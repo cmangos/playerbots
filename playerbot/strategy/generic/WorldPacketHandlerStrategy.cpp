@@ -16,6 +16,7 @@ WorldPacketHandlerStrategy::WorldPacketHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("random bot update");
     supported.push_back("inventory change failure");
     supported.push_back("bg status");
+    supported.push_back("confirm quest");
 }
 
 void WorldPacketHandlerStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)

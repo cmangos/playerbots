@@ -146,3 +146,48 @@ bool AcceptQuestShareAction::Execute(Event& event)
 
     return false;
 }
+
+bool ConfirmQuestAction::Execute(Event& event)
+{
+    Player *bot = ai->GetBot();
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+
+    WorldPacket& p = event.getPacket();
+    p.rpos(0);
+    uint32 quest;
+    p >> quest;
+    Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
+
+    quest = qInfo->GetQuestId();
+    if( !bot->CanTakeQuest( qInfo, false ) )
+    {
+        // can't take quest
+        ai->TellError(requester, BOT_TEXT("quest_cant_take"));
+        return false;
+    }
+
+    if( bot->CanAddQuest( qInfo, false ) )
+    {
+        bot->AddQuest( qInfo, requester );
+
+        if( bot->CanCompleteQuest( quest ) )
+            bot->CompleteQuest( quest );
+
+        if( qInfo->GetSrcSpell() > 0 )
+        {
+            bot->CastSpell( bot, qInfo->GetSrcSpell(),
+#ifdef MANGOS
+                    true
+#endif
+#ifdef CMANGOS
+                    (uint32)0
+#endif
+            );
+        }
+
+        ai->TellPlayer(requester, BOT_TEXT("quest_accept"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        return true;
+    }
+
+    return false;
+}

@@ -339,9 +339,6 @@ namespace ai
         GuidPositionManualSetValue(PlayerbotAI* ai, GuidPosition defaultValue, string name = "value") :
             ManualSetValue<GuidPosition>(ai, defaultValue, name) {}
 
-        virtual string Format() override
-        {
-            return chat->formatGuidPosition(value);
-        }
+        virtual string Format() override;
     };
 }

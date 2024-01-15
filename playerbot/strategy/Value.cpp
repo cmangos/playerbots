@@ -44,3 +44,8 @@ std::string GuidPositionListCalculatedValue::Format()
     out << "}";
     return out.str();
 }
+
+std::string GuidPositionManualSetValue::Format()
+{
+    return chat->formatGuidPosition(value);
+}

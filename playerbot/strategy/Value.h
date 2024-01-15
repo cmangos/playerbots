@@ -341,7 +341,7 @@ namespace ai
 
         virtual string Format() override
         {
-            return chat->formatGuidPosition(Get());
+            return chat->formatGuidPosition(value);
         }
     };
 }

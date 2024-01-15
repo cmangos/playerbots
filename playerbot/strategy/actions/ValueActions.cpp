@@ -244,7 +244,7 @@ bool SetFollowTargetAction::Execute(Event& event)
         const bool removeTarget = param == "none" || param == "unset";
         if (removeTarget)
         {
-            SET_AI_VALUE(Unit*, "manual follow target", nullptr);
+            SET_AI_VALUE(GuidPosition, "manual follow target", GuidPosition());
             ai->TellPlayerNoFacing(requester, "Removed follow target");
             return true;
         }
@@ -257,7 +257,7 @@ bool SetFollowTargetAction::Execute(Event& event)
                 {
                     if (target != bot)
                     {
-                        SET_AI_VALUE(Unit*, "manual follow target", target);
+                        SET_AI_VALUE(GuidPosition, "manual follow target", target);
                         std::stringstream message; message << "Set " << param << " as the follow target";
                         ai->TellPlayerNoFacing(requester, message.str());
                         return true;

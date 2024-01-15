@@ -132,7 +132,7 @@ Unit* PullTargetValue::Get()
 
 Unit* FollowTargetValue::Calculate()
 {
-    Unit* followTarget = AI_VALUE(Unit*, "manual follow target");
+    Unit* followTarget = AI_VALUE(GuidPosition, "manual follow target").GetUnit();
     if (followTarget == nullptr)
     {
         Formation* formation = AI_VALUE(Formation*, "formation");

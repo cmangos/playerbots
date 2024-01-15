@@ -332,4 +332,16 @@ namespace ai
             return unit ? unit->GetName() : "<none>";
         }
     };
+
+    class GuidPositionManualSetValue : public ManualSetValue<GuidPosition>
+    {
+    public:
+        GuidPositionManualSetValue(PlayerbotAI* ai, GuidPosition defaultValue, string name = "value") :
+            ManualSetValue<GuidPosition>(ai, defaultValue, name) {}
+
+        virtual string Format() override
+        {
+            return chat->formatGuidPosition(Get());
+        }
+    };
 }

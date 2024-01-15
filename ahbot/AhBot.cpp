@@ -25,6 +25,8 @@
 
 using namespace ahbot;
 
+#ifndef ENABLE_MANGOSBOTS
+// To be removed once cmangos merge is completed
 bool Player::MinimalLoadFromDB( std::unique_ptr<QueryResult> result, uint32 guid )
 {
     bool delete_result = true;
@@ -63,6 +65,7 @@ bool Player::MinimalLoadFromDB( std::unique_ptr<QueryResult> result, uint32 guid
 
     return true;
 }
+#endif
 
 bool AhBot::HandleAhBotCommand(ChatHandler* handler, char const* args)
 {

@@ -118,7 +118,9 @@ file(GLOB Playerbot_DeathKnight ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/d
 # Define ENABLE_PLAYERBOTS if need
 if (BUILD_PLAYERBOT OR PLAYERBOTS OR BUILD_IKE3_BOTS OR BUILD_MANGOSBOTS)
   add_definitions(-DENABLE_PLAYERBOTS)
-  add_definitions(-DENABLE_MANGOSBOTS)
+  if (BUILD_MANGOSBOTS)
+	add_definitions(-DENABLE_MANGOSBOTS)
+  endif()
 endif()
 # Define Achievements USE_ACHIEVEMENTS if need
 if (BUILD_ACHIEVEMENTS)

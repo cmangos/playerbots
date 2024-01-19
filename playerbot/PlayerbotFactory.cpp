@@ -661,7 +661,10 @@ void PlayerbotFactory::InitPet()
     }
 
     // Force dismiss pet to fix missing flags
-    pet->ForcedDespawn();
+    if (pet->IsAlive())
+    {
+        pet->SetDeathState(JUST_DIED);
+    }
 }
 
 void PlayerbotFactory::InitPetSpells()

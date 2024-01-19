@@ -861,7 +861,7 @@ list<string> PlayerbotHolder::HandlePlayerbotCommand(char const* args, Player* m
 
     if (!charname)
     {
-        if (master->GetTarget() && master->GetTarget()->IsPlayer() && !((Player*)master->GetTarget())->isRealPlayer())
+        if (master && master->GetTarget() && master->GetTarget()->IsPlayer() && !((Player*)master->GetTarget())->isRealPlayer())
         {
             charname = master->GetTarget()->GetName();
         }

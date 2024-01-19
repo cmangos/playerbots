@@ -5,7 +5,6 @@
 #include "MountValues.h"
 
 #include "../../../ahbot/AhBot.h"
-#include "../../GuildTaskMgr.h"
 #include "../../RandomItemMgr.h"
 #include "../../ServerFacade.h"
 
@@ -187,10 +186,6 @@ ItemUsage ItemUsageValue::Calculate()
         else if (stacks < 2)
             return ItemUsage::ITEM_USAGE_KEEP;
     }
-
-    //GUIDTASK
-    if (bot->GetGuildId() && sGuildTaskMgr.IsGuildTaskItem(itemId, bot->GetGuildId()))
-        return ItemUsage::ITEM_USAGE_GUILD_TASK;
 
     //EQUIP
     if (MountValue::GetMountSpell(itemId) && bot->CanUseItem(proto) == EQUIP_ERR_OK && MountValue::GetSpeed(MountValue::GetMountSpell(itemId)))

@@ -9,7 +9,6 @@
 #include "PlayerbotAI.h"
 #include "Player.h"
 #include "AiFactory.h"
-#include "GuildTaskMgr.h"
 #include "PlayerbotCommandServer.h"
 #include "MemoryMonitor.h"
 
@@ -1892,13 +1891,7 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
             if (player->GetGuildId())
             {
                 Guild* guild = sGuildMgr.GetGuildById(player->GetGuildId());
-                if (guild->GetLeaderGuid().GetRawValue() == player->GetObjectGuid().GetRawValue()) {
-                    for (auto i : players)
-                        sGuildTaskMgr.Update(i.second, player);
-                }
-
                 uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guild->GetLeaderGuid());
-
                 if (!sPlayerbotAIConfig.IsInRandomAccountList(accountId))
                 {
                     int32 rank = guild->GetRank(player->GetObjectGuid());

@@ -25,7 +25,6 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "../ahbot/AhBot.h"
-#include "GuildTaskMgr.h"
 #include "PlayerbotDbStore.h"
 #include "strategy/values/PositionValue.h"
 #include "ServerFacade.h"
@@ -4812,11 +4811,6 @@ bool ChatHandler::HandleRandomPlayerbotCommand(char* args)
 bool ChatHandler::HandleAhBotCommand(char* args)
 {
     return ahbot::AhBot::HandleAhBotCommand(this, args);
-}
-
-bool ChatHandler::HandleGuildTaskCommand(char* args)
-{
-    return GuildTaskMgr::HandleConsoleCommand(this, args);
 }
 
 float PlayerbotAI::GetRange(string type)

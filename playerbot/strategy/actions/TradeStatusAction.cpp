@@ -6,7 +6,6 @@
 #include "../../PlayerbotAIConfig.h"
 #include "../../../ahbot/AhBot.h"
 #include "../../RandomPlayerbotMgr.h"
-#include "../../GuildTaskMgr.h"
 #include "../../ServerFacade.h"
 #include "../values/CraftValues.h"
 #include "../values/ItemUsageValue.h"
@@ -85,8 +84,6 @@ bool TradeStatusAction::Execute(Event& event)
                 {
                     craftData.AddObtained(itemId, count);
                 }
-
-                sGuildTaskMgr.CheckItemTask(itemId, count, trader, bot);
             }
 
 

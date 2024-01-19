@@ -29,9 +29,6 @@ AiPlayerbot.DeleteRandomBotAccounts = 0
 # auto-login all player alts as bots on player login
 AiPlayerbot.BotAutologin = 0
 
-# Guild Task system
-AiPlayerbot.EnableGuildTasks = 0
-
 # Enable LFG for random bots
 AiPlayerbot.RandomBotJoinLfg = 1
 
@@ -662,16 +659,6 @@ AiPlayerbot.FleeingEnabled = 1
 #AiPlayerbot.NonCombatStrategies = +custom::say,+return,+delayed roll
 #AiPlayerbot.ReactStrategies = 
 #AiPlayerbot.DeadStrategies = 
-
-# How often tasks are changed
-#AiPlayerbot.MinGuildTaskChangeTime = 172800
-#AiPlayerbot.MaxGuildTaskChangeTime = 432000
-# Mail spam interval
-#AiPlayerbot.MinGuildTaskAdvertisementTime = 300
-#AiPlayerbot.MaxGuildTaskAdvertisementTime = 28800
-# Delay before reward is sent
-#AiPlayerbot.MinGuildTaskRewardTime = 300
-#AiPlayerbot.MaxGuildTaskRewardTime = 3600
 
 # Quest items to leave (do not destroy)
 #AiPlayerbot.RandomBotQuestItems = 6948,5175,5176,5177,5178,16309,12382,13704,11000

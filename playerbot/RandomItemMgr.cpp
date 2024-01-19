@@ -19,79 +19,8 @@ uint64 BotEquipKey::GetKey()
     return level + 100 * clazz + 10000 * spec + 1000000 * slot + 100000000 * quality;
 }
 
-class RandomItemGuildTaskPredicate : public RandomItemPredicate
-{
-public:
-    virtual bool Apply(ItemPrototype const* proto)
-    {
-        if (proto->Bonding == BIND_WHEN_PICKED_UP ||
-                proto->Bonding == BIND_QUEST_ITEM ||
-                proto->Bonding == BIND_WHEN_USE)
-            return false;
-
-        if (proto->Quality < ITEM_QUALITY_NORMAL)
-            return false;
-
-        if ((proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON) && proto->Quality >= ITEM_QUALITY_RARE)
-            return true;
-
-        if (proto->Class == ITEM_CLASS_TRADE_GOODS || proto->Class == ITEM_CLASS_CONSUMABLE)
-            return true;
-
-        return false;
-    }
-};
-
-class RandomItemGuildTaskRewardPredicate : public RandomItemPredicate
-{
-public:
-    RandomItemGuildTaskRewardPredicate(bool equip, bool rare) { this->equip = equip; this->rare = rare;}
-
-    virtual bool Apply(ItemPrototype const* proto)
-    {
-        if (proto->Bonding == BIND_WHEN_PICKED_UP ||
-                proto->Bonding == BIND_QUEST_ITEM ||
-                proto->Bonding == BIND_WHEN_USE)
-            return false;
-
-        if (proto->Class == ITEM_CLASS_QUEST)
-            return false;
-
-        if (equip)
-        {
-            uint32 desiredQuality = rare ? ITEM_QUALITY_RARE : ITEM_QUALITY_UNCOMMON;
-            if (proto->Quality < desiredQuality || proto->Quality >= ITEM_QUALITY_EPIC)
-                return false;
-
-            if (proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON)
-                return true;
-        }
-        else
-        {
-            uint32 desiredQuality = rare ? ITEM_QUALITY_UNCOMMON : ITEM_QUALITY_NORMAL;
-            if (proto->Quality < desiredQuality || proto->Quality >= ITEM_QUALITY_RARE)
-                return false;
-
-            if (proto->Class == ITEM_CLASS_TRADE_GOODS || proto->Class == ITEM_CLASS_CONSUMABLE)
-                return true;
-        }
-
-        return false;
-    }
-
-private:
-    bool equip;
-    bool rare;
-};
-
 RandomItemMgr::RandomItemMgr()
 {
-    predicates[RANDOM_ITEM_GUILD_TASK] = new RandomItemGuildTaskPredicate();
-    predicates[RANDOM_ITEM_GUILD_TASK_REWARD_EQUIP_GREEN] = new RandomItemGuildTaskRewardPredicate(true, false);
-    predicates[RANDOM_ITEM_GUILD_TASK_REWARD_EQUIP_BLUE] = new RandomItemGuildTaskRewardPredicate(true, true);
-    predicates[RANDOM_ITEM_GUILD_TASK_REWARD_TRADE] = new RandomItemGuildTaskRewardPredicate(false, false);
-    predicates[RANDOM_ITEM_GUILD_TASK_REWARD_TRADE_RARE] = new RandomItemGuildTaskRewardPredicate(false, true);
-
     viableSlots[EQUIPMENT_SLOT_HEAD].insert(INVTYPE_HEAD);
     viableSlots[EQUIPMENT_SLOT_NECK].insert(INVTYPE_NECK);
     viableSlots[EQUIPMENT_SLOT_SHOULDERS].insert(INVTYPE_SHOULDERS);

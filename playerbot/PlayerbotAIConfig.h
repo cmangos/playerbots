@@ -174,13 +174,6 @@ public:
     bool nonGmFreeSummon;
 
     uint32 selfBotLevel;
-
-    bool guildTaskEnabled;
-    uint32 minGuildTaskChangeTime, maxGuildTaskChangeTime;
-    uint32 minGuildTaskAdvertisementTime, maxGuildTaskAdvertisementTime;
-    uint32 minGuildTaskRewardTime, maxGuildTaskRewardTime;
-    uint32 guildTaskAdvertCleanupTime;
-
     uint32 iterationsPerTick;
 
     std::string autoPickReward;

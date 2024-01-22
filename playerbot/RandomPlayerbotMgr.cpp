@@ -2004,34 +2004,30 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, vector<WorldLocation> &locs
             Map* tMap = sMapMgr.FindMap(mapId, 0);
             if (tMap && tMap->IsContinent() && tMap->HasActiveAreas())
             {
-                ContinentArea teleportArea = sMapMgr.GetContinentInstanceId(mapId, l.getX(), l.getY());
-                if (tMap->HasActiveAreas(teleportArea))
+                uint32 zoneId = sTerrainMgr.GetZoneId(mapId, l.coord_x, l.coord_y, l.coord_z);
+                if (tMap->HasActiveZone(zoneId))
                 {
-                    uint32 zoneId = sTerrainMgr.GetZoneId(mapId, l.coord_x, l.coord_y, l.coord_z);
-                    if (tMap->HasActiveZone(zoneId))
+                    if (sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmount > 0 && sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmountRadius > 0.0f)
                     {
-                        if (sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmount > 0 && sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmountRadius > 0.0f)
+                        uint32 botsNearTeleportPoint = 0;
+                        for (auto& pair : GetAllBots())
                         {
-                            uint32 botsNearTeleportPoint = 0;
-                            for (auto& pair : GetAllBots())
+                            // Only check the bots that are on the same zone
+                            Player* otherBot = pair.second;
+                            if (otherBot && !otherBot->IsBeingTeleported() && zoneId == otherBot->GetZoneId())
                             {
-                                // Only check the bots that are on the same zone
-                                Player* otherBot = pair.second;
-                                if (otherBot && !otherBot->IsBeingTeleported() && zoneId == otherBot->GetZoneId())
+                                if (l.fDist(WorldPosition(otherBot)) <= sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmountRadius)
                                 {
-                                    if (l.fDist(WorldPosition(otherBot)) <= sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmountRadius)
-                                    {
-                                        botsNearTeleportPoint++;
-                                    }
+                                    botsNearTeleportPoint++;
                                 }
                             }
+                        }
 
-                            return botsNearTeleportPoint >= sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmount;
-                        }
-                        else
-                        {
-                            return false;
-                        }
+                        return botsNearTeleportPoint >= sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmount;
+                    }
+                    else
+                    {
+                        return false;
                     }
                 }
             }

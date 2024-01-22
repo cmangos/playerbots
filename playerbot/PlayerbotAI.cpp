@@ -4260,10 +4260,7 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
     if (bot->IsBeingTeleported() || !bot->IsInWorld() || !bot->GetMap()->HasRealPlayers())
         return ActivePiorityType::IN_INACTIVE_MAP;
 
-    ContinentArea currentArea = sMapMgr.GetContinentInstanceId(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY());
-    if (currentArea == MAP_NO_AREA)
-        return ActivePiorityType::IN_ACTIVE_MAP;
-    if (!bot->GetMap()->HasActiveAreas(currentArea))
+    if (!bot->GetMap()->HasActiveZone(bot->GetZoneId())
         return ActivePiorityType::IN_ACTIVE_MAP;
 
     return ActivePiorityType::IN_ACTIVE_AREA;

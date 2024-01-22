@@ -226,10 +226,7 @@ void PlayerbotHolder::DisablePlayerBot(uint32 guid)
 
         if (bot->GetPlayerbotAI()) 
         {
-            {
-                delete bot->GetPlayerbotAI();
-            }
-            bot->SetPlayerbotAI(0);
+            bot->RemovePlayerbotAI();
         }
     }
 }
@@ -245,8 +242,7 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     if (!ai)
     {
-        ai = new PlayerbotAI(bot);
-        bot->SetPlayerbotAI(ai);
+        bot->CreatePlayerbotAI();
     }
 
 	OnBotLoginInternal(bot);
@@ -826,16 +822,19 @@ list<string> PlayerbotHolder::HandlePlayerbotCommand(char const* args, Player* m
         bool hasBot = false;
 
         if (!master)
+        {
             master = GetPlayerBotsBegin()->second;
+        }
 
         PlayerbotAI* ai = master->GetPlayerbotAI();      
-            
         if (ai)
+        {
             hasBot = true;
+        }
         else
         {
-            ai = new PlayerbotAI(master);
-            master->SetPlayerbotAI(ai);
+            master->CreatePlayerbotAI();
+            ai = master->GetPlayerbotAI();
             ai->SetMaster(master);
             ai->ResetStrategies();
         }
@@ -843,16 +842,15 @@ list<string> PlayerbotHolder::HandlePlayerbotCommand(char const* args, Player* m
         command = command.substr(6);
 
         if(ai->DoSpecificAction("cdebug", Event(".bot",command,master), true))
+        {
             messages.push_back("debug failed");
+        }
 
         if (!hasBot)
         {
             if (master->GetPlayerbotAI()) 
             {
-                {
-                    delete master->GetPlayerbotAI();
-                }
-                master->SetPlayerbotAI(0);
+                master->RemovePlayerbotAI();
             }
         }
 

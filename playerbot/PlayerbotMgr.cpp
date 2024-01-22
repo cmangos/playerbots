@@ -243,6 +243,7 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
     if (!ai)
     {
         bot->CreatePlayerbotAI();
+        ai = bot->GetPlayerbotAI();
     }
 
 	OnBotLoginInternal(bot);

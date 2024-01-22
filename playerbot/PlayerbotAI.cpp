@@ -4260,7 +4260,7 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
     if (bot->IsBeingTeleported() || !bot->IsInWorld() || !bot->GetMap()->HasRealPlayers())
         return ActivePiorityType::IN_INACTIVE_MAP;
 
-    if (!bot->GetMap()->HasActiveZone(bot->GetZoneId())
+    if (!bot->GetMap()->HasActiveZone(bot->GetZoneId()))
         return ActivePiorityType::IN_ACTIVE_MAP;
 
     return ActivePiorityType::IN_ACTIVE_AREA;

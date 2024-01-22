@@ -2002,7 +2002,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, vector<WorldLocation> &locs
         {
             uint32 mapId = l.getMapId();
             Map* tMap = sMapMgr.FindMap(mapId, 0);
-            if (tMap && tMap->IsContinent() && tMap->HasActiveAreas())
+            if (tMap && tMap->IsContinent() && tMap->HasActiveZones())
             {
                 uint32 zoneId = sTerrainMgr.GetZoneId(mapId, l.coord_x, l.coord_y, l.coord_z);
                 if (tMap->HasActiveZone(zoneId))

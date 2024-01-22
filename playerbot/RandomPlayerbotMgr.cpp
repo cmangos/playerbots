@@ -9,7 +9,6 @@
 #include "PlayerbotAI.h"
 #include "Player.h"
 #include "AiFactory.h"
-#include "GuildTaskMgr.h"
 #include "PlayerbotCommandServer.h"
 #include "MemoryMonitor.h"
 
@@ -1892,13 +1891,7 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
             if (player->GetGuildId())
             {
                 Guild* guild = sGuildMgr.GetGuildById(player->GetGuildId());
-                if (guild->GetLeaderGuid().GetRawValue() == player->GetObjectGuid().GetRawValue()) {
-                    for (auto i : players)
-                        sGuildTaskMgr.Update(i.second, player);
-                }
-
                 uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guild->GetLeaderGuid());
-
                 if (!sPlayerbotAIConfig.IsInRandomAccountList(accountId))
                 {
                     int32 rank = guild->GetRank(player->GetObjectGuid());
@@ -2009,32 +2002,36 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, vector<WorldLocation> &locs
         {
             uint32 mapId = l.getMapId();
             Map* tMap = sMapMgr.FindMap(mapId, 0);
-            if (tMap && tMap->IsContinent() && tMap->HasActiveZones())
+            if (tMap && tMap->IsContinent() && tMap->HasActiveAreas())
             {
-                uint32 zoneId = sTerrainMgr.GetZoneId(mapId, l.coord_x, l.coord_y, l.coord_z);
-                if (tMap->HasActiveZone(zoneId))
+                ContinentArea teleportArea = sMapMgr.GetContinentInstanceId(mapId, l.getX(), l.getY());
+                if (tMap->HasActiveAreas(teleportArea))
                 {
-                    if (sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmount > 0 && sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmountRadius > 0.0f)
+                    uint32 zoneId = sTerrainMgr.GetZoneId(mapId, l.coord_x, l.coord_y, l.coord_z);
+                    if (tMap->HasActiveZone(zoneId))
                     {
-                        uint32 botsNearTeleportPoint = 0;
-                        for (auto& pair : GetAllBots())
+                        if (sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmount > 0 && sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmountRadius > 0.0f)
                         {
-                            // Only check the bots that are on the same zone
-                            Player* otherBot = pair.second;
-                            if (otherBot && !otherBot->IsBeingTeleported() && zoneId == otherBot->GetZoneId())
+                            uint32 botsNearTeleportPoint = 0;
+                            for (auto& pair : GetAllBots())
                             {
-                                if (l.fDist(WorldPosition(otherBot)) <= sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmountRadius)
+                                // Only check the bots that are on the same zone
+                                Player* otherBot = pair.second;
+                                if (otherBot && !otherBot->IsBeingTeleported() && zoneId == otherBot->GetZoneId())
                                 {
-                                    botsNearTeleportPoint++;
+                                    if (l.fDist(WorldPosition(otherBot)) <= sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmountRadius)
+                                    {
+                                        botsNearTeleportPoint++;
+                                    }
                                 }
                             }
-                        }
 
-                        return botsNearTeleportPoint >= sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmount;
-                    }
-                    else
-                    {
-                        return false;
+                            return botsNearTeleportPoint >= sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmount;
+                        }
+                        else
+                        {
+                            return false;
+                        }
                     }
                 }
             }
@@ -2314,16 +2311,16 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         for (uint8 level = 1; level <= maxLevel; level++)
         {
             auto results = WorldDatabase.PQuery("select map, position_x, position_y, position_z "
-                "from (select map, position_x, position_y, position_z, avg(t.maxlevel), avg(t.minlevel), "
+                "from (select map, avg(position_x) position_x, avg(position_y) position_y, avg(position_z) position_z, avg(t.maxlevel), avg(t.minlevel), "
                 "%u - (avg(t.maxlevel) + avg(t.minlevel)) / 2 delta "
-                "from creature c inner join creature_template t on c.id = t.entry where t.NpcFlags = 0 and NOT (extraFlags & 1024 OR extraflags & 64 OR unitFlags & 256 OR unitFlags & 512) and t.lootid != 0 group by t.entry having count(*) > 1) q "
+                "from creature c inner join creature_template t on c.id = t.entry where t.NpcFlags = 0 and NOT (extraFlags & 1024 OR extraflags & 64 OR unitFlags & 256 OR unitFlags & 512) and t.lootid != 0 group by t.entry, c.map having count(*) > 1) q "
                 "where delta >= 0 and delta <= %u and map in (%s) and not exists ( "
                 "select map, position_x, position_y, position_z from "
                 "("
-                "select map, c.position_x, c.position_y, c.position_z, avg(t.maxlevel), avg(t.minlevel), "
+                "select map, avg(position_x) position_x, avg(position_y) position_y, avg(position_z) position_z, avg(t.maxlevel), avg(t.minlevel), "
                 "%u - (avg(t.maxlevel) + avg(t.minlevel)) / 2 delta "
                 "from creature c "
-                "inner join creature_template t on c.id = t.entry where t.NpcFlags = 0 and NOT (extraFlags & 1024 OR extraflags & 64 OR unitFlags & 256 OR unitFlags & 512) and t.lootid != 0 group by t.entry "
+                "inner join creature_template t on c.id = t.entry where t.NpcFlags = 0 and NOT (extraFlags & 1024 OR extraflags & 64 OR unitFlags & 256 OR unitFlags & 512) and t.lootid != 0 group by t.entry, c.map "
                 ") q1 "
                 "where abs(delta) > %u and q1.map = q.map "
                 "and sqrt("

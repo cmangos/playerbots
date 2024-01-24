@@ -254,6 +254,7 @@ namespace ai
                 creators["counterspell on enemy healer"] = &TriggerFactoryInternal::counterspell_enemy_healer;
                 creators["arcane power"] = &TriggerFactoryInternal::arcane_power;
                 creators["presence of mind"] = &TriggerFactoryInternal::presence_of_mind;
+                creators["presence of mind aura"] = &TriggerFactoryInternal::presence_of_mind_aura;
                 creators["fire ward"] = &TriggerFactoryInternal::fire_ward;
                 creators["frost ward"] = &TriggerFactoryInternal::frost_ward;
                 creators["blink"] = &TriggerFactoryInternal::blink;
@@ -293,6 +294,7 @@ namespace ai
             static Trigger* frost_ward(PlayerbotAI* ai) { return new FrostWardTrigger(ai); }
             static Trigger* fire_ward(PlayerbotAI* ai) { return new FireWardTrigger(ai); }
             static Trigger* presence_of_mind(PlayerbotAI* ai) { return new PresenceOfMindTrigger(ai); }
+            static Trigger* presence_of_mind_aura(PlayerbotAI* ai) { return new PresenceOfMindAuraTrigger(ai); }
             static Trigger* arcane_power(PlayerbotAI* ai) { return new ArcanePowerTrigger(ai); }
             static Trigger* fireball(PlayerbotAI* ai) { return new FireballTrigger(ai); }
             static Trigger* pyroblast(PlayerbotAI* ai) { return new PyroblastTrigger(ai); }

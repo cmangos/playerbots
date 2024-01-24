@@ -285,6 +285,10 @@ void FireMageBoostRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
 void FireMageCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     MageCcStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "enemy ten yards",
+        NextAction::array(0, new NextAction("blast wave", ACTION_INTERRUPT), NULL)));
 }
 
 void FireMageCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -385,10 +389,6 @@ NextAction** FireMageStrategy::GetDefaultCombatActions()
 void FireMageStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     MageStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "enemy player ten yards",
-        NextAction::array(0, new NextAction("blast wave", ACTION_NORMAL + 6), NULL)));
 
     triggers.push_back(new TriggerNode(
         "no fire vulnerability",
@@ -655,6 +655,10 @@ void FireMageCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "enemy too close for spell",
         NextAction::array(0, new NextAction("dragon's breath", ACTION_EMERGENCY), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "enemy ten yards",
+        NextAction::array(0, new NextAction("blast wave", ACTION_INTERRUPT), NULL)));
 }
 
 void FireMageCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -755,10 +759,6 @@ NextAction** FireMageStrategy::GetDefaultCombatActions()
 void FireMageStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     MageStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "enemy player ten yards",
-        NextAction::array(0, new NextAction("blast wave", ACTION_NORMAL + 6), NULL)));
 
     triggers.push_back(new TriggerNode(
         "living bomb",
@@ -1025,6 +1025,10 @@ void FireMageCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "enemy too close for spell",
         NextAction::array(0, new NextAction("dragon's breath", ACTION_EMERGENCY), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "enemy ten yards",
+        NextAction::array(0, new NextAction("blast wave", ACTION_INTERRUPT), NULL)));
 }
 
 void FireMageCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

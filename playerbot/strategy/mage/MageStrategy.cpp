@@ -82,16 +82,24 @@ void MageStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("blink", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "low mana",
+        NextAction::array(0, new NextAction("mana gem", ACTION_HIGH + 4), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low mana",
+        NextAction::array(0, new NextAction("evocation", ACTION_HIGH + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "target critical health",
-        NextAction::array(0, new NextAction("fire blast", ACTION_HIGH + 1), NULL)));
+        NextAction::array(0, new NextAction("fire blast", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "low mana",
-        NextAction::array(0, new NextAction("mana gem", ACTION_HIGH + 1), NULL)));
+        "presence of mind aura",
+        NextAction::array(0, new NextAction("pyroblast", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "low mana",
-        NextAction::array(0, new NextAction("evocation", ACTION_HIGH), NULL)));
+        "presence of mind aura",
+        NextAction::array(0, new NextAction("frostbolt", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "no mana",

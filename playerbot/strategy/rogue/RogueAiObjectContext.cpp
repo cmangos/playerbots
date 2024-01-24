@@ -316,7 +316,7 @@ namespace ai
                 creators["sprint"] = &TriggerFactoryInternal::sprint;
                 creators["2 combo"] = &TriggerFactoryInternal::combo2;
                 creators["3 combo"] = &TriggerFactoryInternal::combo3;
-                creators["4 combo"] = &TriggerFactoryInternal::combo3;
+                creators["4 combo"] = &TriggerFactoryInternal::combo4;
                 creators["sinister strike"] = &TriggerFactoryInternal::sinister_strike;
                 creators["hemorrhage"] = &TriggerFactoryInternal::hemorrhage;
                 creators["killing spree"] = &TriggerFactoryInternal::killing_spree;

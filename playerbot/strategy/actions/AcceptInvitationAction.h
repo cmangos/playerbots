@@ -40,13 +40,13 @@ namespace ai
             if (!bot->GetGroup() || !bot->GetGroup()->IsMember(inviter->GetObjectGuid()))
                 return false;
 
-            ai->ResetStrategies();
-
             if (sRandomPlayerbotMgr.IsFreeBot(bot))
             {
                 ai->SetMaster(inviter);
                 ai->ChangeStrategy("+follow", BotState::BOT_STATE_NON_COMBAT);
             }
+
+            ai->ResetStrategies();
             
             ai->ChangeStrategy("-lfg,-bg", BotState::BOT_STATE_NON_COMBAT);
             ai->Reset();

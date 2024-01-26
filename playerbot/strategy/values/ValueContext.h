@@ -307,10 +307,11 @@ namespace ai
             creators["need quest reward"] = &ValueContext::need_quest_reward;
             creators["need quest objective"] = &ValueContext::need_quest_objective;
             creators["can use item on"] = &ValueContext::can_use_item_on;
+            creators["quest reward"] = &ValueContext::quest_reward;
             
             creators["money needed for"] = &ValueContext::money_needed_for;
             creators["total money needed for"] = &ValueContext::total_money_needed_for;
-            creators["free money for"] = &ValueContext::free_money_for;            
+            creators["free money for"] = &ValueContext::free_money_for;
             creators["should get money"] = &ValueContext::should_get_money;
 
             creators["free move center"] = &ValueContext::free_move_center;
@@ -380,7 +381,7 @@ namespace ai
             creators["go trapped filter"] = &ValueContext::go_trapped_filter;
             creators["gos in sight"] = &ValueContext::gos_in_sight;
             creators["gos close"] = &ValueContext::gos_close;
-            creators["has object"] = &ValueContext::has_object;   
+            creators["has object"] = &ValueContext::has_object;
 
             creators["action possible"] = &ValueContext::action_possible;
             creators["action useful"] = &ValueContext::action_useful;
@@ -586,7 +587,8 @@ namespace ai
         static UntypedValue* can_repeat_quest_npc(PlayerbotAI* ai) { return new CanRepeatQuestValue(ai); }
         static UntypedValue* need_quest_reward(PlayerbotAI* ai) { return new NeedQuestRewardValue(ai); }
         static UntypedValue* need_quest_objective(PlayerbotAI* ai) { return new NeedQuestObjectiveValue(ai); }
-        static UntypedValue* can_use_item_on(PlayerbotAI* ai) { return new CanUseItemOn(ai); }              
+        static UntypedValue* can_use_item_on(PlayerbotAI* ai) { return new CanUseItemOn(ai); }
+        static UntypedValue* quest_reward(PlayerbotAI* ai) { return new QuestRewardValue(ai); }
 
         static UntypedValue* money_needed_for(PlayerbotAI* ai) { return new MoneyNeededForValue(ai); }
         static UntypedValue* total_money_needed_for(PlayerbotAI* ai) { return new TotalMoneyNeededForValue(ai); }
@@ -629,7 +631,7 @@ namespace ai
         static UntypedValue* group_or(PlayerbotAI* ai) { return new GroupBoolORValue(ai); }
         static UntypedValue* group_ready(PlayerbotAI* ai) { return new GroupReadyValue(ai); }
 
-        static UntypedValue* petition_signs(PlayerbotAI* ai) { return new PetitionSignsValue(ai); }        
+        static UntypedValue* petition_signs(PlayerbotAI* ai) { return new PetitionSignsValue(ai); }
 
         static UntypedValue* experience(PlayerbotAI* ai) { return new ExperienceValue(ai); }
         static UntypedValue* honor(PlayerbotAI* ai) { return new HonorValue(ai); }

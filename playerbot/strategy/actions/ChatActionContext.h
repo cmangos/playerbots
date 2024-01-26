@@ -73,6 +73,7 @@
 #include "BattleGroundJoinAction.h"
 #include "MoveStyleAction.h"
 #include "ValueActions.h"
+#include "QuestRewardActions.h"
 
 namespace ai
 {
@@ -84,6 +85,7 @@ namespace ai
             creators["range"] = &ChatActionContext::range;
             creators["stats"] = &ChatActionContext::stats;
             creators["quests"] = &ChatActionContext::quests;
+            creators["quest reward"] = &ChatActionContext::quest_reward;
             creators["leave"] = &ChatActionContext::leave;
             creators["reputation"] = &ChatActionContext::reputation;
             creators["log"] = &ChatActionContext::log;
@@ -276,6 +278,7 @@ namespace ai
         static Action* share(PlayerbotAI* ai) { return new ShareQuestAction(ai); }
         static Action* stats(PlayerbotAI* ai) { return new StatsAction(ai); }
         static Action* quests(PlayerbotAI* ai) { return new ListQuestsAction(ai); }
+        static Action* quest_reward(PlayerbotAI* ai) { return new QuestRewardAction(ai); }
         static Action* leave(PlayerbotAI* ai) { return new LeaveGroupAction(ai); }
         static Action* reputation(PlayerbotAI* ai) { return new TellReputationAction(ai); }
         static Action* log(PlayerbotAI* ai) { return new LogLevelAction(ai); }

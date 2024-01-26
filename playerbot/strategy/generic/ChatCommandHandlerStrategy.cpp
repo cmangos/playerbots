@@ -27,6 +27,7 @@ ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTr
     actionNodeFactories.Add(new ChatCommandActionNodeFactoryInternal());
 
     supported.push_back("quests");
+    supported.push_back("quest reward");
     supported.push_back("stats");
     supported.push_back("leave");
     supported.push_back("reputation");

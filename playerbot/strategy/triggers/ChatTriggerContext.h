@@ -10,6 +10,7 @@ namespace ai
         ChatTriggerContext()
         {
             creators["quests"] = &ChatTriggerContext::quests;
+            creators["quest reward"] = &ChatTriggerContext::quest_reward;
             creators["stats"] = &ChatTriggerContext::stats;
             creators["leave"] = &ChatTriggerContext::leave;
             creators["rep"] = &ChatTriggerContext::reputation;
@@ -220,6 +221,7 @@ namespace ai
         static Trigger* roll(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "roll"); }
         static Trigger* share(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "share"); }
         static Trigger* quests(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "quests"); }
+        static Trigger* quest_reward(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "quest reward"); }
         static Trigger* stats(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "stats"); }
         static Trigger* leave(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "leave"); }
         static Trigger* reputation(PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "reputation"); }

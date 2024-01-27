@@ -423,6 +423,12 @@ namespace ai
         virtual ActionThreatType getThreatType() { return ActionThreatType::ACTION_THREAT_NONE; }
     };
 
+    class CastBanishOnCcAction : public CastCrowdControlSpellAction
+    {
+    public:
+        CastBanishOnCcAction(PlayerbotAI* ai) : CastCrowdControlSpellAction(ai, "banish") {}
+    };
+
     class CastSeedOfCorruptionAction : public CastRangedDebuffSpellAction
     {
     public:

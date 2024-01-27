@@ -539,7 +539,7 @@ namespace ai
             static Action* drain_mana(PlayerbotAI* ai) { return new CastDrainManaAction(ai); }
             static Action* drain_life(PlayerbotAI* ai) { return new CastDrainLifeAction(ai); }
             static Action* banish(PlayerbotAI* ai) { return new CastBanishAction(ai); }
-            static Action* banish_on_cc(PlayerbotAI* ai) { return new CastBanishAction(ai); }
+            static Action* banish_on_cc(PlayerbotAI* ai) { return new CastBanishOnCcAction(ai); }
             static Action* seed_of_corruption(PlayerbotAI* ai) { return new CastSeedOfCorruptionAction(ai); }
             static Action* rain_of_fire(PlayerbotAI* ai) { return new CastRainOfFireAction(ai); }
             static Action* shadowfury(PlayerbotAI* ai) { return new CastShadowfuryAction(ai); }

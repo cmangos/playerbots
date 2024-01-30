@@ -209,6 +209,8 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             {
                 verb_pos = i;
                 verb_type = 2; // present
+                if (verb_pos == 0)
+                    is_quest = 1;
             }
             else if (word[i] == "will")
             {
@@ -558,7 +560,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
                 msg = "%s, what is a " + word[verb_pos + 1] + "?";
                 break;
             case 2:
-                msg = "yeah i know " + word[verb_pos - 1] + " is a " + word[verb_pos + 1];
+                msg = "yeah i know " + word[verb_pos ? verb_pos - 1 : verb_pos + 1] + " is a " + word[verb_pos + 1];
                 break;
             }
             msg = std::regex_replace(msg, std::regex("%s"), name);

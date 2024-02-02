@@ -240,15 +240,23 @@ bool LootObject::IsLootPossible(Player* bot)
     if (!AI_VALUE2_LAZY(bool, "should loot object", to_string(guid.GetRawValue())))
         return false;
 
-
+    // Check if the game object has quest loot and bot has the quest for it
     if (guid.IsGameObject())
     {
         GameObject* go = ai->GetGameObject(guid);
         if (go)
         {
-            if (sObjectMgr.IsGameObjectForQuests(guid.GetEntry())) //If object has quest loot bot needs the quest.
-                if (!go->ActivateToQuest(bot))
-                    return false;
+            // Ignore for mining nodes and herbs
+            if (skillId != SKILL_MINING && skillId != SKILL_HERBALISM)
+            {
+                if (sObjectMgr.IsGameObjectForQuests(guid.GetEntry()))
+                {
+                    if (!go->ActivateToQuest(bot))
+                    {
+                        return false;
+                    }
+                }
+            }
         }
     }
 

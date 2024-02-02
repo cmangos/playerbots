@@ -4011,6 +4011,62 @@ bool PlayerbotAI::IsHealSpell(const SpellEntry* spell)
     return false;
 }
 
+bool PlayerbotAI::IsMiningNode(const GameObject* go)
+{
+    if (go)
+    {
+        const GameObjectInfo* goInfo = go->GetGOInfo();
+        if (goInfo)
+        {
+            const LockEntry* lockInfo = sLockStore.LookupEntry(goInfo->GetLockId());
+            if (lockInfo)
+            {
+                for (int i = 0; i < 8; ++i)
+                {
+                    if (lockInfo->Type[i] == LOCK_KEY_SKILL)
+                    {
+                        const uint32 skillId = SkillByLockType(LockType(lockInfo->Index[i]));
+                        if (skillId == SKILL_MINING)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+bool PlayerbotAI::IsHerb(const GameObject* go)
+{
+    if (go)
+    {
+        const GameObjectInfo* goInfo = go->GetGOInfo();
+        if (goInfo)
+        {
+            const LockEntry* lockInfo = sLockStore.LookupEntry(goInfo->GetLockId());
+            if (lockInfo)
+            {
+                for (int i = 0; i < 8; ++i)
+                {
+                    if (lockInfo->Type[i] == LOCK_KEY_SKILL)
+                    {
+                        const uint32 skillId = SkillByLockType(LockType(lockInfo->Index[i]));
+                        if (skillId == SKILL_HERBALISM)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 bool IsAlliance(uint8 race)
 {
     return race == RACE_HUMAN || race == RACE_DWARF || race == RACE_NIGHTELF ||

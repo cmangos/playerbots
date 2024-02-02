@@ -383,6 +383,9 @@ public:
     bool canDispel(const SpellEntry* entry, uint32 dispelType);
     static bool IsHealSpell(const SpellEntry* entry);
 
+    static bool IsMiningNode(const GameObject* go);
+    static bool IsHerb(const GameObject* go);
+
     bool HasSpell(string name) const;
     bool HasSpell(uint32 spellid) const;
     bool HasAura(uint32 spellId, Unit* player, bool checkOwner = false);

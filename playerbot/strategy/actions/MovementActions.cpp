@@ -929,18 +929,6 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         else if (mover)
             mover->InterruptMoving(true);
     }
-    else
-    {
-        mm.GetDestination(x, y, z);
-
-        if (movePosition.distance(WorldPosition(movePosition.getMapId(), x, y, z, 0)) > minDist)
-        {
-            if (mover == bot)
-                ai->StopMoving();
-            else
-                mover->InterruptMoving(true);
-        }
-    }
 
     if (totalDistance > maxDist && !detailedMove && !ai->HasPlayerNearby(movePosition)) //Why walk if you can fly?
     {
@@ -960,8 +948,6 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
             masterWalking = true;
     }
 
-    bot->SendHeartBeat();
-
     // Prevent moving if requested to move into a hazard
     if(IsHazardNearPosition(movePosition))
     {
@@ -974,8 +960,6 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
     }
 
 #ifdef MANGOSBOT_ZERO
-    mm.Clear(false, true);
-
     Movement::PointsArray path;
     if(GeneratePathAvoidingHazards(movePosition, generatePath, path))
     {
@@ -990,8 +974,6 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 #else
     if (!bot->IsFreeFlying())
     {
-        mm.Clear(false, true);
-
         Movement::PointsArray path;
         if (GeneratePathAvoidingHazards(movePosition, generatePath, path))
         {
@@ -1092,7 +1074,6 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                     bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
             }
         }
-        mm.Clear(false, true);
         mm.MovePoint(movePosition.getMapId(), Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f), bot->IsFlying() ? FORCED_MOVEMENT_FLIGHT : FORCED_MOVEMENT_RUN, bot->IsFlying() ? bot->GetSpeed(MOVE_FLIGHT) : 0.f, bot->IsFlying());
     }
 #endif
@@ -1524,7 +1505,6 @@ bool MovementAction::ChaseTo(WorldObject* obj, float distance, float angle)
 
     if (!endPosition.isValid()) return false;
     if (angle > 20) angle = 0;
-    mm.Clear(false, true);
     mm.MoveChase((Unit*)obj, distance, angle);
     float dist = sServerFacade.GetDistance2d(bot, obj);
     float distDiff = dist > distance ? dist - distance : 0.f;
@@ -1772,7 +1752,6 @@ bool MovementAction::Flee(Unit *target)
                 return true;
         }
 
-        ai->StopMoving();
         mm->MoveChase(target, distance, WorldPosition(bot).getAngleTo(target), true, false, true, false);
         return true;
     }

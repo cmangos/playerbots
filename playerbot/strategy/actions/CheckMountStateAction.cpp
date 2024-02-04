@@ -416,7 +416,7 @@ bool CheckMountStateAction::Mount(Player* requester)
 
         ai->RemoveShapeshift();
 
-        if (!bot->IsStopped())
+        if (sServerFacade.isMoving(bot))
         {
             ai->StopMoving();
         }

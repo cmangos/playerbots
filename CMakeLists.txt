@@ -122,10 +122,7 @@ if (BUILD_PLAYERBOT OR PLAYERBOTS OR BUILD_IKE3_BOTS OR BUILD_MANGOSBOTS)
 	add_definitions(-DENABLE_MANGOSBOTS)
   endif()
 endif()
-# Define Achievements USE_ACHIEVEMENTS if need
-if (BUILD_ACHIEVEMENTS)
-  add_definitions(-DUSE_ACHIEVEMENTS)
-endif()
+
 # Define BUILD_ELUNA if need
 if (BUILD_ELUNA)
   add_definitions(-DBUILD_ELUNA -DCLASSIC -DCMANGOS)
@@ -155,8 +152,10 @@ endif()
 if (BUILD_IMMERSIVE)
   add_definitions(-DENABLE_IMMERSIVE)
 endif()
-if (IMMERSIVE)
-  add_definitions(-DENABLE_IMMERSIVE)
+
+# Define Achievements USE_ACHIEVEMENTS if need
+if (BUILD_ACHIEVEMENTS)
+  add_definitions(-DENABLE_ACHIEVEMENTS)
 endif()
 
 include_directories(

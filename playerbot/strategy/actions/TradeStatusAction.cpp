@@ -44,7 +44,7 @@ bool TradeStatusAction::Execute(Event& event)
     uint32 status;
     p >> status;
 
-    if (status == TRADE_STATUS_TRADE_ACCEPT || (TRADE_STATUS_BACK_TO_TRADE && trader->GetTradeData() && trader->GetTradeData()->IsAccepted()))
+    if (status == TRADE_STATUS_TRADE_ACCEPT || (status == TRADE_STATUS_BACK_TO_TRADE && trader->GetTradeData() && trader->GetTradeData()->IsAccepted()))
     {
         WorldPacket p;
         uint32 status = 0;
@@ -118,12 +118,12 @@ bool TradeStatusAction::Execute(Event& event)
 
 void TradeStatusAction::BeginTrade()
 {
+    Player* trader = bot->GetTrader();
+    if (!trader || trader->GetPlayerbotAI())
+        return;
+
     WorldPacket p;
     bot->GetSession()->HandleBeginTradeOpcode(p);
-
-    Player* trader = bot->GetTrader();
-    if (trader->GetPlayerbotAI())
-        return;
 
     ListItemsVisitor visitor;
     ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
@@ -145,7 +145,7 @@ void TradeStatusAction::BeginTrade()
 bool TradeStatusAction::CheckTrade()
 {
     Player* trader = bot->GetTrader();
-    if (!bot->GetTradeData() || !trader->GetTradeData())
+    if (!bot->GetTradeData() || !trader || !trader->GetTradeData())
         return false;
 
     if (!ai->HasActivePlayerMaster() && bot->GetTrader()->GetPlayerbotAI())

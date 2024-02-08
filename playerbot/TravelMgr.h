@@ -358,6 +358,14 @@ namespace ai
             , W first_weight, W last_weight
             , URBG&& g)
         {
+            //Only shuffle if there is atleast 1 non-zero value.
+            W check_weight = first_weight;
+            while (check_weight != last_weight && !*check_weight)
+                ++check_weight;
+
+            if (check_weight == last_weight)
+                return;
+
             while (first != last && first_weight != last_weight)
             {
                 std::discrete_distribution<int> dd(first_weight, last_weight);

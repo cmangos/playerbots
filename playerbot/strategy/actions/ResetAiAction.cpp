@@ -33,7 +33,7 @@ void ResetAiAction::ResetValues()
 {
     uint64 guid = ai->GetBot()->GetObjectGuid().GetRawValue();
 
-    auto results = PlayerbotDatabase.PQuery("SELECT `value` FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' and `key` = 'value'", guid);
+    auto results = CharacterDatabase.PQuery("SELECT `value` FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' and `key` = 'value'", guid);
     if (results)
     {
         list<string> values;
@@ -59,7 +59,7 @@ void ResetAiAction::ResetValues()
         } while (results->NextRow());
 
         if(fullReset)
-            PlayerbotDatabase.PExecute("DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' and `key` = 'value'", guid);            
+            CharacterDatabase.PExecute("DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' and `key` = 'value'", guid);
     }
 }
 

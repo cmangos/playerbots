@@ -190,7 +190,7 @@ RandomItemList RandomItemMgr::Query(uint32 level, RandomItemType type, RandomIte
 
 void RandomItemMgr::BuildRandomItemCache()
 {
-    auto results = PlayerbotDatabase.PQuery("select lvl, type, item from ai_playerbot_rnditem_cache");
+    auto results = CharacterDatabase.PQuery("select lvl, type, item from ai_playerbot_rnditem_cache");
     if (results)
     {
         sLog.outString("Loading random item cache");
@@ -241,7 +241,7 @@ void RandomItemMgr::BuildRandomItemCache()
                     continue;
 
                 randomItemCache[level / 10][rit].push_back(itemId);
-                PlayerbotDatabase.PExecute("insert into ai_playerbot_rnditem_cache (lvl, type, item) values (%u, %u, %u)",
+                CharacterDatabase.PExecute("insert into ai_playerbot_rnditem_cache (lvl, type, item) values (%u, %u, %u)",
                         level / 10, type, itemId);
             }
         }
@@ -878,7 +878,7 @@ void RandomItemMgr::BuildItemInfoCache()
 
     // load weightscales
     sLog.outString("Loading weightscales info");
-    auto results = PlayerbotDatabase.PQuery("select id, name, class from ai_playerbot_weightscales");
+    auto results = WorldDatabase.PQuery("select id, name, class from ai_playerbot_weightscales");
 
     if (results)
     {
@@ -904,7 +904,7 @@ void RandomItemMgr::BuildItemInfoCache()
 
         sLog.outString("Loaded %d weightscale class specs", totalcount);
 
-        auto result = PlayerbotDatabase.PQuery("select id, field, val from ai_playerbot_weightscale_data");
+        auto result = WorldDatabase.PQuery("select id, field, val from ai_playerbot_weightscale_data");
         if (result)
         {
             do
@@ -1396,10 +1396,10 @@ void RandomItemMgr::BuildItemInfoCache()
         static SqlStatementID delCache;
         static SqlStatementID insertCache;
 
-        SqlStatement stmt = PlayerbotDatabase.CreateStatement(delCache, "DELETE FROM ai_playerbot_item_info_cache WHERE id = ?");
+        SqlStatement stmt = CharacterDatabase.CreateStatement(delCache, "DELETE FROM ai_playerbot_item_info_cache WHERE id = ?");
         stmt.PExecute(proto->ItemId);
 
-        stmt = PlayerbotDatabase.CreateStatement(insertCache, "INSERT INTO ai_playerbot_item_info_cache (id, quality, slot, source, sourceId, team, faction, factionRepRank, minLevel, "
+        stmt = CharacterDatabase.CreateStatement(insertCache, "INSERT INTO ai_playerbot_item_info_cache (id, quality, slot, source, sourceId, team, faction, factionRepRank, minLevel, "
             "scale_1, scale_2, scale_3, scale_4, scale_5, scale_6, scale_7, scale_8, scale_9, scale_10, scale_11, scale_12, scale_13, scale_14, scale_15, "
             "scale_16, scale_17, scale_18, scale_19, scale_20, scale_21, scale_22, scale_23, scale_24, scale_25, scale_26, scale_27, scale_28, scale_29, scale_30, scale_31, scale_32)"
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -3067,7 +3067,7 @@ void RandomItemMgr::BuildEquipCache()
     if (maxLevel > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
 
-    auto results = PlayerbotDatabase.PQuery("select clazz, spec, lvl, slot, quality, item from ai_playerbot_equip_cache");
+    auto results = CharacterDatabase.PQuery("select clazz, spec, lvl, slot, quality, item from ai_playerbot_equip_cache");
     if (results)
     {
         sLog.outString("Loading equipment cache for %d classes, %d levels, %d slots, %d quality from %d items",
@@ -3159,7 +3159,7 @@ void RandomItemMgr::BuildEquipCache()
                                     if (slot == EQUIPMENT_SLOT_TABARD && std::find(tabardsList.begin(), tabardsList.end(), itemId) == tabardsList.end())
                                         tabardsList.push_back(itemId);
 
-                                    PlayerbotDatabase.PExecute("replace into ai_playerbot_equip_cache (id, clazz, spec, lvl, slot, quality, item) values (%u, %u, %u, %u, %u, %u, %u)",
+                                    CharacterDatabase.PExecute("replace into ai_playerbot_equip_cache (id, clazz, spec, lvl, slot, quality, item) values (%u, %u, %u, %u, %u, %u, %u)",
                                         2000000 + itemId, 1, 1, 60, slot, 1, itemId);
 
                                     continue;
@@ -3213,7 +3213,7 @@ void RandomItemMgr::BuildEquipCache()
 
                                 items.push_back(itemId);
 
-                                PlayerbotDatabase.PExecute("insert into ai_playerbot_equip_cache (clazz, spec, lvl, slot, quality, item) values (%u, %u, %u, %u, %u, %u)",
+                                CharacterDatabase.PExecute("insert into ai_playerbot_equip_cache (clazz, spec, lvl, slot, quality, item) values (%u, %u, %u, %u, %u, %u)",
                                     clazz, spec, level, slot, quality, itemId);
                             }
 
@@ -3588,7 +3588,7 @@ vector<uint32> RandomItemMgr::GetGemsList()
 
 void RandomItemMgr::BuildRarityCache()
 {
-    auto results = PlayerbotDatabase.PQuery("select item, rarity from ai_playerbot_rarity_cache");
+    auto results = CharacterDatabase.PQuery("select item, rarity from ai_playerbot_rarity_cache");
     if (results)
     {
         sLog.outBasic("Loading item rarity cache");
@@ -3719,7 +3719,7 @@ void RandomItemMgr::BuildRarityCache()
                 {
                     rarityCache[itemId] = rarity;
 
-                    PlayerbotDatabase.PExecute("insert into ai_playerbot_rarity_cache (item, rarity) values (%u, %f)",
+                    CharacterDatabase.PExecute("insert into ai_playerbot_rarity_cache (item, rarity) values (%u, %f)",
                             itemId, rarity);
                 }
             }

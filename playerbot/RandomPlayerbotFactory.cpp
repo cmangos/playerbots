@@ -355,7 +355,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
     // check if scheduled for delete
     bool delAccs = false;
     bool delFriends = false;
-    auto values = PlayerbotDatabase.Query(
+    auto values = CharacterDatabase.Query(
         "select value from ai_playerbot_random_bots where event = 'bot_delete'");
 
     if (values)
@@ -465,7 +465,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
             } while (results->NextRow());
         }
 
-        PlayerbotDatabase.Execute("DELETE FROM ai_playerbot_random_bots");
+        CharacterDatabase.Execute("DELETE FROM ai_playerbot_random_bots");
         sLog.outString("Random bot characters deleted");
     }
 	int totalAccCount = sPlayerbotAIConfig.randomBotAccountCount;
@@ -818,7 +818,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
 {
     vector<uint32> randomBots;
 
-    auto results = PlayerbotDatabase.PQuery(
+    auto results = CharacterDatabase.PQuery(
         "select `bot` from ai_playerbot_random_bots where event = 'add'");
 
     if (results)

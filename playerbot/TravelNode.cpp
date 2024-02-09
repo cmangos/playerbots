@@ -2756,9 +2756,9 @@ void TravelNodeMap::saveNodeStore(bool force)
 
     hasToSave = false;
 
-    PlayerbotDatabase.PExecute("DELETE FROM ai_playerbot_travelnode");
-    PlayerbotDatabase.PExecute("DELETE FROM ai_playerbot_travelnode_link");
-    PlayerbotDatabase.PExecute("DELETE FROM ai_playerbot_travelnode_path");
+    WorldDatabase.PExecute("DELETE FROM ai_playerbot_travelnode");
+    WorldDatabase.PExecute("DELETE FROM ai_playerbot_travelnode_link");
+    WorldDatabase.PExecute("DELETE FROM ai_playerbot_travelnode_path");
 
     std::unordered_map<TravelNode*, uint32> saveNodes;
     vector<TravelNode*> anodes = sTravelNodeMap.getNodes();
@@ -2771,7 +2771,7 @@ void TravelNodeMap::saveNodeStore(bool force)
         string name = node->getName();
         name.erase(remove(name.begin(), name.end(), '\''), name.end());
 
-        PlayerbotDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode` (`id`, `name`, `map_id`, `x`, `y`, `z`, `linked`) VALUES ('%lu', '%s', '%d', '%f', '%f', '%f', '%d%')"
+        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode` (`id`, `name`, `map_id`, `x`, `y`, `z`, `linked`) VALUES ('%lu', '%s', '%d', '%f', '%f', '%f', '%d%')"
             , i, name.c_str(), node->getMapId(), node->getX(), node->getY(), node->getZ(), (node->isLinked() ? 1 : 0));
 
         saveNodes.insert(make_pair(node, i));
@@ -2792,7 +2792,7 @@ void TravelNodeMap::saveNodeStore(bool force)
             {
                 TravelNodePath* path = link.second;
 
-                PlayerbotDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_link` (`node_id`, `to_node_id`,`type`,`object`,`distance`,`swim_distance`, `extra_cost`,`calculated`, `max_creature_0`,`max_creature_1`,`max_creature_2`) VALUES ('%lu','%lu', '%d', '%lu', '%f', '%f', '%f', '%d', '%d', '%d', '%d')"
+                WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_link` (`node_id`, `to_node_id`,`type`,`object`,`distance`,`swim_distance`, `extra_cost`,`calculated`, `max_creature_0`,`max_creature_1`,`max_creature_2`) VALUES ('%lu','%lu', '%d', '%lu', '%f', '%f', '%f', '%d', '%d', '%d', '%d')"
                     , i
                     , saveNodes.find(link.first)->second
                     , uint8(path->getPathType())
@@ -2812,7 +2812,7 @@ void TravelNodeMap::saveNodeStore(bool force)
                 for (uint32 j = 0; j < ppath.size(); j++)
                 {
                     WorldPosition point = ppath[j];
-                    PlayerbotDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_path` (`node_id`, `to_node_id`, `nr`, `map_id`, `x`, `y`, `z`) VALUES ('%lu', '%lu', '%d','%d', '%f', '%f', '%f')"
+                    WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_path` (`node_id`, `to_node_id`, `nr`, `map_id`, `x`, `y`, `z`) VALUES ('%lu', '%lu', '%d','%d', '%f', '%f', '%f')"
                         , i
                         , saveNodes.find(link.first)->second
                         , j
@@ -2839,7 +2839,7 @@ void TravelNodeMap::loadNodeStore()
     std::unordered_map<uint32, TravelNode*> saveNodes;   
 
     {
-        auto result = PlayerbotDatabase.PQuery(query.c_str());
+        auto result = WorldDatabase.PQuery(query.c_str());
 
         if (result)
         {
@@ -2875,7 +2875,7 @@ void TravelNodeMap::loadNodeStore()
         //                     0        1          2    3      4         5              6          7          8               9             10 
         string query = "SELECT node_id, to_node_id,type,object,distance,swim_distance, extra_cost,calculated, max_creature_0,max_creature_1,max_creature_2 FROM ai_playerbot_travelnode_link";
 
-        auto result = PlayerbotDatabase.PQuery(query.c_str());
+        auto result = WorldDatabase.PQuery(query.c_str());
 
         if (result)
         {
@@ -2911,7 +2911,7 @@ void TravelNodeMap::loadNodeStore()
         //                     0        1           2   3      4   5  6
         string query = "SELECT node_id, to_node_id, nr, map_id, x, y, z FROM ai_playerbot_travelnode_path order by node_id, to_node_id, nr";
 
-        auto result = PlayerbotDatabase.PQuery(query.c_str());
+        auto result = WorldDatabase.PQuery(query.c_str());
 
         if (result)
         {

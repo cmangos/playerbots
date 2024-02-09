@@ -639,7 +639,7 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
 
     LoginFreeBots();
 
-    //sLog.outString("[char %d, bot %d]", CharacterDatabase.m_threadBody->m_sqlQueue.size(), PlayerbotDatabase.m_threadBody->m_sqlQueue.size());
+    //sLog.outString("[char %d, bot %d]", CharacterDatabase.m_threadBody->m_sqlQueue.size(), CharacterDatabase.m_threadBody->m_sqlQueue.size());
    
     LogPlayerLocation();
 
@@ -814,8 +814,8 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
 
         currentAllowedBotCount = currentAllowedBotCount*2;      
 
-        PlayerbotDatabase.AllowAsyncTransactions();
-        PlayerbotDatabase.BeginTransaction();
+        CharacterDatabase.AllowAsyncTransactions();
+        CharacterDatabase.BeginTransaction();
 
         bool enoughBotsForCriteria = true;
 
@@ -966,7 +966,7 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
             }
         }
 
-        PlayerbotDatabase.CommitTransaction();
+        CharacterDatabase.CommitTransaction();
 
         if (currentAllowedBotCount)
             currentAllowedBotCount = GetEventValue(0, "bot_count") - currentBots.size();          
@@ -1660,7 +1660,7 @@ void RandomPlayerbotMgr::SyncEventTimers()
     {
         uint32 curTime = time(nullptr);
         uint32 timeDiff = curTime - oldTime;
-        PlayerbotDatabase.PExecute("UPDATE ai_playerbot_random_bots SET time = time + %u WHERE owner = 0 and bot <> 0", timeDiff);
+        CharacterDatabase.PExecute("UPDATE ai_playerbot_random_bots SET time = time + %u WHERE owner = 0 and bot <> 0", timeDiff);
     }
 }
 
@@ -2284,7 +2284,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
     if (maxLevel > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
 
-    auto results = PlayerbotDatabase.PQuery("select map_id, x, y, z, level from ai_playerbot_tele_cache");
+    auto results = CharacterDatabase.PQuery("select map_id, x, y, z, level from ai_playerbot_tele_cache");
     if (results)
     {
         sLog.outString("Loading random teleport caches for %d levels...", maxLevel);
@@ -2343,7 +2343,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
                     WorldLocation loc(mapId, x, y, z, 0);
                     locsPerLevelCache[level].push_back(loc);
 
-                    PlayerbotDatabase.PExecute("insert into ai_playerbot_tele_cache (level, map_id, x, y, z) values (%u, %u, %f, %f, %f)",
+                    CharacterDatabase.PExecute("insert into ai_playerbot_tele_cache (level, map_id, x, y, z) values (%u, %u, %f, %f, %f)",
                         level, mapId, x, y, z);
                 } while (results->NextRow());
             }
@@ -2776,7 +2776,7 @@ list<uint32> RandomPlayerbotMgr::GetBots()
 {
     if (!currentBots.empty()) return currentBots;
 
-    auto results = PlayerbotDatabase.Query(
+    auto results = CharacterDatabase.Query(
             "select bot from ai_playerbot_random_bots where owner = 0 and event = 'add'");
 
     if (results)
@@ -2796,7 +2796,7 @@ list<uint32> RandomPlayerbotMgr::GetBgBots(uint32 bracket)
 {
     //if (!currentBgBots.empty()) return currentBgBots;
 
-    auto results = PlayerbotDatabase.PQuery(
+    auto results = CharacterDatabase.PQuery(
         "select bot from ai_playerbot_random_bots where event = 'bg' AND value = '%d'", bracket);
     list<uint32> BgBots;
     if (results)
@@ -2817,7 +2817,7 @@ uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, string event)
     // load all events at once on first event load
     if (eventCache[bot].empty())
     {
-        auto results = PlayerbotDatabase.PQuery("SELECT `event`, `value`, `time`, validIn, `data` from ai_playerbot_random_bots where owner = 0 and bot = '%u'", bot);
+        auto results = CharacterDatabase.PQuery("SELECT `event`, `value`, `time`, validIn, `data` from ai_playerbot_random_bots where owner = 0 and bot = '%u'", bot);
         if (results)
         {
             do
@@ -2867,19 +2867,19 @@ string RandomPlayerbotMgr::GetEventData(uint32 bot, string event)
 
 uint32 RandomPlayerbotMgr::SetEventValue(uint32 bot, string event, uint32 value, uint32 validIn, string data)
 {
-    PlayerbotDatabase.PExecute("delete from ai_playerbot_random_bots where owner = 0 and bot = '%u' and event = '%s'",
+    CharacterDatabase.PExecute("delete from ai_playerbot_random_bots where owner = 0 and bot = '%u' and event = '%s'",
             bot, event.c_str());
     if (value)
     {
         if (data != "")
         {
-            PlayerbotDatabase.PExecute(
+            CharacterDatabase.PExecute(
                 "insert into ai_playerbot_random_bots (owner, bot, `time`, validIn, event, `value`, `data`) values ('%u', '%u', '%u', '%u', '%s', '%u', '%s')",
                 0, bot, (uint32)time(0), validIn, event.c_str(), value, data.c_str());
         }
         else
         {
-            PlayerbotDatabase.PExecute(
+            CharacterDatabase.PExecute(
                 "insert into ai_playerbot_random_bots (owner, bot, `time`, validIn, event, `value`) values ('%u', '%u', '%u', '%u', '%s', '%u')",
                 0, bot, (uint32)time(0), validIn, event.c_str(), value);
         }
@@ -2933,7 +2933,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
 
     if (cmd == "reset")
     {
-        PlayerbotDatabase.PExecute("delete from ai_playerbot_random_bots");
+        CharacterDatabase.PExecute("delete from ai_playerbot_random_bots");
         sRandomPlayerbotMgr.eventCache.clear();
         sLog.outString("Random bots were reset for all players. Please restart the Server.");
         return true;
@@ -3616,7 +3616,7 @@ void RandomPlayerbotMgr::RandomTeleportForRpg(Player* bot, bool activeOnly)
 void RandomPlayerbotMgr::Remove(Player* bot)
 {
     uint32 owner = bot->GetGUIDLow();
-    PlayerbotDatabase.PExecute("delete from ai_playerbot_random_bots where owner = 0 and bot = '%d'", owner);
+    CharacterDatabase.PExecute("delete from ai_playerbot_random_bots where owner = 0 and bot = '%d'", owner);
     eventCache[owner].clear();
 
     LogoutPlayerBot(owner);

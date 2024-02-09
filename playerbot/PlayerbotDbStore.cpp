@@ -18,7 +18,7 @@ void PlayerbotDbStore::Load(PlayerbotAI *ai)
 {
     uint64 guid = ai->GetBot()->GetObjectGuid().GetRawValue();
 
-    auto results = PlayerbotDatabase.PQuery("SELECT `key`,`value` FROM `ai_playerbot_db_store` WHERE `guid` = '%lu'", guid);
+    auto results = CharacterDatabase.PQuery("SELECT `key`,`value` FROM `ai_playerbot_db_store` WHERE `guid` = '%lu'", guid);
     if (results)
     {
         ai->ClearStrategies(BotState::BOT_STATE_COMBAT);
@@ -76,10 +76,10 @@ void PlayerbotDbStore::Reset(PlayerbotAI *ai)
     uint64 guid = ai->GetBot()->GetObjectGuid().GetRawValue();
     uint32 account = sObjectMgr.GetPlayerAccountIdByGUID(ObjectGuid(guid));
 
-    PlayerbotDatabase.PExecute("DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%lu'", guid);
+    CharacterDatabase.PExecute("DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%lu'", guid);
 }
 
 void PlayerbotDbStore::SaveValue(uint64 guid, string key, string value)
 {
-    PlayerbotDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `key`, `value`) VALUES ('%lu', '%s', '%s')", guid, key.c_str(), value.c_str());
+    CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `key`, `value`) VALUES ('%lu', '%s', '%s')", guid, key.c_str(), value.c_str());
 }

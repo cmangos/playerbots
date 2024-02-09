@@ -35,6 +35,7 @@ std::vector<string> ConfigAccess::GetValues(const std::string& name) const
 INSTANTIATE_SINGLETON_1(PlayerbotAIConfig);
 
 PlayerbotAIConfig::PlayerbotAIConfig()
+: enabled(false)
 {
 }
 
@@ -81,7 +82,7 @@ bool PlayerbotAIConfig::Initialize()
         return false;
     }
 
-    enabled = config.GetBoolDefault("AiPlayerbot.Enabled", true);
+    enabled = config.GetBoolDefault("AiPlayerbot.Enabled", false);
     if (!enabled)
     {
         sLog.outString("AI Playerbot is Disabled in aiplayerbot.conf");

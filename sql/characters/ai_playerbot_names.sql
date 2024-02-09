@@ -1277,22 +1277,6 @@ INSERT INTO `ai_playerbot_guild_names` (`name_id`, `name`) VALUES
 (NULL, 'Xelium Determination');
 UNLOCK TABLES;
 
-/*
-SQLyog Ultimate
-MySQL - 5.7.26 : Database - vanilla_characters
-*********************************************************************
-*/
-
-/*!40101 SET NAMES utf8 */;
-
-/*!40101 SET SQL_MODE=''*/;
-
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-/*Table structure for table `ai_playerbot_names` */
-
 DROP TABLE IF EXISTS `ai_playerbot_names`;
 
 CREATE TABLE `ai_playerbot_names` (
@@ -1302,8 +1286,6 @@ CREATE TABLE `ai_playerbot_names` (
   PRIMARY KEY (`name_id`),
   UNIQUE KEY `name_id` (`name_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='PlayerbotAI RandomBot names';
-
-/*Data for the table `ai_playerbot_names` */
 
 LOCK TABLES `ai_playerbot_names` WRITE;
 INSERT INTO `ai_playerbot_names` (`name_id`,`name`,`gender`) VALUES
@@ -11987,8 +11969,3 @@ INSERT INTO `ai_playerbot_names` (`name_id`,`name`,`gender`) VALUES
 (10678,'Zuzene',1),
 (10679,'Zwaante',1);
 UNLOCK TABLES;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

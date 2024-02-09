@@ -794,9 +794,9 @@ void PlayerbotHelpMgr::SaveTemplates()
         replace(temp, "\n", "\\r\\n");
         replace(temp, "'", "''");
         if (text.second.m_new)
-            PlayerbotDatabase.PExecute("INSERT INTO `ai_playerbot_help_texts` (`name`, `template_text`, `template_changed`) VALUES ('%s', '%s', 1)", name.c_str(), temp.c_str());
+            WorldDatabase.PExecute("INSERT INTO `ai_playerbot_help_texts` (`name`, `template_text`, `template_changed`) VALUES ('%s', '%s', 1)", name.c_str(), temp.c_str());
         else
-            PlayerbotDatabase.PExecute("UPDATE `ai_playerbot_help_texts` set  `template_text` = '%s',  `template_changed` = 1 where `name` = '%s'", temp.c_str(), name.c_str());
+            WorldDatabase.PExecute("UPDATE `ai_playerbot_help_texts` set  `template_text` = '%s',  `template_changed` = 1 where `name` = '%s'", temp.c_str(), name.c_str());
     }
 }
 
@@ -921,7 +921,7 @@ void PlayerbotHelpMgr::FormatHelpTopics()
 void PlayerbotHelpMgr::LoadBotHelpTexts()
 {
     sLog.outBasic("Loading playerbot texts...");
-    auto results = PlayerbotDatabase.PQuery("SELECT `name`, `template_text`, `text`, `text_loc1`, `text_loc2`, `text_loc3`, `text_loc4`, `text_loc5`, `text_loc6`, `text_loc7`, `text_loc8` FROM `ai_playerbot_help_texts`");
+    auto results = WorldDatabase.PQuery("SELECT `name`, `template_text`, `text`, `text_loc1`, `text_loc2`, `text_loc3`, `text_loc4`, `text_loc5`, `text_loc6`, `text_loc7`, `text_loc8` FROM `ai_playerbot_help_texts`");
     int count = 0;
     if (results)
     {

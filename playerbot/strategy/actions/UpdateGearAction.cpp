@@ -229,7 +229,7 @@ void UpdateGearAction::EnchantItem(Item* item)
 
         if (enchants.empty())
         {
-            auto result = PlayerbotDatabase.PQuery("SELECT class, spec, spellid, slotid FROM ai_playerbot_enchants");
+            auto result = WorldDatabase.PQuery("SELECT class, spec, spellid, slotid FROM ai_playerbot_enchants");
             if (result)
             {
                 do

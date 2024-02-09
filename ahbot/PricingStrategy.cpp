@@ -75,7 +75,7 @@ double PricingStrategy::GetMarketPrice(uint32 itemId, uint32 auctionHouse)
 {
     double marketPrice = 0;
 
-    auto results = PlayerbotDatabase.PQuery("SELECT price FROM ahbot_price WHERE item = '%u' AND auction_house = '%u'", itemId, auctionHouse);
+    auto results = CharacterDatabase.PQuery("SELECT price FROM ahbot_price WHERE item = '%u' AND auction_house = '%u'", itemId, auctionHouse);
     if (results)
     {
         marketPrice = results->Fetch()[0].GetFloat();
@@ -129,7 +129,7 @@ double PricingStrategy::GetCategoryPriceMultiplier(uint32 untilTime, uint32 auct
 {
     double result = 1.0;
 
-    auto results = PlayerbotDatabase.PQuery(
+    auto results = CharacterDatabase.PQuery(
         "SELECT count(*) FROM (SELECT round(buytime/3600/24/5) as days FROM ahbot_history WHERE category = '%s' AND won = '1' AND buytime <= '%u' AND auction_house = '%u' group by days) q",
         category->GetName().c_str(), untilTime, AhBot::factions[auctionHouse]);
     if (results)
@@ -155,7 +155,7 @@ double PricingStrategy::GetItemPriceMultiplier(ItemPrototype const* proto, uint3
 {
     double result = 1.0;
 
-    auto results = PlayerbotDatabase.PQuery(
+    auto results = CharacterDatabase.PQuery(
         "SELECT count(*) FROM (SELECT round(buytime/3600/24/5) as days FROM ahbot_history WHERE won = '1' AND item = '%u' AND buytime <= '%u' AND auction_house = '%u' group by days) q",
         proto->ItemId, untilTime, AhBot::factions[auctionHouse]);
     if (results)

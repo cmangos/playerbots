@@ -754,12 +754,12 @@ void TravelMgr::loadAreaLevels()
     if (!areaLevels.empty())
         return;
 
-    PlayerbotDatabase.PExecute("CREATE TABLE IF NOT EXISTS `ai_playerbot_zone_level` (`id` bigint(20) NOT NULL ,`level` bigint(20) NOT NULL,PRIMARY KEY(`id`))");
+    WorldDatabase.PExecute("CREATE TABLE IF NOT EXISTS `ai_playerbot_zone_level` (`id` bigint(20) NOT NULL ,`level` bigint(20) NOT NULL,PRIMARY KEY(`id`))");
 
     string query = "SELECT id, level FROM ai_playerbot_zone_level";
 
     {
-        auto result = PlayerbotDatabase.PQuery(query.c_str());
+        auto result = WorldDatabase.PQuery(query.c_str());
 
         vector<uint32> loadedAreas;
 
@@ -790,7 +790,7 @@ void TravelMgr::loadAreaLevels()
                 {
                     int32 level = sTravelMgr.getAreaLevel(area->ID);
 
-                    PlayerbotDatabase.PExecute("INSERT INTO `ai_playerbot_zone_level` (`id`, `level`) VALUES ('%d', '%d')", area->ID, level);
+                    WorldDatabase.PExecute("INSERT INTO `ai_playerbot_zone_level` (`id`, `level`) VALUES ('%d', '%d')", area->ID, level);
                 }
             }
         }

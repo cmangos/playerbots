@@ -64,6 +64,10 @@ CreatureDataPair const* BgMasterValue::NearestBm(bool allowDead)
 
         float dist = botPos.distance(bmPos); //This is the aproximate travel distance.
 
+        // Skip battlemasters that are not on the same map
+        if (bot->GetMapId() != bmPos.getMapId())
+            continue;
+
         //Did we already find a closer unit that is not dead?
         if (rbmPair && rDist <= dist)
             continue;

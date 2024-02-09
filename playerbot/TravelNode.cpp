@@ -1040,7 +1040,7 @@ TravelPath TravelNodeRoute::buildPath(vector<WorldPosition> pathToStart, vector<
 {
     TravelPath travelPath;
 
-    Unit* botForPath = sPlayerbotAIConfig.tweakValue ? NULL : bot;
+    Unit* botForPath = bot;
 
     if (!pathToStart.empty()) //From start position to start of path.
         travelPath.addPath(pathToStart, PathNodeType::NODE_PREPATH);

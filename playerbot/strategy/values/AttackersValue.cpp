@@ -22,77 +22,79 @@ list<ObjectGuid> AttackersValue::Calculate()
     if (bot->IsFlying() && WorldPosition(bot).currentHeight() > 10.0f)
         return result;
 
-    
-    // Try to get the value from nearby friendly bots.
-    list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest friendly players")->Get();
-    for (auto& i : nearGuids)
+    if (!sPlayerbotAIConfig.tweakValue)
     {
-        Player* player = sObjectMgr.GetPlayer(i);
-
-        if (!player)
-            continue;
-
-        if (player == bot)
-            continue;
-
-        if (player->GetMapId() != bot->GetMapId())
-            continue;
-
-        if (sServerFacade.GetDistance2d(bot, player) > 10.0f)
-            continue;
-
-        PlayerbotAI* botAi = player->GetPlayerbotAI();
-
-        if (!botAi)
-            continue;
-
-        string valueName = "attackers" + !qualifier.empty() ? "::" + qualifier : "";
-
-        // Ignore bots without the value.
-        if (!PHAS_AI_VALUE(valueName))
-            continue;
-
-        UntypedValue* pValue = botAi->GetAiObjectContext()->GetUntypedValue(valueName);
-
-        AttackersValue* pAttackersValue = dynamic_cast<AttackersValue*>(pValue);
-
-        if (!pAttackersValue)
-            continue;
-
-        // Ignore expired values.
-        if (pAttackersValue->Expired())
-            continue;
-
-        if (pAttackersValue->calculatePos.sqDistance2d(bot) > 100.0f)
-            continue;
-
-        // Make the value expire at the same time as the copied value.
-        lastCheckTime = pAttackersValue->lastCheckTime;
-
-        calculatePos = pAttackersValue->calculatePos;
-
-        result = PAI_VALUE(list<ObjectGuid>, valueName);
-
-        vector<string> specificTargetNames = { "current target","old target","attack target","pull target" };
-        Unit* target;
-
-        //Remove bot specific targets of the other bot.
-        for (auto& targetName : specificTargetNames)
+        // Try to get the value from nearby friendly bots.
+        list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest friendly players")->Get();
+        for (auto& i : nearGuids)
         {
-            target = (targetName == "attack target") ? ai->GetUnit(PAI_VALUE(ObjectGuid, targetName)) : PAI_VALUE(Unit*,  targetName);
-            if (target)
-                result.remove(target->GetObjectGuid());
-        }
+            Player* player = sObjectMgr.GetPlayer(i);
 
-        //Add bot specific targets of this bot.
-        for (auto& targetName : specificTargetNames)
-        {
-            target = (targetName == "attack target") ? ai->GetUnit(AI_VALUE(ObjectGuid, targetName)) : AI_VALUE(Unit*, targetName);
-            if (target)
-                result.push_back(target->GetObjectGuid());
+            if (!player)
+                continue;
+
+            if (player == bot)
+                continue;
+
+            if (player->GetMapId() != bot->GetMapId())
+                continue;
+
+            if (sServerFacade.GetDistance2d(bot, player) > 10.0f)
+                continue;
+
+            PlayerbotAI* botAi = player->GetPlayerbotAI();
+
+            if (!botAi)
+                continue;
+
+            string valueName = "attackers" + !qualifier.empty() ? "::" + qualifier : "";
+
+            // Ignore bots without the value.
+            if (!PHAS_AI_VALUE(valueName))
+                continue;
+
+            UntypedValue* pValue = botAi->GetAiObjectContext()->GetUntypedValue(valueName);
+
+            AttackersValue* pAttackersValue = dynamic_cast<AttackersValue*>(pValue);
+
+            if (!pAttackersValue)
+                continue;
+
+            // Ignore expired values.
+            if (pAttackersValue->Expired())
+                continue;
+
+            if (pAttackersValue->calculatePos.sqDistance2d(bot) > 100.0f)
+                continue;
+
+            // Make the value expire at the same time as the copied value.
+            lastCheckTime = pAttackersValue->lastCheckTime;
+
+            calculatePos = pAttackersValue->calculatePos;
+
+            result = PAI_VALUE(list<ObjectGuid>, valueName);
+
+            vector<string> specificTargetNames = { "current target","old target","attack target","pull target" };
+            Unit* target;
+
+            //Remove bot specific targets of the other bot.
+            for (auto& targetName : specificTargetNames)
+            {
+                target = (targetName == "attack target") ? ai->GetUnit(PAI_VALUE(ObjectGuid, targetName)) : PAI_VALUE(Unit*, targetName);
+                if (target)
+                    result.remove(target->GetObjectGuid());
+            }
+
+            //Add bot specific targets of this bot.
+            for (auto& targetName : specificTargetNames)
+            {
+                target = (targetName == "attack target") ? ai->GetUnit(AI_VALUE(ObjectGuid, targetName)) : AI_VALUE(Unit*, targetName);
+                if (target)
+                    result.push_back(target->GetObjectGuid());
+            }
+
+            return result;
         }
-                   
-        return result;
     }
     
     calculatePos = bot;

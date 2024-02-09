@@ -793,7 +793,7 @@ vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& startP
     uint32 instanceId;
     if (sTravelNodeMap.gethasToGen())
         instanceId = 0;
-    else if (!bot || sPlayerbotAIConfig.tweakValue || bot->GetMapId() != startPos.getMapId())
+    else if (!bot || bot->GetMapId() != startPos.getMapId())
         instanceId = hasher(std::this_thread::get_id());
     else
         instanceId = bot->GetInstanceId();

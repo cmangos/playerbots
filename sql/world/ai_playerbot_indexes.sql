@@ -1,12 +1,3 @@
-DROP INDEX idx_gameobject_loot_template_item ON gameobject_loot_template;
-DROP INDEX idx_disenchant_loot_template_item ON disenchant_loot_template;
-DROP INDEX idx_fishing_loot_template_item ON fishing_loot_template;
-DROP INDEX idx_item_loot_template_item ON item_loot_template;
-DROP INDEX idx_pickpocketing_loot_template_item ON pickpocketing_loot_template;
-DROP INDEX idx_reference_loot_template_item ON reference_loot_template;
-DROP INDEX idx_skinning_loot_template_item ON skinning_loot_template;
-DROP INDEX idx_creature_loot_template_item ON creature_loot_template;
-
 create index idx_gameobject_loot_template_item on gameobject_loot_template(item);
 create index idx_disenchant_loot_template_item on disenchant_loot_template(item);
 create index idx_fishing_loot_template_item on fishing_loot_template(item);

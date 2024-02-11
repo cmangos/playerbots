@@ -1726,6 +1726,72 @@ AiPlayerbot.GearProgressionSystem.1.5.2.16 = 22329	# Off Hand
 AiPlayerbot.GearProgressionSystem.1.5.2.17 = 13396	# Ranged
 AiPlayerbot.GearProgressionSystem.1.5.2.18 = 5976	# Tabard
 
+# Level 1 (1) Shaman (7) Elemental (0)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEAVvsCAFeDAwBI-QUAMVAGAC2OBwAzcggAVtcJAEhBCgAzxQsAV0MMADLJDQBIJw4AMoIPAFDZEAA2jBEAVzkSAFqf
+AiPlayerbot.GearProgressionSystem.1.7.0.0 = 22267	# Head
+AiPlayerbot.GearProgressionSystem.1.7.0.1 = 22403	# Neck
+AiPlayerbot.GearProgressionSystem.1.7.0.2 = 18681	# Shoulder
+AiPlayerbot.GearProgressionSystem.1.7.0.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.1.7.0.4 = 12624	# Chest
+AiPlayerbot.GearProgressionSystem.1.7.0.5 = 11662	# Waist
+AiPlayerbot.GearProgressionSystem.1.7.0.6 = 13170	# Legs
+AiPlayerbot.GearProgressionSystem.1.7.0.7 = 22231	# Feet
+AiPlayerbot.GearProgressionSystem.1.7.0.8 = 18497	# Wrists
+AiPlayerbot.GearProgressionSystem.1.7.0.9 = 13253	# Hands
+AiPlayerbot.GearProgressionSystem.1.7.0.10 = 22339	# Finger 1
+AiPlayerbot.GearProgressionSystem.1.7.0.11 = 13001	# Finger 2
+AiPlayerbot.GearProgressionSystem.1.7.0.12 = 18471	# Trinket 1
+AiPlayerbot.GearProgressionSystem.1.7.0.13 = 12930	# Trinket 2
+AiPlayerbot.GearProgressionSystem.1.7.0.14 = 20697	# Back
+AiPlayerbot.GearProgressionSystem.1.7.0.15 = 13964	# Main Hand
+AiPlayerbot.GearProgressionSystem.1.7.0.16 = 22329	# Off Hand
+AiPlayerbot.GearProgressionSystem.1.7.0.17 = 23199	# Ranged
+AiPlayerbot.GearProgressionSystem.1.7.0.18 = 5976	# Tabard
+
+# Level 1 (1) Shaman (7) Enhancement (1)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEANC8CADwzAwAyfwUALc4GADPEBwA61ggAORgJADKmCgA61wsASEQMAEUxDQBKsA4ALicPADQcEgBXew
+AiPlayerbot.GearProgressionSystem.1.7.1.0 = 13359	# Head
+AiPlayerbot.GearProgressionSystem.1.7.1.1 = 15411	# Neck
+AiPlayerbot.GearProgressionSystem.1.7.1.2 = 12927	# Shoulder
+AiPlayerbot.GearProgressionSystem.1.7.1.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.1.7.1.4 = 11726	# Chest
+AiPlayerbot.GearProgressionSystem.1.7.1.5 = 13252	# Waist
+AiPlayerbot.GearProgressionSystem.1.7.1.6 = 15062	# Legs
+AiPlayerbot.GearProgressionSystem.1.7.1.7 = 14616	# Feet
+AiPlayerbot.GearProgressionSystem.1.7.1.8 = 12966	# Wrists
+AiPlayerbot.GearProgressionSystem.1.7.1.9 = 15063	# Hands
+AiPlayerbot.GearProgressionSystem.1.7.1.10 = 18500	# Finger 1
+AiPlayerbot.GearProgressionSystem.1.7.1.11 = 17713	# Finger 2
+AiPlayerbot.GearProgressionSystem.1.7.1.12 = 19120	# Trinket 1
+AiPlayerbot.GearProgressionSystem.1.7.1.13 = 11815	# Trinket 2
+AiPlayerbot.GearProgressionSystem.1.7.1.14 = 13340	# Back
+AiPlayerbot.GearProgressionSystem.1.7.1.15 = 19169	# Main Hand
+AiPlayerbot.GearProgressionSystem.1.7.1.16 = 0		# Off Hand
+AiPlayerbot.GearProgressionSystem.1.7.1.17 = 22395	# Ranged
+AiPlayerbot.GearProgressionSystem.1.7.1.18 = 5976	# Tabard
+
+# Level 1 (1) Shaman (7) Restoration (2)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEASDoCAEkjAwBW2gUASGQGAEeXBwBH0ggAVucJADaRCgBIXwsAM3oMAFc-DQBHww4AMoIPAEhOEAAukxEAVy8SAFqg
+AiPlayerbot.GearProgressionSystem.1.7.2.0 = 18490	# Head
+AiPlayerbot.GearProgressionSystem.1.7.2.1 = 18723	# Neck
+AiPlayerbot.GearProgressionSystem.1.7.2.2 = 22234	# Shoulder
+AiPlayerbot.GearProgressionSystem.1.7.2.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.1.7.2.4 = 18532	# Chest
+AiPlayerbot.GearProgressionSystem.1.7.2.5 = 18327	# Waist
+AiPlayerbot.GearProgressionSystem.1.7.2.6 = 18386	# Legs
+AiPlayerbot.GearProgressionSystem.1.7.2.7 = 22247	# Feet
+AiPlayerbot.GearProgressionSystem.1.7.2.8 = 13969	# Wrists
+AiPlayerbot.GearProgressionSystem.1.7.2.9 = 18527	# Hands
+AiPlayerbot.GearProgressionSystem.1.7.2.10 = 13178	# Finger 1
+AiPlayerbot.GearProgressionSystem.1.7.2.11 = 22334	# Finger 2
+AiPlayerbot.GearProgressionSystem.1.7.2.12 = 18371	# Trinket 1
+AiPlayerbot.GearProgressionSystem.1.7.2.13 = 12930	# Trinket 2
+AiPlayerbot.GearProgressionSystem.1.7.2.14 = 18510	# Back
+AiPlayerbot.GearProgressionSystem.1.7.2.15 = 11923	# Main Hand
+AiPlayerbot.GearProgressionSystem.1.7.2.16 = 22319	# Off Hand
+AiPlayerbot.GearProgressionSystem.1.7.2.17 = 23200	# Ranged
+AiPlayerbot.GearProgressionSystem.1.7.2.18 = 5976	# Tabard
+
 # Level 1 (1) Mage (8) Arcane (0)
 # https://www.wowhead.com/classic/gear-planner/mage/gnome/AzwAAAFW-wIvRwNI-QVM4gYtjgdM4whM5AlIQQozxQtXQwxXoQ0ygg5W_A9Q2RBXPxI2cg
 AiPlayerbot.GearProgressionSystem.1.8.0.0 = 22267	# Head
@@ -2279,6 +2345,72 @@ AiPlayerbot.GearProgressionSystem.2.5.3.15 = 18609	# Main Hand
 AiPlayerbot.GearProgressionSystem.2.5.3.16 = 0		# Off Hand
 AiPlayerbot.GearProgressionSystem.2.5.3.17 = 13396	# Ranged
 AiPlayerbot.GearProgressionSystem.2.5.3.18 = 5976	# Tabard
+
+# Level 2 (2) Shaman (7) Elemental (0)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEAQjMCAEl-AwBJjQUATOIGAErABwBM4wgATOQJAEhBCgAzxQsAV0MMAErLDQBJhA4AMoIPAEK2EABJmhIAWp8
+AiPlayerbot.GearProgressionSystem.2.7.0.0 = 16947	# Head
+AiPlayerbot.GearProgressionSystem.2.7.0.1 = 18814	# Neck
+AiPlayerbot.GearProgressionSystem.2.7.0.2 = 18829	# Shoulder
+AiPlayerbot.GearProgressionSystem.2.7.0.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.2.7.0.4 = 19682	# Chest
+AiPlayerbot.GearProgressionSystem.2.7.0.5 = 19136	# Waist
+AiPlayerbot.GearProgressionSystem.2.7.0.6 = 19683	# Legs
+AiPlayerbot.GearProgressionSystem.2.7.0.7 = 19684	# Feet
+AiPlayerbot.GearProgressionSystem.2.7.0.8 = 18497	# Wrists
+AiPlayerbot.GearProgressionSystem.2.7.0.9 = 13253	# Hands
+AiPlayerbot.GearProgressionSystem.2.7.0.10 = 22339	# Finger 1
+AiPlayerbot.GearProgressionSystem.2.7.0.11 = 19147	# Finger 2
+AiPlayerbot.GearProgressionSystem.2.7.0.12 = 18820	# Trinket 1
+AiPlayerbot.GearProgressionSystem.2.7.0.13 = 12930	# Trinket 2
+AiPlayerbot.GearProgressionSystem.2.7.0.14 = 17078	# Back
+AiPlayerbot.GearProgressionSystem.2.7.0.15 = 18842	# Main Hand
+AiPlayerbot.GearProgressionSystem.2.7.0.16 = 0		# Off Hand
+AiPlayerbot.GearProgressionSystem.2.7.0.17 = 23199	# Ranged
+AiPlayerbot.GearProgressionSystem.2.7.0.18 = 5976	# Tabard
+
+# Level 2 (2) Shaman (7) Enhancement (1)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEASYECAEfkAwAyfwUALc4GADPEBwA61ggASsgJAEl8CgA61wsAQqcMAEmFDQA2jQ4ALicPAEhtEgBXew
+AiPlayerbot.GearProgressionSystem.2.7.1.0 = 18817	# Head
+AiPlayerbot.GearProgressionSystem.2.7.1.1 = 18404	# Neck
+AiPlayerbot.GearProgressionSystem.2.7.1.2 = 12927	# Shoulder
+AiPlayerbot.GearProgressionSystem.2.7.1.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.2.7.1.4 = 11726	# Chest
+AiPlayerbot.GearProgressionSystem.2.7.1.5 = 13252	# Waist
+AiPlayerbot.GearProgressionSystem.2.7.1.6 = 15062	# Legs
+AiPlayerbot.GearProgressionSystem.2.7.1.7 = 19144	# Feet
+AiPlayerbot.GearProgressionSystem.2.7.1.8 = 18812	# Wrists
+AiPlayerbot.GearProgressionSystem.2.7.1.9 = 15063	# Hands
+AiPlayerbot.GearProgressionSystem.2.7.1.10 = 17063	# Finger 1
+AiPlayerbot.GearProgressionSystem.2.7.1.11 = 18821	# Finger 2
+AiPlayerbot.GearProgressionSystem.2.7.1.12 = 13965	# Trinket 1
+AiPlayerbot.GearProgressionSystem.2.7.1.13 = 11815	# Trinket 2
+AiPlayerbot.GearProgressionSystem.2.7.1.14 = 18541	# Back
+AiPlayerbot.GearProgressionSystem.2.7.1.15 = 17182	# Main Hand
+AiPlayerbot.GearProgressionSystem.2.7.1.16 = 0		# Off Hand
+AiPlayerbot.GearProgressionSystem.2.7.1.17 = 22395	# Ranged
+AiPlayerbot.GearProgressionSystem.2.7.1.18 = 5976	# Tabard
+
+# Level 2 (2) Shaman (7) Restoration (2)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEAQcoCAEl-AwBBzAUAQckGAEHGBwBBywgAQcUJAEHICgBBxwsASsQMADN6DQBCqA4AMoIPAEhOEABC0REAQtISAFqg
+AiPlayerbot.GearProgressionSystem.2.7.2.0 = 16842	# Head
+AiPlayerbot.GearProgressionSystem.2.7.2.1 = 18814	# Neck
+AiPlayerbot.GearProgressionSystem.2.7.2.2 = 16844	# Shoulder
+AiPlayerbot.GearProgressionSystem.2.7.2.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.2.7.2.4 = 16841	# Chest
+AiPlayerbot.GearProgressionSystem.2.7.2.5 = 16838	# Waist
+AiPlayerbot.GearProgressionSystem.2.7.2.6 = 16843	# Legs
+AiPlayerbot.GearProgressionSystem.2.7.2.7 = 16837	# Feet
+AiPlayerbot.GearProgressionSystem.2.7.2.8 = 16840	# Wrists
+AiPlayerbot.GearProgressionSystem.2.7.2.9 = 16839	# Hands
+AiPlayerbot.GearProgressionSystem.2.7.2.10 = 19140	# Finger 1
+AiPlayerbot.GearProgressionSystem.2.7.2.11 = 13178	# Finger 2
+AiPlayerbot.GearProgressionSystem.2.7.2.12 = 17064	# Trinket 1
+AiPlayerbot.GearProgressionSystem.2.7.2.13 = 12930	# Trinket 2
+AiPlayerbot.GearProgressionSystem.2.7.2.14 = 18510	# Back
+AiPlayerbot.GearProgressionSystem.2.7.2.15 = 17105	# Main Hand
+AiPlayerbot.GearProgressionSystem.2.7.2.16 = 17106	# Off Hand
+AiPlayerbot.GearProgressionSystem.2.7.2.17 = 23200	# Ranged
+AiPlayerbot.GearProgressionSystem.2.7.2.18 = 5976	# Tabard
 
 # Level 2 (2) Mage (8) Arcane (0)
 # https://www.wowhead.com/classic/gear-planner/mage/gnome/AzwAAAFBmwIvR0NQzghvBUziBi2OB0zjCEzkCUGfCkGhC0rLDFdDDUmEDjKCD0K2EFc_EjZy
@@ -2834,6 +2966,72 @@ AiPlayerbot.GearProgressionSystem.3.5.2.16 = 0		# Off Hand
 AiPlayerbot.GearProgressionSystem.3.5.2.17 = 13396	# Ranged
 AiPlayerbot.GearProgressionSystem.3.5.2.18 = 5976	# Tabard
 
+# Level 3 (3) Shaman (7) Elemental (0)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEAS68CAEl-AwBJjQUATOIGAEvIBwBM4wgATOQJAEuuCgBCNAsAS8sMAErLDQBJhA4AS7MPAEuyEABLoBEAS6YSAFqf
+AiPlayerbot.GearProgressionSystem.3.7.0.0 = 19375	# Head
+AiPlayerbot.GearProgressionSystem.3.7.0.1 = 18814	# Neck
+AiPlayerbot.GearProgressionSystem.3.7.0.2 = 18829	# Shoulder
+AiPlayerbot.GearProgressionSystem.3.7.0.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.3.7.0.4 = 19682	# Chest
+AiPlayerbot.GearProgressionSystem.3.7.0.5 = 19400	# Waist
+AiPlayerbot.GearProgressionSystem.3.7.0.6 = 19683	# Legs
+AiPlayerbot.GearProgressionSystem.3.7.0.7 = 19684	# Feet
+AiPlayerbot.GearProgressionSystem.3.7.0.8 = 19374	# Wrists
+AiPlayerbot.GearProgressionSystem.3.7.0.9 = 16948	# Hands
+AiPlayerbot.GearProgressionSystem.3.7.0.10 = 19403	# Finger 1
+AiPlayerbot.GearProgressionSystem.3.7.0.11 = 19147	# Finger 2
+AiPlayerbot.GearProgressionSystem.3.7.0.12 = 18820	# Trinket 1
+AiPlayerbot.GearProgressionSystem.3.7.0.13 = 19379	# Trinket 2
+AiPlayerbot.GearProgressionSystem.3.7.0.14 = 19378	# Back
+AiPlayerbot.GearProgressionSystem.3.7.0.15 = 19360	# Main Hand
+AiPlayerbot.GearProgressionSystem.3.7.0.16 = 19366	# Off Hand
+AiPlayerbot.GearProgressionSystem.3.7.0.17 = 23199	# Ranged
+AiPlayerbot.GearProgressionSystem.3.7.0.18 = 5976	# Tabard
+
+# Level 3 (3) Shaman (7) Enhancement (1)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEASYECAEfkAwAyfwUALc4GAEu0BwA61ggAS7UJAEl8CgBK1QsAS7gMAEmFDQBLzg4ALicPAEvGEgBXew
+AiPlayerbot.GearProgressionSystem.3.7.1.0 = 18817	# Head
+AiPlayerbot.GearProgressionSystem.3.7.1.1 = 18404	# Neck
+AiPlayerbot.GearProgressionSystem.3.7.1.2 = 12927	# Shoulder
+AiPlayerbot.GearProgressionSystem.3.7.1.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.3.7.1.4 = 11726	# Chest
+AiPlayerbot.GearProgressionSystem.3.7.1.5 = 19380	# Waist
+AiPlayerbot.GearProgressionSystem.3.7.1.6 = 15062	# Legs
+AiPlayerbot.GearProgressionSystem.3.7.1.7 = 19381	# Feet
+AiPlayerbot.GearProgressionSystem.3.7.1.8 = 18812	# Wrists
+AiPlayerbot.GearProgressionSystem.2.7.1.9 = 19157	# Hands
+AiPlayerbot.GearProgressionSystem.3.7.1.10 = 19384	# Finger 1
+AiPlayerbot.GearProgressionSystem.3.7.1.11 = 18821	# Finger 2
+AiPlayerbot.GearProgressionSystem.3.7.1.12 = 19406	# Trinket 1
+AiPlayerbot.GearProgressionSystem.3.7.1.13 = 11815	# Trinket 2
+AiPlayerbot.GearProgressionSystem.3.7.1.14 = 19398	# Back
+AiPlayerbot.GearProgressionSystem.3.7.1.15 = 17182	# Main Hand
+AiPlayerbot.GearProgressionSystem.3.7.1.16 = 0		# Off Hand
+AiPlayerbot.GearProgressionSystem.3.7.1.17 = 22395	# Ranged
+AiPlayerbot.GearProgressionSystem.3.7.1.18 = 5976	# Tabard
+
+# Level 3 (3) Shaman (7) Restoration (2)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEAQjMCAEl-AwBJegUAQjYGAEraBwBLuQgAS-0JAEdXCgBCNAsASsQMAEu2DQBCqA4AS8MPAEvmEABLoBEAS5QSAFqg
+AiPlayerbot.GearProgressionSystem.3.7.2.0 = 16947	# Head
+AiPlayerbot.GearProgressionSystem.3.7.2.1 = 18814	# Neck
+AiPlayerbot.GearProgressionSystem.3.7.2.2 = 18810	# Shoulder
+AiPlayerbot.GearProgressionSystem.3.7.2.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.3.7.2.4 = 16950	# Chest
+AiPlayerbot.GearProgressionSystem.3.7.2.5 = 19162	# Waist
+AiPlayerbot.GearProgressionSystem.3.7.2.6 = 19385	# Legs
+AiPlayerbot.GearProgressionSystem.3.7.2.7 = 19437	# Feet
+AiPlayerbot.GearProgressionSystem.3.7.2.8 = 18263	# Wrists
+AiPlayerbot.GearProgressionSystem.3.7.2.9 = 16948	# Hands
+AiPlayerbot.GearProgressionSystem.3.7.2.10 = 19140	# Finger 1
+AiPlayerbot.GearProgressionSystem.3.7.2.11 = 19382	# Finger 2
+AiPlayerbot.GearProgressionSystem.3.7.2.12 = 17064	# Trinket 1
+AiPlayerbot.GearProgressionSystem.3.7.2.13 = 19395	# Trinket 2
+AiPlayerbot.GearProgressionSystem.3.7.2.14 = 19430	# Back
+AiPlayerbot.GearProgressionSystem.3.7.2.15 = 19360	# Main Hand
+AiPlayerbot.GearProgressionSystem.3.7.2.16 = 19348	# Off Hand
+AiPlayerbot.GearProgressionSystem.3.7.2.17 = 23200	# Ranged
+AiPlayerbot.GearProgressionSystem.3.7.2.18 = 5976	# Tabard
+
 # Level 3 (3) Mage (8) Arcane (0)
 # https://www.wowhead.com/classic/gear-planner/mage/gnome/AzwAAAFLrwIvRwNLqgVM4gYtjgdM4whM5AlLrgpCEQtKywxXQw1Liw5Lsw9LshBLnBI2cg
 AiPlayerbot.GearProgressionSystem.3.8.0.0 = 19375	# Head
@@ -3388,6 +3586,72 @@ AiPlayerbot.GearProgressionSystem.4.5.2.16 = 0		# Off Hand
 AiPlayerbot.GearProgressionSystem.4.5.2.17 = 21603	# Ranged
 AiPlayerbot.GearProgressionSystem.4.5.2.18 = 5976	# Tabard
 
+# Level 4 (4) Shaman (7) Elemental (0)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEAS68CAFRoAwBJjQUATOIGAFjKBwBM4wgATOQJAFLCCgBUUQsAS8sMAFTNDQBJhA4AS7MPAFjLEABLoBEAVF0SAFqf
+AiPlayerbot.GearProgressionSystem.4.7.0.0 = 19375	# Head
+AiPlayerbot.GearProgressionSystem.4.7.0.1 = 21608	# Neck
+AiPlayerbot.GearProgressionSystem.4.7.0.2 = 18829	# Shoulder
+AiPlayerbot.GearProgressionSystem.4.7.0.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.4.7.0.4 = 19682	# Chest
+AiPlayerbot.GearProgressionSystem.4.7.0.5 = 22730	# Waist
+AiPlayerbot.GearProgressionSystem.4.7.0.6 = 19683	# Legs
+AiPlayerbot.GearProgressionSystem.4.7.0.7 = 19684	# Feet
+AiPlayerbot.GearProgressionSystem.4.7.0.8 = 21186	# Wrists
+AiPlayerbot.GearProgressionSystem.4.7.0.9 = 21585	# Hands
+AiPlayerbot.GearProgressionSystem.4.7.0.10 = 19403	# Finger 1
+AiPlayerbot.GearProgressionSystem.4.7.0.11 = 21709	# Finger 2
+AiPlayerbot.GearProgressionSystem.4.7.0.12 = 18820	# Trinket 1
+AiPlayerbot.GearProgressionSystem.4.7.0.13 = 19379	# Trinket 2
+AiPlayerbot.GearProgressionSystem.4.7.0.14 = 22731	# Back
+AiPlayerbot.GearProgressionSystem.4.7.0.15 = 19360	# Main Hand
+AiPlayerbot.GearProgressionSystem.4.7.0.16 = 21597	# Off Hand
+AiPlayerbot.GearProgressionSystem.4.7.0.17 = 23199	# Ranged
+AiPlayerbot.GearProgressionSystem.4.7.0.18 = 5976	# Tabard
+
+# Level 4 (4) Shaman (7) Enhancement (1)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEASYECAFSgAwBUoQUALc4GAFRSBwBUkwgAS7UJAFRiCgBUqAsAVK0MAEu4DQBcEg4AS84PAFTFEgBXew
+AiPlayerbot.GearProgressionSystem.4.7.1.0 = 18817	# Head
+AiPlayerbot.GearProgressionSystem.4.7.1.1 = 21664	# Neck
+AiPlayerbot.GearProgressionSystem.4.7.1.2 = 21665	# Shoulder
+AiPlayerbot.GearProgressionSystem.4.7.1.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.4.7.1.4 = 11726	# Chest
+AiPlayerbot.GearProgressionSystem.4.7.1.5 = 21586	# Waist
+AiPlayerbot.GearProgressionSystem.4.7.1.6 = 21651	# Legs
+AiPlayerbot.GearProgressionSystem.4.7.1.7 = 19381	# Feet
+AiPlayerbot.GearProgressionSystem.4.7.1.8 = 21602	# Wrists
+AiPlayerbot.GearProgressionSystem.4.7.1.9 = 21672	# Hands
+AiPlayerbot.GearProgressionSystem.4.7.1.10 = 21677	# Finger 1
+AiPlayerbot.GearProgressionSystem.4.7.1.11 = 19384	# Finger 2
+AiPlayerbot.GearProgressionSystem.4.7.1.12 = 23570	# Trinket 1
+AiPlayerbot.GearProgressionSystem.4.7.1.13 = 19406	# Trinket 2
+AiPlayerbot.GearProgressionSystem.4.7.1.14 = 21701	# Back
+AiPlayerbot.GearProgressionSystem.4.7.1.15 = 21134	# Main Hand
+AiPlayerbot.GearProgressionSystem.4.7.1.16 = 0		# Off Hand
+AiPlayerbot.GearProgressionSystem.4.7.1.17 = 22395	# Ranged
+AiPlayerbot.GearProgressionSystem.4.7.1.18 = 5976	# Tabard
+
+# Level 4 (4) Shaman (7) Restoration (2)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEAQjMCAFTQAwBJegUAVKcGAFROBwBLuQgAS-0JAEIvCgBCNAsASsQMAEu2DQBCqA4AS8MPAFRPEABVTxEAVKISAFd8
+AiPlayerbot.GearProgressionSystem.4.7.2.0 = 16947	# Head
+AiPlayerbot.GearProgressionSystem.4.7.2.1 = 21712	# Neck
+AiPlayerbot.GearProgressionSystem.4.7.2.2 = 18810	# Shoulder
+AiPlayerbot.GearProgressionSystem.4.7.2.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.4.7.2.4 = 21671	# Chest
+AiPlayerbot.GearProgressionSystem.4.7.2.5 = 21582	# Waist
+AiPlayerbot.GearProgressionSystem.4.7.2.6 = 19385	# Legs
+AiPlayerbot.GearProgressionSystem.4.7.2.7 = 19437	# Feet
+AiPlayerbot.GearProgressionSystem.4.7.2.8 = 16943	# Wrists
+AiPlayerbot.GearProgressionSystem.4.7.2.9 = 16948	# Hands
+AiPlayerbot.GearProgressionSystem.4.7.2.10 = 19140	# Finger 1
+AiPlayerbot.GearProgressionSystem.4.7.2.11 = 19382	# Finger 2
+AiPlayerbot.GearProgressionSystem.4.7.2.12 = 17064	# Trinket 1
+AiPlayerbot.GearProgressionSystem.4.7.2.13 = 19395	# Trinket 2
+AiPlayerbot.GearProgressionSystem.4.7.2.14 = 21583	# Back
+AiPlayerbot.GearProgressionSystem.4.7.2.15 = 21839	# Main Hand
+AiPlayerbot.GearProgressionSystem.4.7.2.16 = 21666	# Off Hand
+AiPlayerbot.GearProgressionSystem.4.7.2.17 = 22396	# Ranged
+AiPlayerbot.GearProgressionSystem.4.7.2.18 = 5976	# Tabard
+
 # Level 4 (4) Mage (8) Arcane (0)
 # https://www.wowhead.com/classic/gear-planner/mage/gnome/AzwAAAFTYwJUaANLqgVTXwZYygdT1QhTYAlSwgpUUQtUzQxVTA1Liw5Lsw9YyxBTGRJUYw
 AiPlayerbot.GearProgressionSystem.4.8.0.0 = 21347	# Head
@@ -3941,6 +4205,72 @@ AiPlayerbot.GearProgressionSystem.5.5.2.15 = 22799	# Main Hand
 AiPlayerbot.GearProgressionSystem.5.5.2.16 = 0		# Off Hand
 AiPlayerbot.GearProgressionSystem.5.5.2.17 = 21603	# Ranged
 AiPlayerbot.GearProgressionSystem.5.5.2.18 = 5976	# Tabard
+
+# Level 5 (5) Shaman (7) Elemental (0)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEAS68CAFoRAwBccAUATOIGAFjKBwBM4wgATOQJAFLCCgBUUQsAWfcMAFnxDQBaBg4AS7MPAFoKEABZEBIAWp8
+AiPlayerbot.GearProgressionSystem.5.7.0.0 = 19375	# Head
+AiPlayerbot.GearProgressionSystem.5.7.0.1 = 23057	# Neck
+AiPlayerbot.GearProgressionSystem.5.7.0.2 = 23664	# Shoulder
+AiPlayerbot.GearProgressionSystem.5.7.0.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.5.7.0.4 = 19682	# Chest
+AiPlayerbot.GearProgressionSystem.5.7.0.5 = 22730	# Waist
+AiPlayerbot.GearProgressionSystem.5.7.0.6 = 19683	# Legs
+AiPlayerbot.GearProgressionSystem.5.7.0.7 = 19684	# Feet
+AiPlayerbot.GearProgressionSystem.5.7.0.8 = 21186	# Wrists
+AiPlayerbot.GearProgressionSystem.5.7.0.9 = 21585	# Hands
+AiPlayerbot.GearProgressionSystem.5.7.0.10 = 23031	# Finger 1
+AiPlayerbot.GearProgressionSystem.5.7.0.11 = 23025	# Finger 2
+AiPlayerbot.GearProgressionSystem.5.7.0.12 = 23046	# Trinket 1
+AiPlayerbot.GearProgressionSystem.5.7.0.13 = 19379	# Trinket 2
+AiPlayerbot.GearProgressionSystem.5.7.0.14 = 23050	# Back
+AiPlayerbot.GearProgressionSystem.5.7.0.15 = 22800	# Main Hand
+AiPlayerbot.GearProgressionSystem.5.7.0.16 = 0		# Off Hand
+AiPlayerbot.GearProgressionSystem.5.7.0.17 = 23199	# Ranged
+AiPlayerbot.GearProgressionSystem.5.7.0.18 = 5976	# Tabard
+
+# Level 5 (5)) Shaman (7) Enhancement (1)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEASYECAFoNAwBUoQUAWroGAFRSBwBUkwgAS7UJAFRiCgBUqAsAWf4MAEKnDQBZqg4AWgEPAFoFEgBXew
+AiPlayerbot.GearProgressionSystem.5.7.1.0 = 18817	# Head
+AiPlayerbot.GearProgressionSystem.5.7.1.1 = 23053	# Neck
+AiPlayerbot.GearProgressionSystem.5.7.1.2 = 21665	# Shoulder
+AiPlayerbot.GearProgressionSystem.5.7.1.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.5.7.1.4 = 23226	# Chest
+AiPlayerbot.GearProgressionSystem.5.7.1.5 = 21586	# Waist
+AiPlayerbot.GearProgressionSystem.5.7.1.6 = 21651	# Legs
+AiPlayerbot.GearProgressionSystem.5.7.1.7 = 19381	# Feet
+AiPlayerbot.GearProgressionSystem.5.7.1.8 = 21602	# Wrists
+AiPlayerbot.GearProgressionSystem.5.7.1.9 = 21672	# Hands
+AiPlayerbot.GearProgressionSystem.5.7.1.10 = 23038	# Finger 1
+AiPlayerbot.GearProgressionSystem.5.7.1.11 = 17063	# Finger 2
+AiPlayerbot.GearProgressionSystem.5.7.1.12 = 22954	# Trinket 1
+AiPlayerbot.GearProgressionSystem.5.7.1.13 = 23041	# Trinket 2
+AiPlayerbot.GearProgressionSystem.5.7.1.14 = 23045	# Back
+AiPlayerbot.GearProgressionSystem.5.7.1.15 = 22798	# Main Hand
+AiPlayerbot.GearProgressionSystem.5.7.1.16 = 0		# Off Hand
+AiPlayerbot.GearProgressionSystem.5.7.1.17 = 22395	# Ranged
+AiPlayerbot.GearProgressionSystem.5.7.1.18 = 5976	# Tabard
+
+# Level 5 (5) Shaman (7) Restoration (2)
+# https://www.wowhead.com/classic/gear-planner/shaman/tauren/BDwAAAEAV8ICAFTQAwBXwwUAV8AGAFROBwBXwQgAV8QJAFfHCgBXxQsAWhkMAFmbDQBaBw4AS8MPAFRPEABaEBEAWSMSAFd8
+AiPlayerbot.GearProgressionSystem.5.7.1.0 = 22466	# Head
+AiPlayerbot.GearProgressionSystem.5.7.1.1 = 21712	# Neck
+AiPlayerbot.GearProgressionSystem.5.7.1.2 = 22467	# Shoulder
+AiPlayerbot.GearProgressionSystem.5.7.1.3 = 0		# Shirt
+AiPlayerbot.GearProgressionSystem.5.7.1.4 = 22464	# Chest
+AiPlayerbot.GearProgressionSystem.5.7.1.5 = 21582	# Waist
+AiPlayerbot.GearProgressionSystem.5.7.1.6 = 22465	# Legs
+AiPlayerbot.GearProgressionSystem.5.7.1.7 = 22468	# Feet
+AiPlayerbot.GearProgressionSystem.5.7.1.8 = 22471	# Wrists
+AiPlayerbot.GearProgressionSystem.5.7.1.9 = 22469	# Hands
+AiPlayerbot.GearProgressionSystem.5.7.1.10 = 23065	# Finger 1
+AiPlayerbot.GearProgressionSystem.5.7.1.11 = 22939	# Finger 2
+AiPlayerbot.GearProgressionSystem.5.7.1.12 = 23047	# Trinket 1
+AiPlayerbot.GearProgressionSystem.5.7.1.13 = 19395	# Trinket 2
+AiPlayerbot.GearProgressionSystem.5.7.1.14 = 21583	# Back
+AiPlayerbot.GearProgressionSystem.5.7.1.15 = 23056	# Main Hand
+AiPlayerbot.GearProgressionSystem.5.7.1.16 = 22819	# Off Hand
+AiPlayerbot.GearProgressionSystem.5.7.1.17 = 22396	# Ranged
+AiPlayerbot.GearProgressionSystem.5.7.1.18 = 5976	# Tabard
 
 # Level 5 (5) Mage (8) Arcane (0)
 # https://www.wowhead.com/classic/gear-planner/mage/gnome/AzwAAAFX4gJaEQNZxwVX4AZYygdaHghX5AlSwgpUUQtUzQxaFg1Liw5Lsw9aChBZFxFaCRJZJQ

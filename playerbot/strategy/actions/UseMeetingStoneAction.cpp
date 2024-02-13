@@ -180,29 +180,36 @@ bool SummonAction::Teleport(Player* requester, Player *summoner, Player *player)
             float y = summoner->GetPositionY() + sin(angle) * ai->GetRange("follow");
             float z = summoner->GetPositionZ();
             summoner->UpdateGroundPositionZ(x, y, z);
+
             if (!summoner->IsWithinLOS(x, y, z + player->GetCollisionHeight(), true))
             {
                 x = summoner->GetPositionX();
                 y = summoner->GetPositionY();
                 z = summoner->GetPositionZ();
             }
+
             if (summoner->IsWithinLOS(x, y, z + player->GetCollisionHeight(), true))
             {
                 if (sServerFacade.UnitIsDead(player) && sServerFacade.IsAlive(summoner))
                 {
+                    if (!ai->IsSafe(player) || !ai->IsSafe(summoner))
+                        return false;
+
                     player->ResurrectPlayer(1.0f, false);
                     player->SpawnCorpseBones();
                     ai->TellPlayerNoFacing(requester, "I live, again!");
-                }                
+                }
 
                 if (player->IsTaxiFlying())
                 {
                     player->TaxiFlightInterrupt();
                     player->GetMotionMaster()->MovementExpired();
                 }
+
                 player->GetMotionMaster()->Clear();
                 player->TeleportTo(mapId, x, y, z, 0);
                 player->SendHeartBeat();
+
                 if (summoner->GetTransport())
                     summoner->GetTransport()->AddPassenger(player, false);
                     

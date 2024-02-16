@@ -190,10 +190,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                     for (list<Multiplier*>::iterator i = multipliers.begin(); i != multipliers.end(); i++)
                     {
                         Multiplier* multiplier = *i;
-                        if (relevance < 0)
-                            relevance = ((relevance + 200.0f) * multiplier->GetValue(action)) - 200.0f;
-                        else
-                            relevance *= multiplier->GetValue(action);
+                        relevance *= multiplier->GetValue(action);
 
                         action->setRelevance(relevance);
                         if (!relevance)

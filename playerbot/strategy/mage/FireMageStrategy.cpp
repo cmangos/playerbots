@@ -399,10 +399,6 @@ void FireMageStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("living bomb", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "pyroblast",
-        NextAction::array(0, new NextAction("pyroblast", ACTION_NORMAL), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "fire spells locked",
         NextAction::array(0, new NextAction("frostbolt", ACTION_NORMAL), NULL)));
 }

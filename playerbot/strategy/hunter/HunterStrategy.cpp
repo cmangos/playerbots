@@ -533,8 +533,12 @@ void HunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("hunter's mark", ACTION_NORMAL + 6), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "aimed shot",
-        NextAction::array(0, new NextAction("aimed shot", ACTION_NORMAL + 2), NULL)));
+        "kill command",
+        NextAction::array(0, new NextAction("kill command", ACTION_NORMAL + 6), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "steady shot",
+        NextAction::array(0, new NextAction("steady shot", ACTION_NORMAL + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
         "enemy is close",
@@ -647,7 +651,7 @@ void HunterAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("explosive trap on target", ACTION_INTERRUPT), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "ranged medium aoe",
+        "ranged high aoe",
         NextAction::array(0, new NextAction("volley", ACTION_HIGH + 3), NULL)));
 
     triggers.push_back(new TriggerNode(

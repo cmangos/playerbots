@@ -307,6 +307,7 @@ namespace ai
                 creators["frost trap"] = &TriggerFactoryInternal::frost_trap;
                 creators["explosive trap"] = &TriggerFactoryInternal::explosive_trap;
                 creators["rapid fire"] = &TriggerFactoryInternal::rapid_fire;
+                creators["kill command"] = &TriggerFactoryInternal::kill_command;
                 creators["aspect of the hawk"] = &TriggerFactoryInternal::aspect_of_the_hawk;
                 creators["aspect of the wild"] = &TriggerFactoryInternal::aspect_of_the_wild;
                 creators["aspect of the viper"] = &TriggerFactoryInternal::aspect_of_the_viper;
@@ -331,6 +332,7 @@ namespace ai
                 creators["chimera shot"] = &TriggerFactoryInternal::chimera_shot;
                 creators["explosive shot"] = &TriggerFactoryInternal::explosive_shot;
                 creators["multi-shot"] = &TriggerFactoryInternal::multi_shot;
+                creators["steady shot"] = &TriggerFactoryInternal::steady_shot;
                 creators["intimidation on snare target"] = &TriggerFactoryInternal::intimidation;
                 creators["counterattack"] = &TriggerFactoryInternal::counterattack;
                 creators["wyvern sting"] = &TriggerFactoryInternal::wyvern_sting;
@@ -358,6 +360,7 @@ namespace ai
             static Trigger* chimera_shot(PlayerbotAI* ai) { return new ChimeraShotCanCastTrigger(ai); }
             static Trigger* explosive_shot(PlayerbotAI* ai) { return new ExplosiveShotCanCastTrigger(ai); }
             static Trigger* multi_shot(PlayerbotAI* ai) { return new MultishotCanCastTrigger(ai); }
+            static Trigger* steady_shot(PlayerbotAI* ai) { return new SteadyShotCanCastTrigger(ai); }
             static Trigger* scatter_shot(PlayerbotAI* ai) { return new ScatterShotSnareTrigger(ai); }
             static Trigger* scare_beast(PlayerbotAI* ai) { return new ScareBeastTrigger(ai); }
             static Trigger* concussive_shot_on_snare_target(PlayerbotAI* ai) { return new ConsussiveShotSnareTrigger(ai); }
@@ -374,6 +377,7 @@ namespace ai
             static Trigger* frost_trap(PlayerbotAI* ai) { return new FrostTrapTrigger(ai); }
             static Trigger* explosive_trap(PlayerbotAI* ai) { return new ExplosiveTrapTrigger(ai); }
             static Trigger* rapid_fire(PlayerbotAI* ai) { return new RapidFireTrigger(ai); }
+            static Trigger* kill_command(PlayerbotAI* ai) { return new KillCommandBoostTrigger(ai); }
             static Trigger* low_ammo(PlayerbotAI* ai) { return new HunterLowAmmoTrigger(ai); }
             static Trigger* no_ammo(PlayerbotAI* ai) { return new HunterNoAmmoTrigger(ai); }
             static Trigger* has_ammo(PlayerbotAI* ai) { return new HunterHasAmmoTrigger(ai); }
@@ -419,6 +423,7 @@ namespace ai
                 creators["call pet"] = &AiObjectContextInternal::call_pet;
                 creators["black arrow"] = &AiObjectContextInternal::black_arrow;
                 creators["rapid fire"] = &AiObjectContextInternal::rapid_fire;
+                creators["kill command"] = &AiObjectContextInternal::kill_command;
                 creators["boost"] = &AiObjectContextInternal::rapid_fire;
                 creators["readiness"] = &AiObjectContextInternal::readiness;
                 creators["aspect of the monkey"] = &AiObjectContextInternal::aspect_of_the_monkey;
@@ -512,6 +517,7 @@ namespace ai
             static Action* call_pet(PlayerbotAI* ai) { return new CastCallPetAction(ai); }
             static Action* black_arrow(PlayerbotAI* ai) { return new CastBlackArrow(ai); }
             static Action* rapid_fire(PlayerbotAI* ai) { return new CastRapidFireAction(ai); }
+            static Action* kill_command(PlayerbotAI* ai) { return new CastKillCommandAction(ai); }
             static Action* readiness(PlayerbotAI* ai) { return new CastReadinessAction(ai); }
             static Action* aspect_of_the_monkey(PlayerbotAI* ai) { return new CastAspectOfTheMonkeyAction(ai); }
             static Action* aspect_of_the_hawk(PlayerbotAI* ai) { return new CastAspectOfTheHawkAction(ai); }

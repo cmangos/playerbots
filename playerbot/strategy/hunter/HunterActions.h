@@ -33,8 +33,6 @@ namespace ai
     BEGIN_RANGED_DEBUFF_ACTION(CastConcussiveShotAction, "concussive shot")
     END_SPELL_ACTION()
 
-    SPELL_ACTION(CastSteadyShotAction, "steady shot");
-
     BEGIN_RANGED_DEBUFF_ACTION(CastScatterShotAction, "scatter shot")
     END_SPELL_ACTION()
 
@@ -162,6 +160,12 @@ namespace ai
         CastRapidFireAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "rapid fire") {}
     };
 
+    class CastKillCommandAction : public CastBuffSpellAction
+    {
+    public:
+        CastKillCommandAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "kill command") {}
+    };
+
     class CastBlackArrow : public CastRangedDebuffSpellAction
     {
     public:
@@ -250,6 +254,16 @@ namespace ai
     public:
         CastFlareAction(PlayerbotAI* ai) : CastSpellAction(ai, "flare") {}
         virtual string GetTargetName() override { return "nearest stealthed unit"; }
+    };
+
+    class CastSteadyShotAction : public CastSpellAction
+    {
+    public:
+        CastSteadyShotAction(PlayerbotAI* ai) : CastSpellAction(ai, "steady shot") {}
+        virtual bool Execute(Event& event);
+
+    private:
+        uint32 weaponDelay;
     };
 
     class TrapOnTargetAction : public CastSpellAction

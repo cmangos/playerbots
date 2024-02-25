@@ -113,7 +113,6 @@ namespace ai
             creators["add all loot"] = &ActionContext::add_all_loot;
             creators["release loot"] = &ActionContext::release_loot;
             creators["auto loot roll"] = &ActionContext::auto_loot_roll;
-            creators["shoot"] = &ActionContext::shoot;
             creators["follow"] = &ActionContext::follow;
             creators["stop follow"] = &ActionContext::stop_follow;
             creators["flee to master"] = &ActionContext::flee_to_master;

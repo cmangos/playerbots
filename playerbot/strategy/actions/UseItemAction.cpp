@@ -229,12 +229,12 @@ bool UseItemAction::Execute(Event& event)
             if (requester && ai->HasActivePlayerMaster() && !selfOnly && requester->GetSelectionGuid())
             {
                 Unit* target = ai->GetUnit(requester->GetSelectionGuid());
-                return UseItemOnTarget(requester, *items.begin(), target);
+
+                if (target != ai->GetBot())
+                   return UseItemOnTarget(requester, *items.begin(), target);
             }
-            else
-            {
-                return UseItemAuto(requester, *items.begin());
-            }
+
+            return UseItemAuto(requester, *items.begin());
         }
     }
     else

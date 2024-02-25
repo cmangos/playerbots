@@ -23,7 +23,7 @@ namespace ai
 
         bool isUseful() override
         {
-            if (MovementAction.isUseful())
+            if (MovementAction::isUseful())
             {
                 return (bot->getClass() == CLASS_PRIEST || bot->GetGroup()) && bot->GetHealthPercent() < sPlayerbotAIConfig.mediumHealth && !ai->HasAura("lightwell renew", bot);
             }

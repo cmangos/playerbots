@@ -149,14 +149,9 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "WoTLK")
   add_definitions(-DMANGOSBOT_TWO)
 endif()
 
-# Define ENABLE_IMMERSIVE if need
-if (BUILD_IMMERSIVE)
-  add_definitions(-DENABLE_IMMERSIVE)
-endif()
-
-# Define Achievements USE_ACHIEVEMENTS if need
-if (BUILD_ACHIEVEMENTS)
-  add_definitions(-DENABLE_ACHIEVEMENTS)
+# Define ENABLE_MODULES if need
+if (BUILD_MODULES)
+  add_definitions(-DENABLE_MODULES)
 endif()
 
 include_directories(

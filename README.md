@@ -1,14 +1,16 @@
 # Playerbots
 Bot AI Core from ike3 for cmangos classic, tbc and wotlk
 
-💡  If you're new to building CMaNGOS, check the official guide
+# How to install
+## Compiling Code
+If you're new to building CMaNGOS, check the official guide
 https://github.com/cmangos/issues/wiki/Installation-Instructions
 
 Important: to enable the playerbots you need to check it in cmake ( `BUILD_PLAYERBOTS` ✅ )
 
-💡  After successful build get aiplayerbot.conf file from "src/modules/Bots/playerbot/aiplayerbot%expansion.conf.dist" (based on expansion you use) and put it to the same folder where mangosd.conf and realmd.conf are, and remove ".dist" from its name
+After successful build get aiplayerbot.conf file from "src/modules/Bots/playerbot/aiplayerbot%expansion.conf.dist" (based on expansion you use) and put it to the same folder where mangosd.conf and realmd.conf are, and remove ".dist" from its name
 
-💡  Apply DB modifications:
+## Apply DB modifications
 - Using the `InstallFullDB.sh` script:
   1. Execute the script once to generate the `InstallFullDB.config` file, after that close the script
   2. Edit `InstallFullDB.config` and add `PLAYERBOTS_DB="YES"` at the end and save it
@@ -24,3 +26,8 @@ Important: to enable the playerbots you need to check it in cmake ( `BUILD_PLAYE
   **IMPORTANT**: There are several .sql files that are in a `vanilla`, `tbc` or `wotlk` folder. You should only use the files in the folder for the core expansion you are currently using.
 
 After you complete all steps above you can check bots config and start your server. It'll take some time for the first time, as gear/characters for bots will be generated at first launch. Have fun! 🥳
+
+## How to Use
+- [List of Commands](https://docs.google.com/document/d/1xIdu5l5lAKLSKhqZ2Hb6vaU8qJgbbLwCw4MxmhCW_gI/edit#heading=h.vsmxe9r82yc7)
+- [Playerbots AddOn](https://github.com/celguar/mangosbot-addon)
+- [Playerbots Discord Channel](https://discord.gg/vmjZUnPUdr)

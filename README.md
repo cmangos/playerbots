@@ -1,6 +1,14 @@
 # Playerbots
 Bot AI Core from ike3 for cmangos classic, tbc and wotlk
 
+This system brings the following features:
+- Populate the open world with playerbots
+- Populate BGs and Arenas with playerbots
+- Use alt characters as playerbots
+- Do any kind of PvE content (with some guidance on complex mechanics)
+- Very detailed configurations of playerbot behaviors (for the min-maxers out there :D)
+- Multiple commands to request playerbots do what you require
+
 # How to install
 ## Compiling Code
 If you're new to building CMaNGOS, check the official guide
@@ -29,5 +37,6 @@ After you complete all steps above you can check bots config and start your serv
 
 ## How to Use
 - [List of Commands](https://docs.google.com/document/d/1xIdu5l5lAKLSKhqZ2Hb6vaU8qJgbbLwCw4MxmhCW_gI/edit#heading=h.vsmxe9r82yc7)
-- [Playerbots AddOn](https://github.com/celguar/mangosbot-addon)
+- [Playerbots Behavior AddOn](https://github.com/celguar/mangosbot-addon)
+- [Playerbot Inventory AddOn](https://github.com/davidonete/mangosbot-EngBags)
 - [Playerbots Discord Channel](https://discord.gg/vmjZUnPUdr)

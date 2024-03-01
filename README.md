@@ -1,8 +1,8 @@
 # Playerbots
 Bot AI Core from ike3 for cmangos classic, tbc and wotlk
 
-💡  If you're new to building CMaNGOS, check the official Windows guide
-https://github.com/cmangos/issues/wiki/Detailed-installation-guide-for-Microsoft-Windows
+💡  If you're new to building CMaNGOS, check the official guide
+https://github.com/cmangos/issues/wiki/Installation-Instructions
 
 Important: to enable the playerbots you need to check it in cmake ( BUILD_PLAYERBOTS ✅ )
 

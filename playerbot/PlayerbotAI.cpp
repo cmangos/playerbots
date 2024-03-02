@@ -756,6 +756,11 @@ void PlayerbotAI::UpdateTalentSpec(PlayerTalentSpec spec)
     aiObjectContext->GetValue<PlayerTalentSpec>("talent spec")->Set(spec);
 }
 
+bool PlayerbotAI::CanEnterArea(const AreaTrigger* area)
+{
+    return sRandomPlayerbotMgr.IsRandomBot(GetBot());
+}
+
 bool PlayerbotAI::IsStateActive(BotState state) const
 {
     return currentEngine == engines[(uint8)state];

@@ -533,7 +533,9 @@ public:
 
     PlayerTalentSpec GetTalentSpec();
     void UpdateTalentSpec(PlayerTalentSpec spec = PlayerTalentSpec::TALENT_SPEC_INVALID);
-    
+
+    bool CanEnterArea(const AreaTrigger* area);
+
 private:
     bool UpdateAIReaction(uint32 elapsed, bool minimal, bool isStunned);
     void UpdateFaceTarget(uint32 elapsed, bool minimal);

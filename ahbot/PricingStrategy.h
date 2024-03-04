@@ -1,6 +1,6 @@
 #pragma once
-#include "Config.h"
-#include "ItemPrototype.h"
+#include "Config/Config.h"
+#include "Entities/ItemPrototype.h"
 
 using namespace std;
 

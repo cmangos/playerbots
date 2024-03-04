@@ -1,14 +1,14 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "GoAction.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../ServerFacade.h"
-#include "../values/Formations.h"
-#include "../values/PositionValue.h"
-#include "TravelMgr.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/Formations.h"
+#include "playerbot/strategy/values/PositionValue.h"
+#include "playerbot/TravelMgr.h"
 #include "MotionGenerators/PathFinder.h"
 #include "ChooseTravelTargetAction.h"
-#include "../../TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 
 using namespace ai;
 

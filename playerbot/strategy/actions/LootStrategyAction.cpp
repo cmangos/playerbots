@@ -1,10 +1,10 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "LootStrategyAction.h"
-#include "../values/SubStrategyValue.h"
-#include "../values/ItemUsageValue.h"
+#include "playerbot/strategy/values/SubStrategyValue.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
 #include "LootAction.h"
-#include "PlayerbotAIAware.h"
+#include "playerbot/PlayerbotAIAware.h"
 
 using namespace ai;
 

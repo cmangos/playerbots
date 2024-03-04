@@ -1,5 +1,5 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "PriestMultipliers.h"
 #include "ShadowPriestStrategy.h"
 #include "ShadowPriestStrategyActionNodeFactory.h"

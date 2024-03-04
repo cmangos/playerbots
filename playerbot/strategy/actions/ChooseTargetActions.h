@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../Action.h"
+#include "playerbot/strategy/Action.h"
 #include "AttackAction.h"
-#include "../../ServerFacade.h"
-#include "../../playerbot.h"
-#include "../../LootObjectStack.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/playerbot.h"
+#include "playerbot/LootObjectStack.h"
 #include "ChooseRpgTargetAction.h"
 
 namespace ai

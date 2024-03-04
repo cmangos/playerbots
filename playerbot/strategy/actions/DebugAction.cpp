@@ -1,14 +1,14 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "DebugAction.h"
-#include "../../PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #include <playerbot/TravelNode.h>
 #include "ChooseTravelTargetAction.h"
-#include "strategy/values/SharedValueContext.h"
-#include "../../LootObjectStack.h"
-#include "../../../game/GameEvents/GameEventMgr.h"
-#include "../../TravelMgr.h"
-#include "PlayerbotHelpMgr.h"
+#include "playerbot/strategy/values/SharedValueContext.h"
+#include "playerbot/LootObjectStack.h"
+#include "GameEvents/GameEventMgr.h"
+#include "playerbot/TravelMgr.h"
+#include "playerbot/PlayerbotHelpMgr.h"
 #include "Entities/Transports.h"
 #include "MotionGenerators/PathFinder.h"
 

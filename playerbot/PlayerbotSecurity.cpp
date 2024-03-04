@@ -1,10 +1,10 @@
-#include "../botpch.h"
+
 #include "PlayerbotMgr.h"
-#include "playerbot.h"
-#include "PlayerbotAIConfig.h"
+#include "playerbot/playerbot.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #include "PlayerbotAI.h"
 #include "ChatHelper.h"
-#include "ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 
 PlayerbotSecurity::PlayerbotSecurity(Player* const bot) : bot(bot), account(0)
 {

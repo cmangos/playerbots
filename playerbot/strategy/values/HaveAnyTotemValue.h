@@ -1,7 +1,7 @@
 #pragma once
 #include "../Value.h"
 #include "TargetValue.h"
-#include "../../LootObjectStack.h"
+#include "playerbot/LootObjectStack.h"
 
 namespace ai
 {

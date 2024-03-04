@@ -1,11 +1,11 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "RpgAction.h"
-#include "../../ServerFacade.h"
-#include "../values/Formations.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/Formations.h"
 #include "EmoteAction.h"
 #include "RpgSubActions.h"
-#include "../../TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 
 using namespace ai;
 

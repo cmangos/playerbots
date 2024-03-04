@@ -1,10 +1,10 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "SetCraftAction.h"
 
 #include "../../../ahbot/AhBotConfig.h"
-#include "../../ServerFacade.h"
-#include "../values/CraftValues.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/CraftValues.h"
 using namespace ai;
 
 map<uint32, SkillLineAbilityEntry const*> SetCraftAction::skillSpells;

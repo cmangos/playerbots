@@ -1,14 +1,14 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "DungeonTriggers.h"
-#include "../values/PositionValue.h"
-#include "ServerFacade.h"
+#include "playerbot/strategy/values/PositionValue.h"
+#include "playerbot/ServerFacade.h"
 #include "../AiObjectContext.h"
-#include "../values/HazardsValue.h"
-#include "../actions/MovementActions.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "CellImpl.h"
+#include "playerbot/strategy/values/HazardsValue.h"
+#include "playerbot/strategy/actions/MovementActions.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 
 using namespace ai;
 

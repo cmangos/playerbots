@@ -16,13 +16,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-set(LIBRARY_NAME Bots)
+set(LIBRARY_NAME playerbots)
 
 #Add PCH Files
 set(bots_PCH "${CMAKE_CURRENT_SOURCE_DIR}/botpch.h")
-if(PCH)
-    LIST(APPEND bots_PCH "${CMAKE_CURRENT_SOURCE_DIR}/botpch.cpp")
-endif()
 
 #Base files
 file(GLOB Playerbot_Source ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/*.h)
@@ -36,6 +33,7 @@ set(LIBRARY_SRCS
     ${Playerbot_Source}
     ${AHbot_Source}
     ${bots_PCH}
+    ${CMAKE_CURRENT_SOURCE_DIR}/botpch.cpp
 )
 
 #Strategy files
@@ -118,7 +116,7 @@ file(GLOB Playerbot_DeathKnight ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/d
 # Define ENABLE_PLAYERBOTS if need
 if (BUILD_PLAYERBOT OR PLAYERBOTS OR BUILD_IKE3_BOTS OR BUILD_PLAYERBOTS)
   add_definitions(-DENABLE_PLAYERBOTS)
-  # TO DO: Used by AhBot.cpp, remove it after cmangos merge is done 
+  # TO DO: Used by AhBot.cpp, remove it after cmangos merge is done
   if (BUILD_PLAYERBOTS)
     add_definitions(-DENABLE_MANGOSBOTS)
   endif()
@@ -154,87 +152,21 @@ if (BUILD_MODULES)
   add_definitions(-DENABLE_MODULES)
 endif()
 
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/ahbot
-    ${CMAKE_CURRENT_SOURCE_DIR}/playerbot
-    ${CMAKE_SOURCE_DIR}/src/game
-    ${CMAKE_SOURCE_DIR}/src/game/Achievements
-    ${CMAKE_SOURCE_DIR}/src/game/AI
-    ${CMAKE_SOURCE_DIR}/src/game/AI/BaseAI
-    ${CMAKE_SOURCE_DIR}/src/game/AI/EventAI
-    ${CMAKE_SOURCE_DIR}/src/game/Accounts
-    ${CMAKE_SOURCE_DIR}/src/game/Addons
-    ${CMAKE_SOURCE_DIR}/src/game/Arena
-    ${CMAKE_SOURCE_DIR}/src/game/AuctionHouse
-    ${CMAKE_SOURCE_DIR}/src/game/BattleGround
-    ${CMAKE_SOURCE_DIR}/src/game/Chat
-    ${CMAKE_SOURCE_DIR}/src/game/ChatCommands
-    ${CMAKE_SOURCE_DIR}/src/game/Combat
-    ${CMAKE_SOURCE_DIR}/src/game/DBScripts
-    ${CMAKE_SOURCE_DIR}/src/game/Entities
-    ${CMAKE_SOURCE_DIR}/src/game/GMTickets
-    ${CMAKE_SOURCE_DIR}/src/game/GameEvents
-    ${CMAKE_SOURCE_DIR}/src/game/Globals
-    ${CMAKE_SOURCE_DIR}/src/game/Grids
-    ${CMAKE_SOURCE_DIR}/src/game/Groups
-    ${CMAKE_SOURCE_DIR}/src/game/Guilds
-    ${CMAKE_SOURCE_DIR}/src/game/LFG
-    ${CMAKE_SOURCE_DIR}/src/game/Loot
-    ${CMAKE_SOURCE_DIR}/src/game/Mails
-    ${CMAKE_SOURCE_DIR}/src/game/Maps
-    ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators
-    ${CMAKE_SOURCE_DIR}/src/game/Movement
-    ${CMAKE_SOURCE_DIR}/src/game/Object
-    ${CMAKE_SOURCE_DIR}/src/game/OutdoorPvP
-    ${CMAKE_SOURCE_DIR}/src/game/Pools
-    ${CMAKE_SOURCE_DIR}/src/game/Quests
-    ${CMAKE_SOURCE_DIR}/src/game/References
-    ${CMAKE_SOURCE_DIR}/src/game/Reputation
-    ${CMAKE_SOURCE_DIR}/src/game/Server
-    ${CMAKE_SOURCE_DIR}/src/game/Server
-    ${CMAKE_SOURCE_DIR}/src/game/Skills
-    ${CMAKE_SOURCE_DIR}/src/game/Social
-    ${CMAKE_SOURCE_DIR}/src/game/Spells
-    ${CMAKE_SOURCE_DIR}/src/game/Tools
-    ${CMAKE_SOURCE_DIR}/src/game/Trade
-    ${CMAKE_SOURCE_DIR}/src/game/VoiceChat
-    ${CMAKE_SOURCE_DIR}/src/game/Warden
-    ${CMAKE_SOURCE_DIR}/src/game/Weather
-    ${CMAKE_SOURCE_DIR}/src/game/World
-    ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
-    ${CMAKE_SOURCE_DIR}/src/game/Movement
-    ${CMAKE_SOURCE_DIR}/src/game/Vmap
-    ${CMAKE_SOURCE_DIR}/src/shared
-    ${CMAKE_SOURCE_DIR}/src/shared/Auth
-    ${CMAKE_SOURCE_DIR}/src/shared/Config
-    ${CMAKE_SOURCE_DIR}/src/shared/Common
-    ${CMAKE_SOURCE_DIR}/src/shared/Database
-    ${CMAKE_SOURCE_DIR}/src/shared/DataStores
-    ${CMAKE_SOURCE_DIR}/src/shared/Network
-    ${CMAKE_SOURCE_DIR}/src/shared/Log
-    ${CMAKE_SOURCE_DIR}/src/shared/Threading
-    ${CMAKE_SOURCE_DIR}/src/shared/Utilities
-    ${CMAKE_SOURCE_DIR}/src/framework
-    ${CMAKE_SOURCE_DIR}/src/framework/Platform
-    ${CMAKE_SOURCE_DIR}/dep/g3dlite
-    ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
-    ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}/src/shared
-    ${CMAKE_SOURCE_DIR}/src/modules/Immersive
-    ${MYSQL_INCLUDE_DIR}
-    ${ACE_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
-	${CMAKE_SOURCE_DIR}/dep/lualib
-)
-
 if(PCH)
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SRCS})
 
-target_link_libraries(${LIBRARY_NAME} shared Detour)
+target_link_libraries(${LIBRARY_NAME}
+  PRIVATE shared
+  PRIVATE Detour
+  PRIVATE g3dlite
+)
+
+target_include_directories(${LIBRARY_NAME}
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 if(UNIX)
   # Both systems don't have libdl and don't need them
@@ -255,21 +187,9 @@ if (NOT CONF_INSTALL_DIR)
 endif()
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ahbot.conf.dist DESTINATION ${CONF_INSTALL_DIR})
 
+set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "PlayerBots")
+
 # Generate PCH
 if(PCH)
- if (ADD_CXX_PCH)
-    ADD_CXX_PCH(Bots ${bots_PCH})
- elseif (MSVC)
-    set(PCHBaseName "pchdef")
-    set(PrecompiledBinary "${CMAKE_CURRENT_SOURCE_DIR}/botpch.pch")
-    set(PrecompiledHeader "${CMAKE_CURRENT_SOURCE_DIR}/botpch.h")
-    set(PrecompiledSource "${CMAKE_CURRENT_SOURCE_DIR}/botpch.cpp")
-    set_target_properties(${LIBRARY_NAME} PROPERTIES COMPILE_FLAGS " /Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\" /bigobj")
-    set_source_files_properties(${PrecompiledSource} PROPERTIES COMPILE_FLAGS "/Yc\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
-    set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "Bots")
-  elseif(NOT MINGW)
-    # TODO: Resolve issues with order of includes before enabling Cotire for MinGW builds
-    cotire(${LIBRARY_NAME})
-  endif()
-  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+  target_precompile_headers(${LIBRARY_NAME} PRIVATE ${bots_PCH})
 endif()

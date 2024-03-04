@@ -1,12 +1,12 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "RpgTriggers.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../actions/GuildCreateActions.h"
-#include "SocialMgr.h"
-#include "../../ServerFacade.h"
-#include "../values/ItemUsageValue.h"
-#include "../../TravelMgr.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/strategy/actions/GuildCreateActions.h"
+#include "Social/SocialMgr.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/TravelMgr.h"
 
 using namespace ai;
 

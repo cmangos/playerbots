@@ -1,8 +1,8 @@
-#include "botpch.h"
+
 #include "ActiveSpellValue.h"
-#include "../../playerbot.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../ServerFacade.h"
+#include "playerbot/playerbot.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/ServerFacade.h"
 
 using namespace ai;
 

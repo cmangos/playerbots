@@ -1,8 +1,8 @@
 #pragma once
 #include "../Value.h"
 #include "TargetValue.h"
-#include "../../LootObjectStack.h"
-#include "../../ServerFacade.h"
+#include "playerbot/LootObjectStack.h"
+#include "playerbot/ServerFacade.h"
 #include "PositionValue.h"
 
 namespace ai

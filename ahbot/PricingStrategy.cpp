@@ -2,9 +2,9 @@
 #include "Category.h"
 #include "ItemBag.h"
 #include "AhBotConfig.h"
-#include "../../shared/Database/DatabaseEnv.h"
-#include "../playerbot/RandomItemMgr.h"
-#include "AhBot.h"
+#include "Database/DatabaseEnv.h"
+#include "playerbot/RandomItemMgr.h"
+#include "ahbot/AhBot.h"
 
 using namespace ahbot;
 

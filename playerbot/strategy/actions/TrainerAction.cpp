@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "TrainerAction.h"
-#include "../../ServerFacade.h"
-#include "../values/BudgetValues.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/BudgetValues.h"
 
 using namespace ai;
 

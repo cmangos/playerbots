@@ -1,17 +1,17 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "SeeSpellAction.h"
-#include "../values/Formations.h"
-#include "../values/PositionValue.h"
-#include "../../ServerFacade.h"
-#include "MovementGenerator.h"
+#include "playerbot/strategy/values/Formations.h"
+#include "playerbot/strategy/values/PositionValue.h"
+#include "playerbot/ServerFacade.h"
+#include "MotionGenerators/MovementGenerator.h"
 #ifdef MANGOS
 #include "luaEngine.h"
 #endif
 
 #include <MotionGenerators/PathFinder.h>
 #include "RtscAction.h"
-#include "../../TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 
 
 using namespace ai;

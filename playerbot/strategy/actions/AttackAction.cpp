@@ -1,11 +1,11 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "AttackAction.h"
-#include "MovementGenerator.h"
-#include "CreatureAI.h"
-#include "../../LootObjectStack.h"
-#include "../../ServerFacade.h"
-#include "../generic/CombatStrategy.h"
+#include "MotionGenerators/MovementGenerator.h"
+#include "AI/BaseAI/CreatureAI.h"
+#include "playerbot/LootObjectStack.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/generic/CombatStrategy.h"
 
 using namespace ai;
 

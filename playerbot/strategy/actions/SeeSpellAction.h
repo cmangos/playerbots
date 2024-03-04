@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../Action.h"
+#include "playerbot/strategy/Action.h"
 #include "MovementActions.h"
-#include "../values/LastMovementValue.h"
-#include "../values/RTSCValues.h"
+#include "playerbot/strategy/values/LastMovementValue.h"
+#include "playerbot/strategy/values/RTSCValues.h"
 
 namespace ai
 {

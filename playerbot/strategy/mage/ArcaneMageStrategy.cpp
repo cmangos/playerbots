@@ -1,5 +1,5 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "MageMultipliers.h"
 #include "ArcaneMageStrategy.h"
 

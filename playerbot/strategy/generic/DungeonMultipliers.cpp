@@ -1,8 +1,8 @@
 #include "../../../botpch.h"
-#include "../../playerbot.h"
+#include "playerbot/playerbot.h"
 #include "DungeonMultipliers.h"
-#include "../actions/DungeonActions.h"
-#include "../actions/ReachTargetActions.h"
+#include "playerbot/strategy/actions/DungeonActions.h"
+#include "playerbot/strategy/actions/ReachTargetActions.h"
 
 using namespace ai;
 

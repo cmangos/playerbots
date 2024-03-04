@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "RtiAction.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../values/RtiTargetValue.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/strategy/values/RtiTargetValue.h"
 
 using namespace ai;
 

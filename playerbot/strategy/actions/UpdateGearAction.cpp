@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "UpdateGearAction.h"
-#include "../../RandomPlayerbotMgr.h"
-#include "AiFactory.h"
+#include "playerbot/RandomPlayerbotMgr.h"
+#include "playerbot/AiFactory.h"
 
 using namespace ai;
 

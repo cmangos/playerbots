@@ -1,16 +1,16 @@
 #pragma once
 #include "MovementActions.h"
-#include "../../AiFactory.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../ItemVisitors.h"
-#include "../../RandomPlayerbotMgr.h"
-#include "BattleGround.h"
-#include "BattleGroundMgr.h"
-#include "BattleGroundWS.h"
+#include "playerbot/AiFactory.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/strategy/ItemVisitors.h"
+#include "playerbot/RandomPlayerbotMgr.h"
+#include "BattleGround/BattleGround.h"
+#include "BattleGround/BattleGroundMgr.h"
+#include "BattleGround/BattleGroundWS.h"
 #include "ChooseTargetActions.h"
 #include "CheckMountStateAction.h"
 #include "G3D/Vector3.h"
-#include "GameObject.h"
+#include "Entities/GameObject.h"
 
 using namespace ai;
 

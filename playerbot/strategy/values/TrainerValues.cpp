@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "TrainerValues.h"
 #include "SharedValueContext.h"
-#include "PlayerbotHelpMgr.h"
+#include "playerbot/PlayerbotHelpMgr.h"
 
 using namespace ai;
 

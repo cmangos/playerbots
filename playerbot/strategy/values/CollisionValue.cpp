@@ -1,12 +1,12 @@
-#include "botpch.h"
-#include "../../playerbot.h"
-#include "CollisionValue.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../ServerFacade.h"
 
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "CellImpl.h"
+#include "playerbot/playerbot.h"
+#include "CollisionValue.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/ServerFacade.h"
+
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 
 using namespace ai;
 

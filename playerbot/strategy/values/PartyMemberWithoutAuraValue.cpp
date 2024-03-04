@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "PartyMemberWithoutAuraValue.h"
 
-#include "../../ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 using namespace ai;
 
 extern vector<string> split(const string &s, char delim);

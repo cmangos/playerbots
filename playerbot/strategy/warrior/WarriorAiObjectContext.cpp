@@ -1,5 +1,5 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "../NamedObjectContext.h"
 #include "WarriorActions.h"
 #include "WarriorTriggers.h"

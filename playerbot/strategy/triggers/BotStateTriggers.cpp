@@ -1,6 +1,6 @@
-#include "botpch.h"
-#include "../../playerbot.h"
-#include "../../ServerFacade.h"
+
+#include "playerbot/playerbot.h"
+#include "playerbot/ServerFacade.h"
 #include "BotStateTriggers.h"
 
 using namespace ai;

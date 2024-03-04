@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
-#include "../../LootObjectStack.h"
+
+#include "playerbot/playerbot.h"
+#include "playerbot/LootObjectStack.h"
 #include "ChooseTravelTargetAction.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../TravelMgr.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/TravelMgr.h"
 #include <iomanip>
 
 using namespace ai;

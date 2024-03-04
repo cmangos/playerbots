@@ -1,6 +1,6 @@
 #pragma once
 #include "MovementActions.h"
-#include "../values/HazardsValue.h"
+#include "playerbot/strategy/values/HazardsValue.h"
 
 namespace ai
 {

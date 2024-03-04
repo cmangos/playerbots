@@ -3,7 +3,7 @@
 #include "../Value.h"
 #include "../NamedObjectContext.h"
 #include "../../../botpch.h"
-#include "../../playerbot.h"
+#include "playerbot/playerbot.h"
 
 namespace ai
 {

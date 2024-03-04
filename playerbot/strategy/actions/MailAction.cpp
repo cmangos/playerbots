@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "Mail.h"
-#include "../../playerbot.h"
+
+#include "Mails/Mail.h"
+#include "playerbot/playerbot.h"
 #include "MailAction.h"
-#include "../../PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #include "../../Helpers.h"
 
 using namespace ai;

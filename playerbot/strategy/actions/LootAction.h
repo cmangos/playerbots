@@ -1,5 +1,5 @@
 #pragma once
-#include "../../LootObjectStack.h"
+#include "playerbot/LootObjectStack.h"
 #include "MovementActions.h"
 
 namespace ai

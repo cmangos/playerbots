@@ -1,12 +1,12 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "ItemUsageValue.h"
 #include "CraftValues.h"
 #include "MountValues.h"
 
 #include "../../../ahbot/AhBot.h"
 #include "../../RandomItemMgr.h"
-#include "../../ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 
 #include "AuctionHouseBot/AuctionHouseBot.h"
 

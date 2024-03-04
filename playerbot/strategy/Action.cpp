@@ -1,9 +1,9 @@
-#include "../../botpch.h"
-#include "../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include <stdarg.h>
 #include "AiObjectContext.h"
 #include "Action.h"
-#include "Unit.h"
+#include "Entities/Unit.h"
 
 using namespace ai;
 

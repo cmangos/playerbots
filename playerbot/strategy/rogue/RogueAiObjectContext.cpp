@@ -1,5 +1,5 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "RogueActions.h"
 #include "RogueTriggers.h"
 #include "RogueAiObjectContext.h"

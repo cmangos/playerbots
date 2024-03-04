@@ -1,6 +1,6 @@
-#include "botpch.h"
-#include "../../playerbot.h"
-#include "../../RandomPlayerbotMgr.h"
+
+#include "playerbot/playerbot.h"
+#include "playerbot/RandomPlayerbotMgr.h"
 #include "SecurityCheckAction.h"
 
 using namespace ai;

@@ -1,8 +1,8 @@
 #pragma once
 #include "../Trigger.h"
-#include "../../PlayerbotAIConfig.h"
-#include "ServerFacade.h"
-#include "SpellAuraDefines.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/ServerFacade.h"
+#include "Spells/SpellAuraDefines.h"
 
 namespace ai
 {

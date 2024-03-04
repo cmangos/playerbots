@@ -1,6 +1,6 @@
-#include "botpch.h"
+
 #include "MaintenanceValues.h"
-#include "Mail.h"
+#include "Mails/Mail.h"
 
 using namespace ai;
 

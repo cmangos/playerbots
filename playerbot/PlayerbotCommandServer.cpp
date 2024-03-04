@@ -1,7 +1,7 @@
-#include "../botpch.h"
-#include "playerbot.h"
-#include "PlayerbotAIConfig.h"
-#include "PlayerbotFactory.h"
+
+#include "playerbot/playerbot.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotFactory.h"
 #include "PlayerbotCommandServer.h"
 #include <cstdlib>
 #include <iostream>

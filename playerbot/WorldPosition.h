@@ -1,10 +1,10 @@
 #pragma once
 #define DT_POLYREF64 1
 
-#include "ObjectMgr.h"
-#include "SpellMgr.h"
-#include "PlayerbotAIConfig.h"
-#include "World.h"
+#include "Globals/ObjectMgr.h"
+#include "Spells/SpellMgr.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "World/World.h"
 
 class ByteBuffer;
 

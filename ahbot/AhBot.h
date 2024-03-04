@@ -2,11 +2,11 @@
 
 #include "Category.h"
 #include "ItemBag.h"
-#include "PlayerbotAIBase.h"
-#include "AuctionHouseMgr.h"
-#include "ObjectGuid.h"
-#include "WorldSession.h"
-#include "../botpch.h"
+#include "playerbot/PlayerbotAIBase.h"
+#include "AuctionHouse/AuctionHouseMgr.h"
+#include "Entities/ObjectGuid.h"
+#include "Server/WorldSession.h"
+
 
 #define MAX_AUCTIONS 3
 #define AHBOT_WON_EXPIRE 0

@@ -1,6 +1,6 @@
-#include "botpch.h"
-#include "../../playerbot.h"
-#include "../actions/GenericActions.h"
+
+#include "playerbot/playerbot.h"
+#include "playerbot/strategy/actions/GenericActions.h"
 #include "HunterActions.h"
 
 using namespace ai;

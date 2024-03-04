@@ -1,9 +1,9 @@
-#include "../../botpch.h"
-#include "../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "Action.h"
 #include "Queue.h"
 
-#include "../PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAIConfig.h"
 using namespace ai;
 
 

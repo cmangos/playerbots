@@ -1,7 +1,7 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "XpGainAction.h"
-#include "../../LootObjectStack.h"
+#include "playerbot/LootObjectStack.h"
 #ifdef MANGOS
 #include "luaEngine.h"
 #endif

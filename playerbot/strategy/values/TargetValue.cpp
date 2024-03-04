@@ -1,12 +1,12 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "TargetValue.h"
 
-#include "../../ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 #include "RtiTargetValue.h"
-#include "Unit.h"
+#include "Entities/Unit.h"
 #include "LastMovementValue.h"
-#include "../values/Formations.h"
+#include "playerbot/strategy/values/Formations.h"
 
 using namespace ai;
 

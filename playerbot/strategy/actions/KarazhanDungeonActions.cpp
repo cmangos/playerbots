@@ -1,7 +1,7 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "KarazhanDungeonActions.h"
-#include "../Action.h"
+#include "playerbot/strategy/Action.h"
 
 using namespace ai;
 

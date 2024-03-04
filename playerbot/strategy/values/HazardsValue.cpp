@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "HazardsValue.h"
 #include "../AiObjectContext.h"
-#include "PathFinder.h"
+#include "MotionGenerators/PathFinder.h"
 
 using namespace ai;
 

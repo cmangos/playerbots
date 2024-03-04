@@ -1,10 +1,10 @@
 #include "DungeonActions.h"
-#include "../values/PositionValue.h"
+#include "playerbot/strategy/values/PositionValue.h"
 #include "../AiObjectContext.h"
-#include "../../PlayerbotAI.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "CellImpl.h"
+#include "playerbot/PlayerbotAI.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 
 using namespace ai;
 

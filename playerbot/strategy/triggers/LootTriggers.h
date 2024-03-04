@@ -1,6 +1,6 @@
 #pragma once
 #include "../Trigger.h"
-#include "../values/LastMovementValue.h"
+#include "playerbot/strategy/values/LastMovementValue.h"
 
 namespace ai
 {

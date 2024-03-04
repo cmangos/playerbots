@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "GuildTriggers.h"
-#include "ServerFacade.h"
-#include "../values/BudgetValues.h"
-#include "../../TravelMgr.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/BudgetValues.h"
+#include "playerbot/TravelMgr.h"
 
 using namespace ai;
 

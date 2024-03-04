@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../RandomPlayerbotMgr.h"
-#include "../Action.h"
+#include "playerbot/RandomPlayerbotMgr.h"
+#include "playerbot/strategy/Action.h"
 
 namespace ai
 {

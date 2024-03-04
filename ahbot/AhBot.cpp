@@ -1,22 +1,21 @@
-#include "../botpch.h"
+
 #include "Category.h"
 #include "ItemBag.h"
-#include "AhBot.h"
-#include "World.h"
-#include "Config.h"
-#include "Chat.h"
+#include "ahbot/AhBot.h"
+#include "World/World.h"
+#include "Config/Config.h"
+#include "Chat/Chat.h"
 #include "AhBotConfig.h"
-#include "AuctionHouseMgr.h"
-#include "WorldSession.h"
-#include "Player.h"
-#include "ObjectAccessor.h"
-#include "ObjectGuid.h"
-#include "ObjectMgr.h"
+#include "AuctionHouse/AuctionHouseMgr.h"
+#include "Server/WorldSession.h"
+#include "Entities/Player.h"
+#include "Globals/ObjectAccessor.h"
+#include "Entities/ObjectGuid.h"
+#include "Globals/ObjectMgr.h"
 #include "playerbot/PlayerbotAIConfig.h"
-#include "AccountMgr.h"
+#include "Accounts/AccountMgr.h"
 #include "playerbot/playerbot.h"
-#include "Player.h"
-#include "Mail.h"
+#include "Mails/Mail.h"
 #include "Util/Util.h"
 
 #ifdef CMANGOS
@@ -543,11 +542,11 @@ int AhBot::AddAuctions(int auction, Category* category, ItemBag* inAuctionItems)
             sLog.outDetail("%s in auction %d: has reached max %d/%d",
                 proto->Name1, auctionIds[auction], inAuctionItems->GetCount(category, proto->ItemId), maxAllowedItems);
             continue;
-        }        
+        }
 
         uint32 sellTime = GetSellTime(proto->ItemId, auctionIds[auction], category);
         if (time(0) - sellTime < 0)
-        {          
+        {
             ladded += 1;
             sLog.outDetail( "%s in auction %d: will add in %ld seconds",
                     proto->Name1, auctionIds[auction], sellTime - time(0));
@@ -558,14 +557,14 @@ int AhBot::AddAuctions(int auction, Category* category, ItemBag* inAuctionItems)
             sLog.outDetail( "%s in auction %d: too old (%ld secs)",
                     proto->Name1, auctionIds[auction], time(0) - sellTime);
             continue;
-        }        
+        }
         inAuctionItems->Add(proto);
         added += AddAuction(auction, category, proto);
     }
 
     sLog.outDetail("%s has %d upcomming and %d new auctions.",
         category->GetDisplayName().c_str(), ladded , added);
-    
+
 
     return added;
 }
@@ -929,7 +928,7 @@ void AhBot::CheckCategoryMultipliers()
             else if (k < 80) m = 1 + r; // 2..3
             else if (k < 90) m = 2 + r; // 3..4
             else m = 3 + r; // 4..5
-            categoryMultipliers[name] = m;            
+            categoryMultipliers[name] = m;
             categoryMultiplierExpireTimes[name] = time(0) + urand(4, 7) * 3600 * 24;
         }
 

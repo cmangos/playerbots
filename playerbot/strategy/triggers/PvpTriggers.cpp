@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "PvpTriggers.h"
-#include "ServerFacade.h"
-#include "BattleGroundWS.h"
-#include "strategy/values/PositionValue.h"
+#include "playerbot/ServerFacade.h"
+#include "BattleGround/BattleGroundWS.h"
+#include "playerbot/strategy/values/PositionValue.h"
 #ifndef MANGOSBOT_ZERO
 #include "BattleGroundEY.h"
 #endif

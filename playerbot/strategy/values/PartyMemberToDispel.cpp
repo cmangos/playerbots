@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "PartyMemberToDispel.h"
 
-#include "../../ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 using namespace ai;
 
 class PartyMemberToDispelPredicate : public FindPlayerPredicate, public PlayerbotAIAware

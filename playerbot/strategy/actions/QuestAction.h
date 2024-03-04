@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Action.h"
-#include "QuestDef.h"
+#include "playerbot/strategy/Action.h"
+#include "Quests/QuestDef.h"
 
 namespace ai
 {

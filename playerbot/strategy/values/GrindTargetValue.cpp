@@ -1,13 +1,13 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "GrindTargetValue.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../RandomPlayerbotMgr.h"
-#include "../../ServerFacade.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/RandomPlayerbotMgr.h"
+#include "playerbot/ServerFacade.h"
 #include "AttackersValue.h"
 #include "PossibleAttackTargetsValue.h"
-#include "../actions/ChooseTargetActions.h"
-#include "Formulas.h"
+#include "playerbot/strategy/actions/ChooseTargetActions.h"
+#include "Tools/Formulas.h"
 
 using namespace ai;
 

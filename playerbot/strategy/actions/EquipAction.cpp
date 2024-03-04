@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "EquipAction.h"
 
-#include "../values/ItemCountValue.h"
-#include "../values/ItemUsageValue.h"
+#include "playerbot/strategy/values/ItemCountValue.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
 
 using namespace ai;
 

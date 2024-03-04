@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "SkipSpellsListAction.h"
-#include "../values/SkipSpellsListValue.h"
+#include "playerbot/strategy/values/SkipSpellsListValue.h"
 #include "LootAction.h"
-#include "../../ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 
 using namespace ai;
 

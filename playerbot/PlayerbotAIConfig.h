@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Config.h"
+#include "Config/Config.h"
 #include "Talentspec.h"
-#include "SharedDefines.h"
+#include "Globals/SharedDefines.h"
 
 using namespace std;
 

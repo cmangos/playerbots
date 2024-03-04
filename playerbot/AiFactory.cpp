@@ -1,6 +1,5 @@
-#include "../botpch.h"
-#include "playerbot.h"
-#include "AiFactory.h"
+#include "playerbot/playerbot.h"
+#include "playerbot/AiFactory.h"
 #include "strategy/AiObjectContext.h"
 #include "strategy/ReactionEngine.h"
 
@@ -14,10 +13,10 @@
 #include "strategy/hunter/HunterAiObjectContext.h"
 #include "strategy/rogue/RogueAiObjectContext.h"
 #include "strategy/deathknight/DKAiObjectContext.h"
-#include "Player.h"
-#include "PlayerbotAIConfig.h"
-#include "RandomPlayerbotMgr.h"
-#include "BattleGroundMgr.h"
+#include "Entities/Player.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/RandomPlayerbotMgr.h"
+#include "BattleGround/BattleGroundMgr.h"
 
 AiObjectContext* AiFactory::createAiObjectContext(Player* player, PlayerbotAI* ai)
 {

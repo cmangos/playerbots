@@ -1,7 +1,7 @@
 #pragma once
 #include "ListSpellsAction.h"
-#include "../values/CraftValues.h"
-#include "../values/ItemUsageValue.h"
+#include "playerbot/strategy/values/CraftValues.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
 #include "GenericActions.h"
 #include "../../RandomItemMgr.h"
 

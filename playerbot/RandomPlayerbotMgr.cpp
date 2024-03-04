@@ -1,25 +1,25 @@
 #include "Config/Config.h"
-#include "../botpch.h"
-#include "playerbot.h"
-#include "PlayerbotAIConfig.h"
-#include "PlayerbotFactory.h"
-#include "AccountMgr.h"
-#include "ObjectMgr.h"
-#include "DatabaseEnv.h"
+
+#include "playerbot/playerbot.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotFactory.h"
+#include "Accounts/AccountMgr.h"
+#include "Globals/ObjectMgr.h"
+#include "Database/DatabaseEnv.h"
 #include "PlayerbotAI.h"
-#include "Player.h"
-#include "AiFactory.h"
+#include "Entities/Player.h"
+#include "playerbot/AiFactory.h"
 #include "PlayerbotCommandServer.h"
 #include "MemoryMonitor.h"
 
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "CellImpl.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 #include "FleeManager.h"
-#include "ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 
-#include "BattleGround.h"
-#include "BattleGroundMgr.h"
+#include "BattleGround/BattleGround.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include "Chat/ChannelMgr.h"
 
 #include "World/WorldState.h"
@@ -33,7 +33,7 @@
 #endif
 #endif
 
-#include "TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 #include <iomanip>
 #include <float.h>
 

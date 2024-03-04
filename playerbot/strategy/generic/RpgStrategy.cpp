@@ -1,7 +1,7 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "RpgStrategy.h"
-#include "../actions/RpgSubActions.h"
+#include "playerbot/strategy/actions/RpgSubActions.h"
 
 using namespace ai;
 

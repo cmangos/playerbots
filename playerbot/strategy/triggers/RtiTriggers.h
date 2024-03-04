@@ -1,8 +1,8 @@
 #pragma once
 #include "../Trigger.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../ServerFacade.h"
-#include "../values/RtiTargetValue.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/RtiTargetValue.h"
 
 namespace ai
 {

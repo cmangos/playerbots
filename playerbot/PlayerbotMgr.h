@@ -3,7 +3,7 @@
 
 #include "Common.h"
 #include "PlayerbotAIBase.h"
-#include "../botpch.h"
+
 
 class WorldPacket;
 class Player;

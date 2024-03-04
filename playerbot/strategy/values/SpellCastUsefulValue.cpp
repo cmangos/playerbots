@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "SpellCastUsefulValue.h"
 #include "LastSpellCastValue.h"
-#include "../../ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 #ifdef MANGOS
 #include "Spell.h"
 #endif

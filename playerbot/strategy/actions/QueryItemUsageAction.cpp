@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "QueryItemUsageAction.h"
 #include "../../../ahbot/AhBot.h"
-#include "../values/ItemUsageValue.h"
-#include "../../RandomPlayerbotMgr.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/RandomPlayerbotMgr.h"
 #include "../../RandomItemMgr.h"
 
 using namespace ai;

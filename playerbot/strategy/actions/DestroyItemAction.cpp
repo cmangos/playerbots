@@ -1,7 +1,7 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "DestroyItemAction.h"
-#include "../values/ItemCountValue.h"
+#include "playerbot/strategy/values/ItemCountValue.h"
 
 using namespace ai;
 

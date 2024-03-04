@@ -1,10 +1,10 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "TravelTriggers.h"
 
-#include "../../PlayerbotAIConfig.h"
-#include "../../TravelMgr.h"
-#include "ServerFacade.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/TravelMgr.h"
+#include "playerbot/ServerFacade.h"
 using namespace ai;
 
 bool NoTravelTargetTrigger::IsActive()

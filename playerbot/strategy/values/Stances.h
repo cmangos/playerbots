@@ -1,6 +1,6 @@
 #pragma once
 #include "../Value.h"
-#include "../../PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #include "Formations.h"
 
 namespace ai

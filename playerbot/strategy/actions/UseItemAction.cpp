@@ -1,12 +1,12 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "UseItemAction.h"
 
-#include "../../PlayerbotAIConfig.h"
-#include "DBCStore.h"
-#include "../../ServerFacade.h"
-#include "../values/ItemUsageValue.h"
-#include "../../TravelMgr.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "Database/DBCStore.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/TravelMgr.h"
 #include "CheckMountStateAction.h"
 
 using namespace ai;

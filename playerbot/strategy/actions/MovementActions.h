@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../Action.h"
-#include "../NamedObjectContext.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../TravelNode.h"
-#include "WaypointMovementGenerator.h"
-#include "../values/HazardsValue.h"
+#include "playerbot/strategy/Action.h"
+#include "playerbot/strategy/NamedObjectContext.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/TravelNode.h"
+#include "MotionGenerators/WaypointMovementGenerator.h"
+#include "playerbot/strategy/values/HazardsValue.h"
 
 namespace ai
 {

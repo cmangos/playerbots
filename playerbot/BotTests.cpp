@@ -1,4 +1,4 @@
-#include "PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #include "BotTests.h"
 #include <fstream>
 

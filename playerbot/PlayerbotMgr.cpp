@@ -1,11 +1,11 @@
-#include "../botpch.h"
-#include "playerbot.h"
-#include "PlayerbotAIConfig.h"
+
+#include "playerbot/playerbot.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #include "PlayerbotDbStore.h"
-#include "PlayerbotFactory.h"
-#include "RandomPlayerbotMgr.h"
-#include "ServerFacade.h"
-#include "TravelMgr.h"
+#include "playerbot/PlayerbotFactory.h"
+#include "playerbot/RandomPlayerbotMgr.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/TravelMgr.h"
 #include "Chat/ChannelMgr.h"
 #include "Social/SocialMgr.h"
 

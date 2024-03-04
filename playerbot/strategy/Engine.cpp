@@ -1,11 +1,11 @@
-#include "../../botpch.h"
-#include "../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include <stdarg.h>
 #include <iomanip>
 
 #include "Engine.h"
-#include "../PlayerbotAIConfig.h"
-#include "../PerformanceMonitor.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/PerformanceMonitor.h"
 
 #ifdef BUILD_ELUNA
 #include "LuaEngine/LuaEngine.h"

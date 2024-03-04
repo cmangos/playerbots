@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../shared/Config/Config.h"
+#include "Config/Config.h"
 
 using namespace std;
 

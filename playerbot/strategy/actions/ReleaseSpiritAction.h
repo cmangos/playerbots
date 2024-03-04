@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../ServerFacade.h"
-#include "../Action.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/Action.h"
 #include "MovementActions.h"
-#include "../values/LastMovementValue.h"
+#include "playerbot/strategy/values/LastMovementValue.h"
 #include "ReviveFromCorpseAction.h"
 
 namespace ai

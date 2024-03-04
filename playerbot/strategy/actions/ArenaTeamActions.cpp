@@ -1,5 +1,5 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "ArenaTeamActions.h"
 #ifndef MANGOSBOT_ZERO
 #ifdef CMANGOS

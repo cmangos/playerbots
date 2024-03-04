@@ -1,6 +1,6 @@
-#include "botpch.h"
+
 #include "QuestRewardActions.h"
-#include "../values/QuestValues.h"
+#include "playerbot/strategy/values/QuestValues.h"
 
 using namespace ai;
 

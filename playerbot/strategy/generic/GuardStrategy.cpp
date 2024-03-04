@@ -1,6 +1,6 @@
-#include "botpch.h"
-#include "../../playerbot.h"
-#include "../values/PositionValue.h"
+
+#include "playerbot/playerbot.h"
+#include "playerbot/strategy/values/PositionValue.h"
 #include "GuardStrategy.h"
 
 using namespace ai;

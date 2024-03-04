@@ -1,11 +1,11 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "CheckMountStateAction.h"
-#include "../values/PositionValue.h"
-#include "../../ServerFacade.h"
-#include "../values/MountValues.h"
-#include "BattleGroundWS.h"
-#include "../../TravelMgr.h"
+#include "playerbot/strategy/values/PositionValue.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/MountValues.h"
+#include "BattleGround/BattleGroundWS.h"
+#include "playerbot/TravelMgr.h"
 
 using namespace ai;
 

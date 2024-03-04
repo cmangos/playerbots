@@ -1,9 +1,9 @@
 #include "WorldPosition.h"
 #include "GuidPosition.h"
-#include "TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 #include "TravelNode.h"
 
-#include "Map.h"
+#include "Maps/Map.h"
 
 #ifdef MANGOSBOT_TWO
     #include "Vmap/VMapFactory.h"
@@ -12,11 +12,11 @@
 #endif
 
 
-#include "MoveMap.h"
-#include "World.h"
-#include "PathFinder.h"
+#include "MotionGenerators/MoveMap.h"
+#include "World/World.h"
+#include "MotionGenerators/PathFinder.h"
 #include "Grids/CellImpl.h"
-#include "ObjectAccessor.h"
+#include "Globals/ObjectAccessor.h"
 #include "Entities/Transports.h"
 #include "MemoryMonitor.h"
 

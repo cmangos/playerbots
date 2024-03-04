@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "CurrentTargetValue.h"
 
-#include "../../ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 using namespace ai;
 
 Unit* CurrentTargetValue::Get()

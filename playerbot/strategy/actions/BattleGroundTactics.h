@@ -1,11 +1,11 @@
 #pragma once
 
 #include "MovementActions.h"
-#include "BattleGround.h"
-#include "BattleGroundMgr.h"
-#include "BattleGroundWS.h"
-#include "BattleGroundAV.h"
-#include "BattleGroundAB.h"
+#include "BattleGround/BattleGround.h"
+#include "BattleGround/BattleGroundMgr.h"
+#include "BattleGround/BattleGroundWS.h"
+#include "BattleGround/BattleGroundAV.h"
+#include "BattleGround/BattleGroundAB.h"
 #ifndef MANGOSBOT_ZERO
 #include "BattleGroundEY.h"
 #endif

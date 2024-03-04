@@ -1,8 +1,8 @@
-#include "../Action.h"
+#include "playerbot/strategy/Action.h"
 #include "ChooseTargetActions.h"
-#include "MovementGenerator.h"
-#include "CreatureAI.h"
-#include "../../TravelMgr.h"
+#include "MotionGenerators/MovementGenerator.h"
+#include "AI/BaseAI/CreatureAI.h"
+#include "playerbot/TravelMgr.h"
 
 bool DpsAssistAction::isUseful()
 {

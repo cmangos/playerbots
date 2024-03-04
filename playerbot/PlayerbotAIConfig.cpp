@@ -1,16 +1,16 @@
-#include "../botpch.h"
-#include "../ahbot/AhBot.h"
-#include "PlayerbotAIConfig.h"
-#include "playerbot.h"
+
+#include "ahbot/AhBot.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/playerbot.h"
 #include "RandomPlayerbotFactory.h"
-#include "AccountMgr.h"
+#include "Accounts/AccountMgr.h"
 #include "SystemConfig.h"
-#include "PlayerbotFactory.h"
+#include "playerbot/PlayerbotFactory.h"
 #include "RandomItemMgr.h"
 #include "World/WorldState.h"
-#include "PlayerbotHelpMgr.h"
+#include "playerbot/PlayerbotHelpMgr.h"
 
-#include "TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 
 #include <iostream>
 #include <numeric>

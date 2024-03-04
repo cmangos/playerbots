@@ -1,10 +1,10 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "ConserveManaStrategy.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../actions/GenericSpellActions.h"
-#include "../values/LastSpellCastValue.h"
-#include "../../ServerFacade.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/strategy/actions/GenericSpellActions.h"
+#include "playerbot/strategy/values/LastSpellCastValue.h"
+#include "playerbot/ServerFacade.h"
 
 using namespace ai;
 

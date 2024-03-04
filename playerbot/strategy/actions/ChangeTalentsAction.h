@@ -1,6 +1,6 @@
 #pragma once
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "../../Talentspec.h"
 #include "GenericActions.h"
 

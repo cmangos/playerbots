@@ -1,10 +1,10 @@
 #pragma once
 #include "../Trigger.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../ServerFacade.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/ServerFacade.h"
 #include "../generic/CombatStrategy.h"
-#include "../values/PossibleAttackTargetsValue.h"
-#include "../values/Formations.h"
+#include "playerbot/strategy/values/PossibleAttackTargetsValue.h"
+#include "playerbot/strategy/values/Formations.h"
 
 namespace ai
 {

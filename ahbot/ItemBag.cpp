@@ -1,18 +1,18 @@
-#include "../botpch.h"
+
 #include "Category.h"
 #include "ItemBag.h"
 #include "ConsumableCategory.h"
 #include "TradeCategory.h"
 #include "AhBotConfig.h"
-#include "DBCStructure.h"
-#include "Log.h"
-#include "QueryResult.h"
-#include "DatabaseEnv.h"
-#include "SQLStorage.h"
-#include "DBCStore.h"
-#include "SQLStorages.h"
-#include "AuctionHouseMgr.h"
-#include "ObjectMgr.h"
+#include "Server/DBCStructure.h"
+#include "Log/Log.h"
+#include "Database/QueryResult.h"
+#include "Database/DatabaseEnv.h"
+#include "Database/SQLStorage.h"
+#include "Database/DBCStore.h"
+#include "Server/SQLStorages.h"
+#include "AuctionHouse/AuctionHouseMgr.h"
+#include "Globals/ObjectMgr.h"
 
 using namespace ahbot;
 char * strstri (const char* str1, const char* str2);

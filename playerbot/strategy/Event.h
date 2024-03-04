@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ObjectGuid.h"
-#include "WorldPacket.h"
+#include "Entities/ObjectGuid.h"
+#include "Server/WorldPacket.h"
 
 class Player;
 

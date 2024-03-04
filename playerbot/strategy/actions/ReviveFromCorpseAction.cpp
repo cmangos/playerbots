@@ -1,11 +1,11 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "ReviveFromCorpseAction.h"
 #include "../../PlayerbotFactory.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../FleeManager.h"
-#include "../../TravelMgr.h"
-#include "ServerFacade.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/FleeManager.h"
+#include "playerbot/TravelMgr.h"
+#include "playerbot/ServerFacade.h"
 
 using namespace ai;
 

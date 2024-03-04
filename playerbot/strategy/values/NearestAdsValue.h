@@ -1,7 +1,7 @@
 #pragma once
 #include "../Value.h"
 #include "NearestUnitsValue.h"
-#include "../../PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #include "PossibleTargetsValue.h"
 
 namespace ai

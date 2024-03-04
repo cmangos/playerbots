@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "SayAction.h"
-#include "../../PlayerbotTextMgr.h"
-#include "ChannelMgr.h"
-#include "../../ServerFacade.h"
+#include "playerbot/PlayerbotTextMgr.h"
+#include "Chat/ChannelMgr.h"
+#include "playerbot/ServerFacade.h"
 #include <regex>
 
 using namespace ai;

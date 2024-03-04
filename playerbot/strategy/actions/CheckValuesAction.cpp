@@ -1,13 +1,13 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "CheckValuesAction.h"
 
-#include "../../PlayerbotAIConfig.h"
-#include "../../ServerFacade.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/ServerFacade.h"
 
-#include "../../TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 #include "../../TravelNode.h"
-#include "../values/LastMovementValue.h"
+#include "playerbot/strategy/values/LastMovementValue.h"
 using namespace ai;
 
 CheckValuesAction::CheckValuesAction(PlayerbotAI* ai) : Action(ai, "check values")

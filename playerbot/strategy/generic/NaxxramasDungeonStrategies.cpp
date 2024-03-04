@@ -1,5 +1,5 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "NaxxramasDungeonStrategies.h"
 #include "DungeonMultipliers.h"
 

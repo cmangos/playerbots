@@ -1,10 +1,10 @@
-#include "../botpch.h"
+
 #include "Category.h"
-#include "../playerbot/RandomItemMgr.h"
+#include "playerbot/RandomItemMgr.h"
 #include "ItemBag.h"
 #include "AhBotConfig.h"
 #include "PricingStrategy.h"
-#include "ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 
 using namespace ahbot;
 

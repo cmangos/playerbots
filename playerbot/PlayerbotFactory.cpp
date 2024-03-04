@@ -1,19 +1,19 @@
-#include "../botpch.h"
-#include "playerbot.h"
-#include "PlayerbotFactory.h"
 
-#include "../ahbot/AhBotConfig.h"
-#include "SQLStorages.h"
-#include "ItemPrototype.h"
-#include "PlayerbotAIConfig.h"
-#include "AccountMgr.h"
-#include "DBCStore.h"
-#include "SharedDefines.h"
+#include "playerbot/playerbot.h"
+#include "playerbot/PlayerbotFactory.h"
+
+#include "ahbot/AhBotConfig.h"
+#include "Server/SQLStorages.h"
+#include "Entities/ItemPrototype.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "Accounts/AccountMgr.h"
+#include "Database/DBCStore.h"
+#include "Globals/SharedDefines.h"
 #include "ahbot/AhBot.h"
 #include "RandomItemMgr.h"
 #include "RandomPlayerbotFactory.h"
-#include "ServerFacade.h"
-#include "AiFactory.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/AiFactory.h"
 
 #ifndef MANGOSBOT_ZERO
     #ifdef CMANGOS

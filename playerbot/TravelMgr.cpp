@@ -1,9 +1,9 @@
-#include "TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 #include <numeric>
 #include <iomanip>
 
-#include "strategy/values/SharedValueContext.h"
-#include "PathFinder.h"
+#include "playerbot/strategy/values/SharedValueContext.h"
+#include "MotionGenerators/PathFinder.h"
 #include "TravelNode.h"
 #include "PlayerbotAI.h"
 #include "BotTests.h"

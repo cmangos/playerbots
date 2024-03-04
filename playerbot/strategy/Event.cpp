@@ -1,6 +1,6 @@
-#include "../../botpch.h"
-#include "../playerbot.h"
-#include "Player.h"
+
+#include "playerbot/playerbot.h"
+#include "Entities/Player.h"
 #include "Event.h"
 
 

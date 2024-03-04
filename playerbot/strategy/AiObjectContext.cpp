@@ -1,5 +1,5 @@
-#include "../../botpch.h"
-#include "../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "Action.h"
 #include "AiObjectContext.h"
 #include "NamedObjectContext.h"

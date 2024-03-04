@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../Action.h"
+#include "playerbot/strategy/Action.h"
 #include "MovementActions.h"
 #include "ChooseRpgTargetAction.h"
 #include "UseItemAction.h"
-#include "../values/LastMovementValue.h"
+#include "playerbot/strategy/values/LastMovementValue.h"
 
 namespace ai
 {

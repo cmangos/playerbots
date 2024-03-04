@@ -1,6 +1,6 @@
 #pragma once
 #include "../Value.h"
-#include "WorldPosition.h"
+#include "playerbot/WorldPosition.h"
 
 namespace ai
 {

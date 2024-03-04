@@ -1,7 +1,7 @@
-#include "../botpch.h"
-#include "playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "ChatHelper.h"
-#include "AiFactory.h"
+#include "playerbot/AiFactory.h"
 #include "strategy/values/ItemUsageValue.h"
 #include <numeric>
 #include <iomanip>

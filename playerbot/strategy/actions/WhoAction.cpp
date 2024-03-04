@@ -1,10 +1,10 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "WhoAction.h"
-#include "../../AiFactory.h"
-#include "../ItemVisitors.h"
+#include "playerbot/AiFactory.h"
+#include "playerbot/strategy/ItemVisitors.h"
 #include "../../../ahbot/AhBot.h"
-#include "../../RandomPlayerbotMgr.h"
+#include "playerbot/RandomPlayerbotMgr.h"
 
 using namespace ai;
 

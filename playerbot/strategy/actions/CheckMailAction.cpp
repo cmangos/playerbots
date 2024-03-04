@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
-#include "CheckMailAction.h"
-#include "Mail.h"
 
-#include "../../PlayerbotAIConfig.h"
+#include "playerbot/playerbot.h"
+#include "CheckMailAction.h"
+#include "Mails/Mail.h"
+
+#include "playerbot/PlayerbotAIConfig.h"
 using namespace ai;
 
 bool CheckMailAction::Execute(Event& event)

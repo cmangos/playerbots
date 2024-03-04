@@ -1,6 +1,6 @@
 #pragma once
 #include "../Value.h"
-#include "TravelNode.h"
+#include "playerbot/TravelNode.h"
 
 namespace ai
 {

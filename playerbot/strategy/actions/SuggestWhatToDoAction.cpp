@@ -1,14 +1,14 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "SuggestWhatToDoAction.h"
 #include "../../../ahbot/AhBot.h"
 #include "../../../ahbot/PricingStrategy.h"
-#include "../../AiFactory.h"
+#include "playerbot/AiFactory.h"
 #include "Chat/ChannelMgr.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../PlayerbotTextMgr.h"
-#include "ServerFacade.h"
-#include "../ItemVisitors.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotTextMgr.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/ItemVisitors.h"
 
 using ahbot::PricingStrategy;
 

@@ -1,10 +1,10 @@
-#include "../botpch.h"
+
 #include "playerbot.h"
 #include "FleeManager.h"
-#include "PlayerbotAIConfig.h"
-#include "Group.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "Groups/Group.h"
 #include "strategy/values/MoveStyleValue.h"
-#include "ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 
 using namespace ai;
 using namespace std;

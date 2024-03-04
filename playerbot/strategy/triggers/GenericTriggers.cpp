@@ -1,10 +1,10 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "GenericTriggers.h"
-#include "../../LootObjectStack.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../values/PositionValue.h"
-#include "../values/AoeValues.h"
+#include "playerbot/LootObjectStack.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/strategy/values/PositionValue.h"
+#include "playerbot/strategy/values/AoeValues.h"
 
 using namespace ai;
 

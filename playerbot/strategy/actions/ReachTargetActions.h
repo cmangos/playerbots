@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../Action.h"
+#include "playerbot/strategy/Action.h"
 #include "MovementActions.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../ServerFacade.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/ServerFacade.h"
 #include "../generic/PullStrategy.h"
 #include "../NamedObjectContext.h"
-#include "../values/MoveStyleValue.h"
+#include "playerbot/strategy/values/MoveStyleValue.h"
 #include "GenericSpellActions.h"
 
 namespace ai

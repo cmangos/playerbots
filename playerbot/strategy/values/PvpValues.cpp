@@ -1,12 +1,12 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "PvpValues.h"
-#include "BattleGroundWS.h"
-#include "ServerFacade.h"
+#include "BattleGround/BattleGroundWS.h"
+#include "playerbot/ServerFacade.h"
 #ifndef MANGOSBOT_ZERO
 #include "BattleGroundEY.h"
 #endif
-#include "../../TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 #include "SharedValueContext.h"
 
 using namespace ai;

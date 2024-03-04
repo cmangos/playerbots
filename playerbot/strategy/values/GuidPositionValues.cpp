@@ -1,9 +1,9 @@
 #include "GuidPositionValues.h"
-#include "../../TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 #include "NearestGameObjects.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "CellImpl.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 
 using namespace ai;
 using namespace MaNGOS;

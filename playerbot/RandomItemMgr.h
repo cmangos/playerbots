@@ -3,7 +3,7 @@
 
 #include "Common.h"
 #include "PlayerbotAIBase.h"
-#include "AiFactory.h"
+#include "playerbot/AiFactory.h"
 #ifdef CMANGOS
 #include "Entities/Player.h"
 #endif

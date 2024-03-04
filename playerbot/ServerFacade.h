@@ -2,17 +2,17 @@
 #define _ServerFacade_H
 
 #include "Common.h"
-#include "Unit.h"
-#include "Player.h"
+#include "Entities/Unit.h"
+#include "Entities/Player.h"
 #ifdef CMANGOS
 #include "Entities/GameObject.h"
 #endif
 #ifdef MANGOS
 #include "Object/GameObject.h"
 #endif
-#include "BattleGroundMgr.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include "PlayerbotAIBase.h"
-#include "PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAIConfig.h"
 
 using namespace std;
 

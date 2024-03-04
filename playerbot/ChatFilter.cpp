@@ -1,4 +1,3 @@
-#include "../botpch.h"
 #include "playerbot.h"
 #include "ChatFilter.h"
 #include "strategy/values/RtiTargetValue.h"

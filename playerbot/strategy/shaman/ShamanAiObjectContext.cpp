@@ -1,5 +1,5 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "ShamanActions.h"
 #include "ShamanAiObjectContext.h"
 #include "ShamanTriggers.h"

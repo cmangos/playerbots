@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "ItemCountValue.h"
-#include "Item.h"
-#include "ItemPrototype.h"
-#include "Player.h"
+#include "Entities/Item.h"
+#include "Entities/ItemPrototype.h"
+#include "Entities/Player.h"
 
 using namespace ai;
 

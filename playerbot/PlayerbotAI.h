@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../botpch.h"
+
 #include "PlayerbotMgr.h"
 #include "PlayerbotAIBase.h"
 #include "strategy/AiObjectContext.h"
@@ -13,6 +13,7 @@
 #include "PlayerTalentSpec.h"
 #include <stack>
 #include "strategy/IterateItemsMask.h"
+#include "RandomPlayerbotMgr.h"
 
 class Player;
 class PlayerbotMgr;

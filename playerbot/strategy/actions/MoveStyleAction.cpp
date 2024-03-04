@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "MoveStyleAction.h"
-#include "../values/SubStrategyValue.h"
-#include "../values/MoveStyleValue.h"
-#include "PlayerbotAIAware.h"
+#include "playerbot/strategy/values/SubStrategyValue.h"
+#include "playerbot/strategy/values/MoveStyleValue.h"
+#include "playerbot/PlayerbotAIAware.h"
 
 using namespace ai;
 

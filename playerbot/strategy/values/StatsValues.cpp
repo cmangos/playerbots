@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "StatsValues.h"
 
-#include "../../ServerFacade.h"
-#include "../actions/CheckMountStateAction.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/actions/CheckMountStateAction.h"
 
 using namespace ai;
 

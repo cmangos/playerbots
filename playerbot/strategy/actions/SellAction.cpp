@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "SellAction.h"
-#include "../ItemVisitors.h"
-#include "../values/ItemUsageValue.h"
+#include "playerbot/strategy/ItemVisitors.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
 
 using namespace ai;
 

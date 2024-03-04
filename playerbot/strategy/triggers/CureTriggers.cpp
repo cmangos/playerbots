@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "GenericTriggers.h"
 #include "CureTriggers.h"
-#include "../actions/WorldBuffAction.h"
+#include "playerbot/strategy/actions/WorldBuffAction.h"
 
 using namespace ai;
 

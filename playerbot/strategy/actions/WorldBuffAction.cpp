@@ -1,7 +1,7 @@
-#include "../Action.h"
+#include "playerbot/strategy/Action.h"
 #include "WorldBuffAction.h"
-#include "AiFactory.h"
-#include "PlayerbotAIConfig.h"
+#include "playerbot/AiFactory.h"
+#include "playerbot/PlayerbotAIConfig.h"
 
 using namespace ai;
 

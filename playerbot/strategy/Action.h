@@ -3,7 +3,7 @@
 #include "Value.h"
 #include "AiObject.h"
 #include "AiObject.h"
-#include "PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAIConfig.h"
 
 class Unit;
 

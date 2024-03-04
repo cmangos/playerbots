@@ -1,7 +1,7 @@
 #pragma once
 #include "ChooseTravelTargetAction.h"
-#include "../values/BudgetValues.h"
-#include "ServerFacade.h"
+#include "playerbot/strategy/values/BudgetValues.h"
+#include "playerbot/ServerFacade.h"
 
 namespace ai
 {

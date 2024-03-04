@@ -1,13 +1,12 @@
-#include "../botpch.h"
 #include "playerbot.h"
-#include "PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #include "PerformanceMonitor.h"
 
-#include "../../modules/Bots/ahbot/AhBot.h"
-#include "DatabaseEnv.h"
+#include "ahbot/AhBot.h"
+#include "Database/DatabaseEnv.h"
 #include "PlayerbotAI.h"
 
-#include "../../modules/Bots/ahbot/AhBotConfig.h"
+#include "ahbot/AhBotConfig.h"
 
 PerformanceMonitor::PerformanceMonitor() 
 {

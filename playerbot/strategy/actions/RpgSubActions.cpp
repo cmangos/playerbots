@@ -1,15 +1,15 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "RpgSubActions.h"
 #include "ChooseRpgTargetAction.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../values/PossibleRpgTargetsValue.h"
-#include "../values/Formations.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/strategy/values/PossibleRpgTargetsValue.h"
+#include "playerbot/strategy/values/Formations.h"
 #include "EmoteAction.h"
-#include "GossipDef.h"
+#include "Entities/GossipDef.h"
 #include "GuildCreateActions.h"
-#include "SocialMgr.h"
-#include "../../TravelMgr.h"
+#include "Social/SocialMgr.h"
+#include "playerbot/TravelMgr.h"
 
 
 using namespace ai;

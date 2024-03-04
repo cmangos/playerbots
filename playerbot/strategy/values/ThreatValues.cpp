@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "ThreatValues.h"
 
-#include "../../ServerFacade.h"
-#include "ThreatManager.h"
+#include "playerbot/ServerFacade.h"
+#include "Combat/ThreatManager.h"
 
 using namespace ai;
 

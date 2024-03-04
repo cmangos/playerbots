@@ -1,7 +1,7 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "BotStateActions.h"
-#include "../values/PositionValue.h"
+#include "playerbot/strategy/values/PositionValue.h"
 
 using namespace ai;
 

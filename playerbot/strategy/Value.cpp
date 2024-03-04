@@ -1,8 +1,8 @@
-#include "../../botpch.h"
-#include "../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "Value.h"
-#include "../PerformanceMonitor.h"
-#include "ChatHelper.h"
+#include "playerbot/PerformanceMonitor.h"
+#include "playerbot/ChatHelper.h"
 
 using namespace ai;
 

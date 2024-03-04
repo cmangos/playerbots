@@ -1,5 +1,5 @@
 #pragma once
-#include "../../RandomPlayerbotMgr.h"
+#include "playerbot/RandomPlayerbotMgr.h"
 #include "GenericActions.h"
 
 namespace ai

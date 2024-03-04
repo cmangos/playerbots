@@ -1,14 +1,14 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "ChooseRpgTargetAction.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../values/PossibleRpgTargetsValue.h"
-#include "../../TravelMgr.h"
-#include "../values/BudgetValues.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/strategy/values/PossibleRpgTargetsValue.h"
+#include "playerbot/TravelMgr.h"
+#include "playerbot/strategy/values/BudgetValues.h"
 #include "GuildCreateActions.h"
 #include "RpgSubActions.h"
-#include "../values/ItemUsageValue.h"
-#include "../values/PositionValue.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/strategy/values/PositionValue.h"
 
 using namespace ai;
 

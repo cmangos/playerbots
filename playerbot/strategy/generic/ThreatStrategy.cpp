@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "ThreatStrategy.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../actions/GenericSpellActions.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/strategy/actions/GenericSpellActions.h"
 
 using namespace ai;
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../actions/GenericActions.h"
-#include "../actions/ChangeStrategyAction.h"
+#include "playerbot/strategy/actions/GenericActions.h"
+#include "playerbot/strategy/actions/ChangeStrategyAction.h"
 
 namespace ai
 {

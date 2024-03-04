@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
-#include "strategy/values/PositionValue.h"
+
+#include "playerbot/playerbot.h"
+#include "playerbot/strategy/values/PositionValue.h"
 #include "MovementActions.h"
-#include "BattleGround.h"
-#include "BattleGroundMgr.h"
+#include "BattleGround/BattleGround.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include "BattleGroundTactics.h"
 #include "float.h"
 #ifdef MANGOSBOT_TWO

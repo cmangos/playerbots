@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SeeSpellAction.h"
-#include "../values/RTSCValues.h"
+#include "playerbot/strategy/values/RTSCValues.h"
 
 namespace ai
 {    

@@ -1,6 +1,6 @@
 #pragma once
 #include "../Value.h"
-#include "../values/PartyMemberValue.h"
+#include "playerbot/strategy/values/PartyMemberValue.h"
 
 namespace ai
 {

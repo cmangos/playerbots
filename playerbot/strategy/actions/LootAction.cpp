@@ -1,17 +1,17 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "LootAction.h"
 
-#include "AhBotConfig.h"
+#include "ahbot/AhBotConfig.h"
 
-#include "../../LootObjectStack.h"
-#include "../../PlayerbotAIConfig.h"
-#include "../../../ahbot/AhBot.h"
-#include "../../RandomPlayerbotMgr.h"
-#include "../../ServerFacade.h"
-#include "../values/LootStrategyValue.h"
-#include "../values/ItemUsageValue.h"
-#include "../../ServerFacade.h"
+#include "playerbot/LootObjectStack.h"
+#include "playerbot/PlayerbotAIConfig.h"
+#include "ahbot/AhBot.h"
+#include "playerbot/RandomPlayerbotMgr.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/LootStrategyValue.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/ServerFacade.h"
 
 
 using namespace ai;

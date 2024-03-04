@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "StayActions.h"
 
-#include "../../ServerFacade.h"
-#include "../values/LastMovementValue.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/LastMovementValue.h"
 
 using namespace ai;
 

@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "Stances.h"
 
-#include "../../ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 #include "Arrow.h"
 
 using namespace ai;

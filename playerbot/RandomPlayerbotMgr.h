@@ -4,7 +4,7 @@
 #include "Common.h"
 #include "PlayerbotAIBase.h"
 #include "PlayerbotMgr.h"
-#include "PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAIConfig.h"
 
 class WorldPacket;
 class Player;

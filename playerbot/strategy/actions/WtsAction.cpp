@@ -1,12 +1,12 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "WtsAction.h"
-#include "../../AiFactory.h"
-#include "../ItemVisitors.h"
+#include "playerbot/AiFactory.h"
+#include "playerbot/strategy/ItemVisitors.h"
 #include "../../../ahbot/AhBot.h"
 #include "../../../ahbot/PricingStrategy.h"
-#include "../../RandomPlayerbotMgr.h"
-#include "../values/ItemUsageValue.h"
+#include "playerbot/RandomPlayerbotMgr.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
 
 using ahbot::PricingStrategy;
 

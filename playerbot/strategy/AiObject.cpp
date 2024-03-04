@@ -1,7 +1,7 @@
-#include "../../botpch.h"
-#include "../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "AiObject.h"
-#include "Player.h"
+#include "Entities/Player.h"
 
 AiObject::AiObject(PlayerbotAI* ai) :
     PlayerbotAIAware(ai),

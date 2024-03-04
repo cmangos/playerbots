@@ -1,7 +1,7 @@
 #include "VendorValues.h"
 #include "ItemUsageValue.h"
 #include "BudgetValues.h"
-#include "../../PlayerbotAI.h"
+#include "playerbot/PlayerbotAI.h"
 
 using namespace ai;
 

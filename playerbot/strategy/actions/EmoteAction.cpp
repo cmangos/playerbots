@@ -1,10 +1,10 @@
-#include "botpch.h"
-#include "../../playerbot.h"
-#include "EmoteAction.h"
-#include "../../PlayerbotTextMgr.h"
 
-#include "../../PlayerbotAIConfig.h"
-#include "../../ServerFacade.h"
+#include "playerbot/playerbot.h"
+#include "EmoteAction.h"
+#include "playerbot/PlayerbotTextMgr.h"
+
+#include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/ServerFacade.h"
 using namespace ai;
 
 map<string, uint32> EmoteActionBase::emotes;

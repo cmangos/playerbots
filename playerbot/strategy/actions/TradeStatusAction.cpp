@@ -1,14 +1,14 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "TradeStatusAction.h"
 
-#include "../ItemVisitors.h"
-#include "../../PlayerbotAIConfig.h"
+#include "playerbot/strategy/ItemVisitors.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #include "../../../ahbot/AhBot.h"
-#include "../../RandomPlayerbotMgr.h"
-#include "../../ServerFacade.h"
-#include "../values/CraftValues.h"
-#include "../values/ItemUsageValue.h"
+#include "playerbot/RandomPlayerbotMgr.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/CraftValues.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
 #include "SetCraftAction.h"
 
 using namespace ai;

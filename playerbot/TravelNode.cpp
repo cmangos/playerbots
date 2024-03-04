@@ -1,16 +1,16 @@
 #include "TravelNode.h"
-#include "TravelMgr.h"
+#include "playerbot/TravelMgr.h"
 
 #include <iomanip>
 #include <regex>
 
-#include "ObjectMgr.h"
+#include "Globals/ObjectMgr.h"
 #include "PlayerbotAI.h"
-#include "MoveMapSharedDefines.h"
+#include "MotionGenerators/MoveMapSharedDefines.h"
 #include "MotionGenerators/PathFinder.h"
 #include "Entities/Transports.h"
 #include "strategy/values/BudgetValues.h"
-#include "ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 
 using namespace ai;
 using namespace MaNGOS;

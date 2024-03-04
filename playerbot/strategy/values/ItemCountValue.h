@@ -1,6 +1,6 @@
 #pragma once
 #include "../Value.h"
-#include "../ItemVisitors.h"
+#include "playerbot/strategy/ItemVisitors.h"
 
 namespace ai
 {

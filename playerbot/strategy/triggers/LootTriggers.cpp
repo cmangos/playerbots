@@ -1,9 +1,9 @@
-#include "botpch.h"
-#include "../../playerbot.h"
-#include "LootTriggers.h"
-#include "../../LootObjectStack.h"
 
-#include "../../ServerFacade.h"
+#include "playerbot/playerbot.h"
+#include "LootTriggers.h"
+#include "playerbot/LootObjectStack.h"
+
+#include "playerbot/ServerFacade.h"
 using namespace ai;
 
 bool LootAvailableTrigger::IsActive()

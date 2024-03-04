@@ -3,7 +3,7 @@
 #include <iomanip>
 
 #include "GameEvents/GameEventMgr.h"
-#include "ObjectAccessor.h"
+#include "Globals/ObjectAccessor.h"
 #include "PlayerbotAI.h"
 
 using namespace ai;

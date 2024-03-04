@@ -2,17 +2,17 @@
 #include "Category.h"
 #include "AhBotConfig.h"
 #include "PricingStrategy.h"
-#include "ServerFacade.h"
-#include "SQLStorages.h"
-#include "DBCStructure.h"
-#include "ItemPrototype.h"
+#include "playerbot/ServerFacade.h"
+#include "Server/SQLStorages.h"
+#include "Server/DBCStructure.h"
+#include "Entities/ItemPrototype.h"
 #ifdef CMANGOS
 #include "Globals/ObjectMgr.h"
-#include "SpellEffectDefines.h"
+#include "Spells/SpellEffectDefines.h"
 #endif
 #ifdef MANGOS
 #include "Object/ObjectMgr.h"
-#include "SharedDefines.h"
+#include "Globals/SharedDefines.h"
 #endif
 
 

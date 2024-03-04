@@ -1,6 +1,6 @@
 #pragma once
 #include "GenericActions.h"
-#include "../../ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 #include "../../RandomItemMgr.h"
 
 namespace ai

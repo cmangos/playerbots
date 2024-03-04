@@ -1,8 +1,8 @@
-#include "botpch.h"
-#include "../../playerbot.h"
+
+#include "playerbot/playerbot.h"
 #include "InviteToGroupAction.h"
-#include "../../ServerFacade.h"
-#include "../values/Formations.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/Formations.h"
 
 namespace ai
 {

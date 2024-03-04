@@ -1,9 +1,9 @@
 #pragma once
-#include "Config.h"
+#include "Config/Config.h"
 #include "AhBotConfig.h"
 #include "PricingStrategy.h"
-#include "ItemPrototype.h"
-#include "SharedDefines.h"
+#include "Entities/ItemPrototype.h"
+#include "Globals/SharedDefines.h"
 
 using namespace std;
 

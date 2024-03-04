@@ -1,5 +1,5 @@
 #pragma once
-#include "../../ServerFacade.h"
+#include "playerbot/ServerFacade.h"
 
 namespace ai
 {

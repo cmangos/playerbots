@@ -114,12 +114,8 @@ file(GLOB Playerbot_DeathKnight ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/d
     LIST(APPEND LIBRARY_SRCS ${Playerbot_DeathKnight})
 
 # Define ENABLE_PLAYERBOTS if need
-if (BUILD_PLAYERBOT OR PLAYERBOTS OR BUILD_IKE3_BOTS OR BUILD_PLAYERBOTS)
+if (BUILD_PLAYERBOTS)
   add_definitions(-DENABLE_PLAYERBOTS)
-  # TO DO: Used by AhBot.cpp, remove it after cmangos merge is done
-  if (BUILD_PLAYERBOTS)
-    add_definitions(-DENABLE_MANGOSBOTS)
-  endif()
 endif()
 
 # Define BUILD_ELUNA if need

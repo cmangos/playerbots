@@ -1,6 +1,6 @@
 #pragma once
 #include "Trigger.h"
-#include "Triggers/WorldPacketTrigger.h"
+#include "triggers/WorldPacketTrigger.h"
 #include "playerbot/ChatHelper.h"
 
 namespace ai

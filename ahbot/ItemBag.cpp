@@ -5,7 +5,7 @@
 #include "TradeCategory.h"
 #include "AhBotConfig.h"
 #include "Server/DBCStructure.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Database/QueryResult.h"
 #include "Database/DatabaseEnv.h"
 #include "Database/SQLStorage.h"

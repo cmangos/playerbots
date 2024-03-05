@@ -3,7 +3,7 @@
 #include <sstream>
 #include <time.h>
 #include "Util/Timer.h"
-#include "Log.h"
+#include "Log/Log.h"
 #define BOOST_STACKTRACE_LINK
 #include <boost/stacktrace.hpp>
 

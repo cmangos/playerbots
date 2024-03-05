@@ -24,48 +24,6 @@
 
 using namespace ahbot;
 
-#ifndef ENABLE_MANGOSBOTS
-// To be removed once cmangos merge is completed
-bool Player::MinimalLoadFromDB( std::unique_ptr<QueryResult> result, uint32 guid )
-{
-    bool delete_result = true;
-    if (!result)
-    {
-        //                                        0     1           2           3           4    5          6          7
-        auto results = CharacterDatabase.PQuery ("SELECT name, position_x, position_y, position_z, map, totaltime, leveltime, at_login FROM characters WHERE guid = '%u'",guid);
-        if (!result)
-            return false;
-    }
-    else
-        delete_result = false;
-
-    Field *fields = result->Fetch();
-
-    // overwrite possible wrong/corrupted guid
-    Object::_Create(0, guid, 0, HIGHGUID_PLAYER);
-
-    m_name = fields[0].GetString();
-
-    Relocate(fields[1].GetFloat(),fields[2].GetFloat(),fields[3].GetFloat());
-    SetLocationMapId(fields[4].GetUInt32());
-
-    m_Played_time[PLAYED_TIME_TOTAL] = fields[5].GetUInt32();
-    m_Played_time[PLAYED_TIME_LEVEL] = fields[6].GetUInt32();
-
-    m_atLoginFlags = fields[7].GetUInt32();
-
-    if (delete_result)
-
-    for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
-        m_items[i] = NULL;
-
-    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-        m_deathState = DEAD;
-
-    return true;
-}
-#endif
-
 bool AhBot::HandleAhBotCommand(ChatHandler* handler, char const* args)
 {
     auctionbot.HandleCommand(args);

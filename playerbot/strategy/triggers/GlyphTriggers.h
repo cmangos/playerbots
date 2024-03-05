@@ -1,14 +1,14 @@
 #pragma once
 
 #include "playerbot/playerbot.h"
-#include "../Trigger.h"
+#include "playerbot/strategy/Trigger.h"
 
 namespace ai
 {
     class LearnGlyphTrigger : public Trigger
     {
     public:
-        LearnGlyphTrigger(PlayerbotAI* ai, string triggerName, int glyphId, int requiredSpellId = -1, int requiredLevel = -1, string requiredCombatStrategy = "") : Trigger(ai, triggerName, 60) {
+        LearnGlyphTrigger(PlayerbotAI* ai, std::string triggerName, int glyphId, int requiredSpellId = -1, int requiredLevel = -1, std::string requiredCombatStrategy = "") : Trigger(ai, triggerName, 60) {
             this->glyphId = glyphId;
             this->requiredSpellId = requiredSpellId;
             this->requiredLevel = requiredLevel;
@@ -33,13 +33,13 @@ namespace ai
 
     private:
         int glyphId, requiredSpellId, requiredLevel;
-        string requiredCombatStrategy;
+        std::string requiredCombatStrategy;
     };
 
     class RemoveGlyphTrigger : public Trigger
     {
     public:
-        RemoveGlyphTrigger(PlayerbotAI* ai, string triggerName, int glyphId, int requiredSpellId = -1, int requiredLevel = -1, string requiredCombatStrategy = "") : Trigger(ai, triggerName, 60) {
+        RemoveGlyphTrigger(PlayerbotAI* ai, std::string triggerName, int glyphId, int requiredSpellId = -1, int requiredLevel = -1, std::string requiredCombatStrategy = "") : Trigger(ai, triggerName, 60) {
             this->glyphId = glyphId;
             this->requiredSpellId = requiredSpellId;
             this->requiredLevel = requiredLevel;
@@ -64,6 +64,6 @@ namespace ai
 
     private:
         int glyphId, requiredSpellId, requiredLevel;
-        string requiredCombatStrategy;
+        std::string requiredCombatStrategy;
     };
 }

@@ -8,7 +8,7 @@ namespace ai
     public:
         ProtectionWarriorPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_TANK | STRATEGY_TYPE_MELEE; }
-        string getName() override { return "protection"; }
+        std::string getName() override { return "protection"; }
     };
 
     class ProtectionWarriorStrategy : public WarriorStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         ProtectionWarriorAoePveStrategy(PlayerbotAI* ai) : ProtectionWarriorAoeStrategy(ai) {}
-        string getName() override { return "aoe protection pve"; }
+        std::string getName() override { return "aoe protection pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         ProtectionWarriorAoePvpStrategy(PlayerbotAI* ai) : ProtectionWarriorAoeStrategy(ai) {}
-        string getName() override { return "aoe protection pvp"; }
+        std::string getName() override { return "aoe protection pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         ProtectionWarriorAoeRaidStrategy(PlayerbotAI* ai) : ProtectionWarriorAoeStrategy(ai) {}
-        string getName() override { return "aoe protection raid"; }
+        std::string getName() override { return "aoe protection raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         ProtectionWarriorBuffPveStrategy(PlayerbotAI* ai) : ProtectionWarriorBuffStrategy(ai) {}
-        string getName() override { return "buff protection pve"; }
+        std::string getName() override { return "buff protection pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         ProtectionWarriorBuffPvpStrategy(PlayerbotAI* ai) : ProtectionWarriorBuffStrategy(ai) {}
-        string getName() override { return "buff protection pvp"; }
+        std::string getName() override { return "buff protection pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         ProtectionWarriorBuffRaidStrategy(PlayerbotAI* ai) : ProtectionWarriorBuffStrategy(ai) {}
-        string getName() override { return "buff protection raid"; }
+        std::string getName() override { return "buff protection raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         ProtectionWarriorBoostPveStrategy(PlayerbotAI* ai) : ProtectionWarriorBoostStrategy(ai) {}
-        string getName() override { return "boost protection pve"; }
+        std::string getName() override { return "boost protection pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         ProtectionWarriorBoostPvpStrategy(PlayerbotAI* ai) : ProtectionWarriorBoostStrategy(ai) {}
-        string getName() override { return "boost protection pvp"; }
+        std::string getName() override { return "boost protection pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         ProtectionWarriorBoostRaidStrategy(PlayerbotAI* ai) : ProtectionWarriorBoostStrategy(ai) {}
-        string getName() override { return "boost protection raid"; }
+        std::string getName() override { return "boost protection raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         ProtectionWarriorCcPveStrategy(PlayerbotAI* ai) : ProtectionWarriorCcStrategy(ai) {}
-        string getName() override { return "cc protection pve"; }
+        std::string getName() override { return "cc protection pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         ProtectionWarriorCcPvpStrategy(PlayerbotAI* ai) : ProtectionWarriorCcStrategy(ai) {}
-        string getName() override { return "cc protection pvp"; }
+        std::string getName() override { return "cc protection pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         ProtectionWarriorCcRaidStrategy(PlayerbotAI* ai) : ProtectionWarriorCcStrategy(ai) {}
-        string getName() override { return "cc protection raid"; }
+        std::string getName() override { return "cc protection raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

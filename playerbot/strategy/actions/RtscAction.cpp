@@ -7,7 +7,7 @@ using namespace ai;
 
 bool RTSCAction::Execute(Event& event)
 {
-	string command = event.getParam();
+	std::string command = event.getParam();
 	Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
 	if (!requester)
@@ -28,7 +28,7 @@ bool RTSCAction::Execute(Event& event)
 		}
 
 		RESET_AI_VALUE(bool, "RTSC selected");
-		RESET_AI_VALUE(string, "RTSC next spell action");
+		RESET_AI_VALUE(std::string, "RTSC next spell action");
 
 		for (auto value : ai->GetAiObjectContext()->GetValues())
 			if (value.find("RTSC saved location::") != std::string::npos)
@@ -48,7 +48,7 @@ bool RTSCAction::Execute(Event& event)
 	else if (command == "cancel")
 	{
 		RESET_AI_VALUE(bool, "RTSC selected");
-		RESET_AI_VALUE(string, "RTSC next spell action");
+		RESET_AI_VALUE(std::string, "RTSC next spell action");
 		if(selected)
 			requester->GetSession()->SendPlaySpellVisual(bot->GetObjectGuid(), 6372);
 		return true;
@@ -70,7 +70,7 @@ bool RTSCAction::Execute(Event& event)
 	}
 	else if (command.find("save here ") != std::string::npos)
 	{
-		string locationName = command.substr(10);
+		std::string locationName = command.substr(10);
 
 		WorldPosition spellPosition(bot);
 		SET_AI_VALUE2(WorldPosition, "RTSC saved location", locationName, spellPosition);
@@ -82,7 +82,7 @@ bool RTSCAction::Execute(Event& event)
 	}
 	else if (command.find("unsave ") != std::string::npos)
 	{
-		string locationName = command.substr(7);
+		std::string locationName = command.substr(7);
 
 		RESET_AI_VALUE2(WorldPosition, "RTSC saved location", locationName);
 
@@ -90,13 +90,13 @@ bool RTSCAction::Execute(Event& event)
 	}
 	if (command.find("save ") != std::string::npos || command == "move")
 	{	
-		SET_AI_VALUE(string, "RTSC next spell action", command);			
+		SET_AI_VALUE(std::string, "RTSC next spell action", command);
 
 		return true;
 	}
 	if (command.find("show ") != std::string::npos)
 	{
-		string locationName = command.substr(5);
+		std::string locationName = command.substr(5);
 		WorldPosition spellPosition = AI_VALUE2(WorldPosition, "RTSC saved location", locationName);
 
 		if (spellPosition)
@@ -109,7 +109,7 @@ bool RTSCAction::Execute(Event& event)
 	}
 	if (command.find("show") != std::string::npos)
 	{
-		ostringstream out; out << "saved: ";
+		std::ostringstream out; out << "saved: ";
 
 		for (auto value : ai->GetAiObjectContext()->GetValues())
 			if (value.find("RTSC saved location::") != std::string::npos)
@@ -123,7 +123,7 @@ bool RTSCAction::Execute(Event& event)
 	}
 	if (command.find("go ") != std::string::npos)
 	{
-		string locationName = command.substr(3);
+		std::string locationName = command.substr(3);
 		WorldPosition spellPosition = AI_VALUE2(WorldPosition, "RTSC saved location", locationName);
 
 		if(spellPosition)
@@ -143,7 +143,7 @@ bool RTSCAction::Execute(Event& event)
         WorldPosition spellPosition = AI_VALUE2(WorldPosition, "RTSC saved location", "jump");
         if (!spellPosition)
         {
-            SET_AI_VALUE(string, "RTSC next spell action", command);
+            SET_AI_VALUE(std::string, "RTSC next spell action", command);
         }
         else
         {
@@ -153,13 +153,13 @@ bool RTSCAction::Execute(Event& event)
                 RESET_AI_VALUE2(WorldPosition, "RTSC saved location", "jump");
                 RESET_AI_VALUE2(WorldPosition, "RTSC saved location", "jump point");
                 ai->ChangeStrategy("-rtsc jump", BotState::BOT_STATE_NON_COMBAT);
-                ostringstream out;
+                std::ostringstream out;
                 out << "Can't finish previous jump! Cancelling...";
                 ai->TellError(requester, out.str());
             }
             else
             {
-                ostringstream out;
+                std::ostringstream out;
                 out << "Another jump is in process! Use 'rtsc jump reset' to stop it";
                 ai->TellError(requester, out.str());
                 return false;

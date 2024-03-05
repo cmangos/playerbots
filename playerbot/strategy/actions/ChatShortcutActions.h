@@ -7,9 +7,9 @@ namespace ai
     class ReturnPositionResetAction : public ChatCommandAction
     {
     public:
-        ReturnPositionResetAction(PlayerbotAI* ai, string name) : ChatCommandAction(ai, name) {}
-        void ResetPosition(string posName = "return");
-        void SetPosition(WorldPosition pos, string posName = "return");
+        ReturnPositionResetAction(PlayerbotAI* ai, std::string name) : ChatCommandAction(ai, name) {}
+        void ResetPosition(std::string posName = "return");
+        void SetPosition(WorldPosition pos, std::string posName = "return");
         static void PrintStrategies(PlayerbotAI* ai, Event& event);
     };
 

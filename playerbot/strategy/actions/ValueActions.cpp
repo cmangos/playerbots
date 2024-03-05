@@ -203,17 +203,17 @@ bool SetFocusHealTargetAction::Execute(Event& event)
 bool SetWaitForAttackTimeAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string newTimeStr = event.getParam();
+    std::string newTimeStr = event.getParam();
     if (!newTimeStr.empty())
     {
         // Check if the param is a number
         if (newTimeStr.find_first_not_of("0123456789") == std::string::npos)
         {
-            const int newTime = stoi(newTimeStr.c_str());
+            const int newTime = std::stoi(newTimeStr.c_str());
             if (newTime <= 99)
             {
                 ai->GetAiObjectContext()->GetValue<uint8>("wait for attack time")->Set(newTime);
-                ostringstream out; out << "Wait for attack time set to " << newTime << " seconds";
+                std::ostringstream out; out << "Wait for attack time set to " << newTime << " seconds";
                 ai->TellPlayerNoFacing(requester, out);
                 return true;
             }

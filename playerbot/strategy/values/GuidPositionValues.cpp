@@ -8,29 +8,29 @@
 using namespace ai;
 using namespace MaNGOS;
 
-list<GuidPosition> GameObjectsValue::Calculate()
+std::list<GuidPosition> GameObjectsValue::Calculate()
 {
-    list<GameObject*> targets;
+    std::list<GameObject*> targets;
 
     AnyGameObjectInObjectRangeCheck u_check(bot, sPlayerbotAIConfig.reactDistance);
     GameObjectListSearcher<AnyGameObjectInObjectRangeCheck> searcher(targets, u_check);
     Cell::VisitAllObjects((const WorldObject*)bot, searcher, sPlayerbotAIConfig.reactDistance);
 
-    list<GuidPosition> result;
+    std::list<GuidPosition> result;
     for (auto& target : targets)
         result.push_back(target);
 
     return result;
 }
 
-list<GuidPosition> EntryFilterValue::Calculate()
+std::list<GuidPosition> EntryFilterValue::Calculate()
 {
-    vector<string> pair = getMultiQualifiers(getQualifier(), ",");
+    std::vector<std::string> pair = getMultiQualifiers(getQualifier(), ",");
 
-    list<GuidPosition> guidList = AI_VALUE(list<GuidPosition>, pair[0]);
-    vector<string> entryList = getMultiQualifiers(AI_VALUE(string ,pair[1]), ",");
+    std::list<GuidPosition> guidList = AI_VALUE(std::list<GuidPosition>, pair[0]);
+    std::vector<std::string> entryList = getMultiQualifiers(AI_VALUE(std::string ,pair[1]), ",");
 
-    list<GuidPosition> result;
+    std::list<GuidPosition> result;
     
     for (auto guid : guidList)
     {
@@ -42,14 +42,14 @@ list<GuidPosition> EntryFilterValue::Calculate()
     return result;
 }
 
-list<GuidPosition> RangeFilterValue::Calculate()
+std::list<GuidPosition> RangeFilterValue::Calculate()
 {
-    vector<string> pair = getMultiQualifiers(getQualifier(), ",");
+    std::vector<std::string> pair = getMultiQualifiers(getQualifier(), ",");
 
-    list<GuidPosition> guidList = AI_VALUE(list<GuidPosition>, pair[0]);
+    std::list<GuidPosition> guidList = AI_VALUE(std::list<GuidPosition>, pair[0]);
     float range = stof(pair[1]);
 
-    list<GuidPosition> result;
+    std::list<GuidPosition> result;
 
     for (auto guid : guidList)
     {
@@ -60,11 +60,11 @@ list<GuidPosition> RangeFilterValue::Calculate()
     return result;
 }
 
-list<GuidPosition> GoUsableFilterValue::Calculate()
+std::list<GuidPosition> GoUsableFilterValue::Calculate()
 {
-    list<GuidPosition> guidList = AI_VALUE(list<GuidPosition>, getQualifier());
+    std::list<GuidPosition> guidList = AI_VALUE(std::list<GuidPosition>, getQualifier());
 
-    list<GuidPosition> result;
+    std::list<GuidPosition> result;
 
     for (auto guid : guidList)
     {
@@ -79,11 +79,11 @@ list<GuidPosition> GoUsableFilterValue::Calculate()
     return result;
 }
 
-list<GuidPosition> GoTrappedFilterValue::Calculate()
+std::list<GuidPosition> GoTrappedFilterValue::Calculate()
 {
-    list<GuidPosition> guidList = AI_VALUE(list<GuidPosition>, getQualifier());
+    std::list<GuidPosition> guidList = AI_VALUE(std::list<GuidPosition>, getQualifier());
 
-    list<GuidPosition> result;
+    std::list<GuidPosition> result;
 
     for (auto guid : guidList)
     {

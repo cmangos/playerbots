@@ -8,7 +8,7 @@ namespace ai
     public:
         RetributionPaladinPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_MELEE; }
-        string getName() override { return "retribution"; }
+        std::string getName() override { return "retribution"; }
     };
 
     class RetributionPaladinStrategy : public PaladinStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         RetributionPaladinAoePveStrategy(PlayerbotAI* ai) : RetributionPaladinAoeStrategy(ai) {}
-        string getName() override { return "aoe retribution pve"; }
+        std::string getName() override { return "aoe retribution pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         RetributionPaladinAoePvpStrategy(PlayerbotAI* ai) : RetributionPaladinAoeStrategy(ai) {}
-        string getName() override { return "aoe retribution pvp"; }
+        std::string getName() override { return "aoe retribution pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         RetributionPaladinAoeRaidStrategy(PlayerbotAI* ai) : RetributionPaladinAoeStrategy(ai) {}
-        string getName() override { return "aoe retribution raid"; }
+        std::string getName() override { return "aoe retribution raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         RetributionPaladinBuffPveStrategy(PlayerbotAI* ai) : RetributionPaladinBuffStrategy(ai) {}
-        string getName() override { return "buff retribution pve"; }
+        std::string getName() override { return "buff retribution pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         RetributionPaladinBuffPvpStrategy(PlayerbotAI* ai) : RetributionPaladinBuffStrategy(ai) {}
-        string getName() override { return "buff retribution pvp"; }
+        std::string getName() override { return "buff retribution pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         RetributionPaladinBuffRaidStrategy(PlayerbotAI* ai) : RetributionPaladinBuffStrategy(ai) {}
-        string getName() override { return "buff retribution raid"; }
+        std::string getName() override { return "buff retribution raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         RetributionPaladinBoostPveStrategy(PlayerbotAI* ai) : RetributionPaladinBoostStrategy(ai) {}
-        string getName() override { return "boost retribution pve"; }
+        std::string getName() override { return "boost retribution pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         RetributionPaladinBoostPvpStrategy(PlayerbotAI* ai) : RetributionPaladinBoostStrategy(ai) {}
-        string getName() override { return "boost retribution pvp"; }
+        std::string getName() override { return "boost retribution pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         RetributionPaladinBoostRaidStrategy(PlayerbotAI* ai) : RetributionPaladinBoostStrategy(ai) {}
-        string getName() override { return "boost retribution raid"; }
+        std::string getName() override { return "boost retribution raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         RetributionPaladinCcPveStrategy(PlayerbotAI* ai) : RetributionPaladinCcStrategy(ai) {}
-        string getName() override { return "cc retribution pve"; }
+        std::string getName() override { return "cc retribution pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         RetributionPaladinCcPvpStrategy(PlayerbotAI* ai) : RetributionPaladinCcStrategy(ai) {}
-        string getName() override { return "cc retribution pvp"; }
+        std::string getName() override { return "cc retribution pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         RetributionPaladinCcRaidStrategy(PlayerbotAI* ai) : RetributionPaladinCcStrategy(ai) {}
-        string getName() override { return "cc retribution raid"; }
+        std::string getName() override { return "cc retribution raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -250,7 +250,7 @@ namespace ai
     {
     public:
         RetributionPaladinCurePveStrategy(PlayerbotAI* ai) : RetributionPaladinCureStrategy(ai) {}
-        string getName() override { return "cure retribution pve"; }
+        std::string getName() override { return "cure retribution pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -261,7 +261,7 @@ namespace ai
     {
     public:
         RetributionPaladinCurePvpStrategy(PlayerbotAI* ai) : RetributionPaladinCureStrategy(ai) {}
-        string getName() override { return "cure retribution pvp"; }
+        std::string getName() override { return "cure retribution pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -272,7 +272,7 @@ namespace ai
     {
     public:
         RetributionPaladinCureRaidStrategy(PlayerbotAI* ai) : RetributionPaladinCureStrategy(ai) {}
-        string getName() override { return "cure retribution raid"; }
+        std::string getName() override { return "cure retribution raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -293,7 +293,7 @@ namespace ai
     {
     public:
         RetributionPaladinAuraPveStrategy(PlayerbotAI* ai) : RetributionPaladinAuraStrategy(ai) {}
-        string getName() override { return "aura retribution pve"; }
+        std::string getName() override { return "aura retribution pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -304,7 +304,7 @@ namespace ai
     {
     public:
         RetributionPaladinAuraPvpStrategy(PlayerbotAI* ai) : RetributionPaladinAuraStrategy(ai) {}
-        string getName() override { return "aura retribution pvp"; }
+        std::string getName() override { return "aura retribution pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -315,7 +315,7 @@ namespace ai
     {
     public:
         RetributionPaladinAuraRaidStrategy(PlayerbotAI* ai) : RetributionPaladinAuraStrategy(ai) {}
-        string getName() override { return "aura retribution raid"; }
+        std::string getName() override { return "aura retribution raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -336,7 +336,7 @@ namespace ai
     {
     public:
         RetributionPaladinBlessingPveStrategy(PlayerbotAI* ai) : RetributionPaladinBlessingStrategy(ai) {}
-        string getName() override { return "blessing retribution pve"; }
+        std::string getName() override { return "blessing retribution pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -347,7 +347,7 @@ namespace ai
     {
     public:
         RetributionPaladinBlessingPvpStrategy(PlayerbotAI* ai) : RetributionPaladinBlessingStrategy(ai) {}
-        string getName() override { return "blessing retribution pvp"; }
+        std::string getName() override { return "blessing retribution pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -358,7 +358,7 @@ namespace ai
     {
     public:
         RetributionPaladinBlessingRaidStrategy(PlayerbotAI* ai) : RetributionPaladinBlessingStrategy(ai) {}
-        string getName() override { return "blessing retribution raid"; }
+        std::string getName() override { return "blessing retribution raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

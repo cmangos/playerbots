@@ -3,7 +3,7 @@
 #include "playerbot/playerbot.h"
 #include "SendMailAction.h"
 
-#include "../../../ahbot/AhBot.h"
+#include "ahbot/AhBot.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/strategy/ItemVisitors.h"
 
@@ -15,10 +15,10 @@ bool SendMailAction::Execute(Event& event)
     uint32 account = sObjectMgr.GetPlayerAccountIdByGUID(bot->GetObjectGuid());
     bool randomBot = sPlayerbotAIConfig.IsInRandomAccountList(account);
 
-    string text = event.getParam();
+    std::string text = event.getParam();
     Player* receiver = requester;
     Player* tellTo = requester;
-    vector<string> ss = split(text, ' ');
+    std::vector<std::string> ss = split(text, ' ');
     if (ss.size() > 1)
     {
         Player* p = sObjectMgr.GetPlayer(ss[ss.size() - 1].c_str());
@@ -59,7 +59,7 @@ bool SendMailAction::Execute(Event& event)
             return false;
         }
 
-        ostringstream body;
+        std::ostringstream body;
         body << "Hello, " << receiver->GetName() << ",\n";
         body << "\n";
         body << "Here is the money you asked for";
@@ -73,12 +73,12 @@ bool SendMailAction::Execute(Event& event)
         bot->SetMoney(bot->GetMoney() - money);
         draft.SendMailTo(MailReceiver(receiver), MailSender(bot));
 
-        ostringstream out; out << "Sending mail to " << receiver->GetName();
+        std::ostringstream out; out << "Sending mail to " << receiver->GetName();
         ai->TellPlayer(requester, out.str());
         return true;
     }
 
-    ostringstream body;
+    std::ostringstream body;
     body << "Hello, " << receiver->GetName() << ",\n";
     body << "\n";
     body << "Here are the item(s) you asked for";
@@ -92,13 +92,13 @@ bool SendMailAction::Execute(Event& event)
         FindItemByIdVisitor visitor(*i);
         IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BANK);
         ai->InventoryIterateItems(&visitor, mask);
-        list<Item*> items = visitor.GetResult();
-        for (list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
+        std::list<Item*> items = visitor.GetResult();
+        for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
         {
             Item* item = *i;
             if (item->IsSoulBound() || item->IsConjuredConsumable())
             {
-                ostringstream out;
+                std::ostringstream out;
                 out << "Cannot send " << ChatHelper::formatItem(item);
                 bot->Whisper(out.str(), LANG_UNIVERSAL, tellTo->GetObjectGuid());
                 continue;
@@ -115,7 +115,7 @@ bool SendMailAction::Execute(Event& event)
                 uint32 price = item->GetCount() * auctionbot.GetSellPrice(proto);
                 if (!price)
                 {
-                    ostringstream out;
+                    std::ostringstream out;
                     out << ChatHelper::formatItem(item) << ": it is not for sale";
                     bot->Whisper(out.str(), LANG_UNIVERSAL, tellTo->GetObjectGuid());
                     return false;
@@ -124,7 +124,7 @@ bool SendMailAction::Execute(Event& event)
             }
             draft.SendMailTo(MailReceiver(receiver), MailSender(bot));
 
-            ostringstream out; out << "Sent mail to " << receiver->GetName();
+            std::ostringstream out; out << "Sent mail to " << receiver->GetName();
             bot->Whisper(out.str(), LANG_UNIVERSAL, tellTo->GetObjectGuid());
             return true;
         }

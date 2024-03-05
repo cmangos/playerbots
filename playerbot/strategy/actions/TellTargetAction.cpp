@@ -13,7 +13,7 @@ bool TellTargetAction::Execute(Event& event)
     Unit* target = context->GetValue<Unit*>("current target")->Get();
     if (target)
     {
-        ostringstream out;
+        std::ostringstream out;
 		out << "Attacking " << target->GetName();
         ai->TellPlayer(requester, out);
 
@@ -28,8 +28,8 @@ bool TellAttackersAction::Execute(Event& event)
 
     ai->TellPlayer(requester, "--- Attackers ---");
 
-    list<ObjectGuid> attackers = context->GetValue<list<ObjectGuid>>("attackers")->Get();
-    for (list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); i++)
+    std::list<ObjectGuid> attackers = context->GetValue<std::list<ObjectGuid>>("attackers")->Get();
+    for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); i++)
     {
         Unit* unit = ai->GetUnit(*i);
         if (!unit || !sServerFacade.IsAlive(unit))
@@ -49,7 +49,7 @@ bool TellAttackersAction::Execute(Event& event)
         Unit* unit = threatManager->getOwner();
         float threat = ref->getThreat();
 
-        ostringstream out; out << unit->GetName() << " (" << threat << ")";
+        std::ostringstream out; out << unit->GetName() << " (" << threat << ")";
         ai->TellPlayer(requester, out);
 
         ref = ref->next();
@@ -62,8 +62,8 @@ bool TellPossibleAttackTargetsAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     ai->TellPlayer(requester, "--- Attack Targets ---");
 
-    list<ObjectGuid> attackers = context->GetValue<list<ObjectGuid>>("possible attack targets")->Get();
-    for (list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); i++)
+    std::list<ObjectGuid> attackers = context->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
+    for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); i++)
     {
         Unit* unit = ai->GetUnit(*i);
         if (!unit || !sServerFacade.IsAlive(unit))
@@ -83,7 +83,7 @@ bool TellPossibleAttackTargetsAction::Execute(Event& event)
         Unit *unit = threatManager->getOwner();
         float threat = ref->getThreat();
 
-        ostringstream out; out << unit->GetName() << " (" << threat << ")";
+        std::ostringstream out; out << unit->GetName() << " (" << threat << ")";
         ai->TellPlayer(requester, out);
 
         ref = ref->next();

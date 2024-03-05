@@ -1,5 +1,5 @@
 #pragma once
-#include "../Trigger.h"
+#include "playerbot/strategy/Trigger.h"
 
 namespace ai
 {
@@ -8,8 +8,8 @@ namespace ai
     class NeedCureTrigger : public SpellTrigger 
     {
     public:
-        NeedCureTrigger(PlayerbotAI* ai, string spell, uint32 dispelType, int checkInterval = 3) : SpellTrigger(ai, spell, checkInterval), dispelType(dispelType) {}
-        virtual string GetTargetName() { return "self target"; }
+        NeedCureTrigger(PlayerbotAI* ai, std::string spell, uint32 dispelType, int checkInterval = 3) : SpellTrigger(ai, spell, checkInterval), dispelType(dispelType) {}
+        virtual std::string GetTargetName() { return "self target"; }
         virtual bool IsActive();
 
     protected:
@@ -19,14 +19,14 @@ namespace ai
     class TargetAuraDispelTrigger : public NeedCureTrigger 
     {
     public:
-        TargetAuraDispelTrigger(PlayerbotAI* ai, string spell, uint32 dispelType, int checkInterval = 3) : NeedCureTrigger(ai, spell, dispelType, checkInterval) {}
-		virtual string GetTargetName() { return "current target"; }
+        TargetAuraDispelTrigger(PlayerbotAI* ai, std::string spell, uint32 dispelType, int checkInterval = 3) : NeedCureTrigger(ai, spell, dispelType, checkInterval) {}
+		virtual std::string GetTargetName() { return "current target"; }
     };
 
     class PartyMemberNeedCureTrigger : public NeedCureTrigger 
     {
     public:
-        PartyMemberNeedCureTrigger(PlayerbotAI* ai, string spell, uint32 dispelType) : NeedCureTrigger(ai, spell, dispelType) {}
+        PartyMemberNeedCureTrigger(PlayerbotAI* ai, std::string spell, uint32 dispelType) : NeedCureTrigger(ai, spell, dispelType) {}
 		virtual Value<Unit*>* GetTargetValue();
     };
 

@@ -8,7 +8,7 @@ namespace ai
     class AcceptAllQuestsAction : public QuestAction 
     {
     public:
-        AcceptAllQuestsAction(PlayerbotAI* ai, string name = "accept all quests") : QuestAction(ai, name) {}
+        AcceptAllQuestsAction(PlayerbotAI* ai, std::string name = "accept all quests") : QuestAction(ai, name) {}
 
     protected:
         virtual bool ProcessQuest(Player* requester, Quest const* quest, WorldObject* questGiver) override;

@@ -6,7 +6,7 @@ namespace ai
     class ShareQuestAction : public ChatCommandAction
     {
     public:
-        ShareQuestAction(PlayerbotAI* ai, string name = "share quest") : ChatCommandAction(ai, name) {}
+        ShareQuestAction(PlayerbotAI* ai, std::string name = "share quest") : ChatCommandAction(ai, name) {}
         virtual bool Execute(Event& event) override;
     };
 

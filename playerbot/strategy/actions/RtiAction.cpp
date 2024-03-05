@@ -9,8 +9,8 @@ using namespace ai;
 bool RtiAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
-    string type = "rti";
+    std::string text = event.getParam();
+    std::string type = "rti";
     if (text.find("cc ") == 0)
     {
         type = "rti cc";
@@ -18,28 +18,28 @@ bool RtiAction::Execute(Event& event)
     }
     else if (text.empty() || text == "?")
     {
-        ostringstream outRti; outRti << "rti" << ": ";
+        std::ostringstream outRti; outRti << "rti" << ": ";
         AppendRti(outRti, "rti");
         ai->TellPlayer(requester, outRti);
 
-        ostringstream outRtiCc; outRtiCc << "rti cc" << ": ";
+        std::ostringstream outRtiCc; outRtiCc << "rti cc" << ": ";
         AppendRti(outRtiCc, "rti cc");
         ai->TellPlayer(requester, outRtiCc);
         return true;
     }
 
-    context->GetValue<string>(type)->Set(text);
-    ostringstream out; out << type << " set to: ";
+    context->GetValue<std::string>(type)->Set(text);
+    std::ostringstream out; out << type << " set to: ";
     AppendRti(out, type);
     ai->TellPlayer(requester, out);
     return true;
 }
 
-void RtiAction::AppendRti(ostringstream & out, string type)
+void RtiAction::AppendRti(std::ostringstream & out, std::string type)
 {
-    out << AI_VALUE(string, type);
+    out << AI_VALUE(std::string, type);
 
-    ostringstream n; n << type << " target";
+    std::ostringstream n; n << type << " target";
     Unit* target = AI_VALUE(Unit*, n.str());
     if (target)
         out << " (" << target->GetName() << ")";
@@ -54,8 +54,8 @@ bool MarkRtiAction::Execute(Event& event)
         return false;
 
     Unit* target = NULL;
-    list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<list<ObjectGuid>>("possible attack targets")->Get();
-    for (list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
+    std::list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
+    for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
     {
         Unit* unit = ai->GetUnit(*i);
         if (!unit)
@@ -83,7 +83,7 @@ bool MarkRtiAction::Execute(Event& event)
 
     if (!target) return false;
 
-    string rti = AI_VALUE(string, "rti");
+    std::string rti = AI_VALUE(std::string, "rti");
 
     // Add the default rti if the bot is setup to ignore rti targets
     if (rti == "none")

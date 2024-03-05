@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         GroupMembersValue(PlayerbotAI* ai) : ObjectGuidListCalculatedValue(ai, "group members",2) {}
-        virtual list<ObjectGuid> Calculate();
+        virtual std::list<ObjectGuid> Calculate();
     };
 
     class IsFollowingPartyValue : public BoolCalculatedValue

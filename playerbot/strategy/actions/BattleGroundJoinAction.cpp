@@ -81,7 +81,7 @@ bool BGJoinAction::Execute(Event& event)
         {
             isArena = true;
 
-            vector<uint32>::iterator i = find(ratedList.begin(), ratedList.end(), queueTypeId);
+            std::vector<uint32>::iterator i = find(ratedList.begin(), ratedList.end(), queueTypeId);
             if (i != ratedList.end())
                 isRated = true;
 
@@ -98,7 +98,7 @@ bool BGJoinAction::Execute(Event& event)
         // set bg type and bm guid
         //ai->GetAiObjectContext()->GetValue<ObjectGuid>("bg master")->Set(BmGuid);
 
-        string _bgType;
+        std::string _bgType;
 
         switch (bgTypeId)
         {
@@ -133,7 +133,7 @@ bool BGJoinAction::Execute(Event& event)
 
         ai->GetAiObjectContext()->GetValue<uint32>("bg type")->Set(queueTypeId);
         queueType = queueTypeId;
-        sPlayerbotAIConfig.logEvent(ai, "BGJoinAction", _bgType, to_string(queueTypeId));
+        sPlayerbotAIConfig.logEvent(ai, "BGJoinAction", _bgType, std::to_string(queueTypeId));
     }
 
    return JoinQueue(queueType);
@@ -171,7 +171,7 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
         return false;
     }
 
-    vector<uint32> members;
+    std::vector<uint32> members;
 
     // search for arena team members and make them online
     for (ArenaTeam::MemberList::iterator itr = arenateam->GetMembers().begin(); itr != arenateam->GetMembers().end(); ++itr)
@@ -678,7 +678,7 @@ bool BGJoinAction::JoinQueue(uint32 type)
    bool isRated = false;
    uint8 arenaslot = 0;
    uint8 asGroup = false;
-   string _bgType;
+   std::string _bgType;
 
 // check if arena
 #ifndef MANGOSBOT_ZERO
@@ -1050,7 +1050,7 @@ bool BGStatusAction::Execute(Event& event)
     uint32 statusid;
     uint32 Time1;
     uint32 Time2;
-    string _bgType;
+    std::string _bgType;
     uint8 isRated = 0;
 
 #ifndef MANGOSBOT_ZERO

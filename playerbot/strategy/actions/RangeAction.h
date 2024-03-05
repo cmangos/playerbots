@@ -10,6 +10,6 @@ namespace ai
         virtual bool Execute(Event& event) override;
 
     private:
-        void PrintRange(string type, Player* requester);
+        void PrintRange(std::string type, Player* requester);
     };
 }

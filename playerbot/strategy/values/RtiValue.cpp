@@ -5,11 +5,11 @@
 using namespace ai;
 
 RtiValue::RtiValue(PlayerbotAI* ai)
-    : ManualSetValue<string>(ai, "skull", "rti")
+    : ManualSetValue<std::string>(ai, "skull", "rti")
 {
 }
 
 RtiCcValue::RtiCcValue(PlayerbotAI* ai)
-    : ManualSetValue<string>(ai, "moon", "rti cc")
+    : ManualSetValue<std::string>(ai, "moon", "rti cc")
 {
 }

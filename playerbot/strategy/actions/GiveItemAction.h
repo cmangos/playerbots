@@ -6,13 +6,13 @@ namespace ai
     class GiveItemAction : public Action
     {
     public:
-        GiveItemAction(PlayerbotAI* ai, string name, string item) : Action(ai, name), item(item) {}
+        GiveItemAction(PlayerbotAI* ai, std::string name, std::string item) : Action(ai, name), item(item) {}
         virtual bool Execute(Event& event) override;
         virtual bool isUseful() { return GetTarget() && AI_VALUE2(uint8, "mana", "self target") > sPlayerbotAIConfig.lowMana; }
         virtual Unit* GetTarget();
 
     protected:
-        string item;
+        std::string item;
     };
 
     class GiveFoodAction : public GiveItemAction

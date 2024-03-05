@@ -9,7 +9,7 @@ using namespace ai;
 bool RewardAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string link = event.getParam();
+    std::string link = event.getParam();
 
     ItemIds itemIds = chat->parseItems(link);
     if (itemIds.empty())
@@ -18,8 +18,8 @@ bool RewardAction::Execute(Event& event)
     }
 
     uint32 itemId = *itemIds.begin();
-    list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
+    std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
+    for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
     {
         Unit* npc = ai->GetUnit(*i);
         if (npc && Reward(requester, itemId, npc))
@@ -28,8 +28,8 @@ bool RewardAction::Execute(Event& event)
         }
     }
 
-    list<ObjectGuid> gos = AI_VALUE(list<ObjectGuid>, "nearest game objects");
-    for (list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
+    std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, "nearest game objects");
+    for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
     {
         GameObject* go = ai->GetGameObject(*i);
         if (go && Reward(requester, itemId, go))
@@ -73,7 +73,7 @@ bool RewardAction::Reward(Player* requester, uint32 itemId, Object* questGiver)
                 {
                     bot->RewardQuest(pQuest, rewardIdx, questGiver, false);
 
-                    map<string, string> args;
+                    std::map<std::string, std::string> args;
                     args["%item"] = chat->formatItem(pRewardItem);
                     ai->TellPlayer(requester, BOT_TEXT2("quest_choose_reward", args));
 

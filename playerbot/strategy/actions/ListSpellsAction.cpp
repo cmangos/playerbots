@@ -6,10 +6,10 @@
 
 using namespace ai;
 
-map<uint32, SkillLineAbilityEntry const*> ListSpellsAction::skillSpells;
-set<uint32> ListSpellsAction::vendorItems;
+std::map<uint32, SkillLineAbilityEntry const*> ListSpellsAction::skillSpells;
+std::set<uint32> ListSpellsAction::vendorItems;
 
-bool CompareSpells(pair<uint32, string>& s1, pair<uint32, string>& s2)
+bool CompareSpells(std::pair<uint32, std::string>& s1, std::pair<uint32, std::string>& s2)
 {
     const SpellEntry* const si1 = sServerFacade.LookupSpellInfo(s1.first);
     const SpellEntry* const si2 = sServerFacade.LookupSpellInfo(s2.first);
@@ -53,7 +53,7 @@ bool CompareSpells(pair<uint32, string>& s1, pair<uint32, string>& s2)
     return p1 > p2;
 }
 
-list<pair<uint32, string> > ListSpellsAction::GetSpellList(string filter)
+std::list<std::pair<uint32, std::string> > ListSpellsAction::GetSpellList(std::string filter)
 {    
     if (skillSpells.empty())
     {
@@ -83,7 +83,7 @@ list<pair<uint32, string> > ListSpellsAction::GetSpellList(string filter)
 
     uint32 skill = 0;
 
-    vector<string> ss = split(filter, ' ');
+    std::vector<std::string> ss = split(filter, ' ');
     if (!ss.empty())
     {
         skill = chat->parseSkill(ss[0]);
@@ -104,16 +104,16 @@ list<pair<uint32, string> > ListSpellsAction::GetSpellList(string filter)
     std::string alreadySeenList = ",";
 
     int minLevel = 0, maxLevel = 0;
-    if (filter.find("-") != string::npos)
+    if (filter.find("-") != std::string::npos)
     {
-        vector<string> ff = split(filter, '-');
+        std::vector<std::string> ff = split(filter, '-');
         minLevel = atoi(ff[0].c_str());
         maxLevel = atoi(ff[1].c_str());
         filter = "";
     }
 
     bool craftableOnly = false;
-    if (filter.find("+") != string::npos)
+    if (filter.find("+") != std::string::npos)
     {
         craftableOnly = true;
         filter.erase(remove(filter.begin(), filter.end(), '+'), filter.end());
@@ -123,7 +123,7 @@ list<pair<uint32, string> > ListSpellsAction::GetSpellList(string filter)
     if (slot != EQUIPMENT_SLOT_END)
         filter = "";
 
-    list<pair<uint32, string> > spells;
+    std::list<std::pair<uint32, std::string> > spells;
     for (PlayerSpellMap::iterator itr = bot->GetSpellMap().begin(); itr != bot->GetSpellMap().end(); ++itr) {
         const uint32 spellId = itr->first;
 
@@ -138,7 +138,7 @@ list<pair<uint32, string> > ListSpellsAction::GetSpellList(string filter)
         if (skill != SKILL_NONE && (!skillLine || skillLine->skillId != skill))
             continue;
 
-        string comp = pSpellInfo->SpellName[0];
+        std::string comp = pSpellInfo->SpellName[0];
         if (!(ignoreList.find(comp) == std::string::npos && alreadySeenList.find(comp) == std::string::npos))
             continue;
 
@@ -147,7 +147,7 @@ list<pair<uint32, string> > ListSpellsAction::GetSpellList(string filter)
 
         bool first = true;
         int craftCount = -1;
-        ostringstream materials;
+        std::ostringstream materials;
         for (uint32 x = 0; x < MAX_SPELL_REAGENTS; ++x)
         {
             if (pSpellInfo->Reagent[x] <= 0)
@@ -186,7 +186,7 @@ list<pair<uint32, string> > ListSpellsAction::GetSpellList(string filter)
 
         if (craftCount < 0) craftCount = 0;
 
-        ostringstream out;
+        std::ostringstream out;
         bool filtered = false;
         if (skillLine)
         {
@@ -250,7 +250,7 @@ list<pair<uint32, string> > ListSpellsAction::GetSpellList(string filter)
         if (out.str().empty())
             continue;
 
-        spells.push_back(pair<uint32, string>(spellId, out.str()));
+        spells.push_back(std::pair<uint32, std::string>(spellId, out.str()));
         alreadySeenList += pSpellInfo->SpellName[0];
         alreadySeenList += ",";
     }
@@ -264,20 +264,20 @@ bool ListSpellsAction::Execute(Event& event)
     if (!requester)
         return false;
 
-    string filter = event.getParam();
+    std::string filter = event.getParam();
 
-    list<pair<uint32, string> > spells = GetSpellList(filter);
+    std::list<std::pair<uint32, std::string> > spells = GetSpellList(filter);
 
     ai->TellPlayer(requester, "=== Spells ===");
     spells.sort(CompareSpells);
 
     int count = 0;
-    for (list<pair<uint32, string> >::iterator i = spells.begin(); i != spells.end(); ++i)
+    for (std::list<std::pair<uint32, std::string> >::iterator i = spells.begin(); i != spells.end(); ++i)
     {
         ai->TellPlayerNoFacing(requester, i->second);
         if (++count >= 50)
         {
-            ostringstream msg; msg << (spells.size() - 50) << " more...";
+            std::ostringstream msg; msg << (spells.size() - 50) << " more...";
             ai->TellPlayerNoFacing(requester, msg.str());
             break;
         }

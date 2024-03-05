@@ -21,7 +21,7 @@ namespace ai
 	class SpiritHealerAction : public MovementAction 
     {
 	public:
-	    SpiritHealerAction(PlayerbotAI* ai, string name = "spirit healer") : MovementAction(ai,name) {}
+	    SpiritHealerAction(PlayerbotAI* ai, std::string name = "spirit healer") : MovementAction(ai,name) {}
         virtual bool Execute(Event& event);
         virtual bool isUseful();
     };

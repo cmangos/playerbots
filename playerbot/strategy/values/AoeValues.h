@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
@@ -18,7 +18,7 @@ namespace ai
         AoeCountValue(PlayerbotAI* ai) : CalculatedValue<uint8>(ai, "aoe count") {}
 
 	public:
-        static list<ObjectGuid> FindMaxDensity(Player* bot, float range = 100.0f);
+        static std::list<ObjectGuid> FindMaxDensity(Player* bot, float range = 100.0f);
         virtual uint8 Calculate();
     };
 

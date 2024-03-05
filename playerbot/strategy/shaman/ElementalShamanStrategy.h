@@ -8,7 +8,7 @@ namespace ai
     public:
         ElementalShamanPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_RANGED; }
-        string getName() override { return "elemental"; }
+        std::string getName() override { return "elemental"; }
     };
 
     class ElementalShamanStrategy : public ShamanStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         ElementalShamanAoePveStrategy(PlayerbotAI* ai) : ElementalShamanAoeStrategy(ai) {}
-        string getName() override { return "aoe elemental pve"; }
+        std::string getName() override { return "aoe elemental pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         ElementalShamanAoePvpStrategy(PlayerbotAI* ai) : ElementalShamanAoeStrategy(ai) {}
-        string getName() override { return "aoe elemental pvp"; }
+        std::string getName() override { return "aoe elemental pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         ElementalShamanAoeRaidStrategy(PlayerbotAI* ai) : ElementalShamanAoeStrategy(ai) {}
-        string getName() override { return "aoe elemental raid"; }
+        std::string getName() override { return "aoe elemental raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         ElementalShamanCcPveStrategy(PlayerbotAI* ai) : ElementalShamanCcStrategy(ai) {}
-        string getName() override { return "cc elemental pve"; }
+        std::string getName() override { return "cc elemental pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         ElementalShamanCcPvpStrategy(PlayerbotAI* ai) : ElementalShamanCcStrategy(ai) {}
-        string getName() override { return "cc elemental pvp"; }
+        std::string getName() override { return "cc elemental pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         ElementalShamanCcRaidStrategy(PlayerbotAI* ai) : ElementalShamanCcStrategy(ai) {}
-        string getName() override { return "cc elemental raid"; }
+        std::string getName() override { return "cc elemental raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         ElementalShamanCurePveStrategy(PlayerbotAI* ai) : ElementalShamanCureStrategy(ai) {}
-        string getName() override { return "cure elemental pve"; }
+        std::string getName() override { return "cure elemental pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         ElementalShamanCurePvpStrategy(PlayerbotAI* ai) : ElementalShamanCureStrategy(ai) {}
-        string getName() override { return "cure elemental pvp"; }
+        std::string getName() override { return "cure elemental pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         ElementalShamanCureRaidStrategy(PlayerbotAI* ai) : ElementalShamanCureStrategy(ai) {}
-        string getName() override { return "cure elemental raid"; }
+        std::string getName() override { return "cure elemental raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         ElementalShamanTotemsPveStrategy(PlayerbotAI* ai) : ElementalShamanTotemsStrategy(ai) {}
-        string getName() override { return "totems elemental pve"; }
+        std::string getName() override { return "totems elemental pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         ElementalShamanTotemsPvpStrategy(PlayerbotAI* ai) : ElementalShamanTotemsStrategy(ai) {}
-        string getName() override { return "totems elemental pvp"; }
+        std::string getName() override { return "totems elemental pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         ElementalShamanTotemsRaidStrategy(PlayerbotAI* ai) : ElementalShamanTotemsStrategy(ai) {}
-        string getName() override { return "totems elemental raid"; }
+        std::string getName() override { return "totems elemental raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -250,7 +250,7 @@ namespace ai
     {
     public:
         ElementalShamanBuffPveStrategy(PlayerbotAI* ai) : ElementalShamanBuffStrategy(ai) {}
-        string getName() override { return "buff elemental pve"; }
+        std::string getName() override { return "buff elemental pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -261,7 +261,7 @@ namespace ai
     {
     public:
         ElementalShamanBuffPvpStrategy(PlayerbotAI* ai) : ElementalShamanBuffStrategy(ai) {}
-        string getName() override { return "buff elemental pvp"; }
+        std::string getName() override { return "buff elemental pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -272,7 +272,7 @@ namespace ai
     {
     public:
         ElementalShamanBuffRaidStrategy(PlayerbotAI* ai) : ElementalShamanBuffStrategy(ai) {}
-        string getName() override { return "buff elemental raid"; }
+        std::string getName() override { return "buff elemental raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -293,7 +293,7 @@ namespace ai
     {
     public:
         ElementalShamanBoostPveStrategy(PlayerbotAI* ai) : ElementalShamanBoostStrategy(ai) {}
-        string getName() override { return "boost elemental pve"; }
+        std::string getName() override { return "boost elemental pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -304,7 +304,7 @@ namespace ai
     {
     public:
         ElementalShamanBoostPvpStrategy(PlayerbotAI* ai) : ElementalShamanBoostStrategy(ai) {}
-        string getName() override { return "boost elemental pvp"; }
+        std::string getName() override { return "boost elemental pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -315,7 +315,7 @@ namespace ai
     {
     public:
         ElementalShamanBoostRaidStrategy(PlayerbotAI* ai) : ElementalShamanBoostStrategy(ai) {}
-        string getName() override { return "boost elemental raid"; }
+        std::string getName() override { return "boost elemental raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

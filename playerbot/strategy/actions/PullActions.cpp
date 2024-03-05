@@ -1,6 +1,6 @@
 
 #include "playerbot/playerbot.h"
-#include "../generic/PullStrategy.h"
+#include "playerbot/strategy/generic/PullStrategy.h"
 #include "playerbot/strategy/values/AttackersValue.h"
 #include "PullActions.h"
 #include "playerbot/strategy/values/PositionValue.h"
@@ -40,7 +40,7 @@ bool PullRequestAction::Execute(Event& event)
 
     if (!strategy->CanDoPullAction(target))
     {
-        ostringstream out; out << "Can't perform pull action '" << strategy->GetPullActionName() << "'";
+        std::ostringstream out; out << "Can't perform pull action '" << strategy->GetPullActionName() << "'";
         ai->TellPlayerNoFacing(requester, out.str());
         return false;
     }
@@ -117,7 +117,7 @@ bool PullStartAction::Execute(Event& event)
 }
 
 
-PullAction::PullAction(PlayerbotAI* ai, string name) : CastSpellAction(ai, name)
+PullAction::PullAction(PlayerbotAI* ai, std::string name) : CastSpellAction(ai, name)
 {
     InitPullAction();
 }
@@ -144,7 +144,7 @@ bool PullAction::Execute(Event& event)
                     return false;
                 }
 
-                string actionName = strategy->GetPullActionName();
+                std::string actionName = strategy->GetPullActionName();
 
                 // Execute the pull action
                 SET_AI_VALUE(Unit*, "current target", GetTarget());
@@ -174,7 +174,7 @@ bool PullAction::isPossible()
     PullStrategy* strategy = PullStrategy::Get(ai);
     if (strategy)
     {
-        string spellName = strategy->GetSpellName();
+        std::string spellName = strategy->GetSpellName();
         Unit* target = strategy->GetTarget();
         if (!spellName.empty() && target)
         {
@@ -194,7 +194,7 @@ void PullAction::InitPullAction()
     PullStrategy* strategy = PullStrategy::Get(ai);
     if (strategy)
     {
-        string spellName = strategy->GetSpellName();
+        std::string spellName = strategy->GetSpellName();
         if (!spellName.empty())
         {
             SetSpellName(spellName);

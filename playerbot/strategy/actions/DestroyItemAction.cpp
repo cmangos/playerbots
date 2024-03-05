@@ -8,7 +8,7 @@ using namespace ai;
 bool DestroyItemAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
     ItemIds ids = chat->parseItems(text);
 
     for (ItemIds::iterator i =ids.begin(); i != ids.end(); i++)
@@ -23,11 +23,11 @@ bool DestroyItemAction::Execute(Event& event)
 void DestroyItemAction::DestroyItem(FindItemVisitor* visitor, Player* requester)
 {
     ai->InventoryIterateItems(visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
-    list<Item*> items = visitor->GetResult();
-	for (list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
+    std::list<Item*> items = visitor->GetResult();
+	for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
 		Item* item = *i;
-        ostringstream out; out << chat->formatItem(item) << " destroyed";
+        std::ostringstream out; out << chat->formatItem(item) << " destroyed";
         bot->DestroyItem(item->GetBagSlot(),item->GetSlot(), true);
         ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
@@ -44,7 +44,7 @@ bool SmartDestroyItemAction::Execute(Event& event)
     // only destroy grey items if with real player/guild
     if (ai->HasRealPlayerMaster() || ai->IsInRealGuild())
     {
-        set<Item*> items;
+        std::set<Item*> items;
         FindItemsToTradeByQualityVisitor visitor(ITEM_QUALITY_POOR, 5);
         ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
         items.insert(visitor.GetResult().begin(), visitor.GetResult().end());
@@ -66,7 +66,7 @@ bool SmartDestroyItemAction::Execute(Event& event)
         return true;
     }
 
-    vector<ItemUsage> bestToDestroy = { ItemUsage::ITEM_USAGE_NONE }; //First destroy anything useless.
+    std::vector<ItemUsage> bestToDestroy = { ItemUsage::ITEM_USAGE_NONE }; //First destroy anything useless.
 
     if (!AI_VALUE(bool, "can sell") && AI_VALUE(bool, "should get money")) //We need money so quest items are less important since they can't directly be sold.
     {
@@ -84,7 +84,7 @@ bool SmartDestroyItemAction::Execute(Event& event)
 
     for (auto& usage : bestToDestroy)
     {
-        list<uint32> items = AI_VALUE2(list<uint32>, "inventory item ids", "usage " + to_string((uint8)usage));
+        std::list<uint32> items = AI_VALUE2(std::list<uint32>, "inventory item ids", "usage " + std::to_string((uint8)usage));
 
         items.reverse();
 

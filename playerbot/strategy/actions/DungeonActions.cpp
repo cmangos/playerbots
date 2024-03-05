@@ -1,6 +1,6 @@
 #include "DungeonActions.h"
 #include "playerbot/strategy/values/PositionValue.h"
-#include "../AiObjectContext.h"
+#include "playerbot/strategy/AiObjectContext.h"
 #include "playerbot/PlayerbotAI.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
@@ -10,7 +10,7 @@ using namespace ai;
 
 bool MoveAwayFromHazard::Execute(Event& event)
 {
-    const list<HazardPosition>& hazards = AI_VALUE(list<HazardPosition>, "hazards");
+    const std::list<HazardPosition>& hazards = AI_VALUE(std::list<HazardPosition>, "hazards");
 
     // Get the closest hazard to move away from
     const HazardPosition* closestHazard = nullptr;
@@ -101,7 +101,7 @@ bool MoveAwayFromHazard::isPossible()
     return false;
 }
 
-bool MoveAwayFromHazard::IsHazardNearby(const WorldPosition& point, const list<HazardPosition>& hazards) const
+bool MoveAwayFromHazard::IsHazardNearby(const WorldPosition& point, const std::list<HazardPosition>& hazards) const
 {
     for (const HazardPosition& hazard : hazards)
     {
@@ -120,12 +120,12 @@ bool MoveAwayFromHazard::IsHazardNearby(const WorldPosition& point, const list<H
 bool MoveAwayFromCreature::Execute(Event& event)
 {
     // Get the active attacking creatures
-    list<Creature*> creatures;
+    std::list<Creature*> creatures;
     size_t closestCreatureIdx = 0;
     float closestCreatureDistance = 9999.0f;
 
     // Iterate through the near creatures
-    list<Unit*> units;
+    std::list<Unit*> units;
     MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(bot, creatureID, range);
     MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, u_check);
     Cell::VisitAllObjects(bot, searcher, range);
@@ -151,7 +151,7 @@ bool MoveAwayFromCreature::Execute(Event& event)
         return false;
     }
 
-    const list<HazardPosition>& hazards = AI_VALUE(list<HazardPosition>, "hazards");
+    const std::list<HazardPosition>& hazards = AI_VALUE(std::list<HazardPosition>, "hazards");
 
     // Get the closest creature reference
     auto it = creatures.begin();
@@ -233,7 +233,7 @@ bool MoveAwayFromCreature::isPossible()
     return false;
 }
 
-bool MoveAwayFromCreature::IsValidPoint(const WorldPosition& point, const list<Creature*>& creatures, const list<HazardPosition>& hazards)
+bool MoveAwayFromCreature::IsValidPoint(const WorldPosition& point, const std::list<Creature*>& creatures, const std::list<HazardPosition>& hazards)
 {
     // Check if the point is not near other game objects
     if (!HasCreaturesNearby(point, creatures) && !IsHazardNearby(point, hazards))
@@ -248,7 +248,7 @@ bool MoveAwayFromCreature::IsValidPoint(const WorldPosition& point, const list<C
     return false;
 }
 
-bool MoveAwayFromCreature::HasCreaturesNearby(const WorldPosition& point, const list<Creature*>& creatures) const
+bool MoveAwayFromCreature::HasCreaturesNearby(const WorldPosition& point, const std::list<Creature*>& creatures) const
 {
     for (const Creature* creature : creatures)
     {
@@ -262,7 +262,7 @@ bool MoveAwayFromCreature::HasCreaturesNearby(const WorldPosition& point, const 
     return false;
 }
 
-bool MoveAwayFromCreature::IsHazardNearby(const WorldPosition& point, const list<HazardPosition>& hazards) const
+bool MoveAwayFromCreature::IsHazardNearby(const WorldPosition& point, const std::list<HazardPosition>& hazards) const
 {
     for (const HazardPosition& hazard : hazards)
     {

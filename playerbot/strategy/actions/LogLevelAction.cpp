@@ -6,11 +6,11 @@ using namespace ai;
 
 bool LogLevelAction::Execute(Event& event)
 {
-    string param = event.getParam();
+    std::string param = event.getParam();
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     Value<LogLevel> *value = ai->GetAiObjectContext()->GetValue<LogLevel>("log level");
 
-    ostringstream out; 
+    std::ostringstream out; 
     if (param != "?")
     {
         value->Set(string2logLevel(param));
@@ -24,7 +24,7 @@ bool LogLevelAction::Execute(Event& event)
     return true;    
 }
 
-string LogLevelAction::logLevel2string(LogLevel level)
+std::string LogLevelAction::logLevel2string(LogLevel level)
 {
     switch (level) 
     {
@@ -38,7 +38,7 @@ string LogLevelAction::logLevel2string(LogLevel level)
         return "debug";
     }
 }
-LogLevel LogLevelAction::string2logLevel(string level)
+LogLevel LogLevelAction::string2logLevel(std::string level)
 {
     if (level == "debug")
         return LOG_LVL_DEBUG;

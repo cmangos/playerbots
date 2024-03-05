@@ -30,15 +30,15 @@ bool QuestAction::Execute(Event& event)
     }
 
     bool result = false;
-    list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
+    std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
+    for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
     {
         Unit* unit = ai->GetUnit(*i);
         if (unit && bot->GetDistance(unit) <= INTERACTION_DISTANCE)
             result |= ProcessQuests(unit);
     }
-    list<ObjectGuid> gos = AI_VALUE(list<ObjectGuid>, "nearest game objects");
-    for (list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
+    std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, "nearest game objects");
+    for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
     {
         GameObject* go = ai->GetGameObject(*i);
         if (go && bot->GetDistance(go) <= INTERACTION_DISTANCE)
@@ -199,8 +199,8 @@ bool QuestAction::AcceptQuest(Player* requester, Quest const* quest, uint64 ques
     bool success = false;
     const uint32 questId = quest->GetQuestId();
 
-    string outputMessage;
-    map<string, string> args;
+    std::string outputMessage;
+    std::map<std::string, std::string> args;
     args["%quest"] = chat->formatQuest(quest);
     
     if (bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE)
@@ -242,7 +242,7 @@ bool QuestAction::AcceptQuest(Player* requester, Quest const* quest, uint64 ques
 
         if (bot->GetQuestStatus(questId) != QUEST_STATUS_NONE && bot->GetQuestStatus(questId) != QUEST_STATUS_AVAILABLE)
         {
-            sPlayerbotAIConfig.logEvent(ai, "AcceptQuestAction", quest->GetTitle(), to_string(quest->GetQuestId()));
+            sPlayerbotAIConfig.logEvent(ai, "AcceptQuestAction", quest->GetTitle(), std::to_string(quest->GetQuestId()));
             outputMessage = BOT_TEXT2("quest_accepted", args);
             success = true;
         }
@@ -283,6 +283,6 @@ bool QuestObjectiveCompletedAction::Execute(Event& event)
     }
 
     Quest const* qInfo = sObjectMgr.GetQuestTemplate(questId);
-    sPlayerbotAIConfig.logEvent(ai, "QuestObjectiveCompletedAction", qInfo->GetTitle(), to_string((float)available / (float)required));
+    sPlayerbotAIConfig.logEvent(ai, "QuestObjectiveCompletedAction", qInfo->GetTitle(), std::to_string((float)available / (float)required));
     return false;
 }

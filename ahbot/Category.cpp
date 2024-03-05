@@ -14,7 +14,7 @@ uint32 Category::GetStackCount(ItemPrototype const* proto)
         return 1;
 
     double rarity = GetPricingStrategy()->GetRarityPriceMultiplier(proto->ItemId);
-    return (uint32)max(1.0, proto->GetMaxStackSize() / rarity);
+    return (uint32)std::max(1.0, proto->GetMaxStackSize() / rarity);
 }
 
 PricingStrategy* Category::GetPricingStrategy()
@@ -22,14 +22,14 @@ PricingStrategy* Category::GetPricingStrategy()
     if (pricingStrategy)
         return pricingStrategy;
 
-    ostringstream out; out << "AhBot.PricingStrategy." << GetName();
-    string name = sAhBotConfig.GetStringDefault(out.str().c_str(), "default");
+    std::ostringstream out; out << "AhBot.PricingStrategy." << GetName();
+    std::string name = sAhBotConfig.GetStringDefault(out.str().c_str(), "default");
     return pricingStrategy = PricingStrategyFactory::Create(name, this);
 }
 
 QualityCategoryWrapper::QualityCategoryWrapper(Category* category, uint32 quality) : Category(), quality(quality), category(category)
 {
-    ostringstream out; out << category->GetName() << ".";
+    std::ostringstream out; out << category->GetName() << ".";
     switch (quality)
     {
     case ITEM_QUALITY_POOR:

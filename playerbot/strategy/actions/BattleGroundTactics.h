@@ -43,7 +43,7 @@ extern std::vector<BattleBotPath*> const vPaths_IC;
 class BGTactics : public MovementAction
 {
 public:
-    BGTactics(PlayerbotAI* ai, string name = "bg tactics") : MovementAction(ai, name) {}
+    BGTactics(PlayerbotAI* ai, std::string name = "bg tactics") : MovementAction(ai, name) {}
     virtual bool Execute(Event& event);
 private:
     bool moveToStart(bool force = false);
@@ -69,7 +69,7 @@ private:
 class ArenaTactics : public MovementAction
 {
 public:
-    ArenaTactics(PlayerbotAI* ai, string name = "arena tactics") : MovementAction(ai, name) {}
+    ArenaTactics(PlayerbotAI* ai, std::string name = "arena tactics") : MovementAction(ai, name) {}
     virtual bool Execute(Event& event);
 private:
     bool moveToCenter(BattleGround *bg);

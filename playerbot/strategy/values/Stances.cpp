@@ -44,7 +44,7 @@ WorldLocation Stance::GetNearLocation(float angle, float distance)
 WorldLocation MoveStance::GetLocationInternal()
 {
     Unit* target = GetTarget();
-    float distance = max(sPlayerbotAIConfig.meleeDistance, target->GetObjectBoundingRadius());
+    float distance = std::max(sPlayerbotAIConfig.meleeDistance, target->GetObjectBoundingRadius());
 
     float angle = GetAngle();
     return GetNearLocation(angle, distance);
@@ -187,12 +187,12 @@ void StanceValue::Reset()
     value = new NearStance(ai);
 }
 
-string StanceValue::Save()
+std::string StanceValue::Save()
 {
     return value ? value->getName() : "?";
 }
 
-bool StanceValue::Load(string name)
+bool StanceValue::Load(std::string name)
 {
     if (name == "behind")
     {
@@ -221,13 +221,13 @@ bool StanceValue::Load(string name)
 
 bool SetStanceAction::Execute(Event& event)
 {
-    string stance = event.getParam();
+    std::string stance = event.getParam();
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
     StanceValue* value = (StanceValue*)context->GetValue<Stance*>("stance");
     if (stance == "?" || stance.empty())
     {
-        ostringstream str; str << "Stance: |cff00ff00" << value->Get()->getName();
+        std::ostringstream str; str << "Stance: |cff00ff00" << value->Get()->getName();
         ai->TellPlayer(requester, str);
         return true;
     }
@@ -243,13 +243,13 @@ bool SetStanceAction::Execute(Event& event)
 
     if (!value->Load(stance))
     {
-        ostringstream str; str << "Invalid stance: |cffff0000" << stance;
+        std::ostringstream str; str << "Invalid stance: |cffff0000" << stance;
         ai->TellPlayer(requester, str);
         ai->TellPlayer(requester, "Please set to any of:|cffffffff near (default), tank, turnback, behind");
         return false;
     }
 
-    ostringstream str; str << "Stance set to: " << stance;
+    std::ostringstream str; str << "Stance set to: " << stance;
     ai->TellPlayer(requester, str);
     return true;
 }

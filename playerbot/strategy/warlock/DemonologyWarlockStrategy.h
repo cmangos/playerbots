@@ -8,7 +8,7 @@ namespace ai
     public:
         DemonologyWarlockPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_RANGED; }
-        string getName() override { return "demonology"; }
+        std::string getName() override { return "demonology"; }
     };
 
     class DemonologyWarlockStrategy : public WarlockStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         DemonologyWarlockAoePveStrategy(PlayerbotAI* ai) : DemonologyWarlockAoeStrategy(ai) {}
-        string getName() override { return "aoe demonology pve"; }
+        std::string getName() override { return "aoe demonology pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         DemonologyWarlockAoePvpStrategy(PlayerbotAI* ai) : DemonologyWarlockAoeStrategy(ai) {}
-        string getName() override { return "aoe demonology pvp"; }
+        std::string getName() override { return "aoe demonology pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         DemonologyWarlockAoeRaidStrategy(PlayerbotAI* ai) : DemonologyWarlockAoeStrategy(ai) {}
-        string getName() override { return "aoe demonology raid"; }
+        std::string getName() override { return "aoe demonology raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         DemonologyWarlockBuffPveStrategy(PlayerbotAI* ai) : DemonologyWarlockBuffStrategy(ai) {}
-        string getName() override { return "buff demonology pve"; }
+        std::string getName() override { return "buff demonology pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         DemonologyWarlockBuffPvpStrategy(PlayerbotAI* ai) : DemonologyWarlockBuffStrategy(ai) {}
-        string getName() override { return "buff demonology pvp"; }
+        std::string getName() override { return "buff demonology pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         DemonologyWarlockBuffRaidStrategy(PlayerbotAI* ai) : DemonologyWarlockBuffStrategy(ai) {}
-        string getName() override { return "buff demonology raid"; }
+        std::string getName() override { return "buff demonology raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         DemonologyWarlockBoostPveStrategy(PlayerbotAI* ai) : DemonologyWarlockBoostStrategy(ai) {}
-        string getName() override { return "boost demonology pve"; }
+        std::string getName() override { return "boost demonology pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         DemonologyWarlockBoostPvpStrategy(PlayerbotAI* ai) : DemonologyWarlockBoostStrategy(ai) {}
-        string getName() override { return "boost demonology pvp"; }
+        std::string getName() override { return "boost demonology pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         DemonologyWarlockBoostRaidStrategy(PlayerbotAI* ai) : DemonologyWarlockBoostStrategy(ai) {}
-        string getName() override { return "boost demonology raid"; }
+        std::string getName() override { return "boost demonology raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         DemonologyWarlockCcPveStrategy(PlayerbotAI* ai) : DemonologyWarlockCcStrategy(ai) {}
-        string getName() override { return "cc demonology pve"; }
+        std::string getName() override { return "cc demonology pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         DemonologyWarlockCcPvpStrategy(PlayerbotAI* ai) : DemonologyWarlockCcStrategy(ai) {}
-        string getName() override { return "cc demonology pvp"; }
+        std::string getName() override { return "cc demonology pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         DemonologyWarlockCcRaidStrategy(PlayerbotAI* ai) : DemonologyWarlockCcStrategy(ai) {}
-        string getName() override { return "cc demonology raid"; }
+        std::string getName() override { return "cc demonology raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -250,7 +250,7 @@ namespace ai
     {
     public:
         DemonologyWarlockPetPveStrategy(PlayerbotAI* ai) : DemonologyWarlockPetStrategy(ai) {}
-        string getName() override { return "pet demonology pve"; }
+        std::string getName() override { return "pet demonology pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -261,7 +261,7 @@ namespace ai
     {
     public:
         DemonologyWarlockPetPvpStrategy(PlayerbotAI* ai) : DemonologyWarlockPetStrategy(ai) {}
-        string getName() override { return "pet demonology pvp"; }
+        std::string getName() override { return "pet demonology pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -272,7 +272,7 @@ namespace ai
     {
     public:
         DemonologyWarlockPetRaidStrategy(PlayerbotAI* ai) : DemonologyWarlockPetStrategy(ai) {}
-        string getName() override { return "pet demonology raid"; }
+        std::string getName() override { return "pet demonology raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -292,7 +292,7 @@ namespace ai
     {
     public:
         DemonologyWarlockCursesPveStrategy(PlayerbotAI* ai) : DemonologyWarlockCursesStrategy(ai) {}
-        string getName() override { return "curse demonology pve"; }
+        std::string getName() override { return "curse demonology pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -302,7 +302,7 @@ namespace ai
     {
     public:
         DemonologyWarlockCursesPvpStrategy(PlayerbotAI* ai) : DemonologyWarlockCursesStrategy(ai) {}
-        string getName() override { return "curse demonology pvp"; }
+        std::string getName() override { return "curse demonology pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -312,7 +312,7 @@ namespace ai
     {
     public:
         DemonologyWarlockCursesRaidStrategy(PlayerbotAI* ai) : DemonologyWarlockCursesStrategy(ai) {}
-        string getName() override { return "curse demonology raid"; }
+        std::string getName() override { return "curse demonology raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

@@ -1,5 +1,5 @@
 #pragma once
-#include "../generic/ReactionStrategy.h"
+#include "playerbot/strategy/generic/ReactionStrategy.h"
 
 namespace ai
 {
@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         DKReactionStrategy(PlayerbotAI* ai) : ReactionStrategy(ai) {}
-        string getName() override { return "react"; }
+        std::string getName() override { return "react"; }
 
     private:
         void InitReactionTriggers(std::list<TriggerNode*> &triggers) override;

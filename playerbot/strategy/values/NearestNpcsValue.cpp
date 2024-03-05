@@ -13,7 +13,7 @@
 using namespace ai;
 using namespace MaNGOS;
 
-void NearestNpcsValue::FindUnits(list<Unit*> &targets)
+void NearestNpcsValue::FindUnits(std::list<Unit*> &targets)
 {
     AnyUnitInObjectRangeCheck u_check(bot, range);
     UnitListSearcher<AnyUnitInObjectRangeCheck> searcher(targets, u_check);
@@ -25,7 +25,7 @@ bool NearestNpcsValue::AcceptUnit(Unit* unit)
     return !sServerFacade.IsHostileTo(unit, bot) && !dynamic_cast<Player*>(unit);
 }
 
-void NearestVehiclesValue::FindUnits(list<Unit*>& targets)
+void NearestVehiclesValue::FindUnits(std::list<Unit*>& targets)
 {
     AnyUnitInObjectRangeCheck u_check(bot, range);
     UnitListSearcher<AnyUnitInObjectRangeCheck> searcher(targets, u_check);

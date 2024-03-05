@@ -4,18 +4,18 @@
 
 using namespace ai;
 
-PositionValue::PositionValue(PlayerbotAI* ai, string name)
+PositionValue::PositionValue(PlayerbotAI* ai, std::string name)
     : ManualSetValue<ai::PositionMap&>(ai, positions, name)
 {
 }
 
-string PositionValue::Save()
+std::string PositionValue::Save()
 {
-    ostringstream out;
+    std::ostringstream out;
     bool first = true;
     for (ai::PositionMap::iterator i = value.begin(); i != value.end(); ++i)
     {
-        string name = i->first;
+        std::string name = i->first;
         ai::PositionEntry pos = i->second;
         if (pos.isSet())
         {
@@ -28,18 +28,18 @@ string PositionValue::Save()
     return out.str();
 }
 
-bool PositionValue::Load(string text)
+bool PositionValue::Load(std::string text)
 {
     value.clear();
 
-    vector<string> ss = split(text, '^');
-    for (vector<string>::iterator i = ss.begin(); i != ss.end(); ++i)
+    std::vector<std::string> ss = split(text, '^');
+    for (std::vector<std::string>::iterator i = ss.begin(); i != ss.end(); ++i)
     {
-        vector<string> s1 = split(*i, '=');
+        std::vector<std::string> s1 = split(*i, '=');
         if (s1.size() != 2) continue;
-        string name = s1[0];
+        std::string name = s1[0];
 
-        vector<string> s2 = split(s1[1], ',');
+        std::vector<std::string> s2 = split(s1[1], ',');
         if (s2.size() != 4) continue;
         double x = atof(s2[0].c_str());
         double y = atof(s2[1].c_str());

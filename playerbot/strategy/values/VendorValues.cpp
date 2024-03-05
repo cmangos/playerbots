@@ -31,7 +31,7 @@ bool VendorHasUsefulItemValue::Calculate()
                 vendorItems.push_back(vItem);
     }
 
-    unordered_map <ItemUsage, uint32> freeMoney;
+    std::unordered_map <ItemUsage, uint32> freeMoney;
 
     freeMoney[ItemUsage::ITEM_USAGE_EQUIP] = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::gear);
     freeMoney[ItemUsage::ITEM_USAGE_USE] = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::consumables);

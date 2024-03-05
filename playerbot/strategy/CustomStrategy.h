@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         CustomStrategy(PlayerbotAI* ai) : Strategy(ai), Qualified() {}
-        string getName() override { return "custom::" + qualifier; }
+        std::string getName() override { return "custom::" + qualifier; }
         void Reset();
 
     private:
@@ -17,9 +17,9 @@ namespace ai
         void LoadActionLines(uint32 owner);
 
     private:
-        list<string> actionLines;
+        std::list<std::string> actionLines;
         
     public:
-        static map<string, string> actionLinesCache;
+        static std::map<std::string, std::string> actionLinesCache;
     };
 }

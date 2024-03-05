@@ -11,7 +11,6 @@
 #include "strategy/values/PositionValue.h"
 INSTANTIATE_SINGLETON_1(PlayerbotDbStore);
 
-using namespace std;
 using namespace ai;
 
 void PlayerbotDbStore::Load(PlayerbotAI *ai)
@@ -26,12 +25,12 @@ void PlayerbotDbStore::Load(PlayerbotAI *ai)
         ai->ChangeStrategy("+chat", BotState::BOT_STATE_COMBAT);
         ai->ChangeStrategy("+chat", BotState::BOT_STATE_NON_COMBAT);
 
-        list<string> values;
+        std::list<std::string> values;
         do
         {
             Field* fields = results->Fetch();
-            string key = fields[0].GetString();
-            string value = fields[1].GetString();
+            std::string key = fields[0].GetString();
+            std::string value = fields[1].GetString();
             if (key == "value") values.push_back(value);
             else if (key == "co") ai->ChangeStrategy(value, BotState::BOT_STATE_COMBAT);
             else if (key == "nc") ai->ChangeStrategy(value, BotState::BOT_STATE_NON_COMBAT);
@@ -49,8 +48,8 @@ void PlayerbotDbStore::Save(PlayerbotAI *ai)
 
     Reset(ai);
 
-    list<string> data = ai->GetAiObjectContext()->Save();
-    for (list<string>::iterator i = data.begin(); i != data.end(); ++i)
+    std::list<std::string> data = ai->GetAiObjectContext()->Save();
+    for (std::list<std::string>::iterator i = data.begin(); i != data.end(); ++i)
     {
         SaveValue(guid, "value", *i);
     }
@@ -61,13 +60,13 @@ void PlayerbotDbStore::Save(PlayerbotAI *ai)
     SaveValue(guid, "react", FormatStrategies("react", ai->GetStrategies(BotState::BOT_STATE_REACTION)));
 }
 
-string PlayerbotDbStore::FormatStrategies(string type, list<string_view> strategies)
+std::string PlayerbotDbStore::FormatStrategies(std::string type, std::list<std::string_view> strategies)
 {
-    ostringstream out;
+    std::ostringstream out;
     for(const auto& strategy : strategies)
         out << "+" << strategy << ",";
 
-	string res = out.str();
+    std::string res = out.str();
     return res.substr(0, res.size() - 1);
 }
 
@@ -79,7 +78,7 @@ void PlayerbotDbStore::Reset(PlayerbotAI *ai)
     CharacterDatabase.PExecute("DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%lu'", guid);
 }
 
-void PlayerbotDbStore::SaveValue(uint64 guid, string key, string value)
+void PlayerbotDbStore::SaveValue(uint64 guid, std::string key, std::string value)
 {
     CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `key`, `value`) VALUES ('%lu', '%s', '%s')", guid, key.c_str(), value.c_str());
 }

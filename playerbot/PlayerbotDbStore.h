@@ -5,8 +5,6 @@
 #include "PlayerbotAIBase.h"
 #include "PlayerbotMgr.h"
 
-using namespace std;
-
 class PlayerbotDbStore
 {
 public:
@@ -23,8 +21,8 @@ public:
     void Reset(PlayerbotAI *ai);
 
 private:
-    void SaveValue(uint64 guid, string key, string value);
-    string FormatStrategies(string type, list<string_view> strategies);
+    void SaveValue(uint64 guid, std::string key, std::string value);
+    std::string FormatStrategies(std::string type, std::list<std::string_view> strategies);
 };
 
 #define sPlayerbotDbStore PlayerbotDbStore::instance()

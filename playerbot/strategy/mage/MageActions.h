@@ -33,7 +33,7 @@ namespace ai
     {
     public:
         CastArcaneBlastAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "arcane blast") {}
-        virtual string GetTargetName() { return "current target"; }
+        virtual std::string GetTargetName() { return "current target"; }
     };
 
     class CastArcaneBarrageAction : public CastSpellAction
@@ -250,7 +250,7 @@ namespace ai
         CastPolymorphAction(PlayerbotAI* ai) : CastCrowdControlSpellAction(ai, "polymorph") {}
         virtual bool Execute(Event& event)
         {
-            vector<string> polySpells;
+            std::vector<std::string> polySpells;
             polySpells.push_back("polymorph");
             if (bot->HasSpell(28271))
                 polySpells.push_back("polymorph: turtle");
@@ -283,7 +283,7 @@ namespace ai
 	{
 	public:
 	    CastEvocationAction(PlayerbotAI* ai) : CastSpellAction(ai, "evocation") {}
-	    virtual string GetTargetName() { return "self target"; }
+	    virtual std::string GetTargetName() { return "self target"; }
 	};
 
     class CastCounterspellOnEnemyHealerAction : public CastSpellOnEnemyHealerAction
@@ -370,7 +370,7 @@ namespace ai
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             bot->learnSpell(56975, false);
 
-            ostringstream out;
+            std::ostringstream out;
             out << "I learned Glyph of Fireball";
             ai->TellError(requester, out.str());
 
@@ -388,7 +388,7 @@ namespace ai
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             bot->removeSpell(56975);
 
-            ostringstream out;
+            std::ostringstream out;
             out << "I removed Glyph of Fireball";
             ai->TellError(requester, out.str());
 
@@ -406,7 +406,7 @@ namespace ai
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             bot->learnSpell(56370, false);
 
-            ostringstream out;
+            std::ostringstream out;
             out << "I learned Glyph of Frostbolt";
             ai->TellError(requester, out.str());
 
@@ -424,7 +424,7 @@ namespace ai
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             bot->removeSpell(56370);
 
-            ostringstream out;
+            std::ostringstream out;
             out << "I removed Glyph of Frostbolt";
             ai->TellError(requester, out.str());
 
@@ -442,7 +442,7 @@ namespace ai
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             bot->learnSpell(64275, false);
 
-            ostringstream out;
+            std::ostringstream out;
             out << "I learned Glyph of Living Bomb";
             ai->TellError(requester, out.str());
 
@@ -460,7 +460,7 @@ namespace ai
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             bot->removeSpell(64275);
 
-            ostringstream out;
+            std::ostringstream out;
             out << "I removed Glyph of Living Bomb";
             ai->TellError(requester, out.str());
 
@@ -478,7 +478,7 @@ namespace ai
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             bot->learnSpell(63093, false);
 
-            ostringstream out;
+            std::ostringstream out;
             out << "I learned Glyph of Mirror Image";
             ai->TellError(requester, out.str());
 
@@ -496,7 +496,7 @@ namespace ai
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             bot->removeSpell(63093);
 
-            ostringstream out;
+            std::ostringstream out;
             out << "I removed Glyph of Mirror Image";
             ai->TellError(requester, out.str());
 
@@ -514,7 +514,7 @@ namespace ai
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             bot->learnSpell(42751, false);
 
-            ostringstream out;
+            std::ostringstream out;
             out << "I learned Glyph of Molten Armor";
             ai->TellError(requester, out.str());
 
@@ -532,7 +532,7 @@ namespace ai
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             bot->removeSpell(42751);
 
-            ostringstream out;
+            std::ostringstream out;
             out << "I removed Glyph of Molten Armor";
             ai->TellError(requester, out.str());
 

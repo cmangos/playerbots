@@ -172,7 +172,7 @@ bool AttackAction::Attack(Player* requester, Unit* target)
 
 bool AttackAction::IsTargetValid(Player* requester, Unit* target)
 {
-    ostringstream msg;
+    std::ostringstream msg;
     if (!target)
     {
         if (verbose) ai->TellError(requester, "I have no target");

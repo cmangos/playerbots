@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
@@ -12,7 +12,7 @@ namespace ai
     class BotRolesValue : public Uint8CalculatedValue, public Qualified
     {
     public:
-        BotRolesValue(PlayerbotAI* ai, string name = "bot roles") : Uint8CalculatedValue(ai, name, 10), Qualified() {}
+        BotRolesValue(PlayerbotAI* ai, std::string name = "bot roles") : Uint8CalculatedValue(ai, name, 10), Qualified() {}
         virtual uint8 Calculate()
         {
             return AiFactory::GetPlayerRoles(bot);

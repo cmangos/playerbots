@@ -4,8 +4,8 @@
 #include "MovementActions.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
-#include "../generic/PullStrategy.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/generic/PullStrategy.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 #include "playerbot/strategy/values/MoveStyleValue.h"
 #include "GenericSpellActions.h"
 
@@ -14,9 +14,9 @@ namespace ai
     class ReachTargetAction : public MovementAction, public Qualified
     {
     public:
-        ReachTargetAction(PlayerbotAI* ai, string name, float range = 0.0f) : MovementAction(ai, name), Qualified(), range(range), spellName("") {}
+        ReachTargetAction(PlayerbotAI* ai, std::string name, float range = 0.0f) : MovementAction(ai, name), Qualified(), range(range), spellName("") {}
 
-        virtual void Qualify(const string& qualifier) override
+        virtual void Qualify(const std::string& qualifier) override
         {
             Qualified::Qualify(qualifier);
 
@@ -104,16 +104,16 @@ namespace ai
             return false;
         }
 
-        virtual string GetTargetName() override { return "current target"; }
-        string GetSpellName() const { return spellName; }
+        virtual std::string GetTargetName() override { return "current target"; }
+        std::string GetSpellName() const { return spellName; }
 
         virtual Unit* GetTarget() override
         {
             // Get the target from the qualifiers
             if (!qualifier.empty())
             {
-                string targetQualifier;
-                const string targetName = Qualified::getMultiQualifierStr(qualifier, 1, "::");
+                std::string targetQualifier;
+                const std::string targetName = Qualified::getMultiQualifierStr(qualifier, 1, "::");
                 if (targetName != "current target")
                 {
                     targetQualifier = Qualified::getMultiQualifierStr(qualifier, 2, "::");
@@ -129,13 +129,13 @@ namespace ai
 
     protected:
         float range;
-        string spellName;
+        std::string spellName;
     };
 
     class CastReachTargetSpellAction : public CastSpellAction
     {
     public:
-        CastReachTargetSpellAction(PlayerbotAI* ai, string spell, float distance) : CastSpellAction(ai, spell), distance(distance) {}
+        CastReachTargetSpellAction(PlayerbotAI* ai, std::string spell, float distance) : CastSpellAction(ai, spell), distance(distance) {}
 
 		virtual bool isUseful() override
 		{
@@ -174,7 +174,7 @@ namespace ai
             }
         }
 
-        void Qualify(const string& qualifier) override
+        void Qualify(const std::string& qualifier) override
         {
             ReachTargetAction::Qualify(qualifier);
 
@@ -183,13 +183,13 @@ namespace ai
             range = range > threshold ? range - threshold : range;
         }
 
-        string GetTargetName() override { return "pull target"; }
+        std::string GetTargetName() override { return "pull target"; }
     };
 
     class ReachPartyMemberToHealAction : public ReachTargetAction
     {
     public:
         ReachPartyMemberToHealAction(PlayerbotAI* ai) : ReachTargetAction(ai, "reach party member to heal", ai->GetRange("heal")) {}
-        virtual string GetTargetName() override { return "party member to heal"; }
+        virtual std::string GetTargetName() override { return "party member to heal"; }
     };
 }

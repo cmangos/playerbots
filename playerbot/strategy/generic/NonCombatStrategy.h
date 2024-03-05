@@ -19,7 +19,7 @@ namespace ai
     public:
         CollisionStrategy(PlayerbotAI* ai) : Strategy(ai) {}
 		int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
-        string getName() override { return "collision"; }
+        std::string getName() override { return "collision"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -30,7 +30,7 @@ namespace ai
     public:
         MountStrategy(PlayerbotAI* ai) : Strategy(ai) {};
         int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
-        string getName() override { return "mount"; }
+        std::string getName() override { return "mount"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -41,7 +41,7 @@ namespace ai
     public:
         AttackTaggedStrategy(PlayerbotAI* ai) : Strategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
-        string getName() override { return "attack tagged"; }
+        std::string getName() override { return "attack tagged"; }
     };
 
     class WorldBuffStrategy : public Strategy
@@ -49,7 +49,7 @@ namespace ai
     public:
         WorldBuffStrategy(PlayerbotAI* ai) : Strategy(ai) {}
         virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
-        string getName() override { return "wbuff"; }
+        std::string getName() override { return "wbuff"; }
 
     protected:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;

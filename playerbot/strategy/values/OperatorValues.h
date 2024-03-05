@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
@@ -10,13 +10,13 @@ namespace ai
         virtual bool Calculate();
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "bool and"; } //Must equal iternal name
-        virtual string GetHelpTypeName() { return "operator"; }
-        virtual string GetHelpDescription()
+        virtual std::string GetHelpName() { return "bool and"; } //Must equal iternal name
+        virtual std::string GetHelpTypeName() { return "operator"; }
+        virtual std::string GetHelpDescription()
         {
             return "This value will return true if all of the values included in the qualifier return true.";
         }
-        virtual vector<string> GetUsedValues() { return { }; }
+        virtual std::vector<std::string> GetUsedValues() { return { }; }
 #endif 
     };
 
@@ -27,13 +27,13 @@ namespace ai
         virtual bool Calculate();
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "not"; } //Must equal iternal name
-        virtual string GetHelpTypeName() { return "operator"; }
-        virtual string GetHelpDescription()
+        virtual std::string GetHelpName() { return "not"; } //Must equal iternal name
+        virtual std::string GetHelpTypeName() { return "operator"; }
+        virtual std::string GetHelpDescription()
         {
             return "This value will return false if any of the values included in the qualifier return true.";
         }
-        virtual vector<string> GetUsedValues() { return { }; }
+        virtual std::vector<std::string> GetUsedValues() { return { }; }
 #endif 
     };
 }

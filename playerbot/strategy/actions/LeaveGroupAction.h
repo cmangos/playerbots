@@ -7,7 +7,7 @@ namespace ai
     class LeaveGroupAction : public ChatCommandAction
     {
     public:
-        LeaveGroupAction(PlayerbotAI* ai, string name = "leave") : ChatCommandAction(ai, name) {}
+        LeaveGroupAction(PlayerbotAI* ai, std::string name = "leave") : ChatCommandAction(ai, name) {}
 
         virtual bool Execute(Event& event) override
         {            
@@ -31,7 +31,7 @@ namespace ai
             WorldPacket& p = event.getPacket();
             p.rpos(0);
             uint32 operation;
-            string member;
+            std::string member;
 
             p >> operation >> member;
 

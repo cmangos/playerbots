@@ -31,7 +31,7 @@ bool HealthInRangeTrigger::IsActive()
                 healthCheck = healthPredict < maxValue && healthPredict >= minValue;
                 if (healthCheck && ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT))
                 {
-                    string msg = GetTargetName() + " hp: " + std::to_string(healthPercent) + ", predicted: " + std::to_string(healthPredict);
+                    std::string msg = GetTargetName() + " hp: " + std::to_string(healthPercent) + ", predicted: " + std::to_string(healthPredict);
                     ai->TellPlayerNoFacing(GetMaster(), msg);
                 }
             }
@@ -70,7 +70,7 @@ bool HealTargetFullHealthTrigger::IsActive()
         // Interrupt pre casted heals if target is not injured.
         if (PlayerbotAI::IsHealSpell(currentSpell->m_spellInfo))
         {
-            string status = "fullhp";
+            std::string status = "fullhp";
             if (Unit* pTarget = currentSpell->m_targets.getUnitTarget())
             {
                 bool hpFull = pTarget->GetHealth() == pTarget->GetMaxHealth();
@@ -89,7 +89,7 @@ bool HealTargetFullHealthTrigger::IsActive()
                     uint32 manaCost = currentSpell->GetPowerCost();
                     if (ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT))
                     {
-                        string msg = "target " + status + ", can save " + std::to_string(manaCost) + " mana, cast left : " + std::to_string(currentSpell->GetCastedTime()) + "ms";
+                        std::string msg = "target " + status + ", can save " + std::to_string(manaCost) + " mana, cast left : " + std::to_string(currentSpell->GetCastedTime()) + "ms";
                         ai->TellPlayerNoFacing(GetMaster(), msg);
                     }
                     return true;

@@ -6,9 +6,9 @@
 
 using namespace ai;
 
-list<ObjectGuid> GroupMembersValue::Calculate()
+std::list<ObjectGuid> GroupMembersValue::Calculate()
 {
-    list<ObjectGuid> members;
+    std::list<ObjectGuid> members;
 
     Group* group = bot->GetGroup();
     if (group)
@@ -53,7 +53,7 @@ uint32 GroupBoolCountValue::Calculate()
 {
     uint32 count = 0;
 
-    for (ObjectGuid guid : AI_VALUE(list<ObjectGuid>, "group members"))
+    for (ObjectGuid guid : AI_VALUE(std::list<ObjectGuid>, "group members"))
     {
         Player* player = sObjectMgr.GetPlayer(guid);
 
@@ -75,7 +75,7 @@ uint32 GroupBoolCountValue::Calculate()
 
 bool GroupBoolANDValue::Calculate()
 {
-    for (ObjectGuid guid : AI_VALUE(list<ObjectGuid>, "group members"))
+    for (ObjectGuid guid : AI_VALUE(std::list<ObjectGuid>, "group members"))
     {
         Player* player = sObjectMgr.GetPlayer(guid);
 
@@ -97,7 +97,7 @@ bool GroupBoolANDValue::Calculate()
 
 bool GroupBoolORValue::Calculate()
 {
-    for (ObjectGuid guid : AI_VALUE(list<ObjectGuid>, "group members"))
+    for (ObjectGuid guid : AI_VALUE(std::list<ObjectGuid>, "group members"))
     {
         Player* player = sObjectMgr.GetPlayer(guid);
 
@@ -121,7 +121,7 @@ bool GroupReadyValue::Calculate()
 {
     bool inDungeon = !WorldPosition(bot).isOverworld();
 
-    for (ObjectGuid guid : AI_VALUE(list<ObjectGuid>, "group members"))
+    for (ObjectGuid guid : AI_VALUE(std::list<ObjectGuid>, "group members"))
     {
         Player* member = sObjectMgr.GetPlayer(guid);
 

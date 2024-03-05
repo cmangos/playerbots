@@ -8,7 +8,7 @@ namespace ai
     {
     public:
         HealPriestStrategy(PlayerbotAI* ai);
-        virtual string getName() override { return "heal"; }
+        virtual std::string getName() override { return "heal"; }
 		virtual int GetType() override { return STRATEGY_TYPE_HEAL; }
 
     protected:

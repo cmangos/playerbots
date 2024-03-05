@@ -1,6 +1,6 @@
 #pragma once
-#include "../Multiplier.h"
-#include "../Strategy.h"
+#include "playerbot/strategy/Multiplier.h"
+#include "playerbot/strategy/Strategy.h"
 
 namespace ai
 {
@@ -17,15 +17,15 @@ namespace ai
     {
     public:
         RpgStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual string getName() override { return "rpg"; }
+        virtual std::string getName() override { return "rpg"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "rpg"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "rpg"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot move between npcs to automatically do various interaction.\n"
             "This is the main rpg strategy which make bots pickand move to various rpg targets.\n"
             "The interactions included in this strategy are limited to emotesand wait.";            
         }
-        virtual vector<string> GetRelatedStrategies() { return {"rpg quest", "rpg vendor", "rpg explore", "rpg maintenance", "rpg guild", "rpg bg", "rpg player", "rpg craft", "debug rpg"}; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {"rpg quest", "rpg vendor", "rpg explore", "rpg maintenance", "rpg guild", "rpg bg", "rpg player", "rpg craft", "debug rpg"}; }
 #endif
     protected:
         virtual void OnStrategyAdded(BotState state) override;
@@ -38,15 +38,15 @@ namespace ai
     {
     public:
         RpgQuestStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "rpg quest"; }
+        std::string getName() override { return "rpg quest"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "rpg quest"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "rpg quest"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot move to npcs that have quests the bot can pick up or hand in.\n"
                 "Bots will only pick up quests that give xp unless low on durability.\n"
                 "Bots will also try to do repeatable quests.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "rpg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "rpg" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -56,15 +56,15 @@ namespace ai
     {
     public:
         RpgVendorStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "rpg vendor"; }
+        std::string getName() override { return "rpg vendor"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "rpg vendor"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "rpg vendor"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot move to vendors, auctionhouses and mail-boxes.\n"
                 "Bots will buy and sell items depending on usage see [h:action|query item usage].\n"
                 "Bots will pick up their mail if there is any items or gold attached.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "rpg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "rpg" }; }
 #endif
     private:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -74,15 +74,15 @@ namespace ai
     {
     public:
         RpgExploreStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "rpg explore"; }
+        std::string getName() override { return "rpg explore"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "rpg explore"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "rpg explore"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot move to innkeepers and flight masters.\n"
                 "Bots will make this inn their new home when their current home is far away.\n"
                 "Bots pick a random flight (when not with a player) or discover new flightpaths.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "rpg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "rpg" }; }
 #endif
     private:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -92,15 +92,15 @@ namespace ai
     {
     public:
         RpgMaintenanceStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "rpg maintenance"; }
+        std::string getName() override { return "rpg maintenance"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "rpg maintenance"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "rpg maintenance"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot move to trainers and armorers.\n"
                 "Bots will automatically train new spells or skills that are available.\n"
                 "Bots will automatically repair their armor when below 80% durability.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "rpg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "rpg" }; }
 #endif
     private:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -110,14 +110,14 @@ namespace ai
     {
     public:
         RpgGuildStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "rpg guild"; }
+        std::string getName() override { return "rpg guild"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "rpg guild"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "rpg guild"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot move to guild master npcs.\n"
                 "Bots will automatically buy a petition if they are not already in a guild.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "rpg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "rpg" }; }
 #endif
     private:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -127,14 +127,14 @@ namespace ai
     {
     public:
         RpgBgStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "rpg bg"; }
+        std::string getName() override { return "rpg bg"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "rpg bg"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "rpg bg"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot move to battlemasters.\n"
                 "Bots will automatically queue for battlegrounds.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "rpg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "rpg" }; }
 #endif
     private:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -144,15 +144,15 @@ namespace ai
     {
     public:
         RpgPlayerStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "rpg player"; }
+        std::string getName() override { return "rpg player"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "rpg player"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "rpg player"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot move to nearby players.\n"
                 "Bots will automatically trade other bots items they don't need but the other bot can use.\n"
                 "Bots will automatically start duels with other players 3 levels above and 10 levels below them.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "rpg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "rpg" }; }
 #endif
     private:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -162,15 +162,15 @@ namespace ai
     {
     public:
         RpgCraftStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "rpg craft"; }
+        std::string getName() override { return "rpg craft"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "rpg craft"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "rpg craft"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot move to nearby objects, players, npcs.\n"
                 "Bots will automatically craft items they think are usefull or will give them skill points.\n"
                 "Bots will automatically cast random spells on or near players or npcs.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "rpg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "rpg" }; }
 #endif
     private:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -180,14 +180,14 @@ namespace ai
     {
     public:
         RpgJumpStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "rpg jump"; }
+        std::string getName() override { return "rpg jump"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "rpg jump"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "rpg jump"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot jump randomly.\n"
                 "Chances of jumps forward, in place, backward depend on config.\n";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "rpg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "rpg" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;

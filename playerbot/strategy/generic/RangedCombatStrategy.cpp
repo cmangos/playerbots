@@ -4,7 +4,7 @@
 
 using namespace ai;
 
-void RangedCombatStrategy::InitCombatTriggers(list<TriggerNode*> &triggers)
+void RangedCombatStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
         "enemy too close for spell",

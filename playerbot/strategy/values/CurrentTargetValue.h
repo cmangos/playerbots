@@ -1,12 +1,12 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
     class CurrentTargetValue : public UnitManualSetValue
 	{
 	public:
-        CurrentTargetValue(PlayerbotAI* ai, string name = "current target") : UnitManualSetValue(ai, nullptr, name) {}
+        CurrentTargetValue(PlayerbotAI* ai, std::string name = "current target") : UnitManualSetValue(ai, nullptr, name) {}
         virtual Unit* Get();
         virtual void Set(Unit* unit);
 

@@ -4,10 +4,9 @@
 #include "playerbot/strategy/values/ItemUsageValue.h"
 
 using namespace ai;
-using namespace std;
 
-bool MoveStyleValue::HasValue(PlayerbotAI* ai, const string& value)
+bool MoveStyleValue::HasValue(PlayerbotAI* ai, const std::string& value)
 {
-    string styles = ai->GetAiObjectContext()->GetValue<string>("move style")->Get();
-    return styles.find(value) != string::npos;
+    std::string styles = ai->GetAiObjectContext()->GetValue<std::string>("move style")->Get();
+    return styles.find(value) != std::string::npos;
 }

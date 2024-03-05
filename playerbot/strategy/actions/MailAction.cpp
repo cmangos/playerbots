@@ -3,11 +3,11 @@
 #include "playerbot/playerbot.h"
 #include "MailAction.h"
 #include "playerbot/PlayerbotAIConfig.h"
-#include "../../Helpers.h"
+#include "playerbot/Helpers.h"
 
 using namespace ai;
 
-map<string, MailProcessor*> MailAction::processors;
+std::map<std::string, MailProcessor*> MailAction::processors;
 
 class TellMailProcessor : public MailProcessor
 {
@@ -24,7 +24,7 @@ public:
         Player* bot = ai->GetBot();
         time_t cur_time = time(0);
         int days = (cur_time - mail->deliver_time) / 3600 / 24;
-        ostringstream out;
+        std::ostringstream out;
         out << "#" << (index+1) << " ";
         if (!mail->money && !mail->has_items)
             out << "|cffffffff" << mail->subject;
@@ -44,7 +44,7 @@ public:
                 ItemPrototype const *proto = sObjectMgr.GetItemPrototype(i->item_template);
                 if (proto)
                 {
-                    sPlayerbotAIConfig.logEvent(ai, "MailAction", proto->Name1, to_string(proto->ItemId));
+                    sPlayerbotAIConfig.logEvent(ai, "MailAction", proto->Name1, std::to_string(proto->ItemId));
                     out << ChatHelper::formatItem(item, count);
                     if (!mail->subject.empty()) out << " |cffa0a0a0(" << mail->subject << ")";
                 }
@@ -58,7 +58,7 @@ public:
 
     bool After(Player* requester, PlayerbotAI* ai) override
     {
-        for (list<string>::iterator i = tells.begin(); i != tells.end(); ++i)
+        for (std::list<std::string>::iterator i = tells.begin(); i != tells.end(); ++i)
         {
             ai->TellPlayer(requester, *i, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
@@ -69,7 +69,7 @@ public:
     static TellMailProcessor instance;
 
 private:
-    list<string> tells;
+    std::list<std::string> tells;
 };
 
 class TakeMailProcessor : public MailProcessor
@@ -87,7 +87,7 @@ public:
         ObjectGuid mailbox = FindMailbox(ai);
         if (mail->money)
         {
-            ostringstream out;
+            std::ostringstream out;
             out << mail->subject << ", |cffffff00" << ChatHelper::formatMoney(mail->money) << "|cff00ff00 processed";
             ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 
@@ -99,7 +99,7 @@ public:
         }
         else if (!mail->items.empty())
         {
-            list<uint32> guids;
+            std::list<uint32> guids;
             for (MailItemInfoVec::iterator i = mail->items.begin(); i != mail->items.end(); ++i)
             {
                 ItemPrototype const *proto = sObjectMgr.GetItemPrototype(i->item_template);
@@ -107,7 +107,7 @@ public:
                     guids.push_back(i->item_guid);
             }
 
-            for (list<uint32>::iterator i = guids.begin(); i != guids.end(); ++i)
+            for (std::list<uint32>::iterator i = guids.begin(); i != guids.end(); ++i)
             {
                 WorldPacket packet;
                 packet << mailbox;
@@ -116,7 +116,7 @@ public:
                 packet << *i;
 #endif
                 Item* item = bot->GetMItem(*i);
-                ostringstream out;
+                std::ostringstream out;
                 out << mail->subject << ", " << ChatHelper::formatItem(item) << "|cff00ff00 processed";
 
                 bot->GetSession()->HandleMailTakeItem(packet);
@@ -160,7 +160,7 @@ class DeleteMailProcessor : public MailProcessor
 public:
     bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai) override
     {
-        ostringstream out;
+        std::ostringstream out;
         out << "|cffffffff" << mail->subject << "|cffff0000 deleted";
         RemoveMail(ai->GetBot(), mail->messageID, FindMailbox(ai));
         ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
@@ -175,7 +175,7 @@ class ReadMailProcessor : public MailProcessor
 public:
     bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai) override
     {
-        ostringstream out, body;
+        std::ostringstream out, body;
         out << "|cffffffff" << mail->subject;
         ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 #ifdef MANGOSBOT_TWO
@@ -218,20 +218,20 @@ bool MailAction::Execute(Event& event)
         processors["read"] = &ReadMailProcessor::instance;
     }
 
-    string text = event.getParam();
+    std::string text = event.getParam();
     if (text.empty())
     {
         ai->TellPlayer(requester, "whisper 'mail ?' to query mailbox, 'mail take/delete/read filter' to take/delete/read mails by filter");
         return false;
     }
 
-    vector<string> ss = split(text, ' ');
-    string action = ss[0];
-    string filter = ss.size() > 1 ? ss[1] : "";
+    std::vector<std::string> ss = split(text, ' ');
+    std::string action = ss[0];
+    std::string filter = ss.size() > 1 ? ss[1] : "";
     MailProcessor* processor = processors[action];
     if (!processor)
     {
-        ostringstream out; out << action << ": I don't know how to do that";
+        std::ostringstream out; out << action << ": I don't know how to do that";
         ai->TellPlayer(requester, out.str());
         return false;
     }
@@ -239,7 +239,7 @@ bool MailAction::Execute(Event& event)
     if (!processor->Before(requester, ai))
         return false;
 
-    vector<Mail*> mailList;
+    std::vector<Mail*> mailList;
     time_t cur_time = time(0);
     for (PlayerMails::iterator itr = bot->GetMailBegin(); itr != bot->GetMailEnd(); ++itr)
     {
@@ -253,8 +253,8 @@ bool MailAction::Execute(Event& event)
     if (mailList.empty())
         return false;
 
-    map<int, Mail*> filtered = filterList(mailList, filter);
-    for (map<int, Mail*>::iterator i = filtered.begin(); i != filtered.end(); ++i)
+    std::map<int, Mail*> filtered = filterList(mailList, filter);
+    for (std::map<int, Mail*>::iterator i = filtered.begin(); i != filtered.end(); ++i)
     {
         if (!processor->Process(requester, i->first, i->second, ai))
             break;
@@ -276,9 +276,9 @@ void MailProcessor::RemoveMail(Player* bot, uint32 id, ObjectGuid mailbox)
 
 ObjectGuid MailProcessor::FindMailbox(PlayerbotAI* ai)
 {
-    list<ObjectGuid> gos = *ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest game objects");
+    std::list<ObjectGuid> gos = *ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest game objects");
     ObjectGuid mailbox;
-    for (list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); ++i)
     {
         GameObject* go = ai->GetGameObject(*i);
         if (go && go->GetGoType() == GAMEOBJECT_TYPE_MAILBOX)

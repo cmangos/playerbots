@@ -3,13 +3,12 @@
 #include "SkipSpellsListValue.h"
 
 using namespace ai;
-using namespace std;
 
-string SkipSpellsListValue::Save()
+std::string SkipSpellsListValue::Save()
 {
-    ostringstream out;
+    std::ostringstream out;
     bool first = true;
-    for (set<uint32>::iterator i = value.begin(); i != value.end(); ++i)
+    for (std::set<uint32>::iterator i = value.begin(); i != value.end(); ++i)
     {
         if (!first) out << ",";
         else first = false;
@@ -18,12 +17,12 @@ string SkipSpellsListValue::Save()
     return out.str();
 }
 
-bool SkipSpellsListValue::Load(string text)
+bool SkipSpellsListValue::Load(std::string text)
 {
     value.clear();
 
-    vector<string> ss = split(text, ',');
-    for (vector<string>::iterator i = ss.begin(); i != ss.end(); ++i)
+    std::vector<std::string> ss = split(text, ',');
+    for (std::vector<std::string>::iterator i = ss.begin(); i != ss.end(); ++i)
     {
         value.insert(atoi(i->c_str()));
     }

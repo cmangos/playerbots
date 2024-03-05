@@ -24,13 +24,13 @@ namespace ai
     class AiNamedObject : public AiObject
     {
     public:
-        AiNamedObject(PlayerbotAI* ai, string name) : AiObject(ai), name(name) {}
+        AiNamedObject(PlayerbotAI* ai, std::string name) : AiObject(ai), name(name) {}
 
     public:
-        virtual string getName() { return name; }
+        virtual std::string getName() { return name; }
 
     protected:
-        string name;
+        std::string name;
     };
 }
 

@@ -1,8 +1,6 @@
 #ifndef _PlayerbotSecurity_H
 #define _PlayerbotSecurity_H
 
-using namespace std;
-
 enum class PlayerbotSecurityLevel : uint8
 {
     PLAYERBOT_SECURITY_DENY_ALL = 0,
@@ -41,7 +39,7 @@ class PlayerbotSecurity
     private:
         Player* const bot;
         uint32 account;
-        map<uint64, map<string, time_t> > whispers;
+        std::map<uint64, std::map<std::string, time_t> > whispers;
 };
 
 #endif

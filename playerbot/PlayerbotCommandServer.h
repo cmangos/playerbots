@@ -5,8 +5,6 @@
 #include "PlayerbotAIBase.h"
 #include "PlayerbotMgr.h"
 
-using namespace std;
-
 class PlayerbotCommandServer
 {
 public:

@@ -12,7 +12,7 @@
 using namespace ai;
 using namespace MaNGOS;
 
-vector<uint32> PossibleRpgTargetsValue::allowedNpcFlags;
+std::vector<uint32> PossibleRpgTargetsValue::allowedNpcFlags;
 
 PossibleRpgTargetsValue::PossibleRpgTargetsValue(PlayerbotAI* ai, float range) :
         NearestUnitsValue(ai, "possible rpg targets", range, true)
@@ -45,7 +45,7 @@ PossibleRpgTargetsValue::PossibleRpgTargetsValue(PlayerbotAI* ai, float range) :
     }
 }
 
-void PossibleRpgTargetsValue::FindUnits(list<Unit*> &targets)
+void PossibleRpgTargetsValue::FindUnits(std::list<Unit*> &targets)
 {
     AnyUnitInObjectRangeCheck u_check(bot, range);
     UnitListSearcher<AnyUnitInObjectRangeCheck> searcher(targets, u_check);
@@ -68,7 +68,7 @@ bool PossibleRpgTargetsValue::AcceptUnit(Unit* unit)
 	if (unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER))
 		return false;
 
-    for (vector<uint32>::iterator i = allowedNpcFlags.begin(); i != allowedNpcFlags.end(); ++i)
+    for (std::vector<uint32>::iterator i = allowedNpcFlags.begin(); i != allowedNpcFlags.end(); ++i)
     {
 		if (unit->HasFlag(UNIT_NPC_FLAGS, *i)) return true;
     }

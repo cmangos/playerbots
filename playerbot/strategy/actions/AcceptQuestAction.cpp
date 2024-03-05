@@ -26,7 +26,7 @@ bool AcceptQuestAction::Execute(Event& event)
     uint64 guid = 0;
     uint32 quest = 0;
 
-    string text = event.getParam();
+    std::string text = event.getParam();
     PlayerbotChatHandler ch(requester);
     quest = ch.extractQuestId(text);
 
@@ -34,8 +34,8 @@ bool AcceptQuestAction::Execute(Event& event)
 
     if (event.getPacket().empty())
     {
-        list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-        for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
+        std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
+        for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
         {
             Unit* unit = ai->GetUnit(*i);
             if (unit && quest && unit->HasQuest(quest))
@@ -46,8 +46,8 @@ bool AcceptQuestAction::Execute(Event& event)
             if (unit && text == "*" && sqrt(bot->GetDistance(unit)) <= INTERACTION_DISTANCE)
                 hasAccept |= QuestAction::ProcessQuests(unit);
         }
-        list<ObjectGuid> gos = AI_VALUE(list<ObjectGuid>, "nearest game objects");
-        for (list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
+        std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, "nearest game objects");
+        for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
         {
             GameObject* go = ai->GetGameObject(*i);
             if (go && quest && go->HasQuest(quest))
@@ -76,7 +76,7 @@ bool AcceptQuestAction::Execute(Event& event)
     hasAccept |= AcceptQuest(requester, qInfo, guid);
 
     if (hasAccept)
-        sPlayerbotAIConfig.logEvent(ai, "AcceptQuestAction", qInfo->GetTitle(), to_string(qInfo->GetQuestId()));
+        sPlayerbotAIConfig.logEvent(ai, "AcceptQuestAction", qInfo->GetTitle(), std::to_string(qInfo->GetQuestId()));
 
     return hasAccept;
 }
@@ -119,7 +119,7 @@ bool AcceptQuestShareAction::Execute(Event& event)
     {
         bot->AddQuest( qInfo, requester);
 
-        sPlayerbotAIConfig.logEvent(ai, "AcceptQuestShareAction", qInfo->GetTitle(), to_string(qInfo->GetQuestId()));
+        sPlayerbotAIConfig.logEvent(ai, "AcceptQuestShareAction", qInfo->GetTitle(), std::to_string(qInfo->GetQuestId()));
 
         if( bot->CanCompleteQuest( quest ) )
             bot->CompleteQuest( quest );

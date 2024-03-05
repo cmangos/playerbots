@@ -4,7 +4,7 @@
 
 using namespace ai;
 
-void MeleeCombatStrategy::InitCombatTriggers(list<TriggerNode*> &triggers)
+void MeleeCombatStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
         "enemy out of melee",
@@ -15,7 +15,7 @@ void MeleeCombatStrategy::InitCombatTriggers(list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("move out of enemy contact", ACTION_NORMAL + 8.0f), NULL)));
 }
 
-void SetBehindCombatStrategy::InitCombatTriggers(list<TriggerNode*> &triggers)
+void SetBehindCombatStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
         "not behind target",
@@ -29,12 +29,12 @@ void ChaseJumpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("jump::chase", ACTION_MOVE + 9.0f), NULL)));
 }
 
-void ChaseJumpStrategy::InitCombatTriggers(list<TriggerNode *> &triggers)
+void ChaseJumpStrategy::InitCombatTriggers(std::list<TriggerNode *> &triggers)
 {
     InitNonCombatTriggers(triggers);
 }
 
-void ChaseJumpStrategy::InitReactionTriggers(list<TriggerNode *> &triggers)
+void ChaseJumpStrategy::InitReactionTriggers(std::list<TriggerNode *> &triggers)
 {
     InitNonCombatTriggers(triggers);
 }

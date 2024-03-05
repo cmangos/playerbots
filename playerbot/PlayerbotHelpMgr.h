@@ -6,8 +6,6 @@
 
 #define BOT_HELP(name) sPlayerbotHelpMgr.GetBotText(name)
 
-using namespace std;
-
 struct BotHelpEntry
 {
     BotHelpEntry() { m_new = true; }
@@ -31,42 +29,42 @@ class PlayerbotHelpMgr
         }
 
 	public:
-        static void replace(string& text, const string what, const string with);
-        static string makeList(vector<string>const parts, string partFormat = "<part>", uint32 maxLength = 254);
+        static void replace(std::string& text, const std::string what, const std::string with);
+        static std::string makeList(std::vector<std::string>const parts, std::string partFormat = "<part>", uint32 maxLength = 254);
 #ifdef GenerateBotHelp
         PlayerbotAI* ai;
         AiObjectContext* genericContext;
-        typedef unordered_map<Action*, float> actionMap;
-        typedef unordered_map<Trigger*, actionMap> triggerMap;
-        typedef unordered_map<BotState, triggerMap> stateMap;
-        typedef unordered_map<Strategy*, stateMap> strategyMap;
-        unordered_map<string, strategyMap> classMap;
-        unordered_map<string, AiObjectContext*> classContext;
+        typedef std::unordered_map<Action*, float> actionMap;
+        typedef std::unordered_map<Trigger*, actionMap> triggerMap;
+        typedef std::unordered_map<BotState, triggerMap> stateMap;
+        typedef std::unordered_map<Strategy*, stateMap> strategyMap;
+        std::unordered_map<std::string, strategyMap> classMap;
+        std::unordered_map<std::string, AiObjectContext*> classContext;
 
-        unordered_map<BotState, string> states = { {BotState::BOT_STATE_COMBAT, "combat"},  {BotState::BOT_STATE_NON_COMBAT, "non combat"},  {BotState::BOT_STATE_DEAD, "dead state"},  {BotState::BOT_STATE_REACTION, "reaction"},  {BotState::BOT_STATE_ALL, "all"} };
+        std::unordered_map<BotState, std::string> states = { {BotState::BOT_STATE_COMBAT, "combat"},  {BotState::BOT_STATE_NON_COMBAT, "non combat"},  {BotState::BOT_STATE_DEAD, "dead state"},  {BotState::BOT_STATE_REACTION, "reaction"},  {BotState::BOT_STATE_ALL, "all"} };
 
-        unordered_map<string, string> supportedActionName;
+        std::unordered_map<std::string, std::string> supportedActionName;
 
-        typedef unordered_map<string, bool> nameCoverageMap;
-        unordered_map<string, nameCoverageMap> coverageMap;
+        typedef std::unordered_map<std::string, bool> nameCoverageMap;
+        std::unordered_map<std::string, nameCoverageMap> coverageMap;
 
-        static string initcap(string st) { string s = st; s[0] = toupper(s[0]); return s; }
-        static string formatFloat(float num);
+        static std::string initcap(std::string st) { std::string s = st; s[0] = toupper(s[0]); return s; }
+        static std::string formatFloat(float num);
 
         bool IsGenericSupported(PlayerbotAIAware* object);
-        string GetObjectName(PlayerbotAIAware* object, string className);
-        string GetObjectLink(PlayerbotAIAware* object, string className);
+        std::string GetObjectName(PlayerbotAIAware* object, std::string className);
+        std::string GetObjectLink(PlayerbotAIAware* object, std::string className);
 
-        void LoadStrategies(string className, AiObjectContext* context);
+        void LoadStrategies(std::string className, AiObjectContext* context);
         void LoadAllStrategies();
 
-        string GetStrategyBehaviour(string className, Strategy* strategy);
+        std::string GetStrategyBehaviour(std::string className, Strategy* strategy);
         void GenerateStrategyHelp();
 
-        string GetTriggerBehaviour(string className, Trigger* trigger);
+        std::string GetTriggerBehaviour(std::string className, Trigger* trigger);
         void GenerateTriggerHelp();
 
-        string GetActionBehaviour(string className, Action* Action);
+        std::string GetActionBehaviour(std::string className, Action* Action);
         void GenerateActionHelp();
 
         void GenerateValueHelp();
@@ -79,15 +77,15 @@ class PlayerbotHelpMgr
         
         void GenerateHelp();
 #endif
-        static void FormatHelpTopic(string& text);
+        static void FormatHelpTopic(std::string& text);
         void FormatHelpTopics();
         void LoadBotHelpTexts();
 
-        string GetBotText(string name);
-        bool GetBotText(string name, string& text);
-        vector<string> FindBotText(string name);
+        std::string GetBotText(std::string name);
+        bool GetBotText(std::string name, std::string& text);
+        std::vector<std::string> FindBotText(std::string name);
     private:
-        unordered_map<string, BotHelpEntry> botHelpText;
+    std::unordered_map<std::string, BotHelpEntry> botHelpText;
 };
 
 #define sPlayerbotHelpMgr PlayerbotHelpMgr::instance()

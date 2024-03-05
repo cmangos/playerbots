@@ -6,7 +6,7 @@ namespace ai
     class SummonAction : public MovementAction
     {
     public:
-        SummonAction(PlayerbotAI* ai, string name = "summon") : MovementAction(ai, name) {}
+        SummonAction(PlayerbotAI* ai, std::string name = "summon") : MovementAction(ai, name) {}
         bool isPossible() override { return true; }
         bool isUseful() override { return true; }
         bool isUsefulWhenStunned() override { return true; }

@@ -7,7 +7,7 @@ namespace ai
     class CastSpellAction : public Action
     {
     public:
-        CastSpellAction(PlayerbotAI* ai, string spell);
+        CastSpellAction(PlayerbotAI* ai, std::string spell);
         virtual ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_SINGLE; }
         virtual bool Execute(Event& event) override;
         virtual bool isPossible() override;
@@ -20,13 +20,13 @@ namespace ai
         
     protected:
         const uint32& GetSpellID() const { return spellId; }
-        const string& GetSpellName() const { return spellName; }
-        void SetSpellName(const string& name, string spellIDContextName = "spell id");
+        const std::string& GetSpellName() const { return spellName; }
+        void SetSpellName(const std::string& name, std::string spellIDContextName = "spell id");
 
         Unit* GetTarget() override;
-        virtual string GetTargetName() override { return "current target"; }
-        virtual string GetTargetQualifier() { return ""; }
-        virtual string GetReachActionName() { return "reach spell"; }
+        virtual std::string GetTargetName() override { return "current target"; }
+        virtual std::string GetTargetQualifier() { return ""; }
+        virtual std::string GetReachActionName() { return "reach spell"; }
 
         virtual NextAction** getPrerequisites() override;
 
@@ -34,31 +34,31 @@ namespace ai
 		float range;
 
     private:
-        string spellName;
+        std::string spellName;
         uint32 spellId;
     };
 
     class CastPetSpellAction : public CastSpellAction
     {
     public:
-        CastPetSpellAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) {}
+        CastPetSpellAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell) {}
 
         virtual bool isPossible() override;
 
     protected:
-        virtual string GetTargetName() override { return "current target"; }
-        string GetReachActionName() override { return ""; }
+        virtual std::string GetTargetName() override { return "current target"; }
+        std::string GetReachActionName() override { return ""; }
     };
 
 	//---------------------------------------------------------------------------------------------------------------------
 	class CastAuraSpellAction : public CastSpellAction
 	{
 	public:
-		CastAuraSpellAction(PlayerbotAI* ai, string spell, bool isOwner = false) : CastSpellAction(ai, spell), isOwner(isOwner) {}
+		CastAuraSpellAction(PlayerbotAI* ai, std::string spell, bool isOwner = false) : CastSpellAction(ai, spell), isOwner(isOwner) {}
 		virtual bool isUseful() override;
 
     protected:
-        virtual string GetReachActionName() override { return "reach spell"; }
+        virtual std::string GetReachActionName() override { return "reach spell"; }
 
     protected:
         bool isOwner;
@@ -68,20 +68,20 @@ namespace ai
     class CastMeleeSpellAction : public CastSpellAction
     {
     public:
-        CastMeleeSpellAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) 
+        CastMeleeSpellAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell) 
         {
             range = ATTACK_DISTANCE;
         }
 
     protected:
-        virtual string GetReachActionName() override { return "reach melee"; }
+        virtual std::string GetReachActionName() override { return "reach melee"; }
     };
 
     //---------------------------------------------------------------------------------------------------------------------
     class CastMeleeAoeSpellAction : public CastSpellAction
     {
     public:
-        CastMeleeAoeSpellAction(PlayerbotAI* ai, string spell, float radius) : CastSpellAction(ai, spell), radius(radius)
+        CastMeleeAoeSpellAction(PlayerbotAI* ai, std::string spell, float radius) : CastSpellAction(ai, spell), radius(radius)
         {
             range = ATTACK_DISTANCE;
         }
@@ -89,7 +89,7 @@ namespace ai
         virtual bool isUseful() override;
 
     protected:
-        virtual string GetReachActionName() override { return ""; }
+        virtual std::string GetReachActionName() override { return ""; }
 
     protected:
         float radius;
@@ -99,65 +99,65 @@ namespace ai
     class CastMeleeDebuffSpellAction : public CastAuraSpellAction
     {
     public:
-        CastMeleeDebuffSpellAction(PlayerbotAI* ai, string spell, bool isOwner = true) : CastAuraSpellAction(ai, spell, isOwner)
+        CastMeleeDebuffSpellAction(PlayerbotAI* ai, std::string spell, bool isOwner = true) : CastAuraSpellAction(ai, spell, isOwner)
         {
             range = ATTACK_DISTANCE;
         }
     
     protected:
-        virtual string GetReachActionName() override { return "reach melee"; }
+        virtual std::string GetReachActionName() override { return "reach melee"; }
     };
     
     class CastRangedDebuffSpellAction : public CastAuraSpellAction
     {
     public:
-        CastRangedDebuffSpellAction(PlayerbotAI* ai, string spell, bool isOwner = true) : CastAuraSpellAction(ai, spell, isOwner) {}
+        CastRangedDebuffSpellAction(PlayerbotAI* ai, std::string spell, bool isOwner = true) : CastAuraSpellAction(ai, spell, isOwner) {}
     
     protected:
-        virtual string GetReachActionName() override { return "reach spell"; }
+        virtual std::string GetReachActionName() override { return "reach spell"; }
     };
 
     class CastMeleeDebuffSpellOnAttackerAction : public CastAuraSpellAction
     {
     public:
-        CastMeleeDebuffSpellOnAttackerAction(PlayerbotAI* ai, string spell, bool isOwner = true) : CastAuraSpellAction(ai, spell, isOwner)
+        CastMeleeDebuffSpellOnAttackerAction(PlayerbotAI* ai, std::string spell, bool isOwner = true) : CastAuraSpellAction(ai, spell, isOwner)
         {
             range = ATTACK_DISTANCE;
         }
 
     protected:
-        string GetReachActionName() override { return "reach melee"; }
-        string GetTargetName() override { return "attacker without aura"; }
-        string GetTargetQualifier() override { return GetSpellName(); }
-        virtual string getName() override { return GetSpellName() + " on attacker"; }
+        std::string GetReachActionName() override { return "reach melee"; }
+        std::string GetTargetName() override { return "attacker without aura"; }
+        std::string GetTargetQualifier() override { return GetSpellName(); }
+        virtual std::string getName() override { return GetSpellName() + " on attacker"; }
         virtual ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_AOE; }
     };
 
     class CastRangedDebuffSpellOnAttackerAction : public CastAuraSpellAction
     {
     public:
-        CastRangedDebuffSpellOnAttackerAction(PlayerbotAI* ai, string spell, bool isOwner = true) : CastAuraSpellAction(ai, spell, isOwner) {}
+        CastRangedDebuffSpellOnAttackerAction(PlayerbotAI* ai, std::string spell, bool isOwner = true) : CastAuraSpellAction(ai, spell, isOwner) {}
         
     protected:
-        virtual string GetReachActionName() override { return "reach spell"; }
-        virtual string GetTargetName() override { return "attacker without aura"; }
-        virtual string GetTargetQualifier() override { return GetSpellName(); }
-        virtual string getName() override { return GetSpellName() + " on attacker"; }
+        virtual std::string GetReachActionName() override { return "reach spell"; }
+        virtual std::string GetTargetName() override { return "attacker without aura"; }
+        virtual std::string GetTargetQualifier() override { return GetSpellName(); }
+        virtual std::string getName() override { return GetSpellName() + " on attacker"; }
         virtual ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_AOE; }
     };
 
 	class CastBuffSpellAction : public CastAuraSpellAction
 	{
 	public:
-		CastBuffSpellAction(PlayerbotAI* ai, string spell) : CastAuraSpellAction(ai, spell) { }
-        virtual string GetTargetName() override { return "self target"; }
+		CastBuffSpellAction(PlayerbotAI* ai, std::string spell) : CastAuraSpellAction(ai, spell) { }
+        virtual std::string GetTargetName() override { return "self target"; }
 	};
 
 	class CastEnchantItemAction : public CastSpellAction
 	{
 	public:
-	    CastEnchantItemAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) { }
-        virtual string GetTargetName() override { return "self target"; }
+	    CastEnchantItemAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell) { }
+        virtual std::string GetTargetName() override { return "self target"; }
         virtual bool isPossible() override;
 	};
 
@@ -166,12 +166,12 @@ namespace ai
     class CastHealingSpellAction : public CastAuraSpellAction
     {
     public:
-        CastHealingSpellAction(PlayerbotAI* ai, string spell, uint8 estAmount = 15.0f) : CastAuraSpellAction(ai, spell, true), estAmount(estAmount) {}
+        CastHealingSpellAction(PlayerbotAI* ai, std::string spell, uint8 estAmount = 15.0f) : CastAuraSpellAction(ai, spell, true), estAmount(estAmount) {}
         
     protected:
         virtual ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_AOE; }
-        virtual string GetTargetName() override { return "self target"; }
-        virtual string GetReachActionName() override { return "reach party member to heal"; }
+        virtual std::string GetTargetName() override { return "self target"; }
+        virtual std::string GetReachActionName() override { return "reach party member to heal"; }
 
     protected:
         uint8 estAmount;
@@ -180,64 +180,64 @@ namespace ai
     class CastAoeHealSpellAction : public CastHealingSpellAction
     {
     public:
-    	CastAoeHealSpellAction(PlayerbotAI* ai, string spell, uint8 estAmount = 15.0f) : CastHealingSpellAction(ai, spell, estAmount) {}
-		virtual string GetTargetName() override { return "party member to heal"; }
+    	CastAoeHealSpellAction(PlayerbotAI* ai, std::string spell, uint8 estAmount = 15.0f) : CastHealingSpellAction(ai, spell, estAmount) {}
+		virtual std::string GetTargetName() override { return "party member to heal"; }
         virtual bool isUseful() override;
     };
 
 	class CastCureSpellAction : public CastSpellAction
 	{
 	public:
-		CastCureSpellAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) {}
-		virtual string GetTargetName() override { return "self target"; }
+		CastCureSpellAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell) {}
+		virtual std::string GetTargetName() override { return "self target"; }
 	};
 
 	class PartyMemberActionNameSupport 
     {
 	public:
-		PartyMemberActionNameSupport(string spell) : name(spell + " on party") {}
-		string getName() { return name; }
+		PartyMemberActionNameSupport(std::string spell) : name(spell + " on party") {}
+		std::string getName() { return name; }
 
 	private:
-		string name;
+		std::string name;
 	};
 
     class HealPartyMemberAction : public CastHealingSpellAction, public PartyMemberActionNameSupport
     {
     public:
-        HealPartyMemberAction(PlayerbotAI* ai, string spell, uint8 estAmount = 15.0f) : CastHealingSpellAction(ai, spell, estAmount), PartyMemberActionNameSupport(spell) {}
-        virtual string getName() override { return PartyMemberActionNameSupport::getName(); }
-		virtual string GetTargetName() override { return "party member to heal"; }
+        HealPartyMemberAction(PlayerbotAI* ai, std::string spell, uint8 estAmount = 15.0f) : CastHealingSpellAction(ai, spell, estAmount), PartyMemberActionNameSupport(spell) {}
+        virtual std::string getName() override { return PartyMemberActionNameSupport::getName(); }
+		virtual std::string GetTargetName() override { return "party member to heal"; }
     };
 
     class HealHotPartyMemberAction : public HealPartyMemberAction
     {
     public:
-        HealHotPartyMemberAction(PlayerbotAI* ai, string spell) : HealPartyMemberAction(ai, spell) {}
+        HealHotPartyMemberAction(PlayerbotAI* ai, std::string spell) : HealPartyMemberAction(ai, spell) {}
         virtual bool isUseful() override;
     };
 
 	class ResurrectPartyMemberAction : public CastSpellAction
 	{
 	public:
-		ResurrectPartyMemberAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) {}
+		ResurrectPartyMemberAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell) {}
 		
     protected:
-        virtual string GetTargetName() override { return "party member to resurrect"; }
-        virtual string GetReachActionName() override { return "reach party member to heal"; }
+        virtual std::string GetTargetName() override { return "party member to resurrect"; }
+        virtual std::string GetReachActionName() override { return "reach party member to heal"; }
 	};
     //---------------------------------------------------------------------------------------------------------------------
 
     class CurePartyMemberAction : public CastSpellAction, public PartyMemberActionNameSupport
     {
     public:
-        CurePartyMemberAction(PlayerbotAI* ai, string spell, uint32 dispelType) : CastSpellAction(ai, spell), PartyMemberActionNameSupport(spell), dispelType(dispelType) {}
+        CurePartyMemberAction(PlayerbotAI* ai, std::string spell, uint32 dispelType) : CastSpellAction(ai, spell), PartyMemberActionNameSupport(spell), dispelType(dispelType) {}
     
     protected:
-        virtual string GetReachActionName() override { return "reach party member to heal"; }
-        virtual string getName() override { return PartyMemberActionNameSupport::getName(); }
-        virtual string GetTargetName() override { return "party member to dispel"; }
-        virtual string GetTargetQualifier() override { return std::to_string(dispelType); }
+        virtual std::string GetReachActionName() override { return "reach party member to heal"; }
+        virtual std::string getName() override { return PartyMemberActionNameSupport::getName(); }
+        virtual std::string GetTargetName() override { return "party member to dispel"; }
+        virtual std::string GetTargetQualifier() override { return std::to_string(dispelType); }
 
     protected:
         uint32 dispelType;
@@ -248,12 +248,12 @@ namespace ai
     class BuffOnPartyAction : public CastBuffSpellAction, public PartyMemberActionNameSupport
     {
     public:
-        BuffOnPartyAction(PlayerbotAI* ai, string spell, bool ignoreTanks = false) : CastBuffSpellAction(ai, spell), PartyMemberActionNameSupport(spell), ignoreTanks(ignoreTanks) {}
+        BuffOnPartyAction(PlayerbotAI* ai, std::string spell, bool ignoreTanks = false) : CastBuffSpellAction(ai, spell), PartyMemberActionNameSupport(spell), ignoreTanks(ignoreTanks) {}
         
     protected:
-        virtual string getName() override { return PartyMemberActionNameSupport::getName(); }
-        virtual string GetTargetName() override { return "friendly unit without aura"; }
-        virtual string GetTargetQualifier() override { return GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
+        virtual std::string getName() override { return PartyMemberActionNameSupport::getName(); }
+        virtual std::string GetTargetName() override { return "friendly unit without aura"; }
+        virtual std::string GetTargetQualifier() override { return GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
 
     protected:
         bool ignoreTanks;
@@ -264,12 +264,12 @@ namespace ai
     class GreaterBuffOnPartyAction : public CastBuffSpellAction, public PartyMemberActionNameSupport
     {
     public:
-        GreaterBuffOnPartyAction(PlayerbotAI* ai, string spell, bool ignoreTanks = false) : CastBuffSpellAction(ai, spell), PartyMemberActionNameSupport(spell), ignoreTanks(ignoreTanks) {}
+        GreaterBuffOnPartyAction(PlayerbotAI* ai, std::string spell, bool ignoreTanks = false) : CastBuffSpellAction(ai, spell), PartyMemberActionNameSupport(spell), ignoreTanks(ignoreTanks) {}
 
     protected:
-        virtual string getName() override { return PartyMemberActionNameSupport::getName(); }
-        virtual string GetTargetName() override { return "party member without aura"; }
-        virtual string GetTargetQualifier() override { return GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
+        virtual std::string getName() override { return PartyMemberActionNameSupport::getName(); }
+        virtual std::string GetTargetName() override { return "party member without aura"; }
+        virtual std::string GetTargetQualifier() override { return GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
 
     private:
         bool ignoreTanks;
@@ -280,22 +280,22 @@ namespace ai
     class PartyTankActionNameSupport
     {
     public:
-        PartyTankActionNameSupport(string spell) : name(spell + " on tank") {}
-        string getName() { return name; }
+        PartyTankActionNameSupport(std::string spell) : name(spell + " on tank") {}
+        std::string getName() { return name; }
 
     private:
-        string name;
+        std::string name;
     };
 
     class BuffOnTankAction : public CastBuffSpellAction, public PartyMemberActionNameSupport
     {
     public:
-        BuffOnTankAction(PlayerbotAI* ai, string spell) : CastBuffSpellAction(ai, spell), PartyMemberActionNameSupport(spell) {}
+        BuffOnTankAction(PlayerbotAI* ai, std::string spell) : CastBuffSpellAction(ai, spell), PartyMemberActionNameSupport(spell) {}
 
     protected:
-        virtual string getName() override { return PartyMemberActionNameSupport::getName(); }
-        virtual string GetTargetName() override { return "party tank without aura"; }
-        virtual string GetTargetQualifier() override { return GetSpellName(); }
+        virtual std::string getName() override { return PartyMemberActionNameSupport::getName(); }
+        virtual std::string GetTargetName() override { return "party tank without aura"; }
+        virtual std::string GetTargetQualifier() override { return GetSpellName(); }
     };
 
     class CastShootAction : public CastSpellAction
@@ -307,7 +307,7 @@ namespace ai
         bool isPossible() override;
 
     protected:
-        virtual string GetReachActionName() override { return "reach spell"; }
+        virtual std::string GetReachActionName() override { return "reach spell"; }
 
     private:
         void UpdateWeaponInfo();
@@ -321,13 +321,13 @@ namespace ai
     class RemoveBuffAction : public Action
     {
     public:
-        RemoveBuffAction(PlayerbotAI* ai, string spell) : Action(ai, "remove aura"), name(spell) {}
-        virtual string getName() override { return "remove " + name; }
+        RemoveBuffAction(PlayerbotAI* ai, std::string spell) : Action(ai, "remove aura"), name(spell) {}
+        virtual std::string getName() override { return "remove " + name; }
         virtual bool isUseful() override;
         virtual bool Execute(Event& event) override;
 
     private:
-        string name;
+        std::string name;
     };
 
     // racials
@@ -370,49 +370,49 @@ namespace ai
     class CastSpellOnEnemyHealerAction : public CastSpellAction
     {
     public:
-        CastSpellOnEnemyHealerAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) {}
+        CastSpellOnEnemyHealerAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell) {}
         
     protected:
-        virtual string GetReachActionName() override { return "reach spell"; }
-        virtual string GetTargetName() override { return "enemy healer target"; }
-        virtual string GetTargetQualifier() override { return GetSpellName(); }
-        virtual string getName() override { return GetSpellName() + " on enemy healer"; }
+        virtual std::string GetReachActionName() override { return "reach spell"; }
+        virtual std::string GetTargetName() override { return "enemy healer target"; }
+        virtual std::string GetTargetQualifier() override { return GetSpellName(); }
+        virtual std::string getName() override { return GetSpellName() + " on enemy healer"; }
     };
 
     class CastSnareSpellAction : public CastRangedDebuffSpellAction
     {
     public:
-        CastSnareSpellAction(PlayerbotAI* ai, string spell) : CastRangedDebuffSpellAction(ai, spell) {}
+        CastSnareSpellAction(PlayerbotAI* ai, std::string spell) : CastRangedDebuffSpellAction(ai, spell) {}
         
     protected:
-        virtual string GetReachActionName() override { return "reach spell"; }
-        virtual string GetTargetName() override { return "snare target"; }
-        virtual string GetTargetQualifier() override { return GetSpellName(); }
-        virtual string getName() override { return GetSpellName() + " on snare target"; }
+        virtual std::string GetReachActionName() override { return "reach spell"; }
+        virtual std::string GetTargetName() override { return "snare target"; }
+        virtual std::string GetTargetQualifier() override { return GetSpellName(); }
+        virtual std::string getName() override { return GetSpellName() + " on snare target"; }
         virtual ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_NONE; }
     };
 
     class CastCrowdControlSpellAction : public CastRangedDebuffSpellAction
     {
     public:
-        CastCrowdControlSpellAction(PlayerbotAI* ai, string spell) : CastRangedDebuffSpellAction(ai, spell) {}
+        CastCrowdControlSpellAction(PlayerbotAI* ai, std::string spell) : CastRangedDebuffSpellAction(ai, spell) {}
         
     private:
-        virtual string GetReachActionName() override { return "reach spell"; }
-        virtual string GetTargetName() override { return "cc target"; }
-        virtual string GetTargetQualifier() override { return GetSpellName(); }
+        virtual std::string GetReachActionName() override { return "reach spell"; }
+        virtual std::string GetTargetName() override { return "cc target"; }
+        virtual std::string GetTargetQualifier() override { return GetSpellName(); }
         virtual ActionThreatType getThreatType() { return ActionThreatType::ACTION_THREAT_NONE; }
     };
 
     class CastProtectSpellAction : public CastSpellAction
     {
     public:
-        CastProtectSpellAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) {}
+        CastProtectSpellAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell) {}
         virtual bool isUseful() override { return CastSpellAction::isUseful() && !ai->HasAura(GetSpellName(), GetTarget()); }
 
     protected:
-        virtual string GetReachActionName() override { return "reach spell"; }
-        virtual string GetTargetName() override { return "party member to protect"; }
+        virtual std::string GetReachActionName() override { return "reach spell"; }
+        virtual std::string GetTargetName() override { return "party member to protect"; }
         virtual ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_NONE; }
     };
 
@@ -431,7 +431,7 @@ namespace ai
     class CastVehicleSpellAction : public CastSpellAction
     {
     public:
-        CastVehicleSpellAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell)
+        CastVehicleSpellAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell)
         {
             range = 120.0f;
             SetSpellName(spell, "vehicle spell id");
@@ -443,8 +443,8 @@ namespace ai
 
     protected:
         virtual ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_NONE; }
-        virtual string GetTargetName() override { return "current target"; }
-        virtual string GetReachActionName() override { return ""; }
+        virtual std::string GetTargetName() override { return "current target"; }
+        virtual std::string GetReachActionName() override { return ""; }
     };
 
     class CastHurlBoulderAction : public CastVehicleSpellAction

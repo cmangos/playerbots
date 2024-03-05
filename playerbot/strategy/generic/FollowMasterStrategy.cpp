@@ -66,12 +66,12 @@ void FollowJumpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers
         NextAction::array(0, new NextAction("jump::follow", ACTION_IDLE + 1.0f), NULL)));
 }
 
-void FollowJumpStrategy::InitCombatTriggers(list<TriggerNode *> &triggers)
+void FollowJumpStrategy::InitCombatTriggers(std::list<TriggerNode *> &triggers)
 {
     InitNonCombatTriggers(triggers);
 }
 
-void FollowJumpStrategy::InitReactionTriggers(list<TriggerNode *> &triggers)
+void FollowJumpStrategy::InitReactionTriggers(std::list<TriggerNode *> &triggers)
 {
     InitNonCombatTriggers(triggers);
 }

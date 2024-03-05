@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
 
@@ -12,17 +12,17 @@ namespace ai
     class NearestUnitsValue : public ObjectGuidListCalculatedValue
 	{
 	public:
-        NearestUnitsValue(PlayerbotAI* ai, string name = "nearest units", float range = sPlayerbotAIConfig.sightDistance, bool ignoreLos = false) :
+        NearestUnitsValue(PlayerbotAI* ai, std::string name = "nearest units", float range = sPlayerbotAIConfig.sightDistance, bool ignoreLos = false) :
             ObjectGuidListCalculatedValue(ai, name, 2), range(range), ignoreLos(ignoreLos) {}
 
 	public:
-        virtual list<ObjectGuid> Calculate()
+        virtual std::list<ObjectGuid> Calculate()
         {
-            list<Unit*> targets;
+            std::list<Unit*> targets;
             FindUnits(targets);
 
-            list<ObjectGuid> results;
-            for(list<Unit *>::iterator i = targets.begin(); i!= targets.end(); ++i)
+            std::list<ObjectGuid> results;
+            for(std::list<Unit *>::iterator i = targets.begin(); i!= targets.end(); ++i)
             {
                 Unit* unit = *i;
                 if(ai->IsSafe(unit))
@@ -35,7 +35,7 @@ namespace ai
         }
 
     protected:
-        virtual void FindUnits(list<Unit*> &targets) = 0;
+        virtual void FindUnits(std::list<Unit*> &targets) = 0;
         virtual bool AcceptUnit(Unit* unit) = 0;
 
     protected:
@@ -50,7 +50,7 @@ namespace ai
             NearestUnitsValue(ai, "nearest stealthed units", range) {}
 
     protected:
-        void FindUnits(list<Unit*>& targets)
+        void FindUnits(std::list<Unit*>& targets)
         {
             MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(bot, range);
             MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
@@ -79,12 +79,12 @@ namespace ai
 
         virtual Unit* Calculate()
         {
-            list<ObjectGuid> targets = AI_VALUE(list<ObjectGuid>, "nearest stealthed units");
+            std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "nearest stealthed units");
             if (targets.empty())
                 return nullptr;
 
-            vector<Unit*> units;
-            for (list<ObjectGuid>::iterator i = targets.begin(); i != targets.end(); ++i)
+            std::vector<Unit*> units;
+            for (std::list<ObjectGuid>::iterator i = targets.begin(); i != targets.end(); ++i)
             {
                 Unit* unit = ai->GetUnit(*i);
                 if (!unit)

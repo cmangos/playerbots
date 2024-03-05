@@ -3,7 +3,6 @@
 #include "playerbot/PlayerbotAIConfig.h"
 
 using namespace ai;
-using namespace std;
 
 PlayerbotAIBase::PlayerbotAIBase() : aiInternalUpdateDelay(0)
 {

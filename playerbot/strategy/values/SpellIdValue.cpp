@@ -19,7 +19,7 @@ VehicleSpellIdValue::VehicleSpellIdValue(PlayerbotAI* ai) : CalculatedValue<uint
 
 uint32 SpellIdValue::Calculate()
 {
-    string namepart = qualifier;
+    std::string namepart = qualifier;
     ItemIds itemIds = ChatHelper::parseItems(namepart);
 
     PlayerbotChatHandler handler(bot);
@@ -30,11 +30,11 @@ uint32 SpellIdValue::Calculate()
         if (pSpellInfo) namepart = pSpellInfo->SpellName[0];
     }
 
-    vector<uint32> ids = chat->SpellIds(namepart);
+    std::vector<uint32> ids = chat->SpellIds(namepart);
 
     char firstSymbol = 'x';
     int spellLength = 0;
-    wstring wnamepart;
+    std::wstring wnamepart;
 
     if (ids.empty())
     {
@@ -49,7 +49,7 @@ uint32 SpellIdValue::Calculate()
 
     int loc = bot->GetSession()->GetSessionDbcLocale();
 
-    set<uint32> spellIds;
+    std::set<uint32> spellIds;
     for (PlayerSpellMap::iterator itr = bot->GetSpellMap().begin(); itr != bot->GetSpellMap().end(); ++itr)
     {
         uint32 spellId = itr->first;
@@ -134,7 +134,7 @@ uint32 SpellIdValue::Calculate()
 
     if (saveMana <= 1)
     {
-        for (set<uint32>::reverse_iterator itr = spellIds.rbegin(); itr != spellIds.rend(); ++itr)
+        for (std::set<uint32>::reverse_iterator itr = spellIds.rbegin(); itr != spellIds.rend(); ++itr)
         {
             const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(*itr);
             if (!pSpellInfo)
@@ -142,7 +142,7 @@ uint32 SpellIdValue::Calculate()
 
             std::string spellName = pSpellInfo->Rank[0];
 
-            // For atoi, the input string has to start with a digit, so lets search for the first digit
+            // For atoi, the input std::string has to start with a digit, so lets search for the first digit
             size_t i = 0;
             for (; i < spellName.length(); i++) { if (isdigit(spellName[i])) break; }
 
@@ -173,7 +173,7 @@ uint32 SpellIdValue::Calculate()
     }
     else
     {
-        for (set<uint32>::reverse_iterator i = spellIds.rbegin(); i != spellIds.rend(); ++i)
+        for (std::set<uint32>::reverse_iterator i = spellIds.rbegin(); i != spellIds.rend(); ++i)
         {
             if (!highestSpellId) highestSpellId = *i;
             if (sSpellMgr.IsSpellHigherRankOfSpell(*i, highestSpellId)) highestSpellId = *i;
@@ -202,7 +202,7 @@ uint32 VehicleSpellIdValue::Calculate()
     if (!seat || !seat->HasFlag(SEAT_FLAG_CAN_CAST))
         return 0;
 
-    string namepart = qualifier;
+    std::string namepart = qualifier;
 
     PlayerbotChatHandler handler(bot);
     uint32 extractedSpellId = handler.extractSpellId(namepart);

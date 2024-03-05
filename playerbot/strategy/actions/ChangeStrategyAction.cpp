@@ -8,14 +8,14 @@ using namespace ai;
 bool ChangeCombatStrategyAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
     text = text.empty() ? getName() : text;
 
     ai->ChangeStrategy(text, BotState::BOT_STATE_COMBAT);
     if (event.getSource() == "co")
     {
-        vector<string> splitted = split(text, ',');
-        for (vector<string>::iterator i = splitted.begin(); i != splitted.end(); i++)
+        std::vector<std::string> splitted = split(text, ',');
+        for (std::vector<std::string>::iterator i = splitted.begin(); i != splitted.end(); i++)
         {
             const char* name = i->c_str();
             switch (name[0])
@@ -40,14 +40,14 @@ bool ChangeCombatStrategyAction::Execute(Event& event)
 bool ChangeNonCombatStrategyAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
     text = text.empty() ? getName() : text;
 
     ai->ChangeStrategy(text, BotState::BOT_STATE_NON_COMBAT);
     if (event.getSource() == "nc")
     {
-        vector<string> splitted = split(text, ',');
-        for (vector<string>::iterator i = splitted.begin(); i != splitted.end(); i++)
+        std::vector<std::string> splitted = split(text, ',');
+        for (std::vector<std::string>::iterator i = splitted.begin(); i != splitted.end(); i++)
         {
             const char* name = i->c_str();
             switch (name[0])
@@ -72,7 +72,7 @@ bool ChangeNonCombatStrategyAction::Execute(Event& event)
 bool ChangeDeadStrategyAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
     text = text.empty() ? getName() : text;
 
     ai->ChangeStrategy(text, BotState::BOT_STATE_DEAD);
@@ -88,7 +88,7 @@ bool ChangeDeadStrategyAction::Execute(Event& event)
 bool ChangeReactionStrategyAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
     text = text.empty() ? getName() : text;
 
     ai->ChangeStrategy(text, BotState::BOT_STATE_REACTION);
@@ -104,15 +104,15 @@ bool ChangeReactionStrategyAction::Execute(Event& event)
 bool ChangeAllStrategyAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
-    string strategyName = text.empty() ? strategy : text;
+    std::string text = event.getParam();
+    std::string strategyName = text.empty() ? strategy : text;
 
     ai->ChangeStrategy(strategyName, BotState::BOT_STATE_ALL);
 
     if (event.getSource() == "nc" || event.getSource() == "co")
     {
-        vector<string> splitted = split(text, ',');
-        for (vector<string>::iterator i = splitted.begin(); i != splitted.end(); i++)
+        std::vector<std::string> splitted = split(text, ',');
+        for (std::vector<std::string>::iterator i = splitted.begin(); i != splitted.end(); i++)
         {
             const char* name = i->c_str();
             switch (name[0])

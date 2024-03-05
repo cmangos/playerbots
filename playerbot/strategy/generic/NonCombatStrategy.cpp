@@ -1,7 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "NonCombatStrategy.h"
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 using namespace ai;
 

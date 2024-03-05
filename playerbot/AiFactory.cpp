@@ -89,7 +89,7 @@ AiObjectContext* AiFactory::createAiObjectContext(Player* player, PlayerbotAI* a
 
 int AiFactory::GetPlayerSpecTab(Player* bot)
 {
-    map<uint32, int32> tabs = GetPlayerSpecTabs(bot);
+    std::map<uint32, int32> tabs = GetPlayerSpecTabs(bot);
 
     if (bot->GetLevel() >= 10 && ((tabs[0] + tabs[1] + tabs[2]) > 0))
     {
@@ -127,9 +127,9 @@ int AiFactory::GetPlayerSpecTab(Player* bot)
     }
 }
 
-map<uint32, int32> AiFactory::GetPlayerSpecTabs(Player* bot)
+std::map<uint32, int32> AiFactory::GetPlayerSpecTabs(Player* bot)
 {
-    map<uint32, int32> tabs;
+    std::map<uint32, int32> tabs;
     for (uint32 i = 0; i < uint32(3); i++)
         tabs[i] = 0;
 

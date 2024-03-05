@@ -1,4 +1,3 @@
-#include "../../../botpch.h"
 #include "playerbot/playerbot.h"
 #include "Formations.h"
 #include "Arrow.h"
@@ -127,7 +126,7 @@ void FormationSlot::PlaceUnits(UnitPlacer* placer)
 {
     uint32 index = 0;
     uint32 count = units.size();
-    for (vector<FormationUnit*>::iterator i = units.begin(); i != units.end(); ++i)
+    for (std::vector<FormationUnit*>::iterator i = units.begin(); i != units.end(); ++i)
     {
         FormationUnit* unit = *i;
         unit->SetLocation(placer->Place(unit, index, count));
@@ -143,7 +142,7 @@ UnitPosition MultiLineUnitPlacer::Place(FormationUnit *unit, uint32 index, uint3
 
     int lineNo = index / 6;
     int indexInLine = index % 6;
-    int lineSize = max(count - lineNo * 6, uint32(6));
+    int lineSize = std::max(count - lineNo * 6, uint32(6));
     float x = cos(orientation) * range * lineNo;
     float y = sin(orientation) * range * lineNo;
     return placer.Place(unit, indexInLine, lineSize);
@@ -159,7 +158,7 @@ UnitPosition SingleLineUnitPlacer::Place(FormationUnit *unit, uint32 index, uint
 
 void FormationSlot::Move(float dx, float dy)
 {
-    for (vector<FormationUnit*>::iterator i = units.begin(); i != units.end(); ++i)
+    for (std::vector<FormationUnit*>::iterator i = units.begin(); i != units.end(); ++i)
     {
         FormationUnit* unit = *i;
         unit->SetLocation(unit->GetX() + dx, unit->GetY() + dy);
@@ -168,7 +167,7 @@ void FormationSlot::Move(float dx, float dy)
 
 FormationSlot::~FormationSlot()
 {
-    for (vector<FormationUnit*>::iterator i = units.begin(); i != units.end(); ++i)
+    for (std::vector<FormationUnit*>::iterator i = units.begin(); i != units.end(); ++i)
     {
         FormationUnit* unit = *i;
         delete unit;

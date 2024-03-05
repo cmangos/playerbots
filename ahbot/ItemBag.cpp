@@ -73,7 +73,7 @@ void CategoryList::Add(Category* category)
 
 CategoryList::~CategoryList()
 {
-    for (vector<Category*>::const_iterator i = categories.begin(); i != categories.end(); ++i)
+    for (std::vector<Category*>::const_iterator i = categories.begin(); i != categories.end(); ++i)
         delete *i;
 }
 
@@ -81,7 +81,7 @@ ItemBag::ItemBag()
 {
     for (int i = 0; i < CategoryList::instance.size(); i++)
     {
-        content[CategoryList::instance[i]] = vector<uint32>();
+        content[CategoryList::instance[i]] = std::vector<uint32>();
     }
 }
 
@@ -114,8 +114,8 @@ int32 ItemBag::GetCount(Category* category, uint32 item)
 {
     uint32 count = 0;
 
-    vector<uint32>& items = content[category];
-    for (vector<uint32>::iterator i = items.begin(); i != items.end(); ++i)
+    std::vector<uint32>& items = content[category];
+    for (std::vector<uint32>::iterator i = items.begin(); i != items.end(); ++i)
     {
         if (*i == item)
             count++;
@@ -167,7 +167,7 @@ bool ItemBag::Add(ItemPrototype const* proto)
 
 void AvailableItemsBag::Load()
 {
-    set<uint32> vendorItems;
+    std::set<uint32> vendorItems;
 
       auto results = WorldDatabase.PQuery("SELECT item FROM npc_vendor where maxcount = 0");
       if (results != NULL)
@@ -208,8 +208,8 @@ void InAuctionItemsBag::Load()
     }
 }
 
-string InAuctionItemsBag::GetName()
+std::string InAuctionItemsBag::GetName()
 {
-    ostringstream out; out << "auction house " << auctionId;
+    std::ostringstream out; out << "auction house " << auctionId;
     return out.str();
 }

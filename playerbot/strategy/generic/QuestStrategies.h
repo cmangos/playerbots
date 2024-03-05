@@ -18,7 +18,7 @@ namespace ai
     {
     public:
         DefaultQuestStrategy(PlayerbotAI* ai) : QuestStrategy(ai) {}
-        string getName() override { return "quest"; }
+        std::string getName() override { return "quest"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -28,7 +28,7 @@ namespace ai
     {
     public:
         AcceptAllQuestsStrategy(PlayerbotAI* ai) : QuestStrategy(ai) {}
-        string getName() override { return "accept all quests"; }
+        std::string getName() override { return "accept all quests"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;

@@ -4,7 +4,7 @@
 
 using namespace ai;
 
-CastSpellAction::CastSpellAction(PlayerbotAI* ai, string spell)
+CastSpellAction::CastSpellAction(PlayerbotAI* ai, std::string spell)
 : Action(ai, spell)
 , range(ai->GetRange("spell"))
 {
@@ -32,10 +32,10 @@ bool CastSpellAction::Execute(Event& event)
             if (!pSpellInfo)
                 continue;
 
-            string namepart = pSpellInfo->SpellName[0];
+            std::string namepart = pSpellInfo->SpellName[0];
             strToLower(namepart);
 
-            if (namepart.find(spellName) == string::npos)
+            if (namepart.find(spellName) == std::string::npos)
                 continue;
 
             if (pSpellInfo->Effect[0] != SPELL_EFFECT_CREATE_ITEM)
@@ -200,25 +200,25 @@ bool CastSpellAction::isUseful()
 NextAction** CastSpellAction::getPrerequisites()
 {
     // Set the reach action as the cast spell prerequisite when needed
-    const string reachAction = GetReachActionName();
+    const std::string reachAction = GetReachActionName();
     if (!reachAction.empty())
     {
-        const string targetName = GetTargetName();
+        const std::string targetName = GetTargetName();
 
         // No need for a reach action when target is self
         if (targetName != "self target")
         {
-            const string spellName = GetSpellName();
-            const string targetQualifier = GetTargetQualifier();
+            const std::string spellName = GetSpellName();
+            const std::string targetQualifier = GetTargetQualifier();
 
             // Generate the reach action with qualifiers
-            vector<string> qualifiers = { spellName, targetName };
+            std::vector<std::string> qualifiers = { spellName, targetName };
             if (!targetQualifier.empty())
             {
                 qualifiers.push_back(targetQualifier);
             }
 
-            const string qualifiersStr = Qualified::MultiQualify(qualifiers, "::");
+            const std::string qualifiersStr = Qualified::MultiQualify(qualifiers, "::");
             return NextAction::merge(NextAction::array(0, new NextAction(reachAction + "::" + qualifiersStr), NULL), Action::getPrerequisites());
         }
     }
@@ -226,7 +226,7 @@ NextAction** CastSpellAction::getPrerequisites()
     return Action::getPrerequisites();
 }
 
-void CastSpellAction::SetSpellName(const string& name, string spellIDContextName /*= "spell id"*/)
+void CastSpellAction::SetSpellName(const std::string& name, std::string spellIDContextName /*= "spell id"*/)
 {
     if (spellName != name)
     {
@@ -243,8 +243,8 @@ void CastSpellAction::SetSpellName(const string& name, string spellIDContextName
 
 Unit* CastSpellAction::GetTarget()
 {
-    string targetName = GetTargetName();
-    string targetNameQualifier = GetTargetQualifier();
+    std::string targetName = GetTargetName();
+    std::string targetNameQualifier = GetTargetQualifier();
     return targetNameQualifier.empty() ? AI_VALUE(Unit*, targetName) : AI_VALUE2(Unit*, targetName, targetNameQualifier);
 }
 
@@ -386,7 +386,7 @@ void CastShootAction::UpdateWeaponInfo()
     {
         if (equippedWeapon != rangedWeapon)
         {
-            string spellName = "shoot";
+            std::string spellName = "shoot";
             bool isRangedWeapon = false;
 
 #ifdef MANGOSBOT_ZERO

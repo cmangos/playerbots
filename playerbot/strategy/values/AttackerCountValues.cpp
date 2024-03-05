@@ -60,22 +60,22 @@ bool HasAggroValue::Calculate()
 
 uint8 AttackersCountValue::Calculate()
 {
-    return context->GetValue<list<ObjectGuid>>("attackers")->Get().size();
+    return context->GetValue<std::list<ObjectGuid>>("attackers")->Get().size();
 }
 
 uint8 PossibleAttackTargetsCountValue::Calculate()
 {
-    return context->GetValue<list<ObjectGuid>>("possible attack targets")->Get().size();
+    return context->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get().size();
 }
 
 bool HasAttackersValue::Calculate()
 {
-    return !context->GetValue<list<ObjectGuid>>("attackers", 1)->Get().empty();
+    return !context->GetValue<std::list<ObjectGuid>>("attackers", 1)->Get().empty();
 }
 
 bool HasPossibleAttackTargetsValue::Calculate()
 {
-    return !context->GetValue<list<ObjectGuid>>("possible attack targets", 1)->Get().empty();
+    return !context->GetValue<std::list<ObjectGuid>>("possible attack targets", 1)->Get().empty();
 }
 
 uint8 BalancePercentValue::Calculate()
@@ -102,8 +102,8 @@ uint8 BalancePercentValue::Calculate()
         }
     }
 
-    list<ObjectGuid> v = context->GetValue<list<ObjectGuid>>("possible attack targets")->Get();
-    for (list<ObjectGuid>::iterator i = v.begin(); i!=v.end(); i++)
+    std::list<ObjectGuid> v = context->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
+    for (std::list<ObjectGuid>::iterator i = v.begin(); i!=v.end(); i++)
     {
         Unit* unit = ai->GetUnit(*i);
         if (!unit || !sServerFacade.IsAlive(unit))

@@ -10,7 +10,7 @@ bool TellItemCountAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     if(requester)
     {
-        string text = event.getParam();
+        std::string text = event.getParam();
 
         if (text.find("@") == 0)
             return false;
@@ -25,13 +25,13 @@ bool TellItemCountAction::Execute(Event& event)
             mask = IterateItemsMask::ITERATE_ITEMS_IN_BUYBACK;
 
 
-        list<Item*> found = ai->InventoryParseItems(text, mask);
-        map<uint32, uint32> itemMap;
-        map<uint32, bool> soulbound;
-        map<uint32, bool> equiped;
+        std::list<Item*> found = ai->InventoryParseItems(text, mask);
+        std::map<uint32, uint32> itemMap;
+        std::map<uint32, bool> soulbound;
+        std::map<uint32, bool> equiped;
         bool hasEquip = false;
 
-        for (list<Item*>::iterator i = found.begin(); i != found.end(); i++)
+        for (std::list<Item*>::iterator i = found.begin(); i != found.end(); i++)
         {
             ItemPrototype const* proto = (*i)->GetProto();
             itemMap[proto->ItemId] += (*i)->GetCount();
@@ -45,7 +45,7 @@ bool TellItemCountAction::Execute(Event& event)
             if ((*i)->GetBagSlot() == INVENTORY_SLOT_BAG_0 && (*i)->GetSlot() < EQUIPMENT_SLOT_END)
             {
                 ItemQualifier itemQ = ItemQualifier((*i));
-                ostringstream out;
+                std::ostringstream out;
                 out << chat->formatItem(itemQ);
                 if ((*i)->IsSoulBound())
                     out << " (soulbound)";
@@ -58,7 +58,7 @@ bool TellItemCountAction::Execute(Event& event)
             return true;
 
         ai->TellPlayer(requester, "=== Inventory ===");
-        for (map<uint32, uint32>::iterator i = itemMap.begin(); i != itemMap.end(); ++i)
+        for (std::map<uint32, uint32>::iterator i = itemMap.begin(); i != itemMap.end(); ++i)
         {
             if (equiped[i->first] && i->second == 1)
                 continue;

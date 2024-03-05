@@ -3,8 +3,8 @@
 #include "WtsAction.h"
 #include "playerbot/AiFactory.h"
 #include "playerbot/strategy/ItemVisitors.h"
-#include "../../../ahbot/AhBot.h"
-#include "../../../ahbot/PricingStrategy.h"
+#include "ahbot/AhBot.h"
+#include "ahbot/PricingStrategy.h"
 #include "playerbot/RandomPlayerbotMgr.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 
@@ -18,13 +18,13 @@ bool WtsAction::Execute(Event& event)
     if (!owner)
         return false;
 
-    ostringstream out;
-    string text = event.getParam();
+    std::ostringstream out;
+    std::string text = event.getParam();
 
     if (!sRandomPlayerbotMgr.IsRandomBot(bot))
         return false;
 
-    string link = event.getParam();
+    std::string link = event.getParam();
 
     ItemIds itemIds = chat->parseItems(link);
     if (itemIds.empty())
@@ -37,7 +37,7 @@ bool WtsAction::Execute(Event& event)
         if (!proto)
             continue;
 
-        ostringstream out; out << itemId;
+        std::ostringstream out; out << itemId;
         ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", out.str());
         if (usage == ItemUsage::ITEM_USAGE_NONE)
             continue;
@@ -49,7 +49,7 @@ bool WtsAction::Execute(Event& event)
         if (urand(0, 15) > 2)
             continue;
 
-        ostringstream tell;
+        std::ostringstream tell;
         tell << "I'll buy " << chat->formatItem(proto) << " for " << chat->formatMoney(buyPrice);
 
         // ignore random bot chat filter

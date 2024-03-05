@@ -35,13 +35,13 @@ bool RevealGatheringItemAction::Execute(Event& event)
     if (!bot->GetGroup())
         return false;
 
-    list<GameObject*> targets;
+    std::list<GameObject*> targets;
     AnyGameObjectInObjectRangeCheck u_check(bot, sPlayerbotAIConfig.grindDistance);
     GameObjectListSearcher<AnyGameObjectInObjectRangeCheck> searcher(targets, u_check);
     Cell::VisitAllObjects((const WorldObject*)bot, searcher, sPlayerbotAIConfig.reactDistance);
 
-    vector<GameObject*> result;
-    for(list<GameObject*>::iterator tIter = targets.begin(); tIter != targets.end(); ++tIter)
+    std::vector<GameObject*> result;
+    for(std::list<GameObject*>::iterator tIter = targets.begin(); tIter != targets.end(); ++tIter)
     {
         GameObject* go = *tIter;
         if (!go || !sServerFacade.isSpawned(go) ||
@@ -55,7 +55,7 @@ bool RevealGatheringItemAction::Execute(Event& event)
                 if (lockInfo->Type[i] == LOCK_KEY_SKILL)
                 {
                     uint32 skillId = SkillByLockType(LockType(lockInfo->Index[i]));
-                    uint32 reqSkillValue = max((uint32)2, lockInfo->Skill[i]);
+                    uint32 reqSkillValue = std::max((uint32)2, lockInfo->Skill[i]);
                     if ((skillId == SKILL_MINING || skillId == SKILL_HERBALISM) &&
                             ai->HasSkill((SkillType)skillId) && uint32(bot->GetSkillValue(skillId)) >= reqSkillValue)
                     {
@@ -76,7 +76,7 @@ bool RevealGatheringItemAction::Execute(Event& event)
     GameObject *go = result[urand(0, result.size() - 1)];
     if (!go) return false;
 
-    ostringstream msg;
+    std::ostringstream msg;
     msg << "I see a " << ChatHelper::formatGameobject(go) << ". ";
     switch (go->GetGoType())
     {

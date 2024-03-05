@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "TargetValue.h"
 #include "playerbot/LootObjectStack.h"
 #include "playerbot/ServerFacade.h"
@@ -10,7 +10,7 @@ namespace ai
     class DistanceValue : public FloatCalculatedValue, public Qualified
 	{
 	public:
-        DistanceValue(PlayerbotAI* ai, string name = "distance") : FloatCalculatedValue(ai, name), Qualified() {}
+        DistanceValue(PlayerbotAI* ai, std::string name = "distance") : FloatCalculatedValue(ai, name), Qualified() {}
 
     public:
         float Calculate()
@@ -30,7 +30,7 @@ namespace ai
 
             if (qualifier.find("position_") == 0)
             {
-                string position = qualifier.substr(9);
+                std::string position = qualifier.substr(9);
                 ai::PositionEntry pos = context->GetValue<ai::PositionMap&>("position")->Get()[position];
                 if (!pos.isSet()) return 0.0f;
                 if (ai->GetBot()->GetMapId() != pos.mapId) return 0.0f;
@@ -91,7 +91,7 @@ namespace ai
     class InsideTargetValue : public BoolCalculatedValue, public Qualified
     {
     public:
-        InsideTargetValue(PlayerbotAI* ai, string name = "inside target") : BoolCalculatedValue(ai, name), Qualified() {}
+        InsideTargetValue(PlayerbotAI* ai, std::string name = "inside target") : BoolCalculatedValue(ai, name), Qualified() {}
 
     public:
         bool Calculate()

@@ -11,7 +11,7 @@ namespace ai
     {
     public:
         MeleeAction(PlayerbotAI* ai) : AttackAction(ai, "melee") {}
-        virtual string GetTargetName() { return "current target"; }
+        virtual std::string GetTargetName() { return "current target"; }
         virtual bool isUseful();
     };
 
@@ -33,11 +33,11 @@ namespace ai
 
         bool isPossible() override
         {
-            list<ObjectGuid> closeObjects = AI_VALUE(list<ObjectGuid>, "nearest game objects no los");
+            std::list<ObjectGuid> closeObjects = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
             if (closeObjects.empty())
                 return false;
 
-            for (list<ObjectGuid>::iterator i = closeObjects.begin(); i != closeObjects.end(); ++i)
+            for (std::list<ObjectGuid>::iterator i = closeObjects.begin(); i != closeObjects.end(); ++i)
             {
                 GameObject* go = ai->GetGameObject(*i);
                 if (!go)
@@ -97,7 +97,7 @@ namespace ai
     class ChatCommandAction : public Action
     {
     public:
-        ChatCommandAction(PlayerbotAI* ai, string name, uint32 duration = sPlayerbotAIConfig.reactDelay) : Action(ai, name, duration) {}
+        ChatCommandAction(PlayerbotAI* ai, std::string name, uint32 duration = sPlayerbotAIConfig.reactDelay) : Action(ai, name, duration) {}
     public:
         virtual bool Execute(Event& event) override { return true; }
     };

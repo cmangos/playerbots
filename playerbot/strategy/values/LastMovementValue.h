@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "playerbot/TravelNode.h"
 
 namespace ai
@@ -88,7 +88,7 @@ namespace ai
             return *this;
         };
     public:
-        vector<uint32> taxiNodes;
+        std::vector<uint32> taxiNodes;
         ObjectGuid taxiMaster;
         Unit* lastFollow;
         uint32 lastAreaTrigger;

@@ -6,7 +6,7 @@ namespace ai
     class PassLeadershipToMasterAction : public ChatCommandAction
     {
     public:
-        PassLeadershipToMasterAction(PlayerbotAI* ai, string name = "leader", string message = "Passing leader to you!") : ChatCommandAction(ai, name), message(message) {}
+        PassLeadershipToMasterAction(PlayerbotAI* ai, std::string name = "leader", std::string message = "Passing leader to you!") : ChatCommandAction(ai, name), message(message) {}
 
         virtual bool Execute(Event& event) override
         {
@@ -40,13 +40,13 @@ namespace ai
         bool isUsefulWhenStunned() override { return true; }
 
     protected:
-        string message;
+        std::string message;
     };
 
     class GiveLeaderAction : public PassLeadershipToMasterAction 
     {
     public:
-        GiveLeaderAction(PlayerbotAI* ai, string message = "Lead the way!") : PassLeadershipToMasterAction(ai, "give leader", message) {}
+        GiveLeaderAction(PlayerbotAI* ai, std::string message = "Lead the way!") : PassLeadershipToMasterAction(ai, "give leader", message) {}
 
         virtual bool isUseful()
         {

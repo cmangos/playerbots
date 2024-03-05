@@ -12,7 +12,7 @@ trainableSpellMap* TrainableSpellMapValue::Calculate()
     trainableSpellMap* spellMap = new trainableSpellMap;
 
     //           template, trainer
-    unordered_map <uint32, vector<CreatureInfo const*>> trainerTemplateIds;
+    std::unordered_map <uint32, std::vector<CreatureInfo const*>> trainerTemplateIds;
 
     //Select all trainer lists and their trainers.
     for (uint32 id = 0; id < sCreatureStorage.GetMaxEntry(); ++id)
@@ -75,10 +75,10 @@ trainableSpellMap* TrainableSpellMapValue::Calculate()
     return spellMap;
 }
 
-vector<TrainerSpell const*> TrainableClassSpells::Calculate()
+std::vector<TrainerSpell const*> TrainableClassSpells::Calculate()
 {
-    vector<TrainerSpell const*> trainableSpells;
-    unordered_map<uint32, bool> hasSpell;
+    std::vector<TrainerSpell const*> trainableSpells;
+    std::unordered_map<uint32, bool> hasSpell;
 
     trainableSpellMap* spellMap = GAI_VALUE(trainableSpellMap*, "trainable spell map");
 
@@ -107,9 +107,9 @@ vector<TrainerSpell const*> TrainableClassSpells::Calculate()
     return trainableSpells;
 }
 
-string TrainableClassSpells::Format()
+std::string TrainableClassSpells::Format()
 {
-    vector<string> vec;  
+    std::vector<std::string> vec;  
     for (auto t : value) {
         SpellEntry const* spell = sServerFacade.LookupSpellInfo(t->spell);
         if (!spell)
@@ -124,7 +124,7 @@ uint32 TrainCostValue::Calculate()
 {
     uint32 TotalCost = 0;
 
-    for (auto& spells : AI_VALUE(vector<TrainerSpell const*>, "trainable class spells"))
+    for (auto& spells : AI_VALUE(std::vector<TrainerSpell const*>, "trainable class spells"))
         TotalCost += spells->spellCost;
 
     /*

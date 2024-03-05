@@ -22,7 +22,7 @@ public:
 	}
 
 private:
-	vector<string> auras;
+	std::vector<std::string> auras;
 };
 
 Unit* PartyTankWithoutLifebloomValue::Calculate()

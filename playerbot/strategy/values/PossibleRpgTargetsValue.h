@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "NearestUnitsValue.h"
 #include "playerbot/PlayerbotAIConfig.h"
 
@@ -11,10 +11,10 @@ namespace ai
         PossibleRpgTargetsValue(PlayerbotAI* ai, float range = sPlayerbotAIConfig.rpgDistance);
 
     protected:
-        void FindUnits(list<Unit*> &targets);
+        void FindUnits(std::list<Unit*> &targets);
         bool AcceptUnit(Unit* unit);
 
     public:
-        static vector<uint32> allowedNpcFlags;
+        static std::vector<uint32> allowedNpcFlags;
 	};
 }

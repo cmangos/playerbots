@@ -19,7 +19,7 @@ namespace ai
     class PetitionOfferAction : public Action 
     {
     public:
-        PetitionOfferAction(PlayerbotAI* ai, string name = "petition offer") : Action(ai, name) {}
+        PetitionOfferAction(PlayerbotAI* ai, std::string name = "petition offer") : Action(ai, name) {}
         virtual bool Execute(Event& event);
         virtual bool isUseful() { return sPlayerbotAIConfig.randomBotFormGuild && !bot->GetGuildId(); };
     };

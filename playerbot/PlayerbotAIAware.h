@@ -3,8 +3,6 @@
 
 class PlayerbotAI;
 
-using namespace std;
-
 namespace ai
 {
     class PlayerbotAIAware 
@@ -12,7 +10,7 @@ namespace ai
     public:
         PlayerbotAIAware(PlayerbotAI* const ai) : ai(ai) { }
         virtual ~PlayerbotAIAware() = default;
-        virtual string getName() { return string(); }
+        virtual std::string getName() { return std::string(); }
     protected:
         PlayerbotAI* ai;
     };

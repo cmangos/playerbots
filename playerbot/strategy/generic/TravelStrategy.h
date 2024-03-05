@@ -1,5 +1,5 @@
 #pragma once
-#include "../Strategy.h"
+#include "playerbot/strategy/Strategy.h"
 
 namespace ai
 {
@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         TravelStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "travel"; }
+        std::string getName() override { return "travel"; }
 
     public:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -18,27 +18,27 @@ namespace ai
     {
     public:
         TravelOnceStrategy(PlayerbotAI* ai) : TravelStrategy(ai) {}
-        string getName() override { return "travel once"; }
+        std::string getName() override { return "travel once"; }
     };
 
     class ExploreStrategy : public Strategy
     {
     public:
         ExploreStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "explore"; }
+        std::string getName() override { return "explore"; }
     };
 
     class MapStrategy : public Strategy
     {
     public:
         MapStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "map"; }
+        std::string getName() override { return "map"; }
     };
 
     class MapFullStrategy : public Strategy
     {
     public:
         MapFullStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "map full"; }
+        std::string getName() override { return "map full"; }
     };
 }

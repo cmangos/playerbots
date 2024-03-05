@@ -8,7 +8,7 @@ namespace ai
     public:
         ArmsWarriorPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_COMBAT | STRATEGY_TYPE_DPS | STRATEGY_TYPE_MELEE; }
-        string getName() override { return "arms"; }
+        std::string getName() override { return "arms"; }
     };
 
     class ArmsWarriorStrategy : public WarriorStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         ArmsWarriorAoePveStrategy(PlayerbotAI* ai) : ArmsWarriorAoeStrategy(ai) {}
-        string getName() override { return "aoe arms pve"; }
+        std::string getName() override { return "aoe arms pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         ArmsWarriorAoePvpStrategy(PlayerbotAI* ai) : ArmsWarriorAoeStrategy(ai) {}
-        string getName() override { return "aoe arms pvp"; }
+        std::string getName() override { return "aoe arms pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         ArmsWarriorAoeRaidStrategy(PlayerbotAI* ai) : ArmsWarriorAoeStrategy(ai) {}
-        string getName() override { return "aoe arms raid"; }
+        std::string getName() override { return "aoe arms raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         ArmsWarriorBuffPveStrategy(PlayerbotAI* ai) : ArmsWarriorBuffStrategy(ai) {}
-        string getName() override { return "buff arms pve"; }
+        std::string getName() override { return "buff arms pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         ArmsWarriorBuffPvpStrategy(PlayerbotAI* ai) : ArmsWarriorBuffStrategy(ai) {}
-        string getName() override { return "buff arms pvp"; }
+        std::string getName() override { return "buff arms pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         ArmsWarriorBuffRaidStrategy(PlayerbotAI* ai) : ArmsWarriorBuffStrategy(ai) {}
-        string getName() override { return "buff arms raid"; }
+        std::string getName() override { return "buff arms raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         ArmsWarriorBoostPveStrategy(PlayerbotAI* ai) : ArmsWarriorBoostStrategy(ai) {}
-        string getName() override { return "boost arms pve"; }
+        std::string getName() override { return "boost arms pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         ArmsWarriorBoostPvpStrategy(PlayerbotAI* ai) : ArmsWarriorBoostStrategy(ai) {}
-        string getName() override { return "boost arms pvp"; }
+        std::string getName() override { return "boost arms pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         ArmsWarriorBoostRaidStrategy(PlayerbotAI* ai) : ArmsWarriorBoostStrategy(ai) {}
-        string getName() override { return "boost arms raid"; }
+        std::string getName() override { return "boost arms raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         ArmsWarriorCcPveStrategy(PlayerbotAI* ai) : ArmsWarriorCcStrategy(ai) {}
-        string getName() override { return "cc arms pve"; }
+        std::string getName() override { return "cc arms pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         ArmsWarriorCcPvpStrategy(PlayerbotAI* ai) : ArmsWarriorCcStrategy(ai) {}
-        string getName() override { return "cc arms pvp"; }
+        std::string getName() override { return "cc arms pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         ArmsWarriorCcRaidStrategy(PlayerbotAI* ai) : ArmsWarriorCcStrategy(ai) {}
-        string getName() override { return "cc arms raid"; }
+        std::string getName() override { return "cc arms raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

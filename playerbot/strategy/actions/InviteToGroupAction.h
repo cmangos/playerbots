@@ -6,7 +6,7 @@ namespace ai
     class InviteToGroupAction : public ChatCommandAction
     {
     public:
-        InviteToGroupAction(PlayerbotAI* ai, string name = "invite") : ChatCommandAction(ai, name) {}
+        InviteToGroupAction(PlayerbotAI* ai, std::string name = "invite") : ChatCommandAction(ai, name) {}
 
         virtual bool Execute(Event& event) override
         {
@@ -20,21 +20,21 @@ namespace ai
     class JoinGroupAction : public InviteToGroupAction
     {
     public:
-        JoinGroupAction(PlayerbotAI* ai, string name = "join") : InviteToGroupAction(ai, name) {}
+        JoinGroupAction(PlayerbotAI* ai, std::string name = "join") : InviteToGroupAction(ai, name) {}
         virtual bool Execute(Event& event) override;
     };
 
     class LfgAction : public InviteToGroupAction
     {
     public:
-        LfgAction(PlayerbotAI* ai, string name = "lfg") : InviteToGroupAction(ai, name) {}
+        LfgAction(PlayerbotAI* ai, std::string name = "lfg") : InviteToGroupAction(ai, name) {}
         virtual bool Execute(Event& event) override;
     };
 
     class InviteNearbyToGroupAction : public InviteToGroupAction
     {
     public:
-        InviteNearbyToGroupAction(PlayerbotAI* ai, string name = "invite nearby") : InviteToGroupAction(ai, name) {}
+        InviteNearbyToGroupAction(PlayerbotAI* ai, std::string name = "invite nearby") : InviteToGroupAction(ai, name) {}
         virtual bool Execute(Event& event) override;
         virtual bool isUseful();
     };
@@ -46,19 +46,19 @@ namespace ai
         FindGuildMembers() {};
 
         void operator()(Player* player) { data.push_back(player); };
-        vector<Player*> const GetResult() { return data; };
+        std::vector<Player*> const GetResult() { return data; };
     private:
-        vector<Player*> data;
+        std::vector<Player*> data;
     };
 
     class InviteGuildToGroupAction : public InviteNearbyToGroupAction
     {
     public:
-        InviteGuildToGroupAction(PlayerbotAI* ai, string name = "invite guild") : InviteNearbyToGroupAction(ai, name) {}
+        InviteGuildToGroupAction(PlayerbotAI* ai, std::string name = "invite guild") : InviteNearbyToGroupAction(ai, name) {}
         virtual bool Execute(Event& event) override;
         virtual bool isUseful() { return bot->GetGuildId() && InviteNearbyToGroupAction::isUseful(); };
 
     private:
-        vector<Player*> getGuildMembers();
+        std::vector<Player*> getGuildMembers();
     };
 }

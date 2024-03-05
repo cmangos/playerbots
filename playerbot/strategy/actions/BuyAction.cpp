@@ -15,7 +15,7 @@ bool BuyAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     bool buyUseful = false;
     ItemIds itemIds;
-    string link = event.getParam();
+    std::string link = event.getParam();
 
     if (link == "vendor")
         buyUseful = true;
@@ -24,9 +24,9 @@ bool BuyAction::Execute(Event& event)
         itemIds = chat->parseItems(link);
     }
 
-    list<ObjectGuid> vendors = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest npcs")->Get();
+    std::list<ObjectGuid> vendors = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest npcs")->Get();
     bool vendored = false, result = false;
-    for (list<ObjectGuid>::iterator i = vendors.begin(); i != vendors.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = vendors.begin(); i != vendors.end(); ++i)
     {
         ObjectGuid vendorguid = *i;
         Creature *pCreature = bot->GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
@@ -78,7 +78,7 @@ bool BuyAction::Execute(Event& event)
 
                     NeedMoneyFor needMoneyFor = NeedMoneyFor::none;
 
-                    unordered_map <ItemUsage, uint32> freeMoney;
+                    std::unordered_map <ItemUsage, uint32> freeMoney;
 
                     freeMoney[ItemUsage::ITEM_USAGE_EQUIP] = (uint32)NeedMoneyFor::gear;
                     freeMoney[ItemUsage::ITEM_USAGE_USE] = (uint32)NeedMoneyFor::consumables;
@@ -111,7 +111,7 @@ bool BuyAction::Execute(Event& event)
                         break;   
 
                     RESET_AI_VALUE2(ItemUsage, "item usage", tItem->item);
-                    RESET_AI_VALUE(vector<MountValue>, "mount list");
+                    RESET_AI_VALUE(std::vector<MountValue>, "mount list");
 
                     if (usage == ItemUsage::ITEM_USAGE_EQUIP || usage == ItemUsage::ITEM_USAGE_BAD_EQUIP) //Equip upgrades and stop buying this time.
                     {
@@ -141,7 +141,7 @@ bool BuyAction::Execute(Event& event)
 
                 if (!result)
                 {
-                    ostringstream out; out << "Nobody sells " << ChatHelper::formatItem(proto) << " nearby";
+                    std::ostringstream out; out << "Nobody sells " << ChatHelper::formatItem(proto) << " nearby";
                     ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 }
             }
@@ -187,9 +187,9 @@ bool BuyAction::BuyItem(Player* requester, VendorItemData const* tItems, ObjectG
 
             if (oldCount < AI_VALUE2(uint32, "item count", proto->Name1)) //BuyItem Always returns false (unless unique) so we have to check the item counts.
             {
-                sPlayerbotAIConfig.logEvent(ai, "BuyAction", proto->Name1, to_string(proto->ItemId));
+                sPlayerbotAIConfig.logEvent(ai, "BuyAction", proto->Name1, std::to_string(proto->ItemId));
 
-                ostringstream out; out << "Buying " << ChatHelper::formatItem(proto);
+                std::ostringstream out; out << "Buying " << ChatHelper::formatItem(proto);
                 ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 return true;
             }
@@ -204,9 +204,9 @@ bool BuyAction::BuyItem(Player* requester, VendorItemData const* tItems, ObjectG
 bool BuyBackAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
 
-    list<Item*> found = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_BUYBACK);
+    std::list<Item*> found = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_BUYBACK);
 
     //Sort items on itemLevel descending.
     found.sort([](Item* i, Item* j) {return i->GetProto()->ItemLevel > j->GetProto()->ItemLevel; });
@@ -221,8 +221,8 @@ bool BuyBackAction::Execute(Event& event)
     //Find vendor to interact with.
     ObjectGuid vendorguid;
 
-    list<ObjectGuid> vendors = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest npcs")->Get();
-    for (list<ObjectGuid>::iterator i = vendors.begin(); i != vendors.end(); ++i)
+    std::list<ObjectGuid> vendors = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest npcs")->Get();
+    for (std::list<ObjectGuid>::iterator i = vendors.begin(); i != vendors.end(); ++i)
     {
         vendorguid = *i;
         Creature* pCreature = bot->GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);

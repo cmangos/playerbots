@@ -11,8 +11,8 @@ bool TalkToQuestGiverAction::ProcessQuest(Player* requester, Quest const* quest,
 {
     bool isCompleted = false;
 
-    string outputMessage;
-    map<string, string> args;
+    std::string outputMessage;
+    std::map<std::string, std::string> args;
     args["%quest"] = chat->formatQuest(quest);
 
     QuestStatus status = bot->GetQuestStatus(quest->GetQuestId());
@@ -67,7 +67,7 @@ bool TalkToQuestGiverAction::ProcessQuest(Player* requester, Quest const* quest,
     return isCompleted;
 }
 
-bool TalkToQuestGiverAction::TurnInQuest(Player* requester, Quest const* quest, WorldObject* questGiver, string& out)
+bool TalkToQuestGiverAction::TurnInQuest(Player* requester, Quest const* quest, WorldObject* questGiver, std::string& out)
 {
     uint32 questID = quest->GetQuestId();
     if (bot->GetQuestRewardStatus(questID))
@@ -80,7 +80,7 @@ bool TalkToQuestGiverAction::TurnInQuest(Player* requester, Quest const* quest, 
         bot->PlayDistanceSound(621);
     }
 
-    sPlayerbotAIConfig.logEvent(ai, "TalkToQuestGiverAction", quest->GetTitle(), to_string(quest->GetQuestId()));
+    sPlayerbotAIConfig.logEvent(ai, "TalkToQuestGiverAction", quest->GetTitle(), std::to_string(quest->GetQuestId()));
 
     if (quest->GetRewChoiceItemsCount() == 0)
     {
@@ -98,9 +98,9 @@ bool TalkToQuestGiverAction::TurnInQuest(Player* requester, Quest const* quest, 
     return true;
 }
 
-void TalkToQuestGiverAction::RewardNoItem(Quest const* quest, WorldObject* questGiver, string& out) 
+void TalkToQuestGiverAction::RewardNoItem(Quest const* quest, WorldObject* questGiver, std::string& out) 
 {
-    map<string, string> args;
+    std::map<std::string, std::string> args;
     args["%quest"] = chat->formatQuest(quest);
 
     if (bot->CanRewardQuest(quest, false))
@@ -114,12 +114,12 @@ void TalkToQuestGiverAction::RewardNoItem(Quest const* quest, WorldObject* quest
     }
 }
 
-void TalkToQuestGiverAction::RewardSingleItem(Quest const* quest, WorldObject* questGiver, string& out) 
+void TalkToQuestGiverAction::RewardSingleItem(Quest const* quest, WorldObject* questGiver, std::string& out) 
 {
     int index = 0;
     ItemPrototype const *item = sObjectMgr.GetItemPrototype(quest->RewChoiceItemId[index]);
 
-    map<string, string> args;
+    std::map<std::string, std::string> args;
     args["%quest"] = chat->formatQuest(quest);
     args["%item"] = chat->formatItem(item);
 
@@ -176,13 +176,13 @@ ItemIds TalkToQuestGiverAction::BestRewards(Quest const* quest)
     }
 }
 
-void TalkToQuestGiverAction::RewardMultipleItem(Player* requester, Quest const* quest, WorldObject* questGiver, string& out)
+void TalkToQuestGiverAction::RewardMultipleItem(Player* requester, Quest const* quest, WorldObject* questGiver, std::string& out)
 {
-    map<string, string> args;
+    std::map<std::string, std::string> args;
     args["%quest"] = chat->formatQuest(quest);
 
-    set<uint32> bestIds;
-    ostringstream outid;
+    std::set<uint32> bestIds;
+    std::ostringstream outid;
     auto questRewardOption = static_cast<QuestRewardOptionType>(AI_VALUE(uint8, "quest reward"));
     if (!ai->IsAlt() ||
         questRewardOption == QuestRewardOptionType::QUEST_REWARD_CONFIG_DRIVEN && sPlayerbotAIConfig.autoPickReward == "yes" ||
@@ -228,9 +228,9 @@ void TalkToQuestGiverAction::RewardMultipleItem(Player* requester, Quest const* 
     }
 }
 
-void TalkToQuestGiverAction::AskToSelectReward(Player* requester, Quest const* quest, string& out, bool forEquip)
+void TalkToQuestGiverAction::AskToSelectReward(Player* requester, Quest const* quest, std::string& out, bool forEquip)
 {
-    ostringstream msg;
+    std::ostringstream msg;
     for (uint8 i = 0; i < quest->GetRewChoiceItemsCount(); ++i)
     {
         ItemPrototype const* item = sObjectMgr.GetItemPrototype(quest->RewChoiceItemId[i]);
@@ -242,7 +242,7 @@ void TalkToQuestGiverAction::AskToSelectReward(Player* requester, Quest const* q
         }
     }
 
-    map<string, string> args;
+    std::map<std::string, std::string> args;
     args["%quest"] = chat->formatQuest(quest);
     args["%rewards"] = msg.str();
 

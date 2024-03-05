@@ -93,9 +93,9 @@ bool NoCurseTrigger::IsActive()
 
 bool NoCurseOnAttackerTrigger::IsActive()
 {
-    list<ObjectGuid> attackers = AI_VALUE(list<ObjectGuid>, "possible attack targets");
+    std::list<ObjectGuid> attackers = AI_VALUE(std::list<ObjectGuid>, "possible attack targets");
     Unit* currentTarget = AI_VALUE(Unit*, "current target");
-    for (list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
     {
         Unit* attacker = ai->GetUnit(*i);
         if (attacker && attacker != currentTarget)
@@ -130,8 +130,8 @@ bool FearPvpTrigger::IsActive()
 			{
                 // Check if the bot has feared anyone
                 bool alreadyFeared = false;
-                list<ObjectGuid> attackers = AI_VALUE(list<ObjectGuid>, "attackers");
-                for (list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
+                std::list<ObjectGuid> attackers = AI_VALUE(std::list<ObjectGuid>, "attackers");
+                for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
                 {
                     Unit* attacker = ai->GetUnit(*i);
                     if (ai->HasAura("fear", attacker, false, true))

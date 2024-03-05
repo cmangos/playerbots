@@ -1,5 +1,5 @@
 #pragma once
-#include "../generic/ClassStrategy.h"
+#include "playerbot/strategy/generic/ClassStrategy.h"
 
 namespace ai
 {
@@ -7,14 +7,14 @@ namespace ai
     {
     public:
         WarlockPetPlaceholderStrategy(PlayerbotAI* ai) : PlaceholderStrategy(ai) {}
-        string getName() override { return "pet"; }
+        std::string getName() override { return "pet"; }
     };
 
     class WarlockCursePlaceholderStrategy : public PlaceholderStrategy
     {
     public:
         WarlockCursePlaceholderStrategy(PlayerbotAI* ai) : PlaceholderStrategy(ai) {}
-        string getName() override { return "curse"; }
+        std::string getName() override { return "curse"; }
     };
 
     class WarlockStrategy : public ClassStrategy
@@ -247,7 +247,7 @@ namespace ai
         , triggerName(inTriggerName)
         , actionName(inActionName) {}
 
-        string getName() override { return name; }
+        std::string getName() override { return name; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -267,7 +267,7 @@ namespace ai
         , triggerName(inTriggerName)
         , actionName(inActionName) {}
 
-        string getName() override { return name; }
+        std::string getName() override { return name; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

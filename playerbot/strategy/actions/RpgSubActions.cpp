@@ -23,12 +23,12 @@ void RpgHelper::BeforeExecute()
     setFacing(guidP());
 }
 
-void RpgHelper::AfterExecute(bool doDelay, bool waitForGroup, string nextAction)
+void RpgHelper::AfterExecute(bool doDelay, bool waitForGroup, std::string nextAction)
 {
     if ((ai->HasRealPlayerMaster() || bot->GetGroup() || !urand(0,5)) && nextAction == "rpg") 
         nextAction = "rpg cancel"; 
     
-    SET_AI_VALUE(string, "next rpg action", nextAction);
+    SET_AI_VALUE(std::string, "next rpg action", nextAction);
 
     if(doDelay)
         setDelay(waitForGroup);
@@ -146,7 +146,7 @@ bool RpgTaxiAction::Execute(Event& event)
 
     uint32 node = sObjectMgr.GetNearestTaxiNode(guidP.getX(), guidP.getY(), guidP.getZ(), guidP.getMapId(), bot->GetTeam());
 
-    vector<uint32> nodes;
+    std::vector<uint32> nodes;
     for (uint32 i = 0; i < sTaxiPathStore.GetNumRows(); ++i)
     {
         TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i);
@@ -276,14 +276,14 @@ bool RpgTradeUsefulAction::Execute(Event& event)
     if (!player)
         return false;
 
-    list<Item*> items = AI_VALUE(list<Item*>, "items useful to give");
+    std::list<Item*> items = AI_VALUE(std::list<Item*>, "items useful to give");
 
     if (items.empty())
         return false;
 
     Item* item = items.front();
 
-    ostringstream param;
+    std::ostringstream param;
 
     param << chat->formatWorldobject(player);
     param << " ";
@@ -377,13 +377,13 @@ bool RpgItemAction::Execute(Event& event)
     if (guidP.IsUnit())
         unit = guidP.GetUnit();
 
-    list<Item*> questItems = AI_VALUE2(list<Item*>, "inventory items", "quest");
+    std::list<Item*> questItems = AI_VALUE2(std::list<Item*>, "inventory items", "quest");
 
     bool used = false;
 
     for (auto item : questItems)
     {
-        if (AI_VALUE2(bool, "can use item on", Qualified::MultiQualify({ to_string(item->GetProto()->ItemId),guidP.to_string() }, ",")))
+        if (AI_VALUE2(bool, "can use item on", Qualified::MultiQualify({ std::to_string(item->GetProto()->ItemId),guidP.to_string() }, ",")))
         {
             used = UseItem(GetMaster(), item, guidP.IsGameObject() ? guidP : ObjectGuid(), nullptr, unit);
         }

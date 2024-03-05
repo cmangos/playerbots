@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "TargetValue.h"
 
 namespace ai
@@ -8,7 +8,7 @@ namespace ai
     class GrindTargetValue : public TargetValue
 	{
 	public:
-        GrindTargetValue(PlayerbotAI* ai, string name = "grind target") : TargetValue(ai, name) {}
+        GrindTargetValue(PlayerbotAI* ai, std::string name = "grind target") : TargetValue(ai, name) {}
 
     public:
         Unit* Calculate();

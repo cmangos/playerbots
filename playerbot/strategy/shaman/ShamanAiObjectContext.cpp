@@ -3,7 +3,7 @@
 #include "ShamanActions.h"
 #include "ShamanAiObjectContext.h"
 #include "ShamanTriggers.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 #include "ElementalShamanStrategy.h"
 #include "RestorationShamanStrategy.h"
 #include "EnhancementShamanStrategy.h"

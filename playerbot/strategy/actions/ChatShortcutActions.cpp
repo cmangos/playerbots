@@ -7,7 +7,7 @@
 
 using namespace ai;
 
-void ReturnPositionResetAction::ResetPosition(string posName)
+void ReturnPositionResetAction::ResetPosition(std::string posName)
 {
     ai::PositionMap& posMap = context->GetValue<ai::PositionMap&>("position")->Get();
     ai::PositionEntry pos = posMap[posName];
@@ -15,7 +15,7 @@ void ReturnPositionResetAction::ResetPosition(string posName)
     posMap[posName] = pos;
 }
 
-void ReturnPositionResetAction::SetPosition(WorldPosition wPos, string posName)
+void ReturnPositionResetAction::SetPosition(WorldPosition wPos, std::string posName)
 {
     ai::PositionMap& posMap = context->GetValue<ai::PositionMap&>("position")->Get();
     ai::PositionEntry pos = posMap[posName];

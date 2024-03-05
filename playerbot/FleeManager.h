@@ -2,8 +2,6 @@
 
 #include "WorldPosition.h"
 
-using namespace std;
-
 class Player;
 
 namespace ai
@@ -48,10 +46,10 @@ namespace ai
         bool isUseful();
 
 	private:
-		void calculatePossibleDestinations(list<FleePoint*> &points);
+		void calculatePossibleDestinations(std::list<FleePoint*> &points);
 		void calculateDistanceToCreatures(FleePoint *point);
-		void cleanup(list<FleePoint*> &points);
-		FleePoint* selectOptimalDestination(list<FleePoint*> &points);
+		void cleanup(std::list<FleePoint*> &points);
+		FleePoint* selectOptimalDestination(std::list<FleePoint*> &points);
 		bool isBetterThan(FleePoint* point, FleePoint* other);
 		bool isTooCloseToEdge(float x, float y, float z, float angle);
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "../Trigger.h"
+#include "playerbot/strategy/Trigger.h"
 
 namespace ai
 {
@@ -8,7 +8,7 @@ namespace ai
     public:
         // You can get the mapID from worlddb > instance_template > map column
         // or from here https://wow.tools/dbc/?dbc=map&build=1.12.1.5875
-        EnterDungeonTrigger(PlayerbotAI* ai, string name, string dungeonStrategy, uint32 mapID)
+        EnterDungeonTrigger(PlayerbotAI* ai, std::string name, std::string dungeonStrategy, uint32 mapID)
         : Trigger(ai, name, 5)
         , dungeonStrategy(dungeonStrategy)
         , mapID(mapID) {}
@@ -16,7 +16,7 @@ namespace ai
         bool IsActive() override;
 
     private:
-        string dungeonStrategy;
+        std::string dungeonStrategy;
         uint32 mapID;
     };
 
@@ -25,7 +25,7 @@ namespace ai
     public:
         // You can get the mapID from worlddb > instance_template > map column
         // or from here https://wow.tools/dbc/?dbc=map&build=1.12.1.5875
-        LeaveDungeonTrigger(PlayerbotAI* ai, string name, string dungeonStrategy, uint32 mapID)
+        LeaveDungeonTrigger(PlayerbotAI* ai, std::string name, std::string dungeonStrategy, uint32 mapID)
         : Trigger(ai, name, 5)
         , dungeonStrategy(dungeonStrategy)
         , mapID(mapID) {}
@@ -33,14 +33,14 @@ namespace ai
         bool IsActive() override;
 
     private:
-        string dungeonStrategy;
+        std::string dungeonStrategy;
         uint32 mapID;
     };
 
     class StartBossFightTrigger : public Trigger
     {
     public:
-        StartBossFightTrigger(PlayerbotAI* ai, string name, string bossStrategy, uint64 bossID)
+        StartBossFightTrigger(PlayerbotAI* ai, std::string name, std::string bossStrategy, uint64 bossID)
         : Trigger(ai, name, 1)
         , bossStrategy(bossStrategy)
         , bossID(bossID) {}
@@ -48,14 +48,14 @@ namespace ai
         bool IsActive() override;
 
     private:
-        string bossStrategy;
+        std::string bossStrategy;
         uint64 bossID;
     };
 
     class EndBossFightTrigger : public Trigger
     {
     public:
-        EndBossFightTrigger(PlayerbotAI* ai, string name, string bossStrategy, uint64 bossID)
+        EndBossFightTrigger(PlayerbotAI* ai, std::string name, std::string bossStrategy, uint64 bossID)
         : Trigger(ai, name, 5)
         , bossStrategy(bossStrategy)
         , bossID(bossID) {}
@@ -63,14 +63,14 @@ namespace ai
         bool IsActive() override;
 
     private:
-        string bossStrategy;
+        std::string bossStrategy;
         uint64 bossID;
     };
 
     class CloseToHazardTrigger : public Trigger
     {
     public:
-        CloseToHazardTrigger(PlayerbotAI* ai, string name, int checkInterval, float hazardRadius, time_t hazardDuration)
+        CloseToHazardTrigger(PlayerbotAI* ai, std::string name, int checkInterval, float hazardRadius, time_t hazardDuration)
         : Trigger(ai, name, checkInterval)
         , hazardRadius(hazardRadius)
         , hazardDuration(hazardDuration) {}
@@ -92,7 +92,7 @@ namespace ai
     class CloseToGameObjectHazardTrigger : public CloseToHazardTrigger
     {
     public:
-        CloseToGameObjectHazardTrigger(PlayerbotAI* ai, string name, uint32 gameObjectID, float radius, time_t expirationTime)
+        CloseToGameObjectHazardTrigger(PlayerbotAI* ai, std::string name, uint32 gameObjectID, float radius, time_t expirationTime)
         : CloseToHazardTrigger(ai, name, 1, radius, expirationTime)
         , gameObjectID(gameObjectID) {}
 
@@ -106,7 +106,7 @@ namespace ai
     class CloseToCreatureHazardTrigger : public CloseToHazardTrigger
     {
     public:
-        CloseToCreatureHazardTrigger(PlayerbotAI* ai, string name, uint32 creatureID, float radius, time_t expirationTime)
+        CloseToCreatureHazardTrigger(PlayerbotAI* ai, std::string name, uint32 creatureID, float radius, time_t expirationTime)
         : CloseToHazardTrigger(ai, name, 1, radius, expirationTime)
         , creatureID(creatureID) {}
 
@@ -121,7 +121,7 @@ namespace ai
     class CloseToHostileCreatureHazardTrigger : public CloseToCreatureHazardTrigger
     {
     public:
-        CloseToHostileCreatureHazardTrigger(PlayerbotAI* ai, string name, uint32 creatureID, float radius, time_t expirationTime)
+        CloseToHostileCreatureHazardTrigger(PlayerbotAI* ai, std::string name, uint32 creatureID, float radius, time_t expirationTime)
         : CloseToCreatureHazardTrigger(ai, name, creatureID, radius, expirationTime) {}
 
     private:
@@ -131,7 +131,7 @@ namespace ai
     class CloseToCreatureTrigger : public Trigger
     {
     public:
-        CloseToCreatureTrigger(PlayerbotAI* ai, string name, uint32 creatureID, float range)
+        CloseToCreatureTrigger(PlayerbotAI* ai, std::string name, uint32 creatureID, float range)
         : Trigger(ai, name, 1)
         , creatureID(creatureID)
         , range(range) {}
@@ -146,7 +146,7 @@ namespace ai
     class ItemReadyTrigger : public Trigger
     {
     public:
-        ItemReadyTrigger(PlayerbotAI* ai, string name, uint32 itemID)
+        ItemReadyTrigger(PlayerbotAI* ai, std::string name, uint32 itemID)
         : Trigger(ai, name, 1)
         , itemID(itemID) {}
 
@@ -159,7 +159,7 @@ namespace ai
     class ItemBuffReadyTrigger : public ItemReadyTrigger
     {
     public:
-        ItemBuffReadyTrigger(PlayerbotAI* ai, string name, uint32 itemID, uint32 buffID)
+        ItemBuffReadyTrigger(PlayerbotAI* ai, std::string name, uint32 itemID, uint32 buffID)
         : ItemReadyTrigger(ai, name, itemID)
         , buffID(buffID) {}
 

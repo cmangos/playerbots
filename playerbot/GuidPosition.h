@@ -16,9 +16,9 @@ namespace ai
         GuidPosition(GameObjectDataPair const* dataPair) : ObjectGuid(HIGHGUID_GAMEOBJECT, dataPair->second.id, dataPair->first), WorldPosition(dataPair) {};
         GuidPosition(WorldObject* wo) : WorldPosition(wo) { ObjectGuid::Set(wo->GetObjectGuid()); };
         GuidPosition(HighGuid hi, uint32 entry, uint32 counter = 1, WorldPosition pos = WorldPosition()) : ObjectGuid(hi, entry, counter), WorldPosition(pos) {};
-        GuidPosition(string qualifier);
+        GuidPosition(std::string qualifier);
 
-        virtual string to_string() const override;
+        virtual std::string to_string() const override;
 
         CreatureData* GetCreatureData() { return IsCreature() ? sObjectMgr.GetCreatureData(GetCounter()) : nullptr; }
         CreatureInfo const* GetCreatureTemplate()const {return IsCreature() ? sObjectMgr.GetCreatureTemplate(GetEntry()) : nullptr; };
@@ -47,7 +47,7 @@ namespace ai
         uint16 GetGameEventId();
         bool IsEventUnspawned();
 
-        virtual string print();
+        virtual std::string print();
 
         operator bool() const { return getX() != 0 || getY() != 0 || getZ() != 0 || !IsEmpty(); }
         bool operator!() const { return getX() == 0 && getY() == 0 && getZ() == 0 && IsEmpty(); }

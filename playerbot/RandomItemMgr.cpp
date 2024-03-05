@@ -150,7 +150,7 @@ void RandomItemMgr::InitAfterAhBot()
 
 RandomItemMgr::~RandomItemMgr()
 {
-    for (map<RandomItemType, RandomItemPredicate*>::iterator i = predicates.begin(); i != predicates.end(); ++i)
+    for (std::map<RandomItemType, RandomItemPredicate*>::iterator i = predicates.begin(); i != predicates.end(); ++i)
         delete i->second;
 
     predicates.clear();
@@ -298,7 +298,7 @@ bool RandomItemMgr::CanEquipItem(BotEquipKey key, ItemPrototype const* proto)
     if (proto->Class == ITEM_CLASS_CONTAINER)
         return true;
 
-    set<InventoryType> slots = viableSlots[(EquipmentSlots)key.slot];
+    std::set<InventoryType> slots = viableSlots[(EquipmentSlots)key.slot];
     if (slots.find((InventoryType)proto->InventoryType) == slots.end())
         return false;
 
@@ -359,9 +359,9 @@ bool RandomItemMgr::CanEquipItemNew(ItemPrototype const* proto)
         return false;
 
     bool properSlot = false;
-    for (map<EquipmentSlots, set<InventoryType> >::iterator i = viableSlots.begin(); i != viableSlots.end(); ++i)
+    for (std::map<EquipmentSlots, std::set<InventoryType> >::iterator i = viableSlots.begin(); i != viableSlots.end(); ++i)
     {
-        set<InventoryType> slots = viableSlots[(EquipmentSlots)i->first];
+        std::set<InventoryType> slots = viableSlots[(EquipmentSlots)i->first];
         if (slots.find((InventoryType)proto->InventoryType) != slots.end())
             properSlot = true;
     }
@@ -591,9 +591,9 @@ bool RandomItemMgr::ShouldEquipWeaponForSpec(uint8 playerclass, uint8 spec, Item
     EquipmentSlots slot_mh = EQUIPMENT_SLOT_START;
     EquipmentSlots slot_oh = EQUIPMENT_SLOT_START;
     EquipmentSlots slot_rh = EQUIPMENT_SLOT_START;
-    for (map<EquipmentSlots, set<InventoryType> >::iterator i = viableSlots.begin(); i != viableSlots.end(); ++i)
+    for (std::map<EquipmentSlots, std::set<InventoryType> >::iterator i = viableSlots.begin(); i != viableSlots.end(); ++i)
     {
-        set<InventoryType> slots = viableSlots[(EquipmentSlots)i->first];
+        std::set<InventoryType> slots = viableSlots[(EquipmentSlots)i->first];
         if (slots.find((InventoryType)proto->InventoryType) != slots.end())
         {
             if (i->first == EQUIPMENT_SLOT_MAINHAND)
@@ -890,7 +890,7 @@ void RandomItemMgr::BuildItemInfoCache()
         {
             Field* fields = results->Fetch();
             uint32 id = fields[0].GetUInt32();
-            string name = fields[1].GetString();
+            std::string name = fields[1].GetString();
             uint32 clazz = fields[2].GetUInt32();
 
             WeightScale scale;
@@ -911,7 +911,7 @@ void RandomItemMgr::BuildItemInfoCache()
             {
                 Field* fields = result->Fetch();
                 uint32 id = fields[0].GetUInt32();
-                string field = fields[1].GetString();
+                std::string field = fields[1].GetString();
                 uint32 weight = fields[2].GetUInt32();
 
                 WeightScaleStat stat;
@@ -981,7 +981,7 @@ void RandomItemMgr::BuildItemInfoCache()
 
         if (lTemplateA)
             for (LootStoreItem const& lItem : lTemplateA->Entries)
-                dropMap->insert(make_pair(lItem.itemid, sEntry));
+                dropMap->insert(std::make_pair(lItem.itemid, sEntry));
     }
 
     for (uint32 entry = 0; entry < sGOStorage.GetMaxEntry(); entry++)
@@ -992,7 +992,7 @@ void RandomItemMgr::BuildItemInfoCache()
 
         if (lTemplateA)
             for (LootStoreItem const& lItem : lTemplateA->Entries)
-                dropMap->insert(make_pair(lItem.itemid, -sEntry));
+                dropMap->insert(std::make_pair(lItem.itemid, -sEntry));
     }
 
     sLog.outString("Loaded %d loot templates...", dropMap->size());
@@ -1067,9 +1067,9 @@ void RandomItemMgr::BuildItemInfoCache()
 
         // check possible equip slots
         EquipmentSlots slot = EQUIPMENT_SLOT_END;
-        for (map<EquipmentSlots, set<InventoryType> >::iterator i = viableSlots.begin(); i != viableSlots.end(); ++i)
+        for (std::map<EquipmentSlots, std::set<InventoryType> >::iterator i = viableSlots.begin(); i != viableSlots.end(); ++i)
         {
-            set<InventoryType> slots = viableSlots[(EquipmentSlots)i->first];
+            std::set<InventoryType> slots = viableSlots[(EquipmentSlots)i->first];
             if (slots.find((InventoryType)proto->InventoryType) != slots.end())
                 slot = i->first;
         }
@@ -1151,12 +1151,12 @@ void RandomItemMgr::BuildItemInfoCache()
         // check quests
         if (cacheInfo->source == ITEM_SOURCE_NONE || cacheInfo->source == ITEM_SOURCE_PVP)
         {
-            vector<uint32> questIds = GetQuestIdsForItem(proto->ItemId);
+            std::vector<uint32> questIds = GetQuestIdsForItem(proto->ItemId);
             if (questIds.size())
             {
                 bool isAlly = false;
                 bool isHorde = false;
-                for (vector<uint32>::iterator i = questIds.begin(); i != questIds.end(); ++i)
+                for (std::vector<uint32>::iterator i = questIds.begin(); i != questIds.end(); ++i)
                 {
                     Quest const* quest = sObjectMgr.GetQuestTemplate(*i);
                     if (quest)
@@ -1224,7 +1224,7 @@ void RandomItemMgr::BuildItemInfoCache()
         // check vendors
         if (cacheInfo->source == ITEM_SOURCE_NONE)
         {
-            for (vector<uint32>::iterator i = vendorItems.begin(); i != vendorItems.end(); ++i)
+            for (std::vector<uint32>::iterator i = vendorItems.begin(); i != vendorItems.end(); ++i)
             {
                 if (proto->ItemId == *i)
                 {
@@ -1236,8 +1236,8 @@ void RandomItemMgr::BuildItemInfoCache()
         }
 
         // check drops
-        list<int32> creatures;
-        list<int32> gameobjects;
+        std::list<int32> creatures;
+        std::list<int32> gameobjects;
 
         auto range = dropMap->equal_range(itemId);
 
@@ -1510,7 +1510,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
     {
         uint32 statType = 0;
         int32 val = 0;
-        string weightName = "";
+        std::string weightName = "";
 
         //if (j >= proto->StatsCount)
         //    continue;
@@ -1521,7 +1521,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
         if (val == 0)
             continue;
 
-        for (map<string, uint32 >::iterator i = weightStatLink.begin(); i != weightStatLink.end(); ++i)
+        for (std::map<std::string, uint32 >::iterator i = weightStatLink.begin(); i != weightStatLink.end(); ++i)
         {
             uint32 modd = i->second;
             if (modd == statType)
@@ -1756,8 +1756,8 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
                 {
                     hasAP = true;
                     isAttackItem = true;
-                    string SpellName = spellproto->SpellName[0];
-                    if (SpellName.find("Attack Power - Feral") != string::npos)
+                    std::string SpellName = spellproto->SpellName[0];
+                    if (SpellName.find("Attack Power - Feral") != std::string::npos)
                         isFeral = true;
 #ifdef MANGOSBOT_ZERO
                     if (!isWhitelist && isFeral && (playerclass != CLASS_DRUID && playerclass != CLASS_WARRIOR && playerclass != CLASS_PALADIN && proto->IsWeapon()))
@@ -1855,9 +1855,9 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
                         if (spellproto->EffectMiscValue[0] & (1 << rating))
                         {
                             int32 val = spellproto->EffectBasePoints[j] + 1;
-                            string weightName;
+                            std::string weightName;
 
-                            for (map<string, uint32 >::iterator i = weightRatingLink.begin(); i != weightRatingLink.end(); ++i)
+                            for (std::map<std::string, uint32 >::iterator i = weightRatingLink.begin(); i != weightRatingLink.end(); ++i)
                             {
                                 uint32 modd = i->second;
                                 if (modd == rating)
@@ -2053,7 +2053,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
             return 0;
 
         bool playerCaster = false;
-        for (vector<WeightScaleStat>::iterator i = m_weightScales[spec].stats.begin(); i != m_weightScales[spec].stats.end(); ++i)
+        for (std::vector<WeightScaleStat>::iterator i = m_weightScales[spec].stats.begin(); i != m_weightScales[spec].stats.end(); ++i)
         {
             if (i->stat == "splpwr" || i->stat == "int" || i->stat == "manargn" || i->stat == "splheal" || i->stat == "spellcritstrkrtng" || i->stat == "spellhitrtng")
             {
@@ -2072,7 +2072,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
             return 0;
 
         bool playerAttacker = false;
-        for (vector<WeightScaleStat>::iterator i = m_weightScales[spec].stats.begin(); i != m_weightScales[spec].stats.end(); ++i)
+        for (std::vector<WeightScaleStat>::iterator i = m_weightScales[spec].stats.begin(); i != m_weightScales[spec].stats.end(); ++i)
         {
             if (i->stat == "str" || i->stat == "agi" || i->stat == "atkpwr" || i->stat == "mledps" || i->stat == "rgddps" || i->stat == "hitrtng" || i->stat == "critstrkrtng")
             {
@@ -2306,7 +2306,7 @@ uint32 RandomItemMgr::CalculateSocketWeight(uint8 playerclass, ItemQualifier& qu
     return 0;
 #else
 
-    vector<uint32> gems = { qualifier.GetGem1() , qualifier.GetGem2(), qualifier.GetGem3(), qualifier.GetGem4() };
+    std::vector<uint32> gems = { qualifier.GetGem1() , qualifier.GetGem2(), qualifier.GetGem3(), qualifier.GetGem4() };
 
     ItemPrototype const* proto = qualifier.GetProto();
 
@@ -2390,7 +2390,7 @@ uint32 RandomItemMgr::ItemStatWeight(Player* player, Item* item)
 uint32 RandomItemMgr::CalculateSingleStatWeight(uint8 playerclass, uint8 spec, std::string stat, uint32 value)
 {
     uint32 statWeight = 0;
-    for (vector<WeightScaleStat>::iterator i = m_weightScales[spec].stats.begin(); i != m_weightScales[spec].stats.end(); ++i)
+    for (std::vector<WeightScaleStat>::iterator i = m_weightScales[spec].stats.begin(); i != m_weightScales[spec].stats.end(); ++i)
     {
         if (stat == i->stat)
         {
@@ -2451,9 +2451,9 @@ uint32 RandomItemMgr::GetQuestIdForItem(uint32 itemId)
     return questId;
 }
 
-vector<uint32> RandomItemMgr::GetQuestIdsForItem(uint32 itemId)
+std::vector<uint32> RandomItemMgr::GetQuestIdsForItem(uint32 itemId)
 {
-    vector<uint32> questIds;
+    std::vector<uint32> questIds;
     ObjectMgr::QuestMap const& questTemplates = sObjectMgr.GetQuestTemplates();
     for (ObjectMgr::QuestMap::const_iterator i = questTemplates.begin(); i != questTemplates.end(); ++i)
     {
@@ -2614,7 +2614,7 @@ uint32 RandomItemMgr::GetUpgrade(Player* player, std::string spec, uint8 slot, u
     uint32 specId = 0;
     uint32 closestUpgrade = 0;
     uint32 closestUpgradeWeight = 0;
-    vector<uint32> classspecs;
+    std::vector<uint32> classspecs;
 
     for (uint32 specNum = 1; specNum < 5; ++specNum)
     {
@@ -2639,7 +2639,7 @@ uint32 RandomItemMgr::GetUpgrade(Player* player, std::string spec, uint8 slot, u
             sLog.outString("Old item has no stat weight");
     }
 
-    for (map<uint32, ItemInfoEntry*>::iterator i = itemInfoCache.begin(); i != itemInfoCache.end(); ++i)
+    for (std::map<uint32, ItemInfoEntry*>::iterator i = itemInfoCache.begin(); i != itemInfoCache.end(); ++i)
     {
         ItemInfoEntry* info = i->second;
         if (!info)
@@ -2696,7 +2696,7 @@ uint32 RandomItemMgr::GetUpgrade(Player* player, std::string spec, uint8 slot, u
         // check if item stat score is the best among class specs
         uint32 bestSpecId = 0;
         uint32 bestSpecScore = 0;
-        for (vector<uint32>::iterator i = classspecs.begin(); i != classspecs.end(); ++i)
+        for (std::vector<uint32>::iterator i = classspecs.begin(); i != classspecs.end(); ++i)
         {
             if (info->weights[*i] > bestSpecScore)
             {
@@ -2728,9 +2728,9 @@ uint32 RandomItemMgr::GetUpgrade(Player* player, std::string spec, uint8 slot, u
     return closestUpgrade;
 }
 
-vector<uint32> RandomItemMgr::GetUpgradeList(Player* player, uint32 specId, uint8 slot, uint32 quality, uint32 itemId, uint32 amount)
+std::vector<uint32> RandomItemMgr::GetUpgradeList(Player* player, uint32 specId, uint8 slot, uint32 quality, uint32 itemId, uint32 amount)
 {
-    vector<uint32> listItems;
+    std::vector<uint32> listItems;
     if (!player)
         return listItems;
 
@@ -2738,7 +2738,7 @@ vector<uint32> RandomItemMgr::GetUpgradeList(Player* player, uint32 specId, uint
     uint32 oldStatWeight = 0;
     uint32 closestUpgrade = 0;
     uint32 closestUpgradeWeight = 0;
-    vector<uint32> classspecs;
+    std::vector<uint32> classspecs;
 
     if (itemId && itemInfoCache[itemId])
     {
@@ -2750,7 +2750,7 @@ vector<uint32> RandomItemMgr::GetUpgradeList(Player* player, uint32 specId, uint
             sLog.outString("Old item has no stat weight");
     }
 
-    for (map<uint32, ItemInfoEntry*>::iterator i = itemInfoCache.begin(); i != itemInfoCache.end(); ++i)
+    for (std::map<uint32, ItemInfoEntry*>::iterator i = itemInfoCache.begin(); i != itemInfoCache.end(); ++i)
     {
         ItemInfoEntry* info = i->second;
         if (!info)
@@ -2821,7 +2821,7 @@ vector<uint32> RandomItemMgr::GetUpgradeList(Player* player, uint32 specId, uint
         //    // check if item stat score is the best among class specs
         //    uint32 bestSpecId = 0;
         //    uint32 bestSpecScore = 0;
-        //    for (vector<uint32>::iterator i = classspecs.begin(); i != classspecs.end(); ++i)
+        //    for (std::vector<uint32>::iterator i = classspecs.begin(); i != classspecs.end(); ++i)
         //    {
         //        if (info->weights[*i] > bestSpecScore)
         //        {
@@ -2849,7 +2849,7 @@ vector<uint32> RandomItemMgr::GetUpgradeList(Player* player, uint32 specId, uint
         sLog.outString("New Items: %d, Old item:%d, New items max: %d", listItems.size(), oldStatWeight, closestUpgradeWeight);
 
     // sort by stat weight
-    sort(listItems.begin(), listItems.end(), [specId](int a, int b) { return sRandomItemMgr.GetStatWeight(a, specId) <= sRandomItemMgr.GetStatWeight(b, specId); });
+    std::sort(listItems.begin(), listItems.end(), [specId](int a, int b) { return sRandomItemMgr.GetStatWeight(a, specId) <= sRandomItemMgr.GetStatWeight(b, specId); });
 
     return listItems;
 }
@@ -2878,7 +2878,7 @@ uint32 RandomItemMgr::GetStatWeight(Player* player, uint32 itemId)
 
     uint32 statWeight = 0;
     uint32 specId = GetPlayerSpecId(player);
-    vector<uint32> classspecs;
+    std::vector<uint32> classspecs;
 
     if (specId == 0)
         return 0;
@@ -2886,7 +2886,7 @@ uint32 RandomItemMgr::GetStatWeight(Player* player, uint32 itemId)
     if (!m_weightScales[specId].info.id)
         return 0;
 
-    map<uint32, ItemInfoEntry*>::iterator itr = itemInfoCache.find(itemId);
+    std::map<uint32, ItemInfoEntry*>::iterator itr = itemInfoCache.find(itemId);
     if (itr != itemInfoCache.end())
     {
         statWeight = itr->second->weights[specId];
@@ -2904,12 +2904,12 @@ uint32 RandomItemMgr::GetStatWeight(uint32 itemId, uint32 specId)
         return 0;
 
     uint32 statWeight = 0;
-    vector<uint32> classspecs;
+    std::vector<uint32> classspecs;
 
     if (!m_weightScales[specId].info.id)
         return 0;
 
-    map<uint32, ItemInfoEntry*>::iterator itr = itemInfoCache.find(itemId);
+    std::map<uint32, ItemInfoEntry*>::iterator itr = itemInfoCache.find(itemId);
     if (itr != itemInfoCache.end())
     {
         statWeight = itr->second->weights[specId];
@@ -3150,7 +3150,7 @@ void RandomItemMgr::BuildEquipCache()
 
                                 if ((slot == EQUIPMENT_SLOT_BODY || slot == EQUIPMENT_SLOT_TABARD))
                                 {
-                                    set<InventoryType> slots = viableSlots[(EquipmentSlots)key.slot];
+                                    std::set<InventoryType> slots = viableSlots[(EquipmentSlots)key.slot];
                                     if (slots.find((InventoryType)proto->InventoryType) == slots.end())
                                         continue;
 
@@ -3425,14 +3425,14 @@ void RandomItemMgr::BuildFoodCache()
 
 uint32 RandomItemMgr::GetRandomPotion(uint32 level, uint32 effect)
 {
-    vector<uint32> potions = potionCache[(level - 1) / 10][effect];
+    std::vector<uint32> potions = potionCache[(level - 1) / 10][effect];
     if (potions.empty()) return 0;
     return potions[urand(0, potions.size() - 1)];
 }
 
 uint32 RandomItemMgr::GetFood(uint32 level, uint32 category)
 {
-    vector<uint32> items;
+    std::vector<uint32> items;
     if (category == 11)
     {
         if (level < 5)
@@ -3507,7 +3507,7 @@ uint32 RandomItemMgr::GetFood(uint32 level, uint32 category)
 
 uint32 RandomItemMgr::GetRandomFood(uint32 level, uint32 category)
 {
-    vector<uint32> food = foodCache[(level - 1) / 10][category];
+    std::vector<uint32> food = foodCache[(level - 1) / 10][category];
     if (food.empty()) return 0;
     return food[urand(0, food.size() - 1)];
 }
@@ -3555,14 +3555,14 @@ void RandomItemMgr::BuildTradeCache()
 
 uint32 RandomItemMgr::GetRandomTrade(uint32 level)
 {
-    vector<uint32> trade = tradeCache[(level - 1) / 10];
+    std::vector<uint32> trade = tradeCache[(level - 1) / 10];
     if (trade.empty()) return 0;
     return trade[urand(0, trade.size() - 1)];
 }
 
-vector<uint32> RandomItemMgr::GetGemsList()
+std::vector<uint32> RandomItemMgr::GetGemsList()
 {
-    vector<uint32>_gems;
+    std::vector<uint32>_gems;
 
 #ifndef MANGOSBOT_ZERO
     if (_gems.empty())

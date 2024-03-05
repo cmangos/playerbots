@@ -30,7 +30,7 @@ bool RpgTaxiTrigger::IsActive()
     if (!bot->m_taxi.IsTaximaskNodeKnown(node))
         return false;
 
-    vector<uint32> nodes;
+    std::vector<uint32> nodes;
     for (uint32 i = 0; i < sTaxiPathStore.GetNumRows(); ++i)
     {
         TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i);
@@ -520,7 +520,7 @@ bool RpgCraftTrigger::IsActive()
     if (!guidP.GetWorldObject())
         return false;
 
-    vector<uint32> spellIds = AI_VALUE(vector<uint32>, "craft spells");
+    std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
 
     for (uint32 spellId : spellIds)
     {
@@ -599,7 +599,7 @@ bool RpgTradeUsefulTrigger::IsActive()
     if (bot->GetTrader() && bot->GetTrader() != player)
         return false;
 
-    if (AI_VALUE_LAZY(list<Item*>, "items useful to give").empty())
+    if (AI_VALUE_LAZY(std::list<Item*>, "items useful to give").empty())
         return false;
 
     return true;
@@ -652,7 +652,7 @@ bool RpgDuelTrigger::IsActive()
         return false;
     }
 
-    if (!AI_VALUE(list<ObjectGuid>, "all targets").empty())
+    if (!AI_VALUE(std::list<ObjectGuid>, "all targets").empty())
         return false;
 
     return true;
@@ -673,11 +673,11 @@ bool RpgItemTrigger::IsActive()
     else if (guidP.IsGameObject())
         gameObject = guidP.GetGameObject();
 
-    list<Item*> questItems = AI_VALUE2(list<Item*>, "inventory items", "quest");
+    std::list<Item*> questItems = AI_VALUE2(std::list<Item*>, "inventory items", "quest");
 
     for (auto item : questItems)
     {
-        if (AI_VALUE2(bool, "can use item on", Qualified::MultiQualify({ to_string(item->GetProto()->ItemId),guidP.to_string() }, ",")))
+        if (AI_VALUE2(bool, "can use item on", Qualified::MultiQualify({ std::to_string(item->GetProto()->ItemId),guidP.to_string() }, ",")))
             return true;
     }
 

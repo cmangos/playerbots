@@ -7,7 +7,7 @@ namespace ai
     class EmoteActionBase : public Action
     {
     public:
-        EmoteActionBase(PlayerbotAI* ai, string name);
+        EmoteActionBase(PlayerbotAI* ai, std::string name);
         static uint32 GetNumberOfEmoteVariants(TextEmotes emote, uint8 race, uint8 gender);
 
     protected:
@@ -15,8 +15,8 @@ namespace ai
         bool ReceiveEmote(Player* requester, Player* source, uint32 emote, bool verbal = false);
         Unit* GetTarget();
         void InitEmotes();
-        static map<string, uint32> emotes;
-        static map<string, uint32> textEmotes;
+        static std::map<std::string, uint32> emotes;
+        static std::map<std::string, uint32> textEmotes;
 
     };
 
@@ -40,7 +40,7 @@ namespace ai
     class MountAnimAction : public Action
     {
     public:
-        MountAnimAction(PlayerbotAI* ai, string name = "mount anim") : Action(ai, name) {}
+        MountAnimAction(PlayerbotAI* ai, std::string name = "mount anim") : Action(ai, name) {}
 
         virtual bool isUseful();
         virtual bool Execute(Event& event);

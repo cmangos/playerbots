@@ -1,22 +1,22 @@
 
 #include "playerbot/playerbot.h"
 #include "CustomStrategyEditAction.h"
-#include "../CustomStrategy.h"
+#include "playerbot/strategy/CustomStrategy.h"
 
 using namespace ai;
 
 bool CustomStrategyEditAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
     int pos = text.find(" ");
-    if (pos == string::npos) return PrintHelp(requester);
-    string name = text.substr(0, pos);
+    if (pos == std::string::npos) return PrintHelp(requester);
+    std::string name = text.substr(0, pos);
     text = text.substr(pos + 1);
 
     pos = text.find(" ");
-    if (pos == string::npos) pos = text.size();
-    string idx = text.substr(0, pos);
+    if (pos == std::string::npos) pos = text.size();
+    std::string idx = text.substr(0, pos);
     text = pos >= text.size() ? "" : text.substr(pos + 1);
 
     return idx == "?" ? Print(name, requester) : Edit(name, atoi(idx.c_str()), text, requester);
@@ -32,7 +32,7 @@ bool CustomStrategyEditAction::PrintHelp(Player* requester)
         do
         {
             Field* fields = results->Fetch();
-            string name = fields[0].GetString();
+            std::string name = fields[0].GetString();
             ai->TellPlayer(requester, name);
         } 
         while (results->NextRow());
@@ -42,9 +42,9 @@ bool CustomStrategyEditAction::PrintHelp(Player* requester)
     return false;
 }
 
-bool CustomStrategyEditAction::Print(string name, Player* requester)
+bool CustomStrategyEditAction::Print(std::string name, Player* requester)
 {
-    ostringstream out; out << "=== " << name << " ===";
+    std::ostringstream out; out << "=== " << name << " ===";
     ai->TellPlayer(requester, out.str());
 
     uint32 owner = (uint32)ai->GetBot()->GetGUIDLow();
@@ -55,7 +55,7 @@ bool CustomStrategyEditAction::Print(string name, Player* requester)
         {
             Field* fields = results->Fetch();
             uint32 idx = fields[0].GetUInt32();
-            string action = fields[1].GetString();
+            std::string action = fields[1].GetString();
             PrintActionLine(idx, action, requester);
         } 
         while (results->NextRow());
@@ -64,7 +64,7 @@ bool CustomStrategyEditAction::Print(string name, Player* requester)
     return true;
 }
 
-bool CustomStrategyEditAction::Edit(string name, uint32 idx, string command, Player* requester)
+bool CustomStrategyEditAction::Edit(std::string name, uint32 idx, std::string command, Player* requester)
 {
     uint32 owner = (uint32)ai->GetBot()->GetGUIDLow();
     auto results = CharacterDatabase.PQuery("SELECT action_line FROM ai_playerbot_custom_strategy WHERE name = '%s' and owner = '%u' and idx = '%u'", name.c_str(), owner, idx);
@@ -86,7 +86,7 @@ bool CustomStrategyEditAction::Edit(string name, uint32 idx, string command, Pla
 
     PrintActionLine(idx, command, requester);
 
-    ostringstream ss; ss << "custom::" << name;
+    std::ostringstream ss; ss << "custom::" << name;
     Strategy* strategy = ai->GetAiObjectContext()->GetStrategy(ss.str());
     if (strategy)
     {
@@ -100,9 +100,9 @@ bool CustomStrategyEditAction::Edit(string name, uint32 idx, string command, Pla
     return true;
 }
 
-bool CustomStrategyEditAction::PrintActionLine(uint32 idx, string command, Player* requester)
+bool CustomStrategyEditAction::PrintActionLine(uint32 idx, std::string command, Player* requester)
 {
-    ostringstream out; out << "#" << idx << " " << command;
+    std::ostringstream out; out << "#" << idx << " " << command;
     ai->TellPlayer(requester, out.str());
     return true;
 }

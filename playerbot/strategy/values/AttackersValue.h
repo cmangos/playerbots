@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "playerbot/PlayerbotAIConfig.h"
 
 namespace ai
@@ -9,35 +9,35 @@ namespace ai
 	{
         struct AddGuardiansHelper
         {
-            explicit AddGuardiansHelper(set<Unit*>& units) : units(units) {}
+            explicit AddGuardiansHelper(std::set<Unit*>& units) : units(units) {}
             void operator()(Unit* target) const
             {
                 units.insert(target);
             }
 
-            set<Unit*>& units;
+            std::set<Unit*>& units;
         };
 
 	public:
-        AttackersValue(PlayerbotAI* ai, string name = "attackers", int interval = 2) : ObjectGuidListCalculatedValue(ai, name, interval), Qualified() {}
-        virtual list<ObjectGuid> Calculate() override;
+        AttackersValue(PlayerbotAI* ai, std::string name = "attackers", int interval = 2) : ObjectGuidListCalculatedValue(ai, name, interval), Qualified() {}
+        virtual std::list<ObjectGuid> Calculate() override;
 
         static bool IsValid(Unit* target, Player* player, Player* owner = nullptr, bool checkInCombat = true, bool validatePossibleTarget = true);
-        virtual string Format();
+        virtual std::string Format();
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "attackers"; } //Must equal iternal name
-        virtual string GetHelpTypeName() { return "combat"; }
-        virtual string GetHelpDescription()
+        virtual std::string GetHelpName() { return "attackers"; } //Must equal iternal name
+        virtual std::string GetHelpTypeName() { return "combat"; }
+        virtual std::string GetHelpDescription()
         {
             return "This value contains all the units attacking the player, it's group or those the player or group is attacking.";
         }
-        virtual vector<string> GetUsedValues() { return {"possible targets", "current target" , "attack target" ,  "pull target" }; }
+        virtual std::vector<std::string> GetUsedValues() { return {"possible targets", "current target" , "attack target" ,  "pull target" }; }
 #endif
 
 	private:
-        void AddTargetsOf(Group* group, set<Unit*>& targets, set<ObjectGuid>& invalidTargets, bool getOne = false);
-        void AddTargetsOf(Player* player, set<Unit*>& targets, set<ObjectGuid>& invalidTargets, bool getOne = false);
+        void AddTargetsOf(Group* group, std::set<Unit*>& targets, std::set<ObjectGuid>& invalidTargets, bool getOne = false);
+        void AddTargetsOf(Player* player, std::set<Unit*>& targets, std::set<ObjectGuid>& invalidTargets, bool getOne = false);
         static float GetRange() { return sPlayerbotAIConfig.sightDistance; }
 
         static bool InCombat(Unit* target, Player* player, bool checkPullTargets = true);
@@ -49,7 +49,7 @@ namespace ai
     class AttackersTargetingMeValue : public ObjectGuidListCalculatedValue
     {
     public:
-        AttackersTargetingMeValue(PlayerbotAI* ai, string name = "attackers targeting me") : ObjectGuidListCalculatedValue(ai, name) {}
-        list<ObjectGuid> Calculate() override;
+        AttackersTargetingMeValue(PlayerbotAI* ai, std::string name = "attackers targeting me") : ObjectGuidListCalculatedValue(ai, name) {}
+        std::list<ObjectGuid> Calculate() override;
     };
 }

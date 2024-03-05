@@ -74,14 +74,14 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
         TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, "Tarren Mill");
         if (dest)
         {
-            vector <WorldPosition*> points = dest->nextPoint(botPos, true);
+            std::vector<WorldPosition*> points = dest->nextPoint(botPos, true);
 
             if (!points.empty())
             {
                 target->setTarget(dest, points.front());
                 target->setForced(true);
 
-                ostringstream out; out << "Traveling to " << dest->getTitle();
+                std::ostringstream out; out << "Traveling to " << dest->getTitle();
                 ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 foundTarget = true;
             }
@@ -208,7 +208,7 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
     //If we are heading to a creature/npc clear it from the ignore list. 
     if (oldTarget && oldTarget == newTarget && newTarget->getEntry())
     {
-        set<ObjectGuid>& ignoreList = context->GetValue<set<ObjectGuid>&>("ignore rpg target")->Get();
+        std::set<ObjectGuid>& ignoreList = context->GetValue<std::set<ObjectGuid>&>("ignore rpg target")->Get();
 
         for (auto& i : ignoreList)
         {
@@ -218,7 +218,7 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
             }
         }
 
-        context->GetValue<set<ObjectGuid>&>("ignore rpg target")->Set(ignoreList);
+        context->GetValue<std::set<ObjectGuid>&>("ignore rpg target")->Set(ignoreList);
     }
 
     //Actually apply the new target to the travel target used by the bot.
@@ -243,7 +243,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
     TravelDestination* oldDestination = oldTarget->getDestination();
 
-    ostringstream out;
+    std::ostringstream out;
 
     if (newTarget->isForced())
         out << "(Forced) ";
@@ -261,7 +261,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         else
             gInfo = ObjectMgr::GetGameObjectInfo(destination->getEntry() * -1);
 
-        string Sub;
+        std::string Sub;
 
         if (newTarget->isGroupCopy())
             out << "Following group ";
@@ -399,20 +399,20 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
     ai->TellPlayerNoFacing(requester, out,PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 
-    string message = out.str().c_str();
+    std::string message = out.str().c_str();
 
     if (sPlayerbotAIConfig.hasLog("travel_map.csv"))
     {
         WorldPosition botPos(bot);
         WorldPosition destPos = *newTarget->getPosition();
 
-        ostringstream out;
+        std::ostringstream out;
         out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
         out << bot->GetName() << ",";
         out << std::fixed << std::setprecision(2);
 
-        out << to_string(bot->getRace()) << ",";
-        out << to_string(bot->getClass()) << ",";
+        out << std::to_string(bot->getRace()) << ",";
+        out << std::to_string(bot->getClass()) << ",";
         float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
 
         out << subLevel << ",";
@@ -435,13 +435,13 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
         if (lastPos)
         {
-            ostringstream out;
+            std::ostringstream out;
             out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
             out << bot->GetName() << ",";
             out << std::fixed << std::setprecision(2);
 
-            out << to_string(bot->getRace()) << ",";
-            out << to_string(bot->getClass()) << ",";
+            out << std::to_string(bot->getRace()) << ",";
+            out << std::to_string(bot->getClass()) << ",";
             float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
 
             out << subLevel << ",";
@@ -465,14 +465,14 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 }
 
 //Select only those points that are in sight distance or failing that a multiplication of the sight distance.
-vector<WorldPosition*> ChooseTravelTargetAction::getLogicalPoints(Player* requester, vector<WorldPosition*>& travelPoints)
+std::vector<WorldPosition*> ChooseTravelTargetAction::getLogicalPoints(Player* requester, std::vector<WorldPosition*>& travelPoints)
 {
     PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "getLogicalPoints", &context->performanceStack);
-    vector<WorldPosition*> retvec;
+    std::vector<WorldPosition*> retvec;
 
-    static vector<float> distanceLimits = { sPlayerbotAIConfig.sightDistance, 4 * sPlayerbotAIConfig.sightDistance, 10 * sPlayerbotAIConfig.sightDistance, 20 * sPlayerbotAIConfig.sightDistance, 50 * sPlayerbotAIConfig.sightDistance, 100 * sPlayerbotAIConfig.sightDistance, 10000 * sPlayerbotAIConfig.sightDistance };
+    static std::vector<float> distanceLimits = { sPlayerbotAIConfig.sightDistance, 4 * sPlayerbotAIConfig.sightDistance, 10 * sPlayerbotAIConfig.sightDistance, 20 * sPlayerbotAIConfig.sightDistance, 50 * sPlayerbotAIConfig.sightDistance, 100 * sPlayerbotAIConfig.sightDistance, 10000 * sPlayerbotAIConfig.sightDistance };
 
-    vector<vector<WorldPosition*>> partitions;
+    std::vector<std::vector<WorldPosition*>> partitions;
 
     for (uint8 l = 0; l < distanceLimits.size(); l++)
         partitions.push_back({});
@@ -553,19 +553,19 @@ vector<WorldPosition*> ChooseTravelTargetAction::getLogicalPoints(Player* reques
 }
 
 //Sets the target to the best destination.
-bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* target, vector<TravelDestination*>& TravelDestinations)
+bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* target, std::vector<TravelDestination*>& TravelDestinations)
 {
     if (TravelDestinations.empty())
         return false;
 
     WorldPosition botLocation(bot);
 
-    vector<WorldPosition*> travelPoints;
+    std::vector<WorldPosition*> travelPoints;
 
     //Select all points from the selected destinations
     for (auto& activeTarget : TravelDestinations)
     {
-        vector<WorldPosition*> points = activeTarget->getPoints(true);
+        std::vector<WorldPosition*> points = activeTarget->getPoints(true);
         for (WorldPosition* point : points)
         {
             if (point && point->isValid())
@@ -576,7 +576,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
     }
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(travelPoints.size()) + " points total.");
+        ai->TellPlayerNoFacing(requester, std::to_string(travelPoints.size()) + " points total.");
 
     if (travelPoints.empty()) //No targets or no points.
         return false;
@@ -593,7 +593,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
         return false;
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(travelPoints.size()) + " points in reasonable range.");
+        ai->TellPlayerNoFacing(requester, std::to_string(travelPoints.size()) + " points in reasonable range.");
 
     travelPoints = sTravelMgr.getNextPoint(&botLocation, travelPoints); //Pick a good point.
 
@@ -609,17 +609,17 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
     target->setTarget(TravelDestinations.front(), travelPoints.front());
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, "Point at " + to_string(uint32(target->distance(bot))) + "y selected.");
+        ai->TellPlayerNoFacing(requester, "Point at " + std::to_string(uint32(target->distance(bot))) + "y selected.");
 
     return target->isActive();
 }
 
 bool ChooseTravelTargetAction::SetGroupTarget(Player* requester, TravelTarget* target)
 {
-    vector<TravelDestination*> activeDestinations;
-    vector<WorldPosition*> activePoints;
+    std::vector<TravelDestination*> activeDestinations;
+    std::vector<WorldPosition*> activePoints;
 
-    list<ObjectGuid> groupPlayers;
+    std::list<ObjectGuid> groupPlayers;
 
     Group* group = bot->GetGroup();
     if (!group)
@@ -670,7 +670,7 @@ bool ChooseTravelTargetAction::SetGroupTarget(Player* requester, TravelTarget* t
     }
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(activeDestinations.size()) + " group targets found.");
+        ai->TellPlayerNoFacing(requester, std::to_string(activeDestinations.size()) + " group targets found.");
 
     bool hasTarget = SetBestTarget(requester, target, activeDestinations);
 
@@ -693,7 +693,7 @@ bool ChooseTravelTargetAction::SetCurrentTarget(Player* requester, TravelTarget*
     if (!oldDestination->isActive(bot)) //Is the destination still valid?
         return false;
 
-    vector<TravelDestination*> TravelDestinations = { oldDestination };
+    std::vector<TravelDestination*> TravelDestinations = { oldDestination };
 
     if (!SetBestTarget(requester, target, TravelDestinations))
         return false;
@@ -706,7 +706,7 @@ bool ChooseTravelTargetAction::SetCurrentTarget(Player* requester, TravelTarget*
 
 bool ChooseTravelTargetAction::SetQuestTarget(Player* requester, TravelTarget* target, bool newQuests, bool activeQuests, bool completedQuests)
 {
-    vector<TravelDestination*> TravelDestinations;
+    std::vector<TravelDestination*> TravelDestinations;
 
     bool onlyClassQuest = !urand(0, 10);
 
@@ -718,7 +718,7 @@ bool ChooseTravelTargetAction::SetQuestTarget(Player* requester, TravelTarget* t
     }
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(TravelDestinations.size()) + " new quest destinations found.");
+        ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " new quest destinations found.");
 
     if (activeQuests || completedQuests)
     {
@@ -743,7 +743,7 @@ bool ChooseTravelTargetAction::SetQuestTarget(Player* requester, TravelTarget* t
 
             //Find quest takers or objectives
             PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "getQuestTravelDestinations2", &context->performanceStack);
-            vector<TravelDestination*> questDestinations = sTravelMgr.getQuestTravelDestinations(bot, questId, true, false,0);
+            std::vector<TravelDestination*> questDestinations = sTravelMgr.getQuestTravelDestinations(bot, questId, true, false,0);
             if(pmo) pmo->finish();
 
             if (onlyClassQuest && TravelDestinations.size() && questDestinations.size()) //Only do class quests if we have any.
@@ -767,7 +767,7 @@ bool ChooseTravelTargetAction::SetQuestTarget(Player* requester, TravelTarget* t
     }
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(TravelDestinations.size()) + " quest destinations found.");
+        ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " quest destinations found.");
 
     return SetBestTarget(requester, target, TravelDestinations);
 }
@@ -775,10 +775,10 @@ bool ChooseTravelTargetAction::SetQuestTarget(Player* requester, TravelTarget* t
 bool ChooseTravelTargetAction::SetRpgTarget(Player* requester, TravelTarget* target)
 {
     //Find rpg npcs
-    vector<TravelDestination*> TravelDestinations = sTravelMgr.getRpgTravelDestinations(bot, true, false);
+    std::vector<TravelDestination*> TravelDestinations = sTravelMgr.getRpgTravelDestinations(bot, true, false);
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(TravelDestinations.size()) + " rpg destinations found.");
+        ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " rpg destinations found.");
 
     return SetBestTarget(requester, target, TravelDestinations);
 }
@@ -786,10 +786,10 @@ bool ChooseTravelTargetAction::SetRpgTarget(Player* requester, TravelTarget* tar
 bool ChooseTravelTargetAction::SetGrindTarget(Player* requester, TravelTarget* target)
 {
     //Find grind mobs.
-    vector<TravelDestination*> TravelDestinations = sTravelMgr.getGrindTravelDestinations(bot, true, false, 600+bot->GetLevel()*400);
+    std::vector<TravelDestination*> TravelDestinations = sTravelMgr.getGrindTravelDestinations(bot, true, false, 600+bot->GetLevel()*400);
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(TravelDestinations.size()) + " grind destinations found.");
+        ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " grind destinations found.");
 
     return SetBestTarget(requester, target, TravelDestinations);
 }
@@ -797,10 +797,10 @@ bool ChooseTravelTargetAction::SetGrindTarget(Player* requester, TravelTarget* t
 bool ChooseTravelTargetAction::SetBossTarget(Player* requester, TravelTarget* target)
 {
     //Find boss mobs.
-    vector<TravelDestination*> TravelDestinations = sTravelMgr.getBossTravelDestinations(bot, true);
+    std::vector<TravelDestination*> TravelDestinations = sTravelMgr.getBossTravelDestinations(bot, true);
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(TravelDestinations.size()) + " boss destinations found.");
+        ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " boss destinations found.");
 
     return SetBestTarget(requester, target, TravelDestinations);
 }
@@ -808,22 +808,22 @@ bool ChooseTravelTargetAction::SetBossTarget(Player* requester, TravelTarget* ta
 bool ChooseTravelTargetAction::SetExploreTarget(Player* requester, TravelTarget* target)
 {
     //Find exploration locations (middle of a sub-zone).
-    vector<TravelDestination*> TravelDestinations = sTravelMgr.getExploreTravelDestinations(bot, true, false);
+    std::vector<TravelDestination*> TravelDestinations = sTravelMgr.getExploreTravelDestinations(bot, true, false);
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(TravelDestinations.size()) + " explore destinations found.");
+        ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " explore destinations found.");
 
     return SetBestTarget(requester, target, TravelDestinations);
 }
 
 char* strstri(const char* haystack, const char* needle);
 
-bool ChooseTravelTargetAction::SetNpcFlagTarget(Player* requester, TravelTarget* target, vector<NPCFlags> flags, string name, vector<uint32> items, bool force)
+bool ChooseTravelTargetAction::SetNpcFlagTarget(Player* requester, TravelTarget* target, std::vector<NPCFlags> flags, std::string name, std::vector<uint32> items, bool force)
 {
     WorldPosition pos = WorldPosition(bot);
     WorldPosition* botPos = &pos;
 
-    vector<TravelDestination*> TravelDestinations;
+    std::vector<TravelDestination*> TravelDestinations;
 
     //Loop over all npcs.
     for (auto& d : sTravelMgr.getRpgTravelDestinations(bot, true, true))
@@ -900,7 +900,7 @@ bool ChooseTravelTargetAction::SetNpcFlagTarget(Player* requester, TravelTarget*
     }
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(TravelDestinations.size()) + " npc flag targets found.");
+        ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " npc flag targets found.");
 
     bool isActive = SetBestTarget(requester, target, TravelDestinations);
 
@@ -916,12 +916,12 @@ bool ChooseTravelTargetAction::SetNpcFlagTarget(Player* requester, TravelTarget*
     return isActive;
 }
 
-bool ChooseTravelTargetAction::SetGOTypeTarget(Player* requester, TravelTarget* target, GameobjectTypes type, string name, bool force)
+bool ChooseTravelTargetAction::SetGOTypeTarget(Player* requester, TravelTarget* target, GameobjectTypes type, std::string name, bool force)
 {
     WorldPosition pos = WorldPosition(bot);
     WorldPosition* botPos = &pos;
 
-    vector<TravelDestination*> TravelDestinations;
+    std::vector<TravelDestination*> TravelDestinations;
 
     //Loop over all npcs.
     for (auto& d : sTravelMgr.getRpgTravelDestinations(bot, true, true))
@@ -946,7 +946,7 @@ bool ChooseTravelTargetAction::SetGOTypeTarget(Player* requester, TravelTarget* 
     }
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, to_string(TravelDestinations.size()) + " go type targets found.");
+        ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " go type targets found.");
 
     bool isActive = SetBestTarget(requester, target, TravelDestinations);
 
@@ -970,17 +970,17 @@ bool ChooseTravelTargetAction::SetNullTarget(TravelTarget* target)
     return true;
 }
 
-vector<string> split(const string& s, char delim);
+std::vector<std::string> split(const std::string& s, char delim);
 char* strstri(const char* haystack, const char* needle);
 
 //Find a destination based on (part of) it's name. Includes zones, ncps and mobs. Picks the closest one that matches.
-TravelDestination* ChooseTravelTargetAction::FindDestination(Player* bot, string name, bool zones, bool npcs, bool quests, bool mobs, bool bosses)
+TravelDestination* ChooseTravelTargetAction::FindDestination(Player* bot, std::string name, bool zones, bool npcs, bool quests, bool mobs, bool bosses)
 {
     PlayerbotAI* ai = bot->GetPlayerbotAI();
 
     AiObjectContext* context = ai->GetAiObjectContext();
 
-    vector<TravelDestination*> dests;
+    std::vector<TravelDestination*> dests;
 
     //Quests
     if (quests)

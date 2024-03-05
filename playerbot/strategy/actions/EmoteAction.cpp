@@ -7,11 +7,11 @@
 #include "playerbot/ServerFacade.h"
 using namespace ai;
 
-map<string, uint32> EmoteActionBase::emotes;
-map<string, uint32> EmoteActionBase::textEmotes;
+std::map<std::string, uint32> EmoteActionBase::emotes;
+std::map<std::string, uint32> EmoteActionBase::textEmotes;
 char *strstri(const char *haystack, const char *needle);
 
-EmoteActionBase::EmoteActionBase(PlayerbotAI* ai, string name) : Action(ai, name)
+EmoteActionBase::EmoteActionBase(PlayerbotAI* ai, std::string name) : Action(ai, name)
 {
     if (emotes.empty()) InitEmotes();
 }
@@ -133,9 +133,9 @@ Unit* EmoteActionBase::GetTarget()
 {
     Unit* target = NULL;
 
-    list<ObjectGuid> nfp = *context->GetValue<list<ObjectGuid> >("nearest friendly players");
-    vector<Unit*> targets;
-    for (list<ObjectGuid>::iterator i = nfp.begin(); i != nfp.end(); ++i)
+    std::list<ObjectGuid> nfp = *context->GetValue<std::list<ObjectGuid> >("nearest friendly players");
+    std::vector<Unit*> targets;
+    for (std::list<ObjectGuid>::iterator i = nfp.begin(); i != nfp.end(); ++i)
     {
         Unit* unit = ai->GetUnit(*i);
         if (unit && sServerFacade.GetDistance2d(bot, unit) < sPlayerbotAIConfig.tooCloseDistance) targets.push_back(unit);
@@ -151,8 +151,8 @@ bool EmoteActionBase::ReceiveEmote(Player* requester, Player* source, uint32 emo
 {
     uint32 emoteId = 0;
     uint32 textEmote = 0;
-    string emoteText;
-    string emoteYell;
+    std::string emoteText;
+    std::string emoteYell;
     switch (emote)
     {
     case TEXTEMOTE_BONK:
@@ -665,7 +665,7 @@ bool EmoteAction::Execute(Event& event)
         uint32 text_emote;
         uint32 emote_num;
         uint32 namlen;
-        string nam;
+        std::string nam;
         p.rpos(0);
         p >> source >> text_emote >> emote_num >> namlen;
         if (namlen > 1)
@@ -710,7 +710,7 @@ bool EmoteAction::Execute(Event& event)
             if ((pSource->GetObjectGuid() != bot->GetObjectGuid()) && (pSource->GetSelectionGuid() == bot->GetObjectGuid() || (urand(0, 1) && sServerFacade.IsInFront(pSource, bot, 10.0f, M_PI_F))))
             {
                 sLog.outDetail("Bot #%d %s:%d <%s> received SMSG_EMOTE %d from player #%d <%s>", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), emoteId, pSource->GetGUIDLow(), pSource->GetName());
-                vector<uint32> types;
+                std::vector<uint32> types;
                 for (int32 i = sEmotesTextStore.GetNumRows(); i >= 0; --i)
                 {
                     EmotesTextEntry const* em = sEmotesTextStore.LookupEntry(uint32(i));
@@ -773,7 +773,7 @@ bool EmoteAction::Execute(Event& event)
             return false;
     }
 
-    string param = event.getParam();
+    std::string param = event.getParam();
     if ((!isReact && param.empty()) || emote)
     {
         time_t lastEmote = AI_VALUE2(time_t, "last emote", qualifier);
@@ -806,7 +806,7 @@ bool EmoteAction::Execute(Event& event)
     if (param.empty() || emotes.find(param) == emotes.end())
     {
         int index = rand() % emotes.size();
-        for (map<string, uint32>::iterator i = emotes.begin(); i != emotes.end() && index; ++i, --index)
+        for (std::map<std::string, uint32>::iterator i = emotes.begin(); i != emotes.end() && index; ++i, --index)
             emote = i->second;
     }
     else
@@ -867,7 +867,7 @@ bool TalkAction::Execute(Event& event)
 
 uint32 TalkAction::GetRandomEmote(Unit* unit, bool textEmote)
 {
-    vector<uint32> types;
+    std::vector<uint32> types;
     if (textEmote)
     {
         if (!urand(0, 20))

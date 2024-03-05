@@ -3,7 +3,6 @@
 #include "GuildAcceptAction.h"
 #include "playerbot/ServerFacade.h"
 
-using namespace std;
 using namespace ai;
 
 bool GuildAcceptAction::Execute(Event& event)
@@ -49,7 +48,7 @@ bool GuildAcceptAction::Execute(Event& event)
 
     if (sPlayerbotAIConfig.inviteChat && sServerFacade.GetDistance2d(bot, inviter) < sPlayerbotAIConfig.spellDistance * 1.5 && inviter->GetPlayerbotAI() && sRandomPlayerbotMgr.IsFreeBot(bot))
     {
-        map<string, string> placeholders;
+        std::map<std::string, std::string> placeholders;
         placeholders["%name"] = inviter->GetName();
 
         if (urand(0, 3))
@@ -63,7 +62,7 @@ bool GuildAcceptAction::Execute(Event& event)
     {
         bot->GetSession()->HandleGuildAcceptOpcode(packet);
 
-        sPlayerbotAIConfig.logEvent(ai, "GuildAcceptAction", guild->GetName(), to_string(guild->GetMemberSize()));
+        sPlayerbotAIConfig.logEvent(ai, "GuildAcceptAction", guild->GetName(), std::to_string(guild->GetMemberSize()));
     }
     else
     {

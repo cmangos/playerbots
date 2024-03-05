@@ -5,7 +5,7 @@
 
 using namespace ai;
 
-void CombatStrategy::InitCombatTriggers(list<TriggerNode*> &triggers)
+void CombatStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
         "invalid target",
@@ -37,7 +37,7 @@ float AvoidAoeStrategyMultiplier::GetValue(Action* action)
     if (!action)
         return 1.0f;
 
-    string name = action->getName();
+    std::string name = action->getName();
     if (name == "follow" || name == "co" || name == "nc" || name == "react" || name == "select new target" || name == "flee")
         return 1.0f;
 
@@ -141,7 +141,7 @@ uint8 WaitForAttackStrategy::GetWaitTime(PlayerbotAI* ai)
 float WaitForAttackMultiplier::GetValue(Action* action)
 {
     // Allow some movement and targeting actions
-    const string& actionName = action->getName();
+    const std::string& actionName = action->getName();
     if ((actionName != "wait for attack keep safe distance") && 
         (actionName != "dps assist") && 
         (actionName != "set facing") &&

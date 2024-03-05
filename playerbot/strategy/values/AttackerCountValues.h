@@ -6,35 +6,35 @@ namespace ai
     class AttackersCountValue : public Uint8CalculatedValue, public Qualified
     {
     public:
-        AttackersCountValue(PlayerbotAI* ai, string name = "attackers count") : Uint8CalculatedValue(ai, name, 4), Qualified() {}
+        AttackersCountValue(PlayerbotAI* ai, std::string name = "attackers count") : Uint8CalculatedValue(ai, name, 4), Qualified() {}
         virtual uint8 Calculate();
     };
 
     class PossibleAttackTargetsCountValue : public Uint8CalculatedValue, public Qualified
     {
     public:
-        PossibleAttackTargetsCountValue(PlayerbotAI* ai, string name = "possible attack targets count") : Uint8CalculatedValue(ai, name, 4), Qualified() {}
+        PossibleAttackTargetsCountValue(PlayerbotAI* ai, std::string name = "possible attack targets count") : Uint8CalculatedValue(ai, name, 4), Qualified() {}
         virtual uint8 Calculate();
     };
 
     class HasAttackersValue : public BoolCalculatedValue, public Qualified
     {
     public:
-        HasAttackersValue(PlayerbotAI* ai, string name = "has attackers") : BoolCalculatedValue(ai, name, 4), Qualified() {}
+        HasAttackersValue(PlayerbotAI* ai, std::string name = "has attackers") : BoolCalculatedValue(ai, name, 4), Qualified() {}
         virtual bool Calculate();
     };
 
     class HasPossibleAttackTargetsValue : public BoolCalculatedValue, public Qualified
     {
     public:
-        HasPossibleAttackTargetsValue(PlayerbotAI* ai, string name = "has possible attack targets") : BoolCalculatedValue(ai, name, 4), Qualified() {}
+        HasPossibleAttackTargetsValue(PlayerbotAI* ai, std::string name = "has possible attack targets") : BoolCalculatedValue(ai, name, 4), Qualified() {}
         virtual bool Calculate();
     };
 
     class MyAttackerCountValue : public Uint8CalculatedValue, public Qualified
     {
     public:
-        MyAttackerCountValue(PlayerbotAI* ai, string name = "my attackers count") : Uint8CalculatedValue(ai, name, 4), Qualified() {}
+        MyAttackerCountValue(PlayerbotAI* ai, std::string name = "my attackers count") : Uint8CalculatedValue(ai, name, 4), Qualified() {}
 
         Unit* GetTarget()
         {
@@ -47,7 +47,7 @@ namespace ai
     class HasAggroValue : public BoolCalculatedValue, public Qualified
     {
     public:
-        HasAggroValue(PlayerbotAI* ai, string name = "has agro") : BoolCalculatedValue(ai, name, 4), Qualified() {}
+        HasAggroValue(PlayerbotAI* ai, std::string name = "has agro") : BoolCalculatedValue(ai, name, 4), Qualified() {}
 
         Unit* GetTarget()
         {
@@ -60,7 +60,7 @@ namespace ai
     class BalancePercentValue : public Uint8CalculatedValue, public Qualified
     {
     public:
-        BalancePercentValue(PlayerbotAI* ai, string name = "balance percentage") : Uint8CalculatedValue(ai, name, 4), Qualified() {}
+        BalancePercentValue(PlayerbotAI* ai, std::string name = "balance percentage") : Uint8CalculatedValue(ai, name, 4), Qualified() {}
 
         Unit* GetTarget()
         {

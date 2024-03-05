@@ -16,7 +16,7 @@ namespace ai
     class AddAllLootAction : public ChatCommandAction
     {
     public:
-        AddAllLootAction(PlayerbotAI* ai, string name = "add all loot") : ChatCommandAction(ai, name) {}
+        AddAllLootAction(PlayerbotAI* ai, std::string name = "add all loot") : ChatCommandAction(ai, name) {}
         virtual bool isUseful();
 
     protected:

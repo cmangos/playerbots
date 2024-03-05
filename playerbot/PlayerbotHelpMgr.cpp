@@ -30,7 +30,7 @@ PlayerbotHelpMgr::~PlayerbotHelpMgr()
 {
 }
 
-void PlayerbotHelpMgr::replace(string& text, const string what, const string with)
+void PlayerbotHelpMgr::replace(std::string& text, const std::string what, const std::string with)
 {
     size_t start_pos = 0;
     while ((start_pos = text.find(what, start_pos)) != std::string::npos) {
@@ -39,10 +39,10 @@ void PlayerbotHelpMgr::replace(string& text, const string what, const string wit
     }
 }
 
-string PlayerbotHelpMgr::makeList(vector<string>const parts, string partFormat, uint32 maxLength)
+std::string PlayerbotHelpMgr::makeList(std::vector<std::string>const parts, std::string partFormat, uint32 maxLength)
 {
-    string retString = "";
-    string currentLine = "";
+    std::string retString = "";
+    std::string currentLine = "";
 
     for (auto part : parts)
     {
@@ -52,7 +52,7 @@ string PlayerbotHelpMgr::makeList(vector<string>const parts, string partFormat, 
             retString += currentLine + "\n";
             currentLine.clear();
         }
-        string subPart = partFormat;
+        std::string subPart = partFormat;
 
         replace(subPart, "<part>", part);
 
@@ -65,7 +65,7 @@ string PlayerbotHelpMgr::makeList(vector<string>const parts, string partFormat, 
 #ifdef GenerateBotHelp
 string PlayerbotHelpMgr::formatFloat(float num)
 {
-    ostringstream out;
+    std::ostringstream out;
     out << std::fixed << std::setprecision(3);
     out << num;
     return out.str().c_str();
@@ -73,8 +73,8 @@ string PlayerbotHelpMgr::formatFloat(float num)
 
 bool PlayerbotHelpMgr::IsGenericSupported(PlayerbotAIAware* object)
 {
-    set<string> supported;
-    string name = object->getName();
+    std::set<std::string> supported;
+    std::string name = object->getName();
     if (dynamic_cast<Strategy*>(object))
         supported = genericContext->GetSupportedStrategies();
     else if (dynamic_cast<Trigger*>(object))
@@ -90,14 +90,14 @@ bool PlayerbotHelpMgr::IsGenericSupported(PlayerbotAIAware* object)
     return supported.find(name) != supported.end();
 }
 
-string PlayerbotHelpMgr::GetObjectName(PlayerbotAIAware* object, string className)
+string PlayerbotHelpMgr::GetObjectName(PlayerbotAIAware* object, std::string className)
 {
     return IsGenericSupported(object) ? object->getName() : className + " " + object->getName();
 }
 
-string PlayerbotHelpMgr::GetObjectLink(PlayerbotAIAware* object, string className)
+string PlayerbotHelpMgr::GetObjectLink(PlayerbotAIAware* object, std::string className)
 {
-    string prefix = "unkown";
+    std::string prefix = "unkown";
     if (dynamic_cast<Strategy*>(object))
         prefix = "strategy";
     if (dynamic_cast<Trigger*>(object))
@@ -113,11 +113,11 @@ string PlayerbotHelpMgr::GetObjectLink(PlayerbotAIAware* object, string classNam
     return "[h:" + prefix + "|" + object->getName() + "]";   
 }
 
-void PlayerbotHelpMgr::LoadStrategies(string className, AiObjectContext* context)
+void PlayerbotHelpMgr::LoadStrategies(std::string className, AiObjectContext* context)
 {
     ai->SetAiObjectContext(context);
 
-    vector<string> stratLinks;
+    std::vector<std::string> stratLinks;
     for (auto strategyName : context->GetSupportedStrategies())
     {
         if (strategyName == "custom")
@@ -155,7 +155,7 @@ void PlayerbotHelpMgr::LoadStrategies(string className, AiObjectContext* context
 
                         NextAction** nextActions = triggerNode->getHandlers();
 
-                        vector<NextAction*> nextActionList;
+                        std::vector<NextAction*> nextActionList;
 
                         for (int32 i = 0; i < NextAction::size(nextActions); i++)
                             nextActionList.push_back(nextActions[i]);
@@ -181,7 +181,7 @@ void PlayerbotHelpMgr::LoadStrategies(string className, AiObjectContext* context
 
             if (strategy->getDefaultActions(state))
             {
-                vector<NextAction*> nextActionList;
+                std::vector<NextAction*> nextActionList;
 
                 for (int32 i = 0; i < NextAction::size(strategy->getDefaultActions(state)); i++)
                     nextActionList.push_back(strategy->getDefaultActions(state)[i]);
@@ -235,9 +235,9 @@ void PlayerbotHelpMgr::LoadAllStrategies()
     }
 }
 
-string PlayerbotHelpMgr::GetStrategyBehaviour(string className, Strategy* strategy)
+string PlayerbotHelpMgr::GetStrategyBehaviour(std::string className, Strategy* strategy)
 {
-    string behavior;
+    std::string behavior;
 
     AiObjectContext* context = classContext[className];
 
@@ -254,7 +254,7 @@ string PlayerbotHelpMgr::GetStrategyBehaviour(string className, Strategy* strate
 
             for (auto trig : stat.second)
             {
-                string line;
+                std::string line;
 
                 Trigger* trigger = trig.first;
 
@@ -280,22 +280,22 @@ void PlayerbotHelpMgr::GenerateStrategyHelp()
 {
     for (auto& strategyClass : classMap)
     {
-        string className = strategyClass.first;
+        std::string className = strategyClass.first;
 
-        vector<string> stratLinks;
+        std::vector<std::string> stratLinks;
 
         for (auto& strat : strategyClass.second)
         {
             Strategy* strategy = strat.first;
 
-            string strategyName = strategy->getName();
-            string linkName = GetObjectName(strategy, className);
+            std::string strategyName = strategy->getName();
+            std::string linkName = GetObjectName(strategy, className);
 
             stratLinks.push_back(GetObjectLink(strategy, className));
 
-            string helpTemplate = botHelpText["template:strategy"].m_templateText;
+            std::string helpTemplate = botHelpText["template:strategy"].m_templateText;
 
-            string description, related;
+            std::string description, related;
             if (strategy->GetHelpName() == strategyName) //Only get description if defined in trigger
             {
                 description = strategy->GetHelpDescription();
@@ -308,7 +308,7 @@ void PlayerbotHelpMgr::GenerateStrategyHelp()
             if (!related.empty())
                 related = "\nRelated strategies:\n" + related;
 
-            string behavior = GetStrategyBehaviour(className, strategy);
+            std::string behavior = GetStrategyBehaviour(className, strategy);
 
             replace(helpTemplate, "<name>", strategyName);
             replace(helpTemplate, "<description>", description);
@@ -328,17 +328,17 @@ void PlayerbotHelpMgr::GenerateStrategyHelp()
     }
 }
 
-string PlayerbotHelpMgr::GetTriggerBehaviour(string className, Trigger* trigger)
+string PlayerbotHelpMgr::GetTriggerBehaviour(std::string className, Trigger* trigger)
 {
-    string behavior;
+    std::string behavior;
 
     AiObjectContext* context = classContext[className];
 
     for (auto sstat : states)
     {
         BotState state = sstat.first;
-        string  stateName = sstat.second;
-        string stateBehavior;
+        std::string  stateName = sstat.second;
+        std::string stateBehavior;
 
         for (auto strat : classMap[className])
         {
@@ -350,7 +350,7 @@ string PlayerbotHelpMgr::GetTriggerBehaviour(string className, Trigger* trigger)
             if (stateBehavior.empty())
                 stateBehavior += "\n" + initcap(states[state]) + " behavior:";
 
-            string line;
+            std::string line;
 
             line = "Executes: ";
 
@@ -373,10 +373,10 @@ void PlayerbotHelpMgr::GenerateTriggerHelp()
 {
     for (auto& strategyClass : classMap)
     {
-        string className = strategyClass.first;
+        std::string className = strategyClass.first;
 
-        vector<string> trigLinks;
-        vector<string> triggers;
+        std::vector<std::string> trigLinks;
+        std::vector<std::string> triggers;
 
         for (auto& strat : strategyClass.second)
         {
@@ -389,8 +389,8 @@ void PlayerbotHelpMgr::GenerateTriggerHelp()
                     if (!trigger) //Ignore default actions
                         continue;
 
-                    string triggerName = trigger->getName();
-                    string linkName = GetObjectName(trigger, className);
+                    std::string triggerName = trigger->getName();
+                    std::string linkName = GetObjectName(trigger, className);
 
                     if (std::find(triggers.begin(), triggers.end(), triggerName) != triggers.end())
                         continue;
@@ -399,9 +399,9 @@ void PlayerbotHelpMgr::GenerateTriggerHelp()
 
                     trigLinks.push_back(GetObjectLink(trigger, className));
 
-                    string helpTemplate = botHelpText["template:trigger"].m_templateText;
+                    std::string helpTemplate = botHelpText["template:trigger"].m_templateText;
 
-                    string description, relatedTrig, relatedVal;
+                    std::string description, relatedTrig, relatedVal;
                     if (trigger->GetHelpName() == triggerName) //Only get description if defined in trigger
                     {
                         description = trigger->GetHelpDescription();
@@ -417,7 +417,7 @@ void PlayerbotHelpMgr::GenerateTriggerHelp()
                     if (!relatedVal.empty())
                         relatedVal = "\nUsed values:\n" + relatedVal;
 
-                    string behavior = GetTriggerBehaviour(className, trigger);
+                    std::string behavior = GetTriggerBehaviour(className, trigger);
 
                     replace(helpTemplate, "<name>", triggerName);
                     replace(helpTemplate, "<description>", description);
@@ -441,17 +441,17 @@ void PlayerbotHelpMgr::GenerateTriggerHelp()
     }
 }
 
-string PlayerbotHelpMgr::GetActionBehaviour(string className, Action* nextAction)
+string PlayerbotHelpMgr::GetActionBehaviour(std::string className, Action* nextAction)
 {
-    string behavior;
+    std::string behavior;
 
     AiObjectContext* context = classContext[className];
 
     for (auto sstat : states)
     {
         BotState state = sstat.first;
-        string  stateName = sstat.second;
-        string stateBehavior;
+        std::string  stateName = sstat.second;
+        std::string stateBehavior;
 
         for (auto strat : classMap[className])
         {
@@ -466,7 +466,7 @@ string PlayerbotHelpMgr::GetActionBehaviour(string className, Action* nextAction
                 if (stateBehavior.empty())
                     stateBehavior += "\n" + initcap(states[state]) + " behavior:";
 
-                string line;
+                std::string line;
 
                 if (trig.first)
                     line = "Triggers from: " + GetObjectLink(trig.first, className);
@@ -490,10 +490,10 @@ void PlayerbotHelpMgr::GenerateActionHelp()
 {
     for (auto& strategyClass : classMap)
     {
-        string className = strategyClass.first;
+        std::string className = strategyClass.first;
 
-        vector<string> actionLinks;
-        vector<string> actions;
+        std::vector<std::string> actionLinks;
+        std::vector<std::string> actions;
 
         for (auto& strat : strategyClass.second)
         {
@@ -508,10 +508,10 @@ void PlayerbotHelpMgr::GenerateActionHelp()
 
                     for (auto& act : trig.second)
                     {
-                        string ActionName = act.first->getName();
+                        std::string ActionName = act.first->getName();
                         Action* action = act.first;
 
-                        string linkName = GetObjectName(action, className);
+                        std::string linkName = GetObjectName(action, className);
 
                         if (std::find(actions.begin(), actions.end(), ActionName) != actions.end())
                             continue;
@@ -520,9 +520,9 @@ void PlayerbotHelpMgr::GenerateActionHelp()
 
                         actionLinks.push_back(GetObjectLink(action, className));
 
-                        string helpTemplate = botHelpText["template:action"].m_templateText;
+                        std::string helpTemplate = botHelpText["template:action"].m_templateText;
 
-                        string description, relatedAct, relatedVal;
+                        std::string description, relatedAct, relatedVal;
                         if (action->GetHelpName() == ActionName) //Only get description if defined in trigger
                         {
                             description = action->GetHelpDescription();
@@ -538,7 +538,7 @@ void PlayerbotHelpMgr::GenerateActionHelp()
                         if (!relatedVal.empty())
                             relatedVal = "\nUsed values:\n" + relatedVal;
 
-                        string behavior = GetActionBehaviour(className, act.first);
+                        std::string behavior = GetActionBehaviour(className, act.first);
 
                         replace(helpTemplate, "<name>", ActionName);
                         replace(helpTemplate, "<description>", description);
@@ -565,19 +565,19 @@ void PlayerbotHelpMgr::GenerateActionHelp()
 void PlayerbotHelpMgr::GenerateValueHelp()
 {
     AiObjectContext* genericContext = classContext["generic"];
-    set<string> genericValues = genericContext->GetSupportedValues();
+    std::set<std::string> genericValues = genericContext->GetSupportedValues();
 
-    unordered_map<string, vector<string>> valueLinks;
+    std::unordered_map<std::string, std::vector<std::string>> valueLinks;
 
     for (auto& strategyClass : classMap)
     {
-        string className = strategyClass.first;
+        std::string className = strategyClass.first;
 
-        vector<string> values;
+        std::vector<std::string> values;
 
         AiObjectContext* context = classContext[className];
 
-        set<string> allValues = context->GetSupportedValues();
+        std::set<std::string> allValues = context->GetSupportedValues();
         for (auto& valueName : allValues)
         {
             if (className != "generic" && std::find(genericValues.begin(), genericValues.end(), valueName) != genericValues.end())
@@ -585,21 +585,21 @@ void PlayerbotHelpMgr::GenerateValueHelp()
 
             UntypedValue* value = context->GetUntypedValue(valueName);
 
-            string linkName = GetObjectName(value, className);
+            std::string linkName = GetObjectName(value, className);
 
             if (std::find(values.begin(), values.end(), valueName) != values.end())
                 continue;
 
             values.push_back(valueName);
 
-            string valueType;
+            std::string valueType;
 
-            string helpTemplate = botHelpText["template:value"].m_templateText;
+            std::string helpTemplate = botHelpText["template:value"].m_templateText;
 
-            string description, usedVal, relatedTrig, relatedAct, relatedVal;
+            std::string description, usedVal, relatedTrig, relatedAct, relatedVal;
             if (value->GetHelpName() == valueName) //Only get description if defined in trigger
             {
-                vector<string> usedInTrigger, usedInAction, usedInValue;
+                std::vector<std::string> usedInTrigger, usedInAction, usedInValue;
                 for (auto& strat : strategyClass.second)
                 {
                     for (auto stat : strat.second)
@@ -673,7 +673,7 @@ void PlayerbotHelpMgr::GenerateValueHelp()
         }
     }
 
-    vector<string> valueTypes;
+    std::vector<std::string> valueTypes;
 
     for (auto valueLinkSet : valueLinks)
         if (!valueLinkSet.first.empty())
@@ -681,11 +681,11 @@ void PlayerbotHelpMgr::GenerateValueHelp()
 
     valueTypes.push_back("");
 
-    vector<string> typeLinks;
+    std::vector<std::string> typeLinks;
 
     for (auto type : valueTypes)
     {
-        vector<string> links = valueLinks[type];
+        std::vector<std::string> links = valueLinks[type];
         std::sort(links.begin(), links.end());
 
         if (type.empty())
@@ -695,7 +695,7 @@ void PlayerbotHelpMgr::GenerateValueHelp()
         typeLinks.push_back("[h:list|" + type + " value]");
     }
 
-    string valueHelp = botHelpText["object:value"].m_templateText;
+    std::string valueHelp = botHelpText["object:value"].m_templateText;
 
     valueHelp = valueHelp.substr(0, valueHelp.find("Values:"));
     valueHelp += "Values:" + makeList(typeLinks);
@@ -709,18 +709,18 @@ void PlayerbotHelpMgr::GenerateChatFilterHelp()
 {
     CompositeChatFilter* filter = new CompositeChatFilter(ai);
 
-    vector<string> filterLinks;
+    std::vector<std::string> filterLinks;
 
     for (auto subFilter : filter->GetFilters())
     {
-        string helpTemplate = botHelpText["template:chatfilter"].m_templateText;
+        std::string helpTemplate = botHelpText["template:chatfilter"].m_templateText;
 
-        string filterName = subFilter->GetHelpName();
-        string description = subFilter->GetHelpDescription();
-        string examples;
+        std::string filterName = subFilter->GetHelpName();
+        std::string description = subFilter->GetHelpDescription();
+        std::string examples;
         for (auto& example : subFilter->GetFilterExamples())
         {
-            string line = example.first + ": " + example.second;
+            std::string line = example.first + ": " + example.second;
             examples += (examples.empty() ? "" : "\n") + line;
         }
 
@@ -735,7 +735,7 @@ void PlayerbotHelpMgr::GenerateChatFilterHelp()
         botHelpText["chatfilter:" + filterName].m_templateText = helpTemplate;
     }
 
-    string filterHelp = botHelpText["object:chatfilter"].m_templateText;
+    std::string filterHelp = botHelpText["object:chatfilter"].m_templateText;
 
     filterHelp = filterHelp.substr(0, filterHelp.find("Filters:"));
     filterHelp += "Filters:" + makeList(filterLinks);
@@ -751,7 +751,7 @@ void PlayerbotHelpMgr::PrintCoverage()
 {
     for (auto typeCov : coverageMap)
     {
-        vector<string> missingNames;
+        std::vector<std::string> missingNames;
         uint32 totalNames = 0, hasNames = 0;
 
         for (auto cov : typeCov.second)
@@ -787,8 +787,8 @@ void PlayerbotHelpMgr::SaveTemplates()
         if (!text.second.m_templateChanged)
             continue;
 
-        string name = text.first;
-        string temp = text.second.m_templateText;
+        std::string name = text.first;
+        std::string temp = text.second.m_templateText;
         replace(name, "'", "''");
         replace(temp, "\r\n", "\n");
         replace(temp, "\n", "\\r\\n");
@@ -846,7 +846,7 @@ void PlayerbotHelpMgr::GenerateHelp()
 }
 #endif
 
-void PlayerbotHelpMgr::FormatHelpTopic(string& text)
+void PlayerbotHelpMgr::FormatHelpTopic(std::string& text)
 {
     //[h:subject:topic|name]
     size_t start_pos = 0;
@@ -856,18 +856,18 @@ void PlayerbotHelpMgr::FormatHelpTopic(string& text)
         if (end_pos == std::string::npos)
             break;
 
-        string oldLink = text.substr(start_pos, end_pos - start_pos + 1);
+        std::string oldLink = text.substr(start_pos, end_pos - start_pos + 1);
 
         if (oldLink.find("|") != std::string::npos)
         {
-            string topicCode = oldLink.substr(3, oldLink.find("|") - 3);
+            std::string topicCode = oldLink.substr(3, oldLink.find("|") - 3);
             std::string topicName = oldLink.substr(oldLink.find("|") + 1);
             topicName.pop_back();
 
             if (topicCode.find(":") == std::string::npos)
                 topicCode += ":" + topicName;
 
-            string newLink = ChatHelper::formatValue("help", topicCode, topicName);
+            std::string newLink = ChatHelper::formatValue("help", topicCode, topicName);
 
             text.replace(start_pos, oldLink.length(), newLink);
             start_pos += newLink.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
@@ -884,14 +884,14 @@ void PlayerbotHelpMgr::FormatHelpTopic(string& text)
         if (end_pos == std::string::npos)
             break;
 
-        string oldLink = text.substr(start_pos, end_pos - start_pos + 1);
+        std::string oldLink = text.substr(start_pos, end_pos - start_pos + 1);
 
         if (oldLink.find("|") != std::string::npos)
         {
-            string topicCode = oldLink.substr(3, oldLink.find("|") - 3);
+            std::string topicCode = oldLink.substr(3, oldLink.find("|") - 3);
             std::string topicName = oldLink.substr(oldLink.find("|") + 1);
             topicName.pop_back();                                                                                      
-            string newLink = ChatHelper::formatValue("command", topicCode, topicName, "0000FF00");
+            std::string newLink = ChatHelper::formatValue("command", topicCode, topicName, "0000FF00");
 
             text.replace(start_pos, oldLink.length(), newLink);
             start_pos += newLink.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
@@ -930,7 +930,7 @@ void PlayerbotHelpMgr::LoadBotHelpTexts()
             std::string text, templateText;
             std::map<int32, std::string> text_locale;
             Field* fields = results->Fetch();
-            string name = fields[0].GetString();
+            std::string name = fields[0].GetString();
             templateText = fields[1].GetString();
             text = fields[2].GetString();
 
@@ -955,7 +955,7 @@ void PlayerbotHelpMgr::LoadBotHelpTexts()
 
 // general texts
 
-string PlayerbotHelpMgr::GetBotText(string name)
+std::string PlayerbotHelpMgr::GetBotText(std::string name)
 {
     if (botHelpText.empty())
     {
@@ -981,18 +981,18 @@ string PlayerbotHelpMgr::GetBotText(string name)
     }
 }
 
-bool PlayerbotHelpMgr::GetBotText(string name, string &text)
+bool PlayerbotHelpMgr::GetBotText(std::string name, std::string &text)
 {
     text = GetBotText(name);
     return !text.empty();
 }
 
-vector<string> PlayerbotHelpMgr::FindBotText(string name)
+std::vector<std::string> PlayerbotHelpMgr::FindBotText(std::string name)
 {
-    vector<string> found;
+    std::vector<std::string> found;
     for (auto text : botHelpText)
     {
-        if (text.first.find(name) == string::npos)
+        if (text.first.find(name) == std::string::npos)
             continue;
 
         found.push_back(text.first);

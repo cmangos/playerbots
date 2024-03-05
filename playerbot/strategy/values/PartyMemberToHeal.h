@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "PartyMemberValue.h"
 
 namespace ai
@@ -7,7 +7,7 @@ namespace ai
     class PartyMemberToHeal : public PartyMemberValue
 	{
 	public:
-        PartyMemberToHeal(PlayerbotAI* ai, string name = "party member to heal") :
+        PartyMemberToHeal(PlayerbotAI* ai, std::string name = "party member to heal") :
           PartyMemberValue(ai, name) {}
     
     protected:
@@ -22,7 +22,7 @@ namespace ai
     class PartyMemberToProtect : public PartyMemberValue
     {
     public:
-        PartyMemberToProtect(PlayerbotAI* ai, string name = "party member to protect") :
+        PartyMemberToProtect(PlayerbotAI* ai, std::string name = "party member to protect") :
             PartyMemberValue(ai, name) {}
 
     protected:
@@ -32,7 +32,7 @@ namespace ai
     class PartyMemberToRemoveRoots : public PartyMemberValue
     {
     public:
-        PartyMemberToRemoveRoots(PlayerbotAI* ai, string name = "party member to remove roots") :
+        PartyMemberToRemoveRoots(PlayerbotAI* ai, std::string name = "party member to remove roots") :
             PartyMemberValue(ai, name) {}
 
     protected:

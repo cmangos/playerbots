@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/strategy/actions/GenericActions.h"
 
@@ -8,10 +8,10 @@ namespace ai
     class Formation : public AiNamedObject
     {
     public:
-        Formation(PlayerbotAI* ai, string name) : AiNamedObject (ai, name) {}
+        Formation(PlayerbotAI* ai, std::string name) : AiNamedObject (ai, name) {}
 
     public:
-        virtual string GetTargetName() { return ""; }
+        virtual std::string GetTargetName() { return ""; }
         virtual WorldLocation GetLocation() { return NullLocation; }
         virtual float GetAngle();
         virtual float GetOffset();
@@ -26,24 +26,24 @@ namespace ai
     class FollowFormation : public Formation
     {
     public:
-        FollowFormation(PlayerbotAI* ai, string name) : Formation(ai, name) {}
+        FollowFormation(PlayerbotAI* ai, std::string name) : Formation(ai, name) {}
         virtual WorldLocation GetLocation();
     };
 
     class MoveFormation : public Formation
     {
     public:
-        MoveFormation(PlayerbotAI* ai, string name) : Formation(ai, name) {}
+        MoveFormation(PlayerbotAI* ai, std::string name) : Formation(ai, name) {}
 
     protected:
-        WorldLocation MoveLine(vector<Player*> line, float diff, float cx, float cy, float cz, float orientation, float range);
-        WorldLocation MoveSingleLine(vector<Player*> line, float diff, float cx, float cy, float cz, float orientation, float range);
+        WorldLocation MoveLine(std::vector<Player*> line, float diff, float cx, float cy, float cz, float orientation, float range);
+        WorldLocation MoveSingleLine(std::vector<Player*> line, float diff, float cx, float cy, float cz, float orientation, float range);
     };
 
     class MoveAheadFormation : public MoveFormation
     {
     public:
-        MoveAheadFormation(PlayerbotAI* ai, string name) : MoveFormation(ai, name) {}
+        MoveAheadFormation(PlayerbotAI* ai, std::string name) : MoveFormation(ai, name) {}
         virtual WorldLocation GetLocation();
         virtual WorldLocation GetLocationInternal() { return NullLocation; }
     };
@@ -54,14 +54,14 @@ namespace ai
         FormationValue(PlayerbotAI* ai);
         ~FormationValue() { if (value) { delete value; value = NULL; } }
         virtual void Reset();
-        virtual string Save();
-        virtual bool Load(string value);
+        virtual std::string Save();
+        virtual bool Load(std::string value);
     };
 
     class FormationPositionValue : public CalculatedValue<WorldPosition>
     {
     public:
-        FormationPositionValue(PlayerbotAI* ai, string name = "formation position") : CalculatedValue(ai, name) {}
+        FormationPositionValue(PlayerbotAI* ai, std::string name = "formation position") : CalculatedValue(ai, name) {}
 
         virtual WorldPosition Calculate() {
             Formation* formation = AI_VALUE(Formation*, "formation");

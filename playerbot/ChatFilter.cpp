@@ -5,11 +5,10 @@
 #include "ChatHelper.h"
 
 using namespace ai;
-using namespace std;
 
-string ChatFilter::Filter(string message, string filter)
+std::string ChatFilter::Filter(std::string message, std::string filter)
 {
-    if (message.find("@") == string::npos)
+    if (message.find("@") == std::string::npos)
         return message;
 
     if(filter.empty())
@@ -25,12 +24,12 @@ public:
     StrategyChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "strategy";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@nc=rpg"] = "All bots that have rpg strategy enabled in noncombat state.";
         retMap["@nonc=travel"] = "All bots that do not have travel strategy enabled in noncombat state.";
         retMap["@co=melee"] = "All bots that have melee strategy enabled in combat state.";
@@ -38,18 +37,18 @@ public:
         retMap["@dead=<>"] = "All bots that have <> strategy enabled in dead state.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots based on their strategies.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
 
         if (message.find("@nc=") == 0)
         {
-            string strat = message.substr(message.find("=")+1, message.find(" ") - (message.find("=")+1));
+            std::string strat = message.substr(message.find("=")+1, message.find(" ") - (message.find("=")+1));
 
             if (!strat.empty())
             {             
@@ -60,7 +59,7 @@ public:
         }
         if (message.find("@nonc=") == 0)
         {
-            string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
+            std::string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
 
             if (!strat.empty())
             {
@@ -72,7 +71,7 @@ public:
         }
         if (message.find("@co=") == 0)
         {
-            string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
+            std::string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
 
             if (!strat.empty())
             {
@@ -84,7 +83,7 @@ public:
         }
         if (message.find("@noco=") == 0)
         {
-            string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
+            std::string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
 
             if (!strat.empty())
             {
@@ -96,7 +95,7 @@ public:
         }
         if (message.find("@react=") == 0)
         {
-            string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
+            std::string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
 
             if (!strat.empty())
             {
@@ -108,7 +107,7 @@ public:
         }
         if (message.find("@noreact=") == 0)
         {
-            string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
+            std::string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
 
             if (!strat.empty())
             {
@@ -120,7 +119,7 @@ public:
         }
         if (message.find("@dead=") == 0)
         {
-            string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
+            std::string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
 
             if (!strat.empty())
             {
@@ -132,7 +131,7 @@ public:
         }
         if (message.find("@nodead=") == 0)
         {
-            string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
+            std::string strat = message.substr(message.find("=") + 1, message.find(" ") - (message.find("=") + 1));
 
             if (!strat.empty())
             {
@@ -153,12 +152,12 @@ public:
     RoleChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "role";
     }
-    virtual unordered_map<string,string> GetFilterExamples() 
+    virtual std::unordered_map<std::string,string> GetFilterExamples() 
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@tank"] = "All bots that have a tank spec.";
         retMap["@dps"] = "All bots that do not have a tank or healing spec.";
         retMap["@heal"] = "All bots that have a healing spec.";
@@ -169,12 +168,12 @@ public:
         retMap["@melee"] = "All bots that use melee attacks.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots with a specific role or weapon range.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
         const bool inGroup = bot->GetGroup() != nullptr;
@@ -224,29 +223,29 @@ public:
     LevelChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "level";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@60"] = "All bots that are level 60.";
         retMap["@10-20"] = "All bots ranging from level 10 to 20.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots based on level.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
 
         if (message[0] != '@')
             return message;
 
-        if (message.find("-") != string::npos)
+        if (message.find("-") != std::string::npos)
         {
             uint32 fromLevel = atoi(message.substr(message.find("@") + 1, message.find("-")).c_str());
             uint32 toLevel = atoi(message.substr(message.find("-") + 1, message.find(" ")).c_str());
@@ -271,22 +270,22 @@ public:
     GearChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "gear";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@tier1"] = "All bots that have an avarage item level comparable to tier1";
         retMap["@tier2-3"] = "All bots an avarage item level comparable to tier2 or tier3.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots based on gear level.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
 
@@ -298,7 +297,7 @@ public:
         uint32 botTier = 0;
         uint32 gs = ai->GetEquipGearScore(bot, false, false);
 
-        if (message.find("-") != string::npos)
+        if (message.find("-") != std::string::npos)
         {
             fromLevel = atoi(message.substr(message.find("@tier") + 5, message.find("-")).c_str());
             toLevel = atoi(message.substr(message.find("-") + 1, message.find(" ")).c_str());
@@ -344,22 +343,22 @@ public:
     CombatTypeChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "combat";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@ranged"] = "All bots that use ranged attacks.";
         retMap["@melee"] = "All bots that use melee attacks.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots with a specific weapon range.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
 
@@ -410,17 +409,17 @@ class RtiChatFilter : public ChatFilter
 {
 public:
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "rti";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@star"] = "All bots that are marked with or are targeing something marked with star.";
         retMap["@circle"] = "All bots that are marked with or are targeing something marked with star.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots that are marked with or are targeting sonething marked with a raid target icon.";
     }
 #endif
@@ -437,7 +436,7 @@ public:
         rtis.push_back("@skull");
     }
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
         Group *group = bot->GetGroup();
@@ -446,9 +445,9 @@ public:
 
         bool found = false;
         bool isRti = false;
-        for (list<string>::iterator i = rtis.begin(); i != rtis.end(); i++)
+        for (std::list<std::string>::iterator i = rtis.begin(); i != rtis.end(); i++)
         {
-            string rti = *i;
+            std::string rti = *i;
 
             bool isRti = message.find(rti) == 0;
             if (!isRti)
@@ -477,7 +476,7 @@ public:
     }
 
 private:
-    list<string> rtis;
+    std::list<std::string> rtis;
 };
 
 class ClassChatFilter : public ChatFilter
@@ -500,28 +499,28 @@ public:
     }
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "class";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@rogue"] = "All rogue bots.";
         retMap["@warlock"] = "All warlock bots.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots have a certain class.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
 
         bool found = false;
         bool isClass = false;
-        for (map<string, uint8>::iterator i = classNames.begin(); i != classNames.end(); i++)
+        for (std::map<std::string, uint8>::iterator i = classNames.begin(); i != classNames.end(); i++)
         {
             bool isClass = message.find(i->first) == 0;
             if (isClass && bot->getClass() != i->second)
@@ -539,7 +538,7 @@ public:
     }
 
 private:
-    map<string, uint8> classNames;
+    std::map<std::string, uint8> classNames;
 };
 
 class GroupChatFilter : public ChatFilter
@@ -548,12 +547,12 @@ public:
     GroupChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "group";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@group"] = "All bots in a group.";
         retMap["@group2"] = "All bots in group 2.";
         retMap["@group4-6"] = "All bots in group 4 to 6.";
@@ -564,21 +563,21 @@ public:
         retMap["@rleader"] = "All bots that are leader of a raid group.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots based on their group.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
 
         if (message.find("@group") == 0)
         {
-            string pnum = message.substr(6, message.find(" ")-6);
+            std::string pnum = message.substr(6, message.find(" ")-6);
             int from = atoi(pnum.c_str());
             int to = from;
-            if (pnum.find("-") != string::npos)
+            if (pnum.find("-") != std::string::npos)
             {
                 from = atoi(pnum.substr(pnum.find("@") + 1, pnum.find("-")).c_str());
                 to = atoi(pnum.substr(pnum.find("-") + 1, pnum.find(" ")).c_str());
@@ -642,12 +641,12 @@ public:
     GuildChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "guild";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@guild"] = "All bots in a guild.";
         retMap["@guild=raiders"] = "All bots in guild raiders.";
         retMap["@noguild"] = "All bots not in a guild.";
@@ -655,12 +654,12 @@ public:
         retMap["@rank=Initiate"] = "All bots that have rank Initiate in their guild.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots based on their guild.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
 
@@ -669,12 +668,12 @@ public:
             if (!bot->GetGuildId())
                 return message;
 
-            string pguild = message.substr(7, message.find(" ")-7);
+            std::string pguild = message.substr(7, message.find(" ")-7);
 
             if (!pguild.empty())
             {
                 Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-                string guildName = guild->GetName();
+                std::string guildName = guild->GetName();
 
                 if (pguild.find(guildName) != 0)
                     return message;
@@ -687,12 +686,12 @@ public:
             if (!bot->GetGuildId())
                 return message;
 
-            string pguild = message.substr(6, message.find(" "));
+            std::string pguild = message.substr(6, message.find(" "));
             
             if (!pguild.empty())
             {
                 Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-                string guildName = guild->GetName();
+                std::string guildName = guild->GetName();
 
                 if (pguild.find(guildName) == 0)
                     return message;
@@ -723,12 +722,12 @@ public:
             if (!bot->GetGuildId())
                 return message;
 
-            string rank = message.substr(6, message.find(" ")-6);
+            std::string rank = message.substr(6, message.find(" ")-6);
 
             if (!rank.empty())
             {
                 Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-                string rankName = guild->GetRankName(guild->GetRank(bot->GetObjectGuid()));
+                std::string rankName = guild->GetRankName(guild->GetRank(bot->GetObjectGuid()));
 
                 if (rank.find(rankName) != 0)
                     return message;
@@ -747,23 +746,23 @@ public:
     StateChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "state";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@needrepair"] = "All bots that have durability below 20%.";
         retMap["@outside"] = "All bots that are outside of an instance.";
         retMap["@inside"] = "All bots that are inside an instance.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots based on their state.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
         AiObjectContext* context = bot->GetPlayerbotAI()->GetAiObjectContext();
@@ -800,32 +799,32 @@ public:
     UsageChatFilter(PlayerbotAI * ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "usage";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@use=[itemlink]"] = "All bots that have some use for this item.";
         retMap["@sell=[itemlink]"] = "All bots that will vendor or AH this item.";
         retMap["@need=[itemlink]"] = "All bots that will roll need on this item.";
         retMap["@greed=[itemlink]"] = "All bots that will roll greed on this item.";        
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots based on the use they have for a specific item.";
     }
 #endif
 
-    string FilterLink(string message)
+    std::string FilterLink(std::string message)
     {
-        if (message.find("@") == string::npos)
+        if (message.find("@") == std::string::npos)
             return message;
 
         return message.substr(message.find("|r ") + 3);
     }
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
 
@@ -833,12 +832,12 @@ public:
 
         if (message.find("@use=") == 0)
         {
-            string item = message.substr(message.find("=") + 1, message.find("|r ") - (message.find("=") + 3));
+            std::string item = message.substr(message.find("=") + 1, message.find("|r ") - (message.find("=") + 3));
 
             if (item.empty())
                 return message;
 
-            set<string> qualifiers = ChatHelper::parseItemQualifiers(item);
+            std::set<std::string> qualifiers = ChatHelper::parseItemQualifiers(item);
 
             if(qualifiers.empty())
                 return message;
@@ -854,12 +853,12 @@ public:
         }
         if (message.find("@sell=") == 0)
         {
-            string item = message.substr(message.find("=") + 1, message.find("|r ") - (message.find("=") + 3));
+            std::string item = message.substr(message.find("=") + 1, message.find("|r ") - (message.find("=") + 3));
 
             if (item.empty())
                 return message;
 
-            set<string> qualifiers = ChatHelper::parseItemQualifiers(item);
+            std::set<std::string> qualifiers = ChatHelper::parseItemQualifiers(item);
 
             if (qualifiers.empty())
                 return message;
@@ -875,12 +874,12 @@ public:
         }
         if (message.find("@need=") == 0)
         {
-            string item = message.substr(message.find("=") + 1, message.find("|r ") - (message.find("=") + 3));
+            std::string item = message.substr(message.find("=") + 1, message.find("|r ") - (message.find("=") + 3));
 
             if (item.empty())
                 return message;
 
-            set<string> qualifiers = ChatHelper::parseItemQualifiers(item);
+            std::set<std::string> qualifiers = ChatHelper::parseItemQualifiers(item);
 
             if (qualifiers.empty())
                 return message;
@@ -896,12 +895,12 @@ public:
         }
         if (message.find("@greed=") == 0)
         {
-            string item = message.substr(message.find("=") + 1, message.find("|r ") - (message.find("=") + 3));
+            std::string item = message.substr(message.find("=") + 1, message.find("|r ") - (message.find("=") + 3));
 
             if (item.empty())
                 return message;
 
-            set<string> qualifiers = ChatHelper::parseItemQualifiers(item);
+            std::set<std::string> qualifiers = ChatHelper::parseItemQualifiers(item);
 
             if (qualifiers.empty())
                 return message;
@@ -926,27 +925,27 @@ public:
     TalentSpecChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "talent spec";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@frost"] = "All bots that have frost spec.";
         retMap["@holy"] = "All bots that have holy spec.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots based on their primary talent specialisation.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         Player* bot = ai->GetBot();
 
         AiObjectContext* context = ai->GetAiObjectContext();
-        string filter = "@" + ChatHelper::specName(bot);
+        std::string filter = "@" + ChatHelper::specName(bot);
 
         if (message.find(filter) == 0)
         {
@@ -963,23 +962,23 @@ public:
     LocationChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "location";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@azeroth"] = "All bots in azeroth overworld.";
         retMap["@eastern kingdoms"] = "All bots in eastern kingdoms overworld.";
         retMap["@dun morogh"] = "All bots in the dun morogh zone.";
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects bots based on map or zone name.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         if (message.find("@") == 0)
         {
@@ -992,8 +991,8 @@ public:
 
             if (map)
             {
-                string name = map->GetMapName();
-                string filter = name;
+                std::string name = map->GetMapName();
+                std::string filter = name;
 
                std::transform(filter.begin(), filter.end(), filter.begin(),[](unsigned char c) { return std::tolower(c); });
 
@@ -1007,8 +1006,8 @@ public:
 
             if (bot->GetTerrain())
             {
-                string name = WorldPosition(bot).getAreaName(true, true);
-                string filter = name;
+                std::string name = WorldPosition(bot).getAreaName(true, true);
+                std::string filter = name;
 
                 std::transform(filter.begin(), filter.end(), filter.begin(),[](unsigned char c) { return std::tolower(c); });
 
@@ -1030,12 +1029,12 @@ public:
     RandomChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
 
 #ifdef GenerateBotHelp
-    virtual string GetHelpName() {
+    virtual std::string GetHelpName() {
         return "random";
     }
-    virtual unordered_map<string, string> GetFilterExamples()
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
     {
-        unordered_map<string, string> retMap;
+        std::unordered_map<std::string, std::string> retMap;
         retMap["@random"] = "50% chance the bot responds.";
         retMap["@random=25"] = "25% chance the bot responds.";
         retMap["@fixedrandom"] = "50% chance the bot responds. But always the same bots.";
@@ -1043,16 +1042,16 @@ public:
 
         return retMap;
     }
-    virtual string GetHelpDescription() {
+    virtual std::string GetHelpDescription() {
         return "This filter selects random bots.";
     }
 #endif
 
-    virtual string Filter(string message) override
+    virtual std::string Filter(std::string message) override
     {
         if (message.find("@random=") == 0)
         {
-            string num = message.substr(message.find("=") + 1, message.find(" ") - message.find("=")-1);            
+            std::string num = message.substr(message.find("=") + 1, message.find(" ") - message.find("=")-1);            
             if (urand(0, 100) < stoul(num))
                 return ChatFilter::Filter(message);
 
@@ -1065,7 +1064,7 @@ public:
         }
         if (message.find("@fixedrandom=") == 0)
         {
-            string num = message.substr(message.find("=") + 1, message.find(" ") - message.find("=") - 1);
+            std::string num = message.substr(message.find("=") + 1, message.find(" ") - message.find("=") - 1);
             if (ai->GetFixedBotNumer(BotTypeNumber::CHATFILTER_NUMBER) < stoul(num))
                 return ChatFilter::Filter(message);
 
@@ -1102,15 +1101,15 @@ CompositeChatFilter::CompositeChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
 
 CompositeChatFilter::~CompositeChatFilter()
 {
-    for (list<ChatFilter*>::iterator i = filters.begin(); i != filters.end(); i++)
+    for (std::list<ChatFilter*>::iterator i = filters.begin(); i != filters.end(); i++)
         delete (*i);
 }
 
-string CompositeChatFilter::Filter(string message)
+std::string CompositeChatFilter::Filter(std::string message)
 {
     for (int j = 0; j < filters.size(); ++j)
     {
-        for (list<ChatFilter*>::iterator i = filters.begin(); i != filters.end(); i++)
+        for (std::list<ChatFilter*>::iterator i = filters.begin(); i != filters.end(); i++)
         {
             message = (*i)->Filter(message);
             if (message.empty())

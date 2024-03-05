@@ -11,8 +11,8 @@ class Unit;
 class Object;
 class Item;
 
-typedef map<uint32, Player*> PlayerBotMap;
-typedef map<string, set<string> > PlayerBotErrorMap;
+typedef std::map<uint32, Player*> PlayerBotMap;
+typedef std::map<std::string, std::set<std::string> > PlayerBotErrorMap;
 
 class PlayerbotHolder : public PlayerbotAIBase
 {
@@ -36,10 +36,10 @@ public:
     void OnBotLogin(Player* bot);
     void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder) { auto botptr = playerBots.find(guid); if (botptr == playerBots.end()) return;  newHolder->OnBotLogin(botptr->second); playerBots.erase(guid); }
 
-    list<string> HandlePlayerbotCommand(char const* args, Player* master = NULL);
-    string ProcessBotCommand(string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId);
-    uint32 GetAccountId(string name);
-    string ListBots(Player* master);
+    std::list<std::string> HandlePlayerbotCommand(char const* args, Player* master = NULL);
+    std::string ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId);
+    uint32 GetAccountId(std::string name);
+    std::string ListBots(Player* master);
 
 protected:
     virtual void OnBotLoginInternal(Player * const bot) = 0;
@@ -57,12 +57,12 @@ public:
     static bool HandlePlayerbotMgrCommand(ChatHandler* handler, char const* args);
     void HandleMasterIncomingPacket(const WorldPacket& packet);
     void HandleMasterOutgoingPacket(const WorldPacket& packet);
-    void HandleCommand(uint32 type, const string& text, uint32 lang = LANG_UNIVERSAL);
+    void HandleCommand(uint32 type, const std::string& text, uint32 lang = LANG_UNIVERSAL);
     void OnPlayerLogin(Player* player);
     void CancelLogout();
 
     virtual void UpdateAIInternal(uint32 elapsed, bool minimal = false);
-    void TellError(string botName, string text);
+    void TellError(std::string botName, std::string text);
 
     Player* GetMaster() const { return master; };
 

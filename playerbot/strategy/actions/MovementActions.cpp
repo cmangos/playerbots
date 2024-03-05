@@ -16,7 +16,7 @@
 #ifdef MANGOSBOT_TWO
 #include "Entities/Vehicle.h"
 #endif
-#include "../generic/CombatStrategy.h"
+#include "playerbot/strategy/generic/CombatStrategy.h"
 
 using namespace ai;
 
@@ -68,7 +68,7 @@ bool MovementAction::MoveNear(WorldObject* target, float distance)
     {
 #ifdef CMANGOS
         float dist = distance + target->GetObjectBoundingRadius();
-        target->GetNearPoint(bot, x, y, z, bot->GetObjectBoundingRadius(), min(dist, ai->GetRange("follow")), angle);
+        target->GetNearPoint(bot, x, y, z, bot->GetObjectBoundingRadius(), std::min(dist, ai->GetRange("follow")), angle);
 #endif
 #ifdef MANGOS
         float x = target->GetPositionX() + cos(angle) * distance,
@@ -109,7 +109,7 @@ bool MovementAction::FlyDirect(WorldPosition &startPosition, WorldPosition &endP
 
     if (movePosition.getMapId() != startPosition.getMapId() || !movePosition.isOutside() || !movePosition.canFly()) //We can not fly to the end directly.
     {
-        vector<WorldPosition> path;
+        std::vector<WorldPosition> path;
         if (movePath.empty()) //Make a path starting at the end backwards to see if we can walk to some better place.
         {
             path = endPosition.getPathTo(startPosition, bot);
@@ -214,12 +214,12 @@ bool MovementAction::FlyDirect(WorldPosition &startPosition, WorldPosition &endP
     LastMovement& lastMove = AI_VALUE(LastMovement&,"last movement");
     if (sPlayerbotAIConfig.hasLog("bot_movement.csv") && lastMove.lastMoveShort != movePosition)
     {
-        ostringstream out;
+        std::ostringstream out;
         out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
         out << bot->GetName() << ",";
         startPosition.printWKT({ startPosition, movePosition }, out, 1);
-        out << to_string(bot->getRace()) << ",";
-        out << to_string(bot->getClass()) << ",";
+        out << std::to_string(bot->getRace()) << ",";
+        out << std::to_string(bot->getClass()) << ",";
         float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
         out << subLevel << ",";
         out << "1";
@@ -388,11 +388,11 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 }
                 else if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
                 {
-                    vector<WorldPosition> beginPath = endPosition.getPathFromPath({ startPosition }, bot, 40);
+                    std::vector<WorldPosition> beginPath = endPosition.getPathFromPath({ startPosition }, bot, 40);
                     sTravelNodeMap.m_nMapMtx.lock_shared();
                     TravelNodeRoute route = sTravelNodeMap.getRoute(startPosition, endPosition, beginPath, bot);       
 
-                    string routeList;
+                    std::string routeList;
 
                     for (auto node : route.getNodes())
                     {
@@ -437,7 +437,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
             oldDist = WorldPosition().getPathLength(movePath.getPointPath());
         if (!bot->GetTransport() && movePath.makeShortCut(startPosition, sPlayerbotAIConfig.reactDistance, bot))
             if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
-                ai->TellPlayerNoFacing(GetMaster(), "Found a shortcut: old=" + to_string(uint32(oldDist)) + "y new=" + to_string(uint32(WorldPosition().getPathLength(movePath.getPointPath()))));
+                ai->TellPlayerNoFacing(GetMaster(), "Found a shortcut: old=" + std::to_string(uint32(oldDist)) + "y new=" + std::to_string(uint32(WorldPosition().getPathLength(movePath.getPointPath()))));
 
         if (movePath.empty())
         {
@@ -469,7 +469,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 else
                     telePos = movePosition;
 
-                ostringstream out;
+                std::ostringstream out;
                 out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
                 out << bot->GetName() << ",";
                 if (telePos && telePos != movePosition)
@@ -477,8 +477,8 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 else
                     startPosition.printWKT({ startPosition, movePosition }, out, 1);
 
-                out << to_string(bot->getRace()) << ",";
-                out << to_string(bot->getClass()) << ",";
+                out << std::to_string(bot->getRace()) << ",";
+                out << std::to_string(bot->getClass()) << ",";
                 float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
                 out << subLevel << ",";
                 out << (entry ? entry : -1);
@@ -542,7 +542,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 else
                     telePos = movePosition;
 
-                ostringstream out;
+                std::ostringstream out;
                 out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
                 out << bot->GetName() << ",";
                 if (telePos && telePos != movePosition)
@@ -550,8 +550,8 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 else
                     startPosition.printWKT({ startPosition, movePosition }, out, 1);
 
-                out << to_string(bot->getRace()) << ",";
-                out << to_string(bot->getClass()) << ",";
+                out << std::to_string(bot->getRace()) << ",";
+                out << std::to_string(bot->getClass()) << ",";
                 float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
                 out << subLevel << ",";
                 out << (entry ? entry : -1);
@@ -585,12 +585,12 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                     else
                     {
                         if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
-                            ai->TellPlayer(GetMaster(), "transport at " + to_string(uint32(telePosition.distance(transport))) + "yards of entry");
+                            ai->TellPlayer(GetMaster(), "transport at " + std::to_string(uint32(telePosition.distance(transport))) + "yards of entry");
 
                         if (telePosition.distance(transport) < INTERACTION_DISTANCE) //Transport has arrived Move on.
                         {
                             if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
-                                ai->TellPlayerNoFacing(GetMaster(), "Moving on to transport " + string(transport->GetName()));
+                                ai->TellPlayerNoFacing(GetMaster(), "Moving on to transport " + std::string(transport->GetName()));
 
                             movePosition = WorldPosition(transport);
                             movePosition.setZ(bot->GetPositionZ());
@@ -606,7 +606,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                                 WorldPosition onBoatPos(movePosition);
                                 if(bot->GetTransport()->IsTransport())
                                     onBoatPos += WorldPosition(0, cos(angle / 4 * M_PI_F) * 5.0f, sin(angle / 4 * M_PI_F) * 10.0f);
-                                vector<WorldPosition> step = onBoatPos.getPathStepFrom(bot, bot);
+                                std::vector<WorldPosition> step = onBoatPos.getPathStepFrom(bot, bot);
                                 if (!step.empty() && abs(step.back().getZ() - movePosition.getZ()) < 2.0f)
                                 {
                                     if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
@@ -644,13 +644,13 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 if (ai->GetMoveToTransport() && startPosition.isOnTransport(bot->GetTransport()))
                 {
                     if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
-                        ai->TellPlayerNoFacing(GetMaster(), "I'm on " + string(bot->GetTransport()->GetName()));
+                        ai->TellPlayerNoFacing(GetMaster(), "I'm on " + std::string(bot->GetTransport()->GetName()));
                     ai->SetMoveToTransport(false);
                     entry = 0;
                 }
 
                 if (movePosition.getMapId() == bot->GetMapId() && ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
-                    ai->TellPlayer(GetMaster(), "transport at " + to_string(uint32(telePosition.distance(bot->GetTransport()))) + "yards of exit");
+                    ai->TellPlayer(GetMaster(), "transport at " + std::to_string(uint32(telePosition.distance(bot->GetTransport()))) + "yards of exit");
 
                 if (movePosition.getMapId() == bot->GetMapId() && telePosition.distance(bot->GetTransport()) < INTERACTION_DISTANCE) //We have arived move off.
                 {
@@ -695,8 +695,8 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 
                 if (!bot->m_taxi.IsTaximaskNodeKnown(tEntry->from))
                 {
-                    list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-                    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
+                    std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
+                    for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
                     {
                         Creature* unit = bot->GetNPCIfCanInteractWith(*i, UNIT_NPC_FLAG_FLIGHTMASTER);
                         if (!unit)
@@ -744,7 +744,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
             else
             {
                 if (sServerFacade.IsSpellReady(bot, entry) && (!bot->IsFlying() || WorldPosition(bot).currentHeight() < 10.0f))
-                    if (ai->DoSpecificAction("cast", Event("rpg action", to_string(entry)), true))
+                    if (ai->DoSpecificAction("cast", Event("rpg action", std::to_string(entry)), true))
                         return true;
 
                 movePath.clear();
@@ -794,7 +794,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
     //Stop the path when we might get aggro.
     if (!ai->IsStateActive(BotState::BOT_STATE_COMBAT) && !bot->IsDead() && !ignoreEnemyTargets) 
     {
-        list<ObjectGuid> targets = AI_VALUE_LAZY(list<ObjectGuid>, "possible attack targets");
+        std::list<ObjectGuid> targets = AI_VALUE_LAZY(std::list<ObjectGuid>, "possible attack targets");
 
         if (!targets.empty() && movePosition)
         {
@@ -874,12 +874,12 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
     //Log bot movement
     if (sPlayerbotAIConfig.hasLog("bot_movement.csv") && lastMove.lastMoveShort != movePosition)
     {
-        ostringstream out;
+        std::ostringstream out;
         out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
         out << bot->GetName() << ",";
         startPosition.printWKT({ startPosition, movePosition }, out, 1);
-        out << to_string(bot->getRace()) << ",";
-        out << to_string(bot->getClass()) << ",";
+        out << std::to_string(bot->getRace()) << ",";
+        out << std::to_string(bot->getClass()) << ",";
         float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
         out << subLevel << ",";
         out << 0;
@@ -1634,7 +1634,7 @@ bool MovementAction::Flee(Unit *target)
     if (group)
     {
         Unit* spareTarget = nullptr;
-        vector<Unit*> possibleTargets;
+        std::vector<Unit*> possibleTargets;
         const float minFleeDistance = 5.0f;
         const float maxFleeDistance = isTarget ? 40.0f : ai->GetRange("spell") * 1.5;
         const float minRangedTargetDistance = ai->GetRange("spell") / 2 + ai->GetRange("follow");
@@ -1791,7 +1791,7 @@ bool MovementAction::Flee(Unit *target)
 
         if (!urand(0, 50) && ai->HasStrategy("emote", BotState::BOT_STATE_NON_COMBAT))
         {
-            vector<uint32> sounds;
+            std::vector<uint32> sounds;
             sounds.push_back(304); // guard
             sounds.push_back(306); // flee
             ai->PlayEmote(sounds[urand(0, sounds.size() - 1)]);
@@ -1832,7 +1832,7 @@ bool MovementAction::IsValidPosition(const WorldPosition& position, const WorldP
 bool MovementAction::IsHazardNearPosition(const WorldPosition& position, HazardPosition* outHazard)
 {
     AiObjectContext* context = bot->GetPlayerbotAI()->GetAiObjectContext();
-    list<HazardPosition> hazards = AI_VALUE(list<HazardPosition>, "hazards");
+    std::list<HazardPosition> hazards = AI_VALUE(std::list<HazardPosition>, "hazards");
     if (!hazards.empty())
     {
         for (const HazardPosition& hazard : hazards)
@@ -1859,7 +1859,7 @@ bool MovementAction::GeneratePathAvoidingHazards(const WorldPosition& endPositio
 {
     if (generatePath)
     {
-        list<HazardPosition> hazards = AI_VALUE(list<HazardPosition>, "hazards");
+        std::list<HazardPosition> hazards = AI_VALUE(std::list<HazardPosition>, "hazards");
         if (!hazards.empty())
         {
             PathFinder path(bot);
@@ -2177,8 +2177,8 @@ bool MoveOutOfCollisionAction::isUseful()
         return false;
 #endif
 
-    return AI_VALUE2(bool, "collision", "self target") && ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest friendly players")->Get().size() < 15 &&
-        ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest non bot players")->Get().size() > 0;
+    return AI_VALUE2(bool, "collision", "self target") && ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest friendly players")->Get().size() < 15 &&
+        ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest non bot players")->Get().size() > 0;
 }
 
 bool MoveRandomAction::Execute(Event& event)
@@ -2198,12 +2198,12 @@ bool MoveRandomAction::Execute(Event& event)
 
 bool MoveRandomAction::isUseful()
 {    
-    return !ai->HasRealPlayerMaster() && ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest friendly players")->Get().size() > urand(25, 100);
+    return !ai->HasRealPlayerMaster() && ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest friendly players")->Get().size() > urand(25, 100);
 }
 
 bool MoveToAction::Execute(Event& event)
 {
-    list<GuidPosition> guidList = AI_VALUE(list<GuidPosition>, getQualifier());
+    std::list<GuidPosition> guidList = AI_VALUE(std::list<GuidPosition>, getQualifier());
 
     if (guidList.empty())
         return false;
@@ -2224,16 +2224,16 @@ bool JumpAction::Execute(ai::Event &event)
     if (!event.getOwner() && bot->IsNonMeleeSpellCasted(false, false, true))
         return false;
 
-    string param = event.getParam();
-    string qualify = getQualifier();
-    string options = !param.empty() ? param : !qualify.empty() ? qualify : "";
+    std::string param = event.getParam();
+    std::string qualify = getQualifier();
+    std::string options = !param.empty() ? param : !qualify.empty() ? qualify : "";
     bool jumpInPlace = false;
     bool jumpBackward = false;
     bool showLanding = false;
     bool isRtsc = false;
 
     // only show landing
-    if (options.find("show") != string::npos && options.size() > 5)
+    if (options.find("show") != std::string::npos && options.size() > 5)
     {
         options = param.substr(5);
         showLanding = true;
@@ -2712,7 +2712,7 @@ bool JumpAction::CanWalkTo(const WorldPosition &src, const WorldPosition &dest, 
     if (src.fDist(dest) > sPlayerbotAIConfig.sightDistance)
         return false;
 
-    vector<WorldPosition> path = dest.getPathStepFrom(src, jumper, true);
+    std::vector<WorldPosition> path = dest.getPathStepFrom(src, jumper, true);
     if (path.empty())
     {
         sLog.outDetail("%s: Jump CanWalkTo Fail! No Path!", jumper->GetName());
@@ -2939,7 +2939,7 @@ WorldPosition JumpAction::GetPossibleJumpStartFor(const WorldPosition& src, cons
     }
 
     // try find a closer point
-    vector<WorldPosition> path = dest.getPathStepFrom(src, jumper);
+    std::vector<WorldPosition> path = dest.getPathStepFrom(src, jumper);
 
     // no path found closer to it...
     if (path.empty() || path.size() == 2)

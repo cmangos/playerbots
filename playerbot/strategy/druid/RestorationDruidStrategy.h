@@ -8,7 +8,7 @@ namespace ai
     public:
         RestorationDruidPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_HEAL | STRATEGY_TYPE_RANGED; }
-        string getName() override { return "restoration"; }
+        std::string getName() override { return "restoration"; }
     };
 
     class RestorationDruidStrategy : public DruidStrategy
@@ -76,7 +76,7 @@ namespace ai
     {
     public:
         RestorationDruidAoePveStrategy(PlayerbotAI* ai) : RestorationDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe restoration pve"; }
+        std::string getName() override { return "aoe restoration pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -87,7 +87,7 @@ namespace ai
     {
     public:
         RestorationDruidAoePvpStrategy(PlayerbotAI* ai) : RestorationDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe restoration pvp"; }
+        std::string getName() override { return "aoe restoration pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -98,7 +98,7 @@ namespace ai
     {
     public:
         RestorationDruidAoeRaidStrategy(PlayerbotAI* ai) : RestorationDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe restoration raid"; }
+        std::string getName() override { return "aoe restoration raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -119,7 +119,7 @@ namespace ai
     {
     public:
         RestorationDruidBuffPveStrategy(PlayerbotAI* ai) : RestorationDruidBuffStrategy(ai) {}
-        string getName() override { return "buff restoration pve"; }
+        std::string getName() override { return "buff restoration pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -130,7 +130,7 @@ namespace ai
     {
     public:
         RestorationDruidBuffPvpStrategy(PlayerbotAI* ai) : RestorationDruidBuffStrategy(ai) {}
-        string getName() override { return "buff restoration pvp"; }
+        std::string getName() override { return "buff restoration pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -141,7 +141,7 @@ namespace ai
     {
     public:
         RestorationDruidBuffRaidStrategy(PlayerbotAI* ai) : RestorationDruidBuffStrategy(ai) {}
-        string getName() override { return "buff restoration raid"; }
+        std::string getName() override { return "buff restoration raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -162,7 +162,7 @@ namespace ai
     {
     public:
         RestorationDruidBoostPveStrategy(PlayerbotAI* ai) : RestorationDruidBoostStrategy(ai) {}
-        string getName() override { return "boost restoration pve"; }
+        std::string getName() override { return "boost restoration pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -173,7 +173,7 @@ namespace ai
     {
     public:
         RestorationDruidBoostPvpStrategy(PlayerbotAI* ai) : RestorationDruidBoostStrategy(ai) {}
-        string getName() override { return "boost restoration pvp"; }
+        std::string getName() override { return "boost restoration pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -184,7 +184,7 @@ namespace ai
     {
     public:
         RestorationDruidBoostRaidStrategy(PlayerbotAI* ai) : RestorationDruidBoostStrategy(ai) {}
-        string getName() override { return "boost restoration raid"; }
+        std::string getName() override { return "boost restoration raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -205,7 +205,7 @@ namespace ai
     {
     public:
         RestorationDruidCcPveStrategy(PlayerbotAI* ai) : RestorationDruidCcStrategy(ai) {}
-        string getName() override { return "cc restoration pve"; }
+        std::string getName() override { return "cc restoration pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -216,7 +216,7 @@ namespace ai
     {
     public:
         RestorationDruidCcPvpStrategy(PlayerbotAI* ai) : RestorationDruidCcStrategy(ai) {}
-        string getName() override { return "cc restoration pvp"; }
+        std::string getName() override { return "cc restoration pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -227,7 +227,7 @@ namespace ai
     {
     public:
         RestorationDruidCcRaidStrategy(PlayerbotAI* ai) : RestorationDruidCcStrategy(ai) {}
-        string getName() override { return "cc restoration raid"; }
+        std::string getName() override { return "cc restoration raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -248,7 +248,7 @@ namespace ai
     {
     public:
         RestorationDruidCurePveStrategy(PlayerbotAI* ai) : RestorationDruidCureStrategy(ai) {}
-        string getName() override { return "cure restoration pve"; }
+        std::string getName() override { return "cure restoration pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -259,7 +259,7 @@ namespace ai
     {
     public:
         RestorationDruidCurePvpStrategy(PlayerbotAI* ai) : RestorationDruidCureStrategy(ai) {}
-        string getName() override { return "cure restoration pvp"; }
+        std::string getName() override { return "cure restoration pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -270,7 +270,7 @@ namespace ai
     {
     public:
         RestorationDruidCureRaidStrategy(PlayerbotAI* ai) : RestorationDruidCureStrategy(ai) {}
-        string getName() override { return "cure restoration raid"; }
+        std::string getName() override { return "cure restoration raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

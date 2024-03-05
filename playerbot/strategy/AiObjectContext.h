@@ -5,6 +5,7 @@
 #include "Value.h"
 #include "NamedObjectContext.h"
 #include "Strategy.h"
+#include <set>
 
 namespace ai
 {
@@ -21,78 +22,78 @@ namespace ai
         virtual ~AiObjectContext() {}
 
     public:
-        virtual Strategy* GetStrategy(const string& name) { return strategyContexts.GetObject(name, ai); }
-        virtual set<string> GetSiblingStrategy(const string& name) { return strategyContexts.GetSiblings(name); }
-        virtual Trigger* GetTrigger(const string& name) { return triggerContexts.GetObject(name, ai); }
-        virtual Action* GetAction(const string& name) { return actionContexts.GetObject(name, ai); }
-        virtual UntypedValue* GetUntypedValue(const string& name) { return valueContexts.GetObject(name, ai); }
+        virtual Strategy* GetStrategy(const std::string& name) { return strategyContexts.GetObject(name, ai); }
+        virtual std::set<std::string> GetSiblingStrategy(const std::string& name) { return strategyContexts.GetSiblings(name); }
+        virtual Trigger* GetTrigger(const std::string& name) { return triggerContexts.GetObject(name, ai); }
+        virtual Action* GetAction(const std::string& name) { return actionContexts.GetObject(name, ai); }
+        virtual UntypedValue* GetUntypedValue(const std::string& name) { return valueContexts.GetObject(name, ai); }
 
         template<class T>
-        Value<T>* GetValue(const string& name)
+        Value<T>* GetValue(const std::string& name)
         {
             return dynamic_cast<Value<T>*>(GetUntypedValue(name));
         }
 
         template<class T>
-        Value<T>* GetValue(const string& name, const string& param)
+        Value<T>* GetValue(const std::string& name, const std::string& param)
         {
-            return GetValue<T>((string(name) + "::" + param));
+            return GetValue<T>((std::string(name) + "::" + param));
         }
 
         template<class T>
-        Value<T>* GetValue(const string& name, int32 param)
+        Value<T>* GetValue(const std::string& name, int32 param)
         {
-        	ostringstream out; out << param;
+        	std::ostringstream out; out << param;
             return GetValue<T>(name, out.str());
         }
 
-        bool HasValue(const string& name)
+        bool HasValue(const std::string& name)
         {
             return valueContexts.IsCreated(name);
         }
 
-        bool HasValue(const string& name, const string& param)
+        bool HasValue(const std::string& name, const std::string& param)
         {
-            return HasValue((string(name) + "::" + param));
+            return HasValue((std::string(name) + "::" + param));
         }
 
-        bool HasValue(const string& name, int32 param)
+        bool HasValue(const std::string& name, int32 param)
         {
-            ostringstream out; out << param;
+            std::ostringstream out; out << param;
             return HasValue(name, out.str());
         }
 
 
-        set<string> GetValues()
+        std::set<std::string> GetValues()
         {
             return valueContexts.GetCreated();
         }
 
-        set<string> GetSupportedStrategies()
+        std::set<std::string> GetSupportedStrategies()
         {
             return strategyContexts.supports();
         }
 
-        set<string> GetSupportedTriggers()
+        std::set<std::string> GetSupportedTriggers()
         {
             return triggerContexts.supports();
         }
 
-        set<string> GetSupportedActions()
+        std::set<std::string> GetSupportedActions()
         {
             return actionContexts.supports();
         }
 
-        set<string> GetSupportedValues ()
+        std::set<std::string> GetSupportedValues ()
         {
             return valueContexts.supports();
         }
 
-        void ClearValues(string findName = "");
+        void ClearValues(std::string findName = "");
 
-        void ClearExpiredValues(string findName = "", uint32 interval = 0);
+        void ClearExpiredValues(std::string findName = "", uint32 interval = 0);
 
-        string FormatValues(string findName = "");
+        std::string FormatValues(std::string findName = "");
 
     public:
         virtual void Update();
@@ -101,10 +102,10 @@ namespace ai
         {
             valueContexts.Add(sharedValues);
         }
-        list<string> Save();
-        void Load(list<string> data);
+        std::list<std::string> Save();
+        void Load(std::list<std::string> data);
 
-        vector<string> performanceStack;
+        std::vector<std::string> performanceStack;
     protected:
         NamedObjectContextList<Strategy> strategyContexts;
         NamedObjectContextList<Action> actionContexts;

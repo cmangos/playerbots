@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         BloodDKStrategy(PlayerbotAI* ai);
-        string getName() override { return "blood"; }
+        std::string getName() override { return "blood"; }
         int GetType() override { return STRATEGY_TYPE_TANK | STRATEGY_TYPE_MELEE; }
 
     private:

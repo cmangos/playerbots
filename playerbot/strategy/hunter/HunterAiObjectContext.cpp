@@ -6,7 +6,7 @@
 #include "BeastMasteryHunterStrategy.h"
 #include "MarksmanshipHunterStrategy.h"
 #include "SurvivalHunterStrategy.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 
 namespace ai
 {

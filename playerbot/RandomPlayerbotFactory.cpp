@@ -22,7 +22,7 @@
 #endif
 
 
-map<uint8, vector<uint8> > RandomPlayerbotFactory::availableRaces;
+std::map<uint8, std::vector<uint8> > RandomPlayerbotFactory::availableRaces;
 
 RandomPlayerbotFactory::RandomPlayerbotFactory(uint32 accountId) : accountId(accountId)
 {
@@ -182,7 +182,7 @@ uint8 RandomPlayerbotFactory::GetRandomRace(uint8 cls)
     return availableRaces[cls].front();
 }
 
-bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls, unordered_map<uint8, vector<string>>& names)
+bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls, std::unordered_map<uint8, std::vector<std::string>>& names)
 {
     sLog.outDebug( "Creating new random bot for class %d", cls);
 
@@ -190,7 +190,7 @@ bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls, unordered_map<uint8, vec
 
     uint8 race = GetRandomRace(cls);
 
-    string name;
+    std::string name;
     if(names.empty())
         name = CreateRandomBotName(gender);
     else
@@ -205,8 +205,8 @@ bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls, unordered_map<uint8, vec
     if (name.empty())
         return false;
 
-    vector<uint8> skinColors, facialHairTypes;
-    vector<pair<uint8,uint8>> faces, hairs;
+    std::vector<uint8> skinColors, facialHairTypes;
+    std::vector<std::pair<uint8,uint8>> faces, hairs;
     for (CharSectionsMap::const_iterator itr = sCharSectionMap.begin(); itr != sCharSectionMap.end(); ++itr)
     {
         CharSectionsEntry const* entry = itr->second;
@@ -220,13 +220,13 @@ bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls, unordered_map<uint8, vec
             skinColors.push_back(entry->ColorIndex);
             break;
         case SECTION_TYPE_FACE:
-            faces.push_back(pair<uint8,uint8>(entry->VariationIndex, entry->ColorIndex));
+            faces.push_back(std::pair<uint8,uint8>(entry->VariationIndex, entry->ColorIndex));
             break;
         case SECTION_TYPE_FACIAL_HAIR:
             facialHairTypes.push_back(entry->ColorIndex);
             break;
         case SECTION_TYPE_HAIR:
-            hairs.push_back(pair<uint8,uint8>(entry->VariationIndex, entry->ColorIndex));
+            hairs.push_back(std::pair<uint8,uint8>(entry->VariationIndex, entry->ColorIndex));
             break;
         }
 #else
@@ -236,21 +236,21 @@ bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls, unordered_map<uint8, vec
             skinColors.push_back(entry->Color);
             break;
         case SECTION_TYPE_FACE:
-            faces.push_back(pair<uint8, uint8>(entry->VariationIndex, entry->Color));
+            faces.push_back(std::pair<uint8, uint8>(entry->VariationIndex, entry->Color));
             break;
         case SECTION_TYPE_FACIAL_HAIR:
             facialHairTypes.push_back(entry->Color);
             break;
         case SECTION_TYPE_HAIR:
-            hairs.push_back(pair<uint8, uint8>(entry->VariationIndex, entry->Color));
+            hairs.push_back(std::pair<uint8, uint8>(entry->VariationIndex, entry->Color));
             break;
         }
 #endif
     }
 
     uint8 skinColor = skinColors[urand(0, skinColors.size() - 1)];
-    pair<uint8,uint8> face = faces[urand(0, faces.size() - 1)];
-    pair<uint8,uint8> hair = hairs[urand(0, hairs.size() - 1)];
+    std::pair<uint8,uint8> face = faces[urand(0, faces.size() - 1)];
+    std::pair<uint8,uint8> hair = hairs[urand(0, hairs.size() - 1)];
 
 	bool excludeCheck = (race == RACE_TAUREN) || (gender == GENDER_FEMALE && race != RACE_NIGHTELF && race != RACE_UNDEAD);
 #ifndef MANGOSBOT_TWO
@@ -309,7 +309,7 @@ bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls, unordered_map<uint8, vec
     return true;
 }
 
-string RandomPlayerbotFactory::CreateRandomBotName(uint8 gender)
+std::string RandomPlayerbotFactory::CreateRandomBotName(uint8 gender)
 {
     auto result = CharacterDatabase.Query("SELECT MAX(name_id) FROM ai_playerbot_names");
     if (!result)
@@ -329,15 +329,15 @@ string RandomPlayerbotFactory::CreateRandomBotName(uint8 gender)
     }
 
 	fields = result->Fetch();
-    string bname = fields[0].GetString();
+    std::string bname = fields[0].GetString();
     return bname;
 }
 
-inline string GetNamePostFix(int32 nr)
+inline std::string GetNamePostFix(int32 nr)
 {
-    string ret;
+    std::string ret;
 
-    string str("abcdefghijklmnopqrstuvwxyz");
+    std::string str("abcdefghijklmnopqrstuvwxyz");
 
     while (nr >= 0)
     {
@@ -377,8 +377,8 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
         for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
         {
-            ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
-            string accountName = out.str();
+            std::ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
+            std::string accountName = out.str();
 
             auto result = LoginDatabase.PQuery("SELECT id FROM account where username = '%s'", accountName.c_str());
             if (!result)
@@ -471,20 +471,20 @@ void RandomPlayerbotFactory::CreateRandomBots()
 	int totalAccCount = sPlayerbotAIConfig.randomBotAccountCount;
 	sLog.outString("Creating random bot accounts...");
     
-    vector<std::future<void>> account_creations;
+    std::vector<std::future<void>> account_creations;
 
     BarGoLink bar(totalAccCount);
     for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
     {
-        ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
-        string accountName = out.str();
+        std::ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
+        std::string accountName = out.str();
         auto results = LoginDatabase.PQuery("SELECT id FROM account where username = '%s'", accountName.c_str());
         if (results)
         {
             continue;
         }
 
-        string password = "";
+        std::string password = "";
         if (sPlayerbotAIConfig.randomBotRandomPassword)
         {
             for (int i = 0; i < 10; i++)
@@ -525,8 +525,8 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
     sLog.outString("Loading available names...");
     
-    unordered_map<uint8,vector<string>> freeNames, allNames;
-    unordered_map<string, bool> used;
+    std::unordered_map<uint8, std::vector<std::string>> freeNames, allNames;
+    std::unordered_map<std::string, bool> used;
 
     auto result = CharacterDatabase.PQuery("SELECT n.gender, n.name, e.guid FROM ai_playerbot_names n LEFT OUTER JOIN characters e ON e.name = n.name");
     if (!result)
@@ -539,7 +539,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
     {
         Field* fields = result->Fetch();
         uint8 gender = fields[0].GetUInt8();
-        string bname = fields[1].GetString();
+        std::string bname = fields[1].GetString();
         uint32 guidlo = fields[2].GetUInt32();
         if(!guidlo)
             freeNames[gender].push_back(bname);
@@ -551,7 +551,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
     {
         int32 postItt = 0;
 
-        vector<string> newNames;
+        std::vector<std::string> newNames;
 
         if (totalCharCount < freeNames[gender].size())
             continue;
@@ -562,14 +562,14 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
         while(namesNeeded)
         {
-            string post = GetNamePostFix(postItt);
+            std::string post = GetNamePostFix(postItt);
 
             for (auto name : allNames[gender])
             {
                 if (name.size() + post.size() > 12)
                     continue;
 
-                string newName = name + post;
+                std::string newName = name + post;
                 if (used.find(newName) != used.end())
                     continue;
 
@@ -591,8 +591,8 @@ void RandomPlayerbotFactory::CreateRandomBots()
 	BarGoLink bar1(totalCharCount);
     for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
     {
-        ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
-        string accountName = out.str();
+        std::ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
+        std::string accountName = out.str();
 
         auto results = LoginDatabase.PQuery("SELECT id FROM account where username = '%s'", accountName.c_str());
         if (!results)
@@ -636,7 +636,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
         totalRandomBotChars += sAccountMgr.GetCharactersCount(accountId);
     }
 
-    vector<std::future<void>> bot_creations;
+    std::vector<std::future<void>> bot_creations;
 
     BarGoLink bar2(sObjectAccessor.GetPlayers().size());
     for (auto pl : sObjectAccessor.GetPlayers())
@@ -657,8 +657,8 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
 void RandomPlayerbotFactory::CreateRandomGuilds()
 {
-    vector<uint32> randomBots;
-    map<uint32, vector<uint32>> charAccGuids;
+    std::vector<uint32> randomBots;
+    std::map<uint32, std::vector<uint32>> charAccGuids;
 
     auto charAccounts = CharacterDatabase.PQuery(
         "select `account`, `guid` from `characters`");
@@ -691,7 +691,7 @@ void RandomPlayerbotFactory::CreateRandomGuilds()
     {
         sLog.outString("Deleting random bot guilds...");
         uint32 counter = 0;
-        for (vector<uint32>::iterator i = randomBots.begin(); i != randomBots.end(); ++i)
+        for (std::vector<uint32>::iterator i = randomBots.begin(); i != randomBots.end(); ++i)
         {
             ObjectGuid leader(HIGHGUID_PLAYER, *i);
             Guild* guild = sGuildMgr.GetGuildByLeader(leader);
@@ -710,8 +710,8 @@ void RandomPlayerbotFactory::CreateRandomGuilds()
         return;
 
     uint32 guildNumber = 0;
-    vector<ObjectGuid> availableLeaders;
-    for (vector<uint32>::iterator i = randomBots.begin(); i != randomBots.end(); ++i)
+    std::vector<ObjectGuid> availableLeaders;
+    for (std::vector<uint32>::iterator i = randomBots.begin(); i != randomBots.end(); ++i)
     {
         ObjectGuid leader(HIGHGUID_PLAYER, *i);
         Guild* guild = sGuildMgr.GetGuildByLeader(leader);
@@ -748,7 +748,7 @@ void RandomPlayerbotFactory::CreateRandomGuilds()
         if (sPlayerbotAIConfig.randomBotGuilds.size() >= sPlayerbotAIConfig.randomBotGuildCount)
             break;
 
-        string guildName = CreateRandomGuildName();
+        std::string guildName = CreateRandomGuildName();
         if (guildName.empty())
             continue;
 
@@ -786,7 +786,7 @@ void RandomPlayerbotFactory::CreateRandomGuilds()
         sLog.outString("Total Random Guilds: %d", sPlayerbotAIConfig.randomBotGuilds.size());
 }
 
-string RandomPlayerbotFactory::CreateRandomGuildName()
+std::string RandomPlayerbotFactory::CreateRandomGuildName()
 {
     auto result = CharacterDatabase.Query("SELECT MAX(name_id) FROM ai_playerbot_guild_names");
     if (!result)
@@ -809,14 +809,14 @@ string RandomPlayerbotFactory::CreateRandomGuildName()
     }
 
     fields = result->Fetch();
-    string gname = fields[0].GetString();
+    std::string gname = fields[0].GetString();
     return gname;
 }
 
 #ifndef MANGOSBOT_ZERO
 void RandomPlayerbotFactory::CreateRandomArenaTeams()
 {
-    vector<uint32> randomBots;
+    std::vector<uint32> randomBots;
 
     auto results = CharacterDatabase.PQuery(
         "select `bot` from ai_playerbot_random_bots where event = 'add'");
@@ -834,7 +834,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
     if (sPlayerbotAIConfig.deleteRandomBotArenaTeams && !sRandomPlayerbotMgr.arenaTeamsDeleted)
     {
         sLog.outString("Deleting random bot arena teams...");
-        for (vector<uint32>::iterator i = randomBots.begin(); i != randomBots.end(); ++i)
+        for (std::vector<uint32>::iterator i = randomBots.begin(); i != randomBots.end(); ++i)
         {
             ObjectGuid captain(HIGHGUID_PLAYER, *i);
             ArenaTeam* arenateam = sObjectMgr.GetArenaTeamByCaptain(captain);
@@ -853,8 +853,8 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
     maxTeamsNumber[ARENA_TYPE_2v2] = (uint32)(sPlayerbotAIConfig.randomBotArenaTeamCount * 0.4f);
     maxTeamsNumber[ARENA_TYPE_3v3] = (uint32)(sPlayerbotAIConfig.randomBotArenaTeamCount * 0.3f);
     maxTeamsNumber[ARENA_TYPE_5v5] = (uint32)(sPlayerbotAIConfig.randomBotArenaTeamCount * 0.3f);
-    vector<ObjectGuid> availableCaptains;
-    for (vector<uint32>::iterator i = randomBots.begin(); i != randomBots.end(); ++i)
+    std::vector<ObjectGuid> availableCaptains;
+    for (std::vector<uint32>::iterator i = randomBots.begin(); i != randomBots.end(); ++i)
     {
         ObjectGuid captain(HIGHGUID_PLAYER, *i);
         ArenaTeam* arenateam = sObjectMgr.GetArenaTeamByCaptain(captain);
@@ -906,7 +906,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
             break;
         }
 
-        string arenaTeamName = CreateRandomArenaTeamName();
+        std::string arenaTeamName = CreateRandomArenaTeamName();
         if (arenaTeamName.empty())
             continue;
 
@@ -1055,7 +1055,7 @@ string RandomPlayerbotFactory::CreateRandomArenaTeamName()
     }
 
     fields = result->Fetch();
-    string aname = fields[0].GetString();
+    std::string aname = fields[0].GetString();
     return aname;
 }
 #endif

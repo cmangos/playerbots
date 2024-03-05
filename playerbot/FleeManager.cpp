@@ -7,14 +7,13 @@
 #include "playerbot/ServerFacade.h"
 
 using namespace ai;
-using namespace std;
 
 void FleeManager::calculateDistanceToCreatures(FleePoint *point)
 {
     point->minDistance = -1.0f;
     point->sumDistance = 0.0f;
-    list<ObjectGuid> units = *bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<list<ObjectGuid> >("possible targets no los");
-	for (list<ObjectGuid>::iterator i = units.begin(); i != units.end(); ++i)
+    std::list<ObjectGuid> units = *bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("possible targets no los");
+	for (std::list<ObjectGuid>::iterator i = units.begin(); i != units.end(); ++i)
     {
 		Unit* unit = bot->GetPlayerbotAI()->GetUnit(*i);
 		if (!unit)
@@ -30,9 +29,9 @@ void FleeManager::calculateDistanceToCreatures(FleePoint *point)
 	}
 }
 
-bool intersectsOri(float angle, list<float>& angles, float angleIncrement)
+bool intersectsOri(float angle, std::list<float>& angles, float angleIncrement)
 {
-    for (list<float>::iterator i = angles.begin(); i != angles.end(); ++i)
+    for (std::list<float>::iterator i = angles.begin(); i != angles.end(); ++i)
     {
         float ori = *i;
         if (abs(angle - ori) < angleIncrement) return true;
@@ -41,7 +40,7 @@ bool intersectsOri(float angle, list<float>& angles, float angleIncrement)
     return false;
 }
 
-void FleeManager::calculatePossibleDestinations(list<FleePoint*> &points)
+void FleeManager::calculatePossibleDestinations(std::list<FleePoint*> &points)
 {
     Unit *target = *bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<Unit*>("current target");
 
@@ -52,9 +51,9 @@ void FleeManager::calculatePossibleDestinations(list<FleePoint*> &points)
     FleePoint start(bot->GetPlayerbotAI(), botPosX, botPosY, botPosZ);
     calculateDistanceToCreatures(&start);
 
-    list<float> enemyOri;
-    list<ObjectGuid> units = *bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<list<ObjectGuid> >("possible targets no los");
-    for (list<ObjectGuid>::iterator i = units.begin(); i != units.end(); ++i)
+    std::list<float> enemyOri;
+    std::list<ObjectGuid> units = *bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("possible targets no los");
+    for (std::list<ObjectGuid>::iterator i = units.begin(); i != units.end(); ++i)
     {
         Unit* unit = bot->GetPlayerbotAI()->GetUnit(*i);
         if (!unit)
@@ -64,10 +63,10 @@ void FleeManager::calculatePossibleDestinations(list<FleePoint*> &points)
         enemyOri.push_back(ori);
     }
 
-    float distIncrement = max(sPlayerbotAIConfig.followDistance, (maxAllowedDistance - sPlayerbotAIConfig.tooCloseDistance) / 10.0f);
+    float distIncrement = std::max(sPlayerbotAIConfig.followDistance, (maxAllowedDistance - sPlayerbotAIConfig.tooCloseDistance) / 10.0f);
     for (float dist = maxAllowedDistance; dist >= sPlayerbotAIConfig.tooCloseDistance; dist -= distIncrement)
     {
-        float angleIncrement = max(M_PI / 20, M_PI / 4 / (1.0 + dist - sPlayerbotAIConfig.tooCloseDistance));
+        float angleIncrement = std::max(M_PI / 20, M_PI / 4 / (1.0 + dist - sPlayerbotAIConfig.tooCloseDistance));
         for (float add = 0.0f; add < M_PI / 4 + angleIncrement; add += angleIncrement)
         {
             for (float angle = add; angle < add + 2 * M_PI_F + angleIncrement; angle += M_PI_F / 4)
@@ -124,9 +123,9 @@ bool FleeManager::isTooCloseToEdge(float x, float y, float z, float angle)
     return false;
 }
 
-void FleeManager::cleanup(list<FleePoint*> &points)
+void FleeManager::cleanup(std::list<FleePoint*> &points)
 {
-	for (list<FleePoint*>::iterator i = points.begin(); i != points.end(); i++)
+	for (std::list<FleePoint*>::iterator i = points.begin(); i != points.end(); i++)
     {
 		FleePoint* point = *i;
 		delete point;
@@ -139,10 +138,10 @@ bool FleeManager::isBetterThan(FleePoint* point, FleePoint* other)
     return point->sumDistance - other->sumDistance > 0;
 }
 
-FleePoint* FleeManager::selectOptimalDestination(list<FleePoint*> &points)
+FleePoint* FleeManager::selectOptimalDestination(std::list<FleePoint*> &points)
 {
 	FleePoint* best = NULL;
-	for (list<FleePoint*>::iterator i = points.begin(); i != points.end(); i++)
+	for (std::list<FleePoint*>::iterator i = points.begin(); i != points.end(); i++)
     {
 		FleePoint* point = *i;
         if (!best || isBetterThan(point, best))
@@ -154,7 +153,7 @@ FleePoint* FleeManager::selectOptimalDestination(list<FleePoint*> &points)
 
 bool FleeManager::CalculateDestination(float* rx, float* ry, float* rz)
 {
-	list<FleePoint*> points;
+    std::list<FleePoint*> points;
 	calculatePossibleDestinations(points);
 
     FleePoint* point = selectOptimalDestination(points);
@@ -178,8 +177,8 @@ bool FleeManager::isUseful()
     bool const inAoe = bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<bool>("has area debuff", "self target")->Get();
     if (!inAoe)
     {
-        list<ObjectGuid> units = *bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<list<ObjectGuid> >("possible targets no los");
-        for (list<ObjectGuid>::iterator i = units.begin(); i != units.end(); ++i)
+        std::list<ObjectGuid> units = *bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("possible targets no los");
+        for (std::list<ObjectGuid>::iterator i = units.begin(); i != units.end(); ++i)
         {
             Unit* unit = bot->GetPlayerbotAI()->GetUnit(*i);
             if (unit)

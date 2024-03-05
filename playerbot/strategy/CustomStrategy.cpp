@@ -5,11 +5,11 @@
 
 using namespace ai;
 
-map<string, string> CustomStrategy::actionLinesCache;
+std::map<std::string, std::string> CustomStrategy::actionLinesCache;
 
-NextAction* toNextAction(string action)
+NextAction* toNextAction(std::string action)
 {
-    vector<string> tokens = split(action, '!');
+    std::vector<std::string> tokens = split(action, '!');
     if (tokens.size() == 2 && !tokens[0].empty())
         return new NextAction(tokens[0], atof(tokens[1].c_str()));
     else if (tokens.size() == 1 && !tokens[0].empty())
@@ -19,12 +19,12 @@ NextAction* toNextAction(string action)
     return NULL;
 }
 
-NextAction** toNextActionArray(string actions)
+NextAction** toNextActionArray(std::string actions)
 {
-    vector<string> tokens = split(actions, ',');
+    std::vector<std::string> tokens = split(actions, ',');
     NextAction** res = new NextAction*[tokens.size() + 1];
     int index = 0;
-    for (vector<string>::iterator i = tokens.begin(); i != tokens.end(); ++i)
+    for (std::vector<std::string>::iterator i = tokens.begin(); i != tokens.end(); ++i)
     {
         NextAction* na = toNextAction(*i);
         if (na)
@@ -34,9 +34,9 @@ NextAction** toNextActionArray(string actions)
     return res;
 }
 
-TriggerNode* toTriggerNode(string actionLine)
+TriggerNode* toTriggerNode(std::string actionLine)
 {
-    vector<string> tokens = split(actionLine, '>');
+    std::vector<std::string> tokens = split(actionLine, '>');
     if (tokens.size() == 2)
         return new TriggerNode(tokens[0], toNextActionArray(tokens[1]));
 
@@ -56,15 +56,15 @@ void CustomStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
         }
         else
         {
-            vector<string> tokens = split(actionLinesCache[qualifier], '\n');
-            regex tpl("\\(NULL,\\s*'.+',\\s*'(.+)'\\)(,|;)");
-            for (vector<string>::iterator i = tokens.begin(); i != tokens.end(); ++i)
+            std::vector<std::string> tokens = split(actionLinesCache[qualifier], '\n');
+            std::regex tpl("\\(NULL,\\s*'.+',\\s*'(.+)'\\)(,|;)");
+            for (std::vector<std::string>::iterator i = tokens.begin(); i != tokens.end(); ++i)
             {
-                string line = *i;
-                for (sregex_iterator j = sregex_iterator(line.begin(), line.end(), tpl); j != sregex_iterator(); ++j)
+                std::string line = *i;
+                for (std::sregex_iterator j = std::sregex_iterator(line.begin(), line.end(), tpl); j != std::sregex_iterator(); ++j)
                 {
-                    smatch match = *j;
-                    string actionLine = match[1].str();
+                    std::smatch match = *j;
+                    std::string actionLine = match[1].str();
                     if (!actionLine.empty())
                         this->actionLines.push_back(actionLine);
                 }
@@ -72,7 +72,7 @@ void CustomStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
         }
     }
 
-    for (list<string>::iterator i = actionLines.begin(); i != actionLines.end(); ++i)
+    for (std::list<std::string>::iterator i = actionLines.begin(); i != actionLines.end(); ++i)
     {
         TriggerNode* tn = toTriggerNode(*i);
         if (tn)
@@ -94,7 +94,7 @@ void CustomStrategy::LoadActionLines(uint32 owner)
         do
         {
             Field* fields = results->Fetch();
-            string action = fields[0].GetString();
+            std::string action = fields[0].GetString();
             this->actionLines.push_back(action);
         } while (results->NextRow());
     }

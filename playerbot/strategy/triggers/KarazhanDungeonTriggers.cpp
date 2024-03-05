@@ -11,7 +11,7 @@ using namespace ai;
 bool NetherspiteBeamsCheatNeedRefreshTrigger::IsActive()
 {
     //Checking that is portal phase
-    list<Unit*> creatures;
+    std::list<Unit*> creatures;
     MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(bot, 17369, 100);
     MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
     Cell::VisitAllObjects(bot, searcher, 100);

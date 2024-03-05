@@ -5,7 +5,7 @@
 
 using namespace ai;
 
-map<InventoryResult, string> InventoryChangeFailureAction::messages;
+std::map<InventoryResult, std::string> InventoryChangeFailureAction::messages;
 
 bool InventoryChangeFailureAction::Execute(Event& event)
 {
@@ -89,7 +89,7 @@ bool InventoryChangeFailureAction::Execute(Event& event)
     if (err == EQUIP_ERR_OK)
         return false;
 
-    string msg = messages[(InventoryResult)err];
+    std::string msg = messages[(InventoryResult)err];
     if (!msg.empty())
     {
         ai->TellError(requester, msg);

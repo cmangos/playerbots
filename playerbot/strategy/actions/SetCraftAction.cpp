@@ -2,12 +2,12 @@
 #include "playerbot/playerbot.h"
 #include "SetCraftAction.h"
 
-#include "../../../ahbot/AhBotConfig.h"
+#include "ahbot/AhBotConfig.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/CraftValues.h"
 using namespace ai;
 
-map<uint32, SkillLineAbilityEntry const*> SetCraftAction::skillSpells;
+std::map<uint32, SkillLineAbilityEntry const*> SetCraftAction::skillSpells;
 
 bool SetCraftAction::Execute(Event& event)
 {
@@ -15,7 +15,7 @@ bool SetCraftAction::Execute(Event& event)
     if (!requester)
         return false;
 
-    string link = event.getParam();
+    std::string link = event.getParam();
 
     CraftData& data = AI_VALUE(CraftData&, "craft");
     if (link == "reset")
@@ -119,10 +119,10 @@ void SetCraftAction::TellCraft(Player* requester)
     if (!proto)
         return;
 
-    ostringstream out;
+    std::ostringstream out;
     out << "I will craft " << chat->formatItem(proto) << " using reagents: ";
     bool first = true;
-    for (map<uint32, int>::iterator i = data.required.begin(); i != data.required.end(); ++i)
+    for (std::map<uint32, int>::iterator i = data.required.begin(); i != data.required.end(); ++i)
     {
         uint32 item = i->first;
         int required = i->second;
@@ -152,6 +152,6 @@ uint32 SetCraftAction::GetCraftFee(CraftData& data)
     if (!proto)
         return 0;
 
-    uint32 level = max(proto->ItemLevel, proto->RequiredLevel);
+    uint32 level = std::max(proto->ItemLevel, proto->RequiredLevel);
     return sAhBotConfig.defaultMinPrice * level * level / 40;
 }

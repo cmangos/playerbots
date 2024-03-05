@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         FrostDKStrategy(PlayerbotAI* ai);
-        string getName() override { return "frost"; }
+        std::string getName() override { return "frost"; }
         int GetType() override { return STRATEGY_TYPE_COMBAT | STRATEGY_TYPE_DPS | STRATEGY_TYPE_MELEE; }
 
     private:
@@ -19,7 +19,7 @@ namespace ai
     {
     public:
         FrostDKAoeStrategy(PlayerbotAI* ai) : CombatStrategy(ai) {}
-        string getName() override { return "frost aoe"; }
+        std::string getName() override { return "frost aoe"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;

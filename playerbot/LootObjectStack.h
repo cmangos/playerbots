@@ -1,7 +1,5 @@
 #pragma once
 
-using namespace std;
-
 namespace ai
 {
     class ItemQualifier;
@@ -43,7 +41,7 @@ namespace ai
         time_t asOfTime;
     };
 
-    class LootTargetList : public set<LootTarget>
+    class LootTargetList : public std::set<LootTarget>
     {
     public:
         void shrink(time_t fromTime);
@@ -62,7 +60,7 @@ namespace ai
         LootObject GetLoot(float maxDistance = 0);
 
     private:
-        vector<LootObject> OrderByDistance(float maxDistance = 0);
+        std::vector<LootObject> OrderByDistance(float maxDistance = 0);
 
     private:
         Player* bot;

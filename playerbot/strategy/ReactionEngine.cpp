@@ -5,7 +5,6 @@
 #include <iomanip>
 
 using namespace ai;
-using namespace std;
 
 void Reaction::SetAction(Action* inAction)
 {
@@ -76,7 +75,7 @@ bool ReactionEngine::FindReaction(bool isStunned)
                         if (reaction->isUseful() && (!isStunned || reaction->isUsefulWhenStunned()))
                         {
                             // Process the multipliers
-                            for (list<Multiplier*>::iterator i = multipliers.begin(); i != multipliers.end(); i++)
+                            for (std::list<Multiplier*>::iterator i = multipliers.begin(); i != multipliers.end(); i++)
                             {
                                 reactionRelevance *= (*i)->GetValue(reaction);
                                 reaction->setRelevance(reactionRelevance);
@@ -227,7 +226,7 @@ bool ReactionEngine::ListenAndExecute(Action* action, Event& event)
 
     if (ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT))
     {
-        ostringstream out;
+        std::ostringstream out;
         out << "do: ";
         out << action->getName();
         if (actionExecuted)

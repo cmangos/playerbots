@@ -8,7 +8,7 @@ namespace ai
     class StayActionBase : public MovementAction 
     {
     public:
-        StayActionBase(PlayerbotAI* ai, string name) : MovementAction(ai, name) {}
+        StayActionBase(PlayerbotAI* ai, std::string name) : MovementAction(ai, name) {}
 
     protected:
         bool Stay(Player* requester);

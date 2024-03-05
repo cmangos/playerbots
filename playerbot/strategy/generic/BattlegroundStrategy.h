@@ -8,13 +8,13 @@ namespace ai
     public:
         BGStrategy(PlayerbotAI* ai) : PassTroughStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
-        string getName() override { return "bg"; }
+        std::string getName() override { return "bg"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "bg"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "bg"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy will make bots queue up for battle grounds remotely and join them when they get an invite.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "battleground" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "battleground" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -27,13 +27,13 @@ namespace ai
     public:
         BattlegroundStrategy(PlayerbotAI* ai) : Strategy(ai) {};
         int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
-        string getName() override { return "battleground"; }
+        std::string getName() override { return "battleground"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "battleground"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "battleground"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy gives bots basic behavior inside battle grounds like checking and moving to objectives and getting ready at the start gates.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "bg", "warsong" ,"arathi", "alterac", "eye", "isle",  "arena" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "bg", "warsong" ,"arathi", "alterac", "eye", "isle",  "arena" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -44,13 +44,13 @@ namespace ai
     public:
         WarsongStrategy(PlayerbotAI* ai) : Strategy(ai) {};
         int GetType() override { return STRATEGY_TYPE_GENERIC; }
-        string getName() override { return "warsong"; }
+        std::string getName() override { return "warsong"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "warsong"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "warsong"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy controls the behavior during a warsong gluch battleground like capturing/retaking flags and picking up buffs.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "battleground", "bg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "battleground", "bg" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -62,13 +62,13 @@ namespace ai
     public:
         AlteracStrategy(PlayerbotAI* ai) : Strategy(ai) {};
         int GetType() override { return STRATEGY_TYPE_GENERIC; }
-        string getName() override { return "alterac"; }
+        std::string getName() override { return "alterac"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "alterac"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "alterac"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy controls the behavior during an alertac valley battleground.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "battleground","bg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "battleground","bg" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -80,13 +80,13 @@ namespace ai
     public:
         ArathiStrategy(PlayerbotAI* ai) : Strategy(ai) {};
         int GetType() override { return STRATEGY_TYPE_GENERIC; }
-        string getName() override { return "arathi"; }
+        std::string getName() override { return "arathi"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "arathi"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "arathi"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy controls the behavior during an arathi basin battleground.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "battleground","bg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "battleground","bg" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -98,13 +98,13 @@ namespace ai
     public:
         EyeStrategy(PlayerbotAI* ai) : Strategy(ai) {};
         int GetType() override { return STRATEGY_TYPE_GENERIC; }
-        string getName() { return "eye"; }
+        std::string getName() { return "eye"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "eye"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "eye"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy controls the behavior during an eye of the storm basin battleground.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "battleground","bg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "battleground","bg" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -116,13 +116,13 @@ namespace ai
     public:
         IsleStrategy(PlayerbotAI* ai) : Strategy(ai) {};
         int GetType() override { return STRATEGY_TYPE_GENERIC; }
-        string getName() override { return "isle"; }
+        std::string getName() override { return "isle"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "isle"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "isle"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy controls the behavior during an isle of conquest battleground.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "battleground","bg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "battleground","bg" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -134,13 +134,13 @@ namespace ai
     public:
         ArenaStrategy(PlayerbotAI* ai) : Strategy(ai) {};
         int GetType() override { return STRATEGY_TYPE_GENERIC; }
-        string getName() override { return "arena"; }
+        std::string getName() override { return "arena"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "arena"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "arena"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy controls the behavior arena fight.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "battleground","bg" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "battleground","bg" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;

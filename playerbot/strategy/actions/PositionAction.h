@@ -14,12 +14,12 @@ namespace ai
     class MoveToPositionAction : public MovementAction
     {
     public:
-        MoveToPositionAction(PlayerbotAI* ai, string name, string qualifier, bool idle = false) : MovementAction(ai, name), qualifier(qualifier), idle(idle) {}
+        MoveToPositionAction(PlayerbotAI* ai, std::string name, std::string qualifier, bool idle = false) : MovementAction(ai, name), qualifier(qualifier), idle(idle) {}
         virtual bool Execute(Event& event);
         virtual bool isUseful();
 
     protected:
-        string qualifier;
+        std::string qualifier;
         bool idle;
     };
 

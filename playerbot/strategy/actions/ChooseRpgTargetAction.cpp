@@ -12,7 +12,7 @@
 
 using namespace ai;
 
-bool ChooseRpgTargetAction::HasSameTarget(ObjectGuid guid, uint32 max, list<ObjectGuid>& nearGuids)
+bool ChooseRpgTargetAction::HasSameTarget(ObjectGuid guid, uint32 max, std::list<ObjectGuid>& nearGuids)
 {
     if (ai->HasRealPlayerMaster())
         return 0;
@@ -53,7 +53,7 @@ float ChooseRpgTargetAction::getMaxRelevance(GuidPosition guidP)
 
     Strategy* rpgStrategy;
 
-    list<TriggerNode*> triggerNodes;
+    std::list<TriggerNode*> triggerNodes;
 
     float maxRelevance = 0.0f;
 
@@ -108,7 +108,7 @@ float ChooseRpgTargetAction::getMaxRelevance(GuidPosition guidP)
             }
         }
 
-        for (list<TriggerNode*>::iterator i = triggerNodes.begin(); i != triggerNodes.end(); i++)
+        for (std::list<TriggerNode*>::iterator i = triggerNodes.begin(); i != triggerNodes.end(); i++)
         {
             TriggerNode* trigger = *i;
             delete trigger;
@@ -140,13 +140,13 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         requester = nullptr;
     }
 
-    unordered_map<ObjectGuid, uint32> targets;
-    vector<ObjectGuid> targetList;
+    std::unordered_map<ObjectGuid, uint32> targets;
+    std::vector<ObjectGuid> targetList;
 
-    list<ObjectGuid> possibleTargets = AI_VALUE(list<ObjectGuid>, "possible rpg targets");
-    list<ObjectGuid> possibleObjects = bot->GetMap()->IsDungeon() ? AI_VALUE(list<ObjectGuid>, "nearest game objects") : AI_VALUE(list<ObjectGuid>, "nearest game objects no los"); // skip not in LOS objects in dungeons
-    list<ObjectGuid> possiblePlayers = AI_VALUE(list<ObjectGuid>, "nearest friendly players");
-    set<ObjectGuid>& ignoreList = AI_VALUE(set<ObjectGuid>&, "ignore rpg target");
+    std::list<ObjectGuid> possibleTargets = AI_VALUE(std::list<ObjectGuid>, "possible rpg targets");
+    std::list<ObjectGuid> possibleObjects = bot->GetMap()->IsDungeon() ? AI_VALUE(std::list<ObjectGuid>, "nearest game objects") : AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los"); // skip not in LOS objects in dungeons
+    std::list<ObjectGuid> possiblePlayers = AI_VALUE(std::list<ObjectGuid>, "nearest friendly players");
+    std::set<ObjectGuid>& ignoreList = AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target");
 
     for (auto target : possibleTargets)
         targets[target] = 0.0f;
@@ -176,7 +176,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
             targets.erase(target);
     }
 
-    SET_AI_VALUE(string, "next rpg action", this->getName());
+    SET_AI_VALUE(std::string, "next rpg action", this->getName());
 
     bool hasGoodRelevance = false;
 
@@ -190,7 +190,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     //Update tradeskill items so we can use lazy in trigger check.
     if(ai->HasStrategy("rpg craft", BotState::BOT_STATE_NON_COMBAT))
     {
-        AI_VALUE2(list<uint32>, "inventory item ids", "usage " + to_string((uint8)ItemUsage::ITEM_USAGE_SKILL));
+        AI_VALUE2(std::list<uint32>, "inventory item ids", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_SKILL));
     }
 
     context->ClearExpiredValues("can free move",10); //Clean up old free move to.
@@ -273,7 +273,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
             break;
     }
 
-    SET_AI_VALUE(string, "next rpg action", "");
+    SET_AI_VALUE(std::string, "next rpg action", "");
 
     for (auto it = begin(targets); it != end(targets);)
     {
@@ -291,23 +291,23 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     {
         if (ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT))
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "found: no targets, " << checked << " checked.";
             ai->TellPlayerNoFacing(requester, out);
         }
         sLog.outDetail("%s can't choose RPG target: all %zu are not available", bot->GetName(), possibleTargets.size());
-        RESET_AI_VALUE(set<ObjectGuid>&,"ignore rpg target");
+        RESET_AI_VALUE(std::set<ObjectGuid>&,"ignore rpg target");
         RESET_AI_VALUE(GuidPosition, "rpg target");
         return false;
     }
 
     if (ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT))
     {
-        vector<pair<ObjectGuid, uint32>> sortedTargets(targets.begin(), targets.end());
+        std::vector<std::pair<ObjectGuid, uint32>> sortedTargets(targets.begin(), targets.end());
 
-        std::sort(sortedTargets.begin(), sortedTargets.end(), [](pair<ObjectGuid, uint32>i, pair<ObjectGuid, uint32> j) {return i.second > j.second; });
+        std::sort(sortedTargets.begin(), sortedTargets.end(), [](std::pair<ObjectGuid, uint32>i, std::pair<ObjectGuid, uint32> j) {return i.second > j.second; });
 
-        ai->TellPlayerNoFacing(requester, "------" + to_string(targets.size()) + "------");
+        ai->TellPlayerNoFacing(requester, "------" + std::to_string(targets.size()) + "------");
 
         uint32 checked = 0;
 
@@ -318,7 +318,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
             if (!guidP.GetWorldObject())
                 continue;
 
-            ostringstream out;
+            std::ostringstream out;
             out << chat->formatWorldobject(guidP.GetWorldObject());
 
             out << " " << rgpActionReason[guidP] << " " << target.second;
@@ -329,7 +329,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
             if (checked >= 10)
             {
-                ostringstream out;
+                std::ostringstream out;
                 out << "and " << (sortedTargets.size()-checked) << " more...";
                 ai->TellPlayerNoFacing(requester, out);
                 break;
@@ -337,8 +337,8 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         }
     }
 
-    vector<ObjectGuid> guidps;
-    vector<int> relevances;
+    std::vector<ObjectGuid> guidps;
+    std::vector<int> relevances;
 
     for (auto& target : targets)
     {
@@ -357,14 +357,14 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
     if (!guidP)
     {
-        RESET_AI_VALUE(set<ObjectGuid>&, "ignore rpg target");
+        RESET_AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target");
         RESET_AI_VALUE(GuidPosition, "rpg target");
         return false;
     }
 
     if ((ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT)) && guidP.GetWorldObject())
     {
-        ostringstream out;
+        std::ostringstream out;
         out << "found: ";
         out << chat->formatWorldobject(guidP.GetWorldObject());
 
@@ -374,7 +374,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     }
 
     SET_AI_VALUE(GuidPosition, "rpg target", guidP);
-    SET_AI_VALUE(set<ObjectGuid>&, "ignore rpg target", ignoreList);
+    SET_AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target", ignoreList);
 
     return true;
 }
@@ -394,7 +394,7 @@ bool ChooseRpgTargetAction::isUseful()
     if (travelTarget->isTraveling() && AI_VALUE2(bool, "can free move to", *travelTarget->getPosition()))
         return false;
 
-    if (AI_VALUE(list<ObjectGuid>, "possible rpg targets").empty())
+    if (AI_VALUE(std::list<ObjectGuid>, "possible rpg targets").empty())
         return false;
 
     //Not stay, not guard, not combat, not trading and group ready.

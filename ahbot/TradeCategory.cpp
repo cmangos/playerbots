@@ -170,9 +170,9 @@ bool TradeSkill::IsCraftedBy(ItemPrototype const* proto, uint32 spellId)
     return false;
 }
 
-string TradeSkill::GetName()
+std::string TradeSkill::GetName()
 {
-    string name;
+    std::string name;
     switch (skill)
     {
     case SKILL_TAILORING:
@@ -208,9 +208,9 @@ string TradeSkill::GetName()
     return reagent ? name : name + ".craft";
 }
 
-string TradeSkill::GetMainName()
+std::string TradeSkill::GetMainName()
 {
-    string name;
+    std::string name;
     switch (skill)
     {
     case SKILL_TAILORING:
@@ -246,7 +246,7 @@ string TradeSkill::GetMainName()
     return name;
 }
 
-string TradeSkill::GetLabel()
+std::string TradeSkill::GetLabel()
 {
     if (reagent)
     {

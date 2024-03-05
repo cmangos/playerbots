@@ -8,7 +8,7 @@ namespace ai
     public:
         BeastMasteryHunterPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_RANGED; }
-        string getName() override { return "beast mastery"; }
+        std::string getName() override { return "beast mastery"; }
     };
 
     class BeastMasteryHunterStrategy : public HunterStrategy
@@ -76,7 +76,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterAoePveStrategy(PlayerbotAI* ai) : BeastMasteryHunterAoeStrategy(ai) {}
-        string getName() override { return "aoe beast mastery pve"; }
+        std::string getName() override { return "aoe beast mastery pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -87,7 +87,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterAoePvpStrategy(PlayerbotAI* ai) : BeastMasteryHunterAoeStrategy(ai) {}
-        string getName() override { return "aoe beast mastery pvp"; }
+        std::string getName() override { return "aoe beast mastery pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -98,7 +98,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterAoeRaidStrategy(PlayerbotAI* ai) : BeastMasteryHunterAoeStrategy(ai) {}
-        string getName() override { return "aoe beast mastery raid"; }
+        std::string getName() override { return "aoe beast mastery raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -119,7 +119,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterBuffPveStrategy(PlayerbotAI* ai) : BeastMasteryHunterBuffStrategy(ai) {}
-        string getName() override { return "buff beast mastery pve"; }
+        std::string getName() override { return "buff beast mastery pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -130,7 +130,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterBuffPvpStrategy(PlayerbotAI* ai) : BeastMasteryHunterBuffStrategy(ai) {}
-        string getName() override { return "buff beast mastery pvp"; }
+        std::string getName() override { return "buff beast mastery pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -141,7 +141,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterBuffRaidStrategy(PlayerbotAI* ai) : BeastMasteryHunterBuffStrategy(ai) {}
-        string getName() override { return "buff beast mastery raid"; }
+        std::string getName() override { return "buff beast mastery raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -162,7 +162,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterBoostPveStrategy(PlayerbotAI* ai) : BeastMasteryHunterBoostStrategy(ai) {}
-        string getName() override { return "boost beast mastery pve"; }
+        std::string getName() override { return "boost beast mastery pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -173,7 +173,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterBoostPvpStrategy(PlayerbotAI* ai) : BeastMasteryHunterBoostStrategy(ai) {}
-        string getName() override { return "boost beast mastery pvp"; }
+        std::string getName() override { return "boost beast mastery pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -184,7 +184,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterBoostRaidStrategy(PlayerbotAI* ai) : BeastMasteryHunterBoostStrategy(ai) {}
-        string getName() override { return "boost beast mastery raid"; }
+        std::string getName() override { return "boost beast mastery raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -205,7 +205,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterCcPveStrategy(PlayerbotAI* ai) : BeastMasteryHunterCcStrategy(ai) {}
-        string getName() override { return "cc beast mastery pve"; }
+        std::string getName() override { return "cc beast mastery pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -216,7 +216,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterCcPvpStrategy(PlayerbotAI* ai) : BeastMasteryHunterCcStrategy(ai) {}
-        string getName() override { return "cc beast mastery pvp"; }
+        std::string getName() override { return "cc beast mastery pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -227,7 +227,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterCcRaidStrategy(PlayerbotAI* ai) : BeastMasteryHunterCcStrategy(ai) {}
-        string getName() override { return "cc beast mastery raid"; }
+        std::string getName() override { return "cc beast mastery raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -247,7 +247,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterStingPveStrategy(PlayerbotAI* ai) : BeastMasteryHunterStingStrategy(ai) {}
-        string getName() override { return "sting beast mastery pve"; }
+        std::string getName() override { return "sting beast mastery pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -257,7 +257,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterStingPvpStrategy(PlayerbotAI* ai) : BeastMasteryHunterStingStrategy(ai) {}
-        string getName() override { return "sting beast mastery pvp"; }
+        std::string getName() override { return "sting beast mastery pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -267,7 +267,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterStingRaidStrategy(PlayerbotAI* ai) : BeastMasteryHunterStingStrategy(ai) {}
-        string getName() override { return "sting beast mastery raid"; }
+        std::string getName() override { return "sting beast mastery raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -287,7 +287,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterAspectPveStrategy(PlayerbotAI* ai) : BeastMasteryHunterAspectStrategy(ai) {}
-        string getName() override { return "aspect beast mastery pve"; }
+        std::string getName() override { return "aspect beast mastery pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -298,7 +298,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterAspectPvpStrategy(PlayerbotAI* ai) : BeastMasteryHunterAspectStrategy(ai) {}
-        string getName() override { return "aspect beast mastery pvp"; }
+        std::string getName() override { return "aspect beast mastery pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -309,7 +309,7 @@ namespace ai
     {
     public:
         BeastMasteryHunterAspectRaidStrategy(PlayerbotAI* ai) : BeastMasteryHunterAspectStrategy(ai) {}
-        string getName() override { return "aspect beast mastery raid"; }
+        std::string getName() override { return "aspect beast mastery raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

@@ -19,7 +19,7 @@ bool TellCastFailedAction::Execute(Event& event)
         return false;
 
     const SpellEntry *const pSpellInfo =  sServerFacade.LookupSpellInfo(spellId);
-    ostringstream out; out << chat->formatSpell(pSpellInfo) << ": ";
+    std::ostringstream out; out << chat->formatSpell(pSpellInfo) << ": ";
     switch (result)
     {
     case SPELL_FAILED_NOT_READY:
@@ -57,7 +57,7 @@ bool TellCastFailedAction::Execute(Event& event)
 bool TellSpellAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string spell = event.getParam();
+    std::string spell = event.getParam();
     uint32 spellId = AI_VALUE2(uint32, "spell id", spell);
     if (!spellId)
         return false;
@@ -66,7 +66,7 @@ bool TellSpellAction::Execute(Event& event)
     if (!spellInfo)
         return false;
 
-    ostringstream out; out << chat->formatSpell(spellInfo);
+    std::ostringstream out; out << chat->formatSpell(spellInfo);
     ai->TellError(requester, out.str());
     return true;
 }

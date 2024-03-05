@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         GrindingStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai) {}
-        string getName() override { return "grind"; }
+        std::string getName() override { return "grind"; }
         int GetType() override { return STRATEGY_TYPE_DPS; }
 
     private:

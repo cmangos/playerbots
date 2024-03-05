@@ -6,14 +6,13 @@
 #include "Guilds/Guild.h"
 #include "Guilds/GuildMgr.h"
 
-using namespace std;
 using namespace ai;
 
 bool GuildBankAction::Execute(Event& event)
 {
 #ifndef MANGOSBOT_ZERO
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
     if (text.empty())
         return false;
 
@@ -23,8 +22,8 @@ bool GuildBankAction::Execute(Event& event)
             return false;
     }
 
-    list<ObjectGuid> gos = *ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest game objects");
-    for (list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); ++i)
+    std::list<ObjectGuid> gos = *ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest game objects");
+    for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); ++i)
     {
         GameObject* go = ai->GetGameObject(*i);
         if (!go || !bot->GetGameObjectIfCanInteractWith(go->GetObjectGuid(), GAMEOBJECT_TYPE_GUILD_BANK))
@@ -40,17 +39,17 @@ bool GuildBankAction::Execute(Event& event)
 #endif
 }
 
-bool GuildBankAction::Execute(string text, GameObject* bank, Player* requester)
+bool GuildBankAction::Execute(std::string text, GameObject* bank, Player* requester)
 {
     bool result = true;
 
     IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
 
-    list<Item*> found = ai->InventoryParseItems(text, mask);
+    std::list<Item*> found = ai->InventoryParseItems(text, mask);
     if (found.empty())
         return false;
 
-    for (list<Item*>::iterator i = found.begin(); i != found.end(); i++)
+    for (std::list<Item*>::iterator i = found.begin(); i != found.end(); i++)
     {
         Item* item = *i;
         if (item)
@@ -65,7 +64,7 @@ bool GuildBankAction::MoveFromCharToBank(Item* item, GameObject* bank, Player* r
 #ifndef MANGOSBOT_ZERO
     uint32 playerSlot = item->GetSlot();
     uint32 playerBag = item->GetBagSlot();
-    ostringstream out;
+    std::ostringstream out;
 
     Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
     //guild->SwapItems(bot, 0, playerSlot, 0, INVENTORY_SLOT_BAG_0, 0);

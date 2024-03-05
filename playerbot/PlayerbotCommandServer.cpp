@@ -8,8 +8,6 @@
 
 INSTANTIATE_SINGLETON_1(PlayerbotCommandServer);
 
-using namespace std;
-
 #ifdef CMANGOS
 
 #include <boost/bind.hpp>
@@ -17,14 +15,13 @@ using namespace std;
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
 
-using namespace std;
 using boost::asio::ip::tcp;
 typedef boost::shared_ptr<tcp::socket> socket_ptr;
 
-bool ReadLine(socket_ptr sock, string* buffer, string* line)
+bool ReadLine(socket_ptr sock, std::string* buffer, std::string* line)
 {
     // Do the real reading from fd until buffer has '\n'.
-    string::iterator pos;
+    std::string::iterator pos;
     while ((pos = find(buffer->begin(), buffer->end(), '\n')) == buffer->end())
     {
         char buf[1025];
@@ -39,8 +36,8 @@ bool ReadLine(socket_ptr sock, string* buffer, string* line)
         *buffer += buf;
     }
 
-    *line = string(buffer->begin(), pos);
-    *buffer = string(pos + 1, buffer->end());
+    *line = std::string(buffer->begin(), pos);
+    *buffer = std::string(pos + 1, buffer->end());
     return true;
 }
 
@@ -48,9 +45,9 @@ void session(socket_ptr sock)
 {
     try
     {
-        string buffer, request;
+        std::string buffer, request;
         while (ReadLine(sock, &buffer, &request)) {
-            string response = sRandomPlayerbotMgr.HandleRemoteCommand(request) + "\n";
+            std::string response = sRandomPlayerbotMgr.HandleRemoteCommand(request) + "\n";
             boost::asio::write(*sock, boost::asio::buffer(response.c_str(), response.size()));
             request = "";
         }
@@ -78,7 +75,7 @@ void Run()
         return;
     }
 
-    ostringstream s; s << "Starting Playerbot Command Server on port " << sPlayerbotAIConfig.commandServerPort;
+    std::ostringstream s; s << "Starting Playerbot Command Server on port " << sPlayerbotAIConfig.commandServerPort;
     sLog.outString("%s",s.str().c_str());
 
     try
@@ -94,16 +91,16 @@ void Run()
 
 void PlayerbotCommandServer::Start()
 {
-    thread serverThread(Run);
+    std::thread serverThread(Run);
     serverThread.detach();
 }
 #endif
 
 #ifdef MANGOS
-bool ReadLine(ACE_SOCK_Stream& client_stream, string* buffer, string* line)
+bool ReadLine(ACE_SOCK_Stream& client_stream, std::string* buffer, std::string* line)
 {
     // Do the real reading from fd until buffer has '\n'.
-    string::iterator pos;
+    std::string::iterator pos;
     while ((pos = find(buffer->begin(), buffer->end(), '\n')) == buffer->end())
     {
         char buf[33];
@@ -115,8 +112,8 @@ bool ReadLine(ACE_SOCK_Stream& client_stream, string* buffer, string* line)
         *buffer += buf;
     }
 
-    *line = string(buffer->begin(), pos);
-    *buffer = string(pos + 1, buffer->end());
+    *line = std::string(buffer->begin(), pos);
+    *buffer = std::string(pos + 1, buffer->end());
     return true;
 }
 
@@ -128,7 +125,7 @@ public:
             return 0;
         }
 
-        ostringstream s; s << "Starting Playerbot Command Server on port " << sPlayerbotAIConfig.commandServerPort;
+        std::ostringstream s; s << "Starting Playerbot Command Server on port " << sPlayerbotAIConfig.commandServerPort;
         sLog.outString(s.str().c_str());
 
         ACE_INET_Addr server(sPlayerbotAIConfig.commandServerPort);

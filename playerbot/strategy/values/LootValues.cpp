@@ -1,4 +1,3 @@
-#include "../../../botpch.h"
 #include "playerbot/playerbot.h"
 #include "SharedValueContext.h"
 #include "LootValues.h"
@@ -6,9 +5,9 @@
 
 using namespace ai;
 
-vector<LootItem*> LootAccess::GetLootContentFor(Player* player) const
+std::vector<LootItem*> LootAccess::GetLootContentFor(Player* player) const
 {
-	vector<LootItem*> retvec;
+	std::vector<LootItem*> retvec;
 
 	for (LootItemList::const_iterator lootItemItr = m_lootItems.begin(); lootItemItr != m_lootItems.end(); ++lootItemItr)
 	{
@@ -135,7 +134,7 @@ DropMap* DropMapValue::Calculate()
 
 		if(lTemplateA)
 			for (LootStoreItem const& lItem : lTemplateA->Entries)
-				dropMap->insert(make_pair(lItem.itemid,sEntry));
+				dropMap->insert(std::make_pair(lItem.itemid,sEntry));
 	}
 
 	for (uint32 entry = 0; entry < sGOStorage.GetMaxEntry(); entry++)
@@ -146,20 +145,20 @@ DropMap* DropMapValue::Calculate()
 
 		if(lTemplateA)
 			for (LootStoreItem const& lItem : lTemplateA->Entries)
-				dropMap->insert(make_pair(lItem.itemid, -sEntry));
+				dropMap->insert(std::make_pair(lItem.itemid, -sEntry));
 	}
 
 	return dropMap;
 }
 
 //What items does this entry have in its loot list?
-list<int32> ItemDropListValue::Calculate()
+std::list<int32> ItemDropListValue::Calculate()
 {
 	uint32 itemId = stoi(getQualifier());
 
 	DropMap* dropMap = GAI_VALUE(DropMap*, "drop map");
 
-	list<int32> entries;
+	std::list<int32> entries;
 
 	auto range = dropMap->equal_range(itemId);
 
@@ -170,11 +169,11 @@ list<int32> ItemDropListValue::Calculate()
 }
 
 //What items does this entry have in its loot list?
-list<uint32> EntryLootListValue::Calculate()
+std::list<uint32> EntryLootListValue::Calculate()
 {
 	int32 entry = stoi(getQualifier());
 
-	list<uint32> items;
+	std::list<uint32> items;
 
 	LootTemplateAccess const* lTemplateA;
 
@@ -215,7 +214,7 @@ itemUsageMap EntryLootUsageValue::Calculate()
 {
 	itemUsageMap items;
 
-	for (auto itemId : GAI_VALUE2(list<uint32>, "entry loot list", getQualifier()))
+	for (auto itemId : GAI_VALUE2(std::list<uint32>, "entry loot list", getQualifier()))
 	{
 		items[AI_VALUE2(ItemUsage, "item usage", itemId)].push_back(itemId);
 	}
@@ -245,7 +244,7 @@ uint32 StackSpaceForItem::Calculate()
 	if (maxStack == 1)
 		return 0;
 
-	list<Item*> found = AI_VALUE2(list < Item*>, "inventory items", chat->formatItem(proto));
+	std::list<Item*> found = AI_VALUE2(std::list < Item*>, "inventory items", chat->formatItem(proto));
 
 	maxValue = 0;
 
@@ -343,9 +342,9 @@ void ActiveRolls::CleanUp(Player* bot, LootRollMap& rollMap, ObjectGuid guid, ui
 	}
 }
 
-string ActiveRolls::Format()
+std::string ActiveRolls::Format()
 {
-	ostringstream out;
+	std::ostringstream out;
 
 	for (auto& roll : value)
 	{
@@ -356,7 +355,7 @@ string ActiveRolls::Format()
 		else
 			out << roll.first;
 
-		string itemLink;
+		std::string itemLink;
 
 		Loot* loot = sLootMgr.GetLoot(bot, roll.first);
 		if (loot)

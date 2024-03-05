@@ -11,7 +11,7 @@
 using namespace ai;
 using namespace MaNGOS;
 
-list<ObjectGuid> PossibleTargetsValue::Calculate()
+std::list<ObjectGuid> PossibleTargetsValue::Calculate()
 {
     float rangeCheck = range;
     bool shouldIgnoreValidate = false;
@@ -21,11 +21,11 @@ list<ObjectGuid> PossibleTargetsValue::Calculate()
         shouldIgnoreValidate = Qualified::getMultiQualifierInt(qualifier, 1, ":");
     }
 
-    list<Unit*> targets;
+    std::list<Unit*> targets;
     FindPossibleTargets(bot, targets, rangeCheck);
 
-    list<ObjectGuid> results;
-    for (list<Unit*>::iterator i = targets.begin(); i != targets.end(); ++i)
+    std::list<ObjectGuid> results;
+    for (std::list<Unit*>::iterator i = targets.begin(); i != targets.end(); ++i)
     {
         Unit* unit = *i;
         if (unit && (shouldIgnoreValidate || AcceptUnit(unit)))
@@ -37,7 +37,7 @@ list<ObjectGuid> PossibleTargetsValue::Calculate()
     return results;
 }
 
-void PossibleTargetsValue::FindUnits(list<Unit*> &targets)
+void PossibleTargetsValue::FindUnits(std::list<Unit*> &targets)
 {
     FindPossibleTargets(bot, targets, range);
 }
@@ -47,7 +47,7 @@ bool PossibleTargetsValue::AcceptUnit(Unit* unit)
     return IsValid(unit, bot, ignoreLos);
 }
 
-void PossibleTargetsValue::FindPossibleTargets(Player* player, list<Unit*>& targets, float range)
+void PossibleTargetsValue::FindPossibleTargets(Player* player, std::list<Unit*>& targets, float range)
 {
     MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, range);
     MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);

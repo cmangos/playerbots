@@ -5,12 +5,12 @@
 #include "playerbot/ServerFacade.h"
 using namespace ai;
 
-extern vector<string> split(const string &s, char delim);
+extern std::vector<std::string> split(const std::string &s, char delim);
 
 class PlayerWithoutAuraPredicate : public FindPlayerPredicate, public PlayerbotAIAware
 {
 public:
-    PlayerWithoutAuraPredicate(PlayerbotAI* ai, string aura) :
+    PlayerWithoutAuraPredicate(PlayerbotAI* ai, std::string aura) :
         PlayerbotAIAware(ai), FindPlayerPredicate(), auras(split(aura, ',')) {}
 
 public:
@@ -22,7 +22,7 @@ public:
 
         if (!sServerFacade.IsAlive(unit)) return false;
 
-        for (vector<string>::iterator i = auras.begin(); i != auras.end(); ++i)
+        for (std::vector<std::string>::iterator i = auras.begin(); i != auras.end(); ++i)
         {
 #ifdef MANGOSBOT_ZERO
             // Ignore mana buff spells for non mana users
@@ -43,7 +43,7 @@ public:
     }
 
 private:
-    vector<string> auras;
+    std::vector<std::string> auras;
 };
 
 Unit* FriendlyUnitWithoutAuraValue::Calculate()
@@ -81,7 +81,7 @@ Unit* PartyMemberWithoutAuraValue::Calculate()
 class PlayerWithoutMyAuraPredicate : public FindPlayerPredicate, public PlayerbotAIAware
 {
 public:
-    PlayerWithoutMyAuraPredicate(PlayerbotAI* ai, string aura) :
+    PlayerWithoutMyAuraPredicate(PlayerbotAI* ai, std::string aura) :
         PlayerbotAIAware(ai), FindPlayerPredicate(), auras(split(aura, ',')) {}
 
 public:
@@ -94,7 +94,7 @@ public:
         if (!sServerFacade.IsAlive(unit)) return false;
         if (sServerFacade.GetDistance2d(unit, ai->GetBot()) > 30.0f) return false;
 
-        for (vector<string>::iterator i = auras.begin(); i != auras.end(); ++i)
+        for (std::vector<std::string>::iterator i = auras.begin(); i != auras.end(); ++i)
         {
             if (ai->HasMyAura(*i, unit))
                 return false;
@@ -104,7 +104,7 @@ public:
     }
 
 private:
-    vector<string> auras;
+    std::vector<std::string> auras;
 };
 
 Unit* PartyMemberWithoutMyAuraValue::Calculate()
@@ -126,7 +126,7 @@ Unit* PartyMemberWithoutMyAuraValue::Calculate()
 class TankWithoutAuraPredicate : public FindPlayerPredicate, public PlayerbotAIAware
 {
 public:
-    TankWithoutAuraPredicate(PlayerbotAI* ai, string aura) :
+    TankWithoutAuraPredicate(PlayerbotAI* ai, std::string aura) :
         PlayerbotAIAware(ai), FindPlayerPredicate(), auras(split(aura, ',')) {}
 
 public:
@@ -137,7 +137,7 @@ public:
             if (ai->IsTank((Player*)unit))
             {
                 bool missingAura = false;
-                for (vector<string>::iterator i = auras.begin(); i != auras.end(); ++i)
+                for (std::vector<std::string>::iterator i = auras.begin(); i != auras.end(); ++i)
                 {
                     if (!ai->HasAura(*i, unit))
                     {
@@ -154,7 +154,7 @@ public:
     }
 
 private:
-    vector<string> auras;
+    std::vector<std::string> auras;
 };
 
 Unit* PartyTankWithoutAuraValue::Calculate()

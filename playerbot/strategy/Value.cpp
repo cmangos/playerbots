@@ -14,9 +14,9 @@ std::string ObjectGuidCalculatedValue::Format()
 
 std::string ObjectGuidListCalculatedValue::Format()
 {
-    ostringstream out; out << "{";
-    list<ObjectGuid> guids = this->Calculate();
-    for (list<ObjectGuid>::iterator i = guids.begin(); i != guids.end(); ++i)
+    std::ostringstream out; out << "{";
+    std::list<ObjectGuid> guids = this->Calculate();
+    for (std::list<ObjectGuid>::iterator i = guids.begin(); i != guids.end(); ++i)
     {
         GuidPosition guid = GuidPosition(*i, bot->GetMapId());
         out << chat->formatGuidPosition(guid) << ",";
@@ -27,16 +27,16 @@ std::string ObjectGuidListCalculatedValue::Format()
 
 std::string GuidPositionCalculatedValue::Format()
 {
-    ostringstream out;
+    std::ostringstream out;
     GuidPosition guidP = this->Calculate();
     return chat->formatGuidPosition(guidP);
 }
 
 std::string GuidPositionListCalculatedValue::Format()
 {
-    ostringstream out; out << "{";
-    list<GuidPosition> guids = this->Calculate();
-    for (list<GuidPosition>::iterator i = guids.begin(); i != guids.end(); ++i)
+    std::ostringstream out; out << "{";
+    std::list<GuidPosition> guids = this->Calculate();
+    for (std::list<GuidPosition>::iterator i = guids.begin(); i != guids.end(); ++i)
     {
         GuidPosition guidP = *i;
         out << chat->formatGuidPosition(guidP) << ",";

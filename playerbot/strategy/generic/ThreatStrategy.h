@@ -1,6 +1,6 @@
 #pragma once
-#include "../Multiplier.h"
-#include "../Strategy.h"
+#include "playerbot/strategy/Multiplier.h"
+#include "playerbot/strategy/Strategy.h"
 
 namespace ai
 {
@@ -17,7 +17,7 @@ namespace ai
     {
     public:
         ThreatStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "threat"; }
+        std::string getName() override { return "threat"; }
 
     private:
         void InitCombatMultipliers(std::list<Multiplier*> &multipliers) override;

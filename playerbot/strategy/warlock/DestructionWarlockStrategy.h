@@ -8,7 +8,7 @@ namespace ai
     public:
         DestructionWarlockPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_RANGED; }
-        string getName() override { return "destruction"; }
+        std::string getName() override { return "destruction"; }
     };
 
     class DestructionWarlockStrategy : public WarlockStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         DestructionWarlockAoePveStrategy(PlayerbotAI* ai) : DestructionWarlockAoeStrategy(ai) {}
-        string getName() override { return "aoe destruction pve"; }
+        std::string getName() override { return "aoe destruction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         DestructionWarlockAoePvpStrategy(PlayerbotAI* ai) : DestructionWarlockAoeStrategy(ai) {}
-        string getName() override { return "aoe destruction pvp"; }
+        std::string getName() override { return "aoe destruction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         DestructionWarlockAoeRaidStrategy(PlayerbotAI* ai) : DestructionWarlockAoeStrategy(ai) {}
-        string getName() override { return "aoe destruction raid"; }
+        std::string getName() override { return "aoe destruction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         DestructionWarlockBuffPveStrategy(PlayerbotAI* ai) : DestructionWarlockBuffStrategy(ai) {}
-        string getName() override { return "buff destruction pve"; }
+        std::string getName() override { return "buff destruction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         DestructionWarlockBuffPvpStrategy(PlayerbotAI* ai) : DestructionWarlockBuffStrategy(ai) {}
-        string getName() override { return "buff destruction pvp"; }
+        std::string getName() override { return "buff destruction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         DestructionWarlockBuffRaidStrategy(PlayerbotAI* ai) : DestructionWarlockBuffStrategy(ai) {}
-        string getName() override { return "buff destruction raid"; }
+        std::string getName() override { return "buff destruction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         DestructionWarlockBoostPveStrategy(PlayerbotAI* ai) : DestructionWarlockBoostStrategy(ai) {}
-        string getName() override { return "boost destruction pve"; }
+        std::string getName() override { return "boost destruction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         DestructionWarlockBoostPvpStrategy(PlayerbotAI* ai) : DestructionWarlockBoostStrategy(ai) {}
-        string getName() override { return "boost destruction pvp"; }
+        std::string getName() override { return "boost destruction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         DestructionWarlockBoostRaidStrategy(PlayerbotAI* ai) : DestructionWarlockBoostStrategy(ai) {}
-        string getName() override { return "boost destruction raid"; }
+        std::string getName() override { return "boost destruction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         DestructionWarlockCcPveStrategy(PlayerbotAI* ai) : DestructionWarlockCcStrategy(ai) {}
-        string getName() override { return "cc destruction pve"; }
+        std::string getName() override { return "cc destruction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         DestructionWarlockCcPvpStrategy(PlayerbotAI* ai) : DestructionWarlockCcStrategy(ai) {}
-        string getName() override { return "cc destruction pvp"; }
+        std::string getName() override { return "cc destruction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         DestructionWarlockCcRaidStrategy(PlayerbotAI* ai) : DestructionWarlockCcStrategy(ai) {}
-        string getName() override { return "cc destruction raid"; }
+        std::string getName() override { return "cc destruction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -250,7 +250,7 @@ namespace ai
     {
     public:
         DestructionWarlockPetPveStrategy(PlayerbotAI* ai) : DestructionWarlockPetStrategy(ai) {}
-        string getName() override { return "pet destruction pve"; }
+        std::string getName() override { return "pet destruction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -261,7 +261,7 @@ namespace ai
     {
     public:
         DestructionWarlockPetPvpStrategy(PlayerbotAI* ai) : DestructionWarlockPetStrategy(ai) {}
-        string getName() override { return "pet destruction pvp"; }
+        std::string getName() override { return "pet destruction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -272,7 +272,7 @@ namespace ai
     {
     public:
         DestructionWarlockPetRaidStrategy(PlayerbotAI* ai) : DestructionWarlockPetStrategy(ai) {}
-        string getName() override { return "pet destruction raid"; }
+        std::string getName() override { return "pet destruction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -292,7 +292,7 @@ namespace ai
     {
     public:
         DestructionWarlockCursesPveStrategy(PlayerbotAI* ai) : DestructionWarlockCursesStrategy(ai) {}
-        string getName() override { return "curse destruction pve"; }
+        std::string getName() override { return "curse destruction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -302,7 +302,7 @@ namespace ai
     {
     public:
         DestructionWarlockCursesPvpStrategy(PlayerbotAI* ai) : DestructionWarlockCursesStrategy(ai) {}
-        string getName() override { return "curse destruction pvp"; }
+        std::string getName() override { return "curse destruction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -312,7 +312,7 @@ namespace ai
     {
     public:
         DestructionWarlockCursesRaidStrategy(PlayerbotAI* ai) : DestructionWarlockCursesStrategy(ai) {}
-        string getName() override { return "curse destruction raid"; }
+        std::string getName() override { return "curse destruction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

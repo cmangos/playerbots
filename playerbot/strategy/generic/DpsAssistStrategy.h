@@ -1,5 +1,5 @@
 #pragma once
-#include "../Strategy.h"
+#include "playerbot/strategy/Strategy.h"
 
 namespace ai
 {
@@ -7,15 +7,15 @@ namespace ai
     {
     public:
         DpsAssistStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "dps assist"; }
+        std::string getName() override { return "dps assist"; }
 		int GetType() override { return STRATEGY_TYPE_DPS; }
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "dps assist"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "dps assist"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy will make the bot assist others when picking a target to attack.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "dps aoe" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "dps aoe" }; }
 #endif
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -25,15 +25,15 @@ namespace ai
     {
     public:
         DpsAoeStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "dps aoe"; }
+        std::string getName() override { return "dps aoe"; }
         int GetType() override { return STRATEGY_TYPE_DPS; }
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "dps aoe"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "dps aoe"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy will make the bot use aoe abilities when multiple targets are close to eachother.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "dps assist" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "dps assist" }; }
 #endif
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;

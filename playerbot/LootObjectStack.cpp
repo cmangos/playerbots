@@ -5,7 +5,6 @@
 #include "playerbot/strategy/values/SharedValueContext.h"
 
 using namespace ai;
-using namespace std;
 
 #define MAX_LOOT_OBJECT_COUNT 10
 
@@ -37,7 +36,7 @@ bool LootTarget::operator< (const LootTarget& other) const
 
 void LootTargetList::shrink(time_t fromTime)
 {
-    for (set<LootTarget>::iterator i = begin(); i != end(); )
+    for (std::set<LootTarget>::iterator i = begin(); i != end(); )
     {
         if (i->asOfTime <= fromTime)
             erase(i++);
@@ -102,7 +101,7 @@ void LootObject::Refresh(Player* bot, ObjectGuid guid)
 #else
         /*if (!guid.IsEmpty())
         {
-            for (auto& entry : GAI_VALUE2(list<int32>, "item drop list", -go->GetEntry()))
+            for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", -go->GetEntry()))
             {
                 if (IsNeededForQuest(bot, entry))
                 {
@@ -118,7 +117,7 @@ void LootObject::Refresh(Player* bot, ObjectGuid guid)
             return;
 
         uint32 goId = go->GetGOInfo()->id;
-        set<uint32>& skipGoLootList = ai->GetAiObjectContext()->GetValue<set<uint32>& >("skip go loot list")->Get();
+        std::set<uint32>& skipGoLootList = ai->GetAiObjectContext()->GetValue<std::set<uint32>& >("skip go loot list")->Get();
         if (skipGoLootList.find(goId) != skipGoLootList.end()) return;
 
         uint32 lockId = go->GetGOInfo()->GetLockId();
@@ -145,7 +144,7 @@ void LootObject::Refresh(Player* bot, ObjectGuid guid)
                 else if (SkillByLockType(LockType(lockInfo->Index[i])) > 0)
                 {
                     skillId = SkillByLockType(LockType(lockInfo->Index[i]));
-                    reqSkillValue = max((uint32)1, lockInfo->Skill[i]);
+                    reqSkillValue = std::max((uint32)1, lockInfo->Skill[i]);
                     this->guid = guid;
                 }
                 break;
@@ -236,7 +235,7 @@ bool LootObject::IsLootPossible(Player* bot)
 
     AiObjectContext* context = ai->GetAiObjectContext();
 
-    if (!AI_VALUE2_LAZY(bool, "should loot object", to_string(guid.GetRawValue())))
+    if (!AI_VALUE2_LAZY(bool, "should loot object", std::to_string(guid.GetRawValue())))
         return false;
 
     // Check if the game object has quest loot and bot has the quest for it
@@ -292,7 +291,7 @@ bool LootObjectStack::Add(ObjectGuid guid)
     if (availableLoot.size() < MAX_LOOT_OBJECT_COUNT)
         return true;
 
-    vector<LootObject> ordered = OrderByDistance();
+    std::vector<LootObject> ordered = OrderByDistance();
     for (size_t i = MAX_LOOT_OBJECT_COUNT; i < ordered.size(); i++)
         Remove(ordered[i].guid);
 
@@ -313,21 +312,21 @@ void LootObjectStack::Clear()
 
 bool LootObjectStack::CanLoot(float maxDistance)
 {
-    vector<LootObject> ordered = OrderByDistance(maxDistance);
+    std::vector<LootObject> ordered = OrderByDistance(maxDistance);
     return !ordered.empty();
 }
 
 LootObject LootObjectStack::GetLoot(float maxDistance)
 {
-    vector<LootObject> ordered = OrderByDistance(maxDistance);
+    std::vector<LootObject> ordered = OrderByDistance(maxDistance);
     return ordered.empty() ? LootObject() : *ordered.begin();
 }
 
-vector<LootObject> LootObjectStack::OrderByDistance(float maxDistance)
+std::vector<LootObject> LootObjectStack::OrderByDistance(float maxDistance)
 {
     availableLoot.shrink(time(0) - 30);
 
-    map<float, LootObject> sortedMap;
+    std::map<float, LootObject> sortedMap;
     LootTargetList safeCopy(availableLoot);
     for (LootTargetList::iterator i = safeCopy.begin(); i != safeCopy.end(); i++)
     {
@@ -341,8 +340,8 @@ vector<LootObject> LootObjectStack::OrderByDistance(float maxDistance)
             sortedMap[distance] = lootObject;
     }
 
-    vector<LootObject> result;
-    for (map<float, LootObject>::iterator i = sortedMap.begin(); i != sortedMap.end(); i++)
+    std::vector<LootObject> result;
+    for (std::map<float, LootObject>::iterator i = sortedMap.begin(); i != sortedMap.end(); i++)
         result.push_back(i->second);
     return result;
 }

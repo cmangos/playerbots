@@ -51,7 +51,7 @@ namespace ai
         SharedObjectContext() { valueContexts.Add(new SharedValueContext()); };
 
     public:
-        virtual UntypedValue* GetUntypedValue(const string& name)
+        virtual UntypedValue* GetUntypedValue(const std::string& name)
         {
             PlayerbotAI* ai = new PlayerbotAI();
             UntypedValue* value = valueContexts.GetObject(name, ai);
@@ -60,21 +60,21 @@ namespace ai
         }
 
         template<class T>
-        Value<T>* GetValue(const string& name)
+        Value<T>* GetValue(const std::string& name)
         {
             return dynamic_cast<Value<T>*>(GetUntypedValue(name));
         }
 
         template<class T>
-        Value<T>* GetValue(const string& name, const string& param)
+        Value<T>* GetValue(const std::string& name, const std::string& param)
         {
-            return GetValue<T>((string(name) + "::" + param));
+            return GetValue<T>((std::string(name) + "::" + param));
         }
 
         template<class T>
-        Value<T>* GetValue(const string& name, int32 param)
+        Value<T>* GetValue(const std::string& name, int32 param)
         {
-            ostringstream out; out << param;
+            std::ostringstream out; out << param;
             return GetValue<T>(name, out.str());
         }
     protected:

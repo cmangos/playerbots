@@ -4,7 +4,7 @@
 
 using namespace ai;
 
-void FleeStrategy::InitCombatTriggers(list<TriggerNode*> &triggers)
+void FleeStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
         "panic",
@@ -15,7 +15,7 @@ void FleeStrategy::InitCombatTriggers(list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("flee", ACTION_EMERGENCY + 9), NULL)));
 }
 
-void FleeFromAddsStrategy::InitCombatTriggers(list<TriggerNode*> &triggers)
+void FleeFromAddsStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
         "has nearest adds",

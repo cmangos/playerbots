@@ -6,7 +6,7 @@ namespace ai
     {
     public:
         UseFoodStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "food"; }
+        std::string getName() override { return "food"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;

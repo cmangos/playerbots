@@ -3,8 +3,6 @@
 #include "SystemConfig.h"
 std::vector<std::string> split(const std::string &s, char delim);
 
-using namespace std;
-
 INSTANTIATE_SINGLETON_1(AhBotConfig);
 
 AhBotConfig::AhBotConfig()
@@ -12,10 +10,10 @@ AhBotConfig::AhBotConfig()
 }
 
 template <class T>
-void LoadSet(string value, T &res)
+void LoadSet(std::string value, T &res)
 {
-    vector<string> ids = split(value, ',');
-    for (vector<string>::iterator i = ids.begin(); i != ids.end(); i++)
+    std::vector<std::string> ids = split(value, ',');
+    for (std::vector<std::string>::iterator i = ids.begin(); i != ids.end(); i++)
     {
         uint32 id = atoi((*i).c_str());
         if (!id)
@@ -54,8 +52,8 @@ bool AhBotConfig::Initialize()
     stackReducePrice = config.GetIntDefault("AhBot.StackReducePrice", 1000000);
     priceQualityMultiplier = config.GetFloatDefault("AhBot.PriceQualityMultiplier", 1.0f);
     underPriceProbability = config.GetFloatDefault("AhBot.UnderPriceProbability", 0.05f);
-    LoadSet<set<uint32> >(config.GetStringDefault("AhBot.IgnoreItemIds", "49283,52200,8494,6345,6891,2460,37164,34835"), ignoreItemIds);
-    LoadSet<set<uint32> >(config.GetStringDefault("AhBot.IgnoreVendorItemIds", "755,858,4592,4593,1710,3827,2455,3385"), ignoreVendorItemIds);
+    LoadSet<std::set<uint32> >(config.GetStringDefault("AhBot.IgnoreItemIds", "49283,52200,8494,6345,6891,2460,37164,34835"), ignoreItemIds);
+    LoadSet<std::set<uint32> >(config.GetStringDefault("AhBot.IgnoreVendorItemIds", "755,858,4592,4593,1710,3827,2455,3385"), ignoreVendorItemIds);
     sendmail = config.GetBoolDefault("AhBot.SendMail", true);
 
 

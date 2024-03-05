@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "playerbot/WorldPosition.h"
 
 namespace ai
@@ -42,14 +42,14 @@ namespace ai
     class StoredHazardsValue : public ManualSetValue<std::list<Hazard>>
 	{
 	public:
-        StoredHazardsValue(PlayerbotAI* ai, string name = "stored hazards") : ManualSetValue<std::list<Hazard>>(ai, {}, name) {}
+        StoredHazardsValue(PlayerbotAI* ai, std::string name = "stored hazards") : ManualSetValue<std::list<Hazard>>(ai, {}, name) {}
     };
 
     // Value to add hazards which the bot must avoid when moving around
     class AddHazardValue : public ManualSetValue<Hazard>
     {
     public:
-        AddHazardValue(PlayerbotAI* ai, string name = "add hazard") : ManualSetValue<Hazard>(ai, Hazard(), name) {}
+        AddHazardValue(PlayerbotAI* ai, std::string name = "add hazard") : ManualSetValue<Hazard>(ai, Hazard(), name) {}
 
     private:
         void Set(Hazard hazard) override;
@@ -59,7 +59,7 @@ namespace ai
     class HazardsValue : public CalculatedValue<std::list<HazardPosition>>
     {
     public:
-        HazardsValue(PlayerbotAI* ai, string name = "hazards") : CalculatedValue<std::list<HazardPosition>>(ai, name, 1) {}
+        HazardsValue(PlayerbotAI* ai, std::string name = "hazards") : CalculatedValue<std::list<HazardPosition>>(ai, name, 1) {}
 
     private:
         std::list<HazardPosition> Calculate() override;

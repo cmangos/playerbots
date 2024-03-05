@@ -1,12 +1,12 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
     class SeeSpellLocationValue : public LogCalculatedValue<WorldPosition>
     {
     public:
-        SeeSpellLocationValue(PlayerbotAI* ai, string name = "see spell location") : LogCalculatedValue(ai, name) {};
+        SeeSpellLocationValue(PlayerbotAI* ai, std::string name = "see spell location") : LogCalculatedValue(ai, name) {};
 
         virtual bool EqualToLast(WorldPosition value) { return value == lastValue; };
 
@@ -16,20 +16,20 @@ namespace ai
     class RTSCSelectedValue : public ManualSetValue<bool>
 	{
 	public:
-        RTSCSelectedValue(PlayerbotAI* ai, bool defaultvalue = false, string name = "RTSC selected") : ManualSetValue(ai, defaultvalue,name) {};
+        RTSCSelectedValue(PlayerbotAI* ai, bool defaultvalue = false, std::string name = "RTSC selected") : ManualSetValue(ai, defaultvalue,name) {};
     };
 
-    class RTSCNextSpellActionValue : public ManualSetValue<string>
+    class RTSCNextSpellActionValue : public ManualSetValue<std::string>
     {
     public:
-        RTSCNextSpellActionValue(PlayerbotAI* ai, string defaultvalue = "", string name = "RTSC next spell action") : ManualSetValue(ai, defaultvalue, name) {};
+        RTSCNextSpellActionValue(PlayerbotAI* ai, std::string defaultvalue = "", std::string name = "RTSC next spell action") : ManualSetValue(ai, defaultvalue, name) {};
     };
 
     class RTSCSavedLocationValue : public ManualSetValue<WorldPosition>, public Qualified
     {
     public:
-        RTSCSavedLocationValue(PlayerbotAI* ai, WorldPosition defaultvalue = WorldPosition(), string name = "RTSC saved location") : ManualSetValue(ai, defaultvalue, name), Qualified() {};
-        virtual string Save() { return value.to_string(); }
-        virtual bool Load(string text) { value = WorldPosition(text); return true; }
+        RTSCSavedLocationValue(PlayerbotAI* ai, WorldPosition defaultvalue = WorldPosition(), std::string name = "RTSC saved location") : ManualSetValue(ai, defaultvalue, name), Qualified() {};
+        virtual std::string Save() { return value.to_string(); }
+        virtual bool Load(std::string text) { value = WorldPosition(text); return true; }
     };
 }

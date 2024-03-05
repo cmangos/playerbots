@@ -1,14 +1,14 @@
 
 #include "playerbot/playerbot.h"
-#include "../Strategy.h"
+#include "playerbot/strategy/Strategy.h"
 #include "MageActions.h"
 #include "MageAiObjectContext.h"
 #include "FrostMageStrategy.h"
 #include "ArcaneMageStrategy.h"
 #include "FireMageStrategy.h"
-#include "../generic/PullStrategy.h"
+#include "playerbot/strategy/generic/PullStrategy.h"
 #include "MageTriggers.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 
 namespace ai
 {

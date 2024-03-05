@@ -7,15 +7,15 @@ namespace ai
     {
     public:
         ChatCommandHandlerStrategy(PlayerbotAI* ai);
-        string getName() override { return "chat"; }
+        std::string getName() override { return "chat"; }
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "chat"; } //Must equal internal name
-        virtual string GetHelpDescription() 
+        virtual std::string GetHelpName() { return "chat"; } //Must equal internal name
+        virtual std::string GetHelpDescription() 
         {
             return "This strategy will make bots respond to various chat commands.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { }; }
 #endif
 
     private:

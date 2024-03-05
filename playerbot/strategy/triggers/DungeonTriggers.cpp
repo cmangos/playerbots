@@ -3,7 +3,7 @@
 #include "DungeonTriggers.h"
 #include "playerbot/strategy/values/PositionValue.h"
 #include "playerbot/ServerFacade.h"
-#include "../AiObjectContext.h"
+#include "playerbot/strategy/AiObjectContext.h"
 #include "playerbot/strategy/values/HazardsValue.h"
 #include "playerbot/strategy/actions/MovementActions.h"
 #include "Grids/GridNotifiers.h"
@@ -57,7 +57,7 @@ bool StartBossFightTrigger::IsActive()
         if (bot->IsInWorld() && !bot->IsBeingTeleported())
         {
             AiObjectContext* context = ai->GetAiObjectContext();
-            const list<ObjectGuid> attackers = AI_VALUE(list<ObjectGuid>, "attackers");
+            const std::list<ObjectGuid> attackers = AI_VALUE(std::list<ObjectGuid>, "attackers");
             for (const ObjectGuid& attackerGuid : attackers)
             {
                 Unit* attacker = ai->GetUnit(attackerGuid);
@@ -90,7 +90,7 @@ bool CloseToHazardTrigger::IsActive()
     bool closeToHazard = false;
     if (bot->IsInWorld() && !bot->IsBeingTeleported())
     {
-        const list<ObjectGuid>& possibleHazards = GetPossibleHazards();
+        const std::list<ObjectGuid>& possibleHazards = GetPossibleHazards();
         for (const ObjectGuid& possibleHazardGuid : possibleHazards)
         {
             if (IsHazardValid(possibleHazardGuid))
@@ -165,7 +165,7 @@ float CloseToHazardTrigger::GetDistanceToHazard(const ObjectGuid& hazzardGuid)
 std::list<ObjectGuid> CloseToGameObjectHazardTrigger::GetPossibleHazards()
 {
     // This game objects have a maximum range equal to the sight distance on config file (default 60 yards)
-    return AI_VALUE2(list<ObjectGuid>, "nearest game objects no los", gameObjectID);
+    return AI_VALUE2(std::list<ObjectGuid>, "nearest game objects no los", gameObjectID);
 }
 
 std::list<ObjectGuid> CloseToCreatureHazardTrigger::GetPossibleHazards()
@@ -224,7 +224,7 @@ bool CloseToCreatureTrigger::IsActive()
         AiObjectContext* context = ai->GetAiObjectContext();
 
         // Iterate through the near creatures
-        list<Unit*> creatures;
+        std::list<Unit*> creatures;
         MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(bot, creatureID, range);
         MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
         Cell::VisitAllObjects(bot, searcher, range);

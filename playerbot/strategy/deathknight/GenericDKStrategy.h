@@ -1,5 +1,5 @@
 #pragma once
-#include "../generic/MeleeCombatStrategy.h"
+#include "playerbot/strategy/generic/MeleeCombatStrategy.h"
 
 namespace ai
 {
@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         GenericDKStrategy(PlayerbotAI* ai);
-        virtual string getName() override { return "DK"; }
+        virtual std::string getName() override { return "DK"; }
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;

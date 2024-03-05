@@ -8,7 +8,7 @@ namespace ai
     public:
         EnhancementShamanPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_MELEE; }
-        string getName() override { return "enhancement"; }
+        std::string getName() override { return "enhancement"; }
     };
 
     class EnhancementShamanStrategy : public ShamanStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         EnhancementShamanAoePveStrategy(PlayerbotAI* ai) : EnhancementShamanAoeStrategy(ai) {}
-        string getName() override { return "aoe enhancement pve"; }
+        std::string getName() override { return "aoe enhancement pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         EnhancementShamanAoePvpStrategy(PlayerbotAI* ai) : EnhancementShamanAoeStrategy(ai) {}
-        string getName() override { return "aoe enhancement pvp"; }
+        std::string getName() override { return "aoe enhancement pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         EnhancementShamanAoeRaidStrategy(PlayerbotAI* ai) : EnhancementShamanAoeStrategy(ai) {}
-        string getName() override { return "aoe enhancement raid"; }
+        std::string getName() override { return "aoe enhancement raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         EnhancementShamanCcPveStrategy(PlayerbotAI* ai) : EnhancementShamanCcStrategy(ai) {}
-        string getName() override { return "cc enhancement pve"; }
+        std::string getName() override { return "cc enhancement pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         EnhancementShamanCcPvpStrategy(PlayerbotAI* ai) : EnhancementShamanCcStrategy(ai) {}
-        string getName() override { return "cc enhancement pvp"; }
+        std::string getName() override { return "cc enhancement pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         EnhancementShamanCcRaidStrategy(PlayerbotAI* ai) : EnhancementShamanCcStrategy(ai) {}
-        string getName() override { return "cc enhancement raid"; }
+        std::string getName() override { return "cc enhancement raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         EnhancementShamanCurePveStrategy(PlayerbotAI* ai) : EnhancementShamanCureStrategy(ai) {}
-        string getName() override { return "cure enhancement pve"; }
+        std::string getName() override { return "cure enhancement pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         EnhancementShamanCurePvpStrategy(PlayerbotAI* ai) : EnhancementShamanCureStrategy(ai) {}
-        string getName() override { return "cure enhancement pvp"; }
+        std::string getName() override { return "cure enhancement pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         EnhancementShamanCureRaidStrategy(PlayerbotAI* ai) : EnhancementShamanCureStrategy(ai) {}
-        string getName() override { return "cure enhancement raid"; }
+        std::string getName() override { return "cure enhancement raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         EnhancementShamanTotemsPveStrategy(PlayerbotAI* ai) : EnhancementShamanTotemsStrategy(ai) {}
-        string getName() override { return "totems enhancement pve"; }
+        std::string getName() override { return "totems enhancement pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         EnhancementShamanTotemsPvpStrategy(PlayerbotAI* ai) : EnhancementShamanTotemsStrategy(ai) {}
-        string getName() override { return "totems enhancement pvp"; }
+        std::string getName() override { return "totems enhancement pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         EnhancementShamanTotemsRaidStrategy(PlayerbotAI* ai) : EnhancementShamanTotemsStrategy(ai) {}
-        string getName() override { return "totems enhancement raid"; }
+        std::string getName() override { return "totems enhancement raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -250,7 +250,7 @@ namespace ai
     {
     public:
         EnhancementShamanBuffPveStrategy(PlayerbotAI* ai) : EnhancementShamanBuffStrategy(ai) {}
-        string getName() override { return "buff enhancement pve"; }
+        std::string getName() override { return "buff enhancement pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -261,7 +261,7 @@ namespace ai
     {
     public:
         EnhancementShamanBuffPvpStrategy(PlayerbotAI* ai) : EnhancementShamanBuffStrategy(ai) {}
-        string getName() override { return "buff enhancement pvp"; }
+        std::string getName() override { return "buff enhancement pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -272,7 +272,7 @@ namespace ai
     {
     public:
         EnhancementShamanBuffRaidStrategy(PlayerbotAI* ai) : EnhancementShamanBuffStrategy(ai) {}
-        string getName() override { return "buff enhancement raid"; }
+        std::string getName() override { return "buff enhancement raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -293,7 +293,7 @@ namespace ai
     {
     public:
         EnhancementShamanBoostPveStrategy(PlayerbotAI* ai) : EnhancementShamanBoostStrategy(ai) {}
-        string getName() override { return "boost enhancement pve"; }
+        std::string getName() override { return "boost enhancement pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -304,7 +304,7 @@ namespace ai
     {
     public:
         EnhancementShamanBoostPvpStrategy(PlayerbotAI* ai) : EnhancementShamanBoostStrategy(ai) {}
-        string getName() override { return "boost enhancement pvp"; }
+        std::string getName() override { return "boost enhancement pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -315,7 +315,7 @@ namespace ai
     {
     public:
         EnhancementShamanBoostRaidStrategy(PlayerbotAI* ai) : EnhancementShamanBoostStrategy(ai) {}
-        string getName() override { return "boost enhancement raid"; }
+        std::string getName() override { return "boost enhancement raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

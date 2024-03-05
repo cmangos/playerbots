@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../triggers/GenericTriggers.h"
+#include "playerbot/strategy/triggers/GenericTriggers.h"
 
 namespace ai
 {

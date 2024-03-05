@@ -16,7 +16,7 @@ namespace ai
     class Trigger : public AiNamedObject
 	{
 	public:
-        Trigger(PlayerbotAI* ai, string name = "trigger", int checkInterval = 1) : AiNamedObject(ai, name) {
+        Trigger(PlayerbotAI* ai, std::string name = "trigger", int checkInterval = 1) : AiNamedObject(ai, name) {
             this->triggered = false;
 			this->checkInterval = checkInterval;
             this->lastCheckTime = time(0) - rand() % checkInterval;
@@ -25,9 +25,9 @@ namespace ai
 
 	public:
         virtual Event Check();
-        virtual void ExternalEvent(string param, Player* owner = NULL) {}
+        virtual void ExternalEvent(std::string param, Player* owner = NULL) {}
         virtual void ExternalEvent(WorldPacket &packet, Player* owner = NULL) {}
-        virtual void ExternalEventForce(string param, Player* owner = NULL)
+        virtual void ExternalEventForce(std::string param, Player* owner = NULL)
         {
             this->param = param;
             this->owner = owner;
@@ -39,7 +39,7 @@ namespace ai
         virtual void Reset() { triggered = false; }
         virtual Unit* GetTarget();
         virtual Value<Unit*>* GetTargetValue();
-        virtual string GetTargetName() { return "self target"; }
+        virtual std::string GetTargetName() { return "self target"; }
 
 		bool needCheck() {
 		    if (checkInterval < 2) return true;
@@ -53,16 +53,16 @@ namespace ai
 		}
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "dummy"; } //Must equal iternal name
-        virtual string GetHelpDescription() { return "This is a trigger."; }
-        virtual vector<string> GetUsedTriggers() { return {}; }
-        virtual vector<string> GetUsedValues() { return {}; }
+        virtual std::string GetHelpName() { return "dummy"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() { return "This is a trigger."; }
+        virtual std::vector<std::string> GetUsedTriggers() { return {}; }
+        virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif
 
     protected:
 		int checkInterval;
 		time_t lastCheckTime;
-        string param;
+        std::string param;
         bool triggered;
         Player* owner;
 	};
@@ -71,7 +71,7 @@ namespace ai
     class TriggerNode
     {
     public:
-        TriggerNode(string name, NextAction** handlers = NULL)
+        TriggerNode(std::string name, NextAction** handlers = NULL)
         {
             this->name = name;
             this->handlers = handlers;
@@ -82,7 +82,7 @@ namespace ai
     public:
         Trigger* getTrigger() { return trigger; }
         void setTrigger(Trigger* trigger) { this->trigger = trigger; }
-        string getName() { return name; }
+        std::string getName() { return name; }
 
     public:
         NextAction** getHandlers();

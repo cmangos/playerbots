@@ -124,7 +124,7 @@ namespace ai
     {
     public:
         MeleeFormation(PlayerbotAI* ai) : FollowFormation(ai, "melee") {}
-        virtual string GetTargetName() { return "master target"; }
+        virtual std::string GetTargetName() { return "master target"; }
         virtual float GetAngle() override { return GetFollowAngle(); }
         virtual float GetOffset() override { return ai->GetRange("follow"); }
     };
@@ -133,7 +133,7 @@ namespace ai
     {
     public:
         QueueFormation(PlayerbotAI* ai) : FollowFormation(ai, "queue") {}
-        virtual string GetTargetName() { return "line target"; }
+        virtual std::string GetTargetName() { return "line target"; }
         virtual float GetAngle() override { return M_PI_F; }
         virtual float GetOffset() override { return ai->GetRange("follow"); }
     };
@@ -290,7 +290,7 @@ namespace ai
             float z = followTarget->GetPositionZ();
             float orientation = followTarget->GetOrientation();
 
-            vector<Player*> players;
+            std::vector<Player*> players;
             for (GroupReference* gref = group->GetFirstMember(); gref; gref = gref->next())
             {
                 Player* member = gref->getSource();
@@ -326,8 +326,8 @@ namespace ai
             float z = followTarget->GetPositionZ();
             float orientation = followTarget->GetOrientation();
 
-            vector<Player*> tanks;
-            vector<Player*> dps;
+            std::vector<Player*> tanks;
+            std::vector<Player*> dps;
             for (GroupReference* gref = group->GetFirstMember(); gref; gref = gref->next())
             {
                 Player* member = gref->getSource();
@@ -372,7 +372,7 @@ namespace ai
     {
     public:
         FarFormation(PlayerbotAI* ai) : FollowFormation(ai, "far") {}
-        virtual string GetTargetName() { return "master target"; }
+        virtual std::string GetTargetName() { return "master target"; }
         virtual float GetAngle() override 
         {             
             Unit* followTarget = AI_VALUE(Unit*, "follow target");
@@ -474,7 +474,7 @@ float Formation::GetFollowAngle()
     }
     else if (group)
     {
-        vector<Player*> roster;
+        std::vector<Player*> roster;
         for (GroupReference *ref = group->GetFirstMember(); ref; ref = ref->next())
         {
             Player* member = ref->getSource();
@@ -505,7 +505,7 @@ float Formation::GetFollowAngle()
             }
         }
 
-        for (vector<Player*>::iterator i = roster.begin(); i != roster.end(); ++i)
+        for (std::vector<Player*>::iterator i = roster.begin(); i != roster.end(); ++i)
         {
             if (*i == bot) break;
             index++;
@@ -527,12 +527,12 @@ void FormationValue::Reset()
     value = new NearFormation(ai);
 }
 
-string FormationValue::Save()
+std::string FormationValue::Save()
 {
     return value ? value->getName() : "?";
 }
 
-bool FormationValue::Load(string formation)
+bool FormationValue::Load(std::string formation)
 {
     if (formation == "melee")
     {
@@ -591,13 +591,13 @@ bool FormationValue::Load(string formation)
 
 bool SetFormationAction::Execute(Event& event)
 {
-    string formation = event.getParam();
+    std::string formation = event.getParam();
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
     FormationValue* value = (FormationValue*)context->GetValue<Formation*>("formation");
     if (formation == "?" || formation.empty())
     {
-        ostringstream str; str << "Formation: |cff00ff00" << value->Get()->getName();
+        std::ostringstream str; str << "Formation: |cff00ff00" << value->Get()->getName();
         ai->TellPlayer(requester, str);
         return true;
     }
@@ -613,18 +613,18 @@ bool SetFormationAction::Execute(Event& event)
 
     if (!value->Load(formation))
     {
-        ostringstream str; str << "Invalid formation: |cffff0000" << formation;
+        std::ostringstream str; str << "Invalid formation: |cffff0000" << formation;
         ai->TellPlayer(requester, str);
         ai->TellPlayer(requester, "Please set to any of:|cffffffff near (default), queue, chaos, circle, line, shield, arrow, melee, far");
         return false;
     }
 
-    ostringstream str; str << "Formation set to: " << formation;
+    std::ostringstream str; str << "Formation set to: " << formation;
     ai->TellPlayer(requester, str);
     return true;
 }
 
-WorldLocation MoveFormation::MoveLine(vector<Player*> line, float diff, float cx, float cy, float cz, float orientation, float range)
+WorldLocation MoveFormation::MoveLine(std::vector<Player*> line, float diff, float cx, float cy, float cz, float orientation, float range)
 {
     if (line.size() < 5)
     {
@@ -637,7 +637,7 @@ WorldLocation MoveFormation::MoveLine(vector<Player*> line, float diff, float cx
         float radius = range * i;
         float x = cx + cos(orientation) * radius;
         float y = cy + sin(orientation) * radius;
-        vector<Player*> singleLine;
+        std::vector<Player*> singleLine;
         for (int j = 0; j < 5 && !line.empty(); j++)
         {
             singleLine.push_back(line[line.size() - 1]);
@@ -652,7 +652,7 @@ WorldLocation MoveFormation::MoveLine(vector<Player*> line, float diff, float cx
     return Formation::NullLocation;
 }
 
-WorldLocation MoveFormation::MoveSingleLine(vector<Player*> line, float diff, float cx, float cy, float cz, float orientation, float range)
+WorldLocation MoveFormation::MoveSingleLine(std::vector<Player*> line, float diff, float cx, float cy, float cz, float orientation, float range)
 {
     float count = line.size();
     float angle = orientation - M_PI / 2.0f;
@@ -660,7 +660,7 @@ WorldLocation MoveFormation::MoveSingleLine(vector<Player*> line, float diff, fl
     float y = cy + sin(angle) * (range * floor(count / 2.0f) + diff);
 
     int index = 0;
-    for (vector<Player*>::iterator i = line.begin(); i != line.end(); i++)
+    for (std::vector<Player*>::iterator i = line.begin(); i != line.end(); i++)
     {
         Player* member = *i;
 

@@ -1,16 +1,16 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
-    typedef list<string> Outfit;
+    typedef std::list<std::string> Outfit;
     class OutfitListValue : public ManualSetValue<Outfit&>
 	{
 	public:
-        OutfitListValue(PlayerbotAI* ai, string name = "outfit list") : ManualSetValue<Outfit&>(ai, list, name) {}
+        OutfitListValue(PlayerbotAI* ai, std::string name = "outfit list") : ManualSetValue<Outfit&>(ai, list, name) {}
 
-        virtual string Save();
-        virtual bool Load(string value);
+        virtual std::string Save();
+        virtual bool Load(std::string value);
 
     private:
         Outfit list;

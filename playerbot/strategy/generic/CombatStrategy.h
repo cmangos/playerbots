@@ -17,15 +17,15 @@ namespace ai
     {
     public:
         AvoidAoeStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "avoid aoe"; }
+        std::string getName() override { return "avoid aoe"; }
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "avoid aoe"; } //Must equal iternal name
-        virtual string GetHelpDescription() 
+        virtual std::string GetHelpName() { return "avoid aoe"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() 
         {
             return "This strategy will make bots move away when they are in aoe.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { }; }
 #endif
 
     private:
@@ -46,7 +46,7 @@ namespace ai
     {
     public:
         WaitForAttackStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "wait for attack"; }
+        std::string getName() override { return "wait for attack"; }
 
         static bool ShouldWait(PlayerbotAI* ai);
         static uint8 GetWaitTime(PlayerbotAI* ai);
@@ -54,11 +54,11 @@ namespace ai
         static float GetSafeDistanceThreshold() { return 2.5f; }
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "wait for attack"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "wait for attack"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy will make bots wait a specified time before attacking.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { }; }
 #endif
 
     private:
@@ -77,11 +77,11 @@ namespace ai
     {
     public:
         HealInterruptStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "heal interrupt"; }
+        std::string getName() override { return "heal interrupt"; }
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "heal interrupt"; } //Must equal iternal name
-        virtual string GetHelpDescription()
+        virtual std::string GetHelpName() { return "heal interrupt"; } //Must equal iternal name
+        virtual std::string GetHelpDescription()
         {
             return "This strategy will make the bot interrupt the heal it currently casts if target is at full health";
         }
@@ -96,11 +96,11 @@ namespace ai
     {
     public:
         PreHealStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "preheal"; }
+        std::string getName() override { return "preheal"; }
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "preheal"; } //Must equal iternal name
-        virtual string GetHelpDescription()
+        virtual std::string GetHelpName() { return "preheal"; } //Must equal iternal name
+        virtual std::string GetHelpDescription()
         {
             return "This strategy will make the bot calculate melee damage of attacker when deciding how to heal target";
         }

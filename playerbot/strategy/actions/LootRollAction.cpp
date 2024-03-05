@@ -57,7 +57,7 @@ bool LootStartRollAction::Execute(Event& event)
 bool RollAction::Execute(Event& event)
 {      
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
 
     if (text.empty())
     {
@@ -67,7 +67,7 @@ bool RollAction::Execute(Event& event)
 
     ItemIds ids = ChatHelper::parseItems(text);
 
-    string type = "auto";
+    std::string type = "auto";
     if (ids.empty())
         type = text;
     else

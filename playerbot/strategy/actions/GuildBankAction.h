@@ -10,7 +10,7 @@ namespace ai
         virtual bool Execute(Event& event) override;
 
     private:
-        bool Execute(string text, GameObject* bank, Player* requester);
+        bool Execute(std::string text, GameObject* bank, Player* requester);
         bool MoveFromCharToBank(Item* item, GameObject* bank, Player* requester);
     };
 }

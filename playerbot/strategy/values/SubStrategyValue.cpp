@@ -3,19 +3,19 @@
 
 using namespace ai;
 
-void SubStrategyValue::Set(string newValue)
+void SubStrategyValue::Set(std::string newValue)
 {
 	SetValues(value, newValue, allowedValues);
 }
 
 
-void SubStrategyValue::SetValues(string& currentValue, const string newValue, const string allowedValues)
+void SubStrategyValue::SetValues(std::string& currentValue, const std::string newValue, const std::string allowedValues)
 {
-	vector<string> currentValues = StrSplit(currentValue, ",");
-	vector<string> newValues = StrSplit(newValue, ",");
-	vector<string> allowedVals = StrSplit(allowedValues, ",");
+	std::vector<std::string> currentValues = StrSplit(currentValue, ",");
+	std::vector<std::string> newValues = StrSplit(newValue, ",");
+	std::vector<std::string> allowedVals = StrSplit(allowedValues, ",");
 
-	for (string& newVal : newValues)
+	for (std::string& newVal : newValues)
 	{
 		char operation = newVal[0];
 
@@ -43,14 +43,14 @@ void SubStrategyValue::SetValues(string& currentValue, const string newValue, co
 
 	currentValue = "";
 
-	for (string value : currentValues)
+	for (std::string value : currentValues)
 		currentValue += value + ",";
 
 	if(!currentValues.empty())
 		currentValue.pop_back();
 }
 
-bool SubStrategyValue::Load(string value)
+bool SubStrategyValue::Load(std::string value)
 {
     this->value = "";
     Set(value);

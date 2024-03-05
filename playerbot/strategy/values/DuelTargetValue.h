@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "TargetValue.h"
 
 namespace ai
@@ -7,7 +7,7 @@ namespace ai
     class DuelTargetValue : public TargetValue
 	{
 	public:
-        DuelTargetValue(PlayerbotAI* ai, string name = "duel target") : TargetValue(ai, name) {}
+        DuelTargetValue(PlayerbotAI* ai, std::string name = "duel target") : TargetValue(ai, name) {}
 
     public:
         Unit* Calculate();

@@ -6,13 +6,13 @@
 
 using namespace ai;
 
-vector<string> split(const string &s, char delim);
+std::vector<std::string> split(const std::string &s, char delim);
 
 bool UnequipAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
-    list<Item*> found = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_EQUIP);
+    std::string text = event.getParam();
+    std::list<Item*> found = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_EQUIP);
     for (auto& item : found)
     {
         UnequipItem(requester, item);
@@ -25,7 +25,7 @@ void UnequipAction::UnequipItem(Player* requester, FindItemVisitor* visitor)
 {
     IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP);
     ai->InventoryIterateItems(visitor, mask);
-    list<Item*> items = visitor->GetResult();
+    std::list<Item*> items = visitor->GetResult();
 	if (!items.empty()) UnequipItem(requester, *items.begin());
 }
 
@@ -39,7 +39,7 @@ void UnequipAction::UnequipItem(Player* requester, Item* item)
     packet << bagIndex << slot << dstBag;
     bot->GetSession()->HandleAutoStoreBagItemOpcode(packet);
 
-    map<string, string> args;
+    std::map<std::string, std::string> args;
     args["%item"] = chat->formatItem(item);
     ai->TellPlayer(requester, BOT_TEXT2("unequip_command", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 }

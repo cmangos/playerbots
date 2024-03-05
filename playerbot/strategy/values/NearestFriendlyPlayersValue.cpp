@@ -9,7 +9,7 @@
 using namespace ai;
 using namespace MaNGOS;
 
-void NearestFriendlyPlayersValue::FindUnits(list<Unit*> &targets)
+void NearestFriendlyPlayersValue::FindUnits(std::list<Unit*> &targets)
 {
     AnyFriendlyUnitInObjectRangeCheck u_check(bot, range);
     UnitListSearcher<AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);

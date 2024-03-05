@@ -11,7 +11,7 @@ namespace ai
         virtual bool Execute(Event& event) override;
 
     private:
-        void TellLootList(Player* requester, const string& name);
-        void TellGoList(Player* requester, const string& name);
+        void TellLootList(Player* requester, const std::string& name);
+        void TellGoList(Player* requester, const std::string& name);
     };
 }

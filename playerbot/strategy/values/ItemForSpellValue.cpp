@@ -68,7 +68,7 @@ Item* ItemForSpellValue::Calculate()
     if (!strcmpi(spellInfo->SpellName[0], "disenchant"))
         return NULL;
 
-    vector<uint32> slots;
+    std::vector<uint32> slots;
 
     for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)
     {
@@ -84,9 +84,9 @@ Item* ItemForSpellValue::Calculate()
             return itemForSpell;
     }
 
-    vector<Item*> items;
+    std::vector<Item*> items;
 
-    for (auto& item : AI_VALUE2(list<Item*>, "inventory items", "all"))
+    for (auto& item : AI_VALUE2(std::list<Item*>, "inventory items", "all"))
         items.push_back(item);
 
     std::shuffle(items.begin(), items.end(), *GetRandomGenerator());

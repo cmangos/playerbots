@@ -1,5 +1,5 @@
 #pragma once
-#include "../triggers/GenericTriggers.h"
+#include "playerbot/strategy/triggers/GenericTriggers.h"
 
 namespace ai
 {
@@ -9,7 +9,7 @@ namespace ai
         ShamanWeaponTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "rockbiter weapon") {}
         virtual bool IsActive();
     private:
-        static list<string> spells;
+        static std::list<std::string> spells;
     };
 
     class ReadyToRemoveTotemsTrigger : public Trigger 
@@ -41,7 +41,7 @@ namespace ai
     class TotemTrigger : public Trigger 
     {
     public:
-        TotemTrigger(PlayerbotAI* ai, string spell, int attackerCount = 0) : Trigger(ai, spell), attackerCount(attackerCount) {}
+        TotemTrigger(PlayerbotAI* ai, std::string spell, int attackerCount = 0) : Trigger(ai, spell), attackerCount(attackerCount) {}
 
         virtual bool IsActive()
 		{
@@ -308,7 +308,7 @@ namespace ai
                     if (!IsPositiveSpell(spellId))
                         continue;
 
-                    vector<uint32> ignoreSpells;
+                    std::vector<uint32> ignoreSpells;
                     ignoreSpells.push_back(17627);
                     ignoreSpells.push_back(24382);
                     ignoreSpells.push_back(22888);

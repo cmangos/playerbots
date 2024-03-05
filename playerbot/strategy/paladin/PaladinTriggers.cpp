@@ -22,8 +22,8 @@ bool BlessingTrigger::IsActive()
     Unit* target = GetTarget();
     if (target)
     {
-        vector<std::string> altBlessings;
-        vector<std::string> haveBlessings;
+        std::vector<std::string> altBlessings;
+        std::vector<std::string> haveBlessings;
         altBlessings.push_back("blessing of might");
         altBlessings.push_back("blessing of wisdom");
         altBlessings.push_back("blessing of kings");
@@ -70,8 +70,8 @@ bool GreaterBlessingTrigger::IsActive()
     Unit* target = GetTarget();
     if (target)
     {
-        vector<std::string> altBlessings;
-        vector<std::string> haveBlessings;
+        std::vector<std::string> altBlessings;
+        std::vector<std::string> haveBlessings;
         altBlessings.push_back("blessing of might");
         altBlessings.push_back("blessing of wisdom");
         altBlessings.push_back("blessing of kings");
@@ -110,8 +110,8 @@ bool GreaterBlessingTrigger::IsActive()
 
 bool BlessingOnPartyTrigger::IsActive()
 {
-    vector<std::string> altBlessings;
-    vector<std::string> haveBlessings;
+    std::vector<std::string> altBlessings;
+    std::vector<std::string> haveBlessings;
     altBlessings.push_back("blessing of might");
     altBlessings.push_back("blessing of wisdom");
     altBlessings.push_back("blessing of kings");
@@ -154,8 +154,8 @@ bool BlessingOnPartyTrigger::IsActive()
 
 bool GreaterBlessingOnPartyTrigger::IsActive()
 {
-    vector<std::string> altBlessings;
-    vector<std::string> haveBlessings;
+    std::vector<std::string> altBlessings;
+    std::vector<std::string> haveBlessings;
     altBlessings.push_back("blessing of might");
     altBlessings.push_back("blessing of wisdom");
     altBlessings.push_back("blessing of kings");
@@ -194,8 +194,8 @@ bool GreaterBlessingOnPartyTrigger::IsActive()
 
 bool NoPaladinAuraTrigger::IsActive()
 {
-    vector<std::string> altAuras;
-    vector<std::string> haveAuras;
+    std::vector<std::string> altAuras;
+    std::vector<std::string> haveAuras;
     altAuras.push_back("devotion aura");
     altAuras.push_back("retribution aura");
     altAuras.push_back("concentration aura");

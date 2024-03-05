@@ -9,7 +9,7 @@ using namespace ai;
 
 Unit* SnareTargetValue::Calculate()
 {
-    string spell = qualifier;
+    std::string spell = qualifier;
 
     Unit* enemy = AI_VALUE(Unit*, "enemy player target");
     if (enemy)
@@ -19,9 +19,9 @@ Unit* SnareTargetValue::Calculate()
             return enemy;
     }
 
-    list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<list<ObjectGuid>>("possible attack targets")->Get();
+    std::list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
     Unit* target = ai->GetAiObjectContext()->GetValue<Unit*>("current target")->Get();
-    for (list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
     {
         Unit* unit = ai->GetUnit(*i);
         if (!unit)

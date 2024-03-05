@@ -4,11 +4,10 @@
 #include "TargetValue.h"
 
 using namespace ai;
-using namespace std;
 
-list<ObjectGuid> EnemyPlayersValue::Calculate()
+std::list<ObjectGuid> EnemyPlayersValue::Calculate()
 {
-    list<ObjectGuid> result;
+    std::list<ObjectGuid> result;
     if (ai->AllowActivity(ALL_ACTIVITY))
     {
         if (bot->IsInWorld() && !bot->IsBeingTeleported())
@@ -17,20 +16,20 @@ list<ObjectGuid> EnemyPlayersValue::Calculate()
             bool getOne = false;
             if (!qualifier.empty())
             {
-                getOne = stoi(qualifier);
+                getOne = std::stoi(qualifier);
             }
 
             if (getOne)
             {
                 // Try to get one enemy target
-                result = AI_VALUE2(list<ObjectGuid>, "possible attack targets", 1);
+                result = AI_VALUE2(std::list<ObjectGuid>, "possible attack targets", 1);
                 ApplyFilter(result, getOne);
             }
 
             // If the one enemy player failed, retry with multiple possible attack targets
             if (result.empty())
             {
-                result = AI_VALUE(list<ObjectGuid>, "possible attack targets");
+                result = AI_VALUE(std::list<ObjectGuid>, "possible attack targets");
                 ApplyFilter(result, getOne);
             }
         }
@@ -80,9 +79,9 @@ bool EnemyPlayersValue::IsValid(Unit* target, Player* player)
     return false;
 }
 
-void EnemyPlayersValue::ApplyFilter(list<ObjectGuid>& targets, bool getOne)
+void EnemyPlayersValue::ApplyFilter(std::list<ObjectGuid>& targets, bool getOne)
 {
-    list<ObjectGuid> filteredTargets;
+    std::list<ObjectGuid> filteredTargets;
     for (const ObjectGuid& targetGuid : targets)
     {
         Unit* target = ai->GetUnit(targetGuid);
@@ -102,7 +101,7 @@ void EnemyPlayersValue::ApplyFilter(list<ObjectGuid>& targets, bool getOne)
 
 bool HasEnemyPlayersValue::Calculate()
 {
-    return !context->GetValue<list<ObjectGuid>>("enemy player targets", 1)->Get().empty();
+    return !context->GetValue<std::list<ObjectGuid>>("enemy player targets", 1)->Get().empty();
 }
 
 Unit* EnemyPlayerValue::Calculate()
@@ -114,7 +113,7 @@ Unit* EnemyPlayerValue::Calculate()
     }
 
     Unit* bestEnemyPlayer = nullptr;
-    list<ObjectGuid> enemyPlayers = AI_VALUE(list<ObjectGuid>, "enemy player targets");
+    std::list<ObjectGuid> enemyPlayers = AI_VALUE(std::list<ObjectGuid>, "enemy player targets");
     if (!enemyPlayers.empty())
     {
         const bool isMelee = !ai->IsRanged(bot);

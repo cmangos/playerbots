@@ -28,13 +28,13 @@ bool SellAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
-    string text = event.getParam();
+    std::string text = event.getParam();
 
     if (text == "*" || text.empty())
         text = "gray";
 
-    list<Item*> items = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
-    for (list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
+    std::list<Item*> items = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+    for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
         Sell(requester, *i);
     }
@@ -45,8 +45,8 @@ bool SellAction::Execute(Event& event)
 void SellAction::Sell(Player* requester, FindItemVisitor* visitor)
 {
     ai->InventoryIterateItems(visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
-    list<Item*> items = visitor->GetResult();
-    for (list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
+    std::list<Item*> items = visitor->GetResult();
+    for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
         Sell(requester, *i);
     }
@@ -54,10 +54,10 @@ void SellAction::Sell(Player* requester, FindItemVisitor* visitor)
 
 void SellAction::Sell(Player* requester, Item* item)
 {
-    ostringstream out;
-    list<ObjectGuid> vendors = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest npcs")->Get();
+    std::ostringstream out;
+    std::list<ObjectGuid> vendors = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest npcs")->Get();
 
-    for (list<ObjectGuid>::iterator i = vendors.begin(); i != vendors.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = vendors.begin(); i != vendors.end(); ++i)
     {
         ObjectGuid vendorguid = *i;
         Creature *pCreature = bot->GetNPCIfCanInteractWith(vendorguid,UNIT_NPC_FLAG_VENDOR);
@@ -69,7 +69,7 @@ void SellAction::Sell(Player* requester, Item* item)
 
         uint32 botMoney = bot->GetMoney();
 
-        sPlayerbotAIConfig.logEvent(ai, "SellAction", item->GetProto()->Name1, to_string(item->GetProto()->ItemId));
+        sPlayerbotAIConfig.logEvent(ai, "SellAction", item->GetProto()->Name1, std::to_string(item->GetProto()->ItemId));
 
         WorldPacket p;
         p << vendorguid << itemguid << count;

@@ -170,7 +170,7 @@ bool PlayerbotSecurity::CheckLevelFor(PlayerbotSecurityLevel level, bool silent,
     if (master && bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->IsOpposing(master) && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
         return false;
 
-    ostringstream out;
+    std::ostringstream out;
     switch (realLevel)
     {
     case PlayerbotSecurityLevel::PLAYERBOT_SECURITY_DENY_ALL:
@@ -255,7 +255,7 @@ bool PlayerbotSecurity::CheckLevelFor(PlayerbotSecurityLevel level, bool silent,
             break;
     }
 
-    string text = out.str();
+    std::string text = out.str();
     uint64 guid = from->GetObjectGuid().GetRawValue();
     time_t lastSaid = whispers[guid][text];
     if (!lastSaid || (time(0) - lastSaid) >= sPlayerbotAIConfig.repeatDelay / 1000)

@@ -44,7 +44,7 @@ public:
                 return true;
         
             if (items.find(proto->SubClass) == items.end())
-                items[proto->SubClass] = list<Item*>();
+                items[proto->SubClass] = std::list<Item*>();
 
             items[proto->SubClass].push_back(item);
             break;
@@ -54,7 +54,7 @@ public:
     }
 
 public:
-    map<uint32, list<Item*> > items;
+    std::map<uint32, std::list<Item*> > items;
 
 private:
     Player* bot;
@@ -84,16 +84,16 @@ void BuffAction::TellHeader(uint32 subClass, Player* requester)
 
 bool BuffAction::Execute(Event& event)
 {
-    string text = event.getParam();
+    std::string text = event.getParam();
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
     FindBuffVisitor visitor(bot);
     ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
 
     uint32 oldSubClass = -1;
-    for (map<uint32, list<Item*> >::iterator i = visitor.items.begin(); i != visitor.items.end(); ++i)
+    for (std::map<uint32, std::list<Item*> >::iterator i = visitor.items.begin(); i != visitor.items.end(); ++i)
     {
-        list<Item*> items = i->second;
+        std::list<Item*> items = i->second;
 
         uint32 subClass = i->first;
         if (oldSubClass != subClass)
@@ -105,10 +105,10 @@ bool BuffAction::Execute(Event& event)
 
             oldSubClass = subClass;
         }
-        for (list<Item*>::iterator j = items.begin(); j != items.end(); ++j)
+        for (std::list<Item*>::iterator j = items.begin(); j != items.end(); ++j)
         {
             Item* item = *j;
-            ostringstream out;
+            std::ostringstream out;
             out << chat->formatItem(item, item->GetCount());
             ai->TellPlayer(requester, out);
         }

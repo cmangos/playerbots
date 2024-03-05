@@ -1,13 +1,12 @@
-#include "../../../botpch.h"
 #include "playerbot/playerbot.h"
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "OperatorValues.h"
 
 namespace ai
 {
     bool BoolAndValue::Calculate()
     {
-        vector<string> values = getMultiQualifiers(getQualifier(), ",");
+        std::vector<std::string> values = getMultiQualifiers(getQualifier(), ",");
 
         for (auto value : values)
         {
@@ -20,7 +19,7 @@ namespace ai
 
     bool NotValue::Calculate()
     {
-        vector<string> values = getMultiQualifiers(getQualifier(), ",");
+        std::vector<std::string> values = getMultiQualifiers(getQualifier(), ",");
 
         for (auto value : values)
         {

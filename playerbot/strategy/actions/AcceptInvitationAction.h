@@ -51,7 +51,7 @@ namespace ai
             ai->ChangeStrategy("-lfg,-bg", BotState::BOT_STATE_NON_COMBAT);
             ai->Reset();
 
-            sPlayerbotAIConfig.logEvent(ai, "AcceptInvitationAction", grp->GetLeaderName(), to_string(grp->GetMembersCount()));
+            sPlayerbotAIConfig.logEvent(ai, "AcceptInvitationAction", grp->GetLeaderName(), std::to_string(grp->GetMembersCount()));
 
             Player* master = inviter;
 
@@ -59,9 +59,9 @@ namespace ai
             {
                 if (sPlayerbotAIConfig.inviteChat && sRandomPlayerbotMgr.IsFreeBot(bot))
                 {
-                    map<string, string> placeholders;
+                    std::map<std::string, std::string> placeholders;
                     placeholders["%name"] = master->GetName();
-                    string reply;
+                    std::string reply;
                     if (urand(0, 3))
                         reply = BOT_TEXT2("Send me an invite %name!", placeholders);
                     else

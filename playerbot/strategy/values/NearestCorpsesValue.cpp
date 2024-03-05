@@ -24,7 +24,7 @@ private:
     float i_range;
 };
 
-void NearestCorpsesValue::FindUnits(list<Unit*> &targets)
+void NearestCorpsesValue::FindUnits(std::list<Unit*> &targets)
 {
     AnyDeadUnitInObjectRangeCheck u_check(bot,  range);
     UnitListSearcher<AnyDeadUnitInObjectRangeCheck> searcher(targets, u_check);

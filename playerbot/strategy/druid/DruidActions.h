@@ -202,7 +202,7 @@ namespace ai
     {
     public:
         CastInnervateAction(PlayerbotAI* ai) : CastSpellAction(ai, "innervate") {}
-        virtual string GetTargetName() { return "self target"; }
+        virtual std::string GetTargetName() { return "self target"; }
 
         bool isUseful() override
         {
@@ -388,7 +388,7 @@ namespace ai
     public:
         CastProwlAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "prowl") {}
 
-        virtual string GetTargetName() { return "self target"; }
+        virtual std::string GetTargetName() { return "self target"; }
 
         virtual bool isUseful()
         {
@@ -578,7 +578,7 @@ namespace ai
     public:
         explicit CastLifebloomAction(PlayerbotAI* ai) : CastSpellAction(ai, "lifebloom") {}
 
-        string GetTargetName() override { return "party tank without lifebloom"; }
+        std::string GetTargetName() override { return "party tank without lifebloom"; }
     };
 
     class UpdateDruidPveStrategiesAction : public UpdateStrategyDependenciesAction

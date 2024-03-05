@@ -10,9 +10,9 @@ namespace ai
     public:
         ExternalEventHelper(AiObjectContext* aiObjectContext) : aiObjectContext(aiObjectContext) {}
 
-        bool ParseChatCommand(string command, Player* owner = NULL)
+        bool ParseChatCommand(std::string command, Player* owner = NULL)
         {
-            string linkCommand = ChatHelper::parseValue("command", command);
+            std::string linkCommand = ChatHelper::parseValue("command", command);
             bool forceCommand = false;
 
             if (!linkCommand.empty())
@@ -24,15 +24,15 @@ namespace ai
             if (HandleCommand(command, "", owner, forceCommand))
                 return true;
 
-            size_t i = string::npos;
+            size_t i = std::string::npos;
             while (true)
             {
                 size_t found = command.rfind(" ", i);
-                if (found == string::npos || !found)
+                if (found == std::string::npos || !found)
                     break;
 
-                string name = command.substr(0, found);
-                string param = command.substr(found + 1);
+                std::string name = command.substr(0, found);
+                std::string param = command.substr(found + 1);
 
                 i = found - 1;
 
@@ -43,7 +43,7 @@ namespace ai
             if (!ChatHelper::parseable(command))
                 return false;
 
-            if (command.find("Hvalue:help") != string::npos || command.find("[h:") != string::npos)
+            if (command.find("Hvalue:help") != std::string::npos || command.find("[h:") != std::string::npos)
             {
                 HandleCommand("help", command, owner);
                 return true;
@@ -54,10 +54,10 @@ namespace ai
             return true;
         }
 
-        bool HandlePacket(map<uint16, string> &handlers, const WorldPacket &packet, Player* owner = NULL)
+        bool HandlePacket(std::map<uint16, std::string> &handlers, const WorldPacket &packet, Player* owner = NULL)
         {
             uint16 opcode = packet.GetOpcode();
-            string name = handlers[opcode];
+            std::string name = handlers[opcode];
             if (name.empty())
                 return true;
 
@@ -75,7 +75,7 @@ namespace ai
             return true;
         }
 
-        bool HandleCommand(string name, string param, Player* owner = NULL, bool forceCommand = false)
+        bool HandleCommand(std::string name, std::string param, Player* owner = NULL, bool forceCommand = false)
         {
             Trigger* trigger = aiObjectContext->GetTrigger(name);
             if (!trigger)

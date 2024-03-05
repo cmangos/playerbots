@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         ReturnStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai) {}
-        string getName() override { return "return"; }
+        std::string getName() override { return "return"; }
 
     private:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;

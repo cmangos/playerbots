@@ -5,7 +5,7 @@
 
 using namespace ai;
 
-void ReactionStrategy::InitReactionTriggers(list<TriggerNode*> &triggers)
+void ReactionStrategy::InitReactionTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
         "combat start",

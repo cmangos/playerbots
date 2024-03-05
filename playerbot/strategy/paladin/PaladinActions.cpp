@@ -6,8 +6,8 @@ using namespace ai;
 
 bool CastPaladinAuraAction::Execute(Event& event)
 {
-    vector<std::string> altAuras;
-    vector<std::string> haveAuras;
+    std::vector<std::string> altAuras;
+    std::vector<std::string> haveAuras;
     altAuras.push_back("devotion aura");
     altAuras.push_back("retribution aura");
     altAuras.push_back("concentration aura");
@@ -162,8 +162,8 @@ std::vector<std::string> CastRaidBlessingAction::GetPossibleBlessingsForTarget(U
 
 Unit* CastBlessingOnPartyAction::GetTarget()
 {
-    vector<std::string> altBlessings;
-    vector<std::string> haveBlessings;
+    std::vector<std::string> altBlessings;
+    std::vector<std::string> haveBlessings;
     altBlessings.push_back("blessing of might");
     altBlessings.push_back("blessing of wisdom");
     altBlessings.push_back("blessing of kings");

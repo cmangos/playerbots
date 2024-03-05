@@ -103,7 +103,7 @@ bool OutNumberedTrigger::IsActive()
     int32 botLevel = bot->GetLevel();
     float healthMod = bot->GetHealthPercent() / 100.0f;
     uint32 friendPower = 100 + 100 * healthMod, foePower = 0;
-    for (auto &attacker : ai->GetAiObjectContext()->GetValue<list<ObjectGuid>>("possible attack targets")->Get())
+    for (auto &attacker : ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get())
     {
         Creature* creature = ai->GetCreature(attacker);
         if (!creature)
@@ -123,7 +123,7 @@ bool OutNumberedTrigger::IsActive()
     if (!foePower)
         return false;
 
-    for (auto & helper : ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest friendly players")->Get())
+    for (auto & helper : ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest friendly players")->Get())
     {
         Unit* player = ai->GetUnit(helper);
 
@@ -332,7 +332,7 @@ bool RandomTrigger::IsActive()
 
 bool AndTrigger::IsActive()
 {
-    vector<string> tnames = getMultiQualifiers(getQualifier(), ",");
+    std::vector<std::string> tnames = getMultiQualifiers(getQualifier(), ",");
 
     for (auto tname : tnames)
     {
@@ -344,10 +344,10 @@ bool AndTrigger::IsActive()
     return true;
 }
 
-string AndTrigger::getName()
+std::string AndTrigger::getName()
 {
-    string name;
-    vector<string> tnames = getMultiQualifiers(getQualifier(), ",");
+    std::string name;
+    std::vector<std::string> tnames = getMultiQualifiers(getQualifier(), ",");
 
     for (auto tname : tnames)
     {
@@ -361,7 +361,7 @@ string AndTrigger::getName()
 
 bool OrTrigger::IsActive()
 {
-    vector<string> tnames = getMultiQualifiers(getQualifier(), ",");
+    std::vector<std::string> tnames = getMultiQualifiers(getQualifier(), ",");
 
     for (auto tname : tnames)
     {
@@ -373,10 +373,10 @@ bool OrTrigger::IsActive()
     return false;
 }
 
-string OrTrigger::getName()
+std::string OrTrigger::getName()
 {
-    string name;
-    vector<string> tnames = getMultiQualifiers(getQualifier(), ",");
+    std::string name;
+    std::vector<std::string> tnames = getMultiQualifiers(getQualifier(), ",");
 
     for (auto tname : tnames)
     {
@@ -402,7 +402,7 @@ bool TwoTriggers::IsActive()
     return trigger1->IsActive() && trigger2->IsActive();
 }
 
-string TwoTriggers::getName()
+std::string TwoTriggers::getName()
 {
     std::string name;
     name = name1 + " and " + name2;
@@ -534,7 +534,7 @@ bool NoMovementTrigger::IsActive()
 
 bool NoPossibleTargetsTrigger::IsActive()
 {
-    list<ObjectGuid> targets = AI_VALUE(list<ObjectGuid>, "possible targets");
+    std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
     return !targets.size();
 }
 
@@ -610,13 +610,13 @@ bool IsSwimmingTrigger::IsActive()
 
 bool HasNearestAddsTrigger::IsActive()
 {
-    list<ObjectGuid> targets = AI_VALUE(list<ObjectGuid>, "nearest adds");
+    std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "nearest adds");
     return targets.size();
 }
 
 bool HasItemForSpellTrigger::IsActive()
 {
-	string spell = getName();
+    std::string spell = getName();
     uint32 spellId = AI_VALUE2(uint32, "spell id", spell);
     return spellId && AI_VALUE2(Item*, "item for spell", spellId);
 }
@@ -732,7 +732,7 @@ bool GreaterBuffOnPartyTrigger::IsActive()
 
 bool TargetOfAttacker::IsActive()
 {
-    return !AI_VALUE(list<ObjectGuid>, "attackers targeting me").empty();
+    return !AI_VALUE(std::list<ObjectGuid>, "attackers targeting me").empty();
 }
 
 bool TargetOfAttackerInRange::IsActive()
@@ -743,7 +743,7 @@ bool TargetOfAttackerInRange::IsActive()
 
 bool TargetOfCastedAuraTypeTrigger::IsActive()
 {
-    const list<ObjectGuid>& attackers = AI_VALUE(list<ObjectGuid>, "attackers");
+    const std::list<ObjectGuid>& attackers = AI_VALUE(std::list<ObjectGuid>, "attackers");
     for (const ObjectGuid& attackerGuid : attackers)
     {
         // Check against the given creature id

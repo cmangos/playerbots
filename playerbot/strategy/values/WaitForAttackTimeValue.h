@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
@@ -7,7 +7,7 @@ namespace ai
 	{
 	public:
         WaitForAttackTimeValue(PlayerbotAI* ai) : ManualSetValue<uint8>(ai, 10), Qualified() {}
-        virtual string Save() { return std::to_string(value); }
-        virtual bool Load(string inValue) { value = stoi(inValue); return true; }
+        virtual std::string Save() { return std::to_string(value); }
+        virtual bool Load(std::string inValue) { value = stoi(inValue); return true; }
     };
 }

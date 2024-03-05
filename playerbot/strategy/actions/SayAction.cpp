@@ -8,16 +8,16 @@
 
 using namespace ai;
 
-unordered_set<string> noReplyMsgs = {
+std::unordered_set<std::string> noReplyMsgs = {
   "join", "leave", "follow", "attack", "pull", "flee", "reset", "reset ai",
   "all ?", "talents", "talents list", "talents auto", "talk", "stay", "stats",
   "who", "items", "leave", "join", "repair", "summon", "nc ?", "co ?", "de ?",
   "dead ?", "follow", "los", "guard", "do accept invitation", "stats", "react ?",
   "reset strats", "home",
 };
-unordered_set<string> noReplyMsgParts = { "+", "-","@" , "follow target", "focus heal", "cast ", "accept [", "e [", "destroy [", "go zone" };
+std::unordered_set<std::string> noReplyMsgParts = { "+", "-","@" , "follow target", "focus heal", "cast ", "accept [", "e [", "destroy [", "go zone" };
 
-unordered_set<string> noReplyMsgStarts = { "e ", "accept ", "cast ", "destroy " };
+std::unordered_set<std::string> noReplyMsgStarts = { "e ", "accept ", "cast ", "destroy " };
 
 SayAction::SayAction(PlayerbotAI* ai) : Action(ai, "say"), Qualified()
 {
@@ -25,12 +25,12 @@ SayAction::SayAction(PlayerbotAI* ai) : Action(ai, "say"), Qualified()
 
 bool SayAction::Execute(Event& event)
 {
-    string text = "";
-    map<string, string> placeholders;
+    std::string text = "";
+    std::map<std::string, std::string> placeholders;
     Unit* target = AI_VALUE(Unit*, "tank target");
     if (!target) target = AI_VALUE(Unit*, "current target");
 
-    // set replace strings
+    // set replace std::strings
     if (target) placeholders["<target>"] = target->GetName();
     placeholders["<randomfaction>"] = IsAlliance(bot->getRace()) ? "Alliance" : "Horde";
     if (qualifier == "low ammo" || qualifier == "no ammo")
@@ -65,7 +65,7 @@ bool SayAction::Execute(Event& event)
     Group* group = bot->GetGroup();
     if (group)
     {
-        vector<Player*> members;
+        std::vector<Player*> members;
         for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
         {
             Player* member = ref->getSource();
@@ -88,7 +88,7 @@ bool SayAction::Execute(Event& event)
         }
 
         int index = 0;
-        for (vector<Player*>::iterator i = members.begin(); i != members.end(); ++i)
+        for (std::vector<Player*>::iterator i = members.begin(); i != members.end(); ++i)
         {
             PlayerbotAI* memberAi = (*i)->GetPlayerbotAI();
             if (memberAi)

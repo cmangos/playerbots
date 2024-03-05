@@ -57,18 +57,18 @@ bool SpellCastUsefulValue::Calculate()
             return false;
     }
 
-    set<uint32>& skipSpells = AI_VALUE(set<uint32>&, "skip spells list");
+    std::set<uint32>& skipSpells = AI_VALUE(std::set<uint32>&, "skip spells list");
     if (skipSpells.find(spellid) != skipSpells.end())
         return false;
 
-    const string spellName = spellInfo->SpellName[0];
-    for (set<uint32>::iterator i = skipSpells.begin(); i != skipSpells.end(); ++i)
+    const std::string spellName = spellInfo->SpellName[0];
+    for (std::set<uint32>::iterator i = skipSpells.begin(); i != skipSpells.end(); ++i)
     {
         SpellEntry const *spell = sServerFacade.LookupSpellInfo(*i);
         if (!spell)
             continue;
 
-        wstring wnamepart;
+        std::wstring wnamepart;
         if (!Utf8toWStr(spell->SpellName[0], wnamepart))
             continue;
 

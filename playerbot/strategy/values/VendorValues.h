@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Value.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/Value.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 
 class PlayerbotAI;
 

@@ -25,7 +25,7 @@ namespace ai
     class LfgJoinAction : public Action
     {
     public:
-        LfgJoinAction(PlayerbotAI* ai, string name = "lfg join") : Action(ai, name) {}
+        LfgJoinAction(PlayerbotAI* ai, std::string name = "lfg join") : Action(ai, name) {}
         virtual bool Execute(Event& event) override;
         virtual bool isUseful();
 

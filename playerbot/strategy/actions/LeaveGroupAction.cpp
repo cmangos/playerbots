@@ -25,10 +25,10 @@ namespace ai
         if (!shouldStay)
         {
             if (group)
-                sPlayerbotAIConfig.logEvent(ai, "LeaveGroupAction", group->GetLeaderName(), to_string(group->GetMembersCount()-1));
+                sPlayerbotAIConfig.logEvent(ai, "LeaveGroupAction", group->GetLeaderName(), std::to_string(group->GetMembersCount()-1));
 
             WorldPacket p;
-            string member = bot->GetName();
+            std::string member = bot->GetName();
             p << uint32(PARTY_OP_LEAVE) << member << uint32(0);
             bot->GetSession()->HandleGroupDisbandOpcode(p);
             if (ai->HasRealPlayerMaster() && ai->GetMaster()->GetObjectGuid() != player->GetObjectGuid())

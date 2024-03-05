@@ -59,7 +59,7 @@ namespace ai
 
     private:
         WorldLocation center;
-        vector<FormationUnit*> units;
+        std::vector<FormationUnit*> units;
     };
 
 

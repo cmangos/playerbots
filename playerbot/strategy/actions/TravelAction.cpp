@@ -23,7 +23,7 @@ bool TravelAction::Execute(Event& event)
     target->setStatus(TravelStatus::TRAVEL_STATUS_WORK);
 
      Unit* newTarget;
-    list<Unit*> targets;
+    std::list<Unit*> targets;
     AnyUnitInObjectRangeCheck u_check(bot, sPlayerbotAIConfig.sightDistance * 2);
     UnitListSearcher<AnyUnitInObjectRangeCheck> searcher(targets, u_check);
     Cell::VisitAllObjects(bot, searcher, sPlayerbotAIConfig.sightDistance * 2);

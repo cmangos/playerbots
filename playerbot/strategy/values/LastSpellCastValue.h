@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
@@ -31,7 +31,7 @@ namespace ai
     class LastSpellCastValue : public ManualSetValue<LastSpellCast&>
 	{
 	public:
-        LastSpellCastValue(PlayerbotAI* ai, string name = "last spell cast") : ManualSetValue<LastSpellCast&>(ai, data, name) {}
+        LastSpellCastValue(PlayerbotAI* ai, std::string name = "last spell cast") : ManualSetValue<LastSpellCast&>(ai, data, name) {}
 
     private:
         LastSpellCast data;

@@ -6,19 +6,19 @@
 using namespace std::placeholders;
 
 //Checks a talent link on basic validity.
-bool TalentSpec::CheckTalentLink(string link, ostringstream* out) {
+bool TalentSpec::CheckTalentLink(std::string link, std::ostringstream* out) {
 
-    string validChar = "-";
-    string validNums = "012345";
+    std::string validChar = "-";
+    std::string validNums = "012345";
     int nums = 0;
 
     for (char& c : link) {
-        if (validChar.find(c) == string::npos && validNums.find(c) == string::npos)
+        if (validChar.find(c) == std::string::npos && validNums.find(c) == std::string::npos)
         {
             *out << "talent link is invalid. Must be in format 0-0-0 (see end of wowhead talent calculator url) or a part of a predefined spec as shown with command 'talents list'";
             return false;
         }
-        if (validNums.find(c) != string::npos)
+        if (validNums.find(c) != std::string::npos)
             nums++;
     }
 
@@ -42,7 +42,7 @@ uint32 TalentSpec::PointstoLevel(int points) const
 }
 
 //Check the talentspec for errors.
-bool TalentSpec::CheckTalents(int level, ostringstream* out)
+bool TalentSpec::CheckTalents(int level, std::ostringstream* out)
 {
     for (auto& entry : talents)
     {
@@ -105,7 +105,7 @@ bool TalentSpec::CheckTalents(int level, ostringstream* out)
 }
 
 //Set the talents for the bots to the current spec.
-void TalentSpec::ApplyTalents(Player* bot, ostringstream* out)
+void TalentSpec::ApplyTalents(Player* bot, std::ostringstream* out)
 {
     for (auto& entry : talents)
         for (int rank = 0; rank < MAX_TALENT_RANK; ++rank)
@@ -133,7 +133,7 @@ void TalentSpec::ApplyTalents(Player* bot, ostringstream* out)
         Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
         MemberSlot* member = guild->GetMemberSlot(bot->GetObjectGuid());
         if(guild->HasRankRight(member->RankId, GR_RIGHT_EPNOTE))
-            member->SetPNOTE(ChatHelper::specName(bot) + " (" + to_string(GetTalentPoints(0)) + "/" + to_string(GetTalentPoints(1)) + "/" + to_string(GetTalentPoints(2)) + ")");
+            member->SetPNOTE(ChatHelper::specName(bot) + " (" + std::to_string(GetTalentPoints(0)) + "/" + std::to_string(GetTalentPoints(1)) + "/" + std::to_string(GetTalentPoints(2)) + ")");
     }
 }
 
@@ -235,7 +235,7 @@ void TalentSpec::ReadTalents(Player* bot) {
 }
 
 //Set the talent ranks to the ranks of the link.
-void TalentSpec::ReadTalents(string link) {
+void TalentSpec::ReadTalents(std::string link) {
     int rank = 0;
     int pos = 0;
     int tab = 0;
@@ -310,10 +310,10 @@ int TalentSpec::GetTalentPoints(std::vector<TalentListEntry>& talents, int tabpa
 }
 
 //Generates a wow-head link from a talent list.
-string TalentSpec::GetTalentLink()
+std::string TalentSpec::GetTalentLink()
 {
-    string link = "";
-    string treeLink[3];
+    std::string link = "";
+    std::string treeLink[3];
     int points[3];
     int curPoints = 0;
 
@@ -322,7 +322,7 @@ string TalentSpec::GetTalentLink()
         for (auto& entry : GetTalentTree(i))
         {
             curPoints += entry.rank;
-            treeLink[i] += to_string(entry.rank);
+            treeLink[i] += std::to_string(entry.rank);
             if (curPoints >= points[i])
             {
                 curPoints = 0;
@@ -362,11 +362,11 @@ int TalentSpec::highestTree()
     return 0;
 }
 
-string TalentSpec::formatSpec(Player* bot)
+std::string TalentSpec::formatSpec(Player* bot)
 {
     uint8 cls = bot->getClass();
 
-    ostringstream out;
+    std::ostringstream out;
     //out << chathelper:: specs[cls][highestTree()] << " (";
 
     int c0 = GetTalentPoints(0);
@@ -393,7 +393,7 @@ void TalentSpec::CropTalents(uint32 level)
     for (auto& entry : talents)
     {
         if (points + entry.rank > (int)LeveltoPoints(level))
-            entry.rank = max(0, (int)(LeveltoPoints(level) - points));
+            entry.rank = std::max(0, (int)(LeveltoPoints(level) - points));
         points += entry.rank;
     }
 
@@ -410,7 +410,7 @@ std::vector<TalentSpec::TalentListEntry> TalentSpec::SubTalentList(std::vector<T
                 if (reverse == ABSOLUTE_DIST)
                     newentry.rank = abs(newentry.rank - oldentry.rank);
                 else if (reverse == ADDED_POINTS || reverse == REMOVED_POINTS)
-                    newentry.rank = max(0, (newentry.rank - oldentry.rank) * (reverse / 2));
+                    newentry.rank = std::max(0, (newentry.rank - oldentry.rank) * (reverse / 2));
                 else
                     newentry.rank = (newentry.rank - oldentry.rank) * reverse;
             }
@@ -458,7 +458,7 @@ void TalentSpec::ShiftTalents(TalentSpec* currentSpec, uint32 level)
     for (auto& entry : deltaList)
     {
         if (entry.rank + points > LeveltoPoints(level)) //Running out of points. Only apply what we have left.
-            entry.rank = max(0, int(LeveltoPoints(level) - points));
+            entry.rank = std::max(0, int(LeveltoPoints(level) - points));
 
         for (auto& subentry : talents)
             if (entry.entry == subentry.entry)

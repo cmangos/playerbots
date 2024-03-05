@@ -8,7 +8,7 @@ namespace ai
     public:
         HolyPaladinPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_HEAL | STRATEGY_TYPE_RANGED; }
-        string getName() override { return "holy"; }
+        std::string getName() override { return "holy"; }
     };
 
     class HolyPaladinStrategy : public PaladinStrategy
@@ -76,7 +76,7 @@ namespace ai
     {
     public:
         HolyPaladinAoePveStrategy(PlayerbotAI* ai) : HolyPaladinAoeStrategy(ai) {}
-        string getName() override { return "aoe holy pve"; }
+        std::string getName() override { return "aoe holy pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -87,7 +87,7 @@ namespace ai
     {
     public:
         HolyPaladinAoePvpStrategy(PlayerbotAI* ai) : HolyPaladinAoeStrategy(ai) {}
-        string getName() override { return "aoe holy pvp"; }
+        std::string getName() override { return "aoe holy pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -98,7 +98,7 @@ namespace ai
     {
     public:
         HolyPaladinAoeRaidStrategy(PlayerbotAI* ai) : HolyPaladinAoeStrategy(ai) {}
-        string getName() override { return "aoe holy raid"; }
+        std::string getName() override { return "aoe holy raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -119,7 +119,7 @@ namespace ai
     {
     public:
         HolyPaladinBuffPveStrategy(PlayerbotAI* ai) : HolyPaladinBuffStrategy(ai) {}
-        string getName() override { return "buff holy pve"; }
+        std::string getName() override { return "buff holy pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -130,7 +130,7 @@ namespace ai
     {
     public:
         HolyPaladinBuffPvpStrategy(PlayerbotAI* ai) : HolyPaladinBuffStrategy(ai) {}
-        string getName() override { return "buff holy pvp"; }
+        std::string getName() override { return "buff holy pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -141,7 +141,7 @@ namespace ai
     {
     public:
         HolyPaladinBuffRaidStrategy(PlayerbotAI* ai) : HolyPaladinBuffStrategy(ai) {}
-        string getName() override { return "buff holy raid"; }
+        std::string getName() override { return "buff holy raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -162,7 +162,7 @@ namespace ai
     {
     public:
         HolyPaladinBoostPveStrategy(PlayerbotAI* ai) : HolyPaladinBoostStrategy(ai) {}
-        string getName() override { return "boost holy pve"; }
+        std::string getName() override { return "boost holy pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -173,7 +173,7 @@ namespace ai
     {
     public:
         HolyPaladinBoostPvpStrategy(PlayerbotAI* ai) : HolyPaladinBoostStrategy(ai) {}
-        string getName() override { return "boost holy pvp"; }
+        std::string getName() override { return "boost holy pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -184,7 +184,7 @@ namespace ai
     {
     public:
         HolyPaladinBoostRaidStrategy(PlayerbotAI* ai) : HolyPaladinBoostStrategy(ai) {}
-        string getName() override { return "boost holy raid"; }
+        std::string getName() override { return "boost holy raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -205,7 +205,7 @@ namespace ai
     {
     public:
         HolyPaladinCcPveStrategy(PlayerbotAI* ai) : HolyPaladinCcStrategy(ai) {}
-        string getName() override { return "cc holy pve"; }
+        std::string getName() override { return "cc holy pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -216,7 +216,7 @@ namespace ai
     {
     public:
         HolyPaladinCcPvpStrategy(PlayerbotAI* ai) : HolyPaladinCcStrategy(ai) {}
-        string getName() override { return "cc holy pvp"; }
+        std::string getName() override { return "cc holy pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -227,7 +227,7 @@ namespace ai
     {
     public:
         HolyPaladinCcRaidStrategy(PlayerbotAI* ai) : HolyPaladinCcStrategy(ai) {}
-        string getName() override { return "cc holy raid"; }
+        std::string getName() override { return "cc holy raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -248,7 +248,7 @@ namespace ai
     {
     public:
         HolyPaladinCurePveStrategy(PlayerbotAI* ai) : HolyPaladinCureStrategy(ai) {}
-        string getName() override { return "cure holy pve"; }
+        std::string getName() override { return "cure holy pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -259,7 +259,7 @@ namespace ai
     {
     public:
         HolyPaladinCurePvpStrategy(PlayerbotAI* ai) : HolyPaladinCureStrategy(ai) {}
-        string getName() override { return "cure holy pvp"; }
+        std::string getName() override { return "cure holy pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -270,7 +270,7 @@ namespace ai
     {
     public:
         HolyPaladinCureRaidStrategy(PlayerbotAI* ai) : HolyPaladinCureStrategy(ai) {}
-        string getName() override { return "cure holy raid"; }
+        std::string getName() override { return "cure holy raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -291,7 +291,7 @@ namespace ai
     {
     public:
         HolyPaladinAuraPveStrategy(PlayerbotAI* ai) : HolyPaladinAuraStrategy(ai) {}
-        string getName() override { return "aura holy pve"; }
+        std::string getName() override { return "aura holy pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -302,7 +302,7 @@ namespace ai
     {
     public:
         HolyPaladinAuraPvpStrategy(PlayerbotAI* ai) : HolyPaladinAuraStrategy(ai) {}
-        string getName() override { return "aura holy pvp"; }
+        std::string getName() override { return "aura holy pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -313,7 +313,7 @@ namespace ai
     {
     public:
         HolyPaladinAuraRaidStrategy(PlayerbotAI* ai) : HolyPaladinAuraStrategy(ai) {}
-        string getName() override { return "aura holy raid"; }
+        std::string getName() override { return "aura holy raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -334,7 +334,7 @@ namespace ai
     {
     public:
         HolyPaladinBlessingPveStrategy(PlayerbotAI* ai) : HolyPaladinBlessingStrategy(ai) {}
-        string getName() override { return "blessing holy pve"; }
+        std::string getName() override { return "blessing holy pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -345,7 +345,7 @@ namespace ai
     {
     public:
         HolyPaladinBlessingPvpStrategy(PlayerbotAI* ai) : HolyPaladinBlessingStrategy(ai) {}
-        string getName() override { return "blessing holy pvp"; }
+        std::string getName() override { return "blessing holy pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -356,7 +356,7 @@ namespace ai
     {
     public:
         HolyPaladinBlessingRaidStrategy(PlayerbotAI* ai) : HolyPaladinBlessingStrategy(ai) {}
-        string getName() override { return "blessing holy raid"; }
+        std::string getName() override { return "blessing holy raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

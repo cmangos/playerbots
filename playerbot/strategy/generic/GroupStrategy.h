@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         GroupStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai) {}
-        string getName() override { return "group"; }
+        std::string getName() override { return "group"; }
         int GetType() override { return STRATEGY_TYPE_GENERIC; }
 
     private:

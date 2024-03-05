@@ -1,16 +1,16 @@
 #pragma once
-#include "../Strategy.h"
-#include "../Multiplier.h"
+#include "playerbot/strategy/Strategy.h"
+#include "playerbot/strategy/Multiplier.h"
 
 namespace ai
 {
     class PullStrategy : public Strategy
     {
     public:
-        PullStrategy(PlayerbotAI* ai, string pullAction, string prePullAction = "");
+        PullStrategy(PlayerbotAI* ai, std::string pullAction, std::string prePullAction = "");
 
     public:
-        string getName() override { return "pull"; }
+        std::string getName() override { return "pull"; }
 
         static PullStrategy* Get(PlayerbotAI* ai);
         static uint8 GetMaxPullTime() { return 15; }
@@ -21,11 +21,11 @@ namespace ai
         Unit* GetTarget() const;
         bool HasTarget() const { return GetTarget() != nullptr; }
 
-        string GetPullActionName() const;
-        string GetSpellName() const;
+        std::string GetPullActionName() const;
+        std::string GetSpellName() const;
         float GetRange() const;
 
-        string GetPreActionName() const;
+        std::string GetPreActionName() const;
 
         void RequestPull(Unit* target, bool resetTime = true);
         bool IsPullPendingToStart() const { return pendingToStart; }
@@ -44,8 +44,8 @@ namespace ai
         void InitNonCombatMultipliers(std::list<Multiplier*>& multipliers) override;
 
     private:
-        string pullActionName; //shoot
-        string preActionName;
+        std::string pullActionName; //shoot
+        std::string preActionName;
         bool pendingToStart;
         time_t pullStartTime;
         ReactStates petReactState;
@@ -64,7 +64,7 @@ namespace ai
     {
     public:
         PossibleAdsStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "ads"; }
+        std::string getName() override { return "ads"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -74,7 +74,7 @@ namespace ai
     {
     public:
         PullBackStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "pull back"; }
+        std::string getName() override { return "pull back"; }
 
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;

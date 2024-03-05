@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
@@ -19,14 +19,14 @@ namespace ai
     class PartyMemberValue : public UnitCalculatedValue
 	{
 	public:
-        PartyMemberValue(PlayerbotAI* ai, string name = "party member") : UnitCalculatedValue(ai, name) {}
+        PartyMemberValue(PlayerbotAI* ai, std::string name = "party member") : UnitCalculatedValue(ai, name) {}
 
     public:
         bool IsTargetOfSpellCast(Player* target, SpellEntryPredicate &predicate);
 
     protected:
         Unit* FindPartyMember(FindPlayerPredicate &predicate, bool ignoreOutOfGroup = false, bool ignoreTanks = false);
-        Unit* FindPartyMember(list<Player*>* party, FindPlayerPredicate &predicate, bool ignoreTanks);
+        Unit* FindPartyMember(std::list<Player*>* party, FindPlayerPredicate &predicate, bool ignoreTanks);
         bool Check(Unit* player);
 	};
 }

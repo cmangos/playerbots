@@ -8,7 +8,7 @@ namespace ai
     public:
         AfflictionWarlockPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_RANGED; }
-        string getName() override { return "affliction"; }
+        std::string getName() override { return "affliction"; }
     };
 
     class AfflictionWarlockStrategy : public WarlockStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         AfflictionWarlockAoePveStrategy(PlayerbotAI* ai) : AfflictionWarlockAoeStrategy(ai) {}
-        string getName() override { return "aoe affliction pve"; }
+        std::string getName() override { return "aoe affliction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         AfflictionWarlockAoePvpStrategy(PlayerbotAI* ai) : AfflictionWarlockAoeStrategy(ai) {}
-        string getName() override { return "aoe affliction pvp"; }
+        std::string getName() override { return "aoe affliction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         AfflictionWarlockAoeRaidStrategy(PlayerbotAI* ai) : AfflictionWarlockAoeStrategy(ai) {}
-        string getName() override { return "aoe affliction raid"; }
+        std::string getName() override { return "aoe affliction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         AfflictionWarlockBuffPveStrategy(PlayerbotAI* ai) : AfflictionWarlockBuffStrategy(ai) {}
-        string getName() override { return "buff affliction pve"; }
+        std::string getName() override { return "buff affliction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         AfflictionWarlockBuffPvpStrategy(PlayerbotAI* ai) : AfflictionWarlockBuffStrategy(ai) {}
-        string getName() override { return "buff affliction pvp"; }
+        std::string getName() override { return "buff affliction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         AfflictionWarlockBuffRaidStrategy(PlayerbotAI* ai) : AfflictionWarlockBuffStrategy(ai) {}
-        string getName() override { return "buff affliction raid"; }
+        std::string getName() override { return "buff affliction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         AfflictionWarlockBoostPveStrategy(PlayerbotAI* ai) : AfflictionWarlockBoostStrategy(ai) {}
-        string getName() override { return "boost affliction pve"; }
+        std::string getName() override { return "boost affliction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         AfflictionWarlockBoostPvpStrategy(PlayerbotAI* ai) : AfflictionWarlockBoostStrategy(ai) {}
-        string getName() override { return "boost affliction pvp"; }
+        std::string getName() override { return "boost affliction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         AfflictionWarlockBoostRaidStrategy(PlayerbotAI* ai) : AfflictionWarlockBoostStrategy(ai) {}
-        string getName() override { return "boost affliction raid"; }
+        std::string getName() override { return "boost affliction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         AfflictionWarlockCcPveStrategy(PlayerbotAI* ai) : AfflictionWarlockCcStrategy(ai) {}
-        string getName() override { return "cc affliction pve"; }
+        std::string getName() override { return "cc affliction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         AfflictionWarlockCcPvpStrategy(PlayerbotAI* ai) : AfflictionWarlockCcStrategy(ai) {}
-        string getName() override { return "cc affliction pvp"; }
+        std::string getName() override { return "cc affliction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         AfflictionWarlockCcRaidStrategy(PlayerbotAI* ai) : AfflictionWarlockCcStrategy(ai) {}
-        string getName() override { return "cc affliction raid"; }
+        std::string getName() override { return "cc affliction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -250,7 +250,7 @@ namespace ai
     {
     public:
         AfflictionWarlockPetPveStrategy(PlayerbotAI* ai) : AfflictionWarlockPetStrategy(ai) {}
-        string getName() override { return "pet affliction pve"; }
+        std::string getName() override { return "pet affliction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -261,7 +261,7 @@ namespace ai
     {
     public:
         AfflictionWarlockPetPvpStrategy(PlayerbotAI* ai) : AfflictionWarlockPetStrategy(ai) {}
-        string getName() override { return "pet affliction pvp"; }
+        std::string getName() override { return "pet affliction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -272,7 +272,7 @@ namespace ai
     {
     public:
         AfflictionWarlockPetRaidStrategy(PlayerbotAI* ai) : AfflictionWarlockPetStrategy(ai) {}
-        string getName() override { return "pet affliction raid"; }
+        std::string getName() override { return "pet affliction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -292,7 +292,7 @@ namespace ai
     {
     public:
         AfflictionWarlockCursesPveStrategy(PlayerbotAI* ai) : AfflictionWarlockCursesStrategy(ai) {}
-        string getName() override { return "curse affliction pve"; }
+        std::string getName() override { return "curse affliction pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -302,7 +302,7 @@ namespace ai
     {
     public:
         AfflictionWarlockCursesPvpStrategy(PlayerbotAI* ai) : AfflictionWarlockCursesStrategy(ai) {}
-        string getName() override { return "curse affliction pvp"; }
+        std::string getName() override { return "curse affliction pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -312,7 +312,7 @@ namespace ai
     {
     public:
         AfflictionWarlockCursesRaidStrategy(PlayerbotAI* ai) : AfflictionWarlockCursesStrategy(ai) {}
-        string getName() override { return "curse affliction raid"; }
+        std::string getName() override { return "curse affliction raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

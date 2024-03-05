@@ -1,6 +1,6 @@
 #pragma once
-#include "../triggers/GenericTriggers.h"
-#include "../triggers/GlyphTriggers.h"
+#include "playerbot/strategy/triggers/GenericTriggers.h"
+#include "playerbot/strategy/triggers/GlyphTriggers.h"
 
 namespace ai
 {
@@ -185,7 +185,7 @@ namespace ai
     public:
         IceLanceTrigger(PlayerbotAI* ai) : Trigger(ai, "ice lance") {}
         bool IsActive() override;
-        string GetTargetName() override { return "current target"; }
+        std::string GetTargetName() override { return "current target"; }
     };
 
     BUFF_TRIGGER(MirrorImageTrigger, "mirror image");
@@ -352,7 +352,7 @@ namespace ai
             return false;
         }
 
-        virtual string GetTargetName() { return "current target"; }
+        virtual std::string GetTargetName() { return "current target"; }
     };
 
     class LivingBombTrigger : public DebuffTrigger 
@@ -380,7 +380,7 @@ namespace ai
 
         virtual bool IsActive()
         {
-            return !ai->HasCheat(BotCheatMask::item) && AI_VALUE2(list<Item*>, "inventory items", "conjured food").empty();
+            return !ai->HasCheat(BotCheatMask::item) && AI_VALUE2(std::list<Item*>, "inventory items", "conjured food").empty();
         }
     };
 
@@ -391,7 +391,7 @@ namespace ai
 
         virtual bool IsActive()
         {
-            return !ai->HasCheat(BotCheatMask::item) && AI_VALUE2(list<Item*>, "inventory items", "conjured water").empty();
+            return !ai->HasCheat(BotCheatMask::item) && AI_VALUE2(std::list<Item*>, "inventory items", "conjured water").empty();
         }
     };
 

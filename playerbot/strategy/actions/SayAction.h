@@ -11,7 +11,7 @@ namespace ai
         SayAction(PlayerbotAI* ai);
         virtual bool Execute(Event& event);
         virtual bool isUseful();
-        virtual string getName() { return "say::" + qualifier; }
+        virtual std::string getName() { return "say::" + qualifier; }
 
     private:
     };

@@ -7,10 +7,10 @@ namespace ai
     class KeepItemAction : public ChatCommandAction
     {
     public:
-        KeepItemAction(PlayerbotAI* ai, string name = "keep") : ChatCommandAction(ai, name) {}
+        KeepItemAction(PlayerbotAI* ai, std::string name = "keep") : ChatCommandAction(ai, name) {}
         virtual bool Execute(Event& event) override;
 
-        unordered_map<ForceItemUsage, string> keepName = 
+        std::unordered_map<ForceItemUsage, std::string> keepName = 
         {
             {ForceItemUsage::FORCE_USAGE_NONE, "do not keep"},
             {ForceItemUsage::FORCE_USAGE_KEEP, "keep"},
@@ -20,8 +20,8 @@ namespace ai
         };
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "keep"; } //Must equal iternal name
-        virtual string GetHelpDescription()
+        virtual std::string GetHelpName() { return "keep"; } //Must equal iternal name
+        virtual std::string GetHelpDescription()
         {
             return "This command will force bots to keep an item in their inventory.\n"
                 "The command has an optional parameter to specify what the bot should do with the items\n"
@@ -37,8 +37,8 @@ namespace ai
                 "greed: the bot will try to get more of this item and roll greed.\n"
                 "need: the bot will try to get more of this item and roll need.\n";
         }
-        virtual vector<string> GetUsedActions() { return {}; }
-        virtual vector<string> GetUsedValues() { return { "force item usage" }; }
+        virtual std::vector<std::string> GetUsedActions() { return {}; }
+        virtual std::vector<std::string> GetUsedValues() { return { "force item usage" }; }
 #endif 
     };
 }

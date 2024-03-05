@@ -9,15 +9,15 @@ using namespace ai;
 
 bool MoveStyleAction::Execute(Event& event)
 {
-    string strategy = event.getParam();
+    std::string strategy = event.getParam();
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
-    MoveStyleValue* value = (MoveStyleValue*)context->GetValue<string>("move style");
+    MoveStyleValue* value = (MoveStyleValue*)context->GetValue<std::string>("move style");
 
     if (strategy == "?")
     {
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "Move style: " << value->Get();
             ai->TellPlayer(requester, out);
         }
@@ -27,7 +27,7 @@ bool MoveStyleAction::Execute(Event& event)
         value->Set(strategy);
         
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "Move style set to: " << value->Get();
             ai->TellPlayer(requester, out);
         }

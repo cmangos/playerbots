@@ -28,7 +28,7 @@ bool XpGainAction::Execute(Event& event)
 
     if (sPlayerbotAIConfig.hasLog("bot_events.csv"))
     {
-        sPlayerbotAIConfig.logEvent(ai, "XpGainAction", guid, to_string(xpgain));
+        sPlayerbotAIConfig.logEvent(ai, "XpGainAction", guid, std::to_string(xpgain));
     }
 
     AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
@@ -44,7 +44,7 @@ bool XpGainAction::Execute(Event& event)
 
             if (guild)
             {
-                map<string, string> placeholders;
+                std::map<std::string, std::string> placeholders;
                 placeholders["%name"] = creature->GetName();
 
                 if(urand(0,3))

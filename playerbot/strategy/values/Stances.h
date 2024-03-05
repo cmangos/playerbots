@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "Formations.h"
 
@@ -8,7 +8,7 @@ namespace ai
     class Stance : public Formation
     {
     public:
-        Stance(PlayerbotAI* ai, string name) : Formation (ai, name) {}
+        Stance(PlayerbotAI* ai, std::string name) : Formation (ai, name) {}
         virtual ~Stance() {}
     protected:
         virtual Unit* GetTarget();
@@ -17,14 +17,14 @@ namespace ai
 
     public:
         virtual WorldLocation GetLocation();
-        virtual string GetTargetName() { return "current target"; }
+        virtual std::string GetTargetName() { return "current target"; }
         virtual float GetMaxDistance() { return sPlayerbotAIConfig.contactDistance; }
     };
 
     class MoveStance : public Stance
     {
     public:
-        MoveStance(PlayerbotAI* ai, string name) : Stance (ai, name) {}
+        MoveStance(PlayerbotAI* ai, std::string name) : Stance (ai, name) {}
 
     protected:
         virtual WorldLocation GetLocationInternal();
@@ -40,8 +40,8 @@ namespace ai
         StanceValue(PlayerbotAI* ai);
         ~StanceValue() { if (value) { delete value; value = NULL; } }
         virtual void Reset();
-        virtual string Save();
-        virtual bool Load(string value);
+        virtual std::string Save();
+        virtual bool Load(std::string value);
     };
 
     class SetStanceAction : public ChatCommandAction

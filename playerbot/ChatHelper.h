@@ -1,9 +1,12 @@
 #pragma once
+#include <set>
+#include <string>
+#include <map>
+#include <unordered_map>
+#include <vector>
 
-using namespace std;
-
-typedef set<uint32> ItemIds;
-typedef set<uint32> SpellIds;
+typedef std::set<uint32> ItemIds;
+typedef std::set<uint32> SpellIds;
 
 namespace ai
 {
@@ -18,74 +21,74 @@ namespace ai
         ChatHelper(PlayerbotAI* ai);
 
     public:
-        static string formatMoney(uint32 copper);
-        static uint32 parseMoney(string& text);
+        static std::string formatMoney(uint32 copper);
+        static uint32 parseMoney(std::string& text);
 
-        static string formatQuest(Quest const* quest);
+        static std::string formatQuest(Quest const* quest);
 
-        static string formatItem(ItemQualifier& itemQualifier, int count = 0, int total = 0);
-        static string formatItem(ItemPrototype const * proto, int count = 0, int total = 0);
-        static string formatItem(Item* item, int count = 0, int total = 0);
-        static string formatQItem(uint32 itemId);
-        static ItemIds parseItems(string& text);
-        static set<string> parseItemQualifiers(string& text);
-        static uint32 parseItemQuality(string text);
-        static bool parseItemClass(string text, uint32* itemClass, uint32* itemSubClass);
-        static uint32 parseSlot(string text);
+        static std::string formatItem(ItemQualifier& itemQualifier, int count = 0, int total = 0);
+        static std::string formatItem(ItemPrototype const * proto, int count = 0, int total = 0);
+        static std::string formatItem(Item* item, int count = 0, int total = 0);
+        static std::string formatQItem(uint32 itemId);
+        static ItemIds parseItems(std::string& text);
+        static std::set<std::string> parseItemQualifiers(std::string& text);
+        static uint32 parseItemQuality(std::string text);
+        static bool parseItemClass(std::string text, uint32* itemClass, uint32* itemSubClass);
+        static uint32 parseSlot(std::string text);
 
-        static string formatSpell(SpellEntry const *sInfo);
-        static string formatSpell(uint32 spellId) {const SpellEntry* const spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId); if (!spellInfo) return ""; return formatSpell(spellInfo);};
-        uint32 parseSpell(string& text);
+        static std::string formatSpell(SpellEntry const *sInfo);
+        static std::string formatSpell(uint32 spellId) {const SpellEntry* const spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId); if (!spellInfo) return ""; return formatSpell(spellInfo);};
+        uint32 parseSpell(std::string& text);
 
-        static string formatGameobject(GameObject* go);
-        static list<ObjectGuid> parseGameobjects(string& text);
+        static std::string formatGameobject(GameObject* go);
+        static std::list<ObjectGuid> parseGameobjects(std::string& text);
 
-        static string formatWorldobject(WorldObject* wo);
+        static std::string formatWorldobject(WorldObject* wo);
 
-        static string formatWorldEntry(int32 entry);
-        static list<int32> parseWorldEntries(string& text);
+        static std::string formatWorldEntry(int32 entry);
+        static std::list<int32> parseWorldEntries(std::string& text);
 
-        static string formatQuestObjective(string name, int available, int required);
+        static std::string formatQuestObjective(std::string name, int available, int required);
 
-        static string formatValue(string type, string code, string name, string color = "0000FFFF");
-        static string parseValue(string type, string& text);
+        static std::string formatValue(std::string type, std::string code, std::string name, std::string color = "0000FFFF");
+        static std::string parseValue(std::string type, std::string& text);
 
-        static string formatChat(ChatMsg chat);
-        static ChatMsg parseChat(string& text);
+        static std::string formatChat(ChatMsg chat);
+        static ChatMsg parseChat(std::string& text);
 
-        static string specName(Player* player);
-        static string formatClass(Player* player, int spec);
-        static string formatClass(uint8 cls);
+        static std::string specName(Player* player);
+        static std::string formatClass(Player* player, int spec);
+        static std::string formatClass(uint8 cls);
 
-        static string formatRace(uint8 race);
+        static std::string formatRace(uint8 race);
 
-        static string formatSkill(uint32 skill);
-        uint32 parseSkill(string& text);
+        static std::string formatSkill(uint32 skill);
+        uint32 parseSkill(std::string& text);
 
-        static string formatAngle(float angle);
-        static string formatWorldPosition(WorldPosition& pos);
-        static string formatGuidPosition(GuidPosition& guidP);
+        static std::string formatAngle(float angle);
+        static std::string formatWorldPosition(WorldPosition& pos);
+        static std::string formatGuidPosition(GuidPosition& guidP);
 
-        static string formatBoolean(bool flag);       
+        static std::string formatBoolean(bool flag);       
        
-        static bool parseable(string text);
+        static bool parseable(std::string text);
 
         void eraseAllSubStr(std::string& mainStr, const std::string& toErase);
 
         static void PopulateSpellNameList();
-        static vector<uint32> SpellIds(const string& name);
+        static std::vector<uint32> SpellIds(const std::string& name);
     private:
-        static map<string, uint32> consumableSubClasses;
-        static map<string, uint32> tradeSubClasses;
-        static map<string, uint32> itemQualities;
-        static map<string, uint32> projectileSubClasses;
-        static map<string, pair<uint32, uint32>> itemClasses;
-        static map<string, uint32> slots;
-        static map<string, uint32> skills;
-        static map<string, ChatMsg> chats;
-        static map<uint8, string> classes;
-        static map<uint8, string> races;
-        static map<uint8, map<uint8, string> > specs;
-        static unordered_map<string, vector<uint32>> spellIds;
+        static std::map<std::string, uint32> consumableSubClasses;
+        static std::map<std::string, uint32> tradeSubClasses;
+        static std::map<std::string, uint32> itemQualities;
+        static std::map<std::string, uint32> projectileSubClasses;
+        static std::map<std::string, std::pair<uint32, uint32>> itemClasses;
+        static std::map<std::string, uint32> slots;
+        static std::map<std::string, uint32> skills;
+        static std::map<std::string, ChatMsg> chats;
+        static std::map<uint8, std::string> classes;
+        static std::map<uint8, std::string> races;
+        static std::map<uint8, std::map<uint8, std::string> > specs;
+        static std::unordered_map<std::string, std::vector<uint32>> spellIds;
     };
 };

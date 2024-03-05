@@ -98,12 +98,12 @@ bool LfgJoinAction::JoinLFG()
     if (!stones.size())
         return false;
 
-    vector<uint32> dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
+    std::vector<uint32> dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
     if (!dungeons.size())
         return false;
 
-    vector<MeetingStoneInfo> selected;
-    for (vector<uint32>::iterator i = dungeons.begin(); i != dungeons.end(); ++i)
+    std::vector<MeetingStoneInfo> selected;
+    for (std::vector<uint32>::iterator i = dungeons.begin(); i != dungeons.end(); ++i)
     {
         uint32 zoneId = 0;
         uint32 dungeonId = (*i & 0xFFFF);
@@ -148,7 +148,7 @@ bool LfgJoinAction::JoinLFG()
     uint32 dungeon = urand(0, selected.size() - 1);
     MeetingStoneInfo stoneInfo = selected[dungeon];
     BotRoles botRoles = AiFactory::GetPlayerRoles(bot);
-    string _botRoles;
+    std::string _botRoles;
     switch (botRoles)
     {
     case BOT_ROLE_TANK:
@@ -183,9 +183,9 @@ bool LfgJoinAction::JoinLFG()
     uint32 zoneLFG = 0;
     uint32 questLFG = 0;
     uint32 questZoneLFG = 0;
-    string questName;
-    string zoneName;
-    string lfgName;
+    std::string questName;
+    std::string zoneName;
+    std::string lfgName;
     uint32 needMembers = 0;
     LfgType lfgType = LFG_TYPE_NONE;
     TravelState state = TravelState::TRAVEL_STATE_IDLE;
@@ -343,7 +343,7 @@ bool LfgJoinAction::JoinLFG()
         // lfm for random dungeon if nothing else to do
         else if (status >= TravelStatus::TRAVEL_STATUS_COOLDOWN || state >= TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST || (state == TravelState::TRAVEL_STATE_IDLE && !urand(0, 4)))
         {
-            vector<uint32> dungeons;
+            std::vector<uint32> dungeons;
             for (uint32 i = 0; i < sLFGDungeonStore.GetNumRows(); ++i)
             {
                 if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(i))
@@ -431,10 +431,10 @@ bool LfgJoinAction::JoinLFG()
                                         bot->GetSession()->HandleLfmSetAutoFillOpcode(p);
 
                                         // set auto invite if real player in queue
-                                        vector<uint32> player_dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
+                                        std::vector<uint32> player_dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
                                         if (!player_dungeons.empty())
                                         {
-                                            for (vector<uint32>::iterator i = player_dungeons.begin(); i != player_dungeons.end(); ++i)
+                                            for (std::vector<uint32>::iterator i = player_dungeons.begin(); i != player_dungeons.end(); ++i)
                                             {
                                                 uint32 zoneId = 0;
                                                 uint32 entry = (*i & 0xFFFF);
@@ -492,10 +492,10 @@ bool LfgJoinAction::JoinLFG()
         }
         
         // set auto invite if real player in queue 
-        vector<uint32> player_dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
+        std::vector<uint32> player_dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
         if (!player_dungeons.empty() && !group)
         {
-            for (vector<uint32>::iterator i = player_dungeons.begin(); i != player_dungeons.end(); ++i)
+            for (std::vector<uint32>::iterator i = player_dungeons.begin(); i != player_dungeons.end(); ++i)
             {
                 uint32 zoneId = 0;
                 uint32 entry = (*i & 0xFFFF) & 0xFF;
@@ -614,10 +614,10 @@ bool LfgJoinAction::JoinLFG()
             }
         }
         // lfg for dungeon if real player used LFM with auto invite
-        vector<uint32> player_dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
+        std::vector<uint32> player_dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
         if (!player_dungeons.empty())
         {
-            for (vector<uint32>::iterator i = player_dungeons.begin(); i != player_dungeons.end(); ++i)
+            for (std::vector<uint32>::iterator i = player_dungeons.begin(); i != player_dungeons.end(); ++i)
             {
                 uint32 zoneId = 0;
                 uint32 entry = (*i & 0xFFFF) & 0xFF;
@@ -688,7 +688,7 @@ bool LfgJoinAction::JoinLFG()
         // lfg slot 3 for random dungeon if not very busy
         else if (status >= TravelStatus::TRAVEL_STATUS_COOLDOWN || state >= TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST || (state == TravelState::TRAVEL_STATE_IDLE && !urand(0, 4)))
         {
-            vector<uint32> dungeons;
+            std::vector<uint32> dungeons;
             for (uint32 i = 0; i < sLFGDungeonStore.GetNumRows(); ++i)
             {
                 if (LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(i))
@@ -729,7 +729,7 @@ bool LfgJoinAction::JoinLFG()
                     /*vector<uint32> player_dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
                     if (!player_dungeons.empty())
                     {
-                        for (vector<uint32>::iterator i = player_dungeons.begin(); i != player_dungeons.end(); ++i)
+                        for (std::vector<uint32>::iterator i = player_dungeons.begin(); i != player_dungeons.end(); ++i)
                         {
                             uint32 zoneId = 0;
                             uint32 entry = (*i & 0xFFFF) & 0xFF;
@@ -762,7 +762,7 @@ bool LfgJoinAction::JoinLFG()
 
     // set comment
     BotRoles botRoles = AiFactory::GetPlayerRoles(bot);
-    string _botRoles;
+    std::string _botRoles;
     switch (botRoles)
     {
     case BOT_ROLE_TANK:
@@ -781,13 +781,13 @@ bool LfgJoinAction::JoinLFG()
         _botRoles = "Tank or Dps";
 
     WorldPacket p;
-    string lfgComment;
+    std::string lfgComment;
     if (isLFM)
     {
         if (!group)
             lfgComment += _botRoles + ", ";
 
-        lfgComment = "LF " + to_string(needMembers) + " more";
+        lfgComment = "LF " + std::to_string(needMembers) + " more";
         if (questLFG)
             lfgComment += ", doing " + questName;
     }
@@ -801,14 +801,14 @@ bool LfgJoinAction::JoinLFG()
     }
     if (lfgType == LFG_TYPE_DUNGEON)
     {
-        string _gs = to_string(bot->GetPlayerbotAI()->GetEquipGearScore(bot, false, false));
+        std::string _gs = std::to_string(bot->GetPlayerbotAI()->GetEquipGearScore(bot, false, false));
         lfgComment += ", GS " + _gs;
     }
 
     p << lfgComment;// +", GS - " + _gs;
     bot->GetSession()->HandleSetLfgCommentOpcode(p);
-    string lfgGroup = isLFG ? "LFG" : "LFM";
-    string lfgOption = lfgType == LFG_TYPE_QUEST ? "Quest" : (lfgType == LFG_TYPE_ZONE ? "Zone" : "Dungeon");
+    std::string lfgGroup = isLFG ? "LFG" : "LFM";
+    std::string lfgOption = lfgType == LFG_TYPE_QUEST ? "Quest" : (lfgType == LFG_TYPE_ZONE ? "Zone" : "Dungeon");
 
     if (realLFG)
         sLog.outBasic("Bot #%d %s:%d <%s>: uses %s, %s - %s (%s)", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), lfgGroup.c_str(), lfgOption.c_str(), lfgName.c_str(), _botRoles.c_str());
@@ -829,13 +829,13 @@ bool LfgJoinAction::JoinLFG()
     bool raid = !heroic && (urand(0, 100) < 50 && visitor.count[ITEM_QUALITY_EPIC] >= 5 && (bot->GetLevel() == 60 || bot->GetLevel() == 70 || bot->GetLevel() == 80));*/
 
     LfgDungeonSet list;
-    vector<uint32> selected;
+    std::vector<uint32> selected;
 
-    vector<uint32> dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
+    std::vector<uint32> dungeons = sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()];
     if (!dungeons.size())
         return false;
 
-    for (vector<uint32>::iterator i = dungeons.begin(); i != dungeons.end(); ++i)
+    for (std::vector<uint32>::iterator i = dungeons.begin(); i != dungeons.end(); ++i)
     {
         LFGDungeonData const* dungeon = sLFGMgr.GetLFGDungeon(*i);
         if (!dungeon || (dungeon->type != LFG_TYPE_RANDOM_DUNGEON && dungeon->type != LFG_TYPE_DUNGEON && dungeon->type != LFG_TYPE_HEROIC_DUNGEON &&
@@ -855,7 +855,7 @@ bool LfgJoinAction::JoinLFG()
     if (!selected.size())
         return false;
 
-    if (list.empty())
+    if (std::list.empty())
         return false;
 
     bool many = list.size() > 1;
@@ -891,11 +891,11 @@ bool LfgJoinAction::JoinLFG()
         list.insert(dungeon);
     }
 
-    if (list.empty() && !random)
+    if (std::list.empty() && !random)
         return false;*/
 
     // check role for console msg
-    string _roles = "multiple roles";
+    std::string _roles = "multiple roles";
 
     if ((pState.GetPlayerRoles() & PLAYER_ROLE_TANK) != 0)
         _roles = "TANK";
@@ -964,8 +964,8 @@ bool LfgJoinAction::JoinLFG()
     }*/
 
     // Set Raid Browser comment
-    string _gs = to_string(bot->GetEquipGearScore());
-    string comment = "Bot " + _roles + " GS:" + _gs + " for LFG";
+    std::string _gs = std::to_string(bot->GetEquipGearScore());
+    std::string comment = "Bot " + _roles + " GS:" + _gs + " for LFG";
     sLFGMgr.JoinLfg(bot, GetRoles(), list, comment);
 #endif
     return true;
@@ -1093,7 +1093,7 @@ bool LfgLeaveAction::Execute(Event& event)
             bot->GetSession()->HandleLfmClearOpcode(p);
 
         // clear comment
-        string empty;
+        std::string empty;
         p << empty;
         bot->GetSession()->HandleSetLfgCommentOpcode(p);
     }

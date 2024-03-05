@@ -8,10 +8,10 @@
 
 using namespace ai;
 
-int FindLastSeparator(string text, string sep)
+int FindLastSeparator(std::string text, std::string sep)
 {
     int pos = text.rfind(sep);
-    if (pos == string::npos) return pos;
+    if (pos == std::string::npos) return pos;
 
     int lastLinkBegin = text.rfind("|H");
     int lastLinkEnd = text.find("|h|r", lastLinkBegin + 1);
@@ -36,7 +36,7 @@ bool CastCustomSpellAction::Execute(Event& event)
         return false;
 
     Unit* target = NULL;
-    string text = getQualifier();
+    std::string text = getQualifier();
 
     if(text.empty())
         text = event.getParam();
@@ -49,7 +49,7 @@ bool CastCustomSpellAction::Execute(Event& event)
         return true;
     }
 
-    list<ObjectGuid> gos = chat->parseGameobjects(text);
+    std::list<ObjectGuid> gos = chat->parseGameobjects(text);
 
     if (!gos.empty())
     {
@@ -86,10 +86,10 @@ bool CastCustomSpellAction::Execute(Event& event)
 
     int pos = FindLastSeparator(text, " ");
     int castCount = 1;
-    if (pos != string::npos)
+    if (pos != std::string::npos)
     {
-        string param = text.substr(pos + 1);
-        list<Item*> items = ai->InventoryParseItems(param, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+        std::string param = text.substr(pos + 1);
+        std::list<Item*> items = ai->InventoryParseItems(param, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
         if (!items.empty()) itemTarget = *items.begin();
         else
         {
@@ -103,7 +103,7 @@ bool CastCustomSpellAction::Execute(Event& event)
 
     if (!spell)
     {
-        map<string, string> args;
+        std::map<std::string, std::string> args;
         args["%spell"] = text;
         ai->TellPlayerNoFacing(requester, BOT_TEXT2("cast_spell_command_error_unknown_spell", args));
         return false;
@@ -112,7 +112,7 @@ bool CastCustomSpellAction::Execute(Event& event)
     SpellEntry const* pSpellInfo = sServerFacade.LookupSpellInfo(spell);
     if (!pSpellInfo)
     {
-        map<string, string> args;
+        std::map<std::string, std::string> args;
         args["%spell"] = text;
         ai->TellPlayerNoFacing(requester, BOT_TEXT2("cast_spell_command_error_unknown_spell", args));
         return false;
@@ -137,7 +137,7 @@ bool CastCustomSpellAction::Execute(Event& event)
     {
         sServerFacade.SetFacingTo(bot, target);
         SetDuration(sPlayerbotAIConfig.globalCoolDown);
-        ostringstream msg;
+        std::ostringstream msg;
         msg << "cast " << text;
         ai->HandleCommand(CHAT_MSG_WHISPER, msg.str(), *requester);
         return true;
@@ -167,8 +167,8 @@ bool CastCustomSpellAction::Execute(Event& event)
 
     ai->RemoveShapeshift();
 
-    ostringstream replyStr;
-    map<string, string> replyArgs;
+    std::ostringstream replyStr;
+    std::map<std::string, std::string> replyArgs;
     if (!pSpellInfo->EffectItemType[0])
     {
         replyStr << BOT_TEXT("cast_spell_command_spell");
@@ -205,7 +205,7 @@ bool CastCustomSpellAction::Execute(Event& event)
 
     if (!bot->GetTrader() && !ai->CanCastSpell(spell, target, 0, true, itemTarget, false))
     {
-        map<string, string> args;
+        std::map<std::string, std::string> args;
         args["%spell"] = replyArgs["%spell"];
         ai->TellPlayerNoFacing(requester, BOT_TEXT2("cast_spell_command_error", args));
         return false;
@@ -221,7 +221,7 @@ bool CastCustomSpellAction::Execute(Event& event)
 
         if (castCount > 1)
         {
-            ostringstream cmd;
+            std::ostringstream cmd;
             cmd << castString(target) << " " << text << " " << (castCount - 1);
             ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *requester);
 
@@ -233,7 +233,7 @@ bool CastCustomSpellAction::Execute(Event& event)
     }
     else
     {
-        map<string, string> args;
+        std::map<std::string, std::string> args;
         args["%spell"] = replyArgs["%spell"];
         ai->TellPlayerNoFacing(requester, BOT_TEXT2("cast_spell_command_error_failed", args));
     }
@@ -245,16 +245,16 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
 {
     if (bot->getClass() == CLASS_WARLOCK)
     {
-        if (command.find("summon") != string::npos)
+        if (command.find("summon") != std::string::npos)
         {
             // Don't summon player when trying to summon warlock pet
-            if (command.find("imp") != string::npos || 
-                command.find("voidwalker") != string::npos || 
-                command.find("succubus") != string::npos || 
-                command.find("felhunter") != string::npos ||
-                command.find("felguard") != string::npos ||
-                command.find("felsteed") != string::npos ||
-                command.find("dreadsteed") != string::npos)
+            if (command.find("imp") != std::string::npos || 
+                command.find("voidwalker") != std::string::npos || 
+                command.find("succubus") != std::string::npos || 
+                command.find("felhunter") != std::string::npos ||
+                command.find("felguard") != std::string::npos ||
+                command.find("felsteed") != std::string::npos ||
+                command.find("dreadsteed") != std::string::npos)
             {
                 return false;
             }
@@ -347,10 +347,10 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
                             target->TeleportTo(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), bot->GetOrientation());
                         }
 
-                        ostringstream msg;
+                        std::ostringstream msg;
                         msg << "Summoning " << target->GetName();
 
-                        map<string, string> args;
+                        std::map<std::string, std::string> args;
                         args["%target"] = target->GetName();
                         ai->TellPlayerNoFacing(requester, BOT_TEXT2("cast_spell_command_summon", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                         SetDuration(sPlayerbotAIConfig.globalCoolDown);
@@ -379,18 +379,18 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
 bool CastRandomSpellAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    list<pair<uint32, string>> spellMap = GetSpellList();
+    std::list<std::pair<uint32, std::string>> spellMap = GetSpellList();
     
     Unit* target = nullptr;
     GameObject* got = nullptr;
 
-    string name = event.getParam();
+    std::string name = event.getParam();
     if (name.empty())
     {
         name = getName();
     }
 
-    list<ObjectGuid> wos = chat->parseGameobjects(name);
+    std::list<ObjectGuid> wos = chat->parseGameobjects(name);
 
     for (auto wo : wos)
     {
@@ -422,7 +422,7 @@ bool CastRandomSpellAction::Execute(Event& event)
         target = bot;
     }
 
-    vector<pair<uint32, pair<uint32, WorldObject*>>> spellList;
+    std::vector<std::pair<uint32, std::pair<uint32, WorldObject*>>> spellList;
     for (auto & spell : spellMap)
     {
         uint32 spellId = spell.first;
@@ -449,22 +449,22 @@ bool CastRandomSpellAction::Execute(Event& event)
 
             if (target && ai->CanCastSpell(spellId, target, true))
             {
-                spellList.push_back(make_pair(spellId,make_pair(spellPriority, target)));
+                spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, target)));
             }
 
             if (target && ai->CanCastSpell(spellId, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), true))
             {
-                spellList.push_back(make_pair(spellId, make_pair(spellPriority, target)));
+                spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, target)));
             }
 
             if (got && ai->CanCastSpell(spellId, got->GetPositionX(), got->GetPositionY(), got->GetPositionZ(), true))
             {
-                spellList.push_back(make_pair(spellId, make_pair(spellPriority, got)));
+                spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, got)));
             }
 
             if (ai->CanCastSpell(spellId, bot, true))
             {
-                spellList.push_back(make_pair(spellId, make_pair(spellPriority, bot)));
+                spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, bot)));
             }
         }
     }
@@ -476,7 +476,7 @@ bool CastRandomSpellAction::Execute(Event& event)
 
     bool isCast = false;
 
-    std::sort(spellList.begin(), spellList.end(), [](pair<uint32, pair<uint32, WorldObject*>> i, pair<uint32, pair<uint32, WorldObject*>> j) {return i.first > j.first; });
+    std::sort(spellList.begin(), spellList.end(), [](std::pair<uint32, std::pair<uint32, WorldObject*>> i, std::pair<uint32, std::pair<uint32, WorldObject*>> j) {return i.first > j.first; });
 
     uint32 rndBound = spellList.size() / 4;
 
@@ -556,10 +556,10 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
 
 bool CraftRandomItemAction::Execute(Event& event)
 {
-    vector<uint32> spellIds = AI_VALUE(vector<uint32>, "craft spells");
+    std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
     std::shuffle(spellIds.begin(), spellIds.end(),*GetRandomGenerator());
 
-    list<ObjectGuid> wos = chat->parseGameobjects(name);
+    std::list<ObjectGuid> wos = chat->parseGameobjects(name);
     WorldObject* wot = nullptr;
 
     for (auto wo : wos)
@@ -605,7 +605,7 @@ bool CraftRandomItemAction::Execute(Event& event)
         if (!proto)
             continue;
 
-        ostringstream cmd;
+        std::ostringstream cmd;
 
         cmd << "castnc ";
 
@@ -627,7 +627,7 @@ bool CraftRandomItemAction::Execute(Event& event)
 bool DisenchantRandomItemAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    list<uint32> items = AI_VALUE2(list<uint32>, "inventory item ids", "usage " + to_string((uint8)ItemUsage::ITEM_USAGE_DISENCHANT));
+    std::list<uint32> items = AI_VALUE2(std::list<uint32>, "inventory item ids", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_DISENCHANT));
 
     items.reverse();
 

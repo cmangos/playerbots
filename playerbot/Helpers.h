@@ -1,20 +1,20 @@
 #pragma once
 
 template<typename T>
-map<int, T> filterList(vector<T> src, string filter)
+std::map<int, T> filterList(std::vector<T> src, std::string filter)
 {
-    map<int, T> result;
+    std::map<int, T> result;
     if (filter.empty() || filter == "*")
     {
         int idx = 0;
-        for (typename vector<T>::iterator i = src.begin(); i != src.end(); ++i)
+        for (typename std::vector<T>::iterator i = src.begin(); i != src.end(); ++i)
             result[idx++] = *i;
         return result;
     }
 
-    if (filter.find("-") != string::npos)
+    if (filter.find("-") != std::string::npos)
     {
-        vector<string> ss = split(filter, '-');
+        std::vector<std::string> ss = split(filter, '-');
         int from = 0, to = src.size() - 1;
         if (!ss[0].empty()) from = atoi(ss[0].c_str()) - 1;
         if (ss.size() > 1 && !ss[1].empty()) to = atoi(ss[1].c_str()) - 1;
@@ -29,8 +29,8 @@ map<int, T> filterList(vector<T> src, string filter)
         return result;
     }
 
-    vector<string> ss = split(filter, ',');
-    for (vector<string>::iterator i = ss.begin(); i != ss.end(); ++i)
+    std::vector<std::string> ss = split(filter, ',');
+    for (std::vector<std::string>::iterator i = ss.begin(); i != ss.end(); ++i)
     {
         int idx = atoi(i->c_str()) - 1;
         if (idx < 0) idx = 0;

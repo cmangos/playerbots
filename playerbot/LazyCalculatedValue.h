@@ -1,7 +1,5 @@
 #pragma once
 
-using namespace std;
-
 namespace ai 
 {
     template <class TValue, class TOwner>

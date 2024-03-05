@@ -1,7 +1,7 @@
 #pragma once
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "Groups/Group.h"
 #include "TargetValue.h"
 
@@ -10,11 +10,11 @@ namespace ai
     class RtiTargetValue : public TargetValue
     {
     public:
-        RtiTargetValue(PlayerbotAI* ai, string type = "rti", string name = "rti target") : type(type), TargetValue(ai,name)
+        RtiTargetValue(PlayerbotAI* ai, std::string type = "rti", std::string name = "rti target") : type(type), TargetValue(ai,name)
         {}
 
     public:
-        static int GetRtiIndex(string rti)
+        static int GetRtiIndex(std::string rti)
         {
             int index = -1;
             if(rti == "star") index = 0;
@@ -34,7 +34,7 @@ namespace ai
             if(!group)
                 return NULL;
 
-            string rti = AI_VALUE(string, type);
+            std::string rti = AI_VALUE(std::string, type);
             int index = GetRtiIndex(rti);
 
             if (index == -1)
@@ -44,8 +44,8 @@ namespace ai
             if (!guid)
                 return NULL;
 
-            list<ObjectGuid> attackers = context->GetValue<list<ObjectGuid>>("possible targets")->Get();
-            if (find(attackers.begin(), attackers.end(), guid) == attackers.end()) return NULL;
+            std::list<ObjectGuid> attackers = context->GetValue<std::list<ObjectGuid>>("possible targets")->Get();
+            if (std::find(attackers.begin(), attackers.end(), guid) == attackers.end()) return NULL;
 
             Unit* unit = ai->GetUnit(ObjectGuid(guid));
             if (!unit || sServerFacade.UnitIsDead(unit) ||
@@ -56,12 +56,12 @@ namespace ai
         }
 
     private:
-        string type;
+    std::string type;
     };
 
     class RtiCcTargetValue : public RtiTargetValue
     {
     public:
-        RtiCcTargetValue(PlayerbotAI* ai, string name = "rti cc target") : RtiTargetValue(ai, "rti cc", name) {}
+        RtiCcTargetValue(PlayerbotAI* ai, std::string name = "rti cc target") : RtiTargetValue(ai, "rti cc", name) {}
     };
 }

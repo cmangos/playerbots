@@ -10,6 +10,6 @@ namespace ai
         virtual bool Execute(Event& event);
 
     private:
-        static map<InventoryResult, string> messages;
+        static std::map<InventoryResult, std::string> messages;
     };
 }

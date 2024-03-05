@@ -1,6 +1,6 @@
 
 #include "playerbot/playerbot.h"
-#include "../PassiveMultiplier.h"
+#include "playerbot/strategy/PassiveMultiplier.h"
 #include "PullStrategy.h"
 
 using namespace ai;
@@ -23,7 +23,7 @@ private:
     }
 };
 
-PullStrategy::PullStrategy(PlayerbotAI* ai, string pullAction, string prePullAction)
+PullStrategy::PullStrategy(PlayerbotAI* ai, std::string pullAction, std::string prePullAction)
 : Strategy(ai)
 , pullActionName(pullAction)
 , preActionName(prePullAction)
@@ -37,9 +37,9 @@ PullStrategy::PullStrategy(PlayerbotAI* ai, string pullAction, string prePullAct
         return;
 }
 
-string PullStrategy::GetPullActionName() const
+std::string PullStrategy::GetPullActionName() const
 {
-    string modPullActionName = pullActionName;
+    std::string modPullActionName = pullActionName;
 
     // Select the faerie fire based on druid strategy
     if (ai->GetBot()->getClass() == CLASS_DRUID)
@@ -56,9 +56,9 @@ string PullStrategy::GetPullActionName() const
     return modPullActionName;
 }
 
-string PullStrategy::GetSpellName() const
+std::string PullStrategy::GetSpellName() const
 {
-    string spellName = GetPullActionName();
+    std::string spellName = GetPullActionName();
     if (spellName == "shoot")
     {
         const Item* equippedWeapon = ai->GetBot()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
@@ -121,9 +121,9 @@ float PullStrategy::GetRange() const
     return range;
 }
 
-string PullStrategy::GetPreActionName() const
+std::string PullStrategy::GetPreActionName() const
 {
-    string modPullActionName = preActionName;
+    std::string modPullActionName = preActionName;
 
     // Select the faerie fire based on druid strategy
     if (ai->GetBot()->getClass() == CLASS_DRUID)
@@ -187,7 +187,7 @@ bool PullStrategy::CanDoPullAction(Unit* target)
 {
     // Check if the bot can perform the pull action
     bool canPull = false;
-    const string& pullAction = GetPullActionName();
+    const std::string& pullAction = GetPullActionName();
     if (!pullAction.empty())
     {
         // Temporarily set the pull target to be used by the can do specific action method

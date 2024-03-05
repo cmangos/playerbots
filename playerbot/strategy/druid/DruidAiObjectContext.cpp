@@ -5,10 +5,10 @@
 #include "TankFeralDruidStrategy.h"
 #include "DpsFeralDruidStrategy.h"
 #include "BalanceDruidStrategy.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 #include "DruidTriggers.h"
 #include "RestorationDruidStrategy.h"
-#include "../generic/PullStrategy.h"
+#include "playerbot/strategy/generic/PullStrategy.h"
 
 namespace ai
 {

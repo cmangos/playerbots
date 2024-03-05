@@ -11,7 +11,7 @@ bool CheckMailAction::Execute(Event& event)
     WorldPacket p;
     bot->GetSession()->HandleQueryNextMailTime(p);   
 
-    list<uint32> ids;
+    std::list<uint32> ids;
 
     PlayerMails mails;
 
@@ -39,7 +39,7 @@ bool CheckMailAction::Execute(Event& event)
         mail->state = MAIL_STATE_DELETED;
     }
 
-    for (list<uint32>::iterator i = ids.begin(); i != ids.end(); ++i)
+    for (std::list<uint32>::iterator i = ids.begin(); i != ids.end(); ++i)
     {
         uint32 id = *i;
         bot->SendMailResult(id, MAIL_DELETED, MAIL_OK);
@@ -67,7 +67,7 @@ void CheckMailAction::ProcessMail(Mail* mail, Player* owner)
         return;
     }
 
-    if (mail->subject.find("Item(s) you asked for") != string::npos)
+    if (mail->subject.find("Item(s) you asked for") != std::string::npos)
         return;
 
     for (MailItemInfoVec::iterator i = mail->items.begin(); i != mail->items.end(); ++i)
@@ -76,7 +76,7 @@ void CheckMailAction::ProcessMail(Mail* mail, Player* owner)
         if (!item)
             continue;
 
-        ostringstream body;
+        std::ostringstream body;
         body << "Hello, " << owner->GetName() << ",\n";
         body << "\n";
         body << "Here are the item(s) you've sent me by mistake";

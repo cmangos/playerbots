@@ -36,7 +36,7 @@ namespace ai
 	{
 	public:
 		CastSprintAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "sprint") {}
-        virtual string GetTargetName() { return "self target"; }
+        virtual std::string GetTargetName() { return "self target"; }
 	};
 
     class CastStealthAction : public CastBuffSpellAction
@@ -44,7 +44,7 @@ namespace ai
     public:
         CastStealthAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "stealth") {}
         
-        virtual string GetTargetName() { return "self target"; }
+        virtual std::string GetTargetName() { return "self target"; }
         
         virtual bool isUseful()
         {
@@ -204,7 +204,7 @@ namespace ai
         }
 
     private:
-        string GetReachActionName() override { return "reach melee"; }
+        std::string GetReachActionName() override { return "reach melee"; }
     };
 
     class CastTricksOfTheTradeOnPartyAction : public BuffOnPartyAction 
@@ -283,7 +283,7 @@ namespace ai
     class CastComboAction : public CastMeleeSpellAction
     {
     public:
-        CastComboAction(PlayerbotAI* ai, string name) : CastMeleeSpellAction(ai, name) {}
+        CastComboAction(PlayerbotAI* ai, std::string name) : CastMeleeSpellAction(ai, name) {}
 
         virtual bool isUseful()
         {

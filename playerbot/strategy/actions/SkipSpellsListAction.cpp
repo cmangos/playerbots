@@ -10,8 +10,8 @@ using namespace ai;
 bool SkipSpellsListAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string cmd = event.getParam();
-    set<uint32>& skipSpells = AI_VALUE(set<uint32>&, "skip spells list");
+    std::string cmd = event.getParam();
+    std::set<uint32>& skipSpells = AI_VALUE(std::set<uint32>&, "skip spells list");
 
     if (cmd == "reset")
     {
@@ -28,9 +28,9 @@ bool SkipSpellsListAction::Execute(Event& event)
         else
         {
             bool first = true;
-            ostringstream out;
+            std::ostringstream out;
             out << "Ignored spell list: ";
-            for (set<uint32>::iterator i = skipSpells.begin(); i != skipSpells.end(); i++)
+            for (std::set<uint32>::iterator i = skipSpells.begin(); i != skipSpells.end(); i++)
             {
                 const SpellEntry* spellEntry = sServerFacade.LookupSpellInfo(*i);
                 if (!spellEntry)
@@ -49,10 +49,10 @@ bool SkipSpellsListAction::Execute(Event& event)
     }
     else
     {
-        std::vector<string> spells = ParseSpells(cmd);
+        std::vector<std::string> spells = ParseSpells(cmd);
         if (!spells.empty())
         {
-            for (string& spell : spells)
+            for (std::string& spell : spells)
             {
                 const bool remove = spell.substr(0, 1) == "-";
                 if (remove)
@@ -82,22 +82,22 @@ bool SkipSpellsListAction::Execute(Event& event)
 
                 if (remove)
                 {
-                    set<uint32>::iterator j = skipSpells.find(spellId);
+                    std::set<uint32>::iterator j = skipSpells.find(spellId);
                     if (j != skipSpells.end())
                     {
                         skipSpells.erase(j);
-                        ostringstream out;
+                        std::ostringstream out;
                         out << chat->formatSpell(spellEntry) << " removed from ignored spells";
                         ai->TellPlayer(requester, out);
                     }
                 }
                 else
                 {
-                    set<uint32>::iterator j = skipSpells.find(spellId);
+                    std::set<uint32>::iterator j = skipSpells.find(spellId);
                     if (j == skipSpells.end())
                     {
                         skipSpells.insert(spellId);
-                        ostringstream out;
+                        std::ostringstream out;
                         out << chat->formatSpell(spellEntry) << " added to ignored spells";
                         ai->TellPlayer(requester, out);
                     }
@@ -115,7 +115,7 @@ bool SkipSpellsListAction::Execute(Event& event)
     return false;
 }
 
-std::vector<string> SkipSpellsListAction::ParseSpells(const string& text)
+std::vector<std::string> SkipSpellsListAction::ParseSpells(const std::string& text)
 {
     std::vector<std::string> spells;
 

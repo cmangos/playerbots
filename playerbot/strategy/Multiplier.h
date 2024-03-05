@@ -14,7 +14,7 @@ namespace ai
     class Multiplier : public AiNamedObject
     {
     public:
-        Multiplier(PlayerbotAI* ai, string name) : AiNamedObject(ai, name) {}
+        Multiplier(PlayerbotAI* ai, std::string name) : AiNamedObject(ai, name) {}
         virtual ~Multiplier() {}
 
     public:

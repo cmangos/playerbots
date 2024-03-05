@@ -125,7 +125,7 @@ namespace ai
     {
     public:
 		CastSoulShatterAction(PlayerbotAI* ai) : CastSpellAction(ai, "soulshatter") {}
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
     };
 
     class CastSoulFireAction : public CastSpellAction
@@ -278,7 +278,7 @@ namespace ai
     {
     public:
         CastSacrificeAction(PlayerbotAI* ai) : CastPetSpellAction(ai, "sacrifice") {}
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
     };
 
     class CastSpellLockAction : public CastPetSpellAction
@@ -291,16 +291,16 @@ namespace ai
     {
     public:
         CastSpellLockOnEnemyHealerAction(PlayerbotAI* ai) : CastPetSpellAction(ai, "spell lock") {}
-        virtual string GetTargetName() override { return "enemy healer target"; }
-        virtual string GetTargetQualifier() override { return GetSpellName(); }
-        virtual string getName() override { return GetSpellName() + " on enemy healer"; }
+        virtual std::string GetTargetName() override { return "enemy healer target"; }
+        virtual std::string GetTargetQualifier() override { return GetSpellName(); }
+        virtual std::string getName() override { return GetSpellName() + " on enemy healer"; }
     };
 
 	class CastSummonImpAction : public CastBuffSpellAction
 	{
 	public:
 		CastSummonImpAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "summon imp") {}
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 
         bool isUseful() override
         {
@@ -318,7 +318,7 @@ namespace ai
     {
     public:
         CastSummonSuccubusAction(PlayerbotAI* ai) : CastSpellAction(ai, "summon succubus") {}
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 
         bool isUseful() override
         {
@@ -336,7 +336,7 @@ namespace ai
 	{
 	public:
 		CastSummonFelhunterAction(PlayerbotAI* ai) : CastSpellAction(ai, "summon felhunter") {}
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 
         bool isUseful() override
         {
@@ -354,7 +354,7 @@ namespace ai
     {
     public:
         CastSummonVoidwalkerAction(PlayerbotAI* ai) : CastSpellAction(ai, "summon voidwalker") {}
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 
         bool isUseful() override
         {
@@ -372,7 +372,7 @@ namespace ai
     {
     public:
         CastSummonFelguardAction(PlayerbotAI* ai) : CastSpellAction(ai, "summon felguard") {}
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 
         bool isUseful() override
         {
@@ -397,29 +397,29 @@ namespace ai
 	{
 	public:
 		CastCreateHealthstoneAction(PlayerbotAI* ai) : CastSpellAction(ai, "create healthstone") {}
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 	};
 
 	class CastCreateFirestoneAction : public CastSpellAction
 	{
 	public:
 		CastCreateFirestoneAction(PlayerbotAI* ai) : CastSpellAction(ai, "create firestone") {}
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 	};
 
 	class CastCreateSpellstoneAction : public CastSpellAction
 	{
 	public:
 		CastCreateSpellstoneAction(PlayerbotAI* ai) : CastSpellAction(ai, "create spellstone") {}
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 	};
 
     class CastBanishAction : public CastSpellAction
     {
     public:
         CastBanishAction(PlayerbotAI* ai) : CastSpellAction(ai, "banish") {}
-        virtual string GetTargetName() override { return "snare target"; }
-        virtual string GetTargetQualifier() override { return GetSpellName(); }
+        virtual std::string GetTargetName() override { return "snare target"; }
+        virtual std::string GetTargetQualifier() override { return GetSpellName(); }
         virtual ActionThreatType getThreatType() { return ActionThreatType::ACTION_THREAT_NONE; }
     };
 
@@ -484,7 +484,7 @@ namespace ai
     {
     public:
         CastLifeTapAction(PlayerbotAI* ai) : CastSpellAction(ai, "life tap") {}
-        virtual string GetTargetName() { return "self target"; }
+        virtual std::string GetTargetName() { return "self target"; }
         virtual bool isUseful() { return AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.lowHealth; }
     };
 

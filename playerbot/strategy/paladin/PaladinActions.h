@@ -66,7 +66,7 @@ namespace ai
     class CastSealSpellAction : public CastBuffSpellAction
     {
     public:
-        CastSealSpellAction(PlayerbotAI* ai, string name) : CastBuffSpellAction(ai, name) {}
+        CastSealSpellAction(PlayerbotAI* ai, std::string name) : CastBuffSpellAction(ai, name) {}
         virtual bool isUseful() { return AI_VALUE2(bool, "combat", "self target"); }
     };
 
@@ -132,7 +132,7 @@ namespace ai
     class CastBlessingAction : public CastSpellAction
     {
     public:
-        CastBlessingAction(PlayerbotAI* ai, string name, bool greater) : CastSpellAction(ai, name), greater(greater) {}
+        CastBlessingAction(PlayerbotAI* ai, std::string name, bool greater) : CastSpellAction(ai, name), greater(greater) {}
 
     private:
         Unit* GetTarget() override;
@@ -150,7 +150,7 @@ namespace ai
     class CastPveBlessingAction : public CastBlessingAction
     {
     public:
-        CastPveBlessingAction(PlayerbotAI* ai, string name = "pve blessing", bool greater = false) : CastBlessingAction(ai, name, greater) {}
+        CastPveBlessingAction(PlayerbotAI* ai, std::string name = "pve blessing", bool greater = false) : CastBlessingAction(ai, name, greater) {}
 
     private:
         std::vector<std::string> GetPossibleBlessingsForTarget(Unit* target) const override;
@@ -159,7 +159,7 @@ namespace ai
     class CastPvpBlessingAction : public CastBlessingAction
     {
     public:
-        CastPvpBlessingAction(PlayerbotAI* ai, string name = "pvp blessing", bool greater = false) : CastBlessingAction(ai, name, greater) {}
+        CastPvpBlessingAction(PlayerbotAI* ai, std::string name = "pvp blessing", bool greater = false) : CastBlessingAction(ai, name, greater) {}
 
     private:
         std::vector<std::string> GetPossibleBlessingsForTarget(Unit* target) const override;
@@ -168,7 +168,7 @@ namespace ai
     class CastRaidBlessingAction : public CastBlessingAction
     {
     public:
-        CastRaidBlessingAction(PlayerbotAI* ai, string name = "raid blessing", bool greater = false) : CastBlessingAction(ai, name, greater) {}
+        CastRaidBlessingAction(PlayerbotAI* ai, std::string name = "raid blessing", bool greater = false) : CastBlessingAction(ai, name, greater) {}
 
     private:
         std::vector<std::string> GetPossibleBlessingsForTarget(Unit* target) const override;
@@ -196,7 +196,7 @@ namespace ai
     class CastBlessingOnPartyAction : public CastSpellAction
     {
     public:
-        CastBlessingOnPartyAction(PlayerbotAI* ai, string name, bool greater) : CastSpellAction(ai, name), greater(greater) {}
+        CastBlessingOnPartyAction(PlayerbotAI* ai, std::string name, bool greater) : CastSpellAction(ai, name), greater(greater) {}
 
     private:
         Unit* GetTarget() override;
@@ -213,7 +213,7 @@ namespace ai
     class CastPveBlessingOnPartyAction : public CastBlessingOnPartyAction
     {
     public:
-        CastPveBlessingOnPartyAction(PlayerbotAI* ai, string name = "pve blessing on party", bool greater = false) : CastBlessingOnPartyAction(ai, name, greater) {}
+        CastPveBlessingOnPartyAction(PlayerbotAI* ai, std::string name = "pve blessing on party", bool greater = false) : CastBlessingOnPartyAction(ai, name, greater) {}
 
     private:
         std::vector<std::string> GetPossibleBlessingsForTarget(Unit* target) const override;
@@ -222,7 +222,7 @@ namespace ai
     class CastPvpBlessingOnPartyAction : public CastBlessingOnPartyAction
     {
     public:
-        CastPvpBlessingOnPartyAction(PlayerbotAI* ai, string name = "pvp blessing on party", bool greater = false) : CastBlessingOnPartyAction(ai, name, greater) {}
+        CastPvpBlessingOnPartyAction(PlayerbotAI* ai, std::string name = "pvp blessing on party", bool greater = false) : CastBlessingOnPartyAction(ai, name, greater) {}
 
     private:
         std::vector<std::string> GetPossibleBlessingsForTarget(Unit* target) const override;
@@ -231,7 +231,7 @@ namespace ai
     class CastRaidBlessingOnPartyAction : public CastBlessingOnPartyAction
     {
     public:
-        CastRaidBlessingOnPartyAction(PlayerbotAI* ai, string name = "raid blessing on party", bool greater = false) : CastBlessingOnPartyAction(ai, name, greater) {}
+        CastRaidBlessingOnPartyAction(PlayerbotAI* ai, std::string name = "raid blessing on party", bool greater = false) : CastBlessingOnPartyAction(ai, name, greater) {}
 
     private:
         std::vector<std::string> GetPossibleBlessingsForTarget(Unit* target) const override;
@@ -272,7 +272,7 @@ namespace ai
     {
     public:
 		CastBlessingOfMightOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "blessing of might") {}
-        string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
+        std::string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
     };
 
     class CastGreaterBlessingOfMightOnPartyAction : public GreaterBuffOnPartyAction
@@ -298,7 +298,7 @@ namespace ai
     {
     public:
         CastBlessingOfWisdomOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "blessing of wisdom") {}
-        string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
+        std::string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
     };
 
     class CastGreaterBlessingOfWisdomOnPartyAction : public GreaterBuffOnPartyAction
@@ -324,7 +324,7 @@ namespace ai
     {
     public:
         CastBlessingOfKingsOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "blessing of kings") {}
-        string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
+        std::string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
     };
 
     class CastGreaterBlessingOfKingsOnPartyAction : public GreaterBuffOnPartyAction
@@ -350,7 +350,7 @@ namespace ai
     {
     public:
         CastBlessingOfSanctuaryOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "blessing of sanctuary") {}
-        string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
+        std::string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
     };
 
     class CastGreaterBlessingOfSanctuaryOnPartyAction : public GreaterBuffOnPartyAction
@@ -376,7 +376,7 @@ namespace ai
     {
     public:
         CastBlessingOfLightOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "blessing of light") {}
-        string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
+        std::string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
     };
 
     class CastGreaterBlessingOfLightOnPartyAction : public GreaterBuffOnPartyAction
@@ -402,7 +402,7 @@ namespace ai
     {
     public:
         CastBlessingOfSalvationOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "blessing of salvation", true) {}
-        string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
+        std::string GetTargetQualifier() override { return GetSpellName() + ",greater " + GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
     };
 
     class CastGreaterBlessingOfSalvationOnPartyAction : public GreaterBuffOnPartyAction
@@ -482,7 +482,7 @@ namespace ai
     {
     public:
         CastDivineProtectionOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "divine protection") {}
-        virtual string getName() { return "divine protection on party"; }
+        virtual std::string getName() { return "divine protection on party"; }
     };
 
 	class CastDivineShieldAction: public CastBuffSpellAction
@@ -525,14 +525,14 @@ namespace ai
     {
     public:
         CastPurifyPoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "purify", DISPEL_POISON) {}
-        virtual string getName() { return "purify poison on party"; }
+        virtual std::string getName() { return "purify poison on party"; }
     };
 
 	class CastPurifyDiseaseOnPartyAction : public CurePartyMemberAction
 	{
 	public:
 		CastPurifyDiseaseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "purify", DISPEL_DISEASE) {}
-		virtual string getName() { return "purify disease on party"; }
+		virtual std::string getName() { return "purify disease on party"; }
 	};
 
 	class CastHandOfReckoningAction : public CastSpellAction
@@ -569,21 +569,21 @@ namespace ai
     {
     public:
         CastCleansePoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse", DISPEL_POISON) {}
-        virtual string getName() { return "cleanse poison on party"; }
+        virtual std::string getName() { return "cleanse poison on party"; }
     };
 
 	class CastCleanseDiseaseOnPartyAction : public CurePartyMemberAction
 	{
 	public:
 		CastCleanseDiseaseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse", DISPEL_DISEASE) {}
-		virtual string getName() { return "cleanse disease on party"; }
+		virtual std::string getName() { return "cleanse disease on party"; }
 	};
 
 	class CastCleanseMagicOnPartyAction : public CurePartyMemberAction
 	{
 	public:
 		CastCleanseMagicOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse", DISPEL_MAGIC) {}
-		virtual string getName() { return "cleanse magic on party"; }
+		virtual std::string getName() { return "cleanse magic on party"; }
 	};
 
 	SPELL_ACTION(CastExorcismAction, "exorcism");
@@ -639,8 +639,8 @@ namespace ai
     public:
 		CastBlessingOfFreedomOnPartyAction(PlayerbotAI* ai) : CastSpellAction(ai, "blessing of freedom") {}
         bool isUseful() override { return CastSpellAction::isUseful() && !ai->HasAura(GetSpellName(), GetTarget()); }
-        string GetReachActionName() override { return "reach spell"; }
-        string GetTargetName() override { return "party member to remove roots"; }
+        std::string GetReachActionName() override { return "reach spell"; }
+        std::string GetTargetName() override { return "party member to remove roots"; }
     };
 
     class CastBlessingOfProtectionOnPartyAction : public CastProtectSpellAction

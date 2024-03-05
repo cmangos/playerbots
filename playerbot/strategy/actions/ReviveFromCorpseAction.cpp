@@ -1,7 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "ReviveFromCorpseAction.h"
-#include "../../PlayerbotFactory.h"
+#include "playerbot/PlayerbotFactory.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/FleeManager.h"
 #include "playerbot/TravelMgr.h"
@@ -115,7 +115,7 @@ bool FindCorpseAction::Execute(Event& event)
             return false;
         else 
         {
-            list<ObjectGuid> units = AI_VALUE(list<ObjectGuid>, "possible targets no los");
+            std::list<ObjectGuid> units = AI_VALUE(std::list<ObjectGuid>, "possible targets no los");
             
             if (botPos.getUnitsAggro(units, bot) == 0) //There are no mobs near.
                 return false;
@@ -148,7 +148,7 @@ bool FindCorpseAction::Execute(Event& event)
     if (!ai->AllowActivity(DETAILED_MOVE_ACTIVITY) && !ai->HasPlayerNearby(moveToPos))
     {
         uint32 delay = sServerFacade.GetDistance2d(bot, corpse) / bot->GetSpeed(MOVE_RUN); //Time a bot would take to travel to it's corpse.
-        delay = min(delay, uint32(10 * MINUTE)); //Cap time to get to corpse at 10 minutes.
+        delay = std::min(delay, uint32(10 * MINUTE)); //Cap time to get to corpse at 10 minutes.
 
         if (deadTime > delay)
         {
@@ -205,8 +205,8 @@ bool SpiritHealerAction::Execute(Event& event)
     if (grave && grave.fDist(bot) < sPlayerbotAIConfig.sightDistance)
     {
         bool foundSpiritHealer = false;
-        list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-        for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
+        std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
+        for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
         {
             Unit* unit = ai->GetUnit(*i);
             if (unit && unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER))
@@ -257,7 +257,7 @@ bool SpiritHealerAction::Execute(Event& event)
         //Time a bot would take to travel to it's corpse.
         uint32 delay = sServerFacade.GetDistance2d(bot, corpse) / bot->GetSpeed(MOVE_RUN);
         //Cap time to get to corpse at 10 minutes.
-        delay = min(delay, uint32(10 * MINUTE));
+        delay = std::min(delay, uint32(10 * MINUTE));
 
         shouldTeleportToGY = deadTime > delay;
     }

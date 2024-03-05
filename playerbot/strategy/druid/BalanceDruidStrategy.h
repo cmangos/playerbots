@@ -8,7 +8,7 @@ namespace ai
     public:
         BalanceDruidPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_RANGED; }
-        string getName() override { return "balance"; }
+        std::string getName() override { return "balance"; }
     };
 
     class BalanceDruidStrategy : public DruidStrategy
@@ -80,7 +80,7 @@ namespace ai
     {
     public:
         BalanceDruidAoePveStrategy(PlayerbotAI* ai) : BalanceDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe balance pve"; }
+        std::string getName() override { return "aoe balance pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -91,7 +91,7 @@ namespace ai
     {
     public:
         BalanceDruidAoePvpStrategy(PlayerbotAI* ai) : BalanceDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe balance pvp"; }
+        std::string getName() override { return "aoe balance pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -102,7 +102,7 @@ namespace ai
     {
     public:
         BalanceDruidAoeRaidStrategy(PlayerbotAI* ai) : BalanceDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe balance raid"; }
+        std::string getName() override { return "aoe balance raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -123,7 +123,7 @@ namespace ai
     {
     public:
         BalanceDruidBuffPveStrategy(PlayerbotAI* ai) : BalanceDruidBuffStrategy(ai) {}
-        string getName() override { return "buff balance pve"; }
+        std::string getName() override { return "buff balance pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -134,7 +134,7 @@ namespace ai
     {
     public:
         BalanceDruidBuffPvpStrategy(PlayerbotAI* ai) : BalanceDruidBuffStrategy(ai) {}
-        string getName() override { return "buff balance pvp"; }
+        std::string getName() override { return "buff balance pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -145,7 +145,7 @@ namespace ai
     {
     public:
         BalanceDruidBuffRaidStrategy(PlayerbotAI* ai) : BalanceDruidBuffStrategy(ai) {}
-        string getName() override { return "buff balance raid"; }
+        std::string getName() override { return "buff balance raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -166,7 +166,7 @@ namespace ai
     {
     public:
         BalanceDruidBoostPveStrategy(PlayerbotAI* ai) : BalanceDruidBoostStrategy(ai) {}
-        string getName() override { return "boost balance pve"; }
+        std::string getName() override { return "boost balance pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -177,7 +177,7 @@ namespace ai
     {
     public:
         BalanceDruidBoostPvpStrategy(PlayerbotAI* ai) : BalanceDruidBoostStrategy(ai) {}
-        string getName() override { return "boost balance pvp"; }
+        std::string getName() override { return "boost balance pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -188,7 +188,7 @@ namespace ai
     {
     public:
         BalanceDruidBoostRaidStrategy(PlayerbotAI* ai) : BalanceDruidBoostStrategy(ai) {}
-        string getName() override { return "boost balance raid"; }
+        std::string getName() override { return "boost balance raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -209,7 +209,7 @@ namespace ai
     {
     public:
         BalanceDruidCcPveStrategy(PlayerbotAI* ai) : BalanceDruidCcStrategy(ai) {}
-        string getName() override { return "cc balance pve"; }
+        std::string getName() override { return "cc balance pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -220,7 +220,7 @@ namespace ai
     {
     public:
         BalanceDruidCcPvpStrategy(PlayerbotAI* ai) : BalanceDruidCcStrategy(ai) {}
-        string getName() override { return "cc balance pvp"; }
+        std::string getName() override { return "cc balance pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -231,7 +231,7 @@ namespace ai
     {
     public:
         BalanceDruidCcRaidStrategy(PlayerbotAI* ai) : BalanceDruidCcStrategy(ai) {}
-        string getName() override { return "cc balance raid"; }
+        std::string getName() override { return "cc balance raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -252,7 +252,7 @@ namespace ai
     {
     public:
         BalanceDruidCurePveStrategy(PlayerbotAI* ai) : BalanceDruidCureStrategy(ai) {}
-        string getName() override { return "cure balance pve"; }
+        std::string getName() override { return "cure balance pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -263,7 +263,7 @@ namespace ai
     {
     public:
         BalanceDruidCurePvpStrategy(PlayerbotAI* ai) : BalanceDruidCureStrategy(ai) {}
-        string getName() override { return "cure balance pvp"; }
+        std::string getName() override { return "cure balance pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -274,7 +274,7 @@ namespace ai
     {
     public:
         BalanceDruidCureRaidStrategy(PlayerbotAI* ai) : BalanceDruidCureStrategy(ai) {}
-        string getName() override { return "cure balance raid"; }
+        std::string getName() override { return "cure balance raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

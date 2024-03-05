@@ -200,11 +200,11 @@ uint32 CurrentMountSpeedValue::Calculate()
     return mountSpeed;
 }
 
-vector<MountValue> MountListValue::Calculate()
+std::vector<MountValue> MountListValue::Calculate()
 {
-    vector<MountValue> mounts;
+    std::vector<MountValue> mounts;
 
-	for (auto& mount : AI_VALUE2(list<Item*>, "inventory items", "mount"))
+	for (auto& mount : AI_VALUE2(std::list<Item*>, "inventory items", "mount"))
 		mounts.push_back(MountValue(ai, mount));
 
     for (PlayerSpellMap::iterator itr = bot->GetSpellMap().begin(); itr != bot->GetSpellMap().end(); ++itr)
@@ -215,12 +215,12 @@ vector<MountValue> MountListValue::Calculate()
     return mounts;
 }
 
-string MountListValue::Format()
+std::string MountListValue::Format()
 {
-    ostringstream out; out << "{";
+    std::ostringstream out; out << "{";
     for (auto& mount : this->Calculate())
     {
-        string speed = to_string(mount.GetSpeed(false) + 1) + "%" + (mount.GetSpeed(true) ? ("/" + (to_string(mount.GetSpeed(true) + 1) + "%")) : "");
+        std::string speed = std::to_string(mount.GetSpeed(false) + 1) + "%" + (mount.GetSpeed(true) ? ("/" + (std::to_string(mount.GetSpeed(true) + 1) + "%")) : "");
         out << (mount.IsItem() ? "(item)" : "(spell)") << chat->formatSpell(mount.GetSpellId()) << "(" << speed.c_str() << "),";
     }
     out << "}";

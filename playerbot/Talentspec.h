@@ -5,8 +5,6 @@
 struct TalentEntry;
 struct TalentTabEntry;
 
-using namespace std;
-
 class TalentSpec {
     public:
 #define SORT_BY_DEFAULT 0
@@ -34,22 +32,22 @@ class TalentSpec {
         TalentSpec() {};
         TalentSpec(uint32 classMask) { GetTalents(classMask); }
         TalentSpec(Player* bot) { GetTalents(bot->getClassMask()); ReadTalents(bot); }
-        TalentSpec(TalentSpec* base, string link) { talents = base->talents; ReadTalents(link); }
-        TalentSpec(Player* bot, string link) { GetTalents(bot->getClassMask()); ReadTalents(link); }
+        TalentSpec(TalentSpec* base, std::string link) { talents = base->talents; ReadTalents(link); }
+        TalentSpec(Player* bot, std::string link) { GetTalents(bot->getClassMask()); ReadTalents(link); }
 
-        bool CheckTalentLink(string link, ostringstream* out);
-        virtual bool CheckTalents(int maxPoints, ostringstream* out);
+        bool CheckTalentLink(std::string link, std::ostringstream* out);
+        virtual bool CheckTalents(int maxPoints, std::ostringstream* out);
         void CropTalents(uint32 level);
         void ShiftTalents(TalentSpec* oldTalents, uint32 level);
-        void ApplyTalents(Player* bot, ostringstream* out);
+        void ApplyTalents(Player* bot, std::ostringstream* out);
 
         int GetTalentPoints(std::vector<TalentListEntry>& talents, int tabpage = -1);
         int GetTalentPoints(int tabpage = -1) { return GetTalentPoints(talents, tabpage); };
         bool isEarlierVersionOf(TalentSpec& newSpec);
 
-        string GetTalentLink();
+        std::string GetTalentLink();
         int highestTree();
-        string formatSpec(Player* bot);
+        std::string formatSpec(Player* bot);
     protected:
         uint32 LeveltoPoints(uint32 level) const;
         uint32 PointstoLevel(int points) const;
@@ -58,7 +56,7 @@ class TalentSpec {
         void SortTalents(int sortBy) { SortTalents(talents, sortBy); }
 
         void ReadTalents(Player* bot);
-        void ReadTalents(string link);
+        void ReadTalents(std::string link);
 
         std::vector<TalentListEntry> GetTalentTree(int tabpage);
         std::vector<TalentListEntry> SubTalentList(std::vector<TalentListEntry>& oldList, std::vector<TalentListEntry>& newList, int reverse);
@@ -66,9 +64,9 @@ class TalentSpec {
 
     class TalentPath {
     public:
-        TalentPath(int pathId, string pathName, int pathProbability) { id = pathId; name = pathName; probability = pathProbability; };
+        TalentPath(int pathId, std::string pathName, int pathProbability) { id = pathId; name = pathName; probability = pathProbability; };
         int id =0;
-        string name = "";
+        std::string name = "";
         int probability = 100;
         std::vector<TalentSpec> talentSpec;
     };

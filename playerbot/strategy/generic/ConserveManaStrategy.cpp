@@ -18,7 +18,7 @@ float ConserveManaMultiplier::GetValue(Action* action)
     bool hasMana = AI_VALUE2(bool, "has mana", "self target");
     bool mediumMana = hasMana && mana < sPlayerbotAIConfig.mediumMana;
 
-    string name = action->getName();
+    std::string name = action->getName();
 
     if (health < sPlayerbotAIConfig.lowHealth)
         return 1.0f;
@@ -31,7 +31,7 @@ float ConserveManaMultiplier::GetValue(Action* action)
     if (!spellAction)
         return 1.0f;
 
-    string spell = spellAction->getName();
+    std::string spell = spellAction->getName();
     uint32 spellId = AI_VALUE2(uint32, "spell id", spell);
     const SpellEntry* const spellInfo = sServerFacade.LookupSpellInfo(spellId);
     if (!spellInfo || spellInfo->powerType != POWER_MANA)
@@ -65,7 +65,7 @@ float SaveManaMultiplier::GetValue(Action* action)
     if (!spellAction)
         return 1.0f;
 
-    string spell = spellAction->getName();
+    std::string spell = spellAction->getName();
     uint32 spellId = AI_VALUE2(uint32, "spell id", spell);
     const SpellEntry* const spellInfo = sServerFacade.LookupSpellInfo(spellId);
     if (!spellInfo || spellInfo->powerType != POWER_MANA)

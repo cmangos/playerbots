@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../triggers/GenericTriggers.h"
+#include "playerbot/strategy/triggers/GenericTriggers.h"
 
 namespace ai
 {
@@ -104,7 +104,7 @@ namespace ai
     class FrostTrapTrigger : public MeleeLightAoeTrigger
     {
     public:
-        FrostTrapTrigger(PlayerbotAI* ai, string spell = "frost trap") : MeleeLightAoeTrigger(ai)
+        FrostTrapTrigger(PlayerbotAI* ai, std::string spell = "frost trap") : MeleeLightAoeTrigger(ai)
         {
             spellId = AI_VALUE2(uint32, "spell id", spell);
         }
@@ -129,7 +129,7 @@ namespace ai
     class ExplosiveTrapTrigger : public RangedMediumAoeTrigger
     {
     public:
-        ExplosiveTrapTrigger(PlayerbotAI* ai, string spell = "explosive trap") : RangedMediumAoeTrigger(ai)
+        ExplosiveTrapTrigger(PlayerbotAI* ai, std::string spell = "explosive trap") : RangedMediumAoeTrigger(ai)
         {
             spellId = AI_VALUE2(uint32, "spell id", spell);
         }
@@ -292,7 +292,7 @@ namespace ai
     {
     public:
         AimedShotTrigger(PlayerbotAI* ai) : Trigger(ai, "aimed shot", 2) {}
-        virtual string GetTargetName() { return "current target"; }
+        virtual std::string GetTargetName() { return "current target"; }
 
         virtual bool IsActive()
         {

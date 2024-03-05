@@ -4,7 +4,7 @@
 
 #include "playerbot/strategy/ItemVisitors.h"
 #include "playerbot/PlayerbotAIConfig.h"
-#include "../../../ahbot/AhBot.h"
+#include "ahbot/AhBot.h"
 #include "playerbot/RandomPlayerbotMgr.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/CraftValues.h"
@@ -55,7 +55,7 @@ bool TradeStatusAction::Execute(Event& event)
         {
             int32 botMoney = CalculateCost(bot, true);
 
-            map<uint32, uint32> givenItemIds, takenItemIds;
+            std::map<uint32, uint32> givenItemIds, takenItemIds;
             for (uint32 slot = 0; slot < TRADE_SLOT_TRADED_COUNT; ++slot)
             {
                 Item* item = trader->GetTradeData()->GetItem((TradeSlots)slot);
@@ -74,7 +74,7 @@ bool TradeStatusAction::Execute(Event& event)
                 return false;
             }
 
-            for (map<uint32, uint32>::iterator i = givenItemIds.begin(); i != givenItemIds.end(); ++i)
+            for (std::map<uint32, uint32>::iterator i = givenItemIds.begin(); i != givenItemIds.end(); ++i)
             {
                 uint32 itemId = i->first;
                 uint32 count = i->second;
@@ -87,7 +87,7 @@ bool TradeStatusAction::Execute(Event& event)
             }
 
 
-            for (map<uint32, uint32>::iterator i = takenItemIds.begin(); i != takenItemIds.end(); ++i)
+            for (std::map<uint32, uint32>::iterator i = takenItemIds.begin(); i != takenItemIds.end(); ++i)
             {
                 uint32 itemId = i->first;
                 uint32 count = i->second;
@@ -136,7 +136,7 @@ void TradeStatusAction::BeginTrade()
         uint32 discount = sRandomPlayerbotMgr.GetTradeDiscount(bot, ai->GetMaster());
         if (discount)
         {
-            ostringstream out; out << "Discount up to: " << chat->formatMoney(discount);
+            std::ostringstream out; out << "Discount up to: " << chat->formatMoney(discount);
             ai->TellPlayer(trader, out);
         }
     }
@@ -174,7 +174,7 @@ bool TradeStatusAction::CheckTrade()
 
         if (isGettingItem)
         {
-            string name = trader->GetName();
+            std::string name = trader->GetName();
             if (bot->GetGroup() && bot->GetGroup()->IsMember(bot->GetTrader()->GetObjectGuid()) && ai->HasRealPlayerMaster())
             {
                 ai->TellPlayerNoFacing(trader, "Thank you " + name + ".", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
@@ -211,7 +211,7 @@ bool TradeStatusAction::CheckTrade()
         Item* item = bot->GetTradeData()->GetItem((TradeSlots)slot);
         if (item && !auctionbot.GetSellPrice(item->GetProto()))
         {
-            ostringstream out;
+            std::ostringstream out;
             out << chat->formatItem(item) << " - This is not for sale";
             ai->TellPlayer(trader, out);
             ai->PlaySound(TEXTEMOTE_NO);
@@ -224,7 +224,7 @@ bool TradeStatusAction::CheckTrade()
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
             if ((botMoney && !auctionbot.GetBuyPrice(item->GetProto())) || usage == ItemUsage::ITEM_USAGE_NONE)
             {
-                ostringstream out;
+                std::ostringstream out;
                 out << chat->formatItem(item) << " - I don't need this";
                 ai->TellPlayer(trader, out);
                 ai->PlaySound(TEXTEMOTE_NO);
@@ -285,7 +285,7 @@ bool TradeStatusAction::CheckTrade()
         return true;
     }
 
-    ostringstream out;
+    std::ostringstream out;
     out << "I want " << chat->formatMoney(-(delta + discount)) << " for this";
     ai->TellPlayer(trader, out);
     ai->PlaySound(TEXTEMOTE_NO);

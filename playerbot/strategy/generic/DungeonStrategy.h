@@ -1,5 +1,5 @@
 #pragma once
-#include "../Strategy.h"
+#include "playerbot/strategy/Strategy.h"
 
 namespace ai
 {
@@ -7,15 +7,15 @@ namespace ai
     {
     public:
         DungeonStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "dungeon"; }
+        std::string getName() override { return "dungeon"; }
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "dungeon"; } //Must equal iternal name
-        virtual string GetHelpDescription()
+        virtual std::string GetHelpName() { return "dungeon"; } //Must equal iternal name
+        virtual std::string GetHelpDescription()
         {
             return "This strategy will enable and disable various dungeon and raid specific strategies as the bot enters and leaves.";
         }
-        virtual vector<string> GetRelatedStrategies() { return {"onyxia's lair", "molten core" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {"onyxia's lair", "molten core" }; }
 #endif
 
     private:

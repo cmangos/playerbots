@@ -6,7 +6,7 @@
 
 using namespace ai;
 
-vector<string> split(const string &s, char delim);
+std::vector<std::string> split(const std::string &s, char delim);
 
 bool GiveItemAction::Execute(Event& event)
 {
@@ -25,8 +25,8 @@ bool GiveItemAction::Execute(Event& event)
         return true;
 
     bool moved = false;
-    list<Item*> items = ai->InventoryParseItems(item, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
-    for (list<Item*>::iterator j = items.begin(); j != items.end(); j++)
+    std::list<Item*> items = ai->InventoryParseItems(item, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+    for (std::list<Item*>::iterator j = items.begin(); j != items.end(); j++)
     {
         Item* item = *j;
 
@@ -42,13 +42,13 @@ bool GiveItemAction::Execute(Event& event)
             receiver->MoveItemToInventory(dest, item, true);
             moved = true;
 
-            ostringstream out;
+            std::ostringstream out;
             out << "Got " << chat->formatItem(item, item->GetCount()) << " from " << bot->GetName();
             receiverAi->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
         else
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "Cannot get " << chat->formatItem(item, item->GetCount()) << " from " << bot->GetName() << "- my bags are full";
             receiverAi->TellPlayerNoFacing(requester, out.str());
         }

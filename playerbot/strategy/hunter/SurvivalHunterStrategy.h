@@ -8,7 +8,7 @@ namespace ai
     public:
         SurvivalHunterPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_RANGED; }
-        string getName() override { return "survival"; }
+        std::string getName() override { return "survival"; }
     };
 
     class SurvivalHunterStrategy : public HunterStrategy
@@ -76,7 +76,7 @@ namespace ai
     {
     public:
         SurvivalHunterAoePveStrategy(PlayerbotAI* ai) : SurvivalHunterAoeStrategy(ai) {}
-        string getName() override { return "aoe survival pve"; }
+        std::string getName() override { return "aoe survival pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -87,7 +87,7 @@ namespace ai
     {
     public:
         SurvivalHunterAoePvpStrategy(PlayerbotAI* ai) : SurvivalHunterAoeStrategy(ai) {}
-        string getName() override { return "aoe survival pvp"; }
+        std::string getName() override { return "aoe survival pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -98,7 +98,7 @@ namespace ai
     {
     public:
         SurvivalHunterAoeRaidStrategy(PlayerbotAI* ai) : SurvivalHunterAoeStrategy(ai) {}
-        string getName() override { return "aoe survival raid"; }
+        std::string getName() override { return "aoe survival raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -119,7 +119,7 @@ namespace ai
     {
     public:
         SurvivalHunterBuffPveStrategy(PlayerbotAI* ai) : SurvivalHunterBuffStrategy(ai) {}
-        string getName() override { return "buff survival pve"; }
+        std::string getName() override { return "buff survival pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -130,7 +130,7 @@ namespace ai
     {
     public:
         SurvivalHunterBuffPvpStrategy(PlayerbotAI* ai) : SurvivalHunterBuffStrategy(ai) {}
-        string getName() override { return "buff survival pvp"; }
+        std::string getName() override { return "buff survival pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -141,7 +141,7 @@ namespace ai
     {
     public:
         SurvivalHunterBuffRaidStrategy(PlayerbotAI* ai) : SurvivalHunterBuffStrategy(ai) {}
-        string getName() override { return "buff survival raid"; }
+        std::string getName() override { return "buff survival raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -162,7 +162,7 @@ namespace ai
     {
     public:
         SurvivalHunterBoostPveStrategy(PlayerbotAI* ai) : SurvivalHunterBoostStrategy(ai) {}
-        string getName() override { return "boost survival pve"; }
+        std::string getName() override { return "boost survival pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -173,7 +173,7 @@ namespace ai
     {
     public:
         SurvivalHunterBoostPvpStrategy(PlayerbotAI* ai) : SurvivalHunterBoostStrategy(ai) {}
-        string getName() override { return "boost survival pvp"; }
+        std::string getName() override { return "boost survival pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -184,7 +184,7 @@ namespace ai
     {
     public:
         SurvivalHunterBoostRaidStrategy(PlayerbotAI* ai) : SurvivalHunterBoostStrategy(ai) {}
-        string getName() override { return "boost survival raid"; }
+        std::string getName() override { return "boost survival raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -205,7 +205,7 @@ namespace ai
     {
     public:
         SurvivalHunterCcPveStrategy(PlayerbotAI* ai) : SurvivalHunterCcStrategy(ai) {}
-        string getName() override { return "cc survival pve"; }
+        std::string getName() override { return "cc survival pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -216,7 +216,7 @@ namespace ai
     {
     public:
         SurvivalHunterCcPvpStrategy(PlayerbotAI* ai) : SurvivalHunterCcStrategy(ai) {}
-        string getName() override { return "cc survival pvp"; }
+        std::string getName() override { return "cc survival pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -227,7 +227,7 @@ namespace ai
     {
     public:
         SurvivalHunterCcRaidStrategy(PlayerbotAI* ai) : SurvivalHunterCcStrategy(ai) {}
-        string getName() override { return "cc survival raid"; }
+        std::string getName() override { return "cc survival raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -247,7 +247,7 @@ namespace ai
     {
     public:
         SurvivalHunterStingPveStrategy(PlayerbotAI* ai) : SurvivalHunterStingStrategy(ai) {}
-        string getName() override { return "sting survival pve"; }
+        std::string getName() override { return "sting survival pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -257,7 +257,7 @@ namespace ai
     {
     public:
         SurvivalHunterStingPvpStrategy(PlayerbotAI* ai) : SurvivalHunterStingStrategy(ai) {}
-        string getName() override { return "sting survival pvp"; }
+        std::string getName() override { return "sting survival pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -267,7 +267,7 @@ namespace ai
     {
     public:
         SurvivalHunterStingRaidStrategy(PlayerbotAI* ai) : SurvivalHunterStingStrategy(ai) {}
-        string getName() override { return "sting survival raid"; }
+        std::string getName() override { return "sting survival raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -287,7 +287,7 @@ namespace ai
     {
     public:
         SurvivalHunterAspectPveStrategy(PlayerbotAI* ai) : SurvivalHunterAspectStrategy(ai) {}
-        string getName() override { return "aspect survival pve"; }
+        std::string getName() override { return "aspect survival pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -298,7 +298,7 @@ namespace ai
     {
     public:
         SurvivalHunterAspectPvpStrategy(PlayerbotAI* ai) : SurvivalHunterAspectStrategy(ai) {}
-        string getName() override { return "aspect survival pvp"; }
+        std::string getName() override { return "aspect survival pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -309,7 +309,7 @@ namespace ai
     {
     public:
         SurvivalHunterAspectRaidStrategy(PlayerbotAI* ai) : SurvivalHunterAspectStrategy(ai) {}
-        string getName() override { return "aspect survival raid"; }
+        std::string getName() override { return "aspect survival raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

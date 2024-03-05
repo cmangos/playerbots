@@ -7,8 +7,6 @@
 #define BOT_TEXT(name) sPlayerbotTextMgr.GetBotText(name)
 #define BOT_TEXT2(name, replace) sPlayerbotTextMgr.GetBotText(name, replace)
 
-using namespace std;
-
 struct BotTextEntry
 {
     BotTextEntry(std::string name, std::string text, std::map<int32, std::string> text_locales, uint32 say_type, uint32 reply_type) : m_name(name), m_text(text), m_text_locales(text_locales), m_sayType(say_type), m_replyType(reply_type) {}
@@ -61,25 +59,25 @@ class PlayerbotTextMgr
         }
 
 	public:
-        string GetBotText(string name, map<string, string> placeholders);
-        string GetBotText(string name);
-        string GetBotText(ChatReplyType replyType, map<string, string> placeholders);
-        string GetBotText(ChatReplyType replyType, string name);
-        bool GetBotText(string name, string& text);
-        bool GetBotText(string name, string& text, map<string, string> placeholders);
+        std::string GetBotText(std::string name, std::map<std::string, std::string> placeholders);
+        std::string GetBotText(std::string name);
+        std::string GetBotText(ChatReplyType replyType, std::map<std::string, std::string> placeholders);
+        std::string GetBotText(ChatReplyType replyType, std::string name);
+        bool GetBotText(std::string name, std::string& text);
+        bool GetBotText(std::string name, std::string& text, std::map<std::string, std::string> placeholders);
         void LoadBotTexts();
         void LoadBotTextChance();
 
         void replaceAll(std::string& str, const std::string& from, const std::string& to);
-        bool rollTextChance(string text);
+        bool rollTextChance(std::string text);
 
         int32 GetLocalePriority();
         void AddLocalePriority(int32 locale);
         void ResetLocalePriority();
 
     private:
-        map<string, vector<BotTextEntry>> botTexts;
-        map<string, uint32 > botTextChance;
+        std::map<std::string, std::vector<BotTextEntry>> botTexts;
+        std::map<std::string, uint32> botTextChance;
         uint32 botTextLocalePriority[MAX_LOCALE];
 };
 

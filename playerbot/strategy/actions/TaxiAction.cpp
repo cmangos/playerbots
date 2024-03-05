@@ -1,7 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "TaxiAction.h"
-#include "../../../../../game/Server/DBCStructure.h"
+#include "Server/DBCStructure.h"
 #include "playerbot/strategy/values/LastMovementValue.h"
 
 using namespace ai;
@@ -14,7 +14,7 @@ bool TaxiAction::Execute(Event& event)
     LastMovement& movement = context->GetValue<LastMovement&>("last taxi")->Get();
 
     WorldPacket& p = event.getPacket();
-    string param = event.getParam();
+    std::string param = event.getParam();
     if ((!p.empty() && (p.GetOpcode() == CMSG_TAXICLEARALLNODES || p.GetOpcode() == CMSG_TAXICLEARNODE)) || param == "clear")
     {
         movement.taxiNodes.clear();
@@ -23,8 +23,8 @@ bool TaxiAction::Execute(Event& event)
         return true;
     }
 
-    list<ObjectGuid> units = *context->GetValue<list<ObjectGuid> >("nearest npcs");
-    for (list<ObjectGuid>::iterator i = units.begin(); i != units.end(); i++)
+    std::list<ObjectGuid> units = *context->GetValue<std::list<ObjectGuid> >("nearest npcs");
+    for (std::list<ObjectGuid>::iterator i = units.begin(); i != units.end(); i++)
     {
         Creature *npc = bot->GetNPCIfCanInteractWith(*i, UNIT_NPC_FLAG_FLIGHTMASTER);
         if (!npc)
@@ -32,7 +32,7 @@ bool TaxiAction::Execute(Event& event)
 
         uint32 curloc = sObjectMgr.GetNearestTaxiNode(npc->GetPositionX(), npc->GetPositionY(), npc->GetPositionZ(), npc->GetMapId(), bot->GetTeam());
 
-        vector<uint32> nodes;
+        std::vector<uint32> nodes;
         for (uint32 i = 0; i < sTaxiPathStore.GetNumRows(); ++i)
         {
             TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i);
@@ -47,7 +47,7 @@ bool TaxiAction::Execute(Event& event)
         {
             ai->TellPlayerNoFacing(requester, "=== Taxi ===");
             int index = 1;
-            for (vector<uint32>::iterator i = nodes.begin(); i != nodes.end(); ++i)
+            for (std::vector<uint32>::iterator i = nodes.begin(); i != nodes.end(); ++i)
             {
                 TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(*i);
                 if (!entry) continue;
@@ -55,7 +55,7 @@ bool TaxiAction::Execute(Event& event)
                 TaxiNodesEntry const* dest = sTaxiNodesStore.LookupEntry(entry->to);
                 if (!dest) continue;
 
-                ostringstream out;
+                std::ostringstream out;
                 out << index++ << ": " << dest->name[0];
                 ai->TellPlayerNoFacing(requester, out.str());
             }

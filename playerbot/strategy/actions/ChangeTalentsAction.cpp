@@ -1,6 +1,6 @@
 
 #include "playerbot/playerbot.h"
-#include "../../Talentspec.h"
+#include "playerbot/Talentspec.h"
 #include "ChangeTalentsAction.h"
 
 using namespace ai;
@@ -8,25 +8,25 @@ using namespace ai;
 bool ChangeTalentsAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    ostringstream out;
+    std::ostringstream out;
     TalentSpec botSpec(bot);
-    string param = event.getParam();
+    std::string param = event.getParam();
 
     if (!param.empty())
     {
-        if (param.find("auto") != string::npos)
+        if (param.find("auto") != std::string::npos)
         {
             AutoSelectTalents(&out);
         }
-        else  if (param.find("list ") != string::npos)
+        else  if (param.find("list ") != std::string::npos)
         {
             listPremadePaths(getPremadePaths(param.substr(5)), &out);
         }
-        else  if (param.find("list") != string::npos)
+        else  if (param.find("list") != std::string::npos)
         {
             listPremadePaths(getPremadePaths(""), &out);
         }
-        else if (param.find("reset") != string::npos)
+        else if (param.find("reset") != std::string::npos)
         {
             out << "Reset talents and spec";
             TalentSpec newSpec(bot, "0-0-0");
@@ -38,12 +38,12 @@ bool ChangeTalentsAction::Execute(Event& event)
         {
             bool crop = false;
             bool shift = false;
-            if (param.find("do ") != string::npos)
+            if (param.find("do ") != std::string::npos)
             {
                 crop = true;
                 param = param.substr(3);
             }
-            else if (param.find("shift ") != string::npos)
+            else if (param.find("shift ") != std::string::npos)
             {
                 shift = true;
                 param = param.substr(6);
@@ -53,7 +53,7 @@ bool ChangeTalentsAction::Execute(Event& event)
             if (botSpec.CheckTalentLink(param, &out))
             {
                 TalentSpec newSpec(bot, param);
-                string specLink = newSpec.GetTalentLink();
+                std::string specLink = newSpec.GetTalentLink();
 
                 if (crop)
                 {
@@ -97,7 +97,7 @@ bool ChangeTalentsAction::Execute(Event& event)
                         
                         TalentPath* path = PickPremadePath(paths, sRandomPlayerbotMgr.IsRandomBot(bot));
                         TalentSpec newSpec = *GetBestPremadeSpec(path->id);
-                        string specLink = newSpec.GetTalentLink();
+                        std::string specLink = newSpec.GetTalentLink();
                         newSpec.CropTalents(bot->GetLevel());
                         newSpec.ApplyTalents(bot, &out);
 
@@ -124,7 +124,7 @@ bool ChangeTalentsAction::Execute(Event& event)
         out.clear();
 
         uint32 specId = sRandomPlayerbotMgr.GetValue(bot->GetGUIDLow(), "specNo") - 1;
-        string specName = "";
+        std::string specName = "";
         TalentPath* specPath;
         if (specId)
         {
@@ -149,12 +149,12 @@ bool ChangeTalentsAction::Execute(Event& event)
     return true;
 }
 
-std::vector<TalentPath*> ChangeTalentsAction::getPremadePaths(string findName)
+std::vector<TalentPath*> ChangeTalentsAction::getPremadePaths(std::string findName)
 {
     std::vector<TalentPath*> ret;
     for (auto& path : sPlayerbotAIConfig.classSpecs[bot->getClass()].talentPath)
     {
-        if (findName.empty() || path.name.find(findName) != string::npos)
+        if (findName.empty() || path.name.find(findName) != std::string::npos)
         {
             ret.push_back(&path);
         }
@@ -193,7 +193,7 @@ TalentPath* ChangeTalentsAction::getPremadePath(int id)
     return &sPlayerbotAIConfig.classSpecs[bot->getClass()].talentPath[0];
 }
 
-void ChangeTalentsAction::listPremadePaths(std::vector<TalentPath*> paths, ostringstream* out)
+void ChangeTalentsAction::listPremadePaths(std::vector<TalentPath*> paths, std::ostringstream* out)
 {
     if (paths.size() == 0)
     {
@@ -236,7 +236,7 @@ TalentPath* ChangeTalentsAction::PickPremadePath(std::vector<TalentPath*> paths,
     return paths[0];
 }
 
-bool ChangeTalentsAction::AutoSelectTalents(ostringstream* out)
+bool ChangeTalentsAction::AutoSelectTalents(std::ostringstream* out)
 {
     //Does the bot have talentpoints?
     if (bot->GetLevel() < 10)
@@ -247,7 +247,7 @@ bool ChangeTalentsAction::AutoSelectTalents(ostringstream* out)
 
     uint32 specNo = sRandomPlayerbotMgr.GetValue(bot->GetGUIDLow(), "specNo");
     uint32 specId = specNo ? specNo - 1 : 0;
-    string specLink = sRandomPlayerbotMgr.GetData(bot->GetGUIDLow(), "specLink");
+    std::string specLink = sRandomPlayerbotMgr.GetData(bot->GetGUIDLow(), "specLink");
 
     //Continue the current spec
     if (specNo > 0)
@@ -372,9 +372,9 @@ TalentSpec* ChangeTalentsAction::GetBestPremadeSpec(int specId)
 bool AutoSetTalentsAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    sPlayerbotAIConfig.logEvent(ai, "AutoSetTalentsAction", to_string(bot->m_Played_time[PLAYED_TIME_LEVEL]), to_string(bot->m_Played_time[PLAYED_TIME_TOTAL]));
+    sPlayerbotAIConfig.logEvent(ai, "AutoSetTalentsAction", std::to_string(bot->m_Played_time[PLAYED_TIME_LEVEL]), std::to_string(bot->m_Played_time[PLAYED_TIME_TOTAL]));
 
-    ostringstream out;
+    std::ostringstream out;
 
     if (sPlayerbotAIConfig.autoPickTalents == "no" && !sRandomPlayerbotMgr.IsRandomBot(bot))
     {

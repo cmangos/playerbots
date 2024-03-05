@@ -1,5 +1,5 @@
 #include "CombatStrategy.h"
-#include "../generic/CombatStrategy.h"
+#include "playerbot/strategy/generic/CombatStrategy.h"
 #pragma once
 
 namespace ai
@@ -10,7 +10,7 @@ namespace ai
         MeleeCombatStrategy(PlayerbotAI* ai) : CombatStrategy(ai) {}
         
         virtual int GetType() override { return STRATEGY_TYPE_COMBAT | STRATEGY_TYPE_MELEE; }
-        virtual string getName() override { return "close"; }
+        virtual std::string getName() override { return "close"; }
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -20,7 +20,7 @@ namespace ai
     {
     public:
         SetBehindCombatStrategy(PlayerbotAI* ai) : CombatStrategy(ai) {}
-        string getName() override { return "behind"; }
+        std::string getName() override { return "behind"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -30,13 +30,13 @@ namespace ai
     {
     public:
         ChaseJumpStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "chase jump"; }
+        std::string getName() override { return "chase jump"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "chase jump"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "chase jump"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot jump when chasing enemies they can't reach.\n";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "melee" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "melee" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;

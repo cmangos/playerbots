@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Value.h"
-#include "../AiObjectContext.h"
+#include "playerbot/strategy/Value.h"
+#include "playerbot/strategy/AiObjectContext.h"
 
 namespace ai
 {
@@ -23,11 +23,11 @@ namespace ai
         BgRoleValue(PlayerbotAI* ai) : ManualSetValue<uint32>(ai, 0, "bg role") {}
     };
 
-    class BgMastersValue : public SingleCalculatedValue<list<CreatureDataPair const*>>, public Qualified
+    class BgMastersValue : public SingleCalculatedValue<std::list<CreatureDataPair const*>>, public Qualified
     {
     public:
-        BgMastersValue(PlayerbotAI* ai) : SingleCalculatedValue<list<CreatureDataPair const*>>(ai, "bg masters"), Qualified() {}
-        virtual list<CreatureDataPair const*> Calculate();
+        BgMastersValue(PlayerbotAI* ai) : SingleCalculatedValue<std::list<CreatureDataPair const*>>(ai, "bg masters"), Qualified() {}
+        virtual std::list<CreatureDataPair const*> Calculate();
     };
 
     class BgMasterValue : public CDPairCalculatedValue, public Qualified

@@ -6,7 +6,7 @@
 
 using namespace ai;
 
-void TrainerAction::Learn(uint32 cost, TrainerSpell const* tSpell, ostringstream& msg)
+void TrainerAction::Learn(uint32 cost, TrainerSpell const* tSpell, std::ostringstream& msg)
 {
     if (sPlayerbotAIConfig.autoTrainSpells != "free" &&  !ai->HasCheat(BotCheatMask::gold))
     {
@@ -58,7 +58,7 @@ void TrainerAction::Learn(uint32 cost, TrainerSpell const* tSpell, ostringstream
     if (!learned) bot->learnSpell(tSpell->spell, false);
 #endif
 
-    sPlayerbotAIConfig.logEvent(ai, "TrainerAction", proto->SpellName[0], to_string(proto->Id));
+    sPlayerbotAIConfig.logEvent(ai, "TrainerAction", proto->SpellName[0], std::to_string(proto->Id));
 
     msg << " - learned";
 }
@@ -132,7 +132,7 @@ void TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellA
         uint32 cost = uint32(floor(tSpell->spellCost *  fDiscountMod));
         totalCost += cost;
 
-        ostringstream out;
+        std::ostringstream out;
         out << chat->formatSpell(pSpellInfo) << chat->formatMoney(cost);
 
         if (action)
@@ -155,7 +155,7 @@ void TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellA
 bool TrainerAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
     Creature* creature = nullptr;
 
     if (event.getSource() == "rpg action")
@@ -201,7 +201,7 @@ bool TrainerAction::Execute(Event& event)
     if (spell)
         spells.insert(spell);
 
-    if (text.find("learn") != string::npos || sRandomPlayerbotMgr.IsFreeBot(bot) || (sPlayerbotAIConfig.autoTrainSpells != "no" && (creature->GetCreatureInfo()->TrainerType != TRAINER_TYPE_TRADESKILLS || !ai->HasActivePlayerMaster()))) //Todo rewrite to only exclude start primary profession skills and make config dependent.
+    if (text.find("learn") != std::string::npos || sRandomPlayerbotMgr.IsFreeBot(bot) || (sPlayerbotAIConfig.autoTrainSpells != "no" && (creature->GetCreatureInfo()->TrainerType != TRAINER_TYPE_TRADESKILLS || !ai->HasActivePlayerMaster()))) //Todo rewrite to only exclude start primary profession skills and make config dependent.
         Iterate(requester, creature, &TrainerAction::Learn, spells);
     else
         Iterate(requester, creature, NULL, spells);
@@ -211,7 +211,7 @@ bool TrainerAction::Execute(Event& event)
 
 void TrainerAction::TellHeader(Player* requester, Creature* creature)
 {
-    ostringstream out; out << "--- Can learn from " << creature->GetName() << " ---";
+    std::ostringstream out; out << "--- Can learn from " << creature->GetName() << " ---";
     ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 }
 
@@ -219,7 +219,7 @@ void TrainerAction::TellFooter(Player* requester, uint32 totalCost)
 {
     if (totalCost)
     {
-        ostringstream out; out << "Total cost: " << chat->formatMoney(totalCost);
+        std::ostringstream out; out << "Total cost: " << chat->formatMoney(totalCost);
         ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
 }

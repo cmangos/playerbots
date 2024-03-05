@@ -45,7 +45,7 @@ entryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 			//Loot objective
 			if (quest->ReqItemId[objective])
 			{
-				for (auto& entry : GAI_VALUE2(list<int32>, "item drop list", quest->ReqItemId[objective]))
+				for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", quest->ReqItemId[objective]))
 					rMap[entry][questId] |= relationFlag;
 			}
 		}
@@ -118,7 +118,7 @@ questGuidpMap QuestGuidpMapValue::Calculate()
 questGiverMap QuestGiversValue::Calculate()
 {
 	uint32 level = 0;
-	string q = getQualifier();
+	std::string q = getQualifier();
 	bool hasQualifier = !q.empty();
 
 	if (hasQualifier)
@@ -152,11 +152,11 @@ questGiverMap QuestGiversValue::Calculate()
 	return guidps;
 }
 
-list<GuidPosition> ActiveQuestGiversValue::Calculate()
+std::list<GuidPosition> ActiveQuestGiversValue::Calculate()
 {
 	questGiverMap qGivers = GAI_VALUE2(questGiverMap, "quest givers", bot->GetLevel());
 
-	list<GuidPosition> retQuestGivers;
+	std::list<GuidPosition> retQuestGivers;
 
 	for (auto& qGiver : qGivers)
 	{
@@ -196,11 +196,11 @@ list<GuidPosition> ActiveQuestGiversValue::Calculate()
 	return retQuestGivers;
 }
 
-list<GuidPosition> ActiveQuestTakersValue::Calculate()
+std::list<GuidPosition> ActiveQuestTakersValue::Calculate()
 {
 	questGuidpMap questMap = GAI_VALUE(questGuidpMap, "quest guidp map");
 
-	list<GuidPosition> retQuestTakers;
+	std::list<GuidPosition> retQuestTakers;
 
 	QuestStatusMap& questStatusMap = bot->getQuestStatusMap();
 
@@ -256,11 +256,11 @@ list<GuidPosition> ActiveQuestTakersValue::Calculate()
 	return retQuestTakers;
 }
 
-list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
+std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 {
 	questGuidpMap questMap = GAI_VALUE(questGuidpMap, "quest guidp map");
 
-	list<GuidPosition> retQuestObjectives;
+	std::list<GuidPosition> retQuestObjectives;
 
 	QuestStatusMap& questStatusMap = bot->getQuestStatusMap();
 
@@ -507,7 +507,7 @@ bool NeedQuestObjectiveValue::Calculate()
 bool CanUseItemOn::Calculate()
 {
 	uint32 itemId = getMultiQualifierInt(getQualifier(), 0, ",");
-	string guidPString = getMultiQualifierStr(getQualifier(), 1, ",");
+	std::string guidPString = getMultiQualifierStr(getQualifier(), 1, ",");
 	GuidPosition guidP(guidPString);
 
 	Unit* unit = nullptr;

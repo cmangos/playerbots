@@ -11,8 +11,8 @@ namespace ai
         virtual bool Execute(Event& event) override;
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "skip spells list"; } //Must equal iternal name
-        virtual string GetHelpDescription()
+        virtual std::string GetHelpName() { return "skip spells list"; } //Must equal iternal name
+        virtual std::string GetHelpDescription()
         {
             return "This chat command gives control over the list of spells bots aren't allowed to cast.\n"
                 "Examples:\n"
@@ -20,11 +20,11 @@ namespace ai
                 "ss [spell name] : Never cast this spell.\n"
                 "ss -[spell name] : Remove this spell from the ignored spell list.\n";
         }
-        virtual vector<string> GetUsedActions() { return {}; }
-        virtual vector<string> GetUsedValues() { return { "skip spells list" }; }
+        virtual std::vector<std::string> GetUsedActions() { return {}; }
+        virtual std::vector<std::string> GetUsedValues() { return { "skip spells list" }; }
 #endif 
 
     private:
-        std::vector<string> ParseSpells(const string& text);
+        std::vector<std::string> ParseSpells(const std::string& text);
     };
 }

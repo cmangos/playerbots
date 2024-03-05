@@ -1,5 +1,5 @@
 #pragma once
-#include "../triggers/GenericTriggers.h"
+#include "playerbot/strategy/triggers/GenericTriggers.h"
 
 namespace ai
 {
@@ -24,7 +24,7 @@ namespace ai
         bool IsActive() override;
 
     private:
-        string GetTargetName() override { return "current target"; }
+        std::string GetTargetName() override { return "current target"; }
     };
 
     class NoCurseOnAttackerTrigger : public Trigger
@@ -142,7 +142,7 @@ namespace ai
     class WarlockConjuredItemTrigger : public ItemCountTrigger
     {
     public:
-        WarlockConjuredItemTrigger(PlayerbotAI* ai, string item) : ItemCountTrigger(ai, item, 1) {}
+        WarlockConjuredItemTrigger(PlayerbotAI* ai, std::string item) : ItemCountTrigger(ai, item, 1) {}
 
         virtual bool IsActive() { return ItemCountTrigger::IsActive() && (ai->HasCheat(BotCheatMask::item) || AI_VALUE2(uint32, "item count", "soul shard") > 0); }
     };

@@ -1,6 +1,6 @@
 #pragma once
-#include "../Strategy.h"
-#include "../generic/CombatStrategy.h"
+#include "playerbot/strategy/Strategy.h"
+#include "playerbot/strategy/generic/CombatStrategy.h"
 
 namespace ai
 {
@@ -17,7 +17,7 @@ namespace ai
     {
     public:
         PriestCureStrategy(PlayerbotAI* ai);
-        string getName() override { return "cure"; }
+        std::string getName() override { return "cure"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -28,7 +28,7 @@ namespace ai
     {
     public:
         PriestBoostStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "boost"; }
+        std::string getName() override { return "boost"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -38,7 +38,7 @@ namespace ai
     {
     public:
         PriestCcStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "cc"; }
+        std::string getName() override { return "cc"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;

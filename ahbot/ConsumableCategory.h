@@ -2,7 +2,6 @@
 #include "Config/Config.h"
 #include "Category.h"
 
-using namespace std;
 
 namespace ahbot
 {
@@ -20,8 +19,8 @@ namespace ahbot
                     proto->SubClass == ITEM_SUBCLASS_FLASK);
         }
 
-        virtual string GetName() { return "consumables.alchemy"; }
-        virtual string GetLabel() { return "elixirs and potions"; }
+        virtual std::string GetName() { return "consumables.alchemy"; }
+        virtual std::string GetLabel() { return "elixirs and potions"; }
     };
 
     class Scroll : public Consumable
@@ -37,8 +36,8 @@ namespace ahbot
                     proto->SubClass == ITEM_SUBCLASS_ITEM_ENHANCEMENT);
         }
 
-        virtual string GetName() { return "consumables.scroll"; }
-        virtual string GetLabel() { return "scrolls"; }
+        virtual std::string GetName() { return "consumables.scroll"; }
+        virtual std::string GetLabel() { return "scrolls"; }
     };
 
     class Food : public Consumable
@@ -57,8 +56,8 @@ namespace ahbot
                     );
         }
 
-        virtual string GetName() { return "consumables.food"; }
-        virtual string GetLabel() { return "food and drink"; }
+        virtual std::string GetName() { return "consumables.food"; }
+        virtual std::string GetLabel() { return "food and drink"; }
     };
 
     class Bandage : public Consumable
@@ -73,8 +72,8 @@ namespace ahbot
                     proto->SubClass == ITEM_SUBCLASS_BANDAGE;
         }
 
-        virtual string GetName() { return "consumables.bandage"; }
-        virtual string GetLabel() { return "bandages"; }
+        virtual std::string GetName() { return "consumables.bandage"; }
+        virtual std::string GetLabel() { return "bandages"; }
     };
 
     class ItemEnchant : public Consumable
@@ -89,7 +88,7 @@ namespace ahbot
                     proto->SubClass == ITEM_SUBCLASS_CONSUMABLE_OTHER;
         }
 
-        virtual string GetName() { return "consumables.enchant"; }
-        virtual string GetLabel() { return "item enchants"; }
+        virtual std::string GetName() { return "consumables.enchant"; }
+        virtual std::string GetLabel() { return "item enchants"; }
     };
 };

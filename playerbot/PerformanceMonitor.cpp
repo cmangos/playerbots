@@ -18,19 +18,19 @@ PerformanceMonitor::~PerformanceMonitor()
 
 }
 
-PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric, string name, PerformanceStack* stack)
+PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric, std::string name, PerformanceStack* stack)
 {
 	if (!sPlayerbotAIConfig.perfMonEnabled) return NULL;    
 
-    string stackName = name;
+    std::string stackName = name;
 
 
     if (stack)
     {
         if (!stack->empty())
         {
-            ostringstream out; out << stackName << " [";
-            for (vector<string>::reverse_iterator i = stack->rbegin(); i != stack->rend(); ++i) 
+            std::ostringstream out; out << stackName << " [";
+            for (std::vector<std::string>::reverse_iterator i = stack->rbegin(); i != stack->rend(); ++i)
                 out << *i << (std::next(i)==stack->rend()? "":"|");
             out << "]";
             stackName = out.str().c_str();
@@ -52,7 +52,7 @@ PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric,
 #endif
 }
 
-PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric, string name, PlayerbotAI* ai)
+PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric, std::string name, PlayerbotAI* ai)
 {
     if (!sPlayerbotAIConfig.perfMonEnabled) return NULL;
 
@@ -79,11 +79,11 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack)
 
         sLog.outString("--------------------------------------[TOTAL BOT]------------------------------------------------------");
 
-        for (map<PerformanceMetric, map<string, PerformanceData*> >::iterator i = data.begin(); i != data.end(); ++i)
+        for (std::map<PerformanceMetric, std::map<std::string, PerformanceData*> >::iterator i = data.begin(); i != data.end(); ++i)
         {
-            map<string, PerformanceData*> pdMap = i->second;
+            std::map<std::string, PerformanceData*> pdMap = i->second;
 
-            string key;
+            std::string key;
             switch (i->first)
             {
             case PERF_MON_TRIGGER: key = "T"; break;
@@ -94,16 +94,16 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack)
             default: key = "?";
             }
 
-            list<string> names;
+            std::list<std::string> names;
 
-            for (map<string, PerformanceData*>::iterator j = pdMap.begin(); j != pdMap.end(); ++j)
+            for (std::map<std::string, PerformanceData*>::iterator j = pdMap.begin(); j != pdMap.end(); ++j)
             {
                 if (key == "Total" && j->first.find("PlayerbotAI") == std::string::npos)
                     continue;
                 names.push_back(j->first);
             }
 
-            names.sort([pdMap](string i, string j) {return pdMap.at(i)->totalTime < pdMap.at(j)->totalTime; });
+            names.sort([pdMap](std::string i, std::string j) {return pdMap.at(i)->totalTime < pdMap.at(j)->totalTime; });
 
             float tPerc = 0;
             uint32 tMin = 99999, tMax = 0, tCount = 0, tTime = 0;
@@ -116,7 +116,7 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack)
                 float perc = (float)pd->totalTime / (float)total * 100.0f;
                 float secs = (float)pd->totalTime / 1000.0f;
                 float avg = (float)pd->totalTime / (float)pd->count;
-                string disName = name;
+                std::string disName = name;
                 if (!fullStack && disName.find("|") != std::string::npos)
                     disName = disName.substr(0, disName.find("|")) + "]";
 
@@ -178,11 +178,11 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack)
         sLog.outString(" ");
         sLog.outString("---------------------------------------[PER TICK]------------------------------------------------------");
 
-        for (map<PerformanceMetric, map<string, PerformanceData*> >::iterator i = data.begin(); i != data.end(); ++i)
+        for (std::map<PerformanceMetric, std::map<std::string, PerformanceData*> >::iterator i = data.begin(); i != data.end(); ++i)
         {
-            map<string, PerformanceData*> pdMap = i->second;
+            std::map<std::string, PerformanceData*> pdMap = i->second;
 
-            string key;
+            std::string key;
             switch (i->first)
             {
             case PERF_MON_TRIGGER: key = "T"; break;
@@ -193,14 +193,14 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack)
             default: key = "?";
             }
 
-            list<string> names;
+            std::list<std::string> names;
 
-            for (map<string, PerformanceData*>::iterator j = pdMap.begin(); j != pdMap.end(); ++j)
+            for (std::map<std::string, PerformanceData*>::iterator j = pdMap.begin(); j != pdMap.end(); ++j)
             {
                 names.push_back(j->first);
             }
 
-            names.sort([pdMap](string i, string j) {return pdMap.at(i)->totalTime < pdMap.at(j)->totalTime; });
+            names.sort([pdMap](std::string i, std::string j) {return pdMap.at(i)->totalTime < pdMap.at(j)->totalTime; });
 
             float tPerc = 0, tCount = 0;
             uint32 tMin = 99999, tMax = 0, tTime = 0;
@@ -214,7 +214,7 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack)
                 uint32 secs = pd->totalTime / totalCount;
                 float avg = (float)pd->totalTime / (float)pd->count;
                 float amount = (float)pd->count / (float)totalCount;
-                string disName = name;
+                std::string disName = name;
                 if (!fullStack && disName.find("|") != std::string::npos)
                     disName = disName.substr(0, disName.find("|")) + "]";
 
@@ -275,10 +275,10 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack)
 
 void PerformanceMonitor::Reset()
 {
-    for (map<PerformanceMetric, map<string, PerformanceData*> >::iterator i = data.begin(); i != data.end(); ++i)
+    for (std::map<PerformanceMetric, std::map<std::string, PerformanceData*> >::iterator i = data.begin(); i != data.end(); ++i)
     {
-        map<string, PerformanceData*> pdMap = i->second;
-        for (map<string, PerformanceData*>::iterator j = pdMap.begin(); j != pdMap.end(); ++j)
+        std::map<std::string, PerformanceData*> pdMap = i->second;
+        for (std::map<std::string, PerformanceData*>::iterator j = pdMap.begin(); j != pdMap.end(); ++j)
         {
 #ifdef CMANGOS
             PerformanceData* pd = j->second;
@@ -289,7 +289,7 @@ void PerformanceMonitor::Reset()
     }
 }
 
-PerformanceMonitorOperation::PerformanceMonitorOperation(PerformanceData* data, string name, PerformanceStack* stack) : data(data), name(name), stack(stack)
+PerformanceMonitorOperation::PerformanceMonitorOperation(PerformanceData* data, std::string name, PerformanceStack* stack) : data(data), name(name), stack(stack)
 {
 #ifdef CMANGOS
     started = (std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now())).time_since_epoch();

@@ -22,7 +22,7 @@ GuidPosition GraveyardValue::Calculate()
          refPosition = AI_VALUE(WorldPosition, "home bind");
     else if (getQualifier() == "start")
     {
-        vector<uint32> races;
+        std::vector<uint32> races;
 
         if (bot->GetTeam() == ALLIANCE)
             races = { RACE_HUMAN, RACE_DWARF,RACE_GNOME,RACE_NIGHTELF };
@@ -123,7 +123,7 @@ bool ShouldSpiritHealerValue::Calculate()
     float graveYardDistance = WorldPosition(bot).fDist(corpse);
     bool corpseInSight = corpseDistance < sPlayerbotAIConfig.sightDistance;
     bool graveInSight = graveYardDistance < sPlayerbotAIConfig.sightDistance;
-    bool enemiesNear = !AI_VALUE(list<ObjectGuid>, "possible targets").empty();
+    bool enemiesNear = !AI_VALUE(std::list<ObjectGuid>, "possible targets").empty();
 
     if (enemiesNear)
     {

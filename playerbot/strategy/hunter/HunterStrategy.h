@@ -1,5 +1,5 @@
 #pragma once
-#include "../generic/ClassStrategy.h"
+#include "playerbot/strategy/generic/ClassStrategy.h"
 
 namespace ai
 {
@@ -7,14 +7,14 @@ namespace ai
     {
     public:
         HunterStingPlaceholderStrategy(PlayerbotAI* ai) : PlaceholderStrategy(ai) {}
-        string getName() override { return "sting"; }
+        std::string getName() override { return "sting"; }
     };
 
     class HunterAspectPlaceholderStrategy : public PlaceholderStrategy
     {
     public:
         HunterAspectPlaceholderStrategy(PlayerbotAI* ai) : PlaceholderStrategy(ai) {}
-        string getName() override { return "aspect"; }
+        std::string getName() override { return "aspect"; }
     };
 
     class HunterStrategy : public ClassStrategy
@@ -218,7 +218,7 @@ namespace ai
         , triggerName(inTriggerName)
         , actionName(inActionName) {}
 
-        string getName() override { return name; }
+        std::string getName() override { return name; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -269,7 +269,7 @@ namespace ai
         , triggerName(inTriggerName)
         , actionName(inActionName) {}
 
-        string getName() override { return name; }
+        std::string getName() override { return name; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -285,7 +285,7 @@ namespace ai
     {
     public:
         HunterPetStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "pet"; }
+        std::string getName() override { return "pet"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

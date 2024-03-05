@@ -11,7 +11,7 @@ namespace ai
     class ReleaseSpiritAction : public ChatCommandAction
     {
     public:
-        ReleaseSpiritAction(PlayerbotAI* ai, string name = "release") : ChatCommandAction(ai, name) {}
+        ReleaseSpiritAction(PlayerbotAI* ai, std::string name = "release") : ChatCommandAction(ai, name) {}
 
     public:
         virtual bool Execute(Event& event) override
@@ -52,7 +52,7 @@ namespace ai
     class AutoReleaseSpiritAction : public ReleaseSpiritAction 
     {
     public:
-        AutoReleaseSpiritAction(PlayerbotAI* ai, string name = "auto release") : ReleaseSpiritAction(ai, name) {}
+        AutoReleaseSpiritAction(PlayerbotAI* ai, std::string name = "auto release") : ReleaseSpiritAction(ai, name) {}
 
         virtual bool Execute(Event& event) override
         {
@@ -121,7 +121,7 @@ namespace ai
     class RepopAction : public SpiritHealerAction 
     {
     public:
-        RepopAction(PlayerbotAI* ai, string name = "repop") : SpiritHealerAction(ai, name) {}
+        RepopAction(PlayerbotAI* ai, std::string name = "repop") : SpiritHealerAction(ai, name) {}
 
     public:
         virtual bool Execute(Event& event)
@@ -175,7 +175,7 @@ namespace ai
     class SelfResurrectAction : public ChatCommandAction
     {
     public:
-        SelfResurrectAction(PlayerbotAI* ai, string name = "self resurrect") : ChatCommandAction(ai, name) {}
+        SelfResurrectAction(PlayerbotAI* ai, std::string name = "self resurrect") : ChatCommandAction(ai, name) {}
 
     public:
         bool Execute(Event& event) override

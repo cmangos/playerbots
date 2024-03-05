@@ -36,26 +36,26 @@ AiObjectContext::AiObjectContext(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     //valueContexts.Add(&sSharedValueContext);
 }
 
-void AiObjectContext::ClearValues(string findName)
+void AiObjectContext::ClearValues(std::string findName)
 {
-    set<string> names = valueContexts.GetCreated();
-    for (set<string>::iterator i = names.begin(); i != names.end(); ++i)
+    std::set<std::string> names = valueContexts.GetCreated();
+    for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
     {
         UntypedValue* value = GetUntypedValue(*i);
         if (!value)
             continue;
 
-        if (!findName.empty() && i->find(findName) == string::npos)
+        if (!findName.empty() && i->find(findName) == std::string::npos)
             continue;
 
         valueContexts.Erase(*i);
     }
 }
 
-void AiObjectContext::ClearExpiredValues(string findName, uint32 interval)
+void AiObjectContext::ClearExpiredValues(std::string findName, uint32 interval)
 {
-    set<string> names = valueContexts.GetCreated();
-    for (set<string>::iterator i = names.begin(); i != names.end(); ++i)
+    std::set<std::string> names = valueContexts.GetCreated();
+    for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
     {
         UntypedValue* value = GetUntypedValue(*i);
         if (!value)
@@ -64,7 +64,7 @@ void AiObjectContext::ClearExpiredValues(string findName, uint32 interval)
         if (value->Protected())
             continue;
 
-        if (!findName.empty() && i->find(findName) == string::npos)
+        if (!findName.empty() && i->find(findName) == std::string::npos)
             continue;
 
         if (!interval && !value->Expired())
@@ -78,20 +78,20 @@ void AiObjectContext::ClearExpiredValues(string findName, uint32 interval)
 }
 
 
-string AiObjectContext::FormatValues(string findName)
+std::string AiObjectContext::FormatValues(std::string findName)
 {
-    ostringstream out;
-    set<string> names = valueContexts.GetCreated();
-    for (set<string>::iterator i = names.begin(); i != names.end(); ++i)
+    std::ostringstream out;
+    std::set<std::string> names = valueContexts.GetCreated();
+    for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
     {
         UntypedValue* value = GetUntypedValue(*i);
         if (!value)
             continue;
 
-        if (!findName.empty() && i->find(findName) == string::npos)
+        if (!findName.empty() && i->find(findName) == std::string::npos)
             continue;
 
-        string text = value->Format();
+        std::string text = value->Format();
         if (text == "?")
             continue;
 
@@ -119,23 +119,23 @@ void AiObjectContext::Reset()
     valueContexts.Reset();
 }
 
-list<string> AiObjectContext::Save()
+std::list<std::string> AiObjectContext::Save()
 {
-    list<string> result;
+    std::list<std::string> result;
 
-    set<string> names = valueContexts.GetCreated();
-    for (set<string>::iterator i = names.begin(); i != names.end(); ++i)
+    std::set<std::string> names = valueContexts.GetCreated();
+    for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
     {
         UntypedValue* value = GetUntypedValue(*i);
         if (!value)
             continue;
 
-        string data = value->Save();
+        std::string data = value->Save();
         if (data == "?")
             continue;
 
-        string name = *i;
-        ostringstream out;
+        std::string name = *i;
+        std::ostringstream out;
         out << name;
 
         out << ">" << data;
@@ -144,16 +144,16 @@ list<string> AiObjectContext::Save()
     return result;
 }
 
-void AiObjectContext::Load(list<string> data)
+void AiObjectContext::Load(std::list<std::string> data)
 {
-    for (list<string>::iterator i = data.begin(); i != data.end(); ++i)
+    for (std::list<std::string>::iterator i = data.begin(); i != data.end(); ++i)
     {
-        string row = *i;
-        vector<string> parts = split(row, '>');
+        std::string row = *i;
+        std::vector<std::string> parts = split(row, '>');
         if (parts.size() != 2) continue;
 
-        string name = parts[0];
-        string text = parts[1];
+        std::string name = parts[0];
+        std::string text = parts[1];
 
         UntypedValue* value = GetUntypedValue(name);
         if (!value) continue;

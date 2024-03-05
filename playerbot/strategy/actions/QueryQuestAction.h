@@ -11,6 +11,6 @@ namespace ai
     private:
         bool Execute(Event& event) override;
         void TellObjectives(Player* requester, uint32 questId);
-        void TellObjective(Player* requester, const string& name, int available, int required);
+        void TellObjective(Player* requester, const std::string& name, int available, int required);
     };
 }

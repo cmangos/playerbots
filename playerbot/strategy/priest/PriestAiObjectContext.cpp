@@ -5,9 +5,9 @@
 #include "PriestNonCombatStrategy.h"
 #include "PriestReactionStrategy.h"
 #include "ShadowPriestStrategy.h"
-#include "../generic/PullStrategy.h"
+#include "playerbot/strategy/generic/PullStrategy.h"
 #include "PriestTriggers.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 #include "HolyPriestStrategy.h"
 
 using namespace ai;

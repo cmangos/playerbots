@@ -8,19 +8,19 @@ namespace ai
     class QueryItemUsageAction : public ChatCommandAction
     {
     public:
-        QueryItemUsageAction(PlayerbotAI* ai, string name = "query item usage") : ChatCommandAction(ai, name) {}
+        QueryItemUsageAction(PlayerbotAI* ai, std::string name = "query item usage") : ChatCommandAction(ai, name) {}
 
     protected:
         virtual bool Execute(Event& event) override;
         uint32 GetCount(ItemQualifier& qualifier);
-        string QueryItem(ItemQualifier& qualifier, uint32 count, uint32 total);
-        string QueryItemUsage(ItemQualifier& qualifier);
-        string QueryItemPrice(ItemQualifier& qualifier);
-        string QueryQuestItem(uint32 itemId, const Quest *questTemplate, const QuestStatusData *questStatus);
-        string QueryQuestItem(uint32 itemId);
-        string QueryItemPower(ItemQualifier& qualifier);
+        std::string QueryItem(ItemQualifier& qualifier, uint32 count, uint32 total);
+        std::string QueryItemUsage(ItemQualifier& qualifier);
+        std::string QueryItemPrice(ItemQualifier& qualifier);
+        std::string QueryQuestItem(uint32 itemId, const Quest *questTemplate, const QuestStatusData *questStatus);
+        std::string QueryQuestItem(uint32 itemId);
+        std::string QueryItemPower(ItemQualifier& qualifier);
 
     private:
-        ostringstream out;
+        std::ostringstream out;
     };
 }

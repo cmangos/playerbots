@@ -8,11 +8,11 @@ using namespace ai;
 
 bool TradeAction::Execute(Event& event)
 {
-    string text = event.getParam();
+    std::string text = event.getParam();
 
     if (!bot->GetTrader())
     {
-        list<ObjectGuid> guids = chat->parseGameobjects(text);
+        std::list<ObjectGuid> guids = chat->parseGameobjects(text);
         Player* player = nullptr;
 
         for(auto& guid: guids)
@@ -55,15 +55,15 @@ bool TradeAction::Execute(Event& event)
     }
 
     size_t pos = text.rfind(" ");
-    int count = pos!=string::npos ? atoi(text.substr(pos + 1).c_str()) : 1;
+    int count = pos!= std::string::npos ? atoi(text.substr(pos + 1).c_str()) : 1;
 
     IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
-    list<Item*> found = ai->InventoryParseItems(text, mask);
+    std::list<Item*> found = ai->InventoryParseItems(text, mask);
     if (found.empty())
         return false;
 
     int traded = 0;
-    for (list<Item*>::iterator i = found.begin(); i != found.end(); i++)
+    for (std::list<Item*>::iterator i = found.begin(); i != found.end(); i++)
     {
         Item* item = *i;
 

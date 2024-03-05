@@ -97,7 +97,7 @@
 #include "TalentSpecValue.h"
 #include "MountValues.h"
 #include "DeadValues.h"
-#include "../druid/DruidValues.h"
+#include "playerbot/strategy/druid/DruidValues.h"
 
 namespace ai
 {

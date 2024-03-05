@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "NearestUnitsValue.h"
 #include "playerbot/PlayerbotAIConfig.h"
 
@@ -12,7 +12,7 @@ namespace ai
             NearestUnitsValue(ai, "nearest friendly players", range) {}
 
     protected:
-        void FindUnits(list<Unit*> &targets);
+        void FindUnits(std::list<Unit*> &targets);
         virtual bool AcceptUnit(Unit* unit);
 	};
 }

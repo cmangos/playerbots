@@ -13,7 +13,7 @@ namespace ai
         virtual float GetValue(Action* action);
 
     private:
-        static list<string> allowedActions;
-        static list<string> allowedParts;
+        static std::list<std::string> allowedActions;
+        static std::list<std::string> allowedParts;
     };
 }

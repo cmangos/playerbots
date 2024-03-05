@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 #include "PartyMemberValue.h"
 #include "playerbot/PlayerbotAIConfig.h"
 
@@ -8,7 +8,7 @@ namespace ai
     class PartyMemberWithoutItemValue : public PartyMemberValue, public Qualified
     {
     public:
-        PartyMemberWithoutItemValue(PlayerbotAI* ai, string name = "party member without item", float range = sPlayerbotAIConfig.farDistance) :
+        PartyMemberWithoutItemValue(PlayerbotAI* ai, std::string name = "party member without item", float range = sPlayerbotAIConfig.farDistance) :
           PartyMemberValue(ai, name), Qualified() {}
 
     protected:
@@ -19,7 +19,7 @@ namespace ai
     class PartyMemberWithoutFoodValue : public PartyMemberWithoutItemValue
     {
     public:
-        PartyMemberWithoutFoodValue(PlayerbotAI* ai, string name = "party member without food") : PartyMemberWithoutItemValue(ai, name) {}
+        PartyMemberWithoutFoodValue(PlayerbotAI* ai, std::string name = "party member without food") : PartyMemberWithoutItemValue(ai, name) {}
 
     protected:
         virtual FindPlayerPredicate* CreatePredicate();
@@ -28,7 +28,7 @@ namespace ai
     class PartyMemberWithoutWaterValue : public PartyMemberWithoutItemValue
     {
     public:
-        PartyMemberWithoutWaterValue(PlayerbotAI* ai, string name = "party member without water") : PartyMemberWithoutItemValue(ai, name) {}
+        PartyMemberWithoutWaterValue(PlayerbotAI* ai, std::string name = "party member without water") : PartyMemberWithoutItemValue(ai, name) {}
 
     protected:
         virtual FindPlayerPredicate* CreatePredicate();

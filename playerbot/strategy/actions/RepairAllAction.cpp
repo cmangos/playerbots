@@ -9,8 +9,8 @@ using namespace ai;
 bool RepairAllAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, "nearest npcs");
-    for (list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
+    std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
+    for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
     {
         Creature *unit = bot->GetNPCIfCanInteractWith(*i, UNIT_NPC_FLAG_REPAIR);
         if (!unit)
@@ -70,13 +70,13 @@ bool RepairAllAction::Execute(Event& event)
 
         if (totalCost > 0)
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "Repair: " << chat->formatMoney(totalCost) << " (" << unit->GetName() << ")";
             ai->TellPlayerNoFacing(requester, out.str(),PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             if (sPlayerbotAIConfig.globalSoundEffects)
                 bot->PlayDistanceSound(1116);
 
-            sPlayerbotAIConfig.logEvent(ai, "RepairAllAction", to_string(durability), to_string(totalCost));
+            sPlayerbotAIConfig.logEvent(ai, "RepairAllAction", std::to_string(durability), std::to_string(totalCost));
 
             ai->DoSpecificAction("equip upgrades", event, true);
         }

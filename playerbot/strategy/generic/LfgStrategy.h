@@ -8,7 +8,7 @@ namespace ai
     public:
         LfgStrategy(PlayerbotAI* ai) : PassTroughStrategy(ai) {}
 		int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
-        string getName() override { return "lfg"; }
+        std::string getName() override { return "lfg"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;

@@ -10,7 +10,7 @@ using namespace ai;
 bool UseTrinketAction::Execute(Event& event)
 {
 	Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-	list<Item*> trinkets = AI_VALUE(list<Item*>, "trinkets on use");
+	std::list<Item*> trinkets = AI_VALUE(std::list<Item*>, "trinkets on use");
 	for (Item* item : trinkets)
 	{
 		const ItemPrototype* proto = item->GetProto();
@@ -28,5 +28,5 @@ bool UseTrinketAction::Execute(Event& event)
 
 bool UseTrinketAction::isPossible()
 {
-	return !AI_VALUE(list<Item*>, "trinkets on use").empty();
+	return !AI_VALUE(std::list<Item*>, "trinkets on use").empty();
 }

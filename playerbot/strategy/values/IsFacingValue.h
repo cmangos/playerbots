@@ -1,12 +1,12 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
     class IsFacingValue : public BoolCalculatedValue, public Qualified
 	{
 	public:
-        IsFacingValue(PlayerbotAI* ai, string name = "is facing") : BoolCalculatedValue(ai, name), Qualified() {}
+        IsFacingValue(PlayerbotAI* ai, std::string name = "is facing") : BoolCalculatedValue(ai, name), Qualified() {}
 
         virtual bool Calculate()
         {

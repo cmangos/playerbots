@@ -8,7 +8,7 @@ namespace ai
     {
     public:
         ShadowPriestStrategy(PlayerbotAI* ai);
-        string getName() override { return "shadow"; }
+        std::string getName() override { return "shadow"; }
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_RANGED; }
 
     private:
@@ -20,7 +20,7 @@ namespace ai
     {
     public:
         ShadowPriestAoeStrategy(PlayerbotAI* ai) : CombatStrategy(ai) {}
-        string getName() override { return "shadow aoe"; }
+        std::string getName() override { return "shadow aoe"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -30,7 +30,7 @@ namespace ai
     {
     public:
         ShadowPriestDebuffStrategy(PlayerbotAI* ai) : CombatStrategy(ai) {}
-        string getName() override { return "shadow debuff"; }
+        std::string getName() override { return "shadow debuff"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;

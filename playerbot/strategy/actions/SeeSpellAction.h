@@ -10,7 +10,7 @@ namespace ai
     class SeeSpellAction : public MovementAction
     {
     public:
-        SeeSpellAction(PlayerbotAI* ai, string name = "see spell") : MovementAction(ai, name) {}
+        SeeSpellAction(PlayerbotAI* ai, std::string name = "see spell") : MovementAction(ai, name) {}
         virtual bool Execute(Event& event);
 
         virtual bool isPossible() override { return true; }

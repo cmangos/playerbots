@@ -1,14 +1,14 @@
 
 #include "playerbot/playerbot.h"
 #include "StatsAction.h"
-#include "../../RandomItemMgr.h"
+#include "playerbot/RandomItemMgr.h"
 
 using namespace ai;
 
 bool StatsAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    ostringstream out;
+    std::ostringstream out;
 
     ListGold(out);
 
@@ -31,16 +31,16 @@ bool StatsAction::Execute(Event& event)
     return true;
 }
 
-void StatsAction::ListGold(ostringstream &out)
+void StatsAction::ListGold(std::ostringstream &out)
 {
     out << chat->formatMoney(bot->GetMoney());
 }
 
-void StatsAction::ListPower(ostringstream& out)
+void StatsAction::ListPower(std::ostringstream& out)
 {
     uint32 totalPower = 0;
 
-    vector<uint32> qualityCount = { 0,0,0,0,0,0,0 };
+    std::vector<uint32> qualityCount = { 0,0,0,0,0,0,0 };
 
     for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
     {
@@ -74,10 +74,10 @@ void StatsAction::ListPower(ostringstream& out)
     char color[32];
     sprintf(color, "%x", ItemQualityColors[mostQuality]);
 
-    out << "|h|c" << color << "|h" << to_string(totalPower) << "|h|cffffffff|h Pwr";
+    out << "|h|c" << color << "|h" << std::to_string(totalPower) << "|h|cffffffff|h Pwr";
 }
 
-void StatsAction::ListBagSlots(ostringstream &out)
+void StatsAction::ListBagSlots(std::ostringstream &out)
 {
     uint32 totalused = 0, total = 16;
     // list out items in main backpack
@@ -104,7 +104,7 @@ void StatsAction::ListBagSlots(ostringstream &out)
 
     }
 
-	string color = "ff00ff00";
+    std::string color = "ff00ff00";
 	if (totalfree < total / 2)
 		color = "ffffff00";
 	if (totalfree < total / 4)
@@ -112,7 +112,7 @@ void StatsAction::ListBagSlots(ostringstream &out)
     out << "|h|c" << color << totalfree << "/" << total << "|h|cffffffff Bag";
 }
 
-void StatsAction::ListXP( ostringstream &out )
+void StatsAction::ListXP( std::ostringstream &out )
 {
     uint32 curXP = bot->GetUInt32Value(PLAYER_XP);
     uint32 nextLevelXP = bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
@@ -128,7 +128,7 @@ void StatsAction::ListXP( ostringstream &out )
     out << "|cff00ff00" << xpPercent << "|cffffd333/|cff00ff00" << restPercent << "%|cffffffff XP";
 }
 
-void StatsAction::ListRepairCost(ostringstream &out)
+void StatsAction::ListRepairCost(std::ostringstream &out)
 {
     uint32 totalCost = 0;
     double repairPercent = 0;
@@ -146,7 +146,7 @@ void StatsAction::ListRepairCost(ostringstream &out)
     }
     repairPercent /= repairCount;
 
-    string color = "ff00ff00";
+    std::string color = "ff00ff00";
     if (repairPercent < 50)
         color = "ffffff00";
     if (repairPercent < 25)

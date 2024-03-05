@@ -1,5 +1,5 @@
 #pragma once
-#include "../Strategy.h"
+#include "playerbot/strategy/Strategy.h"
 
 namespace ai
 {
@@ -7,13 +7,13 @@ namespace ai
     {
     public:
         FleeStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "flee"; };
+        std::string getName() override { return "flee"; };
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "flee"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "flee"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy will make the bot flee when it is in danger.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "flee from adds" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "flee from adds" }; }
 #endif
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -23,13 +23,13 @@ namespace ai
     {
     public:
         FleeFromAddsStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "flee from adds"; };
+        std::string getName() override { return "flee from adds"; };
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "flee from adds"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "flee from adds"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This a position strategy that will make the bot try to avoid adds the prevent aggro.";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "flee", "follow", "stay", "runaway", "guard", "free" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "flee", "follow", "stay", "runaway", "guard", "free" }; }
 #endif
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;

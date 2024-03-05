@@ -5,9 +5,9 @@
 
 using namespace ai;
 
-void TellPosition(PlayerbotAI* ai, Player* requester, string name, ai::PositionEntry pos)
+void TellPosition(PlayerbotAI* ai, Player* requester, std::string name, ai::PositionEntry pos)
 {
-    ostringstream out; out << "Position " << name;
+    std::ostringstream out; out << "Position " << name;
     if (pos.isSet())
     {
         float x = pos.x, y = pos.y;
@@ -22,7 +22,7 @@ void TellPosition(PlayerbotAI* ai, Player* requester, string name, ai::PositionE
 bool PositionAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-	string param = event.getParam();
+    std::string param = event.getParam();
 	if (param.empty())
 		return false;
 
@@ -40,15 +40,15 @@ bool PositionAction::Execute(Event& event)
         return true;
     }
 
-    vector<string> params = split(param, ' ');
+    std::vector<std::string> params = split(param, ' ');
     if (params.size() != 2)
     {
         ai->TellPlayer(requester, "Whisper position <name> ?/set/reset");
         return false;
     }
 
-    string name = params[0];
-    string action = params[1];
+    std::string name = params[0];
+    std::string action = params[1];
 	ai::PositionEntry pos = posMap[name];
 	if (action == "?")
 	{
@@ -56,13 +56,13 @@ bool PositionAction::Execute(Event& event)
 	    return true;
 	}
 
-    vector<string> coords = split(action, ',');
+    std::vector<std::string> coords = split(action, ',');
     if (coords.size() == 3)
     {
         pos.Set(atoi(coords[0].c_str()), atoi(coords[1].c_str()), atoi(coords[2].c_str()), ai->GetBot()->GetMapId());
         posMap[name] = pos;
 
-        ostringstream out; out << "Position " << name << " is set";
+        std::ostringstream out; out << "Position " << name << " is set";
         ai->TellPlayer(requester, out);
         return true;
     }
@@ -72,7 +72,7 @@ bool PositionAction::Execute(Event& event)
         pos.Set(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), ai->GetBot()->GetMapId());
 	    posMap[name] = pos;
 
-	    ostringstream out; out << "Position " << name << " is set";
+	    std::ostringstream out; out << "Position " << name << " is set";
 	    ai->TellPlayer(requester, out);
 	    return true;
 	}
@@ -82,7 +82,7 @@ bool PositionAction::Execute(Event& event)
 	    pos.Reset();
 	    posMap[name] = pos;
 
-	    ostringstream out; out << "Position " << name << " is reset";
+	    std::ostringstream out; out << "Position " << name << " is reset";
 	    ai->TellPlayer(requester, out);
 	    return true;
 	}
@@ -96,7 +96,7 @@ bool MoveToPositionAction::Execute(Event& event)
 	ai::PositionEntry pos = context->GetValue<ai::PositionMap&>("position")->Get()[qualifier];
     if (!pos.isSet())
     {
-        ostringstream out; out << "Position " << qualifier << " is not set";
+        std::ostringstream out; out << "Position " << qualifier << " is not set";
         ai->TellPlayer(requester, out);
         return false;
     }
@@ -107,7 +107,7 @@ bool MoveToPositionAction::Execute(Event& event)
 bool MoveToPositionAction::isUseful()
 {
     ai::PositionEntry pos = context->GetValue<ai::PositionMap&>("position")->Get()[qualifier];
-    float distance = AI_VALUE2(float, "distance", string("position_") + qualifier);
+    float distance = AI_VALUE2(float, "distance", std::string("position_") + qualifier);
     return pos.isSet() && distance > ai->GetRange("follow") && IsMovingAllowed();
 }
 

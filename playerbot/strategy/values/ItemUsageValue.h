@@ -1,6 +1,6 @@
 #pragma once
-#include "../Value.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/Value.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 
 namespace ai
 {
@@ -12,7 +12,7 @@ namespace ai
         ItemQualifier(Item* item) { itemId = item->GetProto()->ItemId; enchantId = item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT); randomPropertyId = item->GetItemRandomPropertyId(); gem1 = GemId(item, 0); gem2 = GemId(item, 1); gem3 = GemId(item, 2); gem4 = GemId(item, 3); proto = item->GetProto();};
         ItemQualifier(LootItem* item) { itemId = item->itemId; enchantId = 0; randomPropertyId = item->randomPropertyId; gem1 = 0; gem2 = 0; gem3 = 0; gem4 = 0; proto = nullptr; };
         ItemQualifier(AuctionEntry* auction) { itemId = auction->itemTemplate; enchantId = 0; randomPropertyId = auction->itemRandomPropertyId; gem1 = 0; gem2 = 0; gem3 = 0; gem4 = 0; proto = nullptr;};
-        ItemQualifier(string qualifier, bool linkQualifier = true);
+        ItemQualifier(std::string qualifier, bool linkQualifier = true);
 
         uint32 GetId() { return itemId; }
         uint32 GetEnchantId() { return enchantId; }
@@ -23,11 +23,11 @@ namespace ai
         uint32 GetGem4() { return gem4; }       
 
 #ifdef MANGOSBOT_ZERO
-        string GetLinkQualifier() { return to_string(itemId) + ":" + to_string(enchantId) + ":" + to_string(randomPropertyId) + ":0"; }
+        std::string GetLinkQualifier() { return std::to_string(itemId) + ":" + std::to_string(enchantId) + ":" + std::to_string(randomPropertyId) + ":0"; }
 #else
-        string GetLinkQualifier() { return to_string(itemId) + ":" + to_string(enchantId) + ":" + to_string(gem1) + ":" + to_string(gem2) + ":" + to_string(gem3) + ":" + to_string(gem4) + ":" + to_string(randomPropertyId) + ":0"; }
+        std::string GetLinkQualifier() { return std::to_string(itemId) + ":" + std::to_string(enchantId) + ":" + std::to_string(gem1) + ":" + std::to_string(gem2) + ":" + std::to_string(gem3) + ":" + std::to_string(gem4) + ":" + std::to_string(randomPropertyId) + ":0"; }
 #endif
-        string GetQualifier() { return to_string(itemId) + ((enchantId || gem1 || gem2 || gem3 || gem4 || randomPropertyId) ? ":" + to_string(enchantId) + ":" + to_string(gem1) + ":" + to_string(gem2) + ":" + to_string(gem3) + ":" + to_string(gem4) + ":" + to_string(randomPropertyId) : ""); }
+        std::string GetQualifier() { return std::to_string(itemId) + ((enchantId || gem1 || gem2 || gem3 || gem4 || randomPropertyId) ? ":" + std::to_string(enchantId) + ":" + std::to_string(gem1) + ":" + std::to_string(gem2) + ":" + std::to_string(gem3) + ":" + std::to_string(gem4) + ":" + std::to_string(randomPropertyId) : ""); }
 
         ItemPrototype const* GetProto() { if (!proto) proto = sItemStorage.LookupEntry<ItemPrototype>(itemId); return proto; };
         static uint32 GemId(Item* item, uint8 gemSlot = 0);
@@ -73,7 +73,7 @@ namespace ai
     class ItemUsageValue : public CalculatedValue<ItemUsage>, public Qualified
 	{
 	public:
-        ItemUsageValue(PlayerbotAI* ai, string name = "item usage") : CalculatedValue<ItemUsage>(ai, name), Qualified() {}
+        ItemUsageValue(PlayerbotAI* ai, std::string name = "item usage") : CalculatedValue<ItemUsage>(ai, name), Qualified() {}
         virtual ItemUsage Calculate();
 
     private:
@@ -84,43 +84,43 @@ namespace ai
         bool IsItemUsefulForSkill(ItemPrototype const * proto);
         bool IsItemNeededForUsefullCraft(ItemPrototype const* proto, bool checkAllReagents);
         Item* CurrentItem(ItemPrototype const* proto);
-        float BetterStacks(ItemPrototype const* proto, string usageType = "");
+        float BetterStacks(ItemPrototype const* proto, std::string usageType = "");
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "item usage"; } //Must equal iternal name
-        virtual string GetHelpTypeName() { return "item"; }
-        virtual string GetHelpDescription() 
+        virtual std::string GetHelpName() { return "item usage"; } //Must equal iternal name
+        virtual std::string GetHelpTypeName() { return "item"; }
+        virtual std::string GetHelpDescription() 
         { 
             return "This value gives the reason why a bot finds an item useful.\n"
                    "Based on this value bots will equip/unequip/need/greed/loot/destroy/sell/ah/craft items."; 
         }
-        virtual vector<string> GetUsedValues() { return {"bag space", "force item usage", "inventory items", "item count" }; }
+        virtual std::vector<std::string> GetUsedValues() { return {"bag space", "force item usage", "inventory items", "item count" }; }
 #endif
 
     public:
         static float CurrentStacks(PlayerbotAI* ai, ItemPrototype const* proto);
-        static vector<uint32> SpellsUsingItem(uint32 itemId, Player* bot);
+        static std::vector<uint32> SpellsUsingItem(uint32 itemId, Player* bot);
 
-        static string GetConsumableType(ItemPrototype const* proto, bool hasMana);
+        static std::string GetConsumableType(ItemPrototype const* proto, bool hasMana);
 	};
 
     class ForceItemUsageValue : public ManualSetValue<ForceItemUsage>, public Qualified
     {
     public:
-        ForceItemUsageValue(PlayerbotAI* ai, string name = "force item usage") : ManualSetValue<ForceItemUsage>(ai, ForceItemUsage::FORCE_USAGE_NONE, name), Qualified() {}
+        ForceItemUsageValue(PlayerbotAI* ai, std::string name = "force item usage") : ManualSetValue<ForceItemUsage>(ai, ForceItemUsage::FORCE_USAGE_NONE, name), Qualified() {}
 
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "force item usage"; } //Must equal iternal name
-        virtual string GetHelpTypeName() { return "item"; }
-        virtual string GetHelpDescription()
+        virtual std::string GetHelpName() { return "force item usage"; } //Must equal iternal name
+        virtual std::string GetHelpTypeName() { return "item"; }
+        virtual std::string GetHelpDescription()
         {
             return "This value overrides some reasons why a bot finds an item useful\n"
                     "Based on this value bots will no longer sell/ah/destroy/unequip items.";
         }
-        virtual vector<string> GetUsedValues() { return {}; }
+        virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif
 
-        virtual string Save() override { return (uint8)value ? to_string((uint8)value) : "?"; }
-        virtual bool Load(string force) override { if (!force.empty()) value = ForceItemUsage(stoi(force)); return !force.empty(); }        
+        virtual std::string Save() override { return (uint8)value ? std::to_string((uint8)value) : "?"; }
+        virtual bool Load(std::string force) override { if (!force.empty()) value = ForceItemUsage(stoi(force)); return !force.empty(); }
     };
 }

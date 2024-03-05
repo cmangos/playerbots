@@ -4,8 +4,8 @@
 
 using namespace ai;
 
-list<string> PassiveMultiplier::allowedActions;
-list<string> PassiveMultiplier::allowedParts;
+std::list<std::string> PassiveMultiplier::allowedActions;
+std::list<std::string> PassiveMultiplier::allowedParts;
 
 PassiveMultiplier::PassiveMultiplier(PlayerbotAI* ai) : Multiplier(ai, "passive")
 {
@@ -35,17 +35,17 @@ float PassiveMultiplier::GetValue(Action* action)
     if (!action)
 		return 1.0f;
 
-    string name = action->getName();
+    std::string name = action->getName();
 
-    for (list<string>::iterator i = allowedActions.begin(); i != allowedActions.end(); i++)
+    for (std::list<std::string>::iterator i = allowedActions.begin(); i != allowedActions.end(); i++)
     {
         if (name == *i)
             return 1.0f;
     }
 
-    for (list<string>::iterator i = allowedParts.begin(); i != allowedParts.end(); i++)
+    for (std::list<std::string>::iterator i = allowedParts.begin(); i != allowedParts.end(); i++)
     {
-        if (name.find(*i) != string::npos)
+        if (name.find(*i) != std::string::npos)
             return 1.0f;
     }
 

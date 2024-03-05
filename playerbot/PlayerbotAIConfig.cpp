@@ -17,14 +17,12 @@
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 
-using namespace std;
-
-std::vector<string> ConfigAccess::GetValues(const std::string& name) const
+std::vector<std::string> ConfigAccess::GetValues(const std::string& name) const
 {
-    std::vector<string> values;
+    std::vector<std::string> values;
     auto const nameLower = boost::algorithm::to_lower_copy(name);
     for (auto entry : m_entries)
-        if (entry.first.find(nameLower) != string::npos)
+        if (entry.first.find(nameLower) != std::string::npos)
             values.push_back(entry.first);
 
     return values;
@@ -40,13 +38,13 @@ PlayerbotAIConfig::PlayerbotAIConfig()
 }
 
 template <class T>
-void LoadList(string value, T &list)
+void LoadList(std::string value, T &list)
 {
     list.clear();
-    vector<string> ids = split(value, ',');
-    for (vector<string>::iterator i = ids.begin(); i != ids.end(); i++)
+    std::vector<std::string> ids = split(value, ',');
+    for (std::vector<std::string>::iterator i = ids.begin(); i != ids.end(); i++)
     {
-        string string = *i;
+        std::string string = *i;
         if (string.empty())
             continue;
 
@@ -57,13 +55,13 @@ void LoadList(string value, T &list)
 }
 
 template <class T>
-void LoadListString(string value, T& list)
+void LoadListString(std::string value, T& list)
 {
     list.clear();
-    vector<string> strings = split(value, ',');
-    for (vector<string>::iterator i = strings.begin(); i != strings.end(); i++)
+    std::vector<std::string> strings = split(value, ',');
+    for (std::vector<std::string>::iterator i = strings.begin(); i != strings.end(); i++)
     {
-        string string = *i;
+        std::string string = *i;
         if (string.empty())
             continue;
 
@@ -134,8 +132,8 @@ bool PlayerbotAIConfig::Initialize()
     randomGearMaxLevel = config.GetIntDefault("AiPlayerbot.RandomGearMaxLevel", 500);
     randomGearMaxDiff = config.GetIntDefault("AiPlayerbot.RandomGearMaxDiff", 9);
     randomGearUpgradeEnabled = config.GetBoolDefault("AiPlayerbot.RandomGearUpgradeEnabled", false);
-    LoadList<list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomGearBlacklist", ""), randomGearBlacklist);
-    LoadList<list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomGearWhitelist", ""), randomGearWhitelist);
+    LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomGearBlacklist", ""), randomGearBlacklist);
+    LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomGearWhitelist", ""), randomGearWhitelist);
     randomGearProgression = config.GetBoolDefault("AiPlayerbot.RandomGearProgression", true);
     randomGearLoweringChance = config.GetFloatDefault("AiPlayerbot.RandomGearLoweringChance", 0.15f);
     randomBotMaxLevelChance = config.GetFloatDefault("AiPlayerbot.RandomBotMaxLevelChance", 0.15f);
@@ -161,10 +159,10 @@ bool PlayerbotAIConfig::Initialize()
     allowMultiAccountAltBots = config.GetBoolDefault("AiPlayerbot.AllowMultiAccountAltBots", true);
 
     randomBotMapsAsString = config.GetStringDefault("AiPlayerbot.RandomBotMaps", "0,1,530,571");
-    LoadList<vector<uint32> >(randomBotMapsAsString, randomBotMaps);
-    LoadList<list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotQuestItems", "6948,5175,5176,5177,5178,16309,12382,13704,11000,22754"), randomBotQuestItems);
-    LoadList<list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotSpellIds", "54197"), randomBotSpellIds);
-	LoadList<list<uint32> >(config.GetStringDefault("AiPlayerbot.PvpProhibitedZoneIds", "2255,656,2361,2362,2363,976,35,2268,3425,392,541,1446,3828,3712,3738,3565,3539,3623,4152,3988,4658,4284,4418,4436,4275,4323"), pvpProhibitedZoneIds);
+    LoadList<std::vector<uint32> >(randomBotMapsAsString, randomBotMaps);
+    LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotQuestItems", "6948,5175,5176,5177,5178,16309,12382,13704,11000,22754"), randomBotQuestItems);
+    LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotSpellIds", "54197"), randomBotSpellIds);
+	LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.PvpProhibitedZoneIds", "2255,656,2361,2362,2363,976,35,2268,3425,392,541,1446,3828,3712,3738,3565,3539,3623,4152,3988,4658,4284,4418,4436,4275,4323"), pvpProhibitedZoneIds);
     
 #ifndef MANGOSBOT_ZERO
     // disable pvp near dark portal if event is active
@@ -172,8 +170,8 @@ bool PlayerbotAIConfig::Initialize()
         pvpProhibitedZoneIds.insert(pvpProhibitedZoneIds.begin(), 72);
 #endif
 
-    LoadList<list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotQuestIds", "7848,3802,5505,6502,7761,9378"), randomBotQuestIds);
-    LoadList<list<uint32> >(config.GetStringDefault("AiPlayerbot.ImmuneSpellIds", ""), immuneSpellIds);
+    LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotQuestIds", "7848,3802,5505,6502,7761,9378"), randomBotQuestIds);
+    LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.ImmuneSpellIds", ""), immuneSpellIds);
 
     botAutologin = config.GetBoolDefault("AiPlayerbot.BotAutologin", false);
     randomBotAutologin = config.GetBoolDefault("AiPlayerbot.RandomBotAutologin", true);
@@ -243,7 +241,7 @@ bool PlayerbotAIConfig::Initialize()
         //Set race defaults
         if (race > 0)
         {
-            int rProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb.0." + to_string(race), 100);
+            int rProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb.0." + std::to_string(race), 100);
 
             for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
             {
@@ -255,7 +253,7 @@ bool PlayerbotAIConfig::Initialize()
     //Class overrides
     for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
     {
-        int cProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb." + to_string(cls), -1);
+        int cProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb." + std::to_string(cls), -1);
 
         if (cProb >= 0)
         {
@@ -273,7 +271,7 @@ bool PlayerbotAIConfig::Initialize()
     {
         for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
         {
-            int rcProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb." + to_string(cls) + "." + to_string(race), -1);
+            int rcProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb." + std::to_string(cls) + "." + std::to_string(race), -1);
             if (rcProb >= 0)
                 classRaceProbability[cls][race] = rcProb;
 
@@ -291,25 +289,25 @@ bool PlayerbotAIConfig::Initialize()
         classSpecs[cls] = ClassSpecs(1 << (cls - 1));
         for (uint32 spec = 0; spec < MAX_LEVEL; ++spec)
         {
-            ostringstream os; os << "AiPlayerbot.PremadeSpecName." << cls << "." << spec;
-            string specName = config.GetStringDefault(os.str().c_str(), "");
+            std::ostringstream os; os << "AiPlayerbot.PremadeSpecName." << cls << "." << spec;
+            std::string specName = config.GetStringDefault(os.str().c_str(), "");
             if (!specName.empty())
             {
-                ostringstream os; os << "AiPlayerbot.PremadeSpecProb." << cls << "." << spec;
+                std::ostringstream os; os << "AiPlayerbot.PremadeSpecProb." << cls << "." << spec;
                 int probability = config.GetIntDefault(os.str().c_str(), 100);
 
                 TalentPath talentPath(spec, specName, probability);
 
                 for (int level = 10; level <= 100; level++)
                 {
-                    ostringstream os; os << "AiPlayerbot.PremadeSpecLink." << cls << "." << spec << "." << level;
-                    string specLink = config.GetStringDefault(os.str().c_str(), "");
+                    std::ostringstream os; os << "AiPlayerbot.PremadeSpecLink." << cls << "." << spec << "." << level;
+                    std::string specLink = config.GetStringDefault(os.str().c_str(), "");
                     specLink = specLink.substr(0, specLink.find("#", 0));;
                     specLink = specLink.substr(0, specLink.find(" ", 0));;
 
                     if (!specLink.empty())
                     {
-                        ostringstream out;
+                        std::ostringstream out;
 
                         //Ignore bad specs.
                         if (!classSpecs[cls].baseSpec.CheckTalentLink(specLink, &out))
@@ -341,7 +339,7 @@ bool PlayerbotAIConfig::Initialize()
     }
 
     botCheats.clear();
-    LoadListString<list<string>>(config.GetStringDefault("AiPlayerbot.BotCheats", "taxi,item,breath"), botCheats);
+    LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.BotCheats", "taxi,item,breath"), botCheats);
 
     botCheatMask = 0;
 
@@ -368,13 +366,13 @@ bool PlayerbotAIConfig::Initialize()
     if (std::find(botCheats.begin(), botCheats.end(), "breath") != botCheats.end())
         botCheatMask |= (uint32)BotCheatMask::breath;
 
-    LoadListString<list<string>>(config.GetStringDefault("AiPlayerbot.AllowedLogFiles", ""), allowedLogFiles);
-    LoadListString<list<string>>(config.GetStringDefault("AiPlayerbot.DebugFilter", "add gathering loot,check values,emote,check mount state"), debugFilter);
+    LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.AllowedLogFiles", ""), allowedLogFiles);
+    LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.DebugFilter", "add gathering loot,check values,emote,check mount state"), debugFilter);
 
     worldBuffs.clear();
 
     //Get all config values starting with AiPlayerbot.WorldBuff
-    vector<string> values = configA->GetValues("AiPlayerbot.WorldBuff");
+    std::vector<std::string> values = configA->GetValues("AiPlayerbot.WorldBuff");
    
     if (values.size())
     {
@@ -383,8 +381,8 @@ bool PlayerbotAIConfig::Initialize()
 
         for (auto value : values)
         {
-            vector<string> ids = split(value, '.');
-            vector<uint32> params = { 0,0,0,0,0 };
+            std::vector<std::string> ids = split(value, '.');
+            std::vector<uint32> params = { 0,0,0,0,0 };
 
             //Extract faction, class, spec, minlevel, maxlevel
             for (uint8 i = 0; i < 5; i++)
@@ -392,8 +390,8 @@ bool PlayerbotAIConfig::Initialize()
                     params[i] = stoi(ids[i + 2]);
 
             //Get list of buffs for this combination.
-            list<uint32> buffs;
-            LoadList<list<uint32>>(config.GetStringDefault(value, ""), buffs);
+            std::list<uint32> buffs;
+            LoadList<std::list<uint32>>(config.GetStringDefault(value, ""), buffs);
 
             //Store buffs for later application.
             for (auto buff : buffs)
@@ -481,7 +479,7 @@ bool PlayerbotAIConfig::Initialize()
     // Gear progression phase
     for (uint8 phase = 0; phase < MAX_GEAR_PROGRESSION_LEVEL; phase++)
     {
-        ostringstream os; os << "AiPlayerbot.GearProgressionSystem." << std::to_string(phase) << ".MinItemLevel";
+        std::ostringstream os; os << "AiPlayerbot.GearProgressionSystem." << std::to_string(phase) << ".MinItemLevel";
         gearProgressionSystemItemLevels[phase][0] = config.GetIntDefault(os.str().c_str(), 9999999);
         os.str(""); os << "AiPlayerbot.GearProgressionSystem." << std::to_string(phase) << ".MaxItemLevel";
         gearProgressionSystemItemLevels[phase][1] = config.GetIntDefault(os.str().c_str(), 9999999);
@@ -495,7 +493,7 @@ bool PlayerbotAIConfig::Initialize()
                 // Gear progression slot
                 for (uint8 slot = 0; slot < SLOT_EMPTY; slot++)
                 {
-                    ostringstream os; os << "AiPlayerbot.GearProgressionSystem." << std::to_string(phase) << "." << std::to_string(cls) << "." << std::to_string(spec) << "." << std::to_string(slot);
+                    std::ostringstream os; os << "AiPlayerbot.GearProgressionSystem." << std::to_string(phase) << "." << std::to_string(cls) << "." << std::to_string(spec) << "." << std::to_string(slot);
                     gearProgressionSystemItems[phase][cls][spec][slot] = config.GetIntDefault(os.str().c_str(), -1);
                 }
             }
@@ -504,15 +502,15 @@ bool PlayerbotAIConfig::Initialize()
 
     sLog.outString("Loading free bots.");
     selfBotLevel = config.GetIntDefault("AiPlayerbot.SelfBotLevel", 1);
-    LoadListString<list<string>>(config.GetStringDefault("AiPlayerbot.ToggleAlwaysOnlineAccounts", ""), toggleAlwaysOnlineAccounts);
-    LoadListString<list<string>>(config.GetStringDefault("AiPlayerbot.ToggleAlwaysOnlineChars", ""), toggleAlwaysOnlineChars);
+    LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.ToggleAlwaysOnlineAccounts", ""), toggleAlwaysOnlineAccounts);
+    LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.ToggleAlwaysOnlineChars", ""), toggleAlwaysOnlineChars);
 
-    for (string& nm : toggleAlwaysOnlineAccounts)
-        transform(nm.begin(), nm.end(), nm.begin(), ::toupper);
+    for (std::string& nm : toggleAlwaysOnlineAccounts)
+        std::transform(nm.begin(), nm.end(), nm.begin(), toupper);
 
-    for (string& nm : toggleAlwaysOnlineChars)
+    for (std::string& nm : toggleAlwaysOnlineChars)
     {
-        transform(nm.begin(), nm.end(), nm.begin(), ::tolower);
+        std::transform(nm.begin(), nm.end(), nm.begin(), tolower);
         nm[0] = toupper(nm[0]);
     }
 
@@ -575,9 +573,9 @@ bool PlayerbotAIConfig::IsInPvpProhibitedZone(uint32 id)
 	return find(pvpProhibitedZoneIds.begin(), pvpProhibitedZoneIds.end(), id) != pvpProhibitedZoneIds.end();
 }
 
-string PlayerbotAIConfig::GetValue(string name)
+std::string PlayerbotAIConfig::GetValue(std::string name)
 {
-    ostringstream out;
+    std::ostringstream out;
 
     if (name == "GlobalCooldown")
         out << globalCoolDown;
@@ -614,9 +612,9 @@ string PlayerbotAIConfig::GetValue(string name)
     return out.str();
 }
 
-void PlayerbotAIConfig::SetValue(string name, string value)
+void PlayerbotAIConfig::SetValue(std::string name, std::string value)
 {
-    istringstream out(value, istringstream::in);
+    std::istringstream out(value, std::istringstream::in);
 
     if (name == "GlobalCooldown")
         out >> globalCoolDown;
@@ -665,7 +663,7 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
             bool accountAlwaysOnline = allCharsOnline;
 
             Field* fields = results->Fetch();
-            string accountName = fields[0].GetString();
+            std::string accountName = fields[0].GetString();
             uint32 accountId = fields[1].GetUInt32();
 
             if (std::find(toggleAlwaysOnlineAccounts.begin(), toggleAlwaysOnlineAccounts.end(), accountName) != toggleAlwaysOnlineAccounts.end())
@@ -680,7 +678,7 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
                 bool charAlwaysOnline = allCharsOnline;
 
                 Field* fields = result->Fetch();
-                string charName = fields[0].GetString();
+                std::string charName = fields[0].GetString();
                 uint32 guid = fields[1].GetUInt32();
 
                 uint32 always = sRandomPlayerbotMgr.GetValue(guid, "always");
@@ -692,7 +690,7 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
                     charAlwaysOnline = !charAlwaysOnline;
 
                 if(charAlwaysOnline || accountAlwaysOnline || always)
-                    freeAltBots.push_back(make_pair(accountId, guid));
+                    freeAltBots.push_back(std::make_pair(accountId, guid));
 
             } while (result->NextRow());
         
@@ -716,7 +714,7 @@ std::string PlayerbotAIConfig::GetTimestampStr()
     return std::string(buf);
 }
 
-bool PlayerbotAIConfig::openLog(string fileName, char const* mode)
+bool PlayerbotAIConfig::openLog(std::string fileName, char const* mode)
 {
     if (!hasLog(fileName))
         return false;
@@ -724,7 +722,7 @@ bool PlayerbotAIConfig::openLog(string fileName, char const* mode)
     auto logFileIt = logFiles.find(fileName);
     if (logFileIt == logFiles.end())
     {
-        logFiles.insert(make_pair(fileName, make_pair(nullptr, false)));
+        logFiles.insert(make_pair(fileName, std::make_pair(nullptr, false)));
         logFileIt = logFiles.find(fileName);
     }
 
@@ -734,7 +732,7 @@ bool PlayerbotAIConfig::openLog(string fileName, char const* mode)
     if (fileOpen) //close log file
         fclose(file);
 
-    string m_logsDir = sConfig.GetStringDefault("LogsDir");
+    std::string m_logsDir = sConfig.GetStringDefault("LogsDir");
     if (!m_logsDir.empty())
     {
         if ((m_logsDir.at(m_logsDir.length() - 1) != '/') && (m_logsDir.at(m_logsDir.length() - 1) != '\\'))
@@ -751,7 +749,7 @@ bool PlayerbotAIConfig::openLog(string fileName, char const* mode)
     return true;
 }
 
-void PlayerbotAIConfig::log(string fileName, const char* str, ...)
+void PlayerbotAIConfig::log(std::string fileName, const char* str, ...)
 {
     if (!str)
         return;
@@ -774,21 +772,21 @@ void PlayerbotAIConfig::log(string fileName, const char* str, ...)
     fflush(stdout);
 }
 
-void PlayerbotAIConfig::logEvent(PlayerbotAI* ai, string eventName, string info1, string info2)
+void PlayerbotAIConfig::logEvent(PlayerbotAI* ai, std::string eventName, std::string info1, std::string info2)
 {
     if (hasLog("bot_events.csv"))
     {
         Player* bot = ai->GetBot();
 
-        ostringstream out;
+        std::ostringstream out;
         out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
         out << bot->GetName() << ",";
         out << eventName << ",";
         out << std::fixed << std::setprecision(2);
         WorldPosition(bot).printWKT(out);
 
-        out << to_string(bot->getRace()) << ",";
-        out << to_string(bot->getClass()) << ",";
+        out << std::to_string(bot->getRace()) << ",";
+        out << std::to_string(bot->getClass()) << ",";
         float subLevel = ((float)bot->GetLevel() + (bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) ? ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)) : 0));
 
         out << subLevel << ",";
@@ -800,9 +798,9 @@ void PlayerbotAIConfig::logEvent(PlayerbotAI* ai, string eventName, string info1
     }
 };
 
-void PlayerbotAIConfig::logEvent(PlayerbotAI* ai, string eventName, ObjectGuid guid, string info2)
+void PlayerbotAIConfig::logEvent(PlayerbotAI* ai, std::string eventName, ObjectGuid guid, std::string info2)
 {
-    string info1 = "";
+    std::string info1 = "";
 
     Unit* victim;
     if (guid)
@@ -815,7 +813,7 @@ void PlayerbotAIConfig::logEvent(PlayerbotAI* ai, string eventName, ObjectGuid g
     logEvent(ai, eventName, info1, info2);
 };
 
-bool PlayerbotAIConfig::CanLogAction(PlayerbotAI* ai, string actionName, bool isExecute, string lastActionName)
+bool PlayerbotAIConfig::CanLogAction(PlayerbotAI* ai, std::string actionName, bool isExecute, std::string lastActionName)
 {
     bool forRpg = (actionName.find("rpg") == 0) && ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT);
 

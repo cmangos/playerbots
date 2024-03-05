@@ -135,9 +135,9 @@ bool BotUseItemSpell::OpenLockCheck()
     return false;
 }
 
-vector<uint32> ParseItems(const string& text)
+std::vector<uint32> ParseItems(const std::string& text)
 {
-    vector<uint32> itemIds;
+    std::vector<uint32> itemIds;
 
     uint8 pos = 0;
     while (true)
@@ -155,7 +155,7 @@ vector<uint32> ParseItems(const string& text)
             break;
         }
 
-        string idC = text.substr(pos, endPos - pos);
+        std::string idC = text.substr(pos, endPos - pos);
         uint32 id = atol(idC.c_str());
         pos = endPos;
         if (id)
@@ -187,25 +187,25 @@ bool IsDrink(ItemPrototype const* proto)
 bool UseItemAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string name = event.getParam();
+    std::string name = event.getParam();
     if (name.empty())
     {
         name = getName();
     }
 
-    list<Item*> items = AI_VALUE2(list<Item*>, "inventory items", name);
-    list<ObjectGuid> gos = chat->parseGameobjects(name);
+    std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", name);
+    std::list<ObjectGuid> gos = chat->parseGameobjects(name);
 
     if (gos.empty())
     {
         if (items.size() > 1)
         {
-            list<Item*>::iterator i = items.begin();
+            std::list<Item*>::iterator i = items.begin();
             Item* item = *i++;
             Item* itemTarget = *i;
 
             // Check if the items are in the correct order
-            const vector<uint32> itemIds = ParseItems(name);
+            const std::vector<uint32> itemIds = ParseItems(name);
             if(!itemIds.empty() && item->GetEntry() != *itemIds.begin())
             {
                 // Swap items to match command order
@@ -272,7 +272,7 @@ bool UseItemAction::UseGameObject(Player* requester, ObjectGuid guid)
     *packet << guid;
     bot->GetSession()->QueuePacket(std::move(packet));
     
-   ostringstream out; out << "Using " << chat->formatGameobject(go);
+   std::ostringstream out; out << "Using " << chat->formatGameobject(go);
    ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
    return true;
 }
@@ -320,7 +320,7 @@ bool UseItemAction::UseItemAuto(Player* requester, Item* item)
             packet << questid;
             packet << uint32(0);
             bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(packet);
-            ostringstream out; out << "Got quest " << chat->formatQuest(qInfo);
+            std::ostringstream out; out << "Got quest " << chat->formatQuest(qInfo);
             ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             return true;
         }
@@ -366,7 +366,7 @@ bool UseItemAction::UseItemAuto(Player* requester, Item* item)
         float p;
         if (isDrink && isFood)
         {
-            p = min(hp, mp);
+            p = std::min(hp, mp);
             TellConsumableUse(requester, item, "Feasting", p);
         }
         else if (isDrink)
@@ -492,9 +492,9 @@ bool UseItemAction::UseItem(Player* requester, Item* item, ObjectGuid goGuid, It
 
     bool targetSelected = false;
 
-    map<string, string> replyArgs;
+    std::map<std::string, std::string> replyArgs;
     replyArgs["%target"] = chat->formatItem(item);
-    ostringstream replyStr; replyStr << BOT_TEXT("use_command");
+    std::ostringstream replyStr; replyStr << BOT_TEXT("use_command");
 
     if ((int)item->GetProto()->Stackable > 1)
     {
@@ -676,7 +676,7 @@ bool UseItemAction::UseItem(Player* requester, Item* item, ObjectGuid goGuid, It
             packet << uint32(0);
             bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(packet);
 
-            map<string, string> args;
+            std::map<std::string, std::string> args;
             args["%quest"] = chat->formatQuest(qInfo);
             ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_quest_accepted", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             return true;
@@ -775,9 +775,9 @@ bool UseItemAction::UseItem(Player* requester, Item* item, ObjectGuid goGuid, It
     return true;
 }
 
-void UseItemAction::TellConsumableUse(Player* requester, Item* item, string action, float percent)
+void UseItemAction::TellConsumableUse(Player* requester, Item* item, std::string action, float percent)
 {
-    ostringstream out;
+    std::ostringstream out;
     out << action << " " << chat->formatItem(item);
     if ((int)item->GetProto()->Stackable > 1) out << "/x" << item->GetCount();
     out << " (" << round(percent) << "%)";
@@ -833,7 +833,7 @@ bool UseItemAction::SocketItem(Player* requester, Item* item, Item* gem, bool re
 
    if (fits)
    {
-      ostringstream out; out << "Socketing " << chat->formatItem(item);
+      std::ostringstream out; out << "Socketing " << chat->formatItem(item);
       out << " with " << chat->formatItem(gem);
       ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 
@@ -854,18 +854,18 @@ bool UseItemIdAction::Execute(Event& event)
     {
         itemId = GetItemId();
         target = GetTarget();
-        string params = event.getParam();
-        list<ObjectGuid> gos = chat->parseGameobjects(params);
+        std::string params = event.getParam();
+        std::list<ObjectGuid> gos = chat->parseGameobjects(params);
         if (!gos.empty())
             GameObject* go = ai->GetGameObject(*gos.begin());
     }
     else
     {
-        vector<string> params = getMultiQualifiers(getQualifier(), ",");
+        std::vector<std::string> params = getMultiQualifiers(getQualifier(), ",");
         itemId = stoi(params[0]);
         if (params.size() > 1)
         {
-            list<GuidPosition> guidPs = AI_VALUE(list<GuidPosition>, params[1]);
+            std::list<GuidPosition> guidPs = AI_VALUE(std::list<GuidPosition>, params[1]);
             if (!guidPs.empty())
             {
                 GuidPosition guidP = *guidPs.begin();
@@ -969,7 +969,7 @@ bool UseItemIdAction::CastItemSpell(uint32 itemId, Unit* target, GameObject* goT
 
     if (!ai->HasCheat(BotCheatMask::item)) //If bot has no item cheat it needs an item to cast.
     {
-        list<Item*> items = AI_VALUE2(list<Item*>, "inventory items", chat->formatQItem(itemId));
+        std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", chat->formatQItem(itemId));
 
         if (items.empty())
             return false;
@@ -1057,7 +1057,7 @@ bool UseItemIdAction::isUseful()
     const ItemPrototype* proto = sObjectMgr.GetItemPrototype(GetItemId());
     if (proto)
     {
-        set<uint32>& skipSpells = AI_VALUE(set<uint32>&, "skip spells list");
+        std::set<uint32>& skipSpells = AI_VALUE(std::set<uint32>&, "skip spells list");
         if(!skipSpells.empty())
         {
             for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
@@ -1145,8 +1145,8 @@ bool UseRandomRecipeAction::isUseful()
 
 bool UseRandomRecipeAction::Execute(Event& event)
 {
-    list<Item*> recipes = AI_VALUE2(list<Item*>, "inventory items", "recipe");   
-    string recipeName = "";
+    std::list<Item*> recipes = AI_VALUE2(std::list<Item*>, "inventory items", "recipe");   
+    std::string recipeName = "";
     for (auto& recipe : recipes)
     {
         recipeName = recipe->GetProto()->Name1;
@@ -1172,7 +1172,7 @@ bool UseRandomQuestItemAction::Execute(Event& event)
     Unit* unitTarget = nullptr;
     ObjectGuid goTarget = ObjectGuid();
 
-    list<Item*> questItems = AI_VALUE2(list<Item*>, "inventory items", "quest");
+    std::list<Item*> questItems = AI_VALUE2(std::list<Item*>, "inventory items", "quest");
     if (questItems.empty())
         return false;
 
@@ -1200,7 +1200,7 @@ bool UseRandomQuestItemAction::Execute(Event& event)
         {
             SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(spellId);
 
-            list<ObjectGuid> npcs = AI_VALUE(list<ObjectGuid>, ("nearest npcs"));
+            std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, ("nearest npcs"));
             for (auto& npc : npcs)
             {
                 Unit* unit = ai->GetUnit(npc);
@@ -1212,7 +1212,7 @@ bool UseRandomQuestItemAction::Execute(Event& event)
                 }
             }
 
-            list<ObjectGuid> gos = AI_VALUE(list<ObjectGuid>, ("nearest game objects"));
+            std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, ("nearest game objects"));
             for (auto& go : gos)
             {
                 GameObject* gameObject = ai->GetGameObject(go);

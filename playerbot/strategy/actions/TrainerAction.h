@@ -10,9 +10,9 @@ namespace ai
         virtual bool Execute(Event& event) override;
 
     private:
-        typedef void (TrainerAction::*TrainerSpellAction)(uint32, TrainerSpell const*, ostringstream& msg);
+        typedef void (TrainerAction::*TrainerSpellAction)(uint32, TrainerSpell const*, std::ostringstream& msg);
         void Iterate(Player* requester, Creature* creature, TrainerSpellAction action, SpellIds& spells);
-        void Learn(uint32 cost, TrainerSpell const* tSpell, ostringstream& msg);
+        void Learn(uint32 cost, TrainerSpell const* tSpell, std::ostringstream& msg);
         void TellHeader(Player* requester, Creature* creature);
         void TellFooter(Player* requester, uint32 totalCost);
     };

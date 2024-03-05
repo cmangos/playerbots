@@ -44,9 +44,9 @@ private:
     float i_range;
 };
 
-list<ObjectGuid> NearestGameObjects::Calculate()
+std::list<ObjectGuid> NearestGameObjects::Calculate()
 {
-    list<GameObject*> targets;
+    std::list<GameObject*> targets;
 
     if (!qualifier.empty())
     {
@@ -62,8 +62,8 @@ list<ObjectGuid> NearestGameObjects::Calculate()
         Cell::VisitAllObjects((const WorldObject*)bot, searcher, range);
     }
 
-    list<ObjectGuid> result;
-    for(list<GameObject*>::iterator tIter = targets.begin(); tIter != targets.end(); ++tIter)
+    std::list<ObjectGuid> result;
+    for(std::list<GameObject*>::iterator tIter = targets.begin(); tIter != targets.end(); ++tIter)
     {
 		GameObject* go = *tIter;
         if(ignoreLos || sServerFacade.IsWithinLOSInMap(bot, go))
@@ -73,9 +73,9 @@ list<ObjectGuid> NearestGameObjects::Calculate()
     return result;
 }
 
-list<ObjectGuid> NearestDynamicObjects::Calculate()
+std::list<ObjectGuid> NearestDynamicObjects::Calculate()
 {
-    list<DynamicObject*> targets;
+    std::list<DynamicObject*> targets;
 
     // Remove this when updating wotlk core
 #ifndef MANGOSBOT_TWO
@@ -84,8 +84,8 @@ list<ObjectGuid> NearestDynamicObjects::Calculate()
     Cell::VisitAllObjects((const WorldObject*)bot, searcher, range);
 #endif
 
-    list<ObjectGuid> result;
-    for (list<DynamicObject*>::iterator tIter = targets.begin(); tIter != targets.end(); ++tIter)
+    std::list<ObjectGuid> result;
+    for (std::list<DynamicObject*>::iterator tIter = targets.begin(); tIter != targets.end(); ++tIter)
     {
         DynamicObject* go = *tIter;
         if (ignoreLos || sServerFacade.IsWithinLOSInMap(bot, go))

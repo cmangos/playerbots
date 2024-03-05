@@ -1,6 +1,6 @@
 
 #include "playerbot/playerbot.h"
-#include "../Strategy.h"
+#include "playerbot/strategy/Strategy.h"
 #include "DKActions.h"
 #include "DKAiObjectContext.h"
 #include "FrostDKStrategy.h"
@@ -8,9 +8,9 @@
 #include "GenericDKNonCombatStrategy.h"
 #include "DKReactionStrategy.h"
 #include "UnholyDKStrategy.h"
-#include "../generic/PullStrategy.h"
+#include "playerbot/strategy/generic/PullStrategy.h"
 #include "DKTriggers.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 
 using namespace ai;
 

@@ -4,8 +4,6 @@
 #include "Talentspec.h"
 #include "Globals/SharedDefines.h"
 
-using namespace std;
-
 class Player;
 class PlayerbotMgr;
 class ChatHandler;
@@ -35,7 +33,7 @@ private:
     std::string m_filename;
     std::unordered_map<std::string, std::string> m_entries; // keys are converted to lower case.  values cannot be.
 public:
-    std::vector<string> GetValues(const std::string& name) const;
+    std::vector<std::string> GetValues(const std::string& name) const;
 
     std::mutex m_configLock;
 };
@@ -80,8 +78,8 @@ public:
     std::list<uint32> randomBotQuestIds;
     std::list<uint32> immuneSpellIds;
     std::list<std::pair<uint32, uint32>> freeAltBots;
-    std::list<string> toggleAlwaysOnlineAccounts;
-    std::list<string> toggleAlwaysOnlineChars;
+    std::list<std::string> toggleAlwaysOnlineAccounts;
+    std::list<std::string> toggleAlwaysOnlineChars;
     uint32 randomBotTeleportDistance;
     bool randomBotTeleportNearPlayer;
     uint32 randomBotTeleportNearPlayerMaxAmount;
@@ -122,7 +120,7 @@ public:
     uint32 randomBotMinLevel, randomBotMaxLevel;
     float randomChangeMultiplier;
     uint32 specProbability[MAX_CLASSES][10];
-    string premadeLevelSpec[MAX_CLASSES][10][91]; //lvl 10 - 100
+    std::string premadeLevelSpec[MAX_CLASSES][10][91]; //lvl 10 - 100
     uint32 classRaceProbabilityTotal;
     uint32 classRaceProbability[MAX_CLASSES][MAX_RACES];
     ClassSpecs classSpecs[MAX_CLASSES];
@@ -208,12 +206,12 @@ public:
 
     std::mutex m_logMtx;
 
-    std::list<string> allowedLogFiles;
-    std::list<string> debugFilter;
+    std::list<std::string> allowedLogFiles;
+    std::list<std::string> debugFilter;
 
     std::unordered_map <std::string, std::pair<FILE*, bool>> logFiles;
 
-    std::list<string> botCheats;
+    std::list<std::string> botCheats;
     uint32 botCheatMask = 0;
 
     struct worldBuff{
@@ -225,7 +223,7 @@ public:
         uint32 maxLevel = 0;
     };
 
-    vector<worldBuff> worldBuffs;
+    std::vector<worldBuff> worldBuffs;
 
     int commandServerPort;
     bool perfMonEnabled;
@@ -237,15 +235,15 @@ public:
 
     std::string GetTimestampStr();
 
-    bool hasLog(string fileName) { return std::find(allowedLogFiles.begin(), allowedLogFiles.end(), fileName) != allowedLogFiles.end(); };
-    bool openLog(string fileName, char const* mode = "a");
-    bool isLogOpen(string fileName) { auto it = logFiles.find(fileName); return it != logFiles.end() && it->second.second;}
-    void log(string fileName, const char* str, ...);
+    bool hasLog(std::string fileName) { return std::find(allowedLogFiles.begin(), allowedLogFiles.end(), fileName) != allowedLogFiles.end(); };
+    bool openLog(std::string fileName, char const* mode = "a");
+    bool isLogOpen(std::string fileName) { auto it = logFiles.find(fileName); return it != logFiles.end() && it->second.second;}
+    void log(std::string fileName, const char* str, ...);
 
-    void logEvent(PlayerbotAI* ai, string eventName, string info1 = "", string info2 = "");
-    void logEvent(PlayerbotAI* ai, string eventName, ObjectGuid guid, string info2);
+    void logEvent(PlayerbotAI* ai, std::string eventName, std::string info1 = "", std::string info2 = "");
+    void logEvent(PlayerbotAI* ai, std::string eventName, ObjectGuid guid, std::string info2);
 
-    bool CanLogAction(PlayerbotAI* ai, string actionName, bool isExecute, string lastActionName);
+    bool CanLogAction(PlayerbotAI* ai, std::string actionName, bool isExecute, std::string lastActionName);
 private:
     Config config;
 };

@@ -4,7 +4,6 @@
 #include "TargetValue.h"
 
 using namespace ai;
-using namespace std;
 
 class FindLeastHpTargetStrategy : public FindNonCcTargetStrategy
 {

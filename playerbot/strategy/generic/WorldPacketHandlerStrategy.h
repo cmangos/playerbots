@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         WorldPacketHandlerStrategy(PlayerbotAI* ai);
-        string getName() override { return "default"; }
+        std::string getName() override { return "default"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -19,7 +19,7 @@ namespace ai
     {
     public:
         ReadyCheckStrategy(PlayerbotAI* ai) : PassTroughStrategy(ai) {}
-        string getName() override { return "ready check"; }
+        std::string getName() override { return "ready check"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;

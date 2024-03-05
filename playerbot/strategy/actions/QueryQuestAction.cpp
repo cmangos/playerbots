@@ -31,7 +31,7 @@ bool QueryQuestAction::Execute(Event& event)
             if (!quest)
                 continue;
 
-            if (text.find(quest->GetTitle()) != string::npos)
+            if (text.find(quest->GetTitle()) != std::string::npos)
             {
                 questId = quest->GetQuestId();
                 break;
@@ -47,7 +47,7 @@ bool QueryQuestAction::Execute(Event& event)
         if(questId != bot->GetQuestSlotQuestId(slot))
             continue;
 
-        ostringstream out;
+        std::ostringstream out;
         out << "--- " << chat->formatQuest(sObjectMgr.GetQuestTemplate(questId)) << " ";
         if (bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE)
         {
@@ -64,7 +64,7 @@ bool QueryQuestAction::Execute(Event& event)
         if (travel)
         {
             uint32 limit = 0;
-            vector<TravelDestination*> allDestinations = sTravelMgr.getQuestTravelDestinations(bot, questId, true, true, -1);
+            std::vector<TravelDestination*> allDestinations = sTravelMgr.getQuestTravelDestinations(bot, questId, true, true, -1);
 
             std::sort(allDestinations.begin(), allDestinations.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->distanceTo(botPos) < j->distanceTo(botPos); });
 
@@ -73,7 +73,7 @@ bool QueryQuestAction::Execute(Event& event)
                 if (limit > 50)
                     continue;
 
-                ostringstream out;
+                std::ostringstream out;
 
                 uint32 tpoints = dest->getPoints(true).size();
                 uint32 apoints = dest->getPoints().size();
@@ -142,7 +142,7 @@ void QueryQuestAction::TellObjectives(Player* requester, uint32 questId)
     }
 }
 
-void QueryQuestAction::TellObjective(Player* requester, const string& name, int available, int required)
+void QueryQuestAction::TellObjective(Player* requester, const std::string& name, int available, int required)
 {
     ai->TellPlayer(requester, chat->formatQuestObjective(name, available, required), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 }

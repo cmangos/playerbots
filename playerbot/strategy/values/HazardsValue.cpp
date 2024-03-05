@@ -1,7 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "HazardsValue.h"
-#include "../AiObjectContext.h"
+#include "playerbot/strategy/AiObjectContext.h"
 #include "MotionGenerators/PathFinder.h"
 
 using namespace ai;

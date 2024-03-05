@@ -3,18 +3,18 @@
 #include "playerbot/strategy/values/CraftValues.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "GenericActions.h"
-#include "../../RandomItemMgr.h"
+#include "playerbot/RandomItemMgr.h"
 
 namespace ai
 {
     class CastCustomSpellAction : public ChatCommandAction, public Qualified
     {
     public:
-        CastCustomSpellAction(PlayerbotAI* ai, string name = "cast") : ChatCommandAction(ai, name), Qualified() {}
+        CastCustomSpellAction(PlayerbotAI* ai, std::string name = "cast") : ChatCommandAction(ai, name), Qualified() {}
         virtual bool Execute(Event& event) override;
-        virtual string castString(WorldObject* target) { return "cast"; }
+        virtual std::string castString(WorldObject* target) { return "cast"; }
         virtual uint32 getDuration() const { return 3000U; }
-        virtual string GetTargetName() override { return "current target"; }
+        virtual std::string GetTargetName() override { return "current target"; }
     private:
 
         bool CastSummonPlayer(Player* requester, std::string command);
@@ -26,15 +26,15 @@ namespace ai
     class CastCustomNcSpellAction : public CastCustomSpellAction
     {
     public:
-        CastCustomNcSpellAction(PlayerbotAI* ai, string name = "cast custom nc spell") : CastCustomSpellAction(ai, name) {}
+        CastCustomNcSpellAction(PlayerbotAI* ai, std::string name = "cast custom nc spell") : CastCustomSpellAction(ai, name) {}
         virtual bool isUseful() { return !bot->IsMoving(); }
-        virtual string castString(WorldObject* target) { return "castnc" +(target ? " "+ chat->formatWorldobject(target):""); }
+        virtual std::string castString(WorldObject* target) { return "castnc" +(target ? " "+ chat->formatWorldobject(target):""); }
     };
 
     class CastRandomSpellAction : public ListSpellsAction
     {
     public:
-        CastRandomSpellAction(PlayerbotAI* ai, string name = "cast random spell") : ListSpellsAction(ai, name) {}
+        CastRandomSpellAction(PlayerbotAI* ai, std::string name = "cast random spell") : ListSpellsAction(ai, name) {}
 
         virtual bool AcceptSpell(const SpellEntry* pSpellInfo)
         {
@@ -66,7 +66,7 @@ namespace ai
     {
     public:
         DisenchantRandomItemAction(PlayerbotAI* ai) : CastCustomSpellAction(ai, "disenchant random item")  {}
-        virtual bool isUseful() { return ai->HasSkill(SKILL_ENCHANTING) && !bot->IsInCombat() && AI_VALUE2(uint32, "item count", "usage " + to_string((uint8)ItemUsage::ITEM_USAGE_DISENCHANT)) > 0; }
+        virtual bool isUseful() { return ai->HasSkill(SKILL_ENCHANTING) && !bot->IsInCombat() && AI_VALUE2(uint32, "item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_DISENCHANT)) > 0; }
         virtual bool Execute(Event& event) override;
     };
 

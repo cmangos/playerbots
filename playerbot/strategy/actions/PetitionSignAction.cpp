@@ -10,7 +10,6 @@
 #endif
 #endif
 
-using namespace std;
 using namespace ai;
 
 bool PetitionSignAction::Execute(Event& event)

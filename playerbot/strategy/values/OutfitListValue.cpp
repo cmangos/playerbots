@@ -3,11 +3,10 @@
 #include "OutfitListValue.h"
 
 using namespace ai;
-using namespace std;
 
-string OutfitListValue::Save()
+std::string OutfitListValue::Save()
 {
-    ostringstream out;
+    std::ostringstream out;
     bool first = true;
     for (Outfit::iterator i = value.begin(); i != value.end(); ++i)
     {
@@ -18,12 +17,12 @@ string OutfitListValue::Save()
     return out.str();
 }
 
-bool OutfitListValue::Load(string text)
+bool OutfitListValue::Load(std::string text)
 {
     value.clear();
 
-    vector<string> ss = split(text, '^');
-    for (vector<string>::iterator i = ss.begin(); i != ss.end(); ++i)
+    std::vector<std::string> ss = split(text, '^');
+    for (std::vector<std::string>::iterator i = ss.begin(); i != ss.end(); ++i)
     {
         value.push_back(*i);
     }

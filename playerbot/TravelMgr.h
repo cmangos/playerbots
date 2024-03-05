@@ -37,14 +37,14 @@ namespace ai
     public:
         TravelDestination() {}        
         TravelDestination(float radiusMin1, float radiusMax1) { radiusMin = radiusMin1; radiusMax = radiusMax1; }
-        TravelDestination(vector<WorldPosition*> points1, float radiusMin1, float radiusMax1) { points = points1;  radiusMin = radiusMin1; radiusMax = radiusMax1; }
+        TravelDestination(std::vector<WorldPosition*> points1, float radiusMin1, float radiusMax1) { points = points1;  radiusMin = radiusMin1; radiusMax = radiusMax1; }
 
         void addPoint(WorldPosition* pos) { points.push_back(pos); }
         bool hasPoint(WorldPosition* pos) { return std::find(points.begin(), points.end(), pos) != points.end(); }
         void setExpireDelay(uint32 delay) { expireDelay = delay; }
         void setCooldownDelay(uint32 delay) { cooldownDelay = delay; }
 
-        vector<WorldPosition*> getPoints(bool ignoreFull = false);
+        std::vector<WorldPosition*> getPoints(bool ignoreFull = false);
         uint32 getExpireDelay() { return expireDelay; }
         uint32 getCooldownDelay() { return cooldownDelay; }
 
@@ -52,9 +52,9 @@ namespace ai
 
         virtual bool isActive(Player* bot) { return false; }
 
-        virtual string getName() { return "TravelDestination"; }
+        virtual std::string getName() { return "TravelDestination"; }
         virtual int32 getEntry() { return 0; }
-        virtual string getTitle() { return "generic travel destination"; }
+        virtual std::string getTitle() { return "generic travel destination"; }
 
         WorldPosition* nearestPoint(WorldPosition* pos) {return nearestPoint(*pos);};
         WorldPosition* nearestPoint(WorldPosition pos);
@@ -65,11 +65,11 @@ namespace ai
         virtual bool isOut(WorldPosition pos, float radius = 0) { return !onMap(pos) || distanceTo(pos) > (radius? radius : radiusMax); }
         float getRadiusMin() { return radiusMin; }
 
-        vector<WorldPosition*> touchingPoints(WorldPosition* pos);
-        vector<WorldPosition*> sortedPoints(WorldPosition* pos);
-        vector<WorldPosition*> nextPoint(WorldPosition* pos, bool ignoreFull = true);
+        std::vector<WorldPosition*> touchingPoints(WorldPosition* pos);
+        std::vector<WorldPosition*> sortedPoints(WorldPosition* pos);
+        std::vector<WorldPosition*> nextPoint(WorldPosition* pos, bool ignoreFull = true);
     protected:
-        vector<WorldPosition*> points;
+        std::vector<WorldPosition*> points;
         float radiusMin = 0;
         float radiusMax = 0;
 
@@ -87,8 +87,8 @@ namespace ai
 
         virtual bool isActive(Player* bot) { return false; }
         
-        virtual string getName() { return "NullTravelDestination"; }
-        virtual string getTitle() { return "no destination"; }
+        virtual std::string getName() { return "NullTravelDestination"; }
+        virtual std::string getTitle() { return "no destination"; }
 
         virtual bool isIn(WorldPosition* pos) { return true; }
         virtual bool isOut(WorldPosition* pos) { return false; }
@@ -107,9 +107,9 @@ namespace ai
 
         virtual bool isActive(Player* bot) { return bot->IsActiveQuest(questId); }
         
-        virtual string getName() { return "QuestTravelDestination"; }
+        virtual std::string getName() { return "QuestTravelDestination"; }
         virtual int32 getEntry() { return 0; }
-        virtual string getTitle();
+        virtual std::string getTitle();
     protected:
         uint32 questId;
         Quest const* questTemplate;
@@ -125,9 +125,9 @@ namespace ai
 
         virtual CreatureInfo const* getCreatureInfo() { return entry > 0 ? ObjectMgr::GetCreatureTemplate(entry) : nullptr; }
 
-        virtual string getName() { return "QuestRelationTravelDestination"; }
+        virtual std::string getName() { return "QuestRelationTravelDestination"; }
         virtual int32 getEntry() { return entry; }
-        virtual string getTitle();
+        virtual std::string getTitle();
         virtual uint32 getRelation() { return relation; }
     private:
         uint32 relation;
@@ -154,11 +154,11 @@ namespace ai
 
         virtual bool isActive(Player* bot);
 
-        virtual string getName() { return "QuestObjectiveTravelDestination"; }
+        virtual std::string getName() { return "QuestObjectiveTravelDestination"; }
 
         virtual int32 getEntry() { return entry; }
 
-        virtual string getTitle();
+        virtual std::string getTitle();
 
         virtual uint32 getObjective() { return objective; }
     private:
@@ -178,9 +178,9 @@ namespace ai
 
         virtual CreatureInfo const* getCreatureInfo() { return ObjectMgr::GetCreatureTemplate(entry); }
         virtual GameObjectInfo const* getGoInfo() { return ObjectMgr::GetGameObjectInfo(-1*entry); }
-        virtual string getName() { return "RpgTravelDestination"; }
+        virtual std::string getName() { return "RpgTravelDestination"; }
         virtual int32 getEntry() { return entry; }
-        virtual string getTitle();
+        virtual std::string getTitle();
     protected:
         int32 entry;
     };
@@ -195,9 +195,9 @@ namespace ai
 
         virtual bool isActive(Player* bot);
 
-        virtual string getName() { return "ExploreTravelDestination"; }
+        virtual std::string getName() { return "ExploreTravelDestination"; }
         virtual int32 getEntry() { return 0; }
-        virtual string getTitle() { return title; }
+        virtual std::string getTitle() { return title; }
         virtual void setTitle(std::string newTitle) { title = newTitle; }
         virtual uint32 getAreaId() { return areaId; }
     protected:
@@ -215,9 +215,9 @@ namespace ai
 
         virtual bool isActive(Player* bot);
         virtual CreatureInfo const* getCreatureInfo() { return ObjectMgr::GetCreatureTemplate(entry); }
-        virtual string getName() { return "GrindTravelDestination"; }
+        virtual std::string getName() { return "GrindTravelDestination"; }
         virtual int32 getEntry() { return entry; }
-        virtual string getTitle();
+        virtual std::string getTitle();
     protected:
         int32 entry;
     };
@@ -232,9 +232,9 @@ namespace ai
 
         virtual bool isActive(Player* bot);
         virtual CreatureInfo const* getCreatureInfo() { return ObjectMgr::GetCreatureTemplate(entry); }
-        virtual string getName() { return "BossTravelDestination"; }
+        virtual std::string getName() { return "BossTravelDestination"; }
         virtual int32 getEntry() { return entry; }
-        virtual string getTitle();
+        virtual std::string getTitle();
     protected:
         int32 entry;
     };
@@ -242,9 +242,9 @@ namespace ai
     //A quest destination container for quick lookup of all destinations related to a quest.
     struct QuestContainer
     {
-        vector<QuestTravelDestination*> questGivers;
-        vector<QuestTravelDestination*> questTakers;
-        vector<QuestTravelDestination*> questObjectives;
+        std::vector<QuestTravelDestination*> questGivers;
+        std::vector<QuestTravelDestination*> questTakers;
+        std::vector<QuestTravelDestination*> questObjectives;
     };
 
     //
@@ -301,7 +301,7 @@ namespace ai
 
         float distance(Player* bot) { WorldPosition pos(bot);  return wPosition->distance(pos); };
         WorldPosition* getPosition() { return wPosition; };
-        string GetPosStr() { return wPosition->to_string(); }
+        std::string GetPosStr() { return wPosition->to_string(); }
         TravelDestination* getDestination() { return tDestination; };
         int32 getEntry() { if (!tDestination) return 0; return tDestination->getEntry(); }
         PlayerbotAI* getAi() { return ai; }
@@ -365,24 +365,24 @@ namespace ai
 
                 if (i)
                 {
-                    swap(*first, *std::next(first, i));
-                    swap(*first_weight, *std::next(first_weight, i));
+                    std::swap(*first, *std::next(first, i));
+                    std::swap(*first_weight, *std::next(first_weight, i));
                 }
                 ++first;
                 ++first_weight;
             }
         }
 
-        vector <WorldPosition*> getNextPoint(WorldPosition* center, vector<WorldPosition*> points, uint32 amount = 1);
-        vector <WorldPosition> getNextPoint(WorldPosition center, vector<WorldPosition> points, uint32 amount = 1);
+        std::vector <WorldPosition*> getNextPoint(WorldPosition* center, std::vector<WorldPosition*> points, uint32 amount = 1);
+        std::vector <WorldPosition> getNextPoint(WorldPosition center, std::vector<WorldPosition> points, uint32 amount = 1);
         QuestStatusData* getQuestStatus(Player* bot, uint32 questId);
         bool getObjectiveStatus(Player* bot, Quest const* pQuest, uint32 objective);
         uint32 getDialogStatus(Player* pPlayer, int32 questgiver, Quest const* pQuest);
-        vector<TravelDestination*> getQuestTravelDestinations(Player* bot, int32 questId = -1, bool ignoreFull = false, bool ignoreInactive = false, float maxDistance = 5000, bool ignoreObjectives = false);
-        vector<TravelDestination*> getRpgTravelDestinations(Player* bot, bool ignoreFull = false, bool ignoreInactive = false, float maxDistance = 5000);
-        vector<TravelDestination*> getExploreTravelDestinations(Player* bot, bool ignoreFull = false, bool ignoreInactive = false);
-        vector<TravelDestination*> getGrindTravelDestinations(Player* bot, bool ignoreFull = false, bool ignoreInactive = false, float maxDistance = 5000, uint32 maxCheck = 50);
-        vector<TravelDestination*> getBossTravelDestinations(Player* bot, bool ignoreFull = false, bool ignoreInactive = false, float maxDistance = 25000);
+        std::vector<TravelDestination*> getQuestTravelDestinations(Player* bot, int32 questId = -1, bool ignoreFull = false, bool ignoreInactive = false, float maxDistance = 5000, bool ignoreObjectives = false);
+        std::vector<TravelDestination*> getRpgTravelDestinations(Player* bot, bool ignoreFull = false, bool ignoreInactive = false, float maxDistance = 5000);
+        std::vector<TravelDestination*> getExploreTravelDestinations(Player* bot, bool ignoreFull = false, bool ignoreInactive = false);
+        std::vector<TravelDestination*> getGrindTravelDestinations(Player* bot, bool ignoreFull = false, bool ignoreInactive = false, float maxDistance = 5000, uint32 maxCheck = 50);
+        std::vector<TravelDestination*> getBossTravelDestinations(Player* bot, bool ignoreFull = false, bool ignoreInactive = false, float maxDistance = 25000);
 
 
         void setNullTravelTarget(Player* player);
@@ -395,14 +395,14 @@ namespace ai
         NullTravelDestination* nullTravelDestination = new NullTravelDestination();
         WorldPosition* nullWorldPosition = new WorldPosition();
 
-        void addBadVmap(uint32 mapId, int x, int y) { badVmap.push_back(make_tuple(mapId, x, y)); }
-        void addBadMmap(uint32 mapId, int x, int y) { badMmap.push_back(make_tuple(mapId, x, y)); }
-        bool isBadVmap(uint32 mapId, int x, int y) { return std::find(badVmap.begin(), badVmap.end(), make_tuple(mapId, x, y)) != badVmap.end(); }
-        bool isBadMmap(uint32 mapId, int x, int y) { return std::find(badMmap.begin(), badMmap.end(), make_tuple(mapId, x, y)) != badMmap.end(); }
+        void addBadVmap(uint32 mapId, int x, int y) { badVmap.push_back(std::make_tuple(mapId, x, y)); }
+        void addBadMmap(uint32 mapId, int x, int y) { badMmap.push_back(std::make_tuple(mapId, x, y)); }
+        bool isBadVmap(uint32 mapId, int x, int y) { return std::find(badVmap.begin(), badVmap.end(), std::make_tuple(mapId, x, y)) != badVmap.end(); }
+        bool isBadMmap(uint32 mapId, int x, int y) { return std::find(badMmap.begin(), badMmap.end(), std::make_tuple(mapId, x, y)) != badMmap.end(); }
 
 
-        void printGrid(uint32 mapId, int x, int y, string type);
-        void printObj(WorldObject* obj, string type);
+        void printGrid(uint32 mapId, int x, int y, std::string type);
+        void printObj(WorldObject* obj, std::string type);
 
         int32 getAreaLevel(uint32 area_id);
         void loadAreaLevels();
@@ -411,21 +411,21 @@ namespace ai
     protected:
         void logQuestError(uint32 errorNr, Quest* quest, uint32 objective = 0, uint32 unitId = 0, uint32 itemId = 0);
 
-        vector<uint32> avoidLoaded;
+        std::vector<uint32> avoidLoaded;
 
-        vector<QuestTravelDestination*> questGivers;
-        vector<RpgTravelDestination*> rpgNpcs;
-        vector<GrindTravelDestination*> grindMobs;
-        vector<BossTravelDestination*> bossMobs;
+        std::vector<QuestTravelDestination*> questGivers;
+        std::vector<RpgTravelDestination*> rpgNpcs;
+        std::vector<GrindTravelDestination*> grindMobs;
+        std::vector<BossTravelDestination*> bossMobs;
 
         std::unordered_map<uint32, ExploreTravelDestination*> exploreLocs;
         std::unordered_map<uint32, QuestContainer*> quests;
         std::unordered_map<uint64, GuidPosition> pointsMap;
         std::unordered_map<uint32, int32> areaLevels;
 
-        vector<tuple<uint32, int, int>> badVmap, badMmap;
+        std::vector<std::tuple<uint32, int, int>> badVmap, badMmap;
 
-        std::unordered_map<pair<uint32, uint32>, vector<mapTransfer>, boost::hash<pair<uint32, uint32>>> mapTransfersMap;
+        std::unordered_map<std::pair<uint32, uint32>, std::vector<mapTransfer>, boost::hash<std::pair<uint32, uint32>>> mapTransfersMap;
     };
 }
 

@@ -3,7 +3,7 @@
 #include "PaladinActions.h"
 #include "PaladinTriggers.h"
 #include "PaladinAiObjectContext.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 #include "HolyPaladinStrategy.h"
 #include "ProtectionPaladinStrategy.h"
 #include "RetributionPaladinStrategy.h"

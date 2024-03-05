@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Strategy.h"
-#include "../generic/NonCombatStrategy.h"
+#include "playerbot/strategy/Strategy.h"
+#include "playerbot/strategy/generic/NonCombatStrategy.h"
 
 namespace ai
 {
@@ -9,7 +9,7 @@ namespace ai
     {
     public:
         PriestNonCombatStrategy(PlayerbotAI* ai);
-        string getName() override { return "nc"; }
+        std::string getName() override { return "nc"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -19,7 +19,7 @@ namespace ai
     {
     public:
         PriestBuffStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai) {}
-        string getName() override { return "buff"; }
+        std::string getName() override { return "buff"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -29,7 +29,7 @@ namespace ai
     {
     public:
         PriestShadowResistanceStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai) {}
-        string getName() override { return "rshadow"; }
+        std::string getName() override { return "rshadow"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;

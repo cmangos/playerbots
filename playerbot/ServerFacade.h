@@ -14,8 +14,6 @@
 #include "PlayerbotAIBase.h"
 #include "playerbot/PlayerbotAIConfig.h"
 
-using namespace std;
-
 class ServerFacade
 {
     public:

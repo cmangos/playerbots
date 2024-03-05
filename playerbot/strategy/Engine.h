@@ -65,25 +65,25 @@ namespace ai
         Engine(PlayerbotAI* ai, AiObjectContext *factory, BotState state);
 
 	    void Init();
-        void addStrategy(const string& name);
-		void addStrategies(string first, ...);
-        bool removeStrategy(const string& name, bool init = true);
-        bool HasStrategy(const string& name);
-        Strategy* GetStrategy(const string& name) const;
+        void addStrategy(const std::string& name);
+		void addStrategies(std::string first, ...);
+        bool removeStrategy(const std::string& name, bool init = true);
+        bool HasStrategy(const std::string& name);
+        Strategy* GetStrategy(const std::string& name) const;
         void removeAllStrategies();
-        void toggleStrategy(const string& name);
+        void toggleStrategy(const std::string& name);
         std::string ListStrategies();
-        list<string_view> GetStrategies();
+        std::list<std::string_view> GetStrategies();
 		bool ContainsStrategy(StrategyType type);
-		void ChangeStrategy(const string& names);
-		void PrintStrategies(Player* requester, const string& engineType);
-        string GetLastAction() { return lastAction; }
+		void ChangeStrategy(const std::string& names);
+		void PrintStrategies(Player* requester, const std::string& engineType);
+        std::string GetLastAction() { return lastAction; }
         const Action* GetLastExecutedAction() const { return lastExecutedAction; }
 
     public:
 	    virtual bool DoNextAction(Unit*, int depth, bool minimal, bool isStunned);
-	    ActionResult ExecuteAction(const string& name, Event& event);
-        bool CanExecuteAction(const string& name, bool isUseful = true, bool isPossible = true);
+	    ActionResult ExecuteAction(const std::string& name, Event& event);
+        bool CanExecuteAction(const std::string& name, bool isUseful = true, bool isPossible = true);
 
     public:
         void AddActionExecutionListener(ActionExecutionListener* listener)
@@ -104,7 +104,7 @@ namespace ai
         void ProcessTriggers(bool minimal);
         void PushDefaultActions();
         void PushAgain(ActionNode* actionNode, float relevance, const Event& event);
-        ActionNode* CreateActionNode(const string& name);
+        ActionNode* CreateActionNode(const std::string& name);
         virtual Action* InitializeAction(ActionNode* actionNode);
         virtual bool ListenAndExecute(Action* action, Event& event);
 
@@ -117,7 +117,7 @@ namespace ai
 	    std::list<TriggerNode*> triggers;
         std::list<Multiplier*> multipliers;
         AiObjectContext* aiObjectContext;
-        std::map<string, Strategy*> strategies;
+        std::map<std::string, Strategy*> strategies;
         float lastRelevance;
         std::string lastAction;
         ActionExecutionListeners actionExecutionListeners;

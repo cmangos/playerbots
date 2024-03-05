@@ -1,5 +1,5 @@
 #pragma once
-#include "../Strategy.h"
+#include "playerbot/strategy/Strategy.h"
 
 namespace ai
 {
@@ -8,13 +8,13 @@ namespace ai
     public:
         FollowMasterStrategy(PlayerbotAI* ai) : Strategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
-        string getName() override { return "follow"; }
+        std::string getName() override { return "follow"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "follow"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "follow"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy will make the bot stay near the master";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "stay", "runaway","flee from adds", "guard", "free"}; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "stay", "runaway","flee from adds", "guard", "free"}; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
@@ -31,13 +31,13 @@ namespace ai
     public:
         FreeStrategy(PlayerbotAI* ai) : Strategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
-        string getName() override { return "free"; }
+        std::string getName() override { return "free"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "free"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "free"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy will allow the bot to move freely";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "follow", "stay", "runaway","flee from adds", "guard" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "follow", "stay", "runaway","flee from adds", "guard" }; }
 #endif
     };
 
@@ -45,13 +45,13 @@ namespace ai
     {
     public:
         FollowJumpStrategy(PlayerbotAI* ai) : Strategy(ai) {};
-        string getName() override { return "follow jump"; }
+        std::string getName() override { return "follow jump"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "follow jump"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "follow jump"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy makes bot jump when following.\n";
         }
-        virtual vector<string> GetRelatedStrategies() { return { "follow" }; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "follow" }; }
 #endif
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;

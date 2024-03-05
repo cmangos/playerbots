@@ -2,8 +2,6 @@
 #include "Config/Config.h"
 #include "Entities/ItemPrototype.h"
 
-using namespace std;
-
 namespace ahbot
 {
     class Category;
@@ -14,8 +12,8 @@ namespace ahbot
         PricingStrategy(Category* category) : category(category) {}
 
     public:
-        virtual uint32 GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket = false, ostringstream *explain = NULL);
-        virtual uint32 GetBuyPrice(ItemPrototype const* proto, uint32 auctionHouse, ostringstream *explain = NULL);
+        virtual uint32 GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket = false, std::ostringstream *explain = NULL);
+        virtual uint32 GetBuyPrice(ItemPrototype const* proto, uint32 auctionHouse, std::ostringstream *explain = NULL);
         double GetMarketPrice(uint32 itemId, uint32 auctionHouse);
         virtual double GetRarityPriceMultiplier(uint32 itemId);
         virtual double GetLevelPriceMultiplier(ItemPrototype const* proto);
@@ -28,7 +26,7 @@ namespace ahbot
         virtual double GetCategoryPriceMultiplier(uint32 untilTime, uint32 auctionHouse);
         virtual double GetItemPriceMultiplier(ItemPrototype const* proto, uint32 untilTime, uint32 auctionHouse);
         double GetMultiplier(double count, double firstBuyTime, double lastBuyTime);
-        double CalculatePrice(ostringstream *explain, ...);
+        double CalculatePrice(std::ostringstream *explain, ...);
 
     protected:
         Category* category;
@@ -40,14 +38,14 @@ namespace ahbot
         BuyOnlyRarePricingStrategy(Category* category) : PricingStrategy(category) {}
 
     public:
-        virtual uint32 GetBuyPrice(ItemPrototype const* proto, uint32 auctionHouse, ostringstream *explain = NULL);
-        virtual uint32 GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket = false, ostringstream *explain = NULL);
+        virtual uint32 GetBuyPrice(ItemPrototype const* proto, uint32 auctionHouse, std::ostringstream *explain = NULL);
+        virtual uint32 GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket = false, std::ostringstream *explain = NULL);
     };
 
     class PricingStrategyFactory
     {
     public:
-        static PricingStrategy* Create(string name, Category* category)
+        static PricingStrategy* Create(std::string name, Category* category)
         {
             if (name == "buyOnlyRare")
                 return new BuyOnlyRarePricingStrategy(category);

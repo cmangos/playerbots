@@ -87,7 +87,7 @@ bool SeeSpellAction::Execute(Event& event)
         float y = spellPosition.getY();
         float z = spellPosition.getZ();
 
-        ostringstream out;
+        std::ostringstream out;
 
         if (spellPosition.isOutside())
             out << "[outside]";
@@ -116,7 +116,7 @@ bool SeeSpellAction::Execute(Event& event)
 
     bool selected = AI_VALUE(bool, "RTSC selected");
     bool inRange = spellPosition.distance(bot) <= 10;
-    string nextAction = AI_VALUE(string, "RTSC next spell action");
+    std::string nextAction = AI_VALUE(std::string, "RTSC next spell action");
 
     if (nextAction.empty())
     {
@@ -138,7 +138,7 @@ bool SeeSpellAction::Execute(Event& event)
     }
     else if (nextAction == "jump")
     {
-        RESET_AI_VALUE(string, "RTSC next spell action");
+        RESET_AI_VALUE(std::string, "RTSC next spell action");
         SET_AI_VALUE2(WorldPosition, "RTSC saved location", "jump", spellPosition);
         bool success = ai->DoSpecificAction("jump::rtsc", Event(), true);
         if (!success)
@@ -146,7 +146,7 @@ bool SeeSpellAction::Execute(Event& event)
             RESET_AI_VALUE2(WorldPosition, "RTSC saved location", "jump");
             RESET_AI_VALUE2(WorldPosition, "RTSC saved location", "jump point");
             ai->ChangeStrategy("-rtsc jump", BotState::BOT_STATE_NON_COMBAT);
-            ostringstream out;
+            std::ostringstream out;
             out << "Can't find a way to jump!";
             ai->TellError(requester, out.str());
             return false;
@@ -166,7 +166,7 @@ bool SeeSpellAction::Execute(Event& event)
                 RESET_AI_VALUE2(WorldPosition, "RTSC saved location", "jump");
                 RESET_AI_VALUE2(WorldPosition, "RTSC saved location", "jump point");
                 ai->ChangeStrategy("-rtsc jump", BotState::BOT_STATE_NON_COMBAT);
-                ostringstream out;
+                std::ostringstream out;
                 out << "Can't move to jump position!";
                 ai->TellError(requester, out.str());
                 return false;
@@ -177,7 +177,7 @@ bool SeeSpellAction::Execute(Event& event)
     }
     else if (nextAction.find("save ") != std::string::npos)
     {
-        string locationName;
+        std::string locationName;
         if (nextAction.find("save selected ") != std::string::npos)
         {
             if (!selected)
@@ -193,7 +193,7 @@ bool SeeSpellAction::Execute(Event& event)
         
         Creature* wpCreature = bot->SummonCreature(15631, spellPosition.getX(), spellPosition.getY(), spellPosition.getZ(), spellPosition.getO(), TEMPSPAWN_TIMED_DESPAWN, 2000.0f);
         wpCreature->SetObjectScale(0.5f);
-        RESET_AI_VALUE(string, "RTSC next spell action");
+        RESET_AI_VALUE(std::string, "RTSC next spell action");
 
         return true;
     }

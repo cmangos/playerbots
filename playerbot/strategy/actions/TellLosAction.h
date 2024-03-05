@@ -10,7 +10,7 @@ namespace ai
         virtual bool Execute(Event& event) override;
 
     private:
-        void ListUnits(Player* requester, string title, list<ObjectGuid> units);
-        void ListGameObjects(Player* requester, string title, list<ObjectGuid> gos);
+        void ListUnits(Player* requester, std::string title, std::list<ObjectGuid> units);
+        void ListGameObjects(Player* requester, std::string title, std::list<ObjectGuid> gos);
     };
 }

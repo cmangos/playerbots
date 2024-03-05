@@ -13,9 +13,9 @@
 using namespace ai;
 using namespace MaNGOS;
 
-list<ObjectGuid> PossibleAttackTargetsValue::Calculate()
+std::list<ObjectGuid> PossibleAttackTargetsValue::Calculate()
 {
-    list<ObjectGuid> result;
+    std::list<ObjectGuid> result;
     if (ai->AllowActivity(ALL_ACTIVITY))
     {
         if (bot->IsInWorld() && !bot->IsBeingTeleported())
@@ -30,14 +30,14 @@ list<ObjectGuid> PossibleAttackTargetsValue::Calculate()
             if (getOne)
             {
                 // Try to get one possible attack target
-                result = AI_VALUE2(list<ObjectGuid>, "attackers", 1);
+                result = AI_VALUE2(std::list<ObjectGuid>, "attackers", 1);
                 RemoveNonThreating(result, getOne);
             }
 
             // If the one possible attack target failed, retry with multiple attackers
             if (result.empty())
             {
-                result = AI_VALUE(list<ObjectGuid>, "attackers");
+                result = AI_VALUE(std::list<ObjectGuid>, "attackers");
                 RemoveNonThreating(result, getOne);
             }
         }
@@ -46,31 +46,31 @@ list<ObjectGuid> PossibleAttackTargetsValue::Calculate()
 	return result;
 }
 
-void PossibleAttackTargetsValue::RemoveNonThreating(list<ObjectGuid>& targets, bool getOne)
+void PossibleAttackTargetsValue::RemoveNonThreating(std::list<ObjectGuid>& targets, bool getOne)
 {
-    list<ObjectGuid> breakableCC;
-    list<ObjectGuid> unBreakableCC;
+    std::list<ObjectGuid> breakableCC;
+    std::list<ObjectGuid> unBreakableCC;
 
-    for(list<ObjectGuid>::iterator tIter = targets.begin(); tIter != targets.end();)
+    for(std::list<ObjectGuid>::iterator tIter = targets.begin(); tIter != targets.end();)
     {
         Unit* target = ai->GetUnit(*tIter);
         if (!IsValid(target, bot, sPlayerbotAIConfig.sightDistance, true, false))
         {
-            list<ObjectGuid>::iterator tIter2 = tIter;
+            std::list<ObjectGuid>::iterator tIter2 = tIter;
             ++tIter;
             targets.erase(tIter2);
         }
         else if (!HasIgnoreCCRti(target, bot) && HasBreakableCC(target, bot))
         {
             breakableCC.push_back(*tIter);
-            list<ObjectGuid>::iterator tIter2 = tIter;
+            std::list<ObjectGuid>::iterator tIter2 = tIter;
             ++tIter;
             targets.erase(tIter2);
         }
         else if (!HasIgnoreCCRti(target, bot) && HasUnBreakableCC(target, bot))
         {
             unBreakableCC.push_back(*tIter);
-            list<ObjectGuid>::iterator tIter2 = tIter;
+            std::list<ObjectGuid>::iterator tIter2 = tIter;
             ++tIter;
             targets.erase(tIter2);
         }
@@ -79,7 +79,7 @@ void PossibleAttackTargetsValue::RemoveNonThreating(list<ObjectGuid>& targets, b
             if (getOne)
             {
                 // If the target is valid return it straight away
-                list<ObjectGuid> result = { *tIter };
+                std::list<ObjectGuid> result = { *tIter };
                 targets = result;
                 break;
             }
@@ -193,9 +193,9 @@ bool PossibleAttackTargetsValue::IsImmuneToDamage(Unit* target, Player* player)
     return false;
 }
 
-string PossibleAttackTargetsValue::Format()
+std::string PossibleAttackTargetsValue::Format()
 {
-    ostringstream out;
+    std::ostringstream out;
 
     for (auto& target : value)
     {
@@ -327,10 +327,10 @@ bool PossibleAttackTargetsValue::IsPossibleTarget(Unit* target, Player* player, 
 bool PossibleAddsValue::Calculate()
 {
     PlayerbotAI *ai = bot->GetPlayerbotAI();
-    list<ObjectGuid> possible = ai->GetAiObjectContext()->GetValue<list<ObjectGuid>>("possible targets no los")->Get();
-    list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<list<ObjectGuid>>("possible attack targets")->Get();
+    std::list<ObjectGuid> possible = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("possible targets no los")->Get();
+    std::list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
 
-    for (list<ObjectGuid>::iterator i = possible.begin(); i != possible.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = possible.begin(); i != possible.end(); ++i)
     {
         ObjectGuid guid = *i;
         if (find(attackers.begin(), attackers.end(), guid) != attackers.end()) continue;
@@ -338,7 +338,7 @@ bool PossibleAddsValue::Calculate()
         Unit* add = ai->GetUnit(guid);
         if (add && !add->GetGuidValue(UNIT_FIELD_TARGET) && !sServerFacade.GetThreatManager(add).getCurrentVictim() && sServerFacade.IsHostileTo(add, bot))
         {
-            for (list<ObjectGuid>::iterator j = attackers.begin(); j != attackers.end(); ++j)
+            for (std::list<ObjectGuid>::iterator j = attackers.begin(); j != attackers.end(); ++j)
             {
                 Unit* attacker = ai->GetUnit(*j);
                 if (!attacker) continue;

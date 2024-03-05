@@ -50,17 +50,17 @@ namespace ai
 
 		virtual NextAction** getDefaultActions(BotState state);
 		virtual int GetType() { return STRATEGY_TYPE_GENERIC; }
-        virtual ActionNode* GetAction(string name);
-		virtual string getName() = 0;
+        virtual ActionNode* GetAction(std::string name);
+		virtual std::string getName() = 0;
         void Update() {} //Nonfunctional see AiObjectContext::Update() to enable.
         void Reset() {}
 
 		virtual void OnStrategyAdded(BotState state) {}
 		virtual void OnStrategyRemoved(BotState state) {}
 #ifdef GenerateBotHelp
-		virtual string GetHelpName() { return "dummy"; } //Must equal iternal name
-		virtual string GetHelpDescription() { return "This is a strategy."; }
-		virtual vector<string> GetRelatedStrategies() { return {}; }
+		virtual std::string GetHelpName() { return "dummy"; } //Must equal iternal name
+		virtual std::string GetHelpDescription() { return "This is a strategy."; }
+		virtual std::vector<std::string> GetRelatedStrategies() { return {}; }
 #endif
 	protected:
 		virtual NextAction** GetDefaultCombatActions() { return nullptr; }

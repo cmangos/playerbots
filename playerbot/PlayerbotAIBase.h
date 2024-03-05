@@ -5,8 +5,6 @@ class PlayerbotMgr;
 class ChatHandler;
 class PerformanceMonitorOperation;
 
-using namespace std;
-
 class PlayerbotAIBase
 {
 public:

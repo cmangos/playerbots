@@ -37,8 +37,8 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
     if (master && (master == bot || master->GetMapId() != bot->GetMapId() || master->IsBeingTeleported() || !master->GetPlayerbotAI()))
         master = nullptr;
 
-    list<ObjectGuid> attackers = context->GetValue<list<ObjectGuid>>("possible attack targets")->Get();
-    for (list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); i++)
+    std::list<ObjectGuid> attackers = context->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
+    for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); i++)
     {
         Unit* unit = ai->GetUnit(*i);
         if (!unit || !sServerFacade.IsAlive(unit))
@@ -57,7 +57,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
         return unit;
     }
 
-    list<ObjectGuid> targets = *context->GetValue<list<ObjectGuid> >("possible targets");
+    std::list<ObjectGuid> targets = *context->GetValue<std::list<ObjectGuid> >("possible targets");
 
     if (targets.empty())
         return NULL;
@@ -65,9 +65,9 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
     float distance = 0;
     Unit* result = NULL;
 
-    unordered_map<uint32, bool> needForQuestMap;
+    std::unordered_map<uint32, bool> needForQuestMap;
 
-    for (list<ObjectGuid>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
+    for (std::list<ObjectGuid>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
     {
         Unit* unit = ai->GetUnit(*tIter);
         if (!unit)
@@ -97,7 +97,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
         if (!bot->InBattleGround() && (int)unit->GetLevel() - (int)bot->GetLevel() > 4 && !unit->GetObjectGuid().IsPlayer())
         {
             if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
-                ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (" + to_string((int)unit->GetLevel() - (int)bot->GetLevel()) + " levels above bot).");
+                ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (" + std::to_string((int)unit->GetLevel() - (int)bot->GetLevel()) + " levels above bot).");
             continue;
         }
 
@@ -165,7 +165,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
         if (!bot->InBattleGround() && GetTargetingPlayerCount(unit) > assistCount)
         {
             if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
-                ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " increased distance (" + to_string(GetTargetingPlayerCount(unit)) + " bots already targeting).");
+                ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " increased distance (" + std::to_string(GetTargetingPlayerCount(unit)) + " bots already targeting).");
 
             newdistance =+ GetTargetingPlayerCount(unit) * 5;
         }

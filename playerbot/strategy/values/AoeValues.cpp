@@ -6,16 +6,16 @@
 #include "playerbot/ServerFacade.h"
 using namespace ai;
 
-list<ObjectGuid> AoeCountValue::FindMaxDensity(Player* bot, float range)
+std::list<ObjectGuid> AoeCountValue::FindMaxDensity(Player* bot, float range)
 {
     int maxCount = 0;
     ObjectGuid maxGroup;
-    map<ObjectGuid, list<ObjectGuid> > groups;
+    std::map<ObjectGuid, std::list<ObjectGuid> > groups;
     if (bot)
     {
-        list<ObjectGuid> units = *bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<list<ObjectGuid>>("attackers");
+        std::list<ObjectGuid> units = *bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("attackers");
         
-        for (list<ObjectGuid>::iterator i = units.begin(); i != units.end(); ++i)
+        for (std::list<ObjectGuid>::iterator i = units.begin(); i != units.end(); ++i)
         {
             Unit* unit = bot->GetPlayerbotAI()->GetUnit(*i);
             if (unit)
@@ -23,7 +23,7 @@ list<ObjectGuid> AoeCountValue::FindMaxDensity(Player* bot, float range)
                 float distanceToPlayer = sServerFacade.GetDistance2d(unit, bot);
                 if (sServerFacade.IsDistanceLessOrEqualThan(distanceToPlayer, range))
                 {
-                    for (list<ObjectGuid>::iterator j = units.begin(); j != units.end(); ++j)
+                    for (std::list<ObjectGuid>::iterator j = units.begin(); j != units.end(); ++j)
                     {
                         Unit* other = bot->GetPlayerbotAI()->GetUnit(*j);
                         if (other)
@@ -48,7 +48,7 @@ list<ObjectGuid> AoeCountValue::FindMaxDensity(Player* bot, float range)
 
     if (!maxCount)
     {
-        return list<ObjectGuid>();
+        return std::list<ObjectGuid>();
     }
 
     return groups[maxGroup];
@@ -56,13 +56,13 @@ list<ObjectGuid> AoeCountValue::FindMaxDensity(Player* bot, float range)
 
 WorldLocation AoePositionValue::Calculate()
 {
-    list<ObjectGuid> group = AoeCountValue::FindMaxDensity(bot);
+    std::list<ObjectGuid> group = AoeCountValue::FindMaxDensity(bot);
     if (group.empty())
         return WorldLocation();
 
     // Note: don't know where these values come from or even used.
     float x1, y1, x2, y2;
-    for (list<ObjectGuid>::iterator i = group.begin(); i != group.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = group.begin(); i != group.end(); ++i)
     {
         Unit* unit = bot->GetPlayerbotAI()->GetUnit(*i);
         if (!unit)
@@ -98,11 +98,11 @@ bool HasAreaDebuffValue::Calculate()
     if (!checkTarget)
         return false;
 
-    list<ObjectGuid> nearestDynObjects = *context->GetValue<list<ObjectGuid> >("nearest dynamic objects no los");
+    std::list<ObjectGuid> nearestDynObjects = *context->GetValue<std::list<ObjectGuid> >("nearest dynamic objects no los");
     if (nearestDynObjects.empty())
         return false;
 
-    for (list<ObjectGuid>::iterator i = nearestDynObjects.begin(); i != nearestDynObjects.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = nearestDynObjects.begin(); i != nearestDynObjects.end(); ++i)
     {
         DynamicObject* go = checkTarget->GetMap()->GetDynamicObject(*i);
         if (!go)

@@ -6,11 +6,8 @@
 #include "Util/Util.h"
 #endif
 
-
 namespace ahbot
 {
-    using namespace std;
-
     class CategoryList
     {
     public:
@@ -25,11 +22,11 @@ namespace ahbot
         void Add(Category* category);
 
     private:
-        vector<Category*> categories;
+        std::vector<Category*> categories;
     };
 
     template<class T>
-    void Shuffle(vector<T>& items) 
+    void Shuffle(std::vector<T>& items) 
     {
         uint32 count = items.size();
         for (uint32 i = 0; i < count * 5; i++)
@@ -50,17 +47,17 @@ namespace ahbot
 
     public:
         void Init(bool silent = false);
-        vector<uint32>& Get(Category* category) { return content[category]; }
+        std::vector<uint32>& Get(Category* category) { return content[category]; }
         int32 GetCount(Category* category) { return content[category].size(); }
         int32 GetCount(Category* category, uint32 item);
         bool Add(ItemPrototype const* proto);
 
     protected:
         virtual void Load() = 0;
-        virtual string GetName() = 0;
+        virtual std::string GetName() = 0;
 
     protected:
-        map<Category*,vector<uint32> > content;
+        std::map<Category*, std::vector<uint32> > content;
     };
 
     class AvailableItemsBag : public ItemBag
@@ -70,7 +67,7 @@ namespace ahbot
 
     protected:
         virtual void Load();
-        virtual string GetName() { return "available"; }
+        virtual std::string GetName() { return "available"; }
     };
 
     class InAuctionItemsBag : public ItemBag
@@ -80,7 +77,7 @@ namespace ahbot
 
     protected:
         virtual void Load();
-        virtual string GetName();
+        virtual std::string GetName();
 
     private:
         uint32 auctionId;

@@ -24,22 +24,22 @@ bool ItemsUsefulToGiveValue::IsTradingItem(uint32 entry)
     return false;
 }
 
-list<Item*> ItemsUsefulToGiveValue::Calculate()
+std::list<Item*> ItemsUsefulToGiveValue::Calculate()
 {
     GuidPosition guidP = AI_VALUE(GuidPosition, "rpg target");
     
     Player* player = guidP.GetPlayer();
 
-    list<Item*> giveItems;
+    std::list<Item*> giveItems;
 
     if (ai->HasActivePlayerMaster() || !player->GetPlayerbotAI())
         return giveItems;
 
-    list<ItemUsage> myUsages = { ItemUsage::ITEM_USAGE_NONE , ItemUsage::ITEM_USAGE_VENDOR, ItemUsage::ITEM_USAGE_AH, ItemUsage::ITEM_USAGE_DISENCHANT };
+    std::list<ItemUsage> myUsages = { ItemUsage::ITEM_USAGE_NONE , ItemUsage::ITEM_USAGE_VENDOR, ItemUsage::ITEM_USAGE_AH, ItemUsage::ITEM_USAGE_DISENCHANT };
 
     for (auto& myUsage : myUsages)
     {
-        list<Item*> myItems = AI_VALUE2(list<Item*>, "inventory items", "usage " + to_string((uint8)myUsage));
+        std::list<Item*> myItems = AI_VALUE2(std::list<Item*>, "inventory items", "usage " + std::to_string((uint8)myUsage));
         myItems.reverse();
 
         for (auto& item : myItems)

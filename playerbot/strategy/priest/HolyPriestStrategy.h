@@ -8,7 +8,7 @@ namespace ai
     {
     public:
         HolyPriestStrategy(PlayerbotAI* ai);
-        string getName() override { return "holy"; }
+        std::string getName() override { return "holy"; }
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_RANGED; }
 
     private:

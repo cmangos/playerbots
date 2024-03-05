@@ -8,7 +8,7 @@ namespace ai
     public:
         FireMagePlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_RANGED; }
-        string getName() override { return "fire"; }
+        std::string getName() override { return "fire"; }
     };
 
     class FireMageStrategy : public MageStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         FireMageAoePveStrategy(PlayerbotAI* ai) : FireMageAoeStrategy(ai) {}
-        string getName() override { return "aoe fire pve"; }
+        std::string getName() override { return "aoe fire pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         FireMageAoePvpStrategy(PlayerbotAI* ai) : FireMageAoeStrategy(ai) {}
-        string getName() override { return "aoe fire pvp"; }
+        std::string getName() override { return "aoe fire pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         FireMageAoeRaidStrategy(PlayerbotAI* ai) : FireMageAoeStrategy(ai) {}
-        string getName() override { return "aoe fire raid"; }
+        std::string getName() override { return "aoe fire raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         FireMageBuffPveStrategy(PlayerbotAI* ai) : FireMageBuffStrategy(ai) {}
-        string getName() override { return "buff fire pve"; }
+        std::string getName() override { return "buff fire pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         FireMageBuffPvpStrategy(PlayerbotAI* ai) : FireMageBuffStrategy(ai) {}
-        string getName() override { return "buff fire pvp"; }
+        std::string getName() override { return "buff fire pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         FireMageBuffRaidStrategy(PlayerbotAI* ai) : FireMageBuffStrategy(ai) {}
-        string getName() override { return "buff fire raid"; }
+        std::string getName() override { return "buff fire raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         FireMageBoostPveStrategy(PlayerbotAI* ai) : FireMageBoostStrategy(ai) {}
-        string getName() override { return "boost fire pve"; }
+        std::string getName() override { return "boost fire pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         FireMageBoostPvpStrategy(PlayerbotAI* ai) : FireMageBoostStrategy(ai) {}
-        string getName() override { return "boost fire pvp"; }
+        std::string getName() override { return "boost fire pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         FireMageBoostRaidStrategy(PlayerbotAI* ai) : FireMageBoostStrategy(ai) {}
-        string getName() override { return "boost fire raid"; }
+        std::string getName() override { return "boost fire raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         FireMageCcPveStrategy(PlayerbotAI* ai) : FireMageCcStrategy(ai) {}
-        string getName() override { return "cc fire pve"; }
+        std::string getName() override { return "cc fire pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         FireMageCcPvpStrategy(PlayerbotAI* ai) : FireMageCcStrategy(ai) {}
-        string getName() override { return "cc fire pvp"; }
+        std::string getName() override { return "cc fire pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         FireMageCcRaidStrategy(PlayerbotAI* ai) : FireMageCcStrategy(ai) {}
-        string getName() override { return "cc fire raid"; }
+        std::string getName() override { return "cc fire raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -250,7 +250,7 @@ namespace ai
     {
     public:
         FireMageCurePveStrategy(PlayerbotAI* ai) : FireMageCureStrategy(ai) {}
-        string getName() override { return "cure fire pve"; }
+        std::string getName() override { return "cure fire pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -261,7 +261,7 @@ namespace ai
     {
     public:
         FireMageCurePvpStrategy(PlayerbotAI* ai) : FireMageCureStrategy(ai) {}
-        string getName() override { return "cure fire pvp"; }
+        std::string getName() override { return "cure fire pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -272,7 +272,7 @@ namespace ai
     {
     public:
         FireMageCureRaidStrategy(PlayerbotAI* ai) : FireMageCureStrategy(ai) {}
-        string getName() override { return "cure fire raid"; }
+        std::string getName() override { return "cure fire raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

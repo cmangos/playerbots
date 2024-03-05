@@ -34,15 +34,15 @@ bool RpgAction::Execute(Event& event)
 
 bool RpgAction::isUseful()
 {
-    return (AI_VALUE(string, "next rpg action").empty() || AI_VALUE(string, "next rpg action") == "rpg") && AI_VALUE(GuidPosition, "rpg target");
+    return (AI_VALUE(std::string, "next rpg action").empty() || AI_VALUE(std::string, "next rpg action") == "rpg") && AI_VALUE(GuidPosition, "rpg target");
 }
 
 bool RpgAction::SetNextRpgAction()
 {
     Strategy* rpgStrategy; 
-    vector<Action*> actions;
-    vector<uint32> relevances;
-    list<TriggerNode*> triggerNodes;
+    std::vector<Action*> actions;
+    std::vector<uint32> relevances;
+    std::list<TriggerNode*> triggerNodes;
 
     for (auto& strategy : ai->GetAiObjectContext()->GetSupportedStrategies())
     {
@@ -92,7 +92,7 @@ bool RpgAction::SetNextRpgAction()
             }
         }
 
-        for (list<TriggerNode*>::iterator i = triggerNodes.begin(); i != triggerNodes.end(); i++)
+        for (std::list<TriggerNode*>::iterator i = triggerNodes.begin(); i != triggerNodes.end(); i++)
         {
             TriggerNode* trigger = *i;
             delete trigger;
@@ -105,18 +105,18 @@ bool RpgAction::SetNextRpgAction()
 
     if (ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT))
     {
-        vector<pair<Action*, uint32>> sortedActions;
+        std::vector<std::pair<Action*, uint32>> sortedActions;
         
         for (int i = 0; i < actions.size(); i++)
-            sortedActions.push_back(make_pair(actions[i], relevances[i]));
+            sortedActions.push_back(std::make_pair(actions[i], relevances[i]));
 
-        std::sort(sortedActions.begin(), sortedActions.end(), [](pair<Action*, uint32>i, pair<Action*, uint32> j) {return i.second > j.second; });
+        std::sort(sortedActions.begin(), sortedActions.end(), [](std::pair<Action*, uint32>i, std::pair<Action*, uint32> j) {return i.second > j.second; });
 
         ai->TellPlayerNoFacing(GetMaster(), "------" + chat->formatWorldobject(AI_VALUE(GuidPosition, "rpg target").GetWorldObject()) + "------");
 
         for (auto action : sortedActions)
         {
-            ostringstream out;
+            std::ostringstream out;
 
             out << " " << action.first->getName() << " " << action.second;
 
@@ -132,7 +132,7 @@ bool RpgAction::SetNextRpgAction()
 
     if ((ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT)))
     {
-        ostringstream out;
+        std::ostringstream out;
         out << "do: ";
         out << chat->formatWorldobject(AI_VALUE(GuidPosition, "rpg target").GetWorldObject());
 
@@ -141,7 +141,7 @@ bool RpgAction::SetNextRpgAction()
         ai->TellPlayerNoFacing(GetMaster(), out);
     }
 
-    SET_AI_VALUE(string, "next rpg action", action->getName());
+    SET_AI_VALUE(std::string, "next rpg action", action->getName());
 
     return true;
 }
@@ -151,14 +151,14 @@ bool RpgAction::AddIgnore(ObjectGuid guid)
     if (HasIgnore(guid))
         return false;
 
-    set<ObjectGuid>& ignoreList = context->GetValue<set<ObjectGuid>&>("ignore rpg target")->Get();
+    std::set<ObjectGuid>& ignoreList = context->GetValue<std::set<ObjectGuid>&>("ignore rpg target")->Get();
 
     ignoreList.insert(guid);
 
     if (ignoreList.size() > 50)
         ignoreList.erase(ignoreList.begin());
 
-    context->GetValue<set<ObjectGuid>&>("ignore rpg target")->Set(ignoreList);
+    context->GetValue<std::set<ObjectGuid>&>("ignore rpg target")->Set(ignoreList);
 
     return true;
 }
@@ -168,18 +168,18 @@ bool RpgAction::RemIgnore(ObjectGuid guid)
     if (!HasIgnore(guid))
         return false;
 
-    set<ObjectGuid>& ignoreList = context->GetValue<set<ObjectGuid>&>("ignore rpg target")->Get();
+    std::set<ObjectGuid>& ignoreList = context->GetValue<std::set<ObjectGuid>&>("ignore rpg target")->Get();
 
     ignoreList.erase(ignoreList.find(guid));
 
-    context->GetValue<set<ObjectGuid>&>("ignore rpg target")->Set(ignoreList);
+    context->GetValue<std::set<ObjectGuid>&>("ignore rpg target")->Set(ignoreList);
 
     return true;
 }
 
 bool RpgAction::HasIgnore(ObjectGuid guid)
 {
-    set<ObjectGuid>& ignoreList = context->GetValue<set<ObjectGuid>&>("ignore rpg target")->Get();
+    std::set<ObjectGuid>& ignoreList = context->GetValue<std::set<ObjectGuid>&>("ignore rpg target")->Get();
     if (ignoreList.empty())
         return false;
 

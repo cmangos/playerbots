@@ -8,9 +8,9 @@ using namespace ai;
 bool AutoLearnSpellAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string param = event.getParam();
+    std::string param = event.getParam();
 
-    ostringstream out;
+    std::ostringstream out;
 
     LearnSpells(&out);
 
@@ -22,7 +22,7 @@ bool AutoLearnSpellAction::Execute(Event& event)
         out.seekp(-2, out.cur);
         out << ".";
 
-        map<string, string> args;
+        std::map<std::string, std::string> args;
         args["%spells"] = out.str();
         ai->TellPlayer(requester, BOT_TEXT2("auto_learn_spell", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
@@ -30,7 +30,7 @@ bool AutoLearnSpellAction::Execute(Event& event)
     return true;
 }
 
-void AutoLearnSpellAction::LearnSpells(ostringstream* out)
+void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
 {
     if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && bot->GetGuildId() && sRandomPlayerbotMgr.IsFreeBot(bot))
     {
@@ -38,8 +38,8 @@ void AutoLearnSpellAction::LearnSpells(ostringstream* out)
 
         if (guild)
         {
-            map<string, string> placeholders;
-            placeholders["%level"] = to_string(bot->GetLevel());
+            std::map<std::string, std::string> placeholders;
+            placeholders["%level"] = std::to_string(bot->GetLevel());
 
             if (urand(0, 3))
                 guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Ding!", placeholders), LANG_UNIVERSAL);
@@ -67,7 +67,7 @@ void AutoLearnSpellAction::LearnSpells(ostringstream* out)
     }
 }
 
-void AutoLearnSpellAction::LearnTrainerSpells(ostringstream* out)
+void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
 {
     bot->learnDefaultSpells();
 
@@ -113,7 +113,7 @@ void AutoLearnSpellAction::LearnTrainerSpells(ostringstream* out)
                 SpellEntry const* spell = sServerFacade.LookupSpellInfo(tSpell->spell);
                 if (spell)
                 {
-                    string SpellName = spell->SpellName[0];                    
+                    std::string SpellName = spell->SpellName[0];                    
                     if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
                     {
                         uint32 skill = spell->EffectMiscValue[EFFECT_INDEX_1];
@@ -123,7 +123,7 @@ void AutoLearnSpellAction::LearnTrainerSpells(ostringstream* out)
                             SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
                             if (pSkill)
                             {
-                                if (SpellName.find("Apprentice") != string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
+                                if (SpellName.find("Apprentice") != std::string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
                                     continue;                                
                             }
                         }
@@ -137,7 +137,7 @@ void AutoLearnSpellAction::LearnTrainerSpells(ostringstream* out)
     }
 }
 
-void AutoLearnSpellAction::LearnQuestSpells(ostringstream* out)
+void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
 {
     //CreatureInfo const* co = sCreatureStorage.LookupEntry<CreatureInfo>(id);
     ObjectMgr::QuestMap const& questTemplates = sObjectMgr.GetQuestTemplates();
@@ -165,10 +165,10 @@ void AutoLearnSpellAction::LearnQuestSpells(ostringstream* out)
     }
 }
 
-string formatSpell(SpellEntry const* sInfo)
+std::string formatSpell(SpellEntry const* sInfo)
 {
-    ostringstream out;
-    string rank = sInfo->Rank[0];
+    std::ostringstream out;
+    std::string rank = sInfo->Rank[0];
     
     if(rank.empty())
         out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[LOCALE_enUS] << "]|h|r";
@@ -177,7 +177,7 @@ string formatSpell(SpellEntry const* sInfo)
     return out.str();
 }
 
-void AutoLearnSpellAction::LearnSpell(uint32 spellId, ostringstream* out)
+void AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
 {
     SpellEntry const* proto = sServerFacade.LookupSpellInfo(spellId);
 

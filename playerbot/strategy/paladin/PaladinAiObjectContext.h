@@ -1,5 +1,5 @@
 #pragma once
-#include "../AiObjectContext.h"
+#include "playerbot/strategy/AiObjectContext.h"
 
 namespace ai
 {

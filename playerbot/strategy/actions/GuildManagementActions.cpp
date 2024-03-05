@@ -3,7 +3,6 @@
 #include "GuildManagementActions.h"
 #include "playerbot/ServerFacade.h"
 
-using namespace std;
 using namespace ai;
 
 Player* GuidManageAction::GetPlayer(Event event)
@@ -19,7 +18,7 @@ Player* GuidManageAction::GetPlayer(Event event)
             return player;
     }
 
-    string text = event.getParam();
+    std::string text = event.getParam();
 
     if (!text.empty())
     {
@@ -72,7 +71,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
     Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
     MemberSlot* botMember = guild->GetMemberSlot(bot->GetObjectGuid());
 
-    list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest friendly players")->Get();
+    std::list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest friendly players")->Get();
     for (auto& guid : nearGuids)
     {
         Player* player = sObjectMgr.GetPlayer(guid);
@@ -93,7 +92,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
             {
                 if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && bot->GetGuildId() && !urand(0, 10) && sRandomPlayerbotMgr.IsFreeBot(bot))
                 {
-                    map<string, string> placeholders;
+                    std::map<std::string, std::string> placeholders;
                     placeholders["%name"] = player->GetName();
 
                     guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Good job %name. You deserver this.", placeholders), LANG_UNIVERSAL);
@@ -107,7 +106,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
             {
                 if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && bot->GetGuildId() && !urand(0, 10) && sRandomPlayerbotMgr.IsFreeBot(bot))
                 {
-                    map<string, string> placeholders;
+                    std::map<std::string, std::string> placeholders;
                     placeholders["%name"] = player->GetName();
 
                     guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("That was awefull %name. I hate to do this but...", placeholders), LANG_UNIVERSAL);
@@ -153,13 +152,13 @@ bool GuildManageNearbyAction::Execute(Event& event)
 
         if (sPlayerbotAIConfig.inviteChat && sRandomPlayerbotMgr.IsFreeBot(bot))
         {
-            map<string, string> placeholders;
+            std::map<std::string, std::string> placeholders;
             placeholders["%name"] = player->GetName();
             placeholders["%members"] = guild->GetMemberSize();
             placeholders["%guildname"] = guild->GetName();
             placeholders["%place"] = WorldPosition(player).getAreaName(false, false);
 
-            vector<string> lines;
+            std::vector<std::string> lines;
 
             switch ((urand(0, 10)* urand(0, 10))/10)
             {
@@ -256,7 +255,7 @@ bool GuildLeaveAction::Execute(Event& event)
         guild->BroadcastToGuild(bot->GetSession(), "I am leaving this guild to prevent it from reaching the 1064 member limit.", LANG_UNIVERSAL);
     }
 
-    sPlayerbotAIConfig.logEvent(ai, "GuildLeaveAction", guild->GetName(), to_string(guild->GetMemberSize()));
+    sPlayerbotAIConfig.logEvent(ai, "GuildLeaveAction", guild->GetName(), std::to_string(guild->GetMemberSize()));
 
     WorldPacket packet;
     bot->GetSession()->HandleGuildLeaveOpcode(packet);

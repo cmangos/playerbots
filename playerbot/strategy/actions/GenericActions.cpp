@@ -379,7 +379,7 @@ bool SetPetAction::Execute(Event& event)
                     const bool autocastActive = IsAutocastActive();
                     pet->ToggleAutocast(spellId, !autocastActive);
 
-                    ostringstream out;
+                    std::ostringstream out;
                     out << (autocastActive ? "Disabling" : "Enabling") << " pet autocast for ";
                     out << ChatHelper::formatSpell(sServerFacade.LookupSpellInfo(spellId));
                     ai->TellPlayer(GetMaster(), out);

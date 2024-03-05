@@ -36,7 +36,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
             if (guidPP.IsPlayer())
             {
-                AI_VALUE(set<ObjectGuid>&,"ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
+                AI_VALUE(std::set<ObjectGuid>&,"ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
 
                 RESET_AI_VALUE(GuidPosition, "rpg target");
 
@@ -51,7 +51,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
     if (unit && unit->IsMoving() && !urand(0, 20) && guidP.sqDistance2d(bot) < INTERACTION_DISTANCE * INTERACTION_DISTANCE * 2)
     {
-        AI_VALUE(set<ObjectGuid>&,"ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
+        AI_VALUE(std::set<ObjectGuid>&,"ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
 
         RESET_AI_VALUE(GuidPosition,"rpg target");
 
@@ -64,7 +64,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
     if (!AI_VALUE2(bool, "can free move to", GuidPosition(wo).to_string()))
     {
-        AI_VALUE(set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
+        AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
 
         RESET_AI_VALUE(GuidPosition, "rpg target");
 
@@ -77,7 +77,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
     if (guidP.distance(bot) > sPlayerbotAIConfig.reactDistance * 2)
     {
-        AI_VALUE(set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
+        AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
 
         RESET_AI_VALUE(GuidPosition, "rpg target");
 
@@ -90,7 +90,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
     if (guidP.IsGameObject() && guidP.sqDistance2d(bot) < INTERACTION_DISTANCE * INTERACTION_DISTANCE && guidP.distance(bot) > INTERACTION_DISTANCE * 1.5 && !urand(0, 5))
     {
-        AI_VALUE(set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
+        AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
 
         RESET_AI_VALUE(GuidPosition, "rpg target");
 
@@ -103,7 +103,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
     if (!urand(0, 50))
     {
-        AI_VALUE(set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
+        AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
 
         RESET_AI_VALUE(GuidPosition, "rpg target");
 
@@ -121,7 +121,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
     if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
     {
-        string name = chat->formatWorldobject(wo);
+        std::string name = chat->formatWorldobject(wo);
 
         ai->Poi(x, y, name);
     }
@@ -166,7 +166,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
     if (!couldMove && WorldPosition(mapId,x,y,z).distance(bot) > INTERACTION_DISTANCE)
     {
-        AI_VALUE(set<ObjectGuid>&,"ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
+        AI_VALUE(std::set<ObjectGuid>&,"ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
 
         RESET_AI_VALUE(GuidPosition, "rpg target");
 
@@ -182,14 +182,14 @@ bool MoveToRpgTargetAction::Execute(Event& event)
     {
         if (couldMove)
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "Heading to: ";
             out << chat->formatWorldobject(guidP.GetWorldObject());
             ai->TellPlayerNoFacing(GetMaster(), out);
         }
         else
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "Near: ";
             out << chat->formatWorldobject(guidP.GetWorldObject());
             ai->TellPlayerNoFacing(GetMaster(), out);

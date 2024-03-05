@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
@@ -31,11 +31,11 @@ namespace ai
         virtual uint32 Calculate();
     };
 
-    class MountListValue : public CalculatedValue<vector<MountValue>>
+    class MountListValue : public CalculatedValue<std::vector<MountValue>>
     {
     public:
-        MountListValue(PlayerbotAI* ai) : CalculatedValue<vector<MountValue>>(ai, "mount list", 10) {}
-        virtual vector<MountValue> Calculate();
-        virtual string Format();
+        MountListValue(PlayerbotAI* ai) : CalculatedValue<std::vector<MountValue>>(ai, "mount list", 10) {}
+        virtual std::vector<MountValue> Calculate();
+        virtual std::string Format();
     };        
 }

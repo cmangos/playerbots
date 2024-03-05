@@ -8,7 +8,7 @@ namespace ai
     public:
         AssassinationRoguePlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_MELEE; }
-        string getName() override { return "assassination"; }
+        std::string getName() override { return "assassination"; }
     };
 
     class AssassinationRogueStrategy : public RogueStrategy
@@ -76,7 +76,7 @@ namespace ai
     {
     public:
         AssassinationRogueAoePveStrategy(PlayerbotAI* ai) : AssassinationRogueAoeStrategy(ai) {}
-        string getName() override { return "aoe assassination pve"; }
+        std::string getName() override { return "aoe assassination pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -87,7 +87,7 @@ namespace ai
     {
     public:
         AssassinationRogueAoePvpStrategy(PlayerbotAI* ai) : AssassinationRogueAoeStrategy(ai) {}
-        string getName() override { return "aoe assassination pvp"; }
+        std::string getName() override { return "aoe assassination pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -98,7 +98,7 @@ namespace ai
     {
     public:
         AssassinationRogueAoeRaidStrategy(PlayerbotAI* ai) : AssassinationRogueAoeStrategy(ai) {}
-        string getName() override { return "aoe assassination raid"; }
+        std::string getName() override { return "aoe assassination raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -119,7 +119,7 @@ namespace ai
     {
     public:
         AssassinationRogueBuffPveStrategy(PlayerbotAI* ai) : AssassinationRogueBuffStrategy(ai) {}
-        string getName() override { return "buff assassination pve"; }
+        std::string getName() override { return "buff assassination pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -130,7 +130,7 @@ namespace ai
     {
     public:
         AssassinationRogueBuffPvpStrategy(PlayerbotAI* ai) : AssassinationRogueBuffStrategy(ai) {}
-        string getName() override { return "buff assassination pvp"; }
+        std::string getName() override { return "buff assassination pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -141,7 +141,7 @@ namespace ai
     {
     public:
         AssassinationRogueBuffRaidStrategy(PlayerbotAI* ai) : AssassinationRogueBuffStrategy(ai) {}
-        string getName() override { return "buff assassination raid"; }
+        std::string getName() override { return "buff assassination raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -162,7 +162,7 @@ namespace ai
     {
     public:
         AssassinationRogueBoostPveStrategy(PlayerbotAI* ai) : AssassinationRogueBoostStrategy(ai) {}
-        string getName() override { return "boost assassination pve"; }
+        std::string getName() override { return "boost assassination pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -173,7 +173,7 @@ namespace ai
     {
     public:
         AssassinationRogueBoostPvpStrategy(PlayerbotAI* ai) : AssassinationRogueBoostStrategy(ai) {}
-        string getName() override { return "boost assassination pvp"; }
+        std::string getName() override { return "boost assassination pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -184,7 +184,7 @@ namespace ai
     {
     public:
         AssassinationRogueBoostRaidStrategy(PlayerbotAI* ai) : AssassinationRogueBoostStrategy(ai) {}
-        string getName() override { return "boost assassination raid"; }
+        std::string getName() override { return "boost assassination raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -205,7 +205,7 @@ namespace ai
     {
     public:
         AssassinationRogueCcPveStrategy(PlayerbotAI* ai) : AssassinationRogueCcStrategy(ai) {}
-        string getName() override { return "cc assassination pve"; }
+        std::string getName() override { return "cc assassination pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -216,7 +216,7 @@ namespace ai
     {
     public:
         AssassinationRogueCcPvpStrategy(PlayerbotAI* ai) : AssassinationRogueCcStrategy(ai) {}
-        string getName() override { return "cc assassination pvp"; }
+        std::string getName() override { return "cc assassination pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -227,7 +227,7 @@ namespace ai
     {
     public:
         AssassinationRogueCcRaidStrategy(PlayerbotAI* ai) : AssassinationRogueCcStrategy(ai) {}
-        string getName() override { return "cc assassination raid"; }
+        std::string getName() override { return "cc assassination raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -248,7 +248,7 @@ namespace ai
     {
     public:
         AssassinationRogueStealthPveStrategy(PlayerbotAI* ai) : AssassinationRogueStealthStrategy(ai) {}
-        string getName() override { return "stealth assassination pve"; }
+        std::string getName() override { return "stealth assassination pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -259,7 +259,7 @@ namespace ai
     {
     public:
         AssassinationRogueStealthPvpStrategy(PlayerbotAI* ai) : AssassinationRogueStealthStrategy(ai) {}
-        string getName() override { return "stealth assassination pvp"; }
+        std::string getName() override { return "stealth assassination pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -270,7 +270,7 @@ namespace ai
     {
     public:
         AssassinationRogueStealthRaidStrategy(PlayerbotAI* ai) : AssassinationRogueStealthStrategy(ai) {}
-        string getName() override { return "stealth assassination raid"; }
+        std::string getName() override { return "stealth assassination raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -291,7 +291,7 @@ namespace ai
     {
     public:
         AssassinationRoguePoisonsPveStrategy(PlayerbotAI* ai) : AssassinationRoguePoisonsStrategy(ai) {}
-        string getName() override { return "poisons assassination pve"; }
+        std::string getName() override { return "poisons assassination pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -302,7 +302,7 @@ namespace ai
     {
     public:
         AssassinationRoguePoisonsPvpStrategy(PlayerbotAI* ai) : AssassinationRoguePoisonsStrategy(ai) {}
-        string getName() override { return "poisons assassination pvp"; }
+        std::string getName() override { return "poisons assassination pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -313,7 +313,7 @@ namespace ai
     {
     public:
         AssassinationRoguePoisonsRaidStrategy(PlayerbotAI* ai) : AssassinationRoguePoisonsStrategy(ai) {}
-        string getName() override { return "poisons assassination raid"; }
+        std::string getName() override { return "poisons assassination raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

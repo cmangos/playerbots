@@ -40,7 +40,7 @@ namespace ai
     {
     public:
         CastScatterShotOnClosestAttackerTargetingMeAction(PlayerbotAI* ai) : CastRangedDebuffSpellAction(ai, "scatter shot") {}
-        string GetTargetName() override { return "closest attacker targeting me target"; }
+        std::string GetTargetName() override { return "closest attacker targeting me target"; }
     };
 
     BEGIN_RANGED_SPELL_ACTION(CastDistractingShotAction, "distracting shot")
@@ -131,7 +131,7 @@ namespace ai
     {
     public:
         CastMendPetAction(PlayerbotAI* ai) : CastAuraSpellAction(ai, "mend pet") {}
-        virtual string GetTargetName() { return "pet target"; }
+        virtual std::string GetTargetName() { return "pet target"; }
     };
 
     class CastRevivePetAction : public CastBuffSpellAction
@@ -253,7 +253,7 @@ namespace ai
     {
     public:
         CastFlareAction(PlayerbotAI* ai) : CastSpellAction(ai, "flare") {}
-        virtual string GetTargetName() override { return "nearest stealthed unit"; }
+        virtual std::string GetTargetName() override { return "nearest stealthed unit"; }
     };
 
     class CastSteadyShotAction : public CastSpellAction
@@ -271,37 +271,37 @@ namespace ai
     public:
 #ifdef MANGOSBOT_ZERO
         // For vanilla, bots need to feign death before dropping the trap
-        TrapOnTargetAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, "feign death"), trapSpell(spell)
+        TrapOnTargetAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, "feign death"), trapSpell(spell)
         {
             trapSpellID = AI_VALUE2(uint32, "spell id", trapSpell);
         }
 #else
-        TrapOnTargetAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell), trapSpell(spell) {}
+        TrapOnTargetAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell), trapSpell(spell) {}
 #endif
 
     protected:
         // Traps don't really have target for the spell
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 
         // The move to target
-        virtual string GetTrapTargetName() { return "current target"; }
+        virtual std::string GetTrapTargetName() { return "current target"; }
 
         // The trap spell that will be used
-        string GetTrapSpellName() { return trapSpell; }
+        std::string GetTrapSpellName() { return trapSpell; }
 
-        string GetReachActionName() override { return "reach melee"; }
-        string GetTargetQualifier() override { return GetTrapSpellName(); }
+        std::string GetReachActionName() override { return "reach melee"; }
+        std::string GetTargetQualifier() override { return GetTrapSpellName(); }
         ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_NONE; }
 
         NextAction** getPrerequisites() override
         {
-            const string reachAction = GetReachActionName();
-            const string spellName = GetSpellName();
-            const string targetName = GetTrapTargetName();
+            const std::string reachAction = GetReachActionName();
+            const std::string spellName = GetSpellName();
+            const std::string targetName = GetTrapTargetName();
 
             // Generate the reach action with qualifiers
-            vector<string> qualifiers = { spellName, targetName, trapSpell };
-            const string qualifiersStr = Qualified::MultiQualify(qualifiers, "::");
+            std::vector<std::string> qualifiers = { spellName, targetName, trapSpell };
+            const std::string qualifiersStr = Qualified::MultiQualify(qualifiers, "::");
             return NextAction::merge(NextAction::array(0, new NextAction(reachAction + "::" + qualifiersStr), NULL), Action::getPrerequisites());
         }
 
@@ -319,31 +319,31 @@ namespace ai
 #endif
 
 private:
-        string trapSpell;
+        std::string trapSpell;
         uint32 trapSpellID;
     };
 
     class TrapOnCcTargetAction : public TrapOnTargetAction
     {
     public:
-        TrapOnCcTargetAction(PlayerbotAI* ai, string spell) : TrapOnTargetAction(ai, spell) {}
-        string GetTrapTargetName() override { return "cc target"; }
+        TrapOnCcTargetAction(PlayerbotAI* ai, std::string spell) : TrapOnTargetAction(ai, spell) {}
+        std::string GetTrapTargetName() override { return "cc target"; }
     };
 
     class TrapInPlace : public TrapOnTargetAction
     {
     public:
-        TrapInPlace(PlayerbotAI* ai, string spell) : TrapOnTargetAction(ai, spell) {}
-        string GetTrapTargetName() override { return "self target"; }
+        TrapInPlace(PlayerbotAI* ai, std::string spell) : TrapOnTargetAction(ai, spell) {}
+        std::string GetTrapTargetName() override { return "self target"; }
     };
 
     class CastTrapAction : public CastSpellAction
     {
     public:
-        CastTrapAction(PlayerbotAI* ai, string spell) : CastSpellAction(ai, spell) {}
+        CastTrapAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell) {}
 
         // Traps don't really have target for the spell
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 
 #ifdef MANGOSBOT_ZERO
         bool Execute(Event& event) override
@@ -438,7 +438,7 @@ private:
     public:
         CastDismissPetAction(PlayerbotAI* ai) : CastSpellAction(ai, "dismiss pet") {}
 
-        string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "self target"; }
 
         bool isUseful() override
         {

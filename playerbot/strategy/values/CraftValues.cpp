@@ -5,9 +5,9 @@
 
 using namespace ai;
 
-vector<uint32> CraftSpellsValue::Calculate()
+std::vector<uint32> CraftSpellsValue::Calculate()
 {
-    vector<uint32> spellIds;
+    std::vector<uint32> spellIds;
 
     PlayerSpellMap const& spellMap = bot->GetSpellMap();
 
@@ -96,7 +96,7 @@ bool ShouldCraftSpellValue::Calculate()
     {
         if (pSpellInfo->EffectItemType[i])
         {
-            ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", to_string(pSpellInfo->EffectItemType[i]));
+            ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", std::to_string(pSpellInfo->EffectItemType[i]));
 
             bool needItem = false;
 

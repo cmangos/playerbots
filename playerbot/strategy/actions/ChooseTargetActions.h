@@ -13,14 +13,14 @@ namespace ai
     {
     public:
         DpsAoeAction(PlayerbotAI* ai) : AttackAction(ai, "dps aoe") {}
-        string GetTargetName() override { return "dps aoe target"; }
+        std::string GetTargetName() override { return "dps aoe target"; }
     };
 
     class DpsAssistAction : public AttackAction
     {
     public:
         DpsAssistAction(PlayerbotAI* ai) : AttackAction(ai, "dps assist") {}
-        string GetTargetName() override { return "dps target"; } 
+        std::string GetTargetName() override { return "dps target"; } 
         bool isUseful() override;
     };
 
@@ -28,7 +28,7 @@ namespace ai
     {
     public:
         TankAssistAction(PlayerbotAI* ai) : AttackAction(ai, "tank assist") {}
-        string GetTargetName() override { return "tank target"; }
+        std::string GetTargetName() override { return "tank target"; }
     };
 
     class AttackAnythingAction : public AttackAction
@@ -36,7 +36,7 @@ namespace ai
     private:   
     public:
         AttackAnythingAction(PlayerbotAI* ai) : AttackAction(ai, "attack anything") {}
-        string GetTargetName() override { return "grind target"; }
+        std::string GetTargetName() override { return "grind target"; }
 
         bool isUseful() override;
         bool isPossible() override;
@@ -47,14 +47,14 @@ namespace ai
     {
     public:
         AttackLeastHpTargetAction(PlayerbotAI* ai) : AttackAction(ai, "attack least hp target") {}
-        string GetTargetName() override { return "least hp target"; }
+        std::string GetTargetName() override { return "least hp target"; }
     };
 
     class AttackEnemyPlayerAction : public AttackAction
     {
     public:
         AttackEnemyPlayerAction(PlayerbotAI* ai) : AttackAction(ai, "attack enemy player") {}
-        string GetTargetName() override { return "enemy player target"; }
+        std::string GetTargetName() override { return "enemy player target"; }
         bool isUseful() override;
     };
 
@@ -62,7 +62,7 @@ namespace ai
     {
     public:
         AttackEnemyFlagCarrierAction(PlayerbotAI* ai) : AttackAction(ai, "attack enemy flag carrier") {}
-        string GetTargetName() override { return "enemy flag carrier"; }
+        std::string GetTargetName() override { return "enemy flag carrier"; }
         bool isUseful() override;
     };
 

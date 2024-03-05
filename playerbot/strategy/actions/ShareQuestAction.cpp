@@ -7,7 +7,7 @@ using namespace ai;
 bool ShareQuestAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string link = event.getParam();
+    std::string link = event.getParam();
 
     if (!requester)
         return false;

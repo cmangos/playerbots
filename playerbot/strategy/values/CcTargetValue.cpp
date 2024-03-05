@@ -10,7 +10,7 @@ using namespace ai;
 class FindTargetForCcStrategy : public FindTargetStrategy
 {
 public:
-    FindTargetForCcStrategy(PlayerbotAI* ai, string spell) : FindTargetStrategy(ai)
+    FindTargetForCcStrategy(PlayerbotAI* ai, std::string spell) : FindTargetStrategy(ai)
     {
         this->spell = spell;
         maxDistance = 0;
@@ -91,15 +91,15 @@ public:
     }
 
 private:
-    string spell;
+    std::string spell;
     float maxDistance;
 };
 
 Unit* CcTargetValue::Calculate()
 {
-    list<ObjectGuid> possible = AI_VALUE(list<ObjectGuid>,"possible targets no los");
+    std::list<ObjectGuid> possible = AI_VALUE(std::list<ObjectGuid>,"possible targets no los");
 
-    for (list<ObjectGuid>::iterator i = possible.begin(); i != possible.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = possible.begin(); i != possible.end(); ++i)
     {
         ObjectGuid guid = *i;
         Unit* add = ai->GetUnit(guid);

@@ -84,7 +84,7 @@ namespace ai
         if (requester->GetLevel() > bot->GetLevel() + 4 || bot->GetLevel() > requester->GetLevel() + 4)
             return false;
 
-        string param = event.getParam();
+        std::string param = event.getParam();
 
         if (!param.empty() && param != "40" && param != "25" && param != "20" && param != "10" && param != "5")
         {
@@ -94,8 +94,8 @@ namespace ai
 
         Group* group = requester->GetGroup();
 
-        unordered_map<Classes, unordered_map<BotRoles,uint32>> allowedClassNr;
-        unordered_map<BotRoles, uint32> allowedRoles;
+        std::unordered_map<Classes, std::unordered_map<BotRoles,uint32>> allowedClassNr;
+        std::unordered_map<BotRoles, uint32> allowedRoles;
 
         allowedRoles[BOT_ROLE_TANK] = 1;
         allowedRoles[BOT_ROLE_HEALER] = 1;
@@ -220,9 +220,9 @@ namespace ai
             if (!ai->DoSpecificAction("accept invitation", event, true))
                 return false;
 
-            map<string, string> placeholders;
+            std::map<std::string, std::string> placeholders;
             placeholders["%role"] = (role == BOT_ROLE_TANK ? "tank" : (role == BOT_ROLE_HEALER ? "healer" : "dps"));
-            placeholders["%spotsleft"] = to_string(allowedRoles[role] - 1);
+            placeholders["%spotsleft"] = std::to_string(allowedRoles[role] - 1);
 
             if(allowedRoles[role] > 1)
                 ai->TellPlayer(requester, BOT_TEXT2("Joining as %role, %spotsleft %role spots left.", placeholders));
@@ -239,13 +239,13 @@ namespace ai
     {
         if (!bot->GetGroup())  //Select a random formation to copy.
         {
-            vector<string> formations = { "melee","queue","chaos","circle","line","shield","arrow","near","far"};
+            std::vector<std::string> formations = { "melee","queue","chaos","circle","line","shield","arrow","near","far"};
             FormationValue* value = (FormationValue*)context->GetValue<Formation*>("formation");
-            string newFormation = formations[urand(0, formations.size() - 1)];
+            std::string newFormation = formations[urand(0, formations.size() - 1)];
             value->Load(newFormation);
         }
 
-        list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<list<ObjectGuid> >("nearest friendly players")->Get();
+        std::list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest friendly players")->Get();
         for (auto& i : nearGuids)
         {
             Player* player = sObjectMgr.GetPlayer(i);
@@ -296,7 +296,7 @@ namespace ai
 
             if (sPlayerbotAIConfig.inviteChat && sRandomPlayerbotMgr.IsFreeBot(bot))
             {
-                map<string, string> placeholders;
+                std::map<std::string, std::string> placeholders;
                 placeholders["%player"] = player->GetName();
 
                 if(group && group->IsRaidGroup())
@@ -349,7 +349,7 @@ namespace ai
         return true;
     }
 
-    vector<Player*> InviteGuildToGroupAction::getGuildMembers()
+    std::vector<Player*> InviteGuildToGroupAction::getGuildMembers()
     {
         Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
 
@@ -423,7 +423,7 @@ namespace ai
 
             if (sPlayerbotAIConfig.inviteChat && sRandomPlayerbotMgr.IsFreeBot(bot))
             {
-                map<string, string> placeholders;
+                std::map<std::string, std::string> placeholders;
                 placeholders["%name"] = player->GetName();
                 placeholders["%place"] = WorldPosition(player).getAreaName(false, false);
 

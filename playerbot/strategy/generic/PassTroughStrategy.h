@@ -10,9 +10,9 @@ namespace ai
     protected:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override
         {
-            for (list<string>::iterator i = supported.begin(); i != supported.end(); i++)
+            for (std::list<std::string>::iterator i = supported.begin(); i != supported.end(); i++)
             {
-                string s = i->c_str();
+                std::string s = i->c_str();
                 triggers.push_back(new TriggerNode(
                     s, 
                     NextAction::array(0, new NextAction(s, relevance), NULL)));
@@ -21,9 +21,9 @@ namespace ai
 
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override
         {
-            for (list<string>::iterator i = supported.begin(); i != supported.end(); i++)
+            for (std::list<std::string>::iterator i = supported.begin(); i != supported.end(); i++)
             {
-                string s = i->c_str();
+                std::string s = i->c_str();
                 triggers.push_back(new TriggerNode(
                     s,
                     NextAction::array(0, new NextAction(s, relevance), NULL)));
@@ -32,9 +32,9 @@ namespace ai
 
         virtual void InitDeadTriggers(std::list<TriggerNode*>& triggers) override
         {
-            for (list<string>::iterator i = supported.begin(); i != supported.end(); i++)
+            for (std::list<std::string>::iterator i = supported.begin(); i != supported.end(); i++)
             {
-                string s = i->c_str();
+                std::string s = i->c_str();
                 triggers.push_back(new TriggerNode(
                     s,
                     NextAction::array(0, new NextAction(s, relevance), NULL)));
@@ -42,7 +42,7 @@ namespace ai
         }
 
     protected:
-        list<string> supported;
+        std::list<std::string> supported;
         float relevance;
     };
 }

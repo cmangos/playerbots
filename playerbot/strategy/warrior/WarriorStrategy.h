@@ -1,5 +1,5 @@
 #pragma once
-#include "../generic/ClassStrategy.h"
+#include "playerbot/strategy/generic/ClassStrategy.h"
 
 namespace ai
 {

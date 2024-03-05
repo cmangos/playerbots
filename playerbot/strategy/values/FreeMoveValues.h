@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {    
@@ -20,7 +20,7 @@ namespace ai
     class CanFreeMoveToValue : public BoolCalculatedValue, public Qualified
     {
     public:
-        CanFreeMoveToValue(PlayerbotAI* ai, string name = "can free move to", int checkInterval = 2) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {};
+        CanFreeMoveToValue(PlayerbotAI* ai, std::string name = "can free move to", int checkInterval = 2) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {};
         virtual bool Calculate() override;
     protected:
         virtual float GetRange() { return ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) ? INTERACTION_DISTANCE : AI_VALUE(float, "free move range"); }

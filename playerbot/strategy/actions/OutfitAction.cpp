@@ -9,7 +9,7 @@ using namespace ai;
 bool OutfitAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string param = event.getParam();
+    std::string param = event.getParam();
 
     if (param == "?")
     {
@@ -20,12 +20,12 @@ bool OutfitAction::Execute(Event& event)
     }
     else
     {
-        string name = ai->InventoryParseOutfitName(param);
+        std::string name = ai->InventoryParseOutfitName(param);
         ItemIds items = ai->InventoryParseOutfitItems(param);
         if (!name.empty())
         {
             Save(name, items);
-            ostringstream out;
+            std::ostringstream out;
             out << "Setting outfit " << name << " as " << param;
             ai->TellPlayer(requester, out);
             return true;
@@ -39,10 +39,10 @@ bool OutfitAction::Execute(Event& event)
 
         name = param.substr(0, space);
         ItemIds outfit = ai->InventoryFindOutfitItems(name);
-        string command = param.substr(space + 1);
+        std::string command = param.substr(space + 1);
         if (command == "equip")
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "Equipping outfit " << name;
             ai->TellPlayer(requester, out);
             EquipItems(requester, outfit);
@@ -50,7 +50,7 @@ bool OutfitAction::Execute(Event& event)
         }
         else if (command == "replace")
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "Replacing current equip with outfit " << name;
             ai->TellPlayer(requester, out);
             for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)
@@ -71,7 +71,7 @@ bool OutfitAction::Execute(Event& event)
         }
         else if (command == "reset")
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "Resetting outfit " << name;
             ai->TellPlayer(requester, out);
             Save(name, ItemIds());
@@ -79,7 +79,7 @@ bool OutfitAction::Execute(Event& event)
         }
         else if (command == "update")
         {
-            ostringstream out;
+            std::ostringstream out;
             out << "Updating with current items outfit " << name;
             ai->TellPlayer(requester, out);
             Update(name);
@@ -91,11 +91,11 @@ bool OutfitAction::Execute(Event& event)
         {
             uint32 itemid = *i;
             ItemPrototype const *proto = sItemStorage.LookupEntry<ItemPrototype>(*i);
-            ostringstream out;
+            std::ostringstream out;
             out << chat->formatItem(proto);
             if (remove)
             {
-                set<uint32>::iterator j = outfit.find(itemid);
+                std::set<uint32>::iterator j = outfit.find(itemid);
                 if (j != outfit.end())
                     outfit.erase(j);
 
@@ -115,12 +115,12 @@ bool OutfitAction::Execute(Event& event)
     return true;
 }
 
-void OutfitAction::Save(string name, ItemIds items)
+void OutfitAction::Save(std::string name, ItemIds items)
 {
-    list<string>& outfits = AI_VALUE(list<string>&, "outfit list");
-    for (list<string>::iterator i = outfits.begin(); i != outfits.end(); ++i)
+    std::list<std::string>& outfits = AI_VALUE(std::list<std::string>&, "outfit list");
+    for (std::list<std::string>::iterator i = outfits.begin(); i != outfits.end(); ++i)
     {
-        string outfit = *i;
+        std::string outfit = *i;
         if (name == ai->InventoryParseOutfitName(outfit))
         {
             outfits.erase(i);
@@ -130,7 +130,7 @@ void OutfitAction::Save(string name, ItemIds items)
 
     if (items.empty()) return;
 
-    ostringstream out;
+    std::ostringstream out;
     out << name << "=";
     bool first = true;
     for (ItemIds::iterator i = items.begin(); i != items.end(); i++)
@@ -143,14 +143,14 @@ void OutfitAction::Save(string name, ItemIds items)
 
 void OutfitAction::List(Player* requester)
 {
-    list<string>& outfits = AI_VALUE(list<string>&, "outfit list");
-    for (list<string>::iterator i = outfits.begin(); i != outfits.end(); ++i)
+    std::list<std::string>& outfits = AI_VALUE(std::list<std::string>&, "outfit list");
+    for (std::list<std::string>::iterator i = outfits.begin(); i != outfits.end(); ++i)
     {
-        string outfit = *i;
-        string name = ai->InventoryParseOutfitName(outfit);
+        std::string outfit = *i;
+        std::string name = ai->InventoryParseOutfitName(outfit);
         ItemIds items = ai->InventoryParseOutfitItems(outfit);
 
-        ostringstream out;
+        std::ostringstream out;
         out << name << ": ";
         for (ItemIds::iterator j = items.begin(); j != items.end(); ++j)
         {
@@ -164,13 +164,13 @@ void OutfitAction::List(Player* requester)
     }
 }
 
-void OutfitAction::Update(string name)
+void OutfitAction::Update(std::string name)
 {
     ListItemsVisitor visitor;
     ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_EQUIP);
 
     ItemIds items;
-    for (map<uint32, int>::iterator i = visitor.items.begin(); i != visitor.items.end(); ++i)
+    for (std::map<uint32, int>::iterator i = visitor.items.begin(); i != visitor.items.end(); ++i)
         items.insert(i->first);
 
     Save(name, items);

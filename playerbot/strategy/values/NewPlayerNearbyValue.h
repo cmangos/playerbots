@@ -1,5 +1,5 @@
 #pragma once
-#include "../Value.h"
+#include "playerbot/strategy/Value.h"
 
 namespace ai
 {
@@ -10,12 +10,12 @@ namespace ai
         virtual ObjectGuid Calculate();
     };
 
-    class AlreadySeenPlayersValue : public ManualSetValue<set<ObjectGuid>& >
+    class AlreadySeenPlayersValue : public ManualSetValue<std::set<ObjectGuid>& >
 	{
 	public:
-        AlreadySeenPlayersValue(PlayerbotAI* ai) : ManualSetValue<set<ObjectGuid>& >(ai, data, "already seen players") {}
+        AlreadySeenPlayersValue(PlayerbotAI* ai) : ManualSetValue<std::set<ObjectGuid>& >(ai, data, "already seen players") {}
 
     private:
-        set<ObjectGuid> data;
+        std::set<ObjectGuid> data;
     };
 }

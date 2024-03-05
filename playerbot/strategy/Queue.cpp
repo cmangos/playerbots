@@ -80,7 +80,7 @@ int Queue::Size()
 
 void Queue::RemoveExpired()
 {
-    list<ActionBasket*> expired;
+    std::list<ActionBasket*> expired;
     for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
     {
         ActionBasket* basket = *iter;

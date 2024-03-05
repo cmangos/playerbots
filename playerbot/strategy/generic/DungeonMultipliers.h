@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Multiplier.h"
+#include "playerbot/strategy/Multiplier.h"
 
 class Action;
 

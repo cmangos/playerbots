@@ -7,7 +7,7 @@ using namespace ai;
 bool DropQuestAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string link = event.getParam();
+    std::string link = event.getParam();
     if (!GetMaster())
         return false;
 
@@ -22,7 +22,7 @@ bool DropQuestAction::Execute(Event& event)
         if (!quest)
             continue;
 
-        if (logQuest == entry || link.find(quest->GetTitle()) != string::npos)
+        if (logQuest == entry || link.find(quest->GetTitle()) != std::string::npos)
         {
             bot->SetQuestSlot(slot, 0);
 
@@ -46,7 +46,7 @@ bool DropQuestAction::Execute(Event& event)
 bool CleanQuestLogAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string link = event.getParam();
+    std::string link = event.getParam();
     if (ai->HasActivePlayerMaster())
         return false;
 
@@ -90,7 +90,7 @@ bool CleanQuestLogAction::Execute(Event& event)
 
 void CleanQuestLogAction::DropQuestType(Player* requester, uint8 &numQuest, uint8 wantNum, bool isGreen, bool hasProgress, bool isComplete)
 {
-    vector<uint8> slots;
+    std::vector<uint8> slots;
 
     for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
         slots.push_back(slot);

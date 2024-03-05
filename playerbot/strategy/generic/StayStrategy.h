@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         StayStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "stay"; }
+        std::string getName() override { return "stay"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -21,7 +21,7 @@ namespace ai
     {
     public:
         SitStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai) {}
-        string getName() override { return "sit"; }
+        std::string getName() override { return "sit"; }
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;

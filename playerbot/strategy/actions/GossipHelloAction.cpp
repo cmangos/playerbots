@@ -37,7 +37,7 @@ bool GossipHelloAction::Execute(Event& event)
 	if (pMenuItemBounds.first == pMenuItemBounds.second)
 		return false;
 
-	string text = event.getParam();
+    std::string text = event.getParam();
 	int menuToSelect = -1;
 	if (text.empty())
 	{
@@ -46,7 +46,7 @@ bool GossipHelloAction::Execute(Event& event)
         bot->GetSession()->HandleGossipHelloOpcode(p1);
         sServerFacade.SetFacingTo(bot, pCreature);
 
-        ostringstream out; out << "--- " << pCreature->GetName() << " ---";
+        std::ostringstream out; out << "--- " << pCreature->GetName() << " ---";
         ai->TellPlayerNoFacing(requester, out.str());
 
         TellGossipMenus(requester);
@@ -77,9 +77,9 @@ void GossipHelloAction::TellGossipText(Player* requester, uint32 textId)
     {
         for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; i++)
         {
-            string text0 = text->Options[i].Text_0;
+            std::string text0 = text->Options[i].Text_0;
             if (!text0.empty()) ai->TellPlayerNoFacing(requester, text0);
-            string text1 = text->Options[i].Text_1;
+            std::string text1 = text->Options[i].Text_1;
             if (!text1.empty()) ai->TellPlayerNoFacing(requester, text1);
         }
     }
@@ -106,7 +106,7 @@ void GossipHelloAction::TellGossipMenus(Player* requester)
     for (unsigned int i = 0; i < menu.MenuItemCount(); i++)
     {
         GossipMenuItem const& item = menu.GetItem(i);
-        ostringstream out; out << "[" << (i+1) << "] " << item.m_gMessage;
+        std::ostringstream out; out << "[" << (i+1) << "] " << item.m_gMessage;
         ai->TellPlayerNoFacing(requester, out.str());
     }
 }

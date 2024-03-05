@@ -10,11 +10,11 @@ namespace ai
         virtual bool Execute(Event& event) override;
 
     private:
-        void ListBagSlots(ostringstream &out);
-        void ListXP(ostringstream &out);
-        void ListRepairCost(ostringstream &out);
-        void ListGold(ostringstream &out);
-        void ListPower(ostringstream& out);
+        void ListBagSlots(std::ostringstream &out);
+        void ListXP(std::ostringstream &out);
+        void ListRepairCost(std::ostringstream &out);
+        void ListGold(std::ostringstream &out);
+        void ListPower(std::ostringstream& out);
         uint32 EstRepair(uint16 pos);
         double RepairPercent(uint16 pos);
     };

@@ -1,7 +1,7 @@
 #pragma once
 #include "GenericActions.h"
 #include "playerbot/ServerFacade.h"
-#include "../../RandomItemMgr.h"
+#include "playerbot/RandomItemMgr.h"
 
 namespace ai
 {
@@ -20,7 +20,7 @@ namespace ai
     class UseItemAction : public ChatCommandAction 
     {
     public:
-        UseItemAction(PlayerbotAI* ai, string name = "use", bool selfOnly = false, uint32 duration = sPlayerbotAIConfig.reactDelay) : ChatCommandAction(ai, name, duration), selfOnly(selfOnly) {}
+        UseItemAction(PlayerbotAI* ai, std::string name = "use", bool selfOnly = false, uint32 duration = sPlayerbotAIConfig.reactDelay) : ChatCommandAction(ai, name, duration), selfOnly(selfOnly) {}
 
     public:
         virtual bool isPossible() override;
@@ -37,7 +37,7 @@ namespace ai
         bool UseItem(Player* requester, Item* item, ObjectGuid go, Item* itemTarget, Unit* unitTarget = nullptr);
         bool UseGameObject(Player* requester, ObjectGuid guid);
         bool SocketItem(Player* requester, Item * item, Item * gem, bool replace = false);
-        void TellConsumableUse(Player* requester, Item* item, string action, float percent);
+        void TellConsumableUse(Player* requester, Item* item, std::string action, float percent);
 
     private:
         bool selfOnly;
@@ -46,7 +46,7 @@ namespace ai
     class UseItemIdAction : public UseItemAction, public Qualified
     {
     public:
-        UseItemIdAction(PlayerbotAI* ai, string name = "use id", bool selfOnly = false, uint32 duration = sPlayerbotAIConfig.reactDelay) : UseItemAction(ai, name, selfOnly, duration), Qualified() {}
+        UseItemIdAction(PlayerbotAI* ai, std::string name = "use id", bool selfOnly = false, uint32 duration = sPlayerbotAIConfig.reactDelay) : UseItemAction(ai, name, selfOnly, duration), Qualified() {}
         virtual bool isPossible() override;
         virtual bool isUseful() override;
 
@@ -61,7 +61,7 @@ namespace ai
     class UseTargetedItemIdAction : public UseItemIdAction
     {
     public:
-        UseTargetedItemIdAction(PlayerbotAI* ai, string name, bool selfOnly = false, uint32 duration = sPlayerbotAIConfig.reactDelay) : UseItemIdAction(ai, name, selfOnly, duration) {}
+        UseTargetedItemIdAction(PlayerbotAI* ai, std::string name, bool selfOnly = false, uint32 duration = sPlayerbotAIConfig.reactDelay) : UseItemIdAction(ai, name, selfOnly, duration) {}
         virtual Unit* GetTarget() override { return Action::GetTarget(); }
         virtual uint32 GetItemId() override { return  0; }
     };
@@ -69,20 +69,20 @@ namespace ai
     class UseSpellItemAction : public UseItemAction 
     {
     public:
-        UseSpellItemAction(PlayerbotAI* ai, string name, bool selfOnly = false) : UseItemAction(ai, name, selfOnly) {}
+        UseSpellItemAction(PlayerbotAI* ai, std::string name, bool selfOnly = false) : UseItemAction(ai, name, selfOnly) {}
         virtual bool isUseful() override;
     };
 
     class UsePotionAction : public UseItemIdAction
     {
     public:
-        UsePotionAction(PlayerbotAI* ai, string name, SpellEffects effect) : UseItemIdAction(ai, name), effect(effect) {}
+        UsePotionAction(PlayerbotAI* ai, std::string name, SpellEffects effect) : UseItemIdAction(ai, name), effect(effect) {}
 
         bool isUseful() override { return UseItemIdAction::isUseful() && AI_VALUE2(bool, "combat", "self target"); }
 
         virtual uint32 GetItemId() override
         {
-            list<Item*> items = AI_VALUE2(list<Item*>, "inventory items", getName());
+            std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", getName());
             if (items.empty())
             {
                 return sRandomItemMgr.GetRandomPotion(bot->GetLevel(), effect);
@@ -173,7 +173,7 @@ namespace ai
 
         uint32 GetItemId() override
         {
-            list<Item*> items = AI_VALUE2(list<Item*>, "inventory items", getName());
+            std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", getName());
             if (items.empty())
             {
                 const uint32 level = bot->GetLevel();
@@ -361,8 +361,8 @@ namespace ai
             if (!bot->InBattleGround() || bot->GetLevel() < 60 || !bot->IsInCombat())
                 return false;
 
-            list<ObjectGuid> units = *context->GetValue<list<ObjectGuid> >("nearest npcs no los");
-            for (list<ObjectGuid>::iterator i = units.begin(); i != units.end(); i++)
+            std::list<ObjectGuid> units = *context->GetValue<std::list<ObjectGuid> >("nearest npcs no los");
+            for (std::list<ObjectGuid>::iterator i = units.begin(); i != units.end(); i++)
             {
                 Unit* unit = ai->GetUnit(*i);
                 if (!unit)
@@ -441,7 +441,7 @@ namespace ai
             return true;
         }
 
-        virtual string GetTargetName() override { return "self target"; }
+        virtual std::string GetTargetName() override { return "self target"; }
 
         virtual uint32 GetItemId() override
         {
@@ -475,7 +475,7 @@ namespace ai
     public:
         ThrowGrenadeAction(PlayerbotAI* ai) : UseTargetedItemIdAction(ai, "throw grenade") {}
 
-        virtual string GetTargetName() override { return "current target"; }
+        virtual std::string GetTargetName() override { return "current target"; }
 
         virtual bool isUseful() override
         {

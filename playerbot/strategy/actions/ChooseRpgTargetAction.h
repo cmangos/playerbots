@@ -8,7 +8,7 @@ namespace ai
 {
     class ChooseRpgTargetAction : public Action {
     public:
-        ChooseRpgTargetAction(PlayerbotAI* ai, string name = "choose rpg target") : Action(ai, name) {}
+        ChooseRpgTargetAction(PlayerbotAI* ai, std::string name = "choose rpg target") : Action(ai, name) {}
 
         virtual bool Execute(Event& event);
         virtual bool isUseful();
@@ -17,9 +17,9 @@ namespace ai
         //static bool isFollowValid(Player* bot, WorldPosition pos);
     private:        
         float getMaxRelevance(GuidPosition guidP);
-        bool HasSameTarget(ObjectGuid guid, uint32 max, list<ObjectGuid>& nearGuids);
+        bool HasSameTarget(ObjectGuid guid, uint32 max, std::list<ObjectGuid>& nearGuids);
 
-        unordered_map <ObjectGuid, string> rgpActionReason;
+        std::unordered_map <ObjectGuid, std::string> rgpActionReason;
     };
 
     class ClearRpgTargetAction : public ChooseRpgTargetAction {

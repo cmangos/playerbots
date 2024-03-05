@@ -1,5 +1,5 @@
 #pragma once
-#include "../Strategy.h"
+#include "playerbot/strategy/Strategy.h"
 
 namespace ai
 {
@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         TankAssistStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "tank assist"; }
+        std::string getName() override { return "tank assist"; }
         int GetType() override { return STRATEGY_TYPE_TANK; }
 
     private:

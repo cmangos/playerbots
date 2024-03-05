@@ -8,7 +8,7 @@ namespace ai
     public:
         TankFeralDruidPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_TANK | STRATEGY_TYPE_MELEE; }
-        string getName() override { return "tank feral"; }
+        std::string getName() override { return "tank feral"; }
     };
 
     class TankFeralDruidStrategy : public DruidStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         TankFeralDruidAoePveStrategy(PlayerbotAI* ai) : TankFeralDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe tank feral pve"; }
+        std::string getName() override { return "aoe tank feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         TankFeralDruidAoePvpStrategy(PlayerbotAI* ai) : TankFeralDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe tank feral pvp"; }
+        std::string getName() override { return "aoe tank feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         TankFeralDruidAoeRaidStrategy(PlayerbotAI* ai) : TankFeralDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe tank feral raid"; }
+        std::string getName() override { return "aoe tank feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         TankFeralDruidBuffPveStrategy(PlayerbotAI* ai) : TankFeralDruidBuffStrategy(ai) {}
-        string getName() override { return "buff tank feral pve"; }
+        std::string getName() override { return "buff tank feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         TankFeralDruidBuffPvpStrategy(PlayerbotAI* ai) : TankFeralDruidBuffStrategy(ai) {}
-        string getName() override { return "buff tank feral pvp"; }
+        std::string getName() override { return "buff tank feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         TankFeralDruidBuffRaidStrategy(PlayerbotAI* ai) : TankFeralDruidBuffStrategy(ai) {}
-        string getName() override { return "buff tank feral raid"; }
+        std::string getName() override { return "buff tank feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         TankFeralDruidBoostPveStrategy(PlayerbotAI* ai) : TankFeralDruidBoostStrategy(ai) {}
-        string getName() override { return "boost tank feral pve"; }
+        std::string getName() override { return "boost tank feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         TankFeralDruidBoostPvpStrategy(PlayerbotAI* ai) : TankFeralDruidBoostStrategy(ai) {}
-        string getName() override { return "boost tank feral pvp"; }
+        std::string getName() override { return "boost tank feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         TankFeralDruidBoostRaidStrategy(PlayerbotAI* ai) : TankFeralDruidBoostStrategy(ai) {}
-        string getName() override { return "boost tank feral raid"; }
+        std::string getName() override { return "boost tank feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         TankFeralDruidCcPveStrategy(PlayerbotAI* ai) : TankFeralDruidCcStrategy(ai) {}
-        string getName() override { return "cc tank feral pve"; }
+        std::string getName() override { return "cc tank feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         TankFeralDruidCcPvpStrategy(PlayerbotAI* ai) : TankFeralDruidCcStrategy(ai) {}
-        string getName() override { return "cc tank feral pvp"; }
+        std::string getName() override { return "cc tank feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         TankFeralDruidCcRaidStrategy(PlayerbotAI* ai) : TankFeralDruidCcStrategy(ai) {}
-        string getName() override { return "cc tank feral raid"; }
+        std::string getName() override { return "cc tank feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -250,7 +250,7 @@ namespace ai
     {
     public:
         TankFeralDruidCurePveStrategy(PlayerbotAI* ai) : TankFeralDruidCureStrategy(ai) {}
-        string getName() override { return "cure tank feral pve"; }
+        std::string getName() override { return "cure tank feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -261,7 +261,7 @@ namespace ai
     {
     public:
         TankFeralDruidCurePvpStrategy(PlayerbotAI* ai) : TankFeralDruidCureStrategy(ai) {}
-        string getName() override { return "cure tank feral pvp"; }
+        std::string getName() override { return "cure tank feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -272,7 +272,7 @@ namespace ai
     {
     public:
         TankFeralDruidCureRaidStrategy(PlayerbotAI* ai) : TankFeralDruidCureStrategy(ai) {}
-        string getName() override { return "cure tank feral raid"; }
+        std::string getName() override { return "cure tank feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

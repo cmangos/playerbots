@@ -1,6 +1,6 @@
 #pragma once
-#include "../Value.h"
-#include "../NamedObjectContext.h"
+#include "playerbot/strategy/Value.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 
 namespace ai
 {
@@ -21,7 +21,7 @@ namespace ai
 
         bool IsFulfilled()
         {
-            for (map<uint32, int>::iterator i = required.begin(); i != required.end(); ++i)
+            for (std::map<uint32, int>::iterator i = required.begin(); i != required.end(); ++i)
             {
                 uint32 item = i->first;
                 if (obtained[item] < i->second)
@@ -41,7 +41,7 @@ namespace ai
 
         void Crafted(uint32 count)
         {
-            for (map<uint32, int>::iterator i = required.begin(); i != required.end(); ++i)
+            for (std::map<uint32, int>::iterator i = required.begin(); i != required.end(); ++i)
             {
                 uint32 item = i->first;
                 if (obtained[item] >= required[item] * (int)count)
@@ -53,43 +53,43 @@ namespace ai
 
     public:
         uint32 itemId;
-        map<uint32, int> required, obtained;
+        std::map<uint32, int> required, obtained;
     };
 
     class CraftValue : public ManualSetValue<CraftData&>
     {
     public:
-        CraftValue(PlayerbotAI* ai, string name = "craft") : ManualSetValue<CraftData&>(ai, data, name) {}
+        CraftValue(PlayerbotAI* ai, std::string name = "craft") : ManualSetValue<CraftData&>(ai, data, name) {}
 
     private:
         CraftData data;
     };
 
-    class CraftSpellsValue : public CalculatedValue<vector<uint32>> //All crafting spells
+    class CraftSpellsValue : public CalculatedValue<std::vector<uint32>> //All crafting spells
     {
     public:
-        CraftSpellsValue(PlayerbotAI* ai, string name = "craft spells", int checkInterval = 10) : CalculatedValue<vector<uint32>>(ai, name, checkInterval) {}
-        virtual vector<uint32> Calculate() override;
+        CraftSpellsValue(PlayerbotAI* ai, std::string name = "craft spells", int checkInterval = 10) : CalculatedValue<std::vector<uint32>>(ai, name, checkInterval) {}
+        virtual std::vector<uint32> Calculate() override;
     };
 
     class HasReagentsForValue : public BoolCalculatedValue, public Qualified //Does the bot have reagents to cast this craft spell?
     {
     public:
-        HasReagentsForValue(PlayerbotAI* ai, string name = "has reagents for", int checkInterval = 1) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {}
+        HasReagentsForValue(PlayerbotAI* ai, std::string name = "has reagents for", int checkInterval = 1) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {}
         virtual bool Calculate() override;
     };
 
     class CanCraftSpellValue : public BoolCalculatedValue, public Qualified
     {
     public:
-        CanCraftSpellValue(PlayerbotAI* ai, string name = "can craft spell", int checkInterval = 10) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {}
+        CanCraftSpellValue(PlayerbotAI* ai, std::string name = "can craft spell", int checkInterval = 10) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {}
         virtual bool Calculate() override;
     };
 
     class ShouldCraftSpellValue : public BoolCalculatedValue, public Qualified
     {
     public:
-        ShouldCraftSpellValue(PlayerbotAI* ai, string name = "should craft spell", int checkInterval = 10) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {}
+        ShouldCraftSpellValue(PlayerbotAI* ai, std::string name = "should craft spell", int checkInterval = 10) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {}
         virtual bool Calculate() override;
         static bool SpellGivesSkillUp(uint32 spellId, Player* bot);
     };

@@ -1,5 +1,5 @@
 #pragma once
-#include "../Strategy.h"
+#include "playerbot/strategy/Strategy.h"
 
 namespace ai
 {
@@ -7,13 +7,13 @@ namespace ai
     {
     public:
         AttackEnemyPlayersStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "pvp"; }
+        std::string getName() override { return "pvp"; }
 #ifdef GenerateBotHelp
-        virtual string GetHelpName() { return "pvp"; } //Must equal iternal name
-        virtual string GetHelpDescription() {
+        virtual std::string GetHelpName() { return "pvp"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
             return "This strategy detect nearby enemy players and makes the bot attack them.";
         }
-        virtual vector<string> GetRelatedStrategies() { return {}; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {}; }
 #endif
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;

@@ -7,16 +7,16 @@
 
 using namespace ai;
 
-static list<Item*> Find(PlayerbotAI* ai, string qualifier)
+static std::list<Item*> Find(PlayerbotAI* ai, std::string qualifier)
 {
-    list<Item*> result;
+    std::list<Item*> result;
 
     Player* bot = ai->GetBot();
 
 	IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
 
-    list<Item*> items = ai->InventoryParseItems(qualifier, mask);
-    for (list<Item*>::iterator i = items.begin(); i != items.end(); i++)
+    std::list<Item*> items = ai->InventoryParseItems(qualifier, mask);
+    for (std::list<Item*>::iterator i = items.begin(); i != items.end(); i++)
         result.push_back(*i);
 
     return result;
@@ -25,8 +25,8 @@ static list<Item*> Find(PlayerbotAI* ai, string qualifier)
 uint32 ItemCountValue::Calculate()
 {
     uint32 count = 0;
-    list<Item*> items = Find(ai, qualifier);
-    for (list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
+    std::list<Item*> items = Find(ai, qualifier);
+    for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
         Item* item = *i;
         count += item->GetCount();
@@ -35,15 +35,15 @@ uint32 ItemCountValue::Calculate()
     return count;
 }
 
-list<Item*> InventoryItemValue::Calculate()
+std::list<Item*> InventoryItemValue::Calculate()
 {
     return Find(ai, qualifier);
 }
 
-list<Item*> EquipedUsableTrinketValue::Calculate()
+std::list<Item*> EquipedUsableTrinketValue::Calculate()
 {
-	list<Item*> trinkets;
-	list<Item*> result;
+	std::list<Item*> trinkets;
+	std::list<Item*> result;
 
 	Player* bot = ai->GetBot();
 

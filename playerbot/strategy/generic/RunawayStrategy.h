@@ -1,5 +1,5 @@
 #pragma once
-#include "../Strategy.h"
+#include "playerbot/strategy/Strategy.h"
 
 namespace ai
 {
@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         RunawayStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "runaway"; }
+        std::string getName() override { return "runaway"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*> &triggers) override;

@@ -1,10 +1,10 @@
 
 #include "playerbot/playerbot.h"
 #include "QueryItemUsageAction.h"
-#include "../../../ahbot/AhBot.h"
+#include "ahbot/AhBot.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/RandomPlayerbotMgr.h"
-#include "../../RandomItemMgr.h"
+#include "playerbot/RandomItemMgr.h"
 
 using namespace ai;
 
@@ -76,7 +76,7 @@ bool QueryItemUsageAction::Execute(Event& event)
                             if (!required)
                                 continue;
 
-                            sPlayerbotAIConfig.logEvent(ai, "QueryItemUsageAction", questTemplate->GetTitle(), to_string((float)available / (float)required));
+                            sPlayerbotAIConfig.logEvent(ai, "QueryItemUsageAction", questTemplate->GetTitle(), std::to_string((float)available / (float)required));
                         }
                     }
                 }
@@ -86,8 +86,8 @@ bool QueryItemUsageAction::Execute(Event& event)
         return true;
     }
 
-    string text = event.getParam();
-    set<string> qualifiers = chat->parseItemQualifiers(text);
+    std::string text = event.getParam();
+    std::set<std::string> qualifiers = chat->parseItemQualifiers(text);
     for (auto qualifier : qualifiers)
     {
         ItemQualifier itemQualifier(qualifier);
@@ -103,10 +103,10 @@ uint32 QueryItemUsageAction::GetCount(ItemQualifier& qualifier)
     IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
 
     uint32 total = 0;
-    list<Item*> items = ai->InventoryParseItems(qualifier.GetProto()->Name1, mask);
+    std::list<Item*> items = ai->InventoryParseItems(qualifier.GetProto()->Name1, mask);
     if (!items.empty())
     {
-        for (list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
+        for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
         {
             total += (*i)->GetCount();
         }
@@ -114,18 +114,18 @@ uint32 QueryItemUsageAction::GetCount(ItemQualifier& qualifier)
     return total;
 }
 
-string QueryItemUsageAction::QueryItem(ItemQualifier& qualifier, uint32 count, uint32 total)
+std::string QueryItemUsageAction::QueryItem(ItemQualifier& qualifier, uint32 count, uint32 total)
 {
-    ostringstream out;
+    std::ostringstream out;
 #ifdef CMANGOS
-    string usage = QueryItemUsage(qualifier);
+    std::string usage = QueryItemUsage(qualifier);
 #endif
 #ifdef MANGOS
     bool usage = QueryItemUsage(item);
 #endif
-    string quest = QueryQuestItem(qualifier.GetId());
-    string price = QueryItemPrice(qualifier);
-    string power = QueryItemPower(qualifier);
+    std::string quest = QueryQuestItem(qualifier.GetId());
+    std::string price = QueryItemPrice(qualifier);
+    std::string power = QueryItemPower(qualifier);
 #ifdef CMANGOS
     if (usage.empty())
 #endif
@@ -144,7 +144,7 @@ string QueryItemUsageAction::QueryItem(ItemQualifier& qualifier, uint32 count, u
     return out.str();
 }
 
-string QueryItemUsageAction::QueryItemUsage(ItemQualifier& qualifier)
+std::string QueryItemUsageAction::QueryItemUsage(ItemQualifier& qualifier)
 {
     ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", qualifier.GetQualifier());
     switch (usage)
@@ -182,7 +182,7 @@ string QueryItemUsageAction::QueryItemUsage(ItemQualifier& qualifier)
     return "";
 }
 
-string QueryItemUsageAction::QueryItemPrice(ItemQualifier& qualifier)
+std::string QueryItemUsageAction::QueryItemPrice(ItemQualifier& qualifier)
 {
     if (!sRandomPlayerbotMgr.IsRandomBot(bot))
         return "";
@@ -190,15 +190,15 @@ string QueryItemUsageAction::QueryItemPrice(ItemQualifier& qualifier)
     if (qualifier.GetProto()->Bonding == BIND_WHEN_PICKED_UP)
         return "";
 
-    ostringstream msg;
+    std::ostringstream msg;
 
     IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
 
-    list<Item*> items = ai->InventoryParseItems(qualifier.GetProto()->Name1, mask);
+    std::list<Item*> items = ai->InventoryParseItems(qualifier.GetProto()->Name1, mask);
     int32 sellPrice = 0;
     if (!items.empty())
     {
-        for (list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
+        for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
         {
             Item* sell = *i;
             sellPrice += sell->GetCount() * auctionbot.GetSellPrice(sell->GetProto()) * sRandomPlayerbotMgr.GetSellMultiplier(bot);
@@ -222,7 +222,7 @@ string QueryItemUsageAction::QueryItemPrice(ItemQualifier& qualifier)
     return msg.str();
 }
 
-string QueryItemUsageAction::QueryQuestItem(uint32 itemId)
+std::string QueryItemUsageAction::QueryQuestItem(uint32 itemId)
 {
     Player *bot = ai->GetBot();
     QuestStatusMap& questMap = bot->getQuestStatusMap();
@@ -237,7 +237,7 @@ string QueryItemUsageAction::QueryQuestItem(uint32 itemId)
         if (status == QUEST_STATUS_INCOMPLETE || (status == QUEST_STATUS_COMPLETE && !bot->GetQuestRewardStatus(questId)))
         {
             QuestStatusData const& questStatus = i->second;
-            string usage = QueryQuestItem(itemId, questTemplate, &questStatus);
+            std::string usage = QueryQuestItem(itemId, questTemplate, &questStatus);
             if (!usage.empty()) return usage;
         }
     }
@@ -246,7 +246,7 @@ string QueryItemUsageAction::QueryQuestItem(uint32 itemId)
 }
 
 
-string QueryItemUsageAction::QueryQuestItem(uint32 itemId, const Quest *questTemplate, const QuestStatusData *questStatus)
+std::string QueryItemUsageAction::QueryQuestItem(uint32 itemId, const Quest *questTemplate, const QuestStatusData *questStatus)
 {
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
     {
@@ -265,7 +265,7 @@ string QueryItemUsageAction::QueryQuestItem(uint32 itemId, const Quest *questTem
     return "";
 }
 
-string QueryItemUsageAction::QueryItemPower(ItemQualifier& qualifier)
+std::string QueryItemUsageAction::QueryItemPower(ItemQualifier& qualifier)
 {
     uint32 power = sRandomItemMgr.ItemStatWeight(bot, qualifier);
 
@@ -273,10 +273,10 @@ string QueryItemUsageAction::QueryItemPower(ItemQualifier& qualifier)
 
     if (power)
     {
-        ostringstream out;
+        std::ostringstream out;
         char color[32];
         sprintf(color, "%x", ItemQualityColors[qualifier.GetProto()->Quality]);
-        out << "power: |h|c" << color << "|h" << to_string(power) << "|h|cffffffff";
+        out << "power: |h|c" << color << "|h" << std::to_string(power) << "|h|cffffffff";
         return out.str().c_str();
     }
 

@@ -8,7 +8,7 @@ using namespace ai;
 class PlayerWithoutItemPredicate : public FindPlayerPredicate, public PlayerbotAIAware
 {
 public:
-    PlayerWithoutItemPredicate(PlayerbotAI* ai, string item) :
+    PlayerWithoutItemPredicate(PlayerbotAI* ai, std::string item) :
         PlayerbotAIAware(ai), FindPlayerPredicate(), item(item) {}
 
 public:
@@ -41,7 +41,7 @@ public:
     }
 
 private:
-    string item;
+    std::string item;
 };
 
 Unit* PartyMemberWithoutItemValue::Calculate()

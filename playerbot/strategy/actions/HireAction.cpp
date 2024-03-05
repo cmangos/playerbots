@@ -40,7 +40,7 @@ bool HireAction::Execute(Event& event)
     uint32 moneyReq = m * 5000 * bot->GetLevel();
     if ((int)discount < (int)moneyReq)
     {
-        ostringstream out;
+        std::ostringstream out;
         out << "You cannot hire me - I barely know you. Make sure you have at least " << chat->formatMoney(moneyReq) << " as a trade discount";
         ai->TellPlayer(requester, out.str());
         return false;

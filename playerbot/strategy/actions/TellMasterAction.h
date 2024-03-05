@@ -6,7 +6,7 @@ namespace ai
     class TellMasterAction : public Action 
     {
     public:
-        TellMasterAction(PlayerbotAI* ai, string text) : Action(ai, "tell master"), text(text) {}
+        TellMasterAction(PlayerbotAI* ai, std::string text) : Action(ai, "tell master"), text(text) {}
 
         virtual bool Execute(Event& event)
         {
@@ -15,7 +15,7 @@ namespace ai
         }
 
     private:
-        string text;
+        std::string text;
     };
 
     class OutOfReactRangeAction : public MovementAction 

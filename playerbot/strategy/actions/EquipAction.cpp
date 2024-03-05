@@ -10,7 +10,7 @@ using namespace ai;
 bool EquipAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    string text = event.getParam();
+    std::string text = event.getParam();
     if (text == "?")
     {
         ListItems(requester);
@@ -21,12 +21,12 @@ bool EquipAction::Execute(Event& event)
     if (ids.empty())
     {
         //Get items based on text.
-        list<Item*> found = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+        std::list<Item*> found = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
 
         //Sort items on itemLevel descending.
         found.sort([](Item* i, Item* j) {return i->GetProto()->ItemLevel > j->GetProto()->ItemLevel; });
 
-        vector< uint16> dests;
+        std::vector< uint16> dests;
         for (auto& item : found)
         {
             uint32 itemId = item->GetProto()->ItemId;
@@ -61,8 +61,8 @@ void EquipAction::ListItems(Player* requester)
 {
     ai->TellPlayer(requester, "=== Equip ===");
 
-    map<uint32, int> items;
-    map<uint32, bool> soulbound;
+    std::map<uint32, int> items;
+    std::map<uint32, bool> soulbound;
     for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
     {
         if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
@@ -89,7 +89,7 @@ void EquipAction::EquipItems(Player* requester, ItemIds ids)
 void EquipAction::EquipItem(Player* requester, FindItemVisitor* visitor)
 {
     ai->InventoryIterateItems(visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
-    list<Item*> items = visitor->GetResult();
+    std::list<Item*> items = visitor->GetResult();
 	if (!items.empty()) 
     {
         EquipItem(requester, *items.begin());
@@ -165,9 +165,9 @@ void EquipAction::EquipItem(Player* requester, Item* item)
         }
     }
 
-    sPlayerbotAIConfig.logEvent(ai, "EquipAction", item->GetProto()->Name1, to_string(item->GetProto()->ItemId));
+    sPlayerbotAIConfig.logEvent(ai, "EquipAction", item->GetProto()->Name1, std::to_string(item->GetProto()->ItemId));
 
-    map<string, string> args;
+    std::map<std::string, std::string> args;
     args["%item"] = chat->formatItem(item);
     ai->TellPlayer(requester, BOT_TEXT2("equip_command", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 }
@@ -239,7 +239,7 @@ bool EquipUpgradesAction::Execute(Event& event)
 
     context->ClearExpiredValues("item usage", 10); //Clear old item usage.
 
-    list<Item*> items;
+    std::list<Item*> items;
 
     FindItemUsageVisitor visitor(bot, ItemUsage::ITEM_USAGE_EQUIP);
     ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);

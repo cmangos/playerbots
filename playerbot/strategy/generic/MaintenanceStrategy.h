@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         MaintenanceStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai) {}
-        string getName() override { return "maintenance"; }
+        std::string getName() override { return "maintenance"; }
         int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
 
     private:

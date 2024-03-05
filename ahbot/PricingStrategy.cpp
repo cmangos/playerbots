@@ -8,7 +8,7 @@
 
 using namespace ahbot;
 
-double PricingStrategy::CalculatePrice(ostringstream *explain, ...)
+double PricingStrategy::CalculatePrice(std::ostringstream *explain, ...)
 {
     va_list vl;
     va_start(vl, explain);
@@ -34,7 +34,7 @@ double PricingStrategy::CalculatePrice(ostringstream *explain, ...)
     return result;
 }
 
-uint32 PricingStrategy::GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket, ostringstream *explain)
+uint32 PricingStrategy::GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket, std::ostringstream *explain)
 {
     double marketPrice = GetMarketPrice(proto->ItemId, auctionHouse);
 
@@ -84,7 +84,7 @@ double PricingStrategy::GetMarketPrice(uint32 itemId, uint32 auctionHouse)
     return RoundPrice(marketPrice);
 }
 
-uint32 PricingStrategy::GetBuyPrice(ItemPrototype const* proto, uint32 auctionHouse, ostringstream *explain)
+uint32 PricingStrategy::GetBuyPrice(ItemPrototype const* proto, uint32 auctionHouse, std::ostringstream *explain)
 {
     uint32 untilTime = time(0) - 3600 * 12;
     double price = CalculatePrice(explain,
@@ -148,7 +148,7 @@ double PricingStrategy::GetMultiplier(double count, double firstBuyTime, double 
 {
     double k1 = (double)count / (double)((time(0) - firstBuyTime) / 3600 / 24 + 1);
     double k2 = (double)count / (double)((time(0) - lastBuyTime) / 3600 / 24 + 1);
-    return max(1.0, k1 + k2) * sAhBotConfig.priceMultiplier;
+    return std::max(1.0, k1 + k2) * sAhBotConfig.priceMultiplier;
 }
 
 double PricingStrategy::GetItemPriceMultiplier(ItemPrototype const* proto, uint32 untilTime, uint32 auctionHouse)
@@ -185,11 +185,11 @@ uint32 PricingStrategy::GetDefaultBuyPrice(ItemPrototype const* proto)
     if (proto->SellPrice)
         price = proto->SellPrice;
     if (proto->BuyPrice)
-        price = max(price, proto->BuyPrice / 4);
+        price = std::max(price, proto->BuyPrice / 4);
 
     price *= 2;
 
-    uint32 level = max(proto->ItemLevel, proto->RequiredLevel);
+    uint32 level = std::max(proto->ItemLevel, proto->RequiredLevel);
     if (proto->Class == ITEM_CLASS_QUEST)
     {
         double result = 1.0;
@@ -200,11 +200,11 @@ uint32 PricingStrategy::GetDefaultBuyPrice(ItemPrototype const* proto)
         if (results)
         {
             Field* fields = results->Fetch();
-            level = max(fields[0].GetUInt32(), fields[1].GetUInt32());
+            level = std::max(fields[0].GetUInt32(), fields[1].GetUInt32());
         }
     }
     if (!price) price = sAhBotConfig.defaultMinPrice * level * level / 40;
-    price = max(price, (uint32)1);
+    price = std::max(price, (uint32)1);
 
     return price;
 }
@@ -215,7 +215,7 @@ uint32 PricingStrategy::GetDefaultSellPrice(ItemPrototype const* proto)
 }
 
 
-uint32 BuyOnlyRarePricingStrategy::GetBuyPrice(ItemPrototype const* proto, uint32 auctionHouse, ostringstream *explain)
+uint32 BuyOnlyRarePricingStrategy::GetBuyPrice(ItemPrototype const* proto, uint32 auctionHouse, std::ostringstream *explain)
 {
     if (proto->Quality < ITEM_QUALITY_RARE)
     {
@@ -226,7 +226,7 @@ uint32 BuyOnlyRarePricingStrategy::GetBuyPrice(ItemPrototype const* proto, uint3
     return PricingStrategy::GetBuyPrice(proto, auctionHouse, explain);
 }
 
-uint32 BuyOnlyRarePricingStrategy::GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket, ostringstream *explain)
+uint32 BuyOnlyRarePricingStrategy::GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket, std::ostringstream *explain)
 {
     return PricingStrategy::GetSellPrice(proto, auctionHouse, ignoreMarket, explain);
 }

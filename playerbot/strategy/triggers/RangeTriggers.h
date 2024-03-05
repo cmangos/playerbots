@@ -1,8 +1,8 @@
 #pragma once
-#include "../Trigger.h"
+#include "playerbot/strategy/Trigger.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
-#include "../generic/CombatStrategy.h"
+#include "playerbot/strategy/generic/CombatStrategy.h"
 #include "playerbot/strategy/values/PossibleAttackTargetsValue.h"
 #include "playerbot/strategy/values/Formations.h"
 
@@ -173,7 +173,7 @@ namespace ai
     class EnemyInRangeTrigger : public Trigger 
     {
     public:
-        EnemyInRangeTrigger(PlayerbotAI* ai, string name, float distance, bool enemyMustBePlayer = false, bool enemyTargetsBot = false)
+        EnemyInRangeTrigger(PlayerbotAI* ai, std::string name, float distance, bool enemyMustBePlayer = false, bool enemyTargetsBot = false)
         : Trigger(ai, name)
         , distance(distance)
         , enemyMustBePlayer(enemyMustBePlayer)
@@ -215,7 +215,7 @@ namespace ai
     class OutOfRangeTrigger : public Trigger 
     {
     public:
-        OutOfRangeTrigger(PlayerbotAI* ai, string name, float distance) : Trigger(ai, name)
+        OutOfRangeTrigger(PlayerbotAI* ai, std::string name, float distance) : Trigger(ai, name)
         {
             this->distance = distance;
         }
@@ -227,7 +227,7 @@ namespace ai
                 sServerFacade.IsDistanceGreaterThan(AI_VALUE2(float, "distance", GetTargetName()), distance);
         }
 
-        virtual string GetTargetName() { return "current target"; }
+        virtual std::string GetTargetName() { return "current target"; }
 
     protected:
         float distance;
@@ -267,7 +267,7 @@ namespace ai
     {
     public:
         PartyMemberToHealOutOfSpellRangeTrigger(PlayerbotAI* ai) : OutOfRangeTrigger(ai, "party member to heal out of spell range", ai->GetRange("heal")) {}
-        virtual string GetTargetName() { return "party member to heal"; }
+        virtual std::string GetTargetName() { return "party member to heal"; }
         
         virtual bool IsActive()
         {
@@ -282,7 +282,7 @@ namespace ai
     class FarFromMasterTrigger : public Trigger 
     {
     public:
-        FarFromMasterTrigger(PlayerbotAI* ai, string name = "far from master", float distance = 12.0f, int checkInterval = 50) : Trigger(ai, name, checkInterval), distance(distance) {}
+        FarFromMasterTrigger(PlayerbotAI* ai, std::string name = "far from master", float distance = 12.0f, int checkInterval = 50) : Trigger(ai, name, checkInterval), distance(distance) {}
 
         virtual bool IsActive()
         {
@@ -305,13 +305,13 @@ namespace ai
     class OutOfReactRangeTrigger : public FarFromMasterTrigger
     {
     public:
-        OutOfReactRangeTrigger(PlayerbotAI* ai,string name = "out of react range", float distance = sPlayerbotAIConfig.reactDistance, int checkInterval = 2) : FarFromMasterTrigger(ai, name, distance, checkInterval) {}
+        OutOfReactRangeTrigger(PlayerbotAI* ai, std::string name = "out of react range", float distance = sPlayerbotAIConfig.reactDistance, int checkInterval = 2) : FarFromMasterTrigger(ai, name, distance, checkInterval) {}
     };
 
     class NotNearMasterTrigger : public OutOfReactRangeTrigger
     {
     public:
-        NotNearMasterTrigger(PlayerbotAI* ai, string name = "not near master", int checkInterval = 2) : OutOfReactRangeTrigger(ai, name, 5.0f, checkInterval) {}
+        NotNearMasterTrigger(PlayerbotAI* ai, std::string name = "not near master", int checkInterval = 2) : OutOfReactRangeTrigger(ai, name, 5.0f, checkInterval) {}
 
         virtual bool IsActive()
         {
@@ -400,7 +400,7 @@ namespace ai
     class WaitForAttackSafeDistanceTrigger : public Trigger
     {
     public:
-        WaitForAttackSafeDistanceTrigger(PlayerbotAI* ai, string name = "wait for attack safe distance") : Trigger(ai, name) {}
+        WaitForAttackSafeDistanceTrigger(PlayerbotAI* ai, std::string name = "wait for attack safe distance") : Trigger(ai, name) {}
 
         virtual bool IsActive()
         {

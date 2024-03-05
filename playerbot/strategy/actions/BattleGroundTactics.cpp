@@ -3049,7 +3049,7 @@ bool BGTactics::selectObjective(bool reset)
                 {
                     BgObjective = pVanndar;
                     endBoss = true;
-                    ostringstream out; out << "Attacking Vanndar!";
+                    std::ostringstream out; out << "Attacking Vanndar!";
                     //bot->Say(out.str(), LANG_UNIVERSAL);
                 }
             }
@@ -3064,7 +3064,7 @@ bool BGTactics::selectObjective(bool reset)
                     if (bot->IsWithinDist(pGO, VISIBILITY_DISTANCE_LARGE))
                     {
                         BgObjective = pGO;
-                        ostringstream out; out << "Attacking Snowfall GY!";
+                        std::ostringstream out; out << "Attacking Snowfall GY!";
                         //bot->Say(out.str(), LANG_UNIVERSAL);
                     }
             }
@@ -3084,12 +3084,12 @@ bool BGTactics::selectObjective(bool reset)
                             // get in position to attack Captain
                             pos.Set(AV_STONEHEARTH_WAITING_HORDE.x, AV_STONEHEARTH_WAITING_HORDE.y, AV_STONEHEARTH_WAITING_HORDE.z, bg->GetMapId());
 
-                            ostringstream out; out << "Taking position at Stonehearth!";
+                            std::ostringstream out; out << "Taking position at Stonehearth!";
                             //bot->Say(out.str(), LANG_UNIVERSAL);
                         }
                         else
                         {
-                            ostringstream out; out << "Attacking Balinda!";
+                            std::ostringstream out; out << "Attacking Balinda!";
                             //bot->Say(out.str(), LANG_UNIVERSAL);
                         }
                         BgObjective = pBalinda;
@@ -3191,7 +3191,7 @@ bool BGTactics::selectObjective(bool reset)
                 {
                     BgObjective = pDrek;
                     endBoss = true;
-                    ostringstream out; out << "Attacking DrekThar!";
+                    std::ostringstream out; out << "Attacking DrekThar!";
                     //bot->Say(out.str(), LANG_UNIVERSAL);
                 }
             }
@@ -3206,7 +3206,7 @@ bool BGTactics::selectObjective(bool reset)
                     if (bot->IsWithinDist(pGO, VISIBILITY_DISTANCE_LARGE))
                     {
                         BgObjective = pGO;
-                        ostringstream out; out << "Attacking Snowfall GY!";
+                        std::ostringstream out; out << "Attacking Snowfall GY!";
                         //bot->Say(out.str(), LANG_UNIVERSAL);
                     }
             }
@@ -3226,12 +3226,12 @@ bool BGTactics::selectObjective(bool reset)
                             // get in position to attack Captain
                             pos.Set(AV_ICEBLOOD_GARRISON_WAITING_ALLIANCE.x, AV_ICEBLOOD_GARRISON_WAITING_ALLIANCE.y, AV_ICEBLOOD_GARRISON_WAITING_ALLIANCE.z, bg->GetMapId());
 
-                            ostringstream out; out << "Taking position at Stonehearth!";
+                            std::ostringstream out; out << "Taking position at Stonehearth!";
                             //bot->Say(out.str(), LANG_UNIVERSAL);
                         }
                         else
                         {
-                            ostringstream out; out << "Attacking Balinda!";
+                            std::ostringstream out; out << "Attacking Balinda!";
                             //bot->Say(out.str(), LANG_UNIVERSAL);
                         }
                         BgObjective = pGalvangar;
@@ -3554,7 +3554,7 @@ bool BGTactics::selectObjective(bool reset)
         {
             pos.Set(BgObjective->GetPositionX(), BgObjective->GetPositionY(), BgObjective->GetPositionZ(), BgObjective->GetMapId());
             posMap["bg objective"] = pos;
-            string ObjVerbose = "";
+            std::string ObjVerbose = "";
 
             if (std::abs(pos.x - 977.016) <= 10.0) ObjVerbose = "Blacksmith";
             else if (std::abs(pos.x - 806.182) <= 10.0) ObjVerbose = "Farm";
@@ -4577,7 +4577,7 @@ bool BGTactics::moveToObjectiveWp(BattleBotPath* const& currentPath, uint32 curr
     else
         currPoint++;
 
-    uint32 nPoint = reverse ? max((int)(currPoint - urand(1, 5)), 0) : min((uint32)(currPoint + urand(1, 5)), lastPointInPath);
+    uint32 nPoint = reverse ? std::max((int)(currPoint - urand(1, 5)), 0) : std::min((uint32)(currPoint + urand(1, 5)), lastPointInPath);
     if (reverse && nPoint < 0)
         nPoint = 0;
 
@@ -4712,8 +4712,8 @@ bool BGTactics::atFlag(std::vector<BattleBotPath*> const& vPaths, std::vector<ui
         bgType = bg->GetTypeId(true);
 #endif
 
-    list<ObjectGuid> closeObjects;
-    list<ObjectGuid> closePlayers;
+    std::list<ObjectGuid> closeObjects;
+    std::list<ObjectGuid> closePlayers;
     float flagRange;
 
     switch (bgType)
@@ -4724,8 +4724,8 @@ bool BGTactics::atFlag(std::vector<BattleBotPath*> const& vPaths, std::vector<ui
     case BATTLEGROUND_IC:
 #endif
     {
-        closeObjects = *context->GetValue<list<ObjectGuid> >("closest game objects");
-        closePlayers = *context->GetValue<list<ObjectGuid> >("closest friendly players");
+        closeObjects = *context->GetValue<std::list<ObjectGuid> >("closest game objects");
+        closePlayers = *context->GetValue<std::list<ObjectGuid> >("closest friendly players");
         flagRange = INTERACTION_DISTANCE;
         break;
     }
@@ -4734,8 +4734,8 @@ bool BGTactics::atFlag(std::vector<BattleBotPath*> const& vPaths, std::vector<ui
     case BATTLEGROUND_EY:
 #endif
     {
-        closeObjects = *context->GetValue<list<ObjectGuid> >("nearest game objects no los");
-        closePlayers = *context->GetValue<list<ObjectGuid> >("closest friendly players");
+        closeObjects = *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los");
+        closePlayers = *context->GetValue<std::list<ObjectGuid> >("closest friendly players");
         flagRange = VISIBILITY_DISTANCE_TINY;
         break;
     }
@@ -4761,13 +4761,13 @@ bool BGTactics::atFlag(std::vector<BattleBotPath*> const& vPaths, std::vector<ui
     //ostringstream out; out << "Found " << closeObjects.size() << " nearby objects";
     //bot->Say(out.str(), LANG_UNIVERSAL);
 
-    for (list<ObjectGuid>::iterator i = closeObjects.begin(); i != closeObjects.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = closeObjects.begin(); i != closeObjects.end(); ++i)
     {
         GameObject* go = ai->GetGameObject(*i);
         if (!go)
             continue;
 
-        vector<uint32>::const_iterator f = find(vFlagIds.begin(), vFlagIds.end(), go->GetEntry());
+        std::vector<uint32>::const_iterator f = find(vFlagIds.begin(), vFlagIds.end(), go->GetEntry());
         if (f == vFlagIds.end())
             continue;
 
@@ -4966,7 +4966,7 @@ bool BGTactics::useBuff()
         bgType = bg->GetTypeId(true);
 #endif
 
-    list<ObjectGuid> closeObjects = AI_VALUE(list<ObjectGuid>, "nearest game objects no los");
+    std::list<ObjectGuid> closeObjects = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
 
     if (closeObjects.empty())
         return false;
@@ -4979,7 +4979,7 @@ bool BGTactics::useBuff()
 #endif
     bool foundBuff = false;
 
-    for (list<ObjectGuid>::iterator i = closeObjects.begin(); i != closeObjects.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = closeObjects.begin(); i != closeObjects.end(); ++i)
     {
         GameObject* go = ai->GetGameObject(*i);
         if (!go)
@@ -5071,8 +5071,8 @@ bool BGTactics::IsLockedInsideKeep()
     if (!isInside)
         return false;
 
-    list<ObjectGuid> closeObjects;
-    closeObjects = *context->GetValue<list<ObjectGuid> >("nearest game objects no los");
+    std::list<ObjectGuid> closeObjects;
+    closeObjects = *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los");
     if (closeObjects.empty())
         return moveToStart(true);
 
@@ -5112,7 +5112,7 @@ bool BGTactics::IsLockedInsideKeep()
         }
     }
 
-    for (list<ObjectGuid>::iterator i = closeObjects.begin(); i != closeObjects.end(); ++i)
+    for (std::list<ObjectGuid>::iterator i = closeObjects.begin(); i != closeObjects.end(); ++i)
     {
         GameObject* go = ai->GetGameObject(*i);
         if (!go)

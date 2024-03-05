@@ -1,7 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "playerbot/strategy/Action.h"
-#include "../generic/PullStrategy.h"
+#include "playerbot/strategy/generic/PullStrategy.h"
 #include "PullTriggers.h"
 #include "playerbot/strategy/values/PositionValue.h"
 

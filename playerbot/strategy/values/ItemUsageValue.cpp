@@ -4,8 +4,8 @@
 #include "CraftValues.h"
 #include "MountValues.h"
 
-#include "../../../ahbot/AhBot.h"
-#include "../../RandomItemMgr.h"
+#include "ahbot/AhBot.h"
+#include "playerbot/RandomItemMgr.h"
 #include "playerbot/ServerFacade.h"
 
 #include "AuctionHouseBot/AuctionHouseBot.h"
@@ -13,7 +13,7 @@
 
 using namespace ai;
 
-ItemQualifier::ItemQualifier(string qualifier, bool linkQualifier)
+ItemQualifier::ItemQualifier(std::string qualifier, bool linkQualifier)
 {
     itemId = 0;
     enchantId = 0;
@@ -24,7 +24,7 @@ ItemQualifier::ItemQualifier(string qualifier, bool linkQualifier)
     gem4 = 0;
     proto = nullptr;
 
-    vector<string> numbers = Qualified::getMultiQualifiers(qualifier, ":");
+    std::vector<std::string> numbers = Qualified::getMultiQualifiers(qualifier, ":");
 
     if (numbers.empty())
         return;
@@ -159,7 +159,7 @@ ItemUsage ItemUsageValue::Calculate()
     
     if (proto->Class == ITEM_CLASS_CONSUMABLE && !ai->HasCheat(BotCheatMask::item))
     {       
-        string foodType = GetConsumableType(proto, bot->HasMana());
+        std::string foodType = GetConsumableType(proto, bot->HasMana());
 
         if (!foodType.empty() && bot->CanUseItem(proto) == EQUIP_ERR_OK)
         {
@@ -190,7 +190,7 @@ ItemUsage ItemUsageValue::Calculate()
     //EQUIP
     if (MountValue::GetMountSpell(itemId) && bot->CanUseItem(proto) == EQUIP_ERR_OK && MountValue::GetSpeed(MountValue::GetMountSpell(itemId)))
     {
-        vector<MountValue> mounts = AI_VALUE(vector<MountValue>, "mount list");
+        std::vector<MountValue> mounts = AI_VALUE(std::vector<MountValue>, "mount list");
 
         if (mounts.empty())
             return ItemUsage::ITEM_USAGE_EQUIP;
@@ -339,7 +339,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
 
     uint16 dest;
 
-    list<Item*> items = AI_VALUE2(list<Item*>, "inventory items", chat->formatItem(itemQualifier));
+    std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", chat->formatItem(itemQualifier));
     InventoryResult result;
     if (!items.empty())
     {
@@ -640,7 +640,7 @@ bool ItemUsageValue::IsItemUsefulForSkill(ItemPrototype const* proto)
 
 bool ItemUsageValue::IsItemNeededForUsefullCraft(ItemPrototype const* proto, bool checkAllReagents)
 {    
-    vector<uint32> spellIds = AI_VALUE(vector<uint32>, "craft spells");
+    std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
 
     for (uint32 spellId : spellIds)
     {
@@ -687,7 +687,7 @@ bool ItemUsageValue::IsItemNeededForUsefullCraft(ItemPrototype const* proto, boo
 Item* ItemUsageValue::CurrentItem(ItemPrototype const* proto)
 {
     Item* bestItem = nullptr;
-    list<Item*> found = AI_VALUE2(list < Item*>, "inventory items", chat->formatItem(proto));
+    std::list<Item*> found = AI_VALUE2(std::list < Item*>, "inventory items", chat->formatItem(proto));
 
     for (auto item : found)
     {
@@ -711,7 +711,7 @@ float ItemUsageValue::CurrentStacks(PlayerbotAI* ai, ItemPrototype const* proto)
     AiObjectContext* context = ai->GetAiObjectContext();
     ChatHelper* chat = ai->GetChatHelper();
 
-    list<Item*> found = AI_VALUE2(list<Item*>, "inventory items", chat->formatItem(proto));
+    std::list<Item*> found = AI_VALUE2(std::list<Item*>, "inventory items", chat->formatItem(proto));
 
     float itemCount = 0;
 
@@ -723,9 +723,9 @@ float ItemUsageValue::CurrentStacks(PlayerbotAI* ai, ItemPrototype const* proto)
     return itemCount / maxStack;
 }
 
-float ItemUsageValue::BetterStacks(ItemPrototype const* proto, string itemType)
+float ItemUsageValue::BetterStacks(ItemPrototype const* proto, std::string itemType)
 {
-    list<Item*> items = AI_VALUE2(list<Item*>, "inventory items", itemType);
+    std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", itemType);
 
     float stacks = 0;
 
@@ -749,9 +749,9 @@ float ItemUsageValue::BetterStacks(ItemPrototype const* proto, string itemType)
 }
 
 
-vector<uint32> ItemUsageValue::SpellsUsingItem(uint32 itemId, Player* bot)
+std::vector<uint32> ItemUsageValue::SpellsUsingItem(uint32 itemId, Player* bot)
 {
-    vector<uint32> retSpells;
+    std::vector<uint32> retSpells;
 
     PlayerSpellMap const& spellMap = bot->GetSpellMap();
 
@@ -774,9 +774,9 @@ vector<uint32> ItemUsageValue::SpellsUsingItem(uint32 itemId, Player* bot)
     return retSpells;
 }
 
-string ItemUsageValue::GetConsumableType(ItemPrototype const* proto, bool hasMana)
+std::string ItemUsageValue::GetConsumableType(ItemPrototype const* proto, bool hasMana)
 {
-    string foodType = "";
+    std::string foodType = "";
 
     if ((proto->SubClass == ITEM_SUBCLASS_CONSUMABLE || proto->SubClass == ITEM_SUBCLASS_FOOD))
     {

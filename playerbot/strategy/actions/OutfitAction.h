@@ -12,7 +12,7 @@ namespace ai
 
     private:
         void List(Player* requester);
-        void Save(string name, ItemIds outfit);
-        void Update(string name);
+        void Save(std::string name, ItemIds outfit);
+        void Update(std::string name);
     };
 }

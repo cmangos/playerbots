@@ -1,7 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "ResetAiAction.h"
-#include "../../PlayerbotDbStore.h"
+#include "playerbot/PlayerbotDbStore.h"
 
 using namespace ai;
 
@@ -36,17 +36,17 @@ void ResetAiAction::ResetValues()
     auto results = CharacterDatabase.PQuery("SELECT `value` FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' and `key` = 'value'", guid);
     if (results)
     {
-        list<string> values;
+        std::list<std::string> values;
         do
         {
             Field* fields = results->Fetch();
-            string val = fields[0].GetString();
+            std::string val = fields[0].GetString();
 
-            vector<string> parts = split(val, '>');
+            std::vector<std::string> parts = split(val, '>');
             if (parts.size() != 2) continue;
 
-            string name = parts[0];
-            string text = parts[1];
+            std::string name = parts[0];
+            std::string text = parts[1];
 
             UntypedValue* value = context->GetUntypedValue(name);
             if (!value) continue;

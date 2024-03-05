@@ -8,7 +8,7 @@ namespace ai
     public:
         DpsFeralDruidPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_DPS | STRATEGY_TYPE_MELEE; }
-        string getName() override { return "dps feral"; }
+        std::string getName() override { return "dps feral"; }
     };
 
     class DpsFeralDruidStrategy : public DruidStrategy
@@ -78,7 +78,7 @@ namespace ai
     {
     public:
         DpsFeralDruidAoePveStrategy(PlayerbotAI* ai) : DpsFeralDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe dps feral pve"; }
+        std::string getName() override { return "aoe dps feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -89,7 +89,7 @@ namespace ai
     {
     public:
         DpsFeralDruidAoePvpStrategy(PlayerbotAI* ai) : DpsFeralDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe dps feral pvp"; }
+        std::string getName() override { return "aoe dps feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         DpsFeralDruidAoeRaidStrategy(PlayerbotAI* ai) : DpsFeralDruidAoeStrategy(ai) {}
-        string getName() override { return "aoe dps feral raid"; }
+        std::string getName() override { return "aoe dps feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -121,7 +121,7 @@ namespace ai
     {
     public:
         DpsFeralDruidBuffPveStrategy(PlayerbotAI* ai) : DpsFeralDruidBuffStrategy(ai) {}
-        string getName() override { return "buff dps feral pve"; }
+        std::string getName() override { return "buff dps feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -132,7 +132,7 @@ namespace ai
     {
     public:
         DpsFeralDruidBuffPvpStrategy(PlayerbotAI* ai) : DpsFeralDruidBuffStrategy(ai) {}
-        string getName() override { return "buff dps feral pvp"; }
+        std::string getName() override { return "buff dps feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -143,7 +143,7 @@ namespace ai
     {
     public:
         DpsFeralDruidBuffRaidStrategy(PlayerbotAI* ai) : DpsFeralDruidBuffStrategy(ai) {}
-        string getName() override { return "buff dps feral raid"; }
+        std::string getName() override { return "buff dps feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -164,7 +164,7 @@ namespace ai
     {
     public:
         DpsFeralDruidBoostPveStrategy(PlayerbotAI* ai) : DpsFeralDruidBoostStrategy(ai) {}
-        string getName() override { return "boost dps feral pve"; }
+        std::string getName() override { return "boost dps feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -175,7 +175,7 @@ namespace ai
     {
     public:
         DpsFeralDruidBoostPvpStrategy(PlayerbotAI* ai) : DpsFeralDruidBoostStrategy(ai) {}
-        string getName() override { return "boost dps feral pvp"; }
+        std::string getName() override { return "boost dps feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -186,7 +186,7 @@ namespace ai
     {
     public:
         DpsFeralDruidBoostRaidStrategy(PlayerbotAI* ai) : DpsFeralDruidBoostStrategy(ai) {}
-        string getName() override { return "boost dps feral raid"; }
+        std::string getName() override { return "boost dps feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -207,7 +207,7 @@ namespace ai
     {
     public:
         DpsFeralDruidCcPveStrategy(PlayerbotAI* ai) : DpsFeralDruidCcStrategy(ai) {}
-        string getName() override { return "cc dps feral pve"; }
+        std::string getName() override { return "cc dps feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -218,7 +218,7 @@ namespace ai
     {
     public:
         DpsFeralDruidCcPvpStrategy(PlayerbotAI* ai) : DpsFeralDruidCcStrategy(ai) {}
-        string getName() override { return "cc dps feral pvp"; }
+        std::string getName() override { return "cc dps feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -229,7 +229,7 @@ namespace ai
     {
     public:
         DpsFeralDruidCcRaidStrategy(PlayerbotAI* ai) : DpsFeralDruidCcStrategy(ai) {}
-        string getName() override { return "cc dps feral raid"; }
+        std::string getName() override { return "cc dps feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -250,7 +250,7 @@ namespace ai
     {
     public:
         DpsFeralDruidCurePveStrategy(PlayerbotAI* ai) : DpsFeralDruidCureStrategy(ai) {}
-        string getName() override { return "cure dps feral pve"; }
+        std::string getName() override { return "cure dps feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -261,7 +261,7 @@ namespace ai
     {
     public:
         DpsFeralDruidCurePvpStrategy(PlayerbotAI* ai) : DpsFeralDruidCureStrategy(ai) {}
-        string getName() override { return "cure dps feral pvp"; }
+        std::string getName() override { return "cure dps feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -272,7 +272,7 @@ namespace ai
     {
     public:
         DpsFeralDruidCureRaidStrategy(PlayerbotAI* ai) : DpsFeralDruidCureStrategy(ai) {}
-        string getName() override { return "cure dps feral raid"; }
+        std::string getName() override { return "cure dps feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -293,7 +293,7 @@ namespace ai
     {
     public:
         DpsFeralDruidStealthPvpStrategy(PlayerbotAI* ai) : DpsFeralDruidStealthStrategy(ai) {}
-        string getName() override { return "stealth dps feral pvp"; }
+        std::string getName() override { return "stealth dps feral pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -304,7 +304,7 @@ namespace ai
     {
     public:
         DpsFeralDruidStealthPveStrategy(PlayerbotAI* ai) : DpsFeralDruidStealthStrategy(ai) {}
-        string getName() override { return "stealth dps feral pve"; }
+        std::string getName() override { return "stealth dps feral pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -315,7 +315,7 @@ namespace ai
     {
     public:
         DpsFeralDruidStealthRaidStrategy(PlayerbotAI* ai) : DpsFeralDruidStealthStrategy(ai) {}
-        string getName() override { return "stealth dps feral raid"; }
+        std::string getName() override { return "stealth dps feral raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -336,7 +336,7 @@ namespace ai
     {
     public:
         DpsFeralDruidPowershiftStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        string getName() override { return "powershift"; }
+        std::string getName() override { return "powershift"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

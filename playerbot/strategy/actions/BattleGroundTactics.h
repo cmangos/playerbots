@@ -7,11 +7,11 @@
 #include "BattleGround/BattleGroundAV.h"
 #include "BattleGround/BattleGroundAB.h"
 #ifndef MANGOSBOT_ZERO
-#include "BattleGroundEY.h"
+#include "BattleGround/BattleGroundEY.h"
 #endif
 #ifdef MANGOSBOT_TWO
-#include "BattleGroundIC.h"
-#include "BattleGroundSA.h"
+#include "BattleGround/BattleGroundIC.h"
+#include "BattleGround/BattleGroundSA.h"
 #endif
 #include "CheckMountStateAction.h"
 

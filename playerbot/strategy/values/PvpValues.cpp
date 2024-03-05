@@ -4,7 +4,7 @@
 #include "BattleGround/BattleGroundWS.h"
 #include "playerbot/ServerFacade.h"
 #ifndef MANGOSBOT_ZERO
-#include "BattleGroundEY.h"
+#include "BattleGround/BattleGroundEY.h"
 #endif
 #include "playerbot/TravelMgr.h"
 #include "SharedValueContext.h"

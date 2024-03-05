@@ -5,7 +5,7 @@
 #include "BattleGround/BattleGroundWS.h"
 #include "playerbot/strategy/values/PositionValue.h"
 #ifndef MANGOSBOT_ZERO
-#include "BattleGroundEY.h"
+#include "BattleGround/BattleGroundEY.h"
 #endif
 
 using namespace ai;

@@ -51,6 +51,13 @@ namespace ai
         bool IsActive() override;
     };
 
+    class SeedOfCorruptionOnAttackerTrigger : public DebuffOnAttackerTrigger
+    {
+    public:
+        SeedOfCorruptionOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "seed of corruption") {}
+        bool IsActive() override;
+    };
+
     DEBUFF_TRIGGER(CurseOfAgonyTrigger, "curse of agony");
 
     class CurseOfAgonyOnAttackerTrigger : public DebuffOnAttackerTrigger

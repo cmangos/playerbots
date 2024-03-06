@@ -350,6 +350,7 @@ namespace ai
                 creators["no felguard"] = &TriggerFactoryInternal::no_felguard;
                 creators["spell lock"] = &TriggerFactoryInternal::spell_lock;
                 creators["spell lock enemy healer"] = &TriggerFactoryInternal::spell_lock_enemy_healer;
+                creators["seed of corruption on attacker"] = &TriggerFactoryInternal::seed_of_corruption_on_attacker;
             }
 
         private:
@@ -405,6 +406,7 @@ namespace ai
             static Trigger* no_felguard(PlayerbotAI* ai) { return new NoFelguardTrigger(ai); }
             static Trigger* spell_lock(PlayerbotAI* ai) { return new SpellLockTrigger(ai); }
             static Trigger* spell_lock_enemy_healer(PlayerbotAI* ai) { return new SpellLockEnemyHealerTrigger(ai); }
+            static Trigger* seed_of_corruption_on_attacker(PlayerbotAI* ai) { return new SeedOfCorruptionOnAttackerTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>

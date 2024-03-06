@@ -255,9 +255,12 @@ botPIDImpl::~botPIDImpl()
 {
 }
 
-RandomPlayerbotMgr::RandomPlayerbotMgr() : PlayerbotHolder(), processTicks(0), loginProgressBar(NULL)
+RandomPlayerbotMgr::RandomPlayerbotMgr() 
+: PlayerbotHolder()
+, processTicks(0)
+, loginProgressBar(NULL)
 {
-    if (sPlayerbotAIConfig.enabled || sPlayerbotAIConfig.randomBotAutologin)
+    if (sPlayerbotAIConfig.enabled && sPlayerbotAIConfig.randomBotAutologin)
     {
         sPlayerbotCommandServer.Start();
         PrepareTeleportCache();

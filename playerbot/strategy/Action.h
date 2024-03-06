@@ -37,7 +37,7 @@ namespace ai
         static int size(NextAction** actions);
         static NextAction** clone(NextAction** actions);
         static NextAction** merge(NextAction** what, NextAction** with);
-        static NextAction** array(uint32 nil,...);
+        static NextAction** array(uint32 n,...);
         static void destroy(NextAction** actions);
 
     private:

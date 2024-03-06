@@ -51,10 +51,10 @@ NextAction** NextAction::merge(NextAction** left, NextAction** right)
 }
 
 //NextAction** NextAction::array(uint8 nil, ...)
-NextAction** NextAction::array(uint32 nil, ...)
+NextAction** NextAction::array(uint32 n, ...)
 {
     va_list vl;
-    va_start(vl, nil);
+    va_start(vl, n);
 
     int size = 0;
     NextAction* cur = NULL;
@@ -68,7 +68,7 @@ NextAction** NextAction::array(uint32 nil, ...)
     va_end(vl);
 
     NextAction** res = new NextAction*[size];
-    va_start(vl, nil);
+    va_start(vl, n);
     for (int i=0; i<size; i++)
         res[i] = va_arg(vl, NextAction*);
     va_end(vl);

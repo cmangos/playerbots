@@ -202,7 +202,7 @@ enum class GuilderType : uint8
     SMALL = 50,
     MEDIUM = 70,
     LARGE = 120,
-    HUGE = 250
+    MASSIVE = 250
 };
 
 enum class ActivePiorityType : uint8

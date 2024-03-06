@@ -4151,7 +4151,7 @@ GuilderType PlayerbotAI::GetGuilderType()
     if (grouperNumber < 80)
         return GuilderType::LARGE;
 
-    return GuilderType::HUGE;
+    return GuilderType::MASSIVE;
 }
 
 bool PlayerbotAI::HasPlayerNearby(WorldPosition pos, float range)

@@ -2,7 +2,6 @@
 #include <cstdarg>
 #include <string>
 #include <iosfwd>
-#include <format>
 #include <set>
 #include <list>
 #include <map>

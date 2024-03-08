@@ -799,9 +799,9 @@ bool PlayerbotAI::CanEnterArea(const AreaTrigger* area)
 #ifdef MANGOSBOT_ZERO
                 InstancePlayerBind* pBind = bot->GetBoundInstance(area->target_mapId);
 #elif MANGOSBOT_ONE
-                InstancePlayerBind* pBind = GetBoundInstance(area->target_mapId, bot->GetDifficulty());
+                InstancePlayerBind* pBind = bot->GetBoundInstance(area->target_mapId, bot->GetDifficulty());
 #else
-                InstancePlayerBind* pBind = GetBoundInstance(area->target_mapId, bot->GetDifficulty(mapEntry->IsRaid()));
+                InstancePlayerBind* pBind = bot->GetBoundInstance(area->target_mapId, bot->GetDifficulty(mapEntry->IsRaid()));
 #endif
                 if (pBind && pBind->perm && pBind->state != state)
                 {

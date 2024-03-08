@@ -7,43 +7,47 @@ using namespace ai;
 bool CheatAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    std::string param = event.getParam();
-
-    uint32 cheatMask = (uint32)ai->GetCheat();
-
-    std::vector<std::string> splitted = split(param, ',');
-    for (std::vector<std::string>::iterator i = splitted.begin(); i != splitted.end(); i++)
+    if (requester && requester->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
     {
-        const char* name = i->c_str();
-        BotCheatMask newCheat = GetCheatMask(name + 1);
+        string param = event.getParam();
 
-        switch (name[0])
+        uint32 cheatMask = (uint32)ai->GetCheat();
+
+        vector<string> splitted = split(param, ',');
+        for (vector<string>::iterator i = splitted.begin(); i != splitted.end(); i++)
         {
-        case '+':
-            AddCheat(newCheat);
-            cheatMask |= (uint32)newCheat;
-            break;
-        case '-':
-            RemCheat(newCheat);
-            cheatMask &= ~(uint32)newCheat;
-            break;
-        case '~':
-            if (ai->HasCheat(newCheat))
-                RemCheat(newCheat);
-            else
-                AddCheat(newCheat);
+            const char* name = i->c_str();
+            BotCheatMask newCheat = GetCheatMask(name + 1);
 
-            cheatMask ^= (uint32)newCheat;
-            break;
-        case '?':
-            ListCheats(requester);
-            return true;
+            switch (name[0])
+            {
+            case '+':
+                AddCheat(newCheat);
+                cheatMask |= (uint32)newCheat;
+                break;
+            case '-':
+                RemCheat(newCheat);
+                cheatMask &= ~(uint32)newCheat;
+                break;
+            case '~':
+                if (ai->HasCheat(newCheat))
+                    RemCheat(newCheat);
+                else
+                    AddCheat(newCheat);
+
+                cheatMask ^= (uint32)newCheat;
+                break;
+            case '?':
+                ListCheats(requester);
+                return true;
+            }
         }
+
+        ai->SetCheat(BotCheatMask(cheatMask));
+        return true;
     }
 
-    ai->SetCheat(BotCheatMask(cheatMask));
-
-    return true;
+    return false;
 }
 
 BotCheatMask CheatAction::GetCheatMask(std::string cheat)

@@ -9,10 +9,10 @@ bool CheatAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     if (requester && requester->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
     {
-        string param = event.getParam()
+        std::string param = event.getParam();
         uint32 cheatMask = (uint32)ai->GetCheat();
-        vector<string> splitted = split(param, ',');
-        for (vector<string>::iterator i = splitted.begin(); i != splitted.end(); i++)
+        vector<std::string> splitted = split(param, ',');
+        for (vector<std::string>::iterator i = splitted.begin(); i != splitted.end(); i++)
         {
             const char* name = i->c_str();
             BotCheatMask newCheat = GetCheatMask(name + 1);

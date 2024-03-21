@@ -1020,11 +1020,11 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                     // fly up if destination is far
                     if (totalDistance > maxDist && ground <= movePosition.getZ()) // check if ground level is not higher than path (tunnels)
                     {
-                        movePosition.setZ(min(max(ground, botground) + 100.0f, max(movePosition.getZ() + 10.0f, bot->GetPositionZ() + 10.0f)));
+                        movePosition.setZ(std::min(std::max(ground, botground) + 100.0f, std::max(movePosition.getZ() + 10.0f, bot->GetPositionZ() + 10.0f)));
                     }
                     else
                     {
-                        movePosition.setZ(max(max(ground, botground), bot->GetPositionZ() - 10.0f));
+                        movePosition.setZ(std::max(std::max(ground, botground), bot->GetPositionZ() - 10.0f));
                     }
                 }
             }

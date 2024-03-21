@@ -1032,7 +1032,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
     sLog.outString("%d random bot arena teams available", arenaTeamNumber);
 }
 
-string RandomPlayerbotFactory::CreateRandomArenaTeamName()
+std::string RandomPlayerbotFactory::CreateRandomArenaTeamName()
 {
     auto result = CharacterDatabase.Query("SELECT MAX(name_id) FROM ai_playerbot_arena_team_names");
     if (!result)

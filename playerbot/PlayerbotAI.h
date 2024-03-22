@@ -393,10 +393,10 @@ public:
     Aura* GetAura(std::string spellName, Unit* player, bool checkOwner = false);
     std::vector<Aura*> GetAuras(Unit* player);
 
-    virtual bool CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget = NULL, bool ignoreRange = false, bool ignoreInCombat = false);
-    bool CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = NULL, bool ignoreRange = false, bool ignoreInCombat = false);
-    bool CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effectMask, bool checkHasSpell = true, bool ignoreRange = false, bool ignoreInCombat = false);
-    bool CanCastSpell(uint32 spellid, float x, float y, float z, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = NULL, bool ignoreRange = false, bool ignoreInCombat = false);
+    virtual bool CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget = NULL, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
+    bool CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = NULL, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
+    bool CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effectMask, bool checkHasSpell = true, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
+    bool CanCastSpell(uint32 spellid, float x, float y, float z, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = NULL, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
     bool CanCastVehicleSpell(uint32 spellid, Unit* target);
 
     virtual bool CastSpell(std::string name, Unit* target, Item* itemTarget = NULL, bool waitForSpell = true, uint32* outSpellDuration = NULL, bool canUseReagentCheat = true);

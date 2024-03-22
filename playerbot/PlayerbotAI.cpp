@@ -2898,12 +2898,12 @@ bool PlayerbotAI::HasSpell(uint32 spellid) const
     return false;
 }
 
-bool PlayerbotAI::CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget, bool ignoreRange, bool ignoreInCombat)
+bool PlayerbotAI::CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget, bool ignoreRange, bool ignoreInCombat, bool ignoreMount)
 {
-    return CanCastSpell(aiObjectContext->GetValue<uint32>("spell id", name)->Get(), target, 0, true, itemTarget, ignoreRange, ignoreInCombat);
+    return CanCastSpell(aiObjectContext->GetValue<uint32>("spell id", name)->Get(), target, 0, true, itemTarget, ignoreRange, ignoreInCombat, ignoreMount);
 }
 
-bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell, Item* itemTarget, bool ignoreRange, bool ignoreInCombat)
+bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell, Item* itemTarget, bool ignoreRange, bool ignoreInCombat, bool ignoreMount)
 {
     if (!spellid)
         return false;
@@ -3027,12 +3027,14 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
             return ignoreReagents;
         case SPELL_FAILED_AFFECTING_COMBAT:
             return ignoreInCombat;
+        case SPELL_FAILED_NOT_MOUNTED:
+            return ignoreMount;
         default:
             return false;
     }
 }
 
-bool PlayerbotAI::CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effectMask, bool checkHasSpell, bool ignoreRange, bool ignoreInCombat)
+bool PlayerbotAI::CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effectMask, bool checkHasSpell, bool ignoreRange, bool ignoreInCombat, bool ignoreMount)
 {
     if (!spellid)
         return false;
@@ -3103,12 +3105,14 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effec
         return ignoreReagents;
     case SPELL_FAILED_AFFECTING_COMBAT:
         return ignoreInCombat;
+    case SPELL_FAILED_NOT_MOUNTED:
+        return ignoreMount;
     default:
         return false;
     }
 }
 
-bool PlayerbotAI::CanCastSpell(uint32 spellid, float x, float y, float z, uint8 effectMask, bool checkHasSpell, Item* itemTarget, bool ignoreRange, bool ignoreInCombat)
+bool PlayerbotAI::CanCastSpell(uint32 spellid, float x, float y, float z, uint8 effectMask, bool checkHasSpell, Item* itemTarget, bool ignoreRange, bool ignoreInCombat, bool ignoreMount)
 {
     if (!spellid)
         return false;
@@ -3166,6 +3170,8 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, float x, float y, float z, uint8 
         return ignoreReagents;
     case SPELL_FAILED_AFFECTING_COMBAT:
         return ignoreInCombat;
+    case SPELL_FAILED_NOT_MOUNTED:
+        return ignoreMount;
     default:
         return false;
     }

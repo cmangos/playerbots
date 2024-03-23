@@ -25,7 +25,11 @@ void LoadSet(std::string value, T &res)
 
 bool AhBotConfig::Initialize()
 {
+#ifdef MANGOSBOT_ONE
+    if (!config.SetSource(SYSCONFDIR"ahbot.conf", "AHBot_"))
+#else
     if (!config.SetSource(SYSCONFDIR"ahbot.conf"))
+#endif
     {
         sLog.outString("AhBot is Disabled. Unable to open configuration file ahbot.conf");
         return false;

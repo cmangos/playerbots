@@ -74,7 +74,11 @@ bool PlayerbotAIConfig::Initialize()
 {
     sLog.outString("Initializing AI Playerbot by ike3, based on the original Playerbot by blueboy");
 
+#ifdef MANGOSBOT_ONE
+    if (!config.SetSource(SYSCONFDIR"aiplayerbot.conf", "Playerbots_"))
+#else
     if (!config.SetSource(SYSCONFDIR"aiplayerbot.conf"))
+#endif
     {
         sLog.outString("AI Playerbot is Disabled. Unable to open configuration file aiplayerbot.conf");
         return false;

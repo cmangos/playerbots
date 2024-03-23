@@ -31,10 +31,13 @@ class ConfigAccess
 {
 private:
     std::string m_filename;
+#ifdef MANGOSBOT_ONE
+    std::string m_envVarPrefix;
+#endif
     std::unordered_map<std::string, std::string> m_entries; // keys are converted to lower case.  values cannot be.
+
 public:
     std::vector<std::string> GetValues(const std::string& name) const;
-
     std::mutex m_configLock;
 };
 
@@ -244,6 +247,7 @@ public:
     void logEvent(PlayerbotAI* ai, std::string eventName, ObjectGuid guid, std::string info2);
 
     bool CanLogAction(PlayerbotAI* ai, std::string actionName, bool isExecute, std::string lastActionName);
+
 private:
     Config config;
 };

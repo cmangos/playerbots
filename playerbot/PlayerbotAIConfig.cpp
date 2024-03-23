@@ -28,8 +28,6 @@ std::vector<std::string> ConfigAccess::GetValues(const std::string& name) const
     return values;
 };
 
-
-
 INSTANTIATE_SINGLETON_1(PlayerbotAIConfig);
 
 PlayerbotAIConfig::PlayerbotAIConfig()
@@ -68,7 +66,6 @@ void LoadListString(std::string value, T& list)
         list.push_back(string);
     }
 }
-
 
 bool PlayerbotAIConfig::Initialize()
 {

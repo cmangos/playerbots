@@ -35,9 +35,8 @@ bool CheckValuesAction::Execute(Event& event)
     std::list<ObjectGuid> all_targets = AI_VALUE(std::list<ObjectGuid>, "all targets");
     std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
     std::list<ObjectGuid> corpses = AI_VALUE(std::list<ObjectGuid>, "nearest corpses");
-    std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, "nearest game objects");
+    std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
     std::list<ObjectGuid> nfp = AI_VALUE(std::list<ObjectGuid>, "nearest friendly players");
-    //if (!ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT))
-    //    context->ClearExpiredValues();
+
     return true;
 }

@@ -9,7 +9,7 @@ using namespace ai;
 bool TeleportAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    std::list<ObjectGuid> gos = *context->GetValue<std::list<ObjectGuid> >("nearest game objects");
+    std::list<ObjectGuid> gos = *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los");
     for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
     {
         GameObject* go = ai->GetGameObject(*i);

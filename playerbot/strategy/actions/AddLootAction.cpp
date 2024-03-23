@@ -29,7 +29,7 @@ bool AddAllLootAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     bool added = false;
 
-    std::list<ObjectGuid> gos = context->GetValue<std::list<ObjectGuid> >("nearest game objects")->Get();
+    std::list<ObjectGuid> gos = context->GetValue<std::list<ObjectGuid> >("nearest game objects no los")->Get();
     for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
         added |= AddLoot(requester, *i);
 

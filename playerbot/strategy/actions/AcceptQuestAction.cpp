@@ -46,7 +46,7 @@ bool AcceptQuestAction::Execute(Event& event)
             if (unit && text == "*" && sqrt(bot->GetDistance(unit)) <= INTERACTION_DISTANCE)
                 hasAccept |= QuestAction::ProcessQuests(unit);
         }
-        std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, "nearest game objects");
+        std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
         for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
         {
             GameObject* go = ai->GetGameObject(*i);

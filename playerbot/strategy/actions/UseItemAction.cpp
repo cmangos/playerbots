@@ -1212,7 +1212,7 @@ bool UseRandomQuestItemAction::Execute(Event& event)
                 }
             }
 
-            std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, ("nearest game objects"));
+            std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, ("nearest game objects no los"));
             for (auto& go : gos)
             {
                 GameObject* gameObject = ai->GetGameObject(go);

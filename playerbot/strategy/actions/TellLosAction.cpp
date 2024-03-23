@@ -27,7 +27,7 @@ bool TellLosAction::Execute(Event& event)
 
     if (param.empty() || param == "gos" || param == "game objects")
     {
-        ListGameObjects(requester, "--- Game objects ---", *context->GetValue<std::list<ObjectGuid> >("nearest game objects"));
+        ListGameObjects(requester, "--- Game objects ---", *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los"));
     }
 
     if (param.empty() || param == "players")

@@ -421,7 +421,7 @@ bool StoreLootAction::IsLootAllowed(ItemQualifier& itemQualifier, PlayerbotAI *a
 
 bool ReleaseLootAction::Execute(Event& event)
 {
-    std::list<ObjectGuid> gos = context->GetValue<std::list<ObjectGuid> >("nearest game objects")->Get();
+    std::list<ObjectGuid> gos = context->GetValue<std::list<ObjectGuid> >("nearest game objects no los")->Get();
     for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
     {
         WorldPacket packet(CMSG_LOOT_RELEASE, 8);

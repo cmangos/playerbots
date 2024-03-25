@@ -31,9 +31,7 @@ class ConfigAccess
 {
 private:
     std::string m_filename;
-#ifdef MANGOSBOT_ONE
     std::string m_envVarPrefix;
-#endif
     std::unordered_map<std::string, std::string> m_entries; // keys are converted to lower case.  values cannot be.
 
 public:

@@ -3,7 +3,7 @@
 #include "Multiplier.h"
 #include "Trigger.h"
 #include "NamedObjectContext.h"
-#include "playerbot/BotState.h"
+#include "../BotState.h"
 
 namespace ai
 {

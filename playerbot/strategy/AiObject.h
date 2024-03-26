@@ -1,5 +1,5 @@
 #pragma once
-#include "playerbot/PlayerbotAIAware.h"
+#include "../PlayerbotAIAware.h"
 
 class Player;
 class PlayerbotAI;

@@ -1,11 +1,11 @@
 #pragma once
 #include "Action.h"
 #include "Event.h"
-#include "playerbot/PlayerbotAIAware.h"
-#include "playerbot/PerformanceMonitor.h"
+#include "../PlayerbotAIAware.h"
+#include "../PerformanceMonitor.h"
 #include "Globals/ObjectMgr.h"
 #include "AiObject.h"
-#include "playerbot/GuidPosition.h"
+#include "../GuidPosition.h"
 
 namespace ai
 {

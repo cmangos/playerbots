@@ -1,6 +1,6 @@
 #pragma once
 
-#include "playerbot/PlayerbotAIAware.h"
+#include "../PlayerbotAIAware.h"
 #include "Action.h"
 #include "Value.h"
 #include "NamedObjectContext.h"

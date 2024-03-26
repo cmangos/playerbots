@@ -3,7 +3,7 @@
 #include "Common.h"
 
 #include "Maps/MapManager.h"
-#include "Log/Log.h"
+#include "../../shared/Log.h"
 #include "Globals/ObjectAccessor.h"
 #include "Entities/ObjectGuid.h"
 #include "Server/SQLStorages.h"

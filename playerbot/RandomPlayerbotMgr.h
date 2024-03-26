@@ -4,7 +4,7 @@
 #include "Common.h"
 #include "PlayerbotAIBase.h"
 #include "PlayerbotMgr.h"
-#include "playerbot/PlayerbotAIConfig.h"
+#include "PlayerbotAIConfig.h"
 #include <map>
 #include <list>
 

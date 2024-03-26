@@ -3,7 +3,7 @@
 
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"
-#include "playerbot/PlayerbotAIConfig.h"
+#include "PlayerbotAIConfig.h"
 #include "World/World.h"
 
 class ByteBuffer;

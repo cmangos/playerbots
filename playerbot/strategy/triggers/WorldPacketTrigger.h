@@ -1,6 +1,6 @@
 #pragma once
 
-#include "playerbot/strategy/Trigger.h"
+#include "../Trigger.h"
 
 namespace ai
 {

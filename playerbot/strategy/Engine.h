@@ -6,7 +6,7 @@
 #include "Multiplier.h"
 #include "AiObjectContext.h"
 #include "Strategy.h"
-#include "playerbot/BotState.h"
+#include "../BotState.h"
 
 namespace ai
 {

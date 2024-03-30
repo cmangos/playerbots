@@ -273,18 +273,11 @@ bool ConsecrationTrigger::IsActive()
 {
     if (SpellNoCooldownTrigger::IsActive())
     {
-        if (ai->IsTank(bot) && AI_VALUE(uint8, "attackers count") < 3)
-        {
-            return false;
-        }
-        else
-        {
 #ifdef MANGOSBOT_TWO
-            return true;
+        return true;
 #else
-            return AI_VALUE2(uint8, "mana", "self target") > sPlayerbotAIConfig.mediumMana;
+        return AI_VALUE2(uint8, "mana", "self target") > sPlayerbotAIConfig.mediumMana;
 #endif
-        }
     }
 
     return false;

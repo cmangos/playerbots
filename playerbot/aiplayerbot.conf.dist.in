@@ -1529,69 +1529,69 @@ AiPlayerbot.GearProgressionSystem.1.2.2.17 = 22401	# Ranged
 AiPlayerbot.GearProgressionSystem.1.2.2.18 = 5976	# Tabard
 
 # Level 1 (1) Hunter (3) Beast Master (0)
-# https://www.wowhead.com/classic/gear-planner/hunter/dwarf/BDwAAAEAR_UCADwzAwA0LgUALc4GAEfZBwA61ggAVi0JAEfHCgBV_wsASEQMADMqDQA2jQ4AThcPADQcEAAy_BIASqM
+# https://www.wowhead.com/classic/gear-planner/hunter/orc/BDwOUwACAFBfBSUQMFEwUf8AAAAKZ4EAR_UAPCoCAFdEgwAyfwBYR4UALc4ATjkGAFbYhwA61gA8KogAVi0ATjeJAEfHAB5jigA61wBOLAsASEQMAEhEDQA2jQ4ASCmPADQcADY6kABXKgA2cZIAMWsAMKw
 AiPlayerbot.GearProgressionSystem.1.3.0.0 = 18421	# Head
-AiPlayerbot.GearProgressionSystem.1.3.0.1 = 15411	# Neck
-AiPlayerbot.GearProgressionSystem.1.3.0.2 = 13358	# Shoulder
+AiPlayerbot.GearProgressionSystem.1.3.0.1 = 22340	# Neck
+AiPlayerbot.GearProgressionSystem.1.3.0.2 = 12927	# Shoulder
 AiPlayerbot.GearProgressionSystem.1.3.0.3 = 0		# Shirt
 AiPlayerbot.GearProgressionSystem.1.3.0.4 = 11726	# Chest
-AiPlayerbot.GearProgressionSystem.1.3.0.5 = 18393	# Waist
+AiPlayerbot.GearProgressionSystem.1.3.0.5 = 22232	# Waist
 AiPlayerbot.GearProgressionSystem.1.3.0.6 = 15062	# Legs
 AiPlayerbot.GearProgressionSystem.1.3.0.7 = 22061	# Feet
 AiPlayerbot.GearProgressionSystem.1.3.0.8 = 18375	# Wrists
-AiPlayerbot.GearProgressionSystem.1.3.0.9 = 22015	# Hands
+AiPlayerbot.GearProgressionSystem.1.3.0.9 = 15063	# Hands
 AiPlayerbot.GearProgressionSystem.1.3.0.10 = 18500	# Finger 1
-AiPlayerbot.GearProgressionSystem.1.3.0.11 = 13098	# Finger 2
+AiPlayerbot.GearProgressionSystem.1.3.0.11 = 18500	# Finger 2
 AiPlayerbot.GearProgressionSystem.1.3.0.12 = 13965	# Trinket 1
-AiPlayerbot.GearProgressionSystem.1.3.0.13 = 19991	# Trinket 2
+AiPlayerbot.GearProgressionSystem.1.3.0.13 = 18473	# Trinket 2
 AiPlayerbot.GearProgressionSystem.1.3.0.14 = 13340	# Back
-AiPlayerbot.GearProgressionSystem.1.3.0.15 = 13052	# Main Hand
+AiPlayerbot.GearProgressionSystem.1.3.0.15 = 22314	# Main Hand
 AiPlayerbot.GearProgressionSystem.1.3.0.16 = 0		# Off Hand
-AiPlayerbot.GearProgressionSystem.1.3.0.17 = 19107	# Ranged
+AiPlayerbot.GearProgressionSystem.1.3.0.17 = 12651	# Ranged
 AiPlayerbot.GearProgressionSystem.1.3.0.18 = 5976	# Tabard
 
 # Level 1 (1) Hunter (3) Marksmanship (1)
-# https://www.wowhead.com/classic/gear-planner/hunter/dwarf/BDwAAAEAR_UCADwzAwA0LgUALc4GAEfZBwA61ggAVi0JAEfHCgBV_wsASEQMADMqDQA2jQ4AThcPADQcEAAy_BIASqM
+# https://www.wowhead.com/classic/gear-planner/hunter/orc/BDwOUwACAFBfBSUQMFEwUf8AAAAKZ4EAR_UAPCoCAFdEgwAyfwBYR4UALc4ATjkGAFbYhwA61gA8KogAVi0ATjeJAEfHAB5jigA61wBOLAsASEQMAEhEDQA2jQ4ASCmPADQcADY6kABXKgA2cZIAMWsAMKw
 AiPlayerbot.GearProgressionSystem.1.3.1.0 = 18421	# Head
-AiPlayerbot.GearProgressionSystem.1.3.1.1 = 15411	# Neck
-AiPlayerbot.GearProgressionSystem.1.3.1.2 = 13358	# Shoulder
+AiPlayerbot.GearProgressionSystem.1.3.1.1 = 22340	# Neck
+AiPlayerbot.GearProgressionSystem.1.3.1.2 = 12927	# Shoulder
 AiPlayerbot.GearProgressionSystem.1.3.1.3 = 0		# Shirt
 AiPlayerbot.GearProgressionSystem.1.3.1.4 = 11726	# Chest
-AiPlayerbot.GearProgressionSystem.1.3.1.5 = 18393	# Waist
+AiPlayerbot.GearProgressionSystem.1.3.1.5 = 22232	# Waist
 AiPlayerbot.GearProgressionSystem.1.3.1.6 = 15062	# Legs
 AiPlayerbot.GearProgressionSystem.1.3.1.7 = 22061	# Feet
 AiPlayerbot.GearProgressionSystem.1.3.1.8 = 18375	# Wrists
-AiPlayerbot.GearProgressionSystem.1.3.1.9 = 22015	# Hands
+AiPlayerbot.GearProgressionSystem.1.3.1.9 = 15063	# Hands
 AiPlayerbot.GearProgressionSystem.1.3.1.10 = 18500	# Finger 1
-AiPlayerbot.GearProgressionSystem.1.3.1.11 = 13098	# Finger 2
+AiPlayerbot.GearProgressionSystem.1.3.1.11 = 18500	# Finger 2
 AiPlayerbot.GearProgressionSystem.1.3.1.12 = 13965	# Trinket 1
-AiPlayerbot.GearProgressionSystem.1.3.1.13 = 19991	# Trinket 2
+AiPlayerbot.GearProgressionSystem.1.3.1.13 = 18473	# Trinket 2
 AiPlayerbot.GearProgressionSystem.1.3.1.14 = 13340	# Back
-AiPlayerbot.GearProgressionSystem.1.3.1.15 = 13052	# Main Hand
+AiPlayerbot.GearProgressionSystem.1.3.1.15 = 22314	# Main Hand
 AiPlayerbot.GearProgressionSystem.1.3.1.16 = 0		# Off Hand
-AiPlayerbot.GearProgressionSystem.1.3.1.17 = 19107	# Ranged
+AiPlayerbot.GearProgressionSystem.1.3.1.17 = 12651	# Ranged
 AiPlayerbot.GearProgressionSystem.1.3.1.18 = 5976	# Tabard
 
 # Level 1 (1) Hunter (3) Survival (2)
-# https://www.wowhead.com/classic/gear-planner/hunter/dwarf/BDwAAAEAR_UCADwzAwA0LgUALc4GAEfZBwA61ggAVi0JAEfHCgBV_wsASEQMADMqDQA2jQ4AThcPADQcEAAy_BIASqM
+# https://www.wowhead.com/classic/gear-planner/hunter/orc/BDwOUwACAFBfBSUQMFEwUf8AAAAKZ4EAR_UAPCoCAFdEgwAyfwBYR4UALc4ATjkGAFbYhwA61gA8KogAVi0ATjeJAEfHAB5jigA61wBOLAsASEQMAEhEDQA2jQ4ASCmPADQcADY6kABXKgA2cZIAMWsAMKw
 AiPlayerbot.GearProgressionSystem.1.3.2.0 = 18421	# Head
-AiPlayerbot.GearProgressionSystem.1.3.2.1 = 15411	# Neck
-AiPlayerbot.GearProgressionSystem.1.3.2.2 = 13358	# Shoulder
+AiPlayerbot.GearProgressionSystem.1.3.2.1 = 22340	# Neck
+AiPlayerbot.GearProgressionSystem.1.3.2.2 = 12927	# Shoulder
 AiPlayerbot.GearProgressionSystem.1.3.2.3 = 0		# Shirt
 AiPlayerbot.GearProgressionSystem.1.3.2.4 = 11726	# Chest
-AiPlayerbot.GearProgressionSystem.1.3.2.5 = 18393	# Waist
+AiPlayerbot.GearProgressionSystem.1.3.2.5 = 22232	# Waist
 AiPlayerbot.GearProgressionSystem.1.3.2.6 = 15062	# Legs
 AiPlayerbot.GearProgressionSystem.1.3.2.7 = 22061	# Feet
 AiPlayerbot.GearProgressionSystem.1.3.2.8 = 18375	# Wrists
-AiPlayerbot.GearProgressionSystem.1.3.2.9 = 22015	# Hands
+AiPlayerbot.GearProgressionSystem.1.3.2.9 = 15063	# Hands
 AiPlayerbot.GearProgressionSystem.1.3.2.10 = 18500	# Finger 1
-AiPlayerbot.GearProgressionSystem.1.3.2.11 = 13098	# Finger 2
+AiPlayerbot.GearProgressionSystem.1.3.2.11 = 18500	# Finger 2
 AiPlayerbot.GearProgressionSystem.1.3.2.12 = 13965	# Trinket 1
-AiPlayerbot.GearProgressionSystem.1.3.2.13 = 19991	# Trinket 2
+AiPlayerbot.GearProgressionSystem.1.3.2.13 = 18473	# Trinket 2
 AiPlayerbot.GearProgressionSystem.1.3.2.14 = 13340	# Back
-AiPlayerbot.GearProgressionSystem.1.3.2.15 = 13052	# Main Hand
+AiPlayerbot.GearProgressionSystem.1.3.2.15 = 22314	# Main Hand
 AiPlayerbot.GearProgressionSystem.1.3.2.16 = 0		# Off Hand
-AiPlayerbot.GearProgressionSystem.1.3.2.17 = 19107	# Ranged
+AiPlayerbot.GearProgressionSystem.1.3.2.17 = 12651	# Ranged
 AiPlayerbot.GearProgressionSystem.1.3.2.18 = 5976	# Tabard
 
 # Level 1 (1) Rogue (4) Assassination (0)

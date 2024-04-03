@@ -35,7 +35,7 @@ bool CastCustomSpellAction::Execute(Event& event)
     if (ai->IsInVehicle() && !ai->IsInVehicle(false, false, true))
         return false;
 
-    Unit* target = NULL;
+    Unit* target = nullptr;
     std::string text = getQualifier();
 
     if(text.empty())
@@ -49,17 +49,17 @@ bool CastCustomSpellAction::Execute(Event& event)
         return true;
     }
 
+    GameObject* gameObjectTarget = nullptr;
     std::list<ObjectGuid> gos = chat->parseGameobjects(text);
-
     if (!gos.empty())
     {
         for (auto go : gos)
         {
-            if (!target)
-                target = ai->GetUnit(go);
+            if (!gameObjectTarget)
+                gameObjectTarget = ai->GetGameObject(go);
 
-            if(target)
-                chat->eraseAllSubStr(text, chat->formatWorldobject(target));
+            if(gameObjectTarget)
+                chat->eraseAllSubStr(text, chat->formatWorldobject(gameObjectTarget));
         }
 
         ltrim(text);
@@ -82,8 +82,7 @@ bool CastCustomSpellAction::Execute(Event& event)
     if (!requester) //Use self as requester for permissions.
         requester = bot;
 
-    Item* itemTarget = NULL;
-
+    Item* itemTarget = nullptr;
     int pos = FindLastSeparator(text, " ");
     int castCount = 1;
     if (pos != std::string::npos)
@@ -133,9 +132,15 @@ bool CastCustomSpellAction::Execute(Event& event)
         itemTarget = nullptr;
     }
 
-    if (target != bot && !sServerFacade.IsInFront(bot, target, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))
+    WorldObject* woTarget = nullptr;
+    if (gameObjectTarget)
+        woTarget = gameObjectTarget;
+    else
+        woTarget = target;
+
+    if (woTarget != bot && !sServerFacade.IsInFront(bot, woTarget, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))
     {
-        sServerFacade.SetFacingTo(bot, target);
+        sServerFacade.SetFacingTo(bot, woTarget);
         SetDuration(sPlayerbotAIConfig.globalCoolDown);
         std::ostringstream msg;
         msg << "cast " << text;
@@ -189,6 +194,11 @@ bool CastCustomSpellAction::Execute(Event& event)
         replyStr << " " << BOT_TEXT("command_target_item");
         replyArgs["%item"] = chat->formatItem(itemTarget);
     }
+    else if (gameObjectTarget)
+    {
+        replyStr << " " << BOT_TEXT("command_target_item");
+        replyArgs["%item"] = chat->formatGameobject(gameObjectTarget);
+    }
     else if (pSpellInfo->EffectItemType)
     {
         replyStr << "";
@@ -203,7 +213,8 @@ bool CastCustomSpellAction::Execute(Event& event)
         replyArgs["%unit"] = target->GetName();
     }
 
-    if (!bot->GetTrader() && !ai->CanCastSpell(spell, target, 0, true, itemTarget, false))
+    const bool canCast = gameObjectTarget ? ai->CanCastSpell(spell, gameObjectTarget, 0, true, itemTarget, false) : ai->CanCastSpell(spell, target, 0, true, itemTarget, false);
+    if (!bot->GetTrader() && !canCast)
     {
         std::map<std::string, std::string> args;
         args["%spell"] = replyArgs["%spell"];
@@ -214,7 +225,7 @@ bool CastCustomSpellAction::Execute(Event& event)
     MotionMaster& mm = *bot->GetMotionMaster();
     uint32 spellDuration = sPlayerbotAIConfig.globalCoolDown;
 
-    bool result = spell ? ai->CastSpell(spell, target, itemTarget,true, &spellDuration) : ai->CastSpell(text, target, itemTarget, true, &spellDuration);
+    bool result = gameObjectTarget ? ai->CastSpell(spell, gameObjectTarget, itemTarget, true, &spellDuration) : ai->CastSpell(spell, target, itemTarget, true, &spellDuration);
     if (result)
     {
         SetDuration(spellDuration);
@@ -509,7 +520,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
 
     if (spellItem)
     {
-        if (ai->CastSpell(spellId, nullptr, spellItem, false, &spellDuration))
+        if (ai->CastSpell(spellId, bot, spellItem, false, &spellDuration))
         {
             ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatItem(spellItem), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             executed = true;
@@ -520,14 +531,21 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
     {
         if (wo->GetObjectGuid().IsUnit())
         {
-            if (ai->CastSpell(spellId, (Unit*)(wo), nullptr, false, &spellDuration))
+            if (ai->CastSpell(spellId, (Unit*)wo, nullptr, false, &spellDuration))
             {
                 ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 executed = true;
             }
         }
-
-        if (!executed)
+        else if (wo->GetObjectGuid().IsGameObject())
+        {
+            if (ai->CastSpell(spellId, (GameObject*)wo, nullptr, false, &spellDuration))
+            {
+                ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                executed = true;
+            }
+        }
+        else
         {
             if (ai->CastSpell(spellId, wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ(), nullptr, false, &spellDuration))
             {
@@ -539,7 +557,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
 
     if (!executed)
     {
-        if (ai->CastSpell(spellId, nullptr, nullptr, false, &spellDuration))
+        if (ai->CastSpell(spellId, bot, nullptr, false, &spellDuration))
         {
             ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             executed = true;

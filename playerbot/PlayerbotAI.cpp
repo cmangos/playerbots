@@ -3384,7 +3384,141 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool
     return true;
 }
 
-bool PlayerbotAI::CastSpell(uint32 spellId, float x, float y, float z, Item* itemTarget, bool waitForSpell, uint32* outSpellDuration, bool canUseReagentCheat)
+bool PlayerbotAI::CastSpell(uint32 spellId, GameObject* goTarget, Item* itemTarget, bool waitForSpell, uint32* outSpellDuration)
+{
+    if (!spellId)
+        return false;
+
+    aiObjectContext->GetValue<LastMovement&>("last movement")->Get().Set(NULL);
+    aiObjectContext->GetValue<time_t>("stay time")->Set(0);
+
+    MotionMaster& mm = *bot->GetMotionMaster();
+
+    if (bot->IsFlying() || bot->IsTaxiFlying())
+        return false;
+
+    //bot->clearUnitState(UNIT_STAT_CHASE);
+    //bot->clearUnitState(UNIT_STAT_FOLLOW);
+
+    bool failWithDelay = false;
+    if (!bot->IsStandState())
+    {
+        bot->SetStandState(UNIT_STAND_STATE_STAND);
+        failWithDelay = true;
+    }
+
+    WorldObject* faceTo = goTarget;
+    if (!sServerFacade.IsInFront(bot, faceTo, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))
+    {
+        sServerFacade.SetFacingTo(bot, faceTo);
+        //failWithDelay = true;
+    }
+
+    if (failWithDelay)
+    {
+        if (waitForSpell)
+        {
+            SetAIInternalUpdateDelay(sPlayerbotAIConfig.globalCoolDown);
+        }
+
+        if (outSpellDuration)
+        {
+            *outSpellDuration = sPlayerbotAIConfig.globalCoolDown;
+        }
+
+        return false;
+    }
+
+    const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
+    Spell* spell = new Spell(bot, pSpellInfo, false);
+
+    SpellCastTargets targets;
+    if (pSpellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+    {
+        WorldLocation aoe = aiObjectContext->GetValue<WorldLocation>("aoe position")->Get();
+        if (aoe.coord_x != 0)
+            targets.setDestination(aoe.coord_x, aoe.coord_y, aoe.coord_z);
+        else if (goTarget && goTarget->GetObjectGuid() != bot->GetObjectGuid())
+            targets.setDestination(goTarget->GetPositionX(), goTarget->GetPositionY(), goTarget->GetPositionZ());
+    }
+    else if (pSpellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
+    {
+        targets.setDestination(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ());
+    }
+
+    targets.setGOTarget(goTarget);
+    spell->SetCastItem(itemTarget ? itemTarget : aiObjectContext->GetValue<Item*>("item for spell", spellId)->Get());
+    targets.setItemTarget(spell->GetCastItem());
+
+    if (goTarget->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+    {
+        auto context = GetAiObjectContext();
+        AI_VALUE(LootObjectStack*, "available loot")->Add(goTarget->GetObjectGuid());
+    }
+
+    if (spellId == 1953) // simulate blink coordinates
+    {
+        float angle = bot->GetOrientation();
+        float distance = 20.0f;
+        float fx = bot->GetPositionX() + cos(angle) * distance;
+        float fy = bot->GetPositionY() + sin(angle) * distance;
+        float fz = bot->GetPositionZ();
+
+        float ox, oy, oz;
+        bot->GetPosition(ox, oy, oz);
+        //#ifdef MANGOSBOT_TWO
+        //        bot->GetMap()->GetHitPosition(ox, oy, oz + max_height, fx, fy, fz, bot->GetPhaseMask(), -0.5f);
+        //#else
+        //        bot->GetMap()->GetHitPosition(ox, oy, oz + 2.0f, fx, fy, fz, -0.5f);
+        //#endif
+        bot->UpdateAllowedPositionZ(fx, fy, fz);
+        targets.setDestination(fx, fy, fz);
+    }
+
+    // Fail the cast if the bot is moving and the spell is a casting/channeled spell
+    const bool isMoving = !bot->IsStopped() || bot->IsFalling();
+    if (isMoving && ((GetSpellCastTime(pSpellInfo, bot, spell) > 0) || (IsChanneledSpell(pSpellInfo) && (GetSpellDuration(pSpellInfo) > 0))))
+    {
+        if (IsJumping() || bot->IsFalling())
+        {
+            spell->cancel();
+            return false;
+        }
+        StopMoving();
+    }
+
+    SpellCastResult spellSuccess = spell->SpellStart(&targets);
+    if (spellSuccess != SPELL_CAST_OK)
+        return false;
+
+    PlayAttackEmote(6);
+
+    if (waitForSpell)
+    {
+        WaitForSpellCast(spell);
+    }
+
+    if (outSpellDuration)
+    {
+        *outSpellDuration = GetSpellCastDuration(spell);
+    }
+
+    if (spell->GetCastTime() || (IsChanneledSpell(pSpellInfo) && GetSpellDuration(pSpellInfo) > 0))
+        aiObjectContext->GetValue<LastSpellCast&>("last spell cast")->Get().Set(spellId, goTarget->GetObjectGuid(), time(0));
+
+    aiObjectContext->GetValue<ai::PositionMap&>("position")->Get()["random"].Reset();
+
+    if (HasStrategy("debug spell", BotState::BOT_STATE_NON_COMBAT))
+    {
+        std::ostringstream out;
+        out << "Casting " << ChatHelper::formatSpell(pSpellInfo);
+        TellPlayerNoFacing(GetMaster(), out);
+    }
+
+    return true;
+}
+
+bool PlayerbotAI::CastSpell(uint32 spellId, float x, float y, float z, Item* itemTarget, bool waitForSpell, uint32* outSpellDuration)
 {
     if (!spellId)
         return false;
@@ -5261,6 +5395,12 @@ void PlayerbotAI::InventoryTellItem(Player* player, ItemPrototype const* proto, 
 
 std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItemsMask mask)
 {
+    if(text.empty())
+    {
+        std::list<Item*> result;
+        return result;
+    }
+
     AiObjectContext* context = aiObjectContext;
 
     std::set<Item*> found;

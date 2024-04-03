@@ -334,7 +334,7 @@ bool UseItemAction::UseGameObject(Player* requester, Event& event, ObjectGuid gu
                 return false;
             };
 
-            // Find a spell that can open
+            // Find a spell that can open the door
             uint32 spellId = 0;
             for (PlayerSpellMap::iterator itr = bot->GetSpellMap().begin(); itr != bot->GetSpellMap().end(); ++itr)
             {
@@ -342,15 +342,6 @@ bool UseItemAction::UseGameObject(Player* requester, Event& event, ObjectGuid gu
                 if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled || IsPassiveSpell(possibleSpellId))
                     continue;
 
-                if (CanOpenLock(sServerFacade.LookupSpellInfo(possibleSpellId), go))
-                {
-                    spellId = possibleSpellId;
-                    break;
-                }
-            }
-
-            for (uint32 possibleSpellId = 0; possibleSpellId < sServerFacade.GetSpellInfoRows(); possibleSpellId++)
-            {
                 if (CanOpenLock(sServerFacade.LookupSpellInfo(possibleSpellId), go))
                 {
                     spellId = possibleSpellId;

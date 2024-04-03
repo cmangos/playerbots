@@ -73,11 +73,7 @@ bool OpenLootAction::DoLoot(LootObject& lootObject)
     if (creature && sServerFacade.GetDistance2d(bot, creature) > INTERACTION_DISTANCE)
         return false;
 
-    if (creature && creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE)
-#ifdef CMANGOS
-            && !creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE)
-#endif
-            )
+    if (creature && creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) && !creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
     {        
         if (!lootObject.IsLootPossible(bot)) //Clear loot if bot can't loot it.
             return true;
@@ -121,12 +117,7 @@ bool OpenLootAction::DoLoot(LootObject& lootObject)
     if (go && sServerFacade.GetDistance2d(bot, go) > INTERACTION_DISTANCE)
         return false;
 
-    if (go && (
-#ifdef CMANGOS
-        go->IsInUse() || 
-#endif
-        go->GetGoState() != GO_STATE_READY
-        ))
+    if (go && (go->IsInUse() || go->GetGoState() != GO_STATE_READY))
         return false;
 
     if (lootObject.skillId == SKILL_MINING)

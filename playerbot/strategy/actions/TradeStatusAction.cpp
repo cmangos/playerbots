@@ -68,6 +68,7 @@ bool TradeStatusAction::Execute(Event& event)
             }
 
             bot->GetSession()->HandleAcceptTradeOpcode(p);
+
             if (bot->GetTradeData())
             {
                 sRandomPlayerbotMgr.SetTradeDiscount(bot, trader, discount);
@@ -85,7 +86,6 @@ bool TradeStatusAction::Execute(Event& event)
                     craftData.AddObtained(itemId, count);
                 }
             }
-
 
             for (std::map<uint32, uint32>::iterator i = takenItemIds.begin(); i != takenItemIds.end(); ++i)
             {
@@ -114,7 +114,6 @@ bool TradeStatusAction::Execute(Event& event)
 
     return false;
 }
-
 
 void TradeStatusAction::BeginTrade()
 {

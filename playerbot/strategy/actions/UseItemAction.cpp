@@ -241,7 +241,7 @@ bool UseItemAction::Execute(Event& event)
     {
         if (items.empty())
         {
-            return UseGameObject(requester, *gos.begin());
+            return UseGameObject(requester, event, *gos.begin());
         }
         else
         {
@@ -258,23 +258,149 @@ bool UseItemAction::isPossible()
     return getName() == "use" || (AI_VALUE2(uint32, "item count", getName()) > 0 || ai->HasCheat(BotCheatMask::item));
 }
 
-bool UseItemAction::UseGameObject(Player* requester, ObjectGuid guid)
+bool UseItemAction::UseGameObject(Player* requester, Event& event, ObjectGuid guid)
 {
     GameObject* go = ai->GetGameObject(guid);
-    if (!go || !sServerFacade.isSpawned(go)
-#ifdef CMANGOS
-        || go->IsInUse()
-#endif
-        || go->GetGoState() != GO_STATE_READY)
+    if (!go || !sServerFacade.isSpawned(go) || go->IsInUse() || go->GetGoState() != GO_STATE_READY)
         return false;
 
-    std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
-    *packet << guid;
-    bot->GetSession()->QueuePacket(std::move(packet));
+    if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+    {
+        SET_AI_VALUE(LootObject, "loot target", LootObject(bot, guid));
+
+        if (ai->DoSpecificAction("open loot", event, true))
+        {
+            std::ostringstream out; out << "Looting " << chat->formatGameobject(go);
+            ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            return true;
+        }
+        else
+        {
+            std::ostringstream out; out << "Failed to loot " << chat->formatGameobject(go);
+            ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+        }
+    }
+    else if(go->GetGoType() == GAMEOBJECT_TYPE_DOOR)
+    {
+        uint32 lockId = go->GetGOInfo()->GetLockId();
+        LockEntry const* lockInfo = sLockStore.LookupEntry(lockId);
+        if (lockInfo)
+        {
+            auto CanOpenLock = [this](const SpellEntry* pSpellInfo, GameObject* go) -> bool
+            {
+                if (!pSpellInfo)
+                    return false;
+
+                for (int effIndex = 0; effIndex <= EFFECT_INDEX_2; effIndex++)
+                {
+                    if (pSpellInfo->Effect[effIndex] != SPELL_EFFECT_OPEN_LOCK && pSpellInfo->Effect[effIndex] != SPELL_EFFECT_SKINNING)
+                        return false;
+
+                    uint32 lockId = go->GetGOInfo()->GetLockId();
+                    if (!lockId)
+                        return false;
+
+                    LockEntry const* lockInfo = sLockStore.LookupEntry(lockId);
+                    if (!lockInfo)
+                        return false;
+
+                    bool reqKey = false;
+                    for (int j = 0; j < 8; ++j)
+                    {
+                        if (lockInfo->Type[j] == LOCK_KEY_SKILL)
+                        {
+                            if (uint32(pSpellInfo->EffectMiscValue[effIndex]) != lockInfo->Index[j])
+                            {
+                                continue;
+                            }
+
+                            uint32 skillId = SkillByLockType(LockType(lockInfo->Index[j]));
+                            if (skillId == SKILL_NONE)
+                            {
+                                return true;
+                            }
+
+                            uint32 skillValue = bot->GetSkillValue(skillId);
+                            uint32 reqSkillValue = lockInfo->Skill[j];
+                            if (skillValue >= reqSkillValue || !reqSkillValue)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            };
+
+            // Find a spell that can open
+            uint32 spellId = 0;
+            for (PlayerSpellMap::iterator itr = bot->GetSpellMap().begin(); itr != bot->GetSpellMap().end(); ++itr)
+            {
+                uint32 possibleSpellId = itr->first;
+                if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled || IsPassiveSpell(possibleSpellId))
+                    continue;
+
+                if (CanOpenLock(sServerFacade.LookupSpellInfo(possibleSpellId), go))
+                {
+                    spellId = possibleSpellId;
+                    break;
+                }
+            }
+
+            for (uint32 possibleSpellId = 0; possibleSpellId < sServerFacade.GetSpellInfoRows(); possibleSpellId++)
+            {
+                if (CanOpenLock(sServerFacade.LookupSpellInfo(possibleSpellId), go))
+                {
+                    spellId = possibleSpellId;
+                    break;
+                }
+            }
+
+            if (spellId)
+            {
+                if (ai->CastSpell(spellId, go))
+                {
+                    std::ostringstream out; out << "Opening " << chat->formatGameobject(go);
+                    ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                    return true;
+                }
+                else
+                {
+                    std::ostringstream out; out << "Failed to open " << chat->formatGameobject(go);
+                    ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                }
+            }
+            else
+            {
+                std::ostringstream out; out << "I can't open " << chat->formatGameobject(go);
+                ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            }
+        }
+        else
+        {
+            std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
+            *packet << guid;
+            bot->GetSession()->QueuePacket(std::move(packet));
+
+            std::ostringstream out; out << "Using " << chat->formatGameobject(go);
+            ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            return true;
+        }
+    }
+    else
+    {
+        std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
+        *packet << guid;
+        bot->GetSession()->QueuePacket(std::move(packet));
     
-   std::ostringstream out; out << "Using " << chat->formatGameobject(go);
-   ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-   return true;
+        std::ostringstream out; out << "Using " << chat->formatGameobject(go);
+        ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        return true;
+    }
+
+   return false;
 }
 
 bool UseItemAction::UseItemAuto(Player* requester, Item* item)

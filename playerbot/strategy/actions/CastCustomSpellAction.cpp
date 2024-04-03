@@ -119,6 +119,7 @@ bool CastCustomSpellAction::Execute(Event& event)
 
     // Don't use totem items for totem spells (except enchanting bars)
     if (pSpellInfo->Totem[0] > 0 && 
+        pSpellInfo->Totem[0] != 5060 &&
         pSpellInfo->Totem[0] != 6218 &&
         pSpellInfo->Totem[0] != 6339 &&
         pSpellInfo->Totem[0] != 11130 &&

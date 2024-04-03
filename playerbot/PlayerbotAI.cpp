@@ -3256,7 +3256,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool
     Spell *spell = new Spell(bot, pSpellInfo, false);
 
     SpellCastTargets targets;
-    if (pSpellInfo->Targets & TARGET_FLAG_ITEM)
+    if ((pSpellInfo->Targets & TARGET_FLAG_ITEM) || spellId == 1804)
     {
         spell->SetCastItem(itemTarget ? itemTarget : aiObjectContext->GetValue<Item*>("item for spell", spellId)->Get());
         targets.setItemTarget(spell->GetCastItem());
@@ -3342,12 +3342,15 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK ||
         pSpellInfo->Effect[0] == SPELL_EFFECT_SKINNING)
     {
-        LootObject loot = *aiObjectContext->GetValue<LootObject>("loot target");
-        if (!loot.IsLootPossible(bot))
+        if (!spell->m_targets.getItemTarget())
         {
-            spell->cancel();
-            //delete spell;
-            return false;
+            LootObject loot = *aiObjectContext->GetValue<LootObject>("loot target");
+            if (!loot.IsLootPossible(bot))
+            {
+                spell->cancel();
+                //delete spell;
+                return false;
+            }
         }
     }
 
@@ -3578,7 +3581,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId, float x, float y, float z, Item* ite
     Spell* spell = new Spell(bot, pSpellInfo, false);
 
     SpellCastTargets targets;
-    if (pSpellInfo->Targets & TARGET_FLAG_ITEM)
+    if ((pSpellInfo->Targets & TARGET_FLAG_ITEM) || spellId == 1804)
     {
         spell->SetCastItem(itemTarget ? itemTarget : aiObjectContext->GetValue<Item*>("item for spell", spellId)->Get());
         targets.setItemTarget(spell->GetCastItem());
@@ -3625,12 +3628,15 @@ bool PlayerbotAI::CastSpell(uint32 spellId, float x, float y, float z, Item* ite
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK ||
         pSpellInfo->Effect[0] == SPELL_EFFECT_SKINNING)
     {
-        LootObject loot = *aiObjectContext->GetValue<LootObject>("loot target");
-        if (!loot.IsLootPossible(bot))
+        if (!spell->m_targets.getItemTarget())
         {
-            spell->cancel();
-            //delete spell;
-            return false;
+            LootObject loot = *aiObjectContext->GetValue<LootObject>("loot target");
+            if (!loot.IsLootPossible(bot))
+            {
+                spell->cancel();
+                //delete spell;
+                return false;
+            }
         }
     }
 

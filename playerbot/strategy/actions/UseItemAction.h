@@ -35,7 +35,7 @@ namespace ai
         bool UseItemOnItem(Player* requester, Item* item, Item* itemTarget);
         bool UseItemOnTarget(Player* requester, Item* item, Unit* target);
         bool UseItem(Player* requester, Item* item, ObjectGuid go, Item* itemTarget, Unit* unitTarget = nullptr);
-        bool UseGameObject(Player* requester, ObjectGuid guid);
+        bool UseGameObject(Player* requester, Event& event, ObjectGuid guid);
         bool SocketItem(Player* requester, Item * item, Item * gem, bool replace = false);
         void TellConsumableUse(Player* requester, Item* item, std::string action, float percent);
 

@@ -393,15 +393,17 @@ public:
     Aura* GetAura(std::string spellName, Unit* player, bool checkOwner = false);
     std::vector<Aura*> GetAuras(Unit* player);
 
-    virtual bool CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget = NULL, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
-    bool CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = NULL, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
+    bool HasSpellItems(uint32 spellId, const Item* castItem) const;
+
+    virtual bool CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
+    bool CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
     bool CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effectMask, bool checkHasSpell = true, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
-    bool CanCastSpell(uint32 spellid, float x, float y, float z, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = NULL, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
+    bool CanCastSpell(uint32 spellid, float x, float y, float z, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
     bool CanCastVehicleSpell(uint32 spellid, Unit* target);
 
-    virtual bool CastSpell(std::string name, Unit* target, Item* itemTarget = NULL, bool waitForSpell = true, uint32* outSpellDuration = NULL, bool canUseReagentCheat = true);
-    bool CastSpell(uint32 spellId, Unit* target, Item* itemTarget = NULL, bool waitForSpell = true, uint32* outSpellDuration = NULL, bool canUseReagentCheat = true);
-    bool CastSpell(uint32 spellId, float x, float y, float z, Item* itemTarget = NULL, bool waitForSpell = true, uint32* outSpellDuration = NULL, bool canUseReagentCheat = true);
+    virtual bool CastSpell(std::string name, Unit* target, Item* itemTarget = nullptr, bool waitForSpell = true, uint32* outSpellDuration = nullptr);
+    bool CastSpell(uint32 spellId, Unit* target, Item* itemTarget = nullptr, bool waitForSpell = true, uint32* outSpellDuration = nullptr);
+    bool CastSpell(uint32 spellId, float x, float y, float z, Item* itemTarget = nullptr, bool waitForSpell = true, uint32* outSpellDuration = nullptr);
     bool CastPetSpell(uint32 spellId, Unit* target);
     bool CastVehicleSpell(uint32 spellId, Unit* target);
     bool CastVehicleSpell(uint32 spellId, float x, float y, float z);
@@ -479,7 +481,7 @@ public:
     bool AllowActive(ActivityType activityType);
     bool AllowActivity(ActivityType activityType = ALL_ACTIVITY, bool checkNow = false);
 
-    bool HasCheat(BotCheatMask mask) { return ((uint32)mask & (uint32)cheatMask) != 0 || ((uint32)mask & (uint32)sPlayerbotAIConfig.botCheatMask) != 0; }
+    bool HasCheat(BotCheatMask mask) const { return ((uint32)mask & (uint32)cheatMask) != 0 || ((uint32)mask & (uint32)sPlayerbotAIConfig.botCheatMask) != 0; }
     BotCheatMask GetCheat() { return cheatMask; }
     void SetCheat(BotCheatMask mask) { cheatMask = mask; }
 
@@ -526,7 +528,6 @@ public:
 
     void SetMoveToTransport(bool flag = true) { isMovingToTransport = flag; }
     bool GetMoveToTransport() { return isMovingToTransport; }
-
 
     void SetShouldLogOut(bool val = true) { shouldLogOut = val; }
     bool GetShouldLogOut() { return shouldLogOut; }

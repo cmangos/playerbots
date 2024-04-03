@@ -3008,8 +3008,6 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
 	//if (oldSel)
 	//	bot->SetSelectionGuid(oldSel);
 
-    const bool ignoreReagents = HasCheat(BotCheatMask::item);
-
     switch (result)
     {
         case SPELL_FAILED_NOT_INFRONT:
@@ -3022,9 +3020,6 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
         case SPELL_FAILED_OUT_OF_RANGE:
         case SPELL_FAILED_LINE_OF_SIGHT:
             return ignoreRange;
-        case SPELL_FAILED_REAGENTS:
-        case SPELL_FAILED_TOTEMS:
-            return ignoreReagents;
         case SPELL_FAILED_AFFECTING_COMBAT:
             return ignoreInCombat;
         case SPELL_FAILED_NOT_MOUNTED:
@@ -3088,8 +3083,6 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effec
     //if (oldSel)
     //    bot->SetSelectionGuid(oldSel);
 
-    const bool ignoreReagents = HasCheat(BotCheatMask::item);
-
     switch (result)
     {
     case SPELL_FAILED_NOT_INFRONT:
@@ -3101,8 +3094,6 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effec
         return true;
     case SPELL_FAILED_OUT_OF_RANGE:
         return ignoreRange;
-    case SPELL_FAILED_REAGENTS:
-        return ignoreReagents;
     case SPELL_FAILED_AFFECTING_COMBAT:
         return ignoreInCombat;
     case SPELL_FAILED_NOT_MOUNTED:
@@ -3153,8 +3144,6 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, float x, float y, float z, uint8 
     SpellCastResult result = spell->CheckCast(true);
     delete spell;
 
-    const bool ignoreReagents = HasCheat(BotCheatMask::item);
-
     switch (result)
     {
     case SPELL_FAILED_NOT_INFRONT:
@@ -3166,8 +3155,6 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, float x, float y, float z, uint8 
         return true;
     case SPELL_FAILED_OUT_OF_RANGE:
         return ignoreRange;
-    case SPELL_FAILED_REAGENTS:
-        return ignoreReagents;
     case SPELL_FAILED_AFFECTING_COMBAT:
         return ignoreInCombat;
     case SPELL_FAILED_NOT_MOUNTED:
@@ -3197,9 +3184,9 @@ uint8 PlayerbotAI::GetManaPercent() const
    return GetManaPercent(*bot);
 }
 
-bool PlayerbotAI::CastSpell(std::string name, Unit* target, Item* itemTarget, bool waitForSpell, uint32* outSpellDuration, bool canUseReagentCheat)
+bool PlayerbotAI::CastSpell(std::string name, Unit* target, Item* itemTarget, bool waitForSpell, uint32* outSpellDuration)
 {
-    bool result = CastSpell(aiObjectContext->GetValue<uint32>("spell id", name)->Get(), target, itemTarget, waitForSpell, outSpellDuration, canUseReagentCheat);
+    bool result = CastSpell(aiObjectContext->GetValue<uint32>("spell id", name)->Get(), target, itemTarget, waitForSpell, outSpellDuration);
     if (result)
     {
         aiObjectContext->GetValue<time_t>("last spell cast time", name)->Set(time(0));
@@ -3208,7 +3195,7 @@ bool PlayerbotAI::CastSpell(std::string name, Unit* target, Item* itemTarget, bo
     return result;
 }
 
-bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool waitForSpell, uint32* outSpellDuration, bool canUseReagentCheat)
+bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool waitForSpell, uint32* outSpellDuration)
 {
     if (!spellId)
         return false;
@@ -3350,20 +3337,6 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool
         StopMoving();
     }
 
-    if (HasCheat(BotCheatMask::item) && canUseReagentCheat)
-    {
-        for (uint8 i = 0; i < MAX_SPELL_REAGENTS; i++)
-        {
-            const int32 itemId = pSpellInfo->Reagent[i];
-            if (itemId)
-            {
-                spell->m_ignoreCosts = true;
-                spell->SetPowerCost(spell->CalculatePowerCost(spell->m_spellInfo, bot, spell, spell->GetCastItem(), false));
-                break;              
-            }
-        }       
-    }   
-
     SpellCastResult spellSuccess = spell->SpellStart(&targets);
 
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK ||
@@ -3503,51 +3476,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId, float x, float y, float z, Item* ite
         return false;
     }
 
-    // Prepare the reagents if cheats enabled
-    if (HasCheat(BotCheatMask::item) && canUseReagentCheat)
-    {
-        std::vector<std::pair<int32, uint32>> spellReagents;
-        for (uint8 i = 0; i < MAX_SPELL_REAGENTS; i++)
-        {
-            const int32 itemId = pSpellInfo->Reagent[i];
-            if (itemId)
-            {
-                const uint32 itemAmount = pSpellInfo->ReagentCount[i];
-                if (itemAmount > 0)
-                {
-                    const uint32 currentItemAmount = bot->GetItemCount(itemId);
-                    if (currentItemAmount < itemAmount)
-                    {
-                        spellReagents.emplace_back((uint32)itemId, itemAmount - currentItemAmount);
-                    }
-                }
-            }
-        }
-
-        if (!spellReagents.empty())
-        {
-            for (auto& pair : spellReagents)
-            {
-                // Check bag space and find places
-                const uint32 itemId = pair.first;
-                const uint32 amount = pair.second;
-                ItemPosCountVec dest;
-                uint8 msg = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, amount);
-                if (msg == EQUIP_ERR_OK)
-                {
-                    Item* item = bot->StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
-                    bot->SendNewItem(item, amount, false, true, false);
-                }
-            }
-        }
-    }
-
-#ifdef MANGOS
-    spell->prepare(&targets);
-#endif
-#ifdef CMANGOS
     spell->SpellStart(&targets);
-#endif
 
     if (sServerFacade.isMoving(bot) && spell->GetCastTime())
     {
@@ -4138,13 +4067,91 @@ bool PlayerbotAI::IsHerb(const GameObject* go)
     return false;
 }
 
+bool PlayerbotAI::HasSpellItems(uint32 spellId, const Item* castItem) const
+{
+    const SpellEntry* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+    if (spellEntry)
+    {
+        if (HasCheat(BotCheatMask::item))
+        {
+            return true;
+        }
+        else
+        {
+            if (!bot->CanNoReagentCast(spellEntry))
+            {
+                for (uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
+                {
+                    if (spellEntry->Reagent[i] <= 0)
+                    {
+                        continue;
+                    }
+
+                    uint32 itemid = spellEntry->Reagent[i];
+                    uint32 itemcount = spellEntry->ReagentCount[i];
+
+                    // if CastItem is also spell reagent
+                    if (castItem && castItem->GetEntry() == itemid)
+                    {
+                        const ItemPrototype* proto = castItem->GetProto();
+                        if (!proto)
+                        {
+                            return false;
+                        }
+
+                        for (uint8 s = 0; s < MAX_ITEM_PROTO_SPELLS; ++s)
+                        {
+                            // CastItem will be used up and does not count as reagent
+                            int32 charges = castItem->GetSpellCharges(s);
+                            if (proto->Spells[s].SpellCharges < 0 && abs(charges) < 2)
+                            {
+                                ++itemcount;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!bot->HasItemCount(itemid, itemcount))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            // check totem-item requirements (items presence in inventory)
+            uint32 totems = MAX_SPELL_TOTEMS;
+            for (auto i : spellEntry->Totem)
+            {
+                if (i != 0)
+                {
+                    if (bot->HasItemCount(i, 1))
+                    {
+                        totems -= 1;
+                    }
+                }
+                else
+                {
+                    totems -= 1;
+                }
+            }
+
+            if (totems != 0)
+            {
+                return false;
+            }
+        }
+    }
+
+    return false;
+}
+
 bool IsAlliance(uint8 race)
 {
     return race == RACE_HUMAN || race == RACE_DWARF || race == RACE_NIGHTELF ||
 #ifndef MANGOSBOT_ZERO
-        race == RACE_DRAENEI ||
+           race == RACE_DRAENEI ||
 #endif
-            race == RACE_GNOME;
+           race == RACE_GNOME;
 }
 
 /*

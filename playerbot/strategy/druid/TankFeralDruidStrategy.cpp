@@ -269,7 +269,7 @@ void TankFeralDruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 
     triggers.push_back(new TriggerNode(
         "bear form",
-        NextAction::array(0, new NextAction("dire bear form", ACTION_MOVE), NULL)));
+        NextAction::array(0, new NextAction("dire bear form", ACTION_MOVE + 9), NULL)));
 
     triggers.push_back(new TriggerNode(
         "enrage",

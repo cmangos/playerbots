@@ -172,7 +172,6 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
     masterIncomingPacketHandlers.AddHandler(CMSG_REPOP_REQUEST, "release spirit");
     masterIncomingPacketHandlers.AddHandler(CMSG_RECLAIM_CORPSE, "revive from corpse");
     
-
 #ifdef MANGOSBOT_TWO
     masterIncomingPacketHandlers.AddHandler(CMSG_LFG_TELEPORT, "lfg teleport");
 #endif
@@ -201,7 +200,6 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
     botOutgoingPacketHandlers.AddHandler(MSG_RAID_READY_CHECK, "ready check");
     botOutgoingPacketHandlers.AddHandler(SMSG_QUEST_CONFIRM_ACCEPT, "confirm quest");
 
-    
 #ifndef MANGOSBOT_ZERO
     botOutgoingPacketHandlers.AddHandler(SMSG_ARENA_TEAM_INVITE, "arena team invite");
 #endif
@@ -210,18 +208,14 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
     botOutgoingPacketHandlers.AddHandler(SMSG_LFG_PROPOSAL_UPDATE, "lfg proposal");
 #endif
     
-    
-#ifdef MANGOS
-    botOutgoingPacketHandlers.AddHandler(SMSG_CAST_FAILED, "cast failed");
-#endif
-#ifdef CMANGOS
     botOutgoingPacketHandlers.AddHandler(SMSG_CAST_RESULT, "cast failed");
-#endif
     botOutgoingPacketHandlers.AddHandler(SMSG_DUEL_REQUESTED, "duel requested");
     botOutgoingPacketHandlers.AddHandler(SMSG_INVENTORY_CHANGE_FAILURE, "inventory change failure");
 
     masterOutgoingPacketHandlers.AddHandler(SMSG_PARTY_COMMAND_RESULT, "party command");
+#ifndef MANGOSBOT_ZERO
     masterOutgoingPacketHandlers.AddHandler(MSG_RAID_READY_CHECK_FINISHED, "ready check finished");
+#endif
 }
 
 PlayerbotAI::~PlayerbotAI()

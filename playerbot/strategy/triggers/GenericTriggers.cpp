@@ -278,25 +278,23 @@ bool DebuffTrigger::IsActive()
 
 bool DebuffTrigger::HasMaxDebuffs()
 {
-    bool maxDebuffs = false;
-
-#ifndef MANGOSBOT_TWO
+#ifdef MANGOSBOT_TWO
+    return false;
+#else
     Unit* target = GetTarget();
     if(target)
     {
 #ifdef MANGOSBOT_ONE
-        uint32 debuffLimit = 40;
+        constexpr uint32 debuffLimit = 40;
 #else
-        uint32 debuffLimit = 16;
+        constexpr uint32 debuffLimit = 16;
 #endif
 
-        std::vector<Aura*> auras = ai->GetAuras(target);
-        maxDebuffs = auras.size() >= debuffLimit;
+        return ai->GetAuras(target, false, false).size() >= debuffLimit;
     }
-
 #endif
 
-    return maxDebuffs;
+    return false;
 }
 
 bool SpellTrigger::IsActive()

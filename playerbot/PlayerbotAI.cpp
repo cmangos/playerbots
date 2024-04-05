@@ -2732,7 +2732,7 @@ Aura* PlayerbotAI::GetAura(std::string name, Unit* unit, bool checkIsOwner)
     return nullptr;
 }
 
-std::vector<Aura*> PlayerbotAI::GetAuras(Unit* unit)
+std::vector<Aura*> PlayerbotAI::GetAuras(Unit* unit, bool allAuras, bool positive)
 {
     std::vector<Aura*> outAuras;
     for (uint32 auraType = SPELL_AURA_BIND_SIGHT; auraType < TOTAL_AURAS; auraType++)
@@ -2747,7 +2747,10 @@ std::vector<Aura*> PlayerbotAI::GetAuras(Unit* unit)
             Aura* aura = *i;
             if (aura)
             {
-                outAuras.push_back(aura);
+                if (allAuras || (positive && aura->IsPositive()) || (!positive && !aura->IsPositive()))
+                {
+                    outAuras.push_back(aura);
+                }
             }
         }
     }

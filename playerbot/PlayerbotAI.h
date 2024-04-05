@@ -391,7 +391,7 @@ public:
     bool HasAura(uint32 spellId, Unit* player, bool checkOwner = false);
     Aura* GetAura(uint32 spellId, Unit* player, bool checkOwner = false);
     Aura* GetAura(std::string spellName, Unit* player, bool checkOwner = false);
-    std::vector<Aura*> GetAuras(Unit* player);
+    std::vector<Aura*> GetAuras(Unit* player, bool allAuras = true, bool positive = false);
 
     bool HasSpellItems(uint32 spellId, const Item* castItem) const;
 

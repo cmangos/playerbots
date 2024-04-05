@@ -73,7 +73,7 @@ bool AttackRTITargetAction::Execute(Event& event)
 
 bool AttackMyTargetAction::isUseful()
 {
-    if (ai->ContainsStrategy(STRATEGY_TYPE_HEAL))
+    if (ai->ContainsStrategy(STRATEGY_TYPE_HEAL) && !ai->HasStrategy("offdps", BotState::BOT_STATE_COMBAT))
         return false;
 
     return true;
@@ -81,7 +81,7 @@ bool AttackMyTargetAction::isUseful()
 
 bool AttackRTITargetAction::isUseful()
 {
-    if (ai->ContainsStrategy(STRATEGY_TYPE_HEAL))
+    if (ai->ContainsStrategy(STRATEGY_TYPE_HEAL) && !ai->HasStrategy("offdps", BotState::BOT_STATE_COMBAT))
         return false;
 
     return true;

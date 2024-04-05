@@ -267,6 +267,38 @@ namespace ai
         static void InitNonCombatTriggers(std::list<TriggerNode*>& triggers);
     };
 
+    // Generic strategy to be used for offdps spell rotations
+    class OffdpsStrategy : public Strategy
+    {
+    public:
+        OffdpsStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+
+    protected:
+        virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+    };
+
+    class OffdpsPvpStrategy
+    {
+    public:
+        static void InitCombatTriggers(std::list<TriggerNode*>& triggers);
+        static void InitNonCombatTriggers(std::list<TriggerNode*>& triggers);
+    };
+
+    class OffdpsPveStrategy
+    {
+    public:
+        static void InitCombatTriggers(std::list<TriggerNode*>& triggers);
+        static void InitNonCombatTriggers(std::list<TriggerNode*>& triggers);
+    };
+
+    class OffdpsRaidStrategy
+    {
+    public:
+        static void InitCombatTriggers(std::list<TriggerNode*>& triggers);
+        static void InitNonCombatTriggers(std::list<TriggerNode*>& triggers);
+    };
+
     // Generic strategy to be used for white-listing what can be done during stealth (druid and rogue)
     class StealthedStrategy : public Strategy
     {
@@ -348,5 +380,13 @@ namespace ai
     public:
         OffhealPlaceholderStrategy(PlayerbotAI* ai) : PlaceholderStrategy(ai) {}
         std::string getName() override { return "offheal"; }
+    };
+
+    // This strategy is used to hold the offdps strategy
+    class OffdpsPlaceholderStrategy : public PlaceholderStrategy
+    {
+    public:
+        OffdpsPlaceholderStrategy(PlayerbotAI* ai) : PlaceholderStrategy(ai) {}
+        std::string getName() override { return "offdps"; }
     };
 }

@@ -815,6 +815,23 @@ bool PlayerbotAI::CanEnterArea(const AreaTrigger* area)
     return false;
 }
 
+void PlayerbotAI::Unmount()
+{
+    if (bot->IsMounted())
+    {
+        bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+        bot->Unmount();
+
+        bot->UpdateSpeed(MOVE_RUN, true);
+        bot->UpdateSpeed(MOVE_RUN, false);
+
+        if (bot->IsFlying())
+        {
+            bot->GetMotionMaster()->MoveFall();
+        }
+    }
+}
+
 bool PlayerbotAI::IsStateActive(BotState state) const
 {
     return currentEngine == engines[(uint8)state];

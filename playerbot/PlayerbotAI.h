@@ -1,6 +1,4 @@
 #pragma once
-
-
 #include "PlayerbotMgr.h"
 #include "PlayerbotAIBase.h"
 #include "strategy/AiObjectContext.h"
@@ -537,6 +535,7 @@ public:
     void UpdateTalentSpec(PlayerTalentSpec spec = PlayerTalentSpec::TALENT_SPEC_INVALID);
 
     bool CanEnterArea(const AreaTrigger* area);
+    void Unmount();
 
 private:
     bool UpdateAIReaction(uint32 elapsed, bool minimal, bool isStunned);

@@ -1213,16 +1213,7 @@ bool UseHearthStoneAction::Execute(Event& event)
         if (bot->IsFlying() && WorldPosition(bot).currentHeight() > 10.0f)
             return false;
 
-        if (bot->IsMounted())
-        {
-            WorldPacket emptyPacket;
-            bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);
-            bot->UpdateSpeed(MOVE_RUN, true);
-            bot->UpdateSpeed(MOVE_RUN, false);
-
-            if (bot->IsFlying())
-                bot->GetMotionMaster()->MoveFall();
-        }
+        ai->Unmount();
     }
 
     ai->RemoveShapeshift();

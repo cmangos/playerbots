@@ -1312,8 +1312,9 @@ bool BGStatusAction::Execute(Event& event)
 #endif
 #endif
                     sLog.outBasic("Bot #%u %s:%d <%s>: Force join %s %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
-                    WorldPacket emptyPacket;
-                    bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);
+                    
+                    ai->Unmount();
+
                     action = 0x1;
                     // bg started so players should get invites by now
                     sRandomPlayerbotMgr.NeedBots[queueTypeId][bracketId][isArena ? isRated : GetTeamIndexByTeamId(bot->GetTeam())] = false;
@@ -1324,12 +1325,7 @@ bool BGStatusAction::Execute(Event& event)
 #else
                     packet << type << unk2 << (uint32)_bgTypeId << unk << action;
 #endif
-#ifdef MANGOS
-                    bot->GetSession()->HandleBattleFieldPortOpcode(packet);
-#endif
-#ifdef CMANGOS
                     bot->GetSession()->HandleBattlefieldPortOpcode(packet);
-#endif
 
                     ai->ResetStrategies(false);
                     context->GetValue<uint32>("bg role")->Set(urand(0, 9));
@@ -1437,8 +1433,9 @@ bool BGStatusAction::Execute(Event& event)
 #else
         sLog.outBasic("Bot #%d %s:%d <%s> joined %s - %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
 #endif
-        WorldPacket emptyPacket;
-        bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);
+
+        ai->Unmount();
+
         action = 0x1;
         // bg started so players should get invites by now
         sRandomPlayerbotMgr.NeedBots[queueTypeId][bracketId][isArena ? isRated : GetTeamIndexByTeamId(bot->GetTeam())] = false;
@@ -1449,12 +1446,8 @@ bool BGStatusAction::Execute(Event& event)
 #else
         packet << type << unk2 << (uint32)_bgTypeId << unk << action;
 #endif
-#ifdef MANGOS
-        bot->GetSession()->HandleBattleFieldPortOpcode(packet);
-#endif
-#ifdef CMANGOS
+
         bot->GetSession()->HandleBattlefieldPortOpcode(packet);
-#endif
 
         ai->ResetStrategies(false);
         context->GetValue<uint32>("bg role")->Set(urand(0, 9));

@@ -62,8 +62,7 @@ bool EnterVehicleAction::Execute(Event& event)
         {
             seat = transportCheck->GetTransportSeat();
             // dismount because bots can enter vehicle on mount
-            WorldPacket emptyPacket;
-            bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);
+            ai->Unmount();
             return true;
         }
 

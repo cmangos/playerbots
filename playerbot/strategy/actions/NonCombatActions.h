@@ -51,13 +51,7 @@ namespace ai
                 if (!pSpellInfo)
                     return false;
 
-                if (bot->IsMounted())
-                {
-                    WorldPacket emptyPacket;
-                    bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);
-                    bot->UpdateSpeed(MOVE_RUN, true);
-                    bot->UpdateSpeed(MOVE_RUN, false);
-                }
+                ai->Unmount();
 
                 ai->CastSpell(24355, bot);
                 SetDuration(drinkDuration);
@@ -132,13 +126,7 @@ namespace ai
                 if (!pSpellInfo)
                     return false;
 
-                if (bot->IsMounted())
-                {
-                    WorldPacket emptyPacket;
-                    bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);
-                    bot->UpdateSpeed(MOVE_RUN, true);
-                    bot->UpdateSpeed(MOVE_RUN, false);
-                }
+                ai->Unmount();
 
                 ai->CastSpell(24005, bot);
                 SetDuration(eatDuration);

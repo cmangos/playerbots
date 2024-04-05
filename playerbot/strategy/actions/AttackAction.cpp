@@ -100,14 +100,10 @@ bool AttackAction::Attack(Player* requester, Unit* target)
     {
         if (bot->IsMounted() && (sServerFacade.GetDistance2d(bot, target) < 40.0f || bot->IsFlying()))
         {
-            WorldPacket emptyPacket;
-            bot->GetSession()->HandleCancelMountAuraOpcode(emptyPacket);
-            bot->UpdateSpeed(MOVE_RUN, true);
-            bot->UpdateSpeed(MOVE_RUN, false);
+            ai->Unmount();
             
             if (bot->IsFlying())
             {
-                bot->GetMotionMaster()->MoveFall();
                 return true;
             }
         }

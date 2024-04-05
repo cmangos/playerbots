@@ -1,4 +1,3 @@
-
 #include "playerbot/playerbot.h"
 #include "PaladinStrategy.h"
 
@@ -28,6 +27,7 @@ public:
         creators["greater blessing of kings on party"] = &greater_blessing_of_kings_on_party;
         creators["greater blessing of wisdom on party"] = &greater_blessing_of_wisdom_on_party;
     }
+
 private:
     ACTION_NODE_A(greater_blessing_of_might, "greater blessing of might", "blessing of might");
 
@@ -47,7 +47,8 @@ private:
     {
         return new ActionNode("lay on hands",
             /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("divine shield"), new NextAction("flash of light"), NULL),
+            /*A*/ NextAction::array(0, new NextAction("divine shield"), 
+                                       new NextAction("flash of light"), NULL),
             /*C*/ NULL);
     }
 

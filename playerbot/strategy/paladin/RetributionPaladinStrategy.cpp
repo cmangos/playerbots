@@ -1,4 +1,3 @@
-
 #include "playerbot/playerbot.h"
 #include "PaladinMultipliers.h"
 #include "RetributionPaladinStrategy.h"

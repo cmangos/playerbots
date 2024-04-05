@@ -3,18 +3,18 @@
 
 namespace ai
 {
-    class HolyPriestPlaceholderStrategy : public SpecPlaceholderStrategy
+    class DisciplinePriestPlaceholderStrategy : public SpecPlaceholderStrategy
     {
     public:
-        HolyPriestPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
+        DisciplinePriestPlaceholderStrategy(PlayerbotAI* ai) : SpecPlaceholderStrategy(ai) {}
         int GetType() override { return STRATEGY_TYPE_HEAL | STRATEGY_TYPE_RANGED; }
-        std::string getName() override { return "holy"; }
+        std::string getName() override { return "discipline"; }
     };
 
-    class HolyPriestStrategy : public PriestStrategy
+    class DisciplinePriestStrategy : public PriestStrategy
     {
     public:
-        HolyPriestStrategy(PlayerbotAI* ai);
+        DisciplinePriestStrategy(PlayerbotAI* ai);
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -23,11 +23,11 @@ namespace ai
         virtual void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestPveStrategy : public HolyPriestStrategy
+    class DisciplinePriestPveStrategy : public DisciplinePriestStrategy
     {
     public:
-        HolyPriestPveStrategy(PlayerbotAI* ai) : HolyPriestStrategy(ai) {}
-        std::string getName() override { return "holy pve"; }
+        DisciplinePriestPveStrategy(PlayerbotAI* ai) : DisciplinePriestStrategy(ai) {}
+        std::string getName() override { return "discipline pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -36,11 +36,11 @@ namespace ai
         void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestPvpStrategy : public HolyPriestStrategy
+    class DisciplinePriestPvpStrategy : public DisciplinePriestStrategy
     {
     public:
-        HolyPriestPvpStrategy(PlayerbotAI* ai) : HolyPriestStrategy(ai) {}
-        std::string getName() override { return "holy pvp"; }
+        DisciplinePriestPvpStrategy(PlayerbotAI* ai) : DisciplinePriestStrategy(ai) {}
+        std::string getName() override { return "discipline pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -49,11 +49,11 @@ namespace ai
         void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestRaidStrategy : public HolyPriestStrategy
+    class DisciplinePriestRaidStrategy : public DisciplinePriestStrategy
     {
     public:
-        HolyPriestRaidStrategy(PlayerbotAI* ai) : HolyPriestStrategy(ai) {}
-        std::string getName() override { return "holy raid"; }
+        DisciplinePriestRaidStrategy(PlayerbotAI* ai) : DisciplinePriestStrategy(ai) {}
+        std::string getName() override { return "discipline raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
@@ -62,215 +62,215 @@ namespace ai
         void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestAoeStrategy : public PriestAoeStrategy
+    class DisciplinePriestAoeStrategy : public PriestAoeStrategy
     {
     public:
-        HolyPriestAoeStrategy(PlayerbotAI* ai) : PriestAoeStrategy(ai) {}
+        DisciplinePriestAoeStrategy(PlayerbotAI* ai) : PriestAoeStrategy(ai) {}
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestAoePveStrategy : public HolyPriestAoeStrategy
+    class DisciplinePriestAoePveStrategy : public DisciplinePriestAoeStrategy
     {
     public:
-        HolyPriestAoePveStrategy(PlayerbotAI* ai) : HolyPriestAoeStrategy(ai) {}
-        std::string getName() override { return "aoe holy pve"; }
+        DisciplinePriestAoePveStrategy(PlayerbotAI* ai) : DisciplinePriestAoeStrategy(ai) {}
+        std::string getName() override { return "aoe discipline pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestAoePvpStrategy : public HolyPriestAoeStrategy
+    class DisciplinePriestAoePvpStrategy : public DisciplinePriestAoeStrategy
     {
     public:
-        HolyPriestAoePvpStrategy(PlayerbotAI* ai) : HolyPriestAoeStrategy(ai) {}
-        std::string getName() override { return "aoe holy pvp"; }
+        DisciplinePriestAoePvpStrategy(PlayerbotAI* ai) : DisciplinePriestAoeStrategy(ai) {}
+        std::string getName() override { return "aoe discipline pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestAoeRaidStrategy : public HolyPriestAoeStrategy
+    class DisciplinePriestAoeRaidStrategy : public DisciplinePriestAoeStrategy
     {
     public:
-        HolyPriestAoeRaidStrategy(PlayerbotAI* ai) : HolyPriestAoeStrategy(ai) {}
-        std::string getName() override { return "aoe holy raid"; }
+        DisciplinePriestAoeRaidStrategy(PlayerbotAI* ai) : DisciplinePriestAoeStrategy(ai) {}
+        std::string getName() override { return "aoe discipline raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestBuffStrategy : public PriestBuffStrategy
+    class DisciplinePriestBuffStrategy : public PriestBuffStrategy
     {
     public:
-        HolyPriestBuffStrategy(PlayerbotAI* ai) : PriestBuffStrategy(ai) {}
+        DisciplinePriestBuffStrategy(PlayerbotAI* ai) : PriestBuffStrategy(ai) {}
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestBuffPveStrategy : public HolyPriestBuffStrategy
+    class DisciplinePriestBuffPveStrategy : public DisciplinePriestBuffStrategy
     {
     public:
-        HolyPriestBuffPveStrategy(PlayerbotAI* ai) : HolyPriestBuffStrategy(ai) {}
-        std::string getName() override { return "buff holy pve"; }
+        DisciplinePriestBuffPveStrategy(PlayerbotAI* ai) : DisciplinePriestBuffStrategy(ai) {}
+        std::string getName() override { return "buff discipline pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestBuffPvpStrategy : public HolyPriestBuffStrategy
+    class DisciplinePriestBuffPvpStrategy : public DisciplinePriestBuffStrategy
     {
     public:
-        HolyPriestBuffPvpStrategy(PlayerbotAI* ai) : HolyPriestBuffStrategy(ai) {}
-        std::string getName() override { return "buff holy pvp"; }
+        DisciplinePriestBuffPvpStrategy(PlayerbotAI* ai) : DisciplinePriestBuffStrategy(ai) {}
+        std::string getName() override { return "buff discipline pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestBuffRaidStrategy : public HolyPriestBuffStrategy
+    class DisciplinePriestBuffRaidStrategy : public DisciplinePriestBuffStrategy
     {
     public:
-        HolyPriestBuffRaidStrategy(PlayerbotAI* ai) : HolyPriestBuffStrategy(ai) {}
-        std::string getName() override { return "buff holy raid"; }
+        DisciplinePriestBuffRaidStrategy(PlayerbotAI* ai) : DisciplinePriestBuffStrategy(ai) {}
+        std::string getName() override { return "buff discipline raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestBoostStrategy : public PriestBoostStrategy
+    class DisciplinePriestBoostStrategy : public PriestBoostStrategy
     {
     public:
-        HolyPriestBoostStrategy(PlayerbotAI* ai) : PriestBoostStrategy(ai) {}
+        DisciplinePriestBoostStrategy(PlayerbotAI* ai) : PriestBoostStrategy(ai) {}
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestBoostPveStrategy : public HolyPriestBoostStrategy
+    class DisciplinePriestBoostPveStrategy : public DisciplinePriestBoostStrategy
     {
     public:
-        HolyPriestBoostPveStrategy(PlayerbotAI* ai) : HolyPriestBoostStrategy(ai) {}
-        std::string getName() override { return "boost holy pve"; }
+        DisciplinePriestBoostPveStrategy(PlayerbotAI* ai) : DisciplinePriestBoostStrategy(ai) {}
+        std::string getName() override { return "boost discipline pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestBoostPvpStrategy : public HolyPriestBoostStrategy
+    class DisciplinePriestBoostPvpStrategy : public DisciplinePriestBoostStrategy
     {
     public:
-        HolyPriestBoostPvpStrategy(PlayerbotAI* ai) : HolyPriestBoostStrategy(ai) {}
-        std::string getName() override { return "boost holy pvp"; }
+        DisciplinePriestBoostPvpStrategy(PlayerbotAI* ai) : DisciplinePriestBoostStrategy(ai) {}
+        std::string getName() override { return "boost discipline pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestBoostRaidStrategy : public HolyPriestBoostStrategy
+    class DisciplinePriestBoostRaidStrategy : public DisciplinePriestBoostStrategy
     {
     public:
-        HolyPriestBoostRaidStrategy(PlayerbotAI* ai) : HolyPriestBoostStrategy(ai) {}
-        std::string getName() override { return "boost holy raid"; }
+        DisciplinePriestBoostRaidStrategy(PlayerbotAI* ai) : DisciplinePriestBoostStrategy(ai) {}
+        std::string getName() override { return "boost discipline raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestCcStrategy : public PriestCcStrategy
+    class DisciplinePriestCcStrategy : public PriestCcStrategy
     {
     public:
-        HolyPriestCcStrategy(PlayerbotAI* ai) : PriestCcStrategy(ai) {}
+        DisciplinePriestCcStrategy(PlayerbotAI* ai) : PriestCcStrategy(ai) {}
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestCcPveStrategy : public HolyPriestCcStrategy
+    class DisciplinePriestCcPveStrategy : public DisciplinePriestCcStrategy
     {
     public:
-        HolyPriestCcPveStrategy(PlayerbotAI* ai) : HolyPriestCcStrategy(ai) {}
-        std::string getName() override { return "cc holy pve"; }
+        DisciplinePriestCcPveStrategy(PlayerbotAI* ai) : DisciplinePriestCcStrategy(ai) {}
+        std::string getName() override { return "cc discipline pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestCcPvpStrategy : public HolyPriestCcStrategy
+    class DisciplinePriestCcPvpStrategy : public DisciplinePriestCcStrategy
     {
     public:
-        HolyPriestCcPvpStrategy(PlayerbotAI* ai) : HolyPriestCcStrategy(ai) {}
-        std::string getName() override { return "cc holy pvp"; }
+        DisciplinePriestCcPvpStrategy(PlayerbotAI* ai) : DisciplinePriestCcStrategy(ai) {}
+        std::string getName() override { return "cc discipline pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestCcRaidStrategy : public HolyPriestCcStrategy
+    class DisciplinePriestCcRaidStrategy : public DisciplinePriestCcStrategy
     {
     public:
-        HolyPriestCcRaidStrategy(PlayerbotAI* ai) : HolyPriestCcStrategy(ai) {}
-        std::string getName() override { return "cc holy raid"; }
+        DisciplinePriestCcRaidStrategy(PlayerbotAI* ai) : DisciplinePriestCcStrategy(ai) {}
+        std::string getName() override { return "cc discipline raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestCureStrategy : public PriestCureStrategy
+    class DisciplinePriestCureStrategy : public PriestCureStrategy
     {
     public:
-        HolyPriestCureStrategy(PlayerbotAI* ai) : PriestCureStrategy(ai) {}
+        DisciplinePriestCureStrategy(PlayerbotAI* ai) : PriestCureStrategy(ai) {}
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestCurePveStrategy : public HolyPriestCureStrategy
+    class DisciplinePriestCurePveStrategy : public DisciplinePriestCureStrategy
     {
     public:
-        HolyPriestCurePveStrategy(PlayerbotAI* ai) : HolyPriestCureStrategy(ai) {}
-        std::string getName() override { return "cure holy pve"; }
+        DisciplinePriestCurePveStrategy(PlayerbotAI* ai) : DisciplinePriestCureStrategy(ai) {}
+        std::string getName() override { return "cure discipline pve"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestCurePvpStrategy : public HolyPriestCureStrategy
+    class DisciplinePriestCurePvpStrategy : public DisciplinePriestCureStrategy
     {
     public:
-        HolyPriestCurePvpStrategy(PlayerbotAI* ai) : HolyPriestCureStrategy(ai) {}
-        std::string getName() override { return "cure holy pvp"; }
+        DisciplinePriestCurePvpStrategy(PlayerbotAI* ai) : DisciplinePriestCureStrategy(ai) {}
+        std::string getName() override { return "cure discipline pvp"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
-    class HolyPriestCureRaidStrategy : public HolyPriestCureStrategy
+    class DisciplinePriestCureRaidStrategy : public DisciplinePriestCureStrategy
     {
     public:
-        HolyPriestCureRaidStrategy(PlayerbotAI* ai) : HolyPriestCureStrategy(ai) {}
-        std::string getName() override { return "cure holy raid"; }
+        DisciplinePriestCureRaidStrategy(PlayerbotAI* ai) : DisciplinePriestCureStrategy(ai) {}
+        std::string getName() override { return "cure discipline raid"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

@@ -301,20 +301,20 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
     {
         case CLASS_PRIEST:
         {
-            if (tab == 2)
+            if (tab == 0)
             {
-                combatEngine->addStrategies("dps", "shadow debuff", "shadow aoe", NULL);
+                combatEngine->addStrategy("discipline");
             }
-            else if (tab == 0)
+            else if (tab == 1)
             {
-                combatEngine->addStrategies("holy", "shadow debuff", "shadow aoe", NULL);
+                combatEngine->addStrategy("holy");
             }
             else
             {
-                combatEngine->addStrategies("heal", NULL);
+                combatEngine->addStrategy("shadow");
             }
 
-            combatEngine->addStrategies("dps assist", "flee", "cure", "ranged", "cc", NULL);
+            combatEngine->addStrategies("dps assist", "flee", "cure", "ranged", "cc", "buff", "aoe", "boost", NULL);
             break;
         }
 
@@ -333,7 +333,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
                 combatEngine->addStrategy("frost");
             }
 
-            combatEngine->addStrategies("dps", "dps assist", "flee", "cure", "ranged", "cc", "buff", "aoe", "boost", NULL);
+            combatEngine->addStrategies("dps assist", "flee", "cure", "ranged", "cc", "buff", "aoe", "boost", NULL);
             break;
         }
 
@@ -513,10 +513,9 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
                 combatEngine->removeStrategy("ranged");
             }
 
-            if (player->getClass() == CLASS_PRIEST && tab == 1)
+            if (player->getClass() == CLASS_PRIEST && tab < 2)
             {
-                combatEngine->removeStrategy("heal");
-                combatEngine->addStrategies("holy", "shadow debuff", "shadow aoe", "threat", NULL);
+                combatEngine->addStrategy("offdps");
             }
 
             if (player->getClass() == CLASS_SHAMAN && tab == 2)
@@ -606,7 +605,6 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
         combatEngine->removeStrategy("follow");
         combatEngine->removeStrategy("conserve mana");
         combatEngine->removeStrategy("cast time");
-        combatEngine->addStrategy("boost");
 
         if (player->getClass() == CLASS_SHAMAN && tab == 2)
         {
@@ -644,7 +642,20 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
     {
         case CLASS_PRIEST:
         {
-            nonCombatEngine->addStrategies("dps assist", "cure", "rshadow", NULL);
+            if (tab == 0)
+            {
+                nonCombatEngine->addStrategy("discipline");
+            }
+            else if (tab == 1)
+            {
+                nonCombatEngine->addStrategy("holy");
+            }
+            else
+            {
+                nonCombatEngine->addStrategy("shadow");
+            }
+
+            nonCombatEngine->addStrategies("dps assist", "cure", "buff", "boost", NULL);
             break;
         }
 
@@ -1179,6 +1190,24 @@ void AiFactory::AddDefaultDeadStrategies(Player* player, PlayerbotAI* const faca
 
             break;
         }
+
+        case CLASS_PRIEST:
+        {
+            if (tab == 0)
+            {
+                deadEngine->addStrategy("discipline");
+            }
+            else if (tab == 1)
+            {
+                deadEngine->addStrategy("holy");
+            }
+            else
+            {
+                deadEngine->addStrategy("shadow");
+            }
+
+            break;
+        }
     }
 
     if (facade->IsRealPlayer() || sRandomPlayerbotMgr.IsFreeBot(player))
@@ -1344,6 +1373,24 @@ void AiFactory::AddDefaultReactionStrategies(Player* player, PlayerbotAI* const 
             else
             {
                 reactionEngine->addStrategy("marksmanship");
+            }
+
+            break;
+        }
+
+        case CLASS_PRIEST:
+        {
+            if (tab == 0)
+            {
+                reactionEngine->addStrategy("discipline");
+            }
+            else if (tab == 1)
+            {
+                reactionEngine->addStrategy("holy");
+            }
+            else
+            {
+                reactionEngine->addStrategy("shadow");
             }
 
             break;

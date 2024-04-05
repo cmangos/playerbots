@@ -85,6 +85,7 @@ namespace ai
     ENEMY_HEALER_ACTION(CastSilenceOnEnemyHealerAction, "silence");
     // shadow talents 2.4.3
     RANGED_DEBUFF_ACTION(CastVampiricTouchAction, "vampiric touch");
+    RANGED_DEBUFF_ENEMY_ACTION(CastVampiricTouchActionOnAttacker, "vampiric touch on attacker");
 
     // racials
     RANGED_DEBUFF_ACTION(CastDevouringPlagueAction, "devouring plague");
@@ -114,3 +115,282 @@ namespace ai
         }
     };
 }
+
+class UpdatePriestPveStrategiesAction : public UpdateStrategyDependenciesAction
+{
+public:
+    UpdatePriestPveStrategiesAction(PlayerbotAI* ai) : UpdateStrategyDependenciesAction(ai, "update pve strats")
+    {
+        std::vector<std::string> strategiesRequired = { "holy/heal" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "holy pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "holy pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_DEAD, "holy pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_REACTION, "holy pve", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "aoe" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "aoe holy pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "aoe holy pve", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "cure" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cure holy pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cure holy pve", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "buff" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "buff holy pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "buff holy pve", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "boost" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "boost holy pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "boost holy pve", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "cc" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cc holy pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cc holy pve", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "shadow pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "shadow pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_DEAD, "shadow pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_REACTION, "shadow pve", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "aoe" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "aoe shadow pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "aoe shadow pve", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "cure" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cure shadow pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cure shadow pve", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "buff" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "buff shadow pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "buff shadow pve", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "boost" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "boost shadow pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "boost shadow pve", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "cc" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cc shadow pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cc shadow pve", strategiesRequired);
+
+        strategiesRequired = { "discipline" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "discipline pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "discipline pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_DEAD, "discipline pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_REACTION, "discipline pve", strategiesRequired);
+
+        strategiesRequired = { "discipline", "aoe" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "aoe discipline pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "aoe discipline pve", strategiesRequired);
+
+        strategiesRequired = { "discipline", "cure" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cure discipline pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cure discipline pve", strategiesRequired);
+
+        strategiesRequired = { "discipline", "buff" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "buff discipline pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "buff discipline pve", strategiesRequired);
+
+        strategiesRequired = { "discipline", "boost" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "boost discipline pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "boost discipline pve", strategiesRequired);
+
+        strategiesRequired = { "discipline", "cc" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cc discipline pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cc discipline pve", strategiesRequired);
+
+        strategiesRequired = { "offheal" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "offheal pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "offheal pve", strategiesRequired);
+
+        strategiesRequired = { "offdps" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "offdps pve", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "offdps pve", strategiesRequired);
+    }
+};
+
+class UpdatePriestPvpStrategiesAction : public UpdateStrategyDependenciesAction
+{
+public:
+    UpdatePriestPvpStrategiesAction(PlayerbotAI* ai) : UpdateStrategyDependenciesAction(ai, "update pvp strats")
+    {
+        std::vector<std::string> strategiesRequired = { "holy/heal" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "holy pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "holy pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_DEAD, "holy pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_REACTION, "holy pvp", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "aoe" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "aoe holy pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "aoe holy pvp", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "cure" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cure holy pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cure holy pvp", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "buff" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "buff holy pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "buff holy pvp", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "boost" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "boost holy pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "boost holy pvp", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "cc" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cc holy pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cc holy pvp", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "shadow pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "shadow pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_DEAD, "shadow pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_REACTION, "shadow pvp", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "aoe" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "aoe shadow pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "aoe shadow pvp", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "cure" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cure shadow pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cure shadow pvp", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "buff" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "buff shadow pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "buff shadow pvp", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "boost" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "boost shadow pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "boost shadow pvp", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "cc" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cc shadow pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cc shadow pvp", strategiesRequired);
+
+        strategiesRequired = { "discipline" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "discipline pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "discipline pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_DEAD, "discipline pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_REACTION, "discipline pvp", strategiesRequired);
+
+        strategiesRequired = { "discipline", "aoe" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "aoe discipline pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "aoe discipline pvp", strategiesRequired);
+
+        strategiesRequired = { "discipline", "cure" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cure discipline pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cure discipline pvp", strategiesRequired);
+
+        strategiesRequired = { "discipline", "buff" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "buff discipline pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "buff discipline pvp", strategiesRequired);
+
+        strategiesRequired = { "discipline", "boost" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "boost discipline pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "boost discipline pvp", strategiesRequired);
+
+        strategiesRequired = { "discipline", "cc" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cc discipline pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cc discipline pvp", strategiesRequired);
+
+        strategiesRequired = { "offheal" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "offheal pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "offheal pvp", strategiesRequired);
+
+        strategiesRequired = { "offdps" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "offdps pvp", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "offdps pvp", strategiesRequired);
+    }
+};
+
+class UpdatePriestRaidStrategiesAction : public UpdateStrategyDependenciesAction
+{
+public:
+    UpdatePriestRaidStrategiesAction(PlayerbotAI* ai) : UpdateStrategyDependenciesAction(ai, "update raid strats")
+    {
+        std::vector<std::string> strategiesRequired = { "holy/heal" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "holy raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "holy raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_DEAD, "holy raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_REACTION, "holy raid", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "aoe" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "aoe holy raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "aoe holy raid", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "cure" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cure holy raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cure holy raid", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "buff" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "buff holy raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "buff holy raid", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "boost" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "boost holy raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "boost holy raid", strategiesRequired);
+
+        strategiesRequired = { "holy/heal", "cc" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cc holy raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cc holy raid", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "shadow raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "shadow raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_DEAD, "shadow raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_REACTION, "shadow raid", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "aoe" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "aoe shadow raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "aoe shadow raid", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "cure" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cure shadow raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cure shadow raid", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "buff" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "buff shadow raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "buff shadow raid", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "boost" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "boost shadow raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "boost shadow raid", strategiesRequired);
+
+        strategiesRequired = { "shadow/dps", "cc" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cc shadow raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cc shadow raid", strategiesRequired);
+
+        strategiesRequired = { "discipline" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "discipline raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "discipline raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_DEAD, "discipline raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_REACTION, "discipline raid", strategiesRequired);
+
+        strategiesRequired = { "discipline", "aoe" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "aoe discipline raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "aoe discipline raid", strategiesRequired);
+
+        strategiesRequired = { "discipline", "cure" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cure discipline raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cure discipline raid", strategiesRequired);
+
+        strategiesRequired = { "discipline", "buff" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "buff discipline raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "buff discipline raid", strategiesRequired);
+
+        strategiesRequired = { "discipline", "boost" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "boost discipline raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "boost discipline raid", strategiesRequired);
+
+        strategiesRequired = { "discipline", "cc" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "cc discipline raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "cc discipline raid", strategiesRequired);
+
+        strategiesRequired = { "offheal" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "offheal raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "offheal raid", strategiesRequired);
+
+        strategiesRequired = { "offdps" };
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_COMBAT, "offdps raid", strategiesRequired);
+        strategiesToUpdate.emplace_back(BotState::BOT_STATE_NON_COMBAT, "offdps raid", strategiesRequired);
+    }
+};

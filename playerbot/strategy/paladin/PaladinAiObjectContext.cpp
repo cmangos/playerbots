@@ -1,4 +1,3 @@
-
 #include "playerbot/playerbot.h"
 #include "PaladinActions.h"
 #include "PaladinTriggers.h"

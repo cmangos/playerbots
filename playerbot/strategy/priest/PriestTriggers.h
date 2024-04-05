@@ -8,6 +8,7 @@ namespace ai
     DEBUFF_TRIGGER(PowerWordPainTrigger, "shadow word: pain");
     DEBUFF_ENEMY_TRIGGER(PowerWordPainOnAttackerTrigger, "shadow word: pain");
     DEBUFF_TRIGGER(VampiricTouchTrigger, "vampiric touch");
+    DEBUFF_ENEMY_TRIGGER(VampiricTouchOnAttackerTrigger, "vampiric touch");
     DEBUFF_TRIGGER(VampiricEmbraceTrigger, "vampiric embrace");
     CURE_TRIGGER(DispelMagicTrigger, "dispel magic", DISPEL_MAGIC);
     CURE_PARTY_TRIGGER(DispelMagicPartyMemberTrigger, "dispel magic", DISPEL_MAGIC);
@@ -32,6 +33,8 @@ namespace ai
     DEBUFF_TRIGGER(StarshardsTrigger, "starshards");
 
     BOOST_TRIGGER_A(ShadowfiendTrigger, "shadowfiend");
+    CAN_CAST_TRIGGER(MindBlastTrigger, "mind blast");
+    CAN_CAST_TRIGGER(SmiteTrigger, "smite");
 
     class PowerWordFortitudeOnPartyTrigger : public BuffOnPartyTrigger 
     {

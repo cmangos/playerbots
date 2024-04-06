@@ -96,7 +96,7 @@ namespace ai
             {
                 itemId = 16896;
             }
-            else if (level >= 70 && level < 80)
+            else if (level >= 70 && level < 76)
             {
                 itemId = 22116;
             }

@@ -3,10 +3,10 @@
 
 namespace ai
 {
-    class SetFocusHealTargetAction : public ChatCommandAction
+    class SetFocusHealTargetsAction : public ChatCommandAction
     {
     public:
-        SetFocusHealTargetAction(PlayerbotAI* ai, std::string name = "focus heal target") : ChatCommandAction(ai, name) {}
+        SetFocusHealTargetsAction(PlayerbotAI* ai, std::string name = "focus heal targets") : ChatCommandAction(ai, name) {}
         bool Execute(Event& event) override;
     };
 
@@ -22,5 +22,30 @@ namespace ai
     public:
         SetFollowTargetAction(PlayerbotAI* ai, std::string name = "follow target") : ChatCommandAction(ai, name) {}
         bool Execute(Event& event) override;
+    };
+
+    class SetSpellTargetAction : public ChatCommandAction
+    {
+    public:
+        SetSpellTargetAction(PlayerbotAI* ai, std::string name) : ChatCommandAction(ai, name) {}
+        bool Execute(Event& event) override;
+    };
+
+    class SetBoostTargetsAction : public SetSpellTargetAction
+    {
+    public:
+        SetBoostTargetsAction(PlayerbotAI* ai) : SetSpellTargetAction(ai, "boost targets") {}
+    };
+
+    class SetReviveTargetsAction : public SetSpellTargetAction
+    {
+    public:
+        SetReviveTargetsAction(PlayerbotAI* ai) : SetSpellTargetAction(ai, "revive targets") {}
+    };
+
+    class SetBuffTargetsAction : public SetSpellTargetAction
+    {
+    public:
+        SetBuffTargetsAction(PlayerbotAI* ai) : SetSpellTargetAction(ai, "buff targets") {}
     };
 }

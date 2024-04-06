@@ -197,10 +197,10 @@ bool PartyMemberToHeal::Check(Unit* player)
 std::vector<Player*> PartyMemberToHeal::GetPartyMembers()
 {
     std::vector<Player*> partyMembers;
-    if (ai->HasStrategy("focus heal target", BotState::BOT_STATE_COMBAT))
+    if (ai->HasStrategy("focus heal targets", BotState::BOT_STATE_COMBAT))
     {
         Unit* player = nullptr;
-        const std::list<ObjectGuid> focusHealTargets = AI_VALUE(std::list<ObjectGuid>, "focus heal target");
+        const std::list<ObjectGuid> focusHealTargets = AI_VALUE(std::list<ObjectGuid>, "focus heal targets");
         for(const ObjectGuid& focusHealTarget : focusHealTargets)
         {
             Player* player = (Player*)ai->GetUnit(focusHealTarget);

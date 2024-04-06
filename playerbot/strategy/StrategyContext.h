@@ -134,7 +134,7 @@ namespace ai
             creators["avoid aoe"] = &StrategyContext::avoid_aoe;
             creators["wait for attack"] = &StrategyContext::wait_for_attack;
             creators["pull back"] = &StrategyContext::pull_back;
-            creators["focus heal target"] = &StrategyContext::focus_heal_target;
+            creators["focus heal targets"] = &StrategyContext::focus_heal_targets;
             creators["heal interrupt"] = &StrategyContext::heal_interrupt;
             creators["preheal"] = &StrategyContext::preheal;
             creators["wbuff"] = &StrategyContext::world_buff;
@@ -233,7 +233,7 @@ namespace ai
         static Strategy* avoid_aoe(PlayerbotAI* ai) { return new AvoidAoeStrategy(ai); }
         static Strategy* wait_for_attack(PlayerbotAI* ai) { return new WaitForAttackStrategy(ai); }
         static Strategy* pull_back(PlayerbotAI* ai) { return new PullBackStrategy(ai); }
-        static Strategy* focus_heal_target(PlayerbotAI* ai) { return new FocusHealTargetStrategy(ai); }
+        static Strategy* focus_heal_targets(PlayerbotAI* ai) { return new FocusHealTargetsStrategy(ai); }
         static Strategy* heal_interrupt(PlayerbotAI* ai) { return new HealInterruptStrategy(ai); }
         static Strategy* preheal(PlayerbotAI* ai) { return new PreHealStrategy(ai); }
         static Strategy* world_buff(PlayerbotAI* ai) { return new WorldBuffStrategy(ai); }

@@ -62,10 +62,12 @@ namespace ai
 		}
 	};
 
-	class CastRebirthAction : public ResurrectPartyMemberAction
+	class CastRebirthAction : public CastSpellTargetAction
 	{
 	public:
-		CastRebirthAction(PlayerbotAI* ai) : ResurrectPartyMemberAction(ai, "rebirth") {}
+		CastRebirthAction(PlayerbotAI* ai) : CastSpellTargetAction(ai, "rebirth", "revive targets") {}
+        std::string GetReachActionName() override { return "reach party member to heal"; }
+        std::string GetTargetName() override { return "party member to resurrect"; }
 	};
 
 	BUFF_ACTION(CastMarkOfTheWildAction, "mark of the wild");
@@ -198,17 +200,23 @@ namespace ai
         CastBarskinAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "barskin") {}
     };
 
-    class CastInnervateAction : public CastSpellAction
+    class CastInnervateAction : public CastSpellTargetAction
     {
     public:
-        CastInnervateAction(PlayerbotAI* ai) : CastSpellAction(ai, "innervate") {}
-        virtual std::string GetTargetName() { return "self target"; }
+        CastInnervateAction(PlayerbotAI* ai) : CastSpellTargetAction(ai, "innervate", "boost targets", true, true) {}
+        std::string GetTargetName() override { return "self target"; }
 
-        bool isUseful() override
+        bool IsTargetValid(Unit* target) override
         {
-            if (CastSpellAction::isUseful())
+            if (CastSpellTargetAction::IsTargetValid(target))
             {
-                return bot->IsSpellReady(29166);
+                const uint32 currentMana = target->GetPower(POWER_MANA);
+                if (currentMana > 0)
+                {
+                    const uint32 maxMana = target->GetMaxPower(POWER_MANA);
+                    const uint32 currentManaPct = (uint32)(currentMana / maxMana) * 100;
+                    return currentManaPct < sPlayerbotAIConfig.lowMana;
+                }
             }
 
             return false;

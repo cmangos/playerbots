@@ -217,3 +217,39 @@ bool NoSpecificPetTrigger::IsActive()
 
     return true;
 }
+
+uint32 SoulstoneTrigger::GetItemId()
+{
+    uint32 itemId = 0;
+    const uint32 level = bot->GetLevel();
+    if (level >= 18 && level < 30)
+    {
+        itemId = 5232;
+    }
+    else if (level >= 30 && level < 40)
+    {
+        itemId = 16892;
+    }
+    else if (level >= 40 && level < 50)
+    {
+        itemId = 16893;
+    }
+    else if (level >= 50 && level < 60)
+    {
+        itemId = 16895;
+    }
+    else if (level >= 60 && level < 70)
+    {
+        itemId = 16896;
+    }
+    else if (level >= 70 && level < 80)
+    {
+        itemId = 22116;
+    }
+    else if (level >= 76)
+    {
+        itemId = 36895;
+    }
+
+    return itemId;
+}

@@ -26,7 +26,7 @@ public:
         creators["mark of the wild"] = &mark_of_the_wild;
         creators["mark of the wild on party"] = &mark_of_the_wild_on_party;
         creators["gift of the wild on party"] = &gift_of_the_wild_on_party;
-        creators["innervate self"] = &innervate_self;
+        creators["innervate"] = &innervate;
         creators["dire bear form"] = &dire_bear_form;
         creators["cat form"] = &cat_form;
         creators["travel form"] = &travel_form;
@@ -49,7 +49,7 @@ private:
             /*C*/ NULL);
     }
 
-    static ActionNode* innervate_self(PlayerbotAI* ai)
+    static ActionNode* innervate(PlayerbotAI* ai)
     {
         return new ActionNode("innervate",
             /*P*/ NextAction::array(0, new NextAction("caster form"), NULL),
@@ -360,8 +360,8 @@ void DruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     BuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "innervate self",
-        NextAction::array(0, new NextAction("innervate self", ACTION_HIGH), NULL)));
+        "innervate",
+        NextAction::array(0, new NextAction("innervate", ACTION_HIGH), NULL)));
 }
 
 void DruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -774,8 +774,8 @@ void DruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     BuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "innervate self",
-        NextAction::array(0, new NextAction("innervate self", ACTION_HIGH), NULL)));
+        "innervate",
+        NextAction::array(0, new NextAction("innervate", ACTION_HIGH), NULL)));
 }
 
 void DruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1188,8 +1188,8 @@ void DruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     BuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "innervate self",
-        NextAction::array(0, new NextAction("innervate self", ACTION_HIGH), NULL)));
+        "innervate",
+        NextAction::array(0, new NextAction("innervate", ACTION_HIGH), NULL)));
 }
 
 void DruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

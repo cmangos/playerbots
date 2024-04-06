@@ -82,7 +82,7 @@ void DpsFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     DruidStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "rebirth on party",
+        "rebirth",
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -585,7 +585,7 @@ void DpsFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     DruidStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "rebirth on party",
+        "rebirth",
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -1080,7 +1080,7 @@ void DpsFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     DruidStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "rebirth on party",
+        "rebirth",
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(

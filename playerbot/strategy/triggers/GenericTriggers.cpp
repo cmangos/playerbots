@@ -830,3 +830,119 @@ bool RtscJumpTrigger::IsActive()
 {
     return AI_VALUE2(WorldPosition, "RTSC saved location", "jump point") && AI_VALUE2(WorldPosition, "RTSC saved location", "jump");
 }
+
+bool SpellTargetTrigger::IsActive()
+{
+    if (IsSpellReady())
+    {
+        // Check for assigned targets
+        const std::list<ObjectGuid>& possibleTargets = AI_VALUE(std::list<ObjectGuid>, targetsValue);
+        if (!possibleTargets.empty())
+        {
+            for (const ObjectGuid& possibleTargetGuid : possibleTargets)
+            {
+                if (IsTargetValid(ai->GetUnit(possibleTargetGuid)))
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            // Check for the default target
+            if (IsTargetValid(GetTarget()))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool SpellTargetTrigger::IsTargetValid(Unit* target)
+{
+    return target &&
+           ai->IsSafe(target) &&
+           (bot == target || sServerFacade.GetDistance2d(bot, target) < sPlayerbotAIConfig.sightDistance) &&
+           (bot->IsInGroup(target)) &&
+           (!aliveCheck || !target->IsDead()) &&
+           (!auraCheck || !ai->HasAura(spell, target));
+}
+
+bool SpellTargetTrigger::IsSpellReady()
+{
+    uint32 spellId = AI_VALUE2(uint32, "spell id", spell);
+    return spellId && bot->IsSpellReady(spellId);
+}
+
+bool ItemTargetTrigger::IsTargetValid(Unit* target)
+{
+    if (SpellTargetTrigger::IsTargetValid(target))
+    {
+        if (itemAuraCheck)
+        {
+            const uint32 itemId = GetItemId();
+            const ItemPrototype* proto = sObjectMgr.GetItemPrototype(itemId);
+            if (proto)
+            {
+                for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+                {
+#ifdef MANGOSBOT_ZERO
+                    if (proto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE || proto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_NO_DELAY_USE)
+#else
+                    if (proto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
+#endif
+                    {
+                        if (proto->Spells[i].SpellId > 0 && ai->HasAura(proto->Spells[i].SpellId, target))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool ItemTargetTrigger::IsSpellReady()
+{
+    const uint32 itemId = GetItemId();
+    if (!ai->HasCheat(BotCheatMask::item) && !bot->HasItemCount(itemId, 1))
+        return false;
+
+    const ItemPrototype* proto = sObjectMgr.GetItemPrototype(itemId);
+    if (proto)
+    {
+        for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+        {
+#ifdef MANGOSBOT_ZERO
+            if (proto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE || proto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_NO_DELAY_USE)
+#else
+            if (proto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
+#endif
+            {
+                if (proto->Spells[i].SpellId > 0)
+                {
+                    if (!sServerFacade.IsSpellReady(bot, proto->Spells[i].SpellId) ||
+                        !sServerFacade.IsSpellReady(bot, proto->Spells[i].SpellId, itemId))
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}

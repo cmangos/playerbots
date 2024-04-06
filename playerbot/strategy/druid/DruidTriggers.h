@@ -358,32 +358,35 @@ namespace ai
         FerociousBiteTrigger(PlayerbotAI* ai) : ComboPointsAvailableTrigger(ai, 5) {}
     };
 
-    class RebirthOnPartyTrigger : public PartyMemberDeadTrigger
+    class RebirthTrigger : public SpellTargetTrigger
     {
     public:
-        RebirthOnPartyTrigger(PlayerbotAI* ai) : PartyMemberDeadTrigger(ai) {}
+        RebirthTrigger(PlayerbotAI* ai) : SpellTargetTrigger(ai, "rebirth", "revive targets") {}
+        std::string GetTargetName() override { return "party member to resurrect"; }
 
-        bool IsActive() override
-        {
-            if (PartyMemberDeadTrigger::IsActive())
-            {
-                return bot->IsSpellReady(AI_VALUE2(uint32, "spell id", "rebirth"));
-            }
-
-            return false;
+        bool IsTargetValid(Unit* target) override 
+        { 
+            return SpellTargetTrigger::IsTargetValid(target) && target->IsDead(); 
         }
     };
 
-    class InnervateSelfTrigger : public LowManaTrigger
+    class InnervateTrigger : public SpellTargetTrigger
     {
     public:
-        InnervateSelfTrigger(PlayerbotAI* ai) : LowManaTrigger(ai) {}
+        InnervateTrigger(PlayerbotAI* ai) : SpellTargetTrigger(ai, "innervate", "boost targets", true, true) {}
+        std::string GetTargetName() override { return "self target"; }
 
-        bool IsActive() override
+        bool IsTargetValid(Unit* target) override
         {
-            if (LowManaTrigger::IsActive())
+            if (SpellTargetTrigger::IsTargetValid(target))
             {
-                return bot->IsSpellReady(AI_VALUE2(uint32, "spell id", "innervate"));
+                const uint32 currentMana = target->GetPower(POWER_MANA);
+                if (currentMana > 0)
+                {
+                    const uint32 maxMana = target->GetMaxPower(POWER_MANA);
+                    const uint32 currentManaPct = (uint32)(currentMana / maxMana) * 100;
+                    return currentManaPct < sPlayerbotAIConfig.lowMana;
+                }
             }
 
             return false;

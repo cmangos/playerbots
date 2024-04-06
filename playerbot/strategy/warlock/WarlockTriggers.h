@@ -289,4 +289,12 @@ namespace ai
     public:
         SpellLockEnemyHealerTrigger(PlayerbotAI* ai) : InterruptEnemyHealerTrigger(ai, "spell lock") {}
     };
+
+    class SoulstoneTrigger : public ItemTargetTrigger
+    {
+    public:
+        SoulstoneTrigger(PlayerbotAI* ai) : ItemTargetTrigger(ai, "revive targets", true, true) {}
+        std::string GetTargetName() override { return "self target"; }
+        uint32 GetItemId() override;
+    };
 }

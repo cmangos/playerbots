@@ -817,7 +817,7 @@ bool PlayerbotAI::CanEnterArea(const AreaTrigger* area)
 
 void PlayerbotAI::Unmount()
 {
-    if (bot->IsMounted())
+    if (bot->IsMounted() && !bot->IsTaxiFlying())
     {
         bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         bot->Unmount();

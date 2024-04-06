@@ -228,11 +228,23 @@ void ChatCommandHandlerStrategy::InitReactionTriggers(std::list<TriggerNode*> &t
 
     triggers.push_back(new TriggerNode(
         "focus heal",
-        NextAction::array(0, new NextAction("focus heal target", relevance), NULL)));
+        NextAction::array(0, new NextAction("focus heal targets", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
         "follow target",
         NextAction::array(0, new NextAction("follow target", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "boost target",
+        NextAction::array(0, new NextAction("boost targets", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "revive target",
+        NextAction::array(0, new NextAction("revive targets", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "buff target",
+        NextAction::array(0, new NextAction("buff targets", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
         "self res",

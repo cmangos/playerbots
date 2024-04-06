@@ -43,8 +43,7 @@ void DisciplinePriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",
-        NextAction::array(0, new NextAction("heal on party", ACTION_LIGHT_HEAL + 1),
-                             new NextAction("renew on party", ACTION_LIGHT_HEAL), NULL)));
+        NextAction::array(0, new NextAction("renew on party", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void DisciplinePriestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -395,8 +394,7 @@ void DisciplinePriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",
-        NextAction::array(0, new NextAction("heal on party", ACTION_LIGHT_HEAL + 1),
-                             new NextAction("renew on party", ACTION_LIGHT_HEAL), NULL)));
+        NextAction::array(0, new NextAction("renew on party", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "binding heal",
@@ -755,8 +753,7 @@ void DisciplinePriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",
-        NextAction::array(0, new NextAction("heal on party", ACTION_LIGHT_HEAL + 1),
-                             new NextAction("renew on party", ACTION_LIGHT_HEAL), NULL)));
+        NextAction::array(0, new NextAction("renew on party", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "binding heal",

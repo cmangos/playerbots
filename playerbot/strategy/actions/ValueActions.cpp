@@ -51,7 +51,7 @@ Player* FindGroupPlayerByName(Player* player, const std::string& playerName)
     return groupPlayer;
 }
 
-bool SetFocusHealTargetAction::Execute(Event& event)
+bool SetFocusHealTargetsAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     if (ai->IsHeal(bot) || ai->HasStrategy("offheal", BotState::BOT_STATE_COMBAT))
@@ -59,7 +59,7 @@ bool SetFocusHealTargetAction::Execute(Event& event)
         const std::string param = LowercaseString(event.getParam());
         if (!param.empty())
         {
-            std::list<ObjectGuid> focusHealTargets = AI_VALUE(std::list<ObjectGuid>, "focus heal target");
+            std::list<ObjectGuid> focusHealTargets = AI_VALUE(std::list<ObjectGuid>, "focus heal targets");
 
             // Query current focus targets
             if (param.find('?') != std::string::npos)
@@ -95,7 +95,7 @@ bool SetFocusHealTargetAction::Execute(Event& event)
             else if (param == "none" || param == "unset" || param == "clear")
             {   
                 focusHealTargets.clear();
-                SET_AI_VALUE(std::list<ObjectGuid>, "focus heal target", focusHealTargets);
+                SET_AI_VALUE(std::list<ObjectGuid>, "focus heal targets", focusHealTargets);
                 ai->ChangeStrategy("-focus heal target", BotState::BOT_STATE_COMBAT);
                 ai->TellPlayerNoFacing(requester, "Removed focus heal targets");
                 return true;
@@ -163,7 +163,7 @@ bool SetFocusHealTargetAction::Execute(Event& event)
                             }
                         }
 
-                        SET_AI_VALUE(std::list<ObjectGuid>, "focus heal target", focusHealTargets);
+                        SET_AI_VALUE(std::list<ObjectGuid>, "focus heal targets", focusHealTargets);
 
                         if (focusHealTargets.empty())
                         {
@@ -171,7 +171,7 @@ bool SetFocusHealTargetAction::Execute(Event& event)
                         }
                         else
                         {
-                            ai->ChangeStrategy("+focus heal target", BotState::BOT_STATE_COMBAT);
+                            ai->ChangeStrategy("+focus heal targets", BotState::BOT_STATE_COMBAT);
                         }
 
                         return true;
@@ -276,6 +276,139 @@ bool SetFollowTargetAction::Execute(Event& event)
             else
             {
                 ai->TellPlayerNoFacing(requester, "I'm not in a group");
+            }
+        }
+    }
+    else
+    {
+        ai->TellPlayerNoFacing(requester, "Please provide one or more player names");
+    }
+
+    return false;
+}
+
+bool SetSpellTargetAction::Execute(Event& event)
+{
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    const std::string param = LowercaseString(event.getParam());
+    if (!param.empty())
+    {
+        std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, name);
+
+        // Query current boost targets
+        if (param.find('?') != std::string::npos)
+        {
+            std::stringstream ss;
+            if (targets.empty())
+            {
+                ss << "I don't have any " << name << " saved";
+            }
+            else
+            {
+                ss << "My " << name << " are ";
+                for (const ObjectGuid& boostTargetGuid : targets)
+                {
+                    Unit* boostTarget = ai->GetUnit(boostTargetGuid);
+                    if (boostTarget)
+                    {
+                        if (boostTargetGuid == targets.back())
+                        {
+                            ss << boostTarget->GetName();
+                        }
+                        else
+                        {
+                            ss << boostTarget->GetName() << ", ";
+                        }
+                    }
+                }
+            }
+
+            ai->TellPlayerNoFacing(requester, ss.str());
+            return true;
+        }
+        else if (param == "none" || param == "unset" || param == "clear")
+        {
+            targets.clear();
+            SET_AI_VALUE(std::list<ObjectGuid>, name, targets);
+            std::stringstream ss; ss << "Removed all " << name;
+            ai->TellPlayerNoFacing(requester, ss.str());
+            return true;
+        }
+        else
+        {
+            // Multiple boost targets
+            std::vector<std::string> targetNames;
+            if (param.find(',') != std::string::npos)
+            {
+                std::string targetName;
+                std::stringstream ss(param);
+                while (std::getline(ss, targetName, ','))
+                {
+                    targetNames.push_back(targetName);
+                }
+            }
+            else
+            {
+                targetNames.push_back(param);
+            }
+
+            if (!targetNames.empty())
+            {
+                if (bot->GetGroup())
+                {
+                    for (const std::string& targetName : targetNames)
+                    {
+                        const bool add = targetName.find("+") != std::string::npos;
+                        const bool remove = targetName.find("-") != std::string::npos;
+                        if (add || remove)
+                        {
+                            const std::string playerName = targetName.substr(1);
+                            const Player* target = FindGroupPlayerByName(bot, playerName);
+                            if (target)
+                            {
+                                const ObjectGuid& targetGuid = target->GetObjectGuid();
+                                if (add)
+                                {
+                                    // Check if the target exists already on the list
+                                    if (std::find(targets.begin(), targets.end(), targetGuid) == targets.end())
+                                    {
+                                        targets.push_back(targetGuid);
+                                    }
+
+                                    std::stringstream message; message << "Added " << playerName << " to my " << name;
+                                    ai->TellPlayerNoFacing(requester, message.str());
+                                }
+                                else
+                                {
+                                    targets.remove(targetGuid);
+                                    std::stringstream message; message << "Removed " << playerName << " from my " << name;
+                                    ai->TellPlayerNoFacing(requester, message.str());
+                                }
+                            }
+                            else
+                            {
+                                std::stringstream message; message << "I'm not in a group with " << playerName;
+                                ai->TellPlayerNoFacing(requester, message.str());
+                            }
+                        }
+                        else
+                        {
+                            ai->TellPlayerNoFacing(requester, "Please specify a + for add or - to remove a target");
+                        }
+                    }
+
+                    SET_AI_VALUE(std::list<ObjectGuid>, name, targets);
+
+                    return true;
+                }
+                else
+                {
+                    ai->TellPlayerNoFacing(requester, "I'm not in a group");
+                }
+            }
+            else
+            {
+                ai->TellPlayerNoFacing(requester, "Please provide one or more player names");
             }
         }
     }

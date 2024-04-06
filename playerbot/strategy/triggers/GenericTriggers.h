@@ -399,6 +399,35 @@ namespace ai
         virtual std::string GetTargetName() override { return "current target"; }
     };
 
+    class SpellTargetTrigger : public SpellTrigger
+    {
+    public:
+        SpellTargetTrigger(PlayerbotAI* ai, std::string spell, std::string targetsValue, bool aliveCheck = false, bool auraCheck = false, int checkInterval = 1) : SpellTrigger(ai, spell, checkInterval), targetsValue(targetsValue), aliveCheck(aliveCheck), auraCheck(auraCheck) {}
+        virtual std::string GetTargetName() override { return "self target"; }
+        virtual bool IsTargetValid(Unit* target);
+        virtual bool IsSpellReady();
+
+    private:
+        bool IsActive() override;
+
+    private:
+        std::string targetsValue;
+        bool aliveCheck;
+        bool auraCheck;
+    };
+
+    class ItemTargetTrigger : public SpellTargetTrigger
+    {
+    public:
+        ItemTargetTrigger(PlayerbotAI* ai, std::string targetsValue, bool aliveCheck = false, bool auraCheck = false, int checkInterval = 1) : SpellTargetTrigger(ai, "item target", targetsValue, aliveCheck, false, checkInterval), itemAuraCheck(auraCheck) {}
+        virtual bool IsTargetValid(Unit* target) override;
+        virtual bool IsSpellReady() override;
+        virtual uint32 GetItemId() = 0;
+
+    private:
+        bool itemAuraCheck;
+    };
+
     class ProtectPartyMemberTrigger : public Trigger
     {
     public:

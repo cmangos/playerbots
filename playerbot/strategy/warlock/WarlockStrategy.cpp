@@ -231,7 +231,11 @@ void WarlockBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "demon armor",
-        NextAction::array(0, new NextAction("fel armor", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("fel armor", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "soulstone",
+        NextAction::array(0, new NextAction("soulstone", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "often",
@@ -679,7 +683,11 @@ void WarlockBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "demon armor",
-        NextAction::array(0, new NextAction("fel armor", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("fel armor", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "soulstone",
+        NextAction::array(0, new NextAction("soulstone", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "often",
@@ -1131,7 +1139,11 @@ void WarlockBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "demon armor",
-        NextAction::array(0, new NextAction("fel armor", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("fel armor", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "soulstone",
+        NextAction::array(0, new NextAction("soulstone", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "often",

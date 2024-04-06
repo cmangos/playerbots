@@ -349,7 +349,6 @@ namespace ai
             AiObjectContextInternal()
             {
                 creators["power infusion"] = &AiObjectContextInternal::power_infusion;
-                creators["power infusion on party"] = &AiObjectContextInternal::power_infusion_on_party;
                 creators["inner focus"] = &AiObjectContextInternal::inner_focus;
                 creators["shadow word: pain"] = &AiObjectContextInternal::shadow_word_pain;
                 creators["shadow word: pain on attacker"] = &AiObjectContextInternal::shadow_word_pain_on_attacker;
@@ -411,7 +410,6 @@ namespace ai
                 creators["shadowguard"] = &AiObjectContextInternal::shadowguard;
                 creators["desperate prayer"] = &AiObjectContextInternal::desperate_prayer;
                 creators["fear ward"] = &AiObjectContextInternal::fear_ward;
-                creators["fear ward on party"] = &AiObjectContextInternal::fear_ward_on_party;
                 creators["starshards"] = &AiObjectContextInternal::starshards;
                 creators["elune's grace"] = &AiObjectContextInternal::elunes_grace;
                 creators["feedback"] = &AiObjectContextInternal::feedback;
@@ -446,7 +444,6 @@ namespace ai
             static Action* feedback(PlayerbotAI* ai) { return new CastFeedbackAction(ai); }
             static Action* elunes_grace(PlayerbotAI* ai) { return new CastElunesGraceAction(ai); }
             static Action* starshards(PlayerbotAI* ai) { return new CastStarshardsAction(ai); }
-            static Action* fear_ward_on_party(PlayerbotAI* ai) { return new CastFearWardOnPartyAction(ai); }
             static Action* fear_ward(PlayerbotAI* ai) { return new CastFearWardAction(ai); }
             static Action* desperate_prayer(PlayerbotAI* ai) { return new CastDesperatePrayerAction(ai); }
             static Action* shadowguard(PlayerbotAI* ai) { return new CastShadowguardAction(ai); }
@@ -466,7 +463,6 @@ namespace ai
             static Action* shadow_shadow_on_party(PlayerbotAI* ai) { return new CastShadowProtectionOnPartyAction(ai); }
             static Action* shadow_shadow(PlayerbotAI* ai) { return new CastShadowProtectionAction(ai); }
             static Action* power_infusion(PlayerbotAI* ai) { return new CastPowerInfusionAction(ai); }
-            static Action* power_infusion_on_party(PlayerbotAI* ai) { return new CastPowerInfusionOnPartyAction(ai); }
             static Action* inner_focus(PlayerbotAI* ai) { return new CastInnerFocusAction(ai); }
             //static Action* dispersion(PlayerbotAI* ai) { return new CastDispersionAction(ai); }
             static Action* vampiric_embrace(PlayerbotAI* ai) { return new CastVampiricEmbraceAction(ai); }

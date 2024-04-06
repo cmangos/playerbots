@@ -153,6 +153,39 @@ namespace ai
         virtual std::string GetTargetName() override { return "self target"; }
 	};
 
+    class CastSpellTargetAction : public CastSpellAction
+    {
+    public:
+        CastSpellTargetAction(PlayerbotAI* ai, std::string spell, std::string targetsValue, bool aliveCheck = false, bool auraCheck = false) : CastSpellAction(ai, spell), targetsValue(targetsValue), aliveCheck(aliveCheck), auraCheck(auraCheck) {}
+        virtual std::string GetTargetName() override { return "self target"; }
+        virtual bool IsTargetValid(Unit* target);
+        Unit* GetTarget() override;
+
+    private:
+        std::string targetsValue;
+        bool aliveCheck;
+        bool auraCheck;
+    };
+
+    class CastItemTargetAction : public CastSpellTargetAction
+    {
+    public:
+        CastItemTargetAction(PlayerbotAI* ai, std::string targetsValue, bool aliveCheck = false, bool auraCheck = false) : CastSpellTargetAction(ai, "item target", targetsValue, aliveCheck, false), itemAuraCheck(auraCheck) {}
+        virtual bool IsTargetValid(Unit* target) override;
+        virtual uint32 GetItemId() = 0;
+
+    protected:
+        virtual bool isUseful() override;
+        virtual bool isPossible() override;
+        virtual bool Execute(Event& event) override;
+
+    private:
+        bool HasSpellCooldown(uint32 itemId);
+
+    private:
+        bool itemAuraCheck;
+    };
+
 	class CastEnchantItemAction : public CastSpellAction
 	{
 	public:

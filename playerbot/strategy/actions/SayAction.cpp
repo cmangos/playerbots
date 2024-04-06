@@ -15,7 +15,7 @@ std::unordered_set<std::string> noReplyMsgs = {
   "dead ?", "follow", "los", "guard", "do accept invitation", "stats", "react ?",
   "reset strats", "home",
 };
-std::unordered_set<std::string> noReplyMsgParts = { "+", "-","@" , "follow target", "focus heal", "cast ", "accept [", "e [", "destroy [", "go zone" };
+std::unordered_set<std::string> noReplyMsgParts = { "+", "-","@" , "follow target", "focus heal", "boost target", "buff target", "revive target", "cast ", "accept [", "e [", "destroy [", "go zone" };
 
 std::unordered_set<std::string> noReplyMsgStarts = { "e ", "accept ", "cast ", "destroy " };
 

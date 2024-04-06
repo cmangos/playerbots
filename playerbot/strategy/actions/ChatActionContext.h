@@ -180,10 +180,14 @@ namespace ai
             creators["ah"] = &ChatActionContext::ah;
             creators["ah bid"] = &ChatActionContext::ah_bid;
             creators["wait for attack time"] = &ChatActionContext::wait_for_attack_time;
-            creators["focus heal target"] = &ChatActionContext::focus_heal_target;
-            creators["follow target"] = &ChatActionContext::follow_target;
             creators["self resurrect"] = &ChatActionContext::self_resurrect;
             creators["pet"] = &ChatActionContext::pet;
+
+            creators["focus heal targets"] = &ChatActionContext::focus_heal_targets;
+            creators["follow target"] = &ChatActionContext::follow_target;
+            creators["boost targets"] = &ChatActionContext::boost_targets;
+            creators["revive targets"] = &ChatActionContext::revive_targets;
+            creators["buff targets"] = &ChatActionContext::buff_targets;
 
             creators["guild invite"] = &ChatActionContext::guild_invite;
             creators["guild join"] = &ChatActionContext::guild_join;
@@ -298,10 +302,14 @@ namespace ai
         static Action* ah(PlayerbotAI* ai) { return new AhAction(ai); }
         static Action* ah_bid(PlayerbotAI* ai) { return new AhBidAction(ai); }
         static Action* wait_for_attack_time(PlayerbotAI* ai) { return new SetWaitForAttackTimeAction(ai); }
-        static Action* focus_heal_target(PlayerbotAI* ai) { return new SetFocusHealTargetAction(ai); }
-        static Action* follow_target(PlayerbotAI* ai) { return new SetFollowTargetAction(ai); }
         static Action* self_resurrect(PlayerbotAI* ai) { return new SelfResurrectAction(ai); }
         static Action* pet(PlayerbotAI* ai) { return new SetPetAction(ai); }
+
+        static Action* focus_heal_targets(PlayerbotAI* ai) { return new SetFocusHealTargetsAction(ai); }
+        static Action* follow_target(PlayerbotAI* ai) { return new SetFollowTargetAction(ai); }
+        static Action* boost_targets(PlayerbotAI* ai) { return new SetBoostTargetsAction(ai); }
+        static Action* revive_targets(PlayerbotAI* ai) { return new SetReviveTargetsAction(ai); }
+        static Action* buff_targets(PlayerbotAI* ai) { return new SetBuffTargetsAction(ai); }
 
         static Action* guild_invite(PlayerbotAI* ai) { return new GuildInviteAction(ai); }
         static Action* guild_join(PlayerbotAI* ai) { return new GuildJoinAction(ai); }

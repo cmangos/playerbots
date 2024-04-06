@@ -359,6 +359,10 @@ void PriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "target of attacker",
         NextAction::array(0, new NextAction("elune's grace", ACTION_HIGH + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "fear ward",
+        NextAction::array(0, new NextAction("fear ward", ACTION_HIGH), NULL)));
 }
 
 void PriestBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -930,6 +934,10 @@ void PriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("symbol of hope", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "fear ward",
+        NextAction::array(0, new NextAction("fear ward", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "low mana",
         NextAction::array(0, new NextAction("shadowfiend", ACTION_HIGH), NULL)));
 }
@@ -1489,6 +1497,10 @@ void PriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "target of attacker",
         NextAction::array(0, new NextAction("elune's grace", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "fear ward",
+        NextAction::array(0, new NextAction("fear ward", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low mana",

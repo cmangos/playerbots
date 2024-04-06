@@ -1043,7 +1043,6 @@ bool UseItemIdAction::isPossible()
         spellCount++;        
     }
 
-
     return spellCount;
 }
 

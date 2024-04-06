@@ -23,13 +23,10 @@ namespace ai
     SPELL_ACTION(CastMassDispelAction, "mass dispel");
 
     // disc talents
-    BUFF_ACTION(CastPowerInfusionAction, "power infusion");
-    BUFF_PARTY_ACTION(CastPowerInfusionOnPartyAction, "power infusion");
     BUFF_ACTION(CastInnerFocusAction, "inner focus");
     // disc 2.4.3 talents
     BUFF_ACTION(CastPainSuppressionAction, "pain suppression");
     PROTECT_ACTION(CastPainSuppressionProtectAction, "pain suppression");
-
 
     // holy
     HEAL_ACTION(CastLesserHealAction, "lesser heal");
@@ -46,7 +43,6 @@ namespace ai
     HEAL_PARTY_ACTION(CastPrayerOfMendingAction, "prayer of mending");
     HEAL_PARTY_ACTION(CastBindingHealAction, "binding heal");
     
-
     BUFF_ACTION(CastPrayerOfHealingAction, "prayer of healing");
     AOE_HEAL_ACTION(CastLightwellAction, "lightwell");
     AOE_HEAL_ACTION(CastCircleOfHealingAction, "circle of healing");
@@ -93,8 +89,6 @@ namespace ai
     RANGED_DEBUFF_ACTION(CastHexOfWeaknessAction, "hex of weakness");
     BUFF_ACTION(CastShadowguardAction, "shadowguard");
     HEAL_ACTION(CastDesperatePrayerAction, "desperate prayer");
-    BUFF_ACTION(CastFearWardAction, "fear ward");
-    BUFF_PARTY_ACTION(CastFearWardOnPartyAction, "fear ward");
     SPELL_ACTION_U(CastStarshardsAction, "starshards", (AI_VALUE2(uint8, "mana", "self target") > 50 && AI_VALUE(Unit*, "current target") && AI_VALUE2(float, "distance", "current target") > 15.0f));
     BUFF_ACTION(CastElunesGraceAction, "elune's grace");
     BUFF_ACTION(CastFeedbackAction, "feedback");
@@ -108,11 +102,26 @@ namespace ai
         CastRemoveShadowformAction(PlayerbotAI* ai) : Action(ai, "remove shadowform") {}
         virtual bool isUseful() { return ai->HasAura("shadowform", AI_VALUE(Unit*, "self target")); }
         virtual bool isPossible() { return true; }
+
         virtual bool Execute(Event& event) 
         {
             ai->RemoveAura("shadowform");
             return true;
         }
+    };
+
+    class CastPowerInfusionAction : public CastSpellTargetAction
+    {
+    public:
+        CastPowerInfusionAction(PlayerbotAI* ai) : CastSpellTargetAction(ai, "power infusion", "boost targets", true, true) {}
+        std::string GetTargetName() override { return "self target"; }
+    };
+
+    class CastFearWardAction : public CastSpellTargetAction
+    {
+    public:
+        CastFearWardAction(PlayerbotAI* ai) : CastSpellTargetAction(ai, "fear ward", "buff targets", true, true) {}
+        std::string GetTargetName() override { return "self target"; }
     };
 }
 

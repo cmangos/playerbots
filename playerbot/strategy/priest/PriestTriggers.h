@@ -16,7 +16,6 @@ namespace ai
     CURE_PARTY_TRIGGER(PartyMemberCureDiseaseTrigger, "cure disease", DISPEL_DISEASE);
     BUFF_TRIGGER_A(InnerFireTrigger, "inner fire");
     BUFF_TRIGGER_A(ShadowformTrigger, "shadowform");
-    BUFF_TRIGGER(PowerInfusionTrigger, "power infusion");
     BUFF_TRIGGER(InnerFocusTrigger, "inner focus");
     CC_TRIGGER(ShackleUndeadTrigger, "shackle undead");
     INTERRUPT_TRIGGER(SilenceTrigger, "silence");
@@ -27,7 +26,6 @@ namespace ai
     BUFF_TRIGGER(TouchOfWeaknessTrigger, "touch of weakness");
     DEBUFF_TRIGGER(HexOfWeaknessTrigger, "hex of weakness");
     BUFF_TRIGGER(ShadowguardTrigger, "shadowguard");
-    BUFF_TRIGGER(FearWardTrigger, "fear ward");
     DEFLECT_TRIGGER(FeedbackTrigger, "feedback");
     SNARE_TRIGGER(ChastiseTrigger, "chastise");
     DEBUFF_TRIGGER(StarshardsTrigger, "starshards");
@@ -105,5 +103,19 @@ namespace ai
         {
             return PartyMemberLowHealthTrigger::IsActive() && AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.mediumHealth;
         }
+    };
+
+    class PowerInfusionTrigger : public SpellTargetTrigger
+    {
+    public:
+        PowerInfusionTrigger(PlayerbotAI* ai) : SpellTargetTrigger(ai, "power infusion", "boost targets", true, true) {}
+        std::string GetTargetName() override { return "self target"; }
+    };
+
+    class FearWardTrigger : public SpellTargetTrigger
+    {
+    public:
+        FearWardTrigger(PlayerbotAI* ai) : SpellTargetTrigger(ai, "fear ward", "buff targets", true, true) {}
+        std::string GetTargetName() override { return "self target"; }
     };
 }

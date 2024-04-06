@@ -347,8 +347,8 @@ namespace ai
                 creators["no stealth"] = &TriggerFactoryInternal::no_stealth;
                 creators["stealth"] = &TriggerFactoryInternal::stealth;
                 creators["powershift"] = &TriggerFactoryInternal::powershift;
-                creators["rebirth on party"] = &TriggerFactoryInternal::rebirth_on_party;
-                creators["innervate self"] = &TriggerFactoryInternal::innervate_self;
+                creators["rebirth"] = &TriggerFactoryInternal::rebirth;
+                creators["innervate"] = &TriggerFactoryInternal::innervate;
                 creators["lifebloom"] = &TriggerFactoryInternal::lifebloom;
                 creators["clearcasting"] = &TriggerFactoryInternal::clearcasting;
             }
@@ -394,8 +394,8 @@ namespace ai
             static Trigger* no_stealth(PlayerbotAI* ai) { return new NoStealthTrigger(ai); }
             static Trigger* stealth(PlayerbotAI* ai) { return new StealthTrigger(ai); }
             static Trigger* powershift(PlayerbotAI* ai) { return new PowershiftTrigger(ai); }
-            static Trigger* rebirth_on_party(PlayerbotAI* ai) { return new RebirthOnPartyTrigger(ai); }
-            static Trigger* innervate_self(PlayerbotAI* ai) { return new InnervateSelfTrigger(ai); }
+            static Trigger* rebirth(PlayerbotAI* ai) { return new RebirthTrigger(ai); }
+            static Trigger* innervate(PlayerbotAI* ai) { return new InnervateTrigger(ai); }
             static Trigger* lifebloom(PlayerbotAI* ai) { return new LifebloomTankTrigger(ai); }
             static Trigger* clearcasting(PlayerbotAI* ai) { return new ClearcastingTrigger(ai); }
         };

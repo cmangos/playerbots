@@ -101,7 +101,7 @@ void TankFeralDruidStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
 void TankFeralDruidPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     triggers.push_back(new TriggerNode(
-        "rebirth on party",
+        "rebirth",
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -142,7 +142,7 @@ void TankFeralDruidPveStrategy::InitDeadTriggers(std::list<TriggerNode*>& trigge
 void TankFeralDruidPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     triggers.push_back(new TriggerNode(
-        "rebirth on party",
+        "rebirth",
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -554,7 +554,7 @@ void TankFeralDruidPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     DruidPveStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "rebirth on party",
+        "rebirth",
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -595,7 +595,7 @@ void TankFeralDruidPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     DruidPvpStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "rebirth on party",
+        "rebirth",
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -1000,7 +1000,7 @@ void TankFeralDruidPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     DruidPveStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "rebirth on party",
+        "rebirth",
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -1041,7 +1041,7 @@ void TankFeralDruidPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     DruidPvpStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "rebirth on party",
+        "rebirth",
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(

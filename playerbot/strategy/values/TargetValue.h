@@ -1,4 +1,5 @@
 #pragma once
+#include "playerbot/strategy//AiObject.h"
 #include "playerbot/strategy/Value.h"
 #include "playerbot/TravelMgr.h"
 
@@ -143,5 +144,29 @@ namespace ai
     public:
         ClosestAttackerTargetingMeTargetValue(PlayerbotAI* ai, std::string name = "closest attacker targeting me") : UnitCalculatedValue(ai, name) {}
         Unit* Calculate() override;
+    };
+
+    class FocusHealTargetValue : public ManualSetValue<std::list<ObjectGuid>>
+    {
+    public:
+        FocusHealTargetValue(PlayerbotAI* ai) : ManualSetValue<std::list<ObjectGuid>>(ai, {}) {}
+    };
+
+    class BoostTargetsValue : public ManualSetValue<std::list<ObjectGuid>>
+    {
+    public:
+        BoostTargetsValue(PlayerbotAI* ai) : ManualSetValue<std::list<ObjectGuid>>(ai, {}) {}
+    };
+
+    class ReviveTargetsValue : public ManualSetValue<std::list<ObjectGuid>>
+    {
+    public:
+        ReviveTargetsValue(PlayerbotAI* ai) : ManualSetValue<std::list<ObjectGuid>>(ai, {}) {}
+    };
+
+    class BuffTargetsValue : public ManualSetValue<std::list<ObjectGuid>>
+    {
+    public:
+        BuffTargetsValue(PlayerbotAI* ai) : ManualSetValue<std::list<ObjectGuid>>(ai, {}) {}
     };
 }

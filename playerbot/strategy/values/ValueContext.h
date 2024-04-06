@@ -93,7 +93,6 @@
 #include "EngineValues.h"
 #include "FreeMoveValues.h"
 #include "HazardsValue.h"
-#include "FocusTargetValue.h"
 #include "TalentSpecValue.h"
 #include "MountValues.h"
 #include "DeadValues.h"
@@ -263,6 +262,14 @@ namespace ai
             creators["nearest non bot players"] = &ValueContext::nearest_non_bot_players;
             creators["new player nearby"] = &ValueContext::new_player_nearby;
             creators["already seen players"] = &ValueContext::already_seen_players;
+            creators["group"] = &ValueContext::group;
+            creators["range"] = &ValueContext::range;
+            creators["inside target"] = &ValueContext::inside_target;
+            creators["party member without item"] = &ValueContext::party_member_without_item;
+            creators["party member without food"] = &ValueContext::party_member_without_food;
+            creators["party member without water"] = &ValueContext::party_member_without_water;
+            creators["death count"] = &ValueContext::death_count;
+
             creators["rpg target"] = &ValueContext::rpg_target;
             creators["ignore rpg target"] = &ValueContext::ignore_rpg_target;
             creators["next rpg action"] = &ValueContext::next_rpg_action;
@@ -272,13 +279,10 @@ namespace ai
             creators["pull target"] = &ValueContext::pull_target;
             creators["follow target"] = &ValueContext::follow_target;
             creators["manual follow target"] = &ValueContext::manual_follow_target;
-            creators["group"] = &ValueContext::group;
-            creators["range"] = &ValueContext::range;
-            creators["inside target"] = &ValueContext::inside_target;
-            creators["party member without item"] = &ValueContext::party_member_without_item;
-            creators["party member without food"] = &ValueContext::party_member_without_food;
-            creators["party member without water"] = &ValueContext::party_member_without_water;
-            creators["death count"] = &ValueContext::death_count;
+            creators["focus heal targets"] = &ValueContext::focus_heal_target;
+            creators["boost targets"] = &ValueContext::boost_targets;
+            creators["revive targets"] = &ValueContext::revive_targets;
+            creators["buff targets"] = &ValueContext::buff_targets;
 
             creators["bg type"] = &ValueContext::bg_type;
             creators["rpg bg type"] = &ValueContext::rpg_bg_type; 
@@ -371,7 +375,6 @@ namespace ai
             creators["has area debuff"] = &ValueContext::has_area_debuff;
             creators["combat start time"] = &ValueContext::combat_start_time;
             creators["wait for attack time"] = &ValueContext::wait_for_attack_time;
-            creators["focus heal target"] = &ValueContext::focus_heal_target;
 
             creators["mc runes"] = &ValueContext::mc_runes;
             creators["gos"] = &ValueContext::gos;
@@ -558,6 +561,8 @@ namespace ai
         static UntypedValue* random_bot_update_value(PlayerbotAI* ai) { return new RandomBotUpdateValue(ai); }
         static UntypedValue* nearest_non_bot_players(PlayerbotAI* ai) { return new NearestNonBotPlayersValue(ai); }
         static UntypedValue* skip_spells_list_value(PlayerbotAI* ai) { return new SkipSpellsListValue(ai); }
+        static UntypedValue* death_count(PlayerbotAI* ai) { return new DeathCountValue(ai); }
+
         static UntypedValue* rpg_target(PlayerbotAI* ai) { return new RpgTargetValue(ai); }
         static UntypedValue* ignore_rpg_target(PlayerbotAI* ai) { return new IgnoreRpgTargetValue(ai); }
         static UntypedValue* next_rpg_action(PlayerbotAI* ai) { return new NextRpgActionValue(ai); }
@@ -567,7 +572,10 @@ namespace ai
         static UntypedValue* pull_target(PlayerbotAI* ai) { return new PullTargetValue(ai); }
         static UntypedValue* follow_target(PlayerbotAI* ai) { return new FollowTargetValue(ai); }
         static UntypedValue* manual_follow_target(PlayerbotAI* ai) { return new ManualFollowTargetValue(ai); }
-        static UntypedValue* death_count(PlayerbotAI* ai) { return new DeathCountValue(ai); }
+        static UntypedValue* focus_heal_target(PlayerbotAI* ai) { return new FocusHealTargetValue(ai); }
+        static UntypedValue* boost_targets(PlayerbotAI* ai) { return new BoostTargetsValue(ai); }
+        static UntypedValue* revive_targets(PlayerbotAI* ai) { return new ReviveTargetsValue(ai); }
+        static UntypedValue* buff_targets(PlayerbotAI* ai) { return new BuffTargetsValue(ai); }
 
         static UntypedValue* last_long_move(PlayerbotAI* ai) { return new LastLongMoveValue(ai); }
         static UntypedValue* home_bind(PlayerbotAI* ai) { return new HomeBindValue(ai); }
@@ -652,7 +660,6 @@ namespace ai
         static UntypedValue* has_area_debuff(PlayerbotAI* ai) { return new HasAreaDebuffValue(ai); }
         static UntypedValue* combat_start_time(PlayerbotAI* ai) { return new CombatStartTimeValue(ai); }
         static UntypedValue* wait_for_attack_time(PlayerbotAI* ai) { return new WaitForAttackTimeValue(ai); }
-        static UntypedValue* focus_heal_target(PlayerbotAI* ai) { return new FocusHealTargetValue(ai); }
 
         static UntypedValue* mc_runes(PlayerbotAI* ai) { return new MCRunesValue(ai); }
         static UntypedValue* gos(PlayerbotAI* ai) { return new GameObjectsValue(ai); }

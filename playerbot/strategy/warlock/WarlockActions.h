@@ -66,10 +66,10 @@ namespace ai
         }
     };
 
-    class CastSoulstoneAction : public UseItemIdAction
+    class CastSoulstoneAction : public CastItemTargetAction
     {
     public:
-        CastSoulstoneAction(PlayerbotAI* ai) : UseItemIdAction(ai, "soulstone") {}
+        CastSoulstoneAction(PlayerbotAI* ai) : CastItemTargetAction(ai, "revive targets", true, true) {}
 
     private:
         uint32 GetItemId() override 
@@ -106,18 +106,6 @@ namespace ai
             }
 
             return itemId;
-        }
-
-        Unit* GetTarget() override
-        {
-            Unit* target = nullptr;
-            Player* master = ai->GetMaster();
-            if (master)
-            {
-                target = ai->GetUnit(master->GetSelectionGuid());
-            }
-
-            return target;
         }
     };
 

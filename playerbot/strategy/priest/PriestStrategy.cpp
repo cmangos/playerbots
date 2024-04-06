@@ -1138,6 +1138,83 @@ void PriestOffhealRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
     OffhealRaidStrategy::InitNonCombatTriggers(triggers);
 }
 
+void PriestOffdpsStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    OffdpsStrategy::InitCombatTriggers(triggers);
+
+    if (ai->HasStrategy("aoe", BotState::BOT_STATE_COMBAT))
+    {
+        triggers.push_back(new TriggerNode(
+            "shadow word: pain on attacker",
+            NextAction::array(0, new NextAction("shadow word: pain on attacker", ACTION_HIGH + 1), NULL)));
+
+        triggers.push_back(new TriggerNode(
+            "melee medium aoe",
+            NextAction::array(0, new NextAction("holy nova", ACTION_HIGH), NULL)));
+    }
+
+    triggers.push_back(new TriggerNode(
+        "shadow word: pain",
+        NextAction::array(0, new NextAction("shadow word: pain", ACTION_NORMAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "holy fire",
+        NextAction::array(0, new NextAction("holy fire", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "very often",
+        NextAction::array(0, new NextAction("starshards", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "smite",
+        NextAction::array(0, new NextAction("smite", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "no mana",
+        NextAction::array(0, new NextAction("shoot", ACTION_NORMAL), NULL)));
+}
+
+void PriestOffdpsStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    OffdpsStrategy::InitNonCombatTriggers(triggers);
+}
+
+void PriestOffdpsPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitCombatTriggers(triggers);
+    OffdpsPvpStrategy::InitCombatTriggers(triggers);
+}
+
+void PriestOffdpsPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitNonCombatTriggers(triggers);
+    OffdpsPvpStrategy::InitNonCombatTriggers(triggers);
+}
+
+void PriestOffdpsPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitCombatTriggers(triggers);
+    OffdpsPveStrategy::InitCombatTriggers(triggers);
+}
+
+void PriestOffdpsPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitNonCombatTriggers(triggers);
+    OffdpsPveStrategy::InitNonCombatTriggers(triggers);
+}
+
+void PriestOffdpsRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitCombatTriggers(triggers);
+    OffdpsRaidStrategy::InitCombatTriggers(triggers);
+}
+
+void PriestOffdpsRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitNonCombatTriggers(triggers);
+    OffdpsRaidStrategy::InitNonCombatTriggers(triggers);
+}
+
 #endif
 #ifdef MANGOSBOT_TWO // WOTLK
 
@@ -1620,6 +1697,83 @@ void PriestOffhealRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
 {
     PriestOffhealStrategy::InitNonCombatTriggers(triggers);
     OffhealRaidStrategy::InitNonCombatTriggers(triggers);
+}
+
+void PriestOffdpsStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    OffdpsStrategy::InitCombatTriggers(triggers);
+
+    if (ai->HasStrategy("aoe", BotState::BOT_STATE_COMBAT))
+    {
+        triggers.push_back(new TriggerNode(
+            "shadow word: pain on attacker",
+            NextAction::array(0, new NextAction("shadow word: pain on attacker", ACTION_HIGH + 1), NULL)));
+
+        triggers.push_back(new TriggerNode(
+            "melee medium aoe",
+            NextAction::array(0, new NextAction("holy nova", ACTION_HIGH), NULL)));
+    }
+
+    triggers.push_back(new TriggerNode(
+        "shadow word: pain",
+        NextAction::array(0, new NextAction("shadow word: pain", ACTION_NORMAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "holy fire",
+        NextAction::array(0, new NextAction("holy fire", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "very often",
+        NextAction::array(0, new NextAction("starshards", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "smite",
+        NextAction::array(0, new NextAction("smite", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "no mana",
+        NextAction::array(0, new NextAction("shoot", ACTION_NORMAL), NULL)));
+}
+
+void PriestOffdpsStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    OffdpsStrategy::InitNonCombatTriggers(triggers);
+}
+
+void PriestOffdpsPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitCombatTriggers(triggers);
+    OffdpsPvpStrategy::InitCombatTriggers(triggers);
+}
+
+void PriestOffdpsPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitNonCombatTriggers(triggers);
+    OffdpsPvpStrategy::InitNonCombatTriggers(triggers);
+}
+
+void PriestOffdpsPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitCombatTriggers(triggers);
+    OffdpsPveStrategy::InitCombatTriggers(triggers);
+}
+
+void PriestOffdpsPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitNonCombatTriggers(triggers);
+    OffdpsPveStrategy::InitNonCombatTriggers(triggers);
+}
+
+void PriestOffdpsRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitCombatTriggers(triggers);
+    OffdpsRaidStrategy::InitCombatTriggers(triggers);
+}
+
+void PriestOffdpsRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    PriestOffdpsStrategy::InitNonCombatTriggers(triggers);
+    OffdpsRaidStrategy::InitNonCombatTriggers(triggers);
 }
 
 #endif

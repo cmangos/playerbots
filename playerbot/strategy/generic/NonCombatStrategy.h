@@ -53,5 +53,6 @@ namespace ai
 
     protected:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void OnStrategyRemoved(BotState state) override;
     };
 }

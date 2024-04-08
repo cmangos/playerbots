@@ -226,10 +226,7 @@ bool SpiritHealerAction::Execute(Event& event)
         sLog.outBasic("Bot #%d %s:%d <%s> revives at spirit healer", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
         PlayerbotChatHandler ch(bot);
         bot->ResurrectPlayer(0.5f, !ai->HasCheat(BotCheatMask::repair));
-        if (!ai->HasCheat(BotCheatMask::repair))
-        {
-            bot->DurabilityLossAll(0.25f, true);
-        }
+        bot->DurabilityLossAll(0.25f, true);
 
         bot->SpawnCorpseBones();
         bot->SaveToDB();

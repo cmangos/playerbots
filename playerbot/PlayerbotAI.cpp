@@ -399,12 +399,6 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
             bot->SetPower(POWER_MANA, bot->GetMaxPower(POWER_MANA));
         if (HasCheat(BotCheatMask::power) && bot->GetPowerType() != POWER_MANA)
             bot->SetPower(bot->GetPowerType(), bot->GetMaxPower(bot->GetPowerType()));
-        if (HasCheat(BotCheatMask::repair))
-#ifdef MANGOSBOT_ZERO
-            bot->DurabilityRepairAll(false, 0);
-#else
-            bot->DurabilityRepairAll(false, 0, false);
-#endif
         if (HasCheat(BotCheatMask::cooldown))
             bot->RemoveAllCooldowns();
         if (HasCheat(BotCheatMask::movespeed))
@@ -4297,6 +4291,33 @@ bool PlayerbotAI::HasSpellItems(uint32 spellId, const Item* castItem) const
     }
 
     return false;
+}
+
+void PlayerbotAI::DurabilityLoss(Item* item, double percent)
+{
+    if (item)
+    {
+        const uint32 pCurrDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+        const uint32 pMaxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+        if (pMaxDurability)
+        {
+            if (!HasCheat(BotCheatMask::repair))
+            {
+                // Break item
+                uint32 pDurabilityLoss = std::max(uint32(pMaxDurability * percent), 1U);
+                bot->DurabilityPointsLoss(item, pDurabilityLoss);
+            }
+            else if (pCurrDurability < pMaxDurability)
+            {
+                // Repair if broken
+#ifdef MANGOSBOT_ZERO
+                bot->DurabilityRepair(item->GetPos(), false, 0.0f);
+#else
+                bot->DurabilityRepair(item->GetPos(), false, 0.0f, false);
+#endif
+            }
+        }
+    }
 }
 
 bool IsAlliance(uint8 race)

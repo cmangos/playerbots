@@ -392,6 +392,7 @@ public:
     std::vector<Aura*> GetAuras(Unit* player, bool allAuras = true, bool positive = false);
 
     bool HasSpellItems(uint32 spellId, const Item* castItem) const;
+    void DurabilityLoss(Item* item, double percent);
 
     virtual bool CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
     bool CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);

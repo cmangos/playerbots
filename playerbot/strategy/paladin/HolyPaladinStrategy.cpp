@@ -78,6 +78,22 @@ void HolyPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
     triggers.push_back(new TriggerNode(
         "party member low health",
         NextAction::array(0, new NextAction("holy light on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("flash of light", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("flash of light on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("flash of light", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
+        NextAction::array(0, new NextAction("flash of light on party", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void HolyPaladinStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
@@ -569,6 +585,22 @@ void HolyPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
     triggers.push_back(new TriggerNode(
         "party member low health",
         NextAction::array(0, new NextAction("holy light on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("flash of light", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("flash of light on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("flash of light", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
+        NextAction::array(0, new NextAction("flash of light on party", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void HolyPaladinStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
@@ -1068,6 +1100,22 @@ void HolyPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
     triggers.push_back(new TriggerNode(
         "party member low health",
         NextAction::array(0, new NextAction("holy light on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("flash of light", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("flash of light on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("flash of light", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
+        NextAction::array(0, new NextAction("flash of light on party", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void HolyPaladinStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

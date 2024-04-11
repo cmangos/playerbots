@@ -114,7 +114,14 @@ std::vector<std::string> CastPveBlessingAction::GetPossibleBlessingsForTarget(Un
         }
         else
         {
-            blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            if (player->getClass() == CLASS_PALADIN)
+            {
+                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
+            }
+            else
+            {
+                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            }
         }
     }
 
@@ -144,7 +151,14 @@ std::vector<std::string> CastPvpBlessingAction::GetPossibleBlessingsForTarget(Un
         }
         else
         {
-            blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            if (player->getClass() == CLASS_PALADIN)
+            {
+                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
+            }
+            else
+            {
+                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            }
         }
     }
 
@@ -174,7 +188,14 @@ std::vector<std::string> CastRaidBlessingAction::GetPossibleBlessingsForTarget(U
         }
         else
         {
-            blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            if (player->getClass() == CLASS_PALADIN)
+            {
+                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
+            }
+            else
+            {
+                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            }
         }
     }
 
@@ -307,7 +328,14 @@ std::vector<std::string> CastPveBlessingOnPartyAction::GetPossibleBlessingsForTa
         }
         else
         {
-            blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            if (player->getClass() == CLASS_PALADIN)
+            {
+                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
+            }
+            else
+            {
+                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            }
         }
     }
     else
@@ -353,7 +381,14 @@ std::vector<std::string> CastPvpBlessingOnPartyAction::GetPossibleBlessingsForTa
         }
         else
         {
-            blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            if (player->getClass() == CLASS_PALADIN)
+            {
+                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
+            }
+            else
+            {
+                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            }
         }
     }
     else
@@ -399,7 +434,14 @@ std::vector<std::string> CastRaidBlessingOnPartyAction::GetPossibleBlessingsForT
         }
         else
         {
-            blessings = { "blessing of might", "blessing of kings", "blessing of wisdom", "blessing of sanctuary", "blessing of light" };
+            if (player->getClass() == CLASS_PALADIN)
+            {
+                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
+            }
+            else
+            {
+                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+            }
         }
     }
     else

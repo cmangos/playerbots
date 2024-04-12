@@ -60,10 +60,6 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("seal of wisdom", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "target critical health",
-        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "exorcism",
         NextAction::array(0, new NextAction("exorcism", ACTION_NORMAL + 3), NULL)));
 
@@ -103,6 +99,10 @@ void ProtectionPaladinPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     ProtectionPaladinStrategy::InitCombatTriggers(triggers);
     PaladinPveStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "target critical health",
+        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
 }
 
 void ProtectionPaladinPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -127,6 +127,10 @@ void ProtectionPaladinPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     ProtectionPaladinStrategy::InitCombatTriggers(triggers);
     PaladinPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "target critical health",
+        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
 }
 
 void ProtectionPaladinPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -558,10 +562,6 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("seal of wisdom", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "target critical health",
-        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "exorcism",
         NextAction::array(0, new NextAction("exorcism", ACTION_NORMAL + 3), NULL)));
 
@@ -601,6 +601,10 @@ void ProtectionPaladinPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     ProtectionPaladinStrategy::InitCombatTriggers(triggers);
     PaladinPveStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "target critical health",
+        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
 }
 
 void ProtectionPaladinPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -625,6 +629,10 @@ void ProtectionPaladinPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     ProtectionPaladinStrategy::InitCombatTriggers(triggers);
     PaladinPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "target critical health",
+        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
 }
 
 void ProtectionPaladinPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1052,10 +1060,6 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("seal of wisdom", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "target critical health",
-        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "exorcism",
         NextAction::array(0, new NextAction("exorcism", ACTION_NORMAL + 3), NULL)));
 
@@ -1087,6 +1091,10 @@ void ProtectionPaladinPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     ProtectionPaladinStrategy::InitCombatTriggers(triggers);
     PaladinPveStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "target critical health",
+        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
 }
 
 void ProtectionPaladinPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1111,6 +1119,10 @@ void ProtectionPaladinPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     ProtectionPaladinStrategy::InitCombatTriggers(triggers);
     PaladinPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "target critical health",
+        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
 }
 
 void ProtectionPaladinPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

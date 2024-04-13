@@ -66,6 +66,7 @@
 #include "MoltenCoreDungeonActions.h"
 #include "KarazhanDungeonActions.h"
 #include "NaxxramasDungeonActions.h"
+#include "AQRuinsDungeonActions.h"
 
 namespace ai
 {
@@ -298,10 +299,18 @@ namespace ai
             creators["disable karazhan strategy"] = &ActionContext::karazhan_disable_strategy;
             creators["enable naxxramas strategy"] = &ActionContext::naxxramas_enable_strategy;
             creators["disable naxxramas strategy"] = &ActionContext::naxxramas_disable_strategy;
+            creators["enable aq ruins strategy"] = &ActionContext::aqruins_enable_strategy;
+            creators["disable naxxramas strategy"] = &ActionContext::aqruins_disable_strategy;
 
             // Dungeon Boss Actions
             creators["enable onyxia fight strategy"] = &ActionContext::onyxia_enable_fight_strategy;
             creators["disable onyxia fight strategy"] = &ActionContext::onyxia_disable_fight_strategy;
+
+            creators["enable kurinnaxx fight strategy"] = &ActionContext::kurinnaxx_enable_fight_strategy;
+            creators["disable kurinnaxx fight strategy"] = &ActionContext::kurinnaxx_disable_fight_strategy;
+
+            creators["enable ossirian fight strategy"] = &ActionContext::ossirian_enable_fight_strategy;
+            creators["disable ossirian fight strategy"] = &ActionContext::ossirian_disable_fight_strategy;
 
             creators["enable magmadar fight strategy"] = &ActionContext::magmadar_enable_fight_strategy;
             creators["disable magmadar fight strategy"] = &ActionContext::magmadar_disable_fight_strategy;
@@ -553,10 +562,18 @@ namespace ai
         static Action* karazhan_disable_strategy(PlayerbotAI* ai) { return new KarazhanDisableDungeonStrategyAction(ai); }
         static Action* naxxramas_enable_strategy(PlayerbotAI* ai) { return new NaxxramasEnableDungeonStrategyAction(ai); }
         static Action* naxxramas_disable_strategy(PlayerbotAI* ai) { return new NaxxramasDisableDungeonStrategyAction(ai); }
+        static Action* aqruins_enable_strategy(PlayerbotAI* ai) { return new AQRuinsEnableDungeonStrategyAction(ai); }
+        static Action* aqruins_disable_strategy(PlayerbotAI* ai) { return new AQRuinsDisableDungeonStrategyAction(ai); }
 
         // Dungeon Boss Actions
         static Action* onyxia_enable_fight_strategy(PlayerbotAI* ai) { return new OnyxiaEnableFightStrategyAction(ai); }
         static Action* onyxia_disable_fight_strategy(PlayerbotAI* ai) { return new OnyxiaDisableFightStrategyAction(ai); }
+
+        static Action* kurinnaxx_enable_fight_strategy(PlayerbotAI* ai) { return new KurinnaxxEnableFightStrategyAction(ai); }
+        static Action* kurinnaxx_disable_fight_strategy(PlayerbotAI* ai) { return new KurinnaxxDisableFightStrategyAction(ai); }
+
+        static Action* ossirian_enable_fight_strategy(PlayerbotAI* ai) { return new OssirianEnableFightStrategyAction(ai); }
+        static Action* ossirian_disable_fight_strategy(PlayerbotAI* ai) { return new OssirianDisableFightStrategyAction(ai); }
 
         static Action* magmadar_enable_fight_strategy(PlayerbotAI* ai) { return new MagmadarEnableFightStrategyAction(ai); }
         static Action* magmadar_disable_fight_strategy(PlayerbotAI* ai) { return new MagmadarDisableFightStrategyAction(ai); }

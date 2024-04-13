@@ -18,6 +18,7 @@
 #include "MoltenCoreDungeonTriggers.h"
 #include "KarazhanDungeonTriggers.h"
 #include "NaxxramasDungeonTriggers.h"
+#include "AQRuinsDungeonTriggers.h"
 
 namespace ai
 {
@@ -263,6 +264,8 @@ namespace ai
             creators["leave karazhan"] = &TriggerContext::karazhan_leave;
             creators["enter naxxramas"] = &TriggerContext::naxxramas_enter;
             creators["leave naxxramas"] = &TriggerContext::naxxramas_leave;
+            creators["enter aq ruins"] = &TriggerContext::aqruins_enter;
+            creators["leave aq ruins"] = &TriggerContext::aqruins_leave;
 
             // Dungeon Boss Triggers
             creators["start onyxia fight"] = &TriggerContext::onyxia_start_fight;
@@ -272,6 +275,13 @@ namespace ai
             creators["end magmadar fight"] = &TriggerContext::magmadar_end_fight;
             creators["magmadar lava bomb"] = &TriggerContext::magmadar_lava_bomb;
             creators["magmadar too close"] = &TriggerContext::magmadar_too_close;
+
+            creators["start kurinnaxx fight"] = &TriggerContext::kurinnaxx_start_fight;
+            creators["end kurinnaxx fight"] = &TriggerContext::kurinnaxx_end_fight;
+
+            creators["start ossirian fight"] = &TriggerContext::ossirian_start_fight;
+            creators["end ossirian fight"] = &TriggerContext::ossirian_end_fight;
+
 
             creators["fire protection potion ready"] = &TriggerContext::fire_protection_potion_ready;
 
@@ -506,6 +516,8 @@ namespace ai
         static Trigger* karazhan_leave(PlayerbotAI* ai) { return new KarazhanLeaveDungeonTrigger(ai); }
         static Trigger* naxxramas_enter(PlayerbotAI* ai) { return new NaxxramasEnterDungeonTrigger(ai); }
         static Trigger* naxxramas_leave(PlayerbotAI* ai) { return new NaxxramasLeaveDungeonTrigger(ai); }
+        static Trigger* aqruins_enter(PlayerbotAI* ai) { return new AQRuinsEnterDungeonTrigger(ai); }
+        static Trigger* aqruins_leave(PlayerbotAI* ai) { return new AQRuinsLeaveDungeonTrigger(ai); }
 
         // Dungeon Boss Triggers
         static Trigger* onyxia_start_fight(PlayerbotAI* ai) { return new OnyxiaStartFightTrigger(ai); }
@@ -515,6 +527,12 @@ namespace ai
         static Trigger* magmadar_end_fight(PlayerbotAI* ai) { return new MagmadarEndFightTrigger(ai); }
         static Trigger* magmadar_lava_bomb(PlayerbotAI* ai) { return new MagmadarLavaBombTrigger(ai); }
         static Trigger* magmadar_too_close(PlayerbotAI* ai) { return new MagmadarTooCloseTrigger(ai); }
+
+        static Trigger* kurinnaxx_start_fight(PlayerbotAI* ai) { return new KurinnaxxStartFightTrigger(ai); }
+        static Trigger* kurinnaxx_end_fight(PlayerbotAI* ai) { return new KurinnaxxEndFightTrigger(ai); }
+
+        static Trigger* ossirian_start_fight(PlayerbotAI* ai) { return new OssirianStartFightTrigger(ai); }
+        static Trigger* ossirian_end_fight(PlayerbotAI* ai) { return new OssirianEndFightTrigger(ai); }
 
         static Trigger* fire_protection_potion_ready(PlayerbotAI* ai) { return new FireProtectionPotionReadyTrigger(ai); }
 

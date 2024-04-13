@@ -48,6 +48,7 @@
 #include "generic/MoltenCoreDungeonStrategies.h"
 #include "generic/KarazhanDungeonStrategies.h"
 #include "generic/NaxxramasDungeonStrategies.h"
+#include "generic/AQRuinsDungeonStrategies.h"
 
 namespace ai
 {
@@ -145,6 +146,7 @@ namespace ai
             creators["molten core"] = &StrategyContext::molten_core;
             creators["karazhan"] = &StrategyContext::karazhan;
             creators["naxxramas"] = &StrategyContext::naxxramas;
+            creators["aq ruins"] = &StrategyContext::aqruins;
 
             // Dungeon Boss Strategies
             creators["onyxia"] = &StrategyContext::onyxia;
@@ -152,6 +154,8 @@ namespace ai
             creators["netherspite"] = &StrategyContext::netherspite;
             creators["prince malchezaar"] = &StrategyContext::prince_malchezaar;
             creators["four horseman"] = &StrategyContext::fourhorseman;
+            creators["kurinnaxx"] = &StrategyContext::kurinnaxx;
+            creators["ossirian"] = &StrategyContext::ossirian;
         }
 
     private:
@@ -244,6 +248,7 @@ namespace ai
         static Strategy* molten_core(PlayerbotAI* ai) { return new MoltenCoreDungeonStrategy(ai); }
         static Strategy* karazhan(PlayerbotAI* ai) { return new KarazhanDungeonStrategy(ai); }
         static Strategy* naxxramas(PlayerbotAI* ai) { return new NaxxramasDungeonStrategy(ai); }
+        static Strategy* aqruins(PlayerbotAI* ai) { return new AQRuinsDungeonStrategy(ai); }
 
         // Dungeon Boss Strategy
         static Strategy* onyxia(PlayerbotAI* ai) { return new OnyxiaFightStrategy(ai); }
@@ -251,6 +256,8 @@ namespace ai
         static Strategy* netherspite(PlayerbotAI* ai) { return new NetherspiteFightStrategy(ai); }
         static Strategy* prince_malchezaar(PlayerbotAI* ai) { return new PrinceMalchezaarFightStrategy(ai); }
         static Strategy* fourhorseman(PlayerbotAI* ai) { return new FourHorsemanFightStrategy(ai); }
+        static Strategy* kurinnaxx(PlayerbotAI* ai) { return new KurinnaxxFightStrategy(ai); }
+        static Strategy* ossirian(PlayerbotAI* ai) { return new OssirianFightStrategy(ai); }
     };
 
     class MovementStrategyContext : public NamedObjectContext<Strategy>

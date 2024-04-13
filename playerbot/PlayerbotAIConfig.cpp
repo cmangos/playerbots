@@ -401,6 +401,68 @@ bool PlayerbotAIConfig::Initialize()
         }
     }
 
+    guildBuffs.clear();
+
+    //Get all config values starting with AiPlayerbot.GuildBuff
+    values = configA->GetValues("AiPlayerbot.GuildBuff");
+
+    if (values.size())
+    {
+       sLog.outString("Loading GuildBuffs");
+       BarGoLink pbuffBar(values.size());
+
+       for (auto value : values)
+       {
+          std::vector<std::string> ids = split(value, '.');
+
+          uint32 guildId = stoi(ids[2]);
+
+          //Get list of buffs for this combination.
+          std::list<uint32> buffs;
+          LoadList<std::list<uint32>>(config.GetStringDefault(value, ""), buffs);
+
+          //Store buffs for later application.
+          for (auto buff : buffs)
+          {
+             sLog.outString("Adding buff %d for guild id %d", buff, guildId);
+             guildBuff pb = { buff, guildId };
+             guildBuffs.push_back(pb);
+          }
+
+          pbuffBar.step();
+       }
+    }
+
+    personalBuffs.clear();
+
+    //Get all config values starting with AiPlayerbot.PersonalBuff
+    values = configA->GetValues("AiPlayerbot.PersonalBuff");
+
+    if (values.size())
+    {
+       sLog.outString("Loading PersonalBuffs");
+       BarGoLink pbuffBar(values.size());
+
+       for (auto value : values)
+       {
+          std::vector<std::string> ids = split(value, '.');
+
+          //Get list of buffs for this combination.
+          std::list<uint32> buffs;
+          LoadList<std::list<uint32>>(config.GetStringDefault(value, ""), buffs);
+
+          //Store buffs for later application.
+          for (auto buff : buffs)
+          {
+             sLog.outString("Adding buff %d for %s", buff, ids[2]);
+             personalBuff pb = { buff, ids[2]};
+             personalBuffs.push_back(pb);
+          }
+
+          pbuffBar.step();
+       }
+    }
+
     randomBotAccountPrefix = config.GetStringDefault("AiPlayerbot.RandomBotAccountPrefix", "rndbot");
     randomBotAccountCount = config.GetIntDefault("AiPlayerbot.RandomBotAccountCount", 50);
     deleteRandomBotAccounts = config.GetBoolDefault("AiPlayerbot.DeleteRandomBotAccounts", false);
@@ -411,6 +473,7 @@ bool PlayerbotAIConfig::Initialize()
     randomBotArenaTeamCount = config.GetIntDefault("AiPlayerbot.RandomBotArenaTeamCount", 20);
     deleteRandomBotArenaTeams = config.GetBoolDefault("AiPlayerbot.DeleteRandomBotArenaTeams", false);
 
+    guildBuffsEnabled = config.GetBoolDefault("AiPlayerbot.EnableGuildBuffs", false);
     //cosmetics (by lidocain)
     randomBotShowCloak = config.GetBoolDefault("AiPlayerbot.RandomBotShowCloak", false);
     randomBotShowHelmet = config.GetBoolDefault("AiPlayerbot.RandomBotShowHelmet", false);

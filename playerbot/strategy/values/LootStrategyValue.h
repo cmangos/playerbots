@@ -8,7 +8,7 @@ namespace ai
     class LootStrategyValue : public SubStrategyValue
 	{
 	public:
-        LootStrategyValue(PlayerbotAI* ai, std::string defaultValue = "equip,quest,skill,disenchant,use,vendor", std::string name = "loot strategy", std::string allowedValues = "equip,quest,skill,disenchant,use,vendor,trash") : SubStrategyValue(ai, defaultValue, name, allowedValues) {}
+        LootStrategyValue(PlayerbotAI* ai, std::string defaultValue = "", std::string name = "loot strategy", std::string allowedValues = "equip,quest,skill,disenchant,use,vendor,trash") : SubStrategyValue(ai, defaultValue, name, allowedValues) {}
 
         virtual void Set(std::string newValue) override;
 

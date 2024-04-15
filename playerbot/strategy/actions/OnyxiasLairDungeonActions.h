@@ -7,13 +7,13 @@ namespace ai
     class OnyxiasLairEnableDungeonStrategyAction : public ChangeAllStrategyAction
     {
     public:
-        OnyxiasLairEnableDungeonStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable onyxia's lair strategy", "+onyxia's lair") {}
+        OnyxiasLairEnableDungeonStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable onyxias lair strategy", "+onyxias lair") {}
     };
 
     class OnyxiasLairDisableDungeonStrategyAction : public ChangeAllStrategyAction
     {
     public:
-        OnyxiasLairDisableDungeonStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable onyxia's lair strategy", "-onyxia's lair") {}
+        OnyxiasLairDisableDungeonStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable onyxias lair strategy", "-onyxias lair") {}
     };
 
     class OnyxiaEnableFightStrategyAction : public ChangeAllStrategyAction

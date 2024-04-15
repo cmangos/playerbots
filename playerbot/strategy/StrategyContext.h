@@ -142,7 +142,7 @@ namespace ai
 
             // Dungeon Strategies
             creators["dungeon"] = &StrategyContext::dungeon;
-            creators["onyxia's lair"] = &StrategyContext::onyxias_lair;
+            creators["onyxias lair"] = &StrategyContext::onyxias_lair;
             creators["molten core"] = &StrategyContext::molten_core;
             creators["karazhan"] = &StrategyContext::karazhan;
             creators["naxxramas"] = &StrategyContext::naxxramas;

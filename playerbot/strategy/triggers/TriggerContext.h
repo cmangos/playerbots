@@ -256,8 +256,8 @@ namespace ai
             creators["perception"] = &TriggerContext::cannibalize;
 
             // Dungeon Triggers
-            creators["enter onyxia's lair"] = &TriggerContext::onyxias_lair_enter;
-            creators["leave onyxia's lair"] = &TriggerContext::onyxias_lair_leave;
+            creators["enter onyxias lair"] = &TriggerContext::onyxias_lair_enter;
+            creators["leave onyxias lair"] = &TriggerContext::onyxias_lair_leave;
             creators["enter molten core"] = &TriggerContext::molten_core_enter;
             creators["leave molten core"] = &TriggerContext::molten_core_leave;
             creators["enter karazhan"] = &TriggerContext::karazhan_enter;

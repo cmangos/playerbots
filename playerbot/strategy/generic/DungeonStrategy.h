@@ -15,7 +15,7 @@ namespace ai
         {
             return "This strategy will enable and disable various dungeon and raid specific strategies as the bot enters and leaves.";
         }
-        virtual std::vector<std::string> GetRelatedStrategies() { return {"onyxia's lair", "molten core", "aq ruins", "naxxramas"}; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {"onyxias lair", "molten core", "aq ruins", "naxxramas"}; }
 #endif
 
     private:

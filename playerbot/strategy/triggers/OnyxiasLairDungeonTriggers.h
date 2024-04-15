@@ -6,13 +6,13 @@ namespace ai
     class OnyxiasLairEnterDungeonTrigger : public EnterDungeonTrigger
     {
     public:
-        OnyxiasLairEnterDungeonTrigger(PlayerbotAI* ai) : EnterDungeonTrigger(ai, "enter onyxia's lair", "onyxia's lair", 249) {}
+        OnyxiasLairEnterDungeonTrigger(PlayerbotAI* ai) : EnterDungeonTrigger(ai, "enter onyxias lair", "onyxias lair", 249) {}
     };
 
     class OnyxiasLairLeaveDungeonTrigger : public LeaveDungeonTrigger
     {
     public:
-        OnyxiasLairLeaveDungeonTrigger(PlayerbotAI* ai) : LeaveDungeonTrigger(ai, "leave onyxia's lair", "onyxia's lair", 249) {}
+        OnyxiasLairLeaveDungeonTrigger(PlayerbotAI* ai) : LeaveDungeonTrigger(ai, "leave onyxias lair", "onyxias lair", 249) {}
     };
 
     class OnyxiaStartFightTrigger : public StartBossFightTrigger

@@ -291,8 +291,8 @@ namespace ai
             creators["move to"] = &ActionContext::move_to;
 
             // Dungeon Actions
-            creators["enable onyxia's lair strategy"] = &ActionContext::onyxias_lair_enable_strategy;
-            creators["disable onyxia's lair strategy"] = &ActionContext::onyxias_lair_disable_strategy;
+            creators["enable onyxias lair strategy"] = &ActionContext::onyxias_lair_enable_strategy;
+            creators["disable onyxias lair strategy"] = &ActionContext::onyxias_lair_disable_strategy;
             creators["enable molten core strategy"] = &ActionContext::molten_core_enable_strategy;
             creators["disable molten core strategy"] = &ActionContext::molten_core_disable_strategy;
             creators["enable karazhan strategy"] = &ActionContext::karazhan_enable_strategy;

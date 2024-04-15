@@ -30,11 +30,11 @@ public:
     virtual void UpdateAIInternal(uint32 elapsed, bool minimal = false);
     void UpdateSessions(uint32 elapsed);
 
-    void LoopThroughBots(std::function<void(Player*)> fct) const;
+    void ForEachPlayerbot(std::function<void(Player*)> fct) const;
 
     void LogoutAllBots();
     void OnBotLogin(Player* bot);
-    void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder) { auto botptr = playerBots.find(guid); if (botptr == playerBots.end() || botptr->second == nullptr) return;  newHolder->OnBotLogin(botptr->second); playerBots[guid] = nullptr; }
+    void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder);
 
     std::list<std::string> HandlePlayerbotCommand(char const* args, Player* master = NULL);
     std::string ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId);

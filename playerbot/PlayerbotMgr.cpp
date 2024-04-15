@@ -23,17 +23,28 @@ PlayerbotHolder::~PlayerbotHolder()
 {
 }
 
-void PlayerbotHolder::LoopThroughBots(std::function<void(Player*)> fct) const
+void PlayerbotHolder::ForEachPlayerbot(std::function<void(Player*)> fct) const
 {
-   for (auto& itr : playerBots)
-   {
-      Player* bot = itr.second;
+    for (auto& itr : playerBots)
+    {
+        Player* bot = itr.second;
 
-      if (!bot)
-         continue;
+        if (!bot)
+           continue;
 
-      fct(bot);
-   }
+        fct(bot);
+    }
+}
+
+void PlayerbotHolder::MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder)
+{ 
+    auto botptr = playerBots.find(guid); 
+
+    if (botptr == playerBots.end() || botptr->second == nullptr)
+        return;
+
+    newHolder->OnBotLogin(botptr->second);
+    playerBots[guid] = nullptr; 
 }
 
 void PlayerbotHolder::UpdateAIInternal(uint32 elapsed, bool minimal)
@@ -42,13 +53,8 @@ void PlayerbotHolder::UpdateAIInternal(uint32 elapsed, bool minimal)
 
 void PlayerbotHolder::UpdateSessions(uint32 elapsed)
 {
-   for (auto& itr : playerBots)
+    ForEachPlayerbot([&](Player* bot)
     {
-        Player* const bot = itr->second;
-
-        if (!bot)
-            continue;
-
         if (bot->GetPlayerbotAI() && bot->IsBeingTeleported())
         {
             bot->GetPlayerbotAI()->HandleTeleportAck();
@@ -62,41 +68,36 @@ void PlayerbotHolder::UpdateSessions(uint32 elapsed)
         {
             LogoutPlayerBot(bot->GetObjectGuid().GetRawValue());
         }
-    }
+    });
 
-   Cleanup();
+    Cleanup();
 }
 
 void PlayerbotHolder::Cleanup()
 {
-   auto it = playerBots.begin();
+    auto it = playerBots.begin();
 
-   while (it != playerBots.end())
-   {
-      if (it->second == nullptr)
-      {
-         it = playerBots.erase(it);
-         continue;
-      }
+    while (it != playerBots.end())
+    {
+        if (it->second == nullptr)
+        {
+            it = playerBots.erase(it);
+            continue;
+        }
 
-      ++it;
-   }
+        ++it;
+    }
 }
 
 void PlayerbotHolder::LogoutAllBots()
-{    
-    for (auto& itr : playerBots)
+{
+    ForEachPlayerbot([&](Player* bot)
     {
-        Player* bot = itr.second;
-
-        if (!bot)
-            continue;
-
         if (!bot->GetPlayerbotAI() || bot->GetPlayerbotAI()->IsRealPlayer())
-            continue;
+            return;
 
         LogoutPlayerBot(bot->GetGUIDLow());
-    }
+    });
 
     Cleanup();
 }
@@ -107,45 +108,35 @@ void PlayerbotMgr::CancelLogout()
     if (!master)
         return;
 
-    for (auto& itr : playerBots)
+    ForEachPlayerbot([&](Player* bot)
     {
-        Player* bot = itr.second;
+         PlayerbotAI* ai = bot->GetPlayerbotAI();
+         if (!ai || ai->IsRealPlayer())
+            return;
 
-        if (!bot)
-           continue;
-
-        PlayerbotAI* ai = bot->GetPlayerbotAI();
-        if (!ai || ai->IsRealPlayer())
-            continue;
-
-        if (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut())
-        {
+         if (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut())
+         {
             WorldPacket p;
             bot->GetSession()->HandleLogoutCancelOpcode(p);
             ai->TellPlayer(GetMaster(), BOT_TEXT("logout_cancel"));
-        }
-    }
+         }
+    });
 
-    for (auto& itr : playerBots)
+    sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
     {
-        Player* bot = itr.second;
-
-        if (!bot)
-         continue;
-
         PlayerbotAI* ai = bot->GetPlayerbotAI();
         if (!ai || ai->IsRealPlayer())
-            continue;
+            return;
 
         if (bot->GetPlayerbotAI()->GetMaster() != master)
-            continue;
+            return;
 
         if (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut())
         {
             WorldPacket p;
             bot->GetSession()->HandleLogoutCancelOpcode(p);
         }
-    }
+    });
 }
 
 void PlayerbotHolder::LogoutPlayerBot(uint32 guid)
@@ -857,7 +848,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
 
         if (!master)
         {
-            master = playerBots[0];//GetPlayerBotsBegin()->second;
+            master = playerBots[0];
         }
 
         PlayerbotAI* ai = master->GetPlayerbotAI();      
@@ -1136,64 +1127,46 @@ void PlayerbotMgr::HandleCommand(uint32 type, const std::string& text, uint32 la
         return;
     }
 
-    for (auto& itr : playerBots)
+    ForEachPlayerbot([&](Player *bot)
     {
-        Player* bot = itr.second;
-
-        if (!bot)
-           continue;
-
         if (type == CHAT_MSG_SAY)
             if (bot->GetMapId() != master->GetMapId() || sServerFacade.GetDistance2d(bot, master) > 25)
-                continue;
+                return;
 
         if (type == CHAT_MSG_YELL)
             if (bot->GetMapId() != master->GetMapId() || sServerFacade.GetDistance2d(bot, master) > 300)
-                continue;
+               return;
 
         bot->GetPlayerbotAI()->HandleCommand(type, text, *master, lang);
-    }
+    });
 
-    for (auto& itr : playerBots)
+    sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
     {
-        Player* bot = itr.second;
-
-        if (!bot)
-           continue;
-
         if (type == CHAT_MSG_SAY)
             if (bot->GetMapId() != master->GetMapId() || sServerFacade.GetDistance2d(bot, master) > 25)
-                continue;
+               return;
 
         if (type == CHAT_MSG_YELL)
             if (bot->GetMapId() != master->GetMapId() || sServerFacade.GetDistance2d(bot, master) > 300)
-                continue;
+               return;
 
         if (bot->GetPlayerbotAI()->GetMaster() == master)
             bot->GetPlayerbotAI()->HandleCommand(type, text, *master, lang);
-    }
+    });
 }
 
 void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 {
-   for (auto& itr : playerBots)
-   {
-        Player* bot = itr.second;
-        if (!bot)
-            continue;
-
-        bot->GetPlayerbotAI()->HandleMasterIncomingPacket(packet);
-    }
-
-    for (auto& itr : playerBots)
+    ForEachPlayerbot([&](Player* bot)
     {
-        Player* bot = itr.second;
-        if (!bot)
-            continue;
+        bot->GetPlayerbotAI()->HandleMasterIncomingPacket(packet);
+    });
 
+    sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
+    {
         if (bot->GetPlayerbotAI()->GetMaster() == GetMaster())
             bot->GetPlayerbotAI()->HandleMasterIncomingPacket(packet);
-    }
+    });
 
     switch (packet.GetOpcode())
     {
@@ -1213,42 +1186,29 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 }
 void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
 {
-   for (auto& itr : playerBots)
+   ForEachPlayerbot([&](Player* bot)
    {
-        Player* bot = itr.second;
-        if (!bot)
-            continue;
-
         if (!bot->GetPlayerbotAI())
-            continue;
+            return;
 
         bot->GetPlayerbotAI()->HandleMasterOutgoingPacket(packet);
-    }
+    });
 
-    for (auto& itr : playerBots)
+    sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
     {
-        Player* bot = itr.second;
-        if (!bot)
-            continue;
-
         if (bot->GetPlayerbotAI()->GetMaster() == GetMaster())
             bot->GetPlayerbotAI()->HandleMasterOutgoingPacket(packet);
-    }
+    });
 }
 
 void PlayerbotMgr::SaveToDB()
 {
-    for (auto& itr : playerBots)
+    ForEachPlayerbot([&](Player* bot)
     {
-        Player* bot = itr.second;
-
-        if (!bot)
-           continue;
-
         bot->SaveToDB();
-    }
+    });
 
-    sRandomPlayerbotMgr.LoopThroughBots([this](Player* bot)
+    sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
     {
         if (bot->GetPlayerbotAI()->GetMaster() == GetMaster())
             bot->SaveToDB();

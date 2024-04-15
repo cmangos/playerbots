@@ -14,6 +14,7 @@ namespace ai
 
     class WorldPosition;
     class GuidPosition;
+    class AiObjectContext;
 
     class ChatHelper : public PlayerbotAIAware
     {
@@ -77,6 +78,15 @@ namespace ai
 
         static void PopulateSpellNameList();
         static std::vector<uint32> SpellIds(const std::string& name);
+
+        static std::vector<std::string_view> local_split(std::string_view str, char delim);
+        static bool starts_with(const std::string_view& str, const std::string& prefix);
+
+        static std::list<ObjectGuid> queryGameobjects(Player* requester, AiObjectContext* context, PlayerbotAI* ai, std::string& text);
+
+        static std::string GetLocalizedObjectName(GameObject* go);
+
+        static std::list<ObjectGuid> ApplyFilters(Player* requester, PlayerbotAI* ai, std::list<ObjectGuid> ObjectList, const std::vector<std::string_view>& filters);
     private:
         static std::map<std::string, uint32> consumableSubClasses;
         static std::map<std::string, uint32> tradeSubClasses;

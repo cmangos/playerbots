@@ -34,6 +34,106 @@ static bool substrContainsInMap(std::string searchTerm, std::map<std::string, T>
     return false;
 }
 
+std::vector<std::string_view> ChatHelper::local_split(std::string_view str, char delim)
+{
+   std::vector<std::string_view> result;
+   auto left = str.begin();
+   for (auto it = left; it != str.end(); ++it)
+   {
+      if (*it == delim)
+      {
+         result.emplace_back(&*left, it - left);
+         left = it + 1;
+      }
+   }
+   if (left != str.end())
+      result.emplace_back(&*left, str.end() - left);
+   return result;
+}
+
+bool ChatHelper::starts_with(const std::string_view& str, const std::string& prefix)
+{
+   if (str.length() < prefix.length()) {
+      return false;
+   }
+   return str.substr(0, prefix.length()) == prefix;
+}
+
+std::list<ObjectGuid> ChatHelper::queryGameobjects(Player* requester, AiObjectContext* context, PlayerbotAI* ai, std::string& text)
+{
+   auto p = local_split(text, '|');
+
+   std::list<ObjectGuid> gos = ApplyFilters(requester, ai, *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los"), p);
+
+   return gos;
+}
+
+std::string ChatHelper::GetLocalizedObjectName(GameObject* go)
+{
+   int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
+   std::string name = go->GetGOInfo()->name;
+   if (loc_idx >= 0)
+   {
+      GameObjectLocale const* gl = sObjectMgr.GetGameObjectLocale(go->GetEntry());
+      if (gl)
+      {
+         if ((int32)gl->Name.size() > loc_idx && !gl->Name[loc_idx].empty())
+            name = gl->Name[loc_idx];
+      }
+   }
+
+   return name;
+}
+
+std::list<ObjectGuid> ChatHelper::ApplyFilters(Player* requester, PlayerbotAI* ai, std::list<ObjectGuid> ObjectList, const std::vector<std::string_view>& filters)
+{
+   for (auto& filter : filters)
+   {
+      if (starts_with(filter, "filter:name"))
+      {
+         auto s = filter.substr(12, std::string::npos);
+         auto it = ObjectList.begin();
+
+         while (it != ObjectList.end())
+         {
+            GameObject* go = ai->GetGameObject(*it);
+
+            if (GetLocalizedObjectName(go) == s)
+            {
+               ++it;
+               continue;
+            }
+
+            it = ObjectList.erase(it);
+         }
+         continue;
+      }
+
+      if (starts_with(filter, "sort:range"))
+      {
+         Position pos = (filter == "sort:range:self") ? ai->GetBot()->GetPosition() : requester->GetPosition();
+         ObjectList.sort([ai, pos](const ObjectGuid& a, const ObjectGuid& b)
+            {
+               GameObject* go1 = ai->GetGameObject(a);
+               GameObject* go2 = ai->GetGameObject(b);
+
+               return go1->GetPosition().GetDistance2d(pos) < go2->GetPosition().GetDistance2d(pos);
+            });
+         continue;
+      }
+
+      if (starts_with(filter, "filter:first"))
+      {
+         if (!ObjectList.empty())
+         {
+            ObjectList.resize(1);
+         }
+      }
+   }
+
+   return ObjectList;
+}
+
 ChatHelper::ChatHelper(PlayerbotAI* ai) : PlayerbotAIAware(ai)
 {
     itemQualities["poor"] = ITEM_QUALITY_POOR;

@@ -11,6 +11,6 @@ namespace ai
 
     private:
         void ListUnits(Player* requester, std::string title, std::list<ObjectGuid> units);
-        void ListGameObjects(Player* requester, std::string title, std::list<ObjectGuid> gos);
+        void ListGameObjects(Player* requester, std::string title, const std::list<ObjectGuid>& gos, const std::vector<std::string_view>& decorators);
     };
 }

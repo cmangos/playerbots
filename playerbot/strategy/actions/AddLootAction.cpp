@@ -27,9 +27,20 @@ bool AddLootAction::Execute(Event& event)
 bool AddAllLootAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    std::string param = event.getParam();
     bool added = false;
 
-    std::list<ObjectGuid> gos = context->GetValue<std::list<ObjectGuid> >("nearest game objects no los")->Get();
+    std::list<ObjectGuid> gos;
+
+    if (param.empty())
+    {
+       gos = context->GetValue<std::list<ObjectGuid> >("nearest game objects no los")->Get();
+    }
+    else
+    {
+       gos = chat->queryGameobjects(requester, context, ai, param);
+    }
+     
     for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
         added |= AddLoot(requester, *i);
 
@@ -61,22 +72,29 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
     if (abs(wo->GetPositionZ() - bot->GetPositionZ()) > INTERACTION_DISTANCE)
         return false;
 
+    GameObject* obj = requester->GetMap()->GetGameObject(guid);
+
+    if (obj && obj->GetGoType() == GAMEOBJECT_TYPE_TRAP)
+    {
+       return AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
+    }
+
     if (ai->HasRealPlayerMaster())
     {
-        bool inDungeon = false;
-        if (requester->IsInWorld() &&
-            requester->GetMap()->IsDungeon() &&
-            bot->GetMapId() == requester->GetMapId())
-            inDungeon = true;
+       bool inDungeon = false;
+       if (requester->IsInWorld() &&
+          requester->GetMap()->IsDungeon() &&
+          bot->GetMapId() == requester->GetMapId())
+          inDungeon = true;
 
-        if (inDungeon && sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(requester, wo), sPlayerbotAIConfig.lootDistance))
-            return false;
+       if (inDungeon && sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(requester, wo), sPlayerbotAIConfig.lootDistance))
+          return false;
 
-        if (Group* group = bot->GetGroup())
-        {
-            if (group->GetLootMethod() == LootMethod::MASTER_LOOT && group->GetMasterLooterGuid() && group->GetMasterLooterGuid() != bot->GetObjectGuid())
-                return false;
-        }
+       if (Group* group = bot->GetGroup())
+       {
+          if (group->GetLootMethod() == LootMethod::MASTER_LOOT && group->GetMasterLooterGuid() && group->GetMasterLooterGuid() != bot->GetObjectGuid())
+             return false;
+       }
     }
 
     return AI_VALUE(LootObjectStack*, "available loot")->Add(guid);

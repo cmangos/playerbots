@@ -194,7 +194,17 @@ bool UseItemAction::Execute(Event& event)
     }
 
     std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", name);
-    std::list<ObjectGuid> gos = chat->parseGameobjects(name);
+    std::list<ObjectGuid> gos;
+    
+    if (chat->starts_with(name, "los gos"))
+    {
+      gos = chat->queryGameobjects(requester, context, ai, name);
+    }
+    else
+    {
+      gos = chat->parseGameobjects(name);
+    }
+    
 
     if (gos.empty())
     {

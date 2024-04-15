@@ -25,9 +25,10 @@ bool TellLosAction::Execute(Event& event)
         ListUnits(requester, "--- Corpses ---", *context->GetValue<std::list<ObjectGuid> >("nearest corpses"));
     }
 
-    if (param.empty() || param == "gos" || param == "game objects")
+    if (param.empty() || chat->starts_with(param, "gos") || chat->starts_with(param, "game objects"))
     {
-        ListGameObjects(requester, "--- Game objects ---", *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los"));
+        auto p = chat->local_split(param, '|');
+        ListGameObjects(requester, "--- Game objects ---", chat->queryGameobjects(requester, context, ai, param), p);
     }
 
     if (param.empty() || param == "players")
@@ -50,14 +51,22 @@ void TellLosAction::ListUnits(Player* requester, std::string title, std::list<Ob
     }
 
 }
-void TellLosAction::ListGameObjects(Player* requester, std::string title, std::list<ObjectGuid> gos)
+void TellLosAction::ListGameObjects(Player* requester, std::string title, const std::list<ObjectGuid>& gos, const std::vector<std::string_view>& filters)
 {
     ai->TellPlayer(requester, title);
 
-    for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
+    for (std::list<ObjectGuid>::const_iterator i = gos.begin(); i != gos.end(); i++)
     {
         GameObject* go = ai->GetGameObject(*i);
         if (go)
-            ai->TellPlayer(requester, chat->formatGameobject(go));
+        {
+            std::ostringstream ss;
+            ss << chat->formatGameobject(go);
+
+            if (std::find_if(filters.begin(), filters.end(), [](const std::string_view& el) { return el == "info:range";}) != filters.end())
+               ss << " " << go->GetPosition().GetDistance2d(ai->GetBot()->GetPosition()) << "m";
+
+            ai->TellPlayer(requester, ss.str());
+        }
     }
 }

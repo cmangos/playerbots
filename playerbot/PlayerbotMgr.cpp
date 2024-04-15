@@ -30,23 +30,25 @@ void PlayerbotHolder::UpdateAIInternal(uint32 elapsed, bool minimal)
 
 void PlayerbotHolder::UpdateSessions(uint32 elapsed)
 {
-    for (PlayerBotMap::const_iterator itr = GetPlayerBotsBegin(); itr != GetPlayerBotsEnd(); ++itr)
-    {
-        Player* const bot = itr->second;
-        if (bot->GetPlayerbotAI() && bot->IsBeingTeleported())
-        {
-            bot->GetPlayerbotAI()->HandleTeleportAck();
-        }
-        else if (bot->IsInWorld())
-        {
-            bot->GetSession()->HandleBotPackets();
-        }
+   PlayerBotMap bots = playerBots;
 
-        if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->GetShouldLogOut() && !bot->IsStunnedByLogout() && !bot->GetSession()->isLogingOut())
-        {
-            LogoutPlayerBot(bot->GetObjectGuid().GetRawValue());
-        }
-    }
+   for (auto& itr : bots)
+   {
+      Player* bot = itr.second;
+      if (bot->GetPlayerbotAI() && bot->IsBeingTeleported())
+      {
+         bot->GetPlayerbotAI()->HandleTeleportAck();
+      }
+      else if (bot->IsInWorld())
+      {
+         bot->GetSession()->HandleBotPackets();
+      }
+
+      if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->GetShouldLogOut() && !bot->IsStunnedByLogout() && !bot->GetSession()->isLogingOut())
+      {
+         LogoutPlayerBot(bot->GetObjectGuid().GetRawValue());
+      }
+   }
 }
 
 void PlayerbotHolder::LogoutAllBots()

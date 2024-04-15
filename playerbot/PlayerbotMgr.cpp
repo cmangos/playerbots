@@ -76,6 +76,7 @@ void PlayerbotHolder::Cleanup()
       if (it->second == nullptr)
       {
          it = playerBots.erase(it);
+         continue;
       }
 
       ++it;

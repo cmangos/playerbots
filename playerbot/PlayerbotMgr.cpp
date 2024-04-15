@@ -1244,9 +1244,14 @@ void PlayerbotMgr::SaveToDB()
         if (!bot)
            continue;
 
+        bot->SaveToDB();
+    }
+
+    sRandomPlayerbotMgr.LoopThroughBots([this](Player* bot)
+    {
         if (bot->GetPlayerbotAI()->GetMaster() == GetMaster())
             bot->SaveToDB();
-    }
+    });
 }
 
 void PlayerbotMgr::OnBotLoginInternal(Player * const bot)

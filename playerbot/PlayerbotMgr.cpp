@@ -1,4 +1,3 @@
-
 #include "playerbot/playerbot.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "PlayerbotDbStore.h"
@@ -9,42 +8,44 @@
 #include "Chat/ChannelMgr.h"
 #include "Social/SocialMgr.h"
 
-
 class LoginQueryHolder;
 class CharacterHandler;
 
 PlayerbotHolder::PlayerbotHolder() : PlayerbotAIBase()
 {
     for (uint32 spellId = 0; spellId < sServerFacade.GetSpellInfoRows(); spellId++)
+    {
         sServerFacade.LookupSpellInfo(spellId);
+    }
 }
 
 PlayerbotHolder::~PlayerbotHolder()
 {
 }
 
-void PlayerbotHolder::ForEachPlayerbot(std::function<void(Player*)> fct) const
+void PlayerbotHolder::ForEachPlayerbot(std::function<void(Player*)> callback) const
 {
     for (auto& itr : playerBots)
     {
         Player* bot = itr.second;
-
-        if (!bot)
-           continue;
-
-        fct(bot);
+        if (bot)
+		{
+	    	callback(bot);
+        }
     }
 }
 
 void PlayerbotHolder::MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder)
-{ 
-    auto botptr = playerBots.find(guid); 
-
-    if (botptr == playerBots.end() || botptr->second == nullptr)
-        return;
-
-    newHolder->OnBotLogin(botptr->second);
-    playerBots[guid] = nullptr; 
+{
+    if (newHolder)
+    {
+        auto it = playerBots.find(guid); 
+        if (it != playerBots.end() && it->second != nullptr)
+        {
+            newHolder->OnBotLogin(it->second);
+            playerBots[guid] = nullptr;
+        }
+    }
 }
 
 void PlayerbotHolder::UpdateAIInternal(uint32 elapsed, bool minimal)
@@ -76,16 +77,16 @@ void PlayerbotHolder::UpdateSessions(uint32 elapsed)
 void PlayerbotHolder::Cleanup()
 {
     auto it = playerBots.begin();
-
     while (it != playerBots.end())
     {
         if (it->second == nullptr)
         {
             it = playerBots.erase(it);
-            continue;
         }
-
-        ++it;
+        else
+        {
+            ++it;
+        }
     }
 }
 
@@ -93,10 +94,10 @@ void PlayerbotHolder::LogoutAllBots()
 {
     ForEachPlayerbot([&](Player* bot)
     {
-        if (!bot->GetPlayerbotAI() || bot->GetPlayerbotAI()->IsRealPlayer())
-            return;
-
-        LogoutPlayerBot(bot->GetGUIDLow());
+        if (bot->GetPlayerbotAI() && !bot->GetPlayerbotAI()->IsRealPlayer())
+        {
+            LogoutPlayerBot(bot->GetGUIDLow());
+        }
     });
 
     Cleanup();
@@ -110,31 +111,28 @@ void PlayerbotMgr::CancelLogout()
 
     ForEachPlayerbot([&](Player* bot)
     {
-         PlayerbotAI* ai = bot->GetPlayerbotAI();
-         if (!ai || ai->IsRealPlayer())
-            return;
-
-         if (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut())
-         {
-            WorldPacket p;
-            bot->GetSession()->HandleLogoutCancelOpcode(p);
-            ai->TellPlayer(GetMaster(), BOT_TEXT("logout_cancel"));
-         }
+        PlayerbotAI* ai = bot->GetPlayerbotAI();
+        if (ai && !ai->IsRealPlayer())
+        {
+            if (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut())
+            {
+                WorldPacket p;
+                bot->GetSession()->HandleLogoutCancelOpcode(p);
+                ai->TellPlayer(GetMaster(), BOT_TEXT("logout_cancel"));
+            }
+        }
     });
 
     sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
     {
         PlayerbotAI* ai = bot->GetPlayerbotAI();
-        if (!ai || ai->IsRealPlayer())
-            return;
-
-        if (bot->GetPlayerbotAI()->GetMaster() != master)
-            return;
-
-        if (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut())
+        if (ai && !ai->IsRealPlayer() && ai->GetMaster() == master)
         {
-            WorldPacket p;
-            bot->GetSession()->HandleLogoutCancelOpcode(p);
+            if (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut())
+            {
+                WorldPacket p;
+                bot->GetSession()->HandleLogoutCancelOpcode(p);
+            }
         }
     });
 }
@@ -191,7 +189,9 @@ void PlayerbotHolder::LogoutPlayerBot(uint32 guid)
         if (!logout)
         {
             if (bot && (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut()))
+            {
                 return;
+            }
             else if (bot)
             {
                 ai->TellPlayer(ai->GetMaster(), BOT_TEXT("logout_start"));
@@ -202,6 +202,7 @@ void PlayerbotHolder::LogoutPlayerBot(uint32 guid)
                     playerBots[guid] = nullptr;
                     delete botWorldSessionPtr;    
                 }
+                
                 return;
             }
             else
@@ -209,18 +210,16 @@ void PlayerbotHolder::LogoutPlayerBot(uint32 guid)
                 playerBots[guid] = nullptr;  // deletes bot player ptr inside this WorldSession PlayerBotMap
                 delete botWorldSessionPtr;  // finally delete the bot's WorldSession
             }
+            
             return;
-        } // if instant logout possible, do it
+        } 
+        // if instant logout possible, do it
         else if (bot && (logout || !botWorldSessionPtr->isLogingOut()))
         {
             ai->TellPlayer(ai->GetMaster(), BOT_TEXT("goodbye"));
             playerBots[guid] = nullptr;    // deletes bot player ptr inside this WorldSession PlayerBotMap
-#ifdef CMANGOS
             botWorldSessionPtr->LogoutPlayer(); // this will delete the bot Player object and PlayerbotAI object
-#endif
-#ifdef MANGOS
             //botWorldSessionPtr->LogoutPlayer(true); // this will delete the bot Player object and PlayerbotAI object
-#endif
             if(!sWorld.FindSession(botWorldSessionPtr->GetAccountId())) //Real player sessions will get removed later.
                 delete botWorldSessionPtr;  // finally delete the bot's WorldSession
         }
@@ -275,7 +274,6 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
     playerBots[bot->GetGUIDLow()] = bot;
 
     Player* master = ai->GetMaster();
-
     if (!master && sPlayerbotAIConfig.IsFreeAltBot(bot))
     {
         ai->SetMaster(bot);
@@ -330,9 +328,6 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
     if (master && !master->IsTaxiFlying())
     {
         bot->GetMotionMaster()->MovementExpired();
-#ifdef MANGOS
-        bot->m_taxi.ClearTaxiDestinations();
-#endif
     }
 
     // check activity

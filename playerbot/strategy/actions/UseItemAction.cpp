@@ -193,10 +193,44 @@ bool UseItemAction::Execute(Event& event)
         name = getName();
     }
 
-    std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", name);
-    std::list<ObjectGuid> gos = chat->parseGameobjects(name);
+    ObjectGuid gameObject;
+    std::list<Item*> items;
 
-    if (gos.empty())
+    if (name == "go")
+    {
+        float closest = 9999.0f;
+        GameObject* nearestGO = nullptr;
+        std::list<ObjectGuid> nearestGOs = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
+        for (const ObjectGuid& goGUID : nearestGOs)
+        {
+            GameObject* go = ai->GetGameObject(goGUID);
+            if (go)
+            {
+                const float distance = bot->GetDistance(go);
+                if (distance < closest)
+                {
+                    nearestGO = go;
+                    closest = distance;
+                }
+            }
+        }
+
+        if (nearestGO)
+        {
+            gameObject = nearestGO->GetObjectGuid();
+        }
+    }
+    else
+    {
+        items = AI_VALUE2(std::list<Item*>, "inventory items", name);
+        std::list<ObjectGuid> gos = chat->parseGameobjects(name);
+        if (!gos.empty())
+        {
+            gameObject = *gos.begin();
+        }
+    }
+
+    if (gameObject.IsEmpty())
     {
         if (items.size() > 1)
         {
@@ -241,15 +275,15 @@ bool UseItemAction::Execute(Event& event)
     {
         if (items.empty())
         {
-            return UseGameObject(requester, event, *gos.begin());
+            return UseGameObject(requester, event, gameObject);
         }
         else
         {
-            return UseItemOnGameObject(requester, *items.begin(), *gos.begin());
+            return UseItemOnGameObject(requester, *items.begin(), gameObject);
         }
     }
 
-    ai->TellPlayer(requester, "No items or game objects available");
+    ai->TellPlayerNoFacing(requester, "No items or game objects available");
     return false;
 }
 
@@ -261,8 +295,25 @@ bool UseItemAction::isPossible()
 bool UseItemAction::UseGameObject(Player* requester, Event& event, ObjectGuid guid)
 {
     GameObject* go = ai->GetGameObject(guid);
-    if (!go || !sServerFacade.isSpawned(go) || go->IsInUse() || go->GetGoState() != GO_STATE_READY)
+    if (go == nullptr)
+    {
+        ai->TellPlayerNoFacing(requester, "Invalid game object", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         return false;
+    }
+
+    if (!sServerFacade.isSpawned(go) || go->IsInUse() || go->GetGoState() != GO_STATE_READY)
+    {
+        std::ostringstream out; out << "I can't use " << chat->formatGameobject(go);
+        ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        return false;
+    }
+
+    if (bot->GetDistance(go) > INTERACTION_DISTANCE)
+    {
+        std::ostringstream out; out << "I'm too far away from " << chat->formatGameobject(go);
+        ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        return false;
+    }
 
     if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
     {

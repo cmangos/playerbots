@@ -466,11 +466,11 @@ float Formation::GetFollowAngle()
 
     if (!group && followTarget && !followTarget->GetPlayerbotAI() && followTarget->GetPlayerbotMgr())
     {
-        for (PlayerBotMap::const_iterator i = followTarget->GetPlayerbotMgr()->GetPlayerBotsBegin(); i != followTarget->GetPlayerbotMgr()->GetPlayerBotsEnd(); ++i)
+        followTarget->GetPlayerbotMgr()->ForEachPlayerbot([&](Player* player)
         {
-            if (i->second == bot) index = total;
+            if (player == bot) index = total;
             total++;
-        }
+        });
     }
     else if (group)
     {

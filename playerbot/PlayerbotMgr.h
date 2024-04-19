@@ -26,15 +26,15 @@ public:
     void LogoutPlayerBot(uint32 guid);
     void DisablePlayerBot(uint32 guid);
     Player* GetPlayerBot (uint32 guid) const;
-    PlayerBotMap::const_iterator GetPlayerBotsBegin() const { return playerBots.begin(); }
-    PlayerBotMap::const_iterator GetPlayerBotsEnd()   const { return playerBots.end();   }
 
     virtual void UpdateAIInternal(uint32 elapsed, bool minimal = false);
     void UpdateSessions(uint32 elapsed);
 
+    void ForEachPlayerbot(std::function<void(Player*)> fct) const;
+
     void LogoutAllBots();
     void OnBotLogin(Player* bot);
-    void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder) { auto botptr = playerBots.find(guid); if (botptr == playerBots.end()) return;  newHolder->OnBotLogin(botptr->second); playerBots.erase(guid); }
+    void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder);
 
     std::list<std::string> HandlePlayerbotCommand(char const* args, Player* master = NULL);
     std::string ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId);
@@ -43,6 +43,7 @@ public:
 
 protected:
     virtual void OnBotLoginInternal(Player * const bot) = 0;
+    void Cleanup();
 
 protected:
     PlayerBotMap playerBots;

@@ -29,8 +29,8 @@ void PlayerbotHolder::ForEachPlayerbot(std::function<void(Player*)> callback) co
     {
         Player* bot = itr.second;
         if (bot)
-		{
-	    	callback(bot);
+        {
+            callback(bot);
         }
     }
 }

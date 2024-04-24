@@ -131,14 +131,7 @@ bool UpdateGearAction::isUseful()
         Player* master = GetMaster();
         if (master && master->isRealPlayer() && bot->IsInGroup(master) && sRandomPlayerbotMgr.IsRandomBot(bot))
         {
-#ifdef MANGOSBOT_ZERO
-            const uint32 maxLevel = 60;
-#elif MANGOSBOT_ONE
-            const uint32 maxLevel = 70;
-#else
-            const uint32 maxLevel = 80;
-#endif
-            return bot->GetLevel() == maxLevel;
+            return bot->GetLevel() >= DEFAULT_MAX_LEVEL;
         }
     }
 

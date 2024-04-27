@@ -15,15 +15,18 @@ bool TellItemCountAction::Execute(Event& event)
         if (text.find("@") == 0)
             return false;
 
-        IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+        if (text.empty())
+            text = "inventory";
 
-        if (text == "all")
+        IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+        if (text == "inventory")
+            mask = IterateItemsMask::ITERATE_ITEMS_IN_BAGS;
+        else if (text == "all")
             mask = IterateItemsMask::ITERATE_ALL_ITEMS;
         else if (text == "bank")
             mask = IterateItemsMask::ITERATE_ITEMS_IN_BANK;
         else if (text == "buyback")
             mask = IterateItemsMask::ITERATE_ITEMS_IN_BUYBACK;
-
 
         std::list<Item*> found = ai->InventoryParseItems(text, mask);
         std::map<uint32, uint32> itemMap;

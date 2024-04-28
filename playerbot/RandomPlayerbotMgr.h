@@ -72,7 +72,7 @@ private:
         void DelayedFacingFix();
         void LoginFreeBots();
 public:
-        static void DatabasePing(std::unique_ptr<QueryResult> result, uint32 pingStart, std::string db);
+        static void DatabasePing(QueryResult* result, uint32 pingStart, std::string db);
         void SetDatabaseDelay(std::string db, uint32 delay) {databaseDelay[db] = delay;}
         uint32 GetDatabaseDelay(std::string db) {if(databaseDelay.find(db) == databaseDelay.end()) return 0; return databaseDelay[db];}
 

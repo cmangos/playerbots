@@ -649,7 +649,7 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     DelayedFacingFix();
 
     //Ping character database.
-    //CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "select 1 from dual");
+    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "select 1 from dual");
 }
 
 void RandomPlayerbotMgr::ScaleBotActivity()
@@ -779,7 +779,7 @@ void RandomPlayerbotMgr::DelayedFacingFix()
     }
 }
 
-void RandomPlayerbotMgr::DatabasePing(std::unique_ptr<QueryResult> result, uint32 pingStart, std::string db)
+void RandomPlayerbotMgr::DatabasePing(QueryResult* result, uint32 pingStart, std::string db)
 {
     sRandomPlayerbotMgr.SetDatabaseDelay(db, sWorld.GetCurrentMSTime() - pingStart);
 }

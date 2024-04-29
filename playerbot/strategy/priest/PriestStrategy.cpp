@@ -357,12 +357,12 @@ void PriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     BuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "target of attacker",
-        NextAction::array(0, new NextAction("elune's grace", ACTION_HIGH + 3), NULL)));
+        "fear ward",
+        NextAction::array(0, new NextAction("fear ward", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "fear ward",
-        NextAction::array(0, new NextAction("fear ward", ACTION_HIGH), NULL)));
+        "target of attacker",
+        NextAction::array(0, new NextAction("elune's grace", ACTION_HIGH + 3), NULL)));
 }
 
 void PriestBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -926,16 +926,16 @@ void PriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     BuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "fear ward",
+        NextAction::array(0, new NextAction("fear ward", ACTION_EMERGENCY), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "target of attacker",
         NextAction::array(0, new NextAction("elune's grace", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium mana",
         NextAction::array(0, new NextAction("symbol of hope", ACTION_HIGH + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "fear ward",
-        NextAction::array(0, new NextAction("fear ward", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low mana",
@@ -1495,12 +1495,12 @@ void PriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     BuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "target of attacker",
-        NextAction::array(0, new NextAction("elune's grace", ACTION_HIGH + 1), NULL)));
+        "fear ward",
+        NextAction::array(0, new NextAction("fear ward", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "fear ward",
-        NextAction::array(0, new NextAction("fear ward", ACTION_HIGH), NULL)));
+        "target of attacker",
+        NextAction::array(0, new NextAction("elune's grace", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low mana",

@@ -12,7 +12,7 @@ namespace ai
 
     public:
         virtual bool Execute(Event& event);
-        virtual bool isPossible() override { return true; }; //Override movement stay.
+        virtual bool isPossible() override { return !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST); }; //Override movement stay.
 
     protected:
         bool Attack(Player* requester, Unit* target);

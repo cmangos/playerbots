@@ -22,6 +22,10 @@ std::list<ObjectGuid> AttackersValue::Calculate()
     if (bot->IsFlying() && WorldPosition(bot).currentHeight() > 10.0f)
         return result;
 
+    // lost control, e.g. BG ended
+    if (bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST))
+        return result;
+
     if (!sPlayerbotAIConfig.tweakValue)
     {
         // Try to get the value from nearby friendly bots.

@@ -9,7 +9,7 @@ void EmoteStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
         "random",
-        NextAction::array(0, new NextAction("emote", 1.0f), NULL)));
+        NextAction::array(0, new NextAction("emote", 0.5f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "often",
@@ -28,7 +28,7 @@ void EmoteStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "seldom",
-        NextAction::array(0, new NextAction("talk", 1.0f), NULL)));
+        NextAction::array(0, new NextAction("talk", 0.5f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "receive text emote",

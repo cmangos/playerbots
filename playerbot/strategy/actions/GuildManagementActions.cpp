@@ -125,7 +125,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
         if (guild->GetMemberSize() > 1000)
             return false;
 
-        if (guild->HasRankRight(botMember->RankId, GR_RIGHT_INVITE))
+        if (!guild->HasRankRight(botMember->RankId, GR_RIGHT_INVITE))
             continue;
 
         if (player->GetGuildIdInvited())
@@ -141,7 +141,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
             if (botAi->GetGuilderType() == GuilderType::SOLO && !botAi->HasRealPlayerMaster()) //Do not invite solo players.
                 continue;
             
-            if (botAi->HasActivePlayerMaster()) //Do not invite alts of active players. 
+            if (botAi->HasActivePlayerMaster() && !sRandomPlayerbotMgr.IsRandomBot(player)) //Do not invite alts of active players. 
                 continue;
         }
 

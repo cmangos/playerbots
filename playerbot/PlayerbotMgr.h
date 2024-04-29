@@ -40,12 +40,13 @@ public:
     std::string ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId);
     uint32 GetAccountId(std::string name);
     std::string ListBots(Player* master);
+    uint32 GetPlayerbotsAmount() const;
 
 protected:
     virtual void OnBotLoginInternal(Player * const bot) = 0;
     void Cleanup();
 
-protected:
+private:
     PlayerBotMap playerBots;
 };
 

@@ -15,7 +15,6 @@ public:
         creators["kidney shot"] = &kidney_shot;
         creators["slice and dice"] = &slice_and_dice;
         creators["eviscerate"] = &eviscerate;
-        creators["ambush"] = &ambush;
         creators["sap"] = &sap;
     }
 
@@ -27,8 +26,6 @@ private:
     ACTION_NODE_A(kidney_shot, "kidney shot", "gouge");
 
     ACTION_NODE_A(eviscerate, "eviscerate", "rupture");
-
-    ACTION_NODE_A(ambush, "ambush", "cheap shot");
 
     ACTION_NODE_A(slice_and_dice, "slice and dice", "eviscerate");
 
@@ -1415,6 +1412,7 @@ public:
             (actionName == "garrote") ||
             (actionName == "food") ||
             (actionName == "backstab") ||
+            (actionName == "sinister strike") ||
             (actionName == "dps assist") ||
             (actionName == "select new target") ||
             (actionName == "follow") ||
@@ -1425,7 +1423,13 @@ public:
             (actionName == "set dead state") ||
             (actionName == "update pvp strats") ||
             (actionName == "update pve strats") ||
-            (actionName == "update raid strats"))
+            (actionName == "update raid strats") ||
+            (actionName == "accept invitation") ||
+            (actionName == "bg status") ||
+            (actionName == "bg leave") ||
+            (actionName == "check mount state") ||
+            (actionName == "loot roll") ||
+            (actionName == "auto loot roll"))
         {
             return 1.0f;
         }

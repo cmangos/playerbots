@@ -968,8 +968,6 @@ bool BGLeaveAction::Execute(Event& event)
     if (!(bot->InBattleGroundQueue() || bot->InBattleGround()))
         return false;
 
-    //ai->ChangeStrategy("-bg", BotState::BOT_STATE_NON_COMBAT);
-
     BattleGroundQueueTypeId queueTypeId = bot->GetBattleGroundQueueTypeId(0);
     BattleGroundTypeId _bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
     uint8 type = false;
@@ -1001,6 +999,10 @@ bool BGLeaveAction::Execute(Event& event)
         ai->GetAiObjectContext()->GetValue<uint32>("bg type")->Set(0);
         ai->GetAiObjectContext()->GetValue<uint32>("bg role")->Set(0);
         ai->GetAiObjectContext()->GetValue<uint32>("arena type")->Set(0);
+        ai::PositionMap& posMap = context->GetValue<ai::PositionMap&>("position")->Get();
+        ai::PositionEntry pos = context->GetValue<ai::PositionMap&>("position")->Get()["bg objective"];
+        pos.Reset();
+        posMap["bg objective"] = pos;
 
         return true;
     }
@@ -1034,6 +1036,10 @@ bool BGLeaveAction::Execute(Event& event)
     ai->GetAiObjectContext()->GetValue<uint32>("bg type")->Set(0);
     ai->GetAiObjectContext()->GetValue<uint32>("bg role")->Set(0);
     ai->GetAiObjectContext()->GetValue<uint32>("arena type")->Set(0);
+    ai::PositionMap& posMap = context->GetValue<ai::PositionMap&>("position")->Get();
+    ai::PositionEntry pos = context->GetValue<ai::PositionMap&>("position")->Get()["bg objective"];
+    pos.Reset();
+    posMap["bg objective"] = pos;
     return true;
 }
 

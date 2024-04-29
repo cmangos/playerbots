@@ -102,6 +102,15 @@ namespace ai
         virtual bool IsActive();
     };
 
+    class BgEndedTrigger : public Trigger
+    {
+    public:
+        BgEndedTrigger(PlayerbotAI* ai) : Trigger(ai, "bg ended", 10) {}
+
+    public:
+        virtual bool IsActive();
+    };
+
     class PlayerIsInBattlegroundWithoutFlag : public Trigger
     {
     public:

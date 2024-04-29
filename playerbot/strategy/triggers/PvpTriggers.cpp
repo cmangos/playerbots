@@ -106,6 +106,16 @@ bool BgInviteActiveTrigger::IsActive()
     return false;
 }
 
+bool BgEndedTrigger::IsActive()
+{
+    if (bot->InBattleGround())
+    {
+        if (bot->GetBattleGround() && bot->GetBattleGround()->GetStatus() == STATUS_WAIT_LEAVE)
+            return true;
+    }
+    return false;
+}
+
 bool PlayerIsInBattlegroundWithoutFlag::IsActive()
 {
 #ifdef MANGOS

@@ -29,6 +29,10 @@ void BattlegroundStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigge
         "very often",
         NextAction::array(0, new NextAction("bg check objective", 10.0f), NULL)));
 
+    triggers.push_back(new TriggerNode(
+        "bg ended",
+        NextAction::array(0, new NextAction("bg leave", ACTION_HIGH), NULL)));
+
     /*triggers.push_back(new TriggerNode(
         "enemy flagcarrier near",
         NextAction::array(0, new NextAction("attack enemy flag carrier", 80.0f), NULL)));*/

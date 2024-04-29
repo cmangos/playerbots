@@ -163,6 +163,7 @@ namespace ai
 
             creators["bg waiting"] = &TriggerContext::bg_waiting;
             creators["bg active"] = &TriggerContext::bg_active;
+            creators["bg ended"] = &TriggerContext::bg_ended;
             creators["bg invite active"] = &TriggerContext::bg_invite_active;
             creators["player has no flag"] = &TriggerContext::player_has_no_flag;
             creators["player has flag"] = &TriggerContext::player_has_flag;
@@ -321,6 +322,7 @@ namespace ai
         static Trigger* player_has_no_flag(PlayerbotAI* ai) { return new PlayerHasNoFlag(ai); }
         static Trigger* bg_waiting(PlayerbotAI* ai) { return new BgWaitingTrigger(ai); }
         static Trigger* bg_active(PlayerbotAI* ai) { return new BgActiveTrigger(ai); }
+        static Trigger* bg_ended(PlayerbotAI* ai) { return new BgEndedTrigger(ai); }
         static Trigger* bg_invite_active(PlayerbotAI* ai) { return new BgInviteActiveTrigger(ai); }
         static Trigger* player_has_flag(PlayerbotAI* ai) { return new PlayerHasFlag(ai); }
         static Trigger* team_has_flag(PlayerbotAI* ai) { return new TeamHasFlag(ai); }

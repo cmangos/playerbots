@@ -1395,11 +1395,8 @@ void RandomPlayerbotMgr::CheckLfgQueue()
         bool isLFG = false;
 
 #ifdef MANGOSBOT_ZERO
-        WorldSafeLocsEntry const* ClosestGrave = nullptr;
-        ClosestGrave = player->GetMap()->GetGraveyardManager().GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
-        uint32 zoneId = 0;
-        if (ClosestGrave)
-            zoneId = ClosestGrave->ID;
+        WorldSafeLocsEntry const* ClosestGrave = player->GetMap()->GetGraveyardManager().GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
+        uint32 zoneId = ClosestGrave ? ClosestGrave->ID : 0;
 
         Group* group = player->GetGroup();
         if (group)
@@ -1425,12 +1422,10 @@ void RandomPlayerbotMgr::CheckLfgQueue()
             }
         }
 #endif
+
 #ifdef MANGOSBOT_ONE
-        WorldSafeLocsEntry const* ClosestGrave = nullptr;
-        ClosestGrave = player->GetMap()->GetGraveyardManager().GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
-        uint32 zoneId = 0;
-        if (ClosestGrave)
-            zoneId = ClosestGrave->ID;
+        WorldSafeLocsEntry const* ClosestGrave = player->GetMap()->GetGraveyardManager().GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
+        uint32 zoneId = ClosestGrave ? ClosestGrave->ID : 0;
 
         Group* group = player->GetGroup();
         if (group && !group->IsFull())
@@ -1463,6 +1458,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
             }
         }
 #endif
+
 #ifdef MANGOSBOT_TWO
         Group* group = player->GetGroup();
         if (group)
@@ -1499,22 +1495,18 @@ void RandomPlayerbotMgr::CheckLfgQueue()
         }
 #endif
     }
-#ifdef MANGOSBOT_ONE
-    for (PlayerBotMap::iterator i = playerBots.begin(); i != playerBots.end(); ++i)
-    {
-        Player* bot = i->second;
 
+#ifdef MANGOSBOT_ONE
+    ForEachPlayerbot([&](Player* bot)
+    {
         if (!bot || !bot->IsInWorld())
-            continue;
+            return;
 
         if (LfgDungeons[bot->GetTeam()].empty())
-            continue;
+            return;
 
-        WorldSafeLocsEntry const* ClosestGrave = nullptr;
-        ClosestGrave = bot->GetMap()->GetGraveyardManager().GetClosestGraveYard(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), bot->GetMapId(), bot->GetTeam());
-        uint32 zoneId = 0;
-        if (ClosestGrave)
-            zoneId = ClosestGrave->ID;
+        WorldSafeLocsEntry const* ClosestGrave = bot->GetMap()->GetGraveyardManager().GetClosestGraveYard(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), bot->GetMapId(), bot->GetTeam());
+        uint32 zoneId = ClosestGrave ? ClosestGrave->ID : 0;
 
         Group* group = bot->GetGroup();
         if (group && !group->IsFull())
@@ -1536,8 +1528,9 @@ void RandomPlayerbotMgr::CheckLfgQueue()
                 LfgDungeons[bot->GetTeam()].push_back(lfgType);
             }
         }
-    }
+    });
 #endif
+
     if (LfgDungeons[ALLIANCE].size() || LfgDungeons[HORDE].size())
         sLog.outBasic("LFG Queue check finished. There are real players in queue.");
     else

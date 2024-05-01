@@ -22,7 +22,7 @@ namespace ai
     class AttackMyTargetAction : public AttackAction
     {
     public:
-        AttackMyTargetAction(PlayerbotAI* ai, std::string name = "attack my target") : AttackAction(ai, name) {}
+        AttackMyTargetAction(PlayerbotAI* ai, std::string name = "attack my target") : AttackAction(ai, name) { MakeVerbose(); }
 
     public:
         virtual bool Execute(Event& event);
@@ -32,7 +32,7 @@ namespace ai
     class AttackRTITargetAction : public AttackAction
     {
     public:
-        AttackRTITargetAction(PlayerbotAI* ai, std::string name = "attack rti target") : AttackAction(ai, name) {}
+        AttackRTITargetAction(PlayerbotAI* ai, std::string name = "attack rti target") : AttackAction(ai, name) { MakeVerbose(); }
 
     public:
         virtual bool Execute(Event& event);

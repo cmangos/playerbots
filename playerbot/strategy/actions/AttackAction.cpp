@@ -12,15 +12,10 @@ using namespace ai;
 bool AttackAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+
     Unit* target = GetTarget();
     if (target && target->IsInWorld() && target->GetMapId() == bot->GetMapId())
     {
-        //Unit* victim = bot->GetVictim();
-        //if (victim && victim->IsPlayer() && victim->GetObjectGuid() == target->GetObjectGuid())
-        //{
-        //    return false;
-        //}
-
         return Attack(requester, target);
     }
 
@@ -73,18 +68,12 @@ bool AttackRTITargetAction::Execute(Event& event)
 
 bool AttackMyTargetAction::isUseful()
 {
-    if (ai->ContainsStrategy(STRATEGY_TYPE_HEAL) && !ai->HasStrategy("offdps", BotState::BOT_STATE_COMBAT))
-        return false;
-
-    return true;
+    return !ai->ContainsStrategy(STRATEGY_TYPE_HEAL) || ai->HasStrategy("offdps", BotState::BOT_STATE_COMBAT);
 }
 
 bool AttackRTITargetAction::isUseful()
 {
-    if (ai->ContainsStrategy(STRATEGY_TYPE_HEAL) && !ai->HasStrategy("offdps", BotState::BOT_STATE_COMBAT))
-        return false;
-
-    return true;
+    return !ai->ContainsStrategy(STRATEGY_TYPE_HEAL) || ai->HasStrategy("offdps", BotState::BOT_STATE_COMBAT);
 }
 
 bool AttackAction::Attack(Player* requester, Unit* target)
@@ -92,11 +81,15 @@ bool AttackAction::Attack(Player* requester, Unit* target)
     MotionMaster &mm = *bot->GetMotionMaster();
 	if (mm.GetCurrentMovementGeneratorType() == TAXI_MOTION_TYPE || (bot->IsFlying() && WorldPosition(bot).currentHeight() > 10.0f))
     {
-        if (verbose) ai->TellError(requester, "I cannot attack in flight");
+        if (verbose)
+        {
+            ai->TellPlayerNoFacing(requester, "I cannot attack in flight");
+        }
+
         return false;
     }
 
-    if(IsTargetValid(requester, target))
+    if (IsTargetValid(requester, target))
     {
         if (bot->IsMounted() && (sServerFacade.GetDistance2d(bot, target) < 40.0f || bot->IsFlying()))
         {
@@ -121,7 +114,6 @@ bool AttackAction::Attack(Player* requester, Unit* target)
         AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
 
         const bool isWaitingForAttack = WaitForAttackStrategy::ShouldWait(ai);
-
         Pet* pet = bot->GetPet();
         if (pet)
         {
@@ -151,16 +143,22 @@ bool AttackAction::Attack(Player* requester, Unit* target)
             sServerFacade.SetFacingTo(bot, target);
         }
 
+        bool result = true;
+
         // Don't attack target if it is waiting for attack or in stealth
         if (!ai->HasStrategy("stealthed", BotState::BOT_STATE_COMBAT) && !isWaitingForAttack)
         {
             ai->PlayAttackEmote(1);
-            return bot->Attack(target, !ai->IsRanged(bot) || (sServerFacade.GetDistance2d(bot, target) < 5.0f));
+            result = bot->Attack(target, !ai->IsRanged(bot) || (sServerFacade.GetDistance2d(bot, target) < 5.0f));
         }
-        else
+
+        if (result)
         {
-            return true;
+            // Force change combat state to have a faster reaction time
+            ai->OnCombatStarted();
         }
+
+        return result;
     }
 
     return false;
@@ -168,24 +166,49 @@ bool AttackAction::Attack(Player* requester, Unit* target)
 
 bool AttackAction::IsTargetValid(Player* requester, Unit* target)
 {
-    std::ostringstream msg;
     if (!target)
     {
-        if (verbose) ai->TellError(requester, "I have no target");
+        if (verbose) 
+        {
+            ai->TellPlayerNoFacing(requester, "I have no target");
+        }
+
         return false;
     }
     else if (sServerFacade.IsFriendlyTo(bot, target))
     {
-        msg << target->GetName();
-        msg << " is friendly to me";
-        if (verbose) ai->TellError(requester, msg.str());
+        if (verbose)
+        {
+            std::ostringstream msg;
+            msg << target->GetName();
+            msg << " is friendly to me";
+            ai->TellPlayerNoFacing(requester, msg.str());
+        }
+
         return false;
     }
     else if (sServerFacade.UnitIsDead(target))
     {
-        msg << target->GetName();
-        msg << " is dead";
-        if (verbose) ai->TellError(requester, msg.str());
+        if (verbose)
+        {
+            std::ostringstream msg;
+            msg << target->GetName();
+            msg << " is dead";
+            ai->TellPlayerNoFacing(requester, msg.str());
+        }
+
+        return false;
+    }
+    else if (sServerFacade.GetDistance2d(bot, target) > sPlayerbotAIConfig.sightDistance)
+    {
+        if (verbose)
+        {
+            std::ostringstream msg;
+            msg << target->GetName();
+            msg << " is too far away";
+            ai->TellPlayerNoFacing(requester, msg.str());
+        }
+
         return false;
     }
 

@@ -37,7 +37,9 @@
 #include "RandomItemMgr.h"
 #include "strategy/ItemVisitors.h"
 #include "strategy/values/LootValues.h"
+#include "strategy/values/AttackersValue.h"
 #include "Entities/Transports.h"
+
 #ifdef MANGOSBOT_TWO
 #include "Entities/Vehicle.h"
 #endif
@@ -840,7 +842,24 @@ void PlayerbotAI::OnCombatStarted()
 {
     if(!IsStateActive(BotState::BOT_STATE_COMBAT))
     {
+        // Reset the combat start timestamp
         aiObjectContext->GetValue<time_t>("combat start time")->Set(time(0));
+
+        // Update stay position on location when combat starts
+        if (HasStrategy("stay", BotState::BOT_STATE_COMBAT) && !HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT))
+        {
+            aiObjectContext->GetValue<PositionEntry>("pos", "stay")->Set(PositionEntry(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), bot->GetMapId()));
+        }
+
+        // Stop follow movement on combat start
+        if (!HasStrategy("follow", BotState::BOT_STATE_COMBAT) && HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+        {
+            StopMoving();
+        }
+
+        aiObjectContext->GetValue<std::list<ObjectGuid>>("attackers", 1)->Reset();
+        aiObjectContext->GetValue<bool>("has attackers")->Reset();
+
         ChangeEngine(BotState::BOT_STATE_COMBAT);
     }
 }
@@ -849,7 +868,15 @@ void PlayerbotAI::OnCombatEnded()
 {
     if (!IsStateActive(BotState::BOT_STATE_NON_COMBAT))
     {
+        // Reset the combat start timestamp
         aiObjectContext->GetValue<time_t>("combat start time")->Set(0);
+
+        // Stop following on combat end
+        if (HasStrategy("follow", BotState::BOT_STATE_COMBAT) && !HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+        {
+            StopMoving();
+        }
+
         ChangeEngine(BotState::BOT_STATE_NON_COMBAT);
     }
 }
@@ -941,6 +968,12 @@ void PlayerbotAI::OnResurrected()
 {
     if (IsStateActive(BotState::BOT_STATE_DEAD) && sServerFacade.IsAlive(bot))
     {
+        // Stop following on resurrected
+        if (HasStrategy("follow", BotState::BOT_STATE_COMBAT) && !HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+        {
+            StopMoving();
+        }
+
         ChangeEngine(BotState::BOT_STATE_NON_COMBAT);
     }
 }
@@ -6341,11 +6374,13 @@ bool PlayerbotAI::HasPlayerRelation()
         return true;
 
     for (auto& p : sRandomPlayerbotMgr.GetPlayers())
+    {
         if (p.second && p.second->GetSocial()->HasFriend(bot->GetObjectGuid()))
         {
             SetPlayerFriend(true);
             return true;
         }
+    }
 
     return false;
 }
@@ -6354,7 +6389,6 @@ void PlayerbotAI::QueueChatResponse(uint8 msgtype, ObjectGuid guid1, ObjectGuid 
 {
     chatReplies.push(ChatQueuedReply(msgtype, guid1.GetCounter(), guid2.GetCounter(), message, chanName, name, time(0) + urand(inCombat ? 10 : 5, inCombat ? 25 : 15)));
 }
-
 
 bool PlayerbotAI::PlayAttackEmote(float chanceMultiplier)
 {

@@ -53,6 +53,10 @@ bool PullRequestAction::Execute(Event& event)
     posMap["pull"] = pullPosition;
 
     strategy->RequestPull(target);
+
+    // Force change combat state to have a faster reaction time
+    ai->OnCombatStarted();
+
     return true;
 }
 

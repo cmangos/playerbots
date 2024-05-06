@@ -409,7 +409,19 @@ std::string TwoTriggers::getName()
 
 bool BoostTrigger::IsActive()
 {
-	return ai->IsStateActive(BotState::BOT_STATE_COMBAT) && BuffTrigger::IsActive() && AI_VALUE(uint8, "balance") <= balance;
+    if (ai->IsStateActive(BotState::BOT_STATE_COMBAT) && BuffTrigger::IsActive())
+    {
+        if (!ai->HasRealPlayerMaster())
+        {
+            return AI_VALUE(uint8, "balance") <= balance;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool ItemCountTrigger::IsActive()

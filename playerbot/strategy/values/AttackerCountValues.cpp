@@ -110,7 +110,9 @@ uint8 BalancePercentValue::Calculate()
             continue;
 
         if (unit->IsPlayer())
+        {
             attackerLevel += unit->GetLevel() * 3;
+        }
         else
         {
             Creature* creature = ai->GetCreature((*i));
@@ -118,21 +120,33 @@ uint8 BalancePercentValue::Calculate()
                 continue;
 
             uint32 level = creature->GetLevel();
+            switch (creature->GetCreatureInfo()->Rank) 
+            {
+                case CREATURE_ELITE_RARE:
+                {
+                    level *= 2;
+                    break;
+                }
 
-            switch (creature->GetCreatureInfo()->Rank) {
-            case CREATURE_ELITE_RARE:
-                level *= 2;
-                break;
-            case CREATURE_ELITE_ELITE:
-                level *= 3;
-                break;
-            case CREATURE_ELITE_RAREELITE:
-                level *= 3;
-                break;
-            case CREATURE_ELITE_WORLDBOSS:
-                level *= 5;
-                break;
+                case CREATURE_ELITE_ELITE:
+                {
+                    level *= 3;
+                    break;
+                }
+
+                case CREATURE_ELITE_RAREELITE:
+                {
+                    level *= 3;
+                    break;
+                }
+
+                case CREATURE_ELITE_WORLDBOSS:
+                {
+                    level *= 5;
+                    break;
+                }
             }
+
             attackerLevel += level;
         }
     }

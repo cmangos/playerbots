@@ -15,19 +15,23 @@ SpellCastResult BotUseItemSpell::ForceSpellStart(SpellCastTargets const* targets
 {
     WorldObject* truecaster = GetTrueCaster();
     if (!truecaster)
+    {
         truecaster = m_caster;
+    }
+
     m_spellState = SPELL_STATE_TARGETING;
     m_targets = *targets;
 
     if (triggeredByAura)
+    {
         m_triggeredByAuraSpell = triggeredByAura->GetSpellProto();
+    }
 
     // create and add update event for this spell
     SpellEvent* Event = new SpellEvent(this);
     truecaster->m_events.AddEvent(Event, truecaster->m_events.CalculateTime(1));
 
     SpellCastResult result = PreCastCheck();
-
     bool failed = result != SPELL_CAST_OK;
     if (result == SPELL_FAILED_BAD_TARGETS && OpenLockCheck())
     {
@@ -35,6 +39,7 @@ SpellCastResult BotUseItemSpell::ForceSpellStart(SpellCastTargets const* targets
         m_IsTriggeredSpell = true;
         m_ignoreCastTime = true;
     }
+
     if (result == SPELL_FAILED_REAGENTS && itemCheats)
     {
         failed = false;
@@ -135,71 +140,24 @@ bool BotUseItemSpell::OpenLockCheck()
     return false;
 }
 
-std::vector<uint32> ParseItems(const std::string& text)
+bool UseAction::Execute(Event& event)
 {
-    std::vector<uint32> itemIds;
-
-    uint8 pos = 0;
-    while (true)
-    {
-        int i = text.find("Hitem:", pos);
-        if (i == -1)
-        {
-            break;
-        }
-
-        pos = i + 6;
-        int endPos = text.find(':', pos);
-        if (endPos == -1)
-        {
-            break;
-        }
-
-        std::string idC = text.substr(pos, endPos - pos);
-        uint32 id = atol(idC.c_str());
-        pos = endPos;
-        if (id)
-        {
-            itemIds.push_back(id);
-        }
-    }
-
-    return itemIds;
-}
-
-bool IsFoodOrDrink(ItemPrototype const* proto, uint32 spellCategory)
-{
-    return proto->Class == ITEM_CLASS_CONSUMABLE && 
-            (proto->SubClass == ITEM_SUBCLASS_FOOD || proto->SubClass == ITEM_SUBCLASS_CONSUMABLE) && 
-            proto->Spells[0].SpellCategory == spellCategory;
-}
-
-bool IsFood(ItemPrototype const* proto)
-{
-    return IsFoodOrDrink(proto, 11);
-}
-
-bool IsDrink(ItemPrototype const* proto)
-{
-    return IsFoodOrDrink(proto, 59);
-}
-
-bool UseItemAction::Execute(Event& event)
-{
-    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    Player* requester = event.getOwner();
     std::string name = event.getParam();
     if (name.empty())
     {
         name = getName();
     }
 
-    ObjectGuid gameObject;
-    std::list<Item*> items;
+    MakeVerbose(requester != nullptr);
+
+    uint32 itemID = 0;
+    Item* targetItem = nullptr;
+    GameObject* targetGameObject = nullptr;
 
     if (name == "go")
     {
         float closest = 9999.0f;
-        GameObject* nearestGO = nullptr;
         std::list<ObjectGuid> nearestGOs = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
         for (const ObjectGuid& goGUID : nearestGOs)
         {
@@ -209,77 +167,61 @@ bool UseItemAction::Execute(Event& event)
                 const float distance = bot->GetDistance(go);
                 if (distance < closest)
                 {
-                    nearestGO = go;
+                    targetGameObject = go;
                     closest = distance;
                 }
             }
         }
-
-        if (nearestGO)
-        {
-            gameObject = nearestGO->GetObjectGuid();
-        }
     }
     else
     {
-        items = AI_VALUE2(std::list<Item*>, "inventory items", name);
+        std::vector<uint32> items = chat->parseItemsUnordered(name, false, true);
+        if (!items.empty())
+        {
+            itemID = *items.begin();
+            if (items.size() > 1)
+            {
+                const uint32 targetItemID = *std::next(items.begin(), 1);
+                targetItem = bot->GetItemByEntry(targetItemID);
+            }
+        }
+
         std::list<ObjectGuid> gos = chat->parseGameobjects(name);
         if (!gos.empty())
         {
-            gameObject = *gos.begin();
+            targetGameObject = ai->GetGameObject(*gos.begin());
         }
     }
 
-    if (gameObject.IsEmpty())
+    if (targetGameObject != nullptr)
     {
-        if (items.size() > 1)
+        if (itemID != 0)
         {
-            std::list<Item*>::iterator i = items.begin();
-            Item* item = *i++;
-            Item* itemTarget = *i;
-
-            // Check if the items are in the correct order
-            const std::vector<uint32> itemIds = ParseItems(name);
-            if(!itemIds.empty() && item->GetEntry() != *itemIds.begin())
-            {
-                // Swap items to match command order
-                Item* tmp = item;
-                item = itemTarget;
-                itemTarget = tmp;
-            }
-
-            ItemPrototype const* proto = item->GetProto();
-            if(item->IsPotion() || IsFood(proto) || IsDrink(proto) || itemTarget->GetProto() == proto)
-            {
-                return UseItemAuto(requester, item);
-            }
-            else
-            {
-                return UseItemOnItem(requester, item, itemTarget);
-            }
+            return UseItem(requester, itemID, targetGameObject);
         }
-        else if (!items.empty())
+        else
         {
-            if (requester && ai->HasActivePlayerMaster() && !selfOnly && requester->GetSelectionGuid())
-            {
-                Unit* target = ai->GetUnit(requester->GetSelectionGuid());
-
-                if (target != ai->GetBot())
-                   return UseItemOnTarget(requester, *items.begin(), target);
-            }
-
-            return UseItemAuto(requester, *items.begin());
+            return UseGameObject(requester, event, targetGameObject);
         }
     }
     else
     {
-        if (items.empty())
+        if (itemID != 0)
         {
-            return UseGameObject(requester, event, gameObject);
-        }
-        else
-        {
-            return UseItemOnGameObject(requester, *items.begin(), gameObject);
+            if (targetItem)
+            {
+                return UseItem(requester, itemID, targetItem);
+            }
+            else
+            {
+                Unit* target = nullptr;
+                if (requester && ai->HasActivePlayerMaster() && requester->GetSelectionGuid())
+                {
+                    target = ai->GetUnit(requester->GetSelectionGuid());
+                }
+
+                return UseItem(requester, itemID, target);
+            }
         }
     }
 
@@ -287,58 +229,357 @@ bool UseItemAction::Execute(Event& event)
     return false;
 }
 
-bool UseItemAction::isPossible()
+bool UseAction::UseItem(Player* requester, uint32 itemId, Unit* target)
 {
-    return getName() == "use" || (AI_VALUE2(uint32, "item count", getName()) > 0 || ai->HasCheat(BotCheatMask::item));
+    return UseItemInternal(requester, itemId, target, nullptr, nullptr);
 }
 
-bool UseItemAction::UseGameObject(Player* requester, Event& event, ObjectGuid guid)
+bool UseAction::UseItem(Player* requester, uint32 itemId, GameObject* target)
 {
-    GameObject* go = ai->GetGameObject(guid);
-    if (go == nullptr)
+    return UseItemInternal(requester, itemId, nullptr, target, nullptr);
+}
+
+bool UseAction::UseItem(Player* requester, uint32 itemId, Item* target)
+{
+    return UseItemInternal(requester, itemId, nullptr, nullptr, target);
+}
+
+bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unitTarget, GameObject* gameObjectTarget, Item* itemTarget)
+{
+    // Check for valid item ID
+    const ItemPrototype* proto = sObjectMgr.GetItemPrototype(itemId);
+    if (!proto)
+    {
+        if (verbose)
+        {
+            std::map<std::string, std::string> replyArgs;
+            replyArgs["%item"] = itemId;
+            ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_invalid_item", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        }
+
+        return false;
+    }
+
+    // If bot has no item cheat (or it is a questgiver item) it needs an item to cast
+    Item* item = nullptr;
+    if (!ai->HasCheat(BotCheatMask::item) || proto->StartQuest > 0)
+    {
+        std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatQItem(itemId));
+        if (!items.empty())
+        {
+            item = items.front();
+        }
+        else
+        {
+            if (verbose)
+            {
+                std::map<std::string, std::string> replyArgs;
+                replyArgs["%item"] = ChatHelper::formatItem(proto);
+                ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_item_not_owned", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            }
+
+            return false;
+        }
+    }
+
+    // Check for items that give quests on use (must have item in inventory)
+    if (proto->StartQuest > 0)
+    {
+        return UseQuestGiverItem(requester, item);
+    }
+
+#ifndef MANGOSBOT_ZERO
+    // Check for gem items
+    if (proto->Class == ITEM_CLASS_GEM)
+    {
+        return UseGemItem(requester, itemTarget, item, true);
+    }
+#endif
+
+    // Check for item cooldown
+    if (HasItemCooldown(itemId))
+    {
+        if (verbose)
+        {
+            std::map<std::string, std::string> replyArgs;
+            replyArgs["%item"] = chat->formatItem(proto);
+            ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_item_cooldown", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        }
+
+        return false;
+    }
+
+    uint8 successCasts = 0;
+    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+    {
+        // No spell
+        const auto& spellData = proto->Spells[i];
+        if (!spellData.SpellId)
+        {
+            continue;
+        }
+
+        // Wrong triggering type
+#ifdef MANGOSBOT_ZERO
+        if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE && spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_NO_DELAY_USE)
+#else
+        if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
+#endif
+        {
+            continue;
+        }
+
+        const SpellEntry* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellData.SpellId);
+        if (!spellInfo)
+        {
+            continue;
+        }
+
+        // Check if valid targets
+        bool validTarget = false;
+        SpellCastTargets targets;
+        
+        // Try to figure out which targets are allowed if the spell doesn't provide it
+        uint32 spellTargets = spellInfo->Targets;
+        if (spellTargets == 0)
+        {
+            // Unit target
+            if ((proto->Class == ITEM_CLASS_CONSUMABLE && proto->SubClass == ITEM_SUBCLASS_SCROLL) || // Scrolls
+                (proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass == ITEM_SUBCLASS_EXPLOSIVES) || // Explosives
+                (spellData.SpellCategory == 150) || // First aid
+                (spellData.SpellCategory == 831)) // Soulstone 
+            {
+                spellTargets |= TARGET_FLAG_UNIT;
+            }
+
+            // Location target
+            if (proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass == ITEM_SUBCLASS_EXPLOSIVES) // Explosives
+            {
+                spellTargets |= TARGET_FLAG_DEST_LOCATION;
+            }
+        }
+
+        if (spellTargets & TARGET_FLAG_DEST_LOCATION)
+        {
+            if (unitTarget)
+            {
+                targets.setDestination(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ());
+                validTarget = true;
+            }
+            else if (gameObjectTarget && gameObjectTarget->IsSpawned())
+            {
+                targets.setDestination(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ());
+                validTarget = true;
+            }
+        }
+        
+        if (spellTargets & TARGET_FLAG_UNIT && !validTarget)
+        {
+            if (unitTarget)
+            {
+                targets.setUnitTarget(unitTarget);
+                validTarget = true;
+            }
+        }
+        
+        if (spellTargets & TARGET_FLAG_GAMEOBJECT && !validTarget)
+        {
+            if (gameObjectTarget && gameObjectTarget->IsSpawned())
+            {
+                targets.setGOTarget(gameObjectTarget);
+                targets.m_targetMask = TARGET_FLAG_GAMEOBJECT;
+                validTarget = true;
+            }
+        }
+
+        if (spellTargets & TARGET_FLAG_ITEM && !validTarget)
+        {
+            if (itemTarget)
+            {
+                targets.setItemTarget(itemTarget);
+                validTarget = true;
+            }
+            else
+            {
+                // Try to figure out the item target
+                Item* itemForSpell = AI_VALUE2(Item*, "item for spell", spellInfo->Id);
+                if (itemForSpell)
+                {
+                    if (!itemForSpell->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
+                    {
+                        validTarget = true;
+                        itemTarget = itemForSpell;
+
+                        if (bot->GetTrader())
+                        {
+                            targets.setTradeItemTarget(bot);
+                        }
+                        else
+                        {
+                            targets.setItemTarget(itemForSpell);
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (!validTarget)
+        {
+            targets.m_targetMask = TARGET_FLAG_SELF;
+            validTarget = true;
+        }
+
+        if (validTarget)
+        {
+            // Use triggered flag only for items with many spell casts and for not first cast
+            BotUseItemSpell* spell = new BotUseItemSpell(bot, spellInfo, (successCasts > 0) ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
+            spell->m_clientCast = true;
+
+            // Spend the item if used in the spell
+            if (item)
+            {
+                spell->SetCastItem(item);
+                item->SetUsedInSpell(true);
+            }
+
+            if (sServerFacade.isMoving(bot))
+            {
+                ai->StopMoving();
+            }
+
+            const SpellCastResult result = spell->ForceSpellStart(&targets);
+
+            // Check for using item on trade item
+            bool successCast = result == SPELL_CAST_OK;
+            if (result == SPELL_FAILED_DONT_REPORT && (targets.m_targetMask & TARGET_FLAG_TRADE_ITEM))
+            {
+                successCast = true;
+            }
+
+            if (successCast)
+            {
+                bot->RemoveSpellCooldown(*spellInfo, false);
+                bot->AddCooldown(*spellInfo, proto, false);
+                SetDuration(ai->GetSpellCastDuration(spell));
+                ++successCasts;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    if (successCasts > 0)
+    {
+        if (verbose)
+        {
+            std::map<std::string, std::string> replyArgs;
+            replyArgs["%target"] = chat->formatItem(proto);
+            std::ostringstream replyStr; replyStr << BOT_TEXT("use_command");
+
+            // Target
+            if (itemTarget)
+            {
+                replyArgs["%item"] = chat->formatItem(itemTarget);
+                replyStr << " " << BOT_TEXT("command_target_item");
+            }
+            else if (unitTarget)
+            {
+                replyArgs["%unit"] = unitTarget->GetName();
+                replyStr << " " << BOT_TEXT("command_target_unit");
+            }
+            else if (gameObjectTarget)
+            {
+                replyArgs["%gameobject"] = chat->formatGameobject(gameObjectTarget);
+                replyStr << " " << BOT_TEXT("use_command_target_go");
+            }
+            else
+            {
+                replyStr << " " << BOT_TEXT("command_target_self");
+            }
+
+            // Stackable
+            if (item && proto->Stackable > 1)
+            {
+                uint32 count = item->GetCount();
+                if (count > 1)
+                {
+                    replyArgs["%amount"] = count;
+                    replyStr << " " << BOT_TEXT("use_command_remaining");
+                }
+                else
+                {
+                    replyStr << " " << BOT_TEXT("use_command_last");
+                }
+            }
+
+            ai->TellPlayerNoFacing(requester, BOT_TEXT2(replyStr.str(), replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        }
+        
+        return true;
+    }
+    else
+    {
+        if (verbose)
+        {
+            std::map<std::string, std::string> replyArgs;
+            replyArgs["%item"] = chat->formatItem(proto);
+            ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_item_error", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        }
+    }
+
+    return false;
+}
+
+bool UseAction::UseGameObject(Player* requester, Event& event, GameObject* gameObject)
+{
+    if (gameObject == nullptr)
     {
         ai->TellPlayerNoFacing(requester, "Invalid game object", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         return false;
     }
 
-    if (!sServerFacade.isSpawned(go) || go->IsInUse() || go->GetGoState() != GO_STATE_READY)
+    ObjectGuid guid = gameObject->GetObjectGuid();
+    if (!sServerFacade.isSpawned(gameObject) || gameObject->IsInUse() || gameObject->GetGoState() != GO_STATE_READY)
     {
-        std::ostringstream out; out << "I can't use " << chat->formatGameobject(go);
+        std::ostringstream out; out << "I can't use " << chat->formatGameobject(gameObject);
         ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         return false;
     }
 
-    if (bot->GetDistance(go) > INTERACTION_DISTANCE)
+    if (bot->GetDistance(gameObject) > INTERACTION_DISTANCE)
     {
-        std::ostringstream out; out << "I'm too far away from " << chat->formatGameobject(go);
+        std::ostringstream out; out << "I'm too far away from " << chat->formatGameobject(gameObject);
         ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         return false;
     }
 
-    if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+    if (gameObject->GetGoType() == GAMEOBJECT_TYPE_CHEST)
     {
         SET_AI_VALUE(LootObject, "loot target", LootObject(bot, guid));
 
         if (ai->DoSpecificAction("open loot", event, true))
         {
-            std::ostringstream out; out << "Looting " << chat->formatGameobject(go);
+            std::ostringstream out; out << "Looting " << chat->formatGameobject(gameObject);
             ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             return true;
         }
         else
         {
-            std::ostringstream out; out << "Failed to loot " << chat->formatGameobject(go);
+            std::ostringstream out; out << "Failed to loot " << chat->formatGameobject(gameObject);
             ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-
+            return false;
         }
     }
-    else if(go->GetGoType() == GAMEOBJECT_TYPE_DOOR)
+    else if(gameObject->GetGoType() == GAMEOBJECT_TYPE_DOOR)
     {
-        uint32 lockId = go->GetGOInfo()->GetLockId();
+        uint32 lockId = gameObject->GetGOInfo()->GetLockId();
         LockEntry const* lockInfo = sLockStore.LookupEntry(lockId);
         if (lockInfo)
         {
-            auto CanOpenLock = [this](const SpellEntry* pSpellInfo, GameObject* go) -> bool
+            uint32 keyRequired = 0;
+            auto CanOpenLock = [&](const SpellEntry* pSpellInfo, GameObject* go) -> bool
             {
                 if (!pSpellInfo)
                     return false;
@@ -348,18 +589,13 @@ bool UseItemAction::UseGameObject(Player* requester, Event& event, ObjectGuid gu
                     if (pSpellInfo->Effect[effIndex] != SPELL_EFFECT_OPEN_LOCK && pSpellInfo->Effect[effIndex] != SPELL_EFFECT_SKINNING)
                         return false;
 
-                    uint32 lockId = go->GetGOInfo()->GetLockId();
-                    if (!lockId)
-                        return false;
-
-                    LockEntry const* lockInfo = sLockStore.LookupEntry(lockId);
-                    if (!lockInfo)
-                        return false;
-
-                    bool reqKey = false;
                     for (int j = 0; j < 8; ++j)
                     {
-                        if (lockInfo->Type[j] == LOCK_KEY_SKILL)
+                        if (lockInfo->Type[j] == LOCK_KEY_ITEM)
+                        {
+                            keyRequired = lockInfo->Index[j];
+                        }
+                        else if (lockInfo->Type[j] == LOCK_KEY_SKILL)
                         {
                             if (uint32(pSpellInfo->EffectMiscValue[effIndex]) != lockInfo->Index[j])
                             {
@@ -369,7 +605,7 @@ bool UseItemAction::UseGameObject(Player* requester, Event& event, ObjectGuid gu
                             uint32 skillId = SkillByLockType(LockType(lockInfo->Index[j]));
                             if (skillId == SKILL_NONE)
                             {
-                                return true;
+                                continue;
                             }
 
                             uint32 skillValue = bot->GetSkillValue(skillId);
@@ -393,7 +629,7 @@ bool UseItemAction::UseGameObject(Player* requester, Event& event, ObjectGuid gu
                 if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled || IsPassiveSpell(possibleSpellId))
                     continue;
 
-                if (CanOpenLock(sServerFacade.LookupSpellInfo(possibleSpellId), go))
+                if (CanOpenLock(sServerFacade.LookupSpellInfo(possibleSpellId), gameObject))
                 {
                     spellId = possibleSpellId;
                     break;
@@ -402,630 +638,192 @@ bool UseItemAction::UseGameObject(Player* requester, Event& event, ObjectGuid gu
 
             if (spellId)
             {
-                if (ai->CastSpell(spellId, go))
+                uint32 spellDuration = sPlayerbotAIConfig.globalCoolDown;
+                if (ai->CastSpell(spellId, gameObject, nullptr, true, &spellDuration))
                 {
-                    std::ostringstream out; out << "Opening " << chat->formatGameobject(go);
+                    std::ostringstream out; out << "Opening " << chat->formatGameobject(gameObject);
+                    ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                    SetDuration(spellDuration);
+                    return true;
+                }
+            }
+            else if (keyRequired > 0)
+            {
+                std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", chat->formatQItem(keyRequired));
+                if (!items.empty())
+                {
+                    gameObject->Use(bot);
+                    std::ostringstream out; out << "Opening " << chat->formatGameobject(gameObject);
                     ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                     return true;
                 }
-                else
-                {
-                    std::ostringstream out; out << "Failed to open " << chat->formatGameobject(go);
-                    ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-                }
             }
-            else
-            {
-                std::ostringstream out; out << "I can't open " << chat->formatGameobject(go);
-                ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-            }
-        }
-        else
-        {
-            std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
-            *packet << guid;
-            bot->GetSession()->QueuePacket(std::move(packet));
 
-            std::ostringstream out; out << "Using " << chat->formatGameobject(go);
+            std::ostringstream out; out << "I can't open " << chat->formatGameobject(gameObject);
             ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            return false;
+        }
+    }
+
+    std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
+    *packet << guid;
+    bot->GetSession()->QueuePacket(std::move(packet));
+    
+    std::ostringstream out; out << "Using " << chat->formatGameobject(gameObject);
+    ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+    return true;
+}
+
+bool UseAction::UseQuestGiverItem(Player* requester, Item* item)
+{
+    if (item)
+    {
+        const Quest* quest = sObjectMgr.GetQuestTemplate(item->GetProto()->StartQuest);
+        if (quest)
+        {
+            WorldPacket packet(CMSG_QUESTGIVER_ACCEPT_QUEST, 8 + 4 + 4);
+            packet << item->GetObjectGuid();
+            packet << quest->GetQuestId();
+            packet << uint32(0);
+            bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(packet);
+
+            if (verbose)
+            {
+                std::map<std::string, std::string> replyArgs;
+                replyArgs["%quest"] = chat->formatQuest(quest);
+                ai->TellPlayerNoFacing(requester, BOT_TEXT2("quest_accepted", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            }
+
             return true;
         }
+    }
+
+    return false;
+}
+
+bool UseAction::HasItemCooldown(uint32 itemId) const
+{
+    const ItemPrototype* proto = sObjectMgr.GetItemPrototype(itemId);
+    if (proto)
+    {
+        uint32 spellId = 0;
+        for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+        {
+            if (proto->Spells[i].SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
+            {
+                continue;
+            }
+
+            if (proto->Spells[i].SpellId > 0)
+            {
+                if (!sServerFacade.IsSpellReady(bot, proto->Spells[i].SpellId))
+                    return true;
+
+                if (!sServerFacade.IsSpellReady(bot, proto->Spells[i].SpellId, itemId))
+                    return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+#ifndef MANGOSBOT_ZERO
+bool UseAction::UseGemItem(Player* requester, Item* item, Item* gem, bool replace)
+{
+    if (!item || !gem)
+    {
+        return false;
+    }
+
+    WorldPacket* const packet = new WorldPacket(CMSG_SOCKET_GEMS);
+    *packet << item->GetObjectGuid();
+
+    bool fits = false;
+    for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
+    {
+        uint8 SocketColor = item->GetProto()->Socket[enchant_slot - SOCK_ENCHANTMENT_SLOT].Color;
+        GemPropertiesEntry const* gemProperty = sGemPropertiesStore.LookupEntry(gem->GetProto()->GemProperties);
+        if (gemProperty && (gemProperty->color & SocketColor))
+        {
+            if (fits)
+            {
+                *packet << ObjectGuid();
+                continue;
+            }
+
+            uint32 enchant_id = item->GetEnchantmentId(EnchantmentSlot(enchant_slot));
+            if (!enchant_id)
+            {
+                *packet << gem->GetObjectGuid();
+                fits = true;
+                continue;
+            }
+
+            SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+            if (!enchantEntry || !enchantEntry->GemID)
+            {
+                *packet << gem->GetObjectGuid();
+                fits = true;
+                continue;
+            }
+
+            if (replace && enchantEntry->GemID != gem->GetProto()->ItemId)
+            {
+                *packet << gem->GetObjectGuid();
+                fits = true;
+                continue;
+            }
+        }
+
+        *packet << ObjectGuid();
+    }
+
+    if (fits)
+    {
+        bot->GetSession()->HandleSocketOpcode(*packet);
+
+        if (verbose)
+        {
+            std::map<std::string, std::string> replyArgs;
+            replyArgs["%item"] = chat->formatItem(item);
+            replyArgs["%gem"] = chat->formatItem(gem);
+            ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_socket", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        }
+
+        return true;
     }
     else
     {
-        std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
-        *packet << guid;
-        bot->GetSession()->QueuePacket(std::move(packet));
-    
-        std::ostringstream out; out << "Using " << chat->formatGameobject(go);
-        ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-        return true;
-    }
-
-   return false;
-}
-
-bool UseItemAction::UseItemAuto(Player* requester, Item* item)
-{
-    uint8 bagIndex = item->GetBagSlot();
-    uint8 slot = item->GetSlot();
-    uint8 spell_index = 0;
-    uint8 cast_count = 1;
-    uint32 spellId = 0;
-    ObjectGuid item_guid = item->GetObjectGuid();
-#ifdef MANGOSBOT_ZERO
-    uint16 targetFlag = TARGET_FLAG_SELF;
-#else
-    uint32 targetFlag = TARGET_FLAG_SELF;
-#endif
-    uint32 glyphIndex = 0;
-    uint8 unk_flags = 0;
-
-    ItemPrototype const* proto = item->GetProto();
-    bool isDrink = IsDrink(proto);
-    bool isFood = IsFood(proto);
-
-    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-    {
-        // wrong triggering type
-        if (proto->Spells[i].SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
-            continue;
-
-        if (proto->Spells[i].SpellId > 0)
+        if (verbose)
         {
-            spell_index = i;
-        }
-    }
-
-    //Temporary fix for starting quests:
-    if (uint32 questid = item->GetProto()->StartQuest)
-    {
-        Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
-        if (qInfo)
-        {
-            WorldPacket packet(CMSG_QUESTGIVER_ACCEPT_QUEST, 8 + 4 + 4);
-            packet << item_guid;
-            packet << questid;
-            packet << uint32(0);
-            bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(packet);
-            std::ostringstream out; out << "Got quest " << chat->formatQuest(qInfo);
-            ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-            return true;
-        }
-    }
-
-#ifdef MANGOSBOT_ZERO
-    WorldPacket packet(CMSG_USE_ITEM);
-    packet << bagIndex << slot << spell_index;
-#endif
-#ifdef MANGOSBOT_ONE
-    WorldPacket packet(CMSG_USE_ITEM);
-    packet << bagIndex << slot << spell_index << cast_count << item_guid;
-#endif
-#ifdef MANGOSBOT_TWO
-    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-    {
-        if (item->GetProto()->Spells[i].SpellId > 0)
-        {
-            spellId = item->GetProto()->Spells[i].SpellId;
-            break;
-        }
-    }
-
-    WorldPacket packet(CMSG_USE_ITEM, 1 + 1 + 1 + 4 + 8 + 4 + 1 + 8 + 1);
-    packet << bagIndex << slot << cast_count << spellId << item_guid << glyphIndex << unk_flags;
-#endif
-
-    packet << targetFlag;
-    packet.appendPackGUID(bot->GetObjectGuid());
-
-    SetDuration(sPlayerbotAIConfig.globalCoolDown);
-    if (isFood || isDrink)
-    {
-        if (sServerFacade.IsInCombat(bot))
-            return false;
-
-        bot->addUnitState(UNIT_STAND_STATE_SIT);
-        ai->InterruptSpell();
-        ai->StopMoving();
-
-        float hp = bot->GetHealthPercent();
-        float mp = bot->GetPower(POWER_MANA) * 100.0f / bot->GetMaxPower(POWER_MANA);
-        float p;
-        if (isDrink && isFood)
-        {
-            p = std::min(hp, mp);
-            TellConsumableUse(requester, item, "Feasting", p);
-        }
-        else if (isDrink)
-        {
-            p = mp;
-            TellConsumableUse(requester, item, "Drinking", p);
-        }
-        else if (isFood)
-        {
-            p = hp;
-            TellConsumableUse(requester, item, "Eating", p);
-        }
-        
-        bool waitForWellFed = false;
-        for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-        {
-            if (proto->Spells[i].SpellId > 0)
-            {
-                if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(proto->Spells[i].SpellId))
-                {
-                    for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
-                    {
-                        if (spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellInfo->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_TRIGGER_SPELL)
-                        {
-                            waitForWellFed = true;
-                            break;
-                        }
-                    }
-                }
-            }
+            ai->TellPlayerNoFacing(requester, BOT_TEXT("use_command_socket_error"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
 
-        if(!bot->IsInCombat())
-        {
-            const float multiplier = bot->InBattleGround() ? 20000.0f : 27000.0f;
-            const float duration = waitForWellFed ? 15000.0f : multiplier * ((100 - p) / 100.0f);
-            SetDuration(duration);
-        }
-    }
-
-    bot->GetSession()->HandleUseItemOpcode(packet);
-    return true;
-
-   //return UseItem(item, ObjectGuid(), nullptr);
-}
-
-bool UseItemAction::UseItemOnGameObject(Player* requester, Item* item, ObjectGuid go)
-{
-   return UseItem(requester, item, go, nullptr);
-}
-
-bool UseItemAction::UseItemOnItem(Player* requester, Item* item, Item* itemTarget)
-{
-    return UseItem(requester, item, ObjectGuid(), itemTarget);
-}
-
-bool UseItemAction::UseItemOnTarget(Player* requester, Item* item, Unit* target)
-{
-    return UseItem(requester, item, ObjectGuid(), nullptr, target);
-}
-
-bool UseItemAction::UseItem(Player* requester, Item* item, ObjectGuid goGuid, Item* itemTarget, Unit* unitTarget)
-{
-    if (bot->CanUseItem(item) != EQUIP_ERR_OK)
         return false;
-
-    if (bot->IsNonMeleeSpellCasted(true))
-        return false;
-
-    uint8 bagIndex = item->GetBagSlot();
-    uint8 slot = item->GetSlot();
-    uint8 spell_index = 0;
-    uint8 cast_count = 1;
-    uint32 spellId = 0;
-
-#ifndef MANGOSBOT_TWO
-    ObjectGuid item_guid = item->GetObjectGuid();
-#else
-    ObjectGuid item_guid = item->GetObjectGuid();
-#endif
-
-    uint32 glyphIndex = 0;
-    uint8 unk_flags = 0;
-
-#ifdef MANGOSBOT_ZERO
-    uint16 targetFlag = TARGET_FLAG_SELF;
-#else
-    uint32 targetFlag = TARGET_FLAG_SELF;
-#endif
-
-    if (itemTarget)
-    {
-        for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-        {
-            if (item->GetProto()->Spells[i].SpellId > 0)
-            {
-                spellId = item->GetProto()->Spells[i].SpellId;
-                spell_index = i;
-                break;
-            }
-        }
     }
-
-#ifdef MANGOSBOT_ZERO
-    WorldPacket packet(CMSG_USE_ITEM);
-    packet << bagIndex << slot << spell_index;
-#elif MANGOSBOT_ONE
-    WorldPacket packet(CMSG_USE_ITEM);
-    packet << bagIndex << slot << spell_index << cast_count << item_guid;
-#elif MANGOSBOT_TWO
-    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-    {
-        if (item->GetProto()->Spells[i].SpellId > 0)
-        {
-            spellId = item->GetProto()->Spells[i].SpellId;
-            break;
-        }
-    }
-
-    WorldPacket packet(CMSG_USE_ITEM, 1 + 1 + 1 + 4 + 8 + 4 + 1 + 8 + 1);
-    packet << bagIndex << slot << cast_count << spellId << item_guid << glyphIndex << unk_flags;
-#endif
-
-    bool targetSelected = false;
-
-    std::map<std::string, std::string> replyArgs;
-    replyArgs["%target"] = chat->formatItem(item);
-    std::ostringstream replyStr; replyStr << BOT_TEXT("use_command");
-
-    if ((int)item->GetProto()->Stackable > 1)
-    {
-        uint32 count = item->GetCount();
-        if (count > 1)
-        {
-            replyArgs["%amount"] = count;
-            replyStr << " " << BOT_TEXT("use_command_remaining");
-        }
-        else
-        {
-            replyStr << " " << BOT_TEXT("use_command_last");
-        }
-    }
-
-    if (goGuid)
-    {
-        GameObject* go = ai->GetGameObject(goGuid);
-        if (!go || !sServerFacade.isSpawned(go))
-        {
-            return false;
-        }
-
-        targetFlag = TARGET_FLAG_GAMEOBJECT;
-        packet << targetFlag;
-        packet.appendPackGUID(goGuid.GetRawValue());
-
-        replyArgs["%gameobject"] = chat->formatGameobject(go);
-        replyStr << " " << BOT_TEXT("use_command_target_go");
-
-        targetSelected = true;
-    }
-
-    if (itemTarget)
-    {
-#ifndef MANGOSBOT_ZERO
-        if (item->GetProto()->Class == ITEM_CLASS_GEM)
-        {
-            bool fit = SocketItem(requester, itemTarget, item) || SocketItem(requester, itemTarget, item, true);
-            if (!fit)
-            {
-                ai->TellPlayer(requester, BOT_TEXT("use_command_socket_error"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-            }
-
-            return fit;
-        }
-        else
-        {
-#endif
-            targetFlag = TARGET_FLAG_ITEM;
-            packet << targetFlag;
-            packet.appendPackGUID(itemTarget->GetObjectGuid());
-
-            replyArgs["%item"] = chat->formatItem(itemTarget);
-            replyStr << " " << BOT_TEXT("command_target_item");
-
-            targetSelected = true;
-#ifndef MANGOSBOT_ZERO
-        }
-#endif
-    }
-
-    if (!targetSelected && !selfOnly)
-    {
-        // Prevent using a item target spell on a unit target
-        bool needsItemTarget = false;
-        for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; i++)
-        {
-            spellId = item->GetProto()->Spells[i].SpellId;
-            if (spellId > 0)
-            {
-                const SpellEntry* const pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
-                if (pSpellInfo->Targets & TARGET_FLAG_ITEM)
-                {
-                    needsItemTarget = true;
-                    unitTarget = nullptr;
-                }
-
-                break;
-            }
-        }
-        
-        if(!needsItemTarget)
-        {
-            if (unitTarget)
-            {
-                if (item->IsTargetValidForItemUse(unitTarget))
-                {
-                    targetFlag = TARGET_FLAG_UNIT;
-                    packet << targetFlag << unitTarget->GetObjectGuid().WriteAsPacked();
-
-                    replyArgs["%unit"] = unitTarget->GetName();
-                    replyStr << " " << BOT_TEXT("command_target_unit");
-
-                    targetSelected = true;
-                }
-            }
-            else
-            {
-                if (!targetSelected && requester && ai->HasActivePlayerMaster())
-                {
-                    ObjectGuid requesterSelection = requester->GetSelectionGuid();
-                    if (requesterSelection)
-                    {
-                        Unit* unit = ai->GetUnit(requesterSelection);
-                        if (unit && item->IsTargetValidForItemUse(unit))
-                        {
-                            targetFlag = TARGET_FLAG_UNIT;
-                            packet << targetFlag << requesterSelection.WriteAsPacked();
-
-                            replyArgs["%unit"] = unit->GetName();
-                            replyStr << " " << BOT_TEXT("command_target_unit");
-
-                            targetSelected = true;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (unitTarget)
-    {
-        uint32 spellid = 0;
-        for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-        {
-            if (item->GetProto()->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
-            {
-                spellid = item->GetProto()->Spells[i].SpellId;
-                spell_index = i;
-                break;
-            }
-        }
-
-        if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellid))
-        {
-            if (!bot->IsSpellReady(spellid, item->GetProto()))
-                return false;
-
-            if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
-            {
-                targetFlag = TARGET_FLAG_DEST_LOCATION;
-                Position pos = unitTarget->GetPosition();
-                SpellCastTargets targets;
-                targets.setDestination(pos.x, pos.y, pos.z);
-                targets.m_targetMask = TARGET_FLAG_DEST_LOCATION;
-
-                const auto spell = new Spell(bot, spellInfo, false, bot->GetObjectGuid());
-                spell->m_targets = targets;
-                if (spell->CheckRange(true) != SPELL_CAST_OK)
-                {
-                    delete spell;
-                    return false;
-                }
-
-                delete spell;
-
-#ifdef MANGOSBOT_ZERO
-                bot->CastItemUseSpell(item, targets, spell_index);
-#elif MANGOSBOT_ONE
-                bot->CastItemUseSpell(item, targets, 1, spell_index);
-#elif MANGOSBOT_TWO
-                bot->CastItemUseSpell(item, targets, 1, 0, spellid);
-#endif
-
-                return true;
-            }
-        }
-    }
-
-    if (uint32 questid = item->GetProto()->StartQuest)
-    {
-        Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
-        if (qInfo)
-        {
-            WorldPacket packet(CMSG_QUESTGIVER_ACCEPT_QUEST, 8 + 4 + 4);
-            packet << item_guid;
-            packet << questid;
-            packet << uint32(0);
-            bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(packet);
-
-            std::map<std::string, std::string> args;
-            args["%quest"] = chat->formatQuest(qInfo);
-            ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_quest_accepted", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-            return true;
-        }
-    }
-
-    //bot->clearUnitState(UNIT_STAT_CHASE);
-    //bot->clearUnitState(UNIT_STAT_FOLLOW);
-
-    if (sServerFacade.isMoving(bot))
-    {
-        ai->StopMoving();
-    }
-
-    for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; i++)
-    {
-        spellId = item->GetProto()->Spells[i].SpellId;
-        if (!spellId)
-            continue;
-
-        bool canCast = false;
-
-        if (unitTarget && ai->CanCastSpell(spellId, unitTarget, 0, false))
-            canCast = true;
-
-        if (!canCast && goGuid)
-        {
-            GameObject* go = ai->GetGameObject(goGuid);
-
-            if (go)
-            {
-                if (ai->CanCastSpell(spellId, go, 0, false))
-                    canCast = true;
-            }
-        }
-        if (!canCast && ai->CanCastSpell(spellId, bot, 0, false))
-            canCast = true;
-
-        if (!canCast)
-            return false;
-
-        const SpellEntry* const pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
-        if (pSpellInfo->Targets & TARGET_FLAG_ITEM)
-        {
-            Item* itemForSpell = AI_VALUE2(Item*, "item for spell", spellId);
-            if (!itemForSpell)
-                continue;
-
-            if (itemForSpell->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
-                continue;
-
-            if (bot->GetTrader())
-            {
-                if (selfOnly)
-                    return false;
-
-                targetFlag = TARGET_FLAG_TRADE_ITEM;
-                packet << targetFlag << (uint8)1 << (uint64)TRADE_SLOT_NONTRADED;
-                targetSelected = true;
-                replyStr << " " << BOT_TEXT("command_target_trade");
-            }
-            else
-            {
-                targetFlag = TARGET_FLAG_ITEM;
-                packet << targetFlag;
-                packet.appendPackGUID(itemForSpell->GetObjectGuid());
-                targetSelected = true;
-
-                replyArgs["%item"] = chat->formatItem(itemForSpell);
-                replyStr << " " << BOT_TEXT("command_target_item");
-            }
-
-            Spell *spell = new Spell(bot, pSpellInfo, false);
-            ai->WaitForSpellCast(spell);
-            delete spell;
-        }
-        break;
-    }
-
-    if (!targetSelected)
-    {
-        targetFlag = TARGET_FLAG_SELF;
-        packet << targetFlag;
-        packet.appendPackGUID(bot->GetObjectGuid());
-        targetSelected = true;
-        replyStr << " " << BOT_TEXT("command_target_self");
-    }
-
-    if (!spellId)
-       return false;
-
-    SetDuration(sPlayerbotAIConfig.globalCoolDown);
-    ai->TellPlayerNoFacing(requester, BOT_TEXT2(replyStr.str(), replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-
-    bot->GetSession()->HandleUseItemOpcode(packet);
-    return true;
 }
-
-void UseItemAction::TellConsumableUse(Player* requester, Item* item, std::string action, float percent)
-{
-    std::ostringstream out;
-    out << action << " " << chat->formatItem(item);
-    if ((int)item->GetProto()->Stackable > 1) out << "/x" << item->GetCount();
-    out << " (" << round(percent) << "%)";
-    ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-}
-
-#ifndef MANGOSBOT_ZERO
-bool UseItemAction::SocketItem(Player* requester, Item* item, Item* gem, bool replace)
-{
-   WorldPacket* const packet = new WorldPacket(CMSG_SOCKET_GEMS);
-   *packet << item->GetObjectGuid();
-
-   bool fits = false;
-   for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
-   {
-      uint8 SocketColor = item->GetProto()->Socket[enchant_slot - SOCK_ENCHANTMENT_SLOT].Color;
-      GemPropertiesEntry const* gemProperty = sGemPropertiesStore.LookupEntry(gem->GetProto()->GemProperties);
-      if (gemProperty && (gemProperty->color & SocketColor))
-      {
-         if (fits)
-         {
-            *packet << ObjectGuid();
-            continue;
-         }
-
-         uint32 enchant_id = item->GetEnchantmentId(EnchantmentSlot(enchant_slot));
-         if (!enchant_id)
-         {
-            *packet << gem->GetObjectGuid();
-            fits = true;
-            continue;
-         }
-
-         SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-         if (!enchantEntry || !enchantEntry->GemID)
-         {
-            *packet << gem->GetObjectGuid();
-            fits = true;
-            continue;
-         }
-
-         if (replace && enchantEntry->GemID != gem->GetProto()->ItemId)
-         {
-            *packet << gem->GetObjectGuid();
-            fits = true;
-            continue;
-         }
-
-      }
-
-      *packet << ObjectGuid();
-   }
-
-   if (fits)
-   {
-      std::ostringstream out; out << "Socketing " << chat->formatItem(item);
-      out << " with " << chat->formatItem(gem);
-      ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-
-      bot->GetSession()->HandleSocketOpcode(*packet);
-   }
-   return fits;
-}
-
 #endif
 
 bool UseItemIdAction::Execute(Event& event)
 {
-    uint32 itemId;
-    Unit* target = nullptr;
-    GameObject* go = nullptr;
+    Player* requester = event.getOwner();
+    MakeVerbose(requester != nullptr);
+
+    uint32 itemId = 0;
+    Unit* unitTarget = nullptr;
+    GameObject* gameObjectTarget = nullptr;
 
     if (getQualifier().empty())
     {
         itemId = GetItemId();
-        target = GetTarget();
+        unitTarget = GetTarget();
         std::string params = event.getParam();
         std::list<ObjectGuid> gos = chat->parseGameobjects(params);
         if (!gos.empty())
-            GameObject* go = ai->GetGameObject(*gos.begin());
+        {
+            gameObjectTarget = ai->GetGameObject(*gos.begin());
+        }
     }
     else
     {
@@ -1038,30 +836,38 @@ bool UseItemIdAction::Execute(Event& event)
             {
                 GuidPosition guidP = *guidPs.begin();
                 if (guidP.IsGameObject())
-                    go = guidP.GetGameObject();
+                {
+                    gameObjectTarget = guidP.GetGameObject();
+                }
                 else
-                    target = guidP.GetUnit();
-
+                {
+                    unitTarget = guidP.GetUnit();
+                }
             }
         }
     }
 
-    return CastItemSpell(itemId, target, go);
+    if (gameObjectTarget)
+    {
+        return UseItem(requester, itemId, gameObjectTarget);
+    }
+    else
+    {
+        return UseItem(requester, itemId, unitTarget);
+    }
 }
 
 bool UseItemIdAction::isPossible()
 {
     uint32 itemId = GetItemId();
-
     if (!itemId)
         return false;
 
     ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-
     if (!proto)
         return false;
 
-    if (HasSpellCooldown(itemId))
+    if (HasItemCooldown(itemId))
         return false;
 
     if (!ai->HasCheat(BotCheatMask::item) && !bot->HasItemCount(itemId, 1))
@@ -1095,122 +901,6 @@ bool UseItemIdAction::isPossible()
     }
 
     return spellCount;
-}
-
-bool UseItemIdAction::HasSpellCooldown(const uint32 itemId)
-{
-    ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-
-    if (!proto)
-        return false;
-
-    uint32 spellId = 0;
-    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-    {
-        if (proto->Spells[i].SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
-        {
-            continue;
-        }
-
-        if (proto->Spells[i].SpellId > 0)
-        {
-            if (!sServerFacade.IsSpellReady(bot, proto->Spells[i].SpellId))
-                return true;
-
-            if (!sServerFacade.IsSpellReady(bot, proto->Spells[i].SpellId, itemId))
-                return true;
-        }
-    }
-
-    return false;
-}
-
-bool UseItemIdAction::CastItemSpell(uint32 itemId, Unit* target, GameObject* goTarget)
-{
-    ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-
-    if (!proto)
-        return false;
-
-    Item* item = nullptr;
-
-    if (!ai->HasCheat(BotCheatMask::item)) //If bot has no item cheat it needs an item to cast.
-    {
-        std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", chat->formatQItem(itemId));
-
-        if (items.empty())
-            return false;
-
-        item = items.front();
-    }
-
-    SpellCastTargets targets;
-    if (target)
-    {
-        targets.setUnitTarget(target);
-        targets.setDestination(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
-    }
-    if (goTarget)
-    {
-        targets.setGOTarget(goTarget);
-        targets.m_targetMask = TARGET_FLAG_GAMEOBJECT;
-        targets.setDestination(goTarget->GetPositionX(), goTarget->GetPositionY(), goTarget->GetPositionZ());
-    }
-    else
-        targets.m_targetMask = TARGET_FLAG_SELF;
-        
-    // use triggered flag only for items with many spell casts and for not first cast
-    int count = 0;
-
-    for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-    {
-        _Spell const& spellData = proto->Spells[i];
-
-        // no spell
-        if (!spellData.SpellId)
-            continue;
-
-        // wrong triggering type
-#ifdef MANGOSBOT_ZERO
-        if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE && spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_NO_DELAY_USE)
-#else
-        if (spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
-#endif
-            continue;
-
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellData.SpellId);
-        if (!spellInfo)
-        {
-            continue;
-        }
-
-        if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
-            targets.m_targetMask = TARGET_FLAG_DEST_LOCATION;
-
-        BotUseItemSpell* spell = new BotUseItemSpell(bot, spellInfo, (count > 0) ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
-
-        Item* tItem = nullptr;       
-
-        if (item)
-        {
-            spell->SetCastItem(item);
-            item->SetUsedInSpell(true);
-        }
-
-        spell->m_clientCast = true;
-
-        bool result = (spell->ForceSpellStart(&targets) == SPELL_CAST_OK);
-
-        if (!result)
-            return false;
-
-        bot->RemoveSpellCooldown(*spellInfo, false);
-        bot->AddCooldown(*spellInfo, proto, false);
-
-        ++count;
-    }
-
-    return count;
 }
 
 bool UseItemIdAction::isUseful()
@@ -1268,7 +958,7 @@ bool UseHearthStoneAction::Execute(Event& event)
 
     ai->RemoveShapeshift();
 
-    const bool used = UseItemAction::Execute(event);
+    const bool used = UseAction::Execute(event);
     if (used)
     {
         RESET_AI_VALUE(bool, "combat::self target");
@@ -1317,7 +1007,7 @@ bool UseRandomRecipeAction::Execute(Event& event)
 
     Event rEvent = Event(name, recipeName);
 
-    return UseItemAction::Execute(rEvent);
+    return UseAction::Execute(rEvent);
 }
 
 bool UseRandomQuestItemAction::isUseful()
@@ -1327,8 +1017,9 @@ bool UseRandomQuestItemAction::isUseful()
 
 bool UseRandomQuestItemAction::Execute(Event& event)
 {
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     Unit* unitTarget = nullptr;
-    ObjectGuid goTarget = ObjectGuid();
+    GameObject* goTarget = nullptr;
 
     std::list<Item*> questItems = AI_VALUE2(std::list<Item*>, "inventory items", "quest");
     if (questItems.empty())
@@ -1341,8 +1032,7 @@ bool UseRandomQuestItemAction::Execute(Event& event)
         std::advance(itr, urand(0, questItems.size()- 1));
         Item* questItem = *itr;
 
-        ItemPrototype const* proto = questItem->GetProto();
-
+        const ItemPrototype* proto = questItem->GetProto();
         if (proto->StartQuest)
         {
             Quest const* qInfo = sObjectMgr.GetQuestTemplate(proto->StartQuest);
@@ -1400,14 +1090,23 @@ bool UseRandomQuestItemAction::Execute(Event& event)
         */
     }
 
-    if (!item)
-        return false;
+    bool success = false;
+    if (item)
+    {
+        if (goTarget)
+        {
+            success = UseItem(requester, item->GetEntry(), goTarget);
+        }
+        else
+        {
+            success = UseItem(requester, item->GetEntry(), unitTarget);
+        }
+    }
 
-    bool used = UseItem(nullptr, item, goTarget, nullptr, unitTarget);
-    if (used)
+    if (success)
     {
         SetDuration(sPlayerbotAIConfig.globalCoolDown);
     }
 
-    return used;
+    return success;
 }

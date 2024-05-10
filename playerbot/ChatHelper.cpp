@@ -282,25 +282,50 @@ uint32 ChatHelper::parseMoney(std::string& text)
     return copper;
 }
 
-ItemIds ChatHelper::parseItems(std::string& text)
+ItemIds ChatHelper::parseItems(const std::string& text, bool validate, bool parseItemNames)
 {
-    ItemIds itemIds;
+    std::vector<uint32> itemIDsUnordered = parseItemsUnordered(text, validate, parseItemNames);
+    return ItemIds(itemIDsUnordered.begin(), itemIDsUnordered.end());
+}
 
-    uint8 pos = 0;
-    while (true)
+std::vector<uint32> ChatHelper::parseItemsUnordered(const std::string& text, bool validate, bool parseItemNames)
+{
+    // Replace all item links with item ids
+    std::string textCpy = text;
+    if (textCpy.find("Hitem:") != -1)
     {
-        int i = text.find("Hitem:", pos);
-        if (i == -1)
-            break;
-        pos = i + 6;
-        int endPos = text.find(':', pos);
-        if (endPos == -1)
-            break;
-        std::string idC = text.substr(pos, endPos - pos);
-        uint32 id = atol(idC.c_str());
-        pos = endPos;
-        if (id)
-            itemIds.insert(id);
+        std::vector<std::string> itemLinks = findSubstringsBetween(textCpy, "|c", "|r", true);
+        for (const std::string& itemLink : itemLinks)
+        {
+            std::vector<std::string> itemIDs = findSubstringsBetween(itemLink, "Hitem:", ":");
+            if (!itemIDs.empty())
+            {
+                replaceSubstring(textCpy, itemLink, itemIDs[0]);
+            }
+        }
+    }
+
+    std::vector<uint32> itemIds;
+    for (const std::string& itemStr : splitString(textCpy, " "))
+    {
+        if (isNumeric(itemStr))
+        {
+            const uint32 itemID = std::stoi(itemStr);
+            if (!validate || sObjectMgr.GetItemPrototype(itemID) != nullptr)
+            {
+                itemIds.push_back(std::stoi(itemStr));
+            }
+        }
+        else if (parseItemNames)
+        {
+            std::string itemName = itemStr;
+            WorldDatabase.escape_string(itemName);
+            auto queryResult = WorldDatabase.PQuery("SELECT entry FROM item_template WHERE name LIKE '%s'", itemName.c_str());
+            if (queryResult)
+            {
+                itemIds.push_back(queryResult->Fetch()->GetUInt16());
+            }
+        }
     }
 
     return itemIds;
@@ -862,4 +887,73 @@ std::vector<uint32> ChatHelper::SpellIds(const std::string& name)
         return {};
 
     return spells->second;
+}
+
+std::vector<std::string> ChatHelper::splitString(const std::string& text, const std::string& delimiter)
+{
+    std::vector<std::string> tokens;
+
+    if (text.empty())
+    {
+        return tokens;
+    }
+
+    if (delimiter.empty()) 
+    {
+        tokens.push_back(text);
+        return tokens;
+    }
+
+    std::size_t pos = 0;
+    std::size_t found;
+
+    while ((found = text.find(delimiter, pos)) != std::string::npos)
+    {
+        tokens.push_back(text.substr(pos, found - pos));
+        pos = found + delimiter.length();
+    }
+
+    tokens.push_back(text.substr(pos)); // Last token
+
+    return tokens;
+}
+
+std::vector<std::string> ChatHelper::findSubstringsBetween(const std::string& input, const std::string& start, const std::string& end, bool includeDelimiters)
+{
+    std::vector<std::string> substrings;
+    size_t startPos = 0;
+    size_t endPos;
+
+    while ((startPos = input.find(start, startPos)) != std::string::npos) 
+    {
+        startPos += start.length();
+        endPos = input.find(end, startPos);
+        if (endPos == std::string::npos) 
+        {
+            break;
+        }
+
+        if (includeDelimiters) 
+        {
+            substrings.push_back(input.substr(startPos - start.length(), (endPos - (startPos - start.length())) + end.length()));
+        }
+        else 
+        {
+            substrings.push_back(input.substr(startPos, endPos - startPos));
+        }
+
+        startPos = endPos + end.length();
+    }
+
+    return substrings;
+}
+
+void ChatHelper::replaceSubstring(std::string& str, const std::string& oldStr, const std::string& newStr)
+{
+    size_t pos = str.find(oldStr);
+    while (pos != std::string::npos) 
+    {
+        str.replace(pos, oldStr.length(), newStr);
+        pos = str.find(oldStr, pos + newStr.length());
+    }
 }

@@ -360,6 +360,7 @@ bool RpgDuelAction::Execute(Event& event)
 
 bool RpgItemAction::Execute(Event& event)
 {
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     GuidPosition guidP = AI_VALUE(GuidPosition, "rpg target"), objectGuidP;
 
     if (sServerFacade.isMoving(bot))
@@ -369,20 +370,32 @@ bool RpgItemAction::Execute(Event& event)
         return true;
     }
 
-    Unit* unit = nullptr;
-
+    GameObject* gameObjectTarget = nullptr;
+    Unit* unitTarget = nullptr;
     if (guidP.IsUnit())
-        unit = guidP.GetUnit();
+    {
+        unitTarget = guidP.GetUnit();
+    }
+    else if (guidP.IsGameObject())
+    {
+        gameObjectTarget = guidP.GetGameObject();
+    }
 
     std::list<Item*> questItems = AI_VALUE2(std::list<Item*>, "inventory items", "quest");
 
     bool used = false;
-
-    for (auto item : questItems)
+    for (Item* item : questItems)
     {
         if (AI_VALUE2(bool, "can use item on", Qualified::MultiQualify({ std::to_string(item->GetProto()->ItemId),guidP.to_string() }, ",")))
         {
-            used = UseItem(GetMaster(), item, guidP.IsGameObject() ? guidP : ObjectGuid(), nullptr, unit);
+            if (gameObjectTarget)
+            {
+                used = UseItem(requester, item->GetEntry(), gameObjectTarget);
+            }
+            else
+            {
+                used = UseItem(requester, item->GetEntry(), unitTarget);
+            }
         }
     }
 

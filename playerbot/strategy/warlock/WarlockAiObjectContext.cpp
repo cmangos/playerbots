@@ -514,7 +514,7 @@ namespace ai
             static Action* create_healthstone(PlayerbotAI* ai) { return new CastCreateHealthstoneAction(ai); }
             static Action* create_firestone(PlayerbotAI* ai) { return new CastCreateFirestoneAction(ai); }
             static Action* create_spellstone(PlayerbotAI* ai) { return new CastCreateSpellstoneAction(ai); }
-            static Action* spellstone(PlayerbotAI* ai) { return new UseSpellItemAction(ai, "spellstone", true); }
+            static Action* spellstone(PlayerbotAI* ai) { return new UseSpellItemAction(ai, "spellstone"); }
             static Action* summon_voidwalker(PlayerbotAI* ai) { return new CastSummonVoidwalkerAction(ai); }
             static Action* summon_felguard(PlayerbotAI* ai) { return new CastSummonFelguardAction(ai); }
             static Action* inferno(PlayerbotAI* ai) { return new CastSummonInfernoAction(ai); }

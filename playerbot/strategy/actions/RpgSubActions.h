@@ -290,10 +290,10 @@ namespace ai
         virtual bool Execute(Event& event);
     };
 
-    class RpgItemAction : public UseItemAction, public RpgEnabled
+    class RpgItemAction : public UseAction, public RpgEnabled
     {
     public:
-        RpgItemAction(PlayerbotAI* ai, std::string name = "rpg item") : UseItemAction(ai, name), RpgEnabled(ai) {}
+        RpgItemAction(PlayerbotAI* ai, std::string name = "rpg item") : UseAction(ai, name), RpgEnabled(ai) {}
 
         //Long range is possible?
         virtual bool isPossible() { return rpg->guidP() && rpg->guidP().GetWorldObject(); }

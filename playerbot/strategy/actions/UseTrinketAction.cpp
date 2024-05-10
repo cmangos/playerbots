@@ -9,7 +9,7 @@ using namespace ai;
 
 bool UseTrinketAction::Execute(Event& event)
 {
-	Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+	Player* requester = event.getOwner();
 	std::list<Item*> trinkets = AI_VALUE(std::list<Item*>, "trinkets on use");
 	for (Item* item : trinkets)
 	{
@@ -18,7 +18,7 @@ bool UseTrinketAction::Execute(Event& event)
 		{
 			if (bot->CanUseItem(item) == EQUIP_ERR_OK && !item->IsInTrade())
 			{
-				return UseItemAuto(requester, item);
+				return UseItem(requester, item->GetEntry());
 			}
 		}
 	}

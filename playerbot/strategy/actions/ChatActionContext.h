@@ -269,7 +269,7 @@ namespace ai
         static Action* trade(PlayerbotAI* ai) { return new TradeAction(ai); }
 
         static Action* item_count(PlayerbotAI* ai) { return new TellItemCountAction(ai); }
-        static Action* use(PlayerbotAI* ai) { return new UseItemAction(ai); }
+        static Action* use(PlayerbotAI* ai) { return new UseAction(ai); }
         static Action* repair(PlayerbotAI* ai) { return new RepairAllAction(ai); }
         static Action* taxi(PlayerbotAI* ai) { return new TaxiAction(ai); }
         static Action* teleport(PlayerbotAI* ai) { return new TeleportAction(ai); }

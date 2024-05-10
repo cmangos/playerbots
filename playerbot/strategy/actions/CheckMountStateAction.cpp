@@ -439,7 +439,7 @@ bool CheckMountStateAction::Mount(Player* requester)
                 continue;
             }
 
-            if (UseItemAuto(requester, mount.GetItem()))
+            if (UseItem(requester, mount.GetItem()->GetEntry()))
             {
                 SetDuration(3000U); // 3s
                 didMount = true;

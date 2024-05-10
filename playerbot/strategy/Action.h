@@ -76,7 +76,7 @@ namespace ai
         virtual Unit* GetTarget();
         virtual Value<Unit*>* GetTargetValue();
         virtual std::string GetTargetName() { return "self target"; }
-        void MakeVerbose() { verbose = true; }
+        void MakeVerbose(bool enabled) { verbose = enabled; }
 
         void setRelevance(float relevance1) { relevance = relevance1; };
         virtual float getRelevance() { return relevance; }

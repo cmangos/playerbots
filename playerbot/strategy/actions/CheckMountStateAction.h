@@ -7,10 +7,10 @@
 
 namespace ai
 {
-    class CheckMountStateAction : public UseItemAction 
+    class CheckMountStateAction : public UseAction 
     {
     public:
-        CheckMountStateAction(PlayerbotAI* ai) : UseItemAction(ai, "check mount state", true) {}
+        CheckMountStateAction(PlayerbotAI* ai) : UseAction(ai, "check mount state") {}
 
         virtual bool Execute(Event& event) override;
         virtual bool isPossible() { return true; }

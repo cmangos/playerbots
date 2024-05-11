@@ -2093,6 +2093,9 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
                     return true;
                 if ((zoneId == 215) && bot->getRace() != RACE_TAUREN)
                     return true;
+                // redridge / duskwood
+                if ((zoneId == 44 || zoneId == 10) && bot->GetTeam() != ALLIANCE)
+                    return true;
 #ifndef MANGOSBOT_ZERO
                 if ((zoneId == 3524 || zoneId == 3525) && bot->getRace() != RACE_DRAENEI)
                     return true;

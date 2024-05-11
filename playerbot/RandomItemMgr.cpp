@@ -3040,6 +3040,7 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
 
     // skip missing skills
     if (info->reqSkill && player->GetSkillValue(info->reqSkill) < info->reqSkillRank)
+        return 0;
 
     // skip no stats trinkets
     if (info->weights[specId] == 1 && info->quality > ITEM_QUALITY_RARE && (

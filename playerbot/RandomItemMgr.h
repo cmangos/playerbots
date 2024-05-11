@@ -58,7 +58,7 @@ struct WeightScaleStat
 
 struct ItemInfoEntry
 {
-    ItemInfoEntry() : minLevel(0), itemLevel(0), source(0), sourceId(0), team(0), repRank(0), repFaction(0), reqSkill(0), reqSkillRank(0), pvpRank(0), quality(0), slot(0), itemId(0)
+    ItemInfoEntry() : minLevel(0), itemLevel(0), source(0), team(0), repRank(0), repFaction(0), reqSkill(0), reqSkillRank(0), pvpRank(0), quality(0), slot(0), itemId(0)
     {
         for (int i = 1; i <= MAX_STAT_SCALES; ++i)
         {
@@ -71,7 +71,7 @@ struct ItemInfoEntry
     uint32 minLevel;
     uint32 itemLevel;
     uint32 source;
-    uint32 sourceId;
+    std::list<uint32> sourceIds;
     uint32 team;
     uint32 repRank;
     uint32 repFaction;

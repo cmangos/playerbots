@@ -2447,9 +2447,12 @@ std::vector<Player*> PlayerbotAI::GetPlayersInGroup()
     return members;
 }
 
-bool PlayerbotAI::TellPlayerNoFacing(Player* player, std::string text, PlayerbotSecurityLevel securityLevel, bool isPrivate, bool noRepeat)
+bool PlayerbotAI::TellPlayerNoFacing(Player* player, std::string text, PlayerbotSecurityLevel securityLevel, bool isPrivate, bool noRepeat, bool ignoreSilent)
 {
     if(!player)
+        return false;
+
+    if (!ignoreSilent && HasStrategy("silent", BotState::BOT_STATE_NON_COMBAT))
         return false;
 
     time_t lastSaid = whispers[text];
@@ -2464,9 +2467,10 @@ bool PlayerbotAI::TellPlayerNoFacing(Player* player, std::string text, Playerbot
         if (!isPrivate && bot->GetGroup())
         {
             recievers = GetPlayersInGroup();
-
             if(!recievers.empty())
+            {
                 type = bot->GetGroup()->IsRaidGroup() ? CHAT_MSG_RAID : CHAT_MSG_PARTY;
+            }
         }
 
         if (type == CHAT_MSG_SYSTEM && HasRealPlayerMaster())
@@ -2477,44 +2481,59 @@ bool PlayerbotAI::TellPlayerNoFacing(Player* player, std::string text, Playerbot
 
         WorldPacket data;
 
-        switch (type) {
-        case CHAT_MSG_SAY:
-            bot->Say(text, (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
-            return true;
-        case CHAT_MSG_RAID:
-        case CHAT_MSG_PARTY:
-            ChatHandler::BuildChatPacket(data, type, text.c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
+        switch (type) 
+        {
+            case CHAT_MSG_SAY:
+            {
+                bot->Say(text, (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+                return true;
+            }
 
-            for (auto reciever : recievers)
-                sServerFacade.SendPacket(reciever, data);
+            case CHAT_MSG_RAID:
+            case CHAT_MSG_PARTY:
+            {
+                ChatHandler::BuildChatPacket(data, type, text.c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
 
-            return true;
-        case CHAT_MSG_WHISPER:
-            if (!IsTellAllowed(player, securityLevel))
-                return false;
+                for (auto reciever : recievers)
+                {
+                    sServerFacade.SendPacket(reciever, data);
+                }
 
-            if (!HasRealPlayerMaster())
-                return false;
+                return true;
+            }
 
-            whispers[text] = time(0);
+            case CHAT_MSG_WHISPER:
+            {
+                if (!IsTellAllowed(player, securityLevel))
+                    return false;
 
-            if (currentChat.second >= time(0))
-               type = currentChat.first;
+                if (!HasRealPlayerMaster())
+                    return false;
 
-            if (type == CHAT_MSG_ADDON)
-                text = "BOT\t" + text;
+                whispers[text] = time(0);
 
-            ChatHandler::BuildChatPacket(data, type == CHAT_MSG_ADDON ? CHAT_MSG_PARTY : type, text.c_str(), type == CHAT_MSG_ADDON ? LANG_ADDON : LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
-            sServerFacade.SendPacket(player, data);
+                if (currentChat.second >= time(0))
+                   type = currentChat.first;
+
+                if (type == CHAT_MSG_ADDON)
+                    text = "BOT\t" + text;
+
+                ChatHandler::BuildChatPacket(data, type == CHAT_MSG_ADDON ? CHAT_MSG_PARTY : type, text.c_str(), type == CHAT_MSG_ADDON ? LANG_ADDON : LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
+                sServerFacade.SendPacket(player, data);
+                return true;
+            }
         }
     }
 
     return true;
 }
 
-bool PlayerbotAI::TellError(Player* player, std::string text, PlayerbotSecurityLevel securityLevel)
+bool PlayerbotAI::TellError(Player* player, std::string text, PlayerbotSecurityLevel securityLevel, bool ignoreSilent)
 {
     if (!IsTellAllowed(player, securityLevel) || !IsSafe(player) || player->GetPlayerbotAI())
+        return false;
+
+    if (!ignoreSilent && HasStrategy("silent", BotState::BOT_STATE_NON_COMBAT))
         return false;
 
     PlayerbotMgr* mgr = player->GetPlayerbotMgr();
@@ -2539,9 +2558,9 @@ bool PlayerbotAI::IsTellAllowed(Player* player, PlayerbotSecurityLevel securityL
     return true;
 }
 
-bool PlayerbotAI::TellPlayer(Player* player, std::string text, PlayerbotSecurityLevel securityLevel, bool isPrivate)
+bool PlayerbotAI::TellPlayer(Player* player, std::string text, PlayerbotSecurityLevel securityLevel, bool isPrivate, bool ignoreSilent)
 {
-    if (!TellPlayerNoFacing(player, text, securityLevel, isPrivate))
+    if (!TellPlayerNoFacing(player, text, securityLevel, isPrivate, ignoreSilent))
         return false;
 
     if (player && !player->IsBeingTeleported() && !sServerFacade.isMoving(bot) && !sServerFacade.IsInCombat(bot) && bot->GetMapId() == player->GetMapId() && !bot->IsTaxiFlying() && !bot->IsFlying())

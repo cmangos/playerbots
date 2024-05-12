@@ -114,6 +114,9 @@ bool SayAction::isUseful()
     if (!ai->AllowActivity())
         return false;
 
+    if (ai->HasStrategy("silent", BotState::BOT_STATE_NON_COMBAT))
+        return false;
+
     time_t lastSaid = AI_VALUE2(time_t, "last said", qualifier);
     return (time(0) - lastSaid) > 30;
 }
@@ -689,4 +692,9 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
         }
         bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
     }
+}
+
+bool ChatReplyAction::isUseful()
+{
+    return !ai->HasStrategy("silent", BotState::BOT_STATE_NON_COMBAT);
 }

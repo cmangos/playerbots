@@ -820,7 +820,7 @@ void Engine::PrintStrategies(Player* requester, const std::string& engineType)
     std::string engineStrategies = engineType;
     engineStrategies.append(" Strategies: ");
     engineStrategies.append(ListStrategies());
-    ai->TellPlayer(requester, engineStrategies);
+    ai->TellPlayer(requester, engineStrategies, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, true);
 }
 
 void Engine::LogValues()

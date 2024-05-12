@@ -333,11 +333,11 @@ public:
     static GameObject* GetGameObject(GameObjectDataPair const* gameObjectDataPair);
     WorldObject* GetWorldObject(ObjectGuid guid);
     std::vector<Player*> GetPlayersInGroup();
-    bool TellPlayer(Player* player, std::ostringstream &stream, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true) { return TellPlayer(player, stream.str(), securityLevel, isPrivate); }
-    bool TellPlayer(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true);
-    bool TellPlayerNoFacing(Player* player, std::ostringstream& stream, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool noRepeat = true) { return TellPlayerNoFacing(player, stream.str(), securityLevel, isPrivate, noRepeat); }
-    bool TellPlayerNoFacing(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool noRepeat = true);
-    bool TellError(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL);
+    bool TellPlayer(Player* player, std::ostringstream &stream, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool ignoreSilent = false) { return TellPlayer(player, stream.str(), securityLevel, isPrivate, ignoreSilent); }
+    bool TellPlayer(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool ignoreSilent = false);
+    bool TellPlayerNoFacing(Player* player, std::ostringstream& stream, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool noRepeat = true, bool ignoreSilent = false) { return TellPlayerNoFacing(player, stream.str(), securityLevel, isPrivate, noRepeat, ignoreSilent); }
+    bool TellPlayerNoFacing(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool noRepeat = true, bool ignoreSilent = false);
+    bool TellError(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool ignoreSilent = false);
     void SpellInterrupted(uint32 spellid);
     int32 CalculateGlobalCooldown(uint32 spellid);
     void InterruptSpell(bool withMeleeAndAuto = true);

@@ -138,6 +138,7 @@ namespace ai
             creators["heal interrupt"] = &StrategyContext::heal_interrupt;
             creators["preheal"] = &StrategyContext::preheal;
             creators["wbuff"] = &StrategyContext::world_buff;
+            creators["silent"] = &StrategyContext::silent;
 
             // Dungeon Strategies
             creators["dungeon"] = &StrategyContext::dungeon;
@@ -237,6 +238,7 @@ namespace ai
         static Strategy* heal_interrupt(PlayerbotAI* ai) { return new HealInterruptStrategy(ai); }
         static Strategy* preheal(PlayerbotAI* ai) { return new PreHealStrategy(ai); }
         static Strategy* world_buff(PlayerbotAI* ai) { return new WorldBuffStrategy(ai); }
+        static Strategy* silent(PlayerbotAI* ai) { return new SilentStrategy(ai); }
 
         // Dungeon Strategies
         static Strategy* dungeon(PlayerbotAI* ai) { return new DungeonStrategy(ai); }

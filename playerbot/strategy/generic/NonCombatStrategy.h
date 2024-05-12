@@ -55,4 +55,12 @@ namespace ai
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void OnStrategyRemoved(BotState state) override;
     };
+
+    class SilentStrategy : public Strategy
+    {
+    public:
+        SilentStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "silent"; }
+    };
 }

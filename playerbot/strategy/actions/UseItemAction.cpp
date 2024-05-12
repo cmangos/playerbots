@@ -425,6 +425,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unitTarg
         
         if (!validTarget)
         {
+            targets.setUnitTarget(bot);
             targets.m_targetMask = TARGET_FLAG_SELF;
             validTarget = true;
         }

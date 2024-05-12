@@ -308,6 +308,9 @@ std::vector<uint32> ChatHelper::parseItemsUnordered(const std::string& text, boo
     std::vector<uint32> itemIds;
     for (const std::string& itemStr : splitString(textCpy, " "))
     {
+        if (itemStr.empty())
+            continue;
+
         if (isNumeric(itemStr))
         {
             const uint32 itemID = std::stoi(itemStr);

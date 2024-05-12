@@ -30,7 +30,6 @@ bool KeepItemAction::Execute(Event& event)
 
     if (ids.empty())
     {
-
         IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BANK);
 
         std::list<Item*> found = ai->InventoryParseItems(text, mask);

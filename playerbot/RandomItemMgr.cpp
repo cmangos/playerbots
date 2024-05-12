@@ -1414,7 +1414,7 @@ void RandomItemMgr::BuildItemInfoCache()
         stmt.addUInt32(cacheInfo->quality);
         stmt.addUInt32(cacheInfo->slot);
         stmt.addUInt32(cacheInfo->source);
-        stmt.addUInt32(cacheInfo->sourceIds.front());
+        stmt.addUInt32(cacheInfo->sourceIds.empty() ? 0 : cacheInfo->sourceIds.front());
         stmt.addUInt32(cacheInfo->team);
         stmt.addUInt32(cacheInfo->repFaction);
         stmt.addUInt32(cacheInfo->repRank);

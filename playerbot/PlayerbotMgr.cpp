@@ -523,6 +523,18 @@ std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid,
                 factory.UpgradeGear(syncWithMaster);
                 return "gear upgraded";
             }
+            if (cmd == "equip=best" || cmd == "gear=best")
+            {
+                PlayerbotFactory factory(bot, bot->GetLevel());
+                factory.EquipGearBest();
+                return "random best gear equipped";
+            }
+            if (cmd == "equip=partial" || cmd == "gear=partial")
+            {
+                PlayerbotFactory factory(bot, bot->GetLevel());
+                factory.EquipGearPartialUpgrade();
+                return "random gear upgraded to some slots";
+            }
             if (cmd == "train" || cmd == "learn")
             {
 #ifndef MANGOSBOT_ONE

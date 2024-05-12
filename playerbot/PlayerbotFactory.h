@@ -56,6 +56,8 @@ public:
     void InitSkills();
     void EnchantEquipment();
     void EquipGear() { return InitEquipment(false, false); }
+    void EquipGearBest() { return InitEquipment(false, false, false); }
+    void EquipGearPartialUpgrade() { return InitEquipment(false, false, true, true); }
     void UpgradeGear(bool syncWithMaster) { return InitEquipment(!syncWithMaster, syncWithMaster); }
     void AddReagents() { return InitReagents(); }
     void AddPotions() { return InitPotions(); }
@@ -68,7 +70,7 @@ public:
 private:
     void Prepare();
     void InitSecondEquipmentSet();
-    void InitEquipment(bool incremental, bool syncWithMaster);
+    void InitEquipment(bool incremental, bool syncWithMaster, bool progressive = sPlayerbotAIConfig.randomGearProgression, bool partialUpgrade = false);
     void InitEquipmentNew(bool incremental);
     bool CanEquipItem(ItemPrototype const* proto, uint32 desiredQuality);
     bool CanEquipUnseenItem(uint8 slot, uint16 &dest, uint32 item);

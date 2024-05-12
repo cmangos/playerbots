@@ -284,7 +284,11 @@ INSERT INTO `ai_playerbot_weightscale_data` (`id`, `field`, `val`) VALUES
 	(10, 'mledps', 10),
 	(11, 'mledps', 10),
 	(1, 'mledps', 28),
-	(2, 'mledps', 28);
+	(2, 'mledps', 28),
+	(15, 'int', 2),
+	(15, 'spi', 1),
+	(15, 'manargn', 1),
+	(22, 'spi', 1);
 /*!40000 ALTER TABLE `ai_playerbot_weightscale_data` ENABLE KEYS */;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

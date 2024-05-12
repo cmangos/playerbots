@@ -1467,7 +1467,7 @@ bool PlayerbotFactory::CanEquipItem(ItemPrototype const* proto, uint32 desiredQu
     return true;
 }
 
-void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster)
+void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool progressive, bool partialUpgrade)
 {
     uint32 oldGS = ai->GetEquipGearScore(bot, false, false);
     uint32 masterGS = 0;
@@ -1489,7 +1489,11 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster)
 
     // choose type of weapon
     uint32 weaponType = 0;
-    if (bot->GetLevel() > 40 && (bot->getClass() == CLASS_PRIEST || bot->getClass() == CLASS_MAGE || bot->getClass() == CLASS_WARLOCK || bot->getClass() == CLASS_SHAMAN || specId == 29 || specId == 31))
+#ifdef MANGOSBOT_ZERO
+    if (bot->GetLevel() > 40 && (bot->getClass() == CLASS_PRIEST || bot->getClass() == CLASS_MAGE || bot->getClass() == CLASS_WARLOCK || specId == 20 || specId == 22 || specId == 29 || specId == 31))
+#else
+    if (bot->GetLevel() > 40 && (bot->getClass() == CLASS_PRIEST || bot->getClass() == CLASS_MAGE || bot->getClass() == CLASS_WARLOCK || specId == 20 || specId == 21 || specId == 22 || specId == 29 || specId == 31))
+#endif
     {
         weaponType = sRandomPlayerbotMgr.GetValue(bot, "weaponType");
         if (!weaponType || !incremental)
@@ -1500,64 +1504,64 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster)
     }
 
     // update only limited amount of slots with worst items
-    //map<uint32, bool> upgradeSlots;
-    //if (incremental)
-    //{
-    //    std::vector<uint32> emptySlots;
-    //    std::vector<uint32> itemIds;
-    //    std::map<uint32, uint32> itemSlots;
-    //    uint32 maxSlots = urand(1, 4);
-    //    for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
-    //        upgradeSlots[slot] = false;
+    std::map<uint32, bool> upgradeSlots;
+    if (incremental && partialUpgrade)
+    {
+        std::vector<uint32> emptySlots;
+        std::vector<uint32> itemIds;
+        std::map<uint32, uint32> itemSlots;
+        uint32 maxSlots = urand(1, 4);
+        for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
+            upgradeSlots[slot] = false;
 
-    //    for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
-    //    {
-    //        if (slot == EQUIPMENT_SLOT_TABARD/* && !bot->GetGuildId()*/ || slot == EQUIPMENT_SLOT_TRINKET1 || slot == EQUIPMENT_SLOT_TRINKET2)
-    //            continue;
+        for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
+        {
+            if (slot == EQUIPMENT_SLOT_TABARD/* && !bot->GetGuildId()*/ || slot == EQUIPMENT_SLOT_BODY || slot == EQUIPMENT_SLOT_TRINKET1 || slot == EQUIPMENT_SLOT_TRINKET2)
+                continue;
 
-    //        Item* oldItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
-    //        if (!oldItem)
-    //        {
-    //            emptySlots.push_back(slot);
-    //            continue;
-    //        }
+            Item* oldItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            if (!oldItem)
+            {
+                emptySlots.push_back(slot);
+                continue;
+            }
 
-    //        ItemPrototype const* proto = oldItem->GetProto();
-    //        if (proto)
-    //        {
-    //            if (proto->ItemLevel >= sPlayerbotAIConfig.randomGearMaxLevel)
-    //                continue;
+            ItemPrototype const* proto = oldItem->GetProto();
+            if (proto)
+            {
+                if (proto->ItemLevel > sPlayerbotAIConfig.randomGearMaxLevel)
+                    continue;
 
-    //            itemIds.push_back(proto->ItemId);
-    //            itemSlots[proto->ItemId] = slot;
-    //        }
-    //    }
+                itemIds.push_back(proto->ItemId);
+                itemSlots[proto->ItemId] = slot;
+            }
+        }
 
-    //    std::sort(itemIds.begin(), itemIds.end(), [specId](int a, int b)
-    //        {
-    //            ItemPrototype const* proto1 = sObjectMgr.GetItemPrototype(a);
-    //            ItemPrototype const* proto2 = sObjectMgr.GetItemPrototype(b);
-    //            return proto1->Quality * proto1->ItemLevel <= proto2->Quality * proto2->ItemLevel;
-    //        });
+        std::sort(itemIds.begin(), itemIds.end(), [specId](int a, int b)
+            {
+                ItemPrototype const* proto1 = sObjectMgr.GetItemPrototype(a);
+                ItemPrototype const* proto2 = sObjectMgr.GetItemPrototype(b);
+                return proto1->Quality * proto1->ItemLevel <= proto2->Quality * proto2->ItemLevel;
+            });
 
-    //    uint32 counter = 0;
-    //    for (auto emptySlot : emptySlots)
-    //    {
-    //        if (counter > maxSlots)
-    //            break;
+        uint32 counter = 0;
+        for (auto emptySlot : emptySlots)
+        {
+            if (counter > maxSlots)
+                break;
 
-    //        upgradeSlots[emptySlot] = true;
-    //        counter++;
-    //    }
-    //    for (auto itemId : itemIds)
-    //    {
-    //        if (counter > maxSlots)
-    //            break;
+            upgradeSlots[emptySlot] = true;
+            counter++;
+        }
+        for (auto itemId : itemIds)
+        {
+            if (counter > maxSlots)
+                break;
 
-    //        upgradeSlots[itemSlots[itemId]] = true;
-    //        counter++;
-    //    }
-    //}
+            upgradeSlots[itemSlots[itemId]] = true;
+            counter++;
+        }
+    }
 
     // unavailable legendaries list
     std::vector<uint32> lockedItems;
@@ -1595,13 +1599,13 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster)
         if (slot == EQUIPMENT_SLOT_END || slot == EQUIPMENT_SLOT_TABARD)
             continue;
 
-        /*if (incremental && upgradeSlots.size() && upgradeSlots[slot] != true && !(slot == EQUIPMENT_SLOT_TRINKET1 || slot == EQUIPMENT_SLOT_TRINKET2))
-            continue;*/
+        if (incremental && upgradeSlots.size() && upgradeSlots[slot] != true && !(slot == EQUIPMENT_SLOT_TRINKET1 || slot == EQUIPMENT_SLOT_TRINKET2))
+            continue;
 
         uint32 searchLevel = level;
         uint32 quality = ITEM_QUALITY_POOR;
         uint32 maxItemLevel = sPlayerbotAIConfig.randomGearMaxLevel;
-        bool progressiveGear = sPlayerbotAIConfig.randomGearProgression;
+        bool progressiveGear = progressive;
         if(syncWithMaster && ai->GetMaster())
         {
             maxItemLevel = masterGS + sPlayerbotAIConfig.randomGearMaxDiff;
@@ -1714,7 +1718,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster)
                     if (proto->MaxCount && bot->HasItemCount(proto->ItemId, proto->MaxCount))
                         continue;
 
-                    if (proto->ItemLevel > sPlayerbotAIConfig.randomGearMaxLevel)
+                    if (proto->ItemLevel > maxItemLevel)
                         continue;
 
                     Item* oldItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
@@ -1787,7 +1791,11 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster)
                     }
 
                     // add weapons for dual wield
+#ifdef MANGOSBOT_ZERO
+                    if (slot == EQUIPMENT_SLOT_MAINHAND && (bot->getClass() == CLASS_ROGUE || specId == 2))
+#else
                     if (slot == EQUIPMENT_SLOT_MAINHAND && (bot->getClass() == CLASS_ROGUE || specId == 2 || specId == 21))
+#endif
                     {
                         std::vector<uint32> oneHanded = sRandomItemMgr.Query(level, bot->getClass(), uint8(specId), EQUIPMENT_SLOT_OFFHAND, q);
                         if (oneHanded.size())
@@ -2019,11 +2027,11 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster)
                 }
             }
 
-            if (/*!incremental && */quality == ITEM_QUALITY_EPIC)
+            if (!found && quality > ITEM_QUALITY_NORMAL)
                 quality--;
 
             attempts++;
-        } while (!found && attempts < 2/* && (progressiveGear ? (quality != ITEM_QUALITY_ARTIFACT) : (quality != ITEM_QUALITY_POOR))*/);
+        } while (!found && attempts < 3 && quality != ITEM_QUALITY_POOR);
         if (!found)
         {
             if (slot != EQUIPMENT_SLOT_TRINKET1 && slot != EQUIPMENT_SLOT_TRINKET2)

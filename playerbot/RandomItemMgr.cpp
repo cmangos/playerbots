@@ -1034,7 +1034,9 @@ void RandomItemMgr::BuildItemInfoCache()
             strstr(proto->Name1, "Unused ") ||
             strstr(proto->Name1, "Monster ") ||
             strstr(proto->Name1, "[PH]") ||
-            strstr(proto->Name1, "(OLD)")
+            strstr(proto->Name1, "(OLD)") ||
+            strstr(proto->Name1, "zzz") ||
+            strstr(proto->Name1, "ZZZ")
             )
             continue;
 
@@ -1640,7 +1642,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
         uint32 effectAuraHealStatWeight = 0;
         uint32 effectAuraDamageStatWeight = 0;
 
-        for (uint32 j = 0; j < MAX_EFFECT_INDEX; j++)
+        for (uint8 j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
             if ((spellproto->Effect[j] == SPELL_EFFECT_APPLY_AURA) &&
                 (spellproto->EffectBasePoints[j] >= 0))
@@ -2984,6 +2986,10 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
                 // check if quest is inactive (if linked to a not running game event)
                 if (!quest->IsActive())
                     canDoQuest = false;
+
+                // can be rewarded
+                if (canDoQuest)
+                    break;
             }
         }
         if (!canDoQuest)
@@ -3043,7 +3049,7 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
         return 0;
 
     // skip no stats trinkets
-    if (info->weights[specId] == 1 && info->quality > ITEM_QUALITY_RARE && (
+    if (info->weights[specId] == 1 && (
         info->slot == EQUIPMENT_SLOT_NECK ||
         info->slot == EQUIPMENT_SLOT_TRINKET1 ||
         info->slot == EQUIPMENT_SLOT_TRINKET2 ||
@@ -3088,9 +3094,7 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
 
 void RandomItemMgr::BuildEquipCache()
 {
-    uint32 maxLevel = sPlayerbotAIConfig.randomBotMaxLevel;
-    if (maxLevel > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
-        maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
+    uint32 maxLevel = DEFAULT_MAX_LEVEL;
 
     auto results = CharacterDatabase.PQuery("select clazz, spec, lvl, slot, quality, item from ai_playerbot_equip_cache");
     if (results)
@@ -3196,7 +3200,7 @@ void RandomItemMgr::BuildEquipCache()
                                     continue;
 
                                 // only accept "useless" items if bot level <= 30
-                                if (statWeight == 1 && level > 20)
+                                if (statWeight == 1 && level > 30)
                                     continue;
 
                                 uint32 minLevel = GetMinLevelFromCache(itemId);

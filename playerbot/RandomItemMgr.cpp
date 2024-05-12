@@ -2980,7 +2980,7 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
             if (quest)
             {
                 // only class quests player could do
-                if (player->SatisfyQuestClass(quest, false) && !player->SatisfyQuestRace(quest, false) && !player->SatisfyQuestLevel(quest, false))
+                if (player->SatisfyQuestClass(quest, false) && player->SatisfyQuestRace(quest, false) && player->SatisfyQuestLevel(quest, false))
                     canDoQuest = true;
 
                 // check if quest is inactive (if linked to a not running game event)

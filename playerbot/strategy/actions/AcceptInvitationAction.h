@@ -11,7 +11,6 @@ namespace ai
 
         virtual bool Execute(Event& event)
         {
-            Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             Group* grp = bot->GetGroupInvite();
             if (!grp)
                 return false;
@@ -80,7 +79,7 @@ namespace ai
                 value->Load(masterFormation->getName());
             }
 
-            ai->TellPlayer(requester, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            ai->TellPlayer(inviter, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 
             ai->DoSpecificAction("reset raids", event, true);
             ai->DoSpecificAction("update gear", event, true);

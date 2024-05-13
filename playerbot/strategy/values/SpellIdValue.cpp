@@ -212,7 +212,7 @@ uint32 VehicleSpellIdValue::Calculate()
         if (pSpellInfo) namepart = pSpellInfo->SpellName[0];
     }
 
-    wstring wnamepart;
+    std::wstring wnamepart;
 
     if (!Utf8toWStr(namepart, wnamepart))
         return 0;

@@ -852,10 +852,10 @@ bool LfgJoinAction::JoinLFG()
         list.insert(dungeon->id);
     }
 
-    if (!selected.size())
+    if (selected.empty())
         return false;
 
-    if (std::list.empty())
+    if (list.empty())
         return false;
 
     bool many = list.size() > 1;

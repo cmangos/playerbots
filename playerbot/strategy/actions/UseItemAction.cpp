@@ -176,13 +176,25 @@ bool UseAction::Execute(Event& event)
     else
     {
         std::vector<uint32> items = chat->parseItemsUnordered(name, false, true);
+
+        if (items.empty())
+        {
+            std::list<Item*> inventoryItems = AI_VALUE2(std::list<Item*>, "inventory items", name);
+            for (Item* inventoryItem : inventoryItems)
+            {
+                if (inventoryItem)
+                {
+                    items.push_back(inventoryItem->GetEntry());
+                }
+            }
+        }
+
         if (!items.empty())
         {
-            itemID = *items.begin();
+            itemID = items[0];
             if (items.size() > 1)
             {
-                const uint32 targetItemID = *std::next(items.begin(), 1);
-                targetItem = bot->GetItemByEntry(targetItemID);
+                targetItem = bot->GetItemByEntry(items[1]);
             }
         }
 

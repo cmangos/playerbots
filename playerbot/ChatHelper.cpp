@@ -300,7 +300,9 @@ std::vector<uint32> ChatHelper::parseItemsUnordered(const std::string& text, boo
             std::vector<std::string> itemIDs = findSubstringsBetween(itemLink, "Hitem:", ":");
             if (!itemIDs.empty())
             {
-                replaceSubstring(textCpy, itemLink, itemIDs[0]);
+                std::ostringstream itemIDWithSpaces;
+                itemIDWithSpaces << " " << itemIDs[0] << " ";
+                replaceSubstring(textCpy, itemLink, itemIDWithSpaces.str());
             }
         }
     }
@@ -309,7 +311,9 @@ std::vector<uint32> ChatHelper::parseItemsUnordered(const std::string& text, boo
     for (const std::string& itemStr : splitString(textCpy, " "))
     {
         if (itemStr.empty())
+        {
             continue;
+        }
 
         if (isNumeric(itemStr))
         {

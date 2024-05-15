@@ -223,6 +223,7 @@ bool SeeSpellAction::MoveToSpell(Player* requester, WorldPosition& spellPosition
 
         stayPosition.Set(spellPosition.getX(), spellPosition.getY(), spellPosition.getZ(), spellPosition.getMapId());
         posMap["stay"] = stayPosition;
+        posMap["return"] = stayPosition;
     }
     else if (ai->HasStrategy("guard", ai->GetState()))
     {
@@ -231,6 +232,7 @@ bool SeeSpellAction::MoveToSpell(Player* requester, WorldPosition& spellPosition
 
         guardPosition.Set(spellPosition.getX(), spellPosition.getY(), spellPosition.getZ(), spellPosition.getMapId());
         posMap["guard"] = guardPosition;
+        posMap["return"] = guardPosition;
     }
     else if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && requester)
     {
@@ -246,6 +248,7 @@ bool SeeSpellAction::MoveToSpell(Player* requester, WorldPosition& spellPosition
 
             followPosition.Set(spellPosition.getX(), spellPosition.getY(), spellPosition.getZ(), spellPosition.getMapId());
             posMap["follow"] = followPosition;
+            posMap["return"] = followPosition;
         }
     }
 

@@ -30,8 +30,8 @@ namespace ai
         static std::string formatItem(ItemPrototype const * proto, int count = 0, int total = 0);
         static std::string formatItem(Item* item, int count = 0, int total = 0);
         static std::string formatQItem(uint32 itemId);
-        static ItemIds parseItems(const std::string& text, bool validate = false, bool parseItemNames = false);
-        static std::vector<uint32> parseItemsUnordered(const std::string& text, bool validate = false, bool parseItemNames = false);
+        static ItemIds parseItems(const std::string& text, bool validate = false);
+        static std::vector<uint32> parseItemsUnordered(const std::string& text, bool validate = false);
         static std::set<std::string> parseItemQualifiers(std::string& text);
         static uint32 parseItemQuality(std::string text);
         static bool parseItemClass(std::string text, uint32* itemClass, uint32* itemSubClass);

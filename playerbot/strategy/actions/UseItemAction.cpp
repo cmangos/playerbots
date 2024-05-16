@@ -175,8 +175,7 @@ bool UseAction::Execute(Event& event)
     }
     else
     {
-        std::vector<uint32> items = chat->parseItemsUnordered(name, false, true);
-
+        std::vector<uint32> items = chat->parseItemsUnordered(name, false);
         if (items.empty())
         {
             std::list<Item*> inventoryItems = AI_VALUE2(std::list<Item*>, "inventory items", name);

@@ -146,27 +146,35 @@ namespace ai
         Unit* Calculate() override;
     };
 
-    class FocusHealTargetValue : public ManualSetValue<std::list<ObjectGuid>>
+    class FriendlyManualTargetsValue : public ManualSetValue<std::list<ObjectGuid>>
     {
     public:
-        FocusHealTargetValue(PlayerbotAI* ai) : ManualSetValue<std::list<ObjectGuid>>(ai, {}) {}
+        FriendlyManualTargetsValue(PlayerbotAI* ai) : ManualSetValue<std::list<ObjectGuid>>(ai, {}) {}
+        std::list<ObjectGuid> Get() override;
+        std::list<ObjectGuid> LazyGet() override;
     };
 
-    class BoostTargetsValue : public ManualSetValue<std::list<ObjectGuid>>
+    class FocusHealTargetValue : public FriendlyManualTargetsValue
     {
     public:
-        BoostTargetsValue(PlayerbotAI* ai) : ManualSetValue<std::list<ObjectGuid>>(ai, {}) {}
+        FocusHealTargetValue(PlayerbotAI* ai) : FriendlyManualTargetsValue(ai) {}
     };
 
-    class ReviveTargetsValue : public ManualSetValue<std::list<ObjectGuid>>
+    class BoostTargetsValue : public FriendlyManualTargetsValue
     {
     public:
-        ReviveTargetsValue(PlayerbotAI* ai) : ManualSetValue<std::list<ObjectGuid>>(ai, {}) {}
+        BoostTargetsValue(PlayerbotAI* ai) : FriendlyManualTargetsValue(ai) {}
     };
 
-    class BuffTargetsValue : public ManualSetValue<std::list<ObjectGuid>>
+    class ReviveTargetsValue : public FriendlyManualTargetsValue
     {
     public:
-        BuffTargetsValue(PlayerbotAI* ai) : ManualSetValue<std::list<ObjectGuid>>(ai, {}) {}
+        ReviveTargetsValue(PlayerbotAI* ai) : FriendlyManualTargetsValue(ai) {}
+    };
+
+    class BuffTargetsValue : public FriendlyManualTargetsValue
+    {
+    public:
+        BuffTargetsValue(PlayerbotAI* ai) : FriendlyManualTargetsValue(ai) {}
     };
 }

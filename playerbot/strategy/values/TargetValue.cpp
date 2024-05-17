@@ -171,3 +171,27 @@ Unit* ClosestAttackerTargetingMeTargetValue::Calculate()
 
     return result;
 }
+
+std::list<ObjectGuid> FriendlyManualTargetsValue::Get()
+{
+    value.remove_if([&](const ObjectGuid& playerGuid)
+    {
+        Unit* player = ai->GetUnit(playerGuid);
+        if (ai->IsSafe(player))
+        {
+            if (bot->IsInGroup(player))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    });
+
+    return value;
+}
+
+std::list<ObjectGuid> FriendlyManualTargetsValue::LazyGet()
+{
+    return Get();
+}

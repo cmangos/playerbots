@@ -140,6 +140,23 @@ bool BotUseItemSpell::OpenLockCheck()
     return false;
 }
 
+bool IsFoodOrDrink(const ItemPrototype* proto, uint32 spellCategory)
+{
+    return proto->Class == ITEM_CLASS_CONSUMABLE &&
+           (proto->SubClass == ITEM_SUBCLASS_FOOD || proto->SubClass == ITEM_SUBCLASS_CONSUMABLE) &&
+           proto->Spells[0].SpellCategory == spellCategory;
+}
+
+bool IsFood(const ItemPrototype* proto)
+{
+    return IsFoodOrDrink(proto, 11);
+}
+
+bool IsDrink(const ItemPrototype* proto)
+{
+    return IsFoodOrDrink(proto, 59);
+}
+
 bool UseAction::Execute(Event& event)
 {
     Player* requester = event.getOwner();
@@ -273,7 +290,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unitTarg
 
     // If bot has no item cheat (or it is a questgiver item) it needs an item to cast
     Item* item = nullptr;
-    if (!ai->HasCheat(BotCheatMask::item) || proto->StartQuest > 0)
+    if (!ai->HasCheat(BotCheatMask::item) || proto->StartQuest > 0 || itemId == 6948)
     {
         std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatQItem(itemId));
         if (!items.empty())
@@ -367,6 +384,12 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unitTarg
             if (proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass == ITEM_SUBCLASS_EXPLOSIVES) // Explosives
             {
                 spellTargets |= TARGET_FLAG_DEST_LOCATION;
+            }
+
+            // No target
+            if (itemId == 6948) // Hearthstone
+            {
+                validTarget = true;
             }
         }
 
@@ -472,7 +495,16 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unitTarg
             {
                 bot->RemoveSpellCooldown(*spellInfo, false);
                 bot->AddCooldown(*spellInfo, proto, false);
-                SetDuration(ai->GetSpellCastDuration(spell));
+
+                if (IsFood(proto) || IsDrink(proto))
+                {
+                    SetDuration(24000);
+                }
+                else
+                {
+                    SetDuration(ai->GetSpellCastDuration(spell));
+                }
+
                 ++successCasts;
             }
             else

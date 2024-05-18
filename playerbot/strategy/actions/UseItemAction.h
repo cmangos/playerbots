@@ -684,7 +684,7 @@ namespace ai
                 bot->addUnitState(UNIT_STAND_STATE_SIT);
                 ai->InterruptSpell();
 
-                const float hpMissingPct = 100.0f - bot->GetPowerPercent();
+                const float hpMissingPct = 100.0f - bot->GetHealthPercent();
                 const float multiplier = bot->InBattleGround() ? 20000.0f : 27000.0f;
                 const float eatDuration = multiplier * (hpMissingPct / 100.0f);
 

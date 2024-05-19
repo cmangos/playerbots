@@ -156,6 +156,7 @@ class RandomItemMgr
         uint32 GetStatWeight(Player* player, uint32 itemId);
         uint32 GetLiveStatWeight(Player* player, uint32 itemId, uint32 specId = 0);
         uint32 GetStatWeight(uint32 itemId, uint32 specId);
+        uint32 GetBestRandomEnchantStatWeight(uint32 itemId, uint32 specId);
         uint32 GetRandomItem(uint32 level, RandomItemType type, RandomItemPredicate* predicate = NULL);
         uint32 GetAmmo(uint32 level, uint32 subClass);
         uint32 GetRandomPotion(uint32 level, uint32 effect);
@@ -164,6 +165,8 @@ class RandomItemMgr
         uint32 GetRandomTrade(uint32 level);
         std::vector<uint32> GetGemsList();
 
+        uint32 CalculateRandomEnchantId(uint8 playerclass, uint8 spec, ItemPrototype const* proto);
+        uint32 CalculateBestRandomEnchantId(uint8 playerclass, uint8 spec, uint32 itemId);
         uint32 CalculateEnchantWeight(uint8 playerclass, uint8 spec, uint32 enchantId);
         uint32 CalculateRandomPropertyWeight(uint8 playerclass, uint8 spec, int32 randomPropertyId);
         uint32 CalculateGemWeight(uint8 playerclass, uint8 spec, uint32 gemId);
@@ -194,6 +197,7 @@ class RandomItemMgr
         void BuildPotionCache();
         void BuildTradeCache();
         void BuildRarityCache();
+        void LoadRandomEnchantments();
         bool CanEquipItem(BotEquipKey key, ItemPrototype const* proto);
         bool CanEquipItemNew(ItemPrototype const* proto);
         void AddItemStats(uint32 mod, uint8 &sp, uint8 &ap, uint8 &tank);
@@ -214,6 +218,7 @@ class RandomItemMgr
         std::map<uint32, std::string > ItemStatLink;
         std::map<std::string, uint32 > weightRatingLink;
         std::map<uint32, ItemInfoEntry*> itemInfoCache;
+        std::map<uint32, std::vector<uint32> > randomEnchantsCache;
 };
 
 #define sRandomItemMgr RandomItemMgr::instance()

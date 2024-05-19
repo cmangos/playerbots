@@ -1810,8 +1810,8 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                     // sort items based on stat value, ilvl or quality
                     std::sort(ids.begin(), ids.end(), [specId](int a, int b)
                         {
-                            uint32 baseCompareA = sRandomItemMgr.GetStatWeight(a, specId) * 1000;
-                            uint32 baseCompareB = sRandomItemMgr.GetStatWeight(b, specId) * 1000;
+                            uint32 baseCompareA = (sRandomItemMgr.GetStatWeight(a, specId) + sRandomItemMgr.GetBestRandomEnchantStatWeight(a, specId)) * 1000;
+                            uint32 baseCompareB = (sRandomItemMgr.GetStatWeight(b, specId) + sRandomItemMgr.GetBestRandomEnchantStatWeight(b, specId)) * 1000;
                             if (baseCompareA < baseCompareB)
                                 return true;
 
@@ -1939,6 +1939,16 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                     if (newStatValue <= 0)
                         continue;
 
+                    // Add random enchant value (the best one)
+                    uint32 randomEnchBestId = 0;
+                    uint32 randomEnchBestValue = 0;
+                    if (proto->RandomProperty)
+                    {
+                        randomEnchBestId = sRandomItemMgr.CalculateBestRandomEnchantId(bot->getClass(), specId, newItemId);
+                        randomEnchBestValue = sRandomItemMgr.CalculateEnchantWeight(bot->getClass(), specId, randomEnchBestId);
+                        newStatValue += randomEnchBestValue;
+                    }
+
                     // skip off hand if main hand is worse
 #ifdef MANGOSBOT_ZERO
                     if (proto->IsWeapon() && slot == EQUIPMENT_SLOT_OFFHAND && (bot->getClass() == CLASS_ROGUE || specId == 2))
@@ -2008,6 +2018,13 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         Item* pItem = bot->EquipNewItem(eDest, newItemId, true);
                         if (pItem)
                         {
+                            if (randomEnchBestId)
+                            {
+                                // overwrite random generated property
+                                pItem->SetItemRandomProperties(randomEnchBestId);
+                                // update for inspect
+                                bot->SetVisibleItemSlot(pItem->GetSlot(), pItem);
+                            }
                             pItem->SetOwnerGuid(bot->GetObjectGuid());
                             EnchantItem(pItem);
                             //AddGems(pItem);

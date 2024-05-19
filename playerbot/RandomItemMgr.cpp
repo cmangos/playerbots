@@ -12,6 +12,8 @@
 #include "playerbot/ServerFacade.h"
 #include "strategy/values/LootValues.h"
 
+#include "Entities/ItemEnchantmentMgr.h"
+
 char * strstri (const char* str1, const char* str2);
 
 uint64 BotEquipKey::GetKey()
@@ -140,6 +142,7 @@ void RandomItemMgr::Init()
     BuildPotionCache();
     BuildFoodCache();
     BuildTradeCache();
+    LoadRandomEnchantments();
 }
 
 void RandomItemMgr::InitAfterAhBot()
@@ -310,39 +313,6 @@ bool RandomItemMgr::CanEquipItem(BotEquipKey key, ItemPrototype const* proto)
     }
     if (!requiredLevel)
         return false;
-
-    /*if (!requiredLevel)
-        requiredLevel = key.level;*/
-
-    // test
-    return true;
-
-    uint32 level = key.level;
-    uint32 delta = 2;
-    if (level < 15)
-        delta = urand(7, 15);
-    else if (proto->Class == ITEM_CLASS_WEAPON || proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
-        delta = urand(2, 3);
-    else if (!(level % 10) || (level % 10) == 9)
-        delta = 2;
-    else if (level < 40)
-        delta = urand(5, 10);
-    else if (level < 60)
-        delta = urand(3, 7);
-    else if (level < 70)
-        delta = urand(2, 5);
-    else if (level < 80)
-        delta = urand(2, 4);
-
-    if (key.quality > ITEM_QUALITY_NORMAL &&
-            (requiredLevel > level || requiredLevel < (level - delta)))
-        return false;
-
-    for (uint32 gap = 60; gap <= 80; gap += 10)
-    {
-        if (level > gap && requiredLevel <= gap)
-            return false;
-    }
 
     return true;
 }
@@ -1052,11 +1022,11 @@ void RandomItemMgr::BuildItemInfoCache()
             proto->RequiredCityRank > 0)
             continue;*/
 
+#ifndef MANGOSBOT_ZERO
         // skip random enchant items
         if (proto->RandomProperty)
             continue;
 
-#ifndef MANGOSBOT_ZERO
         if (proto->RandomSuffix)
             continue;
 #endif
@@ -1388,6 +1358,10 @@ void RandomItemMgr::BuildItemInfoCache()
                 if (!statW && cacheInfo->slot == EQUIPMENT_SLOT_RANGED && proto->SubClass == ITEM_SUBCLASS_WEAPON_WAND && (clazz == CLASS_PRIEST || clazz == CLASS_MAGE || clazz == CLASS_WARLOCK))
                     statW = 1;
 
+                // Random properties
+                if (!statW && proto->RandomProperty)
+                    statW = 1;
+
                 // set stat weight = 1 for items that can be equipped but have no proper stats
                 //statWeight.weight = statW;
                 // save item statWeight into ItemCache
@@ -1695,7 +1669,6 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
                     // generic spell damage
                     if (spellproto->EffectMiscValue[j] == SPELL_SCHOOL_MASK_MAGIC)
                     {
-                        isSpellDamageItem = true;
                         effectAuraDamageStatWeight += CalculateSingleStatWeight(playerclass, spec, "splpwr", spellDamage);
                     }
                     else
@@ -1715,9 +1688,6 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
 
                         if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_NATURE) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "natsplpwr", spellDamage);
-
-                        if (!isWhitelist && !specialDamage && isSpellDamageItem)
-                            return 0;
 
                         effectAuraDamageStatWeight += specialDamage;
                     }
@@ -2113,6 +2083,70 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
     return statWeight;
 }
 
+uint32 RandomItemMgr::CalculateRandomEnchantId(uint8 playerclass, uint8 spec, ItemPrototype const* proto)
+{
+    if (!proto)
+        return 0;
+
+    // Random Property case
+    if (proto->RandomProperty)
+    {
+        uint32 randomPropId = GetItemEnchantMod(proto->RandomProperty);
+        ItemRandomPropertiesEntry const* random_id = sItemRandomPropertiesStore.LookupEntry(randomPropId);
+        if (!random_id)
+        {
+            sLog.outErrorDb("Enchantment id #%u used but it doesn't have records in 'ItemRandomProperties.dbc'", randomPropId);
+            return 0;
+        }
+
+        // check stats
+        if (CalculateEnchantWeight(playerclass, spec, random_id->ID))
+            return random_id->ID;
+    }
+
+    return 0;
+}
+
+uint32 RandomItemMgr::CalculateBestRandomEnchantId(uint8 playerclass, uint8 spec, uint32 itemId)
+{
+    if (!itemId)
+        return 0;
+
+    ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+    if (!proto)
+        return 0;
+
+    std::map<uint32, std::vector<uint32> >::const_iterator tab = randomEnchantsCache.find(proto->RandomProperty);
+    if (tab == randomEnchantsCache.end())
+        return 0;
+
+    uint32 bestScore = 0;
+    uint32 bestId = 0;
+
+    const std::vector<uint32> propList = tab->second;  
+    for (auto propId : propList)
+    {
+        ItemRandomPropertiesEntry const* random_id = sItemRandomPropertiesStore.LookupEntry(propId);
+        if (!random_id)
+            continue;
+
+        uint32 currScore = 0;
+        for (uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + 3; ++i)
+        {
+            uint32 enchantId = random_id->enchant_id[i - PROP_ENCHANTMENT_SLOT_0];
+            currScore += CalculateEnchantWeight(playerclass, spec, enchantId);
+        }
+
+        if (currScore > bestScore)
+        {
+            bestScore = currScore;
+            bestId = random_id->ID;;
+        }
+    }
+
+    return bestId;
+}
+
 uint32 RandomItemMgr::CalculateEnchantWeight(uint8 playerclass, uint8 spec, uint32 enchantId)
 {
     if (!enchantId)
@@ -2193,9 +2227,6 @@ uint32 RandomItemMgr::CalculateEnchantWeight(uint8 playerclass, uint8 spec, uint
                         if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_NATURE) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "natsplpwr", spellDamage);
 
-                        if (!specialDamage)
-                            return 0;
-
                         weight += specialDamage;
                     }
                 }
@@ -2227,9 +2258,6 @@ uint32 RandomItemMgr::CalculateEnchantWeight(uint8 playerclass, uint8 spec, uint
 
                         if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_NATURE) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "natsplpwr", spellDamage);
-
-                        if (!specialDamage)
-                            return 0;
 
                         weight += specialDamage;
                     }
@@ -2936,6 +2964,42 @@ uint32 RandomItemMgr::GetStatWeight(uint32 itemId, uint32 specId)
     return statWeight;
 }
 
+uint32 RandomItemMgr::GetBestRandomEnchantStatWeight(uint32 itemId, uint32 specId)
+{
+    if (!specId || !itemId)
+        return 0;
+
+    if (!itemInfoCache[itemId])
+        return 0;
+
+    if (!m_weightScales[specId].info.id)
+        return 0;
+
+    uint8 plrClass = 0;
+    uint32 statWeight = 0;
+
+    for (auto itr : m_weightScales)
+    {
+        if (itr.second.info.id == specId)
+            plrClass = itr.second.info.classId;
+    }
+    
+    if (!plrClass)
+        return 0;
+
+    std::map<uint32, ItemInfoEntry*>::iterator itr = itemInfoCache.find(itemId);
+    if (itr != itemInfoCache.end())
+    {
+        uint32 bestEnch = CalculateBestRandomEnchantId(plrClass, specId, itemId);
+        if (bestEnch)
+        {
+            statWeight = CalculateEnchantWeight(plrClass, specId, bestEnch);
+        }
+    }
+
+    return statWeight;
+}
+
 uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 specId)
 {
     if (!player || !itemId)
@@ -3055,10 +3119,6 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
         info->slot == EQUIPMENT_SLOT_TRINKET2 ||
         info->slot == EQUIPMENT_SLOT_FINGER1 ||
         info->slot == EQUIPMENT_SLOT_FINGER2))
-        return 0;
-
-    // skip items that only fit in slot, but not stats
-    if (!itemId && info->weights[specId] == 1 && player->GetLevel() > 20)
         return 0;
 
     // check if item stat score is the best among class specs
@@ -3200,7 +3260,7 @@ void RandomItemMgr::BuildEquipCache()
                                     continue;
 
                                 // only accept "useless" items if bot level <= 30
-                                if (statWeight == 1 && level > 30)
+                                if (statWeight == 1 && level > 30 && !proto->RandomProperty)
                                     continue;
 
                                 uint32 minLevel = GetMinLevelFromCache(itemId);
@@ -3755,6 +3815,36 @@ void RandomItemMgr::BuildRarityCache()
         }
         sLog.outString("Item rarity cache built from %u items", sItemStorage.GetMaxEntry());
     }
+}
+
+void RandomItemMgr::LoadRandomEnchantments()
+{
+    randomEnchantsCache.clear();
+
+    uint32 count = 0;
+    auto queryResult = WorldDatabase.Query("SELECT entry, ench, chance FROM item_enchantment_template");
+
+    if (queryResult)
+    {
+        do
+        {
+            Field* fields = queryResult->Fetch();
+            uint32 entry = fields[0].GetUInt32();
+            uint32 ench = fields[1].GetUInt32();
+            float chance = fields[2].GetFloat();
+
+            if (chance > 0.000001f && chance <= 100.0f)
+                randomEnchantsCache[entry].push_back(ench);
+
+            ++count;
+        } while (queryResult->NextRow());
+
+        sLog.outString(">> Loaded %u Item Enchantment definitions", count);
+    }
+    else
+        sLog.outErrorDb(">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
+
+    sLog.outString();
 }
 
 float RandomItemMgr::GetItemRarity(uint32 itemId)

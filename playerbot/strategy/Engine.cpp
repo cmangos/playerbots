@@ -574,7 +574,7 @@ void Engine::ProcessTriggers(bool minimal)
             continue;
 
         Event& event = fires[trigger];
-        if (!event & (testMode || trigger->needCheck()))
+        if (!event && (testMode || trigger->needCheck()))
         {
             if (minimal && node->getFirstRelevance() < 100)
                 continue;

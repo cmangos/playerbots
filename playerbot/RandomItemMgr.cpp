@@ -1022,15 +1022,6 @@ void RandomItemMgr::BuildItemInfoCache()
             proto->RequiredCityRank > 0)
             continue;*/
 
-#ifndef MANGOSBOT_ZERO
-        // skip random enchant items
-        if (proto->RandomProperty)
-            continue;
-
-        if (proto->RandomSuffix)
-            continue;
-#endif
-
 #ifdef MANGOSBOT_TWO
         // skip heirloom items
         if (proto->Quality == ITEM_QUALITY_HEIRLOOM)

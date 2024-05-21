@@ -498,6 +498,13 @@ bool TankAssistTrigger::IsActive()
     if (!currentTarget)
         return true;
 
+    // do not switch if enemy target
+    Unit* enemy = AI_VALUE(Unit*, "enemy player target");
+    if (enemy)
+    {
+        return currentTarget != enemy;
+    }
+
     Unit* tankTarget = AI_VALUE(Unit*, "tank target");
     if (!tankTarget || currentTarget == tankTarget)
         return false;

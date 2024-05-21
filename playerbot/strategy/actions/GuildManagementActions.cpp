@@ -154,7 +154,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
         {
             std::map<std::string, std::string> placeholders;
             placeholders["%name"] = player->GetName();
-            placeholders["%members"] = guild->GetMemberSize();
+            placeholders["%members"] = std::to_string(guild->GetMemberSize());
             placeholders["%guildname"] = guild->GetName();
             placeholders["%place"] = WorldPosition(player).getAreaName(false, false);
 

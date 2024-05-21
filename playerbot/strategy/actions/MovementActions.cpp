@@ -507,18 +507,26 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 ai->Unmount();
             }
 
-            Spell* spell = new Spell(bot, pSpellInfo, false);
-            SpellCastTargets targets;
-            targets.setUnitTarget(bot);
-#ifdef MANGOS
-            spell->prepare(&targets, NULL);
-#endif
-#ifdef CMANGOS
-            spell->SpellStart(&targets, NULL);
-#endif
-            SpellCastResult castResult = spell->cast(true);
+            std::list<ObjectGuid> gos = *context->GetValue<std::list<ObjectGuid> >("nearest game objects");
+            for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); i++)
+            {
+                GameObject* go = ai->GetGameObject(*i);
+                if (!go)
+                    continue;
 
-            return castResult == SPELL_CAST_OK;
+                if (go->GetEntry() != entry)
+                    continue;
+
+                if (!bot->GetGameObjectIfCanInteractWith(go->GetObjectGuid(), MAX_GAMEOBJECT_TYPE))
+                    continue;
+
+                std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
+                *packet << *i;
+                bot->GetSession()->QueuePacket(std::move(packet));
+                return true;
+            }
+
+            return false;
         }
 
         if (pathType == TravelNodePathType::areaTrigger)

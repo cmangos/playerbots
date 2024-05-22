@@ -427,7 +427,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             }
         }
         
-        if (spellTargets & TARGET_FLAG_GAMEOBJECT && !validTarget)
+        if ((spellTargets & TARGET_FLAG_GAMEOBJECT || spellTargets & TARGET_FLAG_LOCKED) && !validTarget)
         {
             if (gameObject && gameObject->IsSpawned())
             {
@@ -506,8 +506,12 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
 
             if (successCast)
             {
-                bot->RemoveSpellCooldown(*spellInfo, false);
-                bot->AddCooldown(*spellInfo, proto, false);
+                // Only add cooldown if the spell doesn't use a real item
+                if (itemUsed == nullptr)
+                {
+                    bot->RemoveSpellCooldown(*spellInfo, false);
+                    bot->AddCooldown(*spellInfo, proto, false);
+                }
 
                 if (IsFood(proto) || IsDrink(proto))
                 {
@@ -549,7 +553,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             else if (gameObjectTarget)
             {
                 replyArgs["%gameobject"] = chat->formatGameobject(gameObjectTarget);
-                replyStr << " " << BOT_TEXT("use_command_target_go");
+                replyStr << " " << BOT_TEXT("command_target_go");
             }
             else
             {

@@ -150,7 +150,7 @@ void AiObjectContext::Load(std::list<std::string> data)
     {
         std::string row = *i;
         std::vector<std::string> parts = split(row, '>');
-        if (parts.size() == 0 || parts.size() > 2) continue;
+        if (parts.empty() || parts.size() > 2) continue;
 
         std::string name = parts[0];
         std::string text = (parts.size() == 2) ? parts[1] : "";

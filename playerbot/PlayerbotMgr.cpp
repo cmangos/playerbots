@@ -516,6 +516,24 @@ std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid,
                 factory.EquipGear();
                 return "random gear equipped";
             }
+            if (cmd == "gear=green" || cmd == "gear=uncommon")
+            {
+                PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_UNCOMMON);
+                factory.EquipGear();
+                return "random green gear equipped";
+            }
+            if (cmd == "gear=blue" || cmd == "gear=rare")
+            {
+                PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_RARE);
+                factory.EquipGear();
+                return "random blue gear equipped";
+            }
+            if (cmd == "gear=purple" || cmd == "gear=epic")
+            {
+                PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_EPIC);
+                factory.EquipGear();
+                return "random epic gear equipped";
+            }
             if (cmd == "equip=upgrade" || cmd == "gear=upgrade" || cmd == "upgrade" || cmd == "equip=sync")
             {
                 const bool syncWithMaster = cmd == "equip=sync";

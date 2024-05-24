@@ -1690,9 +1690,19 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
 #endif
                 }
             }
-            if (progressiveGear && !incremental && urand(0, 100) < 100 * sPlayerbotAIConfig.randomGearLoweringChance && quality > ITEM_QUALITY_NORMAL) {
+            if (progressiveGear && !incremental && urand(0, 100) < 100 * sPlayerbotAIConfig.randomGearLoweringChance && quality > ITEM_QUALITY_NORMAL)
+            {
                 quality--;
             }
+        }
+
+        
+        // quality selected from command
+        bool setQuality = false;
+        if (itemQuality > 0)
+        {
+            setQuality = true;
+            quality = itemQuality;
         }
 
         bool found = false;
@@ -1754,6 +1764,10 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                 std::vector<uint32> ids;
                 for (uint32 q = quality; q < ITEM_QUALITY_ARTIFACT; ++q)
                 {
+                    // quality selected from command
+                    if (setQuality && q != quality)
+                        continue;
+
                     uint32 currSearchLevel = searchLevel;
                     bool hasProperLevel = false;
                     while (!hasProperLevel && currSearchLevel > 0)
@@ -1835,8 +1849,10 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                     if (!progressiveGear)
                         std::reverse(ids.begin(), ids.end());
                 }
-                else
-                    if (!ids.empty()) ahbot::Shuffle(ids);
+                else if (!ids.empty())
+                {
+                    ahbot::Shuffle(ids);
+                }
 
                 for (uint32 index = 0; index < ids.size(); ++index)
                 {
@@ -2053,7 +2069,9 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
             }
 
             if (!found && quality > ITEM_QUALITY_NORMAL)
+            {
                 quality--;
+            }
 
             attempts++;
         } while (!found && attempts < 3 && quality != ITEM_QUALITY_POOR);

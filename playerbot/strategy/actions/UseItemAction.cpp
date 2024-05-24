@@ -157,6 +157,59 @@ bool IsDrink(const ItemPrototype* proto)
     return IsFoodOrDrink(proto, 59);
 }
 
+bool IsTargetValidForItemUse(uint32 itemID, Unit* target)
+{
+    ItemRequiredTargetMapBounds bounds = sObjectMgr.GetItemRequiredTargetMapBounds(itemID);
+    if (bounds.first == bounds.second)
+    {
+        return true;
+    }
+
+    if (target)
+    {
+        for (ItemRequiredTargetMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            if (itr->second.IsFitToRequirements(target))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool RequiresItemToUse(const ItemPrototype* itemProto, PlayerbotAI* ai, Player* bot)
+{
+    // If no item cheat
+    if (!ai->HasCheat(BotCheatMask::item))
+        return true;
+
+    // Exception items                                  Jujus                                            Holy water
+    const std::unordered_set<uint32> itemExceptions = { 12450, 12451, 12455, 12457, 12458, 12459, 12460, 13180 };
+    if (itemExceptions.find(itemProto->ItemId) != itemExceptions.end())
+        return false;
+
+    // Required items                                  Hearthstone
+    const std::unordered_set<uint32> itemsRequired = { 6948 };
+    if (itemsRequired.find(itemProto->ItemId) != itemsRequired.end())
+        return true;
+
+    // If item must be equipped
+    if (itemProto->InventoryType != INVTYPE_NON_EQUIP)
+        return true;
+
+    // If item starts quest
+    if (itemProto->StartQuest > 0)
+        return true;
+
+    // Quest related items
+    if (itemProto->Class == ITEM_CLASS_QUEST)
+        return true;
+
+    return false;
+}
+
 bool UseAction::Execute(Event& event)
 {
     Player* requester = event.getOwner();
@@ -288,9 +341,9 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
         return false;
     }
 
-    // If bot has no item cheat (or it is a questgiver item) it needs an item to cast
+    // If bot has no item cheat (or other conditions) it needs to own the item to cast
     Item* itemUsed = nullptr;
-    if (!ai->HasCheat(BotCheatMask::item) || proto->StartQuest > 0 || proto->Class == ITEM_CLASS_QUEST || itemId == 6948)
+    if (RequiresItemToUse(proto, ai, bot))
     {
         std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatQItem(itemId));
         if (!items.empty())
@@ -323,6 +376,46 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
         return UseGemItem(requester, item, itemUsed, true);
     }
 #endif
+
+    // Check for item equipped
+    if (proto->InventoryType != INVTYPE_NON_EQUIP && !(itemUsed || !itemUsed->IsEquipped()))
+    {
+        if (verbose)
+        {
+            std::map<std::string, std::string> replyArgs;
+            replyArgs["%item"] = chat->formatItem(proto);
+            ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_item_error", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        }
+
+        return false;
+    }
+
+    // Check for item usable
+    InventoryResult invResult = bot->CanUseItem(proto);
+    if (invResult != EQUIP_ERR_OK)
+    {
+        if (verbose)
+        {
+            std::map<std::string, std::string> replyArgs;
+            replyArgs["%item"] = chat->formatItem(proto);
+            ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_item_error", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        }
+
+        return false;
+    }
+
+    // Check for trade
+    if (itemUsed && itemUsed->IsInTrade())
+    {
+        if (verbose)
+        {
+            std::map<std::string, std::string> replyArgs;
+            replyArgs["%item"] = chat->formatItem(proto);
+            ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_item_error", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        }
+
+        return false;
+    }
 
     // Check for item cooldown
     if (HasItemCooldown(itemId))
@@ -363,6 +456,11 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
 
         const SpellEntry* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellData.SpellId);
         if (!spellInfo)
+        {
+            continue;
+        }
+
+        if (IsNonCombatSpell(spellInfo) && bot->IsInCombat())
         {
             continue;
         }
@@ -419,7 +517,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
         
         if (spellTargets & TARGET_FLAG_UNIT && !validTarget)
         {
-            if (unit)
+            if (unit && IsTargetValidForItemUse(itemId, unit))
             {
                 unitTarget = unit;
                 targets.setUnitTarget(unit);

@@ -251,6 +251,18 @@ bool LootObject::IsLootPossible(Player* bot)
                     }
                 }
             }
+            
+            // herb-like quest objects
+            if (skillId == SKILL_HERBALISM && reqSkillValue == 1)
+            {
+                if (sObjectMgr.IsGameObjectForQuests(guid.GetEntry()))
+                {
+                    if (go->ActivateToQuest(bot))
+                    {
+                        return true;
+                    }
+                }
+            }
         }
     }
 

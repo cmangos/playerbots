@@ -124,7 +124,22 @@ bool OpenLootAction::DoLoot(LootObject& lootObject)
         return ai->HasSkill(SKILL_MINING) ? ai->CastSpell(MINING, bot) : false;
 
     if (lootObject.skillId == SKILL_HERBALISM)
-        return ai->HasSkill(SKILL_HERBALISM) ? ai->CastSpell(HERB_GATHERING, bot) : false;
+    {
+        // herb-like quest objects
+        bool isForQuest = false;
+        if (sObjectMgr.IsGameObjectForQuests(lootObject.guid.GetEntry()))
+        {
+            if (go->ActivateToQuest(bot))
+            {
+                isForQuest = true;
+            }
+        }
+
+        if (!isForQuest)
+        {
+            return ai->HasSkill(SKILL_HERBALISM) ? ai->CastSpell(HERB_GATHERING, bot) : false;
+        }
+    }
 
     uint32 spellId = GetOpeningSpell(lootObject);
     if (!spellId)

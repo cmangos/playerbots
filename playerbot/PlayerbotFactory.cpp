@@ -187,8 +187,16 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
     }
     if (isRealRandomBot)
     {
+        if (bot->GetLevel() > level)
+            bot->SetLevel(level);
+
         InitQuests(specialQuestIds);
         bot->learnQuestRewardedSpells();
+        
+        // clear inventory and set level after getting xp and quest rewards
+        ClearInventory();
+        if (bot->GetLevel() > level)
+            bot->SetLevel(level);
     }
     if (pmo) pmo->finish();
 

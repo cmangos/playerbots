@@ -175,16 +175,14 @@ std::list<uint32> EntryLootListValue::Calculate()
 
 	std::list<uint32> items;
 
-	LootTemplateAccess const* lTemplateA;
-
-	if (entry > 0)
-		lTemplateA = DropMapValue::GetLootTemplate(ObjectGuid(HIGHGUID_UNIT, entry, uint32(1)), LOOT_CORPSE);
-	else
-		lTemplateA = DropMapValue::GetLootTemplate(ObjectGuid(HIGHGUID_GAMEOBJECT, entry, uint32(1)), LOOT_CORPSE);
-
-	if (lTemplateA)
-		for (LootStoreItem const& lItem : lTemplateA->Entries)
-			items.push_back(lItem.itemid);
+	DropMap* dropMap = GAI_VALUE(DropMap*, "drop map");
+	for (auto it = dropMap->begin(); it != dropMap->end(); ++it)
+	{
+		if (it->second == entry)
+		{
+			items.push_back(it->first);
+		}
+	}
 
 	return items;
 }

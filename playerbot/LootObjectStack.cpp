@@ -259,7 +259,15 @@ bool LootObject::IsLootPossible(Player* bot)
                 {
                     if (go->ActivateToQuest(bot))
                     {
-                        return true;
+                        bool hasQuestItems = false;
+                        for (auto& entry : GAI_VALUE2(std::list<uint32>, "entry loot list", -go->GetEntry()))
+                        {
+                            if (IsNeededForQuest(bot, entry))
+                            {
+                                hasQuestItems = true;
+                            }
+                        }
+                        return hasQuestItems || go->GetLootState() != GO_READY;
                     }
                 }
             }

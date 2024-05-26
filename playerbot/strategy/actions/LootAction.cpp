@@ -12,6 +12,7 @@
 #include "playerbot/strategy/values/LootStrategyValue.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/SharedValueContext.h"
 
 
 using namespace ai;
@@ -127,11 +128,12 @@ bool OpenLootAction::DoLoot(LootObject& lootObject)
     {
         // herb-like quest objects
         bool isForQuest = false;
-        if (sObjectMgr.IsGameObjectForQuests(lootObject.guid.GetEntry()))
+        if (go && sObjectMgr.IsGameObjectForQuests(lootObject.guid.GetEntry()))
         {
             if (go->ActivateToQuest(bot))
             {
-                isForQuest = true;
+                std::list<uint32> lootItems = GAI_VALUE2(std::list<uint32>, "entry loot list", -go->GetEntry());
+                isForQuest = !lootItems.empty() || go->GetLootState() != GO_READY;
             }
         }
 

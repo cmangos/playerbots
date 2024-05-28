@@ -588,7 +588,9 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
                 itemUsed->SetUsedInSpell(true);
             }
 
-            if (sServerFacade.isMoving(bot))
+            // Stop the movement for casted items
+            const bool isCastedSpell = spell->GetCastedTime() > 0 || IsChanneledSpell(spellInfo);
+            if (isCastedSpell)
             {
                 ai->StopMoving();
             }

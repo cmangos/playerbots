@@ -15,6 +15,7 @@ public:
         creators["mocking blow"] = &mocking_blow;
         creators["heroic strike"] = &heroic_strike;
         creators["mortal strike"] = &mortal_strike;
+        creators["whirlwind"] = &whirlwind;
     }
 
 private:
@@ -29,6 +30,8 @@ private:
     ACTION_NODE_A(heroic_strike, "heroic strike", "melee");
 
     ACTION_NODE_A(mortal_strike, "mortal strike", "heroic strike");
+
+    ACTION_NODE_P(whirlwind, "whirlwind", "berserker stance");
 };
 
 ArmsWarriorStrategy::ArmsWarriorStrategy(PlayerbotAI* ai) : WarriorStrategy(ai)
@@ -62,6 +65,10 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "overpower",
         NextAction::array(0, new NextAction("overpower", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "whirlwind",
+        NextAction::array(0, new NextAction("whirlwind", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium rage available",
@@ -169,11 +176,11 @@ void ArmsWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "melee light aoe",
-        NextAction::array(0, new NextAction("sweeping strikes", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("sweeping strikes", ACTION_HIGH + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "melee light aoe",
-        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH), NULL)));
+        "melee medium aoe",
+        NextAction::array(0, new NextAction("whirlwind", ACTION_HIGH + 4), NULL)));
 }
 
 void ArmsWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -830,15 +837,11 @@ void ArmsWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "melee medium aoe",
-        NextAction::array(0, new NextAction("bladestorm", ACTION_HIGH + 1), NULL)));
+        NextAction::array(0, new NextAction("bladestorm", ACTION_HIGH + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
         "melee light aoe",
-        NextAction::array(0, new NextAction("sweeping strikes", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "melee light aoe",
-        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("sweeping strikes", ACTION_HIGH + 4), NULL)));
 }
 
 void ArmsWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -231,10 +231,6 @@ void ProtectionWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     triggers.push_back(new TriggerNode(
         "melee medium aoe",
         NextAction::array(0, new NextAction("battle shout taunt", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "melee light aoe",
-        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH), NULL)));
 }
 
 void ProtectionWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -635,10 +631,6 @@ void ProtectionWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     triggers.push_back(new TriggerNode(
         "melee medium aoe",
         NextAction::array(0, new NextAction("battle shout taunt", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "melee light aoe",
-        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH), NULL)));
 }
 
 void ProtectionWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1027,10 +1019,6 @@ void ProtectionWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     triggers.push_back(new TriggerNode(
         "melee medium aoe",
         NextAction::array(0, new NextAction("battle shout taunt", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "melee light aoe",
-        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH), NULL)));
 }
 
 void ProtectionWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

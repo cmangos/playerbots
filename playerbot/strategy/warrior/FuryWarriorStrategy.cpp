@@ -160,6 +160,14 @@ void FuryWarriorRaidStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers
 void FuryWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarriorAoeStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "melee medium aoe",
+        NextAction::array(0, new NextAction("whirlwind", ACTION_HIGH + 5), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "melee medium aoe",
+        NextAction::array(0, new NextAction("bloodthirst", ACTION_HIGH + 4), NULL)));
 }
 
 void FuryWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -504,6 +512,14 @@ void FuryWarriorRaidStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers
 void FuryWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarriorAoeStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "melee medium aoe",
+        NextAction::array(0, new NextAction("whirlwind", ACTION_HIGH + 5), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "melee medium aoe",
+        NextAction::array(0, new NextAction("bloodthirst", ACTION_HIGH + 4), NULL)));
 }
 
 void FuryWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -857,6 +873,14 @@ void FuryWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
 void FuryWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarriorAoeStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "melee medium aoe",
+        NextAction::array(0, new NextAction("whirlwind", ACTION_HIGH + 5), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "melee medium aoe",
+        NextAction::array(0, new NextAction("bloodthirst", ACTION_HIGH + 4), NULL)));
 }
 
 void FuryWarriorAoePveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

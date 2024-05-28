@@ -20,7 +20,6 @@ public:
         // berserker only
         creators["berserker rage"] = &berserker_rage;
         creators["recklessness"] = &recklessness;
-        creators["whirlwind"] = &whirlwind;
         creators["pummel"] = &pummel;
         creators["intercept"] = &intercept;
 
@@ -48,8 +47,6 @@ private:
     ACTION_NODE_P(berserker_rage, "berserker rage", "berserker stance");
 
     ACTION_NODE_P(recklessness, "recklessness", "berserker stance");
-
-    ACTION_NODE_P(whirlwind, "whirlwind", "berserker stance");
 
     ACTION_NODE_P(pummel, "pummel", "berserker stance");
 
@@ -166,23 +163,19 @@ void WarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "melee medium aoe",
-        NextAction::array(0, new NextAction("whirlwind", ACTION_HIGH + 6), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "melee medium aoe",
-        NextAction::array(0, new NextAction("bloodthirst", ACTION_HIGH + 5), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "melee medium aoe",
-        NextAction::array(0, new NextAction("cleave", ACTION_HIGH + 4), NULL)));
+        NextAction::array(0, new NextAction("cleave", ACTION_HIGH + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "thunder clap",
-        NextAction::array(0, new NextAction("thunder clap", ACTION_HIGH + 3), NULL)));
+        NextAction::array(0, new NextAction("thunder clap", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "thunder clap on snare target",
-        NextAction::array(0, new NextAction("thunder clap on snare target", ACTION_HIGH + 2), NULL)));
+        NextAction::array(0, new NextAction("thunder clap on snare target", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "melee light aoe",
+        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH), NULL)));
 }
 
 void WarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -461,15 +454,7 @@ void WarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "melee light aoe",
-        NextAction::array(0, new NextAction("sweeping strikes", ACTION_HIGH + 6), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "melee medium aoe",
-        NextAction::array(0, new NextAction("whirlwind", ACTION_HIGH + 5), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "melee medium aoe",
-        NextAction::array(0, new NextAction("bloodthirst", ACTION_HIGH + 4), NULL)));
+        NextAction::array(0, new NextAction("sweeping strikes", ACTION_HIGH + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "melee medium aoe",
@@ -482,6 +467,10 @@ void WarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "thunder clap on snare target",
         NextAction::array(0, new NextAction("thunder clap on snare target", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "melee light aoe",
+        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH), NULL)));
 }
 
 void WarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -756,10 +745,6 @@ void WarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "melee medium aoe",
-        NextAction::array(0, new NextAction("whirlwind", ACTION_HIGH + 4), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "melee medium aoe",
         NextAction::array(0, new NextAction("cleave", ACTION_HIGH + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -769,6 +754,10 @@ void WarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "thunder clap on snare target",
         NextAction::array(0, new NextAction("thunder clap on snare target", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "melee light aoe",
+        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH), NULL)));
 }
 
 void WarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -415,13 +415,48 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         }
     }
 
+    PathFinder pathfinder(mover);
+
+    std::list<ObjectGuid> targets = AI_VALUE_LAZY(std::list<ObjectGuid>, "possible targets");
+
+    if (!targets.empty()) //Add pathfinder cost to area's near hostiles to try to avoid them if possible.
+    {
+        FactionTemplateEntry const* humanFaction = sFactionTemplateStore.LookupEntry(1);
+        FactionTemplateEntry const* orcFaction = sFactionTemplateStore.LookupEntry(2);
+
+        for (auto& target : targets)
+        {
+            CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(target.GetEntry());
+
+            if (!cInfo)
+                continue;
+
+            if (cInfo->NpcFlags > 0)
+                continue;
+
+            FactionTemplateEntry const* factionEntry = sFactionTemplateStore.LookupEntry(cInfo->Faction);
+            ReputationRank reactionHum = PlayerbotAI::GetFactionReaction(humanFaction, factionEntry);
+            ReputationRank reactionOrc = PlayerbotAI::GetFactionReaction(orcFaction, factionEntry);
+
+            if (reactionHum >= REP_NEUTRAL || reactionOrc >= REP_NEUTRAL)
+                continue;
+
+            Unit* targetUnit = ai->GetUnit(target);
+
+            WorldPosition point(targetUnit);
+            pathfinder.setArea(point.getMapId(), point.getX(), point.getY(), point.getZ(), 12, 50.0f);
+            pathfinder.setArea(point.getMapId(), point.getX(), point.getY(), point.getZ(), 13, 20.0f);
+
+            CreateWp(bot, point.getX(), point.getY(), point.getZ(), 0.0, 2334);
+        }
+    }
+
     if (movePath.empty() && movePosition.distance(startPosition) > maxDist)
     {
         //Use standard pathfinder to find a route. 
-        PathFinder path(mover);
-        path.calculate(movePosition.getX(), movePosition.getY(), movePosition.getZ(), false);
-        PathType type = path.getPathType();
-        PointsArray& points = path.getPath();
+        pathfinder.calculate(movePosition.getX(), movePosition.getY(), movePosition.getZ(), false);
+        PathType type = pathfinder.getPathType();
+        PointsArray& points = pathfinder.getPath();
         movePath.addPath(startPosition.fromPointsArray(points));
     }
 

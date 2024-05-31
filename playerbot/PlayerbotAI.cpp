@@ -5561,8 +5561,7 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
         VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BUYBACK);
         RETURN_SORT_FOUND;
     }
-
-    if (text == "food" || text == "conjured food")
+    else if (text == "food" || text == "conjured food")
     {
         FindFoodVisitor visitor(bot, 11, (text == "conjured food"));
         VISIT;
@@ -5614,7 +5613,7 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
     else if (text.find("usage ") == 0)
     {
         FindItemUsageVisitor visitor(bot, ItemUsage(stoi(text.substr(6))));
-        VISIT;
+        VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
     }
     else if (text == "tradeskill")
     {
@@ -5629,12 +5628,12 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
     else if (text == "vendor")
     {
         FindItemUsageVisitor visitor(bot, ItemUsage::ITEM_USAGE_VENDOR);
-        VISIT;
+        VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
 
         if (AI_VALUE(uint8, "bag space") > 80 && !urand(0, 10))
         {
             FindItemUsageVisitor visitor(bot, ItemUsage::ITEM_USAGE_AH);
-            VISIT;
+            VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
         }
     }
 

@@ -45,9 +45,22 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     //Empty bags/repair
     if (!foundTarget && urand(1, 100) > 10)                                  //90% chance
     {
-        if (AI_VALUE2(bool, "group or", "should sell,can sell,following party,near leader") || 
-            AI_VALUE2(bool, "group or", "should repair,can repair,following party,near leader") || 
-            (AI_VALUE2(bool, "group or", "should sell,can ah sell,following party,near leader") && bot->GetLevel() > 5))
+        bool shouldRpg = false;
+        if (AI_VALUE2(bool, "group or", "should sell,can sell,following party,near leader")) //One of party members wants to sell items (full bags).
+            shouldRpg = true;
+        else if (AI_VALUE2(bool, "group or", "should repair,can repair,following party,near leader")) //One of party memebers wants to repair.
+            shouldRpg = true;
+        else if (AI_VALUE2(bool, "group or", "should sell,can ah sell,following party,near leader") && bot->GetLevel() > 5) //One of party members wants to sell items to AH (full bags).
+            shouldRpg = true;
+        else if (!shouldRpg && ai->HasStrategy("free", BotState::BOT_STATE_NON_COMBAT))
+        {
+            if (AI_VALUE(bool, "should sell") && (AI_VALUE(bool, "can sell") || AI_VALUE(bool, "can ah sell"))) //Bot wants to sell (full bags).
+                shouldRpg = true;
+            else if (AI_VALUE(bool, "should repair") && AI_VALUE(bool, "can repair")) //Bot wants to repair.
+                shouldRpg = true;
+        }
+                     
+        if (shouldRpg)
         {
             PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetRpgTarget1", &context->performanceStack);
             foundTarget = SetRpgTarget(requester, newTarget);                           //Go to town to sell items or repair

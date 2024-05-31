@@ -5500,7 +5500,7 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
     std::set<Item*> found;
     size_t pos = text.find(" ");
     int count = pos != std::string::npos ? atoi(text.substr(pos + 1).c_str()) : 1;
-    if (count < 1) count = 1;
+    if (count < 1) count = 999;
 
     ItemIds ids = GetChatHelper()->parseItems(text);
     if (!ids.empty())

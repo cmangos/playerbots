@@ -446,9 +446,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
             WorldPosition point(targetUnit);
             pathfinder.setArea(point.getMapId(), point.getX(), point.getY(), point.getZ(), 12, 50.0f);
             pathfinder.setArea(point.getMapId(), point.getX(), point.getY(), point.getZ(), 13, 20.0f);
-
-            CreateWp(bot, point.getX(), point.getY(), point.getZ(), 0.0, 2334);
-        }
+       }
     }
 
     if (movePath.empty() && movePosition.distance(startPosition) > maxDist)

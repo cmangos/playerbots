@@ -243,16 +243,28 @@ bool RpgTravelDestination::isActive(Player* bot)
             return false;
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR)
+        {
             if (AI_VALUE2_LAZY(bool, "group or", "should sell,can sell,following party,near leader"))
                 isUsefull = true;
+            else if (ai->HasStrategy("free", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE(bool, "should sell") && AI_VALUE(bool, "can sell"))
+                isUsefull = true;
+        }
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR)
+        {
             if (AI_VALUE2_LAZY(bool, "group or", "should repair,can repair,following party,near leader"))
                 isUsefull = true;
+            else if (ai->HasStrategy("free", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE(bool, "should repair") && AI_VALUE(bool, "can repair"))
+                isUsefull = true;
+        }
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER)
+        {
             if (AI_VALUE2_LAZY(bool, "group or", "should sell,can ah sell,following party,near leader"))
-                isUsefull = true;        
+                isUsefull = true;
+            else if (ai->HasStrategy("free", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE(bool, "should sell") && AI_VALUE(bool, "can ah sell"))
+                isUsefull = true;
+        }
     }
     else
     {

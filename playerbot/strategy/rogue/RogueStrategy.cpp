@@ -1429,7 +1429,11 @@ public:
             (actionName == "bg leave") ||
             (actionName == "check mount state") ||
             (actionName == "loot roll") ||
-            (actionName == "auto loot roll"))
+            (actionName == "auto loot roll") ||
+            (actionName == "attack anything") ||
+            (actionName == "choose rpg target") ||
+            (actionName == "move to rpg target") ||
+            (actionName == "travel"))
         {
             return 1.0f;
         }

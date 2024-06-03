@@ -396,7 +396,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 
                     for (auto node : route.getNodes())
                     {
-                        routeList += node->getName() + "-";
+                        routeList += node->getName() + (node == route.getNodes().back() ? "" : "-");
                     }
 
                     if (!routeList.empty())

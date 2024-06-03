@@ -132,9 +132,20 @@ DropMap* DropMapValue::Calculate()
 
 		LootTemplateAccess const* lTemplateA = GetLootTemplate(ObjectGuid(HIGHGUID_UNIT, entry, uint32(1)), LOOT_CORPSE);
 
-		if(lTemplateA)
+		if (lTemplateA)
+		{
 			for (LootStoreItem const& lItem : lTemplateA->Entries)
-				dropMap->insert(std::make_pair(lItem.itemid,sEntry));
+				dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+
+			for (LootLootGroupAccess const& group : lTemplateA->Groups)
+			{
+				for (LootStoreItem const& lItem : group.ExplicitlyChanced)
+					dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+
+				for (LootStoreItem const& lItem : group.EqualChanced)
+					dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+			}
+		}
 	}
 
 	for (uint32 entry = 0; entry < sGOStorage.GetMaxEntry(); entry++)
@@ -143,9 +154,20 @@ DropMap* DropMapValue::Calculate()
 
 		LootTemplateAccess const* lTemplateA = GetLootTemplate(ObjectGuid(HIGHGUID_GAMEOBJECT, entry, uint32(1)), LOOT_CORPSE);
 
-		if(lTemplateA)
+		if (lTemplateA)
+		{
 			for (LootStoreItem const& lItem : lTemplateA->Entries)
 				dropMap->insert(std::make_pair(lItem.itemid, -sEntry));
+
+			for (LootLootGroupAccess const& group : lTemplateA->Groups)
+			{
+				for (LootStoreItem const& lItem : group.ExplicitlyChanced)
+					dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+
+				for (LootStoreItem const& lItem : group.EqualChanced)
+					dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+			}
+		}
 	}
 
 	return dropMap;
@@ -200,10 +222,23 @@ float LootChanceValue::Calculate()
 	else
 		lTemplateA = DropMapValue::GetLootTemplate(ObjectGuid(HIGHGUID_GAMEOBJECT, entry, uint32(1)), LOOT_CORPSE);
 
-	if(lTemplateA)
+	if (lTemplateA)
+	{
 		for (auto item : lTemplateA->Entries)
 			if (item.itemid == itemId)
 				return item.chance;
+
+		for (LootLootGroupAccess const& group : lTemplateA->Groups)
+		{
+			for (LootStoreItem const& item : group.ExplicitlyChanced)
+				if (item.itemid == itemId)
+					return item.chance;
+
+			for (LootStoreItem const& item : group.EqualChanced)
+				if (item.itemid == itemId)
+					return item.chance;
+		}
+	}
 
 	return 0.0f;
 }

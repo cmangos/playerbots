@@ -6,11 +6,17 @@
 namespace ai
 { 
     //Cheat class copy to hack into the loot system
+    class LootLootGroupAccess                               // A set of loot definitions for items (refs are not allowed)
+    {
+    public:
+        LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
+        LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
+    };
+
     class LootTemplateAccess
     {
     public:
-        class  LootGroup;                                   // A set of loot definitions for items (refs are not allowed inside)
-        typedef std::vector<LootGroup> LootGroups;
+        typedef std::vector<LootLootGroupAccess> LootGroups;
         LootStoreItemList Entries;                          // not grouped only
         LootGroups        Groups;                           // groups have own (optimized) processing, grouped entries go there
     };

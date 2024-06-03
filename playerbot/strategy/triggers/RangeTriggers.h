@@ -289,7 +289,7 @@ namespace ai
             Unit* master = AI_VALUE(Unit*, "master target");
             if (master && sServerFacade.IsFriendlyTo(bot, master))
             {
-                if (master->GetTransport() == bot->GetTransport())
+                if (master->GetTransport() && master->GetTransport() == bot->GetTransport())
                     return false;
 
                 return sServerFacade.IsDistanceGreaterThan(AI_VALUE2(float, "distance", "master target"), distance);

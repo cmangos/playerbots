@@ -19,7 +19,7 @@ public:
         return true;
     }
 
-    bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai) override
+    bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai, Event& event) override
     {
         Player* bot = ai->GetBot();
         time_t cur_time = time(0);
@@ -75,7 +75,7 @@ private:
 class TakeMailProcessor : public MailProcessor
 {
 public:
-    bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai) override
+    bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai, Event& event) override
     {
         Player* bot = ai->GetBot();
         if (!CheckBagSpace(bot))
@@ -88,8 +88,15 @@ public:
         if (mail->money)
         {
             std::ostringstream out;
-            out << mail->subject << ", |cffffff00" << ChatHelper::formatMoney(mail->money) << "|cff00ff00 processed";
-            ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            if (event.getSource() == "rpg action")
+            {
+                copper += mail->money;
+            }
+            else
+            {
+                out << mail->subject << ", |cffffff00" << ChatHelper::formatMoney(mail->money) << "|cff00ff00 processed";
+                ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            }
 
             WorldPacket packet;
             packet << mailbox;
@@ -102,7 +109,7 @@ public:
             std::list<uint32> guids;
             for (MailItemInfoVec::iterator i = mail->items.begin(); i != mail->items.end(); ++i)
             {
-                ItemPrototype const *proto = sObjectMgr.GetItemPrototype(i->item_template);
+                ItemPrototype const* proto = sObjectMgr.GetItemPrototype(i->item_template);
                 if (proto)
                     guids.push_back(i->item_guid);
             }
@@ -116,15 +123,53 @@ public:
                 packet << *i;
 #endif
                 Item* item = bot->GetMItem(*i);
-                std::ostringstream out;
-                out << mail->subject << ", " << ChatHelper::formatItem(item) << "|cff00ff00 processed";
+
+                if (event.getSource() == "rpg action")
+                {
+                    items.push_back(ChatHelper::formatItem(item));
+                }
+                else
+                {
+                    std::ostringstream out;
+                    out << mail->subject << ", " << ChatHelper::formatItem(item) << "|cff00ff00 processed";
+                    ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                }
 
                 bot->GetSession()->HandleMailTakeItem(packet);
-                ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             }
 
             RemoveMail(bot, mail->messageID, mailbox);
         }
+        return true;
+    }
+
+    bool After(Player* requester, PlayerbotAI* ai) override
+    {
+        if (!items.empty())
+        {
+            std::map<std::string, std::string> args;
+            args["%itemcount"] = std::to_string(items.size());
+
+            std::vector<std::string> lines = { BOT_TEXT2("|cff00ff00%itemcount items recieved from mail:", args) };
+            for (auto& item : items)
+            {
+                if (lines.back().size() + item.size() > 256)
+                    lines.push_back("");
+
+                lines.back() = lines.back() + item;
+            }
+ 
+            for (auto& line : lines)
+                ai->TellPlayer(requester, line, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        }
+
+        if (copper > 0)
+        {
+            std::map<std::string, std::string> args;
+            args["%money"] = ChatHelper::formatMoney(copper);
+            ai->TellPlayer(requester, BOT_TEXT2("|cffffff00%money |cff00ff00recieved from mail.", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        }
+
         return true;
     }
 
@@ -142,7 +187,7 @@ private:
         uint32 totalfree = 16 - totalused;
         for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
         {
-            if (const Bag* const pBag = (Bag*) bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag))
+            if (const Bag* const pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag))
             {
                 ItemPrototype const* pBagProto = pBag->GetProto();
                 if (pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass == ITEM_SUBCLASS_CONTAINER)
@@ -153,12 +198,16 @@ private:
 
         return totalfree >= 2;
     }
+
+private:
+    uint32 copper = 0;
+    std::vector<std::string> items;
 };
 
 class DeleteMailProcessor : public MailProcessor
 {
 public:
-    bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai) override
+    bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai, Event& event) override
     {
         std::ostringstream out;
         out << "|cffffffff" << mail->subject << "|cffff0000 deleted";
@@ -173,7 +222,7 @@ public:
 class ReadMailProcessor : public MailProcessor
 {
 public:
-    bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai) override
+    bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai, Event& event) override
     {
         std::ostringstream out, body;
         out << "|cffffffff" << mail->subject;
@@ -256,7 +305,7 @@ bool MailAction::Execute(Event& event)
     std::map<int, Mail*> filtered = filterList(mailList, filter);
     for (std::map<int, Mail*>::iterator i = filtered.begin(); i != filtered.end(); ++i)
     {
-        if (!processor->Process(requester, i->first, i->second, ai))
+        if (!processor->Process(requester, i->first, i->second, ai, event))
             break;
     }
 

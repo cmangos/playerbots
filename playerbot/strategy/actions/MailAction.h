@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         virtual bool Before(Player* requester, PlayerbotAI* ai) { return true; }
-        virtual bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai) = 0;
+        virtual bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai, Event& event) = 0;
         virtual bool After(Player* requester, PlayerbotAI* ai) { return true; }
 
     public:

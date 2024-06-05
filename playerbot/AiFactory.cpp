@@ -291,6 +291,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
     int tab = GetPlayerSpecTab(player);
 
     combatEngine->addStrategies("mount", NULL);
+    combatEngine->addStrategy("avoid mobs");
 
     if (!player->InBattleGround())
     {
@@ -835,6 +836,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
     }
 
     nonCombatEngine->addStrategies("wbuff", NULL);
+    nonCombatEngine->addStrategy("avoid mobs");
 
     if (!player->InBattleGround())
     {

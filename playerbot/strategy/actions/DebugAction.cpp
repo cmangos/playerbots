@@ -31,41 +31,52 @@ bool DebugAction::Execute(Event& event)
     }
 
     std::string text = event.getParam();
-    if (text == "scan" && isMod)
+    if (text == "avoid scan" && isMod)
     {
-        sPlayerbotAIConfig.openLog("scan.csv", "w");
+        PathFinder path(requester);
 
-        uint32 i;
-        for (auto p : WorldPosition().getCreaturesNear())
+        for (float x = -100.0f; x < 100.0f; x += 2.0f)
+            for (float y = -100.0f; y < 100.0f; y += 2.0f)
+            {
+                WorldPosition p(requester);
+                p.setX(p.getX() + x);
+                p.setY(p.getY() + y);
+                p.setZ(p.getHeight());
+
+
+                Creature* wpCreature = requester->SummonCreature(2334, p.getX(), p.getY(), p.getZ(), 0.0, TEMPSPAWN_TIMED_DESPAWN, 20000.0f);
+
+                if(path.getArea(p.getMapId(), p.getX(), p.getY(), p.getZ()) == 12)
+                    ai->AddAura(wpCreature, 246);
+                if (path.getArea(p.getMapId(), p.getX(), p.getY(), p.getZ()) == 13)
+                    ai->AddAura(wpCreature, 1130);
+            }
+        return true;
+    }
+    else if (text.find("avoid add") == 0 && isMod)
+    {
+        PathFinder pathfinder(bot);
+
+        WorldPosition point(requester);
+
+        uint32 area, radius;
+
+        std::vector<std::string> args = { "12", "5" };
+
+        if (text.length() > std::string("avoid add").size())
         {
-            WorldPosition pos(p);
+            args = ChatHelper::splitString(text.substr(std::string("avoid add").size() + 1), " ");
 
-            const uint32 zoneId = sTerrainMgr.GetZoneId(pos.getMapId(), pos.getX(), pos.getY(), pos.getZ());
-            const uint32 areaId = sTerrainMgr.GetAreaId(pos.getMapId(), pos.getX(), pos.getY(), pos.getZ());
+            if (args.size() == 1)
+                args.push_back("5");
+        }      
 
-            std::ostringstream out;
-            out << zoneId << "," << areaId << "," << pos.getAreaFlag() << "," << (pos.getAreaName().empty() ? "none" : pos.getAreaName()) << ",";
+        area = stoi(args[0]);
+        radius = stoi(args[1]);
 
-            pos.printWKT(out);
+        pathfinder.setArea(point.getMapId(), point.getX(), point.getY(), point.getZ(), area, radius);
 
-            sPlayerbotAIConfig.log("scan.csv", out.str().c_str());
-
-            if (zoneId == 0 && areaId == 0)
-            {
-                const uint32 zoneId = sTerrainMgr.GetZoneId(pos.getMapId(), pos.getX(), pos.getY(), pos.getZ());
-                const uint32 areaId = sTerrainMgr.GetAreaId(pos.getMapId(), pos.getX(), pos.getY(), pos.getZ());
-                sPlayerbotAIConfig.log("x", out.str().c_str());
-            }
-            else
-            {
-                const uint32 zoneId = sTerrainMgr.GetZoneId(pos.getMapId(), pos.getX(), pos.getY(), pos.getZ());
-                const uint32 areaId = sTerrainMgr.GetAreaId(pos.getMapId(), pos.getX(), pos.getY(), pos.getZ());
-                sPlayerbotAIConfig.log("y", out.str().c_str());
-            }
-
-            i = zoneId;
-        }
-        return i == 0;
+        return true;
     }
     else if (text == "gy" && isMod)
     {

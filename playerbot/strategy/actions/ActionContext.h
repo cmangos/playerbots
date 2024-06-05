@@ -60,6 +60,7 @@
 #include "ResetAiAction.h"
 #include "ShareQuestAction.h"
 #include "UpdateGearAction.h"
+#include "SetAvoidAreaAction.h"
 
 #include "OnyxiasLairDungeonActions.h"
 #include "MoltenCoreDungeonActions.h"
@@ -150,6 +151,7 @@ namespace ai
             creators["delay"] = &ActionContext::delay;
             creators["greet"] = &ActionContext::greet;
             creators["check values"] = &ActionContext::check_values;
+            creators["set avoid area"] = &ActionContext::set_avoid_area;
             creators["ra"] = &ActionContext::ra;
             creators["remove blessing of salvation"] = &ActionContext::remove_blessing_of_salvation;
             creators["remove greater blessing of salvation"] = &ActionContext::remove_greater_blessing_of_salvation;
@@ -345,6 +347,7 @@ namespace ai
         static Action* move_out_of_collision(PlayerbotAI* ai) { return new MoveOutOfCollisionAction(ai); }
         static Action* move_random(PlayerbotAI* ai) { return new MoveRandomAction(ai); }
         static Action* check_values(PlayerbotAI* ai) { return new CheckValuesAction(ai); }
+        static Action* set_avoid_area(PlayerbotAI* ai) { return new SetAvoidAreaAction(ai); }
         static Action* greet(PlayerbotAI* ai) { return new GreetAction(ai); }
         static Action* apply_oil(PlayerbotAI* ai) { return new ImbueWithOilAction(ai); }
         static Action* try_emergency(PlayerbotAI* ai) { return new TryEmergencyAction(ai); }

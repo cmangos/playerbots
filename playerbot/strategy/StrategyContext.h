@@ -42,6 +42,7 @@
 #include "generic/GroupStrategy.h"
 #include "generic/GuildStrategy.h"
 #include "generic/FocusTargetStrategy.h"
+#include "generic/AvoidMobsStrategy.h"
 
 #include "generic/DungeonStrategy.h"
 #include "generic/OnyxiasLairDungeonStrategies.h"
@@ -70,6 +71,7 @@ namespace ai
             creators["ready check"] = &StrategyContext::ready_check;
             creators["dead"] = &StrategyContext::dead;
             creators["flee"] = &StrategyContext::flee;
+            creators["avoid mobs"] = &StrategyContext::avoid_mobs;
             creators["duel"] = &StrategyContext::duel;
             creators["start duel"] = &StrategyContext::start_duel;
             creators["kite"] = &StrategyContext::kite;
@@ -177,6 +179,7 @@ namespace ai
         static Strategy* duel(PlayerbotAI* ai) { return new DuelStrategy(ai); }
         static Strategy* start_duel(PlayerbotAI* ai) { return new StartDuelStrategy(ai); }
         static Strategy* flee(PlayerbotAI* ai) { return new FleeStrategy(ai); }
+        static Strategy* avoid_mobs(PlayerbotAI* ai) { return new AvoidMobsStrategy(ai); }
         static Strategy* dead(PlayerbotAI* ai) { return new DeadStrategy(ai); }
         static Strategy* racials(PlayerbotAI* ai) { return new RacialsStrategy(ai); }
         static Strategy* loot(PlayerbotAI* ai) { return new LootNonCombatStrategy(ai); }

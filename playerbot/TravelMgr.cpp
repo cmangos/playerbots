@@ -445,7 +445,7 @@ bool BossTravelDestination::isActive(Player* bot)
 std::string BossTravelDestination::getTitle() {
     std::ostringstream out;
 
-    out << "boss mob ";
+    out << "boss mob";
 
     out << " " << ChatHelper::formatWorldEntry(entry);
 
@@ -1173,7 +1173,7 @@ void TravelMgr::LoadQuestTravelTable()
                 grindMobs.push_back(gLoc);
             }
 
-            if (cInfo->Rank == 3 || (cInfo->Rank == 1 && !point.isOverworld() && u.c == 1))
+            if (cInfo->Rank == 3 || cInfo->Rank == 4 || (cInfo->Rank == 1 && !point.isOverworld() && u.c == 1))
             {
                 std::string nodeName = cInfo->Name;
 

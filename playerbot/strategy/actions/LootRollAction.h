@@ -27,7 +27,6 @@ namespace ai
     public:
         RollAction(PlayerbotAI* ai, std::string name = "roll") : QueryItemUsageAction(ai, name) {}
         virtual bool Execute(Event& event) override;
-        virtual bool isPossible();
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "roll"; } //Must equal internal name
@@ -35,7 +34,7 @@ namespace ai
         {
             return "This will make the bot roll a certain way on a specific item.\n"
                 "Usage: roll <roll type> [itemlink].\n"
-                "Types are need, greed, pass and auto.\n"
+                "Types are need, greed, pass, emote and auto.\n"
                 "When no itemlink is provided bots will roll on all current rollable loot.\n"
                 "Examples:\n"
                 "roll greed [item]\n"
@@ -75,6 +74,7 @@ namespace ai
     public:
         AutoLootRollAction(PlayerbotAI* ai, std::string name = "auto loot roll") : RollAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isPossible();
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "auto loot roll"; } //Must equal internal name

@@ -8,6 +8,7 @@
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/TravelMgr.h"
 #include "CheckMountStateAction.h"
+#include "TellLosAction.h"
 
 using namespace ai;
 
@@ -242,6 +243,21 @@ bool UseAction::Execute(Event& event)
                 }
             }
         }
+    }
+    else if (ChatHelper::startswith(name, "los gos"))
+    {
+       std::list<GameObject*> gos;
+       std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(name.substr(7));
+       gos = TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los")), mods);
+
+       for (GameObject* go : gos)
+       {
+          if (go)
+          {
+             targetGameObject = go;
+             break;
+          }
+       }
     }
     else
     {

@@ -717,7 +717,7 @@ bool ChatHelper::parseItemClass(std::string text, uint32 *itemClass, uint32 *ite
     return false;
 }
 
-uint32 ChatHelper::parseSlot(std::string text)
+uint32 ChatHelper::parseSlot(const std::string& text)
 {
     if (slots.find(text) != slots.end())
         return slots[text];
@@ -968,4 +968,22 @@ void ChatHelper::replaceSubstring(std::string& str, const std::string& oldStr, c
         str.replace(pos, oldStr.length(), newStr);
         pos = str.find(oldStr, pos + newStr.length());
     }
+}
+
+
+std::string ChatHelper::trim(const std::string& str)
+{
+   auto start = std::find_if_not(str.begin(), str.end(), [](unsigned char ch) {
+      return std::isspace(ch);
+      });
+
+   auto end = std::find_if_not(str.rbegin(), str.rend(), [](unsigned char ch) {
+      return std::isspace(ch);
+      }).base();
+
+      if (start >= end) {
+         return "";
+      }
+
+      return std::string(start, end);
 }

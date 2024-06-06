@@ -35,7 +35,7 @@ namespace ai
         static std::set<std::string> parseItemQualifiers(std::string& text);
         static uint32 parseItemQuality(std::string text);
         static bool parseItemClass(std::string text, uint32* itemClass, uint32* itemSubClass);
-        static uint32 parseSlot(std::string text);
+        static uint32 parseSlot(const std::string& text);
 
         static std::string formatSpell(SpellEntry const *sInfo);
         static std::string formatSpell(uint32 spellId) {const SpellEntry* const spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId); if (!spellInfo) return ""; return formatSpell(spellInfo);};
@@ -82,6 +82,7 @@ namespace ai
         static std::vector<std::string> splitString(const std::string& text, const std::string& delimiter);
         static std::vector<std::string> findSubstringsBetween(const std::string& input, const std::string& start, const std::string& end, bool includeDelimiters = false);
         static void replaceSubstring(std::string& str, const std::string& oldStr, const std::string& newStr);
+        static std::string trim(const std::string& str);
 
     private:
         static std::map<std::string, uint32> consumableSubClasses;

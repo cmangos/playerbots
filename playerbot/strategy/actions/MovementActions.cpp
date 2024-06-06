@@ -45,6 +45,15 @@ bool MovementAction::isUseful()
     return !ai->HasStrategy("stay", ai->GetState());
 }
 
+WorldLocation MovementAction::GetNearLocation(const WorldLocation& location, float distance)
+{
+   WorldPosition loc = location;
+   float angle = GetFollowAngle();
+   loc.coord_x += cos(angle) * distance;
+   loc.coord_y += sin(angle) * distance;
+   return loc;
+}
+
 bool MovementAction::MoveNear(uint32 mapId, float x, float y, float z, float distance)
 {
     float angle = GetFollowAngle();
@@ -265,6 +274,11 @@ bool MovementAction::FlyDirect(WorldPosition &startPosition, WorldPosition &endP
 
     return true;
 #endif
+}
+
+bool MovementAction::MoveTo(const WorldLocation& location, bool idle, bool react, bool noPath, bool ignoreEnemyTargets)
+{
+   return MoveTo(location.mapid, location.coord_x, location.coord_y, location.coord_z, idle, react, noPath, ignoreEnemyTargets);
 }
 
 bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, bool react, bool noPath, bool ignoreEnemyTargets)

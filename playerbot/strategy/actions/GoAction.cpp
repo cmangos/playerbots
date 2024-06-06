@@ -9,6 +9,7 @@
 #include "MotionGenerators/PathFinder.h"
 #include "ChooseTravelTargetAction.h"
 #include "playerbot/TravelMgr.h"
+#include "TellLosAction.h"
 
 using namespace ai;
 
@@ -95,8 +96,25 @@ bool GoAction::Execute(Event& event)
         return TravelTo(dest, requester);
     }
 
-    if (MoveToGo(param, requester))
-        return true;
+    std::list<ObjectGuid> goguids = ChatHelper::parseGameobjects(param);
+    bool bInternalLosGosCommand = ChatHelper::startswith(param, "los gos");
+
+    if (goguids.size() || bInternalLosGosCommand)
+    {
+       std::list<GameObject*> gos;
+
+       if (bInternalLosGosCommand)
+       {
+          std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(param.substr(7));
+          gos = TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los")), mods);
+       }
+       else
+       {
+          gos = TellLosAction::GoGuidListToObjList(ai, goguids);
+       }
+
+       return MoveToGo(gos, requester);
+    }
 
     if (MoveToUnit(param, requester))
         return true;
@@ -282,15 +300,19 @@ bool GoAction::TravelTo(TravelDestination* dest, Player* requester) const
     }
 }
 
-bool GoAction::MoveToGo(std::string& param, Player* requester)
+//todo: could be a part of bot API
+inline WorldLocation GameObjectToBotLocation(const GameObject& go)
 {
-    std::list<ObjectGuid> gos = ChatHelper::parseGameobjects(param);
-    if (gos.empty())
-        return false;
+   WorldLocation loc;
+   go.GetPosition(loc);
+   loc.coord_z += 0.5f;
+   return loc;
+}
 
-    for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); ++i)
+bool GoAction::MoveToGo(const std::list<GameObject*>& gos, Player* requester)
+{
+    for (GameObject* go : gos)
     {
-        GameObject* go = ai->GetGameObject(*i);
         if (go && sServerFacade.isSpawned(go))
         {
             if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(bot, go), sPlayerbotAIConfig.reactDistance))
@@ -301,7 +323,13 @@ bool GoAction::MoveToGo(std::string& param, Player* requester)
 
             std::ostringstream out; out << "Moving to " << ChatHelper::formatGameobject(go);
             ai->TellPlayerNoFacing(requester, out.str());
-            return MoveNear(bot->GetMapId(), go->GetPositionX(), go->GetPositionY(), go->GetPositionZ() + 0.5f, ai->GetRange("follow"));
+            
+            WorldLocation location = GetNearLocation(GameObjectToBotLocation(*go), INTERACTION_DISTANCE);
+
+            // todo: could be incorporated at the higher level
+            UpdateStrategyPosition(location);
+
+            return MoveTo(location);
         }
     }
     return false;
@@ -453,4 +481,26 @@ bool GoAction::MoveToPosition(std::string& param, Player* requester)
         return MoveNear(bot->GetMapId(), pos.x, pos.y, pos.z + 0.5f, ai->GetRange("follow"));
     }
     return false;
+}
+
+void GoAction::UpdateStrategyPosition(const WorldPosition& position)
+{
+   if (ai->HasStrategy("stay", ai->GetState()))
+   {
+      PositionMap& posMap = AI_VALUE(PositionMap&, "position");
+      PositionEntry& stayPosition = posMap["stay"];
+
+      stayPosition.Set(position.getX(), position.getY(), position.getZ(), position.getMapId());
+      posMap["stay"] = stayPosition;
+      posMap["return"] = stayPosition;
+   }
+   else if (ai->HasStrategy("guard", ai->GetState()))
+   {
+      PositionMap& posMap = AI_VALUE(PositionMap&, "position");
+      PositionEntry& guardPosition = posMap["guard"];
+
+      guardPosition.Set(position.getX(), position.getY(), position.getZ(), position.getMapId());
+      posMap["guard"] = guardPosition;
+      posMap["return"] = guardPosition;
+   }
 }

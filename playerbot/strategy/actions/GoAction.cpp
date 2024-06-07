@@ -328,7 +328,7 @@ bool GoAction::MoveToGo(std::string& param, Player* requester)
    {
       std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(param.substr(LOS_GOS_PARAM.size()));
 
-      return loopthroughobjects(TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los")), mods));
+      return loopthroughobjects(TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los")), mods));
    }
 
     return false;

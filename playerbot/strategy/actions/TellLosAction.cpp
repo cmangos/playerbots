@@ -9,7 +9,7 @@ using namespace ai;
 constexpr std::string_view GOS_PARAM = "gos";
 constexpr std::string_view GAMEOBJECTS_PARAM = "game objects";
 
-constexpr std::string_view FILTER_NAME_PARAM = "filter:name";
+constexpr std::string_view FILTER_NAME_PARAM = "filter:name:";
 
 
 bool TellLosAction::Execute(Event& event)
@@ -175,6 +175,11 @@ std::vector<LosModifierStruct> TellLosAction::ParseLosModifiers(const std::strin
 {
    std::vector<LosModifierStruct> mods;
 
+   if (str.empty() || str[0] != ' ')
+   {
+      return mods;
+   }
+
    std::vector<std::string> params = ChatHelper::splitString(str, "|");
 
    for (std::string param : params)
@@ -183,19 +188,19 @@ std::vector<LosModifierStruct> TellLosAction::ParseLosModifiers(const std::strin
 
       if (param.find(FILTER_NAME_PARAM) == 0)
       {
-         mods.emplace_back(LosModifierStruct{ LosModifierType::FilterName, param.substr(FILTER_NAME_PARAM.size())});
+         mods.emplace_back(LosModifierStruct{ LosModifierType::FilterName, param.substr(FILTER_NAME_PARAM.size()) });
       }
       else if (param.find("sort:range") == 0)
       {
-         mods.emplace_back(LosModifierStruct{ LosModifierType::SortRange, ""});
+         mods.emplace_back(LosModifierStruct{ LosModifierType::SortRange, "" });
       }
       else if (param.find("filter:first") == 0)
       {
-         mods.emplace_back(LosModifierStruct{ LosModifierType::FilterFirst, ""});
+         mods.emplace_back(LosModifierStruct{ LosModifierType::FilterFirst, "" });
       }
       else if (param.find("show:range") == 0)
       {
-         mods.emplace_back(LosModifierStruct{ LosModifierType::ShowRange, ""});
+         mods.emplace_back(LosModifierStruct{ LosModifierType::ShowRange, "" });
       }
    }
 

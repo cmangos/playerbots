@@ -12,6 +12,8 @@
 
 using namespace ai;
 
+constexpr std::string_view LOS_GOS_PARAM = "los gos";
+
 SpellCastResult BotUseItemSpell::ForceSpellStart(SpellCastTargets const* targets, Aura* triggeredByAura)
 {
     WorldObject* truecaster = GetTrueCaster();
@@ -244,11 +246,11 @@ bool UseAction::Execute(Event& event)
             }
         }
     }
-    else if (ChatHelper::startswith(name, "los gos"))
+    else if (name.find(LOS_GOS_PARAM) == 0)
     {
        std::list<GameObject*> gos;
-       std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(name.substr(7));
-       gos = TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los")), mods);
+       std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(name.substr(LOS_GOS_PARAM.size()));
+       gos = TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los")), mods);
 
        for (GameObject* go : gos)
        {

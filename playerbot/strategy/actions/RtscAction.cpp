@@ -1,4 +1,5 @@
 
+#include <iomanip>
 #include "playerbot/playerbot.h"
 #include "RtscAction.h"
 
@@ -88,9 +89,176 @@ bool RTSCAction::Execute(Event& event)
 
 		return true;
 	}
-	if (command.find("save ") != std::string::npos || command == "move")
+	if (command.find("save ") == 0 || command == "move")
 	{	
 		SET_AI_VALUE(std::string, "RTSC next spell action", command);
+
+		return true;
+	}
+	if (command.find("file ") != std::string::npos)
+	{
+		std::vector<std::string> args = ChatHelper::splitString(command, " ");
+
+		//save/load file_name <position_name_part> <bot_name_part>
+
+		if (args.size() < 3)
+		{
+			ai->TellPlayerNoFacing(requester, "rtsc file needs atleast 2 parameters: rtsc file save/load file_name optional:position_name_part optional:bot_name_part");
+			return false;
+		}
+		if (args.size() < 4)
+		{
+			args.push_back("*"); //position
+		}
+
+		bool filePerBot = args[2].find("BOTNAME") != std::string::npos;
+
+		if (args[1] == "save")
+		{
+			if(!filePerBot)
+				sPlayerbotAIConfig.openLog(args[2], "w", true);
+
+			for (ObjectGuid guid : AI_VALUE(std::list<ObjectGuid>, "group members"))
+			{
+				Player* player = sObjectMgr.GetPlayer(guid);
+
+				if (!player)
+					continue;
+
+				if (player->GetMapId() != bot->GetMapId())
+					continue;
+
+				if (!player->GetPlayerbotAI())
+					continue;
+
+				if (args.size() < 5 && player != bot)
+					continue;
+
+				std::string playerName = player->GetName();
+
+				if (args.size() == 5 && args[4] != "*" && playerName.find(args[4]) == std::string::npos)
+					continue;
+
+				std::string fileName = args[2];
+
+				if (filePerBot)
+				{
+					PlayerbotTextMgr::replaceAll(fileName, "BOTNAME", playerName);
+					sPlayerbotAIConfig.openLog(fileName, "w", true);
+				}
+
+				uint32 cnt = 0;
+
+				std::set<std::string> names = context->GetValues();
+				for (auto name : names)
+				{
+					UntypedValue* value = context->GetUntypedValue(name);
+					if (!value)
+						continue;
+
+					if (name.find("RTSC saved location::") != 0)
+						continue;
+
+					if (args[3] != "*" && name.find(args[3]) == std::string::npos)
+						continue;
+
+					WorldPosition point = PAI_VALUE(WorldPosition, name);
+
+					//BotName,LocationName,location
+
+					std::ostringstream out;
+
+						out << ((args.size() == 5 && !filePerBot) ? playerName.c_str() : "BOTNAME") << ",";
+
+					out << name.substr(std::string("RTSC saved location::").size()) << ",";
+					
+					out << std::fixed << std::setprecision(2);
+					out << point.print().c_str();
+					
+					sPlayerbotAIConfig.log(fileName, out.str().c_str());
+
+					cnt++;
+				}
+
+				if(cnt)
+					ai->TellPlayerNoFacing(requester, playerName + " " + std::to_string(cnt) + " points saved to " + fileName);
+			}
+		}
+		else
+		{
+			for (ObjectGuid guid : AI_VALUE(std::list<ObjectGuid>, "group members"))
+			{
+				Player* player = sObjectMgr.GetPlayer(guid);
+
+				if (!player)
+					continue;
+
+				if (player->GetMapId() != bot->GetMapId())
+					continue;
+
+				if (!player->GetPlayerbotAI())
+					continue;
+
+				if (args.size() < 5 && player != bot)
+					continue;
+
+				std::string playerName = player->GetName();
+
+				if (args.size() == 5 && args[5] != "*" && playerName.find(args[5]) == std::string::npos)
+					continue;
+
+				std::string fileName = args[2];
+
+				if (filePerBot)
+				{
+					PlayerbotTextMgr::replaceAll(fileName, "BOTNAME", playerName);
+				}
+
+				std::string m_logsDir = sConfig.GetStringDefault("LogsDir");
+				if (!m_logsDir.empty())
+				{
+					if ((m_logsDir.at(m_logsDir.length() - 1) != '/') && (m_logsDir.at(m_logsDir.length() - 1) != '\\'))
+						m_logsDir.append("/");
+				}
+				std::ifstream in(m_logsDir + fileName, std::ifstream::in);
+
+				if (in.fail())
+					continue;
+				
+				uint32 cnt = 0;
+
+				do
+				{
+					std::string line;
+					std::getline(in, line);
+
+					if (!line.length())
+						continue;
+
+					Tokens tokens = StrSplit(line, ",");
+
+					//BotName,LocationName,location
+
+					if (tokens.size() != 3)
+						continue;
+
+					if (tokens[0] != "BOTNAME" && tokens[0] != playerName)
+						continue;
+
+					if (args[3] != "*" && tokens[1].find(args[3]) == std::string::npos)
+						continue;
+
+					WorldPosition p(tokens[2]);
+
+					SET_PAI_VALUE2(WorldPosition, "RTSC saved location", tokens[1], p);
+
+					cnt++;
+				} while (in.good());
+
+				if (cnt)
+					ai->TellPlayerNoFacing(requester, playerName + " " + std::to_string(cnt) + " points loaded from " + fileName);
+			}
+		}
 
 		return true;
 	}

@@ -711,9 +711,9 @@ std::string PlayerbotAIConfig::GetTimestampStr()
     return std::string(buf);
 }
 
-bool PlayerbotAIConfig::openLog(std::string fileName, char const* mode)
+bool PlayerbotAIConfig::openLog(std::string fileName, char const* mode, bool haslog)
 {
-    if (!hasLog(fileName))
+    if (!haslog && !hasLog(fileName))
         return false;
      
     auto logFileIt = logFiles.find(fileName);

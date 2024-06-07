@@ -13,6 +13,8 @@
 
 using namespace ai;
 
+constexpr std::string_view LOS_GOS_PARAM = "los gos";
+
 std::vector<std::string> split(const std::string& s, char delim);
 char* strstri(const char* haystack, const char* needle);
 
@@ -96,25 +98,8 @@ bool GoAction::Execute(Event& event)
         return TravelTo(dest, requester);
     }
 
-    std::list<ObjectGuid> goguids = ChatHelper::parseGameobjects(param);
-    bool bInternalLosGosCommand = ChatHelper::startswith(param, "los gos");
-
-    if (goguids.size() || bInternalLosGosCommand)
-    {
-       std::list<GameObject*> gos;
-
-       if (bInternalLosGosCommand)
-       {
-          std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(param.substr(7));
-          gos = TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los")), mods);
-       }
-       else
-       {
-          gos = TellLosAction::GoGuidListToObjList(ai, goguids);
-       }
-
-       return MoveToGo(gos, requester);
-    }
+    if (MoveToGo(param, requester))
+        return true;
 
     if (MoveToUnit(param, requester))
         return true;
@@ -300,38 +285,52 @@ bool GoAction::TravelTo(TravelDestination* dest, Player* requester) const
     }
 }
 
-//todo: could be a part of bot API
-inline WorldLocation GameObjectToBotLocation(const GameObject& go)
+bool GoAction::MoveToGo(std::string& param, Player* requester)
 {
-   WorldLocation loc;
-   go.GetPosition(loc);
-   loc.coord_z += 0.5f;
-   return loc;
-}
-
-bool GoAction::MoveToGo(const std::list<GameObject*>& gos, Player* requester)
-{
-    for (GameObject* go : gos)
-    {
-        if (go && sServerFacade.isSpawned(go))
-        {
-            if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(bot, go), sPlayerbotAIConfig.reactDistance))
+   auto loopthroughobjects = [&](const std::list<GameObject*>& gos) -> bool
+      {
+         for (GameObject* go : gos)
+         {
+            if (go && sServerFacade.isSpawned(go))
             {
-                ai->TellError(requester, "It is too far away");
-                return false;
+               if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(bot, go), sPlayerbotAIConfig.reactDistance))
+               {
+                  ai->TellError(requester, "It is too far away");
+                  return false;
+               }
+
+               std::ostringstream out; out << "Moving to " << ChatHelper::formatGameobject(go);
+               ai->TellPlayerNoFacing(requester, out.str());
+
+               WorldPosition pos;
+               go->GetPosition(pos);
+               const float angle = GetFollowAngle();
+               const float distance = INTERACTION_DISTANCE;
+               pos += WorldPosition(0, cos(angle)* distance, sin(angle)* distance, 0.5f);
+
+               UpdateStrategyPosition(pos);
+
+               return MoveTo(pos);
             }
+         }
 
-            std::ostringstream out; out << "Moving to " << ChatHelper::formatGameobject(go);
-            ai->TellPlayerNoFacing(requester, out.str());
-            
-            WorldLocation location = GetNearLocation(GameObjectToBotLocation(*go), INTERACTION_DISTANCE);
+         return false;
+      };
 
-            // todo: could be incorporated at the higher level
-            UpdateStrategyPosition(location);
+   std::list<ObjectGuid> goguids = ChatHelper::parseGameobjects(param);
 
-            return MoveTo(location);
-        }
-    }
+   if (goguids.size())
+   {
+      return loopthroughobjects(TellLosAction::GoGuidListToObjList(ai, goguids));
+   }
+
+   if (param.find(LOS_GOS_PARAM) == 0)
+   {
+      std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(param.substr(LOS_GOS_PARAM.size()));
+
+      return loopthroughobjects(TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, *context->GetValue<std::list<ObjectGuid> >("nearest game objects no los")), mods));
+   }
+
     return false;
 }
 

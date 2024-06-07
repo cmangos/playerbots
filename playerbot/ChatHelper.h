@@ -82,8 +82,6 @@ namespace ai
         static std::vector<std::string> splitString(const std::string& text, const std::string& delimiter);
         static std::vector<std::string> findSubstringsBetween(const std::string& input, const std::string& start, const std::string& end, bool includeDelimiters = false);
         static void replaceSubstring(std::string& str, const std::string& oldStr, const std::string& newStr);
-        static bool startswith(const std::string& str, const std::string& prefix);
-        static std::string trim(const std::string& str);
 
     private:
         static std::map<std::string, uint32> consumableSubClasses;

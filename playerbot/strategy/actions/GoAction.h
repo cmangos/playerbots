@@ -35,7 +35,7 @@ namespace ai
         bool LeaderAlreadyTraveling(TravelDestination* dest) const;
         bool TellHowToGo(TravelDestination* dest, Player* requester) const;
         bool TravelTo(TravelDestination* dest, Player* requester) const;
-        bool MoveToGo(const std::list<GameObject*>& gos, Player* requester);
+        bool MoveToGo(std::string& param, Player* requester);
         bool MoveToUnit(std::string& param, Player* requester);
         bool MoveToGps(std::string& param, Player* requester);
         bool MoveToMapGps(std::string& param, Player* requester);

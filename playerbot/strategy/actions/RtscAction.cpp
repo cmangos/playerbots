@@ -1,5 +1,6 @@
 
 #include <iomanip>
+#include <fstream>
 #include "playerbot/playerbot.h"
 #include "RtscAction.h"
 

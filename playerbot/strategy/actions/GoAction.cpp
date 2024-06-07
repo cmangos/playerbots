@@ -9,8 +9,11 @@
 #include "MotionGenerators/PathFinder.h"
 #include "ChooseTravelTargetAction.h"
 #include "playerbot/TravelMgr.h"
+#include "TellLosAction.h"
 
 using namespace ai;
+
+constexpr std::string_view LOS_GOS_PARAM = "los gos";
 
 std::vector<std::string> split(const std::string& s, char delim);
 char* strstri(const char* haystack, const char* needle);
@@ -284,26 +287,50 @@ bool GoAction::TravelTo(TravelDestination* dest, Player* requester) const
 
 bool GoAction::MoveToGo(std::string& param, Player* requester)
 {
-    std::list<ObjectGuid> gos = ChatHelper::parseGameobjects(param);
-    if (gos.empty())
-        return false;
-
-    for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); ++i)
-    {
-        GameObject* go = ai->GetGameObject(*i);
-        if (go && sServerFacade.isSpawned(go))
-        {
-            if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(bot, go), sPlayerbotAIConfig.reactDistance))
+   auto loopthroughobjects = [&](const std::list<GameObject*>& gos) -> bool
+      {
+         for (GameObject* go : gos)
+         {
+            if (go && sServerFacade.isSpawned(go))
             {
-                ai->TellError(requester, "It is too far away");
-                return false;
-            }
+               if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(bot, go), sPlayerbotAIConfig.reactDistance))
+               {
+                  ai->TellError(requester, "It is too far away");
+                  return false;
+               }
 
-            std::ostringstream out; out << "Moving to " << ChatHelper::formatGameobject(go);
-            ai->TellPlayerNoFacing(requester, out.str());
-            return MoveNear(bot->GetMapId(), go->GetPositionX(), go->GetPositionY(), go->GetPositionZ() + 0.5f, ai->GetRange("follow"));
-        }
-    }
+               std::ostringstream out; out << "Moving to " << ChatHelper::formatGameobject(go);
+               ai->TellPlayerNoFacing(requester, out.str());
+
+               WorldPosition pos;
+               go->GetPosition(pos);
+               const float angle = GetFollowAngle();
+               const float distance = INTERACTION_DISTANCE;
+               pos += WorldPosition(0, cos(angle)* distance, sin(angle)* distance, 0.5f);
+
+               UpdateStrategyPosition(pos);
+
+               return MoveTo(pos);
+            }
+         }
+
+         return false;
+      };
+
+   std::list<ObjectGuid> goguids = ChatHelper::parseGameobjects(param);
+
+   if (goguids.size())
+   {
+      return loopthroughobjects(TellLosAction::GoGuidListToObjList(ai, goguids));
+   }
+
+   if (param.find(LOS_GOS_PARAM) == 0)
+   {
+      std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(param.substr(LOS_GOS_PARAM.size()));
+
+      return loopthroughobjects(TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los")), mods));
+   }
+
     return false;
 }
 
@@ -453,4 +480,26 @@ bool GoAction::MoveToPosition(std::string& param, Player* requester)
         return MoveNear(bot->GetMapId(), pos.x, pos.y, pos.z + 0.5f, ai->GetRange("follow"));
     }
     return false;
+}
+
+void GoAction::UpdateStrategyPosition(const WorldPosition& position)
+{
+   if (ai->HasStrategy("stay", ai->GetState()))
+   {
+      PositionMap& posMap = AI_VALUE(PositionMap&, "position");
+      PositionEntry& stayPosition = posMap["stay"];
+
+      stayPosition.Set(position.getX(), position.getY(), position.getZ(), position.getMapId());
+      posMap["stay"] = stayPosition;
+      posMap["return"] = stayPosition;
+   }
+   else if (ai->HasStrategy("guard", ai->GetState()))
+   {
+      PositionMap& posMap = AI_VALUE(PositionMap&, "position");
+      PositionEntry& guardPosition = posMap["guard"];
+
+      guardPosition.Set(position.getX(), position.getY(), position.getZ(), position.getMapId());
+      posMap["guard"] = guardPosition;
+      posMap["return"] = guardPosition;
+   }
 }

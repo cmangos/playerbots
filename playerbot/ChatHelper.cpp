@@ -717,7 +717,7 @@ bool ChatHelper::parseItemClass(std::string text, uint32 *itemClass, uint32 *ite
     return false;
 }
 
-uint32 ChatHelper::parseSlot(std::string text)
+uint32 ChatHelper::parseSlot(const std::string& text)
 {
     if (slots.find(text) != slots.end())
         return slots[text];

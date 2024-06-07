@@ -8,8 +8,11 @@
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/TravelMgr.h"
 #include "CheckMountStateAction.h"
+#include "TellLosAction.h"
 
 using namespace ai;
+
+constexpr std::string_view LOS_GOS_PARAM = "los gos";
 
 SpellCastResult BotUseItemSpell::ForceSpellStart(SpellCastTargets const* targets, Aura* triggeredByAura)
 {
@@ -242,6 +245,21 @@ bool UseAction::Execute(Event& event)
                 }
             }
         }
+    }
+    else if (name.find(LOS_GOS_PARAM) == 0)
+    {
+       std::list<GameObject*> gos;
+       std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(name.substr(LOS_GOS_PARAM.size()));
+       gos = TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los")), mods);
+
+       for (GameObject* go : gos)
+       {
+          if (go)
+          {
+             targetGameObject = go;
+             break;
+          }
+       }
     }
     else
     {

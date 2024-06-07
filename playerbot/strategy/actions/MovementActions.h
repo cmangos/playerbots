@@ -18,6 +18,12 @@ namespace ai
         bool ChaseTo(WorldObject *obj, float distance = 0.0f, float angle = 0.0f);
         bool MoveNear(uint32 mapId, float x, float y, float z, float distance = sPlayerbotAIConfig.contactDistance);
         bool FlyDirect(WorldPosition &startPosition,  WorldPosition &endPosition , WorldPosition& movePosition, TravelPath movePath, bool idle);
+
+        inline bool MoveTo(const WorldLocation& location, bool idle = false, bool react = false, bool noPath = false, bool ignoreEnemyTargets = false)
+        {
+           return MoveTo(location.mapid, location.coord_x, location.coord_y, location.coord_z, idle, react, noPath, ignoreEnemyTargets);
+        }
+
         bool MoveTo(uint32 mapId, float x, float y, float z, bool idle = false, bool react = false, bool noPath = false, bool ignoreEnemyTargets = false);
         bool MoveTo(Unit* target, float distance = 0.0f);
         bool MoveNear(WorldObject* target, float distance = sPlayerbotAIConfig.contactDistance);

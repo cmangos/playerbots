@@ -11,6 +11,7 @@ namespace ai
 		GoAction(PlayerbotAI* ai) : MovementAction(ai, "go") {}
 		virtual bool Execute(Event& event) override;
         virtual bool isPossible() override { return true; }
+        virtual bool isUseful() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "go"; } //Must equal iternal name
@@ -39,5 +40,7 @@ namespace ai
         bool MoveToGps(std::string& param, Player* requester);
         bool MoveToMapGps(std::string& param, Player* requester);
         bool MoveToPosition(std::string& param, Player* requester);
+
+        void UpdateStrategyPosition(const WorldPosition& position);
 	};
 }

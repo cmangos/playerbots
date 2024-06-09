@@ -179,7 +179,7 @@ bool ReturnToStayPositionAction::isPossible()
     if (stayPosition.isSet())
     {
         const float distance = bot->GetDistance(stayPosition.x, stayPosition.y, stayPosition.z);
-        if (distance > sPlayerbotAIConfig.reactDistance && 1==2)
+        if (distance > sPlayerbotAIConfig.reactDistance)
         {
             ai->TellError(GetMaster(), "The stay position is too far to return. I am going to stay where I am now");
             

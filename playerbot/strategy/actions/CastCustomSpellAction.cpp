@@ -665,7 +665,7 @@ bool DisenchantRandomItemAction::Execute(Event& event)
 
         if(didCast)
         {
-            ai->TellPlayer(requester, "Disenchanting " + chat->formatQItem(item), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            ai->TellPlayer(requester, "Disenchanting " + chat->formatItem(ObjectMgr::GetItemPrototype(item)), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
 
         return didCast;

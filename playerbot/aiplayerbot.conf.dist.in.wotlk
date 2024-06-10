@@ -720,6 +720,7 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.SelfBotLevel = 1
 
 # Account/character names that are either, always online as bot (SelfBotLevel < 4) or prevented from being always online as bot (SelfBotLevel = 4) 
+# When AiPlayerbot.BotAutologin is set to 2 these characters only log in on player (on the same account) logs in.
 # AiPlayerbot.ToggleAlwaysOnlineAccounts =
 # AiPlayerbot.ToggleAlwaysOnlineChars =
 

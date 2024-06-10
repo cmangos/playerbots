@@ -70,7 +70,7 @@ public:
 
     uint32 openGoSpell;
     bool randomBotAutologin;
-    bool botAutologin;
+    uint32 botAutologin;
     std::string randomBotMapsAsString;
     std::vector<uint32> randomBotMaps;
     std::list<uint32> randomBotQuestItems;

@@ -170,7 +170,7 @@ bool PlayerbotAIConfig::Initialize()
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotQuestIds", "7848,3802,5505,6502,7761,9378"), randomBotQuestIds);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.ImmuneSpellIds", ""), immuneSpellIds);
 
-    botAutologin = config.GetBoolDefault("AiPlayerbot.BotAutologin", false);
+    botAutologin = config.GetIntDefault("AiPlayerbot.BotAutologin", false);
     randomBotAutologin = config.GetBoolDefault("AiPlayerbot.RandomBotAutologin", true);
     minRandomBots = config.GetIntDefault("AiPlayerbot.MinRandomBots", 50);
     maxRandomBots = config.GetIntDefault("AiPlayerbot.MaxRandomBots", 200);

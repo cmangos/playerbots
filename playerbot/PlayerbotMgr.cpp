@@ -1275,7 +1275,7 @@ void PlayerbotMgr::OnPlayerLogin(Player* player)
 
     uint32 accountId = player->GetSession()->GetAccountId();
     auto results = CharacterDatabase.PQuery(
-        "SELECT name FROM characters WHERE account = '%u'",
+        "SELECT guid, name FROM characters WHERE account = '%u'",
         accountId);
     if (results)
     {
@@ -1285,7 +1285,8 @@ void PlayerbotMgr::OnPlayerLogin(Player* player)
         {
             Field* fields = results->Fetch();
             if (first) first = false; else out << ",";
-            out << fields[0].GetString();
+            if(sPlayerbotAIConfig.botAutologin == 2 && !sPlayerbotAIConfig.IsFreeAltBot(fields[0].GetUInt32())) continue;
+            out << fields[1].GetString();
         } while (results->NextRow());
 
         HandlePlayerbotCommand(out.str().c_str(), player);

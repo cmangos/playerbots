@@ -91,7 +91,7 @@ bool ShouldSpiritHealerValue::Calculate()
     uint32 deathCount = AI_VALUE(uint32, "death count");
     uint8 durability = AI_VALUE(uint8, "durability");
 
-    if (!ai->HasActivePlayerMaster()) //Only use spirit healers with direct command with active master.
+    if (ai->HasActivePlayerMaster()) //Only use spirit healers with direct command with active master.
         return false;
 
     //Nothing to lose

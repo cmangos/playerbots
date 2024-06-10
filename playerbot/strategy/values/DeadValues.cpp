@@ -95,7 +95,7 @@ bool ShouldSpiritHealerValue::Calculate()
         return false;
 
     //Nothing to lose
-    if (deathCount > 2 && durability < 10 && ai->HasAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS, bot))
+    if (deathCount > 2 && durability < 10 && (ai->HasAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS, bot) || ai->HasCheat(BotCheatMask::repair)))
         return true;
 
     Corpse* corpse = bot->GetCorpse();

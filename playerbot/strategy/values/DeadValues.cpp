@@ -113,8 +113,8 @@ bool ShouldSpiritHealerValue::Calculate()
     if (deathCount < 5)
         return false;
 
-    //Try to get to a safe place.
-    if (deathCount > 15)
+    //Try to get to a safe place 
+    if ((deathCount > 10 && durability < 10) || deathCount > 15)
         return true;
 
     //If there are enemies near grave and corpse we go to corpse first.

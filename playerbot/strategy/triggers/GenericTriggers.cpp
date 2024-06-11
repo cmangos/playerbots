@@ -6,6 +6,8 @@
 #include "playerbot/strategy/values/PositionValue.h"
 #include "playerbot/strategy/values/AoeValues.h"
 
+#include <regex>
+
 using namespace ai;
 
 bool NoManaTrigger::IsActive()
@@ -481,8 +483,76 @@ bool DeflectSpellTrigger::IsActive()
 
 bool HasAuraTrigger::IsActive()
 {
-	return ai->HasAura(getName(), GetTarget(), false, false, -1, false, 0, auraTypeId);
+   if (!name.empty())
+	{
+      return ai->HasAura(name, GetTarget(), false, false, -1, false, 0, auraTypeId);
+   }
+
+   std::string str = getQualifier();
+   std::regex pattern(R"(spellid::(\d+)::([^:]*)::(\d+))");
+   std::smatch match;
+
+   if (std::regex_search(str, match, pattern) && match.size() == 4)
+   {
+      uint32 spell_id = atoi(match[1].str().c_str());
+
+      if (Aura* aura = ai->GetAura(spell_id, GetTarget()))
+      {
+         uint32 count = atoi(match[3].str().c_str());
+         uint32 stack_size = aura->GetStackAmount();
+         std::string comp_symb = match[2].str();
+
+         if (comp_symb == "equal")
+         {
+            return stack_size == count;
+         }
+         else if (comp_symb == "greater or equal")
+         {
+            return stack_size >= count;
+         }
+         else if (comp_symb == "lesser or equal")
+         {
+            return stack_size <= count;
+         }
+         else if (comp_symb == "greater")
+         {
+            return stack_size > count;
+         }
+         else if (comp_symb == "lesser")
+         {
+            return stack_size < count;
+         }
+         else
+         {
+            return false;
+         }
+      }
+   };
+
+   pattern = R"(spellid::(\d+))";
+
+   if (std::regex_search(str, match, pattern) && match.size() == 2)
+   {
+
+      uint32 spell_id = atoi(match[1].str().c_str());
+      return ai->HasAura(spell_id, GetTarget());
+   }
+
+   return false;
 }
+
+std::string HasAuraTrigger::getName()
+{
+   if (!name.empty())
+   {
+      return name;
+   }
+
+   std::ostringstream ss;
+   ss << "has aura with " << getQualifier();
+   return ss.str();
+}
+
 
 bool HasNoAuraTrigger::IsActive()
 {

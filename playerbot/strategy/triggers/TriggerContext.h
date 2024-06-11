@@ -98,6 +98,7 @@ namespace ai
             creators["melee very high aoe"] = &TriggerContext::melee_very_high_aoe;
 
             creators["has area debuff"] = &TriggerContext::HasAreaDebuff;
+            creators["has aura"] = [](PlayerbotAI* ai) { return new HasAuraTrigger(ai); };
 
             creators["enemy out of melee"] = &TriggerContext::EnemyOutOfMelee;
             creators["enemy out of spell"] = &TriggerContext::EnemyOutOfSpell;

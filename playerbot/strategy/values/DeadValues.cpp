@@ -79,11 +79,11 @@ GuidPosition BestGraveyardValue::Calculate()
         return AI_VALUE2(GuidPosition, "graveyard", "travel");
 
     //Revive near Inn.
-    if (deathCount < 10)
+    if (deathCount < 15)
         return AI_VALUE2(GuidPosition, "graveyard", "home bind");
 
     //Revive at spawn.
-    return AI_VALUE2(GuidPosition, "graveyard", "start");    
+    return AI_VALUE2(GuidPosition, "graveyard", "start");
 }
 
 bool ShouldSpiritHealerValue::Calculate()

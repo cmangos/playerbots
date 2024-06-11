@@ -228,6 +228,7 @@ public:
 
     int commandServerPort;
     bool perfMonEnabled;
+    bool bExplicitDbStoreSave = false;
 
     std::string GetValue(std::string name);
     void SetValue(std::string name, std::string value);

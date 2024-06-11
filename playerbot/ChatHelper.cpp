@@ -800,6 +800,9 @@ std::string ChatHelper::formatAngle(float angle)
 
     float headingAngle = angle / M_PI_F * 180;
 
+    if (headingAngle < 0)
+        headingAngle += 360;
+
     return headings[int32(round(headingAngle / 45)) % 8];
 }
 

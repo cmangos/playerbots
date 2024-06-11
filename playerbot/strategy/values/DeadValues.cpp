@@ -75,7 +75,7 @@ GuidPosition BestGraveyardValue::Calculate()
         return AI_VALUE2(GuidPosition, "graveyard", "self");
 
     //Revive near travel target if it's far away from last death.
-    if (AI_VALUE2(GuidPosition, "graveyard", "travel") && AI_VALUE2(GuidPosition, "graveyard", "travel").fDist(corpse) > sPlayerbotAIConfig.sightDistance)
+    if (AI_VALUE2(GuidPosition, "graveyard", "travel") && AI_VALUE2(GuidPosition, "graveyard", "travel").fDist(corpse) > sPlayerbotAIConfig.reactDistance)
         return AI_VALUE2(GuidPosition, "graveyard", "travel");
 
     //Revive near Inn.

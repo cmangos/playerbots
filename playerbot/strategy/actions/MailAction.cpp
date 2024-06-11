@@ -84,6 +84,9 @@ public:
             return false;
         }
 
+        copper = 0;
+        items.clear();
+
         ObjectGuid mailbox = FindMailbox(ai);
         if (mail->money)
         {

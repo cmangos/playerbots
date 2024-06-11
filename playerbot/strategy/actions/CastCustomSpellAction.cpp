@@ -49,17 +49,33 @@ bool CastCustomSpellAction::Execute(Event& event)
         return true;
     }
 
+    // Grab the first game object or unit from the parameters as target.
     GameObject* gameObjectTarget = nullptr;
     std::list<ObjectGuid> gos = chat->parseGameobjects(text);
     if (!gos.empty())
     {
         for (auto go : gos)
         {
-            if (!gameObjectTarget)
+            if (go.IsGameObject())
+            {
                 gameObjectTarget = ai->GetGameObject(go);
 
-            if(gameObjectTarget)
-                chat->eraseAllSubStr(text, chat->formatWorldobject(gameObjectTarget));
+                if (gameObjectTarget)
+                {
+                    chat->eraseAllSubStr(text, chat->formatWorldobject(gameObjectTarget));
+                    break;
+                }
+            }
+            else if (go.IsUnit())
+            {
+                target = ai->GetUnit(go);
+
+                if (target)
+                {
+                    chat->eraseAllSubStr(text, chat->formatWorldobject(target));
+                    break;
+                }
+            }
         }
 
         ltrim(text);

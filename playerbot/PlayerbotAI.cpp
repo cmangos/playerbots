@@ -887,12 +887,12 @@ void PlayerbotAI::OnDeath()
     {
         StopMoving();
 
-        //Death Count to prevent skeleton piles
         Player* master = GetMaster();
+        AiObjectContext* context = aiObjectContext;
         if (!HasActivePlayerMaster() && !bot->InBattleGround())
         {
-            uint32 dCount = aiObjectContext->GetValue<uint32>("death count")->Get();
-            aiObjectContext->GetValue<uint32>("death count")->Set(++dCount);
+
+            SET_AI_VALUE(uint32, "death count", AI_VALUE(uint32, "death count") + 1);
 
             if (sPlayerbotAIConfig.hasLog("deaths.csv"))
             {
@@ -954,12 +954,14 @@ void PlayerbotAI::OnDeath()
             }
         }
 
-        aiObjectContext->GetValue<Unit*>("current target")->Set(nullptr);
-        aiObjectContext->GetValue<Unit*>("enemy player target")->Set(nullptr);
-        aiObjectContext->GetValue<Unit*>("pull target")->Set(nullptr);
-        aiObjectContext->GetValue<ObjectGuid>("attack target")->Set(ObjectGuid());
-        aiObjectContext->GetValue<LootObject>("loot target")->Set(LootObject());
-        aiObjectContext->GetValue<time_t>("combat start time")->Set(0);
+        SET_AI_VALUE(Unit*, "current target", nullptr);
+        SET_AI_VALUE(Unit*, "enemy player target", nullptr);
+        SET_AI_VALUE(Unit*, "pull target", nullptr);
+        SET_AI_VALUE(ObjectGuid, "attack target", ObjectGuid());
+        SET_AI_VALUE(LootObject, "loot target", LootObject());
+        SET_AI_VALUE(time_t, "combat start time", 0);
+        SET_AI_VALUE2(bool, "manual bool", "enemies near corpse", false);
+        SET_AI_VALUE2(bool, "manual bool", "enemies near graveyard", false);
         ChangeEngine(BotState::BOT_STATE_DEAD);
     }
 }

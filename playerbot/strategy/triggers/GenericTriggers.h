@@ -654,12 +654,13 @@ namespace ai
         AmmoCountTrigger(PlayerbotAI* ai, std::string item, uint32 count = 1, int interval = 30) : ItemCountTrigger(ai, item, count, interval) {}
     };
 
-	class HasAuraTrigger : public Trigger 
+	class HasAuraTrigger : public Trigger, public Qualified
     {
 	public:
-		HasAuraTrigger(PlayerbotAI* ai, std::string spell, int interval = 1, int auraTypeId = TOTAL_AURAS) : Trigger(ai, spell, interval), auraTypeId(auraTypeId) {}
+		HasAuraTrigger(PlayerbotAI* ai, std::string spell = "", int interval = 1, int auraTypeId = TOTAL_AURAS) : Trigger(ai, spell, interval), Qualified(), auraTypeId(auraTypeId) {}
 		virtual std::string GetTargetName() override { return "self target"; }
 		virtual bool IsActive() override;
+      virtual std::string getName() override;
 
     protected:
         int auraTypeId;

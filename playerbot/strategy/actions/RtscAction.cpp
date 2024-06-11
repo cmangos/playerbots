@@ -12,6 +12,11 @@ bool RTSCAction::Execute(Event& event)
 	std::string command = event.getParam();
 	Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
+	if (command.empty() && !qualifier.empty())
+	{
+		command = qualifier;
+	}
+
 	if (!requester)
 		return false;
 

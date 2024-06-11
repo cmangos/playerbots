@@ -341,4 +341,15 @@ namespace ai
 
         virtual std::string Format() override;
     };
+
+    class BoolManualSetValue : public ManualSetValue<bool>, public Qualified
+    {
+    public:
+        BoolManualSetValue(PlayerbotAI* ai, bool defaultValue = false, std::string name = "manual bool") : ManualSetValue<bool>(ai, defaultValue, name), Qualified() {};
+
+        virtual std::string Format()
+        {
+            return this->value ? "true" : "false";
+        }
+    };
 }

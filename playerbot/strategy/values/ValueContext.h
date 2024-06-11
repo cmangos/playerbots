@@ -349,6 +349,7 @@ namespace ai
             creators["near leader"] = &ValueContext::near_leader;
             creators["and"] = &ValueContext::and_value;
             creators["not"] = &ValueContext::not_value;
+            creators["manual bool"] = &ValueContext::manual_bool;
             creators["group count"] = &ValueContext::group_count;
             creators["group and"] = &ValueContext::group_and;
             creators["group or"] = &ValueContext::group_or;
@@ -634,6 +635,7 @@ namespace ai
         static UntypedValue* near_leader(PlayerbotAI* ai) { return new IsNearLeaderValue(ai); }
         static UntypedValue* and_value(PlayerbotAI* ai) { return new BoolAndValue(ai); }
         static UntypedValue* not_value(PlayerbotAI* ai) { return new NotValue(ai); }
+        static UntypedValue* manual_bool(PlayerbotAI* ai) { return new BoolManualSetValue(ai); }
         static UntypedValue* group_count(PlayerbotAI* ai) { return new GroupBoolCountValue(ai); }
         static UntypedValue* group_and(PlayerbotAI* ai) { return new GroupBoolANDValue(ai); }
         static UntypedValue* group_or(PlayerbotAI* ai) { return new GroupBoolORValue(ai); }

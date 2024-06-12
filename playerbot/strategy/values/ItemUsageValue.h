@@ -102,6 +102,7 @@ namespace ai
         static std::vector<uint32> SpellsUsingItem(uint32 itemId, Player* bot);
 
         static std::string GetConsumableType(ItemPrototype const* proto, bool hasMana);
+        static uint32 GetRecipeSpell(ItemPrototype const* proto);
 	};
 
     class ForceItemUsageValue : public ManualSetValue<ForceItemUsage>, public Qualified

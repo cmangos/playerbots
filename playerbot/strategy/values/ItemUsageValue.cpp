@@ -134,12 +134,12 @@ ItemUsage ItemUsageValue::Calculate()
 
             if (proto->Class == ITEM_CLASS_TRADE_GOODS || proto->Class == ITEM_CLASS_MISC || proto->Class == ITEM_CLASS_REAGENT)
                 needItem = IsItemNeededForUsefullCraft(proto, lowBagSpace);
-            else if(proto->Class == ITEM_CLASS_RECIPE)
+            else if (proto->Class == ITEM_CLASS_RECIPE)
             {
-                if (bot->HasSpell(proto->Spells[2].SpellId))
+                if (bot->HasSpell(GetRecipeSpell(proto)))
                     needItem = false;
                 else
-                    needItem = bot->CanUseItem(proto) == EQUIP_ERR_OK; 
+                    needItem = bot->CanUseItem(proto) == EQUIP_ERR_OK;
             }
         }    
 
@@ -609,7 +609,7 @@ bool ItemUsageValue::IsItemUsefulForSkill(ItemPrototype const* proto)
     }
     case ITEM_CLASS_RECIPE:
     {
-        if (bot->HasSpell(proto->Spells[2].SpellId))
+        if (bot->HasSpell(GetRecipeSpell(proto)))
             break;
 
         switch (proto->SubClass)
@@ -808,4 +808,28 @@ std::string ItemUsageValue::GetConsumableType(ItemPrototype const* proto, bool h
     }
 
     return "";
+}
+
+uint32 ItemUsageValue::GetRecipeSpell(ItemPrototype const* proto)
+{
+    if (proto->Spells[2].SpellId)
+        return proto->Spells[2].SpellId;
+
+    if (proto->Spells[0].SpellId)
+    {
+        const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(proto->Spells[0].SpellId);
+
+        if (!pSpellInfo)
+            return 0;
+
+        for (int j = 0; j < 3; ++j)
+        {
+            if (pSpellInfo->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+            {
+                if (pSpellInfo->EffectTriggerSpell[j])
+                    return pSpellInfo->EffectTriggerSpell[j];
+            }
+        }
+    }
+    return 0;
 }

@@ -185,13 +185,24 @@ bool CastCustomSpellAction::Execute(Event& event)
     if (!pSpellInfo->EffectItemType[0])
     {
         replyStr << BOT_TEXT("cast_spell_command_spell");
+
+        replyArgs["%spell"] = ChatHelper::formatSpell(pSpellInfo);
     }
     else
     {
         replyStr << BOT_TEXT("cast_spell_command_craft");
-    }
 
-    replyArgs["%spell"] = ChatHelper::formatSpell(pSpellInfo);
+        uint32 newItemId = pSpellInfo->EffectItemType[0];
+
+        if (!newItemId)
+            replyArgs["%spell"] = ChatHelper::formatSpell(pSpellInfo);
+        else
+        {
+
+            ItemPrototype const* proto = ObjectMgr::GetItemPrototype(newItemId);
+            replyArgs["%spell"] = ChatHelper::formatItem(proto);
+        }
+    }    
 
     if (bot->GetTrader())
     {

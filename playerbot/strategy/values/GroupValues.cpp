@@ -142,7 +142,8 @@ bool GroupReadyValue::Calculate()
         if (ai->GetGroupMaster() && sServerFacade.GetDistance2d(member, ai->GetGroupMaster()) > sPlayerbotAIConfig.sightDistance)
             continue;        
 
-        if (member->GetHealthPercent() < sPlayerbotAIConfig.almostFullHealth)
+        //Wait for members to recover health/mana.
+        if (member->GetHealthPercent() < sPlayerbotAIConfig.almostFullHealth && !member->IsInCombat())
             return false;
 
         if (!member->GetPower(POWER_MANA))
@@ -150,7 +151,7 @@ bool GroupReadyValue::Calculate()
 
         float mana = (static_cast<float> (member->GetPower(POWER_MANA)) / member->GetMaxPower(POWER_MANA)) * 100;
 
-        if (mana < sPlayerbotAIConfig.mediumMana)
+        if (mana < sPlayerbotAIConfig.mediumMana && !member->IsInCombat())
             return false;
     }
 

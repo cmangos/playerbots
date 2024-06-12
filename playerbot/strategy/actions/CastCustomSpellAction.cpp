@@ -245,7 +245,7 @@ bool CastCustomSpellAction::Execute(Event& event)
             ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *requester);
 
             replyStr << " " << BOT_TEXT("cast_spell_command_amount");
-            replyArgs["%amount"] = castCount - 1;
+            replyArgs["%amount"] = std::to_string(castCount - 1);
         }
 
         ai->TellPlayerNoFacing(requester, BOT_TEXT2(replyStr.str(), replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);

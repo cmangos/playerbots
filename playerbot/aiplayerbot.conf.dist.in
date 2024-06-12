@@ -771,7 +771,7 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.AllowedLogFiles = 
 
 # Filters certain actions from showing up in 'nc +debug' and 'nc +debug action'
-# AiPlayerbot.DebugFilter = add gathering loot,check values,emote,check mount state
+# AiPlayerbot.DebugFilter = add gathering loot,check values,emote,check mount state,jump
 
 # Random password: Randombot accounts get created with a randompassword instead of equal to their account name.
 # AiPlayerbot.RandomBotRandomPassword = 1

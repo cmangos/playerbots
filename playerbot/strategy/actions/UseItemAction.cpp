@@ -1184,6 +1184,11 @@ bool UseRandomRecipeAction::Execute(Event& event)
     if (recipeName.empty())
         return false;
 
+    if (bot->IsMoving())
+    {
+        ai->StopMoving();
+    }
+
     Event rEvent = Event(name, recipeName);
 
     return UseAction::Execute(rEvent);

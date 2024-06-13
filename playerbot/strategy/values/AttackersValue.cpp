@@ -366,9 +366,27 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
             }
         }
 
-        if (WorldPosition(player).isOverworld() &&  target->AI() && target->AI()->IsPreventingDeath())
+        if (WorldPosition(player).isOverworld() && target->AI() && target->AI()->IsPreventingDeath())
         {
             return false;
+        }
+    }
+
+    if (playerToCheckAgainst->GetPlayerbotAI())
+    {
+        PlayerbotAI* ai = playerToCheckAgainst->GetPlayerbotAI();
+        AiObjectContext* context = ai->GetAiObjectContext();
+
+        //Ignore Hard hostiles while not already fighting.
+        if (target->GetLevel() > (playerToCheckAgainst->GetLevel() + 5) && ai->GetState() == BotState::BOT_STATE_NON_COMBAT)
+        {
+            //When traveling a long distance.
+            if (AI_VALUE(TravelTarget*, "travel target")->isTraveling() && AI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
+                return false;
+
+            //When moving to master far away.
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE2(bool, "trigger active", "out of react range"))
+                return false;
         }
     }
 

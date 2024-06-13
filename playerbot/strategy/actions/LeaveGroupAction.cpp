@@ -81,6 +81,9 @@ namespace ai
 
         uint32 dCount = AI_VALUE(uint32, "death count");
 
+        if (ai->HasRealPlayerMaster() && !sRandomPlayerbotMgr.IsRandomBot(bot))
+            return false;
+
         if (dCount > 9)
             return true;
 

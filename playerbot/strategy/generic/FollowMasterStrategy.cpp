@@ -53,7 +53,28 @@ void FollowMasterStrategy::OnStrategyRemoved(BotState state)
         ai->StopMoving();
     }
 
-    if (state != BotState::BOT_STATE_REACTION && !ai->HasStrategy("follow", state == BotState::BOT_STATE_COMBAT ? BotState::BOT_STATE_NON_COMBAT : BotState::BOT_STATE_COMBAT))
+    if (state == BotState::BOT_STATE_REACTION)
+        return;
+
+    BotState checkState1, checkState2;
+
+    if (state == BotState::BOT_STATE_COMBAT)
+    {
+        checkState1 = BotState::BOT_STATE_NON_COMBAT;
+        checkState2 = BotState::BOT_STATE_DEAD;
+    }
+    else if (state == BotState::BOT_STATE_NON_COMBAT)
+    {
+        checkState1 = BotState::BOT_STATE_COMBAT;
+        checkState2 = BotState::BOT_STATE_DEAD;
+    }
+    else
+    {
+        checkState1 = BotState::BOT_STATE_NON_COMBAT;
+        checkState2 = BotState::BOT_STATE_COMBAT;
+    }
+
+    if (!ai->HasStrategy("follow", checkState1) && !ai->HasStrategy("follow", checkState2))
     {
         ai->ChangeStrategy("-follow", BotState::BOT_STATE_REACTION);
     }

@@ -858,6 +858,11 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         return false;
     }
 
+    if (movePosition.isUnderWater() && !endPosition.isUnderWater()) //Try to swim on the surface.
+    {
+        movePosition.setZ(movePosition.getHeight(true));
+    }
+
     //Visual waypoints
     if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
     {

@@ -183,10 +183,10 @@ namespace ai
         bool canFly() const;
 
 #if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
-        const float getHeight() const { return getMap()->GetHeight(0, coord_x, coord_y, coord_z); }
+        const float getHeight(bool swim = false) const { return getMap()->GetHeight(0, coord_x, coord_y, coord_z, swim); }
         float GetHeightInRange(float maxSearchDist = 4.0f) const { float z = coord_z;  return getMap() ? (getMap()->GetHeightInRange(0, coord_x, coord_y, z, maxSearchDist) ? z : coord_z) : coord_z; }
 #else
-        float getHeight() const { return getMap() ? getMap()->GetHeight(coord_x, coord_y, coord_z) : coord_z; }
+        float getHeight(bool swim = false) const { return getMap() ? getMap()->GetHeight(coord_x, coord_y, coord_z, swim) : coord_z; }
         float GetHeightInRange(float maxSearchDist = 4.0f) const { float z = coord_z;  return getMap() ? (getMap()->GetHeightInRange(coord_x, coord_y, z, maxSearchDist) ? z : coord_z) : coord_z; }
 #endif
 

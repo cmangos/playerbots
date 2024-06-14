@@ -5,10 +5,10 @@ namespace ai
 {
     class TravelDestination;
 
-	class GoAction : public MovementAction
+	class GoAction : public MovementAction, Qualified
 	{
 	public:
-		GoAction(PlayerbotAI* ai) : MovementAction(ai, "go") {}
+		GoAction(PlayerbotAI* ai) : MovementAction(ai, "go"), Qualified() {}
 		virtual bool Execute(Event& event) override;
         virtual bool isPossible() override { return true; }
         virtual bool isUseful() override { return true; }

@@ -25,6 +25,12 @@ bool GoAction::Execute(Event& event)
         return false;
 
     std::string param = event.getParam();
+
+    if (param.empty())
+    {
+       param = getQualifier();
+    }
+
     if (param == "?")
     {
         float x = bot->GetPositionX();

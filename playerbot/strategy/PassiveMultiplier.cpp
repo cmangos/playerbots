@@ -13,6 +13,9 @@ PassiveMultiplier::PassiveMultiplier(PlayerbotAI* ai) : Multiplier(ai, "passive"
     {
         allowedActions.push_back("co");
         allowedActions.push_back("nc");
+        allowedActions.push_back("load ai");
+        allowedActions.push_back("save ai");
+        allowedActions.push_back("list ai");
         allowedActions.push_back("reset ai");
         allowedActions.push_back("reset strats");
         allowedActions.push_back("reset values");

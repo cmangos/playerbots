@@ -217,9 +217,10 @@ bool UseAction::Execute(Event& event)
 {
     Player* requester = event.getOwner();
     std::string name = event.getParam();
+
     if (name.empty())
     {
-        name = getName();
+       name = getQualifier();
     }
 
     MakeVerbose(requester != nullptr);

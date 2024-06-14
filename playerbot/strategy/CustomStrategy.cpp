@@ -21,7 +21,18 @@ NextAction* toNextAction(std::string action)
 
 NextAction** toNextActionArray(std::string actions)
 {
-    std::vector<std::string> tokens = split(actions, ',');
+    std::vector<std::string> tokens;
+    tokens.push_back("");
+    int stack = 0;
+    for (char a : actions)
+    {
+       if (a == '{') ++stack;
+       if (a == '}') --stack;
+       if (a == ',' && stack == 0) tokens.push_back("");
+       tokens.back() += a;
+    }
+    //std::vector<std::string> tokens = split(actions, ',');
+
     NextAction** res = new NextAction*[tokens.size() + 1];
     int index = 0;
     for (std::vector<std::string>::iterator i = tokens.begin(); i != tokens.end(); ++i)

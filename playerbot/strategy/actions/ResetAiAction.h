@@ -25,6 +25,30 @@ namespace ai
         bool fullReset;
     };
 
+    class SaveAiAction : public ChatCommandAction, public Qualified
+    {
+    public:
+       SaveAiAction(PlayerbotAI* ai, std::string name = "save ai") : ChatCommandAction(ai, name), Qualified() {}
+       virtual bool Execute(Event& event) override;
+       bool isUseful() override { return true; };
+    };
+
+    class LoadAiAction : public ChatCommandAction, public Qualified
+    {
+    public:
+       LoadAiAction(PlayerbotAI* ai, std::string name = "load ai") : ChatCommandAction(ai, name), Qualified() {}
+       virtual bool Execute(Event& event) override;
+       bool isUseful() override { return true; };
+    };
+
+    class ListAiAction : public ChatCommandAction, public Qualified
+    {
+    public:
+       ListAiAction(PlayerbotAI* ai, std::string name = "list ai") : ChatCommandAction(ai, name), Qualified() {}
+       virtual bool Execute(Event& event) override;
+       bool isUseful() override { return true; };
+    };
+
     class ResetStratsAction : public ResetAiAction
     {
     public:

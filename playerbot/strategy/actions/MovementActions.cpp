@@ -2038,7 +2038,11 @@ bool MoveToLootAction::Execute(Event& event)
         return false;
 
     WorldObject *wo = loot.GetWorldObject(bot);
-    return MoveNear(wo, sPlayerbotAIConfig.contactDistance);
+
+    if(sServerFacade.IsWithinLOSInMap(bot, wo))
+        return MoveNear(wo, sPlayerbotAIConfig.contactDistance);
+
+    return MoveTo(WorldPosition(wo));
 }
 
 bool MoveOutOfEnemyContactAction::Execute(Event& event)

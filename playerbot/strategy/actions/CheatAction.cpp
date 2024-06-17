@@ -78,6 +78,9 @@ void CheatAction::ListCheats(Player* requester)
            out << "[" << GetCheatName(BotCheatMask(cheatMask)) << "]";
     }
 
+    if (out.rdbuf()->in_avail() == 0)
+        out << "No cheats enabled.";
+
     ai->TellPlayerNoFacing(requester, out);
 }
 

@@ -118,6 +118,9 @@ namespace ai
 #define AI_VALUE(type, name) context->GetValue<type>(name)->Get()
 #define AI_VALUE2(type, name, param) context->GetValue<type>(name, param)->Get()
 
+#define AI_VALUE_SAFE(type, name) context->GetValue<type>(name) ? context->GetValue<type>(name)->Get() : type()
+#define AI_VALUE2_SAFE(type, name, param) context->GetValue<type>(name, param) ? context->GetValue<type>(name, param)->Get() : type()
+
 #define AI_VALUE_LAZY(type, name) context->GetValue<type>(name)->LazyGet()
 #define AI_VALUE2_LAZY(type, name, param) context->GetValue<type>(name, param)->LazyGet()
 

@@ -7,9 +7,10 @@ namespace ai
    {
       FilterName,   // filter:name:<text>
       SortRange,    // sort:range
-                    // todo: can be extended further - asc, desc, minval etc.
+      FilterRange,  // filter:range
       FilterFirst,  // filter:first
-      ShowRange     // show:range
+      ShowRange,    // show:range
+      ShowGuid,     // show:guid
    };
 
    struct LosModifierStruct

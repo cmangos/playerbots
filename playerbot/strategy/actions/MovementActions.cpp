@@ -2214,7 +2214,7 @@ bool MoveRandomAction::isUseful()
 
 bool MoveToAction::Execute(Event& event)
 {
-    std::list<GuidPosition> guidList = AI_VALUE(std::list<GuidPosition>, getQualifier());
+    std::list<GuidPosition> guidList = AI_VALUE_SAFE(std::list<GuidPosition>, getQualifier());
 
     if (guidList.empty())
         return false;

@@ -11,7 +11,7 @@ namespace ai
 		AttackAction(PlayerbotAI* ai, std::string name) : MovementAction(ai, name) {}
 
     public:
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
         virtual bool isPossible() override { return !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST); }; //Override movement stay.
 
     protected:

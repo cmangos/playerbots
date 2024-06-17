@@ -93,7 +93,7 @@ namespace ai
         ArrowFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "arrow"), built(false), masterUnit(NULL), botUnit(NULL) {}
 
     public:
-        virtual WorldLocation GetLocationInternal();
+        virtual WorldLocation GetLocationInternal() override;
 
     private:
         void Build();

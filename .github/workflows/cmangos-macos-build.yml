@@ -22,16 +22,16 @@ jobs:
 
     strategy:
       matrix:
-       include:
+        version: [classic, tbc]
+        include:
           - os: macos-11
             EXTRA_BUILD: "-DBUILD_PLAYERBOTS=ON"
-            CORE_PATH : ${{github.repository_owner}}/mangos-classic
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: ${{matrix.CORE_PATH}}
+          repository: ${{github.repository_owner}}/mangos-${{matrix.version}}
           ref: master
           path: ${{env.REPO_DIR}}
 

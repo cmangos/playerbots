@@ -19,16 +19,16 @@ jobs:
 
     strategy:
       matrix:
-       include:
+        version: [classic, tbc]
+        include:
           - os: windows-2022
             EXTRA_BUILD: "-DBUILD_PLAYERBOTS=ON"
-            CORE_PATH : ${{github.repository_owner}}/mangos-classic
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: ${{matrix.CORE_PATH}}
+          repository: ${{github.repository_owner}}/mangos-${{matrix.version}}
           ref: master
           path: ${{env.REPO_DIR}}
 
@@ -57,7 +57,7 @@ jobs:
       - name: Configure
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-        run: cmake ${{env.EXTRA_BUILD}} -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+        run: cmake ${{matrix.EXTRA_BUILD}} -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build
         env:
@@ -72,7 +72,7 @@ jobs:
       - name: Archive The Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: snapshot
+          name: ${{matrix.version}}-snapshot
           path: "${{env.BUILD_DIR}}/bin/${{env.ARCHIVE_FILENAME}}"
 
   notify:

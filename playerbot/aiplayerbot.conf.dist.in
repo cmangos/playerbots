@@ -14,6 +14,9 @@ AiPlayerbot.RandomBotAutologin = 1
 # Log on all random bots on start
 AiPlayerbot.RandomBotLoginAtStartup = 1
 
+# Disable automatic DBStore save
+AiPlayerbot.ExplicitDbStoreSave = 0
+
 # Log out random bots after BotInWorldTime interval
 # AiPlayerbot.RandomBotTimedLogout = 1
 

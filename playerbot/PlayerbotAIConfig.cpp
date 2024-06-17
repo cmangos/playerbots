@@ -226,6 +226,7 @@ bool PlayerbotAIConfig::Initialize()
 
     commandServerPort = config.GetIntDefault("AiPlayerbot.CommandServerPort", 0);
     perfMonEnabled = config.GetBoolDefault("AiPlayerbot.PerfMonEnabled", false);
+    bExplicitDbStoreSave = config.GetBoolDefault("AiPlayerbot.ExplicitDbStoreSave", false);
 
     randomBotLoginWithPlayer = config.GetBoolDefault("AiPlayerbot.RandomBotLoginWithPlayer", false);
 

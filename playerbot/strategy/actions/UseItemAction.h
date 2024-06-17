@@ -17,10 +17,10 @@ namespace ai
         bool itemCheats;
     };
 
-    class UseAction : public ChatCommandAction 
+    class UseAction : public ChatCommandAction, public Qualified
     {
     public:
-        UseAction(PlayerbotAI* ai, std::string name = "use", uint32 duration = sPlayerbotAIConfig.reactDelay) : ChatCommandAction(ai, name, duration) {}
+        UseAction(PlayerbotAI* ai, std::string name = "use", uint32 duration = sPlayerbotAIConfig.reactDelay) : ChatCommandAction(ai, name, duration), Qualified() {}
 
     public:
         // Used when this action is executed as a reaction
@@ -45,10 +45,10 @@ namespace ai
 #endif
     };
 
-    class UseItemIdAction : public UseAction, public Qualified
+    class UseItemIdAction : public UseAction
     {
     public:
-        UseItemIdAction(PlayerbotAI* ai, std::string name = "use id", uint32 duration = sPlayerbotAIConfig.reactDelay) : UseAction(ai, name, duration), Qualified() {}
+        UseItemIdAction(PlayerbotAI* ai, std::string name = "use id", uint32 duration = sPlayerbotAIConfig.reactDelay) : UseAction(ai, name, duration) {}
         virtual bool isPossible() override;
         virtual bool isUseful() override;
 

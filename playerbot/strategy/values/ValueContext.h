@@ -380,6 +380,7 @@ namespace ai
             creators["mc runes"] = &ValueContext::mc_runes;
             creators["gos"] = &ValueContext::gos;
             creators["entry filter"] = &ValueContext::entry_filter;
+            creators["guid filter"] = [](PlayerbotAI* ai) { return new GuidFilterValue(ai); };
             creators["range filter"] = &ValueContext::range_filter;
             creators["go usable filter"] = &ValueContext::go_usable_filter;
             creators["go trapped filter"] = &ValueContext::go_trapped_filter;

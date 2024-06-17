@@ -33,6 +33,27 @@ namespace ai
 #endif 
     };
 
+    class GuidFilterValue : public GuidPositionListCalculatedValue, public Qualified
+    {
+    public:
+       GuidFilterValue(PlayerbotAI* ai, std::string name = "guid filter") : GuidPositionListCalculatedValue(ai, name, 1), Qualified() {}
+
+       virtual std::list<GuidPosition> Calculate();
+
+#ifdef GenerateBotHelp
+       virtual std::string GetHelpName() { return "guid filter"; } //Must equal iternal name
+       virtual std::string GetHelpTypeName() { return "guid"; }
+       virtual std::string GetHelpDescription()
+       {
+          return "This value will returns only the ObjectGuids of specific entries.";
+       }
+       virtual std::vector<std::string> GetUsedValues() { return { }; }
+#endif 
+
+    private:
+       std::vector<std::string> QualifierToEntryList(const std::string& qualifier);
+    };
+
     class RangeFilterValue : public GuidPositionListCalculatedValue, public Qualified
     {
     public:
@@ -88,12 +109,12 @@ namespace ai
     };
 
 
-    class GosInSightValue : public GuidPositionListCalculatedValue
+    class GosInSightValue : public GuidPositionListCalculatedValue, public Qualified
 	{
 	public:
-        GosInSightValue(PlayerbotAI* ai, std::string name = "gos in sight") : GuidPositionListCalculatedValue(ai, name, 3) {}
+        GosInSightValue(PlayerbotAI* ai, std::string name = "gos in sight") : GuidPositionListCalculatedValue(ai, name, 3), Qualified() {}
 
-        virtual std::list<GuidPosition> Calculate() { return AI_VALUE2(std::list<GuidPosition>, "range filter", "gos," + std::to_string(sPlayerbotAIConfig.sightDistance)); }
+        virtual std::list<GuidPosition> Calculate();
     };
 
     class GoSCloseValue : public GuidPositionListCalculatedValue, public Qualified

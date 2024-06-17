@@ -8,6 +8,7 @@ using namespace ai;
 
 constexpr std::string_view GOS_PARAM = "gos";
 constexpr std::string_view GAMEOBJECTS_PARAM = "game objects";
+constexpr std::string_view HIGHLIGHT_PARAM = "highlight";
 
 constexpr std::string_view FILTER_NAME_PARAM = "filter:name:";
 
@@ -52,6 +53,25 @@ bool TellLosAction::Execute(Event& event)
     if (param.empty() || param == "players")
     {
         ListUnits(requester, "--- Friendly players ---", AI_VALUE(std::list<ObjectGuid>, "nearest friendly players"));
+    }
+
+    if (param.find(HIGHLIGHT_PARAM) == 0)
+    {
+       std::list<ObjectGuid> goguids = ChatHelper::parseGameobjects(param.substr(HIGHLIGHT_PARAM.size()));
+
+       if (goguids.size())
+       {
+          std::list<GameObject*> objects = GoGuidListToObjList(ai, goguids);
+
+          for (GameObject* go : objects)
+          {
+             WorldPosition spellPosition(go);
+             Creature* wpCreature = ai->GetBot()->SummonCreature(15631, spellPosition.getX(), spellPosition.getY(), spellPosition.getZ(), spellPosition.getO(), TEMPSPAWN_TIMED_DESPAWN, 2000.0f);
+             wpCreature->SetObjectScale(0.5f);
+          }
+       }
+
+       return true;
     }
 
     return true;
@@ -107,6 +127,20 @@ std::list<GameObject*> TellLosAction::FilterGameObjects(Player* requester, const
             }
          }
          break;
+      case LosModifierType::FilterRange:
+         {
+            auto it = gameobjects.begin();
+            while (it != gameobjects.end())
+            {
+               if ((*it)->GetGOInfo()->name != mod.param)
+               {
+                  it = gameobjects.erase(it);
+                  continue;
+               }
+               ++it;
+            }
+         }
+      break;
       case LosModifierType::SortRange:
          {
             std::vector<std::pair<float, GameObject*>> distanceObjectPairs;
@@ -151,6 +185,7 @@ void TellLosAction::TellGameObjects(Player* requester, std::string title, const 
    ai->TellPlayer(requester, title);
 
    bool bShowRange = std::find_if(mods.begin(), mods.end(), [](const LosModifierStruct& el){ return el.typ == LosModifierType::ShowRange; }) != mods.end();
+   bool bShowGuid = std::find_if(mods.begin(), mods.end(), [](const LosModifierStruct& el) { return el.typ == LosModifierType::ShowGuid; }) != mods.end();
 
    for (GameObject* go : gos)
    {  
@@ -160,11 +195,19 @@ void TellLosAction::TellGameObjects(Player* requester, std::string title, const 
 
       if (bShowRange)
       {
-         float distance = sqrtf(requester->GetDistance(go));
+         float distance = requester->GetDistance(go);
 
          ss << " " << distance << "m";
       }
 
+      if (bShowGuid)
+      {
+         ss << " " << std::to_string(go->GetGUIDLow());
+      }
+
+      WorldPosition spellPosition(go);
+      Creature* wpCreature = ai->GetBot()->SummonCreature(15631, spellPosition.getX(), spellPosition.getY(), spellPosition.getZ(), spellPosition.getO(), TEMPSPAWN_TIMED_DESPAWN, 2000.0f);
+      wpCreature->SetObjectScale(0.5f);
 
       ai->TellPlayer(requester, ss.str());
    }
@@ -194,6 +237,10 @@ std::vector<LosModifierStruct> TellLosAction::ParseLosModifiers(const std::strin
       {
          mods.emplace_back(LosModifierStruct{ LosModifierType::SortRange, "" });
       }
+      else if (param.find("filter:range") == 0)
+      {
+         mods.emplace_back(LosModifierStruct{ LosModifierType::FilterRange, "" });
+      }
       else if (param.find("filter:first") == 0)
       {
          mods.emplace_back(LosModifierStruct{ LosModifierType::FilterFirst, "" });
@@ -201,6 +248,10 @@ std::vector<LosModifierStruct> TellLosAction::ParseLosModifiers(const std::strin
       else if (param.find("show:range") == 0)
       {
          mods.emplace_back(LosModifierStruct{ LosModifierType::ShowRange, "" });
+      }
+      else if (param.find("show:guid") == 0)
+      {
+         mods.emplace_back(LosModifierStruct{ LosModifierType::ShowGuid, "" });
       }
    }
 

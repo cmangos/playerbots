@@ -22,12 +22,12 @@ std::map<uint8, std::map<uint8, std::string> > ChatHelper::specs;
 std::unordered_map<std::string, std::vector<uint32>> ChatHelper::spellIds;
 
 template<class T>
-static bool substrContainsInMap(std::string searchTerm, std::map<std::string, T> searchIn)
+static bool substrContainsInMap(const std::string& searchTerm, const std::map<std::string, T>& searchIn)
 {
-    for (typename std::map<std::string, T>::iterator i = searchIn.begin(); i != searchIn.end(); ++i)
+    for (typename std::map<std::string, T>::const_iterator i = searchIn.begin(); i != searchIn.end(); ++i)
     {
         std::string term = i->first;
-		if (term.size() > 1 && searchTerm.find(term) != std::string::npos)
+        if (term.size() > 1 && searchTerm.find(term) != std::string::npos)
             return true;
     }
 
@@ -247,7 +247,7 @@ std::string ChatHelper::formatMoney(uint32 copper)
     return out.str();
 }
 
-uint32 ChatHelper::parseMoney(std::string& text)
+uint32 ChatHelper::parseMoney(const std::string& text)
 {
     // if user specified money in ##g##s##c format
     std::string acum = "";
@@ -343,7 +343,7 @@ std::vector<uint32> ChatHelper::parseItemsUnordered(const std::string& text, boo
     return itemIds;
 }
 
-std::set<std::string> ChatHelper::parseItemQualifiers(std::string& text)
+std::set<std::string> ChatHelper::parseItemQualifiers(const std::string& text)
 {
     std::set<std::string> qualifiers;
 
@@ -376,7 +376,7 @@ std::string ChatHelper::formatQuest(Quest const* quest)
     return out.str();
 }
 
-std::string ChatHelper::formatGameobject(GameObject* go)
+std::string ChatHelper::formatGameobject(const GameObject* go)
 {
     std::ostringstream out;
     int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
@@ -394,7 +394,7 @@ std::string ChatHelper::formatGameobject(GameObject* go)
     return out.str();
 }
 
-std::string ChatHelper::formatWorldobject(WorldObject* wo)
+std::string ChatHelper::formatWorldobject(const WorldObject* wo)
 {
     std::ostringstream out;
     int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
@@ -533,7 +533,7 @@ std::string ChatHelper::formatQItem(uint32 itemId)
     return out.str();
 }
 
-ChatMsg ChatHelper::parseChat(std::string& text)
+ChatMsg ChatHelper::parseChat(const std::string& text)
 {
     if (chats.find(text) != chats.end())
         return chats[text];
@@ -565,7 +565,7 @@ uint32 ChatHelper::parseSpell(std::string& text)
     return handler.extractSpellId(text);
 }
 
-std::list<ObjectGuid> ChatHelper::parseGameobjects(std::string& text)
+std::list<ObjectGuid> ChatHelper::parseGameobjects(const std::string& text)
 {
     std::list<ObjectGuid> gos;
     //    Link format
@@ -605,7 +605,7 @@ std::list<ObjectGuid> ChatHelper::parseGameobjects(std::string& text)
     return gos;
 }
 
-std::list<int32> ChatHelper::parseWorldEntries(std::string& text)
+std::list<int32> ChatHelper::parseWorldEntries(const std::string& text)
 {
     std::list<int32> entries;
     //    Link format
@@ -634,7 +634,7 @@ std::list<int32> ChatHelper::parseWorldEntries(std::string& text)
     return entries;
 }
 
-std::string ChatHelper::formatQuestObjective(std::string name, int available, int required)
+std::string ChatHelper::formatQuestObjective(const std::string& name, int available, int required)
 {
     std::ostringstream out;
     out << "|cFFFFFFFF" << name << (available >= required ? "|c0000FF00: " : "|c00FF0000: ")
@@ -643,14 +643,14 @@ std::string ChatHelper::formatQuestObjective(std::string name, int available, in
     return out.str();
 }
 
-std::string ChatHelper::formatValue(std::string type, std::string topicCode, std::string topicName, std::string color)
+std::string ChatHelper::formatValue(const std::string& type, const std::string& topicCode, const std::string& topicName, const std::string& color)
 {
     std::ostringstream out;
     out << "|c"<< color << "|Hvalue:" << type << ":" << topicCode << "|h[" << topicName << "]|h|r";
     return out.str();
 }
 
-std::string ChatHelper::parseValue(std::string type, std::string& text) {
+std::string ChatHelper::parseValue(const std::string& type, const std::string& text) {
     std::string retString;
 
     std::string pattern = "Hvalue:" + type + ":";
@@ -669,7 +669,7 @@ std::string ChatHelper::parseValue(std::string type, std::string& text) {
     return retString;
 }
 
-uint32 ChatHelper::parseItemQuality(std::string text)
+uint32 ChatHelper::parseItemQuality(const std::string& text)
 {
     if (itemQualities.find(text) == itemQualities.end())
         return MAX_ITEM_QUALITY;
@@ -677,7 +677,7 @@ uint32 ChatHelper::parseItemQuality(std::string text)
     return itemQualities[text];
 }
 
-bool ChatHelper::parseItemClass(std::string text, uint32 *itemClass, uint32 *itemSubClass)
+bool ChatHelper::parseItemClass(const std::string& text, uint32* itemClass, uint32* itemSubClass)
 {
     if (text == "questitem")
     {
@@ -725,7 +725,7 @@ uint32 ChatHelper::parseSlot(const std::string& text)
     return EQUIPMENT_SLOT_END;
 }
 
-bool ChatHelper::parseable(std::string text)
+bool ChatHelper::parseable(const std::string& text)
 {
     return text.find("|H") != std::string::npos ||
         text.find("[h:") != std::string::npos ||
@@ -740,12 +740,12 @@ bool ChatHelper::parseable(std::string text)
             parseMoney(text) > 0;
 }
 
-std::string ChatHelper::specName(Player* player)
+std::string ChatHelper::specName(const Player* player)
 {
-    return specs[player->getClass()][AiFactory::GetPlayerSpecTab(player)]; 
+    return specs[player->getClass()][AiFactory::GetPlayerSpecTab(player)];
 }
 
-std::string ChatHelper::formatClass(Player* player, int spec)
+std::string ChatHelper::formatClass(const Player* player, int spec)
 {
     uint8 cls = player->getClass();
 
@@ -775,7 +775,7 @@ std::string ChatHelper::formatRace(uint8 race)
     return races[race];
 }
 
-uint32 ChatHelper::parseSkill(std::string& text)
+uint32 ChatHelper::parseSkill(const std::string& text)
 {
     if (skills.find(text) != skills.end())
         return skills[text];
@@ -806,7 +806,7 @@ std::string ChatHelper::formatAngle(float angle)
     return headings[int32(round(headingAngle / 45)) % 8];
 }
 
-std::string ChatHelper::formatWorldPosition(WorldPosition& pos)
+std::string ChatHelper::formatWorldPosition(const WorldPosition& pos)
 {
     std::ostringstream out;
     out << std::fixed << std::setprecision(2);
@@ -822,7 +822,7 @@ std::string ChatHelper::formatWorldPosition(WorldPosition& pos)
 }
 
 
-std::string ChatHelper::formatGuidPosition(GuidPosition& guidP)
+std::string ChatHelper::formatGuidPosition(const GuidPosition& guidP)
 {
     std::ostringstream out;
     if (guidP.GetWorldObject())
@@ -839,9 +839,6 @@ std::string ChatHelper::formatGuidPosition(GuidPosition& guidP)
 
     return out.str();
 }
-
-
-
 
 std::string ChatHelper::formatBoolean(bool flag)
 {

@@ -22,7 +22,7 @@ namespace ai
 
     public:
         static std::string formatMoney(uint32 copper);
-        static uint32 parseMoney(std::string& text);
+        static uint32 parseMoney(const std::string& text);
 
         static std::string formatQuest(Quest const* quest);
 
@@ -32,47 +32,47 @@ namespace ai
         static std::string formatQItem(uint32 itemId);
         static ItemIds parseItems(const std::string& text, bool validate = false);
         static std::vector<uint32> parseItemsUnordered(const std::string& text, bool validate = false);
-        static std::set<std::string> parseItemQualifiers(std::string& text);
-        static uint32 parseItemQuality(std::string text);
-        static bool parseItemClass(std::string text, uint32* itemClass, uint32* itemSubClass);
+        static std::set<std::string> parseItemQualifiers(const std::string& text);
+        static uint32 parseItemQuality(const std::string& text);
+        static bool parseItemClass(const std::string& text, uint32* itemClass, uint32* itemSubClass);
         static uint32 parseSlot(const std::string& text);
 
         static std::string formatSpell(SpellEntry const *sInfo);
         static std::string formatSpell(uint32 spellId) {const SpellEntry* const spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId); if (!spellInfo) return ""; return formatSpell(spellInfo);};
         uint32 parseSpell(std::string& text);
 
-        static std::string formatGameobject(GameObject* go);
-        static std::list<ObjectGuid> parseGameobjects(std::string& text);
+        static std::string formatGameobject(const GameObject* go);
+        static std::list<ObjectGuid> parseGameobjects(const std::string& text);
 
-        static std::string formatWorldobject(WorldObject* wo);
+        static std::string formatWorldobject(const WorldObject* wo);
 
         static std::string formatWorldEntry(int32 entry);
-        static std::list<int32> parseWorldEntries(std::string& text);
+        static std::list<int32> parseWorldEntries(const std::string& text);
 
-        static std::string formatQuestObjective(std::string name, int available, int required);
+        static std::string formatQuestObjective(const std::string& name, int available, int required);
 
-        static std::string formatValue(std::string type, std::string code, std::string name, std::string color = "0000FFFF");
-        static std::string parseValue(std::string type, std::string& text);
+        static std::string formatValue(const std::string& type, const std::string& code, const std::string& name, const std::string& color = "0000FFFF");
+        static std::string parseValue(const std::string& type, const std::string& text);
 
         static std::string formatChat(ChatMsg chat);
-        static ChatMsg parseChat(std::string& text);
+        static ChatMsg parseChat(const std::string& text);
 
-        static std::string specName(Player* player);
-        static std::string formatClass(Player* player, int spec);
+        static std::string specName(const Player* player);
+        static std::string formatClass(const Player* player, int spec);
         static std::string formatClass(uint8 cls);
 
         static std::string formatRace(uint8 race);
 
         static std::string formatSkill(uint32 skill);
-        uint32 parseSkill(std::string& text);
+        uint32 parseSkill(const std::string& text);
 
         static std::string formatAngle(float angle);
-        static std::string formatWorldPosition(WorldPosition& pos);
-        static std::string formatGuidPosition(GuidPosition& guidP);
+        static std::string formatWorldPosition(const WorldPosition& pos);
+        static std::string formatGuidPosition(const GuidPosition& guidP);
 
         static std::string formatBoolean(bool flag);       
        
-        static bool parseable(std::string text);
+        static bool parseable(const std::string& text);
 
         void eraseAllSubStr(std::string& mainStr, const std::string& toErase);
 

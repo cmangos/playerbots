@@ -20,15 +20,15 @@ namespace ai
 
         virtual std::string to_string() const override;
 
-        CreatureData* GetCreatureData() { return IsCreature() ? sObjectMgr.GetCreatureData(GetCounter()) : nullptr; }
-        CreatureInfo const* GetCreatureTemplate()const {return IsCreature() ? sObjectMgr.GetCreatureTemplate(GetEntry()) : nullptr; };
+        CreatureData* GetCreatureData() const { return IsCreature() ? sObjectMgr.GetCreatureData(GetCounter()) : nullptr; }
+        CreatureInfo const* GetCreatureTemplate() const {return IsCreature() ? sObjectMgr.GetCreatureTemplate(GetEntry()) : nullptr; };
 
-        GameObjectInfo const* GetGameObjectInfo() { return IsGameObject() ? sObjectMgr.GetGameObjectInfo(GetEntry()) : nullptr; };
+        GameObjectInfo const* GetGameObjectInfo() const { return IsGameObject() ? sObjectMgr.GetGameObjectInfo(GetEntry()) : nullptr; };
 
-        WorldObject* GetWorldObject() { return getMap() ? getMap()->GetWorldObject(*this) : nullptr;}
+        WorldObject* GetWorldObject() const { return getMap() ? getMap()->GetWorldObject(*this) : nullptr;}
         Creature* GetCreature() const;
         Unit* GetUnit() const;
-        GameObject* GetGameObject();
+        GameObject* GetGameObject() const;
         Player* GetPlayer() const;
 
         void updatePosition() {WorldObject* wo = GetWorldObject(); if (wo) WorldPosition::set(wo); }

@@ -124,7 +124,7 @@ namespace ai
     {
     public:
         MeleeFormation(PlayerbotAI* ai) : FollowFormation(ai, "melee") {}
-        virtual std::string GetTargetName() { return "master target"; }
+        virtual std::string GetTargetName() override { return "master target"; }
         virtual float GetAngle() override { return GetFollowAngle(); }
         virtual float GetOffset() override { return ai->GetRange("follow"); }
     };
@@ -133,7 +133,7 @@ namespace ai
     {
     public:
         QueueFormation(PlayerbotAI* ai) : FollowFormation(ai, "queue") {}
-        virtual std::string GetTargetName() { return "line target"; }
+        virtual std::string GetTargetName() override { return "line target"; }
         virtual float GetAngle() override { return M_PI_F; }
         virtual float GetOffset() override { return ai->GetRange("follow"); }
     };
@@ -142,7 +142,7 @@ namespace ai
     {
     public:
         NearFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "near") {}
-        virtual WorldLocation GetLocationInternal()
+        virtual WorldLocation GetLocationInternal() override
         {
             Unit* followTarget = AI_VALUE(Unit*, "follow target");
             if (!ai->IsSafe(followTarget))
@@ -179,7 +179,7 @@ namespace ai
             return WorldLocation(followTarget->GetMapId(), x, y, z);
         }
 
-        virtual float GetMaxDistance() { return ai->GetRange("follow"); }
+        virtual float GetMaxDistance() override { return ai->GetRange("follow"); }
     };
 
 
@@ -187,7 +187,7 @@ namespace ai
     {
     public:
         ChaosFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "chaos"), lastChangeTime(0) {}
-        virtual WorldLocation GetLocationInternal()
+        virtual WorldLocation GetLocationInternal() override
         {
             Unit* followTarget = AI_VALUE(Unit*, "follow target");
             if (!ai->IsSafe(followTarget))
@@ -225,7 +225,7 @@ namespace ai
             return WorldLocation(followTarget->GetMapId(), x, y, z);
         }
 
-        virtual float GetMaxDistance() { return ai->GetRange("follow") + dr; }
+        virtual float GetMaxDistance() override { return ai->GetRange("follow") + dr; }
 
     private:
         time_t lastChangeTime;
@@ -236,7 +236,7 @@ namespace ai
     {
     public:
         CircleFormation(PlayerbotAI* ai) : MoveFormation(ai, "circle") {}
-        virtual WorldLocation GetLocation()
+        virtual WorldLocation GetLocation() override
         {
             float range = ai->GetRange("follow");
 
@@ -273,7 +273,7 @@ namespace ai
     {
     public:
         LineFormation(PlayerbotAI* ai) : MoveAheadFormation(ai, "line") {}
-        virtual WorldLocation GetLocationInternal()
+        virtual WorldLocation GetLocationInternal() override
         {
             Group* group = bot->GetGroup();
             if (!group)
@@ -309,7 +309,7 @@ namespace ai
     {
     public:
         ShieldFormation(PlayerbotAI* ai) : MoveFormation(ai, "shield") {}
-        virtual WorldLocation GetLocation()
+        virtual WorldLocation GetLocation() override
         {
             Group* group = bot->GetGroup();
             if (!group)
@@ -372,7 +372,7 @@ namespace ai
     {
     public:
         FarFormation(PlayerbotAI* ai) : FollowFormation(ai, "far") {}
-        virtual std::string GetTargetName() { return "master target"; }
+        virtual std::string GetTargetName() override { return "master target"; }
         virtual float GetAngle() override 
         {             
             Unit* followTarget = AI_VALUE(Unit*, "follow target");
@@ -434,7 +434,7 @@ namespace ai
             posMap["follow"] = followPosition;
         }
 
-        virtual WorldLocation GetLocationInternal()
+        virtual WorldLocation GetLocationInternal() override
         {
             Unit* followTarget = AI_VALUE(Unit*, "follow target");
 

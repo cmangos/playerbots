@@ -156,7 +156,7 @@ std::list<GuidPosition> RangeFilterValue::Calculate()
           }
           else
           {
-             sLog.outError("RangeFilterValue::Calculate: wrong qualifier params: %s", getQualifier());
+             sLog.outError("RangeFilterValue::Calculate: wrong qualifier params: %s", getQualifier().c_str());
           }
        }
 
@@ -168,7 +168,7 @@ std::list<GuidPosition> RangeFilterValue::Calculate()
     }
     else
     {
-       sLog.outError("RangeFilterValue::Calculate: wrong qualifier params: %s", getQualifier());
+       sLog.outError("RangeFilterValue::Calculate: wrong qualifier params: %s", getQualifier().c_str());
     }
 
     return result;

@@ -16,8 +16,8 @@ namespace ai
         static bool IsValid(Unit* target, Player* player, bool ignoreLos = false);
 
     protected:
-        virtual void FindUnits(std::list<Unit*> &targets);
-        virtual bool AcceptUnit(Unit* unit);
+        virtual void FindUnits(std::list<Unit*> &targets) override;
+        virtual bool AcceptUnit(Unit* unit) override;
 
         static void FindPossibleTargets(Player* player, std::list<Unit*>& targets, float range);
         static bool IsFriendly(Unit* target, Player* player);

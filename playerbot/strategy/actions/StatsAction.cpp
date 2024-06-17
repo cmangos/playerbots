@@ -144,7 +144,10 @@ void StatsAction::ListRepairCost(std::ostringstream &out)
             repairCount++;
         }
     }
-    repairPercent /= repairCount;
+    if (repairCount)
+        repairPercent /= repairCount;
+    else
+        repairPercent = 100;
 
     std::string color = "ff00ff00";
     if (repairPercent < 50)

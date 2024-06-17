@@ -240,6 +240,7 @@ namespace ai
             creators["lfg proposal"] = &ValueContext::lfg_proposal;
             creators["bag space"] = &ValueContext::bag_space;
             creators["durability"] = &ValueContext::durability;
+            creators["lowest durability"] = &ValueContext::lowest_durability;
             creators["max repair cost"] = &ValueContext::max_repair_cost;
             creators["repair cost"] = &ValueContext::repair_cost;
             creators["train cost"] = &ValueContext::train_cost;
@@ -549,6 +550,7 @@ namespace ai
         static UntypedValue* lfg_proposal(PlayerbotAI* ai) { return new LfgProposalValue(ai); }
         static UntypedValue* bag_space(PlayerbotAI* ai) { return new BagSpaceValue(ai); }
         static UntypedValue* durability(PlayerbotAI* ai) { return new DurabilityValue(ai); }
+        static UntypedValue* lowest_durability(PlayerbotAI* ai) { return new LowestDurabilityValue(ai); }
         static UntypedValue* max_repair_cost(PlayerbotAI* ai) { return new MaxGearRepairCostValue(ai); }
         static UntypedValue* repair_cost(PlayerbotAI* ai) { return new RepairCostValue(ai); }
         static UntypedValue* train_cost(PlayerbotAI* ai) { return new TrainCostValue(ai); }

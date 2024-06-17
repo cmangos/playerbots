@@ -204,6 +204,33 @@ uint8 DurabilityValue::Calculate()
     return (static_cast<float> (total) / totalMax) * 100;
 }
 
+uint8 LowestDurabilityValue::Calculate()
+{
+    uint32 durabilityPercent, minDurabilityPercent = 100;
+
+    for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        uint16 pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        Item* item = bot->GetItemByPos(pos);
+
+        if (!item)
+            continue;
+
+        uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+        if (!maxDurability)
+            continue;
+
+        uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+        durabilityPercent = (static_cast<float> (curDurability) / maxDurability) * 100;
+
+        if (durabilityPercent < minDurabilityPercent)
+            minDurabilityPercent = durabilityPercent;
+    }
+
+    return minDurabilityPercent;
+}
+
 uint8 SpeedValue::Calculate()
 {
     Unit* target = GetTarget();

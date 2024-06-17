@@ -87,7 +87,7 @@ AiObjectContext* AiFactory::createAiObjectContext(Player* player, PlayerbotAI* a
     return new AiObjectContext(ai);
 }
 
-int AiFactory::GetPlayerSpecTab(Player* bot)
+int AiFactory::GetPlayerSpecTab(const Player* bot)
 {
     std::map<uint32, int32> tabs = GetPlayerSpecTabs(bot);
 
@@ -127,7 +127,7 @@ int AiFactory::GetPlayerSpecTab(Player* bot)
     }
 }
 
-std::map<uint32, int32> AiFactory::GetPlayerSpecTabs(Player* bot)
+std::map<uint32, int32> AiFactory::GetPlayerSpecTabs(const Player* bot)
 {
     std::map<uint32, int32> tabs;
     for (uint32 i = 0; i < uint32(3); i++)
@@ -164,7 +164,7 @@ std::map<uint32, int32> AiFactory::GetPlayerSpecTabs(Player* bot)
     return tabs;
 }
 
-BotRoles AiFactory::GetPlayerRoles(Player* player)
+BotRoles AiFactory::GetPlayerRoles(const Player* player)
 {
     BotRoles role = BOT_ROLE_NONE;
     int tab = GetPlayerSpecTab(player);

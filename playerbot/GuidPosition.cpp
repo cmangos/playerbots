@@ -53,7 +53,7 @@ Unit* GuidPosition::GetUnit() const
     return GetCreature();
 }
 
-GameObject* GuidPosition::GetGameObject()
+GameObject* GuidPosition::GetGameObject() const
 {
     if (!*this)
         return nullptr;

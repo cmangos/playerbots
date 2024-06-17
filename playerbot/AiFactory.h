@@ -27,7 +27,7 @@ public:
     static void AddDefaultReactionStrategies(Player* player, PlayerbotAI* const facade, ReactionEngine* reactionEngine);
 
 public:
-    static int GetPlayerSpecTab(Player* player);
-    static std::map<uint32, int32> GetPlayerSpecTabs(Player* player);
-    static BotRoles GetPlayerRoles(Player* player);
+    static int GetPlayerSpecTab(const Player* player);
+    static std::map<uint32, int32> GetPlayerSpecTabs(const Player* player);
+    static BotRoles GetPlayerRoles(const Player* player);
 };

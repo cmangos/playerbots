@@ -271,6 +271,10 @@ bool LootObject::IsLootPossible(Player* bot)
                     }
                 }
             }
+
+            //Ignore objects that are currently in use.
+            if (go->IsInUse() || go->GetGoState() != GO_STATE_READY)
+                return false;
         }
     }
 

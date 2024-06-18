@@ -179,6 +179,35 @@ uint8 DurabilityValue::Calculate()
 {
     uint32 totalMax = 0, total = 0;
 
+    for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+    {
+        uint16 pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        Item* item = bot->GetItemByPos(pos);
+
+        if (!item)
+            continue;
+
+        uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+        if (!maxDurability)
+            continue;
+
+        totalMax += maxDurability;
+
+        uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+        total += curDurability;
+    }
+
+    if (total == 0)
+        return 0;
+
+    return (static_cast<float> (total) / totalMax) * 100;
+}
+
+uint8 DurabilityInventoryValue::Calculate()
+{
+    uint32 totalMax = 0, total = 0;
+
     for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
         uint16 pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);

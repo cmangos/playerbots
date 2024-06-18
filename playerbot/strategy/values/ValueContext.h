@@ -240,6 +240,7 @@ namespace ai
             creators["lfg proposal"] = [](PlayerbotAI* ai) { return new LfgProposalValue(ai); };
             creators["bag space"] = [](PlayerbotAI* ai) { return new BagSpaceValue(ai); };
             creators["durability"] = [](PlayerbotAI* ai) { return new DurabilityValue(ai); };
+            creators["durability inventory"] = [](PlayerbotAI* ai) { return new DurabilityInventoryValue(ai); };
             creators["lowest durability"] = [](PlayerbotAI* ai) { return new LowestDurabilityValue(ai); };
             creators["max repair cost"] = [](PlayerbotAI* ai) { return new MaxGearRepairCostValue(ai); };
             creators["repair cost"] = [](PlayerbotAI* ai) { return new RepairCostValue(ai); };

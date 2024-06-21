@@ -1363,6 +1363,13 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
             if (!sSpellMgr.GetSpellTargetPosition(spellId))
                 continue;
 
+            if (ai)
+            {
+                AiObjectContext* context = ai->GetAiObjectContext();
+                if (!AI_VALUE2(bool, "has reagents for", spellId))
+                    continue;
+            }
+
             WorldPosition telePos(sSpellMgr.GetSpellTargetPosition(spellId));
 
             TravelNode* homeNode = sTravelNodeMap.getNode(telePos, nullptr, 10.0f);

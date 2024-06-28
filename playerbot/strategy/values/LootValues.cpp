@@ -267,6 +267,9 @@ uint32 StackSpaceForItem::Calculate()
 	if (!proto) 
 		return maxValue;
 
+	if (proto->MaxCount > 0 && AI_VALUE2(uint32, "item count", proto->Name1) >= proto->MaxCount)
+		return proto->MaxCount - AI_VALUE2(uint32, "item count", proto->Name1);
+
 	if (ai->HasActivePlayerMaster())
 		return maxValue;
 	

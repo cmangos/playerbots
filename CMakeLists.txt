@@ -148,6 +148,11 @@ if (BUILD_MODULES)
   add_definitions(-DENABLE_MODULES)
 endif()
 
+# Define BUILD_AHBOT if need
+if (BUILD_AHBOT)
+  add_definitions(-DBUILD_AHBOT)
+endif()
+
 if(PCH)
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()

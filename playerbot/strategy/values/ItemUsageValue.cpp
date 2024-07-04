@@ -8,10 +8,11 @@
 #include "playerbot/RandomItemMgr.h"
 #include "playerbot/ServerFacade.h"
 
-#include "AuctionHouseBot/AuctionHouseBot.h"
-
-
 using namespace ai;
+
+#ifdef BUILD_AHBOT
+#include "AuctionHouseBot/AuctionHouseBot.h"
+#endif
 
 ItemQualifier::ItemQualifier(std::string qualifier, bool linkQualifier)
 {
@@ -306,8 +307,15 @@ ItemUsage ItemUsageValue::Calculate()
     //VENDOR/AH
     if (proto->SellPrice > 0)
     {
+        uint32 value = 0;
+#ifdef BUILD_AHBOT
         AuctionHouseBotItemData itemInfo = sAuctionHouseBot.GetItemData(proto->ItemId);
-        if (itemInfo.Value > ((int32)proto->SellPrice) * 1.5f)
+        value = itemInfo.Value;
+#else
+        value = (proto->BuyPrice * proto->Quality * 80) / 100;
+#endif
+
+        if (value > ((int32)proto->SellPrice) * 1.5f)
         {
             if(proto->Bonding == NO_BIND)
                 return ItemUsage::ITEM_USAGE_AH;

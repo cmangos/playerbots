@@ -131,7 +131,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
     GuidPosition masterRpgTarget;
-    if (requester && requester != bot && requester->GetPlayerbotAI() && requester->GetMapId() == bot->GetMapId() && !requester->IsBeingTeleported())
+    if (requester && requester->GetPlayerbotAI() && requester->GetMapId() == bot->GetMapId() && !requester->IsBeingTeleported())
     {
         
     }

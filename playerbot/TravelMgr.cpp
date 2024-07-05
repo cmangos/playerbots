@@ -121,11 +121,11 @@ std::string QuestRelationTravelDestination::getTitle() {
     std::ostringstream out;
 
     if (relation == 0)
-        out << "questgiver";
+        out << "questgiver ";
     else
-        out << "questtaker";
+        out << "questtaker ";
 
-    out << " " << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(entry);
     return out.str();
 }
 
@@ -303,7 +303,7 @@ std::string RpgTravelDestination::getTitle() {
     if(entry > 0)
         out << "rpg npc ";
 
-    out << " " << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(entry);
 
     return out.str();
 }
@@ -370,7 +370,7 @@ std::string GrindTravelDestination::getTitle() {
 
     out << "grind mob ";
 
-    out << " " << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(entry);
 
     return out.str();
 }
@@ -445,9 +445,9 @@ bool BossTravelDestination::isActive(Player* bot)
 std::string BossTravelDestination::getTitle() {
     std::ostringstream out;
 
-    out << "boss mob";
+    out << "boss mob ";
 
-    out << " " << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(entry);
 
     return out.str();
 }

@@ -103,6 +103,7 @@ namespace ai
 
         static std::string GetConsumableType(ItemPrototype const* proto, bool hasMana);
         static uint32 GetRecipeSpell(ItemPrototype const* proto);
+        static uint32 GetItemValue(ItemPrototype const* proto);
 	};
 
     class ForceItemUsageValue : public ManualSetValue<ForceItemUsage>, public Qualified

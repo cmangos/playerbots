@@ -308,12 +308,7 @@ ItemUsage ItemUsageValue::Calculate()
     if (proto->SellPrice > 0)
     {
         uint32 value = 0;
-#ifdef BUILD_AHBOT
-        AuctionHouseBotItemData itemInfo = sAuctionHouseBot.GetItemData(proto->ItemId);
-        value = itemInfo.Value;
-#else
-        value = (proto->BuyPrice * proto->Quality * 80) / 100;
-#endif
+
 
         if (value > ((int32)proto->SellPrice) * 1.5f)
         {
@@ -840,4 +835,22 @@ uint32 ItemUsageValue::GetRecipeSpell(ItemPrototype const* proto)
         }
     }
     return 0;
+}
+
+uint32 ItemUsageValue::GetItemValue(ItemPrototype const* proto)
+{
+    uint32 value;
+#ifdef BUILD_AHBOT
+    /* Waiting for prs
+    if (sAuctionHouseBot.IsInitialized())
+    {*/
+        AuctionHouseBotItemData itemInfo = sAuctionHouseBot.GetItemData(proto->ItemId);
+        value = itemInfo.Value;
+    /*}
+    else*/
+#else
+        value = (proto->BuyPrice * proto->Quality * 80) / 100;
+#endif
+
+    return value;
 }

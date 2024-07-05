@@ -7,10 +7,6 @@
 #include "playerbot/strategy/values/BudgetValues.h"
 #include "playerbot/strategy/values/MountValues.h"
 
-#ifdef BUILD_AHBOT
-#include "AuctionHouseBot/AuctionHouseBot.h"
-#endif
-
 using namespace ai;
 
 bool BuyAction::Execute(Event& event)
@@ -89,14 +85,7 @@ bool BuyAction::Execute(Event& event)
                     freeMoney[ItemUsage::ITEM_USAGE_AMMO] =  (uint32)NeedMoneyFor::ammo;
                     freeMoney[ItemUsage::ITEM_USAGE_QUEST] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_NEED] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_GREED] = (uint32)NeedMoneyFor::anything;
                     
-                    uint32 value = 0;
-
-#ifdef BUILD_AHBOT
-                    AuctionHouseBotItemData itemInfo = sAuctionHouseBot.GetItemData(proto->ItemId);
-                    value = itemInfo.Value;
-#else
-                    value = (proto->BuyPrice * proto->Quality * 80) / 100;
-#endif
+                    uint32 value = ItemUsageValue::GetItemValue(proto);;
 
                     if (value > ((int32)proto->BuyPrice) * 1.1f)
                         freeMoney[ItemUsage::ITEM_USAGE_AH] = (uint32)NeedMoneyFor::ah;

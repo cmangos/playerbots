@@ -307,8 +307,7 @@ ItemUsage ItemUsageValue::Calculate()
     //VENDOR/AH
     if (proto->SellPrice > 0)
     {
-        uint32 value = 0;
-
+        uint32 value = GetItemValue(proto);
 
         if (value > ((int32)proto->SellPrice) * 1.5f)
         {

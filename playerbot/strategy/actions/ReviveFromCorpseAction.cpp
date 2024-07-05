@@ -116,7 +116,15 @@ bool FindCorpseAction::Execute(Event& event)
     if (corpseDist < sPlayerbotAIConfig.reactDistance)
     {
         if (moveToMaster)
+        {
+            if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+            {
+                std::ostringstream out;
+                out << "Moving to revive near master.";
+                ai->TellPlayerNoFacing(GetMaster(), out);
+            }
             moveToPos = masterPos;
+        }
         else
         {
             FleeManager manager(bot, reclaimDist, 0.0, urand(0, 1), moveToPos);
@@ -125,10 +133,35 @@ bool FindCorpseAction::Execute(Event& event)
             {
                 float rx, ry, rz;
                 if (manager.CalculateDestination(&rx, &ry, &rz))
+                {
+                    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+                    {
+                        std::ostringstream out;
+                        out << "Moving to revive some where safe.";
+                        ai->TellPlayerNoFacing(GetMaster(), out);
+                    }
                     moveToPos = WorldPosition(moveToPos.getMapId(), rx, ry, rz, 0.0);
+                }
                 else if (!moveToPos.GetReachableRandomPointOnGround(bot, reclaimDist, urand(0, 1)))
+                {
+                    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+                    {
+                        std::ostringstream out;
+                        out << "Moving to revive at corpse.";
+                        ai->TellPlayerNoFacing(GetMaster(), out);
+                    }
                     moveToPos = corpsePos;
+                }
             }
+        }
+    }
+    else
+    {
+        if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+        {
+            std::ostringstream out;
+            out << "Moving towards corpse.";
+            ai->TellPlayerNoFacing(GetMaster(), out);
         }
     }
 
@@ -159,6 +192,7 @@ bool FindCorpseAction::Execute(Event& event)
 #endif
         else
         {
+
             moved = MoveTo(moveToPos.getMapId(), moveToPos.getX(), moveToPos.getY(), moveToPos.getZ(), false, false);
 
             if (!moved && !ai->HasActivePlayerMaster()) //We could not move to coprse. Try spirithealer instead.
@@ -247,6 +281,13 @@ bool SpiritHealerAction::Execute(Event& event)
         delay = std::min(delay, uint32(10 * MINUTE));
 
         shouldTeleportToGY = deadTime > delay;
+    }
+
+    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+    {
+        std::ostringstream out;
+        out << "Moving towards graveyard.";
+        ai->TellPlayerNoFacing(GetMaster(), out);
     }
 
     if (shouldTeleportToGY)

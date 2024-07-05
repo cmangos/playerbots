@@ -88,6 +88,30 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
     bool canMove = false;
 
+    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT) && ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+    {
+        std::ostringstream out;
+
+        out << "Moving to ";
+
+        out << target->getDestination()->getTitle();
+
+        if (!(*target->getPosition() == WorldPosition()))
+        {
+            out << " at " << uint32(target->getPosition()->distance(bot)) << "y";
+        }
+
+        if (target->getStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
+            out << " for " << (target->getTimeLeft() / 1000) << "s";
+
+        if (target->getRetryCount(true))
+            out << " (move retry: " << target->getRetryCount(true) << ")";
+        else if (target->getRetryCount(false))
+            out << " (retry: " << target->getRetryCount(false) << ")";
+
+        ai->TellPlayerNoFacing(GetMaster(), out);
+    }
+
     canMove = MoveTo(mapId, x, y, z, false, false);
 
     if (!canMove)

@@ -57,7 +57,14 @@ namespace ai
                         sServerFacade.IsDistanceGreaterThan(distanceToTarget, sPlayerbotAIConfig.tooCloseDistance))
                 {
                     return true;
-                }                    
+                }                 
+
+                if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+                {
+                    std::ostringstream out;
+                    out << "Moving to reach " << ChatHelper::formatWorldobject(target);
+                    ai->TellPlayerNoFacing(GetMaster(), out);
+                }
                 
                 if (inLos && isFriend && (range <= ai->GetRange("follow")))
                 {

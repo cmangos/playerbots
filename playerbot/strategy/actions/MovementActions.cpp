@@ -392,11 +392,11 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                     sTravelNodeMap.m_nMapMtx.lock_shared();
                     TravelNodeRoute route = sTravelNodeMap.getRoute(startPosition, endPosition, beginPath, bot);       
 
-                    std::string routeList;
+                    std::string routeList = "Route: ";
 
                     for (auto node : route.getNodes())
                     {
-                        routeList += node->getName() + (node == route.getNodes().back() ? "" : "-");
+                        routeList += node->getName() + (node == route.getNodes().back() ? "" : ",");
                     }
 
                     if (!routeList.empty())
@@ -2037,6 +2037,13 @@ bool MoveToLootAction::Execute(Event& event)
         return false;
 
     WorldObject *wo = loot.GetWorldObject(bot);
+
+    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+    {
+        std::ostringstream out;
+        out << "Moving to loot " << ChatHelper::formatWorldobject(wo);
+        ai->TellPlayerNoFacing(GetMaster(), out);
+    }
 
     if(sServerFacade.IsWithinLOSInMap(bot, wo))
         return MoveNear(wo, sPlayerbotAIConfig.contactDistance);

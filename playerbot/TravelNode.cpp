@@ -1366,7 +1366,7 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
             if (ai)
             {
                 AiObjectContext* context = ai->GetAiObjectContext();
-                if (!AI_VALUE2(bool, "has reagents for", spellId))
+                if (AI_VALUE2(uint32, "has reagents for", spellId) == 0)
                     continue;
             }
 

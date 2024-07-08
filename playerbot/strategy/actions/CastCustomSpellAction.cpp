@@ -644,6 +644,11 @@ bool CraftRandomItemAction::Execute(Event& event)
 
         std::ostringstream cmd;
 
+        uint32 castCount = AI_VALUE2(uint32, "has reagents for", spellId); 
+        
+        if (castCount > proto->GetMaxStackSize())
+            castCount = proto->GetMaxStackSize();
+
         cmd << "castnc ";
 
         if (((wot && sServerFacade.IsInFront(bot, wot, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))))
@@ -651,7 +656,7 @@ bool CraftRandomItemAction::Execute(Event& event)
             cmd << chat->formatWorldobject(wot) << " ";
         }
 
-        cmd << spellId << " " << proto->GetMaxStackSize();
+        cmd << spellId << " " << castCount;
 
         ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *bot);
         return true;

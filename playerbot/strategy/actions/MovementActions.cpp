@@ -745,7 +745,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
             }
             else
             {
-                if (sServerFacade.IsSpellReady(bot, entry) && (!bot->IsFlying() || WorldPosition(bot).currentHeight() < 10.0f) && AI_VALUE2(bool, "has reagents for", entry))
+                if (sServerFacade.IsSpellReady(bot, entry) && (!bot->IsFlying() || WorldPosition(bot).currentHeight() < 10.0f) && AI_VALUE2(uint32, "has reagents for", entry) > 0)
                     if (ai->DoSpecificAction("cast", Event("rpg action", std::to_string(entry)), true))
                         return true;
 

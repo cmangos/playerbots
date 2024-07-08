@@ -38,7 +38,7 @@ std::vector<uint32> CraftSpellsValue::Calculate()
     return spellIds;
 }
 
-bool HasReagentsForValue::Calculate()
+uint32 HasReagentsForValue::Calculate()
 {
     if (ai->HasCheat(BotCheatMask::item))
         return true;
@@ -50,6 +50,8 @@ bool HasReagentsForValue::Calculate()
     if (!pSpellInfo)
         return false;
 
+    uint32 craftCount = 9999;
+
     for (uint8 i = 0; i < MAX_SPELL_REAGENTS; i++)
     {
         if (pSpellInfo->ReagentCount[i] > 0 && pSpellInfo->Reagent[i])
@@ -59,11 +61,14 @@ bool HasReagentsForValue::Calculate()
             uint32 count = AI_VALUE2(uint32, "item count", reqProto->Name1);
 
             if (count < pSpellInfo->ReagentCount[i])
-                return false;
+                return 0;
+
+            if (craftCount > count / pSpellInfo->ReagentCount[i])
+                craftCount = count / pSpellInfo->ReagentCount[i];
         }
     }
 
-    return true;
+    return craftCount;
 }
 
 bool CanCraftSpellValue::Calculate()
@@ -75,7 +80,7 @@ bool CanCraftSpellValue::Calculate()
     if (!pSpellInfo)
         return false;
 
-    if (!AI_VALUE2(bool, "has reagents for", spellId))
+    if (AI_VALUE2(uint32, "has reagents for", spellId) == 0)
         return false;
 
     return true;

@@ -423,6 +423,15 @@ bool BossTravelDestination::isActive(Player* bot)
             return false;
 
     }
+
+    //Ragefire casm
+    if (points.front()->getMapId() == 389 && bot->GetTeam() == ALLIANCE)
+        return false;
+
+    //Stockades
+    if (points.front()->getMapId() == 34 && bot->GetTeam() == HORDE)
+        return false;
+
     WorldPosition botPos(bot);
 
     if (!isOut(botPos))

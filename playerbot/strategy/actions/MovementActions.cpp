@@ -928,7 +928,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
     */
 
     // Clean movement if not already moving the same way.
-    if (mm.GetCurrent()->GetMovementGeneratorType() != POINT_MOTION_TYPE)
+    if (mm.GetCurrent()->GetMovementGeneratorType() != POINT_MOTION_TYPE || movePosition.fDist(lastMove.lastMoveShort) > 5.0f)
     {
         if (mover == bot)
             ai->StopMoving();

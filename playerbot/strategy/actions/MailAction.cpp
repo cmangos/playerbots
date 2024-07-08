@@ -134,7 +134,7 @@ public:
 
                 if (event.getSource() == "rpg action")
                 {
-                    items.push_back(ChatHelper::formatItem(item));
+                    items.push_back(ChatHelper::formatItem(item, item->GetCount()));
                 }
                 else
                 {
@@ -158,7 +158,7 @@ public:
             std::map<std::string, std::string> args;
             args["%itemcount"] = std::to_string(items.size());
 
-            std::vector<std::string> lines = { BOT_TEXT2("|cff00ff00%itemcount items recieved from mail:", args) };
+            std::vector<std::string> lines = { BOT_TEXT2("|cff00ff00%itemcount items recieved from mail: ", args) };
             for (auto& item : items)
             {
                 if (lines.back().size() + item.size() > 256)

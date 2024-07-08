@@ -88,7 +88,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
     bool canMove = false;
 
-    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT) && ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
     {
         std::ostringstream out;
 

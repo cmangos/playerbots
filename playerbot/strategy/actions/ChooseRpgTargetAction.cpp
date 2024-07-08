@@ -281,7 +281,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
             it = targets.erase(it);
         else if (hasGoodRelevance && it->second <= 1.0) //Remove useless targets if there's any good ones
             it = targets.erase(it);
-        else if (!hasGoodRelevance && requester && (!masterRpgTarget || it->first != masterRpgTarget)) //Remove useless targets if it's not masters target.
+        else if (!hasGoodRelevance && requester && requester != bot && (!masterRpgTarget || it->first != masterRpgTarget)) //Remove useless targets if it's not masters target.
             it = targets.erase(it);
         else
             ++it;

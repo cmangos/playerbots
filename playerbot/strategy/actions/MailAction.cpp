@@ -75,6 +75,14 @@ private:
 class TakeMailProcessor : public MailProcessor
 {
 public:
+
+    bool Before(Player* requester, PlayerbotAI* ai) override
+    {
+        copper = 0;
+        items.clear();
+        return true;
+    }
+
     bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai, Event& event) override
     {
         Player* bot = ai->GetBot();
@@ -83,9 +91,6 @@ public:
             ai->TellError(requester, "Not enough bag space");
             return false;
         }
-
-        copper = 0;
-        items.clear();
 
         ObjectGuid mailbox = FindMailbox(ai);
         if (mail->money)

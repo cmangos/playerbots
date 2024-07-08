@@ -310,6 +310,20 @@ bool StoreLootAction::Execute(Event& event)
         ItemPrototype const *proto = sItemStorage.LookupEntry<ItemPrototype>(itemid);
         if (!proto)
             continue;
+
+        Loot* loot = sLootMgr.GetLoot(bot);
+
+        if (!loot)
+            continue;
+
+        LootItem* lootItem = loot->GetLootItemInSlot(itemindex);
+
+        if (!lootItem)
+            continue;
+
+        //have no right to loot
+        if (lootItem->isBlocked || lootItem->GetSlotTypeForSharedLoot(bot, loot) == MAX_LOOT_SLOT_TYPE)
+            continue;
        
         Player* master = ai->GetMaster();
         if (sRandomPlayerbotMgr.IsRandomBot(bot) && master)

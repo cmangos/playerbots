@@ -90,7 +90,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
 
             if (!urand(0, 30) && dCount < 2 && guild->HasRankRight(botMember->RankId, GR_RIGHT_PROMOTE))
             {
-                if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && bot->GetGuildId() && !urand(0, 10) && sRandomPlayerbotMgr.IsFreeBot(bot))
+                if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && bot->GetGuildId() && !urand(0, 10))
                 {
                     std::map<std::string, std::string> placeholders;
                     placeholders["%name"] = player->GetName();
@@ -104,7 +104,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
 
             if (!urand(0, 30) && dCount > 2 && guild->HasRankRight(botMember->RankId, GR_RIGHT_DEMOTE))
             {
-                if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && bot->GetGuildId() && !urand(0, 10) && sRandomPlayerbotMgr.IsFreeBot(bot))
+                if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && bot->GetGuildId() && !urand(0, 10) && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
                 {
                     std::map<std::string, std::string> placeholders;
                     placeholders["%name"] = player->GetName();
@@ -150,7 +150,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
         if (!sameGroup && sServerFacade.GetDistance2d(bot, player) > sPlayerbotAIConfig.spellDistance)
             continue;
 
-        if (sPlayerbotAIConfig.inviteChat && sRandomPlayerbotMgr.IsFreeBot(bot))
+        if (sPlayerbotAIConfig.inviteChat && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
         {
             std::map<std::string, std::string> placeholders;
             placeholders["%name"] = player->GetName();

@@ -46,7 +46,7 @@ bool GuildAcceptAction::Execute(Event& event)
         accept = false;
     }
 
-    if (sPlayerbotAIConfig.inviteChat && sServerFacade.GetDistance2d(bot, inviter) < sPlayerbotAIConfig.spellDistance * 1.5 && inviter->GetPlayerbotAI() && sRandomPlayerbotMgr.IsFreeBot(bot))
+    if (sPlayerbotAIConfig.inviteChat && sServerFacade.GetDistance2d(bot, inviter) < sPlayerbotAIConfig.spellDistance * 1.5 && inviter->GetPlayerbotAI() && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
     {
         std::map<std::string, std::string> placeholders;
         placeholders["%name"] = inviter->GetName();

@@ -195,7 +195,7 @@ bool PetitionOfferNearbyAction::Execute(Event& event)
         if (sServerFacade.GetDistance2d(bot, player) > sPlayerbotAIConfig.sightDistance)
             continue;
 
-        if (sPlayerbotAIConfig.inviteChat && sServerFacade.GetDistance2d(bot, player) < sPlayerbotAIConfig.spellDistance && sRandomPlayerbotMgr.IsFreeBot(bot))
+        if (sPlayerbotAIConfig.inviteChat && sServerFacade.GetDistance2d(bot, player) < sPlayerbotAIConfig.spellDistance && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
         {
             std::map<std::string, std::string> placeholders;
             placeholders["%name"] = player->GetName();

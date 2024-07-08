@@ -295,7 +295,7 @@ namespace ai
                 group->ConvertToRaid();
 
             Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-            if (sPlayerbotAIConfig.inviteChat && sRandomPlayerbotMgr.IsFreeBot(bot))
+            if (sPlayerbotAIConfig.inviteChat && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
             {
                 if (guild && bot->IsInGuild(player))
                 {
@@ -447,7 +447,7 @@ namespace ai
                 group->ConvertToRaid();
             }
 
-            if (sPlayerbotAIConfig.inviteChat && sRandomPlayerbotMgr.IsFreeBot(bot))
+            if (sPlayerbotAIConfig.inviteChat && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
             {
                 std::map<std::string, std::string> placeholders;
                 placeholders["%name"] = player->GetName();

@@ -442,6 +442,59 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
         out << "1," << "\"" << destination->getTitle() << "\",\"" << message << "\"";
 
+        if (destination->getName() == "NullTravelDestination")
+            out << ",none";
+        else if (destination->getName() == "QuestTravelDestination")
+            out << ",quest";
+        else if (destination->getName() == "QuestRelationTravelDestination")
+            out << ",questgiver";
+        else if (destination->getName() == "QuestObjectiveTravelDestination")
+            out << ",objective";
+        else  if (destination->getName() == "RpgTravelDestination")
+        {
+            RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
+            if (RpgDestination->getEntry() > 0)
+            {
+                CreatureInfo const* cInfo = RpgDestination->getCreatureInfo();
+
+                if (cInfo)
+                {
+                    if ((cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR) && AI_VALUE2(bool, "group or", "should sell,can sell"))
+                        out << ",sell";
+                    else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
+                        out << ",repair";
+                    else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should sell,can ah sell"))
+                        out << ",ah";
+                    else
+                        out << ",rpg";
+                }
+                else
+                    out << ",rpg";
+            }
+            else
+            {
+                GameObjectInfo const* gInfo = RpgDestination->getGoInfo();
+
+                if (gInfo)
+                {
+                    if (gInfo->type == GAMEOBJECT_TYPE_MAILBOX && AI_VALUE(bool, "can get mail"))
+                        out << ",mail";
+                    else
+                        out << ",rpg";
+                }
+                else
+                    out << ",rpg";
+            }
+        }
+        else if (destination->getName() == "ExploreTravelDestination")
+            out << ",explore";
+        else if (destination->getName() == "GrindTravelDestination")
+            out << ",grind";
+        else if (destination->getName() == "BossTravelDestination")
+            out << ",boss";
+        else
+            out << ",unknown";
+
         sPlayerbotAIConfig.log("travel_map.csv", out.str().c_str());
 
         WorldPosition lastPos = AI_VALUE2(WorldPosition, "custom position", "last choose travel");

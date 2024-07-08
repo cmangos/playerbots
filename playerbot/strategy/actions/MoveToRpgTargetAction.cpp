@@ -235,9 +235,6 @@ bool MoveToRpgTargetAction::isUseful()
     if (guidP.distance(bot) < INTERACTION_DISTANCE)
         return false;
 
-    if (!AI_VALUE2(bool, "can free move to", guidP.to_string()))
-        return false;
-
     if (!AI_VALUE(bool, "can move around"))
         return false;
 

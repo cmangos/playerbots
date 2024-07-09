@@ -144,7 +144,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
         if (guidP.sqDistance2d(bot) < INTERACTION_DISTANCE * INTERACTION_DISTANCE)
             distance = sqrt(guidP.sqDistance2d(bot)); //Stay at this distance.
-        else if(unit)
+        else if(unit || !urand(0, 5)) //Stay futher away from npc's and sometimes gameobjects (for large hitbox objects).
             distance = frand(0.5, 1);
         else
             distance = frand(0, 0.5);

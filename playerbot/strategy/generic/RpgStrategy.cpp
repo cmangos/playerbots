@@ -180,7 +180,7 @@ void RpgCraftStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "rpg craft",
-        NextAction::array(0, new NextAction("rpg craft", 1.001f), NULL)));
+        NextAction::array(0, new NextAction("rpg craft", ai->HasCheat(BotCheatMask::item) ? 1.001f : 1.010f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "rpg item",

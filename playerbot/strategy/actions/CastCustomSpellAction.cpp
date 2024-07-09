@@ -596,7 +596,7 @@ bool CraftRandomItemAction::Execute(Event& event)
     std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
     std::shuffle(spellIds.begin(), spellIds.end(),*GetRandomGenerator());
 
-    std::list<ObjectGuid> wos = chat->parseGameobjects(name);
+    std::list<ObjectGuid> wos = chat->parseGameobjects(event.getParam());
     WorldObject* wot = nullptr;
 
     for (auto wo : wos)

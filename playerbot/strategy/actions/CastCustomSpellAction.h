@@ -57,7 +57,7 @@ namespace ai
     class CraftRandomItemAction : public CastRandomSpellAction
     {
     public:
-        CraftRandomItemAction(PlayerbotAI* ai) : CastRandomSpellAction(ai, "enchant random item") {}
+        CraftRandomItemAction(PlayerbotAI* ai) : CastRandomSpellAction(ai, "craft random item") {}
     public:
         virtual bool Execute(Event& event) override;
     };

@@ -575,14 +575,18 @@ std::vector<WorldPosition*> ChooseTravelTargetAction::getLogicalPoints(Player* r
     for (auto pos : travelPoints)
     {
         PerformanceMonitorOperation* pmo1 = sPerformanceMonitor.start(PERF_MON_VALUE, "AreaLevel", &context->performanceStack);
-        int32 areaLevel = pos->getAreaLevel();
-        if (pmo1) pmo1->finish();
+        
+        if (pos->getMapId() == bot->GetMapId())
+        {
+            int32 areaLevel = pos->getAreaLevel();
+            if (pmo1) pmo1->finish();
 
-        if (!pos->isOverworld() && !canFightElite)
-            areaLevel += 10;
+            if (!pos->isOverworld() && !canFightElite)
+                areaLevel += 10;
 
-        if (!areaLevel || botLevel < areaLevel) //Skip points that are in a area that is too high level.
-            continue;
+            if (!areaLevel || botLevel < areaLevel) //Skip points that are in a area that is too high level.
+                continue;
+        }
 
         GuidPosition* guidP = dynamic_cast<GuidPosition*>(pos);
 

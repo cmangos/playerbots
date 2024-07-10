@@ -293,6 +293,18 @@ bool RpgTravelDestination::isActive(Player* bot)
         }
     }
 
+    //City & Pvp baracks
+    if (points.front()->getMapId() == bot->GetMapId() && points.front()->hasAreaFlag(AREA_FLAG_CAPITAL) && !points.front()->hasFaction(bot->GetTeam()))
+        return false;
+
+    //Horde pvp baracks
+    if (points.front()->getMapId() == 450 && bot->GetTeam() == ALLIANCE)
+        return false;
+
+    //Alliance pvp baracks
+    if (points.front()->getMapId() == 449 && bot->GetTeam() == HORDE)
+        return false;
+
     return !GuidPosition(HIGHGUID_UNIT, entry).IsHostileTo(bot);
 }
 

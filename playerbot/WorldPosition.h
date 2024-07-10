@@ -229,6 +229,9 @@ namespace ai
         std::string getAreaName(const bool fullName = true, const bool zoneName = false) const;
         int32 getAreaLevel() const;
 
+        bool hasAreaFlag(const AreaFlags flag = AREA_FLAG_CAPITAL) const;
+        bool hasFaction(const Team team) const;
+
         std::vector<WorldPosition> fromPointsArray(const std::vector<G3D::Vector3>& path) const;
 
         //Pathfinding

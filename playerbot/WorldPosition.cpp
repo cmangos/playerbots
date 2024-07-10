@@ -539,6 +539,37 @@ int32 WorldPosition::getAreaLevel() const
     return 0;
 }
 
+bool WorldPosition::hasAreaFlag(const AreaFlags flag) const
+{
+    bool inCity = false;
+    AreaTableEntry const* areaEntry = getArea();
+    if (areaEntry)
+    {
+        if (areaEntry->zone)
+            areaEntry = GetAreaEntryByAreaID(areaEntry->zone);
+
+        if (areaEntry && areaEntry->flags & flag)
+            return true;
+    }
+
+    return false;
+}
+
+bool WorldPosition::hasFaction(const Team team) const
+{
+    AreaTableEntry const* areaEntry = getArea();
+    if (areaEntry)
+    {
+        if (areaEntry->team == 2 && team == ALLIANCE)
+            return true;
+        if (areaEntry->team == 4 && team == HORDE)
+            return true;
+        if (areaEntry->team == 6)
+            return true;
+    }
+    return false;
+}
+
 std::set<GenericTransport*> WorldPosition::getTransports(uint32 entry)
 {
     std::set<GenericTransport*> transports;

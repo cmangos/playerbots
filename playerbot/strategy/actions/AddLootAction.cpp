@@ -99,7 +99,7 @@ bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)
     if (!loot.IsLootPossible(bot))
         return false;
 
-    if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(bot, wo), INTERACTION_DISTANCE))
+    if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(bot, wo), INTERACTION_DISTANCE) && sServerFacade.IsDistanceLessThan(sServerFacade.GetDistance2d(bot, requester), sPlayerbotAIConfig.reactDistance))
     {
         std::list<Unit*> targets;
         MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(bot, sPlayerbotAIConfig.lootDistance);

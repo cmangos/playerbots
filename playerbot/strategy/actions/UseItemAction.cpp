@@ -534,7 +534,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             else if (gameObject && gameObject->IsSpawned())
             {
                 gameObjectTarget = gameObject;
-                targets.setDestination(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ());
+                targets.setDestination(gameObject->GetPositionX(), gameObject->GetPositionY(), gameObject->GetPositionZ());
                 validTarget = true;
             }
         }

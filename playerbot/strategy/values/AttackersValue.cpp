@@ -372,25 +372,42 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
         }
     }
 
-    if (playerToCheckAgainst->GetPlayerbotAI())
+    if (IgnoreTarget(target, playerToCheckAgainst))
+        return false;
+
+    return true;
+}
+
+bool AttackersValue::IgnoreTarget(Unit* target, Player* playerToCheckAgainst)
+{
+    if (!playerToCheckAgainst->GetPlayerbotAI())
+        return false; 
+
+    PlayerbotAI* ai = playerToCheckAgainst->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+
+    //Ignore Hard hostiles while not already fighting.
+    if (target->GetLevel() > (playerToCheckAgainst->GetLevel() + 5) && ai->GetState() == BotState::BOT_STATE_NON_COMBAT)
     {
-        PlayerbotAI* ai = playerToCheckAgainst->GetPlayerbotAI();
-        AiObjectContext* context = ai->GetAiObjectContext();
+        //When traveling a long distance.
+        if (AI_VALUE(TravelTarget*, "travel target")->isTraveling() && AI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
+            return true;
 
-        //Ignore Hard hostiles while not already fighting.
-        if (target->GetLevel() > (playerToCheckAgainst->GetLevel() + 5) && ai->GetState() == BotState::BOT_STATE_NON_COMBAT)
+        //When moving to master far away.
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE2(bool, "trigger active", "out of react range"))
+            return true;
+
+        if (ai->GetMaster() && !ai->HasActivePlayerMaster())
         {
-            //When traveling a long distance.
-            if (AI_VALUE(TravelTarget*, "travel target")->isTraveling() && AI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
-                return false;
+            Player* player = ai->GetMaster();
 
-            //When moving to master far away.
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE2(bool, "trigger active", "out of react range"))
-                return false;
+            //When master is traveling a long distance.
+            if (PAI_VALUE(TravelTarget*, "travel target")->isTraveling() && PAI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
+                return true;
         }
     }
 
-    return true;
+    return false;
 }
 
 std::string AttackersValue::Format()

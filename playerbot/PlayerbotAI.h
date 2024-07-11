@@ -173,7 +173,8 @@ enum class BotTypeNumber : uint8
     ACTIVITY_TYPE_NUMBER = 1,
     GROUPER_TYPE_NUMBER = 2,
     GUILDER_TYPE_NUMBER = 3,
-    CHATFILTER_NUMBER = 4
+    CHATFILTER_NUMBER = 4 ,
+    DUMMY_ATTACK_NUMBER = 5
 };
 
 enum class GrouperType : uint8

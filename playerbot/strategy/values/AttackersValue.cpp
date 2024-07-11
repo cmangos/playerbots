@@ -378,12 +378,7 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
             {
                 return false;
             }
-        }
-
-        if (WorldPosition(player).isOverworld() && target->AI() && target->AI()->IsPreventingDeath())
-        {
-            return false;
-        }
+        }        
     }
 
     if (IgnoreTarget(target, playerToCheckAgainst))
@@ -419,6 +414,34 @@ bool AttackersValue::IgnoreTarget(Unit* target, Player* playerToCheckAgainst)
             if (PAI_VALUE(TravelTarget*, "travel target")->isTraveling() && PAI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
                 return true;
         }
+    }
+
+    Player* enemyPlayer = dynamic_cast<Player*>(target);
+
+    if (!enemyPlayer)
+    {
+        bool isDummy = false;
+
+
+        if (WorldPosition(playerToCheckAgainst).isOverworld() && target->AI() && target->AI()->IsPreventingDeath())
+        {
+
+            isDummy = true;
+        }
+
+#define TRAINING_DUMMY_NPC_ENTRY1 190013
+#define TRAINING_DUMMY_NPC_ENTRY2 190014
+#define TRAINING_DUMMY_NPC_ENTRY3 190015
+
+        if (target->GetEntry() == TRAINING_DUMMY_NPC_ENTRY1 ||
+            target->GetEntry() == TRAINING_DUMMY_NPC_ENTRY2 ||
+            target->GetEntry() == TRAINING_DUMMY_NPC_ENTRY3)
+        {
+            isDummy = true;
+        }
+
+        if (isDummy && ai->GetFixedBotNumer(BotTypeNumber::DUMMY_ATTACK_NUMBER, 10, 0.2f)) //90% of bots, cycle every 5 min.
+            return true;
     }
 
     return false;

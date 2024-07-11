@@ -541,7 +541,6 @@ int32 WorldPosition::getAreaLevel() const
 
 bool WorldPosition::hasAreaFlag(const AreaFlags flag) const
 {
-    bool inCity = false;
     AreaTableEntry const* areaEntry = getArea();
     if (areaEntry)
     {

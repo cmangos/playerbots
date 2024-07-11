@@ -47,17 +47,32 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     {
         bool shouldRpg = false;
         if (AI_VALUE2(bool, "group or", "should sell,can sell,following party,near leader")) //One of party members wants to sell items (full bags).
+        {
+            ai->TellDebug(requester, "Group needs to sell items (full bags)", "debug travel");
             shouldRpg = true;
-        else if (AI_VALUE2(bool, "group or", "should repair,can repair,following party,near leader")) //One of party memebers wants to repair.
+        }
+        else if (AI_VALUE2(bool, "group or", "should repair,can repair,following party,near leader")) //One of party members wants to repair.
+        {
+            ai->TellDebug(requester, "Group needs to repair", "debug travel");
             shouldRpg = true;
+        }
         else if (AI_VALUE2(bool, "group or", "should sell,can ah sell,following party,near leader") && bot->GetLevel() > 5) //One of party members wants to sell items to AH (full bags).
+        {
+            ai->TellDebug(requester, "Group needs to ah items (full bags)", "debug travel");
             shouldRpg = true;
+        }
         else if (!shouldRpg && ai->HasStrategy("free", BotState::BOT_STATE_NON_COMBAT))
         {
             if (AI_VALUE(bool, "should sell") && (AI_VALUE(bool, "can sell") || AI_VALUE(bool, "can ah sell"))) //Bot wants to sell (full bags).
-                shouldRpg = true;
+            {
+                ai->TellDebug(requester, "Bot needs to sell/ah items (full bags)", "debug travel");
+                shouldRpg = true;                
+            }
             else if (AI_VALUE(bool, "should repair") && AI_VALUE(bool, "can repair")) //Bot wants to repair.
+            {
+                ai->TellDebug(requester, "Bot needs to repair", "debug travel");
                 shouldRpg = true;
+            }
         }
                      
         if (shouldRpg)
@@ -71,6 +86,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     //Rpg in city
     if (!foundTarget && urand(1, 100) > 90 && bot->GetLevel() > 5)           //10% chance
     {
+        ai->TellDebug(requester, "Random rpg in city", "debug travel");
         PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetNpcFlagTarget2", &context->performanceStack);
         foundTarget = SetNpcFlagTarget(requester, newTarget, { UNIT_NPC_FLAG_BANKER,UNIT_NPC_FLAG_BATTLEMASTER,UNIT_NPC_FLAG_AUCTIONEER });
         if(pmo) pmo->finish();
@@ -80,6 +96,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     bool pvpActivate = false;
     if (pvpActivate && !foundTarget && urand(0, 4) && bot->GetLevel() > 50)
     {
+        ai->TellDebug(requester, "Pvp in Tarren Mill", "debug travel");
         WorldPosition pos = WorldPosition(bot);
         WorldPosition* botPos = &pos;
         TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
@@ -107,6 +124,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
         //Empty mail for money
         if (AI_VALUE(bool, "can get mail"))
         {
+            ai->TellDebug(requester, "Get mail for money", "debug travel");
             PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetGoTarget1", &context->performanceStack);
             foundTarget = SetGOTypeTarget(requester, newTarget, GAMEOBJECT_TYPE_MAILBOX,"",false);  //Find a mailbox
             if (pmo) pmo->finish();
@@ -117,6 +135,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
             if (urand(1, 100) > 50) //50% Focus on active quests for money.
             {
                 {
+                    ai->TellDebug(requester, "Turn in quests for money", "debug travel");
                     PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetQuestTarget1", &context->performanceStack);
                     foundTarget = SetQuestTarget(requester, newTarget, false, true, true);           //Turn in quests for money.
                     if (pmo) pmo->finish();
@@ -124,6 +143,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
 
                 if (!foundTarget)
                 {
+                    ai->TellDebug(requester, "Start quests for money", "debug travel");
                     PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetQuestTarget2", &context->performanceStack);
                     foundTarget = SetQuestTarget(requester, newTarget, true, false, false);      //Find new (low) level quests
                     if (pmo) pmo->finish();
@@ -131,6 +151,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
             }
             else
             {
+                ai->TellDebug(requester, "Grind mobs for money", "debug travel");
                 PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetGrindTarget1", &context->performanceStack);
                 foundTarget = SetGrindTarget(requester, newTarget);                               //Go grind mobs for money    
                 if (pmo) pmo->finish();
@@ -142,6 +163,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     //Continue current target.
     if (!foundTarget && urand(1, 100) > 10)                               //90% chance 
     {
+        ai->TellDebug(requester, "Continue previous target", "debug travel");
         PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetCurrentTarget", &context->performanceStack);
         foundTarget = SetCurrentTarget(requester, newTarget, oldTarget);             //Extend current target.
         if(pmo) pmo->finish();
@@ -152,6 +174,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     {
         if (AI_VALUE(bool, "can get mail"))
         {
+            ai->TellDebug(requester, "Get mail", "debug travel");
             PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetGoTarget2", &context->performanceStack);
             foundTarget = SetGOTypeTarget(requester, newTarget, GAMEOBJECT_TYPE_MAILBOX, "", false);  //Find a mailbox
             if (pmo) pmo->finish();
@@ -162,6 +185,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     if (!foundTarget && urand(1, 100) > 50)                                 //50% chance
         if (AI_VALUE(bool, "can fight boss"))
         {
+            ai->TellDebug(requester, "Fight boss for loot", "debug travel");
             PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetBossTarget", &context->performanceStack);
             foundTarget = SetBossTarget(requester, newTarget);                         //Go fight a (dungeon boss)
             if(pmo) pmo->finish();
@@ -170,6 +194,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     //Do quests (start, do, end)
     if (!foundTarget && urand(1, 100) > 5)                                 //95% chance
     {
+        ai->TellDebug(requester, "Do questing", "debug travel");
         PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetQuestTarget", &context->performanceStack);
         foundTarget = SetQuestTarget(requester, newTarget, true, true, true);    //Do any nearby           
         if(pmo) pmo->finish();
@@ -178,6 +203,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     //Explore a nearby unexplored area.
     if (!foundTarget && ai->HasStrategy("explore", BotState::BOT_STATE_NON_COMBAT) && urand(1, 100) > 90)  //10% chance Explore a unexplored sub-zone.
     {
+        ai->TellDebug(requester, "Explore unexplored areas", "debug travel");
         PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetExploreTarget", &context->performanceStack);
         foundTarget = SetExploreTarget(requester, newTarget);
         if(pmo) pmo->finish();
@@ -187,6 +213,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     if (!foundTarget && urand(1, 100) > 50)                                 //50% chance
     {
         {
+            ai->TellDebug(requester, "Rpg with random npcs", "debug travel");
             PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetRpgTarget2", &context->performanceStack);
             foundTarget = SetRpgTarget(requester, newTarget);
             if (foundTarget)
@@ -197,13 +224,17 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
 
     if (!foundTarget)
     {
+        ai->TellDebug(requester, "Grind random mobs", "debug travel");
         PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetGrindTarget2", &context->performanceStack);
         foundTarget = SetGrindTarget(requester, newTarget);
         if(pmo) pmo->finish();
     }
 
     if (!foundTarget)
+    {
+        ai->TellDebug(requester, "Stop traveling", "debug travel");
         SetNullTarget(newTarget);                                           //Idle a bit.
+    }
 }
 
 void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget)
@@ -645,8 +676,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
         }
     }
 
-    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, std::to_string(travelPoints.size()) + " points total.");
+    ai->TellDebug(requester, std::to_string(travelPoints.size()) + " points total.", "debug travel");
 
     if (travelPoints.empty()) //No targets or no points.
         return false;
@@ -662,8 +692,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
     if (travelPoints.empty())
         return false;
 
-    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, std::to_string(travelPoints.size()) + " points in reasonable range.");
+    ai->TellDebug(requester, std::to_string(travelPoints.size()) + " points in reasonable range.", "debug travel");
 
     travelPoints = sTravelMgr.getNextPoint(&botLocation, travelPoints); //Pick a good point.
 
@@ -678,8 +707,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
     target->setTarget(TravelDestinations.front(), travelPoints.front());
 
-    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, "Point at " + std::to_string(uint32(target->distance(bot))) + "y selected.");
+    ai->TellDebug(requester, "Point at " + std::to_string(uint32(target->distance(bot))) + "y selected.", "debug travel");
 
     return target->isActive();
 }

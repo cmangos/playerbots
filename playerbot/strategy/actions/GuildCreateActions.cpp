@@ -273,6 +273,8 @@ bool PetitionTurnInAction::Execute(Event& event)
     //Select a new target to travel to. 
     TravelTarget newTarget = TravelTarget(ai);
 
+    ai->TellDebug(requester, "Handing in guild petition", "debug travel");
+
     bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_PETITIONER });
 
     if (!foundTarget || !newTarget.isActive())
@@ -322,6 +324,8 @@ bool BuyTabardAction::Execute(Event& event)
 
     //Select a new target to travel to. 
     TravelTarget newTarget = TravelTarget(ai);
+
+    ai->TellDebug(requester, "Buying a tabard", "debug travel");
 
     bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_TABARDDESIGNER }, "Tabard Vendor", { 5976 });
 

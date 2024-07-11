@@ -97,6 +97,20 @@ std::list<ObjectGuid> AttackersValue::Calculate()
                     result.push_back(target->GetObjectGuid());
             }
 
+            //Validate these targets.
+            std::list<ObjectGuid> filter;
+
+            for (auto& guid : result)
+            {
+                target = ai->GetUnit(guid);
+
+                if (!IsValid(target, bot, bot))
+                    filter.push_back(guid);
+            }
+
+            for(auto& guid : filter)
+                result.remove(guid);
+
             return result;
         }
     }

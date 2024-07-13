@@ -13,7 +13,7 @@ namespace ai
     protected:
         virtual bool ProcessQuest(Player* requester, Quest const* quest, WorldObject* questGiver) override;
 
-    private:        
+    private:
         bool TurnInQuest(Player* requester, Quest const* quest, WorldObject* questGiver, std::string& out);
         void RewardNoItem(Quest const* quest, WorldObject* questGiver, std::string& out);
         void RewardSingleItem(Quest const* quest, WorldObject* questGiver, std::string& out);

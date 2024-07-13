@@ -242,6 +242,8 @@ bool QuestAction::AcceptQuest(Player* requester, Quest const* quest, uint64 ques
 
         if (bot->GetQuestStatus(questId) != QUEST_STATUS_NONE && bot->GetQuestStatus(questId) != QUEST_STATUS_AVAILABLE)
         {
+            BroadcastHelper::BroadcastQuestAccepted(ai, bot, quest);
+
             sPlayerbotAIConfig.logEvent(ai, "AcceptQuestAction", quest->GetTitle(), std::to_string(quest->GetQuestId()));
             outputMessage = BOT_TEXT2("quest_accepted", args);
             success = true;
@@ -264,6 +266,8 @@ bool QuestObjectiveCompletedAction::Execute(Event& event)
     ObjectGuid guid;
     p >> questId >> entry >> available >> required >> guid;
 
+    Quest const* qInfo = sObjectMgr.GetQuestTemplate(questId);
+
     if (entry & 0x80000000)
     {
         entry &= 0x7FFFFFFF;
@@ -271,6 +275,8 @@ bool QuestObjectiveCompletedAction::Execute(Event& event)
         if (info)
         {
             ai->TellPlayer(requester, chat->formatQuestObjective(info->name, available, required), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+            BroadcastHelper::BroadcastQuestObjectiveProgress(ai, bot, qInfo, available, required, info->name);
         }
     }
     else
@@ -279,10 +285,11 @@ bool QuestObjectiveCompletedAction::Execute(Event& event)
         if (info)
         {
             ai->TellPlayer(requester, chat->formatQuestObjective(info->Name, available, required), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+            BroadcastHelper::BroadcastQuestObjectiveProgress(ai, bot, qInfo, available, required, info->Name);
         }
     }
 
-    Quest const* qInfo = sObjectMgr.GetQuestTemplate(questId);
     sPlayerbotAIConfig.logEvent(ai, "QuestObjectiveCompletedAction", qInfo->GetTitle(), std::to_string((float)available / (float)required));
     return false;
 }

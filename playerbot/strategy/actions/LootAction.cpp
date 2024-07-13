@@ -347,23 +347,9 @@ bool StoreLootAction::Execute(Event& event)
             ai->TellPlayerNoFacing(requester, BOT_TEXT2("loot_command", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
 
-        if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && bot->GetGuildId() && !urand(0, 10) && proto->Quality >= ITEM_QUALITY_RARE && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
-        {
-            Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-
-            if (guild)
-            {
-                std::map<std::string, std::string> placeholders;
-                placeholders["%name"] = chat->formatItem(itemQualifier);
-
-                if (urand(0, 3))
-                    guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Yay I looted %name!", placeholders), LANG_UNIVERSAL);
-                else
-                    guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Guess who got a %name? Me!", placeholders), LANG_UNIVERSAL);
-            }
-        }
-
         sPlayerbotAIConfig.logEvent(ai, "StoreLootAction", proto->Name1, std::to_string(proto->ItemId));
+
+        BroadcastHelper::BroadcastLootingItem(ai, bot, proto, itemQualifier);
     }
 
     AI_VALUE(LootObjectStack*, "available loot")->Remove(guid);

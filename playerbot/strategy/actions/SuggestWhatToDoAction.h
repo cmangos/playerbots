@@ -18,8 +18,8 @@ namespace ai
         void grindMaterials();
         void grindReputation();
         void something();
-        void trade();
-        void spam(std::string msg, uint8 flags = 0, bool worldChat = false, bool guild = false);
+        void somethingToxic();
+        void toxicLinks();
 
         std::vector<uint32> GetIncompletedQuests();
 

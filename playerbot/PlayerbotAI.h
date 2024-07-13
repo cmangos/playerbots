@@ -62,6 +62,26 @@ namespace ai
 	};
 };
 
+enum ImportantAreaId
+{
+    CITY = 3459
+};
+
+enum ChatChannelId
+{
+    GENERAL = 1,
+    TRADE = 2,
+    LOCAL_DEFENSE = 22,
+    WORLD_DEFENSE = 23,
+#ifdef MANGOSBOT_ZERO
+    //Yes, for 1.12 it is 24
+    LOOKING_FOR_GROUP = 24,
+#else
+    LOOKING_FOR_GROUP = 26,
+#endif
+    GUILD_RECRUITMENT = 25,
+};
+
 enum HealingItemDisplayId
 {
    HEALTHSTONE_DISPLAYID = 8026,
@@ -169,7 +189,7 @@ enum ShieldWardDisplayId
 };
 
 enum class BotTypeNumber : uint8
-{    
+{
     ACTIVITY_TYPE_NUMBER = 1,
     GROUPER_TYPE_NUMBER = 2,
     GUILDER_TYPE_NUMBER = 3,
@@ -236,7 +256,7 @@ enum ActivityType
     PARTY_ACTIVITY = 7,
     REACT_ACTIVITY = 8,
     ALL_ACTIVITY = 9,
-    MAX_ACTIVITY_TYPE 
+    MAX_ACTIVITY_TYPE
 };
 
 enum BotRoles
@@ -299,7 +319,7 @@ public:
 private:
     void UpdateAIInternal(uint32 elapsed, bool minimal = false) override;
 
-public:	
+public:
     static std::string BotStateToString(BotState state);
 	std::string HandleRemoteCommand(std::string command);
     void HandleCommand(uint32 type, const std::string& text, Player& fromPlayer, const uint32 lang = LANG_UNIVERSAL);
@@ -334,6 +354,18 @@ public:
     static GameObject* GetGameObject(GameObjectDataPair const* gameObjectDataPair);
     WorldObject* GetWorldObject(ObjectGuid guid);
     std::vector<Player*> GetPlayersInGroup();
+    const AreaTableEntry* GetCurrentArea();
+    const AreaTableEntry* GetCurrentZone();
+    std::string GetLocalizedAreaName(const AreaTableEntry* entry);
+    bool IsInCapitalCity();
+    bool SayToGuild(std::string msg);
+    bool SayToWorld(std::string msg);
+    bool SayToGeneral(std::string msg);
+    bool SayToTrade(std::string msg);
+    bool SayToLFG(std::string msg);
+    bool SayToLocalDefense(std::string msg);
+    bool SayToWorldDefense(std::string msg);
+    bool SayToGuildRecruitment(std::string msg);
     bool TellPlayer(Player* player, std::ostringstream &stream, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool ignoreSilent = false) { return TellPlayer(player, stream.str(), securityLevel, isPrivate, ignoreSilent); }
     bool TellPlayer(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool ignoreSilent = false);
     bool TellPlayerNoFacing(Player* player, std::ostringstream& stream, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool noRepeat = true, bool ignoreSilent = false) { return TellPlayerNoFacing(player, stream.str(), securityLevel, isPrivate, noRepeat, ignoreSilent); }
@@ -437,6 +469,9 @@ public:
 
     void AccelerateRespawn(Creature* creature, float accelMod = 0);
     void AccelerateRespawn(ObjectGuid guid, float accelMod = 0) { Creature* creature = GetCreature(guid); if (creature) AccelerateRespawn(creature,accelMod); }
+
+public:
+    void GetInventoryAndEquippedItems(std::vector<Item*>& items);
 
 private:
     void InventoryIterateItemsInBags(IterateItemsVisitor* visitor);

@@ -118,11 +118,6 @@ if (BUILD_PLAYERBOTS)
   add_definitions(-DENABLE_PLAYERBOTS)
 endif()
 
-# Define BUILD_ELUNA if need
-if (BUILD_ELUNA)
-  add_definitions(-DBUILD_ELUNA -DCLASSIC -DCMANGOS)
-endif()
-
 # Define Core
 if ( ${CMAKE_PROJECT_NAME} MATCHES "CMaNGOS")
   add_definitions(-DCMANGOS)
@@ -164,6 +159,13 @@ target_link_libraries(${LIBRARY_NAME}
   PRIVATE Detour
   PRIVATE g3dlite
 )
+
+# Additional Eluna includes
+if (BUILD_ELUNA)
+  include_directories(${CMAKE_SOURCE_DIR}/src/game/LuaEngine/hooks)
+  target_link_libraries(${LIBRARY_NAME}
+  PRIVATE lualib)
+endif()
 
 target_include_directories(${LIBRARY_NAME}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}

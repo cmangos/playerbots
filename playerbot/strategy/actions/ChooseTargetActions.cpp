@@ -3,6 +3,7 @@
 #include "MotionGenerators/MovementGenerator.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "playerbot/TravelMgr.h"
+#include "playerbot/strategy/generic/PullStrategy.h"
 
 bool DpsAssistAction::isUseful()
 {
@@ -60,13 +61,19 @@ bool ai::AttackAnythingAction::Execute(Event& event)
 
                 if (ai->HasStrategy("pull", BotState::BOT_STATE_COMBAT))
                 {
-                    Event pullEvent("attack anything", grindTarget->GetObjectGuid());
-                    bool doAction = ai->DoSpecificAction("pull my target", pullEvent, true);
-                    
-                    if (doAction) {
-                        return true;
+                    if (PullStrategy* strategy = PullStrategy::Get(ai))
+                    {
+                        if (strategy->CanDoPullAction(grindTarget) && AI_VALUE2(uint32, "item count", "ammo"))
+                        {
+                            Event pullEvent("attack anything", grindTarget->GetObjectGuid());
+                            bool doAction = ai->DoSpecificAction("pull my target", pullEvent, true);
+
+                            if (doAction)
+                            {
+                                return true;
+                            }
+                        }
                     }
-                 
                 }
 
                 context->GetValue<ObjectGuid>("attack target")->Set(grindTarget->GetObjectGuid());

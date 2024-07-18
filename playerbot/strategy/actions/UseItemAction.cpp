@@ -849,6 +849,14 @@ bool UseAction::UseGameObject(Player* requester, Event& event, GameObject* gameO
             return false;
         }
     }
+    else if (gameObject->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
+    {
+        if (gameObject->ActivateToQuest(bot))
+        {
+            Event event("use game object", gameObject->GetObjectGuid(), bot);
+            ai->DoSpecificAction("talk to quest giver", event, true);
+        }
+    }
 
     std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
     *packet << guid;

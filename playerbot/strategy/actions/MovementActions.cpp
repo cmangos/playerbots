@@ -983,6 +983,10 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 #else
     if (!bot->IsFreeFlying())
     {
+        // water transition
+        if (bot->HasMovementFlag(MOVEFLAG_SWIMMING) && startPosition.isInWater() && !startPosition.isUnderWater() && !movePosition.isInWater())
+            generatePath = true;
+
         Movement::PointsArray path;
         if (GeneratePathAvoidingHazards(movePosition, generatePath, path))
         {
@@ -1296,9 +1300,61 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
                 }
             }
         }
-
         if (!target->IsTaxiFlying()/* || bot->GetTransport()*/)
            return MoveTo(target, ai->GetRange("follow"));
+    }
+
+    // Handle water transition
+    {
+        WorldPosition botPos(bot);
+        WorldPosition tarPos(target);
+        bool targetInWater = (tarPos.isInWater() || tarPos.isUnderWater()) && !botPos.isInWater() && !botPos.isUnderWater();
+        bool selfInWater = (botPos.isInWater() || botPos.isUnderWater()) && !tarPos.isInWater() && !tarPos.isUnderWater();
+        bool targetOnSurface = botPos.isUnderWater() && tarPos.isInWater() && !tarPos.isUnderWater();
+        bool selfOnSurface = tarPos.isUnderWater() && botPos.isInWater() && !botPos.isUnderWater();
+        if ((targetInWater || selfInWater || targetOnSurface || selfOnSurface) && !(tarPos.isUnderWater() && botPos.isUnderWater()))
+        {
+            // in or out of water
+            WorldPosition moveToPos = (targetInWater || selfOnSurface) ? tarPos : botPos;
+            Unit* targetToCheck = (targetInWater || selfOnSurface) ? target : bot;
+            if (const TerrainInfo* terrain = moveToPos.getTerrain())
+            {
+                float bottom = terrain->GetHeightStatic(moveToPos.getX(), moveToPos.getY(), moveToPos.getZ());
+                float waterLevel = terrain->GetWaterOrGroundLevel(moveToPos.getX(), moveToPos.getY(), moveToPos.getZ(), bottom, true);
+                bool canSwimToTarget = selfOnSurface && botPos.IsInLineOfSight(tarPos);
+                moveToPos.setZ(waterLevel);
+                if (waterLevel > -200000.0f && waterLevel > bottom)
+                {
+                    PathFinder pathfinder(bot);
+                    //Use standard pathfinder to find a route.
+                    WorldPosition prevPoint = botPos;
+                    pathfinder.calculate(moveToPos.getVector3(), tarPos.getVector3());
+                    Movement::PointsArray& pathPoints = pathfinder.getPath();
+                    if (pathPoints.size() >= 2)
+                    {
+                        for (uint32 i = 1; i < pathPoints.size() - 1; i++)
+                        {
+                            WorldPosition pathPoint(bot->GetMapId(), pathPoints[i].x, pathPoints[i].y, pathPoints[i].z);
+                            if (selfInWater)
+                            {
+                                if (pathPoint.isInWater())
+                                {
+                                    prevPoint = pathPoint;
+                                    continue;
+                                }
+                                if (!MoveTo(prevPoint))
+                                {
+                                    return MoveTo(pathPoint);
+                                }
+                                return true;
+                            }
+                        }
+                    }
+                    moveToPos = tarPos;
+                    return MoveTo(moveToPos);
+                }
+            }
+        }
     }
 
     bot->HandleEmoteState(0);

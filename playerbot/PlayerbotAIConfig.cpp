@@ -144,6 +144,8 @@ bool PlayerbotAIConfig::Initialize()
     jumpInPlaceChance = config.GetFloatDefault("AiPlayerbot.JumpInPlaceChance", 0.50f);
     jumpBackwardChance = config.GetFloatDefault("AiPlayerbot.JumpBackwardChance", 0.10f);
     jumpHeightLimit = config.GetFloatDefault("AiPlayerbot.JumpHeightLimit", 60.f);
+    jumpVSpeed = config.GetFloatDefault("AiPlayerbot.JumpVSpeed", 7.96f);
+    jumpHSpeed = config.GetFloatDefault("AiPlayerbot.JumpHSpeed", 7.0f);
     jumpInBg = config.GetBoolDefault("AiPlayerbot.JumpInBg", false);
     jumpWithPlayer = config.GetBoolDefault("AiPlayerbot.JumpWithPlayer", false);
     jumpFollow = config.GetBoolDefault("AiPlayerbot.JumpFollow", true);

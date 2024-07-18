@@ -540,6 +540,8 @@ public:
     bool CanEnterArea(const AreaTrigger* area);
     void Unmount();
 
+    void QueuePacket(WorldPacket& pkt);
+
 private:
     bool UpdateAIReaction(uint32 elapsed, bool minimal, bool isStunned);
     void UpdateFaceTarget(uint32 elapsed, bool minimal);

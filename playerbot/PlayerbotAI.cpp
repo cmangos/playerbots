@@ -320,12 +320,6 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
     uint32 curTime = sWorld.GetCurrentMSTime();
     if (jumpTime && (jumpTime < curTime || (jumpTime + 10000 < curTime)))
     {
-        // remove moveflags
-        bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
-        bot->m_movementInfo.jump = MovementInfo::JumpInfo();
-        if (!fallAfterJump)
-            bot->InterruptMoving(true);
-
         // might be not needed
         if (GetJumpDestination())
         {
@@ -335,6 +329,18 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
         // normal landing
         if (!fallAfterJump)
         {
+            bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FALLINGFAR);
+
+            WorldPacket stop(MSG_MOVE_STOP);
+#ifdef MANGOSBOT_TWO
+            stop << bot->GetObjectGuid().WriteAsPacked();
+#endif
+            stop << bot->m_movementInfo;
+            bot->GetSession()->HandleMovementOpcodes(stop);
+
+            bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+            bot->m_movementInfo.jump = MovementInfo::JumpInfo();
+
             WorldPacket land(MSG_MOVE_FALL_LAND);
 #ifdef MANGOSBOT_TWO
             land << bot->GetObjectGuid().WriteAsPacked();
@@ -346,6 +352,8 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
             jumpTime = 0;
             fallAfterJump = false;
             ResetJumpDestination();
+
+            bot->InterruptMoving();
         }
         // falling after hitting something
         else
@@ -357,7 +365,8 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
             bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FALLING);
 #endif
             // use motion master (disabled for now, makes bot move to ceiling it just hit)
-            if (false && bot->GetMotionMaster()->MoveFall())
+            static bool useMoveFall = false;
+            if (useMoveFall && bot->GetMotionMaster()->MoveFall())
             {
                 jumpTime = 0;
                 fallAfterJump = false;
@@ -1636,7 +1645,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         bool goodLanding = true;
         float angleRadian = (vsin > 0) ? acos(vcos) : -acos(vcos);
         float angle = angleRadian;
-        WorldPosition dest_calculated = JumpAction::CalculateJumpParameters(WorldPosition(bot), bot, angle, verticalSpeed, horizontalSpeed, timeToLand, distToLand, maxHeight, goodLanding, 200.f);
+        std::vector<WorldPosition> path;
+        WorldPosition dest_calculated = JumpAction::CalculateJumpParameters(WorldPosition(bot), bot, angle, verticalSpeed, horizontalSpeed, timeToLand, distToLand, maxHeight, goodLanding, path, 200.f);
         bool jumpInPlace = horizontalSpeed == 0.f;
         if (!dest_calculated)
         {
@@ -1697,6 +1707,15 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         uint32 curTime = sWorld.GetCurrentMSTime();
         jumpTime = curTime + sWorld.GetAverageDiff() + (uint32)(timeToLand * IN_MILLISECONDS) + 1000;
         SetJumpDestination(dest_calculated);
+
+        // set highest jump point to relocate
+        WorldPosition highestPoint = dest_calculated;
+        for (auto& point : path)
+        {
+            if (point.getZ() > highestPoint.getZ())
+                highestPoint = point;
+        }
+
         bot->Relocate(dest_calculated.getX(), dest_calculated.getY(), dest_calculated.getZ());
         //bot->m_movementInfo.ChangePosition(dest_calculated.getX(), dest_calculated.getY(), dest_calculated.getZ(), bot->GetOrientation());
         sLog.outDetail("%s: KNOCKBACK x: %f, y: %f, z: %f, time: %f, dist: %f, maxHeight: %f inPlace: %u, landTime: %u", bot->GetName(), dest_calculated.getX(), dest_calculated.getY(), dest_calculated.getZ(), timeToLand, distToLand, maxHeight, jumpInPlace, jumpTime);
@@ -6432,4 +6451,11 @@ bool PlayerbotAI::PlayAttackEmote(float chanceMultiplier)
     }
 
     return false;
+}
+
+void PlayerbotAI::QueuePacket(WorldPacket& pkt)
+{
+    std::unique_ptr<WorldPacket> packet(new WorldPacket(pkt.GetOpcode()));
+    *packet = pkt;
+    bot->GetSession()->QueuePacket(std::move(packet));
 }

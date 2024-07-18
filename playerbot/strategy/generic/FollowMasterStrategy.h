@@ -53,9 +53,5 @@ namespace ai
         }
         virtual std::vector<std::string> GetRelatedStrategies() { return { "follow" }; }
 #endif
-    private:
-        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
-        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
-        void InitReactionTriggers(std::list<TriggerNode*>& triggers) override;
     };
 }

@@ -204,6 +204,8 @@ public:
     float jumpInPlaceChance;
     float jumpBackwardChance;
     float jumpHeightLimit;
+    float jumpVSpeed;
+    float jumpHSpeed;
 
     std::mutex m_logMtx;
 

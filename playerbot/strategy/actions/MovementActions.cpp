@@ -2181,6 +2181,25 @@ bool SetBehindTargetAction::isPossible()
 
 bool MoveOutOfCollisionAction::Execute(Event& event)
 {
+    WorldPosition botPos(bot);
+    float gx, gy, gz;
+    gx = botPos.getX();
+    gy = botPos.getY();
+    gz = botPos.getZ();
+
+    uint32 tries = 1;
+    for (; tries < 10; ++tries)
+    {
+        gx = botPos.getX();
+        gy = botPos.getY();
+        gz = botPos.getZ();
+        if (bot->GetMap()->GetReachableRandomPointOnGround(gx, gy, gz, ai->GetRange("follow")))
+        {
+            return MoveTo(bot->GetMapId(), gx, gy, gz);
+        }
+    }
+
+    // old style
     float angle = M_PI * 2000 / (float)urand(1, 1000);
     float distance = ai->GetRange("follow");
     return MoveTo(bot->GetMapId(), bot->GetPositionX() + cos(angle) * distance, bot->GetPositionY() + sin(angle) * distance, bot->GetPositionZ());

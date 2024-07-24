@@ -108,7 +108,7 @@ void TalkToQuestGiverAction::RewardNoItem(Quest const* quest, WorldObject* quest
         bot->RewardQuest(quest, 0, questGiver, false);
         out = BOT_TEXT2("quest_status_completed", args);
 
-        BroadcastHelper::BroadcastQuestCompleted(ai, bot, quest);
+        BroadcastHelper::BroadcastQuestTurnedIn(ai, bot, quest);
     }
     else
     {
@@ -130,7 +130,7 @@ void TalkToQuestGiverAction::RewardSingleItem(Quest const* quest, WorldObject* q
         bot->RewardQuest(quest, index, questGiver, true);
         out = BOT_TEXT2("quest_status_complete_single_reward", args);
 
-        BroadcastHelper::BroadcastQuestCompleted(ai, bot, quest);
+        BroadcastHelper::BroadcastQuestTurnedIn(ai, bot, quest);
     }
     else
     {
@@ -200,7 +200,7 @@ void TalkToQuestGiverAction::RewardMultipleItem(Player* requester, Quest const* 
             args["%item"] = chat->formatItem(proto);
             out = BOT_TEXT2("quest_status_complete_single_reward", args);
 
-            BroadcastHelper::BroadcastQuestCompleted(ai, bot, quest);
+            BroadcastHelper::BroadcastQuestTurnedIn(ai, bot, quest);
         }
 
         bot->RewardQuest(quest, *bestIds.begin(), questGiver, true);
@@ -228,7 +228,7 @@ void TalkToQuestGiverAction::RewardMultipleItem(Player* requester, Quest const* 
                 args["%item"] = chat->formatItem(proto);
                 out = BOT_TEXT2("quest_status_complete_single_reward", args);
 
-                BroadcastHelper::BroadcastQuestCompleted(ai, bot, quest);
+                BroadcastHelper::BroadcastQuestTurnedIn(ai, bot, quest);
             }
 
             bot->RewardQuest(quest, *bestIds.begin(), questGiver, true);

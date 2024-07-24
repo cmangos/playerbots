@@ -210,10 +210,12 @@ AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
 # AiPlayerbot.BroadcastChanceLootingItemLegendary = 30000
 # AiPlayerbot.BroadcastChanceLootingItemArtifact = 30000
 #
-# AiPlayerbot.BroadcastChanceQuestAcceptedGeneric = 6000
-# AiPlayerbot.BroadcastChanceQuestObjectiveCompletedGeneric = 300
-# AiPlayerbot.BroadcastChanceQuestObjectiveProgressGeneric = 300
-# AiPlayerbot.BroadcastChanceQuestCompletedGeneric = 10000
+# AiPlayerbot.BroadcastChanceQuestAccepted = 6000
+# AiPlayerbot.BroadcastChanceQuestUpdateObjectiveCompleted = 300
+# AiPlayerbot.BroadcastChanceQuestUpdateObjectiveProgress = 300
+# AiPlayerbot.BroadcastChanceQuestUpdateFailedTimer = 300
+# AiPlayerbot.BroadcastChanceQuestUpdateComplete = 1000
+# AiPlayerbot.BroadcastChanceQuestTurnedIn = 10000
 #
 # AiPlayerbot.BroadcastChanceKillNormal = 30
 # AiPlayerbot.BroadcastChanceKillElite = 300
@@ -228,11 +230,11 @@ AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
 # AiPlayerbot.BroadcastChanceLevelupTenX = 30000
 # AiPlayerbot.BroadcastChanceLevelupMaxLevel = 30000
 #
-# AiPlayerbot.BroadcastChanceSuggestInstance = 5000
+# AiPlayerbot.BroadcastChanceSuggestInstance = 1000
 # AiPlayerbot.BroadcastChanceSuggestQuest = 10000
-# AiPlayerbot.BroadcastChanceSuggestGrindMaterials = 5000
-# AiPlayerbot.BroadcastChanceSuggestGrindReputation = 5000
-# AiPlayerbot.BroadcastChanceSuggestSell = 5000
+# AiPlayerbot.BroadcastChanceSuggestGrindMaterials = 1000
+# AiPlayerbot.BroadcastChanceSuggestGrindReputation = 1000
+# AiPlayerbot.BroadcastChanceSuggestSell = 300
 # AiPlayerbot.BroadcastChanceSuggestSomething = 30000
 #
 # Very rude speeches

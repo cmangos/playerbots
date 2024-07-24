@@ -42,15 +42,33 @@ namespace ai
             Player* bot,
             const Quest* quest
         );
-        static bool BroadcastQuestObjectiveProgress(
+        static bool BroadcastQuestUpdateAddKill(
             PlayerbotAI* ai,
             Player* bot,
             Quest const* quest,
-            uint32 available,
-            uint32 required,
+            uint32 availableCount,
+            uint32 requiredCount,
             std::string obectiveName
         );
-        static bool BroadcastQuestCompleted(
+        static bool BroadcastQuestUpdateAddItem(
+            PlayerbotAI* ai,
+            Player* bot,
+            Quest const* quest,
+            uint32 availableCount,
+            uint32 requiredCount,
+            const ItemPrototype* proto
+        );
+        static bool BroadcastQuestUpdateFailedTimer(
+            PlayerbotAI* ai,
+            Player* bot,
+            Quest const* quest
+        );
+        static bool BroadcastQuestUpdateComplete(
+            PlayerbotAI* ai,
+            Player* bot,
+            Quest const* quest
+        );
+        static bool BroadcastQuestTurnedIn(
             PlayerbotAI* ai,
             Player* bot,
             Quest const* quest

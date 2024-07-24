@@ -354,6 +354,10 @@ public:
     static GameObject* GetGameObject(GameObjectDataPair const* gameObjectDataPair);
     WorldObject* GetWorldObject(ObjectGuid guid);
     std::vector<Player*> GetPlayersInGroup();
+    void DropQuest(uint32 questId);
+    std::vector<const Quest*> GetAllCurrentQuests();
+    std::vector<const Quest*> GetCurrentIncompleteQuests();
+    std::vector<std::pair<const Quest*, uint32>> GetCurrentQuestsRequiringItemId(uint32 itemId);
     const AreaTableEntry* GetCurrentArea();
     const AreaTableEntry* GetCurrentZone();
     std::string GetLocalizedAreaName(const AreaTableEntry* entry);
@@ -471,7 +475,9 @@ public:
     void AccelerateRespawn(ObjectGuid guid, float accelMod = 0) { Creature* creature = GetCreature(guid); if (creature) AccelerateRespawn(creature,accelMod); }
 
 public:
-    void GetInventoryAndEquippedItems(std::vector<Item*>& items);
+    std::vector<Item*> GetInventoryAndEquippedItems();
+    std::vector<Item*> GetInventoryItems();
+    uint32 GetInventoryItemsCountWithId(uint32 itemId);
 
 private:
     void InventoryIterateItemsInBags(IterateItemsVisitor* visitor);

@@ -273,7 +273,7 @@ bool BroadcastHelper::BroadcastQuestAccepted(
     const Quest* quest
 )
 {
-    if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestAcceptedGeneric)
+    if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestAccepted)
     {
         std::map<std::string, std::string> placeholders;
         placeholders["%quest_link"] = ai->GetChatHelper()->formatQuest(quest);
@@ -295,12 +295,12 @@ bool BroadcastHelper::BroadcastQuestAccepted(
     return false;
 }
 
-bool BroadcastHelper::BroadcastQuestObjectiveProgress(
+bool BroadcastHelper::BroadcastQuestUpdateAddKill(
     PlayerbotAI* ai,
     Player* bot,
     Quest const* quest,
-    uint32 available,
-    uint32 required,
+    uint32 availableCount,
+    uint32 requiredCount,
     std::string obectiveName
 )
 {
@@ -314,26 +314,26 @@ bool BroadcastHelper::BroadcastQuestObjectiveProgress(
     placeholders["%my_class"] = ai->GetChatHelper()->formatClass(bot->getClass());
     placeholders["%my_race"] = ai->GetChatHelper()->formatRace(bot->getRace());
     placeholders["%my_level"] = std::to_string(bot->GetLevel());
-    placeholders["%quest_obj_available"] = std::to_string(available);
-    placeholders["%quest_obj_required"] = std::to_string(required);
-    placeholders["%quest_obj_missing"] = std::to_string(required - available);
-    placeholders["%quest_obj_full_formatted"] = ai->GetChatHelper()->formatQuestObjective(obectiveName, available, required);
+    placeholders["%quest_obj_available"] = std::to_string(availableCount);
+    placeholders["%quest_obj_required"] = std::to_string(requiredCount);
+    placeholders["%quest_obj_missing"] = std::to_string(requiredCount - std::min(availableCount, requiredCount));
+    placeholders["%quest_obj_full_formatted"] = ai->GetChatHelper()->formatQuestObjective(obectiveName, availableCount, requiredCount);
 
-    if (available < required
-        && urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestObjectiveProgressGeneric)
+    if (availableCount < requiredCount
+        && urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestUpdateObjectiveProgress)
     {
         return BroadcastToChannelWithGlobalChance(
             ai,
-            BOT_TEXT2("broadcast_quest_objective_progress_generic", placeholders),
+            BOT_TEXT2("broadcast_quest_update_add_kill_objective_progress", placeholders),
             { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
         );
     }
-    else if (available >= required
-        && urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestObjectiveCompletedGeneric)
+    else if (availableCount == requiredCount
+        && urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestUpdateObjectiveCompleted)
     {
         return BroadcastToChannelWithGlobalChance(
             ai,
-            BOT_TEXT2("broadcast_quest_objective_completed_generic", placeholders),
+            BOT_TEXT2("broadcast_quest_update_add_kill_objective_completed", placeholders),
             { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
         );
     }
@@ -341,13 +341,60 @@ bool BroadcastHelper::BroadcastQuestObjectiveProgress(
     return false;
 }
 
-bool BroadcastHelper::BroadcastQuestCompleted(
+bool BroadcastHelper::BroadcastQuestUpdateAddItem(
+    PlayerbotAI* ai,
+    Player* bot,
+    Quest const* quest,
+    uint32 availableCount,
+    uint32 requiredCount,
+    const ItemPrototype* proto
+)
+{
+    std::map<std::string, std::string> placeholders;
+    AreaTableEntry const* current_area = ai->GetCurrentArea();
+    AreaTableEntry const* current_zone = ai->GetCurrentZone();
+    placeholders["%area_name"] = current_area ? ai->GetLocalizedAreaName(current_area) : BOT_TEXT("string_unknown_area");
+    placeholders["%zone_name"] = current_zone ? ai->GetLocalizedAreaName(current_zone) : BOT_TEXT("string_unknown_area");
+    placeholders["%quest_link"] = ai->GetChatHelper()->formatQuest(quest);
+    std::string itemLinkFormatted = ai->GetChatHelper()->formatItem(proto);
+    placeholders["%item_link"] = itemLinkFormatted;
+    placeholders["%my_class"] = ai->GetChatHelper()->formatClass(bot->getClass());
+    placeholders["%my_race"] = ai->GetChatHelper()->formatRace(bot->getRace());
+    placeholders["%my_level"] = std::to_string(bot->GetLevel());
+    placeholders["%quest_obj_available"] = std::to_string(availableCount);
+    placeholders["%quest_obj_required"] = std::to_string(requiredCount);
+    placeholders["%quest_obj_missing"] = std::to_string(requiredCount - std::min(availableCount, requiredCount));
+    placeholders["%quest_obj_full_formatted"] = ai->GetChatHelper()->formatQuestObjective(itemLinkFormatted, availableCount, requiredCount);
+
+    if (availableCount < requiredCount
+        && urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestUpdateObjectiveProgress)
+    {
+        return BroadcastToChannelWithGlobalChance(
+            ai,
+            BOT_TEXT2("broadcast_quest_update_add_item_objective_progress", placeholders),
+            { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+        );
+    }
+    else if (availableCount == requiredCount
+        && urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestUpdateObjectiveCompleted)
+    {
+        return BroadcastToChannelWithGlobalChance(
+            ai,
+            BOT_TEXT2("broadcast_quest_update_add_item_objective_completed", placeholders),
+            { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+        );
+    }
+
+    return false;
+}
+
+bool BroadcastHelper::BroadcastQuestUpdateFailedTimer(
     PlayerbotAI* ai,
     Player* bot,
     Quest const* quest
 )
 {
-    if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestCompletedGeneric)
+    if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestUpdateFailedTimer)
     {
         std::map<std::string, std::string> placeholders;
         placeholders["%quest_link"] = ai->GetChatHelper()->formatQuest(quest);
@@ -361,7 +408,64 @@ bool BroadcastHelper::BroadcastQuestCompleted(
 
         return BroadcastToChannelWithGlobalChance(
             ai,
-            BOT_TEXT2("broadcast_quest_completed_generic", placeholders),
+            BOT_TEXT2("broadcast_quest_update_failed_timer", placeholders),
+            { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+        );
+    }
+
+    return false;
+}
+
+bool BroadcastHelper::BroadcastQuestUpdateComplete(
+    PlayerbotAI* ai,
+    Player* bot,
+    Quest const* quest
+)
+{
+    if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestUpdateComplete)
+    {
+        std::map<std::string, std::string> placeholders;
+        placeholders["%quest_link"] = ai->GetChatHelper()->formatQuest(quest);
+        AreaTableEntry const* current_area = ai->GetCurrentArea();
+        AreaTableEntry const* current_zone = ai->GetCurrentZone();
+        placeholders["%area_name"] = current_area ? ai->GetLocalizedAreaName(current_area) : BOT_TEXT("string_unknown_area");
+        placeholders["%zone_name"] = current_zone ? ai->GetLocalizedAreaName(current_zone) : BOT_TEXT("string_unknown_area");
+        placeholders["%my_class"] = ai->GetChatHelper()->formatClass(bot->getClass());
+        placeholders["%my_race"] = ai->GetChatHelper()->formatRace(bot->getRace());
+        placeholders["%my_level"] = std::to_string(bot->GetLevel());
+
+
+        return BroadcastToChannelWithGlobalChance(
+            ai,
+            BOT_TEXT2("broadcast_quest_update_complete", placeholders),
+            { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+        );
+    }
+
+    return false;
+}
+
+bool BroadcastHelper::BroadcastQuestTurnedIn(
+    PlayerbotAI* ai,
+    Player* bot,
+    Quest const* quest
+)
+{
+    if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceQuestTurnedIn)
+    {
+        std::map<std::string, std::string> placeholders;
+        placeholders["%quest_link"] = ai->GetChatHelper()->formatQuest(quest);
+        AreaTableEntry const* current_area = ai->GetCurrentArea();
+        AreaTableEntry const* current_zone = ai->GetCurrentZone();
+        placeholders["%area_name"] = current_area ? ai->GetLocalizedAreaName(current_area) : BOT_TEXT("string_unknown_area");
+        placeholders["%zone_name"] = current_zone ? ai->GetLocalizedAreaName(current_zone) : BOT_TEXT("string_unknown_area");
+        placeholders["%my_class"] = ai->GetChatHelper()->formatClass(bot->getClass());
+        placeholders["%my_race"] = ai->GetChatHelper()->formatRace(bot->getRace());
+        placeholders["%my_level"] = std::to_string(bot->GetLevel());
+
+        return BroadcastToChannelWithGlobalChance(
+            ai,
+            BOT_TEXT2("broadcast_quest_turned_in", placeholders),
             { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
         );
     }
@@ -807,8 +911,7 @@ bool BroadcastHelper::BroadcastSuggestSomethingToxic(
     if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceSuggestSomethingToxic)
     {
         //items
-        std::vector<Item*> botItems;
-        ai->GetInventoryAndEquippedItems(botItems);
+        std::vector<Item*> botItems = ai->GetInventoryAndEquippedItems();
 
         std::map<std::string, std::string> placeholders;
 
@@ -854,8 +957,7 @@ bool BroadcastHelper::BroadcastSuggestToxicLinks(
         }
 
         //items
-        std::vector<Item*> botItems;
-        ai->GetInventoryAndEquippedItems(botItems);
+        std::vector<Item*> botItems = ai->GetInventoryAndEquippedItems();
 
         //spells
         //?

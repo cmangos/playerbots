@@ -7,7 +7,11 @@ using namespace ai;
 WorldPacketHandlerStrategy::WorldPacketHandlerStrategy(PlayerbotAI* ai) : PassTroughStrategy(ai)
 {
     supported.push_back("loot start roll");
-    supported.push_back("quest objective completed");
+    supported.push_back("quest update add kill");
+    supported.push_back("quest update add item");
+    supported.push_back("quest update failed");
+    supported.push_back("quest update failed timer");
+    supported.push_back("quest update complete");
     supported.push_back("party command");
     supported.push_back("ready check");
     supported.push_back("uninvite");

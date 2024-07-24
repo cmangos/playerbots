@@ -193,7 +193,11 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
     botOutgoingPacketHandlers.AddHandler(SMSG_INVENTORY_CHANGE_FAILURE, "cannot equip");
     botOutgoingPacketHandlers.AddHandler(SMSG_TRADE_STATUS, "trade status");
     botOutgoingPacketHandlers.AddHandler(SMSG_LOOT_RESPONSE, "loot response", true);
-    botOutgoingPacketHandlers.AddHandler(SMSG_QUESTUPDATE_ADD_KILL, "quest objective completed", true);
+    botOutgoingPacketHandlers.AddHandler(SMSG_QUESTUPDATE_ADD_KILL, "quest update add kill", true);
+    botOutgoingPacketHandlers.AddHandler(SMSG_QUESTUPDATE_ADD_ITEM, "quest update add item", true);
+    botOutgoingPacketHandlers.AddHandler(SMSG_QUESTUPDATE_FAILED, "quest update failed", true);
+    botOutgoingPacketHandlers.AddHandler(SMSG_QUESTUPDATE_FAILEDTIMER, "quest update failed timer", true);
+    botOutgoingPacketHandlers.AddHandler(SMSG_QUESTUPDATE_COMPLETE, "quest update complete", true);
     botOutgoingPacketHandlers.AddHandler(SMSG_ITEM_PUSH_RESULT, "item push result", true);
     botOutgoingPacketHandlers.AddHandler(SMSG_PARTY_COMMAND_RESULT, "party command");
     botOutgoingPacketHandlers.AddHandler(SMSG_LEVELUP_INFO, "levelup", true);
@@ -2469,6 +2473,100 @@ std::vector<Player*> PlayerbotAI::GetPlayersInGroup()
     }
 
     return members;
+}
+
+void PlayerbotAI::DropQuest(uint32 questIdToDrop)
+{
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 questId = bot->GetQuestSlotQuestId(slot);
+        if (!questId)
+            continue;
+
+        QuestStatus status = bot->GetQuestStatus(questId);
+        if (questId == questIdToDrop)
+        {
+            bot->SetQuestSlot(slot, 0);
+
+            //We ignore unequippable quest items in this case, its' still be equipped
+            bot->TakeQuestSourceItem(questId, false);
+
+            bot->SetQuestStatus(questId, QUEST_STATUS_NONE);
+            bot->getQuestStatusMap()[questId].m_rewarded = false;
+
+            //TODO should probably also remove quest items?
+
+            return;
+        }
+    }
+}
+
+std::vector<const Quest*> PlayerbotAI::GetAllCurrentQuests()
+{
+    std::vector<const Quest*> result;
+
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 questId = bot->GetQuestSlotQuestId(slot);
+        if (!questId)
+            continue;
+
+        QuestStatus status = bot->GetQuestStatus(questId);
+            result.push_back(sObjectMgr.GetQuestTemplate(questId));
+    }
+
+    return result;
+}
+
+std::vector<const Quest*> PlayerbotAI::GetCurrentIncompleteQuests()
+{
+    std::vector<const Quest*> result;
+
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 questId = bot->GetQuestSlotQuestId(slot);
+        if (!questId)
+            continue;
+
+        QuestStatus status = bot->GetQuestStatus(questId);
+        if (status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_NONE)
+            result.push_back(sObjectMgr.GetQuestTemplate(questId));
+    }
+
+    return result;
+}
+
+/*
+* @return vector of pair<quest, count>
+*/
+std::vector<std::pair<const Quest*, uint32>> PlayerbotAI::GetCurrentQuestsRequiringItemId(uint32 itemId)
+{
+    std::vector<std::pair<const Quest*, uint32>> result;
+
+    if (!itemId)
+    {
+        return result;
+    }
+
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 questId = bot->GetQuestSlotQuestId(slot);
+        if (!questId)
+            continue;
+
+        QuestStatus status = bot->GetQuestStatus(questId);
+        const Quest* quest = sObjectMgr.GetQuestTemplate(questId);
+        for (uint8 i = 0; i < std::size(quest->ReqItemId); ++i)
+        {
+            if (quest->ReqItemId[i] == itemId)
+            {
+                result.push_back(std::pair(quest, quest->ReqItemCount[i]));
+                break;
+            }
+        }
+    }
+
+    return result;
 }
 
 const AreaTableEntry* PlayerbotAI::GetCurrentArea()
@@ -5606,21 +5704,86 @@ void PlayerbotAI::InventoryIterateItems(IterateItemsVisitor* visitor, IterateIte
 * Populate vector with inventory and equipped items
 * @param items - vector to populate with itmes
 */
-void PlayerbotAI::GetInventoryAndEquippedItems(std::vector<Item*>& items)
+std::vector<Item*> PlayerbotAI::GetInventoryAndEquippedItems()
 {
+    std::vector<Item*> items;
+
     for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
         if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
             items.push_back(pItem);
+        }
+    }
 
     for (int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+    {
         if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
             items.push_back(pItem);
+        }
+    }
 
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
         if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
             for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
                 if (Item* pItem = pBag->GetItemByPos(j))
+                {
                     items.push_back(pItem);
+                }
+            }
+        }
+    }
+
+    return items;
+}
+
+std::vector<Item*> PlayerbotAI::GetInventoryItems()
+{
+    std::vector<Item*> items;
+
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                if (Item* pItem = pBag->GetItemByPos(j))
+                {
+                    items.push_back(pItem);
+                }
+            }
+        }
+    }
+
+    return items;
+}
+
+uint32 PlayerbotAI::GetInventoryItemsCountWithId(uint32 itemId)
+{
+    uint32 count = 0;
+
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                if (Item* pItem = pBag->GetItemByPos(j))
+                {
+                    if (pItem->GetProto()->ItemId == itemId)
+                    {
+                        count += pItem->GetCount();
+                    }
+                }
+            }
+        }
+    }
+
+    return count;
 }
 
 void PlayerbotAI::InventoryIterateItemsInBags(IterateItemsVisitor* visitor)

@@ -189,10 +189,12 @@ public:
     uint32 broadcastChanceLootingItemLegendary;
     uint32 broadcastChanceLootingItemArtifact;
 
-    uint32 broadcastChanceQuestAcceptedGeneric;
-    uint32 broadcastChanceQuestObjectiveCompletedGeneric;
-    uint32 broadcastChanceQuestObjectiveProgressGeneric;
-    uint32 broadcastChanceQuestCompletedGeneric;
+    uint32 broadcastChanceQuestAccepted;
+    uint32 broadcastChanceQuestUpdateObjectiveCompleted;
+    uint32 broadcastChanceQuestUpdateObjectiveProgress;
+    uint32 broadcastChanceQuestUpdateFailedTimer;
+    uint32 broadcastChanceQuestUpdateComplete;
+    uint32 broadcastChanceQuestTurnedIn;
 
     uint32 broadcastChanceKillNormal;
     uint32 broadcastChanceKillElite;

@@ -2556,16 +2556,39 @@ INSERT INTO `ai_playerbot_texts` (`name`, `text`, `say_type`, `reply_type`, `tex
 -- %my_race
 -- %my_class
 -- %my_level
-('broadcast_quest_objective_completed_generic', 'Finally done with the %quest_obj_name for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
-('broadcast_quest_objective_completed_generic', 'finally got %quest_obj_available/%quest_obj_required of %quest_obj_name for the %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
-('broadcast_quest_objective_completed_generic', '%quest_obj_full_formatted for the %quest_link, at last', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_add_kill_objective_completed', 'Finally done with the %quest_obj_name for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_add_kill_objective_completed', 'finally got %quest_obj_available/%quest_obj_required of %quest_obj_name for the %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_add_kill_objective_completed', '%quest_obj_full_formatted for the %quest_link, at last', 0, 0, '', '', '', '', '', '', '', ''),
 
 
 
-('broadcast_quest_objective_progress_generic', 'Oof, got %quest_obj_available/%quest_obj_required %quest_obj_name for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
-('broadcast_quest_objective_progress_generic', 'still need %quest_obj_missing more of %quest_obj_name for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
-('broadcast_quest_objective_progress_generic', '%quest_obj_full_formatted, still working on %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_add_kill_objective_progress', 'Oof, got %quest_obj_available/%quest_obj_required %quest_obj_name for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_add_kill_objective_progress', 'still need %quest_obj_missing more of %quest_obj_name for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_add_kill_objective_progress', '%quest_obj_full_formatted, still working on %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
 
+
+
+-- usable placeholders:
+-- %quest_link
+-- %zone_name
+-- %area_name
+-- %quest_obj_available
+-- %quest_obj_required
+-- %quest_obj_missing
+-- %item_link
+-- %quest_obj_full_formatted
+-- %my_race
+-- %my_class
+-- %my_level
+('broadcast_quest_update_add_item_objective_completed', 'Finally done with the %item_link for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_add_item_objective_completed', 'finally got %quest_obj_available/%quest_obj_required of %item_link for the %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_add_item_objective_completed', '%quest_obj_full_formatted for the %quest_link, at last', 0, 0, '', '', '', '', '', '', '', ''),
+
+
+
+('broadcast_quest_update_add_item_objective_progress', 'Oof, got %quest_obj_available/%quest_obj_required %item_link for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_add_item_objective_progress', 'still need %quest_obj_missing more of %item_link for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_add_item_objective_progress', '%quest_obj_full_formatted, still working on %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
 
 
 -- usable placeholders:
@@ -2575,11 +2598,34 @@ INSERT INTO `ai_playerbot_texts` (`name`, `text`, `say_type`, `reply_type`, `tex
 -- %my_race
 -- %my_class
 -- %my_level
-('broadcast_quest_completed_generic', 'Yess, I have finally completed the %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
-('broadcast_quest_completed_generic', 'completed the %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
-('broadcast_quest_completed_generic', 'managed to finish %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
-('broadcast_quest_completed_generic', 'just finished %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
-('broadcast_quest_completed_generic', 'just finished %quest_link in %zone_name', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_failed_timer', 'Failed to finish %quest_link in time...', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_failed_timer', 'Ran out of time for %quest_link :(', 0, 0, '', '', '', '', '', '', '', ''),
+
+
+-- usable placeholders:
+-- %quest_link
+-- %zone_name
+-- %area_name
+-- %my_race
+-- %my_class
+-- %my_level
+('broadcast_quest_update_complete', 'I have completed all objectives for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_complete', 'Completed all objectives for %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_update_complete', 'Gonna turn in the %quest_link soon, just finished all objectives', 0, 0, '', '', '', '', '', '', '', ''),
+
+
+-- usable placeholders:
+-- %quest_link
+-- %zone_name
+-- %area_name
+-- %my_race
+-- %my_class
+-- %my_level
+('broadcast_quest_turned_in', 'Yess, I have finally turned in the %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_turned_in', 'turned in the %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_turned_in', 'managed to finish %quest_link, just turned in', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_turned_in', 'just turned in %quest_link', 0, 0, '', '', '', '', '', '', '', ''),
+('broadcast_quest_turned_in', 'just turned in %quest_link in %zone_name', 0, 0, '', '', '', '', '', '', '', ''),
 
 
 

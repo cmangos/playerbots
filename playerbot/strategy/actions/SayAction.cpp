@@ -123,9 +123,6 @@ bool SayAction::isUseful()
 
 void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32 guid2, std::string msg, std::string chanName, std::string name)
 {
-    ChatReplyType replyType = REPLY_NOT_UNDERSTAND; // default not understand
-    std::string respondsText = "";
-
     // if we're just commanding bots around, don't respond...
     // first one is for exact word matches
     if (noReplyMsgs.find(msg) != noReplyMsgs.end()) {
@@ -153,12 +150,67 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
         return;
     }
 
+    std::string responseMessage = CreateReplyMessage(bot, msg, guid1, name);
+
+    // send responds
+    if (type == CHAT_MSG_CHANNEL)
+    {
+        if (chanName == "World")
+        {
+            bot->GetPlayerbotAI()->SayToWorld(responseMessage);
+        }
+    }
+    else
+    {
+        switch (type)
+        {
+            case CHAT_MSG_WHISPER:
+            {
+                bot->GetPlayerbotAI()->Whisper(responseMessage, name);
+                break;
+            }
+            case CHAT_MSG_SAY:
+            {
+                bot->GetPlayerbotAI()->Say(responseMessage);
+                break;
+            }
+            case CHAT_MSG_YELL:
+            {
+                bot->GetPlayerbotAI()->Yell(responseMessage);
+                break;
+            }
+            case CHAT_MSG_GUILD:
+            {
+                bot->GetPlayerbotAI()->SayToGuild(responseMessage);
+                break;
+            }
+            case CHAT_MSG_PARTY:
+            case CHAT_MSG_RAID:
+            case CHAT_MSG_EMOTE:
+            case CHAT_MSG_TEXT_EMOTE:
+            {
+                //TODO unhandled
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
+}
+
+std::string ChatReplyAction::CreateReplyMessage(Player* bot, std::string incomingMessage, uint32 guid1, std::string name)
+{
+    ChatReplyType replyType = REPLY_NOT_UNDERSTAND; // default not understand
+
+    std::string respondsText = "";
+
     // Chat Logic
     int32 verb_pos = -1;
     int32 verb_type = -1;
     int32 is_quest = 0;
     bool found = false;
-    std::stringstream text(msg);
+    std::stringstream text(incomingMessage);
     std::string segment;
     std::vector<std::string> word;
     while (std::getline(text, segment, ' '))
@@ -172,7 +224,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             word.push_back("");
     }
 
-    if (msg.find("?") != std::string::npos)
+    if (incomingMessage.find("?") != std::string::npos)
         is_quest = 1;
     if (word[0].find("what") != std::string::npos)
         is_quest = 2;
@@ -227,7 +279,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             }
             else if (word[i] == "shut" || word[i] == "noob")
             {
-                if (msg.find(bot->GetName()) == std::string::npos)
+                if (incomingMessage.find(bot->GetName()) == std::string::npos)
                 {
                     continue; // not react
                     uint32 rnd = urand(0, 2);
@@ -599,7 +651,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
     if (!found)
     {
         // Name Responds
-        if (msg.find(bot->GetName()) != std::string::npos)
+        if (incomingMessage.find(bot->GetName()) != std::string::npos)
         {
             replyType = REPLY_NAME;
             found = true;
@@ -611,87 +663,19 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
         }
     }
 
-    // send responds
-        // 
-    if (found)
+    // load text if needed
+    if (respondsText.empty())
     {
-        // load text if needed
-        if (respondsText.empty())
-        {
-            respondsText = BOT_TEXT2(replyType, name);
-        }
-        const char* c = respondsText.c_str();
-        if (strlen(c) > 255)
-            return;
-
-        if (chanName == "World")
-        {
-            if (ChannelMgr* cMgr = channelMgr(bot->GetTeam()))
-            {
-                std::string worldChan = "World";
-#ifndef MANGOSBOT_ZERO
-                if (Channel* chn = cMgr->GetJoinChannel(worldChan.c_str(), 0))
-#else
-                if (Channel* chn = cMgr->GetJoinChannel(worldChan.c_str()))
-#endif
-                {
-                    if (bot->GetTeam() == ALLIANCE)
-                    {
-                        chn->Say(bot, c, LANG_COMMON);
-                    }
-                    else
-                    {
-                        chn->Say(bot, c, LANG_ORCISH);
-                    }
-                }
-            }
-        }
-        else
-        {
-            if (type == CHAT_MSG_WHISPER)
-            {
-                ObjectGuid receiver = sObjectMgr.GetPlayerGuidByName(name.c_str());
-                Player* rPlayer = sObjectMgr.GetPlayer(receiver);
-                if (rPlayer)
-                {
-                    if (bot->GetTeam() == ALLIANCE)
-                    {
-                        bot->Whisper(c, LANG_COMMON, receiver);
-                    }
-                    else
-                    {
-                        bot->Whisper(c, LANG_ORCISH, receiver);
-                    }
-                }
-            }
-
-            if (type == CHAT_MSG_SAY)
-            {
-                if (bot->GetTeam() == ALLIANCE)
-                    bot->Say(respondsText, LANG_COMMON);
-                else
-                    bot->Say(respondsText, LANG_ORCISH);
-            }
-
-            if (type == CHAT_MSG_YELL)
-            {
-                if (bot->GetTeam() == ALLIANCE)
-                    bot->Yell(respondsText, LANG_COMMON);
-                else
-                    bot->Yell(respondsText, LANG_ORCISH);
-            }
-
-            if (type == CHAT_MSG_GUILD)
-            {
-                if (!bot->GetGuildId())
-                    return;
-
-                if (Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId()))
-                    guild->BroadcastToGuild(bot->GetSession(), respondsText, LANG_UNIVERSAL);
-            }
-        }
-        bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
+        respondsText = BOT_TEXT2(replyType, name);
     }
+
+    if (respondsText.size() > 255)
+    {
+        respondsText.resize(255);
+    }
+
+    return respondsText;
+
 }
 
 bool ChatReplyAction::isUseful()

@@ -2857,6 +2857,92 @@ bool PlayerbotAI::SayToGuildRecruitment(std::string msg)
 #endif
 }
 
+bool PlayerbotAI::SayToParty(std::string msg)
+{
+    if (!bot->GetGroup())
+    {
+        return false;
+    }
+
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_PARTY, msg.c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
+
+    for (auto reciever : GetPlayersInGroup())
+    {
+        sServerFacade.SendPacket(reciever, data);
+    }
+
+    return true;
+}
+
+bool PlayerbotAI::SayToRaid(std::string msg)
+{
+    if (!bot->GetGroup() || bot->GetGroup()->IsRaidGroup())
+    {
+        return false;
+    }
+
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID, msg.c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
+
+    for (auto reciever : GetPlayersInGroup())
+    {
+        sServerFacade.SendPacket(reciever, data);
+    }
+
+    return true;
+}
+
+bool PlayerbotAI::Yell(std::string msg)
+{
+    if (bot->GetTeam() == ALLIANCE)
+    {
+        bot->Yell(msg, LANG_COMMON);
+    }
+    else
+    {
+        bot->Yell(msg, LANG_ORCISH);
+    }
+
+    return true;
+}
+
+bool PlayerbotAI::Say(std::string msg)
+{
+    if (bot->GetTeam() == ALLIANCE)
+    {
+        bot->Say(msg, LANG_COMMON);
+    }
+    else
+    {
+        bot->Say(msg, LANG_ORCISH);
+    }
+
+    return true;
+}
+
+bool PlayerbotAI::Whisper(std::string msg, std::string receiverName)
+{
+    ObjectGuid receiver = sObjectMgr.GetPlayerGuidByName(receiverName);
+    Player* rPlayer = sObjectMgr.GetPlayer(receiver);
+
+    if (!rPlayer)
+    {
+        return false;
+    }
+
+    if (bot->GetTeam() == ALLIANCE)
+    {
+        bot->Whisper(msg, LANG_COMMON, receiver);
+    }
+    else
+    {
+        bot->Whisper(msg, LANG_ORCISH, receiver);
+    }
+
+    return true;
+}
+
 bool PlayerbotAI::TellPlayerNoFacing(Player* player, std::string text, PlayerbotSecurityLevel securityLevel, bool isPrivate, bool noRepeat, bool ignoreSilent)
 {
     if(!player)

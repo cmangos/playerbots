@@ -203,7 +203,7 @@ AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
 # individual settings
 # setting one of these to 0 will disable the particular broadcast
 # AiPlayerbot.BroadcastChanceLootingItemPoor = 30
-# AiPlayerbot.BroadcastChanceLootingItemNormal = 300
+# AiPlayerbot.BroadcastChanceLootingItemNormal = 150
 # AiPlayerbot.BroadcastChanceLootingItemUncommon = 10000
 # AiPlayerbot.BroadcastChanceLootingItemRare = 20000
 # AiPlayerbot.BroadcastChanceLootingItemEpic = 30000
@@ -230,25 +230,35 @@ AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
 # AiPlayerbot.BroadcastChanceLevelupTenX = 30000
 # AiPlayerbot.BroadcastChanceLevelupMaxLevel = 30000
 #
-# AiPlayerbot.BroadcastChanceSuggestInstance = 1000
+# AiPlayerbot.BroadcastChanceSuggestInstance = 5000
 # AiPlayerbot.BroadcastChanceSuggestQuest = 10000
-# AiPlayerbot.BroadcastChanceSuggestGrindMaterials = 1000
-# AiPlayerbot.BroadcastChanceSuggestGrindReputation = 1000
+# AiPlayerbot.BroadcastChanceSuggestGrindMaterials = 5000
+# AiPlayerbot.BroadcastChanceSuggestGrindReputation = 5000
 # AiPlayerbot.BroadcastChanceSuggestSell = 300
 # AiPlayerbot.BroadcastChanceSuggestSomething = 30000
 #
 # Very rude speeches
 # AiPlayerbot.BroadcastChanceSuggestSomethingToxic = 0
 #
-# Specifically for "<censored> [item link]"
+# Specifically for "<word> [item link]"
 # AiPlayerbot.BroadcastChanceSuggestToxicLinks = 0
+#
+# prefix is used as a word in "<word> [item link]"
+# AiPlayerbot.ToxicLinksPrefix = gnomes
+#
+# chance to suggest thunderfury
+# AiPlayerbot.BroadcastChanceSuggestThunderfury = 1
 #
 # does not depend on global chance
 # AiPlayerbot.BroadcastChanceGuildManagement = 30000
 #
 ##################################################################################
 
-# Bots will chat in guild about certain events (int)
+# Chance to reply to toxic links with toxic links (0-100)
+# AiPlayerbot.ToxicLinksRepliesChance = 100
+# Chance to reply to thunderfury with thunderfury (0-100)
+# AiPlayerbot.ThunderfuryRepliesChance = 100
+# Bots will chat in guild about certain events (int) (0-100)
 # AiPlayerbot.GuildRepliesRate = 100         # Reply someone saying something.
 
 # Bots without a master will say things they normally tell their master.

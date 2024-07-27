@@ -20,6 +20,7 @@ namespace ai
         void something();
         void somethingToxic();
         void toxicLinks();
+        void thunderfury();
 
         std::vector<uint32> GetIncompletedQuests();
 

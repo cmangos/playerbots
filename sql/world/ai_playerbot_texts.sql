@@ -3043,6 +3043,7 @@ INSERT INTO `ai_playerbot_texts` (`name`, `text`, `say_type`, `reply_type`, `tex
 
 -- random generic toxic item links
 -- usable placeholders:
+-- %prefix
 -- %random_taken_quest_or_item_link
 -- %random_inventory_item_link
 -- %my_role
@@ -3051,8 +3052,29 @@ INSERT INTO `ai_playerbot_texts` (`name`, `text`, `say_type`, `reply_type`, `tex
 -- %my_class
 -- %my_race
 -- %my_level
-('suggest_toxic_links', 'gnomes %random_taken_quest_or_item_link', 0, 0, '', '', '', '', '', '', '', ''),
-('suggest_toxic_links', 'gnomes %random_inventory_item_link', 0, 0, '', '', '', '', '', '', '', ''),
+('suggest_toxic_links', '%prefix %random_taken_quest_or_item_link', 0, 0, '', '', '', '', '', '', '', ''),
+('suggest_toxic_links', '%prefix %random_inventory_item_link', 0, 0, '', '', '', '', '', '', '', ''),
+
+
+
+-- thunderfury spam
+-- usable placeholders:
+-- %thunderfury_link
+('thunderfury_spam', '%thunderfury_link', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', '%thunderfury_link%thunderfury_link', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', '%thunderfury_link%thunderfury_link%thunderfury_link', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', 'I think I just heard %thunderfury_link', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', 'I think I heard %thunderfury_link', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', 'I definitely heard %thunderfury_link', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', 'I dunno but I\'m pretty sure I heard %thunderfury_link', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', 'Did you just say %thunderfury_link', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', 'did someone say %thunderfury_link', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', 'Did someone say %thunderfury_link ?', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', 'Someone said %thunderfury_link', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', '%thunderfury_link is coming out of the closet', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', 'could swear it was a %thunderfury_link, might have been %thunderfury_link tho', 0, 0, '', '', '', '', '', '', '', ''),
+('thunderfury_spam', 'Why use %thunderfury_link when %thunderfury_link is clearly way more OP', 0, 0, '', '', '', '', '', '', '', ''),
+
 
 
 -- random WTS
@@ -3106,6 +3128,82 @@ INSERT INTO `ai_playerbot_texts` (`name`, `text`, `say_type`, `reply_type`, `tex
 ('suggest_sell', 'I am going to post %item_formatted_link on the AH but you can buy it now cheaper just for %cost_gold.', 0, 0, '', 'Je vais poster %item_formatted_link à l\'hôtel des ventes mais vous pouvez l\'acheter maintenant moins cher juste pour %cost_gold', '', '', '', 'Voy a poner %item_formatted_link en la casa de subastas pero puedes comprarlo ahora más barato solo por %cost_gold.', '', ''),
 ('suggest_sell', 'Why the #!@ have I bought %item_formatted_link? Anyone needs it for %cost_gold?', 0, 0, '', 'Pourquoi ai-je acheté le #!@ %item_formatted_link ? Quelqu\'un en a besoin pour %cost_gold ?', '', '', '', '¿Por qué #!@ he comprado %item_formatted_link? ¿Alguien lo necesita por %cost_gold?', '', ''),
 
+
+-- response LFG/LFM channel
+-- usable placeholders:
+-- %quest_links
+-- %other_name
+-- %my_role
+-- %zone_name
+-- %area_name
+-- %my_class
+-- %my_race
+-- %my_level
+('response_lfg_quests_channel', 'I have %quest_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel', 'I also have %quest_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel', 'I also have %quest_links, I am in %zone_name right now', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel', '%other_name, I also have %quest_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel', '%other_name, I also have %quest_links, I am in %zone_name right now', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel', 'I am up for %quest_links, I am in %zone_name right now', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel', 'I am up for %quest_links, I am %my_role', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel', '%other_name, I am up for %quest_links, I am in %zone_name right now', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel', '%other_name, I am up for %quest_links, I am %my_role', 0, 0, '', '', '', '', '', '', '', ''),
+
+
+-- response LFG/LFM whisper
+-- usable placeholders:
+-- %quest_links
+-- %other_name
+-- %my_role
+-- %zone_name
+-- %area_name
+-- %my_class
+-- %my_race
+-- %my_level
+('response_lfg_quests_whisper', 'Hey, I\'m up for %quest_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper', 'Hey, I could do %quest_links with you', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper', 'Hey, I also have %quest_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper', 'Hey %other_name, I\'m up for %quest_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper', 'Hey %other_name, I could do %quest_links with you', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper', 'Hey %other_name, I also have %quest_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper', 'wanna group up for %quest_links ?', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper', 'I am up for %quest_links, I am in %zone_name right now', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper', 'I am up for %quest_links, I am %my_role', 0, 0, '', '', '', '', '', '', '', ''),
+
+
+
+-- response WTB channel
+-- usable placeholders:
+-- %formatted_item_links
+-- %other_name
+-- %my_role
+-- %zone_name
+-- %area_name
+-- %my_class
+-- %my_race
+-- %my_level
+('response_wtb_items_channel', '%other_name, I could sell you %formatted_item_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_wtb_items_channel', 'I could potentially sell %formatted_item_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_wtb_items_channel', 'Think I could sell %formatted_item_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_wtb_items_channel', '%other_name, I could potentially sell %formatted_item_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_wtb_items_channel', '%other_name, Think I could sell %formatted_item_links', 0, 0, '', '', '', '', '', '', '', ''),
+
+
+
+
+-- response WTB channel
+-- usable placeholders:
+-- %formatted_item_links
+-- %other_name
+-- %my_role
+-- %zone_name
+-- %area_name
+-- %my_class
+-- %my_race
+-- %my_level
+('response_wtb_items_whisper', 'I could sell you %formatted_item_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_wtb_items_whisper', 'Hey, I got %formatted_item_links for sale', 0, 0, '', '', '', '', '', '', '', ''),
+('response_wtb_items_whisper', 'Hey, I could potentially sell %formatted_item_links', 0, 0, '', '', '', '', '', '', '', ''),
 
 
 
@@ -3254,7 +3352,6 @@ INSERT INTO `ai_playerbot_texts` (`name`, `text`, `say_type`, `reply_type`, `tex
 ('reply', 'wtf are you all talking about', 0, 0, '', '', '', '', '', '', '', ''),
 ('reply', 'fr fr no cap on a stack', 0, 0, '', '', '', '', '', '', '', ''),
 ('reply', 'your not getting jack shit', 0, 0, '', '', '', '', '', '', '', ''),
-('reply', 'are you begging for head ?', 0, 0, '', '', '', '', '', '', '', ''),
 ('reply', 'swag', 0, 0, '', '', '', '', '', '', '', ''),
 ('reply', 'ty!', 0, 0, '', '', '', '', '', '', '', ''),
 ('reply', 'no', 0, 0, '', '', '', '', '', '', '', ''),

@@ -139,6 +139,10 @@ namespace ai
             PlayerbotAI* ai,
             Player* bot
         );
+        static bool BroadcastSuggestThunderfury(
+            PlayerbotAI* ai,
+            Player* bot
+        );
     };
 
 

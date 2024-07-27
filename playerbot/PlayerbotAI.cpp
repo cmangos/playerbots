@@ -1577,50 +1577,76 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 time_t lastChat = GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Get();
                 bool isPaused = time(0) < lastChat;
                 bool shouldReply = false;
-                bool isFreeBot = false;
+                bool isFromFreeBot = false;
                 sObjectMgr.GetPlayerNameByGUID(guid1, name);
                 uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid1);
-                isFreeBot = sPlayerbotAIConfig.IsInRandomAccountList(accountId);
-                if (!isFreeBot)
-                    isFreeBot = sPlayerbotAIConfig.IsFreeAltBot(guid1);
+                isFromFreeBot = sPlayerbotAIConfig.IsInRandomAccountList(accountId);
+                if (!isFromFreeBot)
+                    isFromFreeBot = sPlayerbotAIConfig.IsFreeAltBot(guid1);
 
                 bool isMentioned = message.find(bot->GetName()) != std::string::npos;
 
+                ChatChannelSource chatChannelSource = GetChatChannelSource(bot, msgtype, chanName);
+
                 // random bot speaks, chat CD
-                if (isFreeBot && isPaused)
+                if (isFromFreeBot && isPaused)
                     return;
+
                 // BG: react only if mentioned or if not channel and real player spoke
-                if (bot->InBattleGround() && !(isMentioned || (msgtype != CHAT_MSG_CHANNEL && !isFreeBot)))
+                if (bot->InBattleGround() && !(isMentioned || (msgtype != CHAT_MSG_CHANNEL && !isFromFreeBot)))
                     return;
 
                 if (HasRealPlayerMaster() && guid1 != GetMaster()->GetObjectGuid())
                     return;
 
-                if (isFreeBot && urand(0, 20))
-                    return;
-
                 if (lang == LANG_ADDON)
                     return;
 
-                if (msgtype == CHAT_MSG_GUILD && (!sPlayerbotAIConfig.guildRepliesRate || urand(1, 100) >= sPlayerbotAIConfig.guildRepliesRate))
-                    return;
-
-                if (!isFreeBot)
+                if ((boost::algorithm::istarts_with(message, "LFG") || boost::algorithm::istarts_with(message, "LFM"))
+                    && GetChatHelper()->ExtractAllQuestIds(message).size() > 0)
                 {
-                    if (!isMentioned && urand(0, 4))
+                    if (isFromFreeBot && urand(0, 20))
                         return;
+                }
+                else if (boost::algorithm::istarts_with(message, sPlayerbotAIConfig.toxicLinksPrefix)
+                    && (GetChatHelper()->ExtractAllItemIds(message).size() > 0 || GetChatHelper()->ExtractAllQuestIds(message).size() > 0)
+                    && sPlayerbotAIConfig.toxicLinksRepliesChance)
+                {
+                    if (urand(0, 50) > 0 || urand(1, 100) > sPlayerbotAIConfig.toxicLinksRepliesChance)
+                    {
+                        return;
+                    }
+                }
+                else if ((GetChatHelper()->ExtractAllItemIds(message).count(19019) && sPlayerbotAIConfig.thunderfuryRepliesChance))
+                {
+                    if (urand(0, 60) > 0 || urand(1, 100) > sPlayerbotAIConfig.thunderfuryRepliesChance)
+                    {
+                        return;
+                    }
                 }
                 else
                 {
-                    if (isPaused)
+                    if (isFromFreeBot && urand(0, 20))
                         return;
 
-                    if (urand(0, 20 + 10 * isMentioned))
+                    if (msgtype == CHAT_MSG_GUILD && (!sPlayerbotAIConfig.guildRepliesRate || urand(1, 100) >= sPlayerbotAIConfig.guildRepliesRate))
                         return;
+
+                    if (!isFromFreeBot)
+                    {
+                        if (!isMentioned && urand(0, 4))
+                            return;
+                    }
+                    else
+                    {
+                        if (urand(0, 20 + 10 * isMentioned))
+                            return;
+                    }
                 }
 
                 QueueChatResponse(msgtype, guid1, ObjectGuid(), message, chanName, name);
                 GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
+
                 return;
             }
         }
@@ -2509,10 +2535,11 @@ std::vector<const Quest*> PlayerbotAI::GetAllCurrentQuests()
     {
         uint32 questId = bot->GetQuestSlotQuestId(slot);
         if (!questId)
+        {
             continue;
+        }
 
-        QuestStatus status = bot->GetQuestStatus(questId);
-            result.push_back(sObjectMgr.GetQuestTemplate(questId));
+        result.push_back(sObjectMgr.GetQuestTemplate(questId));
     }
 
     return result;
@@ -2526,14 +2553,90 @@ std::vector<const Quest*> PlayerbotAI::GetCurrentIncompleteQuests()
     {
         uint32 questId = bot->GetQuestSlotQuestId(slot);
         if (!questId)
+        {
             continue;
+        }
 
         QuestStatus status = bot->GetQuestStatus(questId);
         if (status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_NONE)
+        {
             result.push_back(sObjectMgr.GetQuestTemplate(questId));
+        }
     }
 
     return result;
+}
+
+std::set<uint32> PlayerbotAI::GetAllCurrentQuestIds()
+{
+    std::set<uint32> result;
+
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 questId = bot->GetQuestSlotQuestId(slot);
+        if (!questId)
+        {
+            continue;
+        }
+
+        result.insert(questId);
+    }
+
+    return result;
+}
+
+std::set<uint32> PlayerbotAI::GetCurrentIncompleteQuestIds()
+{
+    std::set<uint32> result;
+
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 questId = bot->GetQuestSlotQuestId(slot);
+        if (!questId)
+        {
+            continue;
+        }
+
+        QuestStatus status = bot->GetQuestStatus(questId);
+        if (status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_NONE)
+        {
+            result.insert(questId);
+        }
+    }
+
+    return result;
+}
+
+const Quest* PlayerbotAI::GetCurrentIncompleteQuestWithId(uint32 pQuestId)
+{
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 questId = bot->GetQuestSlotQuestId(slot);
+        if (!questId)
+            continue;
+
+        QuestStatus status = bot->GetQuestStatus(questId);
+        if (pQuestId == questId && status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_NONE)
+            return sObjectMgr.GetQuestTemplate(questId);
+    }
+
+    return nullptr;
+}
+
+bool PlayerbotAI::HasCurrentIncompleteQuestWithId(uint32 pQuestId)
+{
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 questId = bot->GetQuestSlotQuestId(slot);
+        if (!questId)
+            continue;
+
+        QuestStatus status = bot->GetQuestStatus(questId);
+        if (pQuestId == questId && status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_NONE)
+            return true;
+    }
+
+    return false;
 }
 
 /*
@@ -2595,6 +2698,100 @@ bool PlayerbotAI::IsInCapitalCity()
         return false;
     }
     return current_area->flags & AREA_FLAG_CAPITAL;
+}
+
+ChatChannelSource PlayerbotAI::GetChatChannelSource(Player* bot, uint32 type, std::string channelName)
+{
+    if (type == CHAT_MSG_CHANNEL)
+    {
+        if (channelName == "World")
+        {
+            return ChatChannelSource::SRC_WORLD;
+        }
+        else
+        {
+            ChannelMgr* cMgr = channelMgr(bot->GetTeam());
+            if (!cMgr)
+            {
+                return ChatChannelSource::SRC_UNDEFINED;
+            }
+
+            const Channel* channel = cMgr->GetChannel(channelName, bot);
+
+            if (channel)
+            {
+                switch (channel->GetChannelId())
+                {
+                case ChatChannelId::GENERAL:
+                {
+                    return ChatChannelSource::SRC_GENERAL;
+                }
+                case ChatChannelId::TRADE:
+                {
+                    return ChatChannelSource::SRC_TRADE;
+                }
+                case ChatChannelId::LOCAL_DEFENSE:
+                {
+                    return ChatChannelSource::SRC_LOCAL_DEFENSE;
+                }
+                case ChatChannelId::WORLD_DEFENSE:
+                {
+                    return ChatChannelSource::SRC_WORLD_DEFENSE;
+                }
+                case ChatChannelId::LOOKING_FOR_GROUP:
+                {
+                    return ChatChannelSource::SRC_LOOKING_FOR_GROUP;
+                }
+                case ChatChannelId::GUILD_RECRUITMENT:
+                {
+                    return ChatChannelSource::SRC_GUILD_RECRUITMENT;
+                }
+                default:
+                    return ChatChannelSource::SRC_UNDEFINED;
+                }
+            }
+        }
+    }
+    else
+    {
+        switch (type)
+        {
+        case CHAT_MSG_WHISPER:
+        {
+            return ChatChannelSource::SRC_WHISPER;
+        }
+        case CHAT_MSG_SAY:
+        {
+            return ChatChannelSource::SRC_SAY;
+        }
+        case CHAT_MSG_YELL:
+        {
+            return ChatChannelSource::SRC_YELL;
+        }
+        case CHAT_MSG_GUILD:
+        {
+            return ChatChannelSource::SRC_GUILD;
+        }
+        case CHAT_MSG_PARTY:
+        {
+            return ChatChannelSource::SRC_PARTY;
+        }
+        case CHAT_MSG_RAID:
+        {
+            return ChatChannelSource::SRC_RAID;
+        }
+        case CHAT_MSG_EMOTE:
+        {
+            return ChatChannelSource::SRC_EMOTE;
+        }
+        case CHAT_MSG_TEXT_EMOTE:
+        {
+            return ChatChannelSource::SRC_TEXT_EMOTE;
+        }
+        default:
+            return ChatChannelSource::SRC_UNDEFINED;
+        }
+    }
 }
 
 bool PlayerbotAI::SayToGuild(std::string msg)
@@ -5786,13 +5983,23 @@ void PlayerbotAI::InventoryIterateItems(IterateItemsVisitor* visitor, IterateIte
         InventoryIterateItemsInBuyBack(visitor);
 }
 
-/*
-* Populate vector with inventory and equipped items
-* @param items - vector to populate with itmes
-*/
 std::vector<Item*> PlayerbotAI::GetInventoryAndEquippedItems()
 {
     std::vector<Item*> items;
+
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                if (Item* pItem = pBag->GetItemByPos(j))
+                {
+                    items.push_back(pItem);
+                }
+            }
+        }
+    }
 
     for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
@@ -5810,17 +6017,11 @@ std::vector<Item*> PlayerbotAI::GetInventoryAndEquippedItems()
         }
     }
 
-    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)
     {
-        if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
         {
-            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
-            {
-                if (Item* pItem = pBag->GetItemByPos(j))
-                {
-                    items.push_back(pItem);
-                }
-            }
+            items.push_back(pItem);
         }
     }
 
@@ -5842,6 +6043,22 @@ std::vector<Item*> PlayerbotAI::GetInventoryItems()
                     items.push_back(pItem);
                 }
             }
+        }
+    }
+
+    for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            items.push_back(pItem);
+        }
+    }
+
+    for (int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+    {
+        if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            items.push_back(pItem);
         }
     }
 
@@ -5869,7 +6086,74 @@ uint32 PlayerbotAI::GetInventoryItemsCountWithId(uint32 itemId)
         }
     }
 
+    for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            if (pItem->GetProto()->ItemId == itemId)
+            {
+                count += pItem->GetCount();
+            }
+        }
+    }
+
+    for (int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+    {
+        if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            if (pItem->GetProto()->ItemId == itemId)
+            {
+                count += pItem->GetCount();
+            }
+        }
+    }
+
     return count;
+}
+
+bool PlayerbotAI::HasItemInInventory(uint32 itemId)
+{
+
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                if (Item* pItem = pBag->GetItemByPos(j))
+                {
+                    if (pItem->GetProto()->ItemId == itemId)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            if (pItem->GetProto()->ItemId == itemId)
+            {
+                return true;
+            }
+        }
+    }
+
+    for (int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+    {
+        if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            if (pItem->GetProto()->ItemId == itemId)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 void PlayerbotAI::InventoryIterateItemsInBags(IterateItemsVisitor* visitor)
@@ -6304,8 +6588,8 @@ void PlayerbotAI::AccelerateRespawn(Creature* creature, float accelMod)
             return;
 
         uint32 playersNr = AI_VALUE_LAZY(std::list<ObjectGuid>, "nearest friendly players").size()+1;
-      
-     
+
+
         if (playersNr <= sPlayerbotAIConfig.respawnModThreshold)
             return;
 
@@ -6320,7 +6604,7 @@ void PlayerbotAI::AccelerateRespawn(Creature* creature, float accelMod)
     uint32 m_respawnDelay;
     uint32 m_corpseAccelerationDecayDelay;
 
-    if (accelMod >= 1) 
+    if (accelMod >= 1)
     {
         m_respawnDelay = 0;
         m_corpseAccelerationDecayDelay = 0;
@@ -6333,11 +6617,11 @@ void PlayerbotAI::AccelerateRespawn(Creature* creature, float accelMod)
             return;
 
         m_respawnDelay = data->GetRandomRespawnTime() * IN_MILLISECONDS;
-        m_corpseAccelerationDecayDelay = MINIMUM_LOOTING_TIME;          
+        m_corpseAccelerationDecayDelay = MINIMUM_LOOTING_TIME;
 
         uint32 totalDelay = m_respawnDelay + m_corpseAccelerationDecayDelay;
 
-        if (m_respawnDelay < totalDelay * accelMod) 
+        if (m_respawnDelay < totalDelay * accelMod)
         {
             if ((m_corpseAccelerationDecayDelay- ((totalDelay * accelMod) - m_respawnDelay)) < 0)
                 sLog.outError("m_corpseAccelerationDecayDelay: %d, totalDelay: %d, accelMod: %f, m_respawnDelay: %d", m_corpseAccelerationDecayDelay, totalDelay, accelMod, m_respawnDelay);
@@ -6847,7 +7131,7 @@ void PlayerbotAI::EnchantItemT(uint32 spellid, uint8 slot, Item* item)
    if (!((1 << pItem->GetProto()->SubClass) & spellInfo->EquippedItemSubClassMask) &&
       !((1 << pItem->GetProto()->InventoryType) & spellInfo->EquippedItemInventoryTypeMask))
    {
-      
+
       sLog.outError("%s: items could not be enchanted, wrong item type equipped", bot->GetName());
 
       return;
@@ -6889,7 +7173,7 @@ bool PlayerbotAI::CanMove()
     if (IsInVehicle() && !IsInVehicle(true))
         return false;
 
-    if (sServerFacade.IsFrozen(bot) || 
+    if (sServerFacade.IsFrozen(bot) ||
         sServerFacade.IsInRoots(bot) ||
         sServerFacade.IsFeared(bot) ||
         sServerFacade.IsCharmed(bot) ||
@@ -6992,9 +7276,9 @@ bool PlayerbotAI::HasPlayerRelation()
     return false;
 }
 
-void PlayerbotAI::QueueChatResponse(uint8 msgtype, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name)
+void PlayerbotAI::QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name)
 {
-    chatReplies.push(ChatQueuedReply(msgtype, guid1.GetCounter(), guid2.GetCounter(), message, chanName, name, time(0) + urand(inCombat ? 10 : 5, inCombat ? 25 : 15)));
+    chatReplies.push(ChatQueuedReply(msgType, guid1.GetCounter(), guid2.GetCounter(), message, chanName, name, time(0) + urand(inCombat ? 10 : 5, inCombat ? 25 : 15)));
 }
 
 bool PlayerbotAI::PlayAttackEmote(float chanceMultiplier)

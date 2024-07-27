@@ -82,6 +82,29 @@ enum ChatChannelId
     GUILD_RECRUITMENT = 25,
 };
 
+enum ChatChannelSource
+{
+    SRC_GUILD,
+    SRC_WORLD,
+    SRC_GENERAL,
+    SRC_TRADE,
+    SRC_LOOKING_FOR_GROUP,
+    SRC_LOCAL_DEFENSE,
+    SRC_WORLD_DEFENSE,
+    SRC_GUILD_RECRUITMENT,
+
+    SRC_SAY,
+    SRC_WHISPER,
+    SRC_EMOTE,
+    SRC_TEXT_EMOTE,
+    SRC_YELL,
+
+    SRC_PARTY,
+    SRC_RAID,
+
+    SRC_UNDEFINED
+};
+
 enum HealingItemDisplayId
 {
    HEALTHSTONE_DISPLAYID = 8026,
@@ -323,7 +346,7 @@ public:
     static std::string BotStateToString(BotState state);
 	std::string HandleRemoteCommand(std::string command);
     void HandleCommand(uint32 type, const std::string& text, Player& fromPlayer, const uint32 lang = LANG_UNIVERSAL);
-    void QueueChatResponse(uint8 msgtype, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name);
+    void QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name);
 	void HandleBotOutgoingPacket(const WorldPacket& packet);
     void HandleMasterIncomingPacket(const WorldPacket& packet);
     void HandleMasterOutgoingPacket(const WorldPacket& packet);
@@ -357,11 +380,16 @@ public:
     void DropQuest(uint32 questId);
     std::vector<const Quest*> GetAllCurrentQuests();
     std::vector<const Quest*> GetCurrentIncompleteQuests();
+    std::set<uint32> GetAllCurrentQuestIds();
+    std::set<uint32> GetCurrentIncompleteQuestIds();
+    const Quest* GetCurrentIncompleteQuestWithId(uint32 questId);
+    bool HasCurrentIncompleteQuestWithId(uint32 questId);
     std::vector<std::pair<const Quest*, uint32>> GetCurrentQuestsRequiringItemId(uint32 itemId);
     const AreaTableEntry* GetCurrentArea();
     const AreaTableEntry* GetCurrentZone();
     std::string GetLocalizedAreaName(const AreaTableEntry* entry);
     bool IsInCapitalCity();
+    ChatChannelSource GetChatChannelSource(Player* bot, uint32 type, std::string channelName);
     bool SayToGuild(std::string msg);
     bool SayToWorld(std::string msg);
     bool SayToGeneral(std::string msg);
@@ -483,6 +511,7 @@ public:
     std::vector<Item*> GetInventoryAndEquippedItems();
     std::vector<Item*> GetInventoryItems();
     uint32 GetInventoryItemsCountWithId(uint32 itemId);
+    bool HasItemInInventory(uint32 itemId);
 
 private:
     void InventoryIterateItemsInBags(IterateItemsVisitor* visitor);

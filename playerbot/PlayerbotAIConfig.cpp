@@ -162,7 +162,7 @@ bool PlayerbotAIConfig::Initialize()
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotQuestItems", "6948,5175,5176,5177,5178,16309,12382,13704,11000,22754"), randomBotQuestItems);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotSpellIds", "54197"), randomBotSpellIds);
 	LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.PvpProhibitedZoneIds", "2255,656,2361,2362,2363,976,35,2268,3425,392,541,1446,3828,3712,3738,3565,3539,3623,4152,3988,4658,4284,4418,4436,4275,4323"), pvpProhibitedZoneIds);
-    
+
 #ifndef MANGOSBOT_ZERO
     // disable pvp near dark portal if event is active
     if (sWorldState.GetExpansion() == EXPANSION_NONE)
@@ -373,7 +373,7 @@ bool PlayerbotAIConfig::Initialize()
 
     //Get all config values starting with AiPlayerbot.WorldBuff
     std::vector<std::string> values = configA->GetValues("AiPlayerbot.WorldBuff");
-   
+
     if (values.size())
     {
         sLog.outString("Loading WorldBuffs");
@@ -443,6 +443,7 @@ bool PlayerbotAIConfig::Initialize()
 
     guildMaxBotLimit = config.GetIntDefault("AiPlayerbot.GuildMaxBotLimit", 1000);
 
+    ////////////////////////////
     enableBroadcasts = config.GetBoolDefault("AiPlayerbot.EnableBroadcasts", true);
 
     //broadcastChanceMaxValue is used in urand(1, broadcastChanceMaxValue) for broadcasts,
@@ -497,20 +498,27 @@ bool PlayerbotAIConfig::Initialize()
     broadcastChanceSuggestSomething = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestSomething", 30000);
 
     broadcastChanceSuggestSomethingToxic = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestSomethingToxic", 0);
+
     broadcastChanceSuggestToxicLinks = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestToxicLinks", 0);
+    toxicLinksPrefix = config.GetStringDefault("AiPlayerbot.ToxicLinksPrefix", "gnomes");
+
+    broadcastChanceSuggestThunderfury = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestThunderfury", 1);
 
     //does not depend on global chance
     broadcastChanceGuildManagement = config.GetIntDefault("AiPlayerbot.BroadcastChanceGuildManagement", 30000);
+    ////////////////////////////
 
+    toxicLinksRepliesChance = config.GetIntDefault("AiPlayerbot.ToxicLinksRepliesChance", 100); //0-100
+    thunderfuryRepliesChance = config.GetIntDefault("AiPlayerbot.ThunderfuryRepliesChance", 100); //0-100
     guildRepliesRate = config.GetIntDefault("AiPlayerbot.GuildRepliesRate", 100); //0-100
-    
+
     randomBotFormGuild = config.GetBoolDefault("AiPlayerbot.RandomBotFormGuild", true);
-    
+
     boostFollow = config.GetBoolDefault("AiPlayerbot.BoostFollow", false);
     turnInRpg = config.GetBoolDefault("AiPlayerbot.TurnInRpg", false);
     globalSoundEffects = config.GetBoolDefault("AiPlayerbot.GlobalSoundEffects", false);
     nonGmFreeSummon = config.GetBoolDefault("AiPlayerbot.NonGmFreeSummon", false);
-    
+
     //SPP automation
     autoPickReward = config.GetStringDefault("AiPlayerbot.AutoPickReward", "no");
     autoEquipUpgradeLoot = config.GetBoolDefault("AiPlayerbot.AutoEquipUpgradeLoot", false);
@@ -727,7 +735,7 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
             uint32 accountId = fields[1].GetUInt32();
 
             if (std::find(toggleAlwaysOnlineAccounts.begin(), toggleAlwaysOnlineAccounts.end(), accountName) != toggleAlwaysOnlineAccounts.end())
-                accountAlwaysOnline = !accountAlwaysOnline;                       
+                accountAlwaysOnline = !accountAlwaysOnline;
 
             auto result = CharacterDatabase.PQuery("SELECT name, guid FROM characters WHERE account = '%u'", accountId);
             if (!result)
@@ -753,7 +761,7 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
                     freeAltBots.push_back(std::make_pair(accountId, guid));
 
             } while (result->NextRow());
-        
+
 
         } while (results->NextRow());
     }
@@ -778,7 +786,7 @@ bool PlayerbotAIConfig::openLog(std::string fileName, char const* mode, bool has
 {
     if (!haslog && !hasLog(fileName))
         return false;
-     
+
     auto logFileIt = logFiles.find(fileName);
     if (logFileIt == logFiles.end())
     {
@@ -805,7 +813,7 @@ bool PlayerbotAIConfig::openLog(std::string fileName, char const* mode, bool has
 
     logFileIt->second.first = file;
     logFileIt->second.second = fileOpen;
-    
+
     return true;
 }
 
@@ -891,5 +899,5 @@ bool PlayerbotAIConfig::CanLogAction(PlayerbotAI* ai, std::string actionName, bo
         }
     }
 
-    return std::find(debugFilter.begin(), debugFilter.end(), actionName) == debugFilter.end(); 
+    return std::find(debugFilter.begin(), debugFilter.end(), actionName) == debugFilter.end();
 }

@@ -32,6 +32,7 @@ SuggestWhatToDoAction::SuggestWhatToDoAction(PlayerbotAI* ai, std::string name)
     suggestions.push_back(&SuggestWhatToDoAction::something);
     suggestions.push_back(&SuggestWhatToDoAction::somethingToxic);
     suggestions.push_back(&SuggestWhatToDoAction::toxicLinks);
+    suggestions.push_back(&SuggestWhatToDoAction::thunderfury);
 }
 
 bool SuggestWhatToDoAction::isUseful()
@@ -256,6 +257,11 @@ void SuggestWhatToDoAction::somethingToxic()
 void SuggestWhatToDoAction::toxicLinks()
 {
     BroadcastHelper::BroadcastSuggestToxicLinks(ai, bot);
+}
+
+void SuggestWhatToDoAction::thunderfury()
+{
+    BroadcastHelper::BroadcastSuggestThunderfury(ai, bot);
 }
 
 class FindTradeItemsVisitor : public IterateItemsVisitor

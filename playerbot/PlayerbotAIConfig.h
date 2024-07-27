@@ -217,7 +217,13 @@ public:
     uint32 broadcastChanceSuggestSomething;
 
     uint32 broadcastChanceSuggestSomethingToxic;
+
     uint32 broadcastChanceSuggestToxicLinks;
+    std::string toxicLinksPrefix;
+    uint32 toxicLinksRepliesChance;
+
+    uint32 broadcastChanceSuggestThunderfury;
+    uint32 thunderfuryRepliesChance;
 
     uint32 broadcastChanceGuildManagement;
 

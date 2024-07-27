@@ -965,6 +965,7 @@ bool BroadcastHelper::BroadcastSuggestToxicLinks(
         std::map<std::string, std::string> placeholders;
 
         placeholders["%random_inventory_item_link"] = botItems.size() > 0 ? ai->GetChatHelper()->formatItem(botItems[rand() % botItems.size()]) : BOT_TEXT("string_empty_link");
+        placeholders["%prefix"] = sPlayerbotAIConfig.toxicLinksPrefix;
 
         if (incompleteQuests.size() > 0)
         {
@@ -989,6 +990,28 @@ bool BroadcastHelper::BroadcastSuggestToxicLinks(
             ai,
             BOT_TEXT2("suggest_toxic_links", placeholders),
             { {TO_GUILD, 10}, {TO_WORLD, 70}, {TO_GENERAL, 100} }
+        );
+    }
+
+    return false;
+}
+
+bool BroadcastHelper::BroadcastSuggestThunderfury(
+    PlayerbotAI* ai,
+    Player* bot
+)
+{
+    if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceSuggestThunderfury)
+    {
+
+        std::map<std::string, std::string> placeholders;
+        ItemPrototype const* thunderfuryProto = sObjectMgr.GetItemPrototype(19019);
+        placeholders["%thunderfury_link"] = bot->GetPlayerbotAI()->GetChatHelper()->formatItem(thunderfuryProto);
+
+        return BroadcastToChannelWithGlobalChance(
+            ai,
+            BOT_TEXT2("thunderfury_spam", placeholders),
+            { {TO_WORLD, 70}, {TO_GENERAL, 100} }
         );
     }
 

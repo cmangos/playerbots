@@ -1602,13 +1602,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (lang == LANG_ADDON)
                     return;
 
-                if ((boost::algorithm::istarts_with(message, "LFG") || boost::algorithm::istarts_with(message, "LFM"))
-                    && GetChatHelper()->ExtractAllQuestIds(message).size() > 0)
-                {
-                    if (isFromFreeBot && urand(0, 20))
-                        return;
-                }
-                else if (boost::algorithm::istarts_with(message, sPlayerbotAIConfig.toxicLinksPrefix)
+                if (boost::algorithm::istarts_with(message, sPlayerbotAIConfig.toxicLinksPrefix)
                     && (GetChatHelper()->ExtractAllItemIds(message).size() > 0 || GetChatHelper()->ExtractAllQuestIds(message).size() > 0)
                     && sPlayerbotAIConfig.toxicLinksRepliesChance)
                 {

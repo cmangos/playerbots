@@ -330,7 +330,7 @@ bool QuestUpdateAddItemAction::Execute(Event& event)
         std::map<std::string, std::string> placeholders;
         placeholders["%item_link"] = ai->GetChatHelper()->formatItem(itemPrototype);
         uint32 availableItemsCount = ai->GetInventoryItemsCountWithId(itemId);
-        placeholders["%quest_obj_available"] = availableItemsCount;
+        placeholders["%quest_obj_available"] = std::to_string(availableItemsCount);
 
         for (const auto& pair : ai->GetCurrentQuestsRequiringItemId(itemId))
         {
@@ -394,7 +394,7 @@ bool QuestUpdateFailedTimerAction::Execute(Event& event)
     else
     {
         std::map<std::string, std::string> placeholders;
-        placeholders["%quest_id"] = questId;
+        placeholders["%quest_id"] = std::to_string(questId);
 
         ai->TellPlayer(requester, BOT_TEXT2("Failed timer for %quest_id", placeholders), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
@@ -429,7 +429,7 @@ bool QuestUpdateCompleteAction::Execute(Event& event)
     }
     else {
         std::map<std::string, std::string> placeholders;
-        placeholders["%quest_id"] = questId;
+        placeholders["%quest_id"] = std::to_string(questId);
 
         ai->TellPlayer(requester, BOT_TEXT2("Completed %quest_id", placeholders), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }

@@ -162,7 +162,7 @@ bool PlayerbotAIConfig::Initialize()
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotQuestItems", "6948,5175,5176,5177,5178,16309,12382,13704,11000,22754"), randomBotQuestItems);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotSpellIds", "54197"), randomBotSpellIds);
 	LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.PvpProhibitedZoneIds", "2255,656,2361,2362,2363,976,35,2268,3425,392,541,1446,3828,3712,3738,3565,3539,3623,4152,3988,4658,4284,4418,4436,4275,4323"), pvpProhibitedZoneIds);
-    
+
 #ifndef MANGOSBOT_ZERO
     // disable pvp near dark portal if event is active
     if (sWorldState.GetExpansion() == EXPANSION_NONE)
@@ -373,7 +373,7 @@ bool PlayerbotAIConfig::Initialize()
 
     //Get all config values starting with AiPlayerbot.WorldBuff
     std::vector<std::string> values = configA->GetValues("AiPlayerbot.WorldBuff");
-   
+
     if (values.size())
     {
         sLog.outString("Loading WorldBuffs");
@@ -440,17 +440,85 @@ bool PlayerbotAIConfig::Initialize()
     randomBotRaidNearby = config.GetBoolDefault("AiPlayerbot.RandomBotRaidNearby", true);
     randomBotGuildNearby = config.GetBoolDefault("AiPlayerbot.RandomBotGuildNearby", true);
     inviteChat = config.GetBoolDefault("AiPlayerbot.InviteChat", true);
-    guildFeedbackRate = config.GetFloatDefault("AiPlayerbot.GuildFeedbackRate", 100.0f);
-    guildSuggestRate = config.GetFloatDefault("AiPlayerbot.GuildSuggestRate", 100.0f);
-    guildRepliesRate= config.GetFloatDefault("AiPlayerbot.GuildRepliesRate", 100.0f);
-    
+
+    guildMaxBotLimit = config.GetIntDefault("AiPlayerbot.GuildMaxBotLimit", 1000);
+
+    ////////////////////////////
+    enableBroadcasts = config.GetBoolDefault("AiPlayerbot.EnableBroadcasts", true);
+
+    //broadcastChanceMaxValue is used in urand(1, broadcastChanceMaxValue) for broadcasts,
+    //lowering it will increase the chance, setting it to 0 will disable broadcasts
+    //for internal use, not intended to be change by the user
+    broadcastChanceMaxValue = enableBroadcasts ? 30000 : 0;
+
+    //all broadcast chances should be in range 1-broadcastChanceMaxValue, value of 0 will disable this particular broadcast
+    //setting value to max does not guarantee the broadcast, as there are some internal randoms as well
+    broadcastToGuildGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToGuildGlobalChance", 30000);
+    broadcastToWorldGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToWorldGlobalChance", 30000);
+    broadcastToGeneralGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToGeneralGlobalChance", 30000);
+    broadcastToTradeGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToTradeGlobalChance", 30000);
+    broadcastToLFGGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToLFGGlobalChance", 30000);
+    broadcastToLocalDefenseGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToLocalDefenseGlobalChance", 30000);
+    broadcastToWorldDefenseGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToWorldDefenseGlobalChance", 30000);
+    broadcastToGuildRecruitmentGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToGuildRecruitmentGlobalChance", 30000);
+
+    broadcastChanceLootingItemPoor = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemPoor", 30);
+    broadcastChanceLootingItemNormal = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemNormal", 300);
+    broadcastChanceLootingItemUncommon = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemUncommon", 10000);
+    broadcastChanceLootingItemRare = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemRare", 20000);
+    broadcastChanceLootingItemEpic = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemEpic", 30000);
+    broadcastChanceLootingItemLegendary = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemLegendary", 30000);
+    broadcastChanceLootingItemArtifact = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemArtifact", 30000);
+
+    broadcastChanceQuestAccepted = config.GetIntDefault("AiPlayerbot.BroadcastChanceQuestAccepted", 6000);
+    broadcastChanceQuestUpdateObjectiveCompleted = config.GetIntDefault("AiPlayerbot.BroadcastChanceQuestUpdateObjectiveCompleted", 300);
+    broadcastChanceQuestUpdateObjectiveProgress = config.GetIntDefault("AiPlayerbot.BroadcastChanceQuestUpdateObjectiveProgress", 300);
+    broadcastChanceQuestUpdateFailedTimer = config.GetIntDefault("AiPlayerbot.BroadcastChanceQuestUpdateFailedTimer", 300);
+    broadcastChanceQuestUpdateComplete = config.GetIntDefault("AiPlayerbot.BroadcastChanceQuestUpdateComplete", 1000);
+    broadcastChanceQuestTurnedIn = config.GetIntDefault("AiPlayerbot.BroadcastChanceQuestTurnedIn", 10000);
+
+    broadcastChanceKillNormal = config.GetIntDefault("AiPlayerbot.BroadcastChanceKillNormal", 30);
+    broadcastChanceKillElite = config.GetIntDefault("AiPlayerbot.BroadcastChanceKillElite", 300);
+    broadcastChanceKillRareelite = config.GetIntDefault("AiPlayerbot.BroadcastChanceKillRareelite", 3000);
+    broadcastChanceKillWorldboss = config.GetIntDefault("AiPlayerbot.BroadcastChanceKillWorldboss", 20000);
+    broadcastChanceKillRare = config.GetIntDefault("AiPlayerbot.BroadcastChanceKillRare", 10000);
+    broadcastChanceKillUnknown = config.GetIntDefault("AiPlayerbot.BroadcastChanceKillUnknown", 100);
+    broadcastChanceKillPet = config.GetIntDefault("AiPlayerbot.BroadcastChanceKillPet", 10);
+    broadcastChanceKillPlayer = config.GetIntDefault("AiPlayerbot.BroadcastChanceKillPlayer", 30);
+
+    broadcastChanceLevelupGeneric = config.GetIntDefault("AiPlayerbot.BroadcastChanceLevelupGeneric", 20000);
+    broadcastChanceLevelupTenX = config.GetIntDefault("AiPlayerbot.BroadcastChanceLevelupTenX", 30000);
+    broadcastChanceLevelupMaxLevel = config.GetIntDefault("AiPlayerbot.BroadcastChanceLevelupMaxLevel", 30000);
+
+    broadcastChanceSuggestInstance = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestInstance", 5000);
+    broadcastChanceSuggestQuest = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestQuest", 10000);
+    broadcastChanceSuggestGrindMaterials = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestGrindMaterials", 5000);
+    broadcastChanceSuggestGrindReputation = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestGrindReputation", 5000);
+    broadcastChanceSuggestSell = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestSell", 300);
+    broadcastChanceSuggestSomething = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestSomething", 30000);
+
+    broadcastChanceSuggestSomethingToxic = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestSomethingToxic", 0);
+
+    broadcastChanceSuggestToxicLinks = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestToxicLinks", 0);
+    toxicLinksPrefix = config.GetStringDefault("AiPlayerbot.ToxicLinksPrefix", "gnomes");
+
+    broadcastChanceSuggestThunderfury = config.GetIntDefault("AiPlayerbot.BroadcastChanceSuggestThunderfury", 1);
+
+    //does not depend on global chance
+    broadcastChanceGuildManagement = config.GetIntDefault("AiPlayerbot.BroadcastChanceGuildManagement", 30000);
+    ////////////////////////////
+
+    toxicLinksRepliesChance = config.GetIntDefault("AiPlayerbot.ToxicLinksRepliesChance", 100); //0-100
+    thunderfuryRepliesChance = config.GetIntDefault("AiPlayerbot.ThunderfuryRepliesChance", 100); //0-100
+    guildRepliesRate = config.GetIntDefault("AiPlayerbot.GuildRepliesRate", 100); //0-100
+
     randomBotFormGuild = config.GetBoolDefault("AiPlayerbot.RandomBotFormGuild", true);
-    
+
     boostFollow = config.GetBoolDefault("AiPlayerbot.BoostFollow", false);
     turnInRpg = config.GetBoolDefault("AiPlayerbot.TurnInRpg", false);
     globalSoundEffects = config.GetBoolDefault("AiPlayerbot.GlobalSoundEffects", false);
     nonGmFreeSummon = config.GetBoolDefault("AiPlayerbot.NonGmFreeSummon", false);
-    
+
     //SPP automation
     autoPickReward = config.GetStringDefault("AiPlayerbot.AutoPickReward", "no");
     autoEquipUpgradeLoot = config.GetBoolDefault("AiPlayerbot.AutoEquipUpgradeLoot", false);
@@ -667,7 +735,7 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
             uint32 accountId = fields[1].GetUInt32();
 
             if (std::find(toggleAlwaysOnlineAccounts.begin(), toggleAlwaysOnlineAccounts.end(), accountName) != toggleAlwaysOnlineAccounts.end())
-                accountAlwaysOnline = !accountAlwaysOnline;                       
+                accountAlwaysOnline = !accountAlwaysOnline;
 
             auto result = CharacterDatabase.PQuery("SELECT name, guid FROM characters WHERE account = '%u'", accountId);
             if (!result)
@@ -693,7 +761,7 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
                     freeAltBots.push_back(std::make_pair(accountId, guid));
 
             } while (result->NextRow());
-        
+
 
         } while (results->NextRow());
     }
@@ -718,7 +786,7 @@ bool PlayerbotAIConfig::openLog(std::string fileName, char const* mode, bool has
 {
     if (!haslog && !hasLog(fileName))
         return false;
-     
+
     auto logFileIt = logFiles.find(fileName);
     if (logFileIt == logFiles.end())
     {
@@ -745,7 +813,7 @@ bool PlayerbotAIConfig::openLog(std::string fileName, char const* mode, bool has
 
     logFileIt->second.first = file;
     logFileIt->second.second = fileOpen;
-    
+
     return true;
 }
 
@@ -831,5 +899,5 @@ bool PlayerbotAIConfig::CanLogAction(PlayerbotAI* ai, std::string actionName, bo
         }
     }
 
-    return std::find(debugFilter.begin(), debugFilter.end(), actionName) == debugFilter.end(); 
+    return std::find(debugFilter.begin(), debugFilter.end(), actionName) == debugFilter.end();
 }

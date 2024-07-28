@@ -142,13 +142,7 @@ void CleanQuestLogAction::DropQuestType(Player* requester, uint8 &numQuest, uint
             continue;
 
         //Drop quest.
-        bot->SetQuestSlot(slot, 0);
-
-        //We ignore unequippable quest items in this case, its' still be equipped
-        bot->TakeQuestSourceItem(questId, false);
-
-        bot->SetQuestStatus(questId, QUEST_STATUS_NONE);
-        bot->getQuestStatusMap()[questId].m_rewarded = false;
+        bot->GetPlayerbotAI()->DropQuest(questId);
 
         numQuest--;
 

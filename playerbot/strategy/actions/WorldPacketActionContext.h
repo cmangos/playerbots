@@ -71,7 +71,11 @@ namespace ai
             creators["remember taxi"] = &WorldPacketActionContext::remember_taxi;
             creators["accept trade"] = &WorldPacketActionContext::accept_trade;
             creators["store loot"] = &WorldPacketActionContext::store_loot;
-            creators["quest objective completed"] = &WorldPacketActionContext::quest_objective_completed;
+            creators["quest update add kill"] = &WorldPacketActionContext::quest_update_add_kill;
+            creators["quest update add item"] = &WorldPacketActionContext::quest_update_add_item;
+            creators["quest update failed"] = &WorldPacketActionContext::quest_update_failed;
+            creators["quest update failed timer"] = &WorldPacketActionContext::quest_update_failed_timer;
+            creators["quest update complete"] = &WorldPacketActionContext::quest_update_complete;
             creators["party command"] = &WorldPacketActionContext::party_command;
             creators["tell cast failed"] = &WorldPacketActionContext::tell_cast_failed;
             creators["accept duel"] = &WorldPacketActionContext::accept_duel;
@@ -107,7 +111,11 @@ namespace ai
         static Action* accept_duel(PlayerbotAI* ai) { return new AcceptDuelAction(ai); }
         static Action* tell_cast_failed(PlayerbotAI* ai) { return new TellCastFailedAction(ai); }
         static Action* party_command(PlayerbotAI* ai) { return new PartyCommandAction(ai); }
-        static Action* quest_objective_completed(PlayerbotAI* ai) { return new QuestObjectiveCompletedAction(ai); }
+        static Action* quest_update_add_kill(PlayerbotAI* ai) { return new QuestUpdateAddKillAction(ai); }
+        static Action* quest_update_add_item(PlayerbotAI* ai) { return new QuestUpdateAddItemAction(ai); }
+        static Action* quest_update_failed(PlayerbotAI* ai) { return new QuestUpdateFailedAction(ai); }
+        static Action* quest_update_failed_timer(PlayerbotAI* ai) { return new QuestUpdateFailedTimerAction(ai); }
+        static Action* quest_update_complete(PlayerbotAI* ai) { return new QuestUpdateCompleteAction(ai); }
         static Action* store_loot(PlayerbotAI* ai) { return new StoreLootAction(ai); }
         static Action* accept_trade(PlayerbotAI* ai) { return new TradeStatusAction(ai); }
         static Action* remember_taxi(PlayerbotAI* ai) { return new RememberTaxiAction(ai); }

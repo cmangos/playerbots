@@ -166,9 +166,69 @@ public:
     bool randomBotFormGuild;
     bool randomBotRandomPassword;
     bool inviteChat;
-    float guildFeedbackRate;
-    float guildSuggestRate;
-    float guildRepliesRate;
+
+    uint32 guildMaxBotLimit;
+
+    bool enableBroadcasts;
+    uint32 broadcastChanceMaxValue;
+
+    uint32 broadcastToGuildGlobalChance;
+    uint32 broadcastToWorldGlobalChance;
+    uint32 broadcastToGeneralGlobalChance;
+    uint32 broadcastToTradeGlobalChance;
+    uint32 broadcastToLFGGlobalChance;
+    uint32 broadcastToLocalDefenseGlobalChance;
+    uint32 broadcastToWorldDefenseGlobalChance;
+    uint32 broadcastToGuildRecruitmentGlobalChance;
+
+    uint32 broadcastChanceLootingItemPoor;
+    uint32 broadcastChanceLootingItemNormal;
+    uint32 broadcastChanceLootingItemUncommon;
+    uint32 broadcastChanceLootingItemRare;
+    uint32 broadcastChanceLootingItemEpic;
+    uint32 broadcastChanceLootingItemLegendary;
+    uint32 broadcastChanceLootingItemArtifact;
+
+    uint32 broadcastChanceQuestAccepted;
+    uint32 broadcastChanceQuestUpdateObjectiveCompleted;
+    uint32 broadcastChanceQuestUpdateObjectiveProgress;
+    uint32 broadcastChanceQuestUpdateFailedTimer;
+    uint32 broadcastChanceQuestUpdateComplete;
+    uint32 broadcastChanceQuestTurnedIn;
+
+    uint32 broadcastChanceKillNormal;
+    uint32 broadcastChanceKillElite;
+    uint32 broadcastChanceKillRareelite;
+    uint32 broadcastChanceKillWorldboss;
+    uint32 broadcastChanceKillRare;
+    uint32 broadcastChanceKillUnknown;
+    uint32 broadcastChanceKillPet;
+    uint32 broadcastChanceKillPlayer;
+
+    uint32 broadcastChanceLevelupGeneric;
+    uint32 broadcastChanceLevelupTenX;
+    uint32 broadcastChanceLevelupMaxLevel;
+
+    uint32 broadcastChanceSuggestInstance;
+    uint32 broadcastChanceSuggestQuest;
+    uint32 broadcastChanceSuggestGrindMaterials;
+    uint32 broadcastChanceSuggestGrindReputation;
+    uint32 broadcastChanceSuggestSell;
+    uint32 broadcastChanceSuggestSomething;
+
+    uint32 broadcastChanceSuggestSomethingToxic;
+
+    uint32 broadcastChanceSuggestToxicLinks;
+    std::string toxicLinksPrefix;
+    uint32 toxicLinksRepliesChance;
+
+    uint32 broadcastChanceSuggestThunderfury;
+    uint32 thunderfuryRepliesChance;
+
+    uint32 broadcastChanceGuildManagement;
+
+    uint32 guildRepliesRate;
+
     bool talentsInPublicNote;
     bool nonGmFreeSummon;
 

@@ -20,6 +20,7 @@
 #include "PlayerbotMgr.h"
 #include "playerbot/RandomPlayerbotMgr.h"
 #include "ChatHelper.h"
+#include "BroadcastHelper.h"
 #include "PlayerbotAI.h"
 #include "PlayerbotDbStore.h"
 

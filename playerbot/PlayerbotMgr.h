@@ -33,6 +33,7 @@ public:
     void ForEachPlayerbot(std::function<void(Player*)> fct) const;
 
     void LogoutAllBots();
+    void JoinChatChannels(Player* bot);
     void OnBotLogin(Player* bot);
     void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder);
 

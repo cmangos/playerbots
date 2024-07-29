@@ -153,7 +153,7 @@ public:
     int32 levelCheck;
 	bool randomBotPreQuests;
     float playerbotsXPrate;
-    bool disableBotOptimizations;
+    bool enableBotOptimizations;
     uint32 botActiveAlone;
     uint32 diffWithPlayer;
     uint32 diffEmpty;

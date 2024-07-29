@@ -57,6 +57,10 @@ AiPlayerbot.RandomBotMaxLevel = 80
 AiPlayerbot.RandomBotAccountPrefix = rndbot
 AiPlayerbot.RandomBotAccountCount = 200
 
+# Disable bot optimization, to make all bots ACTUALLY active without player in the zones or server
+# (0-1), default 0
+# AiPlayerbot.DisableBotOptimizations = 0
+
 # Percentage of fully active bots. Default is 10, higher numbers may affect performance
 # AiPlayerbot.botActiveAlone = 10
 

@@ -57,9 +57,19 @@ AiPlayerbot.RandomBotMaxLevel = 60
 AiPlayerbot.RandomBotAccountPrefix = rndbot
 AiPlayerbot.RandomBotAccountCount = 200
 
-# Disable bot optimization, to make all bots ACTUALLY active without player in the zones or server
+# Disable core mangos map/bot optimizations which hinders bot activity
+# Works best together with AiPlayerbot.DisableActivityPriorities = 1
 # (0-1), default 0
 # AiPlayerbot.DisableBotOptimizations = 0
+
+# Disable bot activity priorities, to make all bots ACTUALLY active without player in the zones or server (unless AiPlayerbot.DisableBotOptimizations = 0)
+# This setting is added for the sake of having all bots always active regardless of anything
+# With this enabled, if you get lags - then you need to reduce amount of online bots, rather than relying on optimizations
+# You may also want to set AiPlayerbot.DiffWithPlayer and AiPlayerbot.DiffEmpty to about 2x your avg diff, otherwise bots will not be joining BG
+# This will ingore the AiPlayerbot.botActiveAlone setting, all bots will be active regardless
+# Works best together with AiPlayerbot.DisableBotOptimizations = 1
+# (0-1), default 0
+# AiPlayerbot.DisableActivityPriorities = 0
 
 # Percentage of fully active bots. Default is 10, higher numbers may affect performance
 # AiPlayerbot.botActiveAlone = 10

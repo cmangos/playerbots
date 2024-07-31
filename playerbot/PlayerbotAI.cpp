@@ -5221,8 +5221,8 @@ enum ActivityType
 
 ActivePiorityType PlayerbotAI::GetPriorityType()
 {
-    //Has player master. Always active.
-    if (HasRealPlayerMaster())
+    //First priority - priorities disabled or has player master. Always active.
+    if (sPlayerbotAIConfig.disableActivityPriorities || HasRealPlayerMaster())
         return ActivePiorityType::HAS_REAL_PLAYER_MASTER;
 
     //Self bot in a group with a bot master.

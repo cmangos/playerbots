@@ -6150,6 +6150,151 @@ bool PlayerbotAI::HasItemInInventory(uint32 itemId)
     return false;
 }
 
+void PlayerbotAI::DestroyAllGrayItemsInBags(Player* requester)
+{
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                if (Item* pItem = pBag->GetItemByPos(j))
+                {
+                    if (const ItemPrototype* proto = pItem->GetProto())
+                    {
+                        if (proto->Quality == ITEM_QUALITY_POOR)
+                        {
+                            bot->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+                            std::ostringstream out; out << GetChatHelper()->formatItem(pItem) << " destroyed";
+                            TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            if (const ItemPrototype* proto = pItem->GetProto())
+            {
+                if (proto->Quality == ITEM_QUALITY_POOR)
+                {
+                    bot->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+                    std::ostringstream out; out << GetChatHelper()->formatItem(pItem) << " destroyed";
+                    TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                }
+            }
+        }
+    }
+}
+
+/*
+* @return true if has stacks which are not full for these items
+*/
+bool PlayerbotAI::HasNotFullStacksInBagsForLootItems(LootItemList lootItemList)
+{
+    for (auto lootItem : lootItemList)
+    {
+        for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+        {
+            if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            {
+                for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+                {
+                    if (Item* pItem = pBag->GetItemByPos(j))
+                    {
+                        if (pItem->GetProto()->ItemId == lootItem->itemId
+                            && pItem->GetCount() < pItem->GetMaxStackCount())
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+        {
+            if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            {
+                if (pItem->GetProto()->ItemId == lootItem->itemId
+                    && pItem->GetCount() < pItem->GetMaxStackCount())
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+bool PlayerbotAI::HasQuestItemsInWOLootList(WorldObject* wo)
+{
+    LootItemList lootItemList;
+    wo->m_loot->GetLootItemsListFor(bot, lootItemList);
+
+    if (HasQuestItemsInLootList(lootItemList))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool PlayerbotAI::HasQuestItemsInLootList(LootItemList lootItemList)
+{
+    for (auto lootItem : lootItemList)
+    {
+        if (lootItem->lootItemType == LOOTITEM_TYPE_QUEST)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool PlayerbotAI::CanLootSomethingFromWO(WorldObject* wo)
+{
+    ObjectGuid guid = wo->GetObjectGuid();
+    if (guid.IsCreature())
+    {
+        Creature* creature = GetCreature(guid);
+        if (creature && sServerFacade.GetDeathState(creature) == CORPSE)
+        {
+            if (creature->m_loot->GetGoldAmount() > 0)
+            {
+                return true;
+            }
+            LootItemList lootItemList;
+            creature->m_loot->GetLootItemsListFor(bot, lootItemList);
+            if (HasNotFullStacksInBagsForLootItems(lootItemList))
+            {
+                return true;
+            }
+        }
+    }
+    else if (wo->IsGameObject())
+    {
+        GameObject* go = GetGameObject(guid);
+        if (go)
+        {
+            LootItemList lootItemList;
+            go->m_loot->GetLootItemsListFor(bot, lootItemList);
+            if (HasNotFullStacksInBagsForLootItems(lootItemList))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void PlayerbotAI::InventoryIterateItemsInBags(IterateItemsVisitor* visitor)
 {
     for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
@@ -6683,6 +6828,16 @@ void PlayerbotAI::AccelerateRespawn(Creature* creature, float accelMod)
     }
     MANGOS_ASSERT(m_corpseAccelerationDecayDelay < 24 * HOUR* IN_MILLISECONDS);
     creature->SetCorpseAccelerationDelay(m_corpseAccelerationDecayDelay);
+}
+
+std::list<Unit*> PlayerbotAI::GetAllHostileUnitsAroundWO(WorldObject* wo, float distanceAround)
+{
+    std::list<Unit*> hostileUnits;
+    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(wo, distanceAround);
+    MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(hostileUnits, u_check);
+    Cell::VisitAllObjects(wo, searcher, distanceAround);
+
+    return hostileUnits;
 }
 
 std::string PlayerbotAI::InventoryParseOutfitName(std::string outfit)

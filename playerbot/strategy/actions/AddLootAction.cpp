@@ -61,21 +61,94 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
     if (abs(wo->GetPositionZ() - bot->GetPositionZ()) > INTERACTION_DISTANCE)
         return false;
 
-    if (ai->HasRealPlayerMaster())
-    {
-        bool inDungeon = false;
-        if (requester->IsInWorld() &&
-            requester->GetMap()->IsDungeon() &&
-            bot->GetMapId() == requester->GetMapId())
-            inDungeon = true;
+    if (!loot.IsLootPossible(bot))
+        return false;
 
-        if (inDungeon && sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(requester, wo), sPlayerbotAIConfig.lootDistance))
+    float lootDistanceToUse = sPlayerbotAIConfig.lootDistance;
+
+    Group* group = bot->GetGroup();
+
+    bool isInGroup = group ? true : false;
+    bool isGroupLeader = isInGroup ? group->GetLeaderGuid() == bot->GetObjectGuid() : false;
+    bool isInDungeon = bot->GetMap()->IsDungeon();
+
+    if (isInGroup)
+    {
+        //if is not master looter (and loot is set to MASTER_LOOT)
+        //NOTE: They are !unable to loot quests items! too if so
+        if (isInDungeon
+            && group->GetLootMethod() == LootMethod::MASTER_LOOT
+            && group->GetMasterLooterGuid()
+            && group->GetMasterLooterGuid() != bot->GetObjectGuid())
             return false;
 
-        if (Group* group = bot->GetGroup())
+        if (isGroupLeader)
         {
-            if (group->GetLootMethod() == LootMethod::MASTER_LOOT && group->GetMasterLooterGuid() && group->GetMasterLooterGuid() != bot->GetObjectGuid())
+            lootDistanceToUse = sPlayerbotAIConfig.lootDistance;
+        }
+        else
+        {
+            if (ai->HasRealPlayerMaster())
+            {
+                lootDistanceToUse = sPlayerbotAIConfig.groupMemberLootDistanceWithRealMaster;
+            }
+            else
+            {
+                lootDistanceToUse = sPlayerbotAIConfig.groupMemberLootDistance;
+            }
+        }
+    }
+    else
+    {
+        lootDistanceToUse = sPlayerbotAIConfig.lootDistance;
+    }
+
+    if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(requester, wo), lootDistanceToUse))
+    {
+        return false;
+    }
+
+    //check hostile units after distance checks, to avoid unnecessary calculations
+
+    if (isInGroup && !isGroupLeader)
+    {
+        float MOB_AGGRO_DISTANCE = 30.0f;
+        std::list<Unit*> hostiles = ai->GetAllHostileUnitsAroundWO(wo, MOB_AGGRO_DISTANCE);
+
+        if (hostiles.size() > 0)
+        {
+            std::ostringstream out;
+            out << hostiles.front()->GetName() << " is blocking " << wo->GetName() << ", need to kill it or I will not loot";
+            ai->TellError(requester, out.str());
+            return false;
+        }
+    }
+
+    uint8 freeBagSpace = AI_VALUE(uint8, "bag space");
+
+    if (freeBagSpace < 1 && !ai->CanLootSomethingFromWO(wo))
+    {
+        if (ai->HasQuestItemsInWOLootList(wo))
+        {
+            if (freeBagSpace < 1)
+            {
+                ai->DestroyAllGrayItemsInBags(requester);
+                //recount freeBagSpace
+                freeBagSpace = AI_VALUE(uint8, "bag space");
+            }
+
+            if (freeBagSpace < 1)
+            {
+                ai->TellPlayer(requester, "Can not loot quest item, my bags are full", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 return false;
+            }
+
+        }
+
+        if (freeBagSpace < 1)
+        {
+            ai->TellError(requester, "There is some loot but I do not have free bag space, so not looting");
+            return false;
         }
     }
 
@@ -99,17 +172,97 @@ bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)
     if (!loot.IsLootPossible(bot))
         return false;
 
-    if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(bot, wo), INTERACTION_DISTANCE) && sServerFacade.IsDistanceLessThan(sServerFacade.GetDistance2d(bot, requester), sPlayerbotAIConfig.reactDistance))
+    float gatheringDistanceToUse = sPlayerbotAIConfig.gatheringDistance;
+
+    Group* group = bot->GetGroup();
+
+    bool isInGroup = group ? true : false;
+    bool isGroupLeader = isInGroup ? group->GetLeaderGuid() == bot->GetObjectGuid() : false;
+    bool isInDungeon = bot->GetMap()->IsDungeon();
+
+    if (isInGroup && !isGroupLeader)
     {
-        std::list<Unit*> targets;
-        MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(bot, sPlayerbotAIConfig.lootDistance);
-        MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
-        Cell::VisitAllObjects(wo, searcher, sPlayerbotAIConfig.spellDistance * 1.5);
-        if (!targets.empty())
+        if (ai->HasRealPlayerMaster())
+        {
+            gatheringDistanceToUse = sPlayerbotAIConfig.groupMemberGatheringDistanceWithRealMaster;
+        }
+        else
+        {
+            gatheringDistanceToUse = sPlayerbotAIConfig.groupMemberGatheringDistance;
+        }
+    }
+    else if (isInGroup && isGroupLeader)
+    {
+        gatheringDistanceToUse = sPlayerbotAIConfig.gatheringDistance;
+    }
+    else
+    {
+        gatheringDistanceToUse = sPlayerbotAIConfig.gatheringDistance;
+    }
+
+    if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(requester, wo), gatheringDistanceToUse))
+    {
+        return false;
+    }
+
+    //check hostile units after distance checks, to avoid unnecessary calculations
+
+    float MOB_AGGRO_DISTANCE = 30.0f;
+    std::list<Unit*> hostiles = ai->GetAllHostileUnitsAroundWO(wo, MOB_AGGRO_DISTANCE);
+    std::list<Unit*> strongHostiles;
+    for (auto hostile : hostiles)
+    {
+        if (!(bot->GetLevel() > hostile->GetLevel() + 7))
+        {
+            strongHostiles.push_back(hostile);
+        }
+    }
+
+    if (isInGroup && !isGroupLeader)
+    {
+        if (hostiles.size() > 0)
         {
             std::ostringstream out;
-            out << "Kill that " << targets.front()->GetName() << " so I can loot freely";
+            out << hostiles.front()->GetName() << " is blocking " << wo->GetName() << ", need to kill it or I will not gather";
             ai->TellError(requester, out.str());
+            return false;
+        }
+    }
+    else
+    {
+        if (strongHostiles.size() > 1)
+        {
+            std::ostringstream out;
+            out << strongHostiles.front()->GetName() << " is blocking " << wo->GetName() << ", need to kill it or I will not gather";
+            ai->TellError(requester, out.str());
+            return false;
+        }
+    }
+
+    uint8 freeBagSpace = AI_VALUE(uint8, "bag space");
+
+    if (freeBagSpace < 1 && !ai->CanLootSomethingFromWO(wo))
+    {
+        if (ai->HasQuestItemsInWOLootList(wo))
+        {
+            if (freeBagSpace < 1)
+            {
+                ai->DestroyAllGrayItemsInBags(requester);
+                //recount freeBagSpace
+                freeBagSpace = AI_VALUE(uint8, "bag space");
+            }
+
+            if (freeBagSpace < 1)
+            {
+                ai->TellPlayer(requester, "Can not loot quest item, my bags are full", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                return false;
+            }
+
+        }
+
+        if (freeBagSpace < 1)
+        {
+            ai->TellError(requester, "There is some loot but I do not have free bag space, so not looting");
             return false;
         }
     }

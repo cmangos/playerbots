@@ -141,6 +141,7 @@ namespace ai
             creators["preheal"] = &StrategyContext::preheal;
             creators["wbuff"] = &StrategyContext::world_buff;
             creators["silent"] = &StrategyContext::silent;
+            creators["nowar"] = &StrategyContext::nowar;
 
             // Dungeon Strategies
             creators["dungeon"] = &StrategyContext::dungeon;
@@ -242,6 +243,7 @@ namespace ai
         static Strategy* preheal(PlayerbotAI* ai) { return new PreHealStrategy(ai); }
         static Strategy* world_buff(PlayerbotAI* ai) { return new WorldBuffStrategy(ai); }
         static Strategy* silent(PlayerbotAI* ai) { return new SilentStrategy(ai); }
+        static Strategy* nowar(PlayerbotAI* ai) { return new NoWarStrategy(ai); }
 
         // Dungeon Strategies
         static Strategy* dungeon(PlayerbotAI* ai) { return new DungeonStrategy(ai); }

@@ -65,7 +65,6 @@ AiPlayerbot.RandomBotAccountCount = 200
 # Disable bot activity priorities, to make all bots ACTUALLY active without player in the zones or server (unless AiPlayerbot.DisableBotOptimizations = 0)
 # This setting is added for the sake of having all bots always active regardless of anything
 # With this enabled, if you get lags - then you need to reduce amount of online bots, rather than relying on optimizations
-# You may also want to set AiPlayerbot.DiffWithPlayer and AiPlayerbot.DiffEmpty to about 2x your avg diff, otherwise bots will not be joining BG
 # This will ingore the AiPlayerbot.botActiveAlone setting, all bots will be active regardless
 # Works best together with AiPlayerbot.DisableBotOptimizations = 1
 # (0-1), default 0
@@ -272,9 +271,9 @@ AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
 ##################################################################################
 
 # Chance to reply to toxic links with toxic links (0-100)
-# AiPlayerbot.ToxicLinksRepliesChance = 100
+# AiPlayerbot.ToxicLinksRepliesChance = 30
 # Chance to reply to thunderfury with thunderfury (0-100)
-# AiPlayerbot.ThunderfuryRepliesChance = 100
+# AiPlayerbot.ThunderfuryRepliesChance = 40
 # Bots will chat in guild about certain events (int) (0-100)
 # AiPlayerbot.GuildRepliesRate = 100         # Reply someone saying something.
 
@@ -283,6 +282,9 @@ AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
 
 # Bots without a master will say things they normally tell their master.
 # AiPlayerbot.RandomBotSayWithoutMaster = 0
+
+# Minimum level at which bots will start accepting duels
+# AiPlayerbot.BotAcceptDuelMinimumLevel = 10
 
 # Speeds up respawn of mobs after being killed by a bot. This only affects the delays after being fully looted.
 # AiPlayerbot.RespawnModNeutral = 10.0    # Each nearby player will decrease the respawn time by 10% for neutral mobs.
@@ -708,7 +710,18 @@ AiPlayerbot.SpellDistance = 26.0
 AiPlayerbot.ShootDistance = 26.0
 #AiPlayerbot.ReactDistance = 150.0
 #AiPlayerbot.GrindDistance = 75.0
-#AiPlayerbot.LootDistance = 15.0
+#overall loot distance
+#AiPlayerbot.LootDistance = 25.0
+#loot distance when bot is a group member (not leader)
+#AiPlayerbot.GroupMemberLootDistance = 15.0
+#loot distance when bot is a group member (not leader) and has real player master (if player is group leader)
+#AiPlayerbot.GroupMemberLootDistanceWithRealMaster = 10.0
+#overall gathering distance
+#AiPlayerbot.GatheringDistance = 15.0
+#gathering distance when bot is a group member (not leader)
+#AiPlayerbot.GroupMemberGatheringDistance = 10.0
+#gathering distance when bot is a group member (not leader) and has real player master (if player is group leader)
+#AiPlayerbot.GroupMemberGatheringDistanceWithRealMaster = 5.0
 #AiPlayerbot.FleeDistance = 15.0
 #AiPlayerbot.TooCloseDistance = 5.0
 #AiPlayerbot.MeleeDistance = 1.5
@@ -718,6 +731,16 @@ AiPlayerbot.ShootDistance = 26.0
 #AiPlayerbot.ContactDistance = 0.5
 #AiPlayerbot.AoeRadius = 10
 AiPlayerbot.RpgDistance = 200
+#AiPlayerbot.ProximityDistance = 20.0
+
+#bots will destroy all gray items in bags before looting (if bags are full and loot has no money or doesn't add to stacks in bags)
+# AiPlayerbot.DestroyAllGrayItemsBeforeLooting = 0
+#bots will destroy all gray items in bags before gathering (if bags are full and loot doesn't add to stacks in bags)
+# AiPlayerbot.DestroyAllGrayItemsBeforeGathering = 0
+
+# Destroy all gray items in bags if has no free bag space for quest items in bags, and if item stacks are full
+# applies to both looting and gathering
+# AiPlayerbot.DestroyAllGrayItemsBeforeLootingIfLootHasQuestItems = 1
 
 # Bot can flee for enemy
 AiPlayerbot.FleeingEnabled = 1
@@ -766,6 +789,9 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #AiPlayerbot.RandomBotsMaxLoginsPerInterval = 30
 #AiPlayerbot.MinRandomBotsPriceChangeInterval = 7200
 #AiPlayerbot.MaxRandomBotsPriceChangeInterval = 172800
+
+#(0-1) enable or disable random teleports on revive
+# AiPlayerbot.EnableRandomTeleportOnRevive = 1
 
 # How far random bots are teleported after death
 AiPlayerbot.RandomBotTeleportDistance = 100

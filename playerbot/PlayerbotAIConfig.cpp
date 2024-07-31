@@ -108,7 +108,12 @@ bool PlayerbotAIConfig::Initialize()
     reactDistance = config.GetFloatDefault("AiPlayerbot.ReactDistance", 150.0f);
     grindDistance = config.GetFloatDefault("AiPlayerbot.GrindDistance", 75.0f);
     aggroDistance = config.GetFloatDefault("AiPlayerbot.AggroDistance", 22.0f);
-    lootDistance = config.GetFloatDefault("AiPlayerbot.LootDistance", 15.0f);
+    lootDistance = config.GetFloatDefault("AiPlayerbot.LootDistance", 25.0f);
+    groupMemberLootDistance = config.GetFloatDefault("AiPlayerbot.GroupMemberLootDistance", 15.0f);
+    groupMemberLootDistanceWithRealMaster = config.GetFloatDefault("AiPlayerbot.GroupMemberLootDistanceWithRealMaster", 10.0f);
+    gatheringDistance = config.GetFloatDefault("AiPlayerbot.GatheringDistance", 15.0f);
+    groupMemberGatheringDistance = config.GetFloatDefault("AiPlayerbot.GroupMemberGatheringDistance", 10.0f);
+    groupMemberGatheringDistanceWithRealMaster = config.GetFloatDefault("AiPlayerbot.GroupMemberGatheringDistanceWithRealMaster", 5.0f);
     fleeDistance = config.GetFloatDefault("AiPlayerbot.FleeDistance", 8.0f);
     tooCloseDistance = config.GetFloatDefault("AiPlayerbot.TooCloseDistance", 5.0f);
     meleeDistance = config.GetFloatDefault("AiPlayerbot.MeleeDistance", 1.5f);
@@ -118,6 +123,12 @@ bool PlayerbotAIConfig::Initialize()
     contactDistance = config.GetFloatDefault("AiPlayerbot.ContactDistance", 0.5f);
     aoeRadius = config.GetFloatDefault("AiPlayerbot.AoeRadius", 5.0f);
     rpgDistance = config.GetFloatDefault("AiPlayerbot.RpgDistance", 80.0f);
+    proximityDistance = config.GetFloatDefault("AiPlayerbot.ProximityDistance", 20.0f);
+
+    destroyAllGrayItemsBeforeLooting = config.GetBoolDefault("AiPlayerbot.DestroyAllGrayItemsBeforeLooting", false);
+    destroyAllGrayItemsBeforeGathering = config.GetBoolDefault("AiPlayerbot.DestroyAllGrayItemsBeforeGathering", false);
+
+    destroyAllGrayItemsBeforeLootingIfLootHasQuestItems = config.GetBoolDefault("AiPlayerbot.DestroyAllGrayItemsBeforeLootingIfLootHasQuestItems", true);
 
     criticalHealth = config.GetIntDefault("AiPlayerbot.CriticalHealth", 20);
     lowHealth = config.GetIntDefault("AiPlayerbot.LowHealth", 50);
@@ -190,6 +201,7 @@ bool PlayerbotAIConfig::Initialize()
     maxRandomBotChangeStrategyTime = config.GetIntDefault("AiPlayerbot.MaxRandomBotChangeStrategyTime", 2 * 3600);
     minRandomBotReviveTime = config.GetIntDefault("AiPlayerbot.MinRandomBotReviveTime", 60);
     maxRandomBotReviveTime = config.GetIntDefault("AiPlayerbot.MaxRandomReviveTime", 300);
+    enableRandomTeleportOnRevive = config.GetBoolDefault("AiPlayerbot.EnableRandomTeleportOnRevive", true);
     randomBotTeleportDistance = config.GetIntDefault("AiPlayerbot.RandomBotTeleportDistance", 1000);
     randomBotTeleportNearPlayer = config.GetBoolDefault("AiPlayerbot.RandomBotTeleportNearPlayer", false);
     randomBotTeleportNearPlayerMaxAmount = config.GetIntDefault("AiPlayerbot.RandomBotTeleportNearPlayerMaxAmount", 0);
@@ -510,9 +522,11 @@ bool PlayerbotAIConfig::Initialize()
     broadcastChanceGuildManagement = config.GetIntDefault("AiPlayerbot.BroadcastChanceGuildManagement", 30000);
     ////////////////////////////
 
-    toxicLinksRepliesChance = config.GetIntDefault("AiPlayerbot.ToxicLinksRepliesChance", 100); //0-100
-    thunderfuryRepliesChance = config.GetIntDefault("AiPlayerbot.ThunderfuryRepliesChance", 100); //0-100
+    toxicLinksRepliesChance = config.GetIntDefault("AiPlayerbot.ToxicLinksRepliesChance", 30); //0-100
+    thunderfuryRepliesChance = config.GetIntDefault("AiPlayerbot.ThunderfuryRepliesChance", 40); //0-100
     guildRepliesRate = config.GetIntDefault("AiPlayerbot.GuildRepliesRate", 100); //0-100
+
+    botAcceptDuelMinimumLevel = config.GetIntDefault("AiPlayerbot.BotAcceptDuelMinimumLevel", 10);
 
     randomBotFormGuild = config.GetBoolDefault("AiPlayerbot.RandomBotFormGuild", true);
 

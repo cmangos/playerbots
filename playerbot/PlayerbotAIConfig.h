@@ -62,9 +62,13 @@ public:
     bool allowMultiAccountAltBots;
     uint32 globalCoolDown, reactDelay, maxWaitForMove, expireActionTime, dispelAuraDuration, passiveDelay, repeatDelay,
         errorDelay, rpgDelay, sitDelay, returnDelay, lootDelay;
-    float sightDistance, spellDistance, reactDistance, grindDistance, lootDistance, shootDistance,
+    float sightDistance, spellDistance, reactDistance, grindDistance, lootDistance, groupMemberLootDistance, groupMemberLootDistanceWithRealMaster,
+        gatheringDistance, groupMemberGatheringDistance, groupMemberGatheringDistanceWithRealMaster, shootDistance,
         fleeDistance, tooCloseDistance, meleeDistance, followDistance, raidFollowDistance, whisperDistance, contactDistance,
-        aoeRadius, rpgDistance, targetPosRecalcDistance, farDistance, healDistance, aggroDistance;
+        aoeRadius, rpgDistance, targetPosRecalcDistance, farDistance, healDistance, aggroDistance, proximityDistance;
+    bool destroyAllGrayItemsBeforeLooting;
+    bool destroyAllGrayItemsBeforeGathering;
+    bool destroyAllGrayItemsBeforeLootingIfLootHasQuestItems;
     uint32 criticalHealth, lowHealth, mediumHealth, almostFullHealth;
     uint32 lowMana, mediumMana;
 
@@ -81,6 +85,7 @@ public:
     std::list<std::pair<uint32, uint32>> freeAltBots;
     std::list<std::string> toggleAlwaysOnlineAccounts;
     std::list<std::string> toggleAlwaysOnlineChars;
+    bool enableRandomTeleportOnRevive;
     uint32 randomBotTeleportDistance;
     bool randomBotTeleportNearPlayer;
     uint32 randomBotTeleportNearPlayerMaxAmount;
@@ -230,6 +235,8 @@ public:
     uint32 broadcastChanceGuildManagement;
 
     uint32 guildRepliesRate;
+
+    uint32 botAcceptDuelMinimumLevel;
 
     bool talentsInPublicNote;
     bool nonGmFreeSummon;

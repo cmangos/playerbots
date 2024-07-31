@@ -41,17 +41,22 @@ bool CheckValuesAction::Execute(Event& event)
     if (ai->HasStrategy("nowar", BotState::BOT_STATE_NON_COMBAT))
     {
         ReputationMgr& mgr = bot->GetReputationMgr();
-        for (uint32 id = 0; id < sFactionStore.GetNumRows(); ++id)
+        for (auto & faction : mgr.GetStateList())
         {
-            FactionState const* state = mgr.GetState(id);
+            uint32 id = faction.first;
 
-            if (!state)
+            if (!mgr.IsAtWar(id))
+                continue;
+#ifdef MANGOSBOT_ZERO
+            const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry(id);
+#else
+            const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry<FactionEntry>(id);
+#endif
+
+            if (!thisFactionEntry)
                 continue;
 
-            if (!(state->Flags & FACTION_FLAG_AT_WAR))
-                continue;
-
-            if (bot->GetReputationMgr().GetRank(sFactionStore.LookupEntry(id)) != REP_HATED)
+            if (bot->GetReputationMgr().GetRank(thisFactionEntry) < REP_HOSTILE)
                 bot->GetReputationMgr().SetAtWar(id, false);
         }
     }

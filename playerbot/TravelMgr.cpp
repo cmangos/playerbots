@@ -214,7 +214,7 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
 std::string QuestObjectiveTravelDestination::getTitle() {
     std::ostringstream out;
 
-    out << "objective " << objective;
+    out << "objective " << (objective + 1);
 
     if (GetQuestTemplate()->ReqItemCount[objective] > 0)
         out << " loot " << ChatHelper::formatItem(sObjectMgr.GetItemPrototype(GetQuestTemplate()->ReqItemId[objective]), 0, 0) << " from";

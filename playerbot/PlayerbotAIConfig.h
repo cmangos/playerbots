@@ -154,6 +154,7 @@ public:
 	bool randomBotPreQuests;
     float playerbotsXPrate;
     bool disableBotOptimizations;
+    bool disableActivityPriorities;
     uint32 botActiveAlone;
     uint32 diffWithPlayer;
     uint32 diffEmpty;

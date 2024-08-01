@@ -1928,13 +1928,16 @@ void RandomPlayerbotMgr::Revive(Player* player)
     SetEventValue(bot, "dead", 0, 0);
     SetEventValue(bot, "revive", 0, 0);
 
-    if (sServerFacade.GetDeathState(player) == CORPSE)
+    if (sPlayerbotAIConfig.enableRandomTeleportOnRevive)
     {
-        RandomTeleport(player);
-    }
-    else
-    {
-        RandomTeleportForLevel(player, false);
+        if (sServerFacade.GetDeathState(player) == CORPSE)
+        {
+            RandomTeleport(player);
+        }
+        else
+        {
+            RandomTeleportForLevel(player, false);
+        }
     }
 }
 

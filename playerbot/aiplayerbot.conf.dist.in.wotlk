@@ -766,6 +766,9 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #AiPlayerbot.MinRandomBotsPriceChangeInterval = 7200
 #AiPlayerbot.MaxRandomBotsPriceChangeInterval = 172800
 
+#(0-1) enable or disable random teleports on revive
+# AiPlayerbot.EnableRandomTeleportOnRevive = 1
+
 # How far random bots are teleported after death
 AiPlayerbot.RandomBotTeleportDistance = 100
 

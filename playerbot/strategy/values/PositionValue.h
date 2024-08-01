@@ -56,7 +56,7 @@ namespace ai
     {
     public:
         MasterPositionValue(PlayerbotAI* ai, std::string name = "master position", uint32 checkInterval = 1) : MemoryCalculatedValue<WorldPosition>(ai, name, checkInterval) { minChangeInterval = 1; };
-        virtual bool EqualToLast(WorldPosition value) { return value.fDist(lastValue) < sPlayerbotAIConfig.lootDistance; }
+        virtual bool EqualToLast(WorldPosition value) { return value.fDist(lastValue) < sPlayerbotAIConfig.proximityDistance; }
         virtual WorldPosition Calculate() { Player* master = GetMaster();  if (master) return WorldPosition(master); return WorldPosition(); };
     };
 

@@ -365,6 +365,11 @@ bool BGJoinAction::shouldJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroun
     bool isTeamLead = false;
     bool noLag = sWorld.GetAverageDiff() < (sRandomPlayerbotMgr.GetPlayers().empty() ? sPlayerbotAIConfig.diffEmpty : sPlayerbotAIConfig.diffWithPlayer) * 1.1;
 
+    if (sPlayerbotAIConfig.disableActivityPriorities)
+    {
+        noLag = true;
+    }
+
 #ifndef MANGOSBOT_ZERO
     ArenaType type = sServerFacade.BgArenaType(queueTypeId);
     if (type != ARENA_TYPE_NONE)
@@ -405,7 +410,7 @@ bool BGJoinAction::shouldJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroun
         return false;
 
     if (!hasPlayers && bgTypeId == BATTLEGROUND_SA)
-        return false;    
+        return false;
 #endif
 
     uint32 BracketSize = bg->GetMaxPlayers();
@@ -827,6 +832,11 @@ bool FreeBGJoinAction::shouldJoinBg(BattleGroundQueueTypeId queueTypeId, BattleG
     bool isRated = false;
     bool hasTeam = false;
     bool noLag = sWorld.GetAverageDiff() < (sRandomPlayerbotMgr.GetPlayers().empty() ? sPlayerbotAIConfig.diffEmpty : sPlayerbotAIConfig.diffWithPlayer) * 1.5;
+
+    if (sPlayerbotAIConfig.disableActivityPriorities)
+    {
+        noLag = true;
+    }
 
 #ifndef MANGOSBOT_ZERO
     ArenaType type = sServerFacade.BgArenaType(queueTypeId);

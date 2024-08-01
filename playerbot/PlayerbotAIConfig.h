@@ -81,6 +81,7 @@ public:
     std::list<std::pair<uint32, uint32>> freeAltBots;
     std::list<std::string> toggleAlwaysOnlineAccounts;
     std::list<std::string> toggleAlwaysOnlineChars;
+    bool enableRandomTeleportOnRevive;
     uint32 randomBotTeleportDistance;
     bool randomBotTeleportNearPlayer;
     uint32 randomBotTeleportNearPlayerMaxAmount;

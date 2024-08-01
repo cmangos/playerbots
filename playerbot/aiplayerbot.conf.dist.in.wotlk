@@ -283,6 +283,9 @@ AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
 # Bots without a master will say things they normally tell their master.
 # AiPlayerbot.RandomBotSayWithoutMaster = 0
 
+# Minimum level at which bots will start accepting duels
+# AiPlayerbot.BotAcceptDuelMinimumLevel = 10
+
 # Speeds up respawn of mobs after being killed by a bot. This only affects the delays after being fully looted.
 # AiPlayerbot.RespawnModNeutral = 10.0    # Each nearby player will decrease the respawn time by 10% for neutral mobs.
 # AiPlayerbot.RespawnModHostile = 5.0     # Each nearby player will decrease the respawn time by 5% for hostile mobs.

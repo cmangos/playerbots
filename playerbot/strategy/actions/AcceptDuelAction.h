@@ -19,8 +19,9 @@ namespace ai
             ObjectGuid playerGuid;
             p >> playerGuid;
 
-            // do not auto duel with low hp
-            if ((!ai->HasRealPlayerMaster() || (ai->GetMaster() && ai->GetMaster()->GetObjectGuid() != playerGuid)) && AI_VALUE2(uint8, "health", "self target") < 90)
+            // do not auto duel with low hp or below certain level
+            if (bot->GetLevel() < sPlayerbotAIConfig.botAcceptDuelMinimumLevel
+                || ((!ai->HasRealPlayerMaster() || (ai->GetMaster() && ai->GetMaster()->GetObjectGuid() != playerGuid)) && AI_VALUE2(uint8, "health", "self target") < 90))
             {
                 WorldPacket packet(CMSG_DUEL_CANCELLED, 8);
                 packet << flagGuid;

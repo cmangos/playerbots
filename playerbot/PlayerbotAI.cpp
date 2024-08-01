@@ -6837,7 +6837,23 @@ std::list<Unit*> PlayerbotAI::GetAllHostileUnitsAroundWO(WorldObject* wo, float 
     MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(hostileUnits, u_check);
     Cell::VisitAllObjects(wo, searcher, distanceAround);
 
+    //bugs out with players very rarely - returns friendly as hostile to bots
+
     return hostileUnits;
+}
+
+std::list<Unit*> PlayerbotAI::GetAllHostileNonPlayerUnitsAroundWO(WorldObject* wo, float distanceAround)
+{
+    std::list<Unit*> hostileUnitsNonPlayers;
+    for (auto hostileUnit : GetAllHostileUnitsAroundWO(wo, distanceAround))
+    {
+        if (!hostileUnit->IsPlayer())
+        {
+            hostileUnitsNonPlayers.push_back(hostileUnit);
+        }
+    }
+
+    return hostileUnitsNonPlayers;
 }
 
 std::string PlayerbotAI::InventoryParseOutfitName(std::string outfit)

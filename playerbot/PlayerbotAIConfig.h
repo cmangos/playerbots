@@ -232,6 +232,8 @@ public:
 
     uint32 guildRepliesRate;
 
+    uint32 botAcceptDuelMinimumLevel;
+
     bool talentsInPublicNote;
     bool nonGmFreeSummon;
 

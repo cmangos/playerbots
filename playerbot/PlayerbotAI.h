@@ -508,6 +508,7 @@ public:
     void AccelerateRespawn(ObjectGuid guid, float accelMod = 0) { Creature* creature = GetCreature(guid); if (creature) AccelerateRespawn(creature,accelMod); }
 
     std::list<Unit*> GetAllHostileUnitsAroundWO(WorldObject* wo, float distanceAround);
+    std::list<Unit*> GetAllHostileNonPlayerUnitsAroundWO(WorldObject* wo, float distanceAround);
 
 public:
     std::vector<Item*> GetInventoryAndEquippedItems();

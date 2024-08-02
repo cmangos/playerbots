@@ -3014,6 +3014,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     handlers["revive"] = &RandomPlayerbotMgr::Revive;
     handlers["grind"] = &RandomPlayerbotMgr::RandomTeleport;
     handlers["change_strategy"] = &RandomPlayerbotMgr::ChangeStrategy;
+    handlers["remove"] = &RandomPlayerbotMgr::Remove;
 
     for (std::map<std::string, ConsoleCommandHandler>::iterator j = handlers.begin(); j != handlers.end(); ++j)
     {

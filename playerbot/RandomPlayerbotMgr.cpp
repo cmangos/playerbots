@@ -1663,6 +1663,8 @@ void RandomPlayerbotMgr::CheckPlayers()
 
     sLog.outBasic("Checking Players...");
 
+    uint32 newPlayersLevel = 0;
+
     for (auto i : players)
     {
         Player* player = i.second;
@@ -1673,10 +1675,17 @@ void RandomPlayerbotMgr::CheckPlayers()
         //if (player->GetSession()->GetSecurity() > SEC_PLAYER)
         //    continue;
 
-        if (player->GetLevel() > playersLevel)
-            playersLevel = player->GetLevel();
+        if (player->GetLevel() > newPlayersLevel)
+            newPlayersLevel = player->GetLevel();
     }
-    sLog.outBasic("Max player level is %d, max bot level set to %d", playersLevel, playersLevel);
+
+    if(playersLevel!= newPlayersLevel)
+        sLog.outBasic("Max player level is %d, max bot level changed from %d to %d", newPlayersLevel, playersLevel, newPlayersLevel);
+    else
+        sLog.outBasic("Max player level is %d, max bot level set to %d", newPlayersLevel, newPlayersLevel);
+
+    playersLevel = newPlayersLevel;
+
     return;
 }
 

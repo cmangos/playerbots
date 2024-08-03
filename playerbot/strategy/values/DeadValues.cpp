@@ -122,6 +122,10 @@ bool ShouldSpiritHealerValue::Calculate()
     if (deadTime > 10 * MINUTE && deathCount > 1)
         return true;
 
+    //Dead for a long time
+    if (deadTime > 20 * MINUTE)
+        return true;
+
     //If there are enemies near grave and corpse we go to corpse first.
     if (AI_VALUE2(bool, "manual bool", "enemies near graveyard"))
         return false;

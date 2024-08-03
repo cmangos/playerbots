@@ -867,7 +867,7 @@ void PlayerbotAIConfig::logEvent(PlayerbotAI* ai, std::string eventName, std::st
 
         out << std::to_string(bot->getRace()) << ",";
         out << std::to_string(bot->getClass()) << ",";
-        float subLevel = ((float)bot->GetLevel() + (bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) ? ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)) : 0));
+        float subLevel = ai->GetLevelFloat();
 
         out << subLevel << ",";
 

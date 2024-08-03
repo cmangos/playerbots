@@ -646,6 +646,20 @@ bool DebugAction::Execute(Event& event)
 
         return true;
     }
+    else if (text.find("level") == 0) {
+        uint32 level = bot->GetLevel();
+        uint32 nextLevelXp = bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
+        uint32 xp = bot->GetUInt32Value(PLAYER_XP);
+        float flevel = ai->GetLevelFloat();
+
+        std::ostringstream out;
+
+        out << "Level: " << level << ", xp:" << xp << "/" << nextLevelXp << " :" || flevel;
+
+        bot->Whisper(out.str().c_str(), LANG_UNIVERSAL, event.getOwner()->GetObjectGuid());
+
+        return true;
+    }
     else if (text.find("npc") == 0)
     {
         std::ostringstream out;

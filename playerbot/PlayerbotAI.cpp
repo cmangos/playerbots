@@ -7478,3 +7478,27 @@ void PlayerbotAI::QueuePacket(WorldPacket& pkt)
     *packet = pkt;
     bot->GetSession()->QueuePacket(std::move(packet));
 }
+
+float PlayerbotAI::GetLevelFloat() const
+{
+    float level = bot->GetLevel();
+
+    uint32 nextLevelXp = bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
+
+    if (!nextLevelXp)
+        return level;
+
+    uint32 xp = bot->GetUInt32Value(PLAYER_XP);
+
+    while (xp > nextLevelXp)
+    {
+        level++;
+        xp -= nextLevelXp;
+
+        nextLevelXp = sObjectMgr.GetXPForLevel(level);
+    }
+
+    level += float(xp) / float(nextLevelXp);
+
+    return level;
+}

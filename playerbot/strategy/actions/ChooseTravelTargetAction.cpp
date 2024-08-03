@@ -457,7 +457,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
         out << std::to_string(bot->getRace()) << ",";
         out << std::to_string(bot->getClass()) << ",";
-        float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
+        float subLevel = ai->GetLevelFloat();
 
         out << subLevel << ",";
 
@@ -539,7 +539,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
             out << std::to_string(bot->getRace()) << ",";
             out << std::to_string(bot->getClass()) << ",";
-            float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
+            float subLevel = ai->GetLevelFloat();
 
             out << subLevel << ",";
 

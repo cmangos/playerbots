@@ -709,7 +709,7 @@ void RandomPlayerbotMgr::ScaleBotActivity()
                 {
                     std::string bracket = "level:" + std::to_string(bot->GetLevel() / 10);
 
-                    float level = ((float)bot->GetLevel() + (bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) ? ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)) : 0));
+                    float level = bot->GetPlayerbotAI()->GetLevelFloat();
                     float gold = bot->GetMoney() / 10000;
                     float gearscore = bot->GetPlayerbotAI()->GetEquipGearScore(bot, false, false);
 
@@ -3798,8 +3798,9 @@ float RandomPlayerbotMgr::GetMetricDelta(botPerformanceMetric& metric) const
     float deltaMetric = 0;
     for (auto& botMetric : metric)
     {
-        if (botMetric.second.size() > 1)
-            deltaMetric += (botMetric.second.back() - botMetric.second.front()) / botMetric.second.size();
+        std::list<float> values = botMetric.second;
+        if (values.size() > 1)
+            deltaMetric += (values.back() - values.front()) / values.size();
     }
 
     if (metric.empty())

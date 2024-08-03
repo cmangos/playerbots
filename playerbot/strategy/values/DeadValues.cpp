@@ -147,7 +147,7 @@ bool ShouldSpiritHealerValue::Calculate()
         }
         if (corpseInSight)
         {
-            SET_AI_VALUE2(bool, "manual bool", "enemies near graveyard", true);
+            SET_AI_VALUE2(bool, "manual bool", "enemies near corpse", true);
             return true;
         }
     }

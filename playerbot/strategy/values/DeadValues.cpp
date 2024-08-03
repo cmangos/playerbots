@@ -64,26 +64,33 @@ GuidPosition BestGraveyardValue::Calculate()
         return GuidPosition();
     }
 
-    //Revive near master.
-    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
-        return AI_VALUE2(GuidPosition, "graveyard", "master");
-
-    uint32 deathCount = AI_VALUE(uint32, "death count");
-
-    //Revive nearby.
-    if (deathCount < 3)
+    if (sPlayerbotAIConfig.realisticRevives)
+    {
         return AI_VALUE2(GuidPosition, "graveyard", "self");
+    }
+    else
+    {
+        //Revive near master.
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
+            return AI_VALUE2(GuidPosition, "graveyard", "master");
 
-    //Revive near travel target if it's far away from last death.
-    if (AI_VALUE2(GuidPosition, "graveyard", "travel") && AI_VALUE2(GuidPosition, "graveyard", "travel").fDist(corpse) > sPlayerbotAIConfig.reactDistance)
-        return AI_VALUE2(GuidPosition, "graveyard", "travel");
+        uint32 deathCount = AI_VALUE(uint32, "death count");
 
-    //Revive near Inn.
-    if (deathCount < 5)
-        return AI_VALUE2(GuidPosition, "graveyard", "home bind");
+        //Revive nearby.
+        if (deathCount < 3)
+            return AI_VALUE2(GuidPosition, "graveyard", "self");
 
-    //Revive at spawn.
-    return AI_VALUE2(GuidPosition, "graveyard", "start");
+        //Revive near travel target if it's far away from last death.
+        if (AI_VALUE2(GuidPosition, "graveyard", "travel") && AI_VALUE2(GuidPosition, "graveyard", "travel").fDist(corpse) > sPlayerbotAIConfig.reactDistance)
+            return AI_VALUE2(GuidPosition, "graveyard", "travel");
+
+        //Revive near Inn.
+        if (deathCount < 5)
+            return AI_VALUE2(GuidPosition, "graveyard", "home bind");
+
+        //Revive at spawn.
+        return AI_VALUE2(GuidPosition, "graveyard", "start");
+    }
 }
 
 bool ShouldSpiritHealerValue::Calculate()

@@ -1910,18 +1910,32 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
         uint32 changeStrategy = GetEventValue(bot, "change_strategy");
         if (!changeStrategy)
         {
-            sLog.outDetail("Changing strategy for bot #%d %s:%d <%s>", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
-            ChangeStrategy(player);
-            ScheduleChangeStrategy(bot);
+            if (sPlayerbotAIConfig.enableRandomTeleports)
+            {
+                sLog.outDetail("Changing strategy for bot #%d %s:%d <%s>", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+                ChangeStrategy(player);
+                ScheduleChangeStrategy(bot);
+            }
+            else
+            {
+                sLog.outDetail("Changing strategy for bot #%d %s:%d <%s> is supposed to happen, but enableRandomTeleports = false", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+            }
             return true;
         }
 
         uint32 teleport = GetEventValue(bot, "teleport");
         if (!teleport && players.size())
         {
-            sLog.outBasic("Bot #%d %s:%d <%s>: sent to grind", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
-            RandomTeleportForLevel(player, true);
-            ScheduleTeleport(bot);
+            if (sPlayerbotAIConfig.enableRandomTeleports)
+            {
+                sLog.outBasic("Bot #%d %s:%d <%s>: sent to grind", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+                RandomTeleportForLevel(player, true);
+                ScheduleTeleport(bot);
+            }
+            else
+            {
+                sLog.outBasic("Bot #%d %s:%d <%s>: supposed to be sent to grind, but enableRandomTeleports = false", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+            }
             return true;
         }
     }
@@ -1937,16 +1951,13 @@ void RandomPlayerbotMgr::Revive(Player* player)
     SetEventValue(bot, "dead", 0, 0);
     SetEventValue(bot, "revive", 0, 0);
 
-    if (sPlayerbotAIConfig.enableRandomTeleportOnRevive)
+    if (sServerFacade.GetDeathState(player) == CORPSE)
     {
-        if (sServerFacade.GetDeathState(player) == CORPSE)
-        {
-            RandomTeleport(player);
-        }
-        else
-        {
-            RandomTeleportForLevel(player, false);
-        }
+        RandomTeleport(player);
+    }
+    else
+    {
+        RandomTeleportForLevel(player, false);
     }
 }
 
@@ -1968,9 +1979,6 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
         return;
 
     if (bot->IsTaxiFlying() && bot->GetPlayerbotAI()->HasPlayerNearby())
-        return;
-
-    if (sPlayerbotAIConfig.randomBotRpgChance < 0)
         return;
 
     if (locs.empty())
@@ -2036,7 +2044,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
             }
 
             return true;
-        }), 
+        }),
         tlocs.end());
 
         /*if (!tlocs.empty())
@@ -2204,7 +2212,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
             sLog.outDetail("Random teleporting bot %s to %s %f,%f,%f (%u/%zu locations)",
                 bot->GetName(), area->area_name[0], x, y, z, attemtps, tlocs.size());
 
-            if (bot->IsTaxiFlying())          
+            if (bot->IsTaxiFlying())
                 bot->GetMotionMaster()->MovementExpired();
 
             if (hearth)
@@ -2454,7 +2462,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
             if ((cInfo->NpcFlags & flag) != 0)
             {
                 std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(creatureData));
-                
+
                 for (auto& range : ranges)
                     newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), creatureData));
                 break;
@@ -2664,7 +2672,7 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
     SetValue(bot, "level", level);
     PlayerbotFactory factory(bot, level);
     factory.Randomize(false, false);
-	
+
     // schedule randomise
     uint32 randomTime = urand(sPlayerbotAIConfig.minRandomBotRandomizeTime, sPlayerbotAIConfig.maxRandomBotRandomizeTime);
     SetEventValue(bot->GetGUIDLow(), "randomize", 1, randomTime);
@@ -3011,7 +3019,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
 
         return true;
     }
- 
+
 
 
     std::map<std::string, ConsoleCommandHandler> handlers;
@@ -3205,7 +3213,7 @@ void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
 
         //player->Relocate(botPos.getX(), botPos.getY(), botPos.getZ(), botPos.getO());
         //player->Relocate(botPos.coord_x, botPos.coord_y, botPos.coord_z, botPos.orientation);
-        
+
         if (!player->GetFactionTemplateEntry())
         {
             botPos.GetReachableRandomPointOnGround(player, sPlayerbotAIConfig.reactDistance * 2, true);
@@ -3236,7 +3244,7 @@ void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
 
         player->TeleportTo(botPos);
         //player->Relocate(botPos.getX(), botPos.getY(), botPos.getZ(), botPos.getO());
-        
+
     }
 
     if (IsFreeBot(player))
@@ -3461,7 +3469,7 @@ void RandomPlayerbotMgr::PrintStats()
     sLog.outString("Bots status:");
     sLog.outString("    Active: %d", active);
     sLog.outString("    Moving: %d", moving);
-    
+
     //sLog.outString("Bots to:");
     //sLog.outString("    update: %d", update);
     //sLog.outString("    randomize: %d", randomize);
@@ -3589,23 +3597,6 @@ void RandomPlayerbotMgr::ChangeStrategy(Player* player)
 		sLog.outBasic("Bot #%d %s:%d <%s>: sent to inn", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
         RandomTeleportForRpg(player, players.size());
         ScheduleTeleport(bot);
-    }
-}
-
-void RandomPlayerbotMgr::ChangeStrategyOnce(Player* player)
-{
-    uint32 bot = player->GetGUIDLow();
-
-    if (urand(0, 100) > 100 * sPlayerbotAIConfig.randomBotRpgChance && players.size()) // select grind / pvp
-    {
-        sLog.outBasic("Bot #%d %s:%d <%s>: sent to grind spot", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
-        // teleport in different places only if players are online
-        RandomTeleportForLevel(player, true);
-    }
-    else
-    {
-        sLog.outBasic("Bot #%d %s:%d <%s>: sent to inn", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
-        RandomTeleportForRpg(player, players.size());
     }
 }
 

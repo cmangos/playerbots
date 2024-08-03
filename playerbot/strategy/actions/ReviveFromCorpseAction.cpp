@@ -75,7 +75,7 @@ bool FindCorpseAction::Execute(Event& event)
 
     uint32 dCount = AI_VALUE(uint32, "death count");
 
-    if (!ai->HasRealPlayerMaster())
+    if (!sPlayerbotAIConfig.realisticRevives && !ai->HasRealPlayerMaster())
     {
         if (dCount >= 5 && !sRandomPlayerbotMgr.GetValue(bot,"teleport"))
         {
@@ -103,10 +103,10 @@ bool FindCorpseAction::Execute(Event& event)
         }
         else if (deadTime > 8 * MINUTE) //We have walked too long already.
             return false;
-        else 
+        else
         {
             std::list<ObjectGuid> units = AI_VALUE(std::list<ObjectGuid>, "possible targets no los");
-            
+
             if (botPos.getUnitsAggro(units, bot) == 0) //There are no mobs near.
                 return false;
         }
@@ -168,7 +168,7 @@ bool FindCorpseAction::Execute(Event& event)
     //Actual mobing part.
     bool moved = false;
 
-    if (!ai->AllowActivity(DETAILED_MOVE_ACTIVITY) && !ai->HasPlayerNearby(moveToPos))
+    if (!sPlayerbotAIConfig.realisticRevives && !ai->AllowActivity(DETAILED_MOVE_ACTIVITY) && !ai->HasPlayerNearby(moveToPos))
     {
         uint32 delay = sServerFacade.GetDistance2d(bot, corpse) / bot->GetSpeed(MOVE_RUN); //Time a bot would take to travel to it's corpse.
         delay = std::min(delay, uint32(10 * MINUTE)); //Cap time to get to corpse at 10 minutes.
@@ -200,7 +200,7 @@ bool FindCorpseAction::Execute(Event& event)
                 moved = ai->DoSpecificAction("spirit healer", Event(), true);
             }
         }
-    }   
+    }
 
     return moved;
 }
@@ -259,7 +259,7 @@ bool SpiritHealerAction::Execute(Event& event)
         ai->TellPlayer(requester, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         sPlayerbotAIConfig.logEvent(ai, "ReviveFromSpiritHealerAction");
 
-        return true;            
+        return true;
     }
 
     if (!grave)
@@ -267,27 +267,32 @@ bool SpiritHealerAction::Execute(Event& event)
         return false;
     }
 
-    const int64 deadTime = time(nullptr) - corpse->GetGhostTime();
+    bool shouldTeleportToGY = false;
 
-    // Prevent taking too long to go to corpse (20 mins)
-    bool shouldTeleportToGY = deadTime > 1200;
-
-    // Check if we can teleport to the graveyard when nobody is looking
-    if (!shouldTeleportToGY && !ai->AllowActivity(DETAILED_MOVE_ACTIVITY) && !ai->HasPlayerNearby(WorldPosition(grave)))
+    if (!sPlayerbotAIConfig.realisticRevives)
     {
-        //Time a bot would take to travel to it's corpse.
-        uint32 delay = sServerFacade.GetDistance2d(bot, corpse) / bot->GetSpeed(MOVE_RUN);
-        //Cap time to get to corpse at 10 minutes.
-        delay = std::min(delay, uint32(10 * MINUTE));
+        const int64 deadTime = time(nullptr) - corpse->GetGhostTime();
 
-        shouldTeleportToGY = deadTime > delay;
-    }
+        // Prevent taking too long to go to corpse (20 mins)
+        shouldTeleportToGY = deadTime > 1200;
 
-    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
-    {
-        std::ostringstream out;
-        out << "Moving towards graveyard.";
-        ai->TellPlayerNoFacing(GetMaster(), out);
+        // Check if we can teleport to the graveyard when nobody is looking
+        if (!shouldTeleportToGY && !ai->AllowActivity(DETAILED_MOVE_ACTIVITY) && !ai->HasPlayerNearby(WorldPosition(grave)))
+        {
+            //Time a bot would take to travel to it's corpse.
+            uint32 delay = sServerFacade.GetDistance2d(bot, corpse) / bot->GetSpeed(MOVE_RUN);
+            //Cap time to get to corpse at 10 minutes.
+            delay = std::min(delay, uint32(10 * MINUTE));
+
+            shouldTeleportToGY = deadTime > delay;
+        }
+
+        if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+        {
+            std::ostringstream out;
+            out << "Moving towards graveyard.";
+            ai->TellPlayerNoFacing(GetMaster(), out);
+        }
     }
 
     if (shouldTeleportToGY)

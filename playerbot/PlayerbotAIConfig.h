@@ -110,6 +110,11 @@ public:
     uint32 minRandomBotPvpTime, maxRandomBotPvpTime;
     uint32 randomBotsPerInterval, randomBotsMaxLoginsPerInterval;
     uint32 minRandomBotsPriceChangeInterval, maxRandomBotsPriceChangeInterval;
+    //Auction house settings
+    bool shouldQueryAHForItemMedianPrice;
+    std::list<uint32> ahOverVendorItemIds;
+    std::list<uint32> vendorOverAHItemIds;
+    //
     bool randomBotJoinLfg;
     bool randomBotJoinBG;
     bool randomBotAutoJoinBG;

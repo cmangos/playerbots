@@ -3,7 +3,6 @@
 #include "playerbot/playerbot.h"
 #include "SendMailAction.h"
 
-#include "ahbot/AhBot.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/strategy/ItemVisitors.h"
 
@@ -112,7 +111,7 @@ bool SendMailAction::Execute(Event& event)
             draft.AddItem(item);
             if (randomBot)
             {
-                uint32 price = item->GetCount() * auctionbot.GetSellPrice(proto);
+                uint32 price = item->GetCount() * ItemUsageValue::GetBotSellPrice(proto, bot);
                 if (!price)
                 {
                     std::ostringstream out;

@@ -23,7 +23,6 @@
 #include "Entities/Pet.h"
 #include "Spells/SpellAuras.h"
 #include "Spells/SpellMgr.h"
-#include "ahbot/AhBot.h"
 #include "PlayerbotDbStore.h"
 #include "strategy/values/PositionValue.h"
 #include "playerbot/ServerFacade.h"
@@ -5854,11 +5853,6 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
 bool ChatHandler::HandleRandomPlayerbotCommand(char* args)
 {
     return RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(this, args);
-}
-
-bool ChatHandler::HandleAhBotCommand(char* args)
-{
-    return ahbot::AhBot::HandleAhBotCommand(this, args);
 }
 
 float PlayerbotAI::GetRange(std::string type)

@@ -148,6 +148,9 @@ void PlayerbotFactory::Prepare()
     if (!sPlayerbotAIConfig.disableRandomLevels)
     {
         bot->SetLevel(level);
+        //Reset xp and xp for next level.
+        bot->SetUInt32Value(PLAYER_XP, 0);
+        bot->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
     }
 
     if (!sPlayerbotAIConfig.randomBotShowHelmet)
@@ -188,7 +191,12 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
     if (isRealRandomBot)
     {
         if (bot->GetLevel() > level)
+        {
             bot->SetLevel(level);
+            //Reset xp and xp for next level.
+            bot->SetUInt32Value(PLAYER_XP, 0);
+            bot->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
+        }
 
         InitQuests(specialQuestIds);
         bot->learnQuestRewardedSpells();
@@ -196,7 +204,12 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
         // clear inventory and set level after getting xp and quest rewards
         ClearInventory();
         if (bot->GetLevel() > level)
+        {
             bot->SetLevel(level);
+            //Reset xp and xp for next level.
+            bot->SetUInt32Value(PLAYER_XP, 0);
+            bot->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
+        }
     }
     if (pmo) pmo->finish();
 

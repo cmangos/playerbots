@@ -6842,13 +6842,22 @@ std::list<Unit*> PlayerbotAI::GetAllHostileUnitsAroundWO(WorldObject* wo, float 
     return hostileUnits;
 }
 
-std::list<Unit*> PlayerbotAI::GetAllHostileNonPlayerUnitsAroundWO(WorldObject* wo, float distanceAround)
+std::list<Unit*> PlayerbotAI::GetAllHostileNPCNonPetUnitsAroundWO(WorldObject* wo, float distanceAround)
 {
     std::list<Unit*> hostileUnitsNonPlayers;
     for (auto hostileUnit : GetAllHostileUnitsAroundWO(wo, distanceAround))
     {
-        if (!hostileUnit->IsPlayer())
+        if (!hostileUnit->IsPlayer() && !hostileUnit->IsCorpse())
         {
+            if (hostileUnit->IsCreature())
+            {
+                Creature* creature = GetCreature(hostileUnit->GetObjectGuid());
+                if (!creature || (creature && creature->IsPet()))
+                {
+                    continue;
+                }
+            }
+
             hostileUnitsNonPlayers.push_back(hostileUnit);
         }
     }

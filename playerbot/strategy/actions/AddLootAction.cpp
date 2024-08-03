@@ -113,7 +113,7 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
     if (isInGroup && !isGroupLeader)
     {
         float MOB_AGGRO_DISTANCE = 30.0f;
-        std::list<Unit*> hostiles = ai->GetAllHostileNonPlayerUnitsAroundWO(wo, MOB_AGGRO_DISTANCE);
+        std::list<Unit*> hostiles = ai->GetAllHostileNPCNonPetUnitsAroundWO(wo, MOB_AGGRO_DISTANCE);
 
         if (hostiles.size() > 0)
         {
@@ -208,7 +208,7 @@ bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)
     //check hostile units after distance checks, to avoid unnecessary calculations
 
     float MOB_AGGRO_DISTANCE = 30.0f;
-    std::list<Unit*> hostiles = ai->GetAllHostileNonPlayerUnitsAroundWO(wo, MOB_AGGRO_DISTANCE);
+    std::list<Unit*> hostiles = ai->GetAllHostileNPCNonPetUnitsAroundWO(wo, MOB_AGGRO_DISTANCE);
     std::list<Unit*> strongHostiles;
     for (auto hostile : hostiles)
     {

@@ -110,7 +110,6 @@ public:
         bool ProcessBot(Player* player);
         void Revive(Player* player);
         void ChangeStrategy(Player* player);
-        void ChangeStrategyOnce(Player* player);
         uint32 GetValue(Player* bot, std::string type);
         uint32 GetValue(uint32 bot, std::string type);
         int32 GetValueValidTime(uint32 bot, std::string event);

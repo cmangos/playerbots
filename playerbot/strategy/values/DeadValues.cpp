@@ -71,7 +71,7 @@ GuidPosition BestGraveyardValue::Calculate()
     uint32 deathCount = AI_VALUE(uint32, "death count");
 
     //Revive nearby.
-    if (deathCount < 5)
+    if (deathCount < 3)
         return AI_VALUE2(GuidPosition, "graveyard", "self");
 
     //Revive near travel target if it's far away from last death.
@@ -79,7 +79,7 @@ GuidPosition BestGraveyardValue::Calculate()
         return AI_VALUE2(GuidPosition, "graveyard", "travel");
 
     //Revive near Inn.
-    if (deathCount < 15)
+    if (deathCount < 5)
         return AI_VALUE2(GuidPosition, "graveyard", "home bind");
 
     //Revive at spawn.
@@ -95,26 +95,24 @@ bool ShouldSpiritHealerValue::Calculate()
         return false;
 
     //Nothing to lose
-    if (deathCount > 2 && durability < 10 && (ai->HasAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS, bot) || ai->HasCheat(BotCheatMask::repair)))
+    if (ai->HasAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS, bot) || durability < 10)
+        return true;
+
+    //Died too many times
+    if (deathCount > 3)
         return true;
 
     Corpse* corpse = bot->GetCorpse();
     if (!corpse)
     {
-        return false;
+        //if no corpse (?) then definitely should revive at spirit healer
+        return true;
     }
 
     uint32 deadTime = time(nullptr) - corpse->GetGhostTime();
-    //We are dead for a long time
+
+    //Dead for a long time
     if (deadTime > 10 * MINUTE && deathCount > 1)
-        return true;
-
-    //Try to revive nearby.
-    if (deathCount < 5)
-        return false;
-
-    //Try to get to a safe place 
-    if ((deathCount > 10 && durability < 10) || deathCount > 15)
         return true;
 
     //If there are enemies near grave and corpse we go to corpse first.

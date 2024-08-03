@@ -3,11 +3,9 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
 
-#include "ahbot/AhBot.h"
 #include "Database/DatabaseEnv.h"
 #include "PlayerbotAI.h"
 
-#include "ahbot/AhBotConfig.h"
 #include "MotionGenerators/TargetedMovementGenerator.h"
 
 ServerFacade::ServerFacade() {}

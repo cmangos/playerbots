@@ -626,6 +626,7 @@ public:
     void QueuePacket(WorldPacket& pkt);
 
     float GetLevelFloat() const;
+
 private:
     bool UpdateAIReaction(uint32 elapsed, bool minimal, bool isStunned);
     void UpdateFaceTarget(uint32 elapsed, bool minimal);

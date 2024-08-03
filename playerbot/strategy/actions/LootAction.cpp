@@ -2,11 +2,8 @@
 #include "playerbot/playerbot.h"
 #include "LootAction.h"
 
-#include "ahbot/AhBotConfig.h"
-
 #include "playerbot/LootObjectStack.h"
 #include "playerbot/PlayerbotAIConfig.h"
-#include "ahbot/AhBot.h"
 #include "playerbot/RandomPlayerbotMgr.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/LootStrategyValue.h"
@@ -75,7 +72,7 @@ bool OpenLootAction::DoLoot(LootObject& lootObject)
         return false;
 
     if (creature && creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) && !creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
-    {        
+    {
         if (!lootObject.IsLootPossible(bot)) //Clear loot if bot can't loot it.
             return true;
 
@@ -324,11 +321,11 @@ bool StoreLootAction::Execute(Event& event)
         //have no right to loot
         if (lootItem->isBlocked || lootItem->GetSlotTypeForSharedLoot(bot, loot) == MAX_LOOT_SLOT_TYPE)
             continue;
-       
+
         Player* master = ai->GetMaster();
         if (sRandomPlayerbotMgr.IsRandomBot(bot) && master)
         {
-            uint32 price = itemcount * auctionbot.GetBuyPrice(proto) * sRandomPlayerbotMgr.GetBuyMultiplier(bot) + gold;
+            uint32 price = itemcount * ItemUsageValue::GetBotBuyPrice(proto, bot) + gold;
             if (price)
                 sRandomPlayerbotMgr.AddTradeDiscount(bot, master, price);
         }

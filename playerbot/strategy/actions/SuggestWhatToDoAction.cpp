@@ -1,16 +1,12 @@
 
 #include "playerbot/playerbot.h"
-#include "SuggestWhatToDoAction.h"
-#include "ahbot/AhBot.h"
-#include "ahbot/PricingStrategy.h"
+#include "SuggestWhatToDoAction.h"=
 #include "playerbot/AiFactory.h"
 #include "Chat/ChannelMgr.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/PlayerbotTextMgr.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/ItemVisitors.h"
-
-using ahbot::PricingStrategy;
 
 using namespace ai;
 
@@ -148,41 +144,20 @@ void SuggestWhatToDoAction::grindMaterials()
     if (bot->GetLevel() <= 5)
         return;
 
-    auto result = CharacterDatabase.PQuery("SELECT distinct category, multiplier FROM ahbot_category where category not in ('other', 'quest', 'trade', 'reagent') and multiplier > 3 order by multiplier desc limit 10");
-    if (!result)
-        return;
+    auto vec = ItemUsageValue::allReagentItemIdsForCraftingSkillsVector;
 
-    std::map<std::string, double> categories;
-    do
+    if (vec.size() > 0)
     {
-        Field* fields = result->Fetch();
-        categories[fields[0].GetCppString()] = fields[1].GetFloat();
-    } while (result->NextRow());
+        uint32 randomItemId = vec[urand() % vec.size()];
 
-    for (std::map<std::string, double>::iterator i = categories.begin(); i != categories.end(); ++i)
-    {
-        if (urand(0, 10) < 3) {
-            std::string name = i->first;
-            double multiplier = i->second;
-
-            for (int j = 0; j < ahbot::CategoryList::instance.size(); j++)
-            {
-                ahbot::Category* category = ahbot::CategoryList::instance[j];
-                if (name == category->GetName())
-                {
-                    std::string item = category->GetLabel();
-                    transform(item.begin(), item.end(), item.begin(), ::tolower);
-                    std::ostringstream itemout;
-                    itemout << "|c0000b000" << item << "|r";
-                    item = itemout.str();
-
-                    BroadcastHelper::BroadcastSuggestGrindMaterials(ai, item, bot);
-
-                    return;
-                }
-            }
+        const ItemPrototype* proto = ObjectMgr::GetItemPrototype(randomItemId);
+        if (proto)
+        {
+            BroadcastHelper::BroadcastSuggestGrindMaterials(ai, ai->GetChatHelper()->formatItem(proto), bot);
         }
     }
+
+    return;
 }
 
 void SuggestWhatToDoAction::grindReputation()
@@ -351,7 +326,7 @@ bool SuggestTradeAction::Execute(Event& event)
     if (!proto)
         return false;
 
-    uint32 price = PricingStrategy::RoundPrice(auctionbot.GetSellPrice(proto) * sRandomPlayerbotMgr.GetSellMultiplier(bot) * count);
+    uint32 price = ItemUsageValue::GetBotSellPrice(proto, bot) * count;
     if (!price)
         return false;
 

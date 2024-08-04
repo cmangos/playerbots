@@ -83,8 +83,10 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
         }
     }
 
+    WorldPosition botPos(bot);
+
     //Rpg in city
-    if (!foundTarget && urand(1, 100) > 90 && bot->GetLevel() > 5)           //10% chance
+    if (!foundTarget && urand(1, 100) > 90 && bot->GetLevel() > 5 && botPos.isOverworld())           //10% chance if not currenlty in dungeon.
     {
         ai->TellDebug(requester, "Random rpg in city", "debug travel");
         PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetNpcFlagTarget2", &context->performanceStack);
@@ -118,8 +120,8 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
         }
     }
 
-    //Grind for money
-    if (!foundTarget && AI_VALUE(bool, "should get money"))
+    //Grind for money (if not in dungeon)
+    if (!foundTarget && AI_VALUE(bool, "should get money") && botPos.isOverworld())
     {
         //Empty mail for money
         if (AI_VALUE(bool, "can get mail"))
@@ -161,7 +163,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
 
 
     //Continue current target.
-    if (!foundTarget && urand(1, 100) > 10)                               //90% chance 
+    if (!foundTarget && (!botPos.isOverworld() || urand(1, 100) > 10))        //90% chance or currently in dungeon.
     {
         ai->TellDebug(requester, "Continue previous target", "debug travel");
         PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetCurrentTarget", &context->performanceStack);
@@ -182,7 +184,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     }
 
     //Dungeon in group.
-    if (!foundTarget && urand(1, 100) > 50)                                 //50% chance
+    if (!foundTarget && (!botPos.isOverworld() || urand(1, 100) > 50))      //50% chance or currently in instance.
         if (AI_VALUE(bool, "can fight boss"))
         {
             ai->TellDebug(requester, "Fight boss for loot", "debug travel");

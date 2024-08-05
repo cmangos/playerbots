@@ -2786,6 +2786,8 @@ ChatChannelSource PlayerbotAI::GetChatChannelSource(Player* bot, uint32 type, st
             return ChatChannelSource::SRC_UNDEFINED;
         }
     }
+
+    return ChatChannelSource::SRC_UNDEFINED;
 }
 
 bool PlayerbotAI::SayToGuild(std::string msg)

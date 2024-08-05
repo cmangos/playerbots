@@ -147,10 +147,14 @@ ItemUsage ItemUsageValue::Calculate()
         if (needItem)
         {
             float stacks = CurrentStacks(ai, proto);
+
+            if(proto->Class == ITEM_CLASS_RECIPE && stacks > 0) //Only buy one recipe.
+                return ItemUsage::ITEM_USAGE_KEEP;
+
             if (stacks < 2)
                 return ItemUsage::ITEM_USAGE_SKILL; //Buy more.
             else if (stacks == 2)
-                return ItemUsage::ITEM_USAGE_KEEP; //Buy more.
+                return ItemUsage::ITEM_USAGE_KEEP; //Do not buy more.
         }
     }
 

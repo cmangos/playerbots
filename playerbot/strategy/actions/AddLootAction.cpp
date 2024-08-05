@@ -54,14 +54,16 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
 {
     LootObject loot(bot, guid);
 
-    ai->TellDebug(requester, "Add loot from " + std::to_string(guid), "debug loot");
-
     WorldObject* wo = loot.GetWorldObject(bot);
 
     if (!wo)
     {
-        ai->TellDebug(requester, "Loot object doesn't exists.", "debug loot");
+        ai->TellDebug(requester, "Trying to add loot from " + std::to_string(guid) + " but it doesn't exists.", "debug loot");
         return false;
+    }
+    else
+    {
+        ai->TellDebug(requester, "Add loot from " + ChatHelper::formatWorldobject(wo), "debug loot");
     }
 
     if (loot.IsEmpty())

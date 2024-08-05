@@ -2113,11 +2113,27 @@ bool MoveToLootAction::Execute(Event& event)
 {
     LootObject loot = AI_VALUE(LootObject, "loot target");
     if (!loot.IsLootPossible(bot))
+    {
+        if (ai->HasStrategy("debug loot", BotState::BOT_STATE_NON_COMBAT))
+        {
+            WorldObject* wo = loot.GetWorldObject(bot);
+
+            if (!wo)
+            {
+                ai->TellPlayerNoFacing(GetMaster(), "Can not move to loot " + std::to_string(loot.guid) +  " because it no longer exists.");
+            }
+            else
+            {
+                ai->TellPlayerNoFacing(GetMaster(), "Can not move to loot " + ChatHelper::formatWorldobject(wo) + " because it is not possible to loot.");
+            }
+        }
+
         return false;
+    }
 
     WorldObject *wo = loot.GetWorldObject(bot);
 
-    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug loot", BotState::BOT_STATE_NON_COMBAT))
     {
         std::ostringstream out;
         out << "Moving to loot " << ChatHelper::formatWorldobject(wo);

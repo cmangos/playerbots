@@ -110,10 +110,10 @@ bool PlayerbotAIConfig::Initialize()
     aggroDistance = config.GetFloatDefault("AiPlayerbot.AggroDistance", 22.0f);
     lootDistance = config.GetFloatDefault("AiPlayerbot.LootDistance", 25.0f);
     groupMemberLootDistance = config.GetFloatDefault("AiPlayerbot.GroupMemberLootDistance", 15.0f);
-    groupMemberLootDistanceWithRealMaster = config.GetFloatDefault("AiPlayerbot.GroupMemberLootDistanceWithRealMaster", 10.0f);
+    groupMemberLootDistanceWithActiveMaster = config.GetFloatDefault("AiPlayerbot.GroupMemberLootDistanceWithActiveMaster", 10.0f);
     gatheringDistance = config.GetFloatDefault("AiPlayerbot.GatheringDistance", 15.0f);
     groupMemberGatheringDistance = config.GetFloatDefault("AiPlayerbot.GroupMemberGatheringDistance", 10.0f);
-    groupMemberGatheringDistanceWithRealMaster = config.GetFloatDefault("AiPlayerbot.GroupMemberGatheringDistanceWithRealMaster", 5.0f);
+    groupMemberGatheringDistanceWithActiveMaster = config.GetFloatDefault("AiPlayerbot.GroupMemberGatheringDistanceWithActiveMaster", 5.0f);
     fleeDistance = config.GetFloatDefault("AiPlayerbot.FleeDistance", 8.0f);
     tooCloseDistance = config.GetFloatDefault("AiPlayerbot.TooCloseDistance", 5.0f);
     meleeDistance = config.GetFloatDefault("AiPlayerbot.MeleeDistance", 1.5f);

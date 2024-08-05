@@ -714,14 +714,14 @@ AiPlayerbot.ShootDistance = 26.0
 #AiPlayerbot.LootDistance = 25.0
 #loot distance when bot is a group member (not leader)
 #AiPlayerbot.GroupMemberLootDistance = 15.0
-#loot distance when bot is a group member (not leader) and has real player master (if player is group leader)
-#AiPlayerbot.GroupMemberLootDistanceWithRealMaster = 10.0
+#loot distance when bot is a group member (not leader) and has active player master (if player is group leader)
+#AiPlayerbot.GroupMemberLootDistanceWithActiveMaster = 10.0
 #overall gathering distance
 #AiPlayerbot.GatheringDistance = 15.0
 #gathering distance when bot is a group member (not leader)
 #AiPlayerbot.GroupMemberGatheringDistance = 10.0
-#gathering distance when bot is a group member (not leader) and has real player master (if player is group leader)
-#AiPlayerbot.GroupMemberGatheringDistanceWithRealMaster = 5.0
+#gathering distance when bot is a group member (not leader) and has active player master (if player is group leader)
+#AiPlayerbot.GroupMemberGatheringDistanceWithActiveMaster = 5.0
 #AiPlayerbot.FleeDistance = 15.0
 #AiPlayerbot.TooCloseDistance = 5.0
 #AiPlayerbot.MeleeDistance = 1.5

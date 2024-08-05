@@ -109,9 +109,9 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
         }
         else
         {
-            if (ai->HasRealPlayerMaster())
+            if (ai->HasActivePlayerMaster())
             {
-                lootDistanceToUse = sPlayerbotAIConfig.groupMemberLootDistanceWithRealMaster;
+                lootDistanceToUse = sPlayerbotAIConfig.groupMemberLootDistanceWithActiveMaster;
             }
             else
             {
@@ -205,9 +205,9 @@ bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)
 
     if (isInGroup && !isGroupLeader)
     {
-        if (ai->HasRealPlayerMaster())
+        if (ai->HasActivePlayerMaster())
         {
-            gatheringDistanceToUse = sPlayerbotAIConfig.groupMemberGatheringDistanceWithRealMaster;
+            gatheringDistanceToUse = sPlayerbotAIConfig.groupMemberGatheringDistanceWithActiveMaster;
         }
         else
         {

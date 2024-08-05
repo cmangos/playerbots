@@ -54,15 +54,33 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
 {
     LootObject loot(bot, guid);
 
+    ai->TellDebug(requester, "Add loot from " + std::to_string(guid), "debug loot");
+
     WorldObject* wo = loot.GetWorldObject(bot);
-    if (loot.IsEmpty() || !wo)
+
+    if (!wo)
+    {
+        ai->TellDebug(requester, "Loot object doesn't exists.", "debug loot");
         return false;
+    }
+
+    if (loot.IsEmpty())
+    {
+        ai->TellDebug(requester, "Loot object is empty.", "debug loot");
+        return false;
+    }
 
     if (abs(wo->GetPositionZ() - bot->GetPositionZ()) > INTERACTION_DISTANCE)
+    {
+        ai->TellDebug(requester, "Object too high or low.", "debug loot");
         return false;
+    }
 
     if (!loot.IsLootPossible(bot))
+    {
+        ai->TellDebug(requester, "Looting is not possible.", "debug loot");
         return false;
+    }
 
     float lootDistanceToUse = sPlayerbotAIConfig.lootDistance;
 
@@ -80,7 +98,10 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
             && group->GetLootMethod() == LootMethod::MASTER_LOOT
             && group->GetMasterLooterGuid()
             && group->GetMasterLooterGuid() != bot->GetObjectGuid())
+        {
+            ai->TellDebug(requester, "Not master looter.", "debug loot");
             return false;
+        }
 
         if (isGroupLeader)
         {
@@ -105,6 +126,7 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
 
     if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(requester, wo), lootDistanceToUse))
     {
+        ai->TellDebug(requester, "Outside of loot range: " + std::to_string(lootDistanceToUse), "debug loot");
         return false;
     }
 
@@ -132,6 +154,7 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
         {
             if (freeBagSpace < 1)
             {
+                ai->TellDebug(requester, "Destroying items to make room.", "debug loot");
                 ai->DestroyAllGrayItemsInBags(requester);
                 //recount freeBagSpace
                 freeBagSpace = AI_VALUE(uint8, "bag space");

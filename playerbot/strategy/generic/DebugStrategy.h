@@ -135,4 +135,19 @@ namespace ai
         virtual std::vector<std::string> GetRelatedStrategies() { return { "debug" , "threat" }; }
 #endif
     };
+
+    class DebugLootStrategy : public Strategy
+    {
+    public:
+        DebugLootStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "debug loot"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "debug loot"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "This strategy will make the bot give chat feedback about looting.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "debug" }; }
+#endif
+    };
 }

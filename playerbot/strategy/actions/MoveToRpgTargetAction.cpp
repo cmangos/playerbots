@@ -178,7 +178,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
         return false;
     }
 
-    if (ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT) && guidP.GetWorldObject())
+    if ((ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT)) && guidP.GetWorldObject())
     {
         if (couldMove)
         {

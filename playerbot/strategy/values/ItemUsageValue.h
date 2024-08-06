@@ -118,9 +118,9 @@ namespace ai
         /*
         * Median buyout price for current listings of the item on AH
         */
-        static uint32 ItemUsageValue::GetAHMedianBuyoutPrice(ItemPrototype const* proto);
-        static bool ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto);
-        static bool ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* proto);
+        static uint32 GetAHMedianBuyoutPrice(ItemPrototype const* proto);
+        static bool IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto);
+        static bool IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* proto);
         /*
         * bots buy at this price
         */

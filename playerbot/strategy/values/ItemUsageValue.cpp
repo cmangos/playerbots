@@ -980,27 +980,13 @@ uint32 ItemUsageValue::GetItemBaseValue(ItemPrototype const* proto)
 uint32 ItemUsageValue::GetAHMedianBuyoutPrice(ItemPrototype const* proto)
 {
     auto medianPriceForItemQuery = CharacterDatabase.PQuery(
-        "SELECT"
-        " item_template,"
-        " AVG(buyoutprice / item_count)"
-        " FROM"
-        " ("
-        "     SELECT"
-        "     item_template,"
-        "     item_count,"
-        "     buyoutprice,"
-        "     ROW_NUMBER() OVER("
-        "         PARTITION BY item_template"
-        "         ORDER BY(buyoutprice / item_count) asc) AS RowAsc,"
-        "     ROW_NUMBER() OVER("
-        "         PARTITION BY item_template"
-        "         ORDER BY(buyoutprice / item_count) desc) AS RowDesc"
-        "     FROM auction SOH"
-        " ) x"
-        " WHERE"
-        " RowAsc IN(RowDesc, RowDesc - 1, RowDesc + 1) and item_template = '%u'"
-        " GROUP BY item_template"
-        " ORDER BY item_template",
+        "  SELECT item_template, AVG(median)"
+        "  FROM (SELECT item_template, (buyoutprice / item_count) median"
+        "          FROM (SELECT item_template, item_count, buyoutprice, @rownum:= @rownum + 1 as `rownumber`, @total_rows:= @rownum"
+        "                  FROM auction soh, (SELECT @rownum:= 0) r WHERE item_template = '%u'"
+        "                 ORDER BY(buyoutprice / item_count)) x"
+        "         WHERE x.rownumber IN(FLOOR((@total_rows + 1) / 2), FLOOR((@total_rows + 2) / 2))) y"
+        "      GROUP BY item_template",
         proto->ItemId
     );
     if (medianPriceForItemQuery)

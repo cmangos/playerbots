@@ -96,14 +96,44 @@ namespace ai
         }
         virtual std::vector<std::string> GetUsedValues() { return {"bag space", "force item usage", "inventory items", "item count" }; }
 #endif
-
     public:
         static float CurrentStacks(PlayerbotAI* ai, ItemPrototype const* proto);
         static std::vector<uint32> SpellsUsingItem(uint32 itemId, Player* bot);
 
         static std::string GetConsumableType(ItemPrototype const* proto, bool hasMana);
         static uint32 GetRecipeSpell(ItemPrototype const* proto);
-        static uint32 GetItemValue(ItemPrototype const* proto);
+
+        //crafting/gathering/secondary profession material (reagent) ids
+        //<professtion skill id, set of reagent item ids>
+        static std::unordered_map<uint32, std::unordered_set<uint32>> reagentItemIdsForCraftingSkills;
+        //flat for quick checks
+        static std::unordered_set<uint32> allReagentItemIdsForCraftingSkills;
+        static std::vector<uint32> allReagentItemIdsForCraftingSkillsVector;
+
+        static void populateProfessionReagentIds();
+
+        static bool IsItemUsedBySkill(ItemPrototype const* proto, SkillType skillType);
+        static bool IsItemUsedToCraftAnything(ItemPrototype const* proto);
+        static uint32 GetItemBaseValue(ItemPrototype const* proto);
+        /*
+        * Median buyout price for current listings of the item on AH
+        */
+        static uint32 ItemUsageValue::GetAHMedianBuyoutPrice(ItemPrototype const* proto);
+        static bool ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto);
+        static bool ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* proto);
+        /*
+        * bots buy at this price
+        */
+        static uint32 GetBotBuyPrice(ItemPrototype const* proto, Player* bot);
+        /*
+        * bots sell at this price
+        */
+        static uint32 GetBotSellPrice(ItemPrototype const* proto, Player* bot);
+        /*
+        * bots sell to AH at this price
+        */
+        static uint32 GetBotAHSellPrice(ItemPrototype const* proto, Player* bot);
+        static uint32 GetCraftingFee(ItemPrototype const* proto);
 	};
 
     class ForceItemUsageValue : public ManualSetValue<ForceItemUsage>, public Qualified

@@ -2,9 +2,9 @@
 #include "playerbot/playerbot.h"
 #include "SetCraftAction.h"
 
-#include "ahbot/AhBotConfig.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/CraftValues.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
 using namespace ai;
 
 std::map<uint32, SkillLineAbilityEntry const*> SetCraftAction::skillSpells;
@@ -152,6 +152,5 @@ uint32 SetCraftAction::GetCraftFee(CraftData& data)
     if (!proto)
         return 0;
 
-    uint32 level = std::max(proto->ItemLevel, proto->RequiredLevel);
-    return sAhBotConfig.defaultMinPrice * level * level / 40;
+    return ItemUsageValue::GetCraftingFee(proto);
 }

@@ -1276,7 +1276,36 @@ bool DebugAction::Execute(Event& event)
 
             ai->TellPlayerNoFacing(requester, out);
         }
-    return true;
+        return true;
+    }
+    else if (text.find("price ") == 0)
+    {
+        std::ostringstream out;
+
+        if (text.size() < 7)
+            return false;
+
+        std::string link = text.substr(6);
+        ItemIds ids = ChatHelper::parseItems(link);
+
+        for (auto id : ids)
+        {
+            std::ostringstream out;
+
+            const ItemPrototype* proto = sObjectMgr.GetItemPrototype(id);
+            if (!proto)
+                continue;
+
+            out << ChatHelper::formatItem(proto);
+            out << " Buy from vendor: " << ChatHelper::formatMoney(proto->BuyPrice);
+            out << " Sell to vendor: " << ChatHelper::formatMoney(proto->SellPrice);
+            out << " Median buy from AH: " << ChatHelper::formatMoney(ItemUsageValue::GetAHMedianBuyoutPrice(proto));
+            out << " Sell to AH: " << ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellPrice(proto, bot));
+
+            ai->TellPlayerNoFacing(requester, out);
+        }
+
+        return true;
     }
     else if (text.find("add node") == 0 && isMod)
     {

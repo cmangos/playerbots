@@ -844,7 +844,7 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #
 # Auction house settings
 #
-# (0-1) If ot should query current AH listings when determining whether the item is worth posting to AH
+# (0-1) If bot should query current AH listings when determining whether the item is worth posting to AH
 # this list has priority over AiPlayerbot.AhOverVendorItemIds
 # AiPlayerbot.ShouldQueryAHForItemMedianPrice = 1
 #

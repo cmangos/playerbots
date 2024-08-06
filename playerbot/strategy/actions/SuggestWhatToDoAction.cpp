@@ -1,6 +1,5 @@
-
 #include "playerbot/playerbot.h"
-#include "SuggestWhatToDoAction.h"=
+#include "SuggestWhatToDoAction.h"
 #include "playerbot/AiFactory.h"
 #include "Chat/ChannelMgr.h"
 #include "playerbot/PlayerbotAIConfig.h"

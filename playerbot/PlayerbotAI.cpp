@@ -5855,6 +5855,12 @@ bool ChatHandler::HandleRandomPlayerbotCommand(char* args)
     return RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(this, args);
 }
 
+//Dummy handler until Chat.h can be modified.
+bool ChatHandler::HandleAhBotCommand(char* args)
+{
+    return false;
+}
+
 float PlayerbotAI::GetRange(std::string type)
 {
     float val = 0;

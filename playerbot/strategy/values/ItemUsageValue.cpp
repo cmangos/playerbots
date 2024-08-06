@@ -1015,6 +1015,8 @@ uint32 ItemUsageValue::GetAHMedianBuyoutPrice(ItemPrototype const* proto)
             return medianPrice;
         } while (medianPriceForItemQuery->NextRow());
     }
+
+    return 0;
 }
 
 bool ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto)

@@ -954,12 +954,6 @@ uint32 ItemUsageValue::GetItemBaseValue(ItemPrototype const* proto)
                 }
             }
 
-            if (proto->Class == ItemClass::ITEM_CLASS_TRADE_GOODS)
-            {
-                //white trade goods are usually sold by vendors
-                return static_cast<uint32>(proto->SellPrice);
-            }
-
             break;
         }
         //UNCOMMON+ are usually all worth at least the "buy from vendor" price

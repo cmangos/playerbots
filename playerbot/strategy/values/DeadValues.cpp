@@ -70,11 +70,11 @@ GuidPosition BestGraveyardValue::Calculate()
     }
     else
     {
-        //Revive near master.
-        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
-            return AI_VALUE2(GuidPosition, "graveyard", "master");
-
         uint32 deathCount = AI_VALUE(uint32, "death count");
+
+        //Revive near master.
+        if (deathCount < 3 && ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
+            return AI_VALUE2(GuidPosition, "graveyard", "master");
 
         //Revive nearby.
         if (deathCount < 3)

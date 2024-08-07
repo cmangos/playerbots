@@ -47,6 +47,6 @@ namespace ai
 #endif 
     private:
         virtual bool ExecuteCommand(Player* requester, std::string text, Unit* auctioneer);
-        bool BidItem(Player* requester, AuctionEntry* auction, uint32 price, Unit* auctioneer);
+        bool BidItem(Player* requester, AuctionEntry* auction, uint32 price, Unit* auctioneer, std::string reason = "");
     };
 }

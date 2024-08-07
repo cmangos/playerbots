@@ -226,6 +226,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
 
     if (text == "vendor")
     {
+        ItemUsage usage;
         auto data = WorldPacket();
         uint32 count, totalcount = 0;
         auctionHouse->BuildListBidderItems(data, bot, 9999, count, totalcount);
@@ -262,7 +263,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
 
             uint32 cost = std::min(auction->buyout, uint32(std::max(auction->bid, auction->startbid) * frand(1.05f, 1.25f)));
 
-            ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(auction).GetQualifier());
+            usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(auction).GetQualifier());
 
             if (freeMoney.find(usage) == freeMoney.end() || cost > AI_VALUE2(uint32, "free money for", freeMoney[usage]))
                 continue;
@@ -313,7 +314,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             if (!auction)
                 continue;
 
-            ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(auction).GetQualifier());
+            usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(auction).GetQualifier());
 
             uint32 price = std::min(auction->buyout, uint32(std::max(auction->bid, auction->startbid) * frand(1.05f, 1.25f)));
 
@@ -325,7 +326,52 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
                     continue;
             }
 
-            bidItems = BidItem(requester, auction, price, auctioneer);
+            freeMoney[ItemUsage::ITEM_USAGE_EQUIP] = freeMoney[ItemUsage::ITEM_USAGE_BAD_EQUIP] = (uint32)NeedMoneyFor::gear;
+            freeMoney[ItemUsage::ITEM_USAGE_USE] = (uint32)NeedMoneyFor::consumables;
+            freeMoney[ItemUsage::ITEM_USAGE_SKILL] = freeMoney[ItemUsage::ITEM_USAGE_DISENCHANT] = (uint32)NeedMoneyFor::tradeskill;
+            freeMoney[ItemUsage::ITEM_USAGE_AMMO] = (uint32)NeedMoneyFor::ammo;
+            freeMoney[ItemUsage::ITEM_USAGE_QUEST] = freeMoney[ItemUsage::ITEM_USAGE_AH] = freeMoney[ItemUsage::ITEM_USAGE_VENDOR] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_NEED] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_GREED] = (uint32)NeedMoneyFor::anything;
+
+            std::map<std::string, std::string> placeholders;
+            std::string reason;
+            ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(auction).GetQualifier());
+
+            switch (usage)
+            {
+            case ItemUsage::ITEM_USAGE_EQUIP:
+                reason = BOT_TEXT2("for equiping as upgrade.", placeholders);
+                break;
+            case ItemUsage::ITEM_USAGE_BAD_EQUIP:
+                reason = BOT_TEXT2("for equiping until I can find something better.", placeholders);
+                break;
+            case ItemUsage::ITEM_USAGE_USE:
+                reason = BOT_TEXT2("to use it when I need it.", placeholders);
+                break;
+            case ItemUsage::ITEM_USAGE_SKILL:
+            case ItemUsage::ITEM_USAGE_DISENCHANT:
+                reason = BOT_TEXT2("to use it for my profession.", placeholders);
+                break;
+            case ItemUsage::ITEM_USAGE_AMMO:
+                BOT_TEXT2("to use as ammo.", placeholders);
+                break;
+            case ItemUsage::ITEM_USAGE_QUEST:
+                reason = BOT_TEXT2("to complete an objective for a quest.", placeholders);
+                break;
+            case ItemUsage::ITEM_USAGE_AH:
+                placeholders["%price"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate), bot));
+                reason = BOT_TEXT2("to repost on AH for about %price.", placeholders);
+                break;
+            case ItemUsage::ITEM_USAGE_VENDOR:
+                placeholders["%price"] = ChatHelper::formatMoney(sObjectMgr.GetItemPrototype(auction->itemTemplate)->SellPrice);
+                reason = BOT_TEXT2("to sell to a vendor for %price.", placeholders);
+                break;
+            case ItemUsage::ITEM_USAGE_FORCE_NEED:
+            case ItemUsage::ITEM_USAGE_FORCE_GREED:
+                reason = BOT_TEXT2("because I was told to get this item.", placeholders);
+                break;
+            }
+
+            bidItems = BidItem(requester, auction, price, auctioneer, reason);
                 
             if (bidItems)
                 totalcount++;
@@ -387,7 +433,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
     return BidItem(requester, auction, cost, auctioneer);
 }
 
-bool AhBidAction::BidItem(Player* requester, AuctionEntry* auction, uint32 price, Unit* auctioneer)
+bool AhBidAction::BidItem(Player* requester, AuctionEntry* auction, uint32 price, Unit* auctioneer, std::string reason)
 {
     AuctionHouseEntry const* auctionHouseEntry = bot->GetSession()->GetCheckedAuctionHouseForAuctioneer(auctioneer->GetObjectGuid());
     if (!auctionHouseEntry)
@@ -422,6 +468,8 @@ bool AhBidAction::BidItem(Player* requester, AuctionEntry* auction, uint32 price
         sPlayerbotAIConfig.logEvent(ai, "AhBidAction", proto->Name1, std::to_string(proto->ItemId));
         std::ostringstream out;
         out << "Bidding " << ChatHelper::formatMoney(price) << " on " << ChatHelper::formatItem(itemQualifier, count) << " on the AH";
+        if (!reason.empty())
+            out << " " << reason;
         ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         return true;
     }

@@ -154,8 +154,18 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
     x += cos(angle) * INTERACTION_DISTANCE * distance;
     y += sin(angle) * INTERACTION_DISTANCE * distance;
+
+    WorldPosition movePos(mapId, x, y, z);
     
-    //WaitForReach(distance);
+    if (movePos.distance(bot) < sPlayerbotAIConfig.sightDistance)
+    {
+        if (!movePos.ClosestCorrectPoint(5.0f))
+        {
+            ai->TellDebug(GetMaster(), "Can not path to desired location around " + chat->formatWorldobject(guidP.GetWorldObject()) + " trying again later.", "debug move");
+
+            return false;
+        }
+    }
 
     bool couldMove;
 
@@ -164,7 +174,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
     else    
         couldMove = MoveTo(mapId, x, y, z, false, false);
 
-    if (!couldMove && WorldPosition(mapId,x,y,z).distance(bot) > INTERACTION_DISTANCE)
+    if (!couldMove && movePos.distance(bot) > INTERACTION_DISTANCE)
     {
         AI_VALUE(std::set<ObjectGuid>&,"ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
 

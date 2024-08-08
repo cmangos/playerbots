@@ -84,9 +84,9 @@ bool BuyAction::Execute(Event& event)
                     freeMoney[ItemUsage::ITEM_USAGE_SKILL] = (uint32)NeedMoneyFor::tradeskill;
                     freeMoney[ItemUsage::ITEM_USAGE_AMMO] =  (uint32)NeedMoneyFor::ammo;
                     freeMoney[ItemUsage::ITEM_USAGE_QUEST] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_NEED] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_GREED] = (uint32)NeedMoneyFor::anything;
-                    
+
                     //if item is worth selling to AH?
-                    if (ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(proto))
+                    if (ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(proto, tItem->maxcount > 0))
                         freeMoney[ItemUsage::ITEM_USAGE_AH] = (uint32)NeedMoneyFor::ah;
                 
                     if (freeMoney.find(usage) == freeMoney.end())

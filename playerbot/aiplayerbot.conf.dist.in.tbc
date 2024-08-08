@@ -846,7 +846,8 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #
 # (0-1) If bot should query current AH listings when determining whether the item is worth posting to AH
 # this list has priority over AiPlayerbot.AhOverVendorItemIds
-# AiPlayerbot.ShouldQueryAHForItemMedianPrice = 1
+# Disabled by default for performance concerns, but you REALLY want to enable it for nicer price calculations
+# AiPlayerbot.ShouldQueryAHForItemMedianPrice = 0
 #
 # List of item ids which bot will prefer to put to AH rather than selling to vendor (these are overrides)
 # For example if you want bots to put certain gray/white armor pieces to AH rather than selling to vendor

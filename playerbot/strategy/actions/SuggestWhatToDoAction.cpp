@@ -143,7 +143,7 @@ void SuggestWhatToDoAction::grindMaterials()
     if (bot->GetLevel() <= 5)
         return;
 
-    auto vec = ItemUsageValue::allReagentItemIdsForCraftingSkillsVector;
+    auto vec = ItemUsageValue::GetAllReagentItemIdsForCraftingSkillsVector();
 
     if (vec.size() > 0)
     {

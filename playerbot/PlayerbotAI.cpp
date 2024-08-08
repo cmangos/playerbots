@@ -5830,6 +5830,15 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
             case NeedMoneyFor::guild:
                 out << "guild";
                 break;
+            case NeedMoneyFor::tradeskill:
+                out << "tradeskill";
+                break;
+            case NeedMoneyFor::ah:
+                out << "ah";
+                break;
+            case NeedMoneyFor::anything:
+                out << "anything";
+                break;
             }
             out << " | " << ChatHelper::formatMoney(AI_VALUE2(uint32, "free money for", i)) << " / " << ChatHelper::formatMoney(AI_VALUE2(uint32, "money needed for", i)) << "\n";
         }

@@ -73,8 +73,14 @@ GuidPosition BestGraveyardValue::Calculate()
         uint32 deathCount = AI_VALUE(uint32, "death count");
 
         //Revive near master.
-        if (deathCount < 3 && ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
-            return AI_VALUE2(GuidPosition, "graveyard", "master");
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
+        {
+            if (deathCount < 5)
+                return AI_VALUE2(GuidPosition, "graveyard", "master");
+            else if (deathCount < 10 && AI_VALUE2(GuidPosition, "graveyard", "home bind").fDist(AI_VALUE2(GuidPosition, "graveyard", "master")) > sPlayerbotAIConfig.reactDistance)
+                return AI_VALUE2(GuidPosition, "graveyard", "home bind");
+        }
+            
 
         //Revive nearby.
         if (deathCount < 3)

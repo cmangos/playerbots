@@ -9,9 +9,9 @@ namespace ai
     public:
         ItemQualifier() { itemId = 0; enchantId = 0; randomPropertyId = 0; gem1 = 0; gem2 = 0; gem3 = 0; gem4 = 0; proto = nullptr; };
         ItemQualifier(uint32 itemId, int32 randomPropertyId = 0, uint32 enchantId = 0, uint32 gem1 = 0, uint32 gem2 = 0, uint32 gem3 = 0, uint32 gem4 = 0) : itemId(itemId), randomPropertyId(randomPropertyId), enchantId(enchantId), gem1(gem1), gem2(gem2), gem3(gem3), gem4(gem4) { proto = nullptr; };
-        ItemQualifier(Item* item) { itemId = item->GetProto()->ItemId; enchantId = item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT); randomPropertyId = item->GetItemRandomPropertyId(); gem1 = GemId(item, 0); gem2 = GemId(item, 1); gem3 = GemId(item, 2); gem4 = GemId(item, 3); proto = item->GetProto();};
+        ItemQualifier(Item* item) { itemId = item->GetProto()->ItemId; enchantId = item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT); randomPropertyId = item->GetItemRandomPropertyId(); gem1 = GemId(item, 0); gem2 = GemId(item, 1); gem3 = GemId(item, 2); gem4 = GemId(item, 3); proto = item->GetProto(); };
         ItemQualifier(LootItem* item) { itemId = item->itemId; enchantId = 0; randomPropertyId = item->randomPropertyId; gem1 = 0; gem2 = 0; gem3 = 0; gem4 = 0; proto = nullptr; };
-        ItemQualifier(AuctionEntry* auction) { itemId = auction->itemTemplate; enchantId = 0; randomPropertyId = auction->itemRandomPropertyId; gem1 = 0; gem2 = 0; gem3 = 0; gem4 = 0; proto = nullptr;};
+        ItemQualifier(AuctionEntry* auction) { itemId = auction->itemTemplate; enchantId = 0; randomPropertyId = auction->itemRandomPropertyId; gem1 = 0; gem2 = 0; gem3 = 0; gem4 = 0; proto = nullptr; };
         ItemQualifier(std::string qualifier, bool linkQualifier = true);
 
         uint32 GetId() { return itemId; }
@@ -20,7 +20,7 @@ namespace ai
         uint32 GetGem1() { return gem1; }
         uint32 GetGem2() { return gem2; }
         uint32 GetGem3() { return gem3; }
-        uint32 GetGem4() { return gem4; }       
+        uint32 GetGem4() { return gem4; }
 
 #ifdef MANGOSBOT_ZERO
         std::string GetLinkQualifier() { return std::to_string(itemId) + ":" + std::to_string(enchantId) + ":" + std::to_string(randomPropertyId) + ":0"; }
@@ -71,8 +71,8 @@ namespace ai
     };
 
     class ItemUsageValue : public CalculatedValue<ItemUsage>, public Qualified
-	{
-	public:
+    {
+    public:
         ItemUsageValue(PlayerbotAI* ai, std::string name = "item usage") : CalculatedValue<ItemUsage>(ai, name), Qualified() {}
         virtual ItemUsage Calculate();
 
@@ -81,7 +81,7 @@ namespace ai
         uint32 GetSmallestBagSize();
         bool IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory = false);
         bool IsItemNeededForSkill(ItemPrototype const* proto);
-        bool IsItemUsefulForSkill(ItemPrototype const * proto);
+        bool IsItemUsefulForSkill(ItemPrototype const* proto);
         bool IsItemNeededForUsefullCraft(ItemPrototype const* proto, bool checkAllReagents);
         Item* CurrentItem(ItemPrototype const* proto);
         float BetterStacks(ItemPrototype const* proto, std::string usageType = "");
@@ -89,12 +89,12 @@ namespace ai
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "item usage"; } //Must equal iternal name
         virtual std::string GetHelpTypeName() { return "item"; }
-        virtual std::string GetHelpDescription() 
-        { 
+        virtual std::string GetHelpDescription()
+        {
             return "This value gives the reason why a bot finds an item useful.\n"
-                   "Based on this value bots will equip/unequip/need/greed/loot/destroy/sell/ah/craft items."; 
+                "Based on this value bots will equip/unequip/need/greed/loot/destroy/sell/ah/craft items.";
         }
-        virtual std::vector<std::string> GetUsedValues() { return {"bag space", "force item usage", "inventory items", "item count" }; }
+        virtual std::vector<std::string> GetUsedValues() { return { "bag space", "force item usage", "inventory items", "item count" }; }
 #endif
     private:
         //crafting/gathering/secondary profession material (reagent) ids
@@ -106,13 +106,10 @@ namespace ai
 
         static std::unordered_map<uint32, std::vector<std::pair<uint32, uint32>>> m_craftingReagentItemIdsForCraftableItem;
 
-        static std::unordered_set<uint32> m_allItemIdsSoldByAnyNonTeamVendors;
-        static std::unordered_set<uint32> m_allItemIdsSoldByAllianceTeamSpecificVendors;
-        static std::unordered_set<uint32> m_allItemIdsSoldByHordeTeamSpecificVendors;
+        static std::unordered_set<uint32> m_allItemIdsSoldByAnyVendors;
 
         static double GetRarityPriceMultiplier(ItemPrototype const* proto);
         static double GetLevelPriceMultiplier(ItemPrototype const* proto);
-        static uint32 GetItemBaseValue(ItemPrototype const* proto, uint8 maxReagentLevel = 5);
     public:
         static float CurrentStacks(PlayerbotAI* ai, ItemPrototype const* proto);
         static std::vector<uint32> SpellsUsingItem(uint32 itemId, Player* bot);
@@ -127,10 +124,7 @@ namespace ai
         static std::vector<uint32> GetAllReagentItemIdsForCraftingSkillsVector();
         static std::vector<std::pair<uint32, uint32>> GetAllReagentItemIdsForCraftingItem(ItemPrototype const* proto);
 
-        static bool IsItemSoldByAnyNonTeamVendor(ItemPrototype const* proto);
-        static bool IsItemSoldByAnyBotTeamVendorOnly(ItemPrototype const* proto, Player* bot);
-        static bool IsItemSoldByAnyBotAccessibleVendor(ItemPrototype const* proto, Player* bot);
-        static bool IsItemSoldByAnyVendorAtAll(ItemPrototype const* proto);
+        static bool IsItemSoldByAnyVendor(ItemPrototype const* proto);
 
         static bool IsItemUsedBySkill(ItemPrototype const* proto, SkillType skillType);
         static bool IsItemUsedToCraftAnything(ItemPrototype const* proto);
@@ -141,6 +135,8 @@ namespace ai
         static uint32 GetAHMedianBuyoutPrice(ItemPrototype const* proto);
         static bool IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto, Player* bot);
         static bool IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* proto, bool isLimitedSupply);
+
+        static uint32 GetItemBaseValue(ItemPrototype const* proto, uint8 maxReagentLevel = 5);
 
         /*
         * bots buy at this price
@@ -155,7 +151,7 @@ namespace ai
         */
         static uint32 GetBotAHSellBasePrice(ItemPrototype const* proto, Player* bot);
         static uint32 GetCraftingFee(ItemPrototype const* proto);
-	};
+    };
 
     class ForceItemUsageValue : public ManualSetValue<ForceItemUsage>, public Qualified
     {
@@ -168,7 +164,7 @@ namespace ai
         virtual std::string GetHelpDescription()
         {
             return "This value overrides some reasons why a bot finds an item useful\n"
-                    "Based on this value bots will no longer sell/ah/destroy/unequip items.";
+                "Based on this value bots will no longer sell/ah/destroy/unequip items.";
         }
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif

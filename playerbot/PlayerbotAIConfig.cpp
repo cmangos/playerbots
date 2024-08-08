@@ -206,7 +206,7 @@ bool PlayerbotAIConfig::Initialize()
     minRandomBotsPriceChangeInterval = config.GetIntDefault("AiPlayerbot.MinRandomBotsPriceChangeInterval", 2 * 3600);
     maxRandomBotsPriceChangeInterval = config.GetIntDefault("AiPlayerbot.MaxRandomBotsPriceChangeInterval", 48 * 3600);
     //Auction house settings
-    shouldQueryAHForItemMedianPrice = config.GetBoolDefault("AiPlayerbot.ShouldQueryAHForItemMedianPrice", true);
+    shouldQueryAHForItemMedianPrice = config.GetBoolDefault("AiPlayerbot.ShouldQueryAHForItemMedianPrice", false);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.AhOverVendorItemIds", ""), ahOverVendorItemIds);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.VendorOverAHItemIds", ""), vendorOverAHItemIds);
     //
@@ -606,7 +606,9 @@ bool PlayerbotAIConfig::Initialize()
     sTravelMgr.loadAreaLevels();
     sLog.outString("Loading spellIds.");
     ChatHelper::PopulateSpellNameList();
-    ItemUsageValue::populateProfessionReagentIds();
+    ItemUsageValue::PopulateProfessionReagentIds();
+    ItemUsageValue::PopulateSoldByVendorItemIds();
+    ItemUsageValue::PopulateReagentItemIdsForCraftableItemIds();
 
     RandomPlayerbotFactory::CreateRandomBots();
     PlayerbotFactory::Init();

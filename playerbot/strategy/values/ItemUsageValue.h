@@ -96,6 +96,23 @@ namespace ai
         }
         virtual std::vector<std::string> GetUsedValues() { return {"bag space", "force item usage", "inventory items", "item count" }; }
 #endif
+    private:
+        //crafting/gathering/secondary profession material (reagent) ids
+        //<professtion skill id, set of reagent item ids>
+        static std::unordered_map<uint32, std::unordered_set<uint32>> m_reagentItemIdsForCraftingSkills;
+        //flat for quick checks
+        static std::unordered_set<uint32> m_allReagentItemIdsForCraftingSkills;
+        static std::vector<uint32> m_allReagentItemIdsForCraftingSkillsVector;
+
+        static std::unordered_map<uint32, std::vector<std::pair<uint32, uint32>>> m_craftingReagentItemIdsForCraftableItem;
+
+        static std::unordered_set<uint32> m_allItemIdsSoldByAnyNonTeamVendors;
+        static std::unordered_set<uint32> m_allItemIdsSoldByAllianceTeamSpecificVendors;
+        static std::unordered_set<uint32> m_allItemIdsSoldByHordeTeamSpecificVendors;
+
+        static double GetRarityPriceMultiplier(ItemPrototype const* proto);
+        static double GetLevelPriceMultiplier(ItemPrototype const* proto);
+        static uint32 GetItemBaseValue(ItemPrototype const* proto);
     public:
         static float CurrentStacks(PlayerbotAI* ai, ItemPrototype const* proto);
         static std::vector<uint32> SpellsUsingItem(uint32 itemId, Player* bot);
@@ -103,24 +120,28 @@ namespace ai
         static std::string GetConsumableType(ItemPrototype const* proto, bool hasMana);
         static uint32 GetRecipeSpell(ItemPrototype const* proto);
 
-        //crafting/gathering/secondary profession material (reagent) ids
-        //<professtion skill id, set of reagent item ids>
-        static std::unordered_map<uint32, std::unordered_set<uint32>> reagentItemIdsForCraftingSkills;
-        //flat for quick checks
-        static std::unordered_set<uint32> allReagentItemIdsForCraftingSkills;
-        static std::vector<uint32> allReagentItemIdsForCraftingSkillsVector;
+        static void PopulateProfessionReagentIds();
+        static void PopulateReagentItemIdsForCraftableItemIds();
+        static void PopulateSoldByVendorItemIds();
 
-        static void populateProfessionReagentIds();
+        static std::vector<uint32> GetAllReagentItemIdsForCraftingSkillsVector();
+        static std::vector<std::pair<uint32, uint32>> GetAllReagentItemIdsForCraftingItem(ItemPrototype const* proto);
+
+        static bool IsItemSoldByAnyNonTeamVendor(ItemPrototype const* proto);
+        static bool IsItemSoldByAnyBotTeamVendorOnly(ItemPrototype const* proto, Player* bot);
+        static bool IsItemSoldByAnyBotAccessibleVendor(ItemPrototype const* proto, Player* bot);
+        static bool IsItemSoldByAnyVendorAtAll(ItemPrototype const* proto);
 
         static bool IsItemUsedBySkill(ItemPrototype const* proto, SkillType skillType);
         static bool IsItemUsedToCraftAnything(ItemPrototype const* proto);
-        static uint32 GetItemBaseValue(ItemPrototype const* proto);
+
         /*
         * Median buyout price for current listings of the item on AH
         */
         static uint32 GetAHMedianBuyoutPrice(ItemPrototype const* proto);
-        static bool IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto);
-        static bool IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* proto);
+        static bool IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto, Player* bot);
+        static bool IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* proto, bool isLimitedSupply);
+
         /*
         * bots buy at this price
         */
@@ -132,7 +153,7 @@ namespace ai
         /*
         * bots sell to AH at this price
         */
-        static uint32 GetBotAHSellPrice(ItemPrototype const* proto, Player* bot);
+        static uint32 GetBotAHSellBasePrice(ItemPrototype const* proto, Player* bot);
         static uint32 GetCraftingFee(ItemPrototype const* proto);
 	};
 

@@ -104,7 +104,7 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
                 }
 
                 //default desired price if there are no item listings
-                uint32 pricePerItem = ItemUsageValue::GetBotAHSellPrice(proto, bot);
+                uint32 pricePerItem = ItemUsageValue::GetBotAHSellBasePrice(proto, bot);
 
                 // check if it would be reasonable to sell lower than current cheapest listing
                 // also check if the item poster is not self to not to undercut yourself
@@ -128,7 +128,7 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
                 }
 
                 //price should be reasonable, NEVER cheaper or at vendor sell price
-                pricePerItem = std::max(static_cast<uint32>(proto->SellPrice * 1.2f), pricePerItem);
+                pricePerItem = std::max(static_cast<uint32>(proto->SellPrice * 1.1f), pricePerItem);
 
                 //store in immediate cache to use the same price for subsequent postings
                 pricePerItemCache[proto->ItemId] = pricePerItem;
@@ -277,7 +277,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
                 power = sRandomItemMgr.GetLiveStatWeight(bot, auction->itemTemplate);
                 break;
             case ItemUsage::ITEM_USAGE_AH:
-                if (cost >= (int32)ItemUsageValue::GetBotAHSellPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate), bot))
+                if (cost >= (int32)ItemUsageValue::GetBotAHSellBasePrice(sObjectMgr.GetItemPrototype(auction->itemTemplate), bot))
                     continue;
                 power = 1000;
                 break;
@@ -358,7 +358,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
                 reason = BOT_TEXT2("to complete an objective for a quest.", placeholders);
                 break;
             case ItemUsage::ITEM_USAGE_AH:
-                placeholders["%price"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate), bot));
+                placeholders["%price"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellBasePrice(sObjectMgr.GetItemPrototype(auction->itemTemplate), bot));
                 reason = BOT_TEXT2("to repost on AH for about %price.", placeholders);
                 break;
             case ItemUsage::ITEM_USAGE_VENDOR:

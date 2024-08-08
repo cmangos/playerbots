@@ -1272,7 +1272,7 @@ double ItemUsageValue::GetLevelPriceMultiplier(ItemPrototype const* proto)
     return 0.5 + exp(x / 60) / 2;
 }
 
-uint32 ItemUsageValue::GetItemBaseValue(ItemPrototype const* proto)
+uint32 ItemUsageValue::GetItemBaseValue(ItemPrototype const* proto, uint8 maxReagentLevel)
 {
     if (proto->Quality == ItemQualities::ITEM_QUALITY_POOR)
     {
@@ -1286,14 +1286,15 @@ uint32 ItemUsageValue::GetItemBaseValue(ItemPrototype const* proto)
     }
 
     //calculate total value of reagents if the item is craftable
-    if (GetAllReagentItemIdsForCraftingItem(proto).size() > 0)
+    if (maxReagentLevel > 0 && GetAllReagentItemIdsForCraftingItem(proto).size() > 0)
     {
+        maxReagentLevel--;
         uint32 totalReagentsValue = 0;
 
         for (auto idCountPair : GetAllReagentItemIdsForCraftingItem(proto))
         {
             ItemPrototype const* reagentProto = ObjectMgr::GetItemPrototype(idCountPair.first);
-            totalReagentsValue += GetItemBaseValue(reagentProto) * idCountPair.second;
+            totalReagentsValue += GetItemBaseValue(reagentProto, maxReagentLevel) * idCountPair.second;
         }
 
         if (totalReagentsValue > 0)

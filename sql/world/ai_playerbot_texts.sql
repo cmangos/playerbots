@@ -3129,7 +3129,7 @@ INSERT INTO `ai_playerbot_texts` (`name`, `text`, `say_type`, `reply_type`, `tex
 ('suggest_sell', 'Why the #!@ have I bought %item_formatted_link? Anyone needs it for %cost_gold?', 0, 0, '', 'Pourquoi ai-je acheté le #!@ %item_formatted_link ? Quelqu\'un en a besoin pour %cost_gold ?', '', '', '', '¿Por qué #!@ he comprado %item_formatted_link? ¿Alguien lo necesita por %cost_gold?', '', ''),
 
 
--- response LFG/LFM channel
+-- response LFG/LFM channel when solo
 -- usable placeholders:
 -- %quest_links
 -- %other_name
@@ -3150,7 +3150,7 @@ INSERT INTO `ai_playerbot_texts` (`name`, `text`, `say_type`, `reply_type`, `tex
 ('response_lfg_quests_channel', '%other_name, I am up for %quest_links, I am %my_role', 0, 0, '', '', '', '', '', '', '', ''),
 
 
--- response LFG/LFM whisper
+-- response LFG/LFM whisper when solo
 -- usable placeholders:
 -- %quest_links
 -- %other_name
@@ -3169,6 +3169,38 @@ INSERT INTO `ai_playerbot_texts` (`name`, `text`, `say_type`, `reply_type`, `tex
 ('response_lfg_quests_whisper', 'wanna group up for %quest_links ?', 0, 0, '', '', '', '', '', '', '', ''),
 ('response_lfg_quests_whisper', 'I am up for %quest_links, I am in %zone_name right now', 0, 0, '', '', '', '', '', '', '', ''),
 ('response_lfg_quests_whisper', 'I am up for %quest_links, I am %my_role', 0, 0, '', '', '', '', '', '', '', ''),
+
+
+-- response LFG/LFM channel when in party
+-- usable placeholders:
+-- %quest_links
+-- %other_name
+-- %my_role
+-- %zone_name
+-- %area_name
+-- %my_class
+-- %my_race
+-- %my_level
+('response_lfg_quests_channel_in_group', 'I have %quest_links, but I am in group right now', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel_in_group', 'I also have %quest_links, but I am in group', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel_in_group', '%other_name, I also have %quest_links, but I\'m in group', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_channel_in_group', '%other_name, I am in group, but I also have %quest_links, I am in %zone_name right now', 0, 0, '', '', '', '', '', '', '', ''),
+
+
+-- response LFG/LFM whisper when in party
+-- usable placeholders:
+-- %quest_links
+-- %other_name
+-- %my_role
+-- %zone_name
+-- %area_name
+-- %my_class
+-- %my_race
+-- %my_level
+('response_lfg_quests_whisper_in_group', 'Hey, I also have %quest_links but I am in group', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper_in_group', 'Hey %other_name, I am in group, but I also have %quest_links', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper_in_group', 'I am in group, but I have %quest_links, I am in %zone_name right now', 0, 0, '', '', '', '', '', '', '', ''),
+('response_lfg_quests_whisper_in_group', 'I am in group, but I have %quest_links, I am %my_role', 0, 0, '', '', '', '', '', '', '', ''),
 
 
 

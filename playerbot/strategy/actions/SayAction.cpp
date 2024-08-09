@@ -430,12 +430,12 @@ bool ChatReplyAction::HandleLFGQuestsReply(Player* bot, ChatChannelSource chatCh
                 //may reply to the same channel or whisper
                 if (urand(0, 1))
                 {
-                    std::string responseMessage = BOT_TEXT2("response_lfg_quests_channel", placeholders);
+                    std::string responseMessage = BOT_TEXT2(bot->GetGroup() ? "response_lfg_quests_channel_in_group" : "response_lfg_quests_channel", placeholders);
                     bot->GetPlayerbotAI()->SayToWorld(responseMessage);
                 }
                 else
                 {
-                    std::string responseMessage = BOT_TEXT2("response_lfg_quests_whisper", placeholders);
+                    std::string responseMessage = BOT_TEXT2(bot->GetGroup() ? "response_lfg_quests_whisper_in_group" : "response_lfg_quests_whisper", placeholders);
                     bot->GetPlayerbotAI()->Whisper(responseMessage, name);
                 }
                 break;
@@ -445,12 +445,12 @@ bool ChatReplyAction::HandleLFGQuestsReply(Player* bot, ChatChannelSource chatCh
                 //may reply to the same channel or whisper
                 if (urand(0, 1))
                 {
-                    std::string responseMessage = BOT_TEXT2("response_lfg_quests_channel", placeholders);
+                    std::string responseMessage = BOT_TEXT2(bot->GetGroup() ? "response_lfg_quests_channel_in_group" : "response_lfg_quests_channel", placeholders);
                     bot->GetPlayerbotAI()->SayToGeneral(responseMessage);
                 }
                 else
                 {
-                    std::string responseMessage = BOT_TEXT2("response_lfg_quests_whisper", placeholders);
+                    std::string responseMessage = BOT_TEXT2(bot->GetGroup() ? "response_lfg_quests_whisper_in_group" : "response_lfg_quests_whisper", placeholders);
                     bot->GetPlayerbotAI()->Whisper(responseMessage, name);
                 }
                 break;
@@ -459,7 +459,7 @@ bool ChatReplyAction::HandleLFGQuestsReply(Player* bot, ChatChannelSource chatCh
             {
                 //do not reply to the chat
                 //may whisper
-                std::string responseMessage = BOT_TEXT2("response_lfg_quests_whisper", placeholders);
+                std::string responseMessage = BOT_TEXT2(bot->GetGroup() ? "response_lfg_quests_whisper_in_group" : "response_lfg_quests_whisper", placeholders);
                 bot->GetPlayerbotAI()->Whisper(responseMessage, name);
                 break;
             }

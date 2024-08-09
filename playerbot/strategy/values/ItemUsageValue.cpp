@@ -1143,16 +1143,16 @@ uint32 ItemUsageValue::GetAHListingLowestBuyoutPrice(ItemPrototype const* proto)
 
 bool ItemUsageValue::AreCurrentAHListingsTooCheap(ItemPrototype const* proto)
 {
-    uint32 lowestAhBuyoutPrice = GetAHListingLowestBuyoutPrice(proto);
+    uint32 lowestAhItemListingBuyoutPrice = GetAHListingLowestBuyoutPrice(proto);
     uint32 lowestAcceptapleAhBuyoutPrice = GetLowestAcceptableAHBuyoutPrice(proto);
 
     //check if AH listings are already at the bottom price (with a 1% margin for possible calculation errors and is generally better)
-    if (lowestAhBuyoutPrice > 0 && lowestAhBuyoutPrice <= lowestAcceptapleAhBuyoutPrice + (lowestAcceptapleAhBuyoutPrice * 0.01f))
+    if (lowestAhItemListingBuyoutPrice > 0 && lowestAhItemListingBuyoutPrice <= lowestAcceptapleAhBuyoutPrice + (lowestAcceptapleAhBuyoutPrice * 0.01f))
     {
         return true;
     }
 
-    false;
+    return false;
 }
 
 bool ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto, Player* bot)

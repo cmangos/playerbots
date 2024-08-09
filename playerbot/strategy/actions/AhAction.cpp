@@ -128,7 +128,7 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
                 }
 
                 //price should be reasonable, NEVER cheaper or at vendor sell price
-                pricePerItem = std::max(static_cast<uint32>(proto->SellPrice * 1.1f), pricePerItem);
+                pricePerItem = std::max(ItemUsageValue::GetLowestAcceptableAHBuyoutPrice(proto), pricePerItem);
 
                 //store in immediate cache to use the same price for subsequent postings
                 pricePerItemCache[proto->ItemId] = pricePerItem;

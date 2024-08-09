@@ -171,9 +171,37 @@ ItemUsage ItemUsageValue::Calculate()
 
     if (proto->Class == ITEM_CLASS_CONSUMABLE && !ai->HasCheat(BotCheatMask::item))
     {
-        std::string foodType = GetConsumableType(proto, bot->HasMana());
+        std::string foodType = "";
 
-        if (!foodType.empty() && bot->CanUseItem(proto) == EQUIP_ERR_OK)
+        if (IsHpFoodOrDrink(proto))
+        {
+            foodType = "food";
+        }
+        else if (IsManaFoodOrDrink(proto))
+        {
+            foodType = "drink";
+        }
+        else if (IsHealingPotion(proto))
+        {
+            foodType = "healing potion";
+        }
+        else if (IsManaPotion(proto))
+        {
+            foodType = "mana potion";
+        }
+        else if (IsBandage(proto))
+        {
+            foodType = "bandage";
+        }
+
+        //itemlevel 1 consumables are mostly level-independent
+        bool isAppropriateConsumableLevel = proto->RequiredLevel <= bot->GetLevel()
+            && (proto->ItemLevel == 1 || proto->ItemLevel+5 >= bot->GetLevel());
+
+        bool isAppropriateConsumable = isAppropriateConsumableLevel
+            && (IsHpFoodOrDrink(proto) || IsHealingPotion(proto) || IsBandage(proto) || (bot->HasMana() && (IsManaFoodOrDrink(proto) || IsManaPotion(proto))));
+
+        if (isAppropriateConsumable && bot->CanUseItem(proto) == EQUIP_ERR_OK)
         {
             float stacks = BetterStacks(proto, foodType);
 
@@ -811,19 +839,52 @@ std::vector<uint32> ItemUsageValue::SpellsUsingItem(uint32 itemId, Player* bot)
     return retSpells;
 }
 
-std::string ItemUsageValue::GetConsumableType(ItemPrototype const* proto, bool hasMana)
+bool ItemUsageValue::IsHpFoodOrDrink(ItemPrototype const* proto)
 {
-    std::string foodType = "";
-
-    if ((proto->SubClass == ITEM_SUBCLASS_CONSUMABLE || proto->SubClass == ITEM_SUBCLASS_FOOD))
+    if (proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE
+        && (proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_FOOD
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE_OTHER))
     {
-        if (proto->Spells[0].SpellCategory == 11)
-            return "food";
-        else if (proto->Spells[0].SpellCategory == 59 && hasMana)
-            return "drink";
+        for (auto spell : proto->Spells)
+        {
+            if (spell.SpellCategory == 11)
+            {
+                return true;
+            }
+        }
     }
 
-    if (proto->SubClass == ITEM_SUBCLASS_POTION || proto->SubClass == ITEM_SUBCLASS_FLASK)
+    return false;
+}
+
+bool ItemUsageValue::IsManaFoodOrDrink(ItemPrototype const* proto)
+{
+    if (proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE
+        && (proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_FOOD
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE_OTHER))
+    {
+        for (auto spell : proto->Spells)
+        {
+            if (spell.SpellCategory == 59)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool ItemUsageValue::IsHealingPotion(ItemPrototype const* proto)
+{
+    if (proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE &&
+        (proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_POTION
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_FLASK
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_POTION
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE_OTHER))
     {
         for (int j = 0; j < MAX_ITEM_PROTO_SPELLS; j++)
         {
@@ -831,20 +892,48 @@ std::string ItemUsageValue::GetConsumableType(ItemPrototype const* proto, bool h
             if (spellInfo)
                 for (int i = 0; i < 3; i++)
                 {
-                    if (spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE && hasMana)
-                        return "mana potion";
                     if (spellInfo->Effect[i] == SPELL_EFFECT_HEAL)
-                        return "healing potion";
+                        return true;
                 }
         }
     }
 
-    if (proto->SubClass == ITEM_SUBCLASS_BANDAGE)
+    return false;
+}
+
+bool ItemUsageValue::IsManaPotion(ItemPrototype const* proto)
+{
+    if (proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE &&
+        (proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_POTION
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_FLASK
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_POTION
+            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE_OTHER))
     {
-        return "bandage";
+        for (int j = 0; j < MAX_ITEM_PROTO_SPELLS; j++)
+        {
+            const SpellEntry* const spellInfo = sServerFacade.LookupSpellInfo(proto->Spells[j].SpellId);
+            if (spellInfo)
+                for (int i = 0; i < 3; i++)
+                {
+                    if (spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE)
+                        return true;
+                }
+        }
     }
 
-    return "";
+    return false;
+}
+
+bool ItemUsageValue::IsBandage(ItemPrototype const* proto)
+{
+    if (proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE
+        && proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_BANDAGE)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 uint32 ItemUsageValue::GetRecipeSpell(ItemPrototype const* proto)

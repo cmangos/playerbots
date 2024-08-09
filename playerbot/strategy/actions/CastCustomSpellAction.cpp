@@ -556,6 +556,10 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
             if (ai->CastSpell(spellId, (Unit*)wo, nullptr, false, &spellDuration))
             {
                 ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                if(wo != bot)
+                    ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                else
+                    ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 executed = true;
             }
         }

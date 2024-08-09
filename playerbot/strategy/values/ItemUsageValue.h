@@ -114,7 +114,12 @@ namespace ai
         static float CurrentStacks(PlayerbotAI* ai, ItemPrototype const* proto);
         static std::vector<uint32> SpellsUsingItem(uint32 itemId, Player* bot);
 
-        static std::string GetConsumableType(ItemPrototype const* proto, bool hasMana);
+        static bool IsHpFoodOrDrink(ItemPrototype const* proto);
+        static bool IsManaFoodOrDrink(ItemPrototype const* proto);
+        static bool IsHealingPotion(ItemPrototype const* proto);
+        static bool IsManaPotion(ItemPrototype const* proto);
+        static bool IsBandage(ItemPrototype const* proto);
+
         static uint32 GetRecipeSpell(ItemPrototype const* proto);
 
         static void PopulateProfessionReagentIds();

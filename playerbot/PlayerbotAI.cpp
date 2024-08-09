@@ -5988,6 +5988,39 @@ void PlayerbotAI::InventoryIterateItems(IterateItemsVisitor* visitor, IterateIte
         InventoryIterateItemsInBuyBack(visitor);
 }
 
+std::vector<Bag*> PlayerbotAI::GetEquippedAnyBags()
+{
+    std::vector<Bag*> bags;
+
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* bag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            bags.push_back(bag);
+        }
+    }
+
+    return bags;
+}
+
+std::vector<Bag*> PlayerbotAI::GetEquippedQuivers()
+{
+    std::vector<Bag*> bags;
+
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* bag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            if (bag->GetProto()->Class == ITEM_CLASS_QUIVER)
+            {
+                bags.push_back(bag);
+            }
+        }
+    }
+
+    return bags;
+}
+
 std::vector<Item*> PlayerbotAI::GetInventoryAndEquippedItems()
 {
     std::vector<Item*> items;

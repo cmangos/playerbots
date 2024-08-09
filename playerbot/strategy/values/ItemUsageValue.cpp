@@ -428,7 +428,20 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
     {
         if (bot->getClass() == CLASS_HUNTER)
         {
-            return ItemUsage::ITEM_USAGE_EQUIP;
+            std::vector<Bag*> equippedQuivers = bot->GetPlayerbotAI()->GetEquippedQuivers();
+
+            for (auto quiver : equippedQuivers)
+            {
+                if (quiver->GetProto()->ItemLevel < itemProto->ItemLevel)
+                {
+                    return ItemUsage::ITEM_USAGE_EQUIP;
+                }
+
+                if (quiver->GetProto()->ItemLevel == itemProto->ItemLevel && quiver->GetProto()->Quality < itemProto->Quality)
+                {
+                    return ItemUsage::ITEM_USAGE_EQUIP;
+                }
+            }
         }
 
         return ItemUsage::ITEM_USAGE_NONE;

@@ -511,6 +511,8 @@ public:
     std::list<Unit*> GetAllHostileNPCNonPetUnitsAroundWO(WorldObject* wo, float distanceAround);
 
 public:
+    std::vector<Bag*> GetEquippedAnyBags();
+    std::vector<Bag*> GetEquippedQuivers();
     std::vector<Item*> GetInventoryAndEquippedItems();
     std::vector<Item*> GetInventoryItems();
     uint32 GetInventoryItemsCountWithId(uint32 itemId);

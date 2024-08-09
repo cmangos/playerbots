@@ -1082,7 +1082,7 @@ bool ItemUsageValue::IsItemUsedToCraftAnything(ItemPrototype const* proto)
     return m_allReagentItemIdsForCraftingSkills.count(proto->ItemId) > 0;
 }
 
-uint32 ItemUsageValue::GetAHMedianBuyoutPrice(ItemPrototype const* proto)
+uint32 ItemUsageValue::GetAHMedianBuyoutPricePerItem(ItemPrototype const* proto)
 {
     if (sPlayerbotAIConfig.shouldQueryAHListingsOutsideOfAH)
     {
@@ -1113,12 +1113,12 @@ uint32 ItemUsageValue::GetAHMedianBuyoutPrice(ItemPrototype const* proto)
     return 0;
 }
 
-uint32 ItemUsageValue::GetAHListingLowestBuyoutPrice(ItemPrototype const* proto)
+uint32 ItemUsageValue::GetAHListingLowestBuyoutPricePerItem(ItemPrototype const* proto)
 {
     if (sPlayerbotAIConfig.shouldQueryAHListingsOutsideOfAH)
     {
         auto query = CharacterDatabase.PQuery(
-            "SELECT buyoutprice"
+            "SELECT buyoutprice / item_count"
             " FROM auction"
             " WHERE item_template = '%u'"
             " ORDER BY buyoutprice ASC"
@@ -1143,7 +1143,7 @@ uint32 ItemUsageValue::GetAHListingLowestBuyoutPrice(ItemPrototype const* proto)
 
 bool ItemUsageValue::AreCurrentAHListingsTooCheap(ItemPrototype const* proto)
 {
-    uint32 lowestAhItemListingBuyoutPrice = GetAHListingLowestBuyoutPrice(proto);
+    uint32 lowestAhItemListingBuyoutPrice = GetAHListingLowestBuyoutPricePerItem(proto);
     uint32 lowestAcceptapleAhBuyoutPrice = GetLowestAcceptableAHBuyoutPrice(proto);
 
     //check if AH listings are already at the bottom price (with a 1% margin for possible calculation errors and is generally better)
@@ -1306,7 +1306,7 @@ bool ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* pr
         return false;
     }
 
-    if (GetAHMedianBuyoutPrice(proto) > static_cast<uint32>(proto->BuyPrice * 1.1f))
+    if (GetAHMedianBuyoutPricePerItem(proto) > static_cast<uint32>(proto->BuyPrice * 1.1f))
     {
         return true;
     }

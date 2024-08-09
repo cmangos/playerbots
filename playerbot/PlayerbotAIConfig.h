@@ -111,7 +111,7 @@ public:
     uint32 randomBotsPerInterval, randomBotsMaxLoginsPerInterval;
     uint32 minRandomBotsPriceChangeInterval, maxRandomBotsPriceChangeInterval;
     //Auction house settings
-    bool shouldQueryAHForItemMedianPrice;
+    bool shouldQueryAHListingsOutsideOfAH;
     std::list<uint32> ahOverVendorItemIds;
     std::list<uint32> vendorOverAHItemIds;
     //

@@ -785,9 +785,9 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #
 # Auction house settings
 #
-# (0-1) If bot should query current AH listings when determining whether the item is worth posting to AH
+# (0-1) If bot should query current AH listings outside of AH when determining whether the item is worth posting to AH
 # Disabled by default for performance concerns, but you REALLY want to enable it for nicer logic
-# AiPlayerbot.ShouldQueryAHForItemMedianPrice = 0
+# AiPlayerbot.ShouldQueryAHListingsOutsideOfAH = 0
 #
 # List of item ids which bot will prefer to put to AH rather than selling to vendor (these are overrides)
 # For example if you want bots to put certain gray/white armor pieces to AH rather than selling to vendor

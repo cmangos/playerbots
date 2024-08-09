@@ -1084,9 +1084,9 @@ bool ItemUsageValue::IsItemUsedToCraftAnything(ItemPrototype const* proto)
 
 uint32 ItemUsageValue::GetAHMedianBuyoutPrice(ItemPrototype const* proto)
 {
-    if (sPlayerbotAIConfig.shouldQueryAHForItemMedianPrice)
+    if (sPlayerbotAIConfig.shouldQueryAHListingsOutsideOfAH)
     {
-        auto medianPriceForItemQuery = CharacterDatabase.PQuery(
+        auto query = CharacterDatabase.PQuery(
             "  SELECT item_template, AVG(median)"
             "  FROM (SELECT item_template, (buyoutprice / item_count) median"
             "          FROM (SELECT item_template, item_count, buyoutprice, @rownum:= @rownum + 1 as `rownumber`, @total_rows:= @rownum"
@@ -1096,26 +1096,73 @@ uint32 ItemUsageValue::GetAHMedianBuyoutPrice(ItemPrototype const* proto)
             "      GROUP BY item_template",
             proto->ItemId
         );
-        if (medianPriceForItemQuery)
+        if (query)
         {
             do
             {
-                Field* fields = medianPriceForItemQuery->Fetch();
+                Field* fields = query->Fetch();
 
                 uint32 itemId = (fields[0].GetUInt32());
                 uint32 medianPrice = (fields[1].GetUInt32());
 
                 return medianPrice;
-            } while (medianPriceForItemQuery->NextRow());
+            } while (query->NextRow());
         }
     }
 
     return 0;
 }
 
+uint32 ItemUsageValue::GetAHListingLowestBuyoutPrice(ItemPrototype const* proto)
+{
+    if (sPlayerbotAIConfig.shouldQueryAHListingsOutsideOfAH)
+    {
+        auto query = CharacterDatabase.PQuery(
+            "SELECT buyoutprice"
+            " FROM auction"
+            " WHERE item_template = '%u'"
+            " ORDER BY buyoutprice ASC"
+            " LIMIT 1",
+            proto->ItemId
+        );
+        if (query)
+        {
+            do
+            {
+                Field* fields = query->Fetch();
+
+                uint32 lowestBuyoutPrice = (fields[0].GetUInt32());
+
+                return lowestBuyoutPrice;
+            } while (query->NextRow());
+        }
+    }
+
+    return 0;
+}
+
+bool ItemUsageValue::AreCurrentAHListingsTooCheap(ItemPrototype const* proto)
+{
+    uint32 lowestAhBuyoutPrice = GetAHListingLowestBuyoutPrice(proto);
+    uint32 lowestAcceptapleAhBuyoutPrice = GetLowestAcceptableAHBuyoutPrice(proto);
+
+    //check if AH listings are already at the bottom price (with a 1% margin for possible calculation errors and is generally better)
+    if (lowestAhBuyoutPrice > 0 && lowestAhBuyoutPrice <= lowestAcceptapleAhBuyoutPrice + (lowestAcceptapleAhBuyoutPrice * 0.01f))
+    {
+        return true;
+    }
+
+    false;
+}
+
 bool ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto, Player* bot)
 {
     if (proto->Bonding == ItemBondingType::BIND_WHEN_PICKED_UP)
+    {
+        return false;
+    }
+
+    if (AreCurrentAHListingsTooCheap(proto))
     {
         return false;
     }
@@ -1140,11 +1187,6 @@ bool ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const*
     //cool consumeables?
     if (proto->ItemId == 2662) //noggerfogger
         return true;
-
-    if (GetAHMedianBuyoutPrice(proto) > static_cast<uint32>(proto->SellPrice * 1.5f))
-    {
-        return true;
-    }
 
     if (proto->Class == ItemClass::ITEM_CLASS_QUEST)
     {
@@ -1230,6 +1272,11 @@ bool ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const*
 bool ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* proto, bool isLimitedSupply)
 {
     if (proto->Bonding == ItemBondingType::BIND_WHEN_PICKED_UP)
+    {
+        return false;
+    }
+
+    if (AreCurrentAHListingsTooCheap(proto))
     {
         return false;
     }
@@ -1391,6 +1438,14 @@ uint32 ItemUsageValue::GetBotAHSellBasePrice(ItemPrototype const* proto, Player*
         static_cast<uint32>((GetItemBaseValue(proto) + 1) * frand(1.5f, 2.0f)),
         static_cast<uint32>(proto->SellPrice * 1.1f)
     );
+}
+
+/*
+* Lowest buyoutprice at which bots would want to sell at AH
+*/
+uint32 ItemUsageValue::GetLowestAcceptableAHBuyoutPrice(ItemPrototype const* proto)
+{
+    return static_cast<uint32>(proto->SellPrice * 1.1f);
 }
 
 uint32 ItemUsageValue::GetCraftingFee(ItemPrototype const* proto)

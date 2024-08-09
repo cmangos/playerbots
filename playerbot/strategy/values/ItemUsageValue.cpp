@@ -426,8 +426,34 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
 
     if (itemProto->Class == ITEM_CLASS_QUIVER)
     {
-        if (bot->getClass() == CLASS_HUNTER)
+        Item* equippedRangedWeapon = bot->GetWeaponForAttack(WeaponAttackType::RANGED_ATTACK, false, false);
+
+        if (bot->getClass() == CLASS_HUNTER && equippedRangedWeapon)
         {
+            ItemPrototype const* rangedWeaponItemProto = equippedRangedWeapon->GetProto();
+            if (!rangedWeaponItemProto)
+                return ItemUsage::ITEM_USAGE_NONE;
+
+            bool isCorrectQuiverTypeForCurrentWeapon = false;
+
+            if (itemProto->SubClass == ITEM_SUBCLASS_AMMO_POUCH)
+            {
+                if (rangedWeaponItemProto->SubClass == ItemSubclassWeapon::ITEM_SUBCLASS_WEAPON_GUN)
+                {
+                    isCorrectQuiverTypeForCurrentWeapon = true;
+                }
+            }
+            else {
+                if (rangedWeaponItemProto->SubClass == ItemSubclassWeapon::ITEM_SUBCLASS_WEAPON_BOW
+                    || rangedWeaponItemProto->SubClass == ItemSubclassWeapon::ITEM_SUBCLASS_WEAPON_CROSSBOW)
+                {
+                    isCorrectQuiverTypeForCurrentWeapon = true;
+                }
+            }
+
+            if (!isCorrectQuiverTypeForCurrentWeapon)
+                return ItemUsage::ITEM_USAGE_NONE;
+
             std::vector<Bag*> equippedQuivers = bot->GetPlayerbotAI()->GetEquippedQuivers();
 
             for (auto quiver : equippedQuivers)
@@ -441,6 +467,8 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
                 {
                     return ItemUsage::ITEM_USAGE_EQUIP;
                 }
+
+                //no need to check for quiver container slots size, higher ilvl/quality checks is enough
             }
         }
 
@@ -500,15 +528,6 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
 
     if (AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", itemProto->ItemId, ForceItemUsage::FORCE_USAGE_NONE) == ForceItemUsage::FORCE_USAGE_EQUIP) //New item is forced. Always equip it.
         return ItemUsage::ITEM_USAGE_EQUIP;
-
-    //Bigger quiver
-    if (itemProto->Class == ITEM_CLASS_QUIVER)
-    {
-        if (!oldItem || oldItemProto->ContainerSlots < itemProto->ContainerSlots)
-            return ItemUsage::ITEM_USAGE_EQUIP;
-        else
-            ItemUsage::ITEM_USAGE_NONE;
-    }
 
     bool existingShouldEquip = true;
     if (oldItemProto->Class == ITEM_CLASS_WEAPON && !oldStatWeight)

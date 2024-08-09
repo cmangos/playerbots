@@ -551,11 +551,18 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
 
     if (!executed && wo)
     {
-        if (wo->GetObjectGuid().IsUnit())
+        if (pSpellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+        {
+            if (ai->CastSpell(spellId, wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ(), nullptr, false, &spellDuration))
+            {
+                ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " near " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                executed = true;
+            }
+        }
+        else if (wo->GetObjectGuid().IsUnit())
         {
             if (ai->CastSpell(spellId, (Unit*)wo, nullptr, false, &spellDuration))
             {
-                ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 if(wo != bot)
                     ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 else
@@ -575,7 +582,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
         {
             if (ai->CastSpell(spellId, wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ(), nullptr, false, &spellDuration))
             {
-                ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " near " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 executed = true;
             }
         }

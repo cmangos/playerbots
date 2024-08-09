@@ -614,9 +614,9 @@ bool DebugAction::Execute(Event& event)
         if (corpse->GetType() == CORPSE_RESURRECTABLE_PVP)
             out << "CORPSE_RESURRECTABLE_PVP";
 
-        WorldPosition(corpse).printWKT(out);
+        out << ",p:" << WorldPosition(corpse).print();
 
-        out << "time: " << corpse->GetGhostTime();
+        out << ",time: " << corpse->GetGhostTime();
 
         ai->TellPlayerNoFacing(requester, out);
 

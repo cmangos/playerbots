@@ -686,10 +686,15 @@ bool DisenchantRandomItemAction::Execute(Event& event)
 
     for (auto& item: items)
     {
+        ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item);
+
+        if (!proto->DisenchantID)
+            continue;
+
         // don't touch rare+ items if with real player/guild
-        if ((ai->HasRealPlayerMaster() || ai->IsInRealGuild()) && ObjectMgr::GetItemPrototype(item)->Quality > ITEM_QUALITY_UNCOMMON)
+        if ((ai->HasRealPlayerMaster() || ai->IsInRealGuild()) && proto->Quality > ITEM_QUALITY_UNCOMMON)
         {
-            return false;
+            continue;
         }
 
         Event disenchantEvent = Event("disenchant random item", "13262 " + chat->formatQItem(item));

@@ -137,8 +137,8 @@ namespace ai
         /*
         * Median buyout price for current listings of the item on AH
         */
-        static uint32 GetAHMedianBuyoutPrice(ItemPrototype const* proto);
-        static uint32 GetAHListingLowestBuyoutPrice(ItemPrototype const* proto);
+        static uint32 GetAHMedianBuyoutPricePerItem(ItemPrototype const* proto);
+        static uint32 GetAHListingLowestBuyoutPricePerItem(ItemPrototype const* proto);
         static bool AreCurrentAHListingsTooCheap(ItemPrototype const* proto);
         static bool IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto, Player* bot);
         static bool IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* proto, bool isLimitedSupply);

@@ -425,8 +425,14 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
         return ItemUsage::ITEM_USAGE_NONE;
 
     if (itemProto->Class == ITEM_CLASS_QUIVER)
-        if (bot->getClass() != CLASS_HUNTER)
-            return ItemUsage::ITEM_USAGE_NONE;
+    {
+        if (bot->getClass() == CLASS_HUNTER)
+        {
+            return ItemUsage::ITEM_USAGE_EQUIP;
+        }
+
+        return ItemUsage::ITEM_USAGE_NONE;
+    }
 
     if (itemProto->Class == ITEM_CLASS_CONTAINER)
     {

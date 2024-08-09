@@ -164,7 +164,7 @@ bool CastCustomSpellAction::Execute(Event& event)
         SetDuration(sPlayerbotAIConfig.globalCoolDown);
         std::ostringstream msg;
         msg << "cast " << text;
-        ai->HandleCommand(CHAT_MSG_WHISPER, msg.str(), *requester);
+        ai->HandleCommand(CHAT_MSG_WHISPER, msg.str(), event.getOwner() ? *event.getOwner() : *bot);
         return true;
     }
 

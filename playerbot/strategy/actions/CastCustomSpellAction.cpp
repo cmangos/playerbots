@@ -149,14 +149,14 @@ bool CastCustomSpellAction::Execute(Event& event)
         itemTarget = nullptr;
     }
 
+    if ((pSpellInfo->Targets & TARGET_FLAG_ITEM) || (pSpellInfo->Targets & TARGET_FLAG_SELF))
+        target = bot;
+
     WorldObject* woTarget = nullptr;
     if (gameObjectTarget)
         woTarget = gameObjectTarget;
     else
         woTarget = target;
-
-    if ((pSpellInfo->Targets & TARGET_FLAG_ITEM) || (pSpellInfo->Targets & TARGET_FLAG_SELF))
-        woTarget = bot;
 
     if (woTarget != bot && !sServerFacade.IsInFront(bot, woTarget, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))
     {

@@ -107,6 +107,7 @@ namespace ai
         static std::unordered_map<uint32, std::vector<std::pair<uint32, uint32>>> m_craftingReagentItemIdsForCraftableItem;
 
         static std::unordered_set<uint32> m_allItemIdsSoldByAnyVendors;
+        static std::unordered_set<uint32> m_itemIdsSoldByAnyVendorsWithLimitedMaxCount;
 
         static double GetRarityPriceMultiplier(ItemPrototype const* proto);
         static double GetLevelPriceMultiplier(ItemPrototype const* proto);
@@ -130,6 +131,7 @@ namespace ai
         static std::vector<std::pair<uint32, uint32>> GetAllReagentItemIdsForCraftingItem(ItemPrototype const* proto);
 
         static bool IsItemSoldByAnyVendor(ItemPrototype const* proto);
+        static bool IsItemSoldByAnyVendorButHasLimitedMaxCount(ItemPrototype const* proto);
 
         static bool IsItemUsedBySkill(ItemPrototype const* proto, SkillType skillType);
         static bool IsItemUsedToCraftAnything(ItemPrototype const* proto);
@@ -142,6 +144,7 @@ namespace ai
         static bool AreCurrentAHListingsTooCheap(ItemPrototype const* proto);
         static bool IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const* proto, Player* bot);
         static bool IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* proto, bool isLimitedSupply);
+        static bool IsWorthBuyingFromAhToResellAtAH(ItemPrototype const* proto, uint32 totalCost, uint32 itemCount);
 
         static uint32 GetItemBaseValue(ItemPrototype const* proto, uint8 maxReagentLevel = 5);
 
@@ -153,11 +156,8 @@ namespace ai
         * bots sell at this price
         */
         static uint32 GetBotSellPrice(ItemPrototype const* proto, Player* bot);
-        /*
-        * bots sell to AH at this price
-        */
-        static uint32 GetBotAHSellBasePrice(ItemPrototype const* proto, Player* bot);
-        static uint32 GetLowestAcceptableAHBuyoutPrice(ItemPrototype const* proto);
+        static uint32 GetBotAHSellMinPrice(ItemPrototype const* proto);
+        static uint32 GetBotAHSellMaxPrice(ItemPrototype const* proto);
         static uint32 GetCraftingFee(ItemPrototype const* proto);
     };
 

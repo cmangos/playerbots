@@ -16,6 +16,7 @@ std::vector<uint32> ItemUsageValue::m_allReagentItemIdsForCraftingSkillsVector;
 std::unordered_map<uint32, std::vector<std::pair<uint32, uint32>>> ItemUsageValue::m_craftingReagentItemIdsForCraftableItem;
 
 std::unordered_set<uint32> ItemUsageValue::m_allItemIdsSoldByAnyVendors;
+std::unordered_set<uint32> ItemUsageValue::m_itemIdsSoldByAnyVendorsWithLimitedMaxCount;
 
 ItemQualifier::ItemQualifier(std::string qualifier, bool linkQualifier)
 {
@@ -1093,6 +1094,20 @@ void ItemUsageValue::PopulateSoldByVendorItemIds()
             m_allItemIdsSoldByAnyVendors.insert(fields[0].GetUInt32());
         } while (result->NextRow());
     }
+
+    if (auto result = WorldDatabase.PQuery("%s", "SELECT item, entry FROM npc_vendor WHERE maxcount > 0"))
+    {
+        BarGoLink bar(result->GetRowCount());
+        do
+        {
+            bar.step();
+            Field* fields = result->Fetch();
+            uint32 entry = fields[0].GetUInt32();
+            if (!entry)
+                continue;
+            m_itemIdsSoldByAnyVendorsWithLimitedMaxCount.insert(fields[0].GetUInt32());
+        } while (result->NextRow());
+    }
 }
 
 std::vector<uint32> ItemUsageValue::GetAllReagentItemIdsForCraftingSkillsVector()
@@ -1108,6 +1123,11 @@ std::vector<std::pair<uint32, uint32>> ItemUsageValue::GetAllReagentItemIdsForCr
 bool ItemUsageValue::IsItemSoldByAnyVendor(ItemPrototype const* proto)
 {
     return m_allItemIdsSoldByAnyVendors.count(proto->ItemId) > 0;
+}
+
+bool ItemUsageValue::IsItemSoldByAnyVendorButHasLimitedMaxCount(ItemPrototype const* proto)
+{
+    return m_itemIdsSoldByAnyVendorsWithLimitedMaxCount.count(proto->ItemId) > 0;
 }
 
 bool ItemUsageValue::IsItemUsedBySkill(ItemPrototype const* proto, SkillType skillType)
@@ -1182,7 +1202,7 @@ uint32 ItemUsageValue::GetAHListingLowestBuyoutPricePerItem(ItemPrototype const*
 bool ItemUsageValue::AreCurrentAHListingsTooCheap(ItemPrototype const* proto)
 {
     uint32 lowestAhItemListingBuyoutPrice = GetAHListingLowestBuyoutPricePerItem(proto);
-    uint32 lowestAcceptapleAhBuyoutPrice = GetLowestAcceptableAHBuyoutPrice(proto);
+    uint32 lowestAcceptapleAhBuyoutPrice = GetBotAHSellMinPrice(proto);
 
     //check if AH listings are already at the bottom price (with a 1% margin for possible calculation errors and is generally better)
     if (lowestAhItemListingBuyoutPrice > 0 && lowestAhItemListingBuyoutPrice <= lowestAcceptapleAhBuyoutPrice + (lowestAcceptapleAhBuyoutPrice * 0.01f))
@@ -1232,6 +1252,11 @@ bool ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const*
     }
 
     if (IsItemUsedToCraftAnything(proto) && !IsItemSoldByAnyVendor(proto))
+    {
+        return true;
+    }
+
+    if (IsItemSoldByAnyVendorButHasLimitedMaxCount(proto))
     {
         return true;
     }
@@ -1396,6 +1421,14 @@ bool ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* pr
     return false;
 }
 
+bool ItemUsageValue::IsWorthBuyingFromAhToResellAtAH(ItemPrototype const* proto, uint32 totalCost, uint32 itemCount)
+{
+    uint32 pricePerItem = totalCost / itemCount;
+
+    //bottom half is probably always worth buying? That should reduce oversupply
+    return pricePerItem <= GetBotAHSellMinPrice(proto) + ((GetBotAHSellMaxPrice(proto) - GetBotAHSellMinPrice(proto)) / 2);
+}
+
 double ItemUsageValue::GetRarityPriceMultiplier(ItemPrototype const* proto)
 {
     float x = sRandomItemMgr.GetItemRarity(proto->ItemId);
@@ -1464,26 +1497,16 @@ uint32 ItemUsageValue::GetBotSellPrice(ItemPrototype const* proto, Player* bot)
     );
 }
 
-/*
-* bots sell to AH at this price (base price before in-place calculations like undercutting)
-*/
-uint32 ItemUsageValue::GetBotAHSellBasePrice(ItemPrototype const* proto, Player* bot)
+uint32 ItemUsageValue::GetBotAHSellMinPrice(ItemPrototype const* proto)
 {
-    //should never sell for less than sell to vendor price
-    //got to be higher than trade price
-    return std::max(
-        // multiplied by random % to give room for those who buy from vendor and sell to AH
-        static_cast<uint32>((GetItemBaseValue(proto) + 1) * frand(1.5f, 2.0f)),
-        static_cast<uint32>(proto->SellPrice * 1.1f)
-    );
+    //should never sell for less than base value
+    // multiplied by % to give room for those who buy from vendor and sell to AH
+    return static_cast<uint32>((GetItemBaseValue(proto) + 1) * 1.01f);
 }
 
-/*
-* Lowest buyoutprice at which bots would want to sell at AH
-*/
-uint32 ItemUsageValue::GetLowestAcceptableAHBuyoutPrice(ItemPrototype const* proto)
+uint32 ItemUsageValue::GetBotAHSellMaxPrice(ItemPrototype const* proto)
 {
-    return static_cast<uint32>(proto->SellPrice * 1.1f);
+    return static_cast<uint32>(GetItemBaseValue(proto) * 2.0f);
 }
 
 uint32 ItemUsageValue::GetCraftingFee(ItemPrototype const* proto)

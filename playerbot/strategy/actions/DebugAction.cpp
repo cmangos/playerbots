@@ -1301,7 +1301,7 @@ bool DebugAction::Execute(Event& event)
             out << " Sell to vendor: " << ChatHelper::formatMoney(proto->SellPrice);
             out << " Median buyout from AH (price per item): " << ChatHelper::formatMoney(ItemUsageValue::GetAHMedianBuyoutPricePerItem(proto));
             out << " Lowest AH listing buyout (price per item): " << ChatHelper::formatMoney(ItemUsageValue::GetAHListingLowestBuyoutPricePerItem(proto));
-            out << " Sell to AH: " << ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellBasePrice(proto, bot));
+            out << " Sell to AH: " << ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMinPrice(proto)) << " to " << ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMaxPrice(proto));
 
             ai->TellPlayerNoFacing(requester, out);
         }

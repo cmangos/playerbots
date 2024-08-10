@@ -103,38 +103,38 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
                     } while (lowestBuyoutPriceListing->NextRow());
                 }
 
-                //default desired price if there are no item listings
-                uint32 pricePerItem = ItemUsageValue::GetBotAHSellBasePrice(proto, bot);
+                // default desired price if there are no item listings
+                // (is the max price because why not? sounds reasonable to try selling at max price if there are no listings)
+                // make it urand(max, max - 25% of maximum margin) for some randomness
+                uint32 maxAhPrice = ItemUsageValue::GetBotAHSellMaxPrice(proto);
+                uint32 minAhPrice = ItemUsageValue::GetBotAHSellMinPrice(proto);
+                uint32 desiredPricePerItem = maxAhPrice - static_cast<uint32>((maxAhPrice - minAhPrice) * frand(0.0f, 0.25f));
 
                 // check if it would be reasonable to sell lower than current cheapest listing
                 // also check if the item poster is not self to not to undercut yourself
                 if (lowestBuyoutItemPricePerItem > 0 && lowestBuyoutItemPricePerItemOwnerDbGuid != bot->GetDbGuid())
                 {
-                    //try to undercut by randomly 1 copper to 1% (may result in not actually undercutting but it's alright, even better)
-                    uint32 undercutByMoney = urand(
-                        static_cast<uint32>(1),
-                        static_cast<uint32>(lowestBuyoutItemPricePerItem * 0.01f)
-                    );
+                    //try to undercut by randomly 1 copper to 10% (may result in not actually undercutting but it's alright, even better)
+                    uint32 undercutByMoney = std::max(static_cast<uint32>(1), static_cast<uint32>(lowestBuyoutItemPricePerItem * frand(0.0f, 0.1f)));
 
                     if (undercutByMoney < lowestBuyoutItemPricePerItem)
                     {
-                        pricePerItem = lowestBuyoutItemPricePerItem - undercutByMoney;
+                        desiredPricePerItem = lowestBuyoutItemPricePerItem - undercutByMoney;
                     }
                     else
                     {
-                        //no undercut if it is too high
-                        pricePerItem = lowestBuyoutItemPricePerItem;
+                        desiredPricePerItem = lowestBuyoutItemPricePerItem - 1;
                     }
                 }
 
-                //price should be reasonable, NEVER cheaper or at vendor sell price
-                pricePerItem = std::max(ItemUsageValue::GetLowestAcceptableAHBuyoutPrice(proto), pricePerItem);
+                //price should be reasonable, NEVER cheaper than minimal AH price
+                desiredPricePerItem = std::max(minAhPrice, desiredPricePerItem);
 
                 //store in immediate cache to use the same price for subsequent postings
-                pricePerItemCache[proto->ItemId] = pricePerItem;
+                pricePerItemCache[proto->ItemId] = desiredPricePerItem;
 
                 //resulting undercut value for reporting
-                resultingUndercut = (lowestBuyoutItemPricePerItem > 0 && pricePerItem < lowestBuyoutItemPricePerItem) ? lowestBuyoutItemPricePerItem - pricePerItem : 0;
+                resultingUndercut = (lowestBuyoutItemPricePerItem > 0 && desiredPricePerItem < lowestBuyoutItemPricePerItem) ? lowestBuyoutItemPricePerItem - desiredPricePerItem : 0;
             }
 
             postedItem |= PostItem(requester, item, pricePerItemCache[proto->ItemId] * item->GetCount(), auctioneer, time, resultingUndercut);
@@ -261,11 +261,11 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             if (auction->owner == bot->GetGUIDLow())
                 continue;
 
-            uint32 cost = std::min(auction->buyout, uint32(std::max(auction->bid, auction->startbid) * frand(1.05f, 1.25f)));
+            uint32 totalCost = std::min(auction->buyout, uint32(std::max(auction->bid, auction->startbid) * frand(1.05f, 1.25f)));
 
             usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(auction).GetQualifier());
 
-            if (freeMoney.find(usage) == freeMoney.end() || cost > AI_VALUE2(uint32, "free money for", freeMoney[usage]))
+            if (freeMoney.find(usage) == freeMoney.end() || totalCost > AI_VALUE2(uint32, "free money for", freeMoney[usage]))
                 continue;
 
             uint32 power = 1;
@@ -277,12 +277,13 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
                 power = sRandomItemMgr.GetLiveStatWeight(bot, auction->itemTemplate);
                 break;
             case ItemUsage::ITEM_USAGE_AH:
-                if (cost >= (int32)ItemUsageValue::GetBotAHSellBasePrice(sObjectMgr.GetItemPrototype(auction->itemTemplate), bot))
+                if (!ItemUsageValue::IsWorthBuyingFromAhToResellAtAH(sObjectMgr.GetItemPrototype(auction->itemTemplate), totalCost, auction->itemCount))
                     continue;
                 power = 1000;
                 break;
             case ItemUsage::ITEM_USAGE_VENDOR:
-                if (cost >= (int32)sObjectMgr.GetItemPrototype(auction->itemTemplate)->SellPrice)
+                //basically if AH price is lower than vendor sell price then it's worth it
+                if (totalCost / auction->itemCount >= (int32)sObjectMgr.GetItemPrototype(auction->itemTemplate)->SellPrice)
                     continue;
                 power = 1000;
                 break;
@@ -293,7 +294,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             }
 
             power *= 1000;
-            power /= (cost+1);
+            power /= (totalCost +1);
 
             auctionPowers.push_back(std::make_pair(auction, power));
         }
@@ -358,8 +359,9 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
                 reason = BOT_TEXT2("to complete an objective for a quest.", placeholders);
                 break;
             case ItemUsage::ITEM_USAGE_AH:
-                placeholders["%price"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellBasePrice(sObjectMgr.GetItemPrototype(auction->itemTemplate), bot));
-                reason = BOT_TEXT2("to repost on AH for about %price.", placeholders);
+                placeholders["%price_min"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMinPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate)));
+                placeholders["%price_max"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMaxPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate)));
+                reason = BOT_TEXT2("to repost on AH for %price_min to %price_max.", placeholders);
                 break;
             case ItemUsage::ITEM_USAGE_VENDOR:
                 placeholders["%price"] = ChatHelper::formatMoney(sObjectMgr.GetItemPrototype(auction->itemTemplate)->SellPrice);

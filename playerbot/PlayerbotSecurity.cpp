@@ -163,9 +163,9 @@ bool PlayerbotSecurity::CheckLevelFor(PlayerbotSecurityLevel level, bool silent,
     if (realLevel >= level || from == bot)
         return true;
 
-    //Removed to allow bots to invite other bots. Please notify mostlikely if this causes issues and needs to be activated.
-    //if (silent || (from->GetPlayerbotAI() && !from->GetPlayerbotAI()->IsRealPlayer()))
-    //    return false;
+    //Important, may mess up chats/commands a bit if removed, do not remove this check unless you thoroughly test stuff
+    if (silent || (from->GetPlayerbotAI() && !from->GetPlayerbotAI()->IsRealPlayer()))
+        return false;
 
     Player* master = bot->GetPlayerbotAI()->GetMaster();
     if (master && bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->IsOpposing(master) && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)

@@ -1151,8 +1151,14 @@ bool ChooseTravelTargetAction::isUseful()
         if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
             return false;
 
-    return !context->GetValue<TravelTarget *>("travel target")->Get()->isActive() 
-        && !context->GetValue<LootObject>("loot target")->Get().IsLootPossible(bot);
+    if (AI_VALUE(bool, "has available loot"))
+    {
+        LootObject lootObject = AI_VALUE(LootObjectStack*, "available loot")->GetLoot(sPlayerbotAIConfig.lootDistance);
+        if (lootObject.IsLootPossible(bot))
+            return false;
+    }
+
+    return !context->GetValue<TravelTarget *>("travel target")->Get()->isActive();
 }
 
 

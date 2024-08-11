@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include "GuildCreateActions.h"
 #include "playerbot/RandomPlayerbotFactory.h"
+#include "playerbot/LootObjectStack.h"
 #ifndef MANGOSBOT_ZERO
 #ifdef CMANGOS
 #include "Arena/ArenaTeam.h"
@@ -315,7 +316,7 @@ bool PetitionTurnInAction::isUseful()
 bool BuyTabardAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    bool canBuy = ai->DoSpecificAction("buy", Event("buy tabard", "Hitem:5976:"),true);
+    bool canBuy = ai->DoSpecificAction("buy", Event("buy tabard", "|cHitem:5976:|r"),true);
 
     if (canBuy && AI_VALUE2(uint32, "item count", chat->formatQItem(5976)))
         return true;
@@ -344,8 +345,19 @@ bool BuyTabardAction::isUseful()
     if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT))
         return false;
 
-    if (!ChooseTravelTargetAction::isUseful())
+    if (!ai->AllowActivity(TRAVEL_ACTIVITY))
         return false;
+
+    if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
+            return false;
+
+    if (AI_VALUE(bool, "has available loot"))
+    {
+        LootObject lootObject = AI_VALUE(LootObjectStack*, "available loot")->GetLoot(sPlayerbotAIConfig.lootDistance);
+        if (lootObject.IsLootPossible(bot))
+            return false;
+    }
 
     bool inCity = false;
     AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(sServerFacade.GetAreaId(bot));

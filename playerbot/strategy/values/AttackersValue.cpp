@@ -429,13 +429,19 @@ bool AttackersValue::IgnoreTarget(Unit* target, Player* playerToCheckAgainst)
             isDummy = true;
         }
 
+        uint32 entry = target->GetEntry();
+
 #define TRAINING_DUMMY_NPC_ENTRY1 190013
 #define TRAINING_DUMMY_NPC_ENTRY2 190014
 #define TRAINING_DUMMY_NPC_ENTRY3 190015
+#define THERAMORE_COMBAT_DUMMY 4952
+#define NAXXRAMAS_COMBAT_DUMMY 16211
 
-        if (target->GetEntry() == TRAINING_DUMMY_NPC_ENTRY1 ||
-            target->GetEntry() == TRAINING_DUMMY_NPC_ENTRY2 ||
-            target->GetEntry() == TRAINING_DUMMY_NPC_ENTRY3)
+        if (entry == TRAINING_DUMMY_NPC_ENTRY1 ||
+            entry == TRAINING_DUMMY_NPC_ENTRY2 ||
+            entry == TRAINING_DUMMY_NPC_ENTRY3 ||
+            entry == THERAMORE_COMBAT_DUMMY ||
+            entry == NAXXRAMAS_COMBAT_DUMMY)
         {
             isDummy = true;
         }

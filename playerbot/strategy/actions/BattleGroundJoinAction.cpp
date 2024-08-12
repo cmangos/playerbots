@@ -281,7 +281,7 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
 
         if (member->GetLevel() < 70)
         continue;
-        
+
         if (!member->GetPlayerbotAI())
             continue;
 
@@ -317,25 +317,25 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
 }
 #endif
 
-bool BGJoinAction::canJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroundBracketId bracketId)
+bool BGJoinAction::canJoinBg(Player* player, BattleGroundQueueTypeId queueTypeId, BattleGroundBracketId bracketId)
 {
     // check if bot can join this bg/bracket
 
     BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
 
     // check if already in queue
-    if (bot->InBattleGroundQueueForBattleGroundQueueType(queueTypeId))
+    if (player->InBattleGroundQueueForBattleGroundQueueType(queueTypeId))
         return false;
 
     // check too low/high level
-    if (!bot->GetBGAccessByLevel(bgTypeId))
+    if (!player->GetBGAccessByLevel(bgTypeId))
         return false;
 
     // check bracket
 #ifdef MANGOSBOT_TWO
     BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
     uint32 mapId = bg->GetMapId();
-    PvPDifficultyEntry const* pvpDiff = GetBattlegroundBracketByLevel(mapId, bot->GetLevel());
+    PvPDifficultyEntry const* pvpDiff = GetBattlegroundBracketByLevel(mapId, player->GetLevel());
     if (!pvpDiff)
         return false;
 
@@ -344,7 +344,7 @@ bool BGJoinAction::canJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroundBr
     if (bracket_temp != bracketId)
         return false;
 #else
-    if (bot->GetBattleGroundBracketIdFromLevel(bgTypeId) != bracketId)
+    if (player->GetBattleGroundBracketIdFromLevel(bgTypeId) != bracketId)
         return false;
 #endif
     return true;
@@ -600,7 +600,27 @@ bool BGJoinAction::isUseful()
             BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
             BattleGroundBracketId bracketId = BattleGroundBracketId(i);
 
-            if (!canJoinBg(queueTypeId, bracketId))
+            Group* group = bot->GetGroup();
+            if (group)
+            {
+                bool partyMemberCanNotJoinBG = false;
+
+                for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+                {
+                    Player* member = ref->getSource();
+
+                    if (!canJoinBg(member, queueTypeId, bracketId))
+                    {
+                        partyMemberCanNotJoinBG = true;
+                        break;
+                    }
+                }
+
+                if (partyMemberCanNotJoinBG)
+                    continue;
+            }
+
+            if (!canJoinBg(bot, queueTypeId, bracketId))
                 continue;
 
             if (shouldJoinBg(queueTypeId, bracketId))

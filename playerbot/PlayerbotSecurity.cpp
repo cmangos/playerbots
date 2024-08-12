@@ -135,13 +135,13 @@ PlayerbotSecurityLevel PlayerbotSecurity::LevelFor(Player* from, DenyReason* rea
         if (group->IsFull())
         {
             if (reason) *reason = DenyReason::PLAYERBOT_DENY_FULL_GROUP;
-            return PlayerbotSecurityLevel::PLAYERBOT_SECURITY_TALK;
+            return PlayerbotSecurityLevel::PLAYERBOT_SECURITY_GUILD;
         }
 
         if (group->GetLeaderGuid() != bot->GetObjectGuid())
         {
             if (reason) *reason = DenyReason::PLAYERBOT_DENY_NOT_LEADER;
-            return PlayerbotSecurityLevel::PLAYERBOT_SECURITY_TALK;
+            return PlayerbotSecurityLevel::PLAYERBOT_SECURITY_GUILD;
         }
         else
         {
@@ -163,7 +163,7 @@ bool PlayerbotSecurity::CheckLevelFor(PlayerbotSecurityLevel level, bool silent,
     if (realLevel >= level || from == bot)
         return true;
 
-    //Important, may mess up chats/commands a bit if removed, do not remove this check unless you thoroughly test stuff
+    //Do not report security errors to bots.
     if (silent || (from->GetPlayerbotAI() && !from->GetPlayerbotAI()->IsRealPlayer()))
         return false;
 

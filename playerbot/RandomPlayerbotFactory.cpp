@@ -36,6 +36,10 @@ constexpr RandomPlayerbotFactory::NameRaceAndGender RandomPlayerbotFactory::Comb
     case RACE_TAUREN:   return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::TaurenMale)   + gender);
     case RACE_GNOME:    return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::GnomeMale)    + gender);
     case RACE_TROLL:    return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::TrollMale)    + gender);
+#ifndef MANGOSBOT_ZERO
+    case RACE_DRAENEI:  return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::DraeneiMale)  + gender);
+    case RACE_BLOODELF: return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::BloodelfMale) + gender);
+#endif
     default:
         sLog.outError("The race with ID %d does not have a naming category", race);
         return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::GenericMale) + gender);

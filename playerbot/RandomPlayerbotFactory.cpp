@@ -602,7 +602,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
     {
         const auto raceAndGender = static_cast<NameRaceAndGender>(raceAndGenderIndex);
 
-        int32 postItt = 18;
+        int32 postItt = 0;
 
         std::vector<std::string> newNames;
 

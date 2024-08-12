@@ -159,7 +159,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
     
     if (movePos.distance(bot) < sPlayerbotAIConfig.sightDistance)
     {
-        if (!movePos.ClosestCorrectPoint(5.0f))
+        if (!movePos.ClosestCorrectPoint(5.0f) || abs(movePos.getZ()- z) > 10.0f)
         {
             ai->TellDebug(GetMaster(), "Can not path to desired location around " + chat->formatWorldobject(guidP.GetWorldObject()) + " trying again later.", "debug move");
 

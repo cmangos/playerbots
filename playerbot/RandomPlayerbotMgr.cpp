@@ -990,7 +990,7 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
         CharacterDatabase.CommitTransaction();
 
         if (currentAllowedBotCount)
-            currentAllowedBotCount = std::max(GetEventValue(0, "bot_count") - currentBots.size(), 0ULL);          
+            currentAllowedBotCount = std::max(int64(GetEventValue(0, "bot_count")) - int64(currentBots.size()), int64(0));
 
         if(currentAllowedBotCount)
 #ifdef MANGOSBOT_TWO

@@ -112,7 +112,7 @@ public:
             bot->GetSession()->HandleMailTakeMoney(packet);
             RemoveMail(bot, mail->messageID, mailbox);
         }
-        else if (!mail->items.empty())
+        else if (mail->has_items)
         {
             std::list<uint32> guids;
             for (MailItemInfoVec::iterator i = mail->items.begin(); i != mail->items.end(); ++i)

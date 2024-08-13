@@ -1474,7 +1474,7 @@ uint32 ItemUsageValue::GetItemBaseValue(ItemPrototype const* proto, uint8 maxRea
     }
 
     //some items, which are not sold by vendors, have very low or very high vendor buy price, can't rely on it, need to adjust SellPrice
-    return static_cast<uint32>(proto->SellPrice * GetRarityPriceMultiplier(proto) * GetLevelPriceMultiplier(proto));
+    return static_cast<uint32>(proto->SellPrice * GetRarityPriceMultiplier(proto) * GetLevelPriceMultiplier(proto) * 2);
 }
 
 /*
@@ -1506,7 +1506,7 @@ uint32 ItemUsageValue::GetBotAHSellMinPrice(ItemPrototype const* proto)
 
 uint32 ItemUsageValue::GetBotAHSellMaxPrice(ItemPrototype const* proto)
 {
-    return static_cast<uint32>(GetItemBaseValue(proto) * 3.0f);
+    return static_cast<uint32>(GetItemBaseValue(proto) * 2.5f);
 }
 
 uint32 ItemUsageValue::GetCraftingFee(ItemPrototype const* proto)

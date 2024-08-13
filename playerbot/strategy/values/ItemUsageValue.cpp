@@ -1506,7 +1506,7 @@ uint32 ItemUsageValue::GetBotAHSellMinPrice(ItemPrototype const* proto)
 
 uint32 ItemUsageValue::GetBotAHSellMaxPrice(ItemPrototype const* proto)
 {
-    return static_cast<uint32>(GetItemBaseValue(proto) * 2.0f);
+    return static_cast<uint32>(GetItemBaseValue(proto) * 3.0f);
 }
 
 uint32 ItemUsageValue::GetCraftingFee(ItemPrototype const* proto)

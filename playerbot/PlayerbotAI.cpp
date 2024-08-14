@@ -2681,7 +2681,7 @@ void PlayerbotAI::Evacuate()
 
     sLog.outBasic("Evacuating: Removing bot #%d %s:%d <%s> from group", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
     if (Group* group = bot->GetGroup())
-        group->RemoveMember(bot->GetObjectGuid(), GROUP_LEAVE);
+        group->RemoveMember(bot->GetObjectGuid(), 0);
 
     PlayerInfo const* defaultPlayerInfo = sObjectMgr.GetPlayerInfo(bot->getRace(), bot->getClass());
     if (defaultPlayerInfo)

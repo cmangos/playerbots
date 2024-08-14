@@ -83,7 +83,6 @@ public:
     std::list<std::string> toggleAlwaysOnlineAccounts;
     std::list<std::string> toggleAlwaysOnlineChars;
     bool enableRandomTeleports;
-    bool realisticRevives;
     uint32 randomBotTeleportDistance;
     bool randomBotTeleportNearPlayer;
     uint32 randomBotTeleportNearPlayerMaxAmount;

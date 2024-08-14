@@ -74,7 +74,7 @@ bool FindCorpseAction::Execute(Event& event)
         }
     }
 
-    WorldPosition botPos(bot),corpsePos(corpse), moveToPos = corpsePos, masterPos(master);
+    WorldPosition botPos(bot), corpsePos(corpse), moveToPos = corpsePos, masterPos(master);
     float reclaimDist = CORPSE_RECLAIM_RADIUS - 5.0f;
     float corpseDist = botPos.distance(corpsePos);
     int64 deadTime = time(nullptr) - corpse->GetGhostTime();
@@ -215,8 +215,17 @@ bool SpiritHealerAction::Execute(Event& event)
     GuidPosition grave = AI_VALUE(GuidPosition, "best graveyard");
 
     //something went wrong
-    if (!grave)
+    if (!grave || grave == GuidPosition())
     {
+        //prevent doing weird stuff OR GOING TO 0,0,0
+        sLog.outBasic(
+            "ERROR: no graveyard in SpiritHealerAction for bot #%d %s:%d <%s>, evacuating to prevent weird behavior",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
+        ai->DoSpecificAction("repop");
         return false;
     }
 

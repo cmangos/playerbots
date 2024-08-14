@@ -9,44 +9,25 @@ GuidPosition GraveyardValue::Calculate()
 {
     WorldPosition refPosition = bot, botPos(bot);
 
-    if (getQualifier() == "master" && ai->GetGroupMaster() && ai->IsSafe(ai->GetGroupMaster()))
-        refPosition = ai->GetGroupMaster();
+    if (getQualifier() == "master")
+    {
+        if (ai->GetGroupMaster() && ai->IsSafe(ai->GetGroupMaster()) && ai->GetGroupMaster()->GetMapId() == bot->GetMapId())
+        {
+            refPosition = ai->GetGroupMaster();
+        }
+    }
     else if (getQualifier() == "travel")
     {
-        if(!AI_VALUE(TravelTarget*, "travel target") || !AI_VALUE(TravelTarget*, "travel target")->getPosition())
-            return GuidPosition();
+        auto travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-        refPosition = *AI_VALUE(TravelTarget*, "travel target")->getPosition();
-    }
-    else if (getQualifier() == "start")
-    {
-        std::vector<uint32> races;
-
-        if (bot->GetTeam() == ALLIANCE)
-            races = { RACE_HUMAN, RACE_DWARF,RACE_GNOME,RACE_NIGHTELF };
-        else
-            races = { RACE_ORC, RACE_TROLL,RACE_TAUREN,RACE_UNDEAD };
-        refPosition = WorldPosition();
-        for (auto race : races)
-        {
-            for (uint32 cls = 0; cls < MAX_CLASSES; cls++)
-            {
-                PlayerInfo const* info = sObjectMgr.GetPlayerInfo(race, cls);
-                if (!info)
-                    continue;
-                if (refPosition && botPos.fDist(refPosition) < botPos.fDist(info))
-                    continue;
-                refPosition = info;
-            }
-        }
+        if (travelTarget && travelTarget->getPosition() && travelTarget->getPosition()->getMapId() == bot->GetMapId())
+            refPosition = *travelTarget->getPosition();
     }
     else if (getQualifier() == "another closest appropriate")
     {
         //just get ANOTHER nearest appropriate for level (neutral or same team zone)
         if (auto anotherAppropriate = GetAnotherAppropriateClosestGraveyard())
-        {
             return GuidPosition(0, anotherAppropriate);
-        }
     }
 
     WorldSafeLocsEntry const* ClosestGrave = bot->GetMap()->GetGraveyardManager().GetClosestGraveYard(
@@ -58,9 +39,18 @@ GuidPosition GraveyardValue::Calculate()
     );
 
     if (!ClosestGrave)
+    {
+        sLog.outBasic(
+            "ERROR: Unable to find closest graveyard in GraveyardValue, will return GuidPosition() which is 0,0,0 - bot #%d %s:%d <%s>",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
         return GuidPosition();
+    }
 
-    return GuidPosition(0,ClosestGrave);
+    return GuidPosition(0, ClosestGrave);
 }
 
 WorldSafeLocsEntry const* GraveyardValue::GetAnotherAppropriateClosestGraveyard() const
@@ -131,18 +121,17 @@ GuidPosition BestGraveyardValue::Calculate()
     Corpse* corpse = bot->GetCorpse();
     if (!corpse)
     {
+        sLog.outBasic(
+            "ERROR: Unable to find closest graveyard in BestGraveyardValue, will return GuidPosition() which is 0,0,0 - bot #%d %s:%d <%s>",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
         return GuidPosition();
     }
 
     uint32 deathCount = AI_VALUE(uint32, "death count");
-
-    if(!ai->HasActivePlayerMaster() && deathCount >= DEATH_COUNT_BEFORE_TRYING_ANOTHER_GRAVEYARD)
-    {
-        if (GuidPosition anotherGraveyard = AI_VALUE2(GuidPosition, "graveyard", "start"))
-        {
-            return anotherGraveyard;
-        }
-    }
 
     //attempt to revive at other same map graveyards which are not enemy territory
     if (!ai->HasActivePlayerMaster() && deathCount >= DEATH_COUNT_BEFORE_TRYING_ANOTHER_GRAVEYARD)
@@ -228,7 +217,7 @@ bool ShouldSpiritHealerValue::Calculate()
             return true;
         }
     }
-    
+
     //If grave is near and no ress sickness go there.
     if (graveInSight && !corpseInSight && ai->HasCheat(BotCheatMask::repair))
         return true;

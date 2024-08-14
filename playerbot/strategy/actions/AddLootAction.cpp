@@ -10,6 +10,8 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
 
+#include "playerbot/strategy/actions/DestroyItemAction.h"
+
 using namespace ai;
 using namespace MaNGOS;
 
@@ -148,21 +150,23 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
         }
     }
 
-    uint8 freeBagSpace = AI_VALUE(uint8, "bag space");
+    uint8 usedBagSpacePercent = AI_VALUE(uint8, "bag space");
 
-    if (freeBagSpace < 1 && !ai->CanLootSomethingFromWO(wo))
+    if (usedBagSpacePercent > 99 && !ai->CanLootSomethingFromWO(wo))
     {
         if (ai->HasQuestItemsInWOLootList(wo))
         {
-            if (freeBagSpace < 1)
+            if (usedBagSpacePercent > 99 && ai->DoSpecificAction("destroy all gray"))
             {
-                ai->TellDebug(requester, "Destroying items to make room.", "debug loot");
-                ai->DestroyAllGrayItemsInBags(requester);
-                //recount freeBagSpace
-                freeBagSpace = AI_VALUE(uint8, "bag space");
+                usedBagSpacePercent = AI_VALUE(uint8, "bag space");
             }
 
-            if (freeBagSpace < 1)
+            if (usedBagSpacePercent > 99 && ai->DoSpecificAction("smart destroy"))
+            {
+                usedBagSpacePercent = AI_VALUE(uint8, "bag space");
+            }
+
+            if (usedBagSpacePercent > 99)
             {
                 ai->TellPlayer(requester, "Can not loot quest item, my bags are full", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 return false;
@@ -170,7 +174,7 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
 
         }
 
-        if (freeBagSpace < 1)
+        if (usedBagSpacePercent > 99)
         {
             ai->TellError(requester, "There is some loot but I do not have free bag space, so not looting");
             return false;
@@ -264,20 +268,23 @@ bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)
         }
     }
 
-    uint8 freeBagSpace = AI_VALUE(uint8, "bag space");
+    uint8 usedBagSpacePercent = AI_VALUE(uint8, "bag space");
 
-    if (freeBagSpace < 1 && !ai->CanLootSomethingFromWO(wo))
+    if (usedBagSpacePercent > 99 && !ai->CanLootSomethingFromWO(wo))
     {
         if (ai->HasQuestItemsInWOLootList(wo))
         {
-            if (freeBagSpace < 1)
+            if (usedBagSpacePercent > 99 && ai->DoSpecificAction("destroy all gray"))
             {
-                ai->DestroyAllGrayItemsInBags(requester);
-                //recount freeBagSpace
-                freeBagSpace = AI_VALUE(uint8, "bag space");
+                usedBagSpacePercent = AI_VALUE(uint8, "bag space");
             }
 
-            if (freeBagSpace < 1)
+            if (usedBagSpacePercent > 99 && ai->DoSpecificAction("smart destroy"))
+            {
+                usedBagSpacePercent = AI_VALUE(uint8, "bag space");
+            }
+
+            if (usedBagSpacePercent > 99)
             {
                 ai->TellPlayer(requester, "Can not loot quest item, my bags are full", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 return false;
@@ -285,7 +292,7 @@ bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)
 
         }
 
-        if (freeBagSpace < 1)
+        if (usedBagSpacePercent > 99)
         {
             ai->TellError(requester, "There is some loot but I do not have free bag space, so not looting");
             return false;

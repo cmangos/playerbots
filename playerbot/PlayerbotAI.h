@@ -517,9 +517,8 @@ public:
     std::vector<Item*> GetInventoryItems();
     uint32 GetInventoryItemsCountWithId(uint32 itemId);
     bool HasItemInInventory(uint32 itemId);
-    void DestroyAllGrayItemsInBags(Player* requester);
-    bool HasNotFullStacksInBagsForLootItems(LootItemList questLootItemList);
-    bool HasQuestItemsInLootList(LootItemList questLootItemList);
+    bool HasNotFullStacksInBagsForLootItems(LootItemList &questLootItemList);
+    bool HasQuestItemsInLootList(LootItemList &questLootItemList);
     bool HasQuestItemsInWOLootList(WorldObject* wo);
     bool CanLootSomethingFromWO(WorldObject* wo);
 

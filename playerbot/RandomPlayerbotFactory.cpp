@@ -72,6 +72,7 @@ RandomPlayerbotFactory::RandomPlayerbotFactory(uint32 accountId) : accountId(acc
     availableRaces[CLASS_ROGUE].push_back(RACE_NIGHTELF);
     availableRaces[CLASS_ROGUE].push_back(RACE_GNOME);
     availableRaces[CLASS_ROGUE].push_back(RACE_ORC);
+    availableRaces[CLASS_ROGUE].push_back(RACE_UNDEAD);
     availableRaces[CLASS_ROGUE].push_back(RACE_TROLL);
 #ifndef MANGOSBOT_ZERO
     availableRaces[CLASS_ROGUE].push_back(RACE_BLOODELF);

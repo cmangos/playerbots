@@ -2665,39 +2665,6 @@ std::vector<std::pair<const Quest*, uint32>> PlayerbotAI::GetCurrentQuestsRequir
     return result;
 }
 
-//this is something analogous to /unstuck, but forced, for bad situations
-void PlayerbotAI::Evacuate()
-{
-    sLog.outBasic("Evacuating bot #%d %s:%d <%s>", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-
-    aiObjectContext->GetValue<uint32>("death count")->Set(0);
-
-    if (bot->IsDead())
-    {
-        bot->ResurrectPlayer(1.0f, false);
-        bot->SpawnCorpseBones();
-        bot->SaveToDB();
-    }
-
-    sLog.outBasic("Evacuating: Removing bot #%d %s:%d <%s> from group", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-    if (Group* group = bot->GetGroup())
-        group->RemoveMember(bot->GetObjectGuid(), 0);
-
-    PlayerInfo const* defaultPlayerInfo = sObjectMgr.GetPlayerInfo(bot->getRace(), bot->getClass());
-    if (defaultPlayerInfo)
-    {
-        sLog.outBasic("Evacuating: Teleporting bot #%d %s:%d <%s> to spawn", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-        //teleport bot to spawn
-        bot->TeleportTo(defaultPlayerInfo->mapId, defaultPlayerInfo->positionX, defaultPlayerInfo->positionY, defaultPlayerInfo->positionZ, defaultPlayerInfo->orientation);
-    }
-    else
-    {
-        sLog.outBasic("Evacuating: Teleporting bot #%d %s:%d <%s> to homebind", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-        //teleport bot to homebind
-        bot->TeleportToHomebind();
-    }
-}
-
 const AreaTableEntry* PlayerbotAI::GetCurrentArea()
 {
     return GetAreaEntryByAreaID(sServerFacade.GetAreaId(bot));

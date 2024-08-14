@@ -18,6 +18,28 @@ GuidPosition GraveyardValue::Calculate()
 
         refPosition = *AI_VALUE(TravelTarget*, "travel target")->getPosition();
     }
+    else if (getQualifier() == "start")
+    {
+        std::vector<uint32> races;
+
+        if (bot->GetTeam() == ALLIANCE)
+            races = { RACE_HUMAN, RACE_DWARF,RACE_GNOME,RACE_NIGHTELF };
+        else
+            races = { RACE_ORC, RACE_TROLL,RACE_TAUREN,RACE_UNDEAD };
+        refPosition = WorldPosition();
+        for (auto race : races)
+        {
+            for (uint32 cls = 0; cls < MAX_CLASSES; cls++)
+            {
+                PlayerInfo const* info = sObjectMgr.GetPlayerInfo(race, cls);
+                if (!info)
+                    continue;
+                if (refPosition && botPos.fDist(refPosition) < botPos.fDist(info))
+                    continue;
+                refPosition = info;
+            }
+        }
+    }
     else if (getQualifier() == "another closest appropriate")
     {
         //just get ANOTHER nearest appropriate for level (neutral or same team zone)
@@ -113,6 +135,14 @@ GuidPosition BestGraveyardValue::Calculate()
     }
 
     uint32 deathCount = AI_VALUE(uint32, "death count");
+
+    if(!ai->HasActivePlayerMaster() && deathCount >= DEATH_COUNT_BEFORE_TRYING_ANOTHER_GRAVEYARD)
+    {
+        if (GuidPosition anotherGraveyard = AI_VALUE2(GuidPosition, "graveyard", "start"))
+        {
+            return anotherGraveyard;
+        }
+    }
 
     //attempt to revive at other same map graveyards which are not enemy territory
     if (!ai->HasActivePlayerMaster() && deathCount >= DEATH_COUNT_BEFORE_TRYING_ANOTHER_GRAVEYARD)

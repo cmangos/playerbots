@@ -1,6 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "playerbot/strategy/Strategy.h"
+#include "playerbot/strategy/values/DeadValues.h"
 #include "DeadStrategy.h"
 
 using namespace ai;
@@ -12,6 +13,10 @@ void DeadStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "very often",
         NextAction::array(0, new NextAction("auto release", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "val::gt32::{death count," + std::to_string(DeadValueConstants::DEATH_COUNT_BEFORE_EVAC) + "}",
+        NextAction::array(0, new NextAction("repop", relevance + 4.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "very often",

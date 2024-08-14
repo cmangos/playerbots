@@ -150,6 +150,14 @@ namespace ai
                 ai->TellPlayer(requester, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             }
 
+            //Evacuate code
+            if (grave == AI_VALUE2(GuidPosition, "graveyard", "start"))
+            {
+                SET_AI_VALUE(uint32, "death count", 0);
+                if (Group* group = bot->GetGroup())
+                    group->RemoveMember(bot->GetObjectGuid(), 0);
+            }
+
             bot->TeleportTo(grave.getMapId(), grave.getX(), grave.getY(), grave.getZ(), grave.getO());
 
             sPlayerbotAIConfig.logEvent(ai, "RepopAction");

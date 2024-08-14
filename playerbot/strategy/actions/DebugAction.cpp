@@ -193,6 +193,28 @@ bool DebugAction::Execute(Event& event)
 
         return true;
     }
+    else if (text.find("setvalueuin32 ") == 0)
+    {
+        std::vector<std::string> args = Qualified::getMultiQualifiers(text.substr(14), ",");
+
+        if (args.size() == 1)
+        {
+            RESET_AI_VALUE(uint32, args[0]);
+            return true;
+        }
+        else if (args.size() == 2)
+        {
+            SET_AI_VALUE(uint32, args[0], stoi(args[1]));
+            return true;
+        }
+        else if (args.size() == 3)
+        {
+            SET_AI_VALUE2(uint32, args[0], args[1], stoi(args[2]));
+            return true;
+        }
+
+        return false;
+    }
     else if (text.find("do ") == 0)
     {
         return ai->DoSpecificAction(text.substr(3), Event(), true);

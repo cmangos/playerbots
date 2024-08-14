@@ -74,16 +74,6 @@ bool FindCorpseAction::Execute(Event& event)
         }
     }
 
-    uint32 dCount = AI_VALUE(uint32, "death count");
-
-    //something went wrong, probably bot got stuck in a death loop
-    if (dCount >= DeadValueConstants::DEATH_COUNT_BEFORE_EVAC && !ai->HasActivePlayerMaster())
-    {
-        sLog.outBasic("Something went wrong, bot #%d %s:%d <%s>: died too many times and was evacuated", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-        bot->GetPlayerbotAI()->Evacuate();
-        return true;
-    }
-
     WorldPosition botPos(bot),corpsePos(corpse), moveToPos = corpsePos, masterPos(master);
     float reclaimDist = CORPSE_RECLAIM_RADIUS - 5.0f;
     float corpseDist = botPos.distance(corpsePos);
@@ -224,25 +214,9 @@ bool SpiritHealerAction::Execute(Event& event)
     uint32 dCount = AI_VALUE(uint32, "death count");
     GuidPosition grave = AI_VALUE(GuidPosition, "best graveyard");
 
-    //something went wrong, probably bot got stuck in a death loop
-    if (dCount >= DeadValueConstants::DEATH_COUNT_BEFORE_EVAC && !ai->HasActivePlayerMaster())
-    {
-        sLog.outBasic("Something went wrong, bot #%d %s:%d <%s>: died too many times and was evacuated", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-        bot->GetPlayerbotAI()->Evacuate();
-        return true;
-    }
-
     //something went wrong
     if (!grave)
     {
-        sLog.outBasic("Graveyard not found for bot #%d %s:%d <%s>", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-
-        if (!ai->HasActivePlayerMaster())
-        {
-            sLog.outBasic("Graveyard not found, bot #%d %s:%d <%s>: has been evacuated", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-            bot->GetPlayerbotAI()->Evacuate();
-        }
-
         return false;
     }
 

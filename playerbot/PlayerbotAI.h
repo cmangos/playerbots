@@ -385,7 +385,6 @@ public:
     const Quest* GetCurrentIncompleteQuestWithId(uint32 questId);
     bool HasCurrentIncompleteQuestWithId(uint32 questId);
     std::vector<std::pair<const Quest*, uint32>> GetCurrentQuestsRequiringItemId(uint32 itemId);
-    void Evacuate();
     const AreaTableEntry* GetCurrentArea();
     const AreaTableEntry* GetCurrentZone();
     std::string GetLocalizedAreaName(const AreaTableEntry* entry);

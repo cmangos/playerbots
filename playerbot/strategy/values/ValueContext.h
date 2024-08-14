@@ -351,6 +351,7 @@ namespace ai
             creators["near leader"] = [](PlayerbotAI* ai) { return new IsNearLeaderValue(ai); };
             creators["and"] = [](PlayerbotAI* ai) { return new BoolAndValue(ai); };
             creators["not"] = [](PlayerbotAI* ai) { return new NotValue(ai); };
+            creators["gt32"] = [](PlayerbotAI* ai) { return new GT32Value(ai); };
             creators["manual bool"] = [](PlayerbotAI* ai) { return new BoolManualSetValue(ai); };
             creators["group count"] = [](PlayerbotAI* ai) { return new GroupBoolCountValue(ai); };
             creators["group and"] = [](PlayerbotAI* ai) { return new GroupBoolANDValue(ai); };

@@ -823,9 +823,6 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #(0-1) enable or disable random teleports
 # AiPlayerbot.EnableRandomTeleports = 1
 
-#(0-1) 1 - revives will respect game rules (no teleports, revive at nearest graveyard)
-# AiPlayerbot.RealisticRevives = 0
-
 # How far random bots are teleported after death
 AiPlayerbot.RandomBotTeleportDistance = 100
 

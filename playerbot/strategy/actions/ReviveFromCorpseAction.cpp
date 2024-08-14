@@ -6,6 +6,7 @@
 #include "playerbot/FleeManager.h"
 #include "playerbot/TravelMgr.h"
 #include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/DeadValues.h"
 
 using namespace ai;
 
@@ -36,7 +37,7 @@ bool ReviveFromCorpseAction::Execute(Event& event)
     if (corpse->GetGhostTime() + bot->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP) > time(nullptr))
         return false;
 
-    if (master) 
+    if (master)
     {
         //Revive with master.
         if (bot != master && sServerFacade.UnitIsDead(master) && master->GetCorpse() && sServerFacade.IsDistanceLessThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.farDistance))
@@ -51,7 +52,7 @@ bool ReviveFromCorpseAction::Execute(Event& event)
     bot->GetSession()->HandleReclaimCorpseOpcode(packet);
 
     sPlayerbotAIConfig.logEvent(ai, "ReviveFromCorpseAction");
-   
+
     return true;
 }
 
@@ -75,15 +76,12 @@ bool FindCorpseAction::Execute(Event& event)
 
     uint32 dCount = AI_VALUE(uint32, "death count");
 
-    if (!sPlayerbotAIConfig.realisticRevives && !ai->HasRealPlayerMaster())
+    //something went wrong, probably bot got stuck in a death loop
+    if (dCount >= DeadValueConstants::DEATH_COUNT_BEFORE_EVAC && !ai->HasActivePlayerMaster())
     {
-        if (dCount >= 5 && !sRandomPlayerbotMgr.GetValue(bot,"teleport"))
-        {
-            sLog.outBasic("Bot #%d %s:%d <%s>: died too many times and was sent to an inn", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-            context->GetValue<uint32>("death count")->Set(0);
-            sRandomPlayerbotMgr.SetValue(bot, "teleport",1);
-            return true;
-        }
+        sLog.outBasic("Something went wrong, bot #%d %s:%d <%s>: died too many times and was evacuated", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+        bot->GetPlayerbotAI()->Evacuate();
+        return true;
     }
 
     WorldPosition botPos(bot),corpsePos(corpse), moveToPos = corpsePos, masterPos(master);
@@ -168,7 +166,7 @@ bool FindCorpseAction::Execute(Event& event)
     //Actual mobing part.
     bool moved = false;
 
-    if (!sPlayerbotAIConfig.realisticRevives && !ai->AllowActivity(DETAILED_MOVE_ACTIVITY) && !ai->HasPlayerNearby(moveToPos))
+    if (!ai->AllowActivity(DETAILED_MOVE_ACTIVITY) && !ai->HasPlayerNearby(moveToPos))
     {
         uint32 delay = sServerFacade.GetDistance2d(bot, corpse) / bot->GetSpeed(MOVE_RUN); //Time a bot would take to travel to it's corpse.
         delay = std::min(delay, uint32(10 * MINUTE)); //Cap time to get to corpse at 10 minutes.
@@ -226,6 +224,28 @@ bool SpiritHealerAction::Execute(Event& event)
     uint32 dCount = AI_VALUE(uint32, "death count");
     GuidPosition grave = AI_VALUE(GuidPosition, "best graveyard");
 
+    //something went wrong, probably bot got stuck in a death loop
+    if (dCount >= DeadValueConstants::DEATH_COUNT_BEFORE_EVAC && !ai->HasActivePlayerMaster())
+    {
+        sLog.outBasic("Something went wrong, bot #%d %s:%d <%s>: died too many times and was evacuated", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+        bot->GetPlayerbotAI()->Evacuate();
+        return true;
+    }
+
+    //something went wrong
+    if (!grave)
+    {
+        sLog.outBasic("Graveyard not found for bot #%d %s:%d <%s>", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+
+        if (!ai->HasActivePlayerMaster())
+        {
+            sLog.outBasic("Graveyard not found, bot #%d %s:%d <%s>: has been evacuated", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+            bot->GetPlayerbotAI()->Evacuate();
+        }
+
+        return false;
+    }
+
     if (grave && grave.fDist(bot) < sPlayerbotAIConfig.sightDistance)
     {
         bool foundSpiritHealer = false;
@@ -262,37 +282,30 @@ bool SpiritHealerAction::Execute(Event& event)
         return true;
     }
 
-    if (!grave)
-    {
-        return false;
-    }
-
     bool shouldTeleportToGY = false;
 
-    if (!sPlayerbotAIConfig.realisticRevives)
+    const int64 deadTime = time(nullptr) - corpse->GetGhostTime();
+
+    // Prevent taking too long to go to corpse (10 mins)
+    // no need to wait longer, because bot is probably stuck in navigating issues
+    shouldTeleportToGY = deadTime > uint32(10 * MINUTE);
+
+    // Check if we can teleport to the graveyard when nobody is looking
+    if (!shouldTeleportToGY && !ai->AllowActivity(DETAILED_MOVE_ACTIVITY) && !ai->HasPlayerNearby(WorldPosition(grave)))
     {
-        const int64 deadTime = time(nullptr) - corpse->GetGhostTime();
+        //Time a bot would take to travel to it's corpse.
+        uint32 delay = sServerFacade.GetDistance2d(bot, corpse) / bot->GetSpeed(MOVE_RUN);
+        //Cap time to get to corpse at 10 minutes.
+        delay = std::min(delay, uint32(10 * MINUTE));
 
-        // Prevent taking too long to go to corpse (20 mins)
-        shouldTeleportToGY = deadTime > 1200;
+        shouldTeleportToGY = deadTime > delay;
+    }
 
-        // Check if we can teleport to the graveyard when nobody is looking
-        if (!shouldTeleportToGY && !ai->AllowActivity(DETAILED_MOVE_ACTIVITY) && !ai->HasPlayerNearby(WorldPosition(grave)))
-        {
-            //Time a bot would take to travel to it's corpse.
-            uint32 delay = sServerFacade.GetDistance2d(bot, corpse) / bot->GetSpeed(MOVE_RUN);
-            //Cap time to get to corpse at 10 minutes.
-            delay = std::min(delay, uint32(10 * MINUTE));
-
-            shouldTeleportToGY = deadTime > delay;
-        }
-
-        if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
-        {
-            std::ostringstream out;
-            out << "Moving towards graveyard.";
-            ai->TellPlayerNoFacing(GetMaster(), out);
-        }
+    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+    {
+        std::ostringstream out;
+        out << "Moving towards graveyard.";
+        ai->TellPlayerNoFacing(GetMaster(), out);
     }
 
     if (shouldTeleportToGY)

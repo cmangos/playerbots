@@ -1278,12 +1278,14 @@ bool ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const*
 
         if (proto->Class == ItemClass::ITEM_CLASS_ARMOR)
         {
-            //shirts are nice to AH
-            if (proto->SubClass != ItemSubclassArmor::ITEM_SUBCLASS_ARMOR_MISC)
+            //shirts are nice to AH (or other cosmetics something?), also avoid something super cheap like starter boots
+            if (proto->SubClass == ItemSubclassArmor::ITEM_SUBCLASS_ARMOR_MISC && GetItemBaseValue(proto) > 10)
             {
-                //white armor is trash
-                return false;
+                return true;
             }
+
+            //white armor is trash
+            return false;
         }
 
         if (proto->Class == ItemClass::ITEM_CLASS_PROJECTILE)
@@ -1379,8 +1381,8 @@ bool ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* pr
         return true;
     }
 
-    //do not buy items that require skill to use, unless limited supply
-    if (proto->RequiredSkill > 0)
+    //do not buy items that require skill to use, unless limited supply or recipe (just in case)
+    if (proto->RequiredSkill > 0 && !proto->Class == ItemClass::ITEM_CLASS_RECIPE)
     {
         return false;
     }

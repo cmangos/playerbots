@@ -392,7 +392,7 @@ AiPlayerbot.ClassRaceProb.3.4 = 102    # NightElf hunter chance
 AiPlayerbot.ClassRaceProb.3.6 = 23     # Tauren hunter chance
 AiPlayerbot.ClassRaceProb.3.8 = 22     # Troll hunter chance
 
-# AiPlayerbot.ClassRaceProb.1 = 197    # Rogue chance
+# AiPlayerbot.ClassRaceProb.4 = 197    # Rogue chance
 AiPlayerbot.ClassRaceProb.4.1 = 32     # Human rogue chance
 AiPlayerbot.ClassRaceProb.4.2 = 9      # Orc rogue chance
 AiPlayerbot.ClassRaceProb.4.3 = 9      # Dwarf rogue chance

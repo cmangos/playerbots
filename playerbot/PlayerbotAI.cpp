@@ -6194,51 +6194,10 @@ bool PlayerbotAI::HasItemInInventory(uint32 itemId)
     return false;
 }
 
-void PlayerbotAI::DestroyAllGrayItemsInBags(Player* requester)
-{
-    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
-    {
-        if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-        {
-            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
-            {
-                if (Item* pItem = pBag->GetItemByPos(j))
-                {
-                    if (const ItemPrototype* proto = pItem->GetProto())
-                    {
-                        if (proto->Quality == ITEM_QUALITY_POOR)
-                        {
-                            bot->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
-                            std::ostringstream out; out << GetChatHelper()->formatItem(pItem) << " destroyed";
-                            TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
-    {
-        if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-        {
-            if (const ItemPrototype* proto = pItem->GetProto())
-            {
-                if (proto->Quality == ITEM_QUALITY_POOR)
-                {
-                    bot->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
-                    std::ostringstream out; out << GetChatHelper()->formatItem(pItem) << " destroyed";
-                    TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-                }
-            }
-        }
-    }
-}
-
 /*
 * @return true if has stacks which are not full for these items
 */
-bool PlayerbotAI::HasNotFullStacksInBagsForLootItems(LootItemList lootItemList)
+bool PlayerbotAI::HasNotFullStacksInBagsForLootItems(LootItemList &lootItemList)
 {
     for (auto lootItem : lootItemList)
     {
@@ -6278,8 +6237,13 @@ bool PlayerbotAI::HasNotFullStacksInBagsForLootItems(LootItemList lootItemList)
 
 bool PlayerbotAI::HasQuestItemsInWOLootList(WorldObject* wo)
 {
-    LootItemList lootItemList;
-    wo->m_loot->GetLootItemsListFor(bot, lootItemList);
+    if (!wo)
+        return false;
+
+    LootItemList lootItemList = {};
+
+    if (wo->m_loot)
+        wo->m_loot->GetLootItemsListFor(bot, lootItemList);
 
     if (HasQuestItemsInLootList(lootItemList))
     {
@@ -6289,7 +6253,7 @@ bool PlayerbotAI::HasQuestItemsInWOLootList(WorldObject* wo)
     return false;
 }
 
-bool PlayerbotAI::HasQuestItemsInLootList(LootItemList lootItemList)
+bool PlayerbotAI::HasQuestItemsInLootList(LootItemList &lootItemList)
 {
     for (auto lootItem : lootItemList)
     {
@@ -6304,6 +6268,9 @@ bool PlayerbotAI::HasQuestItemsInLootList(LootItemList lootItemList)
 
 bool PlayerbotAI::CanLootSomethingFromWO(WorldObject* wo)
 {
+    if (!wo)
+        return false;
+
     ObjectGuid guid = wo->GetObjectGuid();
     if (guid.IsCreature())
     {
@@ -6314,8 +6281,11 @@ bool PlayerbotAI::CanLootSomethingFromWO(WorldObject* wo)
             {
                 return true;
             }
-            LootItemList lootItemList;
-            creature->m_loot->GetLootItemsListFor(bot, lootItemList);
+            LootItemList lootItemList = {};
+
+            if (creature->m_loot)
+                creature->m_loot->GetLootItemsListFor(bot, lootItemList);
+
             if (HasNotFullStacksInBagsForLootItems(lootItemList))
             {
                 return true;
@@ -6327,8 +6297,11 @@ bool PlayerbotAI::CanLootSomethingFromWO(WorldObject* wo)
         GameObject* go = GetGameObject(guid);
         if (go)
         {
-            LootItemList lootItemList;
-            go->m_loot->GetLootItemsListFor(bot, lootItemList);
+            LootItemList lootItemList = {};
+
+            if (go->m_loot)
+                go->m_loot->GetLootItemsListFor(bot, lootItemList);
+
             if (HasNotFullStacksInBagsForLootItems(lootItemList))
             {
                 return true;

@@ -201,6 +201,7 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
     botOutgoingPacketHandlers.AddHandler(SMSG_PARTY_COMMAND_RESULT, "party command");
     botOutgoingPacketHandlers.AddHandler(SMSG_LEVELUP_INFO, "levelup", true);
     botOutgoingPacketHandlers.AddHandler(SMSG_LOG_XPGAIN, "xpgain", true);
+    botOutgoingPacketHandlers.AddHandler(SMSG_PVP_CREDIT, "honorgain", true);
     botOutgoingPacketHandlers.AddHandler(SMSG_TEXT_EMOTE, "receive text emote");
     botOutgoingPacketHandlers.AddHandler(SMSG_EMOTE, "receive emote");
     botOutgoingPacketHandlers.AddHandler(SMSG_LOOT_START_ROLL, "loot start roll", true);

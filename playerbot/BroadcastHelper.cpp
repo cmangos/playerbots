@@ -473,7 +473,7 @@ bool BroadcastHelper::BroadcastQuestTurnedIn(
     return false;
 }
 
-bool BroadcastHelper::BroadcastKill(
+bool BroadcastHelper::BroadcastCreatureKill(
     PlayerbotAI* ai,
     Player* bot,
     Creature *creature
@@ -503,19 +503,6 @@ bool BroadcastHelper::BroadcastKill(
                 ai,
                 BOT_TEXT2("broadcast_killed_pet", placeholders),
                 { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
-            );
-        }
-    }
-    else if (creature->IsPlayer())
-    {
-        if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceKillPlayer)
-        {
-            placeholders["%victim_class"] = ai->GetChatHelper()->formatClass(creature->getClass());
-
-            return BroadcastToChannelWithGlobalChance(
-                ai,
-                BOT_TEXT2("broadcast_killed_player", placeholders),
-                { {TO_WORLD_DEFENSE, 50}, {TO_LOCAL_DEFENSE, 50}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
             );
         }
     }
@@ -585,6 +572,40 @@ bool BroadcastHelper::BroadcastKill(
             break;
         default:
             break;
+        }
+    }
+
+    return false;
+}
+
+bool BroadcastHelper::BroadcastPlayerKill(
+    PlayerbotAI* ai,
+    Player* bot,
+    Player* victim
+)
+{
+    std::map<std::string, std::string> placeholders;
+    placeholders["%victim_name"] = victim->GetName();
+    AreaTableEntry const* current_area = ai->GetCurrentArea();
+    AreaTableEntry const* current_zone = ai->GetCurrentZone();
+    placeholders["%area_name"] = current_area ? ai->GetLocalizedAreaName(current_area) : BOT_TEXT("string_unknown_area");
+    placeholders["%zone_name"] = current_zone ? ai->GetLocalizedAreaName(current_zone) : BOT_TEXT("string_unknown_area");
+    placeholders["%victim_level"] = victim->GetLevel();
+    placeholders["%my_class"] = ai->GetChatHelper()->formatClass(bot->getClass());
+    placeholders["%my_race"] = ai->GetChatHelper()->formatRace(bot->getRace());
+    placeholders["%my_level"] = std::to_string(bot->GetLevel());
+
+    if (victim)
+    {
+        if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceKillPlayer)
+        {
+            placeholders["%victim_class"] = ai->GetChatHelper()->formatClass(victim->getClass());
+
+            return BroadcastToChannelWithGlobalChance(
+                ai,
+                BOT_TEXT2("broadcast_killed_player", placeholders),
+                { {TO_WORLD_DEFENSE, 50}, {TO_LOCAL_DEFENSE, 50}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+            );
         }
     }
 

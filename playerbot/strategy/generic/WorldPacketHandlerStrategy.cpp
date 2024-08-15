@@ -131,6 +131,10 @@ void WorldPacketHandlerStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &
         NextAction::array(0, new NextAction("xp gain", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "honorgain",
+        NextAction::array(0, new NextAction("honor gain", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "levelup",
         NextAction::array(0, new NextAction("auto talents", relevance), new NextAction("auto learn spell", relevance), NULL)));
 

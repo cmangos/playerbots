@@ -73,10 +73,15 @@ namespace ai
             Player* bot,
             Quest const* quest
         );
-        static bool BroadcastKill(
+        static bool BroadcastCreatureKill(
             PlayerbotAI* ai,
             Player* bot,
             Creature* creature
+        );
+        static bool BroadcastPlayerKill(
+            PlayerbotAI* ai,
+            Player* bot,
+            Player* victim
         );
         static bool BroadcastLevelup(
             PlayerbotAI* ai,

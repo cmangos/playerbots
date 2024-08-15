@@ -55,6 +55,7 @@ namespace ai
             creators["bg status"] = &WorldPacketTriggerContext::bg_status;
             creators["levelup"] = &WorldPacketTriggerContext::levelup;
             creators["xpgain"] = &WorldPacketTriggerContext::xpgain;
+            creators["honorgain"] = &WorldPacketTriggerContext::honorgain;
             creators["see spell"] = &WorldPacketTriggerContext::seespell;
             creators["release spirit"] = &WorldPacketTriggerContext::release_spirit;
             creators["revive from corpse"] = &WorldPacketTriggerContext::revive_from_corpse;
@@ -110,6 +111,7 @@ namespace ai
         static Trigger* taxi(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "activate taxi"); }
         static Trigger* levelup(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "levelup"); }
         static Trigger* xpgain(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "xpgain"); }
+        static Trigger* honorgain(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "honorgain"); }
         static Trigger* seespell(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "see spell"); }
         static Trigger* release_spirit(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "release spirit"); }
         static Trigger* revive_from_corpse(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "revive from corpse"); }

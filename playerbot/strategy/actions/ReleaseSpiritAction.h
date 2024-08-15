@@ -5,6 +5,7 @@
 #include "MovementActions.h"
 #include "playerbot/strategy/values/LastMovementValue.h"
 #include "ReviveFromCorpseAction.h"
+#include "playerbot/TravelMgr.h"
 
 namespace ai
 {
@@ -139,9 +140,29 @@ namespace ai
                 bot->SaveToDB();
             }
 
-            sLog.outBasic("Repop: Removing bot #%d %s:%d <%s> from group", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-            if (Group* group = bot->GetGroup())
-                group->RemoveMember(bot->GetObjectGuid(), 0);
+            
+            if (!ai->HasRealPlayerMaster())
+            {
+                if (Group* group = bot->GetGroup())
+                {
+                    sLog.outBasic("Repop: Removing bot #%d %s:%d <%s> from group", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+                    group->RemoveMember(bot->GetObjectGuid(), 0);
+                }
+            }
+
+            RESET_AI_VALUE(Unit*, "old target");
+            RESET_AI_VALUE(Unit*, "current target");
+            RESET_AI_VALUE(Unit*, "pull target");
+            RESET_AI_VALUE(bool, "combat::self target");
+            RESET_AI_VALUE(WorldPosition, "current position");
+
+            bot->SetSelectionGuid(ObjectGuid());
+            ai->TellPlayer(requester, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+            TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+            travelTarget->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition, true);
+            travelTarget->setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+            travelTarget->setExpireIn(1000);
 
             PlayerInfo const* defaultPlayerInfo = sObjectMgr.GetPlayerInfo(bot->getRace(), bot->getClass());
             if (defaultPlayerInfo)
@@ -157,13 +178,6 @@ namespace ai
                 bot->TeleportToHomebind();
             }
 
-            context->GetValue<Unit*>("current target")->Set(nullptr);
-            bot->SetSelectionGuid(ObjectGuid());
-            ai->TellPlayer(requester, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-
-            RESET_AI_VALUE(bool, "combat::self target");
-            RESET_AI_VALUE(WorldPosition, "current position");
-
             sPlayerbotAIConfig.logEvent(ai, "RepopAction");
 
             return true;
@@ -172,6 +186,9 @@ namespace ai
         virtual bool isUseful()
         {
             if (bot->InBattleGround())
+                return false;
+
+            if (ai->HasActivePlayerMaster())
                 return false;
 
             return true;

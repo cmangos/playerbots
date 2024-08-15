@@ -1382,7 +1382,7 @@ bool ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* pr
     }
 
     //do not buy items that require skill to use, unless limited supply or recipe (just in case)
-    if (proto->RequiredSkill > 0 && !proto->Class == ItemClass::ITEM_CLASS_RECIPE)
+    if (proto->RequiredSkill > 0 && !(proto->Class == ItemClass::ITEM_CLASS_RECIPE))
     {
         return false;
     }

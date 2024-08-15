@@ -733,6 +733,13 @@ AiPlayerbot.ShootDistance = 26.0
 AiPlayerbot.RpgDistance = 200
 #AiPlayerbot.ProximityDistance = 20.0
 
+# Max distance bot allowed to roam freely around master
+#AiPlayerbot.MaxFreeMoveDistance = 150.0
+
+# Delay (in seconds) after master inactivity after which bots will start roaming freely around master
+# Set to 0 to disable (bots will not be going places on their own when you are idle)
+#AiPlayerbot.FreeMoveDelay = 30.0
+
 # Bot can flee for enemy
 AiPlayerbot.FleeingEnabled = 1
 

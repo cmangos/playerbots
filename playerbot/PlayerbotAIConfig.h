@@ -65,7 +65,7 @@ public:
     float sightDistance, spellDistance, reactDistance, grindDistance, lootDistance, groupMemberLootDistance, groupMemberLootDistanceWithActiveMaster,
         gatheringDistance, groupMemberGatheringDistance, groupMemberGatheringDistanceWithActiveMaster, shootDistance,
         fleeDistance, tooCloseDistance, meleeDistance, followDistance, raidFollowDistance, whisperDistance, contactDistance,
-        aoeRadius, rpgDistance, targetPosRecalcDistance, farDistance, healDistance, aggroDistance, proximityDistance;
+        aoeRadius, rpgDistance, targetPosRecalcDistance, farDistance, healDistance, aggroDistance, proximityDistance, maxFreeMoveDistance, freeMoveDelay;
     uint32 criticalHealth, lowHealth, mediumHealth, almostFullHealth;
     uint32 lowMana, mediumMana;
 

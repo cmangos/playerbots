@@ -110,7 +110,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
         if (!sPlayerbotAIConfig.randomBotGuildNearby)
             return false;
 
-        if (guild->GetMemberSize() > 1000)
+        if (guild->GetMemberSize() >= sPlayerbotAIConfig.guildMaxBotLimit)
             return false;
 
         if (!guild->HasRankRight(botMember->RankId, GR_RIGHT_INVITE))

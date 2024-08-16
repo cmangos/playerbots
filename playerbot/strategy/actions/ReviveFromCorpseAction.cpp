@@ -215,7 +215,7 @@ bool SpiritHealerAction::Execute(Event& event)
     GuidPosition grave = AI_VALUE(GuidPosition, "best graveyard");
 
     //something went wrong
-    if (!grave || grave == GuidPosition())
+    if (!grave)
     {
         //prevent doing weird stuff OR GOING TO 0,0,0
         sLog.outBasic(

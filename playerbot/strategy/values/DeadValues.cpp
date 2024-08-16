@@ -141,7 +141,7 @@ GuidPosition BestGraveyardValue::Calculate()
     if (!ai->HasActivePlayerMaster() && deathCount >= DEATH_COUNT_BEFORE_TRYING_ANOTHER_GRAVEYARD)
     {
         GuidPosition anotherGraveyard = AI_VALUE2(GuidPosition, "graveyard", "another closest appropriate");
-        if (anotherGraveyard && anotherGraveyard != GuidPosition())
+        if (anotherGraveyard)
         {
             return anotherGraveyard;
         }
@@ -158,7 +158,7 @@ GuidPosition BestGraveyardValue::Calculate()
     if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
     {
         GuidPosition masterGraveyard = AI_VALUE2(GuidPosition, "graveyard", "master");
-        if (masterGraveyard && masterGraveyard != GuidPosition())
+        if (masterGraveyard)
         {
             return masterGraveyard;
         }
@@ -175,7 +175,7 @@ GuidPosition BestGraveyardValue::Calculate()
     if (AI_VALUE2(GuidPosition, "graveyard", "travel") && AI_VALUE2(GuidPosition, "graveyard", "travel").fDist(corpse) > sPlayerbotAIConfig.reactDistance)
     {
         GuidPosition travelGraveyard = AI_VALUE2(GuidPosition, "graveyard", "travel");
-        if (travelGraveyard && travelGraveyard != GuidPosition())
+        if (travelGraveyard)
         {
             return travelGraveyard;
         }

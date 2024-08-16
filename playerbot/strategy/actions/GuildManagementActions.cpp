@@ -242,7 +242,7 @@ bool GuildLeaveAction::Execute(Event& event)
 
     Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId()); 
     
-    if (guild->GetMemberSize() >= sPlayerbotAIConfig.guildMaxBotLimit)
+    if (guild->GetMemberSize() > sPlayerbotAIConfig.guildMaxBotLimit)
     {
         std::map<std::string, std::string> placeholders;
         placeholders["%guild_bot_limit"] = std::to_string(sPlayerbotAIConfig.guildMaxBotLimit);

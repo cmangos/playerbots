@@ -78,6 +78,8 @@ bool GuildAcceptAction::Execute(Event& event)
     {
         bot->GetSession()->HandleGuildAcceptOpcode(packet);
 
+        TalentSpec::SetPublicNote(bot);
+
         sPlayerbotAIConfig.logEvent(ai, "GuildAcceptAction", guild->GetName(), std::to_string(guild->GetMemberSize()));
     }
     else

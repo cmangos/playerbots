@@ -128,12 +128,18 @@ void TalentSpec::ApplyTalents(Player* bot, std::ostringstream* out)
             }
         }
 
+    SetPublicNote(bot);
+}
+
+void TalentSpec::SetPublicNote(Player* bot)
+{
+    TalentSpec spec(bot);
     if (sPlayerbotAIConfig.talentsInPublicNote && bot->GetGuildId())
     {
         Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
         MemberSlot* member = guild->GetMemberSlot(bot->GetObjectGuid());
-        if(guild->HasRankRight(member->RankId, GR_RIGHT_EPNOTE))
-            member->SetPNOTE(ChatHelper::specName(bot) + " (" + std::to_string(GetTalentPoints(0)) + "/" + std::to_string(GetTalentPoints(1)) + "/" + std::to_string(GetTalentPoints(2)) + ")");
+        if (guild->HasRankRight(member->RankId, GR_RIGHT_EPNOTE))
+            member->SetPNOTE(ChatHelper::specName(bot) + " (" + std::to_string(spec.GetTalentPoints(0)) + "/" + std::to_string(spec.GetTalentPoints(1)) + "/" + std::to_string(spec.GetTalentPoints(2)) + ")");
     }
 }
 

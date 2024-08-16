@@ -21,13 +21,17 @@ GuidPosition GraveyardValue::Calculate()
         auto travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
         if (travelTarget && travelTarget->getPosition() && travelTarget->getPosition()->getMapId() == bot->GetMapId())
+        {
             refPosition = *travelTarget->getPosition();
+        }
     }
     else if (getQualifier() == "another closest appropriate")
     {
         //just get ANOTHER nearest appropriate for level (neutral or same team zone)
         if (auto anotherAppropriate = GetAnotherAppropriateClosestGraveyard())
+        {
             return GuidPosition(0, anotherAppropriate);
+        }
     }
 
     WorldSafeLocsEntry const* ClosestGrave = bot->GetMap()->GetGraveyardManager().GetClosestGraveYard(
@@ -136,21 +140,53 @@ GuidPosition BestGraveyardValue::Calculate()
     //attempt to revive at other same map graveyards which are not enemy territory
     if (!ai->HasActivePlayerMaster() && deathCount >= DEATH_COUNT_BEFORE_TRYING_ANOTHER_GRAVEYARD)
     {
-        if (GuidPosition anotherGraveyard = AI_VALUE2(GuidPosition, "graveyard", "another closest appropriate"))
+        GuidPosition anotherGraveyard = AI_VALUE2(GuidPosition, "graveyard", "another closest appropriate");
+        if (anotherGraveyard && anotherGraveyard != GuidPosition())
         {
             return anotherGraveyard;
         }
+        sLog.outBasic(
+            "ERROR: Unable to find another closest appropriate graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s>",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
     }
 
     //Revive near master.
     if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
     {
-        return AI_VALUE2(GuidPosition, "graveyard", "master");
+        GuidPosition masterGraveyard = AI_VALUE2(GuidPosition, "graveyard", "master");
+        if (masterGraveyard && masterGraveyard != GuidPosition())
+        {
+            return masterGraveyard;
+        }
+        sLog.outBasic(
+            "ERROR: Unable to find master graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s>",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
     }
 
     //Revive near travel target if it's far away from last death.
     if (AI_VALUE2(GuidPosition, "graveyard", "travel") && AI_VALUE2(GuidPosition, "graveyard", "travel").fDist(corpse) > sPlayerbotAIConfig.reactDistance)
-        return AI_VALUE2(GuidPosition, "graveyard", "travel");
+    {
+        GuidPosition travelGraveyard = AI_VALUE2(GuidPosition, "graveyard", "travel");
+        if (travelGraveyard && travelGraveyard != GuidPosition())
+        {
+            return travelGraveyard;
+        }
+        sLog.outBasic(
+            "ERROR: Unable to find travel graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s>",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
+    }
 
     return AI_VALUE2(GuidPosition, "graveyard", "self");
 }

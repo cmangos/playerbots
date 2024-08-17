@@ -825,7 +825,7 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 # For example if you do not want to see certain items on AH
 # AiPlayerbot.VendorOverAHItemIds = 1,2,3
 #
-# Whether bot should check ALL auction house listings when browsing (by default only checks a small amount)
+# (0-1) Whether bot should check ALL auction house listings when browsing (by default only checks a small amount)
 # AiPlayerbot.BotCheckAllAuctionListings = 0
 #
 #######################################

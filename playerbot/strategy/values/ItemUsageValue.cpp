@@ -195,25 +195,23 @@ ItemUsage ItemUsageValue::Calculate()
             foodType = "bandage";
         }
 
+        bool botHasHealingSpells = bot->getClass() == CLASS_PALADIN || bot->getClass() == CLASS_PRIEST || bot->getClass() == CLASS_DRUID || bot->getClass() == CLASS_SHAMAN;
+
         //itemlevel 1 consumables are mostly level-independent
         bool isAppropriateConsumableLevel = proto->RequiredLevel <= bot->GetLevel()
-            && (proto->ItemLevel == 1 || proto->ItemLevel+5 >= bot->GetLevel());
+            && (proto->ItemLevel == 1 || proto->ItemLevel >= bot->GetLevel());
 
         bool isAppropriateConsumable = isAppropriateConsumableLevel
-            && (IsHpFoodOrDrink(proto) || IsHealingPotion(proto) || IsBandage(proto) || (bot->HasMana() && (IsManaFoodOrDrink(proto) || IsManaPotion(proto))));
+            && (IsHpFoodOrDrink(proto) || IsHealingPotion(proto) || (IsBandage(proto) && !botHasHealingSpells) || (bot->HasMana() && (IsManaFoodOrDrink(proto) || IsManaPotion(proto))));
 
         if (isAppropriateConsumable && bot->CanUseItem(proto) == EQUIP_ERR_OK)
         {
             float stacks = BetterStacks(proto, foodType);
 
-            if (stacks < 2)
+            if (stacks < 1)
             {
                 stacks += CurrentStacks(ai, proto);
-
-                if (stacks < 2)
-                    return ItemUsage::ITEM_USAGE_USE; //Buy some to get to 2 stacks
-                else if (stacks < 3)       //Keep the item if less than 3 stacks
-                    return ItemUsage::ITEM_USAGE_KEEP;
+                return ItemUsage::ITEM_USAGE_USE; //Buy some to get to 1 stack
             }
         }
     }

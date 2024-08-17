@@ -242,7 +242,11 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
         freeMoney[ItemUsage::ITEM_USAGE_AMMO] = (uint32)NeedMoneyFor::ammo;
         freeMoney[ItemUsage::ITEM_USAGE_QUEST] = freeMoney[ItemUsage::ITEM_USAGE_AH] = freeMoney[ItemUsage::ITEM_USAGE_VENDOR] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_NEED] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_GREED] = (uint32)NeedMoneyFor::anything;
 
-        uint32 checkNumAuctions = urand(50, 250);
+        uint32 checkNumAuctions = map.size();
+        if (!sPlayerbotAIConfig.botCheckAllAuctionListings)
+        {
+            checkNumAuctions = urand(50, 250);
+        }
 
         for (uint32 i = 0; i < checkNumAuctions; i++)
         {
@@ -384,12 +388,12 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
                 reason = BOT_TEXT2("to complete an objective for a quest.", placeholders);
                 break;
             case ItemUsage::ITEM_USAGE_AH:
-                placeholders["%price_min"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMinPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate)));
-                placeholders["%price_max"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMaxPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate)));
+                placeholders["%price_min"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMinPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate)) * auction->itemCount);
+                placeholders["%price_max"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMaxPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate)) * auction->itemCount);
                 reason = BOT_TEXT2("to repost on AH for %price_min to %price_max.", placeholders);
                 break;
             case ItemUsage::ITEM_USAGE_VENDOR:
-                placeholders["%price"] = ChatHelper::formatMoney(sObjectMgr.GetItemPrototype(auction->itemTemplate)->SellPrice);
+                placeholders["%price"] = ChatHelper::formatMoney(sObjectMgr.GetItemPrototype(auction->itemTemplate)->SellPrice * auction->itemCount);
                 reason = BOT_TEXT2("to sell to a vendor for %price.", placeholders);
                 break;
             case ItemUsage::ITEM_USAGE_FORCE_NEED:

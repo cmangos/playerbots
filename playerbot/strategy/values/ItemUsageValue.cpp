@@ -524,62 +524,35 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
     }
 
     uint32 oldStatWeight = sRandomItemMgr.ItemStatWeight(bot, oldItem);
-    if (statWeight || oldStatWeight)
+    if (statWeight && oldStatWeight)
     {
         shouldEquip = statWeight >= oldStatWeight;
+    }
+    else
+    {
+        shouldEquip = itemProto->Quality >= oldItemProto->Quality && itemProto->ItemLevel >= oldItemProto->ItemLevel;
     }
 
     if (AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", itemProto->ItemId, ForceItemUsage::FORCE_USAGE_NONE) == ForceItemUsage::FORCE_USAGE_EQUIP) //New item is forced. Always equip it.
         return ItemUsage::ITEM_USAGE_EQUIP;
 
-    bool existingShouldEquip = true;
-    if (oldItemProto->Class == ITEM_CLASS_WEAPON && !oldStatWeight)
-        existingShouldEquip = false;
-    if (oldItemProto->Class == ITEM_CLASS_ARMOR && !statWeight)
-        existingShouldEquip = false;
-
-    //Compare items based on item level, quality or itemId.
+    //Compare items based on item level, quality.
     bool isBetter = false;
+    if (!statWeight || !oldStatWeight)
+    {
+        isBetter = (itemProto->Quality > oldItemProto->Quality && itemProto->ItemLevel == oldItemProto->ItemLevel) || (itemProto->Quality == oldItemProto->Quality && itemProto->ItemLevel > oldItemProto->ItemLevel);
+    }
     if (statWeight > oldStatWeight)
         isBetter = true;
     else if (statWeight == oldStatWeight && itemProto->Quality > oldItemProto->Quality)
         isBetter = true;
-    else if (statWeight == oldStatWeight && itemProto->Quality == oldItemProto->Quality && itemProto->ItemId > oldItemProto->ItemId)
+    else if (statWeight == oldStatWeight && itemProto->Quality == oldItemProto->Quality && itemProto->ItemLevel > oldItemProto->ItemLevel)
         isBetter = true;
 
-    Item* item = CurrentItem(itemProto);
-    bool itemIsBroken = item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0 && item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0;
-    bool oldItemIsBroken = oldItem->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0 && oldItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0;
-
-    if (itemProto->ItemId != oldItemProto->ItemId && (shouldEquip || !existingShouldEquip) && isBetter)
+    if (itemProto->ItemId != oldItemProto->ItemId && shouldEquip && isBetter)
     {
-        switch (itemProto->Class)
-        {
-        case ITEM_CLASS_ARMOR:
-            if (oldItemProto->SubClass <= itemProto->SubClass) {
-                if (itemIsBroken && !oldItemIsBroken)
-                    return ItemUsage::ITEM_USAGE_BROKEN_EQUIP;
-                else
-                    if (shouldEquip)
-                        return ItemUsage::ITEM_USAGE_EQUIP;
-                    else
-                        return ItemUsage::ITEM_USAGE_BAD_EQUIP;
-            }
-            break;
-        default:
-            if (itemIsBroken && !oldItemIsBroken)
-                return ItemUsage::ITEM_USAGE_BROKEN_EQUIP;
-            else
-                if (shouldEquip)
-                    return ItemUsage::ITEM_USAGE_EQUIP;
-                else
-                    return ItemUsage::ITEM_USAGE_BAD_EQUIP;
-        }
-    }
-
-    //Item is not better but current item is broken and new one is not.
-    if (oldItemIsBroken && !itemIsBroken)
         return ItemUsage::ITEM_USAGE_EQUIP;
+    }
 
     return ItemUsage::ITEM_USAGE_NONE;
 }

@@ -317,9 +317,34 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
 
             usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(auction).GetQualifier());
 
-            uint32 price = std::min(auction->buyout, uint32(std::max(auction->bid, auction->startbid) * frand(1.05f, 1.25f)));
+            uint32 currentBidPrice = std::max(auction->bid, auction->startbid);
+            uint32 currentBuyoutPrice = auction->buyout;
 
-            if (freeMoney.find(usage) == freeMoney.end() || price > AI_VALUE2(uint32, "free money for", freeMoney[usage]))
+            bool shouldBuyout = false;
+
+            //determine if should look at buyout or bid price depending on item usage
+            uint32 price = currentBuyoutPrice;
+
+            if (usage == ItemUsage::ITEM_USAGE_VENDOR || usage == ItemUsage::ITEM_USAGE_FORCE_GREED || usage == ItemUsage::ITEM_USAGE_NONE)
+            {
+                //do not care for buyout price for items that bot does not need
+                price = currentBidPrice;
+            }
+            else if (currentBidPrice < static_cast<uint32>(currentBuyoutPrice * 0.3f) && !urand(0,1))
+            {
+                //if bid price < 30% of buyout, then might as well (50/50) chance consider bid price directly
+                price = currentBidPrice;
+            }
+
+            //first check if has money for buyout price (if checking against buyout price)
+            if (price == currentBuyoutPrice && (freeMoney.find(usage) == freeMoney.end() || price > AI_VALUE2(uint32, "free money for", freeMoney[usage])))
+            {
+                //check for free money for bid price next if has no money for buyout
+                price = currentBidPrice;
+            }
+
+            //check if have money for bid price (if checking against bid price)
+            if (price != currentBuyoutPrice && (freeMoney.find(usage) == freeMoney.end() || price > AI_VALUE2(uint32, "free money for", freeMoney[usage])))
             {
                 if (!urand(0, 5))
                     break;
@@ -373,8 +398,8 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
                 break;
             }
 
-            bidItems = BidItem(requester, auction, price, auctioneer, reason);
-                
+            bidItems = BidItem(requester, auction, price, auctioneer, price == currentBuyoutPrice, reason);
+
             if (bidItems)
                 totalcount++;
 
@@ -407,7 +432,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
 
         if(!proto->Name1)
             continue;
-        
+
         if (!strstri(proto->Name1, text.c_str()))
             continue;
 
@@ -432,10 +457,10 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
 
     uint32 cost = std::min(auction->buyout, uint32(std::max(auction->bid, auction->startbid) * frand(1.05f, 1.25f)));
 
-    return BidItem(requester, auction, cost, auctioneer);
+    return BidItem(requester, auction, cost, auctioneer, cost == auction->buyout);
 }
 
-bool AhBidAction::BidItem(Player* requester, AuctionEntry* auction, uint32 price, Unit* auctioneer, std::string reason)
+bool AhBidAction::BidItem(Player* requester, AuctionEntry* auction, uint32 price, Unit* auctioneer, bool isBuyout, std::string reason)
 {
     AuctionHouseEntry const* auctionHouseEntry = bot->GetSession()->GetCheckedAuctionHouseForAuctioneer(auctioneer->GetObjectGuid());
     if (!auctionHouseEntry)
@@ -469,7 +494,14 @@ bool AhBidAction::BidItem(Player* requester, AuctionEntry* auction, uint32 price
     {
         sPlayerbotAIConfig.logEvent(ai, "AhBidAction", proto->Name1, std::to_string(proto->ItemId));
         std::ostringstream out;
-        out << "Bidding " << ChatHelper::formatMoney(price) << " on " << ChatHelper::formatItem(itemQualifier, count) << " on the AH";
+        if (isBuyout)
+        {
+            out << "Buying out " << ChatHelper::formatItem(itemQualifier, count) << " for " << ChatHelper::formatMoney(price) << " on the AH";
+        }
+        else
+        {
+            out << "Bidding " << ChatHelper::formatMoney(price) << " on " << ChatHelper::formatItem(itemQualifier, count) << " on the AH";
+        }
         if (!reason.empty())
             out << " " << reason;
         ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);

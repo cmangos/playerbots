@@ -1361,6 +1361,10 @@ bool ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* pr
     if (proto->ItemId == 2662) //noggerfogger
         return true;
 
+    //copper rod
+    if (proto->ItemId == 6217)
+        return false;
+
     //do not buy items that require reputation to use
     if (proto->RequiredReputationFaction > 0 || proto->RequiredReputationRank > 0)
     {

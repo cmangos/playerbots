@@ -1254,7 +1254,7 @@ bool ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(ItemPrototype const*
         return true;
     }
 
-    if (IsItemSoldByAnyVendorButHasLimitedMaxCount(proto))
+    if (IsItemSoldByAnyVendorButHasLimitedMaxCount(proto) && !(proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE && proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_SCROLL))
     {
         return true;
     }
@@ -1374,7 +1374,7 @@ bool ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(ItemPrototype const* pr
         return true;
     }
 
-    if (isLimitedSupply)
+    if (isLimitedSupply && !(proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE && proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_SCROLL))
     {
         return true;
     }

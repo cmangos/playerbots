@@ -110,6 +110,10 @@ ItemUsage ItemUsageValue::Calculate()
     if (proto->ItemId == 6948)
         return ItemUsage::ITEM_USAGE_KEEP;
 
+    //WARLOCKS GOT TO KEEP SOULSHARDS (keep at least 10)
+    if (bot->getClass() == CLASS_WARLOCK && proto->ItemId == 6265 && CurrentStacks(ai, proto) <= 10)
+        return ItemUsage::ITEM_USAGE_KEEP;
+
     //SKILL
     if (ai->HasActivePlayerMaster())
     {

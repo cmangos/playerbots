@@ -140,7 +140,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         requester = nullptr;
     }
 
-    std::unordered_map<ObjectGuid, uint32> targets;
+    std::unordered_map<ObjectGuid, float> targets;
     std::vector<ObjectGuid> targetList;
 
     std::list<ObjectGuid> possibleTargets = AI_VALUE(std::list<ObjectGuid>, "possible rpg targets");

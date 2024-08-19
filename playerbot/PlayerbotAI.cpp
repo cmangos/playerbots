@@ -6660,9 +6660,6 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
         }
     }
 
-    FindNamedItemVisitor visitor(bot, text);
-    VISIT;
-
     uint32 quality = GetChatHelper()->parseItemQuality(text);
     if (quality != MAX_ITEM_QUALITY)
     {
@@ -6695,6 +6692,12 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
     if (!outfit.empty())
     {
         FindItemByIdsVisitor visitor(outfit);
+        VISIT;
+    }
+
+    if (found.size() == 0)
+    {
+        FindNamedItemVisitor visitor(bot, text);
         VISIT;
     }
 

@@ -270,6 +270,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         checked++;
 
         if (checked >= 50) //Some limit on stuff to check.
+        if (checked >= maxCheck)
             break;
     }
 

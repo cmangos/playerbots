@@ -404,7 +404,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         out << "found: ";
         out << chat->formatWorldobject(guidP.GetWorldObject());
 
-        out << " " << rgpActionReason[guidP] << " " << targets[guidP];
+        out << " " << rgpActionReason[guidP] << " " << (uint32)targets[guidP];
 
         ai->TellPlayerNoFacing(requester, out);
     }

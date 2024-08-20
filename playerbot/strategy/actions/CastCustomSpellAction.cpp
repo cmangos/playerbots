@@ -673,6 +673,7 @@ bool CraftRandomItemAction::Execute(Event& event)
         cmd << spellId << " " << castCount;
 
         ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *bot);
+        SetDuration(1.0f); //Spel was not cast yet so no delay is needed.
         return true;
 
     }

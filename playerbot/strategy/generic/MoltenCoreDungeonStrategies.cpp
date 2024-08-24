@@ -8,8 +8,44 @@ using namespace ai;
 void MoltenCoreDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     triggers.push_back(new TriggerNode(
+        "start lucifron fight",
+        NextAction::array(0, new NextAction("enable lucifron fight strategy", 100.0f), NULL)));
+    
+    triggers.push_back(new TriggerNode(
         "start magmadar fight",
         NextAction::array(0, new NextAction("enable magmadar fight strategy", 100.0f), NULL)));
+    
+    triggers.push_back(new TriggerNode(
+        "start gehennas fight",
+        NextAction::array(0, new NextAction("enable gehennas fight strategy", 100.0f), NULL)));
+    
+    triggers.push_back(new TriggerNode(
+        "start garr fight",
+        NextAction::array(0, new NextAction("enable garr fight strategy", 100.0f), NULL)));
+    
+    triggers.push_back(new TriggerNode(
+        "start baron geddon fight",
+        NextAction::array(0, new NextAction("enable baron geddon fight strategy", 100.0f), NULL)));
+    
+    triggers.push_back(new TriggerNode(
+        "start shazzrah fight",
+        NextAction::array(0, new NextAction("enable shazzrah fight strategy", 100.0f), NULL)));
+    
+    triggers.push_back(new TriggerNode(
+        "start sulfuron harbinger fight",
+        NextAction::array(0, new NextAction("enable sulfuron harbinger fight strategy", 100.0f), NULL)));
+    
+    triggers.push_back(new TriggerNode(
+        "start golemagg fight",
+        NextAction::array(0, new NextAction("enable golemagg fight strategy", 100.0f), NULL)));
+    
+    triggers.push_back(new TriggerNode(
+        "start majordomo executus fight",
+        NextAction::array(0, new NextAction("enable majordomo executus fight strategy", 100.0f), NULL)));
+    
+    triggers.push_back(new TriggerNode(
+        "start ragnaros fight",
+        NextAction::array(0, new NextAction("enable ragnaros fight strategy", 100.0f), NULL)));
 }
 
 void MoltenCoreDungeonStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -85,3 +121,4 @@ void MagmadarFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multip
         multipliers.push_back(new PreventMoveAwayFromCreatureOnReachToCastMultiplier(ai));
     }
 }
+    

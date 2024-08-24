@@ -13,7 +13,8 @@
 #include "values/ValueContext.h"
 #include "values/SharedValueContext.h"
 
-
+#include "triggers/MoltenCoreDungeonTriggers.h"
+#include "actions/MoltenCoreDungeonActions.h"
 using namespace ai;
 
 AiObjectContext::AiObjectContext(PlayerbotAI* ai) : PlayerbotAIAware(ai)
@@ -30,6 +31,9 @@ AiObjectContext::AiObjectContext(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     triggerContexts.Add(new TriggerContext());
     triggerContexts.Add(new ChatTriggerContext());
     triggerContexts.Add(new WorldPacketTriggerContext());
+
+    actionContexts.Add(new MoltenCoreActionContext());
+    triggerContexts.Add(new MoltenCoreTriggerContext());
 
     valueContexts.Add(new ValueContext());
 

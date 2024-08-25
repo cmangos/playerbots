@@ -77,6 +77,37 @@ void MoltenCoreDungeonStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
         NextAction::array(0, new NextAction("fire protection potion", 100.0f), NULL)));
 }
 
+// Lucifron Fight Strategy
+void LucifronFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific combat triggers
+}
+
+void LucifronFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end lucifron fight",
+        NextAction::array(0, new NextAction("disable lucifron fight strategy", 100.0f), NULL)));
+}
+
+void LucifronFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end lucifron fight",
+        NextAction::array(0, new NextAction("disable lucifron fight strategy", 100.0f), NULL)));
+}
+
+void LucifronFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific reaction triggers
+}
+
+void LucifronFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    // No specific combat multipliers
+}
+
+
 void MagmadarFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     Player* bot = ai->GetBot();
@@ -122,3 +153,213 @@ void MagmadarFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multip
     }
 }
     
+
+// Gehennas Fight Strategy
+void GehennasFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific combat triggers
+}
+
+void GehennasFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end gehennas fight",
+        NextAction::array(0, new NextAction("disable gehennas fight strategy", 100.0f), NULL)));
+}
+
+void GehennasFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end gehennas fight",
+        NextAction::array(0, new NextAction("disable gehennas fight strategy", 100.0f), NULL)));
+}
+
+void GehennasFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific reaction triggers
+}
+
+void GehennasFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    // No specific combat multipliers
+}
+
+// Garr Fight Strategy
+void GarrFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific combat triggers
+}
+
+void GarrFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end garr fight",
+        NextAction::array(0, new NextAction("disable garr fight strategy", 100.0f), NULL)));
+}
+
+void GarrFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end garr fight",
+        NextAction::array(0, new NextAction("disable garr fight strategy", 100.0f), NULL)));
+}
+
+void GarrFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific reaction triggers
+}
+
+void GarrFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    // No specific combat multipliers
+}
+
+// Baron Geddon Fight Strategy
+void BaronGeddonFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific combat triggers
+}
+
+void BaronGeddonFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end baron geddon fight",
+        NextAction::array(0, new NextAction("disable baron geddon fight strategy", 100.0f), NULL)));
+}
+
+void BaronGeddonFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end baron geddon fight",
+        NextAction::array(0, new NextAction("disable baron geddon fight strategy", 100.0f), NULL)));
+}
+
+void BaronGeddonFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific reaction triggers
+}
+
+void BaronGeddonFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    // No specific combat multipliers
+}
+
+// Shazzrah Fight Strategy
+void ShazzrahFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific combat triggers
+}
+
+void ShazzrahFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end shazzrah fight",
+        NextAction::array(0, new NextAction("disable shazzrah fight strategy", 100.0f), NULL)));
+}
+
+void ShazzrahFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end shazzrah fight",
+        NextAction::array(0, new NextAction("disable shazzrah fight strategy", 100.0f), NULL)));
+}
+
+void ShazzrahFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific reaction triggers
+}
+
+void ShazzrahFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    // No specific combat multipliers
+}
+
+// Sulfuron Harbinger Fight Strategy
+void SulfuronHarbingerFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific combat triggers
+}
+
+void SulfuronHarbingerFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end sulfuron fight",
+        NextAction::array(0, new NextAction("disable sulfuron fight strategy", 100.0f), NULL)));
+}
+
+void SulfuronHarbingerFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end sulfuron fight",
+        NextAction::array(0, new NextAction("disable sulfuron fight strategy", 100.0f), NULL)));
+}
+
+void SulfuronHarbingerFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific reaction triggers
+}
+
+void SulfuronHarbingerFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    // No specific combat multipliers
+}
+
+// Golemagg Fight Strategy
+void GolemaggFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific combat triggers
+}
+
+void GolemaggFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end golemagg fight",
+        NextAction::array(0, new NextAction("disable golemagg fight strategy", 100.0f), NULL)));
+}
+
+void GolemaggFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end golemagg fight",
+        NextAction::array(0, new NextAction("disable golemagg fight strategy", 100.0f), NULL)));
+}
+
+void GolemaggFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific reaction triggers
+}
+
+void GolemaggFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    // No specific combat multipliers
+}
+
+// Ragnaros Fight Strategy
+void RagnarosFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific combat triggers
+}
+
+void RagnarosFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end ragnaros fight",
+        NextAction::array(0, new NextAction("disable ragnaros fight strategy", 100.0f), NULL)));
+}
+
+void RagnarosFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "end ragnaros fight",
+        NextAction::array(0, new NextAction("disable ragnaros fight strategy", 100.0f), NULL)));
+}
+
+void RagnarosFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+    // No specific reaction triggers
+}
+
+void RagnarosFightStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    // No specific combat multipliers
+}

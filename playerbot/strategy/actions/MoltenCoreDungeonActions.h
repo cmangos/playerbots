@@ -57,6 +57,6 @@ namespace ai
       
         private:
         static Action* move_to_mc_rune(PlayerbotAI* ai) { return new MoveToMCRuneAction(ai); }
-        static Action* douse_mc_rune(PlayerbotAI* ai) { return new DouseMCRuneAction(ai); 
+        static Action* douse_mc_rune(PlayerbotAI* ai) { return new DouseMCRuneAction(ai); }
     };
 }

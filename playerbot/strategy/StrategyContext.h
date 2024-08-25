@@ -153,7 +153,16 @@ namespace ai
 
             // Dungeon Boss Strategies
             creators["onyxia"] = &StrategyContext::onyxia;
-            creators["magmadar"] = &StrategyContext::magmadar;
+            creators["lucifron"] = [](PlayerbotAI* ai){ return new LucifronFightStrategy(ai); };
+            creators["magmadar"] = [](PlayerbotAI* ai){ return new MagmadarFightStrategy(ai); };
+            creators["gehennas"] = [](PlayerbotAI* ai){ return new GehennasFightStrategy(ai); };
+            creators["garr"] = [](PlayerbotAI* ai){ return new GarrFightStrategy(ai); };
+            creators["baron geddon"] = [](PlayerbotAI* ai){ return new BaronGeddonFightStrategy(ai); };
+            creators["shazzrah"] = [](PlayerbotAI* ai){ return new ShazzrahFightStrategy(ai); };
+            creators["sulfuron harbinger"] = [](PlayerbotAI* ai){ return new SulfuronHarbingerFightStrategy(ai); };
+            creators["golemagg"] = [](PlayerbotAI* ai){ return new GolemaggFightStrategy(ai); };
+            creators["ragnaros"] = [](PlayerbotAI* ai){ return new RagnarosFightStrategy(ai); };
+
             creators["netherspite"] = &StrategyContext::netherspite;
             creators["prince malchezaar"] = &StrategyContext::prince_malchezaar;
             creators["four horseman"] = &StrategyContext::fourhorseman;

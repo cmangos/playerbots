@@ -12,7 +12,17 @@ using namespace ai;
 
 bool RpgTrigger::IsActive() 
 { 
-    return !ai->HasRealPlayerMaster() || (AI_VALUE(GuidPosition, "rpg target").GetEntry() && AI_VALUE(GuidPosition, "rpg target").GetEntry() == AI_VALUE(TravelTarget*, "travel target")->getEntry()); 
+    if (!ai->HasRealPlayerMaster())
+        return true;
+
+
+    if (AI_VALUE(GuidPosition, "rpg target").GetEntry())
+    {
+        if (AI_VALUE(GuidPosition, "rpg target").GetEntry() == AI_VALUE(TravelTarget*, "travel target")->getEntry())
+            return true;
+    }
+
+    return false;
 };
 
 bool RpgTaxiTrigger::IsActive()

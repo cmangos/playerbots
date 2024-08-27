@@ -6648,6 +6648,11 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
         FindItemUsageVisitor visitor(bot, ItemUsage::ITEM_USAGE_USE);
         VISIT;
     }
+    else if (text == "ah")
+    {
+        FindItemUsageVisitor visitor(bot, ItemUsage::ITEM_USAGE_AH);
+        VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+    }
     else if (text == "vendor")
     {
         FindItemUsageVisitor visitor(bot, ItemUsage::ITEM_USAGE_VENDOR);

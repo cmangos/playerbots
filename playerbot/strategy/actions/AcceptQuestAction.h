@@ -33,4 +33,10 @@ namespace ai
         ConfirmQuestAction(PlayerbotAI* ai) : Action(ai, "confirm quest") {}
         virtual bool Execute(Event& event);
     };
+
+    class QuestDetailsAction : public Action {
+    public:
+        QuestDetailsAction(PlayerbotAI* ai) : Action(ai, "quest details") {}
+        virtual bool Execute(Event& event);
+    };
 }

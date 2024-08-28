@@ -20,6 +20,7 @@ namespace ai
             creators["complete quest"] = &WorldPacketTriggerContext::complete_quest;
             creators["accept quest"] = &WorldPacketTriggerContext::accept_quest;
             creators["confirm quest"] = &WorldPacketTriggerContext::confirm_quest;
+            creators["quest details"] = &WorldPacketTriggerContext::quest_details;
             creators["quest share"] = &WorldPacketTriggerContext::quest_share;
             creators["loot start roll"] = &WorldPacketTriggerContext::loot_start_roll;
             creators["loot roll"] = &WorldPacketTriggerContext::loot_roll;
@@ -105,6 +106,7 @@ namespace ai
         static Trigger* complete_quest(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "complete quest"); }
         static Trigger* accept_quest(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "accept quest"); }
         static Trigger* confirm_quest(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "confirm quest"); }
+        static Trigger* quest_details(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest details"); }
         static Trigger* quest_share(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest share"); }
         static Trigger* loot_start_roll(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "loot start roll"); }
         static Trigger* loot_roll(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "loot roll"); }

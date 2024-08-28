@@ -712,12 +712,14 @@ bool DisenchantRandomItemAction::Execute(Event& event)
             continue;
         }
 
+        ItemQualifier itemQualifier(item);
+
         Event disenchantEvent = Event("disenchant random item", "13262 " + chat->formatQItem(item));
         bool didCast = CastCustomSpellAction::Execute(disenchantEvent);
 
         if(didCast)
         {
-            ai->TellPlayer(requester, "Disenchanting " + chat->formatItem(ItemQualifier(item)), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            ai->TellPlayer(requester, "Disenchanting " + chat->formatItem(itemQualifier), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
 
         return didCast;

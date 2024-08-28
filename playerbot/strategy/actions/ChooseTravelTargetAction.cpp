@@ -134,7 +134,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
 
         if (!foundTarget)
         {
-            if (urand(1, 100) > 50) //50% Focus on active quests for money.
+            if (urand(1, 100) > 10) //90% Focus on active quests for money.
             {
                 {
                     ai->TellDebug(requester, "Turn in quests for money", "debug travel");
@@ -151,7 +151,8 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
                     if (pmo) pmo->finish();
                 }
             }
-            else
+
+            if (!foundTarget)
             {
                 ai->TellDebug(requester, "Grind mobs for money", "debug travel");
                 PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetGrindTarget1", &context->performanceStack);

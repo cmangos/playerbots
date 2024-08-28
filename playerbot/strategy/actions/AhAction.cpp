@@ -66,7 +66,7 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
             if (!ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(item->GetProto(), bot))
                 continue;
 
-            uint32 deposit = AuctionHouseMgr::GetAuctionDeposit(auctionHouseEntry, time, item);
+            uint32 deposit = AuctionHouseMgr::GetAuctionDeposit(auctionHouseEntry, time * MINUTE, item);
 
             RESET_AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah);
             uint32 freeMoney = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah);

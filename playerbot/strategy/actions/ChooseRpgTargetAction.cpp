@@ -9,6 +9,7 @@
 #include "RpgSubActions.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/strategy/values/PositionValue.h"
+#include <iomanip>
 
 using namespace ai;
 
@@ -293,7 +294,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
             if (mod > 60 + targets[guidP])
                 targets[guidP] = 2;
             else
-                targets[guidP] += 60 - mod;
+                targets[guidP] += 60 - (int32)mod;
         }
 
         checked++;
@@ -337,9 +338,9 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     //Report the list of potential targets and their relevance and reason for interaction.
     if (ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT))
     {
-        std::vector<std::pair<ObjectGuid, uint32>> sortedTargets(targets.begin(), targets.end());
+        std::vector<std::pair<ObjectGuid, float>> sortedTargets(targets.begin(), targets.end());
 
-        std::sort(sortedTargets.begin(), sortedTargets.end(), [](std::pair<ObjectGuid, uint32>i, std::pair<ObjectGuid, uint32> j) {return i.second > j.second; });
+        std::sort(sortedTargets.begin(), sortedTargets.end(), [](std::pair<ObjectGuid, float>i, std::pair<ObjectGuid, float> j) {return i.second > j.second; });
 
         ai->TellPlayerNoFacing(requester, "------" + std::to_string(targets.size()) + "------");
 
@@ -355,6 +356,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
             std::ostringstream out;
             out << chat->formatWorldobject(guidP.GetWorldObject());
 
+            out << std::fixed << std::setprecision(2);
             out << " " << rgpActionReason[guidP] << " " << target.second;
 
             ai->TellPlayerNoFacing(requester, out);
@@ -404,7 +406,8 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         out << "found: ";
         out << chat->formatWorldobject(guidP.GetWorldObject());
 
-        out << " " << rgpActionReason[guidP] << " " << (uint32)targets[guidP];
+        out << std::fixed << std::setprecision(2);
+        out << " " << rgpActionReason[guidP] << " " << targets[guidP];
 
         ai->TellPlayerNoFacing(requester, out);
     }

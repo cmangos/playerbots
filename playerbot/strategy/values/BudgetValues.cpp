@@ -1,6 +1,6 @@
-
 #include "playerbot/playerbot.h"
 #include "BudgetValues.h"
+#include "ItemUsageValue.h"
 
 using namespace ai;
 
@@ -135,7 +135,31 @@ uint32 MoneyNeededForValue::Calculate()
         moneyWanted = (level * level * level); //Or level^3 (10s @ lvl10, 3g @ lvl30, 20g @ lvl60, 50g @ lvl80): Todo replace (Should be buyable reagents that combined allow crafting of usefull items)
         break;
     case NeedMoneyFor::ah:
-        moneyWanted = 0; //We don't save any money for deposits 
+        //Save deposit needed for all items the bot wants to AH.
+        uint32 time;
+#ifdef MANGOSBOT_ZERO
+        time = 8 * HOUR;
+#else
+        time = 12 * HOUR;
+#endif
+        float totalDeposit = 0;
+        for (auto item : AI_VALUE2(std::list<Item*>, "inventory items", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_AH)))
+        {
+            float deposit = float(item->GetProto()->SellPrice * item->GetCount() * (time / MIN_AUCTION_TIME));
+
+            deposit = deposit * 15 * 3.0f / 100.0f;
+
+            float min_deposit = float(sWorld.getConfig(CONFIG_UINT32_AUCTION_DEPOSIT_MIN));
+
+            if (deposit < min_deposit)
+                deposit = min_deposit;
+
+            deposit *= sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_DEPOSIT);
+
+            totalDeposit += deposit;
+        }
+
+        return totalDeposit;
         break;
     }
 

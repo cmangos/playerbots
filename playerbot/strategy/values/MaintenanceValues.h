@@ -80,9 +80,9 @@ namespace ai
         {
             uint32 time;
 #ifdef MANGOSBOT_ZERO
-            time = 8 * HOUR / MINUTE;
+            time = 8 * HOUR;
 #else
-            time = 12 * HOUR / MINUTE;
+            time = 12 * HOUR;
 #endif
 
             float minDeposit = 0;

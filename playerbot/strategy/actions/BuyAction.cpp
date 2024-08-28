@@ -87,7 +87,7 @@ bool BuyAction::Execute(Event& event)
 
                     //if item is worth selling to AH?
                     if (ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(proto, tItem->maxcount > 0))
-                        freeMoney[ItemUsage::ITEM_USAGE_AH] = (uint32)NeedMoneyFor::ah;
+                        freeMoney[ItemUsage::ITEM_USAGE_AH] = (uint32)NeedMoneyFor::anything;
                 
                     if (freeMoney.find(usage) == freeMoney.end())
                         continue;

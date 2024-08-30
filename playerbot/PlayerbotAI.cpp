@@ -6514,7 +6514,7 @@ void PlayerbotAI::InventoryTellItem(Player* player, ItemPrototype const* proto, 
 
 std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItemsMask mask)
 {
-    if(text.empty())
+    if (text.empty())
     {
         std::list<Item*> result;
         return result;
@@ -6675,7 +6675,8 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
     }
 
     uint32 itemClass = MAX_ITEM_CLASS, itemSubClass = 0;
-    if (GetChatHelper()->parseItemClass(text, &itemClass, &itemSubClass))
+    GetChatHelper()->parseItemClass(text, &itemClass, &itemSubClass);
+    if (itemClass != MAX_ITEM_CLASS)
     {
         FindItemsByClassVisitor visitor(itemClass, itemSubClass);
         VISIT;
@@ -6702,7 +6703,7 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
         VISIT;
     }
 
-    if (found.size() == 0)
+    if (found.size() == 0 && quality == MAX_ITEM_QUALITY && itemClass == MAX_ITEM_CLASS && fromSlot == EQUIPMENT_SLOT_END && outfit.empty())
     {
         FindNamedItemVisitor visitor(bot, text);
         VISIT;

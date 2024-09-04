@@ -7123,30 +7123,30 @@ static const uint32 uPriorizedWeightStoneIds[7] =
  */
 Item* PlayerbotAI::FindStoneFor(Item* weapon) const
 {
-   Item* stone;
-   ItemPrototype const* pProto = weapon->GetProto();
-   if (pProto && (pProto->SubClass == ITEM_SUBCLASS_WEAPON_SWORD || pProto->SubClass == ITEM_SUBCLASS_WEAPON_SWORD2
-      || pProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE || pProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE2
-      || pProto->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER))
-   {
-      for (uint8 i = 0; i < countof(uPriorizedSharpStoneIds); ++i)
-      {
-         stone = FindConsumable(uPriorizedSharpStoneIds[i]);
-         if (stone)
-            return stone;
-      }
-   }
-   else if (pProto && (pProto->SubClass == ITEM_SUBCLASS_WEAPON_MACE || pProto->SubClass == ITEM_SUBCLASS_WEAPON_MACE2))
-   {
-      for (uint8 i = 0; i < countof(uPriorizedWeightStoneIds); ++i)
-      {
-         stone = FindConsumable(uPriorizedWeightStoneIds[i]);
-         if (stone)
-            return stone;
-      }
-   }
+    Item* stone;
+    ItemPrototype const* pProto = weapon->GetProto();
+    if (pProto && pProto->Class == ITEM_CLASS_WEAPON && (pProto->SubClass == ITEM_SUBCLASS_WEAPON_SWORD || pProto->SubClass == ITEM_SUBCLASS_WEAPON_SWORD2
+        || pProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE || pProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE2
+        || pProto->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER))
+    {
+        for (uint8 i = 0; i < countof(uPriorizedSharpStoneIds); ++i)
+        {
+            stone = FindConsumable(uPriorizedSharpStoneIds[i]);
+            if (stone)
+                return stone;
+        }
+    }
+    else if (pProto && pProto->Class == ITEM_CLASS_WEAPON && (pProto->SubClass == ITEM_SUBCLASS_WEAPON_MACE || pProto->SubClass == ITEM_SUBCLASS_WEAPON_MACE2))
+    {
+        for (uint8 i = 0; i < countof(uPriorizedWeightStoneIds); ++i)
+        {
+            stone = FindConsumable(uPriorizedWeightStoneIds[i]);
+            if (stone)
+                return stone;
+        }
+    }
 
-   return nullptr;
+    return nullptr;
 }
 
 static const uint32 uPriorizedWizardOilIds[5] =

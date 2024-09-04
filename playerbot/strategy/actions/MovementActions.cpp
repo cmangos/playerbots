@@ -1190,7 +1190,7 @@ bool MovementAction::IsMovingAllowed(Unit* target)
 
 bool MovementAction::IsMovingAllowed(uint32 mapId, float x, float y, float z)
 {
-    float distance = sqrt(bot->GetDistance(x, y, z));
+    float distance = bot->GetDistance(x, y, z);
     if (!bot->InBattleGround() && distance > sPlayerbotAIConfig.reactDistance)
         return false;
 

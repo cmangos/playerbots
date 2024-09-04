@@ -93,7 +93,7 @@ WorldSafeLocsEntry const* GraveyardValue::GetAnotherAppropriateClosestGraveyard(
             continue;
 
         //skip higher level zones
-        if (bot->GetLevel() + 5 < graveyardAreaEntry->area_level)
+        if (bot->GetLevel() + 5 < (uint32)graveyardAreaEntry->area_level)
             continue;
 
         float dist2 = (graveyardCoreEntry->x - bot->GetPositionX()) * (graveyardCoreEntry->x - bot->GetPositionX()) + (graveyardCoreEntry->y - bot->GetPositionY()) * (graveyardCoreEntry->y - bot->GetPositionY()) + (graveyardCoreEntry->z - bot->GetPositionZ()) * (graveyardCoreEntry->z - bot->GetPositionZ());

@@ -645,6 +645,10 @@ bool CraftRandomItemAction::Execute(Event& event)
             if (GuidPosition(wot).GetGameObjectInfo()->spellFocus.focusId != pSpellInfo->RequiresSpellFocus)
                 continue;
         }
+        else
+        {
+            wot = nullptr;
+        }
 
         uint32 newItemId = pSpellInfo->EffectItemType[0];
 

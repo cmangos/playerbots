@@ -58,7 +58,11 @@ bool TerrainInfoAccess::Load(const uint32 x, const uint32 y, bool mapOnly /*= fa
     if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y))
     {
         // load navmesh
+#ifdef MANGOSBOT_ZERO
         if (!MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y))
+#else
+        if (!MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), m_mapId, x, y))
+#endif
             return false;
     }
 
@@ -143,7 +147,11 @@ GridMap* TerrainInfoAccess::LoadMapAndVMap(const uint32 x, const uint32 y, bool 
     if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y))
     {
         // load navmesh
+#ifdef MANGOSBOT_ZERO
         if (!MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y))
+#else
+        if (!MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), m_mapId, x, y))
+#endif
             return nullptr;
     }
 

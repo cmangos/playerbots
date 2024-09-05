@@ -94,7 +94,7 @@ bool UpdateGearAction::Execute(Event& event)
             {
                 // Try to equip and enchant the item
                 uint16 eDest;
-                if (CanEquipUnseenItem(slot, eDest, pItemId))
+                if (RandomPlayerbotMgr::CanEquipUnseenItem(bot, slot, eDest, pItemId) == EQUIP_ERR_OK)
                 {
                     Item* pItem = bot->EquipNewItem(eDest, pItemId, true);
                     if (pItem)
@@ -195,21 +195,6 @@ uint8 UpdateGearAction::GetMasterItemProgressionLevel(uint8 slot, uint8 avgProgr
 
         return itemProgressionLevel;
     }
-}
-
-bool UpdateGearAction::CanEquipUnseenItem(uint8 slot, uint16& dest, uint32 itemId)
-{
-    dest = 0;
-    Item* pItem = RandomPlayerbotMgr::CreateTempItem(itemId, 1, bot);
-    if (pItem)
-    {
-        InventoryResult result = bot->CanEquipItem(slot, dest, pItem, true, false);
-        pItem->RemoveFromUpdateQueueOf(bot);
-        delete pItem;
-        return result == EQUIP_ERR_OK;
-    }
-
-    return false;
 }
 
 void UpdateGearAction::EnchantItem(Item* item)

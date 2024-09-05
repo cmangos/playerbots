@@ -415,13 +415,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
     }
     else
     {
-        Item* pItem = RandomPlayerbotMgr::CreateTempItem(itemProto->ItemId, 1, bot);
-        if (!pItem)
-            return ItemUsage::ITEM_USAGE_NONE;
-
-        result = bot->CanEquipItem(NULL_SLOT, dest, pItem, true, false);
-        pItem->RemoveFromUpdateQueueOf(bot);
-        delete pItem;
+        result = RandomPlayerbotMgr::CanEquipUnseenItem(bot, NULL_SLOT, dest, itemProto->ItemId);
     }
 
     if (result != EQUIP_ERR_OK)

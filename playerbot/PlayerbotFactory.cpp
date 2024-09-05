@@ -1771,7 +1771,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         continue;
 
                     uint16 eDest;
-                    if (CanEquipUnseenItem(slot, eDest, newItemId))
+                    if (RandomPlayerbotMgr::CanEquipUnseenItem(bot, slot, eDest, newItemId) == EQUIP_ERR_OK)
                     {
                         if (oldItem)
                             bot->DestroyItem(oldItem->GetBagSlot(), oldItem->GetSlot(), true);
@@ -2059,7 +2059,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         continue;
 
                     uint16 eDest;
-                    if (CanEquipUnseenItem(slot, eDest, newItemId))
+                    if (RandomPlayerbotMgr::CanEquipUnseenItem(bot, slot, eDest, newItemId) == EQUIP_ERR_OK)
                     {
                         if (oldItem)
                             bot->DestroyItem(oldItem->GetBagSlot(), oldItem->GetSlot(), true);
@@ -2412,22 +2412,6 @@ void PlayerbotFactory::AddGems(Item* item)
 #else
     return;
 #endif
-}
-
-bool PlayerbotFactory::CanEquipUnseenItem(uint8 slot, uint16 &dest, uint32 item)
-{
-    dest = 0;
-    Item* pItem = RandomPlayerbotMgr::CreateTempItem(item, 1, bot);
-
-    if (pItem)
-    {
-        InventoryResult result = bot->CanEquipItem(slot, dest, pItem, true, false);
-        pItem->RemoveFromUpdateQueueOf(bot);
-        delete pItem;
-        return result == EQUIP_ERR_OK;
-    }
-
-    return false;
 }
 
 void PlayerbotFactory::InitTradeSkills()

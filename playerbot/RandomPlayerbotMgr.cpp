@@ -1637,6 +1637,27 @@ Item* RandomPlayerbotMgr::CreateTempItem(uint32 item, uint32 count, Player const
     return nullptr;
 }
 
+InventoryResult RandomPlayerbotMgr::CanEquipUnseenItem(Player* player, uint8 slot, uint16& dest, uint32 item)
+{
+    dest = 0;
+    Item* pItem = RandomPlayerbotMgr::CreateTempItem(item, 1, player);
+
+    if (pItem)
+    {
+        InventoryResult result = player->CanEquipItem(slot, dest, pItem, true, false);
+
+        pItem->RemoveFromUpdateQueueOf(player);
+
+        if (!player->GetItemUpdateQueue().empty() && !player->GetItemUpdateQueue().back()) //Prevent queue overflow.
+            player->GetItemUpdateQueue().pop_back();
+
+        delete pItem;
+        return result;
+    }
+
+    return EQUIP_ERR_ITEM_NOT_FOUND;
+}
+
 void RandomPlayerbotMgr::SaveCurTime()
 {
     if (!EventTimeSyncTimer || time(NULL) > (EventTimeSyncTimer + 60))

@@ -480,22 +480,27 @@ bool CastRandomSpellAction::Execute(Event& event)
                 continue;
             }
 
-            if (target && ai->CanCastSpell(spellId, target, true))
+            if (target && ai->CanCastSpell(spellId, target, 0))
             {
                 spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, target)));
             }
 
-            if (target && ai->CanCastSpell(spellId, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), true))
+            if (target && ai->CanCastSpell(spellId, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0))
             {
                 spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, target)));
             }
 
-            if (got && ai->CanCastSpell(spellId, got->GetPositionX(), got->GetPositionY(), got->GetPositionZ(), true))
+            if (got && ai->CanCastSpell(spellId, got->GetPositionX(), got->GetPositionY(), got->GetPositionZ(), 0))
             {
                 spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, got)));
             }
 
-            if (ai->CanCastSpell(spellId, bot, true))
+            Item* item = nullptr;
+
+            if (pSpellInfo->Targets & TARGET_FLAG_ITEM)
+                item = AI_VALUE2(Item*, "item for spell", pSpellInfo->Id);
+
+            if (ai->CanCastSpell(spellId, bot, 0, true, item))
             {
                 spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, bot)));
             }

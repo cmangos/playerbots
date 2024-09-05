@@ -93,6 +93,11 @@ namespace ai
             if (!item)
                 return 0;
 
+            uint32 castCount = AI_VALUE2(uint32, "has reagents for", pSpellInfo->Id);
+
+            if (!castCount)
+                return 0;
+
             ItemPrototype const* proto = item->GetProto();
 
             //Upgrade current equiped item enchantment.
@@ -107,10 +112,11 @@ namespace ai
 
                 uint32 newEnchantWeight = sRandomItemMgr.CalculateEnchantWeight(bot->getClass(), sRandomItemMgr.GetPlayerSpecId(bot), enchant_id);
 
-                if (currentEnchnatWeight >= newEnchantWeight)
+                if (currentEnchnatWeight > newEnchantWeight) //Do not replace better enchants.
                     return 0;
 
-                return 100;
+                if (currentEnchnatWeight < newEnchantWeight) //Place better enchants.
+                    return 100;
             }
 
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", proto->ItemId);

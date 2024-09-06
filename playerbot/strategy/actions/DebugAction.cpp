@@ -219,6 +219,59 @@ bool DebugAction::Execute(Event& event)
     {
         return ai->DoSpecificAction(text.substr(3), Event(), true);
     }
+    else if (text.find("trade ") == 0)
+    {
+        std::string param = "";
+        if (text.length() > 6)
+        {
+            param = text.substr(6);
+        }
+
+        if (param.find("stop") == 0)
+        {
+            if (bot->GetTradeData())
+                bot->TradeCancel(true);
+        }
+        return true;
+    }
+    else if (text.find("trade") == 0)
+    {
+        TradeData* data = bot->GetTradeData();
+        if (!data)
+        {
+            ai->TellPlayerNoFacing(requester, "Not trading.", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+            return true;
+        }
+
+        std::ostringstream out;
+
+        out << "Trading ";
+
+        if (data->GetTrader())
+            out << "with " << ChatHelper::formatWorldobject(data->GetTrader());
+
+        for (uint32 slot = 0; slot < TRADE_SLOT_TRADED_COUNT; ++slot)
+            if (data->GetItem((TradeSlots)slot))
+                out << " " << ChatHelper::formatItem(data->GetItem((TradeSlots)slot));
+
+        if (data->GetSpellCastItem())
+        {
+            out << " [" << ChatHelper::formatItem(data->GetSpellCastItem());
+            if (data->GetSpell())
+                out << "<" << ChatHelper::formatSpell(data->GetSpell());
+            out << "]";
+        }
+
+        if (data->GetMoney())
+            out << " " << ChatHelper::formatMoney(data->GetMoney());
+
+        if (data->IsAccepted())
+            out << " accepted.";
+
+        ai->TellPlayerNoFacing(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+
+        return true;
+    }
     else if (text.find("poi ") == 0)
     {        
         WorldPosition botPos = WorldPosition(bot);

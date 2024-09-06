@@ -165,6 +165,8 @@ bool FindCorpseAction::Execute(Event& event)
         {
             bot->GetMotionMaster()->Clear();
             bot->TeleportTo(moveToPos.getMapId(), moveToPos.getX(), moveToPos.getY(), moveToPos.getZ(), 0);
+            if (bot->isRealPlayer())
+                bot->SendHeartBeat();
         }
 
         moved = true;
@@ -295,6 +297,8 @@ bool SpiritHealerAction::Execute(Event& event)
     {
         bot->GetMotionMaster()->Clear();
         bot->TeleportTo(grave.getMapId(), grave.getX(), grave.getY(), grave.getZ(), 0);
+        if (bot->isRealPlayer())
+            bot->SendHeartBeat();
         return true;
     }
     else

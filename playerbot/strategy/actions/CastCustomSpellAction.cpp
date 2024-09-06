@@ -378,6 +378,8 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
                         else
                         {
                             target->TeleportTo(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), bot->GetOrientation());
+                            if (target->isRealPlayer())
+                                target->SendHeartBeat();
                         }
 
                         std::ostringstream msg;

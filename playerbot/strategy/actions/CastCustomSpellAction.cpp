@@ -516,12 +516,24 @@ bool CastRandomSpellAction::Execute(Event& event)
 
     bool isCast = false;
 
-    std::sort(spellList.begin(), spellList.end(), [](std::pair<uint32, std::pair<uint32, WorldObject*>> i, std::pair<uint32, std::pair<uint32, WorldObject*>> j) {return i.first > j.first; });
+    bool allTheSame = true;
 
-    uint32 rndBound = spellList.size() / 4;
+    for(auto& spell : spellList)
+    { 
+        if (spell.first != spellList[0].first)
+        {
+            allTheSame = false;
+            break;
+        }
+    }
 
-    rndBound = std::min(rndBound, (uint32)10);
-    rndBound = std::max(rndBound, (uint32)0);
+    if (!allTheSame)
+        std::sort(spellList.begin(), spellList.end(), [](std::pair<uint32, std::pair<uint32, WorldObject*>> i, std::pair<uint32, std::pair<uint32, WorldObject*>> j) {return i.first > j.first; });
+
+    uint32 rndBound = spellList.size() - 1;
+
+    if(!allTheSame)
+        rndBound = std::min(rndBound/4, (uint32)10);
 
     for (uint32 i = 0; i < 5; i++)
     {

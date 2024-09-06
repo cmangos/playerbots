@@ -517,7 +517,7 @@ bool RpgSpellTrigger::IsActive()
 {
     //GuidPosition guidP(getGuidP());
 
-    return true;
+    return (!urand(0, 10));
 }
 
 bool RpgCraftTrigger::IsActive()

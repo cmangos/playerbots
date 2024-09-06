@@ -142,11 +142,8 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     GuidPosition masterRpgTarget;
     if (requester && requester->GetPlayerbotAI() && requester->GetMapId() == bot->GetMapId() && !requester->IsBeingTeleported())
     {
-        
-    }
-    else
-    {
-        requester = nullptr;
+        Player* player = requester;
+        masterRpgTarget = PAI_VALUE(GuidPosition, "rpg target");
     }
 
     std::unordered_map<ObjectGuid, float> targets;

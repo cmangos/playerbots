@@ -78,8 +78,11 @@ void CheatAction::ListCheats(Player* requester)
            out << "[" << GetCheatName(BotCheatMask(cheatMask)) << "]";
     }
 
-    if (out.rdbuf()->in_avail() == 0)
+    std::streampos pos = out.tellp();  // store current location
+    out.seekp(0, std::ios_base::end);  // go to end
+    if (out.tellp() == std::streampos(0))
         out << "No cheats enabled.";
+    out.seekp(pos);                    // restore location
 
     ai->TellPlayerNoFacing(requester, out);
 }

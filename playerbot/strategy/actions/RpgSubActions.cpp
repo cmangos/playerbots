@@ -329,6 +329,96 @@ bool RpgTradeUsefulAction::Execute(Event& event)
     return isTrading;
 }
 
+bool RpgEnchantAction::Execute(Event& event)
+{
+    rpg->BeforeExecute();
+
+    GuidPosition guidP = AI_VALUE(GuidPosition, "rpg target");
+
+    Player* player = guidP.GetPlayer();
+
+    if (!player)
+        return false;
+
+    std::list<Item*> items = AI_VALUE(std::list<Item*>, "items useful to enchant");
+
+    if (items.empty())
+        return false;
+
+    std::vector<uint32> enchantSpells = AI_VALUE(std::vector<uint32>, "enchant spells");
+
+    //Needs more logic to pick best enchant to apply instead of a random one that's bette than current.
+    std::shuffle(enchantSpells.begin(), enchantSpells.end(), *GetRandomGenerator());
+
+    for (auto& spellId : enchantSpells)
+    {
+        Item* item = PAI_VALUE2(Item*, "item for spell", spellId);
+
+        if (std::find(items.begin(), items.end(), item) == items.end())
+            continue;
+
+        std::ostringstream param;
+
+        param << chat->formatWorldobject(bot);
+        param << " ";
+        param << chat->formatItem(item);
+
+        ai->TellDebug(ai->GetMaster(), "enchanting" + param.str(), "debug rpg");
+
+        if (player->isRealPlayer() && !player->GetTradeData()) //Start the trade from the other side to open the window
+        {
+            ai->TellDebug(ai->GetMaster(), "open trade window", "debug rpg");
+            WorldPacket packet(CMSG_INITIATE_TRADE);
+            packet << player->GetObjectGuid();
+            bot->GetSession()->HandleInitiateTradeOpcode(packet);
+        }
+
+        if (!player->GetTradeData() || !player->GetTradeData()->HasItem(item->GetObjectGuid()))
+        {
+            ai->TellDebug(ai->GetMaster(), "starting trade", "debug rpg");
+            player->GetPlayerbotAI()->DoSpecificAction("trade", Event("rpg action", param.str().c_str()), true);
+        }
+
+        bool isTrading = bot->GetTradeData();
+
+        if (isTrading)
+        {
+            if (player->GetTradeData()->HasItem(item->GetObjectGuid())) //Did we manage to add the item to the trade?
+            {
+                uint32 duration;
+                Unit* target = nullptr;
+
+                ai->TellDebug(ai->GetMaster(), "set enchant spell", "debug rpg");
+                bool didCast = ai->CastSpell(spellId, target, item, true, &duration);
+
+                if (didCast)
+                {
+                    ai->TellDebug(ai->GetMaster(), "accept trade", "debug rpg");
+                    if (bot->GetGroup() && bot->GetGroup()->IsMember(guidP))
+                        ai->TellPlayerNoFacing(GetMaster(), "Let me enchant this " + chat->formatItem(item) + " with " + chat->formatSpell(spellId) + " for you " + player->GetName() + ".", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                    else
+                        bot->Say("Let me enchant this " + chat->formatItem(item) + " with " + chat->formatSpell(spellId) + " for you " + player->GetName() + ".", (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+
+                    WorldPacket p;
+                    uint32 status = TRADE_STATUS_TRADE_ACCEPT;
+                    p << status;
+                    bot->GetSession()->HandleAcceptTradeOpcode(p);
+                }
+            }
+
+            ai->SetActionDuration(sPlayerbotAIConfig.rpgDelay);            
+        }
+
+        rpg->AfterExecute(isTrading, true, isTrading ? "rpg enchant" : "rpg");
+
+        DoDelay();
+
+        return isTrading;
+    }
+
+    return false;
+}
+
 bool RpgDuelAction::isUseful()
 {
     // do not offer duel in non pvp areas

@@ -12,4 +12,11 @@ namespace ai
     private:
         bool IsTradingItem(uint32 entry);
     };
+
+    class ItemsUsefulToEnchantValue : public CalculatedValue< std::list<Item*>>, public Qualified
+    {
+    public:
+        ItemsUsefulToEnchantValue(PlayerbotAI* ai, std::string name = "useful to enchant") : CalculatedValue(ai, name), Qualified() {}
+        std::list<Item*> Calculate();
+    };
 }

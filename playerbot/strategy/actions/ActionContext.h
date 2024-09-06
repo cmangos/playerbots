@@ -262,6 +262,7 @@ namespace ai
             creators["rpg spell"] = &ActionContext::rpg_spell;
             creators["rpg craft"] = &ActionContext::rpg_craft;
             creators["rpg trade useful"] = &ActionContext::rpg_trade_useful;
+            creators["rpg enchant"] = &ActionContext::rpg_enchant;
             creators["rpg duel"] = &ActionContext::rpg_duel;
             creators["rpg item"] = &ActionContext::rpg_item;
 
@@ -538,6 +539,8 @@ namespace ai
         static Action* rpg_spell(PlayerbotAI* ai) { return new RpgSpellAction(ai); }
         static Action* rpg_craft(PlayerbotAI* ai) { return new RpgCraftAction(ai); }
         static Action* rpg_trade_useful(PlayerbotAI* ai) { return new RpgTradeUsefulAction(ai); }
+        static Action* rpg_enchant(PlayerbotAI* ai) { return new RpgEnchantAction(ai); }
+        
         static Action* rpg_duel(PlayerbotAI* ai) { return new RpgDuelAction(ai); }
         static Action* rpg_item(PlayerbotAI* ai) { return new RpgItemAction(ai); }
 

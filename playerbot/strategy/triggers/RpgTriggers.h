@@ -203,8 +203,15 @@ namespace ai
     public:
         RpgTradeUsefulTrigger(PlayerbotAI* ai, std::string name = "rpg trade useful") : RpgTrigger(ai, name) {}
         virtual bool IsActive();
-    private:
+    protected:
         virtual bool isFriend(Player* player); //Move to value later.
+    };
+
+    class RpgEnchantTrigger : public RpgTradeUsefulTrigger
+    {
+    public:
+        RpgEnchantTrigger(PlayerbotAI* ai, std::string name = "rpg enchant") : RpgTradeUsefulTrigger(ai, name) {}
+        virtual bool IsActive();
     };
 
     class RpgDuelTrigger : public RpgTrigger

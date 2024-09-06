@@ -342,6 +342,7 @@ namespace ai
 
             creators["vendor has useful item"] = [](PlayerbotAI* ai) { return new VendorHasUsefulItemValue(ai); };
             creators["craft spells"] = [](PlayerbotAI* ai) { return new CraftSpellsValue(ai); };
+            creators["enchant spells"] = [](PlayerbotAI* ai) { return new EnchantSpellsValue(ai); };
             creators["has reagents for"] = [](PlayerbotAI* ai) { return new HasReagentsForValue(ai); };
             creators["can craft spell"] = [](PlayerbotAI* ai) { return new CanCraftSpellValue(ai); };
             creators["should craft spell"] = [](PlayerbotAI* ai) { return new ShouldCraftSpellValue(ai); };
@@ -366,6 +367,7 @@ namespace ai
             creators["entry loot usage"] = [](PlayerbotAI* ai) { return new EntryLootUsageValue(ai); };
             creators["has upgrade"] = [](PlayerbotAI* ai) { return new HasUpgradeValue(ai); };
             creators["items useful to give"] = [](PlayerbotAI* ai) { return new ItemsUsefulToGiveValue(ai); };
+            creators["items useful to enchant"] = [](PlayerbotAI* ai) { return new ItemsUsefulToEnchantValue(ai); };
 
             creators["see spell location"] = [](PlayerbotAI* ai) { return new SeeSpellLocationValue(ai); };
             creators["RTSC selected"] = [](PlayerbotAI* ai) { return new RTSCSelectedValue(ai); };

@@ -169,6 +169,9 @@ bool TradeStatusAction::CheckTrade()
                 break;
             }
         }
+        
+        if (!isGettingItem) //Enchanting an item.
+            isGettingItem = (bot->GetTradeData()->GetItem(TRADE_SLOT_NONTRADED) && trader->GetTradeData()->GetSpell());
 
         if (isGettingItem)
         {

@@ -38,6 +38,34 @@ std::vector<uint32> CraftSpellsValue::Calculate()
     return spellIds;
 }
 
+std::vector<uint32> EnchantSpellsValue::Calculate()
+{
+    std::vector<uint32> spellIds;
+
+    PlayerSpellMap const& spellMap = bot->GetSpellMap();
+
+    for (auto& spell : spellMap)
+    {
+        uint32 spellId = spell.first;
+
+        if (spell.second.state == PLAYERSPELL_REMOVED || spell.second.disabled || IsPassiveSpell(spellId))
+            continue;
+
+        const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
+        if (!pSpellInfo)
+            continue;
+
+        if (pSpellInfo->Effect[0] != SPELL_EFFECT_ENCHANT_ITEM || !pSpellInfo->ReagentCount[0])
+            continue;
+
+
+        spellIds.push_back(spellId);
+        break;
+    }
+
+    return spellIds;
+}
+
 uint32 HasReagentsForValue::Calculate()
 {
     if (ai->HasCheat(BotCheatMask::item))

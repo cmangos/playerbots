@@ -281,6 +281,14 @@ namespace ai
         virtual bool Execute(Event& event);
     };
 
+    class RpgEnchantAction : public RpgTradeUsefulAction
+    {
+    public:
+        RpgEnchantAction(PlayerbotAI* ai, std::string name = "rpg enchant") : RpgTradeUsefulAction(ai, name) {}
+
+        virtual bool Execute(Event& event);
+    };
+
     class RpgDuelAction : public RpgSubAction
     {
     public:

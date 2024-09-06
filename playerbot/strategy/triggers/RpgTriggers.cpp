@@ -609,7 +609,42 @@ bool RpgTradeUsefulTrigger::IsActive()
     if (bot->GetTrader() && bot->GetTrader() != player)
         return false;
 
-    if (AI_VALUE_LAZY(std::list<Item*>, "items useful to give").empty())
+    if (AI_VALUE(std::list<Item*>, "items useful to give").empty())
+        return false;
+
+    return true;
+}
+
+bool RpgEnchantTrigger::IsActive()
+{
+    GuidPosition guidP(getGuidP());
+
+    if (!guidP.IsPlayer())
+        return false;
+
+    Player* player = guidP.GetPlayer();
+
+
+    if (!player)
+        return false;
+
+    //if (player->GetTrader() == bot && bot->GetTrader() == player) //Continue trading please.
+    //    return true;
+
+    if (!isFriend(player))
+        return false;
+
+    if (!player->IsWithinLOSInMap(bot))
+        return false;
+
+    //Trading with someone else
+    //if (player->GetTrader() && player->GetTrader() != bot)
+     //   return false;
+
+    //if (bot->GetTrader() && bot->GetTrader() != player)
+    //    return false;
+
+    if (AI_VALUE(std::list<Item*>, "items useful to enchant").empty())
         return false;
 
     return true;

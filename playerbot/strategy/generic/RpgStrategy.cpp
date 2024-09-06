@@ -172,6 +172,10 @@ void RpgPlayerStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("rpg trade useful", 1.030f), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "rpg enchant",
+        NextAction::array(0, new NextAction("rpg enchant", 1.029f), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "rpg duel",
         NextAction::array(0, new NextAction("rpg duel", 1.010f), NULL)));
 }

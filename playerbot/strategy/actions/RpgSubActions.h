@@ -257,6 +257,7 @@ namespace ai
 
     private:
         virtual bool isUseful() { return !urand(0,10); }
+        virtual bool isUseful() { return true; }
         virtual std::string ActionName() { return "cast random spell"; }
         virtual Event ActionEvent(Event event) { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject())); }
     };

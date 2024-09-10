@@ -105,7 +105,7 @@ const ReputationRank GuidPosition::GetReactionTo(const GuidPosition& other, uint
                 const FactionEntry* unitFactionEntry = sFactionStore.LookupEntry(GetFactionTemplateEntry()->faction);
                 return unitPlayer->GetReputationMgr().IsAtWar(unitFactionEntry) ? REP_HOSTILE : REP_FRIENDLY;
 #else
-                if (!other.GetUnit()->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
+                if (!other.GetUnit(instanceId)->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
                 {
 #ifdef MANGOSBOT_TWO
                     const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry(GetFactionTemplateEntry()->faction);

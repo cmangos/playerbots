@@ -112,7 +112,7 @@ bool CanFreeMoveToValue::Calculate()
 
     GuidPosition destPos(qualifier);
 
-    destPos.updatePosition();
+    destPos.updatePosition(bot->GetInstanceId());
 
     GuidPosition refPos = AI_VALUE(GuidPosition, "free move center");
 

@@ -762,28 +762,30 @@ void RandomPlayerbotMgr::DelayedFacingFix()
         return;
 
     for (auto& fMap : facingFix) {
-        for (auto obj : fMap.second) {
-            if (time(0) - obj.second > 5)
-            {
-                if (!obj.first.IsCreature())
-                    continue;
+        for (auto& fInstance : fMap.second) {
+            for (auto obj : fInstance.second) {
+                if (time(0) - obj.second > 5)
+                {
+                    if (!obj.first.IsCreature())
+                        continue;
 
-                GuidPosition guidP(obj.first, WorldPosition(fMap.first, 0, 0, 0));
+                    GuidPosition guidP(obj.first, WorldPosition(fMap.first, 0, 0, 0));
 
-                Creature* unit = guidP.GetCreature();
+                    Creature* unit = guidP.GetCreature(fInstance.first);
 
-                if (!unit)
-                    continue;
+                    if (!unit)
+                        continue;
 
-                CreatureData* data = guidP.GetCreatureData();
+                    CreatureData* data = guidP.GetCreatureData();
 
-                if (!data)
-                    continue;
+                    if (!data)
+                        continue;
 
-                if (unit->GetOrientation() == data->orientation)
-                    continue;
+                    if (unit->GetOrientation() == data->orientation)
+                        continue;
 
-                unit->SetFacingTo(data->orientation);
+                    unit->SetFacingTo(data->orientation);
+                }
             }
         }
         facingFix[fMap.first].clear();

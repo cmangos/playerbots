@@ -41,7 +41,7 @@ void RpgHelper::setFacingTo(GuidPosition guidPosition)
 
     //sServerFacade.SetFacingTo(bot, guidPosition.GetWorldObject());
     MotionMaster& mm = *bot->GetMotionMaster();
-    bot->SetFacingTo(bot->GetAngle(guidPosition.GetWorldObject()));
+    bot->SetFacingTo(bot->GetAngle(guidPosition.GetWorldObject(bot->GetInstanceId())));
     bot->m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
 }
 
@@ -57,7 +57,7 @@ void RpgHelper::setFacing(GuidPosition guidPosition)
         return;
 
 
-    Unit* unit = guidPosition.GetUnit();
+    Unit* unit = guidPosition.GetUnit(bot->GetInstanceId());
 
     if (unit->IsMoving())
         return;
@@ -75,7 +75,7 @@ void RpgHelper::resetFacing(GuidPosition guidPosition)
     if (!guidPosition.IsCreature())
         return;
 
-    Creature* unit = guidPosition.GetCreature();
+    Creature* unit = guidPosition.GetCreature(bot->GetInstanceId());
 
     if (unit->IsMoving())
         return;
@@ -85,7 +85,7 @@ void RpgHelper::resetFacing(GuidPosition guidPosition)
     if (data)
     {
         unit->SetFacingTo(data->orientation);
-        sRandomPlayerbotMgr.AddFacingFix(bot->GetMapId(), guidPosition);
+        sRandomPlayerbotMgr.AddFacingFix(bot->GetMapId(),bot->GetInstanceId(), guidPosition);
     }
 }
 
@@ -101,7 +101,7 @@ bool RpgEmoteAction::Execute(Event& event)
 {
     rpg->BeforeExecute();
 
-    Unit* unit = rpg->guidP().GetUnit();
+    Unit* unit = rpg->guidP().GetUnit(bot->GetInstanceId());
 
     uint32 type;
 
@@ -115,7 +115,7 @@ bool RpgEmoteAction::Execute(Event& event)
         bot->GetSession()->HandleTextEmoteOpcode(data);
     }
     else
-        type = TalkAction::GetRandomEmote(rpg->guidP().GetUnit());
+        type = TalkAction::GetRandomEmote(rpg->guidP().GetUnit(bot->GetInstanceId()));
 
     WorldPacket p1;
     p1 << rpg->guid();
@@ -464,11 +464,11 @@ bool RpgItemAction::Execute(Event& event)
     Unit* unitTarget = nullptr;
     if (guidP.IsUnit())
     {
-        unitTarget = guidP.GetUnit();
+        unitTarget = guidP.GetUnit(bot->GetInstanceId());
     }
     else if (guidP.IsGameObject())
     {
-        gameObjectTarget = guidP.GetGameObject();
+        gameObjectTarget = guidP.GetGameObject(bot->GetInstanceId());
     }
 
     std::list<Item*> questItems = AI_VALUE2(std::list<Item*>, "inventory items", "quest");

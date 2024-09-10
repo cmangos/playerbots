@@ -186,7 +186,7 @@ std::list<GuidPosition> ActiveQuestGiversValue::Calculate()
 					continue;
 			}
 
-			if (guidp.isDead())
+			if (guidp.isDead(bot->GetInstanceId()))
 				continue;
 
 			retQuestGivers.push_back(guidp);
@@ -245,7 +245,7 @@ std::list<GuidPosition> ActiveQuestTakersValue::Calculate()
 
 			for (auto& guidp : entry.second)
 			{
-				if (guidp.isDead())
+				if (guidp.isDead(bot->GetInstanceId()))
 					continue;
 
 				retQuestTakers.push_back(guidp);
@@ -314,7 +314,7 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 			{
 				for (auto& guidp : entry.second)
 				{
-					if (guidp.isDead())
+					if (guidp.isDead(bot->GetInstanceId()))
 						continue;
 
 					retQuestObjectives.push_back(guidp);
@@ -522,9 +522,9 @@ bool CanUseItemOn::Calculate()
 	}
 
 	if (guidP.IsUnit())
-		unit = guidP.GetUnit();
+		unit = guidP.GetUnit(bot->GetInstanceId());
 	else if (guidP.IsGameObject())
-		gameObject = guidP.GetGameObject();
+		gameObject = guidP.GetGameObject(bot->GetInstanceId());
 
 	ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
 

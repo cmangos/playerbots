@@ -159,9 +159,9 @@ bool MoveToRpgTargetAction::Execute(Event& event)
     
     if (movePos.distance(bot) < sPlayerbotAIConfig.sightDistance)
     {
-        if (!movePos.ClosestCorrectPoint(5.0f) || abs(movePos.getZ()- z) > 10.0f)
+        if (!movePos.ClosestCorrectPoint(5.0f, 5.0f, bot->GetInstanceId()) || abs(movePos.getZ()- z) > 10.0f)
         {
-            ai->TellDebug(GetMaster(), "Can not path to desired location around " + chat->formatWorldobject(guidP.GetWorldObject()) + " trying again later.", "debug move");
+            ai->TellDebug(GetMaster(), "Can not path to desired location around " + chat->formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId())) + " trying again later.", "debug move");
 
             return false;
         }
@@ -188,20 +188,20 @@ bool MoveToRpgTargetAction::Execute(Event& event)
         return false;
     }
 
-    if ((ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT)) && guidP.GetWorldObject())
+    if ((ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT)) && guidP.GetWorldObject(bot->GetInstanceId()))
     {
         if (couldMove)
         {
             std::ostringstream out;
             out << "Heading to: ";
-            out << chat->formatWorldobject(guidP.GetWorldObject());
+            out << chat->formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId()));
             ai->TellPlayerNoFacing(GetMaster(), out);
         }
         else
         {
             std::ostringstream out;
             out << "Near: ";
-            out << chat->formatWorldobject(guidP.GetWorldObject());
+            out << chat->formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId()));
             ai->TellPlayerNoFacing(GetMaster(), out);
         }
     }
@@ -216,7 +216,7 @@ bool MoveToRpgTargetAction::isUseful()
     if (!guidP)
         return false;
 
-    WorldObject* wo = guidP.GetWorldObject();
+    WorldObject* wo = guidP.GetWorldObject(bot->GetInstanceId());
 
     if (!wo)
     {
@@ -237,7 +237,7 @@ bool MoveToRpgTargetAction::isUseful()
     if (travelTarget->isTraveling() && AI_VALUE2(bool, "can free move to", travelTarget->GetPosStr()))
         return false;
 
-    guidP.updatePosition();
+    guidP.updatePosition(bot->GetInstanceId());
 
     if(WorldPosition(p) != WorldPosition(guidP))
         SET_AI_VALUE(GuidPosition, "rpg target", guidP);

@@ -86,7 +86,7 @@ bool RpgStartQuestTrigger::IsActive()
 
     if (guidP.IsUnit())
     {
-        Unit* unit = guidP.GetUnit();
+        Unit* unit = guidP.GetUnit(bot->GetInstanceId());
         if (unit && !unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
             return false;
     }
@@ -196,7 +196,7 @@ bool RpgAHSellTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (GuidPosition(bot).IsHostileTo(guidP))
+    if (GuidPosition(bot).IsHostileTo(guidP, bot->GetInstanceId()))
         return false;
 
     if (!AI_VALUE(bool, "can ah sell"))
@@ -215,7 +215,7 @@ bool RpgAHBuyTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (GuidPosition(bot).IsHostileTo(guidP))
+    if (GuidPosition(bot).IsHostileTo(guidP, bot->GetInstanceId()))
         return false;
 
     if (!AI_VALUE(bool, "can ah buy"))
@@ -399,7 +399,7 @@ bool RpgHealTrigger::IsActive()
     if (guidP.IsPlayer())
         return false;
 
-    Unit* unit = guidP.GetUnit();
+    Unit* unit = guidP.GetUnit(bot->GetInstanceId());
 
     if (!unit)
         return false;
@@ -527,7 +527,7 @@ bool RpgCraftTrigger::IsActive()
     if (AI_VALUE(uint8, "bag space") > 80)
         return false;
 
-    if (!guidP.GetWorldObject())
+    if (!guidP.GetWorldObject(bot->GetInstanceId()))
         return false;
 
     std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
@@ -714,9 +714,9 @@ bool RpgItemTrigger::IsActive()
     GameObject* gameObject = nullptr;
     
     if(guidP.IsUnit())
-        unit = guidP.GetUnit();
+        unit = guidP.GetUnit(bot->GetInstanceId());
     else if (guidP.IsGameObject())
-        gameObject = guidP.GetGameObject();
+        gameObject = guidP.GetGameObject(bot->GetInstanceId());
 
     std::list<Item*> questItems = AI_VALUE2(std::list<Item*>, "inventory items", "quest");
 

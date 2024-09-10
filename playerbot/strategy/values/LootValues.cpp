@@ -298,7 +298,7 @@ bool ShouldLootObject::Calculate()
 	if (!guid)
 		return false;
 
-	WorldObject* object = guid.GetWorldObject();
+	WorldObject* object = guid.GetWorldObject(bot->GetInstanceId());
 
 	if (!object)
 		return false;

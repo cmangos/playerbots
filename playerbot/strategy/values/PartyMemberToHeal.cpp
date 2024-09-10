@@ -58,7 +58,7 @@ Unit* PartyMemberToHeal::Calculate()
 
     if (GuidPosition rpgTarget = AI_VALUE(GuidPosition, "rpg target"))
     {
-        Unit* target = rpgTarget.GetCreature();
+        Unit* target = rpgTarget.GetCreature(bot->GetInstanceId());
         if (target && sServerFacade.IsFriendlyTo(bot, target) && target->GetHealthPercent() < 100)
         {
             needHeals.push_back(target);

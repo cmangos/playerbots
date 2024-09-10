@@ -1030,11 +1030,11 @@ bool UseItemIdAction::Execute(Event& event)
                 GuidPosition guidP = *guidPs.begin();
                 if (guidP.IsGameObject())
                 {
-                    gameObjectTarget = guidP.GetGameObject();
+                    gameObjectTarget = guidP.GetGameObject(bot->GetInstanceId());
                 }
                 else
                 {
-                    unitTarget = guidP.GetUnit();
+                    unitTarget = guidP.GetUnit(bot->GetInstanceId());
                 }
             }
         }

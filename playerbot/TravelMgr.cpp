@@ -374,7 +374,7 @@ bool GrindTravelDestination::isActive(Player* bot)
     if (cInfo->Rank > CREATURE_ELITE_NORMAL && !AI_VALUE(bool, "can fight elite"))
         return false;
 
-    return GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, entry));
+    return GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, entry), bot->GetInstanceId());
 }
 
 std::string GrindTravelDestination::getTitle() {
@@ -417,7 +417,7 @@ bool BossTravelDestination::isActive(Player* bot)
     if ((int32)cInfo->MaxLevel > bot->GetLevel() + 3)
         return false;
 
-    if (!GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, entry)))
+    if (!GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, entry), bot->GetInstanceId()))
         return false;
 
     if (bot->GetGroup())

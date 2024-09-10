@@ -846,8 +846,8 @@ std::string ChatHelper::formatWorldPosition(const WorldPosition& pos)
     out << pos.getX() << "," << pos.getY() << "," << pos.getZ();
     if (pos.getO())
         out << " facing " << formatAngle(pos.getO());
-    if (pos.getMap())
-        out << " in " << pos.getMap()->GetMapName();
+    if (pos.getMap(pos.getFirstInstanceId()))
+        out << " in " << pos.getMap(pos.getFirstInstanceId())->GetMapName();
     else
         out << " map:" << pos.getMapId();
 
@@ -858,8 +858,8 @@ std::string ChatHelper::formatWorldPosition(const WorldPosition& pos)
 std::string ChatHelper::formatGuidPosition(const GuidPosition& guidP)
 {
     std::ostringstream out;
-    if (guidP.GetWorldObject())
-        out << guidP.GetWorldObject()->GetName();
+    if (guidP.GetWorldObject(guidP.getFirstInstanceId()))
+        out << guidP.GetWorldObject(guidP.getFirstInstanceId())->GetName();
     else if (guidP.GetCreatureTemplate())
         out << guidP.GetCreatureTemplate()->Name;
     else if (guidP.GetGameObjectInfo())

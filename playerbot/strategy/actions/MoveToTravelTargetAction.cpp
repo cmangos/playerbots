@@ -217,7 +217,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
         WorldPosition* pos = target->getPosition();
         GuidPosition* guidP = dynamic_cast<GuidPosition*>(pos);
 
-        std::string name = (guidP && guidP->GetWorldObject()) ? chat->formatWorldobject(guidP->GetWorldObject()) : "travel target";
+        std::string name = (guidP && guidP->GetWorldObject(bot->GetInstanceId())) ? chat->formatWorldobject(guidP->GetWorldObject(bot->GetInstanceId())) : "travel target";
 
         if (mapId == bot->GetMapId())
         {

@@ -8,7 +8,8 @@ namespace ai
     public:
         GuidPosition() : ObjectGuid(), WorldPosition() {}
         GuidPosition(ObjectGuid guid, WorldPosition pos) : ObjectGuid(guid), WorldPosition(pos) {};
-        GuidPosition(ObjectGuid guid, const uint32 mapId) : ObjectGuid(guid) { WorldPosition::set(guid, mapId); }
+        GuidPosition(ObjectGuid guid, const uint32 mapId, const uint32 instanceId) : ObjectGuid(guid) { WorldPosition::set(guid, mapId, instanceId); }
+        GuidPosition(ObjectGuid guid, const WorldObject* wo) : ObjectGuid(guid), WorldPosition(wo) {}
         GuidPosition(uint64 const& guid, WorldPosition const& pos) : ObjectGuid(guid), WorldPosition(pos) {};
         //template<class T>
         //GuidPosition(ObjectGuid guid, T) : ObjectGuid(guid) {WorldPosition::set(WorldPosition(T))};
@@ -25,23 +26,27 @@ namespace ai
 
         GameObjectInfo const* GetGameObjectInfo() const { return IsGameObject() ? sObjectMgr.GetGameObjectInfo(GetEntry()) : nullptr; };
 
-        WorldObject* GetWorldObject() const { return getMap() ? getMap()->GetWorldObject(*this) : nullptr;}
-        Creature* GetCreature() const;
-        Unit* GetUnit() const;
-        GameObject* GetGameObject() const;
+        WorldObject* GetWorldObject(uint32 m_instanceId) const { return getMap(m_instanceId) ? getMap(m_instanceId)->GetWorldObject(*this) : nullptr;}
+        Creature* GetCreature(uint32 instanceId) const;
+        Unit* GetUnit(uint32 instanceId) const;
+        GameObject* GetGameObject(uint32 instanceId) const;
         Player* GetPlayer() const;
 
-        void updatePosition() {WorldObject* wo = GetWorldObject(); if (wo) WorldPosition::set(wo); }
+        void updatePosition(uint32 m_instanceId) {WorldObject* wo = GetWorldObject(m_instanceId); if (wo) WorldPosition::set(wo); }
 
         bool HasNpcFlag(NPCFlags flag) { return IsCreature() && GetCreatureTemplate()->NpcFlags & flag; }
         bool isGoType(GameobjectTypes type) { return IsGameObject() && GetGameObjectInfo()->type == type; }
 
         const FactionTemplateEntry* GetFactionTemplateEntry() const;
-        const ReputationRank GetReactionTo(const GuidPosition& other);
-        bool IsFriendlyTo(const GuidPosition& other) { return (GetFactionTemplateEntry() && other.GetFactionTemplateEntry()) ? (GetReactionTo(other) > REP_NEUTRAL) : false; }
-        bool IsHostileTo(const GuidPosition& other) { return (GetFactionTemplateEntry() && other.GetFactionTemplateEntry()) ? (GetReactionTo(other) < REP_NEUTRAL) : false; }
+        const ReputationRank GetReactionTo(const GuidPosition& other, uint32 instanceId);        
+        bool IsFriendlyTo(const GuidPosition& other, const uint32 instanceId) { return (GetFactionTemplateEntry() && other.GetFactionTemplateEntry()) ? (GetReactionTo(other, instanceId) > REP_NEUTRAL) : false; }
+        bool IsHostileTo(const GuidPosition& other, const uint32 instanceId) { return (GetFactionTemplateEntry() && other.GetFactionTemplateEntry()) ? (GetReactionTo(other, instanceId) < REP_NEUTRAL) : false; }
 
-        bool isDead(); //For loaded grids check if the unit/object is unloaded/dead.
+        const ReputationRank GetReactionTo(WorldObject* object) { return GetReactionTo(GuidPosition(object), object->GetInstanceId()); }
+        bool IsFriendlyTo(WorldObject* object) { return IsFriendlyTo(GuidPosition(object), object->GetInstanceId()); }
+        bool IsHostileTo(WorldObject* object) { return IsHostileTo(GuidPosition(object), object->GetInstanceId()); }
+
+        bool isDead(uint32 instanceId); //For loaded grids check if the unit/object is unloaded/dead.
 
         uint16 IsPartOfAPool();
         uint16 GetGameEventId();

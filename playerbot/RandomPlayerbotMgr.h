@@ -149,7 +149,7 @@ public:
 
         void PrintTeleportCache();
 
-        void AddFacingFix(uint32 mapId, ObjectGuid guid) { facingFix[mapId].push_back(std::make_pair(guid,time(0))); }
+        void AddFacingFix(uint32 mapId, uint32 instanceId, ObjectGuid guid) { facingFix[mapId][instanceId].push_back(std::make_pair(guid,time(0))); }
 
         bool arenaTeamsDeleted, guildsDeleted = false;
 
@@ -205,7 +205,7 @@ public:
         float GetMetricDelta(botPerformanceMetric& metric) const;
 
         bool showLoginWarning;
-        std::unordered_map<uint32, std::vector<std::pair<ObjectGuid, time_t>>> facingFix;
+        std::unordered_map<uint32, std::unordered_map<uint32, std::vector<std::pair<ObjectGuid, time_t>>>> facingFix;
 };
 
 #define sRandomPlayerbotMgr RandomPlayerbotMgr::instance()

@@ -216,21 +216,21 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
     for (auto& guid :targetList)
     {
-        GuidPosition guidP(guid, bot->GetMapId());
+        GuidPosition guidP(guid, bot->GetMapId(), bot->GetInstanceId());
 
         if (!guidP)
             continue;
 
         //Check if we are allowed to move to this position. This is based on movement strategies follow, free, guard, stay. Bots are limited to finding targets near the center of those movement strategies.
         //For bots with real players they are also slightly limited in range unless the player stands still for a while. See free move values.
-        if (guidP.GetWorldObject() && !AI_VALUE2(bool, "can free move to", guidP.to_string()))
+        if (guidP.GetWorldObject(bot->GetInstanceId()) && !AI_VALUE2(bool, "can free move to", guidP.to_string()))
             continue;
 
 
         if (guidP.IsGameObject())
         {
             //Ignore game objects that are not spawned or being used by others.
-            GameObject* go = guidP.GetGameObject();
+            GameObject* go = guidP.GetGameObject(bot->GetInstanceId());
             if (!go || !sServerFacade.isSpawned(go)
                 || go->IsInUse()
                 || go->GetGoState() != GO_STATE_READY)
@@ -345,13 +345,13 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
         for (auto target : sortedTargets)
         {
-            GuidPosition guidP(target.first, bot->GetMapId());
+            GuidPosition guidP(target.first, bot->GetMapId(), bot->GetInstanceId());
 
-            if (!guidP.GetWorldObject())
+            if (!guidP.GetWorldObject(bot->GetInstanceId()))
                 continue;
 
             std::ostringstream out;
-            out << chat->formatWorldobject(guidP.GetWorldObject());
+            out << chat->formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId()));
 
             out << std::fixed << std::setprecision(2);
             out << " " << rgpActionReason[guidP] << " " << target.second;
@@ -386,7 +386,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     //We pick a random target from the list with targets having a higher relevance of being picked.
     std::mt19937 gen(time(0));
     sTravelMgr.weighted_shuffle(guidps.begin(), guidps.end(), relevances.begin(), relevances.end(), gen);
-    GuidPosition guidP(guidps.front(),bot->GetMapId());
+    GuidPosition guidP(guidps.front(),bot->GetMapId(), bot->GetInstanceId());
 
     //If we can't find a target clear ignore list and try again later.
     if (!guidP)
@@ -397,11 +397,11 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     }
 
     //Report the target that was found.
-    if ((ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT)) && guidP.GetWorldObject())
+    if ((ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT)) && guidP.GetWorldObject(bot->GetInstanceId()))
     {
         std::ostringstream out;
         out << "found: ";
-        out << chat->formatWorldobject(guidP.GetWorldObject());
+        out << chat->formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId()));
 
         out << std::fixed << std::setprecision(2);
         out << " " << rgpActionReason[guidP] << " " << targets[guidP];

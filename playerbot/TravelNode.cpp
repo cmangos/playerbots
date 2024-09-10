@@ -117,7 +117,7 @@ float TravelNodePath::getCost(Unit* unit, uint32 cGold)
             AreaTrigger const* at = sObjectMgr.GetAreaTrigger(pathObject);
             if (atEntry && at && atEntry->mapid == bot->GetMapId())
             {
-                Map* map = WorldPosition(atEntry->mapid, atEntry->box_x, atEntry->box_y, atEntry->box_z).getMap();
+                Map* map = WorldPosition(atEntry->mapid, atEntry->box_x, atEntry->box_y, atEntry->box_z).getMap(bot->GetInstanceId());
                 if (map)
                     if (at && at->conditionId && !sObjectMgr.IsConditionSatisfied(at->conditionId, bot, map, nullptr, CONDITION_FROM_AREATRIGGER_TELEPORT))
                         return -1;
@@ -303,7 +303,7 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
     if (isTransport() && path.size() > 1)
     {
         WorldPosition secondPos = *std::next(path.begin()); //This is to prevent bots from jumping in the water from a transport. Need to remove this when transports are properly handled.
-        if (secondPos.getMap() && secondPos.getTerrain() && secondPos.isInWater())
+        if (secondPos.getTerrain() && secondPos.isInWater())
             canPath = false;
     }
 
@@ -2147,7 +2147,7 @@ void TravelNodeMap::generateTransportNodes()
                         else if(data->displayId == 3031)
                             exitPos.setZ(exitPos.getZ() - 17.0f);
 
-                        if (exitPos.ClosestCorrectPoint(20.0f, 10.0f))
+                        if (exitPos.ClosestCorrectPoint(20.0f, 10.0f,0))
                         {
                             TravelNode* exitNode = sTravelNodeMap.addNode(exitPos, data->name + std::string(" dock"), true, true);
 

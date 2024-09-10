@@ -189,19 +189,19 @@ void WorldPosition::rem()
 #endif
 }
 
-WorldPosition::WorldPosition(const uint32 mapId, const GuidPosition& guidP)
+WorldPosition::WorldPosition(const uint32 mapId, const GuidPosition& guidP, uint32 instanceId)
 {
     if (guidP.mapid !=0 || guidP.coord_x != 0 || guidP.coord_y != 0 || guidP.coord_z !=0) {
         set(WorldPosition(guidP.mapid, guidP.coord_x, guidP.coord_y, guidP.coord_z, guidP.orientation));
         return;
     }
 
-    set(ObjectGuid(guidP), guidP.mapid);
+    set(ObjectGuid(guidP), guidP.mapid, instanceId);
 
     add();
  }
 
-void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId)
+void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32 instanceId)
 {
     switch (guid.GetHigh())
     {
@@ -223,7 +223,7 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId)
     case HIGHGUID_UNIT:
     {
         setMapId(mapId);
-        Creature* creature = getMap()->GetAnyTypeCreature(guid);
+        Creature* creature = getMap(instanceId)->GetAnyTypeCreature(guid);
         if (creature)
         {
             set(creature);
@@ -580,14 +580,14 @@ bool WorldPosition::hasFaction(const Team team) const
 std::set<GenericTransport*> WorldPosition::getTransports(uint32 entry)
 {
     std::set<GenericTransport*> transports;
-    for (auto transport : getMap()->GetTransports()) //Boats&Zeppelins.
+    for (auto transport : getMap(getFirstInstanceId())->GetTransports()) //Boats&Zeppelins.
         if (!entry || transport->GetEntry() == entry)
             transports.insert(transport);
 
     if (transports.empty() || !entry) //Elevators&rams
     {
         for (auto gopair : getGameObjectsNear(0.0f, entry))
-            if (GameObject* go = getMap()->GetGameObject(gopair->first))
+            if (GameObject* go = getMap(getFirstInstanceId())->GetGameObject(gopair->first))
                 if (GenericTransport* transport = dynamic_cast<GenericTransport*>(go))
                     transports.insert(transport);
     }
@@ -961,10 +961,10 @@ std::vector<WorldPosition> WorldPosition::getPathFromPath(const std::vector<Worl
     return fullPath;
 }
 
-bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight)
+bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight, uint32 instanceId)
 {
     MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
-    dtNavMeshQuery const* query = mmap->GetNavMeshQuery(getMapId(), getInstanceId());
+    dtNavMeshQuery const* query = mmap->GetNavMeshQuery(getMapId(), instanceId);
 
     float curPoint[VERTEX_SIZE] = {coord_y, coord_z, coord_x };
     float extend[VERTEX_SIZE] = { maxRange, maxHeight, maxRange };
@@ -995,9 +995,9 @@ bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight)
 bool WorldPosition::GetReachableRandomPointOnGround(const Player* bot, const float radius, const bool randomRange) 
 {
 #ifndef MANGOSBOT_TWO         
-    return getMap()->GetReachableRandomPointOnGround(coord_x, coord_y, coord_z, radius, randomRange);
+    return getMap(bot->GetInstanceId())->GetReachableRandomPointOnGround(coord_x, coord_y, coord_z, radius, randomRange);
 #else
-    return getMap()->GetReachableRandomPointOnGround(bot->GetPhaseMask(), coord_x, coord_y, coord_z, radius, randomRange);
+    return getMap(bot->GetInstanceId())->GetReachableRandomPointOnGround(bot->GetPhaseMask(), coord_x, coord_y, coord_z, radius, randomRange);
 #endif
 }
 
@@ -1029,7 +1029,7 @@ uint32 WorldPosition::getUnitsAggro(const std::list<ObjectGuid>& units, const Pl
     uint32 count = 0;
     for (auto guid : units)
     {
-        Unit* unit = GuidPosition(guid,bot->GetMapId()).GetUnit(); 
+        Unit* unit = GuidPosition(guid,bot).GetUnit(bot->GetInstanceId()); 
         
         if (!unit) continue; 
         

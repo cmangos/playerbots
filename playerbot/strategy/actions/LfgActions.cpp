@@ -1074,6 +1074,7 @@ bool LfgLeaveAction::Execute(Event& event)
     }
 #endif
 #ifdef MANGOSBOT_ONE
+    /* todo: Fix with new system
     bool isLFG = false;
     bool isLFM = false;
     for (int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
@@ -1097,6 +1098,7 @@ bool LfgLeaveAction::Execute(Event& event)
         p << empty;
         bot->GetSession()->HandleSetLfgCommentOpcode(p);
     }
+    */
 #endif
 #ifdef MANGOSBOT_TWO
     // Don't leave if already invited / in dungeon
@@ -1216,6 +1218,7 @@ bool LfgJoinAction::isUseful()
         return false;
 #endif
 #ifdef MANGOSBOT_ONE
+    /* todo: Fix with new system
     bool isLFG = false;
     bool isLFM = false;
     for (int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
@@ -1227,6 +1230,7 @@ bool LfgJoinAction::isUseful()
 
     if ((isLFG || isLFM) && sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()].empty())
         return false;
+        */
 #endif
 #ifdef MANGOSBOT_TWO
     if (sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()].empty())

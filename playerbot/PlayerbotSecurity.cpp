@@ -83,11 +83,7 @@ PlayerbotSecurityLevel PlayerbotSecurity::LevelFor(Player* from, DenyReason* rea
         }
 
 #ifdef MANGOSBOT_ONE
-        if (bot->GetPlayerbotAI()->HasRealPlayerMaster() && !bot->m_lookingForGroup.isEmpty() &&
-            (!bot->m_lookingForGroup.group[0].empty() && bot->m_lookingForGroup.group[0].type == LFG_TYPE_DUNGEON ||
-            (!bot->m_lookingForGroup.group[1].empty() && bot->m_lookingForGroup.group[1].type == LFG_TYPE_DUNGEON) ||
-            (!bot->m_lookingForGroup.group[2].empty() && bot->m_lookingForGroup.group[2].type == LFG_TYPE_DUNGEON) ||
-                (!bot->m_lookingForGroup.more.empty() && bot->m_lookingForGroup.more.type == LFG_TYPE_DUNGEON)))
+        if (bot->GetPlayerbotAI()->HasRealPlayerMaster() && bot->GetSession()->m_lfgInfo.queued)
 #endif
 #ifdef MANGOSBOT_ZERO
         if (sWorld.GetLFGQueue().IsPlayerInQueue(bot->GetObjectGuid()))

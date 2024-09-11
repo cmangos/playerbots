@@ -1426,6 +1426,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
 #endif
 
 #ifdef MANGOSBOT_ONE
+        /* todo: Fix with new system
         WorldSafeLocsEntry const* ClosestGrave = player->GetMap()->GetGraveyardManager().GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
         uint32 zoneId = ClosestGrave ? ClosestGrave->ID : 0;
 
@@ -1434,7 +1435,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
         {
             if (group->IsLeader(player->GetObjectGuid()))
             {
-                if (!player->m_lookingForGroup.more.empty() && player->GetSession()->LookingForGroup_auto_add && player->m_lookingForGroup.more.isAuto())
+                if (player->GetSession()->m_lfgInfo.queued && player->GetSession()->LookingForGroup_auto_add && player->m_lookingForGroup.more.isAuto())
                 {
                     uint32 lfgType = (zoneId << 16) | ((1 << 8) | uint8(player->m_lookingForGroup.more.entry));
                     LfgDungeons[player->GetTeam()].push_back(lfgType);
@@ -1459,6 +1460,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
                 isLFG = true;
             }
         }
+        */
 #endif
 
 #ifdef MANGOSBOT_TWO
@@ -1499,6 +1501,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
     }
 
 #ifdef MANGOSBOT_ONE
+    /* todo: Fix with new system
     ForEachPlayerbot([&](Player* bot)
     {
         if (!bot || !bot->IsInWorld())
@@ -1515,7 +1518,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
         {
             if (group->IsLeader(bot->GetObjectGuid()))
             {
-                if (!bot->m_lookingForGroup.more.empty() && bot->GetSession()->LookingForGroup_auto_add && bot->m_lookingForGroup.more.isAuto())
+                if (bot->GetSession()->m_lfgInfo.queued && bot->GetSession()->m_lfgInfo.autofill)
                 {
                     uint32 lfgType = (zoneId << 16) | ((1 << 8) | uint8(bot->m_lookingForGroup.more.entry));
                     LfgDungeons[bot->GetTeam()].push_back(lfgType);
@@ -1531,6 +1534,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
             }
         }
     });
+    */
 #endif
 
     if (LfgDungeons[ALLIANCE].size() || LfgDungeons[HORDE].size())

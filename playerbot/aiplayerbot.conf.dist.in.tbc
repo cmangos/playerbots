@@ -54,7 +54,7 @@ AiPlayerbot.RandomBotMinLevel = 1
 AiPlayerbot.RandomBotMaxLevel = 70
 
 # Accounts to create for random bots
-AiPlayerbot.RandomBotAccountPrefix = rndbot
+AiPlayerbot.RandomBotAccountPrefix = RNDBOT
 AiPlayerbot.RandomBotAccountCount = 200
 
 # Disable core mangos map/bot optimizations which hinders bot activity

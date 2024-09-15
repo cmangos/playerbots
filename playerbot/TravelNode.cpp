@@ -2763,12 +2763,18 @@ void TravelNodeMap::saveNodeStore(bool force)
 
     hasToSave = false;
 
+    WorldDatabase.BeginTransaction();
+
     WorldDatabase.PExecute("DELETE FROM ai_playerbot_travelnode");
     WorldDatabase.PExecute("DELETE FROM ai_playerbot_travelnode_link");
     WorldDatabase.PExecute("DELETE FROM ai_playerbot_travelnode_path");
 
+    WorldDatabase.CommitTransaction();
+
     std::unordered_map<TravelNode*, uint32> saveNodes;
     std::vector<TravelNode*> anodes = sTravelNodeMap.getNodes();
+
+    WorldDatabase.BeginTransaction();
 
     BarGoLink bar(anodes.size());
     for (uint32 i = 0; i < anodes.size(); i++)
@@ -2786,11 +2792,16 @@ void TravelNodeMap::saveNodeStore(bool force)
         bar.step();
     }
 
+    WorldDatabase.CommitTransaction();
+
     sLog.outString(">> Saved " SIZEFMTD " travelNodes.", anodes.size());
 
     {
         uint32 paths = 0, points = 0;
         BarGoLink bar(anodes.size());
+
+        WorldDatabase.BeginTransaction();
+
         for (uint32 i = 0; i < anodes.size(); i++)
         {
             TravelNode* node = anodes[i];
@@ -2835,6 +2846,8 @@ void TravelNodeMap::saveNodeStore(bool force)
             bar.step();
         }
 
+        WorldDatabase.CommitTransaction();
+
         sLog.outString(">> Saved %d travelNode Paths, %d points.", paths,points);
     }
 }
@@ -2846,7 +2859,7 @@ void TravelNodeMap::loadNodeStore()
     std::unordered_map<uint32, TravelNode*> saveNodes;   
 
     {
-        auto result = WorldDatabase.PQuery(query.c_str());
+        auto result = WorldDatabase.PQuery("%s", query.c_str());
 
         if (result)
         {
@@ -2882,7 +2895,7 @@ void TravelNodeMap::loadNodeStore()
         //                     0        1          2    3      4         5              6          7          8               9             10 
         std::string query = "SELECT node_id, to_node_id,type,object,distance,swim_distance, extra_cost,calculated, max_creature_0,max_creature_1,max_creature_2 FROM ai_playerbot_travelnode_link";
 
-        auto result = WorldDatabase.PQuery(query.c_str());
+        auto result = WorldDatabase.PQuery("%s", query.c_str());
 
         if (result)
         {
@@ -2918,7 +2931,7 @@ void TravelNodeMap::loadNodeStore()
         //                     0        1           2   3      4   5  6
         std::string query = "SELECT node_id, to_node_id, nr, map_id, x, y, z FROM ai_playerbot_travelnode_path order by node_id, to_node_id, nr";
 
-        auto result = WorldDatabase.PQuery(query.c_str());
+        auto result = WorldDatabase.PQuery("%s", query.c_str());
 
         if (result)
         {

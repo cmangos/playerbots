@@ -961,6 +961,8 @@ void RandomItemMgr::BuildItemInfoCache()
     sLog.outString("Calculating stat weights for %d items...", sItemStorage.GetMaxEntry());
     BarGoLink bar(sItemStorage.GetMaxEntry());
 
+    CharacterDatabase.BeginTransaction();
+
     // generate stat weights for classes/specs
     for (uint32 itemId = 0; itemId < sItemStorage.GetMaxEntry(); ++itemId)
     {
@@ -1388,6 +1390,8 @@ void RandomItemMgr::BuildItemInfoCache()
 
         itemInfoCache[cacheInfo->itemId] = cacheInfo;
     }
+
+    CharacterDatabase.CommitTransaction();
 }
 
 uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPrototype const* proto, ItemSpecType& itSpec)

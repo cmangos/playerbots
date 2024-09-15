@@ -814,6 +814,7 @@ void TravelMgr::loadAreaLevels()
         }
 
         BarGoLink bar(sAreaStore.GetNumRows());
+        WorldDatabase.BeginTransaction();
         for (uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)    // areaflag numbered from 0
         {
             bar.step();
@@ -827,6 +828,7 @@ void TravelMgr::loadAreaLevels()
                 }
             }
         }
+        WorldDatabase.CommitTransaction();
         if(areaLevels.size() > loadedAreas.size())
             sLog.outString(">> Generated " SIZEFMTD " areas.", areaLevels.size()- loadedAreas.size());
     }

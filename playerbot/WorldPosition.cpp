@@ -26,155 +26,6 @@
 using namespace ai;
 using namespace MaNGOS;
 
-#ifndef MANGOSBOT_TWO
-class TerrainInfoAccess : public Referencable<std::atomic_long>
-{
-public:
-    TerrainInfoAccess() : Referencable(), m_mapId(0) {}
-    bool Load(const uint32 x, const uint32 y, bool mapOnly = false);
-    void UnLoadUnused();
-private:
-    GridMap* LoadMapAndVMap(const uint32 x, const uint32 y, bool mapOnly = false);
-private:
-    const uint32 m_mapId;
-    GridMap* m_GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-    bool m_GridMapsLoadAttempted[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-    int16 m_GridRef[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-
-    // global garbage collection timer
-    ShortIntervalTimer i_timer;
-
-    VMAP::IVMapManager* m_vmgr;
-
-    typedef std::mutex LOCK_TYPE;
-    typedef std::lock_guard<LOCK_TYPE> LOCK_GUARD;
-    LOCK_TYPE m_mutex;
-    LOCK_TYPE m_refMutex;
-};
-
-bool TerrainInfoAccess::Load(const uint32 x, const uint32 y, bool mapOnly /*= false*/)
-{
-    LOCK_GUARD lock(m_mutex);
-    if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y))
-    {
-        // load navmesh
-#ifdef MANGOSBOT_ZERO
-        if (!MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y))
-#else
-        if (!MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), m_mapId, x, y))
-#endif
-            return false;
-    }
-
-    return true;
-
-    /*
-    if (x >= MAX_NUMBER_OF_GRIDS || y >= MAX_NUMBER_OF_GRIDS) //just load navmesh                     
-        return MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y);
-
-    //Do not reference the grid.
-    //RefGrid(x, y);
-
-    // quick check if GridMap already loaded
-    GridMap* pMap = m_GridMaps[x][y];
-    if (!pMap)
-    {
-        pMap = LoadMapAndVMap(x, y, mapOnly);
-        m_GridMapsLoadAttempted[x][y] = true;
-    }
-
-    return pMap;
-    */
-};
-
-GridMap* TerrainInfoAccess::LoadMapAndVMap(const uint32 x, const uint32 y, bool mapOnly /*= false*/)
-{
-    if ((m_GridMaps[x][y] && mapOnly)
-        || (VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(m_mapId, x, y) && MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y)))
-    {
-        // nothing to load here
-        return m_GridMaps[x][y];
-    }
-
-        LOCK_GUARD lock(m_mutex);
-
-        // double checked lock pattern
-        if (!m_GridMaps[x][y])
-        {
-            GridMap* map = new GridMap();
-
-            // map file name
-            int len = sWorld.GetDataPath().length() + strlen("maps/%03u%02u%02u.map") + 1;
-            char* tmp = new char[len];
-            snprintf(tmp, len, (char*)(sWorld.GetDataPath() + "maps/%03u%02u%02u.map").c_str(), m_mapId, x, y);
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Loading map %s", tmp);
-
-            if (!map->loadData(tmp))
-            {
-                sLog.outError("Error load map file: %s", tmp);
-                //assert(false);
-            }
-
-            delete[] tmp;
-            m_GridMaps[x][y] = map;
-        }
-
-    // we'll load the rest later
-    if (mapOnly)
-        return m_GridMaps[x][y];
-
-    if (!m_vmgr->IsTileLoaded(m_mapId, x, y))
-    {
-        // load VMAPs for current map/grid...
-        const MapEntry* i_mapEntry = sMapStore.LookupEntry(m_mapId);
-        const char* mapName = i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
-
-        int vmapLoadResult = m_vmgr->loadMap((sWorld.GetDataPath() + "vmaps").c_str(), m_mapId, x, y);
-        switch (vmapLoadResult)
-        {
-        case VMAP::VMAP_LOAD_RESULT_OK:
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMAP loaded name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
-            break;
-        case VMAP::VMAP_LOAD_RESULT_ERROR:
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Could not load VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
-            break;
-        case VMAP::VMAP_LOAD_RESULT_IGNORED:
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Ignored VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
-            break;
-        }
-    }
-
-    if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y))
-    {
-        // load navmesh
-#ifdef MANGOSBOT_ZERO
-        if (!MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y))
-#else
-        if (!MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), m_mapId, x, y))
-#endif
-            return nullptr;
-    }
-
-    if (m_GridMaps[x][y])
-        m_GridMaps[x][y]->SetFullyLoaded();
-
-    return m_GridMaps[x][y];
-}
-
-void TerrainInfoAccess::UnLoadUnused()
-{
-    for (uint8 x = 0; x < MAX_NUMBER_OF_GRIDS; x++)
-        for (uint8 y = 0; y < MAX_NUMBER_OF_GRIDS; y++)
-        {
-            if (!m_GridMaps[x][y] && MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y))
-            {
-                LOCK_GUARD lock(m_mutex);
-                MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(m_mapId, x, y);
-            }
-        }
-}
-#endif
-
 void WorldPosition::add()
 {
 #ifdef MEMORY_MONITOR
@@ -763,8 +614,9 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
     bool isLoaded = false;
 
 #ifndef MANGOSBOT_TWO
-    TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
-    isLoaded = terrain->Load(x, y);
+    //TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
+    //isLoaded = terrain->Load(x, y);
+    isLoaded = true;
 #else 
     //Fix to ignore bad mmap files.
     uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%03i.mmap") + 1;
@@ -810,8 +662,8 @@ void WorldPosition::loadMapAndVMaps(const WorldPosition& secondPos, uint32 insta
 void WorldPosition::unloadMapAndVMaps(uint32 mapId)
 {
 #ifndef MANGOSBOT_TWO
-    TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
-    terrain->UnLoadUnused();
+    //TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
+    //terrain->UnLoadUnused();
 #endif
 }
 

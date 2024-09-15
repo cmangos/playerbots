@@ -132,15 +132,18 @@ public:
 #endif
                 Item* item = bot->GetMItem(*i);
 
-                if (event.getSource() == "rpg action")
+                if (item)
                 {
-                    items.push_back(ChatHelper::formatItem(item, item->GetCount()));
-                }
-                else
-                {
-                    std::ostringstream out;
-                    out << mail->subject << ", " << ChatHelper::formatItem(item) << "|cff00ff00 processed";
-                    ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                    if (event.getSource() == "rpg action")
+                    {
+                        items.push_back(ChatHelper::formatItem(item, item->GetCount()));
+                    }
+                    else
+                    {
+                        std::ostringstream out;
+                        out << mail->subject << ", " << ChatHelper::formatItem(item) << "|cff00ff00 processed";
+                        ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                    }
                 }
 
                 bot->GetSession()->HandleMailTakeItem(packet);

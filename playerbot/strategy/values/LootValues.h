@@ -161,7 +161,7 @@ namespace ai
     {
     public:
         HasUpgradeValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "has upgrade", 2), Qualified() {}
-        virtual bool Calculate() { itemUsageMap uMap = AI_VALUE2(itemUsageMap, "entry loot usage", getQualifier()); return uMap.find(ItemUsage::ITEM_USAGE_EQUIP) != uMap.end(); };
+        virtual bool Calculate();
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "has upgrade"; } //Must equal iternal name
@@ -170,7 +170,7 @@ namespace ai
         {
             return "This value checks if a specific creature or game object drops an item that is an equipment upgrade for the bot.";
         }
-        virtual std::vector<std::string> GetUsedValues() { return { "entry loot usage" }; }
+        virtual std::vector<std::string> GetUsedValues() { return {"entry loot list"}; }
 #endif 
     };
 

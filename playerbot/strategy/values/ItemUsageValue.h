@@ -76,9 +76,9 @@ namespace ai
         ItemUsageValue(PlayerbotAI* ai, std::string name = "item usage") : CalculatedValue<ItemUsage>(ai, name), Qualified() {}
         virtual ItemUsage Calculate();
 
-    private:
-        ItemUsage QueryItemUsageForEquip(ItemQualifier& itemQualifier);
-        uint32 GetSmallestBagSize();
+        static ItemUsage QueryItemUsageForEquip(ItemQualifier& itemQualifier, Player* bot);
+        static uint32 GetSmallestBagSize(Player* bot);
+    private:        
         bool IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory = false);
         bool IsItemNeededForSkill(ItemPrototype const* proto);
         bool IsItemUsefulForSkill(ItemPrototype const* proto);

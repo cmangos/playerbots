@@ -265,7 +265,7 @@ ItemUsage ItemUsageValue::Calculate()
             return hasSameMount ? ItemUsage::ITEM_USAGE_KEEP : ItemUsage::ITEM_USAGE_EQUIP;
     }
 
-    ItemUsage equip = QueryItemUsageForEquip(itemQualifier);
+    ItemUsage equip = QueryItemUsageForEquip(itemQualifier, bot);
     if (equip != ItemUsage::ITEM_USAGE_NONE)
         return equip;
 
@@ -395,8 +395,11 @@ ItemUsage ItemUsageValue::Calculate()
     return ItemUsage::ITEM_USAGE_NONE;
 }
 
-ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
+ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, Player* bot)
 {
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+    ChatHelper* chat = ai->GetChatHelper();
     ItemPrototype const* itemProto = itemQualifier.GetProto();
 
     if (bot->CanUseItem(itemProto) != EQUIP_ERR_OK)
@@ -477,7 +480,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
         if (itemProto->SubClass != ITEM_SUBCLASS_CONTAINER)
             return ItemUsage::ITEM_USAGE_NONE; //Todo add logic for non-bag containers. We want to look at professions/class and only replace if non-bag is larger than bag.
 
-        if (GetSmallestBagSize() >= itemProto->ContainerSlots)
+        if (GetSmallestBagSize(bot) >= itemProto->ContainerSlots)
             return ItemUsage::ITEM_USAGE_NONE;
 
         return ItemUsage::ITEM_USAGE_EQUIP;
@@ -552,7 +555,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
 }
 
 //Return smaltest bag size equipped
-uint32 ItemUsageValue::GetSmallestBagSize()
+uint32 ItemUsageValue::GetSmallestBagSize(Player* bot)
 {
     int8 curSlot = 0;
     uint32 curSlots = 0;

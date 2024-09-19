@@ -255,6 +255,24 @@ itemUsageMap EntryLootUsageValue::Calculate()
 	return items;
 }
 
+bool HasUpgradeValue::Calculate()
+{
+	for (auto itemId : GAI_VALUE2(std::list<uint32>, "entry loot list", getQualifier()))
+	{
+		ForceItemUsage forceUsage = AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", itemId, ForceItemUsage::FORCE_USAGE_NONE);
+
+		if (forceUsage == ForceItemUsage::FORCE_USAGE_NEED)
+			return true;
+
+		ItemQualifier qualifier(itemId);
+
+		ItemUsage equip = ItemUsageValue::QueryItemUsageForEquip(qualifier, bot);
+		if (equip == ItemUsage::ITEM_USAGE_EQUIP)
+			return true;
+	}
+	return false;
+}
+
 //How many (stack) items can be looted while still having free space.
 uint32 StackSpaceForItem::Calculate()
 {

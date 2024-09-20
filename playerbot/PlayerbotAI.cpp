@@ -4089,6 +4089,40 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool
         StopMoving();
     }
 
+    for (uint32 j = 0; j < MAX_EFFECT_INDEX; ++j)
+    {
+        uint8 slot = 0;
+        switch (pSpellInfo->Effect[j])
+        {
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT1: slot = 0; break;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT2: slot = 1; break;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT3: slot = 2; break;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT4: slot = 3; break;
+        default: continue;
+        }
+
+        if (ObjectGuid guid = bot->m_ObjectSlotGuid[slot])
+        {
+            if (GameObject* obj = bot ? bot->GetMap()->GetGameObject(guid) : nullptr)
+            {
+                //Object is not mine because I created an object with same guid on different map. 
+                //Make object mine, remove it from my list and give it back to the original owner.
+                if (obj->GetOwnerGuid() != bot->GetObjectGuid())
+                {
+                    ObjectGuid ownerGuid = obj->GetOwnerGuid();
+                    obj->SetOwnerGuid(bot->GetObjectGuid());
+                    obj->SetLootState(GO_JUST_DEACTIVATED);
+
+                    bot->RemoveGameObject(obj, false, pSpellInfo->Id != obj->GetSpellId());
+                    bot->m_ObjectSlotGuid[slot].Clear();
+
+                    obj->SetOwnerGuid(ownerGuid);
+                }
+            }
+        }
+    }
+
+
     SpellCastResult spellSuccess = spell->SpellStart(&targets);
 
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK ||

@@ -40,6 +40,14 @@ namespace ai
     public:
         AvoidAoeStrategyMultiplier(PlayerbotAI* ai) : Multiplier(ai, "run away on area debuff") {}
         float GetValue(Action* action) override;
+        
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "run away on area debuff"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "This stops bots from casting certain (cast-time) spells when affected by an area debuf.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {}; }
+#endif
     };
 
     class WaitForAttackStrategy : public Strategy

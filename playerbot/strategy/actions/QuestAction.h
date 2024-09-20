@@ -8,7 +8,7 @@ namespace ai
     class QuestAction : public Action 
     {
     public:
-        QuestAction(PlayerbotAI* ai, std::string name) : Action(ai, name) {}
+        QuestAction(PlayerbotAI* ai, std::string name = "quest") : Action(ai, name) {}
 
     public:
         virtual bool Execute(Event& event);

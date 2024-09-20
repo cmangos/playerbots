@@ -35,6 +35,18 @@ namespace ai
             ai->ResetStrategies();
             return true;
         }
+
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "accept duel"; } //Must equal iternal name
+        virtual std::string GetHelpDescription()
+        {
+            return "This action clicks the accept button when invited to join a bg.\n"
+                "After joining the bg strategies are reset.\n"
+                "This action is currently disabled.";
+        }
+        virtual std::vector<std::string> GetUsedActions() { return {}; }
+        virtual std::vector<std::string> GetUsedValues() { return {}; }
+#endif 
     };
 
 }

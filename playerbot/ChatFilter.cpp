@@ -155,7 +155,7 @@ public:
     virtual std::string GetHelpName() {
         return "role";
     }
-    virtual std::unordered_map<std::string,string> GetFilterExamples() 
+    virtual std::unordered_map<std::string,std::string> GetFilterExamples() 
     {
         std::unordered_map<std::string, std::string> retMap;
         retMap["@tank"] = "All bots that have a tank spec.";

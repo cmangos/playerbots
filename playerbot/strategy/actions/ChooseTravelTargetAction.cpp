@@ -588,7 +588,9 @@ std::vector<WorldPosition*> ChooseTravelTargetAction::getLogicalPoints(Player* r
     else if (canFightElite)
         botLevel += 2;
     else if (!AI_VALUE(bool, "can fight equal"))
-        botLevel -= 2;
+    {
+        botLevel -= (2 + AI_VALUE(uint32, "death count"));
+    }
 
     if (botLevel < 6)
         botLevel = 6;

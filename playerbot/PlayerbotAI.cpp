@@ -1228,6 +1228,11 @@ void PlayerbotAI::Reset(bool full)
             engines[i]->Init();
         }
     }
+
+    if (!HasActivePlayerMaster())
+    {
+        bot->CombatStop();
+    }
 }
 
 std::map<std::string,ChatMsg> chatMap;

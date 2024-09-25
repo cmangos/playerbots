@@ -3240,7 +3240,7 @@ void PlayerbotFactory::InitPotions()
     {
         uint32 effect = effects[i];
 
-        if (effect = SPELL_EFFECT_ENERGIZE && !bot->HasMana()) //Do not give manapots to non-mana users.
+        if (effect == SPELL_EFFECT_ENERGIZE && !bot->HasMana()) //Do not give manapots to non-mana users.
             continue;
 
         FindPotionVisitor visitor(bot, effect);
@@ -3269,7 +3269,7 @@ void PlayerbotFactory::InitFood()
     {
         uint32 category = categories[i];
 
-        if (category = 59 && !bot->HasMana()) //Do not give drinks to non-mana users.
+        if (category == 59 && !bot->HasMana()) //Do not give drinks to non-mana users.
             continue;
 
         FindFoodVisitor visitor(bot, category);

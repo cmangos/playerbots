@@ -3239,6 +3239,10 @@ void PlayerbotFactory::InitPotions()
     for (int i = 0; i < 2; ++i)
     {
         uint32 effect = effects[i];
+
+        if (effect = SPELL_EFFECT_ENERGIZE && !bot->HasMana()) //Do not give manapots to non-mana users.
+            continue;
+
         FindPotionVisitor visitor(bot, effect);
         ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
         if (!visitor.GetResult().empty()) continue;
@@ -3264,6 +3268,9 @@ void PlayerbotFactory::InitFood()
     for (int i = 0; i < 2; ++i)
     {
         uint32 category = categories[i];
+
+        if (category = 59 && !bot->HasMana()) //Do not give drinks to non-mana users.
+            continue;
 
         FindFoodVisitor visitor(bot, category);
         ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);

@@ -1154,8 +1154,6 @@ bool UseHearthStoneAction::Execute(Event& event)
     const bool used = UseAction::Execute(event);
     if (used)
     {
-        if (bot->isRealPlayer())
-            bot->SendHeartBeat();
         RESET_AI_VALUE(bool, "combat::self target");
         RESET_AI_VALUE(WorldPosition, "current position");
     }

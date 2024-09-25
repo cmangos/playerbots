@@ -1109,7 +1109,7 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
 
 void PlayerbotAI::HandleTeleportAck()
 {
-    if (IsRealPlayer())
+    if (IsRealPlayer() && bot->IsBeingTeleportedFar())
         return;
 
     StopMoving();
@@ -1143,6 +1143,9 @@ void PlayerbotAI::HandleTeleportAck()
         // add delay to simulate teleport delay
         SetAIInternalUpdateDelay(urand(2000, 5000));
 	}
+
+    if (IsRealPlayer())
+        bot->SendHeartBeat();
 
     Reset();
 }

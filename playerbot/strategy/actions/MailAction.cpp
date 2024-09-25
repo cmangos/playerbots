@@ -264,7 +264,7 @@ bool MailAction::Execute(Event& event)
     if (!requester && event.getSource() != "rpg action")
         return false;
 
-    if (!MailProcessor::FindMailbox(ai))
+    if (!MailProcessor::FindMailbox(ai) && event.getSource() != "debug")
     {
         ai->TellError(requester, "There is no mailbox nearby");
         return false;

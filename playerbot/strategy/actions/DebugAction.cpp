@@ -272,6 +272,17 @@ bool DebugAction::Execute(Event& event)
 
         return true;
     }
+    else if (text.find("mail") == 0)
+    {
+        std::string param = "";
+        if (text.length() > 5)
+        {
+            param = text.substr(6);
+        }
+
+        bool doAction = ai->DoSpecificAction("mail", Event("debug", param.empty() ? "?" : param), true);
+        return doAction;
+    }
     else if (text.find("poi ") == 0)
     {        
         WorldPosition botPos = WorldPosition(bot);

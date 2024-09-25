@@ -149,7 +149,7 @@ bool CastCustomSpellAction::Execute(Event& event)
         itemTarget = nullptr;
     }
 
-    if ((pSpellInfo->Targets & TARGET_FLAG_ITEM) || (pSpellInfo->Targets & TARGET_FLAG_SELF))
+    if ((pSpellInfo->Targets & TARGET_FLAG_ITEM) || (pSpellInfo->Targets == TARGET_FLAG_SELF))
         target = bot;
 
     WorldObject* woTarget = nullptr;

@@ -857,7 +857,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         return false;
     }
 
-    if (movePosition.isUnderWater() && !endPosition.isUnderWater()) //Try to swim on the surface.
+    if (movePosition.getMapId() == endPosition.getMapId() && movePosition.isUnderWater() && !endPosition.isUnderWater()) //Try to swim on the surface.
     {
         movePosition.setZ(movePosition.getHeight(true));
 

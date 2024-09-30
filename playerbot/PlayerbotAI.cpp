@@ -1990,7 +1990,7 @@ void PlayerbotAI::DoNextAction(bool min)
     if (bot->InBattleGround() && !HasStrategy("battleground", BotState::BOT_STATE_NON_COMBAT))
         ResetStrategies();
 #else
-    if ((bot->InBattleGround() && !bot->InArena() && !HasStrategy("battleground", BotState::BOT_STATE_NON_COMBAT)) || (bot->InArena() && !HasStrategy("arena", BotState::BOT_STATE_NON_COMBAT)))
+    if ((bot->InBattleGround() && (!bot->IsBeingTeleported() && !bot->InArena()) && !HasStrategy("battleground", BotState::BOT_STATE_NON_COMBAT)) || ((!bot->IsBeingTeleported()&&bot->InArena()) && !HasStrategy("arena", BotState::BOT_STATE_NON_COMBAT)))
         ResetStrategies();
 #endif
 

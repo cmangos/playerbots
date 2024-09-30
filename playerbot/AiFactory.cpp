@@ -594,7 +594,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 #endif
 
 #ifndef MANGOSBOT_ZERO
-        if (player->InArena())
+        if (!player->IsBeingTeleported() && player->InArena())
         {
             combatEngine->addStrategy("arena");
         }
@@ -969,7 +969,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         bool isArena = false;
 
 #ifndef MANGOSBOT_ZERO
-        if (player->InArena())
+        if (!player->IsBeingTeleported() && player->InArena())
         {
             isArena = true;
         }

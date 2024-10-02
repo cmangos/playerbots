@@ -1483,6 +1483,18 @@ bool BGStatusAction::Execute(Event& event)
         packet << type << unk2 << (uint32)_bgTypeId << unk << action;
 #endif
 
+        if (bot->InBattleGround() && bot->GetBattleGroundTypeId() != _bgTypeId)
+        {
+            //We are already in a BG. Joining a new one directly causes a crash when SetBattleGroundId is reset during leave right before teleporting in the new one.
+            //Here we leave the current BG proper so we can join the next fresh.
+            WorldPacket leave(CMSG_LEAVE_BATTLEFIELD);
+            leave << uint8(0) << uint8(0) << uint32(0) << uint16(0);
+            bot->GetSession()->HandleLeaveBattlefieldOpcode(leave);
+            //Queue the event again to try to join next tick.
+            ai->HandleBotOutgoingPacket(event.getPacket());
+            return true;
+        }
+
         bot->GetSession()->HandleBattlefieldPortOpcode(packet);
 
         ai->ResetStrategies(false);

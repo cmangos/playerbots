@@ -43,21 +43,23 @@ bool CheckValuesAction::Execute(Event& event)
         ReputationMgr& mgr = bot->GetReputationMgr();
         for (auto & faction : mgr.GetStateList())
         {
-            uint32 id = faction.first;
+            uint32 factionId = faction.second.ID;
+            uint32 replistId = faction.first;
 
-            if (!mgr.IsAtWar(id))
-                continue;
 #ifdef MANGOSBOT_ZERO
             const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry(id);
 #else
-            const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry<FactionEntry>(id);
+            const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry<FactionEntry>(factionId);
 #endif
+
+            if (!mgr.IsAtWar(factionId))
+                continue;
 
             if (!thisFactionEntry)
                 continue;
 
-            if (bot->GetReputationMgr().GetRank(thisFactionEntry) < REP_HOSTILE)
-                bot->GetReputationMgr().SetAtWar(id, false);
+            if (bot->GetReputationMgr().GetRank(thisFactionEntry) > REP_HATED)
+                bot->GetReputationMgr().SetAtWar(replistId, false);
         }
     }
 

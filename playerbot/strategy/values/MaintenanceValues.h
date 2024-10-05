@@ -52,7 +52,7 @@ namespace ai
     class ShouldSellValue : public BoolCalculatedValue
     {
     public:
-        ShouldSellValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should sell",2) {}
+        ShouldSellValue(PlayerbotAI* ai, std::string name = "should sell", int checkInterval = 2) : BoolCalculatedValue(ai, name , checkInterval) {}
         virtual bool Calculate() { return AI_VALUE(uint8, "bag space") > 80; };
     };
 
@@ -68,6 +68,13 @@ namespace ai
     public:
         CanBuyValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can buy", 2) {}
         virtual bool Calculate() { return ai->HasStrategy("rpg vendor", BotState::BOT_STATE_NON_COMBAT) && !AI_VALUE(bool, "should repair") && !AI_VALUE(bool, "should sell") && !AI_VALUE(bool, "can get mail") && (AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ammo) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::consumables) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::gear) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill)); };
+    };
+
+    class ShouldAHSellValue : public ShouldSellValue
+    {
+    public:
+        ShouldAHSellValue(PlayerbotAI* ai) : ShouldSellValue(ai, "should ah sell", 2) {}
+        virtual bool Calculate();
     };
 
     class CanAHSellValue : public BoolCalculatedValue

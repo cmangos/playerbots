@@ -4,7 +4,26 @@
 
 using namespace ai;
 
+bool ShouldAHSellValue::Calculate() 
+{
+    if (ShouldSellValue::Calculate()) //We need space so we want to try to AH items anyway.
+        return true;
 
+    std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", "inventory");
+
+    for (auto& item : items)
+    {
+        if (!item->GetUInt32Value(ITEM_FIELD_DURABILITY)) //Does the item need to be repaired?
+            continue;
+
+        if (AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier()) != ItemUsage::ITEM_USAGE_AH) //Do we want to AH this item?
+            continue;
+
+        return true; //We have an item that can be damaged (and gives repair cost) that we want to auction. We should auction it now!
+    }
+
+    return false;
+}
 
 
 bool CanGetMailValue::Calculate() {

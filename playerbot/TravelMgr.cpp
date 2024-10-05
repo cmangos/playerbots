@@ -260,9 +260,9 @@ bool RpgTravelDestination::isActive(Player* bot)
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER)
         {
-            if (AI_VALUE2_LAZY(bool, "group or", "should sell,can ah sell,following party,near leader"))
+            if (AI_VALUE2_LAZY(bool, "group or", "should ah sell,can ah sell,following party,near leader"))
                 isUsefull = true;
-            else if (ai->HasStrategy("free", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE(bool, "should sell") && AI_VALUE(bool, "can ah sell"))
+            else if (ai->HasStrategy("free", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE(bool, "should ah sell") && AI_VALUE(bool, "can ah sell"))
                 isUsefull = true;
         }
     }

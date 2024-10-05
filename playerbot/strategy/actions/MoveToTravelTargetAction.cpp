@@ -173,7 +173,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
                                 out << ",sell";
                             else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
                                 out << ",repair";
-                            else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should sell,can ah sell"))
+                            else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should ah sell,can ah sell"))
                                 out << ",ah";
                             else
                                 out << ",rpg";

@@ -56,17 +56,22 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
             ai->TellDebug(requester, "Group needs to repair", "debug travel");
             shouldRpg = true;
         }
-        else if (AI_VALUE2(bool, "group or", "should sell,can ah sell,following party,near leader") && bot->GetLevel() > 5) //One of party members wants to sell items to AH (full bags).
+        else if (AI_VALUE2(bool, "group or", "should ah sell,can ah sell,following party,near leader") && bot->GetLevel() > 5) //One of party members wants to sell items to AH (full bags).
         {
             ai->TellDebug(requester, "Group needs to ah items (full bags)", "debug travel");
             shouldRpg = true;
         }
         else if (!shouldRpg && ai->HasStrategy("free", BotState::BOT_STATE_NON_COMBAT))
         {
-            if (AI_VALUE(bool, "should sell") && (AI_VALUE(bool, "can sell") || AI_VALUE(bool, "can ah sell"))) //Bot wants to sell (full bags).
+            if (AI_VALUE(bool, "should sell") && AI_VALUE(bool, "can sell")) //Bot wants to sell (full bags).
             {
                 ai->TellDebug(requester, "Bot needs to sell/ah items (full bags)", "debug travel");
                 shouldRpg = true;                
+            }
+            if (AI_VALUE(bool, "should ah sell") && AI_VALUE(bool, "can ah sell")) //Bot wants to ah sell (repariable item that it wants to ah).
+            {
+                ai->TellDebug(requester, "Bot needs to sell/ah items (full bags)", "debug travel");
+                shouldRpg = true;
             }
             else if (AI_VALUE(bool, "should repair") && AI_VALUE(bool, "can repair")) //Bot wants to repair.
             {
@@ -350,7 +355,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
                     out << "selling items";
                 else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
                     out << "repairing";
-                else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should sell,can ah sell"))
+                else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should ah sell,can ah sell"))
                     out << "posting items on the auctionhouse";
                 else
                     out << "rpg";
@@ -497,7 +502,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
                         out << ",sell";
                     else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
                         out << ",repair";
-                    else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should sell,can ah sell"))
+                    else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should ah sell,can ah sell"))
                         out << ",ah";
                     else
                         out << ",rpg";

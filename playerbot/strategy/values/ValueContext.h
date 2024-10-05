@@ -333,6 +333,7 @@ namespace ai
             creators["should sell"] = [](PlayerbotAI* ai) { return new ShouldSellValue(ai); };
             creators["can sell"] = [](PlayerbotAI* ai) { return new CanSellValue(ai); };
             creators["can buy"] = [](PlayerbotAI* ai) { return new CanBuyValue(ai); };
+            creators["should ah sell"] = [](PlayerbotAI* ai) { return new ShouldAHSellValue(ai); };
             creators["can ah sell"] = [](PlayerbotAI* ai) { return new CanAHSellValue(ai); };
             creators["can ah buy"] = [](PlayerbotAI* ai) { return new CanAHBuyValue(ai); };
             creators["can get mail"] = [](PlayerbotAI* ai) { return new CanGetMailValue(ai); };

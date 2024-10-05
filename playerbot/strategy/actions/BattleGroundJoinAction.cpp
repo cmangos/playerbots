@@ -717,6 +717,7 @@ bool BGJoinAction::JoinQueue(uint32 type)
 
    // get battlemaster
    Unit* unit = ai->GetUnit(AI_VALUE2(CreatureDataPair const*, "bg master", bgTypeId));
+   if (!unit && bgTypeId == BATTLEGROUND_AA) unit = ai->GetUnit(AI_VALUE2(CreatureDataPair const*, "bg master", BATTLEGROUND_DS));
 #ifndef MANGOSBOT_TWO
    if (!unit)
 #else

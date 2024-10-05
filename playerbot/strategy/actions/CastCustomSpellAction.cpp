@@ -726,8 +726,18 @@ bool DisenchantRandomItemAction::Execute(Event& event)
     {
         ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item);
 
+        if (!proto)
+            continue;
+
         if (!proto->DisenchantID)
             continue;
+
+#ifndef MANGOSBOT_ZERO
+        // 2.0.x addon: Check player enchanting level against the item disenchanting requirements
+        int32 item_disenchantskilllevel = proto->RequiredDisenchantSkill;
+        if (item_disenchantskilllevel > int32(bot->GetSkillValue(SKILL_ENCHANTING)))
+            continue;
+#endif
 
         // don't touch rare+ items if with real player/guild
         if ((ai->HasRealPlayerMaster() || ai->IsInRealGuild()) && proto->Quality > ITEM_QUALITY_UNCOMMON)

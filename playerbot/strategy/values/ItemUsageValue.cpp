@@ -541,6 +541,12 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
     if (AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", itemProto->ItemId, ForceItemUsage::FORCE_USAGE_NONE) == ForceItemUsage::FORCE_USAGE_EQUIP) //New item is forced. Always equip it.
         return ItemUsage::ITEM_USAGE_EQUIP;
 
+    bool existingShouldEquip = true;
+    if (oldItemProto->Class == ITEM_CLASS_WEAPON && !oldStatWeight)
+        existingShouldEquip = false;
+    if (oldItemProto->Class == ITEM_CLASS_ARMOR && !statWeight)
+        existingShouldEquip = false;
+
     //Compare items based on item level, quality.
     bool isBetter = false;
     if (!statWeight || !oldStatWeight)
@@ -554,10 +560,37 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
     else if (statWeight == oldStatWeight && itemProto->Quality == oldItemProto->Quality && itemProto->ItemLevel > oldItemProto->ItemLevel)
         isBetter = true;
 
-    if (itemProto->ItemId != oldItemProto->ItemId && shouldEquip && isBetter)
+    Item* item = CurrentItem(itemProto, bot);
+    bool itemIsBroken = item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0 && item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0;
+    bool oldItemIsBroken = oldItem->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0 && oldItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0;
+    if (itemProto->ItemId != oldItemProto->ItemId && (shouldEquip || !existingShouldEquip) && isBetter)
     {
-        return ItemUsage::ITEM_USAGE_EQUIP;
+        switch (itemProto->Class)
+        {
+        case ITEM_CLASS_ARMOR:
+            if (oldItemProto->SubClass <= itemProto->SubClass) {
+                if (itemIsBroken && !oldItemIsBroken)
+                    return ItemUsage::ITEM_USAGE_BROKEN_EQUIP;
+                else
+                    if (shouldEquip)
+                        return ItemUsage::ITEM_USAGE_EQUIP;
+                    else
+                        return ItemUsage::ITEM_USAGE_BAD_EQUIP;
+            }
+            break;
+        default:
+            if (itemIsBroken && !oldItemIsBroken)
+                return ItemUsage::ITEM_USAGE_BROKEN_EQUIP;
+            else
+                if (shouldEquip)
+                    return ItemUsage::ITEM_USAGE_EQUIP;
+                else
+                    return ItemUsage::ITEM_USAGE_BAD_EQUIP;
+        }
     }
+    //Item is not better but current item is broken and new one is not.
+    if (oldItemIsBroken && !itemIsBroken)
+        return ItemUsage::ITEM_USAGE_EQUIP;
 
     return ItemUsage::ITEM_USAGE_NONE;
 }

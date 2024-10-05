@@ -1038,7 +1038,7 @@ void PlayerbotAI::HandleCommands()
 
 void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
 {
-    if (bot->IsBeingTeleported() || !bot->IsInWorld())
+    if (!bot || bot->IsBeingTeleported() || !bot->IsInWorld())
         return;
 
     std::string mapString = WorldPosition(bot).isOverworld() ? std::to_string(bot->GetMapId()) : "I";
@@ -1058,9 +1058,14 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
             chatReplies.pop();
             continue;
         }
-        ChatReplyAction::ChatReplyDo(bot, holder.m_type, holder.m_guid1, holder.m_guid2, holder.m_msg, holder.m_chanName, holder.m_name);
+
+        // Ensure bot is valid before replying
+        if (bot) {
+            ChatReplyAction::ChatReplyDo(bot, holder.m_type, holder.m_guid1, holder.m_guid2, holder.m_msg, holder.m_chanName, holder.m_name);
+        }
         chatReplies.pop();
     }
+
 
     for (std::list<ChatQueuedReply>::iterator i = delayedResponses.begin(); i != delayedResponses.end(); ++i)
     {
@@ -1071,9 +1076,10 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
     if (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut())
     {
         WorldSession* botWorldSessionPtr = bot->GetSession();
-        bool logout = botWorldSessionPtr->ShouldLogOut(time(nullptr));
-        if (!master || master->GetSession()->GetState() != WORLD_SESSION_STATE_READY)
-            logout = true;
+        if (botWorldSessionPtr) {
+            bool logout = botWorldSessionPtr->ShouldLogOut(time(nullptr));
+            if (!master || master->GetSession()->GetState() != WORLD_SESSION_STATE_READY)
+                logout = true;
 
         if (bot->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || bot->IsTaxiFlying() ||
             botWorldSessionPtr->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))
@@ -1096,8 +1102,9 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
             else
             {
                 sRandomPlayerbotMgr.LogoutPlayerBot(bot->GetObjectGuid().GetRawValue());
+                }
+                return;
             }
-            return;
         }
 
         SetAIInternalUpdateDelay(sPlayerbotAIConfig.reactDelay);

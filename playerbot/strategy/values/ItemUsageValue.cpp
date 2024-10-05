@@ -377,14 +377,22 @@ ItemUsage ItemUsageValue::Calculate()
         //if item value is significantly higher than its vendor sell price
         if (IsMoreProfitableToSellToAHThanToVendor(proto, bot))
         {
+            Item* item = CurrentItem(proto, bot);
             if (proto->Bonding == NO_BIND)
+            {
+                if (item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) < item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
+                    return ItemUsage::ITEM_USAGE_KEEP; //Keep until repaired so we can AH later.
                 return ItemUsage::ITEM_USAGE_AH;
+            }
 
             if (proto->Bonding == BIND_WHEN_EQUIPPED)
             {
-                Item* item = CurrentItem(proto);
                 if (!item || !item->IsSoulBound())
+                {
+                    if (item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) < item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
+                        return ItemUsage::ITEM_USAGE_KEEP; //Keep until repaired so we can AH later.
                     return ItemUsage::ITEM_USAGE_AH;
+                }
             }
         }
 
@@ -760,8 +768,11 @@ bool ItemUsageValue::IsItemNeededForUsefullCraft(ItemPrototype const* proto, boo
     return false;
 }
 
-Item* ItemUsageValue::CurrentItem(ItemPrototype const* proto)
+Item* ItemUsageValue::CurrentItem(ItemPrototype const* proto, Player* bot)
 {
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+    ChatHelper* chat = ai->GetChatHelper();
     Item* bestItem = nullptr;
     std::list<Item*> found = AI_VALUE2(std::list < Item*>, "inventory items", chat->formatItem(proto));
 

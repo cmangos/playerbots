@@ -83,7 +83,7 @@ namespace ai
         bool IsItemNeededForSkill(ItemPrototype const* proto);
         bool IsItemUsefulForSkill(ItemPrototype const* proto);
         bool IsItemNeededForUsefullCraft(ItemPrototype const* proto, bool checkAllReagents);
-        Item* CurrentItem(ItemPrototype const* proto);
+        static Item* CurrentItem(ItemPrototype const* proto, Player* bot);
         float BetterStacks(ItemPrototype const* proto, std::string usageType = "");
 
 #ifdef GenerateBotHelp

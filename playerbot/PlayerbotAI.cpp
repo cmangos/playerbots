@@ -1081,27 +1081,28 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
             if (!master || master->GetSession()->GetState() != WORLD_SESSION_STATE_READY)
                 logout = true;
 
-        if (bot->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || bot->IsTaxiFlying() ||
-            botWorldSessionPtr->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))
-        {
-            logout = true;
-        }
-
-        if (master && (master->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || master->IsTaxiFlying() ||
-            (master->GetSession() && master->GetSession()->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))))
-        {
-            logout = true;
-        }
-
-        if (logout && !bot->GetSession()->ShouldLogOut(time(nullptr)))
-        {
-            if (master && master->GetPlayerbotMgr())
+            if (bot->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || bot->IsTaxiFlying() ||
+                botWorldSessionPtr->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))
             {
-                master->GetPlayerbotMgr()->LogoutPlayerBot(bot->GetObjectGuid().GetRawValue());
+                logout = true;
             }
-            else
+
+            // Ensure master is valid before accessing its session
+            if (master && (master->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || master->IsTaxiFlying() ||
+                (master->GetSession() && master->GetSession()->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))))
             {
-                sRandomPlayerbotMgr.LogoutPlayerBot(bot->GetObjectGuid().GetRawValue());
+                logout = true;
+            }
+
+            if (logout && !bot->GetSession()->ShouldLogOut(time(nullptr)))
+            {
+                if (master && master->GetPlayerbotMgr())
+                {
+                    master->GetPlayerbotMgr()->LogoutPlayerBot(bot->GetObjectGuid().GetRawValue());
+                }
+                else
+                {
+                    sRandomPlayerbotMgr.LogoutPlayerBot(bot->GetObjectGuid().GetRawValue());
                 }
                 return;
             }

@@ -446,6 +446,10 @@ bool BossTravelDestination::isActive(Player* bot)
 
     WorldPosition botPos(bot);
 
+    //Do not move to overworld bosses/uniques that are far away.
+    if (points.front()->isOverworld() && this->distanceTo(botPos) > 2000.0f)
+        return false;
+
     if (!isOut(botPos))
     {
         std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");

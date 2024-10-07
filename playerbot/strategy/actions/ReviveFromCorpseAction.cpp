@@ -77,6 +77,26 @@ bool FindCorpseAction::Execute(Event& event)
     WorldPosition botPos(bot), corpsePos(corpse), moveToPos = corpsePos, masterPos(master);
     float reclaimDist = CORPSE_RECLAIM_RADIUS - 5.0f;
     float corpseDist = botPos.distance(corpsePos);
+
+    //If player fell through terrain move corpse to player position.
+    if (bot->isRealPlayer())
+    {
+        //Try to correct the position upward.
+        if (!moveToPos.ClosestCorrectPoint(5.0f, 500.0f, bot->GetInstanceId()))
+        {
+            //Revive in place.
+            corpse->Relocate(botPos.getX(), botPos.getY(), botPos.getZ());
+            corpsePos = corpse;
+            corpseDist = botPos.distance(corpsePos);
+        }
+        else
+        {
+            corpse->Relocate(moveToPos.getX(), moveToPos.getY(), moveToPos.getZ());
+            corpsePos = corpse;
+            corpseDist = botPos.distance(corpsePos);
+        }
+    }
+
     int64 deadTime = time(nullptr) - corpse->GetGhostTime();
 
     bool moveToMaster = master && master != bot && masterPos.fDist(corpsePos) < reclaimDist;

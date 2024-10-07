@@ -82,7 +82,7 @@ const FactionTemplateEntry* GuidPosition::GetFactionTemplateEntry() const
 {
     if (IsPlayer() && GetPlayer())
         return GetPlayer()->GetFactionTemplateEntry();
-    if (IsCreature() && IsCreature())
+    if (IsCreature() && IsCreature() && GetCreatureTemplate())
         return sFactionTemplateStore.LookupEntry(GetCreatureTemplate()->Faction);
 
     return nullptr;

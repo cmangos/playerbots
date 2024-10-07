@@ -200,12 +200,6 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
     std::shuffle(targetList.begin(), targetList.end(), *GetRandomGenerator());
 
-    //In the trigger evaluation to come we want to check what items are needed for tradeskills. We evalulate this value now so it's cached.
-    if(ai->HasStrategy("rpg craft", BotState::BOT_STATE_NON_COMBAT))
-    {
-        AI_VALUE2(std::list<uint32>, "inventory item ids", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_SKILL));
-    }
-
     //We are going to create a number of 'can free move::objectGuid' values. We remove some old ones here to clean up memory.
     context->ClearExpiredValues("can free move",10); //Clean up old free move to.
 
@@ -438,104 +432,18 @@ bool ChooseRpgTargetAction::isUseful()
     if (!AI_VALUE(bool, "can move around"))
         return false;
 
+    //Check if nearby rpg targets (max rpg distance) can be inside the free move range at al.
+    float range = AI_VALUE(float, "free move range");
+    if(range)
+    {
+        GuidPosition center(AI_VALUE(GuidPosition, "free move center"));
+
+        if (center.getMapId() != bot->GetMapId())
+            return false;
+
+        if (center.sqDistance2d(bot) > range * range + sPlayerbotAIConfig.rpgDistance * sPlayerbotAIConfig.rpgDistance)
+            return false;
+    }
+
     return true;
 }
-
-/*
-bool ChooseRpgTargetAction::isFollowValid(Player* bot, WorldObject* target)
-{
-    if (!target)
-        return false;
-
-    WorldLocation location;
-    target->GetPosition(location);
-    return isFollowValid(bot, location);
-}
-
-bool ChooseRpgTargetAction::isFollowValid(Player* bot, WorldPosition pos)
-{
-    PlayerbotAI* ai = bot->GetPlayerbotAI();
-    Player* master = ai->GetGroupMaster();
-    Player* realMaster = ai->GetMaster();
-    AiObjectContext* context = ai->GetAiObjectContext();
-
-    if (!master || bot == master || master->IsBeingTeleported() || master->GetMapId() != bot->GetMapId())
-        return true;
-
-    float distance;
-
-    PositionMap& posMap = AI_VALUE(PositionMap&, "position");
-    bool freeMove = false;
-    
-    //Set distance relative to focus position.
-    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
-        distance = sqrt(master->GetDistance2d(pos.getX(), pos.getY(), DIST_CALC_NONE));
-    else if (ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) && posMap["stay"].isSet())
-        distance = sqrt(pos.sqDistance2d(posMap["stay"].Get()));
-    else if (ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT) && posMap["guard"].isSet())
-        distance = sqrt(pos.sqDistance2d(posMap["guard"].Get()));
-    else
-    {
-        distance = sqrt(pos.sqDistance2d(bot));
-        freeMove = true;
-    }
-
-
-    //Check if bot is in dungeon with master.
-    bool inDungeon = false;
-    if (master->IsInWorld() && master->GetMap()->IsDungeon())
-    {
-        if (bot->GetMapId() == master->GetMapId())
-            inDungeon = true;
-    }
-
-    //Restrict distance in combat and in dungeons.
-    if ((inDungeon || master->IsInCombat()) && distance > 5.0f)
-        return false;
-
-    //With a bot master bots have more freedom.
-    if (!ai->HasActivePlayerMaster())
-    {
-        Player* player = master;
-        if (PAI_VALUE(WorldPosition, "last long move").distance(pos) < sPlayerbotAIConfig.reactDistance)
-            return true;
-
-        if (!master->IsInCombat() && distance < sPlayerbotAIConfig.reactDistance * 0.75f)
-            return true;
-
-        if (distance < sPlayerbotAIConfig.reactDistance * 0.25f)
-            return true;
-
-        return false;
-    }
-
-    //Increase distance as master is standing still.
-    float maxDist = INTERACTION_DISTANCE;
-
-    if (freeMove || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT)) //Free and guard start with a base 20y range.
-        maxDist += sPlayerbotAIConfig.lootDistance;
-
-    if (WorldPosition(bot).fDist(master) < sPlayerbotAIConfig.reactDistance)
-    {
-        uint32 lastMasterMove = MEM_AI_VALUE(WorldPosition, "master position")->LastChangeDelay();
-
-        if (lastMasterMove > 30.0f) //After 30 seconds increase the range by 1y each second.
-            maxDist += (lastMasterMove - 30);
-
-        if (maxDist > sPlayerbotAIConfig.reactDistance)
-            if (freeMove)
-                return true;
-            else
-                maxDist = sPlayerbotAIConfig.reactDistance;
-    }
-    else if (freeMove)
-        return true;
-    else
-        maxDist = sPlayerbotAIConfig.reactDistance;
-
-    if (distance < maxDist)
-        return true;
-
-    return false;
-}
-*/

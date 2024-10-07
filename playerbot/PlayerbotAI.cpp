@@ -6566,8 +6566,7 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
 
     std::set<Item*> found;
     size_t pos = text.find(" ");
-    int count = pos != std::string::npos ? atoi(text.substr(pos + 1).c_str()) : 1;
-    if (count < 1) count = 999;
+    int count = pos != std::string::npos ? atoi(text.substr(pos + 1).c_str()) : 999;
 
     //Look for item id's in the command.
     ItemIds ids = GetChatHelper()->parseItems(text);
@@ -6712,7 +6711,7 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
     uint32 quality = GetChatHelper()->parseItemQuality(text);
     if (quality != MAX_ITEM_QUALITY)
     {
-        FindItemsToTradeByQualityVisitor visitor(quality, count);
+        FindItemsByQualityVisitor visitor(quality, count);
         VISIT;
     }
 

@@ -971,12 +971,12 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
 
         std::string arenaTeamName = CreateRandomArenaTeamName();
         if (arenaTeamName.empty())
-            continue;
+            break;
 
         if (availableCaptains.empty())
         {
             sLog.outError("No captains for random arena teams available");
-            continue;
+            break;
         }
 
         int index = urand(0, availableCaptains.size() - 1);

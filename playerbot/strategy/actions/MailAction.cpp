@@ -151,6 +151,10 @@ public:
 
             RemoveMail(bot, mail->messageID, mailbox);
         }
+        else if (mail->sender < 10 && !ai->HasActivePlayerMaster()) //Remove empty mails from auctionhouse.
+        {
+            RemoveMail(bot, mail->messageID, mailbox);
+        }
         return true;
     }
 

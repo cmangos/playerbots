@@ -652,13 +652,21 @@ std::vector<WorldPosition*> ChooseTravelTargetAction::getLogicalPoints(Player* r
     for (uint8 l = 0; l < distanceLimits.size(); l++)
     {
         if (partitions[l].empty() || !urand(0, 10)) //Return the first non-empty bracket with 10% chance to skip a higher bracket.
+        {
+            if(!partitions[l].empty())
+            ai->TellDebug(requester, "Skipping " + std::to_string(partitions[l].size()) + " points at range " + std::to_string(uint32(distanceLimits[l])), "debug travel");
             continue;
+        }
 
+        ai->TellDebug(requester, "Selecting " + std::to_string(partitions[l].size()) + " points at range " + std::to_string(uint32(distanceLimits[l])), "debug travel");
         return partitions[l];
     }
 
     if (requester && centerLocation.fDist(bot) > 500.0f) //Try again with bot as center.
+    {
+        ai->TellDebug(requester, "No points near " + std::string(requester->GetName()) + " trying near myself.", "debug travel");
         return getLogicalPoints(nullptr, travelPoints);
+    }
 
     return partitions.back();
 }
@@ -701,8 +709,6 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
     if (travelPoints.empty())
         return false;
-
-    ai->TellDebug(requester, std::to_string(travelPoints.size()) + " points in reasonable range.", "debug travel");
 
     travelPoints = sTravelMgr.getNextPoint(&botLocation, travelPoints); //Pick a good point.
 

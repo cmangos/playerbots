@@ -177,6 +177,7 @@ RollVote RollAction::CalculateRollVote(ItemQualifier& itemQualifier)
     case ItemUsage::ITEM_USAGE_USE:
     case ItemUsage::ITEM_USAGE_DISENCHANT:
     case ItemUsage::ITEM_USAGE_AH:
+    case ItemUsage::ITEM_USAGE_BROKEN_AH:
     case ItemUsage::ITEM_USAGE_VENDOR:
     case ItemUsage::ITEM_USAGE_FORCE_GREED:
         needVote = ROLL_GREED;

@@ -860,7 +860,7 @@ public:
 
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(*qualifiers.begin()).GetQualifier());
 
-            if (usage != ItemUsage::ITEM_USAGE_NONE && usage != ItemUsage::ITEM_USAGE_AH && usage != ItemUsage::ITEM_USAGE_VENDOR)
+            if (usage != ItemUsage::ITEM_USAGE_NONE && usage != ItemUsage::ITEM_USAGE_AH && usage != ItemUsage::ITEM_USAGE_BROKEN_AH && usage != ItemUsage::ITEM_USAGE_VENDOR)
             {
                 return FilterLink(message);
             }
@@ -881,7 +881,7 @@ public:
 
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(*qualifiers.begin()).GetQualifier());
 
-            if (usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_VENDOR)
+            if (usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_BROKEN_AH || usage == ItemUsage::ITEM_USAGE_VENDOR)
             {
                 return FilterLink(message);
             }
@@ -923,7 +923,7 @@ public:
 
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(*qualifiers.begin()).GetQualifier());
 
-            if (usage == ItemUsage::ITEM_USAGE_SKILL || usage == ItemUsage::ITEM_USAGE_USE || usage == ItemUsage::ITEM_USAGE_DISENCHANT || usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_VENDOR || usage == ItemUsage::ITEM_USAGE_FORCE_GREED)
+            if (usage == ItemUsage::ITEM_USAGE_SKILL || usage == ItemUsage::ITEM_USAGE_USE || usage == ItemUsage::ITEM_USAGE_DISENCHANT || usage == ItemUsage::ITEM_USAGE_BROKEN_AH || usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_VENDOR || usage == ItemUsage::ITEM_USAGE_FORCE_GREED)
             {
                 return FilterLink(message);
             }

@@ -168,6 +168,8 @@ std::string QueryItemUsageAction::QueryItemUsage(ItemQualifier& qualifier)
         return "Vendor";
     case ItemUsage::ITEM_USAGE_KEEP:
         return "Useful but have enough";
+    case ItemUsage::ITEM_USAGE_BROKEN_AH:
+        return "Auctionhouse but damaged";
     case ItemUsage::ITEM_USAGE_AH:
         return "Auctionhouse";
     case ItemUsage::ITEM_USAGE_AMMO:

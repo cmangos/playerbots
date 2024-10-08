@@ -37,7 +37,7 @@ std::list<Item*> ItemsUsefulToGiveValue::Calculate()
     if (ai->HasActivePlayerMaster() || !player->GetPlayerbotAI())
         return giveItems;
 
-    std::list<ItemUsage> myUsages = { ItemUsage::ITEM_USAGE_NONE , ItemUsage::ITEM_USAGE_VENDOR, ItemUsage::ITEM_USAGE_AH, ItemUsage::ITEM_USAGE_DISENCHANT };
+    std::list<ItemUsage> myUsages = { ItemUsage::ITEM_USAGE_NONE , ItemUsage::ITEM_USAGE_VENDOR, ItemUsage::ITEM_USAGE_AH, ItemUsage::ITEM_USAGE_BROKEN_AH, ItemUsage::ITEM_USAGE_DISENCHANT };
 
     for (auto& myUsage : myUsages)
     {

@@ -381,7 +381,7 @@ ItemUsage ItemUsageValue::Calculate()
             if (proto->Bonding == NO_BIND)
             {
                 if (item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) < item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
-                    return ItemUsage::ITEM_USAGE_KEEP; //Keep until repaired so we can AH later.
+                    return ItemUsage::ITEM_USAGE_BROKEN_AH; //Keep until repaired so we can AH later.
                 return ItemUsage::ITEM_USAGE_AH;
             }
 
@@ -390,7 +390,7 @@ ItemUsage ItemUsageValue::Calculate()
                 if (!item || !item->IsSoulBound())
                 {
                     if (item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) < item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
-                        return ItemUsage::ITEM_USAGE_KEEP; //Keep until repaired so we can AH later.
+                        return ItemUsage::ITEM_USAGE_BROKEN_AH; //Keep until repaired so we can AH later.
                     return ItemUsage::ITEM_USAGE_AH;
                 }
             }

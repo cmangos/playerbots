@@ -123,7 +123,7 @@ namespace ai
 
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", proto->ItemId);
 
-            if (usage != ItemUsage::ITEM_USAGE_AH && usage != ItemUsage::ITEM_USAGE_VENDOR && usage != ItemUsage::ITEM_USAGE_DISENCHANT && usage != ItemUsage::ITEM_USAGE_NONE)
+            if (usage != ItemUsage::ITEM_USAGE_AH && usage != ItemUsage::ITEM_USAGE_BROKEN_AH && usage != ItemUsage::ITEM_USAGE_VENDOR && usage != ItemUsage::ITEM_USAGE_DISENCHANT && usage != ItemUsage::ITEM_USAGE_NONE)
                 return 0;
 
             //Enchant for skillup

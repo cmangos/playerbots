@@ -148,6 +148,7 @@ bool ShouldCraftSpellValue::Calculate()
                 case ItemUsage::ITEM_USAGE_AMMO:
                 case ItemUsage::ITEM_USAGE_DISENCHANT:
                 case ItemUsage::ITEM_USAGE_AH:
+                case ItemUsage::ITEM_USAGE_BROKEN_AH:
                 case ItemUsage::ITEM_USAGE_VENDOR:
                 case ItemUsage::ITEM_USAGE_FORCE_GREED:
                 {

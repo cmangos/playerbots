@@ -75,6 +75,7 @@ bool SmartDestroyItemAction::Execute(Event& event)
     else //We don't need money so destroy the cheapest stuff.
     {
         bestToDestroy.push_back(ItemUsage::ITEM_USAGE_VENDOR);
+        bestToDestroy.push_back(ItemUsage::ITEM_USAGE_BROKEN_AH);
         bestToDestroy.push_back(ItemUsage::ITEM_USAGE_AH);
     }
 

@@ -6695,6 +6695,9 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
     {
         FindItemUsageVisitor visitor(bot, ItemUsage::ITEM_USAGE_AH);
         VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+
+        visitor = FindItemUsageVisitor(bot, ItemUsage::ITEM_USAGE_BROKEN_AH);
+        VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
     }
     else if (text == "vendor")
     {
@@ -6704,6 +6707,9 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
         if (AI_VALUE(uint8, "bag space") > 80 && !urand(0, 10))
         {
             FindItemUsageVisitor visitor(bot, ItemUsage::ITEM_USAGE_AH);
+            VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+
+            visitor = FindItemUsageVisitor(bot, ItemUsage::ITEM_USAGE_BROKEN_AH);
             VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
         }
     }

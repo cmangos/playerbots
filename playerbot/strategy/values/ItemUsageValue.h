@@ -54,11 +54,12 @@ namespace ai
         ITEM_USAGE_GUILD_TASK = 7,
         ITEM_USAGE_DISENCHANT = 8,
         ITEM_USAGE_AH = 9,
-        ITEM_USAGE_KEEP = 10,
-        ITEM_USAGE_VENDOR = 11,
-        ITEM_USAGE_AMMO = 12,
-        ITEM_USAGE_FORCE_NEED = 13,
-        ITEM_USAGE_FORCE_GREED = 14
+        ITEM_USAGE_BROKEN_AH = 10,
+        ITEM_USAGE_KEEP = 11,
+        ITEM_USAGE_VENDOR = 12,
+        ITEM_USAGE_AMMO = 13,
+        ITEM_USAGE_FORCE_NEED = 14,
+        ITEM_USAGE_FORCE_GREED = 15
     };
 
     enum class ForceItemUsage : uint8

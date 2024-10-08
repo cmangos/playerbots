@@ -159,6 +159,49 @@ uint32 MoneyNeededForValue::Calculate()
             totalDeposit += deposit;
         }
 
+        for (auto item : AI_VALUE2(std::list<Item*>, "inventory items", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_BROKEN_AH)))
+        {
+            float deposit = float(item->GetProto()->SellPrice * item->GetCount() * (time / MIN_AUCTION_TIME));
+
+            deposit = deposit * 15 * 3.0f / 100.0f;
+
+            float min_deposit = float(sWorld.getConfig(CONFIG_UINT32_AUCTION_DEPOSIT_MIN));
+
+            if (deposit < min_deposit)
+                deposit = min_deposit;
+
+            deposit *= sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_DEPOSIT);
+
+            totalDeposit += deposit;
+
+            uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+            if (!maxDurability)
+                continue;
+
+            uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+            uint32 LostDurability = maxDurability - curDurability;
+
+            if (LostDurability == 0)
+                continue;
+
+            ItemPrototype const* ditemProto = item->GetProto();
+
+            DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
+            if (!dcost)
+                continue;
+
+            uint32 dQualitymodEntryId = (ditemProto->Quality + 1) * 2;
+            DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
+            if (!dQualitymodEntry)
+                continue;
+
+            uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
+            uint32 costs = uint32(LostDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
+
+            totalDeposit += costs;
+        }
+
         return totalDeposit;
         break;
     }

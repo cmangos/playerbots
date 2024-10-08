@@ -247,10 +247,10 @@ bool RpgRepairTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && AI_VALUE2_LAZY(bool, "group or", "should repair,can repair,following party,near leader"))
+    if (bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && AI_VALUE2_LAZY(bool, "group or", "can repair,following party,near leader"))
         return true;
 
-    if (AI_VALUE(bool, "should repair") && AI_VALUE(bool, "can repair"))
+    if (AI_VALUE(bool, "can repair"))
         return true;
 
     return false;

@@ -90,7 +90,7 @@ namespace ai
 
         virtual bool isUseful() {return rpg->InRange();}
 
-        virtual bool Execute(Event& event) { rpg->OnCancel();  AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target")); RESET_AI_VALUE(GuidPosition, "rpg target"); rpg->AfterExecute(false, false, ""); DoDelay(); return true; };
+        virtual bool Execute(Event& event);
     };
 
     class RpgTaxiAction : public RpgSubAction

@@ -133,6 +133,18 @@ bool RpgEmoteAction::Execute(Event& event)
     return true;
 }
 
+bool RpgCancelAction::Execute(Event& event)
+{
+    rpg->OnCancel();  
+
+    if (!urand(0,3) || AI_VALUE(GuidPosition, "rpg target").GetEntry() != AI_VALUE(TravelTarget*, "travel target")->getEntry() || !AI_VALUE(TravelTarget*, "travel target")->isWorking()) //1 out of 4 to ignore current travel target after cancel.
+        AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target")); 
+
+    RESET_AI_VALUE(GuidPosition, "rpg target"); rpg->AfterExecute(false, false, ""); DoDelay(); 
+    
+    return true;
+};
+
 bool RpgTaxiAction::Execute(Event& event)
 {
     rpg->BeforeExecute();

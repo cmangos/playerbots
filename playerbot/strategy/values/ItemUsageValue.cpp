@@ -1097,6 +1097,7 @@ void ItemUsageValue::PopulateReagentItemIdsForCraftableItemIds()
 
 void ItemUsageValue::PopulateSoldByVendorItemIds()
 {
+    sRandomPlayerbotMgr.ahQueries += 1;
     if (auto result = WorldDatabase.PQuery("%s", "SELECT item, entry FROM npc_vendor"))
     {
         BarGoLink bar(result->GetRowCount());
@@ -1111,6 +1112,7 @@ void ItemUsageValue::PopulateSoldByVendorItemIds()
         } while (result->NextRow());
     }
 
+    sRandomPlayerbotMgr.ahQueries += 1;
     if (auto result = WorldDatabase.PQuery("%s", "SELECT item, entry FROM npc_vendor WHERE maxcount > 0"))
     {
         BarGoLink bar(result->GetRowCount());
@@ -1160,6 +1162,7 @@ uint32 ItemUsageValue::GetAHMedianBuyoutPricePerItem(ItemPrototype const* proto)
 {
     if (sPlayerbotAIConfig.shouldQueryAHListingsOutsideOfAH)
     {
+        sRandomPlayerbotMgr.ahQueries += 1;
         auto query = CharacterDatabase.PQuery(
             "  SELECT item_template, AVG(median)"
             "  FROM (SELECT item_template, (buyoutprice / item_count) median"
@@ -1191,6 +1194,7 @@ uint32 ItemUsageValue::GetAHListingLowestBuyoutPricePerItem(ItemPrototype const*
 {
     if (sPlayerbotAIConfig.shouldQueryAHListingsOutsideOfAH)
     {
+        sRandomPlayerbotMgr.ahQueries += 1;
         auto query = CharacterDatabase.PQuery(
             "SELECT buyoutprice / item_count"
             " FROM auction"

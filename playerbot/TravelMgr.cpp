@@ -1323,6 +1323,8 @@ void TravelMgr::LoadQuestTravelTable()
         out << "activityPercentageMod,";
         out << "activeBots,";
         out << "playerBots.size(),";
+        out << "ahqueries,";
+        out << "totalLevel,";
         out << "avarageLevel1-9,";
         out << "avarageLevel10-19,";
         out << "avarageLevel20-29,";
@@ -1341,7 +1343,9 @@ void TravelMgr::LoadQuestTravelTable()
 #endif
 #endif
 
+        out << "totalGold,";
         out << "avarageGold,";
+        out << "totalavarageGearScore,";
         out << "avarageGearScore";
 
         sPlayerbotAIConfig.log("activity_pid.csv", out.str().c_str());

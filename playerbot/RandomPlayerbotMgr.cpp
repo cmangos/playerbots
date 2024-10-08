@@ -698,8 +698,11 @@ void RandomPlayerbotMgr::ScaleBotActivity()
         out << activityPercentageMod << ",";
         out << activeBots << ",";
         out << GetPlayerbotsAmount() << ",";
+        out << ahQueries << ",";
 
-        float level = 0, gold = 0, gearscore = 0;
+        ahQueries = 0;
+
+        float totalLevel = 0, totalGold = 0, totalGearscore = 0;
 
         if (sPlayerbotAIConfig.randomBotAutologin)
         {
@@ -710,8 +713,11 @@ void RandomPlayerbotMgr::ScaleBotActivity()
                     std::string bracket = "level:" + std::to_string(bot->GetLevel() / 10);
 
                     float level = bot->GetPlayerbotAI()->GetLevelFloat();
+                    totalLevel += level;
                     float gold = bot->GetMoney() / 10000;
+                    totalGold += gold;
                     float gearscore = bot->GetPlayerbotAI()->GetEquipGearScore(bot, false, false);
+                    totalGearscore += gearscore;
 
                     const uint32 botGuid = bot->GetObjectGuid().GetCounter();
                     PushMetric(botPerformanceMetrics[bracket], botGuid, level);
@@ -722,13 +728,16 @@ void RandomPlayerbotMgr::ScaleBotActivity()
         }
 
         out << std::fixed << std::setprecision(4);
+        out << totalLevel << ",";
 
         for (uint8 i = 0; i < (DEFAULT_MAX_LEVEL / 10) + 1; i++)
         {
             out << GetMetricDelta(botPerformanceMetrics["level:" + std::to_string(i)]) * 12 * 60 << ",";
         }
 
+        out << totalGold << ",";
         out << GetMetricDelta(botPerformanceMetrics["gold"]) * 12 * 60 << ",";
+        out << totalGearscore << ",";
         out << GetMetricDelta(botPerformanceMetrics["gearscore"]) * 12 * 60 << ",";
         //out << CharacterDatabase.m_threadBody->m_sqlQueue.size();
 

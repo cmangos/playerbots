@@ -154,6 +154,8 @@ public:
         bool arenaTeamsDeleted, guildsDeleted = false;
 
         std::mutex m_ahActionMutex;
+
+        uint32 ahQueries = 0;
 	protected:
 	    virtual void OnBotLoginInternal(Player * const bot);
 
@@ -194,7 +196,7 @@ public:
         std::list<uint32> arenaTeamMembers;
         uint32 bgBotsCount;
         uint32 playersLevel = 0;
-        uint32 activeBots = 0;
+        uint32 activeBots = 0;        
 
         std::unordered_map<uint32, std::vector<std::pair<int32,int32>>> playerBotMoveLog;
         typedef std::unordered_map <uint32, std::list<float>> botPerformanceMetric;

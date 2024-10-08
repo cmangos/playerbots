@@ -89,6 +89,7 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
 
                 // check for the cheapest listing with the same count
                 // (simple dumping protection, can be improved by comparing listing prices but it's a bit complicated)
+                sRandomPlayerbotMgr.ahQueries += 1;
                 auto lowestBuyoutPriceListing = CharacterDatabase.PQuery(
                     "SELECT buyoutprice, item_count, itemowner FROM auction WHERE item_template = '%u' AND item_count = '%u' ORDER BY buyoutprice / item_count ASC LIMIT 1",
                     item->GetProto()->ItemId,

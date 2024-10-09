@@ -1464,12 +1464,6 @@ bool BGStatusAction::Execute(Event& event)
 #endif
 #endif
 
-#ifdef MANGOSBOT_ZERO
-        sLog.outBasic("Bot #%d <%s> (%u %s) joined BG (%s)", bot->GetGUIDLow(), bot->GetName(), bot->GetLevel(), bot->GetTeam() == ALLIANCE ? "A" : "H", _bgType.c_str());
-#else
-        sLog.outBasic("Bot #%d %s:%d <%s> joined %s - %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
-#endif
-
         ai->Unmount();
 
         action = 0x1;
@@ -1491,9 +1485,18 @@ bool BGStatusAction::Execute(Event& event)
             leave << uint8(0) << uint8(0) << uint32(0) << uint16(0);
             bot->GetSession()->HandleLeaveBattlefieldOpcode(leave);
             //Queue the event again to try to join next tick.
-            ai->HandleBotOutgoingPacket(event.getPacket());
+            //ai->HandleBotOutgoingPacket(event.getPacket());
+            sLog.outError("Bot %s leaves to join.", bot->GetName());
             return true;
         }
+
+        sLog.outError("Bot %s joins.", bot->GetName());
+
+#ifdef MANGOSBOT_ZERO
+        sLog.outBasic("Bot #%d <%s> (%u %s) joined BG (%s)", bot->GetGUIDLow(), bot->GetName(), bot->GetLevel(), bot->GetTeam() == ALLIANCE ? "A" : "H", _bgType.c_str());
+#else
+        sLog.outBasic("Bot #%d %s:%d <%s> joined %s - %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
+#endif
 
         bot->GetSession()->HandleBattlefieldPortOpcode(packet);
 

@@ -155,7 +155,7 @@ public:
 
         std::mutex m_ahActionMutex;
 
-        uint32 ahQueries = 0;
+        std::vector<AuctionEntry> GetAhPrices(uint32 itemId) { return ahMirror[itemId]; }
 	protected:
 	    virtual void OnBotLoginInternal(Player * const bot);
 
@@ -183,6 +183,7 @@ public:
         void PrepareTeleportCache();
         typedef void (RandomPlayerbotMgr::*ConsoleCommandHandler) (Player*);
 
+        void MirrorAh();
     private:
         PlayerBotMap players;
         int processTicks;
@@ -208,6 +209,9 @@ public:
 
         bool showLoginWarning;
         std::unordered_map<uint32, std::unordered_map<uint32, std::vector<std::pair<ObjectGuid, time_t>>>> facingFix;
+
+        //                   itemId,             buyout, count
+        std::unordered_map < uint32, std::vector<AuctionEntry>> ahMirror;
 };
 
 #define sRandomPlayerbotMgr RandomPlayerbotMgr::instance()

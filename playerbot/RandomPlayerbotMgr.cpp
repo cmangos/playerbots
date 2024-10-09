@@ -658,6 +658,8 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
 
     DelayedFacingFix();
 
+    MirrorAh();
+
     //Ping character database.
     CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "select 1 from dual");
 }
@@ -698,9 +700,6 @@ void RandomPlayerbotMgr::ScaleBotActivity()
         out << activityPercentageMod << ",";
         out << activeBots << ",";
         out << GetPlayerbotsAmount() << ",";
-        out << ahQueries << ",";
-
-        ahQueries = 0;
 
         float totalLevel = 0, totalGold = 0, totalGearscore = 0;
 
@@ -3816,6 +3815,38 @@ void RandomPlayerbotMgr::Hotfix(Player* bot, uint32 version)
     SetValue(bot, "version", MANGOSBOT_VERSION);
     sLog.outBasic("Bot %d hotfix v%d applied",
         bot->GetGUIDLow(), MANGOSBOT_VERSION);
+}
+
+void RandomPlayerbotMgr::MirrorAh()
+{
+    sRandomPlayerbotMgr.m_ahActionMutex.lock();
+
+    ahMirror.clear();
+
+    std::vector<AuctionHouseType> houses = { (AuctionHouseType)0,(AuctionHouseType)1,(AuctionHouseType)2 };
+
+    //Now loops over all houses. Can probably be faction specific later.
+    for (auto house : houses)
+    {
+        AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(house);
+
+        AuctionHouseObject::AuctionEntryMap const& map = auctionHouse->GetAuctions();
+
+        for (auto& auction : map)
+        {
+            if (!auction.second)
+                continue;
+
+            if (!auction.second->buyout)
+                continue;
+
+            if (!auction.second->itemCount)
+                continue;
+
+            ahMirror[auction.second->itemTemplate].push_back(*auction.second);
+        }
+    }
+    sRandomPlayerbotMgr.m_ahActionMutex.unlock();
 }
 
 typedef std::unordered_map <uint32, std::list<float>> botPerformanceMetric;

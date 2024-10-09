@@ -83,13 +83,25 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
             if (!pricePerItemCache[proto->ItemId])
             {
                 //check current AH listing prices for this item and try to set lower (undercut)
+                AuctionEntry lowestPrice;
 
-                uint32 lowestBuyoutItemPricePerItem = 0;
-                uint32 lowestBuyoutItemPricePerItemOwnerDbGuid = 0;
+                lowestPrice.Id = 0;
 
                 // check for the cheapest listing with the same count
                 // (simple dumping protection, can be improved by comparing listing prices but it's a bit complicated)
-                sRandomPlayerbotMgr.ahQueries += 1;
+
+                std::vector<AuctionEntry> auctions;
+                
+                for (auto& auction : sRandomPlayerbotMgr.GetAhPrices(proto->ItemId))
+                {
+                    if (auction.itemCount != item->GetCount())
+                        continue;
+
+                    if (lowestPrice.Id == 0 || float(auction.buyout) / float(auction.itemCount) < float(lowestPrice.buyout) / float(lowestPrice.itemCount))
+                        lowestPrice = auction;
+                }
+                
+                /*
                 auto lowestBuyoutPriceListing = CharacterDatabase.PQuery(
                     "SELECT buyoutprice, item_count, itemowner FROM auction WHERE item_template = '%u' AND item_count = '%u' ORDER BY buyoutprice / item_count ASC LIMIT 1",
                     item->GetProto()->ItemId,
@@ -110,6 +122,9 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
                         }
                     } while (lowestBuyoutPriceListing->NextRow());
                 }
+                */
+
+                uint32 lowestBuyoutItemPricePerItem = float(lowestPrice.buyout) / float(lowestPrice.itemCount);
 
                 // default desired price if there are no item listings
                 // (is the max price because why not? sounds reasonable to try selling at max price if there are no listings)
@@ -120,7 +135,7 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
 
                 // check if it would be reasonable to sell lower than current cheapest listing
                 // also check if the item poster is not self to not to undercut yourself
-                if (lowestBuyoutItemPricePerItem > 0 && lowestBuyoutItemPricePerItemOwnerDbGuid != bot->GetDbGuid())
+                if (lowestBuyoutItemPricePerItem > 0 && lowestPrice.owner != bot->GetDbGuid())
                 {
                     //try to undercut by randomly 1 copper to 10% (may result in not actually undercutting but it's alright, even better)
                     uint32 undercutByMoney = std::max(static_cast<uint32>(1), static_cast<uint32>(lowestBuyoutItemPricePerItem * frand(0.0f, 0.1f)));

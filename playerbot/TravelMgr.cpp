@@ -1323,7 +1323,6 @@ void TravelMgr::LoadQuestTravelTable()
         out << "activityPercentageMod,";
         out << "activeBots,";
         out << "playerBots.size(),";
-        out << "ahqueries,";
         out << "totalLevel,";
         out << "avarageLevel1-9,";
         out << "avarageLevel10-19,";

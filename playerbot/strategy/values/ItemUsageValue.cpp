@@ -1097,7 +1097,6 @@ void ItemUsageValue::PopulateReagentItemIdsForCraftableItemIds()
 
 void ItemUsageValue::PopulateSoldByVendorItemIds()
 {
-    sRandomPlayerbotMgr.ahQueries += 1;
     if (auto result = WorldDatabase.PQuery("%s", "SELECT item, entry FROM npc_vendor"))
     {
         BarGoLink bar(result->GetRowCount());
@@ -1112,7 +1111,6 @@ void ItemUsageValue::PopulateSoldByVendorItemIds()
         } while (result->NextRow());
     }
 
-    sRandomPlayerbotMgr.ahQueries += 1;
     if (auto result = WorldDatabase.PQuery("%s", "SELECT item, entry FROM npc_vendor WHERE maxcount > 0"))
     {
         BarGoLink bar(result->GetRowCount());
@@ -1162,7 +1160,21 @@ uint32 ItemUsageValue::GetAHMedianBuyoutPricePerItem(ItemPrototype const* proto)
 {
     if (sPlayerbotAIConfig.shouldQueryAHListingsOutsideOfAH)
     {
-        sRandomPlayerbotMgr.ahQueries += 1;
+        std::vector<float> prices;
+
+        for (auto& auction : sRandomPlayerbotMgr.GetAhPrices(proto->ItemId))
+        {
+            prices.push_back((float)auction.buyout / (float)auction.itemCount);
+        }
+
+        if (prices.empty())
+            return 0;
+
+        size_t n = prices.size() / 2;
+        std::nth_element(prices.begin(), prices.begin() + n, prices.end());
+        return prices[n];
+
+        /*
         auto query = CharacterDatabase.PQuery(
             "  SELECT item_template, AVG(median)"
             "  FROM (SELECT item_template, (buyoutprice / item_count) median"
@@ -1185,6 +1197,7 @@ uint32 ItemUsageValue::GetAHMedianBuyoutPricePerItem(ItemPrototype const* proto)
                 return medianPrice;
             } while (query->NextRow());
         }
+        */
     }
 
     return 0;
@@ -1194,7 +1207,20 @@ uint32 ItemUsageValue::GetAHListingLowestBuyoutPricePerItem(ItemPrototype const*
 {
     if (sPlayerbotAIConfig.shouldQueryAHListingsOutsideOfAH)
     {
-        sRandomPlayerbotMgr.ahQueries += 1;
+        float minPrice = 0;
+        uint32 minBuyout = 0;
+
+        for (auto& auction : sRandomPlayerbotMgr.GetAhPrices(proto->ItemId))
+        {            
+            if (!minBuyout || minBuyout > auction.buyout)
+            {
+                minBuyout = auction.buyout;
+                minPrice = (float)auction.buyout / (float)auction.itemCount;
+            }
+        }
+       
+        return minBuyout;
+        /*
         auto query = CharacterDatabase.PQuery(
             "SELECT buyoutprice / item_count"
             " FROM auction"
@@ -1214,6 +1240,7 @@ uint32 ItemUsageValue::GetAHListingLowestBuyoutPricePerItem(ItemPrototype const*
                 return lowestBuyoutPrice;
             } while (query->NextRow());
         }
+        */
     }
 
     return 0;

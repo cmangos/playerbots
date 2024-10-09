@@ -261,8 +261,10 @@ class ServerFacade
 #ifdef MANGOS
             return sBattleGroundMgr.m_BattleGroundQueues[queueTypeId];
 #endif
-#ifdef CMANGOS
-            return sBattleGroundMgr.m_battleGroundQueues[queueTypeId];
+#ifndef MANGOSBOT_ONE
+            //return sBattleGroundMgr.m_battleGroundQueues[queueTypeId];
+#else
+            return BattleGroundQueue();
 #endif
         }
 

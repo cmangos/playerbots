@@ -1152,44 +1152,12 @@ void RandomPlayerbotMgr::CheckBgQueue()
 
             BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
 #else
-            BattleGroundBracketId bracketId = player->GetBattleGroundBracketIdFromLevel(bgTypeId);
+            BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, player->GetLevel());
 #endif
 #endif
-#ifndef MANGOSBOT_ZERO
+#ifdef MANGOSBOT_TWO
             if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
             {
-#ifdef MANGOS
-                BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
-                GroupQueueInfo ginfo;
-                uint32 tempT = TeamId;
-
-                if (bgQueue.GetPlayerGroupInfoData(player->GetObjectGuid(), &ginfo))
-                {
-                    if (ginfo.IsRated)
-                    {
-                        for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
-                        {
-                            uint32 arena_team_id = player->GetArenaTeamId(arena_slot);
-                            ArenaTeam* arenateam = sObjectMgr.GetArenaTeamById(arena_team_id);
-                            if (!arenateam)
-                                continue;
-                            if (arenateam->GetType() != arenaType)
-                                continue;
-
-                            Rating[queueTypeId][bracketId][1] = arenateam->GetRating();
-                        }
-                    }
-                    TeamId = ginfo.IsRated ? 1 : 0;
-                }
-                if (player->InArena())
-                {
-                    if (player->GetBattleGround()->isRated() && (ginfo.IsRated && ginfo.ArenaTeamId && ginfo.ArenaTeamRating && ginfo.OpponentsTeamRating))
-                        TeamId = 1;
-                    else
-                        TeamId = 0;
-        }
-#endif
-#ifdef CMANGOS
                 BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
                 GroupQueueInfo ginfo;
                 uint32 tempT = TeamId;
@@ -1219,11 +1187,50 @@ void RandomPlayerbotMgr::CheckBgQueue()
                     else
                         TeamId = 0;
                 }
-#endif
                 ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
-    }
+            }
 #endif
+#ifdef MANGOSBOT_ONE
+            if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
+            {
+                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, player = player, arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
+                    {
+                        uint32 TeamId;
+                        GroupQueueInfo ginfo;
 
+                        BattleGroundQueueItem queueItem = bgQueue->GetBattleGroundQueue(queueTypeId);
+
+                        if (queueItem.GetPlayerGroupInfoData(player->GetObjectGuid(), &ginfo))
+                        {
+                            if (ginfo.isRated)
+                            {
+                                for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
+                                {
+                                    uint32 arena_team_id = player->GetArenaTeamId(arena_slot);
+                                    ArenaTeam* arenateam = sObjectMgr.GetArenaTeamById(arena_team_id);
+                                    if (!arenateam)
+                                        continue;
+                                    if (arenateam->GetType() != arenaType)
+                                        continue;
+
+                                    sRandomPlayerbotMgr.Rating[queueTypeId][bracketId][1] = arenateam->GetRating();
+                                }
+                            }
+                            TeamId = ginfo.isRated ? 1 : 0;
+                        }
+                        if (player->InArena())
+                        {
+                            if (player->GetBattleGround()->IsRated()/* && (ginfo.isRated && ginfo.arenaTeamId && ginfo.arenaTeamRating && ginfo.opponentsTeamRating)*/)
+                                TeamId = 1;
+                            else
+                                TeamId = 0;
+                        }
+                        sRandomPlayerbotMgr.ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
+
+                    }
+                );
+            }
+#endif
             if (player->GetPlayerbotAI())
                 BgBots[queueTypeId][bracketId][TeamId]++;
             else
@@ -1281,10 +1288,10 @@ void RandomPlayerbotMgr::CheckBgQueue()
 
             BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
 #else
-            BattleGroundBracketId bracketId = bot->GetBattleGroundBracketIdFromLevel(bgTypeId);
+            BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel());;
 #endif
 
-#ifndef MANGOSBOT_ZERO
+#ifdef MANGOSBOT_TWO
             ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
             if (arenaType != ARENA_TYPE_NONE)
             {
@@ -1303,6 +1310,34 @@ void RandomPlayerbotMgr::CheckBgQueue()
                         TeamId = 0;
                 }
                 ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
+            }
+#endif
+#ifdef MANGOSBOT_ONE
+            ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
+            if (arenaType != ARENA_TYPE_NONE)
+            {
+                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, bot = bot, arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
+                    {
+                        uint32 TeamId;
+                        GroupQueueInfo ginfo;
+
+                        BattleGroundQueueItem queueItem = bgQueue->GetBattleGroundQueue(queueTypeId);
+
+                        if (queueItem.GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
+                        {
+                            TeamId = ginfo.isRated ? 1 : 0;
+                        }
+                        if (bot->InArena())
+                        {
+                            if (bot->GetBattleGround()->IsRated()/* && (ginfo.isRated && ginfo.arenaTeamId && ginfo.arenaTeamRating && ginfo.opponentsTeamRating)*/)
+                                TeamId = 1;
+                            else
+                                TeamId = 0;
+                        }
+                        sRandomPlayerbotMgr.ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
+
+                    }
+                );
             }
 #endif
             BgBots[queueTypeId][bracketId][TeamId]++;

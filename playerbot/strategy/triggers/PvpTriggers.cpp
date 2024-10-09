@@ -91,7 +91,7 @@ bool BgInviteActiveTrigger::IsActive()
         BattleGroundQueueTypeId queueTypeId = bot->GetBattleGroundQueueTypeId(i);
         if (queueTypeId == BATTLEGROUND_QUEUE_NONE)
             continue;
-
+#ifdef MANGOSBOT_TWO
         BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
         GroupQueueInfo ginfo;
         if (bgQueue.GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
@@ -102,6 +102,11 @@ bool BgInviteActiveTrigger::IsActive()
                 return true;
             }
         }
+#endif
+#ifdef MANGOSBOT_ONE
+        if (bot->IsInvitedForBattleGroundQueueType(queueTypeId))
+            return true;
+#endif
     }
     return false;
 }

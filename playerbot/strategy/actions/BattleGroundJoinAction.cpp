@@ -337,24 +337,24 @@ bool BGJoinAction::canJoinBg(Player* player, BattleGroundQueueTypeId queueTypeId
 
     // check bracket
 #ifdef MANGOSBOT_ZERO
-        if (bracketId != bot->GetBattleGroundBracketIdFromLevel(bgTypeId);
-            return false;
+    if (bracketId != bot->GetBattleGroundBracketIdFromLevel(bgTypeId))
+        return false;
 #endif
 #ifdef MANGOSBOT_ONE
     if (sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel()) != bracketId)
         return false;
 #endif
 #ifdef MANGOSBOT_TWO
-        BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
-        uint32 mapId = bg->GetMapId();
-        PvPDifficultyEntry const* pvpDiff = GetBattlegroundBracketByLevel(mapId, player->GetLevel());
-        if (!pvpDiff)
-            return false;
+    BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
+    uint32 mapId = bg->GetMapId();
+    PvPDifficultyEntry const* pvpDiff = GetBattlegroundBracketByLevel(mapId, player->GetLevel());
+    if (!pvpDiff)
+        return false;
 
-        BattleGroundBracketId bracket_temp = pvpDiff->GetBracketId();
+    BattleGroundBracketId bracket_temp = pvpDiff->GetBracketId();
 
-        if (bracket_temp != bracketId)
-            return false;
+    if (bracket_temp != bracketId)
+        return false;
 #endif
     return true;
 }
@@ -666,10 +666,10 @@ bool BGJoinAction::JoinQueue(uint32 type)
 
     bracketId = pvpDiff->GetBracketId();
 #endif
-#ifdef MANGOSBOS_ZERO
+#ifdef MANGOSBOT_ZERO
     bracketId = bot->GetBattleGroundBracketIdFromLevel(bgTypeId);
 #endif
-#ifdef MANGOSBOS_ONE
+#ifdef MANGOSBOT_ONE
     bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel());
 #endif
 

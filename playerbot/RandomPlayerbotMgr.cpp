@@ -1139,10 +1139,12 @@ void RandomPlayerbotMgr::CheckBgQueue()
             uint32 TeamId = player->GetTeam() == ALLIANCE ? 0 : 1;
 
             BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
-#ifdef MANGOS
+#ifdef MANGOSBOT_ZERO
             BattleGroundBracketId bracketId = player->GetBattleGroundBracketIdFromLevel(bgTypeId);
 #endif
-#ifdef CMANGOS
+#ifdef MANGOSBOT_ONE
+            BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, player->GetLevel());
+#endif
 #ifdef MANGOSBOT_TWO
             BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
             uint32 mapId = bg->GetMapId();
@@ -1151,9 +1153,6 @@ void RandomPlayerbotMgr::CheckBgQueue()
                 continue;
 
             BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
-#else
-            BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, player->GetLevel());
-#endif
 #endif
 #ifdef MANGOSBOT_TWO
             if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
@@ -1279,6 +1278,13 @@ void RandomPlayerbotMgr::CheckBgQueue()
             uint32 TeamId = bot->GetTeam() == ALLIANCE ? 0 : 1;
 
             BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
+
+#ifdef MANGOSBOT_ZERO
+            BattleGroundBracketId bracketId = bot->GetBattleGroundBracketIdFromLevel(bgTypeId);
+#endif
+#ifdef MANGOSBOT_ONE
+            BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel());;
+#endif
 #ifdef MANGOSBOT_TWO
             BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
             uint32 mapId = bg->GetMapId();
@@ -1287,11 +1293,8 @@ void RandomPlayerbotMgr::CheckBgQueue()
                 continue;
 
             BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
-#else
-            BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel());;
 #endif
-
-#ifdef MANGOSBOT_TWO
+            #ifdef MANGOSBOT_TWO
             ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
             if (arenaType != ARENA_TYPE_NONE)
             {

@@ -128,6 +128,8 @@ namespace ai
             creators["debug mount"] = &StrategyContext::debug_mount;
             creators["debug grind"] = &StrategyContext::debug_grind;
             creators["debug loot"] = &StrategyContext::debug_loot;
+            creators["debug log"] = &StrategyContext::debug_log;
+            creators["debug logname"] = &StrategyContext::debug_logname;
             creators["rtsc"] = &StrategyContext::rtsc;
             creators["rtsc jump"] = &StrategyContext::rtsc_jump;
             creators["maintenance"] = &StrategyContext::maintenance;
@@ -231,6 +233,8 @@ namespace ai
         static Strategy* debug_mount(PlayerbotAI* ai) { return new DebugMountStrategy(ai); }
         static Strategy* debug_grind(PlayerbotAI* ai) { return new DebugGrindStrategy(ai); }
         static Strategy* debug_loot(PlayerbotAI* ai) { return new DebugLootStrategy(ai); }
+        static Strategy* debug_log(PlayerbotAI* ai) { return new DebugLogStrategy(ai); }
+        static Strategy* debug_logname(PlayerbotAI* ai) { return new DebugLogNameStrategy(ai); }
         static Strategy* rtsc(PlayerbotAI* ai) { return new RTSCStrategy(ai); }
         static Strategy* rtsc_jump(PlayerbotAI* ai) { return new RTSCSJumptrategy(ai); }
         static Strategy* maintenance(PlayerbotAI* ai) { return new MaintenanceStrategy(ai); }

@@ -3178,6 +3178,37 @@ bool PlayerbotAI::TellPlayerNoFacing(Player* player, std::string text, Playerbot
         if (type == CHAT_MSG_SYSTEM && (sPlayerbotAIConfig.randomBotSayWithoutMaster || HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT)))
             type = CHAT_MSG_SAY;
 
+        if ((sPlayerbotAIConfig.hasLog("chat_log.csv") && HasStrategy("debug log", BotState::BOT_STATE_NON_COMBAT)) || HasStrategy("debug logname", BotState::BOT_STATE_NON_COMBAT))
+        {
+            std::ostringstream out;
+            out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
+            out << bot->GetName() << ",";
+            out << std::fixed << std::setprecision(2);
+
+            out << std::to_string(bot->getRace()) << ",";
+            out << std::to_string(bot->getClass()) << ",";
+            float subLevel = GetLevelFloat();
+
+            out << subLevel << ",";
+            out << std::fixed << std::setprecision(2);
+            WorldPosition(bot).printWKT(out);
+
+            out << type << ",";
+            out << text;
+
+            if (HasStrategy("debug logname", BotState::BOT_STATE_NON_COMBAT))
+            {
+                std::string fileName = "chat_log_";
+                fileName += bot->GetName();
+                fileName += ".csv";
+                if (!sPlayerbotAIConfig.isLogOpen(fileName))
+                    sPlayerbotAIConfig.openLog(fileName, "a", true);
+                sPlayerbotAIConfig.log(fileName, out.str().c_str());
+            }
+            else
+                sPlayerbotAIConfig.log("chat_log.csv", out.str().c_str());
+        }
+
         WorldPacket data;
 
         switch (type)

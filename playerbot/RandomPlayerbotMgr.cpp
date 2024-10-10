@@ -1197,9 +1197,9 @@ void RandomPlayerbotMgr::CheckBgQueue()
                         uint32 TeamId;
                         GroupQueueInfo ginfo;
 
-                        BattleGroundQueueItem queueItem = bgQueue->GetBattleGroundQueue(queueTypeId);
+                        BattleGroundQueueItem* queueItem = &bgQueue->GetBattleGroundQueue(queueTypeId);
 
-                        if (queueItem.GetPlayerGroupInfoData(player->GetObjectGuid(), &ginfo))
+                        if (queueItem->GetPlayerGroupInfoData(player->GetObjectGuid(), &ginfo))
                         {
                             if (ginfo.isRated)
                             {
@@ -1324,9 +1324,9 @@ void RandomPlayerbotMgr::CheckBgQueue()
                         uint32 TeamId;
                         GroupQueueInfo ginfo;
 
-                        BattleGroundQueueItem queueItem = bgQueue->GetBattleGroundQueue(queueTypeId);
+                        BattleGroundQueueItem* queueItem = &bgQueue->GetBattleGroundQueue(queueTypeId);
 
-                        if (queueItem.GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
+                        if (queueItem->GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
                         {
                             TeamId = ginfo.isRated ? 1 : 0;
                         }
@@ -1337,6 +1337,9 @@ void RandomPlayerbotMgr::CheckBgQueue()
                             else
                                 TeamId = 0;
                         }
+
+                        
+
                         sRandomPlayerbotMgr.ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
 
                     }

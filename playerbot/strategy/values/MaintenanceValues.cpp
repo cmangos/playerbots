@@ -32,7 +32,7 @@ bool ShouldAHSellValue::Calculate()
         uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
         uint32 costs = uint32(maxDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
 
-        if ((costs * 100) / bot->GetMoney() <= 1) //Would repairing this item use more than 1% of our current gold?
+        if (bot->GetMoney() && (costs * 100) / bot->GetMoney() <= 1) //Would repairing this item use more than 1% of our current gold?
             continue;
 
         ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());

@@ -347,7 +347,7 @@ bool GrindTravelDestination::isActive(Player* bot)
     if (!urand(0, 10) && !AI_VALUE(bool, "should get money") && !isOut(botPos))
         return false;
 
-    if (AI_VALUE(bool, "should sell"))
+    if (AI_VALUE(bool, "should sell") && (AI_VALUE(bool, "can sell") || AI_VALUE(bool, "can ah sell")))
         return false;
 
     CreatureInfo const* cInfo = this->getCreatureInfo();

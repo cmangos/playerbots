@@ -256,17 +256,13 @@ class ServerFacade
 #endif
         }
 #endif
+
+#ifndef MANGOSBOT_ONE
         BattleGroundQueue& bgQueue(BattleGroundQueueTypeId queueTypeId)
         {
-#ifdef MANGOS
-            return sBattleGroundMgr.m_BattleGroundQueues[queueTypeId];
-#endif
-#ifndef MANGOSBOT_ONE
-            //return sBattleGroundMgr.m_battleGroundQueues[queueTypeId];
-#else
-            return BattleGroundQueue();
-#endif
+            return sBattleGroundMgr.m_battleGroundQueues[queueTypeId];
         }
+#endif
 
         uint32 GetAreaId(WorldObject* wo)
         {

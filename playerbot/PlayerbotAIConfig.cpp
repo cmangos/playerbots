@@ -298,6 +298,8 @@ bool PlayerbotAIConfig::Initialize()
 
     sLog.outString("Loading TalentSpecs");
 
+    uint32 maxSpecLevel = 0;
+
     for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
     {
         classSpecs[cls] = ClassSpecs(1 << (cls - 1));
@@ -312,7 +314,7 @@ bool PlayerbotAIConfig::Initialize()
 
                 TalentPath talentPath(spec, specName, probability);
 
-                for (int level = 10; level <= 100; level++)
+                for (uint32 level = 10; level <= 100; level++)
                 {
                     std::ostringstream os; os << "AiPlayerbot.PremadeSpecLink." << cls << "." << spec << "." << level;
                     std::string specLink = config.GetStringDefault(os.str().c_str(), "");
@@ -321,6 +323,9 @@ bool PlayerbotAIConfig::Initialize()
 
                     if (!specLink.empty())
                     {
+                        if (maxSpecLevel < level)
+                            maxSpecLevel = level;
+
                         std::ostringstream out;
 
                         //Ignore bad specs.
@@ -350,6 +355,15 @@ bool PlayerbotAIConfig::Initialize()
                     classSpecs[cls].talentPath.push_back(talentPath);
             }
         }
+    }
+
+    if(classSpecs[1].talentPath.empty())
+        sLog.outErrorDb("No premade specs found!!");
+    else
+    {
+        if(maxSpecLevel < DEFAULT_MAX_LEVEL && randomBotMaxLevel < DEFAULT_MAX_LEVEL)
+            sLog.outErrorDb("!!!!!!!!!!! randomBotMaxLevel and the talentspec levels are below this expansions max level. Please check if you have the correct config file!!!!!!");
+
     }
 
     botCheats.clear();

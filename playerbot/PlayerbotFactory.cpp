@@ -1576,6 +1576,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
 
     // unavailable legendaries list
     std::vector<uint32> lockedItems;
+    lockedItems.push_back(49623); // Shadowmourne
     lockedItems.push_back(30311); // Warp Slicer
     lockedItems.push_back(30312); // Infinity Blade
     lockedItems.push_back(30313); // Staff of Disentagration
@@ -1868,6 +1869,9 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
 
                     if (std::find(lockedItems.begin(), lockedItems.end(), proto->ItemId) != lockedItems.end())
                         continue;
+
+                    // filter not ready items
+                    if (proto->Flags2 == 8192) continue;
 
                     // skip not available items
                     // TO DO: Replace this with a db query

@@ -56,6 +56,7 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
 
         //resulting undercut value for reporting
         uint32 resultingUndercut = 0;
+        uint32 postedItems = 0;
 
         for (auto item : items)
         {
@@ -160,9 +161,15 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
                 resultingUndercut = (lowestBuyoutItemPricePerItem > 0 && desiredPricePerItem < lowestBuyoutItemPricePerItem) ? lowestBuyoutItemPricePerItem - desiredPricePerItem : 0;
             }
 
-            postedItem |= PostItem(requester, item, pricePerItemCache[proto->ItemId] * item->GetCount(), auctioneer, time, resultingUndercut);
+            bool didPost = PostItem(requester, item, pricePerItemCache[proto->ItemId] * item->GetCount(), auctioneer, time, resultingUndercut);
 
-            if (!urand(0, 5))
+            if (didPost)
+            {
+                    postedItem |= true;
+                    postedItems++;
+            }
+
+            if (!urand(0, 5 + (items.size()- postedItems)/10))
                 break;
         }
 

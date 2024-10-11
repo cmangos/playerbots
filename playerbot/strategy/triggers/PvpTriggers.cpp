@@ -153,6 +153,10 @@ bool PlayerHasFlag::IsActive()
                 return false;
 
             BattleGroundWS *bg = (BattleGroundWS*)ai->GetBot()->GetBattleGround();
+
+            if (!bg)
+                return false;
+
             if (bot->GetObjectGuid() == bg->GetFlagCarrierGuid(TEAM_INDEX_ALLIANCE) || bot->GetObjectGuid() == bg->GetFlagCarrierGuid(TEAM_INDEX_HORDE))
             {
                 return true;
@@ -200,6 +204,9 @@ bool EnemyTeamHasFlag::IsActive()
         if (ai->GetBot()->GetBattleGroundTypeId() == BattleGroundTypeId::BATTLEGROUND_WS)
         {
             BattleGroundWS *bg = (BattleGroundWS*)ai->GetBot()->GetBattleGround();
+
+            if (!bg)
+                return false;
 
             if (bot->GetTeam() == HORDE)
             {

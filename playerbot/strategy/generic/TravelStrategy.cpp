@@ -12,8 +12,11 @@ NextAction** TravelStrategy::GetDefaultNonCombatActions()
 void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
-        //"random",
         "no travel target",
+        NextAction::array(0, new NextAction("choose travel target", 6.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "has nearby quest taker",
         NextAction::array(0, new NextAction("choose travel target", 6.0f), NULL)));
 
     triggers.push_back(new TriggerNode(

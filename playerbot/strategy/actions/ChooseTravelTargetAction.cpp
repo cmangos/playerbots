@@ -1172,7 +1172,7 @@ bool ChooseTravelTargetAction::isUseful()
             return false;
     }
 
-    return !context->GetValue<TravelTarget *>("travel target")->Get()->isActive();
+    return true;
 }
 
 

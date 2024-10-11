@@ -314,6 +314,7 @@ namespace ai
             creators["need quest objective"] = [](PlayerbotAI* ai) { return new NeedQuestObjectiveValue(ai); };
             creators["can use item on"] = [](PlayerbotAI* ai) { return new CanUseItemOn(ai); };
             creators["quest reward"] = [](PlayerbotAI* ai) { return new QuestRewardValue(ai); };
+            creators["has nearby quest taker"] = [](PlayerbotAI* ai) { return new HasNearbyQuestTakerValue(ai); };
 
             creators["money needed for"] = [](PlayerbotAI* ai) { return new MoneyNeededForValue(ai); };
             creators["total money needed for"] = [](PlayerbotAI* ai) { return new TotalMoneyNeededForValue(ai); };

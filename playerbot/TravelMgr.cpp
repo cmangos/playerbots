@@ -144,26 +144,40 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
     if ((bot->GetGroup() && bot->GetGroup()->IsRaidGroup()) != (questTemplate->GetType() == QUEST_TYPE_RAID))
         return false;
 
+    bool isVendor = false;
+
     //Check mob level
     if (getEntry() > 0)
     {
         CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(getEntry());
 
-        if (cInfo && (int)cInfo->MaxLevel - (int)bot->GetLevel() > 4)
-            return false;
-
-        //Do not try to hand-in dungeon/elite quests in instances without a group.
-        if (cInfo->Rank > CREATURE_ELITE_NORMAL)
+        if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[objective] && !GuidPosition(HIGHGUID_UNIT, entry).IsHostileTo(bot))
         {
-            WorldPosition pos(bot);
-            if (!this->nearestPoint(pos)->isOverworld() && !AI_VALUE(bool, "can fight boss"))
+            ItemPrototype const* proto = sObjectMgr.GetItemPrototype(GetQuestTemplate()->ReqItemId[objective]);
+            if (GetQuestTemplate()->ReqItemCount[objective] * proto->BuyPrice > bot->GetMoney()) //Need more money.
                 return false;
-            else if (!AI_VALUE(bool, "can fight elite"))
+
+            isVendor = true;
+        }
+
+        if (!isVendor)
+        {
+            if (cInfo && (int)cInfo->MaxLevel - (int)bot->GetLevel() > 4)
                 return false;
+
+            //Do not try to hand-in dungeon/elite quests in instances without a group.
+            if (cInfo->Rank > CREATURE_ELITE_NORMAL)
+            {
+                WorldPosition pos(bot);
+                if (!this->nearestPoint(pos)->isOverworld() && !AI_VALUE(bool, "can fight boss"))
+                    return false;
+                else if (!AI_VALUE(bool, "can fight elite"))
+                    return false;
+            }
         }
     }
 
-    if (questTemplate->GetType() == QUEST_TYPE_ELITE && !AI_VALUE(bool, "can fight elite"))
+    if (!isVendor && questTemplate->GetType() == QUEST_TYPE_ELITE && !AI_VALUE(bool, "can fight elite"))
         return false;
 
     //Do not try to do dungeon/elite quests in instances without a group.
@@ -192,7 +206,7 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
 
     WorldPosition botPos(bot);
 
-    if (getEntry() > 0 && !isOut(botPos))
+    if (!isVendor && getEntry() > 0 && !isOut(botPos))
     {
         TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
 

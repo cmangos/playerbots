@@ -2,8 +2,50 @@
 #include "ItemUsageValue.h"
 #include "BudgetValues.h"
 #include "playerbot/PlayerbotAI.h"
+#include "SharedValueContext.h"
 
 using namespace ai;
+
+VendorMap* VendorMapValue::Calculate()
+{
+    VendorMap* vendorpMap = new VendorMap;
+
+
+    for (uint32 entry = 0; entry < sCreatureStorage.GetMaxEntry(); entry++)
+    {
+        static CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(entry);
+
+        if (!cInfo)
+            continue;
+
+        VendorItemList vendorItems;
+        VendorItemData const* vItems = sObjectMgr.GetNpcVendorItemList(entry);
+
+        if (vItems)
+            for (auto vItem : vItems->m_items)
+                if(!vItem->maxcount) //Ignore limited amount items.
+                    vendorpMap->insert(std::make_pair(vItem->item, entry));
+    }
+
+    return vendorpMap;
+}
+
+//What items does this entry have in its loot list?
+std::list<int32> ItemVendorListValue::Calculate()
+{
+    uint32 itemId = stoi(getQualifier());
+
+    VendorMap* vendorMap = GAI_VALUE(VendorMap*, "vendor map");
+
+    std::list<int32> entries;
+
+    auto range = vendorMap->equal_range(itemId);
+
+    for (auto itr = range.first; itr != range.second; ++itr)
+        entries.push_back(itr->second);
+
+    return entries;
+}
 
 bool VendorHasUsefulItemValue::Calculate()
 {

@@ -3,6 +3,7 @@
 #include "ItemUsageValue.h"
 #include "CraftValues.h"
 #include "MountValues.h"
+#include "BudgetValues.h"
 
 #include "playerbot/RandomItemMgr.h"
 #include "playerbot/ServerFacade.h"
@@ -272,7 +273,13 @@ ItemUsage ItemUsageValue::Calculate()
     //DISENCHANT
     if ((proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON) && proto->Bonding != BIND_WHEN_PICKED_UP &&
         ai->HasSkill(SKILL_ENCHANTING) && proto->Quality >= ITEM_QUALITY_UNCOMMON)
-        return ItemUsage::ITEM_USAGE_DISENCHANT;
+    {
+        Item* item = CurrentItem(proto, bot);
+
+        //Bot has budget to replace the item it wants to disenchant.
+        if (!item || !sRandomPlayerbotMgr.IsRandomBot(bot) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill) > proto->BuyPrice)
+            return ItemUsage::ITEM_USAGE_DISENCHANT;
+    }
 
     //QUEST
     if (!ai->GetMaster() || !sPlayerbotAIConfig.syncQuestWithPlayer || !IsItemUsefulForQuest(ai->GetMaster(), proto))

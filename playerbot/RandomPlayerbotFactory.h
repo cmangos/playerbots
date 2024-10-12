@@ -49,9 +49,10 @@ class RandomPlayerbotFactory
         static void CreateRandomArenaTeams();
         static std::string CreateRandomGuildName();
         static bool isAvailableRace(uint8 cls, uint8 race);
+        static void CheckCaptainAvailability(Player* player, std::vector<ObjectGuid>& availableCaptains, ObjectGuid captain, const std::vector<ArenaType>& arenaTypes);
 	private:
         std::string CreateRandomBotName(NameRaceAndGender raceAndGender);
-        static std::string CreateRandomArenaTeamName();
+        static std::string CreateRandomArenaTeamName(ArenaType randomType);
 
         uint8 GetRandomClass();
         uint8 GetRandomRace(uint8 cls);

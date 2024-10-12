@@ -72,11 +72,18 @@ namespace ai
         virtual std::vector<uint32> Calculate() override;
     };
 
-    class HasReagentsForValue : public BoolCalculatedValue, public Qualified //Does the bot have reagents to cast this craft spell?
+    class EnchantSpellsValue : public CalculatedValue<std::vector<uint32>> //All enchanting spells
     {
     public:
-        HasReagentsForValue(PlayerbotAI* ai, std::string name = "has reagents for", int checkInterval = 1) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {}
-        virtual bool Calculate() override;
+        EnchantSpellsValue(PlayerbotAI* ai, std::string name = "enchant spells", int checkInterval = 10) : CalculatedValue<std::vector<uint32>>(ai, name, checkInterval) {}
+        virtual std::vector<uint32> Calculate() override;
+    };
+
+    class HasReagentsForValue : public Uint32CalculatedValue, public Qualified //Does the bot have reagents to cast this craft spell?
+    {
+    public:
+        HasReagentsForValue(PlayerbotAI* ai, std::string name = "has reagents for", int checkInterval = 1) : Uint32CalculatedValue(ai, name, checkInterval), Qualified() {}
+        virtual uint32 Calculate() override;
     };
 
     class CanCraftSpellValue : public BoolCalculatedValue, public Qualified

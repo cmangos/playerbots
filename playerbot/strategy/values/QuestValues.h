@@ -233,4 +233,12 @@ namespace ai
             ManualSetValue<uint8>(ai, static_cast<uint8>(QuestRewardOptionType::QUEST_REWARD_CONFIG_DRIVEN), "quest reward"),
             Qualified() {}
     };
+
+    class HasNearbyQuestTakerValue : public BoolCalculatedValue
+    {
+    public:
+        HasNearbyQuestTakerValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "has nearby quest taker", 30) {}
+
+        virtual bool Calculate() override;
+    };
 }

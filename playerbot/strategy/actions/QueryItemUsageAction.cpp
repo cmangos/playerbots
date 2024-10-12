@@ -1,7 +1,6 @@
 
 #include "playerbot/playerbot.h"
 #include "QueryItemUsageAction.h"
-#include "ahbot/AhBot.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/RandomPlayerbotMgr.h"
 #include "playerbot/RandomItemMgr.h"
@@ -169,6 +168,8 @@ std::string QueryItemUsageAction::QueryItemUsage(ItemQualifier& qualifier)
         return "Vendor";
     case ItemUsage::ITEM_USAGE_KEEP:
         return "Useful but have enough";
+    case ItemUsage::ITEM_USAGE_BROKEN_AH:
+        return "Auctionhouse but damaged";
     case ItemUsage::ITEM_USAGE_AH:
         return "Auctionhouse";
     case ItemUsage::ITEM_USAGE_AMMO:
@@ -201,7 +202,7 @@ std::string QueryItemUsageAction::QueryItemPrice(ItemQualifier& qualifier)
         for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
         {
             Item* sell = *i;
-            sellPrice += sell->GetCount() * auctionbot.GetSellPrice(sell->GetProto()) * sRandomPlayerbotMgr.GetSellMultiplier(bot);
+            sellPrice += sell->GetCount() * ItemUsageValue::GetBotSellPrice(sell->GetProto(), bot);
         }
 
         if(sellPrice)
@@ -212,7 +213,7 @@ std::string QueryItemUsageAction::QueryItemPrice(ItemQualifier& qualifier)
     if (usage == ItemUsage::ITEM_USAGE_NONE)
         return msg.str();
 
-    int32 buyPrice = auctionbot.GetBuyPrice(qualifier.GetProto()) * sRandomPlayerbotMgr.GetBuyMultiplier(bot);
+    int32 buyPrice = ItemUsageValue::GetBotBuyPrice(qualifier.GetProto(), bot);
     if (buyPrice)
     {
         if (sellPrice) msg << " ";

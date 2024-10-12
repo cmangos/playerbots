@@ -7,7 +7,11 @@ using namespace ai;
 WorldPacketHandlerStrategy::WorldPacketHandlerStrategy(PlayerbotAI* ai) : PassTroughStrategy(ai)
 {
     supported.push_back("loot start roll");
-    supported.push_back("quest objective completed");
+    supported.push_back("quest update add kill");
+    supported.push_back("quest update add item");
+    supported.push_back("quest update failed");
+    supported.push_back("quest update failed timer");
+    supported.push_back("quest update complete");
     supported.push_back("party command");
     supported.push_back("ready check");
     supported.push_back("uninvite");
@@ -17,6 +21,7 @@ WorldPacketHandlerStrategy::WorldPacketHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("inventory change failure");
     supported.push_back("bg status");
     supported.push_back("confirm quest");
+    supported.push_back("quest details");
 }
 
 void WorldPacketHandlerStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
@@ -125,6 +130,10 @@ void WorldPacketHandlerStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &
     triggers.push_back(new TriggerNode(
         "xpgain",
         NextAction::array(0, new NextAction("xp gain", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "honorgain",
+        NextAction::array(0, new NextAction("honor gain", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
         "levelup",

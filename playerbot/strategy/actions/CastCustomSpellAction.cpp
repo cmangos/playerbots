@@ -149,6 +149,9 @@ bool CastCustomSpellAction::Execute(Event& event)
         itemTarget = nullptr;
     }
 
+    if ((pSpellInfo->Targets & TARGET_FLAG_ITEM) || (pSpellInfo->Targets == TARGET_FLAG_SELF))
+        target = bot;
+
     WorldObject* woTarget = nullptr;
     if (gameObjectTarget)
         woTarget = gameObjectTarget;
@@ -161,7 +164,7 @@ bool CastCustomSpellAction::Execute(Event& event)
         SetDuration(sPlayerbotAIConfig.globalCoolDown);
         std::ostringstream msg;
         msg << "cast " << text;
-        ai->HandleCommand(CHAT_MSG_WHISPER, msg.str(), *requester);
+        ai->HandleCommand(CHAT_MSG_WHISPER, msg.str(), event.getOwner() ? *event.getOwner() : *bot);
         return true;
     }
 
@@ -338,7 +341,7 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
                                 for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
                                 {
                                     Player* member = sObjectMgr.GetPlayer(itr->guid);
-                                    if (member)
+                                    if (member && ai->IsSafe(member))
                                     {
                                         if (itr->guid == targetGuid)
                                         {
@@ -375,6 +378,8 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
                         else
                         {
                             target->TeleportTo(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), bot->GetOrientation());
+                            if (target->isRealPlayer())
+                                target->SendHeartBeat();
                         }
 
                         std::ostringstream msg;
@@ -477,22 +482,27 @@ bool CastRandomSpellAction::Execute(Event& event)
                 continue;
             }
 
-            if (target && ai->CanCastSpell(spellId, target, true))
+            if (target && ai->CanCastSpell(spellId, target, 0))
             {
                 spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, target)));
             }
 
-            if (target && ai->CanCastSpell(spellId, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), true))
+            if (target && ai->CanCastSpell(spellId, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0))
             {
                 spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, target)));
             }
 
-            if (got && ai->CanCastSpell(spellId, got->GetPositionX(), got->GetPositionY(), got->GetPositionZ(), true))
+            if (got && ai->CanCastSpell(spellId, got->GetPositionX(), got->GetPositionY(), got->GetPositionZ(), 0))
             {
                 spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, got)));
             }
 
-            if (ai->CanCastSpell(spellId, bot, true))
+            Item* item = nullptr;
+
+            if (pSpellInfo->Targets & TARGET_FLAG_ITEM)
+                item = AI_VALUE2(Item*, "item for spell", pSpellInfo->Id);
+
+            if (ai->CanCastSpell(spellId, bot, 0, true, item))
             {
                 spellList.push_back(std::make_pair(spellId, std::make_pair(spellPriority, bot)));
             }
@@ -506,12 +516,24 @@ bool CastRandomSpellAction::Execute(Event& event)
 
     bool isCast = false;
 
-    std::sort(spellList.begin(), spellList.end(), [](std::pair<uint32, std::pair<uint32, WorldObject*>> i, std::pair<uint32, std::pair<uint32, WorldObject*>> j) {return i.first > j.first; });
+    bool allTheSame = true;
 
-    uint32 rndBound = spellList.size() / 4;
+    for(auto& spell : spellList)
+    { 
+        if (spell.first != spellList[0].first)
+        {
+            allTheSame = false;
+            break;
+        }
+    }
 
-    rndBound = std::min(rndBound, (uint32)10);
-    rndBound = std::max(rndBound, (uint32)0);
+    if (!allTheSame)
+        std::sort(spellList.begin(), spellList.end(), [](std::pair<uint32, std::pair<uint32, WorldObject*>> i, std::pair<uint32, std::pair<uint32, WorldObject*>> j) {return i.first > j.first; });
+
+    uint32 rndBound = spellList.size() - 1;
+
+    if(!allTheSame)
+        rndBound = std::min(rndBound/4, (uint32)10);
 
     for (uint32 i = 0; i < 5; i++)
     {
@@ -548,11 +570,22 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
 
     if (!executed && wo)
     {
-        if (wo->GetObjectGuid().IsUnit())
+        if (pSpellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+        {
+            if (ai->CastSpell(spellId, wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ(), nullptr, false, &spellDuration))
+            {
+                ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " near " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                executed = true;
+            }
+        }
+        else if (wo->GetObjectGuid().IsUnit())
         {
             if (ai->CastSpell(spellId, (Unit*)wo, nullptr, false, &spellDuration))
             {
-                ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                if(wo != bot)
+                    ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                else
+                    ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 executed = true;
             }
         }
@@ -568,7 +601,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
         {
             if (ai->CastSpell(spellId, wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ(), nullptr, false, &spellDuration))
             {
-                ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " on " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                ai->TellPlayer(requester, "Casting " + ChatHelper::formatSpell(pSpellInfo) + " near " + ChatHelper::formatWorldobject(wo), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 executed = true;
             }
         }
@@ -596,7 +629,7 @@ bool CraftRandomItemAction::Execute(Event& event)
     std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
     std::shuffle(spellIds.begin(), spellIds.end(),*GetRandomGenerator());
 
-    std::list<ObjectGuid> wos = chat->parseGameobjects(name);
+    std::list<ObjectGuid> wos = chat->parseGameobjects(event.getParam());
     WorldObject* wot = nullptr;
 
     for (auto wo : wos)
@@ -631,6 +664,10 @@ bool CraftRandomItemAction::Execute(Event& event)
             if (GuidPosition(wot).GetGameObjectInfo()->spellFocus.focusId != pSpellInfo->RequiresSpellFocus)
                 continue;
         }
+        else
+        {
+            wot = nullptr;
+        }
 
         uint32 newItemId = pSpellInfo->EffectItemType[0];
 
@@ -644,6 +681,11 @@ bool CraftRandomItemAction::Execute(Event& event)
 
         std::ostringstream cmd;
 
+        uint32 castCount = AI_VALUE2(uint32, "has reagents for", spellId); 
+        
+        if (castCount > proto->GetMaxStackSize())
+            castCount = proto->GetMaxStackSize();
+
         cmd << "castnc ";
 
         if (((wot && sServerFacade.IsInFront(bot, wot, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))))
@@ -651,9 +693,10 @@ bool CraftRandomItemAction::Execute(Event& event)
             cmd << chat->formatWorldobject(wot) << " ";
         }
 
-        cmd << spellId << " " << proto->GetMaxStackSize();
+        cmd << spellId << " " << castCount;
 
         ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *bot);
+        SetDuration(1.0f); //Spel was not cast yet so no delay is needed.
         return true;
 
     }
@@ -681,18 +724,35 @@ bool DisenchantRandomItemAction::Execute(Event& event)
 
     for (auto& item: items)
     {
+        ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item);
+
+        if (!proto)
+            continue;
+
+        if (!proto->DisenchantID)
+            continue;
+
+#ifndef MANGOSBOT_ZERO
+        // 2.0.x addon: Check player enchanting level against the item disenchanting requirements
+        int32 item_disenchantskilllevel = proto->RequiredDisenchantSkill;
+        if (item_disenchantskilllevel > int32(bot->GetSkillValue(SKILL_ENCHANTING)))
+            continue;
+#endif
+
         // don't touch rare+ items if with real player/guild
-        if ((ai->HasRealPlayerMaster() || ai->IsInRealGuild()) && ObjectMgr::GetItemPrototype(item)->Quality > ITEM_QUALITY_UNCOMMON)
+        if ((ai->HasRealPlayerMaster() || ai->IsInRealGuild()) && proto->Quality > ITEM_QUALITY_UNCOMMON)
         {
-            return false;
+            continue;
         }
+
+        ItemQualifier itemQualifier(item);
 
         Event disenchantEvent = Event("disenchant random item", "13262 " + chat->formatQItem(item));
         bool didCast = CastCustomSpellAction::Execute(disenchantEvent);
 
         if(didCast)
         {
-            ai->TellPlayer(requester, "Disenchanting " + chat->formatItem(ObjectMgr::GetItemPrototype(item)), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            ai->TellPlayer(requester, "Disenchanting " + chat->formatItem(itemQualifier), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
 
         return didCast;

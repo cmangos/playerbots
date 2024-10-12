@@ -75,6 +75,7 @@ bool SmartDestroyItemAction::Execute(Event& event)
     else //We don't need money so destroy the cheapest stuff.
     {
         bestToDestroy.push_back(ItemUsage::ITEM_USAGE_VENDOR);
+        bestToDestroy.push_back(ItemUsage::ITEM_USAGE_BROKEN_AH);
         bestToDestroy.push_back(ItemUsage::ITEM_USAGE_AH);
     }
 
@@ -104,4 +105,57 @@ bool SmartDestroyItemAction::Execute(Event& event)
     }
 
     return false;
+}
+
+bool DestroyAllGrayItemsAction::Execute(Event& event)
+{
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+
+    bool hasDestroyedAnyItems = false;
+
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                if (Item* pItem = pBag->GetItemByPos(j))
+                {
+                    if (const ItemPrototype* proto = pItem->GetProto())
+                    {
+                        if (proto->Quality == ITEM_QUALITY_POOR)
+                        {
+                            std::ostringstream out; out << ai->GetChatHelper()->formatItem(pItem->GetProto()) << " destroyed";
+                            sLog.outBasic("%s via DestroyAllGrayItemsAction", out.str().c_str());
+                            bot->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+                            ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+                            hasDestroyedAnyItems = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        if (Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            if (const ItemPrototype* proto = pItem->GetProto())
+            {
+                if (proto->Quality == ITEM_QUALITY_POOR)
+                {
+                    std::ostringstream out; out << ai->GetChatHelper()->formatItem(pItem->GetProto()) << " destroyed";
+                    sLog.outBasic("%s via DestroyAllGrayItemsAction", out.str().c_str());
+                    bot->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+                    ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+                    hasDestroyedAnyItems = true;
+                }
+            }
+        }
+    }
+
+    return hasDestroyedAnyItems;
 }

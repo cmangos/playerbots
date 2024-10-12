@@ -180,7 +180,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
             }
             else
             {
-                PerformanceMonitorOperation* pmo2 = sPerformanceMonitor.start(PERF_MON_ACTION, "isUsefull", &aiObjectContext->performanceStack);
+                PerformanceMonitorOperation* pmo2 = sPerformanceMonitor.start(PERF_MON_ACTION, "isUseful", &aiObjectContext->performanceStack);
                 bool isUseful = action->isUseful();
                 if (pmo2) pmo2->finish();
 
@@ -411,15 +411,25 @@ ActionResult Engine::ExecuteAction(const std::string& name, Event& event)
     ActionNode* actionNode = CreateActionNode(name);
     if (actionNode)
     {
+        PerformanceMonitorOperation* pmo1 = sPerformanceMonitor.start(PERF_MON_ACTION, name, &aiObjectContext->performanceStack);
         Action* action = InitializeAction(actionNode);
         if (action)
         {
-            if (action->isUseful())
+            PerformanceMonitorOperation* pmo2 = sPerformanceMonitor.start(PERF_MON_ACTION, "isUseful", &aiObjectContext->performanceStack);
+            bool isUseful = action->isUseful();
+            if (pmo2) pmo2->finish();
+            if (isUseful)
             {
-                if (action->isPossible())
+                PerformanceMonitorOperation* pmo2 = sPerformanceMonitor.start(PERF_MON_ACTION, "isPossible", &aiObjectContext->performanceStack);
+                bool isPossible = action->isPossible();
+                if (pmo2) pmo2->finish();
+
+                if (isPossible)
                 {
                     action->MakeVerbose(true);
+                    PerformanceMonitorOperation* pmo2 = sPerformanceMonitor.start(PERF_MON_ACTION, "Execute", &aiObjectContext->performanceStack);
                     bool executionResult = ListenAndExecute(action, event);
+                    if (pmo2) pmo2->finish();
                     MultiplyAndPush(action->getContinuers(), 0.0f, false, event, "default");
                     actionResult = executionResult ? ACTION_RESULT_OK : ACTION_RESULT_FAILED;
                 }
@@ -433,6 +443,7 @@ ActionResult Engine::ExecuteAction(const std::string& name, Event& event)
                 actionResult = ACTION_RESULT_USELESS;
             }
         }
+        if (pmo1) pmo1->finish();
 
         delete actionNode;
     }

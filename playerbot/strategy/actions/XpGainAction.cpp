@@ -34,25 +34,12 @@ bool XpGainAction::Execute(Event& event)
     AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
     ai->AccelerateRespawn(guid);
 
-    if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && !urand(0,10) && sRandomPlayerbotMgr.IsFreeBot(bot) && (!ai->HasRealPlayerMaster() || !urand(0,10)))
+    Creature* creature = ai->GetCreature(guid);
+
+    //if (creature && ((creature->IsElite() && !creature->GetMap()->IsDungeon()) || creature->IsWorldBoss() || creature->GetLevel() > DEFAULT_MAX_LEVEL + 1 || creature->GetLevel() > bot->GetLevel() + 4))
+    if (creature && !creature->GetMap()->IsDungeon())
     {
-        Creature* creature = ai->GetCreature(guid); 
-
-        if (creature && ((creature->IsElite() && !creature->GetMap()->IsDungeon()) || creature->IsWorldBoss() || creature->GetLevel() > DEFAULT_MAX_LEVEL + 1 || creature->GetLevel() > bot->GetLevel() + 4))
-        {
-            Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-
-            if (guild)
-            {
-                std::map<std::string, std::string> placeholders;
-                placeholders["%name"] = creature->GetName();
-
-                if(urand(0,3))
-                    guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Wow I just killed %name!", placeholders), LANG_UNIVERSAL);
-                else
-                    guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Awesome that %name went down quickly!", placeholders), LANG_UNIVERSAL);
-            }
-        }
+        BroadcastHelper::BroadcastCreatureKill(ai, bot, creature);
     }
 
     if (!sRandomPlayerbotMgr.IsFreeBot(bot) || sPlayerbotAIConfig.playerbotsXPrate == 1)

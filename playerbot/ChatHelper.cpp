@@ -5,6 +5,7 @@
 #include "strategy/values/ItemUsageValue.h"
 #include <numeric>
 #include <iomanip>
+#include <regex>
 
 using namespace ai;
 
@@ -280,6 +281,38 @@ uint32 ChatHelper::parseMoney(const std::string& text)
         }
     }
     return copper;
+}
+
+std::set<uint32> ChatHelper::ExtractAllQuestIds(const std::string& text)
+{
+    std::set<uint32> ids;
+
+    std::regex rgx("Hquest:[0-9]+");
+    auto begin = std::sregex_iterator(text.begin(), text.end(), rgx);
+    auto end = std::sregex_iterator();
+    for (std::sregex_iterator i = begin; i != end; ++i)
+    {
+        std::smatch match = *i;
+        ids.insert(std::stoi(match.str().erase(0, 7)));
+    }
+
+    return ids;
+}
+
+std::set<uint32> ChatHelper::ExtractAllItemIds(const std::string& text)
+{
+    std::set<uint32> ids;
+
+    std::regex rgx("Hitem:[0-9]+");
+    auto begin = std::sregex_iterator(text.begin(), text.end(), rgx);
+    auto end = std::sregex_iterator();
+    for (std::sregex_iterator i = begin; i != end; ++i)
+    {
+        std::smatch match = *i;
+        ids.insert(std::stoi(match.str().erase(0, 6)));
+    }
+
+    return ids;
 }
 
 ItemIds ChatHelper::parseItems(const std::string& text, bool validate)
@@ -813,8 +846,8 @@ std::string ChatHelper::formatWorldPosition(const WorldPosition& pos)
     out << pos.getX() << "," << pos.getY() << "," << pos.getZ();
     if (pos.getO())
         out << " facing " << formatAngle(pos.getO());
-    if (pos.getMap())
-        out << " in " << pos.getMap()->GetMapName();
+    if (pos.getMap(pos.getFirstInstanceId()))
+        out << " in " << pos.getMap(pos.getFirstInstanceId())->GetMapName();
     else
         out << " map:" << pos.getMapId();
 
@@ -825,8 +858,8 @@ std::string ChatHelper::formatWorldPosition(const WorldPosition& pos)
 std::string ChatHelper::formatGuidPosition(const GuidPosition& guidP)
 {
     std::ostringstream out;
-    if (guidP.GetWorldObject())
-        out << guidP.GetWorldObject()->GetName();
+    if (guidP.GetWorldObject(guidP.getFirstInstanceId()))
+        out << guidP.GetWorldObject(guidP.getFirstInstanceId())->GetName();
     else if (guidP.GetCreatureTemplate())
         out << guidP.GetCreatureTemplate()->Name;
     else if (guidP.GetGameObjectInfo())

@@ -53,6 +53,9 @@ GuidPosition FreeMoveCenterValue::Calculate()
 
 float FreeMoveRangeValue::Calculate()
 {
+    if (ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT))
+        return INTERACTION_DISTANCE;
+
     Unit* followTarget = AI_VALUE(Unit*, "follow target");
 
     if (!followTarget || followTarget == bot)
@@ -74,22 +77,21 @@ float FreeMoveRangeValue::Calculate()
 
     bool hasFollow = ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT);
     bool hasGuard = ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT);
-    bool hasStay = ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT);
-    bool hasFree = !hasFollow && !hasGuard && !hasStay;
+    bool hasFree = !hasFollow && !hasGuard;
 
     //When far away from master stop trying to limit the bot.
-    if (!hasFollow && (ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT) || (WorldPosition(followTarget).fDist(bot) > (hasFree ? sPlayerbotAIConfig.sightDistance : sPlayerbotAIConfig.reactDistance))))
+    if (!hasFollow && (ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT) || (WorldPosition(followTarget).fDist(bot) > (hasFree ? sPlayerbotAIConfig.sightDistance : sPlayerbotAIConfig.maxFreeMoveDistance))))
         return 0;
 
     if (hasFree || hasGuard)//Free and guard start with a base 20y range.
-        maxDist += sPlayerbotAIConfig.lootDistance;
+        maxDist += sPlayerbotAIConfig.proximityDistance;
 
     uint32 lastMasterMove = MEM_AI_VALUE(WorldPosition, "master position")->LastChangeDelay();
 
-    if (lastMasterMove > 30.0f) //After 30 seconds increase the range by 1y each second.
-        maxDist += (lastMasterMove - 30);
+    if (sPlayerbotAIConfig.freeMoveDelay && lastMasterMove > sPlayerbotAIConfig.freeMoveDelay) //After 30 seconds increase the range by 1y each second.
+        maxDist += (lastMasterMove - static_cast<uint32>(sPlayerbotAIConfig.freeMoveDelay));
 
-    if (maxDist > sPlayerbotAIConfig.reactDistance)
+    if (maxDist > sPlayerbotAIConfig.maxFreeMoveDistance)
     {
         if (hasFree)
         {
@@ -97,13 +99,12 @@ float FreeMoveRangeValue::Calculate()
         }
         else
         {
-            maxDist = sPlayerbotAIConfig.reactDistance;
+            maxDist = sPlayerbotAIConfig.maxFreeMoveDistance;
         }
     }
 
     return maxDist;
 }
-
 
 bool CanFreeMoveToValue::Calculate()
 {
@@ -112,7 +113,7 @@ bool CanFreeMoveToValue::Calculate()
 
     GuidPosition destPos(qualifier);
 
-    destPos.updatePosition();
+    destPos.updatePosition(bot->GetInstanceId());
 
     GuidPosition refPos = AI_VALUE(GuidPosition, "free move center");
 

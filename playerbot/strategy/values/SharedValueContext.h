@@ -3,6 +3,7 @@
 #include "PvpValues.h"
 #include "QuestValues.h"
 #include "TrainerValues.h"
+#include "VendorValues.h"
 #include "playerbot/PlayerbotAI.h"
 
 namespace ai
@@ -12,36 +13,23 @@ namespace ai
     public:
         SharedValueContext() : NamedObjectContext(true)
         {
-            creators["bg masters"] = &SharedValueContext::bg_masters;
+            creators["bg masters"] = [](PlayerbotAI* ai) { return new BgMastersValue(ai); };
 
-            creators["drop map"] = &SharedValueContext::drop_map;
-            creators["item drop list"] = &SharedValueContext::item_drop_list;
-            creators["entry loot list"] = &SharedValueContext::entry_loot_list;
-            creators["loot chance"] = &SharedValueContext::loot_chance;
+            creators["drop map"] = [](PlayerbotAI* ai) { return new DropMapValue(ai); };
+            creators["item drop list"] = [](PlayerbotAI* ai) { return new ItemDropListValue(ai); };
+            creators["entry loot list"] = [](PlayerbotAI* ai) { return new EntryLootListValue(ai); };
+            creators["loot chance"] = [](PlayerbotAI* ai) { return new LootChanceValue(ai); };
 
-            creators["entry quest relation"] = &SharedValueContext::entry_quest_relation;
+            creators["vendor map"] = [](PlayerbotAI* ai) { return new VendorMapValue(ai); };
+            creators["item vendor list"] = [](PlayerbotAI* ai) { return new ItemVendorListValue(ai); };
 
-            creators["quest guidp map"] = &SharedValueContext::quest_guidp_map;
-            creators["quest givers"] = &SharedValueContext::quest_givers;
+            creators["entry quest relation"] = [](PlayerbotAI* ai) { return new EntryQuestRelationMapValue(ai); };
 
-            creators["trainable spell map"] = &SharedValueContext::trainable_spell_map;
+            creators["quest guidp map"] = [](PlayerbotAI* ai) { return new QuestGuidpMapValue(ai); };
+            creators["quest givers"] = [](PlayerbotAI* ai) { return new QuestGiversValue(ai); };
+
+            creators["trainable spell map"] = [](PlayerbotAI* ai) { return new TrainableSpellMapValue(ai); };
         }
-
-
-    private:
-        static UntypedValue* bg_masters(PlayerbotAI* ai) { return new BgMastersValue(ai); }
-
-        static UntypedValue* drop_map(PlayerbotAI* ai) { return new DropMapValue(ai); }
-        static UntypedValue* item_drop_list(PlayerbotAI* ai) { return new ItemDropListValue(ai); }
-        static UntypedValue* entry_loot_list(PlayerbotAI* ai) { return new EntryLootListValue(ai); }
-        static UntypedValue* loot_chance(PlayerbotAI* ai) { return new LootChanceValue(ai); }
-
-        static UntypedValue* entry_quest_relation(PlayerbotAI* ai) { return new EntryQuestRelationMapValue(ai); }        
-
-        static UntypedValue* quest_guidp_map(PlayerbotAI* ai) { return new QuestGuidpMapValue(ai); }
-        static UntypedValue* quest_givers(PlayerbotAI* ai) { return new QuestGiversValue(ai); }
-
-        static UntypedValue* trainable_spell_map(PlayerbotAI* ai) { return new TrainableSpellMapValue(ai); } 
     };
 
 

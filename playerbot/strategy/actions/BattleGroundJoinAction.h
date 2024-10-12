@@ -21,7 +21,7 @@ public:
     BGJoinAction(PlayerbotAI* ai, std::string name = "bg join") : Action(ai, name) {}
     virtual bool Execute(Event& event);
     virtual bool isUseful();
-    virtual bool canJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroundBracketId bracketId);
+    virtual bool canJoinBg(Player* player, BattleGroundQueueTypeId queueTypeId, BattleGroundBracketId bracketId);
     virtual bool shouldJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroundBracketId bracketId);
 #ifndef MANGOSBOT_ZERO
     virtual bool gatherArenaTeam(ArenaType type);

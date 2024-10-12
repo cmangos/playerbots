@@ -27,11 +27,11 @@ float RpgActionMultiplier::GetValue(Action* action)
 
 void RpgStrategy::OnStrategyAdded(BotState state)
 {
-    ai->ChangeStrategy("+rpg quest,+rpg vendor,+rpg explore,+rpg maintenance,+rpg player,+rpg bg", state);
+    ai->ChangeStrategy("+rpg quest,+rpg vendor,+rpg explore,+rpg maintenance,+rpg player,+rpg bg,+rpg guild", state);
 }
 void RpgStrategy::OnStrategyRemoved(BotState state) 
 {
-    ai->ChangeStrategy("-rpg quest,-rpg vendor,-rpg explore,-rpg maintenance,-rpg player,-rpg bg", state);
+    ai->ChangeStrategy("-rpg quest,-rpg vendor,-rpg explore,-rpg maintenance,-rpg player,-rpg bg,-rpg guild", state);
 }
 
 void RpgStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
@@ -76,6 +76,10 @@ void RpgStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "rpg use",
         NextAction::array(0, new NextAction("rpg use", 1.001f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("rpg cancel", 0.001f), NULL)));
 }
 
 void RpgStrategy::InitNonCombatMultipliers(std::list<Multiplier*>& multipliers)
@@ -168,6 +172,10 @@ void RpgPlayerStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("rpg trade useful", 1.030f), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "rpg enchant",
+        NextAction::array(0, new NextAction("rpg enchant", 1.029f), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "rpg duel",
         NextAction::array(0, new NextAction("rpg duel", 1.010f), NULL)));
 }
@@ -180,7 +188,7 @@ void RpgCraftStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "rpg craft",
-        NextAction::array(0, new NextAction("rpg craft", 1.001f), NULL)));
+        NextAction::array(0, new NextAction("rpg craft", ai->HasCheat(BotCheatMask::item) ? 1.001f : 1.010f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "rpg item",

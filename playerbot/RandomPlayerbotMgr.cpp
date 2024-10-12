@@ -658,6 +658,8 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
 
     DelayedFacingFix();
 
+    MirrorAh();
+
     //Ping character database.
     CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "select 1 from dual");
 }
@@ -699,7 +701,7 @@ void RandomPlayerbotMgr::ScaleBotActivity()
         out << activeBots << ",";
         out << GetPlayerbotsAmount() << ",";
 
-        float level = 0, gold = 0, gearscore = 0;
+        float totalLevel = 0, totalGold = 0, totalGearscore = 0;
 
         if (sPlayerbotAIConfig.randomBotAutologin)
         {
@@ -709,9 +711,12 @@ void RandomPlayerbotMgr::ScaleBotActivity()
                 {
                     std::string bracket = "level:" + std::to_string(bot->GetLevel() / 10);
 
-                    float level = ((float)bot->GetLevel() + (bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) ? ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)) : 0));
+                    float level = bot->GetPlayerbotAI()->GetLevelFloat();
+                    totalLevel += level;
                     float gold = bot->GetMoney() / 10000;
+                    totalGold += gold;
                     float gearscore = bot->GetPlayerbotAI()->GetEquipGearScore(bot, false, false);
+                    totalGearscore += gearscore;
 
                     const uint32 botGuid = bot->GetObjectGuid().GetCounter();
                     PushMetric(botPerformanceMetrics[bracket], botGuid, level);
@@ -722,13 +727,16 @@ void RandomPlayerbotMgr::ScaleBotActivity()
         }
 
         out << std::fixed << std::setprecision(4);
+        out << totalLevel << ",";
 
         for (uint8 i = 0; i < (DEFAULT_MAX_LEVEL / 10) + 1; i++)
         {
             out << GetMetricDelta(botPerformanceMetrics["level:" + std::to_string(i)]) * 12 * 60 << ",";
         }
 
+        out << totalGold << ",";
         out << GetMetricDelta(botPerformanceMetrics["gold"]) * 12 * 60 << ",";
+        out << totalGearscore << ",";
         out << GetMetricDelta(botPerformanceMetrics["gearscore"]) * 12 * 60 << ",";
         //out << CharacterDatabase.m_threadBody->m_sqlQueue.size();
 
@@ -762,28 +770,30 @@ void RandomPlayerbotMgr::DelayedFacingFix()
         return;
 
     for (auto& fMap : facingFix) {
-        for (auto obj : fMap.second) {
-            if (time(0) - obj.second > 5)
-            {
-                if (!obj.first.IsCreature())
-                    continue;
+        for (auto& fInstance : fMap.second) {
+            for (auto obj : fInstance.second) {
+                if (time(0) - obj.second > 5)
+                {
+                    if (!obj.first.IsCreature())
+                        continue;
 
-                GuidPosition guidP(obj.first, WorldPosition(fMap.first, 0, 0, 0));
+                    GuidPosition guidP(obj.first, WorldPosition(fMap.first, 0, 0, 0));
 
-                Creature* unit = guidP.GetCreature();
+                    Creature* unit = guidP.GetCreature(fInstance.first);
 
-                if (!unit)
-                    continue;
+                    if (!unit)
+                        continue;
 
-                CreatureData* data = guidP.GetCreatureData();
+                    CreatureData* data = guidP.GetCreatureData();
 
-                if (!data)
-                    continue;
+                    if (!data)
+                        continue;
 
-                if (unit->GetOrientation() == data->orientation)
-                    continue;
+                    if (unit->GetOrientation() == data->orientation)
+                        continue;
 
-                unit->SetFacingTo(data->orientation);
+                    unit->SetFacingTo(data->orientation);
+                }
             }
         }
         facingFix[fMap.first].clear();
@@ -990,7 +1000,7 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
         CharacterDatabase.CommitTransaction();
 
         if (currentAllowedBotCount)
-            currentAllowedBotCount = GetEventValue(0, "bot_count") - currentBots.size();          
+            currentAllowedBotCount = std::max(int64(GetEventValue(0, "bot_count")) - int64(currentBots.size()), int64(0));
 
         if(currentAllowedBotCount)
 #ifdef MANGOSBOT_TWO
@@ -1129,10 +1139,12 @@ void RandomPlayerbotMgr::CheckBgQueue()
             uint32 TeamId = player->GetTeam() == ALLIANCE ? 0 : 1;
 
             BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
-#ifdef MANGOS
+#ifdef MANGOSBOT_ZERO
             BattleGroundBracketId bracketId = player->GetBattleGroundBracketIdFromLevel(bgTypeId);
 #endif
-#ifdef CMANGOS
+#ifdef MANGOSBOT_ONE
+            BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, player->GetLevel());
+#endif
 #ifdef MANGOSBOT_TWO
             BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
             uint32 mapId = bg->GetMapId();
@@ -1141,45 +1153,10 @@ void RandomPlayerbotMgr::CheckBgQueue()
                 continue;
 
             BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
-#else
-            BattleGroundBracketId bracketId = player->GetBattleGroundBracketIdFromLevel(bgTypeId);
 #endif
-#endif
-#ifndef MANGOSBOT_ZERO
+#ifdef MANGOSBOT_TWO
             if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
             {
-#ifdef MANGOS
-                BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
-                GroupQueueInfo ginfo;
-                uint32 tempT = TeamId;
-
-                if (bgQueue.GetPlayerGroupInfoData(player->GetObjectGuid(), &ginfo))
-                {
-                    if (ginfo.IsRated)
-                    {
-                        for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
-                        {
-                            uint32 arena_team_id = player->GetArenaTeamId(arena_slot);
-                            ArenaTeam* arenateam = sObjectMgr.GetArenaTeamById(arena_team_id);
-                            if (!arenateam)
-                                continue;
-                            if (arenateam->GetType() != arenaType)
-                                continue;
-
-                            Rating[queueTypeId][bracketId][1] = arenateam->GetRating();
-                        }
-                    }
-                    TeamId = ginfo.IsRated ? 1 : 0;
-                }
-                if (player->InArena())
-                {
-                    if (player->GetBattleGround()->isRated() && (ginfo.IsRated && ginfo.ArenaTeamId && ginfo.ArenaTeamRating && ginfo.OpponentsTeamRating))
-                        TeamId = 1;
-                    else
-                        TeamId = 0;
-        }
-#endif
-#ifdef CMANGOS
                 BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
                 GroupQueueInfo ginfo;
                 uint32 tempT = TeamId;
@@ -1209,11 +1186,50 @@ void RandomPlayerbotMgr::CheckBgQueue()
                     else
                         TeamId = 0;
                 }
-#endif
                 ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
-    }
+            }
 #endif
+#ifdef MANGOSBOT_ONE
+            if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
+            {
+                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, player = player, arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
+                    {
+                        uint32 TeamId;
+                        GroupQueueInfo ginfo;
 
+                        BattleGroundQueueItem* queueItem = &bgQueue->GetBattleGroundQueue(queueTypeId);
+
+                        if (queueItem->GetPlayerGroupInfoData(player->GetObjectGuid(), &ginfo))
+                        {
+                            if (ginfo.isRated)
+                            {
+                                for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
+                                {
+                                    uint32 arena_team_id = player->GetArenaTeamId(arena_slot);
+                                    ArenaTeam* arenateam = sObjectMgr.GetArenaTeamById(arena_team_id);
+                                    if (!arenateam)
+                                        continue;
+                                    if (arenateam->GetType() != arenaType)
+                                        continue;
+
+                                    sRandomPlayerbotMgr.Rating[queueTypeId][bracketId][1] = arenateam->GetRating();
+                                }
+                            }
+                            TeamId = ginfo.isRated ? 1 : 0;
+                        }
+                        if (player->InArena())
+                        {
+                            if (player->GetBattleGround()->IsRated()/* && (ginfo.isRated && ginfo.arenaTeamId && ginfo.arenaTeamRating && ginfo.opponentsTeamRating)*/)
+                                TeamId = 1;
+                            else
+                                TeamId = 0;
+                        }
+                        sRandomPlayerbotMgr.ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
+
+                    }
+                );
+            }
+#endif
             if (player->GetPlayerbotAI())
                 BgBots[queueTypeId][bracketId][TeamId]++;
             else
@@ -1262,6 +1278,13 @@ void RandomPlayerbotMgr::CheckBgQueue()
             uint32 TeamId = bot->GetTeam() == ALLIANCE ? 0 : 1;
 
             BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
+
+#ifdef MANGOSBOT_ZERO
+            BattleGroundBracketId bracketId = bot->GetBattleGroundBracketIdFromLevel(bgTypeId);
+#endif
+#ifdef MANGOSBOT_ONE
+            BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel());;
+#endif
 #ifdef MANGOSBOT_TWO
             BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
             uint32 mapId = bg->GetMapId();
@@ -1270,11 +1293,8 @@ void RandomPlayerbotMgr::CheckBgQueue()
                 continue;
 
             BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
-#else
-            BattleGroundBracketId bracketId = bot->GetBattleGroundBracketIdFromLevel(bgTypeId);
 #endif
-
-#ifndef MANGOSBOT_ZERO
+            #ifdef MANGOSBOT_TWO
             ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
             if (arenaType != ARENA_TYPE_NONE)
             {
@@ -1293,6 +1313,37 @@ void RandomPlayerbotMgr::CheckBgQueue()
                         TeamId = 0;
                 }
                 ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
+            }
+#endif
+#ifdef MANGOSBOT_ONE
+            ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
+            if (arenaType != ARENA_TYPE_NONE)
+            {
+                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, bot = bot, arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
+                    {
+                        uint32 TeamId;
+                        GroupQueueInfo ginfo;
+
+                        BattleGroundQueueItem* queueItem = &bgQueue->GetBattleGroundQueue(queueTypeId);
+
+                        if (queueItem->GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
+                        {
+                            TeamId = ginfo.isRated ? 1 : 0;
+                        }
+                        if (bot->InArena())
+                        {
+                            if (bot->GetBattleGround()->IsRated()/* && (ginfo.isRated && ginfo.arenaTeamId && ginfo.arenaTeamRating && ginfo.opponentsTeamRating)*/)
+                                TeamId = 1;
+                            else
+                                TeamId = 0;
+                        }
+
+                        
+
+                        sRandomPlayerbotMgr.ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
+
+                    }
+                );
             }
 #endif
             BgBots[queueTypeId][bracketId][TeamId]++;
@@ -1424,6 +1475,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
 #endif
 
 #ifdef MANGOSBOT_ONE
+        /* todo: Fix with new system
         WorldSafeLocsEntry const* ClosestGrave = player->GetMap()->GetGraveyardManager().GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
         uint32 zoneId = ClosestGrave ? ClosestGrave->ID : 0;
 
@@ -1432,7 +1484,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
         {
             if (group->IsLeader(player->GetObjectGuid()))
             {
-                if (!player->m_lookingForGroup.more.empty() && player->GetSession()->LookingForGroup_auto_add && player->m_lookingForGroup.more.isAuto())
+                if (player->GetSession()->m_lfgInfo.queued && player->GetSession()->LookingForGroup_auto_add && player->m_lookingForGroup.more.isAuto())
                 {
                     uint32 lfgType = (zoneId << 16) | ((1 << 8) | uint8(player->m_lookingForGroup.more.entry));
                     LfgDungeons[player->GetTeam()].push_back(lfgType);
@@ -1457,6 +1509,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
                 isLFG = true;
             }
         }
+        */
 #endif
 
 #ifdef MANGOSBOT_TWO
@@ -1497,6 +1550,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
     }
 
 #ifdef MANGOSBOT_ONE
+    /* todo: Fix with new system
     ForEachPlayerbot([&](Player* bot)
     {
         if (!bot || !bot->IsInWorld())
@@ -1513,7 +1567,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
         {
             if (group->IsLeader(bot->GetObjectGuid()))
             {
-                if (!bot->m_lookingForGroup.more.empty() && bot->GetSession()->LookingForGroup_auto_add && bot->m_lookingForGroup.more.isAuto())
+                if (bot->GetSession()->m_lfgInfo.queued && bot->GetSession()->m_lfgInfo.autofill)
                 {
                     uint32 lfgType = (zoneId << 16) | ((1 << 8) | uint8(bot->m_lookingForGroup.more.entry));
                     LfgDungeons[bot->GetTeam()].push_back(lfgType);
@@ -1529,6 +1583,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
             }
         }
     });
+    */
 #endif
 
     if (LfgDungeons[ALLIANCE].size() || LfgDungeons[HORDE].size())
@@ -1637,6 +1692,27 @@ Item* RandomPlayerbotMgr::CreateTempItem(uint32 item, uint32 count, Player const
     return nullptr;
 }
 
+InventoryResult RandomPlayerbotMgr::CanEquipUnseenItem(Player* player, uint8 slot, uint16& dest, uint32 item)
+{
+    dest = 0;
+    Item* pItem = RandomPlayerbotMgr::CreateTempItem(item, 1, player);
+
+    if (pItem)
+    {
+        InventoryResult result = player->CanEquipItem(slot, dest, pItem, true, false);
+
+        pItem->RemoveFromUpdateQueueOf(player);
+
+        if (!player->GetItemUpdateQueue().empty() && !player->GetItemUpdateQueue().back()) //Prevent queue overflow.
+            player->GetItemUpdateQueue().pop_back();
+
+        delete pItem;
+        return result;
+    }
+
+    return EQUIP_ERR_ITEM_NOT_FOUND;
+}
+
 void RandomPlayerbotMgr::SaveCurTime()
 {
     if (!EventTimeSyncTimer || time(NULL) > (EventTimeSyncTimer + 60))
@@ -1663,6 +1739,8 @@ void RandomPlayerbotMgr::CheckPlayers()
 
     sLog.outBasic("Checking Players...");
 
+    uint32 newPlayersLevel = 0;
+
     for (auto i : players)
     {
         Player* player = i.second;
@@ -1673,10 +1751,17 @@ void RandomPlayerbotMgr::CheckPlayers()
         //if (player->GetSession()->GetSecurity() > SEC_PLAYER)
         //    continue;
 
-        if (player->GetLevel() > playersLevel)
-            playersLevel = player->GetLevel();
+        if (player->GetLevel() > newPlayersLevel)
+            newPlayersLevel = player->GetLevel();
     }
-    sLog.outBasic("Max player level is %d, max bot level set to %d", playersLevel, playersLevel);
+
+    if(playersLevel!= newPlayersLevel)
+        sLog.outBasic("Max player level is %d, max bot level changed from %d to %d", newPlayersLevel, playersLevel, newPlayersLevel);
+    else
+        sLog.outBasic("Max player level is %d, max bot level set to %d", newPlayersLevel, newPlayersLevel);
+
+    playersLevel = newPlayersLevel;
+
     return;
 }
 
@@ -1901,18 +1986,32 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
         uint32 changeStrategy = GetEventValue(bot, "change_strategy");
         if (!changeStrategy)
         {
-            sLog.outDetail("Changing strategy for bot #%d %s:%d <%s>", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
-            ChangeStrategy(player);
-            ScheduleChangeStrategy(bot);
+            if (sPlayerbotAIConfig.enableRandomTeleports)
+            {
+                sLog.outDetail("Changing strategy for bot #%d %s:%d <%s>", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+                ChangeStrategy(player);
+                ScheduleChangeStrategy(bot);
+            }
+            else
+            {
+                sLog.outDetail("Changing strategy for bot #%d %s:%d <%s> is supposed to happen, but enableRandomTeleports = false", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+            }
             return true;
         }
 
         uint32 teleport = GetEventValue(bot, "teleport");
         if (!teleport && players.size())
         {
-            sLog.outBasic("Bot #%d %s:%d <%s>: sent to grind", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
-            RandomTeleportForLevel(player, true);
-            ScheduleTeleport(bot);
+            if (sPlayerbotAIConfig.enableRandomTeleports)
+            {
+                sLog.outBasic("Bot #%d %s:%d <%s>: sent to grind", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+                RandomTeleportForLevel(player, true);
+                ScheduleTeleport(bot);
+            }
+            else
+            {
+                sLog.outBasic("Bot #%d %s:%d <%s>: supposed to be sent to grind, but enableRandomTeleports = false", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+            }
             return true;
         }
     }
@@ -1956,9 +2055,6 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
         return;
 
     if (bot->IsTaxiFlying() && bot->GetPlayerbotAI()->HasPlayerNearby())
-        return;
-
-    if (sPlayerbotAIConfig.randomBotRpgChance < 0)
         return;
 
     if (locs.empty())
@@ -2024,7 +2120,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
             }
 
             return true;
-        }), 
+        }),
         tlocs.end());
 
         /*if (!tlocs.empty())
@@ -2192,7 +2288,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
             sLog.outDetail("Random teleporting bot %s to %s %f,%f,%f (%u/%zu locations)",
                 bot->GetName(), area->area_name[0], x, y, z, attemtps, tlocs.size());
 
-            if (bot->IsTaxiFlying())          
+            if (bot->IsTaxiFlying())
                 bot->GetMotionMaster()->MovementExpired();
 
             if (hearth)
@@ -2442,7 +2538,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
             if ((cInfo->NpcFlags & flag) != 0)
             {
                 std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(creatureData));
-                
+
                 for (auto& range : ranges)
                     newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), creatureData));
                 break;
@@ -2652,7 +2748,7 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
     SetValue(bot, "level", level);
     PlayerbotFactory factory(bot, level);
     factory.Randomize(false, false);
-	
+
     // schedule randomise
     uint32 randomTime = urand(sPlayerbotAIConfig.minRandomBotRandomizeTime, sPlayerbotAIConfig.maxRandomBotRandomizeTime);
     SetEventValue(bot->GetGUIDLow(), "randomize", 1, randomTime);
@@ -2999,7 +3095,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
 
         return true;
     }
- 
+
 
 
     std::map<std::string, ConsoleCommandHandler> handlers;
@@ -3011,6 +3107,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     handlers["revive"] = &RandomPlayerbotMgr::Revive;
     handlers["grind"] = &RandomPlayerbotMgr::RandomTeleport;
     handlers["change_strategy"] = &RandomPlayerbotMgr::ChangeStrategy;
+    handlers["remove"] = &RandomPlayerbotMgr::Remove;
 
     for (std::map<std::string, ConsoleCommandHandler>::iterator j = handlers.begin(); j != handlers.end(); ++j)
     {
@@ -3192,7 +3289,7 @@ void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
 
         //player->Relocate(botPos.getX(), botPos.getY(), botPos.getZ(), botPos.getO());
         //player->Relocate(botPos.coord_x, botPos.coord_y, botPos.coord_z, botPos.orientation);
-        
+
         if (!player->GetFactionTemplateEntry())
         {
             botPos.GetReachableRandomPointOnGround(player, sPlayerbotAIConfig.reactDistance * 2, true);
@@ -3223,7 +3320,7 @@ void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
 
         player->TeleportTo(botPos);
         //player->Relocate(botPos.getX(), botPos.getY(), botPos.getZ(), botPos.getO());
-        
+
     }
 
     if (IsFreeBot(player))
@@ -3448,7 +3545,7 @@ void RandomPlayerbotMgr::PrintStats()
     sLog.outString("Bots status:");
     sLog.outString("    Active: %d", active);
     sLog.outString("    Moving: %d", moving);
-    
+
     //sLog.outString("Bots to:");
     //sLog.outString("    update: %d", update);
     //sLog.outString("    randomize: %d", randomize);
@@ -3576,23 +3673,6 @@ void RandomPlayerbotMgr::ChangeStrategy(Player* player)
 		sLog.outBasic("Bot #%d %s:%d <%s>: sent to inn", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
         RandomTeleportForRpg(player, players.size());
         ScheduleTeleport(bot);
-    }
-}
-
-void RandomPlayerbotMgr::ChangeStrategyOnce(Player* player)
-{
-    uint32 bot = player->GetGUIDLow();
-
-    if (urand(0, 100) > 100 * sPlayerbotAIConfig.randomBotRpgChance && players.size()) // select grind / pvp
-    {
-        sLog.outBasic("Bot #%d %s:%d <%s>: sent to grind spot", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
-        // teleport in different places only if players are online
-        RandomTeleportForLevel(player, true);
-    }
-    else
-    {
-        sLog.outBasic("Bot #%d %s:%d <%s>: sent to inn", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
-        RandomTeleportForRpg(player, players.size());
     }
 }
 
@@ -3778,6 +3858,38 @@ void RandomPlayerbotMgr::Hotfix(Player* bot, uint32 version)
         bot->GetGUIDLow(), MANGOSBOT_VERSION);
 }
 
+void RandomPlayerbotMgr::MirrorAh()
+{
+    sRandomPlayerbotMgr.m_ahActionMutex.lock();
+
+    ahMirror.clear();
+
+    std::vector<AuctionHouseType> houses = { (AuctionHouseType)0,(AuctionHouseType)1,(AuctionHouseType)2 };
+
+    //Now loops over all houses. Can probably be faction specific later.
+    for (auto house : houses)
+    {
+        AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(house);
+
+        AuctionHouseObject::AuctionEntryMap const& map = auctionHouse->GetAuctions();
+
+        for (auto& auction : map)
+        {
+            if (!auction.second)
+                continue;
+
+            if (!auction.second->buyout)
+                continue;
+
+            if (!auction.second->itemCount)
+                continue;
+
+            ahMirror[auction.second->itemTemplate].push_back(*auction.second);
+        }
+    }
+    sRandomPlayerbotMgr.m_ahActionMutex.unlock();
+}
+
 typedef std::unordered_map <uint32, std::list<float>> botPerformanceMetric;
 std::unordered_map<std::string, botPerformanceMetric> botPerformanceMetrics;
 
@@ -3794,8 +3906,9 @@ float RandomPlayerbotMgr::GetMetricDelta(botPerformanceMetric& metric) const
     float deltaMetric = 0;
     for (auto& botMetric : metric)
     {
-        if (botMetric.second.size() > 1)
-            deltaMetric += (botMetric.second.back() - botMetric.second.front()) / botMetric.second.size();
+        std::list<float> values = botMetric.second;
+        if (values.size() > 1)
+            deltaMetric += (values.back() - values.front()) / values.size();
     }
 
     if (metric.empty())

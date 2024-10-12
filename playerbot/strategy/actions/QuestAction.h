@@ -8,7 +8,7 @@ namespace ai
     class QuestAction : public Action 
     {
     public:
-        QuestAction(PlayerbotAI* ai, std::string name) : Action(ai, name) {}
+        QuestAction(PlayerbotAI* ai, std::string name = "quest") : Action(ai, name) {}
 
     public:
         virtual bool Execute(Event& event);
@@ -21,10 +21,46 @@ namespace ai
         bool ProcessQuests(WorldObject* questGiver);
     };
     
-    class QuestObjectiveCompletedAction : public Action 
+    class QuestUpdateAddKillAction : public Action
     {
     public:
-        QuestObjectiveCompletedAction(PlayerbotAI* ai) : Action(ai, "quest objective completed") {}
+        QuestUpdateAddKillAction(PlayerbotAI* ai) : Action(ai, "quest update add kill") {}
+
+    public:
+        virtual bool Execute(Event& event);
+    };
+
+    class QuestUpdateAddItemAction : public Action
+    {
+    public:
+        QuestUpdateAddItemAction(PlayerbotAI* ai) : Action(ai, "quest update add item") {}
+
+    public:
+        virtual bool Execute(Event& event);
+    };
+
+    class QuestUpdateFailedAction : public Action
+    {
+    public:
+        QuestUpdateFailedAction(PlayerbotAI* ai) : Action(ai, "quest update failed") {}
+
+    public:
+        virtual bool Execute(Event& event);
+    };
+
+    class QuestUpdateFailedTimerAction : public Action
+    {
+    public:
+        QuestUpdateFailedTimerAction(PlayerbotAI* ai) : Action(ai, "quest update failed timer") {}
+
+    public:
+        virtual bool Execute(Event& event);
+    };
+
+    class QuestUpdateCompleteAction : public Action
+    {
+    public:
+        QuestUpdateCompleteAction(PlayerbotAI* ai) : Action(ai, "quest update complete") {}
 
     public:
         virtual bool Execute(Event& event);

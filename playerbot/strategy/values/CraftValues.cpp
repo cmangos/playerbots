@@ -38,7 +38,35 @@ std::vector<uint32> CraftSpellsValue::Calculate()
     return spellIds;
 }
 
-bool HasReagentsForValue::Calculate()
+std::vector<uint32> EnchantSpellsValue::Calculate()
+{
+    std::vector<uint32> spellIds;
+
+    PlayerSpellMap const& spellMap = bot->GetSpellMap();
+
+    for (auto& spell : spellMap)
+    {
+        uint32 spellId = spell.first;
+
+        if (spell.second.state == PLAYERSPELL_REMOVED || spell.second.disabled || IsPassiveSpell(spellId))
+            continue;
+
+        const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
+        if (!pSpellInfo)
+            continue;
+
+        if (pSpellInfo->Effect[0] != SPELL_EFFECT_ENCHANT_ITEM || !pSpellInfo->ReagentCount[0])
+            continue;
+
+
+        spellIds.push_back(spellId);
+        break;
+    }
+
+    return spellIds;
+}
+
+uint32 HasReagentsForValue::Calculate()
 {
     if (ai->HasCheat(BotCheatMask::item))
         return true;
@@ -50,20 +78,25 @@ bool HasReagentsForValue::Calculate()
     if (!pSpellInfo)
         return false;
 
+    uint32 craftCount = 9999;
+
     for (uint8 i = 0; i < MAX_SPELL_REAGENTS; i++)
     {
         if (pSpellInfo->ReagentCount[i] > 0 && pSpellInfo->Reagent[i])
         {
             const ItemPrototype* reqProto = sObjectMgr.GetItemPrototype(pSpellInfo->Reagent[i]);
 
-            uint32 count = AI_VALUE2(uint32, "item count", reqProto->Name1);
+            uint32 count = AI_VALUE2(uint32, "item count", ChatHelper::formatItem(reqProto));
 
             if (count < pSpellInfo->ReagentCount[i])
-                return false;
+                return 0;
+
+            if (craftCount > count / pSpellInfo->ReagentCount[i])
+                craftCount = count / pSpellInfo->ReagentCount[i];
         }
     }
 
-    return true;
+    return craftCount;
 }
 
 bool CanCraftSpellValue::Calculate()
@@ -75,7 +108,7 @@ bool CanCraftSpellValue::Calculate()
     if (!pSpellInfo)
         return false;
 
-    if (!AI_VALUE2(bool, "has reagents for", spellId))
+    if (AI_VALUE2(uint32, "has reagents for", spellId) == 0)
         return false;
 
     return true;
@@ -115,6 +148,7 @@ bool ShouldCraftSpellValue::Calculate()
                 case ItemUsage::ITEM_USAGE_AMMO:
                 case ItemUsage::ITEM_USAGE_DISENCHANT:
                 case ItemUsage::ITEM_USAGE_AH:
+                case ItemUsage::ITEM_USAGE_BROKEN_AH:
                 case ItemUsage::ITEM_USAGE_VENDOR:
                 case ItemUsage::ITEM_USAGE_FORCE_GREED:
                 {

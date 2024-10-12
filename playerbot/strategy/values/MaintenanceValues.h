@@ -46,13 +46,13 @@ namespace ai
     {
     public:
         CanRepairValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can repair",2) {}
-        virtual bool Calculate() { return  ai->HasStrategy("rpg maintenance", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE(uint8, "durability") < 100 && AI_VALUE(uint32, "repair cost") < AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::repair); };
+        virtual bool Calculate() { return  ai->HasStrategy("rpg maintenance", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE(uint8, "durability inventory") < 100 && AI_VALUE(uint32, "repair cost") < AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::repair); };
     };
 
     class ShouldSellValue : public BoolCalculatedValue
     {
     public:
-        ShouldSellValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should sell",2) {}
+        ShouldSellValue(PlayerbotAI* ai, std::string name = "should sell", int checkInterval = 2) : BoolCalculatedValue(ai, name , checkInterval) {}
         virtual bool Calculate() { return AI_VALUE(uint8, "bag space") > 80; };
     };
 
@@ -70,6 +70,13 @@ namespace ai
         virtual bool Calculate() { return ai->HasStrategy("rpg vendor", BotState::BOT_STATE_NON_COMBAT) && !AI_VALUE(bool, "should repair") && !AI_VALUE(bool, "should sell") && !AI_VALUE(bool, "can get mail") && (AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ammo) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::consumables) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::gear) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill)); };
     };
 
+    class ShouldAHSellValue : public ShouldSellValue
+    {
+    public:
+        ShouldAHSellValue(PlayerbotAI* ai) : ShouldSellValue(ai, "should ah sell", 2) {}
+        virtual bool Calculate();
+    };
+
     class CanAHSellValue : public BoolCalculatedValue
     {
     public:
@@ -80,9 +87,9 @@ namespace ai
         {
             uint32 time;
 #ifdef MANGOSBOT_ZERO
-            time = 8 * HOUR / MINUTE;
+            time = 8 * HOUR;
 #else
-            time = 12 * HOUR / MINUTE;
+            time = 12 * HOUR;
 #endif
 
             float minDeposit = 0;

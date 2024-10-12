@@ -118,11 +118,6 @@ if (BUILD_PLAYERBOTS)
   add_definitions(-DENABLE_PLAYERBOTS)
 endif()
 
-# Define BUILD_ELUNA if need
-if (BUILD_ELUNA)
-  add_definitions(-DBUILD_ELUNA -DCLASSIC -DCMANGOS)
-endif()
-
 # Define Core
 if ( ${CMAKE_PROJECT_NAME} MATCHES "CMaNGOS")
   add_definitions(-DCMANGOS)
@@ -146,6 +141,11 @@ endif()
 # Define ENABLE_MODULES if need
 if (BUILD_MODULES)
   add_definitions(-DENABLE_MODULES)
+endif()
+
+# Define BUILD_AHBOT if need
+if (BUILD_AHBOT)
+  add_definitions(-DBUILD_AHBOT)
 endif()
 
 if(PCH)

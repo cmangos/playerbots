@@ -127,6 +127,9 @@ namespace ai
             creators["debug threat"] = &StrategyContext::debug_threat;
             creators["debug mount"] = &StrategyContext::debug_mount;
             creators["debug grind"] = &StrategyContext::debug_grind;
+            creators["debug loot"] = &StrategyContext::debug_loot;
+            creators["debug log"] = &StrategyContext::debug_log;
+            creators["debug logname"] = &StrategyContext::debug_logname;
             creators["rtsc"] = &StrategyContext::rtsc;
             creators["rtsc jump"] = &StrategyContext::rtsc_jump;
             creators["maintenance"] = &StrategyContext::maintenance;
@@ -141,6 +144,7 @@ namespace ai
             creators["preheal"] = &StrategyContext::preheal;
             creators["wbuff"] = &StrategyContext::world_buff;
             creators["silent"] = &StrategyContext::silent;
+            creators["nowar"] = &StrategyContext::nowar;
 
             // Dungeon Strategies
             creators["dungeon"] = &StrategyContext::dungeon;
@@ -228,6 +232,9 @@ namespace ai
         static Strategy* debug_threat(PlayerbotAI* ai) { return new DebugThreatStrategy(ai); }
         static Strategy* debug_mount(PlayerbotAI* ai) { return new DebugMountStrategy(ai); }
         static Strategy* debug_grind(PlayerbotAI* ai) { return new DebugGrindStrategy(ai); }
+        static Strategy* debug_loot(PlayerbotAI* ai) { return new DebugLootStrategy(ai); }
+        static Strategy* debug_log(PlayerbotAI* ai) { return new DebugLogStrategy(ai); }
+        static Strategy* debug_logname(PlayerbotAI* ai) { return new DebugLogNameStrategy(ai); }
         static Strategy* rtsc(PlayerbotAI* ai) { return new RTSCStrategy(ai); }
         static Strategy* rtsc_jump(PlayerbotAI* ai) { return new RTSCSJumptrategy(ai); }
         static Strategy* maintenance(PlayerbotAI* ai) { return new MaintenanceStrategy(ai); }
@@ -242,6 +249,7 @@ namespace ai
         static Strategy* preheal(PlayerbotAI* ai) { return new PreHealStrategy(ai); }
         static Strategy* world_buff(PlayerbotAI* ai) { return new WorldBuffStrategy(ai); }
         static Strategy* silent(PlayerbotAI* ai) { return new SilentStrategy(ai); }
+        static Strategy* nowar(PlayerbotAI* ai) { return new NoWarStrategy(ai); }
 
         // Dungeon Strategies
         static Strategy* dungeon(PlayerbotAI* ai) { return new DungeonStrategy(ai); }

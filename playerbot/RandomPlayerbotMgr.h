@@ -110,7 +110,6 @@ public:
         bool ProcessBot(Player* player);
         void Revive(Player* player);
         void ChangeStrategy(Player* player);
-        void ChangeStrategyOnce(Player* player);
         uint32 GetValue(Player* bot, std::string type);
         uint32 GetValue(uint32 bot, std::string type);
         int32 GetValueValidTime(uint32 bot, std::string event);
@@ -138,6 +137,7 @@ public:
         void SyncEventTimers();
         void AddOfflineGroupBots();
         static Item* CreateTempItem(uint32 item, uint32 count, Player const* player, uint32 randomPropertyId = 0);
+        static InventoryResult CanEquipUnseenItem(Player* player, uint8 slot, uint16& dest, uint32 item);
 
         bool AddRandomBot(uint32 bot);
 
@@ -149,11 +149,13 @@ public:
 
         void PrintTeleportCache();
 
-        void AddFacingFix(uint32 mapId, ObjectGuid guid) { facingFix[mapId].push_back(std::make_pair(guid,time(0))); }
+        void AddFacingFix(uint32 mapId, uint32 instanceId, ObjectGuid guid) { facingFix[mapId][instanceId].push_back(std::make_pair(guid,time(0))); }
 
         bool arenaTeamsDeleted, guildsDeleted = false;
 
         std::mutex m_ahActionMutex;
+
+        std::vector<AuctionEntry> GetAhPrices(uint32 itemId) { return ahMirror[itemId]; }
 	protected:
 	    virtual void OnBotLoginInternal(Player * const bot);
 
@@ -181,6 +183,7 @@ public:
         void PrepareTeleportCache();
         typedef void (RandomPlayerbotMgr::*ConsoleCommandHandler) (Player*);
 
+        void MirrorAh();
     private:
         PlayerBotMap players;
         int processTicks;
@@ -194,7 +197,7 @@ public:
         std::list<uint32> arenaTeamMembers;
         uint32 bgBotsCount;
         uint32 playersLevel = 0;
-        uint32 activeBots = 0;
+        uint32 activeBots = 0;        
 
         std::unordered_map<uint32, std::vector<std::pair<int32,int32>>> playerBotMoveLog;
         typedef std::unordered_map <uint32, std::list<float>> botPerformanceMetric;
@@ -205,7 +208,10 @@ public:
         float GetMetricDelta(botPerformanceMetric& metric) const;
 
         bool showLoginWarning;
-        std::unordered_map<uint32, std::vector<std::pair<ObjectGuid, time_t>>> facingFix;
+        std::unordered_map<uint32, std::unordered_map<uint32, std::vector<std::pair<ObjectGuid, time_t>>>> facingFix;
+
+        //                   itemId,             buyout, count
+        std::unordered_map < uint32, std::vector<AuctionEntry>> ahMirror;
 };
 
 #define sRandomPlayerbotMgr RandomPlayerbotMgr::instance()

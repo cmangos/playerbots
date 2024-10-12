@@ -24,6 +24,9 @@ namespace ai
         static std::string formatMoney(uint32 copper);
         static uint32 parseMoney(const std::string& text);
 
+        static std::set<uint32> ExtractAllQuestIds(const std::string& text);
+        static std::set<uint32> ExtractAllItemIds(const std::string& text);
+
         static std::string formatQuest(Quest const* quest);
 
         static std::string formatItem(ItemQualifier& itemQualifier, int count = 0, int total = 0);

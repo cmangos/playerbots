@@ -6,7 +6,6 @@
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/strategy/values/BudgetValues.h"
 #include "playerbot/strategy/values/MountValues.h"
-#include "AuctionHouseBot/AuctionHouseBot.h"
 
 using namespace ai;
 
@@ -85,10 +84,15 @@ bool BuyAction::Execute(Event& event)
                     freeMoney[ItemUsage::ITEM_USAGE_SKILL] = (uint32)NeedMoneyFor::tradeskill;
                     freeMoney[ItemUsage::ITEM_USAGE_AMMO] =  (uint32)NeedMoneyFor::ammo;
                     freeMoney[ItemUsage::ITEM_USAGE_QUEST] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_NEED] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_GREED] = (uint32)NeedMoneyFor::anything;
-                    
-                    AuctionHouseBotItemData itemInfo = sAuctionHouseBot.GetItemData(proto->ItemId);
-                    if (itemInfo.Value > ((int32)proto->BuyPrice) * 1.1f)
-                        freeMoney[ItemUsage::ITEM_USAGE_AH] = (uint32)NeedMoneyFor::ah;
+
+                    //if item is worth selling to AH?
+
+                    PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "IsWorthBuyingFromVendorToResellAtAH", &context->performanceStack);
+                    bool isWorthBuyingFromVendorToResellAtAH = ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(proto, tItem->maxcount > 0);
+                    if (pmo) pmo->finish();
+
+                    if (isWorthBuyingFromVendorToResellAtAH)
+                        freeMoney[ItemUsage::ITEM_USAGE_AH] = (uint32)NeedMoneyFor::anything;
                 
                     if (freeMoney.find(usage) == freeMoney.end())
                         continue;

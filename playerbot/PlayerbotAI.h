@@ -62,6 +62,49 @@ namespace ai
 	};
 };
 
+enum ImportantAreaId
+{
+    CITY = 3459
+};
+
+enum ChatChannelId
+{
+    GENERAL = 1,
+    TRADE = 2,
+    LOCAL_DEFENSE = 22,
+    WORLD_DEFENSE = 23,
+#ifdef MANGOSBOT_ZERO
+    //Yes, for 1.12 it is 24
+    LOOKING_FOR_GROUP = 24,
+#else
+    LOOKING_FOR_GROUP = 26,
+#endif
+    GUILD_RECRUITMENT = 25,
+};
+
+enum ChatChannelSource
+{
+    SRC_GUILD,
+    SRC_WORLD,
+    SRC_GENERAL,
+    SRC_TRADE,
+    SRC_LOOKING_FOR_GROUP,
+    SRC_LOCAL_DEFENSE,
+    SRC_WORLD_DEFENSE,
+    SRC_GUILD_RECRUITMENT,
+
+    SRC_SAY,
+    SRC_WHISPER,
+    SRC_EMOTE,
+    SRC_TEXT_EMOTE,
+    SRC_YELL,
+
+    SRC_PARTY,
+    SRC_RAID,
+
+    SRC_UNDEFINED
+};
+
 enum HealingItemDisplayId
 {
    HEALTHSTONE_DISPLAYID = 8026,
@@ -169,11 +212,12 @@ enum ShieldWardDisplayId
 };
 
 enum class BotTypeNumber : uint8
-{    
+{
     ACTIVITY_TYPE_NUMBER = 1,
     GROUPER_TYPE_NUMBER = 2,
     GUILDER_TYPE_NUMBER = 3,
-    CHATFILTER_NUMBER = 4
+    CHATFILTER_NUMBER = 4 ,
+    DUMMY_ATTACK_NUMBER = 5
 };
 
 enum class GrouperType : uint8
@@ -235,7 +279,7 @@ enum ActivityType
     PARTY_ACTIVITY = 7,
     REACT_ACTIVITY = 8,
     ALL_ACTIVITY = 9,
-    MAX_ACTIVITY_TYPE 
+    MAX_ACTIVITY_TYPE
 };
 
 enum BotRoles
@@ -298,11 +342,11 @@ public:
 private:
     void UpdateAIInternal(uint32 elapsed, bool minimal = false) override;
 
-public:	
+public:
     static std::string BotStateToString(BotState state);
 	std::string HandleRemoteCommand(std::string command);
     void HandleCommand(uint32 type, const std::string& text, Player& fromPlayer, const uint32 lang = LANG_UNIVERSAL);
-    void QueueChatResponse(uint8 msgtype, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name);
+    void QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name);
 	void HandleBotOutgoingPacket(const WorldPacket& packet);
     void HandleMasterIncomingPacket(const WorldPacket& packet);
     void HandleMasterOutgoingPacket(const WorldPacket& packet);
@@ -333,10 +377,37 @@ public:
     static GameObject* GetGameObject(GameObjectDataPair const* gameObjectDataPair);
     WorldObject* GetWorldObject(ObjectGuid guid);
     std::vector<Player*> GetPlayersInGroup();
+    void DropQuest(uint32 questId);
+    std::vector<const Quest*> GetAllCurrentQuests();
+    std::vector<const Quest*> GetCurrentIncompleteQuests();
+    std::set<uint32> GetAllCurrentQuestIds();
+    std::set<uint32> GetCurrentIncompleteQuestIds();
+    const Quest* GetCurrentIncompleteQuestWithId(uint32 questId);
+    bool HasCurrentIncompleteQuestWithId(uint32 questId);
+    std::vector<std::pair<const Quest*, uint32>> GetCurrentQuestsRequiringItemId(uint32 itemId);
+    const AreaTableEntry* GetCurrentArea();
+    const AreaTableEntry* GetCurrentZone();
+    std::string GetLocalizedAreaName(const AreaTableEntry* entry);
+    bool IsInCapitalCity();
+    ChatChannelSource GetChatChannelSource(Player* bot, uint32 type, std::string channelName);
+    bool SayToGuild(std::string msg);
+    bool SayToWorld(std::string msg);
+    bool SayToGeneral(std::string msg);
+    bool SayToTrade(std::string msg);
+    bool SayToLFG(std::string msg);
+    bool SayToLocalDefense(std::string msg);
+    bool SayToWorldDefense(std::string msg);
+    bool SayToGuildRecruitment(std::string msg);
+    bool SayToParty(std::string msg);
+    bool SayToRaid(std::string msg);
+    bool Yell(std::string msg);
+    bool Say(std::string msg);
+    bool Whisper(std::string msg, std::string receiverName);
     bool TellPlayer(Player* player, std::ostringstream &stream, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool ignoreSilent = false) { return TellPlayer(player, stream.str(), securityLevel, isPrivate, ignoreSilent); }
     bool TellPlayer(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool ignoreSilent = false);
     bool TellPlayerNoFacing(Player* player, std::ostringstream& stream, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool noRepeat = true, bool ignoreSilent = false) { return TellPlayerNoFacing(player, stream.str(), securityLevel, isPrivate, noRepeat, ignoreSilent); }
     bool TellPlayerNoFacing(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool noRepeat = true, bool ignoreSilent = false);
+    bool TellDebug(Player* player, std::string text, std::string strategy = "debug", BotState state = BotState::BOT_STATE_NON_COMBAT) { if (HasStrategy(strategy, state)) return TellPlayerNoFacing(player, text); return false; }
     bool TellError(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool ignoreSilent = false);
     void SpellInterrupted(uint32 spellid);
     int32 CalculateGlobalCooldown(uint32 spellid);
@@ -435,6 +506,21 @@ public:
 
     void AccelerateRespawn(Creature* creature, float accelMod = 0);
     void AccelerateRespawn(ObjectGuid guid, float accelMod = 0) { Creature* creature = GetCreature(guid); if (creature) AccelerateRespawn(creature,accelMod); }
+
+    std::list<Unit*> GetAllHostileUnitsAroundWO(WorldObject* wo, float distanceAround);
+    std::list<Unit*> GetAllHostileNPCNonPetUnitsAroundWO(WorldObject* wo, float distanceAround);
+
+public:
+    std::vector<Bag*> GetEquippedAnyBags();
+    std::vector<Bag*> GetEquippedQuivers();
+    std::vector<Item*> GetInventoryAndEquippedItems();
+    std::vector<Item*> GetInventoryItems();
+    uint32 GetInventoryItemsCountWithId(uint32 itemId);
+    bool HasItemInInventory(uint32 itemId);
+    bool HasNotFullStacksInBagsForLootItems(LootItemList &questLootItemList);
+    bool HasQuestItemsInLootList(LootItemList &questLootItemList);
+    bool HasQuestItemsInWOLootList(WorldObject* wo);
+    bool CanLootSomethingFromWO(WorldObject* wo);
 
 private:
     void InventoryIterateItemsInBags(IterateItemsVisitor* visitor);
@@ -537,6 +623,10 @@ public:
 
     bool CanEnterArea(const AreaTrigger* area);
     void Unmount();
+
+    void QueuePacket(WorldPacket& pkt);
+
+    float GetLevelFloat() const;
 
 private:
     bool UpdateAIReaction(uint32 elapsed, bool minimal, bool isStunned);

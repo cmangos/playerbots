@@ -118,7 +118,7 @@ void LogAnalysis::AnalyseEvents()
     eventMin["EquipAction"] = 1;
     eventMin["LeaveGroupAction"] = 1;
     eventMin["QueryItemUsageAction"] = 1;
-    eventMin["QuestObjectiveCompletedAction"] = 1;
+    eventMin["QuestUpdateAddKillAction"] = 1;
     eventMin["ReviveFromCorpseAction"] = 1;
     eventMin["StoreLootAction"] = 1;
     eventMin["SellAction"] = 1;
@@ -184,17 +184,17 @@ void LogAnalysis::AnalyseQuests()
 
         Tokens tokens = StrSplit(line, ",");
 
-        if (tokens.size() == 10) //Some quest names have a "," so add an extra element. 
+        if (tokens.size() == 10) //Some quest names have a "," so add an extra element.
         {
             tokens[7] = tokens[7] + tokens[8];
             tokens[8] = tokens[9];
-        } 
+        }
         else if (tokens.size() == 11)
         {
             tokens[7] = tokens[7] + tokens[8] + tokens[9];
             tokens[8] = tokens[10];
         }
-        
+
 
         for(auto& token : tokens)
             token.erase(std::remove(token.begin(), token.end(), '\"'), token.end());
@@ -204,7 +204,7 @@ void LogAnalysis::AnalyseQuests()
             questId[tokens[7]] = stoi(tokens[8]);
             questStartCount[tokens[7]]++;
         }
-        else if (tokens[2] == "QueryItemUsageAction" || tokens[3] == "QuestObjectiveCompletedAction")
+        else if (tokens[2] == "QueryItemUsageAction" || tokens[3] == "QuestUpdateAddKillAction")
         {
             questId[tokens[7]] = questId[tokens[7]];
             questObjective[tokens[7]]++;

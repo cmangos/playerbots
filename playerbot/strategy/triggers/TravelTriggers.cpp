@@ -9,12 +9,25 @@ using namespace ai;
 
 bool NoTravelTargetTrigger::IsActive()
 {
-    return !context->GetValue<TravelTarget *>("travel target")->Get()->isActive();
+    return !AI_VALUE(TravelTarget *,"travel target")->isActive();
 }
 
 bool FarFromTravelTargetTrigger::IsActive()
 {
-    return context->GetValue<TravelTarget*>("travel target")->Get()->isTraveling();
+    return AI_VALUE(TravelTarget*, "travel target")->isTraveling();
+}
+
+
+bool HasNearbyQuestTakerTrigger::IsActive()
+{
+    TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
+    if (target->isWorking()) //We are not currently working on a target.
+        return false;
+
+    if (target->getExpiredTime() < 2 * MINUTE) //The target was set more than 2 minutes ago.
+        return false;
+
+    return AI_VALUE(bool, "has nearby quest taker");
 }
 
 bool NearDarkPortalTrigger::IsActive()

@@ -107,6 +107,8 @@ void TalkToQuestGiverAction::RewardNoItem(Quest const* quest, WorldObject* quest
     {
         bot->RewardQuest(quest, 0, questGiver, false);
         out = BOT_TEXT2("quest_status_completed", args);
+
+        BroadcastHelper::BroadcastQuestTurnedIn(ai, bot, quest);
     }
     else
     {
@@ -114,7 +116,7 @@ void TalkToQuestGiverAction::RewardNoItem(Quest const* quest, WorldObject* quest
     }
 }
 
-void TalkToQuestGiverAction::RewardSingleItem(Quest const* quest, WorldObject* questGiver, std::string& out) 
+void TalkToQuestGiverAction::RewardSingleItem(Quest const* quest, WorldObject* questGiver, std::string& out)
 {
     int index = 0;
     ItemPrototype const *item = sObjectMgr.GetItemPrototype(quest->RewChoiceItemId[index]);
@@ -127,6 +129,8 @@ void TalkToQuestGiverAction::RewardSingleItem(Quest const* quest, WorldObject* q
     {
         bot->RewardQuest(quest, index, questGiver, true);
         out = BOT_TEXT2("quest_status_complete_single_reward", args);
+
+        BroadcastHelper::BroadcastQuestTurnedIn(ai, bot, quest);
     }
     else
     {
@@ -142,7 +146,7 @@ ItemIds TalkToQuestGiverAction::BestRewards(Quest const* quest)
     {
         return returnIds;
     }
-    else if (quest->GetRewChoiceItemsCount() == 1)    
+    else if (quest->GetRewChoiceItemsCount() == 1)
     {
         return { 0 };
     }
@@ -195,6 +199,8 @@ void TalkToQuestGiverAction::RewardMultipleItem(Player* requester, Quest const* 
         {
             args["%item"] = chat->formatItem(proto);
             out = BOT_TEXT2("quest_status_complete_single_reward", args);
+
+            BroadcastHelper::BroadcastQuestTurnedIn(ai, bot, quest);
         }
 
         bot->RewardQuest(quest, *bestIds.begin(), questGiver, true);
@@ -221,6 +227,8 @@ void TalkToQuestGiverAction::RewardMultipleItem(Player* requester, Quest const* 
             {
                 args["%item"] = chat->formatItem(proto);
                 out = BOT_TEXT2("quest_status_complete_single_reward", args);
+
+                BroadcastHelper::BroadcastQuestTurnedIn(ai, bot, quest);
             }
 
             bot->RewardQuest(quest, *bestIds.begin(), questGiver, true);

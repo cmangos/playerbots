@@ -6,6 +6,7 @@
 #include "playerbot/LootObjectStack.h"
 #include "MotionGenerators/PathFinder.h"
 #include "playerbot/TravelMgr.h"
+#include <iomanip>
 
 using namespace ai;
 
@@ -88,6 +89,30 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
     bool canMove = false;
 
+    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+    {
+        std::ostringstream out;
+
+        out << "Moving to ";
+
+        out << target->getDestination()->getTitle();
+
+        if (!(*target->getPosition() == WorldPosition()))
+        {
+            out << " at " << uint32(target->getPosition()->distance(bot)) << "y";
+        }
+
+        if (target->getStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
+            out << " for " << (target->getTimeLeft() / 1000) << "s";
+
+        if (target->getRetryCount(true))
+            out << " (move retry: " << target->getRetryCount(true) << ")";
+        else if (target->getRetryCount(false))
+            out << " (retry: " << target->getRetryCount(false) << ")";
+
+        ai->TellPlayerNoFacing(GetMaster(), out);
+    }
+
     canMove = MoveTo(mapId, x, y, z, false, false);
 
     if (!canMove)
@@ -95,7 +120,94 @@ bool MoveToTravelTargetAction::Execute(Event& event)
         target->incRetry(true);
 
         if (target->isMaxRetry(true))
+        {
             target->setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+
+            if (sPlayerbotAIConfig.hasLog("travel_map.csv"))
+            {
+                WorldPosition botPos(bot);
+                WorldPosition destPos = *target->getPosition();
+                TravelDestination* destination = target->getDestination();
+
+                std::ostringstream out;
+                out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
+                out << bot->GetName() << ",";
+                out << std::fixed << std::setprecision(2);
+
+                out << std::to_string(bot->getRace()) << ",";
+                out << std::to_string(bot->getClass()) << ",";
+                float subLevel = ai->GetLevelFloat();
+
+                out << subLevel << ",";
+
+                if (!destPos)
+                    destPos = botPos;
+
+                botPos.printWKT({ botPos,destPos }, out, 1);
+
+                if (destination->getName() == "NullTravelDestination")
+                    out << "0,";
+                else
+                    out << round(target->getDestination()->distanceTo(botPos)) << ",";
+
+                out << "2," << "\"" << destination->getTitle() << "\",\"" << "timeout" << "\"";
+
+                if (destination->getName() == "NullTravelDestination")
+                    out << ",none";
+                else if (destination->getName() == "QuestTravelDestination")
+                    out << ",quest";
+                else if (destination->getName() == "QuestRelationTravelDestination")
+                    out << ",questgiver";
+                else if (destination->getName() == "QuestObjectiveTravelDestination")
+                    out << ",objective";
+                else  if (destination->getName() == "RpgTravelDestination")
+                {
+                    RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
+                    if (RpgDestination->getEntry() > 0)
+                    {
+                        CreatureInfo const* cInfo = RpgDestination->getCreatureInfo();
+
+                        if (cInfo)
+                        {
+                            if ((cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR) && AI_VALUE2(bool, "group or", "should sell,can sell"))
+                                out << ",sell";
+                            else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
+                                out << ",repair";
+                            else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should ah sell,can ah sell"))
+                                out << ",ah";
+                            else
+                                out << ",rpg";
+                        }
+                        else
+                            out << ",rpg";
+                    }
+                    else
+                    {
+                        GameObjectInfo const* gInfo = RpgDestination->getGoInfo();
+
+                        if (gInfo)
+                        {
+                            if (gInfo->type == GAMEOBJECT_TYPE_MAILBOX && AI_VALUE(bool, "can get mail"))
+                                out << ",mail";
+                            else
+                                out << ",rpg";
+                        }
+                        else
+                            out << ",rpg";
+                    }
+                }
+                else if (destination->getName() == "ExploreTravelDestination")
+                    out << ",explore";
+                else if (destination->getName() == "GrindTravelDestination")
+                    out << ",grind";
+                else if (destination->getName() == "BossTravelDestination")
+                    out << ",boss";
+                else
+                    out << ",unknown";
+
+                sPlayerbotAIConfig.log("travel_map.csv", out.str().c_str());
+            }
+        }
     }
     else
         target->decRetry(true);
@@ -105,7 +217,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
         WorldPosition* pos = target->getPosition();
         GuidPosition* guidP = dynamic_cast<GuidPosition*>(pos);
 
-        std::string name = (guidP && guidP->GetWorldObject()) ? chat->formatWorldobject(guidP->GetWorldObject()) : "travel target";
+        std::string name = (guidP && guidP->GetWorldObject(bot->GetInstanceId())) ? chat->formatWorldobject(guidP->GetWorldObject(bot->GetInstanceId())) : "travel target";
 
         if (mapId == bot->GetMapId())
         {
@@ -156,9 +268,12 @@ bool MoveToTravelTargetAction::isUseful()
     if (travelPos.isDungeon() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && sTravelMgr.mapTransDistance(bot, travelPos, true) < sPlayerbotAIConfig.sightDistance && !AI_VALUE2(bool, "group and", "near leader"))
         return false;
      
-    LootObject loot = AI_VALUE(LootObject, "loot target");
-    if (loot.IsLootPossible(bot))
-        return false;
+    if (AI_VALUE(bool, "has available loot"))
+    {
+        LootObject lootObject = AI_VALUE(LootObjectStack*, "available loot")->GetLoot(sPlayerbotAIConfig.lootDistance);
+        if (lootObject.IsLootPossible(bot))
+            return false;
+    }
 
     if (!AI_VALUE2(bool, "can free move to", AI_VALUE(TravelTarget*,"travel target")->GetPosStr()))
         return false;

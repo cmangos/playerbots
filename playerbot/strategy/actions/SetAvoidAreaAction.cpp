@@ -56,6 +56,9 @@ bool SetAvoidAreaAction::Execute(Event& event)
 
 bool SetAvoidAreaAction::isUseful()
 {
+    if (bot->GetInstanceId())
+        return false;
+
     PositionEntry p = AI_VALUE2(PositionEntry, "pos", "last avoid");
 
     if (!p.isSet())

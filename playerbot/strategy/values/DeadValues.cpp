@@ -9,51 +9,115 @@ GuidPosition GraveyardValue::Calculate()
 {
     WorldPosition refPosition = bot, botPos(bot);
 
-    if (getQualifier() == "master" && ai->GetGroupMaster() && ai->IsSafe(ai->GetGroupMaster()))
-        refPosition = ai->GetGroupMaster();
+    if (getQualifier() == "master")
+    {
+        if (ai->GetGroupMaster() && ai->IsSafe(ai->GetGroupMaster()) && ai->GetGroupMaster()->GetMapId() == bot->GetMapId())
+        {
+            refPosition = ai->GetGroupMaster();
+        }
+    }
     else if (getQualifier() == "travel")
     {
-        if(!AI_VALUE(TravelTarget*, "travel target") || !AI_VALUE(TravelTarget*, "travel target")->getPosition())
-            return GuidPosition();
+        auto travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-        refPosition = *AI_VALUE(TravelTarget*, "travel target")->getPosition();
-    }
-    else if (getQualifier() == "home bind")
-         refPosition = AI_VALUE(WorldPosition, "home bind");
-    else if (getQualifier() == "start")
-    {
-        std::vector<uint32> races;
-
-        if (bot->GetTeam() == ALLIANCE)
-            races = { RACE_HUMAN, RACE_DWARF,RACE_GNOME,RACE_NIGHTELF };
-        else
-            races = { RACE_ORC, RACE_TROLL,RACE_TAUREN,RACE_UNDEAD };
-
-        refPosition = WorldPosition();
-
-        for (auto race : races)
+        if (travelTarget && travelTarget->getPosition() && travelTarget->getPosition()->getMapId() == bot->GetMapId())
         {
-            for (uint32 cls = 0; cls < MAX_CLASSES; cls++)
-            {
-                PlayerInfo const* info = sObjectMgr.GetPlayerInfo(race, cls);
-
-                if (!info)
-                    continue;
-
-                if (refPosition && botPos.fDist(refPosition) < botPos.fDist(info))
-                    continue;
-
-                refPosition = info;
-            }
+            refPosition = *travelTarget->getPosition();
         }
-    }        
+    }
+    else if (getQualifier() == "another closest appropriate")
+    {
+        //just get ANOTHER nearest appropriate for level (neutral or same team zone)
+        if (auto anotherAppropriate = GetAnotherAppropriateClosestGraveyard())
+        {
+            return GuidPosition(0, anotherAppropriate);
+        }
+    }
 
-    WorldSafeLocsEntry const* ClosestGrave = bot->GetMap()->GetGraveyardManager().GetClosestGraveYard(refPosition.getX(), refPosition.getY(), refPosition.getZ(), refPosition.getMapId(), bot->GetTeam());
+    WorldSafeLocsEntry const* ClosestGrave = bot->GetMap()->GetGraveyardManager().GetClosestGraveYard(
+        refPosition.getX(),
+        refPosition.getY(),
+        refPosition.getZ(),
+        refPosition.getMapId(),
+        bot->GetTeam()
+    );
 
     if (!ClosestGrave)
+    {
+        sLog.outBasic(
+            "ERROR: Unable to find closest graveyard in GraveyardValue, will return GuidPosition() which is 0,0,0 - bot #%d %s:%d <%s>",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
         return GuidPosition();
+    }
 
-    return GuidPosition(0,ClosestGrave);
+    return GuidPosition(0, ClosestGrave);
+}
+
+WorldSafeLocsEntry const* GraveyardValue::GetAnotherAppropriateClosestGraveyard() const
+{
+    // near
+    bool foundNear = false;
+    float distNear = std::numeric_limits<float>::max();
+    WorldSafeLocsEntry const* entryNear = nullptr;
+
+    // far
+    WorldSafeLocsEntry const* entryFar = nullptr;
+
+    for (auto mapValues : sWorld.GetGraveyardManager().GetGraveyardMap())
+    {
+        uint32 locId = mapValues.first;
+        GraveYardData const& graveyardData = mapValues.second;
+
+        uint32 botMapId = bot->GetMapId();
+        uint32 botZoneId = bot->GetZoneId();
+
+        //skip non-neutral or hostile graveyards
+        if (graveyardData.team != bot->GetTeam() && graveyardData.team != TEAM_BOTH_ALLOWED)
+            continue;
+
+        WorldSafeLocsEntry const* graveyardCoreEntry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(graveyardData.safeLocId);
+
+        //skip different maps (no need for other continents)
+        if (graveyardCoreEntry->map_id != botMapId)
+            continue;
+
+        uint32 graveyardZoneId = sTerrainMgr.GetZoneId(graveyardCoreEntry->map_id, graveyardCoreEntry->x, graveyardCoreEntry->y, graveyardCoreEntry->z);
+        auto graveyardAreaEntry = GetAreaEntryByAreaID(graveyardZoneId);
+
+        //skip same zone
+        if (graveyardZoneId == botZoneId)
+            continue;
+
+        //skip higher level zones
+        if (bot->GetLevel() + 5 < (uint32)graveyardAreaEntry->area_level)
+            continue;
+
+        float dist2 = (graveyardCoreEntry->x - bot->GetPositionX()) * (graveyardCoreEntry->x - bot->GetPositionX()) + (graveyardCoreEntry->y - bot->GetPositionY()) * (graveyardCoreEntry->y - bot->GetPositionY()) + (graveyardCoreEntry->z - bot->GetPositionZ()) * (graveyardCoreEntry->z - bot->GetPositionZ());
+        if (foundNear)
+        {
+            if (dist2 < distNear)
+            {
+                distNear = dist2;
+                entryNear = graveyardCoreEntry;
+            }
+        }
+        else
+        {
+            foundNear = true;
+            distNear = dist2;
+            entryNear = graveyardCoreEntry;
+        }
+
+    }
+
+    if (entryNear)
+        return entryNear;
+
+    return entryFar;
 }
 
 GuidPosition BestGraveyardValue::Calculate()
@@ -61,29 +125,70 @@ GuidPosition BestGraveyardValue::Calculate()
     Corpse* corpse = bot->GetCorpse();
     if (!corpse)
     {
+        sLog.outBasic(
+            "ERROR: Unable to find closest graveyard in BestGraveyardValue, will return GuidPosition() which is 0,0,0 - bot #%d %s:%d <%s>",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
         return GuidPosition();
+    }
+
+    uint32 deathCount = AI_VALUE(uint32, "death count");
+
+    //attempt to revive at other same map graveyards which are not enemy territory
+    if (!ai->HasActivePlayerMaster() && deathCount >= DEATH_COUNT_BEFORE_TRYING_ANOTHER_GRAVEYARD)
+    {
+        GuidPosition anotherGraveyard = AI_VALUE2(GuidPosition, "graveyard", "another closest appropriate");
+        if (anotherGraveyard)
+        {
+            return anotherGraveyard;
+        }
+        sLog.outBasic(
+            "ERROR: Unable to find another closest appropriate graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s>",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
     }
 
     //Revive near master.
     if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
-        return AI_VALUE2(GuidPosition, "graveyard", "master");
-
-    uint32 deathCount = AI_VALUE(uint32, "death count");
-
-    //Revive nearby.
-    if (deathCount < 5)
-        return AI_VALUE2(GuidPosition, "graveyard", "self");
+    {
+        GuidPosition masterGraveyard = AI_VALUE2(GuidPosition, "graveyard", "master");
+        if (masterGraveyard)
+        {
+            return masterGraveyard;
+        }
+        sLog.outBasic(
+            "ERROR: Unable to find master graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s>",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
+    }
 
     //Revive near travel target if it's far away from last death.
     if (AI_VALUE2(GuidPosition, "graveyard", "travel") && AI_VALUE2(GuidPosition, "graveyard", "travel").fDist(corpse) > sPlayerbotAIConfig.reactDistance)
-        return AI_VALUE2(GuidPosition, "graveyard", "travel");
+    {
+        GuidPosition travelGraveyard = AI_VALUE2(GuidPosition, "graveyard", "travel");
+        if (travelGraveyard)
+        {
+            return travelGraveyard;
+        }
+        sLog.outBasic(
+            "ERROR: Unable to find travel graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s>",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
+    }
 
-    //Revive near Inn.
-    if (deathCount < 15)
-        return AI_VALUE2(GuidPosition, "graveyard", "home bind");
-
-    //Revive at spawn.
-    return AI_VALUE2(GuidPosition, "graveyard", "start");
+    return AI_VALUE2(GuidPosition, "graveyard", "self");
 }
 
 bool ShouldSpiritHealerValue::Calculate()
@@ -95,26 +200,28 @@ bool ShouldSpiritHealerValue::Calculate()
         return false;
 
     //Nothing to lose
-    if (deathCount > 2 && durability < 10 && (ai->HasAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS, bot) || ai->HasCheat(BotCheatMask::repair)))
+    if (ai->HasAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS, bot) || durability < 10)
+        return true;
+
+    //Died too many times
+    if (deathCount > DEATH_COUNT_BEFORE_REVIVING_AT_SPIRIT_HEALER)
         return true;
 
     Corpse* corpse = bot->GetCorpse();
     if (!corpse)
     {
-        return false;
+        //if no corpse (?) then definitely should revive at spirit healer
+        return true;
     }
 
     uint32 deadTime = time(nullptr) - corpse->GetGhostTime();
-    //We are dead for a long time
+
+    //Dead for a long time
     if (deadTime > 10 * MINUTE && deathCount > 1)
         return true;
 
-    //Try to revive nearby.
-    if (deathCount < 5)
-        return false;
-
-    //Try to get to a safe place 
-    if ((deathCount > 10 && durability < 10) || deathCount > 15)
+    //Dead for a long time
+    if (deadTime > 20 * MINUTE)
         return true;
 
     //If there are enemies near grave and corpse we go to corpse first.
@@ -142,11 +249,11 @@ bool ShouldSpiritHealerValue::Calculate()
         }
         if (corpseInSight)
         {
-            SET_AI_VALUE2(bool, "manual bool", "enemies near graveyard", true);
+            SET_AI_VALUE2(bool, "manual bool", "enemies near corpse", true);
             return true;
         }
     }
-    
+
     //If grave is near and no ress sickness go there.
     if (graveInSight && !corpseInSight && ai->HasCheat(BotCheatMask::repair))
         return true;

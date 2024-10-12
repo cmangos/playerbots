@@ -20,6 +20,7 @@ namespace ai
             creators["complete quest"] = &WorldPacketTriggerContext::complete_quest;
             creators["accept quest"] = &WorldPacketTriggerContext::accept_quest;
             creators["confirm quest"] = &WorldPacketTriggerContext::confirm_quest;
+            creators["quest details"] = &WorldPacketTriggerContext::quest_details;
             creators["quest share"] = &WorldPacketTriggerContext::quest_share;
             creators["loot start roll"] = &WorldPacketTriggerContext::loot_start_roll;
             creators["loot roll"] = &WorldPacketTriggerContext::loot_roll;
@@ -30,7 +31,11 @@ namespace ai
             creators["activate taxi"] = &WorldPacketTriggerContext::taxi;
             creators["trade status"] = &WorldPacketTriggerContext::trade_status;
             creators["loot response"] = &WorldPacketTriggerContext::loot_response;
-            creators["quest objective completed"] = &WorldPacketTriggerContext::quest_objective_completed;
+            creators["quest update add kill"] = &WorldPacketTriggerContext::quest_update_add_kill;
+            creators["quest update add item"] = &WorldPacketTriggerContext::quest_update_add_item;
+            creators["quest update failed"] = &WorldPacketTriggerContext::quest_update_failed;
+            creators["quest update failed timer"] = &WorldPacketTriggerContext::quest_update_failed_timer;
+            creators["quest update complete"] = &WorldPacketTriggerContext::quest_update_complete;
             creators["item push result"] = &WorldPacketTriggerContext::item_push_result;
             creators["party command"] = &WorldPacketTriggerContext::party_command;
             creators["taxi done"] = &WorldPacketTriggerContext::taxi_done;
@@ -51,6 +56,7 @@ namespace ai
             creators["bg status"] = &WorldPacketTriggerContext::bg_status;
             creators["levelup"] = &WorldPacketTriggerContext::levelup;
             creators["xpgain"] = &WorldPacketTriggerContext::xpgain;
+            creators["honorgain"] = &WorldPacketTriggerContext::honorgain;
             creators["see spell"] = &WorldPacketTriggerContext::seespell;
             creators["release spirit"] = &WorldPacketTriggerContext::release_spirit;
             creators["revive from corpse"] = &WorldPacketTriggerContext::revive_from_corpse;
@@ -79,7 +85,11 @@ namespace ai
         static Trigger* taxi_done(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "taxi done"); }
         static Trigger* party_command(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "party command"); }
         static Trigger* item_push_result(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "item push result"); }
-        static Trigger* quest_objective_completed(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest objective completed"); }
+        static Trigger* quest_update_add_kill(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest update add kill"); }
+        static Trigger* quest_update_add_item(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest update add item"); }
+        static Trigger* quest_update_failed(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest update failed"); }
+        static Trigger* quest_update_failed_timer(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest update failed timer"); }
+        static Trigger* quest_update_complete(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest update complete"); }
         static Trigger* loot_response(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "loot response"); }
         static Trigger* trade_status(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "trade status"); }
         static Trigger* cannot_equip(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "cannot equip"); }
@@ -96,12 +106,14 @@ namespace ai
         static Trigger* complete_quest(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "complete quest"); }
         static Trigger* accept_quest(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "accept quest"); }
         static Trigger* confirm_quest(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "confirm quest"); }
+        static Trigger* quest_details(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest details"); }
         static Trigger* quest_share(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "quest share"); }
         static Trigger* loot_start_roll(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "loot start roll"); }
         static Trigger* loot_roll(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "loot roll"); }
         static Trigger* taxi(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "activate taxi"); }
         static Trigger* levelup(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "levelup"); }
         static Trigger* xpgain(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "xpgain"); }
+        static Trigger* honorgain(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "honorgain"); }
         static Trigger* seespell(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "see spell"); }
         static Trigger* release_spirit(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "release spirit"); }
         static Trigger* revive_from_corpse(PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "revive from corpse"); }

@@ -34,15 +34,18 @@ std::string GuidPosition::to_string() const
     return b.str();
 }
 
-Creature* GuidPosition::GetCreature() const
+Creature* GuidPosition::GetCreature(uint32 instanceId) const
 {
     if (!*this)
         return nullptr;
 
-    return getMap()->GetAnyTypeCreature(*this);
+    if (!getMap(instanceId))
+        return nullptr;
+
+    return getMap(instanceId)->GetAnyTypeCreature(*this);
 }
 
-Unit* GuidPosition::GetUnit() const
+Unit* GuidPosition::GetUnit(uint32 instanceId) const
 {
     if (!*this)
         return nullptr;
@@ -50,15 +53,18 @@ Unit* GuidPosition::GetUnit() const
     if (IsPlayer())
         return sObjectAccessor.FindPlayer(*this);
 
-    return GetCreature();
+    return GetCreature(instanceId);
 }
 
-GameObject* GuidPosition::GetGameObject() const
+GameObject* GuidPosition::GetGameObject(uint32 instanceId) const
 {
     if (!*this)
         return nullptr;
 
-    return getMap()->GetGameObject(*this);
+    if (!getMap(instanceId))
+        return nullptr;
+
+    return getMap(instanceId)->GetGameObject(*this);
 }
 
 Player* GuidPosition::GetPlayer() const
@@ -76,18 +82,18 @@ const FactionTemplateEntry* GuidPosition::GetFactionTemplateEntry() const
 {
     if (IsPlayer() && GetPlayer())
         return GetPlayer()->GetFactionTemplateEntry();
-    if (IsCreature() && IsCreature())
+    if (IsCreature() && IsCreature() && GetCreatureTemplate())
         return sFactionTemplateStore.LookupEntry(GetCreatureTemplate()->Faction);
 
     return nullptr;
 }
 
-const ReputationRank GuidPosition::GetReactionTo(const GuidPosition& other)
+const ReputationRank GuidPosition::GetReactionTo(const GuidPosition& other, uint32 instanceId)
 {
-    if(other.IsUnit() && other.GetUnit())
-        if (other.GetUnit()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    if(other.IsUnit() && other.GetUnit(instanceId))
+        if (other.GetUnit(instanceId)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
-            if (const Player* unitPlayer = other.GetUnit()->GetControllingPlayer())
+            if (const Player* unitPlayer = other.GetUnit(instanceId)->GetControllingPlayer())
             {
                 if (unitPlayer->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP) && GetFactionTemplateEntry()->IsContestedGuardFaction())
                     return REP_HOSTILE;
@@ -99,7 +105,7 @@ const ReputationRank GuidPosition::GetReactionTo(const GuidPosition& other)
                 const FactionEntry* unitFactionEntry = sFactionStore.LookupEntry(GetFactionTemplateEntry()->faction);
                 return unitPlayer->GetReputationMgr().IsAtWar(unitFactionEntry) ? REP_HOSTILE : REP_FRIENDLY;
 #else
-                if (!other.GetUnit()->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
+                if (!other.GetUnit(instanceId)->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
                 {
 #ifdef MANGOSBOT_TWO
                     const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry(GetFactionTemplateEntry()->faction);
@@ -119,18 +125,18 @@ const ReputationRank GuidPosition::GetReactionTo(const GuidPosition& other)
     return PlayerbotAI::GetFactionReaction(GetFactionTemplateEntry(), other.GetFactionTemplateEntry());
 }
 
-bool GuidPosition::isDead()
+bool GuidPosition::isDead(uint32 instanceId)
 {
-    if (!getMap())
+    if (!getMap(instanceId))
         return false;
 
-    if (!getMap()->IsLoaded(getX(), getY()))
+    if (!getMap(instanceId)->IsLoaded(getX(), getY()))
         return false;
 
-    if (IsUnit() && GetUnit() && GetUnit()->IsInWorld() && GetUnit()->IsAlive())
+    if (IsUnit() && GetUnit(instanceId) && GetUnit(instanceId)->IsInWorld() && GetUnit(instanceId)->IsAlive())
         return false;
 
-    if (IsGameObject() && GetGameObject() && GetGameObject()->IsInWorld())
+    if (IsGameObject() && GetGameObject(instanceId) && GetGameObject(instanceId)->IsInWorld())
         return false;
 
     return true;

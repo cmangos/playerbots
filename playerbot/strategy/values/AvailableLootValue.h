@@ -11,7 +11,7 @@ namespace ai
 	public:
         AvailableLootValue(PlayerbotAI* ai, std::string name = "available loot") : ManualSetValue<LootObjectStack*>(ai, NULL, name)
         {
-            value = new LootObjectStack(ai->GetBot());
+            value = new LootObjectStack(bot);
         }
 
         virtual ~AvailableLootValue()

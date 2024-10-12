@@ -4,7 +4,6 @@
 
 #include "playerbot/strategy/ItemVisitors.h"
 #include "playerbot/PlayerbotAIConfig.h"
-#include "ahbot/AhBot.h"
 #include "playerbot/RandomPlayerbotMgr.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/CraftValues.h"
@@ -170,6 +169,9 @@ bool TradeStatusAction::CheckTrade()
                 break;
             }
         }
+        
+        if (!isGettingItem) //Enchanting an item.
+            isGettingItem = (bot->GetTradeData()->GetItem(TRADE_SLOT_NONTRADED) && trader->GetTradeData()->GetSpell());
 
         if (isGettingItem)
         {
@@ -208,7 +210,7 @@ bool TradeStatusAction::CheckTrade()
     for (uint32 slot = 0; slot < TRADE_SLOT_TRADED_COUNT; ++slot)
     {
         Item* item = bot->GetTradeData()->GetItem((TradeSlots)slot);
-        if (item && !auctionbot.GetSellPrice(item->GetProto()))
+        if (item && !ItemUsageValue::GetBotSellPrice(item->GetProto(), bot))
         {
             std::ostringstream out;
             out << chat->formatItem(item) << " - This is not for sale";
@@ -221,7 +223,7 @@ bool TradeStatusAction::CheckTrade()
         if (item)
         {
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
-            if ((botMoney && !auctionbot.GetBuyPrice(item->GetProto())) || usage == ItemUsage::ITEM_USAGE_NONE)
+            if ((botMoney && !ItemUsageValue::GetBotBuyPrice(item->GetProto(), bot)) || usage == ItemUsage::ITEM_USAGE_NONE)
             {
                 std::ostringstream out;
                 out << chat->formatItem(item) << " - I don't need this";
@@ -329,11 +331,11 @@ int32 TradeStatusAction::CalculateCost(Player* player, bool sell)
 
         if (sell)
         {
-            sum += item->GetCount() * auctionbot.GetSellPrice(proto) * sRandomPlayerbotMgr.GetSellMultiplier(bot);
+            sum += item->GetCount() * ItemUsageValue::GetBotSellPrice(proto, bot);
         }
         else
         {
-            sum += item->GetCount() * auctionbot.GetBuyPrice(proto) * sRandomPlayerbotMgr.GetBuyMultiplier(bot);
+            sum += item->GetCount() * ItemUsageValue::GetBotBuyPrice(proto, bot);
         }
     }
 

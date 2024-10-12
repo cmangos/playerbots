@@ -62,9 +62,6 @@ bool PossibleRpgTargetsValue::AcceptUnit(Unit* unit)
     if (sServerFacade.IsHostileTo(unit, bot) || dynamic_cast<Player*>(unit))
         return false;
 
-    if (sServerFacade.GetDistance2d(bot, unit) <= sPlayerbotAIConfig.tooCloseDistance)
-        return false;
-
 	if (unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER))
 		return false;
 

@@ -32,21 +32,7 @@ bool AutoLearnSpellAction::Execute(Event& event)
 
 void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
 {
-    if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && bot->GetGuildId() && sRandomPlayerbotMgr.IsFreeBot(bot))
-    {
-        Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-
-        if (guild)
-        {
-            std::map<std::string, std::string> placeholders;
-            placeholders["%level"] = std::to_string(bot->GetLevel());
-
-            if (urand(0, 3))
-                guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Ding!", placeholders), LANG_UNIVERSAL);
-            else
-                guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Yay level %level!", placeholders), LANG_UNIVERSAL);
-        }
-    }
+    BroadcastHelper::BroadcastLevelup(ai, bot);
 
     if (sPlayerbotAIConfig.autoLearnTrainerSpells)
         LearnTrainerSpells(out);

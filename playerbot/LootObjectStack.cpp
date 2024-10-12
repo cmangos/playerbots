@@ -271,6 +271,10 @@ bool LootObject::IsLootPossible(Player* bot)
                     }
                 }
             }
+
+            //Ignore objects that are currently in use.
+            if (go->IsInUse() || go->GetGoState() != GO_STATE_READY)
+                return false;
         }
     }
 
@@ -351,7 +355,7 @@ std::vector<LootObject> LootObjectStack::OrderByDistance(float maxDistance)
         if (!lootObject.IsLootPossible(bot))
             continue;
 
-        float distance = sqrt(bot->GetDistance(lootObject.GetWorldObject(bot)));
+        float distance = bot->GetDistance(lootObject.GetWorldObject(bot));
         if (!maxDistance || distance <= maxDistance)
             sortedMap[distance] = lootObject;
     }

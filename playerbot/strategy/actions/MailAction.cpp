@@ -75,6 +75,14 @@ private:
 class TakeMailProcessor : public MailProcessor
 {
 public:
+
+    bool Before(Player* requester, PlayerbotAI* ai) override
+    {
+        copper = 0;
+        items.clear();
+        return true;
+    }
+
     bool Process(Player* requester, int index, Mail* mail, PlayerbotAI* ai, Event& event) override
     {
         Player* bot = ai->GetBot();
@@ -83,9 +91,6 @@ public:
             ai->TellError(requester, "Not enough bag space");
             return false;
         }
-
-        copper = 0;
-        items.clear();
 
         ObjectGuid mailbox = FindMailbox(ai);
         if (mail->money)
@@ -107,7 +112,7 @@ public:
             bot->GetSession()->HandleMailTakeMoney(packet);
             RemoveMail(bot, mail->messageID, mailbox);
         }
-        else if (!mail->items.empty())
+        else if (mail->has_items)
         {
             std::list<uint32> guids;
             for (MailItemInfoVec::iterator i = mail->items.begin(); i != mail->items.end(); ++i)
@@ -127,20 +132,27 @@ public:
 #endif
                 Item* item = bot->GetMItem(*i);
 
-                if (event.getSource() == "rpg action")
+                if (item)
                 {
-                    items.push_back(ChatHelper::formatItem(item));
-                }
-                else
-                {
-                    std::ostringstream out;
-                    out << mail->subject << ", " << ChatHelper::formatItem(item) << "|cff00ff00 processed";
-                    ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                    if (event.getSource() == "rpg action")
+                    {
+                        items.push_back(ChatHelper::formatItem(item, item->GetCount()));
+                    }
+                    else
+                    {
+                        std::ostringstream out;
+                        out << mail->subject << ", " << ChatHelper::formatItem(item) << "|cff00ff00 processed";
+                        ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                    }
                 }
 
                 bot->GetSession()->HandleMailTakeItem(packet);
             }
 
+            RemoveMail(bot, mail->messageID, mailbox);
+        }
+        else if (mail->sender < 10 && !ai->HasActivePlayerMaster()) //Remove empty mails from auctionhouse.
+        {
             RemoveMail(bot, mail->messageID, mailbox);
         }
         return true;
@@ -153,7 +165,7 @@ public:
             std::map<std::string, std::string> args;
             args["%itemcount"] = std::to_string(items.size());
 
-            std::vector<std::string> lines = { BOT_TEXT2("|cff00ff00%itemcount items recieved from mail:", args) };
+            std::vector<std::string> lines = { BOT_TEXT2("|cff00ff00%itemcount items recieved from mail: ", args) };
             for (auto& item : items)
             {
                 if (lines.back().size() + item.size() > 256)
@@ -256,7 +268,7 @@ bool MailAction::Execute(Event& event)
     if (!requester && event.getSource() != "rpg action")
         return false;
 
-    if (!MailProcessor::FindMailbox(ai))
+    if (!MailProcessor::FindMailbox(ai) && event.getSource() != "debug")
     {
         ai->TellError(requester, "There is no mailbox nearby");
         return false;

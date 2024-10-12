@@ -8,7 +8,7 @@ using namespace ai;
 
 std::string ObjectGuidCalculatedValue::Format()
 {
-    GuidPosition guid = GuidPosition(this->Calculate(), bot->GetMapId());
+    GuidPosition guid = GuidPosition(this->Calculate(), bot);
     return guid ? chat->formatGuidPosition(guid) : "<none>";
 }
 
@@ -18,7 +18,7 @@ std::string ObjectGuidListCalculatedValue::Format()
     std::list<ObjectGuid> guids = this->Calculate();
     for (std::list<ObjectGuid>::iterator i = guids.begin(); i != guids.end(); ++i)
     {
-        GuidPosition guid = GuidPosition(*i, bot->GetMapId());
+        GuidPosition guid = GuidPosition(*i, bot);
         out << chat->formatGuidPosition(guid) << ",";
     }
     out << "}";

@@ -79,20 +79,3 @@ void FollowMasterStrategy::OnStrategyRemoved(BotState state)
         ai->ChangeStrategy("-follow", BotState::BOT_STATE_REACTION);
     }
 }
-
-void FollowJumpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
-{
-    triggers.push_back(new TriggerNode(
-        "very often",
-        NextAction::array(0, new NextAction("jump::follow", ACTION_IDLE + 1.0f), NULL)));
-}
-
-void FollowJumpStrategy::InitCombatTriggers(std::list<TriggerNode *> &triggers)
-{
-    InitNonCombatTriggers(triggers);
-}
-
-void FollowJumpStrategy::InitReactionTriggers(std::list<TriggerNode *> &triggers)
-{
-    InitNonCombatTriggers(triggers);
-}

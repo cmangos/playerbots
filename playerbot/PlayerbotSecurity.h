@@ -5,8 +5,9 @@ enum class PlayerbotSecurityLevel : uint8
 {
     PLAYERBOT_SECURITY_DENY_ALL = 0,
     PLAYERBOT_SECURITY_TALK = 1,
-    PLAYERBOT_SECURITY_INVITE = 2,
-    PLAYERBOT_SECURITY_ALLOW_ALL = 3
+    PLAYERBOT_SECURITY_GUILD = 2, //Intermediate level: Bot can't be invited to group but can accept guild invites.
+    PLAYERBOT_SECURITY_INVITE = 3,
+    PLAYERBOT_SECURITY_ALLOW_ALL = 4
 };
 
 enum class DenyReason : uint8

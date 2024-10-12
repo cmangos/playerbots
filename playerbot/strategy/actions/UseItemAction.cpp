@@ -216,11 +216,16 @@ bool RequiresItemToUse(const ItemPrototype* itemProto, PlayerbotAI* ai, Player* 
 bool UseAction::Execute(Event& event)
 {
     Player* requester = event.getOwner();
-    std::string name = event.getParam();
+    std::string useName = event.getParam();
 
-    if (name.empty())
+    if (useName.empty())
     {
-       name = getQualifier();
+        useName = getQualifier();
+    }
+
+    if (useName.empty())
+    {
+        useName = name;
     }
 
     MakeVerbose(requester != nullptr);
@@ -229,7 +234,7 @@ bool UseAction::Execute(Event& event)
     Item* targetItem = nullptr;
     GameObject* targetGameObject = nullptr;
 
-    if (name == "go")
+    if (useName == "go")
     {
         float closest = 9999.0f;
         std::list<ObjectGuid> nearestGOs = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
@@ -247,10 +252,10 @@ bool UseAction::Execute(Event& event)
             }
         }
     }
-    else if (name.find(LOS_GOS_PARAM) == 0)
+    else if (useName.find(LOS_GOS_PARAM) == 0)
     {
        std::list<GameObject*> gos;
-       std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(name.substr(LOS_GOS_PARAM.size()));
+       std::vector<LosModifierStruct> mods = TellLosAction::ParseLosModifiers(useName.substr(LOS_GOS_PARAM.size()));
        gos = TellLosAction::FilterGameObjects(requester, TellLosAction::GoGuidListToObjList(ai, AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los")), mods);
 
        for (GameObject* go : gos)
@@ -264,10 +269,10 @@ bool UseAction::Execute(Event& event)
     }
     else
     {
-        std::vector<uint32> items = chat->parseItemsUnordered(name, false);
+        std::vector<uint32> items = chat->parseItemsUnordered(useName, false);
         if (items.empty())
         {
-            std::list<Item*> inventoryItems = AI_VALUE2(std::list<Item*>, "inventory items", name);
+            std::list<Item*> inventoryItems = AI_VALUE2(std::list<Item*>, "inventory items", useName);
             for (Item* inventoryItem : inventoryItems)
             {
                 if (inventoryItem)
@@ -286,7 +291,7 @@ bool UseAction::Execute(Event& event)
             }
         }
 
-        std::list<ObjectGuid> gos = chat->parseGameobjects(name);
+        std::list<ObjectGuid> gos = chat->parseGameobjects(useName);
         if (!gos.empty())
         {
             targetGameObject = ai->GetGameObject(*gos.begin());
@@ -529,7 +534,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             else if (gameObject && gameObject->IsSpawned())
             {
                 gameObjectTarget = gameObject;
-                targets.setDestination(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ());
+                targets.setDestination(gameObject->GetPositionX(), gameObject->GetPositionY(), gameObject->GetPositionZ());
                 validTarget = true;
             }
         }
@@ -844,6 +849,14 @@ bool UseAction::UseGameObject(Player* requester, Event& event, GameObject* gameO
             return false;
         }
     }
+    else if (gameObject->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
+    {
+        if (gameObject->ActivateToQuest(bot))
+        {
+            Event event("use game object", gameObject->GetObjectGuid(), bot);
+            ai->DoSpecificAction("talk to quest giver", event, true);
+        }
+    }
 
     std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
     *packet << guid;
@@ -1017,11 +1030,11 @@ bool UseItemIdAction::Execute(Event& event)
                 GuidPosition guidP = *guidPs.begin();
                 if (guidP.IsGameObject())
                 {
-                    gameObjectTarget = guidP.GetGameObject();
+                    gameObjectTarget = guidP.GetGameObject(bot->GetInstanceId());
                 }
                 else
                 {
-                    unitTarget = guidP.GetUnit();
+                    unitTarget = guidP.GetUnit(bot->GetInstanceId());
                 }
             }
         }

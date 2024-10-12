@@ -5,6 +5,7 @@
 #include "MovementActions.h"
 #include "playerbot/strategy/values/LastMovementValue.h"
 #include "ReviveFromCorpseAction.h"
+#include "playerbot/TravelMgr.h"
 
 namespace ai
 {
@@ -126,36 +127,61 @@ namespace ai
     public:
         virtual bool Execute(Event& event)
         {
-            GuidPosition grave = AI_VALUE(GuidPosition, "best graveyard");
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
-            if (!grave)
-                return false;
+            sLog.outBasic("Repop bot #%d %s:%d <%s>", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
 
-            if (!bot->GetCorpse() || AI_VALUE(bool, "should spirit healer"))
+            SET_AI_VALUE(uint32, "death count", 0);
+
+            if (bot->IsDead())
             {
-                sLog.outBasic("Bot #%d %s:%d <%s> repops at graveyard [%s]", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), event.getSource().c_str());
+                bot->ResurrectPlayer(1.0f, false);
+                bot->SpawnCorpseBones();
+                bot->SaveToDB();
+            }
+
+            
+            if (!ai->HasRealPlayerMaster())
+            {
+                if (Group* group = bot->GetGroup())
+                {
+                    sLog.outBasic("Repop: Removing bot #%d %s:%d <%s> from group", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+                    group->RemoveMember(bot->GetObjectGuid(), 0);
+                }
+            }
+
+            RESET_AI_VALUE(Unit*, "old target");
+            RESET_AI_VALUE(Unit*, "current target");
+            RESET_AI_VALUE(Unit*, "pull target");
+            RESET_AI_VALUE(bool, "combat::self target");
+            RESET_AI_VALUE(WorldPosition, "current position");
+
+            bot->SetSelectionGuid(ObjectGuid());
+            ai->TellPlayer(requester, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+            TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+            travelTarget->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition, true);
+            travelTarget->setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+            travelTarget->setExpireIn(1000);
+
+            PlayerInfo const* defaultPlayerInfo = sObjectMgr.GetPlayerInfo(bot->getRace(), bot->getClass());
+            if (defaultPlayerInfo)
+            {
+                sLog.outBasic("Repop: Teleporting bot #%d %s:%d <%s> to spawn", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+                //teleport bot to spawn
+                bot->TeleportTo(defaultPlayerInfo->mapId, defaultPlayerInfo->positionX, defaultPlayerInfo->positionY, defaultPlayerInfo->positionZ, defaultPlayerInfo->orientation);
+                if (bot->isRealPlayer())
+                    bot->SendHeartBeat();
             }
             else
             {
-                sLog.outBasic("Bot #%d %s:%d <%s> repops at spirit healer", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-                PlayerbotChatHandler ch(bot);
-                bot->ResurrectPlayer(0.5f, !ai->HasCheat(BotCheatMask::repair));
-                bot->DurabilityLossAll(0.25f, true);
-
-                bot->SpawnCorpseBones();
-                bot->SaveToDB();
-                context->GetValue<Unit*>("current target")->Set(nullptr);
-                bot->SetSelectionGuid(ObjectGuid());
-                ai->TellPlayer(requester, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                sLog.outBasic("Repop: Teleporting bot #%d %s:%d <%s> to homebind", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+                //teleport bot to homebind
+                bot->TeleportToHomebind();
+                bot->SendHeartBeat();
             }
 
-            bot->TeleportTo(grave.getMapId(), grave.getX(), grave.getY(), grave.getZ(), grave.getO());
-
             sPlayerbotAIConfig.logEvent(ai, "RepopAction");
-
-            RESET_AI_VALUE(bool,"combat::self target");
-            RESET_AI_VALUE(WorldPosition, "current position");
 
             return true;
         }
@@ -163,6 +189,9 @@ namespace ai
         virtual bool isUseful()
         {
             if (bot->InBattleGround())
+                return false;
+
+            if (ai->HasActivePlayerMaster())
                 return false;
 
             return true;

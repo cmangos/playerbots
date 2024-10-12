@@ -294,15 +294,30 @@ namespace ai
             if (group && ai->GetGrouperType() > GrouperType::LEADER_5 && !group->IsRaidGroup() && bot->GetGroup()->GetMembersCount() > 3)
                 group->ConvertToRaid();
 
-            if (sPlayerbotAIConfig.inviteChat && sRandomPlayerbotMgr.IsFreeBot(bot))
+            Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
+            if (sPlayerbotAIConfig.inviteChat && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
             {
-                std::map<std::string, std::string> placeholders;
-                placeholders["%player"] = player->GetName();
-
-                if(group && group->IsRaidGroup())
-                    bot->Say(BOT_TEXT2("join_raid", placeholders), (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));                    
+                if (guild && bot->IsInGuild(player))
+                {
+                    BroadcastHelper::BroadcastGuildGroupOrRaidInvite(
+                        ai,
+                        bot,
+                        player,
+                        group,
+                        guild
+                    );
+                }
                 else
-                    bot->Say(BOT_TEXT2("join_group", placeholders), (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+                {
+
+                    std::map<std::string, std::string> placeholders;
+                    placeholders["%player"] = player->GetName();
+
+                    if (group && group->IsRaidGroup())
+                        bot->Say(BOT_TEXT2("join_raid", placeholders), (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+                    else
+                        bot->Say(BOT_TEXT2("join_group", placeholders), (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+                }
             }
 
             return Invite(bot, player);
@@ -318,7 +333,7 @@ namespace ai
 
         if (bot->InBattleGround())
             return false;
-        
+
         if (bot->InBattleGroundQueue())
             return false;
 
@@ -343,7 +358,7 @@ namespace ai
                 return false;
         }
 
-        if (ai->HasActivePlayerMaster()) //Alts do not invite randomly          
+        if (ai->HasActivePlayerMaster()) //Alts do not invite randomly
            return false;
 
         return true;
@@ -395,10 +410,10 @@ namespace ai
 
             if (playerAi)
             {
-                if (playerAi->GetGrouperType() == GrouperType::SOLO && !playerAi->HasRealPlayerMaster()) //Do not invite solo players. 
+                if (playerAi->GetGrouperType() == GrouperType::SOLO && !playerAi->HasRealPlayerMaster()) //Do not invite solo players.
                     continue;
 
-                if (playerAi->HasActivePlayerMaster()) //Do not invite alts of active players. 
+                if (playerAi->HasActivePlayerMaster()) //Do not invite alts of active players.
                     continue;
 
                 if (player->GetLevel() > bot->GetLevel() + 5) //Invite higher levels that need money so they can grind money and help out.
@@ -421,26 +436,15 @@ namespace ai
                 group->ConvertToRaid();
             }
 
-            if (sPlayerbotAIConfig.inviteChat && sRandomPlayerbotMgr.IsFreeBot(bot))
+            if (sPlayerbotAIConfig.inviteChat && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
             {
-                std::map<std::string, std::string> placeholders;
-                placeholders["%name"] = player->GetName();
-                placeholders["%place"] = WorldPosition(player).getAreaName(false, false);
-
-                if (group && group->IsRaidGroup())
-                {
-                    if (urand(0, 3))
-                        guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Hey anyone want to raid in %place", placeholders), LANG_UNIVERSAL);
-                    else
-                        guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Hey %name I'm raiding in %place do you wan to join me?", placeholders), LANG_UNIVERSAL);
-                }
-                else
-                {
-                    if (urand(0, 3))
-                        guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Hey anyone wanna group up in %place?", placeholders), (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
-                    else
-                        guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Hey %name do you want join my group? I'm heading for %place", placeholders), (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
-                }
+                BroadcastHelper::BroadcastGuildGroupOrRaidInvite(
+                    ai,
+                    bot,
+                    player,
+                    group,
+                    guild
+                );
             }
 
             return Invite(bot, player);

@@ -45,7 +45,9 @@ namespace ai
                 pSpellInfo->SchoolMask == 1;
 #endif
 
-            return !isTradeSkill && (GetSpellRecoveryTime(pSpellInfo) < MINUTE * IN_MILLISECONDS || !ai->HasActivePlayerMaster());
+            bool hasCost = pSpellInfo->manaCost > 0;
+
+            return hasCost && !isTradeSkill && (GetSpellRecoveryTime(pSpellInfo) < MINUTE * IN_MILLISECONDS || !ai->HasActivePlayerMaster());
         }
 
         virtual uint32 GetSpellPriority(const SpellEntry* pSpellInfo) { return 1; }
@@ -57,7 +59,7 @@ namespace ai
     class CraftRandomItemAction : public CastRandomSpellAction
     {
     public:
-        CraftRandomItemAction(PlayerbotAI* ai) : CastRandomSpellAction(ai, "enchant random item") {}
+        CraftRandomItemAction(PlayerbotAI* ai) : CastRandomSpellAction(ai, "craft random item") {}
     public:
         virtual bool Execute(Event& event) override;
     };
@@ -93,6 +95,11 @@ namespace ai
             if (!item)
                 return 0;
 
+            uint32 castCount = AI_VALUE2(uint32, "has reagents for", pSpellInfo->Id);
+
+            if (!castCount)
+                return 0;
+
             ItemPrototype const* proto = item->GetProto();
 
             //Upgrade current equiped item enchantment.
@@ -107,15 +114,16 @@ namespace ai
 
                 uint32 newEnchantWeight = sRandomItemMgr.CalculateEnchantWeight(bot->getClass(), sRandomItemMgr.GetPlayerSpecId(bot), enchant_id);
 
-                if (currentEnchnatWeight >= newEnchantWeight)
+                if (currentEnchnatWeight > newEnchantWeight) //Do not replace better enchants.
                     return 0;
 
-                return 100;
+                if (currentEnchnatWeight < newEnchantWeight) //Place better enchants.
+                    return 100;
             }
 
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", proto->ItemId);
 
-            if (usage != ItemUsage::ITEM_USAGE_AH && usage != ItemUsage::ITEM_USAGE_VENDOR && usage != ItemUsage::ITEM_USAGE_DISENCHANT && usage != ItemUsage::ITEM_USAGE_NONE)
+            if (usage != ItemUsage::ITEM_USAGE_AH && usage != ItemUsage::ITEM_USAGE_BROKEN_AH && usage != ItemUsage::ITEM_USAGE_VENDOR && usage != ItemUsage::ITEM_USAGE_DISENCHANT && usage != ItemUsage::ITEM_USAGE_NONE)
                 return 0;
 
             //Enchant for skillup

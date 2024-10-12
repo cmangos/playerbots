@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include "QuestValues.h"
 #include "SharedValueContext.h"
+#include "playerbot/TravelMgr.h"
 
 using namespace ai;
 
@@ -46,6 +47,13 @@ entryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 			if (quest->ReqItemId[objective])
 			{
 				for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", quest->ReqItemId[objective]))
+					rMap[entry][questId] |= relationFlag;
+			}
+
+			//Buy from vendor objective
+			if (quest->ReqItemId[objective])
+			{
+				for (auto& entry : GAI_VALUE2(std::list<int32>, "item vendor list", quest->ReqItemId[objective]))
 					rMap[entry][questId] |= relationFlag;
 			}
 		}
@@ -186,7 +194,7 @@ std::list<GuidPosition> ActiveQuestGiversValue::Calculate()
 					continue;
 			}
 
-			if (guidp.isDead())
+			if (guidp.isDead(bot->GetInstanceId()))
 				continue;
 
 			retQuestGivers.push_back(guidp);
@@ -245,7 +253,7 @@ std::list<GuidPosition> ActiveQuestTakersValue::Calculate()
 
 			for (auto& guidp : entry.second)
 			{
-				if (guidp.isDead())
+				if (guidp.isDead(bot->GetInstanceId()))
 					continue;
 
 				retQuestTakers.push_back(guidp);
@@ -314,7 +322,7 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 			{
 				for (auto& guidp : entry.second)
 				{
-					if (guidp.isDead())
+					if (guidp.isDead(bot->GetInstanceId()))
 						continue;
 
 					retQuestObjectives.push_back(guidp);
@@ -522,9 +530,9 @@ bool CanUseItemOn::Calculate()
 	}
 
 	if (guidP.IsUnit())
-		unit = guidP.GetUnit();
+		unit = guidP.GetUnit(bot->GetInstanceId());
 	else if (guidP.IsGameObject())
-		gameObject = guidP.GetGameObject();
+		gameObject = guidP.GetGameObject(bot->GetInstanceId());
 
 	ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
 
@@ -554,6 +562,35 @@ bool CanUseItemOn::Calculate()
 			if (ai->CanCastSpell(spellId, gameObject, 0, false, true))
 				return true;
 		}
+	}
+
+	return false;
+};
+
+bool HasNearbyQuestTakerValue::Calculate()
+{
+	std::list<ObjectGuid> possibleTargets = AI_VALUE(std::list<ObjectGuid>, "possible rpg targets");
+
+	int32 travelEntry = AI_VALUE(TravelTarget*, "travel target")->getEntry();
+	
+	for (auto& target : possibleTargets)
+	{
+		if (target.GetEntry() == travelEntry)
+			continue;
+
+		if(AI_VALUE2(bool, "can turn in quest npc", target.GetEntry()))
+			return true;
+	}
+
+	std::list<ObjectGuid> possibleObjects = bot->GetMap()->IsDungeon() ? AI_VALUE(std::list<ObjectGuid>, "nearest game objects") : AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
+
+	for (auto& target : possibleObjects)
+	{
+		if (target.GetEntry() == (travelEntry * -1))
+			continue;
+
+		if (AI_VALUE2(bool, "can turn in quest npc", target.GetEntry()))
+			return true;
 	}
 
 	return false;

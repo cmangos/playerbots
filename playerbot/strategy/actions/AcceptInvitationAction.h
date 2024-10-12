@@ -56,7 +56,7 @@ namespace ai
 
             if (master->GetPlayerbotAI()) //Copy formation from bot master.
             {
-                if (sPlayerbotAIConfig.inviteChat && sRandomPlayerbotMgr.IsFreeBot(bot))
+                if (sPlayerbotAIConfig.inviteChat && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
                 {
                     std::map<std::string, std::string> placeholders;
                     placeholders["%name"] = master->GetName();

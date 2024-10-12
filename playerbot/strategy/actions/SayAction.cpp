@@ -4,7 +4,9 @@
 #include "playerbot/PlayerbotTextMgr.h"
 #include "Chat/ChannelMgr.h"
 #include "playerbot/ServerFacade.h"
+#include "playerbot/AiFactory.h"
 #include <regex>
+#include <boost/algorithm/string.hpp>
 
 using namespace ai;
 
@@ -123,12 +125,10 @@ bool SayAction::isUseful()
 
 void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32 guid2, std::string msg, std::string chanName, std::string name)
 {
-    ChatReplyType replyType = REPLY_NOT_UNDERSTAND; // default not understand
-    std::string respondsText = "";
-
     // if we're just commanding bots around, don't respond...
     // first one is for exact word matches
-    if (noReplyMsgs.find(msg) != noReplyMsgs.end()) {
+    if (noReplyMsgs.find(msg) != noReplyMsgs.end())
+    {
         //ostringstream out;
         //out << "DEBUG ChatReplyDo decided to ignore exact blocklist match" << msg;
         //bot->Say(out.str(), LANG_UNIVERSAL);
@@ -136,7 +136,8 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
     }
 
     // second one is for partial matches like + or - where we change strats
-    if (std::any_of(noReplyMsgParts.begin(), noReplyMsgParts.end(), [&msg](const std::string& part) { return msg.find(part) != std::string::npos; })) {
+    if (std::any_of(noReplyMsgParts.begin(), noReplyMsgParts.end(), [&msg](const std::string& part) { return msg.find(part) != std::string::npos; }))
+    {
         //ostringstream out;
         //out << "DEBUG ChatReplyDo decided to ignore partial blocklist match" << msg;
         //bot->Say(out.str(), LANG_UNIVERSAL);
@@ -146,19 +147,417 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
     if (std::any_of(noReplyMsgStarts.begin(), noReplyMsgStarts.end(), [&msg](const std::string& start) {
         return msg.find(start) == 0;  // Check if the start matches the beginning of msg
-        })) {
+        }))
+    {
         //ostringstream out;
         //out << "DEBUG ChatReplyDo decided to ignore start blocklist match" << msg;
         //bot->Say(out.str(), LANG_UNIVERSAL);
         return;
     }
 
+    ChatChannelSource chatChannelSource = bot->GetPlayerbotAI()->GetChatChannelSource(bot, type, chanName);
+
+    if ((boost::algorithm::istarts_with(msg, "LFG") || boost::algorithm::istarts_with(msg, "LFM"))
+        && HandleLFGQuestsReply(bot, chatChannelSource, msg, name))
+    {
+        return;
+    }
+
+    if ((boost::algorithm::istarts_with(msg, "WTB"))
+        && HandleWTBItemsReply(bot, chatChannelSource, msg, name))
+    {
+        return;
+    }
+
+    //toxic links
+    if (boost::algorithm::istarts_with(msg, sPlayerbotAIConfig.toxicLinksPrefix)
+        && (bot->GetPlayerbotAI()->GetChatHelper()->ExtractAllItemIds(msg).size() > 0 || bot->GetPlayerbotAI()->GetChatHelper()->ExtractAllQuestIds(msg).size() > 0))
+    {
+        HandleToxicLinksReply(bot, chatChannelSource, msg, name);
+        return;
+    }
+
+    //thunderfury
+    if (bot->GetPlayerbotAI()->GetChatHelper()->ExtractAllItemIds(msg).count(19019))
+    {
+        HandleThunderfuryReply(bot, chatChannelSource, msg, name);
+        return;
+    }
+
+
+    SendGeneralResponse(bot, chatChannelSource, GenerateReplyMessage(bot, msg, guid1, name), name);
+}
+
+bool ChatReplyAction::HandleThunderfuryReply(Player* bot, ChatChannelSource chatChannelSource, std::string msg, std::string name)
+{
+    std::map<std::string, std::string> placeholders;
+    ItemPrototype const* thunderfuryProto = sObjectMgr.GetItemPrototype(19019);
+    placeholders["%thunderfury_link"] = bot->GetPlayerbotAI()->GetChatHelper()->formatItem(thunderfuryProto);
+
+    std::string responseMessage = BOT_TEXT2("thunderfury_spam", placeholders);
+
+    switch (chatChannelSource)
+    {
+        case ChatChannelSource::SRC_WORLD:
+        {
+            bot->GetPlayerbotAI()->SayToWorld(responseMessage);
+            break;
+        }
+        case ChatChannelSource::SRC_GENERAL:
+        {
+            bot->GetPlayerbotAI()->SayToGeneral(responseMessage);
+            break;
+        }
+    }
+
+    bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
+
+    return true;
+}
+
+bool ChatReplyAction::HandleToxicLinksReply(Player* bot, ChatChannelSource chatChannelSource, std::string msg, std::string name)
+{
+    //quests
+    std::vector<uint32> incompleteQuests;
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 questId = bot->GetQuestSlotQuestId(slot);
+        if (!questId)
+            continue;
+
+        QuestStatus status = bot->GetQuestStatus(questId);
+        if (status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_NONE)
+            incompleteQuests.push_back(questId);
+    }
+
+    //items
+    std::vector<Item*> botItems = bot->GetPlayerbotAI()->GetInventoryAndEquippedItems();
+
+    //spells
+    //?
+
+    std::map<std::string, std::string> placeholders;
+
+    placeholders["%random_inventory_item_link"] = botItems.size() > 0 ? bot->GetPlayerbotAI()->GetChatHelper()->formatItem(botItems[rand() % botItems.size()]) : BOT_TEXT("string_empty_link");
+    placeholders["%prefix"] = sPlayerbotAIConfig.toxicLinksPrefix;
+
+    if (incompleteQuests.size() > 0)
+    {
+        Quest const* quest = sObjectMgr.GetQuestTemplate(incompleteQuests[rand() % incompleteQuests.size()]);
+        placeholders["%random_taken_quest_or_item_link"] = bot->GetPlayerbotAI()->GetChatHelper()->formatQuest(quest);
+    }
+    else
+    {
+        placeholders["%random_taken_quest_or_item_link"] = placeholders["%random_inventory_item_link"];
+    }
+
+    placeholders["%my_role"] = bot->GetPlayerbotAI()->GetChatHelper()->formatClass(bot, AiFactory::GetPlayerSpecTab(bot));
+    AreaTableEntry const* current_area = bot->GetPlayerbotAI()->GetCurrentArea();
+    AreaTableEntry const* current_zone = bot->GetPlayerbotAI()->GetCurrentZone();
+    placeholders["%area_name"] = current_area ? bot->GetPlayerbotAI()->GetLocalizedAreaName(current_area) : BOT_TEXT("string_unknown_area");
+    placeholders["%zone_name"] = current_zone ? bot->GetPlayerbotAI()->GetLocalizedAreaName(current_zone) : BOT_TEXT("string_unknown_area");
+    placeholders["%my_class"] = bot->GetPlayerbotAI()->GetChatHelper()->formatClass(bot->getClass());
+    placeholders["%my_race"] = bot->GetPlayerbotAI()->GetChatHelper()->formatRace(bot->getRace());
+    placeholders["%my_level"] = std::to_string(bot->GetLevel());
+
+    switch (chatChannelSource)
+    {
+        case ChatChannelSource::SRC_WORLD:
+        {
+            bot->GetPlayerbotAI()->SayToWorld(BOT_TEXT2("suggest_toxic_links", placeholders));
+            break;
+        }
+        case ChatChannelSource::SRC_GENERAL:
+        {
+            bot->GetPlayerbotAI()->SayToGeneral(BOT_TEXT2("suggest_toxic_links", placeholders));
+            break;
+        }
+        case ChatChannelSource::SRC_GUILD:
+        {
+            bot->GetPlayerbotAI()->SayToGuild(BOT_TEXT2("suggest_toxic_links", placeholders));
+            break;
+        }
+    }
+
+    bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 60));
+
+    return true;
+}
+
+/*
+* @return true if message contained item ids
+*/
+bool ChatReplyAction::HandleWTBItemsReply(Player* bot, ChatChannelSource chatChannelSource, std::string msg, std::string name)
+{
+    auto messageItemIds = bot->GetPlayerbotAI()->GetChatHelper()->ExtractAllItemIds(msg);
+
+    if (messageItemIds.empty())
+    {
+        return false;
+    }
+
+    std::set<uint32> matchingItemIds;
+
+    for (auto messageItemId : messageItemIds)
+    {
+        if (bot->GetPlayerbotAI()->HasItemInInventory(messageItemId))
+        {
+            matchingItemIds.insert(messageItemId);
+        }
+    }
+
+    if (!matchingItemIds.empty())
+    {
+        std::map<std::string, std::string> placeholders;
+        placeholders["%other_name"] = name;
+        AreaTableEntry const* current_area = bot->GetPlayerbotAI()->GetCurrentArea();
+        AreaTableEntry const* current_zone = bot->GetPlayerbotAI()->GetCurrentZone();
+        placeholders["%area_name"] = current_area ? bot->GetPlayerbotAI()->GetLocalizedAreaName(current_area) : BOT_TEXT("string_unknown_area");
+        placeholders["%zone_name"] = current_zone ? bot->GetPlayerbotAI()->GetLocalizedAreaName(current_zone) : BOT_TEXT("string_unknown_area");
+        placeholders["%my_class"] = bot->GetPlayerbotAI()->GetChatHelper()->formatClass(bot->getClass());
+        placeholders["%my_race"] = bot->GetPlayerbotAI()->GetChatHelper()->formatRace(bot->getRace());
+        placeholders["%my_level"] = std::to_string(bot->GetLevel());
+        placeholders["%my_role"] = bot->GetPlayerbotAI()->GetChatHelper()->formatClass(bot, AiFactory::GetPlayerSpecTab(bot));
+        placeholders["%formatted_item_links"] = "";
+
+        for (auto matchingItemId : matchingItemIds)
+        {
+            ItemPrototype const* proto = sObjectMgr.GetItemPrototype(matchingItemId);
+            placeholders["%formatted_item_links"] += bot->GetPlayerbotAI()->GetChatHelper()->formatItem(proto, bot->GetPlayerbotAI()->GetInventoryItemsCountWithId(matchingItemId));
+            placeholders["%formatted_item_links"] += " ";
+        }
+
+        switch (chatChannelSource)
+        {
+            case ChatChannelSource::SRC_WORLD:
+            {
+                //may reply to the same channel or whisper
+                if (urand(0, 1))
+                {
+                    std::string responseMessage = BOT_TEXT2("response_wtb_items_channel", placeholders);
+                    bot->GetPlayerbotAI()->SayToWorld(responseMessage);
+                }
+                else
+                {
+                    std::string responseMessage = BOT_TEXT2("response_wtb_items_whisper", placeholders);
+                    bot->GetPlayerbotAI()->Whisper(responseMessage, name);
+                }
+                break;
+            }
+            case ChatChannelSource::SRC_GENERAL:
+            {
+                //may reply to the same channel or whisper
+                if (urand(0, 1))
+                {
+                    std::string responseMessage = BOT_TEXT2("response_wtb_items_channel", placeholders);
+                    bot->GetPlayerbotAI()->SayToGeneral(responseMessage);
+                }
+                else
+                {
+                    std::string responseMessage = BOT_TEXT2("response_wtb_items_whisper", placeholders);
+                    bot->GetPlayerbotAI()->Whisper(responseMessage, name);
+                }
+                break;
+            }
+            case ChatChannelSource::SRC_TRADE:
+            {
+                //may reply to the same channel or whisper
+                if (urand(0, 1))
+                {
+                    std::string responseMessage = BOT_TEXT2("response_wtb_items_channel", placeholders);
+                    bot->GetPlayerbotAI()->SayToTrade(responseMessage);
+                }
+                else
+                {
+                    std::string responseMessage = BOT_TEXT2("response_wtb_items_whisper", placeholders);
+                    bot->GetPlayerbotAI()->Whisper(responseMessage, name);
+                }
+                break;
+            }
+        }
+        bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 60));
+    }
+
+    return true;
+}
+
+/*
+* @return true if message contained quest ids
+*/
+bool ChatReplyAction::HandleLFGQuestsReply(Player* bot, ChatChannelSource chatChannelSource, std::string msg, std::string name)
+{
+    auto messageQuestIds = bot->GetPlayerbotAI()->GetChatHelper()->ExtractAllQuestIds(msg);
+
+    if (messageQuestIds.empty())
+    {
+        return false;
+    }
+
+    auto botQuestIds = bot->GetPlayerbotAI()->GetAllCurrentQuestIds();
+
+    std::set<uint32> matchingQuestIds;
+    for (auto botQuestId : botQuestIds)
+    {
+        if (messageQuestIds.count(botQuestId) != 0)
+        {
+            matchingQuestIds.insert(botQuestId);
+        }
+    }
+
+    if (!matchingQuestIds.empty())
+    {
+        std::map<std::string, std::string> placeholders;
+        placeholders["%other_name"] = name;
+        AreaTableEntry const* current_area = bot->GetPlayerbotAI()->GetCurrentArea();
+        AreaTableEntry const* current_zone = bot->GetPlayerbotAI()->GetCurrentZone();
+        placeholders["%area_name"] = current_area ? bot->GetPlayerbotAI()->GetLocalizedAreaName(current_area) : BOT_TEXT("string_unknown_area");
+        placeholders["%zone_name"] = current_zone ? bot->GetPlayerbotAI()->GetLocalizedAreaName(current_zone) : BOT_TEXT("string_unknown_area");
+        placeholders["%my_class"] = bot->GetPlayerbotAI()->GetChatHelper()->formatClass(bot->getClass());
+        placeholders["%my_race"] = bot->GetPlayerbotAI()->GetChatHelper()->formatRace(bot->getRace());
+        placeholders["%my_level"] = std::to_string(bot->GetLevel());
+        placeholders["%my_role"] = bot->GetPlayerbotAI()->GetChatHelper()->formatClass(bot, AiFactory::GetPlayerSpecTab(bot));
+        placeholders["%quest_links"] = "";
+        for (auto matchingQuestId : matchingQuestIds)
+        {
+            Quest const* quest = sObjectMgr.GetQuestTemplate(matchingQuestId);
+            placeholders["%quest_links"] += bot->GetPlayerbotAI()->GetChatHelper()->formatQuest(quest);
+        }
+
+        switch (chatChannelSource)
+        {
+            case ChatChannelSource::SRC_WORLD:
+            {
+                //may reply to the same channel or whisper
+                if (urand(0, 1))
+                {
+                    std::string responseMessage = BOT_TEXT2(bot->GetGroup() ? "response_lfg_quests_channel_in_group" : "response_lfg_quests_channel", placeholders);
+                    bot->GetPlayerbotAI()->SayToWorld(responseMessage);
+                }
+                else
+                {
+                    std::string responseMessage = BOT_TEXT2(bot->GetGroup() ? "response_lfg_quests_whisper_in_group" : "response_lfg_quests_whisper", placeholders);
+                    bot->GetPlayerbotAI()->Whisper(responseMessage, name);
+                }
+                break;
+            }
+            case ChatChannelSource::SRC_GENERAL:
+            {
+                //may reply to the same channel or whisper
+                if (urand(0, 1))
+                {
+                    std::string responseMessage = BOT_TEXT2(bot->GetGroup() ? "response_lfg_quests_channel_in_group" : "response_lfg_quests_channel", placeholders);
+                    bot->GetPlayerbotAI()->SayToGeneral(responseMessage);
+                }
+                else
+                {
+                    std::string responseMessage = BOT_TEXT2(bot->GetGroup() ? "response_lfg_quests_whisper_in_group" : "response_lfg_quests_whisper", placeholders);
+                    bot->GetPlayerbotAI()->Whisper(responseMessage, name);
+                }
+                break;
+            }
+            case ChatChannelSource::SRC_LOOKING_FOR_GROUP:
+            {
+                //do not reply to the chat
+                //may whisper
+                std::string responseMessage = BOT_TEXT2(bot->GetGroup() ? "response_lfg_quests_whisper_in_group" : "response_lfg_quests_whisper", placeholders);
+                bot->GetPlayerbotAI()->Whisper(responseMessage, name);
+                break;
+            }
+        }
+        bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
+    }
+
+    return true;
+}
+
+bool ChatReplyAction::SendGeneralResponse(Player* bot, ChatChannelSource chatChannelSource, std::string responseMessage, std::string name)
+{
+    // send responds
+    switch (chatChannelSource)
+    {
+    case ChatChannelSource::SRC_WORLD:
+    {
+        //may reply to the same channel or whisper
+        bot->GetPlayerbotAI()->SayToWorld(responseMessage);
+        break;
+    }
+    case ChatChannelSource::SRC_GENERAL:
+    {
+        //may reply to the same channel or whisper
+        //bot->GetPlayerbotAI()->SayToGeneral(responseMessage);
+        bot->GetPlayerbotAI()->Whisper(responseMessage, name);
+        break;
+    }
+    case ChatChannelSource::SRC_TRADE:
+    {
+        //do not reply to the chat
+        //may whisper
+        break;
+    }
+    case ChatChannelSource::SRC_LOCAL_DEFENSE:
+    {
+        //may reply to the same channel or whisper
+        bot->GetPlayerbotAI()->SayToLocalDefense(responseMessage);
+        break;
+    }
+    case ChatChannelSource::SRC_WORLD_DEFENSE:
+    {
+        //may reply only if rank 11+ for MANGOSBOT_ZERO, may always reply for others
+        //may whisper
+        break;
+    }
+    case ChatChannelSource::SRC_LOOKING_FOR_GROUP:
+    {
+        //do not reply to the chat
+        //may whisper
+        break;
+    }
+    case ChatChannelSource::SRC_GUILD_RECRUITMENT:
+    {
+        //do not reply to the chat
+        //may whisper
+        break;
+    }
+    case ChatChannelSource::SRC_WHISPER:
+    {
+        bot->GetPlayerbotAI()->Whisper(responseMessage, name);
+        break;
+    }
+    case ChatChannelSource::SRC_SAY:
+    {
+        bot->GetPlayerbotAI()->Say(responseMessage);
+        break;
+    }
+    case ChatChannelSource::SRC_YELL:
+    {
+        bot->GetPlayerbotAI()->Yell(responseMessage);
+        break;
+    }
+    case ChatChannelSource::SRC_GUILD:
+    {
+        bot->GetPlayerbotAI()->SayToGuild(responseMessage);
+        break;
+    }
+    default:
+        break;
+    }
+    bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
+
+    return true;
+}
+
+std::string ChatReplyAction::GenerateReplyMessage(Player* bot, std::string incomingMessage, uint32 guid1, std::string name)
+{
+    ChatReplyType replyType = REPLY_NOT_UNDERSTAND; // default not understand
+
+    std::string respondsText = "";
+
     // Chat Logic
     int32 verb_pos = -1;
     int32 verb_type = -1;
     int32 is_quest = 0;
     bool found = false;
-    std::stringstream text(msg);
+    std::stringstream text(incomingMessage);
     std::string segment;
     std::vector<std::string> word;
     while (std::getline(text, segment, ' '))
@@ -172,7 +571,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             word.push_back("");
     }
 
-    if (msg.find("?") != std::string::npos)
+    if (incomingMessage.find("?") != std::string::npos)
         is_quest = 1;
     if (word[0].find("what") != std::string::npos)
         is_quest = 2;
@@ -227,7 +626,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             }
             else if (word[i] == "shut" || word[i] == "noob")
             {
-                if (msg.find(bot->GetName()) == std::string::npos)
+                if (incomingMessage.find(bot->GetName()) == std::string::npos)
                 {
                     continue; // not react
                     uint32 rnd = urand(0, 2);
@@ -599,7 +998,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
     if (!found)
     {
         // Name Responds
-        if (msg.find(bot->GetName()) != std::string::npos)
+        if (incomingMessage.find(bot->GetName()) != std::string::npos)
         {
             replyType = REPLY_NAME;
             found = true;
@@ -611,87 +1010,19 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
         }
     }
 
-    // send responds
-        // 
-    if (found)
+    // load text if needed
+    if (respondsText.empty())
     {
-        // load text if needed
-        if (respondsText.empty())
-        {
-            respondsText = BOT_TEXT2(replyType, name);
-        }
-        const char* c = respondsText.c_str();
-        if (strlen(c) > 255)
-            return;
-
-        if (chanName == "World")
-        {
-            if (ChannelMgr* cMgr = channelMgr(bot->GetTeam()))
-            {
-                std::string worldChan = "World";
-#ifndef MANGOSBOT_ZERO
-                if (Channel* chn = cMgr->GetJoinChannel(worldChan.c_str(), 0))
-#else
-                if (Channel* chn = cMgr->GetJoinChannel(worldChan.c_str()))
-#endif
-                {
-                    if (bot->GetTeam() == ALLIANCE)
-                    {
-                        chn->Say(bot, c, LANG_COMMON);
-                    }
-                    else
-                    {
-                        chn->Say(bot, c, LANG_ORCISH);
-                    }
-                }
-            }
-        }
-        else
-        {
-            if (type == CHAT_MSG_WHISPER)
-            {
-                ObjectGuid receiver = sObjectMgr.GetPlayerGuidByName(name.c_str());
-                Player* rPlayer = sObjectMgr.GetPlayer(receiver);
-                if (rPlayer)
-                {
-                    if (bot->GetTeam() == ALLIANCE)
-                    {
-                        bot->Whisper(c, LANG_COMMON, receiver);
-                    }
-                    else
-                    {
-                        bot->Whisper(c, LANG_ORCISH, receiver);
-                    }
-                }
-            }
-
-            if (type == CHAT_MSG_SAY)
-            {
-                if (bot->GetTeam() == ALLIANCE)
-                    bot->Say(respondsText, LANG_COMMON);
-                else
-                    bot->Say(respondsText, LANG_ORCISH);
-            }
-
-            if (type == CHAT_MSG_YELL)
-            {
-                if (bot->GetTeam() == ALLIANCE)
-                    bot->Yell(respondsText, LANG_COMMON);
-                else
-                    bot->Yell(respondsText, LANG_ORCISH);
-            }
-
-            if (type == CHAT_MSG_GUILD)
-            {
-                if (!bot->GetGuildId())
-                    return;
-
-                if (Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId()))
-                    guild->BroadcastToGuild(bot->GetSession(), respondsText, LANG_UNIVERSAL);
-            }
-        }
-        bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
+        respondsText = BOT_TEXT2(replyType, name);
     }
+
+    if (respondsText.size() > 255)
+    {
+        respondsText.resize(255);
+    }
+
+    return respondsText;
+
 }
 
 bool ChatReplyAction::isUseful()

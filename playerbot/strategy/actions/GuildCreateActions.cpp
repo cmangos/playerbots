@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include "GuildCreateActions.h"
 #include "playerbot/RandomPlayerbotFactory.h"
+#include "playerbot/LootObjectStack.h"
 #ifndef MANGOSBOT_ZERO
 #ifdef CMANGOS
 #include "Arena/ArenaTeam.h"
@@ -195,7 +196,7 @@ bool PetitionOfferNearbyAction::Execute(Event& event)
         if (sServerFacade.GetDistance2d(bot, player) > sPlayerbotAIConfig.sightDistance)
             continue;
 
-        if (sPlayerbotAIConfig.inviteChat && sServerFacade.GetDistance2d(bot, player) < sPlayerbotAIConfig.spellDistance && sRandomPlayerbotMgr.IsFreeBot(bot))
+        if (sPlayerbotAIConfig.inviteChat && sServerFacade.GetDistance2d(bot, player) < sPlayerbotAIConfig.spellDistance && (sRandomPlayerbotMgr.IsFreeBot(bot) || !ai->HasActivePlayerMaster()))
         {
             std::map<std::string, std::string> placeholders;
             placeholders["%name"] = player->GetName();
@@ -273,6 +274,8 @@ bool PetitionTurnInAction::Execute(Event& event)
     //Select a new target to travel to. 
     TravelTarget newTarget = TravelTarget(ai);
 
+    ai->TellDebug(requester, "Handing in guild petition", "debug travel");
+
     bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_PETITIONER });
 
     if (!foundTarget || !newTarget.isActive())
@@ -313,7 +316,7 @@ bool PetitionTurnInAction::isUseful()
 bool BuyTabardAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    bool canBuy = ai->DoSpecificAction("buy", Event("buy tabard", "Hitem:5976:"),true);
+    bool canBuy = ai->DoSpecificAction("buy", Event("buy tabard", "|cHitem:5976:|r"),true);
 
     if (canBuy && AI_VALUE2(uint32, "item count", chat->formatQItem(5976)))
         return true;
@@ -322,6 +325,8 @@ bool BuyTabardAction::Execute(Event& event)
 
     //Select a new target to travel to. 
     TravelTarget newTarget = TravelTarget(ai);
+
+    ai->TellDebug(requester, "Buying a tabard", "debug travel");
 
     bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_TABARDDESIGNER }, "Tabard Vendor", { 5976 });
 
@@ -340,8 +345,19 @@ bool BuyTabardAction::isUseful()
     if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT))
         return false;
 
-    if (!ChooseTravelTargetAction::isUseful())
+    if (!ai->AllowActivity(TRAVEL_ACTIVITY))
         return false;
+
+    if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
+            return false;
+
+    if (AI_VALUE(bool, "has available loot"))
+    {
+        LootObject lootObject = AI_VALUE(LootObjectStack*, "available loot")->GetLoot(sPlayerbotAIConfig.lootDistance);
+        if (lootObject.IsLootPossible(bot))
+            return false;
+    }
 
     bool inCity = false;
     AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(sServerFacade.GetAreaId(bot));

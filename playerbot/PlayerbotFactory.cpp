@@ -2,14 +2,12 @@
 #include "playerbot/playerbot.h"
 #include "playerbot/PlayerbotFactory.h"
 
-#include "ahbot/AhBotConfig.h"
 #include "Server/SQLStorages.h"
 #include "Entities/ItemPrototype.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "Accounts/AccountMgr.h"
 #include "Database/DBCStore.h"
 #include "Globals/SharedDefines.h"
-#include "ahbot/AhBot.h"
 #include "RandomItemMgr.h"
 #include "RandomPlayerbotFactory.h"
 #include "playerbot/ServerFacade.h"
@@ -148,6 +146,9 @@ void PlayerbotFactory::Prepare()
     if (!sPlayerbotAIConfig.disableRandomLevels)
     {
         bot->SetLevel(level);
+        //Reset xp and xp for next level.
+        bot->SetUInt32Value(PLAYER_XP, 0);
+        bot->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
     }
 
     if (!sPlayerbotAIConfig.randomBotShowHelmet)
@@ -188,15 +189,25 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
     if (isRealRandomBot)
     {
         if (bot->GetLevel() > level)
+        {
             bot->SetLevel(level);
+            //Reset xp and xp for next level.
+            bot->SetUInt32Value(PLAYER_XP, 0);
+            bot->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
+        }
 
         InitQuests(specialQuestIds);
         bot->learnQuestRewardedSpells();
-        
+
         // clear inventory and set level after getting xp and quest rewards
         ClearInventory();
         if (bot->GetLevel() > level)
+        {
             bot->SetLevel(level);
+            //Reset xp and xp for next level.
+            bot->SetUInt32Value(PLAYER_XP, 0);
+            bot->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
+        }
     }
     if (pmo) pmo->finish();
 
@@ -218,7 +229,7 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
 
     pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Talents");
     sLog.outDetail("Initializing talents...");
-    //InitTalentsTree(incremental);    
+    //InitTalentsTree(incremental);
     //sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "specNo", 0);
     ai->DoSpecificAction("auto talents");
 
@@ -955,7 +966,7 @@ void PlayerbotFactory::InitReputations()
         factions.push_back(749); // hydraxian waterlords
         factions.push_back(529); // argent dawn
     }
-    
+
     // pvp factions
     if (level >= 60)
     {
@@ -1475,6 +1486,20 @@ bool PlayerbotFactory::CanEquipItem(ItemPrototype const* proto, uint32 desiredQu
     return true;
 }
 
+void PlayerbotFactory::Shuffle(std::vector<uint32>& items)
+{
+    uint32 count = items.size();
+    for (uint32 i = 0; i < count * 5; i++)
+    {
+        int i1 = urand(0, count - 1);
+        int i2 = urand(0, count - 1);
+
+        uint32 item = items[i1];
+        items[i1] = items[i2];
+        items[i2] = item;
+    }
+}
+
 void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool progressive, bool partialUpgrade)
 {
     uint32 oldGS = ai->GetEquipGearScore(bot, false, false);
@@ -1696,7 +1721,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
             }
         }
 
-        
+
         // quality selected from command
         bool setQuality = false;
         if (itemQuality > 0)
@@ -1715,7 +1740,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                 std::vector<uint32> ids = sRandomItemMgr.Query(60, 1, 1, slot, 1);
                 sLog.outDetail("Bot #%d %s:%d <%s>: %u possible items for slot %d", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), ids.size(), slot);
 
-                if (!ids.empty()) ahbot::Shuffle(ids);
+                if (!ids.empty()) Shuffle(ids);
 
                 for (uint32 index = 0; index < ids.size(); ++index)
                 {
@@ -1746,7 +1771,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         continue;
 
                     uint16 eDest;
-                    if (CanEquipUnseenItem(slot, eDest, newItemId))
+                    if (RandomPlayerbotMgr::CanEquipUnseenItem(bot, slot, eDest, newItemId) == EQUIP_ERR_OK)
                     {
                         if (oldItem)
                             bot->DestroyItem(oldItem->GetBagSlot(), oldItem->GetSlot(), true);
@@ -1851,7 +1876,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                 }
                 else if (!ids.empty())
                 {
-                    ahbot::Shuffle(ids);
+                    Shuffle(ids);
                 }
 
                 for (uint32 index = 0; index < ids.size(); ++index)
@@ -2034,7 +2059,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         continue;
 
                     uint16 eDest;
-                    if (CanEquipUnseenItem(slot, eDest, newItemId))
+                    if (RandomPlayerbotMgr::CanEquipUnseenItem(bot, slot, eDest, newItemId) == EQUIP_ERR_OK)
                     {
                         if (oldItem)
                             bot->DestroyItem(oldItem->GetBagSlot(), oldItem->GetSlot(), true);
@@ -2301,7 +2326,7 @@ void PlayerbotFactory::AddGems(Item* item)
         if (gems.empty())
             return;
 
-        ahbot::Shuffle(gems);
+        Shuffle(gems);
 
         for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
         {
@@ -2387,22 +2412,6 @@ void PlayerbotFactory::AddGems(Item* item)
 #else
     return;
 #endif
-}
-
-bool PlayerbotFactory::CanEquipUnseenItem(uint8 slot, uint16 &dest, uint32 item)
-{
-    dest = 0;
-    Item* pItem = RandomPlayerbotMgr::CreateTempItem(item, 1, bot);
-    
-    if (pItem)
-    {
-        InventoryResult result = bot->CanEquipItem(slot, dest, pItem, true, false);
-        pItem->RemoveFromUpdateQueueOf(bot);
-        delete pItem;
-        return result == EQUIP_ERR_OK;
-    }
-
-    return false;
 }
 
 void PlayerbotFactory::InitTradeSkills()
@@ -2783,13 +2792,13 @@ void PlayerbotFactory::InitAvailableSpells()
     if (bot->getClass() == CLASS_PALADIN)
     {
         // judgement missing
-        if(!bot->HasSpell(20271)) 
+        if(!bot->HasSpell(20271))
         {
             bot->learnSpell(20271, false);
         }
-        
+
         // crusader strike
-        if(!bot->HasSpell(33394)) 
+        if(!bot->HasSpell(33394))
         {
             bot->learnSpell(33394, false);
         }
@@ -3230,6 +3239,10 @@ void PlayerbotFactory::InitPotions()
     for (int i = 0; i < 2; ++i)
     {
         uint32 effect = effects[i];
+
+        if (effect == SPELL_EFFECT_ENERGIZE && !bot->HasMana()) //Do not give manapots to non-mana users.
+            continue;
+
         FindPotionVisitor visitor(bot, effect);
         ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
         if (!visitor.GetResult().empty()) continue;
@@ -3255,6 +3268,9 @@ void PlayerbotFactory::InitFood()
     for (int i = 0; i < 2; ++i)
     {
         uint32 category = categories[i];
+
+        if (category == 59 && !bot->HasMana()) //Do not give drinks to non-mana users.
+            continue;
 
         FindFoodVisitor visitor(bot, category);
         ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
@@ -3495,7 +3511,7 @@ void PlayerbotFactory::InitInventoryTrade()
     {
     case ITEM_QUALITY_NORMAL:
         count = proto->GetMaxStackSize();
-        stacks = urand(1, 3) / auctionbot.GetRarityPriceMultiplier(proto);
+        stacks = urand(1, 3);
         break;
     case ITEM_QUALITY_UNCOMMON:
         stacks = 1;
@@ -3764,11 +3780,11 @@ void PlayerbotFactory::ApplyEnchantTemplate()
           ApplyEnchantTemplate(10);
       break;
    case CLASS_DRUID:
-      if (tab == 2)    
+      if (tab == 2)
           ApplyEnchantTemplate(112);
-      else if (tab == 0) 
+      else if (tab == 0)
           ApplyEnchantTemplate(110);
-      else 
+      else
           ApplyEnchantTemplate(111);
       break;
    case CLASS_SHAMAN:
@@ -3845,7 +3861,7 @@ void PlayerbotFactory::LoadEnchantContainer()
 {
 #ifndef MANGOSBOT_ZERO
     std::vector<uint32> gems = sRandomItemMgr.GetGemsList();
-    if (!gems.empty()) ahbot::Shuffle(gems);
+    if (!gems.empty()) Shuffle(gems);
 
     for (int slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)
     {

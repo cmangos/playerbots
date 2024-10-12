@@ -238,6 +238,7 @@ namespace ai
             creators["rpg spell"] = &TriggerContext::rpg_spell;
             creators["rpg craft"] = &TriggerContext::rpg_craft;
             creators["rpg trade useful"] = &TriggerContext::rpg_trade_useful;
+            creators["rpg enchant"] = &TriggerContext::rpg_enchant;
             creators["rpg duel"] = &TriggerContext::rpg_duel;
             creators["rpg item"] = &TriggerContext::rpg_item;
 
@@ -494,6 +495,7 @@ namespace ai
         static Trigger* rpg_spell(PlayerbotAI* ai) { return new RpgSpellTrigger(ai); }
         static Trigger* rpg_craft(PlayerbotAI* ai) { return new RpgCraftTrigger(ai); }
         static Trigger* rpg_trade_useful(PlayerbotAI* ai) { return new RpgTradeUsefulTrigger(ai); }
+        static Trigger* rpg_enchant(PlayerbotAI* ai) { return new RpgEnchantTrigger(ai); }
         static Trigger* rpg_duel(PlayerbotAI* ai) { return new RpgDuelTrigger(ai); }
         static Trigger* rpg_item(PlayerbotAI* ai) { return new RpgItemTrigger(ai); }
 

@@ -27,7 +27,7 @@ bool RepairAllAction::Execute(Event& event)
         sServerFacade.SetFacingTo(bot, unit);
         float discountMod = bot->GetReputationPriceDiscount(unit);
 
-        float durability = AI_VALUE(uint8, "durability");
+        float durability = AI_VALUE(uint8, "durability inventory");
 
         uint32 botMoney = bot->GetMoney();
         if (ai->HasCheat(BotCheatMask::gold))
@@ -81,9 +81,10 @@ bool RepairAllAction::Execute(Event& event)
             ai->DoSpecificAction("equip upgrades", event, true);
         }
 
-        context->GetValue<uint32>("death count")->Set(0);
+        SET_AI_VALUE(uint32, "death count", 0);
+        RESET_AI_VALUE(uint8, "durability inventory");
 
-        return durability < 100 && AI_VALUE(uint8, "durability") > durability;
+        return durability < 100 && AI_VALUE(uint8, "durability inventory") > durability;
     }
 
     ai->TellPlayerNoFacing(requester, "Cannot find any npc to repair at");

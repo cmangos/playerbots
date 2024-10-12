@@ -2,11 +2,8 @@
 #include "playerbot/playerbot.h"
 #include "LootAction.h"
 
-#include "ahbot/AhBotConfig.h"
-
 #include "playerbot/LootObjectStack.h"
 #include "playerbot/PlayerbotAIConfig.h"
-#include "ahbot/AhBot.h"
 #include "playerbot/RandomPlayerbotMgr.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/LootStrategyValue.h"
@@ -75,7 +72,7 @@ bool OpenLootAction::DoLoot(LootObject& lootObject)
         return false;
 
     if (creature && creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE) && !creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
-    {        
+    {
         if (!lootObject.IsLootPossible(bot)) //Clear loot if bot can't loot it.
             return true;
 
@@ -310,11 +307,25 @@ bool StoreLootAction::Execute(Event& event)
         ItemPrototype const *proto = sItemStorage.LookupEntry<ItemPrototype>(itemid);
         if (!proto)
             continue;
-       
+
+        Loot* loot = sLootMgr.GetLoot(bot);
+
+        if (!loot)
+            continue;
+
+        LootItem* lootItem = loot->GetLootItemInSlot(itemindex);
+
+        if (!lootItem)
+            continue;
+
+        //have no right to loot
+        if (lootItem->isBlocked || lootItem->GetSlotTypeForSharedLoot(bot, loot) == MAX_LOOT_SLOT_TYPE)
+            continue;
+
         Player* master = ai->GetMaster();
         if (sRandomPlayerbotMgr.IsRandomBot(bot) && master)
         {
-            uint32 price = itemcount * auctionbot.GetBuyPrice(proto) * sRandomPlayerbotMgr.GetBuyMultiplier(bot) + gold;
+            uint32 price = itemcount * ItemUsageValue::GetBotBuyPrice(proto, bot) + gold;
             if (price)
                 sRandomPlayerbotMgr.AddTradeDiscount(bot, master, price);
         }
@@ -333,23 +344,9 @@ bool StoreLootAction::Execute(Event& event)
             ai->TellPlayerNoFacing(requester, BOT_TEXT2("loot_command", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
 
-        if (sPlayerbotAIConfig.guildFeedbackRate && frand(0, 100) <= sPlayerbotAIConfig.guildFeedbackRate && bot->GetGuildId() && !urand(0, 10) && proto->Quality >= ITEM_QUALITY_RARE && sRandomPlayerbotMgr.IsFreeBot(bot))
-        {
-            Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-
-            if (guild)
-            {
-                std::map<std::string, std::string> placeholders;
-                placeholders["%name"] = chat->formatItem(itemQualifier);
-
-                if (urand(0, 3))
-                    guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Yay I looted %name!", placeholders), LANG_UNIVERSAL);
-                else
-                    guild->BroadcastToGuild(bot->GetSession(), BOT_TEXT2("Guess who got a %name? Me!", placeholders), LANG_UNIVERSAL);
-            }
-        }
-
         sPlayerbotAIConfig.logEvent(ai, "StoreLootAction", proto->Name1, std::to_string(proto->ItemId));
+
+        BroadcastHelper::BroadcastLootingItem(ai, bot, proto, itemQualifier);
     }
 
     AI_VALUE(LootObjectStack*, "available loot")->Remove(guid);

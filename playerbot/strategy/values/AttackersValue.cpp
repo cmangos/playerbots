@@ -97,6 +97,20 @@ std::list<ObjectGuid> AttackersValue::Calculate()
                     result.push_back(target->GetObjectGuid());
             }
 
+            //Validate these targets.
+            std::list<ObjectGuid> filter;
+
+            for (auto& guid : result)
+            {
+                target = ai->GetUnit(guid);
+
+                if (!IsValid(target, bot, bot))
+                    filter.push_back(guid);
+            }
+
+            for(auto& guid : filter)
+                result.remove(guid);
+
             return result;
         }
     }
@@ -364,33 +378,79 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
             {
                 return false;
             }
-        }
-
-        if (WorldPosition(player).isOverworld() && target->AI() && target->AI()->IsPreventingDeath())
-        {
-            return false;
-        }
+        }        
     }
 
-    if (playerToCheckAgainst->GetPlayerbotAI())
-    {
-        PlayerbotAI* ai = playerToCheckAgainst->GetPlayerbotAI();
-        AiObjectContext* context = ai->GetAiObjectContext();
-
-        //Ignore Hard hostiles while not already fighting.
-        if (target->GetLevel() > (playerToCheckAgainst->GetLevel() + 5) && ai->GetState() == BotState::BOT_STATE_NON_COMBAT)
-        {
-            //When traveling a long distance.
-            if (AI_VALUE(TravelTarget*, "travel target")->isTraveling() && AI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
-                return false;
-
-            //When moving to master far away.
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE2(bool, "trigger active", "out of react range"))
-                return false;
-        }
-    }
+    if (IgnoreTarget(target, playerToCheckAgainst))
+        return false;
 
     return true;
+}
+
+bool AttackersValue::IgnoreTarget(Unit* target, Player* playerToCheckAgainst)
+{
+    if (!playerToCheckAgainst->GetPlayerbotAI())
+        return false; 
+
+    PlayerbotAI* ai = playerToCheckAgainst->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+
+    //Ignore Hard hostiles while not already fighting.
+    if (target->GetLevel() > (playerToCheckAgainst->GetLevel() + 5) && ai->GetState() == BotState::BOT_STATE_NON_COMBAT)
+    {
+        //When traveling a long distance.
+        if (AI_VALUE(TravelTarget*, "travel target")->isTraveling() && AI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
+            return true;
+
+        //When moving to master far away.
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE2(bool, "trigger active", "out of react range"))
+            return true;
+
+        if (ai->GetMaster() && !ai->HasActivePlayerMaster())
+        {
+            Player* player = ai->GetMaster();
+
+            //When master is traveling a long distance.
+            if (PAI_VALUE(TravelTarget*, "travel target")->isTraveling() && PAI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
+                return true;
+        }
+    }
+
+    Player* enemyPlayer = dynamic_cast<Player*>(target);
+
+    if (!enemyPlayer)
+    {
+        bool isDummy = false;
+
+
+        if (WorldPosition(playerToCheckAgainst).isOverworld() && target->AI() && target->AI()->IsPreventingDeath())
+        {
+
+            isDummy = true;
+        }
+
+        uint32 entry = target->GetEntry();
+
+#define TRAINING_DUMMY_NPC_ENTRY1 190013
+#define TRAINING_DUMMY_NPC_ENTRY2 190014
+#define TRAINING_DUMMY_NPC_ENTRY3 190015
+#define THERAMORE_COMBAT_DUMMY 4952
+#define NAXXRAMAS_COMBAT_DUMMY 16211
+
+        if (entry == TRAINING_DUMMY_NPC_ENTRY1 ||
+            entry == TRAINING_DUMMY_NPC_ENTRY2 ||
+            entry == TRAINING_DUMMY_NPC_ENTRY3 ||
+            entry == THERAMORE_COMBAT_DUMMY ||
+            entry == NAXXRAMAS_COMBAT_DUMMY)
+        {
+            isDummy = true;
+        }
+
+        if (isDummy && ai->GetFixedBotNumer(BotTypeNumber::DUMMY_ATTACK_NUMBER, 10, 0.2f)) //90% of bots, cycle every 5 min.
+            return true;
+    }
+
+    return false;
 }
 
 std::string AttackersValue::Format()

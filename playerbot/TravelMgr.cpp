@@ -121,11 +121,11 @@ std::string QuestRelationTravelDestination::getTitle() {
     std::ostringstream out;
 
     if (relation == 0)
-        out << "questgiver";
+        out << "questgiver ";
     else
-        out << "questtaker";
+        out << "questtaker ";
 
-    out << " " << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(entry);
     return out.str();
 }
 
@@ -144,26 +144,40 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
     if ((bot->GetGroup() && bot->GetGroup()->IsRaidGroup()) != (questTemplate->GetType() == QUEST_TYPE_RAID))
         return false;
 
+    bool isVendor = false;
+
     //Check mob level
     if (getEntry() > 0)
     {
         CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(getEntry());
 
-        if (cInfo && (int)cInfo->MaxLevel - (int)bot->GetLevel() > 4)
-            return false;
-
-        //Do not try to hand-in dungeon/elite quests in instances without a group.
-        if (cInfo->Rank > CREATURE_ELITE_NORMAL)
+        if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[objective] && !GuidPosition(HIGHGUID_UNIT, entry).IsHostileTo(bot))
         {
-            WorldPosition pos(bot);
-            if (!this->nearestPoint(pos)->isOverworld() && !AI_VALUE(bool, "can fight boss"))
+            ItemPrototype const* proto = sObjectMgr.GetItemPrototype(GetQuestTemplate()->ReqItemId[objective]);
+            if (GetQuestTemplate()->ReqItemCount[objective] * proto->BuyPrice > bot->GetMoney()) //Need more money.
                 return false;
-            else if (!AI_VALUE(bool, "can fight elite"))
+
+            isVendor = true;
+        }
+
+        if (!isVendor)
+        {
+            if (cInfo && (int)cInfo->MaxLevel - (int)bot->GetLevel() > 4)
                 return false;
+
+            //Do not try to hand-in dungeon/elite quests in instances without a group.
+            if (cInfo->Rank > CREATURE_ELITE_NORMAL)
+            {
+                WorldPosition pos(bot);
+                if (!this->nearestPoint(pos)->isOverworld() && !AI_VALUE(bool, "can fight boss"))
+                    return false;
+                else if (!AI_VALUE(bool, "can fight elite"))
+                    return false;
+            }
         }
     }
 
-    if (questTemplate->GetType() == QUEST_TYPE_ELITE && !AI_VALUE(bool, "can fight elite"))
+    if (!isVendor && questTemplate->GetType() == QUEST_TYPE_ELITE && !AI_VALUE(bool, "can fight elite"))
         return false;
 
     //Do not try to do dungeon/elite quests in instances without a group.
@@ -192,7 +206,7 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
 
     WorldPosition botPos(bot);
 
-    if (getEntry() > 0 && !isOut(botPos))
+    if (!isVendor && getEntry() > 0 && !isOut(botPos))
     {
         TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
 
@@ -214,7 +228,7 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
 std::string QuestObjectiveTravelDestination::getTitle() {
     std::ostringstream out;
 
-    out << "objective " << objective;
+    out << "objective " << (objective + 1);
 
     if (GetQuestTemplate()->ReqItemCount[objective] > 0)
         out << " loot " << ChatHelper::formatItem(sObjectMgr.GetItemPrototype(GetQuestTemplate()->ReqItemId[objective]), 0, 0) << " from";
@@ -260,9 +274,9 @@ bool RpgTravelDestination::isActive(Player* bot)
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER)
         {
-            if (AI_VALUE2_LAZY(bool, "group or", "should sell,can ah sell,following party,near leader"))
+            if (AI_VALUE2_LAZY(bool, "group or", "should ah sell,can ah sell,following party,near leader"))
                 isUsefull = true;
-            else if (ai->HasStrategy("free", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE(bool, "should sell") && AI_VALUE(bool, "can ah sell"))
+            else if (ai->HasStrategy("free", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE(bool, "should ah sell") && AI_VALUE(bool, "can ah sell"))
                 isUsefull = true;
         }
     }
@@ -293,6 +307,18 @@ bool RpgTravelDestination::isActive(Player* bot)
         }
     }
 
+    //City & Pvp baracks
+    if (points.front()->getMapId() == bot->GetMapId() && points.front()->hasAreaFlag(AREA_FLAG_CAPITAL) && !points.front()->hasFaction(bot->GetTeam()))
+        return false;
+
+    //Horde pvp baracks
+    if (points.front()->getMapId() == 450 && bot->GetTeam() == ALLIANCE)
+        return false;
+
+    //Alliance pvp baracks
+    if (points.front()->getMapId() == 449 && bot->GetTeam() == HORDE)
+        return false;
+
     return !GuidPosition(HIGHGUID_UNIT, entry).IsHostileTo(bot);
 }
 
@@ -303,7 +329,7 @@ std::string RpgTravelDestination::getTitle() {
     if(entry > 0)
         out << "rpg npc ";
 
-    out << " " << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(entry);
 
     return out.str();
 }
@@ -335,7 +361,7 @@ bool GrindTravelDestination::isActive(Player* bot)
     if (!urand(0, 10) && !AI_VALUE(bool, "should get money") && !isOut(botPos))
         return false;
 
-    if (AI_VALUE(bool, "should sell"))
+    if (AI_VALUE(bool, "should sell") && (AI_VALUE(bool, "can sell") || AI_VALUE(bool, "can ah sell")))
         return false;
 
     CreatureInfo const* cInfo = this->getCreatureInfo();
@@ -362,7 +388,7 @@ bool GrindTravelDestination::isActive(Player* bot)
     if (cInfo->Rank > CREATURE_ELITE_NORMAL && !AI_VALUE(bool, "can fight elite"))
         return false;
 
-    return GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, entry));
+    return GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, entry), bot->GetInstanceId());
 }
 
 std::string GrindTravelDestination::getTitle() {
@@ -370,7 +396,7 @@ std::string GrindTravelDestination::getTitle() {
 
     out << "grind mob ";
 
-    out << " " << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(entry);
 
     return out.str();
 }
@@ -405,7 +431,7 @@ bool BossTravelDestination::isActive(Player* bot)
     if ((int32)cInfo->MaxLevel > bot->GetLevel() + 3)
         return false;
 
-    if (!GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, entry)))
+    if (!GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, entry), bot->GetInstanceId()))
         return false;
 
     if (bot->GetGroup())
@@ -423,7 +449,20 @@ bool BossTravelDestination::isActive(Player* bot)
             return false;
 
     }
+
+    //Ragefire casm
+    if (points.front()->getMapId() == 389 && bot->GetTeam() == ALLIANCE)
+        return false;
+
+    //Stockades
+    if (points.front()->getMapId() == 34 && bot->GetTeam() == HORDE)
+        return false;
+
     WorldPosition botPos(bot);
+
+    //Do not move to overworld bosses/uniques that are far away.
+    if (points.front()->isOverworld() && this->distanceTo(botPos) > 2000.0f)
+        return false;
 
     if (!isOut(botPos))
     {
@@ -445,9 +484,9 @@ bool BossTravelDestination::isActive(Player* bot)
 std::string BossTravelDestination::getTitle() {
     std::ostringstream out;
 
-    out << "boss mob";
+    out << "boss mob ";
 
-    out << " " << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(entry);
 
     return out.str();
 }
@@ -793,6 +832,7 @@ void TravelMgr::loadAreaLevels()
         }
 
         BarGoLink bar(sAreaStore.GetNumRows());
+        WorldDatabase.BeginTransaction();
         for (uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)    // areaflag numbered from 0
         {
             bar.step();
@@ -806,6 +846,7 @@ void TravelMgr::loadAreaLevels()
                 }
             }
         }
+        WorldDatabase.CommitTransaction();
         if(areaLevels.size() > loadedAreas.size())
             sLog.outString(">> Generated " SIZEFMTD " areas.", areaLevels.size()- loadedAreas.size());
     }
@@ -1296,6 +1337,7 @@ void TravelMgr::LoadQuestTravelTable()
         out << "activityPercentageMod,";
         out << "activeBots,";
         out << "playerBots.size(),";
+        out << "totalLevel,";
         out << "avarageLevel1-9,";
         out << "avarageLevel10-19,";
         out << "avarageLevel20-29,";
@@ -1314,7 +1356,9 @@ void TravelMgr::LoadQuestTravelTable()
 #endif
 #endif
 
+        out << "totalGold,";
         out << "avarageGold,";
+        out << "totalavarageGearScore,";
         out << "avarageGearScore";
 
         sPlayerbotAIConfig.log("activity_pid.csv", out.str().c_str());

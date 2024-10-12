@@ -3503,7 +3503,7 @@ bool BGTactics::selectObjective(bool reset)
             float probabilityToKeepSameObjective = 1.0f; // Start at 100% then lower over time
 
             GameObject* lastObj = botSelectedObjectives[botGUID];
-            float const lastObjDist = sqrt(bot->GetDistance(lastObj));
+            float const lastObjDist = bot->GetDistance(lastObj);
 
             if (lastObjDist < 50.00f) // if we are close, stick to the objective a bit longer
             {

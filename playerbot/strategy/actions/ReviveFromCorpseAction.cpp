@@ -6,6 +6,7 @@
 #include "playerbot/FleeManager.h"
 #include "playerbot/TravelMgr.h"
 #include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/values/DeadValues.h"
 
 using namespace ai;
 
@@ -38,8 +39,8 @@ bool ReviveFromCorpseAction::Execute(Event& event)
 
     if (master)
     {
-        if (!master->GetPlayerbotAI() && sServerFacade.UnitIsDead(master) && master->GetCorpse()
-            && sServerFacade.IsDistanceLessThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.farDistance))
+        //Revive with master.
+        if (bot != master && sServerFacade.UnitIsDead(master) && master->GetCorpse() && sServerFacade.IsDistanceLessThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.farDistance))
             return false;
     }
 
@@ -51,7 +52,7 @@ bool ReviveFromCorpseAction::Execute(Event& event)
     bot->GetSession()->HandleReclaimCorpseOpcode(packet);
 
     sPlayerbotAIConfig.logEvent(ai, "ReviveFromCorpseAction");
-   
+
     return true;
 }
 
@@ -73,22 +74,29 @@ bool FindCorpseAction::Execute(Event& event)
         }
     }
 
-    uint32 dCount = AI_VALUE(uint32, "death count");
+    WorldPosition botPos(bot), corpsePos(corpse), moveToPos = corpsePos, masterPos(master);
+    float reclaimDist = CORPSE_RECLAIM_RADIUS - 5.0f;
+    float corpseDist = botPos.distance(corpsePos);
 
-    if (!ai->HasRealPlayerMaster())
+    //If player fell through terrain move corpse to player position.
+    if (bot->isRealPlayer())
     {
-        if (dCount >= 5 && !sRandomPlayerbotMgr.GetValue(bot,"teleport"))
+        //Try to correct the position upward.
+        if (!moveToPos.ClosestCorrectPoint(5.0f, 500.0f, bot->GetInstanceId()))
         {
-            sLog.outBasic("Bot #%d %s:%d <%s>: died too many times and was sent to an inn", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
-            context->GetValue<uint32>("death count")->Set(0);
-            sRandomPlayerbotMgr.SetValue(bot, "teleport",1);
-            return true;
+            //Revive in place.
+            corpse->Relocate(botPos.getX(), botPos.getY(), botPos.getZ());
+            corpsePos = corpse;
+            corpseDist = botPos.distance(corpsePos);
+        }
+        else
+        {
+            corpse->Relocate(moveToPos.getX(), moveToPos.getY(), moveToPos.getZ());
+            corpsePos = corpse;
+            corpseDist = botPos.distance(corpsePos);
         }
     }
 
-    WorldPosition botPos(bot),corpsePos(corpse), moveToPos = corpsePos, masterPos(master);
-    float reclaimDist = CORPSE_RECLAIM_RADIUS - 5.0f;
-    float corpseDist = botPos.distance(corpsePos);
     int64 deadTime = time(nullptr) - corpse->GetGhostTime();
 
     bool moveToMaster = master && master != bot && masterPos.fDist(corpsePos) < reclaimDist;
@@ -103,10 +111,10 @@ bool FindCorpseAction::Execute(Event& event)
         }
         else if (deadTime > 8 * MINUTE) //We have walked too long already.
             return false;
-        else 
+        else
         {
             std::list<ObjectGuid> units = AI_VALUE(std::list<ObjectGuid>, "possible targets no los");
-            
+
             if (botPos.getUnitsAggro(units, bot) == 0) //There are no mobs near.
                 return false;
         }
@@ -116,7 +124,15 @@ bool FindCorpseAction::Execute(Event& event)
     if (corpseDist < sPlayerbotAIConfig.reactDistance)
     {
         if (moveToMaster)
+        {
+            if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+            {
+                std::ostringstream out;
+                out << "Moving to revive near master.";
+                ai->TellPlayerNoFacing(GetMaster(), out);
+            }
             moveToPos = masterPos;
+        }
         else
         {
             FleeManager manager(bot, reclaimDist, 0.0, urand(0, 1), moveToPos);
@@ -125,10 +141,35 @@ bool FindCorpseAction::Execute(Event& event)
             {
                 float rx, ry, rz;
                 if (manager.CalculateDestination(&rx, &ry, &rz))
+                {
+                    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+                    {
+                        std::ostringstream out;
+                        out << "Moving to revive some where safe.";
+                        ai->TellPlayerNoFacing(GetMaster(), out);
+                    }
                     moveToPos = WorldPosition(moveToPos.getMapId(), rx, ry, rz, 0.0);
+                }
                 else if (!moveToPos.GetReachableRandomPointOnGround(bot, reclaimDist, urand(0, 1)))
+                {
+                    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+                    {
+                        std::ostringstream out;
+                        out << "Moving to revive at corpse.";
+                        ai->TellPlayerNoFacing(GetMaster(), out);
+                    }
                     moveToPos = corpsePos;
+                }
             }
+        }
+    }
+    else
+    {
+        if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+        {
+            std::ostringstream out;
+            out << "Moving towards corpse.";
+            ai->TellPlayerNoFacing(GetMaster(), out);
         }
     }
 
@@ -144,6 +185,8 @@ bool FindCorpseAction::Execute(Event& event)
         {
             bot->GetMotionMaster()->Clear();
             bot->TeleportTo(moveToPos.getMapId(), moveToPos.getX(), moveToPos.getY(), moveToPos.getZ(), 0);
+            if (bot->isRealPlayer())
+                bot->SendHeartBeat();
         }
 
         moved = true;
@@ -159,6 +202,7 @@ bool FindCorpseAction::Execute(Event& event)
 #endif
         else
         {
+
             moved = MoveTo(moveToPos.getMapId(), moveToPos.getX(), moveToPos.getY(), moveToPos.getZ(), false, false);
 
             if (!moved && !ai->HasActivePlayerMaster()) //We could not move to coprse. Try spirithealer instead.
@@ -166,7 +210,7 @@ bool FindCorpseAction::Execute(Event& event)
                 moved = ai->DoSpecificAction("spirit healer", Event(), true);
             }
         }
-    }   
+    }
 
     return moved;
 }
@@ -191,6 +235,21 @@ bool SpiritHealerAction::Execute(Event& event)
 
     uint32 dCount = AI_VALUE(uint32, "death count");
     GuidPosition grave = AI_VALUE(GuidPosition, "best graveyard");
+
+    //something went wrong
+    if (!grave)
+    {
+        //prevent doing weird stuff OR GOING TO 0,0,0
+        sLog.outBasic(
+            "ERROR: no graveyard in SpiritHealerAction for bot #%d %s:%d <%s>, evacuating to prevent weird behavior",
+            bot->GetGUIDLow(),
+            bot->GetTeam() == ALLIANCE ? "A" : "H",
+            bot->GetLevel(),
+            bot->GetName()
+        );
+        ai->DoSpecificAction("repop");
+        return false;
+    }
 
     if (grave && grave.fDist(bot) < sPlayerbotAIConfig.sightDistance)
     {
@@ -225,18 +284,16 @@ bool SpiritHealerAction::Execute(Event& event)
         ai->TellPlayer(requester, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         sPlayerbotAIConfig.logEvent(ai, "ReviveFromSpiritHealerAction");
 
-        return true;            
+        return true;
     }
 
-    if (!grave)
-    {
-        return false;
-    }
+    bool shouldTeleportToGY = false;
 
     const int64 deadTime = time(nullptr) - corpse->GetGhostTime();
 
-    // Prevent taking too long to go to corpse (20 mins)
-    bool shouldTeleportToGY = deadTime > 1200;
+    // Prevent taking too long to go to corpse (10 mins)
+    // no need to wait longer, because bot is probably stuck in navigating issues
+    shouldTeleportToGY = deadTime > uint32(10 * MINUTE);
 
     // Check if we can teleport to the graveyard when nobody is looking
     if (!shouldTeleportToGY && !ai->AllowActivity(DETAILED_MOVE_ACTIVITY) && !ai->HasPlayerNearby(WorldPosition(grave)))
@@ -249,10 +306,19 @@ bool SpiritHealerAction::Execute(Event& event)
         shouldTeleportToGY = deadTime > delay;
     }
 
+    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+    {
+        std::ostringstream out;
+        out << "Moving towards graveyard.";
+        ai->TellPlayerNoFacing(GetMaster(), out);
+    }
+
     if (shouldTeleportToGY)
     {
         bot->GetMotionMaster()->Clear();
         bot->TeleportTo(grave.getMapId(), grave.getX(), grave.getY(), grave.getZ(), 0);
+        if (bot->isRealPlayer())
+            bot->SendHeartBeat();
         return true;
     }
     else

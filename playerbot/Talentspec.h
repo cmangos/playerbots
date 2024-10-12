@@ -40,6 +40,7 @@ class TalentSpec {
         void CropTalents(uint32 level);
         void ShiftTalents(TalentSpec* oldTalents, uint32 level);
         void ApplyTalents(Player* bot, std::ostringstream* out);
+        static void SetPublicNote(Player* bot);
 
         int GetTalentPoints(std::vector<TalentListEntry>& talents, int tabpage = -1);
         int GetTalentPoints(int tabpage = -1) { return GetTalentPoints(talents, tabpage); };

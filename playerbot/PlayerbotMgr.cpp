@@ -267,6 +267,91 @@ Player* PlayerbotHolder::GetPlayerBot(uint32 playerGuid) const
     return (it == playerBots.end()) ? nullptr : it->second ? it->second : nullptr;
 }
 
+void PlayerbotHolder::JoinChatChannels(Player* bot)
+{
+    // bots join World chat if not solo oriented
+    if (bot->GetLevel() >= 10 && sRandomPlayerbotMgr.IsFreeBot(bot) && bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->GetGrouperType() != GrouperType::SOLO)
+    {
+        // TODO make action/config
+        // Make the bot join the world channel for chat
+        WorldPacket pkt(CMSG_JOIN_CHANNEL);
+#ifndef MANGOSBOT_ZERO
+        pkt << uint32(0) << uint8(0) << uint8(0);
+#endif
+        pkt << std::string("World");
+        pkt << ""; // Pass
+        bot->GetSession()->HandleJoinChannelOpcode(pkt);
+    }
+    // join standard channels
+    uint8 locale = BroadcastHelper::GetLocale();
+
+    AreaTableEntry const* current_zone = bot->GetPlayerbotAI()->GetCurrentZone();
+    ChannelMgr* cMgr = channelMgr(bot->GetTeam());
+    std::string current_zone_name = current_zone ? bot->GetPlayerbotAI()->GetLocalizedAreaName(current_zone) : "";
+
+    if (current_zone && cMgr)
+    {
+        for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
+        {
+            ChatChannelsEntry const* channel = sChatChannelsStore.LookupEntry(i);
+            if (!channel) continue;
+
+            Channel* new_channel = nullptr;
+            switch (channel->ChannelID)
+            {
+                case ChatChannelId::GENERAL:
+                case ChatChannelId::LOCAL_DEFENSE:
+                {
+                    char new_channel_name_buf[100];
+                    snprintf(new_channel_name_buf, 100, channel->pattern[locale], current_zone_name.c_str());
+#ifdef MANGOSBOT_ZERO
+                    new_channel = cMgr->GetJoinChannel(new_channel_name_buf);
+#else
+                    new_channel = cMgr->GetJoinChannel(new_channel_name_buf, channel->ChannelID);
+#endif
+                    break;
+                }
+                case ChatChannelId::TRADE:
+                case ChatChannelId::GUILD_RECRUITMENT:
+                {
+                    char new_channel_name_buf[100];
+                    //3459 is ID for a zone named "City" (only exists for the sake of using its name)
+                    //Currently in magons TBC, if you switch zones, then you join "Trade - <zone>" and "GuildRecruitment - <zone>"
+                    //which is a core bug, should be "Trade - City" and "GuildRecruitment - City" in both 1.12 and TBC
+                    //but if you (actual player) logout in a city and log back in - you join "City" versions
+                    snprintf(
+                        new_channel_name_buf,
+                        100,
+                        channel->pattern[locale],
+                        bot->GetPlayerbotAI()->GetLocalizedAreaName(GetAreaEntryByAreaID(ImportantAreaId::CITY)).c_str()
+                    );
+
+#ifdef MANGOSBOT_ZERO
+                    new_channel = cMgr->GetJoinChannel(new_channel_name_buf);
+#else
+                    new_channel = cMgr->GetJoinChannel(new_channel_name_buf, channel->ChannelID);
+#endif
+                    break;
+                }
+                case ChatChannelId::LOOKING_FOR_GROUP:
+                case ChatChannelId::WORLD_DEFENSE:
+                {
+#ifdef MANGOSBOT_ZERO
+                    new_channel = cMgr->GetJoinChannel(channel->pattern[locale]);
+#else
+                    new_channel = cMgr->GetJoinChannel(channel->pattern[locale], channel->ChannelID);
+#endif
+                    break;
+                }
+                default:
+                    break;
+            }
+            if (new_channel)
+                new_channel->Join(bot, "");
+        }
+    }
+}
+
 void PlayerbotHolder::OnBotLogin(Player * const bot)
 {
     PlayerbotAI* ai = bot->GetPlayerbotAI();
@@ -311,7 +396,7 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
                 }
             }
 
-            // Don't disband alt groups when master goes away 
+            // Don't disband alt groups when master goes away
             // (will need to manually disband with leave command)
             uint32 account = sObjectMgr.GetPlayerAccountIdByGUID(member);
             if (!sPlayerbotAIConfig.IsInRandomAccountList(account))
@@ -344,81 +429,7 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
 
     ai->TellPlayer(ai->GetMaster(), BOT_TEXT("hello"));
 
-    // bots join World chat if not solo oriented
-    if (bot->GetLevel() >= 10 && sRandomPlayerbotMgr.IsFreeBot(bot) && bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->GetGrouperType() != GrouperType::SOLO)
-    {
-        // TODO make action/config
-        // Make the bot join the world channel for chat
-        WorldPacket pkt(CMSG_JOIN_CHANNEL);
-#ifndef MANGOSBOT_ZERO
-        pkt << uint32(0) << uint8(0) << uint8(0);
-#endif
-        pkt << std::string("World");
-        pkt << ""; // Pass
-        bot->GetSession()->HandleJoinChannelOpcode(pkt);
-
-#ifdef MANGOSBOT_ZERO
-        // bots join World Defense
-        WorldPacket pkt2(CMSG_JOIN_CHANNEL);
-#ifndef MANGOSBOT_ZERO
-        pkt2 << uint32(0) << uint8(0) << uint8(0);
-#endif
-        pkt2 << std::string("WorldDefense");
-        pkt2 << ""; // Pass
-        bot->GetSession()->HandleJoinChannelOpcode(pkt2);
-#endif
-    }
-    // join standard channels
-    int32 locale = sConfig.GetIntDefault("DBC.Locale", 0 /*LocaleConstant::LOCALE_enUS*/); // bot->GetSession()->GetSessionDbcLocale();
-    // -- In case we're using auto detect on config file
-    if (locale == 255)
-        locale = static_cast<int32>(LocaleConstant::LOCALE_enUS);
-    
-    AreaTableEntry const* current_zone = GetAreaEntryByAreaID(sTerrainMgr.GetAreaId(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ()));
-    ChannelMgr* cMgr = channelMgr(bot->GetTeam());
-    std::string current_zone_name = current_zone ? current_zone->area_name[locale] : "";
-
-    if (current_zone && cMgr)
-    {
-        for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
-        {
-            ChatChannelsEntry const* channel = sChatChannelsStore.LookupEntry(i);
-            if (!channel) continue;
-
-#ifndef MANGOSBOT_ZERO
-            bool isLfg = (channel->flags & Channel::CHANNEL_DBC_FLAG_LFG) != 0;
-#else
-            bool isLfg = channel->ChannelID == 24;
-#endif
-
-            // skip non built-in channels or global channel without zone name in pattern
-            if (!isLfg && (!channel || (channel->flags & 4) == 4))
-                continue;
-
-            //  new channel
-            Channel* new_channel = nullptr;
-            if (isLfg)
-            {
-#ifndef MANGOSBOT_ZERO
-                new_channel = cMgr->GetJoinChannel(channel->pattern[locale], channel->ChannelID);
-#else
-                new_channel = cMgr->GetJoinChannel("LookingForGroup");
-#endif
-            }
-            else
-            {
-                char new_channel_name_buf[100];
-                snprintf(new_channel_name_buf, 100, channel->pattern[locale], current_zone_name.c_str());
-#ifndef MANGOSBOT_ZERO
-                new_channel = cMgr->GetJoinChannel(new_channel_name_buf, channel->ChannelID);
-#else
-                new_channel = cMgr->GetJoinChannel(new_channel_name_buf);
-#endif
-            }
-            if (new_channel)
-                new_channel->Join(bot, "");
-        }
-    }
+    JoinChatChannels(bot);
 
     if (sRandomPlayerbotMgr.IsRandomBot(bot))
     {

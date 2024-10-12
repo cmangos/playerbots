@@ -23,7 +23,7 @@ namespace ai
         CanFreeMoveToValue(PlayerbotAI* ai, std::string name = "can free move to", int checkInterval = 2) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {};
         virtual bool Calculate() override;
     protected:
-        virtual float GetRange() { return ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) ? INTERACTION_DISTANCE : AI_VALUE(float, "free move range"); }
+        virtual float GetRange() { return AI_VALUE(float, "free move range"); }
     };
 
     class CanFreeTargetValue : public CanFreeMoveToValue

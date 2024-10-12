@@ -11,7 +11,7 @@ namespace ai
 
     private:
         virtual bool ExecuteCommand(Player* requester, std::string text, Unit* auctioneer);
-        bool PostItem(Player* requester, Item* item, uint32 price, Unit* auctioneer, uint32 time);
+        bool PostItem(Player* requester, Item* item, uint32 price, Unit* auctioneer, uint32 time, uint32 undercutByInformationalValue = 0);
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "ah"; } //Must equal iternal name
@@ -24,9 +24,7 @@ namespace ai
         }
         virtual std::vector<std::string> GetUsedActions() { return {}; }
         virtual std::vector<std::string> GetUsedValues() { return { "nearest npcs", "inventory items", "item usage", "free money for" }; }
-#endif 
-    protected:
-        uint32 GetSellPrice(ItemPrototype const* proto);
+#endif
     };
 
     class AhBidAction : public AhAction
@@ -49,6 +47,6 @@ namespace ai
 #endif 
     private:
         virtual bool ExecuteCommand(Player* requester, std::string text, Unit* auctioneer);
-        bool BidItem(Player* requester, AuctionEntry* auction, uint32 price, Unit* auctioneer);
+        bool BidItem(Player* requester, AuctionEntry* auction, uint32 price, Unit* auctioneer, bool isBuyout, std::string reason = "");
     };
 }

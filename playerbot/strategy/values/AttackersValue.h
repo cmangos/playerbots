@@ -23,6 +23,7 @@ namespace ai
         virtual std::list<ObjectGuid> Calculate() override;
 
         static bool IsValid(Unit* target, Player* player, Player* owner = nullptr, bool checkInCombat = true, bool validatePossibleTarget = true);
+        static bool IgnoreTarget(Unit* target, Player* playerToCheckAgainst);
         virtual std::string Format() override;
 
 #ifdef GenerateBotHelp

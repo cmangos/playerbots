@@ -38,6 +38,7 @@
 #include "ChangeTalentsAction.h"
 #include "AutoLearnSpellAction.h"
 #include "XpGainAction.h"
+#include "HonorGainAction.h"
 #include "InviteToGroupAction.h"
 #include "LeaveGroupAction.h"
 #include "ReleaseSpiritAction.h"
@@ -165,6 +166,7 @@ namespace ai
 			creators["auto learn spell"] = &ActionContext::auto_learn_spell;
             creators["auto share quest"] = &ActionContext::auto_share_quest;
             creators["xp gain"] = &ActionContext::xp_gain;
+            creators["honor gain"] = &ActionContext::honor_gain;
             creators["invite nearby"] = &ActionContext::invite_nearby;
             creators["invite guild"] = &ActionContext::invite_guild;
             creators["leave far away"] = &ActionContext::leave_far_away;
@@ -260,6 +262,7 @@ namespace ai
             creators["rpg spell"] = &ActionContext::rpg_spell;
             creators["rpg craft"] = &ActionContext::rpg_craft;
             creators["rpg trade useful"] = &ActionContext::rpg_trade_useful;
+            creators["rpg enchant"] = &ActionContext::rpg_enchant;
             creators["rpg duel"] = &ActionContext::rpg_duel;
             creators["rpg item"] = &ActionContext::rpg_item;
 
@@ -285,7 +288,7 @@ namespace ai
 #endif
 #ifdef MANGOSBOT_TWO
             creators["every_man_for_himself"] = &ActionContext::every_man_for_himself;
-#endif    
+#endif
 
             creators["use id"] = &ActionContext::use_id;
             creators["move to"] = &ActionContext::move_to;
@@ -373,7 +376,7 @@ namespace ai
         static Action* flee(PlayerbotAI* ai) { return new FleeAction(ai); }
         static Action* initialize_pet(PlayerbotAI* ai) { return new InitializePetAction(ai); }
 
-        //racials      
+        //racials
         static Action* war_stomp(PlayerbotAI* ai) { return new CastWarStompAction(ai); }
         static Action* berserking(PlayerbotAI* ai) { return new CastBerserkingAction(ai); }
         static Action* blood_fury(PlayerbotAI* ai) { return new CastBloodFuryAction(ai); }
@@ -387,10 +390,10 @@ namespace ai
         static Action* gift_of_the_naaru(PlayerbotAI* ai) { return new CastGiftOfTheNaaruAction(ai); }
         static Action* arcane_torrent(PlayerbotAI* ai) { return new CastArcaneTorrentAction(ai); }
         static Action* mana_tap(PlayerbotAI* ai) { return new CastManaTapAction(ai); }
-#endif 
+#endif
 #ifdef MANGOSBOT_TWO
         static Action* every_man_for_himself(PlayerbotAI* ai) { return new CastEveryManforHimselfAction(ai); }
-#endif 
+#endif
 
         static Action* emote(PlayerbotAI* ai) { return new EmoteAction(ai); }
         static Action* talk(PlayerbotAI* ai) { return new TalkAction(ai); }
@@ -441,6 +444,7 @@ namespace ai
 		static Action* auto_learn_spell(PlayerbotAI* ai) { return new AutoLearnSpellAction(ai); }
         static Action* auto_share_quest(PlayerbotAI* ai) { return new AutoShareQuestAction(ai); }
         static Action* xp_gain(PlayerbotAI* ai) { return new XpGainAction(ai); }
+        static Action* honor_gain(PlayerbotAI* ai) { return new HonorGainAction(ai); }
         static Action* invite_nearby(PlayerbotAI* ai) { return new InviteNearbyToGroupAction(ai); }
         static Action* invite_guild(PlayerbotAI* ai) { return new InviteGuildToGroupAction(ai); }
         static Action* leave_far_away(PlayerbotAI* ai) { return new LeaveFarAwayAction(ai); }
@@ -535,6 +539,8 @@ namespace ai
         static Action* rpg_spell(PlayerbotAI* ai) { return new RpgSpellAction(ai); }
         static Action* rpg_craft(PlayerbotAI* ai) { return new RpgCraftAction(ai); }
         static Action* rpg_trade_useful(PlayerbotAI* ai) { return new RpgTradeUsefulAction(ai); }
+        static Action* rpg_enchant(PlayerbotAI* ai) { return new RpgEnchantAction(ai); }
+        
         static Action* rpg_duel(PlayerbotAI* ai) { return new RpgDuelAction(ai); }
         static Action* rpg_item(PlayerbotAI* ai) { return new RpgItemAction(ai); }
 

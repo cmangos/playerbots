@@ -75,6 +75,12 @@ bool FollowAction::isUseful()
         return true;
     }
 
+    // maybe jump is faster?
+    if (ai->HasStrategy("follow jump", BotState::BOT_STATE_NON_COMBAT) && ai->AllowActivity())
+    {
+        return true;
+    }
+
     if (followTarget && sServerFacade.GetChaseTarget(bot) && sServerFacade.GetChaseTarget(bot)->GetObjectGuid() == followTarget->GetObjectGuid() && formation->GetAngle() == sServerFacade.GetChaseAngle(bot) && formation->GetOffset() == sServerFacade.GetChaseOffset(bot))
     {
         return false;

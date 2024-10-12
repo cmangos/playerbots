@@ -12,7 +12,17 @@ using namespace ai;
 
 bool RpgTrigger::IsActive() 
 { 
-    return !ai->HasRealPlayerMaster() || (AI_VALUE(GuidPosition, "rpg target").GetEntry() && AI_VALUE(GuidPosition, "rpg target").GetEntry() == AI_VALUE(TravelTarget*, "travel target")->getEntry()); 
+    if (!ai->HasRealPlayerMaster())
+        return true;
+
+
+    if (AI_VALUE(GuidPosition, "rpg target").GetEntry())
+    {
+        if (AI_VALUE(GuidPosition, "rpg target").GetEntry() == AI_VALUE(TravelTarget*, "travel target")->getEntry())
+            return true;
+    }
+
+    return false;
 };
 
 bool RpgTaxiTrigger::IsActive()
@@ -76,7 +86,7 @@ bool RpgStartQuestTrigger::IsActive()
 
     if (guidP.IsUnit())
     {
-        Unit* unit = guidP.GetUnit();
+        Unit* unit = guidP.GetUnit(bot->GetInstanceId());
         if (unit && !unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
             return false;
     }
@@ -186,7 +196,7 @@ bool RpgAHSellTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (GuidPosition(bot).IsHostileTo(guidP))
+    if (GuidPosition(bot).IsHostileTo(guidP, bot->GetInstanceId()))
         return false;
 
     if (!AI_VALUE(bool, "can ah sell"))
@@ -205,7 +215,7 @@ bool RpgAHBuyTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (GuidPosition(bot).IsHostileTo(guidP))
+    if (GuidPosition(bot).IsHostileTo(guidP, bot->GetInstanceId()))
         return false;
 
     if (!AI_VALUE(bool, "can ah buy"))
@@ -237,10 +247,10 @@ bool RpgRepairTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && AI_VALUE2_LAZY(bool, "group or", "should repair,can repair,following party,near leader"))
+    if (bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && AI_VALUE2_LAZY(bool, "group or", "can repair,following party,near leader"))
         return true;
 
-    if (AI_VALUE(bool, "should repair") && AI_VALUE(bool, "can repair"))
+    if (AI_VALUE(bool, "can repair"))
         return true;
 
     return false;
@@ -389,7 +399,7 @@ bool RpgHealTrigger::IsActive()
     if (guidP.IsPlayer())
         return false;
 
-    Unit* unit = guidP.GetUnit();
+    Unit* unit = guidP.GetUnit(bot->GetInstanceId());
 
     if (!unit)
         return false;
@@ -507,7 +517,7 @@ bool RpgSpellTrigger::IsActive()
 {
     //GuidPosition guidP(getGuidP());
 
-    return true;
+    return (!urand(0, 10));
 }
 
 bool RpgCraftTrigger::IsActive()
@@ -517,7 +527,7 @@ bool RpgCraftTrigger::IsActive()
     if (AI_VALUE(uint8, "bag space") > 80)
         return false;
 
-    if (!guidP.GetWorldObject())
+    if (!guidP.GetWorldObject(bot->GetInstanceId()))
         return false;
 
     std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
@@ -599,7 +609,42 @@ bool RpgTradeUsefulTrigger::IsActive()
     if (bot->GetTrader() && bot->GetTrader() != player)
         return false;
 
-    if (AI_VALUE_LAZY(std::list<Item*>, "items useful to give").empty())
+    if (AI_VALUE(std::list<Item*>, "items useful to give").empty())
+        return false;
+
+    return true;
+}
+
+bool RpgEnchantTrigger::IsActive()
+{
+    GuidPosition guidP(getGuidP());
+
+    if (!guidP.IsPlayer())
+        return false;
+
+    Player* player = guidP.GetPlayer();
+
+
+    if (!player)
+        return false;
+
+    //if (player->GetTrader() == bot && bot->GetTrader() == player) //Continue trading please.
+    //    return true;
+
+    if (!isFriend(player))
+        return false;
+
+    if (!player->IsWithinLOSInMap(bot))
+        return false;
+
+    //Trading with someone else
+    //if (player->GetTrader() && player->GetTrader() != bot)
+     //   return false;
+
+    //if (bot->GetTrader() && bot->GetTrader() != player)
+    //    return false;
+
+    if (AI_VALUE(std::list<Item*>, "items useful to enchant").empty())
         return false;
 
     return true;
@@ -669,9 +714,9 @@ bool RpgItemTrigger::IsActive()
     GameObject* gameObject = nullptr;
     
     if(guidP.IsUnit())
-        unit = guidP.GetUnit();
+        unit = guidP.GetUnit(bot->GetInstanceId());
     else if (guidP.IsGameObject())
-        gameObject = guidP.GetGameObject();
+        gameObject = guidP.GetGameObject(bot->GetInstanceId());
 
     std::list<Item*> questItems = AI_VALUE2(std::list<Item*>, "inventory items", "quest");
 

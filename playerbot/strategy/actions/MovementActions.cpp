@@ -220,7 +220,7 @@ bool MovementAction::FlyDirect(WorldPosition &startPosition, WorldPosition &endP
         startPosition.printWKT({ startPosition, movePosition }, out, 1);
         out << std::to_string(bot->getRace()) << ",";
         out << std::to_string(bot->getClass()) << ",";
-        float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
+        float subLevel = ai->GetLevelFloat();
         out << subLevel << ",";
         out << "1";
 
@@ -392,11 +392,11 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                     sTravelNodeMap.m_nMapMtx.lock_shared();
                     TravelNodeRoute route = sTravelNodeMap.getRoute(startPosition, endPosition, beginPath, bot);       
 
-                    std::string routeList;
+                    std::string routeList = "Route: ";
 
                     for (auto node : route.getNodes())
                     {
-                        routeList += node->getName() + (node == route.getNodes().back() ? "" : "-");
+                        routeList += node->getName() + (node == route.getNodes().back() ? "" : ",");
                     }
 
                     if (!routeList.empty())
@@ -479,7 +479,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 
                 out << std::to_string(bot->getRace()) << ",";
                 out << std::to_string(bot->getClass()) << ",";
-                float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
+                float subLevel = ai->GetLevelFloat();
                 out << subLevel << ",";
                 out << (entry ? entry : -1);
 
@@ -554,7 +554,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 
                 out << std::to_string(bot->getRace()) << ",";
                 out << std::to_string(bot->getClass()) << ",";
-                float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
+                float subLevel = ai->GetLevelFloat();
                 out << subLevel << ",";
                 out << (entry ? entry : -1);
 
@@ -745,14 +745,13 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
             }
             else
             {
-                if (sServerFacade.IsSpellReady(bot, entry) && (!bot->IsFlying() || WorldPosition(bot).currentHeight() < 10.0f))
+                if (sServerFacade.IsSpellReady(bot, entry) && (!bot->IsFlying() || WorldPosition(bot).currentHeight() < 10.0f) && AI_VALUE2(uint32, "has reagents for", entry) > 0)
                     if (ai->DoSpecificAction("cast", Event("rpg action", std::to_string(entry)), true))
                         return true;
 
                 movePath.clear();
                 AI_VALUE(LastMovement&, "last movement").setPath(movePath);
                 return false;
-
             }
         }
 
@@ -858,9 +857,12 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         return false;
     }
 
-    if (movePosition.isUnderWater() && !endPosition.isUnderWater()) //Try to swim on the surface.
+    if (movePosition.getMapId() == endPosition.getMapId() && movePosition.isUnderWater() && !endPosition.isUnderWater()) //Try to swim on the surface.
     {
         movePosition.setZ(movePosition.getHeight(true));
+
+        if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+            ai->TellPlayerNoFacing(GetMaster(), "Setting movePosition to water surface.");
     }
 
     //Visual waypoints
@@ -887,7 +889,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         startPosition.printWKT({ startPosition, movePosition }, out, 1);
         out << std::to_string(bot->getRace()) << ",";
         out << std::to_string(bot->getClass()) << ",";
-        float subLevel = ((float)bot->GetLevel() + ((float)bot->GetUInt32Value(PLAYER_XP) / (float)bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP)));
+        float subLevel = ai->GetLevelFloat();
         out << subLevel << ",";
         out << 0;
 
@@ -929,7 +931,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
     */
 
     // Clean movement if not already moving the same way.
-    if (mm.GetCurrent()->GetMovementGeneratorType() != POINT_MOTION_TYPE)
+    if (mm.GetCurrent()->GetMovementGeneratorType() != POINT_MOTION_TYPE || movePosition.fDist(lastMove.lastMoveShort) > 5.0f)
     {
         if (mover == bot)
             ai->StopMoving();
@@ -981,6 +983,10 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 #else
     if (!bot->IsFreeFlying())
     {
+        // water transition
+        if (bot->HasMovementFlag(MOVEFLAG_SWIMMING) && startPosition.isInWater() && !startPosition.isUnderWater() && !movePosition.isInWater())
+            generatePath = true;
+
         Movement::PointsArray path;
         if (GeneratePathAvoidingHazards(movePosition, generatePath, path))
         {
@@ -1184,7 +1190,7 @@ bool MovementAction::IsMovingAllowed(Unit* target)
 
 bool MovementAction::IsMovingAllowed(uint32 mapId, float x, float y, float z)
 {
-    float distance = sqrt(bot->GetDistance(x, y, z));
+    float distance = bot->GetDistance(x, y, z);
     if (!bot->InBattleGround() && distance > sPlayerbotAIConfig.reactDistance)
         return false;
 
@@ -1294,9 +1300,61 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
                 }
             }
         }
-
         if (!target->IsTaxiFlying()/* || bot->GetTransport()*/)
            return MoveTo(target, ai->GetRange("follow"));
+    }
+
+    // Handle water transition
+    {
+        WorldPosition botPos(bot);
+        WorldPosition tarPos(target);
+        bool targetInWater = (tarPos.isInWater() || tarPos.isUnderWater()) && !botPos.isInWater() && !botPos.isUnderWater();
+        bool selfInWater = (botPos.isInWater() || botPos.isUnderWater()) && !tarPos.isInWater() && !tarPos.isUnderWater();
+        bool targetOnSurface = botPos.isUnderWater() && tarPos.isInWater() && !tarPos.isUnderWater();
+        bool selfOnSurface = tarPos.isUnderWater() && botPos.isInWater() && !botPos.isUnderWater();
+        if ((targetInWater || selfInWater || targetOnSurface || selfOnSurface) && !(tarPos.isUnderWater() && botPos.isUnderWater()))
+        {
+            // in or out of water
+            WorldPosition moveToPos = (targetInWater || selfOnSurface) ? tarPos : botPos;
+            Unit* targetToCheck = (targetInWater || selfOnSurface) ? target : bot;
+            if (const TerrainInfo* terrain = moveToPos.getTerrain())
+            {
+                float bottom = terrain->GetHeightStatic(moveToPos.getX(), moveToPos.getY(), moveToPos.getZ());
+                float waterLevel = terrain->GetWaterOrGroundLevel(moveToPos.getX(), moveToPos.getY(), moveToPos.getZ(), bottom, true);
+                bool canSwimToTarget = selfOnSurface && botPos.IsInLineOfSight(tarPos);
+                moveToPos.setZ(waterLevel);
+                if (waterLevel > -200000.0f && waterLevel > bottom)
+                {
+                    PathFinder pathfinder(bot);
+                    //Use standard pathfinder to find a route.
+                    WorldPosition prevPoint = botPos;
+                    pathfinder.calculate(moveToPos.getVector3(), tarPos.getVector3());
+                    Movement::PointsArray& pathPoints = pathfinder.getPath();
+                    if (pathPoints.size() >= 2)
+                    {
+                        for (uint32 i = 1; i < pathPoints.size() - 1; i++)
+                        {
+                            WorldPosition pathPoint(bot->GetMapId(), pathPoints[i].x, pathPoints[i].y, pathPoints[i].z);
+                            if (selfInWater)
+                            {
+                                if (pathPoint.isInWater())
+                                {
+                                    prevPoint = pathPoint;
+                                    continue;
+                                }
+                                if (!MoveTo(prevPoint))
+                                {
+                                    return MoveTo(pathPoint);
+                                }
+                                return true;
+                            }
+                        }
+                    }
+                    moveToPos = tarPos;
+                    return MoveTo(moveToPos);
+                }
+            }
+        }
     }
 
     bot->HandleEmoteState(0);
@@ -1365,6 +1423,18 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
         }
     }
 #endif
+
+    // Find jump shortcut
+    if (ai->HasStrategy("follow jump", BotState::BOT_STATE_NON_COMBAT) && ai->AllowActivity())
+    {
+        WorldPosition botPos(bot);
+        if (!botPos.isInWater())
+        {
+            bool tryJump = ai->DoSpecificAction("jump::follow", Event(), true);
+            if (tryJump)
+                return true;
+        }
+    }
 
     if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
     {
@@ -1509,6 +1579,14 @@ bool MovementAction::ChaseTo(WorldObject* obj, float distance, float angle)
     }
 
     if (!ai->IsSafe(obj)) return false;
+
+    // Find jump shortcut
+    if (ai->HasStrategy("follow chase", BotState::BOT_STATE_NON_COMBAT) && ai->AllowActivity())
+    {
+        bool tryJump = ai->DoSpecificAction("jump::chase", Event(), true);
+        if (tryJump)
+            return true;
+    }
 
     if (!endPosition.isValid()) return false;
     if (angle > 20) angle = 0;
@@ -2035,9 +2113,32 @@ bool MoveToLootAction::Execute(Event& event)
 {
     LootObject loot = AI_VALUE(LootObject, "loot target");
     if (!loot.IsLootPossible(bot))
+    {
+        if (ai->HasStrategy("debug loot", BotState::BOT_STATE_NON_COMBAT))
+        {
+            WorldObject* wo = loot.GetWorldObject(bot);
+
+            if (!wo)
+            {
+                ai->TellPlayerNoFacing(GetMaster(), "Can not move to loot " + std::to_string(loot.guid) +  " because it no longer exists.");
+            }
+            else
+            {
+                ai->TellPlayerNoFacing(GetMaster(), "Can not move to loot " + ChatHelper::formatWorldobject(wo) + " because it is not possible to loot.");
+            }
+        }
+
         return false;
+    }
 
     WorldObject *wo = loot.GetWorldObject(bot);
+
+    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug loot", BotState::BOT_STATE_NON_COMBAT))
+    {
+        std::ostringstream out;
+        out << "Moving to loot " << ChatHelper::formatWorldobject(wo);
+        ai->TellPlayerNoFacing(GetMaster(), out);
+    }
 
     if(sServerFacade.IsWithinLOSInMap(bot, wo))
         return MoveNear(wo, sPlayerbotAIConfig.contactDistance);
@@ -2172,6 +2273,25 @@ bool SetBehindTargetAction::isPossible()
 
 bool MoveOutOfCollisionAction::Execute(Event& event)
 {
+    WorldPosition botPos(bot);
+    float gx, gy, gz;
+    gx = botPos.getX();
+    gy = botPos.getY();
+    gz = botPos.getZ();
+
+    uint32 tries = 1;
+    for (; tries < 10; ++tries)
+    {
+        gx = botPos.getX();
+        gy = botPos.getY();
+        gz = botPos.getZ();
+        if (bot->GetMap()->GetReachableRandomPointOnGround(gx, gy, gz, ai->GetRange("follow")))
+        {
+            return MoveTo(bot->GetMapId(), gx, gy, gz);
+        }
+    }
+
+    // old style
     float angle = M_PI * 2000 / (float)urand(1, 1000);
     float distance = ai->GetRange("follow");
     return MoveTo(bot->GetMapId(), bot->GetPositionX() + cos(angle) * distance, bot->GetPositionY() + sin(angle) * distance, bot->GetPositionZ());
@@ -2289,11 +2409,14 @@ bool JumpAction::Execute(ai::Event &event)
     // find jump position
     if (options == "tome" || options == "follow" || options == "chase" || isRtsc)
     {
+        if (options == "follow" && !ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+            return false;
+
         WorldPosition const src = WorldPosition(bot);
         WorldPosition dest = WorldPosition();
         WorldPosition jumpPoint = WorldPosition();
+        WorldPosition possibleLanding = WorldPosition();
         float requiredSpeed = 0.f;
-
         float distanceTo = 30.f;
         float distanceFrom = 30.f;
 
@@ -2326,7 +2449,6 @@ bool JumpAction::Execute(ai::Event &event)
             }
 
             dest = spellPosition;
-
             distanceTo = sPlayerbotAIConfig.sightDistance;
             distanceFrom = 10.f;
         }
@@ -2343,17 +2465,23 @@ bool JumpAction::Execute(ai::Event &event)
             if ((bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE ||
             bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE) &&
             (bot->GetMotionMaster()->GetCurrent()->GetCurrentTarget() != followTarget ||
-            bot->GetMotionMaster()->GetCurrent()->IsReachable() ||
             /*bot->InBattleGround() ||*/
             bot->GetTransport()))
                 return false;
 
+            // do not try if very close
+            Formation* formation = AI_VALUE(Formation*, "formation");
+            if (formation)
+            {
+                WorldLocation loc = formation->GetLocation();
+                if (!Formation::IsNullLocation(loc) && loc.mapid != -1)
+                {
+                    if (sServerFacade.GetDistance2d(bot, loc.coord_x, loc.coord_y) < ai->GetRange("follow") && fabs(src.getZ() - loc.coord_z) < ai->GetRange("follow"))
+                        return false;
+                }
+            }
+
             dest = WorldPosition(followTarget);
-
-            // do not jump if can walk, MotionMaster IsReachable() doesn't seem to return false if can't reach
-            if (CanWalkTo(src, dest, bot))
-                return false;
-
             distanceTo = 30.f;
             distanceFrom = 40.f;
         }
@@ -2367,37 +2495,30 @@ bool JumpAction::Execute(ai::Event &event)
             if ((bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE ||
             bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE) &&
             (bot->GetMotionMaster()->GetCurrent()->GetCurrentTarget() != chaseTarget ||
-            bot->GetMotionMaster()->GetCurrent()->IsReachable() ||
             /*bot->InBattleGround() ||*/
             bot->GetTransport()))
                 return false;
 
             dest = WorldPosition(chaseTarget);
-
-            // do not jump if can walk, MotionMaster IsReachable() doesn't seem to return false if can't reach
-            if (CanWalkTo(src, dest, bot))
-                return false;
-
-            distanceTo = 10.f;
+            distanceTo = 30.f;
             distanceFrom = sPlayerbotAIConfig.sightDistance;
         }
 
+        // try nearby random points
+        if (!jumpPoint && ai->AllowActivity())
+            jumpPoint = GetPossibleJumpStartForInRange(src, dest, possibleLanding, bot, requiredSpeed, distanceTo, distanceFrom);
+        // try with pathfinder
         if (!jumpPoint)
-            jumpPoint = GetPossibleJumpStartFor(src, dest, bot, requiredSpeed, distanceTo, distanceFrom);
+            jumpPoint = GetPossibleJumpStartFor(src, dest, possibleLanding, bot, requiredSpeed, distanceTo, distanceFrom);
         if (jumpPoint && requiredSpeed > 0.f)
         {
-            sLog.outDetail("%s: GetPossibleJumpStartFor success! Jump speed: %f", bot->GetName(), requiredSpeed);
-            if (showLanding)
+            // check if jumping is much faster
+            if (options == "follow" || options == "chase")
             {
-                Creature* wpCreature = bot->SummonCreature(2334, jumpPoint.getX(), jumpPoint.getY(), jumpPoint.getZ() - 1, bot->GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 3000);
-                PlayerbotAI::AddAura(wpCreature, 246);
-
-                float pointAngle = src.getAngleTo(jumpPoint);
-                sServerFacade.SetFacingTo(bot, pointAngle, true);
-                bot->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
-                SetDuration(sPlayerbotAIConfig.reactDelay);
-                return true;
+                if (!IsJumpFasterThanWalking(src, dest, possibleLanding, bot))
+                    return false;
             }
+            sLog.outDebug("%s: GetPossibleJumpStartFor success! Jump speed: %f", bot->GetName(), requiredSpeed);
 
             // move to jump point
             if (src != jumpPoint && src.distance(jumpPoint) > sPlayerbotAIConfig.contactDistance)
@@ -2420,6 +2541,18 @@ bool JumpAction::Execute(ai::Event &event)
                     }
                 }
 
+                if (showLanding)
+                {
+                    Creature* wpCreature = bot->SummonCreature(2334, jumpPoint.getX(), jumpPoint.getY(), jumpPoint.getZ() - 1, bot->GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 3000);
+                    PlayerbotAI::AddAura(wpCreature, 246);
+
+                    float pointAngle = src.getAngleTo(jumpPoint);
+                    sServerFacade.SetFacingTo(bot, pointAngle, true);
+                    bot->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
+                    SetDuration(sPlayerbotAIConfig.reactDelay);
+                    return true;
+                }
+
                 return MoveTo(jumpPoint.getMapId(), jumpPoint.getX(), jumpPoint.getY(), jumpPoint.getZ());
             }
             else // jump from current position
@@ -2430,9 +2563,21 @@ bool JumpAction::Execute(ai::Event &event)
                     bot->Say(text, (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
                 }
 
-                float pointAngle = jumpPoint.getAngleTo(dest);
+                if (showLanding)
+                {
+                    Creature* wpCreature = bot->SummonCreature(2334, possibleLanding.getX(), possibleLanding.getY(), possibleLanding.getZ() - 1, bot->GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 3000);
+                    PlayerbotAI::AddAura(wpCreature, 246);
+
+                    float pointAngle = src.getAngleTo(possibleLanding);
+                    sServerFacade.SetFacingTo(bot, pointAngle, true);
+                    bot->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
+                    SetDuration(sPlayerbotAIConfig.reactDelay);
+                    return true;
+                }
+
+                float pointAngle = jumpPoint.getAngleTo(possibleLanding ? possibleLanding : dest);
                 sServerFacade.SetFacingTo(bot, pointAngle, true);
-                bool success = JumpTowards(jumpPoint, dest, bot, requiredSpeed);
+                bool success = JumpTowards(jumpPoint, possibleLanding ? possibleLanding : dest, bot, requiredSpeed, possibleLanding);
 
                 if (isRtsc)
                 {
@@ -2455,12 +2600,20 @@ bool JumpAction::Execute(ai::Event &event)
         jumpSpeed = 0.f;
     else
     {
-        jumpSpeed = jumpBackward ? bot->GetSpeed(MOVE_RUN_BACK) : bot->GetSpeed(MOVE_RUN);
+        jumpSpeed = jumpBackward ? bot->GetSpeed(MOVE_WALK) : bot->GetSpeedRate(MOVE_RUN) * sPlayerbotAIConfig.jumpHSpeed;
+
+        if (options == "r" || options == "random")
+        {
+            // slow jump
+            if (urand(0, 1))
+                jumpSpeed = bot->GetSpeed(MOVE_WALK);
+        }
     }
 
     float timeToLand, distToLand, maxHeight;
     bool goodLanding = true;
-    WorldPosition jumpLanding = JumpAction::CalculateJumpParameters(WorldPosition(bot), bot, angle, 7.96f, jumpSpeed, timeToLand, distToLand, maxHeight, goodLanding, sPlayerbotAIConfig.jumpHeightLimit);
+    std::vector<WorldPosition> path;
+    WorldPosition jumpLanding = JumpAction::CalculateJumpParameters(WorldPosition(bot), bot, angle, sPlayerbotAIConfig.jumpVSpeed, jumpSpeed, timeToLand, distToLand, maxHeight, goodLanding, path);
     if (jumpLanding)
     {
         // not jump randomly in the water
@@ -2471,7 +2624,7 @@ bool JumpAction::Execute(ai::Event &event)
         }
 
         // only show landing
-        if (showLanding || ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT))
+        if (showLanding || ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
         {
             Creature* wpCreature = bot->SummonCreature(2334, jumpLanding.getX(), jumpLanding.getY(), jumpLanding.getZ() - 1, bot->GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 3000);
             PlayerbotAI::AddAura(wpCreature, 246);
@@ -2485,25 +2638,35 @@ bool JumpAction::Execute(ai::Event &event)
                 return true;
             }
         }
-        return DoJump(jumpLanding, angle, 7.96f, jumpSpeed, timeToLand, distToLand, maxHeight, goodLanding, jumpInPlace, jumpBackward, showLanding);
+
+        // set highest jump point to relocate
+        WorldPosition highestPoint = jumpLanding;
+        for (auto& point : path)
+        {
+            if (point.getZ() > highestPoint.getZ())
+                highestPoint = point;
+        }
+
+        return DoJump(jumpLanding, highestPoint, angle, sPlayerbotAIConfig.jumpVSpeed, jumpSpeed, timeToLand, distToLand, maxHeight, goodLanding, jumpInPlace, jumpBackward, showLanding);
     }
     return false;
 }
 
-WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit* jumper, float angle, float vSpeed, float hSpeed, float &timeToLand, float &distanceToLand, float &maxHeight, bool &goodLanding, float maxJumpHeight)
+WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit* jumper, float angle, float vSpeed, float hSpeed, float &timeToLand, float &distanceToLand, float &maxHeight, bool &goodLanding, std::vector<WorldPosition>& path, float maxJumpHeight)
 {
     if (!jumper)
         return WorldPosition();
 
     // static data
-    double const jumpVerticalAngle = 48.6717 * M_PI / 180; // approximate
     float const m_gravity = 19.2911f;
+    float const timeForMaxHeight = vSpeed / m_gravity;
+    float velocity = sqrt(vSpeed * vSpeed + hSpeed * hSpeed);
+    double jumpVerticalAngle = 48.f * M_PI / 180; // approximate
+    maxHeight = vSpeed * timeForMaxHeight - m_gravity * timeForMaxHeight * timeForMaxHeight / 2;   
 
     // jump in place
     if (hSpeed == 0.f)
     {
-        float timeForMaxHeight = vSpeed / m_gravity;
-        maxHeight = vSpeed * timeForMaxHeight - m_gravity * timeForMaxHeight * timeForMaxHeight / 2;
         timeToLand = timeForMaxHeight * 2;
         distanceToLand = 0.f;
 
@@ -2538,11 +2701,6 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
 
     float vsin = sin(angle);
     float vcos = cos(angle);
-
-    // calculate max height
-    float velocity = vSpeed / (float)sin(jumpVerticalAngle);
-    float timeForMaxHeight = vSpeed / m_gravity;
-    maxHeight = vSpeed * timeForMaxHeight - m_gravity * timeForMaxHeight * timeForMaxHeight / 2;
 
     // calculate approximate distance on ideal surface
     float rough_distance = 2 * timeForMaxHeight * hSpeed;
@@ -2591,24 +2749,27 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
                 fz -= jumper->GetCollisionHeight();
         }
 
-        // vmaps collision not found - check maps (terrain)
+        path.push_back(WorldPosition(src.getMapId(), fx, fy, fz));
+
+        // vmaps collision not found - check maps (terrain or water)
         if (!foundCollision && !ascending)
         {
-            float newGroundZ = fz;
-            jumper->UpdateAllowedPositionZ(fx, fy, newGroundZ);
+            // check ground below current previous point
+            float prevGroundZ = oz;
+            float nextGroundZ = fz;
+            jumper->UpdateAllowedPositionZ(ox, oy, prevGroundZ);
+            jumper->UpdateAllowedPositionZ(fx, fy, nextGroundZ);
             // calculated point is lower than terrain - land on terrain
-            if (fz < newGroundZ)
+            if (fz < nextGroundZ && oz > prevGroundZ)
             {
                 foundCollision = true;
-                fz = newGroundZ; // not correct, but should not be too far
+                fx = ox;
+                fy = oy;
+                fz = prevGroundZ;
             }
         }
 
         if (maxJumpHeight > 0.f && fabs(src.getZ() - fz) > maxJumpHeight)
-            return WorldPosition();
-
-        // can land and not lava/slime
-        if (!IsJumpSafe(src, WorldPosition(src.getMapId(), fx, fy ,fz), jumper))
             return WorldPosition();
 
         // vmaps collision found
@@ -2623,6 +2784,9 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
             }
 
             WorldPosition destination = WorldPosition(src.getMapId(), fx, fy ,fz);
+            if (!IsJumpSafe(src, destination, jumper))
+                return WorldPosition();
+
             distanceToLand = sqrtf(src.sqDistance2d(destination));
             timeToLand = CalculateJumpTime(fz - (src.getZ() + 0.5f), vSpeed, ascending);
 
@@ -2634,7 +2798,8 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
             if (goodLanding)
             {
                 float groundZ = destination.getZ() + 0.5f;
-                jumper->UpdateAllowedPositionZ(destination.getX(), destination.getY(), groundZ);
+                if (!destination.isInWater())
+                    jumper->UpdateAllowedPositionZ(destination.getX(), destination.getY(), groundZ);
                 // set to fall after land if not at the ground
                 if (groundZ < destination.getZ() && fabs(oz - destination.getZ()) > 5.0f)
                 {
@@ -2741,6 +2906,38 @@ bool JumpAction::CanWalkTo(const WorldPosition &src, const WorldPosition &dest, 
     return true;
 }
 
+bool JumpAction::IsJumpFasterThanWalking(const WorldPosition& src, const WorldPosition& dest, const WorldPosition& jumpLanding, Unit* jumper, float maxDistance)
+{
+    if (!src || !dest || !jumpLanding)
+        return false;
+
+    if (src.getMapId() != dest.getMapId() || src.getMapId() != jumpLanding.getMapId())
+        return false;
+
+    // landing too far from destination
+    if (dest.fDist(jumpLanding) > maxDistance)
+        return false;
+
+    std::vector<WorldPosition> pathWalk = dest.getPathStepFrom(src, jumper, true);
+    std::vector<WorldPosition> pathJump = dest.getPathStepFrom(jumpLanding, jumper, true);
+    if (pathJump.empty())
+        return false;
+    if (pathWalk.empty())
+        return true;
+
+    float pathLengthWalk = src.getPathLength(pathWalk);
+    float pathLengthJump = jumpLanding.getPathLength(pathJump);
+
+    if (pathLengthWalk > 20.f && pathLengthWalk > (pathLengthJump * 2))
+    {
+        sLog.outDebug("%s: Jump IsJumpFasterThanWalking Jumping is faster than walking! Walk Distance: %f, Jump Distance: %f", jumper->GetName(), pathLengthWalk, pathLengthJump);
+        return true;
+    }
+
+    sLog.outDebug("%s: Jump IsJumpFasterThanWalking Jumping is slower than walking! Walk Distance: %f, Jump Distance: %f", jumper->GetName(), pathLengthWalk, pathLengthJump);
+    return false;
+}
+
 bool JumpAction::CanLand(const ai::WorldPosition &dest, Unit *jumper)
 {
     // do not let jump to abyss
@@ -2782,7 +2979,7 @@ bool JumpAction::IsNotMagmaSlime(const WorldPosition &dest, Unit *jumper)
     return true;
 }
 
-bool JumpAction::CanJumpTo(const WorldPosition& src, const WorldPosition& dest, Unit* jumper, float jumpSpeed, float maxDistace)
+bool JumpAction::CanJumpTo(const WorldPosition& src, const WorldPosition& dest, WorldPosition& possiblelanding, float& jumpAngle, Unit* jumper, float jumpSpeed, float maxDistance)
 {
     if (!src || !dest)
         return false;
@@ -2795,27 +2992,32 @@ bool JumpAction::CanJumpTo(const WorldPosition& src, const WorldPosition& dest, 
 
     // some preparation
     static float m_gravity = 19.2911f;
-    float timeForMaxHeight = 7.96f / m_gravity;
-    float maxHeight = 7.96f * timeForMaxHeight - m_gravity * timeForMaxHeight * timeForMaxHeight / 2;
+    float timeForMaxHeight = sPlayerbotAIConfig.jumpVSpeed / m_gravity;
+    float maxHeight = sPlayerbotAIConfig.jumpVSpeed * timeForMaxHeight - m_gravity * timeForMaxHeight * timeForMaxHeight / 2;
 
     // can't jump too high
     if ((src.getZ() + maxHeight) < dest.getZ())
         return false;
 
-    float angle = src.getAngleTo(dest);
-
-    float timeToLand, distToLand;
-    bool goodLanding = true;
-    WorldPosition jumpLanding = JumpAction::CalculateJumpParameters(src, jumper, angle, 7.96f, jumpSpeed, timeToLand, distToLand, maxHeight, goodLanding, sPlayerbotAIConfig.jumpHeightLimit);
-    if (jumpLanding)
+    float destAngle = src.getAngleTo(dest);
+    for (float angle = destAngle; angle <= destAngle + 2 * M_PI; angle += M_PI_F / 4.0f)
     {
-        return CanWalkTo(jumpLanding, dest, jumper, maxDistace);
+        float timeToLand, distToLand;
+        bool goodLanding = true;
+        std::vector<WorldPosition> path;
+        WorldPosition jumpLanding = JumpAction::CalculateJumpParameters(src, jumper, angle, sPlayerbotAIConfig.jumpVSpeed, jumpSpeed, timeToLand, distToLand, maxHeight, goodLanding, path);
+        if (jumpLanding && CanWalkTo(jumpLanding, dest, jumper, maxDistance))
+        {
+            jumpAngle = angle;
+            possiblelanding = jumpLanding;
+            return true;
+        }
     }
 
     return false;
 }
 
-bool JumpAction::JumpTowards(const ai::WorldPosition &src, const ai::WorldPosition &dest, Unit* jumper, float jumpSpeed)
+bool JumpAction::JumpTowards(const ai::WorldPosition &src, const ai::WorldPosition &dest, Unit* jumper, float jumpSpeed, bool preSetLanding)
 {
     if (src.getMapId() != dest.getMapId())
         return false;
@@ -2833,30 +3035,41 @@ bool JumpAction::JumpTowards(const ai::WorldPosition &src, const ai::WorldPositi
 
     float timeToLand, distToLand, maxHeight;
     bool goodLanding = true;
-    WorldPosition jumpLanding = JumpAction::CalculateJumpParameters(src, jumper, angle, 7.96f, jumpSpeed, timeToLand, distToLand, maxHeight, goodLanding, sPlayerbotAIConfig.jumpHeightLimit);
-    sLog.outDetail("%s: JumpTowards attempt! Jump speed: %f", bot->GetName(), jumpSpeed);
+    std::vector<WorldPosition> path;
+    WorldPosition jumpLanding = JumpAction::CalculateJumpParameters(src, jumper, angle, sPlayerbotAIConfig.jumpVSpeed, jumpSpeed, timeToLand, distToLand, maxHeight, goodLanding, path);
+    sLog.outDebug("%s: JumpTowards attempt! Jump speed: %f", bot->GetName(), jumpSpeed);
     if (jumpLanding && goodLanding)
     {
-        return DoJump(jumpLanding, angle, 7.96f, jumpSpeed, timeToLand, distToLand, maxHeight, goodLanding, jumpInPlace, jumpBackward, false);
+        // set highest jump point to relocate
+        WorldPosition highestPoint = dest;
+        for (auto& point : path)
+        {
+            if (point.getZ() > highestPoint.getZ())
+                highestPoint = point;
+        }
+
+        return DoJump((preSetLanding ? dest : jumpLanding), highestPoint, angle, sPlayerbotAIConfig.jumpVSpeed, jumpSpeed, timeToLand, distToLand, maxHeight, goodLanding, jumpInPlace, jumpBackward, false);
     }
 
     sLog.outDetail("%s: Jump ForwardTo Fail!", jumper->GetName());
     return false;
 }
 
-bool JumpAction::DoJump(WorldPosition &dest, float angle, float vSpeed, float hSpeed, float timeToLand, float distanceToLand, float maxHeight, bool goodLanding, bool jumpInPlace, bool jumpBackward, bool showOnly)
+bool JumpAction::DoJump(const WorldPosition &dest, const WorldPosition& highestPoint, float angle, float vSpeed, float hSpeed, float timeToLand, float distanceToLand, float maxHeight, bool goodLanding, bool jumpInPlace, bool jumpBackward, bool showOnly)
 {
     if (!dest)
         return false;
 
+    WorldPosition landing = dest;
+
     // fix height
-    if (goodLanding)
+    if (goodLanding && !dest.isInWater())
     {
         float ox = dest.getX();
         float oy = dest.getY();
         float oz = dest.getZ() + 0.5f;
         bot->UpdateAllowedPositionZ(ox, oy, oz);
-        dest = WorldPosition(dest.getMapId(), ox, oy, oz);
+        landing = WorldPosition(dest.getMapId(), ox, oy, oz);
     }
 
     if (!goodLanding)
@@ -2864,11 +3077,14 @@ bool JumpAction::DoJump(WorldPosition &dest, float angle, float vSpeed, float hS
 
     ai->InterruptSpell(false);
     ai->StopMoving();
-    ai->SetJumpDestination(dest);
+    ai->SetJumpDestination(landing);
     bot->SetFallInformation(0, maxHeight);
 
+    bool slowJump = false;// !jumpBackward && hSpeed == bot->GetSpeed(MOVE_WALK);
+    // TODO calculate slow jump (jump + move forward)
+
     // send move packet before jump
-    if (!jumpInPlace)
+    if (!jumpInPlace && !slowJump)
     {
         bot->m_movementInfo.AddMovementFlag(jumpBackward ? MOVEFLAG_BACKWARD : MOVEFLAG_FORWARD);
         WorldPacket move(jumpBackward ? MSG_MOVE_START_BACKWARD : MSG_MOVE_START_FORWARD);
@@ -2877,7 +3093,7 @@ bool JumpAction::DoJump(WorldPosition &dest, float angle, float vSpeed, float hS
         move << bot->GetObjectGuid().WriteAsPacked();
 #endif
         move << bot->m_movementInfo;
-        bot->GetSession()->HandleMovementOpcodes(move);
+        ai->QueuePacket(move);
     }
 
     float vsin = jumpInPlace ? 0 : sin(angle);
@@ -2885,14 +3101,14 @@ bool JumpAction::DoJump(WorldPosition &dest, float angle, float vSpeed, float hS
 
     // write jump info
     uint32 curTime = sWorld.GetCurrentMSTime();
-    uint32 jumpTime = curTime + sWorld.GetAverageDiff() + uint32(timeToLand * IN_MILLISECONDS) + 1000;
+    uint32 jumpTime = curTime + sWorld.GetAverageDiff() + uint32(timeToLand * IN_MILLISECONDS);
     ai->SetJumpTime(jumpTime);
     bot->m_movementInfo.jump.zspeed = -vSpeed;
     bot->m_movementInfo.jump.cosAngle = vcos;
     bot->m_movementInfo.jump.sinAngle = vsin;
-    bot->m_movementInfo.jump.xyspeed = hSpeed;
+    bot->m_movementInfo.jump.xyspeed = slowJump ? 0.f : hSpeed;
 
-    sLog.outDetail("%s: Jump x: %f, y: %f, z: %f, time: %f, dist: %f, inPlace: %u, landTime: %u, curTime: %u", bot->GetName(), dest.getX(), dest.getY(), dest.getZ(), timeToLand, distanceToLand, jumpInPlace, jumpTime, curTime);
+    sLog.outDetail("%s: Jump x: %f, y: %f, z: %f, time: %f, dist: %f, inPlace: %u, landTime: %u, curTime: %u", bot->GetName(), landing.getX(), landing.getY(), landing.getZ(), timeToLand, distanceToLand, jumpInPlace, jumpTime, curTime);
 
     // send jump packet
 #ifdef MANGOSBOT_ZERO
@@ -2900,29 +3116,58 @@ bool JumpAction::DoJump(WorldPosition &dest, float angle, float vSpeed, float hS
 #else
     bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FALLING);
 #endif
-
-    WorldPacket jump(MSG_MOVE_JUMP);
-    // write packet info
+    
+    // client doesn't seem to show proper bigger jump with faster than real speeds
+    if (vSpeed > (7.96f * 1.3f) || hSpeed > (bot->GetSpeed(MOVE_RUN) * 1.3f))
+    {
+        WorldPacket data(MSG_MOVE_KNOCK_BACK);
+        data << bot->GetMover()->GetPackGUID();
+        data << bot->m_movementInfo;
+        data << bot->m_movementInfo.jump.cosAngle;
+        data << bot->m_movementInfo.jump.sinAngle;
+        data << bot->m_movementInfo.jump.xyspeed;
+        data << bot->m_movementInfo.jump.zspeed;
+        bot->GetMover()->SendMessageToSetExcept(data, bot);
+    }
+    else
+    {
+        WorldPacket jump(MSG_MOVE_JUMP);
+        // write packet info
 #ifdef MANGOSBOT_TWO
-    jump << bot->GetObjectGuid().WriteAsPacked();
+        jump << bot->GetObjectGuid().WriteAsPacked();
 #endif
-    jump << bot->m_movementInfo;
-    bot->GetSession()->HandleMovementOpcodes(jump);
+        jump << bot->m_movementInfo;
+        ai->QueuePacket(jump);
+    }
 
-    // change position to land position
+    // send move packet after jump
+    if (!jumpInPlace && slowJump)
+    {
+        bot->m_movementInfo.AddMovementFlag(jumpBackward ? MOVEFLAG_BACKWARD : MOVEFLAG_FORWARD);
+        bot->m_movementInfo.jump.xyspeed = hSpeed;
+        WorldPacket move(jumpBackward ? MSG_MOVE_START_BACKWARD : MSG_MOVE_START_FORWARD);
+        // write packet info
+#ifdef MANGOSBOT_TWO
+        move << bot->GetObjectGuid().WriteAsPacked();
+#endif
+        move << bot->m_movementInfo;
+        ai->QueuePacket(move);
+    }
+
+    // change position to highest position
     // todo add in between points to avoid mobs instant aggro before landing
-    bot->Relocate(dest.getX(), dest.getY(), dest.getZ());
+    bot->Relocate(highestPoint.getX(), highestPoint.getY(), highestPoint.getZ());
 
     if (ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT))
     {
-        std::string text = "Jump: cos: " + std::to_string(vcos) + " sin: " + std::to_string(vsin) + " distance: " + std::to_string(distanceToLand);
+        std::string text = "Jump: cos: " + std::to_string(vcos) + " sin: " + std::to_string(vsin) + " distance: " + std::to_string(distanceToLand) + " speed: " + std::to_string(hSpeed);
         bot->Say(text, (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
     }
 
     return true;
 }
 
-WorldPosition JumpAction::GetPossibleJumpStartFor(const WorldPosition& src, const WorldPosition& dest, Unit* jumper, float &requiredSpeed, float distanceTo, float distanceFrom)
+WorldPosition JumpAction::GetPossibleJumpStartFor(const WorldPosition& src, const WorldPosition& dest, WorldPosition& possibleLanding, Unit* jumper, float &requiredSpeed, float distanceTo, float distanceFrom)
 {
     if (!src || !dest)
         return WorldPosition();
@@ -2933,18 +3178,19 @@ WorldPosition JumpAction::GetPossibleJumpStartFor(const WorldPosition& src, cons
     if (src.fDist(dest) > sPlayerbotAIConfig.sightDistance)
         return WorldPosition();
 
+    float jumpAngle;
     // try jump from where at
-    if (CanJumpTo(src, dest, jumper, 2.5f, distanceFrom))
+    if (CanJumpTo(src, dest, possibleLanding, jumpAngle, jumper, bot->GetSpeed(MOVE_WALK), distanceFrom))
     {
-        requiredSpeed = 2.5f;
+        requiredSpeed = bot->GetSpeed(MOVE_WALK);
         return src;
     }
     else
     {
         // try slow jump
-        if (CanJumpTo(src, dest, jumper, 7.0f, distanceFrom))
+        if (CanJumpTo(src, dest, possibleLanding, jumpAngle, jumper, jumper->GetSpeedRate(MOVE_RUN) * sPlayerbotAIConfig.jumpHSpeed, distanceFrom))
         {
-            requiredSpeed = 7.0f;
+            requiredSpeed = jumper->GetSpeedRate(MOVE_RUN) * sPlayerbotAIConfig.jumpHSpeed;
             return src;
         }
     }
@@ -2966,22 +3212,129 @@ WorldPosition JumpAction::GetPossibleJumpStartFor(const WorldPosition& src, cons
             break;
 
         // try slow jump
-        if (CanJumpTo(p, dest, jumper, 2.5f, distanceFrom))
+        if (CanJumpTo(p, dest, possibleLanding, jumpAngle, jumper, bot->GetSpeed(MOVE_WALK), distanceFrom))
         {
-            requiredSpeed = 2.5f;
+            requiredSpeed = bot->GetSpeed(MOVE_WALK);
             return p;
         }
         else
         {
             // try fast jump
-            if (CanJumpTo(p, dest, jumper, 7.0f, distanceFrom))
+            if (CanJumpTo(p, dest, possibleLanding, jumpAngle, jumper, jumper->GetSpeedRate(MOVE_RUN) * sPlayerbotAIConfig.jumpHSpeed, distanceFrom))
             {
-                requiredSpeed = 7.0f;
+                requiredSpeed = jumper->GetSpeedRate(MOVE_RUN) * sPlayerbotAIConfig.jumpHSpeed;
                 return p;
             }
             else
                 continue;
         }
+    }
+
+    sLog.outDetail("%s: GetPossibleJumpStartFor Failed to find jump point!", jumper->GetName());
+    return WorldPosition();
+}
+
+WorldPosition JumpAction::GetPossibleJumpStartForInRange(const WorldPosition& src, const WorldPosition& dest, WorldPosition& possibleLanding, Unit* jumper, float& requiredSpeed, float distanceTo, float distanceFrom)
+{
+    if (!src || !dest)
+        return WorldPosition();
+
+    if (src.getMapId() != dest.getMapId())
+        return WorldPosition();
+
+    if (src.fDist(dest) > sPlayerbotAIConfig.sightDistance)
+        return WorldPosition();
+
+    float jumpAngle;
+    // try jump from where at
+    if (CanJumpTo(src, dest, possibleLanding, jumpAngle, jumper, jumper->GetSpeed(MOVE_WALK), distanceFrom))
+    {
+        if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+        {
+            jumper->SummonCreature(VISUAL_WAYPOINT, src.getX(), src.getY(), src.getZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 10000);
+        }
+        requiredSpeed = jumper->GetSpeed(MOVE_WALK);
+        return src;
+    }
+    else
+    {
+        // try slow jump
+        if (CanJumpTo(src, dest, possibleLanding, jumpAngle, jumper, jumper->GetSpeedRate(MOVE_RUN) * sPlayerbotAIConfig.jumpHSpeed, distanceFrom))
+        {
+            if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+            {
+                jumper->SummonCreature(VISUAL_WAYPOINT, src.getX(), src.getY(), src.getZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 10000);
+            }
+            requiredSpeed = jumper->GetSpeedRate(MOVE_RUN) * sPlayerbotAIConfig.jumpHSpeed;
+            return src;
+        }
+    }
+
+    // try find a point in range to jump from
+
+    // some limitations
+    /*if (range > 40.0f)
+        range = 40.0f;
+    if (range < 0.1f)
+        range = 5.0f;*/
+
+    std::vector<WorldPosition> jumpPoints;
+
+    float gx, gy, gz;
+    gx = src.getX();
+    gy = src.getY();
+    gz = src.getZ();
+
+    uint32 tries = 1;
+    uint32 successes = 0;
+    uint32 attempts = 0;
+    uint32 startTime = WorldTimer::getMSTime();
+    for (; tries < 500; ++tries)
+    {
+        gx = src.getX();
+        gy = src.getY();
+        gz = src.getZ();
+        if (jumper->GetMap()->GetReachableRandomPointOnGround(gx, gy, gz, distanceTo))
+        {
+            WorldPosition p(jumper->GetMapId(), gx, gy, gz);
+            ++attempts;
+            if (attempts >= 100)
+                break;
+
+            // point is not reachable
+            if (!CanWalkTo(src, p, jumper))
+                continue;
+
+            if (CanJumpTo(p, dest, possibleLanding, jumpAngle, jumper, jumper->GetSpeedRate(MOVE_RUN) * sPlayerbotAIConfig.jumpHSpeed, distanceFrom))
+            {
+                requiredSpeed = jumper->GetSpeedRate(MOVE_RUN) * sPlayerbotAIConfig.jumpHSpeed;
+                jumpPoints.push_back(p);
+            }
+            else
+                continue;
+
+            if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+            {
+                jumper->SummonCreature(VISUAL_WAYPOINT, gx, gy, gz, 0, TEMPSPAWN_TIMED_DESPAWN, 10000);
+            }
+            ++successes;
+            if (successes >= 10)
+                break;
+        }
+    }
+
+    if (!jumpPoints.empty())
+    {
+        WorldPosition closest = src.closestSq(jumpPoints);
+        if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+        {
+            Creature* wpCreature = bot->SummonCreature(15631, closest.getX(), closest.getY(), closest.getZ(), closest.getO(), TEMPSPAWN_TIMED_DESPAWN, 2000.0f);
+            wpCreature->SetObjectScale(0.2f);
+        }
+
+        // recalculate to get landing and angle
+        CanJumpTo(closest, dest, possibleLanding, jumpAngle, jumper, jumper->GetSpeedRate(MOVE_RUN) * sPlayerbotAIConfig.jumpHSpeed, distanceFrom);
+        return closest;
     }
 
     sLog.outDetail("%s: GetPossibleJumpStartFor Failed to find jump point!", jumper->GetName());

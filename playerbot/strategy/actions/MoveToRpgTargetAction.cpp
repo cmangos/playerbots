@@ -144,7 +144,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
         if (guidP.sqDistance2d(bot) < INTERACTION_DISTANCE * INTERACTION_DISTANCE)
             distance = sqrt(guidP.sqDistance2d(bot)); //Stay at this distance.
-        else if(unit)
+        else if(unit || !urand(0, 5)) //Stay futher away from npc's and sometimes gameobjects (for large hitbox objects).
             distance = frand(0.5, 1);
         else
             distance = frand(0, 0.5);
@@ -154,8 +154,18 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
     x += cos(angle) * INTERACTION_DISTANCE * distance;
     y += sin(angle) * INTERACTION_DISTANCE * distance;
+
+    WorldPosition movePos(mapId, x, y, z);
     
-    //WaitForReach(distance);
+    if (movePos.distance(bot) < sPlayerbotAIConfig.sightDistance)
+    {
+        if (!movePos.ClosestCorrectPoint(5.0f, 5.0f, bot->GetInstanceId()) || abs(movePos.getZ()- z) > 10.0f)
+        {
+            ai->TellDebug(GetMaster(), "Can not path to desired location around " + chat->formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId())) + " trying again later.", "debug move");
+
+            return false;
+        }
+    }
 
     bool couldMove;
 
@@ -164,7 +174,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
     else    
         couldMove = MoveTo(mapId, x, y, z, false, false);
 
-    if (!couldMove && WorldPosition(mapId,x,y,z).distance(bot) > INTERACTION_DISTANCE)
+    if (!couldMove && movePos.distance(bot) > INTERACTION_DISTANCE)
     {
         AI_VALUE(std::set<ObjectGuid>&,"ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target"));
 
@@ -178,20 +188,20 @@ bool MoveToRpgTargetAction::Execute(Event& event)
         return false;
     }
 
-    if (ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT) && guidP.GetWorldObject())
+    if ((ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT)) && guidP.GetWorldObject(bot->GetInstanceId()))
     {
         if (couldMove)
         {
             std::ostringstream out;
             out << "Heading to: ";
-            out << chat->formatWorldobject(guidP.GetWorldObject());
+            out << chat->formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId()));
             ai->TellPlayerNoFacing(GetMaster(), out);
         }
         else
         {
             std::ostringstream out;
             out << "Near: ";
-            out << chat->formatWorldobject(guidP.GetWorldObject());
+            out << chat->formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId()));
             ai->TellPlayerNoFacing(GetMaster(), out);
         }
     }
@@ -206,7 +216,7 @@ bool MoveToRpgTargetAction::isUseful()
     if (!guidP)
         return false;
 
-    WorldObject* wo = guidP.GetWorldObject();
+    WorldObject* wo = guidP.GetWorldObject(bot->GetInstanceId());
 
     if (!wo)
     {
@@ -227,15 +237,12 @@ bool MoveToRpgTargetAction::isUseful()
     if (travelTarget->isTraveling() && AI_VALUE2(bool, "can free move to", travelTarget->GetPosStr()))
         return false;
 
-    guidP.updatePosition();
+    guidP.updatePosition(bot->GetInstanceId());
 
     if(WorldPosition(p) != WorldPosition(guidP))
         SET_AI_VALUE(GuidPosition, "rpg target", guidP);
 
     if (guidP.distance(bot) < INTERACTION_DISTANCE)
-        return false;
-
-    if (!AI_VALUE2(bool, "can free move to", guidP.to_string()))
         return false;
 
     if (!AI_VALUE(bool, "can move around"))

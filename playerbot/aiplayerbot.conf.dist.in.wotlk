@@ -54,8 +54,21 @@ AiPlayerbot.RandomBotMinLevel = 1
 AiPlayerbot.RandomBotMaxLevel = 80
 
 # Accounts to create for random bots
-AiPlayerbot.RandomBotAccountPrefix = rndbot
+AiPlayerbot.RandomBotAccountPrefix = RNDBOT
 AiPlayerbot.RandomBotAccountCount = 200
+
+# Disable core mangos map/bot optimizations which hinders bot activity
+# Works best together with AiPlayerbot.DisableActivityPriorities = 1
+# (0-1), default 0
+# AiPlayerbot.DisableBotOptimizations = 0
+
+# Disable bot activity priorities, to make all bots ACTUALLY active without player in the zones or server (unless AiPlayerbot.DisableBotOptimizations = 0)
+# This setting is added for the sake of having all bots always active regardless of anything
+# With this enabled, if you get lags - then you need to reduce amount of online bots, rather than relying on optimizations
+# This will ingore the AiPlayerbot.botActiveAlone setting, all bots will be active regardless
+# Works best together with AiPlayerbot.DisableBotOptimizations = 1
+# (0-1), default 0
+# AiPlayerbot.DisableActivityPriorities = 0
 
 # Percentage of fully active bots. Default is 10, higher numbers may affect performance
 # AiPlayerbot.botActiveAlone = 10
@@ -177,16 +190,101 @@ AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
 # Bots will chat in say/guild when they invite other bots to groups/raids/guilds
 # AiPlayerbot.InviteChat = 1
 
-# Bots will chat in guild about certain events
-# AIPlayerbot.GuildFeedbackRate = 100.0        # Actual events like levelup, hard kills or nice loot.
-# AiPlayerbot.GuildSuggestRate  = 100.0        # Random suggestions.
-# AiPlayerbot.GuildRepliesRate  = 100.0        # Reply someone saying something.
+#max limit of members in a guild (bots will leave guild if there are more members than this number)
+# AiPlayerbot.guildMaxBotLimit = 1000
+
+##################################################################################
+#
+# Broadcast rates
+#
+# 1 - to enable broadcasts globally, 0 - to disable (default 1)
+# AiPlayerbot.EnableBroadcasts = 1
+#
+# all broadcast chances should be in range 0-30000
+#
+# value of 0 will disable this particular broadcast
+# setting value to 30000 does not guarantee the broadcast, as there are some internal randoms as well
+#
+# setting channel broadcast chance to 0, will re-route most broadcasts to other available channels
+# setting all channel broadcasts to 0 will disable most broadcasts
+# AiPlayerbot.BroadcastToGuildGlobalChance = 30000
+# AiPlayerbot.BroadcastToWorldGlobalChance = 30000
+# AiPlayerbot.BroadcastToGeneralGlobalChance = 30000
+# AiPlayerbot.BroadcastToTradeGlobalChance = 30000
+# AiPlayerbot.BroadcastToLFGGlobalChance = 30000
+# AiPlayerbot.BroadcastToLocalDefenseGlobalChance = 30000
+# AiPlayerbot.BroadcastToWorldDefenseGlobalChance = 30000
+# AiPlayerbot.BroadcastToGuildRecruitmentGlobalChance = 30000
+#
+# individual settings
+# setting one of these to 0 will disable the particular broadcast
+# AiPlayerbot.BroadcastChanceLootingItemPoor = 30
+# AiPlayerbot.BroadcastChanceLootingItemNormal = 150
+# AiPlayerbot.BroadcastChanceLootingItemUncommon = 10000
+# AiPlayerbot.BroadcastChanceLootingItemRare = 20000
+# AiPlayerbot.BroadcastChanceLootingItemEpic = 30000
+# AiPlayerbot.BroadcastChanceLootingItemLegendary = 30000
+# AiPlayerbot.BroadcastChanceLootingItemArtifact = 30000
+#
+# AiPlayerbot.BroadcastChanceQuestAccepted = 6000
+# AiPlayerbot.BroadcastChanceQuestUpdateObjectiveCompleted = 300
+# AiPlayerbot.BroadcastChanceQuestUpdateObjectiveProgress = 300
+# AiPlayerbot.BroadcastChanceQuestUpdateFailedTimer = 300
+# AiPlayerbot.BroadcastChanceQuestUpdateComplete = 1000
+# AiPlayerbot.BroadcastChanceQuestTurnedIn = 10000
+#
+# AiPlayerbot.BroadcastChanceKillNormal = 30
+# AiPlayerbot.BroadcastChanceKillElite = 300
+# AiPlayerbot.BroadcastChanceKillRareelite = 3000
+# AiPlayerbot.BroadcastChanceKillWorldboss = 20000
+# AiPlayerbot.BroadcastChanceKillRare = 10000
+# AiPlayerbot.BroadcastChanceKillUnknown = 100
+# AiPlayerbot.BroadcastChanceKillPet = 10
+# AiPlayerbot.BroadcastChanceKillPlayer = 30
+#
+# AiPlayerbot.BroadcastChanceLevelupGeneric = 20000
+# AiPlayerbot.BroadcastChanceLevelupTenX = 30000
+# AiPlayerbot.BroadcastChanceLevelupMaxLevel = 30000
+#
+# AiPlayerbot.BroadcastChanceSuggestInstance = 5000
+# AiPlayerbot.BroadcastChanceSuggestQuest = 10000
+# AiPlayerbot.BroadcastChanceSuggestGrindMaterials = 5000
+# AiPlayerbot.BroadcastChanceSuggestGrindReputation = 5000
+# AiPlayerbot.BroadcastChanceSuggestSell = 300
+# AiPlayerbot.BroadcastChanceSuggestSomething = 30000
+#
+# Very rude speeches
+# AiPlayerbot.BroadcastChanceSuggestSomethingToxic = 0
+#
+# Specifically for "<word> [item link]"
+# AiPlayerbot.BroadcastChanceSuggestToxicLinks = 0
+#
+# prefix is used as a word in "<word> [item link]"
+# AiPlayerbot.ToxicLinksPrefix = gnomes
+#
+# chance to suggest thunderfury
+# AiPlayerbot.BroadcastChanceSuggestThunderfury = 1
+#
+# does not depend on global chance
+# AiPlayerbot.BroadcastChanceGuildManagement = 30000
+#
+##################################################################################
+
+# Chance to reply to toxic links with toxic links (0-100)
+# AiPlayerbot.ToxicLinksRepliesChance = 30
+# Chance to reply to thunderfury with thunderfury (0-100)
+# AiPlayerbot.ThunderfuryRepliesChance = 40
+# Bots will chat in guild about certain events (int) (0-100)
+# AiPlayerbot.GuildRepliesRate = 100         # Reply someone saying something.
 
 # Bots will chat in guild about certain events
 # AIPlayerbot.GuildFeedback = 1
 
 # Bots without a master will say things they normally tell their master.
 # AiPlayerbot.RandomBotSayWithoutMaster = 0
+
+# Minimum level at which bots will start accepting duels
+# AiPlayerbot.BotAcceptDuelMinimumLevel = 10
 
 # Speeds up respawn of mobs after being killed by a bot. This only affects the delays after being fully looted.
 # AiPlayerbot.RespawnModNeutral = 10.0    # Each nearby player will decrease the respawn time by 10% for neutral mobs.
@@ -289,7 +387,7 @@ AiPlayerbot.ClassRaceProb.3.8 =   7    # Troll hunter chance
 AiPlayerbot.ClassRaceProb.3.10 = 12    # BloodElf hunter chance
 AiPlayerbot.ClassRaceProb.3.11 =  6    # Draenei hunter chance
 
-# AiPlayerbot.ClassRaceProb.1 =  49    # Rogue chance
+# AiPlayerbot.ClassRaceProb.4 =  49    # Rogue chance
 AiPlayerbot.ClassRaceProb.4.1 =   9    # Human rogue chance
 AiPlayerbot.ClassRaceProb.4.2 =   2    # Orc rogue chance
 AiPlayerbot.ClassRaceProb.4.3 =   1    # Dwarf rogue chance
@@ -612,7 +710,18 @@ AiPlayerbot.SpellDistance = 26.0
 AiPlayerbot.ShootDistance = 26.0
 #AiPlayerbot.ReactDistance = 150.0
 #AiPlayerbot.GrindDistance = 75.0
-#AiPlayerbot.LootDistance = 15.0
+#overall loot distance
+#AiPlayerbot.LootDistance = 25.0
+#loot distance when bot is a group member (not leader)
+#AiPlayerbot.GroupMemberLootDistance = 15.0
+#loot distance when bot is a group member (not leader) and has active player master (if player is group leader)
+#AiPlayerbot.GroupMemberLootDistanceWithActiveMaster = 10.0
+#overall gathering distance
+#AiPlayerbot.GatheringDistance = 15.0
+#gathering distance when bot is a group member (not leader)
+#AiPlayerbot.GroupMemberGatheringDistance = 10.0
+#gathering distance when bot is a group member (not leader) and has active player master (if player is group leader)
+#AiPlayerbot.GroupMemberGatheringDistanceWithActiveMaster = 5.0
 #AiPlayerbot.FleeDistance = 15.0
 #AiPlayerbot.TooCloseDistance = 5.0
 #AiPlayerbot.MeleeDistance = 1.5
@@ -622,6 +731,14 @@ AiPlayerbot.ShootDistance = 26.0
 #AiPlayerbot.ContactDistance = 0.5
 #AiPlayerbot.AoeRadius = 10
 AiPlayerbot.RpgDistance = 200
+#AiPlayerbot.ProximityDistance = 20.0
+
+# Max distance bot allowed to roam freely around master
+#AiPlayerbot.MaxFreeMoveDistance = 150.0
+
+# Delay (in seconds) after master inactivity after which bots will start roaming freely around master
+# Set to 0 to disable (bots will not be going places on their own when you are idle)
+#AiPlayerbot.FreeMoveDelay = 30.0
 
 # Bot can flee for enemy
 AiPlayerbot.FleeingEnabled = 1
@@ -670,6 +787,32 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #AiPlayerbot.RandomBotsMaxLoginsPerInterval = 30
 #AiPlayerbot.MinRandomBotsPriceChangeInterval = 7200
 #AiPlayerbot.MaxRandomBotsPriceChangeInterval = 172800
+
+#######################################
+#
+# Auction house settings
+#
+# (0-1) If bot should query current AH listings outside of AH when determining whether the item is worth posting to AH
+# Disabled by default for performance concerns, but you REALLY want to enable it for nicer logic
+# AiPlayerbot.ShouldQueryAHListingsOutsideOfAH = 0
+#
+# List of item ids which bot will prefer to put to AH rather than selling to vendor (these are overrides)
+# For example if you want bots to put certain gray/white armor pieces to AH rather than selling to vendor
+# this list has priority over AiPlayerbot.VendorOverAHItemIds
+# AiPlayerbot.AhOverVendorItemIds = 1,2,3
+#
+# List of item ids which bot will prefer to sell to vendor rather than selling to AH (these are overrides)
+# (Bot will never buy these items from vendor to resell at AH as well)
+# For example if you do not want to see certain items on AH
+# AiPlayerbot.VendorOverAHItemIds = 1,2,3
+#
+# (0-1) Whether bot should check ALL auction house listings when browsing (by default only checks a small amount)
+# AiPlayerbot.BotCheckAllAuctionListings = 0
+#
+#######################################
+
+#(0-1) enable or disable random teleports
+# AiPlayerbot.EnableRandomTeleports = 1
 
 # How far random bots are teleported after death
 AiPlayerbot.RandomBotTeleportDistance = 100

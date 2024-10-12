@@ -117,7 +117,7 @@ float TravelNodePath::getCost(Unit* unit, uint32 cGold)
             AreaTrigger const* at = sObjectMgr.GetAreaTrigger(pathObject);
             if (atEntry && at && atEntry->mapid == bot->GetMapId())
             {
-                Map* map = WorldPosition(atEntry->mapid, atEntry->box_x, atEntry->box_y, atEntry->box_z).getMap();
+                Map* map = WorldPosition(atEntry->mapid, atEntry->box_x, atEntry->box_y, atEntry->box_z).getMap(bot->GetInstanceId());
                 if (map)
                     if (at && at->conditionId && !sObjectMgr.IsConditionSatisfied(at->conditionId, bot, map, nullptr, CONDITION_FROM_AREATRIGGER_TELEPORT))
                         return -1;
@@ -303,7 +303,7 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
     if (isTransport() && path.size() > 1)
     {
         WorldPosition secondPos = *std::next(path.begin()); //This is to prevent bots from jumping in the water from a transport. Need to remove this when transports are properly handled.
-        if (secondPos.getMap() && secondPos.getTerrain() && secondPos.isInWater())
+        if (secondPos.getTerrain() && secondPos.isInWater())
             canPath = false;
     }
 
@@ -1363,6 +1363,13 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
             if (!sSpellMgr.GetSpellTargetPosition(spellId))
                 continue;
 
+            if (ai)
+            {
+                AiObjectContext* context = ai->GetAiObjectContext();
+                if (AI_VALUE2(uint32, "has reagents for", spellId) == 0)
+                    continue;
+            }
+
             WorldPosition telePos(sSpellMgr.GetSpellTargetPosition(spellId));
 
             TravelNode* homeNode = sTravelNodeMap.getNode(telePos, nullptr, 10.0f);
@@ -2140,7 +2147,7 @@ void TravelNodeMap::generateTransportNodes()
                         else if(data->displayId == 3031)
                             exitPos.setZ(exitPos.getZ() - 17.0f);
 
-                        if (exitPos.ClosestCorrectPoint(20.0f, 10.0f))
+                        if (exitPos.ClosestCorrectPoint(20.0f, 10.0f,0))
                         {
                             TravelNode* exitNode = sTravelNodeMap.addNode(exitPos, data->name + std::string(" dock"), true, true);
 
@@ -2756,12 +2763,18 @@ void TravelNodeMap::saveNodeStore(bool force)
 
     hasToSave = false;
 
+    WorldDatabase.BeginTransaction();
+
     WorldDatabase.PExecute("DELETE FROM ai_playerbot_travelnode");
     WorldDatabase.PExecute("DELETE FROM ai_playerbot_travelnode_link");
     WorldDatabase.PExecute("DELETE FROM ai_playerbot_travelnode_path");
 
+    WorldDatabase.CommitTransaction();
+
     std::unordered_map<TravelNode*, uint32> saveNodes;
     std::vector<TravelNode*> anodes = sTravelNodeMap.getNodes();
+
+    WorldDatabase.BeginTransaction();
 
     BarGoLink bar(anodes.size());
     for (uint32 i = 0; i < anodes.size(); i++)
@@ -2779,11 +2792,16 @@ void TravelNodeMap::saveNodeStore(bool force)
         bar.step();
     }
 
+    WorldDatabase.CommitTransaction();
+
     sLog.outString(">> Saved " SIZEFMTD " travelNodes.", anodes.size());
 
     {
         uint32 paths = 0, points = 0;
         BarGoLink bar(anodes.size());
+
+        WorldDatabase.BeginTransaction();
+
         for (uint32 i = 0; i < anodes.size(); i++)
         {
             TravelNode* node = anodes[i];
@@ -2828,6 +2846,8 @@ void TravelNodeMap::saveNodeStore(bool force)
             bar.step();
         }
 
+        WorldDatabase.CommitTransaction();
+
         sLog.outString(">> Saved %d travelNode Paths, %d points.", paths,points);
     }
 }
@@ -2839,7 +2859,7 @@ void TravelNodeMap::loadNodeStore()
     std::unordered_map<uint32, TravelNode*> saveNodes;   
 
     {
-        auto result = WorldDatabase.PQuery(query.c_str());
+        auto result = WorldDatabase.PQuery("%s", query.c_str());
 
         if (result)
         {
@@ -2875,7 +2895,7 @@ void TravelNodeMap::loadNodeStore()
         //                     0        1          2    3      4         5              6          7          8               9             10 
         std::string query = "SELECT node_id, to_node_id,type,object,distance,swim_distance, extra_cost,calculated, max_creature_0,max_creature_1,max_creature_2 FROM ai_playerbot_travelnode_link";
 
-        auto result = WorldDatabase.PQuery(query.c_str());
+        auto result = WorldDatabase.PQuery("%s", query.c_str());
 
         if (result)
         {
@@ -2911,7 +2931,7 @@ void TravelNodeMap::loadNodeStore()
         //                     0        1           2   3      4   5  6
         std::string query = "SELECT node_id, to_node_id, nr, map_id, x, y, z FROM ai_playerbot_travelnode_path order by node_id, to_node_id, nr";
 
-        auto result = WorldDatabase.PQuery(query.c_str());
+        auto result = WorldDatabase.PQuery("%s", query.c_str());
 
         if (result)
         {

@@ -43,7 +43,7 @@ bool AcceptQuestAction::Execute(Event& event)
                 guid = unit->GetObjectGuid().GetRawValue();
                 break;
             }
-            if (unit && text == "*" && sqrt(bot->GetDistance(unit)) <= INTERACTION_DISTANCE)
+            if (unit && text == "*" && bot->GetDistance(unit) <= INTERACTION_DISTANCE)
                 hasAccept |= QuestAction::ProcessQuests(unit);
         }
         std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
@@ -55,7 +55,7 @@ bool AcceptQuestAction::Execute(Event& event)
                 guid = go->GetObjectGuid().GetRawValue();
                 break;
             }
-            if (go && text == "*" && sqrt(bot->GetDistance(go)) <= INTERACTION_DISTANCE)
+            if (go && text == "*" && bot->GetDistance(go) <= INTERACTION_DISTANCE)
                 hasAccept |= QuestAction::ProcessQuests(go);
         }
     }
@@ -181,6 +181,53 @@ bool ConfirmQuestAction::Execute(Event& event)
 #endif
 #ifdef CMANGOS
                     (uint32)0
+#endif
+            );
+        }
+
+        ai->TellPlayer(requester, BOT_TEXT("quest_accept"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        return true;
+    }
+
+    return false;
+}
+
+bool QuestDetailsAction::Execute(Event& event)
+{
+    Player* bot = ai->GetBot();
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+
+    WorldPacket& p = event.getPacket();
+    p.rpos(0);
+    ObjectGuid guid;
+    uint32 quest;
+    p >> guid;
+    p >> quest;
+    Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
+
+    quest = qInfo->GetQuestId();
+    if (!bot->CanTakeQuest(qInfo, false))
+    {
+        // can't take quest
+        ai->TellError(requester, BOT_TEXT("quest_cant_take"));
+        return false;
+    }
+
+    if (bot->CanAddQuest(qInfo, false))
+    {
+        bot->AddQuest(qInfo, requester);
+
+        if (bot->CanCompleteQuest(quest))
+            bot->CompleteQuest(quest);
+
+        if (qInfo->GetSrcSpell() > 0)
+        {
+            bot->CastSpell(bot, qInfo->GetSrcSpell(),
+#ifdef MANGOS
+                true
+#endif
+#ifdef CMANGOS
+                (uint32)0
 #endif
             );
         }

@@ -91,7 +91,7 @@ bool BgInviteActiveTrigger::IsActive()
         BattleGroundQueueTypeId queueTypeId = bot->GetBattleGroundQueueTypeId(i);
         if (queueTypeId == BATTLEGROUND_QUEUE_NONE)
             continue;
-
+#ifdef MANGOSBOT_TWO
         BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
         GroupQueueInfo ginfo;
         if (bgQueue.GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
@@ -102,6 +102,11 @@ bool BgInviteActiveTrigger::IsActive()
                 return true;
             }
         }
+#endif
+#ifdef MANGOSBOT_ONE
+        if (bot->IsInvitedForBattleGroundQueueType(queueTypeId))
+            return true;
+#endif
     }
     return false;
 }
@@ -148,6 +153,10 @@ bool PlayerHasFlag::IsActive()
                 return false;
 
             BattleGroundWS *bg = (BattleGroundWS*)ai->GetBot()->GetBattleGround();
+
+            if (!bg)
+                return false;
+
             if (bot->GetObjectGuid() == bg->GetFlagCarrierGuid(TEAM_INDEX_ALLIANCE) || bot->GetObjectGuid() == bg->GetFlagCarrierGuid(TEAM_INDEX_HORDE))
             {
                 return true;
@@ -195,6 +204,9 @@ bool EnemyTeamHasFlag::IsActive()
         if (ai->GetBot()->GetBattleGroundTypeId() == BattleGroundTypeId::BATTLEGROUND_WS)
         {
             BattleGroundWS *bg = (BattleGroundWS*)ai->GetBot()->GetBattleGround();
+
+            if (!bg)
+                return false;
 
             if (bot->GetTeam() == HORDE)
             {

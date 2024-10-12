@@ -924,28 +924,33 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         if (arenateam)
         {
             teamsNumber[arenateam->GetType()]++;
-            sPlayerbotAIConfig.randomBotArenaTeams.push_back(arenateam->GetId());
+            sPlayerbotAIConfig.randomBotArenaTeams.insert(arenateam->GetId());
         }
 
         Player* player = sObjectMgr.GetPlayer(captain);
         if (player)
         {
-            if (player->GetLevel() < 80)
+            if (player->GetLevel() < 80) {
+                if (arenateam)
+                {
+                    teamsNumber[arenateam->GetType()]--; 
+                    sPlayerbotAIConfig.randomBotArenaTeams.erase(arenateam->GetId());
+                    arenateam->Disband(NULL);
+                }
                 continue;
+            }
 
-            uint8 slot = ArenaTeam::GetSlotByType(ArenaType(ARENA_TYPE_2v2));
-            if (player->GetArenaTeamId(slot))
-                continue;
+            std::vector<ArenaType> arenaTypes = { ARENA_TYPE_2v2, ARENA_TYPE_3v3, ARENA_TYPE_5v5 };  // All arena types
 
-            slot = ArenaTeam::GetSlotByType(ArenaType(ARENA_TYPE_3v3));
-            if (player->GetArenaTeamId(slot))
-                continue;
-
-            slot = ArenaTeam::GetSlotByType(ArenaType(ARENA_TYPE_5v5));
-            if (player->GetArenaTeamId(slot))
-                continue;
-
-            availableCaptains.push_back(captain);
+            for (ArenaType type : arenaTypes)
+            {
+                uint8 slot = ArenaTeam::GetSlotByType(type);
+                if (!player->GetArenaTeamId(slot))
+                {
+                    availableCaptains.push_back(captain);
+                    break;
+                }
+            }
         }
     }
 
@@ -971,7 +976,10 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
 
         std::string arenaTeamName = CreateRandomArenaTeamName();
         if (arenaTeamName.empty())
+        {
+            sLog.outError("No name for random arena teams available");
             break;
+        }
 
         if (availableCaptains.empty())
         {
@@ -1049,8 +1057,9 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         //arenateam->SetStats(STAT_TYPE_WINS_WEEK, urand(0, arenateam->GetStats().games_week));
         //arenateam->SetStats(STAT_TYPE_GAMES_SEASON, urand(arenateam->GetStats().games_week, arenateam->GetStats().games_week * 5));
         //arenateam->SetStats(STAT_TYPE_WINS_SEASON, urand(arenateam->GetStats().wins_week, arenateam->GetStats().games_season));
+        teamsNumber[arenateam->GetType()]++;
         sObjectMgr.AddArenaTeam(arenateam);
-        sPlayerbotAIConfig.randomBotArenaTeams.push_back(arenateam->GetId());
+        sPlayerbotAIConfig.randomBotArenaTeams.insert(arenateam->GetId());
 
         for (uint32 i = 0; i < 10; i++)
         {
@@ -1081,12 +1090,14 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         if (arenateam->GetMembersSize() < type)
         {
             sLog.outBasic("Random Arena team %s %s: failed to get enough members, deleting...", arenaTypeName.c_str(), arenateam->GetName().c_str());
+            teamsNumber[arenateam->GetType()]--;
+            sPlayerbotAIConfig.randomBotArenaTeams.erase(arenateam->GetId());
             arenateam->Disband(nullptr);
             return;
         }
 
         // set random rating
-        arenateam->SetRatingForAll(urand(1500, 2700));
+        arenateam->SetRatingForAll(urand(1500, 2100));
         arenateam->SaveToDB();
 
         sLog.outBasic("Random Arena team %s %s: created", arenaTypeName.c_str(), arenateam->GetName().c_str());

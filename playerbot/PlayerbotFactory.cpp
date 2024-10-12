@@ -1700,6 +1700,10 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
             }
         }
 
+        // if bot arena rating is high enough, give better quality gear
+        uint32 botRating = bot->GetMaxPersonalArenaRatingRequirement(0);
+        bool isBotHighRanked = botRating >= 1800;
+        if (isBotHighRanked) quality = ITEM_QUALITY_EPIC;
 
         // quality selected from command
         bool setQuality = false;
@@ -1896,6 +1900,16 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                     uint32 reqLevel = sRandomItemMgr.GetMinLevelFromCache(newItemId);
                     if (reqLevel && proto->Quality < ITEM_QUALITY_LEGENDARY && abs((int)bot->GetLevel() - (int)reqLevel) > (int)sPlayerbotAIConfig.randomGearMaxDiff)
                         continue;
+
+                    // prevent low items for high rank bots
+                    uint32 ratingChanges = abs((int)botRating - 1500) / 100;
+                    uint32 extraRatingChanges = 0;
+                    if (ratingChanges > 6)
+                    {
+                        ratingChanges = 6;
+                        extraRatingChanges = 12;
+                    }
+                    if (proto->ItemLevel < (174 + extraRatingChanges + (ratingChanges * 13)) && bot->GetLevel() == 80) continue;
 
                     // filter tank weapons
                     if (slot == EQUIPMENT_SLOT_OFFHAND && (specId == 3 || specId == 5) && !(proto->Class == ITEM_CLASS_ARMOR && proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD))

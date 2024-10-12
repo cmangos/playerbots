@@ -3006,11 +3006,13 @@ void PlayerbotFactory::InitQuests(std::list<uint32>& questMap)
                 !bot->SatisfyQuestRace(quest, false))
             continue;
 
-        bot->SetQuestStatus(questId, QUEST_STATUS_COMPLETE);
-        bot->RewardQuest(quest, 0, bot, false);
-        sLog.outDetail("Bot %s (%d level) rewarded quest %d: %s (MinLevel=%d, QuestLevel=%d)",
+        if (!bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE) {
+            bot->SetQuestStatus(questId, QUEST_STATUS_COMPLETE);
+            bot->RewardQuest(quest, 0, bot, false);
+            sLog.outDetail("Bot %s (%d level) rewarded quest %d: %s (MinLevel=%d, QuestLevel=%d)",
                 bot->GetName(), bot->GetLevel(), questId, quest->GetTitle().c_str(),
                 quest->GetMinLevel(), quest->GetQuestLevel());
+        }
         /*if (!(count++ % 10))
             ClearInventory();*/
     }

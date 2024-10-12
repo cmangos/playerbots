@@ -1409,7 +1409,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
     bool isSpellDamageItem = false;
     bool hasInt = false;
 #ifdef MANGOSBOT_TWO
-    bool noCaster = (Classes)playerclass == CLASS_WARRIOR || (Classes)playerclass == CLASS_ROGUE || (Classes)playerclass == CLASS_DEATH_KNIGHT || (Classes)playerclass == CLASS_HUNTER || spec == 30 || spec == 32 || spec == 21 || spec == 6;
+    bool noCaster = (Classes)playerclass == CLASS_WARRIOR || (Classes)playerclass == CLASS_ROGUE || (Classes)playerclass == CLASS_DEATH_KNIGHT || (Classes)playerclass == CLASS_HUNTER || spec == 30 || spec == 32 || spec == 21 || spec == 6 || spec == 5;
     bool hasMana = !((Classes)playerclass == CLASS_WARRIOR || (Classes)playerclass == CLASS_ROGUE || (Classes)playerclass == CLASS_DEATH_KNIGHT);
 
     if (!proto->IsWeapon() && (proto->SubClass == ITEM_SUBCLASS_ARMOR_LIBRAM || proto->SubClass == ITEM_SUBCLASS_ARMOR_IDOL || proto->SubClass == ITEM_SUBCLASS_ARMOR_TOTEM || proto->SubClass == ITEM_SUBCLASS_ARMOR_SIGIL))
@@ -1530,8 +1530,11 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
             if (weightName == "int")
                 hasInt = true;
 
-            if (weightName == "splpwr")
+            if (weightName == "splpwr") 
+            {
+                spellPower += val;
                 isCasterItem = true;
+            }
 
             if (weightName == "str")
                 isAttackItem = true;
@@ -1539,8 +1542,11 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
             if (weightName == "agi")
                 isAttackItem = true;
 
-            if (weightName == "atkpwr")
+            if (weightName == "atkpwr") 
+            {
+                attackPower += val;
                 isAttackItem = true;
+            }
         }
     }
 
@@ -1973,14 +1979,14 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
 #endif
 #ifdef MANGOSBOT_TWO
     // retribution should not use items with spell power in 61+
-    if ((spec == 6 || spec == 21) && (isSpellDamageItem || spellDamage || spellHealing || spellHeal))
+    if (spec == 6 && (isSpellDamageItem || spellDamage || spellHealing || spellHeal))
         return 0;
 
     // filter tanking items (dodge, defense, parry, block) from dps classes
     if (proto->RequiredLevel > 60 && isTankItem && !(spec == 30 || spec == 3 || spec == 5 || spec == 18))
         return 0;
 
-    if (proto->RequiredLevel > 60 && isDpsItem && (spec == 30 || spec == 3 || spec == 5 || spec == 18))
+    if (proto->RequiredLevel > 60 && isDpsItem && ((spec == 30 && proto->SubClass < ITEM_SUBCLASS_ARMOR_LEATHER) || spec == 3 || spec == 5 || spec == 18))
         return 0;
 #endif
 
@@ -1994,7 +2000,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
     // check for caster item
     if (isCasterItem || hasInt || spellHeal || spellPower || isSpellDamageItem || isHealingItem)
     {
-        if (!isWhitelist && (!hasMana || (noCaster && !(spec == 6 || spec == 30 || spec == 32 || spec == 21))) && (spellHeal || isHealingItem || isSpellDamageItem || spellPower))
+        if (!isWhitelist && (!hasMana || (noCaster && !(spec == 30 || spec == 32 || spec == 21 || spec == 5))) && (spellHeal || isHealingItem || isSpellDamageItem || spellPower))
             return 0;
 
         if (!isWhitelist && !hasMana && hasInt)
@@ -2011,7 +2017,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
             return 0;
 #endif
 
-        if (!isWhitelist && (spec != 6 && spec != 21) && !noCaster && isSpellDamageItem && !spellPower && !(spellDamage && spellHealing && proto->IsWeapon() && proto->InventoryType == INVTYPE_WEAPONMAINHAND))
+        if (!isWhitelist && spec != 21 && !noCaster && isSpellDamageItem && !spellPower && !(spellDamage && spellHealing && proto->IsWeapon() && proto->InventoryType == INVTYPE_WEAPONMAINHAND))
             return 0;
 
         bool playerCaster = false;

@@ -13,18 +13,18 @@ namespace ai
     public:
         Qualified() {};
         Qualified(const std::string& qualifier) : qualifier(qualifier) {}
-        Qualified(int32 qualifier1) { Qualify(qualifier1); }
+        Qualified(int32 qualifier1) { Qualify(std::to_string(qualifier1)); }
 
     public:
         virtual void Qualify(int32 qualifier) { std::ostringstream out; out << qualifier; this->qualifier = out.str(); }
         virtual void Qualify(const std::string& qualifier) { this->qualifier = qualifier; }
-        std::string getQualifier() { return qualifier; }
+        const std::string& getQualifier() const { return qualifier; }
         void Reset() { qualifier.clear(); }
 
         static std::string MultiQualify(const std::vector<std::string>& qualifiers, const std::string& separator, const std::string_view brackets = "{}")
         { 
             std::stringstream out;
-            for (uint8 i = 0; i < qualifiers.size(); i++)
+            for (size_t i = 0; i < qualifiers.size(); i++)
             {
                 const std::string& qualifier = qualifiers[i];
                 if (i == qualifiers.size() - 1)
@@ -99,7 +99,7 @@ namespace ai
             return result;
         }
 
-        static bool isValidNumberString(const std::string& str)
+        static bool isValidNumberString(std::string_view str)
         {
             bool valid = !str.empty();
             if (valid)
@@ -167,7 +167,7 @@ namespace ai
 
             if (creators.find(name) == creators.end())
             {
-                return NULL;
+                return nullptr;
             }
 
             ActionCreator& creator = creators[name];
@@ -257,13 +257,14 @@ namespace ai
 
         bool IsCreated(const std::string& name) { return created.find(name) != created.end(); }
 
-        std::set<std::string> GetCreated()
+        std::set<std::string> GetCreated() const
         {
             std::set<std::string> keys;
-            for (typename std::map<std::string, T*>::iterator it = created.begin(); it != created.end(); it++)
-                keys.insert(it->first);
+            for (const auto& pair : created)
+                keys.insert(pair.first);
             return keys;
         }
+
 
     protected:
         std::map<std::string, T*> created;
@@ -296,7 +297,7 @@ namespace ai
                 T* object = (*i)->create(name, ai);
                 if (object) return object;
             }
-            return NULL;
+            return nullptr;
         }
 
         void Update()
@@ -360,19 +361,17 @@ namespace ai
             return false;
         }
 
-        std::set<std::string> GetCreated()
+        std::set<std::string> GetCreated() const
         {
-            std::set<std::string> result;
-
-            for (typename std::list<NamedObjectContext<T>*>::iterator i = contexts.begin(); i != contexts.end(); i++)
+            std::set<std::string> keys;
+            for (const auto& context : contexts)
             {
-                std::set<std::string> createdKeys = (*i)->GetCreated();
-
-                for (std::set<std::string>::iterator j = createdKeys.begin(); j != createdKeys.end(); j++)
-                    result.insert(*j);
+                auto createdKeys = context->GetCreated();
+                keys.insert(createdKeys.begin(), createdKeys.end());
             }
-            return result;
+            return keys;
         }
+
 
         void Erase(const std::string& name)
         {
@@ -407,7 +406,7 @@ namespace ai
                 T* object = (*i)->create(name, ai);
                 if (object) return object;
             }
-            return NULL;
+            return nullptr;
         }
 
     private:

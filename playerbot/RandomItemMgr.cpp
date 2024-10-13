@@ -1499,7 +1499,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
                 if (modd == ITEM_MOD_DODGE_RATING || modd == ITEM_MOD_PARRY_RATING || modd == ITEM_MOD_BLOCK_RATING || modd == ITEM_MOD_DEFENSE_SKILL_RATING)
                     isTankItem = true;
 
-                if (modd == ITEM_MOD_CRIT_MELEE_RATING || modd == ITEM_MOD_CRIT_RATING)
+                if (modd == ITEM_MOD_CRIT_MELEE_RATING || modd == ITEM_MOD_CRIT_RATING || modd == ITEM_MOD_ARMOR_PENETRATION_RATING)
                     isDpsItem = true;
 
 #ifdef MANGOSBOT_TWO
@@ -1979,13 +1979,14 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
 #endif
 #ifdef MANGOSBOT_TWO
     // retribution should not use items with spell power in 61+
-    if (spec == 6 && (isSpellDamageItem || spellDamage || spellHealing || spellHeal))
+    if (proto->RequiredLevel > 60 && spec == 6 && (isSpellDamageItem || spellDamage || spellHealing || spellHeal))
         return 0;
 
     // filter tanking items (dodge, defense, parry, block) from dps classes
     if (proto->RequiredLevel > 60 && isTankItem && !(spec == 30 || spec == 3 || spec == 5 || spec == 18))
         return 0;
 
+    // filter dps items for tanks, feral tank can use dps items for offset
     if (proto->RequiredLevel > 60 && isDpsItem && ((spec == 30 && proto->SubClass < ITEM_SUBCLASS_ARMOR_LEATHER) || spec == 3 || spec == 5 || spec == 18))
         return 0;
 #endif
@@ -2000,12 +2001,15 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
     // check for caster item
     if (isCasterItem || hasInt || spellHeal || spellPower || isSpellDamageItem || isHealingItem)
     {
-        if (!isWhitelist && (!hasMana || (noCaster && !(spec == 30 || spec == 32 || spec == 21 || spec == 5))) && (spellHeal || isHealingItem || isSpellDamageItem || spellPower))
+        // filter items with spellpower if user has no mana or if he is not a caster and its spec is different from enh shman
+        if (!isWhitelist && (!hasMana || (noCaster && spec != 21)) && (spellHeal || isHealingItem || isSpellDamageItem || spellPower))
             return 0;
 
+        // filter int items if user has no mana
         if (!isWhitelist && !hasMana && hasInt)
             return 0;
 
+        // filter if user has no mana and is not a caster and spell > attack
         if (!isWhitelist && !hasMana && noCaster && (spellPower > attackPower || spellHeal > attackPower))
             return 0;
 
@@ -2017,6 +2021,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
             return 0;
 #endif
 
+        // filter if not enh shaman and user is caster and item has spell power but no spell effect and is not a weapon for mainhand with spell effect
         if (!isWhitelist && spec != 21 && !noCaster && isSpellDamageItem && !spellPower && !(spellDamage && spellHealing && proto->IsWeapon() && proto->InventoryType == INVTYPE_WEAPONMAINHAND))
             return 0;
 

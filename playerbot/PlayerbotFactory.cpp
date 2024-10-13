@@ -1904,14 +1904,17 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         continue;
 
                     // prevent low items for high rank bots
-                    uint32 ratingChanges = abs((int)botRating - 1500) / 100;
-                    uint32 extraRatingChanges = 0;
-                    if (ratingChanges > 6)
+                    if (!setQuality)
                     {
-                        ratingChanges = 6;
-                        extraRatingChanges = 12;
+                        uint32 ratingChanges = abs((int)botRating - 1500) / 100;
+                        uint32 extraRatingChanges = 0;
+                        if (ratingChanges > 6)
+                        {
+                            ratingChanges = 6;
+                            extraRatingChanges = 12;
+                        }
+                        if (proto->ItemLevel < (174 + extraRatingChanges + (ratingChanges * 13)) && bot->GetLevel() == 80) continue;
                     }
-                    if (!setQuality && proto->ItemLevel < (174 + extraRatingChanges + (ratingChanges * 13)) && bot->GetLevel() == 80) continue;
 
                     // filter tank weapons
                     if (slot == EQUIPMENT_SLOT_OFFHAND && (specId == 3 || specId == 5) && !(proto->Class == ITEM_CLASS_ARMOR && proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD))

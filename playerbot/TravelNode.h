@@ -372,6 +372,8 @@ namespace ai
         void setHasToGen() { hasToGen = true; }
         bool gethasToGen() { return hasToGen || hasToFullGen; }
 
+        void LoadMaps();
+
         //Below are the steps to creating the content stored in the node, link and path tables. 
         //Nodes are placed based on key locations based on objects/creatures in the world and paths are generated using the standardpathfinder.
 

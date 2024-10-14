@@ -969,7 +969,7 @@ void TravelMgr::SetMobAvoidArea()
 
 void TravelMgr::SetMobAvoidAreaMap(uint32 mapId) 
 {
-    PathFinder path;
+    PathFinder path(mapId, 0);
     FactionTemplateEntry const* humanFaction = sFactionTemplateStore.LookupEntry(1);
     FactionTemplateEntry const* orcFaction = sFactionTemplateStore.LookupEntry(2);
 

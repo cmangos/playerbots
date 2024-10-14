@@ -607,15 +607,23 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
     if (MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y))
         return true;
 #endif
-
     if (sTravelMgr.isBadMmap(mapId, x, y))
         return false;
+
+#ifdef MANGOSBOT_ONE
+    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
+    else
+    {
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
+    }
+#endif
 
     bool isLoaded = false;
 
 #ifndef MANGOSBOT_TWO
-    //TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
-    //isLoaded = terrain->Load(x, y);
+    //TerrainInfo* terrain = sTerrainMgr.LoadTerrain(mapId);
+    //isLoaded = terrain->GetTerrainType(x, y);
     isLoaded = true;
 #else 
     //Fix to ignore bad mmap files.

@@ -11,6 +11,7 @@
 #include "Entities/Transports.h"
 #include "strategy/values/BudgetValues.h"
 #include "playerbot/ServerFacade.h"
+#include "MotionGenerators/MoveMap.h"
 
 using namespace ai;
 using namespace MaNGOS;
@@ -1766,6 +1767,24 @@ void TravelNodeMap::manageNodes(Unit* bot, bool mapFull)
     m_nMapMtx.unlock_shared();
 }
 
+void TravelNodeMap::LoadMaps()
+{
+    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
+        if (!sMapStore.LookupEntry(i))
+            continue;
+
+        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), mapId);
+        }
+        else
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
+        }
+    }
+}
 
 void TravelNodeMap::generateNpcNodes()
 {
@@ -2605,6 +2624,8 @@ void TravelNodeMap::calculatePathCosts()
 
 void TravelNodeMap::generatePaths(bool helpers)
 {
+    sTravelMgr.SetMobAvoidArea();
+
     sLog.outString("-Calculating walkable paths");
     generateWalkPaths();
 
@@ -2629,6 +2650,9 @@ void TravelNodeMap::generatePaths(bool helpers)
 
 void TravelNodeMap::generateAll()
 {
+    if (hasToGen || hasToFullGen)
+        LoadMaps();
+
     if (hasToFullGen)
         generateNodes();
 

@@ -9,7 +9,7 @@ using namespace ai;
 
 bool SetAvoidAreaAction::Execute(Event& event)
 {
-    PathFinder pathfinder(bot);
+    PathFinder pathfinder(bot->GetMapId(), bot->GetInstanceId());
 
     SET_AI_VALUE2(PositionEntry, "pos", "last avoid", PositionEntry(bot));
 

@@ -35,3 +35,8 @@ bool ShockTrigger::IsActive()
 {
     return SpellTrigger::IsActive() && !ai->HasAnyAuraOf(GetTarget(), "frost shock", "earth shock", "flame shock", NULL) && !HasMaxDebuffs();
 }
+
+bool FlameShockOnTargetTrigger::IsActive()
+{
+    return SpellTrigger::IsActive() && ai->HasAnyAuraOf(GetTarget(), "flame shock", NULL) && !HasMaxDebuffs();
+}

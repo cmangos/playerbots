@@ -902,8 +902,12 @@ void ElementalShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     ShamanStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "shock",
-        NextAction::array(0, new NextAction("earth shock", ACTION_NORMAL), NULL)));
+        "flame shock",
+        NextAction::array(0, new NextAction("flame shock", ACTION_HIGH + 1), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
+        "flame shock on target",
+        NextAction::array(0, new NextAction("lava burst", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -925,6 +929,10 @@ void ElementalShamanPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 {
     ElementalShamanStrategy::InitCombatTriggers(triggers);
     ShamanPveStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "medium mana",
+        NextAction::array(0, new NextAction("thunderstorm", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -950,6 +958,10 @@ void ElementalShamanPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
     ElementalShamanStrategy::InitCombatTriggers(triggers);
     ShamanPvpStrategy::InitCombatTriggers(triggers);
 
+    triggers.push_back(new TriggerNode(
+        "enemy is close",
+        NextAction::array(0, new NextAction("thunderstorm", ACTION_HIGH + 2), NULL))); 
+    
     triggers.push_back(new TriggerNode(
         "chain lightning",
         NextAction::array(0, new NextAction("chain lightning", ACTION_HIGH + 1), NULL)));

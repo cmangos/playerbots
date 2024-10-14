@@ -425,6 +425,19 @@ namespace ai
         virtual bool IsActive();
     };
 
+    class FlameShockTrigger : public DebuffTrigger
+    {
+    public:
+        FlameShockTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "flame shock") {}
+    };
+    
+    class FlameShockOnTargetTrigger : public DebuffTrigger
+    {
+    public:
+        FlameShockOnTargetTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "flame shock") {}
+        virtual bool IsActive();
+    };
+
     class FrostShockSnareTrigger : public SnareTargetTrigger
     {
     public:

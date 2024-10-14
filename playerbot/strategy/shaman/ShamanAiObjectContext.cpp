@@ -410,6 +410,8 @@ namespace ai
                 creators["party member cleanse spirit curse"] = &TriggerFactoryInternal::party_member_cleanse_curse;
                 creators["party member cleanse spirit disease"] = &TriggerFactoryInternal::party_member_cleanse_disease;
                 creators["shock"] = &TriggerFactoryInternal::shock;
+                creators["flame shock"] = &TriggerFactoryInternal::flame_shock;
+                creators["flame shock on target"] = &TriggerFactoryInternal::flame_shock_on_target;
                 creators["frost shock snare"] = &TriggerFactoryInternal::frost_shock_snare;
                 creators["heroism"] = &TriggerFactoryInternal::heroism;
                 creators["bloodlust"] = &TriggerFactoryInternal::bloodlust;
@@ -453,6 +455,8 @@ namespace ai
             static Trigger* water_shield(PlayerbotAI* ai) { return new WaterShieldTrigger(ai); }
             static Trigger* lightning_shield(PlayerbotAI* ai) { return new LightningShieldTrigger(ai); }
             static Trigger* shock(PlayerbotAI* ai) { return new ShockTrigger(ai); }
+            static Trigger* flame_shock(PlayerbotAI* ai) { return new FlameShockTrigger(ai); }
+            static Trigger* flame_shock_on_target(PlayerbotAI* ai) { return new FlameShockOnTargetTrigger(ai); }
             static Trigger* frost_shock_snare(PlayerbotAI* ai) { return new FrostShockSnareTrigger(ai); }
             static Trigger* wind_shear_on_enemy_healer(PlayerbotAI* ai) { return new WindShearInterruptEnemyHealerSpellTrigger(ai); }
             static Trigger* cure_poison(PlayerbotAI* ai) { return new CurePoisonTrigger(ai); }
@@ -536,6 +540,7 @@ namespace ai
                 creators["earth shock"] = &AiObjectContextInternal::earth_shock;
                 creators["frost shock"] = &AiObjectContextInternal::frost_shock;
                 creators["chain lightning"] = &AiObjectContextInternal::chain_lightning;
+                creators["lava burst"] = &AiObjectContextInternal::lava_burst;
                 creators["lightning bolt"] = &AiObjectContextInternal::lightning_bolt;
                 creators["thunderstorm"] = &AiObjectContextInternal::thunderstorm;
                 creators["heroism"] = &AiObjectContextInternal::heroism;
@@ -563,6 +568,7 @@ namespace ai
             static Action* thunderstorm(PlayerbotAI* ai) { return new CastThunderstormAction(ai); }
             static Action* lightning_bolt(PlayerbotAI* ai) { return new CastLightningBoltAction(ai); }
             static Action* chain_lightning(PlayerbotAI* ai) { return new CastChainLightningAction(ai); }
+            static Action* lava_burst(PlayerbotAI* ai) { return new CastLavaBurstAction(ai); }
             static Action* frost_shock(PlayerbotAI* ai) { return new CastFrostShockAction(ai); }
             static Action* earth_shock(PlayerbotAI* ai) { return new CastEarthShockAction(ai); }
             static Action* flame_shock(PlayerbotAI* ai) { return new CastFlameShockAction(ai); }

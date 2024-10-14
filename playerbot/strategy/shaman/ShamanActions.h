@@ -372,6 +372,12 @@ namespace ai
         CastChainLightningAction(PlayerbotAI* ai) : CastSpellAction(ai, "chain lightning") {}
     };
 
+    class CastLavaBurstAction : public CastSpellAction
+    {
+    public:
+        CastLavaBurstAction(PlayerbotAI* ai) : CastSpellAction(ai, "lava burst") {}
+    };
+
     class CastLightningBoltAction : public CastSpellAction
     {
     public:

@@ -1494,15 +1494,18 @@ bool DebugAction::Execute(Event& event)
 
                 for (auto p : ppath)
                 {
-                    Creature* wpCreature = bot->SummonCreature(1, p.getX(), p.getY(), p.getZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 20000.0f);
+                    Creature* wpCreature = bot->SummonCreature(2334, p.getX(), p.getY(), p.getZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 20000.0f);
                     //addAura(246, wpCreature);
                     units.push_back(wpCreature->GetObjectGuid());
+
+                    if(!start)
+                        ai->AddAura(wpCreature, 246);
+                    else
+                        ai->AddAura(wpCreature, 1130);
 
                     if (!start)
                         start = wpCreature;
                 }
-
-                //FakeSpell(1064, bot, start, units.front(), units, {}, pos, pos);
             }
         }
         return true;

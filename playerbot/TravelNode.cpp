@@ -1769,6 +1769,7 @@ void TravelNodeMap::manageNodes(Unit* bot, bool mapFull)
 
 void TravelNodeMap::LoadMaps()
 {
+#ifdef MANGOSBOT_ONE
     sLog.outError("Trying to load all maps and tiles for node generation. Please ignore any maps that could not be loaded.");
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
     {
@@ -1785,6 +1786,7 @@ void TravelNodeMap::LoadMaps()
             MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
         }
     }
+#endif
 }
 
 void TravelNodeMap::generateNpcNodes()

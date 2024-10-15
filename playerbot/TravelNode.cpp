@@ -2404,6 +2404,7 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
 
     m_nMapMtx.lock();
     BarGoLink bar(places_to_reach.size());
+    bar.SetOutputState(false);
     m_nMapMtx.unlock();
 
     for (auto& pos : places_to_reach)
@@ -2427,8 +2428,14 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
 
             for (auto& path : *node->getPaths())
             {
+                WorldPosition prevPoint;
                 for (auto& ppoint : path.second.getPath())
                 {
+                    if (prevPoint && ppoint.sqDistance2d(prevPoint) < 25.0f)
+                        continue;
+
+                    prevPoint = ppoint;
+
                     if (!ppoint.canPathTo(pos.first, nullptr))
                         continue;
 
@@ -2456,6 +2463,9 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
         }
 
         m_nMapMtx.lock();
+        printf("\r   ");
+        fflush(stdout);
+        bar.SetOutputState(true);
         bar.step();
         printf("\r%d", mapId);
         fflush(stdout);
@@ -2725,7 +2735,7 @@ void TravelNodeMap::generateAll()
 
     if (hasToGen || hasToFullGen)
     {
-        generatePaths();
+        generatePaths(false);
         hasToGen = false;
         hasToFullGen = false;
         hasToSave = true;

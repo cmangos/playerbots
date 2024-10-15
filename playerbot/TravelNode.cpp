@@ -1769,6 +1769,7 @@ void TravelNodeMap::manageNodes(Unit* bot, bool mapFull)
 
 void TravelNodeMap::LoadMaps()
 {
+    sLog.outError("Trying to load all maps and tiles for node generation. Please ignore any maps that could not be loaded.");
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
     {
         if (!sMapStore.LookupEntry(i))

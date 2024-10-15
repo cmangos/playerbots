@@ -2323,6 +2323,9 @@ void TravelNodeMap::generateWalkPathMap(uint32 mapId)
 
         for (auto& endNode : sTravelNodeMap.getNodes(*startNode->getPosition(), 2000.0f))
         {
+            if (endNode->isTransport() && endNode->isLinked())
+                continue;
+
             if (startNode == endNode)
                 continue;
 
@@ -2380,6 +2383,9 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
     //Find all places we might want to reach.
     for (auto& node : startNodes)
     {
+        if (node->isTransport())
+            continue;
+
         places_to_reach.push_back(make_pair(GuidPosition(0, *node->getPosition()), node->getName()));
     }
 
@@ -2412,6 +2418,10 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
         for (uint8 i = 0; i < std::min(int(startNodes.size()), 5); i++)
         {
             TravelNode* node = startNodes[i];
+
+            if (node->isTransport())
+                continue;
+
             if (node->getPosition()->canPathTo(pos.first, nullptr)) //
                 continue;
 

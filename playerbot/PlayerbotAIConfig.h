@@ -149,6 +149,7 @@ public:
     bool logRandomBotJoinLfg;
     bool randomBotJoinBG;
     bool randomBotAutoJoinBG;
+    bool randomBotAutoJoinArena;
     uint32 randomBotBracketCount;
     bool randomBotLoginAtStartup;
     uint32 randomBotTeleLevel;

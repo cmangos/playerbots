@@ -909,7 +909,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
 
         command = command.substr(6);
 
-        if(ai->DoSpecificAction("cdebug", Event(".bot",command,master), true))
+        if(!ai->DoSpecificAction("cdebug", Event(".bot",command,master), true))
         {
             messages.push_back("debug failed");
         }

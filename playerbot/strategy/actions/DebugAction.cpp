@@ -403,11 +403,11 @@ bool DebugAction::Execute(Event& event)
             GameObjectInfo const* data = sGOStorage.LookupEntry<GameObjectInfo>(trans->GetEntry());
             if (WorldPosition(bot).isOnTransport(trans))
             {
-                ai->TellPlayer(requester, "On transport " + std::string(data->name));
+                ai->TellPlayer(requester, "On transport " + std::string(data->name) + " dist:" + std::to_string(WorldPosition(bot).distance(trans)));
             }
             else
             {
-                ai->TellPlayer(requester, "Not on transport " + std::string(data->name));
+                ai->TellPlayer(requester, "Not on transport " + std::string(data->name) + " dist:" + std::to_string(WorldPosition(bot).distance(trans)));
             }
         }
     }

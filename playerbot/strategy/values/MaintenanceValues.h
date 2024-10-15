@@ -60,7 +60,7 @@ namespace ai
     {
     public:
         CanSellValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can sell",2) {}
-        virtual bool Calculate() { return ai->HasStrategy("rpg vendor", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE2(uint32, "item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_VENDOR)) > 1; };
+        virtual bool Calculate() { return ai->HasStrategy("rpg vendor", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE2(uint32, "item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_VENDOR)) > 0; };
     };
 
     class CanBuyValue : public BoolCalculatedValue

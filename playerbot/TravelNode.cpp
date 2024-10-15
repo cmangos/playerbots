@@ -2075,6 +2075,27 @@ void TravelNodeMap::generateTransportNodes()
                             {
                                 TravelNode* node = sTravelNodeMap.addNode(pos, data->name, true, true, true, entry);
 
+                                pos.loadMapAndVMap(0);
+                                WorldPosition exitPos = pos;
+
+                                if (exitPos.ClosestCorrectPoint(20.0f, 10.0f, 0))
+                                {
+                                    TravelNode* exitNode = getNode(exitPos, nullptr, 5.0f);
+
+                                    if (!exitNode) //Only add paths if we are adding a new node.
+                                    {
+                                        exitNode = sTravelNodeMap.addNode(exitPos, data->name + std::string(" entry"), true, false);
+
+                                        TravelNodePath travelPath(exitPos.distance(pos), 0.0f, (uint8)TravelNodePathType::walk, 0, true);
+                                        travelPath.setComplete(true);
+                                        travelPath.setPath({ exitPos, pos });
+                                        exitNode->setPathTo(node, travelPath, true);
+                                        travelPath.setPath({ pos, exitPos });
+                                        node->setPathTo(exitNode, travelPath, true);
+                                        node->setLinked(true);
+                                    }
+                                }
+
                                 if (!prevNode)
                                 {
                                     ppath.push_back(pos);
@@ -2115,6 +2136,28 @@ void TravelNodeMap::generateTransportNodes()
                                 if (pos.distance(lPos) == 0)
                                 {
                                     TravelNode* node = sTravelNodeMap.addNode(pos, data->name, true, true, true, entry);
+
+                                    pos.loadMapAndVMap(0);
+                                    WorldPosition exitPos = pos;
+
+                                    if (exitPos.ClosestCorrectPoint(20.0f, 10.0f, 0))
+                                    {
+                                        TravelNode* exitNode = getNode(exitPos, nullptr, 5.0f);
+
+                                        if (!exitNode) //Only add paths if we are adding a new node.
+                                        {
+                                            exitNode = sTravelNodeMap.addNode(exitPos, data->name + std::string(" entry"), true, false);
+
+                                            TravelNodePath travelPath(exitPos.distance(pos), 0.0f, (uint8)TravelNodePathType::walk, 0, true);
+                                            travelPath.setComplete(true);
+                                            travelPath.setPath({ exitPos, pos });
+                                            exitNode->setPathTo(node, travelPath, true);
+                                            travelPath.setPath({ pos, exitPos });
+                                            node->setPathTo(exitNode, travelPath, true);
+                                            node->setLinked(true);
+                                        }
+                                    }
+
                                     if (node != prevNode) {
                                         if (p.second->TimeSeg < timeStart)
                                             timeStart = 0;
@@ -2169,13 +2212,20 @@ void TravelNodeMap::generateTransportNodes()
 
                         if (exitPos.ClosestCorrectPoint(20.0f, 10.0f,0))
                         {
-                            TravelNode* exitNode = sTravelNodeMap.addNode(exitPos, data->name + std::string(" dock"), true, true);
+                            TravelNode* exitNode = getNode(exitPos, nullptr, 5.0f);
+                            
+                            if (!exitNode)
+                            {
+                                exitNode = sTravelNodeMap.addNode(exitPos, data->name + std::string(" dock"), true, true);
 
-                            TravelNodePath travelPath(exitPos.distance(pos), 0.0f, (uint8)TravelNodePathType::walk,0, true);
-                            travelPath.setPath({ exitPos, pos });
-                            exitNode->setPathTo(node,travelPath,true);
-                            travelPath.setPath({ pos, exitPos });
-                            node->setPathTo(exitNode, travelPath, true);
+                                TravelNodePath travelPath(exitPos.distance(pos), 0.0f, (uint8)TravelNodePathType::walk, 0, true);
+                                travelPath.setComplete(true);
+                                travelPath.setPath({ exitPos, pos });
+                                exitNode->setPathTo(node, travelPath, true);
+                                travelPath.setPath({ pos, exitPos });
+                                node->setPathTo(exitNode, travelPath, true);
+                                node->setLinked(true);
+                            }
                         }
 
                         if (!prevNode)

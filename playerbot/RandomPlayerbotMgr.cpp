@@ -1266,7 +1266,7 @@ void RandomPlayerbotMgr::CheckBgQueue()
         if (!IsFreeBot(bot))
             return;
 
-        if (bot->InBattleGround() && bot->GetBattleGround()->GetStatus() == STATUS_WAIT_LEAVE)
+        if (bot->InBattleGround() && bot->GetBattleGround() && bot->GetBattleGround()->GetStatus() == STATUS_WAIT_LEAVE)
             return;
 
         for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)

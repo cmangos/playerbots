@@ -1769,6 +1769,35 @@ void TravelNodeMap::manageNodes(Unit* bot, bool mapFull)
 
 void TravelNodeMap::LoadMaps()
 {
+#ifdef MANGOSBOT_ZERO
+    sLog.outError("Trying to load all maps and tiles for node generation. Please ignore any maps that could not be loaded.");
+    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
+        if (!sMapStore.LookupEntry(i))
+            continue;
+
+        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
+
+        for (const auto& entry : boost::filesystem::directory_iterator(sWorld.GetDataPath() + "mmaps"))
+        {
+            if (entry.path().extension() == ".mmtile")
+            {
+                auto filename = entry.path().filename();
+                auto fileNameString = filename.c_str();
+                // trying to avoid string copy
+                uint32 fileMapId = (fileNameString[0] - '0') * 100 + (fileNameString[1] - '0') * 10 + (fileNameString[2] - '0');
+                if (fileMapId != mapId)
+                    continue;
+
+                uint32 x = (fileNameString[3] - '0') * 10 + (fileNameString[4] - '0');
+                uint32 y = (fileNameString[5] - '0') * 10 + (fileNameString[6] - '0');
+                if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y))
+                    MMAP::MMapFactory::createOrGetMMapManager()->loadMap(mapId, x, y);
+
+            }
+        }
+    }
+#endif
 #ifdef MANGOSBOT_ONE
     sLog.outError("Trying to load all maps and tiles for node generation. Please ignore any maps that could not be loaded.");
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
@@ -1787,6 +1816,7 @@ void TravelNodeMap::LoadMaps()
         }
     }
 #endif
+
 }
 
 void TravelNodeMap::generateNpcNodes()
@@ -2486,12 +2516,10 @@ void TravelNodeMap::generateHelperNodes()
 
     std::vector<std::future<void>> calculations;
 
-    BarGoLink bar(nodeMaps.size());
     for (auto& map : nodeMaps)
     {
         uint32 mapId = map.first;
         calculations.push_back(std::async([this, mapId] { generateHelperNodes(mapId); }));
-        bar.step();
     }
 
     for (uint32 i = 0; i < calculations.size(); i++)
@@ -2721,7 +2749,7 @@ void TravelNodeMap::generateAll()
 
     if (hasToGen || hasToFullGen)
     {
-        generatePaths(false);
+        generatePaths(true);
         hasToGen = false;
         hasToFullGen = false;
         hasToSave = true;

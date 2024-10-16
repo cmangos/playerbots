@@ -941,7 +941,7 @@ void TravelMgr::logQuestError(uint32 errorNr, Quest* quest, uint32 objective, ui
 
 void TravelMgr::SetMobAvoidArea()
 {
-    sLog.outString("start mob avoidance maps");
+    sLog.outString("-Apply mob avoidance maps");
 
     std::vector<std::future<void>> calculations;
 

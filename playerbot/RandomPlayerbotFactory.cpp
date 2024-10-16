@@ -1080,7 +1080,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         }
 
         // set random rating
-        arenateam->SetRatingForAll(urand(1500, 2100));
+        arenateam->SetRatingForAll(0);
         arenateam->SaveToDB();
 
         sLog.outBasic("Random Arena team %s %s: created", arenaTypeName.c_str(), arenateam->GetName().c_str());

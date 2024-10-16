@@ -512,6 +512,10 @@ bool BGJoinAction::shouldJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroun
         }
     }
 
+    if (isArena && sPlayerbotAIConfig.randomBotAutoJoinArena) {
+        return true;
+    }
+
     // do not join if BG queue is full
     if (BgCount >= BracketSize && (ACount >= TeamSize) && (HCount >= TeamSize))
     {
@@ -967,6 +971,10 @@ bool FreeBGJoinAction::shouldJoinBg(BattleGroundQueueTypeId queueTypeId, BattleG
     // add more bots if players are not invited or 1st BG instance is full
     if (needBots/* || (hasPlayers && BgCount > BracketSize && (BgCount % BracketSize) != 0)*/)
         return true;
+
+    if (isArena && sPlayerbotAIConfig.randomBotAutoJoinArena) {
+        return true;
+    }
 
     // do not join if BG queue is full
     if (BgCount >= BracketSize && (ACount >= TeamSize) && (HCount >= TeamSize))

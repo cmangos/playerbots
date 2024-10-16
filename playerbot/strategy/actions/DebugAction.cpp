@@ -12,6 +12,8 @@
 #include "Entities/Transports.h"
 #include "MotionGenerators/PathFinder.h"
 
+#include <iomanip>
+
 using namespace ai;
 
 bool DebugAction::Execute(Event& event)
@@ -398,18 +400,36 @@ bool DebugAction::Execute(Event& event)
     }
     else if (text.find("transport") == 0 && isMod) 
     {
-        for (auto trans : WorldPosition(bot).getTransports())
+    std::vector<GenericTransport*> transports;
+
+    for (auto trans : WorldPosition(bot).getTransports())
+        transports.push_back(trans);
+
+        WorldPosition botPos(bot);
+
+        //Closest transport last = below in chat.
+        std::sort(transports.begin(), transports.end(), [botPos](GenericTransport* i, GenericTransport* j){ return botPos.distance(i) > botPos.distance(j); });
+
+        for (auto trans : transports)
         {
             GameObjectInfo const* data = sGOStorage.LookupEntry<GameObjectInfo>(trans->GetEntry());
+            std::ostringstream out;
+
             if (WorldPosition(bot).isOnTransport(trans))
             {
-                ai->TellPlayer(requester, "On transport " + std::string(data->name) + " dist:" + std::to_string(WorldPosition(bot).distance(trans)));
+                out << "On transport ";
             }
             else
             {
-                ai->TellPlayer(requester, "Not on transport " + std::string(data->name) + " dist:" + std::to_string(WorldPosition(bot).distance(trans)));
+                out << "Not on transport ";
             }
+
+            out<< " dist:" << std::fixed << std::setprecision(2) << botPos.distance(trans) << " offset:" << (botPos -trans).print();
+
+            ai->TellPlayer(requester, out);
         }
+
+        return true;
     }
     else if (text.find("ontrans") == 0 && isMod) 
     {

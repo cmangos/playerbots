@@ -1519,9 +1519,10 @@ bool DebugAction::Execute(Event& event)
                     units.push_back(wpCreature->GetObjectGuid());
 
                     if(!start)
-                        ai->AddAura(wpCreature, 246);
-                    else
                         ai->AddAura(wpCreature, 1130);
+                    else
+                        ai->AddAura(wpCreature, 246);
+                        
 
                     if (!start)
                         start = wpCreature;

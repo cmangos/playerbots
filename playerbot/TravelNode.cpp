@@ -2022,6 +2022,30 @@ void TravelNodeMap::generatePortalNodes()
     }
 }
 
+void TravelNodeMap::makeDockNode(TravelNode* node, WorldPosition pos, std::string dockName)
+{
+    pos.loadMapAndVMap(0);
+    WorldPosition exitPos = pos;
+
+    if (exitPos.ClosestCorrectPoint(20.0f, 1.0f, 0))
+    {
+        TravelNode* exitNode = getNode(exitPos, nullptr, 1.0f);
+
+        if (!exitNode) //Only add paths if we are adding a new node or 
+        {
+            exitNode = sTravelNodeMap.addNode(exitPos, node->getName() + dockName, true, false);
+
+            TravelNodePath travelPath(exitPos.distance(pos), 0.1f, (uint8)TravelNodePathType::transport, 0, true); //The path is part of the transport.
+            travelPath.setComplete(true);
+            travelPath.setPath({ exitPos, pos });
+            exitNode->setPathTo(node, travelPath, true);
+            travelPath.setPath({ pos, exitPos });
+            node->setPathTo(exitNode, travelPath, true);
+            node->setLinked(true);
+        }
+    }
+}
+
 void TravelNodeMap::generateTransportNodes()
 {
     for (uint32 entry = 1; entry <= sGOStorage.GetMaxEntry(); ++entry)
@@ -2077,26 +2101,16 @@ void TravelNodeMap::generateTransportNodes()
                             {
                                 TravelNode* node = sTravelNodeMap.addNode(pos, data->name, true, true, true, entry);
 
-                                pos.loadMapAndVMap(0);
                                 WorldPosition exitPos = pos;
 
-                                if (exitPos.ClosestCorrectPoint(20.0f, 10.0f, 0))
-                                {
-                                    TravelNode* exitNode = getNode(exitPos, nullptr, 5.0f);
+                                if (data->displayId == 3831) //Subway
+                                    exitPos.setZ(exitPos.getZ() - 10.0f);
+                                if (data->displayId == 808) //Gnome elevator
+                                    exitPos.setZ(exitPos.getZ() - 1.24f);
+                                if (data->displayId == 455) //Undervator
+                                    exitPos.setZ(exitPos.getZ() - 0.46f);
 
-                                    if (!exitNode) //Only add paths if we are adding a new node.
-                                    {
-                                        exitNode = sTravelNodeMap.addNode(exitPos, data->name + std::string(" entry"), true, false);
-
-                                        TravelNodePath travelPath(exitPos.distance(pos), 0.0f, (uint8)TravelNodePathType::walk, 0, true);
-                                        travelPath.setComplete(true);
-                                        travelPath.setPath({ exitPos, pos });
-                                        exitNode->setPathTo(node, travelPath, true);
-                                        travelPath.setPath({ pos, exitPos });
-                                        node->setPathTo(exitNode, travelPath, true);
-                                        node->setLinked(true);
-                                    }
-                                }
+                                makeDockNode(node, exitPos, "entry");
 
                                 if (!prevNode)
                                 {
@@ -2139,26 +2153,16 @@ void TravelNodeMap::generateTransportNodes()
                                 {
                                     TravelNode* node = sTravelNodeMap.addNode(pos, data->name, true, true, true, entry);
 
-                                    pos.loadMapAndVMap(0);
                                     WorldPosition exitPos = pos;
 
-                                    if (exitPos.ClosestCorrectPoint(20.0f, 10.0f, 0))
-                                    {
-                                        TravelNode* exitNode = getNode(exitPos, nullptr, 5.0f);
+                                    if (data->displayId == 3831) //Subway
+                                        exitPos.setZ(exitPos.getZ() - 10.0f);
+                                    if (data->displayId == 808) //Gnome elevator
+                                        exitPos.setZ(exitPos.getZ() - 1.24f);
+                                    if (data->displayId == 455) //Undervator
+                                        exitPos.setZ(exitPos.getZ() - 0.46f);
 
-                                        if (!exitNode) //Only add paths if we are adding a new node.
-                                        {
-                                            exitNode = sTravelNodeMap.addNode(exitPos, data->name + std::string(" entry"), true, false);
-
-                                            TravelNodePath travelPath(exitPos.distance(pos), 0.0f, (uint8)TravelNodePathType::walk, 0, true);
-                                            travelPath.setComplete(true);
-                                            travelPath.setPath({ exitPos, pos });
-                                            exitNode->setPathTo(node, travelPath, true);
-                                            travelPath.setPath({ pos, exitPos });
-                                            node->setPathTo(exitNode, travelPath, true);
-                                            node->setLinked(true);
-                                        }
-                                    }
+                                    makeDockNode(node, exitPos, "entry");
 
                                     if (node != prevNode) {
                                         if (p.second->TimeSeg < timeStart)
@@ -2190,11 +2194,6 @@ void TravelNodeMap::generateTransportNodes()
                 {
                     WorldPosition pos = WorldPosition(p->mapid, p->x, p->y, p->z, 0);
 
-                    //if (data->displayId == 3015) 
-                    //    pos.setZ(pos.getZ() + 6.0f);
-                    //else if(data->displayId == 3031)
-                   //     pos.setZ(pos.getZ() - 17.0f);
-
                     if (prevNode)
                     {
                         ppath.push_back(pos);
@@ -2203,32 +2202,17 @@ void TravelNodeMap::generateTransportNodes()
                     if (p->delay > 0)
                     {
                         TravelNode* node = sTravelNodeMap.addNode(pos, data->name, true, true, true, entry);
-                        
-                        pos.loadMapAndVMap(0);
+                                                
                         WorldPosition exitPos = pos;
 
-                        if (data->displayId == 3015) 
+                        if (data->displayId == 3015)  //Boat
                             exitPos.setZ(exitPos.getZ() + 6.0f);
-                        else if(data->displayId == 3031)
+                        else if (data->displayId == 3031) //Zepelin
                             exitPos.setZ(exitPos.getZ() - 17.0f);
+                        else if (data->displayId == 7087) //Moonspray
+                            exitPos.setZ(exitPos.getZ() + 4.88f);
 
-                        if (exitPos.ClosestCorrectPoint(20.0f, 10.0f,0))
-                        {
-                            TravelNode* exitNode = getNode(exitPos, nullptr, 5.0f);
-                            
-                            if (!exitNode)
-                            {
-                                exitNode = sTravelNodeMap.addNode(exitPos, data->name + std::string(" dock"), true, true);
-
-                                TravelNodePath travelPath(exitPos.distance(pos), 0.0f, (uint8)TravelNodePathType::walk, 0, true);
-                                travelPath.setComplete(true);
-                                travelPath.setPath({ exitPos, pos });
-                                exitNode->setPathTo(node, travelPath, true);
-                                travelPath.setPath({ pos, exitPos });
-                                node->setPathTo(exitNode, travelPath, true);
-                                node->setLinked(true);
-                            }
-                        }
+                        makeDockNode(node, exitPos, "dock");
 
                         if (!prevNode)
                         {

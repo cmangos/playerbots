@@ -87,9 +87,9 @@ bool BuyAction::Execute(Event& event)
 
                     //if item is worth selling to AH?
 
-                    PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "IsWorthBuyingFromVendorToResellAtAH", &context->performanceStack);
+                    auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "IsWorthBuyingFromVendorToResellAtAH", &context->performanceStack);
                     bool isWorthBuyingFromVendorToResellAtAH = ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(proto, tItem->maxcount > 0);
-                    if (pmo) pmo->finish();
+                    pmo.reset();
 
                     if (isWorthBuyingFromVendorToResellAtAH)
                         freeMoney[ItemUsage::ITEM_USAGE_AH] = (uint32)NeedMoneyFor::anything;

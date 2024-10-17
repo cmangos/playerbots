@@ -244,7 +244,8 @@ PlayerbotAI::~PlayerbotAI()
 void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
 {
     std::string mapString = WorldPosition(bot).isOverworld() ? std::to_string(bot->GetMapId()) : "I";
-    PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_TOTAL, "PlayerbotAI::UpdateAI " + mapString);
+    auto pmo = sPerformanceMonitor.start(PERF_MON_TOTAL, "PlayerbotAI::UpdateAI " + mapString);
+    
     if(aiInternalUpdateDelay > elapsed)
     {
         aiInternalUpdateDelay -= elapsed;
@@ -512,7 +513,6 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
             // Cancel the update if the new delay increased
             if (!CanUpdateAIInternal())
             {
-                if (pmo) pmo->finish();
                 return;
             }
         }
@@ -529,16 +529,16 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
 
         YieldAIInternalThread(min);
     }
-    if (pmo) pmo->finish();
 }
 
 bool PlayerbotAI::UpdateAIReaction(uint32 elapsed, bool minimal, bool isStunned)
 {
     bool reactionFound;
     std::string mapString = WorldPosition(bot).isOverworld() ? std::to_string(bot->GetMapId()) : "I";
-    PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_TOTAL, "PlayerbotAI::UpdateAIReaction " + mapString);
+
+    auto pmo = sPerformanceMonitor.start(PERF_MON_TOTAL, "PlayerbotAI::UpdateAIReaction " + mapString);
     const bool reactionInProgress = reactionEngine->Update(elapsed, minimal, isStunned, reactionFound);
-    if (pmo) pmo->finish();
+    pmo.reset();
 
     if(reactionFound)
     {
@@ -1037,7 +1037,7 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
         return;
 
     std::string mapString = WorldPosition(bot).isOverworld() ? std::to_string(bot->GetMapId()) : "I";
-    PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_TOTAL, "PlayerbotAI::UpdateAIInternal " + mapString);
+    auto pmo = sPerformanceMonitor.start(PERF_MON_TOTAL, "PlayerbotAI::UpdateAIInternal " + mapString);
 
     ExternalEventHelper helper(aiObjectContext);
 
@@ -1104,7 +1104,6 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
     masterOutgoingPacketHandlers.Handle(helper);
 
 	DoNextAction(minimal);
-	if (pmo) pmo->finish();
 }
 
 void PlayerbotAI::HandleTeleportAck()

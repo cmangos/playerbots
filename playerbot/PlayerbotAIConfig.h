@@ -116,6 +116,7 @@ public:
     bool botCheckAllAuctionListings;
     //
     bool randomBotJoinLfg;
+    bool logRandomBotJoinLfg;
     bool randomBotJoinBG;
     bool randomBotAutoJoinBG;
     uint32 randomBotBracketCount;

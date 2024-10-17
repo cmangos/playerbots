@@ -1430,7 +1430,10 @@ void RandomPlayerbotMgr::CheckLfgQueue()
     if (!LfgCheckTimer || time(NULL) > (LfgCheckTimer + 30))
         LfgCheckTimer = time(NULL);
 
-    sLog.outBasic("Checking LFG Queue...");
+    if (sPlayerbotAIConfig.logRandomBotJoinLfg)
+    {
+       sLog.outBasic("Checking LFG Queue...");
+    }
 
     // Clear LFG list
     LfgDungeons[HORDE].clear();
@@ -1586,10 +1589,13 @@ void RandomPlayerbotMgr::CheckLfgQueue()
     */
 #endif
 
-    if (LfgDungeons[ALLIANCE].size() || LfgDungeons[HORDE].size())
-        sLog.outBasic("LFG Queue check finished. There are real players in queue.");
-    else
-        sLog.outBasic("LFG Queue check finished. No real players in queue.");
+    if (sPlayerbotAIConfig.logRandomBotJoinLfg)
+    {
+       if (LfgDungeons[ALLIANCE].size() || LfgDungeons[HORDE].size())
+          sLog.outBasic("LFG Queue check finished. There are real players in queue.");
+       else
+          sLog.outBasic("LFG Queue check finished. No real players in queue.");
+    }
     return;
 }
 

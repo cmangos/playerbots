@@ -11,6 +11,7 @@
 #include "Entities/Transports.h"
 #include "strategy/values/BudgetValues.h"
 #include "playerbot/ServerFacade.h"
+#include "MotionGenerators/MoveMap.h"
 
 using namespace ai;
 using namespace MaNGOS;
@@ -1766,6 +1767,57 @@ void TravelNodeMap::manageNodes(Unit* bot, bool mapFull)
     m_nMapMtx.unlock_shared();
 }
 
+void TravelNodeMap::LoadMaps()
+{
+#ifdef MANGOSBOT_ZERO
+    sLog.outError("Trying to load all maps and tiles for node generation. Please ignore any maps that could not be loaded.");
+    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
+        if (!sMapStore.LookupEntry(i))
+            continue;
+
+        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
+
+        for (const auto& entry : boost::filesystem::directory_iterator(sWorld.GetDataPath() + "mmaps"))
+        {
+            if (entry.path().extension() == ".mmtile")
+            {
+                auto filename = entry.path().filename();
+                auto fileNameString = filename.c_str();
+                // trying to avoid string copy
+                uint32 fileMapId = (fileNameString[0] - '0') * 100 + (fileNameString[1] - '0') * 10 + (fileNameString[2] - '0');
+                if (fileMapId != mapId)
+                    continue;
+
+                uint32 x = (fileNameString[3] - '0') * 10 + (fileNameString[4] - '0');
+                uint32 y = (fileNameString[5] - '0') * 10 + (fileNameString[6] - '0');
+                if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y))
+                    MMAP::MMapFactory::createOrGetMMapManager()->loadMap(mapId, x, y);
+
+            }
+        }
+    }
+#endif
+#ifdef MANGOSBOT_ONE
+    sLog.outError("Trying to load all maps and tiles for node generation. Please ignore any maps that could not be loaded.");
+    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
+        if (!sMapStore.LookupEntry(i))
+            continue;
+
+        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), mapId);
+        }
+        else
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
+        }
+    }
+#endif
+
+}
 
 void TravelNodeMap::generateNpcNodes()
 {
@@ -2000,6 +2052,30 @@ void TravelNodeMap::generatePortalNodes()
     }
 }
 
+void TravelNodeMap::makeDockNode(TravelNode* node, WorldPosition pos, std::string dockName)
+{
+    pos.loadMapAndVMap(0);
+    WorldPosition exitPos = pos;
+
+    if (exitPos.ClosestCorrectPoint(20.0f, 1.0f, 0))
+    {
+        TravelNode* exitNode = getNode(exitPos, nullptr, 1.0f);
+
+        if (!exitNode) //Only add paths if we are adding a new node or 
+        {
+            exitNode = sTravelNodeMap.addNode(exitPos, node->getName() + dockName, true, false);
+
+            TravelNodePath travelPath(exitPos.distance(pos), 0.1f, (uint8)TravelNodePathType::transport, 0, true); //The path is part of the transport.
+            travelPath.setComplete(true);
+            travelPath.setPath({ exitPos, pos });
+            exitNode->setPathTo(node, travelPath, true);
+            travelPath.setPath({ pos, exitPos });
+            node->setPathTo(exitNode, travelPath, true);
+            node->setLinked(true);
+        }
+    }
+}
+
 void TravelNodeMap::generateTransportNodes()
 {
     for (uint32 entry = 1; entry <= sGOStorage.GetMaxEntry(); ++entry)
@@ -2055,6 +2131,17 @@ void TravelNodeMap::generateTransportNodes()
                             {
                                 TravelNode* node = sTravelNodeMap.addNode(pos, data->name, true, true, true, entry);
 
+                                WorldPosition exitPos = pos;
+
+                                if (data->displayId == 3831) //Subway
+                                    exitPos.setZ(exitPos.getZ() - 10.0f);
+                                if (data->displayId == 808) //Gnome elevator
+                                    exitPos.setZ(exitPos.getZ() - 1.24f);
+                                if (data->displayId == 455) //Undervator
+                                    exitPos.setZ(exitPos.getZ() - 0.46f);
+
+                                makeDockNode(node, exitPos, "entry");
+
                                 if (!prevNode)
                                 {
                                     ppath.push_back(pos);
@@ -2095,6 +2182,18 @@ void TravelNodeMap::generateTransportNodes()
                                 if (pos.distance(lPos) == 0)
                                 {
                                     TravelNode* node = sTravelNodeMap.addNode(pos, data->name, true, true, true, entry);
+
+                                    WorldPosition exitPos = pos;
+
+                                    if (data->displayId == 3831) //Subway
+                                        exitPos.setZ(exitPos.getZ() - 10.0f);
+                                    if (data->displayId == 808) //Gnome elevator
+                                        exitPos.setZ(exitPos.getZ() - 1.24f);
+                                    if (data->displayId == 455) //Undervator
+                                        exitPos.setZ(exitPos.getZ() - 0.46f);
+
+                                    makeDockNode(node, exitPos, "entry");
+
                                     if (node != prevNode) {
                                         if (p.second->TimeSeg < timeStart)
                                             timeStart = 0;
@@ -2125,11 +2224,6 @@ void TravelNodeMap::generateTransportNodes()
                 {
                     WorldPosition pos = WorldPosition(p->mapid, p->x, p->y, p->z, 0);
 
-                    //if (data->displayId == 3015) 
-                    //    pos.setZ(pos.getZ() + 6.0f);
-                    //else if(data->displayId == 3031)
-                   //     pos.setZ(pos.getZ() - 17.0f);
-
                     if (prevNode)
                     {
                         ppath.push_back(pos);
@@ -2138,25 +2232,17 @@ void TravelNodeMap::generateTransportNodes()
                     if (p->delay > 0)
                     {
                         TravelNode* node = sTravelNodeMap.addNode(pos, data->name, true, true, true, entry);
-                        
-                        pos.loadMapAndVMap(0);
+                                                
                         WorldPosition exitPos = pos;
 
-                        if (data->displayId == 3015) 
+                        if (data->displayId == 3015)  //Boat
                             exitPos.setZ(exitPos.getZ() + 6.0f);
-                        else if(data->displayId == 3031)
+                        else if (data->displayId == 3031) //Zepelin
                             exitPos.setZ(exitPos.getZ() - 17.0f);
+                        else if (data->displayId == 7087) //Moonspray
+                            exitPos.setZ(exitPos.getZ() + 4.88f);
 
-                        if (exitPos.ClosestCorrectPoint(20.0f, 10.0f,0))
-                        {
-                            TravelNode* exitNode = sTravelNodeMap.addNode(exitPos, data->name + std::string(" dock"), true, true);
-
-                            TravelNodePath travelPath(exitPos.distance(pos), 0.0f, (uint8)TravelNodePathType::walk,0, true);
-                            travelPath.setPath({ exitPos, pos });
-                            exitNode->setPathTo(node,travelPath,true);
-                            travelPath.setPath({ pos, exitPos });
-                            node->setPathTo(exitNode, travelPath, true);
-                        }
+                        makeDockNode(node, exitPos, "dock");
 
                         if (!prevNode)
                         {
@@ -2253,6 +2339,9 @@ void TravelNodeMap::generateWalkPathMap(uint32 mapId)
 
         for (auto& endNode : sTravelNodeMap.getNodes(*startNode->getPosition(), 2000.0f))
         {
+            if (endNode->isTransport() && endNode->isLinked())
+                continue;
+
             if (startNode == endNode)
                 continue;
 
@@ -2310,6 +2399,9 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
     //Find all places we might want to reach.
     for (auto& node : startNodes)
     {
+        if (node->isTransport())
+            continue;
+
         places_to_reach.push_back(make_pair(GuidPosition(0, *node->getPosition()), node->getName()));
     }
 
@@ -2328,6 +2420,7 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
 
     m_nMapMtx.lock();
     BarGoLink bar(places_to_reach.size());
+    bar.SetOutputState(false);
     m_nMapMtx.unlock();
 
     for (auto& pos : places_to_reach)
@@ -2342,13 +2435,23 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
         for (uint8 i = 0; i < std::min(int(startNodes.size()), 5); i++)
         {
             TravelNode* node = startNodes[i];
+
+            if (node->isTransport())
+                continue;
+
             if (node->getPosition()->canPathTo(pos.first, nullptr)) //
                 continue;
 
             for (auto& path : *node->getPaths())
             {
+                WorldPosition prevPoint;
                 for (auto& ppoint : path.second.getPath())
                 {
+                    if (prevPoint && ppoint.sqDistance2d(prevPoint) < 25.0f)
+                        continue;
+
+                    prevPoint = ppoint;
+
                     if (!ppoint.canPathTo(pos.first, nullptr))
                         continue;
 
@@ -2376,6 +2479,9 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
         }
 
         m_nMapMtx.lock();
+        printf("\r   ");
+        fflush(stdout);
+        bar.SetOutputState(true);
         bar.step();
         printf("\r%d", mapId);
         fflush(stdout);
@@ -2410,12 +2516,10 @@ void TravelNodeMap::generateHelperNodes()
 
     std::vector<std::future<void>> calculations;
 
-    BarGoLink bar(nodeMaps.size());
     for (auto& map : nodeMaps)
     {
         uint32 mapId = map.first;
         calculations.push_back(std::async([this, mapId] { generateHelperNodes(mapId); }));
-        bar.step();
     }
 
     for (uint32 i = 0; i < calculations.size(); i++)
@@ -2605,6 +2709,8 @@ void TravelNodeMap::calculatePathCosts()
 
 void TravelNodeMap::generatePaths(bool helpers)
 {
+    sTravelMgr.SetMobAvoidArea();
+
     sLog.outString("-Calculating walkable paths");
     generateWalkPaths();
 
@@ -2629,6 +2735,9 @@ void TravelNodeMap::generatePaths(bool helpers)
 
 void TravelNodeMap::generateAll()
 {
+    if (hasToGen || hasToFullGen)
+        LoadMaps();
+
     if (hasToFullGen)
         generateNodes();
 
@@ -2640,7 +2749,7 @@ void TravelNodeMap::generateAll()
 
     if (hasToGen || hasToFullGen)
     {
-        generatePaths();
+        generatePaths(true);
         hasToGen = false;
         hasToFullGen = false;
         hasToSave = true;

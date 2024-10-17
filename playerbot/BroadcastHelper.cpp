@@ -756,6 +756,7 @@ bool BroadcastHelper::BroadcastSuggestInstance(
         std::ostringstream itemout;
         //itemout << "|c00b000b0" << allowedInstances[urand(0, allowedInstances.size() - 1)] << "|r";
         itemout << allowedInstances[urand(0, allowedInstances.size() - 1)];
+        placeholders["%instance"] = itemout.str();
         placeholders["%instance_name"] = itemout.str();
 
         placeholders["%my_class"] = ai->GetChatHelper()->formatClass(bot->getClass());

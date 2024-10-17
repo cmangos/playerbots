@@ -606,6 +606,7 @@ std::vector<WorldPosition*> ChooseTravelTargetAction::getLogicalPoints(Player* r
         if (pos->getMapId() == bot->GetMapId())
         {
             auto pmo1 = sPerformanceMonitor.start(PERF_MON_VALUE, "AreaLevel", &context->performanceStack);
+
             int32 areaLevel = pos->getAreaLevel();
 
             if (!pos->isOverworld() && !canFightElite)

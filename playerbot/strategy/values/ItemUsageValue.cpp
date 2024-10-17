@@ -381,8 +381,8 @@ ItemUsage ItemUsageValue::Calculate()
     //VENDOR/AH
     if (proto->SellPrice > 0)
     {
-        //if item value is significantly higher than its vendor sell price
-        if (IsMoreProfitableToSellToAHThanToVendor(proto, bot))
+        //if item value is significantly higher than its vendor sell price and we actually have money to place the item on ah.
+        if (IsMoreProfitableToSellToAHThanToVendor(proto, bot) && AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah))
         {
             Item* item = CurrentItem(proto, bot);
             if (proto->Bonding == NO_BIND)

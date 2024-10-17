@@ -607,15 +607,27 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
     if (MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y))
         return true;
 #endif
-
     if (sTravelMgr.isBadMmap(mapId, x, y))
         return false;
+
+#ifdef MANGOSBOT_ZERO
+    MMAP::MMapFactory::createOrGetMMapManager()->loadMap(mapId, x, y);
+#endif
+#ifdef MANGOSBOT_ONE
+    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
+    else
+    {
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
+    }
+#endif
 
     bool isLoaded = false;
 
 #ifndef MANGOSBOT_TWO
-    //TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
-    //isLoaded = terrain->Load(x, y);
+    //TerrainInfo* terrain = sTerrainMgr.LoadTerrain(mapId);
+    //isLoaded = terrain->GetTerrainType(x, y);
     isLoaded = true;
 #else 
     //Fix to ignore bad mmap files.
@@ -847,9 +859,9 @@ bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight, uint32 
 bool WorldPosition::GetReachableRandomPointOnGround(const Player* bot, const float radius, const bool randomRange) 
 {
 #ifndef MANGOSBOT_TWO         
-    return getMap(bot->GetInstanceId())->GetReachableRandomPointOnGround(coord_x, coord_y, coord_z, radius, randomRange);
+    return getMap(bot ? bot->GetInstanceId() : getFirstInstanceId())->GetReachableRandomPointOnGround(coord_x, coord_y, coord_z, radius, randomRange);
 #else
-    return getMap(bot->GetInstanceId())->GetReachableRandomPointOnGround(bot->GetPhaseMask(), coord_x, coord_y, coord_z, radius, randomRange);
+    return getMap(bot ? bot->GetInstanceId() : getFirstInstanceId())->GetReachableRandomPointOnGround(bot->GetPhaseMask(), coord_x, coord_y, coord_z, radius, randomRange);
 #endif
 }
 

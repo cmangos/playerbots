@@ -12,6 +12,8 @@
 #include "Entities/Transports.h"
 #include "MotionGenerators/PathFinder.h"
 
+#include <iomanip>
+
 using namespace ai;
 
 bool DebugAction::Execute(Event& event)
@@ -398,18 +400,36 @@ bool DebugAction::Execute(Event& event)
     }
     else if (text.find("transport") == 0 && isMod) 
     {
-        for (auto trans : WorldPosition(bot).getTransports())
+    std::vector<GenericTransport*> transports;
+
+    for (auto trans : WorldPosition(bot).getTransports())
+        transports.push_back(trans);
+
+        WorldPosition botPos(bot);
+
+        //Closest transport last = below in chat.
+        std::sort(transports.begin(), transports.end(), [botPos](GenericTransport* i, GenericTransport* j){ return botPos.distance(i) > botPos.distance(j); });
+
+        for (auto trans : transports)
         {
             GameObjectInfo const* data = sGOStorage.LookupEntry<GameObjectInfo>(trans->GetEntry());
+            std::ostringstream out;
+
             if (WorldPosition(bot).isOnTransport(trans))
             {
-                ai->TellPlayer(requester, "On transport " + std::string(data->name));
+                out << "On transport ";
             }
             else
             {
-                ai->TellPlayer(requester, "Not on transport " + std::string(data->name));
+                out << "Not on transport ";
             }
+
+            out<< " dist:" << std::fixed << std::setprecision(2) << botPos.distance(trans) << " offset:" << (botPos -trans).print();
+
+            ai->TellPlayer(requester, out);
         }
+
+        return true;
     }
     else if (text.find("ontrans") == 0 && isMod) 
     {
@@ -1494,15 +1514,19 @@ bool DebugAction::Execute(Event& event)
 
                 for (auto p : ppath)
                 {
-                    Creature* wpCreature = bot->SummonCreature(1, p.getX(), p.getY(), p.getZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 20000.0f);
+                    Creature* wpCreature = bot->SummonCreature(2334, p.getX(), p.getY(), p.getZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 20000.0f);
                     //addAura(246, wpCreature);
                     units.push_back(wpCreature->GetObjectGuid());
+
+                    if(!start)
+                        ai->AddAura(wpCreature, 1130);
+                    else
+                        ai->AddAura(wpCreature, 246);
+                        
 
                     if (!start)
                         start = wpCreature;
                 }
-
-                //FakeSpell(1064, bot, start, units.front(), units, {}, pos, pos);
             }
         }
         return true;

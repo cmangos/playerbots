@@ -60,20 +60,20 @@ GuidPosition GraveyardValue::Calculate()
 WorldSafeLocsEntry const* GraveyardValue::GetAnotherAppropriateClosestGraveyard() const
 {
     // near
-    bool foundNear = false;
     float distNear = std::numeric_limits<float>::max();
     WorldSafeLocsEntry const* entryNear = nullptr;
 
     // far
     WorldSafeLocsEntry const* entryFar = nullptr;
 
+    Corpse* corpse = bot->GetCorpse(); //
+    uint32 botMapId = corpse->GetMapId();
+    uint32 botZoneId = corpse->GetZoneId();
+
     for (auto mapValues : sWorld.GetGraveyardManager().GetGraveyardMap())
     {
         uint32 locId = mapValues.first;
         GraveYardData const& graveyardData = mapValues.second;
-
-        uint32 botMapId = bot->GetMapId();
-        uint32 botZoneId = bot->GetZoneId();
 
         //skip non-neutral or hostile graveyards
         if (graveyardData.team != bot->GetTeam() && graveyardData.team != TEAM_BOTH_ALLOWED)
@@ -96,22 +96,13 @@ WorldSafeLocsEntry const* GraveyardValue::GetAnotherAppropriateClosestGraveyard(
         if (bot->GetLevel() + 5 < (uint32)graveyardAreaEntry->area_level)
             continue;
 
-        float dist2 = (graveyardCoreEntry->x - bot->GetPositionX()) * (graveyardCoreEntry->x - bot->GetPositionX()) + (graveyardCoreEntry->y - bot->GetPositionY()) * (graveyardCoreEntry->y - bot->GetPositionY()) + (graveyardCoreEntry->z - bot->GetPositionZ()) * (graveyardCoreEntry->z - bot->GetPositionZ());
-        if (foundNear)
+        float dist = WorldPosition(corpse).sqDistance(graveyardCoreEntry);
+
+        if (dist < distNear)
         {
-            if (dist2 < distNear)
-            {
-                distNear = dist2;
-                entryNear = graveyardCoreEntry;
-            }
-        }
-        else
-        {
-            foundNear = true;
-            distNear = dist2;
+            distNear = dist;
             entryNear = graveyardCoreEntry;
         }
-
     }
 
     if (entryNear)

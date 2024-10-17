@@ -614,11 +614,10 @@ std::vector<WorldPosition*> ChooseTravelTargetAction::getLogicalPoints(Player* r
 
     //Loop over all points
     for (auto pos : travelPoints)
-    {
-        PerformanceMonitorOperation* pmo1 = sPerformanceMonitor.start(PERF_MON_VALUE, "AreaLevel", &context->performanceStack);
-        
+    {       
         if (pos->getMapId() == bot->GetMapId())
         {
+            PerformanceMonitorOperation* pmo1 = sPerformanceMonitor.start(PERF_MON_VALUE, "AreaLevel", &context->performanceStack);
             int32 areaLevel = pos->getAreaLevel();
             if (pmo1) pmo1->finish();
 

@@ -372,12 +372,15 @@ namespace ai
         void setHasToGen() { hasToGen = true; }
         bool gethasToGen() { return hasToGen || hasToFullGen; }
 
+        void LoadMaps();
+
         //Below are the steps to creating the content stored in the node, link and path tables. 
         //Nodes are placed based on key locations based on objects/creatures in the world and paths are generated using the standardpathfinder.
 
         void generateNpcNodes();                  //Creates node at innkeepers, flightmasters, spirithealers and bosses.
         void generateStartNodes();                //Create node at lvl1 players spawn.
         void generateAreaTriggerNodes();          //Create node at area trigger (dungeon portals/teleports) and also link the entry and exit.
+        void makeDockNode(TravelNode* node, WorldPosition pos, std::string dockName); //Create helper node to enter/exit transport.
         void generateTransportNodes();            //Create node at transport (boats/zepelins/elevators) and also create the path they move.
         void generateZoneMeanNodes();             //Create node at zone mean (the avg location of all objects and creatures of a certain area/zone)
         void generatePortalNodes();               //Create node at static portal (ie. dalaran->ironforge) and the desination of teleport spell (ie. teleport to ironforge)

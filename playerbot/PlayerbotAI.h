@@ -628,6 +628,11 @@ public:
 
     float GetLevelFloat() const;
 
+#ifdef BUILD_ELUNA
+    MaNGOS::unique_weak_ptr<PlayerbotAI> GetWeakPtr() const { return m_weakRef; }
+    void SetWeakPtr(MaNGOS::unique_weak_ptr<PlayerbotAI> weakRef) { m_weakRef = std::move(weakRef); }
+#endif
+
 private:
     bool UpdateAIReaction(uint32 elapsed, bool minimal, bool isStunned);
     void UpdateFaceTarget(uint32 elapsed, bool minimal);
@@ -665,6 +670,10 @@ protected:
     bool isPlayerFriend = false;
     bool isMovingToTransport = false;
     bool shouldLogOut = false;
+
+#ifdef BUILD_ELUNA
+    MaNGOS::unique_weak_ptr<PlayerbotAI> m_weakRef;
+#endif
 };
 
 template<typename T>

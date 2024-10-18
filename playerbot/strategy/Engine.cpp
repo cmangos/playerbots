@@ -231,7 +231,8 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
 
 #ifdef PLAYERBOT_ELUNA
                         // used by eluna    
-                        sEluna->OnActionExecute(ai, action->getName(), actionExecuted);
+                        if (Eluna* e = ai->GetBot()->GetEluna())
+                            e->OnActionExecute(ai, action->getName(), actionExecuted);
 #endif
 
                         if (actionExecuted)
@@ -594,7 +595,8 @@ void Engine::ProcessTriggers(bool minimal)
 
 #ifdef PLAYERBOT_ELUNA
             // used by eluna    
-            sEluna->OnTriggerCheck(ai, trigger->getName(), !event ? false : true);
+            if (Eluna* e = ai->GetBot()->GetEluna())
+                e->OnTriggerCheck(ai, trigger->getName(), !event ? false : true);
 #endif
 
             if (pmo) pmo->finish();

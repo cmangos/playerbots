@@ -423,6 +423,8 @@ namespace ai
         bool hasToSave = false;
         bool hasToGen = false;
         bool hasToFullGen = false;
+
+        uint32 mapsDone, mapsTotal;
     };
 }
 

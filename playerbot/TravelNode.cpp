@@ -464,12 +464,6 @@ bool TravelNode::isUselessLink(TravelNode* farNode)
     return false;
 }
 
-void TravelNode::cropUselessLink(TravelNode* farNode)
-{
-    if (isUselessLink(farNode))
-        removeLinkTo(farNode);
-}
-
 bool TravelNode::cropUselessLinks()
 {
     bool hasRemoved = false;
@@ -479,7 +473,8 @@ bool TravelNode::cropUselessLinks()
         TravelNode* farNode = firstLink.first;
         if (this->hasLinkTo(farNode) && this->isUselessLink(farNode))
         {
-            this->removeLinkTo(farNode);
+            this->removeLinkTo(farNode, false);
+            farNode->removeLinkTo(this, false);
             hasRemoved = true;
 
             if (sPlayerbotAIConfig.hasLog("crop.csv"))
@@ -495,7 +490,8 @@ bool TravelNode::cropUselessLinks()
         }
         if (farNode->hasLinkTo(this) && farNode->isUselessLink(this))
         {
-            farNode->removeLinkTo(this);
+            farNode->removeLinkTo(this, false);
+            this->removeLinkTo(farNode, false);
             hasRemoved = true;
 
             if (sPlayerbotAIConfig.hasLog("crop.csv"))

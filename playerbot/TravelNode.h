@@ -190,7 +190,6 @@ namespace ai
 
         //Removes links to other nodes that can also be reached by passing another node.
         bool isUselessLink(TravelNode* farNode);
-        void cropUselessLink(TravelNode* farNode);
         bool cropUselessLinks();
 
         //Returns all nodes that can be reached from this node.

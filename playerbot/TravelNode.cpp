@@ -216,9 +216,12 @@ uint32 TravelNodePath::getPrice()
 }
 
 //Creates or appends the path from one node to another. Returns if the path.
-TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postProcess)
+TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postProcess, bool pathOnly)
 {
     if (getMapId() != endNode->getMapId())
+        return nullptr;
+
+    if (pathOnly && hasLinkTo(endNode))
         return nullptr;
 
     TravelNodePath* returnNodePath;
@@ -292,7 +295,8 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
 
                 backNodePath->setComplete(canPath);
 
-                endNode->setLinkTo(this, true);
+                if(!pathOnly)
+                    endNode->setLinkTo(this, true);
 
                 backNodePath->setPath(reversePath);
 
@@ -310,17 +314,17 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
 
     returnNodePath->setComplete(canPath);
 
-    if (canPath && !hasLinkTo(endNode))
+    if (!pathOnly && canPath && !hasLinkTo(endNode))
         setLinkTo(endNode, true);
 
     returnNodePath->setPath(path);
 
-    if (!returnNodePath->getCalculated())
+    if (!pathOnly && !returnNodePath->getCalculated())
     {
         returnNodePath->calculateCost(!postProcess);
     }
 
-    if (canPath && endNode->hasPathTo(this) && !endNode->hasLinkTo(this))
+    if (!pathOnly && canPath && endNode->hasPathTo(this) && !endNode->hasLinkTo(this))
     {
         TravelNodePath* backNodePath = endNode->getPathTo(this);
 
@@ -2330,11 +2334,11 @@ void TravelNodeMap::generateNodes()
     generatePortalNodes();
 }
 
-void TravelNodeMap::generateWalkPathMap(uint32 mapId)
+void TravelNodeMap::generateWalkPathMap(uint32 mapId, bool pathOnly)
 {
     for (auto& startNode : sTravelNodeMap.getNodes(WorldPosition(mapId, 1, 1)))
     {
-        if (startNode->isLinked())
+        if (!pathOnly && startNode->isLinked())
             continue;
 
         for (auto& endNode : sTravelNodeMap.getNodes(*startNode->getPosition(), 2000.0f))
@@ -2348,17 +2352,21 @@ void TravelNodeMap::generateWalkPathMap(uint32 mapId)
             if (startNode->hasCompletePathTo(endNode))
                 continue;
 
+            if (pathOnly && startNode->hasPathTo(endNode))
+                continue;
+
             if (startNode->getMapId() != endNode->getMapId())
                 continue;
 
-            startNode->buildPath(endNode, nullptr, false);
+            startNode->buildPath(endNode, nullptr, false, pathOnly);
         }
 
-        startNode->setLinked(true);
+        if(!pathOnly)
+            startNode->setLinked(true);
     }
 }
 
-void TravelNodeMap::generateWalkPaths()
+void TravelNodeMap::generateWalkPaths(bool pathOnly)
 {
     //Pathfinder
     std::vector<WorldPosition> ppath;
@@ -2376,7 +2384,7 @@ void TravelNodeMap::generateWalkPaths()
     for (auto& map : nodeMaps)
     {
         uint32 mapId = map.first;
-        calculations.push_back(std::async([this,mapId] { generateWalkPathMap(mapId); }));
+        calculations.push_back(std::async([this,mapId, pathOnly] { generateWalkPathMap(mapId, pathOnly); }));
         bar.step();
     }
 
@@ -2758,6 +2766,15 @@ void TravelNodeMap::generateAll()
     sLog.outString("-Calculating coverage"); //This prevents crashes when bots from multiple maps try to calculate this on the fly.
     for (auto& node : getNodes())
         node->hasRouteTo(node);
+
+    if (false) //Only use this for debugging purposes. This will generate path attempts to see on the map if anything usefull be can be done with those.
+    {
+        hasToGen = true;
+        hasToFullGen = true;
+        generateWalkPaths(true);      
+        hasToGen = false;
+        hasToFullGen = false;
+    }
 }
 
 void TravelNodeMap::printMap()

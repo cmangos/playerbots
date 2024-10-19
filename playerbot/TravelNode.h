@@ -169,7 +169,7 @@ namespace ai
         bool hasPathTo(TravelNode* node) { return paths.find(node) != paths.end(); }
         TravelNodePath* getPathTo(TravelNode* node) { return &paths[node]; }
         bool hasCompletePathTo(TravelNode* node) { return hasPathTo(node) && getPathTo(node)->getComplete(); }
-        TravelNodePath* buildPath(TravelNode* endNode, Unit* bot, bool postProcess = false);
+        TravelNodePath* buildPath(TravelNode* endNode, Unit* bot, bool postProcess = false, bool pathOnly = false);
 
         void setLinkTo(TravelNode* node, float distance = 0.1f) {
             if (this != node)
@@ -386,8 +386,8 @@ namespace ai
         void generatePortalNodes();               //Create node at static portal (ie. dalaran->ironforge) and the desination of teleport spell (ie. teleport to ironforge)
         void generateNodes();                     //Call all above methods.
 
-        void generateWalkPathMap(uint32 mapId);   //Pathfind from all nodes to all nodes in a specific map. Create a path for all attemps and a link for all paths that actually reach the end node.
-        void generateWalkPaths();                 //Call above method for all maps async.
+        void generateWalkPathMap(uint32 mapId, bool pathOnly = false);   //Pathfind from all nodes to all nodes in a specific map. Create a path for all attemps and a link for all paths that actually reach the end node.
+        void generateWalkPaths(bool pathOnly = false);                 //Call above method for all maps async.
 
         //Helper nodes take a long time to generate and have limited impact. Disable is generation time becomes an issue. It does make some places connected to the network though like some caves and tauren start.
         void generateHelperNodes(uint32 mapId);   //For all nodes, objects and creatures, that can't be directly reached from one of the 5 nearby nodes, place a node on one of the paths of the nearby nodes so they can be reached or else place a node at the object. Also generate walkPaths for each node and the entire map again afterwards.

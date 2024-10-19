@@ -687,7 +687,7 @@ void TravelNode::print(bool printFailed)
             std::ostringstream out;
 
             uint32 pathType = 1;
-            if (!hasLinkTo(endNode))
+            if (!hasLinkTo(endNode) && !path->getComplete())
                 pathType = 0;
             else if (path->getPathType() == TravelNodePathType::transport)
                 pathType = 2;
@@ -697,7 +697,7 @@ void TravelNode::print(bool printFailed)
                 pathType = 4;
             else if (path->getPathType() == TravelNodePathType::flightPath)
                 pathType = 5;
-            else if (!path->getComplete())
+            else if (!hasLinkTo(endNode))
                 pathType = 6;
             else if (path->getPathType() == TravelNodePathType::staticPortal)
                 pathType = 7;

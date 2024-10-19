@@ -643,8 +643,12 @@ void RandomPlayerbotFactory::CreateRandomBots()
             postItt++;
         }
 
+        bar.SetOutputState(false);
+
         freeNames[raceAndGender].insert(freeNames[raceAndGender].end(), newNames.begin(), newNames.end());
     }
+
+    sLog.outString(">> Loaded names for " SIZEFMTD " race/gender combinations.", freeNames.size());
 
 	sLog.outString("Creating random bot characters...");
 	BarGoLink bar1(totalCharCount);

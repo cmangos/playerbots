@@ -1904,7 +1904,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         continue;
 
                     // prevent low items for high rank bots
-                    if (!setQuality)
+                    if (!setQuality && botRating > 1000)
                     {
                         uint32 ratingChanges = abs((int)botRating - 1500) / 100;
                         uint32 extraRatingChanges = 0;

@@ -24,6 +24,7 @@
 
 
 std::map<uint8, std::vector<uint8> > RandomPlayerbotFactory::availableRaces;
+std::unordered_map<uint8, std::vector<std::string>> RandomPlayerbotFactory::arenaTeamNames;
 
 constexpr RandomPlayerbotFactory::NameRaceAndGender RandomPlayerbotFactory::CombineRaceAndGender(uint8 gender, uint8 race)
 {
@@ -910,7 +911,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         sRandomPlayerbotMgr.arenaTeamsDeleted = true;
     }
 
-    uint32 arenaTeamNumber = 0;
+    uint32 arenaTeamNumber = sPlayerbotAIConfig.randomBotArenaTeams.size();
     std::map<uint32, uint32> teamsNumber;
     std::map<uint32, uint32> maxTeamsNumber;
     std::vector<ArenaType> arenaTypes = { ARENA_TYPE_2v2, ARENA_TYPE_3v3, ARENA_TYPE_5v5 };  // All arena types
@@ -960,6 +961,10 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
 
     uint32 attempts = 0;
     std::set<ArenaType> exhaustedTypes;
+    if (arenaTeamNames.empty()) {
+        LoadRandomArenaTeamNames();
+    }
+    
     for (; arenaTeamNumber < sPlayerbotAIConfig.randomBotArenaTeamCount; ++arenaTeamNumber)
     {
         if (attempts > sPlayerbotAIConfig.randomBotArenaTeamCount)
@@ -1003,7 +1008,13 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
             continue;
         }
 
-        std::string arenaTeamName = CreateRandomArenaTeamName(slot);
+        std::string arenaTeamName;
+        if (arenaTeamNames.count(slot) > 0 && !arenaTeamNames[slot].empty())
+        {
+            const auto& namesOfType = arenaTeamNames[slot];
+            arenaTeamName = namesOfType[urand(0, namesOfType.size() - 1)];
+        }
+
         if (arenaTeamName.empty())
         {
             exhaustedTypes.insert(type);
@@ -1036,10 +1047,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         //arenateam->SetStats(STAT_TYPE_WINS_WEEK, urand(0, arenateam->GetStats().games_week));
         //arenateam->SetStats(STAT_TYPE_GAMES_SEASON, urand(arenateam->GetStats().games_week, arenateam->GetStats().games_week * 5));
         //arenateam->SetStats(STAT_TYPE_WINS_SEASON, urand(arenateam->GetStats().wins_week, arenateam->GetStats().games_season));
-        teamsNumber[arenateam->GetType()]++;
         sObjectMgr.AddArenaTeam(arenateam);
-        sPlayerbotAIConfig.randomBotArenaTeams.insert(arenateam->GetId());
-
         for (uint32 i = 0; i < 10; i++)
         {
             if (arenateam->GetMembersSize() >= type)
@@ -1073,11 +1081,13 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         if (arenateam->GetMembersSize() < type)
         {
             sLog.outBasic("Random Arena team %s %s: failed to get enough members, deleting...", arenaTypeName.c_str(), arenateam->GetName().c_str());
-            teamsNumber[arenateam->GetType()]--;
-            sPlayerbotAIConfig.randomBotArenaTeams.erase(arenateam->GetId());
             arenateam->Disband(nullptr);
             return;
         }
+
+        teamsNumber[arenateam->GetType()]++;
+        sPlayerbotAIConfig.randomBotArenaTeams.insert(arenateam->GetId());
+        RemoveUsedName(slot, arenaTeamName);
 
         // set random rating
         arenateam->SetRatingForAll(0);
@@ -1089,31 +1099,35 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
     sLog.outString("%d random bot arena teams available", arenaTeamNumber);
 }
 
-std::string RandomPlayerbotFactory::CreateRandomArenaTeamName(uint32 randomType)
+void RandomPlayerbotFactory::LoadRandomArenaTeamNames()
 {
-    auto result = CharacterDatabase.Query("SELECT MAX(name_id) FROM ai_playerbot_arena_team_names");
+    auto result = CharacterDatabase.PQuery("SELECT n.name, n.type FROM ai_playerbot_arena_team_names n "
+        "LEFT OUTER JOIN arena_team e ON e.name = n.name "
+        "WHERE e.arenateamid IS NULL");
     if (!result)
     {
         sLog.outError("No more names left for random arena teams");
-        return "";
+        return;
     }
 
-    Field *fields = result->Fetch();
-    uint32 maxId = fields[0].GetUInt32();
-
-    uint32 id = urand(0, maxId);
-    result = CharacterDatabase.PQuery("SELECT n.name FROM ai_playerbot_arena_team_names n "
-        "LEFT OUTER JOIN arena_team e ON e.name = n.name "
-        "WHERE e.arenateamid IS NULL AND n.name_id >= '%u' and n.type = '%u' LIMIT 1", id, randomType);
-    if (!result)
+    do
     {
-        sLog.outError("No more names left for random arena teams of this type");
-        return "";
-    }
+        Field* fields = result->Fetch();
+        std::string aname = fields[0].GetString();
+        uint8 atype = fields[1].GetUInt8();
 
-    fields = result->Fetch();
-    std::string aname = fields[0].GetString();
-    return aname;
+        arenaTeamNames[atype].push_back(aname);
+    } while (result->NextRow());
+
+}
+
+void RandomPlayerbotFactory::RemoveUsedName(uint8 teamKey, const std::string& nameToRemove) {
+    auto it = arenaTeamNames.find(teamKey);
+    if (it != arenaTeamNames.end()) {
+        std::vector<std::string>& names = it->second;
+
+        names.erase(std::remove(names.begin(), names.end(), nameToRemove), names.end());
+    }
 }
 
 void RandomPlayerbotFactory::CheckCaptainAvailability(Player* player, std::vector<ObjectGuid>& availableCaptains, ObjectGuid captain, const std::vector<ArenaType>& arenaTypes) {

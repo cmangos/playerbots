@@ -260,7 +260,10 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
     if (bot->GetLevel() >= sPlayerbotAIConfig.minEnchantingBotLevel)
     {
         sLog.outDetail("Initializing enchant templates...");
-        LoadEnchantContainer();
+        if (m_EnchantContainer.empty())
+        {
+            LoadEnchantContainer();
+        }
     }
 
     InitEquipment(incremental, syncWithMaster);

@@ -52,13 +52,15 @@ class RandomPlayerbotFactory
         static void CheckCaptainAvailability(Player* player, std::vector<ObjectGuid>& availableCaptains, ObjectGuid captain, const std::vector<ArenaType>& arenaTypes);
 	private:
         std::string CreateRandomBotName(NameRaceAndGender raceAndGender);
-        static std::string CreateRandomArenaTeamName(uint32 randomType);
+        static void LoadRandomArenaTeamNames();
+        static void RemoveUsedName(uint8 teamKey, const std::string& nameToRemove);
 
         uint8 GetRandomClass();
         uint8 GetRandomRace(uint8 cls);
     private:
         uint32 accountId;
         static std::map<uint8, std::vector<uint8> > availableRaces;
+        static std::unordered_map<uint8, std::vector<std::string>> arenaTeamNames;
 };
 
 #endif

@@ -215,128 +215,116 @@ uint32 TravelNodePath::getPrice()
     return taxiPath->price;
 }
 
+
+uint32 TravelNode::getAreaTriggerId()
+{
+    for (auto link : *getLinks())
+    {
+        if (link.second->getPathType() != TravelNodePathType::areaTrigger)
+            continue;
+
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(link.second->getPathObject());
+        if (!atEntry)
+            continue;
+
+        WorldPosition inPos = WorldPosition(atEntry->mapid, atEntry->x, atEntry->y, atEntry->z - 4.0f, 0);
+
+        if (*getPosition() == inPos)
+            return link.second->getPathObject();
+    }
+
+    return 0;
+}
+
+bool TravelNode::isAreaTriggerTarget(uint32 areaTriggerId)
+{
+    for (uint32 i = 0; i < sAreaTriggerStore.GetNumRows(); i++)
+    {
+        if (areaTriggerId && areaTriggerId != i)
+            continue;
+
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(i);
+        if (!atEntry)
+            continue;
+
+        AreaTrigger const* at = sObjectMgr.GetAreaTrigger(i);
+        if (!at)
+            continue;
+
+        WorldPosition outPos = WorldPosition(at->target_mapId, at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
+
+        if (*getPosition() == outPos)
+            return true;
+    }
+
+    return false;
+}
+
 //Creates or appends the path from one node to another. Returns if the path.
-TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postProcess, bool pathOnly)
+TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postProcess)
 {
     if (getMapId() != endNode->getMapId())
         return nullptr;
 
-    if (pathOnly && hasLinkTo(endNode))
-        return nullptr;
-
     TravelNodePath* returnNodePath;
 
-    if (!hasPathTo(endNode))                                //Create path if it doesn't exists
-        returnNodePath = setPathTo(endNode, TravelNodePath(), false);
-    else
-        returnNodePath = getPathTo(endNode);                //Get the exsisting path.
+    returnNodePath = getPathTo(endNode);                    
 
-    if (returnNodePath->getComplete())                      //Path is already complete. Return it.
+    if (returnNodePath->getComplete())                      
         return returnNodePath;
 
     std::vector<WorldPosition> path = returnNodePath->getPath();
 
+    WorldPosition startPos = *getPosition();     
+    WorldPosition endPos = *endNode->getPosition();
+
     if (path.empty())
-        path = { *getPosition() };                      //Start the path from the current Node.
+        path = { startPos };                      
 
-    WorldPosition* endPos = endNode->getPosition();     //Build the path to the end Node.
+    path = endPos.getPathFromPath(path, bot);     
+    bool canPath = endPos.isPathTo(path);         
 
-    path = endPos->getPathFromPath(path, bot);          //Pathfind from the existing path to the end Node.
+    if (canPath && path.size() == 2 && this->getDistance(endNode) > 5.0f) //Very small path probably bad pathfinder or flying. Stop using it.
+        canPath = false;
 
-    bool canPath = endPos->isPathTo(path);              //Check if we reached our destination.
-
-    if (!canPath && endNode->hasLinkTo(this)) //Unable to find a path? See if the reverse is possible.
+    //Cheat a little for walk -> portal/transport.
+    if (!canPath && !isTransport() && !getAreaTriggerId() && (endNode->getAreaTriggerId() || endNode->isTransport()))
     {
-        TravelNodePath backNodePath = *endNode->getPathTo(this);
-
-        if (backNodePath.getPathType() == TravelNodePathType::walk)
+        if (endPos.isPathTo(path, 20.0f))
         {
-            std::vector<WorldPosition> bPath = backNodePath.getPath();
-
-            if (!backNodePath.getComplete()) //Build it if it's not already complete.
-            {
-                if (bPath.empty())
-                    bPath = { *endNode->getPosition() };            //Start the path from the end Node.
-
-                WorldPosition* thisPos = getPosition();             //Build the path to this Node.
-
-                bPath = thisPos->getPathFromPath(bPath, bot);         //Pathfind from the existing path to the this Node.
-
-                canPath = thisPos->isPathTo(bPath);              //Check if we reached our destination.
-            }
-            else
-                canPath = true;
-
-            if (canPath)
-            {
-                std::reverse(bPath.begin(), bPath.end());
-                path = bPath;
-            }
-        }
-    }    
-
-    //Transports are (probably?) not solid at this moment. We need to walk over them so we need extra code for this.
-    //Some portals are 'too' solid so we can't properly walk in them. Again we need to bypass this.
-    if (!isTransport() && !isPortal() && (endNode->isPortal() || endNode->isTransport()))
-    {
-        if (endNode->isTransport() && path.back().isInWater()) //Do not swim to boats.
-            canPath = false;
-        else if (!canPath && endPos->isPathTo(path, 20.0f)) //Cheat a little for transports and portals.
-        {
-            path.push_back(*endPos);
+            path.push_back(endPos);
             canPath = true;
-
-            if (!endNode->hasPathTo(this) || !endNode->getPathTo(this)->getComplete())
-            {
-                std::vector<WorldPosition> reversePath = path;
-                reverse(reversePath.begin(), reversePath.end());
-
-                TravelNodePath* backNodePath = endNode->setPathTo(this, TravelNodePath(), false);
-
-                backNodePath->setComplete(canPath);
-
-                if(!pathOnly)
-                    endNode->setLinkTo(this, true);
-
-                backNodePath->setPath(reversePath);
-
-                backNodePath->calculateCost(!postProcess);
-            }
         }
     }
 
-    if (isTransport() && path.size() > 1)
+    TravelNodePath* backNodePath; //Get/Build the reverse path.
+
+    if (!endNode->hasPathTo(this))
+        backNodePath = endNode->buildPath(this, bot, postProcess);
+    else
+        backNodePath = endNode->getPathTo(this);
+
+    if (!canPath)
     {
-        WorldPosition secondPos = *std::next(path.begin()); //This is to prevent bots from jumping in the water from a transport. Need to remove this when transports are properly handled.
-        if (secondPos.getTerrain() && secondPos.isInWater())
-            canPath = false;
+        std::vector<WorldPosition> backPath = backNodePath->getPath(); 
+
+        if (startPos.isPathTo(backPath))
+        {
+            std::reverse(backPath.begin(), backPath.end());
+            path = backPath;
+            canPath = true;
+        }
     }
-
-    returnNodePath->setComplete(canPath);
-
-    if (!pathOnly && canPath && !hasLinkTo(endNode))
-        setLinkTo(endNode, true);
 
     returnNodePath->setPath(path);
+    returnNodePath->setComplete(canPath);
 
-    if (!pathOnly && !returnNodePath->getCalculated())
+    if (canPath && !hasLinkTo(endNode))
+        setLinkTo(endNode);
+
+    if (!returnNodePath->getCalculated())
     {
         returnNodePath->calculateCost(!postProcess);
-    }
-
-    if (!pathOnly && canPath && endNode->hasPathTo(this) && !endNode->hasLinkTo(this))
-    {
-        TravelNodePath* backNodePath = endNode->getPathTo(this);
-
-        std::vector<WorldPosition> reversePath = path;
-        reverse(reversePath.begin(), reversePath.end());
-        backNodePath->setPath(reversePath);
-        endNode->setLinkTo(this, true);
-
-        if (!backNodePath->getCalculated())
-        {
-            backNodePath->calculateCost(!postProcess);
-        }
     }
 
     return returnNodePath;
@@ -2330,13 +2318,13 @@ void TravelNodeMap::generateNodes()
     generatePortalNodes();
 }
 
-void TravelNodeMap::generateWalkPathMap(uint32 mapId, bool pathOnly)
+void TravelNodeMap::generateWalkPathMap(uint32 mapId)
 {
     for (auto& startNode : sTravelNodeMap.getNodes(WorldPosition(mapId, 1, 1)))
     {
-        if (!pathOnly && startNode->isLinked())
+        if (startNode->isLinked())
             continue;
-
+        
         for (auto& endNode : sTravelNodeMap.getNodes(*startNode->getPosition(), 2000.0f))
         {
             if (endNode->isTransport() && endNode->isLinked())
@@ -2348,21 +2336,17 @@ void TravelNodeMap::generateWalkPathMap(uint32 mapId, bool pathOnly)
             if (startNode->hasCompletePathTo(endNode))
                 continue;
 
-            if (pathOnly && startNode->hasPathTo(endNode))
-                continue;
-
             if (startNode->getMapId() != endNode->getMapId())
                 continue;
 
-            startNode->buildPath(endNode, nullptr, false, pathOnly);
+            startNode->buildPath(endNode, nullptr, false);
         }
 
-        if(!pathOnly)
-            startNode->setLinked(true);
+        startNode->setLinked(true);
     }
 }
 
-void TravelNodeMap::generateWalkPaths(bool pathOnly)
+void TravelNodeMap::generateWalkPaths()
 {
     //Pathfinder
     std::vector<WorldPosition> ppath;
@@ -2380,7 +2364,7 @@ void TravelNodeMap::generateWalkPaths(bool pathOnly)
     for (auto& map : nodeMaps)
     {
         uint32 mapId = map.first;
-        calculations.push_back(std::async([this,mapId, pathOnly] { generateWalkPathMap(mapId, pathOnly); }));
+        calculations.push_back(std::async([this,mapId] { generateWalkPathMap(mapId); }));
         bar.step();
     }
 
@@ -2796,15 +2780,6 @@ void TravelNodeMap::generateAll()
     sLog.outString("-Calculating coverage"); //This prevents crashes when bots from multiple maps try to calculate this on the fly.
     for (auto& node : getNodes())
         node->hasRouteTo(node);
-
-    if (false) //Only use this for debugging purposes. This will generate path attempts to see on the map if anything usefull be can be done with those.
-    {
-        hasToGen = true;
-        hasToFullGen = true;
-        generateWalkPaths(true);      
-        hasToGen = false;
-        hasToFullGen = false;
-    }
 }
 
 void TravelNodeMap::printMap()

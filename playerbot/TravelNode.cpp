@@ -2473,6 +2473,11 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
                 if (node->getPosition()->canPathTo(pos.first, nullptr)) //
                     continue;
 
+                TravelNode* otherNode = getNode(pos.first, nullptr, 1.0f);
+
+                if (otherNode && node->hasLinkTo(otherNode))
+                    continue;
+
                 for (auto& path : *node->getPaths())
                 {
                     WorldPosition prevPoint;

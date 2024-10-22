@@ -424,6 +424,12 @@ bool DebugAction::Execute(Event& event)
                 out << "Not on transport ";
             }
 
+            std::string transportName = trans->GetName();
+            if (transportName.empty())
+                transportName = data->name;
+
+            out << transportName << " (" << trans->GetEntry() << ")";
+
             out<< " dist:" << std::fixed << std::setprecision(2) << botPos.distance(trans) << " offset:" << (botPos -trans).print();
 
             ai->TellPlayer(requester, out);

@@ -1501,14 +1501,18 @@ TravelNodeRoute TravelNodeMap::getRoute(WorldPosition startPos, WorldPosition en
         return TravelNodeRoute();
 
     std::vector<WorldPosition> newStartPath;
-    std::vector<TravelNode*> startNodes = m_nodes, endNodes = m_nodes;
+    std::vector<TravelNode*> startNodes = getNodes(startPos), endNodes = getNodes(endPos);
+
+    uint32 startNr = std::min(5, (int)startNodes.size()-1);
+    uint32 endNr = std::min(5, (int)endNodes.size()-1);
+
     //Partial sort to get the closest 5 nodes at the begin of the array.        
-    std::partial_sort(startNodes.begin(), startNodes.begin() + 5, startNodes.end(), [startPos](TravelNode* i, TravelNode* j) {return i->fDist(startPos) < j->fDist(startPos); });
-    std::partial_sort(endNodes.begin(), endNodes.begin() + 5, endNodes.end(), [endPos](TravelNode* i, TravelNode* j) {return i->fDist(endPos) < j->fDist(endPos); });
+    std::partial_sort(startNodes.begin(), startNodes.begin() + startNr, startNodes.end(), [startPos](TravelNode* i, TravelNode* j) {return i->getPosition()->sqDistance(startPos) < j->getPosition()->sqDistance(startPos); });
+    std::partial_sort(endNodes.begin(), endNodes.begin() + endNr, endNodes.end(), [endPos](TravelNode* i, TravelNode* j) {return i->getPosition()->sqDistance(endPos) < j->getPosition()->sqDistance(endPos); });
 
     //Cycle over the combinations of these 5 nodes.
     uint32 startI = 0, endI = 0;
-    while (startI < 5 && endI < 5)
+    while (startI <= startNr && endI <= endNr)
     {
         TravelNode* startNode = startNodes[startI];
         TravelNode* endNode = endNodes[endI];
@@ -1554,7 +1558,7 @@ TravelNodeRoute TravelNodeMap::getRoute(WorldPosition startPos, WorldPosition en
             botNode->setPoint(startPos);
 
             endI = 0;
-            while (endI < 5)
+            while (endI <= endNr)
             {
                 TravelNode* endNode = endNodes[endI];
                 TravelNodeRoute route = getRoute(botNode, endNode, bot);

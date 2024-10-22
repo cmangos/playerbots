@@ -403,6 +403,28 @@ bool TravelNode::isUselessLink(TravelNode* farNode)
     {
         farPath = getPathTo(farNode);
         farLength = farPath->getDistance();
+
+        if (uint32 areaTriggerId = getAreaTriggerId()) //If area triggers are linked to a nearby exit remove all other links.
+        {
+            bool farIsTarget = farNode->isAreaTriggerTarget();
+
+            for (auto& link : *getLinks())
+            {
+                TravelNode* nearNode = link.first;
+
+                if (farNode == nearNode)
+                    continue;
+
+                if (farNode->getMapId() != nearNode->getMapId())
+                    continue;
+
+                WorldPosition nearPos = *nearNode->getPosition();
+                float nearLength = link.second->getDistance();
+
+                if (!farIsTarget && nearNode->isAreaTriggerTarget() && nearLength < 20.0f)
+                    return true;
+            }
+        }
     }
     else
         farLength = getDistance(farNode);
@@ -419,6 +441,9 @@ bool TravelNode::isUselessLink(TravelNode* farNode)
         if (farNode->hasLinkTo(this) && !nearNode->hasLinkTo(this))
             continue;
 
+        if (nearNode->getAreaTriggerId()) //This node might get removed later, can not use it as a faster route.
+            continue;
+
         if (nearNode->hasLinkTo(farNode))
         {
             //Is it quicker to go past second node to reach first node instead of going directly?
@@ -433,6 +458,9 @@ bool TravelNode::isUselessLink(TravelNode* farNode)
         else
         {
             if (!nearNode->hasRouteTo(farNode, true))
+                continue;
+
+            if (nearNode->getAreaTriggerId()) //This node might get removed later, can not use it as a faster route.
                 continue;
 
             TravelNodeRoute route = sTravelNodeMap.getRoute(nearNode, farNode, nullptr);
@@ -2390,6 +2418,9 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
         if (node->isTransport())
             continue;
 
+        if (node->getAreaTriggerId())
+            continue;
+
         places_to_reach.push_back(make_pair(GuidPosition(0, *node->getPosition()), node->getName()));
     }
 
@@ -2428,6 +2459,9 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
                 TravelNode* node = startNodes[i];
 
                 if (node->isTransport())
+                    continue;
+
+                if (node->getAreaTriggerId())
                     continue;
 
                 if (node->getPosition()->canPathTo(pos.first, nullptr)) //

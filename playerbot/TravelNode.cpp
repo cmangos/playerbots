@@ -2950,6 +2950,8 @@ void TravelNodeMap::saveNodeStore(bool force)
     std::unordered_map<TravelNode*, uint32> saveNodes;
     std::vector<TravelNode*> anodes = sTravelNodeMap.getNodes();
 
+    std::sort(anodes.begin(), anodes.end(), [](TravelNode* i, TravelNode* j) {return i->getName() < j->getName(); });
+
     WorldDatabase.BeginTransaction();
 
     BarGoLink bar(anodes.size());
@@ -2982,7 +2984,14 @@ void TravelNodeMap::saveNodeStore(bool force)
         {
             TravelNode* node = anodes[i];
 
+            std::vector<std::pair<TravelNode*, TravelNodePath*>> links;
+
             for (auto& link : *node->getLinks())
+                links.push_back(std::make_pair(link.first, link.second));
+
+            std::sort(links.begin(), links.end(), [](std::pair<TravelNode*, TravelNodePath*> i, std::pair<TravelNode*, TravelNodePath*> j) {return i.first->getName() < j.first->getName(); });
+
+            for (auto& link : links)
             {
                 TravelNodePath* path = link.second;
 

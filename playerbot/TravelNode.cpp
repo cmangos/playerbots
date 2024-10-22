@@ -1989,8 +1989,6 @@ void TravelNodeMap::generateAreaTriggerNodes()
         else
             nodeName = inPos.getAreaName(false) + " portal";
 
-        TravelNode* entryNode = sTravelNodeMap.getNode(outPos, NULL, 20.0f); //Entry side, portal exit.
-
         TravelNode* outNode = sTravelNodeMap.addNode(outPos, nodeName, true, true); //Exit size, portal exit.
 
         TravelNode* inNode = sTravelNodeMap.getNode(inPos, NULL, 5.0f); //Entry side, portal center.
@@ -2099,10 +2097,14 @@ void TravelNodeMap::makeDockNode(TravelNode* node, WorldPosition pos, std::strin
 void TravelNodeMap::generateTransportNodes()
 {
     for (uint32 entry = 1; entry <= sGOStorage.GetMaxEntry(); ++entry)
-    {
+    {        
         auto data = sGOStorage.LookupEntry<GameObjectInfo>(entry);
+
         if (data && (data->type == GAMEOBJECT_TYPE_TRANSPORT || data->type == GAMEOBJECT_TYPE_MO_TRANSPORT))
         {
+            if (data->displayId == 808) //Remove plunger
+                continue;
+
             TransportAnimation const* animation = sTransportMgr.GetTransportAnimInfo(entry);
 
             uint32 pathId = data->moTransport.taxiPathId;
@@ -2123,7 +2125,7 @@ void TravelNodeMap::generateTransportNodes()
                     TransportPathContainer aPath = animation->Path;
                     float timeStart;
 
-                    for (auto& transport : WorldPosition().getGameObjectsNear(0,entry))
+                    for (auto& transport : WorldPosition().getGameObjectsNear(0, entry))
                     {
                         GuidPosition guidP(transport);
                         prevNode = nullptr;
@@ -2155,8 +2157,8 @@ void TravelNodeMap::generateTransportNodes()
 
                                 if (data->displayId == 3831) //Subway
                                     exitPos.setZ(exitPos.getZ() - 10.0f);
-                                if (data->displayId == 808) //Gnome elevator
-                                    exitPos.setZ(exitPos.getZ() - 1.24f);
+                                if (data->displayId == 807) //Vator
+                                    exitPos.setZ(exitPos.getZ() - 1.25f);
                                 if (data->displayId == 455) //Undervator
                                     exitPos.setZ(exitPos.getZ() - 0.46f);
 
@@ -2207,7 +2209,7 @@ void TravelNodeMap::generateTransportNodes()
 
                                     if (data->displayId == 3831) //Subway
                                         exitPos.setZ(exitPos.getZ() - 10.0f);
-                                    if (data->displayId == 808) //Gnome elevator
+                                    if (data->displayId == 807) //Vator
                                         exitPos.setZ(exitPos.getZ() - 1.24f);
                                     if (data->displayId == 455) //Undervator
                                         exitPos.setZ(exitPos.getZ() - 0.46f);
@@ -2252,7 +2254,7 @@ void TravelNodeMap::generateTransportNodes()
                     if (p->delay > 0)
                     {
                         TravelNode* node = sTravelNodeMap.addNode(pos, data->name, true, true, true, entry);
-                                                
+
                         WorldPosition exitPos = pos;
 
                         if (data->displayId == 3015)  //Boat

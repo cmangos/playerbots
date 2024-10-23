@@ -964,7 +964,34 @@ bool DebugAction::Execute(Event& event)
 
         guidP.printWKT(out);
 
+
         ai->TellPlayerNoFacing(requester, out);
+
+        std::ostringstream out2;
+        
+        FactionTemplateEntry const* requestFaction = sFactionTemplateStore.LookupEntry(requester->GetFaction());
+        FactionTemplateEntry const* objectFaction = sFactionTemplateStore.LookupEntry(guidP.GetGameObjectInfo()->faction);
+        FactionTemplateEntry const* humanFaction = sFactionTemplateStore.LookupEntry(1);
+        FactionTemplateEntry const* orcFaction = sFactionTemplateStore.LookupEntry(2);
+
+        std::map<ReputationRank, std::string> rep;
+
+        rep[REP_HATED] = "hated";
+        rep[REP_HOSTILE] = "hostile";
+        rep[REP_UNFRIENDLY] = "unfriendly";
+        rep[REP_NEUTRAL] = "neutral";
+        rep[REP_FRIENDLY] = "friendly";
+        rep[REP_HONORED] = "honored";
+        rep[REP_REVERED] = "revered";
+        rep[REP_EXALTED] = "exalted";
+
+        ReputationRank reactionRequest = PlayerbotAI::GetFactionReaction(requestFaction, objectFaction);
+        ReputationRank reactionHum = PlayerbotAI::GetFactionReaction(humanFaction, objectFaction);
+        ReputationRank reactionOrc = PlayerbotAI::GetFactionReaction(orcFaction, objectFaction);
+
+        out2 << " faction:" << guidP.GetGameObjectInfo()->faction << " reaction me: "  << rep[reactionRequest] << ",alliance: "<< rep[reactionHum] << " ,horde: "<< rep[reactionOrc];
+
+        ai->TellPlayerNoFacing(requester, out2);
 
         std::unordered_map<uint32, std::string>  types;
         types[GAMEOBJECT_TYPE_DOOR] = "GAMEOBJECT_TYPE_DOOR";

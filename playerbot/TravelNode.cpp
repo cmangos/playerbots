@@ -2987,7 +2987,7 @@ void TravelNodeMap::saveNodeStore(bool force)
     std::unordered_map<TravelNode*, uint32> saveNodes;
     std::vector<TravelNode*> anodes = sTravelNodeMap.getNodes();
 
-    std::sort(anodes.begin(), anodes.end(), [](TravelNode* i, TravelNode* j) {return i->getName() < j->getName(); });
+    std::sort(anodes.begin(), anodes.end(), [](TravelNode* i, TravelNode* j) {return i->getName() + std::to_string(i->getMapId()) + std::to_string(i->getX()) < j->getName() + std::to_string(j->getMapId()) + std::to_string(j->getX()); });
 
     WorldDatabase.BeginTransaction();
 
@@ -3026,7 +3026,7 @@ void TravelNodeMap::saveNodeStore(bool force)
             for (auto& link : *node->getLinks())
                 links.push_back(std::make_pair(link.first, link.second));
 
-            std::sort(links.begin(), links.end(), [](std::pair<TravelNode*, TravelNodePath*> i, std::pair<TravelNode*, TravelNodePath*> j) {return i.first->getName() < j.first->getName(); });
+            std::sort(links.begin(), links.end(), [](std::pair<TravelNode*, TravelNodePath*> i, std::pair<TravelNode*, TravelNodePath*> j) {return i.first->getName() + std::to_string(i.first->getMapId()) + std::to_string(i.first->getX()) < j.first->getName() + std::to_string(j.first->getMapId()) + std::to_string(j.first->getX()); });
 
             for (auto& link : links)
             {

@@ -284,9 +284,6 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
     path = endPos.getPathFromPath(path, bot);     
     bool canPath = endPos.isPathTo(path);         
 
-    if (canPath && path.size() == 2 && this->getDistance(endNode) > 5.0f) //Very small path probably bad pathfinder or flying. Stop using it.
-        canPath = false;
-
     //Cheat a little for walk -> portal/transport.
     if (!canPath && !isTransport() && !getAreaTriggerId() && (endNode->getAreaTriggerId() || endNode->isTransport()))
     {
@@ -313,6 +310,32 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
             std::reverse(backPath.begin(), backPath.end());
             path = backPath;
             canPath = true;
+        }
+    }
+
+    if (canPath && path.size() == 2 && this->getDistance(endNode) > 5.0f) //Very small path probably bad pathfinder or flying. Stop using it.
+        canPath = false;
+
+    if (canPath && path.size() > 2) //Do not allow the path to slope too much at the end (pathfinder cheating)
+    {
+        WorldPosition firstPos = path.front();
+        WorldPosition secondPos = path[1];
+
+        float vDist = fabs(firstPos.getZ() - secondPos.getZ());
+        float hDist = firstPos.fDist(secondPos);
+
+        if (vDist > 10 && (hDist == 0 || vDist / hDist > 2))
+            canPath = false;
+        else
+        {
+            WorldPosition firstPos = path.back();
+            WorldPosition secondPos = path[path.size() - 2];
+
+            float vDist = fabs(firstPos.getZ() - secondPos.getZ());
+            float hDist = firstPos.fDist(secondPos);
+
+            if (vDist > 10 && (hDist == 0 || vDist / hDist > 2))
+                canPath = false;
         }
     }
 

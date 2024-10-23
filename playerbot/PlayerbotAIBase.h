@@ -5,10 +5,12 @@ class PlayerbotMgr;
 class ChatHandler;
 class PerformanceMonitorOperation;
 
+#include <memory>
+
 class PlayerbotAIBase
 {
 public:
-	PlayerbotAIBase();
+    PlayerbotAIBase();
 
 public:
     bool IsActive() const;
@@ -26,5 +28,6 @@ protected:
     
 protected:
 	uint32 aiInternalUpdateDelay;
-    PerformanceMonitorOperation* totalPmo = nullptr;
+
+    std::unique_ptr<PerformanceMonitorOperation> totalPmo;
 };

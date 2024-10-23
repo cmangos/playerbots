@@ -64,9 +64,9 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
             if(AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier()) != ItemUsage::ITEM_USAGE_AH)
                 continue;
 
-            PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "IsMoreProfitableToSellToAHThanToVendor", &context->performanceStack);
+            auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "IsMoreProfitableToSellToAHThanToVendor", &context->performanceStack);
             bool isMoreProfitableToSellToAHThanToVendor = ItemUsageValue::IsMoreProfitableToSellToAHThanToVendor(item->GetProto(), bot);
-            if (pmo) pmo->finish();
+            pmo.reset();
 
             if (!isMoreProfitableToSellToAHThanToVendor)
                 continue;
@@ -312,9 +312,9 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
                 break;
             case ItemUsage::ITEM_USAGE_AH:
             {
-                PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "IsWorthBuyingFromAhToResellAtAH", &context->performanceStack);
+                auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "IsWorthBuyingFromAhToResellAtAH", &context->performanceStack);
                 bool isWorthBuyingFromAhToResellAtAH = ItemUsageValue::IsWorthBuyingFromAhToResellAtAH(sObjectMgr.GetItemPrototype(auction->itemTemplate), totalCost, auction->itemCount);
-                if (pmo) pmo->finish();
+                pmo.reset();
 
                 if (!isWorthBuyingFromAhToResellAtAH)
                     continue;

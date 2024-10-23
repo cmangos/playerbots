@@ -74,6 +74,7 @@ private:
     void InitEquipment(bool incremental, bool syncWithMaster, bool progressive = sPlayerbotAIConfig.randomGearProgression, bool partialUpgrade = false);
     void InitEquipmentNew(bool incremental);
     bool CanEquipItem(ItemPrototype const* proto, uint32 desiredQuality);
+    void InitAllSkills();
     void InitTradeSkills();
     void UpdateTradeSkills();
     void SetRandomSkill(uint16 id);

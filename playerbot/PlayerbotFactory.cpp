@@ -175,7 +175,7 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
     bool isRandomBot = sRandomPlayerbotMgr.IsRandomBot(bot) && bot->GetPlayerbotAI() && !bot->GetPlayerbotAI()->HasRealPlayerMaster() && !bot->GetPlayerbotAI()->IsInRealGuild();
 
     sLog.outDetail("Resetting player...");
-    PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Reset");
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Reset");
     //ClearSkills();
     ClearSpells();
 
@@ -209,23 +209,16 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
             bot->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
         }
     }
-    if (pmo) pmo->finish();
+    pmo.reset();
 
-    pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Bags");
     sLog.outDetail("Initializing bags...");
     InitBags();
-    if (pmo) pmo->finish();
 
-    pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Spells1");
     sLog.outDetail("Initializing spells (step 1)...");
     InitAvailableSpells();
-    if (pmo) pmo->finish();
 
     sLog.outDetail("Initializing skills (step 1)...");
-    pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Skills1");
-    InitSkills();
-    InitTradeSkills();
-    if (pmo) pmo->finish();
+    InitAllSkills();
 
     pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Talents");
     sLog.outDetail("Initializing talents...");
@@ -237,33 +230,28 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
         sPlayerbotDbStore.Reset(ai);
 
     ai->ResetStrategies(incremental); // fix wrong stored strategy
-    if (pmo) pmo->finish();
+    pmo.reset();
 
     pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Spells2");
     sLog.outDetail("Initializing spells (step 2)...");
     InitAvailableSpells();
     InitSpecialSpells();
-    if (pmo) pmo->finish();
+    pmo.reset();
 
     if (isRealRandomBot)
     {
-        pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Mounts");
         sLog.outDetail("Initializing mounts...");
         InitMounts();
-        if (pmo) pmo->finish();
     }
 
-    pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Skills2");
     sLog.outDetail("Initializing skills (step 2)...");
     UpdateTradeSkills();
-    if (pmo) pmo->finish();
 
     if (isRealRandomBot)
     {
-        pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Reputations");
         sLog.outDetail("Initializing reputations...");
         InitReputations();
-        if (pmo) pmo->finish();
+        
     }
 
     pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Equip");
@@ -276,37 +264,27 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
 
     InitEquipment(incremental, syncWithMaster);
     InitGems();
-    if (pmo) pmo->finish();
+    pmo.reset();
 
     if (isRandomBot)
     {
-        pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Ammo");
         sLog.outDetail("Initializing ammo...");
         InitAmmo();
-        if (pmo) pmo->finish();
 
-        pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Food");
         sLog.outDetail("Initializing food...");
         InitFood();
-        if (pmo) pmo->finish();
 
-        pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Potions");
         sLog.outDetail("Initializing potions...");
         InitPotions();
-        if (pmo) pmo->finish();
 
-        pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Reagents");
         sLog.outDetail("Initializing reagents...");
         InitReagents();
-        if (pmo) pmo->finish();
     }
 
     if (!incremental)
     {
-        pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Consumables");
         sLog.outDetail("Initializing consumables...");
         AddConsumables();
-        if (pmo) pmo->finish();
     }
 
     if (!incremental && isRandomBot)
@@ -316,31 +294,28 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
         InitSecondEquipmentSet();
         if (pmo) pmo->finish();*/
 
-        pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Inventory");
         sLog.outDetail("Initializing inventory...");
         InitInventory();
-        if (pmo) pmo->finish();
     }
 
     if (isRandomBot)
     {
-        pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Guilds & ArenaTeams");
+        auto pmo_guild_teams = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Guilds & ArenaTeams");
         sLog.outDetail("Initializing guilds & ArenaTeams");
         InitGuild();
 #ifndef MANGOSBOT_ZERO
         if (bot->GetLevel() >= 70)
             InitArenaTeam();
 #endif
-        if (pmo) pmo->finish();
     }
 
-	if (bot->GetLevel() >= 10) {
-		pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Pet");
-		sLog.outDetail("Initializing pet...");
-		InitPet();
+    if (bot->GetLevel() >= 10)
+    {
+        auto pmo_pet = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Pet");
+        sLog.outDetail("Initializing pet...");
+        InitPet();
         InitPetSpells();
-		if (pmo) pmo->finish();
-	}
+    }
 
     if (isRandomBot)
     {
@@ -357,10 +332,8 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
 
     if (isRandomBot)
     {
-        pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_TaxiNodes");
         sLog.outDetail("Initializing taxi...");
         InitTaxiNodes();
-        if (pmo) pmo->finish();
     }
 
     pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Save");
@@ -368,7 +341,7 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
     if (sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") < 10 * IN_MILLISECONDS)
         bot->SaveToDB();
     sLog.outDetail("Done.");
-    if (pmo) pmo->finish();
+    pmo.reset();
 }
 
 void PlayerbotFactory::Refresh()
@@ -388,6 +361,7 @@ void PlayerbotFactory::Refresh()
 
 void PlayerbotFactory::AddConsumables()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Consumables");
    switch (bot->getClass())
    {
       case CLASS_PRIEST:
@@ -956,6 +930,7 @@ void PlayerbotFactory::ResetQuests()
 
 void PlayerbotFactory::InitReputations()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Reputations");
     // list of factions
     std::list<uint32> factions;
 
@@ -2269,6 +2244,7 @@ void PlayerbotFactory::InitSecondEquipmentSet()
 
 void PlayerbotFactory::InitBags()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Bags");
     for (uint8 slot = INVENTORY_SLOT_BAG_START; slot < INVENTORY_SLOT_BAG_END; ++slot)
     {
         Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
@@ -2412,6 +2388,13 @@ void PlayerbotFactory::AddGems(Item* item)
 #else
     return;
 #endif
+}
+
+void PlayerbotFactory::InitAllSkills()
+{
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Skills1");
+    InitSkills();
+    InitTradeSkills();
 }
 
 void PlayerbotFactory::InitTradeSkills()
@@ -2604,6 +2587,7 @@ void PlayerbotFactory::InitTradeSkills()
 
 void PlayerbotFactory::UpdateTradeSkills()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Skills2");
     for (int i = 0; i < sizeof(tradeSkills) / sizeof(uint32); ++i)
     {
         if (bot->GetSkillValue(tradeSkills[i]) == 1)
@@ -2785,6 +2769,7 @@ void PlayerbotFactory::SetRandomSkill(uint16 id)
 
 void PlayerbotFactory::InitAvailableSpells()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Spells1");
     bot->learnDefaultSpells();
     bot->learnClassLevelSpells(true);
 
@@ -3039,6 +3024,7 @@ void PlayerbotFactory::ClearAllItems()
 
 void PlayerbotFactory::InitAmmo()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Ammo");
     if (bot->getClass() != CLASS_HUNTER && bot->getClass() != CLASS_ROGUE && bot->getClass() != CLASS_WARRIOR)
         return;
 
@@ -3097,6 +3083,7 @@ void PlayerbotFactory::InitAmmo()
 
 void PlayerbotFactory::InitMounts()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Mounts");
     uint32 firstmount =
 #ifdef MANGOSBOT_ZERO
         40
@@ -3235,6 +3222,7 @@ void PlayerbotFactory::InitMounts()
 
 void PlayerbotFactory::InitPotions()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Potions");
     uint32 effects[] = { SPELL_EFFECT_HEAL, SPELL_EFFECT_ENERGIZE };
     for (int i = 0; i < 2; ++i)
     {
@@ -3264,6 +3252,7 @@ void PlayerbotFactory::InitPotions()
 
 void PlayerbotFactory::InitFood()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Food");
     uint32 categories[] = { 11, 59 };
     for (int i = 0; i < 2; ++i)
     {
@@ -3292,6 +3281,7 @@ void PlayerbotFactory::InitFood()
 
 void PlayerbotFactory::InitReagents()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Reagents");
     std::list<uint32> items;
     uint32 regCount = 1;
     switch (bot->getClass())
@@ -3452,6 +3442,7 @@ void PlayerbotFactory::CancelAuras()
 
 void PlayerbotFactory::InitInventory()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Inventory");
     //InitInventoryTrade();
     //InitInventoryEquip();
     InitInventorySkill();
@@ -4120,6 +4111,7 @@ void PlayerbotFactory::InitGems() //WIP
 
 void PlayerbotFactory::InitTaxiNodes()
 {
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_TaxiNodes");
     uint32 startMap = bot->GetMapId();
 
     if (startMap == 530) //BE=EK, DREA=KAL

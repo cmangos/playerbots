@@ -80,6 +80,22 @@ bool DebugAction::Execute(Event& event)
 
         return true;
     }
+    else if (text.find("area") == 0 && isMod)
+    {       
+        WorldPosition point(requester);
+
+        AreaTableEntry const* area = point.getArea();
+
+        std::ostringstream out;
+
+        out << point.getAreaName(true, false); 
+
+        out << "," << area->team << " (" << (area->team != FACTION_GROUP_MASK_ALLIANCE ? (area->team != FACTION_GROUP_MASK_HORDE ? "neutral" : "horde") : "alliance") << ")";
+
+        ai->TellPlayerNoFacing(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+
+        return true;
+    }
     else if (text == "gy" && isMod)
     {
         for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)

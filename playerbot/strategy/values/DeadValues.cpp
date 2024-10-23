@@ -92,6 +92,9 @@ WorldSafeLocsEntry const* GraveyardValue::GetAnotherAppropriateClosestGraveyard(
         if (graveyardZoneId == botZoneId)
             continue;
 
+        if (!graveyardAreaEntry)
+            continue;
+
         //skip higher level zones
         if (bot->GetLevel() + 5 < (uint32)graveyardAreaEntry->area_level)
             continue;

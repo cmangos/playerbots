@@ -2467,12 +2467,23 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
         return;
 
     {
+        uint32 step = 0, rStep = 0, lastNStep = 0, maxStep = 0;
+
+        for (auto& pos : places_to_reach)
+        {
+            step++;
+            rStep += step;
+        }
+
+        maxStep = rStep;
+
+        step = 0;
+        rStep = 0;
+
         m_nMapMtx.lock();
-        BarGoLink bar(places_to_reach.size());
+        BarGoLink bar(maxStep);
         bar.SetOutputState(false);
         m_nMapMtx.unlock();
-
-        uint32 step = 0, lastNStep = 0;
 
         for (auto& pos : places_to_reach)
         {
@@ -2539,7 +2550,8 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
 
             m_nMapMtx.lock();
             step++;
-            uint32 curNStep = (step * 50) / places_to_reach.size();
+            rStep += step;
+            uint32 curNStep = (rStep * 50) / maxStep;
             if (curNStep != lastNStep)
             {
                 printf("\r");
@@ -2556,7 +2568,9 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
             }
 
             bar.SetOutputState(true);
-            bar.step();
+            for (uint32 i = 0; i < step; i++)                
+                bar.step();
+        
             m_nMapMtx.unlock();
         }
 

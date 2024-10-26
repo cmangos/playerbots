@@ -958,13 +958,13 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         }
     }
 
-    uint32 attempts = 0;
+    uint32 attempts = arenaTeamNumber;
     std::set<ArenaType> exhaustedTypes;
     if (arenaTeamNames.empty()) {
         LoadRandomArenaTeamNames();
     }
     
-    for (; arenaTeamNumber < sPlayerbotAIConfig.randomBotArenaTeamCount; ++arenaTeamNumber)
+    for (; attempts < sPlayerbotAIConfig.randomBotArenaTeamCount; ++attempts)
     {
         if (attempts > sPlayerbotAIConfig.randomBotArenaTeamCount)
             break;
@@ -996,7 +996,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
             }
             if (noAvailableSlot)
             {
-                sLog.outError("Not enough captains for random arena teams available");
+                sLog.outError("Not enough captains for random arena teams, %u available", availableCaptains.size());
                 break;
             }
         }
@@ -1049,8 +1049,6 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
             }
             continue;
         }
-
-        attempts++;
 
         if (teamsNumber[type] >= maxTeamsNumber[type])
             continue;

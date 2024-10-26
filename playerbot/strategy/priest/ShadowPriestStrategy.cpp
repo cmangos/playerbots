@@ -817,6 +817,10 @@ void ShadowPriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("shadow word: pain", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("mind flay", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "no mana",
         NextAction::array(0, new NextAction("shoot", ACTION_NORMAL), NULL)));
 }

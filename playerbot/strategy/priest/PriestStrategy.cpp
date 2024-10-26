@@ -10,10 +10,6 @@ public:
     {
         creators["abolish disease"] = &abolish_disease;
         creators["abolish disease on party"] = &abolish_disease_on_party;
-        creators["greater heal"] = &greater_heal;
-        creators["greater heal on party"] = &greater_heal_on_party;
-        creators["heal"] = &heal;
-        creators["heal on party"] = &heal_on_party;
         creators["flash heal"] = &flash_heal;
         creators["flash heal on party"] = &flash_heal_on_party;
         creators["renew"] = &renew;
@@ -26,43 +22,11 @@ private:
 
     ACTION_NODE_A(abolish_disease_on_party, "abolish disease on party", "cure disease on party");
 
-    static ActionNode* greater_heal(PlayerbotAI* ai)
-    {
-        return new ActionNode("greater heal",
-            /*P*/ NextAction::array(0, new NextAction("remove shadowform"), NULL),
-            /*A*/ NextAction::array(0, new NextAction("heal"), NULL),
-            /*C*/ NULL);
-    }
-
-    static ActionNode* greater_heal_on_party(PlayerbotAI* ai)
-    {
-        return new ActionNode("greater heal on party",
-            /*P*/ NextAction::array(0, new NextAction("remove shadowform"), NULL),
-            /*A*/ NextAction::array(0, new NextAction("heal on party"), NULL),
-            /*C*/ NULL);
-    }
-
-    static ActionNode* heal(PlayerbotAI* ai)
-    {
-        return new ActionNode("heal",
-            /*P*/ NextAction::array(0, new NextAction("remove shadowform"), NULL),
-            /*A*/ NextAction::array(0, new NextAction("lesser heal"), NULL),
-            /*C*/ NULL);
-    }
-
-    static ActionNode* heal_on_party(PlayerbotAI* ai)
-    {
-        return new ActionNode("heal on party",
-            /*P*/ NextAction::array(0, new NextAction("remove shadowform"), NULL),
-            /*A*/ NextAction::array(0, new NextAction("lesser heal on party"), NULL),
-            /*C*/ NULL);
-    }
-
     static ActionNode* flash_heal(PlayerbotAI* ai)
     {
         return new ActionNode("flash heal",
             /*P*/ NextAction::array(0, new NextAction("remove shadowform"), NULL),
-            /*A*/ NextAction::array(0, new NextAction("greater heal"), NULL),
+            /*A*/ NextAction::array(0, new NextAction("flash heal"), NULL),
             /*C*/ NULL);
     }
 
@@ -70,7 +34,7 @@ private:
     {
         return new ActionNode("flash heal on party",
             /*P*/ NextAction::array(0, new NextAction("remove shadowform"), NULL),
-            /*A*/ NextAction::array(0, new NextAction("greater heal on party"), NULL),
+            /*A*/ NextAction::array(0, new NextAction("flash heal on party"), NULL),
             /*C*/ NULL);
     }
 
@@ -1240,7 +1204,7 @@ void PriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("greater heal", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("flash heal", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "target of attacker",
@@ -1659,7 +1623,7 @@ void PriestOffhealStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
 
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("greater heal on party", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("flash heal on party", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member medium health",
@@ -1672,7 +1636,7 @@ void PriestOffhealStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigg
 
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("greater heal on party", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("flash heal on party", ACTION_MEDIUM_HEAL), NULL)));
 }
 
 void PriestOffhealPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

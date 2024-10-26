@@ -1545,6 +1545,18 @@ void PaladinBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tri
 void PaladinBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     BoostStrategy::InitCombatTriggers(triggers);
+    
+    triggers.push_back(new TriggerNode(
+        "medium mana",
+        NextAction::array(0, new NextAction("divine plea", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("sacred shield", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("sacred shield", ACTION_NORMAL), NULL)));
 }
 
 void PaladinBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1555,6 +1567,10 @@ void PaladinBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigge
 void PaladinBoostPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     BoostPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("divine sacrifice", ACTION_HIGH + 1), NULL)));
 }
 
 void PaladinBoostPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

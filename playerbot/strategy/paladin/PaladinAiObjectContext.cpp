@@ -420,6 +420,8 @@ namespace ai
                 creators["hand of sacrifice"] = &TriggerFactoryInternal::hand_of_sacrifice;
                 creators["blessing of sacrifice"] = &TriggerFactoryInternal::blessing_of_sacrifice;
                 creators["crusader strike"] = &TriggerFactoryInternal::crusader_strike;
+                creators["hammer of the righteous"] = &TriggerFactoryInternal::hammer_of_the_righteous;
+                creators["shield of righteousness"] = &TriggerFactoryInternal::shield_of_righteousness;
             }
 
         private:
@@ -490,6 +492,8 @@ namespace ai
             static Trigger* hand_of_sacrifice(PlayerbotAI* ai) { return new HandOfSacrificeTrigger(ai); }
             static Trigger* blessing_of_sacrifice(PlayerbotAI* ai) { return new BlessingOfSacrificeTrigger(ai); }
             static Trigger* crusader_strike(PlayerbotAI* ai) { return new CrusaderStrikeTrigger(ai); }
+            static Trigger* hammer_of_the_righteous(PlayerbotAI* ai) { return new HammerOfTheRighteousTrigger(ai); }
+            static Trigger* shield_of_righteousness(PlayerbotAI* ai) { return new ShieldOfRighteousnessTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>
@@ -601,6 +605,11 @@ namespace ai
                 creators["divine illumination"] = &AiObjectContextInternal::divine_illumination;
                 creators["hand of sacrifice"] = &AiObjectContextInternal::hand_of_sacrifice;
                 creators["blessing of sacrifice"] = &AiObjectContextInternal::blessing_of_sacrifice;
+                creators["beacon of light"] = &AiObjectContextInternal::beacon_of_light;
+                creators["sacred shield"] = &AiObjectContextInternal::sacred_shield;
+                creators["divine plea"] = &AiObjectContextInternal::divine_plea;
+                creators["divine sacrifice"] = &AiObjectContextInternal::divine_sacrifice;
+                creators["shield of righteousness"] = &AiObjectContextInternal::shield_of_righteousness;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
@@ -711,6 +720,11 @@ namespace ai
             static Action* holy_shock_on_party(PlayerbotAI* ai) { return new CastHolyShockOnPartyAction(ai); }
             static Action* hand_of_sacrifice(PlayerbotAI* ai) { return new CastHandOfSacrificeAction(ai); }
             static Action* blessing_of_sacrifice(PlayerbotAI* ai) { return new CastBlessingOfSacrificeAction(ai); }
+            static Action* beacon_of_light(PlayerbotAI* ai) { return new CastBeaconOfLightAction(ai); }
+            static Action* sacred_shield(PlayerbotAI* ai) { return new CastSacredShieldAction(ai); }
+            static Action* divine_plea(PlayerbotAI* ai) { return new CastDivinePleaAction(ai); }
+            static Action* divine_sacrifice(PlayerbotAI* ai) { return new CastDivineSacrificeAction(ai); }
+            static Action* shield_of_righteousness(PlayerbotAI* ai) { return new CastShieldOfRighteousnessAction(ai); }
             static Action* update_pve_strats(PlayerbotAI* ai) { return new UpdatePaladinPveStrategiesAction(ai); }
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdatePaladinPvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdatePaladinRaidStrategiesAction(ai); }

@@ -40,8 +40,15 @@ namespace ai
 	//hammer of wrath
 	SPELL_ACTION(CastHammerOfWrathAction, "hammer of wrath");
 
+    // shield
+	SPELL_ACTION(CastShieldOfRighteousnessAction, "shield of righteousness");
+
 	// buffs
 	BUFF_ACTION(CastDivineFavorAction, "divine favor");
+	BUFF_ACTION(CastDivinePleaAction, "divine plea");
+	BUFF_ACTION(CastBeaconOfLightAction, "beacon of light");
+	BUFF_ACTION(CastSacredShieldAction, "sacred shield");
+	BUFF_ACTION(CastDivineSacrificeAction, "divine sacrifice");
 
 	// blessings
 	BUFF_ACTION(CastBlessingOfFreedomAction, "blessing of freedom");

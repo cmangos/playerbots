@@ -1060,7 +1060,7 @@ void RetributionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
         NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "exorcism",
+        "art of war",
         NextAction::array(0, new NextAction("exorcism", ACTION_NORMAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(

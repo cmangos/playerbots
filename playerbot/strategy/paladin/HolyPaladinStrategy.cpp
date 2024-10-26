@@ -1297,6 +1297,14 @@ void HolyPaladinBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     PaladinBoostStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0, new NextAction("divine sacrifice", ACTION_HIGH + 2), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("beacon of light", ACTION_NORMAL), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
         "divine illumination",
         NextAction::array(0, new NextAction("divine illumination", ACTION_HIGH + 1), NULL)));
 

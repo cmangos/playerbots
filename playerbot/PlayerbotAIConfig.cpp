@@ -728,6 +728,9 @@ bool PlayerbotAIConfig::Initialize()
 
     loadFreeAltBotAccounts();
 
+    sLog.outString("Loading arena teams...");
+    loadRandomBotArenaTeam();
+
     targetPosRecalcDistance = config.GetFloatDefault("AiPlayerbot.TargetPosRecalcDistance", 0.1f),
 
     sLog.outString("Loading area levels.");
@@ -917,6 +920,31 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
 
 
         } while (results->NextRow());
+    }
+}
+
+void PlayerbotAIConfig::loadRandomBotArenaTeam()
+{
+    randomBotArenaTeams.clear();
+
+    // Execute query to retrieve arena teams
+    if (auto results = CharacterDatabase.PQuery("SELECT arenateamid, type FROM arena_team"))
+    {
+        do
+        {
+            Field* fields = results->Fetch();
+            uint32 arenaId = fields[0].GetUInt32();
+            uint32 type = fields[1].GetUInt32();
+
+            // Insert arena team ID and type into the map
+            randomBotArenaTeams.insert({ arenaId, type });
+        } while (results->NextRow());
+
+        sLog.outBasic("%zu arena teams loaded", randomBotArenaTeams.size());
+    }
+    else
+    {
+        sLog.outError("Failed to load arena teams: query returned no results or encountered an error.");
     }
 }
 

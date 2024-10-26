@@ -913,6 +913,9 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
 
     uint32 arenaTeamNumber = sPlayerbotAIConfig.randomBotArenaTeams.size();
     std::map<uint32, uint32> teamsNumber;
+    for (const auto& [teamID, bracketType] : sPlayerbotAIConfig.randomBotArenaTeams) {
+        teamsNumber[bracketType]++;
+    }
     std::map<uint32, uint32> maxTeamsNumber;
     std::vector<ArenaType> arenaTypes = { ARENA_TYPE_2v2, ARENA_TYPE_3v3, ARENA_TYPE_5v5 };  // All arena types
     std::map<uint8, std::string> arenaTypeNames = {
@@ -920,19 +923,14 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
     {3, "3v3"},
     {5, "5v5"}
     };
-    maxTeamsNumber[ARENA_TYPE_2v2] = (uint32)(sPlayerbotAIConfig.randomBotArenaTeamCount * 0.4f);
+    maxTeamsNumber[ARENA_TYPE_2v2] = (uint32)(sPlayerbotAIConfig.randomBotArenaTeamCount * 0.5f);
     maxTeamsNumber[ARENA_TYPE_3v3] = (uint32)(sPlayerbotAIConfig.randomBotArenaTeamCount * 0.3f);
-    maxTeamsNumber[ARENA_TYPE_5v5] = (uint32)(sPlayerbotAIConfig.randomBotArenaTeamCount * 0.3f);
+    maxTeamsNumber[ARENA_TYPE_5v5] = (uint32)(sPlayerbotAIConfig.randomBotArenaTeamCount * 0.2f);
     std::vector<ObjectGuid> availableCaptains;
     for (std::vector<uint32>::iterator i = randomBots.begin(); i != randomBots.end(); ++i)
     {
         ObjectGuid captain(HIGHGUID_PLAYER, *i);
         ArenaTeam* arenateam = sObjectMgr.GetArenaTeamByCaptain(captain);
-        if (arenateam)
-        {
-            teamsNumber[arenateam->GetType()]++;
-            sPlayerbotAIConfig.randomBotArenaTeams.insert(arenateam->GetId());
-        }
 
         Player* player = sObjectMgr.GetPlayer(captain);
         if (player)
@@ -942,6 +940,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
                 if (arenateam)
                 {
                     teamsNumber[arenateam->GetType()]--;
+                    arenaTeamNumber--;
                     sPlayerbotAIConfig.randomBotArenaTeams.erase(arenateam->GetId());
                     arenateam->Disband(NULL);
                 }
@@ -970,19 +969,44 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         if (attempts > sPlayerbotAIConfig.randomBotArenaTeamCount)
             break;
 
-        if (availableCaptains.size() < 2)
+        // check if any team bracket can be made with remaining captains
+        if (availableCaptains.size() < 8)
         {
-            sLog.outError("Not enough captains for random arena teams available");
-            break;
+            std::unordered_map<ArenaType, uint8> availableType;
+            for (ObjectGuid captain : availableCaptains)
+            {
+                Player* player = sObjectMgr.GetPlayer(captain);
+                for (ArenaType type : arenaTypes) 
+                {
+                    uint8 slot = ArenaTeam::GetSlotByType(type);
+
+                    if (!player->GetArenaTeamId(slot)) 
+                    {
+                        availableType[type]++;
+                    }
+                }
+            }
+            bool noAvailableSlot = true;
+            for (ArenaType type : arenaTypes)
+            {
+                if (availableType[type] >= type && teamsNumber[type] < maxTeamsNumber[type])
+                {
+                    noAvailableSlot = false;
+                }
+            }
+            if (noAvailableSlot)
+            {
+                sLog.outError("Not enough captains for random arena teams available");
+                break;
+            }
         }
 
         // assign type of arena (2s, 3s or 5s)
         ArenaType type = arenaTypes[urand(0, arenaTypes.size() - 1)];
-        uint8 slot = static_cast<uint8>(type);
-        std::string arenaTypeName = arenaTypeNames[slot];
+        std::string arenaTypeName = arenaTypeNames[type];
 
         // skip if not enough captains for this type
-        if (availableCaptains.size() < slot) continue;
+        if (availableCaptains.size() < type) continue;
 
         // skip if no more names for this type
         if (exhaustedTypes.count(type) > 0) continue;
@@ -1009,9 +1033,9 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         }
 
         std::string arenaTeamName;
-        if (arenaTeamNames.count(slot) > 0 && !arenaTeamNames[slot].empty())
+        if (arenaTeamNames.count(type) > 0 && !arenaTeamNames[type].empty())
         {
-            const auto& namesOfType = arenaTeamNames[slot];
+            const auto& namesOfType = arenaTeamNames[type];
             arenaTeamName = namesOfType[urand(0, namesOfType.size() - 1)];
         }
 
@@ -1048,13 +1072,12 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         //arenateam->SetStats(STAT_TYPE_GAMES_SEASON, urand(arenateam->GetStats().games_week, arenateam->GetStats().games_week * 5));
         //arenateam->SetStats(STAT_TYPE_WINS_SEASON, urand(arenateam->GetStats().wins_week, arenateam->GetStats().games_season));
         sObjectMgr.AddArenaTeam(arenateam);
-        for (uint32 i = 0; i < 10; i++)
+        for (uint32 i = 0; i < availableCaptains.size(); i++)
         {
             if (arenateam->GetMembersSize() >= type)
                 break;
 
-            int index = urand(0, availableCaptains.size() - 1);
-            ObjectGuid possibleMember = availableCaptains[index];
+            ObjectGuid possibleMember = availableCaptains[i];
             if (possibleMember == captain)
                 continue;
 
@@ -1086,8 +1109,9 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         }
 
         teamsNumber[arenateam->GetType()]++;
-        sPlayerbotAIConfig.randomBotArenaTeams.insert(arenateam->GetId());
-        RemoveUsedName(slot, arenaTeamName);
+        arenaTeamNumber++;
+        sPlayerbotAIConfig.randomBotArenaTeams.insert({ arenateam->GetId(), arenateam->GetType() });
+        RemoveUsedName(type, arenaTeamName);
 
         // set random rating
         arenateam->SetRatingForAll(0);
@@ -1096,7 +1120,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         sLog.outBasic("Random Arena team %s %s: created", arenaTypeName.c_str(), arenateam->GetName().c_str());
     }
 
-    sLog.outString("%d random bot arena teams available", arenaTeamNumber);
+    sLog.outString("%u random bot arena teams available", arenaTeamNumber);
 }
 
 void RandomPlayerbotFactory::LoadRandomArenaTeamNames()
@@ -1133,18 +1157,22 @@ void RandomPlayerbotFactory::RemoveUsedName(uint8 teamKey, const std::string& na
 void RandomPlayerbotFactory::CheckCaptainAvailability(Player* player, std::vector<ObjectGuid>& availableCaptains, ObjectGuid captain, const std::vector<ArenaType>& arenaTypes) {
     bool allSlotsFilled = true;
 
-    for (ArenaType type : arenaTypes) {
+    for (ArenaType type : arenaTypes)
+    {
         uint8 slot = ArenaTeam::GetSlotByType(type);
 
-        if (!player->GetArenaTeamId(slot)) {
+        if (!player->GetArenaTeamId(slot))
+        {
             allSlotsFilled = false;
             break;
         }
     }
 
-    if (allSlotsFilled) {
+    if (allSlotsFilled)
+    {
         auto it = std::find(availableCaptains.begin(), availableCaptains.end(), captain);
-        if (it != availableCaptains.end()) {
+        if (it != availableCaptains.end())
+        {
             availableCaptains.erase(it);
         }
     }

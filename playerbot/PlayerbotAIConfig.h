@@ -176,7 +176,7 @@ public:
     bool deleteRandomBotGuilds;
     uint32 randomBotArenaTeamCount;
     bool deleteRandomBotArenaTeams;
-    std::set<uint32> randomBotArenaTeams;
+    std::unordered_map<uint32, uint32> randomBotArenaTeams;
 	bool RandombotsWalkingRPG;
 	bool RandombotsWalkingRPGInDoors;
     bool boostFollow;
@@ -348,6 +348,7 @@ public:
     void SetValue(std::string name, std::string value);
 
     void loadFreeAltBotAccounts();
+    void loadRandomBotArenaTeam();
 
     std::string GetTimestampStr();
 

@@ -307,6 +307,7 @@ namespace ai
                 creators["frost trap"] = &TriggerFactoryInternal::frost_trap;
                 creators["explosive trap"] = &TriggerFactoryInternal::explosive_trap;
                 creators["rapid fire"] = &TriggerFactoryInternal::rapid_fire;
+                creators["call of the wild"] = &TriggerFactoryInternal::call_of_the_wild;
                 creators["kill command"] = &TriggerFactoryInternal::kill_command;
                 creators["aspect of the hawk"] = &TriggerFactoryInternal::aspect_of_the_hawk;
                 creators["aspect of the wild"] = &TriggerFactoryInternal::aspect_of_the_wild;
@@ -344,6 +345,7 @@ namespace ai
                 creators["silencing shot on enemy healer"] = &TriggerFactoryInternal::silencing_shot_interrupt_healer;
                 creators["no beast"] = &TriggerFactoryInternal::no_beast;
                 creators["stealthed nearby"] = &TriggerFactoryInternal::stealthed_nearby;
+                creators["readiness"] = &TriggerFactoryInternal::readiness;
             }
 
         private:
@@ -377,6 +379,7 @@ namespace ai
             static Trigger* frost_trap(PlayerbotAI* ai) { return new FrostTrapTrigger(ai); }
             static Trigger* explosive_trap(PlayerbotAI* ai) { return new ExplosiveTrapTrigger(ai); }
             static Trigger* rapid_fire(PlayerbotAI* ai) { return new RapidFireTrigger(ai); }
+            static Trigger* call_of_the_wild(PlayerbotAI* ai) { return new CallOfTheWildBoostTrigger(ai); }
             static Trigger* kill_command(PlayerbotAI* ai) { return new KillCommandBoostTrigger(ai); }
             static Trigger* low_ammo(PlayerbotAI* ai) { return new HunterLowAmmoTrigger(ai); }
             static Trigger* no_ammo(PlayerbotAI* ai) { return new HunterNoAmmoTrigger(ai); }
@@ -386,6 +389,7 @@ namespace ai
             static Trigger* feign_death(PlayerbotAI* ai) { return new FeignDeathTrigger(ai); }
             static Trigger* no_beast(PlayerbotAI* ai) { return new HunterNoPet(ai); }
             static Trigger* stealthed_nearby(PlayerbotAI* ai) { return new StealthedNearbyTrigger(ai); }
+            static Trigger* readiness(PlayerbotAI* ai) { return new ReadinessBoostTrigger(ai); }
             static Trigger* aspect_of_the_viper(PlayerbotAI* ai) { return new AspectOfTheViperTrigger(ai); }
             static Trigger* aspect_of_the_pack(PlayerbotAI* ai) { return new AspectOfThePackTrigger(ai); }
             static Trigger* aspect_of_the_hawk(PlayerbotAI* ai) { return new AspectOfTheHawkTrigger(ai); }
@@ -454,7 +458,6 @@ namespace ai
                 creators["black arrow on snare target"] = &AiObjectContextInternal::black_arrow_snare;
                 creators["silencing shot"] = &AiObjectContextInternal::silencing_shot;
                 creators["silencing shot on enemy healer"] = &AiObjectContextInternal::silencing_shot_healer;
-                creators["readiness"] = &AiObjectContextInternal::readiness;
                 creators["steady shot"] = &AiObjectContextInternal::steady_shot;
                 creators["tame beast"] = &AiObjectContextInternal::tame_beast;
                 creators["flare"] = &AiObjectContextInternal::flare;
@@ -472,6 +475,8 @@ namespace ai
                 creators["explosive trap in place"] = &AiObjectContextInternal::explosive_trap_in_place;
                 creators["freezing trap in place"] = &AiObjectContextInternal::freezing_trap_in_place;
                 creators["dismiss pet"] = &AiObjectContextInternal::dismiss_pet;
+                creators["call of the wild"] = &AiObjectContextInternal::call_of_the_wild;
+                creators["kill shot"] = &AiObjectContextInternal::kill_shot;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
@@ -546,6 +551,8 @@ namespace ai
             static Action* frost_trap_in_place(PlayerbotAI* ai) { return new CastFrostTrapInPlaceAction(ai); }
             static Action* freezing_trap_in_place(PlayerbotAI* ai) { return new CastFreezingTrapInPlaceAction(ai); }
             static Action* dismiss_pet(PlayerbotAI* ai) { return new CastDismissPetAction(ai); }
+            static Action* call_of_the_wild(PlayerbotAI* ai) { return new CastCallOfTheWildAction(ai); }
+            static Action* kill_shot(PlayerbotAI* ai) { return new CastKillShotAction(ai); }
             static Action* update_pve_strats(PlayerbotAI* ai) { return new UpdateHunterPveStrategiesAction(ai); }
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdateHunterPvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdateHunterRaidStrategiesAction(ai); }

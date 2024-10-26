@@ -273,6 +273,8 @@ namespace ai
     SNARE_TRIGGER(WybernStingSnareTrigger, "wyvern sting");
     CAN_CAST_TRIGGER(MongooseBiteCastTrigger, "mongoose bite");
     BOOST_TRIGGER(BestialWrathBoostTrigger, "bestial wrath");
+    BOOST_TRIGGER(CallOfTheWildBoostTrigger, "call of the wild");
+    BOOST_TRIGGER(ReadinessBoostTrigger, "readiness");
 
     INTERRUPT_TRIGGER(SilencingShotInterruptTrigger, "silencing shot");
     INTERRUPT_HEALER_TRIGGER(SilencingShotInterruptHealerTrigger, "silencing shot");

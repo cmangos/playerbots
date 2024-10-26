@@ -5,6 +5,18 @@
 
 using namespace ai;
 
+class BeastMasteryHunterStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
+{
+public:
+    BeastMasteryHunterStrategyActionNodeFactory()
+    {
+        creators["arcane shot"] = &arcane_shot;
+    }
+
+private:
+    ACTION_NODE_C(arcane_shot, "arcane shot", "steady shot");
+};
+
 #ifdef MANGOSBOT_ZERO // Vanilla
 
 void BeastMasteryHunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -714,6 +726,10 @@ void BeastMasteryHunterAspectRaidStrategy::InitNonCombatTriggers(std::list<Trigg
 void BeastMasteryHunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     HunterStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "arcane shot",
+        NextAction::array(0, new NextAction("arcane shot", ACTION_NORMAL + 5), NULL)));
 }
 
 void BeastMasteryHunterStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

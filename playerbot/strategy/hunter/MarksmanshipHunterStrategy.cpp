@@ -914,6 +914,10 @@ void MarksmanshipHunterBuffRaidStrategy::InitNonCombatTriggers(std::list<Trigger
 void MarksmanshipHunterBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     HunterBoostStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "readiness",
+        NextAction::array(0, new NextAction("readiness", ACTION_NORMAL + 3), NULL)));
 }
 
 void MarksmanshipHunterBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -988,6 +988,10 @@ void HunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("hunter's mark", ACTION_NORMAL + 6), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "target critical health",
+        NextAction::array(0, new NextAction("kill shot", ACTION_NORMAL + 6), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "aimed shot",
         NextAction::array(0, new NextAction("aimed shot", ACTION_NORMAL + 2), NULL)));
 
@@ -1204,6 +1208,14 @@ void HunterBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "rapid fire",
         NextAction::array(0, new NextAction("rapid fire", ACTION_HIGH + 5), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "call of the wild",
+        NextAction::array(0, new NextAction("call of the wild", ACTION_HIGH + 5), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "kill command",
+        NextAction::array(0, new NextAction("kill command", ACTION_HIGH + 5), NULL)));
 }
 
 void HunterBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

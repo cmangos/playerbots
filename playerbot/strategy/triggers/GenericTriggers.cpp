@@ -459,10 +459,11 @@ bool DeflectSpellTrigger::IsActive()
     // warrior deflects all
     if (spell == "spell reflection")
         return true;
-
+#ifndef MANGOSBOT_TWO
     // human priest feedback
     if (spell == "feedback")
         return true;
+#endif // !MANGOS_BOT_TWO
 
     SpellSchoolMask deflectSchool = SpellSchoolMask(deflectSpell->EffectMiscValue[0]);
     SpellSchoolMask attackSchool = SPELL_SCHOOL_MASK_NONE;

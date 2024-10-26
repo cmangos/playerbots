@@ -14,21 +14,23 @@ namespace ai
     CURE_PARTY_TRIGGER(DispelMagicPartyMemberTrigger, "dispel magic", DISPEL_MAGIC);
     CURE_TRIGGER(CureDiseaseTrigger, "cure disease", DISPEL_DISEASE);
     CURE_PARTY_TRIGGER(PartyMemberCureDiseaseTrigger, "cure disease", DISPEL_DISEASE);
-    BUFF_TRIGGER_A(InnerFireTrigger, "inner fire");
+    BUFF_TRIGGER(InnerFireTrigger, "inner fire");
     BUFF_TRIGGER_A(ShadowformTrigger, "shadowform");
     BUFF_TRIGGER(InnerFocusTrigger, "inner focus");
     CC_TRIGGER(ShackleUndeadTrigger, "shackle undead");
     INTERRUPT_TRIGGER(SilenceTrigger, "silence");
     INTERRUPT_HEALER_TRIGGER(SilenceEnemyHealerTrigger, "silence");
+    DEBUFF_TRIGGER(DevouringPlagueTrigger, "devouring plague");
 
     // racials
-    DEBUFF_TRIGGER(DevouringPlagueTrigger, "devouring plague");
+#ifndef MANGOSBOT_TWO  
     BUFF_TRIGGER(TouchOfWeaknessTrigger, "touch of weakness");
     DEBUFF_TRIGGER(HexOfWeaknessTrigger, "hex of weakness");
     BUFF_TRIGGER(ShadowguardTrigger, "shadowguard");
     DEFLECT_TRIGGER(FeedbackTrigger, "feedback");
     SNARE_TRIGGER(ChastiseTrigger, "chastise");
     DEBUFF_TRIGGER(StarshardsTrigger, "starshards");
+#endif // !MANGOS_BOT_TWO
 
     BOOST_TRIGGER_A(ShadowfiendTrigger, "shadowfiend");
     CAN_CAST_TRIGGER(MindBlastTrigger, "mind blast");

@@ -817,10 +817,6 @@ void ShadowPriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("shadow word: pain", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "often",
-        NextAction::array(0, new NextAction("mind flay", ACTION_NORMAL), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "no mana",
         NextAction::array(0, new NextAction("shoot", ACTION_NORMAL), NULL)));
 }
@@ -917,6 +913,10 @@ void ShadowPriestAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     PriestAoeStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "ranged medium aoe",
+        NextAction::array(0, new NextAction("mind sear", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "shadow word: pain on attacker",
         NextAction::array(0, new NextAction("shadow word: pain on attacker", ACTION_HIGH + 1), NULL)));
 
@@ -975,12 +975,8 @@ void ShadowPriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
         NextAction::array(0, new NextAction("shadowform", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "feedback",
-        NextAction::array(0, new NextAction("feedback", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "medium mana",
-        NextAction::array(0, new NextAction("dispersion", ACTION_EMERGENCY + 5), NULL)));
+        NextAction::array(0, new NextAction("dispersion", ACTION_MOVE + 1), NULL)));
 }
 
 void ShadowPriestBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

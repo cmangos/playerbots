@@ -1463,10 +1463,6 @@ void PriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("fear ward", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "target of attacker",
-        NextAction::array(0, new NextAction("elune's grace", ACTION_HIGH + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "low mana",
         NextAction::array(0, new NextAction("shadowfiend", ACTION_HIGH), NULL)));
 }
@@ -1518,14 +1514,6 @@ void PriestBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers
     triggers.push_back(new TriggerNode(
         "fear ward",
         NextAction::array(0, new NextAction("fear ward", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "touch of weakness",
-        NextAction::array(0, new NextAction("touch of weakness", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "shadowguard",
-        NextAction::array(0, new NextAction("shadowguard", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "often",
@@ -1682,6 +1670,10 @@ void PriestOffdpsStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     if (ai->HasStrategy("aoe", BotState::BOT_STATE_COMBAT))
     {
         triggers.push_back(new TriggerNode(
+            "ranged medium aoe",
+            NextAction::array(0, new NextAction("mind sear", ACTION_HIGH + 2), NULL))); 
+        
+        triggers.push_back(new TriggerNode(
             "shadow word: pain on attacker",
             NextAction::array(0, new NextAction("shadow word: pain on attacker", ACTION_HIGH + 1), NULL)));
 
@@ -1697,10 +1689,6 @@ void PriestOffdpsStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "holy fire",
         NextAction::array(0, new NextAction("holy fire", ACTION_NORMAL + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "very often",
-        NextAction::array(0, new NextAction("starshards", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "smite",

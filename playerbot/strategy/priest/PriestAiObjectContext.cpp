@@ -285,14 +285,16 @@ namespace ai
                 creators["prayer of spirit on party"] = &TriggerFactoryInternal::prayer_of_spirit_on_party;
                 creators["shackle undead"] = &TriggerFactoryInternal::shackle_undead;
                 creators["discipline fire"] = &TriggerFactoryInternal::discipline_fire;
+#ifndef MANGOSBOT_TWO
                 creators["touch of weakness"] = &TriggerFactoryInternal::touch_of_weakness;
                 creators["hex of weakness"] = &TriggerFactoryInternal::hex_of_weakness;
                 creators["shadowguard"] = &TriggerFactoryInternal::shadowguard;
                 creators["starshards"] = &TriggerFactoryInternal::starshards;
                 creators["fear ward"] = &TriggerFactoryInternal::fear_ward;
                 creators["feedback"] = &TriggerFactoryInternal::feedback;
-                creators["binding heal"] = &TriggerFactoryInternal::binding_heal;
                 creators["chastise"] = &TriggerFactoryInternal::chastise;
+#endif // !MANGOS_BOT_TWO
+                creators["binding heal"] = &TriggerFactoryInternal::binding_heal;
                 creators["silence"] = &TriggerFactoryInternal::silence;
                 creators["silence on enemy healer"] = &TriggerFactoryInternal::silence_on_enemy_healer;
                 creators["shadowfiend"] = &TriggerFactoryInternal::shadowfiend;
@@ -305,14 +307,16 @@ namespace ai
             static Trigger* shadowfiend(PlayerbotAI* ai) { return new ShadowfiendTrigger(ai); }
             static Trigger* silence_on_enemy_healer(PlayerbotAI* ai) { return new SilenceEnemyHealerTrigger(ai); }
             static Trigger* silence(PlayerbotAI* ai) { return new SilenceTrigger(ai); }
-            static Trigger* chastise(PlayerbotAI* ai) { return new ChastiseTrigger(ai); }
             static Trigger* binding_heal(PlayerbotAI* ai) { return new BindingHealTrigger(ai); }
-            static Trigger* feedback(PlayerbotAI* ai) { return new FeedbackTrigger(ai); }
             static Trigger* fear_ward(PlayerbotAI* ai) { return new FearWardTrigger(ai); }
+#ifndef MANGOSBOT_TWO
+            static Trigger* chastise(PlayerbotAI* ai) { return new ChastiseTrigger(ai); }
+            static Trigger* feedback(PlayerbotAI* ai) { return new FeedbackTrigger(ai); }
             static Trigger* shadowguard(PlayerbotAI* ai) { return new ShadowguardTrigger(ai); }
             static Trigger* starshards(PlayerbotAI* ai) { return new StarshardsTrigger(ai); }
             static Trigger* hex_of_weakness(PlayerbotAI* ai) { return new HexOfWeaknessTrigger(ai); }
             static Trigger* touch_of_weakness(PlayerbotAI* ai) { return new TouchOfWeaknessTrigger(ai); }
+#endif // !MANGOS_BOT_TWO
             static Trigger* discipline_fire(PlayerbotAI* ai) { return new HolyFireTrigger(ai); }
             static Trigger* shadowform(PlayerbotAI* ai) { return new ShadowformTrigger(ai); }
             static Trigger* vampiric_embrace(PlayerbotAI* ai) { return new VampiricEmbraceTrigger(ai); }
@@ -405,6 +409,7 @@ namespace ai
                 creators["prayer of healing"] = &AiObjectContextInternal::prayer_of_healing;
                 creators["lightwell"] = &AiObjectContextInternal::lightwell;
                 creators["mind soothe"] = &AiObjectContextInternal::mind_soothe;
+#ifndef MANGOSBOT_TWO
                 creators["touch of weakness"] = &AiObjectContextInternal::touch_of_weakness;
                 creators["hex of weakness"] = &AiObjectContextInternal::hex_of_weakness;
                 creators["shadowguard"] = &AiObjectContextInternal::shadowguard;
@@ -416,6 +421,7 @@ namespace ai
                 creators["symbol of hope"] = &AiObjectContextInternal::symbol_of_hope;
                 creators["consume magic"] = &AiObjectContextInternal::consume_magic;
                 creators["chastise"] = &AiObjectContextInternal::chastise;
+#endif // !MANGOS_BOT_TWO
                 creators["shadow word: death"] = &AiObjectContextInternal::shadow_word_death;
                 creators["shadowfiend"] = &AiObjectContextInternal::shadowfiend;
                 creators["mass dispel"] = &AiObjectContextInternal::mass_dispel;
@@ -426,6 +432,7 @@ namespace ai
                 creators["holy fire"] = &AiObjectContextInternal::holy_fire;
                 creators["holy nova"] = &AiObjectContextInternal::holy_nova;
                 creators["penance on party"] = &AiObjectContextInternal::penance;
+                creators["mind sear"] = &AiObjectContextInternal::mind_sear;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
@@ -439,17 +446,19 @@ namespace ai
             static Action* mass_dispel(PlayerbotAI* ai) { return new CastMassDispelAction(ai); }
             static Action* shadowfiend(PlayerbotAI* ai) { return new CastShadowfiendAction(ai); }
             static Action* shadow_word_death(PlayerbotAI* ai) { return new CastShadowWordDeathAction(ai); }
+#ifndef MANGOSBOT_TWO
             static Action* chastise(PlayerbotAI* ai) { return new CastChastiseAction(ai); }
             static Action* consume_magic(PlayerbotAI* ai) { return new CastConsumeMagicAction(ai); }
             static Action* symbol_of_hope(PlayerbotAI* ai) { return new CastSymbolOfHopeAction(ai); }
             static Action* feedback(PlayerbotAI* ai) { return new CastFeedbackAction(ai); }
             static Action* elunes_grace(PlayerbotAI* ai) { return new CastElunesGraceAction(ai); }
             static Action* starshards(PlayerbotAI* ai) { return new CastStarshardsAction(ai); }
-            static Action* fear_ward(PlayerbotAI* ai) { return new CastFearWardAction(ai); }
-            static Action* desperate_prayer(PlayerbotAI* ai) { return new CastDesperatePrayerAction(ai); }
             static Action* shadowguard(PlayerbotAI* ai) { return new CastShadowguardAction(ai); }
             static Action* hex_of_weakness(PlayerbotAI* ai) { return new CastHexOfWeaknessAction(ai); }
             static Action* touch_of_weakness(PlayerbotAI* ai) { return new CastTouchOfWeaknessAction(ai); }
+#endif // !MANGOS_BOT_TWO
+            static Action* fear_ward(PlayerbotAI* ai) { return new CastFearWardAction(ai); }
+            static Action* desperate_prayer(PlayerbotAI* ai) { return new CastDesperatePrayerAction(ai); }
             static Action* mind_soothe(PlayerbotAI* ai) { return new CastMindSootheAction(ai); }
             static Action* lightwell(PlayerbotAI* ai) { return new CastLightwellAction(ai); }
             static Action* prayer_of_healing(PlayerbotAI* ai) { return new CastPrayerOfHealingAction(ai); }
@@ -510,6 +519,7 @@ namespace ai
             static Action* holy_fire(PlayerbotAI* ai) { return new CastHolyFireAction(ai); }
             static Action* holy_nova(PlayerbotAI* ai) { return new CastHolyNovaAction(ai); }
             static Action* penance(PlayerbotAI* ai) { return new CastPenanceOnPartyAction(ai); }
+            static Action* mind_sear(PlayerbotAI* ai) { return new CastMindSearAction(ai); }
             static Action* update_pve_strats(PlayerbotAI* ai) { return new UpdatePriestPveStrategiesAction(ai); }
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdatePriestPvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdatePriestRaidStrategiesAction(ai); }

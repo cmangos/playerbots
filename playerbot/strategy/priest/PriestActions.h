@@ -76,6 +76,7 @@ namespace ai
 
     // shadow talents
     SPELL_ACTION(CastMindFlayAction, "mind flay");
+    SPELL_ACTION(CastMindSearAction, "mind sear");
     RANGED_DEBUFF_ACTION(CastVampiricEmbraceAction, "vampiric embrace");
     BUFF_ACTION(CastShadowformAction, "shadowform");
     SPELL_ACTION(CastSilenceAction, "silence");
@@ -87,16 +88,19 @@ namespace ai
 
     // racials
     RANGED_DEBUFF_ACTION(CastDevouringPlagueAction, "devouring plague");
-    BUFF_ACTION(CastTouchOfWeaknessAction, "touch of weakness");
+#ifndef MANGOSBOT_TWO
     RANGED_DEBUFF_ACTION(CastHexOfWeaknessAction, "hex of weakness");
+    BUFF_ACTION(CastFeedbackAction, "feedback");
+    BUFF_ACTION(CastTouchOfWeaknessAction, "touch of weakness");
     BUFF_ACTION(CastShadowguardAction, "shadowguard");
-    HEAL_ACTION(CastDesperatePrayerAction, "desperate prayer");
     SPELL_ACTION_U(CastStarshardsAction, "starshards", (AI_VALUE2(uint8, "mana", "self target") > 50 && AI_VALUE(Unit*, "current target") && AI_VALUE2(float, "distance", "current target") > 15.0f));
     BUFF_ACTION(CastElunesGraceAction, "elune's grace");
-    BUFF_ACTION(CastFeedbackAction, "feedback");
     BUFF_ACTION(CastSymbolOfHopeAction, "symbol of hope");
     SPELL_ACTION(CastConsumeMagicAction, "consume magic");
     SNARE_ACTION(CastChastiseAction, "chastise");
+#endif // !MANGOS_BOT_TWO
+
+    HEAL_ACTION(CastDesperatePrayerAction, "desperate prayer");
 
     class CastRemoveShadowformAction : public Action 
     {

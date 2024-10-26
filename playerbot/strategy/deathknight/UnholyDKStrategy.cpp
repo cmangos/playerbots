@@ -21,7 +21,7 @@ public:
 		//creators["death and decay"] = &death_and_decay;
 		//creators["unholy pressence"] = &unholy_pressence;
 		//creators["raise dead"] = &raise_dead;
-		//creators["army of the dead"] = &army of the dead;
+		creators["army of the dead"] = &army_of_the_dead;
 		//creators["summon gargoyle"] = &army of the dead;
 		//creators["anti magic shell"] = &anti_magic_shell;
 		//creators["anti magic zone"] = &anti_magic_zone;
@@ -51,6 +51,13 @@ private:
 			/*A*/ NextAction::array(0, new NextAction("death strike"), NULL),
 			/*C*/ NULL);
 	}
+	static ActionNode* army_of_the_dead(PlayerbotAI* ai)
+	{
+		return new ActionNode("army of the dead",
+			/*P*/ NextAction::array(0, new NextAction("unholy pressence"), NULL),
+			/*A*/ NextAction::array(0, new NextAction("summon gargoyle"), NULL),
+			/*C*/ NULL);
+	}
 };
 
 NextAction** UnholyDKStrategy::GetDefaultCombatActions()
@@ -62,6 +69,10 @@ void UnholyDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     GenericDKStrategy::InitCombatTriggers(triggers);
 
+	triggers.push_back(new TriggerNode(
+		"often",
+		NextAction::array(0, new NextAction("army of the dead", ACTION_HIGH), NULL))); 
+	
 	triggers.push_back(new TriggerNode(
 		"often",
 		NextAction::array(0, new NextAction("ghoul frenzy", ACTION_NORMAL + 2), NULL)));

@@ -69,8 +69,8 @@ NextAction** FrostDKStrategy::GetDefaultCombatActions()
 {
 	return NextAction::array(0, 
 			new NextAction("melee", ACTION_NORMAL), 
-			new NextAction("frost strike", ACTION_NORMAL + 5),
-			new NextAction("obliterate", ACTION_NORMAL + 4), NULL);
+			new NextAction("frost strike", ACTION_NORMAL + 4),
+			new NextAction("obliterate", ACTION_NORMAL + 5), NULL);
 }
 
 void FrostDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)

@@ -180,6 +180,10 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("mind freeze on enemy healer", ACTION_HIGH + 1), NULL)));
 
 	triggers.push_back(new TriggerNode(
+		"enemy player ten yards",
+		NextAction::array(0, new NextAction("chains of ice", ACTION_HIGH + 10), NULL)));
+
+	triggers.push_back(new TriggerNode(
 		"enemy out of melee",
 		NextAction::array(0, new NextAction("icy touch", ACTION_NORMAL + 9),
 			new NextAction("death grip", ACTION_NORMAL + 9),

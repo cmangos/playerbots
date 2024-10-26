@@ -65,7 +65,8 @@ NextAction** BloodDKStrategy::GetDefaultCombatActions()
 {
 	return NextAction::array(0,
         new NextAction("melee", ACTION_NORMAL + 2),
-		new NextAction("heart strike", ACTION_NORMAL + 5),
+		//new NextAction("heart strike", ACTION_NORMAL + 5), // for blood dps, not tank
+		new NextAction("blood strike", ACTION_NORMAL + 2),
 		new NextAction("death strike", ACTION_NORMAL + 4),
 		new NextAction("rune strike", ACTION_NORMAL + 3), NULL);
 }
@@ -94,10 +95,18 @@ void BloodDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
         "lose aggro",
         NextAction::array(0, new NextAction("dark command", ACTION_HIGH + 3), NULL)));
 
+	triggers.push_back(new TriggerNode(
+		"lose aggro",
+		NextAction::array(0, new NextAction("icy touch", ACTION_HIGH + 2), NULL)));
+
     triggers.push_back(new TriggerNode(
         "low health",
         NextAction::array(0,
             new NextAction("blood tap", ACTION_HIGH + 5),
             new NextAction("vampiric blood", ACTION_HIGH + 3),
             new NextAction("death strike", ACTION_HIGH + 4), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"medium health",
+		NextAction::array(0, new NextAction("death strike", ACTION_HIGH + 1), NULL)));
 }

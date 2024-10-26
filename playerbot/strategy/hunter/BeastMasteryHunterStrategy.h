@@ -14,7 +14,7 @@ namespace ai
     class BeastMasteryHunterStrategy : public HunterStrategy
     {
     public:
-        BeastMasteryHunterStrategy(PlayerbotAI* ai) : HunterStrategy(ai) {}
+        BeastMasteryHunterStrategy(PlayerbotAI* ai);
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

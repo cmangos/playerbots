@@ -14,8 +14,13 @@ public:
     }
 
 private:
-    ACTION_NODE_C(arcane_shot, "arcane shot", "steady shot");
+    ACTION_NODE_A(arcane_shot, "arcane shot", "steady shot");
 };
+
+BeastMasteryHunterStrategy::BeastMasteryHunterStrategy(PlayerbotAI* ai) : HunterStrategy(ai)
+{
+    actionNodeFactories.Add(new BeastMasteryHunterStrategyActionNodeFactory());
+}
 
 #ifdef MANGOSBOT_ZERO // Vanilla
 

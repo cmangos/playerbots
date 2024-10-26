@@ -990,6 +990,14 @@ void RestorationShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "critical health",
+        NextAction::array(0, new NextAction("nature's swiftness", ACTION_CRITICAL_HEAL + 2), NULL))); 
+
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("nature's swiftness", ACTION_CRITICAL_HEAL + 2), NULL)));
+    
+    triggers.push_back(new TriggerNode(
+        "critical health",
         NextAction::array(0, new NextAction("healing wave", ACTION_CRITICAL_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -1092,6 +1100,22 @@ void RestorationShamanPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     RestorationShamanStrategy::InitCombatTriggers(triggers);
     ShamanPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("earth shield", ACTION_CRITICAL_HEAL + 1), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("earth shield on party", ACTION_CRITICAL_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("earth shield", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("earth shield on party", ACTION_MEDIUM_HEAL), NULL)));
 }
 
 void RestorationShamanPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

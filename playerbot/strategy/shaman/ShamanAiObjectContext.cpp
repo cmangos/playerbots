@@ -566,6 +566,7 @@ namespace ai
                 creators["elemental mastery"] = &AiObjectContextInternal::elemental_mastery;
                 creators["feral spirit"] = &AiObjectContextInternal::feral_spirit;
                 creators["shamanistic rage"] = &AiObjectContextInternal::shamanistic_rage;
+                creators["nature's swiftness"] = &AiObjectContextInternal::nature_s_swiftness;
             }
 
         private:
@@ -649,6 +650,7 @@ namespace ai
             static Action* elemental_mastery(PlayerbotAI* ai) { return new CastElementalMasteryAction(ai); }
             static Action* feral_spirit(PlayerbotAI* ai) { return new CastFeralSpiritAction(ai); }
             static Action* shamanistic_rage(PlayerbotAI* ai) { return new CastShamanisticRageAction(ai); }
+            static Action* nature_s_swiftness(PlayerbotAI* ai) { return new CastNaturesSwiftnessAction(ai); }
         };
     };
 };

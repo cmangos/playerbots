@@ -434,6 +434,7 @@ namespace ai
                 creators["chain lightning"] = &TriggerFactoryInternal::chain_lightning;
                 creators["stormstrike"] = &TriggerFactoryInternal::stormstrike;
                 creators["elemental mastery"] = &TriggerFactoryInternal::elemental_mastery;
+                creators["feral spirit"] = &TriggerFactoryInternal::feral_spirit;
             }
 
         private:
@@ -477,6 +478,7 @@ namespace ai
             static Trigger* chain_lightning(PlayerbotAI* ai) { return new ChainLightningTrigger(ai); }
             static Trigger* stormstrike(PlayerbotAI* ai) { return new StormstrikeTrigger(ai); }
             static Trigger* elemental_mastery(PlayerbotAI* ai) { return new ElementalMasteryTrigger(ai); }
+            static Trigger* feral_spirit(PlayerbotAI* ai) { return new FeralSpiritTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>
@@ -562,6 +564,8 @@ namespace ai
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
                 creators["earth shield on party tank"] = &AiObjectContextInternal::earth_shield_on_party_tank;
                 creators["elemental mastery"] = &AiObjectContextInternal::elemental_mastery;
+                creators["feral spirit"] = &AiObjectContextInternal::feral_spirit;
+                creators["shamanistic rage"] = &AiObjectContextInternal::shamanistic_rage;
             }
 
         private:
@@ -643,6 +647,8 @@ namespace ai
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdateShamanRaidStrategiesAction(ai); }
             static Action* earth_shield_on_party_tank(PlayerbotAI* ai) { return new CastEarthShieldOnPartyTankAction(ai); }
             static Action* elemental_mastery(PlayerbotAI* ai) { return new CastElementalMasteryAction(ai); }
+            static Action* feral_spirit(PlayerbotAI* ai) { return new CastFeralSpiritAction(ai); }
+            static Action* shamanistic_rage(PlayerbotAI* ai) { return new CastShamanisticRageAction(ai); }
         };
     };
 };

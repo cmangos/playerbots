@@ -456,11 +456,7 @@ namespace ai
         BloodlustTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "bloodlust") {}
     };
 
-    class MaelstromWeaponTrigger : public HasAuraTrigger
-    {
-    public:
-        MaelstromWeaponTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "maelstrom weapon") {}
-    };
+    HAS_AURA_TRIGGER_A(MaelstromWeaponTrigger, "maelstrom weapon");
 
     class WindShearInterruptEnemyHealerSpellTrigger : public InterruptEnemyHealerTrigger
     {
@@ -517,9 +513,6 @@ namespace ai
 
     CAN_CAST_TRIGGER(StormstrikeTrigger, "stormstrike");
 
-    class ElementalMasteryTrigger : public BuffTrigger
-    {
-    public:
-        ElementalMasteryTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "elemental mastery") {}
-    };
+    BUFF_TRIGGER(ElementalMasteryTrigger, "elemental mastery");
+    BUFF_TRIGGER(FeralSpiritTrigger, "feral spirit");
 }

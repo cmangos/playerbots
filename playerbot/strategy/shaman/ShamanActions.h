@@ -463,11 +463,9 @@ namespace ai
         CastEarthShieldOnPartyTankAction(PlayerbotAI* ai) : BuffOnTankAction(ai, "earth shield") {}
     };
 
-    class CastElementalMasteryAction : public CastBuffSpellAction
-    {
-    public:
-        CastElementalMasteryAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "elemental mastery") {}
-    };
+    BUFF_ACTION(CastElementalMasteryAction, "elemental mastery");
+    BUFF_ACTION(CastFeralSpiritAction, "feral spirit");
+    BUFF_ACTION(CastShamanisticRageAction, "shamanistic rage");
 
     class SetTotemBars : public Action
     {

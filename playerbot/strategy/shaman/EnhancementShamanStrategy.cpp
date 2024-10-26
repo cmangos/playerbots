@@ -916,12 +916,20 @@ void EnhancementShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     ShamanStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "stormstrike",
-        NextAction::array(0, new NextAction("stormstrike", ACTION_NORMAL + 1), NULL)));
-
+        "maelstrom weapon",
+        NextAction::array(0, new NextAction("lightning bolt", ACTION_HIGH + 3), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
+        "flame shock",
+        NextAction::array(0, new NextAction("flame shock", ACTION_HIGH + 2), NULL))); 
+    
     triggers.push_back(new TriggerNode(
         "shock",
-        NextAction::array(0, new NextAction("earth shock", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("earth shock", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "stormstrike",
+        NextAction::array(0, new NextAction("stormstrike", ACTION_NORMAL + 1), NULL)));
 }
 
 void EnhancementShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1238,6 +1246,14 @@ void EnhancementShamanBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
         NextAction::array(0, new NextAction("windfury weapon", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "feral spirit",
+        NextAction::array(0, new NextAction("feral spirit", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium mana",
+        NextAction::array(0, new NextAction("shamanistic rage", ACTION_HIGH), NULL)));
 }
 
 void EnhancementShamanBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

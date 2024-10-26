@@ -40,3 +40,8 @@ bool FlameShockOnTargetTrigger::IsActive()
 {
     return SpellTrigger::IsActive() && ai->HasAnyAuraOf(GetTarget(), "flame shock", NULL) && !HasMaxDebuffs();
 }
+
+bool MaelstromWeaponTrigger::IsActive()
+{
+    return ai->HasAura("maelstrom weapon", bot, true);
+}

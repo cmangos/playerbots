@@ -9,6 +9,7 @@ class DruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
 public:
     DruidStrategyActionNodeFactory()
     {
+        /*
         creators["healing touch"] = &healing_touch;
         creators["healing touch on party"] = &healing_touch_on_party;
         creators["regrowth"] = &regrowth;
@@ -16,8 +17,10 @@ public:
         creators["rejuvenation"] = &rejuvenation;
         creators["rejuvenation on party"] = &rejuvenation_on_party;
         creators["rebirth"] = &rebirth;
+        */
         creators["abolish poison"] = &abolish_poison;
         creators["abolish poison on party"] = &abolish_poison_on_party;
+        /*
         creators["remove curse"] = &remove_curse;
         creators["remove curse on party"] = &remove_curse_on_party;
         creators["hibernate on cc"] = &hibernate_on_cc;
@@ -26,6 +29,7 @@ public:
         creators["mark of the wild"] = &mark_of_the_wild;
         creators["mark of the wild on party"] = &mark_of_the_wild_on_party;
         creators["gift of the wild on party"] = &gift_of_the_wild_on_party;
+        */
         creators["innervate"] = &innervate;
         creators["dire bear form"] = &dire_bear_form;
         creators["cat form"] = &cat_form;
@@ -64,7 +68,7 @@ private:
             /*A*/ NextAction::array(0, new NextAction("bear form"), NULL),
             /*C*/ NULL);
     }
-
+    /*
     ACTION_NODE_P(remove_curse, "remove curse", "caster form");
 
     ACTION_NODE_P(remove_curse_on_party, "remove curse on party", "caster form");
@@ -94,7 +98,7 @@ private:
     ACTION_NODE_P(mark_of_the_wild_on_party, "mark of the wild on party", "caster form");
 
     ACTION_NODE_P(gift_of_the_wild_on_party, "gift of the wild on party", "caster form");
-
+    */
     ACTION_NODE_P(cat_form, "cat form", "caster form");
 
     ACTION_NODE_P(travel_form, "travel form", "caster form");

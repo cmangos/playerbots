@@ -19,6 +19,11 @@ private:
     ACTION_NODE_P(swiftmend, "swiftmend", "active hot");
 };
 
+RestorationDruidStrategy::RestorationDruidStrategy(PlayerbotAI* ai) : DruidStrategy(ai)
+{
+    actionNodeFactories.Add(new RestorationDruidStrategyActionNodeFactory());
+}
+
 #ifdef MANGOSBOT_ZERO // Vanilla
 
 void RestorationDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

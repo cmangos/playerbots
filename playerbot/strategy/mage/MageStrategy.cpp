@@ -1234,6 +1234,10 @@ void MageBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigge
 void MageBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     BoostStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "icy veins",
+        NextAction::array(0, new NextAction("icy veins", ACTION_HIGH + 1), NULL)));
 }
 
 void MageBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -935,10 +935,6 @@ void FrostMageBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
     triggers.push_back(new TriggerNode(
         "summon water elemental",
         NextAction::array(0, new NextAction("summon water elemental", ACTION_HIGH + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "icy veins",
-        NextAction::array(0, new NextAction("icy veins", ACTION_HIGH + 1), NULL)));
 }
 
 void FrostMageBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -1102,14 +1102,6 @@ void RestorationShamanPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     ShamanPvpStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "critical health",
-        NextAction::array(0, new NextAction("earth shield", ACTION_CRITICAL_HEAL + 1), NULL))); 
-    
-    triggers.push_back(new TriggerNode(
-        "party member critical health",
-        NextAction::array(0, new NextAction("earth shield on party", ACTION_CRITICAL_HEAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "medium health",
         NextAction::array(0, new NextAction("earth shield", ACTION_MEDIUM_HEAL), NULL)));
 

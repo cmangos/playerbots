@@ -516,4 +516,10 @@ namespace ai
     CAN_CAST_TRIGGER(ChainLightningTrigger, "chain lightning");
 
     CAN_CAST_TRIGGER(StormstrikeTrigger, "stormstrike");
+
+    class ElementalMasteryTrigger : public BuffTrigger
+    {
+    public:
+        ElementalMasteryTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "elemental mastery") {}
+    };
 }

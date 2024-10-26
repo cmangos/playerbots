@@ -957,10 +957,6 @@ void ElementalShamanPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 {
     ElementalShamanStrategy::InitCombatTriggers(triggers);
     ShamanPvpStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "enemy is close",
-        NextAction::array(0, new NextAction("thunderstorm", ACTION_HIGH + 2), NULL))); 
     
     triggers.push_back(new TriggerNode(
         "chain lightning",
@@ -1093,6 +1089,10 @@ void ElementalShamanCcPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     ElementalShamanCcStrategy::InitCombatTriggers(triggers);
     ShamanCcPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "enemy is close",
+        NextAction::array(0, new NextAction("thunderstorm", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanCcPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1236,6 +1236,10 @@ void ElementalShamanBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& tr
     triggers.push_back(new TriggerNode(
         "water shield",
         NextAction::array(0, new NextAction("water shield", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "elemental mastery",
+        NextAction::array(0, new NextAction("elemental mastery", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

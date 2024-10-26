@@ -739,17 +739,19 @@ void DisciplinePriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
 
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("power word: shield on party", ACTION_CRITICAL_HEAL + 1),
+        NextAction::array(0, new NextAction("power word: shield on party", ACTION_CRITICAL_HEAL + 2),
+                             new NextAction("penance on party", ACTION_CRITICAL_HEAL + 1),
                              new NextAction("flash heal on party", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("power word: shield on party", ACTION_MEDIUM_HEAL + 2),
-                             new NextAction("greater heal on party", ACTION_MEDIUM_HEAL + 1), NULL)));
+        NextAction::array(0, new NextAction("power word: shield on party", ACTION_MEDIUM_HEAL + 3),
+                             new NextAction("penance on party", ACTION_MEDIUM_HEAL + 2),
+                             new NextAction("flash heal on party", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member medium health",
-        NextAction::array(0, new NextAction("greater heal on party", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("flash heal on party", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",
@@ -852,7 +854,7 @@ void DisciplinePriestAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& tr
     PriestAoeStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "medium aoe heal",
+        "light aoe heal",
         NextAction::array(0, new NextAction("prayer of mending", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(

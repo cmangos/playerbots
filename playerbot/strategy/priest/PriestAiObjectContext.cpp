@@ -391,7 +391,7 @@ namespace ai
                 creators["vampiric touch"] = &AiObjectContextInternal::vampiric_touch;
                 creators["vampiric touch on attacker"] = &AiObjectContextInternal::vampiric_touch_on_attacker;
                 creators["vampiric embrace"] = &AiObjectContextInternal::vampiric_embrace;
-                //creators["dispersion"] = &AiObjectContextInternal::dispersion;
+                creators["dispersion"] = &AiObjectContextInternal::dispersion;
                 creators["shadow protection"] = &AiObjectContextInternal::shadow_protection;
                 creators["shadow protection on party"] = &AiObjectContextInternal::shadow_protection_on_party;
                 creators["shackle undead"] = &AiObjectContextInternal::shackle_undead;
@@ -425,6 +425,7 @@ namespace ai
                 creators["binding heal"] = &AiObjectContextInternal::binding_heal;
                 creators["holy fire"] = &AiObjectContextInternal::holy_fire;
                 creators["holy nova"] = &AiObjectContextInternal::holy_nova;
+                creators["penance on party"] = &AiObjectContextInternal::penance;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
@@ -464,7 +465,7 @@ namespace ai
             static Action* shadow_protection(PlayerbotAI* ai) { return new CastShadowProtectionAction(ai); }
             static Action* power_infusion(PlayerbotAI* ai) { return new CastPowerInfusionAction(ai); }
             static Action* inner_focus(PlayerbotAI* ai) { return new CastInnerFocusAction(ai); }
-            //static Action* dispersion(PlayerbotAI* ai) { return new CastDispersionAction(ai); }
+            static Action* dispersion(PlayerbotAI* ai) { return new CastDispersionAction(ai); }
             static Action* vampiric_embrace(PlayerbotAI* ai) { return new CastVampiricEmbraceAction(ai); }
             static Action* vampiric_touch(PlayerbotAI* ai) { return new CastVampiricTouchAction(ai); }
             static Action* vampiric_touch_on_attacker(PlayerbotAI* ai) { return new CastVampiricTouchActionOnAttacker(ai); }
@@ -508,6 +509,7 @@ namespace ai
             static Action* inner_fire(PlayerbotAI* ai) { return new CastInnerFireAction(ai); }
             static Action* holy_fire(PlayerbotAI* ai) { return new CastHolyFireAction(ai); }
             static Action* holy_nova(PlayerbotAI* ai) { return new CastHolyNovaAction(ai); }
+            static Action* penance(PlayerbotAI* ai) { return new CastPenanceOnPartyAction(ai); }
             static Action* update_pve_strats(PlayerbotAI* ai) { return new UpdatePriestPveStrategiesAction(ai); }
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdatePriestPvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdatePriestRaidStrategiesAction(ai); }

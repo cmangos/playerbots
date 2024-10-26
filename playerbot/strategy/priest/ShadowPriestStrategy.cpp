@@ -797,28 +797,24 @@ void ShadowPriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("shadow word: death", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "mind blast",
-        NextAction::array(0, new NextAction("mind blast", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "vampiric embrace",
         NextAction::array(0, new NextAction("vampiric embrace", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "shadow word: pain",
-        NextAction::array(0, new NextAction("shadow word: pain", ACTION_NORMAL + 2), NULL)));
+        "vampiric touch",
+        NextAction::array(0, new NextAction("vampiric touch", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "devouring plague",
         NextAction::array(0, new NextAction("devouring plague", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "hex of weakness",
-        NextAction::array(0, new NextAction("hex of weakness", ACTION_NORMAL + 2), NULL)));
+        "mind blast",
+        NextAction::array(0, new NextAction("mind blast", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "vampiric touch",
-        NextAction::array(0, new NextAction("vampiric touch", ACTION_NORMAL + 1), NULL)));
+        "shadow word: pain",
+        NextAction::array(0, new NextAction("shadow word: pain", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "no mana",
@@ -978,11 +974,9 @@ void ShadowPriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
         "feedback",
         NextAction::array(0, new NextAction("feedback", ACTION_HIGH), NULL)));
 
-    /*
     triggers.push_back(new TriggerNode(
-        "low mana",
+        "medium mana",
         NextAction::array(0, new NextAction("dispersion", ACTION_EMERGENCY + 5), NULL)));
-    */
 }
 
 void ShadowPriestBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

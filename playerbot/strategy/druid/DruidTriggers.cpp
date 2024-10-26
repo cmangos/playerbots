@@ -30,6 +30,16 @@ bool EntanglingRootsKiteTrigger::IsActive()
     return !HasMaxDebuffs();
 }
 
+bool ActiveHotTrigger::IsActive()
+{
+    Unit* target = GetTarget(); 
+    uint32 regrowth = AI_VALUE2(uint32, "spell id", "regrowth");
+    uint32 rejuvenation = AI_VALUE2(uint32, "spell id", "rejuvenation");
+    if (target && !(regrowth || rejuvenation))
+        return false;
+    return ai->HasAura("regrowth", target) || ai->HasAura("rejuvenation", target);
+}
+
 Value<Unit*>* LifebloomTankTrigger::GetTargetValue()
 {
     return context->GetValue<Unit*>("party tank without lifebloom", "lifebloom");

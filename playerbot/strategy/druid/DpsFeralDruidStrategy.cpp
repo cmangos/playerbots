@@ -1097,6 +1097,10 @@ void DpsFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
         NextAction::array(0, new NextAction("feral charge - cat", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "omen of clarity",
+        NextAction::array(0, new NextAction("shred", ACTION_HIGH + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "faerie fire (feral)",
         NextAction::array(0, new NextAction("faerie fire (feral)", ACTION_HIGH + 2), NULL)));
 
@@ -1105,12 +1109,12 @@ void DpsFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
         NextAction::array(0, new NextAction("rip", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "ferocious bite",
-        NextAction::array(0, new NextAction("ferocious bite", ACTION_HIGH), NULL)));
+        "rake",
+        NextAction::array(0, new NextAction("rake", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "rake",
-        NextAction::array(0, new NextAction("rake", ACTION_NORMAL + 2), NULL)));
+        "ferocious bite",
+        NextAction::array(0, new NextAction("ferocious bite", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "behind target",
@@ -1296,7 +1300,15 @@ void DpsFeralDruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "tiger's fury",
-        NextAction::array(0, new NextAction("tiger's fury", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("tiger's fury", ACTION_HIGH + 2), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
+        "berserk",
+        NextAction::array(0, new NextAction("berserk", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "savage roar",
+        NextAction::array(0, new NextAction("savage roar", ACTION_HIGH), NULL)));
 }
 
 void DpsFeralDruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

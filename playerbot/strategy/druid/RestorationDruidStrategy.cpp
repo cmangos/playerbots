@@ -5,6 +5,20 @@
 
 using namespace ai;
 
+class RestorationDruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
+{
+public:
+    RestorationDruidStrategyActionNodeFactory()
+    {
+        creators["nourish"] = &nourish;
+        creators["swiftmend"] = &swiftmend;
+    }
+
+private:
+    ACTION_NODE_P(nourish, "nourish", "active hot");
+    ACTION_NODE_P(swiftmend, "swiftmend", "active hot");
+};
+
 #ifdef MANGOSBOT_ZERO // Vanilla
 
 void RestorationDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -830,24 +844,36 @@ void RestorationDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
         NextAction::array(0, new NextAction("regrowth on party", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("nourish", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0, new NextAction("nourish", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium aoe heal",
+        NextAction::array(0, new NextAction("wild growth", ACTION_MEDIUM_HEAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "medium aoe heal",
         NextAction::array(0, new NextAction("tranquility", ACTION_MEDIUM_HEAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "medium health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member medium health",
-        NextAction::array(0, new NextAction("regrowth on party", ACTION_MEDIUM_HEAL), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "almost full health",
-        NextAction::array(0, new NextAction("rejuvenation", ACTION_LIGHT_HEAL + 1), NULL)));
+        NextAction::array(0, new NextAction("rejuvenation", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",
-        NextAction::array(0, new NextAction("rejuvenation on party", ACTION_LIGHT_HEAL), NULL)));
+        NextAction::array(0, new NextAction("rejuvenation on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("regrowth", ACTION_LIGHT_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("regrowth on party", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void RestorationDruidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1045,6 +1071,14 @@ void RestorationDruidBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& 
 {
     DruidBoostStrategy::InitCombatTriggers(triggers);
 
+    triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("swiftmend", ACTION_HIGH + 1), NULL))); 
+
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("swiftmend", ACTION_HIGH + 1), NULL)));
+    
     triggers.push_back(new TriggerNode(
         "nature's swiftness",
         NextAction::array(0, new NextAction("nature's swiftness", ACTION_HIGH), NULL)));

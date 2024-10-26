@@ -846,6 +846,14 @@ void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "low health",
         NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL), NULL)));
+    
+    triggers.push_back(new TriggerNode(
+        "force of nature",
+        NextAction::array(0, new NextAction("force of nature", ACTION_HIGH + 2), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
+        "insect swarm",
+        NextAction::array(0, new NextAction("insect swarm", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "eclipse (solar)",
@@ -857,11 +865,7 @@ void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "faerie fire",
-        NextAction::array(0, new NextAction("faerie fire", ACTION_NORMAL + 3), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "insect swarm",
-        NextAction::array(0, new NextAction("insect swarm", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("faerie fire", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "moonfire",
@@ -869,7 +873,7 @@ void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "often",
-        NextAction::array(0, new NextAction("starfire", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("wrath", ACTION_NORMAL), NULL)));
 }
 
 void BalanceDruidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -973,8 +977,8 @@ void BalanceDruidAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     DruidAoeStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "ranged high aoe",
-        NextAction::array(0, new NextAction("starfall", ACTION_HIGH), NULL)));
+        "ranged light aoe",
+        NextAction::array(0, new NextAction("starfall", ACTION_HIGH + 2), NULL)));
 }
 
 void BalanceDruidAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

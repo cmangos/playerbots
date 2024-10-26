@@ -589,6 +589,12 @@ namespace ai
         std::string GetTargetName() override { return "party tank without lifebloom"; }
     };
 
+    SPELL_ACTION(CastForceOfNatureAction, "force of nature");
+    BUFF_ACTION(CastSavageRoarAction, "savage roar");
+    BUFF_ACTION(CastWildGrowthAction, "wild growth");
+    HEAL_ACTION(CastNourishAction, "nourish");
+    BUFF_ACTION(CastSwiftmendAction, "swiftmend");
+
     class UpdateDruidPveStrategiesAction : public UpdateStrategyDependenciesAction
     {
     public:

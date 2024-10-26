@@ -73,7 +73,7 @@ namespace ai
     class RipTrigger : public NoDebuffAndComboPointsAvailableTrigger
     {
     public:
-        RipTrigger(PlayerbotAI* ai, uint8 comboPoints = 3) : NoDebuffAndComboPointsAvailableTrigger(ai, "rip", comboPoints) {}
+        RipTrigger(PlayerbotAI* ai, uint8 comboPoints = 5) : NoDebuffAndComboPointsAvailableTrigger(ai, "rip", comboPoints) {}
     };
 
     class InsectSwarmTrigger : public DebuffTrigger
@@ -415,5 +415,15 @@ namespace ai
     {
     public:
         ClearcastingTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "clearcasting") {}
+    };
+
+    CAN_CAST_TRIGGER(ForceOfNatureTrigger, "force of nature");
+    CAN_CAST_TRIGGER(BerserkTrigger, "berserk");
+    BUFF_TRIGGER_A(ActiveHotTrigger, "regrowth");
+
+    class SavageRoarTrigger : public ComboPointsAvailableTrigger
+    {
+    public:
+        SavageRoarTrigger(PlayerbotAI* ai) : ComboPointsAvailableTrigger(ai, 3) {}
     };
 }

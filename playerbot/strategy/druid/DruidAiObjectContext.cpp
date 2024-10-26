@@ -351,6 +351,9 @@ namespace ai
                 creators["innervate"] = &TriggerFactoryInternal::innervate;
                 creators["lifebloom"] = &TriggerFactoryInternal::lifebloom;
                 creators["clearcasting"] = &TriggerFactoryInternal::clearcasting;
+                creators["force of nature"] = &TriggerFactoryInternal::force_of_nature;
+                creators["berserk"] = &TriggerFactoryInternal::berserk;
+                creators["active hot"] = &TriggerFactoryInternal::active_hot;
             }
 
         private:
@@ -398,6 +401,9 @@ namespace ai
             static Trigger* innervate(PlayerbotAI* ai) { return new InnervateTrigger(ai); }
             static Trigger* lifebloom(PlayerbotAI* ai) { return new LifebloomTankTrigger(ai); }
             static Trigger* clearcasting(PlayerbotAI* ai) { return new ClearcastingTrigger(ai); }
+            static Trigger* force_of_nature(PlayerbotAI* ai) { return new ForceOfNatureTrigger(ai); }
+            static Trigger* berserk(PlayerbotAI* ai) { return new BerserkTrigger(ai); }
+            static Trigger* active_hot(PlayerbotAI* ai) { return new ActiveHotTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>
@@ -487,6 +493,11 @@ namespace ai
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
                 creators["lifebloom"] = &AiObjectContextInternal::lifebloom;
+                creators["force of nature"] = &AiObjectContextInternal::force_of_nature;
+                creators["savage roar"] = &AiObjectContextInternal::savage_roar;
+                creators["wild growth"] = &AiObjectContextInternal::wild_growth;
+                creators["nourish"] = &AiObjectContextInternal::nourish;
+                creators["swiftmend"] = &AiObjectContextInternal::swiftmend;
             }
 
         private:
@@ -571,6 +582,11 @@ namespace ai
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdateDruidPvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdateDruidRaidStrategiesAction(ai); }
             static Action* lifebloom(PlayerbotAI* ai) { return new CastLifebloomAction(ai); }
+            static Action* force_of_nature(PlayerbotAI* ai) { return new CastForceOfNatureAction(ai); }
+            static Action* savage_roar(PlayerbotAI* ai) { return new CastSavageRoarAction(ai); }
+            static Action* wild_growth(PlayerbotAI* ai) { return new CastWildGrowthAction(ai); }
+            static Action* nourish(PlayerbotAI* ai) { return new CastNourishAction(ai); }
+            static Action* swiftmend(PlayerbotAI* ai) { return new CastSwiftmendAction(ai); }
         };
     };
 };

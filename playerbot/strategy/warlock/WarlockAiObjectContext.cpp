@@ -351,6 +351,12 @@ namespace ai
                 creators["spell lock"] = &TriggerFactoryInternal::spell_lock;
                 creators["spell lock enemy healer"] = &TriggerFactoryInternal::spell_lock_enemy_healer;
                 creators["seed of corruption on attacker"] = &TriggerFactoryInternal::seed_of_corruption_on_attacker;
+                creators["haunt"] = &TriggerFactoryInternal::haunt;
+                creators["molten core"] = &TriggerFactoryInternal::molten_core;
+                creators["decimation"] = &TriggerFactoryInternal::decimation;
+                creators["demonic empowerment"] = &TriggerFactoryInternal::demonic_empowerment;
+                creators["metamorphosis"] = &TriggerFactoryInternal::metamorphosis;
+                creators["chaos bolt"] = &TriggerFactoryInternal::chaos_bolt;
                 creators["soulstone"] = &TriggerFactoryInternal::soulstone;
             }
 
@@ -408,6 +414,12 @@ namespace ai
             static Trigger* spell_lock(PlayerbotAI* ai) { return new SpellLockTrigger(ai); }
             static Trigger* spell_lock_enemy_healer(PlayerbotAI* ai) { return new SpellLockEnemyHealerTrigger(ai); }
             static Trigger* seed_of_corruption_on_attacker(PlayerbotAI* ai) { return new SeedOfCorruptionOnAttackerTrigger(ai); }
+            static Trigger* haunt(PlayerbotAI* ai) { return new HauntTrigger(ai); }
+            static Trigger* molten_core(PlayerbotAI* ai) { return new MoltenCoreTrigger(ai); }
+            static Trigger* decimation(PlayerbotAI* ai) { return new DecimationTrigger(ai); }
+            static Trigger* demonic_empowerment(PlayerbotAI* ai) { return new DemonicEmpowermentTrigger(ai); }
+            static Trigger* metamorphosis(PlayerbotAI* ai) { return new MetamorphosisTrigger(ai); }
+            static Trigger* chaos_bolt(PlayerbotAI* ai) { return new ChaosBoltTrigger(ai); }
             static Trigger* soulstone(PlayerbotAI* ai) { return new SoulstoneTrigger(ai); }
         };
 
@@ -482,6 +494,11 @@ namespace ai
                 creators["sacrifice"] = &AiObjectContextInternal::sacrifice;
                 creators["spell lock"] = &AiObjectContextInternal::spell_lock;
                 creators["spell lock on enemy healer"] = &AiObjectContextInternal::spell_lock_on_enemy_healer;
+                creators["haunt"] = &AiObjectContextInternal::haunt;
+                creators["demonic empowerment"] = &AiObjectContextInternal::demonic_empowerment;
+                creators["metamorphosis"] = &AiObjectContextInternal::metamorphosis;
+                creators["immolation aura"] = &AiObjectContextInternal::immolation_aura;
+                creators["chaos bolt"] = &AiObjectContextInternal::chaos_bolt;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
@@ -555,6 +572,11 @@ namespace ai
             static Action* sacrifice(PlayerbotAI* ai) { return new CastSacrificeAction(ai); }
             static Action* spell_lock(PlayerbotAI* ai) { return new CastSpellLockAction(ai); }
             static Action* spell_lock_on_enemy_healer(PlayerbotAI* ai) { return new CastSpellLockOnEnemyHealerAction(ai); }
+            static Action* haunt(PlayerbotAI* ai) { return new CastHauntAction(ai); }
+            static Action* demonic_empowerment(PlayerbotAI* ai) { return new CastDemonicEmpowerment(ai); }
+            static Action* metamorphosis(PlayerbotAI* ai) { return new CastMetamorphosis(ai); }
+            static Action* immolation_aura(PlayerbotAI* ai) { return new CastImmolationAura(ai); }
+            static Action* chaos_bolt(PlayerbotAI* ai) { return new CastChaosBolt(ai); }
             static Action* update_pve_strats(PlayerbotAI* ai) { return new UpdateWarlockPveStrategiesAction(ai); }
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdateWarlockPvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdateWarlockRaidStrategiesAction(ai); }

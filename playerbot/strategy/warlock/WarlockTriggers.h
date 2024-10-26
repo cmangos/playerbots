@@ -34,15 +34,22 @@ namespace ai
         bool IsActive() override;
     };
 
+    BUFF_TRIGGER(MoltenCoreTrigger, "molten core");
+    BUFF_TRIGGER(DecimationTrigger, "decimation");
+    BUFF_TRIGGER(DemonicEmpowermentTrigger, "demonic empowerment");
+    BUFF_TRIGGER(MetamorphosisTrigger, "metamorphosis");
     DEBUFF_TRIGGER_A(CorruptionTrigger, "corruption");
     DEBUFF_TRIGGER(SiphonLifeTrigger, "siphon life");
     DEBUFF_TRIGGER(UnstableAfflictionTrigger, "unstable affliction");
+    DEBUFF_TRIGGER(HauntTrigger, "haunt");
 
     INTERRUPT_TRIGGER(DeathCoilInterruptTrigger, "death coil");
     INTERRUPT_HEALER_TRIGGER(DeathCoilInterruptTHealerTrigger, "death coil");
     SNARE_TRIGGER(DeathCoilSnareTrigger, "death coil");
     SNARE_TRIGGER(ShadowfurySnareTrigger, "shadowfury");
     INTERRUPT_TRIGGER(ShadowfuryInterruptTrigger, "shadowfury");
+
+    CAN_CAST_TRIGGER(ChaosBoltTrigger, "chaos bolt");
 
     class CorruptionOnAttackerTrigger : public DebuffOnAttackerTrigger
     {

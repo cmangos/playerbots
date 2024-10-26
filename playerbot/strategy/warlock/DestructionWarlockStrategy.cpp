@@ -753,15 +753,19 @@ void DestructionWarlockStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 
     triggers.push_back(new TriggerNode(
         "backlash",
-        NextAction::array(0, new NextAction("shadow bolt", ACTION_HIGH + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "conflagrate",
-        NextAction::array(0, new NextAction("conflagrate", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("shadow bolt", ACTION_HIGH + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "immolate",
-        NextAction::array(0, new NextAction("immolate", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("immolate", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "conflagrate",
+        NextAction::array(0, new NextAction("conflagrate", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "chaos bolt",
+        NextAction::array(0, new NextAction("chaos bolt", ACTION_HIGH), NULL)));
 }
 
 void DestructionWarlockStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -55,9 +55,9 @@ bool DrainSoulTrigger::IsActive()
 			// Check if it has enough bag space
 			if (AI_VALUE(uint8, "bag space") > 0)
 			{
-                // Check if target health is less than 15%
+                // Check if target health is less than 25%
                 const uint32 targetHealth = AI_VALUE2(uint8, "health", "current target");
-                if (targetHealth <= 15)
+                if (targetHealth <= 25)
                 {
                     return true;
                 }

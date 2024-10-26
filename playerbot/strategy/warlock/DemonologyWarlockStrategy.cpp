@@ -767,6 +767,18 @@ ai::NextAction** DemonologyWarlockStrategy::GetDefaultCombatActions()
 void DemonologyWarlockStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarlockStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "decimation",
+        NextAction::array(0, new NextAction("soul fire", ACTION_NORMAL + 2), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
+        "molten core",
+        NextAction::array(0, new NextAction("incinerate", ACTION_NORMAL + 1), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
+        "immolate",
+        NextAction::array(0, new NextAction("immolate", ACTION_NORMAL), NULL)));
 }
 
 void DemonologyWarlockStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -859,6 +871,10 @@ void DemonologyWarlockRaidStrategy::InitDeadTriggers(std::list<TriggerNode*>& tr
 void DemonologyWarlockAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarlockAoeStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "melee light aoe",
+        NextAction::array(0, new NextAction("immolation aura", ACTION_HIGH), NULL)));
 }
 
 void DemonologyWarlockAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -959,6 +975,14 @@ void DemonologyWarlockBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerN
 void DemonologyWarlockBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarlockBoostStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "metamorphosis",
+        NextAction::array(0, new NextAction("metamorphosis", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "demonic empowerment",
+        NextAction::array(0, new NextAction("demonic empowerment", ACTION_HIGH), NULL)));
 }
 
 void DemonologyWarlockBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -31,12 +31,14 @@ WorldLocation Stance::GetNearLocation(float angle, float distance)
 {
     Unit* target = GetTarget();
 
-    float x = target->GetPositionX() + cos(angle) * distance,
-         y = target->GetPositionY()+ sin(angle) * distance,
-         z = target->GetPositionZ();
+    if (target) {
+        float x = target->GetPositionX() + cos(angle) * distance,
+            y = target->GetPositionY() + sin(angle) * distance,
+            z = target->GetPositionZ();
 
-    if (bot->IsWithinLOS(x, y, z + bot->GetCollisionHeight(), true))
-        return WorldLocation(bot->GetMapId(), x, y, z);
+        if (bot->IsWithinLOS(x, y, z + bot->GetCollisionHeight(), true))
+            return WorldLocation(bot->GetMapId(), x, y, z);
+    }
 
     return Formation::NullLocation;
 }
@@ -44,6 +46,8 @@ WorldLocation Stance::GetNearLocation(float angle, float distance)
 WorldLocation MoveStance::GetLocationInternal()
 {
     Unit* target = GetTarget();
+    if (!target)
+        return Formation::NullLocation;
     float distance = std::max(sPlayerbotAIConfig.meleeDistance, target->GetObjectBoundingRadius());
 
     float angle = GetAngle();

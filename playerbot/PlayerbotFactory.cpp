@@ -3831,6 +3831,14 @@ void PlayerbotFactory::ApplyEnchantTemplate()
       else if (tab == 1)
          ApplyEnchantTemplate(21);
       break;
+   case CLASS_DEATH_KNIGHT:
+       if (tab == 0)
+           ApplyEnchantTemplate(60);
+       else if (tab == 2)
+           ApplyEnchantTemplate(62);
+       else if (tab == 1)
+           ApplyEnchantTemplate(61);
+       break;
    case CLASS_HUNTER:
       ApplyEnchantTemplate(30);
       break;

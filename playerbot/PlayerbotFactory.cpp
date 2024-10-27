@@ -3852,7 +3852,12 @@ void PlayerbotFactory::ApplyEnchantTemplate()
       ApplyEnchantTemplate(90);
       break;
    case CLASS_PRIEST:
-       ApplyEnchantTemplate(50);
+       if (tab == 0)
+           ApplyEnchantTemplate(50);
+       else if (tab == 2)
+           ApplyEnchantTemplate(52);
+       else if (tab == 1)
+           ApplyEnchantTemplate(51);
        break;
    }
 }

@@ -3814,9 +3814,9 @@ void PlayerbotFactory::ApplyEnchantTemplate()
       if (tab == 0)
          ApplyEnchantTemplate(70);
       else if (tab == 2)
-         ApplyEnchantTemplate(71);
-      else
          ApplyEnchantTemplate(72);
+      else
+         ApplyEnchantTemplate(71);
       break;
    case CLASS_PALADIN:
       if (tab == 0)

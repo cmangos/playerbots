@@ -259,11 +259,12 @@ bool CheckMountStateAction::isUseful()
 
     if (bot->getClass() == CLASS_DRUID && bot->InBattleGround() && (ai->HasAura("prowl", bot) || ai->HasAura("dash", bot)))
         return false;
-
+/*
 #ifndef MANGOSBOT_ZERO
     if (bot->InArena())
         return false;
 #endif
+*/
 
     if (!bot->GetPlayerbotAI()->HasStrategy("mount", BotState::BOT_STATE_NON_COMBAT) && !bot->IsMounted())
         return false;

@@ -977,7 +977,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         if (isArena)
         {
             nonCombatEngine->addStrategy("arena");
-            nonCombatEngine->removeStrategy("mount");
+            //nonCombatEngine->removeStrategy("mount");
         }
         else
         {

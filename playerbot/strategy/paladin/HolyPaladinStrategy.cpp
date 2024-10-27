@@ -1085,8 +1085,16 @@ void HolyPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("seal of light", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "medium mana",
+        NextAction::array(0, new NextAction("judgement of wisdom", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "enemy is close",
         NextAction::array(0, new NextAction("judgement of light", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium mana",
+        NextAction::array(0, new NextAction("melee", ACTION_NORMAL), NULL)));
 }
 
 void HolyPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -111,7 +111,7 @@ bool WaitForAttackStrategy::ShouldWait(PlayerbotAI* ai)
                 Player* player = dynamic_cast<Player*>(target);
                 if (player)
                 {
-                    enemyPlayer = !sServerFacade.IsFriendlyTo(target, player);
+                    enemyPlayer = sServerFacade.IsHostileTo(target, player);
                 }
             }
 

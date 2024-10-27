@@ -622,8 +622,7 @@ bool NoMovementTrigger::IsActive()
 
 bool NoPossibleTargetsTrigger::IsActive()
 {
-    std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
-    return !targets.size();
+    return AI_VALUE(std::list<ObjectGuid>, "possible targets").empty();
 }
 
 bool PossibleAddsTrigger::IsActive()

@@ -2297,6 +2297,11 @@ void PlayerbotFactory::EnchantItem(Item* item)
     if (bot->GetLevel() < sPlayerbotAIConfig.minEnchantingBotLevel)
         return;
 
+    if ((item->GetSlot() == 10 || item->GetSlot() == 11) && int32(bot->GetSkillValue(SKILL_ENCHANTING) < 400))
+    {
+        return;
+    }
+
     int tab = AiFactory::GetPlayerSpecTab(bot);
     uint32 tempId = uint32((uint32)bot->getClass() * (uint32)10);
     ApplyEnchantTemplate(tempId += (uint32)tab, item);

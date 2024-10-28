@@ -1936,6 +1936,10 @@ void TravelNodeMap::generateStartNodes()
     startNames[RACE_GNOME] = "Dwarf and Gnome";
     startNames[RACE_TROLL] = "Orc and Troll";
     startNames[RACE_GOBLIN] = "Goblin";
+#ifndef MANGOSBOT_ZERO
+    startNames[RACE_BLOODELF] = "Blood elf";
+    startNames[RACE_DRAENEI] = "Dreanei";
+#endif
 
     for (uint32 i = 0; i < MAX_RACES; i++)
     {

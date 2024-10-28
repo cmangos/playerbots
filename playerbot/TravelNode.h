@@ -198,7 +198,7 @@ namespace ai
         std::vector<TravelNode*> getNodeMap(bool importantOnly = false, std::vector<TravelNode*> ignoreNodes = {}, bool mapOnly = false);
 
         //Checks if it is even possible to route to this node.
-        bool hasRouteTo(TravelNode* node, bool mapOnly = false) { if (routes.empty()) for (auto mNode : getNodeMap(mapOnly)) routes[mNode] = true; return routes.find(node) != routes.end(); };
+        bool hasRouteTo(TravelNode* node, bool mapOnly = false) { if (routes.empty()) for (auto mNode : getNodeMap(false, {}, mapOnly)) routes[mNode] = true; return routes.find(node) != routes.end(); };
         void clearRoutes() { routes.clear(); }
 
         void print(bool printFailed = true);
@@ -351,7 +351,7 @@ namespace ai
         std::vector<TravelNode*> getNodes(WorldPosition pos, float range = -1);
 
         //Find nearest node.
-        TravelNode* getNode(TravelNode* sameNode) { for (auto& node : m_nodes) { if (node->getName() == sameNode->getName() && node->getPosition() == sameNode->getPosition()) return node; } return nullptr; }
+        TravelNode* getNode(TravelNode* sameNode) { for (auto& node : m_map_nodes[sameNode->getMapId()]) { if (node->getName() == sameNode->getName() && node->getPosition() == sameNode->getPosition()) return node; } return nullptr; }
         TravelNode* getNode(WorldPosition pos, std::vector<WorldPosition>& ppath, Unit* bot = nullptr, float range = -1);
         TravelNode* getNode(WorldPosition pos, Unit* bot = nullptr, float range = -1) { std::vector<WorldPosition> ppath; return getNode(pos, ppath, bot, range); }
 
@@ -419,6 +419,7 @@ namespace ai
         std::shared_timed_mutex m_nMapMtx;
     private:
         std::vector<TravelNode*> m_nodes;
+        std::unordered_map<uint32, std::vector<TravelNode*>> m_map_nodes;
 
         std::vector<std::pair<uint32, WorldPosition>> mapOffsets;
 

@@ -1195,9 +1195,7 @@ TravelNodeMap::TravelNodeMap(TravelNodeMap* baseMap)
 
     for (auto& node : baseMap->getNodes())
     {
-        newNode = new TravelNode(node);
-
-        m_nodes.push_back(newNode);
+        addNode(*node->getPosition(), node->getName(), node->isImportant(), true, node->isTransport(), node->getTransportId());
     }
 
     for (auto& node : baseMap->getNodes())
@@ -1234,7 +1232,7 @@ TravelNode* TravelNodeMap::addNode(WorldPosition pos, std::string preferedName, 
         finalName = std::regex_replace(finalName, last_num, "");
         uint32 nameCount = 1;
 
-        for (auto& node : getNodes())
+        for (auto& node : getNodes(pos))
         {
             if (node->getName().find(preferedName + std::to_string(nameCount)) != std::string::npos)
                 nameCount++;
@@ -1247,6 +1245,7 @@ TravelNode* TravelNodeMap::addNode(WorldPosition pos, std::string preferedName, 
     newNode = new TravelNode(pos, finalName, isImportant);
 
     m_nodes.push_back(newNode);
+    m_map_nodes[pos.getMapId()].push_back(newNode);
 
     return newNode;
 }
@@ -1255,7 +1254,9 @@ void TravelNodeMap::removeNode(TravelNode* node)
 {
     node->removeLinkTo(NULL, true);
 
-    for (auto& tnode : m_nodes)
+    uint32 mapId = node->getMapId();
+
+    for (auto& tnode : m_map_nodes[mapId])
     {
         if (tnode == node)
         {
@@ -1264,7 +1265,16 @@ void TravelNodeMap::removeNode(TravelNode* node)
         }
     }
 
+    for (auto& tnode : m_nodes)
+    {
+        if (tnode == node)
+        {
+            tnode = nullptr;
+        }
+    }
+
     m_nodes.erase(std::remove(m_nodes.begin(), m_nodes.end(), nullptr), m_nodes.end());
+    m_map_nodes[mapId].erase(std::remove(m_map_nodes[mapId].begin(), m_map_nodes[mapId].end(), nullptr), m_map_nodes[mapId].end());
 }
 
 void TravelNodeMap::fullLinkNode(TravelNode* startNode, Unit* bot)
@@ -1290,17 +1300,15 @@ void TravelNodeMap::fullLinkNode(TravelNode* startNode, Unit* bot)
 std::vector<TravelNode*> TravelNodeMap::getNodes(WorldPosition pos, float range)
 {
     std::vector<TravelNode*> retVec;
-    for (auto& node : m_nodes)
+    for (auto& node : m_map_nodes[pos.getMapId()])
     {
-        if (node->getMapId() == pos.getMapId())
-            if (range == -1 || node->getDistance(pos) <= range)
-                retVec.push_back(node);
+        if (range == -1 || node->getDistance(pos) <= range)
+            retVec.push_back(node);
     }
 
     std::sort(retVec.begin(), retVec.end(), [pos](TravelNode* i, TravelNode* j) { return i->getPosition()->distance(pos) < j->getPosition()->distance(pos); });
     return retVec;
 }
-
 
 TravelNode* TravelNodeMap::getNode(WorldPosition pos, std::vector<WorldPosition>& ppath, Unit* bot, float range)
 {
@@ -2465,15 +2473,19 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId, BarGoLink* bar)
         places_to_reach.push_back(make_pair(GuidPosition(0, *node->getPosition()), node->getName()));
     }
 
-    for (auto& obj : WorldPosition().getCreaturesNear(WorldPosition(mapId, 1, 1)))
+    /*
+    for (auto& obj : WorldPosition(mapId, 1, 1).getCreaturesNear())
     {
+        if(sObjectMgr.GetCreatureTemplate(obj->second.id))
         places_to_reach.push_back(make_pair(obj, sObjectMgr.GetCreatureTemplate(obj->second.id)->Name));
     }
 
-    for (auto& obj : WorldPosition().getGameObjectsNear(WorldPosition(mapId, 1, 1)))
+    for (auto& obj : WorldPosition(mapId, 1, 1).getGameObjectsNear())
     {
+        if(sObjectMgr.GetGameObjectInfo(obj->second.id))
         places_to_reach.push_back(make_pair(obj, sObjectMgr.GetGameObjectInfo(obj->second.id)->name));
     }
+    */
 
     if (places_to_reach.empty() || startNodes.empty())
         return;

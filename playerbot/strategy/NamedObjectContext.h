@@ -201,12 +201,13 @@ namespace ai
         NamedObjectContext(bool shared = false, bool supportsSiblings = false) :
             NamedObjectFactory<T>(), shared(shared), supportsSiblings(supportsSiblings) {}
 
-        T* create(std::string name, PlayerbotAI* ai)
+        T* create(const std::string& name, PlayerbotAI* ai)
         {
-            if (created.find(name) == created.end())
-                return created[name] = NamedObjectFactory<T>::create(name, ai);
-
-            return created[name];
+            auto it = created.find(name);
+            if (it == created.end()) {
+                it = created.insert({ name, NamedObjectFactory<T>::create(name, ai) }).first;
+            }
+            return it->second;
         }
 
         virtual ~NamedObjectContext()
@@ -292,9 +293,8 @@ namespace ai
 
         T* GetObject(const std::string& name, PlayerbotAI* ai)
         {
-            for (typename std::list<NamedObjectContext<T>*>::iterator i = contexts.begin(); i != contexts.end(); i++)
-            {
-                T* object = (*i)->create(name, ai);
+            for (auto& context : contexts) {
+                T* object = context->create(name, ai);
                 if (object) return object;
             }
             return nullptr;

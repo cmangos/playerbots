@@ -603,6 +603,8 @@ void RandomPlayerbotFactory::CreateRandomBots()
         }
     }
 
+    BarGoLink bar4(static_cast<uint8>(NameRaceAndGender::BloodelfFemale));
+
     for (uint8 raceAndGenderIndex = 0; raceAndGenderIndex <= static_cast<uint8>(NameRaceAndGender::BloodelfFemale); ++raceAndGenderIndex)
     {
         const auto raceAndGender = static_cast<NameRaceAndGender>(raceAndGenderIndex);
@@ -616,8 +618,6 @@ void RandomPlayerbotFactory::CreateRandomBots()
         if (totalCharCount / 2 < freeNames[raceAndGender].size())
             continue;
         uint32 namesNeeded = totalCharCount / 2 - freeNames[raceAndGender].size();
-
-        BarGoLink bar(namesNeeded);
 
         while(namesNeeded)
         {
@@ -635,7 +635,6 @@ void RandomPlayerbotFactory::CreateRandomBots()
                 used[newName] = false;
                 newNames.push_back(newName);
                 namesNeeded--;
-                bar.step();
                 if (!namesNeeded)
                     break;
             }
@@ -643,7 +642,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
             postItt++;
         }
 
-        bar.SetOutputState(false);
+        bar4.step();
 
         freeNames[raceAndGender].insert(freeNames[raceAndGender].end(), newNames.begin(), newNames.end());
     }

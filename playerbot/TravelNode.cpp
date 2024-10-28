@@ -2379,10 +2379,17 @@ void TravelNodeMap::generateNodes()
     generatePortalNodes();
 }
 
-void TravelNodeMap::generateWalkPathMap(uint32 mapId)
+void TravelNodeMap::generateWalkPathMap(uint32 mapId, BarGoLink* bar)
 {
     for (auto& startNode : sTravelNodeMap.getNodes(WorldPosition(mapId, 1, 1)))
     {
+        if (bar)
+        {
+            m_nMapMtx.lock();
+            bar->step();
+            m_nMapMtx.unlock();
+        }
+
         if (startNode->isLinked())
             continue;
         
@@ -2414,32 +2421,33 @@ void TravelNodeMap::generateWalkPaths()
 
     std::map<uint32, bool> nodeMaps;
 
+    uint32 nodes = 0;
+
     for (auto& startNode : sTravelNodeMap.getNodes())
     {
+        nodes++;
         nodeMaps[startNode->getMapId()] = true;
     }
 
+    BarGoLink bar(nodes);
+
     std::vector<std::future<void>> calculations;
 
-    BarGoLink bar(nodeMaps.size());
     for (auto& map : nodeMaps)
     {
         uint32 mapId = map.first;
-        calculations.push_back(std::async([this,mapId] { generateWalkPathMap(mapId); }));
-        bar.step();
+        calculations.push_back(std::async([this,mapId, &bar] { generateWalkPathMap(mapId, &bar); }));
     }
 
-    BarGoLink bar2(calculations.size());
     for (uint32 i = 0; i < calculations.size(); i++)
     {
         calculations[i].wait();
-        bar2.step();
     }
 
     sLog.outString(">> Generated paths for " SIZEFMTD " nodes.", sTravelNodeMap.getNodes().size());
 }
 
-void TravelNodeMap::generateHelperNodes(uint32 mapId)
+void TravelNodeMap::generateHelperNodes(uint32 mapId, BarGoLink* bar)
 {
     std::vector<TravelNode*> startNodes = getNodes(WorldPosition(mapId, 1, 1));
 
@@ -2470,140 +2478,80 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId)
     if (places_to_reach.empty() || startNodes.empty())
         return;
 
+    for (auto& pos : places_to_reach)
     {
-        uint32 step = 0, rStep = 0, lastNStep = 0, maxStep = 0;
+        std::vector<TravelNode*> startNodes = getNodes(WorldPosition(mapId, 1, 1));
+        //Find closest 5 nodes.
+        std::partial_sort(startNodes.begin(), startNodes.begin() + std::min(int(startNodes.size()), 5), startNodes.end(), [pos](TravelNode* i, TravelNode* j) {return i->fDist(pos.first) < j->fDist(pos.first); });
 
-        for (auto& pos : places_to_reach)
+        bool found = false;
+
+        for (uint8 i = 0; i < std::min(int(startNodes.size()), 5); i++)
         {
-            step++;
-            rStep += step;
-        }
+            TravelNode* node = startNodes[i];
 
-        maxStep = rStep;
+            if (node->isTransport())
+                continue;
 
-        step = 0;
-        rStep = 0;
+            if (node->getAreaTriggerId())
+                continue;
 
-        m_nMapMtx.lock();
-        BarGoLink bar(maxStep);
-        bar.SetOutputState(false);
-        m_nMapMtx.unlock();
+            if (node->getPosition()->canPathTo(pos.first, nullptr))
+                continue;
 
-        for (auto& pos : places_to_reach)
-        {
-            startNodes = getNodes(WorldPosition(mapId, 1, 1));
+            TravelNode* otherNode = getNode(pos.first, nullptr, 1.0f);
 
-            //Find closest 5 nodes.
-            std::partial_sort(startNodes.begin(), startNodes.begin() + std::min(int(startNodes.size()), 5), startNodes.end(), [pos](TravelNode* i, TravelNode* j) {return i->fDist(pos.first) < j->fDist(pos.first); });
+            if (otherNode && node->hasLinkTo(otherNode))
+                continue;
 
-            bool found = false;
-
-            for (uint8 i = 0; i < std::min(int(startNodes.size()), 5); i++)
+            for (auto& path : *node->getPaths())
             {
-                TravelNode* node = startNodes[i];
-
-                if (node->isTransport())
-                    continue;
-
-                if (node->getAreaTriggerId())
-                    continue;
-
-                if (node->getPosition()->canPathTo(pos.first, nullptr)) //
-                    continue;
-
-                TravelNode* otherNode = getNode(pos.first, nullptr, 1.0f);
-
-                if (otherNode && node->hasLinkTo(otherNode))
-                    continue;
-
-                for (auto& path : *node->getPaths())
+                WorldPosition prevPoint;
+                for (auto& ppoint : path.second.getPath())
                 {
-                    WorldPosition prevPoint;
-                    for (auto& ppoint : path.second.getPath())
-                    {
-                        if (prevPoint && ppoint.sqDistance2d(prevPoint) < 25.0f)
-                            continue;
+                    if (prevPoint && ppoint.sqDistance2d(prevPoint) < 100.0f)
+                        continue;
 
-                        prevPoint = ppoint;
+                    prevPoint = ppoint;
 
-                        if (!ppoint.canPathTo(pos.first, nullptr))
-                            continue;
+                    if (!ppoint.canPathTo(pos.first, nullptr))
+                        continue;
 
-                        std::string name = node->getName() + " to " + pos.second;
-                        sTravelNodeMap.addNode(ppoint, name, false, true);
-                        found = true;
+                    std::string name = node->getName() + " to " + pos.second;
+                    sTravelNodeMap.addNode(ppoint, name, false, true);
+                    found = true;
 
-                        break;
-                    }
-
-                    if (found)
-                        break;
+                    break;
                 }
 
                 if (found)
-                {
-                    sTravelNodeMap.generateWalkPathMap(mapId);
                     break;
-                }
             }
 
-            if (!found) {
-                std::string name = pos.second;
-                sTravelNodeMap.addNode(pos.first, name, false, true);
-            }
-
-            m_nMapMtx.lock();
-            step++;
-            rStep += step;
-            uint32 curNStep = (rStep * 50) / maxStep;
-            if (curNStep != lastNStep)
+            if (found)
             {
-                printf("\r");
-                //Clear line.
-                for (int i = 0; i < 80; i++)
-                    printf(" ");
-                printf("\r");
-                //Place text after bar.
-                for (int i = 0; i < 60; i++)
-                    printf(" ");
-                printf("[map: %d]", mapId);
-                fflush(stdout);
-                lastNStep = curNStep;
+                sTravelNodeMap.generateWalkPathMap(mapId, nullptr);
+                break;
             }
-
-            bar.SetOutputState(true);
-            for (uint32 i = 0; i < step; i++)                
-                bar.step();
-        
-            m_nMapMtx.unlock();
         }
 
-        for (auto& node : startNodes)
-        {
-            if (!node->isTransport())
-                node->setLinked(false);
+        if (!found) {
+            std::string name = pos.second;
+            sTravelNodeMap.addNode(pos.first, name, false, true);
         }
-
-        sTravelNodeMap.generateWalkPathMap(mapId);
 
         m_nMapMtx.lock();
-        mapsDone++;
-        //Clear line.
-        for (int i = 0; i < 110; i++)
-            printf(" ");
-        printf("\r");
-        //Place text after bar.
-        for (int i = 0; i < 80; i++)
-            printf(" ");
-        //Print that the map is done.
-        printf("[%d/%d done]", mapsDone, mapsTotal);
-        printf("\r");
-        fflush(stdout);  
-
-        //Disable bar and make it goe out of scope before lock ends so it doesn't enable in different thread while going out of scope.
-        bar.SetOutputState(false);
+        bar->step();
+        m_nMapMtx.unlock();
     }
-    m_nMapMtx.unlock();
+
+    for (auto& node : startNodes)
+    {
+        if (!node->isTransport())
+            node->setLinked(false);
+    }
+
+    sTravelNodeMap.generateWalkPathMap(mapId, nullptr);
 }
 
 void TravelNodeMap::generateHelperNodes()
@@ -2615,19 +2563,56 @@ void TravelNodeMap::generateHelperNodes()
 
     uint32 old = sTravelNodeMap.getNodes().size();
 
-    for (auto& startNode : sTravelNodeMap.getNodes())
     {
-        nodeMaps[startNode->getMapId()] = true;
+        BarGoLink bar(old);
+
+        for (auto& startNode : sTravelNodeMap.getNodes())
+        {
+            bar.step();
+            nodeMaps[startNode->getMapId()] = true;
+        }
     }
 
-    mapsTotal = nodeMaps.size();
+    generateWalkPaths();
+
+    uint32 places_to_reach = 0;
+
+    for (auto& map : nodeMaps)
+    {
+        std::vector<TravelNode*> startNodes = getNodes(WorldPosition(map.first, 1, 1));
+        //Find all places we might want to reach.
+        for (auto& node : startNodes)
+        {
+            if (node->isTransport())
+                continue;
+
+            if (node->getAreaTriggerId())
+                continue;
+
+            places_to_reach++;
+        }
+
+        /*
+        for (auto& obj : WorldPosition(map.first, 1, 1).getCreaturesNear())
+        {
+            places_to_reach++;
+        }
+
+        for (auto& obj : WorldPosition(map.first, 1, 1).getGameObjectsNear())
+        {
+            places_to_reach++;
+        }
+        */
+    }
+
+    BarGoLink bar(places_to_reach);
 
     std::vector<std::future<void>> calculations;
 
     for (auto& map : nodeMaps)
     {
         uint32 mapId = map.first;
-        calculations.push_back(std::async([this, mapId] { generateHelperNodes(mapId); }));
+        calculations.push_back(std::async([this, mapId, &bar] { generateHelperNodes(mapId, &bar); }));
     }
 
     for (uint32 i = 0; i < calculations.size(); i++)

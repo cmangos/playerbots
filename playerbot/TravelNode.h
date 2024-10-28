@@ -387,11 +387,11 @@ namespace ai
         void generatePortalNodes();               //Create node at static portal (ie. dalaran->ironforge) and the desination of teleport spell (ie. teleport to ironforge)
         void generateNodes();                     //Call all above methods.
 
-        void generateWalkPathMap(uint32 mapId);   //Pathfind from all nodes to all nodes in a specific map. Create a path for all attemps and a link for all paths that actually reach the end node.
+        void generateWalkPathMap(uint32 mapId, BarGoLink* bar);   //Pathfind from all nodes to all nodes in a specific map. Create a path for all attemps and a link for all paths that actually reach the end node.
         void generateWalkPaths();                 //Call above method for all maps async.
 
         //Helper nodes take a long time to generate and have limited impact. Disable is generation time becomes an issue. It does make some places connected to the network though like some caves and tauren start.
-        void generateHelperNodes(uint32 mapId);   //For all nodes, objects and creatures, that can't be directly reached from one of the 5 nearby nodes, place a node on one of the paths of the nearby nodes so they can be reached or else place a node at the object. Also generate walkPaths for each node and the entire map again afterwards.
+        void generateHelperNodes(uint32 mapId, BarGoLink* bar);   //For all nodes, objects and creatures, that can't be directly reached from one of the 5 nearby nodes, place a node on one of the paths of the nearby nodes so they can be reached or else place a node at the object. Also generate walkPaths for each node and the entire map again afterwards.
         void generateHelperNodes();               //Call above method for all maps async.
 
         void removeLowNodes();                    //Remove any node in the overworld that can reach less than 4 nodes directly or indirectly.
@@ -425,8 +425,6 @@ namespace ai
         bool hasToSave = false;
         bool hasToGen = false;
         bool hasToFullGen = false;
-
-        uint32 mapsDone, mapsTotal;
     };
 }
 

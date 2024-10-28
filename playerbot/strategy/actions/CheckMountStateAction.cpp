@@ -45,6 +45,9 @@ bool CheckMountStateAction::Execute(Event& event)
     //Mount up in battle grounds
     if (bot->InBattleGround())
     {
+        if (WorldPosition(bot).currentHeight() < -5.0f)
+            return UnMount();
+
         if (!canAttackTarget)
         {
             if (!hasAttackers || (farFromTarget && !bot->IsInCombat()))

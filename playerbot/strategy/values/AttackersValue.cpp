@@ -26,6 +26,18 @@ std::list<ObjectGuid> AttackersValue::Calculate()
     if (bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST))
         return result;
 
+    if (ai->HasStrategy("focus rti targets", BotState::BOT_STATE_COMBAT))
+    {
+        Unit* rtiTarget = AI_VALUE(Unit*, "rti target");
+
+        if (rtiTarget && rtiTarget->IsInWorld() && rtiTarget->GetMapId() == bot->GetMapId())
+        {
+            return { rtiTarget->GetObjectGuid() };
+        }
+
+        return result;
+    }
+
     if (!sPlayerbotAIConfig.tweakValue)
     {
         // Try to get the value from nearby friendly bots.

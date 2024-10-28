@@ -14,7 +14,6 @@
 
 #include "MotionGenerators/MoveMap.h"
 #include "World/World.h"
-#include "MotionGenerators/PathFinder.h"
 #include "Grids/CellImpl.h"
 #include "Globals/ObjectAccessor.h"
 #include "Entities/Transports.h"
@@ -689,7 +688,7 @@ std::vector<WorldPosition> WorldPosition::fromPointsArray(const std::vector<G3D:
 }
 
 //A single pathfinding attempt from one position to another. Returns pathfinding status and path.
-std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& startPos, const Unit* bot, bool forceNormalPath) const
+std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& startPos, std::unique_ptr<PathFinder>& pathfinder, const Unit* bot, bool forceNormalPath) const
 {
     std::hash<std::thread::id> hasher;
     uint32 instanceId;
@@ -706,47 +705,25 @@ std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& s
     PointsArray points;
     PathType type;
 
-    if (bot && instanceId == bot->GetInstanceId())
+    WorldPosition start = startPos, end = *this;
+
+    if (bot && bot->GetTransport())
     {
-        PathFinder path(bot);
-
-        path.setAreaCost(NAV_AREA_WATER, 10.0f);  //Water
-        path.setAreaCost(12, 5.0f);  //Mob proximity
-        path.setAreaCost(13, 20.0f); //Mob agro
-
-        WorldPosition start = startPos, end = *this;
-
-        if (bot->GetTransport())
-        {
-            start.CalculatePassengerOffset(bot->GetTransport());
-            end.CalculatePassengerOffset(bot->GetTransport());
-        }
-
-        path.calculate(start.getVector3(), end.getVector3(), false);
-
-        points = path.getPath();
-
-        if (bot->GetTransport())
-        {
-            for (auto& p : points)
-                bot->GetTransport()->CalculatePassengerPosition(p.x, p.y, p.z);
-        }
-
-        type = path.getPathType();
-
+        start.CalculatePassengerOffset(bot->GetTransport());
+        end.CalculatePassengerOffset(bot->GetTransport());
     }
-    else
+
+    pathfinder->calculate(start.getVector3(), end.getVector3(), false);
+
+    points = pathfinder->getPath();
+
+    if (bot && bot->GetTransport())
     {
-        PathFinder path(getMapId(), instanceId);
-
-        path.setAreaCost(NAV_AREA_WATER, 10.0f);
-        path.setAreaCost(12, 5.0f);
-        path.setAreaCost(13, 20.0f);
-        path.calculate(startPos.getVector3(), getVector3(), false);
-
-        points = path.getPath();
-        type = path.getPathType();
+        for (auto& p : points)
+            bot->GetTransport()->CalculatePassengerPosition(p.x, p.y, p.z);
     }
+
+    type = pathfinder->getPathType();
 
     if (sPlayerbotAIConfig.hasLog("pathfind_attempt_point.csv"))
     {
@@ -763,13 +740,18 @@ std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& s
         out << std::fixed << std::setprecision(1) << type << ",";
         printWKT(fromPointsArray(points), out, 1);
         sPlayerbotAIConfig.log("pathfind_attempt.csv", out.str().c_str());
-    }    
+    }
 
     if ((!forceNormalPath && type == PATHFIND_INCOMPLETE) || type == PATHFIND_NORMAL)
         return fromPointsArray(points);
     else
         return {};
+}
 
+std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& startPos, const Unit* bot, bool forceNormalPath) const
+{
+    std::unique_ptr<PathFinder> pathfinder = std::make_unique<PathFinder>(bot);
+    return getPathStepFrom(startPos, pathfinder, bot, forceNormalPath);
 }
 
 bool WorldPosition::cropPathTo(std::vector<WorldPosition>& path, const float maxDistance) const
@@ -801,18 +783,39 @@ std::vector<WorldPosition> WorldPosition::getPathFromPath(const std::vector<Worl
 
     std::vector<WorldPosition> subPath, fullPath = startPath;
 
+    std::hash<std::thread::id> hasher;
+    uint32 instanceId;
+    if (sTravelNodeMap.gethasToGen())
+        instanceId = 0;
+    else if (!bot || bot->GetMapId() != currentPos.getMapId())
+        instanceId = hasher(std::this_thread::get_id());
+    else
+        instanceId = bot->GetInstanceId();
+    //Load mmaps and vmaps between the two points.
+
+    std::unique_ptr<PathFinder> pathfinder = nullptr;
+
+    if (bot && instanceId == bot->GetInstanceId())
+        pathfinder = std::make_unique<PathFinder>(bot);
+    else
+        pathfinder = std::make_unique<PathFinder>(getMapId(), instanceId);
+
+    pathfinder->setAreaCost(NAV_AREA_WATER, 10.0f);
+    pathfinder->setAreaCost(12, 5.0f);
+    pathfinder->setAreaCost(13, 20.0f);
+
     //Limit the pathfinding attempts
     for (uint32 i = 0; i < maxAttempt; i++)
     {
         //Try to pathfind to this position.
-        subPath = getPathStepFrom(currentPos, bot);
+        subPath = getPathStepFrom(currentPos, pathfinder, bot);
 
         //If we could not find a path return what we have now.
         if (subPath.empty() || currentPos.distance(subPath.back()) < sPlayerbotAIConfig.targetPosRecalcDistance)
             break;
-        
+
         //Append the path excluding the start (this should be the same as the end of the startPath)
-        fullPath.insert(fullPath.end(), std::next(subPath.begin(),1), subPath.end());
+        fullPath.insert(fullPath.end(), std::next(subPath.begin(), 1), subPath.end());
 
         //Are we there yet?
         if (isPathTo(subPath))
@@ -878,7 +881,13 @@ std::vector<WorldPosition> WorldPosition::ComputePathToRandomPoint(const Player*
     coord_x += range * cos(angle);
     coord_y += range * sin(angle);
 
-    std::vector<WorldPosition> path = getPathStepFrom(start, bot);
+    std::unique_ptr<PathFinder> pathfinder = std::make_unique<PathFinder>(bot);
+
+    pathfinder->setAreaCost(NAV_AREA_WATER, 10.0f);
+    pathfinder->setAreaCost(12, 5.0f);
+    pathfinder->setAreaCost(13, 20.0f);
+
+    std::vector<WorldPosition> path = getPathStepFrom(start, pathfinder, bot);
     
     if (path.size())
         set(path.back());

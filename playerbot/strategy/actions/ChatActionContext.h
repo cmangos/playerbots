@@ -74,6 +74,7 @@
 #include "MoveStyleAction.h"
 #include "ValueActions.h"
 #include "QuestRewardActions.h"
+#include "ChooseTravelTargetAction.h"
 
 namespace ai
 {
@@ -204,6 +205,7 @@ namespace ai
             creators["move style"] = &ChatActionContext::move_style;
 
             creators["jump"] = &ChatActionContext::jump;
+            creators["doquest"] = [](PlayerbotAI* ai) { return new FocusTravelTargetAction(ai); };
         }
 
     private:

@@ -97,6 +97,7 @@
 #include "MountValues.h"
 #include "DeadValues.h"
 #include "playerbot/strategy/druid/DruidValues.h"
+#include "TravelValues.h"
 
 namespace ai
 {
@@ -401,6 +402,7 @@ namespace ai
 
             creators["party tank without lifebloom"] = [](PlayerbotAI* ai) { return new PartyTankWithoutLifebloomValue(ai); };
             creators["move style"] = [](PlayerbotAI* ai) { return new MoveStyleValue(ai); };
+            creators["focus travel target"] = [](PlayerbotAI* ai) { return new FocusTravelTargetValue(ai); };
         };
     };
 }

@@ -4,6 +4,7 @@
 #include "ChooseTravelTargetAction.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/TravelMgr.h"
+#include "playerbot/strategy/values/TravelValues.h"
 #include <iomanip>
 
 using namespace ai;
@@ -13,7 +14,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
     //Get the current travel target. This target is no longer active.
-    TravelTarget * oldTarget = context->GetValue<TravelTarget *>("travel target")->Get();
+    TravelTarget * oldTarget = AI_VALUE(TravelTarget *,"travel target");
 
     //Select a new target to travel to. 
     TravelTarget newTarget = TravelTarget(ai);   
@@ -39,6 +40,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
 void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget)
 {
     bool foundTarget = false;
+    focusQuestTravelList focusList = AI_VALUE(focusQuestTravelList, "focus travel target");
 
     foundTarget = SetGroupTarget(requester, newTarget);                                 //Join groups members
 
@@ -90,11 +92,26 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     WorldPosition botPos(bot);
 
     //Rpg in city
-    if (!foundTarget && urand(1, 100) > 90 && bot->GetLevel() > 5 && botPos.isOverworld())           //10% chance if not currenlty in dungeon.
+    if (focusList.empty() && !foundTarget && urand(1, 100) > 90 && bot->GetLevel() > 5 && botPos.isOverworld())           //10% chance if not currenlty in dungeon.
     {
         ai->TellDebug(requester, "Random rpg in city", "debug travel");
         auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetNpcFlagTarget2", &context->performanceStack);
         foundTarget = SetNpcFlagTarget(requester, newTarget, { UNIT_NPC_FLAG_BANKER,UNIT_NPC_FLAG_BATTLEMASTER,UNIT_NPC_FLAG_AUCTIONEER });
+    }
+
+    if (!foundTarget && !focusList.empty()) 
+    {
+        ai->TellDebug(requester, "Do focus questing", "debug travel");
+        auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetFocusQuestTarget", &context->performanceStack);
+        foundTarget = SetQuestTarget(requester, newTarget, true, true, true);    //Do any nearby    
+
+        if (!foundTarget)
+        {
+            ai->TellDebug(requester, "No focus quest found", "debug travel");
+            SetNullTarget(newTarget);
+        }
+
+        return;
     }
 
     // PvP activities
@@ -1258,4 +1275,39 @@ bool ChooseTravelTargetAction::needItemForQuest(uint32 itemId, const Quest* ques
     }
 
     return false;
+}
+
+bool FocusTravelTargetAction::Execute(Event& event)
+{
+    std::string text = event.getParam();
+
+    std::set<uint32> questIds = ChatHelper::ExtractAllQuestIds(text);
+
+    if (questIds.empty() && !text.empty())
+    {
+        if (Qualified::isValidNumberString(text))
+            questIds.insert(stoi(text));
+        else
+        {
+            std::vector<std::string> qualifiers = Qualified::getMultiQualifiers(text, ",");
+
+            for (auto& qualifier : qualifiers)
+                if (Qualified::isValidNumberString(qualifier))
+                    questIds.insert(stoi(text));
+        }
+    }
+
+    SET_AI_VALUE(focusQuestTravelList, "focus travel target", questIds);
+
+    if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT))
+        ai->TellError(event.getOwner(), "travel strategy disabled bot needs this to actually do the quest.");
+
+    if (!ai->HasStrategy("rpg quest", BotState::BOT_STATE_NON_COMBAT))
+        ai->TellError(event.getOwner(), "rpg quest strategy disabled bot needs this to actually do the quest.");
+
+    TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
+
+    oldTarget->setExpireIn(1000);
+    
+    return true;
 }

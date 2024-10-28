@@ -3,6 +3,7 @@
 #include <iomanip>
 
 #include "playerbot/strategy/values/SharedValueContext.h"
+#include "playerbot/strategy/values/TravelValues.h"
 #include "MotionGenerators/PathFinder.h"
 #include "TravelNode.h"
 #include "PlayerbotAI.h"
@@ -56,61 +57,82 @@ std::string QuestTravelDestination::getTitle() {
 bool QuestRelationTravelDestination::isActive(Player* bot) {
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     AiObjectContext* context = ai->GetAiObjectContext();
-    if(!ai->HasStrategy("rpg quest", BotState::BOT_STATE_NON_COMBAT))
+    if (!ai->HasStrategy("rpg quest", BotState::BOT_STATE_NON_COMBAT))
         return false;
+
+    focusQuestTravelList focusList = AI_VALUE(focusQuestTravelList, "focus travel target");
+
+    if (!focusList.empty() && focusList.find(questTemplate->GetQuestId()) == focusList.end())
+        return false;
+
+    bool forceThisQuest = !focusList.empty();
 
     if (relation == 0)
     {
-        if ((int32)questTemplate->GetQuestLevel() >= (int32)bot->GetLevel() + (int32)5)
+        if (!forceThisQuest && (int32)questTemplate->GetQuestLevel() >= (int32)bot->GetLevel() + (int32)5)
             return false;
 
         if (getPoints().front()->getMapId() != bot->GetMapId()) //CanTakeQuest will check required conditions which will fail on a different map.
             if (questTemplate->GetRequiredCondition())          //So we skip this quest for now.
                 return false;
-            
-        if (!bot->GetMap()->IsContinent() || !bot->CanTakeQuest(questTemplate, false))
+
+        if ((!forceThisQuest && !bot->GetMap()->IsContinent()) || !bot->CanTakeQuest(questTemplate, false))
             return false;
 
-        uint32 dialogStatus = sTravelMgr.getDialogStatus(bot, entry, questTemplate);
-
-        if (AI_VALUE(bool, "can fight equal"))
+        if (!forceThisQuest)
         {
-            if (AI_VALUE(uint8, "free quest log slots") < 5)
-                return false;
+            if (AI_VALUE(bool, "can fight equal"))
+            {
+                if (AI_VALUE(uint8, "free quest log slots") < 5)
+                    return false;
 
-            if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest npc::" + std::to_string(entry))) //Noone has yellow exclamation mark.
-                if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(entry) + "need quest objective::" + std::to_string(questId))) //Noone can do this quest for a usefull reward.
+                if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest npc::" + std::to_string(entry))) //Noone has yellow exclamation mark.
+                    if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(entry) + "need quest reward::" + std::to_string(questId))) //Noone can do this quest for a usefull reward.
                         return false;
+            }
+            else
+            {
+                if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(entry))) //Noone can pick up this quest for money.
+                    return false;
+
+                if (AI_VALUE(uint8, "free quest log slots") < 10)
+                    return false;
+            }
+
+            //Do not try to pick up dungeon/elite quests in instances without a group.
+            if ((questTemplate->GetType() == QUEST_TYPE_ELITE || questTemplate->GetType() == QUEST_TYPE_DUNGEON) && !AI_VALUE(bool, "can fight boss"))
+                return false;
         }
         else
         {
-            if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(entry))) //Noone can pick up this quest for money.
-                return false;
-
-            if (AI_VALUE(uint8, "free quest log slots") < 10)
+            if (!AI_VALUE2(bool, "can accept quest npc", std::to_string(entry)))
                 return false;
         }
-
-        //Do not try to pick up dungeon/elite quests in instances without a group.
-        if ((questTemplate->GetType() == QUEST_TYPE_ELITE || questTemplate->GetType() == QUEST_TYPE_DUNGEON) && !AI_VALUE(bool, "can fight boss"))
-            return false;
     }
     else
-    {       
-        if (!AI_VALUE2(bool, "group or", "following party,near leader,can turn in quest npc::" + std::to_string(entry)))
-            return false;
-
-        //Do not try to hand-in dungeon/elite quests in instances without a group.
-        if ((questTemplate->GetType() == QUEST_TYPE_ELITE || questTemplate->GetType() == QUEST_TYPE_DUNGEON) && !AI_VALUE(bool, "can fight boss"))
+    {
+        if (!forceThisQuest)
         {
-            WorldPosition pos(bot);
-            if (!this->nearestPoint(pos)->isOverworld())
+            if (!AI_VALUE2(bool, "group or", "following party,near leader,can turn in quest npc::" + std::to_string(entry)))
+                return false;
+
+            //Do not try to hand-in dungeon/elite quests in instances without a group.
+            if ((questTemplate->GetType() == QUEST_TYPE_ELITE || questTemplate->GetType() == QUEST_TYPE_DUNGEON) && !AI_VALUE(bool, "can fight boss"))
+            {
+                WorldPosition pos(bot);
+                if (!this->nearestPoint(pos)->isOverworld())
+                    return false;
+            }
+        }
+        else
+        {
+            if (!AI_VALUE2(bool, "can turn in quest npc", std::to_string(entry)))
                 return false;
         }
     }
-    
+
     if (entry > 0)
-    {     
+    {
         return !GuidPosition(HIGHGUID_UNIT, entry).IsHostileTo(bot);
     }
 
@@ -131,15 +153,27 @@ std::string QuestRelationTravelDestination::getTitle() {
 
 bool QuestObjectiveTravelDestination::isActive(Player* bot) {
     PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+
     if (!ai->HasStrategy("rpg quest", BotState::BOT_STATE_NON_COMBAT))
         return false;
 
-    if ((int32)questTemplate->GetQuestLevel() > (int32)bot->GetLevel() + (int32)1)
+    focusQuestTravelList focusList = AI_VALUE(focusQuestTravelList, "focus travel target");
+
+    if (!focusList.empty() && focusList.find(questTemplate->GetQuestId()) == focusList.end())
         return false;
 
-    AiObjectContext* context = ai->GetAiObjectContext();
-    if (questTemplate->GetQuestLevel() + 5 > (int)bot->GetLevel() && !AI_VALUE(bool, "can fight equal"))
-        return false;
+    bool forceThisQuest = !focusList.empty();
+
+    if (!forceThisQuest)
+    {
+        if ((int32)questTemplate->GetQuestLevel() > (int32)bot->GetLevel() + (int32)1)
+            return false;
+
+        AiObjectContext* context = ai->GetAiObjectContext();
+        if (questTemplate->GetQuestLevel() + 5 > (int)bot->GetLevel() && !AI_VALUE(bool, "can fight equal"))
+            return false;
+    }
 
     if ((bot->GetGroup() && bot->GetGroup()->IsRaidGroup()) != (questTemplate->GetType() == QUEST_TYPE_RAID))
         return false;
@@ -160,7 +194,7 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
             isVendor = true;
         }
 
-        if (!isVendor)
+        if (!isVendor && !forceThisQuest)
         {
             if (cInfo && (int)cInfo->MaxLevel - (int)bot->GetLevel() > 4)
                 return false;
@@ -177,23 +211,27 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
         }
     }
 
-    if (!isVendor && questTemplate->GetType() == QUEST_TYPE_ELITE && !AI_VALUE(bool, "can fight elite"))
-        return false;
-
-    //Do not try to do dungeon/elite quests in instances without a group.
-    if ((questTemplate->GetType() == QUEST_TYPE_ELITE || questTemplate->GetType() == QUEST_TYPE_DUNGEON || questTemplate->GetType() == QUEST_TYPE_RAID) && !AI_VALUE(bool, "can fight boss"))
+    if (!forceThisQuest)
     {
-        WorldPosition pos(bot);
-        if (!this->nearestPoint(pos)->isOverworld())
-            return false;
-    }
 
-    //Do not try to do pvp quests in bg's (no way to travel there). 
-    if (questTemplate->GetType() == QUEST_TYPE_PVP)
-    {
-        WorldPosition pos(bot);
-        if (!this->nearestPoint(pos)->isOverworld())
+        if (!isVendor && questTemplate->GetType() == QUEST_TYPE_ELITE && !AI_VALUE(bool, "can fight elite"))
             return false;
+
+        //Do not try to do dungeon/elite quests in instances without a group.
+        if ((questTemplate->GetType() == QUEST_TYPE_ELITE || questTemplate->GetType() == QUEST_TYPE_DUNGEON || questTemplate->GetType() == QUEST_TYPE_RAID) && !AI_VALUE(bool, "can fight boss"))
+        {
+            WorldPosition pos(bot);
+            if (!this->nearestPoint(pos)->isOverworld())
+                return false;
+        }
+
+        //Do not try to do pvp quests in bg's (no way to travel there). 
+        if (questTemplate->GetType() == QUEST_TYPE_PVP)
+        {
+            WorldPosition pos(bot);
+            if (!this->nearestPoint(pos)->isOverworld())
+                return false;
+        }
     }
 
     std::vector<std::string> qualifier = { std::to_string(questTemplate->GetQuestId()), std::to_string(objective) };

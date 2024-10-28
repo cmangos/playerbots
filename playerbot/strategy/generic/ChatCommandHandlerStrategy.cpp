@@ -105,6 +105,7 @@ ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("cast");
     supported.push_back("move style");
     supported.push_back("jump");
+    supported.push_back("doquest");
 }
 
 void ChatCommandHandlerStrategy::InitReactionTriggers(std::list<TriggerNode*> &triggers)

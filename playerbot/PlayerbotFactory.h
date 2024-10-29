@@ -100,9 +100,9 @@ private:
     bool CanEquipWeapon(ItemPrototype const* proto);
     void EnchantItem(Item* item);
     void AddGems(Item* item);
-    void AddItemStats(uint32 mod, uint8 &sp, uint8 &ap, uint8 &tank);
-    void AddItemSpellStats(uint32 smod, uint8& sp, uint8& ap, uint8& tank);
-    bool CheckItemStats(uint8 sp, uint8 ap, uint8 tank);
+    void AddItemStats(uint32 mod, uint32 amount, uint16 &sp, uint16 &ap, uint16 &tank, uint16 &heal);
+    void AddItemSpellStats(uint32 smod, uint16& sp, uint16& ap, uint16& tank);
+    bool CheckItemStats(uint16 sp, uint16 ap, uint16 tank, uint16 heal, uint16 minValue = 0);
     void CancelAuras();
     bool IsDesiredReplacement(uint32 itemId);
     void InitBags();

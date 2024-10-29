@@ -1114,90 +1114,146 @@ bool PlayerbotFactory::CanEquipArmor(ItemPrototype const* proto)
        continue;
     }
 
-    uint8 sp = 0, ap = 0, tank = 0;
+    uint16 sp = 0, ap = 0, tank = 0, heal = 0;
     for (int j = 0; j < MAX_ITEM_PROTO_STATS; ++j)
     {
         // for ItemStatValue != 0
         if(!proto->ItemStat[j].ItemStatValue)
             continue;
 
-        AddItemStats(proto->ItemStat[j].ItemStatType, sp, ap, tank);
+        AddItemStats(proto->ItemStat[j].ItemStatType, proto->ItemStat[j].ItemStatValue, sp, ap, tank, heal);
     }
 
-    return CheckItemStats(sp, ap, tank);
+    return CheckItemStats(sp, ap, tank, heal);
 }
 
-bool PlayerbotFactory::CheckItemStats(uint8 sp, uint8 ap, uint8 tank)
+bool PlayerbotFactory::CheckItemStats(uint16 sp, uint16 ap, uint16 tank, uint16 heal, uint16 minValue)
 {
-    switch (bot->getClass())
-    {
-    case CLASS_PRIEST:
-    case CLASS_MAGE:
-    case CLASS_WARLOCK:
-        if (!sp || ap > sp || tank > sp)
-            return false;
-        break;
-    case CLASS_PALADIN:
-    case CLASS_WARRIOR:
-        if ((!ap && !tank) || sp > ap || sp > tank)
-            return false;
-        break;
-    case CLASS_HUNTER:
-    case CLASS_ROGUE:
-        if (!ap || sp > ap || sp > tank)
-            return false;
-        break;
+    uint8 botClass = bot->getClass();
+    uint8 botSpecTab = AiFactory::GetPlayerSpecTab(bot);
+    bool isTankItem = tank >= minValue && tank >= ap && tank >= sp && tank >= heal;
+    bool isSpItem = sp >= minValue && sp >= ap && sp >= tank && sp >= heal;
+    bool isHealerItem = heal >= minValue && heal >= sp && heal >= tank && heal >= ap;
+    bool isApItem = ap >= minValue && ap >= sp && ap >= tank && ap >= heal;
+
+    switch (botClass) {
 #ifdef MANGOSBOT_TWO
     case CLASS_DEATH_KNIGHT:
-        if ((!ap && !tank) || sp > ap || sp > tank)
-            return false;
+        if (botSpecTab == 0)
+            return isTankItem;
+        else
+            return isApItem;
         break;
 #endif
+    case CLASS_DRUID:
+        if (botSpecTab == 0)
+            return isSpItem;
+        else if (botSpecTab == 2)
+            return isHealerItem;
+        else if (botSpecTab == 1)
+            return isApItem;
+        break;
+    case CLASS_HUNTER:
+        return isApItem;
+        break;
+    case CLASS_MAGE:
+        return isSpItem;
+        break;
+    case CLASS_PALADIN:
+        if (botSpecTab == 0)
+            return isHealerItem;
+        else if (botSpecTab == 2)
+            return isApItem;
+        else if (botSpecTab == 1)
+            return isTankItem;
+        break;
+    case CLASS_PRIEST:
+        if (botSpecTab == 2)
+            return isSpItem;
+        else
+            return isHealerItem;
+        break;
+    case CLASS_ROGUE:
+        return isApItem;
+        break;
+    case CLASS_SHAMAN:
+        if (botSpecTab == 0)
+            return isSpItem;
+        else if (botSpecTab == 2)
+            return isHealerItem;
+        else if (botSpecTab == 1)
+            return isApItem;
+        break;
+    case CLASS_WARLOCK:
+        return isSpItem;
+        break;
+    case CLASS_WARRIOR:
+        if (botSpecTab == 2)
+            return isTankItem;
+        else
+            return isApItem;
+        break;
+    default: return false;
+        break;
     }
-
-    return sp || ap || tank;
 }
 
-void PlayerbotFactory::AddItemStats(uint32 mod, uint8 &sp, uint8 &ap, uint8 &tank)
+void PlayerbotFactory::AddItemStats(uint32 mod, uint32 amount, uint16 &sp, uint16 &ap, uint16 &tank, uint16 &heal)
 {
     switch (mod)
     {
-    case ITEM_MOD_HEALTH:
-    case ITEM_MOD_STAMINA:
-    case ITEM_MOD_MANA:
-    case ITEM_MOD_INTELLECT:
-    case ITEM_MOD_SPIRIT:
-#ifndef MANGOSBOT_ZERO
-    case ITEM_MOD_HIT_SPELL_RATING:
-        case ITEM_MOD_HASTE_RATING:
-        case ITEM_MOD_HASTE_RANGED_RATING:
-        case ITEM_MOD_CRIT_RANGED_RATING:
-        case ITEM_MOD_HIT_RANGED_RATING:
-#endif
-#ifdef MANGOSBOT_TWO
-    case ITEM_MOD_SPELL_HEALING_DONE:
-    case ITEM_MOD_SPELL_DAMAGE_DONE:
-    case ITEM_MOD_MANA_REGENERATION:
-    case ITEM_MOD_ARMOR_PENETRATION_RATING:
-    case ITEM_MOD_SPELL_POWER:
-    case ITEM_MOD_HEALTH_REGEN:
-    case ITEM_MOD_SPELL_PENETRATION:
-#endif
-        sp++;
+    case ITEM_MOD_MANA: // *1
+        sp += amount;
+        heal += amount;
         break;
-    }
-
-    switch (mod)
-    {
-    case ITEM_MOD_AGILITY:
-    case ITEM_MOD_STRENGTH:
-    case ITEM_MOD_HEALTH:
-    case ITEM_MOD_STAMINA:
-#ifndef MANGOSBOT_ZERO
+    case ITEM_MOD_HEALTH: // *1
+        sp += amount;
+        ap += amount;
+        tank += amount * 2;
+        heal += amount;
+        break;
+    case ITEM_MOD_AGILITY: // *15
+        ap += amount * 15;
+        tank += amount * 15;
+        break;
+    case ITEM_MOD_STRENGTH: // *15
+        ap += amount * 15;
+        tank += amount * 10;
+        break;
+    case ITEM_MOD_INTELLECT: // *15
+        sp += amount * 15;
+        heal += amount * 15;
+        break;
+    case ITEM_MOD_SPIRIT: // *15
+        sp += amount * 15;
+        heal += amount * 15;
+        break;
+    case ITEM_MOD_STAMINA: // *10
+        sp += amount * 10;
+        ap += amount * 10;
+        tank += amount * 15;
+        heal += amount * 10;
+        break;
     case ITEM_MOD_DEFENSE_SKILL_RATING:
     case ITEM_MOD_DODGE_RATING:
     case ITEM_MOD_PARRY_RATING:
     case ITEM_MOD_BLOCK_RATING:
+    case ITEM_MOD_EXPERTISE_RATING: // *15
+        tank += amount * 15;
+        break;
+    case ITEM_MOD_HIT_MELEE_RATING:
+    case ITEM_MOD_HIT_RANGED_RATING:
+    case ITEM_MOD_CRIT_MELEE_RATING:
+    case ITEM_MOD_CRIT_RANGED_RATING:
+    case ITEM_MOD_HASTE_MELEE_RATING:
+    case ITEM_MOD_HASTE_RANGED_RATING: // *5
+        ap += amount * 5;
+        break;
+    case ITEM_MOD_HIT_SPELL_RATING:
+    case ITEM_MOD_CRIT_SPELL_RATING:
+    case ITEM_MOD_HASTE_SPELL_RATING: // *5
+        sp += amount * 5;
+        break;
     case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
     case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
     case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
@@ -1205,45 +1261,60 @@ void PlayerbotFactory::AddItemStats(uint32 mod, uint8 &sp, uint8 &ap, uint8 &tan
     case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
     case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
     case ITEM_MOD_HIT_TAKEN_RATING:
-    case ITEM_MOD_CRIT_TAKEN_RATING:
-    case ITEM_MOD_RESILIENCE_RATING:
-#endif
-#ifdef MANGOSBOT_TWO
-    case ITEM_MOD_BLOCK_VALUE:
-#endif
-        tank++;
+    case ITEM_MOD_CRIT_TAKEN_RATING: // *5
+        tank += amount * 5;
         break;
-    }
-
-    switch (mod)
-    {
-    case ITEM_MOD_HEALTH:
-    case ITEM_MOD_STAMINA:
-    case ITEM_MOD_AGILITY:
-    case ITEM_MOD_STRENGTH:
-#ifndef MANGOSBOT_ZERO
-    case ITEM_MOD_HIT_MELEE_RATING:
-    case ITEM_MOD_HIT_RANGED_RATING:
-    case ITEM_MOD_CRIT_MELEE_RATING:
-    case ITEM_MOD_CRIT_RANGED_RATING:
-    case ITEM_MOD_HASTE_MELEE_RATING:
-    case ITEM_MOD_HASTE_RANGED_RATING:
-    case ITEM_MOD_HIT_RATING:
-    case ITEM_MOD_CRIT_RATING:
-    case ITEM_MOD_HASTE_RATING:
-    case ITEM_MOD_EXPERTISE_RATING:
-#endif
-#ifdef MANGOSBOT_TWO
-    case ITEM_MOD_ATTACK_POWER:
+    case ITEM_MOD_HIT_RATING: // *15
+        sp += amount * 15;
+        ap += amount * 15;
+        tank += amount * 15;
+        heal += amount * 15;
+        break;
+    case ITEM_MOD_CRIT_RATING: // *15
+        sp += amount * 15;
+        ap += amount * 15;
+        heal += amount * 10;
+        break;
+    case ITEM_MOD_RESILIENCE_RATING: // *15
+        sp += amount * 15;
+        ap += amount * 15;
+        tank += amount * 15;
+        heal += amount * 15;
+        break;
+    case ITEM_MOD_HASTE_RATING: // *15
+        sp += amount * 15;
+        ap += amount * 10;
+        heal += amount * 15;
+        break;
+    case ITEM_MOD_ATTACK_POWER: // *7
+        ap += amount * 7;
+        break;
+    case ITEM_MOD_MANA_REGENERATION: // *6
+        heal += amount * 30;
+        break;
+    case ITEM_MOD_ARMOR_PENETRATION_RATING: // *15
+        ap += amount * 15;
+        break;
+    case ITEM_MOD_SPELL_POWER: // *13
+        sp += amount * 13;
+        heal += amount * 13;
+        break;
+    case ITEM_MOD_SPELL_PENETRATION: // *12
+        sp += amount * 12;
+        break;
+    case ITEM_MOD_BLOCK_VALUE:// *3
+        tank += amount * 3;
+        break;
     case ITEM_MOD_RANGED_ATTACK_POWER:
     case ITEM_MOD_FERAL_ATTACK_POWER:
-#endif
-        ap++;
+    case ITEM_MOD_SPELL_HEALING_DONE:
+    case ITEM_MOD_SPELL_DAMAGE_DONE:
+    case ITEM_MOD_HEALTH_REGEN:
         break;
     }
 }
 
-void PlayerbotFactory::AddItemSpellStats(uint32 smod, uint8& sp, uint8& ap, uint8& tank)
+void PlayerbotFactory::AddItemSpellStats(uint32 smod, uint16& sp, uint16& ap, uint16& tank)
 {
     switch (smod)
     {
@@ -2370,19 +2441,19 @@ void PlayerbotFactory::AddGems(Item* item)
                                 /*if ((bot->GetLevel()) < (gemProto->ItemLevel - 10))
                                     continue;*/
 
-                                uint8 sp = 0, ap = 0, tank = 0;
-                                if (GemColor & SocketColor && GemColor == SocketColor)
+                                uint16 sp = 0, ap = 0, tank = 0, heal = 0;
+                                if (GemColor & SocketColor)
                                 {
                                     for (int i = 0; i < 3; ++i)
                                     {
                                         if (pEnchant->type[i] != ITEM_ENCHANTMENT_TYPE_STAT)
                                             continue;
 
-                                        AddItemStats(pEnchant->spellid[i], sp, ap, tank);
+                                        AddItemStats(pEnchant->spellid[i], pEnchant->amount[i], sp, ap, tank, heal);
                                     }
                                 }
 
-                                if (!CheckItemStats(sp, ap, tank))
+                                if (!CheckItemStats(sp, ap, tank, heal))
                                     continue;
 
                                 if (gemProto->RequiredSkillRank > bot->GetSkillValue(SKILL_JEWELCRAFTING))
@@ -3898,125 +3969,7 @@ void PlayerbotFactory::LoadEnchantContainer()
    }
 }
 
-/*void PlayerbotFactory::InitGems() //WIP
-{
-#ifndef MANGOSBOT_ZERO
-    std::vector<uint32> gems = sRandomItemMgr.GetGemsList();
-    if (!gems.empty()) Shuffle(gems);
-
-    for (int slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)
-    {
-        if (Item* item = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
-        {
-            if (ItemPrototype const* proto = item->GetProto())
-            {
-                uint32 gem_placed[MAX_GEM_SOCKETS];
-                ObjectGuid gem_guids[MAX_GEM_SOCKETS];
-                bool gemCreated = false;
-                bool hasSockets = false;
-
-                for (int i = 0; i < MAX_GEM_SOCKETS; ++i)               // check for hack maybe
-                {
-                    // tried to put gem in socket where no socket exists
-                    if (!proto->Socket[i].Color)
-                        continue;
-
-                    if (proto->Socket[i].Color)
-                        hasSockets = true;
-                }
-                if (!hasSockets)
-                    continue;
-
-                    for (int i = 0; i < MAX_GEM_SOCKETS; i++) gem_placed[i] = 0;
-                    {
-                        for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT + MAX_GEM_SOCKETS; ++enchant_slot)
-                        {
-                        ObjectGuid gem_GUID;
-                        uint32 SocketColor = proto->Socket[enchant_slot - SOCK_ENCHANTMENT_SLOT].Color;
-                        uint32 gem_id = 0;
-                        switch (SocketColor) {
-                        case SOCKET_COLOR_META:
-                            gem_id = 25890;
-                            break;
-                        default:
-                        {
-                            for (std::vector<uint32>::const_iterator itr = gems.begin(); itr != gems.end(); itr++)
-                            {
-                                if (ItemPrototype const* gemProto = sObjectMgr.GetItemPrototype(*itr))
-                                {
-                                    if (GemPropertiesEntry const* gemProperty = sGemPropertiesStore.LookupEntry(gemProto->GemProperties))
-                                    {
-                                        if (SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(gemProperty->spellitemenchantement))
-                                        {
-                                            uint32 GemColor = gemProperty->color;
-
-                                            // check unique-equipped on item
-                                            if (gemProto->Flags & ITEM_FLAG_UNIQUE_EQUIPPABLE)
-                                            {
-                                                // there is an equip limit on this item and also we dont want to have more than 1 anywhere
-                                                if ((bot->HasItemOrGemWithIdEquipped(gemProto->ItemId, 1)) || (bot->HasItemCount(gemProto->ItemId, 1)))
-                                                    continue;
-                                            }
-
-                                            if (gemProto->RequiredSkillRank > bot->GetSkillValue(SKILL_JEWELCRAFTING))
-                                                continue;
-
-                                            // no nedd epic gems to low gear and never need crap gem to epic gear
-                                            if (((proto->ItemLevel) < 100) && ((gemProto->Quality) > 3) || ((proto->ItemLevel) > 100) && ((gemProto->Quality) < 3))
-                                                continue;
-
-                                            uint8 sp = 0, ap = 0, tank = 0;
-                                            if (GemColor & SocketColor && GemColor == SocketColor)
-                                            {
-                                                for (int i = 0; i < 3; ++i)
-                                                {
-                                                    if (pEnchant->type[i] != ITEM_ENCHANTMENT_TYPE_STAT)
-                                                        continue;
-
-                                                    AddItemStats(pEnchant->spellid[i], sp, ap, tank);
-                                                }
-                                            }
-
-                                            if (!CheckItemStats(sp, ap, tank))
-                                                continue;
-                                       
-                                            gem_id = gemProto->ItemId;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                        }
-                        if (gem_id > 0)
-                        {
-                            gem_placed[enchant_slot - SOCK_ENCHANTMENT_SLOT] = gem_id;
-                            if (Item* gem = StoreItem(gem_id, 1))
-                            {
-                                gem_GUID = gem->GetObjectGuid();
-                                gem_guids[enchant_slot - SOCK_ENCHANTMENT_SLOT] = gem_GUID;
-                                gemCreated = true;
-                            }
-                        }
-                        }
-                        if (gemCreated)
-                        {
-                        std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_SOCKET_GEMS));
-                        *packet << item->GetObjectGuid();
-                        for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
-                        {
-                            *packet << gem_guids[i];
-                        }
-                        bot->GetSession()->QueuePacket(std::move(packet));
-                        }
-                    }
-            }
-        }
-    }
-#endif
-}*/
-void PlayerbotFactory::InitGems() //WIP
+void PlayerbotFactory::InitGems()
 {
 #ifndef MANGOSBOT_ZERO
     std::vector<uint32> gems = sRandomItemMgr.GetGemsList();
@@ -4054,12 +4007,74 @@ void PlayerbotFactory::InitGems() //WIP
                     uint32 SocketColor = proto->Socket[enchant_slot - SOCK_ENCHANTMENT_SLOT].Color;
                     //uint32 SocketContent = proto->Socket[enchant_slot - SOCK_ENCHANTMENT_SLOT].Content;
                     uint32 gem_id = 0;
+                    uint8 botClass = bot->getClass();
+                    uint8 botSpecTab = AiFactory::GetPlayerSpecTab(bot);
                     switch (SocketColor) {
                     case SOCKET_COLOR_META:
-                        gem_id = 25890;
+                        switch (botClass) {
+#ifdef MANGOSBOT_TWO
+                        case CLASS_DEATH_KNIGHT: 
+                            if (botSpecTab == 0)
+                                gem_id = 41380; // Austere Earthsiege Diamond
+                            else 
+                                gem_id = 41398; // Relentless Earthsiege Diamond
+                            break;
+#endif
+                        case CLASS_DRUID: 
+                            if (botSpecTab == 0)
+                                gem_id = 41285; // Chaotic Skyflare Diamond
+                            else if (botSpecTab == 2)
+                                gem_id = 41401; // Insightful Earthsiege Diamond
+                            else if (botSpecTab == 1)
+                                gem_id = 41398; // Relentless Earthsiege Diamond
+                            break;
+                        case CLASS_HUNTER: 
+                            gem_id = 41398; // Relentless Earthsiege Diamond
+                            break;
+                        case CLASS_MAGE: 
+                            gem_id = 41285; // Chaotic Skyflare Diamond
+                            break;
+                        case CLASS_PALADIN: 
+                            if (botSpecTab == 0)
+                                gem_id = 41401; // Insightful Earthsiege Diamond
+                            else if (botSpecTab == 2)
+                                gem_id = 41398; // Relentless Earthsiege Diamond
+                            else if (botSpecTab == 1)
+                                gem_id = 41380; // Austere Earthsiege Diamond
+                            break;
+                        case CLASS_PRIEST: 
+                            if (botSpecTab == 2)
+                                gem_id = 41285; // Chaotic Skyflare Diamond
+                            else 
+                                gem_id = 41401; // Insightful Earthsiege Diamond
+                            break;
+                        case CLASS_ROGUE: 
+                            gem_id = 41398; // Relentless Earthsiege Diamond
+                            break;
+                        case CLASS_SHAMAN: 
+                            if (botSpecTab == 0)
+                                gem_id = 41285; // Chaotic Skyflare Diamond
+                            else if (botSpecTab == 2)
+                                gem_id = 41401; // Insightful Earthsiege Diamond
+                            else if (botSpecTab == 1)
+                                gem_id = 41398; // Relentless Earthsiege Diamond
+                            break;
+                        case CLASS_WARLOCK: 
+                            gem_id = 41285; // Chaotic Skyflare Diamond
+                            break;
+                        case CLASS_WARRIOR: 
+                            if (botSpecTab == 2)
+                                gem_id = 41380; // Austere Earthsiege Diamond
+                            else
+                                gem_id = 41398; // Relentless Earthsiege Diamond
+                            break;
+                        default: gem_id = 41398; // Relentless Earthsiege Diamond
+                            break;
+                        }
                         break;
                     default:
                     {
+                        Shuffle(gems); 
                         for (std::vector<uint32>::const_iterator itr = gems.begin(); itr != gems.end(); itr++)
                         {
                             if (ItemPrototype const* gemProto = sObjectMgr.GetItemPrototype(*itr))
@@ -4078,8 +4093,14 @@ void PlayerbotFactory::InitGems() //WIP
                                     if (SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(gemProperty->spellitemenchantement))
                                     {
                                         uint32 GemColor = gemProperty->color;
+                                        uint32 GemStatsAmount = 0;
+                                        for (int i = 0; i < 3; i++)
+                                        {
+                                            if (pEnchant->type[i] == ITEM_ENCHANTMENT_TYPE_STAT)
+                                                GemStatsAmount += pEnchant->amount[i];
+                                        }
 
-                                      // check unique-equipped on item
+                                        // check unique-equipped on item
                                         if (gemProto->Flags & ITEM_FLAG_UNIQUE_EQUIPPABLE)
                                         {
                                             // there is an equip limit on this item and also we dont want to have more than 1 anywhere
@@ -4091,20 +4112,25 @@ void PlayerbotFactory::InitGems() //WIP
                                             continue;
 
                                         // no need epic gems to low gear and never need crap gem to epic gear
-                                        if (((proto->ItemLevel) < 100) && ((gemProto->Quality) > 3) || ((proto->ItemLevel) > 100) && ((gemProto->Quality) < 3))
+                                        if (((proto->ItemLevel) < 200) && ((gemProto->Quality) > 3) || ((proto->ItemLevel) >= 200) && ((gemProto->Quality) < 3))
                                             continue;
 
-                                        uint8 sp = 0, ap = 0, tank = 0;
-                                        if (GemColor & SocketColor && GemColor == SocketColor)
+                                        uint16 sp = 0, ap = 0, tank = 0, heal = 0;
+                                        if (GemColor & SocketColor)
                                         {
                                             for (int i = 0; i < 3; ++i)
                                             {
                                                 if (pEnchant->type[i] != ITEM_ENCHANTMENT_TYPE_STAT && pEnchant->type[i] != ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL)
                                                     continue;
+
+                                                // skip if low gem but good item
+                                                if ((proto->ItemLevel) >= 200 && GemStatsAmount < 20 && pEnchant->spellid[i] != 68251)
+                                                    continue;
+
                                                 switch (pEnchant->type[i]) 
                                                 {
                                                 case ITEM_ENCHANTMENT_TYPE_STAT:                                                    
-                                                        AddItemStats(pEnchant->spellid[i], sp, ap, tank);
+                                                        AddItemStats(pEnchant->spellid[i], pEnchant->amount[i], sp, ap, tank, heal);
                                                 break;                                                    
                                                 case ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL:                                                   
                                                         const SpellEntry* const spellInfo = sServerFacade.LookupSpellInfo(pEnchant->spellid[i]);
@@ -4122,7 +4148,7 @@ void PlayerbotFactory::InitGems() //WIP
                                                 }
                                             }
                                         }
-                                        if (!CheckItemStats(sp, ap, tank))
+                                        if (!CheckItemStats(sp, ap, tank, heal, 250))
                                             continue;
                                         gem_id = gemProto->ItemId;
                                         break;
@@ -4136,8 +4162,6 @@ void PlayerbotFactory::InitGems() //WIP
                     if (gem_id > 0)
                     {
                         gem_placed[enchant_slot - SOCK_ENCHANTMENT_SLOT] = gem_id;
-
-
                         ItemPosCountVec dest;
                         InventoryResult res = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, gem_id, 1);
                         if (res == EQUIP_ERR_OK)

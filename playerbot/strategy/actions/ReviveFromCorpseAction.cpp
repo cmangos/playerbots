@@ -267,12 +267,12 @@ bool SpiritHealerAction::Execute(Event& event)
 
         if (!foundSpiritHealer)
         {
-            sLog.outBasic("Bot #%d %s:%d <%s> can't find a spirit healer", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+            sLog.outDetail("Bot #%d %s:%d <%s> can't find a spirit healer", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
             ai->TellPlayerNoFacing(requester, "Cannot find any spirit healer nearby");
         }
 
 
-        sLog.outBasic("Bot #%d %s:%d <%s> revives at spirit healer", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+        sLog.outDetail("Bot #%d %s:%d <%s> revives at spirit healer", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
         PlayerbotChatHandler ch(bot);
         bot->ResurrectPlayer(0.5f, !ai->HasCheat(BotCheatMask::repair));
         bot->DurabilityLossAll(0.25f, true);

@@ -1817,7 +1817,7 @@ bool RandomPlayerbotMgr::AddRandomBot(uint32 bot)
     uint32 randomTime = urand(sPlayerbotAIConfig.minRandomBotReviveTime, sPlayerbotAIConfig.maxRandomBotReviveTime);
     SetEventValue(bot, "update", 1, randomTime);
     currentBots.push_back(bot);
-    sLog.outBasic("Random bot added #%d", bot);
+    sLog.outDetail("Random bot added #%d", bot);
     return true;
 
     player = GetPlayerBot(bot);
@@ -2025,13 +2025,13 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
         {
             if (sPlayerbotAIConfig.enableRandomTeleports)
             {
-                sLog.outBasic("Bot #%d %s:%d <%s>: sent to grind", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+                sLog.outDetail("Bot #%d %s:%d <%s>: sent to grind", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
                 RandomTeleportForLevel(player, true);
                 ScheduleTeleport(bot);
             }
             else
             {
-                sLog.outBasic("Bot #%d %s:%d <%s>: supposed to be sent to grind, but enableRandomTeleports = false", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+                sLog.outDetail("Bot #%d %s:%d <%s>: supposed to be sent to grind, but enableRandomTeleports = false", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
             }
             return true;
         }
@@ -3695,14 +3695,14 @@ void RandomPlayerbotMgr::ChangeStrategy(Player* player)
 
     if (urand(0, 100) > 100 * sPlayerbotAIConfig.randomBotRpgChance) // select grind / pvp
     {
-        sLog.outBasic("Bot #%d %s:%d <%s>: sent to grind spot", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+        sLog.outDetail("Bot #%d %s:%d <%s>: sent to grind spot", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
         // teleport in different places only if players are online
         RandomTeleportForLevel(player, players.size());
         ScheduleTeleport(bot);
     }
     else
     {
-		sLog.outBasic("Bot #%d %s:%d <%s>: sent to inn", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+		sLog.outDetail("Bot #%d %s:%d <%s>: sent to inn", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
         RandomTeleportForRpg(player, players.size());
         ScheduleTeleport(bot);
     }

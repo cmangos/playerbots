@@ -1638,6 +1638,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                     if (HasRealPlayerMaster() && guid1 != GetMaster()->GetObjectGuid())
                         return;
+                    }
 
                     if (lang == LANG_ADDON)
                         return;

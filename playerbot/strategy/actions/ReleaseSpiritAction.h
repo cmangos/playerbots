@@ -129,7 +129,7 @@ namespace ai
         {
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
-            sLog.outBasic("Repop bot #%d %s:%d <%s>", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+            sLog.outDetail("Repop bot #%d %s:%d <%s>", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
 
             SET_AI_VALUE(uint32, "death count", 0);
 

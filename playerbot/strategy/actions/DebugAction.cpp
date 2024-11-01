@@ -1113,7 +1113,15 @@ bool DebugAction::Execute(Event& event)
     else if (text.find("quest ") == 0)
     {
         WorldPosition botPos(bot);
-        uint32 questId = stoi(text.substr(6));
+
+        std::set<uint32> questIds = ChatHelper::ExtractAllQuestIds(text);
+
+        uint32 questId;
+
+        if (questIds.empty())
+            questId = stoi(text.substr(6));
+        else
+            questId = *questIds.begin();
 
         Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
 

@@ -10,13 +10,10 @@ class BalanceDruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNo
 public:
     BalanceDruidStrategyActionNodeFactory()
     {
-        creators["starfall"] = &starfall;
         creators["starfire"] = &starfire;
     }
 
 private:
-    ACTION_NODE_A(starfall, "starfall", "hurricane");
-
     ACTION_NODE_A(starfire, "starfire", "wrath");
 };
 
@@ -849,19 +846,19 @@ void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     
     triggers.push_back(new TriggerNode(
         "force of nature",
-        NextAction::array(0, new NextAction("force of nature", ACTION_HIGH + 2), NULL))); 
+        NextAction::array(0, new NextAction("force of nature", ACTION_HIGH), NULL))); 
     
     triggers.push_back(new TriggerNode(
         "insect swarm",
-        NextAction::array(0, new NextAction("insect swarm", ACTION_HIGH + 1), NULL)));
+        NextAction::array(0, new NextAction("insect swarm", ACTION_NORMAL + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
         "eclipse (solar)",
-        NextAction::array(0, new NextAction("wrath", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("wrath", ACTION_NORMAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "eclipse (lunar)",
-        NextAction::array(0, new NextAction("starfire", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("starfire", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "faerie fire",
@@ -923,6 +920,10 @@ void BalanceDruidPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 {
     BalanceDruidStrategy::InitCombatTriggers(triggers);
     DruidPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("starfall", ACTION_HIGH), NULL)));
 }
 
 void BalanceDruidPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -977,8 +978,12 @@ void BalanceDruidAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     DruidAoeStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "ranged light aoe",
-        NextAction::array(0, new NextAction("starfall", ACTION_HIGH + 2), NULL)));
+        "ranged medium aoe",
+        NextAction::array(0, new NextAction("starfall", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "ranged high aoe",
+        NextAction::array(0, new NextAction("hurricane", ACTION_HIGH), NULL)));
 }
 
 void BalanceDruidAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1132,7 +1137,7 @@ void BalanceDruidCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "entangling roots kite",
-        NextAction::array(0, new NextAction("entangling roots", ACTION_INTERRUPT), NULL)));
+        NextAction::array(0, new NextAction("entangling roots", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "enemy five yards",

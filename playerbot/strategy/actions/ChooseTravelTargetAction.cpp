@@ -1279,7 +1279,31 @@ bool ChooseTravelTargetAction::needItemForQuest(uint32 itemId, const Quest* ques
 
 bool FocusTravelTargetAction::Execute(Event& event)
 {
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     std::string text = event.getParam();
+
+    if (text == "?")
+    {
+        std::set<uint32> questIds = AI_VALUE(focusQuestTravelList, "focus travel target");
+        std::ostringstream out;
+        if (questIds.empty())
+            out << "No quests selected.";
+        else
+        {
+            out << "I will try to only do the following " << questIds.size() << " quests:";
+
+            for (auto questId : questIds)
+            {
+                const Quest* quest = sObjectMgr.GetQuestTemplate(questId);
+
+                if (quest)
+                    out << ChatHelper::formatQuest(quest);
+            }
+
+        }
+        ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        return true;
+    }
 
     std::set<uint32> questIds = ChatHelper::ExtractAllQuestIds(text);
 
@@ -1300,10 +1324,28 @@ bool FocusTravelTargetAction::Execute(Event& event)
     SET_AI_VALUE(focusQuestTravelList, "focus travel target", questIds);
 
     if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellError(event.getOwner(), "travel strategy disabled bot needs this to actually do the quest.");
+        ai->TellError(requester, "travel strategy disabled bot needs this to actually do the quest.");
 
     if (!ai->HasStrategy("rpg quest", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellError(event.getOwner(), "rpg quest strategy disabled bot needs this to actually do the quest.");
+        ai->TellError(requester, "rpg quest strategy disabled bot needs this to actually do the quest.");
+
+    std::ostringstream out;
+    if (questIds.empty())
+        out << "I will now do all quests.";
+    else
+    {
+        out << "I will now only try to do the following " << questIds.size() << " quests:";
+
+        for (auto questId : questIds)
+        {
+            const Quest* quest = sObjectMgr.GetQuestTemplate(questId);
+
+            if (quest)
+                out << ChatHelper::formatQuest(quest);
+        }
+
+    }
+    ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 
     TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
 

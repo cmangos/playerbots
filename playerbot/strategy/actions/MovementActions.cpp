@@ -1502,7 +1502,7 @@ bool MovementAction::ChaseTo(WorldObject* obj, float distance, float angle)
 
 #ifndef MANGOSBOT_ZERO
     if (bot->InArena())
-        return MoveNear(obj, std::max(ATTACK_DISTANCE, distance));
+        return MoveNear(obj, std::max(MELEE_LEEWAY, distance));
 #endif
 
     // Calculate the chase position

@@ -386,6 +386,7 @@ namespace ai
         void generateTransportNodes();            //Create node at transport (boats/zepelins/elevators) and also create the path they move.
         void generateZoneMeanNodes();             //Create node at zone mean (the avg location of all objects and creatures of a certain area/zone)
         void generatePortalNodes();               //Create node at static portal (ie. dalaran->ironforge) and the desination of teleport spell (ie. teleport to ironforge)
+        void addManualNodes();                    //Nodes manually placed to reach places that can not be pathed automatically.
         void generateNodes();                     //Call all above methods.
 
         void generateWalkPathMap(uint32 mapId, BarGoLink* bar);   //Pathfind from all nodes to all nodes in a specific map. Create a path for all attemps and a link for all paths that actually reach the end node.

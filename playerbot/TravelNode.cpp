@@ -2598,7 +2598,12 @@ void TravelNodeMap::generateHelperNodes()
         }
     }
 
-    generateWalkPaths();
+
+    if (sTravelNodeMap.getNodes().size() > old)
+    {
+        sLog.outString("-Calculating walkable paths for %d new nodes.", sTravelNodeMap.getNodes().size() - old);
+        generateWalkPaths();
+    }
 
     uint32 places_to_reach = 0;
 
@@ -2629,6 +2634,8 @@ void TravelNodeMap::generateHelperNodes()
         }
         */
     }
+
+    sLog.outString("-Finding new nodes to reach %d nodes that can currently not be properly reached.", places_to_reach);
 
     BarGoLink bar(places_to_reach);
 
@@ -2720,6 +2727,8 @@ void TravelNodeMap::removeLowNodes()
 
     for (auto& node : remNodes)
         sTravelNodeMap.removeNode(node);
+
+    sLog.outString("-Removed %d nodes had below 5 connections to other nodes.", remNodes.size());
 }
 
 void TravelNodeMap::removeUselessPathMap(uint32 mapId)

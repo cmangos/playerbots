@@ -1052,20 +1052,20 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("holy shield", ACTION_HIGH + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "hammer of the righteous",
-        NextAction::array(0, new NextAction("hammer of the righteous", ACTION_HIGH + 3), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "shield of righteousness",
-        NextAction::array(0, new NextAction("shield of righteousness", ACTION_HIGH + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "medium mana",
         NextAction::array(0, new NextAction("judgement of wisdom", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low mana",
         NextAction::array(0, new NextAction("seal of wisdom", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "hammer of the righteous",
+        NextAction::array(0, new NextAction("hammer of the righteous", ACTION_NORMAL + 5), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "shield of righteousness",
+        NextAction::array(0, new NextAction("shield of righteousness", ACTION_NORMAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "exorcism",
@@ -1268,6 +1268,10 @@ void ProtectionPaladinBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*
 {
     ProtectionPaladinBuffStrategy::InitCombatTriggers(triggers);
     PaladinBuffPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "hand of sacrifice",
+        NextAction::array(0, new NextAction("hand of sacrifice", ACTION_CRITICAL_HEAL), NULL)));
 }
 
 void ProtectionPaladinBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

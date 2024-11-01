@@ -51,7 +51,7 @@ namespace ai
 	BUFF_ACTION(CastDivineSacrificeAction, "divine sacrifice");
 
 	// blessings
-	BUFF_ACTION(CastBlessingOfFreedomAction, "blessing of freedom");
+	BUFF_ACTION(CastBlessingOfFreedomAction, "hand of freedom");
 	// fury
 	BUFF_ACTION(CastRighteousFuryAction, "righteous fury");
 	BUFF_ACTION(CastAvengingWrathAction, "avenging wrath");
@@ -644,7 +644,7 @@ namespace ai
     class CastBlessingOfFreedomOnPartyAction : public CastSpellAction
     {
     public:
-		CastBlessingOfFreedomOnPartyAction(PlayerbotAI* ai) : CastSpellAction(ai, "blessing of freedom") {}
+		CastBlessingOfFreedomOnPartyAction(PlayerbotAI* ai) : CastSpellAction(ai, "hand of freedom") {}
         bool isUseful() override { return CastSpellAction::isUseful() && !ai->HasAura(GetSpellName(), GetTarget()); }
         std::string GetReachActionName() override { return "reach spell"; }
         std::string GetTargetName() override { return "party member to remove roots"; }

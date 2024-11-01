@@ -1499,8 +1499,16 @@ void PaladinBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     BuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "often",
-        NextAction::array(0, new NextAction("avenging wrath", ACTION_HIGH + 1), NULL)));
+        "medium mana",
+        NextAction::array(0, new NextAction("divine plea", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("sacred shield", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("sacred shield", ACTION_NORMAL), NULL)));
 }
 
 void PaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1545,18 +1553,10 @@ void PaladinBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tri
 void PaladinBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     BoostStrategy::InitCombatTriggers(triggers);
-    
-    triggers.push_back(new TriggerNode(
-        "medium mana",
-        NextAction::array(0, new NextAction("divine plea", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "medium health",
-        NextAction::array(0, new NextAction("sacred shield", ACTION_NORMAL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member medium health",
-        NextAction::array(0, new NextAction("sacred shield", ACTION_NORMAL), NULL)));
+        "almost full health",
+        NextAction::array(0, new NextAction("avenging wrath", ACTION_HIGH), NULL)));
 }
 
 void PaladinBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

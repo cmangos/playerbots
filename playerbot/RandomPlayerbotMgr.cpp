@@ -2480,9 +2480,10 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         } while (results->NextRow());
     }
 
-    sLog.outString("Enhancing RPG teleport cache");
+    sLog.outString("Enhancing RPG teleport cache...");
 
     std::vector<std::pair<std::pair<uint32, uint32>, WorldPosition>> newPoints;
+    newPoints.reserve(380000);
 
     //Static portals.
     for (auto& goData : WorldPosition().getGameObjectsNear(0, 0))
@@ -2516,39 +2517,54 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
             newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), pos));
     }
 
+    const std::vector<uint32> allowedNpcFlags = {
+        UNIT_NPC_FLAG_BATTLEMASTER,
+        UNIT_NPC_FLAG_BANKER,
+        UNIT_NPC_FLAG_AUCTIONEER,
+        UNIT_NPC_FLAG_TRAINER,
+        UNIT_NPC_FLAG_VENDOR,
+        UNIT_NPC_FLAG_REPAIR
+    };
+
     //Creatures.
     for (auto& creatureData : WorldPosition().getCreaturesNear(0, 0))
     {
         CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creatureData->second.id);
 
-        if (!cInfo)
+        // Check if creature info is valid and not invisible
+        if (!cInfo || (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INVISIBLE))
             continue;
 
-        if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INVISIBLE)
-            continue;
-
-        std::vector<uint32> allowedNpcFlags;
-
-        allowedNpcFlags.push_back(UNIT_NPC_FLAG_BATTLEMASTER);
-        allowedNpcFlags.push_back(UNIT_NPC_FLAG_BANKER);
-        allowedNpcFlags.push_back(UNIT_NPC_FLAG_AUCTIONEER);
-        allowedNpcFlags.push_back(UNIT_NPC_FLAG_TRAINER);
-        allowedNpcFlags.push_back(UNIT_NPC_FLAG_VENDOR);
-        allowedNpcFlags.push_back(UNIT_NPC_FLAG_REPAIR);
+        // Check for allowed NPC flags
+        uint32 npcFlags = cInfo->NpcFlags;
+        bool isAllowedNpc = false;
 
         for (auto flag : allowedNpcFlags)
         {
-            if ((cInfo->NpcFlags & flag) != 0)
+            if (npcFlags & flag)
             {
-                std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(creatureData));
-
-                for (auto& range : ranges)
-                    newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), creatureData));
+                isAllowedNpc = true;
                 break;
             }
         }
-    }
 
+        if (isAllowedNpc)
+        {
+            // Get the location for the current creature
+            WorldPosition creaturePos(creatureData);
+
+            // Get ranges for RPG locations
+            std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(creaturePos);
+
+            // Add all valid ranges to newPoints
+            for (auto& range : ranges)
+            {
+                newPoints.emplace_back(std::make_pair(range.first, range.second), creaturePos);
+            }
+        }
+    }
+    
+    sLog.outString(">> Enhanced %zu locations.", newPoints.size());
     for (auto newPoint : newPoints)
         rpgLocsCacheLevel[newPoint.first.first][newPoint.first.second].push_back(newPoint.second);
 }

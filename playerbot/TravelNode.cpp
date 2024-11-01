@@ -309,11 +309,18 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
     {
         std::vector<WorldPosition> backPath = backNodePath->getPath();
 
+        if (backPath.size())
         {
             if (startPos.isPathTo(backPath)) //Reverse works so use that.
             {
                 std::reverse(backPath.begin(), backPath.end());
                 path = backPath;
+                canPath = true;
+            }
+            else  if (path.back().distance(backPath.back()) < 5.0f) //Both paths are nearly touching. Make a jump.
+            {
+                std::reverse(backPath.begin(), backPath.end());
+                path.insert(path.end(), backPath.begin(), backPath.end());
                 canPath = true;
             }
         }

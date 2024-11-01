@@ -1946,7 +1946,7 @@ void TravelNodeMap::generateStartNodes()
     startNames[RACE_GOBLIN] = "Goblin";
 #ifndef MANGOSBOT_ZERO
     startNames[RACE_BLOODELF] = "Blood elf";
-    startNames[RACE_DRAENEI] = "Dreanei";
+    startNames[RACE_DRAENEI] = "Draenei";
 #endif
 
     for (uint32 i = 0; i < MAX_RACES; i++)

@@ -431,7 +431,8 @@ namespace ai
                 creators["binding heal"] = &AiObjectContextInternal::binding_heal;
                 creators["holy fire"] = &AiObjectContextInternal::holy_fire;
                 creators["holy nova"] = &AiObjectContextInternal::holy_nova;
-                creators["penance on party"] = &AiObjectContextInternal::penance;
+                creators["penance"] = &AiObjectContextInternal::penance;
+                creators["penance on party"] = &AiObjectContextInternal::penance_on_party;
                 creators["mind sear"] = &AiObjectContextInternal::mind_sear;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
@@ -518,7 +519,8 @@ namespace ai
             static Action* inner_fire(PlayerbotAI* ai) { return new CastInnerFireAction(ai); }
             static Action* holy_fire(PlayerbotAI* ai) { return new CastHolyFireAction(ai); }
             static Action* holy_nova(PlayerbotAI* ai) { return new CastHolyNovaAction(ai); }
-            static Action* penance(PlayerbotAI* ai) { return new CastPenanceOnPartyAction(ai); }
+            static Action* penance(PlayerbotAI* ai) { return new CastPenanceAction(ai); }
+            static Action* penance_on_party(PlayerbotAI* ai) { return new CastPenanceOnPartyAction(ai); }
             static Action* mind_sear(PlayerbotAI* ai) { return new CastMindSearAction(ai); }
             static Action* update_pve_strats(PlayerbotAI* ai) { return new UpdatePriestPveStrategiesAction(ai); }
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdatePriestPvpStrategiesAction(ai); }

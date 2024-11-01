@@ -513,6 +513,6 @@ namespace ai
 
     CAN_CAST_TRIGGER(StormstrikeTrigger, "stormstrike");
 
-    BUFF_TRIGGER(ElementalMasteryTrigger, "elemental mastery");
-    BUFF_TRIGGER(FeralSpiritTrigger, "feral spirit");
+    BOOST_TRIGGER(ElementalMasteryTrigger, "elemental mastery");
+    BOOST_TRIGGER(FeralSpiritTrigger, "feral spirit");
 }

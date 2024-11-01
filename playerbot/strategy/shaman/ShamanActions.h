@@ -464,7 +464,7 @@ namespace ai
     };
 
     BUFF_ACTION(CastElementalMasteryAction, "elemental mastery");
-    BUFF_ACTION(CastFeralSpiritAction, "feral spirit");
+    SPELL_ACTION(CastFeralSpiritAction, "feral spirit");
     BUFF_ACTION(CastShamanisticRageAction, "shamanistic rage");
     BUFF_ACTION(CastNaturesSwiftnessAction, "nature's swiftness");
 

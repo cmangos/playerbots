@@ -9,6 +9,7 @@ namespace ai
     GREATER_BUFF_PARTY_ACTION(CastPrayerOfFortitudeOnPartyAction, "prayer of fortitude");
     BUFF_ACTION(CastPowerWordShieldAction, "power word: shield");
     HEAL_PARTY_ACTION(CastPowerWordShieldOnPartyAction, "power word: shield");
+    HEAL_ACTION(CastPenanceAction, "penance");
     HEAL_PARTY_ACTION(CastPenanceOnPartyAction, "penance");
     BUFF_ACTION(CastInnerFireAction, "inner fire");
     CURE_ACTION(CastDispelMagicAction, "dispel magic");
@@ -80,7 +81,7 @@ namespace ai
     RANGED_DEBUFF_ACTION(CastVampiricEmbraceAction, "vampiric embrace");
     BUFF_ACTION(CastShadowformAction, "shadowform");
     SPELL_ACTION(CastSilenceAction, "silence");
-    SPELL_ACTION(CastDispersionAction, "dispersion");
+    BUFF_ACTION(CastDispersionAction, "dispersion");
     ENEMY_HEALER_ACTION(CastSilenceOnEnemyHealerAction, "silence");
     // shadow talents 2.4.3
     RANGED_DEBUFF_ACTION(CastVampiricTouchAction, "vampiric touch");

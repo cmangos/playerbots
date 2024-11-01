@@ -9,9 +9,9 @@ namespace ai
 	ENEMY_HEALER_ACTION(CastDeathCoilOnHealerAction, "death coil");
 	SPELL_ACTION(CastDeathCoilAction, "death coil");
 	SPELL_ACTION(CastHauntAction, "haunt");
-	SPELL_ACTION(CastMetamorphosis, "metamorphosis");
-	SPELL_ACTION(CastDemonicEmpowerment, "demonic empowerment");
-	SPELL_ACTION(CastImmolationAura, "immolation aura");
+    BUFF_ACTION(CastMetamorphosis, "metamorphosis");
+    BUFF_ACTION(CastDemonicEmpowerment, "demonic empowerment");
+    BUFF_ACTION(CastImmolationAura, "immolation aura");
 	SPELL_ACTION(CastChaosBolt, "chaos bolt");
 	
 	class CastDemonSkinAction : public CastBuffSpellAction 

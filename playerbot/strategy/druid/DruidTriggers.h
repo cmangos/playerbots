@@ -418,7 +418,7 @@ namespace ai
     };
 
     CAN_CAST_TRIGGER(ForceOfNatureTrigger, "force of nature");
-    CAN_CAST_TRIGGER(BerserkTrigger, "berserk");
+    BOOST_TRIGGER(BerserkTrigger, "berserk");
     BUFF_TRIGGER_A(ActiveHotTrigger, "regrowth");
 
     class SavageRoarTrigger : public ComboPointsAvailableTrigger

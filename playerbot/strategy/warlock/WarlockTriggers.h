@@ -34,10 +34,10 @@ namespace ai
         bool IsActive() override;
     };
 
-    BUFF_TRIGGER(MoltenCoreTrigger, "molten core");
-    BUFF_TRIGGER(DecimationTrigger, "decimation");
-    BUFF_TRIGGER(DemonicEmpowermentTrigger, "demonic empowerment");
-    BUFF_TRIGGER(MetamorphosisTrigger, "metamorphosis");
+    HAS_AURA_TRIGGER(MoltenCoreTrigger, "molten core");
+    HAS_AURA_TRIGGER(DecimationTrigger, "decimation");
+    BOOST_TRIGGER(DemonicEmpowermentTrigger, "demonic empowerment");
+    BOOST_TRIGGER(MetamorphosisTrigger, "metamorphosis");
     DEBUFF_TRIGGER_A(CorruptionTrigger, "corruption");
     DEBUFF_TRIGGER(SiphonLifeTrigger, "siphon life");
     DEBUFF_TRIGGER(UnstableAfflictionTrigger, "unstable affliction");

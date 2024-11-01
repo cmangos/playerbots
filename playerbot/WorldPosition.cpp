@@ -742,10 +742,32 @@ std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& s
         sPlayerbotAIConfig.log("pathfind_attempt.csv", out.str().c_str());
     }
 
+    std::vector<WorldPosition> retvec = fromPointsArray(points);
+
+    if (type == PATHFIND_INCOMPLETE)
+    {
+        WorldPosition lastPoint = retvec.back();
+
+        float dist = lastPoint.distance(end);
+
+        if (lastPoint.distance(end) < 50.0f && lastPoint.isUnderWater() && end.isUnderWater() && lastPoint.IsInLineOfSight(end))
+        {
+            if (dist < 5.0f)
+                retvec.push_back(end);
+            else
+            {
+                WorldPosition stepPoint = (end - lastPoint) / dist * 5.0f;
+                retvec.push_back(stepPoint);
+            }
+
+            return retvec;
+        }
+    }
+
     if ((!forceNormalPath && type == PATHFIND_INCOMPLETE) || type == PATHFIND_NORMAL)
-        return fromPointsArray(points);
-    else
-        return {};
+        return retvec;
+
+    return {};
 }
 
 std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& startPos, const Unit* bot, bool forceNormalPath) const

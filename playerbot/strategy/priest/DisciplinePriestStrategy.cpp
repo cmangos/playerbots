@@ -745,7 +745,7 @@ void DisciplinePriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("penance", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("penance", ACTION_CRITICAL_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
@@ -761,7 +761,7 @@ void DisciplinePriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
 
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("penance", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("penance", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",

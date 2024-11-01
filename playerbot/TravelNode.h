@@ -199,6 +199,7 @@ namespace ai
 
         //Checks if it is even possible to route to this node.
         bool hasRouteTo(TravelNode* node, bool mapOnly = false) { if (routes.empty()) for (auto mNode : getNodeMap(false, {}, mapOnly)) routes[mNode] = true; return routes.find(node) != routes.end(); };
+        uint32 getRouteSize(bool mapOnly = false) { if (routes.empty()) for (auto mNode : getNodeMap(false, {}, mapOnly)) routes[mNode] = true; return routes.size(); }
         void clearRoutes() { routes.clear(); }
 
         void print(bool printFailed = true);

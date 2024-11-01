@@ -2483,22 +2483,11 @@ void TravelNodeMap::generateHelperNodes(uint32 mapId, BarGoLink* bar)
         if (node->getAreaTriggerId())
             continue;
 
+        if (node->getRouteSize() > 1000)
+            continue;
+
         places_to_reach.push_back(make_pair(GuidPosition(0, *node->getPosition()), node->getName()));
     }
-
-    /*
-    for (auto& obj : WorldPosition(mapId, 1, 1).getCreaturesNear())
-    {
-        if(sObjectMgr.GetCreatureTemplate(obj->second.id))
-        places_to_reach.push_back(make_pair(obj, sObjectMgr.GetCreatureTemplate(obj->second.id)->Name));
-    }
-
-    for (auto& obj : WorldPosition(mapId, 1, 1).getGameObjectsNear())
-    {
-        if(sObjectMgr.GetGameObjectInfo(obj->second.id))
-        places_to_reach.push_back(make_pair(obj, sObjectMgr.GetGameObjectInfo(obj->second.id)->name));
-    }
-    */
 
     if (places_to_reach.empty() || startNodes.empty())
         return;
@@ -2619,20 +2608,11 @@ void TravelNodeMap::generateHelperNodes()
             if (node->getAreaTriggerId())
                 continue;
 
-            places_to_reach++;
-        }
+            if (node->getRouteSize() > 1000)
+                continue;
 
-        /*
-        for (auto& obj : WorldPosition(map.first, 1, 1).getCreaturesNear())
-        {
             places_to_reach++;
         }
-
-        for (auto& obj : WorldPosition(map.first, 1, 1).getGameObjectsNear())
-        {
-            places_to_reach++;
-        }
-        */
     }
 
     sLog.outString("-Finding new nodes to reach %d nodes that can currently not be properly reached.", places_to_reach);

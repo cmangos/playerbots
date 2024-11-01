@@ -21,6 +21,7 @@ namespace ai
     INTERRUPT_TRIGGER(SilenceTrigger, "silence");
     INTERRUPT_HEALER_TRIGGER(SilenceEnemyHealerTrigger, "silence");
     DEBUFF_TRIGGER(DevouringPlagueTrigger, "devouring plague");
+    CAN_CAST_TRIGGER_A(ManaBurnTrigger, "mana burn");
 
     // racials
 #ifndef MANGOSBOT_TWO  

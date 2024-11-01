@@ -301,6 +301,7 @@ namespace ai
                 creators["mind blast"] = &TriggerFactoryInternal::mind_blast;
                 creators["smite"] = &TriggerFactoryInternal::smite;
                 creators["holy fire"] = &TriggerFactoryInternal::holy_fire;
+                creators["mana burn"] = &TriggerFactoryInternal::mana_burn;
             }
 
         private:
@@ -345,6 +346,7 @@ namespace ai
             static Trigger* mind_blast(PlayerbotAI* ai) { return new MindBlastTrigger(ai); }
             static Trigger* smite(PlayerbotAI* ai) { return new SmiteTrigger(ai); }
             static Trigger* holy_fire(PlayerbotAI* ai) { return new HolyFireTrigger(ai); }
+            static Trigger* mana_burn(PlayerbotAI* ai) { return new ManaBurnTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>

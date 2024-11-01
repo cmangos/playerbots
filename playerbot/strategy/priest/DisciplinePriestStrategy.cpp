@@ -816,6 +816,22 @@ void DisciplinePriestPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& tr
 {
     DisciplinePriestStrategy::InitCombatTriggers(triggers);
     PriestPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "mana burn",
+        NextAction::array(0, new NextAction("mana burn", ACTION_HIGH), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
+        "shadow word: pain",
+        NextAction::array(0, new NextAction("shadow word: pain", ACTION_NORMAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "holy fire",
+        NextAction::array(0, new NextAction("holy fire", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "smite",
+        NextAction::array(0, new NextAction("smite", ACTION_NORMAL + 1), NULL)));
 }
 
 void DisciplinePriestPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -296,6 +296,8 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
         }
     }
 
+    returnNodePath->setPath(path);
+
     TravelNodePath* backNodePath; //Get/Build the reverse path.
 
     if (!endNode->hasPathTo(this))
@@ -305,13 +307,15 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
 
     if (!canPath)
     {
-        std::vector<WorldPosition> backPath = backNodePath->getPath(); 
+        std::vector<WorldPosition> backPath = backNodePath->getPath();
 
-        if (startPos.isPathTo(backPath))
         {
-            std::reverse(backPath.begin(), backPath.end());
-            path = backPath;
-            canPath = true;
+            if (startPos.isPathTo(backPath)) //Reverse works so use that.
+            {
+                std::reverse(backPath.begin(), backPath.end());
+                path = backPath;
+                canPath = true;
+            }
         }
     }
 

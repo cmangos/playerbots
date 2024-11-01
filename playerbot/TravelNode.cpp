@@ -289,6 +289,8 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
     {
         if (endPos.isPathTo(path, 20.0f))
         {
+            if(path.back().distance(endPos) > 1.0f)
+                path.push_back((endPos+path.back())*0.5f);
             path.push_back(endPos);
             canPath = true;
         }

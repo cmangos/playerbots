@@ -1044,8 +1044,8 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     PaladinStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "lose aggro",
-        NextAction::array(0, new NextAction("hand of reckoning", ACTION_MOVE), NULL)));
+        "target critical health",
+        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "holy shield",
@@ -1101,8 +1101,8 @@ void ProtectionPaladinPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     PaladinPveStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "target critical health",
-        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
+        "lose aggro",
+        NextAction::array(0, new NextAction("hand of reckoning", ACTION_MOVE), NULL)));
 }
 
 void ProtectionPaladinPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1127,10 +1127,6 @@ void ProtectionPaladinPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     ProtectionPaladinStrategy::InitCombatTriggers(triggers);
     PaladinPvpStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "target critical health",
-        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
 }
 
 void ProtectionPaladinPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

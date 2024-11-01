@@ -1190,6 +1190,12 @@ void PriestOffdpsRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tr
 #endif
 #ifdef MANGOSBOT_TWO // WOTLK
 
+NextAction** PriestStrategy::GetDefaultCombatActions()
+{
+    return NextAction::array(0, new NextAction("shoot", ACTION_IDLE), NULL);
+
+}
+
 void PriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ClassStrategy::InitCombatTriggers(triggers);

@@ -934,6 +934,11 @@ void WarlockCursesRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 #endif
 #ifdef MANGOSBOT_TWO // WOTLK
 
+ai::NextAction** WarlockStrategy::GetDefaultCombatActions()
+{
+    return NextAction::array(0, new NextAction("shoot", ACTION_IDLE), NULL);
+}
+
 void WarlockStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ClassStrategy::InitCombatTriggers(triggers);

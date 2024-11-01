@@ -923,6 +923,12 @@ void MageCureRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigge
 #endif
 #ifdef MANGOSBOT_TWO // WOTLK
 
+NextAction** MageStrategy::GetDefaultCombatActions()
+{
+    return NextAction::array(0, new NextAction("shoot", ACTION_IDLE), NULL);
+
+}
+
 void MageStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ClassStrategy::InitCombatTriggers(triggers);

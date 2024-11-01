@@ -13,6 +13,8 @@ namespace ai
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
         virtual void InitReactionTriggers(std::list<TriggerNode*>& triggers) override;
         virtual void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
+
+        virtual NextAction** GetDefaultCombatActions() override;
     };
 
     class MagePvpStrategy : public ClassPvpStrategy

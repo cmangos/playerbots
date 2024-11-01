@@ -653,6 +653,8 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
 	sLog.outString("Creating random bot characters...");
 	BarGoLink bar1(totalCharCount);
+    if (!sPlayerbotAIConfig.randomBotAccounts.empty())
+        sPlayerbotAIConfig.randomBotAccounts.clear();
     for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
     {
         std::ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;

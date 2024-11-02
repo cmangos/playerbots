@@ -144,7 +144,6 @@ bool BGJoinAction::Execute(Event& event)
 bool BGJoinAction::gatherArenaTeam(ArenaType type)
 {
     ArenaTeam* arenateam = nullptr;
-    Group* leaderGroup = nullptr;
     uint32 needMembers = (uint32)type;
     //if (bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
     //    leaderGroup = bot->GetGroup();
@@ -219,8 +218,8 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
             if (member->IsInCombat())
                 member->CombatStop(true);
 
-            if (member->GetGroup() && member->GetGroup() != leaderGroup)
-                member->GetGroup()->RemoveMember(member->GetObjectGuid(), 0);
+            if (member->GetGroup())
+                member->RemoveFromGroup();
 
             member->TeleportTo(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), 0);
 
@@ -236,31 +235,23 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
         sLog.outDetail("Team #%d <%s> has not enough members for match", arenateam->GetId(), arenateam->GetName().c_str());
         return false;
     }
+    Group* leaderGroup = nullptr;
+    Group* group = new Group();
 
-    if (!leaderGroup)
+    // disband leaders group
+    if (bot->GetGroup())
+        bot->RemoveFromGroup();
+
+    if (!group->Create(bot->GetObjectGuid(), bot->GetName()))
     {
-#ifndef MANGOSBOT_TWO
-        Group* group = new Group();
-#else
-        Group* group = new Group();//Group* group = new Group(GROUPTYPE_NORMAL);
-#endif
-        uint32 count = 1;
-
-        // disband leaders group
-        if (bot->GetGroup())
-            bot->GetGroup()->RemoveMember(bot->GetObjectGuid(), 0);
-
-        if (!group->Create(bot->GetObjectGuid(), bot->GetName()))
-        {
-            sLog.outDetail("Team #%d <%s>: Can't create group for arena queue", arenateam->GetId(), arenateam->GetName().c_str());
-            delete group;
-            return false;
-        }
-        else
-        {
-            sObjectMgr.AddGroup(group);
-            leaderGroup = group;
-        }
+        sLog.outDetail("Team #%d <%s>: Can't create group for arena queue", arenateam->GetId(), arenateam->GetName().c_str());
+        delete group;
+        return false;
+    }
+    else
+    {
+        sObjectMgr.AddGroup(group);
+        leaderGroup = group;
     }
 
     sLog.outDetail("Bot #%d <%s>: Leader of <%s>", bot->GetGUIDLow(), bot->GetName(), arenateam->GetName().c_str());
@@ -284,9 +275,6 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
             continue;
 
         if (!member->GetPlayerbotAI())
-            continue;
-
-        if (member->GetLevel() < 80)
             continue;
 
         if (member->GetGroup() == leaderGroup)

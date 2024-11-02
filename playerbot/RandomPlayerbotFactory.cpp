@@ -998,7 +998,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
             }
             if (noAvailableSlot)
             {
-                sLog.outError("Not enough captains for random arena teams, %u available", availableCaptains.size());
+                sLog.outDebug("Not enough captains for random arena teams, %u available", availableCaptains.size());
                 break;
             }
         }
@@ -1120,7 +1120,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         sLog.outBasic("Random Arena team %s %s: created", arenaTypeName.c_str(), arenateam->GetName().c_str());
     }
 
-    sLog.outString("%u random bot arena teams available", arenaTeamNumber);
+    sLog.outDetail("%u random bot arena teams available", arenaTeamNumber);
 }
 
 void RandomPlayerbotFactory::LoadRandomArenaTeamNames()

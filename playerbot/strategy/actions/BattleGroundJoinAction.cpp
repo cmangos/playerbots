@@ -728,7 +728,7 @@ bool BGJoinAction::JoinQueue(uint32 type)
    if (!unit && isArena)
 #endif
    {
-       sLog.outError("Bot %d could not find Battlemaster to join", bot->GetGUIDLow());
+       sLog.outDebug("Bot %d could not find Battlemaster to join", bot->GetGUIDLow());
        return false;
    }
 // in wotlk only arena requires battlemaster guid

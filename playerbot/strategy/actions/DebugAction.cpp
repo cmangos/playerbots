@@ -211,6 +211,27 @@ bool DebugAction::Execute(Event& event)
 
         return true;
     }
+    else if (text == "gps" && isMod)
+    {
+        std::ostringstream out;
+        WorldPosition botPos(bot);
+        out << bot->GetName() << ",";
+        out << botPos.getAreaName() << ",";
+
+        out << "\"node = sTravelNodeMap.addNode(WorldPosition(" << botPos.getMapId() << std::fixed << std::setprecision(2);
+        out << ',' << botPos.coord_x << "f";
+        out << ',' << botPos.coord_y << "f";
+        out << ',' << botPos.coord_z << "f";
+        out << "), \\\"c1" << botPos.getAreaName() << "\\\", true, false);\"";
+
+        //node = sTravelNodeMap.addNode(WorldPosition(1, -3626.39f, 917.37f, 150.13f), "c1-Dire maul", true, false);
+
+        if (!sPlayerbotAIConfig.isLogOpen("gps.csv"))
+            sPlayerbotAIConfig.openLog("gps.csv", "a", true);
+        sPlayerbotAIConfig.log("gps.csv", out.str().c_str());
+
+        return true;
+    }
     else if (text.find("setvalueuin32 ") == 0)
     {
         std::vector<std::string> args = Qualified::getMultiQualifiers(text.substr(14), ",");

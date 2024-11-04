@@ -64,7 +64,7 @@ namespace ai
     {
     public:
         ShouldGetMoneyValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should get money",2) {}
-        virtual bool Calculate() { return bot->GetLevel() > 6 && !AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::anything); };
+        virtual bool Calculate() { return bot->GetLevel() > 6 && !AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ammo); };
     };
 }
 

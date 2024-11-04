@@ -2389,9 +2389,9 @@ void TravelNodeMap::generateZoneMeanNodes()
 void TravelNodeMap::addManualNodes()
 {
     TravelNode* node;
-    node = sTravelNodeMap.addNode(WorldPosition(0, -10416.45f, -3832.53f, -36.92f), "c1-Sunken temple", true, false);
-    node = sTravelNodeMap.addNode(WorldPosition(0, -10408.70f, -3834.29f, -44.69f), "c2-Sunken temple", true, false);
-    node = sTravelNodeMap.addNode(WorldPosition(0, -10325.23f, -3865.86f, -44.45f), "c3-Sunken temple", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(0, -10416.45f, -3832.53f, -36.92f), "c1-Sunken Temple", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(0, -10408.70f, -3834.29f, -44.69f), "c2-Sunken Temple", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(0, -10325.23f, -3865.86f, -44.45f), "c3-Sunken Temple", true, false);
     //otherNode = sTravelNodeMap.addNode(WorldPosition(0, -10319.19f, -3868.16f, -40.90f), "c4-Sunken temple", true, false);
 
     node = sTravelNodeMap.addNode(WorldPosition(0, -11367.45f, 1617.10f, 71.22f), "c1-Deadmine exit", true, false);
@@ -2403,14 +2403,18 @@ void TravelNodeMap::addManualNodes()
     node = sTravelNodeMap.addNode(WorldPosition(1, -3034.70f, 144.04f, 70.87f), "c-Tauren start", true, false);
     node = sTravelNodeMap.addNode(WorldPosition(1, -1424.04f, 2945.01f, 134.54f), "c-Maraudon", true, false);
 
-    node = sTravelNodeMap.addNode(WorldPosition(1, 4158.01f, 877.60f, -20.68f), "c1-Blackfathom deep", true, false);
-    node = sTravelNodeMap.addNode(WorldPosition(1, 4156.60f, 909.89f, -20.97f), "c2-Blackfathom deep", true, false);
-    node = sTravelNodeMap.addNode(WorldPosition(1, 4157.46f, 916.44f, -17.40f), "c3-Blackfathom deep", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(1, 4158.01f, 877.60f, -20.68f), "c1-Blackfathom Deeps", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(1, 4156.60f, 909.89f, -20.97f), "c2-Blackfathom Deeps", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(1, 4157.46f, 916.44f, -17.40f), "c3-Blackfathom Deeps", true, false);
 
-    node = sTravelNodeMap.addNode(WorldPosition(1, -3626.39f, 917.37f, 150.13f), "c1-Dire maul", true, false);
-    node = sTravelNodeMap.addNode(WorldPosition(1, -3628.08f, 919.55f, 137.84f), "c2-Dire maul", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(1, -3626.39f, 917.37f, 150.13f), "c1-Dire Maul", true, false);
+    TravelNode* otherNode;
+    otherNode = sTravelNodeMap.addNode(WorldPosition(1, -3628.08f, 919.55f, 137.84f), "c2-Dire Maul", true, false);
+    node->setPathTo(otherNode);
 
-    //node = sTravelNodeMap.addNode(WorldPosition(1, 0, 0, 0), "c-Blackfathom deep", true, true);
+    node = sTravelNodeMap.addNode(WorldPosition(1, -588.53f, -2037.69f, 57.60f), "c1-Wailing Caverns", true, false);
+
+#ifndef MANGOSBOT_ZERO
     node = sTravelNodeMap.addNode(WorldPosition(530, 571.10f, 6938.97f, -16.81f), "c1-Coilfang", true, false);
     node = sTravelNodeMap.addNode(WorldPosition(530, 571.10f, 6938.97f, -15.20f), "c2-Coilfang", true, false);
     node = sTravelNodeMap.addNode(WorldPosition(530, 651.07f, 6865.37f, -82.34f), "c3-Coilfang", true, false);
@@ -2418,6 +2422,7 @@ void TravelNodeMap::addManualNodes()
     node = sTravelNodeMap.addNode(WorldPosition(530, 574.68f, 6942.93f, -37.72f), "c5-Coilfang", true, false);
     node = sTravelNodeMap.addNode(WorldPosition(530, 723.74f, 6865.78f, -74.10f), "c6-Coilfang", true, false);
     node = sTravelNodeMap.addNode(WorldPosition(530, 731.57f, 6866.01f, -70.47f), "c7-Coilfang", true, false);
+#endif
 }
 
 void TravelNodeMap::generateNodes()

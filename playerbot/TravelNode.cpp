@@ -296,36 +296,6 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
         }
     }
 
-    returnNodePath->setPath(path);
-
-    TravelNodePath* backNodePath; //Get/Build the reverse path.
-
-    if (!endNode->hasPathTo(this))
-        backNodePath = endNode->buildPath(this, bot, postProcess);
-    else
-        backNodePath = endNode->getPathTo(this);
-
-    if (!canPath)
-    {
-        std::vector<WorldPosition> backPath = backNodePath->getPath();
-
-        if (backPath.size())
-        {
-            if (startPos.isPathTo(backPath)) //Reverse works so use that.
-            {
-                std::reverse(backPath.begin(), backPath.end());
-                path = backPath;
-                canPath = true;
-            }
-            else  if (path.back().distance(backPath.back()) < 5.0f) //Both paths are nearly touching. Make a jump.
-            {
-                std::reverse(backPath.begin(), backPath.end());
-                path.insert(path.end(), backPath.begin(), backPath.end());
-                canPath = true;
-            }
-        }
-    }
-
     if (canPath && path.size() == 2 && this->getDistance(endNode) > 5.0f) //Very small path probably bad pathfinder or flying. Stop using it.
         canPath = false;
 
@@ -352,6 +322,38 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
         }
     }
 
+    returnNodePath->setPath(path);
+    returnNodePath->setComplete(canPath);
+
+    TravelNodePath* backNodePath; //Get/Build the reverse path.
+
+    if (!endNode->hasPathTo(this))
+        backNodePath = endNode->buildPath(this, bot, postProcess);
+    else
+        backNodePath = endNode->getPathTo(this);
+
+    if (!canPath)
+    {
+        std::vector<WorldPosition> backPath = backNodePath->getPath();
+
+        if (backPath.size())
+        {
+            if (startPos.isPathTo(backPath)) //Reverse works so use that.
+            {
+                std::reverse(backPath.begin(), backPath.end());
+                path = backPath;
+                canPath = backNodePath->getComplete();
+            }
+            else  if (path.back().distance(backPath.back()) < 5.0f) //Both paths are nearly touching. Make a jump.
+            {
+                std::reverse(backPath.begin(), backPath.end());
+                path.insert(path.end(), backPath.begin(), backPath.end());
+                canPath = true;
+                returnNodePath->setPath(path);
+            }
+        }
+    }
+   
     returnNodePath->setPath(path);
     returnNodePath->setComplete(canPath);
 

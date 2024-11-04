@@ -2907,7 +2907,7 @@ void TravelNodeMap::generateAll()
 
     if (hasToGen || hasToFullGen)
     {
-        generatePaths(true);
+        generatePaths(false);
         hasToGen = false;
         hasToFullGen = false;
         hasToSave = true;

@@ -398,13 +398,17 @@ void RandomPlayerbotMgr::LogPlayerLocation()
                         out << (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY) ? "active" : "inactive") << ",";
                         out << (bot->GetPlayerbotAI()->IsActive() ? "active" : "delay") << ",";
                         out << bot->GetPlayerbotAI()->HandleRemoteCommand("state") << ",";
+                        PlayerbotAI* ai = bot->GetPlayerbotAI();
+                        AiObjectContext* context = ai->GetAiObjectContext();
+
+                        out << (AI_VALUE(bool, "should get money") ? "should get money" : "has enough money") << ",";
 
                         if (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY))
                             activeBots++;
                     }
                     else
                     {
-                        out << 0 << "," << 0 << ",err,err,err,";
+                        out << 0 << "," << 0 << ",err,err,err,err,";
                     }
 
                     out << (bot->IsInCombat() ? "combat" : "safe") << ",";
@@ -468,13 +472,17 @@ void RandomPlayerbotMgr::LogPlayerLocation()
                     out << (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY) ? "active" : "inactive") << ",";
                     out << (bot->GetPlayerbotAI()->IsActive() ? "active" : "delay") << ",";
                     out << bot->GetPlayerbotAI()->HandleRemoteCommand("state") << ",";
+                    PlayerbotAI* ai = bot->GetPlayerbotAI();
+                    AiObjectContext* context = ai->GetAiObjectContext();
+
+                    out << (AI_VALUE(bool, "should get money") ? "should get money" : "has enough money") << ",";
 
                     if (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY))
                         activeBots++;
                 }
                 else
                 {
-                    out << 0 << "," << 0 << ",player,player,player,";
+                    out << 0 << "," << 0 << ",player,player,player,player,";
                 }
 
                 out << (bot->IsInCombat() ? "combat" : "safe") << ",";

@@ -2935,6 +2935,7 @@ void TravelNodeMap::printMap()
 
     for (auto& node : anodes)
     {
+        node->print(hasToSave);
     }
 }
 

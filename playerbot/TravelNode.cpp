@@ -765,7 +765,15 @@ void TravelNode::print(bool printFailed)
             out << (path->getComplete() ? 0 : 1) << ",";
             out << std::to_string(path->getMaxLevelCreature()[0])<< ",";
             out << std::to_string(path->getMaxLevelCreature()[1]) << ",";
-            out << std::to_string(path->getMaxLevelCreature()[2]);
+            out << std::to_string(path->getMaxLevelCreature()[2]) << ",";
+
+            name = getName();
+            name.erase(remove(name.begin(), name.end(), '\"'), name.end());
+            out << name.c_str() << ",";
+
+            name = endNode->getName();
+            name.erase(remove(name.begin(), name.end(), '\"'), name.end());
+            out << name.c_str();
 
             sPlayerbotAIConfig.log("travelPaths.csv", out.str().c_str());
         }
@@ -2039,9 +2047,9 @@ void TravelNodeMap::generateAreaTriggerNodes()
         else
             nodeName = inPos.getAreaName(false) + " portal";
 
-        TravelNode* outNode = sTravelNodeMap.addNode(outPos, nodeName, true, true); //Exit size, portal exit.
+        TravelNode* outNode = sTravelNodeMap.addNode(outPos, nodeName, true, true); //Exit side, portal exit.
 
-        TravelNode* inNode = sTravelNodeMap.getNode(inPos, NULL, 5.0f); //Entry side, portal center.
+        TravelNode* inNode = sTravelNodeMap.getNode(inPos, nullptr, 5.0f); //Entry side, portal center.
 
         //Portal link from area trigger to area trigger destination.
         if (outNode && inNode)
@@ -2927,7 +2935,6 @@ void TravelNodeMap::printMap()
 
     for (auto& node : anodes)
     {
-        node->print(false);
     }
 }
 

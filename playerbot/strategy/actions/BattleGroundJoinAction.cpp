@@ -145,25 +145,20 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
 {
     ArenaTeam* arenateam = nullptr;
     uint32 needMembers = (uint32)type;
-    //if (bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
-    //    leaderGroup = bot->GetGroup();
 
     for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
     {
-        ArenaTeam* temp = sObjectMgr.GetArenaTeamById(bot->GetArenaTeamId(arena_slot));
-        if (!temp)
+        ArenaTeam* team = sObjectMgr.GetArenaTeamById(bot->GetArenaTeamId(arena_slot));
+        if (!team)
             continue;
 
-        if (temp->GetCaptainGuid() != bot->GetObjectGuid())
+        if (team->GetCaptainGuid() != bot->GetObjectGuid())
             continue;
 
-        if (temp->GetType() != type)
+        if (team->GetType() != type)
             continue;
 
-        //if ((int)temp->GetMembersSize() < (int)needMembers)
-        //    continue;
-
-        arenateam = temp;
+        arenateam = team;
     }
     if (!arenateam)
     {
@@ -179,16 +174,10 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
         if ((int)members.size() >= (int)needMembers)
             break;
 
-        bool offline = false;
         Player* member = sObjectMgr.GetPlayer(itr->guid);
-        if (!member)
-        {
-            offline = true;
-        }
-        //if (!member && !sObjectMgr.GetPlayerAccountIdByGUID(itr->guid))
-        //    continue;
 
-        if (offline)
+        // offline member
+        if (!member)
         {
             if (!sRandomPlayerbotMgr.AddRandomBot(itr->guid.GetCounter()))
             {
@@ -198,8 +187,6 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
             else
                 continue;
         }
-
-        //member = sObjectMgr.GetPlayer(itr->guid);
 
         if (member)
         {
@@ -215,6 +202,9 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
             if (member->GetObjectGuid() == bot->GetObjectGuid())
                 continue;
 
+            if (member->InBattleGround())
+                continue;
+
             if (member->IsInCombat())
                 member->CombatStop(true);
 
@@ -224,10 +214,9 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
             member->TeleportTo(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), 0);
 
             member->GetPlayerbotAI()->Reset();
-        }
 
-        if (member)
             members.push_back(member->GetGUIDLow());
+        }
     }
 
     if (!members.size() || (int)members.size() < (int)(needMembers - 1))
@@ -235,7 +224,6 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
         sLog.outDetail("Team #%d <%s> has not enough members for match", arenateam->GetId(), arenateam->GetName().c_str());
         return false;
     }
-    Group* leaderGroup = nullptr;
     Group* group = new Group();
 
     // disband leaders group
@@ -251,7 +239,6 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
     else
     {
         sObjectMgr.AddGroup(group);
-        leaderGroup = group;
     }
 
     sLog.outDetail("Bot #%d <%s>: Leader of <%s>", bot->GetGUIDLow(), bot->GetName(), arenateam->GetName().c_str());
@@ -264,7 +251,7 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
         //if (count >= (int)arenateam->GetType())
         //    break;
 
-        if (leaderGroup->GetMembersCount() >= needMembers)
+        if (group->GetMembersCount() >= needMembers)
             break;
 
         Player* member = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, *i));
@@ -277,10 +264,10 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
         if (!member->GetPlayerbotAI())
             continue;
 
-        if (member->GetGroup() == leaderGroup)
+        if (member->GetGroup() == group)
             continue;
 
-        if (!leaderGroup->AddMember(ObjectGuid(HIGHGUID_PLAYER, *i), member->GetName()))
+        if (!group->AddMember(ObjectGuid(HIGHGUID_PLAYER, *i), member->GetName()))
             continue;
 
         member->GetPlayerbotAI()->Reset(true);
@@ -291,15 +278,17 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
         sLog.outDetail("Bot #%d <%s>: Member of <%s>", member->GetGUIDLow(), member->GetName(), arenateam->GetName().c_str());
     }
 
-    if (leaderGroup && leaderGroup->GetMembersCount() >= needMembers)
+    if (group && group->GetMembersCount() >= needMembers)
     {
         sLog.outDetail("Team #%d <%s>: Group is ready for match", arenateam->GetId(), arenateam->GetName().c_str());
         return true;
     }
-    else if (leaderGroup && leaderGroup->GetMembersCount() < needMembers)
+    else if (group && group->GetMembersCount() < needMembers)
     {
         sLog.outDetail("Team #%d <%s>: Group is not ready for match (not enough members)", arenateam->GetId(), arenateam->GetName().c_str());
-        leaderGroup->Disband();
+        group->Disband();
+        sObjectMgr.RemoveGroup(group);
+        delete group;
         return false;
     }
     return false;

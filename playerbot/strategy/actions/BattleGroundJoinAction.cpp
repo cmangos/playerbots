@@ -1488,11 +1488,8 @@ bool BGStatusAction::Execute(Event& event)
             bot->GetSession()->HandleLeaveBattlefieldOpcode(leave);
             //Queue the event again to try to join next tick.
             //ai->HandleBotOutgoingPacket(event.getPacket());
-            sLog.outError("Bot %s leaves to join.", bot->GetName());
             return true;
         }
-
-        sLog.outError("Bot %s joins.", bot->GetName());
 
 #ifdef MANGOSBOT_ZERO
         sLog.outBasic("Bot #%d <%s> (%u %s) joined BG (%s)", bot->GetGUIDLow(), bot->GetName(), bot->GetLevel(), bot->GetTeam() == ALLIANCE ? "A" : "H", _bgType.c_str());

@@ -3264,11 +3264,8 @@ void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
 
     ForEachPlayerbot([&](Player* bot)
     {
-        if (player == bot/* || player->GetPlayerbotAI()*/) // TEST
+        if (player == bot)
             return;
-
-        //if (player->GetCurrentCell() == bot->GetCurrentCell())
-        //    botsNearby++;
 
         Group* group = bot->GetGroup();
         if (!group)
@@ -3291,56 +3288,10 @@ void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
         }
     });
 
-    if (botsNearby > 100 && false)
-    {
-        WorldPosition botPos(player);
-
-        //botPos.GetReachableRandomPointOnGround(player, sPlayerbotAIConfig.reactDistance * 2, true);
-        //botPos.GetReachableRandomPointOnGround(player, sPlayerbotAIConfig.reactDistance * 2, true);
-        //botPos.GetReachableRandomPointOnGround(player, sPlayerbotAIConfig.reactDistance * 2, true);
-
-        //player->Relocate(botPos.getX(), botPos.getY(), botPos.getZ(), botPos.getO());
-        //player->Relocate(botPos.coord_x, botPos.coord_y, botPos.coord_z, botPos.orientation);
-
-        if (!player->GetFactionTemplateEntry())
-        {
-            botPos.GetReachableRandomPointOnGround(player, sPlayerbotAIConfig.reactDistance * 2, true);
-            botPos.GetReachableRandomPointOnGround(player, sPlayerbotAIConfig.reactDistance * 2, true);
-            botPos.GetReachableRandomPointOnGround(player, sPlayerbotAIConfig.reactDistance * 2, true);
-        }
-        else
-        {
-            std::vector<TravelDestination*> dests = sTravelMgr.getRpgTravelDestinations(player, true, true, 200000.0f);
-
-            do
-            {
-                RpgTravelDestination* dest = (RpgTravelDestination*)dests[urand(0, dests.size() - 1)];
-                CreatureInfo const* cInfo = dest->getCreatureInfo();
-                if (!cInfo)
-                    continue;
-
-                FactionTemplateEntry const* factionEntry = sFactionTemplateStore.LookupEntry(cInfo->Faction);
-                ReputationRank reaction = PlayerbotAI::GetFactionReaction(player->GetFactionTemplateEntry(), factionEntry);
-
-                if (reaction > REP_NEUTRAL && dest->nearestPoint(botPos)->mapid == player->GetMapId())
-                {
-                    botPos = *dest->nearestPoint(botPos);
-                    break;
-                }
-            } while (true);
-        }
-
-        player->TeleportTo(botPos);
-        //player->Relocate(botPos.getX(), botPos.getY(), botPos.getZ(), botPos.getO());
-
-    }
-
     if (IsFreeBot(player))
     {
         uint32 guid = player->GetGUIDLow();
-        if (sPlayerbotAIConfig.IsFreeAltBot(player))
-            SetEventValue(guid, "always", 1, 0);
-        else
+        if (!sPlayerbotAIConfig.IsFreeAltBot(player))
            SetEventValue(guid, "login", 0, 0);
     }
     else

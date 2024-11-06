@@ -755,7 +755,7 @@ void RandomPlayerbotMgr::ScaleBotActivity()
 void RandomPlayerbotMgr::LoginFreeBots()
 {
 
-    if (!sPlayerbotAIConfig.freeAltBots.empty() && sPlayerbotAIConfig.botAutologin != 2)
+    if (!sPlayerbotAIConfig.freeAltBots.empty() && sPlayerbotAIConfig.botAutologin != BotAutoLogin::LOGIN_ONLY_ALWAYS_ACTIVE)
     {
         for (auto bot : sPlayerbotAIConfig.freeAltBots)
         {

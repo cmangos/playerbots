@@ -775,17 +775,17 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
 
     if (!strcmp(cmd, "always"))
     {
-        if (sPlayerbotAIConfig.selfBotLevel == 0)
+        if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::DISABLED)
         {
             messages.push_back("Self-bot is disabled");
             return messages;
         }
-        else if (sPlayerbotAIConfig.selfBotLevel == 1 && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+        else if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::GM_ONLY && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
         {
             messages.push_back("You do not have permission to enable player ai");
             return messages;
         }
-        else if (sPlayerbotAIConfig.selfBotLevel == 2 && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+        else if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::ACTIVE_BY_COMMAND && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
         {
             messages.push_back("Player ai is only available while online");
             return messages;
@@ -821,17 +821,36 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
             alwaysName = charname;
         }
 
-        uint32 always = sRandomPlayerbotMgr.GetValue(guid.GetCounter(), "always");
+        BotAlwaysOnline always = BotAlwaysOnline(sRandomPlayerbotMgr.GetValue(guid.GetCounter(), "always"));
 
-        if (!always || always == 2)
+        if (always == BotAlwaysOnline::DISABLED || always == BotAlwaysOnline::DISABLED_BY_COMMAND)
         {
-            sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", 1);
+            sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", (uint32)BotAlwaysOnline::ACTIVE);
             messages.push_back("Enable offline player ai for " + alwaysName);
             sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, guid.GetCounter()));
+
+            if (!charname)
+            {
+                if (!master->GetPlayerbotAI())
+                    OnBotLogin(master);
+            }
+            else
+            {
+                Player* bot = sRandomPlayerbotMgr.GetPlayerBot(guid);
+
+                if (bot)
+                {
+                    ProcessBotCommand("add", guid,
+                        master->GetObjectGuid(),
+                        master->GetSession()->GetSecurity() >= SEC_GAMEMASTER,
+                        master->GetSession()->GetAccountId(),
+                        master->GetGuildId());
+                }
+            }
         }
         else
         {
-            sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", 2);
+            sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", (uint32)BotAlwaysOnline::DISABLED_BY_COMMAND);
             messages.push_back("Disable offline player ai for " + alwaysName);
 
             if (guid != master->GetObjectGuid())
@@ -862,14 +881,14 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
             if (sRandomPlayerbotMgr.GetValue(master->GetObjectGuid().GetCounter(), "selfbot"))
             {
                 messages.push_back("Disable player ai (on login)");
-                sRandomPlayerbotMgr.SetValue(master->GetObjectGuid().GetCounter(), "selfbot", 0);
+                sRandomPlayerbotMgr.SetValue(master->GetObjectGuid().GetCounter(), "selfbot", (uint32)BotAlwaysOnline::DISABLED);
             }
             else
                 messages.push_back("Disable player ai");
         }
-        else if (sPlayerbotAIConfig.selfBotLevel == 0)
+        else if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::DISABLED)
             messages.push_back("Self-bot is disabled");
-        else if (sPlayerbotAIConfig.selfBotLevel == 1 && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+        else if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::GM_ONLY && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
             messages.push_back("You do not have permission to enable player ai");
         else
         {
@@ -1287,14 +1306,18 @@ void PlayerbotMgr::OnPlayerLogin(Player* player)
     sPlayerbotTextMgr.AddLocalePriority(player->GetSession()->GetSessionDbLocaleIndex());
     sLog.outBasic("Player %s logged in, localeDbc %i, localeDb %i", player->GetName(), (uint32)(player->GetSession()->GetSessionDbcLocale()), player->GetSession()->GetSessionDbLocaleIndex());
 
-    if(sPlayerbotAIConfig.selfBotLevel > 2 || sPlayerbotAIConfig.IsFreeAltBot(player) || sRandomPlayerbotMgr.GetValue(master->GetObjectGuid().GetCounter(), "selfbot"))
+    if (sPlayerbotAIConfig.IsFreeAltBot(player))
+    {
+        sLog.outString("Enabling selfbot on login for %s", player->GetName());
         HandlePlayerbotCommand("self", player);
+    }
+
     if (player->GetSession() != player->GetPlayerMenu()->GetGossipMenu().GetMenuSession())
     {
         player->GetPlayerMenu()->GetGossipMenu() = GossipMenu(player->GetSession());
     }
 
-    if (!sPlayerbotAIConfig.botAutologin)
+    if (sPlayerbotAIConfig.botAutologin == BotAutoLogin::DISABLED)
         return;
 
     uint32 accountId = player->GetSession()->GetAccountId();
@@ -1309,7 +1332,7 @@ void PlayerbotMgr::OnPlayerLogin(Player* player)
         {
             Field* fields = results->Fetch();
             if (first) first = false; else out << ",";
-            if(sPlayerbotAIConfig.botAutologin == 2 && !sPlayerbotAIConfig.IsFreeAltBot(fields[0].GetUInt32())) continue;
+            if(sPlayerbotAIConfig.botAutologin == BotAutoLogin::LOGIN_ONLY_ALWAYS_ACTIVE && !sPlayerbotAIConfig.IsFreeAltBot(fields[0].GetUInt32())) continue;
             out << fields[1].GetString();
         } while (results->NextRow());
 

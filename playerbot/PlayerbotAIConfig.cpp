@@ -179,7 +179,7 @@ bool PlayerbotAIConfig::Initialize()
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotQuestIds", "7848,3802,5505,6502,7761,9378"), randomBotQuestIds);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.ImmuneSpellIds", ""), immuneSpellIds);
 
-    botAutologin = config.GetIntDefault("AiPlayerbot.BotAutologin", false);
+    botAutologin = BotAutoLogin(config.GetIntDefault("AiPlayerbot.BotAutologin", 0));
     randomBotAutologin = config.GetBoolDefault("AiPlayerbot.RandomBotAutologin", true);
     minRandomBots = config.GetIntDefault("AiPlayerbot.MinRandomBots", 50);
     maxRandomBots = config.GetIntDefault("AiPlayerbot.MaxRandomBots", 200);
@@ -602,7 +602,7 @@ bool PlayerbotAIConfig::Initialize()
     }
 
     sLog.outString("Loading free bots.");
-    selfBotLevel = config.GetIntDefault("AiPlayerbot.SelfBotLevel", 1);
+    selfBotLevel = BotSelfBotLevel(config.GetIntDefault("AiPlayerbot.SelfBotLevel", uint32(BotSelfBotLevel::GM_ONLY)));
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.ToggleAlwaysOnlineAccounts", ""), toggleAlwaysOnlineAccounts);
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.ToggleAlwaysOnlineChars", ""), toggleAlwaysOnlineChars);
 
@@ -753,7 +753,7 @@ void PlayerbotAIConfig::SetValue(std::string name, std::string value)
 
 void PlayerbotAIConfig::loadFreeAltBotAccounts()
 {
-    bool allCharsOnline = (selfBotLevel > 3);
+    bool allCharsOnline = (selfBotLevel == BotSelfBotLevel::ALWAYS_ACTIVE);
 
     freeAltBots.clear();
 
@@ -762,14 +762,14 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
     {
         do
         {
-            bool accountAlwaysOnline = allCharsOnline;
+            bool accountToggle = false;
 
             Field* fields = results->Fetch();
             std::string accountName = fields[0].GetString();
             uint32 accountId = fields[1].GetUInt32();
 
             if (std::find(toggleAlwaysOnlineAccounts.begin(), toggleAlwaysOnlineAccounts.end(), accountName) != toggleAlwaysOnlineAccounts.end())
-                accountAlwaysOnline = !accountAlwaysOnline;
+                accountToggle = true;
 
             auto result = CharacterDatabase.PQuery("SELECT name, guid FROM characters WHERE account = '%u'", accountId);
             if (!result)
@@ -777,22 +777,30 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
 
             do
             {
-                bool charAlwaysOnline = allCharsOnline;
+                bool charToggle = false;
 
                 Field* fields = result->Fetch();
                 std::string charName = fields[0].GetString();
                 uint32 guid = fields[1].GetUInt32();
 
-                uint32 always = sRandomPlayerbotMgr.GetValue(guid, "always");
+                BotAlwaysOnline always = BotAlwaysOnline(sRandomPlayerbotMgr.GetValue(guid, "always"));
 
-                if (always == 2)
+                if (always == BotAlwaysOnline::DISABLED_BY_COMMAND)
                     continue;
 
                 if (std::find(toggleAlwaysOnlineChars.begin(), toggleAlwaysOnlineChars.end(), charName) != toggleAlwaysOnlineChars.end())
-                    charAlwaysOnline = !charAlwaysOnline;
+                    charToggle = true;
 
-                if(charAlwaysOnline || accountAlwaysOnline || always)
+                bool thisCharAlwaysOnline = allCharsOnline;
+
+                if (accountToggle || charToggle)
+                    thisCharAlwaysOnline = !thisCharAlwaysOnline;
+
+                if ((thisCharAlwaysOnline && always != BotAlwaysOnline::DISABLED_BY_COMMAND) || always == BotAlwaysOnline::ACTIVE)
+                {
+                    sLog.outString("Enabling always online for %s", charName.c_str());
                     freeAltBots.push_back(std::make_pair(accountId, guid));
+                }
 
             } while (result->NextRow());
 

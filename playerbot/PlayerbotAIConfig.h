@@ -25,6 +25,29 @@ enum class BotCheatMask : uint32
     maxMask = 1 << 11
 };
 
+enum class BotAutoLogin : uint32
+{
+    DISABLED = 0,
+    LOGIN_ALL_WITH_MASTER = 1,
+    LOGIN_ONLY_ALWAYS_ACTIVE = 2
+};
+
+enum class BotSelfBotLevel : uint32
+{
+    DISABLED = 0,
+    GM_ONLY = 1,
+    ACTIVE_BY_COMMAND = 2,
+    ACTIVE_BY_LOGIN = 3, 
+    ALWAYS_ACTIVE = 4
+};
+
+enum class BotAlwaysOnline : uint32
+{
+    DISABLED = 0,
+    ACTIVE = 1,
+    DISABLED_BY_COMMAND = 2
+};
+
 #define MAX_GEAR_PROGRESSION_LEVEL 6
 
 class ConfigAccess
@@ -71,7 +94,7 @@ public:
 
     uint32 openGoSpell;
     bool randomBotAutologin;
-    uint32 botAutologin;
+    BotAutoLogin botAutologin;
     std::string randomBotMapsAsString;
     std::vector<uint32> randomBotMaps;
     std::list<uint32> randomBotQuestItems;
@@ -245,7 +268,7 @@ public:
     bool talentsInPublicNote;
     bool nonGmFreeSummon;
 
-    uint32 selfBotLevel;
+    BotSelfBotLevel selfBotLevel;
     uint32 iterationsPerTick;
 
     std::string autoPickReward;

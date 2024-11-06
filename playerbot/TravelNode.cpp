@@ -338,8 +338,9 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
 
         if (backPath.size())
         {
-            if (startPos.isPathTo(backPath)) //Reverse works so use that.
+            if (backNodePath->getComplete()) //Reverse works so use that.
             {
+                MANGOS_ASSERT(startPos.isPathTo(backPath));
                 std::reverse(backPath.begin(), backPath.end());
                 path = backPath;
                 canPath = backNodePath->getComplete();
@@ -349,7 +350,6 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
                 std::reverse(backPath.begin(), backPath.end());
                 path.insert(path.end(), backPath.begin(), backPath.end());
                 canPath = true;
-                returnNodePath->setPath(path);
             }
         }
     }

@@ -361,7 +361,8 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
         ai = bot->GetPlayerbotAI();
     }
 
-	OnBotLoginInternal(bot);
+    if(!ai->HasRealPlayerMaster())
+	    OnBotLoginInternal(bot);
 
     playerBots[bot->GetGUIDLow()] = bot;
 

@@ -6119,7 +6119,7 @@ float PlayerbotAI::GetRange(std::string type)
 {
     float val = 0;
 
-    if (type == "follow" && bot->GetGroup() && bot->GetGroup()->IsRaidGroup())
+    if (type == "follow" && !bot->InArena() && bot->GetGroup() && bot->GetGroup()->IsRaidGroup())
         type = "followraid";
 
     if (aiObjectContext) val = aiObjectContext->GetValue<float>("range", type)->Get();

@@ -1289,6 +1289,10 @@ void PlayerbotMgr::OnPlayerLogin(Player* player)
 
     if(sPlayerbotAIConfig.selfBotLevel > 2 || sPlayerbotAIConfig.IsFreeAltBot(player) || sRandomPlayerbotMgr.GetValue(master->GetObjectGuid().GetCounter(), "selfbot"))
         HandlePlayerbotCommand("self", player);
+    if (player->GetSession() != player->GetPlayerMenu()->GetGossipMenu().GetMenuSession())
+    {
+        player->GetPlayerMenu()->GetGossipMenu() = GossipMenu(player->GetSession());
+    }
 
     if (!sPlayerbotAIConfig.botAutologin)
         return;

@@ -890,12 +890,13 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
     {
         bool hasBot = false;
 
-        if (!master)
+        PlayerbotAI* ai;
+
+        if (master)
         {
-            master = playerBots[0];
+            ai = master->GetPlayerbotAI();
         }
 
-        PlayerbotAI* ai = master->GetPlayerbotAI();      
         if (ai)
         {
             hasBot = true;

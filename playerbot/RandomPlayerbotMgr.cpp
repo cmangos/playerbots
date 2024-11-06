@@ -2773,7 +2773,7 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
     bool hasPlayer = bot->GetPlayerbotAI()->HasRealPlayerMaster();
     bot->GetPlayerbotAI()->Reset(!hasPlayer);
 
-    if (bot->GetGroup() && !hasPlayer)
+    if (bot->GetGroup() && !bot->InBattleGround() && !hasPlayer)
         bot->RemoveFromGroup();
 }
 

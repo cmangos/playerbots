@@ -143,6 +143,9 @@ bool BGJoinAction::Execute(Event& event)
 #ifndef MANGOSBOT_ZERO
 bool BGJoinAction::gatherArenaTeam(ArenaType type)
 {
+    if (bot->InBattleGround())
+        return false;
+    
     ArenaTeam* arenateam = nullptr;
     uint32 needMembers = (uint32)type;
 

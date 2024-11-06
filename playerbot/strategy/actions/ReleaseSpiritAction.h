@@ -141,7 +141,7 @@ namespace ai
             }
 
             
-            if (!ai->HasRealPlayerMaster())
+            if (!ai->HasRealPlayerMaster() && !bot->InBattleGround())
             {
                 if (Group* group = bot->GetGroup())
                 {

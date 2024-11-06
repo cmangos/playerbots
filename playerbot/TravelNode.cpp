@@ -2422,6 +2422,8 @@ void TravelNodeMap::addManualNodes()
 
     node = sTravelNodeMap.addNode(WorldPosition(1, -588.53f, -2037.69f, 57.60f), "c1-Wailing Caverns", true, false);
 
+    node = sTravelNodeMap.addNode(WorldPosition(1, 7016.75f, -2153.84f, 595.09f), "c1-Timbermaw Hold", true, false);
+
 #ifndef MANGOSBOT_ZERO
     node = sTravelNodeMap.addNode(WorldPosition(530, 571.10f, 6938.97f, -16.81f), "c1-Coilfang", true, false);
     node = sTravelNodeMap.addNode(WorldPosition(530, 571.10f, 6938.97f, -15.20f), "c2-Coilfang", true, false);

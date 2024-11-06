@@ -7612,7 +7612,8 @@ void PlayerbotAI::EnchantItemT(uint32 spellid, uint8 slot, Item* item)
       !((1 << pItem->GetProto()->InventoryType) & spellInfo->EquippedItemInventoryTypeMask))
    {
 
-      sLog.outError("%s: items could not be enchanted, wrong item type equipped", bot->GetName());
+      sLog.outError("%s: items could not be enchanted, wrong item type equipped, inventoryType: %u, itemId: %u, Enchant spellId: %u", bot->GetName(), 
+          pItem->GetProto()->InventoryType, pItem->GetProto()->ItemId, spellInfo->Id);
 
       return;
    }

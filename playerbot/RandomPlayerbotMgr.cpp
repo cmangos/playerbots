@@ -1838,6 +1838,12 @@ bool RandomPlayerbotMgr::AddRandomBot(uint32 bot)
     return false;
 }
 
+void RandomPlayerbotMgr::MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder)
+{
+    players[guid] = this->GetPlayerBot(guid);
+    PlayerbotHolder::MovePlayerBot(guid, newHolder);
+}
+
 bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
 {
     Player* player = GetPlayerBot(bot);

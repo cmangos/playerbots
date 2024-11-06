@@ -140,6 +140,7 @@ public:
         static InventoryResult CanEquipUnseenItem(Player* player, uint8 slot, uint16& dest, uint32 item);
 
         bool AddRandomBot(uint32 bot);
+        virtual void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder) override;
 
         std::map<Team, std::map<BattleGroundTypeId, std::list<uint32> > > getBattleMastersCache() { return BattleMastersCache; }
 
@@ -158,7 +159,6 @@ public:
         std::vector<AuctionEntry> GetAhPrices(uint32 itemId) { return ahMirror[itemId]; }
 	protected:
 	    virtual void OnBotLoginInternal(Player * const bot);
-
     private:
         //pid values are set in constructor
         botPID pid = botPID(1, 50, -50, 0, 0, 0);

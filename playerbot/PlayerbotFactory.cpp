@@ -2081,7 +2081,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                     if (proto->IsWeapon() && slot == EQUIPMENT_SLOT_OFFHAND && (bot->getClass() == CLASS_ROGUE || specId == 2 || specId == 21))
 #endif
 #ifdef MANGOSBOT_TWO
-                    if (proto->IsWeapon() && slot == EQUIPMENT_SLOT_OFFHAND && (bot->getClass() == CLASS_ROGUE || specId == 2 || specId == 21 || bot->getClass() == CLASS_DEATH_KNIGHT))
+                    if (proto->IsWeapon() && slot == EQUIPMENT_SLOT_OFFHAND && (bot->getClass() == CLASS_ROGUE || specId == 2 || specId == 21 || specId == 17 || specId == 18 || specId == 19))
 #endif
                         {
                             bool betterValue = false;

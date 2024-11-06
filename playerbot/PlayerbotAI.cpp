@@ -2007,7 +2007,7 @@ void PlayerbotAI::DoNextAction(bool min)
         else if (aiInternalUpdateDelay < 1000)
             bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-        if (!group && sRandomPlayerbotMgr.IsFreeBot(bot))
+        if (!group && sRandomPlayerbotMgr.IsFreeBot(bot) && !IsRealPlayer())
         {
             bot->GetPlayerbotAI()->SetMaster(nullptr);
         }

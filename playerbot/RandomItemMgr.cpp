@@ -838,7 +838,7 @@ void RandomItemMgr::BuildItemInfoCache()
     }
 
     // load weightscales
-    sLog.outString("Loading weightscales info");
+    sLog.outString("Loading weightscales info...");
     auto results = WorldDatabase.PQuery("select id, name, class from ai_playerbot_weightscales");
 
     if (results)
@@ -893,6 +893,23 @@ void RandomItemMgr::BuildItemInfoCache()
         sLog.outError("Error loading item weight scales");
         return;
     }
+    else
+    {
+        for (const auto& entry : m_weightScales)
+        {
+            uint32 spec = entry.first;
+            const WeightScale& weightScale = entry.second;
+            std::unordered_map<std::string, WeightScaleStat> statMap;
+
+            for (const auto& stat : weightScale.stats)
+            {
+                statMap[stat.stat] = stat;
+            }
+
+            specStatCache[spec] = std::move(statMap);
+        }
+    }
+    sLog.outString("Loaded spec stat cache");
 
     // vendor items
     sLog.outString("Loading vendor item list...");
@@ -2026,13 +2043,20 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
             return 0;
 
         bool playerCaster = false;
-        for (std::vector<WeightScaleStat>::iterator i = m_weightScales[spec].stats.begin(); i != m_weightScales[spec].stats.end(); ++i)
+        // Check if the stat cache is available for the spec
+        auto specCache = specStatCache.find(spec);
+
+        if (specCache != specStatCache.end()) // If cache for the spec exists
         {
-            if (i->stat == "splpwr" || i->stat == "int" || i->stat == "manargn" || i->stat == "splheal" || i->stat == "spellcritstrkrtng" || i->stat == "spellhitrtng")
+            // Check if any of the relevant stats exist in the cache
+            if (specCache->second.count("splpwr") || specCache->second.count("int") ||
+                specCache->second.count("manargn") || specCache->second.count("splheal") ||
+                specCache->second.count("spellcritstrkrtng") || specCache->second.count("spellhitrtng"))
             {
                 playerCaster = true;
             }
         }
+
 
         if (!isWhitelist && (spec != 6 && spec != 21 && playerclass != CLASS_HUNTER) && !playerCaster)
             return 0;
@@ -2045,13 +2069,20 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
             return 0;
 
         bool playerAttacker = false;
-        for (std::vector<WeightScaleStat>::iterator i = m_weightScales[spec].stats.begin(); i != m_weightScales[spec].stats.end(); ++i)
+
+        if (specStatCache.find(spec) != specStatCache.end())
         {
-            if (i->stat == "str" || i->stat == "agi" || i->stat == "atkpwr" || i->stat == "mledps" || i->stat == "rgddps" || i->stat == "hitrtng" || i->stat == "critstrkrtng")
+            const auto& statMap = specStatCache[spec];
+
+            if (statMap.find("str") != statMap.end() || statMap.find("agi") != statMap.end() ||
+                statMap.find("atkpwr") != statMap.end() || statMap.find("mledps") != statMap.end() ||
+                statMap.find("rgddps") != statMap.end() || statMap.find("hitrtng") != statMap.end() ||
+                statMap.find("critstrkrtng") != statMap.end())
             {
                 playerAttacker = true;
             }
         }
+
 
         if (!isWhitelist && !playerAttacker)
             return 0;
@@ -2106,22 +2137,22 @@ uint32 RandomItemMgr::CalculateRandomEnchantId(uint8 playerclass, uint8 spec, It
 
 uint32 RandomItemMgr::CalculateBestRandomEnchantId(uint8 playerclass, uint8 spec, uint32 itemId)
 {
-    if (!itemId)
+    if (itemId == 0)
         return 0;
 
     ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
     if (!proto)
         return 0;
 
-    std::map<uint32, std::vector<uint32> >::const_iterator tab = randomEnchantsCache.find(proto->RandomProperty);
+    auto tab = randomEnchantsCache.find(proto->RandomProperty);
     if (tab == randomEnchantsCache.end())
         return 0;
 
     uint32 bestScore = 0;
     uint32 bestId = 0;
 
-    const std::vector<uint32> propList = tab->second;
-    for (auto propId : propList)
+    const std::vector<uint32>& propList = tab->second;
+    for (uint32 propId : propList)
     {
         ItemRandomPropertiesEntry const* random_id = sItemRandomPropertiesStore.LookupEntry(propId);
         if (!random_id)
@@ -2137,7 +2168,7 @@ uint32 RandomItemMgr::CalculateBestRandomEnchantId(uint8 playerclass, uint8 spec
         if (currScore > bestScore)
         {
             bestScore = currScore;
-            bestId = random_id->ID;;
+            bestId = random_id->ID;
         }
     }
 
@@ -2150,7 +2181,6 @@ uint32 RandomItemMgr::CalculateEnchantWeight(uint8 playerclass, uint8 spec, uint
         return 0;
 
     SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchantId);
-
     if (!pEnchant)
         return 0;
 
@@ -2158,28 +2188,32 @@ uint32 RandomItemMgr::CalculateEnchantWeight(uint8 playerclass, uint8 spec, uint
 
     for (int s = 0; s < 3; ++s)
     {
+        uint32 amount = pEnchant->amount[s];
+        uint32 spellId = pEnchant->spellid[s];
+
         switch (pEnchant->type[s])
         {
-        case 1: //Proc //TODO add proc values?
+        case 1: // Proc
             break;
-        case 2: //Damage
-            if (!pEnchant->amount[s])
-                continue;
-            weight += CalculateSingleStatWeight(playerclass, spec, "mledps", pEnchant->amount[s]);
+
+        case 2: // Damage
+            if (amount)
+                weight += CalculateSingleStatWeight(playerclass, spec, "mledps", amount);
             break;
-        case 3:
+
+        case 3: // Spell effects
         {
-            if (!pEnchant->spellid[s])
+            if (!spellId)
                 continue;
 
-            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(pEnchant->spellid[s]);
-
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
             if (!spellInfo)
                 continue;
 
             for (uint32 j = 0; j < MAX_EFFECT_INDEX; ++j)
             {
-                if (spellInfo->Effect[j] != SPELL_EFFECT_APPLY_AURA)
+                uint32 effect = spellInfo->EffectApplyAuraName[j];
+                if (effect != SPELL_EFFECT_APPLY_AURA)
                     continue;
 
                 if (spellInfo->EffectApplyAuraName[j] == SPELL_AURA_MOD_STAT)
@@ -2187,41 +2221,35 @@ uint32 RandomItemMgr::CalculateEnchantWeight(uint8 playerclass, uint8 spec, uint
                     uint32 stat = spellInfo->EffectMiscValue[j];
                     uint32 value = spellInfo->EffectBasePoints[j] + 1;
 
-                    if (!value)
-                        continue;
-
-                    if (ItemStatLink.find(stat) == ItemStatLink.end())
-                        continue;
-
-                    weight += CalculateSingleStatWeight(playerclass, spec, ItemStatLink[stat], value);
+                    if (value && ItemStatLink.find(stat) != ItemStatLink.end())
+                        weight += CalculateSingleStatWeight(playerclass, spec, ItemStatLink[stat], value);
                 }
 #ifdef MANGOSBOT_TWO
                 // spell damage
-                // SPELL_AURA_MOD_DAMAGE_DONE
-                if (spellInfo->EffectApplyAuraName[j] == SPELL_AURA_MOD_DAMAGE_DONE)
+                if (effect == SPELL_AURA_MOD_DAMAGE_DONE)
                 {
                     uint32 spellDamage = spellInfo->EffectBasePoints[j] + 1;
-
-                    if (spellInfo->EffectMiscValue[j] == SPELL_SCHOOL_MASK_MAGIC)
+                    uint32 miscValue = spellInfo->EffectMiscValue[j];
+                    if (miscValue == SPELL_SCHOOL_MASK_MAGIC)
                     {
                         weight += CalculateSingleStatWeight(playerclass, spec, "splpwr", spellDamage);
                     }
                     else
                     {
                         uint32 specialDamage = 0;
-                        if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_ARCANE) != 0)
+                        if (miscValue & SPELL_SCHOOL_MASK_ARCANE)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "arcsplpwr", spellDamage);
 
-                        if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FROST) != 0)
+                        if (miscValue & SPELL_SCHOOL_MASK_FROST)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "frosplpwr", spellDamage);
 
-                        if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FIRE) != 0)
+                        if (miscValue & SPELL_SCHOOL_MASK_FIRE)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "firsplpwr", spellDamage);
 
-                        if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_SHADOW) != 0)
+                        if (miscValue & SPELL_SCHOOL_MASK_SHADOW)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "shasplpwr", spellDamage);
 
-                        if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_NATURE) != 0)
+                        if (miscValue & SPELL_SCHOOL_MASK_NATURE)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "natsplpwr", spellDamage);
 
                         weight += specialDamage;
@@ -2229,72 +2257,68 @@ uint32 RandomItemMgr::CalculateEnchantWeight(uint8 playerclass, uint8 spec, uint
                 }
 #else
                 // spell damage
-                // SPELL_AURA_MOD_DAMAGE_DONE
-                if (spellInfo->EffectApplyAuraName[j] == SPELL_AURA_MOD_DAMAGE_DONE)
+                if (effect == SPELL_AURA_MOD_DAMAGE_DONE)
                 {
                     uint32 spellDamage = spellInfo->EffectBasePoints[j] + 1;
-                    // generic spell damage
-                    if (spellInfo->EffectMiscValue[j] == SPELL_SCHOOL_MASK_MAGIC)
+                    uint32 miscValue = spellInfo->EffectMiscValue[j];
+                    if (miscValue == SPELL_SCHOOL_MASK_MAGIC)
                     {
                         weight += CalculateSingleStatWeight(playerclass, spec, "splpwr", spellDamage);
                     }
                     else
                     {
                         uint32 specialDamage = 0;
-                        if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_ARCANE) != 0)
+                        if (miscValue & SPELL_SCHOOL_MASK_ARCANE)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "arcsplpwr", spellDamage);
 
-                        if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FROST) != 0)
+                        if (miscValue & SPELL_SCHOOL_MASK_FROST)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "frosplpwr", spellDamage);
 
-                        if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FIRE) != 0)
+                        if (miscValue & SPELL_SCHOOL_MASK_FIRE)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "firsplpwr", spellDamage);
 
-                        if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_SHADOW) != 0)
+                        if (miscValue & SPELL_SCHOOL_MASK_SHADOW)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "shasplpwr", spellDamage);
 
-                        if ((spellInfo->EffectMiscValue[j] & SPELL_SCHOOL_MASK_NATURE) != 0)
+                        if (miscValue & SPELL_SCHOOL_MASK_NATURE)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "natsplpwr", spellDamage);
 
                         weight += specialDamage;
                     }
                 }
                 // spell healing
-                // SPELL_AURA_MOD_HEALING_DONE
-                if (spellInfo->EffectApplyAuraName[j] == SPELL_AURA_MOD_HEALING_DONE)
+                if (effect == SPELL_AURA_MOD_HEALING_DONE)
                 {
                     weight += CalculateSingleStatWeight(playerclass, spec, "splheal", spellInfo->EffectBasePoints[j] + 1);
                 }
 #endif
-
-
             }
             break;
         }
-        case 4: //Armor
-            if (!pEnchant->amount[s])
-                continue;
-            weight += CalculateSingleStatWeight(playerclass, spec, "armor", pEnchant->amount[s]);
+
+        case 4: // Armor
+            if (amount)
+                weight += CalculateSingleStatWeight(playerclass, spec, "armor", amount);
             break;
-        case 5: //Stat
-        {
+
+        case 5: // Stat
             for (auto& statLink : weightStatLink)
             {
-                if (statLink.second != pEnchant->spellid[s])
-                    continue;
-
-                weight += CalculateSingleStatWeight(playerclass, spec, statLink.first, pEnchant->amount[s]);
+                if (statLink.second == spellId)
+                    weight += CalculateSingleStatWeight(playerclass, spec, statLink.first, amount);
             }
             break;
-        }
-        case 6: //Totem
+
+        case 6: // Totem
             break;
-        case 7: //Use Spell
+
+        case 7: // Use Spell
             break;
-        case 8: //Prismatic socket
+
+        case 8: // Prismatic socket
             break;
-        }
-    }
+                }
+            }
 
     return weight;
 }
@@ -2421,14 +2445,25 @@ uint32 RandomItemMgr::ItemStatWeight(Player* player, Item* item)
 uint32 RandomItemMgr::CalculateSingleStatWeight(uint8 playerclass, uint8 spec, std::string stat, uint32 value)
 {
     uint32 statWeight = 0;
-    for (std::vector<WeightScaleStat>::iterator i = m_weightScales[spec].stats.begin(); i != m_weightScales[spec].stats.end(); ++i)
+
+    // Check if the cache has the spec and the stat exists in the cache
+    auto specIt = specStatCache.find(spec);
+    if (specIt != specStatCache.end())
     {
-        if (stat == i->stat)
+        auto& statMap = specIt->second;
+
+        auto statIt = statMap.find(stat);
+        if (statIt != statMap.end())
         {
-            statWeight = i->weight * value;
+            const WeightScaleStat& statInfo = statIt->second;
+            statWeight = statInfo.weight * value;
+
             if (statWeight)
-                sLog.outDetail("stat: %s, val: %d, weight: %d, total: %d, class: %d, spec: %s", stat.c_str(), value, i->weight, statWeight, playerclass, m_weightScales[spec].info.name.c_str());
-            return statWeight;
+            {
+                sLog.outDetail("stat: %s, val: %d, weight: %d, total: %d, class: %d, spec: %s",
+                    stat.c_str(), value, statInfo.weight, statWeight, playerclass,
+                    m_weightScales[spec].info.name.c_str());
+            }
         }
     }
 
@@ -2999,117 +3034,62 @@ uint32 RandomItemMgr::GetBestRandomEnchantStatWeight(uint32 itemId, uint32 specI
 
 uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 specId)
 {
-    if (!player || !itemId)
-        return 0;
-
-    if (!itemInfoCache[itemId])
-        return 0;
-
-    uint32 statWeight = 0;
-    specId = specId ? specId : GetPlayerSpecId(player);
-    if (specId == 0)
-        return 0;
-
-    if (!m_weightScales[specId].info.id)
+    if (!player || !itemId || !itemInfoCache[itemId])
         return 0;
 
     ItemInfoEntry* info = itemInfoCache[itemId];
     if (!info)
         return 0;
 
-    statWeight = info->weights[specId];
+    // Set specId if not provided
+    specId = specId ? specId : GetPlayerSpecId(player);
+    if (specId == 0 || !m_weightScales[specId].info.id)
+        return 0;
 
-    // skip higher lvl
+    // Early return for items above player's level
     if (info->minLevel > player->GetLevel())
         return 0;
 
-    // skip too low level
-    //if ((int32)info->minLevel < (int32)(player->GetLevel() - 20))
-    //    return 0;
-
-    // skip wrong team
+    // Skip items for wrong team
     if (info->team && (Team)info->team != player->GetTeam())
         return 0;
 
-    // skip quest items
+    // Skip quest items if player cannot do the quest
     if (info->source == ITEM_SOURCE_QUEST && !info->sourceIds.empty())
     {
-        bool canDoQuest = false;
         for (const auto& source : info->sourceIds)
         {
             Quest const* quest = sObjectMgr.GetQuestTemplate(source);
-            if (quest)
+            if (quest && player->SatisfyQuestClass(quest, false) &&
+                player->SatisfyQuestRace(quest, false) && player->SatisfyQuestLevel(quest, false) && quest->IsActive())
             {
-                // only class quests player could do
-                if (player->SatisfyQuestClass(quest, false) && player->SatisfyQuestRace(quest, false) && player->SatisfyQuestLevel(quest, false))
-                    canDoQuest = true;
-
-                // check if quest is inactive (if linked to a not running game event)
-                if (!quest->IsActive())
-                    canDoQuest = false;
-
-                // can be rewarded
-                if (canDoQuest)
-                    break;
+                return info->weights[specId]; // Can do quest
             }
         }
-        if (!canDoQuest)
-            return 0;
+        return 0; // Cannot do quest
     }
 
-    // skip pvp items
-    /*if (info->source == ITEM_SOURCE_PVP)
-    {
-#ifndef MANGOSBOT_ZERO
-        if (!player->GetHonorPoints() && !player->GetArenaPoints())
-            return 0;
-#else
-        if (!player->GetHonorRankInfo().rank)
-            return 0;
-#endif
-    }*/
-
-    // skip missing reputation
+    // Skip items if reputation rank is insufficient
     if (info->repFaction && uint32(player->GetReputationRank(info->repFaction)) < info->repRank)
         return 0;
 
 #ifdef MANGOSBOT_ZERO
-    // skip missing pvp ranks
+    // Skip missing PvP ranks for MANGOSBOT_ZERO
     if (info->pvpRank && player->GetHonorHighestRankInfo().rank < info->pvpRank)
         return 0;
     if (info->pvpRank && info->pvpRank < 16 && player->GetHonorHighestRankInfo().rank == 18)
         return 0;
-
-    // skip non pvp items for some specs
-    if (info->pvpRank < 16 && player->GetHonorHighestRankInfo().rank == 18)
-    {
-        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-        if (proto && !(
-            info->slot == EQUIPMENT_SLOT_WAIST ||
-            info->slot == EQUIPMENT_SLOT_WRISTS ||
-            info->slot == EQUIPMENT_SLOT_BACK ||
-            info->slot == EQUIPMENT_SLOT_NECK ||
-            info->slot == EQUIPMENT_SLOT_TRINKET1 ||
-            info->slot == EQUIPMENT_SLOT_TRINKET2 ||
-            info->slot == EQUIPMENT_SLOT_FINGER1 ||
-            info->slot == EQUIPMENT_SLOT_FINGER2 ||
-            proto->SubClass == ITEM_SUBCLASS_ARMOR_TOTEM ||
-            proto->SubClass == ITEM_SUBCLASS_ARMOR_LIBRAM ||
-            proto->SubClass == ITEM_SUBCLASS_ARMOR_IDOL)
-            && !(specId == 3 || specId == 4 || specId == 5 || specId == 14 || specId == 22 || specId == 31))
-            return 0;
-    }
 #else
-    // skip missing pvp ranks
+    // Skip missing PvP ranks for non-zero MANGOSBOT
     if (info->pvpRank && player->GetHighestPvPRankIndex() < info->pvpRank)
         return 0;
 #endif
 
-    // skip missing skills
+    // Skip items with insufficient skill
     if (info->reqSkill && player->GetSkillValue(info->reqSkill) < info->reqSkillRank)
         return 0;
 
-    // skip no stats trinkets
+    // Skip non-stat trinkets and certain slots
     if (info->weights[specId] == 1 && (
         info->slot == EQUIPMENT_SLOT_NECK ||
         info->slot == EQUIPMENT_SLOT_TRINKET1 ||
@@ -3118,35 +3098,13 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
         info->slot == EQUIPMENT_SLOT_FINGER2))
         return 0;
 
-    // check if item stat score is the best among class specs
-    /*uint32 bestSpecId = 0;
-    uint32 bestSpecScore = 0;
-    for (uint32 spec = 1; spec < MAX_STAT_SCALES; ++spec)
-    {
-        if (!m_weightScales[spec].info.id)
-            continue;
-
-        if (m_weightScales[spec].info.classId != player->getClass())
-            continue;
-
-        if (info->weights[spec] > bestSpecScore && info->weights[spec] > 1)
-        {
-            bestSpecId = spec;
-            bestSpecScore = info->weights[spec];
-        }
-    }*/
-
-    // TODO test
-    /*if (bestSpecId && bestSpecId != specId && player->GetLevel() >= 60)
-        return 0;*/
-
+    // Optionally increase stat weights for PvP items (adjusted for MANGOSBOT_ZERO)
 #ifdef MANGOSBOT_ZERO
-    // increase stat weights for pvp items
     if (info->pvpRank)
-        return statWeight * 5;
+        return info->weights[specId] * 5;
 #endif
 
-    return statWeight;
+    return info->weights[specId];
 }
 
 void RandomItemMgr::BuildEquipCache()

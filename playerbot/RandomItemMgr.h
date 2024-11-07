@@ -213,6 +213,7 @@ class RandomItemMgr
         std::map<uint32, std::vector<uint32> > tradeCache;
         std::map<uint32, float> rarityCache;
         std::map<uint32, WeightScale> m_weightScales;
+        std::unordered_map<uint32, std::unordered_map<std::string, WeightScaleStat>> specStatCache;
         std::map<std::string, uint32 > weightStatLink;
         std::map<uint32, std::string > ItemStatLink;
         std::map<std::string, uint32 > weightRatingLink;

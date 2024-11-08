@@ -714,7 +714,6 @@ bool DisenchantRandomItemAction::Execute(Event& event)
     if (bot->IsMoving())
     {
         ai->StopMoving();
-        return true;
     }
 
     if (bot->IsMounted())

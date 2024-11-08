@@ -165,7 +165,15 @@ target_include_directories(${LIBRARY_NAME}
 )
 
 # Install config files
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/playerbot/aiplayerbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)
+if ( ${CMAKE_PROJECT_NAME} MATCHES "Classic")
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/playerbot/aiplayerbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)
+endif()	
+if ( ${CMAKE_PROJECT_NAME} MATCHES "TBC")
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/playerbot/aiplayerbot.conf.dist.in.tbc ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)
+endif()	
+if ( ${CMAKE_PROJECT_NAME} MATCHES "WoTLK")
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/playerbot/aiplayerbot.conf.dist.in.wotlk ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)
+endif()
 if (NOT CONF_INSTALL_DIR)
   set(CONF_INSTALL_DIR ${CONF_DIR})
 endif()

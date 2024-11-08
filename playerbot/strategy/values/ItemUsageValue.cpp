@@ -274,11 +274,25 @@ ItemUsage ItemUsageValue::Calculate()
     if ((proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON) && proto->Bonding != BIND_WHEN_PICKED_UP &&
         ai->HasSkill(SKILL_ENCHANTING) && proto->Quality >= ITEM_QUALITY_UNCOMMON)
     {
-        Item* item = CurrentItem(proto, bot);
+        if (proto->DisenchantID)
+        {
 
-        //Bot has budget to replace the item it wants to disenchant.
-        if (!item || !sRandomPlayerbotMgr.IsRandomBot(bot) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill) > proto->BuyPrice)
-            return ItemUsage::ITEM_USAGE_DISENCHANT;
+#ifndef MANGOSBOT_ZERO
+            // 2.0.x addon: Check player enchanting level against the item disenchanting requirements
+            int32 item_disenchantskilllevel = proto->RequiredDisenchantSkill;
+            if (item_disenchantskilllevel <= int32(bot->GetSkillValue(SKILL_ENCHANTING)))
+            {
+#endif
+                Item* item = CurrentItem(proto, bot);
+
+                //Bot has budget to replace the item it wants to disenchant.
+                if (!item || !sRandomPlayerbotMgr.IsRandomBot(bot) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill) > proto->BuyPrice)
+                    return ItemUsage::ITEM_USAGE_DISENCHANT;
+
+#ifndef MANGOSBOT_ZERO
+            }
+#endif
+        }
     }
 
     //QUEST

@@ -3,6 +3,9 @@
 
 #include "Common.h"
 #include "PlayerbotAIBase.h"
+#include "Entities/ObjectGuid.h"
+#include "Database/DatabaseEnv.h"
+#include "Globals/SharedDefines.h"
 
 
 class WorldPacket;

@@ -38,7 +38,7 @@
 #include "strategy/values/LootValues.h"
 #include "strategy/values/AttackersValue.h"
 #include "Entities/Transports.h"
-
+#include "Guilds/GuildMgr.h"
 #include "Chat/ChannelMgr.h"
 
 #include <boost/algorithm/string.hpp>

@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include "GuildAcceptAction.h"
 #include "playerbot/ServerFacade.h"
+#include "Guilds/GuildMgr.h"
 
 using namespace ai;
 

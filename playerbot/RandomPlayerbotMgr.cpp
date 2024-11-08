@@ -21,7 +21,7 @@
 #include "BattleGround/BattleGround.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "Chat/ChannelMgr.h"
-
+#include "Guilds/GuildMgr.h"
 #include "World/WorldState.h"
 
 #ifndef MANGOSBOT_ZERO

@@ -12,6 +12,7 @@
 #include "RandomPlayerbotFactory.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/AiFactory.h"
+#include "Guilds/GuildMgr.h"
 
 #ifndef MANGOSBOT_ZERO
     #ifdef CMANGOS

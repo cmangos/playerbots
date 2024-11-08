@@ -1,6 +1,6 @@
 
 #include "EngineValues.h"
-
+#include "playerbot/strategy/AiObjectContext.h"
 
 using namespace ai;
 

@@ -13,6 +13,7 @@
 #endif
 #include "playerbot/ServerFacade.h"
 #include "playerbot/TravelMgr.h"
+#include "Guilds/GuildMgr.h"
 
 using namespace ai;
 

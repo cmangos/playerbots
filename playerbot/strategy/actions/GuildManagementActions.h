@@ -1,5 +1,6 @@
 #pragma once
 #include "GenericActions.h"
+#include "Guilds/GuildMgr.h"
 
 namespace ai
 {

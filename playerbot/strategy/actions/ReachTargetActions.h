@@ -8,6 +8,7 @@
 #include "playerbot/strategy/NamedObjectContext.h"
 #include "playerbot/strategy/values/MoveStyleValue.h"
 #include "GenericSpellActions.h"
+#include "playerbot/PlayerbotFactory.h"
 
 namespace ai
 {

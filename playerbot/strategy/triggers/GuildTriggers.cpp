@@ -4,6 +4,7 @@
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/BudgetValues.h"
 #include "playerbot/TravelMgr.h"
+#include "Guilds/GuildMgr.h"
 
 using namespace ai;
 

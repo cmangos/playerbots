@@ -11,6 +11,7 @@
 #include "RandomPlayerbotFactory.h"
 #include "SystemConfig.h"
 #include "Social/SocialMgr.h"
+#include "Guilds/GuildMgr.h"
 
 #ifndef MANGOSBOT_ZERO
 #ifdef CMANGOS

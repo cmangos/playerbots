@@ -3,6 +3,7 @@
 #include "InviteToGroupAction.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/Formations.h"
+#include "Guilds/GuildMgr.h"
 
 namespace ai
 {

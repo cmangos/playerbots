@@ -2,6 +2,7 @@
 #include "Talentspec.h"
 #include "playerbot/ServerFacade.h"
 #include "Server/DBCStructure.h"
+#include "Guilds/GuildMgr.h"
 
 using namespace std::placeholders;
 

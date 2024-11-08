@@ -180,7 +180,7 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster, bool par
     //ClearSkills();
     ClearSpells();
 
-    if (!incremental && isRandomBot)
+    if (!incremental && !partialUpgrade && isRandomBot)
     {
         ClearInventory();
         ResetQuests();
@@ -197,11 +197,15 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster, bool par
             bot->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
         }
 
-        InitQuests(specialQuestIds);
-        bot->learnQuestRewardedSpells();
+        if (!partialUpgrade)
+        {
+            InitQuests(specialQuestIds);
+            bot->learnQuestRewardedSpells();
 
-        // clear inventory and set level after getting xp and quest rewards
-        ClearInventory();
+            // clear inventory and set level after getting xp and quest rewards
+            ClearInventory();
+        }
+        
         if (bot->GetLevel() > level)
         {
             bot->SetLevel(level);
@@ -1562,7 +1566,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
     }
 
     bool isRandomBot = sRandomPlayerbotMgr.IsRandomBot(bot) && bot->GetPlayerbotAI() && !bot->GetPlayerbotAI()->HasRealPlayerMaster() && !bot->GetPlayerbotAI()->IsInRealGuild();
-    if (!incremental)
+    if (!incremental && !partialUpgrade)
     {
         DestroyItemsVisitor visitor(bot);
         ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_EQUIP);

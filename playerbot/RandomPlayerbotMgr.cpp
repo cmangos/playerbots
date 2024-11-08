@@ -1840,6 +1840,9 @@ bool RandomPlayerbotMgr::AddRandomBot(uint32 bot)
 
 void RandomPlayerbotMgr::MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder)
 {
+    if (!sPlayerbotAIConfig.enabled)
+        return;
+
     players[guid] = this->GetPlayerBot(guid);
     PlayerbotHolder::MovePlayerBot(guid, newHolder);
 }
@@ -3260,7 +3263,8 @@ void RandomPlayerbotMgr::OnBotLoginInternal(Player * const bot)
 
 void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
 {
-    uint32 botsNearby = 0;
+    if (!sPlayerbotAIConfig.enabled)
+        return;
 
     ForEachPlayerbot([&](Player* bot)
     {

@@ -354,6 +354,9 @@ void PlayerbotHolder::JoinChatChannels(Player* bot)
 
 void PlayerbotHolder::OnBotLogin(Player * const bot)
 {
+    if (!sPlayerbotAIConfig.enabled)
+        return;
+
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     if (!ai)
     {
@@ -1302,6 +1305,14 @@ void PlayerbotMgr::OnBotLoginInternal(Player * const bot)
 
 void PlayerbotMgr::OnPlayerLogin(Player* player)
 {
+    if (player->GetSession() != player->GetPlayerMenu()->GetGossipMenu().GetMenuSession())
+    {
+        player->GetPlayerMenu()->GetGossipMenu() = GossipMenu(player->GetSession());
+    }
+
+    if (!sPlayerbotAIConfig.enabled)
+        return;
+
     // set locale priority for bot texts
     sPlayerbotTextMgr.AddLocalePriority(player->GetSession()->GetSessionDbLocaleIndex());
     sLog.outBasic("Player %s logged in, localeDbc %i, localeDb %i", player->GetName(), (uint32)(player->GetSession()->GetSessionDbcLocale()), player->GetSession()->GetSessionDbLocaleIndex());
@@ -1310,11 +1321,6 @@ void PlayerbotMgr::OnPlayerLogin(Player* player)
     {
         sLog.outString("Enabling selfbot on login for %s", player->GetName());
         HandlePlayerbotCommand("self", player);
-    }
-
-    if (player->GetSession() != player->GetPlayerMenu()->GetGossipMenu().GetMenuSession())
-    {
-        player->GetPlayerMenu()->GetGossipMenu() = GossipMenu(player->GetSession());
     }
 
     if (sPlayerbotAIConfig.botAutologin == BotAutoLogin::DISABLED)

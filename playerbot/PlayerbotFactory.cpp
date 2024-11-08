@@ -163,7 +163,7 @@ void PlayerbotFactory::Prepare()
     }
 }
 
-void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
+void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster, bool partialUpgrade)
 {
     sLog.outDetail("Preparing to %s randomize...", (incremental ? "incremental" : "full"));
     Prepare();
@@ -266,7 +266,7 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
         }
     }
 
-    InitEquipment(incremental, syncWithMaster);
+    InitEquipment(incremental, syncWithMaster, false, partialUpgrade);
     InitGems();
     pmo.reset();
 
@@ -1793,6 +1793,9 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                 quality--;
             }
         }
+
+        if (botLevel >= 60 && quality < ITEM_QUALITY_UNCOMMON)
+            quality = ITEM_QUALITY_UNCOMMON;
 
         bool found = false;
         uint32 attempts = 0;

@@ -50,7 +50,7 @@ public:
     static ObjectGuid GetRandomBot();
     static void Init();
     void Refresh();
-    void Randomize(bool incremental, bool syncWithMaster);
+    void Randomize(bool incremental, bool syncWithMaster, bool partialUpgrade = false);
     static std::list<uint32> classQuestIds;
     static std::list<uint32> specialQuestIds;
     void InitSkills();

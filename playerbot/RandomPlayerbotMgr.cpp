@@ -2713,7 +2713,7 @@ void RandomPlayerbotMgr::UpdateGearSpells(Player* bot)
     uint32 lastLevel = GetValue(bot, "level");
     uint32 level = bot->GetLevel();
     PlayerbotFactory factory(bot, level);
-    factory.Randomize(true, false);
+    factory.Randomize(true, false, true);
 
     if (lastLevel != level)
         SetValue(bot, "level", level);

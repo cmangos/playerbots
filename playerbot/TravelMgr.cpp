@@ -8,6 +8,7 @@
 #include "TravelNode.h"
 #include "PlayerbotAI.h"
 #include "BotTests.h"
+#include "Globals/ObjectAccessor.h"
 
 using namespace ai;
 using namespace MaNGOS;

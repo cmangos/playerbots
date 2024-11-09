@@ -2418,29 +2418,13 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         for (uint8 level = 1; level <= maxLevel; level++)
         {
             auto results = WorldDatabase.PQuery("select map, position_x, position_y, position_z "
-                "from (select map, avg(position_x) position_x, avg(position_y) position_y, avg(position_z) position_z, avg(t.maxlevel), avg(t.minlevel), "
-                "%u - (avg(t.maxlevel) + avg(t.minlevel)) / 2 delta "
-                "from creature c inner join creature_template t on c.id = t.entry where t.NpcFlags = 0 and NOT (extraFlags & 1024 OR extraflags & 64 OR unitFlags & 256 OR unitFlags & 512) and t.lootid != 0 group by t.entry, c.map having count(*) > 1) q "
-                "where delta >= 0 and delta <= %u and map in (%s) and not exists ( "
-                "select map, position_x, position_y, position_z from "
-                "("
-                "select map, avg(position_x) position_x, avg(position_y) position_y, avg(position_z) position_z, avg(t.maxlevel), avg(t.minlevel), "
-                "%u - (avg(t.maxlevel) + avg(t.minlevel)) / 2 delta "
-                "from creature c "
-                "inner join creature_template t on c.id = t.entry where t.NpcFlags = 0 and NOT (extraFlags & 1024 OR extraflags & 64 OR unitFlags & 256 OR unitFlags & 512) and t.lootid != 0 group by t.entry, c.map "
-                ") q1 "
-                "where abs(delta) > %u and q1.map = q.map "
-                "and sqrt("
-                "(q1.position_x - q.position_x)*(q1.position_x - q.position_x) +"
-                "(q1.position_y - q.position_y)*(q1.position_y - q.position_y) +"
-                "(q1.position_z - q.position_z)*(q1.position_z - q.position_z)"
-                ") < %u)",
+                "from (select map, position_x, position_y, position_z, t.maxlevel, t.minlevel, "
+                "%u - (t.maxlevel + t.minlevel) / 2 delta "
+                "from creature c inner join creature_template t on c.id = t.entry where t.CreatureType != 8 AND t.NpcFlags = 0 and t.Rank = 0 AND NOT (t.extraFlags & 1024 OR t.extraFlags & 65536 OR t.extraflags & 64 OR t.unitFlags & 256 OR t.unitFlags & 512) AND t.lootid != 0) q "
+                "where delta >= 0 and delta <= %u and map in (%s)",
                 level,
                 sPlayerbotAIConfig.randomBotTeleLevel,
-                sPlayerbotAIConfig.randomBotMapsAsString.c_str(),
-                level,
-                sPlayerbotAIConfig.randomBotTeleLevel,
-                (uint32)sPlayerbotAIConfig.sightDistance
+                sPlayerbotAIConfig.randomBotMapsAsString.c_str()
             );
             if (results)
             {

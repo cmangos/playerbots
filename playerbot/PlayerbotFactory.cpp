@@ -197,12 +197,12 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster, bool par
             bot->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
         }
 
-        if (!partialUpgrade)
-        {
-            InitQuests(specialQuestIds);
-            bot->learnQuestRewardedSpells();
+        InitQuests(specialQuestIds);
+        bot->learnQuestRewardedSpells();
 
-            // clear inventory and set level after getting xp and quest rewards
+        // clear inventory and set level after getting xp and quest rewards
+        if (!incremental && !partialUpgrade)
+        {
             ClearInventory();
         }
         
@@ -256,7 +256,6 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster, bool par
     {
         sLog.outDetail("Initializing reputations...");
         InitReputations();
-        
     }
 
     pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Equip");

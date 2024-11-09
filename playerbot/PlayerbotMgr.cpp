@@ -376,14 +376,15 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
         master = bot;
     }
 
-    if (master)
+    Group* group = bot->GetGroup();
+
+    if (master && group)
     {
         ObjectGuid masterGuid = master->GetObjectGuid();
-        if (master->GetGroup() && !master->GetGroup()->IsLeader(masterGuid))
+        if (master->GetGroup() && master->GetGroup() == group && !master->GetGroup()->IsLeader(masterGuid))
             master->GetGroup()->ChangeLeader(masterGuid);
     }
 
-    Group* group = bot->GetGroup();
     if (group)
     {
         bool groupValid = false;

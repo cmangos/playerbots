@@ -46,7 +46,7 @@ bool CheckValuesAction::Execute(Event& event)
             uint32 factionId = faction.second.ID;
             uint32 replistId = faction.first;
 
-#ifdef MANGOSBOT_ZERO
+#ifndef MANGOSBOT_ONE
             const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry(factionId);
 #else
             const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry<FactionEntry>(factionId);

@@ -33,7 +33,11 @@ entryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 	for (auto& questItr : questMap)
 	{
 		uint32 questId = questItr.first;
+#ifndef MANGOSBOT_TWO
 		Quest* quest = questItr.second;
+#else
+		Quest* quest = questItr.second.get();
+#endif
 
 		for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
 		{

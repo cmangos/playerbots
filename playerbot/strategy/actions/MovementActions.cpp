@@ -990,7 +990,11 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         Movement::PointsArray path;
         if (GeneratePathAvoidingHazards(movePosition, generatePath, path))
         {
+#ifndef MANGOSBOT_TWO  
             mm.MovePath(path, masterWalking ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_RUN, false, false);
+#else
+            mm.MovePath(path, masterWalking ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_RUN, false);
+#endif
             WaitForReach(path);
         }
         else
@@ -1556,7 +1560,11 @@ bool MovementAction::ChaseTo(WorldObject* obj, float distance, float angle)
         if (GeneratePathAvoidingHazards(endPosition, true, path))
         {
             mm.Clear(false, true);
+#ifndef MANGOSBOT_TWO  
             mm.MovePath(path, FORCED_MOVEMENT_RUN, false, false);
+#else
+            mm.MovePath(path, FORCED_MOVEMENT_RUN, false);
+#endif
             WaitForReach(path);
             return true;
         }
@@ -2285,7 +2293,11 @@ bool MoveOutOfCollisionAction::Execute(Event& event)
         gx = botPos.getX();
         gy = botPos.getY();
         gz = botPos.getZ();
+#ifndef MANGOSBOT_TWO  
         if (bot->GetMap()->GetReachableRandomPointOnGround(gx, gy, gz, ai->GetRange("follow")))
+#else
+        if (bot->GetMap()->GetReachableRandomPointOnGround(bot->GetPhaseMask(), gx, gy, gz, ai->GetRange("follow")))
+#endif
         {
             return MoveTo(bot->GetMapId(), gx, gy, gz);
         }
@@ -3294,7 +3306,11 @@ WorldPosition JumpAction::GetPossibleJumpStartForInRange(const WorldPosition& sr
         gx = src.getX();
         gy = src.getY();
         gz = src.getZ();
+#ifndef MANGOSBOT_TWO  
         if (jumper->GetMap()->GetReachableRandomPointOnGround(gx, gy, gz, distanceTo))
+#else
+        if (jumper->GetMap()->GetReachableRandomPointOnGround(bot->GetPhaseMask(), gx, gy, gz, distanceTo))
+#endif
         {
             WorldPosition p(jumper->GetMapId(), gx, gy, gz);
             ++attempts;

@@ -2436,7 +2436,11 @@ uint32 RandomItemMgr::GetQuestIdForItem(uint32 itemId)
     ObjectMgr::QuestMap const& questTemplates = sObjectMgr.GetQuestTemplates();
     for (ObjectMgr::QuestMap::const_iterator i = questTemplates.begin(); i != questTemplates.end(); ++i)
     {
+#ifndef MANGOSBOT_TWO   
         Quest const* quest = i->second;
+#else
+        Quest const* quest = i->second.get();
+#endif
 
         uint32 rewItemCount = quest->GetRewItemsCount();
         for (uint32 i = 0; i < rewItemCount; ++i)
@@ -2477,7 +2481,11 @@ std::vector<uint32> RandomItemMgr::GetQuestIdsForItem(uint32 itemId)
     ObjectMgr::QuestMap const& questTemplates = sObjectMgr.GetQuestTemplates();
     for (ObjectMgr::QuestMap::const_iterator i = questTemplates.begin(); i != questTemplates.end(); ++i)
     {
+#ifndef MANGOSBOT_TWO  
         Quest const* quest = i->second;
+#else
+        Quest const* quest = i->second.get();
+#endif
 
         uint32 rewItemCount = quest->GetRewItemsCount();
         for (uint32 i = 0; i < rewItemCount; ++i)

@@ -286,9 +286,9 @@ BotRoles AiFactory::GetPlayerRoles(const Player* player)
     return role;
 }
 
-void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* combatEngine)
+void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* combatEngine, int specTab)
 {
-    int tab = GetPlayerSpecTab(player);
+    int tab = specTab != -1 ? specTab : GetPlayerSpecTab(player);
 
     combatEngine->addStrategies("mount", NULL);
     combatEngine->addStrategy("avoid mobs");
@@ -636,9 +636,9 @@ Engine* AiFactory::createCombatEngine(Player* player, PlayerbotAI* const facade,
     return engine;
 }
 
-void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* nonCombatEngine)
+void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* nonCombatEngine, int specTab)
 {
-    const int tab = GetPlayerSpecTab(player);
+    const int tab = specTab != -1 ? specTab : GetPlayerSpecTab(player);
     switch (player->getClass())
     {
         case CLASS_PRIEST:
@@ -1038,7 +1038,7 @@ Engine* AiFactory::createNonCombatEngine(Player* player, PlayerbotAI* const faca
 	return nonCombatEngine;
 }
 
-void AiFactory::AddDefaultDeadStrategies(Player* player, PlayerbotAI* const facade, Engine* deadEngine)
+void AiFactory::AddDefaultDeadStrategies(Player* player, PlayerbotAI* const facade, Engine* deadEngine, int specTab)
 {
     deadEngine->addStrategies("dead", "stay", "default", "follow", "group", NULL);
     if (sRandomPlayerbotMgr.IsFreeBot(player) && !player->GetGroup())
@@ -1046,7 +1046,7 @@ void AiFactory::AddDefaultDeadStrategies(Player* player, PlayerbotAI* const faca
         deadEngine->removeStrategy("follow");
     }
 
-    const int tab = GetPlayerSpecTab(player);
+    const int tab = specTab != -1 ? specTab : GetPlayerSpecTab(player);
     switch (player->getClass())
     {
         case CLASS_SHAMAN:
@@ -1229,11 +1229,11 @@ Engine* AiFactory::createDeadEngine(Player* player, PlayerbotAI* const facade, A
     return deadEngine;
 }
 
-void AiFactory::AddDefaultReactionStrategies(Player* player, PlayerbotAI* const facade, ReactionEngine* reactionEngine)
+void AiFactory::AddDefaultReactionStrategies(Player* player, PlayerbotAI* const facade, ReactionEngine* reactionEngine, int specTab)
 {
     reactionEngine->addStrategies("react", "chat", "avoid aoe", "potions", NULL);
 
-    const int tab = GetPlayerSpecTab(player);
+    const int tab = specTab != -1 ? specTab : GetPlayerSpecTab(player);
     switch (player->getClass())
     {
         case CLASS_SHAMAN:

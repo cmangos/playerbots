@@ -1132,10 +1132,10 @@ bool PlayerbotFactory::CanEquipArmor(ItemPrototype const* proto)
 }
 */
 
-bool PlayerbotFactory::CheckItemStats(uint16 sp, uint16 ap, uint16 tank, uint16 heal, uint16 minValue)
+bool PlayerbotFactory::CheckItemStats(uint16 sp, uint16 ap, uint16 tank, uint16 heal, uint16 minValue, uint8 specTab)
 {
     uint8 botClass = bot->getClass();
-    uint8 botSpecTab = AiFactory::GetPlayerSpecTab(bot);
+    uint8 botSpecTab = specTab != -1 ? specTab : AiFactory::GetPlayerSpecTab(bot);
     bool isTankItem = tank >= minValue && tank >= ap && tank >= sp && tank >= heal;
     bool isSpItem = sp >= minValue && sp >= ap && sp >= tank && sp >= heal;
     bool isHealerItem = heal >= minValue && heal >= sp && heal >= tank && heal >= ap;
@@ -1577,6 +1577,8 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
     uint32 specId = sRandomItemMgr.GetPlayerSpecId(bot);
     if (specId == 0)
         return;
+
+    int specTab = AiFactory::GetPlayerSpecTab(bot);
 
     // choose type of weapon
     uint32 weaponType = 0;
@@ -2115,7 +2117,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                                     bot->SetVisibleItemSlot(pItem->GetSlot(), pItem);
                                 }
                                 pItem->SetOwnerGuid(bot->GetObjectGuid());
-                                EnchantItem(pItem);
+                                EnchantItem(pItem, specTab);
                                 found = true;
                             }
                         }
@@ -2326,7 +2328,7 @@ void PlayerbotFactory::InitBags()
     }
 }
 
-void PlayerbotFactory::EnchantItem(Item* item)
+void PlayerbotFactory::EnchantItem(Item* item, int specTab)
 {
     if (!item)
         return;
@@ -2339,7 +2341,7 @@ void PlayerbotFactory::EnchantItem(Item* item)
         return;
     }
 
-    int tab = AiFactory::GetPlayerSpecTab(bot);
+    int tab = specTab != -1 ? specTab : AiFactory::GetPlayerSpecTab(bot);
     uint32 tempId = uint32((uint32)bot->getClass() * (uint32)10);
     ApplyEnchantTemplate(tempId += (uint32)tab, item);
 }
@@ -3822,12 +3824,14 @@ void PlayerbotFactory::EnchantEquipment()
             LoadEnchantContainer();
         }
 
+        int specTab = AiFactory::GetPlayerSpecTab(bot);
+
         for (uint8 slot = 0; slot < SLOT_EMPTY; slot++)
         {
             Item* item = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
             if (item)
             {
-                EnchantItem(item);
+                EnchantItem(item, specTab);
             }
         }
     }
@@ -4120,7 +4124,7 @@ void PlayerbotFactory::InitGems()
                                                 }
                                             }
                                         }
-                                        if (!CheckItemStats(sp, ap, tank, heal, 250))
+                                        if (!CheckItemStats(sp, ap, tank, heal, 250, botSpecTab))
                                             continue;
                                         gem_id = gemProto->ItemId;
                                         break;

@@ -21,10 +21,10 @@ public:
 	static Engine* createNonCombatEngine(Player* player, PlayerbotAI* const facade, AiObjectContext* AiObjectContext);
     static Engine* createDeadEngine(Player* player, PlayerbotAI* const facade, AiObjectContext* AiObjectContext);
     static ReactionEngine* createReactionEngine(Player* player, PlayerbotAI* const facade, AiObjectContext* AiObjectContext);
-    static void AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* nonCombatEngine);
-    static void AddDefaultDeadStrategies(Player* player, PlayerbotAI* const facade, Engine* deadEngine);
-    static void AddDefaultCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* engine);
-    static void AddDefaultReactionStrategies(Player* player, PlayerbotAI* const facade, ReactionEngine* reactionEngine);
+    static void AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* nonCombatEngine, int specTab = -1);
+    static void AddDefaultDeadStrategies(Player* player, PlayerbotAI* const facade, Engine* deadEngine, int specTab = -1);
+    static void AddDefaultCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* engine, int specTab = -1);
+    static void AddDefaultReactionStrategies(Player* player, PlayerbotAI* const facade, ReactionEngine* reactionEngine, int specTab = -1);
 
 public:
     static int GetPlayerSpecTab(const Player* player);

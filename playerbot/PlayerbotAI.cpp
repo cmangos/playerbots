@@ -2363,10 +2363,11 @@ void PlayerbotAI::ResetStrategies(bool autoLoad)
         engines[i]->removeAllStrategies();
     }
 
-    AiFactory::AddDefaultCombatStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_COMBAT]);
-    AiFactory::AddDefaultNonCombatStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_NON_COMBAT]);
-    AiFactory::AddDefaultDeadStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_DEAD]);
-    AiFactory::AddDefaultReactionStrategies(bot, this, reactionEngine);
+    int tab = AiFactory::GetPlayerSpecTab(bot);
+    AiFactory::AddDefaultCombatStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_COMBAT], tab);
+    AiFactory::AddDefaultNonCombatStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_NON_COMBAT], tab);
+    AiFactory::AddDefaultDeadStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_DEAD], tab);
+    AiFactory::AddDefaultReactionStrategies(bot, this, reactionEngine, tab);
     if (autoLoad && HasPlayerRelation()) sPlayerbotDbStore.Load(this);
 
     for (uint8 i = 0; i < (uint8)BotState::BOT_STATE_ALL; i++)

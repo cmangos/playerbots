@@ -178,7 +178,8 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster, bool par
     sLog.outDetail("Resetting player...");
     auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Reset");
     //ClearSkills();
-    ClearSpells();
+    if (!partialUpgrade)
+        ClearSpells();
 
     if (!incremental && !partialUpgrade && isRandomBot)
     {
@@ -1547,16 +1548,13 @@ bool PlayerbotFactory::CanEquipItem(ItemPrototype const* proto, uint32 desiredQu
 void PlayerbotFactory::Shuffle(std::vector<uint32>& items)
 {
     uint32 count = items.size();
-    for (uint32 i = 0; i < count * 5; i++)
+    for (uint32 i = count - 1; i > 0; --i)
     {
-        int i1 = urand(0, count - 1);
-        int i2 = urand(0, count - 1);
-
-        uint32 item = items[i1];
-        items[i1] = items[i2];
-        items[i2] = item;
+        uint32 j = urand(0, i);
+        std::swap(items[i], items[j]);
     }
 }
+
 
 void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool progressive, bool partialUpgrade)
 {

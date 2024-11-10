@@ -1081,6 +1081,7 @@ private:
 
 };
 
+/*
 bool PlayerbotFactory::CanEquipArmor(ItemPrototype const* proto)
 {
     if (bot->HasSkill(SKILL_SHIELD) && proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
@@ -1129,6 +1130,7 @@ bool PlayerbotFactory::CanEquipArmor(ItemPrototype const* proto)
 
     return CheckItemStats(sp, ap, tank, heal);
 }
+*/
 
 bool PlayerbotFactory::CheckItemStats(uint16 sp, uint16 ap, uint16 tank, uint16 heal, uint16 minValue)
 {
@@ -1367,7 +1369,7 @@ void PlayerbotFactory::AddItemSpellStats(uint32 smod, uint16& sp, uint16& ap, ui
     }
 }
 
-
+/*
 bool PlayerbotFactory::CanEquipWeapon(ItemPrototype const* proto)
 {
    int tab = AiFactory::GetPlayerSpecTab(bot);
@@ -1515,6 +1517,7 @@ bool PlayerbotFactory::CanEquipWeapon(ItemPrototype const* proto)
 
    return true;
 }
+*/
 
 bool PlayerbotFactory::CanEquipItem(ItemPrototype const* proto, uint32 desiredQuality)
 {
@@ -2181,6 +2184,7 @@ bool PlayerbotFactory::IsDesiredReplacement(uint32 itemId)
     return (int)bot->GetLevel() - (int)requiredLevel > delta;
 }
 
+/*
 void PlayerbotFactory::InitSecondEquipmentSet()
 {
     if (bot->getClass() == CLASS_MAGE || bot->getClass() == CLASS_WARLOCK || bot->getClass() == CLASS_PRIEST)
@@ -2302,6 +2306,7 @@ void PlayerbotFactory::InitSecondEquipmentSet()
         }
     }
 }
+*/
 
 void PlayerbotFactory::InitBags()
 {
@@ -2339,6 +2344,7 @@ void PlayerbotFactory::EnchantItem(Item* item)
     ApplyEnchantTemplate(tempId += (uint32)tab, item);
 }
 
+/*
 void PlayerbotFactory::AddGems(Item* item)
 {
     if (!item)
@@ -2395,14 +2401,14 @@ void PlayerbotFactory::AddGems(Item* item)
                                     if ((bot->HasItemOrGemWithIdEquipped(gemProto->ItemId, 1)) || (bot->HasItemCount(gemProto->ItemId, 1)))
                                         continue;*/
 
-                                if (gemProto->RequiredSkillRank > bot->GetSkillValue(SKILL_JEWELCRAFTING))
+                                /*if (gemProto->RequiredSkillRank > bot->GetSkillValue(SKILL_JEWELCRAFTING))
                                     continue;
 
 
                                 /*if ((bot->GetLevel()) < (gemProto->ItemLevel - 10))
                                     continue;*/
 
-                                uint16 sp = 0, ap = 0, tank = 0, heal = 0;
+                                /*uint16 sp = 0, ap = 0, tank = 0, heal = 0;
                                 if (GemColor & SocketColor)
                                 {
                                     for (int i = 0; i < 3; ++i)
@@ -2455,6 +2461,7 @@ void PlayerbotFactory::AddGems(Item* item)
     return;
 #endif
 }
+*/
 
 void PlayerbotFactory::InitAllSkills()
 {
@@ -3552,6 +3559,7 @@ Item* PlayerbotFactory::StoreItem(uint32 itemId, uint32 count, bool ignoreCount)
     return bot->StoreNewItem(sDest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
 }
 
+/*
 void PlayerbotFactory::InitInventoryTrade()
 {
     uint32 itemId = sRandomItemMgr.GetRandomTrade(level);
@@ -3651,6 +3659,7 @@ void PlayerbotFactory::InitInventoryEquip()
             break;
    }
 }
+*/
 
 void PlayerbotFactory::InitGuild()
 {
@@ -3825,6 +3834,7 @@ void PlayerbotFactory::EnchantEquipment()
     InitGems();
 }
 
+/*
 void PlayerbotFactory::ApplyEnchantTemplate()
 {
    int tab = AiFactory::GetPlayerSpecTab(bot);
@@ -3893,6 +3903,7 @@ void PlayerbotFactory::ApplyEnchantTemplate()
        break;
    }
 }
+*/
 
 void PlayerbotFactory::ApplyEnchantTemplate(uint8 spec, Item* item)
 {

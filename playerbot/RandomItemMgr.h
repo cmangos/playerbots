@@ -178,9 +178,9 @@ class RandomItemMgr
         uint32 CalculateSingleStatWeight(uint8 playerclass, uint8 spec, std::string stat, uint32 value);
         bool CanEquipArmor(uint8 clazz, uint8 spec, uint32 level, ItemPrototype const* proto);
         bool ShouldEquipArmorForSpec(uint8 playerclass, uint8 spec, ItemPrototype const* proto);
-        bool CanEquipWeapon(uint8 clazz, ItemPrototype const* proto);
+        //bool CanEquipWeapon(uint8 clazz, ItemPrototype const* proto);
         bool ShouldEquipWeaponForSpec(uint8 playerclass, uint8 spec, ItemPrototype const* proto);
-        bool CheckItemSpec(uint8 spec, ItemSpecType itSpec);
+        //bool CheckItemSpec(uint8 spec, ItemSpecType itSpec);
         float GetItemRarity(uint32 itemId);
         uint32 GetQuestIdForItem(uint32 itemId);
         std::vector<uint32> GetQuestIdsForItem(uint32 itemId);
@@ -200,7 +200,7 @@ class RandomItemMgr
         bool CanEquipItem(BotEquipKey key, ItemPrototype const* proto);
         bool CanEquipItemNew(ItemPrototype const* proto);
         void AddItemStats(uint32 mod, uint8 &sp, uint8 &ap, uint8 &tank);
-        bool CheckItemStats(uint8 clazz, uint8 sp, uint8 ap, uint8 tank);
+        //bool CheckItemStats(uint8 clazz, uint8 sp, uint8 ap, uint8 tank);
 
     private:
         std::map<uint32, RandomItemCache> randomItemCache;

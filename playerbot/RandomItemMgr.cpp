@@ -364,6 +364,7 @@ void RandomItemMgr::AddItemStats(uint32 mod, uint8 &sp, uint8 &ap, uint8 &tank)
     }
 }
 
+/*
 bool RandomItemMgr::CheckItemStats(uint8 clazz, uint8 sp, uint8 ap, uint8 tank)
 {
     switch (clazz)
@@ -388,6 +389,7 @@ bool RandomItemMgr::CheckItemStats(uint8 clazz, uint8 sp, uint8 ap, uint8 tank)
 
     return sp || ap || tank;
 }
+*/
 
 bool RandomItemMgr::ShouldEquipArmorForSpec(uint8 playerclass, uint8 spec, ItemPrototype const* proto)
 {
@@ -740,6 +742,7 @@ bool RandomItemMgr::ShouldEquipWeaponForSpec(uint8 playerclass, uint8 spec, Item
     return false;
 }
 
+/*
 bool RandomItemMgr::CanEquipWeapon(uint8 clazz, ItemPrototype const* proto)
 {
     switch (clazz)
@@ -823,6 +826,7 @@ bool RandomItemMgr::CanEquipWeapon(uint8 clazz, ItemPrototype const* proto)
 
     return true;
 }
+*/
 
 void RandomItemMgr::BuildItemInfoCache()
 {

@@ -69,10 +69,10 @@ public:
 
 private:
     void Prepare();
-    void InitSecondEquipmentSet();
+    //void InitSecondEquipmentSet();
     void Shuffle(std::vector<uint32>& items);
     void InitEquipment(bool incremental, bool syncWithMaster, bool progressive = sPlayerbotAIConfig.randomGearProgression, bool partialUpgrade = false);
-    void InitEquipmentNew(bool incremental);
+    //void InitEquipmentNew(bool incremental);
     bool CanEquipItem(ItemPrototype const* proto, uint32 desiredQuality);
     void InitAllSkills();
     void InitTradeSkills();
@@ -82,7 +82,7 @@ private:
     void InitSpells();
     void ClearSpells();
     void ClearSkills();
-    bool InitLevelOne();
+    //bool InitLevelOne();
     void InitAvailableSpells();
     void InitSpecialSpells();
     void InitTalentsTree(bool incremental);
@@ -96,10 +96,10 @@ private:
     void InitPotions();
     void InitFood();
     void InitReagents();
-    bool CanEquipArmor(ItemPrototype const* proto);
-    bool CanEquipWeapon(ItemPrototype const* proto);
+    //bool CanEquipArmor(ItemPrototype const* proto);
+    //bool CanEquipWeapon(ItemPrototype const* proto);
     void EnchantItem(Item* item);
-    void AddGems(Item* item);
+    //void AddGems(Item* item);
     void AddItemStats(uint32 mod, uint32 amount, uint16 &sp, uint16 &ap, uint16 &tank, uint16 &heal);
     void AddItemSpellStats(uint32 smod, uint16& sp, uint16& ap, uint16& tank);
     bool CheckItemStats(uint16 sp, uint16 ap, uint16 tank, uint16 heal, uint16 minValue = 0);
@@ -107,8 +107,8 @@ private:
     bool IsDesiredReplacement(uint32 itemId);
     void InitBags();
     void InitInventory();
-    void InitInventoryTrade();
-    void InitInventoryEquip();
+    //void InitInventoryTrade();
+    //void InitInventoryEquip();
     void InitInventorySkill();
     Item* StoreItem(uint32 itemId, uint32 count, bool ignoreCount = false);
     void InitGuild();
@@ -117,7 +117,7 @@ private:
     void AddConsumables();
     static void AddPrevQuests(uint32 questId, std::list<uint32>& questIds);
     void LoadEnchantContainer();
-    void ApplyEnchantTemplate();
+    //void ApplyEnchantTemplate();
     void ApplyEnchantTemplate(uint8 spec, Item* item = nullptr);
     void InitGems();
     EnchantContainer::const_iterator GetEnchantContainerBegin() { return m_EnchantContainer.begin(); }

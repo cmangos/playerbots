@@ -358,16 +358,17 @@ namespace ai
             , W first_weight, W last_weight
             , URBG&& g)
         {
-            while (first != last && first_weight != last_weight)
+            std::discrete_distribution<int> dd(first_weight, last_weight);
+
+            while (first != last)
             {
-                std::discrete_distribution<int> dd(first_weight, last_weight);
                 auto i = dd(g);
 
-                if (i)
-                {
-                    std::swap(*first, *std::next(first, i));
-                    std::swap(*first_weight, *std::next(first_weight, i));
+                if (i != 0 && i < std::distance(first, last)) {
+                    std::swap(*first, *(first + i));
+                    std::swap(*first_weight, *(first_weight + i));
                 }
+
                 ++first;
                 ++first_weight;
             }

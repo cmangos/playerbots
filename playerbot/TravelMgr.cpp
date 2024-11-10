@@ -2691,29 +2691,29 @@ std::vector<WorldPosition> TravelMgr::getNextPoint(WorldPosition center, std::ve
         return retVec;
     }
 
-    retVec = points;
+    retVec = std::move(points);
 
-    
     std::vector<uint32> weights;
-
+    bool hasZeroWeight = false;
+    
     //List of weights based on distance (Gausian curve that starts at 100 and lower to 1 at 1000 distance)
     //std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [center](WorldPosition point) { return 1 + 1000 * exp(-1 * pow(point.distance(center) / 400.0, 2)); });
 
     //List of weights based on distance (Twice the distance = half the weight). Caps out at 200.0000 range.
-    std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [center](WorldPosition point) { return 200000/(1+point.distance(center)); });
+    std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [center, &hasZeroWeight](WorldPosition point) {
+        uint32 weight = 200000 / (1 + point.distance(center));
+        if (weight == 0) hasZeroWeight = true;
+        return weight;
+        });
 
     //If any weight is 0 add 1 to all weights.
-    for (auto& w : weights)
-    {
-        if (w > 0)
-            continue;
-
-        std::for_each(weights.begin(), weights.end(), [](uint32& d) { d += 1; });
-        break;
-
+    if (hasZeroWeight) {
+        for (auto& w : weights)
+            w += 1;
     }
 
-    std::mt19937 gen(time(0));
+    std::random_device rd;
+    std::mt19937 gen(rd() + time(0));
 
     weighted_shuffle(retVec.begin(), retVec.end(), weights.begin(), weights.end(), gen);
 

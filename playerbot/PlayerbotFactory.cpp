@@ -618,6 +618,9 @@ void PlayerbotFactory::InitPet()
             pet->UpdateAllStats();
             bot->SetPet(pet);
             bot->SetPetGuid(pet->GetObjectGuid());
+#ifdef MANGOSBOT_TWO
+            pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, 13481);
+#endif
 
             sLog.outDebug(  "Bot %s: assign pet %d (%d level)", bot->GetName(), co->Entry, bot->GetLevel());
             pet->SavePetToDB(PET_SAVE_AS_CURRENT, bot);

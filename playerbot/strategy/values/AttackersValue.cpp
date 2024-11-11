@@ -167,26 +167,24 @@ std::list<ObjectGuid> AttackersValue::Calculate()
     return result;
 }
 
-void AttackersValue::AddTargetsOf(Group* group, std::set<Unit*>& targets, std::set<ObjectGuid>& invalidTargets, bool getOne)
-{
-    Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
-    for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-    {
-        // Only add group member targets that are alive and near the player
-        Player* member = sObjectMgr.GetPlayer(itr->guid);
-        if (member && (member != bot) &&
-           sServerFacade.IsAlive(member) &&
-           member->IsInWorld() &&
-           !member->IsBeingTeleported() &&
-           (member->GetMapId() == bot->GetMapId()) && 
-           (sServerFacade.GetDistance2d(bot, member) <= GetRange()))
-        {
-            AddTargetsOf(member, targets, invalidTargets, getOne);
+void AttackersValue::AddTargetsOf(Group* group, std::set<Unit*>& targets, std::set<ObjectGuid>& invalidTargets, bool getOne) {
+    if (!group) return;
 
-            // Finish early if we only need one target
-            if (getOne && !targets.empty())
-            {
-                break;
+    Group::MemberSlotList groupSlotsSnapshot = group->GetMemberSlots();
+
+    for (const auto& memberSlot : groupSlotsSnapshot) {
+        // Only add group member targets that are alive and near the player
+        if (Player* member = sObjectMgr.GetPlayer(memberSlot.guid)) {
+            if (member != bot && sServerFacade.IsAlive(member) && member->IsInWorld() &&
+                !member->IsBeingTeleported() && member->GetMapId() == bot->GetMapId() &&
+                sServerFacade.GetDistance2d(bot, member) <= GetRange()) {
+
+                AddTargetsOf(member, targets, invalidTargets, getOne);
+                
+                // Finish early if we only need one target
+                if (getOne && !targets.empty()) {
+                    return;
+                }
             }
         }
     }

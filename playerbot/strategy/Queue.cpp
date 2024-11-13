@@ -57,21 +57,23 @@ ActionNode* Queue::Pop(ActionBasket* action)
     return nullptr;
 }
 
-ActionBasket* Queue::Peek()
+ActionBasket* Queue::Peek() const
 {
-    float max = -400;
-    ActionBasket* selection = NULL;
-    for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
+    float max = std::numeric_limits<float>::lowest();
+    ActionBasket* selection = nullptr;
+
+    for (const auto& basket : actions)
     {
-        ActionBasket* basket = *iter;
         if (basket->getRelevance() > max)
         {
             max = basket->getRelevance();
             selection = basket;
         }
     }
+
     return selection;
 }
+
 
 int Queue::Size()
 {

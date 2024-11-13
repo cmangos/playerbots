@@ -127,8 +127,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
         LogValues();
 
     bool actionExecuted = false;
-    ActionBasket* basket = NULL;
-
+    ActionBasket* basket = nullptr;
     time_t currentTime = time(0);
     aiObjectContext->Update();
     ProcessTriggers(minimal);
@@ -136,7 +135,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
 
     int iterations = 0;
     int iterationsPerTick = queue.Size() * (minimal ? (uint32)(sPlayerbotAIConfig.iterationsPerTick / 2) : sPlayerbotAIConfig.iterationsPerTick);
-    do 
+    do
     {
         basket = queue.Peek();
         if (basket) 
@@ -153,10 +152,10 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
             std::string actionName = (action ? action->getName() : "unknown");
             if (!event.getSource().empty())
                 actionName += " <" + event.getSource() + ">";
-            
+
             auto pmo1 = sPerformanceMonitor.start(PERF_MON_ACTION, actionName, &aiObjectContext->performanceStack);
 
-            if(action)
+            if (action)
                 action->setRelevance(relevance);
 
             if (!action)
@@ -186,13 +185,11 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
 
                 if (isUseful && (!isStunned || action->isUsefulWhenStunned()))
                 {
-                    for (std::list<Multiplier*>::iterator i = multipliers.begin(); i != multipliers.end(); i++)
+                    for (auto multiplier : multipliers)
                     {
-                        Multiplier* multiplier = *i;
                         relevance *= multiplier->GetValue(action);
-
                         action->setRelevance(relevance);
-                        if (!relevance)
+                        if (relevance == 0)
                         {
                             LogAction("Multiplier %s made action %s useless", multiplier->getName().c_str(), action->getName().c_str());
                             break;
@@ -213,8 +210,8 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                         {
                             PushAgain(actionNode, relevance + 0.01, event);
                             continue;
-                        }
                     }
+                }
 
                     auto pmo3 = sPerformanceMonitor.start(PERF_MON_ACTION, "isPossible", &aiObjectContext->performanceStack);
                     bool isPossible = action->isPossible();
@@ -248,7 +245,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                     }
                     else
                     {
-                        if (sPlayerbotAIConfig.CanLogAction(ai,actionNode->getName(), false, ""))
+                        if (sPlayerbotAIConfig.CanLogAction(ai, actionNode->getName(), false, ""))
                         {
                             std::ostringstream out;
                             out << "try: ";
@@ -266,10 +263,10 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                         LogAction("A:%s - IMPOSSIBLE", action->getName().c_str());
                         MultiplyAndPush(actionNode->getAlternatives(), relevance + 0.03, false, event, "alt");
                     }
-                }
+            }
                 else
                 {
-                    if (sPlayerbotAIConfig.CanLogAction(ai,actionNode->getName(), false, ""))
+                    if (sPlayerbotAIConfig.CanLogAction(ai, actionNode->getName(), false, ""))
                     {
                         std::ostringstream out;
                         out << "try: ";
@@ -287,34 +284,14 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                     lastRelevance = relevance;
                     LogAction("A:%s - USELESS", action->getName().c_str());
                 }
-            }
-            delete actionNode;
         }
+            delete actionNode;
     }
+}
     while (basket && ++iterations <= iterationsPerTick);
 
-    /*
-    if (!basket)
-    {
-        lastRelevance = 0.0f;
-        PushDefaultActions();
-        if (queue.Peek() && depth < 2)
-            return DoNextAction(unit, depth + 1, minimal, isStunned);
-    }
-    */
-
-    // MEMORY FIX TEST
- /*   do {
-        basket = queue.Peek();
-        if (basket) {
-            // NOTE: queue.Pop() deletes basket
-            delete queue.Pop();
-        }
-    } while (basket);*/
-
-    if (time(0) - currentTime > 1) {
+    if (time(0) - currentTime > 1)
         LogAction("too long execution");
-    }
 
     if (!actionExecuted)
         LogAction("no actions executed");

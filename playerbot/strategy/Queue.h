@@ -12,7 +12,7 @@ public:
 public:
 	void Push(ActionBasket *action);
 	ActionNode* Pop(ActionBasket* action = nullptr);
-    ActionBasket* Peek();
+    ActionBasket* Peek() const;
 	int Size();
 	void RemoveExpired();
 private:

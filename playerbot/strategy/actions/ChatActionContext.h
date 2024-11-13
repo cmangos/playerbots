@@ -75,6 +75,7 @@
 #include "ValueActions.h"
 #include "QuestRewardActions.h"
 #include "ChooseTravelTargetAction.h"
+#include "SkillAction.h"
 
 namespace ai
 {
@@ -206,6 +207,7 @@ namespace ai
 
             creators["jump"] = &ChatActionContext::jump;
             creators["doquest"] = [](PlayerbotAI* ai) { return new FocusTravelTargetAction(ai); };
+            creators["skill"] = [](PlayerbotAI* ai) { return new SkillAction(ai); };
         }
 
     private:

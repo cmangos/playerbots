@@ -315,6 +315,22 @@ std::set<uint32> ChatHelper::ExtractAllItemIds(const std::string& text)
     return ids;
 }
 
+std::set<uint32> ChatHelper::ExtractAllSkillIds(const std::string& text)
+{
+    std::set<uint32> ids;
+
+    std::regex rgx("Hskill:[0-9]+");
+    auto begin = std::sregex_iterator(text.begin(), text.end(), rgx);
+    auto end = std::sregex_iterator();
+    for (std::sregex_iterator i = begin; i != end; ++i)
+    {
+        std::smatch match = *i;
+        ids.insert(std::stoi(match.str().erase(0, 7)));
+    }
+
+    return ids;
+}
+
 ItemIds ChatHelper::parseItems(const std::string& text, bool validate)
 {
     std::vector<uint32> itemIDsUnordered = parseItemsUnordered(text, validate);

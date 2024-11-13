@@ -26,6 +26,7 @@ namespace ai
 
         static std::set<uint32> ExtractAllQuestIds(const std::string& text);
         static std::set<uint32> ExtractAllItemIds(const std::string& text);
+        static std::set<uint32> ExtractAllSkillIds(const std::string& text);
 
         static std::string formatQuest(Quest const* quest);
 

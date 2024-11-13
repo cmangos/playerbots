@@ -849,6 +849,13 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
                         master->GetSession()->GetAccountId(),
                         master->GetGuildId());
                 }
+                else
+                {
+                    Player* player = sObjectMgr.GetPlayer(guid, false);
+
+                    if(player)
+                        OnBotLogin(player);
+                }
             }
         }
         else
@@ -856,13 +863,18 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
             sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", (uint32)BotAlwaysOnline::DISABLED_BY_COMMAND);
             messages.push_back("Disable offline player ai for " + alwaysName);
 
-            if (guid != master->GetObjectGuid())
-            {
-                Player* bot = sRandomPlayerbotMgr.GetPlayerBot(guid);
+            Player* bot = sObjectMgr.GetPlayer(guid, false);
 
-                if (bot && bot->GetPlayerbotAI() && !bot->GetPlayerbotAI()->GetMaster() && sPlayerbotAIConfig.IsFreeAltBot(bot))
+            if (bot && bot->GetPlayerbotAI())
+            {
+                if (guid != master->GetObjectGuid() && !bot->isRealPlayer())
                 {
-                    sRandomPlayerbotMgr.LogoutPlayerBot(guid);
+                    if (sPlayerbotAIConfig.IsFreeAltBot(bot))
+                        sRandomPlayerbotMgr.LogoutPlayerBot(guid);
+                }
+                else
+                {
+                    DisablePlayerBot(guid);
                 }
             }
 

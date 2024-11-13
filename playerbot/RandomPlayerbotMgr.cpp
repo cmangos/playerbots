@@ -759,7 +759,7 @@ void RandomPlayerbotMgr::LoginFreeBots()
     {
         for (auto bot : sPlayerbotAIConfig.freeAltBots)
         {
-            Player* player = GetPlayerBot(bot.second);
+            Player* player = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER,bot.second) , false);
 
             PlayerbotAI* ai = player ? player->GetPlayerbotAI() : NULL;
 

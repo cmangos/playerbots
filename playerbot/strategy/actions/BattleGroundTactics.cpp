@@ -5265,7 +5265,7 @@ bool BGTactics::IsLockedInsideKeep()
 bool ArenaTactics::Execute(Event& event)
 {
 #ifndef MANGOSBOT_ZERO
-    if (!bot->InBattleGround())
+    if (!bot->InBattleGround() || bot->IsDead())
     {
         ai->ChangeStrategy("-arena", BotState::BOT_STATE_COMBAT);
         ai->ChangeStrategy("-arena", BotState::BOT_STATE_NON_COMBAT);
@@ -5273,73 +5273,70 @@ bool ArenaTactics::Execute(Event& event)
         return false;
     }
 
-    if (bot->GetBattleGround()->GetStatus() != STATUS_IN_PROGRESS)
+    BattleGround* bg = bot->GetBattleGround();
+    if (!bg || bg->GetStatus() != STATUS_IN_PROGRESS || bg->GetStartDelayTime() > 0)
         return false;
 
-    if (bot->IsDead())
-    {
-        return false;
-    }
-
-    BattleGround *bg = bot->GetBattleGround();
-    if (!bg)
-        return false;
-
-    // startup phase
-    if (bg->GetStartDelayTime() > 0)
-        return false;
-
+    // Remove "collision" strategy in non-combat state if present
     if (ai->HasStrategy("collision", BotState::BOT_STATE_NON_COMBAT))
         ai->ChangeStrategy("-collision", BotState::BOT_STATE_NON_COMBAT);
 
-#ifdef MANGOS
-    if (sBattleGroundMgr.IsArenaType(bg->GetTypeID()))
+    // Reset strategies if in an arena and set no master
+#if defined(MANGOS) || defined(CMANGOS)
+    if (sBattleGroundMgr.IsArenaType(bg->GetTypeId()))
+    {
+        ai->ResetStrategies(false);
+        ai->SetMaster(nullptr);
+    }
 #endif
-#ifdef CMANGOS
-        if (sBattleGroundMgr.IsArenaType(bg->GetTypeId()))
-#endif
-        {
-            ai->ResetStrategies(false);
-            ai->SetMaster(NULL);
-        }
 
+    // Move to the center if the bot is not in combat
     if (!bot->IsInCombat())
         return moveToCenter(bg);
 #endif
     return true;
 }
 
-bool ArenaTactics::moveToCenter(BattleGround *bg)
+bool ArenaTactics::moveToCenter(BattleGround* bg)
 {
 #ifndef MANGOSBOT_ZERO
-    uint32 Preference = context->GetValue<uint32>("bg role")->Get();
-#ifdef MANGOS
-    switch (bg->GetTypeID())
+    uint32 preference = context->GetValue<uint32>("bg role")->Get();
+    float randomOffsetX = frand(-2, 2);
+    float randomOffsetY = frand(-2, 2);
+
+#if defined(MANGOS) || defined(CMANGOS)
+    switch (bg->GetTypeId())
+    {
+    case BATTLEGROUND_BE:
+        // Two locations in Blade's Edge Arena based on preference
+        if (preference > 10)
+            MoveTo(bg->GetMapId(), 6185.0f + randomOffsetX, 236.0f + randomOffsetY, 6.0f, false, true);
+        else
+            MoveTo(bg->GetMapId(), 6240.0f + randomOffsetX, 262.0f + randomOffsetY, 2.0f, false, true);
+        break;
+
+    case BATTLEGROUND_RL:
+        // Two locations in Ruins of Lordaeron Arena based on preference
+        if (preference < 5)
+            MoveTo(bg->GetMapId(), 1320.0f + randomOffsetX, 1672.0f + randomOffsetY, 38.0f, false, true);
+        else
+            MoveTo(bg->GetMapId(), 1273.0f + randomOffsetX, 1666.0f + randomOffsetY, 36.0f, false, true);
+        break;
+
+    case BATTLEGROUND_NA:
+        // Single central location in Nagrand Arena
+        MoveTo(bg->GetMapId(), 4055.0f + frand(-5, 5), 2921.0f + frand(-5, 5), 15.1f, false, true);
+        break;
+
+    default:
+        break;
+    }
 #endif
-#ifdef CMANGOS
-        switch (bg->GetTypeId())
-#endif
-        {
-        case BATTLEGROUND_BE:
-            if (Preference > 10)
-                MoveTo(bg->GetMapId(), 6185.0f + frand(-2, +2), 236.0f + frand(-2, +2), 6.0f, false, true);
-            else
-                MoveTo(bg->GetMapId(), 6240.0f + frand(-2, +2), 262.0f + frand(-2, +2), 2.0f, false, true);
-            break;
-        case BATTLEGROUND_RL:
-            if (Preference < 5)
-                MoveTo(bg->GetMapId(), 1320.0f + frand(-2, +2), 1672.0f + frand(-2, +2), 38.0f, false, true);
-            else
-                MoveTo(bg->GetMapId(), 1273.0f + frand(-2, +2), 1666.0f + frand(-2, +2), 36.0f, false, true);
-            break;
-        case BATTLEGROUND_NA:
-            MoveTo(bg->GetMapId(), 4055.0f + frand(-5, +5), 2921.0f + frand(-5, +5), 15.1f, false, true);
-            break;
-        default:
-            break;
-        }
+
+    // Randomly update preference (30% chance)
     if (urand(0, 100) > 70)
         context->GetValue<uint32>("bg role")->Set(urand(0, 9));
+
 #endif
     return true;
 }

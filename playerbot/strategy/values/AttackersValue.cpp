@@ -41,7 +41,7 @@ std::list<ObjectGuid> AttackersValue::Calculate()
     if (!sPlayerbotAIConfig.tweakValue)
     {
         // Try to get the value from nearby friendly bots.
-        std::list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest friendly players")->Get();
+        std::list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("close friendly players")->Get();
         for (auto& i : nearGuids)
         {
             Player* player = sObjectMgr.GetPlayer(i);
@@ -53,9 +53,6 @@ std::list<ObjectGuid> AttackersValue::Calculate()
                 continue;
 
             if (player->GetMapId() != bot->GetMapId())
-                continue;
-
-            if (sServerFacade.GetDistance2d(bot, player) > 10.0f)
                 continue;
 
             PlayerbotAI* botAi = player->GetPlayerbotAI();

@@ -120,6 +120,7 @@ namespace ai
             creators["nearest vehicles"] = [](PlayerbotAI* ai) { return new NearestVehiclesValue(ai); };
             creators["nearest friendly players"] = [](PlayerbotAI* ai) { return new NearestFriendlyPlayersValue(ai); };
             creators["closest friendly players"] = [](PlayerbotAI* ai) { return new NearestFriendlyPlayersValue(ai, INTERACTION_DISTANCE); };
+            creators["close friendly players"] = [](PlayerbotAI* ai) { return new NearestFriendlyPlayersValue(ai, INTERACTION_DISTANCE * 2); };
             creators["possible targets"] = [](PlayerbotAI* ai) { return new PossibleTargetsValue(ai); };
             creators["possible targets no los"] = [](PlayerbotAI* ai) { return new PossibleTargetsValue(ai, "possible targets", sPlayerbotAIConfig.sightDistance, true); };
             creators["possible adds"] = [](PlayerbotAI* ai) { return new PossibleAddsValue(ai); };

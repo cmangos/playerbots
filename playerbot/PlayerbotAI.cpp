@@ -656,7 +656,7 @@ bool PlayerbotAI::IsImmuneToSpell(uint32 spellId) const
 
 bool PlayerbotAI::IsInPve()
 {
-    return !IsInPvp() && !IsInRaid();
+    return !IsInPvp() && !IsInRaid(false);
 }
 
 bool PlayerbotAI::IsInPvp()
@@ -664,64 +664,62 @@ bool PlayerbotAI::IsInPvp()
     if (IsSafe(bot))
     {
         const bool inDuel = bot->duel && bot->duel->opponent;
-        if (!inDuel)
-        {
-            const bool inBattleground = bot->InBattleGround();
-            bool inArena = false;
-#ifndef MANGOSBOT_ZERO
-            inArena = bot->InArena();
-#endif
-            if (!inBattleground && !inArena)
-            {
-                AiObjectContext* context = aiObjectContext;
-                const bool isPlayerNear = AI_VALUE(bool, "has enemy player targets");
-                if (!isPlayerNear)
-                {
-                    return false;
-                }
-            }
-        }
+        if (inDuel)
+            return true;
 
-        return true;
+        const bool inBattleground = bot->InBattleGround();
+        bool inArena = false;
+
+#ifndef MANGOSBOT_ZERO 
+        inArena = bot->InArena();
+#endif 
+
+        if (inBattleground || inArena)
+            return true;
+
+        AiObjectContext* context = aiObjectContext;
+        const bool isPlayerNear = AI_VALUE(bool, "has enemy player targets");
+
+        return isPlayerNear;
     }
 
     return false;
 }
 
-bool PlayerbotAI::IsInRaid()
+bool PlayerbotAI::IsInRaid(bool pvpCheck)
 {
-    bool inRaidFight = false;
     if (IsSafe(bot))
     {
         const Map* map = bot->GetMap();
         if (map && (map->IsDungeon() || map->IsRaid()))
         {
-            inRaidFight = true;
+            return true;
         }
-        else if (!IsInPvp() && GetState() == BotState::BOT_STATE_COMBAT)
+
+        // Only check attackers if not in PvP and in combat 
+        if (pvpCheck && IsInPvp())
+            return false;
+
+        if (GetState() == BotState::BOT_STATE_COMBAT)
         {
             AiObjectContext* context = GetAiObjectContext();
             const std::list<ObjectGuid>& attackers = AI_VALUE(std::list<ObjectGuid>, "attackers");
+
             for (const ObjectGuid& attackerGuid : attackers)
             {
                 Creature* creature = GetCreature(attackerGuid);
-                if (creature)
+                if (!creature)
+                    continue;
+
+                const CreatureInfo* creatureInfo = creature->GetCreatureInfo();
+                if (creatureInfo && creatureInfo->Rank == CREATURE_ELITE_WORLDBOSS)
                 {
-                    const CreatureInfo* creatureInfo = creature->GetCreatureInfo();
-                    if (creatureInfo)
-                    {
-                        if (creatureInfo->Rank == CREATURE_ELITE_WORLDBOSS)
-                        {
-                            inRaidFight = true;
-                            break;
-                        }
-                    }
+                    return true;
                 }
             }
         }
     }
-
-    return inRaidFight;
+    return false;
 }
 
 PlayerTalentSpec PlayerbotAI::GetTalentSpec()

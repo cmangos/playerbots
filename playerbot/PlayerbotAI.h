@@ -640,7 +640,7 @@ public:
 
     bool IsInPve();
     bool IsInPvp();
-    bool IsInRaid();
+    bool IsInRaid(bool pvpCheck = true);
 
     void SetMoveToTransport(bool flag = true) { isMovingToTransport = flag; }
     bool GetMoveToTransport() { return isMovingToTransport; }

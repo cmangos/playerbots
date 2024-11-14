@@ -341,7 +341,7 @@ std::set<uint32> ChatHelper::ExtractAllFactionIds(const std::string& text)
     for (std::sregex_iterator i = begin; i != end; ++i)
     {
         std::smatch match = *i;
-        ids.insert(std::stoi(match.str().erase(0, 7)));
+        ids.insert(std::stoi(match.str().erase(0, 9)));
     }
 
     return ids;
@@ -606,6 +606,9 @@ std::string ChatHelper::formatSkill(uint32 skillId, Player* player)
     if (skillInfo)
     {
         int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
+
+        if (loc_idx = -1)
+            loc_idx = 0;
         name = skillInfo->name[loc_idx];
     }
     std::ostringstream out;
@@ -641,6 +644,7 @@ std::string ChatHelper::formatFaction(uint32 factionId, Player* player)
     ReputationRankStrIndex[REP_HATED] = LANG_REP_HATED;
     ReputationRankStrIndex[REP_HOSTILE] = LANG_REP_HOSTILE;
     ReputationRankStrIndex[REP_UNFRIENDLY] = LANG_REP_UNFRIENDLY;
+    ReputationRankStrIndex[REP_NEUTRAL] = LANG_REP_NEUTRAL;
     ReputationRankStrIndex[REP_FRIENDLY] = LANG_REP_FRIENDLY;
     ReputationRankStrIndex[REP_HONORED] = LANG_REP_HONORED;
     ReputationRankStrIndex[REP_REVERED] = LANG_REP_REVERED;
@@ -655,6 +659,8 @@ std::string ChatHelper::formatFaction(uint32 factionId, Player* player)
     if (factionEntry)
     {
         int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
+        if (loc_idx = -1)
+            loc_idx = 0;
         name = factionEntry->name[loc_idx];
     }
     std::ostringstream out;

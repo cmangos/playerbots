@@ -10,13 +10,14 @@ bool FactionAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     std::string cmd = event.getParam();
 
-    bool setwar = (cmd.find("+atwar") == 0);
+    bool setWar = (cmd.find("+atwar") == 0);
     bool removeWar = (cmd.find("-atwar") == 0);
 
-    std::string factionName = cmd;
+    std::string factionName;
 
-    if (setwar || removeWar)
-        factionName = factionName.substr(7);
+    if ((setWar || removeWar) && cmd.size() > 6)
+        factionName = cmd.substr(7);
+
 
     std::wstring wnamepart;
 
@@ -31,7 +32,7 @@ bool FactionAction::Execute(Event& event)
     bool factionFound = false;
     std::map<std::string, std::string> args;
 
-    for (uint32 id = 0; id < sSkillLineStore.GetNumRows(); ++id)
+    for (uint32 id = 0; id < sFactionStore.GetNumRows(); ++id)
     {
 #ifndef MANGOSBOT_ONE
         const FactionEntry* factionEntry = sFactionStore.LookupEntry(id);
@@ -44,10 +45,16 @@ bool FactionAction::Execute(Event& event)
 
         FactionState const* repState = bot->GetReputationMgr().GetState(factionEntry);
 
-        if (!repState || repState->Flags & FACTION_FLAG_VISIBLE)
+        if (!repState)
             continue;
 
-        if (!bot->HasSkill(id))
+        if(!(repState->Flags & FACTION_FLAG_VISIBLE))
+            continue;
+
+        if(repState->Flags & FACTION_FLAG_HIDDEN)
+            continue;
+
+        if (repState->Flags & FACTION_FLAG_INVISIBLE_FORCED)
             continue;
 
         int loc = requester->GetSession()->GetSessionDbcLocale();
@@ -81,21 +88,21 @@ bool FactionAction::Execute(Event& event)
         {
             ReputationMgr& mgr = bot->GetReputationMgr();
 
-            if (setwar || removeWar)
+            if (setWar || removeWar)
             {
-                args["%factionname"] = ChatHelper::formatSkill(id);
-
-                if (removeWar && mgr.IsAtWar(id) && bot->GetReputationMgr().GetRank(factionEntry) == REP_HATED)
-                {
-                    ai->TellPlayerNoFacing(requester, BOT_TEXT2("Unable uncheck at war for %factionname because they hate me too much.", args));
-                    return false;
-                }
+                args["%factionname"] = ChatHelper::formatFaction(id);
 
                 if (!factionName.empty())
                 {
-                    if (repState->Flags & FACTION_FLAG_INVISIBLE_FORCED)
+                    if (removeWar && mgr.IsAtWar(id) && bot->GetReputationMgr().GetRank(factionEntry) < REP_HOSTILE)
                     {
-                        ai->TellPlayerNoFacing(requester, BOT_TEXT2("Unable change at war for %factionname because the warstate is forced.", args));
+                        ai->TellPlayerNoFacing(requester, BOT_TEXT2("Unable uncheck at war for %factionname because they hate me too much.", args));
+                        return false;
+                    }
+
+                    if (repState->Flags & FACTION_FLAG_PEACE_FORCED)
+                    {
+                        ai->TellPlayerNoFacing(requester, BOT_TEXT2("Unable change at war for %factionname because peace is forced for this faction.", args));
                         return false;
                     }
 
@@ -105,16 +112,16 @@ bool FactionAction::Execute(Event& event)
                         return false;
                     }
 
-                    if (setwar && mgr.IsAtWar(id))
+                    if (setWar && mgr.IsAtWar(id))
                     {
                         ai->TellPlayerNoFacing(requester, BOT_TEXT2("I already have at war checked for %factionname.", args));
                         return false;
                     }
                 }
                 
-                bot->GetReputationMgr().SetAtWar(id, setwar);
+                bot->GetReputationMgr().SetAtWar(repState->ReputationListID, setWar);
 
-                if(setwar)
+                if(setWar)
                     ai->TellPlayerNoFacing(requester, BOT_TEXT2("Checked at war for %factionname", args));
                 else
                     ai->TellPlayerNoFacing(requester, BOT_TEXT2("Unchecked at war for %factionname", args));
@@ -132,7 +139,10 @@ bool FactionAction::Execute(Event& event)
     {
         if (factionName.empty())
         {
-            ai->TellPlayerNoFacing(requester, BOT_TEXT2("I do not have any visible factions.", args));
+            if (setWar || removeWar)
+                ai->TellPlayerNoFacing(requester, BOT_TEXT2("I do not have any factions where I can toggle at war.", args));
+            else
+                ai->TellPlayerNoFacing(requester, BOT_TEXT2("I do not have any visible factions.", args));
         }
         else
         {

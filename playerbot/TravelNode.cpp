@@ -1866,7 +1866,7 @@ void TravelNodeMap::LoadMaps()
                 uint32 x = (fileNameString[3] - '0') * 10 + (fileNameString[4] - '0');
                 uint32 y = (fileNameString[5] - '0') * 10 + (fileNameString[6] - '0');
                 if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y))
-                    MMAP::MMapFactory::createOrGetMMapManager()->loadMap(mapId, x, y);
+                    MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
 
             }
         }

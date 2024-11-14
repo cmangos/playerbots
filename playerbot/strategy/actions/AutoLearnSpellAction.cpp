@@ -130,11 +130,7 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
     for (ObjectMgr::QuestMap::const_iterator i = questTemplates.begin(); i != questTemplates.end(); ++i)
     {
         uint32 questId = i->first;
-#ifndef MANGOSBOT_TWO  
-        Quest const* quest = i->second;
-#else
         Quest const* quest = i->second.get();
-#endif;
 
         if (!quest->GetRequiredClasses() || quest->IsRepeatable() || quest->GetMinLevel() < 10)
             continue;

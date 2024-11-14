@@ -610,7 +610,7 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
         return false;
 
 #ifdef MANGOSBOT_ZERO
-    MMAP::MMapFactory::createOrGetMMapManager()->loadMap(mapId, x, y);
+    MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
 #endif
 #ifdef MANGOSBOT_ONE
     if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)

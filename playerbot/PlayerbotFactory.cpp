@@ -61,11 +61,7 @@ void PlayerbotFactory::Init()
 		for (ObjectMgr::QuestMap::const_iterator i = questTemplates.begin(); i != questTemplates.end(); ++i)
 		{
 			uint32 questId = i->first;
-#ifndef MANGOSBOT_TWO  
-			Quest const *quest = i->second;
-#else
-            Quest const* quest = i->second.get();
-#endif
+			Quest const* quest = i->second.get();
 
 			if (!quest->GetRequiredClasses() || quest->IsRepeatable() || quest->GetMinLevel() < 10)
 				continue;
@@ -913,12 +909,7 @@ void PlayerbotFactory::ResetQuests()
     ObjectMgr::QuestMap const& questTemplates = sObjectMgr.GetQuestTemplates();
     for (ObjectMgr::QuestMap::const_iterator i = questTemplates.begin(); i != questTemplates.end(); ++i)
     {
-#ifndef MANGOSBOT_TWO  
-        Quest const* quest = i->second;
-#else
         Quest const* quest = i->second.get();
-#endif;
-
         uint32 entry = quest->GetQuestId();
 
         // remove all quest entries for 'entry' from quest log

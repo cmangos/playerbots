@@ -4,6 +4,7 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
+#include "Tools/Language.h"
 
 typedef std::set<uint32> ItemIds;
 typedef std::set<uint32> SpellIds;
@@ -27,6 +28,7 @@ namespace ai
         static std::set<uint32> ExtractAllQuestIds(const std::string& text);
         static std::set<uint32> ExtractAllItemIds(const std::string& text);
         static std::set<uint32> ExtractAllSkillIds(const std::string& text);
+        static std::set<uint32> ExtractAllFactionIds(const std::string& text);
 
         static std::string formatQuest(Quest const* quest);
 
@@ -35,6 +37,9 @@ namespace ai
         static std::string formatItem(Item* item, int count = 0, int total = 0);
         static std::string formatQItem(uint32 itemId);
         static std::string formatSkill(uint32 skillId, Player* player = nullptr);
+        static std::string formatFaction(uint32 factionId, Player* player = nullptr);
+
+
         static ItemIds parseItems(const std::string& text, bool validate = false);
         static std::vector<uint32> parseItemsUnordered(const std::string& text, bool validate = false);
         static std::set<std::string> parseItemQualifiers(const std::string& text);

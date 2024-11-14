@@ -633,6 +633,53 @@ std::string ChatHelper::formatSkill(uint32 skillId, Player* player)
     return out.str();
 }
 
+std::string ChatHelper::formatFaction(uint32 factionId, Player* player)
+{
+    std::string name = "unknown faction";
+
+    uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK];
+    ReputationRankStrIndex[REP_HATED] = LANG_REP_HATED;
+    ReputationRankStrIndex[REP_HOSTILE] = LANG_REP_HOSTILE;
+    ReputationRankStrIndex[REP_UNFRIENDLY] = LANG_REP_UNFRIENDLY;
+    ReputationRankStrIndex[REP_FRIENDLY] = LANG_REP_FRIENDLY;
+    ReputationRankStrIndex[REP_HONORED] = LANG_REP_HONORED;
+    ReputationRankStrIndex[REP_REVERED] = LANG_REP_REVERED;
+    ReputationRankStrIndex[REP_EXALTED] = LANG_REP_EXALTED;
+
+#ifndef MANGOSBOT_ONE
+    const FactionEntry* factionEntry = sFactionStore.LookupEntry(factionId);
+#else
+    const FactionEntry* factionEntry = sFactionStore.LookupEntry<FactionEntry>(factionId);
+#endif
+
+    if (factionEntry)
+    {
+        int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
+        name = factionEntry->name[loc_idx];
+    }
+    std::ostringstream out;
+    out << "|cffffffff|Hfaction:" << factionId
+        << "|h[" << name << "]|h|r";
+
+    if (player)
+    {
+        FactionState const* repState = player->GetReputationMgr().GetState(factionEntry);
+
+        if (repState && repState->Flags & FACTION_FLAG_VISIBLE)
+        {
+            ReputationRank rank = player->GetReputationMgr().GetRank(factionEntry);
+            std::string rankName = player->GetSession()->GetMangosString(ReputationRankStrIndex[rank]);
+
+            out << " " << rankName << "|h|r (" << player->GetReputationMgr().GetReputation(factionEntry) << ")";
+
+            if (repState->Flags & FACTION_FLAG_AT_WAR)
+                out << " at war";
+        }
+    }
+
+    return out.str();
+}
+
 ChatMsg ChatHelper::parseChat(const std::string& text)
 {
     if (chats.find(text) != chats.end())

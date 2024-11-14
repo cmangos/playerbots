@@ -56,20 +56,20 @@ TaxiNodeLevelContainer PlayerbotFactory::overworldTaxiNodeLevelsH;
 
 void PlayerbotFactory::Init()
 {
-	if (sPlayerbotAIConfig.randomBotPreQuests) {
-		ObjectMgr::QuestMap const& questTemplates = sObjectMgr.GetQuestTemplates();
-		for (ObjectMgr::QuestMap::const_iterator i = questTemplates.begin(); i != questTemplates.end(); ++i)
-		{
-			uint32 questId = i->first;
-			Quest const* quest = i->second.get();
+    if (sPlayerbotAIConfig.randomBotPreQuests) {
+        ObjectMgr::QuestMap const& questTemplates = sObjectMgr.GetQuestTemplates();
+        for (ObjectMgr::QuestMap::const_iterator i = questTemplates.begin(); i != questTemplates.end(); ++i)
+        {
+            uint32 questId = i->first;
+            Quest const* quest = i->second.get();
 
-			if (!quest->GetRequiredClasses() || quest->IsRepeatable() || quest->GetMinLevel() < 10)
-				continue;
+            if (!quest->GetRequiredClasses() || quest->IsRepeatable() || quest->GetMinLevel() < 10)
+                continue;
 
-			AddPrevQuests(questId, classQuestIds);
-			classQuestIds.remove(questId);
-			classQuestIds.push_back(questId);
-		}
+            AddPrevQuests(questId, classQuestIds);
+            classQuestIds.remove(questId);
+            classQuestIds.push_back(questId);
+        }
         for (std::list<uint32>::iterator i = sPlayerbotAIConfig.randomBotQuestIds.begin(); i != sPlayerbotAIConfig.randomBotQuestIds.end(); ++i)
         {
             uint32 questId = *i;
@@ -77,7 +77,7 @@ void PlayerbotFactory::Init()
             specialQuestIds.remove(questId);
             specialQuestIds.push_back(questId);
         }
-	}
+    }
 
     for (uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
     {

@@ -86,7 +86,7 @@ std::list<std::pair<uint32, std::string> > ListSpellsAction::GetSpellList(std::s
     std::vector<std::string> ss = split(filter, ' ');
     if (!ss.empty())
     {
-        skill = chat->parseSkill(ss[0]);
+        skill = chat->parseSkillName(ss[0]);
         if (skill != SKILL_NONE)
         {
             filter = ss.size() > 1 ? filter = ss[1] : "";

@@ -92,11 +92,11 @@ std::string WhoAction::QueryTrade(std::string text)
 std::string WhoAction::QuerySkill(std::string text)
 {
     std::ostringstream out;
-    uint32 skill = chat->parseSkill(text);
+    uint32 skill = chat->parseSkillName(text);
     if (!skill || !ai->HasSkill((SkillType)skill))
         return "";
 
-    std::string skillName = chat->formatSkill(skill);
+    std::string skillName = chat->getSkillName(skill);
     uint32 spellId = AI_VALUE2(uint32, "spell id", skillName);
     uint16 value = bot->GetSkillValue(skill);
 #ifdef MANGOS

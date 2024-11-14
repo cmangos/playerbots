@@ -1,7 +1,6 @@
 
 #include "playerbot/playerbot.h"
 #include "SkillAction.h"
-#include "Tools/Language.h"
 
 using namespace ai;
 
@@ -36,85 +35,58 @@ bool SkillAction::Execute(Event& event)
             continue;
 
         SkillLineEntry const* skillInfo = sSkillLineStore.LookupEntry(id);
-        if (skillInfo)
-        {
-            int loc = requester->GetSession()->GetSessionDbcLocale();
+        if (!skillInfo)
+            continue;
 
+        int loc = requester->GetSession()->GetSessionDbcLocale();
+
+        if (!skillName.empty() && skillIds.empty())
+        {
             std::string name = skillInfo->name[loc];
 
-            if (!skillName.empty() && skillIds.empty())
+            if (name.empty())
+                continue;
+
+            if (!Utf8FitTo(name, wnamepart))
             {
-                if (name.empty())
-                    continue;
-
-                if (!Utf8FitTo(name, wnamepart))
+                loc = 0;
+                for (; loc < MAX_LOCALE; ++loc)
                 {
-                    loc = 0;
-                    for (; loc < MAX_LOCALE; ++loc)
-                    {
-                        if (loc == requester->GetSession()->GetSessionDbcLocale())
-                            continue;
+                    if (loc == requester->GetSession()->GetSessionDbcLocale())
+                        continue;
 
-                        name = skillInfo->name[loc];
-                        if (name.empty())
-                            continue;
+                    name = skillInfo->name[loc];
+                    if (name.empty())
+                        continue;
 
-                        if (Utf8FitTo(name, wnamepart))
-                            break;
-                    }
+                    if (Utf8FitTo(name, wnamepart))
+                        break;
                 }
             }
+        }
 
-            if (skillName.empty() || skillIds.find(id) != skillIds.end() || (loc < MAX_LOCALE && skillIds.empty()))
+        if (skillName.empty() || skillIds.find(id) != skillIds.end() || (loc < MAX_LOCALE && skillIds.empty()))
+        {
+            if (unlearn)
             {
-                if (unlearn)
+                args["%skillname"] = ChatHelper::formatSkill(id);
+
+                if (!bot->GetSkillInfo(uint16(id), ([](SkillRaceClassInfoEntry const& entry) { return (entry.flags & SKILL_FLAG_CAN_UNLEARN); })))
                 {
-                    args["%skillname"] = name;
-
-                    if (!bot->GetSkillInfo(uint16(id), ([](SkillRaceClassInfoEntry const& entry) { return (entry.flags & SKILL_FLAG_CAN_UNLEARN); })))
-                    {
-                        ai->TellPlayerNoFacing(requester, BOT_TEXT2("Unable to unlearn %skillname", args));
-                        return false;
-                    }
-
-                    bot->SetSkillStep(uint16(id), 0);
-
-                    ai->TellPlayerNoFacing(requester, BOT_TEXT2("Unlearned %skillname", args));
-
-                    return true;
+                    ai->TellPlayerNoFacing(requester, BOT_TEXT2("Unable to unlearn %skillname", args));
+                    return false;
                 }
 
-                char valStr[50] = "";
-                char const* knownStr = "";
-                knownStr = requester->GetSession()->GetMangosString(LANG_KNOWN);
-                uint32 curValue = bot->GetSkillValuePure(id);
-                uint32 maxValue = bot->GetSkillMaxPure(id);
-                uint32 permValue = bot->GetSkillBonusPermanent(id);
-                uint32 tempValue = bot->GetSkillBonusTemporary(id);
+                bot->SetSkillStep(uint16(id), 0);
 
-                char const* valFormat = requester->GetSession()->GetMangosString(LANG_SKILL_VALUES);
-                snprintf(valStr, 50, valFormat, curValue, maxValue, permValue, tempValue);
-                std::ostringstream out;
-                out << "|cffffffff|Hskill:";
-                out << id;
-                out << "|h[";
-                out << name;
-                out << "]|h|r (";
-                
-                out << curValue << "/" << maxValue;
+                ai->TellPlayerNoFacing(requester, BOT_TEXT2("Unlearned %skillname", args));
 
-                if (permValue)
-                    out << " +perm " << permValue;
-
-                if (tempValue)
-                    out << " +temp " << permValue;
-
-                out << ")";
-
-                ai->TellPlayerNoFacing(requester, out);
-
-                skillFound = true;
+                return true;
             }
+
+            ai->TellPlayerNoFacing(requester, ChatHelper::formatSkill(id, bot));
+
+            skillFound = true;
         }
     }
 
@@ -122,12 +94,12 @@ bool SkillAction::Execute(Event& event)
     {
         if (skillName.empty())
         {
-            ai->TellPlayerNoFacing(requester, BOT_TEXT2("No skills found.", args));
+            ai->TellPlayerNoFacing(requester, BOT_TEXT2("I do not have skills.", args));
         }
         else
         {
             args["%skillname"] = skillName;
-            ai->TellPlayerNoFacing(requester, BOT_TEXT2("Skill %skillname not found.", args));
+            ai->TellPlayerNoFacing(requester, BOT_TEXT2("I do not have %skillname.", args));
         }
         return false;
     }

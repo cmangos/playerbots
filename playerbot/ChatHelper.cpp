@@ -331,6 +331,22 @@ std::set<uint32> ChatHelper::ExtractAllSkillIds(const std::string& text)
     return ids;
 }
 
+std::set<uint32> ChatHelper::ExtractAllFactionIds(const std::string& text)
+{
+    std::set<uint32> ids;
+
+    std::regex rgx("Hfaction:[0-9]+");
+    auto begin = std::sregex_iterator(text.begin(), text.end(), rgx);
+    auto end = std::sregex_iterator();
+    for (std::sregex_iterator i = begin; i != end; ++i)
+    {
+        std::smatch match = *i;
+        ids.insert(std::stoi(match.str().erase(0, 7)));
+    }
+
+    return ids;
+}
+
 ItemIds ChatHelper::parseItems(const std::string& text, bool validate)
 {
     std::vector<uint32> itemIDsUnordered = parseItemsUnordered(text, validate);
@@ -582,6 +598,41 @@ std::string ChatHelper::formatQItem(uint32 itemId)
     return out.str();
 }
 
+std::string ChatHelper::formatSkill(uint32 skillId, Player* player)
+{
+    std::string name = "unknown skill";
+
+    SkillLineEntry const* skillInfo = sSkillLineStore.LookupEntry(skillId);
+    if (skillInfo)
+    {
+        int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
+        name = skillInfo->name[loc_idx];
+    }
+    std::ostringstream out;
+    out << "|cffffffff|Hskill:" << skillId
+        << "|h[" << name << "]|h|r";
+
+    if (player && player->HasSkill(skillId))
+    {
+        uint32 curValue = player->GetSkillValuePure(skillId);
+        uint32 maxValue = player->GetSkillMaxPure(skillId);
+        uint32 permValue = player->GetSkillBonusPermanent(skillId);
+        uint32 tempValue = player->GetSkillBonusTemporary(skillId);
+
+        out << " (";
+
+        out << curValue << "/" << maxValue;
+
+        if (permValue)
+            out << " +perm " << permValue;
+
+        if (tempValue)
+            out << " +temp " << permValue;
+    }
+
+    return out.str();
+}
+
 ChatMsg ChatHelper::parseChat(const std::string& text)
 {
     if (chats.find(text) != chats.end())
@@ -824,7 +875,7 @@ std::string ChatHelper::formatRace(uint8 race)
     return races[race];
 }
 
-uint32 ChatHelper::parseSkill(const std::string& text)
+uint32 ChatHelper::parseSkillName(const std::string& text)
 {
     if (skills.find(text) != skills.end())
         return skills[text];
@@ -832,7 +883,7 @@ uint32 ChatHelper::parseSkill(const std::string& text)
     return SKILL_NONE;
 }
 
-std::string ChatHelper::formatSkill(uint32 skill)
+std::string ChatHelper::getSkillName(uint32 skill)
 {
     for (std::map<std::string, uint32>::iterator i = skills.begin(); i != skills.end(); ++i)
     {

@@ -1,5 +1,4 @@
 #pragma once
-#include "playerbot/LootObjectStack.h"
 #include "GenericActions.h"
 
 namespace ai
@@ -18,7 +17,7 @@ namespace ai
                 "Examples:\n"
                 "skill : List all skills and their current level.\n"
                 "skill [name] : List the skill level of a current skill.\n"
-                "ss unlearn [name] : Unlearns a primary profession.\n";
+                "skill unlearn [name] : Unlearns a primary profession.\n";
         }
         virtual std::vector<std::string> GetUsedActions() { return {}; }
         virtual std::vector<std::string> GetUsedValues() { return {}; }

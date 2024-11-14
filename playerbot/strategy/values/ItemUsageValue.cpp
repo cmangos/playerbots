@@ -216,7 +216,11 @@ ItemUsage ItemUsageValue::Calculate()
             if (stacks < 1)
             {
                 stacks += CurrentStacks(ai, proto);
-                return ItemUsage::ITEM_USAGE_USE; //Buy some to get to 1 stack
+
+                if (stacks < 1)
+                    return ItemUsage::ITEM_USAGE_USE; //Buy some to get to 1 stack
+                else if (stacks < 2)       
+                    return ItemUsage::ITEM_USAGE_KEEP; //Keep the item if less than 2 stack
             }
         }
     }

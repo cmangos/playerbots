@@ -1023,17 +1023,31 @@ void HolyPaladinBlessingRaidStrategy::InitNonCombatTriggers(std::list<TriggerNod
 
 #ifdef MANGOSBOT_TWO // WOTLK
 
+NextAction** HolyPaladinStrategy::GetDefaultCombatActions()
+{
+    return NextAction::array(0, new NextAction("melee", ACTION_IDLE), NULL);
+}
+
 void HolyPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("divine shield", ACTION_EMERGENCY + 1),
+            new NextAction("holy light", ACTION_EMERGENCY), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("lay on hands on party", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("lay on hands on party", ACTION_CRITICAL_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "protect party member",
-        NextAction::array(0, new NextAction("blessing of protection on party", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("blessing of protection on party", ACTION_CRITICAL_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("holy light", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "hand of sacrifice",
@@ -1050,11 +1064,6 @@ void HolyPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("divine favor", ACTION_MEDIUM_HEAL + 3), 
                              new NextAction("holy shock", ACTION_MEDIUM_HEAL + 2), 
                              new NextAction("holy light", ACTION_MEDIUM_HEAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "critical health",
-        NextAction::array(0, new NextAction("divine shield", ACTION_EMERGENCY + 1),
-            new NextAction("holy light", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low health",
@@ -1081,26 +1090,26 @@ void HolyPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("flash of light on party", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "seal",
-        NextAction::array(0, new NextAction("seal of light", ACTION_NORMAL + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "medium mana",
-        NextAction::array(0, new NextAction("judgement of wisdom", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("judgement of wisdom", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "enemy is close",
-        NextAction::array(0, new NextAction("judgement of light", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "medium mana",
-        NextAction::array(0, new NextAction("melee", ACTION_NORMAL), NULL)));
+        "enemy ten yards",
+        NextAction::array(0, new NextAction("judgement of light", ACTION_NORMAL), NULL))); 
 }
 
 void HolyPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinStrategy::InitNonCombatTriggers(triggers);
 
+    triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("holy light", ACTION_MEDIUM_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("holy light on party", ACTION_MEDIUM_HEAL + 1), NULL)));
+    
     triggers.push_back(new TriggerNode(
         "low health",
         NextAction::array(0, new NextAction("holy light", ACTION_MEDIUM_HEAL), NULL)));
@@ -1111,11 +1120,11 @@ void HolyPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "medium health",
-        NextAction::array(0, new NextAction("flash of light", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("flash of light", ACTION_LIGHT_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member medium health",
-        NextAction::array(0, new NextAction("flash of light on party", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("flash of light on party", ACTION_LIGHT_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "almost full health",
@@ -1257,11 +1266,23 @@ void HolyPaladinAoeRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& 
 void HolyPaladinBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinBuffStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "medium mana",
+        NextAction::array(0, new NextAction("seal of wisdom", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "seal",
+        NextAction::array(0, new NextAction("seal of light", ACTION_HIGH), NULL)));
 }
 
 void HolyPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinBuffStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "seal",
+        NextAction::array(0, new NextAction("seal of light", ACTION_NORMAL), NULL)));
 }
 
 void HolyPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

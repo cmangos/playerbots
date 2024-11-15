@@ -257,7 +257,7 @@ class ServerFacade
         }
 #endif
 
-#ifndef MANGOSBOT_ONE
+#ifdef MANGOSBOT_TWO
         BattleGroundQueue& bgQueue(BattleGroundQueueTypeId queueTypeId)
         {
             return sBattleGroundMgr.m_battleGroundQueues[queueTypeId];

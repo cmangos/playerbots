@@ -1147,10 +1147,7 @@ void RandomPlayerbotMgr::CheckBgQueue()
             uint32 TeamId = player->GetTeam() == ALLIANCE ? 0 : 1;
 
             BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
-#ifdef MANGOSBOT_ZERO
-            BattleGroundBracketId bracketId = player->GetBattleGroundBracketIdFromLevel(bgTypeId);
-#endif
-#ifdef MANGOSBOT_ONE
+#ifndef MANGOSBOT_TWO
             BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, player->GetLevel());
 #endif
 #ifdef MANGOSBOT_TWO
@@ -1287,10 +1284,7 @@ void RandomPlayerbotMgr::CheckBgQueue()
 
             BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
 
-#ifdef MANGOSBOT_ZERO
-            BattleGroundBracketId bracketId = bot->GetBattleGroundBracketIdFromLevel(bgTypeId);
-#endif
-#ifdef MANGOSBOT_ONE
+#ifndef MANGOSBOT_TWO
             BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel());;
 #endif
 #ifdef MANGOSBOT_TWO

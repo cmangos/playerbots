@@ -95,7 +95,7 @@ public:
         Player* GetRandomPlayer();
         PlayerBotMap& GetPlayers() { return players; };
         Player* GetPlayer(uint32 playerGuid);
-        void PrintStats();
+        void PrintStats(uint32 requesterGuid);
         double GetBuyMultiplier(Player* bot);
         double GetSellMultiplier(Player* bot);
         void AddTradeDiscount(Player* bot, Player* master, int32 value);

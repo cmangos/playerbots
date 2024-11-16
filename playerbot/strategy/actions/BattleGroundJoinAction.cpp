@@ -1328,7 +1328,7 @@ bool BGStatusAction::Execute(Event& event)
         // temp fix for crash
          //return true;
 
-#ifdef MANGOSBOT_TWO
+#ifdef MANGOSBOT_TWOx
         BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
         GroupQueueInfo ginfo;
         if (bgQueue.GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
@@ -1428,7 +1428,7 @@ bool BGStatusAction::Execute(Event& event)
 #ifndef MANGOSBOT_ZERO
         if (isArena)
         {
-#ifdef MANGOSBOT_TWO
+#ifdef MANGOSBOT_TWOx
             isArena = true;
             BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
             GroupQueueInfo ginfo;

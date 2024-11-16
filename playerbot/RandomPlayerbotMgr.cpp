@@ -1160,6 +1160,7 @@ void RandomPlayerbotMgr::CheckBgQueue()
             BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
 #endif
 #ifdef MANGOSBOT_TWO
+            /* to fix
             if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
             {
                 BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
@@ -1186,13 +1187,14 @@ void RandomPlayerbotMgr::CheckBgQueue()
                 }
                 if (player->InArena())
                 {
-                    if (player->GetBattleGround()->IsRated()/* && (ginfo.isRated && ginfo.arenaTeamId && ginfo.arenaTeamRating && ginfo.opponentsTeamRating)*/)
+                    if (player->GetBattleGround()->IsRated())
                         TeamId = 1;
                     else
                         TeamId = 0;
                 }
                 ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
             }
+         */
 #endif
 #ifdef MANGOSBOT_ONE
             if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
@@ -1296,7 +1298,8 @@ void RandomPlayerbotMgr::CheckBgQueue()
 
             BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
 #endif
-            #ifdef MANGOSBOT_TWO
+#ifdef MANGOSBOT_TWO
+            /* to fix
             ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
             if (arenaType != ARENA_TYPE_NONE)
             {
@@ -1309,13 +1312,14 @@ void RandomPlayerbotMgr::CheckBgQueue()
                 }
                 if (bot->InArena())
                 {
-                    if (bot->GetBattleGround()->IsRated()/* && (ginfo.isRated && ginfo.arenaTeamId && ginfo.arenaTeamRating && ginfo.opponentsTeamRating)*/)
+                    if (bot->GetBattleGround()->IsRated())
                         TeamId = 1;
                     else
                         TeamId = 0;
                 }
                 ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
             }
+        */
 #endif
 #ifdef MANGOSBOT_ONE
             ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);

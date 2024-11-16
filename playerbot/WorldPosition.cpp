@@ -609,39 +609,24 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
     if (sTravelMgr.isBadMmap(mapId, x, y))
         return false;
 
-#ifndef MANGOSBOT_TWO
-    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
-        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
-    else
-    {
-        MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
-        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
-    }
-#endif
-
     bool isLoaded = false;
 
 #ifndef MANGOSBOT_TWO
-    //TerrainInfo* terrain = sTerrainMgr.LoadTerrain(mapId);
-    //isLoaded = terrain->GetTerrainType(x, y);
-    isLoaded = true;
-#else 
-    //Fix to ignore bad mmap files.
-    uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%03i.mmap") + 1;
-    char* fileName = new char[pathLen];
-    snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%03i.mmap").c_str(), mapId);
-
-    FILE* file = fopen(fileName, "rb");
-    if (!file)
+    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
+    else
     {
-        sTravelMgr.addBadMmap(mapId, x, y);
-        delete[] fileName;
-        return false;
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
+        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
     }
-
-    fclose(file);
-
-    isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, instanceId, x, y, 0);
+#else
+    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId,0, x, y, 0);
+    else
+    {
+        if(MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0))
+        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, 0);
+    }
 #endif
 
     if(!isLoaded)

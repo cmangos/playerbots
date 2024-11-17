@@ -11,6 +11,7 @@
 #include "playerbot/PlayerbotHelpMgr.h"
 #include "Entities/Transports.h"
 #include "MotionGenerators/PathFinder.h"
+#include "playerbot/PlayerbotLLMInterface.h"
 
 #include <iomanip>
 
@@ -94,6 +95,30 @@ bool DebugAction::Execute(Event& event)
 
         ai->TellPlayerNoFacing(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
 
+        return true;
+    }
+    else if (text.find("llm ") == 0)
+    {
+
+        std::thread t([text, requester]() {
+            WorldPacket new_packet(Opcodes(CMSG_MESSAGECHAT), 4096);
+
+            uint32 type = CHAT_MSG_SAY;
+            uint32 lang = LANG_UNIVERSAL;
+
+            new_packet << type;
+            new_packet << lang;
+
+            std::string string = PlayerbotLLMInterface::Generate(text.substr(4));
+
+            new_packet << string;
+
+            std::unique_ptr<WorldPacket> packet(new WorldPacket(new_packet.GetOpcode()));
+            *packet = new_packet;
+            requester->GetSession()->QueuePacket(std::move(packet));
+
+            return; });
+        t.detach();
         return true;
     }
     else if (text == "gy" && isMod)

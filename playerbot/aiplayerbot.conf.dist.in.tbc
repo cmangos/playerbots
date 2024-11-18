@@ -946,6 +946,39 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.DiffWithPlayer = 100
 # AiPlayerbot.DiffEmpty = 200
 
+# LLM values. These values are for noncombat strategy 'ai chat' which allows bots to reply using a LLM api.
+# For a quickstart download koboldcpp, a 7b model from huggingface and start kobold.
+# (Default) KoboldCPP examples:
+
+# The api endpoint that should be called for chat generation.
+# AiPlayerbot.LLMApiEndpoint = http://127.0.0.1:5001/api/v1/generate
+# The api key needed to access the endpoint.
+# AiPlayerbot.LLMApiKey =
+# The default json to send to the endpoint.
+# AiPlayerbot.LLMApiJson = {"max_length": 100, "prompt": "<pre prompt><prompt><post prompt>"}
+
+# The default prompt to send at the beginning of each conversation.
+# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player speaking to you is named <player name>. You are level <bot level> and play as a <bot race> <bot class>. Answer as a roleplaying character. Limit responses to 100 characters.
+# The prompt part containing the last message from the player the bot is responding to.
+# AiPlayerbot.LLMPrompt = <player message>
+# The default prompt to send at the end of each conversation.
+# AiPlayerbot.LLMPostPrompt = 
+
+# What pattern the server should look for to find the start of the repsonse the llm gave. Note spaces in the actual response are ignored of the start pattern.
+# Double quotes at the start and end of the pattern need to be single quotes to be read correctly.
+# AiPlayerbot.LLMResponseStartPattern = 'results":[{"text":'
+# What pattern the server should look for that the response has ended.
+# AiPlayerbot.LLMResponseEndPattern = '
+
+# OPEN-AI example:
+# AiPlayerbot.LLMApiEndpoint = http://IP/URL:PORT/v1/chat/completions
+# AiPlayerbot.LLMApiKey = YOUR_API_KEY
+# AiPlayerbot.LLMApiJson = {\"model\": \"gpt-4o-mini\", "\"messages\": [{\"role\": \"system\", \"content\": \"<pre prompt>\"},{\"role\": \"user\", \"content\": \"<prompt>\"}],\"max_tokens\": 60}
+# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player speaking to you is named <player name>. You are level <bot level> and play as a <bot race> <bot class>. Answer as a roleplaying character. Limit responses to 100 characters.
+# AiPlayerbot.LLMPrompt = <player message>
+# AiPlayerbot.LLMPostPrompt = 
+# AiPlayerbot.LLMResponseStartPattern = 'message":{"role":"system","content":'
+# AiPlayerbot.LLMResponseEndPattern = '
 
 # Mystery config value. Currently enables async bot pathfinding. Rarely crashes the server.
 # AiPlayerbot.TweakValue = 0

@@ -1,4 +1,3 @@
-
 #include "playerbot/playerbot.h"
 #include "DebugAction.h"
 #include "playerbot/PlayerbotAIConfig.h"
@@ -14,6 +13,7 @@
 #include "playerbot/PlayerbotLLMInterface.h"
 
 #include <iomanip>
+#include "SayAction.h"
 
 using namespace ai;
 
@@ -99,26 +99,42 @@ bool DebugAction::Execute(Event& event)
     }
     else if (text.find("llm ") == 0)
     {
+        Player* player = bot;
 
-        std::thread t([text, requester]() {
-            WorldPacket new_packet(Opcodes(CMSG_MESSAGECHAT), 4096);
+        std::future<std::vector<WorldPacket>> futurePacket = std::async([player, text, requester] {
 
-            uint32 type = CHAT_MSG_SAY;
+            WorldPacket packet_template(CMSG_MESSAGECHAT, 4096);
+
+            uint32 type = CHAT_MSG_WHISPER;
             uint32 lang = LANG_UNIVERSAL;
 
-            new_packet << type;
-            new_packet << lang;
+            packet_template << type;
+            packet_template << lang;
+            packet_template << requester->GetName();
 
-            std::string string = PlayerbotLLMInterface::Generate(text.substr(4));
+            std::map<std::string, std::string> jsonFill;
+            jsonFill["<prompt>"] = text.substr(4);
+            std::string json = BOT_TEXT2(sPlayerbotAIConfig.llmApiJson, jsonFill);
 
-            new_packet << string;
+            std::string response = PlayerbotLLMInterface::Generate(json);
+            std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, sPlayerbotAIConfig.llmResponseStartPattern, sPlayerbotAIConfig.llmResponseEndPattern);
 
-            std::unique_ptr<WorldPacket> packet(new WorldPacket(new_packet.GetOpcode()));
-            *packet = new_packet;
-            requester->GetSession()->QueuePacket(std::move(packet));
+            std::vector<WorldPacket> packets;
+            for (auto& line : lines)
+            {
+                WorldPacket packet(packet_template);
+                packet << line;
+                packets.push_back(packet);
+            }
 
-            return; });
-        t.detach();
+            return packets; });
+
+        ai->SendDelayedPacket(bot->GetSession(), std::move(futurePacket));
+        return true;
+    }
+    else if (text.find("chatreplydo ") == 0)
+    {
+        ChatReplyAction::ChatReplyDo(bot, CHAT_MSG_WHISPER, requester->GetGUIDLow(), 0, text.substr(12), "", requester->GetName());
         return true;
     }
     else if (text == "gy" && isMod)

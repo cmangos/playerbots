@@ -62,6 +62,12 @@ public:
     std::mutex m_configLock;
 };
 
+struct ParsedUrl {
+    std::string hostname;
+    std::string path;
+    int port;
+};
+
 class PlayerbotAIConfig
 {
 public:
@@ -327,6 +333,12 @@ public:
     int commandServerPort;
     bool perfMonEnabled;
     bool bExplicitDbStoreSave = false;
+
+    //LM BEGIN
+    std::string llmApiEndpoint, llmApiKey, llmApiJson, llmPrePrompt, llmPrompt, llmPostPrompt, llmResponseStartPattern, llmResponseEndPattern;
+
+    ParsedUrl llmEndPointUrl;
+    //LM END
 
     std::string GetValue(std::string name);
     void SetValue(std::string name, std::string value);

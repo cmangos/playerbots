@@ -7,6 +7,7 @@
 #include "playerbot/AiFactory.h"
 #include <regex>
 #include <boost/algorithm/string.hpp>
+#include "playerbot/PlayerbotLLMInterface.h"
 
 using namespace ai;
 
@@ -184,6 +185,92 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
         return;
     }
 
+    if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT))
+    {
+        Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, guid1));
+        if (player && player->isRealPlayer())
+        {
+            PlayerbotAI* ai = bot->GetPlayerbotAI();
+            std::map<std::string, std::string> placeholders;
+            placeholders["<bot name>"] = bot->GetName();
+            placeholders["<bot level>"] = std::to_string(bot->GetLevel());
+            placeholders["<bot class>"] = ai->GetChatHelper()->formatClass(bot->getClass());
+            placeholders["<bot race>"] = ai->GetChatHelper()->formatRace(bot->getRace());
+            placeholders["<player name>"] = player->GetName();
+            placeholders["<expansion name>"] = "Wrath of the Lichking";
+            placeholders["<player message>"] = msg;
+            
+            std::map<std::string, std::string> jsonFill;
+            jsonFill["<pre prompt>"] = sPlayerbotAIConfig.llmPrePrompt;
+            jsonFill["<prompt>"] = sPlayerbotAIConfig.llmPrompt;
+            jsonFill["<post prompt>"] = sPlayerbotAIConfig.llmPostPrompt;
+            std::string json = BOT_TEXT2(sPlayerbotAIConfig.llmApiJson, jsonFill);
+
+            json = BOT_TEXT2(json, placeholders);
+
+            std::string playerName;
+
+            uint32 type = CHAT_MSG_WHISPER;
+
+            switch (chatChannelSource)
+            {
+            case ChatChannelSource::SRC_WHISPER:
+            {
+                type = CHAT_MSG_WHISPER;
+                playerName = player->GetName();
+                break;
+            }
+            case ChatChannelSource::SRC_SAY:
+            {
+                type = CHAT_MSG_SAY;
+                break;
+            }
+            case ChatChannelSource::SRC_YELL:
+            {
+                type = CHAT_MSG_YELL;
+                break;
+            }
+            case ChatChannelSource::SRC_PARTY:
+            {
+                type = CHAT_MSG_PARTY;
+                break;
+            }
+            case ChatChannelSource::SRC_GUILD:
+            {
+                type = CHAT_MSG_GUILD;
+            }
+            }
+
+            std::future<std::vector<WorldPacket>> futurePackets = std::async([type, bot, playerName, json] {
+
+                WorldPacket packet_template(CMSG_MESSAGECHAT, 4096);               
+
+                uint32 lang = LANG_UNIVERSAL;
+
+                packet_template << type;
+                packet_template << lang;
+
+                if(!playerName.empty())
+                    packet_template << playerName;
+
+                std::string response = PlayerbotLLMInterface::Generate(json);
+                std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, sPlayerbotAIConfig.llmResponseStartPattern, sPlayerbotAIConfig.llmResponseEndPattern);
+
+                std::vector<WorldPacket> packets;
+                for (auto& line : lines)
+                {
+                    WorldPacket packet(packet_template);
+                    packet << line;
+                    packets.push_back(packet);
+                }
+
+                return packets;  });
+
+            ai->SendDelayedPacket(bot->GetSession(), std::move(futurePackets));
+        }
+
+        return;
+    }
 
     SendGeneralResponse(bot, chatChannelSource, GenerateReplyMessage(bot, msg, guid1, name), name);
 }

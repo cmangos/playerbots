@@ -1599,60 +1599,64 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     isFromFreeBot = sPlayerbotAIConfig.IsFreeAltBot(guid1);
 
                 bool isMentioned = message.find(bot->GetName()) != std::string::npos;
+                bool isAiChat = HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT);
 
                 ChatChannelSource chatChannelSource = GetChatChannelSource(bot, msgtype, chanName);
 
-                // random bot speaks, chat CD
-                if (isFromFreeBot && isPaused)
-                    return;
-
-                // BG: react only if mentioned or if not channel and real player spoke
-                if (bot->InBattleGround() && !(isMentioned || (msgtype != CHAT_MSG_CHANNEL && !isFromFreeBot)))
-                    return;
-
-                if (HasRealPlayerMaster() && guid1 != GetMaster()->GetObjectGuid())
-                    return;
-
-                if (lang == LANG_ADDON)
-                    return;
-
-                if (boost::algorithm::istarts_with(message, sPlayerbotAIConfig.toxicLinksPrefix)
-                    && (GetChatHelper()->ExtractAllItemIds(message).size() > 0 || GetChatHelper()->ExtractAllQuestIds(message).size() > 0)
-                    && sPlayerbotAIConfig.toxicLinksRepliesChance)
+                if (!isAiChat || isFromFreeBot)
                 {
-                    if (urand(0, 50) > 0 || urand(1, 100) > sPlayerbotAIConfig.toxicLinksRepliesChance)
-                    {
-                        return;
-                    }
-                }
-                else if ((GetChatHelper()->ExtractAllItemIds(message).count(19019) && sPlayerbotAIConfig.thunderfuryRepliesChance))
-                {
-                    if (urand(0, 60) > 0 || urand(1, 100) > sPlayerbotAIConfig.thunderfuryRepliesChance)
-                    {
-                        return;
-                    }
-                }
-                else
-                {
-                    if (isFromFreeBot && urand(0, 20))
+                    // random bot speaks, chat CD
+                    if (isFromFreeBot && isPaused)
                         return;
 
-                    if (msgtype == CHAT_MSG_GUILD && (!sPlayerbotAIConfig.guildRepliesRate || urand(1, 100) >= sPlayerbotAIConfig.guildRepliesRate))
+                    // BG: react only if mentioned or if not channel and real player spoke
+                    if (bot->InBattleGround() && !(isMentioned || (msgtype != CHAT_MSG_CHANNEL && !isFromFreeBot)))
                         return;
 
-                    if (!isFromFreeBot)
+                    if (HasRealPlayerMaster() && guid1 != GetMaster()->GetObjectGuid())
+                        return;
+
+                    if (lang == LANG_ADDON)
+                        return;
+
+                    if (boost::algorithm::istarts_with(message, sPlayerbotAIConfig.toxicLinksPrefix)
+                        && (GetChatHelper()->ExtractAllItemIds(message).size() > 0 || GetChatHelper()->ExtractAllQuestIds(message).size() > 0)
+                        && sPlayerbotAIConfig.toxicLinksRepliesChance)
                     {
-                        if (!isMentioned && urand(0, 4))
+                        if (urand(0, 50) > 0 || urand(1, 100) > sPlayerbotAIConfig.toxicLinksRepliesChance)
+                        {
                             return;
+                        }
+                    }
+                    else if ((GetChatHelper()->ExtractAllItemIds(message).count(19019) && sPlayerbotAIConfig.thunderfuryRepliesChance))
+                    {
+                        if (urand(0, 60) > 0 || urand(1, 100) > sPlayerbotAIConfig.thunderfuryRepliesChance)
+                        {
+                            return;
+                        }
                     }
                     else
                     {
-                        if (urand(0, 20 + 10 * isMentioned))
+                        if (isFromFreeBot && urand(0, 20))
                             return;
+
+                        if (msgtype == CHAT_MSG_GUILD && (!sPlayerbotAIConfig.guildRepliesRate || urand(1, 100) >= sPlayerbotAIConfig.guildRepliesRate))
+                            return;
+
+                        if (!isFromFreeBot)
+                        {
+                            if (!isMentioned && urand(0, 4))
+                                return;
+                        }
+                        else
+                        {
+                            if (urand(0, 20 + 10 * isMentioned))
+                                return;
+                        }
                     }
                 }
 
-                QueueChatResponse(msgtype, guid1, ObjectGuid(), message, chanName, name);
+                QueueChatResponse(msgtype, guid1, ObjectGuid(), message, chanName, name, isAiChat);
                 GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
 
                 return;
@@ -6976,6 +6980,24 @@ std::list<Unit*> PlayerbotAI::GetAllHostileNPCNonPetUnitsAroundWO(WorldObject* w
     return hostileUnitsNonPlayers;
 }
 
+void PlayerbotAI::SendDelayedPacket(WorldSession* session, std::future<std::vector<WorldPacket>> futurePacket, uint32 waitBeforeSend)
+{
+    time_t doNotSendBefore = time(0) + waitBeforeSend;
+    std::thread t([session, futPacket = std::move(futurePacket), doNotSendBefore]() mutable {
+        if (doNotSendBefore > time(0))
+            Sleep(doNotSendBefore - time(0));
+
+        for (auto& packet : futPacket.get())
+        {
+            std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet));
+
+            session->QueuePacket(std::move(packetPtr));
+        }
+    });
+
+    t.detach();
+}
+
 std::string PlayerbotAI::InventoryParseOutfitName(std::string outfit)
 {
     int pos = outfit.find("=");
@@ -7561,9 +7583,9 @@ bool PlayerbotAI::HasPlayerRelation()
     return false;
 }
 
-void PlayerbotAI::QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name)
+void PlayerbotAI::QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name, bool noDelay)
 {
-    chatReplies.push(ChatQueuedReply(msgType, guid1.GetCounter(), guid2.GetCounter(), message, chanName, name, time(0) + urand(inCombat ? 10 : 5, inCombat ? 25 : 15)));
+    chatReplies.push(ChatQueuedReply(msgType, guid1.GetCounter(), guid2.GetCounter(), message, chanName, name, time(0) + noDelay ? 0 : urand(inCombat ? 10 : 5, inCombat ? 25 : 15)));
 }
 
 bool PlayerbotAI::PlayAttackEmote(float chanceMultiplier)

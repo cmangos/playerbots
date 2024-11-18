@@ -180,4 +180,19 @@ namespace ai
         virtual std::vector<std::string> GetRelatedStrategies() { return { "debug" }; }
 #endif
     };
+
+    class AIChatStrategy : public Strategy
+    {
+    public:
+        AIChatStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "ai chat"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "ai chat"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "Uses the LLM system to respond to player chats.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "" }; }
+#endif
+    };
 }

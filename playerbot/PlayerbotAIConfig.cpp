@@ -15,6 +15,7 @@
 #include <numeric>
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
+#include <regex>
 
 std::vector<std::string> ConfigAccess::GetValues(const std::string& name) const
 {
@@ -64,6 +65,20 @@ void LoadListString(std::string value, T& list)
 
         list.push_back(string);
     }
+}
+
+inline ParsedUrl parseUrl(const std::string& url) {
+    std::regex urlRegex(R"((http|https)://([^:/]+)(:([0-9]+))?(/.*)?)");
+    std::smatch match;
+    if (!std::regex_match(url, match, urlRegex)) {
+        throw std::invalid_argument("Invalid URL format");
+    }
+
+    ParsedUrl parsed;
+    parsed.hostname = match[2];
+    parsed.port = match[4].length() ? std::stoi(match[4]) : 80;
+    parsed.path = match[5].length() ? match[5] : std::string("/");
+    return parsed;
 }
 
 bool PlayerbotAIConfig::Initialize()
@@ -573,6 +588,27 @@ bool PlayerbotAIConfig::Initialize()
     respawnModMax = config.GetIntDefault("AiPlayerbot.RespawnModMax", 18);
     respawnModForPlayerBots = config.GetBoolDefault("AiPlayerbot.RespawnModForPlayerBots", false);
     respawnModForInstances = config.GetBoolDefault("AiPlayerbot.RespawnModForInstances", false);
+
+    //LLM START
+    llmApiEndpoint = config.GetStringDefault("AiPlayerbot.LLMApiEndpoint", "http://127.0.0.1:5001/api/v1/generate");
+    try {
+        llmEndPointUrl = parseUrl(llmApiEndpoint);
+    }
+    catch (const std::invalid_argument& e) {
+        sLog.outError("Unable to parse LLMApiEndpoint url: %s", e.what());
+    }
+    llmApiKey = config.GetStringDefault("AiPlayerbot.LLMApiKey", "");    
+    llmApiJson = config.GetStringDefault("AiPlayerbot.LLMApiJson", "{ \"max_length\": 100, \"prompt\": \"<pre_prompt><prompt><post_prompt>\"}");
+
+    llmPrePrompt = config.GetStringDefault("AiPlayerbot.LLMPrePrompt", "You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player speaking to you is named <player name>. You are level <bot level> and play as a <bot race> <bot class>. Answer as a roleplaying character. Limit responses to 100 characters.");
+    llmPrompt = config.GetStringDefault("AiPlayerbot.LLMPrompt", " <player message>");
+    llmPostPrompt = config.GetStringDefault("AiPlayerbot.LLMPostPrompt", "");
+
+    llmResponseStartPattern = config.GetStringDefault("AiPlayerbot.LLMResponseStartPattern", "\"results\":[{\"text\":\"");
+    std::replace(llmResponseStartPattern.begin(), llmResponseStartPattern.end(), '\'', '\"');
+    llmResponseEndPattern = config.GetStringDefault("AiPlayerbot.LLMResponseEndPattern", "\"");
+    std::replace(llmResponseEndPattern.begin(), llmResponseEndPattern.end(), '\'', '\"');
+    //LLM END
 
     // Gear progression system
     gearProgressionSystemEnabled = config.GetBoolDefault("AiPlayerbot.GearProgressionSystem.Enable", false);

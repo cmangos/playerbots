@@ -197,7 +197,15 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             placeholders["<bot class>"] = ai->GetChatHelper()->formatClass(bot->getClass());
             placeholders["<bot race>"] = ai->GetChatHelper()->formatRace(bot->getRace());
             placeholders["<player name>"] = player->GetName();
-            placeholders["<expansion name>"] = "Wrath of the Lichking";
+#ifdef MANGOSBOT_ZERO
+            placeholders["<expansion name>"] = "Vanilla";
+#endif
+#ifdef MANGOSBOT_ONE
+            placeholders["<expansion name>"] = "The Burning Crusade";
+#endif
+#ifdef MANGOSBOT_TWO
+            placeholders["<expansion name>"] = "Wrath of the Lich King";
+#endif
             placeholders["<player message>"] = msg;
             
             std::map<std::string, std::string> jsonFill;

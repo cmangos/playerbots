@@ -6985,7 +6985,7 @@ void PlayerbotAI::SendDelayedPacket(WorldSession* session, std::future<std::vect
     time_t doNotSendBefore = time(0) + waitBeforeSend;
     std::thread t([session, futPacket = std::move(futurePacket), doNotSendBefore]() mutable {
         if (doNotSendBefore > time(0))
-            Sleep(doNotSendBefore - time(0));
+            std::this_thread::sleep_for(std::chrono::seconds(doNotSendBefore - time(0)));
 
         for (auto& packet : futPacket.get())
         {

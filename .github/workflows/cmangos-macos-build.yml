@@ -8,7 +8,7 @@ env:
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
   BOOST_VERSION: "1.83.0"
-  BOOST_PLATFORM_VERSION: "12"
+  BOOST_PLATFORM_VERSION: "14"
   CORE_REPO_OWNER: ${{github.repository_owner}}
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
           brew install mysql-client@8.4
           brew install openssl
           echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
-
+          echo "MYSQL_HOME=$(brew --prefix --installed mysql-client@8.4)" >> $GITHUB_ENV
       - name: Install Boost
         uses: MarkusJx/install-boost@v2.4.5
         id: install-boost
@@ -55,10 +55,11 @@ jobs:
           toolset: clang
           # NOTE: If a boost version matching all requirements cannot be found,
           # this build step will fail
-
+          arch: aarch64
       - name: Configure
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+          Boost_DIR: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: cmake -DBoost_ARCHITECTURE=-x64 ${{matrix.EXTRA_BUILD}} -DCMAKE_INSTALL_PREFIX=/home/runner/work -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build

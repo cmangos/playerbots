@@ -1587,6 +1587,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
             bool isAiChat = HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT);
 
+            if (isAiChat && lang == LANG_ADDON)
+                return;
+
             if (guid1 != bot->GetObjectGuid()) // do not reply to self
             {
                 // try to always reply to real player

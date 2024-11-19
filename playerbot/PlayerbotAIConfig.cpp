@@ -609,6 +609,9 @@ bool PlayerbotAIConfig::Initialize()
     std::replace(llmResponseStartPattern.begin(), llmResponseStartPattern.end(), '\'', '\"');
     llmResponseEndPattern = config.GetStringDefault("AiPlayerbot.LLMResponseEndPattern", "\"");
     std::replace(llmResponseEndPattern.begin(), llmResponseEndPattern.end(), '\'', '\"');
+
+    llmPreventTalkingForPlayer = config.GetBoolDefault("AiPlayerbot.LLMPreventTalkingForPlayer", false);
+
     //LLM END
 
     // Gear progression system

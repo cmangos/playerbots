@@ -2,11 +2,6 @@
 #include "PlayerbotLLMInterface.h"
 #include "PlayerbotAIConfig.h"
 
-
-#include <iostream>
-#include <string>
-#include <sstream>
-
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -24,9 +19,6 @@
 #include <netinet/in.h>
 #include <cstring>
 #endif
-
-
-
 std::string PlayerbotLLMInterface::Generate(const std::string& prompt) {
     const int bufferSize = 4096;
     char buffer[bufferSize];

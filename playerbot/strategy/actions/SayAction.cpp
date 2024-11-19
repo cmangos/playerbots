@@ -204,6 +204,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             placeholders["<player level>"] = std::to_string(player->GetLevel());
             placeholders["<player class>"] = ai->GetChatHelper()->formatClass(player->getClass());
             placeholders["<player race>"] = ai->GetChatHelper()->formatRace(player->getRace());
+
 #ifdef MANGOSBOT_ZERO
             placeholders["<expansion name>"] = "Vanilla";
 #endif
@@ -279,7 +280,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
             json = BOT_TEXT2(json, placeholders);
 
-            std::string playerName;
+            std::string playerName = player->GetName();
 
             uint32 type = CHAT_MSG_WHISPER;
 
@@ -288,7 +289,6 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             case ChatChannelSource::SRC_WHISPER:
             {
                 type = CHAT_MSG_WHISPER;
-                playerName = player->GetName();
                 break;
             }
             case ChatChannelSource::SRC_SAY:
@@ -321,10 +321,18 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
                 packet_template << type;
                 packet_template << lang;
 
-                if (!playerName.empty())
+                if (type == CHAT_MSG_WHISPER)
                     packet_template << playerName;
 
                 std::string response = PlayerbotLLMInterface::Generate(json);
+
+                if (sPlayerbotAIConfig.llmPreventTalkingForPlayer)
+                {
+                    size_t pos = response.find(playerName + ":");
+                    if (pos != std::string::npos)
+                        response = response.substr(0, pos) + sPlayerbotAIConfig.llmResponseEndPattern;
+                }
+
                 std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, sPlayerbotAIConfig.llmResponseStartPattern, sPlayerbotAIConfig.llmResponseEndPattern);
 
                 std::vector<WorldPacket> packets;

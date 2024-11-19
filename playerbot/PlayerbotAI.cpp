@@ -1585,6 +1585,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             }
 #endif
 
+            bool isAiChat = HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT);
+
             if (guid1 != bot->GetObjectGuid()) // do not reply to self
             {
                 // try to always reply to real player
@@ -1599,7 +1601,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     isFromFreeBot = sPlayerbotAIConfig.IsFreeAltBot(guid1);
 
                 bool isMentioned = message.find(bot->GetName()) != std::string::npos;
-                bool isAiChat = HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT);
+                
 
                 ChatChannelSource chatChannelSource = GetChatChannelSource(bot, msgtype, chanName);
 
@@ -1660,6 +1662,13 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
 
                 return;
+            }
+            else if (isAiChat)
+            {
+                AiObjectContext* context = aiObjectContext;
+                std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext");
+                llmContext = llmContext + " " + bot->GetName() + ":" + message;
+                SET_AI_VALUE(std::string, "manual string::llmcontext", llmContext);
             }
         }
 

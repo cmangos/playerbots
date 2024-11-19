@@ -598,7 +598,8 @@ bool PlayerbotAIConfig::Initialize()
         sLog.outError("Unable to parse LLMApiEndpoint url: %s", e.what());
     }
     llmApiKey = config.GetStringDefault("AiPlayerbot.LLMApiKey", "");    
-    llmApiJson = config.GetStringDefault("AiPlayerbot.LLMApiJson", "{ \"max_length\": 100, \"prompt\": \"<pre_prompt><prompt><post_prompt>\"}");
+    llmApiJson = config.GetStringDefault("AiPlayerbot.LLMApiJson", "{ \"max_length\": 100, \"prompt\": \"[<pre prompt>]<context><prompt><post prompt>\"}");
+    llmContextLength = config.GetIntDefault("AiPlayerbot.LLMContextLength", 4096);
 
     llmPrePrompt = config.GetStringDefault("AiPlayerbot.LLMPrePrompt", "You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player speaking to you is named <player name> an <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot race> <bot class>. Answer as a roleplaying character. Limit responses to 100 characters.");
     llmPrompt = config.GetStringDefault("AiPlayerbot.LLMPrompt", "<player name>:<player message>");

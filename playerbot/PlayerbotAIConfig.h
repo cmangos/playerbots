@@ -336,7 +336,7 @@ public:
 
     //LM BEGIN
     std::string llmApiEndpoint, llmApiKey, llmApiJson, llmPrePrompt, llmPrompt, llmPostPrompt, llmResponseStartPattern, llmResponseEndPattern;
-
+    uint32 llmContextLength;
     ParsedUrl llmEndPointUrl;
     //LM END
 

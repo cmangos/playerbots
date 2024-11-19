@@ -1264,6 +1264,14 @@ namespace ai
 
         bool IsActive() override;
     };
+
+    class AtWarTrigger : public Trigger
+    {
+    public:
+        AtWarTrigger(PlayerbotAI* ai) : Trigger(ai, "at war", 60) {}
+
+        bool IsActive() override;
+    };
 }
 
 #include "RangeTriggers.h"

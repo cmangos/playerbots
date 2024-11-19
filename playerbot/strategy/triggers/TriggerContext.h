@@ -182,6 +182,7 @@ namespace ai
             creators["target of fear cast"] = &TriggerContext::target_of_fear_cast;
             creators["heal target full health"] = &TriggerContext::heal_target_full_health;
             creators["dispel enrage"] = &TriggerContext::dispel_enrage;
+            creators["at war"] = [](PlayerbotAI* ai) { return new AtWarTrigger(ai); };
 
             creators["mounted"] = &TriggerContext::mounted;
             creators["rooted"] = &TriggerContext::rooted;

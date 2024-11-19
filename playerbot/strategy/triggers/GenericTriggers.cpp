@@ -1035,3 +1035,51 @@ bool ItemTargetTrigger::IsSpellReady()
 
     return false;
 }
+
+bool AtWarTrigger::IsActive()
+{
+    ReputationMgr& mgr = bot->GetReputationMgr();
+
+#ifndef MANGOSBOT_ONE
+    for (uint32 id = 0; id < sFactionStore.GetNumRows(); ++id)
+#else
+    for (uint32 id = 0; id < sFactionStore.GetMaxEntry(); ++id)
+#endif
+    {
+#ifndef MANGOSBOT_ONE
+        const FactionEntry* factionEntry = sFactionStore.LookupEntry(id);
+#else
+        const FactionEntry* factionEntry = sFactionStore.LookupEntry<FactionEntry>(id);
+#endif
+
+        if (!factionEntry)
+            continue;
+
+        FactionState const* repState = mgr.GetState(factionEntry);
+
+        if (!repState)
+            continue;
+
+        if (!(repState->Flags & FACTION_FLAG_VISIBLE))
+            continue;
+
+        if (repState->Flags & FACTION_FLAG_HIDDEN)
+            continue;
+
+        if (repState->Flags & FACTION_FLAG_INVISIBLE_FORCED)
+            continue;
+
+        if (repState->Flags & FACTION_FLAG_PEACE_FORCED)
+            continue;
+
+        if (!(repState->Flags & FACTION_FLAG_AT_WAR))
+            continue;
+
+        if (mgr.GetRank(factionEntry) < REP_HOSTILE)
+            continue;
+
+        return true;
+    }
+
+    return false;
+}

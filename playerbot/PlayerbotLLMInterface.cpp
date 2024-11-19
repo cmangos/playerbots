@@ -161,11 +161,10 @@ std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string&
     
         subString += c;
 
-        if ((subString.size() > 1 && subString.back() == 'n' && subString[subString.size() - 2] == '\\') || (subString.size() > 100 && c == '.') || (subString.size() > 200 && c == ' ') || subString.size() > 250)
+        if (subString.back() == '|' || (subString.size() > 100 && c == '.') || (subString.size() > 200 && c == ' ') || subString.size() > 250)
         {
-            if (subString.back() == 'n' && subString[subString.size() - 2] == '\\')
+            if (subString.back() == '|')
             {
-                subString.pop_back();
                 subString.pop_back();
             }
             if(subString.size())

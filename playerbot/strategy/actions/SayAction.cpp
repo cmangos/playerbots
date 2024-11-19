@@ -192,15 +192,17 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
         {
             PlayerbotAI* ai = bot->GetPlayerbotAI();
             AiObjectContext* context = ai->GetAiObjectContext();
+            std::string botName = bot->GetName();
+            std::string playerName = player->GetName();
 
             std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext");
 
             std::map<std::string, std::string> placeholders;
-            placeholders["<bot name>"] = bot->GetName();
+            placeholders["<bot name>"] = botName;
             placeholders["<bot level>"] = std::to_string(bot->GetLevel());
             placeholders["<bot class>"] = ai->GetChatHelper()->formatClass(bot->getClass());
             placeholders["<bot race>"] = ai->GetChatHelper()->formatRace(bot->getRace());
-            placeholders["<player name>"] = player->GetName();
+            placeholders["<player name>"] = playerName;
             placeholders["<player level>"] = std::to_string(player->GetLevel());
             placeholders["<player class>"] = ai->GetChatHelper()->formatClass(player->getClass());
             placeholders["<player race>"] = ai->GetChatHelper()->formatRace(player->getRace());
@@ -280,8 +282,6 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
             json = BOT_TEXT2(json, placeholders);
 
-            std::string playerName = player->GetName();
-
             uint32 type = CHAT_MSG_WHISPER;
 
             switch (chatChannelSource)
@@ -312,7 +312,10 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             }
             }
 
-            std::future<std::vector<WorldPacket>> futurePackets = std::async([type, bot, playerName, json] {
+            WorldSession* session = bot->GetSession();
+
+
+            std::future<std::vector<WorldPacket>> futurePackets = std::async([type, botName, playerName, json] {
 
                 WorldPacket packet_template(CMSG_MESSAGECHAT, 4096);
 
@@ -326,11 +329,25 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
                 std::string response = PlayerbotLLMInterface::Generate(json);
 
+                size_t pos;
+
                 if (sPlayerbotAIConfig.llmPreventTalkingForPlayer)
                 {
-                    size_t pos = response.find(playerName + ":");
+                    pos = response.find(playerName + ":");
                     if (pos != std::string::npos)
                         response = response.substr(0, pos) + sPlayerbotAIConfig.llmResponseEndPattern;
+                }
+
+                pos = 0;
+
+                while ((pos = response.find(botName + ":", pos)) != std::string::npos) {
+                    response.replace(pos, botName.length() + 1, "|");
+                    pos += 1;
+                }
+
+                while ((pos = response.find("/n", pos)) != std::string::npos) {
+                    response.replace(pos, 2, "|");
+                    pos += 1;
                 }
 
                 std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, sPlayerbotAIConfig.llmResponseStartPattern, sPlayerbotAIConfig.llmResponseEndPattern);
@@ -345,7 +362,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
                 return packets;  });
 
-            ai->SendDelayedPacket(bot->GetSession(), std::move(futurePackets));
+            ai->SendDelayedPacket(session, std::move(futurePackets));
 
             SET_AI_VALUE(std::string, "manual string::llmcontext", llmContext);
         }

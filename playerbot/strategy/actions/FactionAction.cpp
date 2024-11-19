@@ -65,7 +65,11 @@ bool FactionAction::Execute(Event& event)
         if (repState->Flags & FACTION_FLAG_INVISIBLE_FORCED)
             continue;
 
-        int loc = requester->GetSession()->GetSessionDbcLocale();
+        int loc = 0;
+        if (requester && requester->GetSession())
+            loc = requester->GetSession()->GetSessionDbcLocale();
+        else if (bot && bot->GetSession())
+            loc = bot->GetSession()->GetSessionDbcLocale();
 
         if (!factionName.empty() && factionIds.empty())
         {

@@ -37,7 +37,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          brew install mysql-client
+          brew install mysql-client@8.4
           brew install openssl
           echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
 

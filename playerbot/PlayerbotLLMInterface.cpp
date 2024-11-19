@@ -195,13 +195,14 @@ std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string&
                 continue; 
 
             endCursor++;
-            if (endCursor == endPattern.size() && responses.size())
+            if (endCursor == endPattern.size())
             {
                 if (subString.size())
                     responses.push_back(subString);
 
-                for (uint32 i = 0; i < std::min(endPattern.size(), responses.back().size()); i++)
-                    responses.back().pop_back();
+                if(responses.size())
+                    for (uint32 i = 0; i < std::min(endPattern.size(), responses.back().size()); i++)
+                        responses.back().pop_back();
                 break;
             }
         }

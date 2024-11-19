@@ -213,6 +213,36 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 #ifdef MANGOSBOT_TWO
             placeholders["<expansion name>"] = "Wrath of the Lich King";
 #endif
+            placeholders["<bot zone>"] = WorldPosition(bot).getAreaName();
+
+            switch (chatChannelSource)
+            {
+            case ChatChannelSource::SRC_WHISPER:
+            {
+                placeholders["<channel name>"] = "in private message";
+                break;
+            }
+            case ChatChannelSource::SRC_SAY:
+            {
+                placeholders["<channel name>"] = "directly";
+                break;
+            }
+            case ChatChannelSource::SRC_YELL:
+            {
+                placeholders["<channel name>"] = "with a yell";
+                break;
+            }
+            case ChatChannelSource::SRC_PARTY:
+            {
+                placeholders["<channel name>"] = "in party chat";
+                break;
+            }
+            case ChatChannelSource::SRC_GUILD:
+            {
+                placeholders["<channel name>"] = "in guild chat";
+            }
+            }
+
             placeholders["<player message>"] = msg;
 
             std::map<std::string, std::string> jsonFill;

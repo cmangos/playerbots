@@ -197,6 +197,9 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             placeholders["<bot class>"] = ai->GetChatHelper()->formatClass(bot->getClass());
             placeholders["<bot race>"] = ai->GetChatHelper()->formatRace(bot->getRace());
             placeholders["<player name>"] = player->GetName();
+            placeholders["<player level>"] = std::to_string(player->GetLevel());
+            placeholders["<player class>"] = ai->GetChatHelper()->formatClass(player->getClass());
+            placeholders["<player race>"] = ai->GetChatHelper()->formatRace(player->getRace());
 #ifdef MANGOSBOT_ZERO
             placeholders["<expansion name>"] = "Vanilla";
 #endif

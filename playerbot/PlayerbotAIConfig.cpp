@@ -600,9 +600,9 @@ bool PlayerbotAIConfig::Initialize()
     llmApiKey = config.GetStringDefault("AiPlayerbot.LLMApiKey", "");    
     llmApiJson = config.GetStringDefault("AiPlayerbot.LLMApiJson", "{ \"max_length\": 100, \"prompt\": \"<pre_prompt><prompt><post_prompt>\"}");
 
-    llmPrePrompt = config.GetStringDefault("AiPlayerbot.LLMPrePrompt", "You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player speaking to you is named <player name>. You are level <bot level> and play as a <bot race> <bot class>. Answer as a roleplaying character. Limit responses to 100 characters.");
-    llmPrompt = config.GetStringDefault("AiPlayerbot.LLMPrompt", " <player message>");
-    llmPostPrompt = config.GetStringDefault("AiPlayerbot.LLMPostPrompt", "");
+    llmPrePrompt = config.GetStringDefault("AiPlayerbot.LLMPrePrompt", "You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player speaking to you is named <player name> an <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot race> <bot class>. Answer as a roleplaying character. Limit responses to 100 characters.");
+    llmPrompt = config.GetStringDefault("AiPlayerbot.LLMPrompt", "<player name>:<player message>");
+    llmPostPrompt = config.GetStringDefault("AiPlayerbot.LLMPostPrompt", "<bot name>:");
 
     llmResponseStartPattern = config.GetStringDefault("AiPlayerbot.LLMResponseStartPattern", "\"results\":[{\"text\":\"");
     std::replace(llmResponseStartPattern.begin(), llmResponseStartPattern.end(), '\'', '\"');

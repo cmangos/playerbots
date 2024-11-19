@@ -188,7 +188,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
     if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT))
     {
         Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, guid1));
-        if (player && player->isRealPlayer())
+        if (player && (player->isRealPlayer() || (sPlayerbotAIConfig.llmBotToBotChatChance && urand(0,99) < sPlayerbotAIConfig.llmBotToBotChatChance)))
         {
             PlayerbotAI* ai = bot->GetPlayerbotAI();
             AiObjectContext* context = ai->GetAiObjectContext();

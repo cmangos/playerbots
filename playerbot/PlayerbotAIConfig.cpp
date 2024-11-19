@@ -611,6 +611,7 @@ bool PlayerbotAIConfig::Initialize()
     std::replace(llmResponseEndPattern.begin(), llmResponseEndPattern.end(), '\'', '\"');
 
     llmPreventTalkingForPlayer = config.GetBoolDefault("AiPlayerbot.LLMPreventTalkingForPlayer", false);
+    llmBotToBotChatChance = config.GetIntDefault("AiPlayerbot.LLMBotToBotChatChance", false);
 
     //LLM END
 

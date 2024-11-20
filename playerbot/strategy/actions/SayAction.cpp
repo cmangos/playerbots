@@ -325,7 +325,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
             std::future<std::vector<WorldPacket>> futurePackets = std::async([type, botName, playerName, json] {
 
-                WorldPacket packet_template(CMSG_MESSAGECHAT, 4096);
+                WorldPacket packet_template(CMSG_MESSAGECHAT);
 
                 uint32 lang = LANG_UNIVERSAL;
 

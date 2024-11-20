@@ -97,42 +97,23 @@ bool DebugAction::Execute(Event& event)
 
         return true;
     }
-    else if (text.find("llm ") == 0)
+    else if (text.find("llm ") == 0 && isMod)
     {
         Player* player = bot;
 
-        std::future<std::vector<WorldPacket>> futurePacket = std::async([player, text, requester] {
+        std::map<std::string, std::string> jsonFill;
+        jsonFill["<prompt>"] = text.substr(4);
+        jsonFill["<context>"] = "";
+        jsonFill["<pre prompt>"] = "";
+        jsonFill["<post prompt>"] = "";
 
-            WorldPacket packet_template(CMSG_MESSAGECHAT, 4096);
+        std::string json = BOT_TEXT2(sPlayerbotAIConfig.llmApiJson, jsonFill);
 
-            uint32 type = CHAT_MSG_WHISPER;
-            uint32 lang = LANG_UNIVERSAL;
-
-            packet_template << type;
-            packet_template << lang;
-            packet_template << requester->GetName();
-
-            std::map<std::string, std::string> jsonFill;
-            jsonFill["<prompt>"] = text.substr(4);
-            std::string json = BOT_TEXT2(sPlayerbotAIConfig.llmApiJson, jsonFill);
-
-            std::string response = PlayerbotLLMInterface::Generate(json);
-            std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, sPlayerbotAIConfig.llmResponseStartPattern, sPlayerbotAIConfig.llmResponseEndPattern);
-
-            std::vector<WorldPacket> packets;
-            for (auto& line : lines)
-            {
-                WorldPacket packet(packet_template);
-                packet << line;
-                packets.push_back(packet);
-            }
-
-            return packets; });
-
-        ai->SendDelayedPacket(bot->GetSession(), std::move(futurePacket));
+        std::string response = PlayerbotLLMInterface::Generate(json);
+        ai->TellPlayerNoFacing(requester, response, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
         return true;
     }
-    else if (text.find("chatreplydo ") == 0)
+    else if (text.find("chatreplydo ") == 0 && isMod)
     {
         ChatReplyAction::ChatReplyDo(bot, CHAT_MSG_WHISPER, requester->GetGUIDLow(), 0, text.substr(12), "", requester->GetName());
         return true;

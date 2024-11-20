@@ -956,6 +956,8 @@ AiPlayerbot.PerfMonEnabled = 0
 
 # Stop parsing the LLM response the moment it finds the pattern <player name>: to stop it impersonating the player.
 # AiPlayerbot.LLMPreventTalkingForPlayer = 0
+# Should previous conversations from all channels be mixed?
+# AiPlayerbot.LLMGlobalContext = 0
 
 # The chance bots will use ai chat to respond to other bots 
 # AiPlayerbot.LLMBotToBotChatChance = 0

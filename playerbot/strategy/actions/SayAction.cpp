@@ -188,14 +188,21 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
     if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && chatChannelSource != ChatChannelSource::SRC_UNDEFINED)
     {
         Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, guid1));
+
+        PlayerbotAI* ai = bot->GetPlayerbotAI();
+        AiObjectContext* context = ai->GetAiObjectContext();
+
+        std::string llmChannel;
+
+        if (!sPlayerbotAIConfig.llmGlobalContext)
+            llmChannel = ((chatChannelSource == ChatChannelSource::SRC_WHISPER) ? name : std::to_string(chatChannelSource));
+
+        std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext" + llmChannel);
+
         if (player && (player->isRealPlayer() || (sPlayerbotAIConfig.llmBotToBotChatChance && urand(0,99) < sPlayerbotAIConfig.llmBotToBotChatChance)))
         {
-            PlayerbotAI* ai = bot->GetPlayerbotAI();
-            AiObjectContext* context = ai->GetAiObjectContext();
             std::string botName = bot->GetName();
             std::string playerName = player->GetName();
-
-            std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext");
 
             std::map<std::string, std::string> placeholders;
             placeholders["<bot name>"] = botName;
@@ -364,8 +371,8 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
             ai->SendDelayedPacket(session, std::move(futurePackets));
 
-            SET_AI_VALUE(std::string, "manual string::llmcontext", llmContext);
         }
+        SET_AI_VALUE(std::string, "manual string::llmcontext" + llmChannel, llmContext);
 
         return;
     }

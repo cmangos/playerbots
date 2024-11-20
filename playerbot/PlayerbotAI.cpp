@@ -40,6 +40,7 @@
 #include "Entities/Transports.h"
 #include "Guilds/GuildMgr.h"
 #include "Chat/ChannelMgr.h"
+#include "PlayerbotLLMInterface.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -1668,10 +1669,18 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             }
             else if (isAiChat)
             {
+                ChatChannelSource chatChannelSource = bot->GetPlayerbotAI()->GetChatChannelSource(bot, msgtype, chanName);
+
+                std::string llmChannel;
+
+                if (!sPlayerbotAIConfig.llmGlobalContext)
+                    llmChannel = ((chatChannelSource == ChatChannelSource::SRC_WHISPER) ? name : std::to_string(chatChannelSource));
+
                 AiObjectContext* context = aiObjectContext;
-                std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext");
+                std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext" + llmChannel);
                 llmContext = llmContext + " " + bot->GetName() + ":" + message;
-                SET_AI_VALUE(std::string, "manual string::llmcontext", llmContext);
+                PlayerbotLLMInterface::LimitContext(llmContext, llmContext.size());
+                SET_AI_VALUE(std::string, "manual string::llmcontext" + llmChannel, llmContext);
             }
         }
 

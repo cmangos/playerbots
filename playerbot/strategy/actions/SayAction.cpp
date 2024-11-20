@@ -256,6 +256,11 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
             placeholders["<player message>"] = msg;
 
+            std::string startPattern, endPattern, splitPattern;
+            startPattern = BOT_TEXT2(sPlayerbotAIConfig.llmResponseStartPattern, placeholders);
+            endPattern = BOT_TEXT2(sPlayerbotAIConfig.llmResponseEndPattern, placeholders);
+            splitPattern = BOT_TEXT2(sPlayerbotAIConfig.llmResponseSplitPattern, placeholders);
+
             std::map<std::string, std::string> jsonFill;
             jsonFill["<pre prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPrePrompt, placeholders);
             jsonFill["<prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPrompt, placeholders); 
@@ -263,24 +268,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
             uint32 currentLength = jsonFill["<pre prompt>"].size() + jsonFill["<context>"].size() + jsonFill["<prompt>"].size() + llmContext.size();
 
-            if(sPlayerbotAIConfig.llmContextLength && currentLength > sPlayerbotAIConfig.llmContextLength)
-            {
-                uint32 cutNeeded = currentLength - sPlayerbotAIConfig.llmContextLength;
-
-                if (cutNeeded > llmContext.size())
-                    llmContext.clear();
-                else
-                {
-                    uint32 cutPosition = 0;
-                    for (auto& c : llmContext)
-                    {
-                        cutPosition++;
-                        if (cutPosition >= cutNeeded && c == ' ' || c == '.')
-                            break;
-                    }
-                    llmContext = llmContext.substr(cutPosition);
-                }
-            }
+            PlayerbotLLMInterface::LimitContext(llmContext, currentLength);
 
             jsonFill["<context>"] = llmContext;
 
@@ -322,8 +310,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
             WorldSession* session = bot->GetSession();
 
-
-            std::future<std::vector<WorldPacket>> futurePackets = std::async([type, botName, playerName, json] {
+            std::future<std::vector<WorldPacket>> futurePackets = std::async([type, playerName, json, startPattern, endPattern, splitPattern] {
 
                 WorldPacket packet_template(CMSG_MESSAGECHAT);
 
@@ -337,28 +324,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
                 std::string response = PlayerbotLLMInterface::Generate(json);
 
-                size_t pos;
-
-                if (sPlayerbotAIConfig.llmPreventTalkingForPlayer)
-                {
-                    pos = response.find(playerName + ":");
-                    if (pos != std::string::npos)
-                        response = response.substr(0, pos) + sPlayerbotAIConfig.llmResponseEndPattern;
-                }
-
-                pos = 0;
-
-                while ((pos = response.find(botName + ":", pos)) != std::string::npos) {
-                    response.replace(pos, botName.length() + 1, "|");
-                    pos += 1;
-                }
-
-                while ((pos = response.find("/n", pos)) != std::string::npos) {
-                    response.replace(pos, 2, "|");
-                    pos += 1;
-                }
-
-                std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, sPlayerbotAIConfig.llmResponseStartPattern, sPlayerbotAIConfig.llmResponseEndPattern);
+                std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, startPattern, endPattern, splitPattern);
 
                 std::vector<WorldPacket> packets;
                 for (auto& line : lines)

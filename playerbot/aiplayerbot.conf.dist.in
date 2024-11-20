@@ -948,14 +948,13 @@ AiPlayerbot.PerfMonEnabled = 0
 # The default prompt to send at the end of each conversation.
 # AiPlayerbot.LLMPostPrompt = <bot name>:
 
-# What pattern the server should look for to find the start of the repsonse the llm gave. Note spaces in the actual response are ignored of the start pattern.
-# Double quotes at the start and end of the pattern need to be single quotes to be read correctly.
-# AiPlayerbot.LLMResponseStartPattern = 'results":[{"text":'
+# What pattern the server should look for to find the start of the repsonse the llm gave.
+# AiPlayerbot.LLMResponseStartPattern = (\"text\":\\s*\")
 # What pattern the server should look for that the response has ended.
-# AiPlayerbot.LLMResponseEndPattern = '
+# AiPlayerbot.LLMResponseEndPattern = (\"|<player name>:)
+# What pattern the server should look for to split the repsonse in multiple lines
+# AiPlayerbot.LLMResponseSplitPattern = (.*?)(\\.|\\?|\\!|\n|<bot name>:|$)\\s*
 
-# Stop parsing the LLM response the moment it finds the pattern <player name>: to stop it impersonating the player.
-# AiPlayerbot.LLMPreventTalkingForPlayer = 0
 # Should previous conversations from all channels be mixed?
 # AiPlayerbot.LLMGlobalContext = 0
 

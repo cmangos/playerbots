@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <regex>
 
 #ifdef _WIN32
 // Windows-specific headers
@@ -134,70 +135,100 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt) {
     return response;
 }
 
-std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string& response, std::string startPattern, std::string endPattern)
+inline std::string extractAfterPattern(const std::string& content, const std::string& startPattern) {
+    std::regex pattern(startPattern);
+    std::smatch match;
+
+    if (std::regex_search(content, match, pattern)) {
+        size_t start_pos = match.position() + match.length();
+        return content.substr(start_pos);
+    }
+    else {
+        return "";
+    }
+
+}
+
+inline std::string extractBeforePattern(const std::string& content, const std::string& endPattern) {
+    std::regex pattern(endPattern);
+    std::smatch match;
+
+    if (std::regex_search(content, match, pattern)) {
+        size_t end_pos = match.position();
+
+        return content.substr(0, end_pos);
+    }
+    else {
+        return content;
+    }
+}
+
+inline std::vector<std::string> splitResponse(const std::string& response, const std::string& splitPattern) {
+    std::vector<std::string> result;
+    std::regex pattern(splitPattern);
+    std::smatch match;
+    std::string remaining = response;
+
+    while (std::regex_search(remaining, match, pattern) && remaining.size()) {
+        std::string sentence = match[1];
+
+        if (match[2] == "." || match[2] == "!" || match[2] == "?")
+            sentence += match[2];
+
+        remaining = match.suffix().str();
+
+        while (sentence.length() > 200) {
+            size_t split_pos = sentence.rfind(' ', 200);
+            if (split_pos == std::string::npos) {
+                split_pos = 200;
+            }
+
+            if (!sentence.substr(0, split_pos).empty())
+                result.push_back(sentence.substr(0, split_pos));
+
+            sentence = sentence.substr(split_pos + 1);
+        }
+
+        if(!sentence.empty())
+            result.push_back(sentence);
+    }
+
+    return result;
+}
+
+std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string& response, const std::string& startPattern, const std::string& endPattern, const std::string& splitPattern)
 {
     uint32 startCursor = 0;
     uint32 endCursor = 0;
-    std::string subString;
 
-    std::vector<std::string> responses;
-
-    for (auto& c : response)
-    {
-        if (startCursor < startPattern.size())
-        {
-            if (c == ' ')
-                continue;
-
-            if (c != startPattern[startCursor])
-            {
-                startCursor = 0;
-                continue;
-            }
-
-            startCursor++;
-            continue;
-        }
+    std::string actualResponse = response;
     
-        subString += c;
+    actualResponse = extractAfterPattern(actualResponse, startPattern);
+    actualResponse = extractBeforePattern(actualResponse, endPattern);
 
-        if (subString.back() == '|' || (subString.size() > 100 && c == '.') || (subString.size() > 200 && c == ' ') || subString.size() > 250)
-        {
-            if (subString.back() == '|')
-            {
-                subString.pop_back();
-            }
-            if(subString.size())
-                responses.push_back(subString);
-            subString.clear();
-        }
-
-
-        if (c == ' ')
-            continue;
-
-        if (c != endPattern[endCursor])
-        {
-            endCursor = 0;
-        }
-        else
-        {
-            if (subString.size() > 1 && subString[subString.size() - 2] == '\\')
-                continue; 
-
-            endCursor++;
-            if (endCursor == endPattern.size())
-            {
-                if (subString.size())
-                    responses.push_back(subString);
-
-                if(responses.size())
-                    for (uint32 i = 0; i < std::min(endPattern.size(), responses.back().size()); i++)
-                        responses.back().pop_back();
-                break;
-            }
-        }
-    }
+    std::vector<std::string> responses = splitResponse(actualResponse, splitPattern);    
 
     return responses;
+}
+
+void PlayerbotLLMInterface::LimitContext(std::string& context, uint32 currentLength)
+{
+    if (sPlayerbotAIConfig.llmContextLength && currentLength > sPlayerbotAIConfig.llmContextLength)
+    {
+        uint32 cutNeeded = currentLength - sPlayerbotAIConfig.llmContextLength;
+
+        if (cutNeeded > context.size())
+            context.clear();
+        else
+        {
+            uint32 cutPosition = 0;
+            for (auto& c : context)
+            {
+                cutPosition++;
+                if (cutPosition >= cutNeeded && c == ' ' || c == '.')
+                    break;
+            }
+            context = context.substr(cutPosition);
+        }
+    }
 }

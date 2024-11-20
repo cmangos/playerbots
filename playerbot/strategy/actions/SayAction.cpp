@@ -373,6 +373,11 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             ai->SendDelayedPacket(session, std::move(futurePackets));
 
         }
+        else if(sPlayerbotAIConfig.llmBotToBotChatChance)
+        {
+            llmContext = llmContext + " " + bot->GetName() + ":" + msg;
+            PlayerbotLLMInterface::LimitContext(llmContext, llmContext.size());
+        }
         SET_AI_VALUE(std::string, "manual string::llmcontext" + llmChannel, llmContext);
 
         return;

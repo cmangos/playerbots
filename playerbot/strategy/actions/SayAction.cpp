@@ -224,6 +224,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             placeholders["<expansion name>"] = "Wrath of the Lich King";
 #endif
             placeholders["<bot zone>"] = WorldPosition(bot).getAreaName();
+            placeholders["<bot subzone>"] = WorldPosition(bot).getAreaOverride();
 
             switch (chatChannelSource)
             {

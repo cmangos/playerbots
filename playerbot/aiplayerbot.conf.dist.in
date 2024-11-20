@@ -942,7 +942,7 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.LLMContextLength = 4096
 
 # The default prompt to send at the beginning of each conversation.
-# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player <player name> is speaking to you <channel name> and is an <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot race> <bot class> that is currently in <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.
+# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player <player name> is speaking to you <channel name> and is an <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot race> <bot class> that is currently in <bot subzone> (<bot zone>). Answer as a roleplaying character. Limit responses to 100 characters.
 # The prompt part containing the last message from the player the bot is responding to.
 # AiPlayerbot.LLMPrompt = <player name>:<player message>
 # The default prompt to send at the end of each conversation.
@@ -966,7 +966,7 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.LLMApiEndpoint = http://IP/URL:PORT/v1/chat/completions
 # AiPlayerbot.LLMApiKey = YOUR_API_KEY
 # AiPlayerbot.LLMApiJson = {\"model\": \"gpt-4o-mini\", "\"messages\": [{\"role\": \"system\", \"content\": \"<pre prompt> <context>\"},{\"role\": \"user\", \"content\": \"<prompt> <post prompt>\"}],\"max_tokens\": 60}
-# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player speaking to you is named <player name>. You are level <bot level> and play as a <bot race> <bot class>. Answer as a roleplaying character. Limit responses to 100 characters.
+# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player <player name> is speaking to you <channel name> and is an <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot race> <bot class> that is currently in <bot subzone> (<bot zone>). Answer as a roleplaying character. Limit responses to 100 characters.
 # AiPlayerbot.LLMPrompt = <player message>
 # AiPlayerbot.LLMPostPrompt = 
 # AiPlayerbot.LLMResponseStartPattern = 'message":{"role":"system","content":'

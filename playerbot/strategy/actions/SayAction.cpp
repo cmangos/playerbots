@@ -206,10 +206,12 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
             std::map<std::string, std::string> placeholders;
             placeholders["<bot name>"] = botName;
+            placeholders["<bot gender>"] = bot->getGender() == GENDER_MALE ? "male" : "female";
             placeholders["<bot level>"] = std::to_string(bot->GetLevel());
             placeholders["<bot class>"] = ai->GetChatHelper()->formatClass(bot->getClass());
             placeholders["<bot race>"] = ai->GetChatHelper()->formatRace(bot->getRace());
             placeholders["<player name>"] = playerName;
+            placeholders["<player gender>"] = player->getGender() == GENDER_MALE ? "male" : "female";
             placeholders["<player level>"] = std::to_string(player->GetLevel());
             placeholders["<player class>"] = ai->GetChatHelper()->formatClass(player->getClass());
             placeholders["<player race>"] = ai->GetChatHelper()->formatRace(player->getRace());

@@ -228,7 +228,7 @@ namespace ai
         uint16 getAreaFlag() const { return isValid() ? sTerrainMgr.GetAreaFlag(getMapId(), coord_x, coord_y, coord_z) : 0; };
         AreaTableEntry const* getArea() const;
         std::string getAreaName(const bool fullName = true, const bool zoneName = false) const;
-        std::string getAreaOverride() const { if (!getTerrain()) return "";  AreaNameInfo nameInfo = getTerrain()->GetAreaName(coord_x, coord_y, coord_z, 0); return nameInfo.wmoNameOverride; }
+        std::string getAreaOverride() const { if (!getTerrain()) return "";  AreaNameInfo nameInfo = getTerrain()->GetAreaName(coord_x, coord_y, coord_z, 0); return nameInfo.wmoNameOverride ? nameInfo.wmoNameOverride : ""; }
         int32 getAreaLevel() const;
 
         bool hasAreaFlag(const AreaFlags flag = AREA_FLAG_CAPITAL) const;

@@ -88,7 +88,7 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt) {
     request << "Host: " << parsedUrl.hostname << "\r\n";
     request << "Content-Type: application/json\r\n";
     if (!sPlayerbotAIConfig.llmApiKey.empty())
-        request << "Authorization: Bearer " << sPlayerbotAIConfig.llmApiKey;
+        request << "Authorization: Bearer " << sPlayerbotAIConfig.llmApiKey << "\r\n";
     std::string body = prompt;
     request << "Content-Length: " << body.size() << "\r\n";
     request << "\r\n";

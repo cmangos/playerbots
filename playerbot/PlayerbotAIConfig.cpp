@@ -613,21 +613,21 @@ bool PlayerbotAIConfig::Initialize()
         std::regex pattern(llmResponseStartPattern);
     }
     catch (const std::regex_error& e) {        
-        sLog.outError("Regex error in %s: %s", llmResponseStartPattern,  e.what());
+        sLog.outError("Regex error in %s: %s", llmResponseStartPattern.c_str(), e.what());
     }
 
     try {
         std::regex pattern(llmResponseEndPattern);
     }
     catch (const std::regex_error& e) {
-        sLog.outError("Regex error in %s: %s", llmResponseEndPattern, e.what());
+        sLog.outError("Regex error in %s: %s", llmResponseEndPattern.c_str(), e.what());
     }
 
     try {
         std::regex pattern(llmResponseEndPattern);
     }
     catch (const std::regex_error& e) {
-        sLog.outError("Regex error in %s: %s", llmResponseSplitPattern, e.what());
+        sLog.outError("Regex error in %s: %s", llmResponseSplitPattern.c_str(), e.what());
     }
 
     llmGlobalContext = config.GetBoolDefault("AiPlayerbot.LLMGlobalContext", false);

@@ -1189,6 +1189,9 @@ bool BGStatusAction::Execute(Event& event)
         return false;
 
 #ifndef MANGOSBOT_TWO
+    BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(_bgTypeId);
+    if (!bg)
+        return false;
     bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(_bgTypeId, bot->GetLevel());
 #endif
 #ifdef MANGOSBOT_TWO

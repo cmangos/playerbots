@@ -955,30 +955,35 @@ AiPlayerbot.PerfMonEnabled = 0
 # The api key needed to access the endpoint.
 # AiPlayerbot.LLMApiKey =
 # The default json to send to the endpoint.
-# AiPlayerbot.LLMApiJson = {"max_length": 100, "prompt": "<pre prompt><prompt><post prompt>"}
+# AiPlayerbot.LLMApiJson = {"max_length": 100, "prompt": "[<pre prompt>]<context> <prompt> <post prompt>"}
+
+# The max context length allowed for the model. 0 to disable. This will shrink the context (all previous conversations) to make the entire prompt <pre prompt><context><prompt><post prompt> fit.
+# AiPlayerbot.LLMContextLength = 4096
 
 # The default prompt to send at the beginning of each conversation.
-# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player speaking to you is named <player name>. You are level <bot level> and play as a <bot race> <bot class>. Answer as a roleplaying character. Limit responses to 100 characters.
+# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player <player name> is speaking to you <channel name> and is an <player gender> <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.
 # The prompt part containing the last message from the player the bot is responding to.
-# AiPlayerbot.LLMPrompt = <player message>
+# AiPlayerbot.LLMPrompt = <player name>:<player message>
 # The default prompt to send at the end of each conversation.
-# AiPlayerbot.LLMPostPrompt = 
+# AiPlayerbot.LLMPostPrompt = <bot name>:
 
-# What pattern the server should look for to find the start of the repsonse the llm gave. Note spaces in the actual response are ignored of the start pattern.
-# Double quotes at the start and end of the pattern need to be single quotes to be read correctly.
-# AiPlayerbot.LLMResponseStartPattern = 'results":[{"text":'
+# What pattern the server should look for to find the start of the repsonse the llm gave.
+# AiPlayerbot.LLMResponseStartPattern = (\"text\":\\s*\")
 # What pattern the server should look for that the response has ended.
-# AiPlayerbot.LLMResponseEndPattern = '
+# AiPlayerbot.LLMResponseEndPattern = (\"|<player name>:)
+# What pattern the server should look for to split the repsonse in multiple lines. The second capture group will be truncated except for .?!
+# AiPlayerbot.LLMResponseSplitPattern = (.*?)(\\.|\\?|\\!|\n|<bot name>:|$)\\s*
+
+# Should previous conversations from all channels be mixed?
+# AiPlayerbot.LLMGlobalContext = 0
+
+# The chance bots will use ai chat to respond to other bots 
+# AiPlayerbot.LLMBotToBotChatChance = 0
 
 # OPEN-AI example:
 # AiPlayerbot.LLMApiEndpoint = http://IP/URL:PORT/v1/chat/completions
 # AiPlayerbot.LLMApiKey = YOUR_API_KEY
-# AiPlayerbot.LLMApiJson = {\"model\": \"gpt-4o-mini\", "\"messages\": [{\"role\": \"system\", \"content\": \"<pre prompt>\"},{\"role\": \"user\", \"content\": \"<prompt>\"}],\"max_tokens\": 60}
-# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player speaking to you is named <player name>. You are level <bot level> and play as a <bot race> <bot class>. Answer as a roleplaying character. Limit responses to 100 characters.
-# AiPlayerbot.LLMPrompt = <player message>
-# AiPlayerbot.LLMPostPrompt = 
-# AiPlayerbot.LLMResponseStartPattern = 'message":{"role":"system","content":'
-# AiPlayerbot.LLMResponseEndPattern = '
+# AiPlayerbot.LLMApiJson = {\"model\": \"gpt-4o-mini\", "\"messages\": [{\"role\": \"system\", \"content\": \"<pre prompt> <context>\"},{\"role\": \"user\", \"content\": \"<prompt>\"}],\"max_tokens\": 60}
 
 # Mystery config value. Currently enables async bot pathfinding. Rarely crashes the server.
 # AiPlayerbot.TweakValue = 0

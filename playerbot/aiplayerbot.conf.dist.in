@@ -942,7 +942,7 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.LLMContextLength = 4096
 
 # The default prompt to send at the beginning of each conversation.
-# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player <player name> is speaking to you <channel name> and is an <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot race> <bot class> that is currently in <bot subzone> (<bot zone>). Answer as a roleplaying character. Limit responses to 100 characters.
+# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player <player name> is speaking to you <channel name> and is an <player gender> <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.
 # The prompt part containing the last message from the player the bot is responding to.
 # AiPlayerbot.LLMPrompt = <player name>:<player message>
 # The default prompt to send at the end of each conversation.
@@ -952,7 +952,7 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.LLMResponseStartPattern = (\"text\":\\s*\")
 # What pattern the server should look for that the response has ended.
 # AiPlayerbot.LLMResponseEndPattern = (\"|<player name>:)
-# What pattern the server should look for to split the repsonse in multiple lines
+# What pattern the server should look for to split the repsonse in multiple lines. The second capture group will be truncated except for .?!
 # AiPlayerbot.LLMResponseSplitPattern = (.*?)(\\.|\\?|\\!|\n|<bot name>:|$)\\s*
 
 # Should previous conversations from all channels be mixed?
@@ -964,12 +964,7 @@ AiPlayerbot.PerfMonEnabled = 0
 # OPEN-AI example:
 # AiPlayerbot.LLMApiEndpoint = http://IP/URL:PORT/v1/chat/completions
 # AiPlayerbot.LLMApiKey = YOUR_API_KEY
-# AiPlayerbot.LLMApiJson = {\"model\": \"gpt-4o-mini\", "\"messages\": [{\"role\": \"system\", \"content\": \"<pre prompt> <context>\"},{\"role\": \"user\", \"content\": \"<prompt> <post prompt>\"}],\"max_tokens\": 60}
-# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player <player name> is speaking to you <channel name> and is an <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot race> <bot class> that is currently in <bot subzone> (<bot zone>). Answer as a roleplaying character. Limit responses to 100 characters.
-# AiPlayerbot.LLMPrompt = <player message>
-# AiPlayerbot.LLMPostPrompt = 
-# AiPlayerbot.LLMResponseStartPattern = 'message":{"role":"system","content":'
-# AiPlayerbot.LLMResponseEndPattern = '
+# AiPlayerbot.LLMApiJson = {\"model\": \"gpt-4o-mini\", "\"messages\": [{\"role\": \"system\", \"content\": \"<pre prompt> <context>\"},{\"role\": \"user\", \"content\": \"<prompt>\"}],\"max_tokens\": 60}
 
 # Mystery config value. Currently enables async bot pathfinding. Rarely crashes the server.
 # AiPlayerbot.TweakValue = 0

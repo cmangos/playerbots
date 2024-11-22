@@ -199,7 +199,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
         std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext" + llmChannel);
 
-        if (player && (player->isRealPlayer() || (sPlayerbotAIConfig.llmBotToBotChatChance && urand(0,99) < sPlayerbotAIConfig.llmBotToBotChatChance)))
+        if (player && (player->isRealPlayer() || (sPlayerbotAIConfig.llmBotToBotChatChance && urand(0, 99) < sPlayerbotAIConfig.llmBotToBotChatChance)))
         {
             std::string botName = bot->GetName();
             std::string playerName = player->GetName();
@@ -271,12 +271,15 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             jsonFill["<post prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPostPrompt, placeholders);
 
             uint32 currentLength = jsonFill["<pre prompt>"].size() + jsonFill["<context>"].size() + jsonFill["<prompt>"].size() + llmContext.size();
-
             PlayerbotLLMInterface::LimitContext(llmContext, currentLength);
-
             jsonFill["<context>"] = llmContext;
 
             llmContext += " " + jsonFill["<prompt>"];
+
+            for (auto& prompt : jsonFill)
+            {
+                prompt.second = PlayerbotLLMInterface::SanitizeForJson(prompt.second);
+            }
 
             std::string json = BOT_TEXT2(sPlayerbotAIConfig.llmApiJson, jsonFill);
 
@@ -312,9 +315,11 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             }
             }
 
+            bool debug = bot->GetPlayerbotAI()->HasStrategy("debug llm", BotState::BOT_STATE_NON_COMBAT);
+
             WorldSession* session = bot->GetSession();
 
-            std::future<std::vector<WorldPacket>> futurePackets = std::async([type, playerName, json, startPattern, endPattern, splitPattern] {
+            std::future<std::vector<WorldPacket>> futurePackets = std::async([type, playerName, json, startPattern, endPattern, splitPattern, debug] {
 
                 WorldPacket packet_template(CMSG_MESSAGECHAT);
 
@@ -326,11 +331,47 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
                 if (type == CHAT_MSG_WHISPER)
                     packet_template << playerName;
 
-                std::string response = PlayerbotLLMInterface::Generate(json);
+                std::vector<std::string> debugLines;
 
-                std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, startPattern, endPattern, splitPattern);
+                if (debug)
+                    debugLines = { json };
+
+                std::string response = PlayerbotLLMInterface::Generate(json, debugLines);
+
+                std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, startPattern, endPattern, splitPattern, debugLines);
 
                 std::vector<WorldPacket> packets;
+
+                if (debug)
+                {
+                    for (auto& line : debugLines)
+                    {
+                        std::string sentence = line;
+                        while (sentence.length() > 200) {
+                            size_t split_pos = sentence.rfind(' ', 200);
+                            if (split_pos == std::string::npos) {
+                                split_pos = 200;
+                            }
+
+                            if (!sentence.substr(0, split_pos).empty())
+                            {
+                                WorldPacket packet(packet_template);
+                                packet << sentence.substr(0, split_pos);
+                                packets.push_back(packet);
+                            }
+
+                            sentence = sentence.substr(split_pos + 1);
+                        }
+
+                        if (!sentence.empty())
+                        {
+                            WorldPacket packet(packet_template);
+                            packet << sentence;
+                            packets.push_back(packet);
+                        }
+                    }
+                }
+
                 for (auto& line : lines)
                 {
                     WorldPacket packet(packet_template);

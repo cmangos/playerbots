@@ -109,18 +109,24 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
     sPlayerbotLLMInterface.generationCount++;
 
 #ifdef _WIN32
-    // Initialize Winsock
+    if (debug)
+        debugLines.push_back("Initialize Winsock");
+
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        if (debug)
+            debugLines.push_back("WSAStartup failed");
+
         sLog.outError("BotLLM: WSAStartup failed");
         return "error";
     }
 #endif
 
-    // Parse the URL
     ParsedUrl parsedUrl = sPlayerbotAIConfig.llmEndPointUrl;
 
-    // Resolve hostname to IP address
+    if (debug)
+        debugLines.push_back("Resolve hostname to IP address: " + parsedUrl.hostname + " " + std::to_string(parsedUrl.port));
+
     struct addrinfo hints = {}, * res;
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
@@ -132,11 +138,15 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
         return "error";
     }
 
-    // Create a socket
+    if (debug)
+        debugLines.push_back("Create a socket");
     int sock;
 #ifdef _WIN32
     sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sock == INVALID_SOCKET) {
+        if (debug)
+            debugLines.push_back("Socket creation failed");
+
         sLog.outError("BotLLM: Socket creation failed");
         WSACleanup();
         return "error";
@@ -144,14 +154,21 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
 #else
     sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sock < 0) {
+        if (debug)
+            debugLines.push_back("Socket creation failed");
         sLog.outError("BotLLM: Socket creation failed");
         freeaddrinfo(res);
         return "error";
     }
 #endif
 
-    // Connect to the server
+    if (debug)
+        debugLines.push_back("Connect to the server");
+
     if (connect(sock, res->ai_addr, res->ai_addrlen) < 0) {
+        if (debug)
+            debugLines.push_back("Connection to server failed");
+
         sLog.outError("BotLLM: Connection to server failed");
 #ifdef _WIN32
         closesocket(sock);
@@ -163,9 +180,8 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
         return "error";
     }
 
-    freeaddrinfo(res); // Free the address info structure
+    freeaddrinfo(res);
 
-    // Create the HTTP POST request
     std::ostringstream request;
     request << "POST " << parsedUrl.path << " HTTP/1.1\r\n";
     request << "Host: " << parsedUrl.hostname << "\r\n";
@@ -177,8 +193,13 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
     request << "\r\n";
     request << body;
 
-    // Send the request
+    if (debug)
+        debugLines.push_back("Send the request" + request.str());
+
     if (send(sock, request.str().c_str(), request.str().size(), 0) < 0) {
+        if (debug)
+            debugLines.push_back("Failed to send request");
+
         sLog.outError("BotLLM: Failed to send request");
 #ifdef _WIN32
         closesocket(sock);
@@ -189,30 +210,45 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
         return "error";
     }
 
-    // Read the response
+    if (debug)
+        debugLines.push_back("Read the response");
+
     int bytesRead;
     
     std::string response = RecvWithTimeout(sock, sPlayerbotAIConfig.llmGenerationTimeout, bytesRead);
 
 #ifdef _WIN32
     if (bytesRead == SOCKET_ERROR) {
+        if (debug)
+            debugLines.push_back("Error reading response");
         sLog.outError("BotLLM: Error reading response");
     }
     closesocket(sock);
     WSACleanup();
 #else
     if (bytesRead < 0) {
+        if (debug)
+            debugLines.push_back("Error reading response");
         sLog.outError("BotLLM: Error reading response");
     }
     close(sock);
 #endif
 
-    // Extract the response body (optional: depending on the server response format)
     sPlayerbotLLMInterface.generationCount--;
+
+    if (debug)
+    {
+        if (!response.empty())
+            debugLines.push_back(response);
+        else
+            debugLines.push_back("Empty response");
+    }
 
     size_t pos = response.find("\r\n\r\n");
     if (pos != std::string::npos) {
         response = response.substr(pos + 4);
+        if (debug)
+            debugLines.push_back(response);
     }
 
     return response;
@@ -279,17 +315,39 @@ inline std::vector<std::string> splitResponse(const std::string& response, const
     return result;
 }
 
-std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string& response, const std::string& startPattern, const std::string& endPattern, const std::string& splitPattern)
+std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string& response, const std::string& startPattern, const std::string& endPattern, const std::string& splitPattern, std::vector<std::string>& debugLines)
 {
+    bool debug = !(debugLines.empty());
     uint32 startCursor = 0;
     uint32 endCursor = 0;
 
     std::string actualResponse = response;
+
+    if (debug)
+        debugLines.push_back("start pattern:" + startPattern);
     
     actualResponse = extractAfterPattern(actualResponse, startPattern);
+
+    if (!actualResponse.empty())
+        debugLines.push_back(actualResponse);
+    else
+        debugLines.push_back("Empty response");
+
+    if (debug)
+        debugLines.push_back("end pattern:" + endPattern);
+
     actualResponse = extractBeforePattern(actualResponse, endPattern);
 
+    if (debug)
+        debugLines.push_back(actualResponse);
+
+    if (debug)
+        debugLines.push_back("split pattern:" + splitPattern);
+
     std::vector<std::string> responses = splitResponse(actualResponse, splitPattern);    
+
+    if (debug)
+        debugLines.insert(debugLines.end(), responses.begin(), responses.end());
 
     return responses;
 }

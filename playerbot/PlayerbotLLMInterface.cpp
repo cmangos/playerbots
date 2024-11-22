@@ -106,7 +106,7 @@ inline std::string RecvWithTimeout(int sock, int timeout_seconds, int& bytesRead
 #ifdef _WIN32
                 sLog.outError("BotLLM: recv error:" + WSAGetLastError());
 #else
-                sLog.outError("BotLLM: recv error:" + sterror(errno));
+                sLog.outError("BotLLM: recv error:" + strerror(errno));
 #endif
                 break;
             }

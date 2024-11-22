@@ -1602,7 +1602,17 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid1);
                 isFromFreeBot = sPlayerbotAIConfig.IsInRandomAccountList(accountId);
                 if (!isFromFreeBot)
+                {
+
                     isFromFreeBot = sPlayerbotAIConfig.IsFreeAltBot(guid1);
+
+                    if (isFromFreeBot)
+                    {
+                        Player* player = sObjectMgr.GetPlayer(guid1);
+                        if (player && player->isRealPlayer())
+                            isFromFreeBot = false;
+                    }
+                }
 
                 bool isMentioned = message.find(bot->GetName()) != std::string::npos;
                 

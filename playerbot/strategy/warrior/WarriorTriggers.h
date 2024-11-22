@@ -9,7 +9,6 @@ namespace ai
     BUFF_TRIGGER(BerserkerStanceTrigger, "berserker stance");
     BUFF_TRIGGER(ShieldBlockTrigger, "shield block");
     BUFF_TRIGGER_A(CommandingShoutTrigger, "commanding shout");
-
     DEBUFF_TRIGGER(RendDebuffTrigger, "rend");
     DEBUFF_TRIGGER(DisarmDebuffTrigger, "disarm");
     DEBUFF_TRIGGER_A(SunderArmorDebuffTrigger, "sunder armor");
@@ -60,6 +59,16 @@ namespace ai
             }
 
             return false;
+        }
+    };
+
+    class SweepingStrikesTrigger : public SpellCanBeCastedTrigger
+    {
+    public:
+        SweepingStrikesTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "sweeping strikes") {}
+        bool IsActive() override
+        {
+            return SpellCanBeCastedTrigger::IsActive();
         }
     };
 

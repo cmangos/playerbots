@@ -607,7 +607,7 @@ std::string ChatHelper::formatSkill(uint32 skillId, Player* player)
     {
         int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
 
-        if (loc_idx = -1)
+        if (loc_idx == -1)
             loc_idx = 0;
         name = skillInfo->name[loc_idx];
     }
@@ -659,7 +659,7 @@ std::string ChatHelper::formatFaction(uint32 factionId, Player* player)
     if (factionEntry)
     {
         int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
-        if (loc_idx = -1)
+        if (loc_idx == -1)
             loc_idx = 0;
         name = factionEntry->name[loc_idx];
     }

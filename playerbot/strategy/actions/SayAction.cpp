@@ -254,6 +254,8 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             {
                 placeholders["<channel name>"] = "in guild chat";
             }
+            default:
+                placeholders["<channel name>"] = "";
             }
 
             placeholders["<player message>"] = msg;

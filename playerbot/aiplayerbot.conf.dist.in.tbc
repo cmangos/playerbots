@@ -959,6 +959,10 @@ AiPlayerbot.PerfMonEnabled = 0
 
 # The max context length allowed for the model. 0 to disable. This will shrink the context (all previous conversations) to make the entire prompt <pre prompt><context><prompt><post prompt> fit.
 # AiPlayerbot.LLMContextLength = 4096
+# Time in seconds the server will wait for the generation to finish. This includes waiting in queue.
+# AiPlayerbot.LLMGenerationTimeout = 600
+# Maximum generation requests allowed at the same time. This includes waiting in queue.
+# AiPlayerbot.LLMMaxSimultaniousGenerations = 100
 
 # The default prompt to send at the beginning of each conversation.
 # AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player <player name> is speaking to you <channel name> and is an <player gender> <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.

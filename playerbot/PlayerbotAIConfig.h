@@ -336,7 +336,7 @@ public:
 
     //LM BEGIN
     std::string llmApiEndpoint, llmApiKey, llmApiJson, llmPrePrompt, llmPrompt, llmPostPrompt, llmResponseStartPattern, llmResponseEndPattern, llmResponseSplitPattern;
-    uint32 llmContextLength, llmBotToBotChatChance;
+    uint32 llmContextLength, llmBotToBotChatChance, llmGenerationTimeout, llmMaxSimultaniousGenerations;
     bool llmGlobalContext;
     ParsedUrl llmEndPointUrl;
     //LM END

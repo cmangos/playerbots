@@ -1,29 +1,112 @@
+//These methods are supposed to be called asynchronous from the main processes 'and' be greatly delayed by LLM interfernece.
+//As such performance (such as opting to use regex) was not a consideration.
+//And yes I used chat-gpt to write most of this. LLM for LLM code is what I call fitting.
 
 #include "PlayerbotLLMInterface.h"
 #include "PlayerbotAIConfig.h"
 
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <sstream>
 #include <regex>
-
+#include <chrono>
 #ifdef _WIN32
-// Windows-specific headers
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#pragma comment(lib, "ws2_32.lib") // Link with Ws2_32.lib
+#pragma comment(lib, "ws2_32.lib")
 #else
-// Linux/Unix-specific headers
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <cstring>
+#include <fcntl.h>
+#include <errno.h>
 #endif
-std::string PlayerbotLLMInterface::Generate(const std::string& prompt) {
-    const int bufferSize = 4096;
-    char buffer[bufferSize];
+
+inline void SetNonBlockingSocket(int sock) {
+#ifdef _WIN32
+    u_long mode = 1;
+    if (ioctlsocket(sock, FIONBIO, &mode) != 0) {
+        sLog.outError("BotLLM: Failed to set non-blocking mode on socket.");
+    }
+#else
+    int flags = fcntl(sock, F_GETFL, 0);
+    if (flags == -1 || fcntl(sock, F_SETFL, flags | O_NONBLOCK) == -1) {
+        sLog.outError("BotLLM: Failed to set non-blocking mode on socket");
+    }
+#endif
+}
+
+inline void RestoreBlockingSocket(int sock) {
+#ifdef _WIN32
+    u_long mode = 0;
+    ioctlsocket(sock, FIONBIO, &mode);
+#else
+    int flags = fcntl(sock, F_GETFL, 0);
+    fcntl(sock, F_SETFL, flags & ~O_NONBLOCK);
+#endif
+}
+
+inline std::string RecvWithTimeout(int sock, int timeout_seconds, int& bytesRead) {
+    char buffer[4096];
+    int bufferSize = sizeof(buffer);
     std::string response;
+
+    SetNonBlockingSocket(sock);
+
+    auto start = std::chrono::steady_clock::now();
+
+    while (true) {
+        bytesRead = recv(sock, buffer, bufferSize - 1, 0);
+
+        if (bytesRead > 0) {
+            buffer[bytesRead] = '\0';
+            response += buffer;
+        }
+        else if (bytesRead == -1) {
+#ifdef _WIN32
+            if (WSAGetLastError() == WSAEWOULDBLOCK) {
+#else
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
+#endif
+                auto now = std::chrono::steady_clock::now();
+                if (std::chrono::duration_cast<std::chrono::seconds>(now - start).count() >= timeout_seconds) {
+                    break;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            else {
+#ifdef _WIN32
+                sLog.outError("BotLLM: recv error:" + WSAGetLastError());
+#else
+                sLog.outError("BotLLM: recv error:" + sterror(errno));
+#endif
+                break;
+            }
+            }
+        else {
+            break;
+        }
+        }
+
+    RestoreBlockingSocket(sock);
+
+    return response;
+    }
+
+std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vector<std::string> & debugLines) {
+    bool debug = !debugLines.empty();
+
+    if (sPlayerbotLLMInterface.generationCount > sPlayerbotAIConfig.llmMaxSimultaniousGenerations)
+    {
+        if (debug)
+            debugLines.push_back("Maxium generations reached");
+        return {};
+    }
+
+    sPlayerbotLLMInterface.generationCount++;
 
 #ifdef _WIN32
     // Initialize Winsock
@@ -108,10 +191,8 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt) {
 
     // Read the response
     int bytesRead;
-    while ((bytesRead = recv(sock, buffer, bufferSize - 1, 0)) > 0) {
-        buffer[bytesRead] = '\0';
-        response += buffer;
-    }
+    
+    std::string response = RecvWithTimeout(sock, sPlayerbotAIConfig.llmGenerationTimeout, bytesRead);
 
 #ifdef _WIN32
     if (bytesRead == SOCKET_ERROR) {
@@ -127,6 +208,8 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt) {
 #endif
 
     // Extract the response body (optional: depending on the server response format)
+    sPlayerbotLLMInterface.generationCount--;
+
     size_t pos = response.find("\r\n\r\n");
     if (pos != std::string::npos) {
         response = response.substr(pos + 4);

@@ -984,10 +984,11 @@ AiPlayerbot.PerfMonEnabled = 0
 # The chance bots will use ai chat to respond to other bots 
 # AiPlayerbot.LLMBotToBotChatChance = 0
 
-# OPEN-AI example:
+# OPEN-AI (chat completions) example:
 # AiPlayerbot.LLMApiEndpoint = http://IP/URL:PORT/v1/chat/completions
 # AiPlayerbot.LLMApiKey = YOUR_API_KEY
 # AiPlayerbot.LLMApiJson = {"model": "gpt-4o-mini", "messages": [{"role": "system", "content": "<pre prompt> <context>"},{"role": "user", "content": "<prompt>"}],"max_tokens": 60}
+# AiPlayerbot.LLMResponseStartPattern = ("content":\s*")
 
 # Mystery config value. Currently enables async bot pathfinding. Rarely crashes the server.
 # AiPlayerbot.TweakValue = 0

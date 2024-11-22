@@ -25,6 +25,31 @@
 #include <errno.h>
 #endif
 
+std::string PlayerbotLLMInterface::SanitizeForJson(const std::string& input) {
+    std::string sanitized;
+    for (char c : input) {
+        switch (c) {
+        case '\"': sanitized += "\\\""; break;
+        case '\\': sanitized += "\\\\"; break;
+        case '\b': sanitized += "\\b"; break; 
+        case '\f': sanitized += "\\f"; break; 
+        case '\n': sanitized += "\\n"; break; 
+        case '\r': sanitized += "\\r"; break; 
+        case '\t': sanitized += "\\t"; break; 
+        default:
+            if (c < 0x20) {
+                char buffer[7];
+                snprintf(buffer, sizeof(buffer), "\\u%04x", c);
+                sanitized += buffer;
+            }
+            else {
+                sanitized += c; 
+            }
+        }
+    }
+    return sanitized;
+}
+
 inline void SetNonBlockingSocket(int sock) {
 #ifdef _WIN32
     u_long mode = 1;
@@ -131,6 +156,9 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     if (getaddrinfo(parsedUrl.hostname.c_str(), std::to_string(parsedUrl.port).c_str(), &hints, &res) != 0) {
+        if (debug)
+            debugLines.push_back("Failed to resolve hostname");
+
         sLog.outError("BotLLM: Failed to resolve hostname");
 #ifdef _WIN32
         WSACleanup();
@@ -156,6 +184,7 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
     if (sock < 0) {
         if (debug)
             debugLines.push_back("Socket creation failed");
+
         sLog.outError("BotLLM: Socket creation failed");
         freeaddrinfo(res);
         return "error";

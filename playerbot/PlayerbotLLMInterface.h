@@ -2,6 +2,7 @@ class PlayerbotLLMInterface
 {
 public:
     PlayerbotLLMInterface() {}
+    static std::string SanitizeForJson(const std::string& input);
 
     static std::string Generate(const std::string& prompt, std::vector<std::string>& debugLines);
 

@@ -2850,10 +2850,34 @@ bool PlayerbotAI::SayToGuild(std::string msg)
     {
         if (Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId()))
         {
+
+            for (auto& player : sRandomPlayerbotMgr.GetPlayers())
+            {
+                if (player.second->GetGuildId() == bot->GetGuildId())
+                {
+                    if (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && urand(0, 99) < sPlayerbotAIConfig.llmBotToBotChatChance)
+                    {
+                        WorldPacket packet_template(CMSG_MESSAGECHAT);
+
+                        uint32 lang = LANG_UNIVERSAL;
+
+                        packet_template << CHAT_MSG_GUILD;
+                        packet_template << LANG_UNIVERSAL;
+                        packet_template << msg;
+
+                        std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
+
+                        bot->GetSession()->QueuePacket(std::move(packetPtr));
+                        return true;
+                    }
+                    break;
+                }
+            }
             if (!guild->HasRankRight(bot->GetRank(), GR_RIGHT_GCHATSPEAK))
             {
                 return false;
             }
+
             guild->BroadcastToGuild(bot->GetSession(), msg.c_str(), LANG_UNIVERSAL);
             return true;
         }
@@ -3108,6 +3132,28 @@ bool PlayerbotAI::SayToParty(std::string msg)
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_PARTY, msg.c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
+
+    if (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && urand(0, 99) < sPlayerbotAIConfig.llmBotToBotChatChance)
+    {
+        for (auto reciever : GetPlayersInGroup())
+        {
+            if (reciever->isRealPlayer())
+            {
+                WorldPacket packet_template(CMSG_MESSAGECHAT);
+
+                uint32 lang = LANG_UNIVERSAL;
+
+                packet_template << CHAT_MSG_PARTY;
+                packet_template << LANG_UNIVERSAL;
+                packet_template << msg;
+
+                std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
+
+                bot->GetSession()->QueuePacket(std::move(packetPtr));
+                return true;
+            }
+        }
+    }
 
     for (auto reciever : GetPlayersInGroup())
     {

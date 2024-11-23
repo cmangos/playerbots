@@ -2855,7 +2855,7 @@ bool PlayerbotAI::SayToGuild(std::string msg)
             {
                 if (player.second->GetGuildId() == bot->GetGuildId())
                 {
-                    if (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && urand(0, 99) < sPlayerbotAIConfig.llmBotToBotChatChance)
+                    if (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && sPlayerbotAIConfig.llmBotToBotChatChance)
                     {
                         WorldPacket packet_template(CMSG_MESSAGECHAT);
 
@@ -3130,10 +3130,7 @@ bool PlayerbotAI::SayToParty(std::string msg)
         return false;
     }
 
-    WorldPacket data;
-    ChatHandler::BuildChatPacket(data, CHAT_MSG_PARTY, msg.c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
-
-    if (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && urand(0, 99) < sPlayerbotAIConfig.llmBotToBotChatChance)
+    if (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && sPlayerbotAIConfig.llmBotToBotChatChance)
     {
         for (auto reciever : GetPlayersInGroup())
         {
@@ -3154,6 +3151,9 @@ bool PlayerbotAI::SayToParty(std::string msg)
             }
         }
     }
+
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_PARTY, msg.c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
 
     for (auto reciever : GetPlayersInGroup())
     {
@@ -3197,6 +3197,34 @@ bool PlayerbotAI::Yell(std::string msg)
 
 bool PlayerbotAI::Say(std::string msg)
 {
+    uint32 lang = LANG_UNIVERSAL;
+    if (bot->GetTeam() == ALLIANCE)
+    {
+        lang =  LANG_COMMON;
+    }
+    else
+    {
+        lang = LANG_ORCISH;
+    }
+
+    if (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && sPlayerbotAIConfig.llmBotToBotChatChance)
+    {
+        if (this->HasPlayerNearby(35.0f))
+        {
+
+            WorldPacket packet_template(CMSG_MESSAGECHAT);
+
+            packet_template << CHAT_MSG_SAY;
+            packet_template << LANG_UNIVERSAL;
+            packet_template << msg;
+
+            std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
+
+            bot->GetSession()->QueuePacket(std::move(packetPtr));
+            return true;
+        }
+    }
+
     if (bot->GetTeam() == ALLIANCE)
     {
         bot->Say(msg, LANG_COMMON);
@@ -3305,14 +3333,14 @@ bool PlayerbotAI::TellPlayerNoFacing(Player* player, std::string text, Playerbot
             }
 
             case CHAT_MSG_RAID:
+            {
+                this->SayToRaid(text.c_str());
+
+                return true;
+            }
             case CHAT_MSG_PARTY:
             {
-                ChatHandler::BuildChatPacket(data, type, text.c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
-
-                for (auto reciever : recievers)
-                {
-                    sServerFacade.SendPacket(reciever, data);
-                }
+                SayToParty(text.c_str());
 
                 return true;
             }
@@ -3333,8 +3361,10 @@ bool PlayerbotAI::TellPlayerNoFacing(Player* player, std::string text, Playerbot
                 if (type == CHAT_MSG_ADDON)
                     text = "BOT\t" + text;
 
-                ChatHandler::BuildChatPacket(data, type == CHAT_MSG_ADDON ? CHAT_MSG_PARTY : type, text.c_str(), type == CHAT_MSG_ADDON ? LANG_ADDON : LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
-                sServerFacade.SendPacket(player, data);
+                //ChatHandler::BuildChatPacket(data, type == CHAT_MSG_ADDON ? CHAT_MSG_PARTY : type, text.c_str(), type == CHAT_MSG_ADDON ? LANG_ADDON : LANG_UNIVERSAL, CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
+                //sServerFacade.SendPacket(player, data);
+
+                this->Whisper(text, player->GetName());
                 return true;
             }
         }

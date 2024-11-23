@@ -127,11 +127,14 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
     if (sPlayerbotLLMInterface.generationCount > sPlayerbotAIConfig.llmMaxSimultaniousGenerations)
     {
         if (debug)
-            debugLines.push_back("Maxium generations reached");
+            debugLines.push_back("Maxium generations reached " + std::to_string(sPlayerbotLLMInterface.generationCount) + "/" + std::to_string(sPlayerbotAIConfig.llmMaxSimultaniousGenerations));
         return {};
     }
 
     sPlayerbotLLMInterface.generationCount++;
+
+    if (debug)
+        debugLines.push_back("Generations start " + std::to_string(sPlayerbotLLMInterface.generationCount) + "/" + std::to_string(sPlayerbotAIConfig.llmMaxSimultaniousGenerations));
 
 #ifdef _WIN32
     if (debug)

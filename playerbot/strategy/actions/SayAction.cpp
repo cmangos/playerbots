@@ -199,199 +199,209 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
         std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext" + llmChannel);
 
-        if (player && (player->isRealPlayer() || (sPlayerbotAIConfig.llmBotToBotChatChance && urand(0, 99) < sPlayerbotAIConfig.llmBotToBotChatChance)))
+        if (player)
         {
-            std::string botName = bot->GetName();
             std::string playerName = player->GetName();
 
-            std::map<std::string, std::string> placeholders;
-            placeholders["<bot name>"] = botName;
-            placeholders["<bot gender>"] = bot->getGender() == GENDER_MALE ? "male" : "female";
-            placeholders["<bot level>"] = std::to_string(bot->GetLevel());
-            placeholders["<bot class>"] = ai->GetChatHelper()->formatClass(bot->getClass());
-            placeholders["<bot race>"] = ai->GetChatHelper()->formatRace(bot->getRace());
-            placeholders["<player name>"] = playerName;
-            placeholders["<player gender>"] = player->getGender() == GENDER_MALE ? "male" : "female";
-            placeholders["<player level>"] = std::to_string(player->GetLevel());
-            placeholders["<player class>"] = ai->GetChatHelper()->formatClass(player->getClass());
-            placeholders["<player race>"] = ai->GetChatHelper()->formatRace(player->getRace());
+            if (player->isRealPlayer() || (sPlayerbotAIConfig.llmBotToBotChatChance && urand(0, 99) < sPlayerbotAIConfig.llmBotToBotChatChance))
+            {
+                std::string botName = bot->GetName();
+
+
+                std::map<std::string, std::string> placeholders;
+                placeholders["<bot name>"] = botName;
+                placeholders["<bot gender>"] = bot->getGender() == GENDER_MALE ? "male" : "female";
+                placeholders["<bot level>"] = std::to_string(bot->GetLevel());
+                placeholders["<bot class>"] = ai->GetChatHelper()->formatClass(bot->getClass());
+                placeholders["<bot race>"] = ai->GetChatHelper()->formatRace(bot->getRace());
+                placeholders["<player name>"] = playerName;
+                placeholders["<player gender>"] = player->getGender() == GENDER_MALE ? "male" : "female";
+                placeholders["<player level>"] = std::to_string(player->GetLevel());
+                placeholders["<player class>"] = ai->GetChatHelper()->formatClass(player->getClass());
+                placeholders["<player race>"] = ai->GetChatHelper()->formatRace(player->getRace());
 
 #ifdef MANGOSBOT_ZERO
-            placeholders["<expansion name>"] = "Vanilla";
+                placeholders["<expansion name>"] = "Vanilla";
 #endif
 #ifdef MANGOSBOT_ONE
-            placeholders["<expansion name>"] = "The Burning Crusade";
+                placeholders["<expansion name>"] = "The Burning Crusade";
 #endif
 #ifdef MANGOSBOT_TWO
-            placeholders["<expansion name>"] = "Wrath of the Lich King";
+                placeholders["<expansion name>"] = "Wrath of the Lich King";
 #endif
-            placeholders["<bot zone>"] = WorldPosition(bot).getAreaName();
-            placeholders["<bot subzone>"] = WorldPosition(bot).getAreaOverride();
+                placeholders["<bot zone>"] = WorldPosition(bot).getAreaName();
+                placeholders["<bot subzone>"] = WorldPosition(bot).getAreaOverride();
 
-            switch (chatChannelSource)
-            {
-            case ChatChannelSource::SRC_WHISPER:
-            {
-                placeholders["<channel name>"] = "in private message";
-                break;
-            }
-            case ChatChannelSource::SRC_SAY:
-            {
-                placeholders["<channel name>"] = "directly";
-                break;
-            }
-            case ChatChannelSource::SRC_YELL:
-            {
-                placeholders["<channel name>"] = "with a yell";
-                break;
-            }
-            case ChatChannelSource::SRC_PARTY:
-            {
-                placeholders["<channel name>"] = "in party chat";
-                break;
-            }
-            case ChatChannelSource::SRC_GUILD:
-            {
-                placeholders["<channel name>"] = "in guild chat";
-            }
-            default:
-                placeholders["<channel name>"] = "";
-            }
-
-            placeholders["<player message>"] = msg;
-
-            std::string startPattern, endPattern, splitPattern;
-            startPattern = BOT_TEXT2(sPlayerbotAIConfig.llmResponseStartPattern, placeholders);
-            endPattern = BOT_TEXT2(sPlayerbotAIConfig.llmResponseEndPattern, placeholders);
-            splitPattern = BOT_TEXT2(sPlayerbotAIConfig.llmResponseSplitPattern, placeholders);
-
-            std::map<std::string, std::string> jsonFill;
-            jsonFill["<pre prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPrePrompt, placeholders);
-            jsonFill["<prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPrompt, placeholders); 
-            jsonFill["<post prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPostPrompt, placeholders);
-
-            uint32 currentLength = jsonFill["<pre prompt>"].size() + jsonFill["<context>"].size() + jsonFill["<prompt>"].size() + llmContext.size();
-            PlayerbotLLMInterface::LimitContext(llmContext, currentLength);
-            jsonFill["<context>"] = llmContext;
-
-            llmContext += " " + jsonFill["<prompt>"];
-
-            for (auto& prompt : jsonFill)
-            {
-                prompt.second = PlayerbotLLMInterface::SanitizeForJson(prompt.second);
-            }
-
-            std::string json = BOT_TEXT2(sPlayerbotAIConfig.llmApiJson, jsonFill);
-
-            json = BOT_TEXT2(json, placeholders);
-
-            uint32 type = CHAT_MSG_WHISPER;
-
-            switch (chatChannelSource)
-            {
-            case ChatChannelSource::SRC_WHISPER:
-            {
-                type = CHAT_MSG_WHISPER;
-                break;
-            }
-            case ChatChannelSource::SRC_SAY:
-            {
-                type = CHAT_MSG_SAY;
-                break;
-            }
-            case ChatChannelSource::SRC_YELL:
-            {
-                type = CHAT_MSG_YELL;
-                break;
-            }
-            case ChatChannelSource::SRC_PARTY:
-            {
-                type = CHAT_MSG_PARTY;
-                break;
-            }
-            case ChatChannelSource::SRC_GUILD:
-            {
-                type = CHAT_MSG_GUILD;
-            }
-            }
-
-            bool debug = bot->GetPlayerbotAI()->HasStrategy("debug llm", BotState::BOT_STATE_NON_COMBAT);
-
-            WorldSession* session = bot->GetSession();
-
-            std::future<std::vector<WorldPacket>> futurePackets = std::async([type, playerName, json, startPattern, endPattern, splitPattern, debug] {
-
-                WorldPacket packet_template(CMSG_MESSAGECHAT);
-
-                uint32 lang = LANG_UNIVERSAL;
-
-                packet_template << type;
-                packet_template << lang;
-
-                if (type == CHAT_MSG_WHISPER)
-                    packet_template << playerName;
-
-                std::vector<std::string> debugLines;
-
-                if (debug)
-                    debugLines = { json };
-
-                std::string response = PlayerbotLLMInterface::Generate(json, debugLines);
-
-                std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, startPattern, endPattern, splitPattern, debugLines);
-
-                std::vector<WorldPacket> packets;
-
-                if (debug)
+                switch (chatChannelSource)
                 {
-                    for (auto& line : debugLines)
+                case ChatChannelSource::SRC_WHISPER:
+                {
+                    placeholders["<channel name>"] = "in private message";
+                    break;
+                }
+                case ChatChannelSource::SRC_SAY:
+                {
+                    placeholders["<channel name>"] = "directly";
+                    break;
+                }
+                case ChatChannelSource::SRC_YELL:
+                {
+                    placeholders["<channel name>"] = "with a yell";
+                    break;
+                }
+                case ChatChannelSource::SRC_PARTY:
+                {
+                    placeholders["<channel name>"] = "in party chat";
+                    break;
+                }
+                case ChatChannelSource::SRC_GUILD:
+                {
+                    placeholders["<channel name>"] = "in guild chat";
+                }
+                default:
+                    placeholders["<channel name>"] = "";
+                }
+
+                placeholders["<player message>"] = msg;
+
+                std::map<std::string, std::string> jsonFill;
+                jsonFill["<pre prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPrePrompt, placeholders);
+                jsonFill["<prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPrompt, placeholders);
+                jsonFill["<post prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPostPrompt, placeholders);
+
+                uint32 currentLength = jsonFill["<pre prompt>"].size() + jsonFill["<context>"].size() + jsonFill["<prompt>"].size() + llmContext.size();
+                PlayerbotLLMInterface::LimitContext(llmContext, currentLength);
+                jsonFill["<context>"] = llmContext;
+
+                llmContext += " " + jsonFill["<prompt>"];
+
+                for (auto& prompt : jsonFill)
+                {
+                    prompt.second = PlayerbotLLMInterface::SanitizeForJson(prompt.second);
+                }
+
+                for (auto& prompt : placeholders) //Sanitize now instead of earlier to prevent double Sanitation
+                {
+                    prompt.second = PlayerbotLLMInterface::SanitizeForJson(prompt.second);
+                }
+
+                std::string startPattern, endPattern, splitPattern;
+                startPattern = BOT_TEXT2(sPlayerbotAIConfig.llmResponseStartPattern, placeholders);
+                endPattern = BOT_TEXT2(sPlayerbotAIConfig.llmResponseEndPattern, placeholders);
+                splitPattern = BOT_TEXT2(sPlayerbotAIConfig.llmResponseSplitPattern, placeholders);
+
+                std::string json = BOT_TEXT2(sPlayerbotAIConfig.llmApiJson, jsonFill);
+
+                json = BOT_TEXT2(json, placeholders);
+
+                uint32 type = CHAT_MSG_WHISPER;
+
+                switch (chatChannelSource)
+                {
+                case ChatChannelSource::SRC_WHISPER:
+                {
+                    type = CHAT_MSG_WHISPER;
+                    break;
+                }
+                case ChatChannelSource::SRC_SAY:
+                {
+                    type = CHAT_MSG_SAY;
+                    break;
+                }
+                case ChatChannelSource::SRC_YELL:
+                {
+                    type = CHAT_MSG_YELL;
+                    break;
+                }
+                case ChatChannelSource::SRC_PARTY:
+                {
+                    type = CHAT_MSG_PARTY;
+                    break;
+                }
+                case ChatChannelSource::SRC_GUILD:
+                {
+                    type = CHAT_MSG_GUILD;
+                }
+                }
+
+                bool debug = bot->GetPlayerbotAI()->HasStrategy("debug llm", BotState::BOT_STATE_NON_COMBAT);
+
+                WorldSession* session = bot->GetSession();
+
+                std::future<std::vector<WorldPacket>> futurePackets = std::async([type, playerName, json, startPattern, endPattern, splitPattern, debug] {
+
+                    WorldPacket packet_template(CMSG_MESSAGECHAT);
+
+                    uint32 lang = LANG_UNIVERSAL;
+
+                    packet_template << type;
+                    packet_template << lang;
+
+                    if (type == CHAT_MSG_WHISPER)
+                        packet_template << playerName;
+
+                    std::vector<std::string> debugLines;
+
+                    if (debug)
+                        debugLines = { json };
+
+                    std::string response = PlayerbotLLMInterface::Generate(json, debugLines);
+
+                    std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, startPattern, endPattern, splitPattern, debugLines);
+
+                    std::vector<WorldPacket> packets;
+
+                    if (debug)
                     {
-                        std::string sentence = line;
-                        while (sentence.length() > 200) {
-                            size_t split_pos = sentence.rfind(' ', 200);
-                            if (split_pos == std::string::npos) {
-                                split_pos = 200;
+                        for (auto& line : debugLines)
+                        {
+                            std::string sentence = line;
+                            while (sentence.length() > 200) {
+                                size_t split_pos = sentence.rfind(' ', 200);
+                                if (split_pos == std::string::npos) {
+                                    split_pos = 200;
+                                }
+
+                                if (!sentence.substr(0, split_pos).empty())
+                                {
+                                    WorldPacket packet(packet_template);
+                                    packet << sentence.substr(0, split_pos);
+                                    packets.push_back(packet);
+                                }
+
+                                sentence = sentence.substr(split_pos + 1);
                             }
 
-                            if (!sentence.substr(0, split_pos).empty())
+                            if (!sentence.empty())
                             {
                                 WorldPacket packet(packet_template);
-                                packet << sentence.substr(0, split_pos);
+                                packet << sentence;
                                 packets.push_back(packet);
                             }
-
-                            sentence = sentence.substr(split_pos + 1);
-                        }
-
-                        if (!sentence.empty())
-                        {
-                            WorldPacket packet(packet_template);
-                            packet << sentence;
-                            packets.push_back(packet);
                         }
                     }
-                }
 
-                for (auto& line : lines)
-                {
-                    WorldPacket packet(packet_template);
-                    packet << line;
-                    packets.push_back(packet);
-                }
+                    for (auto& line : lines)
+                    {
+                        WorldPacket packet(packet_template);
+                        packet << line;
+                        packets.push_back(packet);
+                    }
 
-                return packets;  });
+                    return packets;  });
 
-            ai->SendDelayedPacket(session, std::move(futurePackets));
+                ai->SendDelayedPacket(session, std::move(futurePackets));
 
+            }
+            else if (sPlayerbotAIConfig.llmBotToBotChatChance)
+            {
+                llmContext = llmContext + " " + playerName + ":" + msg;
+                PlayerbotLLMInterface::LimitContext(llmContext, llmContext.size());
+            }
+            SET_AI_VALUE(std::string, "manual string::llmcontext" + llmChannel, llmContext);
+
+            return;
         }
-        else if(sPlayerbotAIConfig.llmBotToBotChatChance)
-        {
-            llmContext = llmContext + " " + bot->GetName() + ":" + msg;
-            PlayerbotLLMInterface::LimitContext(llmContext, llmContext.size());
-        }
-        SET_AI_VALUE(std::string, "manual string::llmcontext" + llmChannel, llmContext);
-
-        return;
     }
 
     SendGeneralResponse(bot, chatChannelSource, GenerateReplyMessage(bot, msg, guid1, name), name);

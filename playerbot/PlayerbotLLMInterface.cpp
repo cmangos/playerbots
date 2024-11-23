@@ -124,7 +124,7 @@ inline std::string RecvWithTimeout(int sock, int timeout_seconds, int& bytesRead
 std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vector<std::string> & debugLines) {
     bool debug = !debugLines.empty();
 
-    if (sPlayerbotLLMInterface.generationCount > sPlayerbotAIConfig.llmMaxSimultaniousGenerations)
+    if ((uint32)sPlayerbotLLMInterface.generationCount > sPlayerbotAIConfig.llmMaxSimultaniousGenerations)
     {
         if (debug)
             debugLines.push_back("Maxium generations reached " + std::to_string(sPlayerbotLLMInterface.generationCount) + "/" + std::to_string(sPlayerbotAIConfig.llmMaxSimultaniousGenerations));
@@ -384,9 +384,9 @@ std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string&
     return responses;
 }
 
-void PlayerbotLLMInterface::LimitContext(std::string& context, uint32 currentLength)
+void PlayerbotLLMInterface::LimitContext(std::string& context, int currentLength)
 {
-    if (sPlayerbotAIConfig.llmContextLength && currentLength > sPlayerbotAIConfig.llmContextLength)
+    if (sPlayerbotAIConfig.llmContextLength && (uint32)currentLength > sPlayerbotAIConfig.llmContextLength)
     {
         uint32 cutNeeded = currentLength - sPlayerbotAIConfig.llmContextLength;
 

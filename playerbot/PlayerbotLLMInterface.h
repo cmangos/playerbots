@@ -1,3 +1,7 @@
+#include <atomic>
+#include <string>
+#include <vector>
+
 class PlayerbotLLMInterface
 {
 public:
@@ -8,9 +12,9 @@ public:
 
     static std::vector<std::string> ParseResponse(const std::string& response, const std::string& startPattern, const std::string& endPattern, const std::string& splitPattern, std::vector<std::string>& debugLines);
 
-    static void LimitContext(std::string& context, uint32 currentLength);
+    static void LimitContext(std::string& context, int currentLength);
 private:
-    std::atomic<uint32> generationCount = 0;
+    std::atomic<int> generationCount = 0;
 };
 
 #define sPlayerbotLLMInterface MaNGOS::Singleton<PlayerbotLLMInterface>::Instance()

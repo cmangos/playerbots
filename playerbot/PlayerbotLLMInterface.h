@@ -10,7 +10,7 @@ public:
 
     static void LimitContext(std::string& context, uint32 currentLength);
 private:
-    std::atomic<uint32> generationCount;
+    std::atomic<uint32> generationCount = 0;
 };
 
 #define sPlayerbotLLMInterface MaNGOS::Singleton<PlayerbotLLMInterface>::Instance()

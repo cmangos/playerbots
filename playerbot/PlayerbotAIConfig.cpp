@@ -610,7 +610,7 @@ bool PlayerbotAIConfig::Initialize()
 
     llmResponseStartPattern = config.GetStringDefault("AiPlayerbot.LLMResponseStartPattern", "(\"text\":\\s*\")");
     llmResponseEndPattern = config.GetStringDefault("AiPlayerbot.LLMResponseEndPattern", "(\"|<player name>:)");
-    llmResponseSplitPattern = config.GetStringDefault("AiPlayerbot.LLMResponseSplitPattern", "(.*?)(\\.|\\?|\\!|\n|<bot name>:|$)\\s*");
+    llmResponseSplitPattern = config.GetStringDefault("AiPlayerbot.LLMResponseSplitPattern", "(.*?)(\\.|\\?|\\!|\\n|<bot name>:|$)\\s*");
 
     try {
         std::regex pattern(llmResponseStartPattern);

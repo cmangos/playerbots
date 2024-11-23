@@ -22,7 +22,7 @@ jobs:
       matrix:
         version: [classic, tbc, wotlk]
         include:
-          - os: macos-14
+          - os: macos-12
             EXTRA_BUILD: "-DBUILD_PLAYERBOTS=ON"
 
     steps:

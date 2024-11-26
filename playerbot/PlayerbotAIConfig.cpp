@@ -76,7 +76,8 @@ inline ParsedUrl parseUrl(const std::string& url) {
 
     ParsedUrl parsed;
     parsed.hostname = match[2];
-    parsed.port = match[4].length() ? std::stoi(match[4]) : 80;
+    parsed.https = match[1] == "https";
+    parsed.port = parsed.https ? 443 : (match[4].length() ? std::stoi(match[4]) : 80);
     parsed.path = match[5].length() ? match[5] : std::string("/");
     return parsed;
 }

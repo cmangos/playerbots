@@ -11,6 +11,8 @@
 #include <sstream>
 #include <regex>
 #include <chrono>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -214,6 +216,48 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
 
     freeaddrinfo(res);
 
+    SSL_CTX* ctx = nullptr;
+    SSL* ssl = nullptr;
+
+    if (parsedUrl.https)
+    {
+        // Initialize OpenSSL
+        SSL_library_init();
+        SSL_load_error_strings();
+        OpenSSL_add_all_algorithms();
+        const SSL_METHOD* method = TLS_client_method();
+        ctx = SSL_CTX_new(method);
+        if (!ctx) {
+            if (debug)
+                debugLines.push_back("Failed to create SSL context");
+            sLog.outError("BotLLM: Failed to create SSL context");
+#ifdef _WIN32
+            closesocket(sock);
+            WSACleanup();
+#else
+            close(sock);
+#endif
+            return "";
+        }
+
+        ssl = SSL_new(ctx);
+        SSL_set_fd(ssl, sock);
+        if (SSL_connect(ssl) <= 0) {
+            if (debug)
+                debugLines.push_back("SSL connection failed");
+            sLog.outError("BotLLM: SSL connection failed");
+            SSL_free(ssl);
+            SSL_CTX_free(ctx);
+#ifdef _WIN32
+            closesocket(sock);
+            WSACleanup();
+#else
+            close(sock);
+#endif
+            return "";
+        }
+    }
+
     std::ostringstream request;
     request << "POST " << parsedUrl.path << " HTTP/1.1\r\n";
     request << "Host: " << parsedUrl.hostname << "\r\n";
@@ -228,11 +272,17 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
     if (debug)
         debugLines.push_back("Send the request" + request.str());
 
-    if (send(sock, request.str().c_str(), request.str().size(), 0) < 0) {
+    bool write = parsedUrl.https ? (SSL_write(ssl, request.str().c_str(), request.str().size()) <= 0) : (send(sock, request.str().c_str(), request.str().size(), 0) < 0);
+    if (write) {
         if (debug)
             debugLines.push_back("Failed to send request");
-
         sLog.outError("BotLLM: Failed to send request");
+        
+        if (parsedUrl.https)
+        {
+            SSL_free(ssl);
+            SSL_CTX_free(ctx);
+        }
 #ifdef _WIN32
         closesocket(sock);
         WSACleanup();

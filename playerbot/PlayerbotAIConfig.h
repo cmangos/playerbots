@@ -66,6 +66,7 @@ struct ParsedUrl {
     std::string hostname;
     std::string path;
     int port;
+    bool https;
 };
 
 class PlayerbotAIConfig

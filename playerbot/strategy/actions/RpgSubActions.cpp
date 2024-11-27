@@ -10,6 +10,8 @@
 #include "GuildCreateActions.h"
 #include "Social/SocialMgr.h"
 #include "playerbot/TravelMgr.h"
+#include "SayAction.h"
+#include "playerbot/PlayerbotLLMInterface.h"
 
 
 using namespace ai;
@@ -141,6 +143,8 @@ bool RpgCancelAction::Execute(Event& event)
         AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target")); 
 
     RESET_AI_VALUE(GuidPosition, "rpg target"); rpg->AfterExecute(false, false, ""); DoDelay(); 
+    RESET_AI_VALUE2(int32, "manual int", "rpg ai chat line");
+    RESET_AI_VALUE2(std::string, "manual string", "llmcontext rpg");
     
     return true;
 };
@@ -254,6 +258,162 @@ bool RpgHealAction::Execute(Event& event)
     DoDelay();
 
     return retVal;
+}
+
+bool RpgAIChatAction::isUseful()
+{
+    GuidPosition guidP = rpg->guidP();
+
+    if (!guidP.IsUnit())
+        return false;
+
+    return true;
+}
+
+bool RpgAIChatAction::Execute(Event& event)
+{
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+
+    int32 chatLine = AI_VALUE2(int32, "manual int", "rpg ai chat line");
+
+    if (chatLine < 0) //We are done talking. 
+        return false;
+
+    if (chatLine == 0)
+        chatLine = urand(5, 11);   
+
+    GuidPosition guidP = rpg->guidP();
+
+    std::string llmContext = AI_VALUE2(std::string, "manual string", "llmcontext rpg");
+
+    Unit* unit = guidP.GetUnit(bot->GetInstanceId());
+
+    std::map<std::string, std::string> placeholders;
+    ChatReplyAction::GetAIChatPlaceholders(placeholders);
+    ChatReplyAction::GetAIChatPlaceholders(placeholders, bot, "bot");
+    ChatReplyAction::GetAIChatPlaceholders(placeholders, unit, "player");
+
+    std::string prePrompt = "In World of Warcraft: <expansion name> in <bot zone> <bot subzone> stands <bot type> <bot name> a level <bot level> <bot gender> <bot race> <bot class>."
+        " Standing nearby is <player type> <player name> <player subname> a level <player level> <player gender> <player race> <player faction> <player class>. Answer as a roleplaying character. Limit responses to 100 characters.";
+
+    if (AI_VALUE2(bool, "trigger active", "rpg start quest"))
+        prePrompt += " <player name> can offer <bot name> a new quest.";
+    else if (AI_VALUE2(bool, "trigger active", "rpg end quest"))
+        prePrompt += " <bot name> has just finished a quest for <player name>.";
+
+    if (AI_VALUE2(bool, "trigger active", "rpg repair"))
+        prePrompt += " <bot name> wants <player name> to repair broken equipment.";
+    else if (AI_VALUE2(bool, "trigger active", "rpg sell"))
+        prePrompt += " <bot name> wants to sell loot to <player name>.";
+    else if (AI_VALUE2(bool, "trigger active", "rpg buy"))
+        prePrompt += " <bot name> wants to buy specific items <player name> has to offer.";
+
+    if (!placeholders["unit gossip"].empty())
+        prePrompt += " <player name> <player gossip>";
+
+    switch (urand(0, 10))
+    {
+    case 0:
+        prePrompt += " <bot name> wants to ask <player name> about the zone.";
+        break;
+    case 1:
+        prePrompt += " <bot name> wants to ask <player name> about lore they know about.";
+        break;
+    case 2:
+        prePrompt += " <bot name> wants to ask <player name> about recent events.";
+        break;
+    case 3:
+        prePrompt += " <bot name> wants to ask <player name> about nearby npcs.";
+        break;
+    default:
+        prePrompt += " <bot name> wants to ask have a chat with <player name>.";
+        break;
+    }
+
+    bool botIstalking = (chatLine % 2 == 0);
+
+    std::string postPompt;
+
+    if (chatLine == 2)
+        postPompt = "[<bot name> has to go. Say goodbye.]";
+
+    if (botIstalking)
+        postPompt += " <bot name>:";
+    else
+        postPompt += " <player name>:";
+
+    std::map<std::string, std::string> jsonFill;
+    jsonFill["<pre prompt>"] = prePrompt;
+    jsonFill["<prompt>"] = "";
+    jsonFill["<post prompt>"] = postPompt;
+
+    for (auto& prompt : jsonFill)
+    {
+        BOT_TEXT2(prompt.second, placeholders);
+    }
+
+    uint32 currentLength = jsonFill["<pre prompt>"].size() + jsonFill["<context>"].size() + jsonFill["<prompt>"].size() + llmContext.size();
+    PlayerbotLLMInterface::LimitContext(llmContext, currentLength);
+    jsonFill["<context>"] = llmContext;
+
+    for (auto& prompt : jsonFill)
+    {
+        prompt.second = PlayerbotLLMInterface::SanitizeForJson(prompt.second);
+    }
+
+    for (auto& prompt : placeholders) //Sanitize now instead of earlier to prevent double Sanitation
+    {
+        prompt.second = PlayerbotLLMInterface::SanitizeForJson(prompt.second);
+    }
+
+    std::string startPattern, endPattern, deletePattern, splitPattern;
+    startPattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseStartPattern, placeholders);
+    endPattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseEndPattern, placeholders);
+    deletePattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseDeletePattern, placeholders);
+    splitPattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseSplitPattern, placeholders);
+
+    std::string json = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmApiJson, jsonFill);
+
+    json = PlayerbotTextMgr::GetReplacePlaceholders(json, placeholders);
+
+    WorldSession* session = bot->GetSession();
+
+    bool debug = bot->GetPlayerbotAI()->HasStrategy("debug llm", BotState::BOT_STATE_NON_COMBAT);
+
+    uint32 lang = bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH;
+
+    WorldPacket chatTemplate, emoteTemplate, systemTemplate = ChatReplyAction::GetPacketTemplate(SMSG_CHAT_RESTRICTED, CHAT_MSG_MONSTER_WHISPER, bot, requester);
+    if (botIstalking)
+    {
+        chatTemplate = ChatReplyAction::GetPacketTemplate(SMSG_CHAT_RESTRICTED, CHAT_MSG_SAY, bot, nullptr);
+        emoteTemplate = ChatReplyAction::GetPacketTemplate(SMSG_CHAT_RESTRICTED, CHAT_MSG_EMOTE, bot, nullptr);
+    }
+    else
+    {
+        chatTemplate = ChatReplyAction::GetPacketTemplate(SMSG_CHAT_RESTRICTED, CHAT_MSG_MONSTER_SAY, unit, bot);
+        emoteTemplate = ChatReplyAction::GetPacketTemplate(SMSG_CHAT_RESTRICTED, CHAT_MSG_MONSTER_EMOTE, unit, bot);
+    }       
+
+    std::future<delayedPackets> futurePackets = std::async(std::launch::async, ChatReplyAction::GenerateResponsePackets, json, chatTemplate, emoteTemplate, systemTemplate, startPattern, endPattern, deletePattern, splitPattern, debug);
+
+    ai->ReceiveDelayedPacket(std::move(futurePackets));
+
+    if (!urand(0, 10))
+        chatLine += urand(-2, 2) * 2;
+    chatLine--;
+
+    if (chatLine == 0)
+        chatLine = -1;
+    else
+    {
+        SET_AI_VALUE(std::string, "next rpg action", "rpg ai chat");
+        SetDuration(sPlayerbotAIConfig.rpgDelay);
+    }
+
+    SET_AI_VALUE2(int32, "manual int", "rpg ai chat line", chatLine);
+    SET_AI_VALUE2(std::string, "manual string", "llmcontext rpg", llmContext);
+
+    return true;
 }
 
 bool RpgTradeUsefulAction::IsTradingItem(uint32 entry)

@@ -250,6 +250,16 @@ namespace ai
         virtual Event ActionEvent(Event event) { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject(bot->GetInstanceId()))); }
     };
 
+    class RpgAIChatAction : public RpgSubAction
+    {
+    public:
+        RpgAIChatAction(PlayerbotAI* ai, std::string name = "rpg ai chat") : RpgSubAction(ai, name) {}
+
+    private:
+        virtual bool isUseful() override;
+        virtual bool Execute(Event& event) override;
+    };
+
     class RpgSpellAction : public RpgSubAction
     {
     public:

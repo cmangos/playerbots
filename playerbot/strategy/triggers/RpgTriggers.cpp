@@ -150,7 +150,6 @@ bool RpgRepeatQuestTrigger::IsActive()
     return false;
 }
 
-
 bool RpgBuyTrigger::IsActive()
 {
     GuidPosition guidP(getGuidP());
@@ -296,7 +295,6 @@ bool RpgTrainTrigger::IsTrainerOf(CreatureInfo const* cInfo, Player* pPlayer)
     }
     return true;
 }
-
 
 bool RpgTrainTrigger::IsActive()
 {
@@ -512,6 +510,30 @@ bool RpgUseTrigger::IsActive()
         return false;
     }   
 }
+
+bool RpgAIChatTrigger::IsActive()
+{
+    if (FarFromRpgTargetTrigger::IsActive())
+        return false;
+
+    if (!ai->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT))
+        return false;
+
+    if (!ai->HasPlayerNearby(sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY)))
+        return false;
+
+    GuidPosition guidP(getGuidP());
+ 
+    if (guidP.IsPlayer())
+    {
+        Player* player = guidP.GetPlayer();
+
+        if (player->isRealPlayer())
+            return false;
+    }
+
+    return true;
+};
 
 bool RpgSpellTrigger::IsActive()
 {

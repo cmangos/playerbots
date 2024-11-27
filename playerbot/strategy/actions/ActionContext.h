@@ -259,6 +259,7 @@ namespace ai
             creators["rpg queue bg"] = &ActionContext::rpg_queue_bg;
             creators["rpg buy petition"] = &ActionContext::rpg_buy_petition;
             creators["rpg use"] = &ActionContext::rpg_use;
+            creators["rpg ai chat"] = [](PlayerbotAI* ai) { return new RpgAIChatAction(ai); };
             creators["rpg spell"] = &ActionContext::rpg_spell;
             creators["rpg craft"] = &ActionContext::rpg_craft;
             creators["rpg trade useful"] = &ActionContext::rpg_trade_useful;

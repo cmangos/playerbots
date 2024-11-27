@@ -352,6 +352,17 @@ namespace ai
         }
     };
 
+    class IntManualSetValue : public ManualSetValue<int32>, public Qualified
+    {
+    public:
+        IntManualSetValue(PlayerbotAI* ai, int32 defaultValue = 0, std::string name = "manual int") : ManualSetValue<int32>(ai, defaultValue, name), Qualified() {};
+
+        virtual std::string Format()
+        {
+            return std::to_string(this->value);
+        }
+    };
+
     class StringManualSetValue : public ManualSetValue<std::string>, public Qualified
     {
     public:

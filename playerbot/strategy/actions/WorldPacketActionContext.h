@@ -89,6 +89,7 @@ namespace ai
             creators["petition sign"] = &WorldPacketActionContext::petition_sign;
             creators["see spell"] = &WorldPacketActionContext::see_spell;
             creators["arena team accept"] = &WorldPacketActionContext::arena_team_accept;
+            creators["message chat"] = [](PlayerbotAI* ai) { return new MessageChatAction(ai); };
         }
 
     private:

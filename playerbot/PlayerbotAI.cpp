@@ -80,13 +80,13 @@ void PacketHandlingHelper::Handle(ExternalEventHelper &helper)
     if (!m_botPacketMutex.try_lock()) //Packets do not have to be handled now. Handle them later.
         return;
 
-    std::stack<WorldPacket> delayed;
+    std::queue<WorldPacket> delayed;
 
     while (!queue.empty())
     {
-        if (!helper.HandlePacket(handlers, queue.top()))
-            if(delay[queue.top().GetOpcode()])
-                delayed.push(queue.top());
+        if (!helper.HandlePacket(handlers, queue.back()))
+            if(queue.back().GetOpcode() == SMSG_MESSAGECHAT || delay[queue.back().GetOpcode()])
+                delayed.push(queue.back());
         queue.pop();
     }
 
@@ -1679,6 +1679,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             }
             else if (isAiChat)
             {
+                if (message.find("d:") != std::string::npos)
+                    return;
+
                 ChatChannelSource chatChannelSource = bot->GetPlayerbotAI()->GetChatChannelSource(bot, msgtype, chanName);
 
                 std::string llmChannel;
@@ -7090,20 +7093,32 @@ std::list<Unit*> PlayerbotAI::GetAllHostileNPCNonPetUnitsAroundWO(WorldObject* w
     return hostileUnitsNonPlayers;
 }
 
-void PlayerbotAI::SendDelayedPacket(WorldSession* session, std::future<std::vector<WorldPacket>> futurePacket, uint32 waitBeforeSend)
+void PlayerbotAI::SendDelayedPacket(WorldSession* session, std::future<std::vector<std::pair<WorldPacket, uint32>>> futurePacket)
 {
-    time_t doNotSendBefore = time(0) + waitBeforeSend;
-    std::thread t([session, futPacket = std::move(futurePacket), doNotSendBefore]() mutable {
-        if (doNotSendBefore > time(0))
-            std::this_thread::sleep_for(std::chrono::seconds(doNotSendBefore - time(0)));
-
-        for (auto& packet : futPacket.get())
+    std::thread t([session, futPacket = std::move(futurePacket)]() mutable {
+        for (auto& delayedPacket : futPacket.get())
         {
-            std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet));
-
+            std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(delayedPacket.first));
             session->QueuePacket(std::move(packetPtr));
+            if (delayedPacket.second)
+                std::this_thread::sleep_for(std::chrono::milliseconds(delayedPacket.second));
         }
     });
+
+    t.detach();
+}
+
+void PlayerbotAI::ReceiveDelayedPacket(std::future<std::vector<std::pair<WorldPacket, uint32>>> futurePacket)
+{
+    PacketHandlingHelper* handler = &botOutgoingPacketHandlers;
+    std::thread t([handler, futPacket = std::move(futurePacket)]() mutable {
+        for (auto& delayedPacket : futPacket.get())
+        {            
+            handler->AddPacket(delayedPacket.first);
+            if(delayedPacket.second)
+                std::this_thread::sleep_for(std::chrono::milliseconds(delayedPacket.second));
+        }
+        });
 
     t.detach();
 }

@@ -111,7 +111,7 @@ bool DebugAction::Execute(Event& event)
 
         std::vector<std::string> debugLines = { json };
 
-        std::string response = PlayerbotLLMInterface::Generate(json, debugLines);
+        std::string response = PlayerbotLLMInterface::Generate(json, sPlayerbotAIConfig.llmGenerationTimeout, sPlayerbotAIConfig.llmMaxSimultaniousGenerations, debugLines);
 
         for(auto line : debugLines)
             ai->TellPlayerNoFacing(requester, line, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);

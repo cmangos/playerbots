@@ -609,9 +609,18 @@ bool PlayerbotAIConfig::Initialize()
     llmPrompt = config.GetStringDefault("AiPlayerbot.LLMPrompt", "<player name>:<player message>");
     llmPostPrompt = config.GetStringDefault("AiPlayerbot.LLMPostPrompt", "<bot name>:");
 
-    llmResponseStartPattern = config.GetStringDefault("AiPlayerbot.LLMResponseStartPattern", "(\"text\":\\s*\")");
-    llmResponseEndPattern = config.GetStringDefault("AiPlayerbot.LLMResponseEndPattern", "(\"|<player name>:)");
-    llmResponseSplitPattern = config.GetStringDefault("AiPlayerbot.LLMResponseSplitPattern", "(.*?)(\\.|\\?|\\!|\\n|<bot name>:|$)\\s*");
+    llmResponseStartPattern = config.GetStringDefault("AiPlayerbot.LLMResponseStartPattern", R"(("text":\s*"))");
+    llmResponseEndPattern = config.GetStringDefault("AiPlayerbot.LLMResponseEndPattern", R"(("|<player name>:))");
+    llmResponseDeletePattern = config.GetStringDefault("AiPlayerbot.LLMResponseDeletePattern", R"((\\n|<bot name>:))");
+    llmResponseSplitPattern = config.GetStringDefault("AiPlayerbot.LLMResponseSplitPattern", R"((\*.*?\*)|(\[.*?\])|(\'.*\')|([^\*\[\] ][^\*\[\]]+?[.?!]))");
+
+    if (true) //Disable for release
+    {
+        sLog.outError("# AiPlayerbot.LLMResponseStartPattern = %s", llmResponseStartPattern.c_str());
+        sLog.outError("# AiPlayerbot.LLMResponseEndPattern = %s", llmResponseEndPattern.c_str());
+        sLog.outError("# AiPlayerbot.LLMResponseDeletePattern = %s", llmResponseDeletePattern.c_str());
+        sLog.outError("# AiPlayerbot.LLMResponseSplitPattern = %s", llmResponseSplitPattern.c_str());
+    }
 
     try {
         std::regex pattern(llmResponseStartPattern);
@@ -628,7 +637,14 @@ bool PlayerbotAIConfig::Initialize()
     }
 
     try {
-        std::regex pattern(llmResponseEndPattern);
+        std::regex pattern(llmResponseDeletePattern);
+    }
+    catch (const std::regex_error& e) {
+        sLog.outError("Regex error in %s: %s", llmResponseDeletePattern.c_str(), e.what());
+    }
+
+    try {
+        std::regex pattern(llmResponseSplitPattern);
     }
     catch (const std::regex_error& e) {
         sLog.outError("Regex error in %s: %s", llmResponseSplitPattern.c_str(), e.what());

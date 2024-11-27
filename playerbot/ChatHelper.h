@@ -72,6 +72,7 @@ namespace ai
         static std::string formatClass(uint8 cls);
 
         static std::string formatRace(uint8 race);
+        static std::string formatFactionName(uint32 factionId);
 
         static std::string getSkillName(uint32 skill);
         uint32 parseSkillName(const std::string& text);

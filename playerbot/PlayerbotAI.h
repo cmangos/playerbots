@@ -300,7 +300,7 @@ public:
 private:
     std::map<uint16, std::string> handlers;
     std::map<uint16, bool> delay;
-    std::stack<WorldPacket> queue;
+    std::queue<WorldPacket> queue;
     std::mutex m_botPacketMutex;
 };
 
@@ -510,7 +510,8 @@ public:
     std::list<Unit*> GetAllHostileUnitsAroundWO(WorldObject* wo, float distanceAround);
     std::list<Unit*> GetAllHostileNPCNonPetUnitsAroundWO(WorldObject* wo, float distanceAround);
 
-    static void SendDelayedPacket(WorldSession* session, std::future<std::vector<WorldPacket>> futurePacket, uint32 waitBeforeSend = 0);
+    static void SendDelayedPacket(WorldSession* session, std::future<std::vector<std::pair<WorldPacket, uint32>>> futurePacket);
+    void ReceiveDelayedPacket(std::future<std::vector<std::pair<WorldPacket, uint32>>> futurePacket);
 public:
     std::vector<Bag*> GetEquippedAnyBags();
     std::vector<Bag*> GetEquippedQuivers();

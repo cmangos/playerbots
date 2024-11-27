@@ -911,12 +911,15 @@ AiPlayerbot.PerfMonEnabled = 0
 # The default prompt to send at the end of each conversation.
 # AiPlayerbot.LLMPostPrompt = <bot name>:
 
-# What pattern the server should look for to find the start of the repsonse the llm gave.
-# AiPlayerbot.LLMResponseStartPattern = (\"text\":\\s*\")
-# What pattern the server should look for that the response has ended.
-# AiPlayerbot.LLMResponseEndPattern = (\"|<player name>:)
-# What pattern the server should look for to split the repsonse in multiple lines. The second capture group will be truncated except for .?!
-# AiPlayerbot.LLMResponseSplitPattern = (.*?)(\\.|\\?|\\!|\n|<bot name>:|$)\\s*
+# Response parse method. The (json) response that the llm will output needs to be cut and split to result in a number of plain lines the bot can give as feedback.
+# Step1: What pattern the server should look for to find the start of the repsonse the llm gave.
+# AiPlayerbot.LLMResponseStartPattern = ("text":\s*")
+# Step2: What pattern the server should look for that the response has ended.
+# AiPlayerbot.LLMResponseEndPattern = ("|<player name>:)
+# Step3: What pattern the server should look for to remove from the response.
+# AiPlayerbot.LLMResponseDeletePattern = (\\n|<bot name>:)
+# Step4: What pattern the server should look for to split the repsonse in multiple lines. Note only lines that follow this pattern will be extracted.
+# AiPlayerbot.LLMResponseSplitPattern = (\*.*?\*)|(\[.*?\])|(\'.*\')|([^\*\[\] ][^\*\[\]]+?[.?!])
 
 # Should previous conversations from all channels be mixed?
 # AiPlayerbot.LLMGlobalContext = 0

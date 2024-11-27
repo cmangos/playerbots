@@ -928,6 +928,37 @@ std::string ChatHelper::formatRace(uint8 race)
     return races[race];
 }
 
+std::string ChatHelper::formatFactionName(uint32 factionId)
+{
+    std::string name = "unknown faction";
+
+    uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK];
+    ReputationRankStrIndex[REP_HATED] = LANG_REP_HATED;
+    ReputationRankStrIndex[REP_HOSTILE] = LANG_REP_HOSTILE;
+    ReputationRankStrIndex[REP_UNFRIENDLY] = LANG_REP_UNFRIENDLY;
+    ReputationRankStrIndex[REP_NEUTRAL] = LANG_REP_NEUTRAL;
+    ReputationRankStrIndex[REP_FRIENDLY] = LANG_REP_FRIENDLY;
+    ReputationRankStrIndex[REP_HONORED] = LANG_REP_HONORED;
+    ReputationRankStrIndex[REP_REVERED] = LANG_REP_REVERED;
+    ReputationRankStrIndex[REP_EXALTED] = LANG_REP_EXALTED;
+
+#ifndef MANGOSBOT_ONE
+    const FactionEntry* factionEntry = sFactionStore.LookupEntry(factionId);
+#else
+    const FactionEntry* factionEntry = sFactionStore.LookupEntry<FactionEntry>(factionId);
+#endif
+
+    if (factionEntry)
+    {
+        int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
+        if (loc_idx == -1)
+            loc_idx = 0;
+        name = factionEntry->name[loc_idx];
+    }
+
+    return name;
+}
+
 uint32 ChatHelper::parseSkillName(const std::string& text)
 {
     if (skills.find(text) != skills.end())

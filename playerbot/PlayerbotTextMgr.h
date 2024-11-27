@@ -59,6 +59,10 @@ class PlayerbotTextMgr
         }
 
 	public:
+        static void replaceAll(std::string& str, const std::string& from, const std::string& to);
+        static void replacePlaceholders(std::string& text, const std::map<std::string, std::string>& placeholders);
+        static std::string GetReplacePlaceholders(const std::string& text, const std::map<std::string, std::string>& placeholders) { std::string retText = text; replacePlaceholders (retText, placeholders); return retText;  }
+
         std::string GetBotText(std::string name, std::map<std::string, std::string> placeholders);
         std::string GetBotText(std::string name);
         std::string GetBotText(ChatReplyType replyType, std::map<std::string, std::string> placeholders);
@@ -68,7 +72,6 @@ class PlayerbotTextMgr
         void LoadBotTexts();
         void LoadBotTextChance();
 
-        static void replaceAll(std::string& str, const std::string& from, const std::string& to);
         bool rollTextChance(std::string text);
 
         int32 GetLocalePriority();

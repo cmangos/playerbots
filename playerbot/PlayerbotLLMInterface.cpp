@@ -3,7 +3,6 @@
 //And yes I used chat-gpt to write most of this. LLM for LLM code is what I call fitting.
 
 #include "PlayerbotLLMInterface.h"
-#include "PlayerbotAIConfig.h"
 
 #include <iostream>
 #include <string>
@@ -123,20 +122,20 @@ inline std::string RecvWithTimeout(int sock, int timeout_seconds, int& bytesRead
     return response;
     }
 
-std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vector<std::string> & debugLines) {
+std::string PlayerbotLLMInterface::Generate(const std::string& prompt, int timeOutSeconds, int maxGenerations, std::vector<std::string> & debugLines) {
     bool debug = !debugLines.empty();
 
-    if ((uint32)sPlayerbotLLMInterface.generationCount > sPlayerbotAIConfig.llmMaxSimultaniousGenerations)
+    if (sPlayerbotLLMInterface.generationCount > maxGenerations)
     {
         if (debug)
-            debugLines.push_back("Maxium generations reached " + std::to_string(sPlayerbotLLMInterface.generationCount) + "/" + std::to_string(sPlayerbotAIConfig.llmMaxSimultaniousGenerations));
+            debugLines.push_back("Maxium generations reached " + std::to_string(sPlayerbotLLMInterface.generationCount) + "/" + std::to_string(maxGenerations));
         return {};
     }
 
     sPlayerbotLLMInterface.generationCount++;
 
     if (debug)
-        debugLines.push_back("Generations start " + std::to_string(sPlayerbotLLMInterface.generationCount) + "/" + std::to_string(sPlayerbotAIConfig.llmMaxSimultaniousGenerations));
+        debugLines.push_back("Generations start " + std::to_string(sPlayerbotLLMInterface.generationCount) + "/" + std::to_string(maxGenerations));
 
 #ifdef _WIN32
     if (debug)
@@ -297,7 +296,7 @@ std::string PlayerbotLLMInterface::Generate(const std::string& prompt, std::vect
 
     int bytesRead;
     
-    std::string response = RecvWithTimeout(sock, sPlayerbotAIConfig.llmGenerationTimeout, bytesRead);
+    std::string response = RecvWithTimeout(sock, timeOutSeconds, bytesRead);
 
 #ifdef _WIN32
     if (bytesRead == SOCKET_ERROR) {
@@ -345,7 +344,7 @@ inline std::string extractAfterPattern(const std::string& content, const std::st
         return content.substr(start_pos);
     }
     else {
-        return "";
+        return content;
     }
 
 }
@@ -368,36 +367,20 @@ inline std::vector<std::string> splitResponse(const std::string& response, const
     std::vector<std::string> result;
     std::regex pattern(splitPattern);
     std::smatch match;
-    std::string remaining = response;
-
-    while (std::regex_search(remaining, match, pattern) && remaining.size()) {
-        std::string sentence = match[1];
-
-        if (match[2] == "." || match[2] == "!" || match[2] == "?")
-            sentence += match[2];
-
-        remaining = match.suffix().str();
-
-        while (sentence.length() > 200) {
-            size_t split_pos = sentence.rfind(' ', 200);
-            if (split_pos == std::string::npos) {
-                split_pos = 200;
-            }
-
-            if (!sentence.substr(0, split_pos).empty())
-                result.push_back(sentence.substr(0, split_pos));
-
-            sentence = sentence.substr(split_pos + 1);
-        }
-
-        if(!sentence.empty())
-            result.push_back(sentence);
+    
+    std::sregex_iterator begin(response.begin(), response.end(), pattern);
+    std::sregex_iterator end;
+    for (auto it = begin; it != end; ++it) {
+        result.push_back(it->str());
     }
+
+    if(result.empty())
+        result.push_back(response);
 
     return result;
 }
 
-std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string& response, const std::string& startPattern, const std::string& endPattern, const std::string& splitPattern, std::vector<std::string>& debugLines)
+std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string& response, const std::string& startPattern, const std::string& endPattern, const std::string& deletePattern, const std::string& splitPattern, std::vector<std::string>& debugLines)
 {
     bool debug = !(debugLines.empty());
     uint32 startCursor = 0;
@@ -410,23 +393,32 @@ std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string&
     
     actualResponse = extractAfterPattern(actualResponse, startPattern);
 
-    if (!actualResponse.empty())
-        debugLines.push_back(actualResponse);
-    else
-        debugLines.push_back("Empty response");
+    PlayerbotTextMgr::replaceAll(actualResponse, R"(\")", "'");
 
     if (debug)
+    {
+        debugLines.push_back(!actualResponse.empty() ? actualResponse : "Empty response");
         debugLines.push_back("end pattern:" + endPattern);
+    }
 
     actualResponse = extractBeforePattern(actualResponse, endPattern);
 
     if (debug)
-        debugLines.push_back(actualResponse);
+    {
+        debugLines.push_back(!actualResponse.empty() ? actualResponse : "Empty response");
+        debugLines.push_back("delete pattern:" + deletePattern);
+    }
+
+    std::regex regexPattern(deletePattern);
+    actualResponse = std::regex_replace(actualResponse, regexPattern, "");
 
     if (debug)
+    {
+        debugLines.push_back(!actualResponse.empty() ? actualResponse : "Empty response");
         debugLines.push_back("split pattern:" + splitPattern);
+    }
 
-    std::vector<std::string> responses = splitResponse(actualResponse, splitPattern);    
+    std::vector<std::string> responses = splitResponse(actualResponse, splitPattern);   
 
     if (debug)
         debugLines.insert(debugLines.end(), responses.begin(), responses.end());

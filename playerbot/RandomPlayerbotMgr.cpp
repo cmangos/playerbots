@@ -3328,11 +3328,9 @@ Player* RandomPlayerbotMgr::GetPlayer(uint32 playerGuid)
 void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
 {
     Player* requester = GetPlayer(requesterGuid);
-    std::stringstream outMessage;
-
     std::stringstream ss; ss << GetPlayerbotsAmount() << " Random Bots online";
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     std::map<uint32, int> alliance, horde;
     for (uint32 i = 0; i < 10; ++i)
@@ -3487,7 +3485,7 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
 
     ss.str(""); ss << "Bots level:";
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
 	uint32 maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
 	for (uint32 i = 0; i < 10; ++i)
@@ -3501,12 +3499,12 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
 
         ss.str(""); ss << "    " << from << ".." << to << ": " << alliance[i] << " alliance, " << horde[i] << " horde";
         sLog.outString(ss.str().c_str());
-        outMessage << ss.str() << "\n";
+        if (requester) { requester->SendMessageToPlayer(ss.str()); }
     }
 
     ss.str(""); ss << "Bots race:";
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     for (uint8 race = RACE_HUMAN; race < MAX_RACES; ++race)
     {
@@ -3514,13 +3512,13 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         {
             ss.str(""); ss << "    " << ChatHelper::formatRace(race) << ": " << perRace[race];
             sLog.outString(ss.str().c_str());
-            outMessage << ss.str() << "\n";
+            if (requester) { requester->SendMessageToPlayer(ss.str()); }
         }
     }
 
     ss.str(""); ss << "Bots class:";
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     for (uint8 cls = CLASS_WARRIOR; cls < MAX_CLASSES; ++cls)
     {
@@ -3528,29 +3526,29 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         {
             ss.str(""); ss << "    " << ChatHelper::formatClass(cls) << ": " << perClass[cls];
             sLog.outString(ss.str().c_str());
-            outMessage << ss.str() << "\n";
+            if (requester) { requester->SendMessageToPlayer(ss.str()); }
         }
     }
 
     ss.str(""); ss << "Bots role:";
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    tank: " << tank << ", heal: " << heal << ", dps: " << dps;
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "Bots status:";
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Active: " << active;
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Moving: " << moving;
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     //sLog.outString("Bots to:");
     //sLog.outString("    update: %d", update);
@@ -3561,43 +3559,43 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
 
     ss.str(""); ss << "    On taxi: " << taxi;
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    On mount: " << mounted;
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    In combat: " << combat;
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Dead: " << dead;
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    AFK: " << afk;
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "Bots questing:";
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Picking quests: " << stateCount[(uint8)TravelState::TRAVEL_STATE_TRAVEL_PICK_UP_QUEST] + stateCount[(uint8)TravelState::TRAVEL_STATE_WORK_PICK_UP_QUEST];
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Doing quests: " << stateCount[(uint8)TravelState::TRAVEL_STATE_TRAVEL_DO_QUEST] + stateCount[(uint8)TravelState::TRAVEL_STATE_WORK_DO_QUEST];
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Completing quests: " << stateCount[(uint8)TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST] + stateCount[(uint8)TravelState::TRAVEL_STATE_WORK_HAND_IN_QUEST];
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Idling: " << stateCount[(uint8)TravelState::TRAVEL_STATE_IDLE];
     sLog.outString(ss.str().c_str());
-    outMessage << ss.str() << "\n";
+    if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     /*sort(questCount.begin(), questCount.end(), [](std::pair<Quest const*, int32> i, std::pair<Quest const*, int32> j) {return i.second > j.second; });
 
@@ -3611,11 +3609,6 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         if (cnt > 25)
             break;
     }*/
-
-    if (requester)
-    {
-        requester->SendMessageToPlayer(outMessage.str());
-    }
 }
 
 double RandomPlayerbotMgr::GetBuyMultiplier(Player* bot)

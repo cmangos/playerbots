@@ -5,6 +5,7 @@
 #include "ChooseRpgTargetAction.h"
 #include "UseItemAction.h"
 #include "playerbot/strategy/values/LastMovementValue.h"
+#include "SayAction.h"
 
 namespace ai
 {
@@ -255,9 +256,17 @@ namespace ai
     public:
         RpgAIChatAction(PlayerbotAI* ai, std::string name = "rpg ai chat") : RpgSubAction(ai, name) {}
 
+        void ManualChat(GuidPosition target, const std::string& line);
     private:
         virtual bool isUseful() override;
+
+        bool SpeakLine();
+        bool WaitForLines();
+        bool RequestNewLines();
         virtual bool Execute(Event& event) override;
+
+        std::queue<delayedPacket> packets;
+        futurePackets futPackets;
     };
 
     class RpgSpellAction : public RpgSubAction

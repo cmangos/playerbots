@@ -124,28 +124,42 @@ bool SayAction::isUseful()
     return (time(0) - lastSaid) > 30;
 }
 
-void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& placeholders, Unit* unit, const std::string preFix)
+void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& placeholders, Unit* sender, Unit* receiver)
 {
-    if (!unit)
-    {
+    if(receiver)
+        placeholders["<receiver name>"] = receiver->GetName();
+    else
+        placeholders["<receiver name>"];
+
+    if (sender)
+        placeholders["<sender name>"] = sender->GetName();
+    else
+        placeholders["<sender name>"];
+
 #ifdef MANGOSBOT_ZERO
-        placeholders["<expansion name>"] = "Vanilla";
+    placeholders["<expansion name>"] = "Vanilla";
 #endif
 #ifdef MANGOSBOT_ONE
-        placeholders["<expansion name>"] = "The Burning Crusade";
+    placeholders["<expansion name>"] = "The Burning Crusade";
 #endif
 #ifdef MANGOSBOT_TWO
-        placeholders["<expansion name>"] = "Wrath of the Lich King";
+    placeholders["<expansion name>"] = "Wrath of the Lich King";
 #endif
-        return;
-    }
+    return;
+}
 
+void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& placeholders, Unit* unit, const std::string preFix, Player* observer)
+{
     placeholders["<" + preFix + " name>"] = unit->GetName();
     placeholders["<" + preFix + " gender>"] = unit->getGender() == GENDER_MALE ? "male" : "female";
     placeholders["<" + preFix + " level>"] = std::to_string(unit->GetLevel());
     placeholders["<" + preFix + " class>"] = ChatHelper::formatClass(unit->getClass());
     placeholders["<" + preFix + " race>"] = ChatHelper::formatRace(unit->getRace());
-    placeholders["<" + preFix + " faction>"] = ChatHelper::formatFactionName(unit->GetFaction());
+
+    FactionTemplateEntry const* factionTemplate = unit->GetFactionTemplateEntry();
+    uint32 factionId = factionTemplate ? factionTemplate->faction : 0;
+
+    placeholders["<" + preFix + " faction>"] = ChatHelper::formatFactionName(factionId);
     WorldPosition pos(unit);
     placeholders["<" + preFix + " zone>"] = pos.getAreaName();
     placeholders["<" + preFix + " subzone>"] = pos.getAreaOverride();
@@ -203,12 +217,38 @@ void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& 
 
         std::string gossipText = placeholders["<" + preFix + " gossip>"];
 
+        
+        GossipMenusMapBounds pMenuBounds = sObjectMgr.GetGossipMenusMapBounds(creature->GetDefaultGossipMenuId());
         GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(creature->GetDefaultGossipMenuId());
+
+        for (auto& gossip = pMenuBounds.first; gossip != pMenuBounds.second; gossip++)
+        {
+            const GossipText* gos = sObjectMgr.GetGossipText(gossip->second.text_id);
+            gossipText += " " + gos->Options->Text_0;
+        }
+
+        uint32 textId = observer->GetGossipTextId(creature);
+
+        if (textId)
+        {
+            const GossipText* gos = sObjectMgr.GetGossipText(textId);
+            if(gos)
+                gossipText += " " + gos->Options->Text_0;
+        }
+
         for (auto& gossip = pMenuItemBounds.first; gossip != pMenuItemBounds.second; gossip++)
         {
-            gossipText = gossip->second.box_text;
-            break;
+            gossipText += " " + gossip->second.option_text;
         }
+
+        PlayerbotTextMgr::replaceAll(gossipText, "<", "*");
+        PlayerbotTextMgr::replaceAll(gossipText, ">", "*");
+        PlayerbotTextMgr::replaceAll(gossipText, "$N", observer->GetName());
+        PlayerbotTextMgr::replaceAll(gossipText, "$B", "");
+        PlayerbotTextMgr::replaceAll(gossipText, "$c", ChatHelper::formatRace(observer->getRace()));
+        PlayerbotTextMgr::replaceAll(gossipText, "$r", ChatHelper::formatClass(unit->getClass()));
+        PlayerbotTextMgr::replaceAll(gossipText, "$g boy : girl;", unit->getGender() == GENDER_MALE ? "boy" : "girl"); //Todo replace with regexp
+        PlayerbotTextMgr::replaceAll(gossipText, "$g lad : lass;", unit->getGender() == GENDER_MALE ? "lass" : "lad");      
 
         placeholders["<" + preFix + " gossip>"] = gossipText;
     }
@@ -427,9 +467,9 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
             {
                 std::map<std::string, std::string> placeholders;
 
-                GetAIChatPlaceholders(placeholders);
+                GetAIChatPlaceholders(placeholders, bot, player);
                 GetAIChatPlaceholders(placeholders, bot, "bot");
-                GetAIChatPlaceholders(placeholders, player, "player");
+                GetAIChatPlaceholders(placeholders, player, "other");
 
                 switch (chatChannelSource)
                 {
@@ -462,7 +502,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
                     placeholders["<channel name>"] = "";
                 }
 
-                placeholders["<player message>"] = msg;
+                placeholders["<initial message>"] = msg;
 
                 std::map<std::string, std::string> jsonFill;
                 jsonFill["<pre prompt>"] = sPlayerbotAIConfig.llmPrePrompt;
@@ -538,9 +578,9 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
                 WorldPacket emoteTemplate = (type == CHAT_MSG_SAY || type == CHAT_MSG_WHISPER) ? GetPacketTemplate(CMSG_MESSAGECHAT, CHAT_MSG_EMOTE, bot, player) : WorldPacket();
                 WorldPacket systemTemplate = GetPacketTemplate(CMSG_MESSAGECHAT, CHAT_MSG_WHISPER, bot, player);
 
-                std::future<delayedPackets> futurePackets = std::async(std::launch::async, ChatReplyAction::GenerateResponsePackets, json, chatTemplate, emoteTemplate, systemTemplate, startPattern, endPattern, deletePattern, splitPattern, debug);
+                futurePackets futPackets = std::async(std::launch::async, ChatReplyAction::GenerateResponsePackets, json, chatTemplate, emoteTemplate, systemTemplate, startPattern, endPattern, deletePattern, splitPattern, debug);
 
-                ai->SendDelayedPacket(session, std::move(futurePackets));
+                ai->SendDelayedPacket(session, std::move(futPackets));
             }
             else if (player != bot || sPlayerbotAIConfig.llmBotToBotChatChance)
             {
@@ -1406,6 +1446,8 @@ bool MessageChatAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
     WorldPacket packet = event.getPacket();
+
+    requester->SendMessageToPlayer(bot->GetName() + std::string(":AI MESSAGE"));
 
     //Does not work for some reason. Fix maybe?
     //bot->SendMessageToSetInRange(packet, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);

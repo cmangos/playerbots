@@ -932,16 +932,6 @@ std::string ChatHelper::formatFactionName(uint32 factionId)
 {
     std::string name = "unknown faction";
 
-    uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK];
-    ReputationRankStrIndex[REP_HATED] = LANG_REP_HATED;
-    ReputationRankStrIndex[REP_HOSTILE] = LANG_REP_HOSTILE;
-    ReputationRankStrIndex[REP_UNFRIENDLY] = LANG_REP_UNFRIENDLY;
-    ReputationRankStrIndex[REP_NEUTRAL] = LANG_REP_NEUTRAL;
-    ReputationRankStrIndex[REP_FRIENDLY] = LANG_REP_FRIENDLY;
-    ReputationRankStrIndex[REP_HONORED] = LANG_REP_HONORED;
-    ReputationRankStrIndex[REP_REVERED] = LANG_REP_REVERED;
-    ReputationRankStrIndex[REP_EXALTED] = LANG_REP_EXALTED;
-
 #ifndef MANGOSBOT_ONE
     const FactionEntry* factionEntry = sFactionStore.LookupEntry(factionId);
 #else

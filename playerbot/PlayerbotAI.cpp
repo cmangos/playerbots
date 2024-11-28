@@ -85,7 +85,7 @@ void PacketHandlingHelper::Handle(ExternalEventHelper &helper)
     while (!queue.empty())
     {
         if (!helper.HandlePacket(handlers, queue.back()))
-            if(queue.back().GetOpcode() == SMSG_MESSAGECHAT || delay[queue.back().GetOpcode()])
+            if(delay[queue.back().GetOpcode()])
                 delayed.push(queue.back());
         queue.pop();
     }
@@ -215,7 +215,7 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
     botOutgoingPacketHandlers.AddHandler(SMSG_QUEST_CONFIRM_ACCEPT, "confirm quest");
     botOutgoingPacketHandlers.AddHandler(SMSG_QUESTGIVER_QUEST_DETAILS, "quest details");
 
-    botOutgoingPacketHandlers.AddHandler(SMSG_CHAT_RESTRICTED, "message chat");
+    botOutgoingPacketHandlers.AddHandler(SMSG_CHAT_RESTRICTED, "message chat", true);
     
 
 #ifndef MANGOSBOT_ZERO
@@ -7095,9 +7095,9 @@ std::list<Unit*> PlayerbotAI::GetAllHostileNPCNonPetUnitsAroundWO(WorldObject* w
     return hostileUnitsNonPlayers;
 }
 
-void PlayerbotAI::SendDelayedPacket(WorldSession* session, std::future<std::vector<std::pair<WorldPacket, uint32>>> futurePacket)
+void PlayerbotAI::SendDelayedPacket(WorldSession* session, futurePackets futPackets)
 {
-    std::thread t([session, futPacket = std::move(futurePacket)]() mutable {
+    std::thread t([session, futPacket = std::move(futPackets)]() mutable {
         for (auto& delayedPacket : futPacket.get())
         {
             std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(delayedPacket.first));
@@ -7110,11 +7110,11 @@ void PlayerbotAI::SendDelayedPacket(WorldSession* session, std::future<std::vect
     t.detach();
 }
 
-void PlayerbotAI::ReceiveDelayedPacket(std::future<std::vector<std::pair<WorldPacket, uint32>>> futurePacket)
+void PlayerbotAI::ReceiveDelayedPacket(futurePackets futPackets)
 {
     PacketHandlingHelper* handler = &botOutgoingPacketHandlers;
-    std::thread t([handler, futPacket = std::move(futurePacket)]() mutable {
-        for (auto& delayedPacket : futPacket.get())
+    std::thread t([handler, futPackets = std::move(futPackets)]() mutable {
+        for (auto& delayedPacket : futPackets.get())
         {            
             handler->AddPacket(delayedPacket.first);
             if(delayedPacket.second)

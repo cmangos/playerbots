@@ -344,7 +344,7 @@ inline std::string extractAfterPattern(const std::string& content, const std::st
         return content.substr(start_pos);
     }
     else {
-        return content;
+        return "";
     }
 
 }

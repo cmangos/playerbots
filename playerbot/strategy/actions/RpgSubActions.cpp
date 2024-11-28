@@ -410,8 +410,7 @@ bool RpgAIChatAction::RequestNewLines()
     ChatReplyAction::GetAIChatPlaceholders(placeholders, bot, "bot");
     ChatReplyAction::GetAIChatPlaceholders(placeholders, unit, "unit", bot);
 
-    std::string prePrompt = "In World of Warcraft: <expansion name> in <bot zone> <bot subzone> stands <bot type> <bot name> a level <bot level> <bot gender> <bot race> <bot class>."
-        " Standing nearby is <player type> <player name> <player subname> a level <player level> <player gender> <player race> <player faction> <player class>. Answer as a roleplaying character. Limit responses to 100 characters.";
+    std::string prePrompt = sPlayerbotAIConfig.llmPreRpgPrompt;
 
     if (AI_VALUE2(bool, "trigger active", "rpg start quest"))
         prePrompt += " <unit name> can offer <bot name> a new quest.";

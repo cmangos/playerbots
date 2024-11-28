@@ -946,19 +946,22 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.LLMMaxSimultaniousGenerations = 100
 
 # The default prompt to send at the beginning of each conversation.
-# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The player <player name> is speaking to you <channel name> and is an <player gender> <player race> <player class> of level <player level>. You are level <bot level> and play as a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.
+# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The <other type> <other name> is speaking to you <channel name> and is an <other gender> <other race> <other class> of level <other level>. You are level <bot level> and play as a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.
 # The prompt part containing the last message from the player the bot is responding to.
 # AiPlayerbot.LLMPrompt = <player name>:<player message>
 # The default prompt to send at the end of each conversation.
 # AiPlayerbot.LLMPostPrompt = <bot name>:
 
+# The prompt used for rpg chat with npc's
+# AiPlayerbot.LLMRpgPrompt = In World of Warcraft: <expansion name> in <bot zone> <bot subzone> stands <bot type> <bot name> a level <bot level> <bot gender> <bot race> <bot class>. Standing nearby is <unit type> <unit name> <unit subname> a level <unit level> <unit gender> <unit race> <unit faction> <unit class>. Answer as a roleplaying character. Limit responses to 100 characters.
+
 # Response parse method. The (json) response that the llm will output needs to be cut and split to result in a number of plain lines the bot can give as feedback.
 # Step1: What pattern the server should look for to find the start of the repsonse the llm gave.
 # AiPlayerbot.LLMResponseStartPattern = ("text":\s*")
 # Step2: What pattern the server should look for that the response has ended.
-# AiPlayerbot.LLMResponseEndPattern = ("|<player name>:)
+# AiPlayerbot.LLMResponseEndPattern = ("|<receiver name>:)
 # Step3: What pattern the server should look for to remove from the response.
-# AiPlayerbot.LLMResponseDeletePattern = (\\n|<bot name>:)
+# AiPlayerbot.LLMResponseDeletePattern = (\\n|<sender name>:)
 # Step4: What pattern the server should look for to split the repsonse in multiple lines. Note only lines that follow this pattern will be extracted.
 # AiPlayerbot.LLMResponseSplitPattern = (\*.*?\*)|(\[.*?\])|(\'.*\')|([^\*\[\] ][^\*\[\]]+?[.?!])
 

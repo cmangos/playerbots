@@ -172,7 +172,7 @@ void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& 
     }
     if (unit->IsCreature())
     {
-        Creature* creature = (Creature * )unit;
+        Creature* creature = (Creature*)unit;
 
         CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature->GetEntry());
 
@@ -217,7 +217,7 @@ void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& 
 
         std::string gossipText = placeholders["<" + preFix + " gossip>"];
 
-        
+
         GossipMenusMapBounds pMenuBounds = sObjectMgr.GetGossipMenusMapBounds(creature->GetDefaultGossipMenuId());
         GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(creature->GetDefaultGossipMenuId());
 
@@ -232,7 +232,7 @@ void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& 
         if (textId)
         {
             const GossipText* gos = sObjectMgr.GetGossipText(textId);
-            if(gos)
+            if (gos)
                 gossipText += " " + gos->Options->Text_0;
         }
 
@@ -241,14 +241,36 @@ void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& 
             gossipText += " " + gossip->second.option_text;
         }
 
-        PlayerbotTextMgr::replaceAll(gossipText, "<", "*");
-        PlayerbotTextMgr::replaceAll(gossipText, ">", "*");
-        PlayerbotTextMgr::replaceAll(gossipText, "$N", observer->GetName());
-        PlayerbotTextMgr::replaceAll(gossipText, "$B", "");
-        PlayerbotTextMgr::replaceAll(gossipText, "$c", ChatHelper::formatRace(observer->getRace()));
-        PlayerbotTextMgr::replaceAll(gossipText, "$r", ChatHelper::formatClass(unit->getClass()));
-        PlayerbotTextMgr::replaceAll(gossipText, "$g boy : girl;", unit->getGender() == GENDER_MALE ? "boy" : "girl"); //Todo replace with regexp
-        PlayerbotTextMgr::replaceAll(gossipText, "$g lad : lass;", unit->getGender() == GENDER_MALE ? "lass" : "lad");      
+        std::map<std::string, std::string> replace;
+        replace["<"] = "*";
+        replace[">"] = "*";
+        replace["$N"] = observer->GetName();
+        replace["$B"] = "";
+        replace["$c"] = ChatHelper::formatRace(observer->getRace());
+        replace["$r"] = ChatHelper::formatClass(unit->getClass());
+        replace["$g boy : girl;"] = unit->getGender() == GENDER_MALE ? "boy" : "girl"; //Todo replace with regexp
+        replace["$g lad : lass;"] = unit->getGender() == GENDER_MALE ? "lass" : "lad";
+
+        replace["GOSSIP_OPTION_GOSSIP"] = unit->GetName() + std::string(" can chat some.");
+        replace["GOSSIP_OPTION_QUESTGIVER"] = unit->GetName() + std::string(" can offer quests.");
+        replace["GOSSIP_OPTION_VENDOR"] = unit->GetName() + std::string(" can sell and buy items.");
+        replace["GOSSIP_OPTION_TAXIVENDOR"] = unit->GetName() + std::string(" is a flight master.");
+        replace["GOSSIP_OPTION_TRAINER"] = unit->GetName() + std::string(" can train certain skills.");
+        replace["GOSSIP_OPTION_SPIRITHEALER"] = unit->GetName() + std::string(" can revive de dead.");
+        replace["GOSSIP_OPTION_SPIRITGUIDE"] = unit->GetName() + std::string(" can revive de dead.");
+        replace["GOSSIP_OPTION_INNKEEPER"] = unit->GetName() + std::string(" runs an inn.");
+        replace["GOSSIP_OPTION_BANKER"] = unit->GetName() + std::string(" can store items in the bank.");
+        replace["GOSSIP_OPTION_PETITIONER"] = unit->GetName() + std::string(" can create new guilds.");
+        replace["GOSSIP_OPTION_TABARDDESIGNER"] = unit->GetName() + std::string(" can redesign the guild tabard.");
+        replace["GOSSIP_OPTION_BATTLEFIELD"] = unit->GetName() + std::string(" recruits to join the battlegrounds.");
+        replace["GOSSIP_OPTION_AUCTIONEER"] = unit->GetName() + std::string(" is an auctioneer.");
+        replace["GOSSIP_OPTION_STABLEPET"] = unit->GetName() + std::string(" can store pets.");
+        replace["GOSSIP_OPTION_ARMORER"] = unit->GetName() + std::string(" can repair armor.");
+        replace["GOSSIP_OPTION_UNLEARNTALENTS"] = unit->GetName() + std::string(" can help unlearning talents.");
+        replace["GOSSIP_OPTION_TRAINER"] = unit->GetName() + std::string(" can train pets.");
+        replace["GOSSIP_OPTION_UNLEARNPETSKILLS"] = unit->GetName() + std::string(" can help pets unlearn their skills.");
+
+        PlayerbotTextMgr::GetReplacePlaceholders(gossipText, replace);
 
         placeholders["<" + preFix + " gossip>"] = gossipText;
     }

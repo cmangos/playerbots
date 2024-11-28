@@ -4,6 +4,7 @@
 #include <playerbot/TravelNode.h>
 #include "ChooseTravelTargetAction.h"
 #include "playerbot/strategy/values/SharedValueContext.h"
+#include "playerbot/strategy/actions/RpgSubActions.h"
 #include "playerbot/LootObjectStack.h"
 #include "GameEvents/GameEventMgr.h"
 #include "playerbot/TravelMgr.h"
@@ -130,67 +131,22 @@ bool DebugAction::Execute(Event& event)
 
         Player* player = requester;
 
-        if (!guidP.IsCreature())
+        if (!guidP.IsUnit())
             return false;
 
-        text = text.substr(12);
+        Action* action = context->GetAction("rpg ai chat");
 
-        uint32 type = 0;
+        if (!action)
+            return false;
 
-        if (Qualified::isValidNumberString(text.substr(0, 1)))
-        {
-            type = stoi(text.substr(0, 1));
-            text = text.substr(2);
-        }
+        RpgAIChatAction* rpgAction = (RpgAIChatAction*)action;
 
-        Creature* creature = guidP.GetCreature(bot->GetInstanceId());
+        if (!rpgAction)
+            return false;
 
-        std::map<std::string, std::string> placeholders;
-        ChatReplyAction::GetAIChatPlaceholders(placeholders, bot, "bot");
-        ChatReplyAction::GetAIChatPlaceholders(placeholders, bot, "player");
+        std::string line = text.substr(12);
 
-        std::string prePrompt = "You are creature in World of Warcraft: <expansion name>. Your name is <bot name> <bot sub name>. The player <player name> is speaking to you and is an <player gender> <player race> <player class> of level <player level>. You are a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Limit responses to 100 characters.";
-
-        placeholders["<player message>"] = text;
-
-        std::string startPattern, endPattern, deletePattern, splitPattern;
-        startPattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseStartPattern, placeholders);
-        endPattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseEndPattern, placeholders);
-        deletePattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseDeletePattern, placeholders);
-        splitPattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseSplitPattern, placeholders);
-
-        std::map<std::string, std::string> jsonFill;
-        jsonFill["<pre prompt>"] = BOT_TEXT2(prePrompt, placeholders);
-        jsonFill["<prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPrompt, placeholders);
-        jsonFill["<post prompt>"] = BOT_TEXT2(sPlayerbotAIConfig.llmPostPrompt, placeholders);
-
-        jsonFill["<context>"] = "";
-
-        for (auto& prompt : jsonFill)
-        {
-            prompt.second = PlayerbotLLMInterface::SanitizeForJson(prompt.second);
-        }
-
-        std::string json = BOT_TEXT2(sPlayerbotAIConfig.llmApiJson, jsonFill);
-
-        json = BOT_TEXT2(json, placeholders);
-
-        bool debug = bot->GetPlayerbotAI()->HasStrategy("debug llm", BotState::BOT_STATE_NON_COMBAT);
-
-        std::vector<std::string> debugLines;
-
-        if (debug)
-            debugLines = { json };
-
-        std::string response = PlayerbotLLMInterface::Generate(json, sPlayerbotAIConfig.llmGenerationTimeout, sPlayerbotAIConfig.llmMaxSimultaniousGenerations, debugLines);
-
-        std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, startPattern, endPattern, deletePattern,splitPattern, debugLines);
-
-        for (auto& line : lines)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-            creature->MonsterText({ line }, type, LANG_UNIVERSAL, requester);
-        }
+        rpgAction->ManualChat(guidP, line);
 
         return true;
     }

@@ -537,6 +537,92 @@ bool RpgAIChatAction::Execute(Event& event)
     return false;
 }
 
+void RpgAIChatAction::ManualChat(GuidPosition target, const std::string& line)
+{  
+    SET_AI_VALUE(GuidPosition, "rpg target", target);
+
+    std::string llmContext = GAI_VALUE2(std::string, "global string", "llmcontext manual" + std::to_string(target.GetCounter()));
+
+    if (line == "clear")
+    {
+        llmContext.clear();
+        SET_GAI_VALUE2(std::string, "global string", "llmcontext manual" + std::to_string(target.GetCounter()), llmContext);
+        bot->SendMessageToPlayer("<conversation restarted>");
+        return;
+    }
+    else if (line == "undo")
+    {
+        Unit* unit = target.GetUnit(bot->GetInstanceId());
+        uint32 lastBot = llmContext.rfind(bot->GetName() + std::string(":"));
+        uint32 lastUnit = llmContext.rfind(unit->GetName() + std::string(":"));
+
+        llmContext = llmContext.substr(0, std::max(lastBot,lastUnit));
+        SET_GAI_VALUE2(std::string, "global string", "llmcontext manual" + std::to_string(target.GetCounter()), llmContext);
+        bot->SendMessageToPlayer("<last message remove>");
+        return;
+    }
+    else if (line == "impersonate")
+    {
+        SET_AI_VALUE2(int32, "manual int", "rpg ai chat line", 10);
+
+        Unit* unit = target.GetUnit(bot->GetInstanceId());
+
+        std::string unitLine = line.substr(12);
+
+        if (line.find("*") == 0)
+            unit->MonsterTextEmote(unitLine.c_str(), bot);
+        else
+            unit->MonsterSay(unitLine.c_str(), LANG_UNIVERSAL, bot);
+
+        llmContext += std::string(" ") + bot->GetName() + std::string(":") + line;
+        SET_GAI_VALUE2(std::string, "global string", "llmcontext manual" + std::to_string(target.GetCounter()), llmContext);
+        return;
+    }
+    else if (line == "continue")
+    {
+        Unit* unit = target.GetUnit(bot->GetInstanceId());
+        uint32 lastBot = llmContext.rfind(bot->GetName() + std::string(":"));
+        uint32 lastUnit = llmContext.rfind(unit->GetName() + std::string(":"));
+
+        if(lastBot < lastUnit)
+            SET_AI_VALUE2(int32, "manual int", "rpg ai chat line", 11);
+        else
+            SET_AI_VALUE2(int32, "manual int", "rpg ai chat line", 12);
+    }
+    else
+    {
+        SET_AI_VALUE2(int32, "manual int", "rpg ai chat line", 11);
+
+        if (line.find("*") == 0)
+            bot->TextEmote(line);
+        else
+            bot->Say(line, LANG_UNIVERSAL);
+
+        llmContext += std::string(" ") + bot->GetName() + std::string(":") + line;
+    }
+
+    SET_AI_VALUE(std::string, "manual string::llmcontext rpg", llmContext);
+        
+
+    RequestNewLines();
+
+    futPackets.wait();
+
+    WaitForLines();
+
+    while (packets.size())
+    {
+        uint32 delay = packets.front().second;
+        SpeakLine();
+
+        if(packets.size())
+            std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+    }
+
+    llmContext = AI_VALUE(std::string, "manual string::llmcontext rpg");
+    SET_GAI_VALUE2(std::string, "global string", "llmcontext manual" + std::to_string(target.GetCounter()), llmContext);
+}
+
 bool RpgTradeUsefulAction::IsTradingItem(uint32 entry)
 {
     TradeData* trade = bot->GetTradeData();

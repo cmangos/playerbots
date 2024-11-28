@@ -961,6 +961,44 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
         return messages;
     }
 
+    if (command.find("c ") != std::string::npos)
+    {
+        bool hasBot = false;
+
+        PlayerbotAI* ai;
+
+        if (master)
+        {
+            ai = master->GetPlayerbotAI();
+        }
+
+        if (ai)
+        {
+            hasBot = true;
+        }
+        else
+        {
+            master->CreatePlayerbotAI();
+            ai = master->GetPlayerbotAI();
+            ai->SetMaster(master);
+            ai->ResetStrategies();
+        }
+
+        command = command.substr(2);
+
+        ai->DoSpecificAction("cdebug", Event(".bot", "monstertalk " + command, master), true);
+        
+        if (!hasBot)
+        {
+            if (master->GetPlayerbotAI())
+            {
+                master->RemovePlayerbotAI();
+            }
+        }
+
+        return messages;
+    }
+
     if (!charname)
     {
         if (master && master->GetTarget() && master->GetTarget()->IsPlayer() && !((Player*)master->GetTarget())->isRealPlayer())

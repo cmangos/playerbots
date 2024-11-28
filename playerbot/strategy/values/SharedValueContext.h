@@ -29,6 +29,9 @@ namespace ai
             creators["quest givers"] = [](PlayerbotAI* ai) { return new QuestGiversValue(ai); };
 
             creators["trainable spell map"] = [](PlayerbotAI* ai) { return new TrainableSpellMapValue(ai); };
+
+
+            creators["global string"] = [](PlayerbotAI* ai) { return new StringManualSetValue(ai); };
         }
     };
 

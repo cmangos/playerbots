@@ -142,8 +142,11 @@ namespace ai
 #define PHAS_AI_VALUE2(name, param) player->GetPlayerbotAI()->GetAiObjectContext()->HasValue(name, param)
 #define MAI_VALUE(type, name) master->GetPlayerbotAI()->GetAiObjectContext()->GetValue<type>(name)->Get()
 #define MAI_VALUE2(type, name, param) master->GetPlayerbotAI()->GetAiObjectContext()->GetValue<type>(name, param)->Get()
+
 #define GAI_VALUE(type, name) sSharedObjectContext.GetValue<type>(name)->Get()
 #define GAI_VALUE2(type, name, param) sSharedObjectContext.GetValue<type>(name, param)->Get()
+#define SET_GAI_VALUE(type, name, value) sSharedObjectContext.GetValue<type>(name)->Set(value)
+#define SET_GAI_VALUE2(type, name, param, value) sSharedObjectContext.GetValue<type>(name, param)->Set(value)
 
 #define MEM_AI_VALUE(type, name) dynamic_cast<MemoryCalculatedValue<type>*>(context->GetUntypedValue(name))
 #define LOG_AI_VALUE(type, name) dynamic_cast<LogCalculatedValue<type>*>(context->GetUntypedValue(name))

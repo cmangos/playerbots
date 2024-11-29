@@ -352,10 +352,13 @@ bool RpgAIChatAction::SpeakLine()
         }
     }
 
-    std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext rpg");
-    llmContext = llmContext + " " + message;
-    PlayerbotLLMInterface::LimitContext(llmContext, llmContext.size());
-    SET_AI_VALUE(std::string, "manual string::llmcontext rpg", llmContext);
+    if (message.find("d:") != std::string::npos)
+    {
+        std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext rpg");
+        llmContext = llmContext + " " + message;
+        PlayerbotLLMInterface::LimitContext(llmContext, llmContext.size());
+        SET_AI_VALUE(std::string, "manual string::llmcontext rpg", llmContext);
+    }
 
     packets.pop();
 

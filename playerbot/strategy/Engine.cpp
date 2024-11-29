@@ -422,7 +422,7 @@ ActionResult Engine::ExecuteAction(const std::string& name, Event& event)
 
                 if (isPossible)
                 {
-                    action->MakeVerbose(true);
+                    action->MakeVerbose(event.getOwner() != nullptr);
                     auto pmo4 = sPerformanceMonitor.start(PERF_MON_ACTION, "Execute", &aiObjectContext->performanceStack);
                     bool executionResult = ListenAndExecute(action, event);
                     pmo4.reset();

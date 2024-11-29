@@ -300,7 +300,7 @@ public:
 private:
     std::map<uint16, std::string> handlers;
     std::map<uint16, bool> delay;
-    std::queue<WorldPacket> queue;
+    std::stack<WorldPacket> queue;
     std::mutex m_botPacketMutex;
 };
 

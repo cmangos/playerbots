@@ -64,7 +64,6 @@ namespace ai
             creators["receive text emote"] = &WorldPacketTriggerContext::receive_text_emote;
             creators["arena team invite"] = &WorldPacketTriggerContext::arena_team_invite;
             creators["summon request"] = &WorldPacketTriggerContext::summon_request;
-            creators["message chat"] = [](PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "message chat"); };
         }
 
     private:

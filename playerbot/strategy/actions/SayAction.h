@@ -43,11 +43,4 @@ namespace ai
         static bool SendGeneralResponse(Player* bot, ChatChannelSource chatChannelSource, std::string responseMessage, std::string name);
         static std::string GenerateReplyMessage(Player* bot, std::string incomingMessage, uint32 guid1, std::string name);
     };
-
-    class MessageChatAction : public Action
-    {
-    public:
-        MessageChatAction(PlayerbotAI* ai) : Action(ai, "message chat") {}
-        virtual bool Execute(Event& event);
-    };
 }

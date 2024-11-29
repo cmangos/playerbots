@@ -1587,7 +1587,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
             bool isAiChat = HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT);
 
-            if (isAiChat && lang == LANG_ADDON)
+            if (isAiChat && (lang == LANG_ADDON || message.find("d:") == 0))
                 return;
 
             if (guid1 != bot->GetObjectGuid()) // do not reply to self
@@ -1678,9 +1678,6 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             }
             else if (isAiChat)
             {
-                if (message.find("d:") != std::string::npos)
-                    return;
-
                 ChatChannelSource chatChannelSource = bot->GetPlayerbotAI()->GetChatChannelSource(bot, msgtype, chanName);
 
                 std::string llmChannel;
@@ -5394,6 +5391,24 @@ bool PlayerbotAI::HasManyPlayersNearby(uint32 trigerrValue, float range)
                 return true;
         }
     }
+    return false;
+}
+
+bool PlayerbotAI::ChannelHasRealPlayer(std::string channelName)
+{
+    if (ChannelMgr* cMgr = channelMgr(bot->GetTeam()))
+    {
+
+        if (Channel* chn = cMgr->GetChannel(channelName, bot))
+        {
+            ChannelAcces* chna = reinterpret_cast<ChannelAcces*>(chn);
+
+            for (auto& player : sRandomPlayerbotMgr.GetPlayers())
+                if (chna->IsOn(player.second->GetObjectGuid()))
+                    return true;
+        }
+    }
+
     return false;
 }
 

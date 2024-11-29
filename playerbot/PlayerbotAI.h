@@ -34,6 +34,32 @@ public:
     }
 };
 
+class ChannelAcces
+{
+public:    
+    struct PlayerInfo
+    {
+        ObjectGuid player;
+        uint8 flags;       
+    };
+
+    typedef std::map<ObjectGuid, PlayerInfo> PlayerList;
+
+    bool IsOn(ObjectGuid who) const { return m_players.find(who) != m_players.end(); }    
+    std::string                 m_name;
+    std::string                 m_password;
+    ObjectGuid                  m_ownerGuid;
+    PlayerList                  m_players;
+    GuidSet                     m_banned;
+    const ChatChannelsEntry* m_entry = nullptr;
+    bool                        m_announcements = false;
+    bool                        m_moderation = false;
+    uint8                       m_flags = 0x00;
+    // Custom features:
+    bool                        m_static = false;
+    bool                        m_realmzone = false;
+};
+
 namespace ai
 {
     class WorldPosition;
@@ -563,6 +589,8 @@ public:
     bool HasPlayerNearby(WorldPosition pos, float range);
     bool HasPlayerNearby(float range = sPlayerbotAIConfig.reactDistance);
     bool HasManyPlayersNearby(uint32 trigerrValue = 20, float range = sPlayerbotAIConfig.sightDistance);
+    bool ChannelHasRealPlayer(std::string channelName);
+
 
     ActivePiorityType GetPriorityType();
     std::pair<uint32,uint32> GetPriorityBracket(ActivePiorityType type);

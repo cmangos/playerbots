@@ -276,7 +276,7 @@ void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& 
     }
 }
 
-WorldPacket ChatReplyAction::GetPacketTemplate(Opcodes op, uint32 type, Unit* sender, Unit* target)
+WorldPacket ChatReplyAction::GetPacketTemplate(Opcodes op, uint32 type, Unit* sender, Unit* target, std::string channelName)
 {
     Player* senderPlayer = (sender->IsPlayer()) ? (Player*)sender : nullptr;
     ObjectGuid senderGuid = sender->GetObjectGuid();
@@ -298,8 +298,15 @@ WorldPacket ChatReplyAction::GetPacketTemplate(Opcodes op, uint32 type, Unit* se
     else
         packetTemplate << LANG_UNIVERSAL;
 
-    if (op == CMSG_MESSAGECHAT && type == CHAT_MSG_WHISPER)
-        packetTemplate << target->GetName();
+    if (op == CMSG_MESSAGECHAT)
+    {
+        if (type == CHAT_MSG_WHISPER)
+            packetTemplate << target->GetName();
+
+        if (!channelName.empty())
+            packetTemplate << channelName;
+    }
+
 
     if (op != CMSG_MESSAGECHAT)
     {
@@ -467,12 +474,16 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
         return;
     }
 
-    if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && chatChannelSource != ChatChannelSource::SRC_UNDEFINED && sPlayerbotAIConfig.llmBlockedReplyChannels.find(chatChannelSource) == sPlayerbotAIConfig.llmBlockedReplyChannels.end())
+    if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && chatChannelSource != ChatChannelSource::SRC_UNDEFINED && sPlayerbotAIConfig.llmBlockedReplyChannels.find(chatChannelSource) == sPlayerbotAIConfig.llmBlockedReplyChannels.end()
+        )
     {
         Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, guid1));
 
         PlayerbotAI* ai = bot->GetPlayerbotAI();
         AiObjectContext* context = ai->GetAiObjectContext();
+
+        if (!chanName.empty() && !ai->ChannelHasRealPlayer(chanName))
+            player = nullptr;
 
         std::string llmChannel;
 
@@ -597,7 +608,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
                 WorldSession* session = bot->GetSession();
 
-                WorldPacket chatTemplate = GetPacketTemplate(CMSG_MESSAGECHAT, type, bot, player);
+                WorldPacket chatTemplate = GetPacketTemplate(CMSG_MESSAGECHAT, type, bot, player, channelName);
                 WorldPacket emoteTemplate = (type == CHAT_MSG_SAY || type == CHAT_MSG_WHISPER) ? GetPacketTemplate(CMSG_MESSAGECHAT, CHAT_MSG_EMOTE, bot, player) : WorldPacket();
                 WorldPacket systemTemplate = GetPacketTemplate(CMSG_MESSAGECHAT, CHAT_MSG_WHISPER, bot, player);
 

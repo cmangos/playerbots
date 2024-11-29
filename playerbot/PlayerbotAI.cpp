@@ -3164,7 +3164,7 @@ bool PlayerbotAI::SayToParty(std::string msg)
 
 bool PlayerbotAI::SayToRaid(std::string msg)
 {
-    if (!bot->GetGroup() || bot->GetGroup()->IsRaidGroup())
+    if (!bot->GetGroup() || !bot->GetGroup()->IsRaidGroup())
     {
         return false;
     }

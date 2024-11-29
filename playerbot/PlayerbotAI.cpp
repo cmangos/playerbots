@@ -84,9 +84,9 @@ void PacketHandlingHelper::Handle(ExternalEventHelper &helper)
 
     while (!queue.empty())
     {
-        if (!helper.HandlePacket(handlers, queue.back()))
-            if(delay[queue.back().GetOpcode()])
-                delayed.push(queue.back());
+        if (!helper.HandlePacket(handlers, queue.top()))
+            if(delay[queue.top().GetOpcode()])
+                delayed.push(queue.top());
         queue.pop();
     }
 

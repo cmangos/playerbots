@@ -993,6 +993,9 @@ AiPlayerbot.PerfMonEnabled = 0
 # The chance (0-100) bots will use ai chat talk to npcs during rpg
 # AiPlayerbot.LLMRpgAIChatChance = 100
 
+# Channels that bots are not allowed to use ai-chat to reply on. Channels: guild,world,general,trade,lfg,ldefence,wdefence,grecruitement,say,whisper,emote,temote,yell,party,raid
+# AiPlayerbot.LLMBlockedReplyChannels = 
+
 # OPEN-AI (chat completions) example:
 # AiPlayerbot.LLMApiEndpoint = http://IP/URL:PORT/v1/chat/completions
 # AiPlayerbot.LLMApiKey = YOUR_API_KEY

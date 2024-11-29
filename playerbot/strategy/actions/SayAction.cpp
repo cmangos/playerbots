@@ -467,7 +467,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
         return;
     }
 
-    if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && chatChannelSource != ChatChannelSource::SRC_UNDEFINED)
+    if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && chatChannelSource != ChatChannelSource::SRC_UNDEFINED && sPlayerbotAIConfig.llmBlockedReplyChannels.find(chatChannelSource) == sPlayerbotAIConfig.llmBlockedReplyChannels.end())
     {
         Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, guid1));
 
@@ -493,36 +493,25 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
                 GetAIChatPlaceholders(placeholders, bot, "bot");
                 GetAIChatPlaceholders(placeholders, player, "other");
 
-                switch (chatChannelSource)
-                {
-                case ChatChannelSource::SRC_WHISPER:
-                {
-                    placeholders["<channel name>"] = "in private message";
-                    break;
-                }
-                case ChatChannelSource::SRC_SAY:
-                {
-                    placeholders["<channel name>"] = "directly";
-                    break;
-                }
-                case ChatChannelSource::SRC_YELL:
-                {
-                    placeholders["<channel name>"] = "with a yell";
-                    break;
-                }
-                case ChatChannelSource::SRC_PARTY:
-                {
-                    placeholders["<channel name>"] = "in party chat";
-                    break;
-                }
-                case ChatChannelSource::SRC_GUILD:
-                {
-                    placeholders["<channel name>"] = "in guild chat";
-                    break;
-                }
-                default:
-                    placeholders["<channel name>"] = "";
-                }
+                std::map<ChatChannelSource, std::string> sourceName;
+                sourceName[ChatChannelSource::SRC_GUILD] = "in guild chat";
+                sourceName[ChatChannelSource::SRC_WORLD] = "in world chat";
+                sourceName[ChatChannelSource::SRC_GENERAL] = "in the general channel";
+                sourceName[ChatChannelSource::SRC_TRADE] = "in the trade channel";
+                sourceName[ChatChannelSource::SRC_LOOKING_FOR_GROUP] = "in looking for group";
+                sourceName[ChatChannelSource::SRC_LOCAL_DEFENSE] = "in the local defence channel";
+                sourceName[ChatChannelSource::SRC_WORLD_DEFENSE] = "in the world defence channel";
+                sourceName[ChatChannelSource::SRC_GUILD_RECRUITMENT] = "in guild recruitement";
+                sourceName[ChatChannelSource::SRC_SAY] = "directly";
+                sourceName[ChatChannelSource::SRC_WHISPER] = "in private message";
+                sourceName[ChatChannelSource::SRC_EMOTE] = "with body language";
+                sourceName[ChatChannelSource::SRC_TEXT_EMOTE] = "with an emote";
+                sourceName[ChatChannelSource::SRC_YELL] = "with a yell";
+                sourceName[ChatChannelSource::SRC_PARTY] = "in party chat";
+                sourceName[ChatChannelSource::SRC_RAID] = "in raid chat";
+
+                placeholders["<channel name>"] = sourceName[chatChannelSource];
+
 
                 placeholders["<initial message>"] = msg;
 
@@ -563,6 +552,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
                 json = PlayerbotTextMgr::GetReplacePlaceholders(json, placeholders);
 
                 uint32 type = CHAT_MSG_WHISPER;
+                std::string channelName;
 
                 switch (chatChannelSource)
                 {
@@ -589,6 +579,17 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
                 case ChatChannelSource::SRC_GUILD:
                 {
                     type = CHAT_MSG_GUILD;
+                }
+                case ChatChannelSource::SRC_WORLD:
+                case ChatChannelSource::SRC_GENERAL:
+                case ChatChannelSource::SRC_TRADE:
+                case ChatChannelSource::SRC_LOCAL_DEFENSE:
+                case ChatChannelSource::SRC_WORLD_DEFENSE:
+                case ChatChannelSource::SRC_LOOKING_FOR_GROUP:
+                case ChatChannelSource::SRC_GUILD_RECRUITMENT:
+                {
+                    type = CHAT_MSG_CHANNEL;
+                    channelName = chanName;
                 }
                 }
 

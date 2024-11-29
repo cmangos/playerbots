@@ -340,6 +340,7 @@ public:
     uint32 llmContextLength, llmBotToBotChatChance, llmGenerationTimeout, llmMaxSimultaniousGenerations, llmRpgAIChatChance;
     bool llmGlobalContext;
     ParsedUrl llmEndPointUrl;
+    std::set<uint32> llmBlockedReplyChannels;
     //LM END
 
     std::string GetValue(std::string name);

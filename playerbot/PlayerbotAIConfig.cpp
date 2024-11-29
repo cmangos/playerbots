@@ -606,8 +606,12 @@ bool PlayerbotAIConfig::Initialize()
         
     
     llmPrePrompt = config.GetStringDefault("AiPlayerbot.LLMPrePrompt", "You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The <other type> <other name> is speaking to you <channel name> and is an <other gender> <other race> <other class> of level <other level>. You are level <bot level> and play as a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.");
+
     llmPreRpgPrompt = config.GetStringDefault("AiPlayerbot.LLMRpgPrompt", "In World of Warcraft: <expansion name> in <bot zone> <bot subzone> stands <bot type> <bot name> a level <bot level> <bot gender> <bot race> <bot class>."
         " Standing nearby is <unit type> <unit name> <unit subname> a level <unit level> <unit gender> <unit race> <unit faction> <unit class>. Answer as a roleplaying character. Limit responses to 100 characters.");
+
+
+
     llmPrompt = config.GetStringDefault("AiPlayerbot.LLMPrompt", "<receiver name>:<initial message>");
     llmPostPrompt = config.GetStringDefault("AiPlayerbot.LLMPostPrompt", "<sender name>:");
 
@@ -656,6 +660,27 @@ bool PlayerbotAIConfig::Initialize()
     llmBotToBotChatChance = config.GetIntDefault("AiPlayerbot.LLMBotToBotChatChance", 0);
     llmRpgAIChatChance = config.GetIntDefault("AiPlayerbot.LLMRpgAIChatChance", 0);
 
+    std::list<std::string> blockedChannels;
+    LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.LLMBlockedReplyChannels", ""), blockedChannels);
+    std::map<std::string, ChatChannelSource> sourceName;
+    sourceName["guild"] = ChatChannelSource::SRC_GUILD;
+    sourceName["world"] = ChatChannelSource::SRC_WORLD;
+    sourceName["general"] = ChatChannelSource::SRC_GENERAL;
+    sourceName["trade"] = ChatChannelSource::SRC_TRADE;
+    sourceName["lfg"] = ChatChannelSource::SRC_LOOKING_FOR_GROUP;
+    sourceName["ldefence"] = ChatChannelSource::SRC_LOCAL_DEFENSE;
+    sourceName["wdefence"] = ChatChannelSource::SRC_WORLD_DEFENSE;
+    sourceName["grecruitement"] = ChatChannelSource::SRC_GUILD_RECRUITMENT;
+    sourceName["say"] = ChatChannelSource::SRC_SAY;
+    sourceName["whisper"] = ChatChannelSource::SRC_WHISPER;
+    sourceName["emote"] = ChatChannelSource::SRC_EMOTE;
+    sourceName["temote"] = ChatChannelSource::SRC_TEXT_EMOTE;
+    sourceName["yell"] = ChatChannelSource::SRC_YELL;
+    sourceName["party"] = ChatChannelSource::SRC_PARTY;
+    sourceName["raid"] = ChatChannelSource::SRC_RAID;
+
+    for (auto& channelName : blockedChannels)
+        llmBlockedReplyChannels.insert(sourceName[channelName]);
 
     //LLM END
 

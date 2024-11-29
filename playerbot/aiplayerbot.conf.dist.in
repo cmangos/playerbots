@@ -968,8 +968,11 @@ AiPlayerbot.PerfMonEnabled = 0
 # Should previous conversations from all channels be mixed?
 # AiPlayerbot.LLMGlobalContext = 0
 
-# The chance bots will use ai chat to respond to other bots 
+# The chance (0-100) bots will use ai chat to respond to other bots 
 # AiPlayerbot.LLMBotToBotChatChance = 0
+
+# The chance (0-100) bots will use ai chat talk to npcs during rpg
+# AiPlayerbot.LLMRpgAIChatChance = 100
 
 # OPEN-AI (chat completions) example:
 # AiPlayerbot.LLMApiEndpoint = http://IP/URL:PORT/v1/chat/completions

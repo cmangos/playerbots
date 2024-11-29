@@ -519,6 +519,9 @@ bool RpgAIChatTrigger::IsActive()
     if (!ai->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT))
         return false;
 
+    if (!sPlayerbotAIConfig.llmRpgAIChatChance || !(urand(0, 99) < sPlayerbotAIConfig.llmRpgAIChatChance))
+        return false;
+
     if (!ai->HasPlayerNearby(sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY)))
         return false;
 

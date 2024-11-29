@@ -658,7 +658,7 @@ bool PlayerbotAIConfig::Initialize()
 
     llmGlobalContext = config.GetBoolDefault("AiPlayerbot.LLMGlobalContext", false);
     llmBotToBotChatChance = config.GetIntDefault("AiPlayerbot.LLMBotToBotChatChance", 0);
-    llmRpgAIChatChance = config.GetIntDefault("AiPlayerbot.LLMRpgAIChatChance", 0);
+    llmRpgAIChatChance = config.GetIntDefault("AiPlayerbot.LLMRpgAIChatChance", 100);
 
     std::list<std::string> blockedChannels;
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.LLMBlockedReplyChannels", ""), blockedChannels);

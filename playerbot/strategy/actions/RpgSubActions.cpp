@@ -352,7 +352,7 @@ bool RpgAIChatAction::SpeakLine()
         }
     }
 
-    if (message.find("d:") != std::string::npos)
+    if (message.find("d:") == std::string::npos)
     {
         std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext rpg");
         llmContext = llmContext + " " + message;

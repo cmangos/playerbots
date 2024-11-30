@@ -757,7 +757,6 @@ bool BroadcastHelper::BroadcastSuggestInstance(
         //itemout << "|c00b000b0" << allowedInstances[urand(0, allowedInstances.size() - 1)] << "|r";
         itemout << allowedInstances[urand(0, allowedInstances.size() - 1)];
         placeholders["%instance_name"] = itemout.str();
-        placeholders["%instance"] = itemout.str();
 
         placeholders["%my_class"] = ai->GetChatHelper()->formatClass(bot->getClass());
         placeholders["%my_race"] = ai->GetChatHelper()->formatRace(bot->getRace());

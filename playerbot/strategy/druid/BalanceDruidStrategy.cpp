@@ -11,9 +11,21 @@ public:
     BalanceDruidStrategyActionNodeFactory()
     {
         creators["starfire"] = &starfire;
+        creators["innervate"] = &innervate;
     }
 
 private:
+
+    static ActionNode* innervate(PlayerbotAI* ai)
+    {
+        return new ActionNode("innervate",
+            /*P*/ NextAction::array(0, new NextAction("caster form"), NULL),
+            /*A*/ NextAction::array(0, new NextAction("mana potion"), NULL),
+            /*C*/ NULL);
+    }
+
+    ACTION_NODE_A(starfall, "starfall", "hurricane");
+
     ACTION_NODE_A(starfire, "starfire", "wrath");
 };
 
@@ -228,6 +240,10 @@ void BalanceDruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "moonkin form",
         NextAction::array(0, new NextAction("moonkin form", ACTION_MOVE), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "innervate",
+        NextAction::array(0, new NextAction("innervate", ACTION_HIGH), NULL)));
 }
 
 void BalanceDruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -621,6 +637,10 @@ void BalanceDruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "moonkin form",
         NextAction::array(0, new NextAction("moonkin form", ACTION_MOVE), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "innervate",
+        NextAction::array(0, new NextAction("innervate", ACTION_HIGH), NULL)));
 }
 
 void BalanceDruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1034,6 +1054,10 @@ void BalanceDruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "moonkin form",
         NextAction::array(0, new NextAction("moonkin form", ACTION_MOVE), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "innervate",
+        NextAction::array(0, new NextAction("innervate", ACTION_HIGH), NULL)));
 }
 
 void BalanceDruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

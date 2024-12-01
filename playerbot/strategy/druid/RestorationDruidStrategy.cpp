@@ -5,24 +5,23 @@
 
 using namespace ai;
 
-class RestorationDruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
+class BalanceDruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
 {
 public:
-    RestorationDruidStrategyActionNodeFactory()
+    BalanceDruidStrategyActionNodeFactory()
     {
-        creators["nourish"] = &nourish;
-        creators["swiftmend"] = &swiftmend;
+        creators["innervate"] = &innervate;
     }
 
 private:
-    ACTION_NODE_P(nourish, "nourish", "active hot");
-    ACTION_NODE_P(swiftmend, "swiftmend", "active hot");
+    static ActionNode* innervate(PlayerbotAI* ai)
+    {
+        return new ActionNode("innervate",
+            /*P*/ NextAction::array(0, new NextAction("caster form"), NULL),
+            /*A*/ NextAction::array(0, new NextAction("mana potion"), NULL),
+            /*C*/ NULL);
+    }
 };
-
-RestorationDruidStrategy::RestorationDruidStrategy(PlayerbotAI* ai) : DruidStrategy(ai)
-{
-    actionNodeFactories.Add(new RestorationDruidStrategyActionNodeFactory());
-}
 
 #ifdef MANGOSBOT_ZERO // Vanilla
 
@@ -217,6 +216,10 @@ void RestorationDruidAoeRaidStrategy::InitNonCombatTriggers(std::list<TriggerNod
 void RestorationDruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     DruidBuffStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "innervate",
+        NextAction::array(0, new NextAction("innervate", ACTION_HIGH), NULL)));
 }
 
 void RestorationDruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -617,6 +620,10 @@ void RestorationDruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     triggers.push_back(new TriggerNode(
         "tree form",
         NextAction::array(0, new NextAction("tree form", ACTION_MOVE), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "innervate",
+        NextAction::array(0, new NextAction("innervate", ACTION_HIGH), NULL)));
 }
 
 void RestorationDruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1029,6 +1036,10 @@ void RestorationDruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     triggers.push_back(new TriggerNode(
         "tree form",
         NextAction::array(0, new NextAction("tree form", ACTION_MOVE), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "innervate",
+        NextAction::array(0, new NextAction("innervate", ACTION_HIGH), NULL)));
 }
 
 void RestorationDruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

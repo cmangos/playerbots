@@ -47,7 +47,7 @@ HunterStrategy::HunterStrategy(PlayerbotAI* ai) : ClassStrategy(ai)
 
 NextAction** HunterStrategy::GetDefaultCombatActions()
 {
-    return NextAction::array(0, new NextAction("auto shot", ACTION_IDLE), NULL);
+    return NextAction::array(0, new NextAction("auto shot", ACTION_NORMAL), NULL);
 }
 
 void HunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -505,7 +505,7 @@ void HunterAspectRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tr
 
 NextAction** HunterStrategy::GetDefaultCombatActions()
 {
-    return NextAction::array(0, new NextAction("auto shot", ACTION_IDLE), NULL);
+    return NextAction::array(0, new NextAction("auto shot", ACTION_NORMAL), NULL);
 }
 
 void HunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -960,7 +960,7 @@ void HunterAspectRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tr
 
 NextAction** HunterStrategy::GetDefaultCombatActions()
 {
-    return NextAction::array(0, new NextAction("auto shot", ACTION_IDLE), NULL);
+    return NextAction::array(0, new NextAction("auto shot", ACTION_NORMAL), NULL);
 }
 
 void HunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -55,7 +55,7 @@ public:
     static std::list<uint32> specialQuestIds;
     void InitSkills();
     void EnchantEquipment();
-    void EquipGear() { return InitEquipment(false, false); }
+    void EquipGear() { InitEquipment(false, false); InitGems(); }
     void EquipGearBest() { return InitEquipment(false, false, false); }
     void EquipGearPartialUpgrade() { return InitEquipment(false, false, true, true); }
     void UpgradeGear(bool syncWithMaster) { return InitEquipment(!syncWithMaster, syncWithMaster); }

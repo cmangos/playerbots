@@ -1636,11 +1636,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                     if (HasRealPlayerMaster() && guid1 != GetMaster()->GetObjectGuid())
                         return;
-                    }
 
                     if (lang == LANG_ADDON)
                         return;
-<<<<<<< HEAD
 
                     if (boost::algorithm::istarts_with(message, sPlayerbotAIConfig.toxicLinksPrefix)
                         && (GetChatHelper()->ExtractAllItemIds(message).size() > 0 || GetChatHelper()->ExtractAllQuestIds(message).size() > 0)
@@ -1655,36 +1653,17 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     {
                         if (urand(0, 60) > 0 || urand(1, 100) > sPlayerbotAIConfig.thunderfuryRepliesChance)
                         {
-=======
-                    }
-                }
-                else
-                {
-                    // Check if the source is world-related
-                    uint32 worldChannelReplyChance = 0;
-                    if (chatChannelSource == SRC_WORLD || chatChannelSource == SRC_WORLD_DEFENSE)
-                        worldChannelReplyChance = (sPlayerbotAIConfig.minRandomBots + sPlayerbotAIConfig.maxRandomBots) / 400;
-                    
-                    if (isFromFreeBot && urand(0, 20 + worldChannelReplyChance))
-                        return;
-
-                    if (msgtype == CHAT_MSG_GUILD && (!sPlayerbotAIConfig.guildRepliesRate || urand(1, 100) >= sPlayerbotAIConfig.guildRepliesRate))
-                        return;
-
-                    if (!isFromFreeBot)
-                    {
-                        if (!isMentioned && urand(0, 4 + worldChannelReplyChance))
->>>>>>> a6ed8ade (fix bots chat: adjust replies in world channels considering faction)
                             return;
                         }
                     }
                     else
                     {
-<<<<<<< HEAD
-                        if (isFromFreeBot && urand(0, 20))
-=======
-                        if (urand(0, 20 + worldChannelReplyChance + 10 * isMentioned))
->>>>>>> a6ed8ade (fix bots chat: adjust replies in world channels considering faction)
+                        // Check if the source is world-related
+                        uint32 worldChannelReplyChance = 0;
+                        if (chatChannelSource == SRC_WORLD || chatChannelSource == SRC_WORLD_DEFENSE)
+                            worldChannelReplyChance = (sPlayerbotAIConfig.minRandomBots + sPlayerbotAIConfig.maxRandomBots) / 400; 
+                        
+                        if (isFromFreeBot && urand(0, 20 + worldChannelReplyChance))
                             return;
 
                         if (msgtype == CHAT_MSG_GUILD && (!sPlayerbotAIConfig.guildRepliesRate || urand(1, 100) >= sPlayerbotAIConfig.guildRepliesRate))
@@ -1692,7 +1671,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                         if (!isFromFreeBot)
                         {
-                            if (!isMentioned && urand(0, 4))
+                            if (!isMentioned && urand(0, 4 + worldChannelReplyChance))
                                 return;
                         }
                         else

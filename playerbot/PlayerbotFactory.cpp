@@ -1820,7 +1820,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         bot->GetGUIDLow(),
                         bot->GetTeam() == ALLIANCE ? "A" : "H",
                         botLevel, bot->GetName(),
-                        ids.size(), slot);
+                        uint32(ids.size()), slot);
 
                     for (uint32 newItemId : ids)
                     {
@@ -1908,7 +1908,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                 }
 
 
-                sLog.outDetail("Bot #%d %s:%d <%s>: %u possible items for slot %d", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", botLevel, bot->GetName(), ids.size(), slot);
+                sLog.outDetail("Bot #%d %s:%d <%s>: %u possible items for slot %d", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", botLevel, bot->GetName(), uint32(ids.size()), slot);
 
                 if (incremental || !progressiveGear)
                 {

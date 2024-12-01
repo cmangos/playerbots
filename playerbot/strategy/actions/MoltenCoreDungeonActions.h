@@ -47,15 +47,9 @@ namespace ai
         MoveToMCRuneAction(PlayerbotAI* ai) : MoveToAction(ai, "move to mc rune") { qualifier = "entry filter::{gos in sight,mc runes}"; }
     };
 
-    class DouseMCRuneActionAqual : public UseItemIdAction
+    class DouseMCRuneAction : public UseItemIdAction
     {
     public:
-        DouseMCRuneActionAqual(PlayerbotAI* ai) : UseItemIdAction(ai, "douse mc rune") { qualifier = "{17333,entry filter::{gos close,mc runes}}"; }
-    };
-
-    class DouseMCRuneActionEternal : public UseItemIdAction
-    {
-    public:
-        DouseMCRuneActionEternal(PlayerbotAI* ai) : UseItemIdAction(ai, "douse mc rune") { qualifier = "{22754,entry filter::{gos close,mc runes}}"; }
+        DouseMCRuneAction(PlayerbotAI* ai) : UseItemIdAction(ai, "douse mc rune") { qualifier = "{17333,entry filter::{gos close,mc runes}}"; }
     };
 }

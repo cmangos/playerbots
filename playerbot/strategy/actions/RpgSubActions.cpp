@@ -463,7 +463,7 @@ bool RpgAIChatAction::RequestNewLines()
 
     for (auto& prompt : jsonFill)
     {
-        BOT_TEXT2(prompt.second, placeholders);
+        prompt.second = BOT_TEXT2(prompt.second, placeholders);
     }
 
     uint32 currentLength = jsonFill["<pre prompt>"].size() + jsonFill["<context>"].size() + jsonFill["<prompt>"].size() + llmContext.size();

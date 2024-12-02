@@ -5,15 +5,19 @@
 
 using namespace ai;
 
-class BalanceDruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
+class RestorationDruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
 {
 public:
-    BalanceDruidStrategyActionNodeFactory()
+    RestorationDruidStrategyActionNodeFactory()
     {
+        creators["nourish"] = &nourish;
+        creators["swiftmend"] = &swiftmend; 
         creators["innervate"] = &innervate;
     }
 
 private:
+    ACTION_NODE_P(nourish, "nourish", "active hot");
+    ACTION_NODE_P(swiftmend, "swiftmend", "active hot");
     static ActionNode* innervate(PlayerbotAI* ai)
     {
         return new ActionNode("innervate",
@@ -22,6 +26,11 @@ private:
             /*C*/ NULL);
     }
 };
+
+RestorationDruidStrategy::RestorationDruidStrategy(PlayerbotAI* ai) : DruidStrategy(ai)
+{
+    actionNodeFactories.Add(new RestorationDruidStrategyActionNodeFactory());
+}
 
 #ifdef MANGOSBOT_ZERO // Vanilla
 

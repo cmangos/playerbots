@@ -50,12 +50,12 @@ namespace ai
     class DouseMCRuneActionAqual : public UseItemIdAction
     {
     public:
-        DouseMCRuneActionAqual(PlayerbotAI* ai) : UseItemIdAction(ai, "douse mc rune") { qualifier = "{17333,entry filter::{gos close,mc runes}}"; }
+        DouseMCRuneActionAqual(PlayerbotAI* ai) : UseItemIdAction(ai, "douse mc rune aqual") { qualifier = "{17333,entry filter::{gos close,mc runes}}"; }
     };
 
     class DouseMCRuneActionEternal : public UseItemIdAction
     {
     public:
-        DouseMCRuneActionEternal(PlayerbotAI* ai) : UseItemIdAction(ai, "douse mc rune") { qualifier = "{22754,entry filter::{gos close,mc runes}}"; }
+        DouseMCRuneActionEternal(PlayerbotAI* ai) : UseItemIdAction(ai, "douse mc rune eternal") { qualifier = "{22754,entry filter::{gos close,mc runes}}"; }
     };
 }

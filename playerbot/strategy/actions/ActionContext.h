@@ -314,8 +314,8 @@ namespace ai
 
             creators["move away from hazard"] = &ActionContext::move_away_from_hazard;
             creators["move to mc rune"] = &ActionContext::move_to_mc_rune;
-            creators["douse mc rune"] = &ActionContext::douse_mc_rune_aqual;
-            creators["douse mc rune"] = &ActionContext::douse_mc_rune_eternal;
+            creators["douse mc rune aqual"] = &ActionContext::douse_mc_rune_aqual;
+            creators["douse mc rune eternal"] = &ActionContext::douse_mc_rune_eternal;
 
             creators["enable netherspite fight strategy"] = &ActionContext::netherspite_enable_fight_strategy;
             creators["disable netherspite fight strategy"] = &ActionContext::netherspite_disable_fight_strategy;

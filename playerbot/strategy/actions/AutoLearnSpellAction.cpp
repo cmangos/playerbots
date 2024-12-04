@@ -144,31 +144,13 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
 
         if (quest->GetRewSpellCast() > 0)
         {
-            LearnSpell(quest->GetRewSpellCast(), out);
-            if (quest->GetRewItemsCount() > 0)
-            {
-                for (int i = 0; i < quest->GetRewItemsCount(); i++)
-                {
-                    if (quest->RewItemId[i] >= 5175 && quest->RewItemId[i] <= 5178) // Checks if reward is Earth, Fire, Water or Air Totem
-                    {
-                        GetClassQuestItem(quest->RewItemId[i], quest->RewItemCount[i], quest->GetTitle(), bot, out);
-                    }
-                }
-            }
+            if(LearnSpell(quest->GetRewSpellCast(), out))
+                GetClassQuestItem(quest, out);
         }
         else if (quest->GetRewSpell() > 0)
         {
-            LearnSpell(quest->GetRewSpell(), out);
-            if (quest->GetRewItemsCount() > 0)
-            {
-                for (int i = 0; i < quest->GetRewItemsCount(); i++)
-                {
-                    if (quest->RewItemId[i] >= 5175 && quest->RewItemId[i] <= 5178) // Checks if reward is Earth, Fire, Water or Air Totem
-                    {
-                        GetClassQuestItem(quest->RewItemId[i], quest->RewItemCount[i], quest->GetTitle(), bot, out);
-                    }
-                }
-            }
+            if(LearnSpell(quest->GetRewSpell(), out))
+                GetClassQuestItem(quest, out);
         }
     }
 }
@@ -176,20 +158,29 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
 * Attempts to add the quest item
 * If the bot's bag is full report to player.
 */
-void AutoLearnSpellAction::GetClassQuestItem(uint32 itemId, uint32 itemCount, std::string title, Player* bot, std::ostringstream* out)
+void AutoLearnSpellAction::GetClassQuestItem(Quest const* quest, std::ostringstream* out)
 {
-    ItemPosCountVec itemVec;
-    ItemPrototype const* itemP = sObjectMgr.GetItemPrototype(itemId);
-    InventoryResult result = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, itemVec, itemId, itemCount);
-    if (result == EQUIP_ERR_OK)
+    if (quest->GetRewItemsCount() > 0)
     {
-        bot->StoreNewItemInInventorySlot(itemId, itemCount);
-        *out << "Got " << chat->formatItem(itemP,1,1) << " from " << title;
-    }
-    else if (result == EQUIP_ERR_INVENTORY_FULL)
-    {
-        // TODO: add a mail option so that if the bag is full the item will be mailed to the bot. For now user can just clear a spot and add the item manually.
-        *out << "Could not add item " << chat->formatItem(itemP) << " from " << title << ". " << bot->GetName() << "'s inventory is full.";
+        for (uint32 i = 0; i < quest->GetRewItemsCount(); i++)
+        {            
+            ItemPosCountVec itemVec;
+            ItemPrototype const* itemP = sObjectMgr.GetItemPrototype(quest->RewItemId[i]);
+            InventoryResult result = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, itemVec, itemP->ItemId, quest->RewItemCount[i]);
+            if (result == EQUIP_ERR_OK)
+            {
+                bot->StoreNewItemInInventorySlot(itemP->ItemId, quest->RewItemCount[i]);
+                *out << "Got " << chat->formatItem(itemP, 1, 1) << " from " << quest->GetTitle();
+            }
+            else if (result == EQUIP_ERR_INVENTORY_FULL)
+            {
+                MailDraft draft("Item(s) from quest reward", quest->GetTitle());
+                Item* item = item->CreateItem(itemP->ItemId, quest->RewItemCount[i]);
+                draft.AddItem(item);
+                draft.SendMailTo(MailReceiver(bot), MailSender(bot));
+                *out << "Could not add item " << chat->formatItem(itemP) << " from " << quest->GetTitle() << ". " << bot->GetName() << "'s inventory is full.";
+            }
+        }
     }
 }
 
@@ -205,12 +196,12 @@ std::string formatSpell(SpellEntry const* sInfo)
     return out.str();
 }
 
-void AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
+bool AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
 {
     SpellEntry const* proto = sServerFacade.LookupSpellInfo(spellId);
 
     if (!proto)
-        return;
+        return false;
 
     bool learned = false;
     for (int j = 0; j < 3; ++j)
@@ -232,5 +223,9 @@ void AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
     if (!learned && !bot->HasSpell(spellId)) {
         bot->learnSpell(spellId, false);
         *out << formatSpell(proto) << ", ";
+
+        learned = bot->HasSpell(spellId);
     }
+
+    return learned;
 }

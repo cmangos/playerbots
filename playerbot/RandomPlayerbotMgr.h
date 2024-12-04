@@ -114,8 +114,8 @@ public:
         uint32 GetValue(uint32 bot, std::string type);
         int32 GetValueValidTime(uint32 bot, std::string event);
         std::string GetData(uint32 bot, std::string type);
-        void SetValue(uint32 bot, std::string type, uint32 value, std::string data = "");
-        void SetValue(Player* bot, std::string type, uint32 value, std::string data = "");
+        void SetValue(uint32 bot, std::string type, uint32 value, std::string data = "", int32 validIn = -1);
+        void SetValue(Player* bot, std::string type, uint32 value, std::string data = "", int32 validIn = -1);
         void Remove(Player* bot);
         void Hotfix(Player* player, uint32 version);
         uint32 GetBattleMasterEntry(Player* bot, BattleGroundTypeId bgTypeId, bool fake = false);
@@ -157,6 +157,7 @@ public:
         std::mutex m_ahActionMutex;
 
         std::vector<AuctionEntry> GetAhPrices(uint32 itemId) { return ahMirror[itemId]; }
+        uint32 GetPlayersLevel() { return playersLevel; }
 	protected:
 	    virtual void OnBotLoginInternal(Player * const bot);
     private:

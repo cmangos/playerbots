@@ -983,6 +983,19 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.LLMApiJson = {"model": "gpt-4o-mini", "messages": [{"role": "system", "content": "<pre prompt> <context>"},{"role": "user", "content": "<prompt>"}],"max_tokens": 60}
 # AiPlayerbot.LLMResponseStartPattern = ("content":\s*")
 
+# Enable the alternative asynchronous login system.
+# AiPlayerbot.AsyncBotLogin = 0
+# When logging in bots that do not match Probability criteria, keep this much space for bots that do. 0 = Do not log in bots that do not match probability criteria.
+# AiPlayerbot.FreeRoomForNonSpareBots = 1
+
+# Only log in bots within this distance from a real player. 0 = Ignore range.
+# AiPlayerbot.LoginBotsNearPlayerRange = 0
+
+# AiPlayerbot.LevelProbability.<level> = <number>         #Probability Randombots will be allowed to login with this level. (default 100)
+# AiPlayerbot.LevelProbability.1 = 100
+# AiPlayerbot.LevelProbability.10 = 100
+# AiPlayerbot.LevelProbability.60 = 100
+
 # Mystery config value. Currently enables async bot pathfinding. Rarely crashes the server.
 # AiPlayerbot.TweakValue = 0
 

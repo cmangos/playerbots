@@ -16,6 +16,7 @@
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <regex>
+#include "PlayerbotLoginMgr.h"
 
 std::vector<std::string> ConfigAccess::GetValues(const std::string& name) const
 {
@@ -262,6 +263,15 @@ bool PlayerbotAIConfig::Initialize()
     bExplicitDbStoreSave = config.GetBoolDefault("AiPlayerbot.ExplicitDbStoreSave", false);
 
     randomBotLoginWithPlayer = config.GetBoolDefault("AiPlayerbot.RandomBotLoginWithPlayer", false);
+    asyncBotLogin = config.GetBoolDefault("AiPlayerbot.AsyncBotLogin", false);
+    freeRoomForNonSpareBots = config.GetIntDefault("AiPlayerbot.FreeRoomForNonSpareBots", 1);
+
+    loginBotsNearPlayerRange = config.GetIntDefault("AiPlayerbot.LoginBotsNearPlayerRange", 0);
+    
+    for (uint32 level = 1; level < DEFAULT_MAX_LEVEL; ++level)
+    {
+        levelProbability[level] = config.GetIntDefault("AiPlayerbot.LevelProbability." + std::to_string(level), 100);
+    }
 
     sLog.outString("Loading Race/Class probabilities");
 
@@ -752,6 +762,12 @@ bool PlayerbotAIConfig::Initialize()
 
     if (sPlayerbotAIConfig.randomBotJoinBG)
         sRandomPlayerbotMgr.LoadBattleMastersCache();
+
+    if (sPlayerbotAIConfig.asyncBotLogin)
+    {
+        std::thread t([] {sPlayerBotLoginMgr.LoadBotsFromDb(); });
+        t.detach();
+    }
 
     sLog.outString("---------------------------------------");
     sLog.outString("        AI Playerbot initialized       ");

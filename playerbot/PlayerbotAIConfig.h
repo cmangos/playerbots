@@ -163,6 +163,7 @@ public:
     std::string premadeLevelSpec[MAX_CLASSES][10][91]; //lvl 10 - 100
     uint32 classRaceProbabilityTotal;
     uint32 classRaceProbability[MAX_CLASSES][MAX_RACES];
+    uint32 levelProbability[DEFAULT_MAX_LEVEL];
     ClassSpecs classSpecs[MAX_CLASSES];
     bool gearProgressionSystemEnabled;
     uint32 gearProgressionSystemItemLevels[MAX_GEAR_PROGRESSION_LEVEL][2];
@@ -295,6 +296,9 @@ public:
     bool respawnModForPlayerBots, respawnModForInstances;
 
     bool randomBotLoginWithPlayer;
+    bool asyncBotLogin;
+    uint32 freeRoomForNonSpareBots;
+    uint32 loginBotsNearPlayerRange;
 
     bool jumpInBg;
     bool jumpWithPlayer;

@@ -2,6 +2,8 @@
 #include "playerbot/playerbot.h"
 #include "AutoLearnSpellAction.h"
 #include "playerbot/ServerFacade.h"
+#include "Entities/Item.h"
+#include <Mails/Mail.h>
 
 using namespace ai;
 
@@ -99,18 +101,18 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
                 SpellEntry const* spell = sServerFacade.LookupSpellInfo(tSpell->spell);
                 if (spell)
                 {
-                    std::string SpellName = spell->SpellName[0];                    
+                    std::string SpellName = spell->SpellName[0];
                     if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
                     {
                         uint32 skill = spell->EffectMiscValue[EFFECT_INDEX_1];
 
                         if (skill)
-                        {                            
+                        {
                             SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
                             if (pSkill)
                             {
                                 if (SpellName.find("Apprentice") != std::string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
-                                    continue;                                
+                                    continue;
                             }
                         }
                     }
@@ -143,11 +145,51 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
         if (quest->GetRewSpellCast() > 0)
         {
             LearnSpell(quest->GetRewSpellCast(), out);
+            if (quest->GetRewItemsCount() > 0)
+            {
+                for (int i = 0; i < quest->GetRewItemsCount(); i++)
+                {
+                    if (quest->RewItemId[i] >= 5175 && quest->RewItemId[i] <= 5178) // Checks if reward is Earth, Fire, Water or Air Totem
+                    {
+                        GetClassQuestItem(quest->RewItemId[i], quest->RewItemCount[i], quest->GetTitle(), bot, out);
+                    }
+                }
+            }
         }
         else if (quest->GetRewSpell() > 0)
         {
             LearnSpell(quest->GetRewSpell(), out);
+            if (quest->GetRewItemsCount() > 0)
+            {
+                for (int i = 0; i < quest->GetRewItemsCount(); i++)
+                {
+                    if (quest->RewItemId[i] >= 5175 && quest->RewItemId[i] <= 5178) // Checks if reward is Earth, Fire, Water or Air Totem
+                    {
+                        GetClassQuestItem(quest->RewItemId[i], quest->RewItemCount[i], quest->GetTitle(), bot, out);
+                    }
+                }
+            }
         }
+    }
+}
+/**
+* Attempts to add the quest item
+* If the bot's bag is full report to player.
+*/
+void AutoLearnSpellAction::GetClassQuestItem(uint32 itemId, uint32 itemCount, std::string title, Player* bot, std::ostringstream* out)
+{
+    ItemPosCountVec itemVec;
+    ItemPrototype const* itemP = sObjectMgr.GetItemPrototype(itemId);
+    InventoryResult result = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, itemVec, itemId, itemCount);
+    if (result == EQUIP_ERR_OK)
+    {
+        bot->StoreNewItemInInventorySlot(itemId, itemCount);
+        *out << "Got " << chat->formatItem(itemP,1,1) << " from " << title;
+    }
+    else if (result == EQUIP_ERR_INVENTORY_FULL)
+    {
+        // TODO: add a mail option so that if the bag is full the item will be mailed to the bot. For now user can just clear a spot and add the item manually.
+        *out << "Could not add item " << chat->formatItem(itemP) << " from " << title << ". " << bot->GetName() << "'s inventory is full.";
     }
 }
 
@@ -155,8 +197,8 @@ std::string formatSpell(SpellEntry const* sInfo)
 {
     std::ostringstream out;
     std::string rank = sInfo->Rank[0];
-    
-    if(rank.empty())
+
+    if (rank.empty())
         out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[LOCALE_enUS] << "]|h|r";
     else
         out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[LOCALE_enUS] << " " << rank << "]|h|r";

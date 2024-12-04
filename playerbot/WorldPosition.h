@@ -3,7 +3,6 @@
 
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"
-#include "playerbot/PlayerbotAIConfig.h"
 #include "World/World.h"
 #include "MotionGenerators/PathFinder.h"
 
@@ -242,8 +241,8 @@ namespace ai
         std::vector<WorldPosition> getPathFromPath(const std::vector<WorldPosition>& startPath, const Unit* bot, const uint8 maxAttempt = 40) const;
         std::vector<WorldPosition> getPathFrom(const WorldPosition& startPos, const Unit* bot) { return getPathFromPath({ startPos }, bot); };
         std::vector<WorldPosition> getPathTo(WorldPosition endPos, const Unit* bot) const { return endPos.getPathFrom(*this, bot); }
-        bool isPathTo(const std::vector<WorldPosition>& path, float const maxDistance = sPlayerbotAIConfig.targetPosRecalcDistance) const { return !path.empty() && distance(path.back()) < maxDistance; };
-        bool cropPathTo(std::vector<WorldPosition>& path, const float maxDistance = sPlayerbotAIConfig.targetPosRecalcDistance) const;
+        bool isPathTo(const std::vector<WorldPosition>& path, float const maxDistance = 0) const;
+        bool cropPathTo(std::vector<WorldPosition>& path, const float maxDistance = 0) const;
         bool canPathTo(const WorldPosition& endPos, const Unit* bot) const { return endPos.isPathTo(getPathTo(endPos, bot)); }
 
         float getPathLength(const std::vector<WorldPosition>& points) const { float dist = 0.0f; for (auto& p : points) if (&p == &points.front()) dist = 0; else dist += std::prev(&p, 1)->distance(p); return dist; }

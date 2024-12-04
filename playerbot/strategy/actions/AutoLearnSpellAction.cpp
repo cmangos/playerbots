@@ -179,17 +179,17 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
 void AutoLearnSpellAction::GetClassQuestItem(uint32 itemId, uint32 itemCount, std::string title, Player* bot, std::ostringstream* out)
 {
     ItemPosCountVec itemVec;
-    Item* item = item->CreateItem(itemId, itemCount);
+    ItemPrototype const* itemP = sObjectMgr.GetItemPrototype(itemId);
     InventoryResult result = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, itemVec, itemId, itemCount);
     if (result == EQUIP_ERR_OK)
     {
-        item = bot->StoreNewItemInInventorySlot(itemId, itemCount);
-        *out << "Got " << chat->formatItem(item, item->GetCount()) << " from " << title;
+        bot->StoreNewItemInInventorySlot(itemId, itemCount);
+        *out << "Got " << chat->formatItem(itemP,1,1) << " from " << title;
     }
     else if (result == EQUIP_ERR_INVENTORY_FULL)
     {
         // TODO: add a mail option so that if the bag is full the item will be mailed to the bot. For now user can just clear a spot and add the item manually.
-        *out << "Could not add item " << chat->formatItem(item, item->GetCount()) << " from " << title << ". " << bot->GetName() << "'s inventory is full.";
+        *out << "Could not add item " << chat->formatItem(itemP) << " from " << title << ". " << bot->GetName() << "'s inventory is full.";
     }
 }
 

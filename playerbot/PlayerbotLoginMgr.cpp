@@ -334,7 +334,8 @@ void PlayerBotLoginMgr::LoadBotsFromDb()
     loginMutex.lock();
     botPool.clear();
     std::set<uint32> accounts;
-    auto result = LoginDatabase.PQuery("SELECT id FROM account where UPPER(username) like UPPER('%s')", sPlayerbotAIConfig.randomBotAccountPrefix + "%");
+    std::string prefixString = sPlayerbotAIConfig.randomBotAccountPrefix + "%";
+    auto result = LoginDatabase.PQuery("SELECT id FROM account where UPPER(username) like UPPER('%s')", prefixString.c_str());
     if (!result)
     {
         loginMutex.unlock();
@@ -348,7 +349,7 @@ void PlayerBotLoginMgr::LoadBotsFromDb()
     accounts.insert(accountId);
     } while (result->NextRow());
 
-    sLog.outDebug("PlayerbotLoginMgr: %d accounts found.", accounts.size());
+    sLog.outDebug("PlayerbotLoginMgr: %d accounts found.", uint32(accounts.size()));
 
     result = CharacterDatabase.PQuery("SELECT account, guid, race, class, level, totaltime, map, position_x, position_y, position_z, orientation FROM characters");
          
@@ -369,7 +370,7 @@ void PlayerBotLoginMgr::LoadBotsFromDb()
         botPool.insert(std::make_pair(guid, PlayerBotInfo(account, guid, race, cls, level, isNew, position)));;
     } while (result->NextRow());
 
-    sLog.outDebug("PlayerbotLoginMgr: %d bots found.", botPool.size());
+    sLog.outDebug("PlayerbotLoginMgr: %d bots found.", uint32(botPool.size()));
 
     loginMutex.unlock();
 
@@ -468,7 +469,7 @@ void PlayerBotLoginMgr::ShowSpace()
     int32 currentOnline = GetMaxOnlineBotCount() - onlineSpace.totalSpace;
     int32 currentOffline = GetMaxOnlineBotCount() - offlineSpace.totalSpace;
 
-    sLog.outError("Bots online %d/%d (%d generated). Log in:%d out:%d", currentOnline, GetMaxOnlineBotCount(), currentOffline, loginQueue.size(), logoutQueue.size());
+    sLog.outError("Bots online %d/%d (%d generated). Log in:%d out:%d", currentOnline, GetMaxOnlineBotCount(), currentOffline, uint32(loginQueue.size()), uint32(logoutQueue.size()));
 
     if (onlineSpace.totalSpace < 0)
         sLog.outError("Too many bots online (%d/%d).", currentOnline, GetMaxOnlineBotCount());
@@ -498,13 +499,13 @@ void PlayerBotLoginMgr::ShowSpace()
             if (onlineSpace.classRaceBucket[cls][race] < 0)
             {
                 int32 current = GetClassRaceBucketSize(cls, race) - onlineSpace.classRaceBucket[cls][race];
-                sLog.outError("Too many %s %s bots online (%d/%d).", ChatHelper::formatRace(race), ChatHelper::formatClass(race), current, GetClassRaceBucketSize(cls, race));
+                sLog.outError("Too many %s %s bots online (%d/%d).", ChatHelper::formatRace(race).c_str(), ChatHelper::formatClass(race).c_str(), current, GetClassRaceBucketSize(cls, race));
             }
 
             if (offlineSpace.classRaceBucket[cls][race] > 0)
             {
                 int32 current = GetClassRaceBucketSize(cls, race) - offlineSpace.classRaceBucket[cls][race];
-                sLog.outError("Too few %s %s bots generated (%d/%d).", ChatHelper::formatRace(race), ChatHelper::formatClass(race), current, GetClassRaceBucketSize(cls, race));
+                sLog.outError("Too few %s %s bots generated (%d/%d).", ChatHelper::formatRace(race).c_str(), ChatHelper::formatClass(race).c_str(), current, GetClassRaceBucketSize(cls, race));
             }
         }
     }
@@ -595,7 +596,7 @@ void PlayerBotLoginMgr::FillLoginLogoutQueue()
     for (auto& login : logins)
         loginQueue.push(login);
 
-    sLog.outDebug("PlayerbotLoginMgr: Queued to log in: %d, out: %d", loginQueue.size(), logoutQueue.size());
+    sLog.outDebug("PlayerbotLoginMgr: Queued to log in: %d, out: %d", uint32(loginQueue.size()), uint32(logoutQueue.size()));
 }
 
 void PlayerBotLoginMgr::LogoutBots(uint32 maxLogouts)

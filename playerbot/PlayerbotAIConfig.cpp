@@ -268,7 +268,9 @@ bool PlayerbotAIConfig::Initialize()
 
     loginBotsNearPlayerRange = config.GetIntDefault("AiPlayerbot.LoginBotsNearPlayerRange", 0);
     
-    for (uint32 level = 1; level < DEFAULT_MAX_LEVEL; ++level)
+    LoadListString<std::vector<std::string> >(config.GetStringDefault("AiPlayerbot.LoginCriteria", "classrace"), loginCriteria);
+
+    for (uint32 level = 1; level <= DEFAULT_MAX_LEVEL; ++level)
     {
         levelProbability[level] = config.GetIntDefault("AiPlayerbot.LevelProbability." + std::to_string(level), 100);
     }

@@ -31,7 +31,7 @@ public:
     PlayerbotHolder* GetPlayerbotHolder() { return playerbotHolder; }
 };
 
-PlayerBotInfo::PlayerBotInfo(uint32 account, uint32 guid, uint8 race, uint8 cls, uint32 level, bool isNew, WorldPosition position) : account(account), guid(guid), race(race), cls(cls), level(level), isNew(isNew), position(position)
+PlayerBotInfo::PlayerBotInfo(const uint32 account, const uint32 guid, const uint8 race, const uint8 cls, const uint32 level, const bool isNew, const WorldPosition& position) : account(account), guid(guid), race(race), cls(cls), level(level), isNew(isNew), position(position)
 {
 
     holder = new PlayerbotLoginQueryHolder(&sRandomPlayerbotMgr, 0, account, guid);
@@ -45,7 +45,7 @@ PlayerBotInfo::PlayerBotInfo(uint32 account, uint32 guid, uint8 race, uint8 cls,
     }    
 }
 
-uint32 PlayerBotInfo::GetLevel()
+uint32 PlayerBotInfo::GetLevel() const
 {
     if (!isNew || sPlayerbotAIConfig.disableRandomLevels)
         return level;
@@ -57,6 +57,25 @@ uint32 PlayerBotInfo::GetLevel()
     maxRandomLevel = std::max(sPlayerbotAIConfig.randomBotMinLevel, std::min(sRandomPlayerbotMgr.GetPlayersLevel() + sPlayerbotAIConfig.syncLevelMaxAbove, sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL)));
 
     return (minRandomLevel + maxRandomLevel) / 2;
+}
+
+bool PlayerBotInfo::IsFarFromPlayer(const LoginSpace& space) const
+{
+    if (space.playerLocations.empty())
+        return false;
+
+    if (isNew && sPlayerbotAIConfig.instantRandomize) //We do not know where the bot will be teleported to on randomisation. 
+        return false;
+
+    for (auto& p : space.playerLocations)
+    {
+        if (p.mapid == position.mapid && p.sqDistance(position) < sPlayerbotAIConfig.loginBotsNearPlayerRange * sPlayerbotAIConfig.loginBotsNearPlayerRange)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool PlayerBotInfo::SendHolder()
@@ -108,7 +127,7 @@ void PlayerBotInfo::HandlePlayerBotLoginCallback(QueryResult* /*dummy*/, SqlQuer
     holderState = HolderState::HOLDER_RECEIVED;
 }
 
-void PlayerBotInfo::FillLoginSpace(LoginSpace& space, FillStep step)
+void PlayerBotInfo::FillLoginSpace(LoginSpace& space, FillStep step) const
 {
     if (step == FillStep::NOW && (loginState == LoginState::BOT_OFFLINE || loginState == LoginState::BOT_ON_LOGINQUEUE))
         return;
@@ -116,104 +135,59 @@ void PlayerBotInfo::FillLoginSpace(LoginSpace& space, FillStep step)
     if (step == FillStep::NEXT_STEP && (loginState == LoginState::BOT_OFFLINE || loginState == LoginState::BOT_ON_LOGOUTQUEUE))
         return;
 
+    if (loginState == LoginState::BOT_ONLINE)
+        space.currentSpace--;
+
     space.totalSpace--;
     space.classRaceBucket[cls][race]--;
     space.levelBucket[GetLevel()]--;
 };
 
-void PlayerBotInfo::EmptyLoginSpace(LoginSpace& space)
+void PlayerBotInfo::EmptyLoginSpace(LoginSpace& space, FillStep step) const
 {
+    if (step == FillStep::NOW && (loginState == LoginState::BOT_OFFLINE || loginState == LoginState::BOT_ON_LOGINQUEUE))
+        return;
+
+    if (step == FillStep::NEXT_STEP && (loginState == LoginState::BOT_OFFLINE || loginState == LoginState::BOT_ON_LOGOUTQUEUE))
+        return;
+
+    if (loginState == LoginState::BOT_ONLINE)
+        space.currentSpace++;
+
     space.totalSpace++;
     space.classRaceBucket[cls][race]++;
     space.levelBucket[GetLevel()]++;
 };
 
-LoginQueueReason PlayerBotInfo::AllowedToQueueLogin(LoginSpace& space, bool ignoreBuckets)
+bool PlayerBotInfo::AllowedToQueueLogin(const LoginSpace& space) const
 {
     if (loginState == LoginState::BOT_ONLINE)
-        return LoginQueueReason::ALREADY_ONLINE;
+        return false;
         
     if (loginState == LoginState::BOT_ON_LOGINQUEUE)
-        return LoginQueueReason::ALREADY_IN_QUEUE;
+        return false;
 
-    //if (holderState != HolderState::HOLDER_RECEIVED)
-    //    return LoginQueueReason::NO_HOLDER;
-
-    if (space.totalSpace <= 0)
-        return LoginQueueReason::NO_TOTAL_SPACE;
-
-    if (ignoreBuckets && space.totalSpace <= (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots)
-        return LoginQueueReason::NO_SPARE_SPACE;
-
-    if (!ignoreBuckets && space.classRaceBucket[cls][race] <= 0)
-        return LoginQueueReason::NO_CLASS_RACE_SPACE;
-
-    if (!ignoreBuckets && space.levelBucket[GetLevel()] <= 0)
-        return LoginQueueReason::NO_LEVEL_SPACE;
-
-    if (sPlayerbotAIConfig.randomBotTimedOffline && sRandomPlayerbotMgr.GetValue(guid, "logout"))
-        return LoginQueueReason::TIMED_OFFLINE;
-
-    if (!ignoreBuckets && sPlayerbotAIConfig.loginBotsNearPlayerRange && space.playerLocations.size())
-    {
-        bool inRange = false;
-        for (auto& p : space.playerLocations)
-        {
-            if (p.sqDistance(position) < sPlayerbotAIConfig.loginBotsNearPlayerRange * sPlayerbotAIConfig.loginBotsNearPlayerRange)
-            {
-                inRange = true;
-                break;
-            }
-        }
-
-        if(!inRange)
-            return LoginQueueReason::OUT_OF_RANGE;
-    }
-
-    return LoginQueueReason::ALLOWED;
+    return true;
 };
 
-LogoutQueueReason PlayerBotInfo::AllowedToQueueLogout(LoginSpace& space, bool ignoreBuckets)
+bool PlayerBotInfo::AllowedToQueueLogout(const LoginSpace& space) const
 {
     if (loginState == LoginState::BOT_OFFLINE)
-        return LogoutQueueReason::ALREADY_OFFLINE;
+        return false;
 
     if (loginState == LoginState::BOT_ON_LOGOUTQUEUE)
-        return LogoutQueueReason::ALREADY_IN_QUEUE;
+        return false;
 
-    if (ignoreBuckets && space.totalSpace <= (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots)
-    {
-        if (space.classRaceBucket[cls][race] <= 0)
-            return LogoutQueueReason::MAKE_SPACE_IN_CLASSRACE_BUCKET;
+    return true;
+}
 
-        if (space.levelBucket[GetLevel()] <= 0)
-            return LogoutQueueReason::MAKE_SPACE_IN_LEVEL_BUCKET;
-    }
+LoginCriterionFailType PlayerBotInfo::MatchNoCriteria(const LoginSpace& space, const LoginCriteria& criteria) const
+{
+    for (auto& [criterionfail, criterion] : criteria)
+        if (criterion(*this, space))
+            return criterionfail;
 
-    if (loginState == LoginState::BOT_ONLINE && sPlayerbotAIConfig.randomBotTimedLogout)
-        if (!sRandomPlayerbotMgr.GetValue(guid, "add"))
-            return LogoutQueueReason::TIMED_LOGOUT;
-
-    if (sPlayerbotAIConfig.loginBotsNearPlayerRange && space.playerLocations.size())
-    {
-        bool inRange = false;
-        for (auto& p : space.playerLocations)
-        {
-            if (p.sqDistance(position) < sPlayerbotAIConfig.loginBotsNearPlayerRange * sPlayerbotAIConfig.loginBotsNearPlayerRange)
-            {
-                inRange = true;
-                break;
-            }
-        }
-
-        if (inRange)
-            return LogoutQueueReason::IN_RANGE;
-
-        if (!ignoreBuckets || space.totalSpace <= (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots)
-            return LogoutQueueReason::MAKE_SPACE_OUT_OF_RANGE;
-    }
-
-    return LogoutQueueReason::DISALLOWED;
+    return LoginCriterionFailType::LOGIN_OK;
 }
 
 bool PlayerBotInfo::QueueLogin(LoginSpace& space)
@@ -239,15 +213,15 @@ bool PlayerBotInfo::QueueLogout(LoginSpace& space)
 {
     if (loginState == LoginState::BOT_ONLINE)
     {
+        EmptyLoginSpace(space, FillStep::NEXT_STEP);
         loginState = LoginState::BOT_ON_LOGOUTQUEUE;
-        EmptyLoginSpace(space);
         return true;
     }
 
     if (loginState == LoginState::BOT_ON_LOGINQUEUE)
     {
+        EmptyLoginSpace(space, FillStep::NEXT_STEP);
         loginState = LoginState::BOT_OFFLINE;
-        EmptyLoginSpace(space);
         return false;
     }
 
@@ -379,7 +353,7 @@ void PlayerBotLoginMgr::LoadBotsFromDb()
 
 void PlayerBotLoginMgr::StopThread()
 {
-    if (!stopThread)
+    if (!stopThread && loginThread.joinable())
     {
         stopThread = true;
         loginThread.join();
@@ -477,7 +451,7 @@ void PlayerBotLoginMgr::ShowSpace()
     if (offlineSpace.totalSpace > 0)
         sLog.outError("Too few bots generated (%d/%d).", currentOffline, GetMaxOnlineBotCount());
 
-    for (uint32 level = 1; level < GetMaxLevel(); ++level)
+    for (uint32 level = 1; level <= GetMaxLevel(); ++level)
     {
         if (onlineSpace.levelBucket[level] < 0)
         {
@@ -511,14 +485,49 @@ void PlayerBotLoginMgr::ShowSpace()
     }
 }
 
+#define ADD_CRITERIA(type, condition) criteria.push_back(std::make_pair(LoginCriterionFailType::type, []( const PlayerBotInfo& info, const LoginSpace& space) {return condition;}))
+
+LoginCriteria PlayerBotLoginMgr::GetLoginCriteria(const uint8 attempt) const
+{
+    LoginCriteria criteria;
+    
+    ADD_CRITERIA(MAX_BOTS, space.totalSpace <= int(0));
+
+    if(attempt == 0)
+        ADD_CRITERIA(LOGOUT_NOK, info.GetLoginState() == LoginState::BOT_ONLINE && space.currentSpace > (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots);
+    else
+        ADD_CRITERIA(SPARE_ROOM, info.GetLoginState() == LoginState::BOT_OFFLINE && space.totalSpace <= (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots);
+
+    if (sPlayerbotAIConfig.randomBotTimedLogout)
+        ADD_CRITERIA(RANDOM_TIMED_LOGOUT, info.GetLoginState() == LoginState::BOT_ONLINE && !sRandomPlayerbotMgr.GetValue(info.GetId(), "add"));
+
+    if (sPlayerbotAIConfig.randomBotTimedOffline)
+        ADD_CRITERIA(RANDOM_TIMED_OFFLINE, info.GetLoginState() == LoginState::BOT_OFFLINE && sRandomPlayerbotMgr.GetValue(info.GetId(), "logout"));
+
+    std::vector<std::string> configCriteria = sPlayerbotAIConfig.loginCriteria;
+
+    for (uint8 i = 0; i < std::min(uint8(configCriteria.size() - attempt), uint8(configCriteria.size())); i++)
+    {
+        if (configCriteria[i] == "classrace")
+            ADD_CRITERIA(CLASSRACE, space.classRaceBucket[info.GetClass()][info.GetRace()] <= 0);
+        if (configCriteria[i] == "level")
+            ADD_CRITERIA(LEVEL, space.classRaceBucket[info.GetLevel()] <= 0);
+        if (configCriteria[i] == "range")
+            ADD_CRITERIA(RANGE, info.IsFarFromPlayer(space));
+    }
+
+    return criteria;
+}
+
 void PlayerBotLoginMgr::FillLoginSpace(LoginSpace& space, FillStep step)
 {
     space.totalSpace = GetMaxOnlineBotCount();
+    space.currentSpace = GetMaxOnlineBotCount();
     playerMutex.lock();
     space.playerLocations = playerLocations;
     playerMutex.unlock();
 
-    for (uint32 level = 1; level < GetMaxLevel(); ++level)
+    for (uint32 level = 1; level <= GetMaxLevel(); ++level)
     {
         space.levelBucket[level] = GetLevelBucketSize(level);
     }
@@ -542,50 +551,43 @@ void PlayerBotLoginMgr::FillLoginLogoutQueue()
     LoginSpace loginSpace;
     FillLoginSpace(loginSpace, FillStep::NEXT_STEP);
 
+    std::unordered_map<uint8, std::unordered_map<LoginCriterionFailType, uint32>> loginFails;
+
     std::vector<PlayerBotInfo*> logins, logouts;
 
-    for (auto& [guid, botInfo] : botPool)
+    for (uint8 attempt = 0; attempt < sPlayerbotAIConfig.loginCriteria.size(); attempt++)
     {
-        LogoutQueueReason outReason = botInfo.AllowedToQueueLogout(loginSpace);
+        LoginCriteria criteria = GetLoginCriteria(attempt);
 
-        if (outReason == LogoutQueueReason::MAKE_SPACE_IN_CLASSRACE_BUCKET || outReason == LogoutQueueReason::MAKE_SPACE_IN_LEVEL_BUCKET || outReason == LogoutQueueReason::TIMED_LOGOUT || outReason == LogoutQueueReason::MAKE_SPACE_OUT_OF_RANGE)
-        {
-            if (botInfo.QueueLogout(loginSpace))
-                logouts.push_back(&botInfo);
-        }
-
-        LoginQueueReason inReason = botInfo.AllowedToQueueLogin(loginSpace, true);
-
-        if (inReason == LoginQueueReason::ALLOWED)
-        {
-            if (botInfo.QueueLogin(loginSpace))
-                logins.push_back(&botInfo);
-        }
-    }
-
-
-    if (sPlayerbotAIConfig.freeRoomForNonSpareBots)
-    {
         for (auto& [guid, botInfo] : botPool)
         {
-            LogoutQueueReason outReason = botInfo.AllowedToQueueLogout(loginSpace, true);
+            botInfo.EmptyLoginSpace(loginSpace, FillStep::NEXT_STEP); //Pretend the bot isn't logged in for a moment.
+            LoginCriterionFailType LoginFail = botInfo.MatchNoCriteria(loginSpace, criteria);
+            botInfo.FillLoginSpace(loginSpace, FillStep::NEXT_STEP);
 
+            bool wantedOnline = (LoginFail == LoginCriterionFailType::LOGIN_OK || LoginFail == LoginCriterionFailType::LOGOUT_NOK);
 
-
-            if (outReason == LogoutQueueReason::MAKE_SPACE_IN_CLASSRACE_BUCKET || outReason == LogoutQueueReason::MAKE_SPACE_IN_LEVEL_BUCKET || outReason == LogoutQueueReason::TIMED_LOGOUT || outReason == LogoutQueueReason::MAKE_SPACE_OUT_OF_RANGE)
+            if (wantedOnline)
             {
-                if (botInfo.QueueLogout(loginSpace))
-                    logouts.push_back(&botInfo);
+                if (botInfo.AllowedToQueueLogin(loginSpace))
+                    if (botInfo.QueueLogin(loginSpace))
+                        logins.push_back(&botInfo);
+            }
+            else if (attempt == 0)
+            {
+                if (botInfo.AllowedToQueueLogout(loginSpace))
+                    if (botInfo.QueueLogout(loginSpace))
+                        logouts.push_back(&botInfo);
             }
 
-            LoginQueueReason inReason = botInfo.AllowedToQueueLogin(loginSpace, true);
+            loginFails[attempt][LoginFail]++;
 
-            if (inReason == LoginQueueReason::ALLOWED)
-            {
-                if (botInfo.QueueLogin(loginSpace))
-                    logins.push_back(&botInfo);
-            }
+            if (attempt > 0 && loginSpace.totalSpace < (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots)
+                loginSpace.totalSpace = 0;
         }
+
+        if (loginSpace.totalSpace <= 0)
+            break;
     }
 
     std::lock_guard<std::mutex> guard(loginMutex);
@@ -595,6 +597,14 @@ void PlayerBotLoginMgr::FillLoginLogoutQueue()
 
     for (auto& login : logins)
         loginQueue.push(login);
+
+    for (auto& [attempt, fails] : loginFails)
+    {
+        for (auto& [fail, nr] : fails)
+        {
+            sLog.outDebug("PlayerbotLoginMgr attempt: %d fail %s: %d", attempt, failName.find(fail)->second.c_str(), nr);
+        }
+    }
 
     sLog.outDebug("PlayerbotLoginMgr: Queued to log in: %d, out: %d", uint32(loginQueue.size()), uint32(logoutQueue.size()));
 }
@@ -627,7 +637,7 @@ void PlayerBotLoginMgr::LoginBots(uint32 maxLogins)
     while (!loginQueue.empty() && sent < maxLogins) {
         if (loginQueue.front()->LoginBot())
             sent++;
-        else
+        else if(loginQueue.front()->GetLoginState() == LoginState::BOT_ON_LOGINQUEUE)
             retryQueue.push(loginQueue.front());
         loginQueue.pop();
     }

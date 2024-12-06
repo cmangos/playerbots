@@ -944,8 +944,11 @@ AiPlayerbot.PerfMonEnabled = 0
 
 # Enable the alternative asynchronous login system.
 # AiPlayerbot.AsyncBotLogin = 0
-# When logging in bots that do not match Probability criteria, keep this much space for bots that do. 0 = Do not log in bots that do not match probability criteria.
-# AiPlayerbot.FreeRoomForNonSpareBots = 1
+# The login criteria to apply when trying to log in bots. options: range,classrace,level
+# When trying to reach max bots it will drop the last criteria first. So if classrace,level only reaches 800/1000 bots it will try to get to 1000 only looking at classrace.
+# AiPlayerbot.LoginCriteria = classrace
+# When bots are logged in that do not fully match all criteria selected it will do so up to xxx spaces below the maximum. Bots that suddenly match all the criteria will then have room to use this to log in.
+# AiPlayerbot.FreeRoomForNonSpareBots = 0
 
 # Only log in bots within this distance from a real player. 0 = Ignore range.
 # AiPlayerbot.LoginBotsNearPlayerRange = 0

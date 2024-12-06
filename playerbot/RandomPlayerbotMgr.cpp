@@ -557,9 +557,11 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     ScaleBotActivity();
     if (sPlayerbotAIConfig.asyncBotLogin)
     {
+        auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "AsyncBotLogin");
         sPlayerBotLoginMgr.SetPlayerLocations(players);
         sPlayerBotLoginMgr.LogoutBots(sPlayerbotAIConfig.randomBotsMaxLoginsPerInterval);
         sPlayerBotLoginMgr.LoginBots(sPlayerbotAIConfig.randomBotsMaxLoginsPerInterval);
+        pmo.reset();
     }
 
     uint32 maxAllowedBotCount = GetEventValue(0, "bot_count");

@@ -534,7 +534,7 @@ bool RpgAIChatTrigger::IsActive()
     {
         Player* player = guidP.GetPlayer();
 
-        if (player->isRealPlayer())
+        if (!player || player->isRealPlayer())
             return false;
     }
 

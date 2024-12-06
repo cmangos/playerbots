@@ -353,6 +353,8 @@ bool CheckMountStateAction::CanMountInBg() const
         //check near A Flag
         uint32 lowguid = 90000;
         uint32 id = 179830;
+        if (!bg)
+            return false;
         GameObject* AllianceflagStand = bg->GetBgMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, id, lowguid));
 
         if (bot->IsWithinDistInMap(AllianceflagStand, 3.0f))

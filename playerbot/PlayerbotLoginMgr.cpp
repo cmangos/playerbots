@@ -551,11 +551,11 @@ LoginCriteria PlayerBotLoginMgr::GetLoginCriteria(const uint8 attempt) const
         if (configCriteria[i] == "classrace")
             ADD_CRITERIA(CLASSRACE, space.classRaceBucket[info.GetClass()][info.GetRace()] <= 0);
         if (configCriteria[i] == "level")
-            ADD_CRITERIA(LEVEL, space.classRaceBucket[info.GetLevel()] <= 0);
+            ADD_CRITERIA(LEVEL, space.levelBucket[info.GetLevel()] <= 0);
         if (configCriteria[i] == "range")
             ADD_CRITERIA(RANGE, !info.IsNearPlayer(space));
         if (configCriteria[i] == "map")
-            ADD_CRITERIA(GUILD, !info.IsOnPlayerMap(space));
+            ADD_CRITERIA(MAP, !info.IsOnPlayerMap(space));
         if (configCriteria[i] == "guild")
             ADD_CRITERIA(GUILD, !info.IsInPlayerGuild(space));
     }
@@ -650,7 +650,7 @@ void PlayerBotLoginMgr::FillLoginLogoutQueue()
                 loginSpace.totalSpace = 0;
         }
 
-        sLog.outError("PlayerbotLoginMgr: Attempt %d, space left %d", attempt, loginSpace.totalSpace);
+        sLog.outDebug("PlayerbotLoginMgr: Attempt %d, space left %d", attempt, loginSpace.totalSpace);
 
         if (loginSpace.totalSpace <= 0)
             break;

@@ -129,6 +129,9 @@ bool PlayerBotInfo::SendHolder()
     if (loginState == LoginState::BOT_ON_LOGOUTQUEUE)
         return false;
 
+    if (loginState == LoginState::BOT_OFFLINE)
+        return false;
+
     sRandomPlayerbotMgr.GetValue(guid, "logout");
 
     holderState = HolderState::HOLDER_SENT;

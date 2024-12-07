@@ -42,7 +42,6 @@ public:
         if (health < sPlayerbotAIConfig.mediumHealth)
             return;
 
-        float minDistance = ai->GetRange("spell");
         Group* group = bot->GetGroup();
         if (!group)
             return;
@@ -57,7 +56,8 @@ public:
         if (creature->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) && !(spell == "fear" || spell == "banish"))
             return;
 
-        if (!creature->IsPlayer())
+        bool isPlayer = creature->IsPlayer();
+        if (!isPlayer)
         {
             int tankCount, dpsCount;
             GetPlayerCount(creature, &tankCount, &dpsCount);
@@ -68,6 +68,16 @@ public:
             }
         }
 
+        if (isPlayer)
+        {
+            uint32 spellId = AI_VALUE2(uint32, "spell id", spell);
+            const SpellEntry* spellInfo = sServerFacade.LookupSpellInfo(spellId);
+            DiminishingGroup diminishingGroup = GetDiminishingReturnsGroupForSpell(spellInfo, false);
+            if (creature->GetDiminishing(diminishingGroup) >= DIMINISHING_LEVEL_IMMUNE)
+                return;
+        }
+
+        float minDistance = ai->GetRange("spell");
         Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {

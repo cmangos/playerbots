@@ -950,8 +950,8 @@ AiPlayerbot.PerfMonEnabled = 0
 # When bots are logged in that do not fully match all criteria selected it will do so up to xxx spaces below the maximum. Bots that suddenly match all the criteria will then have room to use this to log in.
 # AiPlayerbot.FreeRoomForNonSpareBots = 0
 
-# Only log in bots within this distance from a real player. 0 = Ignore range.
-# AiPlayerbot.LoginBotsNearPlayerRange = 0
+# Only log in bots within this distance from a real player.
+# AiPlayerbot.LoginBotsNearPlayerRange = 1000
 
 # AiPlayerbot.LevelProbability.<level> = <number>         #Probability Randombots will be allowed to login with this level. (default 100)
 # AiPlayerbot.LevelProbability.1 = 100

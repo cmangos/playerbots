@@ -1,5 +1,7 @@
 #include "WorldPosition.h"
 
+class PlayerBotInfo;
+
 struct LoginSpace
 {
 	int32 currentSpace;
@@ -33,29 +35,27 @@ enum class FillStep : uint8
 
 enum class LoginCriterionFailType : uint8
 {
-	LOGIN_OK = 0,
-	LOGOUT_NOK = 1,
+	UNKNOWN = 0,
 	MAX_BOTS = 2,
 	SPARE_ROOM = 3,
 	RANDOM_TIMED_LOGOUT = 4,
 	RANDOM_TIMED_OFFLINE = 5,
 	CLASSRACE = 6,
 	LEVEL = 7,
-	RANGE = 8
+	RANGE = 8,
+	LOGIN_OK = 10
 };
 
-static const std::unordered_map<LoginCriterionFailType, std::string> failName = {
- 	 {LoginCriterionFailType::LOGIN_OK, "LOGIN_OK"}
-	,{LoginCriterionFailType::LOGOUT_NOK, "LOGOUT_NOK" }
+static const std::unordered_map<LoginCriterionFailType, std::string> failName = {	
+ 	 {LoginCriterionFailType::UNKNOWN, "UNKNOWN"}
     ,{LoginCriterionFailType::MAX_BOTS, "MAX_BOTS"}
 	,{LoginCriterionFailType::SPARE_ROOM, "SPARE_ROOM"}
 	,{LoginCriterionFailType::RANDOM_TIMED_LOGOUT, "RANDOM_TIMED_LOGOUT"}
 	,{LoginCriterionFailType::RANDOM_TIMED_OFFLINE , "RANDOM_TIMED_OFFLINE"}
 	,{LoginCriterionFailType::CLASSRACE, "CLASSRACE"}
 	,{LoginCriterionFailType::LEVEL, "LEVEL"}
-	,{LoginCriterionFailType::RANGE , "RANGE"} };
-
-class PlayerBotInfo;
+	,{LoginCriterionFailType::RANGE , "RANGE"} 
+    ,{LoginCriterionFailType::LOGIN_OK, "LOGIN_OK"} };
 
 typedef std::vector <std::pair<LoginCriterionFailType, std::function<bool(const PlayerBotInfo&, const LoginSpace&)>>> LoginCriteria;
 
@@ -126,6 +126,7 @@ private:
 
 	LoginCriteria GetLoginCriteria(const uint8 attempt) const;
 	void FillLoginSpace(LoginSpace& space, FillStep step);
+	bool CriteriaStillValid(const LoginCriterionFailType oldFailType, const LoginCriteria& criteria) const;
 	uint32 GetMaxOnlineBotCount() const;
 	uint32 GetMaxLevel() const;
 	uint32 GetClassRaceBucketSize(uint8 cls, uint8 race) const;

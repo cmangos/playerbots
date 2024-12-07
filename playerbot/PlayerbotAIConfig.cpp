@@ -266,7 +266,7 @@ bool PlayerbotAIConfig::Initialize()
     asyncBotLogin = config.GetBoolDefault("AiPlayerbot.AsyncBotLogin", false);
     freeRoomForNonSpareBots = config.GetIntDefault("AiPlayerbot.FreeRoomForNonSpareBots", 1);
 
-    loginBotsNearPlayerRange = config.GetIntDefault("AiPlayerbot.LoginBotsNearPlayerRange", 0);
+    loginBotsNearPlayerRange = config.GetIntDefault("AiPlayerbot.LoginBotsNearPlayerRange", 1000);
     
     LoadListString<std::vector<std::string> >(config.GetStringDefault("AiPlayerbot.LoginCriteria", "classrace"), loginCriteria);
 

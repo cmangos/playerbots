@@ -493,10 +493,8 @@ LoginCriteria PlayerBotLoginMgr::GetLoginCriteria(const uint8 attempt) const
     
     ADD_CRITERIA(MAX_BOTS, space.totalSpace <= int(0));
 
-    if(attempt == 0)
-        ADD_CRITERIA(LOGOUT_NOK, info.GetLoginState() == LoginState::BOT_ONLINE && space.currentSpace > (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots);
-    else
-        ADD_CRITERIA(SPARE_ROOM, info.GetLoginState() == LoginState::BOT_OFFLINE && space.totalSpace <= (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots);
+    if (attempt > 0)
+       ADD_CRITERIA(SPARE_ROOM, info.GetLoginState() == LoginState::BOT_OFFLINE && space.totalSpace <= (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots);
 
     if (sPlayerbotAIConfig.randomBotTimedLogout)
         ADD_CRITERIA(RANDOM_TIMED_LOGOUT, info.GetLoginState() == LoginState::BOT_ONLINE && !sRandomPlayerbotMgr.GetValue(info.GetId(), "add"));
@@ -506,6 +504,7 @@ LoginCriteria PlayerBotLoginMgr::GetLoginCriteria(const uint8 attempt) const
 
     std::vector<std::string> configCriteria = sPlayerbotAIConfig.loginCriteria;
 
+    if(configCriteria.size() >= attempt)
     for (uint8 i = 0; i < std::min(uint8(configCriteria.size() - attempt), uint8(configCriteria.size())); i++)
     {
         if (configCriteria[i] == "classrace")
@@ -546,26 +545,48 @@ void PlayerBotLoginMgr::FillLoginSpace(LoginSpace& space, FillStep step)
     }   
 }
 
+bool PlayerBotLoginMgr::CriteriaStillValid(const LoginCriterionFailType oldFailType, const LoginCriteria& criteria) const
+{
+    switch (oldFailType) //These depends on previous bots accepted/rejected so need to be recalculated.
+    {
+    case LoginCriterionFailType::UNKNOWN:
+    case LoginCriterionFailType::MAX_BOTS:
+    case LoginCriterionFailType::SPARE_ROOM:
+    case LoginCriterionFailType::CLASSRACE:
+    case LoginCriterionFailType::LEVEL:
+        return false;
+    };
+
+    for (auto& [criterionfail, criterion] : criteria)
+        if (criterionfail == oldFailType)
+            return true;
+
+    return false;
+}
+
 void PlayerBotLoginMgr::FillLoginLogoutQueue()
 {
     LoginSpace loginSpace;
     FillLoginSpace(loginSpace, FillStep::NEXT_STEP);
 
-    std::unordered_map<uint8, std::unordered_map<LoginCriterionFailType, uint32>> loginFails;
+    std::unordered_map<uint32, LoginCriterionFailType> loginFails;
 
     std::vector<PlayerBotInfo*> logins, logouts;
 
-    for (uint8 attempt = 0; attempt < sPlayerbotAIConfig.loginCriteria.size(); attempt++)
+    for (uint8 attempt = 0; attempt <= sPlayerbotAIConfig.loginCriteria.size(); attempt++)
     {
         LoginCriteria criteria = GetLoginCriteria(attempt);
 
         for (auto& [guid, botInfo] : botPool)
         {
+            if (CriteriaStillValid(loginFails[guid], criteria))
+                continue;
+
             botInfo.EmptyLoginSpace(loginSpace, FillStep::NEXT_STEP); //Pretend the bot isn't logged in for a moment.
-            LoginCriterionFailType LoginFail = botInfo.MatchNoCriteria(loginSpace, criteria);
+            loginFails[guid] = botInfo.MatchNoCriteria(loginSpace, criteria);
             botInfo.FillLoginSpace(loginSpace, FillStep::NEXT_STEP);
 
-            bool wantedOnline = (LoginFail == LoginCriterionFailType::LOGIN_OK || LoginFail == LoginCriterionFailType::LOGOUT_NOK);
+            bool wantedOnline = (loginFails[guid] == LoginCriterionFailType::LOGIN_OK);
 
             if (wantedOnline)
             {
@@ -579,8 +600,6 @@ void PlayerBotLoginMgr::FillLoginLogoutQueue()
                     if (botInfo.QueueLogout(loginSpace))
                         logouts.push_back(&botInfo);
             }
-
-            loginFails[attempt][LoginFail]++;
 
             if (attempt > 0 && loginSpace.totalSpace < (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots)
                 loginSpace.totalSpace = 0;
@@ -597,14 +616,6 @@ void PlayerBotLoginMgr::FillLoginLogoutQueue()
 
     for (auto& login : logins)
         loginQueue.push(login);
-
-    for (auto& [attempt, fails] : loginFails)
-    {
-        for (auto& [fail, nr] : fails)
-        {
-            sLog.outDebug("PlayerbotLoginMgr attempt: %d fail %s: %d", attempt, failName.find(fail)->second.c_str(), nr);
-        }
-    }
 
     sLog.outDebug("PlayerbotLoginMgr: Queued to log in: %d, out: %d", uint32(loginQueue.size()), uint32(logoutQueue.size()));
 }

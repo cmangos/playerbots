@@ -61,25 +61,43 @@ uint32 PlayerBotInfo::GetLevel() const
     return (minRandomLevel + maxRandomLevel) / 2;
 }
 
-bool PlayerBotInfo::IsFarFromPlayer(const LoginSpace& space) const
+bool PlayerBotInfo::IsNearPlayer(const LoginSpace& space) const
 {
     if (space.realPlayerInfos.empty())
-        return true;
+        return false;
 
     if (isNew && sPlayerbotAIConfig.instantRandomize) //We do not know where the bot will be teleported to on randomisation. 
-        return false;
+        return true;
 
     for (auto& player : space.realPlayerInfos)
     {
         WorldPosition p(player.position);
         if (p.mapid == position.mapid && p.sqDistance(position) < sPlayerbotAIConfig.loginBotsNearPlayerRange * sPlayerbotAIConfig.loginBotsNearPlayerRange)
         {
-            return false;
+            return true;
         }
     }
 
-    return true;
+    return false;
 }
+
+bool PlayerBotInfo::IsOnPlayerMap(const LoginSpace& space) const
+{
+    if (space.realPlayerInfos.empty())
+        return false;
+
+    for (auto& player : space.realPlayerInfos)
+    {
+        WorldPosition p(player.position);
+        if (p.mapid == position.mapid)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 bool PlayerBotInfo::IsInPlayerGuild(const LoginSpace& space) const
 {
@@ -532,7 +550,9 @@ LoginCriteria PlayerBotLoginMgr::GetLoginCriteria(const uint8 attempt) const
         if (configCriteria[i] == "level")
             ADD_CRITERIA(LEVEL, space.classRaceBucket[info.GetLevel()] <= 0);
         if (configCriteria[i] == "range")
-            ADD_CRITERIA(RANGE, info.IsFarFromPlayer(space));
+            ADD_CRITERIA(RANGE, !info.IsNearPlayer(space));
+        if (configCriteria[i] == "map")
+            ADD_CRITERIA(GUILD, !info.IsOnPlayerMap(space));
         if (configCriteria[i] == "guild")
             ADD_CRITERIA(GUILD, !info.IsInPlayerGuild(space));
     }
@@ -626,6 +646,8 @@ void PlayerBotLoginMgr::FillLoginLogoutQueue()
             if (attempt > 0 && loginSpace.totalSpace < (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots)
                 loginSpace.totalSpace = 0;
         }
+
+        sLog.outError("PlayerbotLoginMgr: Attempt %d, space left %d", attempt, loginSpace.totalSpace);
 
         if (loginSpace.totalSpace <= 0)
             break;

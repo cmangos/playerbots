@@ -43,8 +43,9 @@ enum class LoginCriterionFailType : uint8
 	CLASSRACE = 6,
 	LEVEL = 7,
 	RANGE = 8,
-	GUILD = 9,
-	LOGIN_OK = 10
+	MAP = 9,
+	GUILD = 10,
+	LOGIN_OK = 11
 };
 
 static const std::unordered_map<LoginCriterionFailType, std::string> failName = {	
@@ -56,6 +57,7 @@ static const std::unordered_map<LoginCriterionFailType, std::string> failName = 
 	,{LoginCriterionFailType::CLASSRACE, "CLASSRACE"}
 	,{LoginCriterionFailType::LEVEL, "LEVEL"}
 	,{LoginCriterionFailType::RANGE , "RANGE"} 
+	,{LoginCriterionFailType::MAP , "MAP"}
 	,{LoginCriterionFailType::GUILD , "GUILD"}
     ,{LoginCriterionFailType::LOGIN_OK, "LOGIN_OK"} };
 
@@ -73,7 +75,8 @@ public:
 	uint8 GetRace() const { return race; }
 	uint8 GetClass() const { return cls; }
 	uint32 GetLevel() const;
-	bool IsFarFromPlayer(const LoginSpace& space) const;
+	bool IsNearPlayer(const LoginSpace& space) const;
+	bool IsOnPlayerMap(const LoginSpace& space) const;
 	bool IsInPlayerGuild(const LoginSpace& space) const;
 	LoginState GetLoginState() const { return loginState; }
 

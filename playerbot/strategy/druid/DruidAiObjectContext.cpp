@@ -469,6 +469,7 @@ namespace ai
                 creators["regrowth on party"] = &AiObjectContextInternal::regrowth_on_party;
                 creators["rejuvenation on party"] = &AiObjectContextInternal::rejuvenation_on_party;
                 creators["healing touch on party"] = &AiObjectContextInternal::healing_touch_on_party;
+                creators["nourish on party"] = &AiObjectContextInternal::nourish_on_party;
                 creators["rebirth"] = &AiObjectContextInternal::rebirth;
                 creators["revive"] = &AiObjectContextInternal::revive;
                 creators["barskin"] = &AiObjectContextInternal::barskin;
@@ -565,6 +566,7 @@ namespace ai
             static Action* regrowth_on_party(PlayerbotAI* ai) { return new CastRegrowthOnPartyAction(ai); }
             static Action* rejuvenation_on_party(PlayerbotAI* ai) { return new CastRejuvenationOnPartyAction(ai); }
             static Action* healing_touch_on_party(PlayerbotAI* ai) { return new CastHealingTouchOnPartyAction(ai); }
+            static Action* nourish_on_party(PlayerbotAI* ai) { return new CastNourishOnPartyAction(ai); }
             static Action* rebirth(PlayerbotAI* ai) { return new CastRebirthAction(ai); }
             static Action* revive(PlayerbotAI* ai) { return new CastReviveAction(ai); }
             static Action* barskin(PlayerbotAI* ai) { return new CastBarskinAction(ai); }

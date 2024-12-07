@@ -32,12 +32,8 @@ bool EntanglingRootsKiteTrigger::IsActive()
 
 bool ActiveHotTrigger::IsActive()
 {
-    Unit* target = GetTarget(); 
-    uint32 regrowth = AI_VALUE2(uint32, "spell id", "regrowth");
-    uint32 rejuvenation = AI_VALUE2(uint32, "spell id", "rejuvenation");
-    if (target && !(regrowth || rejuvenation))
-        return false;
-    return ai->HasAura("regrowth", target) || ai->HasAura("rejuvenation", target);
+    Unit* target = GetTarget();
+    return ai->HasAura("regrowth", target) || ai->HasAura("rejuvenation", target) || ai->HasAura("life bloom", target) || ai->HasAura("wild growth", target);
 }
 
 Value<Unit*>* LifebloomTankTrigger::GetTargetValue()

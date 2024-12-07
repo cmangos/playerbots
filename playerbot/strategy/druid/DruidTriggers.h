@@ -384,7 +384,7 @@ namespace ai
                 if (currentMana > 0)
                 {
                     const uint32 maxMana = target->GetMaxPower(POWER_MANA);
-                    const uint32 currentManaPct = (uint32)(currentMana / maxMana) * 100;
+                    const uint32 currentManaPct = static_cast<uint32>((static_cast<float>(currentMana) / maxMana) * 100);
                     return currentManaPct < sPlayerbotAIConfig.lowMana;
                 }
             }
@@ -419,7 +419,7 @@ namespace ai
 
     CAN_CAST_TRIGGER(ForceOfNatureTrigger, "force of nature");
     BOOST_TRIGGER(BerserkTrigger, "berserk");
-    BUFF_TRIGGER_A(ActiveHotTrigger, "regrowth");
+    CAN_CAST_TRIGGER_A(ActiveHotTrigger, "nourish");
 
     class SavageRoarTrigger : public ComboPointsAvailableTrigger
     {

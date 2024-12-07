@@ -31,7 +31,7 @@ public:
     PlayerbotHolder* GetPlayerbotHolder() { return playerbotHolder; }
 };
 
-PlayerBotInfo::PlayerBotInfo(const uint32 account, const uint32 guid, const uint8 race, const uint8 cls, const uint32 level, const bool isNew, const WorldPosition& position) : account(account), guid(guid), race(race), cls(cls), level(level), isNew(isNew), position(position)
+PlayerBotInfo::PlayerBotInfo(const uint32 account, const uint32 guid, const uint8 race, const uint8 cls, const uint32 level, const bool isNew, const WorldPosition& position, const uint32 guildId) : account(account), guid(guid), race(race), cls(cls), level(level), isNew(isNew), position(position), guildId(guildId)
 {
 
     holder = new PlayerbotLoginQueryHolder(&sRandomPlayerbotMgr, 0, account, guid);
@@ -44,6 +44,8 @@ PlayerBotInfo::PlayerBotInfo(const uint32 account, const uint32 guid, const uint
         return;
     }    
 }
+
+PlayerBotInfo::PlayerBotInfo(Player* player) : PlayerBotInfo(player->GetSession()->GetAccountId(), player->GetDbGuid(), player->getRace(), player->getClass(), player->GetLevel(), player->GetTotalPlayedTime() == 0, player, player->GetGuildId()) {};
 
 uint32 PlayerBotInfo::GetLevel() const
 {
@@ -61,14 +63,15 @@ uint32 PlayerBotInfo::GetLevel() const
 
 bool PlayerBotInfo::IsFarFromPlayer(const LoginSpace& space) const
 {
-    if (space.playerLocations.empty())
-        return false;
+    if (space.realPlayerInfos.empty())
+        return true;
 
     if (isNew && sPlayerbotAIConfig.instantRandomize) //We do not know where the bot will be teleported to on randomisation. 
         return false;
 
-    for (auto& p : space.playerLocations)
+    for (auto& player : space.realPlayerInfos)
     {
+        WorldPosition p(player.position);
         if (p.mapid == position.mapid && p.sqDistance(position) < sPlayerbotAIConfig.loginBotsNearPlayerRange * sPlayerbotAIConfig.loginBotsNearPlayerRange)
         {
             return false;
@@ -76,6 +79,22 @@ bool PlayerBotInfo::IsFarFromPlayer(const LoginSpace& space) const
     }
 
     return true;
+}
+
+bool PlayerBotInfo::IsInPlayerGuild(const LoginSpace& space) const
+{
+    if (space.realPlayerInfos.empty())
+        return false;
+
+    for (auto& player : space.realPlayerInfos)
+    {
+        if (player.guildId == guildId)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool PlayerBotInfo::SendHolder()
@@ -325,7 +344,7 @@ void PlayerBotLoginMgr::LoadBotsFromDb()
 
     sLog.outDebug("PlayerbotLoginMgr: %d accounts found.", uint32(accounts.size()));
 
-    result = CharacterDatabase.PQuery("SELECT account, guid, race, class, level, totaltime, map, position_x, position_y, position_z, orientation FROM characters");
+    result = CharacterDatabase.PQuery("SELECT account, guid, race, class, level, totaltime, map, position_x, position_y, position_z, orientation, (SELECT guildid FROM guild_member m WHERE m.guid = c.guid) guildId FROM characters c");
          
     do
     {
@@ -341,7 +360,8 @@ void PlayerBotLoginMgr::LoadBotsFromDb()
         uint32 level = fields[4].GetUInt32();
         bool isNew = sPlayerbotAIConfig.instantRandomize ? (fields[5].GetUInt32() == 0) : level == 1;
         WorldPosition position(fields[6].GetFloat(), fields[7].GetFloat(), fields[8].GetFloat(), fields[9].GetFloat(), fields[10].GetFloat());
-        botPool.insert(std::make_pair(guid, PlayerBotInfo(account, guid, race, cls, level, isNew, position)));;
+        uint32 guildId = fields[11].GetUInt32();
+        botPool.insert(std::make_pair(guid, PlayerBotInfo(account, guid, race, cls, level, isNew, position, guildId)));;
     } while (result->NextRow());
 
     sLog.outDebug("PlayerbotLoginMgr: %d bots found.", uint32(botPool.size()));
@@ -389,12 +409,12 @@ void PlayerBotLoginMgr::Update()
 
 void PlayerBotLoginMgr::SetPlayerLocations(std::map<uint32, Player*> players)
 {
-    std::vector<WorldPosition> positions;
+    std::vector<PlayerBotInfo> realPlayers;
     for (auto& [guid, player] : players)
-        positions.push_back(player);
+        realPlayers.push_back(player);
 
     playerMutex.lock();
-    playerLocations = positions;
+    realPlayerInfos = realPlayers;
     playerMutex.unlock();
 }
 
@@ -513,6 +533,8 @@ LoginCriteria PlayerBotLoginMgr::GetLoginCriteria(const uint8 attempt) const
             ADD_CRITERIA(LEVEL, space.classRaceBucket[info.GetLevel()] <= 0);
         if (configCriteria[i] == "range")
             ADD_CRITERIA(RANGE, info.IsFarFromPlayer(space));
+        if (configCriteria[i] == "guild")
+            ADD_CRITERIA(GUILD, !info.IsInPlayerGuild(space));
     }
 
     return criteria;
@@ -523,7 +545,7 @@ void PlayerBotLoginMgr::FillLoginSpace(LoginSpace& space, FillStep step)
     space.totalSpace = GetMaxOnlineBotCount();
     space.currentSpace = GetMaxOnlineBotCount();
     playerMutex.lock();
-    space.playerLocations = playerLocations;
+    space.realPlayerInfos = realPlayerInfos;
     playerMutex.unlock();
 
     for (uint32 level = 1; level <= GetMaxLevel(); ++level)

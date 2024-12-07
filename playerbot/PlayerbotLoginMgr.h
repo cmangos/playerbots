@@ -8,7 +8,7 @@ struct LoginSpace
 	int32 totalSpace;
 	int32 classRaceBucket[MAX_CLASSES][MAX_RACES];
 	int32 levelBucket[DEFAULT_MAX_LEVEL + 1];
-	std::vector<WorldPosition> playerLocations;
+	std::vector<PlayerBotInfo> realPlayerInfos;
 };
 
 enum class HolderState : uint8
@@ -43,6 +43,7 @@ enum class LoginCriterionFailType : uint8
 	CLASSRACE = 6,
 	LEVEL = 7,
 	RANGE = 8,
+	GUILD = 9,
 	LOGIN_OK = 10
 };
 
@@ -55,6 +56,7 @@ static const std::unordered_map<LoginCriterionFailType, std::string> failName = 
 	,{LoginCriterionFailType::CLASSRACE, "CLASSRACE"}
 	,{LoginCriterionFailType::LEVEL, "LEVEL"}
 	,{LoginCriterionFailType::RANGE , "RANGE"} 
+	,{LoginCriterionFailType::GUILD , "GUILD"}
     ,{LoginCriterionFailType::LOGIN_OK, "LOGIN_OK"} };
 
 typedef std::vector <std::pair<LoginCriterionFailType, std::function<bool(const PlayerBotInfo&, const LoginSpace&)>>> LoginCriteria;
@@ -62,7 +64,9 @@ typedef std::vector <std::pair<LoginCriterionFailType, std::function<bool(const 
 class PlayerBotInfo
 {
 public:
-	PlayerBotInfo(const uint32 account, const uint32 guid, const uint8 race, const uint8 cls, const uint32 level, const bool isNew, const WorldPosition& position);
+	PlayerBotInfo(const uint32 account, const uint32 guid, const uint8 race, const uint8 cls, const uint32 level, const bool isNew, const WorldPosition& position, const uint32 guildId);
+
+	PlayerBotInfo(Player* player);
 
 	ObjectGuid GetGuid() const { return ObjectGuid(HIGHGUID_PLAYER, guid); }
 	uint32 GetId() const { return guid; }
@@ -70,6 +74,7 @@ public:
 	uint8 GetClass() const { return cls; }
 	uint32 GetLevel() const;
 	bool IsFarFromPlayer(const LoginSpace& space) const;
+	bool IsInPlayerGuild(const LoginSpace& space) const;
 	LoginState GetLoginState() const { return loginState; }
 
 	bool SendHolder();
@@ -97,6 +102,7 @@ private:
 	uint32 level;
 	bool isNew = false;
 	WorldPosition position;
+	uint32 guildId;
 
 	SqlQueryHolder* holder;
 	HolderState holderState = HolderState::HOLDER_EMPTY;
@@ -137,7 +143,7 @@ private:
 	bool showSpace = false;
 
 	std::mutex playerMutex;
-	std::vector<WorldPosition> playerLocations;
+	std::vector<PlayerBotInfo> realPlayerInfos;
 
 	std::mutex loginMutex;
 	std::queue<PlayerBotInfo*> loginQueue;

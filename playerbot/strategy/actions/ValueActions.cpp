@@ -96,7 +96,7 @@ bool SetFocusHealTargetsAction::Execute(Event& event)
             {   
                 focusHealTargets.clear();
                 SET_AI_VALUE(std::list<ObjectGuid>, "focus heal targets", focusHealTargets);
-                ai->ChangeStrategy("-focus heal target", BotState::BOT_STATE_COMBAT);
+                ai->ChangeStrategy("-focus heal targets", BotState::BOT_STATE_COMBAT);
                 ai->TellPlayerNoFacing(requester, "Removed focus heal targets");
                 return true;
             }
@@ -167,7 +167,7 @@ bool SetFocusHealTargetsAction::Execute(Event& event)
 
                         if (focusHealTargets.empty())
                         {
-                            ai->ChangeStrategy("-focus heal target", BotState::BOT_STATE_COMBAT);
+                            ai->ChangeStrategy("-focus heal targets", BotState::BOT_STATE_COMBAT);
                         }
                         else
                         {

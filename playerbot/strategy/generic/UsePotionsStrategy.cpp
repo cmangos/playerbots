@@ -10,14 +10,11 @@ public:
     UsePotionsStrategyActionNodeFactory()
     {
         creators["healthstone"] = &healthstone;
-        creators["healing potion"] = &healing_potion;
         creators["dark rune"] = &dark_rune;
     }
 
 private:
     ACTION_NODE_A(healthstone, "healthstone", "healing potion");
-
-    ACTION_NODE_A(healing_potion, "healing potion", "use bandage");
 
     ACTION_NODE_A(dark_rune, "dark rune", "mana potion");
 };
@@ -41,7 +38,7 @@ void UsePotionsStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("use bandage", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("use bandage", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low mana",

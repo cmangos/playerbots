@@ -16,7 +16,13 @@ namespace ai
     CURE_PARTY_ACTION(CastDispelMagicOnPartyAction, "dispel magic", DISPEL_MAGIC);
     SPELL_ACTION(CastDispelMagicOnTargetAction, "dispel magic");
     CC_ACTION(CastShackleUndeadAction, "shackle undead");
-    SPELL_ACTION_U(CastManaBurnAction, "mana burn", AI_VALUE2(uint8, "mana", "self target") < 50 && AI_VALUE2(uint8, "mana", "current target") >= 20);
+    SPELL_ACTION_U(
+        CastManaBurnAction, 
+        "mana burn", 
+        AI_VALUE2(uint8, "mana", "self target") >= 15 
+            && AI_VALUE2(uint8, "mana", "current target") >= 5 
+            && AI_VALUE2(uint8, "health", "current target") >= 45
+    );
     BUFF_ACTION(CastLevitateAction, "levitate");
     BUFF_ACTION(CastDivineSpiritAction, "divine spirit");
     BUFF_PARTY_ACTION(CastDivineSpiritOnPartyAction, "divine spirit");

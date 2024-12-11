@@ -745,7 +745,9 @@ void DisciplinePriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("penance", ACTION_CRITICAL_HEAL + 1), NULL)));
+        NextAction::array(0, new NextAction("power word: shield", ACTION_CRITICAL_HEAL + 2),
+                             new NextAction("penance", ACTION_CRITICAL_HEAL + 1),
+                             new NextAction("flash heal", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
@@ -754,14 +756,26 @@ void DisciplinePriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
                              new NextAction("flash heal on party", ACTION_MEDIUM_HEAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("power word: shield", ACTION_MEDIUM_HEAL + 5),
+                             new NextAction("penance", ACTION_MEDIUM_HEAL + 4),
+                             new NextAction("flash heal", ACTION_MEDIUM_HEAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "binding heal",
+        NextAction::array(0, new NextAction("binding heal", ACTION_MEDIUM_HEAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "party member medium health",
         NextAction::array(0, new NextAction("power word: shield on party", ACTION_MEDIUM_HEAL + 2),
                              new NextAction("penance on party", ACTION_MEDIUM_HEAL + 1),
                              new NextAction("flash heal on party", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "low health",
-        NextAction::array(0, new NextAction("penance", ACTION_MEDIUM_HEAL + 1), NULL)));
+        "medium health",
+        NextAction::array(0, new NextAction("power word: shield", ACTION_MEDIUM_HEAL + 2),
+            new NextAction("penance", ACTION_MEDIUM_HEAL + 1),
+            new NextAction("flash heal", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",
@@ -769,13 +783,56 @@ void DisciplinePriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
                              new NextAction("renew on party", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "binding heal",
-        NextAction::array(0, new NextAction("binding heal", ACTION_LIGHT_HEAL), NULL)));
+        "almost full health",
+        NextAction::array(0, new NextAction("power word: shield", ACTION_LIGHT_HEAL + 1),
+            new NextAction("renew", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void DisciplinePriestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PriestStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("penance on party", ACTION_CRITICAL_HEAL + 1),
+            new NextAction("flash heal on party", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("penance", ACTION_CRITICAL_HEAL + 1),
+            new NextAction("flash heal", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0,  new NextAction("penance on party", ACTION_MEDIUM_HEAL + 4),
+            new NextAction("flash heal on party", ACTION_MEDIUM_HEAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("penance", ACTION_MEDIUM_HEAL + 4),
+            new NextAction("flash heal", ACTION_MEDIUM_HEAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "binding heal",
+        NextAction::array(0, new NextAction("binding heal", ACTION_MEDIUM_HEAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("penance on party", ACTION_MEDIUM_HEAL + 1),
+            new NextAction("flash heal on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("penance", ACTION_MEDIUM_HEAL + 1),
+            new NextAction("flash heal", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
+        NextAction::array(0, new NextAction("renew on party", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("renew", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void DisciplinePriestStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

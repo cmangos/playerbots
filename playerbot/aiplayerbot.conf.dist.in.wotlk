@@ -944,9 +944,30 @@ AiPlayerbot.PerfMonEnabled = 0
 
 # Enable the alternative asynchronous login system.
 # AiPlayerbot.AsyncBotLogin = 0
-# The login criteria to apply when trying to log in bots. options: classrace,level,range,map,guild
-# When trying to reach max bots it will drop the last criteria first. So if classrace,level only reaches 800/1000 bots it will try to get to 1000 only looking at classrace.
-# AiPlayerbot.LoginCriteria = classrace,guild
+
+# Dramatically speeds up initial and future bot logins but takes 2gb/1000 accounts and might prevent player login during the initial bot login period.
+# !!warning heavy db usage at start!!
+# AiPlayerbot.PreloadHolders = 0
+
+# The login criteria to apply when trying to log in bots. options: 
+# maxbots: Login bots trying to stay under the current maximum bot count.
+# spareroom: Login bots trying to keep spare room for better bots.
+# logoff: Login bots that are not slated to log off after being online for a configured amount of time.
+# offline: Login bots that are not slated to stay offline for a configured amount of time.
+# classrace: Login bots prefering to stick to class/race probabilities.
+# level: Login bots prefering to stick to level probabilities.
+# range: Login bots prefering to only log in bots inside the near player range.
+# map: Login bots trying to find bots on the same map as players.
+# guild: Login bots trying to find bots in the guild of online players.
+# 
+# How it works: Default criteria are always applied only bots must match all to login.
+# After this only bots matching 'all' criteria of the first line are logged in.
+# If there is still room 1 criteria of line 1 is dropped broadening the range allowing more bots in.
+# After only the last criteria of line 1 is tried it will move to all criteria of line 2. And so on.
+# AiPlayerbot.DefaultLoginCriteria1 = maxbots,spareroom,logoff,offline
+# AiPlayerbot.LoginCriteria.1 = guild
+# AiPlayerbot.LoginCriteria.2 = classrace,level
+
 # When bots are logged in that do not fully match all criteria selected it will do so up to xxx spaces below the maximum. Bots that suddenly match all the criteria will then have room to use this to log in.
 # AiPlayerbot.FreeRoomForNonSpareBots = 0
 

@@ -264,11 +264,27 @@ bool PlayerbotAIConfig::Initialize()
 
     randomBotLoginWithPlayer = config.GetBoolDefault("AiPlayerbot.RandomBotLoginWithPlayer", false);
     asyncBotLogin = config.GetBoolDefault("AiPlayerbot.AsyncBotLogin", false);
+    preloadHolders = config.GetBoolDefault("AiPlayerbot.PreloadHolders", false);
+    
     freeRoomForNonSpareBots = config.GetIntDefault("AiPlayerbot.FreeRoomForNonSpareBots", 1);
 
     loginBotsNearPlayerRange = config.GetIntDefault("AiPlayerbot.LoginBotsNearPlayerRange", 1000);
     
-    LoadListString<std::vector<std::string> >(config.GetStringDefault("AiPlayerbot.LoginCriteria", "classrace,guild"), loginCriteria);
+    LoadListString<std::vector<std::string> >(config.GetStringDefault("AiPlayerbot.DefaultLoginCriteria", "maxbots,spareroom,logoff,offline"), defaultLoginCriteria);
+
+    std::vector<std::string> criteriaValues = configA->GetValues("AiPlayerbot.LoginCriteria");
+    for (auto& value : criteriaValues)
+    {
+        loginCriteria.push_back({});
+        LoadListString<std::vector<std::string> >(config.GetStringDefault(value, ""), loginCriteria.back());
+    }
+
+    if (criteriaValues.empty())
+    {
+        loginCriteria.push_back({"guild"});
+        loginCriteria.push_back({"classrace,level"});
+    }
+    
 
     for (uint32 level = 1; level <= DEFAULT_MAX_LEVEL; ++level)
     {
@@ -764,12 +780,6 @@ bool PlayerbotAIConfig::Initialize()
 
     if (sPlayerbotAIConfig.randomBotJoinBG)
         sRandomPlayerbotMgr.LoadBattleMastersCache();
-
-    if (sPlayerbotAIConfig.asyncBotLogin)
-    {
-        std::thread t([] {sPlayerBotLoginMgr.LoadBotsFromDb(); });
-        t.detach();
-    }
 
     sLog.outString("---------------------------------------");
     sLog.outString("        AI Playerbot initialized       ");

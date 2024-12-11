@@ -1045,36 +1045,39 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
     ExternalEventHelper helper(aiObjectContext);
 
     // chat replies
-    std::list<ChatQueuedReply> delayedResponses;
+    std::vector<ChatQueuedReply> delayedResponses;
+
     while (!chatReplies.empty())
     {
-        ChatQueuedReply holder = chatReplies.front();
+        ChatQueuedReply holder = std::move(chatReplies.front());
+        chatReplies.pop();
+
         time_t checkTime = holder.m_time;
         if (checkTime && time(0) < checkTime)
         {
-            delayedResponses.push_back(holder);
-            chatReplies.pop();
+            delayedResponses.push_back(std::move(holder));
             continue;
         }
 
         // Ensure bot is valid before replying
-        if (bot) {
+        if (bot)
+        {
             ChatReplyAction::ChatReplyDo(bot, holder.m_type, holder.m_guid1, holder.m_guid2, holder.m_msg, holder.m_chanName, holder.m_name);
         }
-        chatReplies.pop();
     }
 
-
-    for (std::list<ChatQueuedReply>::iterator i = delayedResponses.begin(); i != delayedResponses.end(); ++i)
+    // Re-queue delayed responses
+    for (auto& response : delayedResponses)
     {
-        chatReplies.push(*i);
+        chatReplies.push(std::move(response));
     }
 
     // logout if logout timer is ready or if instant logout is possible
     if (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut())
     {
         WorldSession* botWorldSessionPtr = bot->GetSession();
-        if (botWorldSessionPtr) {
+        if (botWorldSessionPtr)
+        {
             bool logout = botWorldSessionPtr->ShouldLogOut(time(nullptr));
             if (!master || master->GetSession()->GetState() != WORLD_SESSION_STATE_READY)
                 logout = true;
@@ -1114,7 +1117,7 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
     masterIncomingPacketHandlers.Handle(helper);
     masterOutgoingPacketHandlers.Handle(helper);
 
-	DoNextAction(minimal);
+    DoNextAction(minimal);
 }
 
 void PlayerbotAI::HandleTeleportAck()

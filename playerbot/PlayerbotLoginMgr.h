@@ -59,7 +59,7 @@ enum class LoginCriterionFailType : uint8
 	LOGIN_OK
 };
 
-static const std::unordered_map<LoginCriterionFailType, std::string> failName = {	
+static std::unordered_map<LoginCriterionFailType, std::string> failName = {	
  	 {LoginCriterionFailType::UNKNOWN, "UNKNOWN"}
     ,{LoginCriterionFailType::MAX_BOTS, "MAX_BOTS"}
 	,{LoginCriterionFailType::SPARE_ROOM, "SPARE_ROOM"}
@@ -138,7 +138,7 @@ class PlayerBotLoginMgr
 {
 public:	
 	void Update(RealPlayers& realPlayers);
-	
+	void ToggleDebug() {debug = !debug;}
 private:
 	static BotPool LoadBotsFromDb();
 	void UpdateOnlineBots();
@@ -163,6 +163,7 @@ private:
 	std::future<BotInfos> futureQueue;
 	std::future<BotPool> futurePool;
 
+	bool debug = false;
 	BotInfos onlineBots;
 	BotPool botPool;
 };

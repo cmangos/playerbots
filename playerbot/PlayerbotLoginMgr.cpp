@@ -631,7 +631,8 @@ BotInfos PlayerBotLoginMgr::FillLoginLogoutQueue(BotPool* pool, const RealPlayer
     std::unordered_map<uint32, LoginCriterionFailType> loginFails;
     std::set<PlayerLoginInfo*> potentialQueue;
 
-    //sLog.outError("PlayerbotLoginMgr: Initial space %d", loginSpace.totalSpace);
+    if(sPlayerBotLoginMgr.debug)
+        sLog.outError("PlayerbotLoginMgr: Initial space %d", loginSpace.totalSpace);
 
     for (uint8 attempt = 0; attempt <= GetLoginCriteriaSize(); attempt++)
     {
@@ -662,7 +663,15 @@ BotInfos PlayerBotLoginMgr::FillLoginLogoutQueue(BotPool* pool, const RealPlayer
             }
         }
 
-        //sLog.outError("PlayerbotLoginMgr: Attempt %d, space left %d", attempt, loginSpace.totalSpace);
+        if (sPlayerBotLoginMgr.debug)
+        {
+            std::string variableCriteria;
+            for (auto& crit : GetVariableLoginCriteria(attempt))
+                variableCriteria += crit + ",";
+            if (!variableCriteria.empty())
+                variableCriteria.pop_back();
+            sLog.outError("PlayerbotLoginMgr: Attempt %d (%s), space left %d", attempt, variableCriteria.c_str(), loginSpace.totalSpace);
+        }
 
         if (loginSpace.totalSpace <= 0)
             break;
@@ -700,7 +709,8 @@ BotInfos PlayerBotLoginMgr::FillLoginLogoutQueue(BotPool* pool, const RealPlayer
             logouts++;
         }
 
-    //sLog.outError("PlayerbotLoginMgr: Queued to log in: %d, out: %d", logins, logouts);
+    if (sPlayerBotLoginMgr.debug)
+        sLog.outError("PlayerbotLoginMgr: Queued to log in: %d, out: %d", logins, logouts);
 
     if(!sPlayerbotAIConfig.preloadHolders)
         SendHolders(queue);

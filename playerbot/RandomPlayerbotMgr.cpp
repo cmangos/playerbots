@@ -3122,6 +3122,12 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         return true;
     }
 
+    if (cmd.find("login debug") == 0)
+    {
+        sPlayerBotLoginMgr.ToggleDebug();
+        return true;
+    }
+
     std::map<std::string, ConsoleCommandHandler> handlers;
     handlers["init"] = &RandomPlayerbotMgr::RandomizeFirst;
     handlers["upgrade"] = &RandomPlayerbotMgr::UpdateGearSpells;

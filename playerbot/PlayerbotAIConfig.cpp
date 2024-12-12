@@ -273,6 +273,8 @@ bool PlayerbotAIConfig::Initialize()
     LoadListString<std::vector<std::string> >(config.GetStringDefault("AiPlayerbot.DefaultLoginCriteria", "maxbots,spareroom,offline"), defaultLoginCriteria);
 
     std::vector<std::string> criteriaValues = configA->GetValues("AiPlayerbot.LoginCriteria");
+    std::sort(criteriaValues.begin(), criteriaValues.end());
+    loginCriteria.clear();
     for (auto& value : criteriaValues)
     {
         loginCriteria.push_back({});

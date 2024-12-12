@@ -488,40 +488,15 @@ void PlayerBotLoginMgr::UpdateOnlineBots()
 
 uint32 PlayerBotLoginMgr::GetLoginCriteriaSize()
 {
-    uint32 critiaAmount = 0;
-    for (auto& criteria : sPlayerbotAIConfig.loginCriteria)
-        critiaAmount += criteria.size();
-    return critiaAmount;
+    return sPlayerbotAIConfig.loginCriteria.size();
 }
 
 std::vector<std::string> PlayerBotLoginMgr::GetVariableLoginCriteria(const uint8 attempt)
 {
-    if (sPlayerbotAIConfig.loginCriteria.empty()) {
+    if (sPlayerbotAIConfig.loginCriteria.empty() || attempt >= sPlayerbotAIConfig.loginCriteria.size())
         return {};
-    }
 
-    std::vector<std::vector<std::string>> fullList = sPlayerbotAIConfig.loginCriteria;
-
-    int index = 0;
-    int iteration = attempt;
-    while (iteration >= 0 && index < fullList.size()) {
-        if (fullList[index].empty()) {
-            ++index;
-            continue;
-        }
-
-        if (iteration < fullList[index].size()) {
-            std::vector<std::string> result = fullList[index];
-            result.erase(result.end() - iteration, result.end());
-            return result;
-        }
-        else {
-            iteration -= fullList[index].size(); 
-            ++index;
-        }
-    }
-
-    return {};
+    return sPlayerbotAIConfig.loginCriteria[attempt];
 }
 
 LoginCriteria PlayerBotLoginMgr::GetLoginCriteria(const uint8 attempt)

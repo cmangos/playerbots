@@ -1027,8 +1027,8 @@ AiPlayerbot.PerfMonEnabled = 0
 # 
 # How it works: All bots are evaluated based on configurd criteria wether they should be online of offline.
 # The default criteria must all be true or the bot will be logged off and can not log in.
-# Each line works as an AND construction where the back criteria are dropped to find more bots to log in.
-# Example classrace,level means it tries to find all bots to properly maintain the level and classrace probabilties and if it needs more bots it only looks at classrace.
+# Each line works as an AND construction where all criteria must be met. Note they are alphabetically sorted so use 01,02 for more than 9 lines.
+# Example logoff,classrace,level,online means a bot needs to have room in available level and classrace brackets, be online and not be slated to log off.
 # The multiple lines work as an OR construction where the top lines are used first and as more bots are needed it moves down.
 # Example 1 = group, 2 = bg. First it tries to login all bots in player groups, then as more bots are needed it looks for bots that might be online inside battlegrounds.
 # 
@@ -1037,7 +1037,9 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.LoginCriteria.2 = bg
 # AiPlayerbot.LoginCriteria.3 = arena
 # AiPlayerbot.LoginCriteria.4 = guild
-# AiPlayerbot.LoginCriteria.5 = classrace,level,logoff
+# AiPlayerbot.LoginCriteria.5 = logoff,classrace,level,online
+# AiPlayerbot.LoginCriteria.6 = logoff,classrace,level
+# AiPlayerbot.LoginCriteria.7 = logoff,classrace
 
 # When bots are logged in that do not fully match all criteria selected it will do so up to xxx spaces below the maximum. Bots that suddenly match all the criteria will then have room to use this to log in.
 # AiPlayerbot.FreeRoomForNonSpareBots = 0

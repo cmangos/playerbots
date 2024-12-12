@@ -287,7 +287,9 @@ bool PlayerbotAIConfig::Initialize()
         loginCriteria.push_back({ "arena" });
         loginCriteria.push_back({ "bg" });
         loginCriteria.push_back({ "guild" });
-        loginCriteria.push_back({ "classrace,level,logoff" });
+        loginCriteria.push_back({ "logoff,classrace,level,online" });
+        loginCriteria.push_back({ "logoff,classrace,level" });
+        loginCriteria.push_back({ "logoff,classrace" });
     }
     
 

@@ -51,6 +51,7 @@ enum class LoginCriterionFailType : uint8
 	LEVEL,
 	RANGE,
 	MAP,
+	GROUP,
 	GUILD,
 	BG,
 	ARENA,
@@ -70,6 +71,7 @@ static const std::unordered_map<LoginCriterionFailType, std::string> failName = 
 	,{LoginCriterionFailType::RANGE , "RANGE"} 
 	,{LoginCriterionFailType::MAP , "MAP"}
 	,{LoginCriterionFailType::GUILD , "GUILD"}
+	,{LoginCriterionFailType::GROUP , "GROUP"}
 	,{LoginCriterionFailType::BG , "BG"}
 	,{LoginCriterionFailType::ARENA , "ARENA"}
 	,{LoginCriterionFailType::INSTANCE , "INSTANCE"}

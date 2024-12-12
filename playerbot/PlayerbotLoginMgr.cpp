@@ -560,6 +560,8 @@ LoginCriteria PlayerBotLoginMgr::GetLoginCriteria(const uint8 attempt)
             ADD_KEEP_CRITERIA(MAP, info.IsOnPlayerMap(space));
         if (criterion == "guild")
             ADD_KEEP_CRITERIA(GUILD, info.IsInPlayerGuild(space));
+        if (criterion == "group")
+            ADD_KEEP_CRITERIA(GROUP, info.IsInPlayerGroup(space));
     }
 
     return criteria;

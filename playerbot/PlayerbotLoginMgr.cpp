@@ -52,7 +52,7 @@ uint32 PlayerLoginInfo::GetLevel() const
 bool PlayerLoginInfo::IsNearPlayer(const LoginSpace& space) const
 {
     if (space.realPlayerInfos.empty())
-        return true;
+        return false;
 
     if (isNew && sPlayerbotAIConfig.instantRandomize) //We do not know where the bot will be teleported to on randomisation. 
         return true;
@@ -72,7 +72,7 @@ bool PlayerLoginInfo::IsNearPlayer(const LoginSpace& space) const
 bool PlayerLoginInfo::IsOnPlayerMap(const LoginSpace& space) const
 {
     if (space.realPlayerInfos.empty())
-        return true;
+        return false;
 
     for (auto& player : space.realPlayerInfos)
     {
@@ -89,7 +89,7 @@ bool PlayerLoginInfo::IsOnPlayerMap(const LoginSpace& space) const
 bool PlayerLoginInfo::IsInPlayerGroup(const LoginSpace& space) const
 {
     if (space.realPlayerInfos.empty())
-        return true;
+        return false;
 
     if (!groupId)
         return false;
@@ -108,7 +108,7 @@ bool PlayerLoginInfo::IsInPlayerGroup(const LoginSpace& space) const
 bool PlayerLoginInfo::IsInPlayerGuild(const LoginSpace& space) const
 {
     if (space.realPlayerInfos.empty())
-        return true;
+        return false;
 
     for (auto& player : space.realPlayerInfos)
     {
@@ -133,7 +133,7 @@ bool PlayerLoginInfo::IsInArena() const
 
 bool PlayerLoginInfo::IsInInstance() const
 {
-    return !position.isOverworld() && !position.isBg() && position.isArena();
+    return !position.isOverworld() && !position.isBg() && !position.isArena();
 }
 
 bool PlayerLoginInfo::SendHolder()

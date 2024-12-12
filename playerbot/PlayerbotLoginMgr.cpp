@@ -86,6 +86,25 @@ bool PlayerLoginInfo::IsOnPlayerMap(const LoginSpace& space) const
     return false;
 }
 
+bool PlayerLoginInfo::IsInPlayerGroup(const LoginSpace& space) const
+{
+    if (space.realPlayerInfos.empty())
+        return true;
+
+    if (!groupId)
+        return false;
+
+    for (auto& player : space.realPlayerInfos)
+    {
+        if (player.groupId == groupId)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool PlayerLoginInfo::IsInPlayerGuild(const LoginSpace& space) const
 {
     if (space.realPlayerInfos.empty())
@@ -100,6 +119,21 @@ bool PlayerLoginInfo::IsInPlayerGuild(const LoginSpace& space) const
     }
 
     return false;
+}
+
+bool PlayerLoginInfo::IsInBG() const
+{
+    return position.isBg();
+}
+
+bool PlayerLoginInfo::IsInArena() const
+{
+    return position.isArena();
+}
+
+bool PlayerLoginInfo::IsInInstance() const
+{
+    return !position.isOverworld() && !position.isBg() && position.isArena();
 }
 
 bool PlayerLoginInfo::SendHolder()
@@ -245,6 +279,8 @@ void PlayerLoginInfo::Update(Player* player)
     level = player->GetLevel();
     position = WorldPosition(player);
     isNew = ((level > 1) ? false : (player->GetTotalPlayedTime() == 0));
+    groupId = player->GetGroup() ? player->GetGroup()->GetId() : 0;
+    guildId = player->GetGuildId();
 }
 
 bool PlayerLoginInfo::LoginBot()
@@ -333,13 +369,15 @@ T GetFuture(Method&& method, std::future<T>& fut, bool restart, Args&&... args) 
 
 void PlayerBotLoginMgr::Update(RealPlayers& realPlayers)
 {
+    UpdateOnlineBots();
+
     if (botPool.empty())
     {
         botPool = GetFuture(LoadBotsFromDb, futurePool, false);  
         return;
     }
 
-    LoginoutQueue queue = GetFuture(FillLoginLogoutQueue, futureQueue, true, &botPool, realPlayers);
+    BotInfos queue = GetFuture(FillLoginLogoutQueue, futureQueue, true, &botPool, realPlayers);
 
     if (!queue.empty())
     {
@@ -411,7 +449,7 @@ BotPool PlayerBotLoginMgr::LoadBotsFromDb()
     return botPool;
 }
 
-void PlayerBotLoginMgr::SendHolders(const LoginoutQueue& queue)
+void PlayerBotLoginMgr::SendHolders(const BotInfos& queue)
 {  
     CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "select 1 from dual");
 
@@ -435,7 +473,18 @@ void PlayerBotLoginMgr::SendHolders(BotPool* pool)
     }
 }
 
+void PlayerBotLoginMgr::UpdateOnlineBots()
+{
+    for (auto& info : onlineBots)
+    {
+        Player* player = info->GetPlayer();
+        if(player)
+            info->Update(player);
+    }
+}
+
 #define ADD_CRITERIA(type, condition) criteria.push_back(std::make_pair(LoginCriterionFailType::type, []( const PlayerLoginInfo& info, const LoginSpace& space) {return condition;}))
+#define ADD_KEEP_CRITERIA(type, condition) criteria.push_back(std::make_pair(LoginCriterionFailType::type, []( const PlayerLoginInfo& info, const LoginSpace& space) {return !(condition);}))
 
 uint32 PlayerBotLoginMgr::GetLoginCriteriaSize()
 {
@@ -475,39 +524,42 @@ std::vector<std::string> PlayerBotLoginMgr::GetVariableLoginCriteria(const uint8
     return {};
 }
 
-
 LoginCriteria PlayerBotLoginMgr::GetLoginCriteria(const uint8 attempt)
 {
     LoginCriteria criteria;
 
-    std::vector<std::string> defaultCriteria = sPlayerbotAIConfig.defaultLoginCriteria;
-
-    for (uint8 i = 0; i < defaultCriteria.size(); i++)
-    {
-        if (defaultCriteria[i] == "maxbots")
-            ADD_CRITERIA(MAX_BOTS, space.totalSpace <= int(0));
-        if (defaultCriteria[i] == "spareroom" && attempt > 0)
-            ADD_CRITERIA(SPARE_ROOM, space.totalSpace <= (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots);
-        if (defaultCriteria[i] == "logoff")
-            ADD_CRITERIA(RANDOM_TIMED_LOGOUT, info.GetLoginState() == LoginState::BOT_ONLINE && !sRandomPlayerbotMgr.GetValue(info.GetId(), "add"));
-        if (defaultCriteria[i] == "offline")
-            ADD_CRITERIA(RANDOM_TIMED_OFFLINE, info.GetLoginState() == LoginState::BOT_OFFLINE && sRandomPlayerbotMgr.GetValue(info.GetId(), "logout"));
-    }
-
-    std::vector<std::string> configCriteria = GetVariableLoginCriteria(attempt);
+    std::vector<std::string> configCriteria = sPlayerbotAIConfig.defaultLoginCriteria;
+    std::vector<std::string> attemptCriteria = GetVariableLoginCriteria(attempt);
+    configCriteria.insert(configCriteria.end(), attemptCriteria.begin(), attemptCriteria.end());
 
     for (auto& criterion : configCriteria)
     {
+        if (criterion == "maxbots")
+            ADD_CRITERIA(MAX_BOTS, space.totalSpace <= int(0));
+        if (criterion == "spareroom" && attempt > 0)
+            ADD_CRITERIA(SPARE_ROOM, space.totalSpace <= (int32)sPlayerbotAIConfig.freeRoomForNonSpareBots);
+        if (criterion == "online")
+            ADD_KEEP_CRITERIA(ONLINE, info.IsOnline());
+        if (criterion == "logoff" && sPlayerbotAIConfig.randomBotTimedLogout)
+            ADD_CRITERIA(RANDOM_TIMED_LOGOUT, info.IsOnline() && !sRandomPlayerbotMgr.GetValue(info.GetId(), "add"));
+        if (criterion == "offline" && sPlayerbotAIConfig.randomBotTimedOffline)
+            ADD_CRITERIA(RANDOM_TIMED_OFFLINE, !info.IsOnline() && sRandomPlayerbotMgr.GetValue(info.GetId(), "logout"));
+        if (criterion == "bg")
+            ADD_KEEP_CRITERIA(BG, info.IsOnline() && info.IsInBG());
+        if (criterion == "arena")
+            ADD_KEEP_CRITERIA(ARENA, info.IsOnline() && info.IsInArena());
+        if (criterion == "instance")
+            ADD_KEEP_CRITERIA(INSTANCE, info.IsOnline() && info.IsInInstance());
         if (criterion == "classrace")
             ADD_CRITERIA(CLASSRACE, space.classRaceBucket[info.GetClass()][info.GetRace()] <= 0);
         if (criterion == "level")
             ADD_CRITERIA(LEVEL, space.levelBucket[info.GetLevel()] <= 0);
         if (criterion == "range")
-            ADD_CRITERIA(RANGE, !info.IsNearPlayer(space));
+            ADD_KEEP_CRITERIA(RANGE, info.IsNearPlayer(space));
         if (criterion == "map")
-            ADD_CRITERIA(MAP, !info.IsOnPlayerMap(space));
+            ADD_KEEP_CRITERIA(MAP, info.IsOnPlayerMap(space));
         if (criterion == "guild")
-            ADD_CRITERIA(GUILD, !info.IsInPlayerGuild(space));
+            ADD_KEEP_CRITERIA(GUILD, info.IsInPlayerGuild(space));
     }
 
     return criteria;
@@ -568,7 +620,7 @@ bool PlayerBotLoginMgr::CriteriaStillValid(const LoginCriterionFailType oldFailT
     return false;
 }
 
-LoginoutQueue PlayerBotLoginMgr::FillLoginLogoutQueue(BotPool* pool, const RealPlayers& realPlayers)
+BotInfos PlayerBotLoginMgr::FillLoginLogoutQueue(BotPool* pool, const RealPlayers& realPlayers)
 {
     LoginSpace loginSpace;
     loginSpace.realPlayerInfos = GetPlayerInfos(realPlayers);
@@ -614,7 +666,7 @@ LoginoutQueue PlayerBotLoginMgr::FillLoginLogoutQueue(BotPool* pool, const RealP
             break;
     }
 
-    LoginoutQueue queue;
+    BotInfos queue;
     uint32 logins = 0;
 
     for (auto& info : potentialQueue)
@@ -656,12 +708,18 @@ LoginoutQueue PlayerBotLoginMgr::FillLoginLogoutQueue(BotPool* pool, const RealP
     return queue;
 }
 
-void PlayerBotLoginMgr::LoginLogoutBots(const LoginoutQueue& queue) const
+void PlayerBotLoginMgr::LoginLogoutBots(const BotInfos& queue)
 {
     for (auto& info : queue)
     {        
-       info->LoginBot();
-       info->LogoutBot();
+        if (info->LoginBot())
+        {
+            onlineBots.push_back(info);
+        }
+        if (info->LogoutBot())
+        {
+            onlineBots.erase(std::remove(onlineBots.begin(), onlineBots.end(), info), onlineBots.end());
+        }
     }
 }
 

@@ -270,7 +270,7 @@ bool PlayerbotAIConfig::Initialize()
 
     loginBotsNearPlayerRange = config.GetIntDefault("AiPlayerbot.LoginBotsNearPlayerRange", 1000);
     
-    LoadListString<std::vector<std::string> >(config.GetStringDefault("AiPlayerbot.DefaultLoginCriteria", "maxbots,spareroom,logoff,offline"), defaultLoginCriteria);
+    LoadListString<std::vector<std::string> >(config.GetStringDefault("AiPlayerbot.DefaultLoginCriteria", "maxbots,spareroom,offline"), defaultLoginCriteria);
 
     std::vector<std::string> criteriaValues = configA->GetValues("AiPlayerbot.LoginCriteria");
     for (auto& value : criteriaValues)
@@ -281,8 +281,11 @@ bool PlayerbotAIConfig::Initialize()
 
     if (criteriaValues.empty())
     {
-        loginCriteria.push_back({"guild"});
-        loginCriteria.push_back({"classrace,level"});
+        loginCriteria.push_back({ "group" });
+        loginCriteria.push_back({ "arena" });
+        loginCriteria.push_back({ "bg" });
+        loginCriteria.push_back({ "guild" });
+        loginCriteria.push_back({ "classrace,level,logoff" });
     }
     
 

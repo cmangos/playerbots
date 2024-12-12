@@ -6,7 +6,7 @@ class PlayerLoginInfo;
 
 typedef std::map<uint32, PlayerLoginInfo> BotPool;
 typedef std::vector<PlayerLoginInfo> RealPlayerInfos;
-typedef std::vector<PlayerLoginInfo*> LoginoutQueue;
+typedef std::vector<PlayerLoginInfo*> BotInfos;
 
 struct LoginSpace
 {
@@ -42,22 +42,27 @@ enum class FillStep : uint8
 enum class LoginCriterionFailType : uint8
 {
 	UNKNOWN = 0,
-	MAX_BOTS = 2,
-	SPARE_ROOM = 3,
-	RANDOM_TIMED_LOGOUT = 4,
-	RANDOM_TIMED_OFFLINE = 5,
-	CLASSRACE = 6,
-	LEVEL = 7,
-	RANGE = 8,
-	MAP = 9,
-	GUILD = 10,
-	LOGIN_OK = 11
+	MAX_BOTS = 1,
+	SPARE_ROOM,
+	ONLINE,
+	RANDOM_TIMED_LOGOUT,
+	RANDOM_TIMED_OFFLINE,
+	CLASSRACE,
+	LEVEL,
+	RANGE,
+	MAP,
+	GUILD,
+	BG,
+	ARENA,
+	INSTANCE,
+	LOGIN_OK
 };
 
 static const std::unordered_map<LoginCriterionFailType, std::string> failName = {	
  	 {LoginCriterionFailType::UNKNOWN, "UNKNOWN"}
     ,{LoginCriterionFailType::MAX_BOTS, "MAX_BOTS"}
 	,{LoginCriterionFailType::SPARE_ROOM, "SPARE_ROOM"}
+	,{LoginCriterionFailType::ONLINE, "ONLINE"}
 	,{LoginCriterionFailType::RANDOM_TIMED_LOGOUT, "RANDOM_TIMED_LOGOUT"}
 	,{LoginCriterionFailType::RANDOM_TIMED_OFFLINE , "RANDOM_TIMED_OFFLINE"}
 	,{LoginCriterionFailType::CLASSRACE, "CLASSRACE"}
@@ -65,6 +70,9 @@ static const std::unordered_map<LoginCriterionFailType, std::string> failName = 
 	,{LoginCriterionFailType::RANGE , "RANGE"} 
 	,{LoginCriterionFailType::MAP , "MAP"}
 	,{LoginCriterionFailType::GUILD , "GUILD"}
+	,{LoginCriterionFailType::BG , "BG"}
+	,{LoginCriterionFailType::ARENA , "ARENA"}
+	,{LoginCriterionFailType::INSTANCE , "INSTANCE"}
     ,{LoginCriterionFailType::LOGIN_OK, "LOGIN_OK"} };
 
 typedef std::vector <std::pair<LoginCriterionFailType, std::function<bool(const PlayerLoginInfo&, const LoginSpace&)>>> LoginCriteria;
@@ -84,7 +92,12 @@ public:
 	Player* GetPlayer() const { return sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, guid), false); }
 	bool IsNearPlayer(const LoginSpace& space) const;
 	bool IsOnPlayerMap(const LoginSpace& space) const;
+	bool IsInPlayerGroup(const LoginSpace& space) const;
 	bool IsInPlayerGuild(const LoginSpace& space) const;
+	bool IsInBG() const;
+	bool IsInArena() const;
+	bool IsInInstance() const;
+	bool IsOnline() const { return loginState == LoginState::BOT_ONLINE || loginState == LoginState::BOT_ON_LOGOUTQUEUE; }
 	LoginState GetLoginState() const { return loginState; }
 
 	bool SendHolder();
@@ -111,6 +124,7 @@ private:
 	uint32 level;
 	bool isNew = false;
 	WorldPosition position;
+	uint32 groupId;
 	uint32 guildId;
 
 	SqlQueryHolder* holder = nullptr;
@@ -125,8 +139,9 @@ public:
 	
 private:
 	static BotPool LoadBotsFromDb();
-	static LoginoutQueue FillLoginLogoutQueue(BotPool* pool, const RealPlayers& realPlayers);
-	void LoginLogoutBots(const LoginoutQueue& queue) const;
+	void UpdateOnlineBots();
+	static BotInfos FillLoginLogoutQueue(BotPool* pool, const RealPlayers& realPlayers);
+	void LoginLogoutBots(const BotInfos& queue);
 
 	static RealPlayerInfos GetPlayerInfos(const RealPlayers& realPlayers);
 	static uint32 GetLoginCriteriaSize();
@@ -140,12 +155,13 @@ private:
 	static uint32 GetLevelBucketSize(uint32 level);
 	static void FillLoginSpace(BotPool* pool, LoginSpace& space, FillStep step);
 
-	static void SendHolders(const LoginoutQueue& queue);
+	static void SendHolders(const BotInfos& queue);
 	static void SendHolders(BotPool* pool);
 
-	std::future<LoginoutQueue> futureQueue;
+	std::future<BotInfos> futureQueue;
 	std::future<BotPool> futurePool;
 
+	BotInfos onlineBots;
 	BotPool botPool;
 };
 

@@ -35,10 +35,10 @@ bool AutoLearnSpellAction::Execute(Event& event)
 void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
 {
     BroadcastHelper::BroadcastLevelup(ai, bot);
-
+    
     if (sPlayerbotAIConfig.autoLearnTrainerSpells)
         LearnTrainerSpells(out);
-
+    
     if (sPlayerbotAIConfig.autoLearnQuestSpells)
         LearnQuestSpells(out);
 
@@ -120,7 +120,7 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
 
             }
 
-            LearnSpell(tSpell->spell, out);
+            LearnSpellFromSpell(tSpell->spell, out);
         }
     }
 }
@@ -142,14 +142,20 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
             !bot->SatisfyQuestRace(quest, false))
             continue;
 
-        if (quest->GetRewSpellCast() > 0)
+        if (quest->GetRewSpellCast() > 0 && 
+            quest->GetRewSpellCast() != 12510) // Prevents mages from learning the Teleport to Azushara Tower spell.
         {
-            if(LearnSpell(quest->GetRewSpellCast(), out))
+            if (LearnSpellFromSpell(quest->GetRewSpellCast(), out))
                 GetClassQuestItem(quest, out);
+            // For some reason the shaman quest Call of the air has a GetRewSpellCast spell but the spell id is actually the 
+            // spell the that is supposed to be learned.
+            else if (quest->GetRewSpellCast() == 8385)
+                if (LearnSpell(quest->GetRewSpellCast(), out))
+                    GetClassQuestItem(quest, out);
         }
         else if (quest->GetRewSpell() > 0)
         {
-            if(LearnSpell(quest->GetRewSpell(), out))
+            if (LearnSpell(quest->GetRewSpell(), out))
                 GetClassQuestItem(quest, out);
         }
     }
@@ -163,7 +169,7 @@ void AutoLearnSpellAction::GetClassQuestItem(Quest const* quest, std::ostringstr
     if (quest->GetRewItemsCount() > 0)
     {
         for (uint32 i = 0; i < quest->GetRewItemsCount(); i++)
-        {            
+        {
             ItemPosCountVec itemVec;
             ItemPrototype const* itemP = sObjectMgr.GetItemPrototype(quest->RewItemId[i]);
             InventoryResult result = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, itemVec, itemP->ItemId, quest->RewItemCount[i]);
@@ -190,13 +196,31 @@ std::string formatSpell(SpellEntry const* sInfo)
     std::string rank = sInfo->Rank[0];
 
     if (rank.empty())
-        out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[LOCALE_enUS] << "]|h|r";
+        out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[LOCALE_enUS] << "]|h|r" << " (" << sInfo->Id << ")";
     else
-        out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[LOCALE_enUS] << " " << rank << "]|h|r";
+        out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[LOCALE_enUS] << " " << rank << "]|h|r" << " (" << sInfo->Id << ")";
     return out.str();
 }
 
 bool AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
+{
+    SpellEntry const* proto = sServerFacade.LookupSpellInfo(spellId);
+
+    if (!proto)
+        return false;
+
+    bool learned = false;
+    if (!learned && !bot->HasSpell(spellId)) {
+        bot->learnSpell(spellId, false);
+        *out << formatSpell(proto) << ", ";
+
+        learned = bot->HasSpell(spellId);
+    }
+
+    return learned;
+}
+
+bool AutoLearnSpellAction::LearnSpellFromSpell(uint32 spellId, std::ostringstream* out)
 {
     SpellEntry const* proto = sServerFacade.LookupSpellInfo(spellId);
 
@@ -209,23 +233,18 @@ bool AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
         if (proto->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
         {
             uint32 learnedSpell = proto->EffectTriggerSpell[j];
-
-            if (!bot->HasSpell(learnedSpell))
+            // If state prevents the Lock Pick Journeyman and Expert from being learned (Rogues still learn their appropriate lock pick skill.
+            if (learnedSpell != 6463 && learnedSpell != 6461)
             {
-                bot->learnSpell(learnedSpell, false);
-                SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(learnedSpell);
-                *out << formatSpell(spellInfo) << ", ";
+                if (!bot->HasSpell(learnedSpell))
+                {
+                    bot->learnSpell(learnedSpell, false);
+                    SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(learnedSpell);
+                    *out << formatSpell(spellInfo) << ", ";
+                    learned = true;
+                }
             }
-            learned = true;
         }
     }
-
-    if (!learned && !bot->HasSpell(spellId)) {
-        bot->learnSpell(spellId, false);
-        *out << formatSpell(proto) << ", ";
-
-        learned = bot->HasSpell(spellId);
-    }
-
     return learned;
 }

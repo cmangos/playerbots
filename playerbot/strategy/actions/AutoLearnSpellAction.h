@@ -19,5 +19,6 @@ namespace ai
         void LearnQuestSpells(std::ostringstream* out);
         void GetClassQuestItem(Quest const* quest, std::ostringstream* out);
         bool LearnSpell(uint32 spellId, std::ostringstream* out);
+        bool LearnSpellFromSpell(uint32 spellId, std::ostringstream* out);
     };
 }

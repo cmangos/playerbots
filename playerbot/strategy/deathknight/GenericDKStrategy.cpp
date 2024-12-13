@@ -181,7 +181,9 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 
 	triggers.push_back(new TriggerNode(
 		"enemy player ten yards",
-		NextAction::array(0, new NextAction("chains of ice", ACTION_HIGH + 10), NULL)));
+		NextAction::array(0, new NextAction("chains of ice", ACTION_NORMAL + 9),
+			new NextAction("death grip", ACTION_NORMAL + 9),
+			new NextAction("reach melee", ACTION_NORMAL + 8), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"enemy out of melee",

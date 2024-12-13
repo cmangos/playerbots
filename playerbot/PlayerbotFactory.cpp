@@ -1601,7 +1601,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
         std::vector<uint32> emptySlots;
         std::vector<std::pair<int, uint32>> prioritizedItems; // Store as (priority, slot) pairs
 
-        uint32 maxSlots = urand(1, 4);
+        uint32 maxSlots = urand(1, 3);
 
         for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
         {
@@ -1952,6 +1952,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                     uint32 newItemId = ids[index];
                     ItemPrototype const* proto = sObjectMgr.GetItemPrototype(newItemId);
 
+                    // Skip unavailable items
                     if (!proto || lockedItemsSet.count(proto->ItemId) || proto->Flags2 == 8192 || unavailableItemsSet.count(proto->ItemId) ||
                         blacklistSet.count(proto->ItemId) || proto->ItemLevel > maxItemLevel)
                         continue;
@@ -1961,11 +1962,24 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         (proto->MaxCount && bot->HasItemCount(proto->ItemId, proto->MaxCount)))
                         continue;
 
+                    // Skip too low ilvl items
                     uint32 reqLevel = sRandomItemMgr.GetMinLevelFromCache(newItemId);
                     if (reqLevel && proto->Quality < ITEM_QUALITY_LEGENDARY && abs((int)botLevel - (int)reqLevel) >(int)sPlayerbotAIConfig.randomGearMaxDiff)
                         continue;
 
-                    // Item level filter for higher rank bots
+                    // Skip too high ilvl items for max level characters
+                    if (incremental && partialUpgrade && botLevel == 80)
+                    {
+                        // Restrict too high item levels for incremental upgrades
+                        if (proto->ItemLevel > 200 && proto->ItemLevel > oldGS + 20)
+                            continue;
+
+                        // Restrict top-end gear for non-high-ranked bots
+                        if (!isBotHighRanked && proto->ItemLevel >= 270)
+                            continue;
+                    }
+
+                    // Skip low ilvl depending on bots arena rating
                     if (!setQuality && botRating > 1000 && botLevel == 80)
                     {
                         uint32 ratingChanges = std::min<uint32>(abs((int)botRating - 1000) / 150, 6U);

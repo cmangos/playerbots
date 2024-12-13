@@ -435,6 +435,7 @@ namespace ai
                 creators["stormstrike"] = &TriggerFactoryInternal::stormstrike;
                 creators["elemental mastery"] = &TriggerFactoryInternal::elemental_mastery;
                 creators["feral spirit"] = &TriggerFactoryInternal::feral_spirit;
+                creators["hex"] = &TriggerFactoryInternal::hex;
             }
 
         private:
@@ -479,6 +480,7 @@ namespace ai
             static Trigger* stormstrike(PlayerbotAI* ai) { return new StormstrikeTrigger(ai); }
             static Trigger* elemental_mastery(PlayerbotAI* ai) { return new ElementalMasteryTrigger(ai); }
             static Trigger* feral_spirit(PlayerbotAI* ai) { return new FeralSpiritTrigger(ai); }
+            static Trigger* hex(PlayerbotAI* ai) { return new HexTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>
@@ -567,6 +569,8 @@ namespace ai
                 creators["feral spirit"] = &AiObjectContextInternal::feral_spirit;
                 creators["shamanistic rage"] = &AiObjectContextInternal::shamanistic_rage;
                 creators["nature's swiftness"] = &AiObjectContextInternal::nature_s_swiftness;
+                creators["hex"] = &AiObjectContextInternal::hex;
+                creators["tidal force"] = &AiObjectContextInternal::tidal_force;
             }
 
         private:
@@ -651,6 +655,8 @@ namespace ai
             static Action* feral_spirit(PlayerbotAI* ai) { return new CastFeralSpiritAction(ai); }
             static Action* shamanistic_rage(PlayerbotAI* ai) { return new CastShamanisticRageAction(ai); }
             static Action* nature_s_swiftness(PlayerbotAI* ai) { return new CastNaturesSwiftnessAction(ai); }
+            static Action* hex(PlayerbotAI* ai) { return new CastHexAction(ai); }
+            static Action* tidal_force(PlayerbotAI* ai) { return new CastTidalForceAction(ai); }
         };
     };
 };

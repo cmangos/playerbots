@@ -902,12 +902,12 @@ void ElementalShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     ShamanStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "flame shock",
-        NextAction::array(0, new NextAction("flame shock", ACTION_HIGH + 1), NULL))); 
+        "flame shock on target",
+        NextAction::array(0, new NextAction("lava burst", ACTION_HIGH + 2), NULL))); 
     
     triggers.push_back(new TriggerNode(
-        "flame shock on target",
-        NextAction::array(0, new NextAction("lava burst", ACTION_HIGH), NULL)));
+        "flame shock",
+        NextAction::array(0, new NextAction("flame shock", ACTION_HIGH), NULL))); 
 }
 
 void ElementalShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

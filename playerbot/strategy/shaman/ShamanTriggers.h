@@ -515,4 +515,5 @@ namespace ai
 
     BOOST_TRIGGER(ElementalMasteryTrigger, "elemental mastery");
     BOOST_TRIGGER(FeralSpiritTrigger, "feral spirit");
+    SNARE_TRIGGER(HexTrigger, "hex");
 }

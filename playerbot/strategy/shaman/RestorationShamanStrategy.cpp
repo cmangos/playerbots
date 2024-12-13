@@ -990,19 +990,15 @@ void RestorationShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("nature's swiftness", ACTION_CRITICAL_HEAL + 2), NULL))); 
+        NextAction::array(0, new NextAction("tidal force", ACTION_CRITICAL_HEAL + 2), 
+            new NextAction("nature's swiftness", ACTION_CRITICAL_HEAL + 2),
+            new NextAction("healing wave", ACTION_CRITICAL_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("nature's swiftness", ACTION_CRITICAL_HEAL + 2), NULL)));
-    
-    triggers.push_back(new TriggerNode(
-        "critical health",
-        NextAction::array(0, new NextAction("healing wave", ACTION_CRITICAL_HEAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member critical health",
-        NextAction::array(0, new NextAction("healing wave on party", ACTION_CRITICAL_HEAL + 1), NULL)));
+        NextAction::array(0, new NextAction("tidal force", ACTION_CRITICAL_HEAL + 2),
+            new NextAction("nature's swiftness", ACTION_CRITICAL_HEAL + 2),
+            new NextAction("healing wave on party", ACTION_CRITICAL_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low health",
@@ -1039,11 +1035,19 @@ void RestorationShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("healing wave", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("healing wave", ACTION_CRITICAL_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("healing wave on party", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("healing wave on party", ACTION_CRITICAL_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("riptide", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0, new NextAction("riptide on party", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium health",

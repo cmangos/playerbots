@@ -1004,12 +1004,20 @@ void ShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     ClassStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_CRITICAL_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_CRITICAL_HEAL), NULL)));
+    
+    triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("healing wave", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("healing wave on party", ACTION_LIGHT_HEAL), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "purge",
@@ -1032,12 +1040,20 @@ void ShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("ancestral spirit", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_CRITICAL_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("healing wave", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("healing wave on party", ACTION_LIGHT_HEAL), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_LIGHT_HEAL), NULL)));
 
     if (sRandomPlayerbotMgr.IsRandomBot(ai->GetBot()))
     {
@@ -1068,6 +1084,10 @@ void ShamanPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "player has flag",
         NextAction::array(0, new NextAction("ghost wolf", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("grounding totem", ACTION_NORMAL), NULL)));
 }
 
 void ShamanPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1180,6 +1200,14 @@ void ShamanCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "wind shear on enemy healer",
         NextAction::array(0, new NextAction("wind shear on enemy healer", ACTION_INTERRUPT), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "hex",
+        NextAction::array(0, new NextAction("hex", ACTION_INTERRUPT), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "enemy is close",
+        NextAction::array(0, new NextAction("earthbind totem", ACTION_HIGH), NULL)));
 }
 
 void ShamanCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

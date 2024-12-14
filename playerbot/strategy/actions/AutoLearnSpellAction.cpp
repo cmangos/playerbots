@@ -35,12 +35,12 @@ bool AutoLearnSpellAction::Execute(Event& event)
 void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
 {
     BroadcastHelper::BroadcastLevelup(ai, bot);
+
+    if (sPlayerbotAIConfig.autoLearnQuestSpells)
+        LearnQuestSpells(out);
     
     if (sPlayerbotAIConfig.autoLearnTrainerSpells)
         LearnTrainerSpells(out);
-    
-    if (sPlayerbotAIConfig.autoLearnQuestSpells)
-        LearnQuestSpells(out);
 
     if (!ai->HasActivePlayerMaster()) //Hunter spells for pets.
     {
@@ -102,7 +102,16 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
                 if (spell)
                 {
                     std::string SpellName = spell->SpellName[0];
+                    if (SpellName.find("Riding") != std::string::npos)
+                    {
+                        std::string test = "test";
+                    }
+#ifdef MANGOSBOT_ZERO
                     if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
+#endif
+#ifdef MANGOSBOT_ONE
+                    if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL || spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
+#endif
                     {
                         uint32 skill = spell->EffectMiscValue[EFFECT_INDEX_1];
 
@@ -111,16 +120,38 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
                             SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
                             if (pSkill)
                             {
+#ifdef MANGOSBOT_ZERO
                                 if (SpellName.find("Apprentice") != std::string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
                                     continue;
+#endif
+#ifdef MANGOSBOT_ONE
+                                std::string SpellRank = spell->Rank[0];
+                                if (SpellName.find("Apprentice") != std::string::npos && (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY))
+                                    continue;
+                                else if (SpellRank.find("Apprentice") != std::string::npos && (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY))
+                                    continue;
+#endif
                             }
                         }
                     }
                 }
 
             }
-
+#ifdef MANGOSBOT_ZERO // Vanilla
             LearnSpellFromSpell(tSpell->spell, out);
+#endif
+#ifdef MANGOSBOT_ONE // TBC
+            if (tSpell->spell != 10321) // Paladin judgment spell is taught as a learn from spell not the spell it self.
+            {
+                LearnSpell(tSpell->spell, out);
+            }
+            else
+            {
+                LearnSpellFromSpell(tSpell->spell, out);
+            }
+#endif
+#ifdef MANGOSBOT_TWO // WOTLK
+#endif
         }
     }
 }
@@ -210,11 +241,14 @@ bool AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
         return false;
 
     bool learned = false;
-    if (!learned && !bot->HasSpell(spellId)) {
-        bot->learnSpell(spellId, false);
-        *out << formatSpell(proto) << ", ";
+    if (/*spellId != 10321*/ true) // Stops Paladin from learning judgment learning spell
+    {
+        if (!learned && !bot->HasSpell(spellId)) {
+            bot->learnSpell(spellId, false);
+            *out << formatSpell(proto) << ", ";
 
-        learned = bot->HasSpell(spellId);
+            learned = bot->HasSpell(spellId);
+        }
     }
 
     return learned;

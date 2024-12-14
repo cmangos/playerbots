@@ -33,6 +33,7 @@ public:
         creators["dire bear form"] = &dire_bear_form;
         creators["cat form"] = &cat_form;
         creators["travel form"] = &travel_form;
+        creators["nourish"] = &nourish;
     }
 
 private:
@@ -93,6 +94,8 @@ private:
     ACTION_NODE_P(cat_form, "cat form", "caster form");
 
     ACTION_NODE_P(travel_form, "travel form", "caster form");
+
+    ACTION_NODE_P(nourish, "nourish", "active hot");
 };
 
 DruidStrategy::DruidStrategy(PlayerbotAI* ai) : ClassStrategy(ai)
@@ -1131,6 +1134,10 @@ void DruidCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     CcStrategy::InitCombatTriggers(triggers);
 
+    triggers.push_back(new TriggerNode(
+        "cyclone",
+        NextAction::array(0, new NextAction("cyclone", ACTION_INTERRUPT), NULL))); 
+    
     triggers.push_back(new TriggerNode(
         "hibernate",
         NextAction::array(0, new NextAction("hibernate on cc", ACTION_INTERRUPT), NULL)));

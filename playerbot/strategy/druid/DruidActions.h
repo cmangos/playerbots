@@ -596,6 +596,7 @@ namespace ai
     };
 
     SPELL_ACTION(CastForceOfNatureAction, "force of nature");
+    SNARE_ACTION(CastCycloneAction, "cyclone");
     BUFF_ACTION(CastSavageRoarAction, "savage roar");
     BUFF_ACTION(CastWildGrowthAction, "wild growth");
     HEAL_ACTION(CastNourishAction, "nourish");

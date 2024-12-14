@@ -418,8 +418,10 @@ namespace ai
     };
 
     CAN_CAST_TRIGGER(ForceOfNatureTrigger, "force of nature");
+    CAN_CAST_TRIGGER(StarfallTrigger, "starfall");
     BOOST_TRIGGER(BerserkTrigger, "berserk");
     CAN_CAST_TRIGGER_A(ActiveHotTrigger, "nourish");
+    SNARE_TRIGGER(CycloneTrigger, "cyclone");
 
     class SavageRoarTrigger : public ComboPointsAvailableTrigger
     {

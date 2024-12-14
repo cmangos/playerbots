@@ -354,6 +354,8 @@ namespace ai
                 creators["force of nature"] = &TriggerFactoryInternal::force_of_nature;
                 creators["berserk"] = &TriggerFactoryInternal::berserk;
                 creators["active hot"] = &TriggerFactoryInternal::active_hot;
+                creators["cyclone"] = &TriggerFactoryInternal::cyclone;
+                creators["starfall"] = &TriggerFactoryInternal::starfall;
             }
 
         private:
@@ -404,6 +406,8 @@ namespace ai
             static Trigger* force_of_nature(PlayerbotAI* ai) { return new ForceOfNatureTrigger(ai); }
             static Trigger* berserk(PlayerbotAI* ai) { return new BerserkTrigger(ai); }
             static Trigger* active_hot(PlayerbotAI* ai) { return new ActiveHotTrigger(ai); }
+            static Trigger* cyclone(PlayerbotAI* ai) { return new CycloneTrigger(ai); }
+            static Trigger* starfall(PlayerbotAI* ai) { return new StarfallTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>
@@ -499,6 +503,7 @@ namespace ai
                 creators["wild growth"] = &AiObjectContextInternal::wild_growth;
                 creators["nourish"] = &AiObjectContextInternal::nourish;
                 creators["swiftmend"] = &AiObjectContextInternal::swiftmend;
+                creators["cyclone"] = &AiObjectContextInternal::cyclone;
             }
 
         private:
@@ -589,6 +594,7 @@ namespace ai
             static Action* wild_growth(PlayerbotAI* ai) { return new CastWildGrowthAction(ai); }
             static Action* nourish(PlayerbotAI* ai) { return new CastNourishAction(ai); }
             static Action* swiftmend(PlayerbotAI* ai) { return new CastSwiftmendAction(ai); }
+            static Action* cyclone(PlayerbotAI* ai) { return new CastCycloneAction(ai); }
         };
     };
 };

@@ -1637,19 +1637,30 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
 
         for (uint8 j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
-            if ((spellproto->Effect[j] == SPELL_EFFECT_APPLY_AURA) &&
-                (spellproto->EffectBasePoints[j] >= 0))
+            SpellEntry const* triggeredSpellproto = nullptr;
+            if (spellproto->EffectTriggerSpell[j])
+            {
+                triggeredSpellproto = sSpellTemplate.LookupEntry<SpellEntry>(spellproto->EffectTriggerSpell[j]);
+            }
+
+            SpellEntry const* relevantSpellproto = spellproto;
+            if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_PROC_TRIGGER_SPELL && triggeredSpellproto)
+            {
+                relevantSpellproto = triggeredSpellproto;
+            }
+            
+            if ((relevantSpellproto->Effect[j] == SPELL_EFFECT_APPLY_AURA) && (relevantSpellproto->EffectBasePoints[j] >= 0))
             {
 #ifdef MANGOSBOT_TWO
                 // spell damage
                 // SPELL_AURA_MOD_DAMAGE_DONE
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_DAMAGE_DONE)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_DAMAGE_DONE)
                 {
                     isSpellDamageItem = true;
                     isCasterItem = true;
-                    spellDamage = spellproto->EffectBasePoints[j] + 1;
+                    spellDamage = relevantSpellproto->EffectBasePoints[j] + 1;
 
-                    if (spellproto->EffectMiscValue[j] == SPELL_SCHOOL_MASK_MAGIC)
+                    if (relevantSpellproto->EffectMiscValue[j] == SPELL_SCHOOL_MASK_MAGIC)
                     {
                         isHealingItem = true;
                         effectAuraDamageStatWeight += CalculateSingleStatWeight(playerclass, spec, "splpwr", spellDamage);
@@ -1657,19 +1668,19 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
                     else
                     {
                         uint32 specialDamage = 0;
-                        if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_ARCANE) != 0)
+                        if ((relevantSpellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_ARCANE) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "arcsplpwr", spellDamage);
 
-                        if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FROST) != 0)
+                        if ((relevantSpellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FROST) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "frosplpwr", spellDamage);
 
-                        if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FIRE) != 0)
+                        if ((relevantSpellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FIRE) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "firsplpwr", spellDamage);
 
-                        if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_SHADOW) != 0)
+                        if ((relevantSpellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_SHADOW) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "shasplpwr", spellDamage);
 
-                        if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_NATURE) != 0)
+                        if ((relevantSpellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_NATURE) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "natsplpwr", spellDamage);
 
                         if (!isWhitelist && !specialDamage && isSpellDamageItem)
@@ -1681,31 +1692,31 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
 #else
                 // spell damage
                 // SPELL_AURA_MOD_DAMAGE_DONE
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_DAMAGE_DONE)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_DAMAGE_DONE)
                 {
-                    spellDamage = spellproto->EffectBasePoints[j] + 1;
+                    spellDamage = relevantSpellproto->EffectBasePoints[j] + 1;
                     isSpellDamageItem = true;
                     // generic spell damage
-                    if (spellproto->EffectMiscValue[j] == SPELL_SCHOOL_MASK_MAGIC)
+                    if (relevantSpellproto->EffectMiscValue[j] == SPELL_SCHOOL_MASK_MAGIC)
                     {
                         effectAuraDamageStatWeight += CalculateSingleStatWeight(playerclass, spec, "splpwr", spellDamage);
                     }
                     else
                     {
                         uint32 specialDamage = 0;
-                        if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_ARCANE) != 0)
+                        if ((relevantSpellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_ARCANE) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "arcsplpwr", spellDamage);
 
-                        if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FROST) != 0)
+                        if ((relevantSpellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FROST) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "frosplpwr", spellDamage);
 
-                        if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FIRE) != 0)
+                        if ((relevantSpellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_FIRE) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "firsplpwr", spellDamage);
 
-                        if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_SHADOW) != 0)
+                        if ((relevantSpellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_SHADOW) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "shasplpwr", spellDamage);
 
-                        if ((spellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_NATURE) != 0)
+                        if ((relevantSpellproto->EffectMiscValue[j] & SPELL_SCHOOL_MASK_NATURE) != 0)
                             specialDamage += CalculateSingleStatWeight(playerclass, spec, "natsplpwr", spellDamage);
 
                         effectAuraDamageStatWeight += specialDamage;
@@ -1713,45 +1724,45 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
                 }
                 // spell healing
                 // SPELL_AURA_MOD_HEALING_DONE
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_HEALING_DONE)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_HEALING_DONE)
                 {
                     isHealingItem = true;
-                    spellHealing = spellproto->EffectBasePoints[j] + 1;
-                    effectAuraHealStatWeight += CalculateSingleStatWeight(playerclass, spec, "splheal", spellproto->EffectBasePoints[j] + 1);
+                    spellHealing = relevantSpellproto->EffectBasePoints[j] + 1;
+                    effectAuraHealStatWeight += CalculateSingleStatWeight(playerclass, spec, "splheal", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 #endif
 
                 // spell hit rating (pre tbc)
                 // SPELL_AURA_MOD_SPELL_HIT_CHANCE
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_SPELL_HIT_CHANCE)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_SPELL_HIT_CHANCE)
                 {
                     isCasterItem = true;
-                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "spellhitrtng", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "spellhitrtng", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 
                 // spell crit rating (pre tbc)
                 // SPELL_AURA_MOD_SPELL_CRIT_CHANCE, SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_SPELL_CRIT_CHANCE || spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_SPELL_CRIT_CHANCE || relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL)
                 {
                     isCasterItem = true;
-                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "spellcritstrkrtng", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "spellcritstrkrtng", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 
                 // spell penetration
                 // SPELL_AURA_MOD_TARGET_RESISTANCE
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_TARGET_RESISTANCE)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_TARGET_RESISTANCE)
                 {
                     // check if magic type
-                    if (spellproto->EffectMiscValue[j] == SPELL_SCHOOL_MASK_SPELL)
-                        effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "spellpenrtng", abs(spellproto->EffectBasePoints[j] + 1));
+                    if (relevantSpellproto->EffectMiscValue[j] == SPELL_SCHOOL_MASK_SPELL)
+                        effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "spellpenrtng", abs(relevantSpellproto->EffectBasePoints[j] + 1));
                 }
 
                 // check attack power
-                if (!hasAP && spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_ATTACK_POWER)
+                if (!hasAP && relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_ATTACK_POWER)
                 {
                     hasAP = true;
                     isAttackItem = true;
-                    std::string SpellName = spellproto->SpellName[0];
+                    std::string SpellName = relevantSpellproto->SpellName[0];
                     if (SpellName.find("Attack Power - Feral") != std::string::npos)
                         isFeral = true;
 #ifdef MANGOSBOT_ZERO
@@ -1762,12 +1773,12 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
                         return 0;
 #endif
 
-                    effectAuraApStatWeight += CalculateSingleStatWeight(playerclass, spec, isFeral ? "feratkpwr" : "atkpwr", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraApStatWeight += CalculateSingleStatWeight(playerclass, spec, isFeral ? "feratkpwr" : "atkpwr", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 
                 // check ranged ap
                 // SPELL_AURA_MOD_RANGED_ATTACK_POWER
-                if (!hasAP && spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_RANGED_ATTACK_POWER)
+                if (!hasAP && relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_RANGED_ATTACK_POWER)
                 {
                     // filter non ranged classes
                     if (playerclass == CLASS_SHAMAN || (!proto->IsRangedWeapon() && playerclass != CLASS_HUNTER))
@@ -1775,81 +1786,81 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
 
                     hasAP = true;
                     isAttackItem = true;
-                    effectAuraApStatWeight += CalculateSingleStatWeight(playerclass, spec, "atkpwr", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraApStatWeight += CalculateSingleStatWeight(playerclass, spec, "atkpwr", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 
                 // check block
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_SHIELD_BLOCKVALUE)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_SHIELD_BLOCKVALUE)
                 {
                     isTankItem = true;
-                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "block", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "block", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_PARRY_PERCENT)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_PARRY_PERCENT)
                 {
                     isTankItem = true;
-                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "parryrtng", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "parryrtng", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_DODGE_PERCENT)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_DODGE_PERCENT)
                 {
                     isTankItem = true;
-                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "dodgertng", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "dodgertng", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 
                 // block chance
                 // SPELL_AURA_MOD_BLOCK_PERCENT
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_BLOCK_PERCENT)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_BLOCK_PERCENT)
                 {
                     isTankItem = true;
-                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "blockrtng", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "blockrtng", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 
                 // armor penetration
                 // SPELL_AURA_MOD_TARGET_RESISTANCE
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_TARGET_RESISTANCE)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_TARGET_RESISTANCE)
                 {
                     // check if physical type
-                    if (spellproto->EffectMiscValue[j] == SPELL_SCHOOL_MASK_NORMAL)
-                        effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "armorpenrtng", abs(spellproto->EffectBasePoints[j] + 1));
+                    if (relevantSpellproto->EffectMiscValue[j] == SPELL_SCHOOL_MASK_NORMAL)
+                        effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "armorpenrtng", abs(relevantSpellproto->EffectBasePoints[j] + 1));
                 }
 
                 // hit rating (pre tbc)
                 // SPELL_AURA_MOD_HIT_CHANCE
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_HIT_CHANCE)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_HIT_CHANCE)
                 {
                     isAttackItem = true;
-                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "hitrtng", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "hitrtng", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 
                 // crit rating (pre tbc)
                 // SPELL_AURA_MOD_HIT_CHANCE
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_CRIT_PERCENT)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_CRIT_PERCENT)
                 {
                     isAttackItem = true;
-                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "critstrkrtng", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "critstrkrtng", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
 
                 //check defense SPELL_AURA_MOD_SKILL
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_SKILL)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_SKILL)
                 {
-                    if (spellproto->EffectMiscValue[j] == SKILL_DEFENSE)
+                    if (relevantSpellproto->EffectMiscValue[j] == SKILL_DEFENSE)
                     {
                         isTankItem = true;
-                        effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "defrtng", spellproto->EffectBasePoints[j] + 1);
+                        effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "defrtng", relevantSpellproto->EffectBasePoints[j] + 1);
                     }
                 }
 
 #ifndef MANGOSBOT_ZERO
                 // ratings
                 // enum CombatRating
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_RATING)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_RATING)
                 {
                     for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
                     {
-                        if (spellproto->EffectMiscValue[0] & (1 << rating))
+                        if (relevantSpellproto->EffectMiscValue[0] & (1 << rating))
                         {
-                            int32 val = spellproto->EffectBasePoints[j] + 1;
+                            int32 val = relevantSpellproto->EffectBasePoints[j] + 1;
                             std::string weightName;
 
                             for (std::map<std::string, uint32 >::iterator i = weightRatingLink.begin(); i != weightRatingLink.end(); ++i)
@@ -1880,10 +1891,10 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
 
                 // mana regen
                 // SPELL_AURA_MOD_POWER_REGEN
-                if (spellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_POWER_REGEN)
+                if (relevantSpellproto->EffectApplyAuraName[j] == SPELL_AURA_MOD_POWER_REGEN)
                 {
                     isCasterItem = true;
-                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "manargn", spellproto->EffectBasePoints[j] + 1);
+                    effectAuraStatWeight += CalculateSingleStatWeight(playerclass, spec, "manargn", relevantSpellproto->EffectBasePoints[j] + 1);
                 }
             }
         }

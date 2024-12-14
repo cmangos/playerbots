@@ -1992,11 +1992,11 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         (slot == EQUIPMENT_SLOT_MAINHAND && proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD) ||
                         (slot == EQUIPMENT_SLOT_MAINHAND && proto->InventoryType == INVTYPE_HOLDABLE) ||
                         (slot == EQUIPMENT_SLOT_MAINHAND && (specId == 3 || specId == 5) && !(proto->Class == ITEM_CLASS_WEAPON && proto->InventoryType != INVTYPE_HOLDABLE)) ||
-                        (slot == EQUIPMENT_SLOT_MAINHAND && specId == 2 && proto->IsWeapon() && proto->Delay < 2000) ||
+                        (slot == EQUIPMENT_SLOT_MAINHAND && specId == 2 && proto->IsWeapon() && (proto->Delay < 2000 && botLevel < 80)) ||
 #ifdef MANGOSBOT_ONE
                         (slot == EQUIPMENT_SLOT_MAINHAND || slot == EQUIPMENT_SLOT_OFFHAND) && botLevel >= 60 && specId == 21 && proto->IsWeapon() && proto->InventoryType != INVTYPE_2HWEAPON && proto->Delay < 2000) ||
 #endif
-                        (slot == EQUIPMENT_SLOT_MAINHAND && (specId == 6 || specId == 21) && proto->IsWeapon() && botLevel >= 60 && proto->InventoryType == INVTYPE_2HWEAPON && proto->Delay < 3000))
+                        (slot == EQUIPMENT_SLOT_MAINHAND && (specId == 6) && proto->IsWeapon() && botLevel >= 60 && proto->InventoryType == INVTYPE_2HWEAPON && proto->Delay < 3000))
                         continue;
 
                         // Caster weapon checks
@@ -2107,7 +2107,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                             }
 
                             // Skip if the offhand is not worth equipping
-                            if (betterDps || (betterDamage && betterValue)) continue;
+                            if (!(betterDps || (betterDamage && betterValue))) continue;
                         }
 
                         if ((incremental || progressiveGear) && oldItem && oldProto->Quality < ITEM_QUALITY_NORMAL && proto->Quality < ITEM_QUALITY_NORMAL && level > 5)

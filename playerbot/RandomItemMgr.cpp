@@ -586,23 +586,23 @@ bool RandomItemMgr::ShouldEquipWeaponForSpec(uint8 playerclass, uint8 spec, Item
         {
             mh_weapons = { ITEM_SUBCLASS_WEAPON_SWORD, ITEM_SUBCLASS_WEAPON_AXE, ITEM_SUBCLASS_WEAPON_MACE, ITEM_SUBCLASS_WEAPON_FIST };
             oh_weapons = { ITEM_SUBCLASS_ARMOR_SHIELD };
-            r_weapons = { ITEM_SUBCLASS_WEAPON_BOW, ITEM_SUBCLASS_WEAPON_CROSSBOW, ITEM_SUBCLASS_WEAPON_GUN };
+            r_weapons = { ITEM_SUBCLASS_WEAPON_BOW, ITEM_SUBCLASS_WEAPON_CROSSBOW, ITEM_SUBCLASS_WEAPON_GUN, ITEM_SUBCLASS_WEAPON_THROWN };
         }
         else if (m_weightScales[spec].info.name == "arms")
         {
             mh_weapons = { ITEM_SUBCLASS_WEAPON_SWORD2, ITEM_SUBCLASS_WEAPON_AXE2, ITEM_SUBCLASS_WEAPON_MACE2, ITEM_SUBCLASS_WEAPON_POLEARM };
-            r_weapons = { ITEM_SUBCLASS_WEAPON_BOW, ITEM_SUBCLASS_WEAPON_CROSSBOW, ITEM_SUBCLASS_WEAPON_GUN };
+            r_weapons = { ITEM_SUBCLASS_WEAPON_BOW, ITEM_SUBCLASS_WEAPON_CROSSBOW, ITEM_SUBCLASS_WEAPON_GUN, ITEM_SUBCLASS_WEAPON_THROWN };
         }
         else if (proto->RequiredLevel < 80)
         {
             mh_weapons = { ITEM_SUBCLASS_WEAPON_SWORD, ITEM_SUBCLASS_WEAPON_AXE, ITEM_SUBCLASS_WEAPON_MACE, ITEM_SUBCLASS_WEAPON_FIST };
-            r_weapons = { ITEM_SUBCLASS_WEAPON_BOW, ITEM_SUBCLASS_WEAPON_CROSSBOW, ITEM_SUBCLASS_WEAPON_GUN };
+            r_weapons = { ITEM_SUBCLASS_WEAPON_BOW, ITEM_SUBCLASS_WEAPON_CROSSBOW, ITEM_SUBCLASS_WEAPON_GUN, ITEM_SUBCLASS_WEAPON_THROWN };
         }
         else
         {
             mh_weapons = { ITEM_SUBCLASS_WEAPON_SWORD2, ITEM_SUBCLASS_WEAPON_AXE2, ITEM_SUBCLASS_WEAPON_MACE2 };
             oh_weapons = { ITEM_SUBCLASS_WEAPON_SWORD2, ITEM_SUBCLASS_WEAPON_AXE2, ITEM_SUBCLASS_WEAPON_MACE2 };
-            r_weapons = { ITEM_SUBCLASS_WEAPON_BOW, ITEM_SUBCLASS_WEAPON_CROSSBOW, ITEM_SUBCLASS_WEAPON_GUN };
+            r_weapons = { ITEM_SUBCLASS_WEAPON_BOW, ITEM_SUBCLASS_WEAPON_CROSSBOW, ITEM_SUBCLASS_WEAPON_GUN, ITEM_SUBCLASS_WEAPON_THROWN };
         }
         break;
     }
@@ -2030,10 +2030,10 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
 #endif
 
     // limit speed for tank weapons
-    if (!isWhitelist && spec == 3 && proto->IsWeapon() && proto->Delay > 2300)
+    if (!isWhitelist && spec == 3 && proto->IsWeapon() && !proto->IsRangedWeapon() && proto->Delay > 2300)
         return 0;
 
-    if (!isWhitelist && spec == 5 && proto->IsWeapon() && proto->Delay > 2400)
+    if (!isWhitelist && spec == 5 && proto->IsWeapon() && !proto->IsRangedWeapon() && proto->Delay > 2400)
         return 0;
 
     // check for caster item

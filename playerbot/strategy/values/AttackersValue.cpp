@@ -145,13 +145,13 @@ std::list<ObjectGuid> AttackersValue::Calculate()
     {
         // Add the targets of the members of the group
         Group* group = bot->GetGroup();
-        if (group && !bot->InBattleGround())
+        if (group && (!bot->InBattleGround() || bot->InArena()))
         {
             AddTargetsOf(group, targets, invalidTargets, getOne);
         }
 
         Player* master = GetMaster();
-        if (master && !bot->InBattleGround() && (!group || master->GetGroup() != group))
+        if (master && (!bot->InBattleGround() || bot->InArena()) && (!group || master->GetGroup() != group))
             AddTargetsOf(master, targets, invalidTargets, getOne);
     }
 

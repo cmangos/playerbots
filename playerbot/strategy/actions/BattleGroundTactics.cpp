@@ -5277,22 +5277,23 @@ bool ArenaTactics::Execute(Event& event)
     if (!bg || bg->GetStatus() != STATUS_IN_PROGRESS || bg->GetStartDelayTime() > 0)
         return false;
 
-    // Remove "collision" strategy in non-combat state if present
-    if (ai->HasStrategy("collision", BotState::BOT_STATE_NON_COMBAT))
-        ai->ChangeStrategy("-collision", BotState::BOT_STATE_NON_COMBAT);
-
-    // Reset strategies if in an arena and set no master
-#if defined(MANGOS) || defined(CMANGOS)
-    if (sBattleGroundMgr.IsArenaType(bg->GetTypeId()))
-    {
-        ai->ResetStrategies(false);
-        ai->SetMaster(nullptr);
-    }
-#endif
-
     // Move to the center if the bot is not in combat
     if (!bot->IsInCombat())
+    {
+        // Remove "collision" strategy in non-combat state if present
+        if (ai->HasStrategy("collision", BotState::BOT_STATE_NON_COMBAT))
+            ai->ChangeStrategy("-collision", BotState::BOT_STATE_NON_COMBAT);
+
+        // Reset strategies if in an arena and set no master
+#if defined(MANGOS) || defined(CMANGOS)
+        if (sBattleGroundMgr.IsArenaType(bg->GetTypeId()))
+        {
+            ai->ResetStrategies(false);
+            ai->SetMaster(nullptr);
+        }
+#endif
         return moveToCenter(bg);
+    }
 #endif
     return true;
 }
@@ -5309,7 +5310,7 @@ bool ArenaTactics::moveToCenter(BattleGround* bg)
     {
     case BATTLEGROUND_BE:
         // Two locations in Blade's Edge Arena based on preference
-        if (preference > 10)
+        if (preference >= 5)
             MoveTo(bg->GetMapId(), 6185.0f + randomOffsetX, 236.0f + randomOffsetY, 6.0f, false, true);
         else
             MoveTo(bg->GetMapId(), 6240.0f + randomOffsetX, 262.0f + randomOffsetY, 2.0f, false, true);

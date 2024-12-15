@@ -109,7 +109,7 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
 #ifdef MANGOSBOT_ZERO
                     if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
 #endif
-#ifdef MANGOSBOT_ONE
+#if defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
                     if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL || spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
 #endif
                     {
@@ -124,7 +124,7 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
                                 if (SpellName.find("Apprentice") != std::string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
                                     continue;
 #endif
-#ifdef MANGOSBOT_ONE
+#if defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
                                 std::string SpellRank = spell->Rank[0];
                                 if (SpellName.find("Apprentice") != std::string::npos && (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY))
                                     continue;
@@ -140,8 +140,9 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
 #ifdef MANGOSBOT_ZERO // Vanilla
             LearnSpellFromSpell(tSpell->spell, out);
 #endif
-#ifdef MANGOSBOT_ONE // TBC
-            if (tSpell->spell != 10321) // Paladin judgment spell is taught as a learn from spell not the spell it self.
+#if defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
+            // Future To Do move these checks into a boolean function to clean up.
+            if (NotATroubledSpellIds(tSpell->spell, bot->getClass()))
             {
                 LearnSpell(tSpell->spell, out);
             }
@@ -149,8 +150,6 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
             {
                 LearnSpellFromSpell(tSpell->spell, out);
             }
-#endif
-#ifdef MANGOSBOT_TWO // WOTLK
 #endif
         }
     }
@@ -281,4 +280,45 @@ bool AutoLearnSpellAction::LearnSpellFromSpell(uint32 spellId, std::ostringstrea
         }
     }
     return learned;
+}
+
+bool AutoLearnSpellAction::NotATroubledSpellIds(uint32 spellId, uint8 classId)
+{
+    return
+        spellId != 10321 && // Paladin judgment spell is taught as a learn from spell not the spell it self. (TBC Issue untested and left in for WoTLK)
+        spellId != 1785 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4 (WotLK)
+        spellId != 1786 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4 (WotLK)
+        spellId != 1787 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4 (WotLK)
+        spellId != 6783 && // Druid Prowl no longer has ranks so remove learning ranks 2-3 (WotLK)
+        spellId != 9913 && // Druid Prowl no longer has ranks so remove learning ranks 2-3 (WotLK)
+        spellId != 51426 && // DK Pestilence doesn't have ranks (WotLK)
+        spellId != 51427 && // DK Pestilence doesn't have ranks (WotLK)
+        spellId != 51428 && // DK Pestilence doesn't have ranks (WotLK)
+        spellId != 51429 && // DK Pestilence doesn't have ranks (WotLK)
+        spellId != 49913 && // DK Strangulate doesn't have ranks (WotLK)
+        spellId != 49914 && // DK Strangulate doesn't have ranks (WotLK)
+        spellId != 49915 && // DK Strangulate doesn't have ranks (WotLK)
+        spellId != 49916 &&  // DK Strangulate doesn't have ranks (WotLK)
+        !(classId == 8 &&    // Prevent mage from learning Shaman Spells (these may not be the correct id for the shaman spells but for now adding this filter in) (WotLK)
+            (spellId == 526 ||      // Cure Toxins
+                spellId == 52127 || // Water Shield Rank 1
+                spellId == 52129 || // Water Shield Rank 2
+                spellId == 52131 || // Water Shield Rank 3
+                spellId == 52134 || // Water Shield Rank 4
+                spellId == 52136 || // Water Shield Rank 5
+                spellId == 52138 || // Water Shield Rank 6
+                spellId == 51730 || // Earthliving Weapon 1
+                spellId == 51988 || // Earthliving Weapon 2
+                spellId == 51991 || // Earthliving Weapon 3
+                spellId == 51992 || // Earthliving Weapon 4
+                spellId == 51993 || // Earthliving Weapon 5
+                spellId == 51994 || // Earthliving Weapon 6
+                spellId == 66842 || // Call of the Elements
+                spellId == 66843 || // Call of the Ancestors
+                spellId == 66844 || // Call of the Spirits
+                spellId == 42748 || // Shadow Axe
+                spellId == 2894 || // Fire Elemental Totem
+                spellId == 51505 || // Lave Burst Rank 1
+                spellId == 51514)); // Hex
+        
 }

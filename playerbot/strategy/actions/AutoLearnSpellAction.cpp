@@ -141,7 +141,6 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
             LearnSpellFromSpell(tSpell->spell, out);
 #endif
 #if defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
-            // Future To Do move these checks into a boolean function to clean up.
             if (NotATroubledSpellIds(tSpell->spell, bot->getClass()))
             {
                 LearnSpell(tSpell->spell, out);

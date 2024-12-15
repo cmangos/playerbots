@@ -221,6 +221,10 @@ namespace ai
             creators["attack enemy flag carrier"] = &ActionContext::attack_enemy_fc;
             creators["bg check flag"] = &ActionContext::bg_check_flag;
 
+            // Arena Tactics
+            creators["arena tactics"] = &ActionContext::arena_tactics;
+            creators["arena move to center"] = &ActionContext::arena_move_to_center;
+
             // lightwell
             creators["use lightwell"] = &ActionContext::use_lightwell;
 
@@ -497,7 +501,11 @@ namespace ai
         static Action* bg_protect_fc(PlayerbotAI* ai) { return new BGTactics(ai, "protect fc"); }
         static Action* attack_enemy_fc(PlayerbotAI* ai) { return new AttackEnemyFlagCarrierAction(ai); }
         static Action* bg_use_buff(PlayerbotAI* ai) { return new BGTactics(ai, "use buff"); }
-        static Action* bg_check_flag(PlayerbotAI* ai) { return new BGTactics(ai, "check flag"); }   
+        static Action* bg_check_flag(PlayerbotAI* ai) { return new BGTactics(ai, "check flag"); }  
+
+        // Arena Tactics
+        static Action* arena_tactics(PlayerbotAI* ai) { return new ArenaTactics(ai); }   
+        static Action* arena_move_to_center(PlayerbotAI* ai) { return new ArenaTactics(ai, "move to center"); }
 
         // lightwell
         static Action* use_lightwell(PlayerbotAI* ai) { return new UseLightwellAction(ai); }

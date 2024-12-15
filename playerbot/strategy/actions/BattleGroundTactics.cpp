@@ -5277,23 +5277,24 @@ bool ArenaTactics::Execute(Event& event)
     if (!bg || bg->GetStatus() != STATUS_IN_PROGRESS || bg->GetStartDelayTime() > 0)
         return false;
 
-    // Move to the center if the bot is not in combat
-    if (!bot->IsInCombat())
-    {
-        // Remove "collision" strategy in non-combat state if present
-        if (ai->HasStrategy("collision", BotState::BOT_STATE_NON_COMBAT))
-            ai->ChangeStrategy("-collision", BotState::BOT_STATE_NON_COMBAT);
+    // Remove "collision" strategy in non-combat state if present
+    if (ai->HasStrategy("collision", BotState::BOT_STATE_NON_COMBAT))
+        ai->ChangeStrategy("-collision", BotState::BOT_STATE_NON_COMBAT);
 
-        // Reset strategies if in an arena and set no master
+    // Reset strategies if in an arena and set no master
 #if defined(MANGOS) || defined(CMANGOS)
-        if (sBattleGroundMgr.IsArenaType(bg->GetTypeId()))
-        {
-            ai->ResetStrategies(false);
-            ai->SetMaster(nullptr);
-        }
+    if (sBattleGroundMgr.IsArenaType(bg->GetTypeId()))
+    {
+        ai->ResetStrategies(false);
+        ai->SetMaster(nullptr);
+    }
 #endif
+
+    if (getName() == "move to center")
+    {
         return moveToCenter(bg);
     }
+    
 #endif
     return true;
 }

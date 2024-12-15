@@ -256,7 +256,7 @@ bool PossibleAttackTargetsValue::IsTapped(Unit* target, Player* player)
     return false;
 }
 
-bool PossibleAttackTargetsValue::IsValid(Unit* target, Player* player, float range, bool ignoreCC, bool checkAttackerValid)
+bool PossibleAttackTargetsValue::IsValid(Unit* target, Player* player, float range, bool ignoreSoftCC, bool ignoreHardCC, bool checkAttackerValid)
 {
     // Check for the valid attackers value
     if (checkAttackerValid && !AttackersValue::IsValid(target, player))
@@ -264,10 +264,10 @@ bool PossibleAttackTargetsValue::IsValid(Unit* target, Player* player, float ran
         return false;
     }
 
-    if (!IsPossibleTarget(target, player, range, ignoreCC))
+    if (!IsPossibleTarget(target, player, range, ignoreSoftCC, ignoreHardCC))
         return false;
 
-    if (sServerFacade.GetThreatManager(target).getCurrentVictim())
+    if (!target->GetObjectGuid().IsPlayer() && sServerFacade.GetThreatManager(target).getCurrentVictim())
         return true;
 
     if (target->GetGuidValue(UNIT_FIELD_TARGET))
@@ -279,13 +279,10 @@ bool PossibleAttackTargetsValue::IsValid(Unit* target, Player* player, float ran
     if (player->GetPlayerbotAI() && (target->GetObjectGuid() == PAI_VALUE(ObjectGuid, "attack target")))
         return true;
 
-    if(!HasIgnoreCCRti(target, player) && (HasBreakableCC(target, player) || HasUnBreakableCC(target, player)))
-        return true;
-
     return false;
 }
 
-bool PossibleAttackTargetsValue::IsPossibleTarget(Unit* target, Player* player, float range, bool ignoreCC)
+bool PossibleAttackTargetsValue::IsPossibleTarget(Unit* target, Player* player, float range, bool ignoreSoftCC, bool ignoreHardCC)
 {
     if(target)
     {
@@ -302,7 +299,7 @@ bool PossibleAttackTargetsValue::IsPossibleTarget(Unit* target, Player* player, 
         }
 
         // If the target is CC'ed
-        if(!ignoreCC && !HasIgnoreCCRti(target, player) && (HasBreakableCC(target, player) || HasUnBreakableCC(target, player)))
+        if(!HasIgnoreCCRti(target, player) && ((!ignoreSoftCC && HasBreakableCC(target, player)) || (!ignoreHardCC && HasUnBreakableCC(target, player))))
         {
             return false;
         }

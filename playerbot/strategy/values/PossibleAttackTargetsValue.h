@@ -11,8 +11,8 @@ namespace ai
 	public:
         PossibleAttackTargetsValue(PlayerbotAI* ai) : ObjectGuidListCalculatedValue(ai, "possible attack targets", 2), Qualified() {}
         std::list<ObjectGuid> Calculate();
-        static bool IsValid(Unit* target, Player* player, float range = sPlayerbotAIConfig.sightDistance, bool ignoreCC = false, bool checkAttackerValid = true);
-        static bool IsPossibleTarget(Unit* target, Player* player, float range, bool ignoreCC);
+        static bool IsValid(Unit* target, Player* player, float range = sPlayerbotAIConfig.sightDistance, bool ignoreSoftCC = false, bool ignoreHardCC = true, bool checkAttackerValid = true);
+        static bool IsPossibleTarget(Unit* target, Player* player, float range, bool ignoreSoftCC, bool ignoreHardCC);
         static bool HasBreakableCC(Unit* target, Player* player);
         static bool HasUnBreakableCC(Unit* target, Player* player);
         virtual std::string Format();

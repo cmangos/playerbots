@@ -913,7 +913,7 @@ void ShadowPriestAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     PriestAoeStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "ranged medium aoe",
+        "ranged high aoe",
         NextAction::array(0, new NextAction("mind sear", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -923,6 +923,10 @@ void ShadowPriestAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     triggers.push_back(new TriggerNode(
         "vampiric touch on attacker",
         NextAction::array(0, new NextAction("vampiric touch on attacker", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "ranged medium aoe",
+        NextAction::array(0, new NextAction("mind sear", ACTION_NORMAL + 2), NULL)));
 }
 
 void ShadowPriestAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -1676,7 +1676,7 @@ void PriestOffdpsStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     if (ai->HasStrategy("aoe", BotState::BOT_STATE_COMBAT))
     {
         triggers.push_back(new TriggerNode(
-            "ranged medium aoe",
+            "ranged high aoe",
             NextAction::array(0, new NextAction("mind sear", ACTION_HIGH + 2), NULL))); 
         
         triggers.push_back(new TriggerNode(
@@ -1686,6 +1686,10 @@ void PriestOffdpsStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         triggers.push_back(new TriggerNode(
             "melee medium aoe",
             NextAction::array(0, new NextAction("holy nova", ACTION_HIGH), NULL)));
+
+        triggers.push_back(new TriggerNode(
+            "ranged medium aoe",
+            NextAction::array(0, new NextAction("mind sear", ACTION_NORMAL + 2), NULL)));
     }
 
     triggers.push_back(new TriggerNode(

@@ -180,14 +180,8 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("mind freeze on enemy healer", ACTION_HIGH + 1), NULL)));
 
 	triggers.push_back(new TriggerNode(
-		"enemy player ten yards",
-		NextAction::array(0, new NextAction("chains of ice", ACTION_NORMAL + 9),
-			new NextAction("death grip", ACTION_NORMAL + 9),
-			new NextAction("reach melee", ACTION_NORMAL + 8), NULL)));
-
-	triggers.push_back(new TriggerNode(
 		"enemy out of melee",
-		NextAction::array(0, new NextAction("icy touch", ACTION_NORMAL + 9),
+		NextAction::array(0, new NextAction("chains of ice", ACTION_NORMAL + 9),
 			new NextAction("death grip", ACTION_NORMAL + 9),
 			new NextAction("reach melee", ACTION_NORMAL + 8), NULL)));
 
@@ -203,19 +197,19 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 
 	triggers.push_back(new TriggerNode(
 		"icy touch on attacker",
-		NextAction::array(0, new NextAction("icy touch", ACTION_HIGH + 1), NULL)));
+		NextAction::array(0, new NextAction("icy touch", ACTION_NORMAL + 1), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"icy touch",
-		NextAction::array(0, new NextAction("icy touch", ACTION_HIGH + 1), NULL)));
+		NextAction::array(0, new NextAction("icy touch", ACTION_NORMAL + 1), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"plague strike",
-		NextAction::array(0, new NextAction("plague strike", ACTION_HIGH + 1), NULL)));
+		NextAction::array(0, new NextAction("plague strike", ACTION_NORMAL + 1), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"plague strike on attacker",
-		NextAction::array(0, new NextAction("plague strike", ACTION_HIGH + 1), NULL)));
+		NextAction::array(0, new NextAction("plague strike", ACTION_NORMAL + 1), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"melee high aoe",

@@ -71,7 +71,8 @@ void UnholyDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 
 	triggers.push_back(new TriggerNode(
 		"often",
-		NextAction::array(0, new NextAction("army of the dead", ACTION_HIGH), NULL))); 
+		NextAction::array(0, new NextAction("army of the dead", ACTION_HIGH),
+			new NextAction("summon gargoyle", ACTION_HIGH), NULL)));
 	
 	triggers.push_back(new TriggerNode(
 		"often",

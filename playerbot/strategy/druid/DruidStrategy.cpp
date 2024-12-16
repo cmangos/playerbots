@@ -1077,6 +1077,10 @@ void DruidCureStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "party member remove curse",
         NextAction::array(0, new NextAction("remove curse on party", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "rooted",
+        NextAction::array(0, new NextAction("caster form", ACTION_DISPEL), NULL)));
 }
 
 void DruidCureStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -5302,6 +5302,7 @@ bool ArenaTactics::Execute(Event& event)
 bool ArenaTactics::moveToCenter(BattleGround* bg)
 {
 #ifndef MANGOSBOT_ZERO
+    bool botMoved = false;
     uint32 preference = context->GetValue<uint32>("bg role")->Get();
     float randomOffsetX = frand(-2, 2);
     float randomOffsetY = frand(-2, 2);
@@ -5312,22 +5313,22 @@ bool ArenaTactics::moveToCenter(BattleGround* bg)
     case BATTLEGROUND_BE:
         // Two locations in Blade's Edge Arena based on preference
         if (preference >= 5)
-            MoveTo(bg->GetMapId(), 6185.0f + randomOffsetX, 236.0f + randomOffsetY, 6.0f, false, true);
+            botMoved = MoveTo(bg->GetMapId(), 6185.0f + randomOffsetX, 236.0f + randomOffsetY, 6.0f, false, true);
         else
-            MoveTo(bg->GetMapId(), 6240.0f + randomOffsetX, 262.0f + randomOffsetY, 2.0f, false, true);
+            botMoved = MoveTo(bg->GetMapId(), 6240.0f + randomOffsetX, 262.0f + randomOffsetY, 2.0f, false, true);
         break;
 
     case BATTLEGROUND_RL:
         // Two locations in Ruins of Lordaeron Arena based on preference
         if (preference < 5)
-            MoveTo(bg->GetMapId(), 1320.0f + randomOffsetX, 1672.0f + randomOffsetY, 38.0f, false, true);
+            botMoved = MoveTo(bg->GetMapId(), 1320.0f + randomOffsetX, 1672.0f + randomOffsetY, 38.0f, false, true);
         else
-            MoveTo(bg->GetMapId(), 1273.0f + randomOffsetX, 1666.0f + randomOffsetY, 36.0f, false, true);
+            botMoved = MoveTo(bg->GetMapId(), 1273.0f + randomOffsetX, 1666.0f + randomOffsetY, 36.0f, false, true);
         break;
 
     case BATTLEGROUND_NA:
         // Single central location in Nagrand Arena
-        MoveTo(bg->GetMapId(), 4055.0f + frand(-5, 5), 2921.0f + frand(-5, 5), 15.1f, false, true);
+        botMoved = MoveTo(bg->GetMapId(), 4055.0f + frand(-5, 5), 2921.0f + frand(-5, 5), 15.1f, false, true);
         break;
 
     default:
@@ -5340,5 +5341,5 @@ bool ArenaTactics::moveToCenter(BattleGround* bg)
         context->GetValue<uint32>("bg role")->Set(urand(0, 9));
 
 #endif
-    return true;
+    return botMoved;
 }

@@ -2107,7 +2107,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                             }
 
                             // Skip if the offhand is not worth equipping
-                            if (!(betterDps || (betterDamage && betterValue))) continue;
+                            if (betterDps || (betterDamage && betterValue)) continue;
                         }
 
                         if ((incremental || progressiveGear) && oldItem && oldProto->Quality < ITEM_QUALITY_NORMAL && proto->Quality < ITEM_QUALITY_NORMAL && level > 5)

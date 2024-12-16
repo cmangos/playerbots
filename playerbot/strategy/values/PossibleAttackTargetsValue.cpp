@@ -178,7 +178,7 @@ bool PossibleAttackTargetsValue::IsImmuneToDamage(Unit* target, Player* player)
         for (const Aura* aura : ai->GetAuras(target))
         {
             const SpellEntry* spellInfo = aura->GetSpellProto();
-            if (spellInfo)
+            if (spellInfo && spellInfo->Id != 25771) // Forbearance
             {
                 if (spellInfo->Mechanic == MECHANIC_BANISH || 
                     spellInfo->Mechanic == MECHANIC_INVULNERABILITY ||

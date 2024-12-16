@@ -4,20 +4,9 @@
 
 namespace ai
 {
-	class CastBloodPresenceAction : public CastBuffSpellAction {
-	public:
-		CastBloodPresenceAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "blood presence") {}
-	};
-
-	class CastFrostPresenceAction : public CastBuffSpellAction {
-	public:
-		CastFrostPresenceAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "frost presence") {}
-	};
-
-	class CastUnholyPresenceAction : public CastBuffSpellAction {
-	public:
-		CastUnholyPresenceAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "unholy presence") {}
-	};
+	BUFF_ACTION(CastBloodPresenceAction, "blood presence");
+	BUFF_ACTION(CastFrostPresenceAction, "frost presence");
+	BUFF_ACTION(CastUnholyPresenceAction, "unholy presence");
 
 	class CastDeathchillAction : public CastBuffSpellAction {
 	public:
@@ -116,10 +105,10 @@ namespace ai
 		CastUnholyBlightAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "unholy blight") {}
 	};
 
-	class CastSummonGargoyleAction : public CastBuffSpellAction
+	class CastSummonGargoyleAction : public CastSpellAction
 	{
 	public:
-		CastSummonGargoyleAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "summon gargoyle") {}
+		CastSummonGargoyleAction(PlayerbotAI* ai) : CastSpellAction(ai, "summon gargoyle") {}
 	};
 
 	class CastGhoulFrenzyAction : public CastBuffSpellAction

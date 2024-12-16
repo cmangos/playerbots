@@ -27,6 +27,8 @@ namespace ai
         virtual bool IsActive();
     };
 
+	CAN_CAST_TRIGGER(SummonGargoyleTrigger, "summon gargoyle");
+
 	class BloodTapTrigger : public BuffTrigger {
 	public:
 		BloodTapTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "blood tap") {}

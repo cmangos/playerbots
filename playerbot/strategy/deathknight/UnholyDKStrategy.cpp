@@ -19,7 +19,7 @@ public:
 		//creators["unholy blight"] = &unholy_blight;
 		creators["scourge strike"] = &scourge_strike;
 		//creators["death and decay"] = &death_and_decay;
-		//creators["unholy pressence"] = &unholy_pressence;
+		//creators["unholy presence"] = &unholy_presence;
 		//creators["raise dead"] = &raise_dead;
 		creators["army of the dead"] = &army_of_the_dead;
 		//creators["summon gargoyle"] = &army of the dead;
@@ -33,32 +33,37 @@ private:
 	static ActionNode* death_strike(PlayerbotAI* ai)
 	{
 		return new ActionNode("death strike",
-			/*P*/ NextAction::array(0, new NextAction("unholy pressence"), NULL),
+			/*P*/ NextAction::array(0, new NextAction("unholy presence"), NULL),
 			/*A*/ NULL,
 			/*C*/ NULL);
 	}
 	static ActionNode* corpse_explosion(PlayerbotAI* ai)
 	{
 		return new ActionNode("corpse explosion",
-			/*P*/ NextAction::array(0, new NextAction("unholy pressence"), NULL),
+			/*P*/ NextAction::array(0, new NextAction("unholy presence"), NULL),
 			/*A*/ NULL,
 			/*C*/ NULL);
 	}
 	static ActionNode* scourge_strike(PlayerbotAI* ai)
 	{
 		return new ActionNode("scourge strike",
-			/*P*/ NextAction::array(0, new NextAction("unholy pressence"), NULL),
+			/*P*/ NextAction::array(0, new NextAction("unholy presence"), NULL),
 			/*A*/ NextAction::array(0, new NextAction("death strike"), NULL),
 			/*C*/ NULL);
 	}
 	static ActionNode* army_of_the_dead(PlayerbotAI* ai)
 	{
 		return new ActionNode("army of the dead",
-			/*P*/ NextAction::array(0, new NextAction("unholy pressence"), NULL),
+			/*P*/ NextAction::array(0, new NextAction("unholy presence"), NULL),
 			/*A*/ NextAction::array(0, new NextAction("summon gargoyle"), NULL),
 			/*C*/ NULL);
 	}
 };
+
+UnholyDKStrategy::UnholyDKStrategy(PlayerbotAI* ai) : GenericDKStrategy(ai)
+{
+	actionNodeFactories.Add(new UnholyDKStrategyActionNodeFactory());
+}
 
 NextAction** UnholyDKStrategy::GetDefaultCombatActions()
 {
@@ -70,9 +75,12 @@ void UnholyDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
     GenericDKStrategy::InitCombatTriggers(triggers);
 
 	triggers.push_back(new TriggerNode(
+		"summon gargoyle",
+		NextAction::array(0, new NextAction("summon gargoyle", ACTION_HIGH + 1), NULL)));
+	
+	triggers.push_back(new TriggerNode(
 		"often",
-		NextAction::array(0, new NextAction("army of the dead", ACTION_HIGH),
-			new NextAction("summon gargoyle", ACTION_HIGH), NULL)));
+		NextAction::array(0, new NextAction("army of the dead", ACTION_HIGH), NULL)));
 	
 	triggers.push_back(new TriggerNode(
 		"often",

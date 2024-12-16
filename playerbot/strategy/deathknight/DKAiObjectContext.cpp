@@ -104,6 +104,8 @@ namespace ai
 				creators["blood tap"] = &TriggerFactoryInternal::blood_tap;
 				creators["raise dead"] = &TriggerFactoryInternal::raise_dead;
 				creators["chains of ice"] = &TriggerFactoryInternal::chains_of_ice;
+				creators["dk presence"] = &TriggerFactoryInternal::dk_presence;
+				creators["summon gargoyle"] = &TriggerFactoryInternal::summon_gargoyle;
             }
 
         private:
@@ -124,6 +126,8 @@ namespace ai
 			static Trigger* blood_tap(PlayerbotAI* ai) { return new BloodTapTrigger(ai); }
 			static Trigger* raise_dead(PlayerbotAI* ai) { return new RaiseDeadTrigger(ai); }
 			static Trigger* chains_of_ice(PlayerbotAI* ai) { return new ChainsOfIceSnareTrigger(ai); }
+			static Trigger* dk_presence(PlayerbotAI* ai) { return new DKPresenceTrigger(ai); }
+			static Trigger* summon_gargoyle(PlayerbotAI* ai) { return new SummonGargoyleTrigger(ai); }
 
 
 		};
@@ -153,7 +157,7 @@ namespace ai
 				creators["unholy blight"] = &AiObjectContextInternal::unholy_blight;
 				creators["scourge strike"] = &AiObjectContextInternal::scourge_strike;
 				creators["death and decay"] = &AiObjectContextInternal::death_and_decay;
-				creators["unholy pressence"] = &AiObjectContextInternal::unholy_pressence;
+				creators["unholy presence"] = &AiObjectContextInternal::unholy_presence;
 				creators["raise dead"] = &AiObjectContextInternal::raise_dead;
 				creators["army of the dead"] = &AiObjectContextInternal::army_of_the_dead;
 				creators["summon gargoyle"] = &AiObjectContextInternal::summon_gargoyle;
@@ -210,7 +214,7 @@ namespace ai
 			static Action* unholy_blight(PlayerbotAI* ai) { return new CastUnholyBlightAction(ai); }
 			static Action* scourge_strike(PlayerbotAI* ai) { return new CastScourgeStrikeAction(ai); }
 			static Action* death_and_decay(PlayerbotAI* ai) { return new CastDeathAndDecayAction(ai); }
-			static Action* unholy_pressence(PlayerbotAI* ai) { return new CastUnholyPresenceAction(ai); }
+			static Action* unholy_presence(PlayerbotAI* ai) { return new CastUnholyPresenceAction(ai); }
 			static Action* raise_dead(PlayerbotAI* ai) { return new CastRaiseDeadAction(ai); }
 			static Action* army_of_the_dead(PlayerbotAI* ai) { return new CastArmyOfTheDeadAction(ai); }
 			static Action* summon_gargoyle(PlayerbotAI* ai) { return new CastSummonGargoyleAction(ai); }

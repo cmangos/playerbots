@@ -106,8 +106,7 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
                     std::string SpellName = spell->SpellName[0];
 #ifdef MANGOSBOT_ZERO
                     if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
-#endif
-#if defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
+#elif defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
                         if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL || spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
 #endif
                         {
@@ -121,8 +120,7 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
 #ifdef MANGOSBOT_ZERO
                                     if (SpellName.find("Apprentice") != std::string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
                                         continue;
-#endif
-#if defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
+#elif defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
                                     std::string SpellRank = spell->Rank[0];
                                     if (SpellName.find("Apprentice") != std::string::npos && (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY))
                                         continue;
@@ -137,6 +135,8 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
             }
 #ifdef MANGOSBOT_ZERO // Vanilla
             LearnSpellFromSpell(tSpell->spell, out);
+#elif MANGOSBOT_ONE
+            LearnSpell(tSpell->spell, out);
 #endif
         }
     }
@@ -339,13 +339,13 @@ bool AutoLearnSpellAction::IsValidSpell(uint32 spellId)
         spellId != 6453 && // Prevents hunter from learning pet skill Pet Resistance Rank 5
         // Paladin
         spellId != 1973; // Prevents Paladins from learning zzOldHip Shot III.
-#endif
-#ifdef  MANGOSBOT_ONE
+#elif MANGOSBOT_ONE
     isSpellValid =
-        // Paladin (TBC)
-        spellId != 10321; // Paladin judgment spell is taught as a learn from spell not the spell it self. (TBC Issue untested and left in for WoTLK)
-#endif //  MANGOSBOT_ONE
-#ifdef MANGOSBOT_TWO
+        // Paladin
+        spellId != 10321 && // Prevents Paladin from learning judgment training spell.
+        // Hunter
+        spellId != 530;     // Prevents hunter from learning Charm (Possess) (Spell is attached to a pet trainer)
+#elif MANGOSBOT_TWO
     isSpellValid =
         // Rogue (Wotlk)
         spellId != 1785 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4 (WotLK)

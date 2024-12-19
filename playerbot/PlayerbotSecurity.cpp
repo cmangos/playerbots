@@ -16,10 +16,6 @@ PlayerbotSecurity::PlayerbotSecurity(Player* const bot) : bot(bot), account(0)
 
 PlayerbotSecurityLevel PlayerbotSecurity::LevelFor(Player* from, DenyReason* reason, bool ignoreGroup)
 {
-    if(bot->isRealPlayer() && !from->isRealPlayer())
-    {
-        return PlayerbotSecurityLevel::PLAYERBOT_SECURITY_DENY_ALL;
-    }
 
     // Allow everything if request is from gm account
     if (from->GetSession()->GetSecurity() >= SEC_GAMEMASTER)

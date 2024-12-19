@@ -264,11 +264,34 @@ bool PlayerbotAIConfig::Initialize()
 
     randomBotLoginWithPlayer = config.GetBoolDefault("AiPlayerbot.RandomBotLoginWithPlayer", false);
     asyncBotLogin = config.GetBoolDefault("AiPlayerbot.AsyncBotLogin", false);
+    preloadHolders = config.GetBoolDefault("AiPlayerbot.PreloadHolders", false);
+    
     freeRoomForNonSpareBots = config.GetIntDefault("AiPlayerbot.FreeRoomForNonSpareBots", 1);
 
     loginBotsNearPlayerRange = config.GetIntDefault("AiPlayerbot.LoginBotsNearPlayerRange", 1000);
     
-    LoadListString<std::vector<std::string> >(config.GetStringDefault("AiPlayerbot.LoginCriteria", "classrace,guild"), loginCriteria);
+    LoadListString<std::vector<std::string> >(config.GetStringDefault("AiPlayerbot.DefaultLoginCriteria", "maxbots,spareroom,offline"), defaultLoginCriteria);
+
+    std::vector<std::string> criteriaValues = configA->GetValues("AiPlayerbot.LoginCriteria");
+    std::sort(criteriaValues.begin(), criteriaValues.end());
+    loginCriteria.clear();
+    for (auto& value : criteriaValues)
+    {
+        loginCriteria.push_back({});
+        LoadListString<std::vector<std::string> >(config.GetStringDefault(value, ""), loginCriteria.back());
+    }
+
+    if (criteriaValues.empty())
+    {
+        loginCriteria.push_back({ "group" });
+        loginCriteria.push_back({ "arena" });
+        loginCriteria.push_back({ "bg" });
+        loginCriteria.push_back({ "guild" });
+        loginCriteria.push_back({ "logoff,classrace,level,online" });
+        loginCriteria.push_back({ "logoff,classrace,level" });
+        loginCriteria.push_back({ "logoff,classrace" });
+    }
+    
 
     for (uint32 level = 1; level <= DEFAULT_MAX_LEVEL; ++level)
     {
@@ -603,6 +626,7 @@ bool PlayerbotAIConfig::Initialize()
     respawnModForInstances = config.GetBoolDefault("AiPlayerbot.RespawnModForInstances", false);
 
     //LLM START
+    llmEnabled = config.GetIntDefault("AiPlayerbot.LLMEnabled", 1);
     llmApiEndpoint = config.GetStringDefault("AiPlayerbot.LLMApiEndpoint", "http://127.0.0.1:5001/api/v1/generate");
     try {
         llmEndPointUrl = parseUrl(llmApiEndpoint);
@@ -764,12 +788,6 @@ bool PlayerbotAIConfig::Initialize()
 
     if (sPlayerbotAIConfig.randomBotJoinBG)
         sRandomPlayerbotMgr.LoadBattleMastersCache();
-
-    if (sPlayerbotAIConfig.asyncBotLogin)
-    {
-        std::thread t([] {sPlayerBotLoginMgr.LoadBotsFromDb(); });
-        t.detach();
-    }
 
     sLog.outString("---------------------------------------");
     sLog.outString("        AI Playerbot initialized       ");

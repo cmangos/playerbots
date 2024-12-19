@@ -554,13 +554,14 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     if (!sPlayerbotAIConfig.randomBotAutologin || !sPlayerbotAIConfig.enabled)
         return;
 
+    if (!playersLevel)
+        playersLevel = sPlayerbotAIConfig.syncLevelNoPlayer;
+
     ScaleBotActivity();
     if (sPlayerbotAIConfig.asyncBotLogin)
     {
         auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "AsyncBotLogin");
-        sPlayerBotLoginMgr.SetPlayerLocations(players);
-        sPlayerBotLoginMgr.LogoutBots(sPlayerbotAIConfig.randomBotsMaxLoginsPerInterval);
-        sPlayerBotLoginMgr.LoginBots(sPlayerbotAIConfig.randomBotsMaxLoginsPerInterval);
+        sPlayerBotLoginMgr.Update(players);
         pmo.reset();
     }
 
@@ -829,9 +830,6 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
 
     uint32 maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
     float currentAvgLevel = 0, wantedAvgLevel = 0, randomAvgLevel = 0;
-
-    if (!playersLevel)
-        playersLevel = sPlayerbotAIConfig.syncLevelNoPlayer;
 
     if(sPlayerbotAIConfig.asyncBotLogin)
         return 0;
@@ -3051,27 +3049,6 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         return true;
     }
 
-    if (cmd == "login db")
-    {
-        std::thread t([] {sPlayerBotLoginMgr.LoadBotsFromDb(); });
-        t.detach();
-        return true;
-    }
-
-    if (cmd == "login check")
-    {
-        std::thread t([] {sPlayerBotLoginMgr.SetShowSpace(); });
-        t.detach();
-        return true;
-    }
-
-    if (cmd == "login login")
-    {
-        sPlayerBotLoginMgr.LoginBots(5000);
-        return true;
-    }
-
-
     if (cmd == "update")
     {
         sRandomPlayerbotMgr.UpdateAIInternal(0);
@@ -3142,6 +3119,12 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
             t.detach();
         }
 
+        return true;
+    }
+
+    if (cmd.find("login debug") == 0)
+    {
+        sPlayerBotLoginMgr.ToggleDebug();
         return true;
     }
 

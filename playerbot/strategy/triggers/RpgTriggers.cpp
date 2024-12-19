@@ -516,10 +516,13 @@ bool RpgUseTrigger::IsActive()
 
 bool RpgAIChatTrigger::IsActive()
 {
-    if (FarFromRpgTargetTrigger::IsActive())
+    if (sPlayerbotAIConfig.llmEnabled == 0)
         return false;
 
-    if (!ai->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT))
+    if (FarFromRpgTargetTrigger::IsActive())
+        return false;    
+
+    if (!ai->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && sPlayerbotAIConfig.llmEnabled < 3)
         return false;
 
     if (!sPlayerbotAIConfig.llmRpgAIChatChance || !(urand(0, 99) < sPlayerbotAIConfig.llmRpgAIChatChance))

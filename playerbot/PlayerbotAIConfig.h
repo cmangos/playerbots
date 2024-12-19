@@ -341,6 +341,7 @@ public:
         uint32 specId = 0;
         uint32 minLevel = 0;
         uint32 maxLevel = 0;
+        uint32 eventId = 0;
     };
 
     std::vector<worldBuff> worldBuffs;

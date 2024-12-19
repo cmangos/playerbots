@@ -65,10 +65,12 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
         if (!co)
             continue;
 
-        if (co->TrainerType != TRAINER_TYPE_CLASS && co->TrainerType != TRAINER_TYPE_TRADESKILLS)
+        if (co->TrainerType != TRAINER_TYPE_CLASS && 
+            co->TrainerType != TRAINER_TYPE_TRADESKILLS &&
+            co->TrainerType != TRAINER_TYPE_PETS)
             continue;
 
-        if (co->TrainerType == TRAINER_TYPE_CLASS && co->TrainerClass != bot->getClass())
+        if ((co->TrainerType == TRAINER_TYPE_CLASS || co->TrainerType == TRAINER_TYPE_PETS) && co->TrainerClass != bot->getClass())
             continue;
 
         uint32 trainerId = co->TrainerTemplateId;
@@ -138,6 +140,11 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
 #endif
         }
     }
+
+    if (bot->getClass() == CLASS_WARLOCK)
+    {
+
+    }
 }
 
 void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
@@ -161,25 +168,35 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
             quest->GetRewSpellCast() != 12510) // Prevents mages from learning the Teleport to Azushara Tower spell.
         {
             if (LearnSpellFromSpell(quest->GetRewSpellCast(), out))
+            {
                 GetClassQuestItem(quest, out);
-            // For some reason the shaman quest Call of the air has a GetRewSpellCast spell but the spell id is actually the 
-            // spell the that is supposed to be learned.
+            }
+            // Shaman Call of Air Quest casts Swift Wind on player and rewards Air Totem, Swift Wind is not to be learned however it is a one time cast.
             else if (quest->GetRewSpellCast() == 8385)
-                if (LearnSpell(quest->GetRewSpellCast(), out))
+            {
+                bool hasAirTotem = false;
+                hasAirTotem = bot->HasItemCount(5178, 1, true);
+                if (!hasAirTotem)
+                {
                     GetClassQuestItem(quest, out);
+                }
+            }
         }
         else if (quest->GetRewSpell() > 0)
         {
-            if (quest->GetRewSpell() == 19318 ||    // Touch of weakness Teaching Spell listed as actual spell
-                quest->GetRewSpell() == 2946)       // Devouring Plague Teaching Spell listed as actual spell
+            if (IsTeachingSpellListedAsSpell(quest->GetRewSpell()))
             {
                 if (LearnSpellFromSpell(quest->GetRewSpell(), out))
+                {
                     GetClassQuestItem(quest, out);
+                }
             }
             else
             {
                 if (LearnSpell(quest->GetRewSpell(), out))
+                {
                     GetClassQuestItem(quest, out);
+                }
             }
         }
     }
@@ -205,19 +222,6 @@ void AutoLearnSpellAction::GetClassQuestItem(Quest const* quest, std::ostringstr
                     ItemPosCountVec itemVec;
                     ItemPrototype const* itemP = sObjectMgr.GetItemPrototype(quest->RewItemId[i]);
                     InventoryResult result = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, itemVec, itemP->ItemId, quest->RewItemCount[i]);
-                    if (result == EQUIP_ERR_OK)
-                    {
-                        bot->StoreNewItemInInventorySlot(itemP->ItemId, quest->RewItemCount[i]);
-                        *out << "Got " << chat->formatItem(itemP, 1, 1) << " from " << quest->GetTitle();
-                    }
-                    else if (result == EQUIP_ERR_INVENTORY_FULL)
-                    {
-                        MailDraft draft("Item(s) from quest reward", quest->GetTitle());
-                        Item* item = item->CreateItem(itemP->ItemId, quest->RewItemCount[i]);
-                        draft.AddItem(item);
-                        draft.SendMailTo(MailReceiver(bot), MailSender(bot));
-                        *out << "Could not add item " << chat->formatItem(itemP) << " from " << quest->GetTitle() << ". " << bot->GetName() << "'s inventory is full.";
-                    }
                     if (result == EQUIP_ERR_OK)
                     {
                         bot->StoreNewItemInInventorySlot(itemP->ItemId, quest->RewItemCount[i]);
@@ -301,7 +305,9 @@ bool AutoLearnSpellAction::LearnSpellFromSpell(uint32 spellId, std::ostringstrea
 */
 bool AutoLearnSpellAction::IsValidSpell(uint32 spellId)
 {
-    bool isSpellValid =
+    bool isSpellValid = true;
+#ifdef MANGOSBOT_ZERO
+    isSpellValid =
         // All Classes (Classic)
         spellId != 6463 && // Incorrect lock pick skill that was taught to all classes (Rogues still learn correct lock pick skill) (DB Error)
         spellId != 6461 &&  // Incorrect lock pick skill that was taught to all classes (Rogues still learn correct lock pick skill) (DB Error)
@@ -309,8 +315,38 @@ bool AutoLearnSpellAction::IsValidSpell(uint32 spellId)
         spellId != 877 && // Prevent Warriors from learning Elemental Fury (DB Error)
         // Shaman (Classic)
         spellId != 8385 && // Prevents Shaman from learning Swift Wind spell which is cast onto player as a reward, the spell is not supposed to be learned.
+        // Hunter
+        spellId != 542  && // Prevents hunter from learning pet skill zzOLDLearn Nature Resistance.
+        spellId != 6284 && // Prevents hunter from learning pet skill Pet Hardiness Rank 1
+        spellId != 6287 && // Prevents hunter from learning pet skill Pet Hardiness Rank 2
+        spellId != 6288 && // Prevents hunter from learning pet skill Pet Hardiness Rank 3
+        spellId != 6289 && // Prevents hunter from learning pet skill Pet Hardiness Rank 4
+        spellId != 6290 && // Prevents hunter from learning pet skill Pet Hardiness Rank 5
+        spellId != 6312 && // Prevents hunter from learning pet skill Pet Aggression Rank 1
+        spellId != 6318 && // Prevents hunter from learning pet skill Pet Aggression Rank 2
+        spellId != 6319 && // Prevents hunter from learning pet skill Pet Aggression Rank 3
+        spellId != 6320 && // Prevents hunter from learning pet skill Pet Aggression Rank 4
+        spellId != 6321 && // Prevents hunter from learning pet skill Pet Aggression Rank 5
+        spellId != 6329 && // Prevents hunter from learning pet skill Pet Recovery Rank 1
+        spellId != 6335 && // Prevents hunter from learning pet skill Pet Recovery Rank 2
+        spellId != 6336 && // Prevents hunter from learning pet skill Pet Recovery Rank 3
+        spellId != 6337 && // Prevents hunter from learning pet skill Pet Recovery Rank 4
+        spellId != 6338 && // Prevents hunter from learning pet skill Pet Recovery Rank 5
+        spellId != 6448 && // Prevents hunter from learning pet skill Pet Resistance Rank 1
+        spellId != 6450 && // Prevents hunter from learning pet skill Pet Resistance Rank 2
+        spellId != 6451 && // Prevents hunter from learning pet skill Pet Resistance Rank 3
+        spellId != 6452 && // Prevents hunter from learning pet skill Pet Resistance Rank 4
+        spellId != 6453 && // Prevents hunter from learning pet skill Pet Resistance Rank 5
+        // Paladin
+        spellId != 1973; // Prevents Paladins from learning zzOldHip Shot III.
+#endif
+#ifdef  MANGOSBOT_ONE
+    isSpellValid =
         // Paladin (TBC)
-        spellId != 10321 && // Paladin judgment spell is taught as a learn from spell not the spell it self. (TBC Issue untested and left in for WoTLK)
+        spellId != 10321; // Paladin judgment spell is taught as a learn from spell not the spell it self. (TBC Issue untested and left in for WoTLK)
+#endif //  MANGOSBOT_ONE
+#ifdef MANGOSBOT_TWO
+    isSpellValid =
         // Rogue (Wotlk)
         spellId != 1785 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4 (WotLK)
         spellId != 1786 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4 (WotLK)
@@ -348,5 +384,24 @@ bool AutoLearnSpellAction::IsValidSpell(uint32 spellId)
         spellId != 2894 && // Fire Elemental Totem
         spellId != 51505 && // Lave Burst Rank 1
         spellId != 51514; // Hex
+#endif
     return isSpellValid;
+}
+
+bool AutoLearnSpellAction::IsTeachingSpellListedAsSpell(uint32 spellId)
+{
+    bool isTeachingSpellListedAsSpell = false;
+#ifdef MANGOSBOT_ZERO
+    isTeachingSpellListedAsSpell = 
+        spellId == 19318 ||    // Touch of weakness Teaching Spell listed as actual spell
+        spellId == 2946  ||    // Devouring Plague Teaching Spell listed as actual spell
+        spellId == 19325 ||    // Hex Of Weakness Teaching Spell listed as actual spell
+        spellId == 19331 ||    // Shadowguard Teaching Spell listed as actual spell
+        spellId == 19338 ||    // Desperate Prayer Teaching Spell listed as actual spell
+        spellId == 19345 ||    // Feed Back Teaching Spell listed as actual spell
+        spellId == 19337 ||    // Fear Ward Teaching Spell listed as actual spell
+        spellId == 19357 ||    // Elune's Grace Teaching Spell listed as actual spell
+        spellId == 19350;      // Starshards Teaching Spell listed as actual spell
+#endif
+        return isTeachingSpellListedAsSpell;
 }

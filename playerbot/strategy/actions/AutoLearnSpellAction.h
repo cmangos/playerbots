@@ -21,5 +21,6 @@ namespace ai
         bool LearnSpell(uint32 spellId, std::ostringstream* out);
         bool LearnSpellFromSpell(uint32 spellId, std::ostringstream* out);
         bool IsValidSpell(uint32 spellId);
+        bool IsTeachingSpellListedAsSpell(uint32 spellId);
     };
 }

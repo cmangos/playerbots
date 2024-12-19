@@ -49,8 +49,11 @@ namespace ai
                 return true;
             }
 
-            HandleCommand("c", command, owner);
-            HandleCommand("t", command, owner);
+            if (owner->isRealPlayer())
+            {
+                HandleCommand("c", command, owner);
+                HandleCommand("t", command, owner);
+            }
             return true;
         }
 

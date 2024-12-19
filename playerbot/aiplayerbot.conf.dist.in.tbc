@@ -950,6 +950,8 @@ AiPlayerbot.PerfMonEnabled = 0
 # For a quickstart download koboldcpp, a 7b model from huggingface and start kobold.
 # (Default) KoboldCPP examples:
 
+# Enables/disables LLM globaly: 0 = disabled, 1 = enabled with ai chat strategy, 2 = ai chat strategy default for all bots, 3 = enabled without ai chat strategy.
+# AiPlayerbot.LLMEnabled = 1
 # The api endpoint that should be called for chat generation.
 # AiPlayerbot.LLMApiEndpoint = http://127.0.0.1:5001/api/v1/generate
 # The api key needed to access the endpoint.

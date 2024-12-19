@@ -1585,7 +1585,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             }
 #endif
 
-            bool isAiChat = HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT);
+            bool isAiChat = sPlayerbotAIConfig.llmEnabled > 0 && (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) || sPlayerbotAIConfig.llmEnabled == 3);
 
             if (isAiChat && (lang == LANG_ADDON || message.find("d:") == 0))
                 return;
@@ -2854,7 +2854,7 @@ bool PlayerbotAI::SayToGuild(std::string msg)
             {
                 if (player.second->GetGuildId() == bot->GetGuildId())
                 {
-                    if (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && sPlayerbotAIConfig.llmBotToBotChatChance)
+                    if (sPlayerbotAIConfig.llmEnabled > 0 && (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) || sPlayerbotAIConfig.llmEnabled == 3) && sPlayerbotAIConfig.llmBotToBotChatChance)
                     {
                         WorldPacket packet_template(CMSG_MESSAGECHAT);
 
@@ -3129,7 +3129,7 @@ bool PlayerbotAI::SayToParty(std::string msg)
         return false;
     }
 
-    if (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && sPlayerbotAIConfig.llmBotToBotChatChance)
+    if (sPlayerbotAIConfig.llmEnabled > 0 && (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) || sPlayerbotAIConfig.llmEnabled == 3) && sPlayerbotAIConfig.llmBotToBotChatChance)
     {
         for (auto reciever : GetPlayersInGroup())
         {
@@ -3206,7 +3206,7 @@ bool PlayerbotAI::Say(std::string msg)
         lang = LANG_ORCISH;
     }
 
-    if (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && sPlayerbotAIConfig.llmBotToBotChatChance)
+    if (sPlayerbotAIConfig.llmEnabled > 0 && (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) || sPlayerbotAIConfig.llmEnabled == 3) && sPlayerbotAIConfig.llmBotToBotChatChance)
     {
         if (this->HasPlayerNearby(35.0f))
         {
@@ -5290,6 +5290,12 @@ uint32 PlayerbotAI::GetFixedBotNumer(BotTypeNumber typeNumber, uint32 maxNum, fl
 
 GrouperType PlayerbotAI::GetGrouperType()
 {
+    AiObjectContext* context = GetAiObjectContext();
+    int32 grouperOverride = AI_VALUE2(int32, "manual saved int", "grouper override");
+
+    if (grouperOverride >= 0)
+        return GrouperType(grouperOverride);
+
     uint32 maxGroupType = sPlayerbotAIConfig.randomBotRaidNearby ? 100 : 95;
     uint32 grouperNumber = GetFixedBotNumer(BotTypeNumber::GROUPER_TYPE_NUMBER, maxGroupType, 0);
 
@@ -5322,6 +5328,12 @@ GrouperType PlayerbotAI::GetGrouperType()
 
 GuilderType PlayerbotAI::GetGuilderType()
 {
+    AiObjectContext* context = GetAiObjectContext();
+    int32 guilderOverride = AI_VALUE2(int32, "manual saved int", "guilder override");
+
+    if (guilderOverride >= 0)
+        return GuilderType(guilderOverride);
+
     uint32 grouperNumber = GetFixedBotNumer(BotTypeNumber::GUILDER_TYPE_NUMBER, 100, 0);
 
     if (grouperNumber < 20 && !HasRealPlayerMaster())
@@ -5336,6 +5348,25 @@ GuilderType PlayerbotAI::GetGuilderType()
         return GuilderType::LARGE;
 
     return GuilderType::MASSIVE;
+}
+
+uint32 PlayerbotAI::GetMaxPreferedGuildSize()
+{
+    uint32 maxSize = (uint8)GetGuilderType();
+
+    if (!bot->GetGuildId()) return maxSize;
+
+    Guild* guild =sGuildMgr.GetGuildById(bot->GetGuildId());
+
+    uint32 maxRank = guild->GetRanksSize();
+
+    MemberSlot* botMember = guild->GetMemberSlot(bot->GetObjectGuid());
+
+    if (!botMember->RankId) return maxSize;
+
+    uint32 memberMod = (botMember->RankId * 20) / maxRank;
+
+    return (maxSize * (100 - memberMod)) / 100;
 }
 
 bool PlayerbotAI::HasPlayerNearby(WorldPosition pos, float range)
@@ -5536,9 +5567,10 @@ std::pair<uint32, uint32> PlayerbotAI::GetPriorityBracket(ActivePiorityType type
     case ActivePiorityType::HAS_REAL_PLAYER_MASTER:
     case ActivePiorityType::IS_REAL_PLAYER:
     case ActivePiorityType::IN_GROUP_WITH_REAL_PLAYER:
+        return { 0,0 };
     case ActivePiorityType::IN_INSTANCE:
     case ActivePiorityType::VISIBLE_FOR_PLAYER:
-        return { 0,0 };
+        return { 0,5 };
     case ActivePiorityType::IS_ALWAYS_ACTIVE:
     case ActivePiorityType::IN_COMBAT:
         return { 0,10 };
@@ -5603,11 +5635,11 @@ bool PlayerbotAI::AllowActive(ActivityType activityType)
         case ActivePiorityType::IS_REAL_PLAYER:
         case ActivePiorityType::IN_GROUP_WITH_REAL_PLAYER:
         case ActivePiorityType::IN_INSTANCE:
-        case ActivePiorityType::VISIBLE_FOR_PLAYER:
         case ActivePiorityType::IS_ALWAYS_ACTIVE:
-        case ActivePiorityType::IN_COMBAT:
             return true;
             break;
+        case ActivePiorityType::VISIBLE_FOR_PLAYER:
+        case ActivePiorityType::IN_COMBAT:
         case ActivePiorityType::NEARBY_PLAYER:
         case ActivePiorityType::IN_BG_QUEUE:
         case ActivePiorityType::IN_LFG:
@@ -5618,7 +5650,6 @@ bool PlayerbotAI::AllowActive(ActivityType activityType)
         case ActivePiorityType::IN_ACTIVE_MAP:
         case ActivePiorityType::IN_INACTIVE_MAP:
         default:
-            return false;
             break;
         }
     }

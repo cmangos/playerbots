@@ -44,7 +44,7 @@ bool LeaveLargeGuildTrigger::IsActive()
 	if (!bot->GetGuildId())
 		return false;
 
-	if (ai->IsRealPlayer())
+	if (ai->HasActivePlayerMaster())
 		return false;
 
 	if (ai->IsAlt())
@@ -61,19 +61,14 @@ bool LeaveLargeGuildTrigger::IsActive()
 	if (ai->IsInRealGuild())
 		return false;
 
-	GuilderType type = ai->GetGuilderType();
-
 	Player* leader = sObjectMgr.GetPlayer(guild->GetLeaderGuid());
 
 	//Only leave the guild if we know the leader is not a real player.
 	if (!leader || !leader->GetPlayerbotAI() || leader->GetPlayerbotAI()->IsRealPlayer())
 		return false;
 
-	if (type == GuilderType::SOLO && guild->GetLeaderGuid() != bot->GetObjectGuid())
-		return true;
-
 	uint32 members = guild->GetMemberSize();
-	uint32 maxMembers = uint8(type);
+	uint32 maxMembers = ai->GetMaxPreferedGuildSize();
 
 	return members > maxMembers;
 }

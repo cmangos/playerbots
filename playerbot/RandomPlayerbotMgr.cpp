@@ -23,6 +23,7 @@
 #include "Chat/ChannelMgr.h"
 #include "Guilds/GuildMgr.h"
 #include "World/WorldState.h"
+#include "PlayerbotLoginMgr.h"
 
 #ifndef MANGOSBOT_ZERO
 #ifdef CMANGOS
@@ -553,7 +554,16 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     if (!sPlayerbotAIConfig.randomBotAutologin || !sPlayerbotAIConfig.enabled)
         return;
 
+    if (!playersLevel)
+        playersLevel = sPlayerbotAIConfig.syncLevelNoPlayer;
+
     ScaleBotActivity();
+    if (sPlayerbotAIConfig.asyncBotLogin)
+    {
+        auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "AsyncBotLogin");
+        sPlayerBotLoginMgr.Update(players);
+        pmo.reset();
+    }
 
     uint32 maxAllowedBotCount = GetEventValue(0, "bot_count");
     if (!maxAllowedBotCount || ((uint32)maxAllowedBotCount < sPlayerbotAIConfig.minRandomBots || (uint32)maxAllowedBotCount > sPlayerbotAIConfig.maxRandomBots))
@@ -633,7 +643,7 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
         }
 
         //Log in bots
-        if (sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") < 10 * IN_MILLISECONDS)
+        if (sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") < 10 * IN_MILLISECONDS && !sPlayerbotAIConfig.asyncBotLogin)
         {
             for (auto bot : availableBots)
             {
@@ -821,8 +831,8 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
     uint32 maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
     float currentAvgLevel = 0, wantedAvgLevel = 0, randomAvgLevel = 0;
 
-    if (!playersLevel)
-        playersLevel = sPlayerbotAIConfig.syncLevelNoPlayer;
+    if(sPlayerbotAIConfig.asyncBotLogin)
+        return 0;
   
     if (currentBots.size() < currentAllowedBotCount)
     {
@@ -1859,7 +1869,7 @@ bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
 
     bool isValid = true;
    
-    if (sPlayerbotAIConfig.randomBotTimedLogout && !GetEventValue(bot, "add")) // RandomBotInWorldTime is expired.
+    if (sPlayerbotAIConfig.randomBotTimedLogout && !GetEventValue(bot, "add") && !sPlayerbotAIConfig.asyncBotLogin) // RandomBotInWorldTime is expired.
         isValid = false;
     else if(!botsAllowedInWorld)                                               // Logout if all players logged out
         isValid = false;
@@ -3008,14 +3018,14 @@ std::string RandomPlayerbotMgr::GetData(uint32 bot, std::string type)
     return GetEventData(bot, type);
 }
 
-void RandomPlayerbotMgr::SetValue(uint32 bot, std::string type, uint32 value, std::string data)
+void RandomPlayerbotMgr::SetValue(uint32 bot, std::string type, uint32 value, std::string data, int32 validIn)
 {
-    SetEventValue(bot, type, value, 15*24*3600, data);
+    SetEventValue(bot, type, value, validIn == -1 ? 15*24*3600 : validIn, data);
 }
 
-void RandomPlayerbotMgr::SetValue(Player* bot, std::string type, uint32 value, std::string data)
+void RandomPlayerbotMgr::SetValue(Player* bot, std::string type, uint32 value, std::string data, int32 validIn)
 {
-    SetValue(bot->GetObjectGuid().GetCounter(), type, value, data);
+    SetValue(bot->GetObjectGuid().GetCounter(), type, value, data, validIn);
 }
 
 bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, char const* args)
@@ -3084,6 +3094,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         std::stringstream ss;
         ss << "Avg diff: " << sWorld.GetAverageDiff() << "\n";
         ss << "Max diff: " << sWorld.GetMaxDiff() << "\n";
+        ss << "char db ping: " << sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") << "\n";
         ss << "Sessions online: " << sWorld.GetActiveSessionCount();
 
         sLog.outString(ss.str().c_str());
@@ -3124,6 +3135,12 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
             t.detach();
         }
 
+        return true;
+    }
+
+    if (cmd.find("login debug") == 0)
+    {
+        sPlayerBotLoginMgr.ToggleDebug();
         return true;
     }
 

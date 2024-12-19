@@ -424,6 +424,9 @@ bool RpgHomeBindTrigger::IsActive()
     if (AI_VALUE(WorldPosition, "home bind").distance(bot) < 500.0f)
         return false;
 
+    if ((ai->IsRealPlayer() || sPlayerbotAIConfig.IsFreeAltBot(bot)) && bot->GetLevel() == DEFAULT_MAX_LEVEL)
+        return false;
+
     return true;
 }
 
@@ -513,10 +516,13 @@ bool RpgUseTrigger::IsActive()
 
 bool RpgAIChatTrigger::IsActive()
 {
-    if (FarFromRpgTargetTrigger::IsActive())
+    if (sPlayerbotAIConfig.llmEnabled == 0)
         return false;
 
-    if (!ai->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT))
+    if (FarFromRpgTargetTrigger::IsActive())
+        return false;    
+
+    if (!ai->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && sPlayerbotAIConfig.llmEnabled < 3)
         return false;
 
     if (!sPlayerbotAIConfig.llmRpgAIChatChance || !(urand(0, 99) < sPlayerbotAIConfig.llmRpgAIChatChance))
@@ -531,7 +537,7 @@ bool RpgAIChatTrigger::IsActive()
     {
         Player* player = guidP.GetPlayer();
 
-        if (player->isRealPlayer())
+        if (!player || player->isRealPlayer())
             return false;
     }
 

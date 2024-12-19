@@ -758,14 +758,23 @@ std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& s
     return getPathStepFrom(startPos, pathfinder, bot, forceNormalPath);
 }
 
+bool WorldPosition::isPathTo(const std::vector<WorldPosition>& path, float const maxDistance) const
+{
+    float realMaxDistance = maxDistance ? maxDistance : sPlayerbotAIConfig.targetPosRecalcDistance;
+    return !path.empty() && distance(path.back()) < realMaxDistance;
+};
+
+
 bool WorldPosition::cropPathTo(std::vector<WorldPosition>& path, const float maxDistance) const
 {
+    float realMaxDistance = maxDistance ? maxDistance : sPlayerbotAIConfig.targetPosRecalcDistance; 
+
     if (path.empty())
         return false;
 
    auto bestPos = std::min_element(path.begin(), path.end(), [this](WorldPosition i, WorldPosition j) {return this->sqDistance(i) < this->sqDistance(j); });
 
-   bool insRange = this->sqDistance(*bestPos) <= maxDistance * maxDistance;
+   bool insRange = this->sqDistance(*bestPos) <= realMaxDistance * realMaxDistance;
 
    if (bestPos == path.end())
        return insRange;

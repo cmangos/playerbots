@@ -518,6 +518,10 @@ void RestorationShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     ShamanStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "low mana",
+        NextAction::array(0, new NextAction("mana tide totem", ACTION_EMERGENCY), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "critical health",
         NextAction::array(0, new NextAction("healing wave", ACTION_CRITICAL_HEAL + 1), NULL)));
 
@@ -987,6 +991,10 @@ void RestorationShamanBoostRaidStrategy::InitNonCombatTriggers(std::list<Trigger
 void RestorationShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "low mana",
+        NextAction::array(0, new NextAction("mana tide totem", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
         "critical health",

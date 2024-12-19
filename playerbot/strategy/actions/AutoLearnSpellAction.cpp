@@ -2,6 +2,8 @@
 #include "playerbot/playerbot.h"
 #include "AutoLearnSpellAction.h"
 #include "playerbot/ServerFacade.h"
+#include "Entities/Item.h"
+#include <Mails/Mail.h>
 
 using namespace ai;
 
@@ -44,7 +46,7 @@ void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
     {
         if (bot->getClass() == CLASS_HUNTER && bot->GetLevel() >= 10)
         {
-            bot->learnSpell(261, false); //Best training
+            bot->learnSpell(5149, false); //Beast training
             bot->learnSpell(883, false); //Call pet
             bot->learnSpell(982, false); //Revive pet
             bot->learnSpell(6991, false); //Feed pet
@@ -99,18 +101,18 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
                 SpellEntry const* spell = sServerFacade.LookupSpellInfo(tSpell->spell);
                 if (spell)
                 {
-                    std::string SpellName = spell->SpellName[0];                    
+                    std::string SpellName = spell->SpellName[0];
                     if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
                     {
                         uint32 skill = spell->EffectMiscValue[EFFECT_INDEX_1];
 
                         if (skill)
-                        {                            
+                        {
                             SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
                             if (pSkill)
                             {
                                 if (SpellName.find("Apprentice") != std::string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
-                                    continue;                                
+                                    continue;
                             }
                         }
                     }
@@ -132,7 +134,7 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
         uint32 questId = i->first;
         Quest const* quest = i->second.get();
 
-        if (!quest->GetRequiredClasses() || quest->IsRepeatable() || quest->GetMinLevel() < 10)
+        if (!quest->GetRequiredClasses() || quest->IsRepeatable())
             continue;
 
         if (!bot->SatisfyQuestClass(quest, false) ||
@@ -142,11 +144,42 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
 
         if (quest->GetRewSpellCast() > 0)
         {
-            LearnSpell(quest->GetRewSpellCast(), out);
+            if(LearnSpell(quest->GetRewSpellCast(), out))
+                GetClassQuestItem(quest, out);
         }
         else if (quest->GetRewSpell() > 0)
         {
-            LearnSpell(quest->GetRewSpell(), out);
+            if(LearnSpell(quest->GetRewSpell(), out))
+                GetClassQuestItem(quest, out);
+        }
+    }
+}
+/**
+* Attempts to add the quest item
+* If the bot's bag is full report to player.
+*/
+void AutoLearnSpellAction::GetClassQuestItem(Quest const* quest, std::ostringstream* out)
+{
+    if (quest->GetRewItemsCount() > 0)
+    {
+        for (uint32 i = 0; i < quest->GetRewItemsCount(); i++)
+        {            
+            ItemPosCountVec itemVec;
+            ItemPrototype const* itemP = sObjectMgr.GetItemPrototype(quest->RewItemId[i]);
+            InventoryResult result = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, itemVec, itemP->ItemId, quest->RewItemCount[i]);
+            if (result == EQUIP_ERR_OK)
+            {
+                bot->StoreNewItemInInventorySlot(itemP->ItemId, quest->RewItemCount[i]);
+                *out << "Got " << chat->formatItem(itemP, 1, 1) << " from " << quest->GetTitle();
+            }
+            else if (result == EQUIP_ERR_INVENTORY_FULL)
+            {
+                MailDraft draft("Item(s) from quest reward", quest->GetTitle());
+                Item* item = item->CreateItem(itemP->ItemId, quest->RewItemCount[i]);
+                draft.AddItem(item);
+                draft.SendMailTo(MailReceiver(bot), MailSender(bot));
+                *out << "Could not add item " << chat->formatItem(itemP) << " from " << quest->GetTitle() << ". " << bot->GetName() << "'s inventory is full.";
+            }
         }
     }
 }
@@ -155,20 +188,20 @@ std::string formatSpell(SpellEntry const* sInfo)
 {
     std::ostringstream out;
     std::string rank = sInfo->Rank[0];
-    
-    if(rank.empty())
+
+    if (rank.empty())
         out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[LOCALE_enUS] << "]|h|r";
     else
         out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[LOCALE_enUS] << " " << rank << "]|h|r";
     return out.str();
 }
 
-void AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
+bool AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
 {
     SpellEntry const* proto = sServerFacade.LookupSpellInfo(spellId);
 
     if (!proto)
-        return;
+        return false;
 
     bool learned = false;
     for (int j = 0; j < 3; ++j)
@@ -190,5 +223,9 @@ void AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
     if (!learned && !bot->HasSpell(spellId)) {
         bot->learnSpell(spellId, false);
         *out << formatSpell(proto) << ", ";
+
+        learned = bot->HasSpell(spellId);
     }
+
+    return learned;
 }

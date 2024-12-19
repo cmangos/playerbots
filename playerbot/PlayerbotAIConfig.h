@@ -48,6 +48,14 @@ enum class BotAlwaysOnline : uint32
     DISABLED_BY_COMMAND = 2
 };
 
+enum class BotLoginCriteriaType : uint8
+{
+    RACECLASS = 0,
+    LEVEL = 1,
+    RANGE_TO_PLAYER = 2,
+    MAX_LOGIN_CRITERIA = 3
+};
+
 #define MAX_GEAR_PROGRESSION_LEVEL 6
 
 class ConfigAccess
@@ -164,6 +172,7 @@ public:
     std::string premadeLevelSpec[MAX_CLASSES][10][91]; //lvl 10 - 100
     uint32 classRaceProbabilityTotal;
     uint32 classRaceProbability[MAX_CLASSES][MAX_RACES];
+    uint32 levelProbability[DEFAULT_MAX_LEVEL + 1];
     ClassSpecs classSpecs[MAX_CLASSES];
     bool gearProgressionSystemEnabled;
     uint32 gearProgressionSystemItemLevels[MAX_GEAR_PROGRESSION_LEVEL][2];
@@ -296,6 +305,11 @@ public:
     bool respawnModForPlayerBots, respawnModForInstances;
 
     bool randomBotLoginWithPlayer;
+    bool asyncBotLogin, preloadHolders;
+    uint32 freeRoomForNonSpareBots;
+    uint32 loginBotsNearPlayerRange;
+    std::vector<std::string> defaultLoginCriteria;
+    std::vector<std::vector<std::string>> loginCriteria;
 
     bool jumpInBg;
     bool jumpWithPlayer;
@@ -338,7 +352,7 @@ public:
 
     //LM BEGIN
     std::string llmApiEndpoint, llmApiKey, llmApiJson, llmPrePrompt, llmPreRpgPrompt, llmPrompt, llmPostPrompt, llmResponseStartPattern, llmResponseEndPattern, llmResponseDeletePattern, llmResponseSplitPattern;
-    uint32 llmContextLength, llmBotToBotChatChance, llmGenerationTimeout, llmMaxSimultaniousGenerations, llmRpgAIChatChance;
+    uint32 llmEnabled, llmContextLength, llmBotToBotChatChance, llmGenerationTimeout, llmMaxSimultaniousGenerations, llmRpgAIChatChance;
     bool llmGlobalContext;
     ParsedUrl llmEndPointUrl;
     std::set<uint32> llmBlockedReplyChannels;

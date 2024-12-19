@@ -234,6 +234,7 @@ namespace ai
                 creators["totem fire resistance"] = &shaman::FireTotemStrategyFactoryInternal::totem_fire_resistance;
                 creators["totem fire magma"] = &shaman::FireTotemStrategyFactoryInternal::totem_fire_magma;
                 creators["totem fire searing"] = &shaman::FireTotemStrategyFactoryInternal::totem_fire_searing;
+                creators["totem fire wrath"] = &shaman::FireTotemStrategyFactoryInternal::totem_fire_wrath;
             }
 
         private:
@@ -246,6 +247,7 @@ namespace ai
             static Strategy* totem_fire_resistance(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire resistance", "fire totem", "frost resistance totem"); }
             static Strategy* totem_fire_magma(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire magma", "fire totem", "magma totem"); }
             static Strategy* totem_fire_searing(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire searing", "fire totem", "searing totem"); }
+            static Strategy* totem_fire_wrath(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire wrath", "fire totem", "totem of wrath"); }
         };
 
         class WaterTotemStrategyFactoryInternal : public NamedObjectContext<Strategy>

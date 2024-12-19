@@ -586,6 +586,8 @@ public:
 
     GrouperType GetGrouperType();
     GuilderType GetGuilderType();
+    uint32 GetMaxPreferedGuildSize();
+
     bool HasPlayerNearby(WorldPosition pos, float range);
     bool HasPlayerNearby(float range = sPlayerbotAIConfig.reactDistance);
     bool HasManyPlayersNearby(uint32 trigerrValue = 20, float range = sPlayerbotAIConfig.sightDistance);

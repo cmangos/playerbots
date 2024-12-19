@@ -54,6 +54,7 @@ namespace ai
 
         virtual std::string getName() { return "TravelDestination"; }
         virtual int32 getEntry() { return 0; }
+        virtual uint32 getSubEntry() { return 0; }
         virtual std::string getTitle() { return "generic travel destination"; }
 
         WorldPosition* nearestPoint(WorldPosition* pos) {return nearestPoint(*pos);};
@@ -127,8 +128,8 @@ namespace ai
 
         virtual std::string getName() { return "QuestRelationTravelDestination"; }
         virtual int32 getEntry() { return entry; }
+        virtual uint32 getSubEntry() { return relation; }
         virtual std::string getTitle();
-        virtual uint32 getRelation() { return relation; }
     private:
         uint32 relation;
         int32 entry;
@@ -157,10 +158,9 @@ namespace ai
         virtual std::string getName() { return "QuestObjectiveTravelDestination"; }
 
         virtual int32 getEntry() { return entry; }
+        virtual uint32 getSubEntry() { return objective; }
 
         virtual std::string getTitle();
-
-        virtual uint32 getObjective() { return objective; }
     private:
         uint32 objective;
         int32 entry;
@@ -233,6 +233,24 @@ namespace ai
         virtual bool isActive(Player* bot);
         virtual CreatureInfo const* getCreatureInfo() { return ObjectMgr::GetCreatureTemplate(entry); }
         virtual std::string getName() { return "BossTravelDestination"; }
+        virtual int32 getEntry() { return entry; }
+        virtual std::string getTitle();
+    protected:
+        int32 entry;
+    };
+
+    //A location with a object that can be gathered
+    class GatherTravelDestination : public TravelDestination
+    {
+    public:
+        GatherTravelDestination(int32 entry1, float radiusMin1, float radiusMax1) : TravelDestination(radiusMin1, radiusMax1) {
+            entry = entry1; cooldownDelay = 1000;
+        }
+
+        virtual CreatureInfo const* getCreatureInfo() { return ObjectMgr::GetCreatureTemplate(entry); }
+        virtual GameObjectInfo const* getGameObjectInfo() { return ObjectMgr::GetGameObjectInfo(entry); }
+        virtual bool isActive(Player* bot);
+        virtual std::string getName() { return "GatherTravelDestination"; }
         virtual int32 getEntry() { return entry; }
         virtual std::string getTitle();
     protected:
@@ -340,6 +358,11 @@ namespace ai
         WorldPosition* wPosition = nullptr;
     };
 
+
+    typedef std::vector<TravelDestination*> DestinationList;
+    typedef std::unordered_map<int32, DestinationList> DestinationMap;
+    typedef std::unordered_map<std::type_index, DestinationMap> TypedDestinationMap;
+
     //General container for all travel destinations.
     class TravelMgr
     {
@@ -406,20 +429,35 @@ namespace ai
 
         int32 getAreaLevel(uint32 area_id);
         void loadAreaLevels();
-        std::unordered_map<uint32, QuestContainer*> getQuests() { return quests; }
-        std::unordered_map<uint32, ExploreTravelDestination*> getExploreLocs() { return exploreLocs; }
+
+        template<class T>
+        T* AddDestination(int32 entry) {
+            if (destinationMap[typeid(T)].find(entry) == destinationMap[typeid(T)].end())
+                destinationMap[typeid(T)][entry].push_back(new T(entry, sPlayerbotAIConfig.tooCloseDistance, sPlayerbotAIConfig.sightDistance));
+
+            return (T*)destinationMap[typeid(T)][entry].back();
+        }
+
+        template<class T>
+        T* AddQuestDestination(int32 questId, uint32 entry, uint32 subEntry) {
+            for (auto& dest : destinationMap[typeid(T)][questId])
+                if (dest->getEntry() == entry && dest->getSubEntry() == subEntry)
+                    return (T*)dest;
+            
+            destinationMap[typeid(T)][questId].push_back(new T(questId, entry, subEntry, sPlayerbotAIConfig.tooCloseDistance, sPlayerbotAIConfig.sightDistance));
+
+            return (T*)destinationMap[typeid(T)][questId].back();            
+        }
+      
+
+        std::vector<TravelDestination*> getExploreLocs();
     protected:
         void logQuestError(uint32 errorNr, Quest* quest, uint32 objective = 0, uint32 unitId = 0, uint32 itemId = 0);
 
         std::vector<uint32> avoidLoaded;
 
-        std::vector<QuestTravelDestination*> questGivers;
-        std::vector<RpgTravelDestination*> rpgNpcs;
-        std::vector<GrindTravelDestination*> grindMobs;
-        std::vector<BossTravelDestination*> bossMobs;
-
-        std::unordered_map<uint32, ExploreTravelDestination*> exploreLocs;
-        std::unordered_map<uint32, QuestContainer*> quests;
+        TypedDestinationMap destinationMap;
+        
         std::unordered_map<uint64, GuidPosition> pointsMap;
         std::unordered_map<uint32, int32> areaLevels;
 

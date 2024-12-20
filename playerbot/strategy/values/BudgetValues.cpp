@@ -88,142 +88,130 @@ uint32 RepairCostValue::Calculate()
     return TotalCost;
 }
 
-uint32 MoneyNeededForValue::Calculate()
-{
-	NeedMoneyFor needMoneyFor = NeedMoneyFor(stoi(getQualifier()));
+uint32 MoneyNeededForValue::Calculate() {
+    NeedMoneyFor needMoneyFor = NeedMoneyFor(stoi(getQualifier()));
 
-	PlayerbotAI* ai = bot->GetPlayerbotAI();
-	AiObjectContext* context = ai->GetAiObjectContext();
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
 
-	uint32 moneyWanted = 0;
+    uint32 moneyWanted = 0;
+    uint32 level = bot->GetLevel();
 
-	uint32 level = bot->GetLevel();
-
-    switch (needMoneyFor)
-    {
+    switch (needMoneyFor) {
     case NeedMoneyFor::none:
         moneyWanted = 0;
         break;
+
     case NeedMoneyFor::repair:
         moneyWanted = AI_VALUE(uint32, "max repair cost");
         break;
+
     case NeedMoneyFor::ammo:
-        moneyWanted = (bot->getClass() == CLASS_HUNTER) ? (level * level * level) / 10 : 0; //Or level^3 (1s @ lvl10, 30s @ lvl30, 2g @ lvl60, 5g @ lvl80): Todo replace (should be best ammo buyable x 8 stacks cost)
+        if (bot->getClass() == CLASS_HUNTER) {
+            moneyWanted = (level * level * level) / 10;  // Approximation based on level
+        }
         break;
+
     case NeedMoneyFor::spells:
         moneyWanted = AI_VALUE(uint32, "train cost");
         break;
+
     case NeedMoneyFor::travel:
-        moneyWanted = bot->isTaxiCheater() ? 0 : 1500; //15s for traveling half a continent. Todo: Add better calculation (Should be ???)
+        moneyWanted = bot->isTaxiCheater() ? 0 : 1500;  // 15s for standard travel
         break;
+
     case NeedMoneyFor::gear:
-        moneyWanted = level * level * level; //Or level^3 (10s @ lvl10, 3g @ lvl30, 20g @ lvl60, 50g @ lvl80): Todo replace (Should be ~total cost of all >green gear equiped)
+    case NeedMoneyFor::tradeskill:
+        moneyWanted = level * level * level;  // Same formula for both cases
         break;
+
     case NeedMoneyFor::consumables:
-        moneyWanted = (level * level * level) / 10; //Or level^3 (1s @ lvl10, 30s @ lvl30, 2g @ lvl60, 5g @ lvl80): Todo replace (Should be best food/drink x 2 stacks cost)
+        moneyWanted = (level * level * level) / 10;  // Approximation based on level
         break;
+
     case NeedMoneyFor::guild:
-        if (ai->HasStrategy("guild", BotState::BOT_STATE_NON_COMBAT))
-        {
-            if (bot->GetGuildId() && bot->GetLevel() > 20)
-                moneyWanted = AI_VALUE2(uint32, "item count", chat->formatQItem(5976)) ? 0 : 10000; //1g (tabard)
-            else if (bot->GetLevel() > 10)
-                moneyWanted = AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) ? 0 : 1000; //10s (guild charter)
+        if (ai->HasStrategy("guild", BotState::BOT_STATE_NON_COMBAT)) {
+            if (bot->GetGuildId() && level > 20) {
+                moneyWanted = AI_VALUE2(uint32, "item count", chat->formatQItem(5976)) ? 0 : 10000;  // Tabard cost
+            }
+            else if (level > 10) {
+                moneyWanted = AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) ? 0 : 1000;  // Guild charter cost
+            }
         }
         break;
-    case NeedMoneyFor::tradeskill:
-        moneyWanted = (level * level * level); //Or level^3 (10s @ lvl10, 3g @ lvl30, 20g @ lvl60, 50g @ lvl80): Todo replace (Should be buyable reagents that combined allow crafting of usefull items)
-        break;
-    case NeedMoneyFor::ah:
-        //Save deposit needed for all items the bot wants to AH.
-        uint32 time;
+
+    case NeedMoneyFor::ah: {
+        // Auction-related costs
+        uint32 time =
 #ifdef MANGOSBOT_ZERO
-        time = 8 * HOUR;
+            8 * HOUR;
 #else
-        time = 12 * HOUR;
+            12 * HOUR;
 #endif
         float totalDeposit = 0;
-        for (auto item : AI_VALUE2(std::list<Item*>, "inventory items", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_AH)))
-        {
-            float deposit = float(item->GetProto()->SellPrice * item->GetCount() * (time / MIN_AUCTION_TIME));
 
-            deposit = deposit * 15 * 3.0f / 100.0f;
+        auto calculateDeposit = [&](Item* item) {
+            float deposit = float(item->GetProto()->SellPrice * item->GetCount() * (time / MIN_AUCTION_TIME));
+            deposit *= 15 * 3.0f / 100.0f;
 
             float min_deposit = float(sWorld.getConfig(CONFIG_UINT32_AUCTION_DEPOSIT_MIN));
-
-            if (deposit < min_deposit)
+            if (deposit < min_deposit) {
                 deposit = min_deposit;
-
+            }
             deposit *= sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_DEPOSIT);
+            return deposit;
+            };
 
-            totalDeposit += deposit;
+        for (Item* item : AI_VALUE2(std::list<Item*>, "inventory items", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_AH))) {
+            totalDeposit += calculateDeposit(item);
         }
 
-        for (auto item : AI_VALUE2(std::list<Item*>, "inventory items", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_BROKEN_AH)))
-        {
-            float deposit = float(item->GetProto()->SellPrice * item->GetCount() * (time / MIN_AUCTION_TIME));
+        for (Item* item : AI_VALUE2(std::list<Item*>, "inventory items", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_BROKEN_AH))) {
+            totalDeposit += calculateDeposit(item);
 
-            deposit = deposit * 15 * 3.0f / 100.0f;
-
-            float min_deposit = float(sWorld.getConfig(CONFIG_UINT32_AUCTION_DEPOSIT_MIN));
-
-            if (deposit < min_deposit)
-                deposit = min_deposit;
-
-            deposit *= sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_DEPOSIT);
-
-            totalDeposit += deposit;
-
+            // Additional cost for broken items
             uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-            if (!maxDurability)
-                continue;
+            if (!maxDurability) continue;
 
             uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
-
-            uint32 LostDurability = maxDurability - curDurability;
-
-            if (LostDurability == 0)
-                continue;
+            uint32 lostDurability = maxDurability - curDurability;
+            if (!lostDurability) continue;
 
             ItemPrototype const* ditemProto = item->GetProto();
-
             DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
-            if (!dcost)
-                continue;
+            if (!dcost) continue;
 
-            uint32 dQualitymodEntryId = (ditemProto->Quality + 1) * 2;
-            DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
-            if (!dQualitymodEntry)
-                continue;
+            uint32 dQualityModEntryId = (ditemProto->Quality + 1) * 2;
+            DurabilityQualityEntry const* dQualityModEntry = sDurabilityQualityStore.LookupEntry(dQualityModEntryId);
+            if (!dQualityModEntry) continue;
 
-            uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
-            uint32 costs = uint32(LostDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
-
+            uint32 dMultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
+            uint32 costs = uint32(lostDurability * dMultiplier * double(dQualityModEntry->quality_mod));
             totalDeposit += costs;
         }
 
-        return totalDeposit;
-        break;
+        return static_cast<uint32>(totalDeposit);
+    }
+                         break;
     }
 
-	return moneyWanted;
-};
+    return moneyWanted;
+}
 
 uint32 TotalMoneyNeededForValue::Calculate()
 {
     NeedMoneyFor needMoneyFor = NeedMoneyFor(stoi(getQualifier()));
 
-    uint32 moneyWanted = AI_VALUE2(uint32, "money needed for", (uint32)needMoneyFor);
-
     auto needPtr = std::find(saveMoneyFor.begin(), saveMoneyFor.end(), needMoneyFor);
 
-    while (needPtr != saveMoneyFor.begin())
-    {
-        needPtr--;
+    if (needPtr == saveMoneyFor.end()) {
+        return 0;
+    }
 
-        NeedMoneyFor alsoNeed = *needPtr;
+    uint32 moneyWanted = 0;
 
-        moneyWanted = moneyWanted + AI_VALUE2(uint32, "money needed for", (uint32)alsoNeed);
+    for (auto it = needPtr; it >= saveMoneyFor.begin(); --it) {
+        moneyWanted += AI_VALUE2(uint32, "money needed for", static_cast<uint32>(*it));
     }
 
     return moneyWanted;

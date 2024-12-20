@@ -6581,12 +6581,18 @@ void PlayerbotAI::InventoryIterateItemsInBags(IterateItemsVisitor* visitor)
             if (!visitor->Visit(pItem))
                 return;
 
-    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
-        if (Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
-                if (Item* pItem = pBag->GetItemByPos(j))
-                    if (!visitor->Visit(pItem))
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i) {
+        if (Bag* pBag = static_cast<Bag*>(bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))) {
+            uint32 bagSize = pBag->GetBagSize();
+            for (uint32 j = 0; j < bagSize; ++j) {
+                if (Item* pItem = pBag->GetItemByPos(j)) {
+                    if (!visitor->Visit(pItem)) {
                         return;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void PlayerbotAI::InventoryIterateItemsInEquip(IterateItemsVisitor* visitor)

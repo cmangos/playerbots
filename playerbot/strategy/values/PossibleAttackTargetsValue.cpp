@@ -54,7 +54,7 @@ void PossibleAttackTargetsValue::RemoveNonThreating(std::list<ObjectGuid>& targe
     for(std::list<ObjectGuid>::iterator tIter = targets.begin(); tIter != targets.end();)
     {
         Unit* target = ai->GetUnit(*tIter);
-        if (!IsValid(target, bot, sPlayerbotAIConfig.sightDistance, true, false))
+        if (!IsValid(target, bot, sPlayerbotAIConfig.sightDistance, true, true, false))
         {
             std::list<ObjectGuid>::iterator tIter2 = tIter;
             ++tIter;

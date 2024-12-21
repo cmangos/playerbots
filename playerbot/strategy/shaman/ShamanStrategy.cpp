@@ -1204,10 +1204,6 @@ void ShamanCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "hex",
         NextAction::array(0, new NextAction("hex", ACTION_INTERRUPT), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "enemy is close",
-        NextAction::array(0, new NextAction("earthbind totem", ACTION_HIGH), NULL)));
 }
 
 void ShamanCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1218,6 +1214,11 @@ void ShamanCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 void ShamanCcPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     CcPvpStrategy::InitCombatTriggers(triggers);
+
+
+    triggers.push_back(new TriggerNode(
+        "enemy is close",
+        NextAction::array(0, new NextAction("earthbind totem", ACTION_INTERRUPT), NULL)));
 }
 
 void ShamanCcPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

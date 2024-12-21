@@ -23,6 +23,16 @@ bool InfernoTrigger::IsActive()
 	return AI_VALUE(uint8, "attackers count") > 1 && bot->HasSpell(1122) && bot->HasItemCount(5565, 1) && !urand(0, 2);
 }
 
+bool DecimationTrigger::IsActive()
+{
+    return ai->HasAura(63165, bot) || ai->HasAura(63167, bot);
+}
+
+bool MoltenCoreTrigger::IsActive()
+{
+    return ai->HasAura(47383, bot) || ai->HasAura(71162, bot) || ai->HasAura(71165, bot);
+}
+
 bool CorruptionTrigger::IsActive()
 {
 	Unit* target = GetTarget();

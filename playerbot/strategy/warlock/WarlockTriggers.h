@@ -34,8 +34,8 @@ namespace ai
         bool IsActive() override;
     };
 
-    HAS_AURA_TRIGGER(MoltenCoreTrigger, "molten core");
-    HAS_AURA_TRIGGER(DecimationTrigger, "decimation");
+    HAS_AURA_TRIGGER_A(MoltenCoreTrigger, "molten core");
+    HAS_AURA_TRIGGER_A(DecimationTrigger, "decimation");
     BOOST_TRIGGER(DemonicEmpowermentTrigger, "demonic empowerment");
     BOOST_TRIGGER(MetamorphosisTrigger, "metamorphosis");
     DEBUFF_TRIGGER_A(CorruptionTrigger, "corruption");

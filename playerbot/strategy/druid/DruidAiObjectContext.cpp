@@ -354,7 +354,7 @@ namespace ai
                 creators["force of nature"] = &TriggerFactoryInternal::force_of_nature;
                 creators["berserk"] = &TriggerFactoryInternal::berserk;
                 creators["active hot"] = &TriggerFactoryInternal::active_hot;
-                creators["cyclone"] = &TriggerFactoryInternal::cyclone;
+                creators["cyclone pvp"] = &TriggerFactoryInternal::cyclone_pvp;
                 creators["starfall"] = &TriggerFactoryInternal::starfall;
             }
 
@@ -406,7 +406,7 @@ namespace ai
             static Trigger* force_of_nature(PlayerbotAI* ai) { return new ForceOfNatureTrigger(ai); }
             static Trigger* berserk(PlayerbotAI* ai) { return new BerserkTrigger(ai); }
             static Trigger* active_hot(PlayerbotAI* ai) { return new ActiveHotTrigger(ai); }
-            static Trigger* cyclone(PlayerbotAI* ai) { return new CycloneTrigger(ai); }
+            static Trigger* cyclone_pvp(PlayerbotAI* ai) { return new CyclonePvpTrigger(ai); }
             static Trigger* starfall(PlayerbotAI* ai) { return new StarfallTrigger(ai); }
         };
 

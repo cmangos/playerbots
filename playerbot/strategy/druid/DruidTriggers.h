@@ -421,7 +421,7 @@ namespace ai
     CAN_CAST_TRIGGER(StarfallTrigger, "starfall");
     BOOST_TRIGGER(BerserkTrigger, "berserk");
     CAN_CAST_TRIGGER_A(ActiveHotTrigger, "nourish");
-    SNARE_TRIGGER(CycloneTrigger, "cyclone");
+    SNARE_TRIGGER_A(CyclonePvpTrigger, "cyclone");
 
     class SavageRoarTrigger : public ComboPointsAvailableTrigger
     {

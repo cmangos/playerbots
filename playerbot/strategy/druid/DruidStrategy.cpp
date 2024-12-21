@@ -1137,10 +1137,6 @@ void DruidCureRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigg
 void DruidCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     CcStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "cyclone",
-        NextAction::array(0, new NextAction("cyclone", ACTION_INTERRUPT), NULL))); 
     
     triggers.push_back(new TriggerNode(
         "hibernate",
@@ -1155,6 +1151,10 @@ void DruidCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 void DruidCcPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     CcPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "cyclone pvp",
+        NextAction::array(0, new NextAction("cyclone", ACTION_INTERRUPT), NULL)));
 }
 
 void DruidCcPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

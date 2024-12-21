@@ -40,3 +40,38 @@ Value<Unit*>* LifebloomTankTrigger::GetTargetValue()
 {
     return context->GetValue<Unit*>("party tank without lifebloom", "lifebloom");
 }
+
+bool CyclonePvpTrigger::IsActive()
+{
+    Unit* target = AI_VALUE(Unit*, "current target");
+    if (!target || !target->IsPlayer() || target->GetDiminishing(DIMINISHING_CYCLONE) >= DIMINISHING_LEVEL_IMMUNE)
+        return false;
+
+    // Check bot's health for defensive use
+    const uint8 health = AI_VALUE2(uint8, "health", "self target");
+    if (health <= sPlayerbotAIConfig.lowHealth && target->GetSelectionGuid() == bot->GetObjectGuid())
+    {
+        // Defensive CC: Check distance for Cyclone
+        if (target->GetDistance(bot) <= 20.0f)
+        {
+            return true;
+        }
+    }
+
+    // Avoid targets already crowd-controlled
+    if (!PossibleAttackTargetsValue::HasUnBreakableCC(target, bot) &&
+        target->GetDistance(bot) <= 20.0f)
+    {
+        // Check if Cyclone is already active
+        std::list<ObjectGuid> attackers = AI_VALUE(std::list<ObjectGuid>, "attackers");
+        for (const auto& guid : attackers)
+        {
+            Unit* attacker = ai->GetUnit(guid);
+            if (ai->HasAura("cyclone", attacker, false, true))
+                return false; // Cyclone already active on another target
+        }
+        return true;
+    }
+
+    return false;
+}

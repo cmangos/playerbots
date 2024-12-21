@@ -668,13 +668,8 @@ bool PlayerbotAI::IsInPvp()
             return true;
 
         const bool inBattleground = bot->InBattleGround();
-        bool inArena = false;
-
-#ifndef MANGOSBOT_ZERO 
-        inArena = bot->InArena();
-#endif 
-
-        if (inBattleground || inArena)
+        
+        if (inBattleground)
             return true;
 
         AiObjectContext* context = aiObjectContext;

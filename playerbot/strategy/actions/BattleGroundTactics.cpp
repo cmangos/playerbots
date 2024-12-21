@@ -5272,10 +5272,25 @@ bool ArenaTactics::Execute(Event& event)
         ai->ResetStrategies();
         return false;
     }
-
     BattleGround* bg = bot->GetBattleGround();
-    if (!bg || bg->GetStatus() != STATUS_IN_PROGRESS || bg->GetStartDelayTime() > 0)
+    if (!bg)
         return false;
+    
+    if (bg->GetStatus() != STATUS_IN_PROGRESS || bg->GetStartDelayTime() > 0)
+    {
+        uint32 mapid = bg->GetMapId();
+        float x, y, z, O;
+        Team team = bot->GetBGTeam();
+        if (team == 0)
+            team = bot->GetTeam();
+        bg->GetTeamStartLoc(team, x, y, z, O);
+
+        if (!bot->IsWithinLOS(x, y, z, true))
+            bot->TeleportTo(mapid, x, y, z, O);
+
+        return false;
+    }
+
 
     // Remove "collision" strategy in non-combat state if present
     if (ai->HasStrategy("collision", BotState::BOT_STATE_NON_COMBAT))

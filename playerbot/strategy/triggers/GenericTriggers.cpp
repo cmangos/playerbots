@@ -54,11 +54,11 @@ bool LoseAggroTrigger::IsActive()
 {
     if(!AI_VALUE2(bool, "has aggro", "current target"))
     {
-        // Check if the aggro has been taken by another tank
-        if(ai->IsTank(bot))
+        Unit* target = AI_VALUE(Unit*, "current target"); 
+        if(target && !target->IsPlayer())
         {
-            Unit* target = AI_VALUE(Unit*, "current target");
-            if(target && !target->IsPlayer())
+            // Check if the aggro has been taken by another tank
+            if(ai->IsTank(bot))
             {
                 Unit* targetsTarget = target->GetVictim();
                 if(targetsTarget && targetsTarget->IsPlayer())
@@ -67,9 +67,9 @@ bool LoseAggroTrigger::IsActive()
                     return !ai->IsTank(targetsPlayerTarget);
                 }
             }
-        }
 
-        return true;
+            return true;
+        }
     }
 
     return false;

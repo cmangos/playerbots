@@ -24,8 +24,6 @@ private:
             /*C*/ NULL);
     }
 
-    ACTION_NODE_A(starfall, "starfall", "hurricane");
-
     ACTION_NODE_A(starfire, "starfire", "wrath");
 };
 
@@ -857,43 +855,33 @@ void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_CRITICAL_HEAL + 1),
-            new NextAction("healing touch", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("regrowth", ACTION_CRITICAL_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("regrowth on party", ACTION_CRITICAL_HEAL + 1),
-            new NextAction("healing touch on party", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("regrowth on party", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL + 1),
-            new NextAction("nourish", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("regrowth", ACTION_NORMAL + 2),
+            new NextAction("nourish", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("regrowth on party", ACTION_MEDIUM_HEAL + 1),
-            new NextAction("nourish on party", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("regrowth on party", ACTION_NORMAL + 1),
+            new NextAction("nourish on party", ACTION_NORMAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium aoe heal",
-        NextAction::array(0, new NextAction("tranquility", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("tranquility", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member medium health",
-        NextAction::array(0, new NextAction("regrowth on party", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("regrowth", ACTION_NORMAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "almost full health",
-        NextAction::array(0, new NextAction("rejuvenation", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member almost full health",
-        NextAction::array(0, new NextAction("rejuvenation on party", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("rejuvenation", ACTION_NORMAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "force of nature",
@@ -1005,8 +993,8 @@ void BalanceDruidPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     DruidPvpStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "often",
-        NextAction::array(0, new NextAction("starfall", ACTION_HIGH + 1), NULL)));
+        "starfall",
+        NextAction::array(0, new NextAction("starfall", ACTION_MOVE), NULL)));
 }
 
 void BalanceDruidPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

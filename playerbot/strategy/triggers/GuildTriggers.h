@@ -14,7 +14,7 @@ namespace ai
     class BuyTabardTrigger : public Trigger {
     public:
         BuyTabardTrigger(PlayerbotAI* ai) :
-            Trigger(ai, "buy tabard trigger", 5) {}
+            Trigger(ai, "buy tabard trigger", 30) {}
 
         bool IsActive();
     };

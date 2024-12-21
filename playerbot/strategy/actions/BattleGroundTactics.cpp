@@ -5283,7 +5283,7 @@ bool ArenaTactics::Execute(Event& event)
 
     // Reset strategies if in an arena and set no master
 #if defined(MANGOS) || defined(CMANGOS)
-    if (sBattleGroundMgr.IsArenaType(bg->GetTypeId()))
+    if (sBattleGroundMgr.IsArenaType(bg->GetTypeId()) && !ai->HasStrategy("arena", BotState::BOT_STATE_COMBAT))
     {
         ai->ResetStrategies(false);
         ai->SetMaster(nullptr);

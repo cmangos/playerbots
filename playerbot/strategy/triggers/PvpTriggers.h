@@ -87,7 +87,7 @@ namespace ai
     class BgActiveTrigger : public Trigger
     {
     public:
-        BgActiveTrigger(PlayerbotAI* ai) : Trigger(ai, "bg active", 1) {}
+        BgActiveTrigger(PlayerbotAI* ai, int interval) : Trigger(ai, "bg active", interval) {}
 
     public:
         virtual bool IsActive();

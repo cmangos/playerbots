@@ -233,7 +233,7 @@ void ArenaStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("arena tactics", 1.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "bg active",
+        "arena active",
         NextAction::array(0, new NextAction("arena move to center", 80.0f), NULL)));
 
     triggers.push_back(new TriggerNode(

@@ -556,7 +556,7 @@ void PlayerBotLoginMgr::FillLoginSpace(BotPool* pool, LoginSpace& space, FillSte
     space.currentSpace = GetMaxOnlineBotCount();
     space.totalSpace = GetMaxOnlineBotCount();
 
-    for (uint32 level = 1; level <= DEFAULT_MAX_LEVEL + 1; ++level)
+    for (uint32 level = 1; level <= DEFAULT_MAX_LEVEL; ++level)
     {
         space.levelBucket[level] = GetLevelBucketSize(level);
     }
@@ -738,7 +738,7 @@ uint32 PlayerBotLoginMgr::GetLevelBucketSize(uint32 level)
         return 0;
 
     uint32 levelProbabilityTotal = 0;
-    for (uint32 level = 1; level < GetMaxLevel(); ++level)
+    for (uint32 level = 1; level <= GetMaxLevel(); ++level)
     {
         levelProbabilityTotal += sPlayerbotAIConfig.levelProbability[level];
     }

@@ -354,9 +354,12 @@ namespace ai
         public:
             TriggerFactoryInternal()
             {
+#ifndef MANGOSBOT_TWO
                 creators["judgement"] = &TriggerFactoryInternal::judgement;
+#else
                 creators["judgement of wisdom"] = &TriggerFactoryInternal::judgement_of_wisdom;
                 creators["judgement of light"] = &TriggerFactoryInternal::judgement_of_light;
+#endif
                 creators["seal"] = &TriggerFactoryInternal::seal;
                 creators["art of war"] = &TriggerFactoryInternal::art_of_war;
                 creators["blessing"] = &TriggerFactoryInternal::blessing;
@@ -422,6 +425,7 @@ namespace ai
                 creators["crusader strike"] = &TriggerFactoryInternal::crusader_strike;
                 creators["hammer of the righteous"] = &TriggerFactoryInternal::hammer_of_the_righteous;
                 creators["shield of righteousness"] = &TriggerFactoryInternal::shield_of_righteousness;
+                creators["divine plea"] = &TriggerFactoryInternal::divine_plea;
             }
 
         private:
@@ -431,9 +435,12 @@ namespace ai
             static Trigger* divine_favor(PlayerbotAI* ai) { return new DivineFavorTrigger(ai); }
             static Trigger* holy_shield(PlayerbotAI* ai) { return new HolyShieldTrigger(ai); }
             static Trigger* righteous_fury(PlayerbotAI* ai) { return new RighteousFuryTrigger(ai); }
+#ifndef MANGOSBOT_TWO
             static Trigger* judgement(PlayerbotAI* ai) { return new JudgementTrigger(ai); }
+#else
             static Trigger* judgement_of_wisdom(PlayerbotAI* ai) { return new JudgementOfWisdomTrigger(ai); }
             static Trigger* judgement_of_light(PlayerbotAI* ai) { return new JudgementOfLightTrigger(ai); }
+#endif
             static Trigger* seal(PlayerbotAI* ai) { return new SealTrigger(ai); }
             static Trigger* art_of_war(PlayerbotAI* ai) { return new ArtOfWarTrigger(ai); }
             static Trigger* blessing(PlayerbotAI* ai) { return new BlessingTrigger(ai); }
@@ -494,6 +501,7 @@ namespace ai
             static Trigger* crusader_strike(PlayerbotAI* ai) { return new CrusaderStrikeTrigger(ai); }
             static Trigger* hammer_of_the_righteous(PlayerbotAI* ai) { return new HammerOfTheRighteousTrigger(ai); }
             static Trigger* shield_of_righteousness(PlayerbotAI* ai) { return new ShieldOfRighteousnessTrigger(ai); }
+            static Trigger* divine_plea(PlayerbotAI* ai) { return new DivinePleaTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>
@@ -571,9 +579,13 @@ namespace ai
                 creators["hand of reckoning"] = &AiObjectContextInternal::hand_of_reckoning;
                 creators["avenger's shield"] = &AiObjectContextInternal::avengers_shield;
                 creators["exorcism"] = &AiObjectContextInternal::exorcism;
+#ifndef MANGOSBOT_TWO
                 creators["judgement"] = &AiObjectContextInternal::judgement;
+#else
                 creators["judgement of light"] = &AiObjectContextInternal::judgement_of_light;
                 creators["judgement of wisdom"] = &AiObjectContextInternal::judgement_of_wisdom;
+                creators["judgement of justice"] = &AiObjectContextInternal::judgement_of_justice;
+#endif
                 creators["divine shield"] = &AiObjectContextInternal::divine_shield;
                 creators["divine protection"] = &AiObjectContextInternal::divine_protection;
                 creators["divine protection on party"] =&AiObjectContextInternal::divine_protection_on_party;
@@ -583,7 +595,6 @@ namespace ai
                 creators["holy light on party"] = &AiObjectContextInternal::holy_light_on_party;
                 creators["lay on hands"] = &AiObjectContextInternal::lay_on_hands;
                 creators["lay on hands on party"] = &AiObjectContextInternal::lay_on_hands_on_party;
-                creators["judgement of justice"] = &AiObjectContextInternal::judgement_of_justice;
                 creators["hammer of wrath"] = &AiObjectContextInternal::hammer_of_wrath;
                 creators["holy shield"] = &AiObjectContextInternal::holy_shield;
                 creators["hammer of the righteous"] = &AiObjectContextInternal::hammer_of_the_righteous;
@@ -694,9 +705,15 @@ namespace ai
             static Action* hand_of_reckoning(PlayerbotAI* ai) { return new CastHandOfReckoningAction(ai); }
             static Action* avengers_shield(PlayerbotAI* ai) { return new CastAvengersShieldAction(ai); }
             static Action* exorcism(PlayerbotAI* ai) { return new CastExorcismAction(ai); }
+#ifndef MANGOSBOT_TWO
             static Action* judgement(PlayerbotAI* ai) { return new CastJudgementAction(ai); }
+#else
             static Action* judgement_of_light(PlayerbotAI* ai) { return new CastJudgementOfLightAction(ai); }
             static Action* judgement_of_wisdom(PlayerbotAI* ai) { return new CastJudgementOfWisdomAction(ai); }
+            static Action* judgement_of_justice(PlayerbotAI* ai) { return new CastJudgementOfJusticeAction(ai); }
+#endif
+            
+            
             static Action* divine_shield(PlayerbotAI* ai) { return new CastDivineShieldAction(ai); }
             static Action* divine_protection(PlayerbotAI* ai) { return new CastDivineProtectionAction(ai); }
             static Action* divine_protection_on_party(PlayerbotAI* ai) { return new CastDivineProtectionOnPartyAction(ai); }
@@ -706,7 +723,6 @@ namespace ai
             static Action* holy_light_on_party(PlayerbotAI* ai) { return new CastHolyLightOnPartyAction(ai); }
             static Action* lay_on_hands(PlayerbotAI* ai) { return new CastLayOnHandsAction(ai); }
             static Action* lay_on_hands_on_party(PlayerbotAI* ai) { return new CastLayOnHandsOnPartyAction(ai); }
-            static Action* judgement_of_justice(PlayerbotAI* ai) { return new CastJudgementOfJusticeAction(ai); }
             static Action* hammer_of_wrath(PlayerbotAI* ai) { return new CastHammerOfWrathAction(ai); }
             static Action* holy_shield(PlayerbotAI* ai) { return new CastHolyShieldAction(ai); }
             static Action* hammer_of_the_righteous(PlayerbotAI* ai) { return new CastHammerOfTheRighteousAction(ai); }

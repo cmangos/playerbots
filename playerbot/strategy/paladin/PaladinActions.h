@@ -10,21 +10,22 @@ namespace ai
 	BUFF_ACTION(CastSealOfWisdomAction, "seal of wisdom");
 	BUFF_ACTION(CastSealOfCommandAction, "seal of command");
 	BUFF_ACTION(CastSealOfVengeanceAction, "seal of vengeance");
-
-	class CastJudgementAction : public CastMeleeDebuffSpellAction
-	{
-	public:
-		CastJudgementAction(PlayerbotAI* ai) : CastMeleeDebuffSpellAction(ai, "judgement") { range = 10.0f; }
-		virtual bool isUseful() 
-		{
-			return ai->HasAnyAuraOf(bot, "seal of justice", "seal of command", "seal of vengeance", "seal of blood", "seal of righteousness", "seal of light", "seal of wisdom", NULL);
-		}
-	};
-
-	// judgements
-	MELEE_DEBUFF_ACTION_R(CastJudgementOfLightAction, "judgement of light", 10.0f);
-	MELEE_DEBUFF_ACTION_R(CastJudgementOfWisdomAction, "judgement of wisdom", 10.0f);
-	MELEE_DEBUFF_ACTION_R(CastJudgementOfJusticeAction, "judgement of justice", 10.0f);
+#ifndef MANGOSBOT_TWO
+    class CastJudgementAction : public CastMeleeDebuffSpellAction
+    {
+    public:
+        CastJudgementAction(PlayerbotAI* ai) : CastMeleeDebuffSpellAction(ai, "judgement") { range = 10.0f; }
+        virtual bool isUseful()
+        {
+            return ai->HasAnyAuraOf(bot, "seal of justice", "seal of command", "seal of vengeance", "seal of blood", "seal of righteousness", "seal of light", "seal of wisdom", NULL);
+        }
+    };
+#else
+    // judgements
+    MELEE_DEBUFF_ACTION_R(CastJudgementOfLightAction, "judgement of light", 10.0f);
+    MELEE_DEBUFF_ACTION_R(CastJudgementOfWisdomAction, "judgement of wisdom", 10.0f);
+    MELEE_DEBUFF_ACTION_R(CastJudgementOfJusticeAction, "judgement of justice", 10.0f);
+#endif
 
 	SPELL_ACTION(CastHolyShockAction, "holy shock");
 	HEAL_PARTY_ACTION(CastHolyShockOnPartyAction, "holy shock");

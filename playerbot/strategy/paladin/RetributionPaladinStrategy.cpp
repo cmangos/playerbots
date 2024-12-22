@@ -18,7 +18,9 @@ public:
         creators["repentance on enemy healer"] = &repentance_on_enemy_healer;
         creators["repentance on snare target"] = &repentance_on_snare_target;
         creators["repentance of shield"] = &repentance_or_shield;
+#ifndef MANGOSBOT_TWO
         creators["judgement"] = &judgement;
+#endif   
     }
 
 private:
@@ -40,7 +42,9 @@ private:
 
     ACTION_NODE_A(repentance_or_shield, "repentance", "divine shield");
 
+#ifndef MANGOSBOT_TWO
     ACTION_NODE_A(judgement, "judgement", "exorcism");
+#endif   
 };
 
 RetributionPaladinStrategy::RetributionPaladinStrategy(PlayerbotAI* ai) : PaladinStrategy(ai)
@@ -1068,7 +1072,7 @@ void RetributionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
         NextAction::array(0, new NextAction("seal of command", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "judgement of wisdom",
+        "medium mana",
         NextAction::array(0, new NextAction("judgement of wisdom", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(

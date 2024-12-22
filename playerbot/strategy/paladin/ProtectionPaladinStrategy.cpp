@@ -12,15 +12,18 @@ public:
     {
         creators["seal of vengeance"] = &seal_of_vengeance;
         creators["hand of reckoning"] = &hand_of_reckoning;
+#ifndef MANGOSBOT_TWO
         creators["judgement"] = &judgement;
+#endif
     }
 
 private:
     ACTION_NODE_A(seal_of_vengeance, "seal of vengeance", "seal of righteousness");
 
     ACTION_NODE_A(hand_of_reckoning, "hand of reckoning", "righteous defense");
-
-    ACTION_NODE_A(judgement, "judgement", "exorcism");
+#ifndef MANGOSBOT_TWO
+    ACTION_NODE_A(judgement, "judgement", "exorcism"); 
+#endif
 };
 
 ProtectionPaladinStrategy::ProtectionPaladinStrategy(PlayerbotAI* ai) : PaladinStrategy(ai)
@@ -1052,8 +1055,8 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("holy shield", ACTION_HIGH + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "medium mana",
-        NextAction::array(0, new NextAction("judgement of wisdom", ACTION_HIGH + 1), NULL)));
+        "divine plea",
+        NextAction::array(0, new NextAction("divine plea", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low mana",
@@ -1064,16 +1067,20 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("hammer of the righteous", ACTION_NORMAL + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "shield of righteousness",
-        NextAction::array(0, new NextAction("shield of righteousness", ACTION_NORMAL + 4), NULL)));
+        "consecration",
+        NextAction::array(0, new NextAction("consecration", ACTION_NORMAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "exorcism",
-        NextAction::array(0, new NextAction("exorcism", ACTION_NORMAL + 3), NULL)));
+        "shield of righteousness",
+        NextAction::array(0, new NextAction("shield of righteousness", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "seal",
         NextAction::array(0, new NextAction("seal of vengeance", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium mana",
+        NextAction::array(0, new NextAction("judgement of wisdom", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "judgement of light",

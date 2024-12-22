@@ -30,10 +30,13 @@ namespace ai
 	};
 
     // judgements
+#ifndef MANGOSBOT_TWO
     DEBUFF_TRIGGER(JudgementTrigger, "judgement");
-    DEBUFF_TRIGGER(JudgementOfLightTrigger, "judgement of light");
-    DEBUFF_TRIGGER(JudgementOfWisdomTrigger, "judgement of wisdom");
-
+#else
+    CAN_CAST_TRIGGER(JudgementOfLightTrigger, "judgement of light");
+    CAN_CAST_TRIGGER(JudgementOfWisdomTrigger, "judgement of wisdom");
+#endif
+    
     class ConsecrationTrigger : public SpellNoCooldownTrigger
     {
     public:
@@ -460,4 +463,5 @@ namespace ai
     BOOST_TRIGGER(DivineIlluminationBoostTrigger, "divine illumination");
     CAN_CAST_TRIGGER(HammerOfTheRighteousTrigger, "hammer of the righteous");
     CAN_CAST_TRIGGER(ShieldOfRighteousnessTrigger, "shield of righteousness");
+    BUFF_TRIGGER(DivinePleaTrigger, "divine plea");
 }

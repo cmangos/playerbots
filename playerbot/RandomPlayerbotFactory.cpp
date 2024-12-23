@@ -984,13 +984,13 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         Player* player = sObjectMgr.GetPlayer(captain);
         if (!player)
         {
-            sLog.outError("Cannot find player for captain %d", (uint64)captain);
+            sLog.outError("Cannot find player for captain %d", player->GetGUIDLow());
             continue;
         }
 
         if (player->GetLevel() < 70)
         {
-            sLog.outError("Bot %d must be level 70 to create an arena team", (uint64)captain);
+            sLog.outError("Bot %d must be level 70 to create an arena team", player->GetGUIDLow());
             continue;
         }
 

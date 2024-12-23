@@ -468,7 +468,7 @@ bool BossTravelDestination::IsActive(Player* bot) const
 #ifndef MANGOSBOT_TWO
             if (firstPoint.getMapEntry() && firstPoint.getMapEntry()->IsNonRaidDungeon())
 #else
-            if (points.front()->getMapEntry() && points.front()->getMapEntry()->IsNonRaidDungeon())
+            if (firstPoint.getMapEntry() && firstPoint.getMapEntry()->IsNonRaidDungeon())
 #endif
                 return false;
         }

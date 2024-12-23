@@ -81,17 +81,17 @@ int ListQuestsAction::ListQuests(Player* requester, bool completed, bool silent,
 
         ai->TellPlayer(requester, chat->formatQuest(pQuest));
 
-        if (travelDetail != QUEST_TRAVEL_DETAIL_NONE && target->getDestination())
+        if (travelDetail != QUEST_TRAVEL_DETAIL_NONE && target->GetDestination())
         {
-            if (typeid(target->getDestination()) == typeid(QuestRelationTravelDestination) || typeid(target->getDestination()) == typeid(QuestObjectiveTravelDestination))
+            if (typeid(*target->GetDestination()) == typeid(QuestRelationTravelDestination) || typeid(*target->GetDestination()) == typeid(QuestObjectiveTravelDestination))
             {
-                QuestTravelDestination* QuestDestination = (QuestTravelDestination*)target->getDestination();
+                QuestTravelDestination* QuestDestination = (QuestTravelDestination*)target->GetDestination();
 
                 if (QuestDestination->GetQuestId() == questId)
                 {
                     std::ostringstream out;
 
-                    out << "[Active] traveling " << target->getPosition()->distance(botPos);
+                    out << "[Active] traveling " << target->GetPosition()->distance(botPos);
 
                     out << " to " << QuestDestination->GetTitle();
 

@@ -134,17 +134,17 @@ bool GoAction::TellWhereToGo(std::string& param, Player* requester) const
 
     TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
 
-    target->setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+    target->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
 
     travelAction->getNewTarget(requester, target, target);
 
-    if (!target->getDestination() || target->getDestination()->GetTitle().empty())
+    if (!target->GetDestination() || target->GetDestination()->GetTitle().empty())
     {
         ai->TellPlayerNoFacing(requester, "I have no place I want to go to.");
         return false;
     }
 
-    std::string title = target->getDestination()->GetTitle();
+    std::string title = target->GetDestination()->GetTitle();
 
     if (title.find('[') != std::string::npos)
         title = title.substr(title.find("[") + 1, title.find("]") - title.find("[") - 1);
@@ -153,7 +153,7 @@ bool GoAction::TellWhereToGo(std::string& param, Player* requester) const
     TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, title);
 
     if (!dest)
-        dest = target->getDestination();
+        dest = target->GetDestination();
 
     if (!dest)
     {
@@ -163,7 +163,7 @@ bool GoAction::TellWhereToGo(std::string& param, Player* requester) const
 
     std::string link = ChatHelper::formatValue("command", "go to " + title, title, "FF00FFFF");
 
-    ai->TellPlayerNoFacing(requester, "I would like to travel to " + link + "(" + target->getDestination()->GetTitle() + ")");
+    ai->TellPlayerNoFacing(requester, "I would like to travel to " + link + "(" + target->GetDestination()->GetTitle() + ")");
 
     delete travelAction;
     return true;
@@ -183,10 +183,10 @@ bool GoAction::LeaderAlreadyTraveling(TravelDestination* dest) const
     Player* player = ai->GetGroupMaster();
     TravelTarget* masterTarget = PAI_VALUE(TravelTarget*, "travel target");
 
-    if (!masterTarget->getDestination())
+    if (!masterTarget->GetDestination())
         return false;
 
-    if (masterTarget->getDestination() != dest)
+    if (masterTarget->GetDestination() != dest)
         return false;
 
     return true;
@@ -272,8 +272,8 @@ bool GoAction::TravelTo(TravelDestination* dest, Player* requester) const
         if (!point)
             return false;
 
-        target->setTarget(dest, point);
-        target->setForced(true);
+        target->SetTarget(dest, point);
+        target->SetForced(true);
 
         std::ostringstream out; out << "Traveling to " << dest->GetTitle();
         ai->TellPlayerNoFacing(requester, out.str());
@@ -286,7 +286,7 @@ bool GoAction::TravelTo(TravelDestination* dest, Player* requester) const
     else
     {
         sTravelMgr.SetNullTravelTarget(target);
-        target->setForced(false);
+        target->SetForced(false);
         return false;
     }
 }

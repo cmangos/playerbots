@@ -249,7 +249,7 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot) const {
         TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
 
         //Only look for the target if it is unique or if we are currently working on it.
-        if (GetPoints().size() == 1 || (target->getStatus() == TravelStatus::TRAVEL_STATUS_WORK && target->GetEntry() == GetEntry()))
+        if (GetPoints().size() == 1 || (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK && target->GetEntry() == GetEntry()))
         {
             std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
 
@@ -592,24 +592,24 @@ TravelTarget::TravelTarget(PlayerbotAI* ai) : AiObject(ai)
     sTravelMgr.SetNullTravelTarget(this);
 }
 
-void TravelTarget::setTarget(TravelDestination* tDestination1, WorldPosition* wPosition1, bool groupCopy1) {
+void TravelTarget::SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1, bool groupCopy1) {
     wPosition = wPosition1;
     tDestination = tDestination1;
     groupCopy = groupCopy1;
     forced = false;
     radius = 0;
 
-    setStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
+    SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
 }
 
-void TravelTarget::copyTarget(TravelTarget* target) {
-    setTarget(target->tDestination, target->wPosition);
-    groupCopy = target->isGroupCopy();
+void TravelTarget::CopyTarget(TravelTarget* const target) {
+    SetTarget(target->tDestination, target->wPosition);
+    groupCopy = target->IsGroupCopy();
     forced = target->forced;
     extendRetryCount = target->extendRetryCount;
 }
 
-void TravelTarget::setStatus(TravelStatus status) {
+void TravelTarget::SetStatus(TravelStatus status) {
     m_status = status;
     startTime = WorldTimer::getMSTime();
 
@@ -620,7 +620,7 @@ void TravelTarget::setStatus(TravelStatus status) {
         statusTime = 1;
         break;
     case TravelStatus::TRAVEL_STATUS_TRAVEL:
-        statusTime = getMaxTravelTime() * 2 + sPlayerbotAIConfig.maxWaitForMove;
+        statusTime = GetMaxTravelTime() * 2 + sPlayerbotAIConfig.maxWaitForMove;
         break;
     case TravelStatus::TRAVEL_STATUS_WORK:
         statusTime = tDestination->GetExpireDelay();
@@ -635,47 +635,47 @@ bool TravelTarget::IsActive() {
     if (m_status == TravelStatus::TRAVEL_STATUS_NONE || m_status == TravelStatus::TRAVEL_STATUS_EXPIRED || m_status == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
-    if (forced && isTraveling())
+    if (forced && IsTraveling())
         return true;
 
     if ((statusTime > 0 && startTime + statusTime < WorldTimer::getMSTime()))
     {
-        setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+        SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
         return false;
     }
 
     if (m_status == TravelStatus::TRAVEL_STATUS_COOLDOWN)
         return true;
 
-    if (isTraveling())
+    if (IsTraveling())
         return true;
 
-    if (isWorking())
+    if (IsWorking())
         return true;   
 
     if (!tDestination->IsActive(bot)) //Target has become invalid. Stop.
     {
-        setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+        SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return true;
     }
 
     return true;
 };
 
-bool TravelTarget::isTraveling() {
+bool TravelTarget::IsTraveling() {
     if (m_status != TravelStatus::TRAVEL_STATUS_TRAVEL)
         return false;
 
     if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
         if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT))
         {
-            setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+            SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
             return false;
         }
 
     if (!tDestination->IsActive(bot) && !forced) //Target has become invalid. Stop.
     {
-        setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+        SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return false;
     }
 
@@ -685,7 +685,7 @@ bool TravelTarget::isTraveling() {
 
     if (HasArrived)
     {
-        setStatus(TravelStatus::TRAVEL_STATUS_WORK);
+        SetStatus(TravelStatus::TRAVEL_STATUS_WORK);
         return false;
     }
 
@@ -698,13 +698,13 @@ bool TravelTarget::isTraveling() {
     return true;
 }
 
-bool TravelTarget::isWorking() {
+bool TravelTarget::IsWorking() {
     if (m_status != TravelStatus::TRAVEL_STATUS_WORK)
         return false;
 
     if (!tDestination->IsActive(bot)) //Target has become invalid. Stop.
     {
-        setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+        SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return false;
     }
 
@@ -719,46 +719,46 @@ bool TravelTarget::isWorking() {
     return true;
 }
 
-bool TravelTarget::isPreparing() {
+bool TravelTarget::IsPreparing() {
     if (m_status != TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
     return true;
 }
 
-TravelState TravelTarget::getTravelState() {
-    if (!tDestination || typeid(tDestination) == typeid(NullTravelDestination))
+TravelState TravelTarget::GetTravelState() {
+    if (!tDestination || typeid(*tDestination) == typeid(NullTravelDestination))
         return TravelState::TRAVEL_STATE_IDLE;
 
-    if (typeid(tDestination) == typeid(QuestRelationTravelDestination))
+    if (typeid(*tDestination) == typeid(QuestRelationTravelDestination))
     {
         if (tDestination->GetSubEntry() == 0)
         {
-            if (isTraveling() || isPreparing())
+            if (IsTraveling() || IsPreparing())
                 return TravelState::TRAVEL_STATE_TRAVEL_PICK_UP_QUEST;
-            if (isWorking())
+            if (IsWorking())
                 return TravelState::TRAVEL_STATE_WORK_PICK_UP_QUEST;
         }
         else
         {
-            if (isTraveling() || isPreparing())
+            if (IsTraveling() || IsPreparing())
                 return TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST;
-            if (isWorking())
+            if (IsWorking())
                 return TravelState::TRAVEL_STATE_WORK_HAND_IN_QUEST;
         }
     }
-    else if (typeid(tDestination) == typeid(QuestObjectiveTravelDestination))
+    else if (typeid(*tDestination) == typeid(QuestObjectiveTravelDestination))
     {
-        if (isTraveling() || isPreparing())
+        if (IsTraveling() || IsPreparing())
             return TravelState::TRAVEL_STATE_TRAVEL_DO_QUEST;
-        if (isWorking())
+        if (IsWorking())
             return TravelState::TRAVEL_STATE_WORK_DO_QUEST;
     }
-    else if (typeid(tDestination) == typeid(RpgTravelDestination))
+    else if (typeid(*tDestination) == typeid(RpgTravelDestination))
     {
         return TravelState::TRAVEL_STATE_TRAVEL_RPG;
     }
-    else if (typeid(tDestination) == typeid(ExploreTravelDestination))
+    else if (typeid(*tDestination) == typeid(ExploreTravelDestination))
     {
         return TravelState::TRAVEL_STATE_TRAVEL_EXPLORE;
     }
@@ -2108,20 +2108,12 @@ std::vector<TravelDestination*> TravelMgr::GetQuestTravelDestinations(Player* bo
     }
     else
     {
-        for (auto& dest : destinationMap.at(typeid(QuestRelationTravelDestination)).at(questId))
+        for (auto& [destQuestId, dests] : destinationMap.at(typeid(QuestRelationTravelDestination)))
         {
-
-            if (!ignoreInactive && !dest->IsActive(bot))
+            if (destQuestId != questId)
                 continue;
 
-            if (maxDistance > 0 && dest->DistanceTo(botLocation) > maxDistance)
-                continue;
-
-            retTravelLocations.push_back(dest);
-        }
-
-        if (!ignoreObjectives)
-            for (auto& dest : destinationMap.at(typeid(QuestObjectiveTravelDestination)).at(questId))
+            for (auto& dest : dests)
             {
                 if (!ignoreInactive && !dest->IsActive(bot))
                     continue;
@@ -2130,6 +2122,25 @@ std::vector<TravelDestination*> TravelMgr::GetQuestTravelDestinations(Player* bo
                     continue;
 
                 retTravelLocations.push_back(dest);
+            }
+        }
+
+        if (!ignoreObjectives)
+            for (auto& [destQuestId, dests] : destinationMap.at(typeid(QuestObjectiveTravelDestination)))
+            {
+                if (destQuestId != questId)
+                    continue;
+
+                for (auto& dest : dests)
+                {
+                    if (!ignoreInactive && !dest->IsActive(bot))
+                        continue;
+
+                    if (maxDistance > 0 && dest->DistanceTo(botLocation) > maxDistance)
+                        continue;
+
+                    retTravelLocations.push_back(dest);
+                }
             }
     }
     return retTravelLocations;
@@ -2240,7 +2251,7 @@ std::vector<TravelDestination*> TravelMgr::GetBossTravelDestinations(Player* bot
 void TravelMgr::SetNullTravelTarget(TravelTarget* target) const
 {
     if (target)
-        target->setTarget(nullTravelDestination, nullWorldPosition);
+        target->SetTarget(nullTravelDestination, nullWorldPosition);
 }
 
 void TravelMgr::SetNullTravelTarget(Player* player) const

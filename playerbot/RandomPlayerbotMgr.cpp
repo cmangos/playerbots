@@ -1984,7 +1984,7 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
     TravelTarget* target = player->GetPlayerbotAI()->GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
     if (target)
     {
-        if (target->getTravelState() == TravelState::TRAVEL_STATE_IDLE)
+        if (target->GetTravelState() == TravelState::TRAVEL_STATE_IDLE)
             idleBot = true;
     }
     else
@@ -3469,7 +3469,7 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         TravelTarget* target = bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
         if (target)
         {
-            TravelState state = target->getTravelState();
+            TravelState state = target->GetTravelState();
             stateCount[(uint8)state]++;            
         }
     });
@@ -3701,8 +3701,8 @@ void RandomPlayerbotMgr::RandomTeleportForRpg(Player* bot, bool activeOnly)
         TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
         sTravelMgr.SetNullTravelTarget(travelTarget);
-        travelTarget->setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
-        travelTarget->setExpireIn(10 * MINUTE * IN_MILLISECONDS);
+        travelTarget->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+        travelTarget->SetExpireIn(10 * MINUTE * IN_MILLISECONDS);
     }
 }
 

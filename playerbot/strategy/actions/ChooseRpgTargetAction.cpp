@@ -433,7 +433,7 @@ bool ChooseRpgTargetAction::isUseful()
 
     TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    if (travelTarget->isTraveling() && AI_VALUE2(bool, "can free move to", *travelTarget->getPosition()))
+    if (travelTarget->IsTraveling() && AI_VALUE2(bool, "can free move to", *travelTarget->GetPosition()))
         return false;
 
     if (AI_VALUE(std::list<ObjectGuid>, "possible rpg targets").empty())

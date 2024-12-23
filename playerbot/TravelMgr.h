@@ -234,45 +234,49 @@ namespace ai
 	{
 	public:
 		TravelTarget(PlayerbotAI* ai);
-		TravelTarget(PlayerbotAI* ai, TravelDestination* tDestination1, WorldPosition* wPosition1) : AiObject(ai) { setTarget(tDestination1, wPosition1); }
+		TravelTarget(PlayerbotAI* ai, TravelDestination* tDestination1, WorldPosition* wPosition1) : AiObject(ai) { SetTarget(tDestination1, wPosition1); }
 		~TravelTarget() = default;
 
-		void setTarget(TravelDestination* tDestination1, WorldPosition* wPosition1, bool groupCopy1 = false);
-		void setStatus(TravelStatus status);
-		void setExpireIn(uint32 expireMs) { statusTime = getExpiredTime() + expireMs; }
-		void incRetry(bool isMove) { if (isMove) moveRetryCount += 2; else extendRetryCount += 2; }
-		void decRetry(bool isMove) { if (isMove && moveRetryCount > 0) moveRetryCount--; else if (extendRetryCount > 0) extendRetryCount--; }
-		void setRetry(bool isMove, uint32 newCount = 0) { if (isMove) moveRetryCount = newCount; else extendRetryCount = newCount; }
-		void setGroupCopy(bool isGroupCopy = true) { groupCopy = isGroupCopy; }
-		void setForced(bool forced1) { forced = forced1; }
-		void setRadius(float radius1) { radius = radius1; }
+		float Distance(Player* bot) const { WorldPosition pos(bot);  return wPosition->distance(pos); };
+		TravelDestination* GetDestination() const { return tDestination; };
+		WorldPosition* GetPosition() const { return wPosition; };
+		std::string GetPosStr() const { return wPosition->to_string(); }
 
-		void copyTarget(TravelTarget* target);
+		int32 GetEntry() const { if (!tDestination) return 0; return tDestination->GetEntry(); }
+		TravelStatus GetStatus() const { return m_status; }
+		TravelState GetTravelState();
 
-		float distance(Player* bot) { WorldPosition pos(bot);  return wPosition->distance(pos); };
-		WorldPosition* getPosition() { return wPosition; };
-		std::string GetPosStr() { return wPosition->to_string(); }
-		TravelDestination* getDestination() { return tDestination; };
-		int32 GetEntry() { if (!tDestination) return 0; return tDestination->GetEntry(); }
-		PlayerbotAI* getAi() { return ai; }
+		bool IsGroupCopy() const { return groupCopy; }
+		bool IsForced() const { return forced; }
 
-		uint32 getExpiredTime() { return WorldTimer::getMSTime() - startTime; }
-		uint32 getTimeLeft() { return statusTime - getExpiredTime(); }
-		uint32 getMaxTravelTime() { return (1000.0 * distance(bot)) / bot->GetSpeed(MOVE_RUN); }
-		uint32 getRetryCount(bool isMove) { return isMove ? moveRetryCount : extendRetryCount; }
-
-		bool isTraveling();
 		bool IsActive();
-		bool isWorking();
-		bool isPreparing();
-		bool isMaxRetry(bool isMove) { return isMove ? (moveRetryCount > 10) : (extendRetryCount > 5); }
-		TravelStatus getStatus() { return m_status; }
+		bool IsTraveling();
+		bool IsWorking();
 
-		TravelState getTravelState();
+		uint32 GetRetryCount(bool isMove) const { return isMove ? moveRetryCount : extendRetryCount; }
+		uint32 GetTimeLeft() const { return statusTime - GetExpiredTime(); }
+		uint32 GetExpiredTime() const { return WorldTimer::getMSTime() - startTime; }
 
-		bool isGroupCopy() { return groupCopy; }
-		bool isForced() { return forced; }
-	protected:
+		void SetRetry(bool isMove, uint32 newCount = 0) { if (isMove) moveRetryCount = newCount; else extendRetryCount = newCount; }
+		bool IsMaxRetry(bool isMove) { return isMove ? (moveRetryCount > 10) : (extendRetryCount > 5); }
+
+		void SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1, bool groupCopy1 = false);
+
+		void SetStatus(TravelStatus status);
+		void SetExpireIn(uint32 expireMs) { statusTime = GetExpiredTime() + expireMs; }
+		void SetForced(bool forced1) { forced = forced1; }
+		void SetGroupCopy(bool isGroupCopy = true) { groupCopy = isGroupCopy; }
+		void SetRadius(float radius1) { radius = radius1; }
+
+		void IncRetry(bool isMove) { if (isMove) moveRetryCount += 2; else extendRetryCount += 2; }
+		void DecRetry(bool isMove) { if (isMove && moveRetryCount > 0) moveRetryCount--; else if (extendRetryCount > 0) extendRetryCount--; }
+
+		void CopyTarget(TravelTarget* const target);
+	private:
+		uint32 GetMaxTravelTime() const { return (1000.0 * Distance(bot)) / bot->GetSpeed(MOVE_RUN); }
+
+ 		bool IsPreparing();
+
 		TravelStatus m_status = TravelStatus::TRAVEL_STATUS_NONE;
 
 		uint32 startTime = WorldTimer::getMSTime();

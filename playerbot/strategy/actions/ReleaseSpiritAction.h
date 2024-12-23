@@ -161,8 +161,8 @@ namespace ai
 
             TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
             sTravelMgr.SetNullTravelTarget(travelTarget);
-            travelTarget->setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
-            travelTarget->setExpireIn(1000);
+            travelTarget->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+            travelTarget->SetExpireIn(1000);
 
             PlayerInfo const* defaultPlayerInfo = sObjectMgr.GetPlayerInfo(bot->getRace(), bot->getClass());
             if (defaultPlayerInfo)

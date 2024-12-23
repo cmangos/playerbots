@@ -15,7 +15,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
 
     WorldPosition botLocation(bot);
-    WorldLocation location = *target->getPosition();
+    WorldLocation location = *target->GetPosition();
     
     Group* group = bot->GetGroup();
     if (group && !urand(0, 1) && bot == ai->GetGroupMaster())
@@ -36,7 +36,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
                 continue;
 
             WorldPosition memberPos(member);
-            WorldPosition targetPos = *target->getPosition();
+            WorldPosition targetPos = *target->GetPosition();
 
             float memberDistance = botLocation.distance(memberPos);
 
@@ -63,7 +63,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
                 ai->TellPlayerNoFacing(GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             }
 
-            target->setExpireIn(target->getTimeLeft() + sPlayerbotAIConfig.maxWaitForMove);
+            target->SetExpireIn(target->GetTimeLeft() + sPlayerbotAIConfig.maxWaitForMove);
 
             SetDuration(sPlayerbotAIConfig.maxWaitForMove);
 
@@ -71,7 +71,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
         }
     }
 
-    float maxDistance = target->getDestination()->GetRadiusMin();
+    float maxDistance = target->GetDestination()->GetRadiusMin();
 
     //Evenly distribute around the target.
     float angle = 2 * M_PI * urand(0, 100) / 100.0;
@@ -95,20 +95,20 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
         out << "Moving to ";
 
-        out << target->getDestination()->GetTitle();
+        out << target->GetDestination()->GetTitle();
 
-        if (!(*target->getPosition() == WorldPosition()))
+        if (!(*target->GetPosition() == WorldPosition()))
         {
-            out << " at " << uint32(target->getPosition()->distance(bot)) << "y";
+            out << " at " << uint32(target->GetPosition()->distance(bot)) << "y";
         }
 
-        if (target->getStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << " for " << (target->getTimeLeft() / 1000) << "s";
+        if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
+            out << " for " << (target->GetTimeLeft() / 1000) << "s";
 
-        if (target->getRetryCount(true))
-            out << " (move retry: " << target->getRetryCount(true) << ")";
-        else if (target->getRetryCount(false))
-            out << " (retry: " << target->getRetryCount(false) << ")";
+        if (target->GetRetryCount(true))
+            out << " (move retry: " << target->GetRetryCount(true) << ")";
+        else if (target->GetRetryCount(false))
+            out << " (retry: " << target->GetRetryCount(false) << ")";
 
         ai->TellPlayerNoFacing(GetMaster(), out);
     }
@@ -117,17 +117,17 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
     if (!canMove)
     {
-        target->incRetry(true);
+        target->IncRetry(true);
 
-        if (target->isMaxRetry(true))
+        if (target->IsMaxRetry(true))
         {
-            target->setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+            target->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
 
             if (sPlayerbotAIConfig.hasLog("travel_map.csv"))
             {
                 WorldPosition botPos(bot);
-                WorldPosition destPos = *target->getPosition();
-                TravelDestination* destination = target->getDestination();
+                WorldPosition destPos = *target->GetPosition();
+                TravelDestination* destination = target->GetDestination();
 
                 std::ostringstream out;
                 out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
@@ -145,22 +145,22 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
                 botPos.printWKT({ botPos,destPos }, out, 1);
 
-                if (typeid(destination) == typeid(NullTravelDestination))
+                if (typeid(*destination) == typeid(NullTravelDestination))
                     out << "0,";
                 else
-                    out << round(target->getDestination()->DistanceTo(botPos)) << ",";
+                    out << round(target->GetDestination()->DistanceTo(botPos)) << ",";
 
                 out << "2," << "\"" << destination->GetTitle() << "\",\"" << "timeout" << "\"";
 
-                if (typeid(destination) == typeid(NullTravelDestination))
+                if (typeid(*destination) == typeid(NullTravelDestination))
                     out << ",none";
-                else if (typeid(destination) == typeid(QuestTravelDestination))
+                else if (typeid(*destination) == typeid(QuestTravelDestination))
                     out << ",quest";
-                else if (typeid(destination) == typeid(QuestRelationTravelDestination))
+                else if (typeid(*destination) == typeid(QuestRelationTravelDestination))
                     out << ",questgiver";
-                else if (typeid(destination) == typeid(QuestObjectiveTravelDestination))
+                else if (typeid(*destination) == typeid(QuestObjectiveTravelDestination))
                     out << ",objective";
-                else  if (typeid(destination) == typeid(RpgTravelDestination))
+                else  if (typeid(*destination) == typeid(RpgTravelDestination))
                 {
                     RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
                     if (RpgDestination->GetEntry() > 0)
@@ -196,11 +196,11 @@ bool MoveToTravelTargetAction::Execute(Event& event)
                             out << ",rpg";
                     }
                 }
-                else if (typeid(destination) == typeid(ExploreTravelDestination))
+                else if (typeid(*destination) == typeid(ExploreTravelDestination))
                     out << ",explore";
-                else if (typeid(destination) == typeid(GrindTravelDestination))
+                else if (typeid(*destination) == typeid(GrindTravelDestination))
                     out << ",grind";
-                else if (typeid(destination) == typeid(BossTravelDestination))
+                else if (typeid(*destination) == typeid(BossTravelDestination))
                     out << ",boss";
                 else
                     out << ",unknown";
@@ -210,11 +210,11 @@ bool MoveToTravelTargetAction::Execute(Event& event)
         }
     }
     else
-        target->decRetry(true);
+        target->DecRetry(true);
 
     if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
     {
-        WorldPosition* pos = target->getPosition();
+        WorldPosition* pos = target->GetPosition();
         GuidPosition* guidP = dynamic_cast<GuidPosition*>(pos);
 
         std::string name = (guidP && guidP->GetWorldObject(bot->GetInstanceId())) ? chat->formatWorldobject(guidP->GetWorldObject(bot->GetInstanceId())) : "travel target";
@@ -245,7 +245,7 @@ bool MoveToTravelTargetAction::isUseful()
     if (!ai->AllowActivity(TRAVEL_ACTIVITY))
         return false;
 
-    if (!AI_VALUE(TravelTarget*,"travel target")->isTraveling())
+    if (!AI_VALUE(TravelTarget*,"travel target")->IsTraveling())
         return false;
 
     if (bot->IsTaxiFlying())
@@ -263,7 +263,7 @@ bool MoveToTravelTargetAction::isUseful()
     if (!AI_VALUE(bool, "can move around"))
         return false;
 
-    WorldPosition travelPos(*AI_VALUE(TravelTarget*, "travel target")->getPosition());
+    WorldPosition travelPos(*AI_VALUE(TravelTarget*, "travel target")->GetPosition());
 
     if (travelPos.isDungeon() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && sTravelMgr.MapTransDistance(bot, travelPos, true) < sPlayerbotAIConfig.sightDistance && !AI_VALUE2(bool, "group and", "near leader"))
         return false;

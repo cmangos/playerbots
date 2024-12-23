@@ -134,7 +134,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
        
         if (unit->GetEntry() && !AI_VALUE2(bool, "need for quest", std::to_string(unit->GetEntry())))
         {
-            if (urand(0, 100) < 99 && AI_VALUE(TravelTarget*, "travel target")->isWorking() && typeid(AI_VALUE(TravelTarget*, "travel target")->getDestination()) != typeid(GrindTravelDestination))
+            if (urand(0, 100) < 99 && AI_VALUE(TravelTarget*, "travel target")->IsWorking() && typeid(AI_VALUE(TravelTarget*, "travel target")->GetDestination()) != typeid(GrindTravelDestination))
             {
                 if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
                     ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (not needed for active quest).");
@@ -144,7 +144,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
             else if (creature && !MaNGOS::XP::Gain(bot, creature) && urand(0, 50))
             {
                 if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
-                    if ((context->GetValue<TravelTarget*>("travel target")->Get()->isWorking() && typeid(context->GetValue<TravelTarget*>("travel target")->Get()->getDestination()) != typeid(GrindTravelDestination)))
+                    if ((context->GetValue<TravelTarget*>("travel target")->Get()->IsWorking() && typeid(context->GetValue<TravelTarget*>("travel target")->Get()->GetDestination()) != typeid(GrindTravelDestination)))
                         ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (not xp and not needed for quest).");
 
                 continue;
@@ -152,7 +152,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
             else if (urand(0, 100) < 75)
             {
                 if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
-                    if ((context->GetValue<TravelTarget*>("travel target")->Get()->isWorking() && typeid(context->GetValue<TravelTarget*>("travel target")->Get()->getDestination()) != typeid(GrindTravelDestination)))
+                    if ((context->GetValue<TravelTarget*>("travel target")->Get()->IsWorking() && typeid(context->GetValue<TravelTarget*>("travel target")->Get()->GetDestination()) != typeid(GrindTravelDestination)))
                         ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " increased distance (not needed for quest).");
 
                 newdistance += 20;

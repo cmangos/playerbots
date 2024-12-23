@@ -20,7 +20,7 @@ bool TravelAction::Execute(Event& event)
     if (sServerFacade.isMoving(bot))
         return false;
 
-    target->setStatus(TravelStatus::TRAVEL_STATUS_WORK);
+    target->SetStatus(TravelStatus::TRAVEL_STATUS_WORK);
 
      Unit* newTarget;
     std::list<Unit*> targets;
@@ -41,7 +41,7 @@ bool TravelAction::Execute(Event& event)
         if (!newTarget->IsAlive())
             continue;
 
-        if (newTarget->GetEntry() != target->getDestination()->GetEntry())
+        if (newTarget->GetEntry() != target->GetDestination()->GetEntry())
             continue;
 
         if (newTarget->IsInCombat())

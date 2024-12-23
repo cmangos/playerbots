@@ -336,6 +336,9 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 
 bool NeedForQuestValue::Calculate()
 {
+	if (!Qualified::isValidNumberString(getQualifier()))
+		return false;
+
 	int32 entry = stoi(getQualifier());
 
 	questGuidpMap questMap = GAI_VALUE(questGuidpMap, "quest guidp map");

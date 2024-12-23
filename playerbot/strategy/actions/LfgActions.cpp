@@ -382,9 +382,9 @@ bool LfgJoinAction::JoinLFG()
         if (target && group && !group->IsFull())
         {
             // if moving to boss
-            if (target->getDestination() && target->getDestination()->getName() == "BossTravelDestination")
+            if (target->GetDestination() && typeid(*target->GetDestination()) == typeid(BossTravelDestination))
             {
-                WorldPosition* location = target->getPosition();
+                WorldPosition* location = target->GetPosition();
                 uint32 targetAreaFlag = GetAreaFlagByMapId(location->mapid);
                 if (targetAreaFlag)
                 {

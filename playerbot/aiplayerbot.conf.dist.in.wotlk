@@ -673,6 +673,8 @@ AiPlayerbot.PremadeSpecLink.11.8.80 = 05320001--230033312031512531153313051
 # AiPlayerbot.WorldBuff.0.9.1.10 = 18149,3436
 # All alliance lvl60 rogues      Plainsrunning & Sprint & Speed
 # AiPlayerbot.WorldBuff.1.4.60 = 12566,11305,2379
+# Darkmoon Faire - Elwynn Forest	Sayge's Dark Fortune of Damage
+# AiPlayerbot.WorldBuff.0.0.0.0.0.4 = 23768
 
 # Prefix for bot chat commands (e.g. follow, stay)
 #AiPlayerbot.CommandPrefix =

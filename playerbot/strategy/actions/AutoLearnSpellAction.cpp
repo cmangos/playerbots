@@ -46,7 +46,9 @@ void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
     {
         if (bot->getClass() == CLASS_HUNTER && bot->GetLevel() >= 10)
         {
+#if !defined(MANGOSBOT_TWO)
             bot->learnSpell(5149, false); //Beast training
+#endif
             bot->learnSpell(883, false); //Call pet
             bot->learnSpell(982, false); //Revive pet
             bot->learnSpell(6991, false); //Feed pet
@@ -135,21 +137,15 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
             }
 #ifdef MANGOSBOT_ZERO // Vanilla
             LearnSpellFromSpell(tSpell->spell, out);
-#elif MANGOSBOT_ONE
+#elif defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO)
             LearnSpell(tSpell->spell, out);
 #endif
         }
-    }
-
-    if (bot->getClass() == CLASS_WARLOCK)
-    {
-
     }
 }
 
 void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
 {
-    //CreatureInfo const* co = sCreatureStorage.LookupEntry<CreatureInfo>(id);
     ObjectMgr::QuestMap const& questTemplates = sObjectMgr.GetQuestTemplates();
     for (ObjectMgr::QuestMap::const_iterator i = questTemplates.begin(); i != questTemplates.end(); ++i)
     {

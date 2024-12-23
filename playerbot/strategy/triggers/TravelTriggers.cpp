@@ -9,7 +9,7 @@ using namespace ai;
 
 bool NoTravelTargetTrigger::IsActive()
 {
-    return !AI_VALUE(TravelTarget *,"travel target")->isActive();
+    return !AI_VALUE(TravelTarget *,"travel target")->IsActive();
 }
 
 bool FarFromTravelTargetTrigger::IsActive()

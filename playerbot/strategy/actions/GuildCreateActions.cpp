@@ -279,7 +279,7 @@ bool PetitionTurnInAction::Execute(Event& event)
 
     bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_PETITIONER });
 
-    if (!foundTarget || !newTarget.isActive())
+    if (!foundTarget || !newTarget.IsActive())
         return false;
 
     newTarget.setRadius(INTERACTION_DISTANCE);
@@ -331,7 +331,7 @@ bool BuyTabardAction::Execute(Event& event)
 
     bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_TABARDDESIGNER }, "Tabard Vendor", { 5976 });
 
-    if (!foundTarget || !newTarget.isActive())
+    if (!foundTarget || !newTarget.IsActive())
         return false;
 
     newTarget.setRadius(INTERACTION_DISTANCE);

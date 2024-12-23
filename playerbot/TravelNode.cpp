@@ -2381,12 +2381,12 @@ void TravelNodeMap::generateZoneMeanNodes()
     {
         std::vector<WorldPosition*> points;
 
-        for (auto p : loc->getPoints(true))
+        for (auto p : loc->GetPoints())
             if (!p->isUnderWater())
                 points.push_back(p);
 
         if (points.empty())
-            points = loc->getPoints(true);
+            points = loc->GetPoints();
 
         WorldPosition  pos = WorldPosition(points, WP_MEAN_CENTROID);
 

@@ -3470,33 +3470,7 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         if (target)
         {
             TravelState state = target->getTravelState();
-            stateCount[(uint8)state]++;
-
-            const Quest* quest = nullptr;
-            if (target->getDestination())
-            {
-                quest = target->getDestination()->GetQuestTemplate();
-            }
-
-            if (quest)
-            {
-                bool found = false;
-                for (auto& q : questCount)
-                {
-                    if (q.first != quest)
-                    {
-                        continue;
-                    }
-
-                    q.second++;
-                    found = true;
-                }
-
-                if (!found)
-                {
-                    questCount.push_back(std::make_pair(quest, 1));
-                }
-            }
+            stateCount[(uint8)state]++;            
         }
     });
 
@@ -3613,19 +3587,6 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
     ss.str(""); ss << "    Idling: " << stateCount[(uint8)TravelState::TRAVEL_STATE_IDLE];
     sLog.outString(ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
-
-    /*sort(questCount.begin(), questCount.end(), [](std::pair<Quest const*, int32> i, std::pair<Quest const*, int32> j) {return i.second > j.second; });
-
-    sLog.outString("Bots top quests:");
-
-    int cnt = 0;
-    for (auto& quest : questCount)
-    {
-        sLog.outString("    [%d]: %s (%d)", quest.second, quest.first->GetTitle().c_str(), quest.first->GetQuestLevel());
-        cnt++;
-        if (cnt > 25)
-            break;
-    }*/
 }
 
 double RandomPlayerbotMgr::GetBuyMultiplier(Player* bot)

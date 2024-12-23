@@ -24,7 +24,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
         newTarget.copyTarget(oldTarget);
 
     //If the new target is not active we failed.
-    if (!newTarget.isActive() && !newTarget.isForced())
+    if (!newTarget.IsActive() && !newTarget.isForced())
        return false;    
 
     setNewTarget(requester, &newTarget, oldTarget);
@@ -120,20 +120,19 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
     {
         ai->TellDebug(requester, "Pvp in Tarren Mill", "debug travel");
         WorldPosition pos = WorldPosition(bot);
-        WorldPosition* botPos = &pos;
         TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
 
         TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, "Tarren Mill");
         if (dest)
         {
-            std::vector<WorldPosition*> points = dest->nextPoint(botPos, true);
+            std::vector<WorldPosition*> points = dest->NextPoint(pos);
 
             if (!points.empty())
             {
                 target->setTarget(dest, points.front());
                 target->setForced(true);
 
-                std::ostringstream out; out << "Traveling to " << dest->getTitle();
+                std::ostringstream out; out << "Traveling to " << dest->GetTitle();
                 ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 foundTarget = true;
             }
@@ -254,7 +253,7 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
     if (oldTarget->isForced() && (oldTarget->getStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN || oldTarget->getStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED) && ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
     {
         ai->ChangeStrategy("-travel once", BotState::BOT_STATE_NON_COMBAT);
-        ai->TellPlayerNoFacing(requester, "Arrived at " + oldTarget->getDestination()->getTitle());
+        ai->TellPlayerNoFacing(requester, "Arrived at " + oldTarget->getDestination()->GetTitle());
         SetNullTarget(newTarget);
     }
 
@@ -262,13 +261,13 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
         ReportTravelTarget(requester, newTarget, oldTarget);
 
     //If we are heading to a creature/npc clear it from the ignore list. 
-    if (oldTarget && oldTarget == newTarget && newTarget->getEntry())
+    if (oldTarget && oldTarget == newTarget && newTarget->GetEntry())
     {
         std::set<ObjectGuid>& ignoreList = context->GetValue<std::set<ObjectGuid>&>("ignore rpg target")->Get();
 
         for (auto& i : ignoreList)
         {
-            if (i.GetEntry() == newTarget->getEntry())
+            if (i.GetEntry() == newTarget->GetEntry())
             {
                 ignoreList.erase(i);
             }
@@ -281,7 +280,7 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
     oldTarget->copyTarget(newTarget);
 
     //If we are idling but have a master. Idle only 10 seconds.
-    if (ai->GetMaster() && oldTarget->isActive() && oldTarget->getDestination()->getName() == "NullTravelDestination")
+    if (ai->GetMaster() && oldTarget->IsActive() && typeid(oldTarget->getDestination()) == typeid(NullTravelDestination))
         oldTarget->setExpireIn(10 * IN_MILLISECONDS);
     else if (oldTarget->isForced()) //Make sure travel goes into cooldown after getting to the destination.
         oldTarget->setExpireIn(HOUR * IN_MILLISECONDS);
@@ -304,18 +303,17 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
     if (newTarget->isForced())
         out << "(Forced) ";
 
-    if (destination->getName() == "QuestRelationTravelDestination" || destination->getName() == "QuestObjectiveTravelDestination")
+    if (typeid(destination) == typeid(QuestRelationTravelDestination) || typeid(destination) == typeid(QuestObjectiveTravelDestination))
     {
         QuestTravelDestination* QuestDestination = (QuestTravelDestination*)destination;
-        Quest const* quest = QuestDestination->GetQuestTemplate();
         WorldPosition botLocation(bot);
         CreatureInfo const* cInfo = NULL;
         GameObjectInfo const* gInfo = NULL;
 
-        if (destination->getEntry() > 0)
-            cInfo = ObjectMgr::GetCreatureTemplate(destination->getEntry());
+        if (destination->GetEntry() > 0)
+            cInfo = ObjectMgr::GetCreatureTemplate(destination->GetEntry());
         else
-            gInfo = ObjectMgr::GetGameObjectInfo(destination->getEntry() * -1);
+            gInfo = ObjectMgr::GetGameObjectInfo(destination->GetEntry() * -1);
 
         std::string Sub;
 
@@ -326,13 +324,13 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         else
             out << "Traveling ";
 
-        out << round(newTarget->getDestination()->distanceTo(botLocation)) << "y";
+        out << round(newTarget->getDestination()->DistanceTo(botLocation)) << "y";
 
-        out << " for " << chat->formatQuest(quest);
+        out << " for " << QuestDestination->QuestTravelDestination::GetTitle();
 
-        out << " to " << QuestDestination->getTitle();
+        out << " to " << QuestDestination->GetTitle();
     }
-    else if (destination->getName() == "RpgTravelDestination")
+    else if (typeid(destination) == typeid(RpgTravelDestination))
     {
         RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
 
@@ -345,13 +343,13 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         else
             out << "Traveling ";
 
-        out << round(newTarget->getDestination()->distanceTo(botLocation)) << "y";
+        out << round(newTarget->getDestination()->DistanceTo(botLocation)) << "y";
 
         out << " for ";
 
-        if (RpgDestination->getEntry() > 0)
+        if (RpgDestination->GetEntry() > 0)
         {
-            CreatureInfo const* cInfo = RpgDestination->getCreatureInfo();
+            CreatureInfo const* cInfo = RpgDestination->GetCreatureInfo();
 
             if (cInfo)
             {
@@ -369,7 +367,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         }
         else
         {
-            GameObjectInfo const* gInfo = RpgDestination->getGoInfo();
+            GameObjectInfo const* gInfo = RpgDestination->GetGoInfo();
 
             if (gInfo)
             {
@@ -382,9 +380,9 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
                 out << "rpg";
         }
 
-        out << " to " << RpgDestination->getTitle();        
+        out << " to " << RpgDestination->GetTitle();        
     }
-    else if (destination->getName() == "ExploreTravelDestination")
+    else if (typeid(destination) == typeid(ExploreTravelDestination))
     {
         ExploreTravelDestination* ExploreDestination = (ExploreTravelDestination*)destination;
 
@@ -397,13 +395,13 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         else
             out << "Traveling ";
 
-        out << round(newTarget->getDestination()->distanceTo(botLocation)) << "y";
+        out << round(newTarget->getDestination()->DistanceTo(botLocation)) << "y";
 
         out << " for exploration";
 
-        out << " to " << ExploreDestination->getTitle();
+        out << " to " << ExploreDestination->GetTitle();
     }
-    else if (destination->getName() == "GrindTravelDestination")
+    else if (typeid(destination) == typeid(GrindTravelDestination))
     {
         GrindTravelDestination* GrindDestination = (GrindTravelDestination*)destination;
 
@@ -416,13 +414,13 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         else
             out << "Traveling ";
 
-        out << round(newTarget->getDestination()->distanceTo(botLocation)) << "y";
+        out << round(newTarget->getDestination()->DistanceTo(botLocation)) << "y";
 
         out << " for grinding money";
 
-        out << " to " << GrindDestination->getTitle();
+        out << " to " << GrindDestination->GetTitle();
     }
-    else if (destination->getName() == "BossTravelDestination")
+    else if (typeid(destination) == typeid(BossTravelDestination))
     {
         BossTravelDestination* BossDestination = (BossTravelDestination*)destination;
 
@@ -435,15 +433,15 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         else
             out << "Traveling ";
 
-        out << round(newTarget->getDestination()->distanceTo(botLocation)) << "y";
+        out << round(newTarget->getDestination()->DistanceTo(botLocation)) << "y";
 
         out << " for good loot";
 
-        out << " to " << BossDestination->getTitle();
+        out << " to " << BossDestination->GetTitle();
     }
-    else if (destination->getName() == "NullTravelDestination")
+    else if (typeid(destination) == typeid(NullTravelDestination))
     {
-        if (!oldTarget->getDestination() || oldTarget->getDestination()->getName() != "NullTravelDestination")
+        if (!oldTarget->getDestination() || typeid(oldTarget->getDestination()) != typeid(NullTravelDestination))
         {
             out.clear();
             out << "No where to travel. Idling a bit.";
@@ -478,27 +476,27 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
         botPos.printWKT({ botPos,destPos }, out, 1);
 
-        if (destination->getName() == "NullTravelDestination")
+        if (typeid(destination) == typeid(NullTravelDestination))
             out << "0,";
         else
-            out << round(newTarget->getDestination()->distanceTo(botPos)) << ",";
+            out << round(newTarget->getDestination()->DistanceTo(botPos)) << ",";
 
-        out << "1," << "\"" << destination->getTitle() << "\",\"" << message << "\"";
+        out << "1," << "\"" << destination->GetTitle() << "\",\"" << message << "\"";
 
-        if (destination->getName() == "NullTravelDestination")
+        if (typeid(destination) == typeid(NullTravelDestination))
             out << ",none";
-        else if (destination->getName() == "QuestTravelDestination")
+        else if (typeid(destination) == typeid(QuestTravelDestination))
             out << ",quest";
-        else if (destination->getName() == "QuestRelationTravelDestination")
+        else if (typeid(destination) == typeid(QuestRelationTravelDestination))
             out << ",questgiver";
-        else if (destination->getName() == "QuestObjectiveTravelDestination")
+        else if (typeid(destination) == typeid(QuestObjectiveTravelDestination))
             out << ",objective";
-        else  if (destination->getName() == "RpgTravelDestination")
+        else  if (typeid(destination) == typeid(RpgTravelDestination))
         {
             RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
-            if (RpgDestination->getEntry() > 0)
+            if (RpgDestination->GetEntry() > 0)
             {
-                CreatureInfo const* cInfo = RpgDestination->getCreatureInfo();
+                CreatureInfo const* cInfo = RpgDestination->GetCreatureInfo();
 
                 if (cInfo)
                 {
@@ -516,7 +514,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
             }
             else
             {
-                GameObjectInfo const* gInfo = RpgDestination->getGoInfo();
+                GameObjectInfo const* gInfo = RpgDestination->GetGoInfo();
 
                 if (gInfo)
                 {
@@ -529,11 +527,11 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
                     out << ",rpg";
             }
         }
-        else if (destination->getName() == "ExploreTravelDestination")
+        else if (typeid(destination) == typeid(ExploreTravelDestination))
             out << ",explore";
-        else if (destination->getName() == "GrindTravelDestination")
+        else if (typeid(destination) == typeid(GrindTravelDestination))
             out << ",grind";
-        else if (destination->getName() == "BossTravelDestination")
+        else if (typeid(destination) == typeid(BossTravelDestination))
             out << ",boss";
         else
             out << ",unknown";
@@ -559,12 +557,12 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
             botPos.printWKT({ lastPos, botPos }, out, 1);
 
-            if (destination->getName() == "NullTravelDestination")
+            if (typeid(destination) == typeid(NullTravelDestination))
                 out << "0,";
             else
-                out << round(newTarget->getDestination()->distanceTo(botPos)) << ",";
+                out << round(newTarget->getDestination()->DistanceTo(botPos)) << ",";
 
-            out << "0," << "\"" << destination->getTitle() << "\",\""<< message << "\"";
+            out << "0," << "\"" << destination->GetTitle() << "\",\""<< message << "\"";
 
             sPlayerbotAIConfig.log("travel_map.csv", out.str().c_str());
         }
@@ -687,7 +685,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
     //Select all points from the selected destinations
     for (auto& activeTarget : TravelDestinations)
     {
-        std::vector<WorldPosition*> points = activeTarget->getPoints(true);
+        std::vector<WorldPosition*> points = activeTarget->GetPoints();
         for (WorldPosition* point : points)
         {
             if (point && point->isValid())
@@ -705,7 +703,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
     if (TravelDestinations.size() == 1 && travelPoints.size() == 1)
     {
         target->setTarget(TravelDestinations.front(), travelPoints.front());
-        return target->isActive();
+        return target->IsActive();
     }
 
     travelPoints = getLogicalPoints(requester, travelPoints);
@@ -713,12 +711,12 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
     if (travelPoints.empty())
         return false;
 
-    travelPoints = sTravelMgr.getNextPoint(&botLocation, travelPoints); //Pick a good point.
+    travelPoints = sTravelMgr.getNextPoint(botLocation, travelPoints); //Pick a good point.
 
     //Pick the best destination and point (random shuffle).
 
     for (auto destination : TravelDestinations) //Pick the destination that has this point.
-        if (destination->hasPoint(travelPoints.front()))
+        if (destination->HasPoint(travelPoints.front()))
         {
             TravelDestinations.front() = destination;
             break;
@@ -728,7 +726,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
     ai->TellDebug(requester, "Point at " + std::to_string(uint32(target->distance(bot))) + "y selected.", "debug travel");
 
-    return target->isActive();
+    return target->IsActive();
 }
 
 bool ChooseTravelTargetAction::SetGroupTarget(Player* requester, TravelTarget* target)
@@ -776,10 +774,10 @@ bool ChooseTravelTargetAction::SetGroupTarget(Player* requester, TravelTarget* t
         if (groupTarget->isGroupCopy())
             continue;
 
-        if (!groupTarget->isActive())
+        if (!groupTarget->IsActive())
             continue;
 
-        if (!groupTarget->getDestination()->isActive(bot) || groupTarget->getDestination()->getName() == "RpgTravelDestination")
+        if (!groupTarget->getDestination()->IsActive(bot) || typeid(groupTarget->getDestination()) == typeid(RpgTravelDestination))
             continue;
 
         activeDestinations.push_back(groupTarget->getDestination());
@@ -807,7 +805,7 @@ bool ChooseTravelTargetAction::SetCurrentTarget(Player* requester, TravelTarget*
     if (!oldDestination) //Does this target have a destination?
         return false;
 
-    if (!oldDestination->isActive(bot)) //Is the destination still valid?
+    if (!oldDestination->IsActive(bot)) //Is the destination still valid?
         return false;
 
     std::vector<TravelDestination*> TravelDestinations = { oldDestination };
@@ -818,7 +816,7 @@ bool ChooseTravelTargetAction::SetCurrentTarget(Player* requester, TravelTarget*
     target->setStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
     target->setRetry(false, oldTarget->getRetryCount(false) + 1);
 
-    return target->isActive();
+    return target->IsActive();
 }
 
 bool ChooseTravelTargetAction::SetQuestTarget(Player* requester, TravelTarget* target, bool newQuests, bool activeQuests, bool completedQuests)
@@ -864,10 +862,11 @@ bool ChooseTravelTargetAction::SetQuestTarget(Player* requester, TravelTarget* t
 
             if (onlyClassQuest && TravelDestinations.size() && questDestinations.size()) //Only do class quests if we have any.
             {
-                if (TravelDestinations.front()->GetQuestTemplate()->GetRequiredClasses() && !questTemplate->GetRequiredClasses())
+                QuestTravelDestination* firstDestination = (QuestTravelDestination * )TravelDestinations.front();
+                if (firstDestination->IsClassQuest() && !questTemplate->GetRequiredClasses())
                     continue;
 
-                if (!TravelDestinations.front()->GetQuestTemplate()->GetRequiredClasses() && questTemplate->GetRequiredClasses())
+                if (!firstDestination->IsClassQuest() && questTemplate->GetRequiredClasses())
                     TravelDestinations.clear();
             }
 
@@ -943,10 +942,10 @@ bool ChooseTravelTargetAction::SetNpcFlagTarget(Player* requester, TravelTarget*
     //Loop over all npcs.
     for (auto& d : sTravelMgr.getRpgTravelDestinations(bot, true, true))
     {
-        if (d->getEntry() <= 0)
+        if (d->GetEntry() <= 0)
             continue;
 
-        CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(d->getEntry());
+        CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(d->GetEntry());
 
         if (!cInfo)
             continue;
@@ -974,7 +973,7 @@ bool ChooseTravelTargetAction::SetNpcFlagTarget(Player* requester, TravelTarget*
             VendorItemData const* vItems = nullptr;
             VendorItemData const* tItems = nullptr;
 
-            vItems = sObjectMgr.GetNpcVendorItemList(d->getEntry());
+            vItems = sObjectMgr.GetNpcVendorItemList(d->GetEntry());
 
 //#ifndef MANGOSBOT_ZERO    
             uint32 vendorId = cInfo->VendorTemplateId;
@@ -1041,10 +1040,10 @@ bool ChooseTravelTargetAction::SetGOTypeTarget(Player* requester, TravelTarget* 
     //Loop over all npcs.
     for (auto& d : sTravelMgr.getRpgTravelDestinations(bot, true, true))
     {
-        if (d->getEntry() >= 0)
+        if (d->GetEntry() >= 0)
             continue;
 
-        GameObjectInfo const* gInfo = ObjectMgr::GetGameObjectInfo(-1 * d->getEntry());
+        GameObjectInfo const* gInfo = ObjectMgr::GetGameObjectInfo(-1 * d->GetEntry());
 
         if (!gInfo)
             continue;
@@ -1102,7 +1101,7 @@ TravelDestination* ChooseTravelTargetAction::FindDestination(Player* bot, std::s
     {
         for (auto& d : sTravelMgr.getQuestTravelDestinations(bot, 0, true, true))
         {
-            if (strstri(d->getTitle().c_str(), name.c_str()))
+            if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
         }
     }
@@ -1112,7 +1111,7 @@ TravelDestination* ChooseTravelTargetAction::FindDestination(Player* bot, std::s
     {
         for (auto& d : sTravelMgr.getExploreTravelDestinations(bot, true, true))
         {
-            if (strstri(d->getTitle().c_str(), name.c_str()))
+            if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
         }
     }
@@ -1122,7 +1121,7 @@ TravelDestination* ChooseTravelTargetAction::FindDestination(Player* bot, std::s
     {
         for (auto& d : sTravelMgr.getRpgTravelDestinations(bot, true, true))
         {
-            if (strstri(d->getTitle().c_str(), name.c_str()))
+            if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
         }
     }
@@ -1132,7 +1131,7 @@ TravelDestination* ChooseTravelTargetAction::FindDestination(Player* bot, std::s
     {
         for (auto& d : sTravelMgr.getGrindTravelDestinations(bot, true, true, 5000.0f, 0))
         {
-            if (strstri(d->getTitle().c_str(), name.c_str()))
+            if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
         }
     }
@@ -1142,7 +1141,7 @@ TravelDestination* ChooseTravelTargetAction::FindDestination(Player* bot, std::s
     {
         for (auto& d : sTravelMgr.getBossTravelDestinations(bot, true, true))
         {
-            if (strstri(d->getTitle().c_str(), name.c_str()))
+            if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
         }
     }
@@ -1152,7 +1151,7 @@ TravelDestination* ChooseTravelTargetAction::FindDestination(Player* bot, std::s
     if (dests.empty())
         return nullptr;
 
-    TravelDestination* dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->distanceTo(botPos) < j->distanceTo(botPos); });
+    TravelDestination* dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
 
     return dest;
 };

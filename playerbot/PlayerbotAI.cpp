@@ -6002,9 +6002,9 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
 
         TravelTarget* target = GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
         if (target->getDestination()) {
-            out << "Destination = " << target->getDestination()->getName();
+            out << "Destination ";
 
-            out << ": " << target->getDestination()->getTitle();
+            out << ": " << target->getDestination()->GetTitle();
 
             if (!(*target->getPosition() == WorldPosition()))
             {

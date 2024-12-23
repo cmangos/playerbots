@@ -13,16 +13,17 @@
 using namespace ai;
 using namespace MaNGOS;
 
-std::vector<WorldPosition*> TravelDestination::getPoints(bool ignoreFull)
+std::vector<WorldPosition*> TravelDestination::GetPoints() const
 {
     return points;
 }
 
-WorldPosition* TravelDestination::nearestPoint(WorldPosition pos) {
+WorldPosition* TravelDestination::NearestPoint(const WorldPosition& pos) const {
     return *std::min_element(points.begin(), points.end(), [pos](WorldPosition* i, WorldPosition* j) {return i->distance(pos) < j->distance(pos); });
 }
 
-std::vector<WorldPosition*> TravelDestination::touchingPoints(WorldPosition* pos) {
+/*
+std::vector<WorldPosition*> TravelDestination::TouchingPoints(WorldPosition* pos) {
     std::vector<WorldPosition*> ret_points;
     for (auto& point : points)
     {
@@ -39,23 +40,24 @@ std::vector<WorldPosition*> TravelDestination::touchingPoints(WorldPosition* pos
     return ret_points;
 };
 
-std::vector<WorldPosition*> TravelDestination::sortedPoints(WorldPosition* pos) {
+std::vector<WorldPosition*> TravelDestination::SortedPoints(WorldPosition* pos) {
     std::vector<WorldPosition*> ret_points = points;
 
     std::sort(ret_points.begin(), ret_points.end(), [pos](WorldPosition* i, WorldPosition* j) {return i->distance(*pos) < j->distance(*pos); });
 
     return ret_points;
 };
+*/
 
-std::vector <WorldPosition*> TravelDestination::nextPoint(WorldPosition* pos, bool ignoreFull) {
-    return sTravelMgr.getNextPoint(pos, ignoreFull ? points : getPoints());
+std::vector <WorldPosition*> TravelDestination::NextPoint(const WorldPosition& pos) const {
+    return sTravelMgr.getNextPoint(pos, GetPoints());
 }
 
-std::string QuestTravelDestination::getTitle() {
-    return ChatHelper::formatQuest(questTemplate);
+std::string QuestTravelDestination::GetTitle() const {
+    return ChatHelper::formatQuest(GetQuestTemplate());
 }
 
-bool QuestRelationTravelDestination::isActive(Player* bot) {
+bool QuestRelationTravelDestination::IsActive(const Player* bot) const {
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     AiObjectContext* context = ai->GetAiObjectContext();
     if (!ai->HasStrategy("rpg quest", BotState::BOT_STATE_NON_COMBAT))
@@ -63,21 +65,21 @@ bool QuestRelationTravelDestination::isActive(Player* bot) {
 
     focusQuestTravelList focusList = AI_VALUE(focusQuestTravelList, "focus travel target");
 
-    if (!focusList.empty() && focusList.find(questTemplate->GetQuestId()) == focusList.end())
+    if (!focusList.empty() && focusList.find(GetQuestTemplate()->GetQuestId()) == focusList.end())
         return false;
 
     bool forceThisQuest = !focusList.empty();
 
-    if (relation == 0)
+    if (GetSubEntry() == 0)
     {
-        if (!forceThisQuest && (int32)questTemplate->GetQuestLevel() >= (int32)bot->GetLevel() + (int32)5)
+        if (!forceThisQuest && (int32)GetQuestTemplate()->GetQuestLevel() >= (int32)bot->GetLevel() + (int32)5)
             return false;
 
-        if (getPoints().front()->getMapId() != bot->GetMapId()) //CanTakeQuest will check required conditions which will fail on a different map.
-            if (questTemplate->GetRequiredCondition())          //So we skip this quest for now.
+        if (GetPoints().front()->getMapId() != bot->GetMapId()) //CanTakeQuest will check required conditions which will fail on a different map.
+            if (GetQuestTemplate()->GetRequiredCondition())          //So we skip this quest for now.
                 return false;
 
-        if ((!forceThisQuest && !bot->GetMap()->IsContinent()) || !bot->CanTakeQuest(questTemplate, false))
+        if ((!forceThisQuest && !bot->GetMap()->IsContinent()) || !bot->CanTakeQuest(GetQuestTemplate(), false))
             return false;
 
         if (!forceThisQuest)
@@ -87,13 +89,13 @@ bool QuestRelationTravelDestination::isActive(Player* bot) {
                 if (AI_VALUE(uint8, "free quest log slots") < 5)
                     return false;
 
-                if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest npc::" + std::to_string(entry))) //Noone has yellow exclamation mark.
-                    if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(entry) + "need quest reward::" + std::to_string(questId))) //Noone can do this quest for a usefull reward.
+                if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest npc::" + std::to_string(GetEntry()))) //Noone has yellow exclamation mark.
+                    if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(GetEntry()) + "need quest reward::" + std::to_string(GetQuestId()))) //Noone can do this quest for a usefull reward.
                         return false;
             }
             else
             {
-                if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(entry))) //Noone can pick up this quest for money.
+                if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(GetEntry()))) //Noone can pick up this quest for money.
                     return false;
 
                 if (AI_VALUE(uint8, "free quest log slots") < 10)
@@ -101,12 +103,12 @@ bool QuestRelationTravelDestination::isActive(Player* bot) {
             }
 
             //Do not try to pick up dungeon/elite quests in instances without a group.
-            if ((questTemplate->GetType() == QUEST_TYPE_ELITE || questTemplate->GetType() == QUEST_TYPE_DUNGEON) && !AI_VALUE(bool, "can fight boss"))
+            if ((GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE || GetQuestTemplate()->GetType() == QUEST_TYPE_DUNGEON) && !AI_VALUE(bool, "can fight boss"))
                 return false;
         }
         else
         {
-            if (!AI_VALUE2(bool, "can accept quest npc", std::to_string(entry)))
+            if (!AI_VALUE2(bool, "can accept quest npc", std::to_string(GetEntry())))
                 return false;
         }
     }
@@ -114,45 +116,45 @@ bool QuestRelationTravelDestination::isActive(Player* bot) {
     {
         if (!forceThisQuest)
         {
-            if (!AI_VALUE2(bool, "group or", "following party,near leader,can turn in quest npc::" + std::to_string(entry)))
+            if (!AI_VALUE2(bool, "group or", "following party,near leader,can turn in quest npc::" + std::to_string(GetEntry())))
                 return false;
 
             //Do not try to hand-in dungeon/elite quests in instances without a group.
-            if ((questTemplate->GetType() == QUEST_TYPE_ELITE || questTemplate->GetType() == QUEST_TYPE_DUNGEON) && !AI_VALUE(bool, "can fight boss"))
+            if ((GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE || GetQuestTemplate()->GetType() == QUEST_TYPE_DUNGEON) && !AI_VALUE(bool, "can fight boss"))
             {
                 WorldPosition pos(bot);
-                if (!this->nearestPoint(pos)->isOverworld())
+                if (!this->NearestPoint(pos)->isOverworld())
                     return false;
             }
         }
         else
         {
-            if (!AI_VALUE2(bool, "can turn in quest npc", std::to_string(entry)))
+            if (!AI_VALUE2(bool, "can turn in quest npc", std::to_string(GetEntry())))
                 return false;
         }
     }
 
-    if (entry > 0)
+    if (GetEntry() > 0)
     {
-        return !GuidPosition(HIGHGUID_UNIT, entry).IsHostileTo(bot);
+        return !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot);
     }
 
     return true;
 }
 
-std::string QuestRelationTravelDestination::getTitle() {
+std::string QuestRelationTravelDestination::GetTitle() const {
     std::ostringstream out;
 
-    if (relation == 0)
+    if (GetSubEntry() == 0)
         out << "questgiver ";
     else
         out << "questtaker ";
 
-    out << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(GetEntry());
     return out.str();
 }
 
-bool QuestObjectiveTravelDestination::isActive(Player* bot) {
+bool QuestObjectiveTravelDestination::IsActive(const Player* bot) const {
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     AiObjectContext* context = ai->GetAiObjectContext();
 
@@ -161,35 +163,35 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
 
     focusQuestTravelList focusList = AI_VALUE(focusQuestTravelList, "focus travel target");
 
-    if (!focusList.empty() && focusList.find(questTemplate->GetQuestId()) == focusList.end())
+    if (!focusList.empty() && focusList.find(GetQuestTemplate()->GetQuestId()) == focusList.end())
         return false;
 
     bool forceThisQuest = !focusList.empty();
 
     if (!forceThisQuest)
     {
-        if ((int32)questTemplate->GetQuestLevel() > (int32)bot->GetLevel() + (int32)1)
+        if ((int32)GetQuestTemplate()->GetQuestLevel() > (int32)bot->GetLevel() + (int32)1)
             return false;
 
         AiObjectContext* context = ai->GetAiObjectContext();
-        if (questTemplate->GetQuestLevel() + 5 > (int)bot->GetLevel() && !AI_VALUE(bool, "can fight equal"))
+        if (GetQuestTemplate()->GetQuestLevel() + 5 > (int)bot->GetLevel() && !AI_VALUE(bool, "can fight equal"))
             return false;
     }
 
-    if ((bot->GetGroup() && bot->GetGroup()->IsRaidGroup()) != (questTemplate->GetType() == QUEST_TYPE_RAID))
+    if ((bot->GetGroup() && bot->GetGroup()->IsRaidGroup()) != (GetQuestTemplate()->GetType() == QUEST_TYPE_RAID))
         return false;
 
     bool isVendor = false;
 
     //Check mob level
-    if (getEntry() > 0)
+    if (GetEntry() > 0)
     {
-        CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(getEntry());
+        CreatureInfo const* cInfo = GetCreatureInfo();
 
-        if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[objective] && !GuidPosition(HIGHGUID_UNIT, entry).IsHostileTo(bot))
+        if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetSubEntry()] && !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot))
         {
-            ItemPrototype const* proto = sObjectMgr.GetItemPrototype(GetQuestTemplate()->ReqItemId[objective]);
-            if (GetQuestTemplate()->ReqItemCount[objective] * proto->BuyPrice > bot->GetMoney()) //Need more money.
+            ItemPrototype const* proto = sObjectMgr.GetItemPrototype(GetQuestTemplate()->ReqItemId[GetSubEntry()]);
+            if (GetQuestTemplate()->ReqItemCount[GetSubEntry()] * proto->BuyPrice > bot->GetMoney()) //Need more money.
                 return false;
 
             isVendor = true;
@@ -204,7 +206,7 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
             if (cInfo->Rank > CREATURE_ELITE_NORMAL)
             {
                 WorldPosition pos(bot);
-                if (!this->nearestPoint(pos)->isOverworld() && !AI_VALUE(bool, "can fight boss"))
+                if (!this->NearestPoint(pos)->isOverworld() && !AI_VALUE(bool, "can fight boss"))
                     return false;
                 else if (!AI_VALUE(bool, "can fight elite"))
                     return false;
@@ -215,47 +217,47 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
     if (!forceThisQuest)
     {
 
-        if (!isVendor && questTemplate->GetType() == QUEST_TYPE_ELITE && !AI_VALUE(bool, "can fight elite"))
+        if (!isVendor && GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE && !AI_VALUE(bool, "can fight elite"))
             return false;
 
         //Do not try to do dungeon/elite quests in instances without a group.
-        if ((questTemplate->GetType() == QUEST_TYPE_ELITE || questTemplate->GetType() == QUEST_TYPE_DUNGEON || questTemplate->GetType() == QUEST_TYPE_RAID) && !AI_VALUE(bool, "can fight boss"))
+        if ((GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE || GetQuestTemplate()->GetType() == QUEST_TYPE_DUNGEON || GetQuestTemplate()->GetType() == QUEST_TYPE_RAID) && !AI_VALUE(bool, "can fight boss"))
         {
             WorldPosition pos(bot);
-            if (!this->nearestPoint(pos)->isOverworld())
+            if (!this->NearestPoint(pos)->isOverworld())
                 return false;
         }
 
         //Do not try to do pvp quests in bg's (no way to travel there). 
-        if (questTemplate->GetType() == QUEST_TYPE_PVP)
+        if (GetQuestTemplate()->GetType() == QUEST_TYPE_PVP)
         {
             WorldPosition pos(bot);
-            if (!this->nearestPoint(pos)->isOverworld())
+            if (!this->NearestPoint(pos)->isOverworld())
                 return false;
         }
     }
 
-    std::vector<std::string> qualifier = { std::to_string(questTemplate->GetQuestId()), std::to_string(objective) };
+    std::vector<std::string> qualifier = { std::to_string(GetQuestTemplate()->GetQuestId()), std::to_string(GetSubEntry()) };
 
     if (!AI_VALUE2(bool, "group or", "following party,near leader,need quest objective::" + Qualified::MultiQualify(qualifier,","))) //Noone needs the quest objective.
         return false;
 
-    if (!sTravelMgr.getObjectiveStatus(bot, questTemplate, objective))
+    if (!sTravelMgr.getObjectiveStatus(bot, GetQuestTemplate(), GetSubEntry()))
         return false;
 
     WorldPosition botPos(bot);
 
-    if (!isVendor && getEntry() > 0 && !isOut(botPos))
+    if (!isVendor && GetEntry() > 0 && !IsOut(botPos))
     {
         TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
 
         //Only look for the target if it is unique or if we are currently working on it.
-        if (points.size() == 1 || (target->getStatus() == TravelStatus::TRAVEL_STATUS_WORK && target->getEntry() == getEntry()))
+        if (GetPoints().size() == 1 || (target->getStatus() == TravelStatus::TRAVEL_STATUS_WORK && target->GetEntry() == GetEntry()))
         {
             std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
 
             for (auto& target : targets)
-                if (target.GetEntry() == getEntry() && target.IsCreature() && ai->GetCreature(target) && ai->GetCreature(target)->IsAlive())
+                if (target.GetEntry() == GetEntry() && target.IsCreature() && ai->GetCreature(target) && ai->GetCreature(target)->IsAlive())
                     return true;
 
             return false;
@@ -264,33 +266,34 @@ bool QuestObjectiveTravelDestination::isActive(Player* bot) {
 
     return true;
 }
-std::string QuestObjectiveTravelDestination::getTitle() {
+
+std::string QuestObjectiveTravelDestination::GetTitle() const {
     std::ostringstream out;
 
-    out << "objective " << (objective + 1);
+    out << "objective " << (GetSubEntry() + 1);
 
-    if (GetQuestTemplate()->ReqItemCount[objective] > 0)
-        out << " loot " << ChatHelper::formatItem(sObjectMgr.GetItemPrototype(GetQuestTemplate()->ReqItemId[objective]), 0, 0) << " from";
-    else if (entry > 0)
+    if (GetQuestTemplate()->ReqItemCount[GetSubEntry()] > 0)
+        out << " loot " << ChatHelper::formatItem(sObjectMgr.GetItemPrototype(GetQuestTemplate()->ReqItemId[GetSubEntry()]), 0, 0) << " from";
+    else if (GetEntry() > 0)
         out << " to kill";
     else
         out << " to use";
 
-    out << " " << ChatHelper::formatWorldEntry(entry);
+    out << " " << ChatHelper::formatWorldEntry(GetEntry());
     return out.str();
 }
 
-bool RpgTravelDestination::isActive(Player* bot)
+bool RpgTravelDestination::IsActive(const Player* bot) const
 {
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     AiObjectContext* context = ai->GetAiObjectContext();
 
     bool isUsefull = false;
 
-    if (entry > 0)
+    if (GetEntry() > 0)
     {
 
-        CreatureInfo const* cInfo = this->getCreatureInfo();
+        CreatureInfo const* cInfo = this->GetCreatureInfo();
 
         if (!cInfo)
             return false;
@@ -321,7 +324,7 @@ bool RpgTravelDestination::isActive(Player* bot)
     }
     else
     {
-        GameObjectInfo const* gInfo = this->getGoInfo();
+        GameObjectInfo const* gInfo = this->GetGoInfo();
 
         if (!gInfo)
             return false;
@@ -340,42 +343,45 @@ bool RpgTravelDestination::isActive(Player* bot)
 
     for (auto& i : ignoreList)
     {
-        if (i.GetEntry() == getEntry())
+        if (i.GetEntry() == GetEntry())
         {
             return false;
         }
     }
 
+    WorldPosition firstPoint = *GetPoints().front();
+
     //City & Pvp baracks
-    if (points.front()->getMapId() == bot->GetMapId() && points.front()->hasAreaFlag(AREA_FLAG_CAPITAL) && !points.front()->hasFaction(bot->GetTeam()))
+    if (firstPoint.getMapId() == bot->GetMapId() && firstPoint.hasAreaFlag(AREA_FLAG_CAPITAL) && !firstPoint.hasFaction(bot->GetTeam()))
         return false;
 
     //Horde pvp baracks
-    if (points.front()->getMapId() == 450 && bot->GetTeam() == ALLIANCE)
+    if (firstPoint.getMapId() == 450 && bot->GetTeam() == ALLIANCE)
         return false;
 
     //Alliance pvp baracks
-    if (points.front()->getMapId() == 449 && bot->GetTeam() == HORDE)
+    if (firstPoint.getMapId() == 449 && bot->GetTeam() == HORDE)
         return false;
 
-    return !GuidPosition(HIGHGUID_UNIT, entry).IsHostileTo(bot);
+    return !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot);
 }
 
-std::string RpgTravelDestination::getTitle() {
+std::string RpgTravelDestination::GetTitle() const 
+{
     std::ostringstream out;
 
 
-    if(entry > 0)
+    if(GetEntry() > 0)
         out << "rpg npc ";
 
-    out << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(GetEntry());
 
     return out.str();
 }
 
-bool ExploreTravelDestination::isActive(Player* bot)
+bool ExploreTravelDestination::IsActive(const Player* bot) const
 {
-    AreaTableEntry const* area = GetAreaEntryByAreaID(areaId);
+    AreaTableEntry const* area = GetAreaEntryByAreaID(GetEntry());
 
     if (area->area_level && (uint32)area->area_level > bot->GetLevel() && bot->GetLevel() < DEFAULT_MAX_LEVEL)
         return false;
@@ -390,20 +396,20 @@ bool ExploreTravelDestination::isActive(Player* bot)
     return !(currFields & val);    
 }
 
-bool GrindTravelDestination::isActive(Player* bot)
+bool GrindTravelDestination::IsActive(const Player* bot) const
 {
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     AiObjectContext* context = ai->GetAiObjectContext();
 
     WorldPosition botPos(bot);
     
-    if (!urand(0, 10) && !AI_VALUE(bool, "should get money") && !isOut(botPos))
+    if (!urand(0, 10) && !AI_VALUE(bool, "should get money") && !IsOut(botPos))
         return false;
 
     if (AI_VALUE(bool, "should sell") && (AI_VALUE(bool, "can sell") || AI_VALUE(bool, "can ah sell")))
         return false;
 
-    CreatureInfo const* cInfo = this->getCreatureInfo();
+    CreatureInfo const* cInfo = GetCreatureInfo();
 
     int32 botLevel = bot->GetLevel();
 
@@ -427,20 +433,21 @@ bool GrindTravelDestination::isActive(Player* bot)
     if (cInfo->Rank > CREATURE_ELITE_NORMAL && !AI_VALUE(bool, "can fight elite"))
         return false;
 
-    return GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, entry), bot->GetInstanceId());
+    return GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, GetEntry()), bot->GetInstanceId());
 }
 
-std::string GrindTravelDestination::getTitle() {
+std::string GrindTravelDestination::GetTitle() const
+{
     std::ostringstream out;
 
     out << "grind mob ";
 
-    out << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(GetEntry());
 
     return out.str();
 }
 
-bool BossTravelDestination::isActive(Player* bot)
+bool BossTravelDestination::IsActive(const Player* bot) const
 {
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     AiObjectContext* context = ai->GetAiObjectContext();
@@ -448,71 +455,73 @@ bool BossTravelDestination::isActive(Player* bot)
     if (!AI_VALUE(bool, "can fight boss"))
         return false;
 
-    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(entry);
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(GetEntry());
 
     if ((int32)cInfo->MaxLevel > bot->GetLevel() + 3)
         return false;
 
-    if (!GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, entry), bot->GetInstanceId()))
+    if (!GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, GetEntry()), bot->GetInstanceId()))
         return false;
+    WorldPosition firstPoint = *GetPoints().front();
 
     if (bot->GetGroup())
     {
         if (bot->GetGroup()->IsRaidGroup())
         {
 #ifndef MANGOSBOT_TWO
-            if (points.front()->getMapEntry() && points.front()->getMapEntry()->IsNonRaidDungeon())
+            if (firstPoint.getMapEntry() && firstPoint.getMapEntry()->IsNonRaidDungeon())
 #else
             if (points.front()->getMapEntry() && points.front()->getMapEntry()->IsNonRaidDungeon())
 #endif
                 return false;
         }
-        else if (points.front()->getMapEntry() && points.front()->getMapEntry()->IsRaid())
+        else if (firstPoint.getMapEntry() && firstPoint.getMapEntry()->IsRaid())
             return false;
     }
 
     //Ragefire casm
-    if (points.front()->getMapId() == 389 && bot->GetTeam() == ALLIANCE)
+    if (firstPoint.getMapId() == 389 && bot->GetTeam() == ALLIANCE)
         return false;
 
     //Stockades
-    if (points.front()->getMapId() == 34 && bot->GetTeam() == HORDE)
+    if (firstPoint.getMapId() == 34 && bot->GetTeam() == HORDE)
         return false;
 
     WorldPosition botPos(bot);
 
     //Do not move to overworld bosses/uniques that are far away.
-    if (points.front()->isOverworld() && this->distanceTo(botPos) > 2000.0f)
+    if (firstPoint.isOverworld() && DistanceTo(botPos) > 2000.0f)
         return false;
 
-    if (!isOut(botPos))
+    if (!IsOut(botPos))
     {
         std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
 
         for (auto& target : targets)
-            if (target.GetEntry() == getEntry() && target.IsCreature() && ai->GetCreature(target) && ai->GetCreature(target)->IsAlive())
+            if (target.GetEntry() == GetEntry() && target.IsCreature() && ai->GetCreature(target) && ai->GetCreature(target)->IsAlive())
                 return true;
 
         return false;
     }
 
-    if (!AI_VALUE2(bool, "has upgrade",  getEntry()))
+    if (!AI_VALUE2(bool, "has upgrade",  GetEntry()))
         return false;
 
     return true;
 }
 
-std::string BossTravelDestination::getTitle() {
+std::string BossTravelDestination::GetTitle() const
+{
     std::ostringstream out;
 
     out << "boss mob ";
 
-    out << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(GetEntry());
 
     return out.str();
 }
 
-bool GatherTravelDestination::isActive(Player* bot)
+bool GatherTravelDestination::IsActive(const Player* bot) const
 {
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     AiObjectContext* context = ai->GetAiObjectContext();
@@ -520,9 +529,9 @@ bool GatherTravelDestination::isActive(Player* bot)
     uint32 skillId = SKILL_NONE;
     uint32 reqSkillValue = 0;
 
-    if (entry > 0)
+    if (GetEntry() > 0)
     {
-        CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(entry);
+        CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(GetEntry());
 
         if (!cInfo)
             return false;
@@ -533,7 +542,7 @@ bool GatherTravelDestination::isActive(Player* bot)
     }
     else
     {
-        GameObjectInfo const* goInfo = ObjectMgr::GetGameObjectInfo(entry);
+        GameObjectInfo const* goInfo = ObjectMgr::GetGameObjectInfo(GetEntry());
 
         if (!goInfo)
             return false;
@@ -571,12 +580,12 @@ bool GatherTravelDestination::isActive(Player* bot)
     return true;
 }
 
-std::string GatherTravelDestination::getTitle() {
+std::string GatherTravelDestination::GetTitle() const {
     std::ostringstream out;
 
     out << "gathering location ";
 
-    out << ChatHelper::formatWorldEntry(entry);
+    out << ChatHelper::formatWorldEntry(GetEntry());
 
     return out.str();
 }
@@ -612,15 +621,15 @@ void TravelTarget::setStatus(TravelStatus status) {
         statusTime = getMaxTravelTime() * 2 + sPlayerbotAIConfig.maxWaitForMove;
         break;
     case TravelStatus::TRAVEL_STATUS_WORK:
-        statusTime = tDestination->getExpireDelay();
+        statusTime = tDestination->GetExpireDelay();
         break;
     case TravelStatus::TRAVEL_STATUS_COOLDOWN:
-        statusTime = tDestination->getCooldownDelay();
+        statusTime = tDestination->GetCooldownDelay();
     default: break;
     }
 }
 
-bool TravelTarget::isActive() {
+bool TravelTarget::IsActive() {
     if (m_status == TravelStatus::TRAVEL_STATUS_NONE || m_status == TravelStatus::TRAVEL_STATUS_EXPIRED || m_status == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
@@ -642,7 +651,7 @@ bool TravelTarget::isActive() {
     if (isWorking())
         return true;   
 
-    if (!tDestination->isActive(bot)) //Target has become invalid. Stop.
+    if (!tDestination->IsActive(bot)) //Target has become invalid. Stop.
     {
         setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return true;
@@ -662,7 +671,7 @@ bool TravelTarget::isTraveling() {
             return false;
         }
 
-    if (!tDestination->isActive(bot) && !forced) //Target has become invalid. Stop.
+    if (!tDestination->IsActive(bot) && !forced) //Target has become invalid. Stop.
     {
         setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return false;
@@ -670,7 +679,7 @@ bool TravelTarget::isTraveling() {
 
     WorldPosition pos(bot);
 
-    bool HasArrived = tDestination->isIn(pos, radius);
+    bool HasArrived = tDestination->IsIn(pos, radius);
 
     if (HasArrived)
     {
@@ -691,7 +700,7 @@ bool TravelTarget::isWorking() {
     if (m_status != TravelStatus::TRAVEL_STATUS_WORK)
         return false;
 
-    if (!tDestination->isActive(bot)) //Target has become invalid. Stop.
+    if (!tDestination->IsActive(bot)) //Target has become invalid. Stop.
     {
         setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return false;
@@ -716,12 +725,12 @@ bool TravelTarget::isPreparing() {
 }
 
 TravelState TravelTarget::getTravelState() {
-    if (!tDestination || tDestination->getName() == "NullTravelDestination")
+    if (!tDestination || typeid(tDestination) == typeid(NullTravelDestination))
         return TravelState::TRAVEL_STATE_IDLE;
 
-    if (tDestination->getName() == "QuestRelationTravelDestination")
+    if (typeid(tDestination) == typeid(QuestRelationTravelDestination))
     {
-        if (tDestination->getSubEntry() == 0)
+        if (tDestination->GetSubEntry() == 0)
         {
             if (isTraveling() || isPreparing())
                 return TravelState::TRAVEL_STATE_TRAVEL_PICK_UP_QUEST;
@@ -736,18 +745,18 @@ TravelState TravelTarget::getTravelState() {
                 return TravelState::TRAVEL_STATE_WORK_HAND_IN_QUEST;
         }
     }
-    else if (tDestination->getName() == "QuestObjectiveTravelDestination")
+    else if (typeid(tDestination) == typeid(QuestObjectiveTravelDestination))
     {
         if (isTraveling() || isPreparing())
             return TravelState::TRAVEL_STATE_TRAVEL_DO_QUEST;
         if (isWorking())
             return TravelState::TRAVEL_STATE_WORK_DO_QUEST;
     }
-    else if (tDestination->getName() == "RpgTravelDestination")
+    else if (typeid(tDestination) == typeid(RpgTravelDestination))
     {
         return TravelState::TRAVEL_STATE_TRAVEL_RPG;
     }
-    else if (tDestination->getName() == "ExploreTravelDestination")
+    else if (typeid(tDestination) == typeid(ExploreTravelDestination))
     {
         return TravelState::TRAVEL_STATE_TRAVEL_EXPLORE;
     }
@@ -1157,8 +1166,6 @@ void TravelMgr::LoadQuestTravelTable()
         {
             uint32 questId = q.first;
 
-            QuestContainer* container = new QuestContainer;
-
             for (auto& r : q.second)
             {
                 uint32 flag = r.first;
@@ -1173,15 +1180,11 @@ void TravelMgr::LoadQuestTravelTable()
                     if (flag & (uint32)QuestRelationFlag::questGiver)
                     {
                         loc = AddQuestDestination<QuestRelationTravelDestination>(questId, entry, 0);
-                        loc->setExpireDelay(5 * 60 * 1000);
-                        container->questGivers.push_back(loc);
                         locs.push_back(loc);
                     }
                     if (flag & (uint32)QuestRelationFlag::questTaker)
                     {
                         loc = AddQuestDestination<QuestRelationTravelDestination>(questId, entry, 1);
-                        loc->setExpireDelay(5 * 60 * 1000);
-                        container->questTakers.push_back(loc);
                         locs.push_back(loc);
                     }
                     if(flag & ((uint32)QuestRelationFlag::objective1 | (uint32)QuestRelationFlag::objective2 | (uint32)QuestRelationFlag::objective3 | (uint32)QuestRelationFlag::objective4))
@@ -1197,8 +1200,6 @@ void TravelMgr::LoadQuestTravelTable()
                             objective = 3;
 
                         loc = AddQuestDestination<QuestObjectiveTravelDestination>(questId, entry, objective);
-                        loc->setExpireDelay(1 * 60 * 1000);
-                        container->questObjectives.push_back(loc);
                         locs.push_back(loc);
                     }
 
@@ -1208,7 +1209,7 @@ void TravelMgr::LoadQuestTravelTable()
 
                         for (auto tLoc : locs)
                         {
-                            tLoc->addPoint(&pointsMap.find(guidP.GetRawValue())->second);
+                            tLoc->AddPoint(&pointsMap.find(guidP.GetRawValue())->second);
                         }
                     }
                 }
@@ -1261,10 +1262,9 @@ void TravelMgr::LoadQuestTravelTable()
                 if ((cInfo->NpcFlags & flag) != 0)
                 {
                     rLoc = AddDestination<RpgTravelDestination>(u.entry);
-                    rLoc->setExpireDelay(5 * 60 * 1000);
 
                     pointsMap.insert_or_assign(u.guid, point);
-                    rLoc->addPoint(&pointsMap.find(u.guid)->second);
+                    rLoc->AddPoint(&pointsMap.find(u.guid)->second);
                     break;
                 }
             }
@@ -1272,30 +1272,26 @@ void TravelMgr::LoadQuestTravelTable()
             if (cInfo->MinLootGold > 0)
             {
                 gLoc = AddDestination<GrindTravelDestination>(u.entry);
-                gLoc->setExpireDelay(5 * 60 * 1000);
 
                 point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
                 pointsMap.insert_or_assign(u.guid, point);
-                gLoc->addPoint(&pointsMap.find(u.guid)->second);
+                gLoc->AddPoint(&pointsMap.find(u.guid)->second);
             }
 
             if (cInfo->Rank == 3 || cInfo->Rank == 4 || (cInfo->Rank == 1 && !point.isOverworld() && u.c == 1))
             {
                 bLoc = AddDestination<BossTravelDestination>(u.entry);
-                bLoc->setExpireDelay(5 * 60 * 1000);
 
                 pointsMap.insert_or_assign(u.guid, point);
-                bLoc->addPoint(&pointsMap.find(u.guid)->second);
+                bLoc->AddPoint(&pointsMap.find(u.guid)->second);
             }
 
             if (cInfo->GetRequiredLootSkill() == SKILL_SKINNING)
             {
                 tLoc = AddDestination<GatherTravelDestination>(u.entry);
 
-                tLoc->setExpireDelay(5 * 60 * 1000);
-
                 pointsMap.insert_or_assign(u.guid, point);
-                tLoc->addPoint(&pointsMap.find(u.guid)->second);                
+                tLoc->AddPoint(&pointsMap.find(u.guid)->second);                
             }
         }
         else
@@ -1321,10 +1317,9 @@ void TravelMgr::LoadQuestTravelTable()
                 if (gInfo->type == type)
                 {
                     rLoc = AddDestination<RpgTravelDestination>(entry);
-                    rLoc->setExpireDelay(5 * 60 * 1000);
 
                     pointsMap.insert_or_assign(u.guid, point);
-                    rLoc->addPoint(&pointsMap.find(u.guid)->second);
+                    rLoc->AddPoint(&pointsMap.find(u.guid)->second);
                     break;
                 }
             }
@@ -1350,10 +1345,8 @@ void TravelMgr::LoadQuestTravelTable()
                     {
                         tLoc = AddDestination<GatherTravelDestination>(entry);
 
-                        tLoc->setExpireDelay(5 * 60 * 1000);
-
                         pointsMap.insert_or_assign(u.guid, point);
-                        tLoc->addPoint(&pointsMap.find(u.guid)->second);
+                        tLoc->AddPoint(&pointsMap.find(u.guid)->second);
                     }
                 }
             }
@@ -1369,7 +1362,7 @@ void TravelMgr::LoadQuestTravelTable()
 
         GuidPosition point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
         AreaTableEntry const* area = point.getArea();
-
+        
         if (!area)
             continue;
 
@@ -1384,11 +1377,7 @@ void TravelMgr::LoadQuestTravelTable()
         pointsMap.insert_or_assign(guid, point);
 
         loc = AddDestination<ExploreTravelDestination>(area->ID);
-        loc->setCooldownDelay(1000);
-        loc->setExpireDelay(1000);
-        loc->setTitle(area->area_name[0]);
-
-        loc->addPoint(&pointsMap.find(guid)->second);
+        loc->AddPoint(&pointsMap.find(guid)->second);
     }
 
     //Analyse log files
@@ -2122,63 +2111,7 @@ void TravelMgr::LoadQuestTravelTable()
 
             sPlayerbotAIConfig.log("zones.csv", out.str().c_str());
         }
-    }
-
-    if (sPlayerbotAIConfig.hasLog("quest_map.csv"))
-    {
-        std::vector<uint32> questIds;
-
-        for (auto& [type, ids] : destinationMap)
-            if (type == typeid(QuestRelationTravelDestination) || type == typeid(QuestObjectiveTravelDestination))
-                for (auto& [questId, destinations] : ids)
-                    if (std::find(questIds.begin(), questIds.end(), questId) == questIds.end()) questIds.push_back(questId);
-
-        for (auto& questId : questIds)
-        {
-            std::vector<std::pair<uint32, QuestTravelDestination*>> printQuestMap;
-
-            for (auto& dest : destinationMap[typeid(QuestRelationTravelDestination)][questId])
-                if(dest->getSubEntry() == 0)
-                printQuestMap.push_back(std::make_pair(0, (QuestTravelDestination*)dest));
-
-            for (auto& dest : destinationMap[typeid(QuestObjectiveTravelDestination)][questId])
-                printQuestMap.push_back(std::make_pair(1, (QuestTravelDestination*)dest));
-
-            for (auto& dest : destinationMap[typeid(QuestRelationTravelDestination)][questId])
-                if (dest->getSubEntry() == 1)
-                    printQuestMap.push_back(std::make_pair(2, (QuestTravelDestination*)dest));
-
-            for (auto dest : printQuestMap)
-            {
-                std::ostringstream out;
-
-                out << std::fixed << std::setprecision(2);
-                out << std::to_string(dest.first) << ",";
-                out << std::to_string(dest.second->GetQuestTemplate()->GetQuestId()) << ",";
-                out << "\"" << dest.second->GetQuestTemplate()->GetTitle() << "\"" << ",";
-                if (dest.second->getName() == "QuestObjectiveTravelDestination")
-                    out << std::to_string(((QuestObjectiveTravelDestination*)dest.second)->getSubEntry()) << ",";
-                else
-                    out << std::to_string(0) << ",";
-
-                out << std::to_string(dest.second->getEntry()) << ",";
-
-                std::vector<WorldPosition> points;
-
-                for (auto p : dest.second->getPoints())
-                    points.push_back(*p);
-
-                WorldPosition().printWKT(points, out, 0);
-
-                out << std::to_string(dest.second->GetQuestTemplate()->GetQuestLevel()) << ",";
-                out << std::to_string(dest.second->GetQuestTemplate()->GetMinLevel()) << ",";
-                out << std::to_string(dest.second->GetQuestTemplate()->GetMaxLevel()) << ",";
-                out << std::to_string((uint32(ceilf(dest.second->GetQuestTemplate()->GetRewMoneyMaxLevel() / 0.6))));
-
-                sPlayerbotAIConfig.log("quest_map.csv", out.str().c_str());
-            }
-        }
-    }
+    }    
 
     if (sPlayerbotAIConfig.hasLog("telecache.csv"))
     {
@@ -2596,7 +2529,7 @@ void TravelMgr::LoadQuestTravelTable()
     */    
 }
 
-uint32 TravelMgr::getDialogStatus(Player* pPlayer, int32 questgiver, Quest const* pQuest)
+uint32 TravelMgr::getDialogStatus(const Player* pPlayer, int32 questgiver, Quest const* pQuest)
 {
     uint32 dialogStatus = DIALOG_STATUS_NONE;
 
@@ -2676,7 +2609,7 @@ uint32 TravelMgr::getDialogStatus(Player* pPlayer, int32 questgiver, Quest const
                 if (pPlayer->SatisfyQuestLevel(pQuest, false))
                 {
                     int32 lowLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
-                    if (pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && pPlayer->getQuestStatusMap()[questId].m_rewarded))
+                    if (pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && pPlayer->getQuestStatusMap().find(questId)->second.m_rewarded))
                     {
                         dialogStatusNew = DIALOG_STATUS_REWARD_REP;
                     }
@@ -2710,7 +2643,7 @@ uint32 TravelMgr::getDialogStatus(Player* pPlayer, int32 questgiver, Quest const
 }
 
 //Selects a random WorldPosition from a list. Use a distance weighted distribution.
-std::vector<WorldPosition*> TravelMgr::getNextPoint(WorldPosition* center, std::vector<WorldPosition*> points, uint32 amount) {
+std::vector<WorldPosition*> TravelMgr::getNextPoint(const WorldPosition& center, std::vector<WorldPosition*> points, uint32 amount) {
     std::vector<WorldPosition*> retVec;
 
     if (points.size() < 2)
@@ -2723,7 +2656,7 @@ std::vector<WorldPosition*> TravelMgr::getNextPoint(WorldPosition* center, std::
 
     std::vector<uint32> weights;
 
-    std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [center](WorldPosition* point) { return 200000 / (1 + point->distance(*center)); });
+    std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [center](WorldPosition* point) { return 200000 / (1 + point->distance(center)); });
 
     //If any weight is 0 add 1 to all weights.
     for (auto& w : weights)
@@ -2743,7 +2676,7 @@ std::vector<WorldPosition*> TravelMgr::getNextPoint(WorldPosition* center, std::
     return retVec;
 }
 
-std::vector<WorldPosition> TravelMgr::getNextPoint(WorldPosition center, std::vector<WorldPosition> points, uint32 amount) {
+std::vector<WorldPosition> TravelMgr::getNextPoint(const WorldPosition& center, std::vector<WorldPosition> points, uint32 amount) {
     std::vector<WorldPosition> retVec;
 
     if (points.size() < 2)
@@ -2782,12 +2715,13 @@ std::vector<WorldPosition> TravelMgr::getNextPoint(WorldPosition center, std::ve
     return retVec;
 }
 
-QuestStatusData* TravelMgr::getQuestStatus(Player* bot, uint32 questId)
+QuestStatusData* TravelMgr::getQuestStatus(const Player* bot, uint32 questId)
 {
-    return &bot->getQuestStatusMap()[questId];
+    auto questStatusMap = bot->getQuestStatusMap();
+    return &(questStatusMap.find(questId)->second);
 }
 
-bool TravelMgr::getObjectiveStatus(Player* bot, Quest const* pQuest, uint32 objective)
+bool TravelMgr::getObjectiveStatus(const Player* bot, Quest const* pQuest, uint32 objective)
 {
     uint32 questId = pQuest->GetQuestId();
     if (!bot->IsActiveQuest(questId))
@@ -2825,10 +2759,10 @@ std::vector<TravelDestination*> TravelMgr::getQuestTravelDestinations(Player* bo
         {
             for (auto& dest : dests)
             {
-                if (!ignoreInactive && !dest->isActive(bot))
+                if (!ignoreInactive && !dest->IsActive(bot))
                     continue;
 
-                if (maxDistance > 0 && dest->distanceTo(&botLocation) > maxDistance)
+                if (maxDistance > 0 && dest->DistanceTo(botLocation) > maxDistance)
                     continue;
 
                 retTravelLocations.push_back(dest);
@@ -2839,10 +2773,10 @@ std::vector<TravelDestination*> TravelMgr::getQuestTravelDestinations(Player* bo
         {
             for (auto& dest : dests)
             {
-                if (!ignoreInactive && !dest->isActive(bot))
+                if (!ignoreInactive && !dest->IsActive(bot))
                     continue;
 
-                if (maxDistance > 0 && dest->distanceTo(&botLocation) > maxDistance)
+                if (maxDistance > 0 && dest->DistanceTo(botLocation) > maxDistance)
                     continue;
 
                 retTravelLocations.push_back(dest);
@@ -2855,19 +2789,14 @@ std::vector<TravelDestination*> TravelMgr::getQuestTravelDestinations(Player* bo
         {
             for (auto& dest : dests)
             {
-                if (dest->getSubEntry() != 0)
+                if (dest->GetSubEntry() != 0)
                     continue;
 
-                if (!ignoreInactive && !dest->isActive(bot))
+                if (!ignoreInactive && !dest->IsActive(bot))
                     continue;
 
-                if (maxDistance > 0 && dest->distanceTo(&botLocation) > maxDistance)
+                if (maxDistance > 0 && dest->DistanceTo(botLocation) > maxDistance)
                     continue;
-
-                // ignore PvP Halls for now
-                for (auto p : dest->getPoints(true))
-                    if (p->getMapId() == 449 || p->getMapId() == 450)
-                        continue;
 
                 retTravelLocations.push_back(dest);
             }
@@ -2878,16 +2807,11 @@ std::vector<TravelDestination*> TravelMgr::getQuestTravelDestinations(Player* bo
         for (auto& dest : destinationMap[typeid(QuestRelationTravelDestination)][questId])
         {
 
-            if (!ignoreInactive && !dest->isActive(bot))
+            if (!ignoreInactive && !dest->IsActive(bot))
                 continue;
 
-            if (maxDistance > 0 && dest->distanceTo(&botLocation) > maxDistance)
+            if (maxDistance > 0 && dest->DistanceTo(botLocation) > maxDistance)
                 continue;
-
-            // ignore PvP Halls for now
-            for (auto p : dest->getPoints(true))
-                if (p->getMapId() == 449 || p->getMapId() == 450)
-                    continue;
 
             retTravelLocations.push_back(dest);
         }
@@ -2895,10 +2819,10 @@ std::vector<TravelDestination*> TravelMgr::getQuestTravelDestinations(Player* bo
         if (!ignoreObjectives)
             for (auto& dest : destinationMap[typeid(QuestObjectiveTravelDestination)][questId])
             {
-                if (!ignoreInactive && !dest->isActive(bot))
+                if (!ignoreInactive && !dest->IsActive(bot))
                     continue;
 
-                if (maxDistance > 0 && dest->distanceTo(&botLocation) > maxDistance)
+                if (maxDistance > 0 && dest->DistanceTo(botLocation) > maxDistance)
                     continue;
 
                 retTravelLocations.push_back(dest);
@@ -2917,16 +2841,11 @@ std::vector<TravelDestination*> TravelMgr::getRpgTravelDestinations(Player* bot,
     {
         for (auto& dest : dests)
         {
-            if (!ignoreInactive && !dest->isActive(bot))
+            if (!ignoreInactive && !dest->IsActive(bot))
                 continue;
 
-            if (maxDistance > 0 && dest->distanceTo(&botLocation) > maxDistance)
+            if (maxDistance > 0 && dest->DistanceTo(botLocation) > maxDistance)
                 continue;
-
-            // ignore PvP Halls for now
-            for (auto p : dest->getPoints(true))
-                if (p->getMapId() == 449 || p->getMapId() == 450)
-                    continue;
 
             retTravelLocations.push_back(dest);
         }
@@ -2945,13 +2864,8 @@ std::vector<TravelDestination*> TravelMgr::getExploreTravelDestinations(Player* 
     {
         for (auto& dest : dests)
         {
-            if (!ignoreInactive && !dest->isActive(bot))
+            if (!ignoreInactive && !dest->IsActive(bot))
                 continue;
-
-            // ignore PvP Halls for now
-            for (auto p : dest->getPoints(true))
-                if (p->getMapId() == 449 || p->getMapId() == 450)
-                    continue;
 
             retTravelLocations.push_back(dest);
         }        
@@ -2980,16 +2894,11 @@ std::vector<TravelDestination*> TravelMgr::getGrindTravelDestinations(Player* bo
     {
         for (auto& dest : dests)
         {
-            if (maxDistance > 0 && dest->distanceTo(&botLocation) > maxDistance)
+            if (maxDistance > 0 && dest->DistanceTo(botLocation) > maxDistance)
                 continue;
 
-            if (!ignoreInactive && !dest->isActive(bot))
+            if (!ignoreInactive && !dest->IsActive(bot))
                 continue;
-
-            // ignore PvP Halls for now
-            for (auto p : dest->getPoints(true))
-                if (p->getMapId() == 449 || p->getMapId() == 450)
-                    continue;
 
             retTravelLocations.push_back(dest);
 
@@ -3011,10 +2920,10 @@ std::vector<TravelDestination*> TravelMgr::getBossTravelDestinations(Player* bot
     {
         for (auto& dest : dests)
         {
-            if (!ignoreInactive && !dest->isActive(bot))
+            if (!ignoreInactive && !dest->IsActive(bot))
                 continue;
 
-            if (maxDistance > 0 && dest->distanceTo(&botLocation) > maxDistance)
+            if (maxDistance > 0 && dest->DistanceTo(botLocation) > maxDistance)
                 continue;
 
             retTravelLocations.push_back(dest);

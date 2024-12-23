@@ -272,7 +272,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         float relevance = getMaxRelevance(guidP);
 
         //If this rpg target is our travel target increase the relevance by 50% to make it more likely to be picked.
-        bool isTravelTarget = guidP.GetEntry() == travelTarget->getEntry();
+        bool isTravelTarget = guidP.GetEntry() == travelTarget->GetEntry();
         if (isTravelTarget)
         {
             if (focusList.empty())

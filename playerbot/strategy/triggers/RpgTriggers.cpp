@@ -18,7 +18,7 @@ bool RpgTrigger::IsActive()
 
     if (AI_VALUE(GuidPosition, "rpg target").GetEntry())
     {
-        if (AI_VALUE(GuidPosition, "rpg target").GetEntry() == AI_VALUE(TravelTarget*, "travel target")->getEntry())
+        if (AI_VALUE(GuidPosition, "rpg target").GetEntry() == AI_VALUE(TravelTarget*, "travel target")->GetEntry())
             return true;
     }
 
@@ -101,7 +101,7 @@ bool RpgStartQuestTrigger::IsActive()
         if (!AI_VALUE2(bool, "can accept quest low level npc", entry) )
             return false;
 
-        if (entry == AI_VALUE(TravelTarget*, "travel target")->getEntry())
+        if (entry == AI_VALUE(TravelTarget*, "travel target")->GetEntry())
             return true;
     }
     else

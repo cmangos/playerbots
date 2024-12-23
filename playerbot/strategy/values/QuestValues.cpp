@@ -571,7 +571,7 @@ bool HasNearbyQuestTakerValue::Calculate()
 {
 	std::list<ObjectGuid> possibleTargets = AI_VALUE(std::list<ObjectGuid>, "possible rpg targets");
 
-	int32 travelEntry = AI_VALUE(TravelTarget*, "travel target")->getEntry();
+	int32 travelEntry = AI_VALUE(TravelTarget*, "travel target")->GetEntry();
 	
 	for (auto& target : possibleTargets)
 	{

@@ -160,7 +160,7 @@ namespace ai
             ai->TellPlayer(requester, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 
             TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
-            travelTarget->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition, true);
+            sTravelMgr.SetNullTravelTarget(travelTarget);
             travelTarget->setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
             travelTarget->setExpireIn(1000);
 

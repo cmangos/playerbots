@@ -388,11 +388,11 @@ bool DebugAction::Execute(Event& event)
 
         if (dest)
         {
-            std::vector<WorldPosition*> points = dest->nextPoint(&botPos, true);
+            std::vector<WorldPosition*> points = dest->NextPoint(botPos);
             if (!points.empty())
             {
                 poiPoint = *points.front();
-                name = dest->getTitle();
+                name = dest->GetTitle();
             }
         }
 
@@ -912,8 +912,8 @@ bool DebugAction::Execute(Event& event)
         if (guidP.getArea()->zone && GetAreaEntryByAreaID(guidP.getArea()->zone))
         {
             out << " z:" << GetAreaEntryByAreaID(guidP.getArea()->zone)->area_name[0];
-            if (sTravelMgr.getAreaLevel(guidP.getArea()->zone))
-                out << " level: " << sTravelMgr.getAreaLevel(guidP.getArea()->zone);
+            if (sTravelMgr.GetAreaLevel(guidP.getArea()->zone))
+                out << " level: " << sTravelMgr.GetAreaLevel(guidP.getArea()->zone);
         }
 
         out << "] ";
@@ -1160,7 +1160,7 @@ bool DebugAction::Execute(Event& event)
         TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, destination);
         if (dest)
         {
-            std::vector<WorldPosition*> points = dest->nextPoint(&botPos, true);
+            std::vector<WorldPosition*> points = dest->NextPoint(botPos);
 
             if (points.empty())
                 return false;
@@ -1168,7 +1168,7 @@ bool DebugAction::Execute(Event& event)
             std::vector<WorldPosition> beginPath, endPath;
             TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *points.front(), beginPath, bot);
 
-            std::ostringstream out; out << "Traveling to " << dest->getTitle() << ": ";
+            std::ostringstream out; out << "Traveling to " << dest->GetTitle() << ": ";
 
             for (auto node : route.getNodes())
             {

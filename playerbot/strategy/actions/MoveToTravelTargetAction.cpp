@@ -71,7 +71,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
         }
     }
 
-    float maxDistance = target->getDestination()->getRadiusMin();
+    float maxDistance = target->getDestination()->GetRadiusMin();
 
     //Evenly distribute around the target.
     float angle = 2 * M_PI * urand(0, 100) / 100.0;
@@ -95,7 +95,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
         out << "Moving to ";
 
-        out << target->getDestination()->getTitle();
+        out << target->getDestination()->GetTitle();
 
         if (!(*target->getPosition() == WorldPosition()))
         {
@@ -145,27 +145,27 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
                 botPos.printWKT({ botPos,destPos }, out, 1);
 
-                if (destination->getName() == "NullTravelDestination")
+                if (typeid(destination) == typeid(NullTravelDestination))
                     out << "0,";
                 else
-                    out << round(target->getDestination()->distanceTo(botPos)) << ",";
+                    out << round(target->getDestination()->DistanceTo(botPos)) << ",";
 
-                out << "2," << "\"" << destination->getTitle() << "\",\"" << "timeout" << "\"";
+                out << "2," << "\"" << destination->GetTitle() << "\",\"" << "timeout" << "\"";
 
-                if (destination->getName() == "NullTravelDestination")
+                if (typeid(destination) == typeid(NullTravelDestination))
                     out << ",none";
-                else if (destination->getName() == "QuestTravelDestination")
+                else if (typeid(destination) == typeid(QuestTravelDestination))
                     out << ",quest";
-                else if (destination->getName() == "QuestRelationTravelDestination")
+                else if (typeid(destination) == typeid(QuestRelationTravelDestination))
                     out << ",questgiver";
-                else if (destination->getName() == "QuestObjectiveTravelDestination")
+                else if (typeid(destination) == typeid(QuestObjectiveTravelDestination))
                     out << ",objective";
-                else  if (destination->getName() == "RpgTravelDestination")
+                else  if (typeid(destination) == typeid(RpgTravelDestination))
                 {
                     RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
-                    if (RpgDestination->getEntry() > 0)
+                    if (RpgDestination->GetEntry() > 0)
                     {
-                        CreatureInfo const* cInfo = RpgDestination->getCreatureInfo();
+                        CreatureInfo const* cInfo = RpgDestination->GetCreatureInfo();
 
                         if (cInfo)
                         {
@@ -183,7 +183,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
                     }
                     else
                     {
-                        GameObjectInfo const* gInfo = RpgDestination->getGoInfo();
+                        GameObjectInfo const* gInfo = RpgDestination->GetGoInfo();
 
                         if (gInfo)
                         {
@@ -196,11 +196,11 @@ bool MoveToTravelTargetAction::Execute(Event& event)
                             out << ",rpg";
                     }
                 }
-                else if (destination->getName() == "ExploreTravelDestination")
+                else if (typeid(destination) == typeid(ExploreTravelDestination))
                     out << ",explore";
-                else if (destination->getName() == "GrindTravelDestination")
+                else if (typeid(destination) == typeid(GrindTravelDestination))
                     out << ",grind";
-                else if (destination->getName() == "BossTravelDestination")
+                else if (typeid(destination) == typeid(BossTravelDestination))
                     out << ",boss";
                 else
                     out << ",unknown";
@@ -265,7 +265,7 @@ bool MoveToTravelTargetAction::isUseful()
 
     WorldPosition travelPos(*AI_VALUE(TravelTarget*, "travel target")->getPosition());
 
-    if (travelPos.isDungeon() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && sTravelMgr.mapTransDistance(bot, travelPos, true) < sPlayerbotAIConfig.sightDistance && !AI_VALUE2(bool, "group and", "near leader"))
+    if (travelPos.isDungeon() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && sTravelMgr.MapTransDistance(bot, travelPos, true) < sPlayerbotAIConfig.sightDistance && !AI_VALUE2(bool, "group and", "near leader"))
         return false;
      
     if (AI_VALUE(bool, "has available loot"))

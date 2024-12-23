@@ -1191,7 +1191,7 @@ void PlayerbotAI::Reset(bool full)
         aiObjectContext->GetValue<LastMovement& >("last area trigger")->Get().Set(NULL);
         aiObjectContext->GetValue<LastMovement& >("last taxi")->Get().Set(NULL);
 
-        aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition, true);
+        sTravelMgr.SetNullTravelTarget(aiObjectContext->GetValue<TravelTarget* >("travel target")->Get());
         aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
         aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->setExpireIn(1000);
 
@@ -6002,9 +6002,9 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
 
         TravelTarget* target = GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
         if (target->getDestination()) {
-            out << "Destination = " << target->getDestination()->getName();
+            out << "Destination ";
 
-            out << ": " << target->getDestination()->getTitle();
+            out << ": " << target->getDestination()->GetTitle();
 
             if (!(*target->getPosition() == WorldPosition()))
             {

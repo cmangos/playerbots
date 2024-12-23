@@ -121,6 +121,14 @@ namespace ai
         ActiveQuestObjectivesValue(PlayerbotAI* ai) : CalculatedValue(ai, "active quest objectives", 5) {}
         virtual std::list<GuidPosition> Calculate() override;
     };
+
+    //Check if a specific entry is a quest objective that the bot has to complete.
+    class NeedForQuestValue : public BoolCalculatedValue, Qualified
+    {
+    public:
+        NeedForQuestValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "need for quest", 5) {}
+        virtual bool Calculate() override;
+    };
     
     //Free quest log slots
     class FreeQuestLogSlotValue : public Uint8CalculatedValue

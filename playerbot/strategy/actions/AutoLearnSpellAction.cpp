@@ -271,8 +271,8 @@ bool AutoLearnSpellAction::LearnSpell(uint32 spellId, std::ostringstream* out)
 
             learned = bot->HasSpell(spellId);
         }
-        return learned;
     }
+    return learned;
 }
 
 bool AutoLearnSpellAction::LearnSpellFromSpell(uint32 spellId, std::ostringstream* out)

@@ -58,12 +58,12 @@ void session(socket_ptr sock)
     }
 }
 
-void server(boost::asio::io_service& io_service, short port)
+void server(boost::asio::io_context& io_context, short port)
 {
-    tcp::acceptor a(io_service, tcp::endpoint(tcp::v4(), port));
+    tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), port));
     for (;;)
     {
-        socket_ptr sock(new tcp::socket(io_service));
+        socket_ptr sock(new tcp::socket(io_context));
         a.accept(*sock);
         boost::thread t(boost::bind(session, sock));
     }
@@ -80,8 +80,8 @@ void Run()
 
     try
     {
-        boost::asio::io_service io_service;
-        server(io_service, sPlayerbotAIConfig.commandServerPort);
+        boost::asio::io_context io_context;
+        server(io_context, sPlayerbotAIConfig.commandServerPort);
     }
     catch (std::exception& e)
     {

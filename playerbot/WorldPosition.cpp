@@ -141,7 +141,7 @@ float WorldPosition::distance(const WorldPosition& to) const
         return relPoint(to).size();
 
     //this -> mapTransfer | mapTransfer -> center
-    return sTravelMgr.mapTransDistance(*this, to);
+    return sTravelMgr.MapTransDistance(*this, to);
 };
 
 float WorldPosition::fDist(const WorldPosition& to) const
@@ -150,7 +150,7 @@ float WorldPosition::fDist(const WorldPosition& to) const
         return sqrt(sqDistance2d(to));
 
     //this -> mapTransfer | mapTransfer -> center
-    return sTravelMgr.fastMapTransDistance(*this, to);
+    return sTravelMgr.FastMapTransDistance(*this, to);
 };
 
 //When moving from this along list return last point that falls within range.
@@ -256,6 +256,79 @@ std::vector<std::vector<WorldPosition*>> WorldPosition::distancePartition(const 
 
     return partitions;
 }
+
+std::vector<WorldPosition*> WorldPosition::GetNextPoint(std::vector<WorldPosition*> points, uint32 amount) const {
+    std::vector<WorldPosition*> retVec;
+
+    if (points.size() < 2)
+    {
+        retVec.push_back(points[0]);
+        return retVec;
+    }
+
+    retVec = points;
+
+    std::vector<uint32> weights;
+
+    std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [this](WorldPosition* point) { return 200000 / (1 + this->distance(*point)); });
+
+    //If any weight is 0 add 1 to all weights.
+    for (auto& w : weights)
+    {
+        if (w > 0)
+            continue;
+
+        std::for_each(weights.begin(), weights.end(), [](uint32& d) { d += 1; });
+        break;
+
+    }
+
+    std::mt19937 gen(time(0));
+
+    WeightedShuffle(retVec.begin(), retVec.end(), weights.begin(), weights.end(), gen);
+
+    return retVec;
+}
+
+std::vector<WorldPosition> WorldPosition::GetNextPoint(std::vector<WorldPosition> points, uint32 amount) const {
+    std::vector<WorldPosition> retVec;
+
+    if (points.size() < 2)
+    {
+        if (points.size() == 1)
+            retVec.push_back(points[0]);
+        return retVec;
+    }
+
+    retVec = points;
+
+
+    std::vector<uint32> weights;
+
+    //List of weights based on distance (Gausian curve that starts at 100 and lower to 1 at 1000 distance)
+    //std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [center](WorldPosition point) { return 1 + 1000 * exp(-1 * pow(point.distance(center) / 400.0, 2)); });
+
+    //List of weights based on distance (Twice the distance = half the weight). Caps out at 200.0000 range.
+    std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [this](WorldPosition point) { return 200000 / (1 + this->distance(point)); });
+
+    //If any weight is 0 add 1 to all weights.
+    for (auto& w : weights)
+    {
+        if (w > 0)
+            continue;
+
+        std::for_each(weights.begin(), weights.end(), [](uint32& d) { d += 1; });
+        break;
+
+    }
+
+    std::mt19937 gen(time(0));
+
+    WeightedShuffle(retVec.begin(), retVec.end(), weights.begin(), weights.end(), gen);
+
+    return retVec;
+}
+
 
 bool WorldPosition::canFly() const
 {
@@ -392,7 +465,7 @@ std::string WorldPosition::getAreaName(const bool fullName, const bool zoneName)
 int32 WorldPosition::getAreaLevel() const
 {
     if(getArea())
-        return sTravelMgr.getAreaLevel(getArea()->ID);
+        return sTravelMgr.GetAreaLevel(getArea()->ID);
 
     return 0;
 }
@@ -606,7 +679,7 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
     if (MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y))
         return true;
 #endif
-    if (sTravelMgr.isBadMmap(mapId, x, y))
+    if (sTravelMgr.IsBadMmap(mapId, x, y))
         return false;
 
     bool isLoaded = false;
@@ -630,13 +703,13 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
 #endif
 
     if(!isLoaded)
-        sTravelMgr.addBadMmap(mapId, x, y);
+        sTravelMgr.AddBadMmap(mapId, x, y);
 
     if (sPlayerbotAIConfig.hasLog(logName))
     {
         std::ostringstream out;
         out << sPlayerbotAIConfig.GetTimestampStr();
-        out << "+00,\"mmap\", " << x << "," << y << "," << (sTravelMgr.isBadMmap(mapId, x, y) ? "0" : "1") << ",";
+        out << "+00,\"mmap\", " << x << "," << y << "," << (sTravelMgr.IsBadMmap(mapId, x, y) ? "0" : "1") << ",";
         printWKT(frommGridPair(mGridPair(x, y), mapId), out, 1, true);
         sPlayerbotAIConfig.log(logName, out.str().c_str());
     }

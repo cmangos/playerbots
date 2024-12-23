@@ -390,7 +390,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
     //We pick a random target from the list with targets having a higher relevance of being picked.
     std::mt19937 gen(time(0));
-    sTravelMgr.weighted_shuffle(guidps.begin(), guidps.end(), relevances.begin(), relevances.end(), gen);
+    WeightedShuffle(guidps.begin(), guidps.end(), relevances.begin(), relevances.end(), gen);
     GuidPosition guidP(guidps.front(),bot->GetMapId(), bot->GetInstanceId());
 
     //If we can't find a target clear ignore list and try again later.

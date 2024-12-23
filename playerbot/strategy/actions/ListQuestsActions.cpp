@@ -102,13 +102,13 @@ int ListQuestsAction::ListQuests(Player* requester, bool completed, bool silent,
 
         if (travelDetail == QUEST_TRAVEL_DETAIL_SUMMARY)
         {
-            std::vector<TravelDestination*> allDestinations = sTravelMgr.getQuestTravelDestinations(bot, questId, true, true, -1);
-            std::vector<TravelDestination*> availDestinations = sTravelMgr.getQuestTravelDestinations(bot, questId, ai->GetMaster(), false, -1);
+            std::vector<TravelDestination*> allDestinations = sTravelMgr.GetQuestTravelDestinations(bot, questId, true, true, -1);
+            std::vector<TravelDestination*> availDestinations = sTravelMgr.GetQuestTravelDestinations(bot, questId, ai->GetMaster(), false, -1);
 
             uint32 desTot = allDestinations.size();
             uint32 desAvail = availDestinations.size();
-            uint32 desFull = desAvail - sTravelMgr.getQuestTravelDestinations(bot, questId, false, false, -1).size();
-            uint32 desRange = desAvail - sTravelMgr.getQuestTravelDestinations(bot, questId, false, false).size();
+            uint32 desFull = desAvail - sTravelMgr.GetQuestTravelDestinations(bot, questId, false, false, -1).size();
+            uint32 desRange = desAvail - sTravelMgr.GetQuestTravelDestinations(bot, questId, false, false).size();
 
             uint32 tpoints = 0;
             uint32 apoints = 0;
@@ -129,7 +129,7 @@ int ListQuestsAction::ListQuests(Player* requester, bool completed, bool silent,
         else if (travelDetail == QUEST_TRAVEL_DETAIL_FULL)
         {
             uint32 limit = 0;
-            std::vector<TravelDestination*> allDestinations = sTravelMgr.getQuestTravelDestinations(bot, questId, true, true, -1);
+            std::vector<TravelDestination*> allDestinations = sTravelMgr.GetQuestTravelDestinations(bot, questId, true, true, -1);
 
             std::sort(allDestinations.begin(), allDestinations.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
 

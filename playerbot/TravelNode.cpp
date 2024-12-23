@@ -2377,7 +2377,7 @@ void TravelNodeMap::generateTransportNodes()
 void TravelNodeMap::generateZoneMeanNodes()
 {
     //Zone means   
-    for (auto& loc : sTravelMgr.getExploreLocs())
+    for (auto& loc : sTravelMgr.GetExploreLocs())
     {
         std::vector<WorldPosition*> points;
 
@@ -2905,7 +2905,7 @@ void TravelNodeMap::generateAll()
     calcMapOffset();
 
     sLog.outString("-Generating maptransfers");
-    sTravelMgr.loadMapTransfers();
+    sTravelMgr.LoadMapTransfers();
 
     if (hasToGen || hasToFullGen)
     {

@@ -1191,7 +1191,7 @@ void PlayerbotAI::Reset(bool full)
         aiObjectContext->GetValue<LastMovement& >("last area trigger")->Get().Set(NULL);
         aiObjectContext->GetValue<LastMovement& >("last taxi")->Get().Set(NULL);
 
-        aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition, true);
+        sTravelMgr.SetNullTravelTarget(aiObjectContext->GetValue<TravelTarget* >("travel target")->Get());
         aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
         aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->setExpireIn(1000);
 

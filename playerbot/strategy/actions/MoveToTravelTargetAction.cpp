@@ -265,7 +265,7 @@ bool MoveToTravelTargetAction::isUseful()
 
     WorldPosition travelPos(*AI_VALUE(TravelTarget*, "travel target")->getPosition());
 
-    if (travelPos.isDungeon() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && sTravelMgr.mapTransDistance(bot, travelPos, true) < sPlayerbotAIConfig.sightDistance && !AI_VALUE2(bool, "group and", "near leader"))
+    if (travelPos.isDungeon() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && sTravelMgr.MapTransDistance(bot, travelPos, true) < sPlayerbotAIConfig.sightDistance && !AI_VALUE2(bool, "group and", "near leader"))
         return false;
      
     if (AI_VALUE(bool, "has available loot"))

@@ -2105,7 +2105,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
     tlocs.erase(std::remove_if(tlocs.begin(), tlocs.end(), [](const WorldPosition& l) {std::vector<uint32>::iterator i = find(sPlayerbotAIConfig.randomBotMaps.begin(), sPlayerbotAIConfig.randomBotMaps.end(), l.getMapId()); return i == sPlayerbotAIConfig.randomBotMaps.end(); }), tlocs.end());
 
     //Random shuffle based on distance. Closer distances are more likely (but not exclusively) to be at the begin of the list.
-    tlocs = sTravelMgr.getNextPoint(WorldPosition(bot), tlocs, 0);
+    tlocs = WorldPosition(bot).GetNextPoint(tlocs, 0);
 
     //5% + 0.1% per level chance node on different map in selection.
     //tlocs.erase(std::remove_if(tlocs.begin(), tlocs.end(), [bot](WorldLocation const& l) {return l.mapid != bot->GetMapId() && urand(1, 100) > 0.5 * bot->GetLevel(); }), tlocs.end());
@@ -3700,7 +3700,7 @@ void RandomPlayerbotMgr::RandomTeleportForRpg(Player* bot, bool activeOnly)
         AiObjectContext* context = bot->GetPlayerbotAI()->GetAiObjectContext();
         TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-        travelTarget->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition, true);
+        sTravelMgr.SetNullTravelTarget(travelTarget);
         travelTarget->setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         travelTarget->setExpireIn(10 * MINUTE * IN_MILLISECONDS);
     }

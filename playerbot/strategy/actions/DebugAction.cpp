@@ -912,8 +912,8 @@ bool DebugAction::Execute(Event& event)
         if (guidP.getArea()->zone && GetAreaEntryByAreaID(guidP.getArea()->zone))
         {
             out << " z:" << GetAreaEntryByAreaID(guidP.getArea()->zone)->area_name[0];
-            if (sTravelMgr.getAreaLevel(guidP.getArea()->zone))
-                out << " level: " << sTravelMgr.getAreaLevel(guidP.getArea()->zone);
+            if (sTravelMgr.GetAreaLevel(guidP.getArea()->zone))
+                out << " level: " << sTravelMgr.GetAreaLevel(guidP.getArea()->zone);
         }
 
         out << "] ";

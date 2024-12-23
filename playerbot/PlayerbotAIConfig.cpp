@@ -766,7 +766,7 @@ bool PlayerbotAIConfig::Initialize()
     targetPosRecalcDistance = config.GetFloatDefault("AiPlayerbot.TargetPosRecalcDistance", 0.1f),
 
     sLog.outString("Loading area levels.");
-    sTravelMgr.loadAreaLevels();
+    sTravelMgr.LoadAreaLevels();
     sLog.outString("Loading spellIds.");
     ChatHelper::PopulateSpellNameList();
     ItemUsageValue::PopulateProfessionReagentIds();

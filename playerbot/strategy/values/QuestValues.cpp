@@ -334,6 +334,61 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 	return retQuestObjectives;
 }
 
+bool NeedForQuestValue::Calculate()
+{
+	int32 entry = stoi(getQualifier());
+
+	questGuidpMap questMap = GAI_VALUE(questGuidpMap, "quest guidp map");
+
+	std::list<GuidPosition> retQuestObjectives;
+
+	QuestStatusMap& questStatusMap = bot->getQuestStatusMap();
+
+	for (auto& questStatus : questStatusMap)
+	{
+		uint32 questId = questStatus.first;
+
+		Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+
+		if (!quest || !quest->IsActive())
+		{
+			continue;
+		}
+
+		QuestStatusData statusData = questStatus.second;
+
+		if (statusData.m_status != QUEST_STATUS_INCOMPLETE)
+			continue;
+
+		for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
+		{
+			std::vector<std::string> qualifier = { std::to_string(questId), std::to_string(objective) };
+
+			if (!AI_VALUE2(bool, "need quest objective", Qualified::MultiQualify(qualifier, ",")))
+				continue;
+
+			auto q = questMap.find(questId);
+
+			if (q == questMap.end())
+				continue;
+
+			auto qt = q->second.find((int)QuestRelationFlag(1 << objective));
+
+			if (qt == q->second.end())
+				continue;
+
+			for (auto& [objectiveEntry, guidPs] : qt->second)
+			{
+				if (entry == objectiveEntry)
+					return true;
+
+			}
+		}
+	}
+
+	return false;
+}
+
 uint8 FreeQuestLogSlotValue::Calculate()
 {
 	uint8 numQuest = 0;

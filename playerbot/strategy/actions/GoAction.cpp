@@ -285,7 +285,7 @@ bool GoAction::TravelTo(TravelDestination* dest, Player* requester) const
     }
     else
     {
-        target->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition);
+        sTravelMgr.SetNullTravelTarget(target);
         target->setForced(false);
         return false;
     }

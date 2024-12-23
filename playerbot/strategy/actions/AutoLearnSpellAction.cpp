@@ -46,7 +46,7 @@ void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
     {
         if (bot->getClass() == CLASS_HUNTER && bot->GetLevel() >= 10)
         {
-#if !defined(MANGOSBOT_TWO)
+#if !defined(MANGOSBOT_TWO) // Beast training not available in WotLK 
             bot->learnSpell(5149, false); //Beast training
 #endif
             bot->learnSpell(883, false); //Call pet
@@ -138,7 +138,14 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
 #ifdef MANGOSBOT_ZERO // Vanilla
             LearnSpellFromSpell(tSpell->spell, out);
 #elif defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO)
-            LearnSpell(tSpell->spell, out);
+            if (IsTeachingSpellListedAsSpell(tSpell->spell))
+            {
+                LearnSpellFromSpell(tSpell->spell, out);
+            }
+            else
+            {
+                LearnSpell(tSpell->spell, out);
+            }
 #endif
         }
     }
@@ -338,48 +345,48 @@ bool AutoLearnSpellAction::IsValidSpell(uint32 spellId)
 #elif MANGOSBOT_ONE
     isSpellValid =
         // Paladin
-        spellId != 10321 && // Prevents Paladin from learning judgment training spell.
+        spellId != 10321 &&       // Prevents Paladin from learning judgment training spell.   
         // Hunter
         spellId != 530;     // Prevents hunter from learning Charm (Possess) (Spell is attached to a pet trainer)
 #elif MANGOSBOT_TWO
     isSpellValid =
-        // Rogue (Wotlk)
-        spellId != 1785 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4 (WotLK)
-        spellId != 1786 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4 (WotLK)
-        spellId != 1787 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4 (WotLK)
-        // Druid (Wotlk)
-        spellId != 6783 && // Druid Prowl no longer has ranks so remove learning ranks 2-3 (WotLK)
-        spellId != 9913 && // Druid Prowl no longer has ranks so remove learning ranks 2-3 (WotLK)
-        // DK (Wotlk)
-        spellId != 51426 && // DK Pestilence doesn't have ranks (WotLK)
-        spellId != 51427 && // DK Pestilence doesn't have ranks (WotLK)
-        spellId != 51428 && // DK Pestilence doesn't have ranks (WotLK)
-        spellId != 51429 && // DK Pestilence doesn't have ranks (WotLK)
-        spellId != 49913 && // DK Strangulate doesn't have ranks (WotLK)
-        spellId != 49914 && // DK Strangulate doesn't have ranks (WotLK)
-        spellId != 49915 && // DK Strangulate doesn't have ranks (WotLK)
-        spellId != 49916 && // DK Strangulate doesn't have ranks (WotLK)
-        // Mage (Wotlk)
-        spellId != 526 &&   // Cure Toxins
-        spellId != 52127 && // Water Shield Rank 1
-        spellId != 52129 && // Water Shield Rank 2
-        spellId != 52131 && // Water Shield Rank 3
-        spellId != 52134 && // Water Shield Rank 4
-        spellId != 52136 && // Water Shield Rank 5
-        spellId != 52138 && // Water Shield Rank 6
-        spellId != 51730 && // Earthliving Weapon 1
-        spellId != 51988 && // Earthliving Weapon 2
-        spellId != 51991 && // Earthliving Weapon 3
-        spellId != 51992 && // Earthliving Weapon 4
-        spellId != 51993 && // Earthliving Weapon 5
-        spellId != 51994 && // Earthliving Weapon 6
-        spellId != 66842 && // Call of the Elements
-        spellId != 66843 && // Call of the Ancestors
-        spellId != 66844 && // Call of the Spirits
-        spellId != 42748 && // Shadow Axe
-        spellId != 2894 && // Fire Elemental Totem
-        spellId != 51505 && // Lave Burst Rank 1
-        spellId != 51514; // Hex
+        // Rogue
+        spellId != 1785 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4
+        spellId != 1786 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4
+        spellId != 1787 && // Rogue Stealth no longer has ranks so remove learning ranks 2-4
+        // Druid
+        spellId != 6783 && // Druid Prowl no longer has ranks so remove learning ranks 2-3
+        spellId != 9913 && // Druid Prowl no longer has ranks so remove learning ranks 2-3
+        // DK
+        spellId != 51426 && // DK Pestilence doesn't have ranks
+        spellId != 51427 && // DK Pestilence doesn't have ranks
+        spellId != 51428 && // DK Pestilence doesn't have ranks
+        spellId != 51429 && // DK Pestilence doesn't have ranks
+        spellId != 49913 && // DK Strangulate doesn't have ranks
+        spellId != 49914 && // DK Strangulate doesn't have ranks
+        spellId != 49915 && // DK Strangulate doesn't have ranks
+        spellId != 49916 && // DK Strangulate doesn't have ranks
+        // Mage
+        spellId != 526 &&   // Prevents mage from learning shaman Cure Toxins
+        spellId != 52127 && // Prevents mage from learning shaman Water Shield Rank 1
+        spellId != 52129 && // Prevents mage from learning shaman Water Shield Rank 2
+        spellId != 52131 && // Prevents mage from learning shaman Water Shield Rank 3
+        spellId != 52134 && // Prevents mage from learning shaman Water Shield Rank 4
+        spellId != 52136 && // Prevents mage from learning shaman Water Shield Rank 5
+        spellId != 52138 && // Prevents mage from learning shaman Water Shield Rank 6
+        spellId != 51730 && // Prevents mage from learning shaman Earthliving Weapon 1
+        spellId != 51988 && // Prevents mage from learning shaman Earthliving Weapon 2
+        spellId != 51991 && // Prevents mage from learning shaman Earthliving Weapon 3
+        spellId != 51992 && // Prevents mage from learning shaman Earthliving Weapon 4
+        spellId != 51993 && // Prevents mage from learning shaman Earthliving Weapon 5
+        spellId != 51994 && // Prevents mage from learning shaman Earthliving Weapon 6
+        spellId != 66842 && // Prevents mage from learning shaman Call of the Elements
+        spellId != 66843 && // Prevents mage from learning shaman Call of the Ancestors
+        spellId != 66844 && // Prevents mage from learning shaman Call of the Spirits
+        spellId != 42748 && // Prevents mage from learning shaman Shadow Axe
+        spellId != 2894 &&  // Prevents mage from learning shaman Fire Elemental Totem
+        spellId != 51505 && // Prevents mage from learning shaman Lave Burst Rank 1
+        spellId != 51514;   // Prevents mage from learning shaman Hex
 #endif
     return isSpellValid;
 }
@@ -388,7 +395,7 @@ bool AutoLearnSpellAction::IsTeachingSpellListedAsSpell(uint32 spellId)
 {
     bool isTeachingSpellListedAsSpell = false;
 #ifdef MANGOSBOT_ZERO
-    isTeachingSpellListedAsSpell = 
+    isTeachingSpellListedAsSpell =
         spellId == 19318 ||    // Touch of weakness Teaching Spell listed as actual spell
         spellId == 2946  ||    // Devouring Plague Teaching Spell listed as actual spell
         spellId == 19325 ||    // Hex Of Weakness Teaching Spell listed as actual spell

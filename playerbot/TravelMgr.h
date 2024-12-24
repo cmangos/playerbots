@@ -160,11 +160,12 @@ namespace ai
 	class ExploreTravelDestination : public EntryTravelDestination
 	{
 	public:
-		ExploreTravelDestination(int32 areaId) : EntryTravelDestination(areaId) { SetExpireFast(); SetCooldownShort(); title = sAreaStore.LookupEntry(areaId)->area_name[0]; }
+		ExploreTravelDestination(int32 areaId) : EntryTravelDestination(areaId) { SetExpireFast(); SetCooldownShort(); if(auto area = GetArea()) title = area->area_name[0]; }
 
 		virtual bool IsActive(Player* bot) const override;
 		virtual std::string GetTitle() const override { return title; }
-	protected:
+	private:
+		AreaTableEntry const* GetArea() const;
 		std::string title = "";
 	};
 

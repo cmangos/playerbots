@@ -393,6 +393,20 @@ bool ExploreTravelDestination::IsActive(Player* bot) const
     return !(currFields & val);    
 }
 
+AreaTableEntry const* ExploreTravelDestination::GetArea() const
+{
+    for (uint32 areaid = 0; areaid <= sAreaStore.GetNumRows(); ++areaid)
+    {
+        AreaTableEntry const* areaEntry = sAreaStore.LookupEntry(areaid);
+        if (areaEntry && areaEntry->ID == GetEntry())
+        {
+            return areaEntry;
+        }
+    }
+
+    return nullptr;
+}
+
 bool GrindTravelDestination::IsActive(Player* bot) const
 {
     PlayerbotAI* ai = bot->GetPlayerbotAI();

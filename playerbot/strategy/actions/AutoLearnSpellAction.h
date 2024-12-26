@@ -9,7 +9,6 @@ namespace ai
     class AutoLearnSpellAction : public Action {
     public:
         AutoLearnSpellAction(PlayerbotAI* ai, std::string name = "auto learn spell") : Action(ai, name) {}
-        
     public:
         virtual bool Execute(Event& event);
 
@@ -22,5 +21,7 @@ namespace ai
         bool LearnSpellFromSpell(uint32 spellId, std::ostringstream* out);
         bool IsValidSpell(uint32 spellId);
         bool IsTeachingSpellListedAsSpell(uint32 spellId);
+        void LearnDroppedTrainingBooks(std::ostringstream* out);
+        bool LearnSpellFromItem(uint32 itemId, std::ostringstream* out);
     };
 }

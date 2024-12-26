@@ -4,6 +4,8 @@
 #include "playerbot/ServerFacade.h"
 #include "Entities/Item.h"
 #include <Mails/Mail.h>
+#include "Spells/Spell.h"
+#include <cmath>
 
 using namespace ai;
 
@@ -42,6 +44,9 @@ void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
     if (sPlayerbotAIConfig.autoLearnTrainerSpells)
         LearnTrainerSpells(out);
 
+    if (sPlayerbotAIConfig.autoLearnBookSpells)
+        LearnDroppedTrainingBooks(out);
+
     if (!ai->HasActivePlayerMaster()) //Hunter spells for pets.
     {
         if (bot->getClass() == CLASS_HUNTER && bot->GetLevel() >= 10)
@@ -67,7 +72,7 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
         if (!co)
             continue;
 
-        if (co->TrainerType != TRAINER_TYPE_CLASS && 
+        if (co->TrainerType != TRAINER_TYPE_CLASS &&
             co->TrainerType != TRAINER_TYPE_TRADESKILLS &&
             co->TrainerType != TRAINER_TYPE_PETS)
             continue;
@@ -109,29 +114,29 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
 #ifdef MANGOSBOT_ZERO
                     if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
 #elif defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
-                        if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL || spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
+                    if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL || spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
 #endif
-                        {
-                            uint32 skill = spell->EffectMiscValue[EFFECT_INDEX_1];
+                    {
+                        uint32 skill = spell->EffectMiscValue[EFFECT_INDEX_1];
 
-                            if (skill)
+                        if (skill)
+                        {
+                            SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
+                            if (pSkill)
                             {
-                                SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
-                                if (pSkill)
-                                {
 #ifdef MANGOSBOT_ZERO
-                                    if (SpellName.find("Apprentice") != std::string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
-                                        continue;
+                                if (SpellName.find("Apprentice") != std::string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
+                                    continue;
 #elif defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
-                                    std::string SpellRank = spell->Rank[0];
-                                    if (SpellName.find("Apprentice") != std::string::npos && (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY))
-                                        continue;
-                                    else if (SpellRank.find("Apprentice") != std::string::npos && (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY))
-                                        continue;
+                                std::string SpellRank = spell->Rank[0];
+                                if (SpellName.find("Apprentice") != std::string::npos && (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY))
+                                    continue;
+                                else if (SpellRank.find("Apprentice") != std::string::npos && (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY))
+                                    continue;
 #endif
-                                }
                             }
                         }
+                    }
                 }
 
             }
@@ -319,7 +324,7 @@ bool AutoLearnSpellAction::IsValidSpell(uint32 spellId)
         // Shaman (Classic)
         spellId != 8385 && // Prevents Shaman from learning Swift Wind spell which is cast onto player as a reward, the spell is not supposed to be learned.
         // Hunter
-        spellId != 542  && // Prevents hunter from learning pet skill zzOLDLearn Nature Resistance.
+        spellId != 542 && // Prevents hunter from learning pet skill zzOLDLearn Nature Resistance.
         spellId != 6284 && // Prevents hunter from learning pet skill Pet Hardiness Rank 1
         spellId != 6287 && // Prevents hunter from learning pet skill Pet Hardiness Rank 2
         spellId != 6288 && // Prevents hunter from learning pet skill Pet Hardiness Rank 3
@@ -397,7 +402,7 @@ bool AutoLearnSpellAction::IsTeachingSpellListedAsSpell(uint32 spellId)
 #ifdef MANGOSBOT_ZERO
     isTeachingSpellListedAsSpell =
         spellId == 19318 ||    // Touch of weakness Teaching Spell listed as actual spell
-        spellId == 2946  ||    // Devouring Plague Teaching Spell listed as actual spell
+        spellId == 2946 ||    // Devouring Plague Teaching Spell listed as actual spell
         spellId == 19325 ||    // Hex Of Weakness Teaching Spell listed as actual spell
         spellId == 19331 ||    // Shadowguard Teaching Spell listed as actual spell
         spellId == 19338 ||    // Desperate Prayer Teaching Spell listed as actual spell
@@ -406,5 +411,99 @@ bool AutoLearnSpellAction::IsTeachingSpellListedAsSpell(uint32 spellId)
         spellId == 19357 ||    // Elune's Grace Teaching Spell listed as actual spell
         spellId == 19350;      // Starshards Teaching Spell listed as actual spell
 #endif
-        return isTeachingSpellListedAsSpell;
+    return isTeachingSpellListedAsSpell;
+}
+
+void AutoLearnSpellAction::LearnDroppedTrainingBooks(std::ostringstream* out)
+{
+    uint32 bookIds[] = {
+        // Warriors
+        21297, // Manual of Heroic Strike IX            AQ
+        21298, // Manual of Battle Shout VII            AQ
+        21299, // Manual of Revenge VI                  AQ
+
+        // Paladins
+        21288, // Libram: Blessing of Wisdom VI         AQ
+        21289, // Libram: Blessing of Might VII         AQ
+        21290, // Libram: Holy Light IX                 AQ
+
+        // Hunters
+        21304, // Guide: Multi-Shot V                   AQ
+        21306, // Guide: Serpent Sting IX               AQ
+        21307, // Guide: Aspect of the Hawk VII         AQ
+        16665, // Tome of Tranquilizing Shot            MC
+
+        // Rogues
+        21300, // Handbook of Backstab IX               AQ
+        21302, // Handbook of Deadly Poison V           AQ
+        21303, // Handbook of Feint V                   AQ
+        24102, // Manual of Eviscerate IX               UBRS
+
+        // Priests
+        21284, // Codex of Greater Heal V               AQ
+        21285, // Codex of Renew X                      AQ
+        21287, // Codex of Prayer of Healing V          AQ
+        17413, // Codex: Prayer of Fortitude            50+ dungeons/raids
+        17414, // Codex: Prayer of Fortitude II         52+ dungeons/raids
+        22393, // Codex: Prayer of Shadow Protection    52+ dungeons/raids
+
+        // Shamans
+        23320, // Tablet of Flame Shock VI              UBRS
+        21291, // Tablet of Healing Wave X              AQ
+        21292, // Tablet of Strength of Earth Totem V   AQ
+        21293, // Tablet of Grace of Air Totem III      AQ
+
+        // Mages
+        22897, // Tome of Conjure Food VII              Stratholme
+        22890,  // Tome of Frost Ward V                  52+ dungeons/raids
+        21214, // Tome of Fireball XII                  AQ
+        21279, // Tome of Frostbolt XI                  AQ
+        21280, // Tome of Arcane Missiles VIII          AQ
+        18600, // Tome of Arcane Brilliance             52+ dungeons/raids
+        22739, // Tome of Polymorph: Turtle             ZG
+
+        // Warlocks
+        4213,  // Grimoire of Doom                      Doomguard Commander/Dreadlord Blasted Lands
+        22891, // Grimoire of Shadow Ward IV            52+ dungeons/raids
+        21281, // Grimoire of Shadow Bolt X             AQ
+        21282, // Grimoire of Immolate VIII             AQ
+        21283, // Grimoire of Corruption VII            AQ
+        9214,  // Grimoire of Inferno                   LBRS
+
+        // Druids
+        24101, // Book of Ferocious Bite V              UBRS
+        21294, // Book of Healing Touch XI              AQ
+        21295, // Book of Starfire VII                  AQ
+        21296, // Book of Rejuvenation XI               AQ
+        17682, // Book: Gift of the Wild                50+ dungeons/raids
+        17683, // Book: Gift of the Wild II             52+ dungeons/raids
+    };
+
+    for (uint32 itemId : bookIds)
+    {
+        LearnSpellFromItem(itemId, out);
+    }
+}
+
+bool AutoLearnSpellAction::LearnSpellFromItem(uint32 itemId, std::ostringstream* out)
+{
+    ItemPrototype const* itemP = sObjectMgr.GetItemPrototype(itemId);
+    uint32 requiredClass = itemP->AllowableClass;
+    if (requiredClass > 31232)
+    {
+        requiredClass -= 31232;
+    }
+    if (requiredClass > 0)
+    {
+        requiredClass = (log(requiredClass) / log(2)) + 1;
+    }
+    else
+    {
+        requiredClass += 1;
+    }
+    if (bot->getClass() == requiredClass && bot->GetLevel() >= itemP->RequiredLevel)
+    {
+        return LearnSpellFromSpell(itemP->Spells[0].SpellId, out);
+    }
+    return false;
 }

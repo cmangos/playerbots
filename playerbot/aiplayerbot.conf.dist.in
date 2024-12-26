@@ -333,6 +333,10 @@ AiPlayerbot.AutoLearnTrainerSpells = 0
 # Default: 0 (disabled)
 AiPlayerbot.AutoLearnQuestSpells = 0
 
+# Bots automatically learn class spells from books (such as the ones from AQ20)
+# Default: 0 (disabled)
+AiPlayerbot.AutoLearnBookSpells = 0
+
 # Random Bots will pick quests on their own and try to complete
 # Default: 0 (disabled)
 AiPlayerbot.AutoDoQuests = 0

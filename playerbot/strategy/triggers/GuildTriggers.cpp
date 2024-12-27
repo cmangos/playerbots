@@ -30,9 +30,12 @@ bool BuyTabardTrigger::IsActive()
 	if (!inCity)
 		return false;
 
+	if (!ai->HasCheat(BotCheatMask::gold) && bot->GetMoney() < 10000)
+		return false;
+
 	if(AI_VALUE2(uint32, "item count", chat->formatQItem(5976)))
 		return false;
-		
+
     if(AI_VALUE2(uint32, "free money for", uint32(NeedMoneyFor::guild)) < 10000)
 		return false;
 

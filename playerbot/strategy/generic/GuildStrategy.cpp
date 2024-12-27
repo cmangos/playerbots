@@ -20,7 +20,7 @@ void GuildStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "buy tabard",
-        NextAction::array(0, new NextAction("buy tabard", 10.0f), NULL)));
+        NextAction::array(0, new NextAction("buy tabard", 4.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "leave large guild",

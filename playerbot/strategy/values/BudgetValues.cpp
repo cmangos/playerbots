@@ -222,9 +222,9 @@ uint32 FreeMoneyForValue::Calculate()
     uint32 money = bot->GetMoney();
 
     if (ai->HasCheat(BotCheatMask::gold))
-        return 10000000;
+        return 100000000;
 
-    if (ai->HasActivePlayerMaster())
+    if (ai->HasActivePlayerMaster() || money > 10000 * 10000)
         return money;
 
     uint32 savedMoney = AI_VALUE2(uint32, "total money needed for", getQualifier()) - AI_VALUE2(uint32, "money needed for", getQualifier());

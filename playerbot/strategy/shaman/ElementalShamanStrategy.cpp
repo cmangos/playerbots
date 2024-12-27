@@ -1092,7 +1092,7 @@ void ElementalShamanCcPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 
     triggers.push_back(new TriggerNode(
         "enemy is close",
-        NextAction::array(0, new NextAction("thunderstorm", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("thunderstorm", ACTION_INTERRUPT), NULL)));
 }
 
 void ElementalShamanCcPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

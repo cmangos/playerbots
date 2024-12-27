@@ -445,6 +445,14 @@ namespace ai
 
         virtual uint32 GetItemId() override
         {
+            if (bot->GetSkillValue(129) >= 400)
+                return 34722; 
+            if (bot->GetSkillValue(129) >= 350)
+                return 34721; 
+            if (bot->GetSkillValue(129) >= 325)
+                return 21991;
+            if (bot->GetSkillValue(129) >= 300)
+                return 21990;
             if (bot->GetSkillValue(129) >= 225)
                 return 14530;
             if (bot->GetSkillValue(129) >= 200)

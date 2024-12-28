@@ -42,65 +42,74 @@ bool UpdateStrategyDependenciesAction::Execute(Event& event)
 
 bool UpdateStrategyDependenciesAction::isUseful()
 {
-    if (!strategiesToUpdate.empty())
+    if (strategiesToUpdate.empty())
     {
-        strategiesToAdd.clear();
-        strategiesToRemove.clear();
-        for (const StrategyToUpdate& strategy : strategiesToUpdate)
+        return false;
+    }
+
+    strategiesToAdd.clear();
+    strategiesToRemove.clear();
+
+    for (const StrategyToUpdate& strategy : strategiesToUpdate)
+    {
+        // Check if required strategies are met
+        bool requiredStrategyMissing = false;
+
+        for (const std::string& strategyRequired : strategy.strategiesRequired)
         {
-            // Ignore if the strategies required are not found
-            bool requiredStrategyMissing = false;
-            for (const std::string& strategyRequired : strategy.strategiesRequired)
+            std::vector<std::string> strategyRequiredAliases;
+            if (strategyRequired.find("/") != std::string::npos)
             {
-                // Check if the strategy required has any aliases
-                std::vector<std::string> strategyRequiredAliases = { strategyRequired };
-                if (strategyRequired.find("/") != std::string::npos)
+                // Parse aliases if '/' exists
+                std::string alias;
+                std::stringstream ss(strategyRequired);
+                while (std::getline(ss, alias, '/'))
                 {
-                    strategyRequiredAliases.clear();
-                    std::string alias;
-                    std::stringstream ss(strategyRequired);
-                    while (std::getline(ss, alias, '/'))
-                    {
-                        strategyRequiredAliases.push_back(alias);
-                    }
-                }
-
-                bool synonymFound = false;
-                for (const std::string& strategyRequiredAlias : strategyRequiredAliases)
-                {
-                    if (ai->HasStrategy(strategyRequiredAlias, strategy.state))
-                    {
-                        synonymFound = true;
-                        break;
-                    }
-                }
-
-                if (!synonymFound)
-                {
-                    requiredStrategyMissing = true;
-                    break;
-                }
-            }
-
-            if (requiredStrategyMissing)
-            {
-                // Check if we need to remove the strategy
-                if (ai->HasStrategy(strategy.name, strategy.state))
-                {
-                    strategiesToRemove.emplace_back(&strategy);
+                    strategyRequiredAliases.push_back(alias);
                 }
             }
             else
             {
-                // Check if we need to add the strategy
-                if (!ai->HasStrategy(strategy.name, strategy.state))
+                strategyRequiredAliases.push_back(strategyRequired);
+            }
+
+            // Check if any alias exists in the AI
+            bool synonymFound = false;
+            for (const std::string& alias : strategyRequiredAliases)
+            {
+                if (ai->HasStrategy(alias, strategy.state))
                 {
-                    strategiesToAdd.emplace_back(&strategy);
+                    synonymFound = true;
+                    break;
                 }
+            }
+
+            if (!synonymFound)
+            {
+                requiredStrategyMissing = true;
+                break;
+            }
+        }
+
+        if (requiredStrategyMissing)
+        {
+            // Strategy exists but requirements are missing: Mark for removal
+            if (ai->HasStrategy(strategy.name, strategy.state))
+            {
+                strategiesToRemove.emplace_back(&strategy);
+            }
+        }
+        else
+        {
+            // Strategy does not exist but requirements are met: Mark for addition
+            if (!ai->HasStrategy(strategy.name, strategy.state))
+            {
+                strategiesToAdd.emplace_back(&strategy);
             }
         }
     }
 
+    // Determine if any strategies need to be updated
     return !strategiesToAdd.empty() || !strategiesToRemove.empty();
 }
 

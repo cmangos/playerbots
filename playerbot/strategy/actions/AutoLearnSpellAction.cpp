@@ -4,7 +4,6 @@
 #include "playerbot/ServerFacade.h"
 #include "Entities/Item.h"
 #include <Mails/Mail.h>
-#include "Spells/Spell.h"
 #include <cmath>
 
 using namespace ai;

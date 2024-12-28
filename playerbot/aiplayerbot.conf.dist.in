@@ -333,7 +333,7 @@ AiPlayerbot.AutoLearnTrainerSpells = 0
 # Default: 0 (disabled)
 AiPlayerbot.AutoLearnQuestSpells = 0
 
-# Bots automatically learn class spells from books (such as the ones from AQ20)
+# Alt Bots automatically learn class spells from books dropped from dungeons and raids when leveled and they reached the required level of the book.
 # Default: 0 (disabled)
 AiPlayerbot.AutoLearnBookSpells = 0
 

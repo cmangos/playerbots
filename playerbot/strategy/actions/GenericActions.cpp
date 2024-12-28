@@ -114,10 +114,10 @@ bool InitializePetAction::Execute(Event& event)
 
 bool InitializePetAction::isUseful()
 {
-    // Only for random bots with item cheats enabled
     if (
         // Only for random bots with item cheats enabled
         (ai->HasCheat(BotCheatMask::item) && sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId())) ||
+        // All bots
         sPlayerbotAIConfig.autoLearnTrainerSpells)
     {
         if (bot->getClass() == CLASS_HUNTER)

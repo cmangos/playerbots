@@ -4,7 +4,6 @@
 #include "playerbot/ServerFacade.h"
 #include "Entities/Item.h"
 #include <Mails/Mail.h>
-#include <cmath>
 
 using namespace ai;
 
@@ -487,20 +486,9 @@ void AutoLearnSpellAction::LearnDroppedTrainingBooks(std::ostringstream* out)
 bool AutoLearnSpellAction::LearnSpellFromItem(uint32 itemId, std::ostringstream* out)
 {
     ItemPrototype const* itemP = sObjectMgr.GetItemPrototype(itemId);
-    uint32 requiredClass = itemP->AllowableClass;
-    if (requiredClass > 31232)
-    {
-        requiredClass -= 31232;
-    }
-    if (requiredClass > 0)
-    {
-        requiredClass = (log(requiredClass) / log(2)) + 1;
-    }
-    else
-    {
-        requiredClass += 1;
-    }
-    if (bot->getClass() == requiredClass && bot->GetLevel() >= itemP->RequiredLevel)
+    uint32 allowableClasses = itemP->AllowableClass;
+    uint32 classMask = bot->getClassMask();
+    if ((allowableClasses & classMask) == classMask && bot->GetLevel() >= itemP->RequiredLevel)
     {
         return LearnSpellFromSpell(itemP->Spells[0].SpellId, out);
     }

@@ -42,14 +42,19 @@ bool HonorGainAction::Execute(Event& event)
 
         if (player)
         {
-            if (!bot->InBattleGround()
-#ifndef MANGOSBOT_ZERO
-                && !bot->InArena()
-#endif
-                )
+            if (!bot->InBattleGround())
             {
                 BroadcastHelper::BroadcastPlayerKill(ai, bot, player);
             }
+#ifndef MANGOSBOT_ZERO
+            if (!bot->InArena())
+#endif
+            {
+                uint32 title = bot->GetTeam() == ALLIANCE ? bot->GetHighestPvPRankIndex() - 4 : bot->GetHighestPvPRankIndex() + 10;
+                if (title > 0)
+                    bot->SetUInt32Value(PLAYER_CHOSEN_TITLE, title);
+            }
+
         }
         else if (creature)
         {

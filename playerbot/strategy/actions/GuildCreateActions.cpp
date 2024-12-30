@@ -279,10 +279,10 @@ bool PetitionTurnInAction::Execute(Event& event)
 
     bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_PETITIONER });
 
-    if (!foundTarget || !newTarget.isActive())
+    if (!foundTarget || !newTarget.IsActive())
         return false;
 
-    newTarget.setRadius(INTERACTION_DISTANCE);
+    newTarget.SetRadius(INTERACTION_DISTANCE);
 
     setNewTarget(requester, &newTarget, oldTarget);
 
@@ -311,7 +311,7 @@ bool PetitionTurnInAction::isUseful()
             inCity = true;
     }
 
-    return inCity && !bot->GetGuildId() && AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) && AI_VALUE(uint8, "petition signs") >= sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS) && !context->GetValue<TravelTarget*>("travel target")->Get()->isTraveling();
+    return inCity && !bot->GetGuildId() && AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) && AI_VALUE(uint8, "petition signs") >= sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS) && !context->GetValue<TravelTarget*>("travel target")->Get()->IsTraveling();
 };
 
 bool BuyTabardAction::Execute(Event& event)
@@ -331,10 +331,10 @@ bool BuyTabardAction::Execute(Event& event)
 
     bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_TABARDDESIGNER }, "Tabard Vendor", { 5976 });
 
-    if (!foundTarget || !newTarget.isActive())
+    if (!foundTarget || !newTarget.IsActive())
         return false;
 
-    newTarget.setRadius(INTERACTION_DISTANCE);
+    newTarget.SetRadius(INTERACTION_DISTANCE);
 
     setNewTarget(requester, &newTarget, oldTarget);
 
@@ -371,5 +371,5 @@ bool BuyTabardAction::isUseful()
             inCity = true;
     }
 
-    return inCity && bot->GetGuildId() && !AI_VALUE2(uint32, "item count", chat->formatQItem(5976)) && AI_VALUE2(uint32, "free money for", uint32(NeedMoneyFor::guild)) >= 10000 && !context->GetValue<TravelTarget*>("travel target")->Get()->isTraveling();
+    return inCity && bot->GetGuildId() && !AI_VALUE2(uint32, "item count", chat->formatQItem(5976)) && AI_VALUE2(uint32, "free money for", uint32(NeedMoneyFor::guild)) >= 10000 && !context->GetValue<TravelTarget*>("travel target")->Get()->IsTraveling();
 };

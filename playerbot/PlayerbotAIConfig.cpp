@@ -463,10 +463,10 @@ bool PlayerbotAIConfig::Initialize()
         for (auto value : values)
         {
             std::vector<std::string> ids = split(value, '.');
-            std::vector<uint32> params = { 0,0,0,0,0 };
+            std::vector<uint32> params = { 0,0,0,0,0,0 };
 
             //Extract faction, class, spec, minlevel, maxlevel
-            for (uint8 i = 0; i < 5; i++)
+            for (uint8 i = 0; i < 6; i++)
                 if (ids.size() > i + 2)
                     params[i] = stoi(ids[i + 2]);
 
@@ -477,7 +477,7 @@ bool PlayerbotAIConfig::Initialize()
             //Store buffs for later application.
             for (auto buff : buffs)
             {
-                worldBuff wb = { buff, params[0], params[1], params[2], params[3], params[4] };
+                worldBuff wb = { buff, params[0], params[1], params[2], params[3], params[4], params[5] };
                 worldBuffs.push_back(wb);
             }
 
@@ -770,7 +770,7 @@ bool PlayerbotAIConfig::Initialize()
     targetPosRecalcDistance = config.GetFloatDefault("AiPlayerbot.TargetPosRecalcDistance", 0.1f),
 
     sLog.outString("Loading area levels.");
-    sTravelMgr.loadAreaLevels();
+    sTravelMgr.LoadAreaLevels();
     sLog.outString("Loading spellIds.");
     ChatHelper::PopulateSpellNameList();
     ItemUsageValue::PopulateProfessionReagentIds();

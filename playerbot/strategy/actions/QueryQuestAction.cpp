@@ -64,9 +64,9 @@ bool QueryQuestAction::Execute(Event& event)
         if (travel)
         {
             uint32 limit = 0;
-            std::vector<TravelDestination*> allDestinations = sTravelMgr.getQuestTravelDestinations(bot, questId, true, true, -1);
+            std::vector<TravelDestination*> allDestinations = sTravelMgr.GetQuestTravelDestinations(bot, questId, true, true, -1);
 
-            std::sort(allDestinations.begin(), allDestinations.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->distanceTo(botPos) < j->distanceTo(botPos); });
+            std::sort(allDestinations.begin(), allDestinations.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
 
             for (auto dest : allDestinations) 
             {
@@ -75,20 +75,16 @@ bool QueryQuestAction::Execute(Event& event)
 
                 std::ostringstream out;
 
-                uint32 tpoints = dest->getPoints(true).size();
-                uint32 apoints = dest->getPoints().size();
+                uint32 tpoints = dest->GetPoints().size();
 
+                out << round(dest->DistanceTo(botPos));
 
-                out << round(dest->distanceTo(botPos));
+                out << " to " << dest->GetTitle();
 
-                out << " to " << dest->getTitle();
-
-                out << " " << apoints;
-                if (apoints < tpoints)
-                    out << "/" << tpoints;
+                out << " " << tpoints;
                 out << " points.";
 
-                if (!dest->isActive(bot))
+                if (!dest->IsActive(bot))
                     out << " not active";
 
                 ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);

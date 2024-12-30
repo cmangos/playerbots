@@ -678,7 +678,7 @@ AiPlayerbot.PremadeSpecName.11.9 = pvp dps balance (boomkin)
 AiPlayerbot.PremadeSpecLink.11.9.60 = 0143503002551351--5005021
 
 # Applies a permanent buff to all bots.
-# WorldBuff.Faction.Class.MinLevel.MaxLevel = spellId
+# WorldBuff.Faction.Class.MinLevel.MaxLevel,EventID = spellId
 # All bots:               Rallying Cry of the Dragonslayer for all bots
 # AiPlayerbot.WorldBuff = 22888 
 # All horde                 Warchief's Blessing for all horde
@@ -689,6 +689,8 @@ AiPlayerbot.PremadeSpecLink.11.9.60 = 0143503002551351--5005021
 # AiPlayerbot.WorldBuff.0.9.1.10 = 18149,3436
 # All alliance lvl60 rogues      Plainsrunning & Sprint & Speed
 # AiPlayerbot.WorldBuff.1.4.60 = 12566,11305,2379
+# Darkmoon Faire - Elwynn Forest	Sayge's Dark Fortune of Damage
+# AiPlayerbot.WorldBuff.0.0.0.0.0.4 = 23768
 
 # Prefix for bot chat commands (e.g. follow, stay)
 #AiPlayerbot.CommandPrefix =

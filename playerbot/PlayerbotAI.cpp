@@ -1195,9 +1195,9 @@ void PlayerbotAI::Reset(bool full)
         aiObjectContext->GetValue<LastMovement& >("last area trigger")->Get().Set(NULL);
         aiObjectContext->GetValue<LastMovement& >("last taxi")->Get().Set(NULL);
 
-        aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition, true);
-        aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
-        aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->setExpireIn(1000);
+        sTravelMgr.SetNullTravelTarget(aiObjectContext->GetValue<TravelTarget* >("travel target")->Get());
+        aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+        aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->SetExpireIn(1000);
 
         InterruptSpell();
 
@@ -6011,35 +6011,35 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
         std::ostringstream out;
 
         TravelTarget* target = GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
-        if (target->getDestination()) {
-            out << "Destination = " << target->getDestination()->getName();
+        if (target->GetDestination()) {
+            out << "Destination ";
 
-            out << ": " << target->getDestination()->getTitle();
+            out << ": " << target->GetDestination()->GetTitle();
 
-            if (!(*target->getPosition() == WorldPosition()))
+            if (target->GetPosition())
             {
-                out << "(" << target->getPosition()->getAreaName() << ")";
-                out << " distance: " << target->getPosition()->distance(bot) << "y";
+                out << "(" << target->GetPosition()->getAreaName() << ")";
+                out << " distance: " << target->GetPosition()->distance(bot) << "y";
             }
         }
         out << " Status =";
-        if (target->getStatus() == TravelStatus::TRAVEL_STATUS_NONE)
+        if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_NONE)
             out << " none";
-        else if (target->getStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
+        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
             out << " prepare";
-        else if (target->getStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
+        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
             out << " travel";
-        else if (target->getStatus() == TravelStatus::TRAVEL_STATUS_WORK)
+        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
             out << " work";
-        else if (target->getStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
+        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
             out << " cooldown";
-        else if (target->getStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
+        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
             out << " expired";
 
-        if(target->getStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << " Expire in " << (target->getTimeLeft()/1000) << "s";
+        if(target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
+            out << " Expire in " << (target->GetTimeLeft()/1000) << "s";
 
-        out << " Retry " << target->getRetryCount(true) << "/" << target->getRetryCount(false);
+        out << " Retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false);
 
         return out.str();
     }

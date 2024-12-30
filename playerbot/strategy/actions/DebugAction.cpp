@@ -388,11 +388,11 @@ bool DebugAction::Execute(Event& event)
 
         if (dest)
         {
-            std::vector<WorldPosition*> points = dest->nextPoint(&botPos, true);
+            std::vector<WorldPosition*> points = dest->NextPoint(botPos);
             if (!points.empty())
             {
                 poiPoint = *points.front();
-                name = dest->getTitle();
+                name = dest->GetTitle();
             }
         }
 
@@ -912,8 +912,8 @@ bool DebugAction::Execute(Event& event)
         if (guidP.getArea()->zone && GetAreaEntryByAreaID(guidP.getArea()->zone))
         {
             out << " z:" << GetAreaEntryByAreaID(guidP.getArea()->zone)->area_name[0];
-            if (sTravelMgr.getAreaLevel(guidP.getArea()->zone))
-                out << " level: " << sTravelMgr.getAreaLevel(guidP.getArea()->zone);
+            if (sTravelMgr.GetAreaLevel(guidP.getArea()->zone))
+                out << " level: " << sTravelMgr.GetAreaLevel(guidP.getArea()->zone);
         }
 
         out << "] ";
@@ -1160,7 +1160,7 @@ bool DebugAction::Execute(Event& event)
         TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, destination);
         if (dest)
         {
-            std::vector<WorldPosition*> points = dest->nextPoint(&botPos, true);
+            std::vector<WorldPosition*> points = dest->NextPoint(botPos);
 
             if (points.empty())
                 return false;
@@ -1168,7 +1168,7 @@ bool DebugAction::Execute(Event& event)
             std::vector<WorldPosition> beginPath, endPath;
             TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *points.front(), beginPath, bot);
 
-            std::ostringstream out; out << "Traveling to " << dest->getTitle() << ": ";
+            std::ostringstream out; out << "Traveling to " << dest->GetTitle() << ": ";
 
             for (auto node : route.getNodes())
             {
@@ -1184,186 +1184,6 @@ bool DebugAction::Execute(Event& event)
             ai->TellPlayerNoFacing(requester, "Destination " + destination + " not found.");
             return true;
         }
-    }
-    else if (text.find("quest ") == 0)
-    {
-        WorldPosition botPos(bot);
-
-        std::set<uint32> questIds = ChatHelper::ExtractAllQuestIds(text);
-
-        uint32 questId;
-
-        if (questIds.empty())
-            questId = stoi(text.substr(6));
-        else
-            questId = *questIds.begin();
-
-        Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
-
-        if (!quest || sTravelMgr.getQuests().find(questId) == sTravelMgr.getQuests().end())
-        {
-            ai->TellPlayerNoFacing(requester, "Quest " + text.substr(6) + " not found.");
-            return false;
-        }
-
-        std::ostringstream out;
-
-        out << quest->GetTitle() << ": ";
-
-        ai->TellPlayerNoFacing(requester, out);
-
-        QuestContainer* cont = sTravelMgr.getQuests()[questId];
-
-        uint32 i = 0;
-
-        std::vector<QuestTravelDestination*> dests = cont->questGivers;
-
-        std::sort(dests.begin(), dests.end(), [botPos](QuestTravelDestination* i, QuestTravelDestination* j) {return i->distanceTo(botPos) < j->distanceTo(botPos); });
-
-
-        for (auto g : dests)
-        {
-            std::ostringstream out;
-
-            if (g->isActive(bot))
-                out << "(ACTIVE)";
-
-            out << g->getTitle().c_str();
-
-            out << " (" << g->distanceTo(botPos) << "y)";
-
-            ai->TellPlayerNoFacing(requester, out);
-
-            if (i >= 10)
-                break;
-
-            i++;
-        }
-
-        for (uint32 o = 0; o < 4; o++)
-        {
-            i = 0;
-
-            dests.clear();
-
-            for (auto g : cont->questObjectives)
-            {
-                QuestObjectiveTravelDestination* d = (QuestObjectiveTravelDestination*)g;
-                if (d->getObjective() == o)
-                    dests.push_back(g);
-            }
-
-            std::sort(dests.begin(), dests.end(), [botPos](QuestTravelDestination* i, QuestTravelDestination* j) {return i->distanceTo(botPos) < j->distanceTo(botPos); });
-
-            for (auto g : dests)
-            {
-                std::ostringstream out;
-
-                if (g->isActive(bot))
-                    out << "(ACTIVE)";
-
-                out << g->getTitle().c_str();
-
-                QuestObjectiveTravelDestination* d = (QuestObjectiveTravelDestination*)g;
-
-                if (d->getEntry())
-                    out << "[" << ObjectMgr::GetCreatureTemplate(d->getEntry())->MaxLevel << "]";
-
-                out << " (" << g->distanceTo(botPos) << "y)";
-
-                ai->TellPlayerNoFacing(requester, out);
-
-                if (i >= 5)
-                    break;
-
-                i++;
-            }
-        }
-
-        i = 0;
-
-       dests = cont->questGivers;
-
-        std::sort(dests.begin(), dests.end(), [botPos](QuestTravelDestination* i, QuestTravelDestination* j) {return i->distanceTo(botPos) < j->distanceTo(botPos); });
-
-
-        for (auto g : dests)
-        {
-            std::ostringstream out;
-
-            if (g->isActive(bot))
-                out << "(ACTIVE)";
-
-            out << g->getTitle().c_str();
-
-            out << " (" << g->distanceTo(botPos) << "y)";
-
-            ai->TellPlayerNoFacing(requester, out);
-
-            if (i >= 10)
-                break;
-
-            i++;
-        }
-
-        return true;
-    }
-    else if (text.find("quest") == 0)
-    {
-        std::ostringstream out;
-        out << sTravelMgr.getQuests().size() << " quests ";
-
-        uint32 noT = 0, noG = 0, noO = 0;
-
-        for (auto q : sTravelMgr.getQuests())
-        {
-            if (q.second->questGivers.empty())
-                noG++;
-
-            if (q.second->questTakers.empty())
-                noT++;
-
-            if (q.second->questObjectives.empty())
-                noO++;
-        }
-
-        out << noG << "|" << noT << "|" << noO << " bad.";
-
-        ai->TellPlayerNoFacing(requester, out);
-
-        return true;
-    }
-    else if (text.find("bquest") == 0)
-    {
-        std::ostringstream out;
-        out << "bad quests:";
-
-        uint32 noT = 0, noG = 0, noO = 0;
-
-        for (auto q : sTravelMgr.getQuests())
-        {
-            Quest const* quest = sObjectMgr.GetQuestTemplate(q.first);
-
-            if (!quest)
-            {
-                out << " " << q.first << " does not exists";
-                continue;
-            }
-
-            if (q.second->questGivers.empty() || q.second->questTakers.empty() || q.second->questObjectives.empty())
-                out << quest->GetTitle() << " ";
-
-            if (q.second->questGivers.empty())
-                out << " no G";
-
-            if (q.second->questTakers.empty())
-                out << " no T";
-
-            if (q.second->questObjectives.empty())
-                out << " no O";
-        }
-        ai->TellPlayerNoFacing(requester, out);
-
     }
     else if (text.find("values ") == 0)
     {

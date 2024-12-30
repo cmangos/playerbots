@@ -272,7 +272,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         float relevance = getMaxRelevance(guidP);
 
         //If this rpg target is our travel target increase the relevance by 50% to make it more likely to be picked.
-        bool isTravelTarget = guidP.GetEntry() == travelTarget->getEntry();
+        bool isTravelTarget = guidP.GetEntry() == travelTarget->GetEntry();
         if (isTravelTarget)
         {
             if (focusList.empty())
@@ -390,7 +390,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
     //We pick a random target from the list with targets having a higher relevance of being picked.
     std::mt19937 gen(time(0));
-    sTravelMgr.weighted_shuffle(guidps.begin(), guidps.end(), relevances.begin(), relevances.end(), gen);
+    WeightedShuffle(guidps.begin(), guidps.end(), relevances.begin(), relevances.end(), gen);
     GuidPosition guidP(guidps.front(),bot->GetMapId(), bot->GetInstanceId());
 
     //If we can't find a target clear ignore list and try again later.
@@ -433,7 +433,7 @@ bool ChooseRpgTargetAction::isUseful()
 
     TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    if (travelTarget->isTraveling() && AI_VALUE2(bool, "can free move to", *travelTarget->getPosition()))
+    if (travelTarget->IsTraveling() && AI_VALUE2(bool, "can free move to", *travelTarget->GetPosition()))
         return false;
 
     if (AI_VALUE(std::list<ObjectGuid>, "possible rpg targets").empty())

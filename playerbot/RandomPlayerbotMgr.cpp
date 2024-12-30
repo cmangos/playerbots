@@ -1984,7 +1984,7 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
     TravelTarget* target = player->GetPlayerbotAI()->GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
     if (target)
     {
-        if (target->getTravelState() == TravelState::TRAVEL_STATE_IDLE)
+        if (target->GetTravelState() == TravelState::TRAVEL_STATE_IDLE)
             idleBot = true;
     }
     else
@@ -2105,7 +2105,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
     tlocs.erase(std::remove_if(tlocs.begin(), tlocs.end(), [](const WorldPosition& l) {std::vector<uint32>::iterator i = find(sPlayerbotAIConfig.randomBotMaps.begin(), sPlayerbotAIConfig.randomBotMaps.end(), l.getMapId()); return i == sPlayerbotAIConfig.randomBotMaps.end(); }), tlocs.end());
 
     //Random shuffle based on distance. Closer distances are more likely (but not exclusively) to be at the begin of the list.
-    tlocs = sTravelMgr.getNextPoint(WorldPosition(bot), tlocs, 0);
+    tlocs = WorldPosition(bot).GetNextPoint(tlocs, 0);
 
     //5% + 0.1% per level chance node on different map in selection.
     //tlocs.erase(std::remove_if(tlocs.begin(), tlocs.end(), [bot](WorldLocation const& l) {return l.mapid != bot->GetMapId() && urand(1, 100) > 0.5 * bot->GetLevel(); }), tlocs.end());
@@ -3461,34 +3461,8 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         TravelTarget* target = bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
         if (target)
         {
-            TravelState state = target->getTravelState();
-            stateCount[(uint8)state]++;
-
-            const Quest* quest = nullptr;
-            if (target->getDestination())
-            {
-                quest = target->getDestination()->GetQuestTemplate();
-            }
-
-            if (quest)
-            {
-                bool found = false;
-                for (auto& q : questCount)
-                {
-                    if (q.first != quest)
-                    {
-                        continue;
-                    }
-
-                    q.second++;
-                    found = true;
-                }
-
-                if (!found)
-                {
-                    questCount.push_back(std::make_pair(quest, 1));
-                }
-            }
+            TravelState state = target->GetTravelState();
+            stateCount[(uint8)state]++;            
         }
     });
 
@@ -3605,19 +3579,6 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
     ss.str(""); ss << "    Idling: " << stateCount[(uint8)TravelState::TRAVEL_STATE_IDLE];
     sLog.outString(ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
-
-    /*sort(questCount.begin(), questCount.end(), [](std::pair<Quest const*, int32> i, std::pair<Quest const*, int32> j) {return i.second > j.second; });
-
-    sLog.outString("Bots top quests:");
-
-    int cnt = 0;
-    for (auto& quest : questCount)
-    {
-        sLog.outString("    [%d]: %s (%d)", quest.second, quest.first->GetTitle().c_str(), quest.first->GetQuestLevel());
-        cnt++;
-        if (cnt > 25)
-            break;
-    }*/
 }
 
 double RandomPlayerbotMgr::GetBuyMultiplier(Player* bot)
@@ -3731,9 +3692,9 @@ void RandomPlayerbotMgr::RandomTeleportForRpg(Player* bot, bool activeOnly)
         AiObjectContext* context = bot->GetPlayerbotAI()->GetAiObjectContext();
         TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-        travelTarget->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition, true);
-        travelTarget->setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
-        travelTarget->setExpireIn(10 * MINUTE * IN_MILLISECONDS);
+        sTravelMgr.SetNullTravelTarget(travelTarget);
+        travelTarget->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+        travelTarget->SetExpireIn(10 * MINUTE * IN_MILLISECONDS);
     }
 }
 

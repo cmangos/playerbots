@@ -160,9 +160,9 @@ namespace ai
             ai->TellPlayer(requester, BOT_TEXT("hello"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 
             TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
-            travelTarget->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition, true);
-            travelTarget->setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
-            travelTarget->setExpireIn(1000);
+            sTravelMgr.SetNullTravelTarget(travelTarget);
+            travelTarget->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+            travelTarget->SetExpireIn(1000);
 
             PlayerInfo const* defaultPlayerInfo = sObjectMgr.GetPlayerInfo(bot->getRace(), bot->getClass());
             if (defaultPlayerInfo)

@@ -128,7 +128,7 @@ bool CheckMountStateAction::Execute(Event& event)
     }
 
     //Doing stuff nearby.
-    if (travelTarget->isWorking())
+    if (travelTarget->IsWorking())
     {
         if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && IsMounted)
             ai->TellPlayerNoFacing(requester, "Unmount. Near travel target.");
@@ -169,7 +169,7 @@ bool CheckMountStateAction::Execute(Event& event)
     if (!ai->IsStateActive(BotState::BOT_STATE_COMBAT) && !hasEnemy)
     {
         //Mounting to travel.
-        if (travelTarget->isTraveling() && AI_VALUE(bool, "can move around"))
+        if (travelTarget->IsTraveling() && AI_VALUE(bool, "can move around"))
         {
             if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && !IsMounted)
                 ai->TellPlayerNoFacing(requester, "Mount. Traveling some place.");

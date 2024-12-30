@@ -1018,7 +1018,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         Player* player = sObjectMgr.GetPlayer(captain);
         if (!player)
         {
-            sLog.outError("Cannot find player for captain %d", (uint64)captain);
+            sLog.outError("Cannot find player for captain %d", player->GetGUIDLow());
             continue;
         }
 

@@ -13,7 +13,7 @@ bool BuyTabardTrigger::IsActive()
 	if (!bot->GetGuildId())
 		return false;
 
-	if(context->GetValue<TravelTarget*>("travel target")->Get()->isTraveling())
+	if(context->GetValue<TravelTarget*>("travel target")->Get()->IsTraveling())
 		return false;
 
 	bool inCity = false;

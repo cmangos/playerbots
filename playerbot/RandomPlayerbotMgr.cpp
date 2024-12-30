@@ -2493,41 +2493,9 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
     sLog.outString("Enhancing RPG teleport cache...");
 
     std::vector<std::pair<std::pair<uint32, uint32>, WorldPosition>> newPoints;
-    newPoints.reserve(380000);
+    newPoints.reserve(370523);
 
-    //Static portals.
-    for (auto& goData : WorldPosition().getGameObjectsNear(0, 0))
-    {
-        GuidPosition go(goData);
-
-        auto data = sGOStorage.LookupEntry<GameObjectInfo>(go.GetEntry());
-
-        if (!data)
-            continue;
-
-        if (data->type != GAMEOBJECT_TYPE_SPELLCASTER)
-            continue;
-
-        const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(data->spellcaster.spellId);
-
-        if (pSpellInfo->EffectTriggerSpell[0])
-            pSpellInfo = sServerFacade.LookupSpellInfo(pSpellInfo->EffectTriggerSpell[0]);
-
-        if (pSpellInfo->Effect[0] != SPELL_EFFECT_TELEPORT_UNITS && pSpellInfo->Effect[1] != SPELL_EFFECT_TELEPORT_UNITS && pSpellInfo->Effect[2] != SPELL_EFFECT_TELEPORT_UNITS)
-            continue;
-
-        SpellTargetPosition const* pos = sSpellMgr.GetSpellTargetPosition(pSpellInfo->Id);
-
-        if (!pos)
-            continue;
-
-        std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(pos));
-
-        for (auto& range : ranges)
-            newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), pos));
-    }
-
-    const std::vector<uint32> allowedNpcFlags = {
+    const std::unordered_set<uint32> allowedNpcFlags = {
         UNIT_NPC_FLAG_BATTLEMASTER,
         UNIT_NPC_FLAG_BANKER,
         UNIT_NPC_FLAG_AUCTIONEER,
@@ -2536,47 +2504,55 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         UNIT_NPC_FLAG_REPAIR
     };
 
-    //Creatures.
+    // Static portals.
+    for (auto& goData : WorldPosition().getGameObjectsNear(0, 0))
+    {
+        GuidPosition go(goData);
+        auto* data = sGOStorage.LookupEntry<GameObjectInfo>(go.GetEntry());
+        if (!data || data->type != GAMEOBJECT_TYPE_SPELLCASTER)
+            continue;
+
+        auto* pSpellInfo = sServerFacade.LookupSpellInfo(data->spellcaster.spellId);
+        if (!pSpellInfo) continue;
+
+        if (pSpellInfo->EffectTriggerSpell[0])
+            pSpellInfo = sServerFacade.LookupSpellInfo(pSpellInfo->EffectTriggerSpell[0]);
+
+        if (!pSpellInfo ||
+            std::none_of(std::begin(pSpellInfo->Effect), std::end(pSpellInfo->Effect),
+                [](uint32 effect) { return effect == SPELL_EFFECT_TELEPORT_UNITS; }))
+            continue;
+
+        auto* pos = sSpellMgr.GetSpellTargetPosition(pSpellInfo->Id);
+        if (!pos) continue;
+
+        auto ranges = RpgLocationsNear(WorldPosition(pos));
+        for (auto& range : ranges)
+            newPoints.emplace_back(std::make_pair(range.first, range.second), pos);
+    }
+
+    // Creatures.
     for (auto& creatureData : WorldPosition().getCreaturesNear(0, 0))
     {
-        CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creatureData->second.id);
-
-        // Check if creature info is valid and not invisible
+        auto* cInfo = ObjectMgr::GetCreatureTemplate(creatureData->second.id);
         if (!cInfo || (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INVISIBLE))
             continue;
 
-        // Check for allowed NPC flags
         uint32 npcFlags = cInfo->NpcFlags;
-        bool isAllowedNpc = false;
+        if (std::none_of(allowedNpcFlags.begin(), allowedNpcFlags.end(),
+            [&](uint32 flag) { return npcFlags & flag; }))
+            continue;
 
-        for (auto flag : allowedNpcFlags)
-        {
-            if (npcFlags & flag)
-            {
-                isAllowedNpc = true;
-                break;
-            }
-        }
+        WorldPosition creaturePos(creatureData);
+        auto ranges = RpgLocationsNear(creaturePos);
 
-        if (isAllowedNpc)
-        {
-            // Get the location for the current creature
-            WorldPosition creaturePos(creatureData);
-
-            // Get ranges for RPG locations
-            std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(creaturePos);
-
-            // Add all valid ranges to newPoints
-            for (auto& range : ranges)
-            {
-                newPoints.emplace_back(std::make_pair(range.first, range.second), creaturePos);
-            }
-        }
+        for (auto& range : ranges)
+            newPoints.emplace_back(std::make_pair(range.first, range.second), creaturePos);
     }
-    
+
     sLog.outString(">> Enhanced %zu locations.", newPoints.size());
-    for (auto newPoint : newPoints)
-        rpgLocsCacheLevel[newPoint.first.first][newPoint.first.second].push_back(newPoint.second);
+    for (auto& newPoint : newPoints)
+        rpgLocsCacheLevel[newPoint.first.first][newPoint.first.second].push_back(std::move(newPoint.second));
 }
 
 void RandomPlayerbotMgr::PrintTeleportCache()

@@ -1461,6 +1461,9 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
         if (playerclass == CLASS_SHAMAN && proto->SubClass != ITEM_SUBCLASS_ARMOR_TOTEM)
             return 0;
 
+        if (playerclass == CLASS_DEATH_KNIGHT && proto->SubClass != proto->SubClass == ITEM_SUBCLASS_ARMOR_SIGIL)
+            return 0;
+
         if (playerclass == CLASS_WARRIOR
             || playerclass == CLASS_HUNTER
             || playerclass == CLASS_ROGUE
@@ -3102,7 +3105,8 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
         return 0;
 #else
     // Skip missing PvP ranks for non-zero MANGOSBOT
-    if (info->pvpRank && player->GetHighestPvPRankIndex() < info->pvpRank)
+    uint8 playerPvpRank = player->GetHighestPvPRankIndex();
+    if (info->pvpRank && playerPvpRank < info->pvpRank)
         return 0;
 #endif
 
@@ -3123,6 +3127,9 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
 #ifdef MANGOSBOT_ZERO
     if (info->pvpRank)
         return info->weights[specId] * 5;
+#else
+    if (info->source == ITEM_SOURCE_PVP && playerPvpRank >= 10)
+        return static_cast<uint32>(info->weights[specId] * 1.5);
 #endif
 
     return info->weights[specId];

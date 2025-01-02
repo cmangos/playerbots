@@ -3806,19 +3806,33 @@ bool PlayerbotAI::HasSpell(uint32 spellid) const
     return false;
 }
 
-bool PlayerbotAI::CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget, bool ignoreRange, bool ignoreInCombat, bool ignoreMount)
+bool PlayerbotAI::CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget, bool ignoreRange, bool ignoreInCombat, bool ignoreMount, SpellCastResult* checkResult)
 {
-    return CanCastSpell(aiObjectContext->GetValue<uint32>("spell id", name)->Get(), target, 0, true, itemTarget, ignoreRange, ignoreInCombat, ignoreMount);
+    return CanCastSpell(aiObjectContext->GetValue<uint32>("spell id", name)->Get(), target, 0, true, itemTarget, ignoreRange, ignoreInCombat, ignoreMount, checkResult);
 }
 
-bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell, Item* itemTarget, bool ignoreRange, bool ignoreInCombat, bool ignoreMount)
+bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell, Item* itemTarget, bool ignoreRange, bool ignoreInCombat, bool ignoreMount, SpellCastResult* checkResult)
 {
     if (!spellid)
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_KNOWN;
+        }
+
         return false;
+    }
 
     Pet* pet = bot->GetPet();
     if (pet && pet->HasSpell(spellid) && pet->IsSpellReady(spellid))
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_CAST_OK;
+        }
+
         return true;
+    }
 
     if (bot->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
     {
@@ -3826,6 +3840,11 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
         const std::list<uint32> ignoreOutOfControllSpells = { 642, 1020, 1499, 1953, 7744, 11958, 13795, 13809, 13813, 14302, 14303, 14304, 14305, 14310, 14311, 14316, 14317, 27023, 27025, 34600, 49055, 49056, 49066, 49067 };
         if (std::find(ignoreOutOfControllSpells.begin(), ignoreOutOfControllSpells.end(), spellid) == ignoreOutOfControllSpells.end())
         {
+            if (checkResult)
+            {
+                *checkResult = SPELL_FAILED_NOT_IN_CONTROL;
+            }
+
             return false;
         }
     }
@@ -3834,14 +3853,35 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
         target = bot;
 
     if (checkHasSpell && !HasSpell(spellid))
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_KNOWN;
+        }
+
         return false;
+    }
 
     if (!bot->IsSpellReady(spellid))
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_READY;
+        }
+
         return false;
+    }
 
 	SpellEntry const *spellInfo = sServerFacade.LookupSpellInfo(spellid);
 	if (!spellInfo)
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_KNOWN;
+        }
+
         return false;
+    }
 
     // already active next melee swing spell
     if (IsNextMeleeSwingSpell(spellInfo))
@@ -3850,7 +3890,14 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
         if (autorepeatSpell)
         {
             if (autorepeatSpell->m_spellInfo->Id == spellInfo->Id)
+            {
+                if (checkResult)
+                {
+                    *checkResult = SPELL_FAILED_SPELL_IN_PROGRESS;
+                }
+
                 return false;
+            }
         }
     }
 
@@ -3863,10 +3910,24 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
         {
             const bool positiveSpell = IsPositiveSpell(spellInfo);
             if (positiveSpell && sServerFacade.IsHostileTo(bot, target))
+            {
+                if (checkResult)
+                {
+                    *checkResult = SPELL_FAILED_TARGET_ENEMY;
+                }
+
                 return false;
+            }
 
             if (!positiveSpell && sServerFacade.IsFriendlyTo(bot, target))
+            {
+                if (checkResult)
+                {
+                    *checkResult = SPELL_FAILED_TARGET_FRIENDLY;
+                }
+                
                 return false;
+            }
         }
 
         bool damage = false;
@@ -3895,12 +3956,26 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
             {
                 bool immune = target->IsImmuneToSpellEffect(spellInfo, (SpellEffectIndex)i, false);
                 if (immune)
+                {
+                    if (checkResult)
+                    {
+                        *checkResult = SPELL_FAILED_IMMUNE;
+                    }
+
                     return false;
+                }
             }
         }
 
         if (!ignoreRange && bot != target && sServerFacade.GetDistance2d(bot, target) > sPlayerbotAIConfig.sightDistance)
+        {
+            if (checkResult)
+            {
+                *checkResult = SPELL_FAILED_OUT_OF_RANGE;
+            }
+
             return false;
+        }
 	}
 
 	ObjectGuid oldSel = bot->GetSelectionGuid();
@@ -3915,6 +3990,11 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
     delete spell;
 	//if (oldSel)
 	//	bot->SetSelectionGuid(oldSel);
+
+    if (checkResult)
+    {
+        *checkResult = result;
+    }
 
     switch (result)
     {
@@ -3937,14 +4017,28 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
     }
 }
 
-bool PlayerbotAI::CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effectMask, bool checkHasSpell, bool ignoreRange, bool ignoreInCombat, bool ignoreMount)
+bool PlayerbotAI::CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effectMask, bool checkHasSpell, bool ignoreRange, bool ignoreInCombat, bool ignoreMount, SpellCastResult* checkResult)
 {
     if (!spellid)
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_KNOWN;
+        }
+
         return false;
+    }
 
     Pet* pet = bot->GetPet();
     if (pet && pet->HasSpell(spellid) && pet->IsSpellReady(spellid))
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_CAST_OK;
+        }
+
         return true;
+    }
 
     if (bot->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
     {
@@ -3952,19 +4046,45 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effec
         const std::list<uint32> ignoreOutOfControllSpells = { 642, 1020, 1499, 1953, 7744, 11958, 13795, 13809, 13813, 14302, 14303, 14304, 14305, 14310, 14311, 14316, 14317, 27023, 27025, 34600, 49055, 49056, 49066, 49067 };
         if (std::find(ignoreOutOfControllSpells.begin(), ignoreOutOfControllSpells.end(), spellid) == ignoreOutOfControllSpells.end())
         {
+            if (checkResult)
+            {
+                *checkResult = SPELL_FAILED_NOT_IN_CONTROL;
+            }
+
             return false;
         }
     }
 
-    if (checkHasSpell && !bot->HasSpell(spellid))
+    if (checkHasSpell && !HasSpell(spellid))
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_KNOWN;
+        }
+
         return false;
+    }
 
     if (!bot->IsSpellReady(spellid))
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_READY;
+        }
+
         return false;
+    }
 
     SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(spellid);
     if (!spellInfo)
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_KNOWN;
+        }
+
         return false;
+    }
 
     bool damage = false;
     for (int32 i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; i++)
@@ -3975,8 +4095,16 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effec
             break;
         }
     }
+
     if (sServerFacade.GetDistance2d(bot, goTarget) > sPlayerbotAIConfig.sightDistance)
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_OUT_OF_RANGE;
+        }
+
         return false;
+    }
 
     //ObjectGuid oldSel = bot->GetSelectionGuid();
     bot->SetSelectionGuid(goTarget->GetObjectGuid());
@@ -3991,34 +4119,53 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effec
     //if (oldSel)
     //    bot->SetSelectionGuid(oldSel);
 
+    if (checkResult)
+    {
+        *checkResult = result;
+    }
+
     switch (result)
     {
-    case SPELL_FAILED_NOT_INFRONT:
-    case SPELL_FAILED_NOT_STANDING:
-    case SPELL_FAILED_UNIT_NOT_INFRONT:
-    case SPELL_FAILED_MOVING:
-    case SPELL_FAILED_TRY_AGAIN:
-    case SPELL_CAST_OK:
-        return true;
-    case SPELL_FAILED_OUT_OF_RANGE:
-        return ignoreRange;
-    case SPELL_FAILED_AFFECTING_COMBAT:
-        return ignoreInCombat;
-    case SPELL_FAILED_NOT_MOUNTED:
-        return ignoreMount;
-    default:
-        return false;
+        case SPELL_FAILED_NOT_INFRONT:
+        case SPELL_FAILED_NOT_STANDING:
+        case SPELL_FAILED_UNIT_NOT_INFRONT:
+        case SPELL_FAILED_MOVING:
+        case SPELL_FAILED_TRY_AGAIN:
+        case SPELL_CAST_OK:
+            return true;
+        case SPELL_FAILED_OUT_OF_RANGE:
+            return ignoreRange;
+        case SPELL_FAILED_AFFECTING_COMBAT:
+            return ignoreInCombat;
+        case SPELL_FAILED_NOT_MOUNTED:
+            return ignoreMount;
+        default:
+            return false;
     }
 }
 
-bool PlayerbotAI::CanCastSpell(uint32 spellid, float x, float y, float z, uint8 effectMask, bool checkHasSpell, Item* itemTarget, bool ignoreRange, bool ignoreInCombat, bool ignoreMount)
+bool PlayerbotAI::CanCastSpell(uint32 spellid, float x, float y, float z, uint8 effectMask, bool checkHasSpell, Item* itemTarget, bool ignoreRange, bool ignoreInCombat, bool ignoreMount, SpellCastResult* checkResult)
 {
     if (!spellid)
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_KNOWN;
+        }
+
         return false;
+    }
 
     Pet* pet = bot->GetPet();
     if (pet && pet->HasSpell(spellid) && pet->IsSpellReady(spellid))
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_CAST_OK;
+        }
+
         return true;
+    }
 
     if (bot->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
     {
@@ -4026,21 +4173,47 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, float x, float y, float z, uint8 
         const std::list<uint32> ignoreOutOfControllSpells = { 642, 1020, 1499, 1953, 7744, 11958, 13795, 13809, 13813, 14302, 14303, 14304, 14305, 14310, 14311, 14316, 14317, 27023, 27025, 34600, 49055, 49056, 49066, 49067 };
         if (std::find(ignoreOutOfControllSpells.begin(), ignoreOutOfControllSpells.end(), spellid) == ignoreOutOfControllSpells.end())
         {
+            if (checkResult)
+            {
+                *checkResult = SPELL_FAILED_NOT_IN_CONTROL;
+            }
+
             return false;
         }
     }
 
-    if (checkHasSpell && !bot->HasSpell(spellid))
+    if (checkHasSpell && !HasSpell(spellid))
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_KNOWN;
+        }
+
         return false;
+    }
 
     SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(spellid);
     if (!spellInfo)
+    {
+        if (checkResult)
+        {
+            *checkResult = SPELL_FAILED_NOT_KNOWN;
+        }
+
         return false;
+    }
 
     if (!itemTarget)
     {
         if (sqrt(bot->GetDistance(x,y,z)) > sPlayerbotAIConfig.sightDistance)
+        {
+            if (checkResult)
+            {
+                *checkResult = SPELL_FAILED_OUT_OF_RANGE;
+            }
+
             return false;
+        }
     }
 
     Spell* spell = new Spell(bot, spellInfo, false);
@@ -4052,23 +4225,28 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, float x, float y, float z, uint8 
     SpellCastResult result = spell->CheckCast(true);
     delete spell;
 
+    if (checkResult)
+    {
+        *checkResult = result;
+    }
+
     switch (result)
     {
-    case SPELL_FAILED_NOT_INFRONT:
-    case SPELL_FAILED_NOT_STANDING:
-    case SPELL_FAILED_UNIT_NOT_INFRONT:
-    case SPELL_FAILED_MOVING:
-    case SPELL_FAILED_TRY_AGAIN:
-    case SPELL_CAST_OK:
-        return true;
-    case SPELL_FAILED_OUT_OF_RANGE:
-        return ignoreRange;
-    case SPELL_FAILED_AFFECTING_COMBAT:
-        return ignoreInCombat;
-    case SPELL_FAILED_NOT_MOUNTED:
-        return ignoreMount;
-    default:
-        return false;
+        case SPELL_FAILED_NOT_INFRONT:
+        case SPELL_FAILED_NOT_STANDING:
+        case SPELL_FAILED_UNIT_NOT_INFRONT:
+        case SPELL_FAILED_MOVING:
+        case SPELL_FAILED_TRY_AGAIN:
+        case SPELL_CAST_OK:
+            return true;
+        case SPELL_FAILED_OUT_OF_RANGE:
+            return ignoreRange;
+        case SPELL_FAILED_AFFECTING_COMBAT:
+            return ignoreInCombat;
+        case SPELL_FAILED_NOT_MOUNTED:
+            return ignoreMount;
+        default:
+            return false;
     }
 }
 

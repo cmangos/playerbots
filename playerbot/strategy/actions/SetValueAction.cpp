@@ -23,7 +23,7 @@ bool SetValueAction::Execute(Event& event)
             ai->TellPlayer(requester, "Incorrect value " + value + " allowed values: -1,0,1,2,3,4,5,20,40", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 #else
             ai->TellPlayer(requester, "Incorrect value " + value + " allowed values: -1,0,1,2,3,4,5,10,25", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-#endif;
+#endif
             return false;
         }
 
@@ -67,7 +67,7 @@ bool SetValueAction::Execute(Event& event)
             ai->TellPlayer(requester, "Incorrect value " + value + " allowed values: -1,0,1,2,3,4,5,20,40", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 #else
             ai->TellPlayer(requester, "Incorrect value " + value + " allowed values: -1,0,1,2,3,4,5,10,25", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-#endif;
+#endif
         }
         return false;
     }

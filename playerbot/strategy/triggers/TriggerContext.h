@@ -182,6 +182,7 @@ namespace ai
             creators["target of fear cast"] = &TriggerContext::target_of_fear_cast;
             creators["heal target full health"] = &TriggerContext::heal_target_full_health;
             creators["dispel enrage"] = &TriggerContext::dispel_enrage;
+            creators["at war"] = [](PlayerbotAI* ai) { return new AtWarTrigger(ai); };
 
             creators["mounted"] = &TriggerContext::mounted;
             creators["rooted"] = &TriggerContext::rooted;
@@ -235,6 +236,7 @@ namespace ai
             creators["rpg queue bg"] = &TriggerContext::rpg_queue_bg;
             creators["rpg buy petition"] = &TriggerContext::rpg_buy_petition;
             creators["rpg use"] = &TriggerContext::rpg_use;
+            creators["rpg ai chat"] = [](PlayerbotAI* ai) { return new RpgAIChatTrigger(ai); };
             creators["rpg spell"] = &TriggerContext::rpg_spell;
             creators["rpg craft"] = &TriggerContext::rpg_craft;
             creators["rpg trade useful"] = &TriggerContext::rpg_trade_useful;

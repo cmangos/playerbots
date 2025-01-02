@@ -78,3 +78,11 @@ void WorldBuffStrategy::OnStrategyRemoved(BotState state)
         }
     }
 }
+
+void NoWarStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "at war",
+        NextAction::array(0, new NextAction("faction", 1.0f), NULL)));
+}
+

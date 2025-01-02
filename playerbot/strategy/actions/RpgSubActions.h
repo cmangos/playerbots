@@ -5,6 +5,7 @@
 #include "ChooseRpgTargetAction.h"
 #include "UseItemAction.h"
 #include "playerbot/strategy/values/LastMovementValue.h"
+#include "SayAction.h"
 
 namespace ai
 {
@@ -248,6 +249,24 @@ namespace ai
     private:
         virtual std::string ActionName() { if (rpg->guidP().IsGameObject() && rpg->guidP().GetGameObject(bot->GetInstanceId())->GetGoType() == GAMEOBJECT_TYPE_CHEST) return "add all loot";  return "use"; }
         virtual Event ActionEvent(Event event) { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject(bot->GetInstanceId()))); }
+    };
+
+    class RpgAIChatAction : public RpgSubAction
+    {
+    public:
+        RpgAIChatAction(PlayerbotAI* ai, std::string name = "rpg ai chat") : RpgSubAction(ai, name) {}
+
+        void ManualChat(GuidPosition target, const std::string& line);
+    private:
+        virtual bool isUseful() override;
+
+        bool SpeakLine();
+        bool WaitForLines();
+        bool RequestNewLines();
+        virtual bool Execute(Event& event) override;
+
+        std::queue<delayedPacket> packets;
+        futurePackets futPackets;
     };
 
     class RpgSpellAction : public RpgSubAction

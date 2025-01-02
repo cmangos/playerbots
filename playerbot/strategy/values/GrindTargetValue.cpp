@@ -131,13 +131,10 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
         }
 
         float newdistance = sServerFacade.GetDistance2d(bot, unit);
-
-        if (needForQuestMap.find(unit->GetEntry()) == needForQuestMap.end())
-            needForQuestMap[unit->GetEntry()] = needForQuest(unit);
-
-        if (!needForQuestMap[unit->GetEntry()])
+       
+        if (unit->GetEntry() && !AI_VALUE2(bool, "need for quest", std::to_string(unit->GetEntry())))
         {
-            if (urand(0, 100) < 99 && AI_VALUE(TravelTarget*, "travel target")->isWorking() && AI_VALUE(TravelTarget*, "travel target")->getDestination()->getName() != "GrindTravelDestination")
+            if (urand(0, 100) < 99 && AI_VALUE(TravelTarget*, "travel target")->IsWorking() && typeid(AI_VALUE(TravelTarget*, "travel target")->GetDestination()) != typeid(GrindTravelDestination))
             {
                 if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
                     ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (not needed for active quest).");
@@ -147,7 +144,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
             else if (creature && !MaNGOS::XP::Gain(bot, creature) && urand(0, 50))
             {
                 if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
-                    if ((context->GetValue<TravelTarget*>("travel target")->Get()->isWorking() && context->GetValue<TravelTarget*>("travel target")->Get()->getDestination()->getName() != "GrindTravelDestination"))
+                    if ((context->GetValue<TravelTarget*>("travel target")->Get()->IsWorking() && typeid(context->GetValue<TravelTarget*>("travel target")->Get()->GetDestination()) != typeid(GrindTravelDestination)))
                         ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (not xp and not needed for quest).");
 
                 continue;
@@ -155,7 +152,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
             else if (urand(0, 100) < 75)
             {
                 if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
-                    if ((context->GetValue<TravelTarget*>("travel target")->Get()->isWorking() && context->GetValue<TravelTarget*>("travel target")->Get()->getDestination()->getName() != "GrindTravelDestination"))
+                    if ((context->GetValue<TravelTarget*>("travel target")->Get()->IsWorking() && typeid(context->GetValue<TravelTarget*>("travel target")->Get()->GetDestination()) != typeid(GrindTravelDestination)))
                         ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " increased distance (not needed for quest).");
 
                 newdistance += 20;
@@ -210,87 +207,6 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
     }
 
     return result;
-}
-
-bool GrindTargetValue::needForQuest(Unit* target)
-{
-    bool justCheck = (bot->GetObjectGuid() == target->GetObjectGuid());
-
-    QuestStatusMap& questMap = bot->getQuestStatusMap();
-    for (auto& quest : questMap)
-    {
-        const Quest* questTemplate = sObjectMgr.GetQuestTemplate(quest.first);
-        if (!questTemplate)
-            continue;
-
-        uint32 questId = questTemplate->GetQuestId();
-
-        if (!questId)
-            continue;
-
-        QuestStatus status = bot->GetQuestStatus(questId);
-
-        if ((status == QUEST_STATUS_COMPLETE && !bot->GetQuestRewardStatus(questId)))
-        {
-            if (!justCheck && !target->HasInvolvedQuest(questId))
-                continue;
-
-            return true;
-        }
-        else if (status == QUEST_STATUS_INCOMPLETE)
-        {
-            QuestStatusData* questStatus = sTravelMgr.getQuestStatus(bot, questId);
-
-            if ((int32)questTemplate->GetQuestLevel() > (int32)bot->GetLevel()+5)
-                continue;
-
-            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
-            {
-                int32 entry = questTemplate->ReqCreatureOrGOId[j];
-
-                if (entry && entry > 0)
-                {
-                    int required = questTemplate->ReqCreatureOrGOCount[j];
-                    int available = questStatus->m_creatureOrGOcount[j];
-
-                    if (required && available < required && (target->GetEntry() == entry || justCheck))
-                        return true;
-                }
-
-                if (justCheck)
-                {
-                    int32 itemId = questTemplate->ReqItemId[j];
-
-                    if (itemId && itemId > 0)
-                    {
-                        int required = questTemplate->ReqItemCount[j];
-                        int available = questStatus->m_itemcount[j];
-
-                        if (required && available < required)
-                            return true;
-                    }
-                }
-            }
-
-            if (!justCheck)
-            {
-                CreatureInfo const* data = sObjectMgr.GetCreatureTemplate(target->GetEntry());
-
-                if (data)
-                {
-                    uint32 lootId = data->LootId;
-
-                    if (lootId)
-                    {
-                        if (LootTemplates_Creature.HaveQuestLootForPlayer(lootId, bot))
-                            return true;
-                    }
-                }
-            }
-        }
-
-    }
-    return false;
 }
 
 int GrindTargetValue::GetTargetingPlayerCount( Unit* unit )

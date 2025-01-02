@@ -9,22 +9,22 @@ using namespace ai;
 
 bool NoTravelTargetTrigger::IsActive()
 {
-    return !AI_VALUE(TravelTarget *,"travel target")->isActive();
+    return !AI_VALUE(TravelTarget *,"travel target")->IsActive();
 }
 
 bool FarFromTravelTargetTrigger::IsActive()
 {
-    return AI_VALUE(TravelTarget*, "travel target")->isTraveling();
+    return AI_VALUE(TravelTarget*, "travel target")->IsTraveling();
 }
 
 
 bool HasNearbyQuestTakerTrigger::IsActive()
 {
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
-    if (target->isWorking()) //We are not currently working on a target.
+    if (target->IsWorking()) //We are not currently working on a target.
         return false;
 
-    if (target->getExpiredTime() < 2 * MINUTE) //The target was set more than 2 minutes ago.
+    if (target->GetExpiredTime() < 2 * MINUTE) //The target was set more than 2 minutes ago.
         return false;
 
     return AI_VALUE(bool, "has nearby quest taker");

@@ -61,9 +61,8 @@ namespace ai
             {
                 lastCheckTime = now;
 
-                PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, AiNamedObject::getName(), this->ai);
+                auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, AiNamedObject::getName(), this->ai);
                 value = Calculate();
-                if (pmo) pmo->finish();
             }
             return value;
         }
@@ -99,9 +98,8 @@ namespace ai
             {
                 this->lastCheckTime = now;
 
-                PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_VALUE, AiNamedObject::getName(), this->ai);
+                auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, AiNamedObject::getName(), this->ai);
                 this->value = this->Calculate();
-                if (pmo) pmo->finish();
             }
             return this->value;
         }
@@ -351,6 +349,42 @@ namespace ai
         virtual std::string Format()
         {
             return this->value ? "true" : "false";
+        }
+    };
+
+    class IntManualSetValue : public ManualSetValue<int32>, public Qualified
+    {
+    public:
+        IntManualSetValue(PlayerbotAI* ai, int32 defaultValue = 0, std::string name = "manual int") : ManualSetValue<int32>(ai, defaultValue, name), Qualified() {};
+
+        virtual std::string Format()
+        {
+            return std::to_string(this->value);
+        }
+    };
+
+    class IntManualSetSavedValue : public IntManualSetValue
+    {
+    public:
+        IntManualSetSavedValue(PlayerbotAI* ai, int32 defaultValue = -1, std::string name = "manual saved int") : IntManualSetValue(ai, defaultValue, name){};
+
+        virtual std::string Format()
+        {
+            return std::to_string(this->value);
+        }
+
+        virtual std::string Save() { return std::to_string(this->value); }
+        virtual bool Load(std::string value) { value = stoi(value); return true; }
+    };
+
+    class StringManualSetValue : public ManualSetValue<std::string>, public Qualified
+    {
+    public:
+        StringManualSetValue(PlayerbotAI* ai, std::string defaultValue = "", std::string name = "manual string") : ManualSetValue<std::string>(ai, defaultValue, name), Qualified() {};
+
+        virtual std::string Format()
+        {
+            return this->value;
         }
     };
 }

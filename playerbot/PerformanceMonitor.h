@@ -32,9 +32,11 @@ class PerformanceMonitorOperation
 {
 public:
     PerformanceMonitorOperation(PerformanceData* data, std::string name, PerformanceStack* stack);
-    void finish();
+    ~PerformanceMonitorOperation();
 
 private:
+    void finish();
+
     PerformanceData* data;
     std::string name;
     PerformanceStack* stack;
@@ -54,15 +56,17 @@ class PerformanceMonitor
             return instance;
         }
 
-	public:
-        PerformanceMonitorOperation* start(PerformanceMetric metric, std::string name, PerformanceStack* stack = nullptr);
-        PerformanceMonitorOperation* start(PerformanceMetric metric, std::string name, PlayerbotAI* ai);
+    public:
+        std::unique_ptr<PerformanceMonitorOperation> start(PerformanceMetric metric, std::string name, PerformanceStack* stack = nullptr);
+        std::unique_ptr<PerformanceMonitorOperation> start(PerformanceMetric metric, std::string name, PlayerbotAI* ai);
         void PrintStats(bool perTick = false,  bool fullStack = false);
         void Reset();
-	private:
+
+    private:
         std::map<PerformanceMetric, std::map<std::string, PerformanceData*> > data;
+
 #ifdef CMANGOS
-		std::mutex lock;
+        std::mutex lock;
 #endif
 };
 

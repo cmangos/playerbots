@@ -137,6 +137,10 @@ namespace ai
             creators["bg free"] = &ChatTriggerContext::bg_free;
             creators["move style"] = &ChatTriggerContext::move_style;
             creators["jump"] = &ChatTriggerContext::jump;
+            creators["doquest"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "doquest");  };
+            creators["skill"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "skill");  };
+            creators["faction"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "faction");  };
+            creators["set value"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "set value");  };
         }
 
     private:

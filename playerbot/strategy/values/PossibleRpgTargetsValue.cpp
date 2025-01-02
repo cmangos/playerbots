@@ -56,7 +56,7 @@ bool PossibleRpgTargetsValue::AcceptUnit(Unit* unit)
 {
     TravelTarget* travelTarget = context->GetValue<TravelTarget*>("travel target")->Get();
 
-    if (travelTarget->getDestination() && travelTarget->getDestination()->getEntry() == unit->GetEntry())
+    if (travelTarget->GetDestination() && travelTarget->GetDestination()->GetEntry() == unit->GetEntry())
         return true;
 
     if (sServerFacade.IsHostileTo(unit, bot) || dynamic_cast<Player*>(unit))

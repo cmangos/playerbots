@@ -234,7 +234,7 @@ bool MoveToRpgTargetAction::isUseful()
 
     TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    if (travelTarget->isTraveling() && AI_VALUE2(bool, "can free move to", travelTarget->GetPosStr()))
+    if (travelTarget->IsTraveling() && AI_VALUE2(bool, "can free move to", travelTarget->GetPosStr()))
         return false;
 
     guidP.updatePosition(bot->GetInstanceId());

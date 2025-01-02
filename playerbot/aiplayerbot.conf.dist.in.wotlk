@@ -673,6 +673,8 @@ AiPlayerbot.PremadeSpecLink.11.8.80 = 05320001--230033312031512531153313051
 # AiPlayerbot.WorldBuff.0.9.1.10 = 18149,3436
 # All alliance lvl60 rogues      Plainsrunning & Sprint & Speed
 # AiPlayerbot.WorldBuff.1.4.60 = 12566,11305,2379
+# Darkmoon Faire - Elwynn Forest	Sayge's Dark Fortune of Damage
+# AiPlayerbot.WorldBuff.0.0.0.0.0.4 = 23768
 
 # Prefix for bot chat commands (e.g. follow, stay)
 #AiPlayerbot.CommandPrefix =
@@ -886,6 +888,113 @@ AiPlayerbot.PerfMonEnabled = 0
 # AiPlayerbot.DiffWithPlayer = 100
 # AiPlayerbot.DiffEmpty = 200
 
+# LLM values. These values are for noncombat strategy 'ai chat' which allows bots to reply using a LLM api.
+# For a quickstart download koboldcpp, a 7b model from huggingface and start kobold.
+# (Default) KoboldCPP examples:
+
+# Enables/disables LLM globaly: 0 = disabled, 1 = enabled with ai chat strategy, 2 = ai chat strategy default for all bots, 3 = enabled without ai chat strategy.
+# AiPlayerbot.LLMEnabled = 1
+# The api endpoint that should be called for chat generation.
+# AiPlayerbot.LLMApiEndpoint = http://127.0.0.1:5001/api/v1/generate
+# The api key needed to access the endpoint.
+# AiPlayerbot.LLMApiKey =
+# The default json to send to the endpoint.
+# AiPlayerbot.LLMApiJson = {"max_length": 100, "prompt": "[<pre prompt>]<context> <prompt> <post prompt>"}
+
+# The max context length allowed for the model. 0 to disable. This will shrink the context (all previous conversations) to make the entire prompt <pre prompt><context><prompt><post prompt> fit.
+# AiPlayerbot.LLMContextLength = 4096
+# Time in seconds the server will wait for the generation to finish. This includes waiting in queue.
+# AiPlayerbot.LLMGenerationTimeout = 600
+# Maximum generation requests allowed at the same time. This includes waiting in queue.
+# AiPlayerbot.LLMMaxSimultaniousGenerations = 100
+
+# The default prompt to send at the beginning of each conversation.
+# AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The <other type> <other name> is speaking to you <channel name> and is an <other gender> <other race> <other class> of level <other level>. You are level <bot level> and play as a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.
+# The prompt part containing the last message from the player the bot is responding to.
+# AiPlayerbot.LLMPrompt = <player name>:<player message>
+# The default prompt to send at the end of each conversation.
+# AiPlayerbot.LLMPostPrompt = <bot name>:
+
+# The prompt used for rpg chat with npc's
+# AiPlayerbot.LLMRpgPrompt = In World of Warcraft: <expansion name> in <bot zone> <bot subzone> stands <bot type> <bot name> a level <bot level> <bot gender> <bot race> <bot class>. Standing nearby is <unit type> <unit name> <unit subname> a level <unit level> <unit gender> <unit race> <unit faction> <unit class>. Answer as a roleplaying character. Limit responses to 100 characters.
+
+# Response parse method. The (json) response that the llm will output needs to be cut and split to result in a number of plain lines the bot can give as feedback.
+# Step1: What pattern the server should look for to find the start of the repsonse the llm gave.
+# AiPlayerbot.LLMResponseStartPattern = ("text":\s*")
+# Step2: What pattern the server should look for that the response has ended.
+# AiPlayerbot.LLMResponseEndPattern = ("|<receiver name>:)
+# Step3: What pattern the server should look for to remove from the response.
+# AiPlayerbot.LLMResponseDeletePattern = (\\n|<sender name>:)
+# Step4: What pattern the server should look for to split the repsonse in multiple lines. Note only lines that follow this pattern will be extracted.
+# AiPlayerbot.LLMResponseSplitPattern = (\*.*?\*)|(\[.*?\])|(\'.*\')|([^\*\[\] ][^\*\[\]]+?[.?!])
+
+# Should previous conversations from all channels be mixed?
+# AiPlayerbot.LLMGlobalContext = 0
+
+# The chance (0-100) bots will use ai chat to respond to other bots 
+# AiPlayerbot.LLMBotToBotChatChance = 0
+
+# The chance (0-100) bots will use ai chat talk to npcs during rpg
+# AiPlayerbot.LLMRpgAIChatChance = 100
+
+# Channels that bots are not allowed to use ai-chat to reply on. Channels: guild,world,general,trade,lfg,ldefence,wdefence,grecruitement,say,whisper,emote,temote,yell,party,raid
+# AiPlayerbot.LLMBlockedReplyChannels = 
+
+# OPEN-AI (chat completions) example:
+# AiPlayerbot.LLMApiEndpoint = http://IP/URL:PORT/v1/chat/completions
+# AiPlayerbot.LLMApiKey = YOUR_API_KEY
+# AiPlayerbot.LLMApiJson = {"model": "gpt-4o-mini", "messages": [{"role": "system", "content": "<pre prompt> <context>"},{"role": "user", "content": "<prompt>"}],"max_tokens": 60}
+# AiPlayerbot.LLMResponseStartPattern = ("content":\s*")
+
+# Enable the alternative asynchronous login system.
+# AiPlayerbot.AsyncBotLogin = 0
+
+# Dramatically speeds up initial and future bot logins but takes 2gb/1000 accounts and might prevent player login during the initial bot login period.
+# !!warning heavy db usage at start!!
+# AiPlayerbot.PreloadHolders = 0
+
+# The login criteria to apply when trying to log in/keep online bots. options: 
+# maxbots: Keep the total number of bots below the maxium (between max/min).
+# spareroom: Keep some spare room below the max to login better bots.
+# bg: Bots online inside battlegrounds should not log off.
+# arena: Bots online inside arenas should not log off.
+# instance: Bots online inside instances should not log off.
+# online: Bots currently online stay online.
+# logoff: Bots slated to logoff should log off. (Needs RandomBotTimedLogout)
+# offline: Bots slated to stay offline should stay offline. (Needs RandomBotTimedOffline)
+# classrace: Match the online bots to the configured class/race probabilities.
+# level: Match the online bots to the configured level probabilities.
+# range: Prefer bots near an online player.
+# map: Prefer bots on the same map of an online player.
+# group: Prefer bots in the same group as an online player.
+# guild: Prefer bots in the same guild as an online player.
+# 
+# How it works: All bots are evaluated based on configurd criteria wether they should be online of offline.
+# The default criteria must all be true or the bot will be logged off and can not log in.
+# Each line works as an AND construction where all criteria must be met. Note they are alphabetically sorted so use 01,02 for more than 9 lines.
+# Example logoff,classrace,level,online means a bot needs to have room in available level and classrace brackets, be online and not be slated to log off.
+# The multiple lines work as an OR construction where the top lines are used first and as more bots are needed it moves down.
+# Example 1 = group, 2 = bg. First it tries to login all bots in player groups, then as more bots are needed it looks for bots that might be online inside battlegrounds.
+# 
+# AiPlayerbot.DefaultLoginCriteria1 = maxbots,spareroom,offline
+# AiPlayerbot.LoginCriteria.1 = group
+# AiPlayerbot.LoginCriteria.2 = bg
+# AiPlayerbot.LoginCriteria.3 = arena
+# AiPlayerbot.LoginCriteria.4 = guild
+# AiPlayerbot.LoginCriteria.5 = logoff,classrace,level,online
+# AiPlayerbot.LoginCriteria.6 = logoff,classrace,level
+# AiPlayerbot.LoginCriteria.7 = logoff,classrace
+
+# When bots are logged in that do not fully match all criteria selected it will do so up to xxx spaces below the maximum. Bots that suddenly match all the criteria will then have room to use this to log in.
+# AiPlayerbot.FreeRoomForNonSpareBots = 0
+
+# Only log in bots within this distance from a real player.
+# AiPlayerbot.LoginBotsNearPlayerRange = 1000
+
+# AiPlayerbot.LevelProbability.<level> = <number>         #Probability Randombots will be allowed to login with this level. (default 100)
+# AiPlayerbot.LevelProbability.1 = 100
+# AiPlayerbot.LevelProbability.10 = 100
+# AiPlayerbot.LevelProbability.60 = 100
 
 # Mystery config value. Currently enables async bot pathfinding. Rarely crashes the server.
 # AiPlayerbot.TweakValue = 0

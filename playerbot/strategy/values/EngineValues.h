@@ -26,4 +26,12 @@ namespace ai
 
         virtual bool Calculate();
     };
+
+    class HasStrategyValue : public BoolCalculatedValue, public Qualified
+    {
+    public:
+        HasStrategyValue(PlayerbotAI* ai, std::string name = "has strategy") : BoolCalculatedValue(ai, name), Qualified() {}
+
+        virtual bool Calculate();
+    };
 }

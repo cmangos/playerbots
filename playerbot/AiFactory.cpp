@@ -838,6 +838,9 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
     nonCombatEngine->addStrategies("wbuff", NULL);
     nonCombatEngine->addStrategy("avoid mobs");
 
+    if(sPlayerbotAIConfig.llmEnabled == 2)
+        nonCombatEngine->addStrategy("ai chat");
+
     if (!player->InBattleGround())
     {
         nonCombatEngine->addStrategies("racials", "nc", "food", "follow", "default", "quest", "loot", "gather", "duel", "emote", "buff", "mount", NULL);

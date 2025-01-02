@@ -28,6 +28,12 @@ void PlayerbotTextMgr::replaceAll(std::string & str, const std::string & from, c
     }
 }
 
+void PlayerbotTextMgr::replacePlaceholders(std::string& text, const std::map<std::string, std::string>& placeholders)
+{
+    for (auto& placeholder : placeholders)
+        replaceAll(text, placeholder.first, placeholder.second);
+}
+
 void PlayerbotTextMgr::LoadBotTexts()
 {
     sLog.outBasic("Loading playerbot texts...");
@@ -109,8 +115,7 @@ std::string PlayerbotTextMgr::GetBotText(std::string name, std::map<std::string,
     if (botText.empty())
         botText = name;
 
-    for (std::map<std::string, std::string>::iterator i = placeholders.begin(); i != placeholders.end(); ++i)
-        replaceAll(botText, i->first, i->second);
+    replacePlaceholders(botText, placeholders);
 
     return botText;
 }
@@ -151,8 +156,7 @@ std::string PlayerbotTextMgr::GetBotText(ChatReplyType replyType, std::map<std::
             botText = textEntry.m_text;
     }
 
-    for (std::map<std::string, std::string>::iterator i = placeholders.begin(); i != placeholders.end(); ++i)
-        replaceAll(botText, i->first, i->second);
+    replacePlaceholders(botText, placeholders);
 
     return botText;
 }

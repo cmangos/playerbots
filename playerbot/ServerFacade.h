@@ -257,13 +257,6 @@ class ServerFacade
         }
 #endif
 
-#ifndef MANGOSBOT_ONE
-        BattleGroundQueue& bgQueue(BattleGroundQueueTypeId queueTypeId)
-        {
-            return sBattleGroundMgr.m_battleGroundQueues[queueTypeId];
-        }
-#endif
-
         uint32 GetAreaId(WorldObject* wo)
         {
             return sTerrainMgr.GetAreaId(wo->GetMapId(), wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ());

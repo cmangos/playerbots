@@ -57,10 +57,7 @@ bool BGJoinAction::Execute(Event& event)
         if (!bg)
             return false;
 
-#ifdef MANGOSBOT_ZERO
-        bracketId = bot->GetBattleGroundBracketIdFromLevel(bgTypeId);
-#endif
-#ifdef MANGOSBOT_ONE
+#ifndef MANGOSBOT_TWO
         bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel());
 #endif
 #ifdef MANGOSBOT_TWO
@@ -336,11 +333,7 @@ bool BGJoinAction::canJoinBg(Player* player, BattleGroundQueueTypeId queueTypeId
         return false;
 
     // check bracket
-#ifdef MANGOSBOT_ZERO
-    if (bracketId != bot->GetBattleGroundBracketIdFromLevel(bgTypeId))
-        return false;
-#endif
-#ifdef MANGOSBOT_ONE
+#ifndef MANGOSBOT_TWO
     if (sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel()) != bracketId)
         return false;
 #endif
@@ -666,10 +659,7 @@ bool BGJoinAction::JoinQueue(uint32 type)
 
     bracketId = pvpDiff->GetBracketId();
 #endif
-#ifdef MANGOSBOT_ZERO
-    bracketId = bot->GetBattleGroundBracketIdFromLevel(bgTypeId);
-#endif
-#ifdef MANGOSBOT_ONE
+#ifndef MANGOSBOT_TWO
     bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel());
 #endif
 
@@ -1198,10 +1188,10 @@ bool BGStatusAction::Execute(Event& event)
     if (!queueTypeId)
         return false;
 
-#ifdef MANGOSBOT_ZERO
-    bracketId = bot->GetBattleGroundBracketIdFromLevel(_bgTypeId);
-#endif
-#ifdef MANGOSBOT_ONE
+#ifndef MANGOSBOT_TWO
+    BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(_bgTypeId);
+    if (!bg)
+        return false;
     bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(_bgTypeId, bot->GetLevel());
 #endif
 #ifdef MANGOSBOT_TWO
@@ -1341,7 +1331,7 @@ bool BGStatusAction::Execute(Event& event)
         // temp fix for crash
          //return true;
 
-#ifdef MANGOSBOT_TWO
+#ifdef MANGOSBOT_TWOx
         BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
         GroupQueueInfo ginfo;
         if (bgQueue.GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
@@ -1441,7 +1431,7 @@ bool BGStatusAction::Execute(Event& event)
 #ifndef MANGOSBOT_ZERO
         if (isArena)
         {
-#ifdef MANGOSBOT_TWO
+#ifdef MANGOSBOT_TWOx
             isArena = true;
             BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
             GroupQueueInfo ginfo;
@@ -1488,11 +1478,8 @@ bool BGStatusAction::Execute(Event& event)
             bot->GetSession()->HandleLeaveBattlefieldOpcode(leave);
             //Queue the event again to try to join next tick.
             //ai->HandleBotOutgoingPacket(event.getPacket());
-            sLog.outError("Bot %s leaves to join.", bot->GetName());
             return true;
         }
-
-        sLog.outError("Bot %s joins.", bot->GetName());
 
 #ifdef MANGOSBOT_ZERO
         sLog.outBasic("Bot #%d <%s> (%u %s) joined BG (%s)", bot->GetGUIDLow(), bot->GetName(), bot->GetLevel(), bot->GetTeam() == ALLIANCE ? "A" : "H", _bgType.c_str());

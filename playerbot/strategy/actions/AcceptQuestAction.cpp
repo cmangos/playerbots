@@ -205,6 +205,9 @@ bool QuestDetailsAction::Execute(Event& event)
     p >> quest;
     Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest);
 
+    if (!qInfo)
+        return false;
+
     quest = qInfo->GetQuestId();
     if (!bot->CanTakeQuest(qInfo, false))
     {

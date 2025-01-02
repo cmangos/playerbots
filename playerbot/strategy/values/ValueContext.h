@@ -97,6 +97,7 @@
 #include "MountValues.h"
 #include "DeadValues.h"
 #include "playerbot/strategy/druid/DruidValues.h"
+#include "TravelValues.h"
 
 namespace ai
 {
@@ -312,6 +313,7 @@ namespace ai
             creators["can repeat quest npc"] = [](PlayerbotAI* ai) { return new CanRepeatQuestValue(ai); };
             creators["need quest reward"] = [](PlayerbotAI* ai) { return new NeedQuestRewardValue(ai); };
             creators["need quest objective"] = [](PlayerbotAI* ai) { return new NeedQuestObjectiveValue(ai); };
+            creators["need for quest"] = [](PlayerbotAI* ai) { return new NeedForQuestValue(ai); };
             creators["can use item on"] = [](PlayerbotAI* ai) { return new CanUseItemOn(ai); };
             creators["quest reward"] = [](PlayerbotAI* ai) { return new QuestRewardValue(ai); };
             creators["has nearby quest taker"] = [](PlayerbotAI* ai) { return new HasNearbyQuestTakerValue(ai); };
@@ -356,6 +358,9 @@ namespace ai
             creators["not"] = [](PlayerbotAI* ai) { return new NotValue(ai); };
             creators["gt32"] = [](PlayerbotAI* ai) { return new GT32Value(ai); };
             creators["manual bool"] = [](PlayerbotAI* ai) { return new BoolManualSetValue(ai); };
+            creators["manual int"] = [](PlayerbotAI* ai) { return new IntManualSetValue(ai); };
+            creators["manual saved int"] = [](PlayerbotAI* ai) { return new IntManualSetSavedValue(ai); };
+            creators["manual string"] = [](PlayerbotAI* ai) { return new StringManualSetValue(ai); };
             creators["group count"] = [](PlayerbotAI* ai) { return new GroupBoolCountValue(ai); };
             creators["group and"] = [](PlayerbotAI* ai) { return new GroupBoolANDValue(ai); };
             creators["group or"] = [](PlayerbotAI* ai) { return new GroupBoolORValue(ai); };
@@ -398,9 +403,11 @@ namespace ai
             creators["action possible"] = [](PlayerbotAI* ai) { return new ActionPossibleValue(ai); };
             creators["action useful"] = [](PlayerbotAI* ai) { return new ActionUsefulValue(ai); };
             creators["trigger active"] = [](PlayerbotAI* ai) { return new TriggerActiveValue(ai); };
+            creators["has strategy"] = [](PlayerbotAI* ai) { return new HasStrategyValue(ai); };
 
             creators["party tank without lifebloom"] = [](PlayerbotAI* ai) { return new PartyTankWithoutLifebloomValue(ai); };
             creators["move style"] = [](PlayerbotAI* ai) { return new MoveStyleValue(ai); };
+            creators["focus travel target"] = [](PlayerbotAI* ai) { return new FocusTravelTargetValue(ai); };
         };
     };
 }

@@ -234,18 +234,14 @@ bool LfgJoinAction::JoinLFG()
     TravelTarget* target = bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
     if (target)
     {
-        state = target->getTravelState();
-        status = target->getStatus();
+        state = target->GetTravelState();
+        status = target->GetStatus();
         // queue only if quest not completed
         if (state < TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST)
         {
-            Quest const* quest = NULL;
-            if (target->getDestination())
-                quest = target->getDestination()->GetQuestTemplate();
-
-            if (quest)
+            if (typeid(*target) == typeid(QuestTravelDestination))
             {
-                Quest const* qinfo = sObjectMgr.GetQuestTemplate(quest->GetQuestId());
+                Quest const* qinfo = sObjectMgr.GetQuestTemplate(((QuestTravelDestination*)target->GetDestination())->GetQuestId());
                 if (qinfo)
                 {
                     // only group quests are allowed for quest lfg
@@ -386,9 +382,9 @@ bool LfgJoinAction::JoinLFG()
         if (target && group && !group->IsFull())
         {
             // if moving to boss
-            if (target->getDestination() && target->getDestination()->getName() == "BossTravelDestination")
+            if (target->GetDestination() && typeid(*target->GetDestination()) == typeid(BossTravelDestination))
             {
-                WorldPosition* location = target->getPosition();
+                WorldPosition* location = target->GetPosition();
                 uint32 targetAreaFlag = GetAreaFlagByMapId(location->mapid);
                 if (targetAreaFlag)
                 {

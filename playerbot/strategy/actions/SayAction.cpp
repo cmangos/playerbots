@@ -7,6 +7,7 @@
 #include "playerbot/AiFactory.h"
 #include <regex>
 #include <boost/algorithm/string.hpp>
+#include "playerbot/PlayerbotLLMInterface.h"
 
 using namespace ai;
 
@@ -123,6 +124,295 @@ bool SayAction::isUseful()
     return (time(0) - lastSaid) > 30;
 }
 
+void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& placeholders, Unit* sender, Unit* receiver)
+{
+    if(receiver)
+        placeholders["<receiver name>"] = receiver->GetName();
+    else
+        placeholders["<receiver name>"];
+
+    if (sender)
+        placeholders["<sender name>"] = sender->GetName();
+    else
+        placeholders["<sender name>"];
+
+#ifdef MANGOSBOT_ZERO
+    placeholders["<expansion name>"] = "Vanilla";
+#endif
+#ifdef MANGOSBOT_ONE
+    placeholders["<expansion name>"] = "The Burning Crusade";
+#endif
+#ifdef MANGOSBOT_TWO
+    placeholders["<expansion name>"] = "Wrath of the Lich King";
+#endif
+    return;
+}
+
+void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& placeholders, Unit* unit, const std::string preFix, Player* observer)
+{
+    placeholders["<" + preFix + " name>"] = unit->GetName();
+    placeholders["<" + preFix + " gender>"] = unit->getGender() == GENDER_MALE ? "male" : "female";
+    placeholders["<" + preFix + " level>"] = std::to_string(unit->GetLevel());
+    placeholders["<" + preFix + " class>"] = ChatHelper::formatClass(unit->getClass());
+    placeholders["<" + preFix + " race>"] = ChatHelper::formatRace(unit->getRace());
+
+    FactionTemplateEntry const* factionTemplate = unit->GetFactionTemplateEntry();
+    uint32 factionId = factionTemplate ? factionTemplate->faction : 0;
+
+    placeholders["<" + preFix + " faction>"] = ChatHelper::formatFactionName(factionId);
+    WorldPosition pos(unit);
+    placeholders["<" + preFix + " zone>"] = pos.getAreaName();
+    placeholders["<" + preFix + " subzone>"] = pos.getAreaOverride();
+
+    if (unit->IsPlayer())
+    {
+        placeholders["<" + preFix + " type>"] = "player";
+        placeholders["<" + preFix + " subname>"] = "";
+        placeholders["<" + preFix + " gossip>"] = "";
+    }
+    if (unit->IsCreature())
+    {
+        Creature* creature = (Creature*)unit;
+
+        CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature->GetEntry());
+
+        switch (creature->GetCreatureType())
+        {
+        case CREATURE_TYPE_BEAST:
+            placeholders["<" + preFix + " type>"] = "beast";
+            break;
+        case  CREATURE_TYPE_DRAGONKIN:
+            placeholders["<" + preFix + " type>"] = "dragonkin";
+            break;
+        case      CREATURE_TYPE_DEMON:
+            placeholders["<" + preFix + " type>"] = "demon";
+            break;
+        case    CREATURE_TYPE_ELEMENTAL:
+            placeholders["<" + preFix + " type>"] = "elemental";
+            break;
+        case    CREATURE_TYPE_GIANT:
+            placeholders["<" + preFix + " type>"] = "giant";
+            break;
+        case   CREATURE_TYPE_UNDEAD:
+            placeholders["<" + preFix + " type>"] = "undead";
+            break;
+        case  CREATURE_TYPE_HUMANOID:
+            placeholders["<" + preFix + " type>"] = "humanoid";
+            break;
+        case  CREATURE_TYPE_CRITTER:
+            placeholders["<" + preFix + " type>"] = "critter";
+            break;
+        case  CREATURE_TYPE_MECHANICAL:
+            placeholders["<" + preFix + " type>"] = "mechanical";
+            break;
+        case  CREATURE_TYPE_NOT_SPECIFIED:
+            placeholders["<" + preFix + " type>"] = "being";
+            break;
+        case  CREATURE_TYPE_TOTEM:
+            placeholders["<" + preFix + " type>"] = "totem";
+            break;
+        }
+
+        placeholders["<" + preFix + " subname>"] = creature->GetSubName();
+
+        std::string gossipText = placeholders["<" + preFix + " gossip>"];
+
+
+        GossipMenusMapBounds pMenuBounds = sObjectMgr.GetGossipMenusMapBounds(creature->GetDefaultGossipMenuId());
+        GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(creature->GetDefaultGossipMenuId());
+
+        for (auto& gossip = pMenuBounds.first; gossip != pMenuBounds.second; gossip++)
+        {
+            const GossipText* gos = sObjectMgr.GetGossipText(gossip->second.text_id);
+            gossipText += " " + gos->Options->Text_0;
+        }
+
+        uint32 textId = observer->GetGossipTextId(creature);
+
+        if (textId)
+        {
+            const GossipText* gos = sObjectMgr.GetGossipText(textId);
+            if (gos)
+                gossipText += " " + gos->Options->Text_0;
+        }
+
+        for (auto& gossip = pMenuItemBounds.first; gossip != pMenuItemBounds.second; gossip++)
+        {
+            gossipText += " " + gossip->second.option_text;
+        }
+
+        std::map<std::string, std::string> replace;
+        replace["<"] = "*";
+        replace[">"] = "*";
+        replace["$N"] = observer->GetName();
+        replace["$B"] = "";
+        replace["$c"] = ChatHelper::formatRace(observer->getRace());
+        replace["$r"] = ChatHelper::formatClass(unit->getClass());
+        replace["$g boy : girl;"] = unit->getGender() == GENDER_MALE ? "boy" : "girl"; //Todo replace with regexp
+        replace["$g lad : lass;"] = unit->getGender() == GENDER_MALE ? "lass" : "lad";
+
+        replace["GOSSIP_OPTION_GOSSIP"] = unit->GetName() + std::string(" can chat some.");
+        replace["GOSSIP_OPTION_QUESTGIVER"] = unit->GetName() + std::string(" can offer quests.");
+        replace["GOSSIP_OPTION_VENDOR"] = unit->GetName() + std::string(" can sell and buy items.");
+        replace["GOSSIP_OPTION_TAXIVENDOR"] = unit->GetName() + std::string(" is a flight master.");
+        replace["GOSSIP_OPTION_TRAINER"] = unit->GetName() + std::string(" can train certain skills.");
+        replace["GOSSIP_OPTION_SPIRITHEALER"] = unit->GetName() + std::string(" can revive de dead.");
+        replace["GOSSIP_OPTION_SPIRITGUIDE"] = unit->GetName() + std::string(" can revive de dead.");
+        replace["GOSSIP_OPTION_INNKEEPER"] = unit->GetName() + std::string(" runs an inn.");
+        replace["GOSSIP_OPTION_BANKER"] = unit->GetName() + std::string(" can store items in the bank.");
+        replace["GOSSIP_OPTION_PETITIONER"] = unit->GetName() + std::string(" can create new guilds.");
+        replace["GOSSIP_OPTION_TABARDDESIGNER"] = unit->GetName() + std::string(" can redesign the guild tabard.");
+        replace["GOSSIP_OPTION_BATTLEFIELD"] = unit->GetName() + std::string(" recruits to join the battlegrounds.");
+        replace["GOSSIP_OPTION_AUCTIONEER"] = unit->GetName() + std::string(" is an auctioneer.");
+        replace["GOSSIP_OPTION_STABLEPET"] = unit->GetName() + std::string(" can store pets.");
+        replace["GOSSIP_OPTION_ARMORER"] = unit->GetName() + std::string(" can repair armor.");
+        replace["GOSSIP_OPTION_UNLEARNTALENTS"] = unit->GetName() + std::string(" can help unlearning talents.");
+        replace["GOSSIP_OPTION_TRAINER"] = unit->GetName() + std::string(" can train pets.");
+        replace["GOSSIP_OPTION_UNLEARNPETSKILLS"] = unit->GetName() + std::string(" can help pets unlearn their skills.");
+
+        PlayerbotTextMgr::GetReplacePlaceholders(gossipText, replace);
+
+        placeholders["<" + preFix + " gossip>"] = gossipText;
+    }
+}
+
+WorldPacket ChatReplyAction::GetPacketTemplate(Opcodes op, uint32 type, Unit* sender, Unit* target, std::string channelName)
+{
+    Player* senderPlayer = (sender->IsPlayer()) ? (Player*)sender : nullptr;
+    ObjectGuid senderGuid = sender->GetObjectGuid();
+    ObjectGuid targetGuid = target ? target->GetObjectGuid() : ObjectGuid();
+    Player* targetPlayer = (target && target->IsPlayer()) ? (Player*)target : nullptr;
+    const char* senderName = sender->GetName();
+
+    WorldPacket packetTemplate(op);
+
+    if (op == CMSG_MESSAGECHAT)
+        packetTemplate << type;
+    else
+        packetTemplate << uint8(type);
+
+    if (senderPlayer)
+        packetTemplate << ((senderPlayer->GetTeam() == ALLIANCE) ? LANG_COMMON : LANG_ORCISH);
+    else if (targetPlayer)
+        packetTemplate << ((targetPlayer->GetTeam() == ALLIANCE) ? LANG_COMMON : LANG_ORCISH);
+    else
+        packetTemplate << LANG_UNIVERSAL;
+
+    if (op == CMSG_MESSAGECHAT)
+    {
+        if (type == CHAT_MSG_WHISPER)
+            packetTemplate << target->GetName();
+
+        if (!channelName.empty())
+            packetTemplate << channelName;
+    }
+
+
+    if (op != CMSG_MESSAGECHAT)
+    {
+        switch (type)
+        {
+        case CHAT_MSG_MONSTER_WHISPER:
+        case CHAT_MSG_RAID_BOSS_WHISPER:
+        case CHAT_MSG_RAID_BOSS_EMOTE:
+        case CHAT_MSG_MONSTER_EMOTE:
+            packetTemplate << ObjectGuid(senderGuid); //Deviation from standards. To support emotes.
+            packetTemplate << uint32(strlen(senderName) + 1);
+            packetTemplate << senderName;
+            packetTemplate << ObjectGuid(targetGuid);
+            break;
+
+        case CHAT_MSG_SAY:
+        case CHAT_MSG_PARTY:
+        case CHAT_MSG_YELL:
+            packetTemplate << ObjectGuid(senderGuid);
+            packetTemplate << ObjectGuid(senderGuid);
+            break;
+
+        case CHAT_MSG_MONSTER_SAY:
+        case CHAT_MSG_MONSTER_YELL:
+            MANGOS_ASSERT(senderName);
+            packetTemplate << ObjectGuid(senderGuid);
+            packetTemplate << uint32(strlen(senderName) + 1);
+            packetTemplate << senderName;
+            packetTemplate << ObjectGuid(targetGuid);
+            break;
+        default:
+            packetTemplate << ObjectGuid(senderGuid);
+            break;
+        }
+    }
+    return packetTemplate;
+}
+
+inline void LineToPacket(delayedPackets& delayedPackets, const WorldPacket packetTemplate, const std::string& line, uint32 MsPerChar, bool debug = false)
+{
+    WorldPacket packet(packetTemplate);
+    if (packetTemplate.GetOpcode() != CMSG_MESSAGECHAT)
+        packet << uint32(line.size() + 1 + (debug ? 2 : 0));
+    packet << ((debug ? "d:" : "") + line);
+
+    if (packetTemplate.GetOpcode() != CMSG_MESSAGECHAT)
+        packet << CHAT_TAG_NONE;
+
+    delayedPackets.push_back(std::make_pair(packet, line.size() * MsPerChar));
+}
+
+delayedPackets ChatReplyAction::LinesToPackets(const std::vector<std::string>& lines, WorldPacket packetTemplate, bool debug, uint32 MsPerChar, WorldPacket emoteTemplate)
+{
+    delayedPackets delayedPackets;
+
+    WorldPacket packet;
+    for (auto& line : lines)
+    {
+        bool useEmote = !emoteTemplate.empty() && (line.find("*") == 0 || line.find("[") == 0);
+
+        std::string sentence = line;
+        while (sentence.length() > 200) {
+            size_t splitPos = sentence.rfind(' ', 200);
+            if (splitPos == std::string::npos) {
+                splitPos = 200;
+            }
+
+            if (!sentence.substr(0, splitPos).empty())
+                LineToPacket(delayedPackets, useEmote ? emoteTemplate : packetTemplate, sentence.substr(0, splitPos), MsPerChar, debug);                
+
+            sentence = sentence.substr(splitPos + 1);
+        }
+
+        if (!sentence.empty())
+        {
+            LineToPacket(delayedPackets, useEmote ? emoteTemplate : packetTemplate, sentence, MsPerChar, debug);
+        }
+    }
+    return delayedPackets;
+}
+
+delayedPackets ChatReplyAction::GenerateResponsePackets(const std::string json
+    , const WorldPacket chatTemplate, const WorldPacket emoteTemplate, const WorldPacket systemTemplate, const std::string startPattern, const std::string endPattern, const std::string deletePattern, const std::string splitPattern, bool debug)
+{
+    std::vector<std::string> debugLines;
+
+    if (debug)
+        debugLines = { json };
+
+    std::string response = PlayerbotLLMInterface::Generate(json, sPlayerbotAIConfig.llmGenerationTimeout, sPlayerbotAIConfig.llmMaxSimultaniousGenerations, debugLines);
+
+    std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, startPattern, endPattern, deletePattern, splitPattern, debugLines);
+
+    delayedPackets packets, debugPackets;
+
+    packets = LinesToPackets(lines, chatTemplate, false, 200, emoteTemplate);
+
+    if (!debugLines.empty())
+    {
+        debugPackets = LinesToPackets(debugLines, systemTemplate, true, 1);
+        packets.insert(packets.begin(), debugPackets.begin(), debugPackets.end());
+    }
+
+    return packets;
+}
+
 void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32 guid2, std::string msg, std::string chanName, std::string name)
 {
     // if we're just commanding bots around, don't respond...
@@ -184,6 +474,161 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
         return;
     }
 
+    if (bot->GetPlayerbotAI() && sPlayerbotAIConfig.llmEnabled > 0 && (bot->GetPlayerbotAI()->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) || sPlayerbotAIConfig.llmEnabled == 3) && chatChannelSource != ChatChannelSource::SRC_UNDEFINED && sPlayerbotAIConfig.llmBlockedReplyChannels.find(chatChannelSource) == sPlayerbotAIConfig.llmBlockedReplyChannels.end()
+        )
+    {
+        Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, guid1));
+
+        PlayerbotAI* ai = bot->GetPlayerbotAI();
+        AiObjectContext* context = ai->GetAiObjectContext();
+
+        if (!chanName.empty() && !ai->ChannelHasRealPlayer(chanName))
+            player = nullptr;
+
+        std::string llmChannel;
+
+        if (!sPlayerbotAIConfig.llmGlobalContext)
+            llmChannel = ((chatChannelSource == ChatChannelSource::SRC_WHISPER) ? name : std::to_string(chatChannelSource));
+
+        std::string llmContext = AI_VALUE(std::string, "manual string::llmcontext" + llmChannel);
+
+        if (player)
+        {
+            std::string playerName = player->GetName();
+
+            if (player != bot && (player->isRealPlayer() || (sPlayerbotAIConfig.llmBotToBotChatChance && urand(0, 99) < sPlayerbotAIConfig.llmBotToBotChatChance)))
+            {
+                std::map<std::string, std::string> placeholders;
+
+                GetAIChatPlaceholders(placeholders, bot, player);
+                GetAIChatPlaceholders(placeholders, bot, "bot");
+                GetAIChatPlaceholders(placeholders, player, "other");
+
+                std::map<ChatChannelSource, std::string> sourceName;
+                sourceName[ChatChannelSource::SRC_GUILD] = "in guild chat";
+                sourceName[ChatChannelSource::SRC_WORLD] = "in world chat";
+                sourceName[ChatChannelSource::SRC_GENERAL] = "in the general channel";
+                sourceName[ChatChannelSource::SRC_TRADE] = "in the trade channel";
+                sourceName[ChatChannelSource::SRC_LOOKING_FOR_GROUP] = "in looking for group";
+                sourceName[ChatChannelSource::SRC_LOCAL_DEFENSE] = "in the local defence channel";
+                sourceName[ChatChannelSource::SRC_WORLD_DEFENSE] = "in the world defence channel";
+                sourceName[ChatChannelSource::SRC_GUILD_RECRUITMENT] = "in guild recruitement";
+                sourceName[ChatChannelSource::SRC_SAY] = "directly";
+                sourceName[ChatChannelSource::SRC_WHISPER] = "in private message";
+                sourceName[ChatChannelSource::SRC_EMOTE] = "with body language";
+                sourceName[ChatChannelSource::SRC_TEXT_EMOTE] = "with an emote";
+                sourceName[ChatChannelSource::SRC_YELL] = "with a yell";
+                sourceName[ChatChannelSource::SRC_PARTY] = "in party chat";
+                sourceName[ChatChannelSource::SRC_RAID] = "in raid chat";
+
+                placeholders["<channel name>"] = sourceName[chatChannelSource];
+
+
+                placeholders["<initial message>"] = msg;
+
+                std::map<std::string, std::string> jsonFill;
+                jsonFill["<pre prompt>"] = sPlayerbotAIConfig.llmPrePrompt;
+                jsonFill["<prompt>"] = sPlayerbotAIConfig.llmPrompt;
+                jsonFill["<post prompt>"] = sPlayerbotAIConfig.llmPostPrompt;
+
+                for (auto& prompt : jsonFill)
+                {
+                    prompt.second = BOT_TEXT2(prompt.second, placeholders);
+                }
+
+                uint32 currentLength = jsonFill["<pre prompt>"].size() + jsonFill["<context>"].size() + jsonFill["<prompt>"].size() + llmContext.size();
+                PlayerbotLLMInterface::LimitContext(llmContext, currentLength);
+                jsonFill["<context>"] = llmContext;
+
+                llmContext += " " + jsonFill["<prompt>"];
+
+                for (auto& prompt : jsonFill)
+                {
+                    prompt.second = PlayerbotLLMInterface::SanitizeForJson(prompt.second);
+                }
+
+                for (auto& prompt : placeholders) //Sanitize now instead of earlier to prevent double Sanitation
+                {
+                    prompt.second = PlayerbotLLMInterface::SanitizeForJson(prompt.second);
+                }
+
+                std::string startPattern, endPattern, deletePattern, splitPattern;
+                startPattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseStartPattern, placeholders);
+                endPattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseEndPattern, placeholders);
+                deletePattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseDeletePattern, placeholders);
+                splitPattern = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmResponseSplitPattern, placeholders);
+
+                std::string json = PlayerbotTextMgr::GetReplacePlaceholders(sPlayerbotAIConfig.llmApiJson, jsonFill);
+
+                json = PlayerbotTextMgr::GetReplacePlaceholders(json, placeholders);
+
+                uint32 type = CHAT_MSG_WHISPER;
+                std::string channelName;
+
+                switch (chatChannelSource)
+                {
+                case ChatChannelSource::SRC_WHISPER:
+                {
+                    type = CHAT_MSG_WHISPER;
+                    break;
+                }
+                case ChatChannelSource::SRC_SAY:
+                {
+                    type = CHAT_MSG_SAY;
+                    break;
+                }
+                case ChatChannelSource::SRC_YELL:
+                {
+                    type = CHAT_MSG_YELL;
+                    break;
+                }
+                case ChatChannelSource::SRC_PARTY:
+                {
+                    type = CHAT_MSG_PARTY;
+                    break;
+                }
+                case ChatChannelSource::SRC_GUILD:
+                {
+                    type = CHAT_MSG_GUILD;
+                }
+                case ChatChannelSource::SRC_WORLD:
+                case ChatChannelSource::SRC_GENERAL:
+                case ChatChannelSource::SRC_TRADE:
+                case ChatChannelSource::SRC_LOCAL_DEFENSE:
+                case ChatChannelSource::SRC_WORLD_DEFENSE:
+                case ChatChannelSource::SRC_LOOKING_FOR_GROUP:
+                case ChatChannelSource::SRC_GUILD_RECRUITMENT:
+                {
+                    type = CHAT_MSG_CHANNEL;
+                    channelName = chanName;
+                }
+                }
+
+                bool debug = bot->GetPlayerbotAI()->HasStrategy("debug llm", BotState::BOT_STATE_NON_COMBAT);
+
+                WorldSession* session = bot->GetSession();
+
+                WorldPacket chatTemplate = GetPacketTemplate(CMSG_MESSAGECHAT, type, bot, player, channelName);
+                WorldPacket emoteTemplate = (type == CHAT_MSG_SAY || type == CHAT_MSG_WHISPER) ? GetPacketTemplate(CMSG_MESSAGECHAT, CHAT_MSG_EMOTE, bot, player) : WorldPacket();
+                WorldPacket systemTemplate = GetPacketTemplate(CMSG_MESSAGECHAT, CHAT_MSG_WHISPER, bot, player);
+
+                futurePackets futPackets = std::async(std::launch::async, ChatReplyAction::GenerateResponsePackets, json, chatTemplate, emoteTemplate, systemTemplate, startPattern, endPattern, deletePattern, splitPattern, debug);
+
+                ai->SendDelayedPacket(session, std::move(futPackets));
+            }
+            else if (player != bot || sPlayerbotAIConfig.llmBotToBotChatChance)
+            {
+                if (msg.find("d:") != std::string::npos)
+                    return;
+
+                llmContext = llmContext + " " + playerName + ":" + msg;
+                PlayerbotLLMInterface::LimitContext(llmContext, llmContext.size());
+            }
+            SET_AI_VALUE(std::string, "manual string::llmcontext" + llmChannel, llmContext);
+
+            return;
+        }
+    }
 
     SendGeneralResponse(bot, chatChannelSource, GenerateReplyMessage(bot, msg, guid1, name), name);
 }

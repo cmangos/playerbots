@@ -16,6 +16,7 @@ public:
         creators["heroic strike"] = &heroic_strike;
         creators["mortal strike"] = &mortal_strike;
         creators["whirlwind"] = &whirlwind;
+        creators["sweeping strikes"] = &sweeping_strikes;
     }
 
 private:
@@ -32,6 +33,8 @@ private:
     ACTION_NODE_A(mortal_strike, "mortal strike", "heroic strike");
 
     ACTION_NODE_P(whirlwind, "whirlwind", "berserker stance");
+
+    ACTION_NODE_P(sweeping_strikes, "sweeping strikes", "battle stance");
 };
 
 ArmsWarriorStrategy::ArmsWarriorStrategy(PlayerbotAI* ai) : WarriorStrategy(ai)
@@ -67,16 +70,16 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("overpower", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "whirlwind",
-        NextAction::array(0, new NextAction("whirlwind", ACTION_NORMAL + 3), NULL)));
+        "mortal strike",
+        NextAction::array(0, new NextAction("mortal strike", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium rage available",
-        NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("whirlwind", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "mortal strike",
-        NextAction::array(0, new NextAction("mortal strike", ACTION_NORMAL + 1), NULL)));
+        "medium rage available",
+        NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "rend",
@@ -179,8 +182,9 @@ void ArmsWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
         NextAction::array(0, new NextAction("sweeping strikes", ACTION_HIGH + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "melee medium aoe",
+        "melee light aoe",
         NextAction::array(0, new NextAction("whirlwind", ACTION_HIGH + 4), NULL)));
+
 }
 
 void ArmsWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -229,8 +233,9 @@ void ArmsWarriorBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     WarriorBuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "battle stance",
-        NextAction::array(0, new NextAction("battle stance", ACTION_MOVE), NULL)));
+        "berserker stance",
+        NextAction::array(0, new NextAction("berserker stance", ACTION_NORMAL), NULL)));
+
 }
 
 void ArmsWarriorBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -890,8 +895,8 @@ void ArmsWarriorBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     WarriorBuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "battle stance",
-        NextAction::array(0, new NextAction("battle stance", ACTION_MOVE), NULL)));
+        "berserker stance",
+        NextAction::array(0, new NextAction("berserker stance", ACTION_MOVE), NULL)));
 }
 
 void ArmsWarriorBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

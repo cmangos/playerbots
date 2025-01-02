@@ -2,6 +2,7 @@
 #include "WorldBuffAction.h"
 #include "playerbot/AiFactory.h"
 #include "playerbot/PlayerbotAIConfig.h"
+#include "GameEvents/GameEventMgr.h"
 
 using namespace ai;
 
@@ -44,6 +45,9 @@ std::vector<uint32> WorldBuffAction::NeedWorldBuffs(Unit* unit)
             continue;
 
         if (wb.maxLevel != 0 && wb.maxLevel < unit->GetLevel())
+            continue;
+
+        if (wb.eventId != 0 && !sGameEventMgr.IsActiveEvent(wb.eventId))
             continue;
 
         if (unit->HasAura(wb.spellId))

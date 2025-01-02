@@ -82,13 +82,15 @@ const FactionTemplateEntry* GuidPosition::GetFactionTemplateEntry() const
 {
     if (IsPlayer() && GetPlayer())
         return GetPlayer()->GetFactionTemplateEntry();
-    if (IsCreature() && IsCreature() && GetCreatureTemplate())
+    if (IsCreature()  && GetCreatureTemplate())
         return sFactionTemplateStore.LookupEntry(GetCreatureTemplate()->Faction);
+    if (IsGameObject() && GetGameObjectInfo())
+        return sFactionTemplateStore.LookupEntry(GetGameObjectInfo()->faction);
 
     return nullptr;
 }
 
-const ReputationRank GuidPosition::GetReactionTo(const GuidPosition& other, uint32 instanceId)
+const ReputationRank GuidPosition::GetReactionTo(const GuidPosition& other, uint32 instanceId) const
 {
     if(other.IsUnit() && other.GetUnit(instanceId))
         if (other.GetUnit(instanceId)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))

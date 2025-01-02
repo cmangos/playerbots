@@ -7,8 +7,6 @@ env:
   BUILD_TYPE: Release
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
-  BOOST_VERSION: "1.83.0"
-  BOOST_PLATFORM_VERSION: "12"
   CORE_REPO_OWNER: ${{github.repository_owner}}
 
 permissions:
@@ -22,7 +20,7 @@ jobs:
 
     strategy:
       matrix:
-        version: [classic, tbc]
+        version: [classic, tbc, wotlk]
         include:
           - os: macos-12
             EXTRA_BUILD: "-DBUILD_PLAYERBOTS=ON"
@@ -34,31 +32,19 @@ jobs:
           repository: ${{github.repository_owner}}/mangos-${{matrix.version}}
           ref: master
           path: ${{env.REPO_DIR}}
+          submodules: true
 
       - name: Install Dependencies
         run: |
-          brew install mysql-client
+          brew install mysql-client@8.4
           brew install openssl
+          brew install boost
           echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
-
-      - name: Install Boost
-        uses: MarkusJx/install-boost@v2.4.5
-        id: install-boost
-        with:
-          # REQUIRED: Specify the required boost version
-          # A list of supported versions can be found here:
-          # https://github.com/MarkusJx/prebuilt-boost/blob/main/versions-manifest.json
-          boost_version: ${{env.BOOST_VERSION}}
-          # OPTIONAL: Specify a platform version
-          platform_version: ${{env.BOOST_PLATFORM_VERSION}}
-          # OPTIONAL: Specify a toolset
-          toolset: clang
-          # NOTE: If a boost version matching all requirements cannot be found,
-          # this build step will fail
-
+          echo "MYSQL_HOME=$(brew --prefix --installed mysql-client@8.4)" >> $GITHUB_ENV      
       - name: Configure
         env:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+          Boost_DIR: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: cmake -DBoost_ARCHITECTURE=-x64 ${{matrix.EXTRA_BUILD}} -DCMAKE_INSTALL_PREFIX=/home/runner/work -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build

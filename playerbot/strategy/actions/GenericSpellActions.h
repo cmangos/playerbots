@@ -1,6 +1,7 @@
 #pragma once
 #include "playerbot/strategy/Action.h"
 #include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/PlayerbotAI.h"
 
 namespace ai
 {
@@ -396,6 +397,7 @@ namespace ai
 
     BUFF_ACTION(CastWillOfTheForsakenAction, "will of the forsaken");
     BUFF_ACTION_U(CastEscapeArtistAction, "escape artist", !ai->HasAura("stealth", AI_VALUE(Unit*, "self target")));
+
 #ifdef MANGOSBOT_TWO
     SPELL_ACTION(CastEveryManforHimselfAction, "every man for himself");
 #endif

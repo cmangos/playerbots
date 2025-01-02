@@ -20,7 +20,7 @@ bool TravelAction::Execute(Event& event)
     if (sServerFacade.isMoving(bot))
         return false;
 
-    target->setStatus(TravelStatus::TRAVEL_STATUS_WORK);
+    target->SetStatus(TravelStatus::TRAVEL_STATUS_WORK);
 
      Unit* newTarget;
     std::list<Unit*> targets;
@@ -41,7 +41,7 @@ bool TravelAction::Execute(Event& event)
         if (!newTarget->IsAlive())
             continue;
 
-        if (newTarget->GetEntry() != target->getDestination()->getEntry())
+        if (newTarget->GetEntry() != target->GetDestination()->GetEntry())
             continue;
 
         if (newTarget->IsInCombat())
@@ -60,7 +60,7 @@ bool TravelAction::Execute(Event& event)
 
 bool TravelAction::isUseful()
 {
-    return false && AI_VALUE(TravelTarget *,"travel target")->isActive() && (!AI_VALUE(GuidPosition,"rpg target") || !AI_VALUE(ObjectGuid,"attack target"));
+    return false && AI_VALUE(TravelTarget *,"travel target")->IsActive() && (!AI_VALUE(GuidPosition,"rpg target") || !AI_VALUE(ObjectGuid,"attack target"));
 }
 
 bool MoveToDarkPortalAction::Execute(Event& event)

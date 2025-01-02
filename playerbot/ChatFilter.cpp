@@ -3,6 +3,7 @@
 #include "strategy/values/RtiTargetValue.h"
 #include "strategy/values/ItemUsageValue.h"
 #include "ChatHelper.h"
+#include "Guilds/GuildMgr.h"
 
 using namespace ai;
 

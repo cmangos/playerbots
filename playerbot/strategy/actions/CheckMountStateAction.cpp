@@ -45,6 +45,9 @@ bool CheckMountStateAction::Execute(Event& event)
     //Mount up in battle grounds
     if (bot->InBattleGround())
     {
+        if (WorldPosition(bot).currentHeight() < -5.0f)
+            return UnMount();
+
         if (!canAttackTarget)
         {
             if (!hasAttackers || (farFromTarget && !bot->IsInCombat()))
@@ -125,7 +128,7 @@ bool CheckMountStateAction::Execute(Event& event)
     }
 
     //Doing stuff nearby.
-    if (travelTarget->isWorking())
+    if (travelTarget->IsWorking())
     {
         if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && IsMounted)
             ai->TellPlayerNoFacing(requester, "Unmount. Near travel target.");
@@ -166,7 +169,7 @@ bool CheckMountStateAction::Execute(Event& event)
     if (!ai->IsStateActive(BotState::BOT_STATE_COMBAT) && !hasEnemy)
     {
         //Mounting to travel.
-        if (travelTarget->isTraveling() && AI_VALUE(bool, "can move around"))
+        if (travelTarget->IsTraveling() && AI_VALUE(bool, "can move around"))
         {
             if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && !IsMounted)
                 ai->TellPlayerNoFacing(requester, "Mount. Traveling some place.");
@@ -350,6 +353,8 @@ bool CheckMountStateAction::CanMountInBg() const
         //check near A Flag
         uint32 lowguid = 90000;
         uint32 id = 179830;
+        if (!bg)
+            return false;
         GameObject* AllianceflagStand = bg->GetBgMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, id, lowguid));
 
         if (bot->IsWithinDistInMap(AllianceflagStand, 3.0f))

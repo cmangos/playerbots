@@ -116,5 +116,7 @@ namespace ai
         }
         virtual std::vector<std::string> GetRelatedStrategies() { return {}; }
 #endif
+    protected:
+        virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 }

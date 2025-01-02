@@ -315,6 +315,38 @@ std::set<uint32> ChatHelper::ExtractAllItemIds(const std::string& text)
     return ids;
 }
 
+std::set<uint32> ChatHelper::ExtractAllSkillIds(const std::string& text)
+{
+    std::set<uint32> ids;
+
+    std::regex rgx("Hskill:[0-9]+");
+    auto begin = std::sregex_iterator(text.begin(), text.end(), rgx);
+    auto end = std::sregex_iterator();
+    for (std::sregex_iterator i = begin; i != end; ++i)
+    {
+        std::smatch match = *i;
+        ids.insert(std::stoi(match.str().erase(0, 7)));
+    }
+
+    return ids;
+}
+
+std::set<uint32> ChatHelper::ExtractAllFactionIds(const std::string& text)
+{
+    std::set<uint32> ids;
+
+    std::regex rgx("Hfaction:[0-9]+");
+    auto begin = std::sregex_iterator(text.begin(), text.end(), rgx);
+    auto end = std::sregex_iterator();
+    for (std::sregex_iterator i = begin; i != end; ++i)
+    {
+        std::smatch match = *i;
+        ids.insert(std::stoi(match.str().erase(0, 9)));
+    }
+
+    return ids;
+}
+
 ItemIds ChatHelper::parseItems(const std::string& text, bool validate)
 {
     std::vector<uint32> itemIDsUnordered = parseItemsUnordered(text, validate);
@@ -566,6 +598,94 @@ std::string ChatHelper::formatQItem(uint32 itemId)
     return out.str();
 }
 
+std::string ChatHelper::formatSkill(uint32 skillId, Player* player)
+{
+    std::string name = "unknown skill";
+
+    SkillLineEntry const* skillInfo = sSkillLineStore.LookupEntry(skillId);
+    if (skillInfo)
+    {
+        int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
+
+        if (loc_idx == -1)
+            loc_idx = 0;
+        name = skillInfo->name[loc_idx];
+    }
+    std::ostringstream out;
+    out << "|cffffffff|Hskill:" << skillId
+        << "|h[" << name << "]|h|r";
+
+    if (player && player->HasSkill(skillId))
+    {
+        uint32 curValue = player->GetSkillValuePure(skillId);
+        uint32 maxValue = player->GetSkillMaxPure(skillId);
+        uint32 permValue = player->GetSkillBonusPermanent(skillId);
+        uint32 tempValue = player->GetSkillBonusTemporary(skillId);
+
+        out << " (";
+
+        out << curValue << "/" << maxValue;
+
+        if (permValue)
+            out << " +perm " << permValue;
+
+        if (tempValue)
+            out << " +temp " << permValue;
+    }
+
+    return out.str();
+}
+
+std::string ChatHelper::formatFaction(uint32 factionId, Player* player)
+{
+    std::string name = "unknown faction";
+
+    uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK];
+    ReputationRankStrIndex[REP_HATED] = LANG_REP_HATED;
+    ReputationRankStrIndex[REP_HOSTILE] = LANG_REP_HOSTILE;
+    ReputationRankStrIndex[REP_UNFRIENDLY] = LANG_REP_UNFRIENDLY;
+    ReputationRankStrIndex[REP_NEUTRAL] = LANG_REP_NEUTRAL;
+    ReputationRankStrIndex[REP_FRIENDLY] = LANG_REP_FRIENDLY;
+    ReputationRankStrIndex[REP_HONORED] = LANG_REP_HONORED;
+    ReputationRankStrIndex[REP_REVERED] = LANG_REP_REVERED;
+    ReputationRankStrIndex[REP_EXALTED] = LANG_REP_EXALTED;
+
+#ifndef MANGOSBOT_ONE
+    const FactionEntry* factionEntry = sFactionStore.LookupEntry(factionId);
+#else
+    const FactionEntry* factionEntry = sFactionStore.LookupEntry<FactionEntry>(factionId);
+#endif
+
+    if (factionEntry)
+    {
+        int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
+        if (loc_idx == -1)
+            loc_idx = 0;
+        name = factionEntry->name[loc_idx];
+    }
+    std::ostringstream out;
+    out << "|cffffffff|Hfaction:" << factionId
+        << "|h[" << name << "]|h|r";
+
+    if (player)
+    {
+        FactionState const* repState = player->GetReputationMgr().GetState(factionEntry);
+
+        if (repState && repState->Flags & FACTION_FLAG_VISIBLE)
+        {
+            ReputationRank rank = player->GetReputationMgr().GetRank(factionEntry);
+            std::string rankName = player->GetSession()->GetMangosString(ReputationRankStrIndex[rank]);
+
+            out << " " << rankName << "|h|r (" << player->GetReputationMgr().GetReputation(factionEntry) << ")";
+
+            if (repState->Flags & FACTION_FLAG_AT_WAR)
+                out << " at war";
+        }
+    }
+
+    return out.str();
+}
+
 ChatMsg ChatHelper::parseChat(const std::string& text)
 {
     if (chats.find(text) != chats.end())
@@ -808,7 +928,28 @@ std::string ChatHelper::formatRace(uint8 race)
     return races[race];
 }
 
-uint32 ChatHelper::parseSkill(const std::string& text)
+std::string ChatHelper::formatFactionName(uint32 factionId)
+{
+    std::string name = "unknown faction";
+
+#ifndef MANGOSBOT_ONE
+    const FactionEntry* factionEntry = sFactionStore.LookupEntry(factionId);
+#else
+    const FactionEntry* factionEntry = sFactionStore.LookupEntry<FactionEntry>(factionId);
+#endif
+
+    if (factionEntry)
+    {
+        int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
+        if (loc_idx == -1)
+            loc_idx = 0;
+        name = factionEntry->name[loc_idx];
+    }
+
+    return name;
+}
+
+uint32 ChatHelper::parseSkillName(const std::string& text)
 {
     if (skills.find(text) != skills.end())
         return skills[text];
@@ -816,7 +957,7 @@ uint32 ChatHelper::parseSkill(const std::string& text)
     return SKILL_NONE;
 }
 
-std::string ChatHelper::formatSkill(uint32 skill)
+std::string ChatHelper::getSkillName(uint32 skill)
 {
     for (std::map<std::string, uint32>::iterator i = skills.begin(); i != skills.end(); ++i)
     {

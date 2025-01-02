@@ -9,6 +9,7 @@
 #include "RpgSubActions.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/strategy/values/PositionValue.h"
+#include "playerbot/strategy/values/TravelValues.h"
 #include <iomanip>
 
 using namespace ai;
@@ -138,6 +139,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+    focusQuestTravelList focusList = AI_VALUE(focusQuestTravelList, "focus travel target");
 
     GuidPosition masterRpgTarget;
     if (requester && requester->GetPlayerbotAI() && requester->GetMapId() == bot->GetMapId() && !requester->IsBeingTeleported())
@@ -208,7 +210,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     if (ai->HasRealPlayerMaster())
         maxCheck = 500;
 
-    for (auto& guid :targetList)
+    for (auto& guid : targetList)
     {
         GuidPosition guidP(guid, bot->GetMapId(), bot->GetInstanceId());
 
@@ -257,7 +259,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
                 }
 
                 //Leaders are not allowed to rpg with groupmembers to prevent follow from making members run away.
-                if (bot->GetGroup() && player->GetGroup() == bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid())) 
+                if (bot->GetGroup() && player->GetGroup() == bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
                     continue;
             }
         }
@@ -270,22 +272,32 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         float relevance = getMaxRelevance(guidP);
 
         //If this rpg target is our travel target increase the relevance by 50% to make it more likely to be picked.
-        if (guidP.GetEntry() == travelTarget->getEntry())
-            relevance *= 1.5f;
+        bool isTravelTarget = guidP.GetEntry() == travelTarget->GetEntry();
+        if (isTravelTarget)
+        {
+            if (focusList.empty())
+                relevance *= 1.5f;
+            else
+                relevance *= 10.0f;
+        }
 
         //If we already had a different target with a relevance above 1 and this only has 1 (trivial) skip this target.
         if (!hasGoodRelevance || relevance > 1)
+        {
             targets[guidP] = relevance;
 
-        //If this relevance isn't trivial scale it based on distance. +60 when right ontop and decreasing 1 for each yard down to 2.
-        if (targets[guidP] > 1)
-        {
+            //Scale relevance based on distance
             hasGoodRelevance = true;
-            uint32 mod = guidP.fDist(bot);
+            int32 mod;
+            if (!isTravelTarget || focusList.empty())
+                mod = guidP.fDist(bot);
+            else
+                mod = 0;
+
             if (mod > 60 + targets[guidP])
                 targets[guidP] = 2;
             else
-                targets[guidP] += 60 - (int32)mod;
+                targets[guidP] += 60 - mod;
         }
 
         checked++;
@@ -299,8 +311,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     SET_AI_VALUE(std::string, "next rpg action", "");
 
     for (auto it = begin(targets); it != end(targets);)
-    {
-        
+    {        
         if (it->second == 0) //Remove empty targets.
             it = targets.erase(it);
         else if (hasGoodRelevance && it->second <= 1.0)  //Remove useless targets if there's any good ones.
@@ -379,7 +390,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
     //We pick a random target from the list with targets having a higher relevance of being picked.
     std::mt19937 gen(time(0));
-    sTravelMgr.weighted_shuffle(guidps.begin(), guidps.end(), relevances.begin(), relevances.end(), gen);
+    WeightedShuffle(guidps.begin(), guidps.end(), relevances.begin(), relevances.end(), gen);
     GuidPosition guidP(guidps.front(),bot->GetMapId(), bot->GetInstanceId());
 
     //If we can't find a target clear ignore list and try again later.
@@ -422,7 +433,7 @@ bool ChooseRpgTargetAction::isUseful()
 
     TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    if (travelTarget->isTraveling() && AI_VALUE2(bool, "can free move to", *travelTarget->getPosition()))
+    if (travelTarget->IsTraveling() && AI_VALUE2(bool, "can free move to", *travelTarget->GetPosition()))
         return false;
 
     if (AI_VALUE(std::list<ObjectGuid>, "possible rpg targets").empty())

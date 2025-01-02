@@ -18,7 +18,7 @@ bool RpgTrigger::IsActive()
 
     if (AI_VALUE(GuidPosition, "rpg target").GetEntry())
     {
-        if (AI_VALUE(GuidPosition, "rpg target").GetEntry() == AI_VALUE(TravelTarget*, "travel target")->getEntry())
+        if (AI_VALUE(GuidPosition, "rpg target").GetEntry() == AI_VALUE(TravelTarget*, "travel target")->GetEntry())
             return true;
     }
 
@@ -101,7 +101,7 @@ bool RpgStartQuestTrigger::IsActive()
         if (!AI_VALUE2(bool, "can accept quest low level npc", entry) )
             return false;
 
-        if (entry == AI_VALUE(TravelTarget*, "travel target")->getEntry())
+        if (entry == AI_VALUE(TravelTarget*, "travel target")->GetEntry())
             return true;
     }
     else
@@ -149,7 +149,6 @@ bool RpgRepeatQuestTrigger::IsActive()
 
     return false;
 }
-
 
 bool RpgBuyTrigger::IsActive()
 {
@@ -297,7 +296,6 @@ bool RpgTrainTrigger::IsTrainerOf(CreatureInfo const* cInfo, Player* pPlayer)
     return true;
 }
 
-
 bool RpgTrainTrigger::IsActive()
 {
     GuidPosition guidP(getGuidP());
@@ -426,6 +424,9 @@ bool RpgHomeBindTrigger::IsActive()
     if (AI_VALUE(WorldPosition, "home bind").distance(bot) < 500.0f)
         return false;
 
+    if ((ai->IsRealPlayer() || sPlayerbotAIConfig.IsFreeAltBot(bot)) && bot->GetLevel() == DEFAULT_MAX_LEVEL)
+        return false;
+
     return true;
 }
 
@@ -512,6 +513,36 @@ bool RpgUseTrigger::IsActive()
         return false;
     }   
 }
+
+bool RpgAIChatTrigger::IsActive()
+{
+    if (sPlayerbotAIConfig.llmEnabled == 0)
+        return false;
+
+    if (FarFromRpgTargetTrigger::IsActive())
+        return false;    
+
+    if (!ai->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && sPlayerbotAIConfig.llmEnabled < 3)
+        return false;
+
+    if (!sPlayerbotAIConfig.llmRpgAIChatChance || !(urand(0, 99) < sPlayerbotAIConfig.llmRpgAIChatChance))
+        return false;
+
+    if (!ai->HasPlayerNearby(sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY)))
+        return false;
+
+    GuidPosition guidP(getGuidP());
+ 
+    if (guidP.IsPlayer())
+    {
+        Player* player = guidP.GetPlayer();
+
+        if (!player || player->isRealPlayer())
+            return false;
+    }
+
+    return true;
+};
 
 bool RpgSpellTrigger::IsActive()
 {

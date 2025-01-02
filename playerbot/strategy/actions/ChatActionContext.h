@@ -74,6 +74,10 @@
 #include "MoveStyleAction.h"
 #include "ValueActions.h"
 #include "QuestRewardActions.h"
+#include "ChooseTravelTargetAction.h"
+#include "SkillAction.h"
+#include "FactionAction.h"
+#include "SetValueAction.h"
 
 namespace ai
 {
@@ -204,6 +208,10 @@ namespace ai
             creators["move style"] = &ChatActionContext::move_style;
 
             creators["jump"] = &ChatActionContext::jump;
+            creators["doquest"] = [](PlayerbotAI* ai) { return new FocusTravelTargetAction(ai); };
+            creators["skill"] = [](PlayerbotAI* ai) { return new SkillAction(ai); };
+            creators["faction"] = [](PlayerbotAI* ai) { return new FactionAction(ai); };
+            creators["set value"] = [](PlayerbotAI* ai) { return new SetValueAction(ai); };
         }
 
     private:

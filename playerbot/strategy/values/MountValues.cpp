@@ -1,5 +1,6 @@
-
 #include "MountValues.h"
+#include "playerbot/ChatHelper.h"
+#include "playerbot/strategy/AiObjectContext.h"
 
 using namespace ai;
 

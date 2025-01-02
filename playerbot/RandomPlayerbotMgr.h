@@ -95,7 +95,7 @@ public:
         Player* GetRandomPlayer();
         PlayerBotMap& GetPlayers() { return players; };
         Player* GetPlayer(uint32 playerGuid);
-        void PrintStats();
+        void PrintStats(uint32 requesterGuid);
         double GetBuyMultiplier(Player* bot);
         double GetSellMultiplier(Player* bot);
         void AddTradeDiscount(Player* bot, Player* master, int32 value);
@@ -114,8 +114,8 @@ public:
         uint32 GetValue(uint32 bot, std::string type);
         int32 GetValueValidTime(uint32 bot, std::string event);
         std::string GetData(uint32 bot, std::string type);
-        void SetValue(uint32 bot, std::string type, uint32 value, std::string data = "");
-        void SetValue(Player* bot, std::string type, uint32 value, std::string data = "");
+        void SetValue(uint32 bot, std::string type, uint32 value, std::string data = "", int32 validIn = -1);
+        void SetValue(Player* bot, std::string type, uint32 value, std::string data = "", int32 validIn = -1);
         void Remove(Player* bot);
         void Hotfix(Player* player, uint32 version);
         uint32 GetBattleMasterEntry(Player* bot, BattleGroundTypeId bgTypeId, bool fake = false);
@@ -140,6 +140,7 @@ public:
         static InventoryResult CanEquipUnseenItem(Player* player, uint8 slot, uint16& dest, uint32 item);
 
         bool AddRandomBot(uint32 bot);
+        virtual void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder) override;
 
         std::map<Team, std::map<BattleGroundTypeId, std::list<uint32> > > getBattleMastersCache() { return BattleMastersCache; }
 
@@ -156,9 +157,9 @@ public:
         std::mutex m_ahActionMutex;
 
         std::vector<AuctionEntry> GetAhPrices(uint32 itemId) { return ahMirror[itemId]; }
+        uint32 GetPlayersLevel() { return playersLevel; }
 	protected:
 	    virtual void OnBotLoginInternal(Player * const bot);
-
     private:
         //pid values are set in constructor
         botPID pid = botPID(1, 50, -50, 0, 0, 0);

@@ -20,9 +20,9 @@ GuidPosition GraveyardValue::Calculate()
     {
         auto travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-        if (travelTarget && travelTarget->getPosition() && travelTarget->getPosition()->getMapId() == bot->GetMapId())
+        if (travelTarget && travelTarget->GetPosition() && travelTarget->GetPosition()->getMapId() == bot->GetMapId())
         {
-            refPosition = *travelTarget->getPosition();
+            refPosition = *travelTarget->GetPosition();
         }
     }
     else if (getQualifier() == "another closest appropriate")
@@ -90,6 +90,9 @@ WorldSafeLocsEntry const* GraveyardValue::GetAnotherAppropriateClosestGraveyard(
 
         //skip same zone
         if (graveyardZoneId == botZoneId)
+            continue;
+
+        if (!graveyardAreaEntry)
             continue;
 
         //skip higher level zones

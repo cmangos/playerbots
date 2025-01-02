@@ -129,6 +129,7 @@ namespace ai
             creators["debug grind"] = &StrategyContext::debug_grind;
             creators["debug loot"] = &StrategyContext::debug_loot;
             creators["debug log"] = &StrategyContext::debug_log;
+            creators["debug llm"] = [](PlayerbotAI* ai) { return new DebugLLMStrategy(ai); };
             creators["debug logname"] = &StrategyContext::debug_logname;
             creators["rtsc"] = &StrategyContext::rtsc;
             creators["rtsc jump"] = &StrategyContext::rtsc_jump;
@@ -140,11 +141,13 @@ namespace ai
             creators["wait for attack"] = &StrategyContext::wait_for_attack;
             creators["pull back"] = &StrategyContext::pull_back;
             creators["focus heal targets"] = &StrategyContext::focus_heal_targets;
+            creators["focus rti targets"] = [](PlayerbotAI* ai) { return new FocusRtiTargetsStrategy(ai); };
             creators["heal interrupt"] = &StrategyContext::heal_interrupt;
             creators["preheal"] = &StrategyContext::preheal;
             creators["wbuff"] = &StrategyContext::world_buff;
             creators["silent"] = &StrategyContext::silent;
             creators["nowar"] = &StrategyContext::nowar;
+            creators["ai chat"] = [](PlayerbotAI* ai) { return new AIChatStrategy(ai); };
 
             // Dungeon Strategies
             creators["dungeon"] = &StrategyContext::dungeon;

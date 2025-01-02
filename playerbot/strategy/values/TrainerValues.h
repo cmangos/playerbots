@@ -24,7 +24,7 @@ namespace ai
     public:
         TrainableClassSpells(PlayerbotAI* ai) : CalculatedValue<std::vector<TrainerSpell const*>>(ai, "trainable class spells") {}
 
-        virtual std::vector<TrainerSpell const*> Calculate();
+        virtual std::vector<TrainerSpell const*> Calculate() override;
 
         virtual std::string Format() override;
     };
@@ -34,7 +34,7 @@ namespace ai
     public:
         TrainCostValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "train cost", 60) {}
 
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
     };
 }
 

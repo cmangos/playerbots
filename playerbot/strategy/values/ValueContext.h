@@ -403,6 +403,7 @@ namespace ai
             creators["action possible"] = [](PlayerbotAI* ai) { return new ActionPossibleValue(ai); };
             creators["action useful"] = [](PlayerbotAI* ai) { return new ActionUsefulValue(ai); };
             creators["trigger active"] = [](PlayerbotAI* ai) { return new TriggerActiveValue(ai); };
+            creators["has strategy"] = [](PlayerbotAI* ai) { return new HasStrategyValue(ai); };
 
             creators["party tank without lifebloom"] = [](PlayerbotAI* ai) { return new PartyTankWithoutLifebloomValue(ai); };
             creators["move style"] = [](PlayerbotAI* ai) { return new MoveStyleValue(ai); };

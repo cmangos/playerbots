@@ -647,7 +647,9 @@ bool Engine::ContainsStrategy(StrategyType type)
 	for (std::map<std::string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
 	{
 		Strategy* strategy = i->second;
-		if (strategy->GetType() & type)
+        if (!strategy)
+            sLog.outError("Engine::ContainsStrategy> Strategy %s is invalid", i->first);
+		else if (strategy->GetType() & type)
 			return true;
 	}
 	return false;

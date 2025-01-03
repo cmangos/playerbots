@@ -946,7 +946,7 @@ bool ChooseTravelTargetAction::SetNpcFlagTarget(Player* requester, TravelTarget*
     std::vector<TravelDestination*> TravelDestinations;
 
     //Loop over all npcs.
-    for (auto& d : sTravelMgr.GetDestinations(info, typeid(RpgTravelDestination)))
+    for (auto& d : sTravelMgr.GetDestinations(info, typeid(RpgTravelDestination), 0, 0, 0, false))
     {
         if (d->GetEntry() <= 0)
             continue;

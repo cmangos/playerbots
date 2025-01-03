@@ -476,6 +476,9 @@ AiPlayerbot.PremadeSpecLink.1.4.60 = 30325001302-05052130025012051
 AiPlayerbot.PremadeSpecName.1.5 = pvp prot
 AiPlayerbot.PremadeSpecLink.1.5.60 = 05003--55255113032021251
 
+AiPlayerbot.PremadeSpecName.1.6 = fury slam
+AiPlayerbot.PremadeSpecLink.1.5.60 = 30305001322-05050005005510051
+
 # Paladin
 AiPlayerbot.PremadeSpecName.2.0 = pve dps ret (basic ret)
 AiPlayerbot.PremadeSpecLink.2.0.60 = 550001-503-542300512003151

@@ -109,7 +109,7 @@ bool QuestRelationTravelDestination::IsPossible(const PlayerTravelInfo& info) co
         }
     }
 
-    return false;
+    return true;
 }
 
 bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) const {

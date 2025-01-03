@@ -115,6 +115,8 @@ namespace ai
 	{
 	public:
 		CastStarfallAction(PlayerbotAI* ai) : CastSpellAction(ai, "starfall") {}
+
+        virtual std::string GetTargetName() { return "self target"; }
 	};
 
 	class CastHurricaneAction : public CastSpellAction

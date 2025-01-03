@@ -418,7 +418,6 @@ namespace ai
     };
 
     CAN_CAST_TRIGGER(ForceOfNatureTrigger, "force of nature");
-    CAN_CAST_TRIGGER(StarfallTrigger, "starfall");
     BOOST_TRIGGER(BerserkTrigger, "berserk");
     CAN_CAST_TRIGGER_A(ActiveHotTrigger, "nourish");
     SNARE_TRIGGER_A(CyclonePvpTrigger, "cyclone");
@@ -427,5 +426,12 @@ namespace ai
     {
     public:
         SavageRoarTrigger(PlayerbotAI* ai) : ComboPointsAvailableTrigger(ai, 3) {}
+    };
+
+    class StarfallTrigger : public SpellCanBeCastedTrigger
+    {
+    public:
+        StarfallTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "starfall") {}
+        std::string GetTargetName() override { return "self target"; }
     };
 }

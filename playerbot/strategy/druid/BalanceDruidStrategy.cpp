@@ -855,11 +855,11 @@ void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_CRITICAL_HEAL + 1), NULL)));
+        NextAction::array(0, new NextAction("regrowth", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("regrowth on party", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("regrowth on party", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low health",
@@ -877,11 +877,11 @@ void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "medium health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("regrowth", ACTION_IDLE + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "almost full health",
-        NextAction::array(0, new NextAction("rejuvenation", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("rejuvenation", ACTION_IDLE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "force of nature",

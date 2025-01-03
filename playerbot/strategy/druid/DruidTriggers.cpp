@@ -64,6 +64,10 @@ bool CyclonePvpTrigger::IsActive()
     {
         // Check if Cyclone is already active
         std::list<ObjectGuid> attackers = AI_VALUE(std::list<ObjectGuid>, "attackers");
+
+        if (attackers.size() <= 1)
+            return false;
+
         for (const auto& guid : attackers)
         {
             Unit* attacker = ai->GetUnit(guid);

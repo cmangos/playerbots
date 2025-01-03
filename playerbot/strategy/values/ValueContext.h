@@ -361,6 +361,7 @@ namespace ai
             creators["manual int"] = [](PlayerbotAI* ai) { return new IntManualSetValue(ai); };
             creators["manual saved int"] = [](PlayerbotAI* ai) { return new IntManualSetSavedValue(ai); };
             creators["manual string"] = [](PlayerbotAI* ai) { return new StringManualSetValue(ai); };
+            creators["manual saved string"] = [](PlayerbotAI* ai) { return new StringManualSetSavedValue(ai); };
             creators["group count"] = [](PlayerbotAI* ai) { return new GroupBoolCountValue(ai); };
             creators["group and"] = [](PlayerbotAI* ai) { return new GroupBoolANDValue(ai); };
             creators["group or"] = [](PlayerbotAI* ai) { return new GroupBoolORValue(ai); };

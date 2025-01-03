@@ -11,13 +11,6 @@ bool QueryQuestAction::Execute(Event& event)
     Player *bot = ai->GetBot();
     WorldPosition botPos(bot);
     std::string text = event.getParam();
-    bool travel = false;
-
-    if (text.find("travel") != std::string::npos)
-    {
-        travel = true;
-        chat->eraseAllSubStr(text, " travel");
-    }
 
     PlayerbotChatHandler ch(bot);
     uint32 questId = ch.extractQuestId(text);
@@ -44,7 +37,7 @@ bool QueryQuestAction::Execute(Event& event)
 
     for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
     {
-        if(questId != bot->GetQuestSlotQuestId(slot))
+        if (questId != bot->GetQuestSlotQuestId(slot))
             continue;
 
         std::ostringstream out;
@@ -59,39 +52,7 @@ bool QueryQuestAction::Execute(Event& event)
             out << "|c00FF0000not completed|r ---";
             ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             TellObjectives(requester, questId);
-        }
-
-        if (travel)
-        {
-            uint32 limit = 0;
-            std::vector<TravelDestination*> allDestinations = sTravelMgr.GetQuestTravelDestinations(bot, questId, true, true, -1);
-
-            std::sort(allDestinations.begin(), allDestinations.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
-
-            for (auto dest : allDestinations) 
-            {
-                if (limit > 50)
-                    continue;
-
-                std::ostringstream out;
-
-                uint32 tpoints = dest->GetPoints().size();
-
-                out << round(dest->DistanceTo(botPos));
-
-                out << " to " << dest->GetTitle();
-
-                out << " " << tpoints;
-                out << " points.";
-
-                if (!dest->IsActive(bot))
-                    out << " not active";
-
-                ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-
-                limit++;
-            }
-        }
+        }      
 
         return true;
     }

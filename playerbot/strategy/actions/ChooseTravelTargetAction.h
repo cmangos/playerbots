@@ -3,12 +3,10 @@
 #include "playerbot/strategy/Action.h"
 #include "MovementActions.h"
 #include "GenericActions.h"
+#include "playerbot/TravelMgr.h"
 
 namespace ai
 {
-    class TravelTarget;
-    class TravelDestination;
-
     class ChooseTravelTargetAction : public MovementAction {
     public:
         ChooseTravelTargetAction(PlayerbotAI* ai, std::string name = "choose travel target") : MovementAction(ai, name) {}
@@ -41,6 +39,8 @@ namespace ai
     private:
         virtual bool needForQuest(Unit* target);
         virtual bool needItemForQuest(uint32 itemId, const Quest* questTemplate, const QuestStatusData* questStatus);
+
+        PlayerTravelInfo info;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "choose travel target"; } //Must equal iternal name

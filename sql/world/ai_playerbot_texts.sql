@@ -4408,34 +4408,16 @@ INSERT INTO `ai_playerbot_texts` (`name`, `text`, `say_type`, `reply_type`, `tex
 ('cast_spell_command_summon_error_members', 'I don\'t have enough party members around to cast a summon', 0, 0, '', '', '', '', '', 'No tengo suficientes miembros de grupo alrededor para invocar', '', ''),
 ('cast_spell_command_summon_error_target', 'Failed to find the summon target', 0, 0, '', '', '', '', '', 'No he podido encontrar al objetivo de la invocación', '', ''),
 ('cast_spell_command_summon_error_combat', 'I can\'t summon while I\'m in combat', 0, 0, '', '', '', '', '', 'No puedo invocar durante un combate', '', ''),
-
-
-
 ('cast_spell_command_error_unknown_spell', 'I don\'t know the spell %spell', 0, 0, '', '', '', '', '', 'No conozco el hechizo %spell', '', ''),
-
-
-
 ('cast_spell_command_spell', 'Casting %spell', 0, 0, '', '', '', '', '', 'Lanzando %spell', '', ''),
-
-
-
 ('cast_spell_command_craft', 'Crafting %spell', 0, 0, '', '', '', '', '', 'Creando %spell', '', ''),
-
-
-
-('cast_spell_command_error', 'Cannot cast %spell', 0, 0, '', '', '', '', '', 'No puedo lanzar %spell', '', ''),
+('cast_spell_command_error', 'Cannot cast %spell. %fail_reason', 0, 0, '', '', '', '', '', 'No puedo lanzar %spell. %fail_reason', '', ''),
 ('cast_spell_command_error_failed', 'Failed to cast %spell', 0, 0, '', '', '', '', '', 'Fallo al lanzar %spell', '', ''),
-
-
-
 ('cast_spell_command_amount', ' |cffffff00(x%amount left)|r', 0, 0, '', '', '', '', '', ' |cffffff00(x%amount restante)|r', '', ''),
 
 
 
-
 ('dummy_end', 'dummy', 0, 0, '', '', '', '', '', '', '', '');
-
-
 
 DROP TABLE IF EXISTS `ai_playerbot_texts_chance`;
 CREATE TABLE IF NOT EXISTS `ai_playerbot_texts_chance` (

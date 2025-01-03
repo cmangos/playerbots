@@ -20,14 +20,6 @@ bool ListQuestsAction::Execute(Event& event)
     {
         ListQuests(requester, QUEST_LIST_FILTER_ALL);
     }
-    else if (event.getParam() == "travel")
-    {
-        ListQuests(requester, QUEST_LIST_FILTER_ALL, QUEST_TRAVEL_DETAIL_SUMMARY);
-    }
-    else if (event.getParam() == "travel detail")
-    {
-        ListQuests(requester, QUEST_LIST_FILTER_ALL, QUEST_TRAVEL_DETAIL_FULL);
-    }
     else
     {
         ListQuests(requester, QUEST_LIST_FILTER_SUMMARY);
@@ -58,6 +50,7 @@ int ListQuestsAction::ListQuests(Player* requester, bool completed, bool silent,
 {
     TravelTarget* target;
     WorldPosition botPos(bot);
+    PlayerTravelInfo info(bot);
     
     if (travelDetail != QUEST_TRAVEL_DETAIL_NONE)
         target = context->GetValue<TravelTarget*>("travel target")->Get();
@@ -98,65 +91,7 @@ int ListQuestsAction::ListQuests(Player* requester, bool completed, bool silent,
                     ai->TellPlayer(requester, out);
                 }
             }
-        }
-
-        if (travelDetail == QUEST_TRAVEL_DETAIL_SUMMARY)
-        {
-            std::vector<TravelDestination*> allDestinations = sTravelMgr.GetQuestTravelDestinations(bot, questId, true, true, -1);
-            std::vector<TravelDestination*> availDestinations = sTravelMgr.GetQuestTravelDestinations(bot, questId, ai->GetMaster(), false, -1);
-
-            uint32 desTot = allDestinations.size();
-            uint32 desAvail = availDestinations.size();
-            uint32 desFull = desAvail - sTravelMgr.GetQuestTravelDestinations(bot, questId, false, false, -1).size();
-            uint32 desRange = desAvail - sTravelMgr.GetQuestTravelDestinations(bot, questId, false, false).size();
-
-            uint32 tpoints = 0;
-            uint32 apoints = 0;
-
-            for (auto dest : allDestinations)
-                tpoints += dest->GetPoints().size();
-
-            std::ostringstream out;
-
-            out << desAvail << "/" << desTot << " destinations " << tpoints << " points. ";
-            if (desFull > 0)
-                out << desFull << " crowded.";
-            if (desRange > 0)
-                out << desRange << " out of range.";
-
-            ai->TellPlayer(requester, out);
-        }
-        else if (travelDetail == QUEST_TRAVEL_DETAIL_FULL)
-        {
-            uint32 limit = 0;
-            std::vector<TravelDestination*> allDestinations = sTravelMgr.GetQuestTravelDestinations(bot, questId, true, true, -1);
-
-            std::sort(allDestinations.begin(), allDestinations.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
-
-            for (auto dest : allDestinations)
-            {
-                if (limit > 5)
-                    continue;
-
-                std::ostringstream out;
-
-                uint32 tpoints = dest->GetPoints().size();
-
-                out << round(dest->DistanceTo(botPos));
-
-                out << " to " << dest->GetTitle();
-
-                out << " " << tpoints;
-                out << " points.";
-
-                if (!dest->IsActive(bot))
-                    out << " not active";
-
-                ai->TellPlayer(requester, out);
-
-                limit++;
-            }
-        }
+        }       
     }
 
     return count;

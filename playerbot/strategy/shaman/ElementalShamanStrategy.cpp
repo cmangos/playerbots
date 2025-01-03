@@ -1091,8 +1091,8 @@ void ElementalShamanCcPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     ShamanCcPvpStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "enemy is close",
-        NextAction::array(0, new NextAction("thunderstorm", ACTION_INTERRUPT), NULL)));
+        "enemy player ten yards target bot",
+        NextAction::array(0, new NextAction("thunderstorm", ACTION_EMERGENCY), NULL)));
 }
 
 void ElementalShamanCcPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

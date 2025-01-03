@@ -1013,11 +1013,27 @@ void ShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("lesser healing wave", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
         NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("healing wave", ACTION_IDLE + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("healing wave on party", ACTION_IDLE + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_IDLE), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
+        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_IDLE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "purge",
@@ -1041,18 +1057,34 @@ void ShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("lesser healing wave", ACTION_CRITICAL_HEAL + 1), NULL)));
+        NextAction::array(0, new NextAction("healing wave", ACTION_CRITICAL_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("healing wave on party", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("lesser healing wave", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("healing wave", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
+        NextAction::array(0, new NextAction("healing wave on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("healing wave", ACTION_LIGHT_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("healing wave on party", ACTION_LIGHT_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
         NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_LIGHT_HEAL), NULL)));
 
     if (sRandomPlayerbotMgr.IsRandomBot(ai->GetBot()))
@@ -1204,6 +1236,10 @@ void ShamanCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "hex",
         NextAction::array(0, new NextAction("hex", ACTION_INTERRUPT), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "enemy player ten yards target bot",
+        NextAction::array(0, new NextAction("earthbind totem", ACTION_INTERRUPT), NULL)));
 }
 
 void ShamanCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1214,11 +1250,6 @@ void ShamanCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 void ShamanCcPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     CcPvpStrategy::InitCombatTriggers(triggers);
-
-
-    triggers.push_back(new TriggerNode(
-        "enemy is close",
-        NextAction::array(0, new NextAction("earthbind totem", ACTION_INTERRUPT), NULL)));
 }
 
 void ShamanCcPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1229,6 +1260,10 @@ void ShamanCcPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
 void ShamanCcPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     CcPveStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "enemy is close",
+        NextAction::array(0, new NextAction("earthbind totem", ACTION_HIGH), NULL)));
 }
 
 void ShamanCcPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

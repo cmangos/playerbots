@@ -147,14 +147,13 @@ namespace ai
             }
 
             float distance = 30.0f;
-            if (target && target->GetVictim())
+            if (target && !target->IsPlayer() && target->GetVictim())
             {
                 distance -= 10;
-            }
-
-            if (sServerFacade.isMoving(target) && target->GetVictim())
-            {
-                distance -= 10;
+                if (sServerFacade.isMoving(target))
+                {
+                    distance -= 5;
+                }
             }
 
             if (bot->InBattleGround())

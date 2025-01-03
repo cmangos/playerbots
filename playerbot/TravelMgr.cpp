@@ -109,7 +109,7 @@ bool QuestRelationTravelDestination::IsPossible(const PlayerTravelInfo& info) co
         }
     }
 
-    return false;
+    return true;
 }
 
 bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) const {
@@ -2147,40 +2147,6 @@ void TravelMgr::LoadQuestTravelTable()
         WorldPosition::unloadMapAndVMaps(mapId);
     }
 #endif     
-}
-
-template <typename T, typename Pred>
-auto FilterCopyIfParChunksFuture(const std::vector<T>& vec, Pred p) {
-    const auto chunks = std::thread::hardware_concurrency();
-    const auto chunkLen = vec.size() / chunks;
-
-    std::vector<std::future<std::vector<T>>> tasks(chunks);
-
-    for (size_t i = 0; i < chunks; ++i) {
-        auto startIt = std::next(std::begin(vec), i * chunkLen);
-        auto endIt = std::next(startIt, chunkLen);
-        tasks[i] = std::async(std::launch::async, [=, &p] {
-            std::vector<T> chunkOut;
-            std::copy_if(startIt, endIt, std::back_inserter(chunkOut), p);
-            return chunkOut;
-            });
-    }
-
-    std::vector<T> out;
-
-    for (auto& ft : tasks)
-    {
-        auto part = ft.get();
-        out.insert(out.end(), part.begin(), part.end());
-    }
-
-    // remaining part:
-    if (vec.size() % chunks != 0) {
-        auto startIt = std::next(std::begin(vec), chunks * chunkLen);
-        std::copy_if(startIt, end(vec), std::back_inserter(out), p);
-    }
-
-    return out;
 }
 
 std::vector<TravelDestination*> TravelMgr::GetDestinations(const PlayerTravelInfo& info, std::type_index type, int32 entry, int32 subEntry1, int32 subEntry2, bool onlyPossible, float maxDistance) const

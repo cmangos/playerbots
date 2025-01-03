@@ -5755,9 +5755,9 @@ std::pair<uint32, uint32> PlayerbotAI::GetPriorityBracket(ActivePiorityType type
     case ActivePiorityType::HAS_REAL_PLAYER_MASTER:
     case ActivePiorityType::IS_REAL_PLAYER:
     case ActivePiorityType::IN_GROUP_WITH_REAL_PLAYER:
+    case ActivePiorityType::VISIBLE_FOR_PLAYER:
         return { 0,0 };
     case ActivePiorityType::IN_INSTANCE:
-    case ActivePiorityType::VISIBLE_FOR_PLAYER:
         return { 0,5 };
     case ActivePiorityType::IS_ALWAYS_ACTIVE:
     case ActivePiorityType::IN_COMBAT:

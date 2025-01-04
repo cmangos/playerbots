@@ -5550,6 +5550,8 @@ uint32 PlayerbotAI::GetMaxPreferedGuildSize()
 
     MemberSlot* botMember = guild->GetMemberSlot(bot->GetObjectGuid());
 
+    if (!botMember) return maxSize;
+
     if (!botMember->RankId) return maxSize;
 
     uint32 memberMod = (botMember->RankId * 20) / maxRank;

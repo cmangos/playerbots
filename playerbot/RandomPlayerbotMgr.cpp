@@ -3131,6 +3131,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
 
     std::map<std::string, ConsoleCommandHandler> handlers;
     handlers["init"] = &RandomPlayerbotMgr::RandomizeFirst;
+    handlers["gear"] = &RandomPlayerbotMgr::Randomize;
     handlers["upgrade"] = &RandomPlayerbotMgr::UpdateGearSpells;
     handlers["refresh"] = &RandomPlayerbotMgr::Refresh;
     handlers["teleport"] = &RandomPlayerbotMgr::RandomTeleportForLevel;

@@ -191,6 +191,8 @@ Unit* FlagCarrierValue::Calculate()
         if (ai->GetBot()->GetBattleGroundTypeId() == BattleGroundTypeId::BATTLEGROUND_EY)
         {
             BattleGroundEY* bg = (BattleGroundEY*)ai->GetBot()->GetBattleGround();
+            if (!bg)
+                return nullptr;
 
             if (bg->GetFlagCarrierGuid().IsEmpty())
                 return nullptr;

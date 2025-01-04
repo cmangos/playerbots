@@ -166,7 +166,7 @@ bool PlayerHasFlag::IsActive()
         if (bot->GetBattleGroundTypeId() == BattleGroundTypeId::BATTLEGROUND_EY)
         {
             BattleGroundEY* bg = (BattleGroundEY*)ai->GetBot()->GetBattleGround();
-            return bot->GetObjectGuid() == bg->GetFlagCarrierGuid();
+            return bg && bot->GetObjectGuid() == bg->GetFlagCarrierGuid();
         }
 #endif
         return false;

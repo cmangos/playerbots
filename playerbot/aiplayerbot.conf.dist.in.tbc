@@ -452,6 +452,9 @@ AiPlayerbot.PremadeSpecLink.1.4.70 = 05015001302-050501350050120531251
 AiPlayerbot.PremadeSpecName.1.5 = pvp prot
 AiPlayerbot.PremadeSpecLink.1.5.70 = 050253212--2305011303302123201351
 
+AiPlayerbot.PremadeSpecName.1.6 = fury slam
+AiPlayerbot.PremadeSpecLink.1.5.70 = 33005001332-050530020052120531151
+
 # Paladin
 AiPlayerbot.PremadeSpecName.2.0 = pve holy
 AiPlayerbot.PremadeSpecLink.2.0.70 = 05503020520132531051-050241030003

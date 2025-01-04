@@ -738,13 +738,33 @@ void HolyPriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
                              new NextAction("flash heal on party", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("power word: shield", ACTION_CRITICAL_HEAL + 1),
+            new NextAction("flash heal", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("power word: shield", ACTION_MEDIUM_HEAL + 2),
+            new NextAction("greater heal", ACTION_MEDIUM_HEAL + 1), NULL))); 
+    
+    triggers.push_back(new TriggerNode(
         "party member low health",
         NextAction::array(0, new NextAction("power word: shield on party", ACTION_MEDIUM_HEAL + 2),
                              new NextAction("greater heal on party", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("power word: shield", ACTION_MEDIUM_HEAL + 1),
+            new NextAction("greater heal", ACTION_MEDIUM_HEAL), NULL)));
+    
+    triggers.push_back(new TriggerNode(
         "party member medium health",
-        NextAction::array(0, new NextAction("greater heal on party", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("power word: shield on party", ACTION_MEDIUM_HEAL + 1),
+            new NextAction("greater heal on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("renew", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",
@@ -752,12 +772,48 @@ void HolyPriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "binding heal",
-        NextAction::array(0, new NextAction("binding heal", ACTION_LIGHT_HEAL), NULL)));
+        NextAction::array(0, new NextAction("binding heal", ACTION_MEDIUM_HEAL + 1), NULL)));
 }
 
 void HolyPriestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PriestStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("flash heal on party", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("flash heal", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("greater heal", ACTION_MEDIUM_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0, new NextAction("greater heal on party", ACTION_MEDIUM_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("greater heal", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("greater heal", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("renew", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
+        NextAction::array(0, new NextAction("renew on party", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "binding heal",
+        NextAction::array(0, new NextAction("binding heal", ACTION_MEDIUM_HEAL + 1), NULL)));
 }
 
 void HolyPriestStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

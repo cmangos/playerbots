@@ -188,7 +188,7 @@ bool PullStrategy::CanDoPullAction(Unit* target)
     // Check if the bot can perform the pull action
 
     // check if has ranged weapon
-    if (ai->GetBot()->getClass() != CLASS_DRUID && !ai->GetBot()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+    if (ai->GetBot()->getClass() != CLASS_DRUID && ai->GetBot()->getClass() != CLASS_PALADIN && !ai->GetBot()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
         return false;
 
     bool canPull = false;

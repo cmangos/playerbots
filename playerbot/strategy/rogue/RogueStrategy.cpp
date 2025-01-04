@@ -1433,7 +1433,13 @@ public:
             (actionName == "attack anything") ||
             (actionName == "choose rpg target") ||
             (actionName == "move to rpg target") ||
-            (actionName == "travel"))
+            (actionName == "travel") ||
+            (actionName == "bg move to start") ||
+            (actionName == "bg move to objective") ||
+            (actionName == "bg select objective") ||
+            (actionName == "bg check objective") ||
+            (actionName == "arena tactics") ||
+            (actionName == "arena move to center"))
         {
             return 1.0f;
         }

@@ -63,7 +63,7 @@ bool ai::AttackAnythingAction::Execute(Event& event)
                 {
                     if (PullStrategy* strategy = PullStrategy::Get(ai))
                     {
-                        if (strategy->CanDoPullAction(grindTarget) && AI_VALUE2(uint32, "item count", "ammo"))
+                        if (strategy->CanDoPullAction(grindTarget) && (ai->GetBot()->getClass() == CLASS_DRUID || ai->GetBot()->getClass() == CLASS_PALADIN || AI_VALUE2(uint32, "item count", "ammo")))
                         {
                             Event pullEvent("attack anything", grindTarget->GetObjectGuid());
                             bool doAction = ai->DoSpecificAction("pull my target", pullEvent, true);

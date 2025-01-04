@@ -140,7 +140,7 @@ bool PullAction::Execute(Event& event)
             const float distanceToTarget = target->GetDistance(bot);
             if (distanceToTarget <= strategy->GetRange())
             {
-                if (bot->IsMoving())
+                if (sServerFacade.isMoving(bot))
                 {
                     // Force stop
                     ai->StopMoving();

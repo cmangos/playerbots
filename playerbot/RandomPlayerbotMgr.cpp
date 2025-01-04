@@ -1393,40 +1393,49 @@ void RandomPlayerbotMgr::CheckBgQueue()
 #endif
             BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
             std::string _bgType;
+            std::string _bgBracket;
             switch (bgTypeId)
             {
             case BATTLEGROUND_AV:
                 _bgType = "AV";
+                _bgBracket = i == 0 ? "51-60" : i == 1 ? "61-70" : i == 2 ? (i == 2 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
                 break;
             case BATTLEGROUND_WS:
                 _bgType = "WSG";
+                _bgBracket = i == 0 ? "10-19" : i == 1 ? "20-29" : i == 2 ? "30-39" : i == 3 ? "40-49" : i == 4 ? "50-59" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 6 ? (i == 6 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
                 break;
             case BATTLEGROUND_AB:
                 _bgType = "AB";
+                _bgBracket = i == 0 ? "20-29" : i == 1 ? "30-39" : i == 2 ? "40-49" : i == 3 ? "50-59" : (i == 4 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 4 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 5 ? (i == 5 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
                 break;
 #ifndef MANGOSBOT_ZERO
             case BATTLEGROUND_EY:
                 _bgType = "EotS";
+                _bgBracket = i == 0 ? "61-69" : i == 1 ? (i == 1 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
                 break;
 #endif
 #ifdef MANGOSBOT_TWO
             case BATTLEGROUND_RB:
                 _bgType = "Random";
+                _bgBracket = "80";
                 break;
             case BATTLEGROUND_SA:
                 _bgType = "SotA";
+                _bgBracket = i == 0 ? "71-79" : "80";
                 break;
             case BATTLEGROUND_IC:
                 _bgType = "IoC";
+                _bgBracket = i == 0 ? "71-79" : "80";
                 break;
 #endif
             default:
                 _bgType = "Other";
+                _bgBracket = "??";
                 break;
             }
             sLog.outBasic("BG:%s %s: Plr (%d:%d) Bot (%d:%d) Total (A:%d H:%d)",
                 _bgType.c_str(),
-                i == 0 ? "10-19" : i == 1 ? "20-29" : i == 2 ? "30-39" : i == 3 ? "40-49" : i == 4 ? "50-59" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 6 ? (i == 6 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80",
+                _bgBracket.c_str(),
                 BgPlayers[j][i][0],
                 BgPlayers[j][i][1],
                 BgBots[j][i][0],

@@ -5825,10 +5825,10 @@ bool PlayerbotAI::AllowActive(ActivityType activityType)
         case ActivePiorityType::IS_REAL_PLAYER:
         case ActivePiorityType::IN_GROUP_WITH_REAL_PLAYER:
         case ActivePiorityType::IN_INSTANCE:
+        case ActivePiorityType::VISIBLE_FOR_PLAYER:
         case ActivePiorityType::IS_ALWAYS_ACTIVE:
             return true;
             break;
-        case ActivePiorityType::VISIBLE_FOR_PLAYER:
         case ActivePiorityType::IN_COMBAT:
         case ActivePiorityType::NEARBY_PLAYER:
         case ActivePiorityType::IN_BG_QUEUE:

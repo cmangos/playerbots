@@ -243,6 +243,7 @@ namespace ai
                 creators["intercept and far enemy"] = &TriggerFactoryInternal::intercept_and_far_enemy;
                 creators["intercept and rage"] = &TriggerFactoryInternal::intercept_and_rage;
                 creators["recklessness"] = &TriggerFactoryInternal::recklessness;
+                creators["slam"] = &TriggerFactoryInternal::slam;
             }
 
         private:

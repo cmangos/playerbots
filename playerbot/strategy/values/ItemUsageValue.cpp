@@ -111,8 +111,11 @@ ItemUsage ItemUsageValue::Calculate()
     if (proto->ItemId == 6948)
         return ItemUsage::ITEM_USAGE_KEEP;
 
+    // assign stacks to be reused
+    float stacks = CurrentStacks(ai, proto);
+
     //WARLOCKS GOT TO KEEP SOULSHARDS (keep at least 10)
-    if (bot->getClass() == CLASS_WARLOCK && proto->ItemId == 6265 && CurrentStacks(ai, proto) <= 10)
+    if (bot->getClass() == CLASS_WARLOCK && proto->ItemId == 6265 && stacks <= 10)
         return ItemUsage::ITEM_USAGE_KEEP;
 
     //SKILL
@@ -123,7 +126,6 @@ ItemUsage ItemUsageValue::Calculate()
 
         if (IsItemNeededForSkill(proto))
         {
-            float stacks = CurrentStacks(ai, proto);
             if (stacks < 1)
                 return ItemUsage::ITEM_USAGE_SKILL; //Buy more.
             else if (stacks == 1)
@@ -136,7 +138,6 @@ ItemUsage ItemUsageValue::Calculate()
 
         if (IsItemNeededForSkill(proto))
         {
-            float stacks = CurrentStacks(ai, proto);
             if (stacks < 1)
                 return ItemUsage::ITEM_USAGE_SKILL; //Buy more.
             else if (stacks == 1)
@@ -159,8 +160,6 @@ ItemUsage ItemUsageValue::Calculate()
 
         if (needItem)
         {
-            float stacks = CurrentStacks(ai, proto);
-
             if (proto->Class == ITEM_CLASS_RECIPE && stacks > 0) //Only buy one recipe.
                 return ItemUsage::ITEM_USAGE_KEEP;
 
@@ -211,15 +210,15 @@ ItemUsage ItemUsageValue::Calculate()
 
         if (isAppropriateConsumable && bot->CanUseItem(proto) == EQUIP_ERR_OK)
         {
-            float stacks = BetterStacks(proto, foodType);
+            float betterStacks = BetterStacks(proto, foodType);
 
-            if (stacks < 1)
+            if (betterStacks < 1)
             {
-                stacks += CurrentStacks(ai, proto);
+                betterStacks += stacks;
 
-                if (stacks < 1)
+                if (betterStacks < 1)
                     return ItemUsage::ITEM_USAGE_USE; //Buy some to get to 1 stack
-                else if (stacks < 2)       
+                else if (betterStacks < 2)
                     return ItemUsage::ITEM_USAGE_KEEP; //Keep the item if less than 2 stack
             }
         }
@@ -227,8 +226,6 @@ ItemUsage ItemUsageValue::Calculate()
 
     if (proto->Class == ITEM_CLASS_REAGENT && SpellsUsingItem(proto->ItemId, bot).size())
     {
-        float stacks = CurrentStacks(ai, proto);
-
         if (stacks < 1)
             return ItemUsage::ITEM_USAGE_USE;
         else if (stacks < 2)
@@ -304,7 +301,7 @@ ItemUsage ItemUsageValue::Calculate()
     {
         if (IsItemUsefulForQuest(bot, proto))
             return ItemUsage::ITEM_USAGE_QUEST;
-        else if (IsItemUsefulForQuest(bot, proto, true) && CurrentStacks(ai, proto) < 2) //Do not sell quest items unless selling a full stack will stil keep enough in inventory.
+        else if (IsItemUsefulForQuest(bot, proto, true) && stacks < 2) //Do not sell quest items unless selling a full stack will stil keep enough in inventory.
             return ItemUsage::ITEM_USAGE_KEEP;
     }
 
@@ -356,7 +353,7 @@ ItemUsage ItemUsageValue::Calculate()
 
                     if (ammo < needAmmo) //We already have enough of the current ammo.
                     {
-                        ammo += CurrentStacks(ai, proto);
+                        ammo += stacks;
 
                         if (ammo < needAmmo)         //Buy ammo to get to the proper supply
                             return ItemUsage::ITEM_USAGE_AMMO;

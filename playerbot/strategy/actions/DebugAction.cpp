@@ -1185,6 +1185,74 @@ bool DebugAction::Execute(Event& event)
             return true;
         }
     }
+    else if (text.find("print travel") == 0)
+    {
+        if (!sPlayerbotAIConfig.isLogOpen("travel.csv"))
+            sPlayerbotAIConfig.openLog("travel.csv", "w", true);
+
+        if (!sPlayerbotAIConfig.isLogOpen("travelActive.csv"))
+            sPlayerbotAIConfig.openLog("travelActive.csv", "w", true);
+
+        PlayerTravelInfo info(bot);
+
+        std::vector<std::type_index> types = { typeid(QuestTravelDestination), typeid(RpgTravelDestination), typeid(ExploreTravelDestination), typeid(GrindTravelDestination), typeid(BossTravelDestination), typeid(GatherTravelDestination) };
+
+        for (auto& type : types)
+        {
+            for (auto& dest : sTravelMgr.GetDestinations(info, type, 0, 0, 0, false, 0))
+            {
+                bool isPossible = dest->IsPossible(info);
+                bool isActive = dest->IsActive(bot, info);
+                for (auto& point : dest->GetPoints())
+                {
+                    GuidPosition* guidP = dynamic_cast<GuidPosition*>(point);
+
+                    if (guidP && guidP->IsEventUnspawned()) //Skip points that are not spawned due to events.
+                    {
+                        continue;
+                    }
+
+                    std::ostringstream out;
+
+                    out << type.name() << ",";
+                    out << "\"";
+                    if (type == typeid(QuestTravelDestination))
+                    {
+                        uint32 questId = ((QuestTravelDestination*)dest)->GetQuestId();
+                        Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+                        out << quest->GetTitle();
+                    }
+                    else if (type != typeid(ExploreTravelDestination))
+                    {
+                        if (((EntryTravelDestination*)dest)->GetCreatureInfo())
+                            out << ((EntryTravelDestination*)dest)->GetCreatureInfo()->Name;
+                        else if (((EntryTravelDestination*)dest)->GetGoInfo())
+                            out << ((EntryTravelDestination*)dest)->GetGoInfo()->name;
+                        else
+                            out << "";
+                    }
+                    else
+                    {
+                        out << dest->GetTitle();
+                    }
+                    out << "\",";
+                    out << std::to_string(dest->GetEntry()) << ",";
+                    out << std::to_string(dest->GetSubEntry()) << ",";
+                    out << "\"" << dest->GetTitle() << "\",";
+                    out << isPossible << ",";
+                    out << isActive << ",";
+                    point->printWKT(out);
+
+                    sPlayerbotAIConfig.log("travel.csv", out.str().c_str());
+                    if(isActive)
+                        sPlayerbotAIConfig.log("travelActive.csv", out.str().c_str());
+                }
+
+                if (dest->GetPoints().empty())
+                    sLog.outError("Destination %s has no points!", dest->GetTitle());
+            }
+        }
+    }
     else if (text.find("values ") == 0)
     {
         ai->TellPlayerNoFacing(requester, ai->GetAiObjectContext()->FormatValues(text.substr(7)));

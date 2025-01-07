@@ -5,14 +5,6 @@
 
 #include "Maps/Map.h"
 
-#ifdef MANGOSBOT_TWO
-    #include "Vmap/VMapFactory.h"
-#else
-    #include "vmap/VMapFactory.h"
-#endif
-
-
-#include "MotionGenerators/MoveMap.h"
 #include "World/World.h"
 #include "Grids/CellImpl.h"
 #include "Globals/ObjectAccessor.h"
@@ -416,7 +408,7 @@ AreaTableEntry const* WorldPosition::getArea() const
 {
     loadMapAndVMap(0);
 
-    uint16 areaFlag = getAreaFlag();
+    uint16 areaFlag = getAreaFlag(0);
 
     return GetAreaEntryByAreaFlagAndMap(areaFlag, getMapId());
 }
@@ -672,38 +664,62 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
 {
     std::string logName = "load_map_grid.csv";
 
-#ifndef MANGOSBOT_TWO
-    if (MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y))
+    bool hasVmap = isVmapLoaded(mapId, instanceId, x, y);
+    bool hasMmap = isMmapLoaded(mapId, instanceId, x, y);
+
+    if (hasVmap && hasMmap)
         return true;
-#else
-    if (MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y))
-        return true;
-#endif
+
     if (sTravelMgr.IsBadMmap(mapId, x, y))
         return false;
 
     bool isLoaded = false;
 
+    if (!hasMmap)
+    {
 #ifndef MANGOSBOT_TWO
-    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
-        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
-    else
-    {
-        MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
-        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
-    }
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
+        else
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, instanceId);
+            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
+        }
 #else
-    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
-        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId,0, x, y, 0);
-    else
-    {
-        if(MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0))
-        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, 0);
-    }
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, instanceId);
+        else
+        {
+            if (MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, instanceId))
+                isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, instanceId);
+        }
 #endif
 
-    if(!isLoaded)
-        sTravelMgr.AddBadMmap(mapId, x, y);
+
+        if (!isLoaded)
+            sTravelMgr.AddBadMmap(mapId, x, y);
+    }
+
+    if (!hasVmap)
+    {
+#ifndef MANGOSBOT_TWO
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+            isLoaded = VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, x, y);
+        else
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath().c_str(), mapId, instanceId);
+            isLoaded = VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, x, y);
+        }
+#else
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+            isLoaded = VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, 0, x, y, instanceId);
+        else
+        {
+            if (MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath().c_str(), mapId, instanceId))
+                isLoaded = VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, 0, x, y, instanceId);
+        }
+#endif
+    }
 
     if (sPlayerbotAIConfig.hasLog(logName))
     {

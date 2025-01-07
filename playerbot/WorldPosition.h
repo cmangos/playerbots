@@ -6,6 +6,14 @@
 #include "World/World.h"
 #include "MotionGenerators/PathFinder.h"
 
+#ifdef MANGOSBOT_TWO
+#include "Vmap/VMapFactory.h"
+#else
+#include "vmap/VMapFactory.h"
+#endif
+
+#include "MotionGenerators/MoveMap.h"
+
 class ByteBuffer;
 
 namespace G3D
@@ -187,6 +195,29 @@ namespace ai
 
         std::vector <WorldPosition*> GetNextPoint(std::vector<WorldPosition*> points, uint32 amount = 1) const;
         std::vector <WorldPosition> GetNextPoint(std::vector<WorldPosition> points, uint32 amount = 1) const;
+        
+        template<class T>
+        void GetNextPoint(std::vector <std::pair<T, WorldPosition*>>& data) const
+        {
+            std::vector<uint32> weights;
+
+            std::transform(data.begin(), data.end(), std::back_inserter(weights), [this](std::pair<T, WorldPosition*> point) { return 200000 / (1 + this->distance(*point.second)); });
+
+            //If any weight is 0 add 1 to all weights.
+            for (auto& w : weights)
+            {
+                if (w > 0)
+                    continue;
+
+                std::for_each(weights.begin(), weights.end(), [](uint32& d) { d += 1; });
+                break;
+            }
+
+            std::mt19937 gen(time(0));
+
+            WeightedShuffle(data.begin(), data.end(), weights.begin(), weights.end(), gen);
+        }
+
 
         //Map functions. Player independent.
         const MapEntry* getMapEntry() const { return sMapStore.LookupEntry(mapid); }
@@ -238,6 +269,25 @@ namespace ai
         std::vector<mGridPair> getmGridPairs(const WorldPosition& secondPos) const;
         static std::vector<WorldPosition> frommGridPair(const mGridPair& gridPair, uint32 mapId);
 
+        static bool isVmapLoaded(uint32 mapId, uint32 instanceId, int x, int y) {
+#ifndef MANGOSBOT_TWO
+            return VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(mapId, x, y);
+#else
+            return VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(mapId, instanceId, x, y);
+#endif
+        }
+
+        bool isVmapLoaded(uint32 instanceId) const { return isVmapLoaded(getMapId(), instanceId, getmGridPair().first, getmGridPair().second); }
+
+        static bool isMmapLoaded(uint32 mapId, uint32 instanceId, int x, int y)  {
+#ifndef MANGOSBOT_TWO
+            return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y);
+#else
+            return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y);
+#endif
+        }
+
+        bool isMmapLoaded(uint32 instanceId) const { return isMmapLoaded(getMapId(), instanceId, getmGridPair().first, getmGridPair().second); }
 
         static bool loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y);
         bool loadMapAndVMap(uint32 instanceId) const {return loadMapAndVMap(getMapId(), instanceId, getmGridPair().first, getmGridPair().second); }
@@ -250,7 +300,7 @@ namespace ai
         float getDisplayY() const { return getDisplayLocation().coord_x; }
 
         bool isValid() const { return MaNGOS::IsValidMapCoord(coord_x, coord_y, coord_z, orientation); };
-        uint16 getAreaFlag() const { return isValid() ? sTerrainMgr.GetAreaFlag(getMapId(), coord_x, coord_y, coord_z) : 0; };
+        uint16 getAreaFlag(uint32 instanceId) const { return isValid() && isVmapLoaded(instanceId) ? sTerrainMgr.GetAreaFlag(getMapId(), coord_x, coord_y, coord_z) : 0; };
         AreaTableEntry const* getArea() const;
         std::string getAreaName(const bool fullName = true, const bool zoneName = false) const;
         std::string getAreaOverride() const { if (!getTerrain()) return "";  AreaNameInfo nameInfo = getTerrain()->GetAreaName(coord_x, coord_y, coord_z, 0); return nameInfo.wmoNameOverride ? nameInfo.wmoNameOverride : ""; }

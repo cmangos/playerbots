@@ -243,6 +243,7 @@ namespace ai
                 creators["intercept and far enemy"] = &TriggerFactoryInternal::intercept_and_far_enemy;
                 creators["intercept and rage"] = &TriggerFactoryInternal::intercept_and_rage;
                 creators["recklessness"] = &TriggerFactoryInternal::recklessness;
+                creators["slam"] = &TriggerFactoryInternal::slam;
             }
 
         private:
@@ -295,6 +296,7 @@ namespace ai
             static Trigger* intercept_and_far_enemy(PlayerbotAI* ai) { return new TwoTriggers(ai, "enemy is out of melee", "intercept can cast"); }
             static Trigger* intercept_and_rage(PlayerbotAI* ai) { return new TwoTriggers(ai, "intercept and far enemy", "light rage available"); }
             static Trigger* recklessness(PlayerbotAI* ai) { return new RecklessnessTrigger(ai); }
+            static Trigger* slam(PlayerbotAI* ai) { return new SlamTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>

@@ -653,8 +653,8 @@ bool PlayerbotAIConfig::Initialize()
     llmPostPrompt = config.GetStringDefault("AiPlayerbot.LLMPostPrompt", "<sender name>:");
 
     llmResponseStartPattern = config.GetStringDefault("AiPlayerbot.LLMResponseStartPattern", R"(("text":\s*"))");
-    llmResponseEndPattern = config.GetStringDefault("AiPlayerbot.LLMResponseEndPattern", R"(("|<receiver name>:))");
-    llmResponseDeletePattern = config.GetStringDefault("AiPlayerbot.LLMResponseDeletePattern", R"((\\n|<sender name>:))");
+    llmResponseEndPattern = config.GetStringDefault("AiPlayerbot.LLMResponseEndPattern", R"(("|\b(?!<sender name>\b)(\w+):))");
+    llmResponseDeletePattern = config.GetStringDefault("AiPlayerbot.LLMResponseDeletePattern", R"((\\n|<sender name>:|\\[^ ]+))");
     llmResponseSplitPattern = config.GetStringDefault("AiPlayerbot.LLMResponseSplitPattern", R"((\*.*?\*)|(\[.*?\])|(\'.*\')|([^\*\[\] ][^\*\[\]]+?[.?!]))");
 
     if (false) //Disable for release

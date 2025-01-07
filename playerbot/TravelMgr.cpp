@@ -45,11 +45,6 @@ PlayerTravelInfo::PlayerTravelInfo(Player* player)
         value = AI_VALUE(uint8, valueName);
 }
 
-std::vector<WorldPosition*> TravelDestination::GetPoints() const
-{
-    return points;
-}
-
 WorldPosition* TravelDestination::NearestPoint(const WorldPosition& pos) const {
     return *std::min_element(points.begin(), points.end(), [pos](WorldPosition* i, WorldPosition* j) {return i->distance(pos) < j->distance(pos); });
 }
@@ -656,6 +651,9 @@ bool GatherTravelDestination::IsPossible(const PlayerTravelInfo& info) const
     if (reqSkillValue > skillValue)
         return false;
 
+    if (info.GetLevel() * 5 <= skillValue) //Not able to increase skill.
+        return false;
+
     if (info.GetSkillMax((SkillType)skillId) <= skillValue) //Not able to increase skill.
         return false;
 
@@ -1218,6 +1216,9 @@ void TravelMgr::LoadQuestTravelTable()
 
                     for (auto& guidP : e.second)
                     {
+                        if (!guidP.isValid())
+                            continue; 
+
                         pointsMap.insert(std::make_pair(guidP.GetRawValue(), guidP));
 
                         for (auto tLoc : locs)
@@ -1270,6 +1271,9 @@ void TravelMgr::LoadQuestTravelTable()
 
             point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
 
+            if (!point.isValid())
+                continue;
+
             for (auto flag : allowedNpcFlags)
             {
                 if ((cInfo->NpcFlags & flag) != 0)
@@ -1299,7 +1303,7 @@ void TravelMgr::LoadQuestTravelTable()
                 bLoc->AddPoint(&pointsMap.at(u.guid));
             }
 
-            if (cInfo->GetRequiredLootSkill() == SKILL_SKINNING)
+            if (cInfo->SkinningLootId && cInfo->GetRequiredLootSkill() == SKILL_SKINNING)
             {
                 tLoc = AddDestination<GatherTravelDestination>(u.entry);
 
@@ -1323,7 +1327,10 @@ void TravelMgr::LoadQuestTravelTable()
 
             point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
 
-            uint32 entry = u.entry * 1;
+            if (!point.isValid())
+                continue;
+
+            uint32 entry = u.entry * -1;
 
             for (auto type : allowedGoTypes)
             {
@@ -1374,6 +1381,10 @@ void TravelMgr::LoadQuestTravelTable()
         ExploreTravelDestination* loc;
 
         GuidPosition point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
+
+        if (!point.isValid())
+            continue;
+
         AreaTableEntry const* area = point.getArea();
         
         if (!area)
@@ -1394,8 +1405,13 @@ void TravelMgr::LoadQuestTravelTable()
     }
 
     //Analyse log files
-    if(sPlayerbotAIConfig.hasLog("log_analysis.csv"))
+    if (sPlayerbotAIConfig.hasLog("log_analysis.csv"))
+    {
+        sLog.outString("Running analysis.");
         LogAnalysis::RunAnalysis();
+    }
+
+    sLog.outString("Clearing log files.");
 
      //Clear these logs files
     sPlayerbotAIConfig.openLog("zones.csv", "w");
@@ -1468,6 +1484,8 @@ void TravelMgr::LoadQuestTravelTable()
     }
 #endif
 
+    sLog.outString("Loading travel nodes.");
+
     sTravelNodeMap.loadNodeStore();
 
     sTravelNodeMap.generateAll();
@@ -1479,6 +1497,8 @@ void TravelMgr::LoadQuestTravelTable()
     //Creature/gos/zone export.
     if (sPlayerbotAIConfig.hasLog("creatures.csv"))
     {
+        sLog.outString("Create creature overlay exports.");
+
         for (auto& creaturePair : WorldPosition().getCreaturesNear())
         {
             CreatureData const cData = creaturePair->second;
@@ -2040,6 +2060,7 @@ void TravelMgr::LoadQuestTravelTable()
 
     if (sPlayerbotAIConfig.hasLog("gos.csv"))
     {
+        sLog.outString("Create go overlay exports.");
         for (auto& gameObjectPair : WorldPosition().getGameObjectsNear())
         {
             GameObjectData const gData = gameObjectPair->second;
@@ -2067,6 +2088,8 @@ void TravelMgr::LoadQuestTravelTable()
 
     if (sPlayerbotAIConfig.hasLog("zones.csv"))
     {
+        sLog.outString("Create zone overlay exports.");
+
         std::unordered_map<std::string, std::vector<WorldPosition>> zoneLocs;
 
         std::vector<WorldPosition> Locs = {};
@@ -2128,6 +2151,8 @@ void TravelMgr::LoadQuestTravelTable()
 
     if (sPlayerbotAIConfig.hasLog("telecache.csv"))
     {
+        sLog.outString("Create telecache overlay exports.");
+
         sRandomPlayerbotMgr.PrintTeleportCache();
     }
 

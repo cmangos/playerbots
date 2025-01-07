@@ -119,4 +119,10 @@ namespace ai
 #endif
         }
     };
+
+    class SlamTrigger : public SpellCanBeCastedTrigger
+    {
+    public:
+        SlamTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "slam") {}
+    };
 }

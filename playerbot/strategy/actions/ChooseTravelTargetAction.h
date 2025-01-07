@@ -20,13 +20,13 @@ namespace ai
         void setNewTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget);
         void ReportTravelTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget);
 
-        std::vector<WorldPosition*> getLogicalPoints(Player* requester, std::vector<WorldPosition*>& travelPoints);
-        bool SetBestTarget(Player* requester, TravelTarget* target, std::vector<TravelDestination*>& activeDestinations);
+        std::vector<std::pair<TravelDestination*, WorldPosition*>> getLogicalPoints(Player* requester, const std::vector<std::pair<TravelDestination*, WorldPosition*>>& travelPoints);
+        bool SetBestTarget(Player* requester, TravelTarget* target, std::vector<TravelDestination*>& activeDestinations, bool onlyActive = true);
 
         bool SetGroupTarget(Player* requester, TravelTarget* target);
         bool SetCurrentTarget(Player* requester, TravelTarget* target, TravelTarget* oldTarget);
         bool SetQuestTarget(Player* requester, TravelTarget* target, bool newQuests = true, bool activeQuests = true, bool completedQuests = true);
-        bool SetRpgTarget(Player* requester, TravelTarget* target);
+        bool SetRpgTarget(Player* requester, TravelTarget* target, bool onlyActive = true);
         bool SetGrindTarget(Player* requester, TravelTarget* target);
         bool SetBossTarget(Player* requester, TravelTarget* target);
         bool SetExploreTarget(Player* requester, TravelTarget* target);

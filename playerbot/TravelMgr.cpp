@@ -1394,8 +1394,13 @@ void TravelMgr::LoadQuestTravelTable()
     }
 
     //Analyse log files
-    if(sPlayerbotAIConfig.hasLog("log_analysis.csv"))
+    if (sPlayerbotAIConfig.hasLog("log_analysis.csv"))
+    {
+        sLog.outString("Running analysis.");
         LogAnalysis::RunAnalysis();
+    }
+
+    sLog.outString("Clearing log files.");
 
      //Clear these logs files
     sPlayerbotAIConfig.openLog("zones.csv", "w");
@@ -1468,6 +1473,8 @@ void TravelMgr::LoadQuestTravelTable()
     }
 #endif
 
+    sLog.outString("Loading travel nodes.");
+
     sTravelNodeMap.loadNodeStore();
 
     sTravelNodeMap.generateAll();
@@ -1479,6 +1486,8 @@ void TravelMgr::LoadQuestTravelTable()
     //Creature/gos/zone export.
     if (sPlayerbotAIConfig.hasLog("creatures.csv"))
     {
+        sLog.outString("Create creature overlay exports.");
+
         for (auto& creaturePair : WorldPosition().getCreaturesNear())
         {
             CreatureData const cData = creaturePair->second;
@@ -2040,6 +2049,7 @@ void TravelMgr::LoadQuestTravelTable()
 
     if (sPlayerbotAIConfig.hasLog("gos.csv"))
     {
+        sLog.outString("Create go overlay exports.");
         for (auto& gameObjectPair : WorldPosition().getGameObjectsNear())
         {
             GameObjectData const gData = gameObjectPair->second;
@@ -2067,6 +2077,8 @@ void TravelMgr::LoadQuestTravelTable()
 
     if (sPlayerbotAIConfig.hasLog("zones.csv"))
     {
+        sLog.outString("Create zone overlay exports.");
+
         std::unordered_map<std::string, std::vector<WorldPosition>> zoneLocs;
 
         std::vector<WorldPosition> Locs = {};
@@ -2128,6 +2140,8 @@ void TravelMgr::LoadQuestTravelTable()
 
     if (sPlayerbotAIConfig.hasLog("telecache.csv"))
     {
+        sLog.outString("Create telecache overlay exports.");
+
         sRandomPlayerbotMgr.PrintTeleportCache();
     }
 

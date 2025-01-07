@@ -143,7 +143,10 @@ bool NoCurseOnAttackerTrigger::IsActive()
 bool FearPvpTrigger::IsActive()
 {
     Unit* target = AI_VALUE(Unit*, "current target");
-    if (target && target->IsPlayer() && target->GetDiminishing(DIMINISHING_FEAR_CHARM_BLIND) < DIMINISHING_LEVEL_IMMUNE)
+    uint32 spellId = AI_VALUE2(uint32, "spell id", "fear");
+    const SpellEntry* spellInfo = sServerFacade.LookupSpellInfo(spellId);
+    if (target && target->IsPlayer() && target->GetDiminishing(DIMINISHING_FEAR_CHARM_BLIND) < DIMINISHING_LEVEL_IMMUNE
+        && !target->IsImmuneToSpell(spellInfo, false, GetCheckCastEffectMask(spellInfo), bot))
 	{
 		// Check if low health
         const uint8 health = AI_VALUE2(uint8, "health", "self target");

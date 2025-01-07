@@ -229,7 +229,7 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
         {
             ai->TellDebug(requester, "Rpg with random npcs", "debug travel");
             auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetRpgTarget2", &context->performanceStack);
-            foundTarget = SetRpgTarget(requester, newTarget);
+            foundTarget = SetRpgTarget(requester, newTarget, false);
             if (foundTarget)
                 newTarget->SetForced(true);
         }
@@ -675,27 +675,31 @@ TravelPoints ChooseTravelTargetAction::getLogicalPoints(Player* requester, const
 }
 
 //Sets the target to the best destination.
-bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* target, std::vector<TravelDestination*>& TravelDestinations)
+bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* target, std::vector<TravelDestination*>& TravelDestinations, bool onlyActive)
 {
     if (TravelDestinations.empty())
         return false;
 
     WorldPosition botLocation(bot);
 
-    std::vector<WorldPosition*> travelPoints;
+    TravelPoints travelPoints;
 
     //Select all points from the selected destinations
-    for (auto& activeTarget : TravelDestinations)
+    for (auto& destination : TravelDestinations)
     {
-        if (!activeTarget->IsActive(bot, info))
+        if (onlyActive && !destination->IsActive(bot, info))
             continue;
 
-        std::vector<WorldPosition*> points = activeTarget->GetPoints();
-        for (WorldPosition* point : points)
+        for (auto& point : destination->GetPoints())
         {
+            GuidPosition* guidP = dynamic_cast<GuidPosition*>(point);
+
+            if (guidP && guidP->IsEventUnspawned()) //Skip points that are not spawned due to events.
             {
-                travelPoints.push_back(point);
+                continue;
             }
+
+            travelPoints.push_back(std::make_pair(destination,point));
         }
     }
 
@@ -706,7 +710,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
     if (TravelDestinations.size() == 1 && travelPoints.size() == 1)
     {
-        target->SetTarget(TravelDestinations.front(), travelPoints.front());
+        target->SetTarget(travelPoints.front().first, travelPoints.front().second);
         return target->IsActive();
     }
 
@@ -715,20 +719,21 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
     if (travelPoints.empty())
         return false;
 
-    travelPoints = botLocation.GetNextPoint(travelPoints); //Pick a good point.
+    botLocation.GetNextPoint(travelPoints); //Pick a good point.
 
     //Pick the best destination and point (random shuffle).
 
-    for (auto destination : TravelDestinations) //Pick the destination that has this point.
-        if (destination->HasPoint(travelPoints.front()))
-        {
-            TravelDestinations.front() = destination;
-            break;
-        }
+    bool hasTarget = false;
 
-    target->SetTarget(TravelDestinations.front(), travelPoints.front());
-
-    ai->TellDebug(requester, "Point at " + std::to_string(uint32(target->Distance(bot))) + "y selected.", "debug travel");
+    for (auto& [destination, point] : travelPoints)
+    {
+        target->SetTarget(destination, point);
+        hasTarget = true;
+        break;
+    }
+     
+    if(hasTarget)
+        ai->TellDebug(requester, "Point at " + std::to_string(uint32(target->Distance(bot))) + "y selected.", "debug travel");
 
     return target->IsActive();
 }
@@ -892,7 +897,7 @@ bool ChooseTravelTargetAction::SetQuestTarget(Player* requester, TravelTarget* t
     return SetBestTarget(requester, target, TravelDestinations);
 }
 
-bool ChooseTravelTargetAction::SetRpgTarget(Player* requester, TravelTarget* target)
+bool ChooseTravelTargetAction::SetRpgTarget(Player* requester, TravelTarget* target, bool onlyActive)
 {
     //Find rpg npcs
     std::vector<TravelDestination*> TravelDestinations = sTravelMgr.GetDestinations(info, typeid(RpgTravelDestination));
@@ -900,7 +905,7 @@ bool ChooseTravelTargetAction::SetRpgTarget(Player* requester, TravelTarget* tar
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
         ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " rpg destinations found.");
 
-    return SetBestTarget(requester, target, TravelDestinations);
+    return SetBestTarget(requester, target, TravelDestinations, onlyActive);
 }
 
 bool ChooseTravelTargetAction::SetGrindTarget(Player* requester, TravelTarget* target)
@@ -1022,7 +1027,7 @@ bool ChooseTravelTargetAction::SetNpcFlagTarget(Player* requester, TravelTarget*
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
         ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " npc flag targets found.");
 
-    bool isActive = SetBestTarget(requester, target, TravelDestinations);
+    bool isActive = SetBestTarget(requester, target, TravelDestinations, false);
 
     if (!target->GetDestination())
         return false;
@@ -1068,7 +1073,7 @@ bool ChooseTravelTargetAction::SetGOTypeTarget(Player* requester, TravelTarget* 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
         ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " go type targets found.");
 
-    bool isActive = SetBestTarget(requester, target, TravelDestinations);
+    bool isActive = SetBestTarget(requester, target, TravelDestinations, !force);
 
     if (!target->GetDestination())
         return false;

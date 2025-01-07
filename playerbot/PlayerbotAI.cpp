@@ -1628,7 +1628,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     if (bot->InBattleGround() && !(isMentioned || (msgtype != CHAT_MSG_CHANNEL && !isFromFreeBot)))
                         return;
 
-                    if (!isAiChat && HasRealPlayerMaster() && guid1 != GetMaster()->GetObjectGuid())
+                    if (HasRealPlayerMaster() && guid1 != GetMaster()->GetObjectGuid())
                         return;
 
                     if (lang == LANG_ADDON)
@@ -1650,7 +1650,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                             return;
                         }
                     }
-                    else if (!isAiChat)
+                    else
                     {
                         if (isFromFreeBot && urand(0, 20))
                             return;

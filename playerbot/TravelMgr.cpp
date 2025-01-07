@@ -656,6 +656,9 @@ bool GatherTravelDestination::IsPossible(const PlayerTravelInfo& info) const
     if (reqSkillValue > skillValue)
         return false;
 
+    if (info.GetLevel() * 5 <= skillValue) //Not able to increase skill.
+        return false;
+
     if (info.GetSkillMax((SkillType)skillId) <= skillValue) //Not able to increase skill.
         return false;
 

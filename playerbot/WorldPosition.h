@@ -270,11 +270,7 @@ namespace ai
         static std::vector<WorldPosition> frommGridPair(const mGridPair& gridPair, uint32 mapId);
 
         static bool isVmapLoaded(uint32 mapId, uint32 instanceId, int x, int y) {
-#ifndef MANGOSBOT_TWO
             return VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(mapId, x, y);
-#else
-            return VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(mapId, instanceId, x, y);
-#endif
         }
 
         bool isVmapLoaded(uint32 instanceId) const { return isVmapLoaded(getMapId(), instanceId, getmGridPair().first, getmGridPair().second); }

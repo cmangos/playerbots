@@ -702,7 +702,6 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
 
     if (!hasVmap)
     {
-#ifndef MANGOSBOT_TWO
         if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
             isLoaded = VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, x, y);
         else
@@ -710,15 +709,6 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
             MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath().c_str(), mapId, instanceId);
             isLoaded = VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, x, y);
         }
-#else
-        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
-            isLoaded = VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, 0, x, y, instanceId);
-        else
-        {
-            if (MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath().c_str(), mapId, instanceId))
-                isLoaded = VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, 0, x, y, instanceId);
-        }
-#endif
     }
 
     if (sPlayerbotAIConfig.hasLog(logName))

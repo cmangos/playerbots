@@ -985,9 +985,9 @@ AiPlayerbot.PerfMonEnabled = 0
 # Step1: What pattern the server should look for to find the start of the repsonse the llm gave.
 # AiPlayerbot.LLMResponseStartPattern = ("text":\s*")
 # Step2: What pattern the server should look for that the response has ended.
-# AiPlayerbot.LLMResponseEndPattern = ("|<receiver name>:)
+# AiPlayerbot.LLMResponseEndPattern = ("|\b(?!<sender name>\b)(\w+):)
 # Step3: What pattern the server should look for to remove from the response.
-# AiPlayerbot.LLMResponseDeletePattern = (\\n|<sender name>:)
+# AiPlayerbot.LLMResponseDeletePattern = (\\n|<sender name>:|\\[^ ]+)
 # Step4: What pattern the server should look for to split the repsonse in multiple lines. Note only lines that follow this pattern will be extracted.
 # AiPlayerbot.LLMResponseSplitPattern = (\*.*?\*)|(\[.*?\])|(\'.*\')|([^\*\[\] ][^\*\[\]]+?[.?!])
 

@@ -112,7 +112,7 @@ namespace ai
 
 		float GetRadiusMin() { return radiusMin; }
 		bool HasPoint(const WorldPosition* pos) { return std::find(points.begin(), points.end(), pos) != points.end(); }
-		std::vector<WorldPosition*> GetPoints() const;
+		const std::vector<WorldPosition*>& GetPoints() const {return points;};
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const { return false; }
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const { return false; }

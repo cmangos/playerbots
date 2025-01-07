@@ -45,11 +45,6 @@ PlayerTravelInfo::PlayerTravelInfo(Player* player)
         value = AI_VALUE(uint8, valueName);
 }
 
-std::vector<WorldPosition*> TravelDestination::GetPoints() const
-{
-    return points;
-}
-
 WorldPosition* TravelDestination::NearestPoint(const WorldPosition& pos) const {
     return *std::min_element(points.begin(), points.end(), [pos](WorldPosition* i, WorldPosition* j) {return i->distance(pos) < j->distance(pos); });
 }

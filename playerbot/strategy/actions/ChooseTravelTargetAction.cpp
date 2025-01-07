@@ -692,7 +692,6 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
         std::vector<WorldPosition*> points = activeTarget->GetPoints();
         for (WorldPosition* point : points)
         {
-            if (point && point->isValid())
             {
                 travelPoints.push_back(point);
             }

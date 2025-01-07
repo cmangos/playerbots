@@ -1218,6 +1218,9 @@ void TravelMgr::LoadQuestTravelTable()
 
                     for (auto& guidP : e.second)
                     {
+                        if (!guidP.isValid())
+                            continue; 
+
                         pointsMap.insert(std::make_pair(guidP.GetRawValue(), guidP));
 
                         for (auto tLoc : locs)
@@ -1269,6 +1272,9 @@ void TravelMgr::LoadQuestTravelTable()
             allowedNpcFlags.push_back(UNIT_NPC_FLAG_REPAIR);
 
             point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
+
+            if (!point.isValid())
+                continue;
 
             for (auto flag : allowedNpcFlags)
             {
@@ -1324,6 +1330,8 @@ void TravelMgr::LoadQuestTravelTable()
             point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
 
             uint32 entry = u.entry * 1;
+            if (!point.isValid())
+                continue;
 
             for (auto type : allowedGoTypes)
             {
@@ -1374,6 +1382,10 @@ void TravelMgr::LoadQuestTravelTable()
         ExploreTravelDestination* loc;
 
         GuidPosition point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
+
+        if (!point.isValid())
+            continue;
+
         AreaTableEntry const* area = point.getArea();
         
         if (!area)

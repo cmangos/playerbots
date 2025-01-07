@@ -526,8 +526,10 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
                 placeholders["<initial message>"] = msg;
 
+                std::string llmPromptCustom = AI_VALUE(std::string, "manual saved string::llmdefaultprompt");
+
                 std::map<std::string, std::string> jsonFill;
-                jsonFill["<pre prompt>"] = sPlayerbotAIConfig.llmPrePrompt;
+                jsonFill["<pre prompt>"] = sPlayerbotAIConfig.llmPrePrompt + " " + llmPromptCustom;
                 jsonFill["<prompt>"] = sPlayerbotAIConfig.llmPrompt;
                 jsonFill["<post prompt>"] = sPlayerbotAIConfig.llmPostPrompt;
 

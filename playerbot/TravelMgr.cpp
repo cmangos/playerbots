@@ -1308,7 +1308,7 @@ void TravelMgr::LoadQuestTravelTable()
                 bLoc->AddPoint(&pointsMap.at(u.guid));
             }
 
-            if (cInfo->GetRequiredLootSkill() == SKILL_SKINNING)
+            if (cInfo->SkinningLootId && cInfo->GetRequiredLootSkill() == SKILL_SKINNING)
             {
                 tLoc = AddDestination<GatherTravelDestination>(u.entry);
 

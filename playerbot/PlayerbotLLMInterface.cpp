@@ -440,7 +440,7 @@ void PlayerbotLLMInterface::LimitContext(std::string& context, int currentLength
             for (auto& c : context)
             {
                 cutPosition++;
-                if (cutPosition >= cutNeeded && c == ' ' || c == '.')
+                if (cutPosition >= cutNeeded && (c == ' ' || c == '.'))
                     break;
             }
             context = context.substr(cutPosition);

@@ -276,10 +276,10 @@ namespace ai
         bool isVmapLoaded(uint32 instanceId) const { return isVmapLoaded(getMapId(), instanceId, getmGridPair().first, getmGridPair().second); }
 
         static bool isMmapLoaded(uint32 mapId, uint32 instanceId, int x, int y)  {
-#ifndef MANGOSBOT_TWO
-            return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y);
-#else
+#if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
             return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y);
+#else
+            return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y);
 #endif
         }
 

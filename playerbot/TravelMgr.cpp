@@ -1332,9 +1332,10 @@ void TravelMgr::LoadQuestTravelTable()
 
             point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
 
-            uint32 entry = u.entry * 1;
             if (!point.isValid())
                 continue;
+
+            uint32 entry = u.entry * -1;
 
             for (auto type : allowedGoTypes)
             {

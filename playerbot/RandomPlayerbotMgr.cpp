@@ -225,6 +225,10 @@ double botPIDImpl::calculate(double setpoint, double pv)
 
     // Integral term
     _integral += error * _dt;
+
+    _integral = std::min(_integral, (double)100);
+    _integral = std::max(_integral, (double)-100);
+
     double Iout = _Ki * _integral;
 
     // Derivative term
@@ -286,7 +290,7 @@ RandomPlayerbotMgr::RandomPlayerbotMgr()
         //1) Proportional: Amount activity is adjusted based on diff being above or below wanted diff. (100 wanted diff & 0.1 p = 150 diff = -5% activity)
         //2) Integral: Same as proportional but builds up each tick. (100 wanted diff & 0.01 i = 150 diff = -0.5% activity each tick)
         //3) Derative: Based on speed of diff. (+5 diff last tick & 0.05 d = -0.25% activity)
-        pid.adjust(0.05,0.01,0.2);
+        pid.adjust(0.05,0.1,0.2);
         BgCheckTimer = 0;
         LfgCheckTimer = 0;
         PlayersCheckTimer = 0;

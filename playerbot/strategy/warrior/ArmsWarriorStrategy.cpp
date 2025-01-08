@@ -24,7 +24,7 @@ private:
 
     ACTION_NODE_A(death_wish, "death wish", "bloodrage");
 
-    ACTION_NODE_A(piercing_howl, "piercing howl", "mocking blow");
+    ACTION_NODE_A(piercing_howl, "piercing howl", "hamstring");
 
     ACTION_NODE_A(mocking_blow, "mocking blow", "hamstring");
 
@@ -737,7 +737,7 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("overpower", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "medium rage available",
+        "high rage available",
         NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -792,6 +792,10 @@ void ArmsWarriorPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
 {
     ArmsWarriorStrategy::InitCombatTriggers(triggers);
     WarriorPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "medium rage available",
+        NextAction::array(0, new NextAction("bladestorm", ACTION_NORMAL), NULL)));
 }
 
 void ArmsWarriorPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -870,6 +874,10 @@ void ArmsWarriorAoePvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 {
     ArmsWarriorAoeStrategy::InitCombatTriggers(triggers);
     WarriorAoePvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "melee light aoe",
+        NextAction::array(0, new NextAction("bladestorm", ACTION_HIGH + 5), NULL)));
 }
 
 void ArmsWarriorAoePvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

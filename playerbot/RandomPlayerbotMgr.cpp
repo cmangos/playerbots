@@ -2375,34 +2375,40 @@ std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(Worl
 {
     std::vector<std::pair<uint32, uint32>> results;
     float minDist = FLT_MAX;
-    std::string hasZone = "-", wantZone = WorldPosition(pos).getAreaName(true, true);
-    for (uint32 level = 1; level < sPlayerbotAIConfig.randomBotMaxLevel + 1; level++)
-    {
-        for (uint32 r = 1; r < MAX_RACES; r++)
-        {
-            for (auto p : rpgLocsCacheLevel[r][level])
-            {
-                std::string currentZone = WorldPosition(p).getAreaName(true, true);
+    std::string targetZone = WorldPosition(pos).getAreaName(true, true);
+    std::string currentZone;
 
-                if (currentZone != wantZone && hasZone == wantZone) //If we already have the right id but this location isn't in the right id. Skip it.
+    for (uint32 level = 1; level <= sPlayerbotAIConfig.randomBotMaxLevel; ++level)
+    {
+        for (uint32 race = 1; race < MAX_RACES; ++race)
+        {
+            for (const auto& loc : rpgLocsCacheLevel[race][level])
+            {
+                currentZone = WorldPosition(loc).getAreaName(true, true);
+
+                // Skip if location's zone is not the target zone and we're already processing the correct zone.
+                if (currentZone != targetZone && !results.empty())
                     continue;
 
-                if (currentZone == wantZone && hasZone != wantZone) //If this is the first spot with a good area id use this now.
+                // Reset distance and results if switching to the correct zone.
+                if (currentZone == targetZone && results.empty())
                     minDist = FLT_MAX;
 
-                float dist = WorldPosition(pos).fDist(p);
+                float dist = WorldPosition(pos).fDist(loc);
 
+                // Skip if location is outside radius or not closer than the minimum distance.
                 if (dist > radius || dist > minDist)
                     continue;
 
+                // Clear results if a closer location is found.
                 if (dist < minDist)
+                {
                     results.clear();
+                    minDist = dist;
+                }
 
-                results.push_back(std::make_pair(r, level));
-
-                hasZone = currentZone;
-
-                minDist = dist;
+                // Add the current race and level to the results.
+                results.emplace_back(race, level);
             }
         }
     }
@@ -2506,7 +2512,6 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
     sLog.outString("Enhancing RPG teleport cache...");
 
     std::vector<std::pair<std::pair<uint32, uint32>, WorldPosition>> newPoints;
-    newPoints.reserve(370523);
 
     const std::unordered_set<uint32> allowedNpcFlags = {
         UNIT_NPC_FLAG_BATTLEMASTER,

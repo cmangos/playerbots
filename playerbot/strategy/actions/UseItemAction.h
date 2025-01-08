@@ -422,6 +422,9 @@ namespace ai
             if (bot->HasAura(11196))
                 return false;
 
+            if (bot->IsCrowdControlled())
+                return false;
+
             if (AI_VALUE(uint8, "my attacker count") > 0 || bot->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE))
                 return false;
 
@@ -437,6 +440,9 @@ namespace ai
                     return false;
                 }
             }
+
+            if (AI_VALUE(bool, "has enemy player targets"))
+                return false;
 
             return true;
         }

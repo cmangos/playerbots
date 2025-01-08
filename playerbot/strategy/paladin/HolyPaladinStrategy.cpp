@@ -1173,6 +1173,14 @@ void HolyPaladinPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
 {
     HolyPaladinStrategy::InitCombatTriggers(triggers);
     PaladinPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("flash of light", ACTION_MEDIUM_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0, new NextAction("flash of light on party", ACTION_MEDIUM_HEAL + 1), NULL)));
 }
 
 void HolyPaladinPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

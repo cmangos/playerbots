@@ -126,7 +126,7 @@ bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInf
             if (info.GetBoolValue("can fight equal"))
             {
                 if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest npc::" + std::to_string(GetEntry()))) //Noone has yellow exclamation mark.
-                    if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(GetEntry()) + "need quest reward::" + std::to_string(GetQuestId()))) //Noone can do this quest for a usefull reward.
+                    if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(GetEntry()) + ",need quest reward::" + std::to_string(GetQuestId()))) //Noone can do this quest for a usefull reward.
                         return false;
             }
             else
@@ -371,10 +371,6 @@ bool RpgTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 
     WorldPosition firstPoint = *GetPoints().front();
 
-    //City & Pvp baracks
-    if (firstPoint.getMapId() == info.GetPosition().getMapId() && firstPoint.hasAreaFlag(AREA_FLAG_CAPITAL) && !firstPoint.hasFaction(info.GetTeam()))
-        return false;
-
     //Horde pvp baracks
     if (firstPoint.getMapId() == 450 && info.GetTeam() == ALLIANCE)
         return false;
@@ -405,6 +401,12 @@ bool RpgTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) c
         }
     }    
 
+    WorldPosition firstPoint = *GetPoints().front();
+
+    //City & Pvp baracks
+    if (firstPoint.getMapId() == info.GetPosition().getMapId() && firstPoint.HasAreaFlag(AREA_FLAG_CAPITAL) && !firstPoint.HasFaction(info.GetTeam()))
+        return false;
+
     return !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot);
 }
 
@@ -425,7 +427,7 @@ bool ExploreTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 {
     AreaTableEntry const* area = GetArea();
 
-    if (area->area_level && (uint32)area->area_level > info.GetLevel() && info.GetLevel() < DEFAULT_MAX_LEVEL)
+    if (level && (uint32)level > info.GetLevel() && info.GetLevel() < DEFAULT_MAX_LEVEL)
         return false;
 
     return true;
@@ -941,7 +943,7 @@ int32 TravelMgr::GetAreaLevel(uint32 area_id)
 
     for (auto& creaturePair : WorldPosition().getCreaturesNear())
     {
-        if (WorldPosition(creaturePair).getArea() != area)
+        if (WorldPosition(creaturePair).GetArea() != area)
             continue;
 
         CreatureData const cData = creaturePair->second;
@@ -1385,7 +1387,7 @@ void TravelMgr::LoadQuestTravelTable()
         if (!point.isValid())
             continue;
 
-        AreaTableEntry const* area = point.getArea();
+        AreaTableEntry const* area = point.GetArea();
         
         if (!area)
             continue;
@@ -2126,7 +2128,7 @@ void TravelMgr::LoadQuestTravelTable()
 
             pos.printWKT(out);
 
-            if(points.begin()->getArea())
+            if(points.begin()->GetArea())
                 out << std::to_string(points.begin()->getAreaLevel());
             else
                 out << std::to_string(-1);
@@ -2140,7 +2142,7 @@ void TravelMgr::LoadQuestTravelTable()
 
             point.printWKT(points, out, 0);
 
-            if (points.begin()->getArea())
+            if (points.begin()->GetArea())
                 out << std::to_string(points.begin()->getAreaLevel());
             else
                 out << std::to_string(-1);
@@ -2186,7 +2188,7 @@ std::vector<TravelDestination*> TravelMgr::GetDestinations(const PlayerTravelInf
         destinationMap.at(type).begin(),
         destinationMap.at(type).end(),
         [&](TravelDestination* dest) {
-            if (typeid(type) == typeid(QuestTravelDestination))
+            if (type == typeid(QuestTravelDestination))
             {
                 if (entry && ((QuestTravelDestination*)dest)->GetQuestId() != entry)
                     return;

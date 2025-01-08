@@ -86,7 +86,7 @@ bool DebugAction::Execute(Event& event)
     {       
         WorldPosition point(requester);
 
-        AreaTableEntry const* area = point.getArea();
+        AreaTableEntry const* area = point.GetArea();
 
         std::ostringstream out;
 
@@ -905,15 +905,15 @@ bool DebugAction::Execute(Event& event)
 
         guidP.printWKT(out);
 
-        out << "[a:" << guidP.getArea()->area_name[0]; 
+        out << "[a:" << guidP.GetArea()->area_name[0]; 
 
-        if (guidP.getArea() && guidP.getAreaLevel())
+        if (guidP.GetArea() && guidP.getAreaLevel())
             out << " level: " << guidP.getAreaLevel();
-        if (guidP.getArea()->zone && GetAreaEntryByAreaID(guidP.getArea()->zone))
+        if (guidP.GetArea()->zone && GetAreaEntryByAreaID(guidP.GetArea()->zone))
         {
-            out << " z:" << GetAreaEntryByAreaID(guidP.getArea()->zone)->area_name[0];
-            if (sTravelMgr.GetAreaLevel(guidP.getArea()->zone))
-                out << " level: " << sTravelMgr.GetAreaLevel(guidP.getArea()->zone);
+            out << " z:" << GetAreaEntryByAreaID(guidP.GetArea()->zone)->area_name[0];
+            if (sTravelMgr.GetAreaLevel(guidP.GetArea()->zone))
+                out << " level: " << sTravelMgr.GetAreaLevel(guidP.GetArea()->zone);
         }
 
         out << "] ";

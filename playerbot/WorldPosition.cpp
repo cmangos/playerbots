@@ -404,11 +404,11 @@ WorldPosition WorldPosition::getDisplayLocation() const
     return offset(mapOffset);
 };
 
-AreaTableEntry const* WorldPosition::getArea() const
+AreaTableEntry const* WorldPosition::GetArea() const
 {
-    loadMapAndVMap(0);
+    loadVMap();
 
-    uint16 areaFlag = getAreaFlag(0);
+    uint16 areaFlag = getAreaFlag();
 
     return GetAreaEntryByAreaFlagAndMap(areaFlag, getMapId());
 }
@@ -422,7 +422,7 @@ std::string WorldPosition::getAreaName(const bool fullName, const bool zoneName)
             return map->name[0];
     }
 
-    AreaTableEntry const* area = getArea();
+    AreaTableEntry const* area = GetArea();
 
     if (!area)
         return "";
@@ -456,15 +456,15 @@ std::string WorldPosition::getAreaName(const bool fullName, const bool zoneName)
 
 int32 WorldPosition::getAreaLevel() const
 {
-    if(getArea())
-        return sTravelMgr.GetAreaLevel(getArea()->ID);
+    if(GetArea())
+        return sTravelMgr.GetAreaLevel(GetArea()->ID);
 
     return 0;
 }
 
-bool WorldPosition::hasAreaFlag(const AreaFlags flag) const
+bool WorldPosition::HasAreaFlag(const AreaFlags flag) const
 {
-    AreaTableEntry const* areaEntry = getArea();
+    AreaTableEntry const* areaEntry = GetArea();
     if (areaEntry)
     {
         if (areaEntry->zone)
@@ -477,9 +477,9 @@ bool WorldPosition::hasAreaFlag(const AreaFlags flag) const
     return false;
 }
 
-bool WorldPosition::hasFaction(const Team team) const
+bool WorldPosition::HasFaction(const Team team) const
 {
-    AreaTableEntry const* areaEntry = getArea();
+    AreaTableEntry const* areaEntry = GetArea();
     if (areaEntry)
     {
         if (areaEntry->team == 2 && team == ALLIANCE)
@@ -664,7 +664,7 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
 {
     std::string logName = "load_map_grid.csv";
 
-    bool hasVmap = isVmapLoaded(mapId, instanceId, x, y);
+    bool hasVmap = isVmapLoaded(mapId, x, y);
     bool hasMmap = isMmapLoaded(mapId, instanceId, x, y);
 
     if (hasVmap && hasMmap)
@@ -702,13 +702,7 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
 
     if (!hasVmap)
     {
-        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
-            isLoaded = VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, x, y);
-        else
-        {
-            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath().c_str(), mapId, instanceId);
-            isLoaded = VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, x, y);
-        }
+        loadVMap(mapId, x, y);
     }
 
     if (sPlayerbotAIConfig.hasLog(logName))
@@ -737,6 +731,16 @@ void WorldPosition::unloadMapAndVMaps(uint32 mapId)
     //TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
     //terrain->UnLoadUnused();
 #endif
+}
+
+bool WorldPosition::loadVMap(uint32 mapId, int x, int y)
+{
+    std::string logName = "load_map_grid.csv";
+
+    if (isVmapLoaded(mapId, x, y))
+        return true;
+
+    return VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, x, y);
 }
 
 std::vector<WorldPosition> WorldPosition::fromPointsArray(const std::vector<G3D::Vector3>& path) const

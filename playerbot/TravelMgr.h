@@ -239,7 +239,8 @@ namespace ai
 	class ExploreTravelDestination : public EntryTravelDestination
 	{
 	public:
-		ExploreTravelDestination(int32 areaId) : EntryTravelDestination(areaId) { SetExpireFast(); SetCooldownShort(); if(auto area = GetArea()) title = area->area_name[0]; }
+		ExploreTravelDestination(int32 areaId) : EntryTravelDestination(areaId) {
+			SetExpireFast(); SetCooldownShort(); if (auto area = GetArea()) { title = area->area_name[0]; level = area->area_level; }}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
@@ -247,6 +248,7 @@ namespace ai
 	private:
 		AreaTableEntry const* GetArea() const;
 		std::string title = "";
+		int32 level = 0;
 	};
 
 	//A location with zone exploration target(s) 

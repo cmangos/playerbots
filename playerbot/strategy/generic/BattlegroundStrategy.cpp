@@ -69,6 +69,10 @@ void WarsongStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("attack enemy flag carrier", 80.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "team flagcarrier near",
+        NextAction::array(0, new NextAction("bg protect fc", 40.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "player has flag",
         NextAction::array(0, new NextAction("bg move to objective", 80.0f), NULL)));
 

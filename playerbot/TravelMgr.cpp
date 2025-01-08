@@ -126,7 +126,7 @@ bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInf
             if (info.GetBoolValue("can fight equal"))
             {
                 if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest npc::" + std::to_string(GetEntry()))) //Noone has yellow exclamation mark.
-                    if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(GetEntry()) + "need quest reward::" + std::to_string(GetQuestId()))) //Noone can do this quest for a usefull reward.
+                    if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(GetEntry()) + ",need quest reward::" + std::to_string(GetQuestId()))) //Noone can do this quest for a usefull reward.
                         return false;
             }
             else

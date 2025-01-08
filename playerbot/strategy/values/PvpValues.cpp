@@ -83,7 +83,7 @@ CreatureDataPair const* BgMasterValue::NearestBm(bool allowDead)
         if (ai->getReaction(bmFactionEntry) < REP_NEUTRAL)
             continue;
 
-        AreaTableEntry const* area = bmPos.getArea();
+        AreaTableEntry const* area = bmPos.GetArea();
 
         if (!area)
             continue;

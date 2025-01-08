@@ -269,11 +269,11 @@ namespace ai
         std::vector<mGridPair> getmGridPairs(const WorldPosition& secondPos) const;
         static std::vector<WorldPosition> frommGridPair(const mGridPair& gridPair, uint32 mapId);
 
-        static bool isVmapLoaded(uint32 mapId, uint32 instanceId, int x, int y) {
+        static bool isVmapLoaded(uint32 mapId, int x, int y) {
             return VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(mapId, x, y);
         }
 
-        bool isVmapLoaded(uint32 instanceId) const { return isVmapLoaded(getMapId(), instanceId, getmGridPair().first, getmGridPair().second); }
+        bool isVmapLoaded() const { return isVmapLoaded(getMapId(), getmGridPair().first, getmGridPair().second); }
 
         static bool isMmapLoaded(uint32 mapId, uint32 instanceId, int x, int y)  {
 #ifndef MANGOSBOT_TWO
@@ -290,20 +290,23 @@ namespace ai
         void loadMapAndVMaps(const WorldPosition& secondPos, uint32 instanceId) const;
         static void unloadMapAndVMaps(uint32 mapId);
 
+        static bool loadVMap(uint32 mapId, int x, int y);
+        bool loadVMap() const { return loadVMap(getMapId(), getmGridPair().first, getmGridPair().second); }
+
         //Display functions
         WorldPosition getDisplayLocation() const;
         float getDisplayX() const { return getDisplayLocation().coord_y * -1.0; }
         float getDisplayY() const { return getDisplayLocation().coord_x; }
 
         bool isValid() const { return MaNGOS::IsValidMapCoord(coord_x, coord_y, coord_z, orientation); };
-        uint16 getAreaFlag(uint32 instanceId) const { return isValid() && isVmapLoaded(instanceId) ? sTerrainMgr.GetAreaFlag(getMapId(), coord_x, coord_y, coord_z) : 0; };
-        AreaTableEntry const* getArea() const;
+        uint16 getAreaFlag() const { return isValid() && isVmapLoaded() ? sTerrainMgr.GetAreaFlag(getMapId(), coord_x, coord_y, coord_z) : 0; };
+        AreaTableEntry const* GetArea() const;
         std::string getAreaName(const bool fullName = true, const bool zoneName = false) const;
         std::string getAreaOverride() const { if (!getTerrain()) return "";  AreaNameInfo nameInfo = getTerrain()->GetAreaName(coord_x, coord_y, coord_z, 0); return nameInfo.wmoNameOverride ? nameInfo.wmoNameOverride : ""; }
         int32 getAreaLevel() const;
 
-        bool hasAreaFlag(const AreaFlags flag = AREA_FLAG_CAPITAL) const;
-        bool hasFaction(const Team team) const;
+        bool HasAreaFlag(const AreaFlags flag = AREA_FLAG_CAPITAL) const;
+        bool HasFaction(const Team team) const;
 
         std::vector<WorldPosition> fromPointsArray(const std::vector<G3D::Vector3>& path) const;
 

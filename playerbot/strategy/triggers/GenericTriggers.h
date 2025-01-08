@@ -1024,10 +1024,57 @@ namespace ai
 
         virtual bool IsActive()
         {
-            return bot->HasAuraType(SPELL_AURA_MOD_FEAR);
-            return bot->HasAuraType(SPELL_AURA_MOD_STUN);
-            return bot->HasAuraType(SPELL_AURA_MOD_CHARM);
-            return bot->HasAuraType(SPELL_AURA_MOD_CONFUSE);
+            return bot->HasAuraType(SPELL_AURA_MOD_FEAR)
+                || bot->HasAuraType(SPELL_AURA_MOD_CHARM)
+                || bot->HasAuraType(SPELL_AURA_MOD_CONFUSE);
+        }
+    };
+
+    class EMfHTrigger : public Trigger
+    {
+    public:
+        EMfHTrigger(PlayerbotAI* ai) : Trigger(ai, "every man for himself") {}
+
+        virtual bool IsActive()
+        {
+            if (AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.almostFullHealth)
+                return false;
+            bool isHealthy = AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.mediumHealth;
+            bool isFine = AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.lowHealth;
+            for (const Aura* aura : ai->GetAuras(bot))
+            {
+                const SpellEntry* spellInfo = aura->GetSpellProto();
+                if (spellInfo)
+                {
+                    switch (spellInfo->Mechanic)
+                    {
+                    case SPELL_AURA_MOD_STUN:
+                        if (aura->GetAuraDuration() >= 3500)
+                        {
+                            return true;
+                        }
+                        break;
+                    case SPELL_AURA_MOD_FEAR:
+                    case SPELL_AURA_MOD_CHARM:
+                    case SPELL_AURA_MOD_CONFUSE:
+                    case SPELL_AURA_MOD_PACIFY:
+                        if (!isHealthy && aura->GetAuraDuration() >= 7000)
+                        {
+                            return true;
+                        }
+                        break;
+                    case SPELL_AURA_MOD_ROOT:
+                        if (!isFine && aura->GetAuraDuration() >= 9500)
+                        {
+                            return true;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            }
+            return false;
         }
     };
 

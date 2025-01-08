@@ -57,6 +57,10 @@ void RacialsStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "arcane torrent",
         NextAction::array(0, new NextAction("arcane torrent", 71.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "every man for himself",
+        NextAction::array(0, new NextAction("every man for himself", 71.0f), NULL)));
 }
 
 void RacialsStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

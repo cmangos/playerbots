@@ -254,6 +254,7 @@ namespace ai
             creators["blood fury"] = &TriggerContext::blood_fury;
             creators["cannibalize"] = &TriggerContext::cannibalize;
             creators["will of the forsaken"] = &TriggerContext::will_of_the_forsaken;
+            creators["every man for himself"] = &TriggerContext::every_man_for_himself;
             creators["stoneform"] = &TriggerContext::stoneform;
             creators["shadowmeld"] = &TriggerContext::shadowmeld;
             creators["mana tap"] = &TriggerContext::mana_tap;
@@ -307,6 +308,7 @@ namespace ai
         static Trigger* blood_fury(PlayerbotAI* ai) { return new BloodFuryTrigger(ai); }
         static Trigger* cannibalize(PlayerbotAI* ai) { return new CannibalizeTrigger(ai); }
         static Trigger* will_of_the_forsaken(PlayerbotAI* ai) { return new WOtFTrigger(ai); }
+        static Trigger* every_man_for_himself(PlayerbotAI* ai) { return new EMfHTrigger(ai); }
         static Trigger* rooted(PlayerbotAI* ai) { return new RootedTrigger(ai); }
         static Trigger* feared(PlayerbotAI* ai) { return new FearedTrigger(ai); }
         static Trigger* stunned(PlayerbotAI* ai) { return new StunnedTrigger(ai); }

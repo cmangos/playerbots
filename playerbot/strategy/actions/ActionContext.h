@@ -292,7 +292,7 @@ namespace ai
             creators["gift of the naaru"] = &ActionContext::gift_of_the_naaru;
 #endif
 #ifdef MANGOSBOT_TWO
-            creators["every_man_for_himself"] = &ActionContext::every_man_for_himself;
+            creators["every man for himself"] = &ActionContext::every_man_for_himself;
 #endif
 
             creators["use id"] = &ActionContext::use_id;

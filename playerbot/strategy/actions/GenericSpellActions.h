@@ -399,7 +399,7 @@ namespace ai
     BUFF_ACTION_U(CastEscapeArtistAction, "escape artist", !ai->HasAura("stealth", AI_VALUE(Unit*, "self target")));
 
 #ifdef MANGOSBOT_TWO
-    SPELL_ACTION(CastEveryManforHimselfAction, "every man for himself");
+    BUFF_ACTION(CastEveryManforHimselfAction, "every man for himself");
 #endif
 
     class CastSpellOnEnemyHealerAction : public CastSpellAction

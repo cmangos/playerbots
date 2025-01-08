@@ -3892,13 +3892,15 @@ void RandomPlayerbotMgr::MirrorAh()
             if (!auction.second)
                 continue;
 
-            if (!auction.second->buyout)
+            AuctionEntry auctionEntry = *auction.second;
+
+            if (!auctionEntry.buyout)
                 continue;
 
-            if (!auction.second->itemCount)
+            if (!auctionEntry.itemCount)
                 continue;
 
-            ahMirror[auction.second->itemTemplate].push_back(*auction.second);
+            ahMirror[auctionEntry.itemTemplate].push_back(auctionEntry);
         }
     }
     sRandomPlayerbotMgr.m_ahActionMutex.unlock();

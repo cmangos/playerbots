@@ -2188,7 +2188,7 @@ std::vector<TravelDestination*> TravelMgr::GetDestinations(const PlayerTravelInf
         destinationMap.at(type).begin(),
         destinationMap.at(type).end(),
         [&](TravelDestination* dest) {
-            if (typeid(type) == typeid(QuestTravelDestination))
+            if (type == typeid(QuestTravelDestination))
             {
                 if (entry && ((QuestTravelDestination*)dest)->GetQuestId() != entry)
                     return;

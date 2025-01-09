@@ -38,28 +38,26 @@ namespace ai
     //                     questId, QuestRelationFlag
     typedef std::unordered_map<uint32, uint32> questRelationMap;
     //                     entry
-    typedef std::unordered_map<int32, questRelationMap> entryQuestRelationMap;
+    typedef std::unordered_map<int32, questRelationMap> EntryQuestRelationMap;
 
     //                      entry
     typedef std::unordered_map<int32, std::list<GuidPosition>> questEntryGuidps;
     //                      QuestRelationFlag
     typedef std::unordered_map<uint32, questEntryGuidps> questRelationGuidps;
-
     //                      questId
-    typedef std::unordered_map<uint32, questRelationGuidps> questGuidpMap;
-    
+    typedef std::unordered_map<uint32, questRelationGuidps> questGuidpMap;    
 
     //                      questId
     typedef std::unordered_map<uint32, std::list<GuidPosition>> questGiverMap;
     
     
     //Returns the quest relation Flags for all entries and quests
-    class EntryQuestRelationMapValue : public SingleCalculatedValue<entryQuestRelationMap>
+    class EntryQuestRelationMapValue : public SingleCalculatedValue<EntryQuestRelationMap>
     {
     public:
         EntryQuestRelationMapValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "entry quest relation map") {}
 
-        virtual entryQuestRelationMap Calculate() override;
+        virtual EntryQuestRelationMap Calculate() override;
     };
         
     //Generic quest object finder
@@ -76,7 +74,7 @@ namespace ai
         std::unordered_map<int32, std::vector<std::pair<uint32, QuestRelationFlag>>> entryMap;
         std::unordered_map<uint32, std::vector<std::pair<uint32, QuestRelationFlag>>> itemMap;
 
-        entryQuestRelationMap relationMap;
+        EntryQuestRelationMap relationMap;
 
         questGuidpMap data;
     };

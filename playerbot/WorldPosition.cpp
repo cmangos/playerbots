@@ -757,8 +757,6 @@ void WorldPosition::unloadMapAndVMaps(uint32 mapId)
 
 bool WorldPosition::loadVMap(uint32 mapId, int x, int y)
 {
-    std::string logName = "load_map_grid.csv";
-
     if (isVmapLoaded(mapId, x, y))
         return true;
 

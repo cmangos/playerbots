@@ -198,6 +198,36 @@ void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* new
         }
     }
 
+    if ((int)urand(1, 100) > (90 - (40 * (!bot->GetGroup()))))
+    {
+        std::vector<SkillType> gatheringSkills = { SKILL_MINING, SKILL_SKINNING, SKILL_HERBALISM, SKILL_FISHING };
+
+        SkillType needSkillup = SKILL_NONE;
+
+        for (auto& skill : gatheringSkills)
+        {
+            if (bot->GetSkillValue(skill) < std::min(bot->GetSkillMax(skill), bot->GetSkillMaxForLevel(bot)))
+            {
+                needSkillup = skill;
+                break;
+            }
+        }
+
+        if (needSkillup != SKILL_NONE)
+        {
+            if (needSkillup == SKILL_MINING)
+                ai->TellDebug(requester, "Gather for mining skillup ", "debug travel");
+            if (needSkillup == SKILL_SKINNING)
+                ai->TellDebug(requester, "Gather for skinning skillup ", "debug travel");
+            if (needSkillup == SKILL_HERBALISM)
+                ai->TellDebug(requester, "Gather for herbalism skillup ", "debug travel");
+            if (needSkillup == SKILL_FISHING)
+                ai->TellDebug(requester, "Gather for fishing skillup ", "debug travel");
+            auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetGatherTarget", &context->performanceStack);
+            foundTarget = SetGatherTarget(requester, newTarget);
+        }
+    }
+
     //Dungeon in group.
     if (!foundTarget && (!botPos.isOverworld() || urand(1, 100) > 50))      //50% chance or currently in instance.
         if (AI_VALUE(bool, "can fight boss"))
@@ -1087,6 +1117,15 @@ bool ChooseTravelTargetAction::SetGOTypeTarget(Player* requester, TravelTarget* 
     return isActive;
 }
 
+bool ChooseTravelTargetAction::SetGatherTarget(Player* requester, TravelTarget* target)
+{
+    std::vector<TravelDestination*> TravelDestinations = sTravelMgr.GetDestinations(info, typeid(GatherTravelDestination));
+
+    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
+        ai->TellPlayerNoFacing(requester, std::to_string(TravelDestinations.size()) + " gather destinations found.");
+
+    return SetBestTarget(requester, target, TravelDestinations);
+}
 
 bool ChooseTravelTargetAction::SetNullTarget(TravelTarget* target)
 {

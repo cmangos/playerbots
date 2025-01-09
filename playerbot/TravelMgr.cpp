@@ -1110,279 +1110,108 @@ void TravelMgr::LoadQuestTravelTable()
     // Clearing store (for reloading case)
     Clear();
 
-    struct unit { uint64 guid; uint32 type; uint32 entry; uint32 map; float  x; float  y; float  z;  float  o; uint32 c; } t_unit;
-    std::vector<unit> units;
-
     sLog.outString("Loading trainable spells.");
     if (GAI_VALUE(trainableSpellMap*, "trainable spell map")->empty())
     {
 
-    }
-
-    ObjectMgr::QuestMap const& questMap = sObjectMgr.GetQuestTemplates();
-    std::vector<uint32> questIds;
-
-    std::unordered_map <uint32, uint32> entryCount;
-
-    for (auto& quest : questMap)
-        questIds.push_back(quest.first);
-
-    std::sort(questIds.begin(), questIds.end());
-
-    sLog.outString("Loading units locations.");
-    for (auto& creaturePair : WorldPosition().getCreaturesNear())
-    {
-        t_unit.type = 0;
-        t_unit.guid = ObjectGuid(HIGHGUID_UNIT, creaturePair->second.id, creaturePair->first).GetRawValue();
-        t_unit.entry = creaturePair->second.id;
-        t_unit.map = creaturePair->second.mapid;
-        t_unit.x = creaturePair->second.posX;
-        t_unit.y = creaturePair->second.posY;
-        t_unit.z = creaturePair->second.posZ;
-        t_unit.o = creaturePair->second.orientation;
-
-        entryCount[creaturePair->second.id]++;
-
-        units.push_back(t_unit);
-    }
-
-    for (auto& unit : units)
-    {
-        unit.c = entryCount[unit.entry];
-    }
-
-    sLog.outString("Loading game object locations.");
-    for (auto& goPair : WorldPosition().getGameObjectsNear())
-    {
-        t_unit.type = 1;
-        t_unit.guid = ObjectGuid(HIGHGUID_GAMEOBJECT, goPair->second.id, goPair->first).GetRawValue();
-        t_unit.entry = goPair->second.id;
-        t_unit.map = goPair->second.mapid;
-        t_unit.x = goPair->second.posX;
-        t_unit.y = goPair->second.posY;
-        t_unit.z = goPair->second.posZ;
-        t_unit.o = goPair->second.orientation;
-        t_unit.c = 1;
-
-        units.push_back(t_unit);
-    } 
+    }     
 
     sLog.outString("Loading quest data.");
 
-    bool loadQuestData = true;
+    EntryGuidps guidpMap = GAI_VALUE(EntryGuidps, "entry guidps");
 
-    if (loadQuestData)
+    for (auto& [entry, relation] : GAI_VALUE(EntryQuestRelationMap, "entry quest relation"))
     {
-        questGuidpMap questMap = GAI_VALUE(questGuidpMap, "quest guidp map");
-
-        for (auto& q : questMap)
+        for (auto& [questId, flag] : relation)
         {
-            uint32 questId = q.first;
-
-            for (auto& r : q.second)
+            if (guidpMap.find(entry) == guidpMap.end())
             {
-                uint32 flag = r.first;
+                sLog.outDebug("Entry %d for quest %d has no valid location.", entry, questId);
+                continue;
+            }
 
-                for (auto& e : r.second)
+            QuestTravelDestination* loc;
+            std::vector<QuestTravelDestination*> locs;
+
+            if (flag & (uint32)QuestRelationFlag::questGiver)
+            {
+                loc = AddQuestDestination<QuestRelationTravelDestination>(questId, entry, 0);
+                locs.push_back(loc);
+            }
+            if (flag & (uint32)QuestRelationFlag::questTaker)
+            {
+                loc = AddQuestDestination<QuestRelationTravelDestination>(questId, entry, 1);
+                locs.push_back(loc);
+            }
+            if (flag & ((uint32)QuestRelationFlag::objective1 | (uint32)QuestRelationFlag::objective2 | (uint32)QuestRelationFlag::objective3 | (uint32)QuestRelationFlag::objective4))
+            {
+                uint32 objective;
+                if (flag & (uint32)QuestRelationFlag::objective1)
+                    objective = 0;
+                else if (flag & (uint32)QuestRelationFlag::objective2)
+                    objective = 1;
+                else if (flag & (uint32)QuestRelationFlag::objective3)
+                    objective = 2;
+                else if (flag & (uint32)QuestRelationFlag::objective4)
+                    objective = 3;
+
+                loc = AddQuestDestination<QuestObjectiveTravelDestination>(questId, entry, objective);
+                locs.push_back(loc);
+            }
+
+            for (auto& guidP : guidpMap.at(entry))
+            {
+                pointsMap.insert(std::make_pair(guidP.GetRawValue(), guidP));
+
+                for (auto tLoc : locs)
                 {
-                    int32 entry = e.first;
-
-                    QuestTravelDestination* loc;
-                    std::vector<QuestTravelDestination*> locs;
-
-                    if (flag & (uint32)QuestRelationFlag::questGiver)
-                    {
-                        loc = AddQuestDestination<QuestRelationTravelDestination>(questId, entry, 0);
-                        locs.push_back(loc);
-                    }
-                    if (flag & (uint32)QuestRelationFlag::questTaker)
-                    {
-                        loc = AddQuestDestination<QuestRelationTravelDestination>(questId, entry, 1);
-                        locs.push_back(loc);
-                    }
-                    if(flag & ((uint32)QuestRelationFlag::objective1 | (uint32)QuestRelationFlag::objective2 | (uint32)QuestRelationFlag::objective3 | (uint32)QuestRelationFlag::objective4))
-                    {
-                        uint32 objective;
-                        if (flag & (uint32)QuestRelationFlag::objective1)
-                            objective = 0;
-                        else if (flag & (uint32)QuestRelationFlag::objective2)
-                            objective = 1;
-                        else if (flag & (uint32)QuestRelationFlag::objective3)
-                            objective = 2;
-                        else if (flag & (uint32)QuestRelationFlag::objective4)
-                            objective = 3;
-
-                        loc = AddQuestDestination<QuestObjectiveTravelDestination>(questId, entry, objective);
-                        locs.push_back(loc);
-                    }
-
-                    for (auto& guidP : e.second)
-                    {
-                        if (!guidP.isValid())
-                            continue; 
-
-                        pointsMap.insert(std::make_pair(guidP.GetRawValue(), guidP));
-
-                        for (auto tLoc : locs)
-                        {
-                            tLoc->AddPoint(&pointsMap.at(guidP.GetRawValue()));
-                        }
-                    }
+                    tLoc->AddPoint(&pointsMap.at(guidP.GetRawValue()));
                 }
             }
         }
-    }
+    }    
 
     sLog.outString("Loading Rpg, Grind and Boss locations.");
 
-    GuidPosition point;
-
-    //Rpg locations
-    for (auto& u : units)
+    for (auto& [entry, purpose] : GAI_VALUE(EntryTravelPurposeMap, "entry travel purpose"))
     {
-        RpgTravelDestination* rLoc;
-        GrindTravelDestination* gLoc;
-        BossTravelDestination* bLoc;
-        TravelDestination* tLoc;
-
-        if (u.type == 0)
+        if (guidpMap.find(entry) == guidpMap.end())
         {
-            CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(u.entry);
+            sLog.outDebug("Entry %d for purpose %d has no valid location.", entry, purpose);
+            continue;
+        }
 
-            if (!cInfo)
-                continue;
+        std::vector<TravelDestination*> dests;
+        if (purpose & (uint32)TravelDestinationPurposeFlag::RPG)
+            dests.push_back(AddDestination<RpgTravelDestination>(entry));
 
-            if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INVISIBLE)
-                continue;
+        if (purpose & (uint32)TravelDestinationPurposeFlag::GRIND)
+            dests.push_back(AddDestination<GrindTravelDestination>(entry));
 
-            std::vector<uint32> allowedNpcFlags;
+        if (purpose & (uint32)TravelDestinationPurposeFlag::BOSS)
+            dests.push_back(AddDestination<BossTravelDestination>(entry));
 
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_INNKEEPER);
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_GOSSIP);
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_QUESTGIVER);
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_FLIGHTMASTER);
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_BANKER);
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_AUCTIONEER);
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_STABLEMASTER);
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_PETITIONER);
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_TABARDDESIGNER);
+        if (purpose & (uint32)TravelDestinationPurposeFlag::GATHER)
+            dests.push_back(AddDestination<GatherTravelDestination>(entry));
 
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_TRAINER);
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_VENDOR);
-            allowedNpcFlags.push_back(UNIT_NPC_FLAG_REPAIR);
-
-            point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
-
-            if (!point.isValid())
-                continue;
-
-            for (auto flag : allowedNpcFlags)
+        for (auto& point : guidpMap.at(entry))
+        {
+            pointsMap.insert_or_assign(point.GetRawValue(), point);
+            for (auto& dest : dests)
             {
-                if ((cInfo->NpcFlags & flag) != 0)
-                {
-                    rLoc = AddDestination<RpgTravelDestination>(u.entry);
-
-                    pointsMap.insert_or_assign(u.guid, point);
-                    rLoc->AddPoint(&pointsMap.at(u.guid));
-                    break;
-                }
-            }
-
-            if (cInfo->MinLootGold > 0)
-            {
-                gLoc = AddDestination<GrindTravelDestination>(u.entry);
-
-                point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
-                pointsMap.insert_or_assign(u.guid, point);
-                gLoc->AddPoint(&pointsMap.at(u.guid));
-            }
-
-            if (cInfo->Rank == 3 || cInfo->Rank == 4 || (cInfo->Rank == 1 && !point.isOverworld() && u.c == 1))
-            {
-                bLoc = AddDestination<BossTravelDestination>(u.entry);
-
-                pointsMap.insert_or_assign(u.guid, point);
-                bLoc->AddPoint(&pointsMap.at(u.guid));
-            }
-
-            if (cInfo->SkinningLootId && cInfo->GetRequiredLootSkill() == SKILL_SKINNING)
-            {
-                tLoc = AddDestination<GatherTravelDestination>(u.entry);
-
-                pointsMap.insert_or_assign(u.guid, point);
-                tLoc->AddPoint(&pointsMap.at(u.guid));                
+                dest->AddPoint(&pointsMap.at(point.GetRawValue()));
             }
         }
-        else
-        {
-            GameObjectInfo const* gInfo = ObjectMgr::GetGameObjectInfo(u.entry);
-
-            if (!gInfo)
-                continue;
-
-            if (gInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INVISIBLE)
-                continue;
-
-            std::vector<uint32> allowedGoTypes;
-
-            allowedGoTypes.push_back(GAMEOBJECT_TYPE_MAILBOX);
-
-            point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
-
-            if (!point.isValid())
-                continue;
-
-            uint32 entry = u.entry * -1;
-
-            for (auto type : allowedGoTypes)
-            {
-                if (gInfo->type == type)
-                {
-                    rLoc = AddDestination<RpgTravelDestination>(entry);
-
-                    pointsMap.insert_or_assign(u.guid, point);
-                    rLoc->AddPoint(&pointsMap.at(u.guid));
-                    break;
-                }
-            }
-
-            if (uint32 lockId = gInfo->GetLockId())
-            {
-                LockEntry const* lockInfo = sLockStore.LookupEntry(lockId);
-                if (lockInfo)
-                {
-                    uint32 skillId = SKILL_NONE;
-
-                    for (int i = 0; i < 8; ++i)
-                    {
-                        if (lockInfo->Type[i] == LOCK_KEY_SKILL)
-                            if (SkillByLockType(LockType(lockInfo->Index[i])) > 0)
-                            {
-                                skillId = SkillByLockType(LockType(lockInfo->Index[i]));
-                                break;
-                            }
-                    }
-            
-                    if (skillId == SKILL_LOCKPICKING || skillId == SKILL_MINING || skillId == SKILL_HERBALISM || skillId == SKILL_FISHING)
-                    {
-                        tLoc = AddDestination<GatherTravelDestination>(entry);
-
-                        pointsMap.insert_or_assign(u.guid, point);
-                        tLoc->AddPoint(&pointsMap.at(u.guid));
-                    }
-                }
-            }
-        }
-    }
+    }    
 
     sLog.outString("Loading Explore locations.");
 
     //Explore points
-    for (auto& u : units)
+    for (auto& creatureDataPair : WorldPosition().getCreaturesNear())
     {
         ExploreTravelDestination* loc;
 
-        GuidPosition point = GuidPosition(u.guid, WorldPosition(u.map, u.x, u.y, u.z, u.o));
+        GuidPosition point(creatureDataPair);
 
         if (!point.isValid())
             continue;
@@ -1395,15 +1224,10 @@ void TravelMgr::LoadQuestTravelTable()
         if (!area->exploreFlag)
             continue;
 
-        if (u.type == 1)
-            continue;
-
-        int32 guid = u.type == 0 ? u.guid : u.guid * -1;
-
-        pointsMap.insert_or_assign(guid, point);
+        pointsMap.insert_or_assign(point.GetRawValue(), point);
 
         loc = AddDestination<ExploreTravelDestination>(area->ID);
-        loc->AddPoint(&pointsMap.at(guid));
+        loc->AddPoint(&pointsMap.at(point.GetRawValue()));
     }
 
     //Analyse log files
@@ -2096,10 +1920,10 @@ void TravelMgr::LoadQuestTravelTable()
 
         std::vector<WorldPosition> Locs = {};
         
-        for (auto& u : units)
+        for (auto& cdp : WorldPosition().getCreaturesNear())
         {
-            WorldPosition point = WorldPosition(u.map, u.x, u.y, u.z, u.o);
-            std::string name = std::to_string(u.map) + point.getAreaName();
+            WorldPosition point(cdp);
+            std::string name = std::to_string(point.getMapId()) + point.getAreaName();
 
             if (zoneLocs.find(name) == zoneLocs.end())
                 zoneLocs.insert_or_assign(name, Locs);
@@ -2140,7 +1964,7 @@ void TravelMgr::LoadQuestTravelTable()
             out << points.begin()->getAreaName() << ",";
             out << points.begin()->getAreaName(true, true) << ",";
 
-            point.printWKT(points, out, 0);
+            WorldPosition().printWKT(points, out, 0);
 
             if (points.begin()->GetArea())
                 out << std::to_string(points.begin()->getAreaLevel());

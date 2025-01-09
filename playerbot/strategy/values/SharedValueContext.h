@@ -4,6 +4,7 @@
 #include "QuestValues.h"
 #include "TrainerValues.h"
 #include "VendorValues.h"
+#include "TravelValues.h"
 #include "playerbot/PlayerbotAI.h"
 
 namespace ai
@@ -30,6 +31,8 @@ namespace ai
 
             creators["trainable spell map"] = [](PlayerbotAI* ai) { return new TrainableSpellMapValue(ai); };
 
+            creators["entry travel purpose"] = [](PlayerbotAI* ai) { return new EntryTravelPurposeMapValue(ai); };
+            creators["entry guidps"] = [](PlayerbotAI* ai) { return new EntryGuidpsValue(ai); };
 
             creators["global string"] = [](PlayerbotAI* ai) { return new StringManualSetValue(ai); };
         }

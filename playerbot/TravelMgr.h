@@ -429,7 +429,7 @@ namespace ai
 		template<class T>
 		T* AddQuestDestination(int32 questId, uint32 entry, uint32 subEntry) {
 			for (auto& dest : destinationMap[typeid(QuestTravelDestination)])
-				if (((QuestTravelDestination*)dest)->GetQuestId() == questId && dest->GetEntry() == entry && dest->GetSubEntry() == subEntry)
+				if (dest->GetEntry() == entry && dest->GetSubEntry() == subEntry && ((QuestTravelDestination*)dest)->GetQuestId() == questId)
 					return (T*)dest;
 
 			destinationMap[typeid(QuestTravelDestination)].push_back(new T(questId, entry, subEntry));

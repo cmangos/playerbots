@@ -32,6 +32,7 @@ namespace ai
         bool SetExploreTarget(Player* requester, TravelTarget* target);
         bool SetNpcFlagTarget(Player* requester, TravelTarget* target, std::vector<NPCFlags> flags, std::string name = "", std::vector<uint32> items = {}, bool force = true);
         bool SetGOTypeTarget(Player* requester, TravelTarget* target, GameobjectTypes type, std::string name = "", bool force = true);
+        bool SetGatherTarget(Player* requester, TravelTarget* target);
         bool SetNullTarget(TravelTarget* target);
 
     public:

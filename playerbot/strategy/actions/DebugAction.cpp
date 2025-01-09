@@ -1249,7 +1249,7 @@ bool DebugAction::Execute(Event& event)
                 }
 
                 if (dest->GetPoints().empty())
-                    sLog.outError("Destination %s has no points!", dest->GetTitle());
+                    sLog.outError("Destination %s has no points!", dest->GetTitle().c_str());
             }
         }
     }

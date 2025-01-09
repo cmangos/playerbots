@@ -11,6 +11,14 @@
 #include "Entities/Transports.h"
 #include "MemoryMonitor.h"
 
+#include "MotionGenerators/MoveMap.h"
+
+#ifdef MANGOSBOT_TWO
+#include "Vmap/VMapFactory.h"
+#else
+#include "vmap/VMapFactory.h"
+#endif
+
 #include <numeric>
 #include <iomanip>
 
@@ -658,6 +666,20 @@ std::vector<WorldPosition> WorldPosition::frommGridPair(const mGridPair& gridPai
     }
 
     return retVec;
+}
+
+bool WorldPosition::isVmapLoaded(uint32 mapId, int x, int y) 
+{
+    return VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(mapId, x, y);
+}
+
+bool WorldPosition::isMmapLoaded(uint32 mapId, uint32 instanceId, int x, int y)
+{
+#ifndef MANGOSBOT_TWO
+    return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y);
+#else
+    return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y);
+#endif
 }
 
 bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y)

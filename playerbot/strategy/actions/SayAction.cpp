@@ -592,6 +592,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
                 case ChatChannelSource::SRC_GUILD:
                 {
                     type = CHAT_MSG_GUILD;
+                    break;
                 }
                 case ChatChannelSource::SRC_WORLD:
                 case ChatChannelSource::SRC_GENERAL:

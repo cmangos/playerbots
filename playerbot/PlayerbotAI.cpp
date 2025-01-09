@@ -1625,7 +1625,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 if (!isAiChat || isFromFreeBot)
                 {
                     // random bot speaks, chat CD
-                    if (isFromFreeBot && isPaused)
+                    if ((isFromFreeBot || isAiChat) && isPaused)
                         return;
 
                     // BG: react only if mentioned or if not channel and real player spoke

@@ -6,14 +6,6 @@
 #include "World/World.h"
 #include "MotionGenerators/PathFinder.h"
 
-#ifdef MANGOSBOT_TWO
-#include "Vmap/VMapFactory.h"
-#else
-#include "vmap/VMapFactory.h"
-#endif
-
-#include "MotionGenerators/MoveMap.h"
-
 class ByteBuffer;
 
 namespace G3D
@@ -269,19 +261,11 @@ namespace ai
         std::vector<mGridPair> getmGridPairs(const WorldPosition& secondPos) const;
         static std::vector<WorldPosition> frommGridPair(const mGridPair& gridPair, uint32 mapId);
 
-        static bool isVmapLoaded(uint32 mapId, int x, int y) {
-            return VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(mapId, x, y);
-        }
+        static bool isVmapLoaded(uint32 mapId, int x, int y);
 
         bool isVmapLoaded() const { return isVmapLoaded(getMapId(), getmGridPair().first, getmGridPair().second); }
 
-        static bool isMmapLoaded(uint32 mapId, uint32 instanceId, int x, int y)  {
-#ifndef MANGOSBOT_TWO
-            return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y);
-#else
-            return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y);
-#endif
-        }
+        static bool isMmapLoaded(uint32 mapId, uint32 instanceId, int x, int y);
 
         bool isMmapLoaded(uint32 instanceId) const { return isMmapLoaded(getMapId(), instanceId, getmGridPair().first, getmGridPair().second); }
 

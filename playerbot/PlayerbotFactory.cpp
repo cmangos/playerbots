@@ -2042,8 +2042,8 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                             continue;
 
                         // Stat calculation and comparison
-                        uint32 oldStatValue = (oldItem) ? sRandomItemMgr.GetLiveStatWeight(bot, oldProto->ItemId, specId) : 0;
-                        uint32 newStatValue = sRandomItemMgr.GetLiveStatWeight(bot, newItemId, specId);
+                        uint32 oldStatValue = (oldItem) ? sRandomItemMgr.GetLiveStatWeight(bot, oldProto->ItemId, specId, isBotHighRanked) : 0;
+                        uint32 newStatValue = sRandomItemMgr.GetLiveStatWeight(bot, newItemId, specId, isBotHighRanked);
                         if (newStatValue <= 0)
                             continue;
 
@@ -2079,7 +2079,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                             if (mhItem && mhItem->GetProto())
                             {
                                 ItemPrototype const* mhProto = mhItem->GetProto();
-                                uint32 mhStatValue = sRandomItemMgr.GetLiveStatWeight(bot, mhProto->ItemId, specId);
+                                uint32 mhStatValue = sRandomItemMgr.GetLiveStatWeight(bot, mhProto->ItemId, specId, isBotHighRanked);
                                 betterValue = (newStatValue > mhStatValue);
 
                                 uint32 mhDps = 0, mhDamage = 0;

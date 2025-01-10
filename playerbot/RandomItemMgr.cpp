@@ -3053,7 +3053,7 @@ uint32 RandomItemMgr::GetBestRandomEnchantStatWeight(uint32 itemId, uint32 specI
     return statWeight;
 }
 
-uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 specId)
+uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 specId, bool isBotHighRanked)
 {
     if (!player || !itemId || !itemInfoCache[itemId])
         return 0;
@@ -3125,7 +3125,7 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
     if (info->pvpRank)
         return info->weights[specId] * 5;
 #else
-    if (info->source == ITEM_SOURCE_PVP && playerPvpRank >= 10)
+    if (info->source == ITEM_SOURCE_PVP && (playerPvpRank >= 10 || isBotHighRanked))
         return static_cast<uint32>(info->weights[specId] * 1.5);
 #endif
 

@@ -42,6 +42,9 @@ void StatsAction::ListPower(std::ostringstream& out)
 
     std::vector<uint32> qualityCount = { 0,0,0,0,0,0,0 };
 
+    bool isBotHighRanked = bot->GetMaxPersonalArenaRatingRequirement(0) >= 1800;
+    uint32 specId = sRandomItemMgr.GetPlayerSpecId(bot);
+
     for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
     {
         if (i == EQUIPMENT_SLOT_BODY || i == EQUIPMENT_SLOT_TABARD)
@@ -55,7 +58,7 @@ void StatsAction::ListPower(std::ostringstream& out)
             continue;
         }
 
-        uint32 power = sRandomItemMgr.GetLiveStatWeight(bot, item->GetEntry());
+        uint32 power = sRandomItemMgr.GetLiveStatWeight(bot, item->GetEntry(), specId, isBotHighRanked);
         totalPower += power;
 
         if (power)

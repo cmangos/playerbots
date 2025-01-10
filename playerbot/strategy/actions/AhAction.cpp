@@ -278,6 +278,9 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             checkNumAuctions = urand(50, 250);
         }
 
+        bool isBotHighRanked = bot->GetMaxPersonalArenaRatingRequirement(0) >= 1800;
+        uint32 specId = sRandomItemMgr.GetPlayerSpecId(bot);
+
         for (uint32 i = 0; i < checkNumAuctions; i++)
         {
             auto curAuction = std::next(std::begin(map), urand(0, map.size()-1));
@@ -308,7 +311,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             {
             case ItemUsage::ITEM_USAGE_EQUIP:
             case ItemUsage::ITEM_USAGE_BAD_EQUIP:
-                power = sRandomItemMgr.GetLiveStatWeight(bot, auction->itemTemplate);
+                power = sRandomItemMgr.GetLiveStatWeight(bot, auction->itemTemplate, specId, isBotHighRanked);
                 break;
             case ItemUsage::ITEM_USAGE_AH:
             {

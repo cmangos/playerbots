@@ -153,7 +153,7 @@ class RandomItemMgr
         bool HasStatWeight(uint32 itemId);
         uint32 GetMinLevelFromCache(uint32 itemId);
         uint32 GetStatWeight(Player* player, uint32 itemId);
-        uint32 GetLiveStatWeight(Player* player, uint32 itemId, uint32 specId = 0);
+        uint32 GetLiveStatWeight(Player* player, uint32 itemId, uint32 specId, bool isBotHighRanked);
         uint32 GetStatWeight(uint32 itemId, uint32 specId);
         uint32 GetBestRandomEnchantStatWeight(uint32 itemId, uint32 specId);
         uint32 GetRandomItem(uint32 level, RandomItemType type, RandomItemPredicate* predicate = NULL);

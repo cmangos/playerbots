@@ -37,8 +37,9 @@ enum class BotSelfBotLevel : uint32
     DISABLED = 0,
     GM_ONLY = 1,
     ACTIVE_BY_COMMAND = 2,
-    ACTIVE_BY_LOGIN = 3, 
-    ALWAYS_ACTIVE = 4
+    ALWAYS_ALLOWED = 3,
+    ACTIVE_BY_LOGIN = 4, 
+    ALWAYS_ACTIVE = 5
 };
 
 enum class BotAlwaysOnline : uint32

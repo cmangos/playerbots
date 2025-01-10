@@ -908,7 +908,7 @@ AiPlayerbot.PerfMonEnabled = 0
 
 # Self bot turns your current character into a bot with the command ".bot self"
 # !!DISCLAMER!! Selfbots will work and act like randombots based on their enabled strategies. Your epic mount will be sold to a vendor!
-# Self bot level. Values: 0 (disabled), 1 (Game masters only), 2 (Any player), 3 (Enabled on login), 4 (Enabled even when offline)
+# Self bot level. Values: 0 (disabled), 1 (Game masters only), 2 (Any player), 3 (Allow .bot always command for all players), 4 (Enabled on login), 4 (Enabled even when offline)
 # AiPlayerbot.SelfBotLevel = 1
 
 # Account/character names that are either, always online as bot (SelfBotLevel < 4) or prevented from being always online as bot (SelfBotLevel = 4) 

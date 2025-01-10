@@ -1605,8 +1605,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
 
         for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
         {
-            if (slot == EQUIPMENT_SLOT_TABARD || slot == EQUIPMENT_SLOT_BODY ||
-                slot == EQUIPMENT_SLOT_TRINKET1 || slot == EQUIPMENT_SLOT_TRINKET2)
+            if (slot == EQUIPMENT_SLOT_TABARD || slot == EQUIPMENT_SLOT_BODY)
                 continue;
 
             Item* oldItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
@@ -1628,6 +1627,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
         std::sort(prioritizedItems.begin(), prioritizedItems.end());
 
         uint32 counter = 0;
+        uint32 extraCounter = 0;
 
         for (auto emptySlot : emptySlots)
         {
@@ -1640,7 +1640,17 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
         for (const auto& item : prioritizedItems)
         {
             if (counter >= maxSlots)
-                break;
+            {
+                if (extraCounter > 2)
+                    break;
+                if (urand(0, 100) < 20) // 20% chance to include a non-prioritized item
+                {
+                    upgradeSlots[item.second] = true;
+                    extraCounter++;
+                }
+                continue;
+            }
+
             upgradeSlots[item.second] = true;
             counter++;
         }

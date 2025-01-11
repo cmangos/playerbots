@@ -333,11 +333,7 @@ namespace ai
 		virtual bool Execute(Event& event);
 	};
 
-    class CastFeralChargeCatAction : public CastReachTargetSpellAction
-    {
-    public:
-        CastFeralChargeCatAction(PlayerbotAI* ai) : CastReachTargetSpellAction(ai, "feral charge - cat", 1.5f) {}
-    };
+    REACH_ACTION(CastFeralChargeCatAction, "feral charge - cat", 8.0f);
 
     class CastCowerAction : public CastBuffSpellAction
     {
@@ -501,16 +497,15 @@ namespace ai
         CastPounceAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "pounce") {}
     };
 
+#ifdef MANGOSBOT_TWO
+    REACH_ACTION(CastFeralChargeBearAction, "feral charge - bear", 8.0f);
+#else
     class CastFeralChargeBearAction : public CastReachTargetSpellAction
     {
     public:
-        CastFeralChargeBearAction(PlayerbotAI* ai) 
-#ifdef MANGOSBOT_TWO
-        : CastReachTargetSpellAction(ai, "feral charge - bear", 1.5f) {}
-#else
-        : CastReachTargetSpellAction(ai, "feral charge", 1.5f) {}
-#endif
+        CastFeralChargeBearAction(PlayerbotAI* ai) : CastReachTargetSpellAction(ai, "feral charge", 1.5f) {}
     };
+#endif
 
     class CastGrowlAction : public CastSpellAction
     {

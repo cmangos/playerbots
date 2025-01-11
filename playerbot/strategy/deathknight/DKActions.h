@@ -24,8 +24,7 @@ namespace ai
 		}
 	};
 
-	BEGIN_RANGED_SPELL_ACTION(CastDeathGripAction, "death grip")
-		END_SPELL_ACTION()
+	REACH_ACTION(CastDeathGripAction, "death grip", 8.0f);
 
 	// Unholy presence
 	class CastUnholyMeleeSpellAction : public CastMeleeSpellAction {

@@ -1608,7 +1608,23 @@ public:
             (actionName == "set dead state") ||
             (actionName == "update pvp strats") ||
             (actionName == "update pve strats") ||
-            (actionName == "update raid strats"))
+            (actionName == "update raid strats") ||
+            (actionName == "accept invitation") ||
+            (actionName == "bg status") ||
+            (actionName == "bg leave") ||
+            (actionName == "check mount state") ||
+            (actionName == "loot roll") ||
+            (actionName == "auto loot roll") ||
+            (actionName == "attack anything") ||
+            (actionName == "choose rpg target") ||
+            (actionName == "move to rpg target") ||
+            (actionName == "travel") ||
+            (actionName == "bg move to start") ||
+            (actionName == "bg move to objective") ||
+            (actionName == "bg select objective") ||
+            (actionName == "bg check objective") ||
+            (actionName == "arena tactics") ||
+            (actionName == "arena move to center"))
         {
             return 1.0f;
         }

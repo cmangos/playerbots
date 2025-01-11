@@ -10,27 +10,21 @@ public:
     ArmsWarriorStrategyActionNodeFactory()
     {
         creators["charge"] = &charge;
-        creators["death wish"] = &death_wish;
         creators["piercing howl"] = &piercing_howl;
         creators["mocking blow"] = &mocking_blow;
         creators["heroic strike"] = &heroic_strike;
-        creators["mortal strike"] = &mortal_strike;
         creators["whirlwind"] = &whirlwind;
         creators["sweeping strikes"] = &sweeping_strikes;
     }
 
 private:
-    ACTION_NODE_A(charge, "charge", "reach melee");
-
-    ACTION_NODE_A(death_wish, "death wish", "bloodrage");
+    ACTION_NODE_A(charge, "charge", "battle stance");
 
     ACTION_NODE_A(piercing_howl, "piercing howl", "hamstring");
 
     ACTION_NODE_A(mocking_blow, "mocking blow", "hamstring");
 
     ACTION_NODE_A(heroic_strike, "heroic strike", "melee");
-
-    ACTION_NODE_A(mortal_strike, "mortal strike", "heroic strike");
 
     ACTION_NODE_P(whirlwind, "whirlwind", "berserker stance");
 
@@ -718,7 +712,8 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "enemy out of melee",
-        NextAction::array(0, new NextAction("charge", ACTION_MOVE), NULL)));
+        NextAction::array(0, new NextAction("charge", ACTION_MOVE + 1),
+            new NextAction("intercept", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "target critical health",

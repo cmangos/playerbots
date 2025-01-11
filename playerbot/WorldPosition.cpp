@@ -686,10 +686,10 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
 {
     std::string logName = "load_map_grid.csv";
 
-    bool hasVmap = isVmapLoaded(mapId, x, y);
+    //bool hasVmap = isVmapLoaded(mapId, x, y);
     bool hasMmap = isMmapLoaded(mapId, instanceId, x, y);
 
-    if (hasVmap && hasMmap)
+    if (hasMmap)
         return true;
 
     if (sTravelMgr.IsBadMmap(mapId, x, y))
@@ -718,14 +718,14 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
 #endif
 
 
-        if (!isLoaded)
-            sTravelMgr.AddBadMmap(mapId, x, y);
+        //if (!isLoaded)
+        //    sTravelMgr.AddBadMmap(mapId, x, y);
     }
 
-    if (!hasVmap)
-    {
-        loadVMap(mapId, x, y);
-    }
+    //if (!hasVmap)
+    //{
+    //    loadVMap(mapId, x, y);
+    //}
 
     if (sPlayerbotAIConfig.hasLog(logName))
     {

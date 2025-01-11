@@ -81,7 +81,7 @@ void TravelNodePath::calculateCost(bool distanceOnly)
 
             if (lastPoint && point.getMapId() == lastPoint.getMapId())
             {
-                if (!distanceOnly && (point.isInWater() || lastPoint.isInWater()))
+                if (!distanceOnly && (point.isVmapLoaded() && point.isInWater()) || (lastPoint.isVmapLoaded() && lastPoint.isInWater()))
                     swimDistance += point.distance(lastPoint);
 
                 distance += point.distance(lastPoint);
@@ -1843,8 +1843,23 @@ void TravelNodeMap::manageNodes(Unit* bot, bool mapFull)
 
 void TravelNodeMap::LoadMaps()
 {
-#ifdef MANGOSBOT_ZERO
     sLog.outError("Trying to load all maps and tiles for node generation. Please ignore any maps that could not be loaded.");
+    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
+        if (!sMapStore.LookupEntry(i))
+            continue;
+
+        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), mapId);
+        }
+        else
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
+        }
+    }
+
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
     {
         if (!sMapStore.LookupEntry(i))
@@ -1871,26 +1886,6 @@ void TravelNodeMap::LoadMaps()
             }
         }
     }
-#endif
-#ifdef MANGOSBOT_ONE
-    sLog.outError("Trying to load all maps and tiles for node generation. Please ignore any maps that could not be loaded.");
-    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
-    {
-        if (!sMapStore.LookupEntry(i))
-            continue;
-
-        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
-        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
-        {
-            MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), mapId);
-        }
-        else
-        {
-            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
-        }
-    }
-#endif
-
 }
 
 void TravelNodeMap::generateNpcNodes()

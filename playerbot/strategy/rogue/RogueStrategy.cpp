@@ -1012,6 +1012,10 @@ void RoguePvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "enemy flagcarrier near",
         NextAction::array(0, new NextAction("sprint", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "bg waiting",
+        NextAction::array(0, new NextAction("fan of knives", ACTION_IDLE), NULL)));
 }
 
 void RoguePvpStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
@@ -1071,6 +1075,10 @@ void RogueRaidStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
 void RogueAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     AoeStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "melee medium aoe",
+        NextAction::array(0, new NextAction("fan of knives", ACTION_HIGH), NULL))); 
 }
 
 void RogueAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

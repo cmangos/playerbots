@@ -415,7 +415,7 @@ namespace ai
                 creators["killing spree"] = &AiObjectContextInternal::killing_spree;
                 creators["tricks of the trade"] = &AiObjectContextInternal::tricks_of_the_trade;
                 creators["cloak of shadows"] = &AiObjectContextInternal::cloak_of_shadows;
-                //creators["fan of knives"] = &AiObjectContextInternal::fan_of_knives;
+                creators["fan of knives"] = &AiObjectContextInternal::fan_of_knives;
                 creators["cold blood"] = &AiObjectContextInternal::cold_blood;
                 creators["preparation"] = &AiObjectContextInternal::preparation;
                 creators["premeditation"] = &AiObjectContextInternal::premeditation;
@@ -473,7 +473,7 @@ namespace ai
             static Action* killing_spree(PlayerbotAI* ai) { return new CastKillingSpreeAction(ai); }
             static Action* tricks_of_the_trade(PlayerbotAI* ai) { return new CastTricksOfTheTradeOnPartyAction(ai); }
             static Action* cloak_of_shadows(PlayerbotAI* ai) { return new CastCloakOfShadowsAction(ai); }
-            //static Action* fan_of_knives(PlayerbotAI* ai) { return new CastFanOfKnivesAction(ai); }
+            static Action* fan_of_knives(PlayerbotAI* ai) { return new CastFanOfKnivesAction(ai); }
             static Action* update_pve_strats(PlayerbotAI* ai) { return new UpdateRoguePveStrategiesAction(ai); }
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdateRoguePvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdateRogueRaidStrategiesAction(ai); }

@@ -5,6 +5,7 @@
 namespace ai
 {
     BUFF_ACTION(CastColdBloodAction, "cold blood");
+    BUFF_ACTION(CastFanOfKnivesAction, "fan of knives");
 
     BUFF_ACTION_U(CastPreparationAction, "preparation", !bot->IsSpellReady(14177) || !bot->IsSpellReady(2983) || !bot->IsSpellReady(2094));
 
@@ -189,10 +190,10 @@ namespace ai
 		CastAdrenalineRushAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "adrenaline rush") {}
 	};
 
-	class CastKillingSpreeAction : public CastBuffSpellAction
+	class CastKillingSpreeAction : public CastMeleeSpellAction
 	{
 	public:
-		CastKillingSpreeAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "killing spree") {}
+		CastKillingSpreeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "killing spree") {}
 	};
 
     class CastKickOnEnemyHealerAction : public CastSpellOnEnemyHealerAction

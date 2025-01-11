@@ -47,6 +47,10 @@ bool CyclonePvpTrigger::IsActive()
     if (!target || !target->IsPlayer() || target->GetDiminishing(DIMINISHING_CYCLONE) >= DIMINISHING_LEVEL_IMMUNE)
         return false;
 
+    // Check if bot is in cat form and has not Predatory strikes
+    if (ai->HasAura("cat form", bot) && !ai->HasAura("predatory strikes", bot))
+        return false;
+
     // Check bot's health for defensive use
     const uint8 health = AI_VALUE2(uint8, "health", "self target");
     if (health <= sPlayerbotAIConfig.lowHealth && target->GetSelectionGuid() == bot->GetObjectGuid())

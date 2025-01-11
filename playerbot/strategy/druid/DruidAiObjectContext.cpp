@@ -356,6 +356,7 @@ namespace ai
                 creators["active hot"] = &TriggerFactoryInternal::active_hot;
                 creators["cyclone pvp"] = &TriggerFactoryInternal::cyclone_pvp;
                 creators["starfall"] = &TriggerFactoryInternal::starfall;
+                creators["predatory strikes"] = &TriggerFactoryInternal::predatory_strikes;
             }
 
         private:
@@ -408,6 +409,7 @@ namespace ai
             static Trigger* active_hot(PlayerbotAI* ai) { return new ActiveHotTrigger(ai); }
             static Trigger* cyclone_pvp(PlayerbotAI* ai) { return new CyclonePvpTrigger(ai); }
             static Trigger* starfall(PlayerbotAI* ai) { return new StarfallTrigger(ai); }
+            static Trigger* predatory_strikes(PlayerbotAI* ai) { return new PredatoryStrikes(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>

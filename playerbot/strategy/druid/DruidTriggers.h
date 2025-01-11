@@ -434,4 +434,5 @@ namespace ai
         StarfallTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "starfall") {}
         std::string GetTargetName() override { return "self target"; }
     };
+    BUFF_TRIGGER(PredatoryStrikes, "predatory strikes");
 }

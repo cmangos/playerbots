@@ -917,19 +917,8 @@ void BalanceDruidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigge
     DruidStrategy::InitNonCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "critical health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_CRITICAL_HEAL + 1),
-            new NextAction("healing touch", ACTION_CRITICAL_HEAL), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("regrowth on party", ACTION_CRITICAL_HEAL + 1),
-            new NextAction("healing touch on party", ACTION_CRITICAL_HEAL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "low health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL + 1),
-            new NextAction("nourish", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("healing touch on party", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
@@ -937,20 +926,17 @@ void BalanceDruidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigge
             new NextAction("nourish on party", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "medium health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_NORMAL + 1), NULL)));
+        "medium aoe heal",
+        NextAction::array(0, new NextAction("wild growth", ACTION_LIGHT_HEAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member medium health",
-        NextAction::array(0, new NextAction("regrowth on party", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "almost full health",
-        NextAction::array(0, new NextAction("rejuvenation", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("regrowth on party", ACTION_LIGHT_HEAL + 1),
+            new NextAction("nourish on party", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",
-        NextAction::array(0, new NextAction("rejuvenation on party", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("rejuvenation on party", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void BalanceDruidStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

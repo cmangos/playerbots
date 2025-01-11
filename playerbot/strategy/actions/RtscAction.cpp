@@ -149,7 +149,7 @@ bool RTSCAction::Execute(Event& event)
 
 				if (filePerBot)
 				{
-					PlayerbotTextMgr::replaceAll(fileName, "BOTNAME", playerName);
+					PlayerbotTextMgr::ReplaceAll(fileName, "BOTNAME", playerName);
 					sPlayerbotAIConfig.openLog(fileName, "w", true);
 				}
 
@@ -217,7 +217,7 @@ bool RTSCAction::Execute(Event& event)
 
 				if (filePerBot)
 				{
-					PlayerbotTextMgr::replaceAll(fileName, "BOTNAME", playerName);
+					PlayerbotTextMgr::ReplaceAll(fileName, "BOTNAME", playerName);
 				}
 
 				std::string m_logsDir = sConfig.GetStringDefault("LogsDir");

@@ -426,6 +426,7 @@ namespace ai
                 creators["hammer of the righteous"] = &TriggerFactoryInternal::hammer_of_the_righteous;
                 creators["shield of righteousness"] = &TriggerFactoryInternal::shield_of_righteousness;
                 creators["divine plea"] = &TriggerFactoryInternal::divine_plea;
+                creators["sacred shield"] = &TriggerFactoryInternal::sacred_shield;
             }
 
         private:
@@ -502,6 +503,7 @@ namespace ai
             static Trigger* hammer_of_the_righteous(PlayerbotAI* ai) { return new HammerOfTheRighteousTrigger(ai); }
             static Trigger* shield_of_righteousness(PlayerbotAI* ai) { return new ShieldOfRighteousnessTrigger(ai); }
             static Trigger* divine_plea(PlayerbotAI* ai) { return new DivinePleaTrigger(ai); }
+            static Trigger* sacred_shield(PlayerbotAI* ai) { return new SacredShieldTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>

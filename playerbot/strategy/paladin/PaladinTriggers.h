@@ -464,4 +464,5 @@ namespace ai
     CAN_CAST_TRIGGER(HammerOfTheRighteousTrigger, "hammer of the righteous");
     CAN_CAST_TRIGGER(ShieldOfRighteousnessTrigger, "shield of righteousness");
     BUFF_TRIGGER(DivinePleaTrigger, "divine plea");
+    BUFF_TRIGGER(SacredShieldTrigger, "sacred shield");
 }

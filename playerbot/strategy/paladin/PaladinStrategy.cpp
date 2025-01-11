@@ -1500,15 +1500,11 @@ void PaladinBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "medium mana",
-        NextAction::array(0, new NextAction("divine plea", ACTION_HIGH + 1), NULL)));
+        NextAction::array(0, new NextAction("divine plea", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "medium health",
-        NextAction::array(0, new NextAction("sacred shield", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member medium health",
-        NextAction::array(0, new NextAction("sacred shield", ACTION_NORMAL), NULL)));
+        "sacred shield",
+        NextAction::array(0, new NextAction("sacred shield", ACTION_MOVE), NULL)));
 }
 
 void PaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

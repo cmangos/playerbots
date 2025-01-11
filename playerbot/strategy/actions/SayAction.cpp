@@ -270,7 +270,7 @@ void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& 
         replace["GOSSIP_OPTION_TRAINER"] = unit->GetName() + std::string(" can train pets.");
         replace["GOSSIP_OPTION_UNLEARNPETSKILLS"] = unit->GetName() + std::string(" can help pets unlearn their skills.");
 
-        PlayerbotTextMgr::GetReplacePlaceholders(gossipText, replace);
+        PlayerbotTextMgr::ReplacePlaceholders(gossipText, replace);
 
         placeholders["<" + preFix + " gossip>"] = gossipText;
     }

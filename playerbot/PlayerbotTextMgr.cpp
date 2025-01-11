@@ -18,7 +18,7 @@ PlayerbotTextMgr::~PlayerbotTextMgr()
 {
 }
 
-void PlayerbotTextMgr::replaceAll(std::string & str, const std::string & from, const std::string & to) {
+void PlayerbotTextMgr::ReplaceAll(std::string & str, const std::string & from, const std::string & to) {
     if (from.empty())
         return;
     size_t start_pos = 0;
@@ -28,10 +28,10 @@ void PlayerbotTextMgr::replaceAll(std::string & str, const std::string & from, c
     }
 }
 
-void PlayerbotTextMgr::replacePlaceholders(std::string& text, const std::map<std::string, std::string>& placeholders)
+void PlayerbotTextMgr::ReplacePlaceholders(std::string& text, const std::map<std::string, std::string>& placeholders)
 {
     for (auto& placeholder : placeholders)
-        replaceAll(text, placeholder.first, placeholder.second);
+        ReplaceAll(text, placeholder.first, placeholder.second);
 }
 
 void PlayerbotTextMgr::LoadBotTexts()

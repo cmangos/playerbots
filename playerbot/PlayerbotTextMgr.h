@@ -59,9 +59,9 @@ class PlayerbotTextMgr
         }
 
 	public:
-        static void replaceAll(std::string& str, const std::string& from, const std::string& to);
-        static void replacePlaceholders(std::string& text, const std::map<std::string, std::string>& placeholders);
-        static std::string GetReplacePlaceholders(const std::string& text, const std::map<std::string, std::string>& placeholders) { std::string retText = text; replacePlaceholders (retText, placeholders); return retText;  }
+        static void ReplaceAll(std::string& str, const std::string& from, const std::string& to);
+        static void ReplacePlaceholders(std::string& text, const std::map<std::string, std::string>& placeholders);
+        static std::string GetReplacePlaceholders(const std::string& text, const std::map<std::string, std::string>& placeholders) { std::string retText = text; ReplacePlaceholders (retText, placeholders); return retText;  }
 
         std::string GetBotText(std::string name, std::map<std::string, std::string> placeholders);
         std::string GetBotText(std::string name);

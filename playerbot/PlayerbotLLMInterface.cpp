@@ -393,7 +393,7 @@ std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string&
     
     actualResponse = extractAfterPattern(actualResponse, startPattern);
 
-    PlayerbotTextMgr::replaceAll(actualResponse, R"(\")", "'");
+    PlayerbotTextMgr::ReplaceAll(actualResponse, R"(\")", "'");
 
     if (debug)
     {

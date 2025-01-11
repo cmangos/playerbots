@@ -71,6 +71,35 @@ Position const IC_CANNON_POS_HORDE2 = { 1139.695f, -686.574f, 88.173f, 3.95f };
 Position const IC_CANNON_POS_ALLIANCE1 = { 424.860f, -855.795f, 87.96f, 0.44f };
 Position const IC_CANNON_POS_ALLIANCE2 = { 425.525f, -779.538f, 87.717f, 5.88f };
 
+// Define a map to store area triggers and their positions
+std::map<uint16, Position> const areaTriggersNA = {
+    // NA_AREATRIGGER
+    {4536, {4009.189f, 2895.25f, 13.052f, 0.0f}},  // NA_AREATRIGGER_BUFF1
+    {4537, {4103.330f, 2946.350f, 13.051f, 0.0f}}, // NA_AREATRIGGER_BUFF2
+    {4917, {4054.149f, 2923.699f, -40.0f, 0.0f}},  // NA_AREATRIGGER_UNDERMAP1
+    {5006, {4054.149f, 2923.699f, 0.0f, 0.0f}},    // NA_AREATRIGGER_UNDERMAP2
+    {5008, {4054.149f, 2923.699f, -20.0f, 0.0f}},  // NA_AREATRIGGER_UNDERMAP3
+};
+
+std::map<uint16, Position> const areaTriggersRL = {
+    // RL_AREATRIGGER
+    {4696, {1328.719f, 1632.719f, 36.730f, 0.0f}},  // RL_AREATRIGGER_BUFF1
+    {4697, {1243.300f, 1699.170f, 34.872f, 0.0f}},  // RL_AREATRIGGER_BUFF2
+    {4927, {1200.329f, 1682.089f, 33.078f, 0.0f}},  // RL_AREATRIGGER_UNDERMAP1
+    {4928, {1223.609f, 1630.810f, 32.607f, 0.0f}},  // RL_AREATRIGGER_UNDERMAP2
+    {4929, {1359.180f, 1692.250f, 37.070f, 0.0f}}, // RL_AREATRIGGER_UNDERMAP3
+    {4930, {1371.510f, 1649.079f, 34.508f, 0.0f}}, // RL_AREATRIGGER_UNDERMAP4
+    {4931, {1299.760f, 1554.739f, 40.000f, 0.0f}}, // RL_AREATRIGGER_UNDERMAP5
+    {4932, {1274.510f, 1774.680f, 27.036f, 0.0f}}, // RL_AREATRIGGER_UNDERMAP6
+    {4933, {1246.060f, 1743.619f, 40.000f, 0.0f}}, // RL_AREATRIGGER_UNDERMAP7
+    {4934, {1305.439f, 1754.140f, 40.000f, 0.0f}}, // RL_AREATRIGGER_UNDERMAP8
+    {4935, {1321.619f, 1586.979f, 40.000f, 0.0f}}, // RL_AREATRIGGER_UNDERMAP9
+    {4936, {1269.119f, 1579.989f, 40.000f, 0.0f}}, // RL_AREATRIGGER_UNDERMAP10
+    {4941, {1285.359f, 1667.680f, 10.000f, 0.0f}}, // RL_AREATRIGGER_UNDERMAP11
+    {5041, {1285.359f, 1667.680f, -10.000f, 0.0f}}, // RL_AREATRIGGER_UNDERMAP12
+    {5042, {1285.359f, 1667.680f, -30.000f, 0.0f}}  // RL_AREATRIGGER_UNDERMAP13
+};
+
 enum BattleBotWsgWaitSpot
 {
     BB_WSG_WAIT_SPOT_SPAWN,
@@ -5307,7 +5336,8 @@ bool ArenaTactics::Execute(Event& event)
 
     if (getName() == "move to center")
     {
-        return moveToCenter(bg);
+        if (!handleAreaTrigger(bg))
+            return moveToCenter(bg);
     }
     
 #endif
@@ -5357,4 +5387,29 @@ bool ArenaTactics::moveToCenter(BattleGround* bg)
 
 #endif
     return botMoved;
+}
+
+bool ArenaTactics::handleAreaTrigger(BattleGround* bg)
+{
+    const std::map<uint8, std::map<uint16, Position>> battlegroundTriggers = {
+        { BATTLEGROUND_RL, areaTriggersRL },
+        { BATTLEGROUND_NA, areaTriggersNA }
+    };
+
+    // Find the triggers for the current battleground
+    auto it = battlegroundTriggers.find(bg->GetTypeId());
+    if (it != battlegroundTriggers.end()) {
+        const auto& triggers = it->second;
+        for (const auto& [areaTriggerId, position] : triggers) {
+            if (bot->IsWithinDist3d(position.x, position.y, position.z, INTERACTION_DISTANCE)) {
+                // Trigger the area trigger if within distance
+                WorldPacket data(CMSG_AREATRIGGER);
+                data << uint32(areaTriggerId);
+                bot->GetSession()->HandleAreaTriggerOpcode(data);
+                return true;
+            }
+        }
+    }
+
+    return false; // No triggers handled
 }

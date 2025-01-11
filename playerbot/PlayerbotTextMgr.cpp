@@ -115,7 +115,7 @@ std::string PlayerbotTextMgr::GetBotText(std::string name, std::map<std::string,
     if (botText.empty())
         botText = name;
 
-    replacePlaceholders(botText, placeholders);
+    ReplacePlaceholders(botText, placeholders);
 
     return botText;
 }
@@ -156,7 +156,7 @@ std::string PlayerbotTextMgr::GetBotText(ChatReplyType replyType, std::map<std::
             botText = textEntry.m_text;
     }
 
-    replacePlaceholders(botText, placeholders);
+    ReplacePlaceholders(botText, placeholders);
 
     return botText;
 }

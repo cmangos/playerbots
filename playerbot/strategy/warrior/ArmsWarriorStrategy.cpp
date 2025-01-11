@@ -10,6 +10,7 @@ public:
     ArmsWarriorStrategyActionNodeFactory()
     {
         creators["charge"] = &charge;
+        creators["intercept"] = &intercept;
         creators["piercing howl"] = &piercing_howl;
         creators["mocking blow"] = &mocking_blow;
         creators["heroic strike"] = &heroic_strike;
@@ -18,7 +19,9 @@ public:
     }
 
 private:
-    ACTION_NODE_A(charge, "charge", "battle stance");
+    ACTION_NODE_P(charge, "charge", "battle stance");
+
+    ACTION_NODE_P(intercept, "intercept", "berserker stance");
 
     ACTION_NODE_A(piercing_howl, "piercing howl", "hamstring");
 
@@ -712,8 +715,11 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "enemy out of melee",
-        NextAction::array(0, new NextAction("charge", ACTION_MOVE + 1),
-            new NextAction("intercept", ACTION_MOVE), NULL)));
+        NextAction::array(0, new NextAction("charge", ACTION_MOVE + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "intercept and rage",
+        NextAction::array(0, new NextAction("intercept", ACTION_MOVE + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "target critical health",
@@ -896,10 +902,6 @@ void ArmsWarriorAoeRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& 
 void ArmsWarriorBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarriorBuffStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "berserker stance",
-        NextAction::array(0, new NextAction("berserker stance", ACTION_MOVE), NULL)));
 }
 
 void ArmsWarriorBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -911,6 +913,10 @@ void ArmsWarriorBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 {
     ArmsWarriorBuffStrategy::InitCombatTriggers(triggers);
     WarriorBuffPveStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "berserker stance",
+        NextAction::array(0, new NextAction("berserker stance", ACTION_MOVE), NULL)));
 }
 
 void ArmsWarriorBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -923,6 +929,10 @@ void ArmsWarriorBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 {
     ArmsWarriorBuffStrategy::InitCombatTriggers(triggers);
     WarriorBuffPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "battle stance",
+        NextAction::array(0, new NextAction("battle stance", ACTION_MOVE), NULL)));
 }
 
 void ArmsWarriorBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

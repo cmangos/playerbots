@@ -293,7 +293,7 @@ namespace ai
             static Trigger* thunderclap_and_rage(PlayerbotAI* ai) { return new TwoTriggers(ai, "thunder clap", "medium rage available"); }
             static Trigger* thunderclap_and_rage_and_aoe(PlayerbotAI* ai) { return new TwoTriggers(ai, "thunder clap and rage", "ranged light aoe"); }
             static Trigger* intercept_can_cast(PlayerbotAI* ai) { return new InterceptCanCastTrigger(ai); }
-            static Trigger* intercept_and_far_enemy(PlayerbotAI* ai) { return new TwoTriggers(ai, "enemy is out of melee", "intercept can cast"); }
+            static Trigger* intercept_and_far_enemy(PlayerbotAI* ai) { return new TwoTriggers(ai, "enemy out of melee", "intercept can cast"); }
             static Trigger* intercept_and_rage(PlayerbotAI* ai) { return new TwoTriggers(ai, "intercept and far enemy", "light rage available"); }
             static Trigger* recklessness(PlayerbotAI* ai) { return new RecklessnessTrigger(ai); }
             static Trigger* slam(PlayerbotAI* ai) { return new SlamTrigger(ai); }

@@ -9,7 +9,6 @@
 #include <cstring>
 #include <sstream>
 #include <regex>
-#include <numeric>
 #include <chrono>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -81,45 +80,47 @@ inline std::string RecvWithTimeout(int sock, int timeout_seconds, int& bytesRead
     int bufferSize = sizeof(buffer);
     std::string response;
 
-    fd_set readfds;
-    struct timeval timeout;
+    SetNonBlockingSocket(sock);
 
-    FD_ZERO(&readfds);
-    FD_SET(sock, &readfds);
-
-    timeout.tv_sec = timeout_seconds;
-    timeout.tv_usec = 0;
+    auto start = std::chrono::steady_clock::now();
 
     while (true) {
-        int ready = select(sock + 1, &readfds, NULL, NULL, &timeout);
+        bytesRead = recv(sock, buffer, bufferSize - 1, 0);
 
-        if (ready > 0) {
-            bytesRead = recv(sock, buffer, bufferSize - 1, 0);
-
-            if (bytesRead > 0) {
-                buffer[bytesRead] = '\0';
-                response += buffer;
+        if (bytesRead > 0) {
+            buffer[bytesRead] = '\0';
+            response += buffer;
         }
-            else {
-                break; // Connection closed or error
-            }
-    }
-        else if (ready == 0) {
-            break; // Timeout
-        }
-        else {
-            // Handle error
+        else if (bytesRead == -1) {
 #ifdef _WIN32
-            sLog.outError("BotLLM: select error: %s", WSAGetLastError());
+            if (WSAGetLastError() == WSAEWOULDBLOCK) {
 #else
-            sLog.outError("BotLLM: select error: %s", strerror(errno));
+            if (errno == EWOULDBLOCK || errno == EAGAIN) {
 #endif
+                auto now = std::chrono::steady_clock::now();
+                if (std::chrono::duration_cast<std::chrono::seconds>(now - start).count() >= timeout_seconds) {
+                    break;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            else {
+#ifdef _WIN32
+                sLog.outError("BotLLM: recv error: %s", WSAGetLastError());
+#else
+                sLog.outError("BotLLM: recv error: %s", strerror(errno));
+#endif
+                break;
+            }
+            }
+        else {
             break;
         }
-}
+        }
+
+    RestoreBlockingSocket(sock);
 
     return response;
-}
+    }
 
 std::string PlayerbotLLMInterface::Generate(const std::string& prompt, int timeOutSeconds, int maxGenerations, std::vector<std::string> & debugLines) {
     bool debug = !debugLines.empty();
@@ -343,7 +344,7 @@ inline std::string extractAfterPattern(const std::string& content, const std::st
         return content.substr(start_pos);
     }
     else {
-        return content;
+        return "";
     }
 
 }
@@ -381,41 +382,48 @@ inline std::vector<std::string> splitResponse(const std::string& response, const
 
 std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string& response, const std::string& startPattern, const std::string& endPattern, const std::string& deletePattern, const std::string& splitPattern, std::vector<std::string>& debugLines)
 {
-    std::vector<std::string> parsedChunks;
+    bool debug = !(debugLines.empty());
+    uint32 startCursor = 0;
+    uint32 endCursor = 0;
 
-    // Extract all chunks with "content" field using regex
-    std::regex chunkPattern(R"("content"\s*:\s*"(.*?)\")");
-        std::smatch match;
-    std::string::const_iterator searchStart(response.cbegin());
+    std::string actualResponse = response;
 
-    while (std::regex_search(searchStart, response.cend(), match, chunkPattern)) {
-        parsedChunks.emplace_back(match[1]); // Capture content
-        searchStart = match.suffix().first; // Move to next match
+    if (debug)
+        debugLines.push_back("start pattern:" + startPattern);
+    
+    actualResponse = extractAfterPattern(actualResponse, startPattern);
+
+    PlayerbotTextMgr::replaceAll(actualResponse, R"(\")", "'");
+
+    if (debug)
+    {
+        debugLines.push_back(!actualResponse.empty() ? actualResponse : "Empty response");
+        debugLines.push_back("end pattern:" + endPattern);
     }
 
-    // Join the accumulated content into one string
-    std::string combinedResponse = std::accumulate(parsedChunks.begin(), parsedChunks.end(), std::string());
+    actualResponse = extractBeforePattern(actualResponse, endPattern);
 
-    // Apply start and end patterns
-    combinedResponse = extractAfterPattern(combinedResponse, startPattern);
-    combinedResponse = extractBeforePattern(combinedResponse, endPattern);
-
-    // Apply delete pattern
-    std::regex deleteRegex(deletePattern);
-    combinedResponse = std::regex_replace(combinedResponse, deleteRegex, "");
-
-    // Split the response based on the split pattern
-    std::vector<std::string> finalResponse = splitResponse(combinedResponse, splitPattern);
-
-    // Debug logging
-    if (!debugLines.empty()) {
-        debugLines.push_back("Streamed Response Debug:");
-        debugLines.insert(debugLines.end(), parsedChunks.begin(), parsedChunks.end());
-        debugLines.push_back("Combined Response: " + combinedResponse);
-        debugLines.insert(debugLines.end(), finalResponse.begin(), finalResponse.end());
+    if (debug)
+    {
+        debugLines.push_back(!actualResponse.empty() ? actualResponse : "Empty response");
+        debugLines.push_back("delete pattern:" + deletePattern);
     }
 
-    return finalResponse;
+    std::regex regexPattern(deletePattern);
+    actualResponse = std::regex_replace(actualResponse, regexPattern, "");
+
+    if (debug)
+    {
+        debugLines.push_back(!actualResponse.empty() ? actualResponse : "Empty response");
+        debugLines.push_back("split pattern:" + splitPattern);
+    }
+
+    std::vector<std::string> responses = splitResponse(actualResponse, splitPattern);   
+
+    if (debug)
+        debugLines.insert(debugLines.end(), responses.begin(), responses.end());
+
+    return responses;
 }
 
 void PlayerbotLLMInterface::LimitContext(std::string& context, int currentLength)

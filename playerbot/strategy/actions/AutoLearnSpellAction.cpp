@@ -229,11 +229,17 @@ void AutoLearnSpellAction::LearnDroppedSpells(std::ostringstream* out)
     spellList[CLASS_DRUID][50] = { 21849 };
     spellList[CLASS_DRUID][60] = { 31018, 25297, 25299, 25298, 21850 };
     
-    for (uint32 spellId : spellList[bot->getClass()][bot->GetLevel()])
+    for (const auto& levelSpells : spellList[bot->getClass()])
     {
-        if (!bot->HasSpell(spellId))
+        if (bot->GetLevel() >= levelSpells.first)
         {
-            bot->learnSpell(spellId, false);
+            for (uint32 spellId : levelSpells.second)
+            {
+                if (!bot->HasSpell(spellId))
+                {
+                    bot->learnSpell(spellId, false);
+                }
+            }
         }
     }
 }

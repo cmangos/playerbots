@@ -232,7 +232,7 @@ namespace ai
         bool canFly() const;
 
 #if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
-        const float getHeight(bool swim = false) const { return getMap(getFirstInstanceId())->GetHeight(0, coord_x, coord_y, coord_z, swim); }
+        const float getHeight(bool swim = false) const { if(getMap(getFirstInstanceId())) return getMap(getFirstInstanceId())->GetHeight(0, coord_x, coord_y, coord_z, swim); return 0.0;}
         float GetHeightInRange(float maxSearchDist = 4.0f) const { float z = coord_z;  return getMap(getFirstInstanceId()) ? (getMap(getFirstInstanceId())->GetHeightInRange(0, coord_x, coord_y, z, maxSearchDist) ? z : coord_z) : coord_z; }
 #else
         float getHeight(bool swim = false) const { return getMap(getFirstInstanceId()) ? getMap(getFirstInstanceId())->GetHeight(coord_x, coord_y, coord_z, swim) : coord_z; }

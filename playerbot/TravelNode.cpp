@@ -2119,6 +2119,12 @@ void TravelNodeMap::generatePortalNodes()
 
         WorldPosition outPos(pos);
 
+        if (outPos.currentHeight() > 0.5f && outPos.currentHeight() < 50.0f)
+        {
+            sLog.outError("%s adjusting height down from %f", pSpellInfo->SpellName[0], outPos.currentHeight());
+            outPos.setZ(outPos.getZ() - outPos.currentHeight() + 0.5f);
+        }
+
         TravelNode* destNode = sTravelNodeMap.addNode(outPos, pSpellInfo->SpellName[0], true, true);
     }
 }

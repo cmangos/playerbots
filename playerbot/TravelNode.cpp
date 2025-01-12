@@ -340,7 +340,7 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
         {
             if (backNodePath->getComplete()) //Reverse works so use that.
             {
-                MANGOS_ASSERT(startPos.isPathTo(backPath));
+                //MANGOS_ASSERT(startPos.isPathTo(backPath));
                 std::reverse(backPath.begin(), backPath.end());
                 path = backPath;
                 canPath = backNodePath->getComplete();
@@ -1852,7 +1852,11 @@ void TravelNodeMap::LoadMaps()
         uint32 mapId = sMapStore.LookupEntry(i)->MapID;
         if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
         {
+#ifndef MANGOSBOT_TWO
             MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), mapId);
+#else
+            MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), mapId, 0);
+#endif
         }
         else
         {
@@ -1860,6 +1864,7 @@ void TravelNodeMap::LoadMaps()
         }
     }
 
+#ifndef MANGOSBOT_TWO
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
     {
         if (!sMapStore.LookupEntry(i))
@@ -1880,12 +1885,13 @@ void TravelNodeMap::LoadMaps()
 
                 uint32 x = (fileNameString[3] - '0') * 10 + (fileNameString[4] - '0');
                 uint32 y = (fileNameString[5] - '0') * 10 + (fileNameString[6] - '0');
+
                 if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y))
                     MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
-
             }
         }
     }
+#endif
 }
 
 void TravelNodeMap::generateNpcNodes()
@@ -2118,6 +2124,12 @@ void TravelNodeMap::generatePortalNodes()
             continue;
 
         WorldPosition outPos(pos);
+
+        if (outPos.currentHeight() > 0.5f && outPos.currentHeight() < 50.0f)
+        {
+            sLog.outError("%s adjusting height down from %f", pSpellInfo->SpellName[0], outPos.currentHeight());
+            outPos.setZ(outPos.getZ() - outPos.currentHeight() + 0.5f);
+        }
 
         TravelNode* destNode = sTravelNodeMap.addNode(outPos, pSpellInfo->SpellName[0], true, true);
     }

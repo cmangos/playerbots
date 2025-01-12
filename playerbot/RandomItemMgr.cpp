@@ -1320,7 +1320,8 @@ void RandomItemMgr::BuildItemInfoCache()
                     slot == EQUIPMENT_SLOT_LEGS ||
                     slot == EQUIPMENT_SLOT_FEET ||
                     slot == EQUIPMENT_SLOT_WRISTS ||
-                    slot == EQUIPMENT_SLOT_HANDS) &&
+                    slot == EQUIPMENT_SLOT_HANDS ||
+                    proto->InventoryType == INVTYPE_RELIC) &&
                     !ShouldEquipArmorForSpec(clazz, spec, proto))
                     continue;
 
@@ -1458,7 +1459,7 @@ uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPro
         if (playerclass == CLASS_SHAMAN && proto->SubClass != ITEM_SUBCLASS_ARMOR_TOTEM)
             return 0;
 
-        if (playerclass == CLASS_DEATH_KNIGHT && proto->SubClass != proto->SubClass == ITEM_SUBCLASS_ARMOR_SIGIL)
+        if (playerclass == CLASS_DEATH_KNIGHT && proto->SubClass == ITEM_SUBCLASS_ARMOR_SIGIL)
             return 0;
 
         if (playerclass == CLASS_WARRIOR

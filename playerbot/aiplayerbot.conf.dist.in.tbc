@@ -317,7 +317,7 @@ AiPlayerbot.AutoLearnQuestSpells = 0
 
 # Random Bots will pick quests on their own and try to complete
 # Default: 0 (disabled)
-AiPlayerbot.AutoDoQuests = 0
+# AiPlayerbot.AutoDoQuests = 1
 
 ##################################################################################
 #                                                                                #

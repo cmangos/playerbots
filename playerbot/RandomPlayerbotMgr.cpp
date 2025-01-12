@@ -3091,7 +3091,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         ss << "char db ping: " << sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") << "\n";
         ss << "Sessions online: " << sWorld.GetActiveSessionCount();
 
-        sLog.outString(ss.str().c_str());
+        sLog.outString("s%", ss.str().c_str());
 
         Player* requester = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
         if (requester)
@@ -3357,7 +3357,7 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
 {
     Player* requester = GetPlayer(requesterGuid);
     std::stringstream ss; ss << GetPlayerbotsAmount() << " Random Bots online";
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     std::map<uint32, int> alliance, horde;
@@ -3486,7 +3486,7 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
     });
 
     ss.str(""); ss << "Bots level:";
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
 	uint32 maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
@@ -3500,12 +3500,12 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         if (!from) from = 1;
 
         ss.str(""); ss << "    " << from << ".." << to << ": " << alliance[i] << " alliance, " << horde[i] << " horde";
-        sLog.outString(ss.str().c_str());
+        sLog.outString("s%", ss.str().c_str());
         if (requester) { requester->SendMessageToPlayer(ss.str()); }
     }
 
     ss.str(""); ss << "Bots race:";
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     for (uint8 race = RACE_HUMAN; race < MAX_RACES; ++race)
@@ -3513,13 +3513,13 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         if (perRace[race])
         {
             ss.str(""); ss << "    " << ChatHelper::formatRace(race) << ": " << perRace[race];
-            sLog.outString(ss.str().c_str());
+            sLog.outString("s%", ss.str().c_str());
             if (requester) { requester->SendMessageToPlayer(ss.str()); }
         }
     }
 
     ss.str(""); ss << "Bots class:";
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     for (uint8 cls = CLASS_WARRIOR; cls < MAX_CLASSES; ++cls)
@@ -3527,29 +3527,29 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         if (perClass[cls])
         {
             ss.str(""); ss << "    " << ChatHelper::formatClass(cls) << ": " << perClass[cls];
-            sLog.outString(ss.str().c_str());
+            sLog.outString("s%", ss.str().c_str());
             if (requester) { requester->SendMessageToPlayer(ss.str()); }
         }
     }
 
     ss.str(""); ss << "Bots role:";
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    tank: " << tank << ", heal: " << heal << ", dps: " << dps;
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "Bots status:";
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Active: " << active;
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Moving: " << moving;
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     //sLog.outString("Bots to:");
@@ -3560,43 +3560,43 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
     //sLog.outString("    revive: %d", revive);
 
     ss.str(""); ss << "    On taxi: " << taxi;
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    On mount: " << mounted;
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    In combat: " << combat;
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Dead: " << dead;
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    AFK: " << afk;
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "Bots questing:";
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Picking quests: " << stateCount[(uint8)TravelState::TRAVEL_STATE_TRAVEL_PICK_UP_QUEST] + stateCount[(uint8)TravelState::TRAVEL_STATE_WORK_PICK_UP_QUEST];
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Doing quests: " << stateCount[(uint8)TravelState::TRAVEL_STATE_TRAVEL_DO_QUEST] + stateCount[(uint8)TravelState::TRAVEL_STATE_WORK_DO_QUEST];
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Completing quests: " << stateCount[(uint8)TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST] + stateCount[(uint8)TravelState::TRAVEL_STATE_WORK_HAND_IN_QUEST];
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Idling: " << stateCount[(uint8)TravelState::TRAVEL_STATE_IDLE];
-    sLog.outString(ss.str().c_str());
+    sLog.outString("s%", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 }
 

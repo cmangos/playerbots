@@ -42,6 +42,9 @@ void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
     if (sPlayerbotAIConfig.autoLearnTrainerSpells)
         LearnTrainerSpells(out);
 
+    if (sPlayerbotAIConfig.autoLearnDroppedSpells)
+        LearnDroppedSpells(out);
+
     if (!ai->HasActivePlayerMaster()) //Hunter spells for pets.
     {
         if (bot->getClass() == CLASS_HUNTER && bot->GetLevel() >= 10)
@@ -203,6 +206,27 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
             }
         }
     }
+}
+void AutoLearnSpellAction::LearnDroppedSpells(std::ostringstream* out)
+{   //       Class       Level      // Spells
+    std::map<uint8, std::map<uint8, std::vector<uint32>>> spellList;
+    spellList[CLASS_WARRIOR][60] = { 25289, 25288, 25286 };
+    spellList[CLASS_PALADIN][60] = { 25291, 25290, 25292 };
+    spellList[CLASS_HUNTER][60] = { 19801, 25296, 25294, 25295 };
+    spellList[CLASS_ROGUE][60] = { 25300, 25347, 25302, 31016 };
+    spellList[CLASS_PRIEST][48] = { 21562 };
+    // Spell 27683 Prayer of Shadow Protection https://www.wowhead.com/classic/spell=27683/prayer-of-shadow-protection book requires level 60, spell requires 56. 
+    // Went with the book requirement.
+    spellList[CLASS_PRIEST][60] = { 25314, 25315, 25316,21564,27683 };
+    spellList[CLASS_SHAMAN][60] = { 29228, 25359, 25357, 25361 };
+    spellList[CLASS_MAGE][56] = { 23028 };
+    // Spell 25345 Arcane Missiles https://www.wowhead.com/classic/spell=25345/arcane-missiles book requires level 60, spell requires 56.
+    // Went with the book requirement.
+    spellList[CLASS_MAGE][60] = { 28612, 28609, 25345, 25306, 25304, 28271 };
+    spellList[CLASS_WARLOCK][50] = { 1122 };
+    spellList[CLASS_WARLOCK][60] = { 18540, 25311, 25309, 25307, 28610 };
+    spellList[CLASS_DRUID][50] = { 21849 };
+    spellList[CLASS_DRUID][60] = { 31018, 25297, 25299, 25298, 21850 };
 }
 /**
 * Attempts to add the quest item

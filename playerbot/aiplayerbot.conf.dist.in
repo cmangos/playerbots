@@ -333,6 +333,10 @@ AiPlayerbot.AutoLearnTrainerSpells = 0
 # Default: 0 (disabled)
 AiPlayerbot.AutoLearnQuestSpells = 0
 
+# Alt Bots automatically learn spells learned from drops at the required level.
+# Default: 0 (disabled)
+AiPlayerbot.AutoLearnDroppedSpells = 0
+
 # Random Bots will pick quests on their own and try to complete
 # Default: 0 (disabled)
 # AiPlayerbot.AutoDoQuests = 1

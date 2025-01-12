@@ -207,6 +207,7 @@ void AutoLearnSpellAction::LearnQuestSpells(std::ostringstream* out)
         }
     }
 }
+
 void AutoLearnSpellAction::LearnDroppedSpells(std::ostringstream* out)
 {   //       Class       Level      // Spells
     std::map<uint8, std::map<uint8, std::vector<uint32>>> spellList;
@@ -227,7 +228,16 @@ void AutoLearnSpellAction::LearnDroppedSpells(std::ostringstream* out)
     spellList[CLASS_WARLOCK][60] = { 18540, 25311, 25309, 25307, 28610 };
     spellList[CLASS_DRUID][50] = { 21849 };
     spellList[CLASS_DRUID][60] = { 31018, 25297, 25299, 25298, 21850 };
+    
+    for (uint32 spellId : spellList[bot->getClass()][bot->GetLevel()])
+    {
+        if (!bot->HasSpell(spellId))
+        {
+            bot->learnSpell(spellId, false);
+        }
+    }
 }
+
 /**
 * Attempts to add the quest item
 * If the bot's bag is full report to player.

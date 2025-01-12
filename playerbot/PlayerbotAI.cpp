@@ -884,6 +884,10 @@ void PlayerbotAI::OnCombatStarted()
         aiObjectContext->GetValue<bool>("has attackers")->Reset();
 
         ChangeEngine(BotState::BOT_STATE_COMBAT);
+        if (bot->IsSitState());
+        {
+            ResetAIInternalUpdateDelay();
+        }
     }
 }
 
@@ -5751,7 +5755,7 @@ std::pair<uint32, uint32> PlayerbotAI::GetPriorityBracket(ActivePiorityType type
         return { 0,5 };
     case ActivePiorityType::IS_ALWAYS_ACTIVE:
     case ActivePiorityType::IN_COMBAT:
-        return { 0,10 };
+        return { 99,100 };
     case ActivePiorityType::IN_BG_QUEUE:
         return { 0,20 };
     case ActivePiorityType::IN_LFG:
@@ -5814,9 +5818,9 @@ bool PlayerbotAI::AllowActive(ActivityType activityType)
         case ActivePiorityType::IN_GROUP_WITH_REAL_PLAYER:
         case ActivePiorityType::IN_INSTANCE:
         case ActivePiorityType::IS_ALWAYS_ACTIVE:
+        case ActivePiorityType::VISIBLE_FOR_PLAYER:
             return true;
             break;
-        case ActivePiorityType::VISIBLE_FOR_PLAYER:
         case ActivePiorityType::IN_COMBAT:
         case ActivePiorityType::NEARBY_PLAYER:
         case ActivePiorityType::IN_BG_QUEUE:

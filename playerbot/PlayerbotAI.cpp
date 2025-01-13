@@ -877,7 +877,7 @@ void PlayerbotAI::OnCombatStarted()
         aiObjectContext->GetValue<bool>("has attackers")->Reset();
 
         ChangeEngine(BotState::BOT_STATE_COMBAT);
-        if (bot->IsSitState());
+        if (bot->IsSitState())
         {
             ResetAIInternalUpdateDelay();
         }

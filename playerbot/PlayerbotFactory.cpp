@@ -1209,6 +1209,7 @@ bool PlayerbotFactory::CheckItemStats(uint16 sp, uint16 ap, uint16 tank, uint16 
     default: return false;
         break;
     }
+    return false;
 }
 
 void PlayerbotFactory::AddItemStats(uint32 mod, uint32 amount, uint16 &sp, uint16 &ap, uint16 &tank, uint16 &heal)

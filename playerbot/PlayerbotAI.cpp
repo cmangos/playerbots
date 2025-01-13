@@ -1992,8 +1992,8 @@ void PlayerbotAI::DoNextAction(bool min)
                     else
                     {
 #ifndef MANGOSBOT_ZERO
-                        uint32 honorpts = member->GetHonorPoints();
-                        if (bot->GetHonorPoints() && honorpts < bot->GetHonorPoints())
+                        uint8 rank = member->GetHighestPvPRankIndex();
+                        if (rank <= bot->GetHighestPvPRankIndex())
                             continue;
 #else
                         if (bot->GetHonorRankInfo().rank >= member->GetHonorRankInfo().rank)
@@ -2041,7 +2041,7 @@ void PlayerbotAI::DoNextAction(bool min)
     if (bot->InBattleGround() && !HasStrategy("battleground", BotState::BOT_STATE_NON_COMBAT))
         ResetStrategies();
 #else
-    if ((bot->InBattleGround() && (!bot->IsBeingTeleported() && !bot->InArena()) && !HasStrategy("battleground", BotState::BOT_STATE_NON_COMBAT)) || ((!bot->IsBeingTeleported()&&bot->InArena()) && !HasStrategy("arena", BotState::BOT_STATE_NON_COMBAT)))
+    if ((bot->InBattleGround() && !bot->IsBeingTeleported() && !bot->InArena() && !HasStrategy("battleground", BotState::BOT_STATE_NON_COMBAT)) || (!bot->IsBeingTeleported() && bot->InArena() && !HasStrategy("arena", BotState::BOT_STATE_NON_COMBAT)))
         ResetStrategies();
 #endif
 

@@ -2371,44 +2371,40 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
     sLog.outError("Cannot teleport bot %s - no locations available", bot->GetName());
 }
 
-std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(WorldLocation pos, uint32 areaId, uint32 radius)
+std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(WorldLocation pos, const std::map<uint32, std::map<uint32, std::vector<std::string_view>>>& areaNames, uint32 radius)
 {
     std::vector<std::pair<uint32, uint32>> results;
     float minDist = FLT_MAX;
-    std::string targetZone = WorldPosition(pos).getAreaName(true, true);
-    std::string currentZone;
-
-    for (uint32 level = 1; level <= sPlayerbotAIConfig.randomBotMaxLevel; ++level)
+    std::string_view hasZone = "-", wantZone = WorldPosition(pos).getAreaName(true, true);
+    for (uint32 level = 1; level < sPlayerbotAIConfig.randomBotMaxLevel + 1; level++)
     {
-        for (uint32 race = 1; race < MAX_RACES; ++race)
+        for (uint32 r = 1; r < MAX_RACES; r++)
         {
-            for (const auto& loc : rpgLocsCacheLevel[race][level])
+            uint32 i = 0;
+            for (auto p : rpgLocsCacheLevel[r][level])
             {
-                currentZone = WorldPosition(loc).getAreaName(true, true);
+                std::string_view currentZone = areaNames.at(level).at(r)[i];
+                i++;
 
-                // Skip if location's zone is not the target zone and we're already processing the correct zone.
-                if (currentZone != targetZone && !results.empty())
+                if (currentZone != wantZone && hasZone == wantZone) //If we already have the right id but this location isn't in the right id. Skip it.
                     continue;
 
-                // Reset distance and results if switching to the correct zone.
-                if (currentZone == targetZone && results.empty())
+                if (currentZone == wantZone && hasZone != wantZone) //If this is the first spot with a good area id use this now.
                     minDist = FLT_MAX;
 
-                float dist = WorldPosition(pos).fDist(loc);
+                float dist = WorldPosition(pos).fDist(p);
 
-                // Skip if location is outside radius or not closer than the minimum distance.
                 if (dist > radius || dist > minDist)
                     continue;
 
-                // Clear results if a closer location is found.
                 if (dist < minDist)
-                {
                     results.clear();
-                    minDist = dist;
-                }
 
-                // Add the current race and level to the results.
-                results.emplace_back(race, level);
+                results.push_back(std::make_pair(r, level));
+
+                hasZone = currentZone;
+
+                minDist = dist;
             }
         }
     }
@@ -2511,6 +2507,19 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
 
     sLog.outString("Enhancing RPG teleport cache...");
 
+    std::map<uint32, std::map<uint32, std::vector<std::string_view>>> areaNames;
+
+    for (uint32 level = 1; level < sPlayerbotAIConfig.randomBotMaxLevel + 1; level++)
+    {
+        for (uint32 r = 1; r < MAX_RACES; r++)
+        {
+            for (auto p : rpgLocsCacheLevel[r][level])
+            {
+                areaNames[level][r].push_back(WorldPosition(p).getAreaName(true, true));
+            }
+        }
+    }
+
     std::vector<std::pair<std::pair<uint32, uint32>, WorldPosition>> newPoints;
 
     const std::unordered_set<uint32> allowedNpcFlags = {
@@ -2544,7 +2553,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         auto* pos = sSpellMgr.GetSpellTargetPosition(pSpellInfo->Id);
         if (!pos) continue;
 
-        auto ranges = RpgLocationsNear(WorldPosition(pos));
+        auto ranges = RpgLocationsNear(WorldPosition(pos), areaNames);
         for (auto& range : ranges)
             newPoints.emplace_back(std::make_pair(range.first, range.second), pos);
     }
@@ -2562,7 +2571,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
             continue;
 
         WorldPosition creaturePos(creatureData);
-        auto ranges = RpgLocationsNear(creaturePos);
+        auto ranges = RpgLocationsNear(WorldPosition(creatureData), areaNames);
 
         for (auto& range : ranges)
             newPoints.emplace_back(std::make_pair(range.first, range.second), creaturePos);

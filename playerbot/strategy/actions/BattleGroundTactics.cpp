@@ -5352,31 +5352,44 @@ bool ArenaTactics::moveToCenter(BattleGround* bg)
     float randomOffsetX = frand(-2, 2);
     float randomOffsetY = frand(-2, 2);
 
+    Team ennemyTeam = bot->GetTeam() == ALLIANCE ? HORDE : ALLIANCE;
+    float x, y, z, o = 0;
+    bg->GetTeamStartLoc(ennemyTeam, x, y, z, o);
+
 #if defined(MANGOS) || defined(CMANGOS)
+    auto moveToEnemyStart = [&]() {
+        return MoveTo(bg->GetMapId(), x + randomOffsetX, y + randomOffsetY, z, false, true);
+        };
+
     switch (bg->GetTypeId())
     {
     case BATTLEGROUND_BE:
-        // Two locations in Blade's Edge Arena based on preference
-        if (preference >= 5)
-            botMoved = MoveTo(bg->GetMapId(), 6185.0f + randomOffsetX, 236.0f + randomOffsetY, 6.0f, false, true);
+        // Blade's Edge Arena positions
+        if (bot->IsWithinDist3d(6185.0f, 236.0f, 6.0f, INTERACTION_DISTANCE) || bot->IsWithinDist3d(6240.0f, 262.0f, 2.0f, INTERACTION_DISTANCE))
+            botMoved = moveToEnemyStart();
         else
-            botMoved = MoveTo(bg->GetMapId(), 6240.0f + randomOffsetX, 262.0f + randomOffsetY, 2.0f, false, true);
+            botMoved = MoveTo(bg->GetMapId(), (preference >= 5 ? 6185.0f : 6240.0f) + randomOffsetX, (preference >= 5 ? 236.0f : 262.0f) + randomOffsetY, (preference >= 5 ? 6.0f : 2.0f), false, true);
         break;
 
     case BATTLEGROUND_RL:
-        // Two locations in Ruins of Lordaeron Arena based on preference
-        if (preference < 5)
-            botMoved = MoveTo(bg->GetMapId(), 1320.0f + randomOffsetX, 1672.0f + randomOffsetY, 38.0f, false, true);
+        // Ruins of Lordaeron Arena positions
+        if (bot->IsWithinDist3d(1320.0f, 1672.0f, 38.0f, INTERACTION_DISTANCE) || bot->IsWithinDist3d(1273.0f, 1666.0f, 36.0f, INTERACTION_DISTANCE))
+            botMoved = moveToEnemyStart();
         else
-            botMoved = MoveTo(bg->GetMapId(), 1273.0f + randomOffsetX, 1666.0f + randomOffsetY, 36.0f, false, true);
+            botMoved = MoveTo(bg->GetMapId(), (preference < 5 ? 1320.0f : 1273.0f) + randomOffsetX, (preference < 5 ? 1672.0f : 1666.0f) + randomOffsetY, (preference < 5 ? 38.0f : 36.0f), false, true);
         break;
 
     case BATTLEGROUND_NA:
-        // Single central location in Nagrand Arena
-        botMoved = MoveTo(bg->GetMapId(), 4055.0f + frand(-5, 5), 2921.0f + frand(-5, 5), 15.1f, false, true);
+        // Nagrand Arena positions
+        if (bot->IsWithinDist3d(4055.0f, 2921.0f, 15.1f, INTERACTION_DISTANCE))
+            botMoved = moveToEnemyStart();
+        else
+            botMoved = MoveTo(bg->GetMapId(), 4055.0f + frand(-5, 5), 2921.0f + frand(-5, 5), 15.1f, false, true);
         break;
 
     default:
+        // Fallback to enemy team start location
+        botMoved = moveToEnemyStart();
         break;
     }
 #endif

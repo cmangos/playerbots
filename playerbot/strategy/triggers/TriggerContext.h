@@ -331,7 +331,7 @@ namespace ai
         static Trigger* player_has_no_flag(PlayerbotAI* ai) { return new PlayerHasNoFlag(ai); }
         static Trigger* bg_waiting(PlayerbotAI* ai) { return new BgWaitingTrigger(ai); }
         static Trigger* bg_active(PlayerbotAI* ai) { return new BgActiveTrigger(ai, 1); }
-        static Trigger* arena_active(PlayerbotAI* ai) { return new BgActiveTrigger(ai, 5); }
+        static Trigger* arena_active(PlayerbotAI* ai) { return new BgActiveTrigger(ai, 10); }
         static Trigger* bg_ended(PlayerbotAI* ai) { return new BgEndedTrigger(ai); }
         static Trigger* bg_invite_active(PlayerbotAI* ai) { return new BgInviteActiveTrigger(ai); }
         static Trigger* player_has_flag(PlayerbotAI* ai) { return new PlayerHasFlag(ai); }

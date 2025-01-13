@@ -49,7 +49,10 @@ bool FollowAction::isUseful()
 
     if (followTarget)
     {
-        if (followTarget->IsTaxiFlying() || !CanDeadFollow(followTarget) || followTarget->GetGUIDLow() == bot->GetGUIDLow())
+        if (followTarget->IsTaxiFlying() 
+            || !CanDeadFollow(followTarget) 
+            || followTarget->GetGUIDLow() == bot->GetGUIDLow()
+            || followTarget->GetMapId() != bot->GetMapId())
         {
             return false;
         }

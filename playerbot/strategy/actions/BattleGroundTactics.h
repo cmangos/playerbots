@@ -73,5 +73,4 @@ public:
     virtual bool Execute(Event& event);
 private:
     bool moveToCenter(BattleGround *bg);
-    bool handleAreaTrigger(BattleGround *bg);
 };

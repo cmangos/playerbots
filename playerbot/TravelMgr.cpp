@@ -2109,11 +2109,11 @@ void TravelMgr::AddMapTransfer(WorldPosition start, WorldPosition end, float por
 
 void TravelMgr::LoadMapTransfers()
 {
-    for (auto& node : sTravelNodeMap.getNodes())
+    for (auto& startNode : sTravelNodeMap.getNodes())
     {
-        for (auto& [node, path] : *node->getLinks())
+        for (auto& [endNode, path] : *startNode->getLinks())
         {
-            AddMapTransfer(*node->getPosition(), *node->getPosition(), path->getDistance());
+            AddMapTransfer(*startNode->getPosition(), *endNode->getPosition(), path->getDistance());
         }
     }
 }

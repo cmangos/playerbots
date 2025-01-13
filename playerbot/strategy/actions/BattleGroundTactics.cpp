@@ -5276,20 +5276,46 @@ bool ArenaTactics::Execute(Event& event)
     if (!bg)
         return false;
     
+    // check for bots out of arena
+    uint32 mapid = bg->GetMapId();
+    float x, y, z, O;
+    Team team = bot->GetBGTeam();
+    if (team == 0)
+        team = bot->GetTeam();
+
+    bg->GetTeamStartLoc(team, x, y, z, O);
+
     if (bg->GetStatus() != STATUS_IN_PROGRESS || bg->GetStartDelayTime() > 0)
     {
-        uint32 mapid = bg->GetMapId();
-        float x, y, z, O;
-        Team team = bot->GetTeam();
-        bg->GetTeamStartLoc(team, x, y, z, O);
-
-        if (!bot->IsWithinLOS(x, y, z, true) || !bot->IsWithinDist3d(x, y, z, 15.0f) || bot->GetPositionZ() < z - 1.0f)
+        if (!bot->IsWithinLOS(x, y, z, true) || !bot->IsWithinDist3d(x, y, z, 15.0f))
             bot->TeleportTo(mapid, x, y, z, O);
-
         return false;
     }
-
-
+    else
+    {
+        float arenaCenterX, arenaCenterY, arenaCenterZ;
+        switch (bg->GetTypeId())
+        {
+        case BATTLEGROUND_RL:
+            arenaCenterX = 1285.359f;
+            arenaCenterY = 1667.680f;
+            arenaCenterZ = 40.0f;
+            break;
+        case BATTLEGROUND_NA:
+            arenaCenterX = 4054.149f;
+            arenaCenterY = 2895.25f;
+            arenaCenterZ = 15.1f;
+            break;
+        default:
+            arenaCenterX = x;
+            arenaCenterY = y;
+            arenaCenterZ = z;
+            break;
+        }
+        if (!bot->IsWithinDist3d(arenaCenterX, arenaCenterY, arenaCenterZ, 100.0f) || bot->GetPositionZ() < z - 1.0f)
+            bot->TeleportTo(mapid, arenaCenterX, arenaCenterY, arenaCenterZ, O);
+    }
+    
     // Remove "collision" strategy in non-combat state if present
     if (ai->HasStrategy("collision", BotState::BOT_STATE_NON_COMBAT))
         ai->ChangeStrategy("-collision", BotState::BOT_STATE_NON_COMBAT);

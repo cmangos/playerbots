@@ -75,7 +75,6 @@ namespace ai
             creators["not dps aoe target active"] = &TriggerContext::not_dps_aoe_target_active;
             creators["has nearest adds"] = &TriggerContext::has_nearest_adds;
             creators["enemy player near"] = &TriggerContext::enemy_player_near;
-            creators["pending duel"] = &TriggerContext::pending_duel;
 
             creators["combat start"] = &TriggerContext::combat_start;
             creators["combat end"] = &TriggerContext::combat_end;
@@ -419,7 +418,6 @@ namespace ai
         static Trigger* pull_start(PlayerbotAI* ai) { return new PullStartTrigger(ai); }
         static Trigger* pull_end(PlayerbotAI* ai) { return new PullEndTrigger(ai); }
         static Trigger* enemy_player_near(PlayerbotAI* ai) { return new EnemyPlayerNear(ai); }
-        static Trigger* pending_duel(PlayerbotAI* ai) { return new PendingDuel(ai); }
         static Trigger* Random(PlayerbotAI* ai) { return new RandomTrigger(ai, "random", 20); }
         static Trigger* seldom(PlayerbotAI* ai) { return new RandomTrigger(ai, "seldom", 300); }
         static Trigger* often(PlayerbotAI* ai) { return new RandomTrigger(ai, "often", 5); }

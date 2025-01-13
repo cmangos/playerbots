@@ -146,13 +146,4 @@ namespace ai
     public:
         virtual bool IsActive();
     };
-
-    class PendingDuel : public Trigger
-    {
-    public:
-        PendingDuel(PlayerbotAI* ai) : Trigger(ai, "pending duel") {}
-
-    public:
-        virtual bool IsActive();
-    }; 
 }

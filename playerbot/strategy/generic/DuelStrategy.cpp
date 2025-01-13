@@ -13,10 +13,6 @@ void DuelStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("accept duel", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "pending duel",
-        NextAction::array(0, new NextAction("accept duel", 1.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "no attackers",
         NextAction::array(0, new NextAction("attack duel opponent", 70.0f), NULL)));
 }

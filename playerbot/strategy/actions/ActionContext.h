@@ -118,7 +118,7 @@ namespace ai
             creators["stop follow"] = &ActionContext::stop_follow;
             creators["flee to master"] = &ActionContext::flee_to_master;
             creators["runaway"] = &ActionContext::runaway;
-            creators["stay"] = &ActionContext::stay;
+            //creators["stay"] = &ActionContext::stay;
             creators["sit"] = &ActionContext::sit;
             creators["attack anything"] = &ActionContext::attack_anything;
             creators["attack least hp target"] = &ActionContext::attack_least_hp_target;
@@ -411,7 +411,7 @@ namespace ai
         static Action* pull_action(PlayerbotAI* ai) { return new PullAction(ai); }
         static Action* return_to_pull_position(PlayerbotAI* ai) { return new ReturnToPullPositionAction(ai); }
         static Action* pull_end(PlayerbotAI* ai) { return new PullEndAction(ai); }
-        static Action* stay(PlayerbotAI* ai) { return new StayAction(ai); }
+        //static Action* stay(PlayerbotAI* ai) { return new StayAction(ai); }
         static Action* sit(PlayerbotAI* ai) { return new SitAction(ai); }
         static Action* runaway(PlayerbotAI* ai) { return new RunAwayAction(ai); }
         static Action* follow(PlayerbotAI* ai) { return new FollowAction(ai); }

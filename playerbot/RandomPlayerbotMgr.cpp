@@ -2362,18 +2362,20 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
     sLog.outError("Cannot teleport bot %s - no locations available", bot->GetName());
 }
 
-std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(WorldLocation pos, uint32 areaId, uint32 radius)
+std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(WorldLocation pos, const std::map<uint32, std::map<uint32, std::vector<std::string_view>>>& areaNames, uint32 radius)
 {
     std::vector<std::pair<uint32, uint32>> results;
     float minDist = FLT_MAX;
-    std::string hasZone = "-", wantZone = WorldPosition(pos).getAreaName(true, true);
+    std::string_view hasZone = "-", wantZone = WorldPosition(pos).getAreaName(true, true);
     for (uint32 level = 1; level < sPlayerbotAIConfig.randomBotMaxLevel + 1; level++)
     {
         for (uint32 r = 1; r < MAX_RACES; r++)
         {
+            uint32 i = 0;
             for (auto p : rpgLocsCacheLevel[r][level])
             {
-                std::string currentZone = WorldPosition(p).getAreaName(true, true);
+                std::string_view currentZone = areaNames.at(level).at(r)[i];
+                i++;
 
                 if (currentZone != wantZone && hasZone == wantZone) //If we already have the right id but this location isn't in the right id. Skip it.
                     continue;
@@ -2496,6 +2498,19 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
 
     sLog.outString("Enhancing RPG teleport cache");
 
+    std::map<uint32, std::map<uint32, std::vector<std::string_view>>> areaNames;
+
+    for (uint32 level = 1; level < sPlayerbotAIConfig.randomBotMaxLevel + 1; level++)
+    {
+        for (uint32 r = 1; r < MAX_RACES; r++)
+        {
+            for (auto p : rpgLocsCacheLevel[r][level])
+            {
+                areaNames[level][r].push_back(WorldPosition(p).getAreaName(true, true));
+            }
+        }
+    }
+
     std::vector<std::pair<std::pair<uint32, uint32>, WorldPosition>> newPoints;
 
     //Static portals.
@@ -2524,7 +2539,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         if (!pos)
             continue;
 
-        std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(pos));
+        std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(pos), areaNames);
 
         for (auto& range : ranges)
             newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), pos));
@@ -2554,7 +2569,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         {
             if ((cInfo->NpcFlags & flag) != 0)
             {
-                std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(creatureData));
+                std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(creatureData), areaNames);
 
                 for (auto& range : ranges)
                     newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), creatureData));

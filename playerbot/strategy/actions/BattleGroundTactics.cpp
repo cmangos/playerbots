@@ -5280,12 +5280,10 @@ bool ArenaTactics::Execute(Event& event)
     {
         uint32 mapid = bg->GetMapId();
         float x, y, z, O;
-        Team team = bot->GetBGTeam();
-        if (team == 0)
-            team = bot->GetTeam();
+        Team team = bot->GetTeam();
         bg->GetTeamStartLoc(team, x, y, z, O);
 
-        if (!bot->IsWithinLOS(x, y, z, true))
+        if (!bot->IsWithinLOS(x, y, z, true) || !bot->IsWithinDist3d(x, y, z, 15.0f) || bot->GetPositionZ() < z - 1.0f)
             bot->TeleportTo(mapid, x, y, z, O);
 
         return false;

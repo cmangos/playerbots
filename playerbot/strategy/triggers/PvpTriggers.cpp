@@ -263,3 +263,8 @@ bool InVehicleTrigger::IsActive()
 {
     return ai->IsInVehicle();
 }
+
+bool PendingDuel::IsActive()
+{
+    return bot->duel && bot->duel->startTimer == 0;
+}

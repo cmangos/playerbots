@@ -1158,7 +1158,7 @@ std::vector<uint32> ItemUsageValue::GetAllReagentItemIdsForCraftingSkillsVector(
 
 std::vector<std::pair<uint32, uint32>> ItemUsageValue::GetAllReagentItemIdsForCraftingItem(ItemPrototype const* proto)
 {
-    auto& items = m_craftingReagentItemIdsForCraftableItem.find(proto->ItemId);
+    auto items = m_craftingReagentItemIdsForCraftableItem.find(proto->ItemId);
 
     if (items == m_craftingReagentItemIdsForCraftableItem.end())
         return {};

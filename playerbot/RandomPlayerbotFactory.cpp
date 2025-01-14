@@ -846,7 +846,7 @@ void RandomPlayerbotFactory::CreateRandomGuilds()
     }
 
     if (newGuilds)
-        sLog.outString("Total Random Guilds: %d", sPlayerbotAIConfig.randomBotGuilds.size());
+        sLog.outString("Total Random Guilds: %d", (uint32)sPlayerbotAIConfig.randomBotGuilds.size());
 }
 
 std::string RandomPlayerbotFactory::CreateRandomGuildName()

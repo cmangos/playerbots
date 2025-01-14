@@ -1051,27 +1051,29 @@ void HolyPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "hand of sacrifice",
-        NextAction::array(0, new NextAction("hand of sacrifice", ACTION_MEDIUM_HEAL + 8), NULL)));
+        NextAction::array(0, new NextAction("hand of sacrifice", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("divine favor", ACTION_MEDIUM_HEAL + 6), 
-                             new NextAction("holy shock on party", ACTION_MEDIUM_HEAL + 5), 
-                             new NextAction("holy light on party", ACTION_MEDIUM_HEAL + 4), NULL)));
+        NextAction::array(0, new NextAction("aura mastery", ACTION_MEDIUM_HEAL + 4), 
+                             new NextAction("divine favor", ACTION_MEDIUM_HEAL + 3),
+                             new NextAction("holy shock on party", ACTION_MEDIUM_HEAL + 2), 
+                             new NextAction("holy light on party", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("divine favor", ACTION_MEDIUM_HEAL + 3), 
+        NextAction::array(0, new NextAction("aura mastery", ACTION_MEDIUM_HEAL + 4),
+                             new NextAction("divine favor", ACTION_MEDIUM_HEAL + 3),
                              new NextAction("holy shock", ACTION_MEDIUM_HEAL + 2), 
                              new NextAction("holy light", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("holy light", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("holy light", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("holy light on party", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("holy light on party", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium health",
@@ -1523,6 +1525,10 @@ void HolyPaladinAuraPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& 
 {
     HolyPaladinAuraStrategy::InitNonCombatTriggers(triggers);
     PaladinAuraPvpStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "concentration aura",
+        NextAction::array(0, new NextAction("concentration aura", ACTION_NORMAL), NULL)));
 }
 
 void HolyPaladinAuraRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

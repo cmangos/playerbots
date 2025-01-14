@@ -21,6 +21,7 @@ namespace ai
 
     BUFF_TRIGGER(HolyShieldTrigger, "holy shield");
     BUFF_TRIGGER(RighteousFuryTrigger, "righteous fury");
+    BUFF_TRIGGER(AuraMasteryTrigger, "aura mastery");
 
 	class SealTrigger : public BuffTrigger
 	{
@@ -463,6 +464,7 @@ namespace ai
     BOOST_TRIGGER(DivineIlluminationBoostTrigger, "divine illumination");
     CAN_CAST_TRIGGER(HammerOfTheRighteousTrigger, "hammer of the righteous");
     CAN_CAST_TRIGGER(ShieldOfRighteousnessTrigger, "shield of righteousness");
+    CAN_CAST_TRIGGER(DivineStormTrigger, "divine storm");
     BUFF_TRIGGER(DivinePleaTrigger, "divine plea");
     BUFF_TRIGGER(SacredShieldTrigger, "sacred shield");
 }

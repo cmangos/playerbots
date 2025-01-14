@@ -427,6 +427,8 @@ namespace ai
                 creators["shield of righteousness"] = &TriggerFactoryInternal::shield_of_righteousness;
                 creators["divine plea"] = &TriggerFactoryInternal::divine_plea;
                 creators["sacred shield"] = &TriggerFactoryInternal::sacred_shield;
+                creators["aura mastery"] = &TriggerFactoryInternal::aura_mastery;
+                creators["divine storm"] = &TriggerFactoryInternal::divine_storm;
             }
 
         private:
@@ -504,6 +506,8 @@ namespace ai
             static Trigger* shield_of_righteousness(PlayerbotAI* ai) { return new ShieldOfRighteousnessTrigger(ai); }
             static Trigger* divine_plea(PlayerbotAI* ai) { return new DivinePleaTrigger(ai); }
             static Trigger* sacred_shield(PlayerbotAI* ai) { return new SacredShieldTrigger(ai); }
+            static Trigger* aura_mastery(PlayerbotAI* ai) { return new AuraMasteryTrigger(ai); }
+            static Trigger* divine_storm(PlayerbotAI* ai) { return new DivineStormTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>
@@ -623,6 +627,7 @@ namespace ai
                 creators["divine plea"] = &AiObjectContextInternal::divine_plea;
                 creators["divine sacrifice"] = &AiObjectContextInternal::divine_sacrifice;
                 creators["shield of righteousness"] = &AiObjectContextInternal::shield_of_righteousness;
+                creators["aura mastery"] = &AiObjectContextInternal::aura_mastery;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
@@ -743,6 +748,7 @@ namespace ai
             static Action* divine_plea(PlayerbotAI* ai) { return new CastDivinePleaAction(ai); }
             static Action* divine_sacrifice(PlayerbotAI* ai) { return new CastDivineSacrificeAction(ai); }
             static Action* shield_of_righteousness(PlayerbotAI* ai) { return new CastShieldOfRighteousnessAction(ai); }
+            static Action* aura_mastery(PlayerbotAI* ai) { return new CastAuraMasteryAction(ai); }
             static Action* update_pve_strats(PlayerbotAI* ai) { return new UpdatePaladinPveStrategiesAction(ai); }
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdatePaladinPvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdatePaladinRaidStrategiesAction(ai); }

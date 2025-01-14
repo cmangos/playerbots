@@ -6,44 +6,36 @@ using namespace ai;
 
 bool CastPaladinAuraAction::Execute(Event& event)
 {
-    std::vector<std::string> altAuras;
-    std::vector<std::string> haveAuras;
-    altAuras.push_back("devotion aura");
-    altAuras.push_back("retribution aura");
-    altAuras.push_back("concentration aura");
-    altAuras.push_back("sanctity aura");
-    altAuras.push_back("shadow resistance aura");
-    altAuras.push_back("fire resistance aura");
-    altAuras.push_back("frost resistance aura");
-    altAuras.push_back("crusader aura");
+    // List of all paladin auras
+    const std::vector<std::string> altAuras = {
+        "devotion aura",
+        "retribution aura",
+        "concentration aura",
+        "sanctity aura",
+        "shadow resistance aura",
+        "fire resistance aura",
+        "frost resistance aura",
+        "crusader aura"
+    };
 
-    for (auto aura : altAuras)
+    for (const auto& aura : altAuras)
     {
+        // Check if the aura is available
         if (AI_VALUE2(uint32, "spell id", aura))
-            haveAuras.push_back(aura);
-    }
-
-    if (haveAuras.empty())
-    {
-        return false;
-    }
-
-    for (auto aura : haveAuras)
-    {
-        if (!ai->HasAura(aura, bot))
         {
-            uint32 spellDuration = sPlayerbotAIConfig.globalCoolDown;
-            bool executed = ai->CastSpell(aura, bot, nullptr, false);
-            if (executed)
+            // If the aura is not already active, cast it
+            if (!ai->HasAura(aura, bot))
             {
-                SetDuration(1.0f);
+                if (ai->CastSpell(aura, bot, nullptr, false))
+                {
+                    SetDuration(1.0f); // Prevent immediate re-casting
+                    return true;       // Return after successfully casting an aura
+                }
             }
-
-            return executed;
         }
     }
 
-    return false;
+    return false; // No aura was cast
 }
 
 Unit* CastBlessingAction::GetTarget()

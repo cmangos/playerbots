@@ -12,8 +12,8 @@ bool SealTrigger::IsActive()
         !ai->HasAura("seal of command", target) &&
         !ai->HasAura("seal of vengeance", target) &&
 		!ai->HasAura("seal of righteousness", target) &&
-		!ai->HasAura("seal of light", target) &&
-        !ai->HasAura("seal of wisdom", target) &&
+		(!ai->HasAura("seal of light", target) || AI_VALUE2(uint8, "health", "self target") > 85) &&
+        (!ai->HasAura("seal of wisdom", target) || AI_VALUE2(uint8, "mana", "self target") > 85) &&
         AI_VALUE2(bool, "combat", "self target");
 }
 
@@ -194,55 +194,44 @@ bool GreaterBlessingOnPartyTrigger::IsActive()
 
 bool NoPaladinAuraTrigger::IsActive()
 {
-    std::vector<std::string> altAuras;
-    std::vector<std::string> haveAuras;
-    altAuras.push_back("devotion aura");
-    altAuras.push_back("retribution aura");
-    altAuras.push_back("concentration aura");
-    altAuras.push_back("sanctity aura");
-    altAuras.push_back("shadow resistance aura");
-    altAuras.push_back("fire resistance aura");
-    altAuras.push_back("frost resistance aura");
-    altAuras.push_back("crusader aura");
-
-    for (auto aura : altAuras)
-    {
-        if (AI_VALUE2(uint32, "spell id", aura))
-        {
-            haveAuras.push_back(aura);
-        }
-    }
-
-    if (haveAuras.empty())
-    {
-        return false;
-    }
+    // List of alternative auras
+    const std::vector<std::string> altAuras = {
+        "devotion aura",
+        "retribution aura",
+        "concentration aura",
+        "sanctity aura",
+        "shadow resistance aura",
+        "fire resistance aura",
+        "frost resistance aura",
+        "crusader aura"
+    };
 
     bool hasAura = false;
-    for (auto aura : haveAuras)
-    {
-        if (ai->HasMyAura(aura, bot))
-        {
-            hasAura = true;
-            break;
-        }
-    }
-
-    if (hasAura)
-    {
-        return false;
-    }
-
     bool needAura = false;
-    for (auto aura : haveAuras)
+
+    for (const auto& aura : altAuras)
     {
-        if (!ai->HasAura(aura, bot))
+        // Check if the aura is available to the bot
+        if (AI_VALUE2(uint32, "spell id", aura))
         {
-            needAura = true;
-            break;
+            if (ai->HasMyAura(aura, bot))
+            {
+                hasAura = true;
+                break; // No need to continue if the bot already has an aura
+            }
+
+            if (!ai->HasAura(aura, bot))
+            {
+                needAura = true;
+            }
         }
     }
 
+    // If the bot already has one of its own auras, return false
+    if (hasAura)
+        return false;
+
+    // If no aura is active and an aura is available, return true
     return needAura;
 }
 

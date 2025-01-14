@@ -50,6 +50,7 @@ namespace ai
 	BUFF_ACTION(CastBeaconOfLightAction, "beacon of light");
 	BUFF_ACTION(CastSacredShieldAction, "sacred shield");
 	BUFF_ACTION(CastDivineSacrificeAction, "divine sacrifice");
+    BUFF_ACTION(CastAuraMasteryAction, "aura mastery");
 
 	// blessings
 	BUFF_ACTION(CastBlessingOfFreedomAction, "hand of freedom");

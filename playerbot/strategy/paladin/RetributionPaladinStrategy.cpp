@@ -1052,7 +1052,8 @@ void RetributionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("repentance or shield", ACTION_EMERGENCY + 1),
+        NextAction::array(0, new NextAction("aura mastery", ACTION_EMERGENCY + 2),
+                             new NextAction("repentance or shield", ACTION_EMERGENCY + 1),
                              new NextAction("holy light", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -1069,7 +1070,7 @@ void RetributionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 
     triggers.push_back(new TriggerNode(
         "seal",
-        NextAction::array(0, new NextAction("seal of command", ACTION_NORMAL + 3), NULL)));
+        NextAction::array(0, new NextAction("seal of vengeance", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium mana",
@@ -1080,7 +1081,7 @@ void RetributionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
         NextAction::array(0, new NextAction("judgement of light", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "very often",
+        "divine storm",
         NextAction::array(0, new NextAction("divine storm", ACTION_NORMAL), NULL)));
 
     triggers.push_back(new TriggerNode(

@@ -1080,6 +1080,10 @@ void DpsFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
     DruidStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("survival instincts", ACTION_EMERGENCY), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "rebirth",
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
@@ -1447,6 +1451,22 @@ void DpsFeralDruidCcRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>&
 void DpsFeralDruidCureStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     DruidCureStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "cure poison",
+        NextAction::array(0, new NextAction("abolish poison", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member cure poison",
+        NextAction::array(0, new NextAction("abolish poison on party", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "remove curse",
+        NextAction::array(0, new NextAction("remove curse", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member remove curse",
+        NextAction::array(0, new NextAction("remove curse on party", ACTION_NORMAL), NULL)));
 }
 
 void DpsFeralDruidCureStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

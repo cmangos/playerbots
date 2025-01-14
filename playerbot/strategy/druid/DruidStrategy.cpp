@@ -60,7 +60,7 @@ private:
             /*A*/ NextAction::array(0, new NextAction("bear form"), NULL),
             /*C*/ NULL);
     }
-    /*
+
     ACTION_NODE_P(remove_curse, "remove curse", "caster form");
 
     ACTION_NODE_P(remove_curse_on_party, "remove curse on party", "caster form");
@@ -90,7 +90,7 @@ private:
     ACTION_NODE_P(mark_of_the_wild_on_party, "mark of the wild on party", "caster form");
 
     ACTION_NODE_P(gift_of_the_wild_on_party, "gift of the wild on party", "caster form");
-    */
+
     ACTION_NODE_P(cat_form, "cat form", "caster form");
 
     ACTION_NODE_P(travel_form, "travel form", "caster form");
@@ -1083,22 +1083,6 @@ void DruidAoeRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigge
 void DruidCureStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     CureStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "cure poison",
-        NextAction::array(0, new NextAction("abolish poison", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cure poison",
-        NextAction::array(0, new NextAction("abolish poison on party", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "remove curse",
-        NextAction::array(0, new NextAction("remove curse", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member remove curse",
-        NextAction::array(0, new NextAction("remove curse on party", ACTION_DISPEL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "rooted",

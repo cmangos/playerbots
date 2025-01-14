@@ -1429,7 +1429,7 @@ void PlayerbotMgr::CheckTellErrors(uint32 elapsed)
         }
         out << "|cfff00000: " << text;
         
-        ChatHandler(master->GetSession()).PSendSysMessage(out.str().c_str());
+        ChatHandler(master->GetSession()).PSendSysMessage("%s", out.str().c_str());
     }
     errors.clear();
 }

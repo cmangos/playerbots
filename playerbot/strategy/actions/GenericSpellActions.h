@@ -436,7 +436,7 @@ namespace ai
         virtual std::string GetReachActionName() override { return "reach spell"; }
         virtual std::string GetTargetName() override { return "cc target"; }
         virtual std::string GetTargetQualifier() override { return GetSpellName(); }
-        virtual ActionThreatType getThreatType() { return ActionThreatType::ACTION_THREAT_NONE; }
+        virtual ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_NONE; }
     };
 
     class CastProtectSpellAction : public CastSpellAction

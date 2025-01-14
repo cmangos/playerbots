@@ -948,9 +948,9 @@ void RandomItemMgr::BuildItemInfoCache()
 #endif
         } while (result->NextRow());
     }
-    sLog.outString("Loaded %d vendor items...", vendorItems.size());
-    sLog.outString("Loaded %d alliance only vendor items...", allianceItems.size());
-    sLog.outString("Loaded %d horde only vendor items...", hordeItems.size());
+    sLog.outString("Loaded %d vendor items...", (uint32)vendorItems.size());
+    sLog.outString("Loaded %d alliance only vendor items...", (uint32)allianceItems.size());
+    sLog.outString("Loaded %d horde only vendor items...", (uint32)hordeItems.size());
 
     // calculate drop source
     sLog.outString("Loading loot templates...");
@@ -980,7 +980,7 @@ void RandomItemMgr::BuildItemInfoCache()
                 dropMap->insert(std::make_pair(lItem.itemid, -sEntry));
     }
 
-    sLog.outString("Loaded %d loot templates...", dropMap->size());
+    sLog.outString("Loaded %d loot templates...", (uint32)dropMap->size());
 
     sLog.outString("Calculating stat weights for %d items...", sItemStorage.GetMaxEntry());
     BarGoLink bar(sItemStorage.GetMaxEntry());
@@ -1243,7 +1243,7 @@ void RandomItemMgr::BuildItemInfoCache()
                 else
                 {
                     cacheInfo->source = ITEM_SOURCE_DROP;
-                    sLog.outDetail("Item: %d, source: creatures drop, number: %d", proto->ItemId, creatures.size());
+                    sLog.outDetail("Item: %d, source: creatures drop, number: %d", proto->ItemId, (uint32)creatures.size());
                 }
             }
         }
@@ -1262,7 +1262,7 @@ void RandomItemMgr::BuildItemInfoCache()
                 else
                 {
                     cacheInfo->source = ITEM_SOURCE_DROP;
-                    sLog.outDetail("Item: %d, source: gameobjects, number: %d", proto->ItemId, gameobjects.size());
+                    sLog.outDetail("Item: %d, source: gameobjects, number: %d", proto->ItemId, (uint32)gameobjects.size());
                 }
             }
         }

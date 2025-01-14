@@ -357,6 +357,7 @@ namespace ai
                 creators["cyclone pvp"] = &TriggerFactoryInternal::cyclone_pvp;
                 creators["starfall"] = &TriggerFactoryInternal::starfall;
                 creators["predatory strikes"] = &TriggerFactoryInternal::predatory_strikes;
+                creators["typhoon"] = &TriggerFactoryInternal::typhoon;
             }
 
         private:
@@ -410,6 +411,7 @@ namespace ai
             static Trigger* cyclone_pvp(PlayerbotAI* ai) { return new CyclonePvpTrigger(ai); }
             static Trigger* starfall(PlayerbotAI* ai) { return new StarfallTrigger(ai); }
             static Trigger* predatory_strikes(PlayerbotAI* ai) { return new PredatoryStrikes(ai); }
+            static Trigger* typhoon(PlayerbotAI* ai) { return new TyphoonTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>
@@ -506,6 +508,7 @@ namespace ai
                 creators["nourish"] = &AiObjectContextInternal::nourish;
                 creators["swiftmend"] = &AiObjectContextInternal::swiftmend;
                 creators["cyclone"] = &AiObjectContextInternal::cyclone;
+                creators["typhoon"] = &AiObjectContextInternal::typhoon;
             }
 
         private:
@@ -597,6 +600,7 @@ namespace ai
             static Action* nourish(PlayerbotAI* ai) { return new CastNourishAction(ai); }
             static Action* swiftmend(PlayerbotAI* ai) { return new CastSwiftmendAction(ai); }
             static Action* cyclone(PlayerbotAI* ai) { return new CastCycloneAction(ai); }
+            static Action* typhoon(PlayerbotAI* ai) { return new CastTyphoonAction(ai); }
         };
     };
 };

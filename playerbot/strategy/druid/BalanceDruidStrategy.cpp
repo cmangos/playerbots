@@ -1226,6 +1226,10 @@ void BalanceDruidCcPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 {
     BalanceDruidCcStrategy::InitCombatTriggers(triggers);
     DruidCcPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "typhoon",
+        NextAction::array(0, new NextAction("typhoon", ACTION_INTERRUPT), NULL)));
 }
 
 void BalanceDruidCcPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

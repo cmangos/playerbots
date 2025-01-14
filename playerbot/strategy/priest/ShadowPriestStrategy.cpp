@@ -785,7 +785,7 @@ void ShadowPriestCureRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>
 
 NextAction** ShadowPriestStrategy::GetDefaultCombatActions()
 {
-    return NextAction::array(0, new NextAction("mind flay", ACTION_IDLE), NULL);
+    return NextAction::array(0, new NextAction("shoot", ACTION_IDLE), NULL);
 }
 
 void ShadowPriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -797,28 +797,25 @@ void ShadowPriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("shadow word: death", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "vampiric embrace",
-        NextAction::array(0, new NextAction("vampiric embrace", ACTION_NORMAL + 3), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "vampiric touch",
-        NextAction::array(0, new NextAction("vampiric touch", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("vampiric touch", ACTION_NORMAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "devouring plague",
-        NextAction::array(0, new NextAction("devouring plague", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("devouring plague", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "mind blast",
-        NextAction::array(0, new NextAction("mind blast", ACTION_NORMAL + 1), NULL)));
+        "shadow word: pain active",
+        NextAction::array(0, new NextAction("mind flay", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "shadow word: pain",
         NextAction::array(0, new NextAction("shadow word: pain", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "no mana",
-        NextAction::array(0, new NextAction("shoot", ACTION_NORMAL), NULL)));
+        "mind blast",
+        NextAction::array(0, new NextAction("mind blast", ACTION_NORMAL), NULL)));
+
 }
 
 void ShadowPriestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -974,6 +971,8 @@ void ShadowPriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
 {
     PriestBuffStrategy::InitCombatTriggers(triggers);
 
+    ShadowPriestBuffStrategy::InitNonCombatTriggers(triggers);
+
     triggers.push_back(new TriggerNode(
         "shadowform",
         NextAction::array(0, new NextAction("shadowform", ACTION_MOVE), NULL)));
@@ -981,11 +980,16 @@ void ShadowPriestBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
     triggers.push_back(new TriggerNode(
         "medium mana",
         NextAction::array(0, new NextAction("dispersion", ACTION_MOVE + 1), NULL)));
+
 }
 
 void ShadowPriestBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PriestBuffStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "vampiric embrace",
+        NextAction::array(0, new NextAction("vampiric embrace", ACTION_NORMAL + 3), NULL)));
 }
 
 void ShadowPriestBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1104,6 +1108,10 @@ void ShadowPriestCcPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 {
     ShadowPriestCcStrategy::InitCombatTriggers(triggers);
     PriestCcPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "psychic horror",
+        NextAction::array(0, new NextAction("psychic horror", ACTION_INTERRUPT), NULL)));
 }
 
 void ShadowPriestCcPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

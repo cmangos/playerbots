@@ -23,3 +23,13 @@ bool ManaBurnTrigger::IsActive()
     return target->IsPlayer();
 }
 
+bool ShadowWordPainActiveTrigger::IsActive()
+{
+    Unit* target = GetTarget();
+    if (target && target->IsAlive())
+    {
+        return ai->HasAura("shadow word: pain", target, false, true);
+    }
+
+    return false;
+}

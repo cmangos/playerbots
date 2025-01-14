@@ -30,6 +30,8 @@ namespace ai
     //disc 2.4.3
     SPELL_ACTION(CastMassDispelAction, "mass dispel");
 
+    CC_ACTION(CastPsychicHorrorAction, "psychic horror");
+
     // disc talents
     BUFF_ACTION(CastInnerFocusAction, "inner focus");
     // disc 2.4.3 talents

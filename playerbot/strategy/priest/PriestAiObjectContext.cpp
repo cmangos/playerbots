@@ -262,6 +262,7 @@ namespace ai
             {
                 creators["devouring plague"] = &TriggerFactoryInternal::devouring_plague;
                 creators["shadow word: pain"] = &TriggerFactoryInternal::shadow_word_pain;
+                creators["shadow word: pain active"] = &TriggerFactoryInternal::shadow_word_pain_active;
                 creators["shadow word: pain on attacker"] = &TriggerFactoryInternal::shadow_word_pain_on_attacker;
                 creators["dispel magic"] = &TriggerFactoryInternal::dispel_magic;
                 creators["dispel magic on party"] = &TriggerFactoryInternal::dispel_magic_party_member;
@@ -302,6 +303,7 @@ namespace ai
                 creators["smite"] = &TriggerFactoryInternal::smite;
                 creators["holy fire"] = &TriggerFactoryInternal::holy_fire;
                 creators["mana burn"] = &TriggerFactoryInternal::mana_burn;
+                creators["psychic horror"] = &TriggerFactoryInternal::psychic_horror;
             }
 
         private:
@@ -325,6 +327,7 @@ namespace ai
             static Trigger* vampiric_touch_on_attacker(PlayerbotAI* ai) { return new VampiricTouchOnAttackerTrigger(ai); }
             static Trigger* devouring_plague(PlayerbotAI* ai) { return new DevouringPlagueTrigger(ai); }
             static Trigger* shadow_word_pain(PlayerbotAI* ai) { return new PowerWordPainTrigger(ai); }
+            static Trigger* shadow_word_pain_active(PlayerbotAI* ai) { return new ShadowWordPainActiveTrigger(ai); }
             static Trigger* shadow_word_pain_on_attacker(PlayerbotAI* ai) { return new PowerWordPainOnAttackerTrigger(ai); }
             static Trigger* dispel_magic(PlayerbotAI* ai) { return new DispelMagicTrigger(ai); }
             static Trigger* dispel_magic_party_member(PlayerbotAI* ai) { return new DispelMagicPartyMemberTrigger(ai); }
@@ -347,6 +350,7 @@ namespace ai
             static Trigger* smite(PlayerbotAI* ai) { return new SmiteTrigger(ai); }
             static Trigger* holy_fire(PlayerbotAI* ai) { return new HolyFireTrigger(ai); }
             static Trigger* mana_burn(PlayerbotAI* ai) { return new ManaBurnTrigger(ai); }
+            static Trigger* psychic_horror(PlayerbotAI* ai) { return new PsychicHorrorTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>
@@ -436,6 +440,7 @@ namespace ai
                 creators["penance"] = &AiObjectContextInternal::penance;
                 creators["penance on party"] = &AiObjectContextInternal::penance_on_party;
                 creators["mind sear"] = &AiObjectContextInternal::mind_sear;
+                creators["psychic horror"] = &AiObjectContextInternal::psychic_horror;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
@@ -524,6 +529,7 @@ namespace ai
             static Action* penance(PlayerbotAI* ai) { return new CastPenanceAction(ai); }
             static Action* penance_on_party(PlayerbotAI* ai) { return new CastPenanceOnPartyAction(ai); }
             static Action* mind_sear(PlayerbotAI* ai) { return new CastMindSearAction(ai); }
+            static Action* psychic_horror(PlayerbotAI* ai) { return new CastPsychicHorrorAction(ai); }
             static Action* update_pve_strats(PlayerbotAI* ai) { return new UpdatePriestPveStrategiesAction(ai); }
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdatePriestPvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdatePriestRaidStrategiesAction(ai); }

@@ -4,12 +4,13 @@
 
 namespace ai
 {
-    DEBUFF_TRIGGER(HolyFireTrigger, "holy fire");
+    CAN_CAST_TRIGGER(HolyFireTrigger, "holy fire");
     DEBUFF_TRIGGER(PowerWordPainTrigger, "shadow word: pain");
+    DEBUFF_TRIGGER_A(ShadowWordPainActiveTrigger, "shadow word: pain");
     DEBUFF_ENEMY_TRIGGER(PowerWordPainOnAttackerTrigger, "shadow word: pain");
     DEBUFF_TRIGGER(VampiricTouchTrigger, "vampiric touch");
     DEBUFF_ENEMY_TRIGGER(VampiricTouchOnAttackerTrigger, "vampiric touch");
-    DEBUFF_TRIGGER(VampiricEmbraceTrigger, "vampiric embrace");
+    BUFF_TRIGGER(VampiricEmbraceTrigger, "vampiric embrace");
     CURE_TRIGGER(DispelMagicTrigger, "dispel magic", DISPEL_MAGIC);
     CURE_PARTY_TRIGGER(DispelMagicPartyMemberTrigger, "dispel magic", DISPEL_MAGIC);
     CURE_TRIGGER(CureDiseaseTrigger, "cure disease", DISPEL_DISEASE);
@@ -18,6 +19,7 @@ namespace ai
     BUFF_TRIGGER_A(ShadowformTrigger, "shadowform");
     BUFF_TRIGGER(InnerFocusTrigger, "inner focus");
     CC_TRIGGER(ShackleUndeadTrigger, "shackle undead");
+    CC_TRIGGER(PsychicHorrorTrigger, "psychic horror");
     INTERRUPT_TRIGGER(SilenceTrigger, "silence");
     INTERRUPT_HEALER_TRIGGER(SilenceEnemyHealerTrigger, "silence");
     DEBUFF_TRIGGER(DevouringPlagueTrigger, "devouring plague");

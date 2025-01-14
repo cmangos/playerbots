@@ -8,30 +8,15 @@ using namespace ai;
 
 EntryGuidps EntryGuidpsValue::Calculate()
 {
-    EntryTravelPurposeMap entryMap = GAI_VALUE(EntryTravelPurposeMap, "entry travel purpose");
-
     EntryGuidps guidps;
 
-    std::vector<CreatureDataPair const*> creatures = WorldPosition().getCreaturesNear();
-    std::vector<GameObjectDataPair const*> gos = WorldPosition().getGameObjectsNear();
+    for (auto& creatureDataPair : WorldPosition().getCreaturesNear())
+        if (GuidPosition(creatureDataPair).isValid())
+            guidps[creatureDataPair->second.id].push_back(creatureDataPair);
 
-    for (auto& [entry, purpose] : entryMap)
-    {
-        if (entry > 0)
-        {
-            for (auto& creatureDataPair : creatures)
-                if(creatureDataPair->second.id == entry)
-                    if (GuidPosition(creatureDataPair).isValid())                    
-                        guidps[entry].push_back(creatureDataPair);
-        }
-        else
-        {
-            for (auto& goDataPair : gos)
-                if (goDataPair->second.id == (entry * -1))
-                    if (GuidPosition(goDataPair).isValid())
-                        guidps[entry].push_back(goDataPair);
-        }
-    }
+    for (auto& goDataPair : WorldPosition().getGameObjectsNear())
+        if (GuidPosition(goDataPair).isValid())
+            guidps[goDataPair->second.id * -1].push_back(goDataPair);
 
     return guidps;
 }
@@ -39,6 +24,7 @@ EntryGuidps EntryGuidpsValue::Calculate()
 EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
 {
     EntryQuestRelationMap relationMap = GAI_VALUE(EntryQuestRelationMap, "entry quest relation");
+    EntryGuidps guidpMap = GAI_VALUE(EntryGuidps, "entry guidps");
 
     EntryTravelPurposeMap entryPurposeMap;
 
@@ -58,6 +44,14 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
     allowedNpcFlags.push_back(UNIT_NPC_FLAG_VENDOR);
     allowedNpcFlags.push_back(UNIT_NPC_FLAG_REPAIR);
 
+    std::unordered_map<NPCFlags, TravelDestinationPurpose> npcPurposeMap =
+    {
+        { UNIT_NPC_FLAG_REPAIR, TravelDestinationPurpose::Repair },
+        { UNIT_NPC_FLAG_VENDOR, TravelDestinationPurpose::Vendor },
+        { UNIT_NPC_FLAG_TRAINER, TravelDestinationPurpose::Trainer },
+        { UNIT_NPC_FLAG_AUCTIONEER, TravelDestinationPurpose::AH }
+    };
+
     for (uint32 entry = 0; entry < sCreatureStorage.GetMaxEntry(); ++entry)
     {
         CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
@@ -71,44 +65,57 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
         DestinationPurose purpose = 0;
 
         if(relationMap.find(entry) != relationMap.end())
-            purpose |= (uint32)TravelDestinationPurposeFlag::QUEST;
+            for(auto& [questId, questFlag] : relationMap[entry])
+                purpose |= questFlag;
 
-        for (auto flag : allowedNpcFlags)
+        for (auto& flag : allowedNpcFlags)
         {
             if ((cInfo->NpcFlags & flag) != 0)
             {
-                purpose |= (uint32)TravelDestinationPurposeFlag::RPG;
+                purpose |= (uint32)TravelDestinationPurpose::GenericRpg;
                 break;
             }
         }
 
+        for (auto& [flag, flagPurpose] : npcPurposeMap)
+        {
+            if ((cInfo->NpcFlags & flag) != 0)
+            {
+                purpose |= (uint32)flagPurpose;
+            }
+        }
+
+
         if (cInfo->MinLootGold > 0)
         {
-            purpose |= (uint32)TravelDestinationPurposeFlag::GRIND;
+            purpose |= (uint32)TravelDestinationPurpose::Grind;
         }
 
         if (cInfo->Rank == 3 || cInfo->Rank == 4 || cInfo->Rank == 1)
         {
             if (cInfo->Rank == 1)
             {
-                std::vector<CreatureDataPair const*> creatures = WorldPosition().getCreaturesNear(0, entry);
-                if (creatures.size() == 1)
-                    if (WorldPosition(creatures[0]).isOverworld())
-                        purpose |= (uint32)TravelDestinationPurposeFlag::BOSS;
+                if (guidpMap[entry].size() == 1)
+                    if (WorldPosition(guidpMap[entry].front()).isOverworld())
+                        purpose |= (uint32)TravelDestinationPurpose::Boss;
             }
             else
-                purpose |= (uint32)TravelDestinationPurposeFlag::BOSS;
+                purpose |= (uint32)TravelDestinationPurpose::Boss;
         }
 
         if (cInfo->SkinningLootId && cInfo->GetRequiredLootSkill() == SKILL_SKINNING)
         {
-            purpose |= (uint32)TravelDestinationPurposeFlag::GATHER;
+            purpose |= (uint32)TravelDestinationPurpose::GatherSkinning;
         }
 
         if (uint32 skillId = SkillIdToGatherEntry(entry))
         {
-            if (skillId == SKILL_SKINNING || skillId == SKILL_MINING || skillId == SKILL_HERBALISM)
-                purpose |= (uint32)TravelDestinationPurposeFlag::GATHER;
+            if (skillId == SKILL_SKINNING)
+                purpose |= (uint32)TravelDestinationPurpose::GatherSkinning;
+            if (skillId == SKILL_MINING)
+                purpose |= (uint32)TravelDestinationPurpose::GatherMining;
+            if (skillId == SKILL_HERBALISM)
+                purpose |= (uint32)TravelDestinationPurpose::GatherHerbalism;
         }
 
         if (purpose > 0)
@@ -129,8 +136,9 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
 
         DestinationEntry goEntry = entry * -1;
 
-        if (relationMap.find(goEntry) != relationMap.end())
-            purpose |= (uint32)TravelDestinationPurposeFlag::QUEST;
+        if (relationMap.find(entry) != relationMap.end())
+            for (auto& [questId, questFlag] : relationMap[entry])
+                purpose |= questFlag;
 
         std::vector<GameobjectTypes> allowedGoTypes;
 
@@ -140,15 +148,19 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
         {
             if (gInfo->type == type)
             {
-                purpose |= (uint32)TravelDestinationPurposeFlag::RPG;
+                purpose |= (uint32)TravelDestinationPurpose::MailBox;
                 break;
             }
         }
 
         if (uint32 skillId = SkillIdToGatherEntry(goEntry))
         {
-            if (skillId == SKILL_LOCKPICKING || skillId == SKILL_MINING || skillId == SKILL_HERBALISM || skillId == SKILL_FISHING)
-                purpose |= (uint32)TravelDestinationPurposeFlag::GATHER;
+            if (skillId == SKILL_SKINNING)
+                purpose |= (uint32)TravelDestinationPurpose::GatherSkinning;
+            if (skillId == SKILL_MINING)
+                purpose |= (uint32)TravelDestinationPurpose::GatherMining;
+            if (skillId == SKILL_HERBALISM)
+                purpose |= (uint32)TravelDestinationPurpose::GatherHerbalism;
         }
 
         if (purpose > 0)

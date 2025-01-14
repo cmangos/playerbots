@@ -59,30 +59,41 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32
     {
         Player* player = sObjectAccessor.FindPlayer(guid);
         if (player)
+        {
             set(player);
+            return;
+        }
         break;
     }
     case HIGHGUID_GAMEOBJECT:
-    {        
+    {
         GameObjectDataPair const* gpair = sObjectMgr.GetGODataPair(guid.GetCounter());
         if (gpair)
+        {
             set(gpair);
-
+            return;
+        }
         break;
     }
     case HIGHGUID_UNIT:
     {
         setMapId(mapId);
-        Creature* creature = getMap(instanceId)->GetAnyTypeCreature(guid);
-        if (creature)
+        if (Map* map = getMap(instanceId))
         {
-            set(creature);
-            return;
+            Creature* creature = map->GetAnyTypeCreature(guid);
+            if (creature)
+            {
+                set(creature);
+                return;
+            }
         }
 
         CreatureDataPair const* cpair = sObjectMgr.GetCreatureDataPair(guid.GetCounter());
         if (cpair)
+        {
             set(cpair);
+            return;
+        }
         break;
     }
     case HIGHGUID_TRANSPORT:
@@ -91,8 +102,11 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32
     case HIGHGUID_PET:
     case HIGHGUID_DYNAMICOBJECT:
     case HIGHGUID_CORPSE:
+        set(WorldPosition());
         return;
     }
+
+    set(WorldPosition());
 }
 
 WorldPosition::WorldPosition(const std::vector<WorldPosition*>& list, const WorldPositionConst conType)
@@ -686,8 +700,11 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
 {
     std::string logName = "load_map_grid.csv";
 
-    //bool hasVmap = isVmapLoaded(mapId, x, y);
-    bool hasMmap = isMmapLoaded(mapId, instanceId, x, y);
+    bool hasMmap = false;
+    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        hasMmap = isMmapLoaded(mapId, 0, x, y);
+    else
+        hasMmap = isMmapLoaded(mapId, instanceId, x, y);
 
     if (hasMmap)
         return true;
@@ -709,11 +726,13 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
         }
 #else
         if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
-            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, instanceId);
+        {
+            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, 0);
+        }
         else
         {
             if (MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, instanceId))
-                isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, instanceId);
+                isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, instanceId, x, y, 0);
         }
 #endif
 

@@ -27,17 +27,6 @@ namespace ai
 
     using DestinationPurose = uint32;
 
-    //Reasons a bot might want to travel to a creature or object
-    enum class TravelDestinationPurposeFlag : uint32
-    {
-        NONE = 0,
-        QUEST = 1 << 0,  //Starts, ends or is objective of some quest.
-        RPG = 1 << 1,    //Has a usefull npc flag or gameobject type.
-        GRIND = 1 << 2,  //Drops gold. 
-        GATHER = 1 << 3, //Can be mined/herbed/skinned ect.       
-        BOSS = 1 << 4    //Is a boss, worldboss or unique (silver) elite.
-    };
-
     using EntryTravelPurposeMap = std::unordered_map<DestinationEntry, DestinationPurose>;
 
     //All creature and gameobject entries and reason a bot might want to travel to them.

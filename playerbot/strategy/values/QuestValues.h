@@ -1,6 +1,6 @@
 #pragma once
 #include "playerbot/strategy/Value.h"
-#include "playerbot/travelMgr.h"
+#include "playerbot/TravelMgr.h"
 
 namespace ai
 {          

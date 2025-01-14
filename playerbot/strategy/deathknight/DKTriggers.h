@@ -6,7 +6,7 @@ namespace ai
     
     BUFF_TRIGGER(HornOfWinterTrigger, "horn of winter");
     BUFF_TRIGGER(BoneShieldTrigger, "bone shield");
-    BUFF_TRIGGER(ImprovedIcyTalonsTrigger, "improved icy talons");
+    BUFF_TRIGGER(ImprovedIcyTalonsTrigger, "icy talons");
     DEBUFF_TRIGGER(PlagueStrikeDebuffTrigger, "plague strike");
     DEBUFF_TRIGGER(IcyTouchDebuffTrigger, "icy touch");
 
@@ -28,6 +28,8 @@ namespace ai
     };
 
 	CAN_CAST_TRIGGER(SummonGargoyleTrigger, "summon gargoyle");
+	CAN_CAST_TRIGGER(DancingWeaponTrigger, "dancing rune weapon");
+	CAN_CAST_TRIGGER(UnholyFrenzyTrigger, "unholy frenzy");
 
 	class BloodTapTrigger : public BuffTrigger {
 	public:

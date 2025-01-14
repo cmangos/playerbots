@@ -23,7 +23,6 @@ public:
 		//creators["chains of ice"] = &chains_of_ice;
 		//creators["icy clutch"] = &icy_clutch;
 		creators["horn of winter"] = &horn_of_winter;
-		creators["killing machine"] = &killing_machine;	// buff
 		//creators["deathchill"] = &deathchill;		//boost
 		creators["icebound fortitude"] = &icebound_fortitude;
 		//creators["mind freeze"] = &mind_freeze; interrupt
@@ -106,13 +105,6 @@ private:
             /*A*/ NULL,
             /*C*/ NULL);
     }
-    static ActionNode* killing_machine(PlayerbotAI* ai)
-    {
-        return new ActionNode ("killing machine",
-            /*P*/ NULL,
-            /*A*/ NextAction::array(0, new NextAction("improved icy talons"), NULL),
-            /*C*/ NULL);
-    }
     static ActionNode* corpse_explosion(PlayerbotAI* ai)
     {
         return new ActionNode ("corpse explosion",
@@ -167,6 +159,10 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
         "mind freeze",
         NextAction::array(0, new NextAction("mind freeze", ACTION_HIGH + 1), NULL)));
 
+	triggers.push_back(new TriggerNode(
+		"strangulate",
+		NextAction::array(0, new NextAction("strangulate", ACTION_HIGH + 1), NULL)));
+
     triggers.push_back(new TriggerNode(
         "bone shield",
         NextAction::array(0, new NextAction("bone shield", ACTION_NORMAL + 1), NULL)));
@@ -217,7 +213,7 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 	triggers.push_back(new TriggerNode(
 		"melee high aoe",
 		NextAction::array(0,
-			new NextAction("unholy blight", ACTION_NORMAL + 6),
+			//new NextAction("unholy blight", ACTION_NORMAL + 6),
 			new NextAction("death and decay", ACTION_NORMAL + 5),
 			new NextAction("pestilence", ACTION_NORMAL + 4),
 			new NextAction("blood boil", ACTION_NORMAL + 3), NULL)));
@@ -231,7 +227,7 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 
 	triggers.push_back(new TriggerNode("melee light aoe",
 		NextAction::array(0,
-			new NextAction("howling blast", ACTION_NORMAL + 5),
+			//new NextAction("howling blast", ACTION_NORMAL + 5),
 			new NextAction("pestilence", ACTION_NORMAL + 4),
 			new NextAction("hearth strike", ACTION_NORMAL + 3),
 			new NextAction("blood boil", ACTION_NORMAL + 3), NULL)));

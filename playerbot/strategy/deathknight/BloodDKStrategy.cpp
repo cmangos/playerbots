@@ -109,4 +109,12 @@ void BloodDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 	triggers.push_back(new TriggerNode(
 		"medium health",
 		NextAction::array(0, new NextAction("death strike", ACTION_HIGH + 1), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"dancing weapon",
+		NextAction::array(0, new NextAction("dancing weapon", ACTION_HIGH), NULL)));
+	
+	triggers.push_back(new TriggerNode(
+		"unholy frenzy",
+		NextAction::array(0, new NextAction("unholy frenzy", ACTION_HIGH), NULL)));
 }

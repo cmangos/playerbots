@@ -77,13 +77,29 @@ void FrostDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     GenericDKStrategy::InitCombatTriggers(triggers);
 
+	triggers.push_back(new TriggerNode(
+		"target of attacker",
+		NextAction::array(0, new NextAction("unbreakable armor", ACTION_HIGH), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"will of the forsaken",
+		NextAction::array(0, new NextAction("lichborne", ACTION_DISPEL), NULL)));
+
     triggers.push_back(new TriggerNode(
         "empower weapon",
         NextAction::array(0, new NextAction("empower weapon", ACTION_NORMAL + 4), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"rune strike",
+		NextAction::array(0, new NextAction("rune strike", ACTION_NORMAL + 3), NULL)));
 }
 
 void FrostDKAoeStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 {
+	triggers.push_back(new TriggerNode(
+		"melee light aoe",
+		NextAction::array(0, new NextAction("hungering cold", ACTION_HIGH), NULL)));
+	
 	triggers.push_back(new TriggerNode(
 		"melee light aoe",
 		NextAction::array(0, new NextAction("howling blast", ACTION_NORMAL + 4), NULL)));

@@ -106,6 +106,9 @@ namespace ai
 				creators["chains of ice"] = &TriggerFactoryInternal::chains_of_ice;
 				creators["dk presence"] = &TriggerFactoryInternal::dk_presence;
 				creators["summon gargoyle"] = &TriggerFactoryInternal::summon_gargoyle;
+				creators["dancing weapon"] = &TriggerFactoryInternal::dancing_weapon;
+				creators["killing machine"] = &TriggerFactoryInternal::killing_machine;
+				creators["unholy frenzy"] = &TriggerFactoryInternal::unholy_frenzy;
             }
 
         private:
@@ -128,8 +131,9 @@ namespace ai
 			static Trigger* chains_of_ice(PlayerbotAI* ai) { return new ChainsOfIceSnareTrigger(ai); }
 			static Trigger* dk_presence(PlayerbotAI* ai) { return new DKPresenceTrigger(ai); }
 			static Trigger* summon_gargoyle(PlayerbotAI* ai) { return new SummonGargoyleTrigger(ai); }
-
-
+			static Trigger* dancing_weapon(PlayerbotAI* ai) { return new DancingWeaponTrigger(ai); }
+			static Trigger* killing_machine(PlayerbotAI* ai) { return new KillingMachineTrigger(ai); }
+			static Trigger* unholy_frenzy(PlayerbotAI* ai) { return new UnholyFrenzyTrigger(ai); }
 		};
     };
 };
@@ -154,7 +158,7 @@ namespace ai
 				creators["death grip"] = &AiObjectContextInternal::death_grip;
 				creators["death coil"] = &AiObjectContextInternal::death_coil;
 				creators["death strike"] = &AiObjectContextInternal::death_strike;
-				creators["unholy blight"] = &AiObjectContextInternal::unholy_blight;
+				//creators["unholy blight"] = &AiObjectContextInternal::unholy_blight;
 				creators["scourge strike"] = &AiObjectContextInternal::scourge_strike;
 				creators["death and decay"] = &AiObjectContextInternal::death_and_decay;
 				creators["unholy presence"] = &AiObjectContextInternal::unholy_presence;
@@ -175,7 +179,6 @@ namespace ai
 				creators["rune strike"] = &AiObjectContextInternal::rune_strike;
 				//creators["icy clutch"] = &AiObjectContextInternal::icy_clutch;
 				creators["horn of winter"] = &AiObjectContextInternal::horn_of_winter;
-				creators["killing machine"] = &AiObjectContextInternal::killing_machine;
 				creators["frost presence"] = &AiObjectContextInternal::frost_presence;
 				creators["deathchill"] = &AiObjectContextInternal::deathchill;
 				creators["icebound fortitude"] = &AiObjectContextInternal::icebound_fortitude;
@@ -184,6 +187,7 @@ namespace ai
 				creators["hungering cold"] = &AiObjectContextInternal::hungering_cold;
 				creators["unbreakable armor"] = &AiObjectContextInternal::unbreakable_armor;
 				creators["improved icy talons"] = &AiObjectContextInternal::improved_icy_talons;
+				creators["lichborne"] = &AiObjectContextInternal::lichborne;
 				// blood
 				creators["blood strike"] = &AiObjectContextInternal::blood_strike;
 				creators["blood tap"] = &AiObjectContextInternal::blood_tap;
@@ -191,15 +195,16 @@ namespace ai
 				creators["strangulate"] = &AiObjectContextInternal::strangulate;
 				creators["blood boil"] = &AiObjectContextInternal::blood_boil;
 				creators["heart strike"] = &AiObjectContextInternal::heart_strike;
-				creators["mark of_blood"] = &AiObjectContextInternal::mark_of_blood;
+				creators["mark of blood"] = &AiObjectContextInternal::mark_of_blood;
 				creators["blood presence"] = &AiObjectContextInternal::blood_presence;
 				creators["rune tap"] = &AiObjectContextInternal::rune_tap;
 				creators["vampiric blood"] = &AiObjectContextInternal::vampiric_blood;
 				creators["death pact"] = &AiObjectContextInternal::death_pact;
-				creators["death rune_mastery"] = &AiObjectContextInternal::death_rune_mastery;
+				creators["death rune mastery"] = &AiObjectContextInternal::death_rune_mastery;
 				//creators["hysteria"] = &AiObjectContextInternal::hysteria;
 				creators["dancing weapon"] = &AiObjectContextInternal::dancing_weapon;
 				creators["dark command"] = &AiObjectContextInternal::dark_command;
+				creators["unholy frenzy"] = &AiObjectContextInternal::unholy_frenzy;
             }
 
         private:
@@ -232,7 +237,6 @@ namespace ai
 			static Action* rune_strike(PlayerbotAI* ai) { return new CastRuneStrikeAction(ai); }
 			//static Action* icy_clutch(PlayerbotAI* ai) { return new CastIcyClutchAction(ai); }
 			static Action* horn_of_winter(PlayerbotAI* ai) { return new CastHornOfWinterAction(ai); }
-			static Action* killing_machine(PlayerbotAI* ai) { return new CastKillingMachineAction(ai); }
 			static Action* frost_presence(PlayerbotAI* ai) { return new CastFrostPresenceAction(ai); }
 			static Action* deathchill(PlayerbotAI* ai) { return new CastDeathchillAction(ai); }
 			static Action* icebound_fortitude(PlayerbotAI* ai) { return new CastIceboundFortitudeAction(ai); }
@@ -241,6 +245,7 @@ namespace ai
 			static Action* hungering_cold(PlayerbotAI* ai) { return new CastHungeringColdAction(ai); }
 			static Action* unbreakable_armor(PlayerbotAI* ai) { return new CastUnbreakableArmorAction(ai); }
 			static Action* improved_icy_talons(PlayerbotAI* ai) { return new CastImprovedIcyTalonsAction(ai); }
+			static Action* lichborne(PlayerbotAI* ai) { return new CastLichborneAction(ai); }
 			// blood
 			static Action* blood_strike(PlayerbotAI* ai) { return new CastBloodStrikeAction(ai); }
 			static Action* blood_tap(PlayerbotAI* ai) { return new CastBloodTapAction(ai); }
@@ -257,6 +262,7 @@ namespace ai
 			//static Action* hysteria(PlayerbotAI* ai) { return new CastHysteriaAction(ai); }
 			static Action* dancing_weapon(PlayerbotAI* ai) { return new CastDancingWeaponAction(ai); }
 			static Action* dark_command(PlayerbotAI* ai) { return new CastDarkCommandAction(ai); }
+			static Action* unholy_frenzy(PlayerbotAI* ai) { return new CastUnholyFrenzyAction(ai); }
             static Action* mind_freeze_on_enemy_healer(PlayerbotAI* ai) { return new CastMindFreezeOnEnemyHealerAction(ai); }
 			
         };

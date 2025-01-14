@@ -8,6 +8,9 @@ namespace ai
 	BUFF_ACTION(CastFrostPresenceAction, "frost presence");
 	BUFF_ACTION(CastUnholyPresenceAction, "unholy presence");
 
+	BUFF_ACTION(CastLichborneAction, "lichborne");
+	BUFF_ACTION(CastUnholyFrenzyAction, "unholy frenzy");
+
 	class CastDeathchillAction : public CastBuffSpellAction {
 	public:
 		CastDeathchillAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "deathchill") {}
@@ -116,15 +119,11 @@ namespace ai
 		CastGhoulFrenzyAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "ghoul frenzy") {}
 	};
 
-	BEGIN_MELEE_SPELL_ACTION(CastCorpseExplosionAction, "corpse explosion")
-	END_SPELL_ACTION()
+	SPELL_ACTION(CastCorpseExplosionAction, "corpse explosion");
 
-	BEGIN_MELEE_SPELL_ACTION(CastAntiMagicShellAction, "anti magic shell")
-	END_SPELL_ACTION()
+	BUFF_ACTION(CastAntiMagicShellAction, "anti-magic shell");
 
-
-	BEGIN_MELEE_SPELL_ACTION(CastAntiMagicZoneAction, "anti magic zone")
-	END_SPELL_ACTION()
+	SPELL_ACTION(CastAntiMagicZoneAction, "anti-magic zone");
 
 
 	class CastChainsOfIceAction : public CastSpellAction {
@@ -132,9 +131,9 @@ namespace ai
 		CastChainsOfIceAction(PlayerbotAI* ai) : CastSpellAction(ai, "chains of ice") {}
 	};
 
-	class CastHungeringColdAction : public CastMeleeSpellAction {
+	class CastHungeringColdAction : public CastSpellAction {
 	public:
-		CastHungeringColdAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "hungering cold") {}
+		CastHungeringColdAction(PlayerbotAI* ai) : CastSpellAction(ai, "hungering cold") {}
 	};
 
 	class CastHeartStrikeAction : public CastMeleeSpellAction {
@@ -164,12 +163,12 @@ namespace ai
 
 	class CastScourgeStrikeAction : public CastMeleeSpellAction {
 	public:
-		CastScourgeStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "scorgue strike") {}
+		CastScourgeStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "scourge strike") {}
 	};
 
 	class CastDeathCoilAction : public CastSpellAction {
 	public:
-		CastDeathCoilAction(PlayerbotAI* ai) : CastSpellAction(ai, "death coill") {}
+		CastDeathCoilAction(PlayerbotAI* ai) : CastSpellAction(ai, "death coil") {}
 	};
 
 	class CastBloodBoilAction : public CastBuffSpellAction {
@@ -191,7 +190,7 @@ namespace ai
 	class CastImprovedIcyTalonsAction : public CastBuffSpellAction
 	{
 	public:
-		CastImprovedIcyTalonsAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "improved icy talons") {}
+		CastImprovedIcyTalonsAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "icy talons") {}
 	};
 
 	class CastBoneShieldAction : public CastBuffSpellAction
@@ -215,7 +214,7 @@ namespace ai
 	class CastDancingWeaponAction : public CastBuffSpellAction
 	{
 	public:
-		CastDancingWeaponAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "dancing weapon") {}
+		CastDancingWeaponAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "dancing rune weapon") {}
 	};
 
 	class CastEmpowerRuneWeaponAction : public CastBuffSpellAction
@@ -236,12 +235,6 @@ namespace ai
 	public:
 		CastRaiseDeadAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "raise dead") {}
 		virtual bool isPossible() override;
-	};
-
-	class CastKillingMachineAction : public CastBuffSpellAction
-	{
-	public:
-		CastKillingMachineAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "killing machine") {}
 	};
 
 	class CastIceboundFortitudeAction : public CastBuffSpellAction

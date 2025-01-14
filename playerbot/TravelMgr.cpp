@@ -19,6 +19,8 @@ PlayerTravelInfo::PlayerTravelInfo(Player* player)
     PlayerbotAI* ai = player->GetPlayerbotAI();
     AiObjectContext* context = ai->GetAiObjectContext();
 
+    position = player;
+
     team = player->GetTeam();
     level = player->GetLevel();
     currentSkill[SKILL_MINING] = player->GetSkillValue(SKILL_MINING);

@@ -42,8 +42,10 @@ void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
     if (sPlayerbotAIConfig.autoLearnTrainerSpells)
         LearnTrainerSpells(out);
 
+#ifdef MANGOSBOT_ZERO
     if (sPlayerbotAIConfig.autoLearnDroppedSpells)
         LearnDroppedSpells(out);
+#endif
 
     if (!ai->HasActivePlayerMaster()) //Hunter spells for pets.
     {

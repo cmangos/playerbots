@@ -298,6 +298,7 @@ public:
     bool autoLearnTrainerSpells;
     bool autoLearnQuestSpells;
     bool autoDoQuests;
+    bool autoDuel;
     bool syncLevelWithPlayers;
     uint32 syncLevelMaxAbove, syncLevelNoPlayer;
     uint32 tweakValue; //Debugging config

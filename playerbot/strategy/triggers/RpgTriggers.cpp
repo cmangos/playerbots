@@ -728,7 +728,7 @@ bool RpgDuelTrigger::IsActive()
         return false;
     }
 
-    if (!AI_VALUE(std::list<ObjectGuid>, "all targets").empty())
+    if (AI_VALUE(bool, "has attackers"))
         return false;
 
     return true;

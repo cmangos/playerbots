@@ -866,9 +866,10 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         nonCombatEngine->addStrategy("roll");
 
         // let 25% of free bots start duels.
-        if (!urand(0, 3))
+        if (sPlayerbotAIConfig.autoDuel && (!urand(0, 3) || (player->GetLevel() >= 80 && !urand(0, 1))))
         {
             nonCombatEngine->addStrategy("start duel");
+            nonCombatEngine->addStrategy("rpg player");
         }
 
         if (sPlayerbotAIConfig.randomBotJoinLfg)

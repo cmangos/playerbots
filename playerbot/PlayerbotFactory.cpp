@@ -4118,7 +4118,7 @@ void PlayerbotFactory::InitGems()
                                             continue;
 
                                         // no need epic gems to low gear and never need crap gem to epic gear
-                                        if (((proto->ItemLevel) < 200) && ((gemProto->Quality) > 3) || ((proto->ItemLevel) >= 200) && ((gemProto->Quality) < 3))
+                                        if ((((proto->ItemLevel) < 200) && ((gemProto->Quality) > 3)) || (((proto->ItemLevel) >= 200) && ((gemProto->Quality) < 3)))
                                             continue;
 
                                         uint16 sp = 0, ap = 0, tank = 0, heal = 0;

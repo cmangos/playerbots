@@ -3,6 +3,7 @@
 #include "Config/Config.h"
 #include "Talentspec.h"
 #include "Globals/SharedDefines.h"
+#include "strategy/hunter/HunterPetBuild.h"
 
 class Player;
 class PlayerbotMgr;
@@ -58,6 +59,13 @@ enum class BotLoginCriteriaType : uint8
 };
 
 #define MAX_GEAR_PROGRESSION_LEVEL 6
+
+#ifdef MANGOSBOT_ZERO
+#define MAX_FAMILY_BUILDS = 28;
+#endif
+#ifdef MANGOSBOT_ONE
+#define MAX_FAMILY_BUILDS = 36;
+#endif
 
 class ConfigAccess
 {
@@ -174,6 +182,9 @@ public:
     uint32 classRaceProbability[MAX_CLASSES][MAX_RACES];
     uint32 levelProbability[DEFAULT_MAX_LEVEL + 1];
     ClassSpecs classSpecs[MAX_CLASSES];
+    FamilyPetBuilds familyPetBuilds[MAX_FAMILY_BUILDS];
+    uint32 familyPetBuildProbability[MAX_FAMILY_BUILDS][10];
+    std::string premadeLevelFamilyPetBuild[MAX_FAMILY_BUILDS][10][100]; //lvl 1 - 100
     bool gearProgressionSystemEnabled;
     uint32 gearProgressionSystemItemLevels[MAX_GEAR_PROGRESSION_LEVEL][2];
     int32 gearProgressionSystemItems[MAX_GEAR_PROGRESSION_LEVEL][MAX_CLASSES][4][SLOT_EMPTY];

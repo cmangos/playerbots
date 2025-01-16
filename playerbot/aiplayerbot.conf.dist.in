@@ -968,7 +968,7 @@ AiPlayerbot.PerfMonEnabled = 0
 # The default prompt to send at the beginning of each conversation.
 # AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The <other type> <other name> is speaking to you <channel name> and is an <other gender> <other race> <other class> of level <other level>. You are level <bot level> and play as a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.
 # The prompt part containing the last message from the player the bot is responding to.
-# AiPlayerbot.LLMPrompt = <player name>:<player message>
+# AiPlayerbot.LLMPrompt = <receiver name>:<initial message>
 # The default prompt to send at the end of each conversation.
 # AiPlayerbot.LLMPostPrompt = <bot name>:
 

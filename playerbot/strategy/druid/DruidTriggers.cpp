@@ -66,12 +66,12 @@ bool CyclonePvpTrigger::IsActive()
     if (!PossibleAttackTargetsValue::HasUnBreakableCC(target, bot) &&
         target->GetDistance(bot) <= 20.0f)
     {
-        // Check if Cyclone is already active
         std::list<ObjectGuid> attackers = AI_VALUE(std::list<ObjectGuid>, "attackers");
 
-        if (attackers.size() <= 1)
+        if (attackers.size() == 1 || (bot->InBattleGround() && !bot->InArena()))
             return false;
 
+        // Check if Cyclone is already active
         for (const auto& guid : attackers)
         {
             Unit* attacker = ai->GetUnit(guid);

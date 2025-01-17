@@ -3712,7 +3712,13 @@ bool PlayerbotAI::GetSpellRange(std::string name, float* maxRange, float* minRan
             if(spellRangeEntry)
             {
                 float spellMinRange = 0.0f, spellMaxRange = 0.0f, rangeMod = 0.0f;
-                if (spellRangeEntry->Flags & SPELL_RANGE_FLAG_MELEE)
+                if (spellRangeEntry->ID == 1 && spellInfo->EffectRadiusIndex[EFFECT_INDEX_0])
+                {
+                    const SpellRadiusEntry* spellRadiusEntry = sServerFacade.LookupSpellRadiusEntry(spellInfo->EffectRadiusIndex[EFFECT_INDEX_0]);
+                    if (spellRadiusEntry)
+                        spellMaxRange = spellRadiusEntry->Radius;
+                }
+                else if (spellRangeEntry->Flags & SPELL_RANGE_FLAG_MELEE)
                 {
                     rangeMod = bot->GetCombinedCombatReach(bot, true, 0.f);
                 }

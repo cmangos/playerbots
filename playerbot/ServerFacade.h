@@ -194,6 +194,11 @@ class ServerFacade
         {
             return sSpellRangeStore.LookupEntry(rangeIndex);
         }
+        
+        SpellRadiusEntry const* LookupSpellRadiusEntry(uint32 EffectRadiusIndex)
+        {
+            return sSpellRadiusStore.LookupEntry(EffectRadiusIndex);
+        }
 
         uint32 GetSpellInfoRows()
         {

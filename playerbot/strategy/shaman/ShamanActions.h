@@ -384,10 +384,11 @@ namespace ai
         CastLightningBoltAction(PlayerbotAI* ai) : CastSpellAction(ai, "lightning bolt") {}
     };
 
-    class CastThunderstormAction : public CastMeleeSpellAction
+    class CastThunderstormAction : public CastSpellAction
     {
     public:
-        CastThunderstormAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "thunderstorm") {}
+        CastThunderstormAction(PlayerbotAI* ai) : CastSpellAction(ai, "thunderstorm") {}
+        virtual std::string GetTargetName() { return "self target"; }
     };
 
     class CastHeroismAction : public CastBuffSpellAction
@@ -466,7 +467,7 @@ namespace ai
     BUFF_ACTION(CastElementalMasteryAction, "elemental mastery");
     SPELL_ACTION(CastFeralSpiritAction, "feral spirit");
     SPELL_ACTION(CastHexAction, "hex");
-    SPELL_ACTION(CastTidalForceAction, "tidal force");
+    BUFF_ACTION(CastTidalForceAction, "tidal force");
     BUFF_ACTION(CastShamanisticRageAction, "shamanistic rage");
     BUFF_ACTION(CastNaturesSwiftnessAction, "nature's swiftness");
 

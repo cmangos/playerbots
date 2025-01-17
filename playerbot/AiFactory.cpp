@@ -593,12 +593,18 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
         }
 #endif
 
+        bool isArena = false;
 #ifndef MANGOSBOT_ZERO
         if (!player->IsBeingTeleported() && player->InArena())
         {
-            combatEngine->addStrategy("arena");
+            isArena = true;
         }
 #endif
+        if (isArena)
+        {
+            combatEngine->addStrategy("arena");
+        }
+
         combatEngine->addStrategies("boost", "racials", "default", "aoe", "dps assist", "pvp", NULL);
         combatEngine->removeStrategy("custom::say");
         combatEngine->removeStrategy("flee");
@@ -625,6 +631,12 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
         if (player->getClass() == CLASS_ROGUE)
         {
             combatEngine->addStrategies("behind", "stealth", "poisons", "buff", NULL);
+        }
+
+        if (player->getClass() == CLASS_PALADIN && tab == 0 && isArena)
+        {
+            combatEngine->addStrategies("retribution", "close", NULL);
+            combatEngine->removeStrategy("ranged");
         }
     }
 }

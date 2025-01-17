@@ -1096,11 +1096,11 @@ void HolyPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("judgement of wisdom", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "enemy ten yards",
+        "judgement of light",
         NextAction::array(0, new NextAction("judgement of light", ACTION_NORMAL + 1), NULL))); 
 
     triggers.push_back(new TriggerNode(
-        "shield of righteousness",
+        "enemy five yards",
         NextAction::array(0, new NextAction("shield of righteousness", ACTION_NORMAL), NULL)));
 }
 

@@ -422,71 +422,65 @@ bool PlayerbotAIConfig::Initialize()
 
     uint32 maxHunterPetBuildLevel = 0;
 
-    for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
+    for (uint32 family = 1; family < MAX_FAMILY_BUILDS; ++family)
     {
-        classSpecs[cls] = ClassSpecs(1 << (cls - 1));
-        for (uint32 spec = 0; spec < MAX_LEVEL; ++spec)
+        familyPetBuilds[family] = FamilyPetBuilds(family);
+        for (uint32 build = 0; build < MAX_LEVEL; ++build)
         {
-            std::ostringstream os; os << "AiPlayerbot.PremadeSpecName." << cls << "." << spec;
+            std::ostringstream os; os << "AiPlayerbot.HunterPetBuildName." << family << "." << build;
             std::string specName = config.GetStringDefault(os.str().c_str(), "");
             if (!specName.empty())
             {
-                std::ostringstream os; os << "AiPlayerbot.PremadeSpecProb." << cls << "." << spec;
+                std::ostringstream os; os << "AiPlayerbot.HunterPetBuildProb." << family << "." << build;
                 int probability = config.GetIntDefault(os.str().c_str(), 100);
 
-                TalentPath talentPath(spec, specName, probability);
+                HunterPetBuildPath hunterPetBuildPath(build, specName, probability);
 
-                for (uint32 level = 10; level <= 100; level++)
+                for (uint32 level = 1; level <= 100; level++)
                 {
-                    std::ostringstream os; os << "AiPlayerbot.PremadeSpecLink." << cls << "." << spec << "." << level;
-                    std::string specLink = config.GetStringDefault(os.str().c_str(), "");
-                    specLink = specLink.substr(0, specLink.find("#", 0));;
-                    specLink = specLink.substr(0, specLink.find(" ", 0));;
+                    std::ostringstream os; os << "AiPlayerbot.HunterPetBuild." << family << "." << build << "." << level;
+                    std::string buildLink = config.GetStringDefault(os.str().c_str(), "");
+                    buildLink = buildLink.substr(0, buildLink.find("#", 0));;
+                    buildLink = buildLink.substr(0, buildLink.find(" ", 0));;
 
-                    if (!specLink.empty())
+                    if (!buildLink.empty())
                     {
-                        if (maxSpecLevel < level)
-                            maxSpecLevel = level;
+                        if (maxHunterPetBuildLevel < level)
+                            maxHunterPetBuildLevel = level;
 
                         std::ostringstream out;
 
                         //Ignore bad specs.
-                        if (!classSpecs[cls].baseSpec.CheckTalentLink(specLink, &out))
+                        if (!familyPetBuilds[family].baseBuild.CheckBuildLink(buildLink, &out))
                         {
-                            sLog.outErrorDb("Error with premade spec link: %s", specLink.c_str());
+                            sLog.outErrorDb("Error with premade hunter build link: %s", buildLink.c_str());
                             sLog.outErrorDb("%s", out.str().c_str());
                             continue;
                         }
 
-                        TalentSpec linkSpec(&classSpecs[cls].baseSpec, specLink);
+                        HunterPetBuild hunterPetBuild(&familyPetBuilds[family].baseBuild, buildLink);
 
-                        if (!linkSpec.CheckTalents(level, &out))
+                        if (!hunterPetBuild.CheckBuild(level, &out))
                         {
-                            sLog.outErrorDb("Error with premade spec: %s", specLink.c_str());
+                            sLog.outErrorDb("Error with premade hunter build: %s", buildLink.c_str());
                             sLog.outErrorDb("%s", out.str().c_str());
                             continue;
                         }
 
 
-                        talentPath.talentSpec.push_back(linkSpec);
+                        hunterPetBuildPath.hunterPetBuild.push_back(hunterPetBuild);
                     }
                 }
 
                 //Only add paths that have atleast 1 spec.
-                if(talentPath.talentSpec.size() > 0)
-                    classSpecs[cls].talentPath.push_back(talentPath);
+                if(hunterPetBuildPath.hunterPetBuild.size() > 0)
+                    familyPetBuilds[family].hunterPetBuildPaths.push_back(hunterPetBuildPath);
             }
         }
     }
 
-    if(classSpecs[1].talentPath.empty())
-        sLog.outErrorDb("No premade specs found!!");
-    else
-    {
-        if(maxSpecLevel < DEFAULT_MAX_LEVEL && randomBotMaxLevel < DEFAULT_MAX_LEVEL)
-            sLog.outErrorDb("!!!!!!!!!!! randomBotMaxLevel and the talentspec levels are below this expansions max level. Please check if you have the correct config file!!!!!!");
-
-    }
+    if(familyPetBuilds[1].hunterPetBuildPaths.empty())
+        sLog.outErrorDb("No premade hunter pet builds found. found!!");
 
     botCheats.clear();
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.BotCheats", "taxi,item,breath"), botCheats);

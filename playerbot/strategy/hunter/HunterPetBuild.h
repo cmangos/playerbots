@@ -12,16 +12,40 @@ class HunterPetBuild
             uint8 TPCost;
             uint32 SpellId;
             uint32 TrainingSpellId;
-        };
-        uint16 GetTPCostOfBuild();
-        std::vector<HunterPetBuildSpellEntity> spells;
-        HunterPetBuild() {};
-        HunterPetBuild(uint32 familyId) { GetSpells(familyId); };
 
+            HunterPetBuildSpellEntity(uint8 rank, uint8 level, uint8 tpCost, uint32 spellId, uint32 trainingSpellId)
+            {
+                Rank = rank;
+                Level = level;
+                TPCost = tpCost;
+                SpellId = spellId;
+                TrainingSpellId = trainingSpellId;
+            }
+        };
+        std::vector<HunterPetBuildSpellEntity> spells;
+
+        HunterPetBuild() {};
+        HunterPetBuild(uint32 familyId);
+        HunterPetBuild(HunterPetBuild* build, std::string buildLink);
+
+        virtual bool CheckBuild(uint32 level, std::ostringstream* out);
+        bool CheckBuildLink(std::string buildLink, std::ostringstream* out);
+
+        void ReadSpells(std::string buildLink);
         void GetSpells(uint32 familyId);
+
+        uint16 GetTPCostOfBuild();
 
     private:
         uint16 TPCost = 0;
+      // Position in buildLink
+        std::map<uint8, 
+          // Rank of Spell
+            std::map<uint8, HunterPetBuildSpellEntity>> SpellRankEntityMapping;
+
+#pragma region HunterPetBuildSpellEntities
+        HunterPetBuildSpellEntity rank1ArcaneResistance = HunterPetBuildSpellEntity(1, 20, 5, 24493, 24519);
+#pragma endregion
 };
 
 class HunterPetBuildPath {

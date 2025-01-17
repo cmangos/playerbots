@@ -86,7 +86,7 @@ namespace ai
     // shadow talents
     SPELL_ACTION(CastMindFlayAction, "mind flay");
     SPELL_ACTION(CastMindSearAction, "mind sear");
-    RANGED_DEBUFF_ACTION(CastVampiricEmbraceAction, "vampiric embrace");
+    BUFF_ACTION(CastVampiricEmbraceAction, "vampiric embrace");
     BUFF_ACTION(CastShadowformAction, "shadowform");
     SPELL_ACTION(CastSilenceAction, "silence");
     BUFF_ACTION(CastDispersionAction, "dispersion");

@@ -139,29 +139,79 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 	CombatStrategy::InitCombatTriggers(triggers);
 
 	triggers.push_back(new TriggerNode(
+		"critical aoe heal",
+		NextAction::array(0, new NextAction("anti magic zone", ACTION_EMERGENCY + 1), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"critical health",
+		NextAction::array(0, new NextAction("anti magic shell", ACTION_CRITICAL_HEAL + 1), 
+							 new NextAction("anti magic zone", ACTION_CRITICAL_HEAL + 3),
+							 new NextAction("icebound fortitude", ACTION_CRITICAL_HEAL + 2),
+							 new NextAction("rune tap", ACTION_CRITICAL_HEAL + 1),
+						     new NextAction("death strike", ACTION_HIGH + 3), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"low health",
+		NextAction::array(0, new NextAction("anti magic shell", ACTION_MEDIUM_HEAL + 4),
+							 new NextAction("anti magic zone", ACTION_MEDIUM_HEAL + 3),
+							 new NextAction("icebound fortitude", ACTION_MEDIUM_HEAL + 2),
+							 new NextAction("rune tap", ACTION_MEDIUM_HEAL + 1),
+							 new NextAction("death strike", ACTION_HIGH + 3), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"mind freeze",
+		NextAction::array(0, new NextAction("mind freeze", ACTION_INTERRUPT + 1), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"mind freeze on enemy healer",
+		NextAction::array(0, new NextAction("mind freeze on enemy healer", ACTION_INTERRUPT + 1), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"strangulate",
+		NextAction::array(0, new NextAction("strangulate", ACTION_INTERRUPT), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"enemy out of melee",
+		NextAction::array(0, new NextAction("death grip", ACTION_MOVE + 1),
+			new NextAction("chains of ice", ACTION_MOVE), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"no pet",
+		NextAction::array(0, new NextAction("raise dead", ACTION_NORMAL + 5), NULL)));
+
+	triggers.push_back(new TriggerNode(
 		"melee high aoe",
+		NextAction::array(0,
+			new NextAction("death and decay", ACTION_NORMAL + 5),
+			new NextAction("pestilence", ACTION_NORMAL + 4),
+			new NextAction("blood boil", ACTION_NORMAL + 3), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"melee medium aoe",
+		NextAction::array(0,
+			new NextAction("death and decay", ACTION_NORMAL + 5),
+			new NextAction("pestilence", ACTION_NORMAL + 4),
+			new NextAction("blood boil", ACTION_NORMAL + 3), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"melee light aoe",
+		NextAction::array(0,
+			new NextAction("pestilence", ACTION_NORMAL + 4),
+			new NextAction("blood boil", ACTION_NORMAL + 3), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"medium health",
+		NextAction::array(0, new NextAction("rune tap", ACTION_NORMAL + 4),
+			new NextAction("death strike", ACTION_NORMAL + 3), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"melee medium aoe",
 		NextAction::array(0,
 			new NextAction("anti magic shell", ACTION_NORMAL + 3), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"death coil",
 		NextAction::array(0, new NextAction("death coil", ACTION_NORMAL + 3), NULL)));
-
-	triggers.push_back(new TriggerNode(
-		"critical aoe heal",
-		NextAction::array(0, new NextAction("anti magic zone", ACTION_EMERGENCY + 1), NULL)));
-
-	triggers.push_back(new TriggerNode(
-		"no pet",
-		NextAction::array(0, new NextAction("raise dead", ACTION_NORMAL + 5), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "mind freeze",
-        NextAction::array(0, new NextAction("mind freeze", ACTION_HIGH + 1), NULL)));
-
-	triggers.push_back(new TriggerNode(
-		"strangulate",
-		NextAction::array(0, new NextAction("strangulate", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "bone shield",
@@ -170,25 +220,6 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 	triggers.push_back(new TriggerNode(
 		"horn of winter",
 		NextAction::array(0, new NextAction("horn of winter", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "mind freeze on enemy healer",
-        NextAction::array(0, new NextAction("mind freeze on enemy healer", ACTION_HIGH + 1), NULL)));
-
-	triggers.push_back(new TriggerNode(
-		"enemy out of melee",
-		NextAction::array(0, new NextAction("death grip", ACTION_NORMAL + 9),
-							 new NextAction("chains of ice", ACTION_NORMAL + 8), NULL)));
-
-	triggers.push_back(new TriggerNode(
-		"low health",
-		NextAction::array(0, new NextAction("icebound fortitude", ACTION_HIGH + 5),
-			new NextAction("rune tap", ACTION_HIGH + 4), NULL)));
-
-	triggers.push_back(new TriggerNode(
-		"medium health",
-		NextAction::array(0, new NextAction("rune tap", ACTION_NORMAL + 4),
-			new NextAction("death strike", ACTION_NORMAL + 3), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"icy touch on attacker",
@@ -207,24 +238,7 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 		NextAction::array(0, new NextAction("plague strike", ACTION_NORMAL + 1), NULL)));
 
 	triggers.push_back(new TriggerNode(
-		"melee high aoe",
-		NextAction::array(0,
-			//new NextAction("unholy blight", ACTION_NORMAL + 6),
-			new NextAction("death and decay", ACTION_NORMAL + 5),
-			new NextAction("pestilence", ACTION_NORMAL + 4),
-			new NextAction("blood boil", ACTION_NORMAL + 3), NULL)));
+		"empower weapon",
+		NextAction::array(0, new NextAction("empower weapon", ACTION_NORMAL), NULL)));
 
-	triggers.push_back(new TriggerNode(
-		"melee medium aoe",
-		NextAction::array(0,
-			new NextAction("death and decay", ACTION_NORMAL + 5),
-			new NextAction("pestilence", ACTION_NORMAL + 4),
-			new NextAction("blood boil", ACTION_NORMAL + 3), NULL)));
-
-	triggers.push_back(new TriggerNode("melee light aoe",
-		NextAction::array(0,
-			//new NextAction("howling blast", ACTION_NORMAL + 5),
-			new NextAction("pestilence", ACTION_NORMAL + 4),
-			new NextAction("hearth strike", ACTION_NORMAL + 3),
-			new NextAction("blood boil", ACTION_NORMAL + 3), NULL)));
 }

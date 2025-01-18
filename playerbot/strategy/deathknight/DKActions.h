@@ -123,7 +123,7 @@ namespace ai
 
 	BUFF_ACTION(CastAntiMagicShellAction, "anti-magic shell");
 
-	SPELL_ACTION(CastAntiMagicZoneAction, "anti-magic zone");
+	BUFF_ACTION(CastAntiMagicZoneAction, "anti-magic zone");
 
 
 	class CastChainsOfIceAction : public CastSpellAction {

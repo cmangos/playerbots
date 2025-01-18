@@ -78,7 +78,7 @@ namespace ai
     class BgWaitingTrigger : public Trigger
     {
     public:
-        BgWaitingTrigger(PlayerbotAI* ai) : Trigger(ai, "bg waiting", 30) {}
+        BgWaitingTrigger(PlayerbotAI* ai, int interval) : Trigger(ai, "bg waiting", interval) {}
 
     public:
         virtual bool IsActive();

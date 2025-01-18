@@ -164,6 +164,7 @@ namespace ai
             creators["give water"] = &TriggerContext::give_water;
 
             creators["bg waiting"] = &TriggerContext::bg_waiting;
+            creators["arena waiting"] = &TriggerContext::arena_waiting;
             creators["bg active"] = &TriggerContext::bg_active;
             creators["arena active"] = &TriggerContext::arena_active;
             creators["bg ended"] = &TriggerContext::bg_ended;
@@ -328,9 +329,10 @@ namespace ai
         static Trigger* mounted(PlayerbotAI* ai) { return new IsMountedTrigger(ai); }
         static Trigger* enemy_flagcarrier_near(PlayerbotAI* ai) { return new EnemyFlagCarrierNear(ai); }
         static Trigger* player_has_no_flag(PlayerbotAI* ai) { return new PlayerHasNoFlag(ai); }
-        static Trigger* bg_waiting(PlayerbotAI* ai) { return new BgWaitingTrigger(ai); }
+        static Trigger* bg_waiting(PlayerbotAI* ai) { return new BgWaitingTrigger(ai, 30); }
+        static Trigger* arena_waiting(PlayerbotAI* ai) { return new BgWaitingTrigger(ai, 10); }
         static Trigger* bg_active(PlayerbotAI* ai) { return new BgActiveTrigger(ai, 1); }
-        static Trigger* arena_active(PlayerbotAI* ai) { return new BgActiveTrigger(ai, 10); }
+        static Trigger* arena_active(PlayerbotAI* ai) { return new BgActiveTrigger(ai, 2); }
         static Trigger* bg_ended(PlayerbotAI* ai) { return new BgEndedTrigger(ai); }
         static Trigger* bg_invite_active(PlayerbotAI* ai) { return new BgInviteActiveTrigger(ai); }
         static Trigger* player_has_flag(PlayerbotAI* ai) { return new PlayerHasFlag(ai); }

@@ -5287,9 +5287,8 @@ bool ArenaTactics::Execute(Event& event)
 
     if (bg->GetStatus() != STATUS_IN_PROGRESS || bg->GetStartDelayTime() > 0)
     {
-        if (!bot->IsWithinLOS(x, y, z, true) || !bot->IsWithinDist3d(x, y, z, 15.0f))
-            bot->TeleportTo(mapid, x, y, z, O);
-        return false;
+        if (!bot->IsWithinLOS(x, y, z, true) || !bot->IsWithinDist3d(x, y, z, 15.0f) || bot->GetPositionZ() < z - 1.0f)
+            return bot->TeleportTo(mapid, x, y, z, O);
     }
     else
     {
@@ -5313,7 +5312,7 @@ bool ArenaTactics::Execute(Event& event)
             break;
         }
         if (!bot->IsWithinDist3d(arenaCenterX, arenaCenterY, arenaCenterZ, 100.0f) || bot->GetPositionZ() < z - 1.0f)
-            bot->TeleportTo(mapid, arenaCenterX, arenaCenterY, arenaCenterZ, O);
+            return bot->TeleportTo(mapid, arenaCenterX, arenaCenterY, arenaCenterZ, O);
     }
     
     // Remove "collision" strategy in non-combat state if present
@@ -5322,7 +5321,7 @@ bool ArenaTactics::Execute(Event& event)
 
     // Reset strategies if in an arena and set no master
 #if defined(MANGOS) || defined(CMANGOS)
-    if (sBattleGroundMgr.IsArenaType(bg->GetTypeId()) && !ai->HasStrategy("arena", BotState::BOT_STATE_COMBAT))
+    if (sBattleGroundMgr.IsArenaType(bg->GetTypeId()) && !ai->HasStrategy("arena", BotState::BOT_STATE_NON_COMBAT))
     {
         ai->ResetStrategies(false);
         ai->SetMaster(nullptr);
@@ -5333,7 +5332,7 @@ bool ArenaTactics::Execute(Event& event)
     {
         return moveToCenter(bg);
     }
-    
+
 #endif
     return true;
 }

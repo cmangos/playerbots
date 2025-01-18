@@ -233,12 +233,12 @@ void IsleStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 void ArenaStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
-        "no possible targets",
+        "arena waiting",
         NextAction::array(0, new NextAction("arena tactics", 1.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "arena active",
-        NextAction::array(0, new NextAction("arena move to center", 80.0f), NULL)));
+        NextAction::array(0, new NextAction("arena move to center", 1.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "move stuck",

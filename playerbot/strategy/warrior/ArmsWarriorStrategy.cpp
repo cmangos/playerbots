@@ -13,8 +13,6 @@ public:
         creators["death wish"] = &death_wish;
         creators["piercing howl"] = &piercing_howl;
         creators["mocking blow"] = &mocking_blow;
-        creators["heroic strike"] = &heroic_strike;
-        creators["mortal strike"] = &mortal_strike;
         creators["whirlwind"] = &whirlwind;
         creators["sweeping strikes"] = &sweeping_strikes;
     }
@@ -27,10 +25,6 @@ private:
     ACTION_NODE_A(piercing_howl, "piercing howl", "mocking blow");
 
     ACTION_NODE_A(mocking_blow, "mocking blow", "hamstring");
-
-    ACTION_NODE_A(heroic_strike, "heroic strike", "melee");
-
-    ACTION_NODE_A(mortal_strike, "mortal strike", "heroic strike");
 
     ACTION_NODE_P(whirlwind, "whirlwind", "berserker stance");
 

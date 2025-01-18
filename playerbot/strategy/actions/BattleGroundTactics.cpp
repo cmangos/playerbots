@@ -5287,8 +5287,11 @@ bool ArenaTactics::Execute(Event& event)
 
     if (bg->GetStatus() != STATUS_IN_PROGRESS || bg->GetStartDelayTime() > 0)
     {
-        if (!bot->IsWithinLOS(x, y, z, true) || !bot->IsWithinDist3d(x, y, z, 15.0f) || bot->GetPositionZ() < z - 1.0f)
-            return bot->TeleportTo(mapid, x, y, z, O);
+        if (!bot->IsWithinDist3d(x, y, z, 15.0f) || bot->GetPositionZ() < z - 1.0f)
+        {
+            bot->TeleportTo(mapid, x, y, z, O);
+        }
+        return false;
     }
     else
     {
@@ -5312,7 +5315,10 @@ bool ArenaTactics::Execute(Event& event)
             break;
         }
         if (!bot->IsWithinDist3d(arenaCenterX, arenaCenterY, arenaCenterZ, 100.0f) || bot->GetPositionZ() < z - 1.0f)
-            return bot->TeleportTo(mapid, arenaCenterX, arenaCenterY, arenaCenterZ, O);
+        {
+            bot->TeleportTo(mapid, arenaCenterX, arenaCenterY, arenaCenterZ, O);
+            return false;
+        }
     }
     
     // Remove "collision" strategy in non-combat state if present

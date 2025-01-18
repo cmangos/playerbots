@@ -26,13 +26,13 @@ namespace ai
         bool SetGroupTarget(Player* requester, TravelTarget* target);
         bool SetCurrentTarget(Player* requester, TravelTarget* target, TravelTarget* oldTarget);
         bool SetQuestTarget(Player* requester, TravelTarget* target, bool newQuests = true, bool activeQuests = true, bool completedQuests = true);
-        bool SetRpgTarget(Player* requester, TravelTarget* target, bool onlyActive = true);
+        bool SetRpgTarget(Player* requester, TravelTarget* target, TravelDestinationPurpose rpgPurpose = TravelDestinationPurpose::GenericRpg, bool onlyActive = true);
         bool SetGrindTarget(Player* requester, TravelTarget* target);
         bool SetBossTarget(Player* requester, TravelTarget* target);
         bool SetExploreTarget(Player* requester, TravelTarget* target);
         bool SetNpcFlagTarget(Player* requester, TravelTarget* target, std::vector<NPCFlags> flags, std::string name = "", std::vector<uint32> items = {}, bool force = true);
         bool SetGOTypeTarget(Player* requester, TravelTarget* target, GameobjectTypes type, std::string name = "", bool force = true);
-        bool SetGatherTarget(Player* requester, TravelTarget* target);
+        bool SetGatherTarget(Player* requester, TravelTarget* target, TravelDestinationPurpose gatherPurpose = TravelDestinationPurpose::None);
         bool SetNullTarget(TravelTarget* target);
 
     public:

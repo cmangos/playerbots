@@ -310,7 +310,14 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster)
 #endif
     }
 
-    if (bot->GetLevel() >= 10)
+    if (bot->GetLevel() >= 10 && bot->getClass() == CLASS_HUNTER)
+    {
+        auto pmo_pet = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Pet");
+        sLog.outDetail("Initializing pet...");
+        InitPet();
+        InitPetSpells();
+    }
+    else if (bot->getClass() == CLASS_WARLOCK)
     {
         auto pmo_pet = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Pet");
         sLog.outDetail("Initializing pet...");

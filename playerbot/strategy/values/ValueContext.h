@@ -98,6 +98,7 @@
 #include "DeadValues.h"
 #include "playerbot/strategy/druid/DruidValues.h"
 #include "TravelValues.h"
+#include "LootValues.h"
 
 namespace ai
 {

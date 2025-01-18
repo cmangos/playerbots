@@ -855,7 +855,9 @@ void WarlockPetStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
 void WarlockPetStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
-
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("initialize pet", ACTION_NORMAL), NULL)));
 }
 
 void WarlockPetPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1394,6 +1396,10 @@ void WarlockManualPetStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tr
     triggers.push_back(new TriggerNode(
         triggerName,
         NextAction::array(0, new NextAction(actionName, ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("initialize pet", ACTION_NORMAL + 1), NULL)));
 }
 
 void WarlockManualCurseStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

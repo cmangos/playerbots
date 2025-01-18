@@ -1199,7 +1199,7 @@ bool DebugAction::Execute(Event& event)
 
         for (auto& type : types)
         {
-            for (auto& dest : sTravelMgr.GetDestinations(info, type, 0, 0, 0, false, 0))
+            for (auto& dest : sTravelMgr.GetDestinations(info, TravelDestinationPurpose::None, 0, true, 0))
             {
                 bool isPossible = dest->IsPossible(info);
                 bool isActive = dest->IsActive(bot, info);
@@ -1215,6 +1215,7 @@ bool DebugAction::Execute(Event& event)
                     std::ostringstream out;
 
                     out << type.name() << ",";
+                    out << (uint32)((EntryTravelDestination*)dest)->GetPurpose() << ",";
                     out << "\"";
                     if (type == typeid(QuestTravelDestination))
                     {
@@ -1242,8 +1243,9 @@ bool DebugAction::Execute(Event& event)
                     out << isPossible << ",";
                     out << isActive << ",";
                     point->printWKT(out);
+                    out << point->getAreaLevel();
 
-                    sPlayerbotAIConfig.log("travel.csv", out.str().c_str());
+                    //sPlayerbotAIConfig.log("travel.csv", out.str().c_str());
                     if(isActive)
                         sPlayerbotAIConfig.log("travelActive.csv", out.str().c_str());
                 }

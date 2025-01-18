@@ -2362,18 +2362,21 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
     sLog.outError("Cannot teleport bot %s - no locations available", bot->GetName());
 }
 
-std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(WorldLocation pos, uint32 areaId, uint32 radius)
+std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(WorldLocation pos, const std::map<uint32, std::map<uint32, std::vector<std::string_view>>>& areaNames, uint32 radius)
 {
     std::vector<std::pair<uint32, uint32>> results;
     float minDist = FLT_MAX;
-    std::string hasZone = "-", wantZone = WorldPosition(pos).getAreaName(true, true);
+    WorldPosition areaPos(pos);
+    std::string_view hasZone = "-", wantZone = areaPos.getAreaName(true, true);
     for (uint32 level = 1; level < sPlayerbotAIConfig.randomBotMaxLevel + 1; level++)
     {
         for (uint32 r = 1; r < MAX_RACES; r++)
         {
+            uint32 i = 0;
             for (auto p : rpgLocsCacheLevel[r][level])
             {
-                std::string currentZone = WorldPosition(p).getAreaName(true, true);
+                std::string_view currentZone = areaNames.at(level).at(r)[i];
+                i++;
 
                 if (currentZone != wantZone && hasZone == wantZone) //If we already have the right id but this location isn't in the right id. Skip it.
                     continue;
@@ -2496,6 +2499,19 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
 
     sLog.outString("Enhancing RPG teleport cache");
 
+    std::map<uint32, std::map<uint32, std::vector<std::string_view>>> areaNames;
+
+    for (uint32 level = 1; level < sPlayerbotAIConfig.randomBotMaxLevel + 1; level++)
+    {
+        for (uint32 r = 1; r < MAX_RACES; r++)
+        {
+            for (auto p : rpgLocsCacheLevel[r][level])
+            {
+                areaNames[level][r].push_back(WorldPosition(p).getAreaName(true, true));
+            }
+        }
+    }
+
     std::vector<std::pair<std::pair<uint32, uint32>, WorldPosition>> newPoints;
 
     //Static portals.
@@ -2524,7 +2540,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         if (!pos)
             continue;
 
-        std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(pos));
+        std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(pos), areaNames);
 
         for (auto& range : ranges)
             newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), pos));
@@ -2554,7 +2570,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         {
             if ((cInfo->NpcFlags & flag) != 0)
             {
-                std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(creatureData));
+                std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(creatureData), areaNames);
 
                 for (auto& range : ranges)
                     newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), creatureData));
@@ -3085,7 +3101,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         ss << "char db ping: " << sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") << "\n";
         ss << "Sessions online: " << sWorld.GetActiveSessionCount();
 
-        sLog.outString("s%", ss.str().c_str());
+        sLog.outString("%s", ss.str().c_str());
 
         Player* requester = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
         if (requester)
@@ -3350,7 +3366,7 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
 {
     Player* requester = GetPlayer(requesterGuid);
     std::stringstream ss; ss << GetPlayerbotsAmount() << " Random Bots online";
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     std::map<uint32, int> alliance, horde;
@@ -3479,7 +3495,7 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
     });
 
     ss.str(""); ss << "Bots level:";
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
 	uint32 maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
@@ -3493,12 +3509,12 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         if (!from) from = 1;
 
         ss.str(""); ss << "    " << from << ".." << to << ": " << alliance[i] << " alliance, " << horde[i] << " horde";
-        sLog.outString("s%", ss.str().c_str());
+        sLog.outString("%s", ss.str().c_str());
         if (requester) { requester->SendMessageToPlayer(ss.str()); }
     }
 
     ss.str(""); ss << "Bots race:";
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     for (uint8 race = RACE_HUMAN; race < MAX_RACES; ++race)
@@ -3506,13 +3522,13 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         if (perRace[race])
         {
             ss.str(""); ss << "    " << ChatHelper::formatRace(race) << ": " << perRace[race];
-            sLog.outString("s%", ss.str().c_str());
+            sLog.outString("%s", ss.str().c_str());
             if (requester) { requester->SendMessageToPlayer(ss.str()); }
         }
     }
 
     ss.str(""); ss << "Bots class:";
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     for (uint8 cls = CLASS_WARRIOR; cls < MAX_CLASSES; ++cls)
@@ -3520,29 +3536,29 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
         if (perClass[cls])
         {
             ss.str(""); ss << "    " << ChatHelper::formatClass(cls) << ": " << perClass[cls];
-            sLog.outString("s%", ss.str().c_str());
+            sLog.outString("%s", ss.str().c_str());
             if (requester) { requester->SendMessageToPlayer(ss.str()); }
         }
     }
 
     ss.str(""); ss << "Bots role:";
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    tank: " << tank << ", heal: " << heal << ", dps: " << dps;
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "Bots status:";
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Active: " << active;
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Moving: " << moving;
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     //sLog.outString("Bots to:");
@@ -3553,43 +3569,43 @@ void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
     //sLog.outString("    revive: %d", revive);
 
     ss.str(""); ss << "    On taxi: " << taxi;
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    On mount: " << mounted;
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    In combat: " << combat;
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Dead: " << dead;
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    AFK: " << afk;
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "Bots questing:";
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Picking quests: " << stateCount[(uint8)TravelState::TRAVEL_STATE_TRAVEL_PICK_UP_QUEST] + stateCount[(uint8)TravelState::TRAVEL_STATE_WORK_PICK_UP_QUEST];
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Doing quests: " << stateCount[(uint8)TravelState::TRAVEL_STATE_TRAVEL_DO_QUEST] + stateCount[(uint8)TravelState::TRAVEL_STATE_WORK_DO_QUEST];
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Completing quests: " << stateCount[(uint8)TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST] + stateCount[(uint8)TravelState::TRAVEL_STATE_WORK_HAND_IN_QUEST];
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 
     ss.str(""); ss << "    Idling: " << stateCount[(uint8)TravelState::TRAVEL_STATE_IDLE];
-    sLog.outString("s%", ss.str().c_str());
+    sLog.outString("%s", ss.str().c_str());
     if (requester) { requester->SendMessageToPlayer(ss.str()); }
 }
 

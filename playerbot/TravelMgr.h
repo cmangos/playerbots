@@ -93,7 +93,7 @@ namespace ai
 			{"durability",0},
 		};
 	};
-
+	
 	//A destination for a bot to travel to and do something.
 	class TravelDestination
 	{
@@ -152,83 +152,96 @@ namespace ai
 		virtual bool IsOut(const WorldPosition& pos, float radius = 0) const override { return false; }
 	};
 
+	enum class TravelDestinationPurpose : uint32
+	{
+		None = 0,
+		QuestGiver = 1 << 0,
+		QuestObjective1 = 1 << 1,
+		QuestObjective2 = 1 << 2,
+		QuestObjective3 = 1 << 3,
+		QuestObjective4 = 1 << 4,
+		QuestTaker = 1 << 5,
+		GenericRpg = 1 << 6,
+		Trainer = 1 << 7,
+		Repair = 1 << 8,
+		Vendor = 1 << 9,
+		AH = 1 << 10,
+		MailBox = 1 << 11,
+		Grind = 1 << 12,
+		Boss = 1 << 13,
+		GatherSkinning = 1 << 14,
+		GatherMining = 1 << 15,
+		GatherHerbalism = 1 << 16,
+		GatherFishing = 1 << 17,
+		Explore = 1 << 18,
+		MaxFlag = 1 << 19
+	};
+
 	class EntryTravelDestination : public TravelDestination
 	{
 	public:
-		EntryTravelDestination(int32 entry) : TravelDestination(), entry(entry) { if (entry > 0) creatureInfo = ObjectMgr::GetCreatureTemplate(entry); else goInfo = ObjectMgr::GetGameObjectInfo(-1 * entry); }
+		EntryTravelDestination(TravelDestinationPurpose purpose, int32 entry) : TravelDestination(), purpose(purpose), entry(entry) { if (entry > 0) creatureInfo = ObjectMgr::GetCreatureTemplate(entry); else goInfo = ObjectMgr::GetGameObjectInfo(-1 * entry); }
 		virtual int32 GetEntry() const override { return entry; }
 		virtual GameObjectInfo const* GetGoInfo() const { return goInfo; }
 		virtual CreatureInfo const* GetCreatureInfo() const { return creatureInfo; }
+		TravelDestinationPurpose GetPurpose() const { return purpose; }
 	private:
 		CreatureInfo const* creatureInfo = nullptr;
 		GameObjectInfo const* goInfo = nullptr;
 		int32 entry = 0;
+		TravelDestinationPurpose purpose = TravelDestinationPurpose::None;
 	};
 
 	//A travel target specifically related to a quest.
 	class QuestTravelDestination : public EntryTravelDestination
 	{
 	public:
-		QuestTravelDestination(uint32 questId, int32 entry, uint8 subEntry) : EntryTravelDestination(entry), questId(questId), subEntry(subEntry) { questTemplate = sObjectMgr.GetQuestTemplate(questId); };
+		QuestTravelDestination(TravelDestinationPurpose purpose, uint32 questId, int32 entry) : EntryTravelDestination(purpose, entry), questId(questId) { questTemplate = sObjectMgr.GetQuestTemplate(questId); };
 
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override { return bot->IsActiveQuest(questId); }
 
 		virtual std::string GetTitle() const override;
 
 		virtual bool IsClassQuest() const { return questTemplate->GetRequiredClasses(); }
-		virtual int32 GetQuestId() const { return questId; }
+		virtual uint32 GetQuestId() const { return questId; }
 	protected:
 		virtual Quest const* GetQuestTemplate() const { return questTemplate; }
-		virtual uint8 GetSubEntry() const override { return subEntry; }
 	private:
-		uint8 subEntry;
 		uint32 questId;
 		Quest const* questTemplate;
-	};
-
-	enum class QuestTravelSubEntry : uint8
-	{
-		ALL = 0,
-		OBJECTIVE1 = 1,
-		OBJECTIVE2 = 2,
-		OBJECTIVE3 = 3,
-		OBJECTIVE4 = 4,
-		QUESTGIVER = 5,
-		QUESTTAKER = 6,
-		NONE = 7
 	};
 
 	//A quest giver or taker.
 	class QuestRelationTravelDestination : public QuestTravelDestination
 	{
 	public:
-		QuestRelationTravelDestination(uint32 questId, int32 entry, uint8 relation) : QuestTravelDestination(questId, entry, relation + (uint8)QuestTravelSubEntry::QUESTGIVER) {}
+		QuestRelationTravelDestination(TravelDestinationPurpose purpose, uint32 questId, int32 entry) : QuestTravelDestination(purpose, questId, entry) {}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
 		virtual std::string GetTitle() const override;
 
-		virtual uint8 GetRelation() const { return GetSubEntry() - (uint8)QuestTravelSubEntry::QUESTGIVER; }
+		virtual uint8 GetRelation() const { return GetPurpose() == TravelDestinationPurpose::QuestTaker; }
 	};
 
 	//A quest objective (creature/gameobject to grind/loot)
 	class QuestObjectiveTravelDestination : public QuestTravelDestination
 	{
 	public:
-		QuestObjectiveTravelDestination(uint32 questId, int32 entry, uint8 objective) : QuestTravelDestination(questId, entry, objective + (uint8)QuestTravelSubEntry::OBJECTIVE1) { SetExpireFast(); };
+		QuestObjectiveTravelDestination(TravelDestinationPurpose purpose, uint32 questId, int32 entry) : QuestTravelDestination(purpose, questId, entry) { SetExpireFast(); };
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
 		virtual std::string GetTitle() const override;
 
-		virtual uint8 GetObjective() const { return GetSubEntry() - (uint8)QuestTravelSubEntry::OBJECTIVE1; }
+		virtual uint8 GetObjective() const;
 	};
 
 	//A location with rpg target(s) based on race and level
 	class RpgTravelDestination : public EntryTravelDestination
 	{
 	public:
-		RpgTravelDestination(int32 entry) : EntryTravelDestination(entry) {}
+		RpgTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
@@ -239,7 +252,7 @@ namespace ai
 	class ExploreTravelDestination : public EntryTravelDestination
 	{
 	public:
-		ExploreTravelDestination(int32 areaId) : EntryTravelDestination(areaId) {
+		ExploreTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {
 			SetExpireFast(); SetCooldownShort(); if (auto area = GetArea()) { title = area->area_name[0]; level = area->area_level; }}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
@@ -255,7 +268,7 @@ namespace ai
 	class GrindTravelDestination : public EntryTravelDestination
 	{
 	public:
-		GrindTravelDestination(int32 entry) : EntryTravelDestination(entry) {}
+		GrindTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
@@ -266,7 +279,7 @@ namespace ai
 	class BossTravelDestination : public EntryTravelDestination
 	{
 	public:
-		BossTravelDestination(int32 entry) : EntryTravelDestination(entry) { SetCooldownShort(); }
+		BossTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) { SetCooldownShort(); }
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
@@ -277,7 +290,7 @@ namespace ai
 	class GatherTravelDestination : public EntryTravelDestination
 	{
 	public:
-		GatherTravelDestination(int32 entry) : EntryTravelDestination(entry) {}
+		GatherTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
@@ -381,10 +394,11 @@ namespace ai
 		WorldPosition* wPosition = nullptr;
 	};
 
+	using DestinationList = std::vector<TravelDestination*>;
 
-	typedef std::vector<TravelDestination*> DestinationList;
-	//typedef std::unordered_map<int32, DestinationList> DestinationMap;
-	typedef std::unordered_map<std::type_index, DestinationList> TypedDestinationMap;
+	//TypedDestinationMap[Purpose][QuestId/Entry]={TravelDestination}
+	using EntryDestinationMap = std::unordered_map<int32, DestinationList>;
+	using PurposeDestinationMap = std::unordered_map<TravelDestinationPurpose, EntryDestinationMap>;
 
 	//General container for all travel destinations.
 	class TravelMgr
@@ -392,10 +406,10 @@ namespace ai
 	public:
 		TravelMgr() {};
 		void LoadQuestTravelTable();
-		std::vector<TravelDestination*> GetExploreLocs() const {return destinationMap.at(typeid(ExploreTravelDestination));}
+		EntryDestinationMap GetExploreLocs() const { return destinationMap.at(TravelDestinationPurpose::Explore); };
 		void SetMobAvoidArea();
 
-		std::vector<TravelDestination*> GetDestinations(const PlayerTravelInfo& info, std::type_index type, int32 entry = 0, int32 subEntry1 = 0, int32 subEntry2 = 0, bool onlyPossible = true, float maxDistance = 5000) const;
+		std::vector<TravelDestination*> GetDestinations(const PlayerTravelInfo& info, TravelDestinationPurpose purposeFlag = TravelDestinationPurpose::None, int32 entry = 0, bool onlyPossible = true, float maxDistance = 5000) const;
 
 		void SetNullTravelTarget(TravelTarget* target) const;
 
@@ -416,30 +430,19 @@ namespace ai
 		void AddMapTransfer(WorldPosition start, WorldPosition end, float portalDistance = 0.1f, bool makeShortcuts = true);
 
 		template<class T>
-		T* AddDestination(int32 entry) {
-			for (auto& dest : destinationMap[typeid(T)])
-				if (dest->GetEntry() == entry)
-					return (T*)dest;
+		T* AddDestination(const int32 entry, const TravelDestinationPurpose purpose, const uint32 questId = 0) {
+			uint32 id = questId ? questId : entry;
+			if(destinationMap[purpose].find(id) != destinationMap[purpose].end())
+					return (T*)destinationMap[purpose][id].front();
 
-			destinationMap[typeid(T)].push_back(new T(entry));
+			destinationMap[purpose][id].push_back(new T(purpose, questId, entry));
 
-			return (T*)destinationMap[typeid(T)].back();
-		}
-
-		template<class T>
-		T* AddQuestDestination(int32 questId, uint32 entry, uint32 subEntry) {
-			for (auto& dest : destinationMap[typeid(QuestTravelDestination)])
-				if (dest->GetEntry() == entry && dest->GetSubEntry() == subEntry && ((QuestTravelDestination*)dest)->GetQuestId() == questId)
-					return (T*)dest;
-
-			destinationMap[typeid(QuestTravelDestination)].push_back(new T(questId, entry, subEntry));
-
-			return (T*)destinationMap[typeid(QuestTravelDestination)].back();
+			return (T*)destinationMap[purpose][id].back();
 		}
 
 		NullTravelDestination* nullTravelDestination = new NullTravelDestination();
 		WorldPosition* nullWorldPosition = new WorldPosition();
-		TypedDestinationMap destinationMap;
+		PurposeDestinationMap destinationMap;
 
 		std::unordered_map<uint64, GuidPosition> pointsMap;
 		std::unordered_map<uint32, int32> areaLevels;

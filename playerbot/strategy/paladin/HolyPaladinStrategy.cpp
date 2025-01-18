@@ -1188,14 +1188,15 @@ void HolyPaladinPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "target critical health",
-        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH + 1),
+                             new NextAction("holy shock on enemy", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "exorcism",
         NextAction::array(0, new NextAction("exorcism", ACTION_NORMAL), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "almost full health",
+        "often",
         NextAction::array(0, new NextAction("holy shock on enemy", ACTION_NORMAL), NULL)));
 }
 

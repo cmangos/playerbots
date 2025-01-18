@@ -1499,6 +1499,10 @@ void PaladinBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     BuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "low mana",
+        NextAction::array(0, new NextAction("divine plea", ACTION_MOVE), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "medium mana",
         NextAction::array(0, new NextAction("divine plea", ACTION_MOVE), NULL)));
 
@@ -1551,7 +1555,7 @@ void PaladinBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     BoostStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "almost full health",
+        "often",
         NextAction::array(0, new NextAction("avenging wrath", ACTION_HIGH), NULL)));
 }
 

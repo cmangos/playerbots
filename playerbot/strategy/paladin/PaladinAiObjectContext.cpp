@@ -254,7 +254,9 @@ namespace ai
                 creators["aura frost"] = &paladin::AuraManualStrategyFactoryInternal::aura_frost;
                 creators["aura fire"] = &paladin::AuraManualStrategyFactoryInternal::aura_fire;
                 creators["aura crusader"] = &paladin::AuraManualStrategyFactoryInternal::aura_crusader;
+#ifndef MANGOSBOT_TWO
                 creators["aura sanctity"] = &paladin::AuraManualStrategyFactoryInternal::aura_sanctity;
+#endif
             }
 
         private:
@@ -266,7 +268,9 @@ namespace ai
             static Strategy* aura_frost(PlayerbotAI* ai) { return new PaladinManualAuraStrategy(ai, "aura frost", "frost resistance aura", "frost resistance aura"); }
             static Strategy* aura_fire(PlayerbotAI* ai) { return new PaladinManualAuraStrategy(ai, "aura fire", "fire resistance aura", "fire resistance aura"); }
             static Strategy* aura_crusader(PlayerbotAI* ai) { return new PaladinManualAuraStrategy(ai, "aura crusader", "crusader aura", "crusader aura"); }
+#ifndef MANGOSBOT_TWO
             static Strategy* aura_sanctity(PlayerbotAI* ai) { return new PaladinManualAuraStrategy(ai, "aura sanctity", "sanctity aura", "sanctity aura"); }
+#endif
         };
 
         class AuraSituationStrategyFactoryInternal : public NamedObjectContext<Strategy>
@@ -356,6 +360,7 @@ namespace ai
             {
 #ifndef MANGOSBOT_TWO
                 creators["judgement"] = &TriggerFactoryInternal::judgement;
+                creators["sanctity aura"] = &TriggerFactoryInternal::sanctity_aura;
 #else
                 creators["judgement of wisdom"] = &TriggerFactoryInternal::judgement_of_wisdom;
                 creators["judgement of light"] = &TriggerFactoryInternal::judgement_of_light;
@@ -394,7 +399,6 @@ namespace ai
                 creators["crusader aura"] = &TriggerFactoryInternal::crusader_aura;
                 creators["retribution aura"] = &TriggerFactoryInternal::retribution_aura;
                 creators["devotion aura"] = &TriggerFactoryInternal::devotion_aura;
-                creators["sanctity aura"] = &TriggerFactoryInternal::sanctity_aura;
                 creators["concentration aura"] = &TriggerFactoryInternal::concentration_aura;
                 creators["shadow resistance aura"] = &TriggerFactoryInternal::shadow_resistance_aura;
                 creators["fire resistance aura"] = &TriggerFactoryInternal::fire_resistance_aura;
@@ -440,6 +444,7 @@ namespace ai
             static Trigger* righteous_fury(PlayerbotAI* ai) { return new RighteousFuryTrigger(ai); }
 #ifndef MANGOSBOT_TWO
             static Trigger* judgement(PlayerbotAI* ai) { return new JudgementTrigger(ai); }
+            static Trigger* sanctity_aura(PlayerbotAI* ai) { return new SanctityAuraTrigger(ai); }
 #else
             static Trigger* judgement_of_wisdom(PlayerbotAI* ai) { return new JudgementOfWisdomTrigger(ai); }
             static Trigger* judgement_of_light(PlayerbotAI* ai) { return new JudgementOfLightTrigger(ai); }
@@ -478,7 +483,6 @@ namespace ai
             static Trigger* crusader_aura(PlayerbotAI* ai) { return new CrusaderAuraTrigger(ai); }
             static Trigger* retribution_aura(PlayerbotAI* ai) { return new RetributionAuraTrigger(ai); }
             static Trigger* devotion_aura(PlayerbotAI* ai) { return new DevotionAuraTrigger(ai); }
-            static Trigger* sanctity_aura(PlayerbotAI* ai) { return new SanctityAuraTrigger(ai); }
             static Trigger* concentration_aura(PlayerbotAI* ai) { return new ConcentrationAuraTrigger(ai); }
             static Trigger* shadow_resistance_aura(PlayerbotAI* ai) { return new ShadowResistanceAuraTrigger(ai); }
             static Trigger* fire_resistance_aura(PlayerbotAI* ai) { return new FireResistanceAuraTrigger(ai); }
@@ -564,7 +568,6 @@ namespace ai
                 creators["shadow resistance aura"] = &AiObjectContextInternal::shadow_resistance_aura;
                 creators["fire resistance aura"] = &AiObjectContextInternal::fire_resistance_aura;
                 creators["frost resistance aura"] = &AiObjectContextInternal::frost_resistance_aura;
-                creators["sanctity aura"] = &AiObjectContextInternal::sanctity_aura;
                 creators["seal of light"] = &AiObjectContextInternal::seal_of_light;
                 creators["holy wrath"] = &AiObjectContextInternal::holy_wrath;
                 creators["consecration"] = &AiObjectContextInternal::consecration;
@@ -587,6 +590,7 @@ namespace ai
                 creators["exorcism"] = &AiObjectContextInternal::exorcism;
 #ifndef MANGOSBOT_TWO
                 creators["judgement"] = &AiObjectContextInternal::judgement;
+                creators["sanctity aura"] = &AiObjectContextInternal::sanctity_aura;
 #else
                 creators["judgement of light"] = &AiObjectContextInternal::judgement_of_light;
                 creators["judgement of wisdom"] = &AiObjectContextInternal::judgement_of_wisdom;
@@ -693,7 +697,6 @@ namespace ai
             static Action* shadow_resistance_aura(PlayerbotAI* ai) { return new CastShadowResistanceAuraAction(ai); }
             static Action* fire_resistance_aura(PlayerbotAI* ai) { return new CastFireResistanceAuraAction(ai); }
             static Action* frost_resistance_aura(PlayerbotAI* ai) { return new CastFrostResistanceAuraAction(ai); }
-            static Action* sanctity_aura(PlayerbotAI* ai) { return new CastSanctityAuraAction(ai); }
             static Action* holy_wrath(PlayerbotAI* ai) { return new CastHolyWrathAction(ai); }
             static Action* consecration(PlayerbotAI* ai) { return new CastConsecrationAction(ai); }
             static Action* cleanse_poison(PlayerbotAI* ai) { return new CastCleansePoisonAction(ai); }
@@ -715,6 +718,7 @@ namespace ai
             static Action* exorcism(PlayerbotAI* ai) { return new CastExorcismAction(ai); }
 #ifndef MANGOSBOT_TWO
             static Action* judgement(PlayerbotAI* ai) { return new CastJudgementAction(ai); }
+            static Action* sanctity_aura(PlayerbotAI* ai) { return new CastSanctityAuraAction(ai); }
 #else
             static Action* judgement_of_light(PlayerbotAI* ai) { return new CastJudgementOfLightAction(ai); }
             static Action* judgement_of_wisdom(PlayerbotAI* ai) { return new CastJudgementOfWisdomAction(ai); }

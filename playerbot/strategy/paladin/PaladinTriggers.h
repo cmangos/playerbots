@@ -16,7 +16,6 @@ namespace ai
     BUFF_TRIGGER(DevotionAuraTrigger, "devotion aura");
     BUFF_TRIGGER(RetributionAuraTrigger, "retribution aura");
     BUFF_TRIGGER(CrusaderAuraTrigger, "crusader aura");
-    BUFF_TRIGGER(SanctityAuraTrigger, "sanctity aura");
     BUFF_TRIGGER(ConcentrationAuraTrigger, "concentration aura");
 
     BUFF_TRIGGER(HolyShieldTrigger, "holy shield");
@@ -32,6 +31,7 @@ namespace ai
 
     // judgements
 #ifndef MANGOSBOT_TWO
+    BUFF_TRIGGER(SanctityAuraTrigger, "sanctity aura"); 
     DEBUFF_TRIGGER(JudgementTrigger, "judgement");
 #else
     CAN_CAST_TRIGGER(JudgementOfLightTrigger, "judgement of light");

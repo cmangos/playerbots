@@ -20,11 +20,17 @@ namespace ai
             return ai->HasAnyAuraOf(bot, "seal of justice", "seal of command", "seal of vengeance", "seal of blood", "seal of righteousness", "seal of light", "seal of wisdom", NULL);
         }
     };
+
+    class CastSanctityAuraAction : public CastBuffSpellAction
+    {
+    public:
+        CastSanctityAuraAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "sanctity aura") {}
+    };
 #else
     // judgements
     SPELL_ACTION(CastJudgementOfLightAction, "judgement of light");
     SPELL_ACTION(CastJudgementOfWisdomAction, "judgement of wisdom");
-    SPELL_ACTION(CastJudgementOfJusticeAction, "judgement of justice");
+    MELEE_DEBUFF_ACTION_R(CastJudgementOfJusticeAction, "judgement of justice", 10.0f);
 #endif
 
 	SPELL_ACTION(CastHolyShockOnEnemyAction, "holy shock");
@@ -61,10 +67,10 @@ namespace ai
 
 	BUFF_ACTION(CastDivineIlluminationAction, "divine illumination");
 
-	class CastDivineStormAction : public CastBuffSpellAction
+	class CastDivineStormAction : public CastMeleeAoeSpellAction
 	{
 	public:
-		CastDivineStormAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "divine storm") {}
+		CastDivineStormAction(PlayerbotAI* ai) : CastMeleeAoeSpellAction(ai, "divine storm", 8.0f) {}
 	};
 
 	class CastCrusaderStrikeAction : public CastMeleeSpellAction
@@ -130,12 +136,6 @@ namespace ai
     {
     public:
         CastCrusaderAuraAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "crusader aura") {}
-    };
-
-    class CastSanctityAuraAction : public CastBuffSpellAction
-    {
-    public:
-        CastSanctityAuraAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "sanctity aura") {}
     };
 
     // Pick the best blessing based on spec

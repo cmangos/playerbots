@@ -199,7 +199,9 @@ bool NoPaladinAuraTrigger::IsActive()
         "devotion aura",
         "retribution aura",
         "concentration aura",
+#ifndef MANGOSBOT_TWO
         "sanctity aura",
+#endif
         "shadow resistance aura",
         "fire resistance aura",
         "frost resistance aura",

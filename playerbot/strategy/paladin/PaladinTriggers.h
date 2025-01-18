@@ -45,14 +45,9 @@ namespace ai
         bool IsActive() override;
     };
 
-    class ExorcismTrigger : public SpellNoCooldownTrigger
-    {
-    public:
-        ExorcismTrigger(PlayerbotAI* ai) : SpellNoCooldownTrigger(ai, "exorcism") {}
-        bool IsActive() override;
-    };
+    CAN_CAST_TRIGGER(ExorcismTrigger, "exorcism");
 
-    CD_TRIGGER(CrusaderStrikeTrigger, "crusader strike");
+    CAN_CAST_TRIGGER(CrusaderStrikeTrigger, "crusader strike");
 
     // repentance triggers
     INTERRUPT_HEALER_TRIGGER(RepentanceOnHealerTrigger, "repentance");

@@ -22,9 +22,9 @@ namespace ai
     };
 #else
     // judgements
-    MELEE_DEBUFF_ACTION_R(CastJudgementOfLightAction, "judgement of light", 10.0f);
-    MELEE_DEBUFF_ACTION_R(CastJudgementOfWisdomAction, "judgement of wisdom", 10.0f);
-    MELEE_DEBUFF_ACTION_R(CastJudgementOfJusticeAction, "judgement of justice", 10.0f);
+    SPELL_ACTION(CastJudgementOfLightAction, "judgement of light");
+    SPELL_ACTION(CastJudgementOfWisdomAction, "judgement of wisdom");
+    SPELL_ACTION(CastJudgementOfJusticeAction, "judgement of justice");
 #endif
 
 	SPELL_ACTION(CastHolyShockOnEnemyAction, "holy shock");

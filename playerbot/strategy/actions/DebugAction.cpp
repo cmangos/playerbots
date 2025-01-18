@@ -384,7 +384,16 @@ bool DebugAction::Execute(Event& event)
         std::string name = "bot";
 
         std::vector<std::string> args = Qualified::getMultiQualifiers(text.substr(4), " ");
-        TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, args[0]);
+
+        DestinationList dests = ChooseTravelTargetAction::FindDestination(bot, args[0]);
+        TravelDestination* dest = nullptr;
+
+        if (!dests.empty())
+        {
+            WorldPosition botPos(bot);
+
+            dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
+        }
 
         if (dest)
         {
@@ -1157,7 +1166,16 @@ bool DebugAction::Execute(Event& event)
 
         std::string destination = text.substr(7);
 
-        TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, destination);
+        DestinationList dests = ChooseTravelTargetAction::FindDestination(bot, destination);
+        TravelDestination* dest = nullptr;
+
+        if (!dests.empty())
+        {
+            WorldPosition botPos(bot);
+
+            dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
+        }
+
         if (dest)
         {
             std::vector<WorldPosition*> points = dest->NextPoint(botPos);
@@ -1199,7 +1217,7 @@ bool DebugAction::Execute(Event& event)
 
         for (auto& type : types)
         {
-            for (auto& dest : sTravelMgr.GetDestinations(info, TravelDestinationPurpose::None, 0, true, 0))
+            for (auto& dest : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::None, 0, true, 0))
             {
                 bool isPossible = dest->IsPossible(info);
                 bool isActive = dest->IsActive(bot, info);

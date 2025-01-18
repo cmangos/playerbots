@@ -18,7 +18,7 @@ namespace ai
     public:
         virtual void Qualify(int32 qualifier) { std::ostringstream out; out << qualifier; this->qualifier = out.str(); }
         virtual void Qualify(const std::string& qualifier) { this->qualifier = qualifier; }
-        std::string getQualifier() { return qualifier; }
+        std::string getQualifier() const { return qualifier; }
         void Reset() { qualifier.clear(); }
 
         static std::string MultiQualify(const std::vector<std::string>& qualifiers, const std::string& separator, const std::string_view brackets = "{}")

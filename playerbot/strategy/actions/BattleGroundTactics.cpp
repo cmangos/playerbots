@@ -3700,12 +3700,14 @@ bool BGTactics::selectObjective(bool reset)
             }
             else if (role < 8) //Attack and Defend
             {
-                while (BgObjective == nullptr)
+                while (!BgObjective && maxTry <= 10)
                 {
-                    if (!bg->IsActiveEvent(attackObjectivesFront[0], rootTeamIndex) || !bg->IsActiveEvent(attackObjectivesFront[1], rootTeamIndex))
-                    { //Capture front objectives before attacking back objectives
-                        //sLog.outBasic("Bot #%d %s:%d <%s>: Get Front Objectives", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
-                        if (role < 6) {
+                    if (!bg->IsActiveEvent(attackObjectivesFront[0], rootTeamIndex) ||
+                        !bg->IsActiveEvent(attackObjectivesFront[1], rootTeamIndex))
+                    {
+                        // Prioritize capturing front objectives
+                        if (role < 5)
+                        {
                             BgObjective = bot->GetMap()->GetGameObject(bg->GetSingleGameObjectGuid(attackObjectivesFront[0], 0));
                         }
                         else if (role < 8)
@@ -3714,17 +3716,18 @@ bool BGTactics::selectObjective(bool reset)
                         }
                     }
                     else
-                    { //Now capture all objectives with priority on back
-                        //sLog.outBasic("Bot #%d %s:%d <%s>: Get All Objectives", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
-                        if (role < 4)
+                    {
+                        // Front objectives captured, prioritize back objectives
+                        if (role < 3)
                         {
                             BgObjective = bot->GetMap()->GetGameObject(bg->GetSingleGameObjectGuid(attackObjectivesFront[0], 0));
                         }
-                        else if (role < 5)
+                        else if (role < 4)
                         {
                             BgObjective = bot->GetMap()->GetGameObject(bg->GetSingleGameObjectGuid(attackObjectivesFront[1], 0));
                         }
-                        else if (role < 8) {
+                        else if (role < 8)
+                        {
                             if (!bg->IsActiveEvent(attackObjectivesBack[0], rootTeamIndex))
                             {
                                 BgObjective = bot->GetMap()->GetGameObject(bg->GetSingleGameObjectGuid(attackObjectivesBack[0], 0));
@@ -3736,24 +3739,26 @@ bool BGTactics::selectObjective(bool reset)
                         }
                     }
 
-                    if (bg->IsActiveEvent(attackObjectivesFront[0], rootTeamIndex) && bg->IsActiveEvent(attackObjectivesFront[1], rootTeamIndex) && bg->IsActiveEvent(attackObjectivesBack[0], rootTeamIndex) && bg->IsActiveEvent(attackObjectivesBack[1], rootTeamIndex))
+                    // If all objectives are already active, assign a fallback role
+                    if (bg->IsActiveEvent(attackObjectivesFront[0], rootTeamIndex) &&
+                        bg->IsActiveEvent(attackObjectivesFront[1], rootTeamIndex) &&
+                        bg->IsActiveEvent(attackObjectivesBack[0], rootTeamIndex) &&
+                        bg->IsActiveEvent(attackObjectivesBack[1], rootTeamIndex))
                     {
-                        role = urand(0, 9);
+                        role = urand(0, 9); // Fallback strategy
                     }
-                    if(maxTry > 10)
-                        role = urand(0, 9);
 
+                    // Exit the loop after 10 attempts if no objective is found
                     maxTry++;
                 }
             }
             else if (role < 10) { //Get the flag or defend flag carrier
                 Unit* teamFC = AI_VALUE(Unit*, "team flag carrier");
-                if (teamFC)
+                if (teamFC && sServerFacade.GetDistance2d(bot, teamFC) < 50.0f)
                 {
                     BgObjective = teamFC;
                     //pos.Set(teamFC->GetPositionX(), teamFC->GetPositionY(), teamFC->GetPositionZ(), bot->GetMapId());
-                    if (sServerFacade.GetDistance2d(bot, teamFC) < 50.0f)
-                        Follow(teamFC);
+                    Follow(teamFC);
                 }
                 else
                 {

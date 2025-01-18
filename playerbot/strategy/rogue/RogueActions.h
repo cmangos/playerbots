@@ -5,7 +5,8 @@
 namespace ai
 {
     BUFF_ACTION(CastColdBloodAction, "cold blood");
-    BUFF_ACTION(CastFanOfKnivesAction, "fan of knives");
+    SPELL_ACTION(CastFanOfKnivesAction, "fan of knives");
+    BUFF_ACTION(CastShadowDanceAction, "shadow dance");
 
     BUFF_ACTION_U(CastPreparationAction, "preparation", !bot->IsSpellReady(14177) || !bot->IsSpellReady(2983) || !bot->IsSpellReady(2094));
 
@@ -462,7 +463,12 @@ namespace ai
     class ApplyCripplingPoisonAction : public ApplyPoisonAction
     {
     public:
+#ifndef MANGOSBOT_TWO
         ApplyCripplingPoisonAction(PlayerbotAI* ai, bool inMainHand) : ApplyPoisonAction(ai, inMainHand, { 3775, 3776 }, "apply crippling poison") {}
+#else
+        ApplyCripplingPoisonAction(PlayerbotAI* ai, bool inMainHand) : ApplyPoisonAction(ai, inMainHand, { 3775 }, "apply crippling poison") {}
+#endif
+
     };
 
     class ApplyMindPoisonAction : public ApplyPoisonAction

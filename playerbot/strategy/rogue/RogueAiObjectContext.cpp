@@ -420,6 +420,7 @@ namespace ai
                 creators["preparation"] = &AiObjectContextInternal::preparation;
                 creators["premeditation"] = &AiObjectContextInternal::premeditation;
                 creators["shadowstep"] = &AiObjectContextInternal::shadowstep;
+                creators["shadow dance"] = &AiObjectContextInternal::shadow_dance;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
@@ -438,6 +439,7 @@ namespace ai
             }
 
         private:
+            static Action* shadow_dance(PlayerbotAI* ai) { return new CastShadowDanceAction(ai); }
             static Action* shadowstep(PlayerbotAI* ai) { return new CastShadowstepAction(ai); }
             static Action* premeditation(PlayerbotAI* ai) { return new CastPremeditationAction(ai); }
             static Action* preparation(PlayerbotAI* ai) { return new CastPreparationAction(ai); }

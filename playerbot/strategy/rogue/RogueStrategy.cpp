@@ -1213,6 +1213,14 @@ void RogueCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("sap", ACTION_INTERRUPT + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "critical health",
+        NextAction::array(0, new NextAction("kidney shot", ACTION_INTERRUPT + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("gouge", ACTION_INTERRUPT), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "medium health",
         NextAction::array(0, new NextAction("gouge", ACTION_INTERRUPT), NULL)));
 }
@@ -1226,6 +1234,10 @@ void RogueCcPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     CcPvpStrategy::InitCombatTriggers(triggers);
 
+    triggers.push_back(new TriggerNode(
+        "4 combo",
+        NextAction::array(0, new NextAction("kidney shot", ACTION_INTERRUPT), NULL)));
+    
     triggers.push_back(new TriggerNode(
         "enemy out of melee",
         NextAction::array(0, new NextAction("throw grenade", ACTION_INTERRUPT), NULL)));
@@ -1349,8 +1361,8 @@ void RoguePoisonsPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 void RoguePoisonsPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     triggers.push_back(new TriggerNode(
-        "apply mind poison main hand",
-        NextAction::array(0, new NextAction("apply mind poison main hand", ACTION_NORMAL), NULL)));
+        "apply wound poison main hand",
+        NextAction::array(0, new NextAction("apply wound poison main hand", ACTION_NORMAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "apply crippling poison off hand",
@@ -1365,8 +1377,8 @@ void RoguePoisonsPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 void RoguePoisonsPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     triggers.push_back(new TriggerNode(
-        "apply instant poison main hand",
-        NextAction::array(0, new NextAction("apply instant poison main hand", ACTION_NORMAL), NULL)));
+        "apply wound poison main hand",
+        NextAction::array(0, new NextAction("apply wound poison main hand", ACTION_NORMAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "apply instant poison off hand",

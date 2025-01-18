@@ -45,6 +45,9 @@ PlayerTravelInfo::PlayerTravelInfo(Player* player)
 
     for (auto& [valueName, value] : uint8Values)
         value = AI_VALUE(uint8, valueName);
+
+    for (auto& [valueName, value] : uint32Values)
+        value = AI_VALUE(uint32, valueName);
 }
 
 WorldPosition* TravelDestination::NearestPoint(const WorldPosition& pos) const {
@@ -1215,7 +1218,7 @@ void TravelMgr::LoadQuestTravelTable()
                 case TravelDestinationPurpose::Repair:
                 case TravelDestinationPurpose::Vendor:
                 case TravelDestinationPurpose::AH:
-                case TravelDestinationPurpose::MailBox:
+                case TravelDestinationPurpose::Mail:
                     dests.push_back(AddDestination<RpgTravelDestination>(entry, purposeFlag));
                     break;
                 case TravelDestinationPurpose::GatherSkinning:
@@ -1257,18 +1260,20 @@ void TravelMgr::LoadQuestTravelTable()
     {
         ExploreTravelDestination* loc;
 
-        GuidPosition point(creatureDataPair);
+        AsyncGuidPosition point(creatureDataPair);
 
         if (!point.isValid())
             continue;
 
         AreaTableEntry const* area = point.GetArea();
-        
+       
         if (!area)
             continue;
 
         if (!area->exploreFlag)
             continue;
+
+        point.FetchArea();
 
         pointsMap.insert_or_assign(point.GetRawValue(), point);
 
@@ -2046,28 +2051,28 @@ void TravelMgr::LoadQuestTravelTable()
 #endif     
 }
 
-std::vector<TravelDestination*> TravelMgr::GetDestinations(const PlayerTravelInfo& info, TravelDestinationPurpose purposeFlag, int32 entry, bool onlyPossible, float maxDistance) const
+DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag, const int32 entry, bool onlyPossible, float maxDistance) const
 {
     WorldPosition center = info.GetPosition();
-    std::vector<TravelDestination*> retTravelLocations;
+    DestinationList retDests;
 
-    std::mutex resultMutex;
+    //std::mutex resultMutex;
 
     for (auto& [purpose, entryDests] : destinationMap)
     {
 
-        if (purposeFlag != TravelDestinationPurpose::None && !((uint32)purpose & (uint32)purposeFlag))
+        if (purposeFlag != (uint32)TravelDestinationPurpose::None && !((uint32)purpose & (uint32)purposeFlag))
             continue;
 
         std::for_each(
-            std::execution::par,
+            std::execution::seq,
             entryDests.begin(),
             entryDests.end(),
             [&](auto& entryDests) {
                 if (entry && entryDests.first != entry)
                     return;
 
-                std::vector<TravelDestination*> dests = entryDests.second;
+                DestinationList dests = entryDests.second;
 
                 for (auto& dest : dests)
                 {
@@ -2077,13 +2082,92 @@ std::vector<TravelDestination*> TravelMgr::GetDestinations(const PlayerTravelInf
                     if (maxDistance > 0 && dest->DistanceTo(center) > maxDistance)
                         return;
 
-                    std::lock_guard<std::mutex> guard(resultMutex);
-                    retTravelLocations.push_back(dest);
+                    //std::lock_guard<std::mutex> guard(resultMutex);
+                    retDests.push_back(dest);
                 }
             });    
     }
 
-    return retTravelLocations;
+    return retDests;
+}
+
+PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const int32 entry, bool onlyPossible, float maxDistance) const
+{
+    std::unordered_map<uint32, std::vector<TravelPoint>> pointMap;
+    DestinationList destinations = GetDestinations(info, purposeFlag, entry, onlyPossible, maxDistance);
+
+    bool canFightElite = info.GetBoolValue("can fight elite");
+    uint32 botLevel = info.GetLevel();
+
+    if (info.GetBoolValue("can fight boss"))
+        botLevel += 5;
+    else if (canFightElite)
+        botLevel += 2;
+    else if (!info.GetBoolValue("can fight equal"))
+    {
+        botLevel -= (2 + info.GetUint32Value("death count"));
+    }
+
+    if (botLevel < 6)
+        botLevel = 6;
+
+    for(auto& dest : destinations)
+    {
+        for (auto& position : dest->GetPoints())
+        {
+            uint32 areaLevel = position->getAreaLevel();
+
+            if (!position->isOverworld() && !canFightElite)
+                areaLevel += 10;
+
+            if (!areaLevel || botLevel < areaLevel) //Skip points that are in a area that is too high level.
+                continue;
+
+            float distance = position->distance(center);
+            TravelPoint point(dest, position, distance);
+
+            for (auto& partition : distancePartitions)
+            {
+                if (partition == distancePartitions.back() || distance < partition)
+                {
+                    pointMap[partition].push_back(point);
+                    break;
+                }
+            }
+        }
+    }
+
+    PartitionedTravelList retList;
+
+    for (auto& [partition, points] : pointMap)
+    {
+        ShuffleTravelPoints(points);
+
+        for (auto& point : points)
+            retList[partition].push_back(point);
+    }
+
+    return retList;
+}
+
+void TravelMgr::ShuffleTravelPoints(std::vector<TravelPoint>&points)
+{
+    std::vector<uint32> weights;
+    std::transform(points.begin(), points.end(), std::back_inserter(weights), [](TravelPoint point) { return 200000 / (1 + std::get<2>(point)); });
+
+    //If any weight is 0 add 1 to all weights.
+    for (auto& w : weights)
+    {
+        if (w > 0)
+            continue;
+
+        std::for_each(weights.begin(), weights.end(), [](uint32& d) { d += 1; });
+        break;
+    }
+
+    std::mt19937 gen(time(0));
+
+    WeightedShuffle(points.begin(), points.end(), weights.begin(), weights.end(), gen);
 }
 
 void TravelMgr::SetNullTravelTarget(TravelTarget* target) const

@@ -11,12 +11,24 @@ EntryGuidps EntryGuidpsValue::Calculate()
     EntryGuidps guidps;
 
     for (auto& creatureDataPair : WorldPosition().getCreaturesNear())
-        if (GuidPosition(creatureDataPair).isValid())
-            guidps[creatureDataPair->second.id].push_back(creatureDataPair);
+    {
+        AsyncGuidPosition aGuidP(creatureDataPair);
+        if (aGuidP.isValid() && !aGuidP.IsEventUnspawned())
+        {
+            aGuidP.FetchArea();
+            guidps[aGuidP.GetEntry()].push_back(aGuidP);
+        }
+    }
 
     for (auto& goDataPair : WorldPosition().getGameObjectsNear())
-        if (GuidPosition(goDataPair).isValid())
-            guidps[goDataPair->second.id * -1].push_back(goDataPair);
+    {
+        AsyncGuidPosition aGuidP(goDataPair);
+        if (aGuidP.isValid() && !aGuidP.IsEventUnspawned())
+        {
+            aGuidP.FetchArea();
+            guidps[aGuidP.GetEntry()].push_back(aGuidP);
+        }
+    }
 
     return guidps;
 }
@@ -148,7 +160,7 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
         {
             if (gInfo->type == type)
             {
-                purpose |= (uint32)TravelDestinationPurpose::MailBox;
+                purpose |= (uint32)TravelDestinationPurpose::Mail;
                 break;
             }
         }
@@ -208,6 +220,100 @@ uint32 EntryTravelPurposeMapValue::SkillIdToGatherEntry(int32 entry)
     }
 
     return 0;
+}
+
+bool NeedTravelPurposeValue::Calculate()
+{
+    if (AI_VALUE(TravelTarget*, "travel target")->IsActive())
+        return false;
+
+    TravelDestinationPurpose purpose = TravelDestinationPurpose(stoi(getQualifier()));
+
+    const std::map<TravelDestinationPurpose, SkillType> gatheringSkills =
+    { {TravelDestinationPurpose::GatherFishing, SKILL_FISHING}
+        , {TravelDestinationPurpose::GatherSkinning, SKILL_SKINNING}
+        , {TravelDestinationPurpose::GatherMining, SKILL_MINING}
+        , {TravelDestinationPurpose::GatherHerbalism, SKILL_HERBALISM}
+    };
+
+    SkillType skill;
+
+    switch (purpose)
+    {
+    case TravelDestinationPurpose::Repair:
+        if (AI_VALUE2(bool, "group or", "should repair,can repair,following party,near leader"))
+            return true;
+        if (AI_VALUE2(bool, "has strategy", "free") && AI_VALUE(bool, "should repair") && AI_VALUE(bool, "can repair"))
+            return true;
+        break;
+    case TravelDestinationPurpose::Vendor:
+        if (AI_VALUE2(bool, "group or", "should sell,can sell,following party,near leader"))
+            return true;
+        if (AI_VALUE2(bool, "has strategy", "free") && AI_VALUE(bool, "should sell") && AI_VALUE(bool, "can sell"))
+            return true;
+        break;
+    case TravelDestinationPurpose::AH:
+        if (AI_VALUE2(bool, "group or", "should ah sell,can ah sell,following party,near leader"))
+            return true;
+        if (AI_VALUE2(bool, "has strategy", "free") && AI_VALUE(bool, "should ah sell") && AI_VALUE(bool, "can ah sell"))
+            return true;
+        break;
+    case TravelDestinationPurpose::GatherFishing:
+    case TravelDestinationPurpose::GatherSkinning:
+    case TravelDestinationPurpose::GatherMining:
+    case TravelDestinationPurpose::GatherHerbalism:
+        skill = gatheringSkills.at(purpose);
+        if (bot->GetSkillValue(skill) < std::min(bot->GetSkillMax(skill), bot->GetSkillMaxForLevel(bot)))
+        {
+            return true;
+        }
+
+        return false;
+    case TravelDestinationPurpose::Boss:
+        return AI_VALUE(bool, "can fight boss");
+    case TravelDestinationPurpose::Mail:
+        return AI_VALUE(bool, "can get mail");
+    case TravelDestinationPurpose::Explore:
+        return ai->HasStrategy("explore", BotState::BOT_STATE_NON_COMBAT);
+    default:
+        return false;
+    }
+
+    return false;
+}
+
+bool ShouldTravelNamedValue::Calculate()
+{
+    if (AI_VALUE(TravelTarget*, "travel target")->IsActive())
+        return false;
+
+    std::string_view name = getQualifier();
+
+    WorldPosition botPos(bot);
+
+    if (name == "city")
+    {
+        if (bot->GetLevel() <= 5)
+            return false;
+
+        if (!botPos.isOverworld())
+            return false;
+
+        return true;
+    }
+    else if (name == "pvp")
+    {
+        if (bot->GetLevel() <= 50)
+            return false;
+
+        if (!botPos.isOverworld())
+            return false;
+
+        return true;
+    }
+
+
+    return false;
 }
 
 bool QuestStageActiveValue::Calculate()

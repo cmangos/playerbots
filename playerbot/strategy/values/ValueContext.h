@@ -277,7 +277,6 @@ namespace ai
             creators["rpg target"] = [](PlayerbotAI* ai) { return new RpgTargetValue(ai); };
             creators["ignore rpg target"] = [](PlayerbotAI* ai) { return new IgnoreRpgTargetValue(ai); };
             creators["next rpg action"] = [](PlayerbotAI* ai) { return new NextRpgActionValue(ai); };
-            creators["travel target"] = [](PlayerbotAI* ai) { return new TravelTargetValue(ai); };
             creators["talk target"] = [](PlayerbotAI* ai) { return new TalkTargetValue(ai); };
             creators["attack target"] = [](PlayerbotAI* ai) { return new AttackTargetValue(ai); };
             creators["pull target"] = [](PlayerbotAI* ai) { return new PullTargetValue(ai); };
@@ -409,7 +408,19 @@ namespace ai
 
             creators["party tank without lifebloom"] = [](PlayerbotAI* ai) { return new PartyTankWithoutLifebloomValue(ai); };
             creators["move style"] = [](PlayerbotAI* ai) { return new MoveStyleValue(ai); };
+
+            //Travel
             creators["focus travel target"] = [](PlayerbotAI* ai) { return new FocusTravelTargetValue(ai); };
+            creators["has focus travel target"] = [](PlayerbotAI* ai) { return new HasFocusTravelTargetValue(ai); };
+            
+            creators["travel target"] = [](PlayerbotAI* ai) { return new TravelTargetValue(ai); };
+            creators["travel destinations"] = [](PlayerbotAI* ai) { return new TravelDestinationsValue(ai); };
+            creators["need travel purpose"] = [](PlayerbotAI* ai) { return new NeedTravelPurposeValue(ai); };
+            creators["should travel named"] = [](PlayerbotAI* ai) { return new ShouldTravelNamedValue(ai); };
+            creators["in overworld"] = [](PlayerbotAI* ai) { return new InOverworldValue(ai); };
+
+            
+            
         };
     };
 }

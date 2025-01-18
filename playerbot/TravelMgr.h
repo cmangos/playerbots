@@ -40,7 +40,7 @@ namespace ai
 		PlayerTravelInfo() {};
 		PlayerTravelInfo(Player* player);
 		
-		WorldPosition GetPosition() const { return position; }
+		const WorldPosition& GetPosition() const { return position; }
 		Team GetTeam() const { return team; }
 		uint32 GetLevel() const  { return level; }
 		uint16 GetCurrentSkill(SkillType skillType) const  { return currentSkill[skillType]; }
@@ -55,6 +55,7 @@ namespace ai
 		bool GetBoolValue(const std::string& valueName) const {return boolValues.at(valueName);};
 		bool GetBoolValue2(const std::string& valueName, const std::string& qualifier) const { return boolValues.at(valueName + "::" + qualifier); };
 		uint8 GetUint8Value(const std::string& valueName) const { return uint8Values.at(valueName);};
+		uint8 GetUint32Value(const std::string& valueName) const { return uint32Values.at(valueName); };
 
 	private:
 		WorldPosition position;
@@ -91,6 +92,11 @@ namespace ai
 		{
 			{"free quest log slots", 0},
 			{"durability",0},
+		};
+
+		std::unordered_map<std::string, uint32> uint32Values =
+		{
+			{"death count", 0},
 		};
 	};
 	
@@ -150,31 +156,6 @@ namespace ai
 		virtual bool IsIn(const WorldPosition& pos, float radius = 0) const override { return true; }
 	protected:
 		virtual bool IsOut(const WorldPosition& pos, float radius = 0) const override { return false; }
-	};
-
-	enum class TravelDestinationPurpose : uint32
-	{
-		None = 0,
-		QuestGiver = 1 << 0,
-		QuestObjective1 = 1 << 1,
-		QuestObjective2 = 1 << 2,
-		QuestObjective3 = 1 << 3,
-		QuestObjective4 = 1 << 4,
-		QuestTaker = 1 << 5,
-		GenericRpg = 1 << 6,
-		Trainer = 1 << 7,
-		Repair = 1 << 8,
-		Vendor = 1 << 9,
-		AH = 1 << 10,
-		MailBox = 1 << 11,
-		Grind = 1 << 12,
-		Boss = 1 << 13,
-		GatherSkinning = 1 << 14,
-		GatherMining = 1 << 15,
-		GatherHerbalism = 1 << 16,
-		GatherFishing = 1 << 17,
-		Explore = 1 << 18,
-		MaxFlag = 1 << 19
 	};
 
 	class EntryTravelDestination : public TravelDestination
@@ -351,6 +332,7 @@ namespace ai
 		bool IsActive();
 		bool IsTraveling();
 		bool IsWorking();
+		bool IsPreparing();
 
 		uint32 GetRetryCount(bool isMove) const { return isMove ? moveRetryCount : extendRetryCount; }
 		uint32 GetTimeLeft() const { return statusTime - GetExpiredTime(); }
@@ -374,8 +356,6 @@ namespace ai
 	private:
 		uint32 GetMaxTravelTime() const { return (1000.0 * Distance(bot)) / bot->GetSpeed(MOVE_RUN); }
 
- 		bool IsPreparing();
-
 		TravelStatus m_status = TravelStatus::TRAVEL_STATUS_NONE;
 
 		uint32 startTime = WorldTimer::getMSTime();
@@ -394,12 +374,6 @@ namespace ai
 		WorldPosition* wPosition = nullptr;
 	};
 
-	using DestinationList = std::vector<TravelDestination*>;
-
-	//TypedDestinationMap[Purpose][QuestId/Entry]={TravelDestination}
-	using EntryDestinationMap = std::unordered_map<int32, DestinationList>;
-	using PurposeDestinationMap = std::unordered_map<TravelDestinationPurpose, EntryDestinationMap>;
-
 	//General container for all travel destinations.
 	class TravelMgr
 	{
@@ -409,7 +383,9 @@ namespace ai
 		EntryDestinationMap GetExploreLocs() const { return destinationMap.at(TravelDestinationPurpose::Explore); };
 		void SetMobAvoidArea();
 
-		std::vector<TravelDestination*> GetDestinations(const PlayerTravelInfo& info, TravelDestinationPurpose purposeFlag = TravelDestinationPurpose::None, int32 entry = 0, bool onlyPossible = true, float maxDistance = 5000) const;
+		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const int32 entry = 0, bool onlyPossible = true, float maxDistance = 5000) const;
+		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const int32 entry = 0, bool onlyPossible = true, float maxDistance = 5000) const;
+		static void ShuffleTravelPoints(std::vector<TravelPoint>& points);
 
 		void SetNullTravelTarget(TravelTarget* target) const;
 
@@ -444,7 +420,7 @@ namespace ai
 		WorldPosition* nullWorldPosition = new WorldPosition();
 		PurposeDestinationMap destinationMap;
 
-		std::unordered_map<uint64, GuidPosition> pointsMap;
+		std::unordered_map<uint64, AsyncGuidPosition> pointsMap;
 		std::unordered_map<uint32, int32> areaLevels;
 
 		std::vector<std::tuple<uint32, int, int>> badMmap;

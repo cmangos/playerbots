@@ -162,10 +162,10 @@ DropMap* DropMapValue::Calculate()
 			for (LootLootGroupAccess const& group : lTemplateA->Groups)
 			{
 				for (LootStoreItem const& lItem : group.ExplicitlyChanced)
-					dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+					dropMap->insert(std::make_pair(lItem.itemid, -sEntry));
 
 				for (LootStoreItem const& lItem : group.EqualChanced)
-					dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+					dropMap->insert(std::make_pair(lItem.itemid, -sEntry));
 			}
 		}
 	}

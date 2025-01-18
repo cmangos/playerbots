@@ -1037,3 +1037,27 @@ void ArmsWarriorCcRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
 }
 
 #endif
+
+class WarriorSweepingStrikesMultiplier : public Multiplier
+{
+public:
+    WarriorSweepingStrikesMultiplier(PlayerbotAI* ai) : Multiplier(ai, "sweeping strikes") {}
+
+    float GetValue(Action* action) override
+    {
+        // Disable Berserker Stance
+        const std::string& actionName = action->getName();
+        if ((actionName == "berserker stance" || actionName == "whirlwind" || actionName == "cleave")
+            && bot->HasSpell(12292) && bot->IsSpellReady(12292) && !bot->HasAura(12292))
+        {
+            return 0.0f;
+        }
+
+        return 1.0f;
+    }
+};
+
+void ArmsWarriorAoeStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    multipliers.push_back(new WarriorSweepingStrikesMultiplier(ai));
+}

@@ -19,7 +19,7 @@ namespace ai
     BUFF_TRIGGER_A(ShadowformTrigger, "shadowform");
     BUFF_TRIGGER(InnerFocusTrigger, "inner focus");
     CC_TRIGGER(ShackleUndeadTrigger, "shackle undead");
-    CC_TRIGGER(PsychicHorrorTrigger, "psychic horror");
+    INTERRUPT_TRIGGER(PsychicHorrorTrigger, "psychic horror");
     INTERRUPT_TRIGGER(SilenceTrigger, "silence");
     INTERRUPT_HEALER_TRIGGER(SilenceEnemyHealerTrigger, "silence");
     DEBUFF_TRIGGER(DevouringPlagueTrigger, "devouring plague");

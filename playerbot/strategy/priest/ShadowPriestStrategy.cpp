@@ -1085,6 +1085,10 @@ void ShadowPriestCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
     triggers.push_back(new TriggerNode(
         "silence on enemy healer",
         NextAction::array(0, new NextAction("silence on enemy healer", ACTION_INTERRUPT), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "psychic horror",
+        NextAction::array(0, new NextAction("psychic horror", ACTION_INTERRUPT), NULL)));
 }
 
 void ShadowPriestCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1108,10 +1112,6 @@ void ShadowPriestCcPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 {
     ShadowPriestCcStrategy::InitCombatTriggers(triggers);
     PriestCcPvpStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "psychic horror",
-        NextAction::array(0, new NextAction("psychic horror", ACTION_INTERRUPT), NULL)));
 }
 
 void ShadowPriestCcPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

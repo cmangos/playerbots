@@ -1038,17 +1038,70 @@ void ArmsWarriorCcRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
 
 #endif
 
-class WarriorSweepingStrikesMultiplier : public Multiplier
+class WarriorSweepingStrikesPveMultiplier : public Multiplier
 {
 public:
-    WarriorSweepingStrikesMultiplier(PlayerbotAI* ai) : Multiplier(ai, "sweeping strikes") {}
+    WarriorSweepingStrikesPveMultiplier(PlayerbotAI* ai) : Multiplier(ai, "aoe arms pve") {}
 
     float GetValue(Action* action) override
     {
         // Disable Berserker Stance
         const std::string& actionName = action->getName();
-        if ((actionName == "berserker stance" || actionName == "whirlwind" || actionName == "cleave")
-            && bot->HasSpell(12292) && bot->IsSpellReady(12292) && !bot->HasAura(12292))
+        if ((actionName == "berserker stance" ||
+            actionName == "whirlwind" ||
+            actionName == "cleave") &&
+            AI_VALUE2(bool, "trigger active", "melee light aoe") &&
+            bot->HasSpell(12292) &&
+            bot->IsSpellReady(12292) &&
+            !bot->HasAura(12292))
+        {
+            return 0.0f;
+        }
+
+        return 1.0f;
+    }
+};
+
+class WarriorSweepingStrikesRaidMultiplier : public Multiplier
+{
+public:
+    WarriorSweepingStrikesRaidMultiplier(PlayerbotAI* ai) : Multiplier(ai, "aoe arms raid") {}
+
+    float GetValue(Action* action) override
+    {
+        // Disable Berserker Stance
+        const std::string& actionName = action->getName();
+        if ((actionName == "berserker stance" ||
+            actionName == "whirlwind" ||
+            actionName == "cleave") &&
+            AI_VALUE2(bool, "trigger active", "melee light aoe") &&
+            bot->HasSpell(12292) &&
+            bot->IsSpellReady(12292) &&
+            !bot->HasAura(12292))
+        {
+            return 0.0f;
+        }
+
+        return 1.0f;
+    }
+};
+
+class WarriorSweepingStrikesPvpMultiplier : public Multiplier
+{
+public:
+    WarriorSweepingStrikesPvpMultiplier(PlayerbotAI* ai) : Multiplier(ai, "aoe arms pvp") {}
+
+    float GetValue(Action* action) override
+    {
+        // Disable Berserker Stance
+        const std::string& actionName = action->getName();
+        if ((actionName == "berserker stance" ||
+            actionName == "whirlwind" ||
+            actionName == "cleave") &&
+            AI_VALUE2(bool, "trigger active", "melee light aoe") &&
+            bot->HasSpell(12292) &&
+            bot->IsSpellReady(12292) &&
+            !bot->HasAura(12292))
         {
             return 0.0f;
         }
@@ -1059,5 +1112,7 @@ public:
 
 void ArmsWarriorAoeStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
 {
-    multipliers.push_back(new WarriorSweepingStrikesMultiplier(ai));
+    multipliers.push_back(new WarriorSweepingStrikesPveMultiplier(ai));
+    multipliers.push_back(new WarriorSweepingStrikesRaidMultiplier(ai));
+    multipliers.push_back(new WarriorSweepingStrikesPvpMultiplier(ai));
 }

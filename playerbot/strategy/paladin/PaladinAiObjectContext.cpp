@@ -616,6 +616,7 @@ namespace ai
                 creators["repentance on snare target"] = &AiObjectContextInternal::repentance_on_snare_target;
                 creators["repentance on enemy healer"] = &AiObjectContextInternal::repentance_on_enemy_healer;
                 creators["holy shock"] = &AiObjectContextInternal::holy_shock;
+                creators["holy shock on enemy"] = &AiObjectContextInternal::holy_shock_on_enemy;
                 creators["holy shock on party"] = &AiObjectContextInternal::holy_shock_on_party;
                 creators["blessing of freedom"] = &AiObjectContextInternal::blessing_of_freedom;
                 creators["avenging wrath"] = &AiObjectContextInternal::avenging_wrath;
@@ -740,6 +741,7 @@ namespace ai
             static Action* repentance_on_snare_target(PlayerbotAI* ai) { return new CastRepentanceSnareAction(ai); }
             static Action* repentance_on_enemy_healer(PlayerbotAI* ai) { return new CastRepentanceOnHealerAction(ai); }
             static Action* holy_shock(PlayerbotAI* ai) { return new CastHolyShockAction(ai); }
+            static Action* holy_shock_on_enemy(PlayerbotAI* ai) { return new CastHolyShockOnEnemyAction(ai); }
             static Action* holy_shock_on_party(PlayerbotAI* ai) { return new CastHolyShockOnPartyAction(ai); }
             static Action* hand_of_sacrifice(PlayerbotAI* ai) { return new CastHandOfSacrificeAction(ai); }
             static Action* blessing_of_sacrifice(PlayerbotAI* ai) { return new CastBlessingOfSacrificeAction(ai); }

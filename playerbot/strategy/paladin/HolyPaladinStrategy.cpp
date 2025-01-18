@@ -1034,46 +1034,44 @@ void HolyPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("divine shield", ACTION_EMERGENCY + 1),
-            new NextAction("holy light", ACTION_EMERGENCY), NULL))); 
+        NextAction::array(0, new NextAction("divine shield", ACTION_EMERGENCY),
+            new NextAction("aura mastery", ACTION_CRITICAL_HEAL + 4),
+            new NextAction("divine favor", ACTION_CRITICAL_HEAL + 3),
+            new NextAction("holy shock", ACTION_CRITICAL_HEAL + 2),
+            new NextAction("holy light", ACTION_CRITICAL_HEAL + 1), NULL)));
     
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("lay on hands on party", ACTION_CRITICAL_HEAL + 1), NULL)));
+        NextAction::array(0, new NextAction("lay on hands on party", ACTION_CRITICAL_HEAL + 7), NULL)));
 
     triggers.push_back(new TriggerNode(
         "protect party member",
-        NextAction::array(0, new NextAction("blessing of protection on party", ACTION_CRITICAL_HEAL + 1), NULL)));
+        NextAction::array(0, new NextAction("blessing of protection on party", ACTION_CRITICAL_HEAL + 6), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("holy light", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("aura mastery", ACTION_CRITICAL_HEAL + 4),
+                             new NextAction("divine favor", ACTION_CRITICAL_HEAL + 3),
+                             new NextAction("holy shock on party", ACTION_CRITICAL_HEAL + 2),
+                             new NextAction("holy light on party", ACTION_CRITICAL_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "hand of sacrifice",
-        NextAction::array(0, new NextAction("hand of sacrifice", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("hand of sacrifice", ACTION_CRITICAL_HEAL + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
         NextAction::array(0, new NextAction("aura mastery", ACTION_MEDIUM_HEAL + 4), 
                              new NextAction("divine favor", ACTION_MEDIUM_HEAL + 3),
-                             new NextAction("holy shock on party", ACTION_MEDIUM_HEAL + 2), 
+                             new NextAction("holy shock on party", ACTION_MEDIUM_HEAL + 2),
                              new NextAction("holy light on party", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "low health",
         NextAction::array(0, new NextAction("aura mastery", ACTION_MEDIUM_HEAL + 4),
                              new NextAction("divine favor", ACTION_MEDIUM_HEAL + 3),
-                             new NextAction("holy shock", ACTION_MEDIUM_HEAL + 2), 
+                             new NextAction("holy shock", ACTION_MEDIUM_HEAL + 2),
                              new NextAction("holy light", ACTION_MEDIUM_HEAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "low health",
-        NextAction::array(0, new NextAction("holy light", ACTION_MEDIUM_HEAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member low health",
-        NextAction::array(0, new NextAction("holy light on party", ACTION_MEDIUM_HEAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium health",
@@ -1187,6 +1185,18 @@ void HolyPaladinPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
     triggers.push_back(new TriggerNode(
         "party member low health",
         NextAction::array(0, new NextAction("flash of light on party", ACTION_MEDIUM_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "target critical health",
+        NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "exorcism",
+        NextAction::array(0, new NextAction("exorcism", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("holy shock on enemy", ACTION_NORMAL), NULL)));
 }
 
 void HolyPaladinPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

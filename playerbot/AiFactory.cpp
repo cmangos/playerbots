@@ -635,7 +635,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 
         if (player->getClass() == CLASS_PALADIN && tab == 0 && isArena)
         {
-            combatEngine->addStrategies("retribution", "close", NULL);
+            combatEngine->addStrategies("close", NULL);
             combatEngine->removeStrategy("ranged");
         }
     }

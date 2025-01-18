@@ -27,7 +27,8 @@ namespace ai
     MELEE_DEBUFF_ACTION_R(CastJudgementOfJusticeAction, "judgement of justice", 10.0f);
 #endif
 
-	SPELL_ACTION(CastHolyShockAction, "holy shock");
+	SPELL_ACTION(CastHolyShockOnEnemyAction, "holy shock");
+	HEAL_ACTION(CastHolyShockAction, "holy shock");
 	HEAL_PARTY_ACTION(CastHolyShockOnPartyAction, "holy shock");
 
 	// consecration

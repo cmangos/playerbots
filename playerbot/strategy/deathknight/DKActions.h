@@ -199,10 +199,11 @@ namespace ai
 		CastBoneShieldAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "bone shield") {}
 	};
 
-	class CastDeathPactAction : public CastBuffSpellAction
+	class CastDeathPactAction : public CastSpellAction
 	{
 	public:
-		CastDeathPactAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "death pact") {}
+		CastDeathPactAction(PlayerbotAI* ai) : CastSpellAction(ai, "death pact") {}
+		virtual std::string GetTargetName() { return "pet target"; }
 	};
 
 	class CastDeathRuneMasteryAction : public CastBuffSpellAction
@@ -211,10 +212,10 @@ namespace ai
 		CastDeathRuneMasteryAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "death rune mastery") {}
 	};
 
-	class CastDancingWeaponAction : public CastBuffSpellAction
+	class CastDancingWeaponAction : public CastSpellAction
 	{
 	public:
-		CastDancingWeaponAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "dancing rune weapon") {}
+		CastDancingWeaponAction(PlayerbotAI* ai) : CastSpellAction(ai, "dancing rune weapon") {}
 	};
 
 	class CastEmpowerRuneWeaponAction : public CastBuffSpellAction

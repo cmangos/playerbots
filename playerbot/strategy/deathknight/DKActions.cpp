@@ -9,7 +9,8 @@ bool CastRaiseDeadAction::isPossible()
 {
 	if (!CastBuffSpellAction::isPossible())
 		return false;
-	if (AI_VALUE2(uint32, "item count", "corpse dust") > 0)
+
+	if (ai->HasCheat(BotCheatMask::item) || AI_VALUE2(uint32, "item count", "corpse dust") > 0)
 		return true;
 		
 	for (auto guid : AI_VALUE(std::list<ObjectGuid>, "nearest corpses"))

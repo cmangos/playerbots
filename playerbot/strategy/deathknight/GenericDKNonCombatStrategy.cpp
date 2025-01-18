@@ -40,7 +40,7 @@ void GenericDKNonCombatStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &
     NonCombatStrategy::InitNonCombatTriggers(triggers);
 
 	triggers.push_back(new TriggerNode(
-		"raise dead",
+		"no pet",
 		NextAction::array(0, new NextAction("raise dead", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(

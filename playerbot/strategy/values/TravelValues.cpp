@@ -274,7 +274,11 @@ bool NeedTravelPurposeValue::Calculate()
     case TravelDestinationPurpose::Mail:
         return AI_VALUE(bool, "can get mail");
     case TravelDestinationPurpose::Explore:
-        return ai->HasStrategy("explore", BotState::BOT_STATE_NON_COMBAT);
+        return ai->HasStrategy("explore", BotState::BOT_STATE_NON_COMBAT);    
+    case TravelDestinationPurpose::GenericRpg:
+        return true;
+    case TravelDestinationPurpose::Grind:
+        return true;
     default:
         return false;
     }

@@ -376,10 +376,10 @@ namespace ai
         HammerOfJusticeSnareTrigger(PlayerbotAI* ai) : SnareTargetTrigger(ai, "hammer of justice") {}
     };
 
-    class HammerOfJusticeOnEnemyTrigger : public Trigger
+    class HammerOfJusticeOnEnemyTrigger : public SpellTrigger
     {
     public:
-        HammerOfJusticeOnEnemyTrigger(PlayerbotAI* ai) : Trigger(ai, "hammer of justice on enemy") {}
+        HammerOfJusticeOnEnemyTrigger(PlayerbotAI* ai) : SpellTrigger(ai, "hammer of justice") {}
         virtual bool IsActive();
     };
 
@@ -462,4 +462,5 @@ namespace ai
     CAN_CAST_TRIGGER(DivineStormTrigger, "divine storm");
     BUFF_TRIGGER(DivinePleaTrigger, "divine plea");
     BUFF_TRIGGER(SacredShieldTrigger, "sacred shield");
+    BUFF_TRIGGER(BeaconOfLightTrigger, "beacon of light");
 }

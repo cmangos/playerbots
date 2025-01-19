@@ -433,6 +433,8 @@ namespace ai
                 creators["sacred shield"] = &TriggerFactoryInternal::sacred_shield;
                 creators["aura mastery"] = &TriggerFactoryInternal::aura_mastery;
                 creators["divine storm"] = &TriggerFactoryInternal::divine_storm;
+                creators["beacon of light"] = &TriggerFactoryInternal::beacon_of_light;
+                creators["divine illumination"] = &TriggerFactoryInternal::divine_illumination;
             }
 
         private:
@@ -512,6 +514,7 @@ namespace ai
             static Trigger* sacred_shield(PlayerbotAI* ai) { return new SacredShieldTrigger(ai); }
             static Trigger* aura_mastery(PlayerbotAI* ai) { return new AuraMasteryTrigger(ai); }
             static Trigger* divine_storm(PlayerbotAI* ai) { return new DivineStormTrigger(ai); }
+            static Trigger* beacon_of_light(PlayerbotAI* ai) { return new BeaconOfLightTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>

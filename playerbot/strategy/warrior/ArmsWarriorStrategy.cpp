@@ -1060,6 +1060,15 @@ public:
             return 0.0f;
         }
 
+        // Disable Battle Stance spam if SS is on CD
+        if ((actionName == "battle stance") &&
+            AI_VALUE2(bool, "trigger active", "melee light aoe") &&
+            bot->HasSpell(12292) &&
+            !bot->IsSpellReady(12292))
+        {
+            return 0.0f;
+        }
+
         return 1.0f;
     }
 };
@@ -1086,6 +1095,15 @@ public:
             return 0.0f;
         }
 
+        // Disable Battle Stance spam if SS is on CD
+        if ((actionName == "battle stance") &&
+            AI_VALUE2(bool, "trigger active", "melee light aoe") &&
+            bot->HasSpell(12292) &&
+            !bot->IsSpellReady(12292))
+        {
+            return 0.0f;
+        }
+
         return 1.0f;
     }
 };
@@ -1108,6 +1126,15 @@ public:
             bot->HasSpell(12292) &&
             bot->IsSpellReady(12292) &&
             !bot->HasAura(12292))
+        {
+            return 0.0f;
+        }
+
+        // Disable Battle Stance spam if SS is on CD
+        if ((actionName == "battle stance") &&
+            AI_VALUE2(bool, "trigger active", "melee light aoe") &&
+            bot->HasSpell(12292) &&
+            !bot->IsSpellReady(12292))
         {
             return 0.0f;
         }

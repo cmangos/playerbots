@@ -258,7 +258,7 @@ bool CastAuraSpellAction::isUseful()
 
 bool CastMeleeAoeSpellAction::isUseful()
 {
-    return CastSpellAction::isUseful() && sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", GetTargetName()), radius);
+    return CastSpellAction::isUseful() && sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", GetTargetName()), radius - AOE_LEEWAY);
 }
 
 bool CastEnchantItemAction::isPossible()

@@ -489,7 +489,7 @@ BattleBotPath vPath_AB_AllianceBase_to_Stables =
     { 1213.25f, 1224.93f, -47.5513f, nullptr },
     { 1189.29f, 1219.49f, -53.119f, nullptr },
     { 1177.17f, 1210.21f, -56.4593f, nullptr },
-    { 1167.98f, 1202.9f, -56.4743f, nullptr },
+    { 1167.59f, 1201.34f, -56.4042f, nullptr },
 };
 // Blacksmith to Lumber Mill
 BattleBotPath vPath_AB_Blacksmith_to_LumberMill =
@@ -501,7 +501,7 @@ BattleBotPath vPath_AB_Blacksmith_to_LumberMill =
     { 796.25f, 1009.93f, -44.3286f, nullptr },
     { 781.29f, 1034.49f, -32.887f, nullptr },
     { 793.17f, 1107.21f, 5.5663f, nullptr },
-    { 848.98f, 1155.9f, 11.3453f, nullptr },
+    { 854.825f, 1147.77f, 11.529f, nullptr },
 };
 // Blacksmith to GoldMine
 BattleBotPath vPath_AB_Blacksmith_to_GoldMine =
@@ -513,7 +513,7 @@ BattleBotPath vPath_AB_Blacksmith_to_GoldMine =
     { 1218.58f, 1016.96f, -76.9848f, nullptr },
     { 1192.83f, 956.25f, -93.6974f, nullptr },
     { 1162.93f, 908.92f, -108.6703f, nullptr },
-    { 1144.94f, 860.09f, -111.2100f, nullptr },
+    { 1146.04f, 849.71f, -110.5256f, nullptr },
 };
 // Farm to Stables
 BattleBotPath vPath_AB_Farm_to_Stable =
@@ -528,7 +528,7 @@ BattleBotPath vPath_AB_Farm_to_Stable =
     { 1063.11f, 1211.55f, -53.4164f, nullptr },
     { 1098.45f, 1225.47f, -53.1301f, nullptr },
     { 1146.02f, 1226.34f, -53.8979f, nullptr },
-    { 1167.10f, 1204.31f, -56.55f, nullptr },
+    { 1167.59f, 1201.34f, -56.4042f, nullptr },
 };
 // Alliance Base to Gold Mine
 BattleBotPath vPath_AB_AllianceBase_to_GoldMine =
@@ -549,7 +549,7 @@ BattleBotPath vPath_AB_AllianceBase_to_GoldMine =
     { 1166.29f, 913.945f, -107.214f, nullptr },
     { 1153.17f, 887.863f, -112.34f, nullptr },
     { 1148.89f, 871.391f, -111.96f, nullptr },
-    { 1145.24f, 850.82f, -110.514f, nullptr },
+    { 1146.04f, 849.71f, -110.5256f, nullptr },
 };
 // Alliance Base to Lumber Mill
 BattleBotPath vPath_AB_AllianceBase_to_LumberMill =
@@ -573,7 +573,7 @@ BattleBotPath vPath_AB_AllianceBase_to_LumberMill =
     { 880.329f, 1192.63f, 7.61168f, nullptr },
     { 869.965f, 1178.52f, 10.9678f, nullptr },
     { 864.74f, 1163.78f, 12.385f, nullptr },
-    { 859.165f, 1148.84f, 11.5289f, nullptr },
+    { 857.143f, 1150.19f, 11.5289f, nullptr },
 };
 // Stables to Blacksmith
 BattleBotPath vPath_AB_Stables_to_Blacksmith =
@@ -599,7 +599,7 @@ BattleBotPath vPath_AB_Stables_to_Blacksmith =
     { 1029.72f, 1014.88f, -45.3546f, nullptr },
     { 1013.94f, 1028.7f, -43.9786f, nullptr },
     { 990.89f, 1039.3f, -42.7659f, nullptr },
-    { 978.269f, 1043.84f, -44.4588f, nullptr },
+    { 977.84f, 1045.37f, -44.5721f, nullptr },
 };
 // Horde Base to Farm
 BattleBotPath vPath_AB_HordeBase_to_Farm =
@@ -616,7 +616,7 @@ BattleBotPath vPath_AB_HordeBase_to_Farm =
     { 767.947f, 839.274f, -50.8574f, nullptr },
     { 773.745f, 852.013f, -52.6226f, nullptr },
     { 785.123f, 869.103f, -54.2089f, nullptr },
-    { 804.429f, 874.961f, -55.2691f, nullptr },
+    { 805.317f, 875.03f, -55.4019f, nullptr },
 };
 // Horde Base to Gold Mine
 BattleBotPath vPath_AB_HordeBase_to_GoldMine =
@@ -641,7 +641,7 @@ BattleBotPath vPath_AB_HordeBase_to_GoldMine =
     { 1081.6f, 828.32f, -99.4137f, nullptr },
     { 1104.64f, 844.773f, -106.387f, nullptr },
     { 1117.56f, 853.686f, -110.716f, nullptr },
-    { 1144.9f, 850.049f, -110.522f, nullptr },
+    { 1146.04f, 849.71f, -110.5256f, nullptr },
 };
 // Horde Base to Lumber Mill
 BattleBotPath vPath_AB_HordeBase_to_LumberMill =
@@ -674,7 +674,7 @@ BattleBotPath vPath_AB_HordeBase_to_LumberMill =
     { 812.476f, 1131.1f, 10.439f, nullptr },
     { 829.704f, 1142.52f, 10.738f, nullptr },
     { 842.646f, 1143.51f, 11.9984f, nullptr },
-    { 857.674f, 1146.16f, 11.529f, nullptr },
+    { 854.825f, 1147.77f, 11.529f, nullptr },
 };
 // Farm to Blacksmith
 BattleBotPath vPath_AB_Farm_to_Blacksmith =
@@ -693,7 +693,7 @@ BattleBotPath vPath_AB_Farm_to_Blacksmith =
     { 932.418f, 1011.44f, -51.9225f, nullptr },
     { 944.244f, 1018.92f, -49.1438f, nullptr },
     { 961.55f, 1030.81f, -45.814f, nullptr },
-    { 978.122f, 1043.87f, -44.4682f, nullptr },
+    { 977.84f, 1045.37f, -44.5721f, nullptr },
 };
 // Stables to Gold Mine
 BattleBotPath vPath_AB_Stables_to_GoldMine =
@@ -717,7 +717,7 @@ BattleBotPath vPath_AB_Stables_to_GoldMine =
     { 1169.86f, 918.68f, -105.588f, nullptr },
     { 1159.36f, 900.497f, -110.461f, nullptr },
     { 1149.32f, 874.429f, -112.142f, nullptr },
-    { 1145.34f, 849.824f, -110.523f, nullptr },
+    { 1146.04f, 849.71f, -110.5256f, nullptr },
 };
 // Stables to Lumber Mill
 BattleBotPath vPath_AB_Stables_to_LumberMill =
@@ -742,7 +742,7 @@ BattleBotPath vPath_AB_Stables_to_LumberMill =
     { 873.419f, 1189.27f, 9.3466f, nullptr },
     { 863.821f, 1181.72f, 9.76912f, nullptr },
     { 851.803f, 1166.3f, 10.4423f, nullptr },
-    { 853.921f, 1150.92f, 11.543f, nullptr },
+    { 857.143f, 1150.19f, 11.5289f, nullptr },
 };
 // Farm to Gold Mine
 BattleBotPath vPath_AB_Farm_to_GoldMine =
@@ -775,7 +775,7 @@ BattleBotPath vPath_AB_Farm_to_GoldMine =
     { 1092.85f, 836.986f, -102.755f, nullptr },
     { 1114.75f, 851.21f, -109.782f, nullptr },
     { 1128.22f, 851.928f, -111.078f, nullptr },
-    { 1145.14f, 849.895f, -110.523f, nullptr },
+    { 1146.04f, 849.71f, -110.5256f, nullptr },
 };
 // Farm to Lumber Mill
 BattleBotPath vPath_AB_Farm_to_LumberMill =
@@ -798,7 +798,7 @@ BattleBotPath vPath_AB_Farm_to_LumberMill =
     { 817.3f, 1134.59f, 10.6064f, nullptr },
     { 828.961f, 1142.98f, 10.7354f, nullptr },
     { 841.63f, 1147.75f, 11.6916f, nullptr },
-    { 854.326f, 1150.55f, 11.537f, nullptr },
+    { 854.825f, 1147.77f, 11.529f, nullptr },
 };
 
 BattleBotPath vPath_AV_Horde_Cave_to_Tower_Point_Crossroad =

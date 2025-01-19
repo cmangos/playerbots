@@ -490,9 +490,14 @@ bool BGJoinAction::shouldJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroun
     if (!isArena && bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
         return false;
 
-    bool needBots = sRandomPlayerbotMgr.NeedBots[queueTypeId][bracketId][isArena ? isRated : GetTeamIndexByTeamId(bot->GetTeam())];
+    // do not join if BG queue is full
+    if (BgCount >= BracketSize && (ACount >= TeamSize) && (HCount >= TeamSize))
+    {
+        return false;
+    }
 
     // add more bots if players are not invited or if 1st BG instance is full
+    bool needBots = sRandomPlayerbotMgr.NeedBots[queueTypeId][bracketId][isArena ? isRated : GetTeamIndexByTeamId(bot->GetTeam())];
     if (needBots || (hasPlayers && BgCount > BracketSize && (BgCount % BracketSize) != 0))
     {
         bool needAlly = HCount >= ACount;
@@ -510,12 +515,6 @@ bool BGJoinAction::shouldJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroun
 
             return true;
         }
-    }
-
-    // do not join if BG queue is full
-    if (BgCount >= BracketSize && (ACount >= TeamSize) && (HCount >= TeamSize))
-    {
-        return false;
     }
 
     if (!isArena && ((ACount >= TeamSize && TeamId == 0) || (HCount >= TeamSize && TeamId == 1)))
@@ -837,7 +836,7 @@ bool BGJoinAction::JoinQueue(uint32 type)
    }
 #endif
 
-   bot->GetSession()->HandleBattlemasterJoinOpcode(packet);
+   ai->QueuePacket(packet);
    return true;
 }
 
@@ -1331,7 +1330,7 @@ bool BGStatusAction::Execute(Event& event)
         // temp fix for crash
          //return true;
 
-#ifdef MANGOSBOT_TWOx
+#ifdef MANGOSBOT_TWO
         BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
         GroupQueueInfo ginfo;
         if (bgQueue.GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))

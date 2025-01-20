@@ -297,6 +297,7 @@ public:
     std::string autoPickTalents;
     bool autoLearnTrainerSpells;
     bool autoLearnQuestSpells;
+    bool autoLearnDroppedSpells;
     bool autoDoQuests;
     bool autoDuel;
     bool syncLevelWithPlayers;

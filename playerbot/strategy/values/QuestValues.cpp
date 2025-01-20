@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include "QuestValues.h"
 #include "SharedValueContext.h"
+#include "ItemUsageValue.h"
 #include "playerbot/TravelMgr.h"
 
 using namespace ai;
@@ -16,16 +17,16 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 	QuestObjectMgr* questObjectMgr = (QuestObjectMgr*)&sObjectMgr;
 
 	for (auto [entry, questId] : questObjectMgr->GetCreatureQuestRelationsMap())
-		rMap[entry][questId] |= (int)QuestRelationFlag::questGiver;
+		rMap[entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
 
 	for (auto [entry, questId] : questObjectMgr->GetCreatureQuestInvolvedRelationsMap())
-		rMap[entry][questId] |= (int)QuestRelationFlag::questTaker;
+		rMap[entry][questId] |= (uint8)TravelDestinationPurpose::QuestTaker;
 
 	for (auto [entry, questId] : questObjectMgr->GetGOQuestRelationsMap())
-		rMap[-(int32)entry][questId] |= (int)QuestRelationFlag::questGiver;
+		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
 
 	for (auto [entry, questId] : questObjectMgr->GetGOQuestInvolvedRelationsMap())
-		rMap[-(int32)entry][questId] |= (int)QuestRelationFlag::questGiver;
+		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
 
 	//Quest objectives
 	ObjectMgr::QuestMap const& questMap = sObjectMgr.GetQuestTemplates();
@@ -36,7 +37,7 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 
 		for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
 		{
-			uint32 relationFlag = 1 << objective;
+			uint32 relationFlag = 1 << (objective+1);
 
 			//Kill objective
 			if (quest->ReqCreatureOrGOId[objective])
@@ -64,7 +65,7 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 
 			if (bounds.first != bounds.second) //Add target of source item to second quest objective.
 				for (ItemRequiredTargetMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
-					rMap[itr->second.m_uiTargetEntry][questId] |= (int)QuestRelationFlag::objective2;
+					rMap[itr->second.m_uiTargetEntry][questId] |= (uint8)TravelDestinationPurpose::QuestObjective2;
 		}
 	}
 
@@ -131,7 +132,7 @@ questGiverMap QuestGiversValue::Calculate()
 
 	for (auto& [questId, questRelationGuidps]: questMap)
 	{
-		for (auto& entry : questRelationGuidps[(int)QuestRelationFlag::questGiver])
+		for (auto& entry : questRelationGuidps[(uint8)TravelDestinationPurpose::QuestGiver])
 		{
 			for (auto& guidp : entry.second)
 			{
@@ -139,7 +140,7 @@ questGiverMap QuestGiversValue::Calculate()
 				{
 					Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
 
-					if (quest && (level < quest->GetMinLevel() || (int)level > quest->GetQuestLevel() + 10))
+					if (quest && (level < quest->GetMinLevel() || (int32)level > quest->GetQuestLevel() + 10))
 						continue;
 				}
 
@@ -221,7 +222,7 @@ std::list<GuidPosition> ActiveQuestTakersValue::Calculate()
 		if (q == questMap.end())
 			continue;
 
-		auto qt = q->second.find((int)QuestRelationFlag::questTaker);
+		auto qt = q->second.find((uint8)TravelDestinationPurpose::QuestTaker);
 
 		if (qt == q->second.end())
 			continue;		
@@ -297,7 +298,7 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 			if (q == questMap.end())
 				continue;
 
-			auto qt = q->second.find((int)QuestRelationFlag(1<<objective));
+			auto qt = q->second.find((uint8)TravelDestinationPurpose(1<<(objective+1)));
 
 			if (qt == q->second.end())
 				continue;
@@ -359,7 +360,7 @@ bool NeedForQuestValue::Calculate()
 			if (q == questMap.end())
 				continue;
 
-			auto qt = q->second.find((int)QuestRelationFlag(1 << objective));
+			auto qt = q->second.find((uint8)TravelDestinationPurpose(1 << (objective+1)));
 
 			if (qt == q->second.end())
 				continue;

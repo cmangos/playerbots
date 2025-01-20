@@ -1,6 +1,6 @@
 #pragma once
 #include "playerbot/strategy/Value.h"
-#include "LootValues.h"
+#include "playerbot/travelMgr.h"
 
 namespace ai
 {          
@@ -15,18 +15,6 @@ namespace ai
         QuestRelationsMap& GetGOQuestInvolvedRelationsMap() { return m_GOQuestInvolvedRelations; }
     };
 
-    enum class QuestRelationFlag : uint32
-    {
-        none = 0,
-        objective1 = 1,
-        objective2 = 2,
-        objective3 = 4,
-        objective4 = 8,
-        questGiver = 16,
-        questTaker = 32,
-        maxQuestRelationFlag = 64
-    };
-
     enum class QuestRewardOptionType : uint8
     {
         QUEST_REWARD_CONFIG_DRIVEN = 0x00,
@@ -35,19 +23,16 @@ namespace ai
         QUEST_REWARD_OPTION_ASK = 0x03,
     };
 
-    //                     questId, QuestRelationFlag
+    //EntryQuestRelationMap[entry][questId] = QuestRelationFlag
     typedef std::unordered_map<uint32, uint32> questRelationMap;
-    //                     entry
     typedef std::unordered_map<int32, questRelationMap> EntryQuestRelationMap;
 
-    //                      entry
+    //questGuidpMap[questId][QuestRelationFlag][entry] = {GuidPosition}
     typedef std::unordered_map<int32, std::list<GuidPosition>> questEntryGuidps;
-    //                      QuestRelationFlag
     typedef std::unordered_map<uint32, questEntryGuidps> questRelationGuidps;
-    //                      questId
     typedef std::unordered_map<uint32, questRelationGuidps> questGuidpMap;    
 
-    //                      questId
+    //questGiverMap[questId] = {GuidPosition}
     typedef std::unordered_map<uint32, std::list<GuidPosition>> questGiverMap;
     
     
@@ -71,8 +56,8 @@ namespace ai
         bool operator()(GameObjectDataPair const& dataPair);
         questGuidpMap GetResult() const { return data; };
     private:
-        std::unordered_map<int32, std::vector<std::pair<uint32, QuestRelationFlag>>> entryMap;
-        std::unordered_map<uint32, std::vector<std::pair<uint32, QuestRelationFlag>>> itemMap;
+        std::unordered_map<int32, std::vector<std::pair<uint32, TravelDestinationPurpose>>> entryMap;
+        std::unordered_map<uint32, std::vector<std::pair<uint32, TravelDestinationPurpose>>> itemMap;
 
         EntryQuestRelationMap relationMap;
 

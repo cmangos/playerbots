@@ -5,6 +5,7 @@
 #include "TrainerValues.h"
 #include "VendorValues.h"
 #include "TravelValues.h"
+#include "LootValues.h"
 #include "playerbot/PlayerbotAI.h"
 
 namespace ai

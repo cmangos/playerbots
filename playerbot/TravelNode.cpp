@@ -2384,16 +2384,18 @@ void TravelNodeMap::generateTransportNodes()
 void TravelNodeMap::generateZoneMeanNodes()
 {
     //Zone means   
-    for (auto& loc : sTravelMgr.GetExploreLocs())
+    for (auto& [entry, dests] :sTravelMgr.GetExploreLocs())
     {
         std::vector<WorldPosition*> points;
+        for (auto& dest : dests)
+        {
+            for (auto p : dest->GetPoints())
+                if (!p->isUnderWater())
+                    points.push_back(p);
 
-        for (auto p : loc->GetPoints())
-            if (!p->isUnderWater())
-                points.push_back(p);
-
-        if (points.empty())
-            points = loc->GetPoints();
+            if (points.empty())
+                points = dest->GetPoints();
+        }
 
         WorldPosition  pos = WorldPosition(points, WP_MEAN_CENTROID);
 
@@ -2650,7 +2652,7 @@ void TravelNodeMap::generateHelperNodes()
 
     if (sTravelNodeMap.getNodes().size() > old)
     {
-        sLog.outString("-Calculating walkable paths for %d new nodes.", sTravelNodeMap.getNodes().size() - old);
+        sLog.outString("-Calculating walkable paths for %d new nodes.", uint32(sTravelNodeMap.getNodes().size() - old));
         generateWalkPaths();
     }
 
@@ -2768,7 +2770,7 @@ void TravelNodeMap::removeLowNodes()
     for (auto& node : remNodes)
         sTravelNodeMap.removeNode(node);
 
-    sLog.outString("-Removed %d nodes had below 5 connections to other nodes.", remNodes.size());
+    sLog.outString("-Removed %d nodes had below 5 connections to other nodes.", (uint32)remNodes.size());
 }
 
 void TravelNodeMap::removeUselessPathMap(uint32 mapId)
@@ -3062,7 +3064,7 @@ void TravelNodeMap::saveNodeStore(bool force)
         std::string name = node->getName();
         name.erase(remove(name.begin(), name.end(), '\''), name.end());
 
-        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode` (`id`, `name`, `map_id`, `x`, `y`, `z`, `linked`) VALUES ('%lu', '%s', '%d', '%f', '%f', '%f', '%d%')"
+        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode` (`id`, `name`, `map_id`, `x`, `y`, `z`, `linked`) VALUES ('%lu', '%s', '%d', '%f', '%f', '%f', '%d')"
             , i, name.c_str(), node->getMapId(), node->getX(), node->getY(), node->getZ(), (node->isLinked() ? 1 : 0));
 
         saveNodes.insert(std::make_pair(node, i));
@@ -3095,7 +3097,7 @@ void TravelNodeMap::saveNodeStore(bool force)
             {
                 TravelNodePath* path = link.second;
 
-                WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_link` (`node_id`, `to_node_id`,`type`,`object`,`distance`,`swim_distance`, `extra_cost`,`calculated`, `max_creature_0`,`max_creature_1`,`max_creature_2`) VALUES ('%lu','%lu', '%d', '%lu', '%f', '%f', '%f', '%d', '%d', '%d', '%d')"
+                WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_link` (`node_id`, `to_node_id`,`type`,`object`,`distance`,`swim_distance`, `extra_cost`,`calculated`, `max_creature_0`,`max_creature_1`,`max_creature_2`) VALUES ('%d','%d', '%d', '%lu', '%f', '%f', '%f', '%d', '%d', '%d', '%d')"
                     , i
                     , saveNodes.find(link.first)->second
                     , uint8(path->getPathType())
@@ -3115,7 +3117,7 @@ void TravelNodeMap::saveNodeStore(bool force)
                 for (uint32 j = 0; j < ppath.size(); j++)
                 {
                     WorldPosition point = ppath[j];
-                    WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_path` (`node_id`, `to_node_id`, `nr`, `map_id`, `x`, `y`, `z`) VALUES ('%lu', '%lu', '%d','%d', '%f', '%f', '%f')"
+                    WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_path` (`node_id`, `to_node_id`, `nr`, `map_id`, `x`, `y`, `z`) VALUES ('%d', '%d', '%d','%d', '%f', '%f', '%f')"
                         , i
                         , saveNodes.find(link.first)->second
                         , j

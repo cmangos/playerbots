@@ -614,7 +614,7 @@ bool PlayerbotAIConfig::Initialize()
     autoLearnTrainerSpells = config.GetBoolDefault("AiPlayerbot.AutoLearnTrainerSpells", false);
     autoLearnQuestSpells = config.GetBoolDefault("AiPlayerbot.AutoLearnQuestSpells", false);
     autoLearnDroppedSpells = config.GetBoolDefault("AiPlayerbot.AutoLearnDroppedSpells", false);
-    autoDoQuests = config.GetBoolDefault("AiPlayerbot.AutoDoQuests", false);
+    autoDoQuests = config.GetBoolDefault("AiPlayerbot.AutoDoQuests", true);
     autoDuel = config.GetBoolDefault("AiPlayerbot.AutoDuel", false);
     syncLevelWithPlayers = config.GetBoolDefault("AiPlayerbot.SyncLevelWithPlayers", false);
     syncLevelMaxAbove = config.GetIntDefault("AiPlayerbot.SyncLevelMaxAbove", 5);

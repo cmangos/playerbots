@@ -79,7 +79,7 @@ bool FindCorpseAction::Execute(Event& event)
     float corpseDist = botPos.distance(corpsePos);
 
     //If player fell through terrain move corpse to player position.
-    if (bot->isRealPlayer())
+    if (bot->isRealPlayer() && botPos.getMapId() == moveToPos.getMapId())
     {
         //Try to correct the position upward.
         if (!moveToPos.ClosestCorrectPoint(5.0f, 500.0f, bot->GetInstanceId()))

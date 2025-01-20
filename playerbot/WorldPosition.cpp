@@ -428,8 +428,6 @@ WorldPosition WorldPosition::getDisplayLocation() const
 
 AreaTableEntry const* WorldPosition::GetArea() const
 {
-    loadVMap();
-
     uint16 areaFlag = getAreaFlag();
 
     return GetAreaEntryByAreaFlagAndMap(areaFlag, getMapId());

@@ -84,6 +84,11 @@ namespace ai
 			creators["travel"] = &ActionContext::travel;
 			creators["choose travel target"] = &ActionContext::choose_travel_target;
 			creators["move to travel target"] = &ActionContext::move_to_travel_target;
+            creators["choose group travel target"] = [](PlayerbotAI* ai) { return new ChooseGroupTravelTargetAction(ai); };
+            creators["refresh travel target"] = [](PlayerbotAI* ai) { return new RefreshTravelTargetAction(ai); };
+            creators["choose async travel target"] = [](PlayerbotAI* ai) { return new ChooseAsyncTravelTargetAction(ai); };
+            creators["choose async named travel target"] = [](PlayerbotAI* ai) { return new ChooseAsyncNamedTravelTargetAction(ai); };
+            creators["choose async quest travel target"] = [](PlayerbotAI* ai) { return new ChooseAsyncQuestTravelTargetAction(ai); };
             creators["move out of collision"] = &ActionContext::move_out_of_collision;
             creators["move random"] = &ActionContext::move_random;
             creators["attack"] = &ActionContext::melee;

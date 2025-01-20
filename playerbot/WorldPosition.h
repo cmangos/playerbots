@@ -210,6 +210,27 @@ namespace ai
             WeightedShuffle(data.begin(), data.end(), weights.begin(), weights.end(), gen);
         }
 
+        template<class T>
+        void GetNextPoint(std::vector<T>& data) const
+        {
+            std::vector<uint32> weights;
+
+            std::transform(data.begin(), data.end(), std::back_inserter(weights), [this](T element) { return 200000 / (1 + this->distance(*std::get<WorldPosition*>(T))); });
+
+            //If any weight is 0 add 1 to all weights.
+            for (auto& w : weights)
+            {
+                if (w > 0)
+                    continue;
+
+                std::for_each(weights.begin(), weights.end(), [](uint32& d) { d += 1; });
+                break;
+            }
+
+            std::mt19937 gen(time(0));
+
+            WeightedShuffle(data.begin(), data.end(), weights.begin(), weights.end(), gen);
+        }
 
         //Map functions. Player independent.
         const MapEntry* getMapEntry() const { return sMapStore.LookupEntry(mapid); }
@@ -283,7 +304,9 @@ namespace ai
         float getDisplayY() const { return getDisplayLocation().coord_x; }
 
         bool isValid() const { return MaNGOS::IsValidMapCoord(coord_x, coord_y, coord_z, orientation); };
-        uint16 getAreaFlag() const { return isValid() && isVmapLoaded() ? sTerrainMgr.GetAreaFlag(getMapId(), coord_x, coord_y, coord_z) : 0; };
+        virtual uint16 getAreaFlag() const {
+            loadVMap();
+            return isValid() && isVmapLoaded() ? sTerrainMgr.GetAreaFlag(getMapId(), coord_x, coord_y, coord_z) : 0; };
         AreaTableEntry const* GetArea() const;
         std::string getAreaName(const bool fullName = true, const bool zoneName = false) const;
         std::string getAreaOverride() const { if (!getTerrain()) return "";  AreaNameInfo nameInfo = getTerrain()->GetAreaName(coord_x, coord_y, coord_z, 0); return nameInfo.wmoNameOverride ? nameInfo.wmoNameOverride : ""; }

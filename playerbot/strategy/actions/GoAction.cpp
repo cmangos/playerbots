@@ -49,7 +49,18 @@ bool GoAction::Execute(Event& event)
     if (param.find("how") != std::string::npos && param.size() > 4)
     {
         std::string destination = param.substr(4);
-        TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, destination);
+
+        DestinationList dests = ChooseTravelTargetAction::FindDestination(bot, destination);
+        if (dests.empty())
+        {
+            ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + destination);
+            return false;
+        }
+
+        WorldPosition botPos(bot);
+
+        TravelDestination* dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
+
         if (!dest)
         {
             ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + destination);
@@ -67,17 +78,29 @@ bool GoAction::Execute(Event& event)
     for (const auto& option : goTos)
     {
         if (param.find(option.first) == 0 && param.size() > option.second)
-        {
+        {             
             std::string destination = param.substr(option.second);
+            DestinationList dests;
             TravelDestination* dest = nullptr;
             if (option.first == "to")
             {
-                dest = ChooseTravelTargetAction::FindDestination(bot, destination);
+                dests = ChooseTravelTargetAction::FindDestination(bot, destination);
             }
             else
             {
-                dest = ChooseTravelTargetAction::FindDestination(bot, destination, option.first == "zone", option.first == "npc", option.first == "quest", option.first == "mob", option.first == "boss");
+                dests = ChooseTravelTargetAction::FindDestination(bot, destination, option.first == "zone", option.first == "npc", option.first == "quest", option.first == "mob", option.first == "boss");
             }
+
+            if (dests.empty())
+            {
+                ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + destination);
+                return false;
+            }
+
+            WorldPosition botPos(bot);
+
+            dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
+
 
             if (!dest)
             {
@@ -99,7 +122,20 @@ bool GoAction::Execute(Event& event)
     {
         std::string destination = param.substr(7);
 
-        TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, destination);
+        DestinationList dests;
+        TravelDestination* dest = nullptr;
+
+        dests = ChooseTravelTargetAction::FindDestination(bot, destination);
+
+        if (dests.empty())
+        {
+            ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + destination);
+            return false;
+        }
+
+        WorldPosition botPos(bot);
+
+        dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
 
         return TravelTo(dest, requester);
     }
@@ -150,14 +186,27 @@ bool GoAction::TellWhereToGo(std::string& param, Player* requester) const
         title = title.substr(title.find("[") + 1, title.find("]") - title.find("[") - 1);
 
 
-    TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, title);
+    DestinationList dests;
+    TravelDestination* dest = nullptr;
+
+    dests = ChooseTravelTargetAction::FindDestination(bot, title);
+
+    if (dests.empty())
+    {
+        ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + title);
+        return false;
+    }
+
+    WorldPosition botPos(bot);
+
+    dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
 
     if (!dest)
         dest = target->GetDestination();
 
     if (!dest)
     {
-        ai->TellPlayerNoFacing(requester, "I have no place I want to go to");
+        ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + title);
         return false;
     }
 

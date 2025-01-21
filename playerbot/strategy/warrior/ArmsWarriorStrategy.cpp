@@ -14,7 +14,6 @@ public:
         creators["piercing howl"] = &piercing_howl;
         creators["mocking blow"] = &mocking_blow;
         creators["heroic strike"] = &heroic_strike;
-        creators["mortal strike"] = &mortal_strike;
         creators["whirlwind"] = &whirlwind;
         creators["sweeping strikes"] = &sweeping_strikes;
     }
@@ -29,8 +28,6 @@ private:
     ACTION_NODE_A(mocking_blow, "mocking blow", "hamstring");
 
     ACTION_NODE_A(heroic_strike, "heroic strike", "melee");
-
-    ACTION_NODE_A(mortal_strike, "mortal strike", "heroic strike");
 
     ACTION_NODE_P(whirlwind, "whirlwind", "berserker stance");
 
@@ -78,7 +75,7 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("whirlwind", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "medium rage available",
+        "heroic strike",
         NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -405,7 +402,7 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("overpower", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "medium rage available",
+        "heroic strike",
         NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -737,7 +734,7 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("overpower", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "medium rage available",
+        "heroic strike",
         NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(

@@ -1001,7 +1001,7 @@ bool ChooseAsyncTravelTargetAction::WaitForDestinations()
 
 bool ChooseAsyncTravelTargetAction::SetBestDestination(Event& event)
 {
-    if (destinationList.empty())
+    if (!hasDestinations || destinationList.empty())
         return false; //Nothing to set. Try getting new destinations.
 
     TravelTarget newTarget = TravelTarget(ai);
@@ -1130,8 +1130,6 @@ bool ChooseAsyncTravelTargetAction::isUseful()
         if (destinationList.empty())
             return false;
     }
-    else
-        destinationList.clear();
 
     return true;
 }

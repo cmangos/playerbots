@@ -210,28 +210,6 @@ namespace ai
             WeightedShuffle(data.begin(), data.end(), weights.begin(), weights.end(), gen);
         }
 
-        template<class T>
-        void GetNextPoint(std::vector<T>& data) const
-        {
-            std::vector<uint32> weights;
-
-            std::transform(data.begin(), data.end(), std::back_inserter(weights), [this](T element) { return 200000 / (1 + this->distance(*std::get<WorldPosition*>(T))); });
-
-            //If any weight is 0 add 1 to all weights.
-            for (auto& w : weights)
-            {
-                if (w > 0)
-                    continue;
-
-                std::for_each(weights.begin(), weights.end(), [](uint32& d) { d += 1; });
-                break;
-            }
-
-            std::mt19937 gen(time(0));
-
-            WeightedShuffle(data.begin(), data.end(), weights.begin(), weights.end(), gen);
-        }
-
         //Map functions. Player independent.
         const MapEntry* getMapEntry() const { return sMapStore.LookupEntry(mapid); }
         uint32 getFirstInstanceId() const { for (auto& map : sMapMgr.Maps()) { if (map.second->GetId() == getMapId()) return map.second->GetInstanceId(); }; return 0; }

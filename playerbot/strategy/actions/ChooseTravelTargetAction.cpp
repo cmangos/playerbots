@@ -1028,7 +1028,7 @@ bool ChooseAsyncTravelTargetAction::RequestNewDestinations(Event& event)
     if (futureDestinations.valid())
         return false;
 
-    if (PassTrough())
+    if (!isAllowed())
         return false;
 
     //ai->TellPlayer(ai->GetMaster(), "Fetching new destinations for " + std::to_string((uint32)actionPurpose));
@@ -1040,6 +1040,40 @@ bool ChooseAsyncTravelTargetAction::RequestNewDestinations(Event& event)
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
 
     return true;
+}
+
+bool ChooseAsyncTravelTargetAction::isAllowed() const
+{
+    switch (actionPurpose)
+    {
+    case TravelDestinationPurpose::Repair:
+    case TravelDestinationPurpose::Vendor:
+    case TravelDestinationPurpose::AH:
+        return urand(1, 100) < 90;
+    case TravelDestinationPurpose::Mail:
+        if (AI_VALUE(bool, "should get money"))
+            return urand(1, 100) < 70;
+        else
+            return true;
+    case TravelDestinationPurpose::GatherSkinning:
+    case TravelDestinationPurpose::GatherMining:
+    case TravelDestinationPurpose::GatherHerbalism:
+    case TravelDestinationPurpose::GatherFishing:
+        if(bot->GetGroup())
+            return urand(1, 100) < 50;
+        else
+            return urand(1, 100) < 90;
+    case TravelDestinationPurpose::Boss:
+        return urand(1, 100) < 50;
+    case TravelDestinationPurpose::Explore:
+        return urand(1, 100) < 10;
+    case TravelDestinationPurpose::GenericRpg:
+        return urand(1, 100) < 50;
+    case TravelDestinationPurpose::Grind:
+        return true;
+    default:
+        return true;
+    }
 }
 
 bool ChooseAsyncTravelTargetAction::Execute(Event& event)
@@ -1089,18 +1123,20 @@ bool ChooseAsyncTravelTargetAction::isUseful()
     return true;
 }
 
-bool ChooseAsyncNamedTravelTargetAction::PassTrough() const
+bool ChooseAsyncNamedTravelTargetAction::isAllowed() const
 {
     std::string_view name = getQualifier();
     if (name == "city")
     {
-        if (urand(1, 100) <= 90)
-            return true;
+        if (urand(1, 100) > 10)
+            return false;
+        return true;
     }
     else if (name == "pvp")
     {
-        if (!urand(0, 4))
-            return true;
+        if (urand(0, 4))
+            return false;
+        return true;
     }
 
     return false;
@@ -1116,7 +1152,7 @@ bool ChooseAsyncNamedTravelTargetAction::RequestNewDestinations(Event& event)
     if (futureDestinations.valid())
         return false;
 
-    if (PassTrough())
+    if (!isAllowed())
         return false;
 
     //ai->TellPlayer(ai->GetMaster(), "Fetching new destinations for " + std::string(name));
@@ -1152,12 +1188,25 @@ bool ChooseAsyncNamedTravelTargetAction::RequestNewDestinations(Event& event)
     return true;
 }
 
+bool ChooseAsyncQuestTravelTargetAction::isAllowed() const
+{
+    if (AI_VALUE(bool, "should get money"))
+        return urand(1, 100) < 90;
+    else
+        return urand(1, 100) < 95;
+
+    return false;
+}
+
 bool ChooseAsyncQuestTravelTargetAction::RequestNewDestinations(Event& event)
 {
     if (destinationList.size())
         return false;
 
     if (futureDestinations.valid())
+        return false;
+
+    if (!isAllowed())
         return false;
 
     //ai->TellPlayer(ai->GetMaster(), "Fetching new destinations for quests");

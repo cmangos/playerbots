@@ -22,21 +22,21 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     //All the standard choose travel target actions using either a specific val trigger or a generic purpose trigger.
     const std::vector<std::tuple<std::string, TravelDestinationPurpose, float>> PurposeActions =
-    {
-        {"",TravelDestinationPurpose::Vendor, 6.95f},
-        {"",TravelDestinationPurpose::AH, 6.94f},
-        {"",TravelDestinationPurpose::Repair, 6.93f},
-        {"val:and{no travel target,should get money,can get mail}", TravelDestinationPurpose::Mail, 6.79f},
-        {"val:and{no travel target,should get money}", TravelDestinationPurpose::Grind, 6.77f},
-        {"",TravelDestinationPurpose::Mail, 6.6f},
-        {"",TravelDestinationPurpose::GatherMining, 6.5f},
-        {"",TravelDestinationPurpose::GatherSkinning, 6.5f},
-        {"",TravelDestinationPurpose::GatherHerbalism, 6.5f},
-        //{"",TravelDestinationPurpose::GatherFishing, 6.5f},
-        {"",TravelDestinationPurpose::Boss, 6.4f},
-        {"",TravelDestinationPurpose::Explore, 6.29f},
-        {"",TravelDestinationPurpose::GenericRpg, 6.28f},
-        {"",TravelDestinationPurpose::Grind, 6.27f},
+    {        
+        {"",TravelDestinationPurpose::Vendor, 6.95f},                                         //See PassTrough 90%
+        {"",TravelDestinationPurpose::AH, 6.94f},                                                           // 90%
+        {"",TravelDestinationPurpose::Repair, 6.93f},                                                       // 90%
+        {"val:and{no travel target,should get money,can get mail}", TravelDestinationPurpose::Mail, 6.79f}, //100%
+        {"val:and{no travel target,should get money}", TravelDestinationPurpose::Grind, 6.77f},             // 90%
+        {"",TravelDestinationPurpose::Mail, 6.6f},                                                          // 70%
+        {"",TravelDestinationPurpose::GatherMining, 6.5f},                                                  // 90%/40% in group
+        {"",TravelDestinationPurpose::GatherSkinning, 6.5f},                                                // 90%/40% in group
+        {"",TravelDestinationPurpose::GatherHerbalism, 6.5f},                                               // 90%/40% in group
+        //{"",TravelDestinationPurpose::GatherFishing, 6.5f},                                               // 90%/40% in group
+        {"",TravelDestinationPurpose::Boss, 6.4f},                                                          // 50%
+        {"",TravelDestinationPurpose::Explore, 6.29f},                                                      // 10%
+        {"",TravelDestinationPurpose::GenericRpg, 6.28f},                                                   // 50%
+        {"",TravelDestinationPurpose::Grind, 6.27f},                                                        // 100%
     };
 
     for (auto& [condition, purpose, relevance] : PurposeActions)
@@ -50,13 +50,13 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     //Specific named exceptions
     const std::vector<std::tuple<std::string, std::string, float>> StringActions =
     {
-        {"no travel target","choose group travel target", 6.99f},
-        {"val::should travel named::city","choose async named travel target::city", 6.85f},
-        {"val:and{no travel target,has focus travel target}","choose async quest travel target", 6.84f},
-        //{"val::should travel named::pvp","choose async named travel target::pvp", 6.83f},
-        {"val:and{no travel target,should get money}", "choose async quest travel target", 6.78f},
-        {"no travel target","refresh travel target", 6.7f},
-        {"no travel target", "choose async quest travel target", 6.3f}
+        {"no travel target","choose group travel target", 6.99f},                         //See PassTrough 100%
+        {"val::should travel named::city","choose async named travel target::city", 6.85f},              // 10%
+        {"val:and{no travel target,has focus travel target}","choose async quest travel target", 6.84f}, //100%
+        //{"val::should travel named::pvp","choose async named travel target::pvp", 6.83f},              // 25%
+        {"val:and{no travel target,should get money}", "choose async quest travel target", 6.78f},       // 90%
+        {"no travel target","refresh travel target", 6.7f},                                              // 90%
+        {"no travel target", "choose async quest travel target", 6.3f}                                   // 95%
     };
 
     for (auto& [trigger, action, relevance] : StringActions)

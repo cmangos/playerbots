@@ -1,5 +1,10 @@
 #include "PlayerbotLoginMgr.h"
 #include "Database/DatabaseImpl.h"
+#include "PlayerbotMgr.h"
+#include "PlayerbotAIConfig.h"
+#include "RandomPlayerbotMgr.h"
+
+using namespace ai;
 
 class LoginQueryHolder : public SqlQueryHolder
 {

@@ -24,6 +24,10 @@
 #include <cstring>
 #include <fcntl.h>
 #include <errno.h>
+#include <thread>
+#include "Log/Log.h"
+#include "PlayerbotAIConfig.h"
+#include "PlayerbotTextMgr.h"
 #endif
 
 std::string PlayerbotLLMInterface::SanitizeForJson(const std::string& input) {

@@ -629,13 +629,13 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 }
 
 //Sets the target to the best destination.
-bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* target, PartitionedTravelList& travelPartitions, bool onlyActive)
+bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* target, PartitionedTravelList& partitionedList, bool onlyActive)
 {
     std::unordered_map<TravelDestination*, bool> isActive;
 
     bool hasTarget = false;
 
-    for (auto& [partition, travelPointList] : travelPartitions)
+    for (auto& [partition, travelPointList] : partitionedList)
     {
         for (auto& [destination, position, distance] : travelPointList)
         {
@@ -644,7 +644,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
             if(isActive[destination] = destination->IsActive(bot, info))
             {
-                if (partition != travelPartitions.end()->first && !urand(0, 10)) //10% chance to skip to a longer partition.            
+                if (partition != travelPartitions.back() && !urand(0, 10)) //10% chance to skip to a longer partition.            
                     break;
 
                 target->SetTarget(destination, position);

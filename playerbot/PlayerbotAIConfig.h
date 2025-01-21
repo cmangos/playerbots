@@ -60,14 +60,6 @@ enum class BotLoginCriteriaType : uint8
 
 #define MAX_GEAR_PROGRESSION_LEVEL 6
 
-
-#ifdef MANGOSBOT_ZERO
-#define MAX_FAMILY_BUILDS 28
-#endif
-#ifdef MANGOSBOT_ONE
-#define MAX_FAMILY_BUILDS 36
-#endif
-
 class ConfigAccess
 {
 private:

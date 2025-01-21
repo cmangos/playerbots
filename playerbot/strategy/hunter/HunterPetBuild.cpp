@@ -544,13 +544,7 @@ bool HunterPetBuild::CheckBuild(uint32 level, std::ostringstream* out)
 
 bool HunterPetBuild::CheckBuildLink(std::string buildLink, std::ostringstream* out)
 {
-#ifdef MANGOSBOT_ZERO
-    int buildLinkLength = 27;
-#endif
-#ifdef MANGOSBOT_ONE
-    int buildLinkLength = 35;
-#endif
-    for (int ii = 0; ii < buildLinkLength; ii++)
+    for (int ii = 0; ii < MAX_FAMILY_BUILDS; ii++)
     {
         // if 4th digit skip if '-' other wise invalid format so reject build link.
         if ((ii + 1) % 4 == 0)

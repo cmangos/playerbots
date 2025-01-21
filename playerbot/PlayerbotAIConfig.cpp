@@ -422,7 +422,13 @@ bool PlayerbotAIConfig::Initialize()
 
     uint32 maxHunterPetBuildLevel = 0;
 
-    for (uint32 family = 1; family < MAX_FAMILY_BUILDS; ++family)
+#ifdef MANGOSBOT_ZERO
+    int maxFamilyBuilds = 27;
+#endif
+#ifdef MANGOSBOT_ONE
+    int maxFamilyBuilds = 34;
+#endif
+    for (uint32 family = 1; family < maxFamilyBuilds; ++family)
     {
         familyPetBuilds[family] = FamilyPetBuilds(family);
         for (uint32 build = 0; build < MAX_LEVEL; ++build)

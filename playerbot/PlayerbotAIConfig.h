@@ -175,9 +175,16 @@ public:
     uint32 classRaceProbability[MAX_CLASSES][MAX_RACES];
     uint32 levelProbability[DEFAULT_MAX_LEVEL + 1];
     ClassSpecs classSpecs[MAX_CLASSES];
-    FamilyPetBuilds familyPetBuilds[MAX_FAMILY_BUILDS];
-    uint32 familyPetBuildProbability[MAX_FAMILY_BUILDS][10];
-    std::string premadeLevelFamilyPetBuild[MAX_FAMILY_BUILDS][10][100]; //lvl 1 - 100
+#ifdef MANGOSBOT_ZERO
+    FamilyPetBuilds familyPetBuilds[27];
+    uint32 familyPetBuildProbability[27][10];
+    std::string premadeLevelFamilyPetBuild[27][10][100]; //lvl 1 - 100
+#endif
+#ifdef MANGOSBOT_ONE
+    FamilyPetBuilds familyPetBuilds[34];
+    uint32 familyPetBuildProbability[34][10];
+    std::string premadeLevelFamilyPetBuild[34][10][100]; //lvl 1 - 100
+#endif
     bool gearProgressionSystemEnabled;
     uint32 gearProgressionSystemItemLevels[MAX_GEAR_PROGRESSION_LEVEL][2];
     int32 gearProgressionSystemItems[MAX_GEAR_PROGRESSION_LEVEL][MAX_CLASSES][4][SLOT_EMPTY];

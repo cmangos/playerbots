@@ -121,7 +121,7 @@ void ProtectionWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("mortal strike", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "high rage available",
+        "heroic strike",
         NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -517,7 +517,7 @@ void ProtectionWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("revenge", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "high rage available",
+        "heroic strike",
         NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -913,7 +913,7 @@ void ProtectionWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("devastate", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "high rage available",
+        "heroic strike",
         NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(

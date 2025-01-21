@@ -536,7 +536,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         else
             out << round(newTarget->GetDestination()->DistanceTo(botPos)) << ",";
 
-        out << "1," << "\"" << destination->GetTitle() << "\",\"" << message << "\"";
+        out << "new," << "\"" << destination->GetTitle() << "\",\"" << message << "\"";
 
         if (typeid(*destination) == typeid(NullTravelDestination))
             out << ",none";
@@ -619,7 +619,62 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
             else
                 out << round(newTarget->GetDestination()->DistanceTo(botPos)) << ",";
 
-            out << "0," << "\"" << destination->GetTitle() << "\",\""<< message << "\"";
+            out << "previous," << "\"" << destination->GetTitle() << "\",\""<< message << "\"";
+
+            if (typeid(*destination) == typeid(NullTravelDestination))
+                out << ",none";
+            else if (typeid(*destination) == typeid(QuestTravelDestination))
+                out << ",quest";
+            else if (typeid(*destination) == typeid(QuestRelationTravelDestination))
+                out << ",questgiver";
+            else if (typeid(*destination) == typeid(QuestObjectiveTravelDestination))
+                out << ",objective";
+            else  if (typeid(*destination) == typeid(RpgTravelDestination))
+            {
+                RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
+                if (RpgDestination->GetEntry() > 0)
+                {
+                    CreatureInfo const* cInfo = RpgDestination->GetCreatureInfo();
+
+                    if (cInfo)
+                    {
+                        if ((cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR) && AI_VALUE2(bool, "group or", "should sell,can sell"))
+                            out << ",sell";
+                        else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
+                            out << ",repair";
+                        else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should ah sell,can ah sell"))
+                            out << ",ah";
+                        else
+                            out << ",rpg";
+                    }
+                    else
+                        out << ",rpg";
+                }
+                else
+                {
+                    GameObjectInfo const* gInfo = RpgDestination->GetGoInfo();
+
+                    if (gInfo)
+                    {
+                        if (gInfo->type == GAMEOBJECT_TYPE_MAILBOX && AI_VALUE(bool, "can get mail"))
+                            out << ",mail";
+                        else
+                            out << ",rpg";
+                    }
+                    else
+                        out << ",rpg";
+                }
+            }
+            else if (typeid(*destination) == typeid(ExploreTravelDestination))
+                out << ",explore";
+            else if (typeid(*destination) == typeid(GrindTravelDestination))
+                out << ",grind";
+            else if (typeid(*destination) == typeid(BossTravelDestination))
+                out << ",boss";
+            else if (typeid(*destination) == typeid(GatherTravelDestination))
+                out << ",gather";
+            else
+                out << ",unknown";
 
             sPlayerbotAIConfig.log("travel_map.csv", out.str().c_str());
         }
@@ -633,6 +688,14 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 {
     std::unordered_map<TravelDestination*, bool> isActive;
 
+    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
+    {
+        for (auto& [partition, travelPointList] : partitionedList)
+        {
+            ai->TellPlayerNoFacing(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(partition));
+        }
+    }
+
     bool hasTarget = false;
 
     for (auto& [partition, travelPointList] : partitionedList)
@@ -644,8 +707,11 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
             if(isActive[destination] = destination->IsActive(bot, info))
             {
-                if (partition != travelPartitions.back() && !urand(0, 10)) //10% chance to skip to a longer partition.            
+                if (partition != std::prev(partitionedList.end())->first && !urand(0, 10)) //10% chance to skip to a longer partition.
+                {
+                    ai->TellDebug(requester, "Skipping range " + std::to_string(partition), "debug travel");
                     break;
+                }
 
                 target->SetTarget(destination, position);
                 hasTarget = true;
@@ -978,7 +1044,7 @@ bool ChooseAsyncTravelTargetAction::WaitForDestinations()
 
     destinationList = futureDestinations.get();
 
-    //ai->TellPlayer(ai->GetMaster(), "Got new destinations for " + std::to_string((uint32)actionPurpose));
+    ai->TellDebug(ai->GetMaster(), "Got " + std::to_string(destinationList.size()) + " new destination ranges for " + getName() + (getQualifier().empty() ? "" : ("::" + getQualifier())), "debug travel");
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_NONE);
     SET_AI_VALUE2(PartitionedTravelList, "travel destinations", (uint32)actionPurpose, destinationList);
@@ -990,7 +1056,7 @@ bool ChooseAsyncTravelTargetAction::WaitForDestinations()
 
 bool ChooseAsyncTravelTargetAction::SetBestDestination(Event& event)
 {
-    if (destinationList.empty())
+    if (!hasDestinations || destinationList.empty())
         return false; //Nothing to set. Try getting new destinations.
 
     TravelTarget newTarget = TravelTarget(ai);
@@ -1028,18 +1094,54 @@ bool ChooseAsyncTravelTargetAction::RequestNewDestinations(Event& event)
     if (futureDestinations.valid())
         return false;
 
-    if (PassTrough())
+    if (!isAllowed())
         return false;
 
     //ai->TellPlayer(ai->GetMaster(), "Fetching new destinations for " + std::to_string((uint32)actionPurpose));
     
     WorldPosition center = event.getOwner() ? event.getOwner() : (GetMaster() ? GetMaster() : bot);
 
+    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for " + getName() + (getQualifier().empty() ? "" : ("::" + getQualifier())), "debug travel");
+
     futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = info, center, purpose = actionPurpose]() {return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)purpose); });
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
 
     return true;
+}
+
+bool ChooseAsyncTravelTargetAction::isAllowed() const
+{
+    switch (actionPurpose)
+    {
+    case TravelDestinationPurpose::Repair:
+    case TravelDestinationPurpose::Vendor:
+    case TravelDestinationPurpose::AH:
+        return urand(1, 100) < 90;
+    case TravelDestinationPurpose::Mail:
+        if (AI_VALUE(bool, "should get money"))
+            return urand(1, 100) < 70;
+        else
+            return true;
+    case TravelDestinationPurpose::GatherSkinning:
+    case TravelDestinationPurpose::GatherMining:
+    case TravelDestinationPurpose::GatherHerbalism:
+    case TravelDestinationPurpose::GatherFishing:
+        if(bot->GetGroup())
+            return urand(1, 100) < 50;
+        else
+            return urand(1, 100) < 90;
+    case TravelDestinationPurpose::Boss:
+        return urand(1, 100) < 50;
+    case TravelDestinationPurpose::Explore:
+        return urand(1, 100) < 10;
+    case TravelDestinationPurpose::GenericRpg:
+        return urand(1, 100) < 50;
+    case TravelDestinationPurpose::Grind:
+        return true;
+    default:
+        return true;
+    }
 }
 
 bool ChooseAsyncTravelTargetAction::Execute(Event& event)
@@ -1083,24 +1185,24 @@ bool ChooseAsyncTravelTargetAction::isUseful()
         if (destinationList.empty())
             return false;
     }
-    else
-        destinationList.clear();
 
     return true;
 }
 
-bool ChooseAsyncNamedTravelTargetAction::PassTrough() const
+bool ChooseAsyncNamedTravelTargetAction::isAllowed() const
 {
     std::string_view name = getQualifier();
     if (name == "city")
     {
-        if (urand(1, 100) <= 90)
-            return true;
+        if (urand(1, 100) > 10)
+            return false;
+        return true;
     }
     else if (name == "pvp")
     {
-        if (!urand(0, 4))
-            return true;
+        if (urand(0, 4))
+            return false;
+        return true;
     }
 
     return false;
@@ -1116,12 +1218,14 @@ bool ChooseAsyncNamedTravelTargetAction::RequestNewDestinations(Event& event)
     if (futureDestinations.valid())
         return false;
 
-    if (PassTrough())
+    if (!isAllowed())
         return false;
 
     //ai->TellPlayer(ai->GetMaster(), "Fetching new destinations for " + std::string(name));
 
     WorldPosition center = event.getOwner() ? event.getOwner() : (GetMaster() ? GetMaster() : bot);
+
+    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for " + getName() + (getQualifier().empty() ? "" : ("::" + getQualifier())), "debug travel");
 
     if (name == "city")
     {
@@ -1152,12 +1256,25 @@ bool ChooseAsyncNamedTravelTargetAction::RequestNewDestinations(Event& event)
     return true;
 }
 
+bool ChooseAsyncQuestTravelTargetAction::isAllowed() const
+{
+    if (AI_VALUE(bool, "should get money"))
+        return urand(1, 100) < 90;
+    else
+        return urand(1, 100) < 95;
+
+    return false;
+}
+
 bool ChooseAsyncQuestTravelTargetAction::RequestNewDestinations(Event& event)
 {
     if (destinationList.size())
         return false;
 
     if (futureDestinations.valid())
+        return false;
+
+    if (!isAllowed())
         return false;
 
     //ai->TellPlayer(ai->GetMaster(), "Fetching new destinations for quests");
@@ -1171,6 +1288,8 @@ bool ChooseAsyncQuestTravelTargetAction::RequestNewDestinations(Event& event)
     uint32 questObjectiveFlag = (uint32)TravelDestinationPurpose::QuestObjective1 | (uint32)TravelDestinationPurpose::QuestObjective2 | (uint32)TravelDestinationPurpose::QuestObjective3 | (uint32)TravelDestinationPurpose::QuestObjective4;
 
     WorldPosition center = event.getOwner() ? event.getOwner() : (GetMaster() ? GetMaster() : bot);
+
+    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for " + getName() + (getQualifier().empty() ? "" : ("::" + getQualifier())), "debug travel");
 
     //Find destinations related to the active quests.
     for (auto& [questId, questStatus] : questMap)

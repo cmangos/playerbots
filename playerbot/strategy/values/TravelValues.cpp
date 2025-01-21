@@ -26,7 +26,7 @@ EntryGuidps EntryGuidpsValue::Calculate()
         if (aGuidP.isValid() && !aGuidP.IsEventUnspawned())
         {
             aGuidP.FetchArea();
-            guidps[aGuidP.GetEntry()].push_back(aGuidP);
+            guidps[-((int32)aGuidP.GetEntry())].push_back(aGuidP);
         }
     }
 
@@ -77,7 +77,7 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
         DestinationPurose purpose = 0;
 
         if(relationMap.find(entry) != relationMap.end())
-            for(auto& [questId, questFlag] : relationMap[entry])
+            for(auto& [questId, questFlag] : relationMap.at(entry))
                 purpose |= questFlag;
 
         for (auto& flag : allowedNpcFlags)
@@ -134,7 +134,7 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
             entryPurposeMap[entry] = purpose;
     }
 
-    for (uint32 entry = 0; entry < sCreatureStorage.GetMaxEntry(); ++entry)
+    for (uint32 entry = 0; entry < sGOStorage.GetMaxEntry(); ++entry)
     {
         GameObjectInfo const* gInfo = ObjectMgr::GetGameObjectInfo(entry);
 
@@ -148,8 +148,8 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
 
         DestinationEntry goEntry = entry * -1;
 
-        if (relationMap.find(entry) != relationMap.end())
-            for (auto& [questId, questFlag] : relationMap[entry])
+        if (relationMap.find(goEntry) != relationMap.end())
+            for (auto& [questId, questFlag] : relationMap.at(goEntry))
                 purpose |= questFlag;
 
         std::vector<GameobjectTypes> allowedGoTypes;

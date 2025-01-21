@@ -1,5 +1,6 @@
 #pragma once
 #include "playerbot/strategy/Value.h"
+#include "playerbot/strategy/AiObjectContext.h"
 
 namespace ai
 {
@@ -69,7 +70,7 @@ namespace ai
     //TravelPoint[point, destination, distance]
     using TravelPoint = std::tuple<TravelDestination*, WorldPosition*, float>;
     using TravelPointList = std::list<TravelPoint>;
-    using PartitionedTravelList = std::unordered_map<uint32, TravelPointList>;
+    using PartitionedTravelList = std::map<uint32, TravelPointList>;
 
     typedef std::set<uint32> focusQuestTravelList;
 

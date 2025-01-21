@@ -150,7 +150,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
                 else
                     out << round(target->GetDestination()->DistanceTo(botPos)) << ",";
 
-                out << "2," << "\"" << destination->GetTitle() << "\",\"" << "timeout" << "\"";
+                out << "fail," << "\"" << destination->GetTitle() << "\",\"" << "timeout" << "\"";
 
                 if (typeid(*destination) == typeid(NullTravelDestination))
                     out << ",none";

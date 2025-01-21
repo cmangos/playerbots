@@ -70,7 +70,7 @@ namespace ai
         TravelDestinationPurpose actionPurpose = TravelDestinationPurpose::None;
 
         virtual bool RequestNewDestinations(Event& event);
-        virtual bool PassTrough() const { return false; } //We need this skip on the request instead of isUsefull to only skip the request sometimes but not the Wait and Set that could follow a nonskip.
+        virtual bool isAllowed() const; //We need this skip on the request instead of isUsefull to only skip the request sometimes but not the Wait and Set that could follow a nonskip.
 
         bool hasDestinations = false;
         PartitionedTravelList destinationList = {};
@@ -87,7 +87,7 @@ namespace ai
     public:
         ChooseAsyncNamedTravelTargetAction(PlayerbotAI* ai, std::string name = "choose async named travel target") : ChooseAsyncTravelTargetAction(ai, name) {}
     protected:
-        virtual bool PassTrough() const override;
+        virtual bool isAllowed() const override;
         virtual bool RequestNewDestinations(Event& event) override;
         virtual bool isUseful() override { return ChooseTravelTargetAction::isUseful(); };
     };
@@ -96,6 +96,7 @@ namespace ai
     public:
         ChooseAsyncQuestTravelTargetAction(PlayerbotAI* ai, std::string name = "choose async quest travel target") : ChooseAsyncTravelTargetAction(ai, name) {}
     protected:
+        virtual bool isAllowed() const override;
         virtual bool RequestNewDestinations(Event& event) override;
         virtual bool isUseful() override { return ChooseTravelTargetAction::isUseful(); };
     };

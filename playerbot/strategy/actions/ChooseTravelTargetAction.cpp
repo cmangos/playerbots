@@ -536,7 +536,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         else
             out << round(newTarget->GetDestination()->DistanceTo(botPos)) << ",";
 
-        out << "1," << "\"" << destination->GetTitle() << "\",\"" << message << "\"";
+        out << "new," << "\"" << destination->GetTitle() << "\",\"" << message << "\"";
 
         if (typeid(*destination) == typeid(NullTravelDestination))
             out << ",none";
@@ -619,7 +619,62 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
             else
                 out << round(newTarget->GetDestination()->DistanceTo(botPos)) << ",";
 
-            out << "0," << "\"" << destination->GetTitle() << "\",\""<< message << "\"";
+            out << "previous," << "\"" << destination->GetTitle() << "\",\""<< message << "\"";
+
+            if (typeid(*destination) == typeid(NullTravelDestination))
+                out << ",none";
+            else if (typeid(*destination) == typeid(QuestTravelDestination))
+                out << ",quest";
+            else if (typeid(*destination) == typeid(QuestRelationTravelDestination))
+                out << ",questgiver";
+            else if (typeid(*destination) == typeid(QuestObjectiveTravelDestination))
+                out << ",objective";
+            else  if (typeid(*destination) == typeid(RpgTravelDestination))
+            {
+                RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
+                if (RpgDestination->GetEntry() > 0)
+                {
+                    CreatureInfo const* cInfo = RpgDestination->GetCreatureInfo();
+
+                    if (cInfo)
+                    {
+                        if ((cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR) && AI_VALUE2(bool, "group or", "should sell,can sell"))
+                            out << ",sell";
+                        else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
+                            out << ",repair";
+                        else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should ah sell,can ah sell"))
+                            out << ",ah";
+                        else
+                            out << ",rpg";
+                    }
+                    else
+                        out << ",rpg";
+                }
+                else
+                {
+                    GameObjectInfo const* gInfo = RpgDestination->GetGoInfo();
+
+                    if (gInfo)
+                    {
+                        if (gInfo->type == GAMEOBJECT_TYPE_MAILBOX && AI_VALUE(bool, "can get mail"))
+                            out << ",mail";
+                        else
+                            out << ",rpg";
+                    }
+                    else
+                        out << ",rpg";
+                }
+            }
+            else if (typeid(*destination) == typeid(ExploreTravelDestination))
+                out << ",explore";
+            else if (typeid(*destination) == typeid(GrindTravelDestination))
+                out << ",grind";
+            else if (typeid(*destination) == typeid(BossTravelDestination))
+                out << ",boss";
+            else if (typeid(*destination) == typeid(GatherTravelDestination))
+                out << ",gather";
+            else
+                out << ",unknown";
 
             sPlayerbotAIConfig.log("travel_map.csv", out.str().c_str());
         }

@@ -1061,9 +1061,9 @@ bool ChooseAsyncTravelTargetAction::WaitForDestinations()
 
     destinationList = futureDestinations.get();
 
-    if(getName() == "ChooseAsyncTravelTargetAction")
+    if(getName() == "choose async travel target")
         ai->TellDebug(ai->GetMaster(), "Got " + std::to_string(destinationList.size()) + " new destination ranges for " + TravelDestinationPurposeName.at(actionPurpose), "debug travel");
-    else if (getName() == "ChooseAsyncNamedTravelTargetAction")
+    else if (getName() == "choose async named travel target")
         ai->TellDebug(ai->GetMaster(), "Got " + std::to_string(destinationList.size()) + " new destination ranges for " + getQualifier(), "debug travel");
     else
         ai->TellDebug(ai->GetMaster(), "Got " + std::to_string(destinationList.size()) + " new destination ranges for quests", "debug travel");

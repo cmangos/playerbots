@@ -46,8 +46,6 @@ bool ChooseTravelTargetAction::Execute(Event& event)
 //Eventually we want to rewrite this to be more intelligent.
 void ChooseTravelTargetAction::getNewTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget)
 {
-    info = PlayerTravelInfo(bot);
-
     bool foundTarget = false;
     focusQuestTravelList focusList = AI_VALUE(focusQuestTravelList, "focus travel target");
 
@@ -705,7 +703,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
             if (isActive.find(destination) != isActive.end() && !isActive[destination])
                 continue;
 
-            if(isActive[destination] = destination->IsActive(bot, info))
+            if(isActive[destination] = destination->IsActive(bot, PlayerTravelInfo(bot)))
             {
                 if (partition != std::prev(partitionedList.end())->first && !urand(0, 10)) //10% chance to skip to a longer partition.
                 {
@@ -741,7 +739,7 @@ bool ChooseTravelTargetAction::SetNpcFlagTarget(Player* requester, TravelTarget*
     uint32 found = 0;
 
     //Loop over all npcs.
-    for (auto& [partition, points] : sTravelMgr.GetPartitions(pos, travelPartitions, info, (uint32)TravelDestinationPurpose::GenericRpg, 0, false))
+    for (auto& [partition, points] : sTravelMgr.GetPartitions(pos, travelPartitions, PlayerTravelInfo(bot), (uint32)TravelDestinationPurpose::GenericRpg, 0, false))
     {
         for (auto& [dest, position, distance] : points)
         {
@@ -1127,7 +1125,7 @@ bool ChooseAsyncTravelTargetAction::RequestNewDestinations(Event& event)
 
     ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for " + TravelDestinationPurposeName.at(actionPurpose), "debug travel");
 
-    futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = info, center, purpose = actionPurpose]() {return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)purpose); });
+    futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center, purpose = actionPurpose]() {return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)purpose); });
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
 
@@ -1181,8 +1179,6 @@ bool ChooseAsyncTravelTargetAction::Execute(Event& event)
 
     if (AI_VALUE(TravelTarget*, "travel target")->IsPreparing()) //Another action is fetching destinations. 
         return false;
-
-    info = PlayerTravelInfo(bot);
 
     if (SetBestDestination(event))
         return true;
@@ -1253,11 +1249,11 @@ bool ChooseAsyncNamedTravelTargetAction::RequestNewDestinations(Event& event)
 
     if (name == "city")
     {
-        futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = info, center]() {return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GenericRpg); });
+        futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]() {return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GenericRpg); });
     }
     else if (name == "pvp")
     {
-        futureDestinations = std::async(std::launch::async, [travelInfo = info, center]()
+        futureDestinations = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center]()
             {
                 PartitionedTravelList list;
                 for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, "Tarren Mill"))
@@ -1361,7 +1357,7 @@ bool ChooseAsyncQuestTravelTargetAction::RequestNewDestinations(Event& event)
 
     MANGOS_ASSERT(travelPartitions.size() && travelPartitions.size() < 1000);
 
-    futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = info, center, destinationFetches]()
+    futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center, destinationFetches]()
         {
             MANGOS_ASSERT(partitions.size() && partitions.size() < 1000);
             PartitionedTravelList list;

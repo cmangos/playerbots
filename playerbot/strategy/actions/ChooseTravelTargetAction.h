@@ -28,7 +28,6 @@ namespace ai
     public:
         static DestinationList FindDestination(PlayerTravelInfo info, std::string name, bool zones = true, bool npcs = true, bool quests = true, bool mobs = true, bool bosses = true);
     protected:
-        PlayerTravelInfo info;
         const std::vector<uint32> travelPartitions = { 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 10000, 50000, 100000, 500000 };
     private:
 #ifdef GenerateBotHelp

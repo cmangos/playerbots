@@ -520,7 +520,10 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
 
     uint32 specId = sRandomItemMgr.GetPlayerSpecId(bot);
 
-    uint32 statWeight = sRandomItemMgr.ItemStatWeight(bot, itemQualifier);
+    uint32 botRating = bot->GetMaxPersonalArenaRatingRequirement(0);
+    bool isBotHighRanked = botRating >= 1800;
+
+    uint32 statWeight = sRandomItemMgr.GetLiveStatWeight(bot, itemProto->ItemId, specId, isBotHighRanked);
     if (statWeight)
         shouldEquip = true;
 
@@ -550,8 +553,8 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
             return ItemUsage::ITEM_USAGE_NONE;
     }
 
-    uint32 oldStatWeight = sRandomItemMgr.ItemStatWeight(bot, oldItem);
-    if (statWeight && oldStatWeight)
+    uint32 oldStatWeight = sRandomItemMgr.GetLiveStatWeight(bot, oldItemProto->ItemId, specId, isBotHighRanked);
+    if (statWeight || oldStatWeight)
     {
         shouldEquip = statWeight >= oldStatWeight;
     }
@@ -566,12 +569,12 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
     bool existingShouldEquip = true;
     if (oldItemProto->Class == ITEM_CLASS_WEAPON && !oldStatWeight)
         existingShouldEquip = false;
-    if (oldItemProto->Class == ITEM_CLASS_ARMOR && !statWeight)
+    if (oldItemProto->Class == ITEM_CLASS_ARMOR && !oldStatWeight)
         existingShouldEquip = false;
 
     //Compare items based on item level, quality.
     bool isBetter = false;
-    if (!statWeight || !oldStatWeight)
+    if (!statWeight && !oldStatWeight)
     {
         isBetter = (itemProto->Quality > oldItemProto->Quality && itemProto->ItemLevel == oldItemProto->ItemLevel) || (itemProto->Quality == oldItemProto->Quality && itemProto->ItemLevel > oldItemProto->ItemLevel);
     }

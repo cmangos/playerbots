@@ -2439,21 +2439,23 @@ uint32 RandomItemMgr::CalculateSocketWeight(uint8 playerclass, ItemQualifier& qu
 uint32 RandomItemMgr::ItemStatWeight(Player* player, ItemQualifier& qualifier)
 {
     ItemSpecType itSpec;
-    uint32 weight = CalculateStatWeight(player->getClass(), GetPlayerSpecId(player), qualifier.GetProto(), itSpec);
+    uint8 playerClass = player->getClass();
+    uint32 specId = GetPlayerSpecId(player);
+    uint32 weight = CalculateStatWeight(playerClass, specId, qualifier.GetProto(), itSpec);
     if(qualifier.GetEnchantId())
-        weight += CalculateEnchantWeight(player->getClass(), GetPlayerSpecId(player), qualifier.GetEnchantId());
+        weight += CalculateEnchantWeight(playerClass, specId, qualifier.GetEnchantId());
     if (qualifier.GetRandomPropertyId())
-        weight += CalculateRandomPropertyWeight(player->getClass(), GetPlayerSpecId(player), qualifier.GetRandomPropertyId());
+        weight += CalculateRandomPropertyWeight(playerClass, specId, qualifier.GetRandomPropertyId());
     if(qualifier.GetGem1())
-        weight += CalculateGemWeight(player->getClass(), GetPlayerSpecId(player), qualifier.GetGem1());
+        weight += CalculateGemWeight(playerClass, specId, qualifier.GetGem1());
     if (qualifier.GetGem2())
-        weight += CalculateGemWeight(player->getClass(), GetPlayerSpecId(player), qualifier.GetGem2());
+        weight += CalculateGemWeight(playerClass, specId, qualifier.GetGem2());
     if (qualifier.GetGem3())
-        weight += CalculateGemWeight(player->getClass(), GetPlayerSpecId(player), qualifier.GetGem3());
+        weight += CalculateGemWeight(playerClass, specId, qualifier.GetGem3());
     if (qualifier.GetGem4())
-        weight += CalculateGemWeight(player->getClass(), GetPlayerSpecId(player), qualifier.GetGem4());
+        weight += CalculateGemWeight(playerClass, specId, qualifier.GetGem4());
 
-    weight += CalculateSocketWeight(player->getClass(), qualifier, GetPlayerSpecId(player));
+    weight += CalculateSocketWeight(playerClass, qualifier, specId);
 
     return weight;
 }

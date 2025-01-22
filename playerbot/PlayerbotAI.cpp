@@ -3250,6 +3250,15 @@ bool PlayerbotAI::Whisper(std::string msg, std::string receiverName)
         return false;
     }
 
+    if (rPlayer == bot)
+    {
+        WorldPacket data;
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, msg.c_str(), LANG_UNIVERSAL, bot->GetChatTag(), bot->GetObjectGuid(), bot->GetName());
+        rPlayer->GetSession()->SendPacket(data);
+
+        return true;
+    }
+
     if (bot->GetTeam() == ALLIANCE)
     {
         bot->Whisper(msg, LANG_COMMON, receiver);

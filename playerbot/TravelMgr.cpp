@@ -1111,7 +1111,7 @@ void TravelMgr::SetMobAvoidAreaMap(uint32 mapId)
 
         WorldPosition point = WorldPosition(cData.mapid, cData.posX, cData.posY, cData.posZ, cData.orientation);
 
-        if (cInfo->NpcFlags > 0)
+        if (cInfo->NpcFlags > 0 || cInfo->UnitFlags & UNIT_FLAG_UNINTERACTIBLE)
             continue;
 
         FactionTemplateEntry const* factionEntry = sFactionTemplateStore.LookupEntry(cInfo->Faction);

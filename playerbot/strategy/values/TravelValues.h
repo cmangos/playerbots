@@ -57,6 +57,31 @@ namespace ai
         MaxFlag = 1 << 19
     };
 
+    const std::unordered_map<TravelDestinationPurpose, std::string> TravelDestinationPurposeName =
+    {
+        {TravelDestinationPurpose::None, "None"},
+        {TravelDestinationPurpose::QuestGiver, "QuestGiver"},
+        {TravelDestinationPurpose::QuestObjective1, "QuestObjective1"},
+        {TravelDestinationPurpose::QuestObjective2, "QuestObjective2"},
+        {TravelDestinationPurpose::QuestObjective3 , "QuestObjective3"},
+        {TravelDestinationPurpose::QuestObjective4, "QuestObjective4"},
+        {TravelDestinationPurpose::QuestTaker, "QuestTaker"},
+        {TravelDestinationPurpose::GenericRpg , "GenericRpg"},
+        {TravelDestinationPurpose::Trainer, "Trainer"},
+        {TravelDestinationPurpose::Repair, "Repair"},
+        {TravelDestinationPurpose::Vendor, "Vendor"},
+        {TravelDestinationPurpose::AH , "AH"},
+        {TravelDestinationPurpose::Mail , "Mail"},
+        {TravelDestinationPurpose::Grind , "Grind"},
+        {TravelDestinationPurpose::Boss, "Boss"},
+        {TravelDestinationPurpose::GatherSkinning , "GatherSkinning"},
+        {TravelDestinationPurpose::GatherMining, "GatherMining"},
+        {TravelDestinationPurpose::GatherHerbalism, "GatherHerbalism"},
+        {TravelDestinationPurpose::GatherFishing, "GatherFishing"},
+        {TravelDestinationPurpose::Explore, "Explore"},
+        {TravelDestinationPurpose::MaxFlag, "MaxFlag"}
+    };
+
     class TravelDestination;
 
     using DestinationList = std::list<TravelDestination*>;

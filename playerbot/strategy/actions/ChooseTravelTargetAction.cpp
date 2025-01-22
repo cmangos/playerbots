@@ -982,8 +982,10 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
 
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
-    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, std::to_string(groupTargets[0].size()) + " group targets found.");
+    ai->TellDebug(requester, std::to_string(groupTargets[0].size()) + " group targets found.", "debug travel");
+
+    if (groupTargets[0].empty())
+        return false;
 
     TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
 
@@ -1009,26 +1011,43 @@ bool RefreshTravelTargetAction::Execute(Event& event)
 
     TravelDestination* oldDestination = target->GetDestination();
 
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+
     if (target->IsMaxRetry(false))
+    {
+        ai->TellDebug(requester, "Old destination was tried to many times.", "debug travel");
         return false;
+    }
 
     if (!oldDestination) //Does this target have a destination?
         return false;
 
-    if (!oldDestination->IsActive(bot, info)) //Is the destination still valid?
+    if (!oldDestination->IsActive(bot, PlayerTravelInfo(bot))) //Is the destination still valid?
+    {
+        ai->TellDebug(requester, "Old destination was no longer valid.", "debug travel");
         return false;
+    }
 
     std::vector<WorldPosition*> newPositions = oldDestination->NextPoint(*target->GetPosition());
 
     if (newPositions.empty())
+    {
+        ai->TellDebug(requester, "No new locations found for old destination.", "debug travel");
         return false;
+    }
 
     target->SetTarget(oldDestination, newPositions.front());
 
     target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
     target->SetRetry(false, target->GetRetryCount(false) + 1);
 
-    return target->IsActive();
+    if (target->IsActive())
+    {
+        ai->TellDebug(requester, "Target was not active after refresh.", "debug travel");
+        return false;
+    }
+
+    return true;
 }
 
 bool ChooseAsyncTravelTargetAction::WaitForDestinations()
@@ -1044,7 +1063,12 @@ bool ChooseAsyncTravelTargetAction::WaitForDestinations()
 
     destinationList = futureDestinations.get();
 
-    ai->TellDebug(ai->GetMaster(), "Got " + std::to_string(destinationList.size()) + " new destination ranges for " + getName() + (getQualifier().empty() ? "" : ("::" + getQualifier())), "debug travel");
+    if(getName() == "ChooseAsyncTravelTargetAction")
+        ai->TellDebug(ai->GetMaster(), "Got " + std::to_string(destinationList.size()) + " new destination ranges for " + TravelDestinationPurposeName.at(actionPurpose), "debug travel");
+    else if (getName() == "ChooseAsyncNamedTravelTargetAction")
+        ai->TellDebug(ai->GetMaster(), "Got " + std::to_string(destinationList.size()) + " new destination ranges for " + getQualifier(), "debug travel");
+    else
+        ai->TellDebug(ai->GetMaster(), "Got " + std::to_string(destinationList.size()) + " new destination ranges for quests", "debug travel");
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_NONE);
     SET_AI_VALUE2(PartitionedTravelList, "travel destinations", (uint32)actionPurpose, destinationList);
@@ -1101,7 +1125,7 @@ bool ChooseAsyncTravelTargetAction::RequestNewDestinations(Event& event)
     
     WorldPosition center = event.getOwner() ? event.getOwner() : (GetMaster() ? GetMaster() : bot);
 
-    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for " + getName() + (getQualifier().empty() ? "" : ("::" + getQualifier())), "debug travel");
+    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for " + TravelDestinationPurposeName.at(actionPurpose), "debug travel");
 
     futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = info, center, purpose = actionPurpose]() {return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)purpose); });
 
@@ -1225,7 +1249,7 @@ bool ChooseAsyncNamedTravelTargetAction::RequestNewDestinations(Event& event)
 
     WorldPosition center = event.getOwner() ? event.getOwner() : (GetMaster() ? GetMaster() : bot);
 
-    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for " + getName() + (getQualifier().empty() ? "" : ("::" + getQualifier())), "debug travel");
+    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for travel " + getQualifier(), "debug travel");
 
     if (name == "city")
     {
@@ -1289,7 +1313,7 @@ bool ChooseAsyncQuestTravelTargetAction::RequestNewDestinations(Event& event)
 
     WorldPosition center = event.getOwner() ? event.getOwner() : (GetMaster() ? GetMaster() : bot);
 
-    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for " + getName() + (getQualifier().empty() ? "" : ("::" + getQualifier())), "debug travel");
+    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for quests", "debug travel");
 
     //Find destinations related to the active quests.
     for (auto& [questId, questStatus] : questMap)

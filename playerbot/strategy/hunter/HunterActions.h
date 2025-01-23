@@ -240,6 +240,7 @@ namespace ai
     BUFF_ACTION(IntimidationAction, "intimidation");
     BUFF_ACTION(DeterrenceAction, "deterrence");
     BUFF_ACTION(CastCallOfTheWildAction, "call of the wild");
+    BUFF_ACTION(CastDisengageAction, "disengage");
     SPELL_ACTION(CastKillShotAction, "kill shot");
     MELEE_ACTION(CastCounterattackAction, "counterattack");
     SNARE_ACTION(WyvernStingSnareAction, "wyvern sting");

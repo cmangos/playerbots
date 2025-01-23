@@ -234,7 +234,7 @@ namespace ai
             return target && ai->HasStrategy("close", BotState::BOT_STATE_COMBAT) &&
                 (target->GetVictim() != bot ||
                 target->IsImmobilizedState() ||
-                (target->GetSpeed(MOVE_RUN) <= (bot->GetSpeed(MOVE_RUN) / 2) && !((!bot->GetPet() || bot->GetPet()->IsDead()) && target->IsCreature() && target->GetHealthPercent() < 50.f && target->GetHealth() < bot->GetHealth())) ||
+                (target->GetSpeed(MOVE_RUN) <= (bot->GetSpeed(MOVE_RUN) * 0.75f) && !((!bot->GetPet() || bot->GetPet()->IsDead()) && target->IsCreature() && target->GetHealthPercent() < 50.f && target->GetHealth() < bot->GetHealth())) ||
                 distance > 8.0f);
         }
     };
@@ -255,7 +255,7 @@ namespace ai
                 return true;
 
             Unit* target = AI_VALUE(Unit*, "current target");
-            return target && ((target->GetSpeed(MOVE_RUN) > (bot->GetSpeed(MOVE_RUN) / 2)) || ((!bot->GetPet() || bot->GetPet()->IsDead()) && target->GetHealthPercent() < 50.f && target->IsCreature() && target->GetHealth() < bot->GetHealth())) &&
+            return target && ((target->GetSpeed(MOVE_RUN) > (bot->GetSpeed(MOVE_RUN) * 0.75f)) || ((!bot->GetPet() || bot->GetPet()->IsDead()) && target->GetHealthPercent() < 50.f && target->IsCreature() && target->GetHealth() < bot->GetHealth())) &&
                 !target->IsImmobilizedState() &&
                 ai->HasStrategy("ranged", BotState::BOT_STATE_COMBAT) &&
                 target->GetVictim() == bot &&

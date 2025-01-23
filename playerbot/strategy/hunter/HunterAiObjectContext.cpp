@@ -477,6 +477,7 @@ namespace ai
                 creators["dismiss pet"] = &AiObjectContextInternal::dismiss_pet;
                 creators["call of the wild"] = &AiObjectContextInternal::call_of_the_wild;
                 creators["kill shot"] = &AiObjectContextInternal::kill_shot;
+                creators["disengage"] = &AiObjectContextInternal::disengage;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
@@ -553,6 +554,7 @@ namespace ai
             static Action* dismiss_pet(PlayerbotAI* ai) { return new CastDismissPetAction(ai); }
             static Action* call_of_the_wild(PlayerbotAI* ai) { return new CastCallOfTheWildAction(ai); }
             static Action* kill_shot(PlayerbotAI* ai) { return new CastKillShotAction(ai); }
+            static Action* disengage(PlayerbotAI* ai) { return new CastDisengageAction(ai); }
             static Action* update_pve_strats(PlayerbotAI* ai) { return new UpdateHunterPveStrategiesAction(ai); }
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdateHunterPvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdateHunterRaidStrategiesAction(ai); }

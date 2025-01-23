@@ -997,7 +997,8 @@ void HunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "enemy is close",
-        NextAction::array(0, new NextAction("raptor strike", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("wing clip", ACTION_NORMAL + 1),
+                             new NextAction("disengage", ACTION_NORMAL), NULL)));
 }
 
 void HunterStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

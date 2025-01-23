@@ -127,7 +127,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
     }
 	
 	if (sPlayerbotAIConfig.RandombotsWalkingRPG)
-        if (!bot->GetTerrain()->IsOutdoors(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ()))
+        if (!sPlayerbotAIConfig.RandombotsWalkingRPGInDoors || !bot->GetTerrain()->IsOutdoors(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ()))
             bot->m_movementInfo.AddMovementFlag(MOVEFLAG_WALK_MODE);
 
     float angle;

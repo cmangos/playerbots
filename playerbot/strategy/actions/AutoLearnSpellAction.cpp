@@ -362,6 +362,7 @@ bool AutoLearnSpellAction::IsValidSpell(uint32 spellId)
         spellId != 8385 && // Prevents Shaman from learning Swift Wind spell which is cast onto player as a reward, the spell is not supposed to be learned.
         // Hunter
         spellId != 542  && // Prevents hunter from learning pet skill zzOLDLearn Nature Resistance.
+        spellId != 530  && // Prevents hunter from learning Charm (Possess)
         spellId != 6284 && // Prevents hunter from learning pet skill Pet Hardiness Rank 1
         spellId != 6287 && // Prevents hunter from learning pet skill Pet Hardiness Rank 2
         spellId != 6288 && // Prevents hunter from learning pet skill Pet Hardiness Rank 3

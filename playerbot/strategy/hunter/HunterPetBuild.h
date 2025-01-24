@@ -27,6 +27,7 @@ class HunterPetBuild
         HunterPetBuild() { InitHunterPetBuildSpellEntityList(); };
         HunterPetBuild(uint32 familyId);
         HunterPetBuild(HunterPetBuild* build, std::string buildLink);
+        HunterPetBuild(Player* bot) { InitHunterPetBuildSpellEntityList(); };
 
         virtual bool CheckBuild(uint32 level, std::ostringstream* out);
         bool CheckBuildLink(std::string buildLink, std::ostringstream* out);

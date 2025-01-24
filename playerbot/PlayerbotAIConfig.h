@@ -178,12 +178,12 @@ public:
 #ifdef MANGOSBOT_ZERO
     FamilyPetBuilds familyPetBuilds[27];
     uint32 familyPetBuildProbability[27][10];
-    std::string premadeLevelFamilyPetBuild[27][10][100]; //lvl 1 - 100
+    //std::string premadeLevelFamilyPetBuild[27][10][100]; //lvl 1 - 100
 #endif
 #ifdef MANGOSBOT_ONE
     FamilyPetBuilds familyPetBuilds[34];
     uint32 familyPetBuildProbability[34][10];
-    std::string premadeLevelFamilyPetBuild[34][10][100]; //lvl 1 - 100
+    //std::string premadeLevelFamilyPetBuild[34][10][100]; //lvl 1 - 100
 #endif
     bool gearProgressionSystemEnabled;
     uint32 gearProgressionSystemItemLevels[MAX_GEAR_PROGRESSION_LEVEL][2];

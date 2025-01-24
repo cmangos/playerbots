@@ -1716,7 +1716,8 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
         setQuality = true;
     }
 
-    // if bot arena rating is high enough, give better quality gear
+    // if bot pvp rank or arena rating is high enough, give better quality gear
+    uint8 playerPvpRank = bot->GetHighestPvPRankIndex();
     uint32 botRating = bot->GetMaxPersonalArenaRatingRequirement(0);
     bool isBotHighRanked = botRating >= 1800;
     bool isBotVeryHighRanked = botRating >= 2100;
@@ -1989,21 +1990,27 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                     if (incremental && partialUpgrade && botLevel == 80)
                     {
                         // Restrict too high item levels for incremental upgrades
-                        if (proto->ItemLevel > 200 && proto->ItemLevel > oldGS + 20)
-                            continue;
-
-                        // Restrict top-end gear for non-high-ranked bots
-                        if (!isBotHighRanked && proto->ItemLevel >= 270)
+                        if (proto->ItemLevel > 239 && proto->ItemLevel > oldGS + 20)
                             continue;
                     }
 
-                    // Skip low ilvl depending on bots arena rating
-                    if (!setQuality && botRating > 1000 && botLevel == 80)
+                    // Skip low ilvl depending on bots arena rating or pvp rank
+                    if (!setQuality && (botRating > 1000 || playerPvpRank >= 10) && botLevel == 80)
                     {
-                        uint32 ratingChanges = std::min<uint32>(abs((int)botRating - 1000) / 150, 6U);
-                        uint32 extraRatingChanges = (ratingChanges > 6) ? 12 : 0;
-                        if (proto->ItemLevel < (174 + extraRatingChanges + (ratingChanges * 13))) continue;
+                        // arena rating
+                        uint32 ratingChanges = std::max(uint32(std::round(float(botRating - 1000) / 150.0)), 0U);
+
+                        // pvp rank
+                        uint32 pvpRankChanges = std::max(int(playerPvpRank) - 9, 0);
+
+                        // check if item is skipped
+                        uint32 extraChanges = ((ratingChanges > 6 || pvpRankChanges > 6) ? 12U : 0U);
+                        uint32 extraItemLevel = (std::min(std::max(ratingChanges, pvpRankChanges), 6U) * 13) + extraChanges;
+
+                        if (proto->ItemLevel < (174 + extraItemLevel))
+                            continue;
                     }
+
 
                     // Specific item slot and spec checks
                     if ((slot == EQUIPMENT_SLOT_OFFHAND && (specId == 3 || specId == 5) && !(proto->Class == ITEM_CLASS_ARMOR && proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)) ||

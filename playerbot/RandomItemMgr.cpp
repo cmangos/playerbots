@@ -3129,7 +3129,7 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
         return info->weights[specId] * 5;
 #else
     if (info->source == ITEM_SOURCE_PVP && (playerPvpRank >= 10 || isBotHighRanked))
-        return static_cast<uint32>(info->weights[specId] * 1.5);
+        return static_cast<uint32>(info->weights[specId] * (1.0f + isBotHighRanked ? 0.75f : 0.5f));
 #endif
 
     return info->weights[specId];

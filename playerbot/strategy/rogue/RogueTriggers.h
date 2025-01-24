@@ -98,8 +98,19 @@ namespace ai
 
         bool IsActive() override
         {
-            if (ai->HasAura("stealth", bot) && !bot->InBattleGround())
+            if (ai->HasAura("stealth", bot))
             {
+                if (bot->InBattleGround())
+                {
+                    if (bot->InArena())
+                        return false;
+                    
+                    // Allow stealth only when moving or no immediate threats exist
+                    return !AI_VALUE2(bool, "moving", "self target") &&
+                        !AI_VALUE(bool, "has attackers") &&
+                        !AI_VALUE(bool, "has enemy player targets");
+                }
+                
                 if (!AI_VALUE(bool, "has attackers") && !AI_VALUE(bool, "has enemy player targets"))
                 {
                     if (AI_VALUE2(bool, "moving", "self target"))
@@ -131,6 +142,9 @@ namespace ai
             {
                 return false;
             }
+
+            if (bot->InBattleGround() && bot->InArena())
+                return true;
 
             Unit* target = AI_VALUE(Unit*, "enemy player target");
             if (!target)

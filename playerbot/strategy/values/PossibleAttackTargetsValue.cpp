@@ -67,7 +67,7 @@ void PossibleAttackTargetsValue::RemoveNonThreating(std::list<ObjectGuid>& targe
             ++tIter;
             targets.erase(tIter2);
         }
-        else if (!HasIgnoreCCRti(target, bot) && HasUnBreakableCC(target, bot))
+        else if (!target->IsPlayer() && !HasIgnoreCCRti(target, bot) && HasUnBreakableCC(target, bot))
         {
             unBreakableCC.push_back(*tIter);
             std::list<ObjectGuid>::iterator tIter2 = tIter;

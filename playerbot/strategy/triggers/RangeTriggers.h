@@ -189,7 +189,7 @@ namespace ai
                     return false;
                 }
 
-                if (enemyTargetsBot && target->GetTarget() != bot)
+                if (enemyTargetsBot && target->GetSelectionGuid() != bot->GetObjectGuid())
                 {
                     return false;
                 }

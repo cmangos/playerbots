@@ -214,8 +214,6 @@ namespace ai
             creators["skill"] = [](PlayerbotAI* ai) { return new SkillAction(ai); };
             creators["faction"] = [](PlayerbotAI* ai) { return new FactionAction(ai); };
             creators["set value"] = [](PlayerbotAI* ai) { return new SetValueAction(ai); };
-
-            creators["pet-build"] = &ChatActionContext::change_pet_build;
         }
 
     private:
@@ -336,7 +334,5 @@ namespace ai
         static Action* bg_free(PlayerbotAI* ai) { return new BGLeaveAction(ai); }
         static Action* move_style(PlayerbotAI* ai) { return new MoveStyleAction(ai); }
         static Action* jump(PlayerbotAI* ai) { return new JumpAction(ai); }
-
-        static Action* change_pet_build(PlayerbotAI* ai) { return new ChangePetBuildAction(ai); }
     };
 };

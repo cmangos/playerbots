@@ -78,7 +78,6 @@
 #include "SkillAction.h"
 #include "FactionAction.h"
 #include "SetValueAction.h"
-#include "playerbot/strategy/hunter/ChangePetBuildAction.h"
 #include "PetActions.h"
 
 namespace ai

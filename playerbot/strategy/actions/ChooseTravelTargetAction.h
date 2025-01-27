@@ -49,7 +49,7 @@ namespace ai
         ChooseGroupTravelTargetAction(PlayerbotAI* ai, std::string name = "choose group travel target") : ChooseTravelTargetAction(ai, name) {}
 
         virtual bool Execute(Event& event);
-        virtual bool isUseful() { return bot->GetGroup(); }
+        virtual bool isUseful() { return ChooseTravelTargetAction::isUseful() && bot->GetGroup(); }
     };
 
     class RefreshTravelTargetAction : public ChooseTravelTargetAction {
@@ -57,7 +57,7 @@ namespace ai
         RefreshTravelTargetAction(PlayerbotAI* ai, std::string name = "refresh travel target") : ChooseTravelTargetAction(ai, name) {}
 
         virtual bool Execute(Event& event);
-        virtual bool isUseful() { return AI_VALUE(TravelTarget*, "travel target")->GetDestination()->IsActive(bot, PlayerTravelInfo(bot)) && (!WorldPosition(bot).isOverworld() || urand(1, 100) > 10); }
+        virtual bool isUseful() { return ChooseTravelTargetAction::isUseful() && AI_VALUE(TravelTarget*, "travel target")->GetDestination()->IsActive(bot, PlayerTravelInfo(bot)) && (!WorldPosition(bot).isOverworld() || urand(1, 100) > 10); }
     };
 
     using FutureDestinations = std::future<PartitionedTravelList>;

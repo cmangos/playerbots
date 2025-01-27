@@ -457,7 +457,7 @@ bool PlayerbotAIConfig::Initialize()
                         std::ostringstream out;
 
                         //Ignore bad specs.
-                        if (!familyPetBuilds[family].baseBuild.CheckBuildLink(buildLink, &out))
+                        if (!familyPetBuilds[family].baseBuild.CheckBuildLink(buildLink, family, &out))
                         {
                             sLog.outErrorDb("Error with premade hunter build link: %s", buildLink.c_str());
                             sLog.outErrorDb("%s", out.str().c_str());

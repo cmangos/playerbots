@@ -245,6 +245,7 @@ bool SetPetAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     std::string command = event.getParam();
+    HunterPetBuild* hpb = new HunterPetBuild(bot);
 
     // Extract the command and the parameters
     std::string parameter;
@@ -467,6 +468,51 @@ bool SetPetAction::Execute(Event& event)
                 listPremadePaths(getPremadePaths(""), &out);
                 ai->TellPlayer(requester, out.str());
             }
+            else if (parameter.find("get tp") != std::string::npos || parameter.find("get training points") != std::string::npos)
+            {
+                out << bot->GetPet()->GetName() << " should have " << hpb->CalculateTrainingPoints(bot) << " total training points.";
+                ai->TellPlayer(requester, out);
+            }
+            else
+            {
+                if (hpb->CheckBuildLink(parameter, pet->GetCreatureInfo()->Family, &out))
+                {
+                    HunterPetBuild newBuild(bot, parameter);
+                    std::string buildLink = newBuild.GetBuildLink();
+
+                    if (newBuild.CheckBuild(hpb->CalculateTrainingPoints(bot), &out))
+                    {
+                        newBuild.ApplyBuild(bot, &out);
+                        sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "buildNo", 0);
+                        sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "buildLink", 1, buildLink);
+                    }
+                }
+                else
+                {
+                    std::vector<HunterPetBuildPath*> paths = getPremadePaths(parameter);
+                    if (paths.size() > 0)
+                    {
+                        out.str("");
+                        out.clear();
+
+                        if (paths.size() > 1)
+                            out << "Found " << paths.size() << " possible pet builds for this family to choose from. ";
+
+                        HunterPetBuildPath* path = PickPremadePath(paths, sRandomPlayerbotMgr.IsRandomBot(bot));
+                        HunterPetBuild newBuild = *GetBestPremadeBuild(path->id);
+                        std::string buildLink = newBuild.GetBuildLink();
+                        newBuild.ApplyBuild(bot, &out);
+
+                        if (newBuild.GetTPCostOfBuild() > 0)
+                        {
+                            out << "Apply spec " << "|h|cffffffff" << path->name;
+                            sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "buildNo", path->id + 1);
+                            sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "buildLink", 0);
+                        }
+                    }
+                }
+            }
+            
         }
         else
         {
@@ -494,7 +540,6 @@ bool SetPetAction::Execute(Event& event)
 
     return false;
 }
-
 
 std::vector<HunterPetBuildPath*> SetPetAction::getPremadePaths(std::string findName)
 {
@@ -526,4 +571,57 @@ void SetPetAction::listPremadePaths(std::vector<HunterPetBuildPath*> paths, std:
 
     out->seekp(-2, out->cur);
     *out << ".";
+}
+
+HunterPetBuildPath* SetPetAction::PickPremadePath(std::vector<HunterPetBuildPath*> paths, bool useProbability)
+{
+    int totalProability = 0;
+    int curProbability = 0;
+
+    if (paths.size() == 1)
+        return paths[0];
+
+    for (auto path : paths)
+    {
+        totalProability += useProbability ? path->probability : 1;
+    }
+
+    totalProability = irand(0, totalProability);
+
+    for (auto path : paths)
+    {
+        curProbability += (useProbability ? path->probability : 1);
+        if (curProbability >= totalProability)
+            return path;
+    }
+
+    return paths[0];
+}
+
+HunterPetBuild* SetPetAction::GetBestPremadeBuild(int specId)
+{
+    HunterPetBuildPath* path = getPremadePath(specId);
+    for (auto& build : path->hunterPetBuild)
+    {
+        if (build.tpCost >= build.CalculateTrainingPoints(bot))
+            return &build;
+    }
+    if (path->hunterPetBuild.size())
+        return &path->hunterPetBuild.back();
+
+    return &sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].baseBuild;
+}
+
+HunterPetBuildPath* SetPetAction::getPremadePath(int id)
+{
+    for (auto& path : sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths)
+    {
+        if (id == path.id)
+            return &path;
+    }
+
+    if (sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths.empty())
+        return nullptr;
+
+    return &sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths[0];
 }

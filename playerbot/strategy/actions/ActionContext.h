@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GenericActions.h"
+//#include "GenericActions.h"
 #include "EmoteAction.h"
 #include "AddLootAction.h"
 #include "LootAction.h"
@@ -67,6 +67,8 @@
 #include "MoltenCoreDungeonActions.h"
 #include "KarazhanDungeonActions.h"
 #include "NaxxramasDungeonActions.h"
+
+#include "PetActions.h"
 
 namespace ai
 {

@@ -21,25 +21,67 @@ class HunterPetBuild
                 SpellId = spellId;
                 TrainingSpellId = trainingSpellId;
             }
+
+            HunterPetBuildSpellEntity()
+            {
+                Rank = -1;
+                Level = -1;
+                TPCost = -1;
+                SpellId = -1;
+                TrainingSpellId = -1;
+            }
         };
-        std::vector<HunterPetBuildSpellEntity> spells;
+
+        struct HunterPetBuildSpell
+        {
+            std::string Name;
+            uint8 Position;
+            bool IsActiveAbility;
+            std::vector<uint32> FamilyIds;
+            std::map<uint8, HunterPetBuildSpellEntity> Spells;
+
+            HunterPetBuildSpell(std::string name, uint8 position, bool isActiveAbility, std::vector<uint32> familyIds, std::map<uint8, HunterPetBuildSpellEntity> spells)
+            {
+                Name = name;
+                Position = position;
+                IsActiveAbility = isActiveAbility;
+                FamilyIds = familyIds;
+                Spells = spells;
+            }
+            HunterPetBuildSpell()
+            {
+                Name = "Bad Entry";
+                Position = -1;
+                IsActiveAbility = true;
+            }
+        };
+
+        std::vector<HunterPetBuildSpell> spells;
+        uint32 tpCost;
 
         HunterPetBuild() { InitHunterPetBuildSpellEntityList(); };
         HunterPetBuild(uint32 familyId);
         HunterPetBuild(HunterPetBuild* build, std::string buildLink);
-        HunterPetBuild(Player* bot) { InitHunterPetBuildSpellEntityList(); };
+        HunterPetBuild(Player* bot);
+        HunterPetBuild(Player* bot, std::string buildLink);
 
-        virtual bool CheckBuild(uint32 level, std::ostringstream* out);
-        bool CheckBuildLink(std::string buildLink, std::ostringstream* out);
+        virtual bool CheckBuild(uint32 tpPoints, std::ostringstream* out);
+
+        bool CheckBuildLink(std::string buildLink, uint32 familyId, std::ostringstream* out);
+
+        std::string GetBuildLink();
 
         void ReadSpells(std::string buildLink);
-        void GetSpells(uint32 familyId);
+        void ReadSpells(Player* bot);
+        void ApplyBuild(Player* bot, std::ostringstream* out);
+
+        uint32 CalculateTrainingPoints(Player* bot);
 
         uint16 GetTPCostOfBuild();
 
     private:
         uint16 TPCost = 0;
-        std::map<uint8, std::map<uint8, HunterPetBuildSpellEntity>> spellRankEntityMapping;
+        std::map<uint8, HunterPetBuildSpell> spellRankEntityMapping;
 
         void InitHunterPetBuildSpellEntityList();
       

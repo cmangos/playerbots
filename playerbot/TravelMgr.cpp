@@ -2056,36 +2056,28 @@ DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 
     WorldPosition center = info.GetPosition();
     DestinationList retDests;
 
-    //std::mutex resultMutex;
-
     for (auto& [purpose, entryDests] : destinationMap)
     {
 
         if (purposeFlag != (uint32)TravelDestinationPurpose::None && !((uint32)purpose & (uint32)purposeFlag))
             continue;
 
-        std::for_each(
-            std::execution::seq,
-            entryDests.begin(),
-            entryDests.end(),
-            [&](auto& entryDests) {
-                if (entry && entryDests.first != entry)
-                    return;
+        for (auto& [destEntry, dests] : entryDests)
+        {
+            if (entry && destEntry != entry)
+                continue;
 
-                DestinationList dests = entryDests.second;
+            for (auto& dest : dests)
+            {
+                if (onlyPossible && !dest->IsPossible(info))
+                    continue;
 
-                for (auto& dest : dests)
-                {
-                    if (onlyPossible && !dest->IsPossible(info))
-                        return;
-
-                    if (maxDistance > 0 && dest->DistanceTo(center) > maxDistance)
-                        return;
-
-                    //std::lock_guard<std::mutex> guard(resultMutex);
-                    retDests.push_back(dest);
-                }
-            });    
+                if (maxDistance > 0 && dest->DistanceTo(center) > maxDistance)
+                    continue;
+                
+                retDests.push_back(dest);
+            }
+        }
     }
 
     return retDests;
@@ -2093,7 +2085,7 @@ DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 
 
 PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const int32 entry, bool onlyPossible, float maxDistance) const
 {
-    std::unordered_map<uint32, std::vector<TravelPoint>> pointMap;
+    PartitionedTravelList pointMap;
     DestinationList destinations = GetDestinations(info, purposeFlag, entry, onlyPossible, maxDistance);
 
     bool canFightElite = info.GetBoolValue("can fight elite");
@@ -2137,21 +2129,18 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
         }
     }
 
-    PartitionedTravelList retList;
-
     for (auto& [partition, points] : pointMap)
-    {
         ShuffleTravelPoints(points);
 
-        for (auto& point : points)
-            retList[partition].push_back(point);
-    }
 
-    return retList;
+    return pointMap;
 }
 
 void TravelMgr::ShuffleTravelPoints(std::vector<TravelPoint>&points)
 {
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::shuffle(points.begin(), points.end(), std::default_random_engine(seed));
+    /*
     std::vector<uint32> weights;
     std::transform(points.begin(), points.end(), std::back_inserter(weights), [](TravelPoint point) { return 200000 / (1 + std::get<2>(point)); });
 
@@ -2168,6 +2157,7 @@ void TravelMgr::ShuffleTravelPoints(std::vector<TravelPoint>&points)
     std::mt19937 gen(time(0));
 
     WeightedShuffle(points.begin(), points.end(), weights.begin(), weights.end(), gen);
+    */
 }
 
 void TravelMgr::SetNullTravelTarget(TravelTarget* target) const

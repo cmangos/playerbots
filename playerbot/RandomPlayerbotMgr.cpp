@@ -1213,12 +1213,16 @@ void RandomPlayerbotMgr::CheckBgQueue()
 #ifdef MANGOSBOT_ONE
             if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
             {
-                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, player = player, arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
+                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, playerId = player->GetObjectGuid(), arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
                     {
                         uint32 TeamId;
                         GroupQueueInfo ginfo;
 
                         BattleGroundQueueItem* queueItem = &bgQueue->GetBattleGroundQueue(queueTypeId);
+                        Player *player = RandomPlayerbotMgr::instance().GetPlayer(playerId);
+
+                        if (!player)
+                            return;
 
                         if (queueItem->GetPlayerGroupInfoData(player->GetObjectGuid(), &ginfo))
                         {
@@ -1339,12 +1343,15 @@ void RandomPlayerbotMgr::CheckBgQueue()
             ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
             if (arenaType != ARENA_TYPE_NONE)
             {
-                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, bot = bot, arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
+                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, botId = bot->GetObjectGuid(), arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
                     {
                         uint32 TeamId;
                         GroupQueueInfo ginfo;
 
                         BattleGroundQueueItem* queueItem = &bgQueue->GetBattleGroundQueue(queueTypeId);
+                        Player *bot = RandomPlayerbotMgr::instance().GetPlayer(botId);
+                        if (!bot)
+                            return;
 
                         if (queueItem->GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
                         {

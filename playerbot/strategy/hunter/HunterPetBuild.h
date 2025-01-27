@@ -24,11 +24,11 @@ class HunterPetBuild
 
             HunterPetBuildSpellEntity()
             {
-                Rank = -1;
-                Level = -1;
-                TPCost = -1;
-                SpellId = -1;
-                TrainingSpellId = -1;
+                Rank = 0;
+                Level = 1;
+                TPCost = 0;
+                SpellId = 0;
+                TrainingSpellId = 0;
             }
         };
 
@@ -74,6 +74,7 @@ class HunterPetBuild
         void ReadSpells(std::string buildLink);
         void ReadSpells(Player* bot);
         void ApplyBuild(Player* bot, std::ostringstream* out);
+        void UnlearnCurrentSpells(Player* bot);
 
         uint32 CalculateTrainingPoints(Player* bot);
 
@@ -81,6 +82,7 @@ class HunterPetBuild
 
     private:
         uint16 TPCost = 0;
+        uint8 MaxRank = 0;
         std::map<uint8, HunterPetBuildSpell> spellRankEntityMapping;
 
         void InitHunterPetBuildSpellEntityList();

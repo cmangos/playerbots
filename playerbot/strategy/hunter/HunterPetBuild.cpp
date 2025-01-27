@@ -5,7 +5,7 @@ uint16 HunterPetBuild::GetTPCostOfBuild()
     int tpCost = 0;
     for (HunterPetBuildSpell spell : spells)
     {
-        tpCost += spell.Spells[0].TPCost;
+        tpCost += spell.Spells[spell.Spells.size() - 1].TPCost;
     }
 
     return tpCost;
@@ -403,7 +403,8 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
     {
         { 0, arcaneResistance },
         { 1, bite },
-        { 4, charge },
+        { 2, charge },
+        { 4, claw },
         { 5, cower },
         { 6, dash },
         { 8, dive },
@@ -460,9 +461,9 @@ HunterPetBuild::HunterPetBuild(Player* bot, std::string buildLink)
 // and loyalty of a given pet that check will be done separately.
 bool HunterPetBuild::CheckBuild(uint32 level, std::ostringstream* out)
 {
-    for (auto& entry : spells)
+    for (HunterPetBuildSpell entry : spells)
     {
-        if (entry.Spells[0].Level > level)
+        if (entry.Spells[entry.Spells.size() - 1].Level > level)
         {
             *out << "Build is for a higher level.";
             return false;
@@ -528,8 +529,19 @@ bool HunterPetBuild::CheckBuildLink(std::string buildLink, uint32 familyId, std:
 
 std::string HunterPetBuild::GetBuildLink()
 {
-    std::string link = "";
-    
+#ifdef MANGOSBOT_ZERO
+    std::string link = "000-000-000-000-000-000-000";
+#endif
+#ifdef MANGOSBOT_ONE
+    std::string link = "000-000-000-000-000-000-000-000-000";
+#endif
+
+    for (HunterPetBuildSpell spell : spells)
+    {
+        std::stringstream stream;
+        stream << std::hex << spell.Spells[spell.Spells.size() - 1].Rank;
+        link[spell.Position] = stream.str()[0];
+    }
     return link;
 }
 
@@ -546,7 +558,14 @@ void HunterPetBuild::ReadSpells(std::string buildLink)
             ss >> std::hex >> rank;
             HunterPetBuildSpell spell = spellRankEntityMapping[ii];
             spell.Spells.clear();
-            spell.Spells.insert({ rank, spellRankEntityMapping[ii].Spells[rank] });
+            if (rank > MaxRank)
+            {
+                MaxRank = rank;
+            }
+            for (int iii = 1; iii <= rank; iii++)
+            {
+                spell.Spells.insert({ iii, spellRankEntityMapping[ii].Spells[iii] });
+            }
             spells.push_back(spell);
         }
     }
@@ -564,7 +583,7 @@ void HunterPetBuild::ReadSpells(Player* bot)
     CreatureSpellList creatureSpellList = pet->GetSpellList();
     std::vector<uint32> spellIdList;
     
-    for (auto creatureSpell : creatureSpellList.Spells)
+    for (auto& creatureSpell : creatureSpellList.Spells)
     {
         spellIdList.push_back(creatureSpell.second.SpellId);
     }
@@ -590,10 +609,83 @@ void HunterPetBuild::ReadSpells(Player* bot)
     }
 }
 
+void HunterPetBuild::ApplyBuild(Player* bot, std::ostringstream* out)
+{
+#ifdef MANGOSBOT_ZERO
+    int maxFamilyBuilds = 27;
+#endif
+#ifdef MANGOSBOT_ONE
+    int maxFamilyBuilds = 34;
+#endif
+    HunterPetBuild currentBuild = HunterPetBuild(bot);
+    std::string currentBuildString = currentBuild.GetBuildLink();
+    std::string proposedBuildString = GetBuildLink();
+    if (currentBuildString != proposedBuildString)
+    {
+        UnlearnCurrentSpells(bot);
+        Pet* pet = bot->GetPet();
+        uint16 currentTPCost = 0;
+        uint16 maxTPCost = pet->GetLevel() * (pet->GetLoyaltyLevel() - 1);
+        for (int ii = 1; ii <= MaxRank; ii++)
+        {
+            for (int iii = 0; iii < maxFamilyBuilds; iii++)
+            {
+                if ((iii + 1) % 4 == 0)
+                    continue;
+                if (currentTPCost + spells[iii].Spells[ii].TPCost <= maxTPCost)
+                {
+                    if (ii > 1)
+                    {
+                        pet->unlearnSpell(spells[iii].Spells[ii - 1].SpellId, false);
+                        currentTPCost -= spells[iii].Spells[ii - 1].TPCost;
+                    }
+                    pet->learnSpell(spells[iii].Spells[ii].SpellId);
+                    currentTPCost += spells[iii].Spells[ii].TPCost;
+                }
+            }
+        }
+    }
+
+}
+
 uint32 HunterPetBuild::CalculateTrainingPoints(Player* bot)
 {
     Pet* pet = bot->GetPet();
     uint32 level = pet->GetLevel();
     uint32 loyalty = pet->GetLoyaltyLevel();
     return level * (loyalty - 1);
+}
+
+void HunterPetBuild::UnlearnCurrentSpells(Player* bot)
+{
+#ifdef MANGOSBOT_ZERO
+    int maxFamilyBuilds = 27;
+#endif
+#ifdef MANGOSBOT_ONE
+    int maxFamilyBuilds = 34;
+#endif
+    Pet* pet = bot->GetPet();
+    CreatureSpellList creatureSpellList = pet->GetSpellList();
+    std::vector<uint32> spellIdList;
+
+    for (auto& creatureSpell : creatureSpellList.Spells)
+    {
+        spellIdList.push_back(creatureSpell.second.SpellId);
+    }
+
+    for (int ii = 0; ii < maxFamilyBuilds; ii++)
+    {
+        if ((ii + 1) % 4 == 0)
+            continue;
+        for (auto position : spellRankEntityMapping)
+        {
+            for (auto rank : position.second.Spells)
+            {
+                if (std::find(spellIdList.begin(), spellIdList.end(), rank.second.SpellId) != spellIdList.end())
+                {
+                    pet->unlearnSpell(rank.second.SpellId, false);
+                }
+            }
+        }
+    }
 }

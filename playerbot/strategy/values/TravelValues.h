@@ -94,7 +94,7 @@ namespace ai
 
     //TravelPoint[point, destination, distance]
     using TravelPoint = std::tuple<TravelDestination*, WorldPosition*, float>;
-    using TravelPointList = std::list<TravelPoint>;
+    using TravelPointList = std::vector<TravelPoint>;
     using PartitionedTravelList = std::map<uint32, TravelPointList>;
 
     typedef std::set<uint32> focusQuestTravelList;
@@ -117,6 +117,16 @@ namespace ai
     {
     public:
         TravelDestinationsValue(PlayerbotAI* ai, std::string name = "travel destinations") : ManualSetValue<PartitionedTravelList>(ai, {}, name), Qualified() {}
+    };
+
+    //Starting to travel
+
+    class TravelTargetActiveValue : public BoolCalculatedValue, public Qualified
+    {
+    public:
+        TravelTargetActiveValue(PlayerbotAI* ai, std::string name = "travel target active", int checkInterval = 5) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {};
+
+        virtual bool Calculate();
     };
 
     class NeedTravelPurposeValue : public BoolCalculatedValue, public Qualified
@@ -143,7 +153,7 @@ namespace ai
         virtual bool Calculate() override {return WorldPosition(bot).isOverworld();}
     };
 
-    //Travel conditions
+    //Keep using this target
 
     class QuestStageActiveValue : public BoolCalculatedValue, public Qualified
     {

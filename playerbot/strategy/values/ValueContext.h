@@ -412,6 +412,8 @@ namespace ai
             //Travel
             creators["focus travel target"] = [](PlayerbotAI* ai) { return new FocusTravelTargetValue(ai); };
             creators["has focus travel target"] = [](PlayerbotAI* ai) { return new HasFocusTravelTargetValue(ai); };
+
+            creators["travel target active"] = [](PlayerbotAI* ai) { return new TravelTargetActiveValue(ai); };            
             
             creators["travel target"] = [](PlayerbotAI* ai) { return new TravelTargetValue(ai); };
             creators["travel destinations"] = [](PlayerbotAI* ai) { return new TravelDestinationsValue(ai); };

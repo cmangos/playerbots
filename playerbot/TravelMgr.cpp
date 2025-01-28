@@ -641,7 +641,7 @@ bool GatherTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 
     if (GetEntry() > 0)
     {
-        CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(GetEntry());
+        CreatureInfo const* cInfo = GetCreatureInfo();
 
         if (!cInfo)
             return false;
@@ -652,7 +652,7 @@ bool GatherTravelDestination::IsPossible(const PlayerTravelInfo& info) const
     }
     else
     {
-        GameObjectInfo const* goInfo = ObjectMgr::GetGameObjectInfo(GetEntry());
+        GameObjectInfo const* goInfo = GetGoInfo();
 
         if (!goInfo)
             return false;

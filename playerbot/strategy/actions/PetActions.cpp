@@ -466,12 +466,16 @@ bool SetPetAction::Execute(Event& event)
             else if (parameter.find("list") != std::string::npos)
             {
                 listPremadePaths(getPremadePaths(""), &out);
-                ai->TellPlayer(requester, out.str());
+                ai->TellPlayer(requester, out);
             }
             else if (parameter.find("get tp") != std::string::npos || parameter.find("get training points") != std::string::npos)
             {
-                out << bot->GetPet()->GetName() << " should have " << hpb->CalculateTrainingPoints(bot) << " total training points.";
+                out << bot->GetPet()->GetName() << " has " << hpb->CalculateTrainingPoints(bot) << " total training points.";
                 ai->TellPlayer(requester, out);
+            }
+            else if (parameter.find("build link ") != std::string::npos)
+            {
+
             }
             else
             {
@@ -508,7 +512,9 @@ bool SetPetAction::Execute(Event& event)
                             out << "Apply spec " << "|h|cffffffff" << path->name;
                             sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "buildNo", path->id + 1);
                             sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "buildLink", 0);
+
                         }
+                        ai->TellPlayer(requester, out);
                     }
                 }
             }

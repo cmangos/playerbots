@@ -56,7 +56,7 @@ class HunterPetBuild
             }
         };
 
-        std::vector<HunterPetBuildSpell> spells;
+        std::map<int, HunterPetBuildSpell> spells;
         uint32 tpCost;
 
         HunterPetBuild() { InitHunterPetBuildSpellEntityList(); };

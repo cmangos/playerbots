@@ -687,18 +687,12 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
     bool distanceCheck = true;
     std::unordered_map<TravelDestination*, bool> isActive;
 
-    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-    {
-        for (auto& [partition, travelPointList] : partitionedList)
-        {
-            ai->TellPlayerNoFacing(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(partition));
-        }
-    }
-
     bool hasTarget = false;
 
     for (auto& [partition, travelPointList] : partitionedList)
     {
+        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(partition), "debug travel");
+
         for (auto& [destination, position, distance] : travelPointList)
         {
             if (!target->IsForced() && isActive.find(destination) != isActive.end() && !isActive[destination])
@@ -709,6 +703,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
                 WorldPosition center(requester ? requester : bot);
                 if (position->distance(center) > distance * 2 && position->distance(center) > 100)
                 {
+                    ai->TellDebug(requester, "We had some destinations but we moved too far since. Trying to get a new list.", "debug travel");
                     return false;
                 }
 
@@ -1056,6 +1051,8 @@ bool RefreshTravelTargetAction::Execute(Event& event)
         ai->TellDebug(requester, "Target was not active after refresh.", "debug travel");
         return true;
     }
+
+    ai->TellDebug(requester, "Refreshed travel target", "debug travel");
 
     return false;
 }

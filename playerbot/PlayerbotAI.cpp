@@ -2348,7 +2348,7 @@ void PlayerbotAI::ResetStrategies(bool autoLoad)
     AiFactory::AddDefaultNonCombatStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_NON_COMBAT], tab);
     AiFactory::AddDefaultDeadStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_DEAD], tab);
     AiFactory::AddDefaultReactionStrategies(bot, this, reactionEngine, tab);
-    if (autoLoad && HasPlayerRelation()) sPlayerbotDbStore.Load(this);
+    if (autoLoad && HasPlayerRelation() && !bot->InBattleGround()) sPlayerbotDbStore.Load(this);
 
     for (uint8 i = 0; i < (uint8)BotState::BOT_STATE_ALL; i++)
     {

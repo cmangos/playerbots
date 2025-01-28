@@ -684,6 +684,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 //Sets the target to the best destination.
 bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* target, PartitionedTravelList& partitionedList, bool onlyActive)
 {
+    bool distanceCheck = true;
     std::unordered_map<TravelDestination*, bool> isActive;
 
     if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
@@ -702,6 +703,17 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
         {
             if (!target->IsForced() && isActive.find(destination) != isActive.end() && !isActive[destination])
                 continue;
+
+            if (distanceCheck) //Check if we have moved significantly after getting the destinations.
+            {
+                WorldPosition center(requester ? requester : bot);
+                if (position->distance(center) > distance * 2 && position->distance(center) > 100)
+                {
+                    return false;
+                }
+
+                distanceCheck = false;
+            }
 
             if(target->IsForced() || (isActive[destination] = destination->IsActive(bot, PlayerTravelInfo(bot))))
             {

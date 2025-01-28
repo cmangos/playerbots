@@ -1095,7 +1095,7 @@ bool ChooseAsyncTravelTargetAction::SetBestDestination(Event& event)
 
     TravelTarget newTarget = TravelTarget(ai);
 
-    if (actionPurpose == TravelDestinationPurpose::GenericRpg || actionPurpose == TravelDestinationPurpose::Grind || getQualifier() == "pvp" || getQualifier() == "city")
+    if (getQualifier() == "pvp" || getQualifier() == "city")
         newTarget.SetForced(true);
 
     SetBestTarget(bot, &newTarget, destinationList);

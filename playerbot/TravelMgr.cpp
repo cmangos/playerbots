@@ -349,7 +349,7 @@ bool RpgTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 {
     bool isUsefull = false;
 
-    if (GetEntry() > 0)
+    if (GetEntry() > 0 && GetPurpose() != TravelDestinationPurpose::GenericRpg)
     {
 
         CreatureInfo const* cInfo = this->GetCreatureInfo();

@@ -102,7 +102,7 @@ namespace ai
     class FocusTravelTargetValue : public ManualSetValue<focusQuestTravelList>
     {
     public:
-        FocusTravelTargetValue(PlayerbotAI* ai, focusQuestTravelList defaultValue = {}, std::string name = "forced travel target") : ManualSetValue<focusQuestTravelList>(ai, defaultValue, name) {};
+        FocusTravelTargetValue(PlayerbotAI* ai, focusQuestTravelList defaultValue = {}, std::string name = "focus travel target") : ManualSetValue<focusQuestTravelList>(ai, defaultValue, name) {};
     };
 
     class HasFocusTravelTargetValue : public BoolCalculatedValue
@@ -110,7 +110,7 @@ namespace ai
     public:
         HasFocusTravelTargetValue(PlayerbotAI* ai, std::string name = "has focus travel target", int checkInterval = 10) : BoolCalculatedValue(ai, name, checkInterval) {}
 
-        virtual bool Calculate() override { return !AI_VALUE(focusQuestTravelList, "forced travel target").empty(); };
+        virtual bool Calculate() override { return !AI_VALUE(focusQuestTravelList, "focus travel target").empty(); };
     };
 
     class TravelDestinationsValue : public ManualSetValue<PartitionedTravelList>, public Qualified

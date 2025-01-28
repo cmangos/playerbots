@@ -88,7 +88,8 @@ namespace ai
     protected:
         virtual bool isAllowed() const override;
         virtual bool RequestNewDestinations(Event& event) override;
-        virtual bool isUseful() override { return ChooseTravelTargetAction::isUseful(); };
+        virtual bool isUseful() override { return !AI_VALUE(TravelTarget*, "travel target")->IsPreparing() &&
+        ChooseTravelTargetAction::isUseful(); };
     };
 
     class ChooseAsyncQuestTravelTargetAction : public ChooseAsyncTravelTargetAction {
@@ -97,7 +98,7 @@ namespace ai
     protected:
         virtual bool isAllowed() const override;
         virtual bool RequestNewDestinations(Event& event) override;
-        virtual bool isUseful() override { return ChooseTravelTargetAction::isUseful(); };
+        virtual bool isUseful() override { return !AI_VALUE(TravelTarget*, "travel target")->IsPreparing() && ChooseTravelTargetAction::isUseful(); };
     };
 
     class FocusTravelTargetAction : public ChatCommandAction {

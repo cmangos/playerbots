@@ -85,116 +85,6 @@ std::string CastBlessingAction::GetBlessingForTarget(Unit* target)
     return chosenBlessing;
 }
 
-std::vector<std::string> CastPveBlessingAction::GetPossibleBlessingsForTarget(Unit* target) const
-{
-    std::vector<std::string> blessings;
-    if (target && target->IsPlayer())
-    {
-        Player* player = (Player*)target;
-        if (ai->IsTank(player))
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light" };
-            }
-            else
-            {
-                blessings = { "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light", "blessing of wisdom" };
-            }
-        }
-        else if (ai->IsHeal(player))
-        {
-            blessings = { "blessing of wisdom", "blessing of kings", "blessing of light", "blessing of sanctuary", "blessing of might" };
-        }
-        else
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
-            }
-            else
-            {
-                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
-            }
-        }
-    }
-
-    return blessings;
-}
-
-std::vector<std::string> CastPvpBlessingAction::GetPossibleBlessingsForTarget(Unit* target) const
-{
-    std::vector<std::string> blessings;
-    if (target && target->IsPlayer())
-    {
-        Player* player = (Player*)target;
-        if (ai->IsTank(player))
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light" };
-            }
-            else
-            {
-                blessings = { "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light", "blessing of wisdom" };
-            }
-        }
-        else if (ai->IsHeal(player))
-        {
-            blessings = { "blessing of wisdom", "blessing of kings", "blessing of light", "blessing of sanctuary", "blessing of might" };
-        }
-        else
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
-            }
-            else
-            {
-                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
-            }
-        }
-    }
-
-    return blessings;
-}
-
-std::vector<std::string> CastRaidBlessingAction::GetPossibleBlessingsForTarget(Unit* target) const
-{
-    std::vector<std::string> blessings;
-    if (target && target->IsPlayer())
-    {
-        Player* player = (Player*)target;
-        if (ai->IsTank(player))
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light" };
-            }
-            else
-            {
-                blessings = { "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light", "blessing of wisdom" };
-            }
-        }
-        else if (ai->IsHeal(player))
-        {
-            blessings = { "blessing of wisdom", "blessing of kings", "blessing of light", "blessing of sanctuary", "blessing of might" };
-        }
-        else
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
-            }
-            else
-            {
-                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
-            }
-        }
-    }
-
-    return blessings;
-}
 
 Unit* CastBlessingOnPartyAction::GetTarget()
 {
@@ -205,7 +95,9 @@ Unit* CastBlessingOnPartyAction::GetTarget()
     altBlessings.push_back("blessing of kings");
     altBlessings.push_back("blessing of sanctuary");
     altBlessings.push_back("blessing of salvation");
+#ifndef MANGOSBOT_TWO
     altBlessings.push_back("blessing of light");
+#endif
 
     for (auto blessing : altBlessings)
     {
@@ -288,161 +180,107 @@ std::string CastBlessingOnPartyAction::GetBlessingForTarget(Unit* target)
     return chosenBlessing;
 }
 
-std::vector<std::string> CastPveBlessingOnPartyAction::GetPossibleBlessingsForTarget(Unit* target) const
+std::vector<std::string> GetBlessingsForPlayerRole(Player* player, PlayerbotAI* ai)
 {
-    std::vector<std::string> blessings;
-    if (target && target->IsPlayer())
+    if (ai->IsTank(player))
     {
-        Player* player = (Player*)target;
-        if (ai->IsTank(player))
+#ifndef MANGOSBOT_TWO
+        if (player->getClass() == CLASS_PALADIN)
         {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light" };
-            }
-            else
-            {
-                blessings = { "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light", "blessing of wisdom" };
-            }
+            return { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light" };
         }
-        else if (ai->IsHeal(player))
+        return { "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light", "blessing of wisdom" };
+#else
+        return { "blessing of sanctuary", "blessing of kings", "blessing of might", "blessing of wisdom" };
+#endif 
+    }
+    else if (ai->IsHeal(player))
+    {
+#ifndef MANGOSBOT_TWO
+        return { "blessing of wisdom", "blessing of kings", "blessing of light", "blessing of sanctuary", "blessing of might" };
+#else
+        return { "blessing of wisdom", "blessing of kings", "blessing of sanctuary", "blessing of might" };
+#endif 
+    }
+    else if (ai->IsRanged(player))
+    {
+        if (player->getClass() == CLASS_HUNTER)
         {
-            blessings = { "blessing of wisdom", "blessing of kings", "blessing of light", "blessing of sanctuary", "blessing of might" };
+#ifndef MANGOSBOT_TWO
+            return { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of light", "blessing of sanctuary" };
+#else
+            return { "blessing of might", "blessing of kings", "blessing of wisdom", "blessing of sanctuary" };
+#endif 
         }
-        else if (ai->IsRanged(player))
-        {
-            if (player->getClass() == CLASS_HUNTER)
-            {
-                blessings = { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of light", "blessing of sanctuary" };
-            }
-            else
-            {
-                blessings = { "blessing of kings", "blessing of wisdom", "blessing of light", "blessing of sanctuary", "blessing of might" };
-            }
-        }
-        else
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
-            }
-            else
-            {
-                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
-            }
-        }
+#ifndef MANGOSBOT_TWO
+        return { "blessing of kings", "blessing of wisdom", "blessing of light", "blessing of sanctuary", "blessing of might" };
+#else
+        return { "blessing of kings", "blessing of wisdom", "blessing of sanctuary", "blessing of might" };
+#endif 
     }
     else
     {
-        // Blessings for pets
-        blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
+#ifndef MANGOSBOT_TWO
+        if (player->getClass() == CLASS_PALADIN)
+        {
+            return { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
+        }
+#else
+        if (player->getClass() == CLASS_WARRIOR)
+        {
+            return { "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of wisdom" };
+        }
+#endif
+#ifndef MANGOSBOT_TWO
+        return { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+#else
+        return { "blessing of might", "blessing of kings", "blessing of wisdom", "blessing of sanctuary" };
+#endif 
+    }
+}
+
+std::vector<std::string> GetBlessingsForTarget(Unit* target, PlayerbotAI* ai)
+{
+    if (target && target->IsPlayer())
+    {
+        Player* player = static_cast<Player*>(target);
+        return GetBlessingsForPlayerRole(player, ai);
     }
 
-    return blessings;
+    // Blessings for pets or non-players
+#ifndef MANGOSBOT_TWO
+    return { "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
+#else
+    return { "blessing of might", "blessing of kings", "blessing of sanctuary" };
+#endif 
+}
+
+std::vector<std::string> CastPveBlessingAction::GetPossibleBlessingsForTarget(Unit* target) const
+{
+    return GetBlessingsForTarget(target, ai);
+}
+
+std::vector<std::string> CastPvpBlessingAction::GetPossibleBlessingsForTarget(Unit* target) const
+{
+    return GetBlessingsForTarget(target, ai);
+}
+
+std::vector<std::string> CastRaidBlessingAction::GetPossibleBlessingsForTarget(Unit* target) const
+{
+    return GetBlessingsForTarget(target, ai);
+}
+
+std::vector<std::string> CastPveBlessingOnPartyAction::GetPossibleBlessingsForTarget(Unit* target) const
+{
+    return GetBlessingsForTarget(target, ai);
 }
 
 std::vector<std::string> CastPvpBlessingOnPartyAction::GetPossibleBlessingsForTarget(Unit* target) const
 {
-    std::vector<std::string> blessings;
-    if (target && target->IsPlayer())
-    {
-        Player* player = (Player*)target;
-        if (ai->IsTank(player))
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light" };
-            }
-            else
-            {
-                blessings = { "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light", "blessing of wisdom" };
-            }
-        }
-        else if (ai->IsHeal(player))
-        {
-            blessings = { "blessing of wisdom", "blessing of kings", "blessing of light", "blessing of sanctuary", "blessing of might" };
-        }
-        else if (ai->IsRanged(player))
-        {
-            if (player->getClass() == CLASS_HUNTER)
-            {
-                blessings = { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of light", "blessing of sanctuary" };
-            }
-            else
-            {
-                blessings = { "blessing of kings", "blessing of wisdom", "blessing of light", "blessing of sanctuary", "blessing of might" };
-            }
-        }
-        else
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
-            }
-            else
-            {
-                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
-            }
-        }
-    }
-    else
-    {
-        // Blessings for pets
-        blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
-    }
-
-    return blessings;
+    return GetBlessingsForTarget(target, ai);
 }
 
 std::vector<std::string> CastRaidBlessingOnPartyAction::GetPossibleBlessingsForTarget(Unit* target) const
 {
-    std::vector<std::string> blessings;
-    if (target && target->IsPlayer())
-    {
-        Player* player = (Player*)target;
-        if (ai->IsTank(player))
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light" };
-            }
-            else
-            {
-                blessings = { "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light", "blessing of wisdom" };
-            }
-        }
-        else if (ai->IsHeal(player))
-        {
-            blessings = { "blessing of wisdom", "blessing of kings", "blessing of sanctuary", "blessing of light", "blessing of might" };
-        }
-        else if (ai->IsRanged(player))
-        {
-            if (player->getClass() == CLASS_HUNTER)
-            {
-                blessings = { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of light", "blessing of sanctuary" };
-            }
-            else
-            {
-                blessings = { "blessing of kings", "blessing of wisdom", "blessing of light", "blessing of sanctuary", "blessing of might" };
-            }
-        }
-        else
-        {
-            if (player->getClass() == CLASS_PALADIN)
-            {
-                blessings = { "blessing of wisdom", "blessing of might", "blessing of kings", "blessing of light", "blessing of sanctuary" };
-            }
-            else
-            {
-                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
-            }
-        }
-    }
-    else
-    {
-        // Blessings for pets
-        blessings = { "blessing of might", "blessing of kings", "blessing of sanctuary", "blessing of light" };
-    }
-
-    return blessings;
+    return GetBlessingsForTarget(target, ai);
 }

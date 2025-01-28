@@ -369,6 +369,7 @@ namespace ai
         CastGreaterBlessingOfSanctuaryOnPartyAction(PlayerbotAI* ai) : GreaterBuffOnPartyAction(ai, "greater blessing of sanctuary") {}
     };
 
+#ifndef MANGOSBOT_TWO
     class CastBlessingOfLightAction : public CastBuffSpellAction
     {
     public:
@@ -394,6 +395,7 @@ namespace ai
     public:
         CastGreaterBlessingOfLightOnPartyAction(PlayerbotAI* ai) : GreaterBuffOnPartyAction(ai, "greater blessing of light") {}
     };
+#endif
 
     class CastBlessingOfSalvationAction : public CastBuffSpellAction
     {

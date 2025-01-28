@@ -29,7 +29,9 @@ bool BlessingTrigger::IsActive()
         altBlessings.push_back("blessing of kings");
         altBlessings.push_back("blessing of sanctuary");
         altBlessings.push_back("blessing of salvation");
+#ifndef MANGOSBOT_TWO
         altBlessings.push_back("blessing of light");
+#endif
 
         for (auto blessing : altBlessings)
         {
@@ -77,7 +79,9 @@ bool GreaterBlessingTrigger::IsActive()
         altBlessings.push_back("blessing of kings");
         altBlessings.push_back("blessing of sanctuary");
         altBlessings.push_back("blessing of salvation");
+#ifndef MANGOSBOT_TWO
         altBlessings.push_back("blessing of light");
+#endif
 
         for (auto blessing : altBlessings)
         {
@@ -117,7 +121,9 @@ bool BlessingOnPartyTrigger::IsActive()
     altBlessings.push_back("blessing of kings");
     altBlessings.push_back("blessing of sanctuary");
     altBlessings.push_back("blessing of salvation");
+#ifndef MANGOSBOT_TWO
     altBlessings.push_back("blessing of light");
+#endif
 
     for (auto blessing : altBlessings)
     {
@@ -161,7 +167,9 @@ bool GreaterBlessingOnPartyTrigger::IsActive()
     altBlessings.push_back("blessing of kings");
     altBlessings.push_back("blessing of sanctuary");
     altBlessings.push_back("blessing of salvation");
+#ifndef MANGOSBOT_TWO
     altBlessings.push_back("blessing of light");
+#endif
 
     for (auto blessing : altBlessings)
     {

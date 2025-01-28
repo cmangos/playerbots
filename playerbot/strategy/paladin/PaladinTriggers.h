@@ -125,6 +125,7 @@ namespace ai
         GreaterBlessingOfKingsOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "greater blessing of kings", "blessing of kings", 4) {}
     };
 
+#ifndef MANGOSBOT_TWO
     class BlessingOfLightOnPartyTrigger : public BuffOnPartyTrigger
     {
     public:
@@ -143,6 +144,7 @@ namespace ai
     public:
         GreaterBlessingOfLightOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "greater blessing of light", "blessing of light", 4) {}
     };
+#endif
 
     class BlessingOfSalvationOnPartyTrigger : public BuffOnPartyTrigger
     {
@@ -280,6 +282,7 @@ namespace ai
         }
     };
 
+#ifndef MANGOSBOT_TWO
     class BlessingOfLightTrigger : public BuffTrigger
     {
     public:
@@ -307,6 +310,7 @@ namespace ai
             return false;
         }
     };
+#endif
 
     class BlessingOfSalvationTrigger : public BuffTrigger
     {

@@ -311,7 +311,9 @@ namespace ai
                 creators["blessing wisdom"] = &paladin::BlessingManualStrategyFactoryInternal::blessing_wisdom;
                 creators["blessing kings"] = &paladin::BlessingManualStrategyFactoryInternal::blessing_kings;
                 creators["blessing sanctuary"] = &paladin::BlessingManualStrategyFactoryInternal::blessing_sanctuary;
+#ifndef MANGOSBOT_TWO
                 creators["blessing light"] = &paladin::BlessingManualStrategyFactoryInternal::blessing_light;
+#endif
                 creators["blessing salvation"] = &paladin::BlessingManualStrategyFactoryInternal::blessing_salvation;
             }
 
@@ -321,7 +323,9 @@ namespace ai
             static Strategy* blessing_wisdom(PlayerbotAI* ai) { return new PaladinManualBlessingStrategy(ai, "blessing wisdom", "blessing of wisdom", "blessing of wisdom"); }
             static Strategy* blessing_kings(PlayerbotAI* ai) { return new PaladinManualBlessingStrategy(ai, "blessing kings", "blessing of kings", "blessing of kings"); }
             static Strategy* blessing_sanctuary(PlayerbotAI* ai) { return new PaladinManualBlessingStrategy(ai, "blessing sanctuary", "blessing of sanctuary", "blessing of sanctuary"); }
+#ifndef MANGOSBOT_TWO
             static Strategy* blessing_light(PlayerbotAI* ai) { return new PaladinManualBlessingStrategy(ai, "blessing light", "blessing of light", "blessing of light"); }
+#endif
             static Strategy* blessing_salvation(PlayerbotAI* ai) { return new PaladinManualBlessingStrategy(ai, "blessing salvation", "blessing of salvation", "blessing of salvation"); }
         };
 
@@ -373,13 +377,17 @@ namespace ai
                 creators["blessing of wisdom"] = &TriggerFactoryInternal::blessing_of_wisdom;
                 creators["blessing of kings"] = &TriggerFactoryInternal::blessing_of_kings;
                 creators["blessing of sanctuary"] = &TriggerFactoryInternal::blessing_of_sanctuary;
+#ifndef MANGOSBOT_TWO
                 creators["blessing of light"] = &TriggerFactoryInternal::blessing_of_light;
+                creators["greater blessing of light"] = &TriggerFactoryInternal::greater_blessing_of_light;
+                creators["blessing of light on party"] = &TriggerFactoryInternal::blessing_of_light_on_party;
+                creators["greater blessing of light on party"] = &TriggerFactoryInternal::greater_blessing_of_light_on_party;
+#endif
                 creators["blessing of salvation"] = &TriggerFactoryInternal::blessing_of_salvation;
                 creators["greater blessing of might"] = &TriggerFactoryInternal::greater_blessing_of_might;
                 creators["greater blessing of wisdom"] = &TriggerFactoryInternal::greater_blessing_of_wisdom;
                 creators["greater blessing of kings"] = &TriggerFactoryInternal::greater_blessing_of_kings;
                 creators["greater blessing of sanctuary"] = &TriggerFactoryInternal::greater_blessing_of_sanctuary;
-                creators["greater blessing of light"] = &TriggerFactoryInternal::greater_blessing_of_light;
                 creators["greater blessing of salvation"] = &TriggerFactoryInternal::greater_blessing_of_salvation;
                 creators["blessing on party"] = &TriggerFactoryInternal::blessing_on_party;
                 creators["greater blessing on party"] = &TriggerFactoryInternal::greater_blessing_on_party;
@@ -387,13 +395,11 @@ namespace ai
                 creators["blessing of wisdom on party"] = &TriggerFactoryInternal::blessing_of_wisdom_on_party;
                 creators["blessing of kings on party"] = &TriggerFactoryInternal::blessing_of_kings_on_party;
                 creators["blessing of sanctuary on party"] = &TriggerFactoryInternal::blessing_of_sanctuary_on_party;
-                creators["blessing of light on party"] = &TriggerFactoryInternal::blessing_of_light_on_party;
                 creators["blessing of salvation on party"] = &TriggerFactoryInternal::blessing_of_salvation_on_party;
                 creators["greater blessing of might on party"] = &TriggerFactoryInternal::greater_blessing_of_might_on_party;
                 creators["greater blessing of wisdom on party"] = &TriggerFactoryInternal::greater_blessing_of_wisdom_on_party;
                 creators["greater blessing of kings on party"] = &TriggerFactoryInternal::greater_blessing_of_kings_on_party;
                 creators["greater blessing of sanctuary on party"] = &TriggerFactoryInternal::greater_blessing_of_sanctuary_on_party;
-                creators["greater blessing of light on party"] = &TriggerFactoryInternal::greater_blessing_of_light_on_party;
                 creators["greater blessing of salvation on party"] = &TriggerFactoryInternal::greater_blessing_of_salvation_on_party;
                 creators["no paladin aura"] = &TriggerFactoryInternal::no_paladin_aura;
                 creators["crusader aura"] = &TriggerFactoryInternal::crusader_aura;
@@ -461,8 +467,12 @@ namespace ai
             static Trigger* greater_blessing_of_wisdom(PlayerbotAI* ai) { return new GreaterBlessingOfWisdomTrigger(ai); }
             static Trigger* blessing_of_kings(PlayerbotAI* ai) { return new BlessingOfKingsTrigger(ai); }
             static Trigger* greater_blessing_of_kings(PlayerbotAI* ai) { return new GreaterBlessingOfKingsTrigger(ai); }
+#ifndef MANGOSBOT_TWO
             static Trigger* blessing_of_light(PlayerbotAI* ai) { return new BlessingOfLightTrigger(ai); }
             static Trigger* greater_blessing_of_light(PlayerbotAI* ai) { return new GreaterBlessingOfLightTrigger(ai); }
+            static Trigger* blessing_of_light_on_party(PlayerbotAI* ai) { return new BlessingOfLightOnPartyTrigger(ai); }
+            static Trigger* greater_blessing_of_light_on_party(PlayerbotAI* ai) { return new GreaterBlessingOfLightOnPartyTrigger(ai); }
+#endif
             static Trigger* blessing_of_salvation(PlayerbotAI* ai) { return new BlessingOfSalvationTrigger(ai); }
             static Trigger* greater_blessing_of_salvation(PlayerbotAI* ai) { return new GreaterBlessingOfSalvationTrigger(ai); }
             static Trigger* blessing_of_sanctuary(PlayerbotAI* ai) { return new BlessingOfSanctuaryTrigger(ai); }
@@ -475,8 +485,6 @@ namespace ai
             static Trigger* greater_blessing_of_wisdom_on_party(PlayerbotAI* ai) { return new GreaterBlessingOfWisdomOnPartyTrigger(ai); }
             static Trigger* blessing_of_kings_on_party(PlayerbotAI* ai) { return new BlessingOfKingsOnPartyTrigger(ai); }
             static Trigger* greater_blessing_of_kings_on_party(PlayerbotAI* ai) { return new GreaterBlessingOfKingsOnPartyTrigger(ai); }
-            static Trigger* blessing_of_light_on_party(PlayerbotAI* ai) { return new BlessingOfLightOnPartyTrigger(ai); }
-            static Trigger* greater_blessing_of_light_on_party(PlayerbotAI* ai) { return new GreaterBlessingOfLightOnPartyTrigger(ai); }
             static Trigger* blessing_of_salvation_on_party(PlayerbotAI* ai) { return new BlessingOfSalvationOnPartyTrigger(ai); }
             static Trigger* greater_blessing_of_salvation_on_party(PlayerbotAI* ai) { return new GreaterBlessingOfSalvationOnPartyTrigger(ai); }
             static Trigger* blessing_of_sanctuary_on_party(PlayerbotAI* ai) { return new BlessingOfSanctuaryOnPartyTrigger(ai); }
@@ -552,10 +560,12 @@ namespace ai
                 creators["greater blessing of sanctuary"] = &AiObjectContextInternal::greater_blessing_of_sanctuary;
                 creators["blessing of sanctuary on party"] = &AiObjectContextInternal::blessing_of_sanctuary_on_party;
                 creators["greater blessing of sanctuary on party"] = &AiObjectContextInternal::greater_blessing_of_sanctuary_on_party;
+#ifndef MANGOSBOT_TWO
                 creators["blessing of light"] = &AiObjectContextInternal::blessing_of_light;
                 creators["greater blessing of light"] = &AiObjectContextInternal::greater_blessing_of_light;
                 creators["blessing of light on party"] = &AiObjectContextInternal::blessing_of_light_on_party;
                 creators["greater blessing of light on party"] = &AiObjectContextInternal::greater_blessing_of_light_on_party;
+#endif
                 creators["blessing of salvation"] = &AiObjectContextInternal::blessing_of_salvation;
                 creators["greater blessing of salvation"] = &AiObjectContextInternal::greater_blessing_of_salvation;
                 creators["blessing of salvation on party"] = &AiObjectContextInternal::blessing_of_salvation_on_party;
@@ -680,10 +690,12 @@ namespace ai
             static Action* greater_blessing_of_sanctuary(PlayerbotAI* ai) { return new CastGreaterBlessingOfSanctuaryAction(ai); }
             static Action* blessing_of_sanctuary_on_party(PlayerbotAI* ai) { return new CastBlessingOfSanctuaryOnPartyAction(ai); }
             static Action* greater_blessing_of_sanctuary_on_party(PlayerbotAI* ai) { return new CastGreaterBlessingOfSanctuaryOnPartyAction(ai); }
+#ifndef MANGOSBOT_TWO
             static Action* blessing_of_light(PlayerbotAI* ai) { return new CastBlessingOfLightAction(ai); }
             static Action* greater_blessing_of_light(PlayerbotAI* ai) { return new CastGreaterBlessingOfLightAction(ai); }
             static Action* blessing_of_light_on_party(PlayerbotAI* ai) { return new CastBlessingOfLightOnPartyAction(ai); }
             static Action* greater_blessing_of_light_on_party(PlayerbotAI* ai) { return new CastGreaterBlessingOfLightOnPartyAction(ai); }
+#endif
             static Action* blessing_of_salvation(PlayerbotAI* ai) { return new CastBlessingOfSalvationAction(ai); }
             static Action* greater_blessing_of_salvation(PlayerbotAI* ai) { return new CastGreaterBlessingOfSalvationAction(ai); }
             static Action* blessing_of_salvation_on_party(PlayerbotAI* ai) { return new CastBlessingOfSalvationOnPartyAction(ai); }

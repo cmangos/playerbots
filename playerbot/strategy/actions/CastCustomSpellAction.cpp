@@ -666,7 +666,7 @@ bool CraftRandomItemAction::Execute(Event& event)
             if (GuidPosition(wot).GetGameObjectInfo()->spellFocus.focusId != pSpellInfo->RequiresSpellFocus)
                 continue;
         }
-        else
+        else if(wot != bot)
         {
             wot = nullptr;
         }

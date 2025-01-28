@@ -684,26 +684,33 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 //Sets the target to the best destination.
 bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* target, PartitionedTravelList& partitionedList, bool onlyActive)
 {
+    bool distanceCheck = true;
     std::unordered_map<TravelDestination*, bool> isActive;
-
-    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-    {
-        for (auto& [partition, travelPointList] : partitionedList)
-        {
-            ai->TellPlayerNoFacing(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(partition));
-        }
-    }
 
     bool hasTarget = false;
 
     for (auto& [partition, travelPointList] : partitionedList)
     {
+        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(partition), "debug travel");
+
         for (auto& [destination, position, distance] : travelPointList)
         {
-            if (isActive.find(destination) != isActive.end() && !isActive[destination])
+            if (!target->IsForced() && isActive.find(destination) != isActive.end() && !isActive[destination])
                 continue;
 
-            if(isActive[destination] = destination->IsActive(bot, PlayerTravelInfo(bot)))
+            if (distanceCheck) //Check if we have moved significantly after getting the destinations.
+            {
+                WorldPosition center(requester ? requester : bot);
+                if (position->distance(center) > distance * 2 && position->distance(center) > 100)
+                {
+                    ai->TellDebug(requester, "We had some destinations but we moved too far since. Trying to get a new list.", "debug travel");
+                    return false;
+                }
+
+                distanceCheck = false;
+            }
+
+            if(target->IsForced() || (isActive[destination] = destination->IsActive(bot, PlayerTravelInfo(bot))))
             {
                 if (partition != std::prev(partitionedList.end())->first && !urand(0, 10)) //10% chance to skip to a longer partition.
                 {
@@ -1039,13 +1046,15 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
     target->SetRetry(false, target->GetRetryCount(false) + 1);
 
-    if (target->IsActive())
+    if (!target->IsActive())
     {
         ai->TellDebug(requester, "Target was not active after refresh.", "debug travel");
-        return false;
+        return true;
     }
 
-    return true;
+    ai->TellDebug(requester, "Refreshed travel target", "debug travel");
+
+    return false;
 }
 
 bool ChooseAsyncTravelTargetAction::WaitForDestinations()
@@ -1082,7 +1091,17 @@ bool ChooseAsyncTravelTargetAction::SetBestDestination(Event& event)
         return false; //Nothing to set. Try getting new destinations.
 
     TravelTarget newTarget = TravelTarget(ai);
-    SetBestTarget(bot, &newTarget, destinationList);
+
+    if (getQualifier() == "pvp" || getQualifier() == "city")
+        newTarget.SetForced(true);
+
+    if (!SetBestTarget(bot, &newTarget, destinationList))
+    {
+        ai->TellDebug(ai->GetMaster(), "No target set", "debug travel");
+        hasDestinations = false;
+        destinationList.clear();
+        return false;
+    }
 
     TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
 
@@ -1125,7 +1144,12 @@ bool ChooseAsyncTravelTargetAction::RequestNewDestinations(Event& event)
 
     ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for " + TravelDestinationPurposeName.at(actionPurpose), "debug travel");
 
-    futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center, purpose = actionPurpose]() {return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)purpose); });
+    bool onlyPossible = true;
+    
+    if (actionPurpose == TravelDestinationPurpose::Grind || actionPurpose == TravelDestinationPurpose::GenericRpg)
+        onlyPossible = false;
+
+    futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center, purpose = actionPurpose, onlyPossible]() {return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)purpose,0, onlyPossible); });
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
 
@@ -1205,6 +1229,8 @@ bool ChooseAsyncTravelTargetAction::isUseful()
         if (destinationList.empty())
             return false;
     }
+    else if (!destinationList.empty())
+       destinationList.clear();
 
     return true;
 }
@@ -1249,7 +1275,7 @@ bool ChooseAsyncNamedTravelTargetAction::RequestNewDestinations(Event& event)
 
     if (name == "city")
     {
-        futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]() {return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GenericRpg); });
+        futureDestinations = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]() {return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GenericRpg, 0, false); });
     }
     else if (name == "pvp")
     {

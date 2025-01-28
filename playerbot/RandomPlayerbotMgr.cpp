@@ -226,9 +226,6 @@ double botPIDImpl::calculate(double setpoint, double pv)
     // Integral term
     _integral += error * _dt;
 
-    _integral = std::min(_integral, (double)1000);
-    _integral = std::max(_integral, (double)-1000);
-
     double Iout = _Ki * _integral;
 
     // Derivative term
@@ -290,7 +287,7 @@ RandomPlayerbotMgr::RandomPlayerbotMgr()
         //1) Proportional: Amount activity is adjusted based on diff being above or below wanted diff. (100 wanted diff & 0.1 p = 150 diff = -5% activity)
         //2) Integral: Same as proportional but builds up each tick. (100 wanted diff & 0.01 i = 150 diff = -0.5% activity each tick)
         //3) Derative: Based on speed of diff. (+5 diff last tick & 0.05 d = -0.25% activity)
-        pid.adjust(0.05,0.01,0.05);
+        pid.adjust(0.05,0.001,0.05);
         BgCheckTimer = 0;
         LfgCheckTimer = 0;
         PlayersCheckTimer = 0;
@@ -1213,12 +1210,16 @@ void RandomPlayerbotMgr::CheckBgQueue()
 #ifdef MANGOSBOT_ONE
             if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
             {
-                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, player = player, arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
+                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, playerId = player->GetObjectGuid(), arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
                     {
                         uint32 TeamId;
                         GroupQueueInfo ginfo;
 
                         BattleGroundQueueItem* queueItem = &bgQueue->GetBattleGroundQueue(queueTypeId);
+                        Player *player = RandomPlayerbotMgr::instance().GetPlayer(playerId);
+
+                        if (!player)
+                            return;
 
                         if (queueItem->GetPlayerGroupInfoData(player->GetObjectGuid(), &ginfo))
                         {
@@ -1339,12 +1340,15 @@ void RandomPlayerbotMgr::CheckBgQueue()
             ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
             if (arenaType != ARENA_TYPE_NONE)
             {
-                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, bot = bot, arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
+                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, botId = bot->GetObjectGuid(), arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
                     {
                         uint32 TeamId;
                         GroupQueueInfo ginfo;
 
                         BattleGroundQueueItem* queueItem = &bgQueue->GetBattleGroundQueue(queueTypeId);
+                        Player *bot = RandomPlayerbotMgr::instance().GetPlayer(botId);
+                        if (!bot)
+                            return;
 
                         if (queueItem->GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
                         {

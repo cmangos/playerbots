@@ -1098,7 +1098,13 @@ bool ChooseAsyncTravelTargetAction::SetBestDestination(Event& event)
     if (getQualifier() == "pvp" || getQualifier() == "city")
         newTarget.SetForced(true);
 
-    SetBestTarget(bot, &newTarget, destinationList);
+    if (!SetBestTarget(bot, &newTarget, destinationList))
+    {
+        ai->TellDebug(ai->GetMaster(), "No target set", "debug travel");
+        hasDestinations = false;
+        destinationList.clear();
+        return false;
+    }
 
     TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
 
@@ -1226,6 +1232,8 @@ bool ChooseAsyncTravelTargetAction::isUseful()
         if (destinationList.empty())
             return false;
     }
+    else if (!destinationList.empty())
+       destinationList.clear();
 
     return true;
 }

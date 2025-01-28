@@ -701,6 +701,28 @@ bool GatherTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info
     if (!IsPossible(info))
         return false;   
 
+    if (!IsOut(bot))
+    {
+        if (this->GetEntry() > 0)
+        {
+            std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
+
+            for (auto& target : targets)
+                if (target.GetEntry() == GetEntry() && target.IsCreature() && ai->GetCreature(target) && ai->GetCreature(target)->IsAlive())
+                    return true;
+        }
+        else
+        {
+            std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
+
+            for (auto& target : targets)
+                if (target.GetEntry() == GetEntry())
+                    return true;
+        }
+
+        return false;
+    }
+
     return true;
 }
 

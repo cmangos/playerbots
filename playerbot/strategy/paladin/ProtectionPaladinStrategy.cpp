@@ -1402,6 +1402,22 @@ void ProtectionPaladinCcRaidStrategy::InitNonCombatTriggers(std::list<TriggerNod
 void ProtectionPaladinCureStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinCureStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "party member rooted",
+        NextAction::array(0, new NextAction("blessing of freedom on party", ACTION_NORMAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cleanse party member cure disease",
+        NextAction::array(0, new NextAction("cleanse disease on party", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cleanse party member cure poison",
+        NextAction::array(0, new NextAction("cleanse poison on party", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cleanse party member cure magic",
+        NextAction::array(0, new NextAction("cleanse magic on party", ACTION_NORMAL + 2), NULL)));
 }
 
 void ProtectionPaladinCureStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

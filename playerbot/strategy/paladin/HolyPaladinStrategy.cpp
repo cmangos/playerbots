@@ -1035,7 +1035,6 @@ void HolyPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "critical health",
         NextAction::array(0, new NextAction("divine shield", ACTION_EMERGENCY),
-            new NextAction("divine sacrifice", ACTION_CRITICAL_HEAL + 6),
             new NextAction("aura mastery", ACTION_CRITICAL_HEAL + 5),
             new NextAction("divine favor", ACTION_CRITICAL_HEAL + 4),
             new NextAction("divine illumination", ACTION_CRITICAL_HEAL + 3),
@@ -1457,6 +1456,22 @@ void HolyPaladinCcRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
 void HolyPaladinCureStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinCureStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "party member rooted",
+        NextAction::array(0, new NextAction("blessing of freedom on party", ACTION_DISPEL + 4), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cleanse party member cure disease",
+        NextAction::array(0, new NextAction("cleanse disease on party", ACTION_DISPEL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cleanse party member cure poison",
+        NextAction::array(0, new NextAction("cleanse poison on party", ACTION_DISPEL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cleanse party member cure magic",
+        NextAction::array(0, new NextAction("cleanse magic on party", ACTION_DISPEL + 3), NULL)));
 }
 
 void HolyPaladinCureStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

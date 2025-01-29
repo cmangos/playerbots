@@ -7,28 +7,23 @@
 
 namespace ai
 {
-    class ChooseTravelTargetAction : public MovementAction {
+    class ChooseTravelTargetAction : public Action {
     public:
-        ChooseTravelTargetAction(PlayerbotAI* ai, std::string name = "choose travel target") : MovementAction(ai, name) {}
+        ChooseTravelTargetAction(PlayerbotAI* ai, std::string name = "choose travel target") : Action(ai, name) {}
 
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
-
-        void getNewTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget);
-
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     protected:
         void setNewTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget);
         void ReportTravelTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget);
 
         bool SetBestTarget(Player* requester, TravelTarget* target, PartitionedTravelList& travelPartitions, bool onlyActive = true);
 
-        bool SetNpcFlagTarget(Player* requester, TravelTarget* target, std::vector<NPCFlags> flags, std::string name = "", std::vector<uint32> items = {}, bool force = false);
+        //bool SetNpcFlagTarget(Player* requester, TravelTarget* target, std::vector<NPCFlags> flags, std::string name = "", std::vector<uint32> items = {}, bool force = false);
    
         bool SetNullTarget(TravelTarget* target);
     public:
         static DestinationList FindDestination(PlayerTravelInfo info, std::string name, bool zones = true, bool npcs = true, bool quests = true, bool mobs = true, bool bosses = true);
-    protected:
-        const std::vector<uint32> travelPartitions = { 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 10000, 50000, 100000, 500000 };
     private:
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "choose travel target"; } //Must equal iternal name
@@ -48,57 +43,51 @@ namespace ai
     public:
         ChooseGroupTravelTargetAction(PlayerbotAI* ai, std::string name = "choose group travel target") : ChooseTravelTargetAction(ai, name) {}
 
-        virtual bool Execute(Event& event);
-        virtual bool isUseful() { return ChooseTravelTargetAction::isUseful() && bot->GetGroup(); }
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 
     class RefreshTravelTargetAction : public ChooseTravelTargetAction {
     public:
         RefreshTravelTargetAction(PlayerbotAI* ai, std::string name = "refresh travel target") : ChooseTravelTargetAction(ai, name) {}
 
-        virtual bool Execute(Event& event);
-        virtual bool isUseful() { return ChooseTravelTargetAction::isUseful() && AI_VALUE(TravelTarget*, "travel target")->GetDestination()->IsActive(bot, PlayerTravelInfo(bot)) && (!WorldPosition(bot).isOverworld() || urand(1, 100) > 10); }
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 
-    using FutureDestinations = std::future<PartitionedTravelList>;
-
-    class ChooseAsyncTravelTargetAction : public ChooseTravelTargetAction, public Qualified {
+    class ResetTargetAction : public ChooseTravelTargetAction {
     public:
-        ChooseAsyncTravelTargetAction(PlayerbotAI* ai, std::string name = "choose async travel target") : ChooseTravelTargetAction(ai, name), Qualified() {}
+        ResetTargetAction(PlayerbotAI* ai, std::string name = "reset travel target") : ChooseTravelTargetAction(ai, name) {}
+
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
+    };    
+
+    class RequestTravelTargetAction : public Action, public Qualified {
+    public:
+        RequestTravelTargetAction(PlayerbotAI* ai, std::string name = "request travel target") : Action(ai, name), Qualified() {}
     protected:
-        TravelDestinationPurpose actionPurpose = TravelDestinationPurpose::None;
-
-        virtual bool RequestNewDestinations(Event& event);
-        virtual bool isAllowed() const; //We need this skip on the request instead of isUsefull to only skip the request sometimes but not the Wait and Set that could follow a nonskip.
-
-        bool hasDestinations = false;
-        PartitionedTravelList destinationList = {};
-        FutureDestinations futureDestinations;
+        const std::vector<uint32> travelPartitions = { 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 10000, 50000, 100000, 500000 };
     private:
         virtual bool Execute(Event& event) override;
-
         virtual bool isUseful() override;
-        bool WaitForDestinations();
-        bool SetBestDestination(Event& event);
+        virtual bool isAllowed() const;
     };
 
-    class ChooseAsyncNamedTravelTargetAction : public ChooseAsyncTravelTargetAction {
+    class RequestNamedTravelTargetAction : public RequestTravelTargetAction {
     public:
-        ChooseAsyncNamedTravelTargetAction(PlayerbotAI* ai, std::string name = "choose async named travel target") : ChooseAsyncTravelTargetAction(ai, name) {}
-    protected:
+        RequestNamedTravelTargetAction(PlayerbotAI* ai, std::string name = "request named travel target") : RequestTravelTargetAction(ai, name) {}
+    private:
+        virtual bool Execute(Event& event) override;
         virtual bool isAllowed() const override;
-        virtual bool RequestNewDestinations(Event& event) override;
-        virtual bool isUseful() override { return !AI_VALUE(TravelTarget*, "travel target")->IsPreparing() &&
-        ChooseTravelTargetAction::isUseful(); };
     };
 
-    class ChooseAsyncQuestTravelTargetAction : public ChooseAsyncTravelTargetAction {
+    class RequestQuestTravelTargetAction : public RequestTravelTargetAction {
     public:
-        ChooseAsyncQuestTravelTargetAction(PlayerbotAI* ai, std::string name = "choose async quest travel target") : ChooseAsyncTravelTargetAction(ai, name) {}
-    protected:
+        RequestQuestTravelTargetAction(PlayerbotAI* ai, std::string name = "choose async quest travel target") : RequestTravelTargetAction(ai, name) {}
+    private:
+        virtual bool Execute(Event& event) override;
         virtual bool isAllowed() const override;
-        virtual bool RequestNewDestinations(Event& event) override;
-        virtual bool isUseful() override { return !AI_VALUE(TravelTarget*, "travel target")->IsPreparing() && ChooseTravelTargetAction::isUseful(); };
     };
 
     class FocusTravelTargetAction : public ChatCommandAction {

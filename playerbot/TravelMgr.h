@@ -166,6 +166,7 @@ namespace ai
 		virtual GameObjectInfo const* GetGoInfo() const { return goInfo; }
 		virtual CreatureInfo const* GetCreatureInfo() const { return creatureInfo; }
 		TravelDestinationPurpose GetPurpose() const { return purpose; }
+		bool HasNpcFlag(uint32 flag) { if(GetCreatureInfo() && (GetCreatureInfo()->NpcFlags & flag)) return true; return false; }
 	private:
 		CreatureInfo const* creatureInfo = nullptr;
 		GameObjectInfo const* goInfo = nullptr;

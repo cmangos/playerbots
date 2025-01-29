@@ -414,9 +414,11 @@ namespace ai
             creators["has focus travel target"] = [](PlayerbotAI* ai) { return new HasFocusTravelTargetValue(ai); };
 
             creators["travel target active"] = [](PlayerbotAI* ai) { return new TravelTargetActiveValue(ai); };            
+            creators["travel target traveling"] = [](PlayerbotAI* ai) { return new TravelTargetTravelingValue(ai); };
             
             creators["travel target"] = [](PlayerbotAI* ai) { return new TravelTargetValue(ai); };
-            creators["travel destinations"] = [](PlayerbotAI* ai) { return new TravelDestinationsValue(ai); };
+            creators["future travel destinations"] = [](PlayerbotAI* ai) { return new FutureTravelDestinationsValue(ai); };
+            creators["no active travel destinations"] = [](PlayerbotAI* ai) { return new NoActiveTravelDestinationsValue(ai); };
             creators["need travel purpose"] = [](PlayerbotAI* ai) { return new NeedTravelPurposeValue(ai); };
             creators["should travel named"] = [](PlayerbotAI* ai) { return new ShouldTravelNamedValue(ai); };
             creators["in overworld"] = [](PlayerbotAI* ai) { return new InOverworldValue(ai); };

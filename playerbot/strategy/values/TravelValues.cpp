@@ -182,7 +182,6 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
     return entryPurposeMap;
 }
 
-
 uint32 EntryTravelPurposeMapValue::SkillIdToGatherEntry(int32 entry)
 {
     if (entry > 0)
@@ -224,7 +223,7 @@ uint32 EntryTravelPurposeMapValue::SkillIdToGatherEntry(int32 entry)
 
 bool NeedTravelPurposeValue::Calculate()
 {
-    if (AI_VALUE(TravelTarget*, "travel target")->IsActive())
+    if (AI_VALUE(bool, "travel target active"))
         return false;
 
     TravelDestinationPurpose purpose = TravelDestinationPurpose(stoi(getQualifier()));
@@ -323,6 +322,11 @@ bool ShouldTravelNamedValue::Calculate()
 bool TravelTargetActiveValue::Calculate() 
 {
     return AI_VALUE(TravelTarget*, "travel target")->IsActive(); 
+};
+
+bool TravelTargetTravelingValue::Calculate()
+{
+    return AI_VALUE(TravelTarget*, "travel target")->IsTraveling();
 };
 
 bool QuestStageActiveValue::Calculate()

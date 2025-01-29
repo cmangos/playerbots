@@ -551,6 +551,7 @@ namespace ai
                 creators["lava burst"] = &AiObjectContextInternal::lava_burst;
                 creators["lightning bolt"] = &AiObjectContextInternal::lightning_bolt;
                 creators["thunderstorm"] = &AiObjectContextInternal::thunderstorm;
+                creators["thunderstorm self"] = &AiObjectContextInternal::thunderstorm_self;
                 creators["heroism"] = &AiObjectContextInternal::heroism;
                 creators["bloodlust"] = &AiObjectContextInternal::bloodlust;
                 creators["cure disease"] = &AiObjectContextInternal::cure_disease;
@@ -580,6 +581,7 @@ namespace ai
             static Action* heroism(PlayerbotAI* ai) { return new CastHeroismAction(ai); }
             static Action* bloodlust(PlayerbotAI* ai) { return new CastBloodlustAction(ai); }
             static Action* thunderstorm(PlayerbotAI* ai) { return new CastThunderstormAction(ai); }
+            static Action* thunderstorm_self(PlayerbotAI* ai) { return new CastThunderstormSelfAction(ai); }
             static Action* lightning_bolt(PlayerbotAI* ai) { return new CastLightningBoltAction(ai); }
             static Action* chain_lightning(PlayerbotAI* ai) { return new CastChainLightningAction(ai); }
             static Action* lava_burst(PlayerbotAI* ai) { return new CastLavaBurstAction(ai); }

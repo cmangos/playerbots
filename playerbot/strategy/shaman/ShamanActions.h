@@ -388,6 +388,13 @@ namespace ai
     {
     public:
         CastThunderstormAction(PlayerbotAI* ai) : CastSpellAction(ai, "thunderstorm") {}
+        virtual bool isUseful() { Unit* target = AI_VALUE(Unit*, "current target"); return CastSpellAction::isUseful() && target && !target->IsRooted(); }
+    };
+
+    class CastThunderstormSelfAction : public CastSpellAction
+    {
+    public:
+        CastThunderstormSelfAction(PlayerbotAI* ai) : CastSpellAction(ai, "thunderstorm") {}
         virtual std::string GetTargetName() { return "self target"; }
     };
 

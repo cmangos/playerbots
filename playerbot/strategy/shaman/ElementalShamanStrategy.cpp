@@ -932,7 +932,7 @@ void ElementalShamanPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 
     triggers.push_back(new TriggerNode(
         "medium mana",
-        NextAction::array(0, new NextAction("thunderstorm", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("thunderstorm self", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

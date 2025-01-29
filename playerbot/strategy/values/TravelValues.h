@@ -94,7 +94,7 @@ namespace ai
 
     //TravelPoint[point, destination, distance]
     using TravelPoint = std::tuple<TravelDestination*, WorldPosition*, float>;
-    using TravelPointList = std::list<TravelPoint>;
+    using TravelPointList = std::vector<TravelPoint>;
     using PartitionedTravelList = std::map<uint32, TravelPointList>;
 
     typedef std::set<uint32> focusQuestTravelList;
@@ -102,7 +102,7 @@ namespace ai
     class FocusTravelTargetValue : public ManualSetValue<focusQuestTravelList>
     {
     public:
-        FocusTravelTargetValue(PlayerbotAI* ai, focusQuestTravelList defaultValue = {}, std::string name = "forced travel target") : ManualSetValue<focusQuestTravelList>(ai, defaultValue, name) {};
+        FocusTravelTargetValue(PlayerbotAI* ai, focusQuestTravelList defaultValue = {}, std::string name = "focus travel target") : ManualSetValue<focusQuestTravelList>(ai, defaultValue, name) {};
     };
 
     class HasFocusTravelTargetValue : public BoolCalculatedValue
@@ -110,13 +110,23 @@ namespace ai
     public:
         HasFocusTravelTargetValue(PlayerbotAI* ai, std::string name = "has focus travel target", int checkInterval = 10) : BoolCalculatedValue(ai, name, checkInterval) {}
 
-        virtual bool Calculate() override { return !AI_VALUE(focusQuestTravelList, "forced travel target").empty(); };
+        virtual bool Calculate() override { return !AI_VALUE(focusQuestTravelList, "focus travel target").empty(); };
     };
 
     class TravelDestinationsValue : public ManualSetValue<PartitionedTravelList>, public Qualified
     {
     public:
         TravelDestinationsValue(PlayerbotAI* ai, std::string name = "travel destinations") : ManualSetValue<PartitionedTravelList>(ai, {}, name), Qualified() {}
+    };
+
+    //Starting to travel
+
+    class TravelTargetActiveValue : public BoolCalculatedValue, public Qualified
+    {
+    public:
+        TravelTargetActiveValue(PlayerbotAI* ai, std::string name = "travel target active", int checkInterval = 5) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {};
+
+        virtual bool Calculate();
     };
 
     class NeedTravelPurposeValue : public BoolCalculatedValue, public Qualified
@@ -143,7 +153,7 @@ namespace ai
         virtual bool Calculate() override {return WorldPosition(bot).isOverworld();}
     };
 
-    //Travel conditions
+    //Keep using this target
 
     class QuestStageActiveValue : public BoolCalculatedValue, public Qualified
     {

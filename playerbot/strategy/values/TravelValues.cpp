@@ -320,6 +320,11 @@ bool ShouldTravelNamedValue::Calculate()
     return false;
 }
 
+bool TravelTargetActiveValue::Calculate() 
+{
+    return AI_VALUE(TravelTarget*, "travel target")->IsActive(); 
+};
+
 bool QuestStageActiveValue::Calculate()
 {
     uint32 questId = getMultiQualifierInt(getQualifier(), 0, ",");

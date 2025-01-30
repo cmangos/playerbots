@@ -305,7 +305,8 @@ bool BGJoinAction::canJoinBg(Player* player, BattleGroundQueueTypeId queueTypeId
     BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
 
     // check if already in queue
-    if (player->InBattleGroundQueueForBattleGroundQueueType(queueTypeId))
+    //if (player->InBattleGroundQueueForBattleGroundQueueType(queueTypeId))
+    if (player->InBattleGroundQueue())
         return false;
 
     // check too low/high level
@@ -652,7 +653,8 @@ bool BGJoinAction::JoinQueue(uint32 type)
     uint32 TeamId = GetTeamIndexByTeamId(bot->GetTeam());
 
     // check if already in queue
-    if (bot->InBattleGroundQueueForBattleGroundQueueType(queueTypeId))
+    //if (bot->InBattleGroundQueueForBattleGroundQueueType(queueTypeId))
+    if (bot->InBattleGroundQueue())
         return false;
 
     // check bg req level

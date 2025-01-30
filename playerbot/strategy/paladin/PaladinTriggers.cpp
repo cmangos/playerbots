@@ -281,3 +281,12 @@ bool ConsecrationTrigger::IsActive()
 
     return false;
 }
+
+bool HandOfFreedomTrigger::IsActive()
+{
+    uint32 spellId = AI_VALUE2(uint32, "spell id", spell);
+    if (!spellId)
+        return false;
+
+    return BuffOnPartyTrigger::IsActive() && bot->IsSpellReady(spellId) && AI_VALUE(Unit*, "party member to remove roots");
+}

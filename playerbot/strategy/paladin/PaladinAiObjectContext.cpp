@@ -441,10 +441,12 @@ namespace ai
                 creators["divine storm"] = &TriggerFactoryInternal::divine_storm;
                 creators["beacon of light"] = &TriggerFactoryInternal::beacon_of_light;
                 creators["divine illumination"] = &TriggerFactoryInternal::divine_illumination;
+                creators["hand of freedom on party"] = &TriggerFactoryInternal::hand_of_freedom_on_party;
             }
 
         private:
             static Trigger* divine_illumination(PlayerbotAI* ai) { return new DivineIlluminationBoostTrigger(ai); }
+            static Trigger* hand_of_freedom_on_party(PlayerbotAI* ai) { return new HandOfFreedomTrigger(ai); }
             static Trigger* hammer_on_enemy(PlayerbotAI* ai) { return new HammerOfJusticeOnEnemyTrigger(ai); }
             static Trigger* turn_undead(PlayerbotAI* ai) { return new TurnUndeadTrigger(ai); }
             static Trigger* divine_favor(PlayerbotAI* ai) { return new DivineFavorTrigger(ai); }

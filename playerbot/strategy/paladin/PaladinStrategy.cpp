@@ -1364,7 +1364,7 @@ void PaladinCureStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
         NextAction::array(0, new NextAction("blessing of freedom", ACTION_DISPEL), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "party member rooted",
+        "hand of freedom on party",
         NextAction::array(0, new NextAction("blessing of freedom on party", ACTION_DISPEL), NULL)));
 
     triggers.push_back(new TriggerNode(

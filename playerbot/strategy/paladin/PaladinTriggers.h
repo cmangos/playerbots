@@ -460,6 +460,7 @@ namespace ai
     };
 
     DEBUFF_TRIGGER(AvengerShieldTrigger, "avenger's shield");
+    BUFF_PARTY_TRIGGER_A(HandOfFreedomTrigger, "hand of freedom");
     BOOST_TRIGGER(DivineIlluminationBoostTrigger, "divine illumination");
     CAN_CAST_TRIGGER(HammerOfTheRighteousTrigger, "hammer of the righteous");
     CAN_CAST_TRIGGER(ShieldOfRighteousnessTrigger, "shield of righteousness");

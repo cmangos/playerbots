@@ -1458,7 +1458,7 @@ void HolyPaladinCureStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     PaladinCureStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "party member rooted",
+        "hand of freedom on party",
         NextAction::array(0, new NextAction("blessing of freedom on party", ACTION_DISPEL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(

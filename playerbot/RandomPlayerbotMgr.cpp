@@ -1135,91 +1135,49 @@ void RandomPlayerbotMgr::CheckBgQueue()
             NeedBots[j][i][1] = false;
         }
     }
-
-    for (auto i : players)
-    {
-        Player* player = i.second;
-
-        if (!player || !player->IsInWorld())
-            continue;
-
-        if (!player->InBattleGroundQueue())
-            continue;
-
-        if (player->InBattleGround() && player->GetBattleGround()->GetStatus() == STATUS_WAIT_LEAVE)
-            continue;
-
-        for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+    sWorld.GetBGQueue().GetMessager().AddMessage([](BattleGroundQueue* bgQueue)
         {
-            BattleGroundQueueTypeId queueTypeId = player->GetBattleGroundQueueTypeId(i);
-            if (queueTypeId == BATTLEGROUND_QUEUE_NONE)
-                continue;
+            for (auto i : sRandomPlayerbotMgr.players)
+            {
+                Player* player = i.second;
 
-            uint32 TeamId = player->GetTeam() == ALLIANCE ? 0 : 1;
+                if (!player || !player->IsInWorld())
+                    continue;
 
-            BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
+                if (!player->InBattleGroundQueue())
+                    continue;
+
+                if (player->InBattleGround() && player->GetBattleGround()->GetStatus() == STATUS_WAIT_LEAVE)
+                    continue;
+
+                for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+                {
+                    BattleGroundQueueTypeId queueTypeId = player->GetBattleGroundQueueTypeId(i);
+                    if (queueTypeId == BATTLEGROUND_QUEUE_NONE)
+                        continue;
+
+                    uint32 TeamId = player->GetTeam() == ALLIANCE ? 0 : 1;
+
+                    BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
 #ifndef MANGOSBOT_TWO
-            BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, player->GetLevel());
+                    BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, player->GetLevel());
 #endif
 #ifdef MANGOSBOT_TWO
-            BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
-            uint32 mapId = bg->GetMapId();
-            PvPDifficultyEntry const* pvpDiff = GetBattlegroundBracketByLevel(mapId, player->GetLevel());
-            if (!pvpDiff)
-                continue;
+                    BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
+                    uint32 mapId = bg->GetMapId();
+                    PvPDifficultyEntry const* pvpDiff = GetBattlegroundBracketByLevel(mapId, player->GetLevel());
+                    if (!pvpDiff)
+                        continue;
 
-            BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
+                    BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
 #endif
-#ifdef MANGOSBOT_TWO
-            /* to fix
-            if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
-            {
-                BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
-                GroupQueueInfo ginfo;
-                uint32 tempT = TeamId;
-
-                if (bgQueue.GetPlayerGroupInfoData(player->GetObjectGuid(), &ginfo))
-                {
-                    if (ginfo.isRated)
+#ifndef MANGOSBOT_ZERO
+                    if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
                     {
-                        for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
-                        {
-                            uint32 arena_team_id = player->GetArenaTeamId(arena_slot);
-                            ArenaTeam* arenateam = sObjectMgr.GetArenaTeamById(arena_team_id);
-                            if (!arenateam)
-                                continue;
-                            if (arenateam->GetType() != arenaType)
-                                continue;
-
-                            Rating[queueTypeId][bracketId][1] = arenateam->GetRating();
-                        }
-                    }
-                    TeamId = ginfo.isRated ? 1 : 0;
-                }
-                if (player->InArena())
-                {
-                    if (player->GetBattleGround()->IsRated())
-                        TeamId = 1;
-                    else
-                        TeamId = 0;
-                }
-                ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
-            }
-         */
-#endif
-#ifdef MANGOSBOT_ONE
-            if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
-            {
-                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, playerId = player->GetObjectGuid(), arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
-                    {
-                        uint32 TeamId;
+                        uint32 tempT = TeamId;
                         GroupQueueInfo ginfo;
 
                         BattleGroundQueueItem* queueItem = &bgQueue->GetBattleGroundQueue(queueTypeId);
-                        Player *player = RandomPlayerbotMgr::instance().GetPlayer(playerId);
-
-                        if (!player)
-                            return;
 
                         if (queueItem->GetPlayerGroupInfoData(player->GetObjectGuid(), &ginfo))
                         {
@@ -1247,108 +1205,77 @@ void RandomPlayerbotMgr::CheckBgQueue()
                                 TeamId = 0;
                         }
                         sRandomPlayerbotMgr.ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
-
                     }
-                );
-            }
 #endif
-            if (player->GetPlayerbotAI())
-                BgBots[queueTypeId][bracketId][TeamId]++;
-            else
-                BgPlayers[queueTypeId][bracketId][TeamId]++;
-
-            if (!player->IsInvitedForBattleGroundQueueType(queueTypeId) && (!player->InBattleGround() || player->GetBattleGround()->GetTypeId() != sServerFacade.BgTemplateId(queueTypeId)))
-            {
-#ifndef MANGOSBOT_ZERO
-                if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
-                {
-                    NeedBots[queueTypeId][bracketId][TeamId] = true;
-                }
-                else
-                {
-                    NeedBots[queueTypeId][bracketId][0] = true;
-                    NeedBots[queueTypeId][bracketId][1] = true;
-                }
-#else
-                NeedBots[queueTypeId][bracketId][0] = true;
-                NeedBots[queueTypeId][bracketId][1] = true;
-#endif
-            }
-        }
-    }
-
-    ForEachPlayerbot([&](Player* bot)
-    {
-        if (!bot || !bot->IsInWorld())
-            return;
-
-        if (!bot->InBattleGroundQueue())
-            return;
-
-        if (!IsFreeBot(bot))
-            return;
-
-        if (bot->InBattleGround() && bot->GetBattleGround() && bot->GetBattleGround()->GetStatus() == STATUS_WAIT_LEAVE)
-            return;
-
-        for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
-        {
-            BattleGroundQueueTypeId queueTypeId = bot->GetBattleGroundQueueTypeId(i);
-            if (queueTypeId == BATTLEGROUND_QUEUE_NONE)
-                continue;
-
-            uint32 TeamId = bot->GetTeam() == ALLIANCE ? 0 : 1;
-
-            BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
-
-#ifndef MANGOSBOT_TWO
-            BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel());;
-#endif
-#ifdef MANGOSBOT_TWO
-            BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
-            uint32 mapId = bg->GetMapId();
-            PvPDifficultyEntry const* pvpDiff = GetBattlegroundBracketByLevel(mapId, bot->GetLevel());
-            if (!pvpDiff)
-                continue;
-
-            BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
-#endif
-#ifdef MANGOSBOT_TWO
-            /* to fix
-            ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
-            if (arenaType != ARENA_TYPE_NONE)
-            {
-                BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
-                GroupQueueInfo ginfo;
-                uint32 tempT = TeamId;
-                if (bgQueue.GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
-                {
-                    TeamId = ginfo.isRated ? 1 : 0;
-                }
-                if (bot->InArena())
-                {
-                    if (bot->GetBattleGround()->IsRated())
-                        TeamId = 1;
+                    if (player->GetPlayerbotAI())
+                        sRandomPlayerbotMgr.BgBots[queueTypeId][bracketId][TeamId]++;
                     else
-                        TeamId = 0;
-                }
-                ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
-            }
-        */
-#endif
-#ifdef MANGOSBOT_ONE
-            ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
-            if (arenaType != ARENA_TYPE_NONE)
-            {
-                sWorld.GetBGQueue().GetMessager().AddMessage([queueTypeId, botId = bot->GetObjectGuid(), arenaType = arenaType, bracketId = bracketId, tempT = TeamId](BattleGroundQueue* bgQueue)
+                        sRandomPlayerbotMgr.BgPlayers[queueTypeId][bracketId][TeamId]++;
+
+                    if (!player->IsInvitedForBattleGroundQueueType(queueTypeId) && (!player->InBattleGround() || player->GetBattleGround()->GetTypeId() != sServerFacade.BgTemplateId(queueTypeId)))
                     {
-                        uint32 TeamId;
+#ifndef MANGOSBOT_ZERO
+                        if (ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId))
+                        {
+                            sRandomPlayerbotMgr.NeedBots[queueTypeId][bracketId][TeamId] = true;
+                        }
+                        else
+                        {
+                            sRandomPlayerbotMgr.NeedBots[queueTypeId][bracketId][0] = true;
+                            sRandomPlayerbotMgr.NeedBots[queueTypeId][bracketId][1] = true;
+                        }
+#else
+                        sRandomPlayerbotMgr.NeedBots[queueTypeId][bracketId][0] = true;
+                        sRandomPlayerbotMgr.NeedBots[queueTypeId][bracketId][1] = true;
+#endif
+                    }
+                }
+            }
+
+            sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
+            {
+                if (!bot || !bot->IsInWorld())
+                    return;
+
+                if (!bot->InBattleGroundQueue())
+                    return;
+
+                if (!sRandomPlayerbotMgr.IsFreeBot(bot))
+                    return;
+
+                if (bot->InBattleGround() && bot->GetBattleGround() && bot->GetBattleGround()->GetStatus() == STATUS_WAIT_LEAVE)
+                    return;
+
+                for (int i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+                {
+                    BattleGroundQueueTypeId queueTypeId = bot->GetBattleGroundQueueTypeId(i);
+                    if (queueTypeId == BATTLEGROUND_QUEUE_NONE)
+                        continue;
+
+                    uint32 TeamId = bot->GetTeam() == ALLIANCE ? 0 : 1;
+
+                    BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
+
+ #ifndef MANGOSBOT_TWO
+                    BattleGroundBracketId bracketId = sBattleGroundMgr.GetBattleGroundBracketIdFromLevel(bgTypeId, bot->GetLevel());;
+ #endif
+ #ifdef MANGOSBOT_TWO
+                    BattleGround* bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
+                    uint32 mapId = bg->GetMapId();
+                    PvPDifficultyEntry const* pvpDiff = GetBattlegroundBracketByLevel(mapId, bot->GetLevel());
+                    if (!pvpDiff)
+                        continue;
+
+                    BattleGroundBracketId bracketId = pvpDiff->GetBracketId();
+ #endif
+  #ifndef MANGOSBOT_ZERO
+                    ArenaType arenaType = sServerFacade.BgArenaType(queueTypeId);
+                    if (arenaType != ARENA_TYPE_NONE)
+                    {
+                        uint32 tempT = TeamId;
                         GroupQueueInfo ginfo;
 
                         BattleGroundQueueItem* queueItem = &bgQueue->GetBattleGroundQueue(queueTypeId);
-                        Player *bot = RandomPlayerbotMgr::instance().GetPlayer(botId);
-                        if (!bot)
-                            return;
 
                         if (queueItem->GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
                         {
@@ -1361,100 +1288,94 @@ void RandomPlayerbotMgr::CheckBgQueue()
                             else
                                 TeamId = 0;
                         }
-
-                        
-
                         sRandomPlayerbotMgr.ArenaBots[queueTypeId][bracketId][TeamId][tempT]++;
-
                     }
-                );
-            }
-#endif
-            BgBots[queueTypeId][bracketId][TeamId]++;
-        }
-    });
+ #endif      
+                    sRandomPlayerbotMgr.BgBots[queueTypeId][bracketId][TeamId]++;
+                }
+            });
 
-    for (int i = BG_BRACKET_ID_FIRST; i < MAX_BATTLEGROUND_BRACKETS; ++i)
-    {
-        for (int j = BATTLEGROUND_QUEUE_AV; j < MAX_BATTLEGROUND_QUEUE_TYPES; ++j)
-        {
-            BattleGroundQueueTypeId queueTypeId = BattleGroundQueueTypeId(j);
-
-            if ((BgPlayers[j][i][0] + BgBots[j][i][0] + BgPlayers[j][i][1] + BgBots[j][i][1]) == 0)
-                continue;
-
-#ifndef MANGOSBOT_ZERO
-            if (ArenaType type = sServerFacade.BgArenaType(queueTypeId))
+            for (int i = BG_BRACKET_ID_FIRST; i < MAX_BATTLEGROUND_BRACKETS; ++i)
             {
-                sLog.outBasic("ARENA:%s %s: Plr (Skirmish:%d, Rated:%d) Bot (Skirmish:%d, Rated:%d) Total (Skirmish:%d Rated:%d)",
-                    type == ARENA_TYPE_2v2 ? "2v2" : type == ARENA_TYPE_3v3 ? "3v3" : "5v5",
-                    i == 0 ? "10-19" : i == 1 ? "20-29" : i == 2 ? "30-39" : i == 3 ? "40-49" : i == 4 ? "50-59" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 6 ? (i == 6 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80",
-                    BgPlayers[j][i][0],
-                    BgPlayers[j][i][1],
-                    BgBots[j][i][0],
-                    BgBots[j][i][1],
-                    BgPlayers[j][i][0] + BgBots[j][i][0],
-                    BgPlayers[j][i][1] + BgBots[j][i][1]
-                );
-                continue;
-            }
+                for (int j = BATTLEGROUND_QUEUE_AV; j < MAX_BATTLEGROUND_QUEUE_TYPES; ++j)
+                {
+                    BattleGroundQueueTypeId queueTypeId = BattleGroundQueueTypeId(j);
+
+                    if ((sRandomPlayerbotMgr.BgPlayers[j][i][0] + sRandomPlayerbotMgr.BgBots[j][i][0] + sRandomPlayerbotMgr.BgPlayers[j][i][1] + sRandomPlayerbotMgr.BgBots[j][i][1]) == 0)
+                        continue;
+
+ #ifndef MANGOSBOT_ZERO
+                    if (ArenaType type = sServerFacade.BgArenaType(queueTypeId))
+                    {
+                        sLog.outBasic("ARENA:%s %s: Plr (Skirmish:%d, Rated:%d) Bot (Skirmish:%d, Rated:%d) Total (Skirmish:%d Rated:%d)",
+                            type == ARENA_TYPE_2v2 ? "2v2" : type == ARENA_TYPE_3v3 ? "3v3" : "5v5",
+                            i == 0 ? "10-19" : i == 1 ? "20-29" : i == 2 ? "30-39" : i == 3 ? "40-49" : i == 4 ? "50-59" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 6 ? (i == 6 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80",
+                            sRandomPlayerbotMgr.BgPlayers[j][i][0],
+                            sRandomPlayerbotMgr.BgPlayers[j][i][1],
+                            sRandomPlayerbotMgr.BgBots[j][i][0],
+                            sRandomPlayerbotMgr.BgBots[j][i][1],
+                            sRandomPlayerbotMgr.BgPlayers[j][i][0] + sRandomPlayerbotMgr.BgBots[j][i][0],
+                            sRandomPlayerbotMgr.BgPlayers[j][i][1] + sRandomPlayerbotMgr.BgBots[j][i][1]
+                        );
+                        continue;
+                    }
 #endif
-            BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
-            std::string _bgType;
-            std::string _bgBracket;
-            switch (bgTypeId)
-            {
-            case BATTLEGROUND_AV:
-                _bgType = "AV";
-                _bgBracket = i == 0 ? "51-60" : i == 1 ? "61-70" : i == 2 ? (i == 2 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
-                break;
-            case BATTLEGROUND_WS:
-                _bgType = "WSG";
-                _bgBracket = i == 0 ? "10-19" : i == 1 ? "20-29" : i == 2 ? "30-39" : i == 3 ? "40-49" : i == 4 ? "50-59" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 6 ? (i == 6 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
-                break;
-            case BATTLEGROUND_AB:
-                _bgType = "AB";
-                _bgBracket = i == 0 ? "20-29" : i == 1 ? "30-39" : i == 2 ? "40-49" : i == 3 ? "50-59" : (i == 4 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 4 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 5 ? (i == 5 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
-                break;
+                    BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
+                    std::string _bgType;
+                    std::string _bgBracket;
+                    switch (bgTypeId)
+                    {
+                    case BATTLEGROUND_AV:
+                        _bgType = "AV";
+                        _bgBracket = i == 0 ? "51-60" : i == 1 ? "61-70" : i == 2 ? (i == 2 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
+                        break;
+                    case BATTLEGROUND_WS:
+                        _bgType = "WSG";
+                        _bgBracket = i == 0 ? "10-19" : i == 1 ? "20-29" : i == 2 ? "30-39" : i == 3 ? "40-49" : i == 4 ? "50-59" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 6 ? (i == 6 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
+                        break;
+                    case BATTLEGROUND_AB:
+                        _bgType = "AB";
+                        _bgBracket = i == 0 ? "20-29" : i == 1 ? "30-39" : i == 2 ? "40-49" : i == 3 ? "50-59" : (i == 4 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 4 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 5 ? (i == 5 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
+                        break;
 #ifndef MANGOSBOT_ZERO
-            case BATTLEGROUND_EY:
-                _bgType = "EotS";
-                _bgBracket = i == 0 ? "61-69" : i == 1 ? (i == 1 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
-                break;
+                    case BATTLEGROUND_EY:
+                        _bgType = "EotS";
+                        _bgBracket = i == 0 ? "61-69" : i == 1 ? (i == 1 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80";
+                        break;
 #endif
 #ifdef MANGOSBOT_TWO
-            case BATTLEGROUND_RB:
-                _bgType = "Random";
-                _bgBracket = "80";
-                break;
-            case BATTLEGROUND_SA:
-                _bgType = "SotA";
-                _bgBracket = i == 0 ? "71-79" : "80";
-                break;
-            case BATTLEGROUND_IC:
-                _bgType = "IoC";
-                _bgBracket = i == 0 ? "71-79" : "80";
-                break;
+                    case BATTLEGROUND_RB:
+                        _bgType = "Random";
+                        _bgBracket = "80";
+                        break;
+                    case BATTLEGROUND_SA:
+                        _bgType = "SotA";
+                        _bgBracket = i == 0 ? "71-79" : "80";
+                        break;
+                    case BATTLEGROUND_IC:
+                        _bgType = "IoC";
+                        _bgBracket = i == 0 ? "71-79" : "80";
+                        break;
 #endif
-            default:
-                _bgType = "Other";
-                _bgBracket = "??";
-                break;
+                    default:
+                        _bgType = "Other";
+                        _bgBracket = "??";
+                        break;
+                    }
+                    sLog.outBasic("BG:%s %s: Plr (%d:%d) Bot (%d:%d) Total (A:%d H:%d)",
+                        _bgType.c_str(),
+                        _bgBracket.c_str(),
+                        sRandomPlayerbotMgr.BgPlayers[j][i][0],
+                        sRandomPlayerbotMgr.BgPlayers[j][i][1],
+                        sRandomPlayerbotMgr.BgBots[j][i][0],
+                        sRandomPlayerbotMgr.BgBots[j][i][1],
+                        sRandomPlayerbotMgr.BgPlayers[j][i][0] + sRandomPlayerbotMgr.BgBots[j][i][0],
+                        sRandomPlayerbotMgr.BgPlayers[j][i][1] + sRandomPlayerbotMgr.BgBots[j][i][1]
+                    );
+                }
             }
-            sLog.outBasic("BG:%s %s: Plr (%d:%d) Bot (%d:%d) Total (A:%d H:%d)",
-                _bgType.c_str(),
-                _bgBracket.c_str(),
-                BgPlayers[j][i][0],
-                BgPlayers[j][i][1],
-                BgBots[j][i][0],
-                BgBots[j][i][1],
-                BgPlayers[j][i][0] + BgBots[j][i][0],
-                BgPlayers[j][i][1] + BgBots[j][i][1]
-            );
-        }
-    }
-
-    sLog.outBasic("BG Queue check finished");
+            sLog.outBasic("BG Queue check finished");
+        });
     return;
 }
 

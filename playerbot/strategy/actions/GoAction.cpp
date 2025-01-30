@@ -166,56 +166,8 @@ bool GoAction::TellWhereToGo(std::string& param, Player* requester) const
     if (param.size() > 6)
         text = param.substr(6);
 
-    ChooseTravelTargetAction* travelAction = new ChooseTravelTargetAction(ai);
-
-    TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
-
-    target->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
-
-    travelAction->getNewTarget(requester, target, target);
-
-    if (!target->GetDestination() || target->GetDestination()->GetTitle().empty())
-    {
-        ai->TellPlayerNoFacing(requester, "I have no place I want to go to.");
-        return false;
-    }
-
-    std::string title = target->GetDestination()->GetTitle();
-
-    if (title.find('[') != std::string::npos)
-        title = title.substr(title.find("[") + 1, title.find("]") - title.find("[") - 1);
-
-
-    DestinationList dests;
-    TravelDestination* dest = nullptr;
-
-    dests = ChooseTravelTargetAction::FindDestination(bot, title);
-
-    if (dests.empty())
-    {
-        ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + title);
-        return false;
-    }
-
-    WorldPosition botPos(bot);
-
-    dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
-
-    if (!dest)
-        dest = target->GetDestination();
-
-    if (!dest)
-    {
-        ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + title);
-        return false;
-    }
-
-    std::string link = ChatHelper::formatValue("command", "go to " + title, title, "FF00FFFF");
-
-    ai->TellPlayerNoFacing(requester, "I would like to travel to " + link + "(" + target->GetDestination()->GetTitle() + ")");
-
-    delete travelAction;
-    return true;
+    ai->TellPlayerNoFacing(requester, "I have no place I want to go to.");
+    return false;   
 }
 
 bool GoAction::LeaderAlreadyTraveling(TravelDestination* dest) const

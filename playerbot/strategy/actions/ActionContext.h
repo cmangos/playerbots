@@ -82,13 +82,14 @@ namespace ai
             creators["choose rpg target"] = &ActionContext::choose_rpg_target;
             creators["move to rpg target"] = &ActionContext::move_to_rpg_target;
 			creators["travel"] = &ActionContext::travel;
-			creators["choose travel target"] = &ActionContext::choose_travel_target;
-			creators["move to travel target"] = &ActionContext::move_to_travel_target;
+			creators["choose travel target"] = [](PlayerbotAI* ai) { return new ChooseTravelTargetAction(ai); };
             creators["choose group travel target"] = [](PlayerbotAI* ai) { return new ChooseGroupTravelTargetAction(ai); };
             creators["refresh travel target"] = [](PlayerbotAI* ai) { return new RefreshTravelTargetAction(ai); };
-            creators["choose async travel target"] = [](PlayerbotAI* ai) { return new ChooseAsyncTravelTargetAction(ai); };
-            creators["choose async named travel target"] = [](PlayerbotAI* ai) { return new ChooseAsyncNamedTravelTargetAction(ai); };
-            creators["choose async quest travel target"] = [](PlayerbotAI* ai) { return new ChooseAsyncQuestTravelTargetAction(ai); };
+            creators["request travel target"] = [](PlayerbotAI* ai) { return new RequestTravelTargetAction(ai); };
+            creators["request named travel target"] = [](PlayerbotAI* ai) { return new RequestNamedTravelTargetAction(ai); };
+            creators["request quest travel target"] = [](PlayerbotAI* ai) { return new RequestQuestTravelTargetAction(ai); };
+            creators["reset travel target"] = [](PlayerbotAI* ai) { return new ResetTargetAction(ai); };
+            creators["move to travel target"] = &ActionContext::move_to_travel_target;
             creators["move out of collision"] = &ActionContext::move_out_of_collision;
             creators["move random"] = &ActionContext::move_random;
             creators["attack"] = &ActionContext::melee;
@@ -356,7 +357,6 @@ namespace ai
         static Action* choose_rpg_target(PlayerbotAI* ai) { return new ChooseRpgTargetAction(ai); }
         static Action* move_to_rpg_target(PlayerbotAI* ai) { return new MoveToRpgTargetAction(ai); }
         static Action* travel(PlayerbotAI* ai) { return new TravelAction(ai); }
-        static Action* choose_travel_target(PlayerbotAI* ai) { return new ChooseTravelTargetAction(ai); }
         static Action* move_to_travel_target(PlayerbotAI* ai) { return new MoveToTravelTargetAction(ai); }
         static Action* move_out_of_collision(PlayerbotAI* ai) { return new MoveOutOfCollisionAction(ai); }
         static Action* move_random(PlayerbotAI* ai) { return new MoveRandomAction(ai); }

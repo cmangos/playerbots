@@ -194,6 +194,9 @@ Unit* FlagCarrierValue::Calculate()
             if (!bg)
                 return nullptr;
 
+            if (!bg)
+                return nullptr;
+
             if (bg->GetFlagCarrierGuid().IsEmpty())
                 return nullptr;
 

@@ -7,17 +7,6 @@
 #include "playerbot/ServerFacade.h"
 using namespace ai;
 
-bool NoTravelTargetTrigger::IsActive()
-{
-    return !AI_VALUE(TravelTarget *,"travel target")->IsActive();
-}
-
-bool FarFromTravelTargetTrigger::IsActive()
-{
-    return AI_VALUE(TravelTarget*, "travel target")->IsTraveling();
-}
-
-
 bool HasNearbyQuestTakerTrigger::IsActive()
 {
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");

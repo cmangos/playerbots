@@ -96,6 +96,7 @@ namespace ai
     using TravelPoint = std::tuple<TravelDestination*, WorldPosition*, float>;
     using TravelPointList = std::vector<TravelPoint>;
     using PartitionedTravelList = std::map<uint32, TravelPointList>;
+    using FutureDestinations = std::future<PartitionedTravelList>;
 
     typedef std::set<uint32> focusQuestTravelList;
 
@@ -113,21 +114,37 @@ namespace ai
         virtual bool Calculate() override { return !AI_VALUE(focusQuestTravelList, "focus travel target").empty(); };
     };
 
-    class TravelDestinationsValue : public ManualSetValue<PartitionedTravelList>, public Qualified
+    //Target fetching
+
+    class FutureTravelDestinationsValue : public ManualSetValue<FutureDestinations*>
     {
     public:
-        TravelDestinationsValue(PlayerbotAI* ai, std::string name = "travel destinations") : ManualSetValue<PartitionedTravelList>(ai, {}, name), Qualified() {}
+        FutureTravelDestinationsValue(PlayerbotAI* ai, std::string name = "future travel destinations") : ManualSetValue<FutureDestinations*>(ai, new FutureDestinations, name) {}
+
+        ~FutureTravelDestinationsValue() { delete value; }
     };
 
-    //Starting to travel
-
-    class TravelTargetActiveValue : public BoolCalculatedValue, public Qualified
+    class NoActiveTravelDestinationsValue : public ManualSetValue<bool>, public Qualified
     {
     public:
-        TravelTargetActiveValue(PlayerbotAI* ai, std::string name = "travel target active", int checkInterval = 5) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {};
-
-        virtual bool Calculate();
+        NoActiveTravelDestinationsValue(PlayerbotAI* ai, std::string name = "no active travel destinations") : ManualSetValue<bool>(ai, {}, name), Qualified() {}
     };
+
+    class TravelTargetActiveValue : public BoolCalculatedValue
+    {
+    public:
+        TravelTargetActiveValue(PlayerbotAI* ai, std::string name = "travel target active", int checkInterval = 5) : BoolCalculatedValue(ai, name, checkInterval) {};
+
+        virtual bool Calculate() override;
+    };
+
+    class TravelTargetTravelingValue : public BoolCalculatedValue
+    {
+    public:
+        TravelTargetTravelingValue(PlayerbotAI* ai, std::string name = "travel target traveling", int checkInterval = 5) : BoolCalculatedValue(ai, name, checkInterval){};
+
+        virtual bool Calculate() override;
+    };    
 
     class NeedTravelPurposeValue : public BoolCalculatedValue, public Qualified
     {
@@ -160,6 +177,6 @@ namespace ai
     public:
         QuestStageActiveValue(PlayerbotAI* ai, std::string name = "quest stage active", int checkInterval = 1) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {};
 
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 }

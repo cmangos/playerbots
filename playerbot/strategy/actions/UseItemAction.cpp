@@ -980,8 +980,6 @@ bool UseAction::UseGemItem(Player* requester, Item* item, Item* gem, bool replac
 
     if (fits)
     {
-        bot->GetSession()->HandleSocketOpcode(*packet);
-
         if (verbose)
         {
             std::map<std::string, std::string> replyArgs;
@@ -989,6 +987,8 @@ bool UseAction::UseGemItem(Player* requester, Item* item, Item* gem, bool replac
             replyArgs["%gem"] = chat->formatItem(gem);
             ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_socket", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
+
+        bot->GetSession()->HandleSocketOpcode(*packet);
 
         return true;
     }

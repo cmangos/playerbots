@@ -63,7 +63,7 @@ class HunterPetBuild
         HunterPetBuild(uint32 familyId);
         HunterPetBuild(HunterPetBuild* build, std::string buildLink);
         HunterPetBuild(Player* bot);
-        HunterPetBuild(Player* bot, std::string buildLink);
+        HunterPetBuild(std::string buildLink);
 
         virtual bool CheckBuild(uint32 tpPoints, std::ostringstream* out);
 
@@ -92,8 +92,8 @@ class HunterPetBuild
 class HunterPetBuildPath {
     public: 
         HunterPetBuildPath(int pathId, std::string pathName, int pathProbability) { id = pathId; name = pathName; probability = pathProbability; };
-
-        int id = 0;
+        HunterPetBuildPath() {};
+        int id = -1;
         std::string name = "";
         int probability = 100;
 
@@ -102,11 +102,14 @@ class HunterPetBuildPath {
 
 class FamilyPetBuilds {
 public:
-    FamilyPetBuilds() {};
     FamilyPetBuilds(uint32 familyBuildId) { familyId = familyBuildId; baseBuild = HunterPetBuild(familyBuildId); };
+    FamilyPetBuilds() { };
+
 
     uint32 familyId = 0;
     HunterPetBuild baseBuild;
 
     std::vector<HunterPetBuildPath> hunterPetBuildPaths;
+
+    HunterPetBuildPath GetBuildPath(int buildNo);
 };

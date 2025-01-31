@@ -11,11 +11,23 @@ namespace ai
         bool isUseful() override;
     };
 
+    class InitializePetSpellsAction : public Action
+    {
+    public:
+        InitializePetSpellsAction(PlayerbotAI* ai) : Action(ai, "initialize pet spells") {}
+        bool Execute(Event& event) override;
+        bool isUseful() override;
+        HunterPetBuildPath* PickPremadePath(std::vector<HunterPetBuildPath*> paths, bool useProbability);
+        HunterPetBuild* GetBestPremadeBuild(int specId);
+        HunterPetBuildPath* getPremadePath(int id);
+    };
+
     class SetPetAction : public Action
     {
     public:
         SetPetAction(PlayerbotAI* ai) : Action(ai, "pet") {}
         bool Execute(Event& event) override;
+        virtual bool AutoSelectBuild(Player* bot, std::ostringstream* out);
 
     private:
         std::vector<HunterPetBuildPath*> getPremadePaths(std::string findName);

@@ -681,8 +681,29 @@ void PlayerbotFactory::InitPetSpells()
     {
         if (bot->getClass() == CLASS_HUNTER)
         {
-            // TO DO
-            // ...
+            bool hasTamedPet = bot->GetPet();
+            if (hasTamedPet)
+            {
+
+                HunterPetBuild currentBuild = HunterPetBuild(bot);
+                HunterPetBuild* proposedBuild;
+                std::string buildLink = "";
+                HunterPetBuildPath hpbp;
+                switch (sPlayerbotDbStore.PetHasBuilds(bot->GetPet()->GetGUIDLow()))
+                {
+                case 0:
+                    ai->DoSpecificAction("pet", Event("pet", "build set random"));
+                    break;
+                case 1:
+                    hpbp = sPlayerbotDbStore.LoadPetBuildPath(bot->GetPet()->GetGUIDLow());
+                    ai->DoSpecificAction("pet build set " + hpbp.id);
+                    break;
+                case 2:
+                    buildLink = sPlayerbotDbStore.LoadPetBuildLink(bot->GetPet()->GetGUIDLow());
+                    ai->DoSpecificAction("pet build set " + buildLink);
+                    break;
+                }
+            }
         }
 // Warlock pets should auto learn spells in WOTLK
 #ifndef MANGOSBOT_TWO

@@ -9,7 +9,6 @@ bool InitializePetAction::Execute(Event& event)
 {
     PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_LEGENDARY);
     factory.InitPet();
-    factory.InitPetSpells();
     return true;
 }
 
@@ -39,8 +38,54 @@ bool InitializePetAction::isUseful()
 
             return !hasTamedPet;
         }
-        // Warlock pets should auto learn spells in WOTLK
+    }
+    return false;
+}
+
+bool InitializePetSpellsAction::Execute(Event& event)
+{
+    PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_LEGENDARY);
+    factory.InitPetSpells();
+    return true;
+}
+
+bool InitializePetSpellsAction::isUseful()
+{
+    // Only for random bots with item cheats enabled
+    if ((ai->HasCheat(BotCheatMask::item) && sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId())) ||
+        // Or if alt bot and autoLearnTrainerSpells is true
+        (!sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId()) && sPlayerbotAIConfig.autoLearnTrainerSpells))
+    {
+        if (bot->getClass() == CLASS_HUNTER && bot->GetLevel() >= 10)
+        {
+            bool hasTamedPet = bot->GetPet();
+            if (hasTamedPet)
+            {
+
+                HunterPetBuild currentBuild = HunterPetBuild(bot);
+                HunterPetBuild* proposedBuild;
+                std::string buildLink = "";
+                HunterPetBuildPath hpbp;
+                switch (sPlayerbotDbStore.PetHasBuilds(bot->GetPet()->GetGUIDLow()))
+                {
+                    case 0:
+                        return true;
+                    case 1:
+                        hpbp = sPlayerbotDbStore.LoadPetBuildPath(bot->GetPet()->GetGUIDLow());
+                        proposedBuild = GetBestPremadeBuild(hpbp.id);
+                        return !(proposedBuild->GetBuildLink() == currentBuild.GetBuildLink());
+                    case 2:
+                        buildLink = sPlayerbotDbStore.LoadPetBuildLink(bot->GetPet()->GetGUIDLow());
+                        return !(buildLink == currentBuild.GetBuildLink());
+                    default:
+                        // incorrect value returned
+                        return false;
+                }
+            }
+            return false;
+        }
 #ifndef MANGOSBOT_TWO
+        // Warlock pets should auto learn spells in WOTLK
         else if (bot->getClass() == CLASS_WARLOCK)
         {
             // Only initialize if warlock has the pet summoned
@@ -235,10 +280,8 @@ bool InitializePetAction::isUseful()
                 }
             }
         }
-#endif
     }
-
-    return false;
+#endif
 }
 
 bool SetPetAction::Execute(Event& event)
@@ -457,68 +500,101 @@ bool SetPetAction::Execute(Event& event)
         }
         else if (command == "build")
         {
-            std::ostringstream out;
-            if (parameter.find("list ") != std::string::npos)
+            if (bot->getClass() == CLASS_HUNTER)
             {
-                listPremadePaths(getPremadePaths(parameter.substr(5)), &out);
-                ai->TellPlayer(requester, out.str());
-            }
-            else if (parameter.find("list") != std::string::npos)
-            {
-                listPremadePaths(getPremadePaths(""), &out);
-                ai->TellPlayer(requester, out);
-            }
-            else if (parameter.find("get tp") != std::string::npos || parameter.find("get training points") != std::string::npos)
-            {
-                out << bot->GetPet()->GetName() << " has " << hpb->CalculateTrainingPoints(bot) << " total training points.";
-                ai->TellPlayer(requester, out);
-            }
-            else if (parameter.find("build link ") != std::string::npos)
-            {
+                std::ostringstream out;
+                if (parameter.find("list ") != std::string::npos)
+                {
+                    listPremadePaths(getPremadePaths(parameter.substr(5)), &out);
+                    ai->TellPlayer(requester, out.str());
+                }
+                else if (parameter.find("list") != std::string::npos)
+                {
+                    listPremadePaths(getPremadePaths(""), &out);
+                    ai->TellPlayer(requester, out);
+                }
+                else if (parameter.find("get tp") != std::string::npos || parameter.find("get training points") != std::string::npos)
+                {
+                    out << bot->GetPet()->GetName() << " has " << hpb->CalculateTrainingPoints(bot) << " total training points.";
+                    ai->TellPlayer(requester, out);
+                }
+                else if (parameter.find("update") != std::string::npos)
+                {
+                    ai->TellPlayer(requester, "Not working, still in progress.");
+                }
+                else if (parameter.find("set ") != std::string::npos)
+                {
+                    if (parameter.substr(4).find("random") != std::string::npos)
+                    {
+                        std::vector<HunterPetBuildPath*> paths = getPremadePaths("");
+                        if (paths.size() > 0)
+                        {
+                            out.str("");
+                            out.clear();
 
+                            if (paths.size() > 1)
+                                out << "Found " << paths.size() << " possible pet builds for this family to choose from. ";
+
+                            HunterPetBuildPath* path = PickPremadePath(paths, sRandomPlayerbotMgr.IsRandomBot(bot));
+                            HunterPetBuild newBuild = *GetBestPremadeBuild(path->id);
+                            std::string buildLink = newBuild.GetBuildLink();
+                            newBuild.ApplyBuild(bot, &out);
+
+                            if (newBuild.GetTPCostOfBuild() > 0)
+                            {
+                                out << "Apply spec " << "|h|cffffffff" << path->name;
+                                sPlayerbotDbStore.SavePetBuildPath(pet->GetGUIDLow(), pet->GetCreatureInfo()->Family, path->id);
+
+                            }
+                            ai->TellPlayer(requester, out);
+                        }
+                    }
+                    else
+                    {
+                        if (hpb->CheckBuildLink(parameter, pet->GetCreatureInfo()->Family, &out))
+                        {
+                            HunterPetBuild newBuild(parameter);
+                            std::string buildLink = newBuild.GetBuildLink();
+
+                            if (newBuild.CheckBuild(hpb->CalculateTrainingPoints(bot), &out))
+                            {
+                                newBuild.ApplyBuild(bot, &out);
+                                sPlayerbotDbStore.SavePetBuildLink(pet->GetGUIDLow(), buildLink);
+                            }
+                        }
+                        else
+                        {
+                            parameter = parameter.substr(4);
+                            std::vector<HunterPetBuildPath*> paths = getPremadePaths(parameter);
+                            if (paths.size() > 0)
+                            {
+                                out.str("");
+                                out.clear();
+
+                                if (paths.size() > 1)
+                                    out << "Found " << paths.size() << " possible pet builds for this family to choose from. ";
+
+                                HunterPetBuildPath* path = PickPremadePath(paths, false);
+                                HunterPetBuild newBuild = *GetBestPremadeBuild(path->id);
+                                std::string buildLink = newBuild.GetBuildLink();
+                                newBuild.ApplyBuild(bot, &out);
+
+                                if (newBuild.GetTPCostOfBuild() > 0)
+                                {
+                                    out << "Apply spec " << "|h|cffffffff" << path->name;
+                                    sPlayerbotDbStore.SavePetBuildPath(pet->GetGUIDLow(), pet->GetCreatureInfo()->Family, path->id);
+
+                                }
+                                ai->TellPlayer(requester, out);
+                            }
+                        }
+                    }
+                }
             }
             else
             {
-                if (hpb->CheckBuildLink(parameter, pet->GetCreatureInfo()->Family, &out))
-                {
-                    HunterPetBuild newBuild(bot, parameter);
-                    std::string buildLink = newBuild.GetBuildLink();
-
-                    if (newBuild.CheckBuild(hpb->CalculateTrainingPoints(bot), &out))
-                    {
-                        newBuild.ApplyBuild(bot, &out);
-                        sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "buildNo", 0);
-                        sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "buildLink", 1, buildLink);
-                    }
-                }
-                else
-                {
-                    std::vector<HunterPetBuildPath*> paths = getPremadePaths(parameter);
-                    if (paths.size() > 0)
-                    {
-                        out.str("");
-                        out.clear();
-
-                        if (paths.size() > 1)
-                            out << "Found " << paths.size() << " possible pet builds for this family to choose from. ";
-
-                        HunterPetBuildPath* path = PickPremadePath(paths, sRandomPlayerbotMgr.IsRandomBot(bot));
-                        HunterPetBuild newBuild = *GetBestPremadeBuild(path->id);
-                        std::string buildLink = newBuild.GetBuildLink();
-                        newBuild.ApplyBuild(bot, &out);
-
-                        if (newBuild.GetTPCostOfBuild() > 0)
-                        {
-                            out << "Apply spec " << "|h|cffffffff" << path->name;
-                            sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "buildNo", path->id + 1);
-                            sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "buildLink", 0);
-
-                        }
-                        ai->TellPlayer(requester, out);
-                    }
-                }
+                ai->TellPlayer(requester, "pet build and its sub commands are hunter only commands.");
             }
-            
         }
         else
         {
@@ -544,6 +620,31 @@ bool SetPetAction::Execute(Event& event)
         ai->TellPlayer(requester, "I don't have any pets");
     }
 
+    return false;
+}
+
+bool SetPetAction::AutoSelectBuild(Player* bot, std::ostringstream* out)
+{
+    HunterPetBuild currentBuild = HunterPetBuild(bot);
+    HunterPetBuildPath path = sPlayerbotDbStore.LoadPetBuildPath(bot->GetPet()->GetGUIDLow());
+    if (path.id >= 0)
+    {
+        HunterPetBuild* build = GetBestPremadeBuild(path.id);
+        if (currentBuild.GetBuildLink() != build->GetBuildLink())
+        {
+            build->ApplyBuild(bot, out);
+            return true;
+        }
+    }
+    else
+    {
+        std::string buildLink = sPlayerbotDbStore.LoadPetBuildLink(bot->GetPet()->GetGUIDLow());
+        if (buildLink != "")
+        {
+            HunterPetBuild build = HunterPetBuild(buildLink);
+
+        }
+    }
     return false;
 }
 
@@ -619,6 +720,59 @@ HunterPetBuild* SetPetAction::GetBestPremadeBuild(int specId)
 }
 
 HunterPetBuildPath* SetPetAction::getPremadePath(int id)
+{
+    for (auto& path : sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths)
+    {
+        if (id == path.id)
+            return &path;
+    }
+
+    if (sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths.empty())
+        return nullptr;
+
+    return &sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths[0];
+}
+
+HunterPetBuildPath* InitializePetSpellsAction::PickPremadePath(std::vector<HunterPetBuildPath*> paths, bool useProbability)
+{
+    int totalProability = 0;
+    int curProbability = 0;
+
+    if (paths.size() == 1)
+        return paths[0];
+
+    for (auto path : paths)
+    {
+        totalProability += useProbability ? path->probability : 1;
+    }
+
+    totalProability = irand(0, totalProability);
+
+    for (auto path : paths)
+    {
+        curProbability += (useProbability ? path->probability : 1);
+        if (curProbability >= totalProability)
+            return path;
+    }
+
+    return paths[0];
+}
+
+HunterPetBuild* InitializePetSpellsAction::GetBestPremadeBuild(int specId)
+{
+    HunterPetBuildPath* path = getPremadePath(specId);
+    for (auto& build : path->hunterPetBuild)
+    {
+        if (build.tpCost >= build.CalculateTrainingPoints(bot))
+            return &build;
+    }
+    if (path->hunterPetBuild.size())
+        return &path->hunterPetBuild.back();
+
+    return &sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].baseBuild;
+}
+
+HunterPetBuildPath* InitializePetSpellsAction::getPremadePath(int id)
 {
     for (auto& path : sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths)
     {

@@ -451,7 +451,7 @@ HunterPetBuild::HunterPetBuild(Player* bot)
     ReadSpells(bot);
 }
 
-HunterPetBuild::HunterPetBuild(Player* bot, std::string buildLink)
+HunterPetBuild::HunterPetBuild(std::string buildLink)
 {
     InitHunterPetBuildSpellEntityList();
     ReadSpells(buildLink);
@@ -583,29 +583,32 @@ void HunterPetBuild::ReadSpells(Player* bot)
     int maxFamilyBuilds = 34;
 #endif
     Pet* pet = bot->GetPet();
-    CreatureSpellList creatureSpellList = pet->GetSpellList();
-    std::vector<uint32> spellIdList;
-    
-    for (auto& creatureSpell : creatureSpellList.Spells)
+    if (pet)
     {
-        spellIdList.push_back(creatureSpell.second.SpellId);
-    }
+        CreatureSpellList creatureSpellList = pet->GetSpellList();
+        std::vector<uint32> spellIdList;
 
-    for (int ii = 0; ii < maxFamilyBuilds; ii++)
-    {
-        if ((ii + 1) % 4 == 0)
-            continue;
-        for (auto position : spellRankEntityMapping)
+        for (auto& creatureSpell : creatureSpellList.Spells)
         {
-            for (auto rank : position.second.Spells)
+            spellIdList.push_back(creatureSpell.second.SpellId);
+        }
+
+        for (int ii = 0; ii < maxFamilyBuilds; ii++)
+        {
+            if ((ii + 1) % 4 == 0)
+                continue;
+            for (auto position : spellRankEntityMapping)
             {
-                if (std::find(spellIdList.begin(), spellIdList.end(), rank.second.SpellId) != spellIdList.end())
+                for (auto rank : position.second.Spells)
                 {
-                    HunterPetBuildSpell spell = spellRankEntityMapping[ii];
-                    spell.Spells.clear();
-                    spell.Spells.insert({ rank.second.Rank, spellRankEntityMapping[ii].Spells[rank.second.Rank]});
-                    spells[ii] = spell;
-                    break;
+                    if (std::find(spellIdList.begin(), spellIdList.end(), rank.second.SpellId) != spellIdList.end())
+                    {
+                        HunterPetBuildSpell spell = spellRankEntityMapping[ii];
+                        spell.Spells.clear();
+                        spell.Spells.insert({ rank.second.Rank, spellRankEntityMapping[ii].Spells[rank.second.Rank] });
+                        spells[ii] = spell;
+                        break;
+                    }
                 }
             }
         }
@@ -695,4 +698,17 @@ void HunterPetBuild::UnlearnCurrentSpells(Player* bot)
             }
         }
     }
+}
+
+HunterPetBuildPath FamilyPetBuilds::GetBuildPath(int buildNo)
+{
+    HunterPetBuildPath foundPath;
+    for (HunterPetBuildPath path : hunterPetBuildPaths)
+    {
+        if (buildNo == path.id)
+        {
+            return path;
+        }
+    }
+    return foundPath;
 }

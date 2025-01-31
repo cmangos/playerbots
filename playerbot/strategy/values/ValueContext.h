@@ -372,6 +372,9 @@ namespace ai
             creators["group ready"] = [](PlayerbotAI* ai) { return new GroupReadyValue(ai); };
 
             creators["petition signs"] = [](PlayerbotAI* ai) { return new PetitionSignsValue(ai); };
+            creators["can hand in petition"] = [](PlayerbotAI* ai) { return new CanHandInPetitionValue(ai); };
+            creators["can buy tabard"] = [](PlayerbotAI* ai) { return new CanBuyTabard(ai); };
+            
 
             creators["experience"] = [](PlayerbotAI* ai) { return new ExperienceValue(ai); };
             creators["honor"] = [](PlayerbotAI* ai) { return new HonorValue(ai); };

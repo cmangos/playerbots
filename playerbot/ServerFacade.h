@@ -215,6 +215,11 @@ class ServerFacade
 #endif
         }
 
+        bool IsWithinStaticLOSInMap(Player* bot, WorldObject* wo) const
+        {
+            return wo->IsInMap(bot) ? WorldPosition(wo).IsInStaticLineOfSight(WorldPosition(bot)) : false;
+        }
+
         bool IsDistanceLessThan(float dist1, float dist2);
         bool IsDistanceGreaterThan(float dist1, float dist2);
         bool IsDistanceGreaterOrEqualThan(float dist1, float dist2);

@@ -4806,7 +4806,7 @@ bool BGTactics::atFlag(std::vector<BattleBotPath*> const& vPaths, std::vector<ui
     case BATTLEGROUND_IC:
 #endif
     {
-        closeObjects = *context->GetValue<std::list<ObjectGuid> >("closest game objects");
+        closeObjects = *context->GetValue<std::list<ObjectGuid> >("closest game objects static los");
         closePlayers = *context->GetValue<std::list<ObjectGuid> >("closest friendly players");
         flagRange = INTERACTION_DISTANCE;
         break;

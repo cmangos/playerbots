@@ -112,10 +112,10 @@ namespace ai
             creators["collision"] = [](PlayerbotAI* ai) { return new CollisionValue(ai); };
             creators["skip spells list"] = [](PlayerbotAI* ai) { return new SkipSpellsListValue(ai); };
             creators["nearest game objects"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai); };
-            creators["nearest game objects no los"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai, sPlayerbotAIConfig.sightDistance, true); };
+            creators["nearest game objects no los"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai, sPlayerbotAIConfig.sightDistance, LOS_IGNORE); };
             creators["nearest dynamic objects"] = [](PlayerbotAI* ai) { return new NearestDynamicObjects(ai); };
-            creators["nearest dynamic objects no los"] = [](PlayerbotAI* ai) { return new NearestDynamicObjects(ai, sPlayerbotAIConfig.sightDistance, true); };
-            creators["closest game objects"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai, INTERACTION_DISTANCE); };
+            creators["nearest dynamic objects no los"] = [](PlayerbotAI* ai) { return new NearestDynamicObjects(ai, sPlayerbotAIConfig.sightDistance, LOS_IGNORE); };
+            creators["closest game objects static los"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai, INTERACTION_DISTANCE, LOS_STATIC); };
             creators["nearest npcs"] = [](PlayerbotAI* ai) { return new NearestNpcsValue(ai); };
             creators["nearest npcs no los"] = [](PlayerbotAI* ai) { return new NearestNpcsValue(ai, sPlayerbotAIConfig.sightDistance, true); };
             creators["nearest vehicles"] = [](PlayerbotAI* ai) { return new NearestVehiclesValue(ai); };

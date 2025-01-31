@@ -343,6 +343,22 @@ std::vector<WorldPosition> WorldPosition::GetNextPoint(std::vector<WorldPosition
     return retVec;
 }
 
+bool WorldPosition::IsInStaticLineOfSight(WorldPosition pos, float heightMod) const
+{
+    if (mapid != pos.mapid)
+    {
+        return false;
+    }
+    
+    float srcX = coord_x;
+    float srcY = coord_y;
+    float srcZ = coord_z + heightMod;
+    float dstX = pos.coord_x;
+    float dstY = pos.coord_y;
+    float dstZ = pos.coord_z + heightMod;
+
+    return VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(mapid, srcX, srcY, srcZ, dstX, dstY, dstZ, true);
+}
 
 bool WorldPosition::canFly() const
 {

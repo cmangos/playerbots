@@ -270,7 +270,7 @@ void PlayerbotFactory::Randomize(bool incremental, bool syncWithMaster, bool par
         }
     }
 
-    InitEquipment(incremental, syncWithMaster, false, partialUpgrade);
+    InitEquipment(incremental, syncWithMaster, sPlayerbotAIConfig.randomGearProgression, partialUpgrade);
     InitGems();
     pmo.reset();
 
@@ -1987,7 +1987,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         continue;
 
                     // Skip too high ilvl items for max level characters
-                    if (incremental && partialUpgrade && botLevel == 80)
+                    if (progressiveGear && botLevel == 80)
                     {
                         // Restrict too high item levels for incremental upgrades
                         if (proto->ItemLevel > 239 && proto->ItemLevel > oldGS + 20)
@@ -1995,7 +1995,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                     }
 
                     // Skip low ilvl depending on bots arena rating or pvp rank
-                    if (!setQuality && (botRating > 1000 || playerPvpRank >= 10) && botLevel == 80)
+                    if (!setQuality && progressiveGear && (botRating > 1000 || playerPvpRank >= 10) && botLevel == 80)
                     {
                         // arena rating
                         uint32 ratingChanges = std::max(uint32(std::round(float(botRating - 1000) / 150.0)), 0U);

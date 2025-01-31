@@ -57,7 +57,7 @@ public:
     void EnchantEquipment();
     void EquipGear() { InitEquipment(false, false); InitGems(); }
     void EquipGearBest() { return InitEquipment(false, false, false); }
-    void EquipGearPartialUpgrade() { return InitEquipment(false, false, true, true); }
+    void EquipGearPartialUpgrade() { return InitEquipment(true, false, true, true); }
     void UpgradeGear(bool syncWithMaster) { return InitEquipment(!syncWithMaster, syncWithMaster); }
     void AddReagents() { return InitReagents(); }
     void AddPotions() { return InitPotions(); }

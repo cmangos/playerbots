@@ -382,7 +382,8 @@ namespace ai
             creators["RTSC next spell action"] = [](PlayerbotAI* ai) { return new RTSCNextSpellActionValue(ai); };
             creators["RTSC saved location"] = [](PlayerbotAI* ai) { return new RTSCSavedLocationValue(ai); };
 
-            creators["trainable class spells"] = [](PlayerbotAI* ai) { return new TrainableClassSpells(ai); };
+            creators["trainable spells"] = [](PlayerbotAI* ai) { return new TrainableSpellsValue(ai); };
+            creators["available trainers"] = [](PlayerbotAI* ai) { return new AvailableTrainersValue(ai); };
             creators["mount list"] = [](PlayerbotAI* ai) { return new MountListValue(ai); };
             creators["current mount speed"] = [](PlayerbotAI* ai) { return new CurrentMountSpeedValue(ai); };
 

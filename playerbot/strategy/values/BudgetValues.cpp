@@ -111,7 +111,7 @@ uint32 MoneyNeededForValue::Calculate()
         moneyWanted = (bot->getClass() == CLASS_HUNTER) ? (level * level * level) / 10 : 0; //Or level^3 (1s @ lvl10, 30s @ lvl30, 2g @ lvl60, 5g @ lvl80): Todo replace (should be best ammo buyable x 8 stacks cost)
         break;
     case NeedMoneyFor::spells:
-        moneyWanted = AI_VALUE(uint32, "train cost");
+        moneyWanted = AI_VALUE2(uint32, "train cost", TRAINER_TYPE_CLASS);
         break;
     case NeedMoneyFor::travel:
         moneyWanted = bot->isTaxiCheater() ? 0 : 1500; //15s for traveling half a continent. Todo: Add better calculation (Should be ???)

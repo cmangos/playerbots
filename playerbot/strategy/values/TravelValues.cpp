@@ -308,7 +308,22 @@ bool ShouldTravelNamedValue::Calculate()
 
         return true;
     }
+    else if (name.find("trainer") == 0)
+    {
+        TrainerType type = TRAINER_TYPE_CLASS;
 
+        if (name == "trainer mount")
+            type = TRAINER_TYPE_MOUNTS;
+        if (name == "trainer trade")
+            type = TRAINER_TYPE_TRADESKILLS;
+        if (name == "trainer pet")
+            type = TRAINER_TYPE_PETS;
+
+        if (AI_VALUE2(uint32, "train cost", type) > 0)
+            return true;
+
+        return false;
+    }
 
     return false;
 }

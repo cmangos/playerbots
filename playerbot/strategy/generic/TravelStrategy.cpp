@@ -71,11 +71,15 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     const std::vector<std::tuple<std::string, std::string, float>> StringActions =
     {
         {"not::travel target active","choose group travel target", 6.97f},                                               //See isAllowed  100%
+        {"val::should travel named::trainer class","request named travel target::trainer class", 6.89f},                                // 25%
+        //{"val::should travel named::trainer pet","request named travel target::trainer pet", 6.88f},                                  // 25%
+        {"val::should travel named::trainer mount","request named travel target::trainer mount", 6.87f},                                // 25%
         {"val::should travel named::city","request named travel target::city", 6.85f},                                                  // 10%
         {"val::and::{has strategy::rpg quest,has focus travel target}","request quest travel target", 6.84f},                           //100%
         //{"val::should travel named::pvp","request named travel target::pvp", 6.83f},                                                  // 25%
         {"val::and::{has strategy::rpg quest,should get money}", "request quest travel target", 6.78f},                                 // 90%
         {"val::not::travel target active","refresh travel target", 6.7f},                                                               // 90%
+        {"val::should travel named::trainer trade","request named travel target::trainer trade", 6.51f},                                // 25%
         {"val::has strategy::rpg quest", "request quest travel target", 6.3f}                                                           // 95%
     };
 

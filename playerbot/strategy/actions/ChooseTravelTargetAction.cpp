@@ -977,6 +977,32 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
             }
         );
     }
+    else if (travelName.find("trainer") == 0)
+    {
+        TrainerType type;
+
+        if (travelName == "trainer class")
+            type = TRAINER_TYPE_CLASS;
+        if (travelName == "trainer mount")
+            type = TRAINER_TYPE_MOUNTS;
+        if (travelName == "trainer trade")
+            type = TRAINER_TYPE_TRADESKILLS;
+        if (travelName == "trainer pet")
+            type = TRAINER_TYPE_PETS;
+
+        std::vector<int32> trainerEntries = AI_VALUE2(std::vector <int32>, "available trainers", type);
+
+        if (trainerEntries.empty())
+        {
+            ai->TellDebug(ai->GetMaster(), "No trainer entries found for " + getQualifier(), "debug travel");
+            return false;
+        }
+
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [entries = trainerEntries, partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]()
+            {
+                return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Trainer, entries, false);
+            });
+    }
     else
     {
         uint32 useFlags;
@@ -1030,6 +1056,12 @@ bool RequestNamedTravelTargetAction::isAllowed() const
     else if (name == "pvp")
     {
         if (urand(0, 4))
+            return false;
+        return true;
+    }
+    else if (name.find("trainer") == 0)
+    {
+        if (urand(1, 100) > 100)
             return false;
         return true;
     }

@@ -1003,6 +1003,21 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Trainer, entries, false);
             });
     }
+    else if (travelName == "mount")
+    {
+        std::vector<int32> mountVendorEntries = AI_VALUE(std::vector <int32>, "available mount vendors");
+
+        if (mountVendorEntries.empty())
+        {
+            ai->TellDebug(ai->GetMaster(), "No vendor entries found for " + getQualifier(), "debug travel");
+            return false;
+        }
+
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [entries = mountVendorEntries, partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]()
+            {
+                return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Vendor, entries, false);
+            });
+    }
     else
     {
         uint32 useFlags;
@@ -1056,6 +1071,12 @@ bool RequestNamedTravelTargetAction::isAllowed() const
     else if (name == "pvp")
     {
         if (urand(0, 4))
+            return false;
+        return true;
+    }
+    else if (name == "mount")
+    {
+        if (urand(1, 100) > 100)
             return false;
         return true;
     }

@@ -74,6 +74,7 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         {"val::should travel named::trainer class","request named travel target::trainer class", 6.89f},                                // 25%
         //{"val::should travel named::trainer pet","request named travel target::trainer pet", 6.88f},                                  // 25%
         {"val::should travel named::trainer mount","request named travel target::trainer mount", 6.87f},                                // 25%
+        {"val::should travel named::mount","request named travel target::mount", 6.86f},                                                // 25%
         {"val::should travel named::city","request named travel target::city", 6.85f},                                                  // 10%
         {"val::and::{has strategy::rpg quest,has focus travel target}","request quest travel target", 6.84f},                           //100%
         //{"val::should travel named::pvp","request named travel target::pvp", 6.83f},                                                  // 25%

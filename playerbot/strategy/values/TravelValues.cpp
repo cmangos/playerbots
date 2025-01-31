@@ -308,6 +308,13 @@ bool ShouldTravelNamedValue::Calculate()
 
         return true;
     }
+    else if (name == "mount")
+    {
+        if (AI_VALUE(bool, "can buy mount"))
+            return true;
+
+        return false;
+    }
     else if (name.find("trainer") == 0)
     {
         TrainerType type = TRAINER_TYPE_CLASS;

@@ -18,7 +18,8 @@ namespace ai
         guild = 7,
         tradeskill = 8,
         ah = 9,
-        anything = 10
+        mount = 10,
+        anything = 11
     };
 
     class MaxGearRepairCostValue : public Uint32CalculatedValue

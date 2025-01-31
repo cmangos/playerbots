@@ -176,6 +176,10 @@ namespace ai
             creators["has attackers"] = [](PlayerbotAI* ai) { return new HasAttackersValue(ai); };
             creators["has possible attack targets"] = [](PlayerbotAI* ai) { return new HasPossibleAttackTargetsValue(ai); };
             creators["mounted"] = [](PlayerbotAI* ai) { return new IsMountedValue(ai); };
+            creators["mount skilltype"] = [](PlayerbotAI* ai) { return new MountSkillTypeValue(ai); };
+            creators["available mount vendors"] = [](PlayerbotAI* ai) { return new AvailableMountVendors(ai); };
+            creators["can train mount"] = [](PlayerbotAI* ai) { return new CanTrainMountValue(ai); };
+            creators["can buy mount"] = [](PlayerbotAI* ai) { return new CanBuyMountValue(ai); };
 
             creators["can loot"] = [](PlayerbotAI* ai) { return new CanLootValue(ai); };
             creators["loot target"] = [](PlayerbotAI* ai) { return new LootTargetValue(ai); };

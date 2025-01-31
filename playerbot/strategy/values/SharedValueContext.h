@@ -6,6 +6,7 @@
 #include "VendorValues.h"
 #include "TravelValues.h"
 #include "LootValues.h"
+#include "MountValues.h"
 #include "playerbot/PlayerbotAI.h"
 
 namespace ai
@@ -34,6 +35,8 @@ namespace ai
 
             creators["entry travel purpose"] = [](PlayerbotAI* ai) { return new EntryTravelPurposeMapValue(ai); };
             creators["entry guidps"] = [](PlayerbotAI* ai) { return new EntryGuidpsValue(ai); };
+
+            creators["full mount list"] = [](PlayerbotAI* ai) { return new FullMountListValue(ai); };
 
             creators["global string"] = [](PlayerbotAI* ai) { return new StringManualSetValue(ai); };
         }

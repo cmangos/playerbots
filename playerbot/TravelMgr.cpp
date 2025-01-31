@@ -1163,10 +1163,9 @@ void TravelMgr::LoadQuestTravelTable()
     Clear();
 
     sLog.outString("Loading trainable spells.");
-    if (GAI_VALUE(trainableSpellMap*, "trainable spell map")->empty())
-    {
-
-    }     
+    GAI_VALUE(trainableSpellMap*, "trainable spell map");
+    GAI_VALUE(std::vector<MountValue>, "full mount list");
+    
 
     sLog.outString("Loading object locations.");
 

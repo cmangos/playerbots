@@ -330,6 +330,9 @@ namespace ai
 		bool IsGroupCopy() const { return groupCopy; }
 		bool IsForced() const { return forced; }
 
+
+		bool IsConditionsActive();
+
 		bool IsActive();
 		bool IsTraveling();
 		bool IsWorking();
@@ -343,6 +346,9 @@ namespace ai
 		bool IsMaxRetry(bool isMove) { return isMove ? (moveRetryCount > 10) : (extendRetryCount > 5); }
 
 		void SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1, bool groupCopy1 = false);
+		
+		void AddCondition(std::string condition) { travelConditions.push_back(condition); }
+		void SetConditions(std::vector<std::string> conditions) { travelConditions = conditions; }
 
 		void SetStatus(TravelStatus status);
 		void SetExpireIn(uint32 expireMs) { statusTime = GetExpiredTime() + expireMs; }
@@ -384,8 +390,8 @@ namespace ai
 		EntryDestinationMap GetExploreLocs() const { return destinationMap.at(TravelDestinationPurpose::Explore); };
 		void SetMobAvoidArea();
 
-		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const int32 entry = 0, bool onlyPossible = true, float maxDistance = 10000.0f) const;
-		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const int32 entry = 0, bool onlyPossible = true, float maxDistance = 10000.0f) const;
+		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
+		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
 		static void ShuffleTravelPoints(std::vector<TravelPoint>& points);
 
 		void SetNullTravelTarget(TravelTarget* target) const;

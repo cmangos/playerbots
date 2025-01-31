@@ -292,7 +292,7 @@ bool PetitionTurnInAction::Execute(Event& event)
 
     oldTarget->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
 
-    return ai->DoSpecificAction("request named travel target::petition", Event("buy tabard"), true);
+    return ai->DoSpecificAction("request named travel target::petition", Event("can hand in petition"), true);
 };
 
 bool PetitionTurnInAction::isUseful()
@@ -343,7 +343,7 @@ bool BuyTabardAction::Execute(Event& event)
             return false;
     }
 
-    return ai->DoSpecificAction("request named travel target::tabard", Event("buy tabard"), true);  
+    return ai->DoSpecificAction("request named travel target::tabard", Event("can buy tabard"), true);  
 };
 
 bool BuyTabardAction::isUseful()

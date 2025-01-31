@@ -5,6 +5,26 @@
 
 using namespace ai;
 
+float TravelActionMultiplier::GetValue(Action* action)
+{
+    if (action == NULL) return 1.0f;
+
+    bool hasTarget = AI_VALUE(bool, "travel target active");
+    std::string name = action->getName();
+
+    if (hasTarget && name.find("request") == 0 )
+    {
+        return 0.0f;
+    }
+
+    return 1.0f;
+}
+
+void TravelStrategy::InitNonCombatMultipliers(std::list<Multiplier*>& multipliers)
+{
+    multipliers.push_back(new TravelActionMultiplier(ai));
+}
+
 NextAction** TravelStrategy::GetDefaultNonCombatActions()
 {
     return NextAction::array(0, new NextAction("travel", 1.0f), NULL);
@@ -26,8 +46,8 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         {"",TravelDestinationPurpose::AH, 6.95f},                                                         //See isAllowed  90%
         {"",TravelDestinationPurpose::Vendor, 6.94f},                                                                   // 90%
         {"",TravelDestinationPurpose::Repair, 6.93f},                                                                   // 90%
-        {"val::and::{not::travel target active,should get money,can get mail}", TravelDestinationPurpose::Mail, 6.79f}, //100%
-        {"val::and::{not::travel target active,should get money}", TravelDestinationPurpose::Grind, 6.77f},             // 90%
+        {"val::and::{should get money,can get mail}", TravelDestinationPurpose::Mail, 6.79f},                           //100%
+        {"val::should get money", TravelDestinationPurpose::Grind, 6.77f},                                              // 90%
         {"",TravelDestinationPurpose::Mail, 6.6f},                                                                      // 70%
         {"",TravelDestinationPurpose::GatherMining, 6.5f},                                                              // 90%/40% in group
         {"",TravelDestinationPurpose::GatherSkinning, 6.5f},                                                            // 90%/40% in group
@@ -50,13 +70,13 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     //Specific named exceptions
     const std::vector<std::tuple<std::string, std::string, float>> StringActions =
     {
-        {"not::travel target active","choose group travel target", 6.97f},                                                        //See isAllowed  100%
+        {"not::travel target active","choose group travel target", 6.97f},                                               //See isAllowed  100%
         {"val::should travel named::city","request named travel target::city", 6.85f},                                                  // 10%
-        {"val::and::{has strategy::rpg quest,not::travel target active,has focus travel target}","request quest travel target", 6.84f}, //100%
+        {"val::and::{has strategy::rpg quest,has focus travel target}","request quest travel target", 6.84f},                           //100%
         //{"val::should travel named::pvp","request named travel target::pvp", 6.83f},                                                  // 25%
-        {"val::and::{has strategy::rpg quest,not::travel target active,should get money}", "request quest travel target", 6.78f},       // 90%
-        {"val::not::travel target active","refresh travel target", 6.7f},                                                                             // 90%
-        {"val::and::{has strategy::rpg quest,not::travel target active}", "request quest travel target", 6.3f}                          // 95%
+        {"val::and::{has strategy::rpg quest,should get money}", "request quest travel target", 6.78f},                                 // 90%
+        {"val::not::travel target active","refresh travel target", 6.7f},                                                               // 90%
+        {"val::has strategy::rpg quest", "request quest travel target", 6.3f}                                                           // 95%
     };
 
     for (auto& [trigger, action, relevance] : StringActions)

@@ -31,7 +31,7 @@ namespace ai
         virtual bool IsActive()
         {
             Unit* target = GetTarget();
-            if (BuffOnPartyTrigger::IsActive() && (!target->IsPlayer() || !ai->IsRanged((Player*)target)))
+            if (target && BuffOnPartyTrigger::IsActive() && (!target->IsPlayer() || !ai->IsRanged((Player*)target)))
             {
                 // Don't apply thorns if fire shield (conflict) is on the target
                 return !ai->HasAura("fire shield", target);

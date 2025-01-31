@@ -383,8 +383,8 @@ namespace ai
 		EntryDestinationMap GetExploreLocs() const { return destinationMap.at(TravelDestinationPurpose::Explore); };
 		void SetMobAvoidArea();
 
-		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const int32 entry = 0, bool onlyPossible = true, float maxDistance = 5000) const;
-		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const int32 entry = 0, bool onlyPossible = true, float maxDistance = 5000) const;
+		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const int32 entry = 0, bool onlyPossible = true, float maxDistance = 10000.0f) const;
+		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const int32 entry = 0, bool onlyPossible = true, float maxDistance = 10000.0f) const;
 		static void ShuffleTravelPoints(std::vector<TravelPoint>& points);
 
 		void SetNullTravelTarget(TravelTarget* target) const;

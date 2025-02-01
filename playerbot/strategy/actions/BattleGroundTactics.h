@@ -45,8 +45,8 @@ public:
     BGTactics(PlayerbotAI* ai, std::string name = "bg tactics") : MovementAction(ai, name) {}
     virtual bool Execute(Event& event);
 private:
-    bool SelectAvObjectiveAlliance(WorldLocation& objectiveLocation);
-    bool SelectAvObjectiveHorde(WorldLocation& objectiveLocation);
+    //bool SelectAvObjectiveAlliance(WorldLocation& objectiveLocation);
+    //bool SelectAvObjectiveHorde(WorldLocation& objectiveLocation);
     bool moveToStart(bool force = false);
     bool selectObjective(bool reset = false);
     bool moveToObjective();
@@ -59,7 +59,7 @@ private:
     bool wsgRoofJump();
     bool eotsJump();
     bool atFlag(std::vector<BattleBotPath*> const& vPaths, std::vector<uint32> const& vFlagIds);
-    bool CheckFlagAv();
+    //bool CheckFlagAv();
     bool flagTaken();
     bool teamFlagTaken();
     bool protectFC();

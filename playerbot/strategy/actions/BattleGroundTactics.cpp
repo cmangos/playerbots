@@ -2836,7 +2836,7 @@ bool BGTactics::Execute(Event& event)
     {
         switch (bgType)
         {
-            case BATTLEGROUND_AV: return CheckFlagAv();
+            //case BATTLEGROUND_AV: return CheckFlagAv();
         }
 
         if (vFlagIds)
@@ -2973,6 +2973,8 @@ bool BGTactics::selectObjective(bool reset)
     if (pos.isSet() && !reset)
         return false;
 
+    WorldObject* BgObjective = nullptr;
+
     BattleGroundTypeId bgType = bg->GetTypeId();
 #ifdef MANGOSBOT_TWO
     if (bgType == BATTLEGROUND_RB)
@@ -2988,8 +2990,8 @@ bool BGTactics::selectObjective(bool reset)
 
         switch (bot->GetTeam())
         {
-            case ALLIANCE: hasObjective = SelectAvObjectiveAlliance(objectiveLocation); break;
-            case HORDE: hasObjective = SelectAvObjectiveHorde(objectiveLocation); break;
+            //case ALLIANCE: hasObjective = SelectAvObjectiveAlliance(objectiveLocation); break;
+            //case HORDE: hasObjective = SelectAvObjectiveHorde(objectiveLocation); break;
         }
 
         if (hasObjective)

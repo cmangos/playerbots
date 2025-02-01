@@ -30,7 +30,7 @@ namespace ai
     class AvailableTrainersValue : public CalculatedValue<std::vector<int32>>, public Qualified
     {
     public:
-        class AvailableTrainersValue(PlayerbotAI* ai, std::string name = "available trainers", int checkInterval = 5) : CalculatedValue<std::vector<int32>>(ai, name, checkInterval), Qualified() {}
+        AvailableTrainersValue(PlayerbotAI* ai, std::string name = "available trainers", int checkInterval = 5) : CalculatedValue<std::vector<int32>>(ai, name, checkInterval), Qualified() {}
 
         virtual std::vector<int32> Calculate() override;
     };

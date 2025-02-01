@@ -1217,7 +1217,7 @@ bool DebugAction::Execute(Event& event)
 
         for (auto& type : types)
         {
-            for (auto& dest : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::None, 0, true, 0))
+            for (auto& dest : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::None, {}, true, 0))
             {
                 bool isPossible = dest->IsPossible(info);
                 bool isActive = dest->IsActive(bot, info);

@@ -223,9 +223,6 @@ uint32 EntryTravelPurposeMapValue::SkillIdToGatherEntry(int32 entry)
 
 bool NeedTravelPurposeValue::Calculate()
 {
-    if (AI_VALUE(bool, "travel target active"))
-        return false;
-
     TravelDestinationPurpose purpose = TravelDestinationPurpose(stoi(getQualifier()));
 
     const std::map<TravelDestinationPurpose, SkillType> gatheringSkills =
@@ -287,10 +284,7 @@ bool NeedTravelPurposeValue::Calculate()
 
 bool ShouldTravelNamedValue::Calculate()
 {
-    if (AI_VALUE(TravelTarget*, "travel target")->IsActive())
-        return false;
-
-    std::string_view name = getQualifier();
+    std::string name = getQualifier();
 
     WorldPosition botPos(bot);
 
@@ -314,7 +308,29 @@ bool ShouldTravelNamedValue::Calculate()
 
         return true;
     }
+    else if (name == "mount")
+    {
+        if (AI_VALUE(bool, "can buy mount"))
+            return true;
 
+        return false;
+    }
+    else if (name.find("trainer") == 0)
+    {
+        TrainerType type = TRAINER_TYPE_CLASS;
+
+        if (name == "trainer mount")
+            type = TRAINER_TYPE_MOUNTS;
+        if (name == "trainer trade")
+            type = TRAINER_TYPE_TRADESKILLS;
+        if (name == "trainer pet")
+            type = TRAINER_TYPE_PETS;
+
+        if (AI_VALUE2(uint32, "train cost", type) > 0)
+            return true;
+
+        return false;
+    }
 
     return false;
 }
@@ -332,19 +348,37 @@ bool TravelTargetTravelingValue::Calculate()
 bool QuestStageActiveValue::Calculate()
 {
     uint32 questId = getMultiQualifierInt(getQualifier(), 0, ",");
-    uint32 stage = getMultiQualifierInt(getQualifier(), 1, ",");
+    TravelDestinationPurpose purpose = (TravelDestinationPurpose)getMultiQualifierInt(getQualifier(), 1, ",");
+
     uint32 objective = 0;
-    if (stage == 1)
-        objective = getMultiQualifierInt(getQualifier(), 2, ",");
 
-    if (stage == 0 && bot->HasQuest(questId))
-        return false;
+    switch (purpose)
+    {
+    case TravelDestinationPurpose::QuestGiver:
+        if (bot->HasQuest(questId))
+            return false;
+        break;
+    case TravelDestinationPurpose::QuestTaker:
+        if (!bot->CanCompleteQuest(questId))
+            return false;
+        break;
+    case TravelDestinationPurpose::QuestObjective1:
+        objective = 1;
+        break;
+    case TravelDestinationPurpose::QuestObjective2:
+        objective = 2;
+        break;
+    case TravelDestinationPurpose::QuestObjective3:
+        objective = 3;
+        break;
+    case TravelDestinationPurpose::QuestObjective4:
+        objective = 4;
+        break;
+    }
 
-    if (stage == 1 && !AI_VALUE2(bool, "need quest objective", objective))
-        return false;
-
-    if (!bot->CanCompleteQuest(questId))
-        return false;
+    if(objective)
+        if (!AI_VALUE2(bool, "need quest objective", objective - 1))
+            return false;
 
     return true;
 }

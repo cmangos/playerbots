@@ -30,6 +30,10 @@ void BattlegroundStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigge
         NextAction::array(0, new NextAction("bg check objective", 10.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "bg active",
+        NextAction::array(0, new NextAction("bg check flag", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "bg ended",
         NextAction::array(0, new NextAction("bg leave", ACTION_HIGH), NULL)));
 
@@ -92,14 +96,13 @@ void WarsongStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
 void AlteracStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
-    triggers.push_back(new TriggerNode(
-        "very often",
-        NextAction::array(0, new NextAction("bg banner", 10.0f), NULL)));
 }
 
 void AlteracStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
-    InitNonCombatTriggers(triggers);
+    triggers.push_back(new TriggerNode(
+        "very often",
+        NextAction::array(0, new NextAction("bg banner", ACTION_NORMAL), NULL)));
 }
 
 void ArathiStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)

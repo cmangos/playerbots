@@ -1,6 +1,7 @@
 #include "playerbot/playerbot.h"
 #include "BudgetValues.h"
 #include "ItemUsageValue.h"
+#include "MountValues.h"
 
 using namespace ai;
 
@@ -88,16 +89,19 @@ uint32 RepairCostValue::Calculate()
     return TotalCost;
 }
 
-uint32 MoneyNeededForValue::Calculate() {
+uint32 MoneyNeededForValue::Calculate()
+{
     NeedMoneyFor needMoneyFor = NeedMoneyFor(stoi(getQualifier()));
 
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     AiObjectContext* context = ai->GetAiObjectContext();
 
     uint32 moneyWanted = 0;
+
     uint32 level = bot->GetLevel();
 
-    switch (needMoneyFor) {
+    switch (needMoneyFor)
+    {
     case NeedMoneyFor::none:
         moneyWanted = 0;
         break;
@@ -113,7 +117,7 @@ uint32 MoneyNeededForValue::Calculate() {
         break;
 
     case NeedMoneyFor::spells:
-        moneyWanted = AI_VALUE(uint32, "train cost");
+        moneyWanted = AI_VALUE2(uint32, "train cost", TRAINER_TYPE_CLASS);
         break;
 
     case NeedMoneyFor::travel:
@@ -139,10 +143,10 @@ uint32 MoneyNeededForValue::Calculate() {
             }
         }
         break;
-
-    case NeedMoneyFor::ah: {
-        // Auction-related costs
-        uint32 time =
+    case NeedMoneyFor::ah:
+    {
+        //Save deposit needed for all items the bot wants to AH.
+        uint32 time;
 #ifdef MANGOSBOT_ZERO
             8 * HOUR;
 #else
@@ -192,11 +196,62 @@ uint32 MoneyNeededForValue::Calculate() {
 
         return static_cast<uint32>(totalDeposit);
     }
-                         break;
+    case NeedMoneyFor::mount:
+    {
+        uint32 maxMountSpeed = 0;
+        uint32 maxFlyMountSpeed = 0;
+
+        for (auto& mount : AI_VALUE(std::vector<MountValue>, "mount list"))
+        {
+            if (mount.GetSpeed(false) > maxMountSpeed)
+            {
+                maxMountSpeed = mount.GetSpeed(false);
+            }
+            if (mount.GetSpeed(true) > maxFlyMountSpeed)
+            {
+                maxFlyMountSpeed = mount.GetSpeed(true);
+            }
+        }
+
+        if (level >= 40)
+        {
+            if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 75)
+                moneyWanted += 35 * GOLD;
+
+            if (maxMountSpeed < 59)
+                moneyWanted += 10 * GOLD;
+        }
+        if (level >= 60)
+        {
+            if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 150)
+                moneyWanted += 600 * GOLD;
+
+            if (maxMountSpeed < 99)
+                moneyWanted += 100 * GOLD;
+        }
+        if (level >= 70)
+        {
+            if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 225)
+                moneyWanted += 800 * GOLD;
+            else if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 300)
+                moneyWanted += 5000 * GOLD;
+
+            if (maxFlyMountSpeed < 99)
+                moneyWanted += 100 * GOLD;
+            else if (maxFlyMountSpeed < 279)
+                moneyWanted += 200 * GOLD;
+        }
+        if (level >= 77)
+        {
+            if (!bot->HasSpell(54197))
+                moneyWanted += 1000 * GOLD;
+        }
+        break;
+    }
     }
 
     return moneyWanted;
-}
+};
 
 uint32 TotalMoneyNeededForValue::Calculate()
 {

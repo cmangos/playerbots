@@ -3,6 +3,15 @@
 
 namespace ai
 {
+    class TravelActionMultiplier : public Multiplier
+    {
+    public:
+        TravelActionMultiplier(PlayerbotAI* ai) : Multiplier(ai, "travel action") {}
+
+    public:
+        virtual float GetValue(Action* action);
+    };
+
     class TravelStrategy : public Strategy
     {
     public:
@@ -10,6 +19,7 @@ namespace ai
         std::string getName() override { return "travel"; }
 
     public:
+        void InitNonCombatMultipliers(std::list<Multiplier*>& multipliers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
         NextAction** GetDefaultNonCombatActions() override;
     };

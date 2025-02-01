@@ -1720,7 +1720,6 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
     uint8 playerPvpRank = bot->GetHighestPvPRankIndex();
     uint32 botRating = bot->GetMaxPersonalArenaRatingRequirement(0);
     bool isBotHighRanked = botRating >= 1800;
-    bool isBotVeryHighRanked = botRating >= 2100;
 
     for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
     {
@@ -1741,11 +1740,11 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
         {
             quality = itemQuality;
         }
-        else if (isBotVeryHighRanked)
+        else if (isBotHighRanked)
         {
             quality = ITEM_QUALITY_LEGENDARY;
         }
-        else if (isBotHighRanked)
+        else if ((botRating > 1450 || playerPvpRank >= 12) && quality < ITEM_QUALITY_EPIC)
         {
             quality = ITEM_QUALITY_EPIC;
         }
@@ -1821,9 +1820,6 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
 
         if (botLevel >= 60 && quality < ITEM_QUALITY_UNCOMMON)
             quality = ITEM_QUALITY_UNCOMMON;
-
-        if ((botRating > 1450 || playerPvpRank >= 12) && quality < ITEM_QUALITY_EPIC)
-            quality = ITEM_QUALITY_EPIC;
 
         bool found = false;
         uint32 attempts = 0;
@@ -1990,7 +1986,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         continue;
 
                     // Skip too high ilvl items for max level characters
-                    if (progressiveGear && botLevel == 80)
+                    if (progressiveGear && botLevel == 80 && !isBotHighRanked)
                     {
                         // Restrict too high item levels for incremental upgrades
                         if (proto->ItemLevel > 239 && proto->ItemLevel > oldGS + 20)

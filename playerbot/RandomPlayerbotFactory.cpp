@@ -937,33 +937,15 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         Player* player = sObjectMgr.GetPlayer(captain);
         if (player)
         {
-            if (arenateam)
+            if (player->GetLevel() < 80) 
             {
-                bool badTeam = false;
-                if (player->GetLevel() >= 80)
-                {
-                    ArenaTeamStats teamStats = arenateam->GetStats();
-
-                    // Require at least 50 games before evaluating win rate
-                    if (teamStats.games_season >= 50 &&
-                        (float(teamStats.wins_season) / teamStats.games_season) < 0.40f)
-                    {
-                        badTeam = true;
-                        sLog.outBasic("Captain #%d of Random Arena team [%s]: win rate was too low, disbanding...", player->GetGUIDLow(), arenateam->GetName().c_str());
-                    }
-                }
-
-                if (player->GetLevel() < 80 || badTeam)
+                if (arenateam)
                 {
                     teamsNumber[arenateam->GetType()]--;
                     arenaTeamNumber--;
                     sPlayerbotAIConfig.randomBotArenaTeams.erase(arenateam->GetId());
                     arenateam->Disband(nullptr);
-                    continue;
                 }
-            }
-            else if (player->GetLevel() < 80)
-            {
                 continue;
             }
 

@@ -3855,6 +3855,23 @@ void PlayerbotFactory::InitArenaTeam()
     if (!sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId()))
         return;
 
+    for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
+    {
+        if (ArenaTeam* team = sObjectMgr.GetArenaTeamById(bot->GetArenaTeamId(arena_slot)))
+        {
+            ArenaTeamStats teamStats = team->GetStats();
+
+            // Require at least 50 games before evaluating win rate
+            if (teamStats.games_season >= 50 &&
+                (float(teamStats.wins_season) / teamStats.games_season) < 0.40f)
+            {
+                sLog.outBasic("Captain #%d of Random Arena team [%s]: win rate was too low, disbanding...", bot->GetGUIDLow(), team->GetName().c_str());
+                sPlayerbotAIConfig.randomBotArenaTeams.erase(team->GetId());
+                team->Disband(nullptr);
+            }
+        }
+    }
+
     if (sPlayerbotAIConfig.randomBotArenaTeams.size() < sPlayerbotAIConfig.randomBotArenaTeamCount)
         RandomPlayerbotFactory::CreateRandomArenaTeams();
 }

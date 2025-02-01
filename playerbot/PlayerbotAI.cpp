@@ -6272,6 +6272,9 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
             case NeedMoneyFor::ah:
                 out << "ah";
                 break;
+            case NeedMoneyFor::mount:
+                out << "mount";
+                break;
             case NeedMoneyFor::anything:
                 out << "anything";
                 break;

@@ -30,6 +30,10 @@ void BattlegroundStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigge
         NextAction::array(0, new NextAction("bg check objective", 10.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "bg active",
+        NextAction::array(0, new NextAction("bg check flag", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "bg ended",
         NextAction::array(0, new NextAction("bg leave", ACTION_HIGH), NULL)));
 

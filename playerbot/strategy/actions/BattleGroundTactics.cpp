@@ -2879,10 +2879,6 @@ bool BGTactics::Execute(Event& event)
         if (bg->GetStatus() == STATUS_WAIT_JOIN)
             return false;
 
-        if (vFlagIds)
-            if (atFlag(*vPaths, *vFlagIds))
-                return true;
-
         if (useBuff())
             return true;
 

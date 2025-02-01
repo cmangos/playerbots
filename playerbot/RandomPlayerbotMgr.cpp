@@ -2427,13 +2427,13 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
     sLog.outError("Cannot teleport bot %s - no locations available", bot->GetName());
 }
 
-std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(WorldLocation pos, const std::map<uint32, std::map<uint32, std::vector<std::string_view>>>& areaNames, uint32 radius)
+std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(WorldLocation pos, const std::map<uint32, std::map<uint32, std::vector<std::string>>>& areaNames, uint32 radius)
 {
     std::vector<std::pair<uint32, uint32>> results;
     float minDist = FLT_MAX;
     WorldPosition areaPos(pos);
-    std::string areaZone = areaPos.getAreaName(true, true);
-    std::string_view hasZone = "-", wantZone = areaZone;
+    std::string hasZone = "-", wantZone = areaPos.getAreaName(true, true);
+
     for (uint32 level = 1; level < sPlayerbotAIConfig.randomBotMaxLevel + 1; level++)
     {
         for (uint32 r = 1; r < MAX_RACES; r++)
@@ -2441,7 +2441,7 @@ std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(Worl
             uint32 i = 0;
             for (auto p : rpgLocsCacheLevel[r][level])
             {
-                std::string_view currentZone = areaNames.at(level).at(r)[i];
+                std::string currentZone = areaNames.at(level).at(r)[i];
                 i++;
 
                 if (currentZone != wantZone && hasZone == wantZone) //If we already have the right id but this location isn't in the right id. Skip it.
@@ -2565,7 +2565,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
 
     sLog.outString("Enhancing RPG teleport cache");
 
-    std::map<uint32, std::map<uint32, std::vector<std::string_view>>> areaNames;
+    std::map<uint32, std::map<uint32, std::vector<std::string>>> areaNames;
 
     for (uint32 level = 1; level < sPlayerbotAIConfig.randomBotMaxLevel + 1; level++)
     {

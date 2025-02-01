@@ -1822,6 +1822,9 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
         if (botLevel >= 60 && quality < ITEM_QUALITY_UNCOMMON)
             quality = ITEM_QUALITY_UNCOMMON;
 
+        if ((botRating > 1450 || playerPvpRank >= 12) && quality < ITEM_QUALITY_EPIC)
+            quality = ITEM_QUALITY_EPIC;
+
         bool found = false;
         uint32 attempts = 0;
         do
@@ -2007,8 +2010,13 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                         uint32 extraChanges = ((ratingChanges > 6 || pvpRankChanges > 6) ? 12U : 0U);
                         uint32 extraItemLevel = (std::min(std::max(ratingChanges, pvpRankChanges), 6U) * 13) + extraChanges;
 
-                        if (proto->ItemLevel < (174 + extraItemLevel))
-                            continue;
+                        if ((extraItemLevel <= 13 || quality >= ITEM_QUALITY_RARE) &&
+                            (extraItemLevel <= 26 || quality >= ITEM_QUALITY_EPIC))
+                        {
+                            if (proto->ItemLevel < (174 + extraItemLevel))
+                                continue;
+                        }
+
                     }
 
 

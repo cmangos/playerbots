@@ -2432,7 +2432,8 @@ std::vector<std::pair<uint32, uint32>> RandomPlayerbotMgr::RpgLocationsNear(Worl
     std::vector<std::pair<uint32, uint32>> results;
     float minDist = FLT_MAX;
     WorldPosition areaPos(pos);
-    std::string_view hasZone = "-", wantZone = areaPos.getAreaName(true, true);
+    std::string areaZone = areaPos.getAreaName(true, true);
+    std::string_view hasZone = "-", wantZone = areaZone;
     for (uint32 level = 1; level < sPlayerbotAIConfig.randomBotMaxLevel + 1; level++)
     {
         for (uint32 r = 1; r < MAX_RACES; r++)

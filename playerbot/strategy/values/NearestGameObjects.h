@@ -4,6 +4,13 @@
 
 namespace ai
 {
+    enum LineOfSight
+    {
+        LOS_IGNORE = 0,
+        LOS_STATIC = 1,
+        LOS_FULL   = 2,
+    };
+
     class AnyGameObjectInObjectRangeCheck
     {
     public:
@@ -30,28 +37,28 @@ namespace ai
     class NearestGameObjects : public ObjectGuidListCalculatedValue, public Qualified
 	{
 	public:
-        NearestGameObjects(PlayerbotAI* ai, float range = sPlayerbotAIConfig.sightDistance, bool ignoreLos = false, std::string name = "nearest game objects") :
-            ObjectGuidListCalculatedValue(ai, name), range(range) , ignoreLos(ignoreLos), Qualified() {}
+        NearestGameObjects(PlayerbotAI* ai, float range = sPlayerbotAIConfig.sightDistance, LineOfSight lineOfSight = LOS_FULL, std::string name = "nearest game objects") :
+            ObjectGuidListCalculatedValue(ai, name), range(range), lineOfSight(lineOfSight), Qualified() {}
 
     protected:
         virtual std::list<ObjectGuid> Calculate();
 
     private:
         float range;
-        bool ignoreLos;
+        LineOfSight lineOfSight;
 	};
 
     class NearestDynamicObjects : public ObjectGuidListCalculatedValue
     {
     public:
-        NearestDynamicObjects(PlayerbotAI* ai, float range = sPlayerbotAIConfig.farDistance, bool ignoreLos = false, std::string name = "nearest dynamic objects") :
-            ObjectGuidListCalculatedValue(ai, name), range(range), ignoreLos(ignoreLos) {}
+        NearestDynamicObjects(PlayerbotAI* ai, float range = sPlayerbotAIConfig.farDistance, LineOfSight lineOfSight = LOS_FULL, std::string name = "nearest dynamic objects") :
+            ObjectGuidListCalculatedValue(ai, name), range(range), lineOfSight(lineOfSight) {}
 
     protected:
         virtual std::list<ObjectGuid> Calculate();
 
     private:
         float range;
-        bool ignoreLos;
+        LineOfSight lineOfSight;
     };
 }

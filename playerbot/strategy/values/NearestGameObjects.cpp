@@ -66,8 +66,24 @@ std::list<ObjectGuid> NearestGameObjects::Calculate()
     for(std::list<GameObject*>::iterator tIter = targets.begin(); tIter != targets.end(); ++tIter)
     {
 		GameObject* go = *tIter;
-        if(ignoreLos || sServerFacade.IsWithinLOSInMap(bot, go))
-			result.push_back(go->GetObjectGuid());
+
+        switch (lineOfSight)
+        {
+            case LOS_STATIC:
+                if (!sServerFacade.IsWithinStaticLOSInMap(bot, go))
+                {
+                    continue;
+                }
+                break;
+            case LOS_FULL:
+                if (!sServerFacade.IsWithinLOSInMap(bot, go))
+                {
+                    continue;
+                }
+                break;
+        }
+
+        result.push_back(go->GetObjectGuid());
     }
 
     return result;
@@ -88,8 +104,24 @@ std::list<ObjectGuid> NearestDynamicObjects::Calculate()
     for (std::list<DynamicObject*>::iterator tIter = targets.begin(); tIter != targets.end(); ++tIter)
     {
         DynamicObject* go = *tIter;
-        if (ignoreLos || sServerFacade.IsWithinLOSInMap(bot, go))
-            result.push_back(go->GetObjectGuid());
+
+        switch (lineOfSight)
+        {
+        case LOS_STATIC:
+            if (!sServerFacade.IsWithinStaticLOSInMap(bot, go))
+            {
+                continue;
+            }
+            break;
+        case LOS_FULL:
+            if (!sServerFacade.IsWithinLOSInMap(bot, go))
+            {
+                continue;
+            }
+            break;
+        }
+
+        result.push_back(go->GetObjectGuid());
     }
 
     return result;

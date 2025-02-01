@@ -88,14 +88,13 @@ void WarsongStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
 void AlteracStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
-    triggers.push_back(new TriggerNode(
-        "very often",
-        NextAction::array(0, new NextAction("bg banner", 10.0f), NULL)));
 }
 
 void AlteracStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
-    InitNonCombatTriggers(triggers);
+    triggers.push_back(new TriggerNode(
+        "very often",
+        NextAction::array(0, new NextAction("bg banner", ACTION_NORMAL), NULL)));
 }
 
 void ArathiStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)

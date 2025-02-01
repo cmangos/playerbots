@@ -193,11 +193,19 @@ bool RpgTaxiAction::Execute(Event& event)
         sLog.outError("Bot %s cannot talk to flightmaster (%zu location available)", bot->GetName(), nodes.size());
         return false;
     }
+#ifdef MANGOSBOT_TWO                
+    bot->OnTaxiFlightEject(true);
+#endif
     if (!bot->ActivateTaxiPathTo({ entry->from, entry->to }, flightMaster, 0))
     {
         sLog.outError("Bot %s cannot fly %u (%zu location available)", bot->GetName(), path, nodes.size());
         return false;
     }
+
+#ifdef MANGOSBOT_TWO
+    bot->ResolvePendingMount();
+#endif
+
     sLog.outString("Bot #%d <%s> is flying from %s to %s (%zu location available)", bot->GetGUIDLow(), bot->GetName(), nodeFrom->name[0], nodeTo->name[0], nodes.size());
     bot->SetMoney(money);
 

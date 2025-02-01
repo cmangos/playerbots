@@ -824,6 +824,67 @@ void RandomPlayerbotMgr::DatabasePing(QueryResult* result, uint32 pingStart, std
     sRandomPlayerbotMgr.SetDatabaseDelay(db, sWorld.GetCurrentMSTime() - pingStart);
 }
 
+void RandomPlayerbotMgr::LoadNamedLocations()
+{
+    namedLocations.clear();
+
+    auto result = WorldDatabase.Query("SELECT `name`, `map_id`, `position_x`, `position_y`, `position_z`, `orientation` FROM `ai_playerbot_named_location`");
+
+    if (!result)
+    {
+        sLog.outString(">> Loaded 0 named locations - table is empty!");
+        sLog.outString();
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        ++count;
+
+        Field* fields = result->Fetch();
+
+        std::string name = fields[0].GetCppString();
+        uint32 mapId = fields[1].GetUInt32();
+        float positionX = fields[2].GetFloat();
+        float positionY = fields[3].GetFloat();
+        float positionZ = fields[4].GetFloat();
+        float orientation = fields[5].GetFloat();
+
+        AddNamedLocation(name, WorldLocation(mapId, positionX, positionY, positionZ, orientation));
+    } while (result->NextRow());
+
+    sLog.outString(">> Loaded %u named locations", count);
+    sLog.outString();
+}
+
+bool RandomPlayerbotMgr::AddNamedLocation(std::string const& name, WorldLocation const& location)
+{
+    if (namedLocations.find(name) != namedLocations.end())
+    {
+        sLog.outError("RandomPlayerbotMgr::AddNamedLocation: Failed to add named location '%s' - already exists!", name);
+        return false;
+    }
+
+    namedLocations[name] = location;
+
+    return true;
+}
+
+bool RandomPlayerbotMgr::GetNamedLocation(std::string const& name, WorldLocation& location)
+{
+    auto itr = namedLocations.find(name);
+    if (itr == namedLocations.end())
+    {
+        sLog.outError("RandomPlayerbotMgr::GetNamedLocation: Named location '%s' not found! Please ensure that your ai_playerbot_named_location table is up to date.", name);
+        return false;
+    }
+
+    location = itr->second;
+
+    return true;
+}
+
 uint32 RandomPlayerbotMgr::AddRandomBots()
 {
     uint32 maxAllowedBotCount = GetEventValue(0, "bot_count");    

@@ -2698,6 +2698,16 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
         level = 60;
 #endif
 
+    // if arena team, level is max
+    for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
+    {
+        if (ArenaTeam* team = sObjectMgr.GetArenaTeamById(bot->GetArenaTeamId(arena_slot)))
+        {
+            level = 80;
+            break;
+        }
+    }
+
     if (level == sWorld.getConfig(CONFIG_UINT32_START_PLAYER_LEVEL))
         return;
 

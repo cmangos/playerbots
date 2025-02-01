@@ -158,6 +158,7 @@ namespace ai
         template<class T>
         std::pair<T, WorldPosition> closest(const std::vector<T>& list) const { return closest(GetPosVector(list)); }
 
+        bool IsWithinDist(const WorldPosition& other, float dist2compare) const { return sqDistance(other) < dist2compare * dist2compare; }
 
         //Quick square distance in 2d plane.
         float sqDistance2d(const WorldPosition& to) const { return (coord_x - to.coord_x) * (coord_x - to.coord_x) + (coord_y - to.coord_y) * (coord_y - to.coord_y); };

@@ -77,6 +77,10 @@ public:
         void SetDatabaseDelay(std::string db, uint32 delay) {databaseDelay[db] = delay;}
         uint32 GetDatabaseDelay(std::string db) {if(databaseDelay.find(db) == databaseDelay.end()) return 0; return databaseDelay[db];}
 
+        void LoadNamedLocations();
+        bool AddNamedLocation(std::string const& name, WorldLocation const& location);
+        bool GetNamedLocation(std::string const& name, WorldLocation& location);
+
         static bool HandlePlayerbotConsoleCommand(ChatHandler* handler, char const* args);
         bool IsRandomBot(Player* bot);
         bool IsRandomBot(uint32 bot);
@@ -189,6 +193,7 @@ public:
     private:
         PlayerBotMap players;
         int processTicks;
+        std::unordered_map<std::string, WorldLocation> namedLocations;
         std::map<uint8, std::vector<WorldLocation> > locsPerLevelCache;
         std::map<uint32, std::vector<WorldLocation> > rpgLocsCache;
 		std::map<uint32, std::map<uint32, std::vector<WorldLocation> > > rpgLocsCacheLevel;

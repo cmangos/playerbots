@@ -4,52 +4,6 @@
 
 using namespace ai;
 
-void BGStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
-{
-    triggers.push_back(new TriggerNode(
-        "random",
-        NextAction::array(0, new NextAction("bg join", relevance), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "bg invite active",
-        NextAction::array(0, new NextAction("bg status check", relevance), NULL)));
-}
-
-void BattlegroundStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
-{
-    triggers.push_back(new TriggerNode(
-        "bg waiting",
-        NextAction::array(0, new NextAction("bg move to start", 1.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "bg active",
-        NextAction::array(0, new NextAction("check mount state", 2.0f), new NextAction("bg move to objective", 1.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "very often",
-        NextAction::array(0, new NextAction("bg check objective", 10.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "bg active",
-        NextAction::array(0, new NextAction("bg check flag", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "bg ended",
-        NextAction::array(0, new NextAction("bg leave", ACTION_HIGH), NULL)));
-
-    /*triggers.push_back(new TriggerNode(
-        "enemy flagcarrier near",
-        NextAction::array(0, new NextAction("attack enemy flag carrier", 80.0f), NULL)));*/
-
-    /*triggers.push_back(new TriggerNode(
-        "team flagcarrier near",
-        NextAction::array(0, new NextAction("bg protect fc", 40.0f), NULL)));*/
-
-    /*triggers.push_back(new TriggerNode(
-        "player has flag",
-        NextAction::array(0, new NextAction("bg move to objective", 90.0f), NULL)));*/
-}
-
 void WarsongStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
@@ -88,17 +42,6 @@ void WarsongStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 void WarsongStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     InitNonCombatTriggers(triggers);
-}
-
-void AlteracStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
-{
-}
-
-void AlteracStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
-{
-    triggers.push_back(new TriggerNode(
-        "very often",
-        NextAction::array(0, new NextAction("bg banner", ACTION_NORMAL), NULL)));
 }
 
 void ArathiStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)

@@ -3282,6 +3282,8 @@ bool BGTactics::selectObjective(bool reset)
             rootTeamIndex = TEAM_INDEX_ALLIANCE;
         }
 
+        WorldObject* BgObjective = nullptr;
+
         //Get BgObjective if not set
         if (!bot->HasAura(EY_SPELL_NETHERSTORM_FLAG))
         {
@@ -3440,6 +3442,7 @@ bool BGTactics::selectObjective(bool reset)
 #ifdef MANGOSBOT_TWO
     case BATTLEGROUND_IC:
     {
+        WorldObject* BgObjective = nullptr;
         uint32 currentObjective = BG_IC_MAX_OBJECTIVES;
         uint32 role = context->GetValue<uint32>("bg role")->Get();
         bool inVehicle = ai->IsInVehicle();

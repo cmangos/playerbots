@@ -862,7 +862,7 @@ bool RandomPlayerbotMgr::AddNamedLocation(std::string const& name, WorldLocation
 {
     if (namedLocations.find(name) != namedLocations.end())
     {
-        sLog.outError("RandomPlayerbotMgr::AddNamedLocation: Failed to add named location '%s' - already exists!", name);
+        sLog.outError("RandomPlayerbotMgr::AddNamedLocation: Failed to add named location '%s' - already exists!", name.c_str());
         return false;
     }
 
@@ -876,7 +876,7 @@ bool RandomPlayerbotMgr::GetNamedLocation(std::string const& name, WorldLocation
     auto itr = namedLocations.find(name);
     if (itr == namedLocations.end())
     {
-        sLog.outError("RandomPlayerbotMgr::GetNamedLocation: Named location '%s' not found! Please ensure that your ai_playerbot_named_location table is up to date.", name);
+        sLog.outError("RandomPlayerbotMgr::GetNamedLocation: Named location '%s' not found! Please ensure that your ai_playerbot_named_location table is up to date.", name.c_str());
         return false;
     }
 

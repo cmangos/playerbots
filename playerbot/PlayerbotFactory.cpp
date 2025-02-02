@@ -1626,7 +1626,8 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
             ItemPrototype const* proto = oldItem->GetProto();
             if (proto && proto->ItemLevel <= sPlayerbotAIConfig.randomGearMaxLevel)
             {
-                int priority = proto->Quality * proto->ItemLevel;
+                int effectiveItemLevel = std::min(proto->ItemLevel, 264u);
+                int priority = proto->Quality * effectiveItemLevel;
                 prioritizedItems.emplace_back(priority, slot);
             }
         }
@@ -2067,7 +2068,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
 
                         // Skip legendary items with a chance
                         if ((proto->Quality == ITEM_QUALITY_LEGENDARY && urand(0, 100) > 20) ||
-                            (incremental && oldItem && oldProto->Quality == ITEM_QUALITY_LEGENDARY && urand(0, 100) > uint32(100 * 0.5f)))
+                            (incremental && oldItem && oldProto->Quality == ITEM_QUALITY_LEGENDARY && urand(0, 100) > 50))
                             continue;
 
                         // Stat calculation and comparison

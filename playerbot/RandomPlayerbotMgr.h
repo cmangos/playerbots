@@ -14,6 +14,7 @@ class Player;
 class Unit;
 class Object;
 class Item;
+struct StrategyRecord;
 
 class CachedEvent
 {
@@ -80,6 +81,9 @@ public:
         void LoadNamedLocations();
         bool AddNamedLocation(std::string const& name, WorldLocation const& location);
         bool GetNamedLocation(std::string const& name, WorldLocation& location);
+
+        void LoadStrategyRecords();
+        auto GetStrategyRecords() const { return strategyRecords; }
 
         static bool HandlePlayerbotConsoleCommand(ChatHandler* handler, char const* args);
         bool IsRandomBot(Player* bot);
@@ -194,6 +198,7 @@ public:
         PlayerBotMap players;
         int processTicks;
         std::unordered_map<std::string, WorldLocation> namedLocations;
+        std::vector<std::shared_ptr<StrategyRecord>> strategyRecords;
         std::map<uint8, std::vector<WorldLocation> > locsPerLevelCache;
         std::map<uint32, std::vector<WorldLocation> > rpgLocsCache;
 		std::map<uint32, std::map<uint32, std::vector<WorldLocation> > > rpgLocsCacheLevel;

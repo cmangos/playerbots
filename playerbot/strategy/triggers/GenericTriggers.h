@@ -1037,6 +1037,9 @@ namespace ai
 
         virtual bool IsActive()
         {
+            if (bot->getRace() != RACE_HUMAN)
+                return false;
+
             if (AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.almostFullHealth)
                 return false;
             bool isHealthy = AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.mediumHealth;

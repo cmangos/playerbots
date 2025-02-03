@@ -143,7 +143,7 @@ bool BGJoinAction::Execute(Event& event)
 #ifndef MANGOSBOT_ZERO
 bool BGJoinAction::gatherArenaTeam(ArenaType type)
 {
-    if (bot->InBattleGround())
+    if (bot->InBattleGround() || bot->InBattleGroundQueue())
         return false;
     
     ArenaTeam* arenateam = nullptr;
@@ -205,7 +205,7 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
             if (member->GetObjectGuid() == bot->GetObjectGuid())
                 continue;
 
-            if (member->InBattleGround())
+            if (member->InBattleGround() || member->InBattleGroundQueue())
                 continue;
 
             if (member->IsInCombat())

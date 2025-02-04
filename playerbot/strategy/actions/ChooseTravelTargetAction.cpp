@@ -19,6 +19,9 @@ bool ChooseTravelTargetAction::Execute(Event& event)
     FutureDestinations* futureDestinations = AI_VALUE(FutureDestinations*, "future travel destinations");
     std::string futureTravelPurpose = AI_VALUE2(std::string, "manual string", "future travel purpose");
 
+    if (Qualified::isValidNumberString(futureTravelPurpose))
+        futureTravelPurpose = TravelDestinationPurposeName.at(TravelDestinationPurpose(stoi(futureTravelPurpose)));
+
     if (!futureDestinations->valid())
     {
         travelTarget->SetStatus(TravelStatus::TRAVEL_STATUS_NONE);
@@ -97,6 +100,7 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
 
     //Actually apply the new target to the travel target used by the bot.
     oldTarget->CopyTarget(newTarget);
+    oldTarget->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
 
     //If we are idling but have a master. Idle only 10 seconds.
     if (ai->GetMaster() && oldTarget->IsActive() && typeid(*oldTarget->GetDestination()) == typeid(NullTravelDestination))

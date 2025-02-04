@@ -1009,7 +1009,7 @@ void ShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_NORMAL + 1), NULL)));
     
     triggers.push_back(new TriggerNode(
         "low health",

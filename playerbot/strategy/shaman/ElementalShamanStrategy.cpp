@@ -894,7 +894,7 @@ void ElementalShamanBoostRaidStrategy::InitNonCombatTriggers(std::list<TriggerNo
 
 NextAction** ElementalShamanStrategy::GetDefaultCombatActions()
 {
-    return NextAction::array(0, new NextAction("lightning bolt", ACTION_IDLE), NULL);
+    return NextAction::array(0, new NextAction("lightning bolt", ACTION_NORMAL), NULL);
 }
 
 void ElementalShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

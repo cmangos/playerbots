@@ -1,6 +1,7 @@
 #include "playerbot/playerbot.h"
 #include "BudgetValues.h"
 #include "ItemUsageValue.h"
+#include "MountValues.h"
 
 using namespace ai;
 
@@ -90,14 +91,14 @@ uint32 RepairCostValue::Calculate()
 
 uint32 MoneyNeededForValue::Calculate()
 {
-	NeedMoneyFor needMoneyFor = NeedMoneyFor(stoi(getQualifier()));
+    NeedMoneyFor needMoneyFor = NeedMoneyFor(stoi(getQualifier()));
 
-	PlayerbotAI* ai = bot->GetPlayerbotAI();
-	AiObjectContext* context = ai->GetAiObjectContext();
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
 
-	uint32 moneyWanted = 0;
+    uint32 moneyWanted = 0;
 
-	uint32 level = bot->GetLevel();
+    uint32 level = bot->GetLevel();
 
     switch (needMoneyFor)
     {
@@ -111,7 +112,7 @@ uint32 MoneyNeededForValue::Calculate()
         moneyWanted = (bot->getClass() == CLASS_HUNTER) ? (level * level * level) / 10 : 0; //Or level^3 (1s @ lvl10, 30s @ lvl30, 2g @ lvl60, 5g @ lvl80): Todo replace (should be best ammo buyable x 8 stacks cost)
         break;
     case NeedMoneyFor::spells:
-        moneyWanted = AI_VALUE(uint32, "train cost");
+        moneyWanted = AI_VALUE2(uint32, "train cost", TRAINER_TYPE_CLASS);
         break;
     case NeedMoneyFor::travel:
         moneyWanted = bot->isTaxiCheater() ? 0 : 1500; //15s for traveling half a continent. Todo: Add better calculation (Should be ???)
@@ -135,6 +136,7 @@ uint32 MoneyNeededForValue::Calculate()
         moneyWanted = (level * level * level); //Or level^3 (10s @ lvl10, 3g @ lvl30, 20g @ lvl60, 50g @ lvl80): Todo replace (Should be buyable reagents that combined allow crafting of usefull items)
         break;
     case NeedMoneyFor::ah:
+    {
         //Save deposit needed for all items the bot wants to AH.
         uint32 time;
 #ifdef MANGOSBOT_ZERO
@@ -205,8 +207,54 @@ uint32 MoneyNeededForValue::Calculate()
         return totalDeposit;
         break;
     }
+    case NeedMoneyFor::mount:
+    {
+        uint32 maxMountSpeed = 0;
+        uint32 maxFlyMountSpeed = 0;
 
-	return moneyWanted;
+        for (auto& mount : AI_VALUE(std::vector<MountValue>, "mount list"))
+        {
+            if (mount.GetSpeed(false) > maxMountSpeed)
+            {
+                maxMountSpeed = mount.GetSpeed(false);
+                maxFlyMountSpeed = mount.GetSpeed(true);
+            }
+        }
+
+        if (level >= 40)
+        {
+            if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 75)
+                moneyWanted += 35 * GOLD;
+
+            if (maxMountSpeed < 59)
+                moneyWanted += 10 * GOLD;
+        }
+        if (level >= 60)
+        {
+            if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 150)
+                moneyWanted += 600 * GOLD;
+
+            if (maxMountSpeed < 99)
+                moneyWanted += 100 * GOLD;
+        }
+        if (level >= 70)
+        {
+            if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 225)
+                moneyWanted += 800 * GOLD;
+            else if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 300)
+                moneyWanted += 5000 * GOLD;
+
+            if (maxFlyMountSpeed < 99)
+                moneyWanted += 100 * GOLD;
+            else if (maxFlyMountSpeed < 279)
+                moneyWanted += 200 * GOLD;
+        }
+        //todo WOTLK
+        break;
+    }
+    }
+
+    return moneyWanted;
 };
 
 uint32 TotalMoneyNeededForValue::Calculate()

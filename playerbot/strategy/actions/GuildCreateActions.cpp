@@ -270,23 +270,29 @@ bool PetitionTurnInAction::Execute(Event& event)
         return true;
     }
 
-    TravelTarget* oldTarget = context->GetValue<TravelTarget*>("travel target")->Get();
-
     //Select a new target to travel to. 
     TravelTarget newTarget = TravelTarget(ai);
 
     ai->TellDebug(requester, "Handing in guild petition", "debug travel");
 
-    bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_PETITIONER });
+    TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    if (!foundTarget || !newTarget.IsActive())
+    if (oldTarget->IsPreparing())
         return false;
 
-    newTarget.SetRadius(INTERACTION_DISTANCE);
+    if (oldTarget->GetDestination())
+    {
+        TravelDestination* dest = oldTarget->GetDestination();
 
-    setNewTarget(requester, &newTarget, oldTarget);
+        EntryTravelDestination* eDest = dynamic_cast<EntryTravelDestination*>(dest);
 
-    return true;
+        if (eDest && eDest->HasNpcFlag(UNIT_NPC_FLAG_PETITIONER))
+            return false;
+    }
+
+    oldTarget->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+
+    return ai->DoSpecificAction("request named travel target::petition", Event("can hand in petition"), true);
 };
 
 bool PetitionTurnInAction::isUseful()
@@ -322,23 +328,22 @@ bool BuyTabardAction::Execute(Event& event)
     if (canBuy && AI_VALUE2(uint32, "item count", chat->formatQItem(5976)))
         return true;
 
-    TravelTarget* oldTarget = context->GetValue<TravelTarget*>("travel target")->Get();
+    TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    //Select a new target to travel to. 
-    TravelTarget newTarget = TravelTarget(ai);
-
-    ai->TellDebug(requester, "Buying a tabard", "debug travel");
-
-    bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_TABARDDESIGNER }, "Tabard Vendor", { 5976 });
-
-    if (!foundTarget || !newTarget.IsActive())
+    if (oldTarget->IsPreparing())
         return false;
 
-    newTarget.SetRadius(INTERACTION_DISTANCE);
+    if (oldTarget->GetDestination())
+    {
+        TravelDestination* dest = oldTarget->GetDestination();
 
-    setNewTarget(requester, &newTarget, oldTarget);
+        EntryTravelDestination* eDest = dynamic_cast<EntryTravelDestination*>(dest);
 
-    return true;
+        if (eDest && eDest->HasNpcFlag(UNIT_NPC_FLAG_TABARDDESIGNER))
+            return false;
+    }
+
+    return ai->DoSpecificAction("request named travel target::tabard", Event("can buy tabard"), true);  
 };
 
 bool BuyTabardAction::isUseful()

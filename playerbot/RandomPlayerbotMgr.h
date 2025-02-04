@@ -77,6 +77,10 @@ public:
         void SetDatabaseDelay(std::string db, uint32 delay) {databaseDelay[db] = delay;}
         uint32 GetDatabaseDelay(std::string db) {if(databaseDelay.find(db) == databaseDelay.end()) return 0; return databaseDelay[db];}
 
+        void LoadNamedLocations();
+        bool AddNamedLocation(std::string const& name, WorldLocation const& location);
+        bool GetNamedLocation(std::string const& name, WorldLocation& location);
+
         static bool HandlePlayerbotConsoleCommand(ChatHandler* handler, char const* args);
         bool IsRandomBot(Player* bot);
         bool IsRandomBot(uint32 bot);
@@ -189,6 +193,7 @@ public:
     private:
         PlayerBotMap players;
         int processTicks;
+        std::unordered_map<std::string, WorldLocation> namedLocations;
         std::map<uint8, std::vector<WorldLocation> > locsPerLevelCache;
         std::map<uint32, std::vector<WorldLocation> > rpgLocsCache;
 		std::map<uint32, std::map<uint32, std::vector<WorldLocation> > > rpgLocsCacheLevel;
@@ -205,7 +210,7 @@ public:
         typedef std::unordered_map <uint32, std::list<float>> botPerformanceMetric;
         std::unordered_map<std::string, botPerformanceMetric> botPerformanceMetrics;
         
-        std::vector<std::pair<uint32, uint32>> RpgLocationsNear(const WorldLocation pos, const std::map<uint32, std::map<uint32, std::vector<std::string_view>>>& areaNames, uint32 radius = 2000);
+        std::vector<std::pair<uint32, uint32>> RpgLocationsNear(const WorldLocation pos, const std::map<uint32, std::map<uint32, std::vector<std::string>>>& areaNames, uint32 radius = 2000);
         void PushMetric(botPerformanceMetric& metric, const uint32 bot, const float value, const uint32 maxNum = 60) const;
         float GetMetricDelta(botPerformanceMetric& metric) const;
 

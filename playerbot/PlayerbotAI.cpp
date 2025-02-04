@@ -840,6 +840,9 @@ void PlayerbotAI::Unmount()
     {
         bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         bot->Unmount();
+#ifdef MANGOSBOT_TWO
+        bot->ResolvePendingUnmount();
+#endif
 
         bot->UpdateSpeed(MOVE_RUN, true);
         bot->UpdateSpeed(MOVE_RUN, false);
@@ -6268,6 +6271,9 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
                 break;
             case NeedMoneyFor::ah:
                 out << "ah";
+                break;
+            case NeedMoneyFor::mount:
+                out << "mount";
                 break;
             case NeedMoneyFor::anything:
                 out << "anything";

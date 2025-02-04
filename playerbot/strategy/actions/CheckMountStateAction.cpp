@@ -469,6 +469,9 @@ bool CheckMountStateAction::Mount(Player* requester)
 
             if (ai->CastSpell(mount.GetSpellId(), bot))
             {
+#ifdef MANGOSBOT_TWO
+                bot->ResolvePendingMount();
+#endif
                 sPlayerbotAIConfig.logEvent(ai, "CheckMountStateAction", sServerFacade.LookupSpellInfo(mount.GetSpellId())->SpellName[0], std::to_string(mount.GetSpeed(canFly)));
                 SetDuration(GetSpellRecoveryTime(sServerFacade.LookupSpellInfo(mount.GetSpellId())));
                 didMount = true;

@@ -347,9 +347,9 @@ uint8 QuestObjectiveTravelDestination::GetObjective() const
 
 bool RpgTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 {
-    bool isUsefull = false;
+    /*bool isUsefull = false;
 
-    if (GetEntry() > 0 && GetPurpose() != TravelDestinationPurpose::GenericRpg)
+    if (GetEntry() > 0 && GetPurpose() != TravelDestinationPurpose::GenericRpg && GetPurpose() != TravelDestinationPurpose::Trainer && GetPurpose() != TravelDestinationPurpose::)
     {
 
         CreatureInfo const* cInfo = this->GetCreatureInfo();
@@ -396,6 +396,7 @@ bool RpgTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 
     if (!isUsefull)
         return false;
+        */
 
     WorldPosition firstPoint = *GetPoints().front();
 
@@ -781,6 +782,15 @@ void TravelTarget::SetStatus(TravelStatus status) {
     }
 }
 
+bool TravelTarget::IsConditionsActive()
+{
+    for (auto& condition : travelConditions)
+        if (!AI_VALUE(bool, condition))
+            return false;
+
+    return true;
+}
+
 bool TravelTarget::IsActive() {
     if (m_status == TravelStatus::TRAVEL_STATUS_NONE || m_status == TravelStatus::TRAVEL_STATUS_EXPIRED || m_status == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
@@ -803,7 +813,7 @@ bool TravelTarget::IsActive() {
     if (IsWorking())
         return true;   
 
-    if (!tDestination->IsActive(bot, PlayerTravelInfo(bot))) //Target has become invalid. Stop.
+    if (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive()) //Target has become invalid. Stop.
     {
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return true;
@@ -1163,10 +1173,9 @@ void TravelMgr::LoadQuestTravelTable()
     Clear();
 
     sLog.outString("Loading trainable spells.");
-    if (GAI_VALUE(trainableSpellMap*, "trainable spell map")->empty())
-    {
-
-    }     
+    GAI_VALUE(trainableSpellMap*, "trainable spell map");
+    GAI_VALUE(std::vector<MountValue>, "full mount list");
+    
 
     sLog.outString("Loading object locations.");
 
@@ -2073,7 +2082,7 @@ void TravelMgr::LoadQuestTravelTable()
 #endif     
 }
 
-DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag, const int32 entry, bool onlyPossible, float maxDistance) const
+DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
 {
     WorldPosition center = info.GetPosition();
     DestinationList retDests;
@@ -2086,7 +2095,7 @@ DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 
 
         for (auto& [destEntry, dests] : entryDests)
         {
-            if (entry && destEntry != entry)
+            if (entries.size() && std::find(entries.begin(), entries.end(), destEntry) == entries.end())
                 continue;
 
             for (auto& dest : dests)
@@ -2105,10 +2114,10 @@ DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 
     return retDests;
 }
 
-PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const int32 entry, bool onlyPossible, float maxDistance) const
+PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
 {
     PartitionedTravelList pointMap;
-    DestinationList destinations = GetDestinations(info, purposeFlag, entry, onlyPossible, maxDistance);
+    DestinationList destinations = GetDestinations(info, purposeFlag, entries, onlyPossible, maxDistance);
 
     bool canFightElite = info.GetBoolValue("can fight elite");
     uint32 botLevel = info.GetLevel();

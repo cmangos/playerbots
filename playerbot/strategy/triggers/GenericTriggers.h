@@ -561,7 +561,7 @@ namespace ai
     {
     public:
         ValueTrigger(PlayerbotAI* ai, std::string name = "val", int checkInterval = 1) : Trigger(ai, name, checkInterval), Qualified() {}
-        virtual bool IsActive() { return AI_VALUE(bool, getQualifier()); }
+        virtual bool IsActive() { name = getQualifier();  return AI_VALUE(bool, getQualifier()); }
     };
 
     class SnareTargetTrigger : public DebuffTrigger

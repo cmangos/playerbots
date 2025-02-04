@@ -715,8 +715,13 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 {
                     bot->SetMoney(10000000);
                 }
-
+#ifdef MANGOSBOT_TWO                
+                bot->OnTaxiFlightEject(true);
+#endif
                 bool goTaxi = bot->ActivateTaxiPathTo({ tEntry->from, tEntry->to }, unit, 1);
+#ifdef MANGOSBOT_TWO
+                bot->ResolvePendingMount();
+#endif
 
                 if (ai->HasCheat(BotCheatMask::gold) || ai->HasCheat(BotCheatMask::taxi))
                 {

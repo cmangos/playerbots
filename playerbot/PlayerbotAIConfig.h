@@ -308,6 +308,11 @@ public:
     bool autoLearnTrainerSpells;
     bool autoLearnQuestSpells;
     bool autoLearnDroppedSpells;
+#ifndef MANGOSBOT_TWO
+    bool autoLearnHunterPetTrainedSkills;
+#endif
+    uint32 trainHunterPets;
+
     bool autoDoQuests;
     bool syncLevelWithPlayers;
     uint32 syncLevelMaxAbove, syncLevelNoPlayer;

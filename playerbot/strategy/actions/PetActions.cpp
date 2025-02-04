@@ -26,7 +26,7 @@ bool InitializePetAction::isUseful()
             {
                 std::unique_ptr<QueryResult> queryResult = CharacterDatabase.PQuery("SELECT id, entry, owner "
                     "FROM character_pet WHERE owner = '%u' AND (slot = '%u' OR slot > '%u') ",
-                    bot->GetGUIDLow(), PET_SAVE_AS_CURRENT, PET_SAVE_LAST_STABLE_SLOT);
+                    bot->GetGUIDHigh(), PET_SAVE_AS_CURRENT, PET_SAVE_LAST_STABLE_SLOT);
 
                 if (queryResult)
                 {
@@ -64,19 +64,21 @@ bool InitializePetSpellsAction::isUseful()
 
                 HunterPetBuild currentBuild = HunterPetBuild(bot);
                 HunterPetBuild* proposedBuild;
-                std::string buildLink = "";
+                std::string proposedBuildLink = "";
+                std::string currentBuildLink = currentBuild.GetBuildLink();
                 HunterPetBuildPath hpbp;
-                switch (sPlayerbotDbStore.PetHasBuilds(bot->GetPet()->GetGUIDLow()))
+                switch (sPlayerbotDbStore.PetHasBuilds(bot->GetPet()->GetCharmInfo()->GetPetNumber()))
                 {
                     case 0:
                         return true;
                     case 1:
-                        hpbp = sPlayerbotDbStore.LoadPetBuildPath(bot->GetPet()->GetGUIDLow());
+                        hpbp = sPlayerbotDbStore.LoadPetBuildPath(bot->GetPet()->GetCharmInfo()->GetPetNumber());
                         proposedBuild = GetBestPremadeBuild(hpbp.id);
-                        return !(proposedBuild->GetBuildLink() == currentBuild.GetBuildLink());
+                        proposedBuildLink = proposedBuild->GetBuildLink();
+                        return !(proposedBuildLink == currentBuildLink);
                     case 2:
-                        buildLink = sPlayerbotDbStore.LoadPetBuildLink(bot->GetPet()->GetGUIDLow());
-                        return !(buildLink == currentBuild.GetBuildLink());
+                        proposedBuildLink = sPlayerbotDbStore.LoadPetBuildLink(bot->GetPet()->GetCharmInfo()->GetPetNumber());
+                        return !(proposedBuildLink == currentBuildLink);
                     default:
                         // incorrect value returned
                         return false;
@@ -520,7 +522,40 @@ bool SetPetAction::Execute(Event& event)
                 }
                 else if (parameter.find("update") != std::string::npos)
                 {
-                    ai->TellPlayer(requester, "Not working, still in progress.");
+                    uint32 petNumber = pet->GetCharmInfo()->GetPetNumber();
+                    int savedType = sPlayerbotDbStore.PetHasBuilds(pet->GetCharmInfo()->GetPetNumber());
+                    switch (savedType)
+                    {
+                        case 0:
+                            ai->TellPlayer(requester, "No build saved. Please run 'pet build set random', 'pet build set <path number>', 'pet build set <path name>', or 'pet build <build link>'");
+                            break;
+                        case 1:
+                        {
+                            HunterPetBuild currentBuild = HunterPetBuild(bot);
+                            std::string currentBuildString = currentBuild.GetBuildLink();
+                            HunterPetBuildPath path = sPlayerbotDbStore.LoadPetBuildPath(pet->GetCharmInfo()->GetPetNumber());
+                            HunterPetBuild newBuild = *GetBestPremadeBuild(path.id);
+                            std::string buildLink = newBuild.GetBuildLink();
+                            if (currentBuildString != buildLink)
+                            {
+                                newBuild.ApplyBuild(bot, &out);
+                            }
+                            break;
+                        }
+                        case 2:
+                        {
+                            HunterPetBuild currentBuild = HunterPetBuild(bot);
+                            std::string currentBuildString = currentBuild.GetBuildLink();
+                            std::string buildLink = sPlayerbotDbStore.LoadPetBuildLink(pet->GetCharmInfo()->GetPetNumber());
+                            if (currentBuildString != buildLink)
+                            {
+                                HunterPetBuild newBuild = HunterPetBuild(buildLink);
+                                newBuild.ApplyBuild(bot, &out);
+                            }
+                            break;
+                        }
+
+                    }
                 }
                 else if (parameter.find("set ") != std::string::npos)
                 {
@@ -543,10 +578,10 @@ bool SetPetAction::Execute(Event& event)
                             if (newBuild.GetTPCostOfBuild() > 0)
                             {
                                 out << "Apply spec " << "|h|cffffffff" << path->name;
-                                sPlayerbotDbStore.SavePetBuildPath(pet->GetGUIDLow(), pet->GetCreatureInfo()->Family, path->id);
+                                sPlayerbotDbStore.SavePetBuildPath(pet->GetCharmInfo()->GetPetNumber(), pet->GetCreatureInfo()->Family, path->id);
+                                ai->TellPlayer(requester, out);
 
                             }
-                            ai->TellPlayer(requester, out);
                         }
                     }
                     else
@@ -559,13 +594,15 @@ bool SetPetAction::Execute(Event& event)
                             if (newBuild.CheckBuild(hpb->CalculateTrainingPoints(bot), &out))
                             {
                                 newBuild.ApplyBuild(bot, &out);
-                                sPlayerbotDbStore.SavePetBuildLink(pet->GetGUIDLow(), buildLink);
+                                sPlayerbotDbStore.SavePetBuildLink(pet->GetCharmInfo()->GetPetNumber(), buildLink);
+                                ai->TellPlayer(requester, out);
                             }
                         }
                         else
                         {
                             parameter = parameter.substr(4);
-                            std::vector<HunterPetBuildPath*> paths = getPremadePaths(parameter);
+                            int buildId = stoi(parameter);
+                            std::vector<HunterPetBuildPath*> paths = getPremadePaths(buildId);
                             if (paths.size() > 0)
                             {
                                 out.str("");
@@ -582,10 +619,10 @@ bool SetPetAction::Execute(Event& event)
                                 if (newBuild.GetTPCostOfBuild() > 0)
                                 {
                                     out << "Apply spec " << "|h|cffffffff" << path->name;
-                                    sPlayerbotDbStore.SavePetBuildPath(pet->GetGUIDLow(), pet->GetCreatureInfo()->Family, path->id);
+                                    sPlayerbotDbStore.SavePetBuildPath(pet->GetCharmInfo()->GetPetNumber(), pet->GetCreatureInfo()->Family, path->id);
+                                    ai->TellPlayer(requester, out);
 
                                 }
-                                ai->TellPlayer(requester, out);
                             }
                         }
                     }
@@ -626,7 +663,7 @@ bool SetPetAction::Execute(Event& event)
 bool SetPetAction::AutoSelectBuild(Player* bot, std::ostringstream* out)
 {
     HunterPetBuild currentBuild = HunterPetBuild(bot);
-    HunterPetBuildPath path = sPlayerbotDbStore.LoadPetBuildPath(bot->GetPet()->GetGUIDLow());
+    HunterPetBuildPath path = sPlayerbotDbStore.LoadPetBuildPath(bot->GetPet()->GetCharmInfo()->GetPetNumber());
     if (path.id >= 0)
     {
         HunterPetBuild* build = GetBestPremadeBuild(path.id);
@@ -638,7 +675,7 @@ bool SetPetAction::AutoSelectBuild(Player* bot, std::ostringstream* out)
     }
     else
     {
-        std::string buildLink = sPlayerbotDbStore.LoadPetBuildLink(bot->GetPet()->GetGUIDLow());
+        std::string buildLink = sPlayerbotDbStore.LoadPetBuildLink(bot->GetPet()->GetCharmInfo()->GetPetNumber());
         if (buildLink != "")
         {
             HunterPetBuild build = HunterPetBuild(buildLink);
@@ -654,6 +691,21 @@ std::vector<HunterPetBuildPath*> SetPetAction::getPremadePaths(std::string findN
     for (auto& path : sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths)
     {
         if (findName.empty() || path.name.find(findName) != std::string::npos)
+        {
+            ret.push_back(&path);
+        }
+    }
+
+    return ret;
+}
+
+
+std::vector<HunterPetBuildPath*> SetPetAction::getPremadePaths(int id)
+{
+    std::vector<HunterPetBuildPath*> ret;
+    for (auto& path : sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths)
+    {
+        if (path.id == id)
         {
             ret.push_back(&path);
         }

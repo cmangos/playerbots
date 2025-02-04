@@ -83,6 +83,7 @@ class HunterPetBuild
     private:
         uint16 TPCost = 0;
         uint8 MaxRank = 0;
+        std::string BuildLink;
         std::map<uint8, HunterPetBuildSpell> spellRankEntityMapping;
 
         void InitHunterPetBuildSpellEntityList();

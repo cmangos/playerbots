@@ -85,24 +85,28 @@ void PlayerbotDbStore::SaveValue(uint64 guid, std::string preset, std::string ke
 
 void PlayerbotDbStore::SavePetBuildLink(uint64 petGuid, std::string buildLink)
 {
-    auto idResults = CharacterDatabase.PQuery("SELECT id FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = petBuild", petGuid);
+    auto idResults = CharacterDatabase.PQuery("SELECT id FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = 'petBuild'", petGuid);
     if (idResults)
     {
         auto fields = idResults->Fetch();
         uint64 id = fields[0].GetUInt64();
-        buildLink = "buildLink>>" + buildLink;
+        std::stringstream ss;
+        ss << "buildLink>>" << buildLink;
+        std::string buildLink = ss.str();
         CharacterDatabase.PExecute("UPDATE `ai_playerbot_db_store` SET `value` = '%s' WHERE id = '%lu';", buildLink.c_str(), petGuid);
     }
     else
     {
-        buildLink = "buildLink>>" + buildLink;
-        CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES '%lu', '%s', '%s', '%s');", petGuid, "", "petBuild", buildLink.c_str());
+        std::stringstream ss;
+        ss << "buildLink>>" << buildLink;
+        std::string buildLink = ss.str();
+        CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES (%lu, '%s', '%s', '%s');", petGuid, "", "petBuild", buildLink.c_str());
     }
 }
 
 std::string PlayerbotDbStore::LoadPetBuildLink(uint64 petGuid)
 {
-    auto buildLinkResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = petBuild", petGuid);
+    auto buildLinkResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = 'petBuild'", petGuid);
     if (buildLinkResults)
     {
         auto field = buildLinkResults->Fetch();
@@ -117,7 +121,7 @@ std::string PlayerbotDbStore::LoadPetBuildLink(uint64 petGuid)
 
 void PlayerbotDbStore::SavePetBuildPath(uint64 petGuid, uint32 petFamilyId, int buildNo)
 {
-    auto idResults = CharacterDatabase.PQuery("SELECT id FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = petBuild", petGuid);
+    auto idResults = CharacterDatabase.PQuery("SELECT id FROM `ai_playerbot_db_store` WHERE `guid` = %lu AND `key` = 'petBuild'", petGuid);
     if (idResults)
     {
         auto fields = idResults->Fetch();
@@ -125,19 +129,21 @@ void PlayerbotDbStore::SavePetBuildPath(uint64 petGuid, uint32 petFamilyId, int 
         std::stringstream ss;
         ss << "buildNo>>" << std::to_string(petFamilyId) << ">>" << buildNo;
         std::string buildLink = ss.str();
-        CharacterDatabase.PExecute("UPDATE `ai_playerbot_db_store` SET `value` = '%s' WHERE id = '%lu';", buildLink.c_str(), petGuid);
+        CharacterDatabase.PExecute("UPDATE `ai_playerbot_db_store` SET `value` = '%s' WHERE id = %lu;", buildLink.c_str(), petGuid);
     }
     else
     {
-        std::string buildLink = "buildNo>>" + buildNo;
-        CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES '%lu', '%s', '%s', '%s');", petGuid, "", "petBuild", buildLink.c_str());
+        std::stringstream ss;
+        ss << "buildNo>>" << std::to_string(petFamilyId) << ">>" << buildNo;
+        std::string buildLink = ss.str();
+        CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES (%lu, '%s', '%s', '%s');", petGuid, "", "petBuild", buildLink.c_str());
     }
 }
 
 HunterPetBuildPath PlayerbotDbStore::LoadPetBuildPath(uint64 petGuid)
 {
     HunterPetBuildPath path = HunterPetBuildPath();
-    auto buildResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = 'petBuild'", petGuid);
+    auto buildResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = %lu AND `key` = 'petBuild'", petGuid);
     if (buildResults)
     {
         auto field = buildResults->Fetch();
@@ -147,7 +153,8 @@ HunterPetBuildPath PlayerbotDbStore::LoadPetBuildPath(uint64 petGuid)
             buildNoString = buildNoString.substr(9);
             std::string delimiter = ">>";
             uint32 familyId = std::stoi(buildNoString.substr(0, buildNoString.find(delimiter)));
-            int buildNo = std::stoi(buildNoString.substr(buildNoString.find(delimiter)));
+            std::string buildNoStringA = buildNoString.substr(buildNoString.find(delimiter)+2);
+            int buildNo = std::stoi(buildNoStringA);
             return sPlayerbotAIConfig.familyPetBuilds[familyId].GetBuildPath(buildNo);
         }
     }

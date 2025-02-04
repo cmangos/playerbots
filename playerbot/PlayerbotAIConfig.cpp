@@ -695,6 +695,17 @@ bool PlayerbotAIConfig::Initialize()
     respawnModMax = config.GetIntDefault("AiPlayerbot.RespawnModMax", 18);
     respawnModForPlayerBots = config.GetBoolDefault("AiPlayerbot.RespawnModForPlayerBots", false);
     respawnModForInstances = config.GetBoolDefault("AiPlayerbot.RespawnModForInstances", false);
+#ifndef MANGOSBOT_TWO
+    autoLearnHunterPetTrainedSkills = config.GetBoolDefault("AiPlayerbot.autoLearnHunterPetTrainedSkills", 1);
+#endif
+    trainHunterPets = config.GetIntDefault("AiPlayerbot.TrainHunterPets", 1);
+
+    if (trainHunterPets < 0 || trainHunterPets > 2)
+    {
+
+        sLog.outError("AiPlayerbot.TrainHunterPets value of %lu is outside the accepted range and defaults to 1.", trainHunterPets);
+        trainHunterPets = 1;
+    }
 
     //LLM START
     llmEnabled = config.GetIntDefault("AiPlayerbot.LLMEnabled", 1);

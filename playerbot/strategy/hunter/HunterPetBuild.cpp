@@ -1,4 +1,5 @@
 #include "HunterPetBuild.h"
+#include <playerbot/ServerFacade.h>
 
 uint16 HunterPetBuild::GetTPCostOfBuild()
 {
@@ -76,7 +77,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> clawEntities = { {1,rank1Claw}, {2,rank2Claw}, {3, rank3Claw}, {4, rank4Claw}, {5, rank5Claw}, {6, rank6Claw}, {7, rank7Claw}, {8, rank8Claw},
 #ifdef MANGOSBOT_ONE
-        {9, rank9Claw} 
+        {9, rank9Claw}
 #endif
     };
 
@@ -94,13 +95,13 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> cowerEntities = { {1,rank1Cower}, {2,rank2Cower}, {3,rank3Cower}, {4,rank4Cower}, {5,rank5Cower}, {6,rank6Cower},
 #ifdef MANGOSBOT_ONE
-        {7,rank7Cower} 
+        {7,rank7Cower}
 #endif
     };
 
     HunterPetBuildSpell cower = HunterPetBuildSpell("Cower", 5, true, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, cowerEntities);
 #pragma endregion
-    
+
 #pragma region Dash
     HunterPetBuildSpellEntity rank1Dash = HunterPetBuildSpellEntity(1, 30, 15, 23099, 23100);
     HunterPetBuildSpellEntity rank2Dash = HunterPetBuildSpellEntity(2, 40, 20, 23109, 23111);
@@ -127,13 +128,13 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
     HunterPetBuildSpellEntity rank3FireResistance = HunterPetBuildSpellEntity(3, 40, 45, 24444, 24463);
     HunterPetBuildSpellEntity rank4FireResistance = HunterPetBuildSpellEntity(4, 50, 90, 24445, 24464);
     HunterPetBuildSpellEntity rank5FireResistance = HunterPetBuildSpellEntity(5, 60, 105, 27053, 27351); // TBC
-    
+
     std::map<uint8, HunterPetBuildSpellEntity> fireResistanceEntites = { {1,rank1FireResistance},{2,rank2FireResistance},{3,rank3FireResistance},{4,rank4FireResistance},
 #ifdef MANGOSBOT_ONE
         {5,rank5FireResistance}
 #endif
     };
-    
+
     HunterPetBuildSpell fireResistance = HunterPetBuildSpell("Fire Resistance", 9, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, fireResistanceEntites);
 #pragma endregion
 
@@ -143,7 +144,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
     HunterPetBuildSpellEntity rank3FrostResistance = HunterPetBuildSpellEntity(3, 40, 45, 24448, 24477);
     HunterPetBuildSpellEntity rank4FrostResistance = HunterPetBuildSpellEntity(4, 50, 90, 24449, 24478);
     HunterPetBuildSpellEntity rank5FrostResistance = HunterPetBuildSpellEntity(5, 60, 105, 27054, 27352); // TBC
-    
+
     std::map<uint8, HunterPetBuildSpellEntity> frostResistanceEntites = { {1,rank1FrostResistance},{2,rank2FrostResistance},{3,rank3FrostResistance},{4,rank4FrostResistance},
 #ifdef MANGOSBOT_ONE
         {5,rank5FrostResistance}
@@ -177,7 +178,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
     HunterPetBuildSpellEntity rank10GreatStamina = HunterPetBuildSpellEntity(10, 60, 185, 5042, 5049);
     HunterPetBuildSpellEntity rank11GreatStamina = HunterPetBuildSpellEntity(11, 70, 215, 27062, 27364); // TBC
 
-    std::map<uint8, HunterPetBuildSpellEntity> greatStaminaEntities = { {1, rank1GreatStamina}, {2, rank2GreatStamina}, {3,rank3GreatStamina}, {4,rank4GreatStamina}, {5,rank5GreatStamina},{6,rank6GreatStamina}, {7, rank7GreatStamina}, {8,rank8GreatStamina}, {9,rank9GreatStamina}, {10, rank10GreatStamina}, 
+    std::map<uint8, HunterPetBuildSpellEntity> greatStaminaEntities = { {1, rank1GreatStamina}, {2, rank2GreatStamina}, {3,rank3GreatStamina}, {4,rank4GreatStamina}, {5,rank5GreatStamina},{6,rank6GreatStamina}, {7, rank7GreatStamina}, {8,rank8GreatStamina}, {9,rank9GreatStamina}, {10, rank10GreatStamina},
 
 #ifdef MANGOSBOT_ONE
         {11, rank11GreatStamina}
@@ -216,7 +217,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> lightingBreathEntities = {
 #ifdef MANGOSBOT_ONE
-        {1, rank1LightningBreath}, 
+        {1, rank1LightningBreath},
 #endif
         {2, rank2LightningBreath}, {3,rank3LightningBreath}, {4,rank4LightningBreath}, {5,rank5LightningBreath},{6,rank6LightningBreath} };
 
@@ -246,15 +247,15 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #pragma endregion
 
 #pragma region Nature Resistance
-    HunterPetBuildSpellEntity rank1NatureResistance = HunterPetBuildSpellEntity(1, 20, 5, 24494, 24494);
-    HunterPetBuildSpellEntity rank2NatureResistance = HunterPetBuildSpellEntity(2, 30, 15, 24511, 24511);
-    HunterPetBuildSpellEntity rank3NatureResistance = HunterPetBuildSpellEntity(3, 40, 45, 24512, 24512);
-    HunterPetBuildSpellEntity rank4NatureResistance = HunterPetBuildSpellEntity(4, 50, 90, 24513, 24513);
+    HunterPetBuildSpellEntity rank1NatureResistance = HunterPetBuildSpellEntity(1, 20, 5, 24492, 24494);
+    HunterPetBuildSpellEntity rank2NatureResistance = HunterPetBuildSpellEntity(2, 30, 15, 24502, 24511);
+    HunterPetBuildSpellEntity rank3NatureResistance = HunterPetBuildSpellEntity(3, 40, 45, 24503, 24512);
+    HunterPetBuildSpellEntity rank4NatureResistance = HunterPetBuildSpellEntity(4, 50, 90, 24504, 24513);
     HunterPetBuildSpellEntity rank5NatureResistance = HunterPetBuildSpellEntity(5, 60, 105, 27055, 27354); // TBC
 
     std::map<uint8, HunterPetBuildSpellEntity> natureResistanceEntities = { {1, rank1NatureResistance}, {2, rank2NatureResistance}, {3, rank3NatureResistance}, {4, rank4NatureResistance},
 #ifdef MANGOSBOT_ONE
-        {5, rank5NatureResistance} 
+        {5, rank5NatureResistance}
 #endif
     };
 
@@ -293,9 +294,9 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
     HunterPetBuildSpellEntity rank4Screech = HunterPetBuildSpellEntity(4, 56, 25, 24579, 24582);
     HunterPetBuildSpellEntity rank5Screech = HunterPetBuildSpellEntity(5, 64, 29, 27051, 27349); // TBC
 
-    std::map<uint8, HunterPetBuildSpellEntity> screechEntites = { {1,rank1Screech},{2,rank2Screech}, {3,rank3Screech},{4,rank4Screech}, 
+    std::map<uint8, HunterPetBuildSpellEntity> screechEntites = { {1,rank1Screech},{2,rank2Screech}, {3,rank3Screech},{4,rank4Screech},
 #ifdef MANGOSBOT_ONE
-        {5,rank5Screech} 
+        {5,rank5Screech}
 #endif
     };
 
@@ -309,9 +310,9 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
     HunterPetBuildSpellEntity rank4ShadowResistance = HunterPetBuildSpellEntity(4, 50, 90, 24507, 24516);
     HunterPetBuildSpellEntity rank5ShadowResistance = HunterPetBuildSpellEntity(5, 60, 105, 27056, 27353); // TBC
 
-    std::map<uint8, HunterPetBuildSpellEntity> shadowResistanceEntities = { {1, rank1ShadowResistance}, {2, rank2ShadowResistance}, {3, rank3ShadowResistance}, {4, rank4ShadowResistance}, 
+    std::map<uint8, HunterPetBuildSpellEntity> shadowResistanceEntities = { {1, rank1ShadowResistance}, {2, rank2ShadowResistance}, {3, rank3ShadowResistance}, {4, rank4ShadowResistance},
 #ifdef MANGOSBOT_ONE 
-        {5, rank5ShadowResistance} 
+        {5, rank5ShadowResistance}
 #endif 
     };
 
@@ -529,27 +530,12 @@ bool HunterPetBuild::CheckBuildLink(std::string buildLink, uint32 familyId, std:
 
 std::string HunterPetBuild::GetBuildLink()
 {
-#ifdef MANGOSBOT_ZERO
-    std::string link = "000-000-000-000-000-000-000";
-#endif
-#ifdef MANGOSBOT_ONE
-    std::string link = "000-000-000-000-000-000-000-000-000";
-#endif
-    for (int ii = 0; ii < spells.size(); ii++)
-    {
-        if ((ii + 1) % 4 == 0)
-            continue;
-        int intRank = spells[ii].Spells[spells[ii].Spells.size() - 1].Rank;
-        std::stringstream stream;
-        stream << std::hex << intRank;
-        std::string rank = stream.str();
-        link.replace(ii, 1, rank);
-    }
-    return link;
+    return BuildLink;
 }
 
 void HunterPetBuild::ReadSpells(std::string buildLink)
 {
+    BuildLink = buildLink;
     spells.clear();
     for (int ii = 0; ii < buildLink.size(); ii++)
     {
@@ -578,41 +564,54 @@ void HunterPetBuild::ReadSpells(Player* bot)
 {
 #ifdef MANGOSBOT_ZERO
     int maxFamilyBuilds = 27;
+    std::string link = "000-000-000-000-000-000-000";
 #endif
 #ifdef MANGOSBOT_ONE
     int maxFamilyBuilds = 34;
+    std::string link = "000-000-000-000-000-000-000-000-000";
 #endif
     Pet* pet = bot->GetPet();
     if (pet)
     {
-        CreatureSpellList creatureSpellList = pet->GetSpellList();
+        PetSpellMap creatureSpellList = pet->m_spells;
         std::vector<uint32> spellIdList;
 
-        for (auto& creatureSpell : creatureSpellList.Spells)
+        for (auto& creatureSpell : creatureSpellList)
         {
-            spellIdList.push_back(creatureSpell.second.SpellId);
+            const SpellEntry* spellEntry = sServerFacade.LookupSpellInfo(creatureSpell.first);
+            spellIdList.push_back(creatureSpell.first);
         }
 
         for (int ii = 0; ii < maxFamilyBuilds; ii++)
         {
+            HunterPetBuildSpell spell = spellRankEntityMapping[ii];
+            spell.Spells.clear();
             if ((ii + 1) % 4 == 0)
                 continue;
-            for (auto position : spellRankEntityMapping)
+            for (auto rank : spellRankEntityMapping[ii].Spells)
             {
-                for (auto rank : position.second.Spells)
+                if (std::find(spellIdList.begin(), spellIdList.end(), rank.second.SpellId) != spellIdList.end())
                 {
-                    if (std::find(spellIdList.begin(), spellIdList.end(), rank.second.SpellId) != spellIdList.end())
+                    int spellRank = rank.second.Rank;
+                    for (int iii = 0; iii <= spellRank; iii++)
                     {
-                        HunterPetBuildSpell spell = spellRankEntityMapping[ii];
-                        spell.Spells.clear();
-                        spell.Spells.insert({ rank.second.Rank, spellRankEntityMapping[ii].Spells[rank.second.Rank] });
-                        spells[ii] = spell;
-                        break;
+                        HunterPetBuildSpellEntity spellFromPair = spellRankEntityMapping[ii].Spells[iii];
+                        std::pair<uint8, HunterPetBuildSpellEntity> spellpair = { iii, spellFromPair };
+                        spell.Spells.insert(spellpair);
                     }
+                    break;
                 }
             }
+            spells[ii] = spell;
+            int intRank = spells[ii].Spells[spells[ii].Spells.size() - 1].Rank;
+            std::stringstream stream;
+            stream << std::hex << intRank;
+            std::string rank = stream.str();
+            link.replace(ii, 1, rank);
         }
+        BuildLink = link;
     }
+    
 }
 
 void HunterPetBuild::ApplyBuild(Player* bot, std::ostringstream* out)
@@ -641,21 +640,21 @@ void HunterPetBuild::ApplyBuild(Player* bot, std::ostringstream* out)
                     int spellCost = ii == 1 ? spells[iii].Spells[ii].TPCost : spells[iii].Spells[ii].TPCost - spells[iii].Spells[ii - 1].TPCost;
                     if (currentTPCost + spellCost <= maxTPCost)
                     {
-                        if (ii > 1)
+                        if (sPlayerbotAIConfig.trainHunterPets == 2 || sPlayerbotAIConfig.trainHunterPets == 1 && bot->HasSpell(spells[iii].Spells[ii].TrainingSpellId))
                         {
-                            pet->unlearnSpell(spells[iii].Spells[ii - 1].SpellId, false);
-                            currentTPCost -= spells[iii].Spells[ii - 1].TPCost;
+                            if (ii > 1)
+                            {
+                                pet->unlearnSpell(spells[iii].Spells[ii - 1].SpellId, false);
+                                currentTPCost -= spells[iii].Spells[ii - 1].TPCost;
+                            }
+                            pet->learnSpell(spells[iii].Spells[ii].SpellId);
+                            currentTPCost += spells[iii].Spells[ii].TPCost;
                         }
-                        pet->learnSpell(spells[iii].Spells[ii].SpellId);
-                        currentTPCost += spells[iii].Spells[ii].TPCost;
                     }
-                    else
-                        return;
                 }
             }
         }
     }
-    *out << "Build done";
 }
 
 uint32 HunterPetBuild::CalculateTrainingPoints(Player* bot)

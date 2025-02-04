@@ -1335,11 +1335,11 @@ void PlayerbotAI::HandleCommand(uint32 type, const std::string& text, Player& fr
     if (filtered.empty())
         return;
 
-    if (filtered.substr(0, 6) == "debug ")
+    if (lang == LANG_ADDON && filtered.substr(0, 6) == "debug ")
     {
         std::string response = HandleRemoteCommand(filtered.substr(6));
         WorldPacket data;
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_ADDON, response.c_str(), LANG_ADDON,
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_PARTY, response.c_str(), LANG_ADDON,
                 CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
         sServerFacade.SendPacket(&fromPlayer, data);
         return;

@@ -82,6 +82,29 @@ bool DebugAction::Execute(Event& event)
 
         return true;
     }
+    else if (text.find("mount") == 0)
+    {
+        std::ostringstream out;
+
+        out << (bot->IsMounted() ? "mounted" : "not mounted");
+        out << (bot->IsTaxiFlying() ? ", taxi flying" : ", not taxi flying");
+
+        out << ", mount speed: " << AI_VALUE2(uint32, "current mount speed", "self target");
+        out << ", mount id: " << bot->GetMountID();        
+
+        if(bot->GetMountInfo())
+            out << ", mount info: " << bot->GetMountInfo()->Name;
+
+        ai->TellPlayerNoFacing(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+
+        return true;
+    }
+    else if (text.find("unmount") == 0)
+    {
+        ai->Unmount();
+
+        return true;
+    }
     else if (text.find("area") == 0 && isMod)
     {       
         WorldPosition point(requester);

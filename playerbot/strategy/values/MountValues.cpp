@@ -105,7 +105,7 @@ uint32 MountValue::GetMountSpell(uint32 itemId)
     return 0;
 }
 
-bool MountValue::IsValidLocation()
+bool MountValue::IsValidLocation(Player* bot)
 {
     if (GetSpeed(true)) //Flying mount
     {
@@ -216,7 +216,7 @@ std::vector<MountValue> FullMountListValue::Calculate()
         if (!MountValue::GetMountSpell(pProto->ItemId))
             continue;
 
-        mounts.push_back(MountValue(ai, pProto));
+        mounts.push_back(MountValue(pProto));
 
         GAI_VALUE2(std::list<int32>, "item vendor list", pProto->ItemId);
     }
@@ -230,7 +230,7 @@ std::vector<MountValue> FullMountListValue::Calculate()
         if (!MountValue::IsMountSpell(spellInfo->Id))
             continue;
 
-        mounts.push_back(MountValue(ai, spellInfo->Id));
+        mounts.push_back(MountValue(spellInfo->Id));
     }
 
     return mounts;
@@ -241,12 +241,12 @@ std::vector<MountValue> MountListValue::Calculate()
     std::vector<MountValue> mounts;
 
 	for (auto& mount : AI_VALUE2(std::list<Item*>, "inventory items", "mount"))
-		mounts.push_back(MountValue(ai, mount));
+		mounts.push_back(MountValue(mount));
 
     for (PlayerSpellMap::iterator itr = bot->GetSpellMap().begin(); itr != bot->GetSpellMap().end(); ++itr)
         if (itr->second.state != PLAYERSPELL_REMOVED && !itr->second.disabled && !IsPassiveSpell(itr->first))
             if(MountValue::IsMountSpell(itr->first))
-                mounts.push_back(MountValue(ai, itr->first));
+                mounts.push_back(MountValue(itr->first));
 
     return mounts;
 }

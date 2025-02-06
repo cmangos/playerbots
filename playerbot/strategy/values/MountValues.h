@@ -3,28 +3,26 @@
 
 namespace ai
 {
-    class MountValue : AiObject
+    class MountValue
     {
     public:
-        MountValue(PlayerbotAI* ai, uint32 spellId) : AiObject(ai), spellId(spellId) {};
-        MountValue(PlayerbotAI* ai, const ItemPrototype* proto) : AiObject(ai), proto(proto) { spellId = GetMountSpell(proto->ItemId); };
-        MountValue(PlayerbotAI* ai, Item* item) : AiObject(ai), itemGuid(item->GetObjectGuid()) { spellId = GetMountSpell(item->GetProto()->ItemId); proto = item->GetProto(); };
-        MountValue(PlayerbotAI* ai, MountValue mount) : AiObject(ai), itemGuid(mount.itemGuid), spellId(mount.spellId), proto(proto){};
+        MountValue(uint32 spellId) : spellId(spellId) {};
+        MountValue(const ItemPrototype* proto) : proto(proto) { spellId = GetMountSpell(proto->ItemId); };
+        MountValue(Item* item) { spellId = GetMountSpell(item->GetProto()->ItemId); proto = item->GetProto(); };
+        MountValue(const MountValue& mount) : spellId(mount.spellId), proto(mount.proto) {};
 
-        bool IsItem() { return itemGuid || proto; }
-        Item* GetItem() { return bot->GetItemByGuid(itemGuid); }
+        bool IsItem() { return proto; }
         const ItemPrototype* GetItemProto() { return proto; }
         uint32 GetSpellId() { return spellId; }
-        uint32 GetSpeed(bool canFly) {return GetSpeed(spellId, canFly);}
+        uint32 GetSpeed(bool canFly) { return GetSpeed(spellId, canFly); }
         static uint32 IsMountSpell(uint32 spellId) { return GetSpeed(spellId, false) || GetSpeed(spellId, true); }
         static uint32 GetSpeed(uint32 spellId, bool canFly);
         static uint32 GetSpeed(uint32 spellId) { return std::max(GetSpeed(spellId, false), GetSpeed(spellId, true)); };
         static uint32 GetMountSpell(uint32 itemId);
-        bool IsValidLocation();
+        bool IsValidLocation(Player* bot);
 
     private:
         const ItemPrototype* proto = nullptr;
-        ObjectGuid itemGuid = ObjectGuid();
         uint32 spellId = 0;
     };
 

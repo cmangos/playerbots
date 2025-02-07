@@ -1128,7 +1128,7 @@ bool RequestQuestTravelTargetAction::Execute(Event& event)
             flag = (uint32)TravelDestinationPurpose::QuestTaker;
         else
         {
-            for (uint32 objective = 1; objective < 5; objective++)
+            for (uint32 objective = 0; objective < 4; objective++)
             {
                 TravelDestinationPurpose purposeFlag = (TravelDestinationPurpose)(1 << (objective + 1));
 

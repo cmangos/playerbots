@@ -16,10 +16,11 @@ namespace ai
         consumables = 5,
         gear = 6,
         guild = 7,
-        tradeskill = 8,
-        ah = 9,
-        mount = 10,
-        anything = 11
+        skilltraining = 8,
+        tradeskill = 9,
+        ah = 10,
+        mount = 11,
+        anything = 12
     };
 
     class MaxGearRepairCostValue : public Uint32CalculatedValue
@@ -59,6 +60,13 @@ namespace ai
     public:
         FreeMoneyForValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "free money for"), Qualified() {}
         virtual uint32 Calculate();
+    };
+
+    class HasAllMoneyForValue : public BoolCalculatedValue, public Qualified
+    {
+    public:
+        HasAllMoneyForValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "has all money for"), Qualified() {}
+        virtual bool Calculate();
     };
     
     class ShouldGetMoneyValue : public BoolCalculatedValue

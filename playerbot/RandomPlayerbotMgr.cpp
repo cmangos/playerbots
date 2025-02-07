@@ -2579,6 +2579,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
     }
 
     std::vector<std::pair<std::pair<uint32, uint32>, WorldPosition>> newPoints;
+    std::vector<std::pair<std::pair<uint32, uint32>, GuidPosition>> innPoints;
 
     //Static portals.
     for (auto& goData : WorldPosition().getGameObjectsNear(0, 0))
@@ -2631,15 +2632,24 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         allowedNpcFlags.push_back(UNIT_NPC_FLAG_TRAINER);
         allowedNpcFlags.push_back(UNIT_NPC_FLAG_VENDOR);
         allowedNpcFlags.push_back(UNIT_NPC_FLAG_REPAIR);
+        allowedNpcFlags.push_back(UNIT_NPC_FLAG_INNKEEPER);
 
         for (auto flag : allowedNpcFlags)
-        {
+        {          
             if ((cInfo->NpcFlags & flag) != 0)
             {
                 std::vector<std::pair<uint32, uint32>> ranges = RpgLocationsNear(WorldPosition(creatureData), areaNames);
 
-                for (auto& range : ranges)
-                    newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), creatureData));
+                if (cInfo->NpcFlags & UNIT_NPC_FLAG_INNKEEPER)
+                {
+                    for (auto& range : ranges)
+                        innPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), creatureData));
+                }
+                else
+                {
+                    for (auto& range : ranges)
+                        newPoints.push_back(std::make_pair(std::make_pair(range.first, range.second), creatureData));
+                }
                 break;
             }
         }
@@ -2647,6 +2657,9 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
 
     for (auto newPoint : newPoints)
         rpgLocsCacheLevel[newPoint.first.first][newPoint.first.second].push_back(newPoint.second);
+    
+    for (auto innPoint : innPoints)
+        innCacheLevel[innPoint.first.first][innPoint.first.second].push_back(std::make_pair(innPoint.second, innPoint.second));
 }
 
 void RandomPlayerbotMgr::PrintTeleportCache()
@@ -2692,6 +2705,28 @@ void RandomPlayerbotMgr::RandomTeleportForLevel(Player* bot, bool activeOnly)
     sLog.outDetail("Preparing location to random teleporting bot %s for level %u", bot->GetName(), bot->GetLevel());
     RandomTeleport(bot, locsPerLevelCache[bot->GetLevel()], false, activeOnly);
     Refresh(bot);
+
+    WorldPosition botPos(bot);
+
+    ObjectGuid closestInn;
+    float minDistance = -1.0f;
+    for (auto& [innGuid, innPosition] : innCacheLevel[bot->getRace()][bot->GetLevel()])
+    {
+        float distance = botPos.sqDistance(innPosition);
+        if (minDistance > 0 || distance >= minDistance)
+            continue;
+
+        minDistance = distance;
+        closestInn = innGuid;
+    }
+
+    if (closestInn)
+    {
+        WorldPacket data(SMSG_TRAINER_BUY_SUCCEEDED, (8 + 4));
+        data << closestInn;
+        data << uint32(3286);                                   // Bind
+        bot->GetSession()->SendPacket(data);
+    }
 }
 
 void RandomPlayerbotMgr::RandomTeleport(Player* bot)

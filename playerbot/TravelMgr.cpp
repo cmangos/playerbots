@@ -2134,9 +2134,18 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
     if (botLevel < 6)
         botLevel = 6;
 
-    for(auto& dest : destinations)
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::shuffle(destinations.begin(), destinations.end(), std::default_random_engine(seed));
+
+    for (auto& dest : destinations)
     {
-        for (auto& position : dest->GetPoints())
+        TravelPoint point(dest, sTravelMgr.nullWorldPosition, 0.0f);
+        uint32 minPartition = 0;
+
+        std::vector<WorldPosition*> points = dest->GetPoints();
+        std::shuffle(points.begin(), points.end(), std::default_random_engine(seed));
+
+        for (auto& position : points)
         {
             uint32 areaLevel = position->getAreaLevel();
 
@@ -2147,22 +2156,27 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
                 continue;
 
             float distance = position->distance(center);
-            TravelPoint point(dest, position, distance);
 
+            uint32 currentPartition = 0;
             for (auto& partition : distancePartitions)
             {
                 if (partition == distancePartitions.back() || distance < partition)
                 {
-                    pointMap[partition].push_back(point);
-                    break;
+                    currentPartition = partition;
                 }
             }
+
+            if (minPartition && currentPartition >= minPartition)
+                continue;
+
+            minPartition = currentPartition;
+            TravelPoint point(dest, position, distance);
         }
+
+        if (minPartition)
+            pointMap[minPartition].push_back(point);
+        break;
     }
-
-    for (auto& [partition, points] : pointMap)
-        ShuffleTravelPoints(points);
-
 
     return pointMap;
 }

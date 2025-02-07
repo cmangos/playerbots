@@ -815,6 +815,8 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
     target->SetRetry(false, target->GetRetryCount(false) + 1);
 
+    RESET_AI_VALUE(bool, "travel target active");
+
     if (!target->IsActive())
     {
         ai->TellDebug(requester, "Target was not active after refresh.", "debug travel");

@@ -913,7 +913,12 @@ bool RequestTravelTargetAction::isUseful() {
 
     if (!isAllowed())
     {
-        ai->TellDebug(ai->GetMaster(), "Skipped " + getQualifier() + " because of skip chance", "debug travel");
+        std::string futureTravelPurpose = AI_VALUE2(std::string, "manual string", "future travel purpose");
+
+        if (Qualified::isValidNumberString(futureTravelPurpose))
+            futureTravelPurpose = TravelDestinationPurposeName.at(TravelDestinationPurpose(stoi(futureTravelPurpose)));
+
+        ai->TellDebug(ai->GetMaster(), "Skipped " + futureTravelPurpose + " because of skip chance", "debug travel");
         return false;
     }
 

@@ -3,6 +3,7 @@
 #include "playerbot/playerbot.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/PlayerbotFactory.h"
+#include "playerbot/record/StrategyRecord.h"
 #include "Accounts/AccountMgr.h"
 #include "Globals/ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
@@ -883,6 +884,134 @@ bool RandomPlayerbotMgr::GetNamedLocation(std::string const& name, WorldLocation
     location = itr->second;
 
     return true;
+}
+
+void RandomPlayerbotMgr::LoadStrategyRecords()
+{
+    strategyRecords.clear();
+
+    // Check if any actions reference a non-existent trigger id
+    do
+    {
+        auto result = WorldDatabase.Query("SELECT a.`id`, a.`trigger_id` FROM `ai_playerbot_strategy_action` a LEFT JOIN `ai_playerbot_strategy_trigger` t ON a.`trigger_id` = t.`id` WHERE t.`id` IS NULL");
+        if (!result)
+        {
+            break;
+        }
+
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 actionId = fields[0].GetUInt32();
+            uint32 triggerId = fields[1].GetUInt32();
+            sLog.outErrorDb("Action '%u' references a missing trigger '%u' in 'ai_playerbot_strategy_action'", actionId, triggerId);
+        } while (result->NextRow());
+    } while (false);
+
+    // Check if any triggers reference a non-existent strategy id
+    do
+    {
+        auto result = WorldDatabase.Query("SELECT t.`id`, t.`strategy_id` FROM `ai_playerbot_strategy_trigger` t LEFT JOIN `ai_playerbot_strategy` s ON t.`strategy_id` = s.`id` WHERE s.`id` IS NULL");
+        if (!result)
+        {
+            break;
+        }
+
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 triggerId = fields[0].GetUInt32();
+            uint32 strategyId = fields[1].GetUInt32();
+            sLog.outErrorDb("Trigger '%u' references a missing strategy '%u' in 'ai_playerbot_strategy_trigger'", triggerId, strategyId);
+        } while (result->NextRow());
+    } while (false);
+
+    uint32 actionCounter = 0;
+    uint32 triggerCounter = 0;
+    uint32 strategyCounter = 0;
+
+    do
+    {
+        auto strategyResult = WorldDatabase.Query("SELECT `id`, `type`, `name`, `description`, `related_strategies` FROM `ai_playerbot_strategy`");
+        if (!strategyResult)
+        {
+            break;
+        }
+
+        do
+        {
+            Field* strategyFields = strategyResult->Fetch();
+            uint32 strategyId = strategyFields[0].GetUInt32();
+            uint32 strategyType = strategyFields[1].GetUInt32();
+            std::string strategyName = strategyFields[2].GetCppString();
+            std::string strategyDescription = strategyFields[3].GetCppString();
+            std::string relatedStrategiesAsString = strategyFields[4].GetCppString();
+
+            if (strategyType & ~VALID_STRATEGY_TYPE)
+            {
+                sLog.outErrorDb("Strategy '%u' contains invalid type flags that will be removed!", strategyId);
+                strategyType &= VALID_STRATEGY_TYPE;
+            }
+
+            std::vector<std::string> relatedStrategies;
+            if (relatedStrategiesAsString.find(",") != std::string::npos)
+            {
+                std::string relatedStrategy;
+                std::stringstream ss(relatedStrategiesAsString);
+                while (std::getline(ss, relatedStrategy, ','))
+                {
+                    relatedStrategies.push_back(relatedStrategy);
+                }
+            }
+            else if (relatedStrategiesAsString.size() > 0)
+            {
+                relatedStrategies.push_back(relatedStrategiesAsString);
+            }
+
+            std::vector<TriggerRecord> triggerRecords;
+            if (auto triggerResult = WorldDatabase.PQuery("SELECT `id`, `name`, `flags` FROM `ai_playerbot_strategy_trigger` WHERE `strategy_id`=%u ORDER BY `execution_order`", strategyId))
+            {
+                do
+                {
+                    Field* triggerFields = triggerResult->Fetch();
+                    uint32 triggerId = triggerFields[0].GetUInt32();
+                    std::string triggerName = triggerFields[1].GetCppString();
+                    uint32 triggerFlags = triggerFields[2].GetUInt32();
+
+                    if (triggerFlags & ~VALID_TRIGGER_FLAGS)
+                    {
+                        sLog.outErrorDb("Trigger '%u' contains invalid flags that will be removed!", triggerId);
+                        triggerFlags &= VALID_TRIGGER_FLAGS;
+                    }
+
+                    std::vector<ActionRecord> actionRecords;
+                    if (auto actionResult = WorldDatabase.PQuery("SELECT `name`, `priority` FROM `ai_playerbot_strategy_action` WHERE `trigger_id`=%u ORDER BY `execution_order`", triggerId))
+                    {
+                        do
+                        {
+                            Field* actionFields = actionResult->Fetch();
+                            std::string actionName = actionFields[0].GetCppString();
+                            float actionPriority = actionFields[1].GetFloat();
+
+                            actionRecords.push_back(ActionRecord{ actionName, actionPriority });
+                            actionCounter++;
+                        } while (actionResult->NextRow());
+                    }
+
+                    triggerRecords.push_back(TriggerRecord{ triggerName, static_cast<TriggerFlags>(triggerFlags), actionRecords });
+                    triggerCounter++;
+                } while (triggerResult->NextRow());
+            }
+
+            strategyRecords.push_back(std::make_shared<StrategyRecord>(static_cast<StrategyType>(strategyType), strategyName, strategyDescription, relatedStrategies, triggerRecords));
+            strategyCounter++;
+        } while (strategyResult->NextRow());
+    } while (false);
+
+    sLog.outString(">> Loaded %u strategy records", strategyCounter);
+    sLog.outString(">> Loaded %u trigger records", triggerCounter);
+    sLog.outString(">> Loaded %u action records", actionCounter);
+    sLog.outString();
 }
 
 uint32 RandomPlayerbotMgr::AddRandomBots()

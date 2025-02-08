@@ -36,6 +36,11 @@ set(LIBRARY_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/botpch.cpp
 )
 
+#Record files
+file(GLOB Playerbot_Record ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/record/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/record/*.h)
+    source_group("Player Bot\\Records" FILES ${Playerbot_Record})
+    LIST(APPEND LIBRARY_SRCS ${Playerbot_Record})
+
 #Strategy files
 file(GLOB Playerbot_Strategy ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/*.h)
     source_group("Player Bot\\Strategies" FILES ${Playerbot_Strategy})

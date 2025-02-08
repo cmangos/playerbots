@@ -790,6 +790,9 @@ bool PlayerbotAIConfig::Initialize()
     sLog.outString("Loading named locations...");
     sRandomPlayerbotMgr.LoadNamedLocations();
 
+    sLog.outString("Loading strategy records...");
+    sRandomPlayerbotMgr.LoadStrategyRecords();
+
     if (sPlayerbotAIConfig.randomBotJoinBG)
         sRandomPlayerbotMgr.LoadBattleMastersCache();
 

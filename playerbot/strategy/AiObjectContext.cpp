@@ -3,6 +3,7 @@
 #include "Action.h"
 #include "AiObjectContext.h"
 #include "NamedObjectContext.h"
+#include "DatabaseStrategyContext.h"
 #include "StrategyContext.h"
 #include "triggers/TriggerContext.h"
 #include "actions/ActionContext.h"
@@ -18,6 +19,7 @@ using namespace ai;
 
 AiObjectContext::AiObjectContext(PlayerbotAI* ai) : PlayerbotAIAware(ai)
 {
+    strategyContexts.Add(new DatabaseStrategyContext());
     strategyContexts.Add(new StrategyContext());
     strategyContexts.Add(new MovementStrategyContext());
     strategyContexts.Add(new AssistStrategyContext());

@@ -229,13 +229,32 @@ bool GuildManageNearbyAction::Execute(Event& event)
 
 bool GuildManageNearbyAction::isUseful()
 {
-    if (!bot->GetGuildId())
+    if (!bot)
         return false;
 
-    Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-    MemberSlot* botMember = guild->GetMemberSlot(bot->GetObjectGuid());
+    uint32 guildId = bot->GetGuildId();
+    if (!guildId)
+        return false;
 
-    return  guild->HasRankRight(botMember->RankId, GR_RIGHT_DEMOTE) || guild->HasRankRight(botMember->RankId, GR_RIGHT_PROMOTE) || guild->HasRankRight(botMember->RankId, GR_RIGHT_INVITE);
+    Guild* guild = sGuildMgr.GetGuildById(guildId);
+    if (!guild)
+        return false;
+
+    MemberSlot* botMember = guild->GetMemberSlot(bot->GetObjectGuid());
+    if (!botMember)
+        return false;
+
+    static const std::array<uint32, 3> requiredRights = {
+        GR_RIGHT_DEMOTE, GR_RIGHT_PROMOTE, GR_RIGHT_INVITE
+    };
+
+    for (uint32 right : requiredRights)
+    {
+        if (guild->HasRankRight(botMember->RankId, right))
+            return true;
+    }
+
+    return false;
 }
 
 bool GuildLeaveAction::Execute(Event& event)

@@ -21,6 +21,16 @@ struct TaxiNodeLevel
     uint32 Level;
 };
 
+struct DefautSkillRank {
+    uint16 minimumLevel = 0;
+    uint16 maximumLevel = 0;
+    uint16 spellId = 0;
+};
+
+typedef std::map <std::string, std::vector<DefautSkillRank>> SkillMap;
+
+SkillMap DefaultSkillMap;
+
 typedef std::vector<TaxiNodeLevel> TaxiNodeLevelContainer;
 
 //TODO: more spec/role

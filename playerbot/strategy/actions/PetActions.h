@@ -9,6 +9,9 @@ namespace ai
         InitializePetAction(PlayerbotAI* ai) : Action(ai, "initialize pet") {}
         bool Execute(Event& event) override;
         bool isUseful() override;
+
+    private:
+        void InitialFamilySkill(Pet* pet);
     };
 
     class InitializePetSpellsAction : public Action

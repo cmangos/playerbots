@@ -47,6 +47,11 @@ void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
         LearnDroppedSpells(out);
 #endif
 
+#ifndef MANGOSBOT_TWO
+    if (sPlayerbotAIConfig.autoLearnHunterPetTrainedSkills)
+        LearnHunterPetTrainedSkills(out);
+#endif
+
     if (!ai->HasActivePlayerMaster()) //Hunter spells for pets.
     {
         if (bot->getClass() == CLASS_HUNTER && bot->GetLevel() >= 10)
@@ -450,4 +455,159 @@ bool AutoLearnSpellAction::IsTeachingSpellListedAsSpell(uint32 spellId)
         spellId == 19350;      // Starshards Teaching Spell listed as actual spell
 #endif
         return isTeachingSpellListedAsSpell;
+}
+
+void AutoLearnSpellAction::LearnHunterPetTrainedSkills(std::ostringstream* out)
+{
+    std::map<uint16, uint32> HunterSpells;
+#pragma region Bite
+    HunterSpells.insert(1,17254);
+    HunterSpells.insert(8,17262);
+    HunterSpells.insert(16,17263);
+    HunterSpells.insert(24,17264);
+    HunterSpells.insert(32,17265);
+    HunterSpells.insert(40,17266);
+    HunterSpells.insert(48,17267);
+    HunterSpells.insert(56,17268);
+#ifdef MANGOSBOT_ONE
+    HunterSpells.insert(64,27348); // TBC
+#endif
+#pragma endregion 
+
+#pragma region Charge
+    HunterSpells.insert(1,7370);
+    HunterSpells.insert(12,26184);
+    HunterSpells.insert(24,26185);
+    HunterSpells.insert(36,26186);
+    HunterSpells.insert(48,26202);
+    HunterSpells.insert(60,28343);
+#pragma endregion 
+
+#pragma region Claw
+    HunterSpells.insert(1,2980);
+    HunterSpells.insert(8,2981);
+    HunterSpells.insert(16,2982);
+    HunterSpells.insert(24,3667);
+    HunterSpells.insert(32,2975);
+    HunterSpells.insert(40,2976);
+    HunterSpells.insert(48,2977);
+    HunterSpells.insert(56,3666);
+#ifdef MANGOSBOT_ONE
+    HunterSpells.insert(64,27347); // TBC
+#endif
+#pragma endregion 
+
+#pragma region Cower
+    HunterSpells.insert(5,1747);
+    HunterSpells.insert(15,1748);
+    HunterSpells.insert(25,1749);
+    HunterSpells.insert(35,1750);
+    HunterSpells.insert(45,1751);
+    HunterSpells.insert(55,16998);
+#ifdef MANGOSBOT_ONE
+    HunterSpells.insert(65,27346); // TBC
+#endif
+#pragma endregion
+
+#pragma region Dash
+    HunterSpells.insert(30,23100);
+    HunterSpells.insert(40,23111);
+    HunterSpells.insert(50,23112);
+#pragma endregion
+
+#pragma region Dive
+    HunterSpells.insert(30,23146);
+    HunterSpells.insert(40,23149);
+    HunterSpells.insert(50,23150);
+#pragma endregion
+
+#pragma region Furious Howl
+    HunterSpells.insert(20,24609);
+    HunterSpells.insert(30,24608);
+    HunterSpells.insert(40,24607);
+    HunterSpells.insert(50,24599);
+#pragma endregion
+
+#pragma region Lightning Breath
+#ifdef MANGOSBOT_ONE
+    HunterSpells.insert(1,24845);  // TBC
+#endif
+    HunterSpells.insert(12,25013);
+    HunterSpells.insert(24,25014);
+    HunterSpells.insert(36,25015);
+    HunterSpells.insert(48,25016);
+    HunterSpells.insert(60,25017);
+#pragma endregion
+
+#pragma region Prowl
+    HunterSpells.insert(30,24451);
+    HunterSpells.insert(40,24454);
+    HunterSpells.insert(50,24455);
+#pragma endregion
+
+#pragma region Scorpid Poison
+    HunterSpells.insert(8,24584);
+    HunterSpells.insert(24,24588);
+    HunterSpells.insert(40,24589);
+    HunterSpells.insert(56,24641);
+#ifdef MANGOSBOT_ONE
+    HunterSpells.insert(64,27361); // TBC
+#endif
+#pragma endregion
+
+#pragma region Screech
+    HunterSpells.insert(8,24424);
+    HunterSpells.insert(24,24580);
+    HunterSpells.insert(40,24581);
+    HunterSpells.insert(56,24582);
+#ifdef MANGOSBOT_ONE
+    HunterSpells.insert(64,27349); // TBC
+#endif
+#pragma endregion
+
+#pragma region Shell Shield
+    HunterSpells.insert(20,26065);
+#pragma endregion
+
+#pragma region Thunderstomp
+    HunterSpells.insert(30,26094);
+    HunterSpells.insert(40,26189);
+    HunterSpells.insert(50,26190);
+#pragma endregion
+
+#ifdef MANGOSBOT_ONE
+#pragma region Fire Breath
+    HunterSpells.insert(1,34890); // TBC
+    HunterSpells.insert(60,35324); // TBC
+#pragma endregion
+
+#pragma region Gore
+    HunterSpells.insert(1,35299); // TBC
+    HunterSpells.insert(8,35300); // TBC
+    HunterSpells.insert(16,35302); // TBC
+    HunterSpells.insert(24,35303); // TBC
+    HunterSpells.insert(32,35304); // TBC
+    HunterSpells.insert(40,35305); // TBC
+    HunterSpells.insert(48,35306); // TBC
+    HunterSpells.insert(56,35307); // TBC
+    HunterSpells.insert(63,35308); // TBC
+#pragma endregion
+
+#pragma region Poison Spit
+    HunterSpells.insert(15,35388); // TBC
+    HunterSpells.insert(45,35390); // TBC
+    HunterSpells.insert(60,35391); // TBC
+#pragma endregion
+
+#pragma region Warp
+#pragma endregion
+#endif
+
+    for (auto& pair : HunterSpells)
+    {
+        if (pair.first <= bot->GetLevel() && !bot->HasSpell(pair.second))
+        {
+            bot->learnSpell(pair.second, false);
+        }
+    }
 }

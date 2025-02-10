@@ -311,13 +311,23 @@ AiPlayerbot.AutoPickTalents = full
 # Default: 0 (disabled)
 AiPlayerbot.AutoLearnTrainerSpells = 0
 
-# Bots automatically learn classquest reward spells on levelup
+# Bots automatically learn class quest reward spells on levelup
 # Default: 0 (disabled)
 AiPlayerbot.AutoLearnQuestSpells = 0
 
 # Alt Bots automatically learn class spells from books dropped from dungeons and raids when leveled and they reached the required level of the book. Classic Only.
 # Default: 0 (disabled)
 AiPlayerbot.AutoLearnDroppedSpells = 0
+
+# Bots train their pets.
+# Options
+# 0 disabled, 1 train only skills the hunter knows, 2 train skills regardless if hunter knows them. Any value outside this scope defaults to 1.
+# Default: 1 (train only skills the hunter knows)
+AiPlayerbot.TrainHunterPets = 1
+
+# Bots automatically learn pet skills that are trained from taming pets of the appropriate level when the bot reaches the minimum teaching level of the spell.
+# Default: 0 (disabled)
+AiPlayerbot.AutoLearnHunterPetTrainedSkills = 0
 
 # Random Bots will pick quests on their own and try to complete
 # Default: 1 (enabled)

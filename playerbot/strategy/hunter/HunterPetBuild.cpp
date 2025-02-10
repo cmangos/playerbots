@@ -614,7 +614,7 @@ void HunterPetBuild::ReadSpells(Player* bot)
     
 }
 
-void HunterPetBuild::ApplyBuild(Player* bot, std::ostringstream* out)
+void HunterPetBuild::ApplyBuild(Player* bot, std::vector<std::stringstream> out)
 {
 #ifdef MANGOSBOT_ZERO
     int maxFamilyBuilds = 27;
@@ -640,7 +640,7 @@ void HunterPetBuild::ApplyBuild(Player* bot, std::ostringstream* out)
                     int spellCost = ii == 1 ? spells[iii].Spells[ii].TPCost : spells[iii].Spells[ii].TPCost - spells[iii].Spells[ii - 1].TPCost;
                     if (currentTPCost + spellCost <= maxTPCost)
                     {
-                        if (sPlayerbotAIConfig.trainHunterPets == 2 || sPlayerbotAIConfig.trainHunterPets == 1 && bot->HasSpell(spells[iii].Spells[ii].TrainingSpellId))
+                        if (sPlayerbotAIConfig.trainHunterPets == 2 || (sPlayerbotAIConfig.trainHunterPets == 1 && bot->HasSpell(spells[iii].Spells[ii].TrainingSpellId)))
                         {
                             if (ii > 1)
                             {
@@ -650,6 +650,15 @@ void HunterPetBuild::ApplyBuild(Player* bot, std::ostringstream* out)
                             pet->learnSpell(spells[iii].Spells[ii].SpellId);
                             currentTPCost += spells[iii].Spells[ii].TPCost;
                         }
+                        /*
+                        * This will be for a future update where pet apply is set on pet level not randomly.
+                        else if (sPlayerbotAIConfig.trainHunterPets == 1 && !bot->HasSpell(spells[iii].Spells[ii].TrainingSpellId))
+                        {
+                            std::stringstream ostring;
+                            ostring << "I don't know spell " << spells[iii].Name << " Rank " << spells[iii].Spells[ii].Rank;
+                            out.push_back(ostring);
+                        }
+                        */
                     }
                 }
             }
@@ -710,4 +719,35 @@ HunterPetBuildPath FamilyPetBuilds::GetBuildPath(int buildNo)
         }
     }
     return foundPath;
+}
+
+void HunterPetBuild::InitializeStartingPetSpells(Pet* pet, uint32 level, uint32 family)
+{
+    for (auto& positionMapItem : spells)
+    {
+        if (positionMapItem.second.IsPetLearned && std::find(positionMapItem.second.FamilyIds.begin(), positionMapItem.second.FamilyIds.end(), family) != positionMapItem.second.FamilyIds.end())
+        {
+            for (int ii = 0; ii < positionMapItem.second.Spells.size(); ii++)
+            {
+                if (positionMapItem.second.Spells.size() > 1)
+                {
+                    HunterPetBuildSpellEntity spellEntity = positionMapItem.second.Spells[ii];
+                    if (ii != positionMapItem.second.Spells.size() + 1)
+                    {
+                        if (level >= spellEntity.Level && level < positionMapItem.second.Spells[ii + 1].Level)
+                        {
+                            pet->learnSpell(spellEntity.SpellId);
+                        }
+                    }
+                    else
+                    {
+                        if (level >= spellEntity.Level)
+                        {
+                            pet->learnSpell(spellEntity.SpellId);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

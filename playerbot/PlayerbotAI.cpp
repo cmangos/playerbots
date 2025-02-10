@@ -1512,6 +1512,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             case CHAT_MSG_CHANNEL:
             case CHAT_MSG_SAY:
             case CHAT_MSG_PARTY:
+            case CHAT_MSG_PARTY_LEADER:
             case CHAT_MSG_YELL:
             case CHAT_MSG_WHISPER:
             case CHAT_MSG_GUILD:
@@ -1582,6 +1583,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 [[fallthrough]];
             case CHAT_MSG_SAY:
             case CHAT_MSG_PARTY:
+            case CHAT_MSG_PARTY_LEADER:
             case CHAT_MSG_YELL:
             case CHAT_MSG_WHISPER:
             case CHAT_MSG_GUILD:
@@ -2833,7 +2835,15 @@ ChatChannelSource PlayerbotAI::GetChatChannelSource(Player* bot, uint32 type, st
         {
             return ChatChannelSource::SRC_PARTY;
         }
+        case CHAT_MSG_PARTY_LEADER:
+        {
+            return ChatChannelSource::SRC_PARTY;
+        }
         case CHAT_MSG_RAID:
+        {
+            return ChatChannelSource::SRC_RAID;
+        }
+        case CHAT_MSG_RAID_LEADER:
         {
             return ChatChannelSource::SRC_RAID;
         }

@@ -82,10 +82,18 @@ bool GuildManageNearbyAction::Execute(Event& event)
         if (player->isDND())
             continue;
 
+        uint32 playerGuild = player->GetGuildId();
 
-        if(player->GetGuildId()) //Promote or demote nearby members based on chance.
+        if (playerGuild) //Promote or demote nearby members based on chance.
         {          
+            if (playerGuild != bot->GetGuildId()) // don't try to promote players not in the same guild
+                continue;
+
             MemberSlot* member = guild->GetMemberSlot(player->GetObjectGuid());
+
+            if (member->RankId <= botMember->RankId) // don't try to promote if rank is not higher
+                continue;
+
             uint32 dCount = AI_VALUE(uint32, "death count");
 
             if (!urand(0, 30) && dCount < 2 && guild->HasRankRight(botMember->RankId, GR_RIGHT_PROMOTE))

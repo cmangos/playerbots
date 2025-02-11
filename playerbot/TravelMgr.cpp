@@ -2163,6 +2163,7 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
                 if (partition == distancePartitions.back() || distance < partition)
                 {
                     currentPartition = partition;
+                    break;
                 }
             }
 
@@ -2170,12 +2171,11 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
                 continue;
 
             minPartition = currentPartition;
-            TravelPoint point(dest, position, distance);
+            point = TravelPoint(dest, position, distance);
         }
 
         if (minPartition)
             pointMap[minPartition].push_back(point);
-        break;
     }
 
     return pointMap;

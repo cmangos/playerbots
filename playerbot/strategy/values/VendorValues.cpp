@@ -13,7 +13,7 @@ VendorMap* VendorMapValue::Calculate()
 
     for (uint32 entry = 0; entry < sCreatureStorage.GetMaxEntry(); entry++)
     {
-        static CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(entry);
+        CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(entry);
 
         if (!cInfo)
             continue;

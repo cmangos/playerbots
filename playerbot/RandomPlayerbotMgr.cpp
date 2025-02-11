@@ -680,7 +680,7 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     MirrorAh();
 
     //Ping character database.
-    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "select 1 from dual");
+    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "SELECT 1 FROM dual");
 }
 
 void RandomPlayerbotMgr::ScaleBotActivity()
@@ -960,14 +960,14 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
                     bool rndCanIncrease = !sPlayerbotAIConfig.disableRandomLevels && randomAvgLevel > currentAvgLevel;
                     bool rndCanLower = !sPlayerbotAIConfig.disableRandomLevels && randomAvgLevel < currentAvgLevel;
 
-                    std::string query = "SELECT guid, level, totaltime, race, class FROM characters WHERE account = '%u' and level <= %u";
+                    std::string query = "SELECT guid, level, totaltime, race, class FROM characters WHERE account = '%u' AND level <= %u";
                     std::string wasRand = sPlayerbotAIConfig.instantRandomize ? "totaltime" : "(level > 1)";
 
                     if (needToIncrease) //We need more higher level bots.
                     {
-                        query += " and (level > %u";
+                        query += " AND (level > %u";
                         if (rndCanIncrease) //Log in higher level bots or bots that will be randomized.
-                            query += " or !" + wasRand;
+                            query += " OR !" + wasRand;
                         query += ")";
 
                         result = CharacterDatabase.PQuery(query.c_str(), accountId, maxLevel, (uint32)wantedAvgLevel);
@@ -975,7 +975,7 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
                     else
                     {
                         if (needToLower && !rndCanLower) //Do not load unrandomized if it'll only increase level.
-                            query += " and " + wasRand;
+                            query += " AND " + wasRand;
 
                         result = CharacterDatabase.PQuery(query.c_str(), accountId, maxLevel);
                     }
@@ -1819,7 +1819,7 @@ void RandomPlayerbotMgr::SyncEventTimers()
     {
         uint32 curTime = time(nullptr);
         uint32 timeDiff = curTime - oldTime;
-        CharacterDatabase.PExecute("UPDATE ai_playerbot_random_bots SET time = time + %u WHERE owner = 0 and bot <> 0", timeDiff);
+        CharacterDatabase.PExecute("UPDATE ai_playerbot_random_bots SET time = time + %u WHERE owner = 0 AND bot <> 0", timeDiff);
     }
 }
 
@@ -2476,7 +2476,7 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
     if (maxLevel > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
 
-    auto results = CharacterDatabase.PQuery("select map_id, x, y, z, level from ai_playerbot_tele_cache");
+    auto results = CharacterDatabase.PQuery("SELECT `map_id`, `x`, `y`, `z`, `level` FROM `ai_playerbot_tele_cache`");
     if (results)
     {
         sLog.outString("Loading random teleport caches for %d levels...", maxLevel);
@@ -2498,17 +2498,18 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
         BarGoLink bar(maxLevel);
         for (uint8 level = 1; level <= maxLevel; level++)
         {
-            auto results = WorldDatabase.PQuery("select map, position_x, position_y, position_z "
-                "from (select map, position_x, position_y, position_z, t.maxlevel, t.minlevel, "
+            auto results = WorldDatabase.PQuery("SELECT `map`, `position_x`, `position_y`, `position_z` "
+                "FROM (SELECT `map`, `position_x`, `position_y`, `position_z`, t.maxlevel, t.minlevel, "
                 "%u - (t.maxlevel + t.minlevel) / 2 delta "
-                "from creature c inner join creature_template t on c.id = t.entry where t.CreatureType != 8 AND t.NpcFlags = 0 and t.Rank = 0 AND NOT (t.extraFlags & 1024 OR t.extraFlags & 65536 OR t.extraflags & 64 OR t.unitFlags & 256 OR t.unitFlags & 512) AND t.lootid != 0) q "
-                "where delta >= 0 and delta <= %u and map in (%s)",
+                "FROM creature c INNER JOIN creature_template t ON c.id = t.entry WHERE t.CreatureType != 8 AND t.NpcFlags = 0 AND t.Rank = 0 AND NOT (t.extraFlags & 1024 OR t.extraFlags & 65536 OR t.extraflags & 64 OR t.unitFlags & 256 OR t.unitFlags & 512) AND t.lootid != 0) q "
+                "WHERE delta >= 0 AND delta <= %u AND map in (%s)",
                 level,
                 sPlayerbotAIConfig.randomBotTeleLevel,
                 sPlayerbotAIConfig.randomBotMapsAsString.c_str()
             );
             if (results)
             {
+                CharacterDatabase.BeginTransaction();
                 do
                 {
                     Field* fields = results->Fetch();
@@ -2519,9 +2520,10 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
                     WorldLocation loc(mapId, x, y, z, 0);
                     locsPerLevelCache[level].push_back(loc);
 
-                    CharacterDatabase.PExecute("insert into ai_playerbot_tele_cache (level, map_id, x, y, z) values (%u, %u, %f, %f, %f)",
+                    CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_tele_cache` (`level`, `map_id`, `x`, `y`, `z`) VALUES (%u, %u, %f, %f, %f)",
                         level, mapId, x, y, z);
                 } while (results->NextRow());
+                CharacterDatabase.CommitTransaction();
             }
             bar.step();
         }
@@ -2531,8 +2533,8 @@ void RandomPlayerbotMgr::PrepareTeleportCache()
 
     results = WorldDatabase.PQuery("SELECT map, position_x, position_y, position_z, "
         "r.race, r.minl, r.maxl "
-        "from creature c inner join ai_playerbot_rpg_races r on c.id = r.entry "
-        "where r.race < 15");
+        "FROM creature c INNER JOIN ai_playerbot_rpg_races r ON c.id = r.entry "
+        "WHERE r.race < 15");
 
     if (results)
     {
@@ -2897,9 +2899,9 @@ uint32 RandomPlayerbotMgr::GetZoneLevel(uint16 mapId, float teleX, float teleY, 
 	uint32 maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
 
 	uint32 level;
-    auto results = WorldDatabase.PQuery("select avg(t.minlevel) minlevel, avg(t.maxlevel) maxlevel from creature c "
-            "inner join creature_template t on c.id = t.entry "
-            "where map = '%u' and minlevel > 1 and abs(position_x - '%f') < '%u' and abs(position_y - '%f') < '%u'",
+    auto results = WorldDatabase.PQuery("SELECT AVG(t.minlevel) minlevel, AVG(t.maxlevel) maxlevel FROM creature c "
+            "INNER JOIN creature_template t ON c.id = t.entry "
+            "WHERE map = '%u' AND minlevel > 1 AND abs(position_x - '%f') < '%u' AND abs(position_y - '%f') < '%u'",
             mapId, teleX, sPlayerbotAIConfig.randomBotTeleportDistance / 2, teleY, sPlayerbotAIConfig.randomBotTeleportDistance / 2);
 
     if (results)
@@ -2995,7 +2997,7 @@ std::list<uint32> RandomPlayerbotMgr::GetBots()
     if (!currentBots.empty()) return currentBots;
 
     auto results = CharacterDatabase.Query(
-            "select bot from ai_playerbot_random_bots where owner = 0 and event = 'add'");
+            "SELECT bot FROM ai_playerbot_random_bots WHERE owner = 0 AND event = 'add'");
 
     if (results)
     {
@@ -3015,7 +3017,7 @@ std::list<uint32> RandomPlayerbotMgr::GetBgBots(uint32 bracket)
     //if (!currentBgBots.empty()) return currentBgBots;
 
     auto results = CharacterDatabase.PQuery(
-        "select bot from ai_playerbot_random_bots where event = 'bg' AND value = '%d'", bracket);
+        "SELECT bot FROM ai_playerbot_random_bots WHERE event = 'bg' AND value = '%d'", bracket);
     std::list<uint32> BgBots;
     if (results)
     {
@@ -3035,7 +3037,7 @@ uint32 RandomPlayerbotMgr::GetEventValue(uint32 bot, std::string event)
     // load all events at once on first event load
     if (eventCache[bot].empty())
     {
-        auto results = CharacterDatabase.PQuery("SELECT `event`, `value`, `time`, validIn, `data` from ai_playerbot_random_bots where owner = 0 and bot = '%u'", bot);
+        auto results = CharacterDatabase.PQuery("SELECT `event`, `value`, `time`, validIn, `data` FROM ai_playerbot_random_bots WHERE owner = 0 AND bot = '%u'", bot);
         if (results)
         {
             do
@@ -3085,20 +3087,20 @@ std::string RandomPlayerbotMgr::GetEventData(uint32 bot, std::string event)
 
 uint32 RandomPlayerbotMgr::SetEventValue(uint32 bot, std::string event, uint32 value, uint32 validIn, std::string data)
 {
-    CharacterDatabase.PExecute("delete from ai_playerbot_random_bots where owner = 0 and bot = '%u' and event = '%s'",
+    CharacterDatabase.PExecute("DELETE FROM ai_playerbot_random_bots WHERE owner = 0 AND bot = '%u' AND event = '%s'",
             bot, event.c_str());
     if (value)
     {
         if (data != "")
         {
             CharacterDatabase.PExecute(
-                "insert into ai_playerbot_random_bots (owner, bot, `time`, validIn, event, `value`, `data`) values ('%u', '%u', '%u', '%u', '%s', '%u', '%s')",
+                "INSERT INTO ai_playerbot_random_bots (owner, bot, `time`, validIn, event, `value`, `data`) VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%s')",
                 0, bot, (uint32)time(0), validIn, event.c_str(), value, data.c_str());
         }
         else
         {
             CharacterDatabase.PExecute(
-                "insert into ai_playerbot_random_bots (owner, bot, `time`, validIn, event, `value`) values ('%u', '%u', '%u', '%u', '%s', '%u')",
+                "INSERT INTO ai_playerbot_random_bots (owner, bot, `time`, validIn, event, `value`) VALUES ('%u', '%u', '%u', '%u', '%s', '%u')",
                 0, bot, (uint32)time(0), validIn, event.c_str(), value);
         }
     }
@@ -3270,7 +3272,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         for (std::list<uint32>::iterator i = sPlayerbotAIConfig.randomBotAccounts.begin(); i != sPlayerbotAIConfig.randomBotAccounts.end(); ++i)
         {
             uint32 account = *i;
-            if (auto results = CharacterDatabase.PQuery("SELECT guid FROM characters where account = '%u' and name like '%s'",
+            if (auto results = CharacterDatabase.PQuery("SELECT guid FROM characters WHERE account = '%u' AND name LIKE '%s'",
                     account, name.c_str()))
             {
                 do
@@ -3830,7 +3832,7 @@ void RandomPlayerbotMgr::RandomTeleportForRpg(Player* bot, bool activeOnly)
 void RandomPlayerbotMgr::Remove(Player* bot)
 {
     uint32 owner = bot->GetGUIDLow();
-    CharacterDatabase.PExecute("delete from ai_playerbot_random_bots where owner = 0 and bot = '%d'", owner);
+    CharacterDatabase.PExecute("DELETE FROM ai_playerbot_random_bots WHERE owner = 0 AND bot = '%d'", owner);
     eventCache[owner].clear();
 
     LogoutPlayerBot(owner);

@@ -23,8 +23,18 @@ VendorMap* VendorMapValue::Calculate()
 
         if (vItems)
             for (auto vItem : vItems->m_items)
-                if(!vItem->maxcount) //Ignore limited amount items.
+                if (!vItem->maxcount) //Ignore limited amount items.
                     vendorpMap->insert(std::make_pair(vItem->item, entry));
+
+        uint32 vendorId = cInfo->VendorTemplateId;
+        if (vendorId)
+        {
+            vItems = sObjectMgr.GetNpcVendorTemplateItemList(vendorId);
+            if (vItems)
+                for (auto vItem : vItems->m_items)
+                    if (!vItem->maxcount) //Ignore limited amount items.
+                        vendorpMap->insert(std::make_pair(vItem->item, entry));
+        }
     }
 
     return vendorpMap;

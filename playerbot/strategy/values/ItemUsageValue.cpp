@@ -545,6 +545,17 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
 
     const ItemPrototype* oldItemProto = oldItem->GetProto();
 
+    if (itemProto->Class == ITEM_CLASS_ARMOR && itemProto->InventoryType == INVTYPE_TABARD)
+    {
+        if(itemProto->ItemId != oldItemProto->ItemId && urand(1, 100) <= 10) //Not equiped. Random 10% equip it.
+            return ItemUsage::ITEM_USAGE_EQUIP;
+
+        if (CurrentStacks(ai, itemProto) > 0) //Do not have it yet. Buy/get it.
+            return ItemUsage::ITEM_USAGE_EQUIP;
+
+        return ItemUsage::ITEM_USAGE_KEEP;
+    }
+
     if (AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", oldItemProto->ItemId, ForceItemUsage::FORCE_USAGE_NONE) == ForceItemUsage::FORCE_USAGE_EQUIP) //Current equip is forced. Do not unequip.
     {
         if (AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", itemProto->ItemId, ForceItemUsage::FORCE_USAGE_NONE) == ForceItemUsage::FORCE_USAGE_EQUIP)

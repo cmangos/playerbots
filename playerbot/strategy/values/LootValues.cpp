@@ -234,9 +234,11 @@ float LootChanceValue::Calculate()
 				if (item.itemid == itemId)
 					return item.chance;
 
+			float equalChance = 100.0f / (float)group.EqualChanced.size();
+
 			for (LootStoreItem const& item : group.EqualChanced)
 				if (item.itemid == itemId)
-					return item.chance;
+					return item.chance ? item.chance : equalChance;
 		}
 	}
 

@@ -60,9 +60,8 @@ namespace ai
         TimePoint        m_createTime;                    // create time (used to refill loot if need)
     };
 
-    //                   itemId, entry
-    typedef std::unordered_multimap<uint32, int32> DropMap;
-    typedef std::unordered_map<std::pair<uint32, int32> , float > ChanceMap;
+    //DropMap[itemId] = {entry}
+    typedef std::unordered_multimap<uint32, int32> DropMap;    
 
     //Returns the loot map of all entries
     class DropMapValue : public SingleCalculatedValue<DropMap*>

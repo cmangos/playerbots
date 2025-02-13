@@ -568,7 +568,11 @@ bool BGJoinAction::isUseful()
         return false;
 
     // reduce amount of healers in BG
-    bool shouldJoinAsTankOrHealer = (ai->IsTank(bot, false) || ai->IsHeal(bot, false)) && urand(0, 100) > 30;
+    bool isBgRestricted = (ai->IsTank(bot, false) || ai->IsHeal(bot, false)) && urand(0, 100) > 30;
+
+    // if not max level, can't join arenas
+    if (isBgRestricted && bot->GetLevel() < 80)
+        return false;
 
     // do not try if in dungeon
     //Map* map = bot->GetMap();
@@ -580,7 +584,7 @@ bool BGJoinAction::isUseful()
 
     for (int i = BG_BRACKET_ID_FIRST; i < MAX_BATTLEGROUND_BRACKETS; ++i)
     {
-        for (int j = shouldJoinAsTankOrHealer ? BATTLEGROUND_QUEUE_AV : BATTLEGROUND_QUEUE_2v2; j < MAX_BATTLEGROUND_QUEUE_TYPES; ++j)
+        for (int j = isBgRestricted ? BATTLEGROUND_QUEUE_2v2 : BATTLEGROUND_QUEUE_AV; j < MAX_BATTLEGROUND_QUEUE_TYPES; ++j)
         {
             BattleGroundQueueTypeId queueTypeId = BattleGroundQueueTypeId(j);
             BattleGroundTypeId bgTypeId = sServerFacade.BgTemplateId(queueTypeId);

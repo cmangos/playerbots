@@ -325,6 +325,7 @@ namespace ai
             creators["money needed for"] = [](PlayerbotAI* ai) { return new MoneyNeededForValue(ai); };
             creators["total money needed for"] = [](PlayerbotAI* ai) { return new TotalMoneyNeededForValue(ai); };
             creators["free money for"] = [](PlayerbotAI* ai) { return new FreeMoneyForValue(ai); };
+            creators["has all money for"] = [](PlayerbotAI* ai) { return new HasAllMoneyForValue(ai); };
             creators["should get money"] = [](PlayerbotAI* ai) { return new ShouldGetMoneyValue(ai); };
 
             creators["free move center"] = [](PlayerbotAI* ai) { return new FreeMoveCenterValue(ai); };

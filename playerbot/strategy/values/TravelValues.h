@@ -84,7 +84,7 @@ namespace ai
 
     class TravelDestination;
 
-    using DestinationList = std::list<TravelDestination*>;
+    using DestinationList = std::vector<TravelDestination*>;
 
     //TypedDestinationMap[Purpose][QuestId/Entry]={TravelDestination}
     using EntryDestinationMap = std::unordered_map<int32, DestinationList>;

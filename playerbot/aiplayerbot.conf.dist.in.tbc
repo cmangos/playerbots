@@ -768,6 +768,9 @@ AiPlayerbot.PremadeSpecLink.11.12.70 = 01-500232130322125331251-05503001
 # Allow/deny bots from your guild
 AiPlayerbot.AllowGuildBots = 1
 
+# Allow/deny bots from other player accounts (must have AiPlayerbot.AllowGuildBots activated and character on same guild)
+AiPlayerbot.AllowMultiAccountAltBots = 1
+
 # Delay between two short-time spells cast (Default 500)
 AiPlayerbot.GlobalCooldown = 1500
 

@@ -3,6 +3,7 @@
 #include "TravelValues.h"
 #include "QuestValues.h"
 #include "SharedValueContext.h"
+#include "BudgetValues.h"
 
 using namespace ai;
 
@@ -317,19 +318,32 @@ bool ShouldTravelNamedValue::Calculate()
     }
     else if (name.find("trainer") == 0)
     {
-        TrainerType type = TRAINER_TYPE_CLASS;
+        TrainerType trainerType = TRAINER_TYPE_CLASS;
+        NeedMoneyFor budgetType = NeedMoneyFor::spells;
 
         if (name == "trainer mount")
-            type = TRAINER_TYPE_MOUNTS;
+        {
+            trainerType = TRAINER_TYPE_MOUNTS;
+            budgetType = NeedMoneyFor::mount; //Only train mounts when you can actually buy mount
+        }
         if (name == "trainer trade")
-            type = TRAINER_TYPE_TRADESKILLS;
+        {
+            trainerType = TRAINER_TYPE_TRADESKILLS;
+            budgetType = NeedMoneyFor::skilltraining;
+        }
         if (name == "trainer pet")
-            type = TRAINER_TYPE_PETS;
+        {
+            trainerType = TRAINER_TYPE_PETS;
+            budgetType = NeedMoneyFor::anything;
+        }
 
-        if (AI_VALUE2(uint32, "train cost", type) > 0)
-            return true;
+        if (AI_VALUE2(uint32, "train cost", trainerType) == 0) //Has nothing to train
+            return false;
 
-        return false;
+        if (!AI_VALUE2(bool, "has all money for", (uint32)budgetType))
+            return false;
+
+        return true;
     }
 
     return false;

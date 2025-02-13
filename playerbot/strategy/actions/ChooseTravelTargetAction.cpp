@@ -815,6 +815,8 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
     target->SetRetry(false, target->GetRetryCount(false) + 1);
 
+    RESET_AI_VALUE(bool, "travel target active");
+
     if (!target->IsActive())
     {
         ai->TellDebug(requester, "Target was not active after refresh.", "debug travel");
@@ -911,7 +913,12 @@ bool RequestTravelTargetAction::isUseful() {
 
     if (!isAllowed())
     {
-        ai->TellDebug(ai->GetMaster(), "Skipped " + getQualifier() + " because of skip chance", "debug travel");
+        std::string futureTravelPurpose = AI_VALUE2(std::string, "manual string", "future travel purpose");
+
+        if (Qualified::isValidNumberString(futureTravelPurpose))
+            futureTravelPurpose = TravelDestinationPurposeName.at(TravelDestinationPurpose(stoi(futureTravelPurpose)));
+
+        ai->TellDebug(ai->GetMaster(), "Skipped " + futureTravelPurpose + " because of skip chance", "debug travel");
         return false;
     }
 
@@ -1128,7 +1135,7 @@ bool RequestQuestTravelTargetAction::Execute(Event& event)
             flag = (uint32)TravelDestinationPurpose::QuestTaker;
         else
         {
-            for (uint32 objective = 1; objective < 5; objective++)
+            for (uint32 objective = 0; objective < 4; objective++)
             {
                 TravelDestinationPurpose purposeFlag = (TravelDestinationPurpose)(1 << (objective + 1));
 

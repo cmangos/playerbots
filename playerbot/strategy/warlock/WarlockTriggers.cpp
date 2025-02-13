@@ -142,42 +142,80 @@ bool NoCurseOnAttackerTrigger::IsActive()
 
 bool FearPvpTrigger::IsActive()
 {
-    Unit* target = AI_VALUE(Unit*, "current target");
     uint32 spellId = AI_VALUE2(uint32, "spell id", "fear");
+    if (!spellId)
+        return false;
+
     const SpellEntry* spellInfo = sServerFacade.LookupSpellInfo(spellId);
-    if (target && target->IsPlayer() && target->GetDiminishing(DIMINISHING_FEAR_CHARM_BLIND) < DIMINISHING_LEVEL_IMMUNE
-        && !PossibleAttackTargetsValue::HasUnBreakableCC(target, bot) && !target->IsImmuneToSpellEffect(spellInfo, EFFECT_INDEX_0, false))
-	{
-		// Check if low health
-        const uint8 health = AI_VALUE2(uint8, "health", "self target");
-        if (health <= sPlayerbotAIConfig.lowHealth)
+    if (!spellInfo)
+        return false;
+
+    Unit* target = AI_VALUE(Unit*, "current target");
+    if (!target || !target->IsPlayer())
+        return false;
+
+    if (target->GetDiminishing(DIMINISHING_FEAR_CHARM_BLIND) >= DIMINISHING_LEVEL_IMMUNE ||
+        target->IsImmuneToSpellEffect(spellInfo, EFFECT_INDEX_0, false))
+        return false;
+
+    // Check if bot is low on health
+    if (AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.lowHealth)
+        return false;
+
+    // Check if target is attacking the bot
+    if (target->GetSelectionGuid() != bot->GetObjectGuid())
+        return false;
+
+    // Avoid fearing if already under CC
+    for (const Aura* aura : ai->GetAuras(target))
+    {
+        if (!aura)
+            continue;
+
+        const SpellEntry* spellInfo = aura->GetSpellProto();
+        if (spellInfo)
         {
-			// Check if targeting bot
-			if (target->GetSelectionGuid() == bot->GetObjectGuid())
-			{
-                // Check if the bot has feared anyone
-                bool alreadyFeared = false;
-                std::list<ObjectGuid> attackers = AI_VALUE(std::list<ObjectGuid>, "attackers");
-                for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
+            switch (spellInfo->Mechanic)
+            {
+            case SPELL_AURA_MOD_STUN:
+            case SPELL_AURA_MOD_FEAR:
+            case SPELL_AURA_MOD_CHARM:
+            case SPELL_AURA_MOD_CONFUSE:
+            case SPELL_AURA_MOD_PACIFY:
+            case SPELL_AURA_MOD_ROOT:
+                if (aura->GetAuraDuration() >= 1500)
                 {
-                    Unit* attacker = ai->GetUnit(*i);
-                    if (ai->HasAura("fear", attacker, false, true))
-                    {
-                        alreadyFeared = true;
-                        break;
-                    }
+                    return false;
                 }
+                break;
+            default:
+                break;
+            }
+        }
+    }
 
-                if (!alreadyFeared)
-                {
-                    const float distance = target->GetDistance(bot);
-                    return distance <= 10.0f;
-                }
-			}
-		}
-	}
+    // Check if the bot has already feared a target
+    std::list<ObjectGuid> attackers = AI_VALUE(std::list<ObjectGuid>, "attackers");
+    for (const ObjectGuid& guid : attackers)
+    {
+        Unit* attacker = ai->GetUnit(guid);
+        if (!attacker || !attacker->isFeared())
+            continue;
 
-	return false;
+        for (const Aura* aura : ai->GetAuras(attacker, false, false))
+        {
+            const SpellEntry* auraSpellInfo = aura->GetSpellProto();
+            if (auraSpellInfo && auraSpellInfo->Id == spellId && aura->GetCasterGuid() == bot->GetObjectGuid())
+            {
+                if (aura->GetAuraDuration() > 1500)
+                    return false; // Already feared
+                break;
+            }
+        }
+    }
+
+    // Check if target is within fear range
+    return target->GetDistance(bot) <= 20.0f;
 }
 
 bool ConflagrateTrigger::IsActive()

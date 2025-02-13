@@ -28,7 +28,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell arcaneResistance = HunterPetBuildSpell("Arcane Resistance", 0, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, arcaneResistanceEntities);
+    HunterPetBuildSpell arcaneResistance = HunterPetBuildSpell("Arcane Resistance", 0, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, arcaneResistanceEntities);
 #pragma endregion 
 
 #pragma region Bite
@@ -48,7 +48,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell bite = HunterPetBuildSpell("Bite", 1, true, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 21, 24, 25, 27, 30, 31, 32, 34, 35}, biteEntities);
+    HunterPetBuildSpell bite = HunterPetBuildSpell("Bite", 1, true, true, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 21, 24, 25, 27, 30, 31, 32, 34, 35}, biteEntities);
 #pragma endregion 
 
 #pragma region Charge
@@ -61,7 +61,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> chargeEntities = { {1,rank1Charge}, {2,rank2Charge},{3,rank3Charge},{4,rank4Charge},{5,rank5Charge},{6,rank6Charge} };
 
-    HunterPetBuildSpell charge = HunterPetBuildSpell("Charge", 2, true, std::vector<uint32> {5}, chargeEntities);
+    HunterPetBuildSpell charge = HunterPetBuildSpell("Charge", 2, true, true, std::vector<uint32> {5}, chargeEntities);
 #pragma endregion 
 
 #pragma region Claw
@@ -81,7 +81,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell claw = HunterPetBuildSpell("Claw", 4, true, std::vector<uint32> {2, 4, 7, 7, 8, 11, 20, 26, 32}, clawEntities);
+    HunterPetBuildSpell claw = HunterPetBuildSpell("Claw", 4, true, true, std::vector<uint32> {2, 4, 7, 7, 8, 11, 20, 26, 32}, clawEntities);
 #pragma endregion 
 
 #pragma region Cower
@@ -99,7 +99,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell cower = HunterPetBuildSpell("Cower", 5, true, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, cowerEntities);
+    HunterPetBuildSpell cower = HunterPetBuildSpell("Cower", 5, true, true, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, cowerEntities);
 #pragma endregion
 
 #pragma region Dash
@@ -109,7 +109,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> dashEntities{ {1, rank1Dash}, {2, rank2Dash}, {3, rank3Dash} };
 
-    HunterPetBuildSpell dash = HunterPetBuildSpell("Dash", 6, true, std::vector<uint32> {1, 2, 5, 11, 12, 25, 31}, dashEntities);
+    HunterPetBuildSpell dash = HunterPetBuildSpell("Dash", 6, true, true, std::vector<uint32> {1, 2, 5, 11, 12, 25, 31}, dashEntities);
 #pragma endregion
 
 #pragma region Dive
@@ -119,7 +119,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> diveEntites = { {1,rank1Dive}, {2,rank2Dive}, {3,rank3Dive} };
 
-    HunterPetBuildSpell dive = HunterPetBuildSpell("Dive", 8, true, std::vector<uint32> {7, 24, 26, 27, 30, 34}, diveEntites);
+    HunterPetBuildSpell dive = HunterPetBuildSpell("Dive", 8, true, true, std::vector<uint32> {7, 24, 26, 27, 30, 34}, diveEntites);
 #pragma endregion
 
 #pragma region Fire Resistance
@@ -135,7 +135,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell fireResistance = HunterPetBuildSpell("Fire Resistance", 9, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, fireResistanceEntites);
+    HunterPetBuildSpell fireResistance = HunterPetBuildSpell("Fire Resistance", 9, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, fireResistanceEntites);
 #pragma endregion
 
 #pragma region Frost Resistance
@@ -151,7 +151,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell frostResistance = HunterPetBuildSpell("Frost Resistance", 10, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, frostResistanceEntites);
+    HunterPetBuildSpell frostResistance = HunterPetBuildSpell("Frost Resistance", 10, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, frostResistanceEntites);
 #pragma endregion
 
 #pragma region Furious Howl
@@ -162,7 +162,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> furiousHowlsEntities = { {1,rank1FuriousHowl}, {2,rank2FuriousHowl}, {3,rank3FuriousHowl},{4,rank4FuriousHowl} };
 
-    HunterPetBuildSpell furiousHowl = HunterPetBuildSpell("Furious Howl", 12, true, std::vector<uint32> {1}, furiousHowlsEntities);
+    HunterPetBuildSpell furiousHowl = HunterPetBuildSpell("Furious Howl", 12, true, true, std::vector<uint32> {1}, furiousHowlsEntities);
 #pragma endregion
 
 #pragma region Great Stamina
@@ -185,7 +185,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell greatStamina = HunterPetBuildSpell("Great Stamina", 13, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, greatStaminaEntities);
+    HunterPetBuildSpell greatStamina = HunterPetBuildSpell("Great Stamina", 13, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, greatStaminaEntities);
 #pragma endregion
 
 #pragma region Growl
@@ -204,7 +204,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell growl = HunterPetBuildSpell("Growl", 14, true, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, growlEntities);
+    HunterPetBuildSpell growl = HunterPetBuildSpell("Growl", 14, true, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, growlEntities);
 #pragma endregion
 
 #pragma region Lightning Breath
@@ -221,7 +221,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
         {2, rank2LightningBreath}, {3,rank3LightningBreath}, {4,rank4LightningBreath}, {5,rank5LightningBreath},{6,rank6LightningBreath} };
 
-    HunterPetBuildSpell lightningBreath = HunterPetBuildSpell("Lightning Breath", 16, true, std::vector<uint32> {27}, lightingBreathEntities);
+    HunterPetBuildSpell lightningBreath = HunterPetBuildSpell("Lightning Breath", 16, true, true, std::vector<uint32> {27}, lightingBreathEntities);
 #pragma endregion
 
 #pragma region Natural Armor
@@ -243,7 +243,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell naturalArmor = HunterPetBuildSpell("Natural Armor", 17, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, naturalArmorEntities);
+    HunterPetBuildSpell naturalArmor = HunterPetBuildSpell("Natural Armor", 17, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, naturalArmorEntities);
 #pragma endregion
 
 #pragma region Nature Resistance
@@ -259,7 +259,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell natureResistance = HunterPetBuildSpell("Nature Resistance", 18, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, natureResistanceEntities);
+    HunterPetBuildSpell natureResistance = HunterPetBuildSpell("Nature Resistance", 18, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, natureResistanceEntities);
 #pragma endregion
 
 #pragma region Prowl
@@ -269,7 +269,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> prowlEntities = { {1,rank1Prowl},{2,rank2Prowl},{3,rank3Prowl} };
 
-    HunterPetBuildSpell prowl = HunterPetBuildSpell("Prowl", 20, true, std::vector<uint32> {2}, prowlEntities);
+    HunterPetBuildSpell prowl = HunterPetBuildSpell("Prowl", 20, true, true, std::vector<uint32> {2}, prowlEntities);
 #pragma endregion
 
 #pragma region Scorpid Poison
@@ -284,7 +284,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
         {5,rank5ScorpidPoison}
 #endif
     };
-    HunterPetBuildSpell scorpidPoison = HunterPetBuildSpell("Scorpid Poison", 21, true, std::vector<uint32> {20}, scorpidPoisonEntites);
+    HunterPetBuildSpell scorpidPoison = HunterPetBuildSpell("Scorpid Poison", 21, true, true, std::vector<uint32> {20}, scorpidPoisonEntites);
 #pragma endregion
 
 #pragma region Screech
@@ -300,7 +300,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell screech = HunterPetBuildSpell("Screech", 21, true, std::vector<uint32> {7, 24, 26}, screechEntites);
+    HunterPetBuildSpell screech = HunterPetBuildSpell("Screech", 21, true, true, std::vector<uint32> {7, 24, 26}, screechEntites);
 #pragma endregion
 
 #pragma region Shadow Resistance
@@ -316,7 +316,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif 
     };
 
-    HunterPetBuildSpell shadowResistance = HunterPetBuildSpell("Shadow Resistance", 24, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, shadowResistanceEntities);
+    HunterPetBuildSpell shadowResistance = HunterPetBuildSpell("Shadow Resistance", 24, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, shadowResistanceEntities);
 #pragma endregion
 
 #pragma region Shell Shield
@@ -324,7 +324,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> shellShieldEntity = { {1, rank1ShellShield} };
 
-    HunterPetBuildSpell shellShield = HunterPetBuildSpell("Shell Shield", 25, true, std::vector<uint32> {21}, shellShieldEntity);
+    HunterPetBuildSpell shellShield = HunterPetBuildSpell("Shell Shield", 25, true, true, std::vector<uint32> {21}, shellShieldEntity);
 #pragma endregion
 
 #pragma region Thunderstomp
@@ -334,7 +334,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> thunderstompEntities = { {1,rank1Thunderstomp}, {2,rank2Thunderstomp}, {3,rank3Thunderstomp} };
 
-    HunterPetBuildSpell thunderstomp = HunterPetBuildSpell("Thunderstomp", 26, true, std::vector<uint32> {9}, thunderstompEntities);
+    HunterPetBuildSpell thunderstomp = HunterPetBuildSpell("Thunderstomp", 26, true, true, std::vector<uint32> {9}, thunderstompEntities);
 #pragma endregion
 #ifdef MANGOSBOT_ONE
 #pragma region Avoidance
@@ -343,7 +343,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> avoidanceEntities = { {1, rank1Avoidance}, {2, rank2Avoidance} };
 
-    HunterPetBuildSpell avoidance = HunterPetBuildSpell("Avoidance", 28, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, avoidanceEntities);
+    HunterPetBuildSpell avoidance = HunterPetBuildSpell("Avoidance", 28, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, avoidanceEntities);
 #pragma endregion 
 
 #pragma region Cobra Reflexes
@@ -351,7 +351,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> cobraReflexesEntities = { { 1, rank1CobraReflexes } };
 
-    HunterPetBuildSpell cobraReflex = HunterPetBuildSpell("Cobra Reflexes", 29, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, cobraReflexesEntities);
+    HunterPetBuildSpell cobraReflex = HunterPetBuildSpell("Cobra Reflexes", 29, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, cobraReflexesEntities);
 #pragma endregion 
 
 #pragma region Fire Breath
@@ -360,7 +360,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> fireBreathEntites = { {1,rank1FireBreath}, {2,rank2FireBreath} };
 
-    HunterPetBuildSpell fireBreath = HunterPetBuildSpell("Fire Breath", 30, true, std::vector<uint32> {30}, fireBreathEntites);
+    HunterPetBuildSpell fireBreath = HunterPetBuildSpell("Fire Breath", 30, true, true, std::vector<uint32> {30}, fireBreathEntites);
 #pragma endregion
 
 #pragma region Gore
@@ -376,7 +376,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> goreEntities = { {1, rank1Gore}, {2, rank2Gore}, {3,rank3Gore}, {4,rank4Gore}, {5,rank5Gore},{6,rank6Gore}, {7, rank7Gore}, {8,rank8Gore}, {9,rank9Gore} };
 
-    HunterPetBuildSpell gore = HunterPetBuildSpell("Gore", 32, true, std::vector<uint32> {5, 31}, goreEntities);
+    HunterPetBuildSpell gore = HunterPetBuildSpell("Gore", 32, true, true, std::vector<uint32> {5, 31}, goreEntities);
 #pragma endregion
 
 #pragma region Poison Spit
@@ -386,7 +386,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> poisonSpitEntities = { {1,rank1PoisonSpit}, {2,rank2PoisonSpit}, {3,rank3PoisonSpit} };
 
-    HunterPetBuildSpell poisonSpit = HunterPetBuildSpell("Poison Spit", 26, true, std::vector<uint32> {35}, poisonSpitEntities);
+    HunterPetBuildSpell poisonSpit = HunterPetBuildSpell("Poison Spit", 26, true, true, std::vector<uint32> {35}, poisonSpitEntities);
 #pragma endregion
 
 #pragma region Warp
@@ -394,7 +394,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> warpEntity = { {1, rank1Warp} };
 
-    HunterPetBuildSpell warp = HunterPetBuildSpell("Warp", 25, true, std::vector<uint32> {32}, warpEntity);
+    HunterPetBuildSpell warp = HunterPetBuildSpell("Warp", 25, true, true, std::vector<uint32> {32}, warpEntity);
 #pragma endregion
 #endif
 #pragma endregion
@@ -614,7 +614,7 @@ void HunterPetBuild::ReadSpells(Player* bot)
     
 }
 
-void HunterPetBuild::ApplyBuild(Player* bot, std::vector<std::stringstream> out)
+void HunterPetBuild::ApplyBuild(Player* bot, std::vector<std::string> out)
 {
 #ifdef MANGOSBOT_ZERO
     int maxFamilyBuilds = 27;
@@ -721,31 +721,42 @@ HunterPetBuildPath FamilyPetBuilds::GetBuildPath(int buildNo)
     return foundPath;
 }
 
-void HunterPetBuild::InitializeStartingPetSpells(Pet* pet, uint32 level, uint32 family)
+void HunterPetBuild::InitializeStartingPetSpells(Player* bot, uint32 petLevel, uint32 petFamily)
 {
-    for (auto& positionMapItem : spells)
+    for (auto& positionMapItem : spellRankEntityMapping)
     {
-        if (positionMapItem.second.IsPetLearned && std::find(positionMapItem.second.FamilyIds.begin(), positionMapItem.second.FamilyIds.end(), family) != positionMapItem.second.FamilyIds.end())
+        if (positionMapItem.second.IsPetLearned && std::find(positionMapItem.second.FamilyIds.begin(), positionMapItem.second.FamilyIds.end(), petFamily) != positionMapItem.second.FamilyIds.end())
         {
             for (int ii = 0; ii < positionMapItem.second.Spells.size(); ii++)
             {
                 if (positionMapItem.second.Spells.size() > 1)
                 {
                     HunterPetBuildSpellEntity spellEntity = positionMapItem.second.Spells[ii];
-                    if (ii != positionMapItem.second.Spells.size() + 1)
+                    if (ii < positionMapItem.second.Spells.size() - 1)
                     {
-                        if (level >= spellEntity.Level && level < positionMapItem.second.Spells[ii + 1].Level)
+                        if (petLevel >= spellEntity.Level && petLevel < positionMapItem.second.Spells[ii + 1].Level)
                         {
-                            pet->learnSpell(spellEntity.SpellId);
+                            bot->learnSpell(spellEntity.TrainingSpellId, false);
+                            bot->GetPet()->learnSpell(spellEntity.SpellId);
+                            break;
                         }
                     }
                     else
                     {
-                        if (level >= spellEntity.Level)
+                        if (petLevel >= spellEntity.Level)
                         {
-                            pet->learnSpell(spellEntity.SpellId);
+                            bot->learnSpell(spellEntity.TrainingSpellId, false);
+                            bot->GetPet()->learnSpell(spellEntity.SpellId);
+                            break;
                         }
                     }
+                }
+                else
+                {
+                    HunterPetBuildSpellEntity spellEntity = positionMapItem.second.Spells[ii];
+                    bot->learnSpell(spellEntity.TrainingSpellId, false);
+                    bot->GetPet()->learnSpell(spellEntity.SpellId);
+                    break;
                 }
             }
         }

@@ -10,7 +10,7 @@ bool InitializePetAction::Execute(Event& event)
 {
     PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_LEGENDARY);
     factory.InitPet();
-    InitialFamilySkill(bot->GetPet());
+    InitialFamilySkill(bot);
     return true;
 }
 
@@ -21,7 +21,7 @@ bool InitializePetAction::isUseful()
         // Or if alt bot and autoLearnTrainerSpells is true
         (!sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId()) && sPlayerbotAIConfig.autoLearnTrainerSpells))
     {
-        if (bot->getClass() == CLASS_HUNTER)
+        if (bot->GetLevel() >= 10 && bot->getClass() == CLASS_HUNTER)
         {
             bool hasTamedPet = bot->GetPet();
             if (!hasTamedPet)
@@ -540,7 +540,7 @@ bool SetPetAction::Execute(Event& event)
                             std::string buildLink = newBuild.GetBuildLink();
                             if (currentBuildString != buildLink)
                             {
-                                std::vector<std::stringstream> outGroup;
+                                std::vector<std::string> outGroup;
                                 newBuild.ApplyBuild(bot, outGroup);
                             }
                             break;
@@ -553,7 +553,7 @@ bool SetPetAction::Execute(Event& event)
                             if (currentBuildString != buildLink)
                             {
                                 HunterPetBuild newBuild = HunterPetBuild(buildLink);
-                                std::vector<std::stringstream> outGroup;
+                                std::vector<std::string> outGroup;
                                 newBuild.ApplyBuild(bot, outGroup);
                             }
                             break;
@@ -577,7 +577,7 @@ bool SetPetAction::Execute(Event& event)
                             HunterPetBuildPath* path = PickPremadePath(paths, sRandomPlayerbotMgr.IsRandomBot(bot));
                             HunterPetBuild newBuild = *GetBestPremadeBuild(path->id);
                             std::string buildLink = newBuild.GetBuildLink();
-                            std::vector<std::stringstream> outGroup;
+                            std::vector<std::string> outGroup;
                             newBuild.ApplyBuild(bot, outGroup);
 
                             if (newBuild.GetTPCostOfBuild() > 0)
@@ -598,7 +598,7 @@ bool SetPetAction::Execute(Event& event)
 
                             if (newBuild.CheckBuild(hpb->CalculateTrainingPoints(bot), &out))
                             {
-                                std::vector<std::stringstream> outGroup;
+                                std::vector<std::string> outGroup;
                                 newBuild.ApplyBuild(bot, outGroup);
                                 sPlayerbotDbStore.SavePetBuildLink(pet->GetCharmInfo()->GetPetNumber(), buildLink);
                                 ai->TellPlayer(requester, out);
@@ -620,7 +620,7 @@ bool SetPetAction::Execute(Event& event)
                                 HunterPetBuildPath* path = PickPremadePath(paths, false);
                                 HunterPetBuild newBuild = *GetBestPremadeBuild(path->id);
                                 std::string buildLink = newBuild.GetBuildLink();
-                                std::vector<std::stringstream> outGroup;
+                                std::vector<std::string> outGroup;
                                 newBuild.ApplyBuild(bot, outGroup);
 
                                 if (newBuild.GetTPCostOfBuild() > 0)
@@ -676,7 +676,7 @@ bool SetPetAction::AutoSelectBuild(Player* bot, std::ostringstream* out)
         HunterPetBuild* build = GetBestPremadeBuild(path.id);
         if (currentBuild.GetBuildLink() != build->GetBuildLink())
         {
-            std::vector<std::stringstream> outGroup;
+            std::vector<std::string> outGroup;
             build->ApplyBuild(bot, outGroup);
             return true;
         }
@@ -845,10 +845,10 @@ HunterPetBuildPath* InitializePetSpellsAction::getPremadePath(int id)
     return &sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths[0];
 }
 
-void InitializePetAction::InitialFamilySkill(Pet* pet)
+void InitializePetAction::InitialFamilySkill(Player* bot)
 {
-    uint32 level = pet->GetLevel();
-    uint32 family = pet->GetCreatureInfo()->Family;
+    uint32 level = bot->GetPet()->GetLevel();
+    uint32 family = bot->GetPet()->GetCreatureInfo()->Family;
     HunterPetBuild hunterPetBuild = HunterPetBuild();
-    hunterPetBuild.InitializeStartingPetSpells(pet, level, family);
+    hunterPetBuild.InitializeStartingPetSpells(bot, level, family);
 }

@@ -339,11 +339,12 @@ AiPlayerbot.AutoLearnDroppedSpells = 0
 
 # Bots train their pets.
 # Options
-# 0 disabled, 1 train only skills the hunter knows, 2 train skills regardless if hunter knows them. Any value outside this scope defaults to 1.
+# 0 disabled do not train their pets, 1 train only skills the hunter knows, 2 train skills regardless if hunter knows them. Any value outside this scope defaults to 1.
 # Default: 1 (train only skills the hunter knows)
 AiPlayerbot.TrainHunterPets = 1
 
-# Bots automatically learn pet skills that are trained from taming pets of the appropriate level when the bot reaches the minimum teaching level of the spell.
+# Alt Bots automatically learn pet skills that are trained from taming pets of the appropriate level when the bot reaches the minimum teaching level of the spell.
+# Random bots have this enabled at all times.p
 # Default: 0 (disabled)
 AiPlayerbot.AutoLearnHunterPetTrainedSkills = 0
 

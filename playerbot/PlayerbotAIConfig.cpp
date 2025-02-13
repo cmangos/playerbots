@@ -696,7 +696,7 @@ bool PlayerbotAIConfig::Initialize()
     respawnModForPlayerBots = config.GetBoolDefault("AiPlayerbot.RespawnModForPlayerBots", false);
     respawnModForInstances = config.GetBoolDefault("AiPlayerbot.RespawnModForInstances", false);
 #ifndef MANGOSBOT_TWO
-    autoLearnHunterPetTrainedSkills = config.GetBoolDefault("AiPlayerbot.autoLearnHunterPetTrainedSkills", 1);
+    autoLearnHunterPetTrainedSkills = config.GetBoolDefault("AiPlayerbot.autoLearnHunterPetTrainedSkills", false);
 #endif
     trainHunterPets = config.GetIntDefault("AiPlayerbot.TrainHunterPets", 1);
 

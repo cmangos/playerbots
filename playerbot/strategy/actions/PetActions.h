@@ -11,7 +11,7 @@ namespace ai
         bool isUseful() override;
 
     private:
-        void InitialFamilySkill(Pet* pet);
+        void InitialFamilySkill(Player* pet);
     };
 
     class InitializePetSpellsAction : public Action

@@ -40,7 +40,11 @@ void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
         LearnQuestSpells(out);
 
     if (sPlayerbotAIConfig.autoLearnTrainerSpells)
+    {
         LearnTrainerSpells(out);
+        if (bot->getClass() == CLASS_HUNTER)
+            LearnHunterPetTrainerLearnedSkills(out);
+    }
 
 #ifdef MANGOSBOT_ZERO
     if (sPlayerbotAIConfig.autoLearnDroppedSpells)
@@ -48,8 +52,8 @@ void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
 #endif
 
 #ifndef MANGOSBOT_TWO
-    if (sPlayerbotAIConfig.autoLearnHunterPetTrainedSkills)
-        LearnHunterPetTrainedSkills(out);
+    if (bot->getClass() == CLASS_HUNTER && (sPlayerbotAIConfig.autoLearnHunterPetTrainedSkills || sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId())))
+        LearnHunterPetLearnedSkills(out);
 #endif
 
     if (!ai->HasActivePlayerMaster()) //Hunter spells for pets.
@@ -78,11 +82,10 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
             continue;
 
         if (co->TrainerType != TRAINER_TYPE_CLASS && 
-            co->TrainerType != TRAINER_TYPE_TRADESKILLS &&
-            co->TrainerType != TRAINER_TYPE_PETS)
+            co->TrainerType != TRAINER_TYPE_TRADESKILLS)
             continue;
 
-        if ((co->TrainerType == TRAINER_TYPE_CLASS || co->TrainerType == TRAINER_TYPE_PETS) && co->TrainerClass != bot->getClass())
+        if (co->TrainerType == TRAINER_TYPE_CLASS && co->TrainerClass != bot->getClass())
             continue;
 
         uint32 trainerId = co->TrainerTemplateId;
@@ -368,26 +371,46 @@ bool AutoLearnSpellAction::IsValidSpell(uint32 spellId)
         // Hunter
         spellId != 542  && // Prevents hunter from learning pet skill zzOLDLearn Nature Resistance.
         spellId != 530  && // Prevents hunter from learning Charm (Possess)
+        spellId != 6280 && // Prevents hunter from learning pet skill Pet Hardiness Rank 1
         spellId != 6284 && // Prevents hunter from learning pet skill Pet Hardiness Rank 1
+        spellId != 6281 && // Prevents hunter from learning pet skill Pet Hardiness Rank 2
         spellId != 6287 && // Prevents hunter from learning pet skill Pet Hardiness Rank 2
+        spellId != 6282 && // Prevents hunter from learning pet skill Pet Hardiness Rank 3
         spellId != 6288 && // Prevents hunter from learning pet skill Pet Hardiness Rank 3
+        spellId != 6283 && // Prevents hunter from learning pet skill Pet Hardiness Rank 4
         spellId != 6289 && // Prevents hunter from learning pet skill Pet Hardiness Rank 4
         spellId != 6290 && // Prevents hunter from learning pet skill Pet Hardiness Rank 5
+        spellId != 6286 && // Prevents hunter from learning pet skill Pet Hardiness Rank 5
+        spellId != 6311 && // Prevents hunter from learning pet skill Pet Aggression Rank 1
         spellId != 6312 && // Prevents hunter from learning pet skill Pet Aggression Rank 1
+        spellId != 6314 && // Prevents hunter from learning pet skill Pet Aggression Rank 2
         spellId != 6318 && // Prevents hunter from learning pet skill Pet Aggression Rank 2
+        spellId != 6315 && // Prevents hunter from learning pet skill Pet Aggression Rank 3
         spellId != 6319 && // Prevents hunter from learning pet skill Pet Aggression Rank 3
+        spellId != 6316 && // Prevents hunter from learning pet skill Pet Aggression Rank 4
         spellId != 6320 && // Prevents hunter from learning pet skill Pet Aggression Rank 4
+        spellId != 6317 && // Prevents hunter from learning pet skill Pet Aggression Rank 5
         spellId != 6321 && // Prevents hunter from learning pet skill Pet Aggression Rank 5
         spellId != 6329 && // Prevents hunter from learning pet skill Pet Recovery Rank 1
+        spellId != 6328 && // Prevents hunter from learning pet skill Pet Recovery Rank 1
+        spellId != 6331 && // Prevents hunter from learning pet skill Pet Recovery Rank 2
         spellId != 6335 && // Prevents hunter from learning pet skill Pet Recovery Rank 2
+        spellId != 6332 && // Prevents hunter from learning pet skill Pet Recovery Rank 3
         spellId != 6336 && // Prevents hunter from learning pet skill Pet Recovery Rank 3
+        spellId != 6333 && // Prevents hunter from learning pet skill Pet Recovery Rank 4
         spellId != 6337 && // Prevents hunter from learning pet skill Pet Recovery Rank 4
+        spellId != 6334 && // Prevents hunter from learning pet skill Pet Recovery Rank 5
         spellId != 6338 && // Prevents hunter from learning pet skill Pet Recovery Rank 5
+        spellId != 6443 && // Prevents hunter from learning pet skill Pet Resistance Rank 1
         spellId != 6448 && // Prevents hunter from learning pet skill Pet Resistance Rank 1
+        spellId != 6444 && // Prevents hunter from learning pet skill Pet Resistance Rank 2
         spellId != 6450 && // Prevents hunter from learning pet skill Pet Resistance Rank 2
+        spellId != 6445 && // Prevents hunter from learning pet skill Pet Resistance Rank 3
         spellId != 6451 && // Prevents hunter from learning pet skill Pet Resistance Rank 3
+        spellId != 6446 && // Prevents hunter from learning pet skill Pet Resistance Rank 4
         spellId != 6452 && // Prevents hunter from learning pet skill Pet Resistance Rank 4
         spellId != 6453 && // Prevents hunter from learning pet skill Pet Resistance Rank 5
+        spellId != 6447 && // Prevents hunter from learning pet skill Pet Resistance Rank 5
         // Paladin
         spellId != 1973; // Prevents Paladins from learning zzOldHip Shot III.
 #elif MANGOSBOT_ONE
@@ -457,149 +480,240 @@ bool AutoLearnSpellAction::IsTeachingSpellListedAsSpell(uint32 spellId)
         return isTeachingSpellListedAsSpell;
 }
 
-void AutoLearnSpellAction::LearnHunterPetTrainedSkills(std::ostringstream* out)
+void AutoLearnSpellAction::LearnHunterPetTrainerLearnedSkills(std::ostringstream* out)
+{
+    std::map<uint16, uint32> HunterSpells;
+#pragma region Arcane Resistance
+        HunterSpells.insert({ 20,24495 });
+        HunterSpells.insert({ 30,24508 });
+        HunterSpells.insert({ 40,24509 });
+        HunterSpells.insert({ 50,24510 });
+        HunterSpells.insert({ 60,27350 }); // TBC
+    #pragma endregion 
+
+#pragma region Fire Resistance
+        HunterSpells.insert({ 20,24440 });
+        HunterSpells.insert({ 30,24441 });
+        HunterSpells.insert({ 40,24463 });
+        HunterSpells.insert({ 50,24464 });
+        HunterSpells.insert({ 60,27351 }); // TBC
+#pragma endregion
+
+#pragma region Frost Resistance
+        HunterSpells.insert({ 20,24475 });
+        HunterSpells.insert({ 30,24476 });
+        HunterSpells.insert({ 40,24477 });
+        HunterSpells.insert({ 50,24478 });
+        HunterSpells.insert({ 60,27352 }); // TBC
+#pragma endregion
+
+#pragma region Great Stamina
+        HunterSpells.insert({ 10,4195 });
+        HunterSpells.insert({ 12,4196 });
+        HunterSpells.insert({ 18,4197 });
+        HunterSpells.insert({ 24,4198 });
+        HunterSpells.insert({ 30,4199 });
+        HunterSpells.insert({ 36,4200 });
+        HunterSpells.insert({ 42,4201 });
+        HunterSpells.insert({ 48,4202 });
+        HunterSpells.insert({ 54,5048 });
+        HunterSpells.insert({ 60,5049 });
+        HunterSpells.insert({ 70,27364 }); // TBC
+#pragma endregion
+
+#pragma region Growl
+        HunterSpells.insert({ 1,1853 });
+        HunterSpells.insert({ 10,14922 });
+        HunterSpells.insert({ 20,14923 });
+        HunterSpells.insert({ 30,14924 });
+        HunterSpells.insert({ 40,14925 });
+        HunterSpells.insert({ 50,14926 });
+        HunterSpells.insert({ 60,14927 });
+        HunterSpells.insert({ 70,27344 }); // TBC
+#pragma endregion
+
+#pragma region Natural Armor
+        HunterSpells.insert({ 10,24547 });
+        HunterSpells.insert({ 12,24556 });
+        HunterSpells.insert({ 18,24557 });
+        HunterSpells.insert({ 24,24558 });
+        HunterSpells.insert({ 30,24559 });
+        HunterSpells.insert({ 36,24560 });
+        HunterSpells.insert({ 42,24561 });
+        HunterSpells.insert({ 48,24562 });
+        HunterSpells.insert({ 54,24631 });
+        HunterSpells.insert({ 60,24632 });
+        HunterSpells.insert({ 70,27362 }); // TBC
+#pragma endregion
+
+#pragma region Nature Resistance
+        HunterSpells.insert({ 20,24494 });
+        HunterSpells.insert({ 30,24511 });
+        HunterSpells.insert({ 40,24512 });
+        HunterSpells.insert({ 50,24513 });
+        HunterSpells.insert({ 60,27354 }); // TBC
+#pragma endregion
+
+#pragma region Shadow Resistance
+        HunterSpells.insert({ 20,24490 });
+        HunterSpells.insert({ 30,24514 });
+        HunterSpells.insert({ 40,24515 });
+        HunterSpells.insert({ 50,24516 });
+        HunterSpells.insert({ 60,27353 }); // TBC
+#pragma endregion
+
+#ifdef MANGOSBOT_ONE
+#pragma region Avoidance
+        HunterSpells.insert({ 30,35699 }); // TBC
+        HunterSpells.insert({ 60,35700 }); // TBC
+#pragma endregion 
+
+#pragma region Cobra Reflexes
+        HunterSpells.insert({ 30,25077 }); // TBC
+#pragma endregion 
+#endif
+
+        for (auto& pair : HunterSpells)
+        {
+            if (pair.first <= bot->GetLevel() && !bot->HasSpell(pair.second))
+            {
+                bot->learnSpell(pair.second, false);
+            }
+        }
+}
+
+void AutoLearnSpellAction::LearnHunterPetLearnedSkills(std::ostringstream* out)
 {
     std::map<uint16, uint32> HunterSpells;
 #pragma region Bite
-    HunterSpells.insert(1,17254);
-    HunterSpells.insert(8,17262);
-    HunterSpells.insert(16,17263);
-    HunterSpells.insert(24,17264);
-    HunterSpells.insert(32,17265);
-    HunterSpells.insert(40,17266);
-    HunterSpells.insert(48,17267);
-    HunterSpells.insert(56,17268);
-#ifdef MANGOSBOT_ONE
-    HunterSpells.insert(64,27348); // TBC
-#endif
+    HunterSpells.insert({1,17254});
+    HunterSpells.insert({8,17262});
+    HunterSpells.insert({16,17263});
+    HunterSpells.insert({24,17264});
+    HunterSpells.insert({32,17265});
+    HunterSpells.insert({40,17266});
+    HunterSpells.insert({48,17267});
+    HunterSpells.insert({56,17268});
+    HunterSpells.insert({64,27348}); // TBC
 #pragma endregion 
 
 #pragma region Charge
-    HunterSpells.insert(1,7370);
-    HunterSpells.insert(12,26184);
-    HunterSpells.insert(24,26185);
-    HunterSpells.insert(36,26186);
-    HunterSpells.insert(48,26202);
-    HunterSpells.insert(60,28343);
+    HunterSpells.insert({1,7370});
+    HunterSpells.insert({12,26184});
+    HunterSpells.insert({24,26185});
+    HunterSpells.insert({36,26186});
+    HunterSpells.insert({48,26202});
+    HunterSpells.insert({60,28343});
 #pragma endregion 
 
 #pragma region Claw
-    HunterSpells.insert(1,2980);
-    HunterSpells.insert(8,2981);
-    HunterSpells.insert(16,2982);
-    HunterSpells.insert(24,3667);
-    HunterSpells.insert(32,2975);
-    HunterSpells.insert(40,2976);
-    HunterSpells.insert(48,2977);
-    HunterSpells.insert(56,3666);
-#ifdef MANGOSBOT_ONE
-    HunterSpells.insert(64,27347); // TBC
-#endif
+    HunterSpells.insert({1,2980});
+    HunterSpells.insert({8,2981});
+    HunterSpells.insert({16,2982});
+    HunterSpells.insert({24,3667});
+    HunterSpells.insert({32,2975});
+    HunterSpells.insert({40,2976});
+    HunterSpells.insert({48,2977});
+    HunterSpells.insert({56,3666});
+    HunterSpells.insert({64,27347}); // TBC
 #pragma endregion 
 
 #pragma region Cower
-    HunterSpells.insert(5,1747);
-    HunterSpells.insert(15,1748);
-    HunterSpells.insert(25,1749);
-    HunterSpells.insert(35,1750);
-    HunterSpells.insert(45,1751);
-    HunterSpells.insert(55,16998);
-#ifdef MANGOSBOT_ONE
-    HunterSpells.insert(65,27346); // TBC
-#endif
+    HunterSpells.insert({5,1747});
+    HunterSpells.insert({15,1748});
+    HunterSpells.insert({25,1749});
+    HunterSpells.insert({35,1750});
+    HunterSpells.insert({45,1751});
+    HunterSpells.insert({55,16998});
+    HunterSpells.insert({65,27346}); // TBC
 #pragma endregion
 
 #pragma region Dash
-    HunterSpells.insert(30,23100);
-    HunterSpells.insert(40,23111);
-    HunterSpells.insert(50,23112);
+    HunterSpells.insert({30,23100});
+    HunterSpells.insert({40,23111});
+    HunterSpells.insert({50,23112});
 #pragma endregion
 
 #pragma region Dive
-    HunterSpells.insert(30,23146);
-    HunterSpells.insert(40,23149);
-    HunterSpells.insert(50,23150);
+    HunterSpells.insert({30,23146});
+    HunterSpells.insert({40,23149});
+    HunterSpells.insert({50,23150});
 #pragma endregion
 
 #pragma region Furious Howl
-    HunterSpells.insert(20,24609);
-    HunterSpells.insert(30,24608);
-    HunterSpells.insert(40,24607);
-    HunterSpells.insert(50,24599);
+    HunterSpells.insert({20,24609});
+    HunterSpells.insert({30,24608});
+    HunterSpells.insert({40,24607});
+    HunterSpells.insert({50,24599});
 #pragma endregion
 
 #pragma region Lightning Breath
-#ifdef MANGOSBOT_ONE
-    HunterSpells.insert(1,24845);  // TBC
-#endif
-    HunterSpells.insert(12,25013);
-    HunterSpells.insert(24,25014);
-    HunterSpells.insert(36,25015);
-    HunterSpells.insert(48,25016);
-    HunterSpells.insert(60,25017);
+    HunterSpells.insert({1,24845});  // TBC
+    HunterSpells.insert({12,25013});
+    HunterSpells.insert({24,25014});
+    HunterSpells.insert({36,25015});
+    HunterSpells.insert({48,25016});
+    HunterSpells.insert({60,25017});
 #pragma endregion
 
 #pragma region Prowl
-    HunterSpells.insert(30,24451);
-    HunterSpells.insert(40,24454);
-    HunterSpells.insert(50,24455);
+    HunterSpells.insert({30,24451});
+    HunterSpells.insert({40,24454});
+    HunterSpells.insert({50,24455});
 #pragma endregion
 
 #pragma region Scorpid Poison
-    HunterSpells.insert(8,24584);
-    HunterSpells.insert(24,24588);
-    HunterSpells.insert(40,24589);
-    HunterSpells.insert(56,24641);
-#ifdef MANGOSBOT_ONE
-    HunterSpells.insert(64,27361); // TBC
-#endif
+    HunterSpells.insert({8,24584});
+    HunterSpells.insert({24,24588});
+    HunterSpells.insert({40,24589});
+    HunterSpells.insert({56,24641});
+    HunterSpells.insert({64,27361}); // TBC
 #pragma endregion
 
 #pragma region Screech
-    HunterSpells.insert(8,24424);
-    HunterSpells.insert(24,24580);
-    HunterSpells.insert(40,24581);
-    HunterSpells.insert(56,24582);
-#ifdef MANGOSBOT_ONE
-    HunterSpells.insert(64,27349); // TBC
-#endif
+    HunterSpells.insert({8,24424});
+    HunterSpells.insert({24,24580});
+    HunterSpells.insert({40,24581});
+    HunterSpells.insert({56,24582});
+    HunterSpells.insert({64,27349}); // TBC
 #pragma endregion
 
 #pragma region Shell Shield
-    HunterSpells.insert(20,26065);
+    HunterSpells.insert({20,26065});
 #pragma endregion
 
 #pragma region Thunderstomp
-    HunterSpells.insert(30,26094);
-    HunterSpells.insert(40,26189);
-    HunterSpells.insert(50,26190);
+    HunterSpells.insert({30,26094});
+    HunterSpells.insert({40,26189});
+    HunterSpells.insert({50,26190});
 #pragma endregion
 
 #ifdef MANGOSBOT_ONE
 #pragma region Fire Breath
-    HunterSpells.insert(1,34890); // TBC
-    HunterSpells.insert(60,35324); // TBC
+    HunterSpells.insert({1,34890}); // TBC
+    HunterSpells.insert({60,35324}); // TBC
 #pragma endregion
 
 #pragma region Gore
-    HunterSpells.insert(1,35299); // TBC
-    HunterSpells.insert(8,35300); // TBC
-    HunterSpells.insert(16,35302); // TBC
-    HunterSpells.insert(24,35303); // TBC
-    HunterSpells.insert(32,35304); // TBC
-    HunterSpells.insert(40,35305); // TBC
-    HunterSpells.insert(48,35306); // TBC
-    HunterSpells.insert(56,35307); // TBC
-    HunterSpells.insert(63,35308); // TBC
+    HunterSpells.insert({1,35299}); // TBC
+    HunterSpells.insert({8,35300}); // TBC
+    HunterSpells.insert({16,35302}); // TBC
+    HunterSpells.insert({24,35303}); // TBC
+    HunterSpells.insert({32,35304}); // TBC
+    HunterSpells.insert({40,35305}); // TBC
+    HunterSpells.insert({48,35306}); // TBC
+    HunterSpells.insert({56,35307}); // TBC
+    HunterSpells.insert({63,35308}); // TBC
 #pragma endregion
 
 #pragma region Poison Spit
-    HunterSpells.insert(15,35388); // TBC
-    HunterSpells.insert(45,35390); // TBC
-    HunterSpells.insert(60,35391); // TBC
+    HunterSpells.insert({15,35388}); // TBC
+    HunterSpells.insert({45,35390}); // TBC
+    HunterSpells.insert({60,35391}); // TBC
 #pragma endregion
 
 #pragma region Warp
+    HunterSpells.insert({60,35348}); // TBC
 #pragma endregion
 #endif
 

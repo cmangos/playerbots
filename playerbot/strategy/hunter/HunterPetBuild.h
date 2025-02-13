@@ -41,7 +41,7 @@ class HunterPetBuild
             std::vector<uint32> FamilyIds;
             std::map<uint8, HunterPetBuildSpellEntity> Spells;
 
-            HunterPetBuildSpell(std::string name, uint8 position, bool isActiveAbility, std::vector<uint32> familyIds, std::map<uint8, HunterPetBuildSpellEntity> spells, bool isPetLearned = false)
+            HunterPetBuildSpell(std::string name, uint8 position, bool isActiveAbility, bool isPetLearned, std::vector<uint32> familyIds, std::map<uint8, HunterPetBuildSpellEntity> spells)
             {
                 Name = name;
                 Position = position;
@@ -84,10 +84,10 @@ class HunterPetBuild
 
         void ReadSpells(std::string buildLink);
         void ReadSpells(Player* bot);
-        void ApplyBuild(Player* bot, std::vector<std::stringstream> out);
+        void ApplyBuild(Player* bot, std::vector<std::string> out);
         void UnlearnCurrentSpells(Player* bot);
 
-        void InitializeStartingPetSpells(Pet* pet, uint32 level, uint32 family);
+        void InitializeStartingPetSpells(Player* bot, uint32 petLevel, uint32 petFamily);
 
         uint32 CalculateTrainingPoints(Player* bot);
 

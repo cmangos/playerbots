@@ -851,7 +851,7 @@ AiPlayerbot.HunterPetBuild.5.1.60 = 086-000-000-097-080-000-000
 #Crocolisks
 AiPlayerbot.HunterPetBuildName.6.1 = "Crocolisks Default"
 AiPlayerbot.HunterPetBuildProb.6.1 = 100
-AiPlayerbot.HunterPetBuild.6.1.60 = 010-000-000-097-090-000-000
+AiPlayerbot.HunterPetBuild.6.1.60 = 080-000-000-097-090-000-000
 
 #Carrion Birds
 AiPlayerbot.HunterPetBuildName.7.1 = "Carrion Birds Default"
@@ -886,12 +886,12 @@ AiPlayerbot.HunterPetBuild.20.1.60 = 000-800-000-097-080-040-000
 #Turtles 
 AiPlayerbot.HunterPetBuildName.21.1 = "Turtles Default"
 AiPlayerbot.HunterPetBuildProb.21.1 = 100
-AiPlayerbot.HunterPetBuild.21.1.60 = 080-000-000-097-070-000-010
+AiPlayerbot.HunterPetBuild.21.1.60 = 080-000-000-097-080-000-010
 
 #Bats 
 AiPlayerbot.HunterPetBuildName.24.1 = "Bats Default"
 AiPlayerbot.HunterPetBuildProb.24.1 = 100
-AiPlayerbot.HunterPetBuild.24.1.60 = 080-000-000-097-070-004-000
+AiPlayerbot.HunterPetBuild.24.1.60 = 080-000-000-097-080-004-000
 
 #Hyenas 
 AiPlayerbot.HunterPetBuildName.25.1 = "Hyenas Default"
@@ -901,7 +901,7 @@ AiPlayerbot.HunterPetBuild.25.1.60 = 080-000-000-097-090-000-000
 #Owls 
 AiPlayerbot.HunterPetBuildName.26.1 = "Owls Default"
 AiPlayerbot.HunterPetBuildProb.26.1 = 100
-AiPlayerbot.HunterPetBuild.26.1.60 = 000-800-000-097-070-004-000
+AiPlayerbot.HunterPetBuild.26.1.60 = 000-800-000-097-080-004-000
 
 #Wind Serpents 
 AiPlayerbot.HunterPetBuildName.27.1 = "Wind Serpents Default"

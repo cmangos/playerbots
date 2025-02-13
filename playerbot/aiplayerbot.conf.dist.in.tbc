@@ -327,7 +327,7 @@ AiPlayerbot.TrainHunterPets = 1
 
 # Bots automatically learn pet skills that are trained from taming pets of the appropriate level when the bot reaches the minimum teaching level of the spell.
 # Default: 0 (disabled)
-AiPlayerbot.AutoLearnHunterPetTrainedSkills = 0
+AiPlayerbot.AutoLearnHunterPetTrainedSkills = 1
 
 # Random Bots will pick quests on their own and try to complete
 # Default: 1 (enabled)
@@ -743,6 +743,243 @@ AiPlayerbot.PremadeSpecLink.11.11.70 = 01-503202132322125331151-05403001
 AiPlayerbot.PremadeSpecName.11.12 = pvp feral (mangler)
 AiPlayerbot.PremadeSpecProb.11.12 = 44
 AiPlayerbot.PremadeSpecLink.11.12.70 = 01-500232130322125331251-05503001
+
+##################################################################################
+#                                                                                #
+# Premade Hunter Pet Builds                                                      #
+#                                                                                #
+##################################################################################
+# 
+# Please read all this before setting up hunter pet builds
+#
+# 0  A = Arcane Resistance (0-5 [0 = No Ranks 5 = Rank 5])                              # Learned By All
+# 1  B = Bite (0-9 [0 = No Ranks 9 = Rank 9])                                           # Learned By Bats, Bears, Boars, Carrion Birds, Cats, Crocolisks, Dragonhawks, Gorillas, Hyenas, Nether Rays, Raptors, Ravagers, Serpents, Spiders, Tallstriders, Turtles, Warp Stalkers, Wind Serpents, Wolves
+# 2  C = Charge (0-6 [0 = No Ranks 6 = Rank 6])                                         # Learned By Boars
+# 3
+# 4  D = Claw (0-9 [0 = No Ranks 8 = Rank 9])                                           # Learned By Bears, Carrion Birds, Cats, Crabs, Owls, Raptors, Scorpids, Warp Stalkers
+# 5  E = Cower (0-7 [0 = No Ranks 7 = Rank 7])                                          # Learned By All
+# 6  F = Dash (0-3 [0 = No Ranks 3 = Rank 3])                                           # Learned By Boars Boars, Cats, Hyenas, Raptors, Ravagers, Tallstriders, Wolves
+# 7
+# 8  G = Dive (0-3 [0 = No Ranks 3 = Rank 3])                                           # Learned By Boars, Cats, Hyenas, Raptors, Ravagers, Tallstriders, Wolves
+# 9  H = Fire Resistance (0-5 [0 = No Ranks 5 = Rank 5])                                # Learned By All
+# 10 I = Frost Resistance (0-5 [0 = No Ranks 5 = Rank 5])                               # Learned By All
+# 11
+# 12 J = Furious Howl (0-4 [0 = No Ranks 4 = Rank 4])                                   # Learned By Wolves
+# 13 K = Great Stamina (0-B [0 = No Ranks 9 = Rank 9 and A = Rank 10 B = Rank 11])      # Learned By All
+# 14 L = Growl (0-8 [0 = No Ranks 8 = Rank 8])                                          # Learned By All
+# 15
+# 16 M = Lightning Breath (0-6 [0 = No Ranks 6 = Rank 6])                               # Learned By Wind Serpents
+# 17 N = Natural Armor (0-B [0 = No Ranks 9 = Rank 9 and A = Rank 10 B = Rank 11])      # Learned By All
+# 18 O = Nature Resistance (0-5 [0 = No Ranks 5 = Rank 5])                              # Learned By All
+# 19
+# 20 P = Prowl (0-3 [0 = No Ranks 3 = Rank 3])                                          # Learned By Cats
+# 21 Q = Scorpid Poision (0-5 [0 = No Ranks 5 = Rank 5])                                # Learned By Scorpids
+# 22 R = Screech (0-5 [0 = No Ranks 5 = Rank 5])                                        # Learned By Bats Carrion Birds Owls
+# 23
+# 24 S = Shadow Resistance (0-5 [0 = No Ranks 5 = Rank 5])                              # Learned By All
+# 25 T = Shell Shield (0-1 [0 = No ranks 1 = Rank 1]                                    # Learned By Turtles
+# 26 U = Thunderstomp (0-3 [0 = No Ranks 3 = Rank 3])                                   # Learned By Gorillas
+# //TBC
+# 27
+# 28 V Avoidance (0-2 [0 = No Ranks 2 = Rank 2])                                        # Learned By All
+# 29 W Cobra Reflexes (0-1 [0 = No Ranks 1 = Rank 1])                                   # Learned By All
+# 30 X Flame Breath (0-2 [0 = No Ranks 2 = Rank 2])                                     # Learned By Dragon Hawks
+# 31
+# 32 Y Gore (0-9 [0 = No Ranks 8 = Rank 9])                                             # Learned By Boars Ravagers
+# 33 Z Poison Spit (0-3 [0 = No Ranks 3 = Rank 3])                                      # Learned By Serpents
+# 34 ? Warp (0-1 [0 = No Ranks 1 = Rank 1])                                             # Learned By Warp Stalkers
+#
+#
+# The way pets will learn is that pets will start with the first skill, level it up to the max it can then continue on to the next skill and do the same until it can't train anymore. 
+# If a skill is not available to the pet or the hunter doesn't have the skill learned the skill will be ignored.
+# 
+# List of Family Entities
+# Family Ids
+# 1   Wolves
+# 2   Cats
+# 3   Spiders
+# 4   Bears
+# 5   Boars
+# 6   Crocolisks
+# 7   Carrion Birds
+# 8   Crabs
+# 9   Gorillas
+# 11  Raptors
+# 12  Tallstriders
+# 20  Scorpids
+# 21  Turtles
+# 24  Bats
+# 25  Hyenas
+# 26  Owls
+# 27  Wind Serpents
+# TBC Only
+# 30 Dragon Hawk
+# 31 Ravager
+# 32 Warp Stalker
+# 33 Spore Bat
+# 34 Nether Ray
+# 35 Serpent
+#
+# Bats, Carrion Birds, Dragonhawks, Nether Rays, Owls, Wind Serpents
+# AiPlayerbot.HunterPetBuildName.<FamilyEntity>.<petSkillBuildNo> = <Name>                                  # Name of the Hunter Pet Skill Build
+# AiPlayerbot.HunterPetBuildProb.<FamilyEntity>.<petSkillBuildNo> = <number>                                # Probability Randombot Hunters will pick this build with given pet family
+# AiPlayerbot.HunterPetBuild.<FamilyEntity>.<petSkillBuildNo>.<level> = ABC-DEF-GHI-JKL-MNO-PQR-STU-VWX-YZ? # What the build should looklike at a given level (Assuming that the pet has the available TP)
+
+#Example
+AiPlayerbot.HunterPetBuildName.2.1 = "Cat DPS (Shadow Resistance)"
+AiPlayerbot.HunterPetBuildProb.2.1 = 100
+# The below allows a demo of what happens if the pet does not have enough TP. 
+# At level 1 with 6 loyalty the pet only has 5 training points. Bite and Claw cost 1 point each, leaving 3 TP points left. Next the pet will attempt to learn Great Satmina Rank 1 and fail because it doesn't have enough TP.
+# As there isn't enough TP left over, Great Stamina Rank 1 will be skipped and the next skill will attempt to be learned which is Growl. Growl does not cost any points so that will be learned and the next skill will attempt 
+# to be learned, Natural Armor Rank 1. Natural Armor Rank 1 costs 1 TP the pet will have 2 points left. After the pet reaches level 2, the pet then gain 5 training points bringing their total to 8. The pet will then learn 
+# Great Stamina Rank 1 and have 2 points remainging. 
+AiPlayerbot.HunterPetBuild.2.1.1 =  010-100-000-011-010-000-000-000-000     # Learn Natural Armor Rank 1 Great Stamina Rank 1 Growl Rank 1 Bite Rank 1 and Claw Rank 1
+AiPlayerbot.HunterPetBuild.2.1.8 =  020-200-000-011-010-000-000-000-000     # Learn Bite Rank 2 and Claw Rank 2
+AiPlayerbot.HunterPetBuild.2.1.10 = 020-200-000-012-010-000-000-000-000     # Learn Growl Rank 2
+AiPlayerbot.HunterPetBuild.2.1.12 = 020-200-000-022-020-000-000-000-000     # Learn Natural Armor Rank 2 and Great Stamina Rank 2
+AiPlayerbot.HunterPetBuild.2.1.16 = 030-300-000-022-020-000-000-000-000     # Learn Bite Rank 3 and Claw Rank 3
+AiPlayerbot.HunterPetBuild.2.1.18 = 030-300-000-032-030-000-000-000-000     # Learn Natural Armor Rank 3 and Great Stamina Rank 3
+AiPlayerbot.HunterPetBuild.2.1.20 = 030-300-000-033-030-000-000-000-000     # Learn Growl Rank 3
+AiPlayerbot.HunterPetBuild.2.1.24 = 040-400-000-043-030-000-000-000-000     # Learn Great Stamina Rank 4 Bite Rank 4 and Claw Rank 4
+AiPlayerbot.HunterPetBuild.2.1.30 = 040-400-000-054-030-000-000-110-000     # Learn Great Stamina Rank 5 Growl Rank 4 Cobra Reflex and Avoidance Rank 1
+AiPlayerbot.HunterPetBuild.2.1.32 = 050-500-000-054-030-000-000-110-000     # Learn Bite Rank 4 and Claw Rank 4
+AiPlayerbot.HunterPetBuild.2.1.36 = 050-500-000-064-030-000-000-110-000     # Learn Great Stamina Rank 6
+AiPlayerbot.HunterPetBuild.2.1.40 = 060-600-000-065-030-000-000-110-000     # Learn Growl Rank 5 Bite Rank 6 and Claw Rank 6
+AiPlayerbot.HunterPetBuild.2.1.42 = 060-600-000-075-030-000-000-110-000     # Learn Great Stamina Rank 7
+AiPlayerbot.HunterPetBuild.2.1.48 = 070-700-000-085-030-000-000-110-000     # Learn Great Stamina Rank 8 Bite Rank 7 and Claw Rank 7
+AiPlayerbot.HunterPetBuild.2.1.50 = 070-700-000-086-030-000-000-110-000     # Learn Learn Growl Rank 6
+AiPlayerbot.HunterPetBuild.2.1.54 = 070-700-000-096-030-000-000-110-000     # Learn Great Stamina Rank 9
+AiPlayerbot.HunterPetBuild.2.1.56 = 080-800-000-096-030-000-000-110-000     # Learn Great Bite Rank 8 and Claw Rank 8
+AiPlayerbot.HunterPetBuild.2.1.60 = 080-800-000-097-030-000-300-210-000     # Learn Growl Rank 7 Shadow Resistance 3 and Avoidance Rank 2
+AiPlayerbot.HunterPetBuild.2.1.64 = 090-900-000-097-030-000-300-210-000     # Learn Bite Rank 9 and Claw Rank 9
+AiPlayerbot.HunterPetBuild.2.1.70 = 090-900-000-098-030-000-400-210-000     # Learn Growl Rank 8 and Shadow Resistance 4
+
+#Wolfs
+AiPlayerbot.HunterPetBuildName.1.1 = "Wolf Furious Howl Only (Shadow Resistance)"
+AiPlayerbot.HunterPetBuildProb.1.1 = 100
+AiPlayerbot.HunterPetBuild.1.1.70 = 000-000-000-4A8-000-000-500-200-000
+
+AiPlayerbot.HunterPetBuildName.1.2 = "Wolf Furious Howl Only (Fire Resistance)"
+AiPlayerbot.HunterPetBuildProb.1.2 = 100
+AiPlayerbot.HunterPetBuild.1.1.70 = 000-000-050-4A8-000-000-000-200-000
+
+AiPlayerbot.HunterPetBuildName.1.3 = "Wolf Furious Howl Only (Nature Resistance)"
+AiPlayerbot.HunterPetBuildProb.1.3 = 100
+AiPlayerbot.HunterPetBuild.1.3.70 = 000-000-000-4A8-005-000-000-200-000
+
+AiPlayerbot.HunterPetBuildName.1.4 = "Wolf DPS"
+AiPlayerbot.HunterPetBuildProb.1.4 = 100
+AiPlayerbot.HunterPetBuild.1.4.70 = 090-000-000-4B8-080-000-000-210-000
+
+#Cats
+AiPlayerbot.HunterPetBuildName.2.2 = "Cat DPS (Fire Resistance)"
+AiPlayerbot.HunterPetBuildProb.2.2 = 100
+AiPlayerbot.HunterPetBuild.2.2.70 = 090-900-040-098-030-000-000-210-000
+
+#Spiders
+AiPlayerbot.HunterPetBuildName.3.1 = "Spider Default"
+AiPlayerbot.HunterPetBuildProb.3.1 = 100
+AiPlayerbot.HunterPetBuild.3.1.70 = 090-000-000-098-090-000-000-210-000
+
+#Bears
+AiPlayerbot.HunterPetBuildName.4.1 = "Bears Default"
+AiPlayerbot.HunterPetBuildProb.4.1 = 100
+AiPlayerbot.HunterPetBuild.4.1.70 = 090-900-000-098-080-000-000-210-000
+
+#Boars
+AiPlayerbot.HunterPetBuildName.5.1 = "Boars Default"
+AiPlayerbot.HunterPetBuildProb.5.1 = 100
+AiPlayerbot.HunterPetBuild.5.1.70 = 000-900-000-098-080-000-000-210-900
+
+#Crocolisks
+AiPlayerbot.HunterPetBuildName.6.1 = "Crocolisks Default"
+AiPlayerbot.HunterPetBuildProb.6.1 = 100
+AiPlayerbot.HunterPetBuild.6.1.70 = 090-000-000-098-090-000-000-210-000
+
+#Carrion Birds
+AiPlayerbot.HunterPetBuildName.7.1 = "Carrion Birds Default"
+AiPlayerbot.HunterPetBuildProb.7.1 = 100
+AiPlayerbot.HunterPetBuild.7.1.70 = 000-900-000-098-080-005-000-210-000
+
+#Crabs 
+AiPlayerbot.HunterPetBuildName.8.1 = "Crabs Default"
+AiPlayerbot.HunterPetBuildProb.8.1 = 100
+AiPlayerbot.HunterPetBuild.7.8.70 = 000-900-000-098-090-000-000-210-000
+
+#Gorillas 
+AiPlayerbot.HunterPetBuildName.9.1 = "Gorillas Default"
+AiPlayerbot.HunterPetBuildProb.9.1 = 100
+AiPlayerbot.HunterPetBuild.9.1.70 = 090-000-000-098-080-000-003-210-000
+
+#Raptors 
+AiPlayerbot.HunterPetBuildName.11.1 = "Raptors Default"
+AiPlayerbot.HunterPetBuildProb.11.1 = 100
+AiPlayerbot.HunterPetBuild.11.1.70 = 090-900-000-098-080-000-000-210-000
+
+#Tallstriders 
+AiPlayerbot.HunterPetBuildName.12.1 = "Tallstriders Default"
+AiPlayerbot.HunterPetBuildProb.12.1 = 100
+AiPlayerbot.HunterPetBuild.12.1.70 = 090-000-000-097-090-000-000-210-000
+
+#Scorpids 
+AiPlayerbot.HunterPetBuildName.20.1 = "Scorpids Default"
+AiPlayerbot.HunterPetBuildProb.20.1 = 100
+AiPlayerbot.HunterPetBuild.20.1.70 = 000-900-000-098-080-050-000-210-000
+
+#Turtles 
+AiPlayerbot.HunterPetBuildName.21.1 = "Turtles Default"
+AiPlayerbot.HunterPetBuildProb.21.1 = 100
+AiPlayerbot.HunterPetBuild.21.1.70 = 090-000-000-098-080-000-010-210-000
+
+#Bats 
+AiPlayerbot.HunterPetBuildName.24.1 = "Bats Default"
+AiPlayerbot.HunterPetBuildProb.24.1 = 100
+AiPlayerbot.HunterPetBuild.24.1.70 = 090-000-000-098-080-005-000-210-000
+
+#Hyenas 
+AiPlayerbot.HunterPetBuildName.25.1 = "Hyenas Default"
+AiPlayerbot.HunterPetBuildProb.25.1 = 100
+AiPlayerbot.HunterPetBuild.25.1.70 = 090-000-000-097-090-000-000-210-000
+
+#Owls 
+AiPlayerbot.HunterPetBuildName.26.1 = "Owls Default"
+AiPlayerbot.HunterPetBuildProb.26.1 = 100
+AiPlayerbot.HunterPetBuild.26.1.70 = 000-900-000-098-080-005-000-210-000
+
+#Wind Serpents 
+AiPlayerbot.HunterPetBuildName.27.1 = "Wind Serpents Default"
+AiPlayerbot.HunterPetBuildProb.27.1 = 100
+AiPlayerbot.HunterPetBuild.27.1.70 = 090-000-000-098-690-000-000-210-000
+
+#Dragon Hawk
+AiPlayerbot.HunterPetBuildName.30.1 = "Dragon Hawk Default"
+AiPlayerbot.HunterPetBuildProb.30.1 = 100
+AiPlayerbot.HunterPetBuild.30.1.70 = 090-000-000-098-080-000-000-210-200
+
+#Ravager
+AiPlayerbot.HunterPetBuildName.31.1 = "Ravager Default"
+AiPlayerbot.HunterPetBuildProb.31.1 = 100
+AiPlayerbot.HunterPetBuild.31.1.70 = 000-900-000-098-080-000-000-210-900
+
+#Warp Stalker
+AiPlayerbot.HunterPetBuildName.32.1 = "Warp Stalker Default"
+AiPlayerbot.HunterPetBuildProb.32.1 = 100
+AiPlayerbot.HunterPetBuild.32.1.70 = 090-900-000-098-080-000-000-210-001
+
+#Spore Bat
+AiPlayerbot.HunterPetBuildName.32.1 = "Spore Bat Default"
+AiPlayerbot.HunterPetBuildProb.32.1 = 100
+AiPlayerbot.HunterPetBuild.32.1.70 = 000-000-000-0A8-090-000-000-210-000
+
+#Nether Ray
+AiPlayerbot.HunterPetBuildName.33.1 = "Nether Ray Default"
+AiPlayerbot.HunterPetBuildProb.33.1 = 100
+AiPlayerbot.HunterPetBuild.33.1.70 = 090-000-000-098-090-000-000-210-000
+
+#Serpent
+AiPlayerbot.HunterPetBuildName.33.1 = "Serpent Default"
+AiPlayerbot.HunterPetBuildProb.33.1 = 100
+AiPlayerbot.HunterPetBuild.33.1.70 = 090-000-000-098-080-000-000-210-030
 
 # Applies a permanent buff to all bots.
 # WorldBuff.Faction.Class.MinLevel.MaxLevel = spellId

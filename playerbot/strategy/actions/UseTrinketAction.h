@@ -3,13 +3,19 @@
 
 namespace ai
 {
-    class UseTrinketAction : public UseAction 
+    class UseTrinketAction : public UseAction
     {
     public:
+        UseTrinketAction(PlayerbotAI* ai, bool allowPvPTrinket = false)
+            : UseAction(ai, "use trinket"), allowPvPTrinket(allowPvPTrinket) {}
 
-        UseTrinketAction(PlayerbotAI* ai) : UseAction(ai, "use trinket") {}
-        virtual bool Execute(Event& event) override;
-        virtual bool isPossible();
-        virtual bool isUseful() { return UseAction::isUseful() && !bot->HasStealthAura(); }
+        bool Execute(Event& event) override;
+        bool isPossible() override;
+        bool CanUseTrinket(Item* item);
+        bool isUseful() override { return UseAction::isUseful() && !bot->HasStealthAura(); }
+
+    private:
+        bool allowPvPTrinket;
+        bool IsPvPTrinket(Item* item);
     };
 }

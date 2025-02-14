@@ -191,6 +191,7 @@ namespace ai
             creators["feared"] = &TriggerContext::feared;
             creators["charmed"] = &TriggerContext::charmed;
             creators["stunned"] = &TriggerContext::stunned;
+            creators["pvp trinket"] = &TriggerContext::pvp_trinket;
 
             // move to/enter dark portal if near
             creators["near dark portal"] = &TriggerContext::near_dark_portal;
@@ -307,7 +308,8 @@ namespace ai
         static Trigger* blood_fury(PlayerbotAI* ai) { return new BloodFuryTrigger(ai); }
         static Trigger* cannibalize(PlayerbotAI* ai) { return new CannibalizeTrigger(ai); }
         static Trigger* will_of_the_forsaken(PlayerbotAI* ai) { return new WOtFTrigger(ai); }
-        static Trigger* every_man_for_himself(PlayerbotAI* ai) { return new EMfHTrigger(ai); }
+        static Trigger* every_man_for_himself(PlayerbotAI* ai) { return new PvpTrinketTrigger(ai, true); }
+        static Trigger* pvp_trinket(PlayerbotAI* ai) { return new PvpTrinketTrigger(ai, false); }
         static Trigger* rooted(PlayerbotAI* ai) { return new RootedTrigger(ai); }
         static Trigger* feared(PlayerbotAI* ai) { return new FearedTrigger(ai); }
         static Trigger* stunned(PlayerbotAI* ai) { return new StunnedTrigger(ai); }

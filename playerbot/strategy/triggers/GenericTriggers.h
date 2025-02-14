@@ -1030,48 +1030,74 @@ namespace ai
         }
     };
 
-    class EMfHTrigger : public Trigger
+    class PvpTrinketTrigger : public Trigger
     {
     public:
-        EMfHTrigger(PlayerbotAI* ai) : Trigger(ai, "every man for himself") {}
+        PvpTrinketTrigger(PlayerbotAI* ai, bool useRacial) : Trigger(ai, "pvp trinket"), useRacial(useRacial) {}
 
         virtual bool IsActive()
         {
-            if (bot->getRace() != RACE_HUMAN)
+            uint8 health = AI_VALUE2(uint8, "health", "self target");
+            if (health > sPlayerbotAIConfig.almostFullHealth)
+                return false;
+            
+            // Check if bot has an active escape ability available
+            if (!CanUseEscapeAbility())
                 return false;
 
-            if (AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.almostFullHealth)
-                return false;
+            // Check if bot is under a critical disabling effect
+            return IsUnderCriticalEffect(health);
+        }
+
+    private:
+        bool useRacial;
+
+        bool CanUseEscapeAbility()
+        {
+            if (useRacial) // every man for himself
+            {
+                return bot->getRace() == RACE_HUMAN && bot->IsSpellReady(59752);
+            }
+            else // Check if bot is non-human and has a ready PvP trinket
+            {
+                return (HasReadyTrinket(51377) || HasReadyTrinket(51378));
+            }
+        }
+
+        bool HasReadyTrinket(uint32 itemId)
+        {
+            ItemPrototype const* trinket = sObjectMgr.GetItemPrototype(itemId);
+            return bot->HasItemOrGemWithIdEquipped(itemId, 1) && bot->IsSpellReady(42292, trinket);
+        }
+
+        bool IsUnderCriticalEffect(uint8 health)
+        {
+            static const std::set<uint32> criticalAuras = {
+                SPELL_AURA_MOD_STUN, SPELL_AURA_MOD_FEAR, SPELL_AURA_MOD_CHARM,
+                SPELL_AURA_MOD_CONFUSE, SPELL_AURA_MOD_PACIFY, SPELL_AURA_MOD_ROOT
+            };
 
             for (const Aura* aura : ai->GetAuras(bot))
             {
-                if (aura)
+                if (!aura)
+                    continue;
+
+                uint32 auraType = aura->GetModifier()->m_auraname;
+                if (criticalAuras.find(auraType) != criticalAuras.end())
                 {
-                    switch (aura->GetModifier()->m_auraname)
+                    int32 duration = aura->GetAuraDuration();
+
+                    switch (auraType)
                     {
                     case SPELL_AURA_MOD_STUN:
-                        if (aura->GetAuraDuration() >= 3500)
-                        {
-                            return true;
-                        }
-                        break;
+                        return duration >= 3500;
                     case SPELL_AURA_MOD_FEAR:
                     case SPELL_AURA_MOD_CHARM:
                     case SPELL_AURA_MOD_CONFUSE:
                     case SPELL_AURA_MOD_PACIFY:
-                        if (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.mediumHealth && aura->GetAuraDuration() >= 7000)
-                        {
-                            return true;
-                        }
-                        break;
+                        return (health < sPlayerbotAIConfig.mediumHealth && duration >= 7000);
                     case SPELL_AURA_MOD_ROOT:
-                        if (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.lowHealth && aura->GetAuraDuration() >= 9500)
-                        {
-                            return true;
-                        }
-                        break;
-                    default:
-                        break;
+                        return (health < sPlayerbotAIConfig.lowHealth && duration >= 9500);
                     }
                 }
             }

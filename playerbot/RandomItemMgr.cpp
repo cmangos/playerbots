@@ -3129,7 +3129,13 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
         return info->weights[specId] * 5;
 #else
     if (info->source == ITEM_SOURCE_PVP && (playerPvpRank >= 10 || isBotHighRanked))
-        return static_cast<uint32>(static_cast<float>(info->weights[specId]) * (1.0f + (isBotHighRanked ? 0.75f : 0.5f)));
+    {
+        if (info->itemId == 51377 || info->itemId == 51378)
+            return UINT32_MAX; // Must have a trinket for PvP
+
+        float multiplier = 1.0f + (isBotHighRanked ? 0.75f : 0.5f);
+        return static_cast<uint32>(static_cast<float>(info->weights[specId]) * multiplier);
+    }
 #endif
 
     return info->weights[specId];

@@ -954,6 +954,10 @@ void ClassStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("check mount state", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "pvp trinket",
+        NextAction::array(0, new NextAction("use pvp trinket", 71.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "very often",
         NextAction::array(0, new NextAction("use lightwell", ACTION_LIGHT_HEAL), NULL)));
 

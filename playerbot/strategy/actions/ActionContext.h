@@ -199,6 +199,7 @@ namespace ai
             creators["buy tabard"] = &ActionContext::buy_tabard;
             creators["guild manage nearby"] = &ActionContext::guild_manage_nearby;
             creators["use trinket"] = &ActionContext::use_trinket;
+            creators["use pvp trinket"] = &ActionContext::use_pvp_trinket;
             creators["reset"] = &ActionContext::reset;
             creators["interrupt current spell"] = &ActionContext::interrupt_current_spell;
             creators["initialize pet"] = &ActionContext::initialize_pet;
@@ -482,6 +483,7 @@ namespace ai
         static Action* buy_tabard(PlayerbotAI* ai) { return new BuyTabardAction(ai); }
         static Action* guild_manage_nearby(PlayerbotAI* ai) { return new GuildManageNearbyAction(ai); }
         static Action* use_trinket(PlayerbotAI* ai) { return new UseTrinketAction(ai); }
+        static Action* use_pvp_trinket(PlayerbotAI* ai) { return new UseTrinketAction(ai, true); }
         static Action* reset(PlayerbotAI* ai) { return new ResetAction(ai); }
         static Action* interrupt_current_spell(PlayerbotAI* ai) { return new InterruptCurrentSpellAction(ai); }
 

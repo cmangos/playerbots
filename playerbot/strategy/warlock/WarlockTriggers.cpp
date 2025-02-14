@@ -169,13 +169,9 @@ bool FearPvpTrigger::IsActive()
     // Avoid fearing if already under CC
     for (const Aura* aura : ai->GetAuras(target))
     {
-        if (!aura)
-            continue;
-
-        const SpellEntry* spellInfo = aura->GetSpellProto();
-        if (spellInfo)
+        if (aura)
         {
-            switch (spellInfo->Mechanic)
+            switch (aura->GetModifier()->m_auraname)
             {
             case SPELL_AURA_MOD_STUN:
             case SPELL_AURA_MOD_FEAR:

@@ -1045,10 +1045,9 @@ namespace ai
 
             for (const Aura* aura : ai->GetAuras(bot))
             {
-                const SpellEntry* spellInfo = aura->GetSpellProto();
-                if (spellInfo)
+                if (aura)
                 {
-                    switch (spellInfo->Mechanic)
+                    switch (aura->GetModifier()->m_auraname)
                     {
                     case SPELL_AURA_MOD_STUN:
                         if (aura->GetAuraDuration() >= 3500)

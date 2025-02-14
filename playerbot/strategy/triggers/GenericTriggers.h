@@ -1042,8 +1042,7 @@ namespace ai
 
             if (AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.almostFullHealth)
                 return false;
-            bool isHealthy = AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.mediumHealth;
-            bool isFine = AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.lowHealth;
+
             for (const Aura* aura : ai->GetAuras(bot))
             {
                 const SpellEntry* spellInfo = aura->GetSpellProto();
@@ -1061,13 +1060,13 @@ namespace ai
                     case SPELL_AURA_MOD_CHARM:
                     case SPELL_AURA_MOD_CONFUSE:
                     case SPELL_AURA_MOD_PACIFY:
-                        if (!isHealthy && aura->GetAuraDuration() >= 7000)
+                        if (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.mediumHealth && aura->GetAuraDuration() >= 7000)
                         {
                             return true;
                         }
                         break;
                     case SPELL_AURA_MOD_ROOT:
-                        if (!isFine && aura->GetAuraDuration() >= 9500)
+                        if (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.lowHealth && aura->GetAuraDuration() >= 9500)
                         {
                             return true;
                         }

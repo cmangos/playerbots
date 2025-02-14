@@ -108,6 +108,8 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
     else if (oldTarget->IsForced()) //Make sure travel goes into cooldown after getting to the destination.
         oldTarget->SetExpireIn(HOUR * IN_MILLISECONDS);
 
+    AI_VALUE(TravelTarget*, "travel target")->SetConditions({ AI_VALUE2(std::string, "manual string", "future travel condition")});
+
     if (typeid(oldTarget->GetDestination()) == typeid(QuestObjectiveTravelDestination) || typeid(oldTarget->GetDestination()) == typeid(QuestRelationTravelDestination))
     {
         QuestTravelDestination* dest = dynamic_cast<QuestTravelDestination*>(oldTarget->GetDestination());
@@ -885,8 +887,8 @@ bool RequestTravelTargetAction::Execute(Event& event)
     *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center, purpose = actionPurpose]() { return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)purpose); });
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
-    AI_VALUE(TravelTarget*, "travel target")->SetConditions({ event.getSource() });
-    SET_AI_VALUE2(std::string, "manual string", "future travel purpose", getQualifier());
+        SET_AI_VALUE2(std::string, "manual string", "future travel purpose", getQualifier());
+        SET_AI_VALUE2(std::string, "manual string", "future travel condition", event.getSource());
 
     return true;
 }
@@ -1063,9 +1065,9 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
             });
     }
 
-    AI_VALUE(TravelTarget*, "travel target")->SetConditions({ event.getSource() });
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
     SET_AI_VALUE2(std::string, "manual string", "future travel purpose", getQualifier());
+    SET_AI_VALUE2(std::string, "manual string", "future travel condition", event.getSource());
 
     return true;
 }
@@ -1181,9 +1183,9 @@ bool RequestQuestTravelTargetAction::Execute(Event& event)
         }
     );
 
-    AI_VALUE(TravelTarget*, "travel target")->SetConditions({ event.getSource() });
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
     SET_AI_VALUE2(std::string, "manual string", "future travel purpose", "quest");
+    SET_AI_VALUE2(std::string, "manual string", "future travel condition", event.getSource());
 
     return true;
 }

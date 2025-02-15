@@ -60,7 +60,7 @@ private:
 	{
 		return new ActionNode("death grip",
 			/*P*/ NULL,
-			/*A*/ NextAction::array(0, new NextAction("icy touch"), NULL),
+			/*A*/ NULL,
 			/*C*/ NULL);
 	}
 	static ActionNode* plague_strike(PlayerbotAI* ai)

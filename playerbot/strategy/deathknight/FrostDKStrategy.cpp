@@ -55,7 +55,7 @@ public:
 		{
 		return new ActionNode("howling blast",
 			/*P*/ NextAction::array(0, new NextAction("blood presence"), NULL),
-			/*A*/ NextAction::array(0, new NextAction("icy touch"), NULL),
+			/*A*/ NULL,
 			/*C*/ NULL);	
 		}
 };

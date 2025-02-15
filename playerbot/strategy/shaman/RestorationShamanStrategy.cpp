@@ -1094,6 +1094,22 @@ void RestorationShamanPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     RestorationShamanStrategy::InitCombatTriggers(triggers);
     ShamanPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "flame shock on target",
+        NextAction::array(0, new NextAction("lava burst", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "flame shock",
+        NextAction::array(0, new NextAction("flame shock", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "shock",
+        NextAction::array(0, new NextAction("frost shock", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("lightning bolt", ACTION_NORMAL), NULL)));
 }
 
 void RestorationShamanPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

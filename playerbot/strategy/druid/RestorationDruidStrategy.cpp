@@ -956,6 +956,22 @@ void RestorationDruidPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& tr
 {
     RestorationDruidStrategy::InitCombatTriggers(triggers);
     DruidPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "insect swarm",
+        NextAction::array(0, new NextAction("insect swarm", ACTION_NORMAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "faerie fire",
+        NextAction::array(0, new NextAction("faerie fire", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "moonfire",
+        NextAction::array(0, new NextAction("moonfire", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("wrath", ACTION_NORMAL), NULL)));
 }
 
 void RestorationDruidPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

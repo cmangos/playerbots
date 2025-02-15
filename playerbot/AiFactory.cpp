@@ -613,14 +613,9 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
         combatEngine->removeStrategy("conserve mana");
         combatEngine->removeStrategy("cast time");
 
-        if (player->getClass() == CLASS_SHAMAN && tab == 2)
+        if (player->getClass() == CLASS_PRIEST && tab < 2)
         {
-            combatEngine->addStrategies("elemental", "aoe", "cc", NULL);
-        }
-
-        if (player->getClass() == CLASS_DRUID && tab == 2)
-        {
-            combatEngine->addStrategies("balance", NULL);
+            combatEngine->addStrategies("offdps", NULL);
         }
 
         if (player->getClass() == CLASS_DRUID && tab == 1)

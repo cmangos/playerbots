@@ -3,6 +3,8 @@
 
 namespace ai
 {
+    BUFF_TRIGGER(HungerForBloodTrigger, "hunger for blood");
+    
     class KickInterruptSpellTrigger : public InterruptSpellTrigger
     {
     public:
@@ -27,7 +29,7 @@ namespace ai
     class RuptureTrigger : public NoDebuffAndComboPointsAvailableTrigger
     {
     public:
-        RuptureTrigger(PlayerbotAI* ai, uint8 comboPoints = 4) : NoDebuffAndComboPointsAvailableTrigger(ai, "rupture", comboPoints) {}
+        RuptureTrigger(PlayerbotAI* ai, uint8 comboPoints = 5) : NoDebuffAndComboPointsAvailableTrigger(ai, "rupture", comboPoints) {}
     };
 
     class EviscerateTrigger : public ComboPointsAvailableTrigger

@@ -326,6 +326,7 @@ namespace ai
                 creators["cloak of shadows"] = &TriggerFactoryInternal::cloak_of_shadows;
                 creators["fan of knives"] = &TriggerFactoryInternal::fan_of_knives;
                 creators["riposte"] = &TriggerFactoryInternal::riposte;
+                creators["hunger for blood"] = &TriggerFactoryInternal::hunger_for_blood;
                 creators["apply deadly poison main hand"] = &TriggerFactoryInternal::apply_deadly_poison_main_hand;
                 creators["apply crippling poison main hand"] = &TriggerFactoryInternal::apply_crippling_poison_main_hand;
                 creators["apply mind poison main hand"] = &TriggerFactoryInternal::apply_mind_poison_main_hand;
@@ -341,6 +342,7 @@ namespace ai
             }
 
         private:
+            static Trigger* hunger_for_blood(PlayerbotAI* ai) { return new HungerForBloodTrigger(ai); }
             static Trigger* riposte(PlayerbotAI* ai) { return new RiposteCastTrigger(ai); }
             static Trigger* adrenaline_rush(PlayerbotAI* ai) { return new RogueBoostBuffTrigger(ai, "adrenaline rush"); }
             static Trigger* kick(PlayerbotAI* ai) { return new KickInterruptSpellTrigger(ai); }
@@ -421,6 +423,8 @@ namespace ai
                 creators["premeditation"] = &AiObjectContextInternal::premeditation;
                 creators["shadowstep"] = &AiObjectContextInternal::shadowstep;
                 creators["shadow dance"] = &AiObjectContextInternal::shadow_dance;
+                creators["hunger for blood"] = &AiObjectContextInternal::hunger_for_blood;
+                creators["envenom"] = &AiObjectContextInternal::envenom;
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
@@ -439,6 +443,8 @@ namespace ai
             }
 
         private:
+            static Action* envenom(PlayerbotAI* ai) { return new CastEnvenomAction(ai); }
+            static Action* hunger_for_blood(PlayerbotAI* ai) { return new CastHungerForBloodAction(ai); }
             static Action* shadow_dance(PlayerbotAI* ai) { return new CastShadowDanceAction(ai); }
             static Action* shadowstep(PlayerbotAI* ai) { return new CastShadowstepAction(ai); }
             static Action* premeditation(PlayerbotAI* ai) { return new CastPremeditationAction(ai); }

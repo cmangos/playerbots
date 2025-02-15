@@ -827,24 +827,25 @@ void AssassinationRogueStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
     RogueStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "eviscerate",
-        NextAction::array(0, new NextAction("eviscerate", ACTION_HIGH + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "slice and dice",
         NextAction::array(0, new NextAction("slice and dice", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "3 combo",
-        NextAction::array(0, new NextAction("rupture", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "behind target",
-        NextAction::array(0, new NextAction("mutilate back", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("mutilate back", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "not behind target",
-        NextAction::array(0, new NextAction("mutilate front", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("mutilate front", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "5 combo",
+        NextAction::array(0, new NextAction("cold blood", ACTION_NORMAL + 1),
+                             new NextAction("envenom", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "4 combo",
+        NextAction::array(0, new NextAction("envenom", ACTION_NORMAL), NULL)));
 }
 
 void AssassinationRogueStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -983,6 +984,10 @@ void AssassinationRogueAoeRaidStrategy::InitNonCombatTriggers(std::list<TriggerN
 void AssassinationRogueBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     RogueBuffStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "hunger for blood",
+        NextAction::array(0, new NextAction("hunger for blood", ACTION_HIGH), NULL)));
 }
 
 void AssassinationRogueBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1029,10 +1034,6 @@ void AssassinationRogueBuffRaidStrategy::InitNonCombatTriggers(std::list<Trigger
 void AssassinationRogueBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     RogueBoostStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "very often",
-        NextAction::array(0, new NextAction("cold blood", ACTION_HIGH + 5), NULL)));
 }
 
 void AssassinationRogueBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

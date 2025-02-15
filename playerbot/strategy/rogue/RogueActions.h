@@ -6,7 +6,9 @@ namespace ai
 {
     BUFF_ACTION(CastColdBloodAction, "cold blood");
     SPELL_ACTION(CastFanOfKnivesAction, "fan of knives");
+    SPELL_ACTION(CastEnvenomAction, "envenom");
     BUFF_ACTION(CastShadowDanceAction, "shadow dance");
+    BUFF_ACTION(CastHungerForBloodAction, "hunger for blood");
 
     BUFF_ACTION_U(CastPreparationAction, "preparation", !bot->IsSpellReady(14177) || !bot->IsSpellReady(2983) || !bot->IsSpellReady(2094));
 

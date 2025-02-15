@@ -3133,7 +3133,32 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
         if (info->itemId == 51377 || info->itemId == 51378)
             return UINT32_MAX; // Must have a trinket for PvP
 
-        float multiplier = 1.0f + (isBotHighRanked ? 0.75f : 0.5f);
+        float multiplier = 1.0f;
+
+        switch (info->slot)
+        {
+        case EQUIPMENT_SLOT_HEAD:
+        case EQUIPMENT_SLOT_SHOULDERS:
+        case EQUIPMENT_SLOT_CHEST:
+        case EQUIPMENT_SLOT_LEGS:
+        case EQUIPMENT_SLOT_HANDS:
+            multiplier += isBotHighRanked ? 1.0f : 0.75f; // Higher for set pieces
+            break;
+
+        case EQUIPMENT_SLOT_NECK:
+        case EQUIPMENT_SLOT_FINGER1:
+        case EQUIPMENT_SLOT_FINGER2:
+        case EQUIPMENT_SLOT_TRINKET1:
+        case EQUIPMENT_SLOT_TRINKET2:
+        case EQUIPMENT_SLOT_BACK:
+            multiplier += isBotHighRanked ? 0.5f : 0.25f; // Lowest for jewelry & cloaks
+            break;
+
+        default:
+            multiplier += isBotHighRanked ? 0.75f : 0.5f;
+            break;
+        }
+
         return static_cast<uint32>(static_cast<float>(info->weights[specId]) * multiplier);
     }
 #endif

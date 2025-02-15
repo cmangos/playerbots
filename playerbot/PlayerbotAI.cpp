@@ -3484,91 +3484,101 @@ bool PlayerbotAI::HasAura(std::string name, Unit* unit, bool maxStack, bool chec
 
     if (ids.empty())
     {
-        //sLog.outError("Please add %s to spell list", name.c_str());
+        //sLog.outError("Please add %s to spell list", name.c_str()); 
         if (!Utf8toWStr(name, wnamepart))
-            return 0;
+            return false;
 
         wstrToLower(wnamepart);
     }
 
     int auraAmount = 0;
 
-	for (uint32 auraType = SPELL_AURA_BIND_SIGHT; auraType < TOTAL_AURAS; auraType++)
-	{
+    for (uint32 auraType = SPELL_AURA_BIND_SIGHT; auraType < TOTAL_AURAS; auraType++)
+    {
         if (auraTypeId != TOTAL_AURAS && auraType != auraTypeId)
             continue;
 
-		Unit::AuraList const& auras = unit->GetAurasByType((AuraType)auraType);
+        Unit::AuraList const& auras = unit->GetAurasByType((AuraType)auraType);
 
         if (auras.empty())
             continue;
 
-        for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); i++)
+        for (Aura* aura : auras)
         {
-            Aura* aura = *i;
             if (!aura)
                 continue;
 
-            if (ids.empty())
+            const SpellEntry* spell = aura->GetSpellProto();
+            if (!spell)
+                continue;
+
+            // Check by ID or Name
+            bool validAura = false;
+            if (!ids.empty())
             {
-                const std::string auraName = aura->GetSpellProto()->SpellName[0];
-                if (auraName.empty() || auraName.length() != wnamepart.length() || !Utf8FitTo(auraName, wnamepart))
-                    continue;
+                validAura = (std::find(ids.begin(), ids.end(), spell->Id) != ids.end());
             }
             else
             {
-                if (std::find(ids.begin(), ids.end(), aura->GetSpellProto()->Id) == ids.end())
-                    continue;
+                const std::string auraName = spell->SpellName[0];
+                validAura = (!auraName.empty() && auraName.length() == wnamepart.length() && Utf8FitTo(auraName, wnamepart));
             }
 
-			if (IsRealAura(bot, aura, unit))
+            if (!validAura)
+                continue;
+
+            if (!IsRealAura(bot, aura, unit))
+                continue;
+
+            // Validate aura ownership if needed
+            if (hasMyAura && aura->GetHolder() && aura->GetHolder()->GetCasterGuid() != bot->GetObjectGuid())
+                continue;
+
+            if (checkIsOwner && aura->GetHolder() && aura->GetHolder()->GetCasterGuid() != bot->GetObjectGuid())
+                continue;
+
+            // Stack and charge checks
+            uint32 maxStackAmount = spell->StackAmount;
+            uint32 maxProcCharges = spell->procCharges;
+
+            if (maxStack)
             {
-                if (hasMyAura && aura->GetHolder())
-                {
-                    if (aura->GetHolder()->GetCasterGuid() == bot->GetObjectGuid())
-                        return true;
-                    else
-                        continue;
-                }
+                if (!maxStackAmount && !maxProcCharges)
+                    continue;
 
-                if (checkIsOwner && aura->GetHolder())
-                {
-                    if (aura->GetHolder()->GetCasterGuid() != bot->GetObjectGuid())
-                        continue;
-                }
+                if (maxStackAmount && aura->GetStackAmount() < maxStackAmount)
+                    continue;
 
-                uint32 maxStackAmount = aura->GetSpellProto()->StackAmount;
-                uint32 maxProcCharges = aura->GetSpellProto()->procCharges;
+                if (maxProcCharges && aura->GetHolder()->GetAuraCharges() < maxProcCharges)
+                    continue;
 
-                if (maxStack)
-                {
-                    if (maxStackAmount && aura->GetStackAmount() >= maxStackAmount)
-                        auraAmount++;
-
-                    if (maxProcCharges && aura->GetHolder()->GetAuraCharges() >= maxProcCharges)
-                        auraAmount++;
-                }
-                else
-                    auraAmount++;
-
-                bool minDurationPassed = true;
-
-                if (minDuration > 0)
-                {
-                    int32 auraDuration = aura->GetHolder()->GetAuraDuration();
-                    minDurationPassed = minDuration <= auraDuration;
-                }
-
-                if (maxAuraAmount < 0 && minDurationPassed)
-                    return auraAmount > 0;
+                auraAmount++;
             }
-		}
+            else
+            {
+                auraAmount++;
+            }
+
+            // Duration check
+            bool minDurationPassed = true;
+            if (minDuration > 0 && aura->GetHolder())
+            {
+                int32 auraDuration = aura->GetHolder()->GetAuraDuration();
+                minDurationPassed = (auraDuration >= minDuration);
+            }
+
+            // Only return if we found a perfect match
+            if (maxAuraAmount < 0 && minDurationPassed)
+            {
+                if (!maxStack || auraAmount > 0) // Ensure it's the right type of aura
+                    return true;
+            }
+        }
     }
 
+    // Final validation after full iteration
     if (maxAuraAmount >= 0)
-    {
         return auraAmount == maxAuraAmount || (auraAmount > 0 && auraAmount <= maxAuraAmount);
-    }
 
     return false;
 }

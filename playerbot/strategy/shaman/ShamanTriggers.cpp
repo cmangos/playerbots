@@ -46,28 +46,41 @@ bool MaelstromWeaponTrigger::IsActive()
     return ai->HasAura("maelstrom weapon", bot, true);
 }
 
+Player* GetLowestHealthPlayer(Group* group)
+{
+    float lowestHealth = 100.0f;
+    Player* lowestHealthPlayer = nullptr;
+
+    for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+    {
+        if (Player* player = ref->getSource())
+        {
+            float health = player->GetHealthPercent();
+            if (health > 0.0f && health < lowestHealth)
+            {
+                lowestHealth = health;
+                lowestHealthPlayer = player;
+            }
+        }
+    }
+
+    return lowestHealthPlayer;
+}
+
 bool LowestHpEarthShieldTrigger::IsActive()
 {
     Group* group = bot->GetGroup();
-    if (group)
-    {
-        float lowestHealth = 100.0f;
-        Player* lowestHealthPlayer = nullptr;
-        for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
-        {
-            if (Player* player = ref->getSource())
-            {
-                float health = player->GetHealthPercent();
-                if (health < lowestHealth)
-                {
-                    lowestHealth = health;
-                    lowestHealthPlayer = player;
-                }
-            }
-        }
-        if (!ai->HasAura("earth shield", lowestHealthPlayer, false, true))
-            return true;
-    }
+    if (!group) return false;
 
-    return false;
+    Player* lowestHealthPlayer = GetLowestHealthPlayer(group);
+    return lowestHealthPlayer && bot != lowestHealthPlayer && !ai->HasAura("earth shield", lowestHealthPlayer, false, true);
+}
+
+bool EarthShieldTrigger::IsActive()
+{
+    Group* group = bot->GetGroup();
+    if (!group) return false;
+
+    Player* lowestHealthPlayer = GetLowestHealthPlayer(group);
+    return lowestHealthPlayer && bot == lowestHealthPlayer && !ai->HasAura("earth shield", lowestHealthPlayer, false, true);
 }

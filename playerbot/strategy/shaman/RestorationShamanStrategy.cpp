@@ -1009,10 +1009,6 @@ void RestorationShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
             new NextAction("healing wave on party", ACTION_CRITICAL_HEAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "earth shield on lowest hp",
-        NextAction::array(0, new NextAction("earth shield on lowest hp", ACTION_CRITICAL_HEAL), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "low health",
         NextAction::array(0, new NextAction("riptide", ACTION_MEDIUM_HEAL + 2),
             new NextAction("healing wave", ACTION_MEDIUM_HEAL + 2), NULL)));
@@ -1418,6 +1414,14 @@ void RestorationShamanTotemsRaidStrategy::InitNonCombatTriggers(std::list<Trigge
 void RestorationShamanBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanBuffStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "earth shield",
+        NextAction::array(0, new NextAction("earth shield", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "earth shield on lowest hp",
+        NextAction::array(0, new NextAction("earth shield on lowest hp", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",

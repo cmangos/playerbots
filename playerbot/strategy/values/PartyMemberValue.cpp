@@ -53,7 +53,7 @@ Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ign
                 if (lowestHp)
                 {
                     float health = player->GetHealthPercent();
-                    if (health < lowestHealth)
+                    if (health > 0.0f && health < lowestHealth && player != bot)
                     {
                         lowestHealth = health;
                         lowestHealthPlayer = player;
@@ -93,7 +93,7 @@ Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ign
     for (std::list<ObjectGuid>::iterator i = nearestPlayers.begin(); i != nearestPlayers.end(); ++i)
     {
         Player* player = dynamic_cast<Player*>(ai->GetUnit(*i));
-        if (!player || (player == bot && !lowestHp))
+        if (!player || player == bot)
         {
             continue;
         }

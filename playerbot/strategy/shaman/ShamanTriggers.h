@@ -510,6 +510,7 @@ namespace ai
     };
 
     BUFF_TRIGGER_A(LowestHpEarthShieldTrigger, "earth shield");
+    BUFF_TRIGGER_A(EarthShieldTrigger, "earth shield");
 
     CAN_CAST_TRIGGER(ChainLightningTrigger, "chain lightning");
 

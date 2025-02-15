@@ -60,26 +60,32 @@ bool MovementAction::MoveNear(WorldObject* target, float distance)
     distance += target->GetObjectBoundingRadius();
 #endif
 
-    float x = target->GetPositionX();
-    float y = target->GetPositionY();
-    float z = target->GetPositionZ();
     float followAngle = GetFollowAngle();
-    for (float angle = followAngle; angle <= followAngle + 2 * M_PI; angle += M_PI_F / 4.0f)
+    float baseDist = std::min(distance + target->GetObjectBoundingRadius(), ai->GetRange("follow"));
+    float boundingRadius = bot->GetObjectBoundingRadius();
+
+    for (int attempt = 0; attempt < 3; ++attempt) // Expand search if needed
     {
+        float dist = baseDist + attempt; // Increase distance only if needed
+
+        for (float angle = followAngle; angle <= followAngle + 2 * M_PI; angle += M_PI_F / 8.0f) // Finer angle steps
+        {
+            float x, y, z; // Ensure fresh values each iteration
+
 #ifdef CMANGOS
-        float dist = distance + target->GetObjectBoundingRadius();
-        target->GetNearPoint(bot, x, y, z, bot->GetObjectBoundingRadius(), std::min(dist, ai->GetRange("follow")), angle);
+            target->GetNearPoint(bot, x, y, z, boundingRadius, dist, angle);
 #endif
 #ifdef MANGOS
-        float x = target->GetPositionX() + cos(angle) * distance,
-             y = target->GetPositionY()+ sin(angle) * distance,
-             z = target->GetPositionZ();
+            x = target->GetPositionX() + cos(angle) * dist;
+            y = target->GetPositionY() + sin(angle) * dist;
+            z = target->GetPositionZ();
 #endif
-        if (!bot->IsWithinLOS(x, y, z + bot->GetCollisionHeight(), true))
-            continue;
-        bool moved = MoveTo(target->GetMapId(), x, y, z);
-        if (moved)
-            return true;
+            if (bot->IsWithinLOS(x, y, z + bot->GetCollisionHeight(), true))
+            {
+                if (MoveTo(target->GetMapId(), x, y, z))
+                    return true;
+            }
+        }
     }
 
     //ai->TellError("All paths not in LOS");

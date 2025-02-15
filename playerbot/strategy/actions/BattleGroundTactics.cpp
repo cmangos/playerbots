@@ -4431,7 +4431,7 @@ bool BGTactics::moveToObjective()
         }
 #endif
 
-        if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(bot, pos.x, pos.y), 100.0f))
+        if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(bot, pos.x, pos.y), 100.0f) && bgType != BATTLEGROUND_WS)
         {
             //ostringstream out; out << "It is too far away! " << pos.x << ", " << pos.y << ", Distance: " << sServerFacade.GetDistance2d(bot, pos.x, pos.y);
             //bot->Say(out.str(), LANG_UNIVERSAL);

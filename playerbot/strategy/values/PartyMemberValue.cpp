@@ -31,7 +31,7 @@ Unit* PartyMemberValue::FindPartyMember(std::list<Player*>* party, FindPlayerPre
     return NULL;
 }
 
-Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ignoreOutOfGroup, bool ignoreTanks)
+Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ignoreOutOfGroup, bool ignoreTanks, bool lowestHp)
 {
     Player* master = GetMaster();
     std::list<ObjectGuid> nearestPlayers;
@@ -43,35 +43,57 @@ Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ign
     Group* group = bot->GetGroup();
     if (group)
     {
+        float lowestHealth = 100.0f;
+        Player* lowestHealthPlayer = nullptr;
+
         for (GroupReference *ref = group->GetFirstMember(); ref; ref = ref->next())
         {
-            if (!ref->getSource() || bot->GetMapId() != ref->getSource()->GetMapId()) continue;
-
-            if (ref->getSource() != bot)
+            if (Player* player = ref->getSource())
             {
-                if (ref->getSubGroup() != bot->GetSubGroup())
+                if (lowestHp)
                 {
-                    nearestGroupPlayers.push_back(ref->getSource()->GetObjectGuid());
+                    float health = player->GetHealthPercent();
+                    if (health < lowestHealth)
+                    {
+                        lowestHealth = health;
+                        lowestHealthPlayer = player;
+                    }
                 }
                 else
                 {
-                    nearestGroupPlayers.push_front(ref->getSource()->GetObjectGuid());
+                    if (!player || bot->GetMapId() != player->GetMapId()) continue;
+
+                    if (player != bot)
+                    {
+                        if (ref->getSubGroup() != bot->GetSubGroup())
+                        {
+                            nearestGroupPlayers.push_back(player->GetObjectGuid());
+                        }
+                        else
+                        {
+                            nearestGroupPlayers.push_front(player->GetObjectGuid());
+                        }
+                    }
                 }
             }
         }
+        if (lowestHp && lowestHealthPlayer)
+            nearestGroupPlayers.push_back(lowestHealthPlayer->GetObjectGuid());
+        else
+            delete lowestHealthPlayer;
     }
     
-    if (!ignoreOutOfGroup && !nearestPlayers.empty() && nearestPlayers.size() < 100  && sServerFacade.IsDistanceLessThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.sightDistance))
+    if (!lowestHp && !ignoreOutOfGroup && !nearestPlayers.empty() && nearestPlayers.size() < 100  && sServerFacade.IsDistanceLessThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.sightDistance))
         nearestGroupPlayers.insert(nearestGroupPlayers.end(), nearestPlayers.begin(), nearestPlayers.end());
 
     nearestPlayers = nearestGroupPlayers;
 
     std::list<Player*> healers, tanks, others, masters;
-    if (master) masters.push_back(master);
+    if (master && !lowestHp) masters.push_back(master);
     for (std::list<ObjectGuid>::iterator i = nearestPlayers.begin(); i != nearestPlayers.end(); ++i)
     {
         Player* player = dynamic_cast<Player*>(ai->GetUnit(*i));
-        if (!player || player == bot) 
+        if (!player || (player == bot && !lowestHp))
         {
             continue;
         }
@@ -84,7 +106,7 @@ Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ign
         {
             tanks.push_back(player);
         }
-        else if (player != master)
+        else if (player != master || lowestHp)
         {
             others.push_back(player);
         }

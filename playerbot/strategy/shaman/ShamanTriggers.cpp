@@ -45,3 +45,29 @@ bool MaelstromWeaponTrigger::IsActive()
 {
     return ai->HasAura("maelstrom weapon", bot, true);
 }
+
+bool LowestHpEarthShieldTrigger::IsActive()
+{
+    Group* group = bot->GetGroup();
+    if (group)
+    {
+        float lowestHealth = 100.0f;
+        Player* lowestHealthPlayer = nullptr;
+        for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+        {
+            if (Player* player = ref->getSource())
+            {
+                float health = player->GetHealthPercent();
+                if (health < lowestHealth)
+                {
+                    lowestHealth = health;
+                    lowestHealthPlayer = player;
+                }
+            }
+        }
+        if (!ai->HasAura("earth shield", lowestHealthPlayer, false, true))
+            return true;
+    }
+
+    return false;
+}

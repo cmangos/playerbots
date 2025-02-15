@@ -60,6 +60,13 @@ namespace ai
         CastEarthShieldOnPartyAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "earth shield") {}
     };
 
+    class CastEarthShieldOnLowestHpAction : public BuffOnPartyAction
+    {
+    public:
+        CastEarthShieldOnLowestHpAction(PlayerbotAI* ai) : BuffOnPartyAction(ai, "earth shield") {}
+        virtual std::string GetTargetName() { return "party member without my aura lowest hp"; }
+    };
+
     class CastWaterShieldAction : public CastBuffSpellAction 
     {
     public:

@@ -433,6 +433,7 @@ namespace ai
                 creators["call of the spirits"] = &TriggerFactoryInternal::call_of_the_spirits;
                 creators["totemic recall"] = &TriggerFactoryInternal::totemic_recall;
                 creators["earth shield on party tank"] = &TriggerFactoryInternal::earth_shield_on_party_tank;
+                creators["earth shield on lowest hp"] = &TriggerFactoryInternal::earth_shield_on_lowest_hp;
                 creators["chain lightning"] = &TriggerFactoryInternal::chain_lightning;
                 creators["stormstrike"] = &TriggerFactoryInternal::stormstrike;
                 creators["elemental mastery"] = &TriggerFactoryInternal::elemental_mastery;
@@ -478,6 +479,7 @@ namespace ai
             static Trigger* call_of_the_spirits(PlayerbotAI* ai) { return new TotemsAreNotSummonedTrigger(ai); }
             static Trigger* totemic_recall(PlayerbotAI* ai) { return new ReadyToRemoveTotemsTrigger(ai); }
             static Trigger* earth_shield_on_party_tank(PlayerbotAI* ai) { return new PartyTankEarthShieldTrigger(ai); }
+            static Trigger* earth_shield_on_lowest_hp(PlayerbotAI* ai) { return new LowestHpEarthShieldTrigger(ai); }
             static Trigger* chain_lightning(PlayerbotAI* ai) { return new ChainLightningTrigger(ai); }
             static Trigger* stormstrike(PlayerbotAI* ai) { return new StormstrikeTrigger(ai); }
             static Trigger* elemental_mastery(PlayerbotAI* ai) { return new ElementalMasteryTrigger(ai); }
@@ -529,6 +531,7 @@ namespace ai
                 creators["lesser healing wave on party"] = &AiObjectContextInternal::lesser_healing_wave_on_party;
                 creators["earth shield"] = &AiObjectContextInternal::earth_shield;
                 creators["earth shield on party"] = &AiObjectContextInternal::earth_shield_on_party;
+                creators["earth shield on lowest hp"] = &AiObjectContextInternal::earth_shield_on_lowest_hp;
                 creators["chain heal"] = &AiObjectContextInternal::chain_heal;
                 creators["riptide"] = &AiObjectContextInternal::riptide;
                 creators["riptide on party"] = &AiObjectContextInternal::riptide_on_party;
@@ -635,6 +638,7 @@ namespace ai
             static Action* lesser_healing_wave_on_party(PlayerbotAI* ai) { return new CastLesserHealingWaveOnPartyAction(ai); }
             static Action* earth_shield(PlayerbotAI* ai) { return new CastEarthShieldAction(ai); }
             static Action* earth_shield_on_party(PlayerbotAI* ai) { return new CastEarthShieldOnPartyAction(ai); }
+            static Action* earth_shield_on_lowest_hp(PlayerbotAI* ai) { return new CastEarthShieldOnLowestHpAction(ai); }
             static Action* chain_heal(PlayerbotAI* ai) { return new CastChainHealAction(ai); }
             static Action* riptide(PlayerbotAI* ai) { return new CastRiptideAction(ai); }
             static Action* riptide_on_party(PlayerbotAI* ai) { return new CastRiptideOnPartyAction(ai); }

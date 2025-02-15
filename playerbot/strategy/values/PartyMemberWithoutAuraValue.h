@@ -28,8 +28,11 @@ namespace ai
     class PartyMemberWithoutMyAuraValue : public PartyMemberValue, public Qualified
     {
     public:
-        PartyMemberWithoutMyAuraValue(PlayerbotAI* ai, std::string name = "party member without my aura", float range = 30.0f) :
-            PartyMemberValue(ai, name), Qualified() {}
+        PartyMemberWithoutMyAuraValue(PlayerbotAI* ai, bool lowestHp = false, std::string name = "party member without my aura", float range = 30.0f) :
+            PartyMemberValue(ai, name), Qualified(), lowestHp(lowestHp) {}
+
+    private:
+        bool lowestHp;
 
     protected:
         virtual Unit* Calculate();

@@ -25,7 +25,7 @@ namespace ai
         bool IsTargetOfSpellCast(Player* target, SpellEntryPredicate &predicate);
 
     protected:
-        Unit* FindPartyMember(FindPlayerPredicate &predicate, bool ignoreOutOfGroup = false, bool ignoreTanks = false);
+        Unit* FindPartyMember(FindPlayerPredicate &predicate, bool ignoreOutOfGroup = false, bool ignoreTanks = false, bool lowestHp = false);
         Unit* FindPartyMember(std::list<Player*>* party, FindPlayerPredicate &predicate, bool ignoreTanks);
         bool Check(Unit* player);
 	};

@@ -1237,11 +1237,72 @@ void RestorationShamanCcRaidStrategy::InitNonCombatTriggers(std::list<TriggerNod
 void RestorationShamanCureStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanCureStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "cure disease",
+        NextAction::array(0, new NextAction("cure disease", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member cure disease",
+        NextAction::array(0, new NextAction("cure disease on party", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cleanse spirit poison",
+        NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cleanse spirit disease",
+        NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cleanse spirit curse",
+        NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member cleanse spirit poison",
+        NextAction::array(0, new NextAction("cleanse spirit poison on party", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member cleanse spirit disease",
+        NextAction::array(0, new NextAction("cleanse spirit disease on party", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member cleanse spirit curse",
+        NextAction::array(0, new NextAction("cleanse spirit curse on party", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cure poison",
+        NextAction::array(0, new NextAction("cure poison", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member cure poison",
+        NextAction::array(0, new NextAction("cure poison on party", ACTION_DISPEL), NULL)));
 }
 
 void RestorationShamanCureStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanCureStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "cleanse spirit disease",
+        NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cleanse spirit curse",
+        NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member cleanse spirit poison",
+        NextAction::array(0, new NextAction("cleanse spirit poison on party", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member cleanse spirit disease",
+        NextAction::array(0, new NextAction("cleanse spirit disease on party", ACTION_DISPEL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member cleanse spirit curse",
+        NextAction::array(0, new NextAction("cleanse spirit curse on party", ACTION_DISPEL), NULL)));
+
 }
 
 void RestorationShamanCurePveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -1005,23 +1005,23 @@ void ShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("lesser healing wave", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_IDLE + 7), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_IDLE + 5), NULL)));
     
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("lesser healing wave", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_IDLE + 6), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_IDLE + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium health",
-        NextAction::array(0, new NextAction("healing wave", ACTION_IDLE + 1), NULL)));
+        NextAction::array(0, new NextAction("healing wave", ACTION_IDLE + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member medium health",
@@ -1029,7 +1029,7 @@ void ShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "almost full health",
-        NextAction::array(0, new NextAction("lesser healing wave", ACTION_IDLE), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_IDLE + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",
@@ -1287,43 +1287,19 @@ void ShamanCureStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "cure disease",
-        NextAction::array(0, new NextAction("cure disease", ACTION_DISPEL), NULL)));
+        NextAction::array(0, new NextAction("cure disease", ACTION_NORMAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member cure disease",
-        NextAction::array(0, new NextAction("cure disease on party", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "cleanse spirit poison",
-        NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "cleanse spirit disease",
-        NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "cleanse spirit curse",
-        NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cleanse spirit poison",
-        NextAction::array(0, new NextAction("cleanse spirit poison on party", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cleanse spirit disease",
-        NextAction::array(0, new NextAction("cleanse spirit disease on party", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cleanse spirit curse",
-        NextAction::array(0, new NextAction("cleanse spirit curse on party", ACTION_DISPEL), NULL)));
+        NextAction::array(0, new NextAction("cure disease on party", ACTION_IDLE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "cure poison",
-        NextAction::array(0, new NextAction("cure poison", ACTION_DISPEL), NULL)));
+        NextAction::array(0, new NextAction("cure poison", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member cure poison",
-        NextAction::array(0, new NextAction("cure poison on party", ACTION_DISPEL), NULL)));
+        NextAction::array(0, new NextAction("cure poison on party", ACTION_IDLE + 1), NULL)));
 }
 
 void ShamanCureStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1341,26 +1317,6 @@ void ShamanCureStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers
     triggers.push_back(new TriggerNode(
         "cleanse spirit poison",
         NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "cleanse spirit disease",
-        NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "cleanse spirit curse",
-        NextAction::array(0, new NextAction("cleanse spirit", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cleanse spirit poison",
-        NextAction::array(0, new NextAction("cleanse spirit poison on party", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cleanse spirit disease",
-        NextAction::array(0, new NextAction("cleanse spirit disease on party", ACTION_DISPEL), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "party member cleanse spirit curse",
-        NextAction::array(0, new NextAction("cleanse spirit curse on party", ACTION_DISPEL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "cure poison",

@@ -925,11 +925,13 @@ void EnhancementShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     
     triggers.push_back(new TriggerNode(
         "shock",
-        NextAction::array(0, new NextAction("earth shock", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("earth shock", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "stormstrike",
-        NextAction::array(0, new NextAction("stormstrike", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("stormstrike", ACTION_HIGH + 1),
+                             new NextAction("fire nova", ACTION_HIGH),
+                             new NextAction("lava lash", ACTION_NORMAL + 9), NULL)));
 }
 
 void EnhancementShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1025,7 +1027,7 @@ void EnhancementShamanAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 
     triggers.push_back(new TriggerNode(
         "melee medium aoe",
-        NextAction::array(0, new NextAction("fire nova", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("fire nova", ACTION_HIGH + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "melee light aoe",
@@ -1195,7 +1197,11 @@ void EnhancementShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "fire totem",
-        NextAction::array(0, new NextAction("flametongue totem", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("magma totem", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "fire totem",
+        NextAction::array(0, new NextAction("flametongue totem", ACTION_NORMAL + 9), NULL)));
 }
 
 void EnhancementShamanTotemsStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

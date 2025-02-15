@@ -6,7 +6,16 @@ using namespace ai;
 
 void RacialsStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
-	triggers.push_back(new TriggerNode(
+#ifndef MANGOSBOT_TWO
+    triggers.push_back(new TriggerNode(
+        "perception",
+        NextAction::array(0, new NextAction("perception", 71.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "mana tap",
+        NextAction::array(0, new NextAction("mana tap", 71.0f), NULL)));    
+#endif
+    triggers.push_back(new TriggerNode(
 		"low health", 
 		NextAction::array(0, new NextAction("gift of the naaru", 71.0f), NULL)));
 
@@ -21,10 +30,6 @@ void RacialsStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "cannibalize",
         NextAction::array(0, new NextAction("cannibalize", 71.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "perception",
-        NextAction::array(0, new NextAction("perception", 71.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "rooted",
@@ -49,10 +54,6 @@ void RacialsStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "stoneform",
         NextAction::array(0, new NextAction("stoneform", 71.0f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "mana tap",
-        NextAction::array(0, new NextAction("mana tap", 71.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "arcane torrent",

@@ -3130,7 +3130,7 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
 #else
     if (info->source == ITEM_SOURCE_PVP && (playerPvpRank >= 10 || isBotHighRanked))
     {
-        if (info->itemId == 51377 || info->itemId == 51378)
+        if ((info->itemId == 51377 || info->itemId == 51378) && !player->getRace() == RACE_HUMAN)
             return UINT32_MAX; // Must have a trinket for PvP
 
         float multiplier = 1.0f;

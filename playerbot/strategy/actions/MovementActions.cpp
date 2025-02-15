@@ -1598,6 +1598,8 @@ bool MovementAction::ChaseTo(WorldObject* obj, float distance, float angle)
 
     if (!endPosition.isValid()) return false;
     if (angle > 20) angle = 0;
+    if (bot->IsStopped())
+        mm.Clear(false, true);
     mm.MoveChase((Unit*)obj, distance, angle);
     float dist = sServerFacade.GetDistance2d(bot, obj);
     float distDiff = dist > distance ? dist - distance : 0.f;

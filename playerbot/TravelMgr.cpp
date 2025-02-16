@@ -833,7 +833,7 @@ bool TravelTarget::IsTraveling() {
             return false;
         }
 
-    if (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) && !forced) //Target has become invalid. Stop.
+    if ((!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive()) && !forced) //Target has become invalid. Stop.
     {
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return false;
@@ -862,7 +862,7 @@ bool TravelTarget::IsWorking() {
     if (m_status != TravelStatus::TRAVEL_STATUS_WORK)
         return false;
 
-    if (!tDestination->IsActive(bot, PlayerTravelInfo(bot))) //Target has become invalid. Stop.
+    if (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive()) //Target has become invalid. Stop.
     {
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return false;

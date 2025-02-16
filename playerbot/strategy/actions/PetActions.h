@@ -40,5 +40,7 @@ namespace ai
         HunterPetBuild* GetBestPremadeBuild(int specId);
         HunterPetBuildPath* getPremadePath(int id);
         void listCurrentPath(std::ostringstream* out);
+        bool IsValidBuildId(std::string buildId);
+        bool IsValidBuildName(std::string buildName);
     };
 }

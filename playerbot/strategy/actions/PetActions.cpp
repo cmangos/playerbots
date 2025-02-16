@@ -37,7 +37,6 @@ bool InitializePetAction::isUseful()
                     hasTamedPet = ObjectMgr::GetCreatureTemplate(entry);
                 }
             }
-
             return !hasTamedPet;
         }
     }
@@ -596,20 +595,7 @@ bool SetPetAction::Execute(Event& event)
                     }
                     else
                     {
-                        if (hpb->CheckBuildLink(parameter, pet->GetCreatureInfo()->Family, &out))
-                        {
-                            HunterPetBuild newBuild(parameter);
-                            std::string buildLink = newBuild.GetBuildLink();
-
-                            if (newBuild.CheckBuild(hpb->CalculateTrainingPoints(bot), &out))
-                            {
-                                std::vector<std::string> outGroup;
-                                newBuild.ApplyBuild(bot, outGroup);
-                                sPlayerbotDbStore.SavePetBuildLink(pet->GetCharmInfo()->GetPetNumber(), buildLink);
-                                ai->TellPlayer(requester, out);
-                            }
-                        }
-                        else
+                        if (IsValidBuildId(parameter.substr(4)))
                         {
                             parameter = parameter.substr(4);
                             int buildId = stoi(parameter);
@@ -618,9 +604,6 @@ bool SetPetAction::Execute(Event& event)
                             {
                                 out.str("");
                                 out.clear();
-
-                                if (paths.size() > 1)
-                                    out << "Found " << paths.size() << " possible pet builds for this family to choose from. ";
 
                                 HunterPetBuildPath* path = PickPremadePath(paths, false);
                                 HunterPetBuild newBuild = *GetBestPremadeBuild(path->id);
@@ -633,9 +616,50 @@ bool SetPetAction::Execute(Event& event)
                                     out << "Apply spec " << "|h|cffffffff" << path->name;
                                     sPlayerbotDbStore.SavePetBuildPath(pet->GetCharmInfo()->GetPetNumber(), pet->GetCreatureInfo()->Family, path->id);
                                     ai->TellPlayer(requester, out);
-
                                 }
                             }
+                        }
+                        else if (IsValidBuildName(parameter.substr(4)))
+                        {
+                            std::string buildName = parameter.substr(4);
+                            std::vector<HunterPetBuildPath*> paths = getPremadePaths(buildName);
+
+                            if (paths.size() > 1)
+                            {
+                                std::ostringstream multiplePathsFoundString;
+                                multiplePathsFoundString << paths.size() << " paths found. A random one will be picked. Or you can use pet build list " << buildName << " to view build ids + name and select a build that way.";
+                                ai->TellPlayer(requester, multiplePathsFoundString);
+                            }
+
+                            HunterPetBuildPath* path = PickPremadePath(paths, false);
+                            HunterPetBuild newBuild = *GetBestPremadeBuild(path->id);
+                            std::string buildLink = newBuild.GetBuildLink();
+                            std::vector<std::string> outGroup;
+                            newBuild.ApplyBuild(bot, outGroup);
+
+                            if (newBuild.GetTPCostOfBuild() > 0)
+                            {
+                                out << "Apply spec " << "|h|cffffffff" << path->name;
+                                sPlayerbotDbStore.SavePetBuildPath(pet->GetCharmInfo()->GetPetNumber(), pet->GetCreatureInfo()->Family, path->id);
+                                ai->TellPlayer(requester, out);
+                            }
+                        }
+                        else if (hpb->CheckBuildLink(parameter.substr(4), pet->GetCreatureInfo()->Family, &out))
+                        {
+                            HunterPetBuild newBuild(parameter.substr(4));
+                            std::string buildLink = newBuild.GetBuildLink();
+
+                            if (newBuild.CheckBuild(hpb->CalculateTrainingPoints(bot), &out))
+                            {
+                                std::vector<std::string> outGroup;
+                                newBuild.ApplyBuild(bot, outGroup);
+                                sPlayerbotDbStore.SavePetBuildLink(pet->GetCharmInfo()->GetPetNumber(), buildLink);
+                                ai->TellPlayer(requester, out);
+                            }
+                        }
+                        else
+                        {
+                            ai->TellPlayer(requester, "Invalid build id, name or build link provided.");
                         }
                     }
                 }
@@ -737,7 +761,7 @@ void SetPetAction::listPremadePaths(std::vector<HunterPetBuildPath*> paths, std:
 
     for (auto path : paths)
     {
-        *out << path->name << " (" << path->name << "), ";
+        *out << "id: " << path->id << " Name:" << path->name << ", ";
     }
 
     out->seekp(-2, out->cur);
@@ -800,7 +824,7 @@ HunterPetBuildPath* SetPetAction::getPremadePath(int id)
 void SetPetAction::listCurrentPath(std::ostringstream* out)
 {
     std::string petBuildName = sPlayerbotDbStore.GetPetBuildName(bot->GetPet()->GetCharmInfo()->GetPetNumber());
-    *out << petBuildName;
+    *out << "|h|cffffffff" << petBuildName;
 }
 
 HunterPetBuildPath* InitializePetSpellsAction::PickPremadePath(std::vector<HunterPetBuildPath*> paths, bool useProbability)
@@ -862,4 +886,21 @@ void InitializePetAction::InitialFamilySkill(Player* bot)
     uint32 family = bot->GetPet()->GetCreatureInfo()->Family;
     HunterPetBuild hunterPetBuild = HunterPetBuild();
     hunterPetBuild.InitializeStartingPetSpells(bot, level, family);
+}
+
+bool SetPetAction::IsValidBuildId(std::string buildId)
+{
+    std::istringstream iss(buildId);
+    int buildIdNum;
+    iss >> buildIdNum;
+    if (!(iss.eof() && !iss.fail()))
+        return false;
+
+    return getPremadePath(buildIdNum);
+}
+
+bool SetPetAction::IsValidBuildName(std::string buildName)
+{
+    std::vector<HunterPetBuildPath*> paths = getPremadePaths(buildName);
+    return paths.size() > 0;
 }

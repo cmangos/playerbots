@@ -28,6 +28,8 @@ public:
 
     int PetHasBuilds(uint64 petGuid);
 
+    std::string GetPetBuildName(uint64 petGuid);
+
 private:
     void SaveValue(uint64 guid, std::string preset, std::string key, std::string value);
     std::string FormatStrategies(std::string type, std::list<std::string_view> strategies);

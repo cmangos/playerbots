@@ -181,3 +181,48 @@ int PlayerbotDbStore::PetHasBuilds(uint64 petGuid)
         }
     }    return 0;
 }
+
+std::string PlayerbotDbStore::GetPetBuildName(uint64 petGuid)
+{
+    switch (PetHasBuilds(petGuid))
+    {
+        case 0:
+            return "No Pet has build saved.";
+        case 1:
+        {
+            HunterPetBuildPath path = HunterPetBuildPath();
+            auto buildResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = %lu AND `key` = 'petBuild'", petGuid);
+            if (buildResults)
+            {
+                auto field = buildResults->Fetch();
+                std::string buildNoString = field[0].GetString();
+                if (buildNoString._Starts_with("buildNo>>"))
+                {
+                    buildNoString = buildNoString.substr(9);
+                    std::string delimiter = ">>";
+                    uint32 familyId = std::stoi(buildNoString.substr(0, buildNoString.find(delimiter)));
+                    std::string buildNoStringA = buildNoString.substr(buildNoString.find(delimiter) + 2);
+                    int buildNo = std::stoi(buildNoStringA);
+                    return sPlayerbotAIConfig.familyPetBuilds[familyId].GetBuildPath(buildNo).name;
+                }
+            }
+            return "Error retrieving build path";
+        }
+        case 2:
+        {
+            auto buildLinkResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = 'petBuild'", petGuid);
+            if (buildLinkResults)
+            {
+                auto field = buildLinkResults->Fetch();
+                std::string buildLink = field[0].GetString();
+                if (buildLink._Starts_with("buildLink>>"))
+                {
+                    return buildLink.substr(11);
+                }
+            }
+            return "Error retrieving build link";
+        }
+        default:
+            return "Error retrieving pet build info.";
+    }
+}

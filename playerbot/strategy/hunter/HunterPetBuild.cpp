@@ -732,22 +732,26 @@ void HunterPetBuild::InitializeStartingPetSpells(Player* bot, uint32 petLevel, u
                 if (positionMapItem.second.Spells.size() > 1)
                 {
                     HunterPetBuildSpellEntity spellEntity = positionMapItem.second.Spells[ii];
-                    if (ii < positionMapItem.second.Spells.size() - 1)
+                    if (spellEntity.Rank > 0) // check added because Dive rank 0 is added into spellRankEntityMapping[8].second.
+                                              // Spells but can't find the source other spells may have the same issue.
                     {
-                        if (petLevel >= spellEntity.Level && petLevel < positionMapItem.second.Spells[ii + 1].Level)
+                        if (ii < positionMapItem.second.Spells.size() - 1)
                         {
-                            bot->learnSpell(spellEntity.TrainingSpellId, false);
-                            bot->GetPet()->learnSpell(spellEntity.SpellId);
-                            break;
+                            if (petLevel >= spellEntity.Level && petLevel < positionMapItem.second.Spells[ii + 1].Level)
+                            {
+                                bot->learnSpell(spellEntity.TrainingSpellId, false);
+                                bot->GetPet()->learnSpell(spellEntity.SpellId);
+                                break;
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (petLevel >= spellEntity.Level)
+                        else
                         {
-                            bot->learnSpell(spellEntity.TrainingSpellId, false);
-                            bot->GetPet()->learnSpell(spellEntity.SpellId);
-                            break;
+                            if (petLevel >= spellEntity.Level)
+                            {
+                                bot->learnSpell(spellEntity.TrainingSpellId, false);
+                                bot->GetPet()->learnSpell(spellEntity.SpellId);
+                                break;
+                            }
                         }
                     }
                 }

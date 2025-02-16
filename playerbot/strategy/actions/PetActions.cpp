@@ -507,7 +507,12 @@ bool SetPetAction::Execute(Event& event)
             if (bot->getClass() == CLASS_HUNTER)
             {
                 std::ostringstream out;
-                if (parameter.find("list ") != std::string::npos)
+                if (parameter == "" || parameter == " ")
+                {
+                    listCurrentPath(&out);
+                    ai->TellPlayer(requester, out.str());
+                }
+                else if (parameter.find("list ") != std::string::npos)
                 {
                     listPremadePaths(getPremadePaths(parameter.substr(5)), &out);
                     ai->TellPlayer(requester, out.str());
@@ -790,6 +795,12 @@ HunterPetBuildPath* SetPetAction::getPremadePath(int id)
         return nullptr;
 
     return &sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths[0];
+}
+
+void SetPetAction::listCurrentPath(std::ostringstream* out)
+{
+    std::string petBuildName = sPlayerbotDbStore.GetPetBuildName(bot->GetPet()->GetCharmInfo()->GetPetNumber());
+    *out << petBuildName;
 }
 
 HunterPetBuildPath* InitializePetSpellsAction::PickPremadePath(std::vector<HunterPetBuildPath*> paths, bool useProbability)

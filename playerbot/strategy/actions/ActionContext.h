@@ -1,6 +1,6 @@
 #pragma once
 
-//#include "GenericActions.h"
+#include "GenericActions.h"
 #include "EmoteAction.h"
 #include "AddLootAction.h"
 #include "LootAction.h"

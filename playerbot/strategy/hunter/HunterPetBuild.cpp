@@ -48,7 +48,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 #endif
     };
 
-    HunterPetBuildSpell bite = HunterPetBuildSpell("Bite", 1, true, true, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 21, 24, 25, 27, 30, 31, 32, 34, 35}, biteEntities);
+    HunterPetBuildSpell bite = HunterPetBuildSpell("Bite", 1, true, true, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 21, 24, 25, 27, 30, 31, 32, 33, 34, 35}, biteEntities);
 #pragma endregion 
 
 #pragma region Charge
@@ -351,7 +351,7 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
 
     std::map<uint8, HunterPetBuildSpellEntity> cobraReflexesEntities = { { 1, rank1CobraReflexes } };
 
-    HunterPetBuildSpell cobraReflex = HunterPetBuildSpell("Cobra Reflexes", 29, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, cobraReflexesEntities);
+    HunterPetBuildSpell cobraReflexes = HunterPetBuildSpell("Cobra Reflexes", 29, false, false, std::vector<uint32> {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 20, 21, 24, 25, 26, 27, 30, 31, 32, 33, 34, 35}, cobraReflexesEntities);
 #pragma endregion 
 
 #pragma region Fire Breath
@@ -422,8 +422,8 @@ void HunterPetBuild::InitHunterPetBuildSpellEntityList()
         { 22, screech },
         { 24, shadowResistance },
         { 25, shellShield },
-        { 26, thunderstomp }
-#ifdef MANOGSBOT_ONE
+        { 26, thunderstomp },
+#ifdef MANGOSBOT_ONE
         { 28, avoidance },
         { 29, cobraReflexes },
         { 30, fireBreath },

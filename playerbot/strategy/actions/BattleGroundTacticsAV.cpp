@@ -6,7 +6,7 @@
 static std::tuple<uint32, uint32, std::string> AV_HordeAttackObjectives[] =
 {
     // Attack
-#ifndef MANGOSBOT_TWO  
+#ifdef MANGOSBOT_TWO  
     { BG_AV_NODES_STONEHEART_BUNKER, BG_AV_NODE_STATUS_ALLY_OCCUPIED, "AV_STONEHEART_BUNKER"},
     { BG_AV_NODES_STONEHEART_GRAVE, BG_AV_NODE_STATUS_ALLY_CONTESTED, "AV_STONEHEART_GRAVEYARD" },
     { BG_AV_NODES_STONEHEART_GRAVE, BG_AV_NODE_STATUS_ALLY_OCCUPIED, "AV_STONEHEART_GRAVEYARD" },
@@ -34,7 +34,7 @@ static std::tuple<uint32, uint32, std::string> AV_HordeAttackObjectives[] =
 static std::tuple<uint32, uint32, std::string> AV_HordeDefendObjectives[] =
 {
     // Defend
-#ifndef MANGOSBOT_TWO
+#ifdef MANGOSBOT_TWO
     { BG_AV_NODES_FROSTWOLF_GRAVE, BG_AV_NODE_STATUS_ALLY_CONTESTED, "AV_FROSTWOLF_GRAVEYARD" },
     { BG_AV_NODES_FROSTWOLF_GRAVE, BG_AV_NODE_STATUS_ALLY_OCCUPIED, "AV_FROSTWOLF_GRAVEYARD" },
     { BG_AV_NODES_FROSTWOLF_ETOWER, BG_AV_NODE_STATUS_ALLY_CONTESTED, "AV_EAST_FROSTWOLF_TOWER" },
@@ -54,7 +54,7 @@ static std::tuple<uint32, uint32, std::string> AV_HordeDefendObjectives[] =
 static std::tuple<uint32, uint32, std::string> AV_AllianceAttackObjectives[] =
 {
     // Attack
-#ifndef MANGOSBOT_TWO  
+#ifdef MANGOSBOT_TWO  
     { BG_AV_NODES_ICEBLOOD_TOWER, BG_AV_NODE_STATUS_HORDE_OCCUPIED, "AV_ICEBLOOD_TOWER" },
     { BG_AV_NODES_ICEBLOOD_GRAVE, BG_AV_NODE_STATUS_HORDE_CONTESTED, "AV_ICEBLOOD_GRAVEYARD" },
     { BG_AV_NODES_ICEBLOOD_GRAVE, BG_AV_NODE_STATUS_HORDE_OCCUPIED, "AV_ICEBLOOD_GRAVEYARD" },
@@ -82,7 +82,7 @@ static std::tuple<uint32, uint32, std::string> AV_AllianceAttackObjectives[] =
 static std::tuple<uint32, uint32, std::string> AV_AllianceDefendObjectives[] =
 {
     // Defend
-#ifndef MANGOSBOT_TWO
+#ifdef MANGOSBOT_TWO
     { BG_AV_NODES_STORMPIKE_GRAVE, BG_AV_NODE_STATUS_HORDE_CONTESTED, "AV_STORMPIKE_GRAVEYARD" },
     { BG_AV_NODES_STORMPIKE_GRAVE, BG_AV_NODE_STATUS_HORDE_OCCUPIED, "AV_STORMPIKE_GRAVEYARD" },
     { BG_AV_NODES_DUNBALDAR_SOUTH, BG_AV_NODE_STATUS_HORDE_CONTESTED, "AV_DUNBALDAR_SOUTH" },
@@ -108,7 +108,7 @@ bool BGTactics::SelectAvObjectiveAlliance(WorldLocation& objectiveLocation)
     }
 
     // End boss
-#ifndef MANGOSBOT_TWO  
+#ifdef MANGOSBOT_TWO  
     if (!bg->IsActiveEvent(BG_AV_NODES_ICEBLOOD_TOWER, BG_AV_NODE_STATUS_HORDE_OCCUPIED) &&
         !bg->IsActiveEvent(BG_AV_NODES_TOWER_POINT, BG_AV_NODE_STATUS_HORDE_OCCUPIED) &&
         !bg->IsActiveEvent(BG_AV_NODES_FROSTWOLF_ETOWER, BG_AV_NODE_STATUS_HORDE_OCCUPIED) &&
@@ -134,7 +134,7 @@ bool BGTactics::SelectAvObjectiveAlliance(WorldLocation& objectiveLocation)
     bool supporter = role < (uint32)(strifeTime ? 4 : 2);
 
     // Only go to Snowfall Graveyard if already close to it.
-#ifndef MANGOSBOT_TWO  
+#ifdef MANGOSBOT_TWO  
     if (supporter && (bg->IsActiveEvent(BG_AV_NODES_SNOWFALL_GRAVE, BG_AV_NODE_STATUS_HORDE_CONTESTED) || bg->IsActiveEvent(BG_AV_NODES_SNOWFALL_GRAVE, BG_AV_NODE_STATUS_HORDE_OCCUPIED) || bg->IsActiveEvent(BG_AV_NODES_SNOWFALL_GRAVE, BG_AV_NODE_STATUS_NEUTRAL_OCCUPIED)))
     {
 #else
@@ -237,7 +237,7 @@ bool BGTactics::SelectAvObjectiveAlliance(WorldLocation& objectiveLocation)
             }
 
             // Split team to capture 2 towers at same time
-#ifndef MANGOSBOT_TWO  
+#ifdef MANGOSBOT_TWO  
             if (urand(0, 1) && nodeId == BG_AV_NODES_FROSTWOLF_ETOWER && bg->IsActiveEvent(BG_AV_NODES_FROSTWOLF_WTOWER, BG_AV_NODE_STATUS_HORDE_OCCUPIED))
 #else
             if (urand(0, 1) && nodeId == BG_AV_NODE_FROSTWOLF_EAST && bg->IsActiveEvent(BG_AV_NODE_FROSTWOLF_WEST, BG_AV_NODE_STATUS_HORDE_OCCUPIED))
@@ -269,7 +269,7 @@ bool BGTactics::SelectAvObjectiveHorde(WorldLocation& objectiveLocation)
     }
 
     // End Boss
-#ifndef MANGOSBOT_TWO  
+#ifdef MANGOSBOT_TWO  
     if (!bg->IsActiveEvent(BG_AV_NODES_DUNBALDAR_SOUTH, BG_AV_NODE_STATUS_ALLY_OCCUPIED) &&
         !bg->IsActiveEvent(BG_AV_NODES_DUNBALDAR_NORTH, BG_AV_NODE_STATUS_ALLY_OCCUPIED) &&
         !bg->IsActiveEvent(BG_AV_NODES_ICEWING_BUNKER, BG_AV_NODE_STATUS_ALLY_OCCUPIED) &&
@@ -295,7 +295,7 @@ bool BGTactics::SelectAvObjectiveHorde(WorldLocation& objectiveLocation)
     bool supporter = role < (uint32)(strifeTime ? 4 : 2); // first bunker strike team
 
     // Only go to Snowfall Graveyard if already close to it.
-#ifndef MANGOSBOT_TWO  
+#ifdef MANGOSBOT_TWO  
     if (supporter && (bg->IsActiveEvent(BG_AV_NODES_SNOWFALL_GRAVE, BG_AV_NODE_STATUS_ALLY_CONTESTED) || bg->IsActiveEvent(BG_AV_NODES_SNOWFALL_GRAVE, BG_AV_NODE_STATUS_ALLY_OCCUPIED) || bg->IsActiveEvent(BG_AV_NODES_SNOWFALL_GRAVE, BG_AV_NODE_STATUS_NEUTRAL_OCCUPIED)))
     {
 #else
@@ -365,7 +365,7 @@ bool BGTactics::SelectAvObjectiveHorde(WorldLocation& objectiveLocation)
     }
 
     // Mine capture (need paths & script fix)
-#ifndef MANGOSBOT_TWO  
+#ifdef MANGOSBOT_TWO  
     if (!supporter && (bg->IsActiveEvent(BG_AV_MINE_BOSSES_NORTH, TEAM_INDEX_ALLIANCE) || bg->IsActiveEvent(BG_AV_MINE_BOSSES_NORTH, TEAM_INDEX_NEUTRAL)) &&
         !bg->IsActiveEvent(BG_AV_NODES_STORMPIKE_GRAVE, BG_AV_NODE_STATUS_ALLY_OCCUPIED))
 #else
@@ -404,7 +404,7 @@ bool BGTactics::SelectAvObjectiveHorde(WorldLocation& objectiveLocation)
             }
 
             // Split team to capture 2 towers at same time
-#ifndef MANGOSBOT_TWO  
+#ifdef MANGOSBOT_TWO  
             if (urand(0, 1) && nodeId == BG_AV_NODES_DUNBALDAR_SOUTH && bg->IsActiveEvent(BG_AV_NODES_DUNBALDAR_NORTH, BG_AV_NODE_STATUS_ALLY_OCCUPIED))
 #else
             if (urand(0, 1) && nodeId == BG_AV_NODE_DUNBALDAR_SOUTH && bg->IsActiveEvent(BG_AV_NODE_DUNBALDAR_NORTH, BG_AV_NODE_STATUS_ALLY_OCCUPIED))

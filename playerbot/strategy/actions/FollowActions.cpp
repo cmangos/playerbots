@@ -107,8 +107,8 @@ bool FleeToMasterAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     Unit* fTarget = AI_VALUE(Unit*, "master target");
-    bool canFollow = Follow(fTarget);
-    if (!canFollow)
+
+    if (!Follow(fTarget))
     {
         //SetDuration(5000);
         return false;
@@ -118,30 +118,30 @@ bool FleeToMasterAction::Execute(Event& event)
     WorldPosition bosPos(bot);
     float distance = bosPos.fDist(targetPos);
 
+    Group* botGroup = bot->GetGroup();
+    uint32 groupSize = botGroup ? botGroup->GetMembersCount() : 1;
+    uint32 scale = (groupSize > 5) ? groupSize : 5;
 
-    uint32 scale = 5;
-    if (bot->GetGroup() && bot->GetGroup()->GetMembersCount() > 5)
-        scale = bot->GetGroup()->GetMembersCount();
-        
+    uint32 randValue = urand(0, scale * 6);
 
     if (distance > sPlayerbotAIConfig.reactDistance && bot->IsInCombat())
     {
-        if (!urand(0, scale))
+        if (randValue < scale)
             ai->TellPlayerNoFacing(requester, "I'm heading to your location but I'm in combat", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             //ai->TellPlayer(BOT_TEXT("wait_travel_combat"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
     else if (distance < sPlayerbotAIConfig.reactDistance * 3)
     {
-        if (!urand(0, scale))
+        if (randValue < scale)
             ai->TellPlayerNoFacing(requester, BOT_TEXT("wait_travel_close"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
     else if (distance < 1000)
     {
-        if (!urand(0, scale*4))
+        if (randValue < scale * 4)
             ai->TellPlayerNoFacing(requester, BOT_TEXT("wait_travel_medium"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
     else
-        if (!urand(0, scale*6))
+        if (randValue < scale * 6)
             ai->TellPlayerNoFacing(requester, BOT_TEXT("wait_travel_medium"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
            
     SetDuration(3000U);

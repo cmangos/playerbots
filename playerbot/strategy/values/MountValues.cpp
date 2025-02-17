@@ -302,27 +302,23 @@ uint32 MountSkillTypeValue::Calculate()
 
 std::vector<int32> AvailableMountVendors::Calculate()
 {
-    std::vector<int32> mountVendors;
-    std::vector<MountValue> mountList = GAI_VALUE(std::vector<MountValue>, "full mount list");
-    
-    for (auto& mount : mountList)
+    std::unordered_set<int32> mountVendors;
+
+    for (auto& mount : GAI_VALUE(std::vector<MountValue>, "full mount list"))
     {
         if (!mount.IsItem())
             continue;
 
-        uint32 itemId = mount.GetItemProto()->ItemId;
+        const uint32 itemId = mount.GetItemProto()->ItemId;
 
-        ItemUsage usage = AI_VALUE2_LAZY(ItemUsage, "item usage", itemId);
-
-        if (usage != ItemUsage::ITEM_USAGE_EQUIP)
+        if (AI_VALUE2_LAZY(ItemUsage, "item usage", itemId) != ItemUsage::ITEM_USAGE_EQUIP)
             continue;
 
-        for (auto& vendor : GAI_VALUE2(std::list<int32>, "item vendor list", itemId))
-            if(std::find(mountVendors.begin(), mountVendors.end(), vendor) == mountVendors.end())
-                mountVendors.push_back(vendor);
+        for (const int32 vendor : GAI_VALUE2(std::list<int32>, "item vendor list", itemId))
+            mountVendors.emplace(vendor);
     }
 
-    return mountVendors;
+    return { mountVendors.begin(), mountVendors.end() };
 }
 
 bool CanTrainMountValue::Calculate()

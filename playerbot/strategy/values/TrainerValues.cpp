@@ -51,6 +51,34 @@ trainableSpellMap* TrainableSpellMapValue::Calculate()
 
         for (auto& [id, trainerSpell] : trainer_spells->spellList)
         {
+            const TrainerSpell* sameTrainerSpell = &trainerSpell;
+            for (auto& [otherTrainerSpell, trainers] : (*spellMap)[trainerType][spellRequirement])
+            {
+                if (otherTrainerSpell->spell != trainerSpell.spell)
+                    continue;
+
+                if (otherTrainerSpell->spellCost != trainerSpell.spellCost)
+                    continue;
+
+                if (otherTrainerSpell->reqSkill != trainerSpell.reqSkill)
+                    continue;
+
+                if (otherTrainerSpell->reqSkillValue != trainerSpell.reqSkillValue)
+                    continue;
+
+                if (otherTrainerSpell->reqLevel != trainerSpell.reqSkill)
+                    continue;
+
+                if (otherTrainerSpell->learnedSpell != trainerSpell.reqSkill)
+                    continue;
+
+                if (otherTrainerSpell->conditionId != trainerSpell.conditionId)
+                    continue;
+
+                sameTrainerSpell = otherTrainerSpell;
+                break;
+            }
+
             if (trainerType == TRAINER_TYPE_TRADESKILLS)
             {
                 if (trainerSpell.reqSkill)
@@ -65,7 +93,7 @@ trainableSpellMap* TrainableSpellMapValue::Calculate()
             }
 
             for (auto& trainer : trainers)
-                (*spellMap)[trainerType][spellRequirement][&trainerSpell].push_back(trainer->Entry);
+                (*spellMap)[trainerType][spellRequirement][sameTrainerSpell].push_back(trainer->Entry);
         }
     }
 
@@ -75,7 +103,6 @@ trainableSpellMap* TrainableSpellMapValue::Calculate()
 std::vector<TrainerSpell const*> TrainableSpellsValue::Calculate()
 {
     std::vector<TrainerSpell const*> trainableSpells;
-    std::unordered_map<uint32, bool> hasSpell;
 
     int8 qualifierType = getQualifier().empty() ? -1 : stoi(getQualifier());
 
@@ -95,11 +122,6 @@ std::vector<TrainerSpell const*> TrainableSpellsValue::Calculate()
 
             for (auto& [trainerSpell, trainers] : trainerSpellList)
             {
-                if (hasSpell.find(trainerSpell->spell) != hasSpell.end())
-                    continue;
-
-                hasSpell[trainerSpell->spell] = true;
-
                 uint32 reqLevel = 0;
 
                 reqLevel = trainerSpell->isProvidedReqLevel ? trainerSpell->reqLevel : std::max(reqLevel, trainerSpell->reqLevel);

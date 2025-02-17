@@ -432,7 +432,7 @@ bool CheckMountStateAction::Mount(Player* requester)
 
         bool didMount = false;
 
-        if (!mount.IsValidLocation())
+        if (!mount.IsValidLocation(bot))
         {
             if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
                 ai->TellPlayerNoFacing(requester, "Bot can not use this mount here.", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
@@ -441,14 +441,14 @@ bool CheckMountStateAction::Mount(Player* requester)
 
         if (mount.IsItem())
         {
-            if (!mount.GetItem())
+            if (!bot->GetItemByEntry(mount.GetItemProto()->ItemId))
             {
                 if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
                     ai->TellPlayerNoFacing(requester, "Bot does not have this mount.", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
                 continue;
             }
 
-            if (UseItem(requester, mount.GetItem()->GetEntry()))
+            if (UseItem(requester, mount.GetItemProto()->ItemId))
             {
                 SetDuration(3000U); // 3s
                 didMount = true;
@@ -470,6 +470,9 @@ bool CheckMountStateAction::Mount(Player* requester)
 
             if (ai->CastSpell(mount.GetSpellId(), bot))
             {
+#ifdef MANGOSBOT_TWO
+                bot->ResolvePendingMount();
+#endif
                 sPlayerbotAIConfig.logEvent(ai, "CheckMountStateAction", sServerFacade.LookupSpellInfo(mount.GetSpellId())->SpellName[0], std::to_string(mount.GetSpeed(canFly)));
                 SetDuration(GetSpellRecoveryTime(sServerFacade.LookupSpellInfo(mount.GetSpellId())));
                 didMount = true;

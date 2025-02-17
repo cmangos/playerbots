@@ -46,8 +46,18 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 			//Loot objective
 			if (quest->ReqItemId[objective])
 			{
-				for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", quest->ReqItemId[objective]))
-					rMap[entry][questId] |= relationFlag;
+				uint32 itemId = quest->ReqItemId[objective];
+				ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+
+				if (proto)
+				{
+					for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", itemId))
+					{
+						std::string chanceQualifier = std::to_string(entry) + " " + std::to_string(itemId);
+						if (proto->Class == ITEM_CLASS_QUEST || GAI_VALUE2(float, "loot chance", chanceQualifier) > 5.0f)
+							rMap[entry][questId] |= relationFlag;
+					}
+				}
 			}
 
 			//Buy from vendor objective

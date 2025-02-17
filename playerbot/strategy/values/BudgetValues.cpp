@@ -143,6 +143,9 @@ uint32 MoneyNeededForValue::Calculate()
             }
         }
         break;
+    case NeedMoneyFor::skilltraining:
+        moneyWanted = AI_VALUE2(uint32, "train cost", TRAINER_TYPE_TRADESKILLS);
+        break;
     case NeedMoneyFor::ah:
     {
         //Save deposit needed for all items the bot wants to AH.
@@ -201,6 +204,8 @@ uint32 MoneyNeededForValue::Calculate()
         uint32 maxMountSpeed = 0;
         uint32 maxFlyMountSpeed = 0;
 
+        moneyWanted = AI_VALUE2(uint32, "train cost", TRAINER_TYPE_MOUNTS);
+
         for (auto& mount : AI_VALUE(std::vector<MountValue>, "mount list"))
         {
             if (mount.GetSpeed(false) > maxMountSpeed)
@@ -215,27 +220,16 @@ uint32 MoneyNeededForValue::Calculate()
 
         if (level >= 40)
         {
-            if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 75)
-                moneyWanted += 35 * GOLD;
-
             if (maxMountSpeed < 59)
                 moneyWanted += 10 * GOLD;
         }
         if (level >= 60)
         {
-            if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 150)
-                moneyWanted += 600 * GOLD;
-
             if (maxMountSpeed < 99)
                 moneyWanted += 100 * GOLD;
         }
         if (level >= 70)
         {
-            if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 225)
-                moneyWanted += 800 * GOLD;
-            else if (bot->GetSkill(AI_VALUE(uint32, "mount skilltype"), true, true) < 300)
-                moneyWanted += 5000 * GOLD;
-
             if (maxFlyMountSpeed < 99)
                 moneyWanted += 100 * GOLD;
             else if (maxFlyMountSpeed < 279)
@@ -271,6 +265,27 @@ uint32 TotalMoneyNeededForValue::Calculate()
 
     return moneyWanted;
 }
+
+bool HasAllMoneyForValue::Calculate()
+{
+    uint32 money = bot->GetMoney();
+
+    if (ai->HasCheat(BotCheatMask::gold))
+        return true;
+
+    uint32 needMoney;
+
+    if (ai->HasActivePlayerMaster())
+        needMoney = AI_VALUE2(uint32, "money needed for", getQualifier());
+    else
+        needMoney = AI_VALUE2(uint32, "total money needed for", getQualifier());
+
+    if (needMoney <= money)
+        return true;
+
+    return false;
+}
+
 
 uint32 FreeMoneyForValue::Calculate() 
 {

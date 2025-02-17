@@ -28,7 +28,7 @@ bool CanBuyTabard::Calculate()
 	if (!bot->GetGuildId())
 		return false;
 
-	if (context->GetValue<TravelTarget*>("travel target")->Get()->IsTraveling())
+	if (AI_VALUE(TravelTarget*,"travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
 		return false;
 
 	bool inCity = false;

@@ -88,7 +88,7 @@ bool CastSpellAction::isPossible()
         }
         if (bot->IsInCombat())
         {
-            bot->Unmount();
+            ai->Unmount();
             return false;
         }
     }

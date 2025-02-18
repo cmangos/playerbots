@@ -110,9 +110,8 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
 
     AI_VALUE(TravelTarget*, "travel target")->SetConditions({ AI_VALUE2(std::string, "manual string", "future travel condition")});
 
-    if (typeid(oldTarget->GetDestination()) == typeid(QuestObjectiveTravelDestination) || typeid(oldTarget->GetDestination()) == typeid(QuestRelationTravelDestination))
+    if (QuestTravelDestination* dest = dynamic_cast<QuestTravelDestination*>(oldTarget->GetDestination()))
     {
-        QuestTravelDestination* dest = dynamic_cast<QuestTravelDestination*>(oldTarget->GetDestination());
         std::string condition = "group or::{following party,near leader,quest stage active::{" + std::to_string(dest->GetQuestId()) + "," + std::to_string((uint8)dest->GetPurpose()) + "}}";
         oldTarget->AddCondition(condition);
     }

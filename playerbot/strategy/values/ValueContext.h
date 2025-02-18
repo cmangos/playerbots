@@ -431,6 +431,7 @@ namespace ai
             creators["need travel purpose"] = [](PlayerbotAI* ai) { return new NeedTravelPurposeValue(ai); };
             creators["should travel named"] = [](PlayerbotAI* ai) { return new ShouldTravelNamedValue(ai); };
             creators["in overworld"] = [](PlayerbotAI* ai) { return new InOverworldValue(ai); };
+            creators["quest stage active"] = [](PlayerbotAI* ai) { return new QuestStageActiveValue(ai); };
 
             
             

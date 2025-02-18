@@ -64,13 +64,13 @@ bool MovementAction::MoveNear(WorldObject* target, float distance)
     float baseDist = std::min(distance + target->GetObjectBoundingRadius(), ai->GetRange("follow"));
     float boundingRadius = bot->GetObjectBoundingRadius();
 
-    for (int attempt = 0; attempt < 3; ++attempt) // Expand search if needed
+    for (int attempt = 0; attempt < 3; ++attempt)
     {
-        float dist = baseDist + attempt; // Increase distance only if needed
+        float dist = baseDist + ((float)attempt * ATTACK_DISTANCE);
 
-        for (float angle = followAngle; angle <= followAngle + 2 * M_PI; angle += M_PI_F / 8.0f) // Finer angle steps
+        for (float angle = followAngle; angle <= followAngle + 2 * M_PI; angle += M_PI_F / 8.0f)
         {
-            float x, y, z; // Ensure fresh values each iteration
+            float x, y, z;
 
 #ifdef CMANGOS
             target->GetNearPoint(bot, x, y, z, boundingRadius, dist, angle);

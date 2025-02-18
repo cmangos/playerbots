@@ -6206,24 +6206,24 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
                 out << " distance: " << target->GetPosition()->distance(bot) << "y";
             }
         }
-        out << " Status =";
+        out << "\nStatus =";
         if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_NONE)
             out << " none";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
-            out << " prepare";
+            out << " preparing";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
-            out << " travel";
+            out << " traveling";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
-            out << " work";
+            out << " working";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
             out << " cooldown";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
             out << " expired";
 
         if(target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << " Expire in " << (target->GetTimeLeft()/1000) << "s";
+            out << " valid for " << (target->GetTimeLeft()/1000) << "s";
 
-        out << " Retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false);
+        out << " retry (" << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
 
         return out.str();
     }

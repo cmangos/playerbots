@@ -52,8 +52,8 @@ bool InitializePetSpellsAction::Execute(Event& event)
 
 bool InitializePetSpellsAction::isUseful()
 {
-    // Only for random bots with item cheats enabled
-    if ((ai->HasCheat(BotCheatMask::item) && sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId())) ||
+    // Only for random bots
+    if (sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId()) ||
         // Or if alt bot and autoLearnTrainerSpells is true
         (!sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId()) && sPlayerbotAIConfig.autoLearnTrainerSpells))
     {
@@ -669,6 +669,14 @@ bool SetPetAction::Execute(Event& event)
                 ai->TellPlayer(requester, "pet build and its sub commands are hunter only commands.");
             }
         }
+        else if (command == "spells")
+        {
+            std::vector<std::string> spells = GetCurrentPetSpellNames(bot->GetPet());
+            for (std::string spell : spells)
+            {
+                ai->TellPlayer(requester, spell, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL);
+            }
+        }
         else
         {
             ai->TellPlayer(requester, "Please specify a pet command (Like autocast).");
@@ -903,4 +911,28 @@ bool SetPetAction::IsValidBuildName(std::string buildName)
 {
     std::vector<HunterPetBuildPath*> paths = getPremadePaths(buildName);
     return paths.size() > 0;
+}
+
+std::vector<std::string> SetPetAction::GetCurrentPetSpellNames(Pet* pet)
+{
+    std::vector<std::string> spells;
+    uint32 petGuid = pet->GetCharmInfo()->GetPetNumber();
+    auto spellList = CharacterDatabase.PQuery("SELECT spell FROM `pet_spell` WHERE `guid` = '%lu'", petGuid);
+    if (spellList)
+    {
+        do
+        {
+            auto row = spellList->Fetch();
+            uint32 spellId = row[0].GetInt32();
+            SpellEntry const* spell = sServerFacade.LookupSpellInfo(spellId);
+            std::stringstream ss;
+            ss << *spell->SpellName << " " << *spell->Rank;
+            spells.push_back(ss.str());
+        } while (spellList->NextRow());
+    }
+    if (spells.empty())
+    {
+        spells.push_back("No spells for pet.");
+    }
+    return spells;
 }

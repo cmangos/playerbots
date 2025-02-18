@@ -42,5 +42,6 @@ namespace ai
         void listCurrentPath(std::ostringstream* out);
         bool IsValidBuildId(std::string buildId);
         bool IsValidBuildName(std::string buildName);
+        std::vector<std::string> GetCurrentPetSpellNames(Pet* pet);
     };
 }

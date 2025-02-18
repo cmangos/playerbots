@@ -768,6 +768,9 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
 
 bool ChooseGroupTravelTargetAction::isUseful()
 {
+    if (bot->InBattleGround())
+        return false;
+
     if (!bot->GetGroup())
         return false;
 
@@ -831,6 +834,9 @@ bool RefreshTravelTargetAction::Execute(Event& event)
 
 bool RefreshTravelTargetAction::isUseful()
 {
+    if (bot->InBattleGround())
+        return false;
+
     if (!ChooseTravelTargetAction::isUseful())
         return false;
 
@@ -866,6 +872,9 @@ bool ResetTargetAction::Execute(Event& event)
 
 bool ResetTargetAction::isUseful()
 {
+    if (bot->InBattleGround())
+        return false;
+
     if (!ChooseTravelTargetAction::isUseful())
         return false;
 
@@ -893,6 +902,9 @@ bool RequestTravelTargetAction::Execute(Event& event)
 }
 
 bool RequestTravelTargetAction::isUseful() {
+    if (bot->InBattleGround())
+        return false;
+
     if (!ai->AllowActivity(TRAVEL_ACTIVITY))
         return false;
 

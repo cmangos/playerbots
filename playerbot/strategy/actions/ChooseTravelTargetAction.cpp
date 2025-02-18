@@ -949,8 +949,8 @@ bool RequestTravelTargetAction::isAllowed() const
     case TravelDestinationPurpose::AH:
         return urand(1, 100) < 90;
     case TravelDestinationPurpose::Mail:
-        if (AI_VALUE(bool, "should get money"))
-            return urand(1, 100) < 70;
+        if (!AI_VALUE(bool, "should get money"))
+            return urand(1, 100) < 30;
         else
             return true;
     case TravelDestinationPurpose::GatherSkinning:

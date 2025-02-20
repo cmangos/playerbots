@@ -1285,6 +1285,9 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
         {
             Player* pTarget = (Player*)target;
 
+            if (pTarget->InBattleGround() && pTarget->GetBattleGroundId() != bot->GetBattleGroundId())
+                return false;
+
             if (pTarget->GetPlayerbotAI()) //Try to move to where the bot is going if it is closer and in the same direction.
             {
                 WorldPosition botPos(bot);

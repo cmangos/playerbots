@@ -123,6 +123,7 @@ bool FleeToMasterAction::Execute(Event& event)
     uint32 scale = (groupSize > 5) ? groupSize : 5;
 
     uint32 randValue = urand(0, scale * 6);
+    scale += 1;
 
     if (distance > sPlayerbotAIConfig.reactDistance && bot->IsInCombat())
     {

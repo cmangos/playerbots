@@ -85,11 +85,7 @@ namespace ai
         MissileBarrageTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "missile barrage") {}
     };
 
-    class ArcaneBlastTrigger : public BuffTrigger 
-    {
-    public:
-        ArcaneBlastTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "arcane blast") {}
-    };
+    BUFF_TRIGGER_A(ArcaneBlastTrigger, "arcane blast");
 
     class CounterspellInterruptSpellTrigger : public InterruptSpellTrigger
     {

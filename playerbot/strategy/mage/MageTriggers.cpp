@@ -64,3 +64,8 @@ bool NoImprovedScorchDebuffTrigger::IsActive()
 
     return false;
 }
+
+bool ArcaneBlastTrigger::IsActive()
+{
+    return !ai->HasAura("arcane blast", bot, true);
+}

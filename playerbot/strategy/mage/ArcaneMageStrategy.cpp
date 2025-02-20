@@ -11,16 +11,10 @@ public:
     ArcaneMageStrategyActionNodeFactory()
     {
         creators["arcane blast"] = &arcane_blast;
-        creators["arcane barrage"] = &arcane_barrage;
-        creators["arcane missiles"] = &arcane_missiles;
     }
 
 private:
-    ACTION_NODE_A(arcane_blast, "arcane blast", "arcane missiles");
-
-    ACTION_NODE_A(arcane_barrage, "arcane barrage", "arcane missiles");
-
-    ACTION_NODE_A(arcane_missiles, "arcane missiles", "shoot");
+    ACTION_NODE_A(arcane_blast, "arcane blast", "shoot");
 };
 
 ArcaneMageStrategy::ArcaneMageStrategy(PlayerbotAI* ai) : MageStrategy(ai)
@@ -720,7 +714,7 @@ void ArcaneMageCureRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& 
 
 NextAction** ArcaneMageStrategy::GetDefaultCombatActions()
 {
-    return NextAction::array(0, new NextAction("arcane missiles", ACTION_IDLE), NULL);
+    return NextAction::array(0, new NextAction("arcane blast", ACTION_IDLE), NULL);
 }
 
 void ArcaneMageStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -779,6 +773,10 @@ void ArcaneMagePvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
 {
     ArcaneMageStrategy::InitCombatTriggers(triggers);
     MagePvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "missile barrage",
+        NextAction::array(0, new NextAction("arcane missiles", ACTION_NORMAL + 2), NULL)));
 }
 
 void ArcaneMagePvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -62,12 +62,10 @@ namespace ai
 	CastRuneStrikeAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "rune strike") {}
 	};
 	//debuff
-	BEGIN_MELEE_DEBUFF_ACTION(CastPestilenceAction, "pestilence")
-	END_SPELL_ACTION()
+	SPELL_ACTION(CastPestilenceAction, "pestilence");
 
 	//debuff
-	BEGIN_RANGED_DEBUFF_ACTION(CastHowlingBlastAction, "howling blast")
-	END_SPELL_ACTION()
+	SPELL_ACTION(CastHowlingBlastAction, "howling blast");
 
 	//debuff it
 	BEGIN_RANGED_DEBUFF_ACTION(CastIcyTouchAction, "icy touch")

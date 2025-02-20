@@ -3540,6 +3540,9 @@ bool PlayerbotAI::HasAura(std::string name, Unit* unit, bool maxStack, bool chec
             if (checkIsOwner && aura->GetHolder() && aura->GetHolder()->GetCasterGuid() != bot->GetObjectGuid())
                 continue;
 
+            if (aura->GetHolder() && aura->GetHolder()->IsPassive())
+                continue;
+
             // Stack and charge checks
             uint32 maxStackAmount = spell->StackAmount;
             uint32 maxProcCharges = spell->procCharges;
@@ -3573,7 +3576,7 @@ bool PlayerbotAI::HasAura(std::string name, Unit* unit, bool maxStack, bool chec
             // Only return if we found a perfect match
             if (maxAuraAmount < 0 && minDurationPassed)
             {
-                if (!maxStack || auraAmount > 0) // Ensure it's the right type of aura
+                if (auraAmount > 0)
                     return true;
             }
         }

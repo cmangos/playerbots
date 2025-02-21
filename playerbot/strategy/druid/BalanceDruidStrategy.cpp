@@ -909,7 +909,7 @@ void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "often",
-        NextAction::array(0, new NextAction("wrath", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("starfire", ACTION_NORMAL), NULL)));
 }
 
 void BalanceDruidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -10,10 +10,10 @@ class FireMageStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
 public:
     FireMageStrategyActionNodeFactory()
     {
-        creators["fire blast"] = &fire_blast;
+        creators["scorch"] = &scorch;
     }
 private:
-    ACTION_NODE_A(fire_blast, "fire blast", "scorch");
+    ACTION_NODE_A(scorch, "scorch", "fireball");
 };
 
 FireMageStrategy::FireMageStrategy(PlayerbotAI* ai) : MageStrategy(ai)
@@ -761,12 +761,12 @@ void FireMageStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("living bomb", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "hot streak",
-        NextAction::array(0, new NextAction("pyroblast", ACTION_NORMAL + 2), NULL)));
+        "no improved scorch",
+        NextAction::array(0, new NextAction("scorch", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "no improved scorch",
-        NextAction::array(0, new NextAction("scorch", ACTION_NORMAL + 1), NULL)));
+        "hot streak",
+        NextAction::array(0, new NextAction("pyroblast", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "fire spells locked",
@@ -816,6 +816,10 @@ void FireMagePvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     FireMageStrategy::InitCombatTriggers(triggers);
     MagePvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "scorch",
+        NextAction::array(0, new NextAction("scorch", ACTION_NORMAL), NULL)));
 }
 
 void FireMagePvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1024,7 +1028,7 @@ void FireMageCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "enemy ten yards",
-        NextAction::array(0, new NextAction("blast wave", ACTION_INTERRUPT), NULL)));
+        NextAction::array(0, new NextAction("blast wave", ACTION_INTERRUPT + 4), NULL)));
 }
 
 void FireMageCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

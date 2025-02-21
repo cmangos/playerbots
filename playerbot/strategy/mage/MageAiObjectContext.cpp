@@ -233,6 +233,8 @@ namespace ai
         public:
             TriggerFactoryInternal()
             {
+                creators["scorch"] = &TriggerFactoryInternal::scorch;
+                creators["impact"] = &TriggerFactoryInternal::impact;
                 creators["fireball"] = &TriggerFactoryInternal::fireball;
                 creators["pyroblast"] = &TriggerFactoryInternal::pyroblast;
                 creators["combustion"] = &TriggerFactoryInternal::combustion;
@@ -287,6 +289,8 @@ namespace ai
             }
 
         private:
+            static Trigger* scorch(PlayerbotAI* ai) { return new ScorchTrigger(ai); }
+            static Trigger* impact(PlayerbotAI* ai) { return new ImpactTrigger(ai); }
             static Trigger* ice_lance(PlayerbotAI* ai) { return new IceLanceTrigger(ai); }
             static Trigger* summon_water_frost(PlayerbotAI* ai) { return new WaterElementalBoostTrigger(ai); }
             static Trigger* mana_shield(PlayerbotAI* ai) { return new ManaShieldTrigger(ai); }

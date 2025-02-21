@@ -4,6 +4,8 @@
 
 namespace ai
 {
+    CAN_CAST_TRIGGER(ScorchTrigger, "scorch");
+    HAS_AURA_TRIGGER(ImpactTrigger, "impact");
     DEFLECT_TRIGGER(FireWardTrigger, "fire ward");
     DEFLECT_TRIGGER(FrostWardTrigger, "frost ward");
 

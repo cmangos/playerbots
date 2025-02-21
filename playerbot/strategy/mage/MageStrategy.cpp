@@ -1034,7 +1034,7 @@ void MagePvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     ClassPvpStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "very often",
+        "impact",
         NextAction::array(0, new NextAction("fire blast", ACTION_HIGH), NULL)));
 }
 
@@ -1287,7 +1287,7 @@ void MageCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "enemy ten yards",
-        NextAction::array(0, new NextAction("frost nova", ACTION_EMERGENCY), NULL)));
+        NextAction::array(0, new NextAction("frost nova", ACTION_INTERRUPT + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "counterspell on enemy healer",

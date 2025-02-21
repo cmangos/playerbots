@@ -1079,7 +1079,7 @@ namespace ai
 
             for (const Aura* aura : ai->GetAuras(bot))
             {
-                if (!aura)
+                if (!aura || aura->IsPositive())
                     continue;
 
                 uint32 auraType = aura->GetModifier()->m_auraname;

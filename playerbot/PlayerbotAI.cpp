@@ -3534,8 +3534,13 @@ bool PlayerbotAI::HasAura(std::string name, Unit* unit, bool maxStack, bool chec
                 continue;
 
             // Validate aura ownership if needed
-            if (hasMyAura && aura->GetHolder() && aura->GetHolder()->GetCasterGuid() != bot->GetObjectGuid())
-                continue;
+            if (hasMyAura && aura->GetHolder())
+            {
+                if (aura->GetHolder()->GetCasterGuid() == bot->GetObjectGuid())
+                    return true;
+                else
+                    continue;
+            }
 
             if (checkIsOwner && aura->GetHolder() && aura->GetHolder()->GetCasterGuid() != bot->GetObjectGuid())
                 continue;

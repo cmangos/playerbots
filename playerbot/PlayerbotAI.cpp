@@ -5731,8 +5731,11 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
         }
     }
 
-    if (bot->IsBeingTeleported()) //Allow activity while teleportation.
-        return ActivePiorityType::IN_INSTANCE;
+    if (bot->IsBeingTeleported()) //We might end up in a bg so stay active.
+        return ActivePiorityType::IN_BATTLEGROUND;
+
+    if (!WorldPosition(bot).isBg())
+        return ActivePiorityType::IN_BATTLEGROUND;
 
     if (!WorldPosition(bot).isOverworld())
         return ActivePiorityType::IN_INSTANCE;
@@ -5809,6 +5812,7 @@ std::pair<uint32, uint32> PlayerbotAI::GetPriorityBracket(ActivePiorityType type
     case ActivePiorityType::IS_REAL_PLAYER:
     case ActivePiorityType::IN_GROUP_WITH_REAL_PLAYER:
     case ActivePiorityType::VISIBLE_FOR_PLAYER:
+    case ActivePiorityType::IN_BATTLEGROUND:
         return { 0,0 };
     case ActivePiorityType::IN_INSTANCE:
         return { 0,5 };

@@ -3812,7 +3812,7 @@ uint32 PlayerbotAI::GetSpellCastDuration(Spell* spell)
         spellDuration = spell->GetCastTime();
         if (IsChanneledSpell(pSpellInfo))
         {
-            int32 duration = GetSpellDuration(pSpellInfo);
+            int32 duration = spell->GetDuration();
             if (duration > 0)
             {
                 spellDuration += duration;

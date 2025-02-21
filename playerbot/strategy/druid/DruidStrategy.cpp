@@ -9,7 +9,6 @@ class DruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
 public:
     DruidStrategyActionNodeFactory()
     {
-        /*
         creators["healing touch"] = &healing_touch;
         creators["healing touch on party"] = &healing_touch_on_party;
         creators["regrowth"] = &regrowth;
@@ -17,10 +16,8 @@ public:
         creators["rejuvenation"] = &rejuvenation;
         creators["rejuvenation on party"] = &rejuvenation_on_party;
         creators["rebirth"] = &rebirth;
-        */
         creators["abolish poison"] = &abolish_poison;
         creators["abolish poison on party"] = &abolish_poison_on_party;
-        /*
         creators["remove curse"] = &remove_curse;
         creators["remove curse on party"] = &remove_curse_on_party;
         creators["hibernate on cc"] = &hibernate_on_cc;
@@ -29,7 +26,6 @@ public:
         creators["mark of the wild"] = &mark_of_the_wild;
         creators["mark of the wild on party"] = &mark_of_the_wild_on_party;
         creators["gift of the wild on party"] = &gift_of_the_wild_on_party;
-        */
         creators["dire bear form"] = &dire_bear_form;
         creators["cat form"] = &cat_form;
         creators["travel form"] = &travel_form;

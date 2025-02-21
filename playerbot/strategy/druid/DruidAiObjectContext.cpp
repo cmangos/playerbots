@@ -340,6 +340,7 @@ namespace ai
                 creators["ferocious bite"] = &TriggerFactoryInternal::ferocious_bite;
                 creators["claw"] = &TriggerFactoryInternal::claw;
                 creators["rip"] = &TriggerFactoryInternal::rip;
+                creators["savage roar"] = &TriggerFactoryInternal::savage_roar;
                 creators["enrage"] = &TriggerFactoryInternal::enrage;
                 creators["lacerate"] = &TriggerFactoryInternal::lacerate;
                 creators["unstealth"] = &TriggerFactoryInternal::unstealth;
@@ -357,10 +358,14 @@ namespace ai
                 creators["cyclone pvp"] = &TriggerFactoryInternal::cyclone_pvp;
                 creators["starfall"] = &TriggerFactoryInternal::starfall;
                 creators["predatory strikes"] = &TriggerFactoryInternal::predatory_strikes;
+                creators["predatory strikes regrowth"] = &TriggerFactoryInternal::predatory_strikes_regrowth;
+                creators["predatory strikes heal"] = &TriggerFactoryInternal::predatory_strikes_heal;
                 creators["typhoon"] = &TriggerFactoryInternal::typhoon;
+                creators["cyclone on target"] = &TriggerFactoryInternal::cyclone_on_target;
             }
 
         private:
+            static Trigger* savage_roar(PlayerbotAI* ai) { return new SavageRoarTrigger(ai); }
             static Trigger* rip(PlayerbotAI* ai) { return new RipTrigger(ai, 3); }
             static Trigger* ferocious_bite(PlayerbotAI* ai) { return new FerociousBiteTrigger(ai); }
             static Trigger* natures_swiftness(PlayerbotAI* ai) { return new NaturesSwiftnessTrigger(ai); }
@@ -410,8 +415,11 @@ namespace ai
             static Trigger* active_hot(PlayerbotAI* ai) { return new ActiveHotTrigger(ai); }
             static Trigger* cyclone_pvp(PlayerbotAI* ai) { return new CyclonePvpTrigger(ai); }
             static Trigger* starfall(PlayerbotAI* ai) { return new StarfallTrigger(ai); }
-            static Trigger* predatory_strikes(PlayerbotAI* ai) { return new PredatoryStrikes(ai); }
+            static Trigger* predatory_strikes(PlayerbotAI* ai) { return new PredatoryStrikesTrigger(ai); }
+            static Trigger* predatory_strikes_regrowth(PlayerbotAI* ai) { return new PredatoryStrikesRegrowthTrigger(ai); }
+            static Trigger* predatory_strikes_heal(PlayerbotAI* ai) { return new PredatoryStrikesHealTrigger(ai); }
             static Trigger* typhoon(PlayerbotAI* ai) { return new TyphoonTrigger(ai); }
+            static Trigger* cyclone_on_target(PlayerbotAI* ai) { return new CycloneOnTargetTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>

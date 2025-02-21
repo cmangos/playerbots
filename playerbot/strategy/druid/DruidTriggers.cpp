@@ -48,7 +48,7 @@ bool CyclonePvpTrigger::IsActive()
         return false;
 
     // Check if bot is in cat form and has not Predatory strikes
-    if (ai->HasAura("cat form", bot) && !ai->HasAura("predatory strikes", bot))
+    if (ai->HasAura("cat form", bot) && !ai->HasAura("predator's swiftness", bot))
         return false;
 
     // Check bot's health for defensive use
@@ -82,4 +82,18 @@ bool CyclonePvpTrigger::IsActive()
     }
 
     return false;
+}
+
+bool PredatoryStrikesRegrowthTrigger::IsActive()
+{
+    return AI_VALUE2(uint8, "health", "self target") <= sPlayerbotAIConfig.mediumHealth 
+        && ai->HasAura("predator's swiftness", bot)
+        && BuffTrigger::IsActive();
+}
+
+bool PredatoryStrikesHealTrigger::IsActive()
+{
+    return AI_VALUE2(uint8, "health", "self target") <= sPlayerbotAIConfig.mediumHealth
+        && ai->HasAura("regrowth", bot)
+        && HasAuraTrigger::IsActive();
 }

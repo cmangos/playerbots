@@ -1088,13 +1088,19 @@ void DpsFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
         NextAction::array(0, new NextAction("rebirth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "critical health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_CRITICAL_HEAL + 1),
-                             new NextAction("healing touch", ACTION_CRITICAL_HEAL), NULL)));
+        "predatory strikes regrowth",
+        NextAction::array(0, new NextAction("regrowth", ACTION_LIGHT_HEAL + 1),
+                             new NextAction("rejuvenation", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "low health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL), NULL)));
+        "predatory strikes heal",
+        NextAction::array(0, new NextAction("healing touch", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "cyclone on target",
+        NextAction::array(0, new NextAction("regrowth", ACTION_LIGHT_HEAL + 1),
+            new NextAction("rejuvenation", ACTION_LIGHT_HEAL + 1),
+            new NextAction("nourish", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "enemy out of melee",
@@ -1299,16 +1305,16 @@ void DpsFeralDruidBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("cat form", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "savage roar",
+        NextAction::array(0, new NextAction("savage roar", ACTION_HIGH + 4), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "tiger's fury",
         NextAction::array(0, new NextAction("tiger's fury", ACTION_HIGH + 2), NULL))); 
     
     triggers.push_back(new TriggerNode(
         "berserk",
         NextAction::array(0, new NextAction("berserk", ACTION_HIGH + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "savage roar",
-        NextAction::array(0, new NextAction("savage roar", ACTION_HIGH), NULL)));
 }
 
 void DpsFeralDruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1523,16 +1529,8 @@ void DpsFeralDruidStealthStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
         NextAction::array(0, new NextAction("check stealth", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "behind target",
-        NextAction::array(0, new NextAction("pounce", ACTION_NORMAL + 3), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "not behind target",
-        NextAction::array(0, new NextAction("ravage", ACTION_NORMAL + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "kick",
-        NextAction::array(0, new NextAction("pounce", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("pounce", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "unstealth",
@@ -1556,6 +1554,10 @@ void DpsFeralDruidStealthPveStrategy::InitCombatTriggers(std::list<TriggerNode*>
 {
     DpsFeralDruidStealthStrategy::InitCombatTriggers(triggers);
     StealthPveStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "behind target",
+        NextAction::array(0, new NextAction("ravage", ACTION_NORMAL + 3), NULL)));
 }
 
 void DpsFeralDruidStealthPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

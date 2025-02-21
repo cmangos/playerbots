@@ -70,6 +70,8 @@ namespace ai
         RakeTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "rake") {}
     };
 
+    BUFF_TRIGGER(SavageRoarTrigger, "savage roar");
+
     class RipTrigger : public NoDebuffAndComboPointsAvailableTrigger
     {
     public:
@@ -431,17 +433,6 @@ namespace ai
         ClearcastingTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "clearcasting") {}
     };
 
-    CAN_CAST_TRIGGER(ForceOfNatureTrigger, "force of nature");
-    BOOST_TRIGGER(BerserkTrigger, "berserk");
-    CAN_CAST_TRIGGER_A(ActiveHotTrigger, "nourish");
-    SNARE_TRIGGER_A(CyclonePvpTrigger, "cyclone");
-    SNARE_TRIGGER(TyphoonTrigger, "typhoon");
-
-    class SavageRoarTrigger : public ComboPointsAvailableTrigger
-    {
-    public:
-        SavageRoarTrigger(PlayerbotAI* ai) : ComboPointsAvailableTrigger(ai, 3) {}
-    };
 
     class StarfallTrigger : public SpellCanBeCastedTrigger
     {
@@ -449,5 +440,20 @@ namespace ai
         StarfallTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "starfall") {}
         std::string GetTargetName() override { return "self target"; }
     };
-    BUFF_TRIGGER(PredatoryStrikes, "predatory strikes");
+
+    class CycloneOnTargetTrigger : public HasAuraTrigger
+    {
+    public:
+        CycloneOnTargetTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "cyclone") {}
+        std::string GetTargetName() override { return "current target"; }
+    };
+
+    BUFF_TRIGGER_A(PredatoryStrikesRegrowthTrigger, "regrowth");
+    CAN_CAST_TRIGGER(ForceOfNatureTrigger, "force of nature");
+    BOOST_TRIGGER(BerserkTrigger, "berserk");
+    CAN_CAST_TRIGGER_A(ActiveHotTrigger, "nourish");
+    SNARE_TRIGGER_A(CyclonePvpTrigger, "cyclone");
+    SNARE_TRIGGER(TyphoonTrigger, "typhoon");
+    HAS_AURA_TRIGGER(PredatoryStrikesTrigger, "predator's swiftness");
+    HAS_AURA_TRIGGER_A(PredatoryStrikesHealTrigger, "predator's swiftness");
 }

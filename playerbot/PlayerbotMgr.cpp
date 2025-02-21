@@ -760,14 +760,14 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
         return messages;
     }
 
-    if (!strcmp(cmd, "reload"))
+    if (!strcmp(cmd, "reload") && master->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
     {
         messages.push_back("Reloading config");
         sPlayerbotAIConfig.Initialize();
         return messages;
     }   
 
-    if (!strcmp(cmd, "tweak"))
+    if (!strcmp(cmd, "tweak") && master->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
     {
         sPlayerbotAIConfig.tweakValue = sPlayerbotAIConfig.tweakValue++;
         if (sPlayerbotAIConfig.tweakValue > 2)
@@ -921,7 +921,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
        return messages;
      }
 
-    if (command.find("debug ") != std::string::npos)
+    if (command.find("debug ") != std::string::npos && master->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
     {
         bool hasBot = false;
 

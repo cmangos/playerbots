@@ -179,11 +179,15 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
             }
             else
             {
-                auto pmo2 = sPerformanceMonitor.start(PERF_MON_ACTION, "isUseful", &aiObjectContext->performanceStack);
-                bool isUseful = action->isUseful();
-                pmo2.reset();
+                bool isUseful = false;
+                if (!isStunned || action->isUsefulWhenStunned())
+                {
+                    auto pmo2 = sPerformanceMonitor.start(PERF_MON_ACTION, "isUseful", &aiObjectContext->performanceStack);
+                    isUseful = action->isUseful();
+                    pmo2.reset();
+                }
 
-                if (isUseful && (!isStunned || action->isUsefulWhenStunned()))
+                if (isUseful)
                 {
                     for (auto multiplier : multipliers)
                     {

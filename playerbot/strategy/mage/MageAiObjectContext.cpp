@@ -268,7 +268,7 @@ namespace ai
                 creators["ice barrier"] = &TriggerFactoryInternal::ice_barrier;
                 creators["hot streak"] = &TriggerFactoryInternal::hot_streak;
                 creators["free fireball"] = &TriggerFactoryInternal::free_fireball;
-                creators["finger of frost"] = &TriggerFactoryInternal::finger_of_frost;
+                creators["fingers of frost"] = &TriggerFactoryInternal::fingers_of_frost;
                 creators["mirror image"] = &TriggerFactoryInternal::mirror_image;
                 creators["learn glyph of fireball"] = &TriggerFactoryInternal::learn_glyph_of_fireball;
                 creators["remove glyph of fireball"] = &TriggerFactoryInternal::remove_glyph_of_fireball;
@@ -324,7 +324,7 @@ namespace ai
             static Trigger* ice_barrier(PlayerbotAI* ai) { return new IceBarrierTrigger(ai); }
             static Trigger* hot_streak(PlayerbotAI* ai) { return new HotStreakTrigger(ai); }
             static Trigger* free_fireball(PlayerbotAI* ai) { return new FireballOrFrostfireBoltFreeTrigger(ai); }
-            static Trigger* finger_of_frost(PlayerbotAI* ai) { return new FingersOfFrostTrigger(ai); }
+            static Trigger* fingers_of_frost(PlayerbotAI* ai) { return new FingersOfFrostTrigger(ai); }
             static Trigger* mirror_image(PlayerbotAI* ai) { return new MirrorImageTrigger(ai); }
             static Trigger* learn_glyph_of_fireball(PlayerbotAI* ai) { return new LearnGlyphOfFireballTrigger(ai); }
             static Trigger* remove_glyph_of_fireball(PlayerbotAI* ai) { return new RemoveGlyphOfFireballTrigger(ai); }

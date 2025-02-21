@@ -725,7 +725,7 @@ void FrostMageStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("frostfire bolt", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "finger of frost",
+        "fingers of frost",
         NextAction::array(0, new NextAction("deep freeze", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(

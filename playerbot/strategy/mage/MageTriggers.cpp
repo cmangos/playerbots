@@ -41,7 +41,7 @@ bool ManaShieldTrigger::IsActive()
 bool IceLanceTrigger::IsActive()
 {
     Unit* target = GetTarget();
-    return target && ai->HasAnyAuraOf(target, "frost nova", "frostbite", NULL);
+    return target && (ai->HasAura("fingers of frost", bot) || ai->HasAnyAuraOf(target, "frost nova", "frostbite", NULL));
 }
 
 bool HotStreakTrigger::IsActive()

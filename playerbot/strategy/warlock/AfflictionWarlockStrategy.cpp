@@ -768,12 +768,16 @@ void AfflictionWarlockStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("dark pact", ACTION_HIGH + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "corruption",
+        NextAction::array(0, new NextAction("corruption", ACTION_NORMAL + 5), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "haunt",
-        NextAction::array(0, new NextAction("haunt", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("haunt", ACTION_NORMAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "unstable affliction",
-        NextAction::array(0, new NextAction("unstable affliction", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("unstable affliction", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "siphon life",

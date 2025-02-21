@@ -1131,6 +1131,14 @@ void DemonologyWarlockPetRaidStrategy::InitNonCombatTriggers(std::list<TriggerNo
 void DemonologyWarlockCursesStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarlockCursesStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "no curse",
+        NextAction::array(0, new NextAction("curse of the elements", ACTION_NORMAL + 4), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "no curse",
+        NextAction::array(0, new NextAction("curse of doom", ACTION_NORMAL + 3), NULL)));
 }
 
 void DemonologyWarlockCursesPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

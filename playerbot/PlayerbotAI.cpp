@@ -5256,7 +5256,15 @@ bool PlayerbotAI::HasAuraToDispel(Unit* target, uint32 dispelType)
 		for (Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
 		{
 			const Aura* aura = *itr;
+
+            if (sPlayerbotAIConfig.dispelAuraDuration && aura->GetAuraDuration() && aura->GetAuraDuration() < (int32)sPlayerbotAIConfig.dispelAuraDuration)
+                continue;
+
 			const SpellEntry* entry = aura->GetSpellProto();
+
+            if (!canDispel(entry, dispelType))
+                continue;
+
 			uint32 spellId = entry->Id;
 
 			bool isPositiveSpell = IsPositiveSpell(spellId);
@@ -5266,11 +5274,7 @@ bool PlayerbotAI::HasAuraToDispel(Unit* target, uint32 dispelType)
 			if (!isPositiveSpell && !isFriend)
 				continue;
 
-			if (sPlayerbotAIConfig.dispelAuraDuration && aura->GetAuraDuration() && aura->GetAuraDuration() < (int32)sPlayerbotAIConfig.dispelAuraDuration)
-			    return false;
-
-			if (canDispel(entry, dispelType))
-				return true;
+            return true;
 		}
 	}
 	return false;

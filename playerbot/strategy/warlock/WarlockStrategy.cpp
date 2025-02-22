@@ -68,6 +68,10 @@ void WarlockStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     ClassStrategy::InitNonCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("initialize pet", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "no healthstone",
         NextAction::array(0, new NextAction("create healthstone", ACTION_NORMAL), NULL)));
 

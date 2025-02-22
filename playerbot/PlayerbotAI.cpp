@@ -1630,15 +1630,16 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 
 
                 ChatChannelSource chatChannelSource = GetChatChannelSource(bot, msgtype, chanName);
+                bool isChannelMsgType = msgtype == CHAT_MSG_CHANNEL;
 
-                if (!isAiChat || isFromFreeBot)
+                if (!isAiChat || isFromFreeBot || isChannelMsgType)
                 {
                     // random bot speaks, chat CD
                     if ((isFromFreeBot || isAiChat) && isPaused)
                         return;
 
                     // BG: react only if mentioned or if not channel and real player spoke
-                    if (bot->InBattleGround() && !(isMentioned || (msgtype != CHAT_MSG_CHANNEL && !isFromFreeBot)))
+                    if (bot->InBattleGround() && !(isMentioned || (!isChannelMsgType && !isFromFreeBot)))
                         return;
 
                     if (HasRealPlayerMaster() && guid1 != GetMaster()->GetObjectGuid())
@@ -1668,8 +1669,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         // Check if the source is world-related
                         uint32 worldChannelReplyChance = 0;
                         if (chatChannelSource == SRC_WORLD || chatChannelSource == SRC_WORLD_DEFENSE)
-                            worldChannelReplyChance = (sPlayerbotAIConfig.minRandomBots + sPlayerbotAIConfig.maxRandomBots) / 400; 
-                        
+                            worldChannelReplyChance = static_cast<uint32>(std::round((sPlayerbotAIConfig.minRandomBots + sPlayerbotAIConfig.maxRandomBots) / 2.0));
+
                         if (isFromFreeBot && urand(0, 20 + worldChannelReplyChance))
                             return;
 
@@ -1683,7 +1684,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         }
                         else
                         {
-                            if (urand(0, 20 + 10 * isMentioned))
+                            if (urand(0, 20 - (10 * isMentioned) + worldChannelReplyChance))
                                 return;
                         }
                     }

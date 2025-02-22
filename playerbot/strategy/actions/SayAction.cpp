@@ -1475,5 +1475,8 @@ std::string ChatReplyAction::GenerateReplyMessage(Player* bot, std::string incom
 
 bool ChatReplyAction::isUseful()
 {
+    if (!ai->AllowActivity())
+        return false; 
+    
     return !ai->HasStrategy("silent", BotState::BOT_STATE_NON_COMBAT);
 }

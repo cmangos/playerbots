@@ -634,30 +634,33 @@ void HunterPetBuild::ApplyBuild(Player* bot, std::vector<std::string> out)
         {
             for (int iii = 0; iii < maxFamilyBuilds; iii++)
             {
-                if (spells[iii].Spells[ii].Rank > 0)
+                if (pet->GetLevel() >= spells[iii].Spells[ii].Level)
                 {
-                    int spellCost = ii == 1 ? spells[iii].Spells[ii].TPCost : spells[iii].Spells[ii].TPCost - spells[iii].Spells[ii - 1].TPCost;
-                    if (currentTPCost + spellCost <= maxTPCost)
+                    if (spells[iii].Spells[ii].Rank > 0)
                     {
-                        if (sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId()) || sPlayerbotAIConfig.trainHunterPets == 2 || (sPlayerbotAIConfig.trainHunterPets == 1 && bot->HasSpell(spells[iii].Spells[ii].TrainingSpellId)))
+                        int spellCost = ii == 1 ? spells[iii].Spells[ii].TPCost : spells[iii].Spells[ii].TPCost - spells[iii].Spells[ii - 1].TPCost;
+                        if (currentTPCost + spellCost <= maxTPCost)
                         {
-                            if (ii > 1)
+                            if (sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId()) || sPlayerbotAIConfig.trainHunterPets == 2 || (sPlayerbotAIConfig.trainHunterPets == 1 && bot->HasSpell(spells[iii].Spells[ii].TrainingSpellId)))
                             {
-                                pet->unlearnSpell(spells[iii].Spells[ii - 1].SpellId, false);
-                                currentTPCost -= spells[iii].Spells[ii - 1].TPCost;
+                                if (ii > 1)
+                                {
+                                    pet->unlearnSpell(spells[iii].Spells[ii - 1].SpellId, false);
+                                    currentTPCost -= spells[iii].Spells[ii - 1].TPCost;
+                                }
+                                pet->learnSpell(spells[iii].Spells[ii].SpellId);
+                                currentTPCost += spells[iii].Spells[ii].TPCost;
                             }
-                            pet->learnSpell(spells[iii].Spells[ii].SpellId);
-                            currentTPCost += spells[iii].Spells[ii].TPCost;
+                            /*
+                            * This will be for a future update where pet apply is set on pet level not randomly.
+                            else if (sPlayerbotAIConfig.trainHunterPets == 1 && !bot->HasSpell(spells[iii].Spells[ii].TrainingSpellId))
+                            {
+                                std::stringstream ostring;
+                                ostring << "I don't know spell " << spells[iii].Name << " Rank " << spells[iii].Spells[ii].Rank;
+                                out.push_back(ostring);
+                            }
+                            */
                         }
-                        /*
-                        * This will be for a future update where pet apply is set on pet level not randomly.
-                        else if (sPlayerbotAIConfig.trainHunterPets == 1 && !bot->HasSpell(spells[iii].Spells[ii].TrainingSpellId))
-                        {
-                            std::stringstream ostring;
-                            ostring << "I don't know spell " << spells[iii].Name << " Rank " << spells[iii].Spells[ii].Rank;
-                            out.push_back(ostring);
-                        }
-                        */
                     }
                 }
             }

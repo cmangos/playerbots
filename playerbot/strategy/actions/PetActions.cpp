@@ -661,6 +661,45 @@ bool SetPetAction::Execute(Event& event)
                         }
                     }
                 }
+                else if (parameter.find("get current build link") != std::string::npos)
+                {
+                    HunterPetBuild hp = HunterPetBuild(bot);
+                    ai->TellPlayer(requester, hp.GetBuildLink());
+                }
+                else if (parameter.find("get planned build link") != std::string::npos)
+                {
+
+                    uint32 petNumber = pet->GetCharmInfo()->GetPetNumber();
+                    int savedType = sPlayerbotDbStore.PetHasBuilds(pet->GetCharmInfo()->GetPetNumber());
+                    switch (savedType)
+                    {
+                        case 0:
+                            ai->TellPlayer(requester, "No build saved. Please run 'pet build set random', 'pet build set <path number>', 'pet build set <path name>', or 'pet build <build link>'");
+                            break;
+                        case 1:
+                        {
+                            HunterPetBuild currentBuild = HunterPetBuild(bot);
+                            std::string currentBuildString = currentBuild.GetBuildLink();
+                            HunterPetBuildPath path = sPlayerbotDbStore.LoadPetBuildPath(pet->GetCharmInfo()->GetPetNumber());
+                            HunterPetBuild newBuild = *GetBestPremadeBuild(path.id);
+                            std::stringstream nextLink;
+                            nextLink << "Next Link in Path: " << newBuild.GetBuildLink();
+                            ai->TellPlayer(requester, nextLink.str());
+                            std::stringstream finalBuildLink;
+                            finalBuildLink << "Final Link in Path: " << path.hunterPetBuild.back().GetBuildLink();
+                            ai->TellPlayer(requester, finalBuildLink.str());
+                            break;
+                        }
+                        case 2:
+                        {
+                            HunterPetBuild currentBuild = HunterPetBuild(bot);
+                            std::string currentBuildString = currentBuild.GetBuildLink();
+                            std::string buildLink = sPlayerbotDbStore.LoadPetBuildLink(pet->GetCharmInfo()->GetPetNumber());
+                            ai->TellPlayer(requester, buildLink);
+                            break;
+                        }
+                    }
+                }
             }
             else
             {
@@ -924,7 +963,7 @@ std::vector<std::string> SetPetAction::GetCurrentPetSpellNames(Pet* pet)
         if (creatureSpell.second.state != PetSpellState::PETSPELL_REMOVED)
         {
             std::stringstream spellNameStream;
-            spellNameStream << spell->SpellName << " " << spell->Rank;
+            spellNameStream << spell->SpellName[0] << " " << spell->Rank[0];
             std::string spellName = spellNameStream.str();
             if (spellName.find("Tamed Pet Passive (DND)") == std::string::npos)
             {

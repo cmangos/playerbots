@@ -68,7 +68,7 @@ bool MovementAction::MoveNear(WorldObject* target, float distance)
     {
         float dist = baseDist + ((float)attempt * ATTACK_DISTANCE);
 
-        for (float angle = followAngle; angle <= followAngle + 2 * M_PI; angle += M_PI_F / 8.0f)
+        for (float angle = followAngle; angle <= followAngle + 2 * M_PI; angle += M_PI_F / 4.0f)
         {
             float x, y, z;
 

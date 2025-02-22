@@ -5684,8 +5684,11 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
         }
     }
 
-    if (bot->IsBeingTeleported()) //Allow activity while teleportation.
-        return ActivePiorityType::IN_INSTANCE;
+    if (bot->IsBeingTeleported()) //We might end up in a bg so stay active.
+        return ActivePiorityType::IN_BATTLEGROUND;
+
+    if (WorldPosition(bot).isBg())
+        return ActivePiorityType::IN_BATTLEGROUND;
 
     if (!WorldPosition(bot).isOverworld())
         return ActivePiorityType::IN_INSTANCE;
@@ -5762,6 +5765,7 @@ std::pair<uint32, uint32> PlayerbotAI::GetPriorityBracket(ActivePiorityType type
     case ActivePiorityType::IS_REAL_PLAYER:
     case ActivePiorityType::IN_GROUP_WITH_REAL_PLAYER:
     case ActivePiorityType::VISIBLE_FOR_PLAYER:
+    case ActivePiorityType::IN_BATTLEGROUND:
         return { 0,0 };
     case ActivePiorityType::IN_INSTANCE:
         return { 0,5 };
@@ -6206,24 +6210,24 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
                 out << " distance: " << target->GetPosition()->distance(bot) << "y";
             }
         }
-        out << " Status =";
+        out << "\nStatus =";
         if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_NONE)
             out << " none";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
-            out << " prepare";
+            out << " preparing";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
-            out << " travel";
+            out << " traveling";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
-            out << " work";
+            out << " working";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
             out << " cooldown";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
             out << " expired";
 
         if(target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << " Expire in " << (target->GetTimeLeft()/1000) << "s";
+            out << " valid for " << (target->GetTimeLeft()/1000) << "s";
 
-        out << " Retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false);
+        out << " retry (" << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
 
         return out.str();
     }

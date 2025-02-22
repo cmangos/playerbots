@@ -48,7 +48,7 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         {"",TravelDestinationPurpose::Repair, 6.93f},                                                                   // 90%
         {"val::and::{should get money,can get mail}", TravelDestinationPurpose::Mail, 6.79f},                           //100%
         {"val::should get money", TravelDestinationPurpose::Grind, 6.77f},                                              // 90%
-        {"",TravelDestinationPurpose::Mail, 6.6f},                                                                      // 70%
+        {"",TravelDestinationPurpose::Mail, 6.6f},                                                                      // 30%
         {"",TravelDestinationPurpose::GatherMining, 6.5f},                                                              // 90%/40% in group
         {"",TravelDestinationPurpose::GatherSkinning, 6.5f},                                                            // 90%/40% in group
         {"",TravelDestinationPurpose::GatherHerbalism, 6.5f},                                                           // 90%/40% in group

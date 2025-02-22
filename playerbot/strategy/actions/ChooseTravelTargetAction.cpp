@@ -110,9 +110,8 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
 
     AI_VALUE(TravelTarget*, "travel target")->SetConditions({ AI_VALUE2(std::string, "manual string", "future travel condition")});
 
-    if (typeid(oldTarget->GetDestination()) == typeid(QuestObjectiveTravelDestination) || typeid(oldTarget->GetDestination()) == typeid(QuestRelationTravelDestination))
+    if (QuestTravelDestination* dest = dynamic_cast<QuestTravelDestination*>(oldTarget->GetDestination()))
     {
-        QuestTravelDestination* dest = dynamic_cast<QuestTravelDestination*>(oldTarget->GetDestination());
         std::string condition = "group or::{following party,near leader,quest stage active::{" + std::to_string(dest->GetQuestId()) + "," + std::to_string((uint8)dest->GetPurpose()) + "}}";
         oldTarget->AddCondition(condition);
     }
@@ -769,6 +768,9 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
 
 bool ChooseGroupTravelTargetAction::isUseful()
 {
+    if (bot->InBattleGround())
+        return false;
+
     if (!bot->GetGroup())
         return false;
 
@@ -832,6 +834,9 @@ bool RefreshTravelTargetAction::Execute(Event& event)
 
 bool RefreshTravelTargetAction::isUseful()
 {
+    if (bot->InBattleGround())
+        return false;
+
     if (!ChooseTravelTargetAction::isUseful())
         return false;
 
@@ -867,6 +872,9 @@ bool ResetTargetAction::Execute(Event& event)
 
 bool ResetTargetAction::isUseful()
 {
+    if (bot->InBattleGround())
+        return false;
+
     if (!ChooseTravelTargetAction::isUseful())
         return false;
 
@@ -894,6 +902,9 @@ bool RequestTravelTargetAction::Execute(Event& event)
 }
 
 bool RequestTravelTargetAction::isUseful() {
+    if (bot->InBattleGround())
+        return false;
+
     if (!ai->AllowActivity(TRAVEL_ACTIVITY))
         return false;
 
@@ -938,8 +949,8 @@ bool RequestTravelTargetAction::isAllowed() const
     case TravelDestinationPurpose::AH:
         return urand(1, 100) < 90;
     case TravelDestinationPurpose::Mail:
-        if (AI_VALUE(bool, "should get money"))
-            return urand(1, 100) < 70;
+        if (!AI_VALUE(bool, "should get money"))
+            return urand(1, 100) < 30;
         else
             return true;
     case TravelDestinationPurpose::GatherSkinning:

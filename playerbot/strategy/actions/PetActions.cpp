@@ -2,7 +2,6 @@
 #include "playerbot/PlayerbotFactory.h"
 #include "playerbot/playerbot.h"
 #include <playerbot/ServerFacade.h>
-
 using namespace ai;
 #define MANGOSBOT_ONE 1
 
@@ -562,7 +561,6 @@ bool SetPetAction::Execute(Event& event)
                             }
                             break;
                         }
-
                     }
                 }
                 else if (parameter.find("set ") != std::string::npos)
@@ -917,19 +915,24 @@ std::vector<std::string> SetPetAction::GetCurrentPetSpellNames(Pet* pet)
 {
     std::vector<std::string> spells;
     uint32 petGuid = pet->GetCharmInfo()->GetPetNumber();
-    auto spellList = CharacterDatabase.PQuery("SELECT spell FROM `pet_spell` WHERE `guid` = '%lu'", petGuid);
-    if (spellList)
+
+    PetSpellMap creatureSpellList = pet->m_spells;
+
+    for (auto& creatureSpell : creatureSpellList)
     {
-        do
+        SpellEntry const* spell = sServerFacade.LookupSpellInfo(creatureSpell.first);
+        if (creatureSpell.second.state != PetSpellState::PETSPELL_REMOVED)
         {
-            auto row = spellList->Fetch();
-            uint32 spellId = row[0].GetInt32();
-            SpellEntry const* spell = sServerFacade.LookupSpellInfo(spellId);
-            std::stringstream ss;
-            ss << *spell->SpellName << " " << *spell->Rank;
-            spells.push_back(ss.str());
-        } while (spellList->NextRow());
+            std::stringstream spellNameStream;
+            spellNameStream << spell->SpellName << " " << spell->Rank;
+            std::string spellName = spellNameStream.str();
+            if (spellName.find("Tamed Pet Passive (DND)") == std::string::npos)
+            {
+                spells.push_back(spellName);
+            }
+        }
     }
+
     if (spells.empty())
     {
         spells.push_back("No spells for pet.");

@@ -578,7 +578,6 @@ void HunterPetBuild::ReadSpells(Player* bot)
 
         for (auto& creatureSpell : creatureSpellList)
         {
-            const SpellEntry* spellEntry = sServerFacade.LookupSpellInfo(creatureSpell.first);
             spellIdList.push_back(creatureSpell.first);
         }
 
@@ -640,7 +639,7 @@ void HunterPetBuild::ApplyBuild(Player* bot, std::vector<std::string> out)
                     int spellCost = ii == 1 ? spells[iii].Spells[ii].TPCost : spells[iii].Spells[ii].TPCost - spells[iii].Spells[ii - 1].TPCost;
                     if (currentTPCost + spellCost <= maxTPCost)
                     {
-                        if (sPlayerbotAIConfig.trainHunterPets == 2 || (sPlayerbotAIConfig.trainHunterPets == 1 && bot->HasSpell(spells[iii].Spells[ii].TrainingSpellId)))
+                        if (sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId()) || sPlayerbotAIConfig.trainHunterPets == 2 || (sPlayerbotAIConfig.trainHunterPets == 1 && bot->HasSpell(spells[iii].Spells[ii].TrainingSpellId)))
                         {
                             if (ii > 1)
                             {
@@ -676,36 +675,14 @@ uint32 HunterPetBuild::CalculateTrainingPoints(Player* bot)
 
 void HunterPetBuild::UnlearnCurrentSpells(Player* bot)
 {
-#ifdef MANGOSBOT_ZERO
-    int maxFamilyBuilds = 27;
-#endif
-#ifdef MANGOSBOT_ONE
-    int maxFamilyBuilds = 34;
-#endif
     Pet* pet = bot->GetPet();
-    CreatureSpellList creatureSpellList = pet->GetSpellList();
-    std::vector<uint32> spellIdList;
+    PetSpellMap creatureSpellList = pet->m_spells;
 
-    for (auto& creatureSpell : creatureSpellList.Spells)
+    for (auto& creatureSpell : creatureSpellList)
     {
-        spellIdList.push_back(creatureSpell.second.SpellId);
+        pet->unlearnSpell(creatureSpell.first, false);
     }
-
-    for (int ii = 0; ii < maxFamilyBuilds; ii++)
-    {
-        if ((ii + 1) % 4 == 0)
-            continue;
-        for (auto position : spellRankEntityMapping)
-        {
-            for (auto rank : position.second.Spells)
-            {
-                if (std::find(spellIdList.begin(), spellIdList.end(), rank.second.SpellId) != spellIdList.end())
-                {
-                    pet->unlearnSpell(rank.second.SpellId, false);
-                }
-            }
-        }
-    }
+    creatureSpellList = pet->m_spells;
 }
 
 HunterPetBuildPath FamilyPetBuilds::GetBuildPath(int buildNo)

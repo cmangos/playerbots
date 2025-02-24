@@ -79,8 +79,6 @@ Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ign
         }
         if (lowestHp && lowestHealthPlayer)
             nearestGroupPlayers.push_back(lowestHealthPlayer->GetObjectGuid());
-        else
-            delete lowestHealthPlayer;
     }
     
     if (!lowestHp && !ignoreOutOfGroup && !nearestPlayers.empty() && nearestPlayers.size() < 100  && sServerFacade.IsDistanceLessThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.sightDistance))

@@ -418,6 +418,76 @@ bool PlayerbotAIConfig::Initialize()
 
     }
 
+    sLog.outString("Loading Hunter Pet Builds");
+
+    uint32 maxHunterPetBuildLevel = 0;
+
+#ifdef MANGOSBOT_ZERO
+    int maxFamilyBuilds = 27;
+#endif
+#ifdef MANGOSBOT_ONE
+    int maxFamilyBuilds = 34;
+#endif
+    for (uint32 family = 1; family < maxFamilyBuilds; ++family)
+    {
+        familyPetBuilds[family] = FamilyPetBuilds(family);
+        for (uint32 build = 0; build < MAX_LEVEL; ++build)
+        {
+            std::ostringstream os; os << "AiPlayerbot.HunterPetBuildName." << family << "." << build;
+            std::string specName = config.GetStringDefault(os.str().c_str(), "");
+            if (!specName.empty())
+            {
+                std::ostringstream os; os << "AiPlayerbot.HunterPetBuildProb." << family << "." << build;
+                int probability = config.GetIntDefault(os.str().c_str(), 100);
+
+                HunterPetBuildPath hunterPetBuildPath(build, specName, probability);
+
+                for (uint32 level = 1; level <= 100; level++)
+                {
+                    std::ostringstream os; os << "AiPlayerbot.HunterPetBuild." << family << "." << build << "." << level;
+                    std::string buildLink = config.GetStringDefault(os.str().c_str(), "");
+                    buildLink = buildLink.substr(0, buildLink.find("#", 0));;
+                    buildLink = buildLink.substr(0, buildLink.find(" ", 0));;
+
+                    if (!buildLink.empty())
+                    {
+                        if (maxHunterPetBuildLevel < level)
+                            maxHunterPetBuildLevel = level;
+
+                        std::ostringstream out;
+
+                        //Ignore bad specs.
+                        if (!familyPetBuilds[family].baseBuild.CheckBuildLink(buildLink, family, &out))
+                        {
+                            sLog.outErrorDb("Error with premade hunter build link: %s", buildLink.c_str());
+                            sLog.outErrorDb("%s", out.str().c_str());
+                            continue;
+                        }
+
+                        HunterPetBuild hunterPetBuild(&familyPetBuilds[family].baseBuild, buildLink);
+
+                        if (!hunterPetBuild.CheckBuild(level, &out))
+                        {
+                            sLog.outErrorDb("Error with premade hunter build: %s", buildLink.c_str());
+                            sLog.outErrorDb("%s", out.str().c_str());
+                            continue;
+                        }
+
+
+                        hunterPetBuildPath.hunterPetBuild.push_back(hunterPetBuild);
+                    }
+                }
+
+                //Only add paths that have atleast 1 spec.
+                if(hunterPetBuildPath.hunterPetBuild.size() > 0)
+                    familyPetBuilds[family].hunterPetBuildPaths.push_back(hunterPetBuildPath);
+            }
+        }
+    }
+
+    if(familyPetBuilds[1].hunterPetBuildPaths.empty())
+        sLog.outErrorDb("No premade hunter pet builds found. found!!");
+
     botCheats.clear();
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.BotCheats", "taxi,item,breath"), botCheats);
 
@@ -625,6 +695,17 @@ bool PlayerbotAIConfig::Initialize()
     respawnModMax = config.GetIntDefault("AiPlayerbot.RespawnModMax", 18);
     respawnModForPlayerBots = config.GetBoolDefault("AiPlayerbot.RespawnModForPlayerBots", false);
     respawnModForInstances = config.GetBoolDefault("AiPlayerbot.RespawnModForInstances", false);
+#ifndef MANGOSBOT_TWO
+    autoLearnHunterPetTrainedSkills = config.GetBoolDefault("AiPlayerbot.autoLearnHunterPetTrainedSkills", false);
+#endif
+    trainHunterPets = config.GetIntDefault("AiPlayerbot.TrainHunterPets", 1);
+
+    if (trainHunterPets < 0 || trainHunterPets > 2)
+    {
+
+        sLog.outError("AiPlayerbot.TrainHunterPets value of %lu is outside the accepted range and defaults to 1.", trainHunterPets);
+        trainHunterPets = 1;
+    }
 
     //LLM START
     llmEnabled = config.GetIntDefault("AiPlayerbot.LLMEnabled", 1);

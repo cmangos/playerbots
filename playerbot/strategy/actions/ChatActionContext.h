@@ -78,6 +78,7 @@
 #include "SkillAction.h"
 #include "FactionAction.h"
 #include "SetValueAction.h"
+#include "PetActions.h"
 
 namespace ai
 {

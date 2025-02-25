@@ -672,6 +672,8 @@ void PlayerbotFactory::InitPet()
 
 void PlayerbotFactory::InitPetSpells()
 {
+    // Warlock and Hunter pets should auto learn spells in WOTLK
+#ifndef MANGOSBOT_TWO
     Map* map = bot->GetMap();
     if (!map)
         return;
@@ -679,13 +681,28 @@ void PlayerbotFactory::InitPetSpells()
     Pet* pet = bot->GetPet();
     if (pet)
     {
-        if (bot->getClass() == CLASS_HUNTER)
+        if (bot->getClass() == CLASS_HUNTER && sPlayerbotAIConfig.trainHunterPets > 0)
         {
-            // TO DO
-            // ...
+            bool hasTamedPet = bot->GetPet();
+            if (hasTamedPet)
+            {
+
+                HunterPetBuild currentBuild = HunterPetBuild(bot);
+                HunterPetBuild* proposedBuild;
+                std::string buildLink = "";
+                HunterPetBuildPath hpbp;
+                switch (sPlayerbotDbStore.PetHasBuilds(bot->GetPet()->GetCharmInfo()->GetPetNumber()))
+                {
+                case 0:
+                    ai->DoSpecificAction("pet", Event("pet", "build set random"));
+                    break;
+                case 1:
+                case 2:
+                    ai->DoSpecificAction("pet", Event("pet", "build update"));
+                    break;
+                }
+            }
         }
-// Warlock pets should auto learn spells in WOTLK
-#ifndef MANGOSBOT_TWO
         else if (bot->getClass() == CLASS_WARLOCK)
         {
             constexpr uint32 PET_IMP = 416;
@@ -874,8 +891,8 @@ void PlayerbotFactory::InitPetSpells()
                 }
             }
         }
-#endif
     }
+#endif
 }
 
 void PlayerbotFactory::ClearSkills()

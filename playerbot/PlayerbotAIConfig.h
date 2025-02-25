@@ -3,6 +3,7 @@
 #include "Config/Config.h"
 #include "Talentspec.h"
 #include "Globals/SharedDefines.h"
+#include "strategy/hunter/HunterPetBuild.h"
 
 class Player;
 class PlayerbotMgr;
@@ -174,6 +175,16 @@ public:
     uint32 classRaceProbability[MAX_CLASSES][MAX_RACES];
     uint32 levelProbability[DEFAULT_MAX_LEVEL + 1];
     ClassSpecs classSpecs[MAX_CLASSES];
+#ifdef MANGOSBOT_ZERO
+    FamilyPetBuilds familyPetBuilds[27];
+    uint32 familyPetBuildProbability[27][10];
+    //std::string premadeLevelFamilyPetBuild[27][10][100]; //lvl 1 - 100
+#endif
+#ifdef MANGOSBOT_ONE
+    FamilyPetBuilds familyPetBuilds[34];
+    uint32 familyPetBuildProbability[34][10];
+    //std::string premadeLevelFamilyPetBuild[34][10][100]; //lvl 1 - 100
+#endif
     bool gearProgressionSystemEnabled;
     uint32 gearProgressionSystemItemLevels[MAX_GEAR_PROGRESSION_LEVEL][2];
     int32 gearProgressionSystemItems[MAX_GEAR_PROGRESSION_LEVEL][MAX_CLASSES][4][SLOT_EMPTY];
@@ -297,6 +308,11 @@ public:
     bool autoLearnTrainerSpells;
     bool autoLearnQuestSpells;
     bool autoLearnDroppedSpells;
+#ifndef MANGOSBOT_TWO
+    bool autoLearnHunterPetTrainedSkills;
+#endif
+    uint32 trainHunterPets;
+
     bool autoDoQuests;
     bool syncLevelWithPlayers;
     uint32 syncLevelMaxAbove, syncLevelNoPlayer;

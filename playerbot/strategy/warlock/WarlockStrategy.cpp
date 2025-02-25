@@ -1399,7 +1399,7 @@ void WarlockManualPetStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tr
 
     triggers.push_back(new TriggerNode(
         "often",
-        NextAction::array(0, new NextAction("initialize pet", ACTION_NORMAL + 1), NULL)));
+        NextAction::array(0, new NextAction("initialize pet", ACTION_NORMAL + 1), new NextAction("initialize pet spell", ACTION_NORMAL + 1), NULL)));
 }
 
 void WarlockManualCurseStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

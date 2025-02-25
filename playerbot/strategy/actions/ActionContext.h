@@ -68,6 +68,8 @@
 #include "KarazhanDungeonActions.h"
 #include "NaxxramasDungeonActions.h"
 
+#include "PetActions.h"
+
 namespace ai
 {
     class ActionContext : public NamedObjectContext<Action>
@@ -202,6 +204,7 @@ namespace ai
             creators["reset"] = &ActionContext::reset;
             creators["interrupt current spell"] = &ActionContext::interrupt_current_spell;
             creators["initialize pet"] = &ActionContext::initialize_pet;
+            creators["initialize pet spells"] = &ActionContext::initialize_pet_spells;
 
             // item helpers
             creators["goblin sapper"] = &ActionContext::goblin_sapper;
@@ -382,6 +385,7 @@ namespace ai
         static Action* wait_for_attack_keep_safe_distance(PlayerbotAI* ai) { return new WaitForAttackKeepSafeDistanceAction(ai); }
         static Action* flee(PlayerbotAI* ai) { return new FleeAction(ai); }
         static Action* initialize_pet(PlayerbotAI* ai) { return new InitializePetAction(ai); }
+        static Action* initialize_pet_spells(PlayerbotAI* ai) { return new InitializePetSpellsAction(ai); }
 
         //racials
         static Action* war_stomp(PlayerbotAI* ai) { return new CastWarStompAction(ai); }

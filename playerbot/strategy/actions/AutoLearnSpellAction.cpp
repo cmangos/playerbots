@@ -40,11 +40,20 @@ void AutoLearnSpellAction::LearnSpells(std::ostringstream* out)
         LearnQuestSpells(out);
 
     if (sPlayerbotAIConfig.autoLearnTrainerSpells)
+    {
         LearnTrainerSpells(out);
+        if (bot->getClass() == CLASS_HUNTER)
+            LearnHunterPetTrainerLearnedSkills(out);
+    }
 
 #ifdef MANGOSBOT_ZERO
     if (sPlayerbotAIConfig.autoLearnDroppedSpells)
         LearnDroppedSpells(out);
+#endif
+
+#ifndef MANGOSBOT_TWO
+    if (bot->getClass() == CLASS_HUNTER && (sPlayerbotAIConfig.autoLearnHunterPetTrainedSkills || sPlayerbotAIConfig.IsInRandomAccountList(bot->GetSession()->GetAccountId())))
+        LearnHunterPetLearnedSkills(out);
 #endif
 
     if (!ai->HasActivePlayerMaster()) //Hunter spells for pets.
@@ -73,11 +82,10 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
             continue;
 
         if (co->TrainerType != TRAINER_TYPE_CLASS && 
-            co->TrainerType != TRAINER_TYPE_TRADESKILLS &&
-            co->TrainerType != TRAINER_TYPE_PETS)
+            co->TrainerType != TRAINER_TYPE_TRADESKILLS)
             continue;
 
-        if ((co->TrainerType == TRAINER_TYPE_CLASS || co->TrainerType == TRAINER_TYPE_PETS) && co->TrainerClass != bot->getClass())
+        if (co->TrainerType == TRAINER_TYPE_CLASS && co->TrainerClass != bot->getClass())
             continue;
 
         uint32 trainerId = co->TrainerTemplateId;
@@ -362,26 +370,47 @@ bool AutoLearnSpellAction::IsValidSpell(uint32 spellId)
         spellId != 8385 && // Prevents Shaman from learning Swift Wind spell which is cast onto player as a reward, the spell is not supposed to be learned.
         // Hunter
         spellId != 542  && // Prevents hunter from learning pet skill zzOLDLearn Nature Resistance.
+        spellId != 530  && // Prevents hunter from learning Charm (Possess)
+        spellId != 6280 && // Prevents hunter from learning pet skill Pet Hardiness Rank 1
         spellId != 6284 && // Prevents hunter from learning pet skill Pet Hardiness Rank 1
+        spellId != 6281 && // Prevents hunter from learning pet skill Pet Hardiness Rank 2
         spellId != 6287 && // Prevents hunter from learning pet skill Pet Hardiness Rank 2
+        spellId != 6282 && // Prevents hunter from learning pet skill Pet Hardiness Rank 3
         spellId != 6288 && // Prevents hunter from learning pet skill Pet Hardiness Rank 3
+        spellId != 6283 && // Prevents hunter from learning pet skill Pet Hardiness Rank 4
         spellId != 6289 && // Prevents hunter from learning pet skill Pet Hardiness Rank 4
         spellId != 6290 && // Prevents hunter from learning pet skill Pet Hardiness Rank 5
+        spellId != 6286 && // Prevents hunter from learning pet skill Pet Hardiness Rank 5
+        spellId != 6311 && // Prevents hunter from learning pet skill Pet Aggression Rank 1
         spellId != 6312 && // Prevents hunter from learning pet skill Pet Aggression Rank 1
+        spellId != 6314 && // Prevents hunter from learning pet skill Pet Aggression Rank 2
         spellId != 6318 && // Prevents hunter from learning pet skill Pet Aggression Rank 2
+        spellId != 6315 && // Prevents hunter from learning pet skill Pet Aggression Rank 3
         spellId != 6319 && // Prevents hunter from learning pet skill Pet Aggression Rank 3
+        spellId != 6316 && // Prevents hunter from learning pet skill Pet Aggression Rank 4
         spellId != 6320 && // Prevents hunter from learning pet skill Pet Aggression Rank 4
+        spellId != 6317 && // Prevents hunter from learning pet skill Pet Aggression Rank 5
         spellId != 6321 && // Prevents hunter from learning pet skill Pet Aggression Rank 5
         spellId != 6329 && // Prevents hunter from learning pet skill Pet Recovery Rank 1
+        spellId != 6328 && // Prevents hunter from learning pet skill Pet Recovery Rank 1
+        spellId != 6331 && // Prevents hunter from learning pet skill Pet Recovery Rank 2
         spellId != 6335 && // Prevents hunter from learning pet skill Pet Recovery Rank 2
+        spellId != 6332 && // Prevents hunter from learning pet skill Pet Recovery Rank 3
         spellId != 6336 && // Prevents hunter from learning pet skill Pet Recovery Rank 3
+        spellId != 6333 && // Prevents hunter from learning pet skill Pet Recovery Rank 4
         spellId != 6337 && // Prevents hunter from learning pet skill Pet Recovery Rank 4
+        spellId != 6334 && // Prevents hunter from learning pet skill Pet Recovery Rank 5
         spellId != 6338 && // Prevents hunter from learning pet skill Pet Recovery Rank 5
+        spellId != 6443 && // Prevents hunter from learning pet skill Pet Resistance Rank 1
         spellId != 6448 && // Prevents hunter from learning pet skill Pet Resistance Rank 1
+        spellId != 6444 && // Prevents hunter from learning pet skill Pet Resistance Rank 2
         spellId != 6450 && // Prevents hunter from learning pet skill Pet Resistance Rank 2
+        spellId != 6445 && // Prevents hunter from learning pet skill Pet Resistance Rank 3
         spellId != 6451 && // Prevents hunter from learning pet skill Pet Resistance Rank 3
+        spellId != 6446 && // Prevents hunter from learning pet skill Pet Resistance Rank 4
         spellId != 6452 && // Prevents hunter from learning pet skill Pet Resistance Rank 4
         spellId != 6453 && // Prevents hunter from learning pet skill Pet Resistance Rank 5
+        spellId != 6447 && // Prevents hunter from learning pet skill Pet Resistance Rank 5
         // Paladin
         spellId != 1973; // Prevents Paladins from learning zzOldHip Shot III.
 #elif MANGOSBOT_ONE
@@ -449,4 +478,262 @@ bool AutoLearnSpellAction::IsTeachingSpellListedAsSpell(uint32 spellId)
         spellId == 19350;      // Starshards Teaching Spell listed as actual spell
 #endif
         return isTeachingSpellListedAsSpell;
+}
+
+void AutoLearnSpellAction::LearnHunterPetTrainerLearnedSkills(std::ostringstream* out)
+{
+    std::map<uint16, std::vector<uint32>> HunterSpells;
+#pragma region Arcane Resistance
+        HunterSpells[20].push_back(24495);
+        HunterSpells[30].push_back(24508);
+        HunterSpells[40].push_back(24509);
+        HunterSpells[50].push_back(24510);
+        HunterSpells[60].push_back(27350); // TBC
+    #pragma endregion 
+
+#pragma region Fire Resistance
+        HunterSpells[20].push_back(24440);
+        HunterSpells[30].push_back(24441);
+        HunterSpells[40].push_back(24463);
+        HunterSpells[50].push_back(24464);
+        HunterSpells[60].push_back(27351); // TBC
+#pragma endregion
+
+#pragma region Frost Resistance
+        HunterSpells[20].push_back(24475);
+        HunterSpells[30].push_back(24476);
+        HunterSpells[40].push_back(24477);
+        HunterSpells[50].push_back(24478);
+        HunterSpells[60].push_back(27352); // TBC
+#pragma endregion
+
+#pragma region Great Stamina
+        HunterSpells[10].push_back(4195);
+        HunterSpells[12].push_back(4196);
+        HunterSpells[18].push_back(4197);
+        HunterSpells[24].push_back(4198);
+        HunterSpells[30].push_back(4199);
+        HunterSpells[36].push_back(4200);
+        HunterSpells[42].push_back(4201);
+        HunterSpells[48].push_back(4202);
+        HunterSpells[54].push_back(5048);
+        HunterSpells[60].push_back(5049);
+        HunterSpells[70].push_back(27364); // TBC
+#pragma endregion
+
+#pragma region Growl
+        HunterSpells[1].push_back(1853);
+        HunterSpells[10].push_back(14922);
+        HunterSpells[20].push_back(14923);
+        HunterSpells[30].push_back(14924);
+        HunterSpells[40].push_back(14925);
+        HunterSpells[50].push_back(14926);
+        HunterSpells[60].push_back(14927);
+        HunterSpells[70].push_back(27344); // TBC
+#pragma endregion
+
+#pragma region Natural Armor
+        HunterSpells[10].push_back(24547);
+        HunterSpells[12].push_back(24556);
+        HunterSpells[18].push_back(24557);
+        HunterSpells[24].push_back(24558);
+        HunterSpells[30].push_back(24559);
+        HunterSpells[36].push_back(24560);
+        HunterSpells[42].push_back(24561);
+        HunterSpells[48].push_back(24562);
+        HunterSpells[54].push_back(24631);
+        HunterSpells[60].push_back(24632);
+        HunterSpells[70].push_back(27362); // TBC
+#pragma endregion
+
+#pragma region Nature Resistance
+        HunterSpells[20].push_back(24494);
+        HunterSpells[30].push_back(24511);
+        HunterSpells[40].push_back(24512);
+        HunterSpells[50].push_back(24513);
+        HunterSpells[60].push_back(27354); // TBC
+#pragma endregion
+
+#pragma region Shadow Resistance
+        HunterSpells[20].push_back(24490);
+        HunterSpells[30].push_back(24514);
+        HunterSpells[40].push_back(24515);
+        HunterSpells[50].push_back(24516);
+        HunterSpells[60].push_back(27353); // TBC
+#pragma endregion
+
+#ifdef MANGOSBOT_ONE
+#pragma region Avoidance
+        HunterSpells[30].push_back(35699); // TBC
+        HunterSpells[60].push_back(35700); // TBC
+#pragma endregion 
+
+#pragma region Cobra Reflexes
+        HunterSpells[30].push_back(25077); // TBC
+#pragma endregion 
+#endif
+
+        for (auto& pair : HunterSpells)
+        {
+            if (pair.first <= bot->GetLevel())
+            {
+                for (uint32 spellId : pair.second)
+                {
+                    if (!bot->HasSpell(spellId))
+                    {
+                        bot->learnSpell(spellId, false);
+                    }
+                }
+            }
+        }
+}
+
+void AutoLearnSpellAction::LearnHunterPetLearnedSkills(std::ostringstream* out)
+{
+    std::map<uint16, std::vector<uint32>> HunterSpells;
+#pragma region Bite
+    HunterSpells[1].push_back(17254);
+    HunterSpells[8].push_back(17262);
+    HunterSpells[16].push_back(17263);
+    HunterSpells[24].push_back(17264);
+    HunterSpells[32].push_back(17265);
+    HunterSpells[40].push_back(17266);
+    HunterSpells[48].push_back(17267);
+    HunterSpells[56].push_back(17268);
+    HunterSpells[64].push_back(27348); // TBC
+#pragma endregion 
+
+#pragma region Charge
+    HunterSpells[1].push_back(7370);
+    HunterSpells[12].push_back(26184);
+    HunterSpells[24].push_back(26185);
+    HunterSpells[36].push_back(26186);
+    HunterSpells[48].push_back(26202);
+    HunterSpells[60].push_back(28343);
+#pragma endregion 
+
+#pragma region Claw
+    HunterSpells[1].push_back(2980);
+    HunterSpells[8].push_back(2981);
+    HunterSpells[16].push_back(2982);
+    HunterSpells[24].push_back(3667);
+    HunterSpells[32].push_back(2975);
+    HunterSpells[40].push_back(2976);
+    HunterSpells[48].push_back(2977);
+    HunterSpells[56].push_back(3666);
+    HunterSpells[64].push_back(27347); // TBC
+#pragma endregion 
+
+#pragma region Cower
+    HunterSpells[5].push_back(1747);
+    HunterSpells[15].push_back(1748);
+    HunterSpells[25].push_back(1749);
+    HunterSpells[35].push_back(1750);
+    HunterSpells[45].push_back(1751);
+    HunterSpells[55].push_back(16998);
+    HunterSpells[65].push_back(27346); // TBC
+#pragma endregion
+
+#pragma region Dash
+    HunterSpells[30].push_back(23100);
+    HunterSpells[40].push_back(23111);
+    HunterSpells[50].push_back(23112);
+#pragma endregion
+
+#pragma region Dive
+    HunterSpells[30].push_back(23146);
+    HunterSpells[40].push_back(23149);
+    HunterSpells[50].push_back(23150);
+#pragma endregion
+
+#pragma region Furious Howl
+    HunterSpells[20].push_back(24609);
+    HunterSpells[30].push_back(24608);
+    HunterSpells[40].push_back(24607);
+    HunterSpells[50].push_back(24599);
+#pragma endregion
+
+#pragma region Lightning Breath
+    HunterSpells[1].push_back(24845);  // TBC
+    HunterSpells[12].push_back(25013);
+    HunterSpells[24].push_back(25014);
+    HunterSpells[36].push_back(25015);
+    HunterSpells[48].push_back(25016);
+    HunterSpells[60].push_back(25017);
+#pragma endregion
+
+#pragma region Prowl
+    HunterSpells[30].push_back(24451);
+    HunterSpells[40].push_back(24454);
+    HunterSpells[50].push_back(24455);
+#pragma endregion
+
+#pragma region Scorpid Poison
+    HunterSpells[8].push_back(24584);
+    HunterSpells[24].push_back(24588);
+    HunterSpells[40].push_back(24589);
+    HunterSpells[56].push_back(24641);
+    HunterSpells[64].push_back(27361); // TBC
+#pragma endregion
+
+#pragma region Screech
+    HunterSpells[8].push_back(24424);
+    HunterSpells[24].push_back(24580);
+    HunterSpells[40].push_back(24581);
+    HunterSpells[56].push_back(24582);
+    HunterSpells[64].push_back(27349); // TBC
+#pragma endregion
+
+#pragma region Shell Shield
+    HunterSpells[20].push_back(26065);
+#pragma endregion
+
+#pragma region Thunderstomp
+    HunterSpells[30].push_back(26094);
+    HunterSpells[40].push_back(26189);
+    HunterSpells[50].push_back(26190);
+#pragma endregion
+
+#ifdef MANGOSBOT_ONE
+#pragma region Fire Breath
+    HunterSpells[1].push_back(34890); // TBC
+    HunterSpells[60].push_back(35324); // TBC
+#pragma endregion
+
+#pragma region Gore
+    HunterSpells[1].push_back(35299); // TBC
+    HunterSpells[8].push_back(35300); // TBC
+    HunterSpells[16].push_back(35302); // TBC
+    HunterSpells[24].push_back(35303); // TBC
+    HunterSpells[32].push_back(35304); // TBC
+    HunterSpells[40].push_back(35305); // TBC
+    HunterSpells[48].push_back(35306); // TBC
+    HunterSpells[56].push_back(35307); // TBC
+    HunterSpells[63].push_back(35308); // TBC
+#pragma endregion
+
+#pragma region Poison Spit
+    HunterSpells[15].push_back(35388); // TBC
+    HunterSpells[45].push_back(35390); // TBC
+    HunterSpells[60].push_back(35391); // TBC
+#pragma endregion
+
+#pragma region Warp
+    HunterSpells[60].push_back(35348); // TBC
+#pragma endregion
+#endif
+
+    for (auto& pair : HunterSpells)
+    {
+        if (pair.first <= bot->GetLevel())
+        {
+            for (uint32 spellId : pair.second)
+            {
+                if (!bot->HasSpell(spellId))
+                {
+                    bot->learnSpell(spellId, false);
+                }
+            }
+        }
+    }
 }

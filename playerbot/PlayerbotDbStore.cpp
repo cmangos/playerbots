@@ -82,3 +82,147 @@ void PlayerbotDbStore::SaveValue(uint64 guid, std::string preset, std::string ke
 {
     CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES ('%lu', '%s', '%s', '%s')", guid, preset.c_str(), key.c_str(), value.c_str());
 }
+
+void PlayerbotDbStore::SavePetBuildLink(uint64 petGuid, std::string buildLink)
+{
+    auto idResults = CharacterDatabase.PQuery("SELECT id FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = 'petBuild'", petGuid);
+    if (idResults)
+    {
+        auto fields = idResults->Fetch();
+        uint64 id = fields[0].GetUInt64();
+        std::stringstream ss;
+        ss << "buildLink>>" << buildLink;
+        std::string buildLink = ss.str();
+        CharacterDatabase.PExecute("UPDATE `ai_playerbot_db_store` SET `value` = '%s' WHERE id = '%lu';", buildLink.c_str(), petGuid);
+    }
+    else
+    {
+        std::stringstream ss;
+        ss << "buildLink>>" << buildLink;
+        std::string buildLink = ss.str();
+        CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES (%lu, '%s', '%s', '%s');", petGuid, "", "petBuild", buildLink.c_str());
+    }
+}
+
+std::string PlayerbotDbStore::LoadPetBuildLink(uint64 petGuid)
+{
+    auto buildLinkResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = 'petBuild'", petGuid);
+    if (buildLinkResults)
+    {
+        auto field = buildLinkResults->Fetch();
+        std::string buildLink = field[0].GetString();
+        if (buildLink._Starts_with("buildLink>>"))
+        {
+            return buildLink.substr(11);
+        }
+    }
+    return "";
+}
+
+void PlayerbotDbStore::SavePetBuildPath(uint64 petGuid, uint32 petFamilyId, int buildNo)
+{
+    auto idResults = CharacterDatabase.PQuery("SELECT id FROM `ai_playerbot_db_store` WHERE `guid` = %lu AND `key` = 'petBuild'", petGuid);
+    if (idResults)
+    {
+        auto fields = idResults->Fetch();
+        uint64 id = fields[0].GetUInt64();
+        std::stringstream ss;
+        ss << "buildNo>>" << std::to_string(petFamilyId) << ">>" << buildNo;
+        std::string buildLink = ss.str();
+        CharacterDatabase.PExecute("UPDATE `ai_playerbot_db_store` SET `value` = '%s' WHERE id = %lu;", buildLink.c_str(), petGuid);
+    }
+    else
+    {
+        std::stringstream ss;
+        ss << "buildNo>>" << std::to_string(petFamilyId) << ">>" << buildNo;
+        std::string buildLink = ss.str();
+        CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES (%lu, '%s', '%s', '%s');", petGuid, "", "petBuild", buildLink.c_str());
+    }
+}
+
+HunterPetBuildPath PlayerbotDbStore::LoadPetBuildPath(uint64 petGuid)
+{
+    HunterPetBuildPath path = HunterPetBuildPath();
+    auto buildResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = %lu AND `key` = 'petBuild'", petGuid);
+    if (buildResults)
+    {
+        auto field = buildResults->Fetch();
+        std::string buildNoString = field[0].GetString();
+        if (buildNoString._Starts_with("buildNo>>"))
+        {
+            buildNoString = buildNoString.substr(9);
+            std::string delimiter = ">>";
+            uint32 familyId = std::stoi(buildNoString.substr(0, buildNoString.find(delimiter)));
+            std::string buildNoStringA = buildNoString.substr(buildNoString.find(delimiter)+2);
+            int buildNo = std::stoi(buildNoStringA);
+            return sPlayerbotAIConfig.familyPetBuilds[familyId].GetBuildPath(buildNo);
+        }
+    }
+    return path;
+}
+
+/**
+Returns 0 if no builds are found, 1 if HunterPetBuildPath is found, 2 if only HunterPetBuild build Link is found
+*/
+int PlayerbotDbStore::PetHasBuilds(uint64 petGuid)
+{
+    auto buildResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = 'petBuild'", petGuid);
+    if (buildResults)
+    {
+        auto field = buildResults->Fetch();
+        std::string buildString = field[0].GetString();
+        if (buildString._Starts_with("buildNo>>"))
+        {
+            return 1;
+        }
+        else if (buildString._Starts_with("buildLink>>"))
+        {
+            return 2;
+        }
+    }    return 0;
+}
+
+std::string PlayerbotDbStore::GetPetBuildName(uint64 petGuid)
+{
+    switch (PetHasBuilds(petGuid))
+    {
+        case 0:
+            return "No Pet has build saved.";
+        case 1:
+        {
+            HunterPetBuildPath path = HunterPetBuildPath();
+            auto buildResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = %lu AND `key` = 'petBuild'", petGuid);
+            if (buildResults)
+            {
+                auto field = buildResults->Fetch();
+                std::string buildNoString = field[0].GetString();
+                if (buildNoString._Starts_with("buildNo>>"))
+                {
+                    buildNoString = buildNoString.substr(9);
+                    std::string delimiter = ">>";
+                    uint32 familyId = std::stoi(buildNoString.substr(0, buildNoString.find(delimiter)));
+                    std::string buildNoStringA = buildNoString.substr(buildNoString.find(delimiter) + 2);
+                    int buildNo = std::stoi(buildNoStringA);
+                    return sPlayerbotAIConfig.familyPetBuilds[familyId].GetBuildPath(buildNo).name;
+                }
+            }
+            return "Error retrieving build path";
+        }
+        case 2:
+        {
+            auto buildLinkResults = CharacterDatabase.PQuery("SELECT value FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `key` = 'petBuild'", petGuid);
+            if (buildLinkResults)
+            {
+                auto field = buildLinkResults->Fetch();
+                std::string buildLink = field[0].GetString();
+                if (buildLink._Starts_with("buildLink>>"))
+                {
+                    return buildLink.substr(11);
+                }
+            }
+            return "Error retrieving build link";
+        }
+        default:
+            return "Error retrieving pet build info.";
+    }
+}

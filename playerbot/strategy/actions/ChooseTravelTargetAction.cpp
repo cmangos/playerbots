@@ -633,7 +633,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Quests
     if (quests)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::QuestGiver, { 0 }, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::QuestGiver, {}, false))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -643,7 +643,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Zones
     if (zones)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Explore, { 0 }, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Explore, {}, false))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -653,7 +653,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Npcs
     if (npcs)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::GenericRpg, { 0 }, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::GenericRpg, {}, false))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -663,7 +663,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Mobs
     if (mobs)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Grind, { 0 }, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Grind, {}, false))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -673,7 +673,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Bosses
     if (bosses)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Boss, { 0 }, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Boss, {}, false))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);

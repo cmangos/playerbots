@@ -78,7 +78,6 @@ namespace ai
 			{"should ah sell", false},
 			{"can ah sell", false},
 			{"can get mail", false },
-			{"has strategy::free", false},
 			{"has strategy::rpg quest", false},
 			{"can fight equal", false},
 			{"can fight elite", false},
@@ -336,8 +335,8 @@ namespace ai
 		bool IsPreparing();
 
 		uint32 GetRetryCount(bool isMove) const { return isMove ? moveRetryCount : extendRetryCount; }
-		uint32 GetTimeLeft() const { return statusTime - GetExpiredTime(); }
-		uint32 GetExpiredTime() const { return WorldTimer::getMSTime() - startTime; }
+		int32 GetTimeLeft() const { return statusTime - GetExpiredTime(); }
+		int32 GetExpiredTime() const { return WorldTimer::getMSTime() - startTime; }
 
 		void SetRetry(bool isMove, uint32 newCount = 0) { if (isMove) moveRetryCount = newCount; else extendRetryCount = newCount; }
 		bool IsMaxRetry(bool isMove) { return isMove ? (moveRetryCount > 10) : (extendRetryCount > 5); }
@@ -346,6 +345,7 @@ namespace ai
 		
 		void AddCondition(std::string condition) { travelConditions.push_back(condition); }
 		void SetConditions(std::vector<std::string> conditions) { travelConditions = conditions; }
+		std::vector<std::string> GetConditions() { return travelConditions; }
 
 		void SetStatus(TravelStatus status);
 		void SetExpireIn(uint32 expireMs) { statusTime = GetExpiredTime() + expireMs; }

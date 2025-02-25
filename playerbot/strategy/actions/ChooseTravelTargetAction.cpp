@@ -129,6 +129,7 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
 
     //Clear rpg and attack/grind target. We want to travel, not hang around some more.
     RESET_AI_VALUE(GuidPosition,"rpg target");
+    RESET_AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target");
     RESET_AI_VALUE(ObjectGuid,"attack target");
     RESET_AI_VALUE(bool, "travel target active");
     context->ClearValues("no active travel destinations");

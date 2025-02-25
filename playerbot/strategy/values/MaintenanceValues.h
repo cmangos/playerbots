@@ -129,6 +129,13 @@ namespace ai
         virtual bool Calculate();
     };
 
+    class ShouldGetMailValue : public BoolCalculatedValue
+    {
+    public:
+        ShouldGetMailValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should get mail", 60) {}
+        virtual bool Calculate();
+    };
+
     class CanFightEqualValue: public BoolCalculatedValue
     {
     public:

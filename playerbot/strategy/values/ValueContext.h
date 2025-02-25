@@ -345,6 +345,7 @@ namespace ai
             creators["can ah sell"] = [](PlayerbotAI* ai) { return new CanAHSellValue(ai); };
             creators["can ah buy"] = [](PlayerbotAI* ai) { return new CanAHBuyValue(ai); };
             creators["can get mail"] = [](PlayerbotAI* ai) { return new CanGetMailValue(ai); };
+            creators["should get mail"] = [](PlayerbotAI* ai) { return new ShouldGetMailValue(ai); };
             creators["can fight equal"] = [](PlayerbotAI* ai) { return new CanFightEqualValue(ai); };
             creators["can fight elite"] = [](PlayerbotAI* ai) { return new CanFightEliteValue(ai); };
             creators["can fight boss"] = [](PlayerbotAI* ai) { return new CanFightBossValue(ai); };

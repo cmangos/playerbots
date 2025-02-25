@@ -1177,7 +1177,7 @@ bool RequestQuestTravelTargetAction::Execute(Event& event)
 
                     std::vector<std::string> qualifier = { std::to_string(questId), std::to_string(objective) };
 
-                    if (AI_VALUE2(bool, "group or", "following party,near leader,need quest objective::" + Qualified::MultiQualify(qualifier, ","))) //Noone needs the quest objective.
+                    if (AI_VALUE2(bool, "group or", "following party,need quest objective::" + Qualified::MultiQualify(qualifier, ","))) //Noone needs the quest objective.
                         flag = flag | (uint32)purposeFlag;
                 }
             }

@@ -70,9 +70,6 @@ namespace ai
 
 		std::unordered_map<std::string, bool> boolValues = 
 		{
-			{"group or::should sell,can sell,following party,near leader", false},
-			{"group or::should repair,can repair,following party,near leader", false},
-			{"group or::should ah sell,can ah sell,following party,near leader", false},
 			{"should get money", false},
 			{"should sell", false},
 			{"can sell", false},

@@ -238,19 +238,19 @@ bool NeedTravelPurposeValue::Calculate()
     switch (purpose)
     {
     case TravelDestinationPurpose::Repair:
-        if (AI_VALUE2(bool, "group or", "should repair,can repair,following party,near leader"))
+        if (AI_VALUE2(bool, "group or", "should repair,can repair,following party"))
             return true;
         if (AI_VALUE2(bool, "has strategy", "free") && AI_VALUE(bool, "should repair") && AI_VALUE(bool, "can repair"))
             return true;
         break;
     case TravelDestinationPurpose::Vendor:
-        if (AI_VALUE2(bool, "group or", "should sell,can sell,following party,near leader"))
+        if (AI_VALUE2(bool, "group or", "should sell,can sell,following party"))
             return true;
         if (AI_VALUE2(bool, "has strategy", "free") && AI_VALUE(bool, "should sell") && AI_VALUE(bool, "can sell"))
             return true;
         break;
     case TravelDestinationPurpose::AH:
-        if (AI_VALUE2(bool, "group or", "should ah sell,can ah sell,following party,near leader"))
+        if (AI_VALUE2(bool, "group or", "should ah sell,can ah sell,following party"))
             return true;
         if (AI_VALUE2(bool, "has strategy", "free") && AI_VALUE(bool, "should ah sell") && AI_VALUE(bool, "can ah sell"))
             return true;
@@ -269,7 +269,7 @@ bool NeedTravelPurposeValue::Calculate()
     case TravelDestinationPurpose::Boss:
         return AI_VALUE(bool, "can fight boss");
     case TravelDestinationPurpose::Mail:
-        return AI_VALUE(bool, "can get mail");
+        return AI_VALUE(bool, "can get mail") && AI_VALUE(bool, "should get mail");
     case TravelDestinationPurpose::Explore:
         return ai->HasStrategy("explore", BotState::BOT_STATE_NON_COMBAT);    
     case TravelDestinationPurpose::GenericRpg:
@@ -391,7 +391,7 @@ bool QuestStageActiveValue::Calculate()
     }
 
     if(objective)
-        if (!AI_VALUE2(bool, "need quest objective", objective - 1))
+        if (!AI_VALUE2(bool, "need quest objective", "{" + std::to_string(questId) + "," + std::to_string(objective - 1) + "}"))
             return false;
 
     return true;

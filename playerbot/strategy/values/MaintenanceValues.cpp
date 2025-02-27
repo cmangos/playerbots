@@ -69,3 +69,30 @@ bool CanGetMailValue::Calculate() {
 
     return false;
 }
+
+bool ShouldGetMailValue::Calculate() {
+    time_t cur_time = time(0);
+
+    for (PlayerMails::iterator itr = bot->GetMailBegin(); itr != bot->GetMailEnd(); ++itr)
+    {
+        if ((*itr)->state == MAIL_STATE_DELETED || cur_time < (*itr)->deliver_time)
+            continue;
+
+        int32 waitingInBoxTime = (*itr)->deliver_time - cur_time;
+
+        if (waitingInBoxTime < HOUR) //Let mail sit in the inbox for atleast 1 hour
+            return false;
+
+        if ((*itr)->has_items && waitingInBoxTime > HOUR * 4) //Items are allowed to sit in the mail for max 4 hours.
+        {
+            return true;
+        }
+
+        if ((*itr)->money && AI_VALUE(bool, "should get money")) //We need money so we should get it.
+        {
+            return true;
+        }
+    }
+
+    return false;
+}

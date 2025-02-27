@@ -37,6 +37,23 @@ namespace ai
 #endif 
     };
 
+    class BoolOrValue : public BoolCalculatedValue, public Qualified
+    {
+    public:
+        BoolOrValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "bool or"), Qualified() {}
+        virtual bool Calculate();
+
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "bool or"; } //Must equal iternal name
+        virtual std::string GetHelpTypeName() { return "operator"; }
+        virtual std::string GetHelpDescription()
+        {
+            return "This value will return true if any of the values included in the qualifier return true.";
+        }
+        virtual std::vector<std::string> GetUsedValues() { return { }; }
+#endif 
+    };
+
     class GT32Value : public BoolCalculatedValue, public Qualified
     {
     public:

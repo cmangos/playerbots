@@ -108,10 +108,7 @@ namespace ai
             creators["close"] = &StrategyContext::close;
             creators["ranged"] = &StrategyContext::ranged;
             creators["behind"] = &StrategyContext::behind;
-            creators["bg"] = &StrategyContext::bg;
-            creators["battleground"] = &StrategyContext::battleground;
             creators["warsong"] = &StrategyContext::warsong;
-            creators["alterac"] = &StrategyContext::alterac;
             creators["arathi"] = &StrategyContext::arathi;
             creators["eye"] = &StrategyContext::eye;
             creators["isle"] = &StrategyContext::isle;
@@ -167,10 +164,7 @@ namespace ai
     private:
         static Strategy* mount(PlayerbotAI* ai) { return new MountStrategy(ai); }
         static Strategy* arena(PlayerbotAI* ai) { return new ArenaStrategy(ai); }
-        static Strategy* bg(PlayerbotAI* ai) { return new BGStrategy(ai); }
-        static Strategy* battleground(PlayerbotAI* ai) { return new BattlegroundStrategy(ai); }
         static Strategy* warsong(PlayerbotAI* ai) { return new WarsongStrategy(ai); }
-        static Strategy* alterac(PlayerbotAI* ai) { return new AlteracStrategy(ai); }
         static Strategy* arathi(PlayerbotAI* ai) { return new ArathiStrategy(ai); }
         static Strategy* eye(PlayerbotAI* ai) { return new EyeStrategy(ai); }
         static Strategy* isle(PlayerbotAI* ai) { return new IsleStrategy(ai); }

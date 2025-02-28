@@ -57,9 +57,3 @@ bool CastRaiseDeadAction::isPossible()
 
 	return false;
 }
-
-bool CastDeathGripAction::isUseful()
-{
-	Unit* target = AI_VALUE(Unit*, "current target"); 
-	return CastReachTargetSpellAction::isUseful() && target && !target->IsCrowdControlled();
-}

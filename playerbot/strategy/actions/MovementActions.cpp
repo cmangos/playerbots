@@ -2379,12 +2379,19 @@ bool JumpAction::Execute(ai::Event &event)
     bool jumpBackward = false;
     bool showLanding = false;
     bool isRtsc = false;
+    bool toPosition = false;
 
     // only show landing
     if (options.find("show") != std::string::npos && options.size() > 5)
     {
-        options = param.substr(5);
+        options = options.substr(5);
         showLanding = true;
+    }
+    // to position
+    if (options.find("position") != std::string::npos && options.size() > 9)
+    {
+        options = options.substr(9);
+        toPosition = true;
     }
     // rtsc stuff
     if (options == "rtsc")
@@ -2424,7 +2431,7 @@ bool JumpAction::Execute(ai::Event &event)
     }
 
     // find jump position
-    if (options == "tome" || options == "follow" || options == "chase" || isRtsc)
+    if (options == "tome" || options == "follow" || options == "chase" || isRtsc || toPosition)
     {
         if (options == "follow" && !ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
             return false;
@@ -2521,6 +2528,18 @@ bool JumpAction::Execute(ai::Event &event)
             distanceFrom = sPlayerbotAIConfig.sightDistance;
         }
 
+        if (toPosition)
+        {
+            ai::PositionMap& posMap = context->GetValue<ai::PositionMap&>("position")->Get();
+            ai::PositionEntry pos = context->GetValue<ai::PositionMap&>("position")->Get()[options];
+            if (!pos.isSet())
+                return false;
+
+            dest = WorldPosition(pos.Get());
+            distanceTo = 50.0f;
+            distanceFrom = 50.0f;
+        }
+
         // try nearby random points
         if (!jumpPoint && ai->AllowActivity())
             jumpPoint = GetPossibleJumpStartForInRange(src, dest, possibleLanding, bot, requiredSpeed, distanceTo, distanceFrom);
@@ -2530,7 +2549,7 @@ bool JumpAction::Execute(ai::Event &event)
         if (jumpPoint && requiredSpeed > 0.f)
         {
             // check if jumping is much faster
-            if (options == "follow" || options == "chase")
+            if (options == "follow" || options == "chase" || toPosition)
             {
                 if (!IsJumpFasterThanWalking(src, dest, possibleLanding, bot))
                     return false;

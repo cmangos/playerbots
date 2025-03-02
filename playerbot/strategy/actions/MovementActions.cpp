@@ -2779,10 +2779,32 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
 
         if (!foundCollision)
         {
-            fx -= jumper->GetCollisionWidth() * vcos;
-            fy -= jumper->GetCollisionWidth() * vsin;
+            fx += jumper->GetCollisionWidth() * vcos;
+            fy += jumper->GetCollisionWidth() * vsin;
+        }
+
+        if (!foundCollision)
+        {
+            // check distanct collision
             if (ascending)
-                fz -= jumper->GetCollisionHeight();
+                fz += jumper->GetCollisionHeight();
+
+            fx += jumper->GetCollisionWidth() * vcos;
+            fy += jumper->GetCollisionWidth() * vsin;
+
+#ifdef MANGOSBOT_TWO
+            foundCollision = jumper->GetMap()->GetHitPosition(ox, oy, oz, fx, fy, fz, jumper->GetPhaseMask(), -0.5f);
+#else
+            foundCollision = jumper->GetMap()->GetHitPosition(ox, oy, oz, fx, fy, fz, -0.5f);
+#endif
+
+            if (!foundCollision)
+            {
+                fx -= jumper->GetCollisionWidth() * vcos;
+                fy -= jumper->GetCollisionWidth() * vsin;
+                if (ascending)
+                    fz -= jumper->GetCollisionHeight();
+            }
         }
 
         path.push_back(WorldPosition(src.getMapId(), fx, fy, fz));
@@ -2816,7 +2838,8 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
             {
                 goodLanding = false;
                 // reduce landing height by collision height
-                fz = fz - CONTACT_DISTANCE - jumper->GetCollisionHeight();
+                float fz_mod = fz - CONTACT_DISTANCE - jumper->GetCollisionHeight();
+                jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, -0.5f);
             }
 
             WorldPosition destination = WorldPosition(src.getMapId(), fx, fy ,fz);

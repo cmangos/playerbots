@@ -2840,6 +2840,11 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
                 // reduce landing height by collision height
                 float fz_mod = fz - CONTACT_DISTANCE - jumper->GetCollisionHeight();
                 jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, -0.5f);
+#ifdef MANGOSBOT_TWO
+                jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, jumper->GetPhaseMask(), -0.5f);
+#else
+                jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, -0.5f);
+#endif
             }
 
             WorldPosition destination = WorldPosition(src.getMapId(), fx, fy ,fz);

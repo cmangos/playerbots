@@ -22,6 +22,10 @@ void BattlegroundStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigge
         NextAction::array(0, new NextAction("bg move to start", 1.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "player has flag",
+        NextAction::array(0, new NextAction("jump::position bg objective", 3.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "bg active",
         NextAction::array(0, new NextAction("check mount state", 2.0f), new NextAction("bg move to objective", 1.0f), NULL)));
 
@@ -74,7 +78,10 @@ void WarsongStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "player has flag",
-        NextAction::array(0, new NextAction("bg move to objective", 80.0f), NULL)));
+        NextAction::array(0,
+            new NextAction("jump::position bg objective", 80.5f),
+            new NextAction("bg move to objective", 80.0f),
+            NULL)));
 
     triggers.push_back(new TriggerNode(
         "player has flag",

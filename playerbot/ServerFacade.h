@@ -13,6 +13,7 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "PlayerbotAIBase.h"
 #include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/Worldposition.h"
 
 class ServerFacade
 {

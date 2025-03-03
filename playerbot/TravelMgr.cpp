@@ -9,7 +9,6 @@
 #include "PlayerbotAI.h"
 #include "BotTests.h"
 #include "Globals/ObjectAccessor.h"
-#include <execution>
 
 using namespace ai;
 using namespace MaNGOS;

@@ -9,7 +9,6 @@
 #include "PlayerbotAI.h"
 #include "BotTests.h"
 #include "Globals/ObjectAccessor.h"
-#include <execution>
 
 using namespace ai;
 using namespace MaNGOS;
@@ -135,13 +134,13 @@ bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInf
         {
             if (info.GetBoolValue("can fight equal"))
             {
-                if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest npc::" + std::to_string(GetEntry()))) //Noone has yellow exclamation mark.
-                    if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(GetEntry()) + ",need quest reward::" + std::to_string(GetQuestId()))) //Noone can do this quest for a usefull reward.
+                if (!AI_VALUE2(bool, "group or", "following party,can accept quest npc::" + std::to_string(GetEntry()))) //Noone has yellow exclamation mark.
+                    if (!AI_VALUE2(bool, "group or", "following party,can accept quest low level npc::" + std::to_string(GetEntry()) + ",need quest reward::" + std::to_string(GetQuestId()))) //Noone can do this quest for a usefull reward.
                         return false;
             }
             else
             {
-                if (!AI_VALUE2(bool, "group or", "following party,near leader,can accept quest low level npc::" + std::to_string(GetEntry()))) //Noone can pick up this quest for money.
+                if (!AI_VALUE2(bool, "group or", "following party,can accept quest low level npc::" + std::to_string(GetEntry()))) //Noone can pick up this quest for money.
                     return false;
             }
         }
@@ -155,7 +154,7 @@ bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInf
     {
         if (!forceThisQuest)
         {
-            if (!AI_VALUE2(bool, "group or", "following party,near leader,can turn in quest npc::" + std::to_string(GetEntry())))
+            if (!AI_VALUE2(bool, "group or", "following party,can turn in quest npc::" + std::to_string(GetEntry())))
                 return false;
         }
         else
@@ -286,7 +285,7 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
 
    std::vector<std::string> qualifier = { std::to_string(GetQuestTemplate()->GetQuestId()), std::to_string(GetObjective()) };
 
-    if (!AI_VALUE2(bool, "group or", "following party,near leader,need quest objective::" + Qualified::MultiQualify(qualifier,","))) //Noone needs the quest objective.
+    if (!AI_VALUE2(bool, "group or", "following party,need quest objective::" + Qualified::MultiQualify(qualifier,","))) //Noone needs the quest objective.
         return false;
 
     WorldPosition botPos(bot);
@@ -346,58 +345,7 @@ uint8 QuestObjectiveTravelDestination::GetObjective() const
 }
 
 bool RpgTravelDestination::IsPossible(const PlayerTravelInfo& info) const
-{
-    /*bool isUsefull = false;
-
-    if (GetEntry() > 0 && GetPurpose() != TravelDestinationPurpose::GenericRpg && GetPurpose() != TravelDestinationPurpose::Trainer && GetPurpose() != TravelDestinationPurpose::)
-    {
-
-        CreatureInfo const* cInfo = this->GetCreatureInfo();
-
-        if (!cInfo)
-            return false;
-
-        if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR)
-        {
-            if (info.GetBoolValue2("group or", "should sell,can sell,following party,near leader"))
-                isUsefull = true;
-            else if (info.GetBoolValue2("has strategy", "free") && info.GetBoolValue("should sell") && info.GetBoolValue("can sell"))
-                isUsefull = true;
-        }
-
-        if (cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR)
-        {
-            if (info.GetBoolValue2("group or", "should repair,can repair,following party,near leader"))
-                isUsefull = true;
-            else if (info.GetBoolValue2("has strategy", "free") && info.GetBoolValue("should repair") && info.GetBoolValue("can repair"))
-                isUsefull = true;
-        }
-
-        if (cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER)
-        {
-            if (info.GetBoolValue2("group or", "should ah sell,can ah sell,following party,near leader"))
-                isUsefull = true;
-            else if (info.GetBoolValue2("has strategy", "free") && info.GetBoolValue("should ah sell") && info.GetBoolValue("can ah sell"))
-                isUsefull = true;
-        }
-    }
-    else
-    {
-        GameObjectInfo const* gInfo = this->GetGoInfo();
-
-        if (!gInfo)
-            return false;
-
-        if (gInfo->type == GAMEOBJECT_TYPE_MAILBOX)
-            if (info.GetBoolValue("can get mail"))
-                isUsefull = true;
-    }
-
-
-    if (!isUsefull)
-        return false;
-        */
-
+{   
     WorldPosition firstPoint = *GetPoints().front();
 
     //Horde pvp baracks

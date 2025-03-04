@@ -12,6 +12,10 @@
 #include <chrono>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <thread>
+#include "Log/Log.h"
+#include "PlayerbotAIConfig.h"
+#include "PlayerbotTextMgr.h"
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -24,10 +28,6 @@
 #include <cstring>
 #include <fcntl.h>
 #include <errno.h>
-#include <thread>
-#include "Log/Log.h"
-#include "PlayerbotAIConfig.h"
-#include "PlayerbotTextMgr.h"
 #endif
 
 std::string PlayerbotLLMInterface::SanitizeForJson(const std::string& input) {

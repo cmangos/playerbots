@@ -6200,34 +6200,48 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
 
         TravelTarget* target = GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
         if (target->GetDestination()) {
-            out << "Destination ";
-
-            out << ": " << target->GetDestination()->GetTitle();
+            out << "Target: " << target->GetDestination()->GetTitle();
 
             if (target->GetPosition())
             {
-                out << "(" << target->GetPosition()->getAreaName() << ")";
-                out << " distance: " << target->GetPosition()->distance(bot) << "y";
+                out << "\nLocation: " << target->GetPosition()->getAreaName();
+                out << " (" << target->GetPosition()->distance(bot) << "y)";
             }
         }
-        out << "\nStatus =";
+        out << "\nStatus: ";
         if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_NONE)
-            out << " none";
+            out << "none";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
-            out << " preparing";
+            out << "preparing";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
-            out << " traveling";
+            out << "traveling";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
-            out << " working";
+            out << "working";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
-            out << " cooldown";
+            out << "cooldown";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << " expired";
+            out << "expired";
 
         if(target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << " valid for " << (target->GetTimeLeft()/1000) << "s";
+            out << " [for " << (target->GetTimeLeft()/1000) << "s]";
 
-        out << " retry (" << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
+        if(target->GetRetryCount(true) || target->GetRetryCount(false))
+            out << "(retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
+
+        out << "\nConditions: ";
+
+        for (auto& condition : target->GetConditions())
+        {
+            AiObjectContext* context = GetAiObjectContext();
+            out << condition;
+            if (AI_VALUE(bool, condition))
+                out << " (true)";
+            else
+                out << " (false)";
+
+            if (condition != target->GetConditions().back())
+                out << ", ";
+        }
 
         return out.str();
     }

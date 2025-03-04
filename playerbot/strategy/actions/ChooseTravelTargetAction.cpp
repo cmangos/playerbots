@@ -110,14 +110,26 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
 
     AI_VALUE(TravelTarget*, "travel target")->SetConditions({ AI_VALUE2(std::string, "manual string", "future travel condition")});
 
-    if (QuestTravelDestination* dest = dynamic_cast<QuestTravelDestination*>(oldTarget->GetDestination()))
+    if (QuestObjectiveTravelDestination* dest = dynamic_cast<QuestObjectiveTravelDestination*>(oldTarget->GetDestination()))
     {
-        std::string condition = "group or::{following party,near leader,quest stage active::{" + std::to_string(dest->GetQuestId()) + "," + std::to_string((uint8)dest->GetPurpose()) + "}}";
+        std::string condition = "group or::{following party,need quest objective::{" + std::to_string(dest->GetQuestId()) + "," + std::to_string((uint8)dest->GetObjective()) + "}}";
+        oldTarget->AddCondition(condition);
+    }
+    else if (QuestRelationTravelDestination* dest = dynamic_cast<QuestRelationTravelDestination*>(oldTarget->GetDestination()))
+    {
+        std::string condition, qualifier = std::to_string(dest->GetEntry());
+        if (dest->GetPurpose() == TravelDestinationPurpose::QuestGiver)
+
+            condition = "group or::{following party,or::{can accept quest npc::" + qualifier + ",can accept quest low level npc::" + qualifier + "}}";
+        else
+            condition = "group or::{following party,can turn in quest npc::" + qualifier + "}";
+
         oldTarget->AddCondition(condition);
     }
 
     //Clear rpg and attack/grind target. We want to travel, not hang around some more.
     RESET_AI_VALUE(GuidPosition,"rpg target");
+    RESET_AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target");
     RESET_AI_VALUE(ObjectGuid,"attack target");
     RESET_AI_VALUE(bool, "travel target active");
     context->ClearValues("no active travel destinations");
@@ -633,7 +645,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Quests
     if (quests)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::QuestGiver, { 0 }, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::QuestGiver, {}, false))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -643,7 +655,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Zones
     if (zones)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Explore, { 0 }, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Explore, {}, false))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -653,7 +665,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Npcs
     if (npcs)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::GenericRpg, { 0 }, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::GenericRpg, {}, false))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -663,7 +675,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Mobs
     if (mobs)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Grind, { 0 }, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Grind, {}, false))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -673,7 +685,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Bosses
     if (bosses)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Boss, { 0 }, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Boss, {}, false))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -1165,7 +1177,7 @@ bool RequestQuestTravelTargetAction::Execute(Event& event)
 
                     std::vector<std::string> qualifier = { std::to_string(questId), std::to_string(objective) };
 
-                    if (AI_VALUE2(bool, "group or", "following party,near leader,need quest objective::" + Qualified::MultiQualify(qualifier, ","))) //Noone needs the quest objective.
+                    if (AI_VALUE2(bool, "group or", "following party,need quest objective::" + Qualified::MultiQualify(qualifier, ","))) //Noone needs the quest objective.
                         flag = flag | (uint32)purposeFlag;
                 }
             }

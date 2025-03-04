@@ -708,16 +708,20 @@ void SurvivalHunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
     HunterStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "black arrow",
-        NextAction::array(0, new NextAction("black arrow", ACTION_HIGH + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "black arrow on snare target",
         NextAction::array(0, new NextAction("black arrow", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "explosive shot",
-        NextAction::array(0, new NextAction("explosive shot", ACTION_NORMAL + 3), NULL)));
+        NextAction::array(0, new NextAction("explosive shot", ACTION_NORMAL + 6), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "black arrow",
+        NextAction::array(0, new NextAction("black arrow", ACTION_NORMAL + 5), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "steady shot",
+        NextAction::array(0, new NextAction("steady shot", ACTION_NORMAL + 2), NULL)));
 }
 
 void SurvivalHunterStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

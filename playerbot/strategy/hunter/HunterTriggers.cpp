@@ -8,10 +8,10 @@ using namespace ai;
 bool HunterNoStingsActiveTrigger::IsActive()
 {
 	Unit* target = AI_VALUE(Unit*, "current target");
-    return target && AI_VALUE2(uint8, "health", "current target") > 40 &&
-        !ai->HasAura("serpent sting", target) &&
-        !ai->HasAura("scorpid sting", target) &&
-        !ai->HasAura("viper sting", target);
+    return target &&
+        !ai->HasAura("serpent sting", target, false, true) &&
+        !ai->HasAura("scorpid sting", target, false, true) &&
+        !ai->HasAura("viper sting", target, false, true);
 }
 
 bool HuntersPetDeadTrigger::IsActive()
@@ -36,9 +36,9 @@ bool ViperStingOnAttackerTrigger::IsActive()
     Unit* target = GetTarget();
     if (target)
     {
-        const bool noStings = !ai->HasAura("serpent sting", target) &&
-                              !ai->HasAura("scorpid sting", target) &&
-                              !ai->HasAura("viper sting", target);
+        const bool noStings = !ai->HasAura("serpent sting", target, false, true) &&
+                              !ai->HasAura("scorpid sting", target, false, true) &&
+                              !ai->HasAura("viper sting", target, false, true);
         if (noStings)
         {
             if (target->GetPower(POWER_MANA) >= 10)
@@ -56,9 +56,9 @@ bool SerpentStingOnAttackerTrigger::IsActive()
     Unit* target = GetTarget();
     if (target)
     {
-        const bool noStings = !ai->HasAura("serpent sting", target) &&
-                              !ai->HasAura("scorpid sting", target) &&
-                              !ai->HasAura("viper sting", target);
+        const bool noStings = !ai->HasAura("serpent sting", target, false, true) &&
+                              !ai->HasAura("scorpid sting", target, false, true) &&
+                              !ai->HasAura("viper sting", target, false, true);
         if (noStings)
         {
             if (target->GetPower(POWER_MANA) < 10)

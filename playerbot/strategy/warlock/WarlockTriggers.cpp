@@ -36,7 +36,7 @@ bool MoltenCoreTrigger::IsActive()
 bool CorruptionTrigger::IsActive()
 {
 	Unit* target = GetTarget();
-	return target && !ai->HasAura("corruption", target) && !ai->HasAura("seed of corruption", target) && !HasMaxDebuffs();
+	return target && !ai->HasAura("corruption", target, false, true) && !ai->HasAura("seed of corruption", target, false, true) && !HasMaxDebuffs();
 }
 
 bool LifeTapTrigger::IsActive()

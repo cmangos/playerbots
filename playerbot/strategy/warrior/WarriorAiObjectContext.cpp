@@ -218,6 +218,7 @@ namespace ai
                 creators["mocking blow"] = &TriggerFactoryInternal::mocking_blow;
                 creators["rampage"] = &TriggerFactoryInternal::rampage;
                 creators["mortal strike"] = &TriggerFactoryInternal::mortal_strike;
+                creators["mortal strike debuff"] = &TriggerFactoryInternal::mortal_strike_debuff;
                 creators["thunder clap on snare target"] = &TriggerFactoryInternal::thunder_clap_on_snare_target;
                 creators["thunder clap"] = &TriggerFactoryInternal::thunder_clap;
                 creators["bloodthirst"] = &TriggerFactoryInternal::bloodthirst;
@@ -266,7 +267,8 @@ namespace ai
             static Trigger* heroic_strike(PlayerbotAI* ai) { return new HeroicStrikeTrigger(ai); }
             static Trigger* thunder_clap_on_snare_target(PlayerbotAI* ai) { return new ThunderClapSnareTrigger(ai); }
             static Trigger* thunder_clap(PlayerbotAI* ai) { return new ThunderClapTrigger(ai); }
-            static Trigger* mortal_strike(PlayerbotAI* ai) { return new MortalStrikeDebuffTrigger(ai); }
+            static Trigger* mortal_strike_debuff(PlayerbotAI* ai) { return new MortalStrikeDebuffTrigger(ai); }
+            static Trigger* mortal_strike(PlayerbotAI* ai) { return new MortalStrikeCanCastTrigger(ai); }
             static Trigger* rampage(PlayerbotAI* ai) { return new RampageAvailableTrigger(ai); }
             static Trigger* mocking_blow(PlayerbotAI* ai) { return new MockingBlowTrigger(ai); }
             static Trigger* overpower(PlayerbotAI* ai) { return new OverpowerAvailableTrigger(ai); }

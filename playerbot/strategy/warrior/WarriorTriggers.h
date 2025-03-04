@@ -14,6 +14,7 @@ namespace ai
     DEBUFF_TRIGGER_A(SunderArmorDebuffTrigger, "sunder armor");
     DEBUFF_TRIGGER(DemoralizingShoutDebuffTrigger, "demoralizing shout");
     DEBUFF_TRIGGER(MortalStrikeDebuffTrigger, "mortal strike");
+    CD_TRIGGER(MortalStrikeCanCastTrigger, "mortal strike");
     DEBUFF_ENEMY_TRIGGER(RendDebuffOnAttackerTrigger, "rend");
     CAN_CAST_TRIGGER(DevastateAvailableTrigger, "devastate");
     CAN_CAST_TRIGGER(RevengeAvailableTrigger, "revenge");
@@ -111,7 +112,9 @@ namespace ai
         bool IsActive() override
         {
 #ifdef MANGOSBOT_TWO
-            return SpellCanBeCastedTrigger::IsActive();
+            return SpellCanBeCastedTrigger::IsActive() 
+                && (AI_VALUE2(uint8, "rage", "self target") > 60 || bot->GetLevel() < 60)
+                && (AI_VALUE2(uint8, "health", "current target") > 20 || ai->IsTank(bot));
 #else
             bool hasTalents = bot->HasSpell(12294) || bot->HasSpell(21551) || bot->HasSpell(21552) || bot->HasSpell(21553) || bot->HasSpell(25248) || bot->HasSpell(30330) || bot->HasSpell(23881) || bot->HasSpell(23892) || bot->HasSpell(23893) || bot->HasSpell(23894) || bot->HasSpell(25251) || bot->HasSpell(30335);
             if ((hasTalents && AI_VALUE2(uint8, "rage", "self target") > 60) || (!hasTalents && AI_VALUE2(uint8, "rage", "self target") >= 15))

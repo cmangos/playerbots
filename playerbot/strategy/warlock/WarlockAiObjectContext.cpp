@@ -339,6 +339,7 @@ namespace ai
                 creators["unstable affliction on attacker"] = &TriggerFactoryInternal::unstable_affliction_on_attacker;
                 creators["life tap"] = &TriggerFactoryInternal::life_tap;
                 creators["drain soul"] = &TriggerFactoryInternal::drain_soul;
+                creators["drain soul affli"] = &TriggerFactoryInternal::drain_soul_affli;
                 creators["no curse"] = &TriggerFactoryInternal::no_curse;
                 creators["no curse on attacker"] = &TriggerFactoryInternal::no_curse_on_attacker;
                 creators["conflagrate"] = &TriggerFactoryInternal::conflagrate;
@@ -401,6 +402,7 @@ namespace ai
             static Trigger* immolate(PlayerbotAI* ai) { return new ImmolateTrigger(ai); }
             static Trigger* life_tap(PlayerbotAI* ai) { return new LifeTapTrigger(ai); }
             static Trigger* drain_soul(PlayerbotAI* ai) { return new DrainSoulTrigger(ai); }
+            static Trigger* drain_soul_affli(PlayerbotAI* ai) { return new DrainSoulAffliTrigger(ai); }
             static Trigger* no_curse(PlayerbotAI* ai) { return new NoCurseTrigger(ai); }
             static Trigger* no_curse_on_attacker(PlayerbotAI* ai) { return new NoCurseOnAttackerTrigger(ai); }
             static Trigger* conflagrate(PlayerbotAI* ai) { return new ConflagrateTrigger(ai); }

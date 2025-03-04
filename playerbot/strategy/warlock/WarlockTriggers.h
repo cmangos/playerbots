@@ -212,6 +212,13 @@ namespace ai
         bool IsActive() override;
     };
 
+    class DrainSoulAffliTrigger : public Trigger
+    {
+    public:
+        DrainSoulAffliTrigger(PlayerbotAI* ai) : Trigger(ai, "drain soul") {}
+        bool IsActive() override;
+    };
+
     class FearPvpTrigger : public Trigger
     {
     public:

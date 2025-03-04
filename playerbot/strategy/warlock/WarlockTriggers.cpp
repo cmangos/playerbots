@@ -78,6 +78,18 @@ bool DrainSoulTrigger::IsActive()
 	return false;
 }
 
+bool DrainSoulAffliTrigger::IsActive()
+{
+    // Check if target health is less than 25%
+    const uint32 targetHealth = AI_VALUE2(uint8, "health", "current target");
+    if (targetHealth <= 25)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 bool CorruptionOnAttackerTrigger::IsActive()
 {
     if (DebuffOnAttackerTrigger::IsActive())
@@ -104,9 +116,11 @@ bool NoCurseTrigger::IsActive()
 	if (target)
 	{
 		return !ai->HasAura("curse of agony", target, false, true) &&
+#ifndef MANGOSBOT_TWO
+               !ai->HasAura("curse of recklessness", target, false, true) &&
+               !ai->HasAura("curse of shadow", target, false, true) &&
+#endif
 			   !ai->HasAura("curse of doom", target, false, true) &&
-			   !ai->HasAura("curse of recklessness", target, false, true) &&
-			   !ai->HasAura("curse of shadow", target, false, true) &&
 			   !ai->HasAura("curse of the elements", target, false, true) &&
 			   !ai->HasAura("curse of weakness", target, false, true) &&
 			   !ai->HasAura("curse of exhaustion", target, false, true) &&
@@ -126,9 +140,11 @@ bool NoCurseOnAttackerTrigger::IsActive()
         if (attacker && attacker != currentTarget)
         {
 			if (!ai->HasAura("curse of agony", attacker, false, true) &&
+#ifndef MANGOSBOT_TWO
+                !ai->HasAura("curse of recklessness", target, false, true) &&
+                !ai->HasAura("curse of shadow", target, false, true) &&
+#endif
 				!ai->HasAura("curse of doom", attacker, false, true) &&
-				!ai->HasAura("curse of recklessness", attacker, false, true) &&
-				!ai->HasAura("curse of shadow", attacker, false, true) &&
 				!ai->HasAura("curse of the elements", attacker, false, true) &&
 				!ai->HasAura("curse of weakness", attacker, false, true) &&
                 !ai->HasAura("curse of exhaustion", attacker, false, true) &&

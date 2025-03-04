@@ -780,6 +780,10 @@ void AfflictionWarlockStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("unstable affliction", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "drain soul affli",
+        NextAction::array(0, new NextAction("drain soul", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "siphon life",
         NextAction::array(0, new NextAction("siphon life", ACTION_NORMAL), NULL)));
 }

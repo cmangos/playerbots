@@ -1133,7 +1133,7 @@ void DemonologyWarlockCursesStrategy::InitCombatTriggers(std::list<TriggerNode*>
     WarlockCursesStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "no curse",
+        "curse of the elements",
         NextAction::array(0, new NextAction("curse of the elements", ACTION_NORMAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(

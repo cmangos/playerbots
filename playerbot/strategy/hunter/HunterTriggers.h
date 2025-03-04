@@ -25,6 +25,10 @@ namespace ai
     {
     public:
         AspectOfTheViperTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "aspect of the viper") {}
+        bool IsActive() override
+        {
+            return BuffTrigger::IsActive() && AI_VALUE2(uint8, "mana", "self target") < sPlayerbotAIConfig.lowMana;
+        }
     };
 
     class AspectOfThePackTrigger : public BuffTrigger
@@ -58,7 +62,11 @@ namespace ai
     
         bool IsActive() override
         {
-            return BuffTrigger::IsActive() && !ai->HasAura("aspect of the hawk", bot);
+            return BuffTrigger::IsActive() 
+#ifndef MANGOSBOT_TWO
+                && !ai->HasAura("aspect of the hawk", bot)
+#endif
+                && (!ai->HasAura("aspect of the viper", bot) || AI_VALUE2(uint8, "mana", "self target") > sPlayerbotAIConfig.almostFullHealth);
         }
     };
 

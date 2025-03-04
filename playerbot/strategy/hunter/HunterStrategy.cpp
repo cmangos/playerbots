@@ -1364,6 +1364,10 @@ void HunterStingRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 void HunterAspectStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     triggers.push_back(new TriggerNode(
+        "aspect of the viper",
+        NextAction::array(0, new NextAction("aspect of the viper", ACTION_HIGH + 6), NULL)));
+    
+    triggers.push_back(new TriggerNode(
         "aspect of the dragonhawk",
         NextAction::array(0, new NextAction("aspect of the dragonhawk", ACTION_HIGH + 5), NULL)));
 }

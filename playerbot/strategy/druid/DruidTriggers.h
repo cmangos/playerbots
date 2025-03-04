@@ -80,7 +80,6 @@ namespace ai
     {
     public:
         MoonfireTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "moonfire", 1, true) {}
-        virtual bool IsActive() { return DebuffTrigger::IsActive() && !GetTarget()->IsRooted(); }
     };
 
     class FaerieFireTrigger : public DebuffTrigger

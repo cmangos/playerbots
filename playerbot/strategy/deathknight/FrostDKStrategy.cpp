@@ -11,7 +11,6 @@ public:
 	FrostDKStrategyActionNodeFactory()
 	{
 		//creators["icy touch"] = &icy_touch;
-		creators["obliterate"] = &obliterate;
 		creators["howling blast"] = &howling_blast;
 		creators["frost strike"] = &frost_strike;
 		//creators["chains of ice"] = &chains_of_ice;
@@ -30,13 +29,6 @@ public:
 	}
 
 	private:
-		static ActionNode* obliterate(PlayerbotAI* ai)
-		{
-		return new ActionNode("obliterate",
-			/*P*/ NextAction::array(0, new NextAction("blood presence"), NULL),
-			/*A*/ NextAction::array(0, new NextAction("frost strike"), NULL),
-			/*C*/ NULL);
-		}
 		static ActionNode* rune_strike(PlayerbotAI* ai)
 		{
 		return new ActionNode("rune strike",
@@ -88,12 +80,24 @@ void FrostDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 		NextAction::array(0, new NextAction("obliterate", ACTION_NORMAL + 5), NULL)));
 
 	triggers.push_back(new TriggerNode(
-		"frost strike",
+		"killing machine",
 		NextAction::array(0, new NextAction("frost strike", ACTION_NORMAL + 4), NULL)));
 
 	triggers.push_back(new TriggerNode(
+		"rime",
+		NextAction::array(0, new NextAction("howling blast", ACTION_NORMAL + 3), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"frost strike",
+		NextAction::array(0, new NextAction("frost strike", ACTION_NORMAL + 2), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"blood strike",
+		NextAction::array(0, new NextAction("blood strike", ACTION_NORMAL), NULL)));
+
+	triggers.push_back(new TriggerNode(
 		"rune strike",
-		NextAction::array(0, new NextAction("rune strike", ACTION_NORMAL + 3), NULL)));
+		NextAction::array(0, new NextAction("rune strike", ACTION_NORMAL), NULL)));
 }
 
 void FrostDKAoeStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)

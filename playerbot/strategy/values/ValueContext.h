@@ -165,6 +165,7 @@ namespace ai
             creators["health"] = [](PlayerbotAI* ai) { return new HealthValue(ai); };
             creators["rage"] = [](PlayerbotAI* ai) { return new RageValue(ai); };
             creators["energy"] = [](PlayerbotAI* ai) { return new EnergyValue(ai); };
+            creators["runic"] = [](PlayerbotAI* ai) { return new RunicValue(ai); };
             creators["mana"] = [](PlayerbotAI* ai) { return new ManaValue(ai); };
             creators["combo"] = [](PlayerbotAI* ai) { return new ComboPointsValue(ai); };
             creators["dead"] = [](PlayerbotAI* ai) { return new IsDeadValue(ai); };

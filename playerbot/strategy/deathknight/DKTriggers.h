@@ -14,8 +14,11 @@ namespace ai
 	DEBUFF_TRIGGER_OWN(IcyTouchDebuffTrigger, "frost fever");
 	DEBUFF_ENEMY_TRIGGER_OWN(PlagueStrikeDebuffOnAttackerTrigger, "blood plague");
 	DEBUFF_ENEMY_TRIGGER_OWN(IcyTouchDebuffOnAttackerTrigger, "frost fever");
-	CAN_CAST_TRIGGER(FrostStrikeTrigger, "frost strike");
+	CAN_CAST_TRIGGER_A(FrostStrikeTrigger, "frost strike");
 	CAN_CAST_TRIGGER_A(ObliterateTrigger, "obliterate");
+	CAN_CAST_TRIGGER_A(ScourgeStrikeTrigger, "scourge strike");
+	HAS_AURA_TRIGGER(RimeTrigger, "freezing fog");
+	HAS_AURA_TRIGGER(KillingMachineTrigger, "killing machine");
 
 	// Cds
 	CAN_CAST_TRIGGER(SummonGargoyleTrigger, "summon gargoyle");
@@ -38,8 +41,8 @@ namespace ai
 		RuneStrikeTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "rune strike") {}
 	};
 
-	CAN_CAST_TRIGGER(DeathCoilTrigger, "death coil");
-	CAN_CAST_TRIGGER(PestilenceTrigger, "pestilence");
+	CAN_CAST_TRIGGER_A(DeathCoilTrigger, "death coil");
+	CAN_CAST_TRIGGER_A(PestilenceTrigger, "pestilence");
 	CAN_CAST_TRIGGER(BloodStrikeTrigger, "blood strike");
 	CAN_CAST_TRIGGER(HowlingBlastTrigger, "howling blast");
 
@@ -54,12 +57,6 @@ namespace ai
 	public:
 		StrangulateInterruptSpellTrigger(PlayerbotAI* ai) : InterruptSpellTrigger(ai, "strangulate") {}
 	};
-
-    class KillingMachineTrigger : public BoostTrigger
-    {
-    public:
-		KillingMachineTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "killing machine") {}
-    };
 
     class MindFreezeOnEnemyHealerTrigger : public InterruptEnemyHealerTrigger
     {

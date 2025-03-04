@@ -65,7 +65,7 @@ uint8 RageValue::Calculate()
     Unit* target = GetTarget();
     if (!target)
         return 0;
-    return (target->GetPower(POWER_RAGE) / 10.0f);
+    return (static_cast<float> (target->GetPower(POWER_RAGE) / 10.0f));
 }
 
 uint8 EnergyValue::Calculate()
@@ -74,6 +74,14 @@ uint8 EnergyValue::Calculate()
     if (!target)
         return 0;
     return (static_cast<float> (target->GetPower(POWER_ENERGY)));
+}
+
+uint8 RunicValue::Calculate()
+{
+    Unit* target = GetTarget();
+    if (!target)
+        return 0;
+    return (static_cast<float> (target->GetPower(POWER_RUNIC_POWER) / 10.0f));
 }
 
 uint8 ManaValue::Calculate()

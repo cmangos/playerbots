@@ -173,7 +173,8 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 	triggers.push_back(new TriggerNode(
 		"enemy out of melee",
 		NextAction::array(0, new NextAction("death grip", ACTION_MOVE + 1),
-			new NextAction("chains of ice", ACTION_MOVE), NULL)));
+			new NextAction("chains of ice", ACTION_MOVE),
+			new NextAction("reach melee", ACTION_MOVE), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"no pet",
@@ -212,6 +213,10 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 	triggers.push_back(new TriggerNode(
 		"death coil",
 		NextAction::array(0, new NextAction("death coil", ACTION_NORMAL + 3), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"pestilence",
+		NextAction::array(0, new NextAction("pestilence", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "bone shield",

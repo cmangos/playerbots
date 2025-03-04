@@ -64,11 +64,10 @@ BloodDKStrategy::BloodDKStrategy(PlayerbotAI* ai) : GenericDKStrategy(ai)
 NextAction** BloodDKStrategy::GetDefaultCombatActions()
 {
 	return NextAction::array(0,
-        new NextAction("melee", ACTION_NORMAL + 2),
+        new NextAction("melee", ACTION_NORMAL),
 		//new NextAction("heart strike", ACTION_NORMAL + 5), // for blood dps, not tank
 		new NextAction("blood strike", ACTION_NORMAL + 2),
-		new NextAction("death strike", ACTION_NORMAL + 4),
-		new NextAction("rune strike", ACTION_NORMAL + 3), NULL);
+		new NextAction("death strike", ACTION_NORMAL + 4), NULL);
 }
 
 void BloodDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)

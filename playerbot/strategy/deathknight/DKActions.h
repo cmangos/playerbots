@@ -68,26 +68,14 @@ namespace ai
 	SPELL_ACTION(CastHowlingBlastAction, "howling blast");
 
 	//debuff it
-	BEGIN_RANGED_DEBUFF_ACTION(CastIcyTouchAction, "icy touch")
-	END_SPELL_ACTION()
+	SPELL_ACTION(CastIcyTouchAction, "icy touch");
 
-
-	class CastIcyTouchOnAttackerAction : public CastRangedDebuffSpellOnAttackerAction
-	{
-	public:
-		CastIcyTouchOnAttackerAction(PlayerbotAI* ai) : CastRangedDebuffSpellOnAttackerAction(ai, "icy touch") {}
-	};
+	SPELL_ACTION_U(CastIcyTouchOnAttackerAction, "icy touch", CastSpellAction::isUseful() && !ai->HasAura("frost fever", GetTarget(), false, true));
 
 	//debuff ps
-	BEGIN_MELEE_DEBUFF_ACTION(CastPlagueStrikeAction, "plague strike")
-	END_SPELL_ACTION()
+	MELEE_ACTION(CastPlagueStrikeAction, "plague strike");
 
-
-	class CastPlagueStrikeOnAttackerAction : public CastMeleeDebuffSpellOnAttackerAction
-	{
-	public:
-		CastPlagueStrikeOnAttackerAction(PlayerbotAI* ai) : CastMeleeDebuffSpellOnAttackerAction(ai, "plague strike") {}
-	};
+	MELEE_ACTION_U(CastPlagueStrikeOnAttackerAction, "plague strike", CastMeleeSpellAction::isUseful() && !ai->HasAura("blood plague", GetTarget(), false, true));
 
 	//debuff
 	BEGIN_RANGED_DEBUFF_ACTION(CastMarkOfBloodAction, "mark of blood")

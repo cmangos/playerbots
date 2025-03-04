@@ -109,8 +109,9 @@ namespace ai
 				creators["dancing weapon"] = &TriggerFactoryInternal::dancing_weapon;
 				creators["killing machine"] = &TriggerFactoryInternal::killing_machine;
 				creators["unholy frenzy"] = &TriggerFactoryInternal::unholy_frenzy;
-				creators["obliterate"] = &TriggerFactoryInternal::obliterate;
+				creators["scourge strike"] = &TriggerFactoryInternal::scourge_strike;
 				creators["frost strike"] = &TriggerFactoryInternal::frost_strike;
+				creators["rime"] = &TriggerFactoryInternal::rime;
             }
 
         private:
@@ -137,7 +138,9 @@ namespace ai
 			static Trigger* killing_machine(PlayerbotAI* ai) { return new KillingMachineTrigger(ai); }
 			static Trigger* unholy_frenzy(PlayerbotAI* ai) { return new UnholyFrenzyTrigger(ai); }
 			static Trigger* obliterate(PlayerbotAI* ai) { return new ObliterateTrigger(ai); }
+			static Trigger* scourge_strike(PlayerbotAI* ai) { return new ScourgeStrikeTrigger(ai); }
 			static Trigger* frost_strike(PlayerbotAI* ai) { return new FrostStrikeTrigger(ai); }
+			static Trigger* rime(PlayerbotAI* ai) { return new RimeTrigger(ai); }
 		};
     };
 };

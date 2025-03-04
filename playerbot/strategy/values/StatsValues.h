@@ -75,6 +75,20 @@ namespace ai
         virtual uint8 Calculate();
     };
 
+    class RunicValue : public Uint8CalculatedValue, public Qualified
+    {
+    public:
+        RunicValue(PlayerbotAI* ai, std::string name = "runic") : Uint8CalculatedValue(ai, name), Qualified() {}
+
+        Unit* GetTarget()
+        {
+            AiObjectContext* ctx = AiObject::context;
+            return ctx->GetValue<Unit*>(qualifier)->Get();
+        }
+
+        virtual uint8 Calculate();
+    };
+
     class ManaValue : public Uint8CalculatedValue, public Qualified
     {
     public:

@@ -83,6 +83,14 @@ void UnholyDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 		NextAction::array(0, new NextAction("army of the dead", ACTION_HIGH), NULL)));
 	
 	triggers.push_back(new TriggerNode(
+		"scourge strike",
+		NextAction::array(0, new NextAction("scourge strike", ACTION_NORMAL + 5), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"blood strike",
+		NextAction::array(0, new NextAction("blood strike", ACTION_NORMAL + 4), NULL)));
+
+	triggers.push_back(new TriggerNode(
 		"often",
 		NextAction::array(0, new NextAction("ghoul frenzy", ACTION_NORMAL + 2), NULL)));
 

@@ -703,7 +703,7 @@ bool PlayerbotAIConfig::Initialize()
     if (trainHunterPets < 0 || trainHunterPets > 2)
     {
 
-        sLog.outError("AiPlayerbot.TrainHunterPets value of %lu is outside the accepted range and defaults to 1.", trainHunterPets);
+        sLog.outError("AiPlayerbot.TrainHunterPets value of %u is outside the accepted range and defaults to 1.", trainHunterPets);
         trainHunterPets = 1;
     }
 

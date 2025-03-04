@@ -111,7 +111,7 @@ std::string PlayerbotDbStore::LoadPetBuildLink(uint64 petGuid)
     {
         auto field = buildLinkResults->Fetch();
         std::string buildLink = field[0].GetString();
-        if (buildLink._Starts_with("buildLink>>"))
+        if (buildLink.rfind("buildLink>>"))
         {
             return buildLink.substr(11);
         }
@@ -148,7 +148,7 @@ HunterPetBuildPath PlayerbotDbStore::LoadPetBuildPath(uint64 petGuid)
     {
         auto field = buildResults->Fetch();
         std::string buildNoString = field[0].GetString();
-        if (buildNoString._Starts_with("buildNo>>"))
+        if (buildNoString.rfind("buildNo>>"))
         {
             buildNoString = buildNoString.substr(9);
             std::string delimiter = ">>";
@@ -171,11 +171,11 @@ int PlayerbotDbStore::PetHasBuilds(uint64 petGuid)
     {
         auto field = buildResults->Fetch();
         std::string buildString = field[0].GetString();
-        if (buildString._Starts_with("buildNo>>"))
+        if (buildString.rfind("buildNo>>"))
         {
             return 1;
         }
-        else if (buildString._Starts_with("buildLink>>"))
+        else if (buildString.rfind("buildLink>>"))
         {
             return 2;
         }
@@ -196,7 +196,7 @@ std::string PlayerbotDbStore::GetPetBuildName(uint64 petGuid)
             {
                 auto field = buildResults->Fetch();
                 std::string buildNoString = field[0].GetString();
-                if (buildNoString._Starts_with("buildNo>>"))
+                if (buildNoString.rfind("buildNo>>"))
                 {
                     buildNoString = buildNoString.substr(9);
                     std::string delimiter = ">>";
@@ -215,7 +215,7 @@ std::string PlayerbotDbStore::GetPetBuildName(uint64 petGuid)
             {
                 auto field = buildLinkResults->Fetch();
                 std::string buildLink = field[0].GetString();
-                if (buildLink._Starts_with("buildLink>>"))
+                if (buildLink.rfind("buildLink>>"))
                 {
                     return buildLink.substr(11);
                 }

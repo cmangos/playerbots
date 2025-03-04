@@ -33,7 +33,9 @@ public:
         creators["intervene"] = &intervene;
         */
 
+#ifndef MANGOSBOT_TWO
         creators["berserker rage"] = &berserker_rage;
+#endif
     }
 
 private:
@@ -71,7 +73,10 @@ private:
 
     */
 
+#ifndef MANGOSBOT_TWO
     ACTION_NODE_P(berserker_rage, "berserker rage", "berserker stance");
+#endif
+
 };
 
 WarriorStrategy::WarriorStrategy(PlayerbotAI* ai) : ClassStrategy(ai)

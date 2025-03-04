@@ -16,6 +16,7 @@ public:
         creators["heroic strike"] = &heroic_strike;
         creators["whirlwind"] = &whirlwind;
         creators["sweeping strikes"] = &sweeping_strikes;
+        creators["rend"] = &rend;
     }
 
 private:
@@ -32,6 +33,8 @@ private:
     ACTION_NODE_P(whirlwind, "whirlwind", "berserker stance");
 
     ACTION_NODE_P(sweeping_strikes, "sweeping strikes", "battle stance");
+
+    ACTION_NODE_P(rend, "rend", "battle stance");
 };
 
 ArmsWarriorStrategy::ArmsWarriorStrategy(PlayerbotAI* ai) : WarriorStrategy(ai)

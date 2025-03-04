@@ -484,7 +484,7 @@ namespace ai
     class DebuffOnAttackerTrigger : public DebuffTrigger
     {
     public:
-        DebuffOnAttackerTrigger(PlayerbotAI* ai, std::string spell) : DebuffTrigger(ai, spell) {}
+        DebuffOnAttackerTrigger(PlayerbotAI* ai, std::string spell, int checkInterval = 1, bool checkIsOwner = false) : DebuffTrigger(ai, spell, checkInterval, checkIsOwner) {}
 
     public:
         virtual Value<Unit*>* GetTargetValue();

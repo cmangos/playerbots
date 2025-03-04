@@ -64,11 +64,7 @@ namespace ai
         OmenOfClarityTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "omen of clarity") {}
     };
 
-    class RakeTrigger : public DebuffTrigger
-    {
-    public:
-        RakeTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "rake") {}
-    };
+    DEBUFF_TRIGGER_OWN(RakeTrigger, "rake");
 
     BUFF_TRIGGER(SavageRoarTrigger, "savage roar");
 
@@ -78,16 +74,12 @@ namespace ai
         RipTrigger(PlayerbotAI* ai, uint8 comboPoints = 5) : NoDebuffAndComboPointsAvailableTrigger(ai, "rip", comboPoints) {}
     };
 
-    class InsectSwarmTrigger : public DebuffTrigger
-    {
-    public:
-        InsectSwarmTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "insect swarm") {}
-    };
+    DEBUFF_TRIGGER_OWN(InsectSwarmTrigger, "insect swarm");
 
     class MoonfireTrigger : public DebuffTrigger
     {
     public:
-        MoonfireTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "moonfire") {}
+        MoonfireTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "moonfire", 1, true) {}
         virtual bool IsActive() { return DebuffTrigger::IsActive() && !GetTarget()->IsRooted(); }
     };
 
@@ -235,7 +227,7 @@ namespace ai
         bool IsActive() override
         {
             Unit* target = GetTarget();
-            return target && !ai->HasAura("lacerate", target, true) && !HasMaxDebuffs();
+            return target && !ai->HasAura("lacerate", target, true, true) && !HasMaxDebuffs();
         }
     };
 

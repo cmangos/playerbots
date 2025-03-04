@@ -9,13 +9,13 @@ namespace ai
     BUFF_TRIGGER(BerserkerStanceTrigger, "berserker stance");
     BUFF_TRIGGER(ShieldBlockTrigger, "shield block");
     BUFF_TRIGGER_A(CommandingShoutTrigger, "commanding shout");
-    DEBUFF_TRIGGER(RendDebuffTrigger, "rend");
+    DEBUFF_TRIGGER_OWN(RendDebuffTrigger, "rend");
     DEBUFF_TRIGGER(DisarmDebuffTrigger, "disarm");
     DEBUFF_TRIGGER_A(SunderArmorDebuffTrigger, "sunder armor");
     DEBUFF_TRIGGER(DemoralizingShoutDebuffTrigger, "demoralizing shout");
-    DEBUFF_TRIGGER(MortalStrikeDebuffTrigger, "mortal strike");
+    DEBUFF_TRIGGER_OWN(MortalStrikeDebuffTrigger, "mortal strike");
     CD_TRIGGER(MortalStrikeCanCastTrigger, "mortal strike");
-    DEBUFF_ENEMY_TRIGGER(RendDebuffOnAttackerTrigger, "rend");
+    DEBUFF_ENEMY_TRIGGER_OWN(RendDebuffOnAttackerTrigger, "rend");
     CAN_CAST_TRIGGER(DevastateAvailableTrigger, "devastate");
     CAN_CAST_TRIGGER(RevengeAvailableTrigger, "revenge");
     CAN_CAST_TRIGGER(OverpowerAvailableTrigger, "overpower");

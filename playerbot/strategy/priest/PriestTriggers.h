@@ -5,11 +5,11 @@
 namespace ai
 {
     CAN_CAST_TRIGGER(HolyFireTrigger, "holy fire");
-    DEBUFF_TRIGGER(PowerWordPainTrigger, "shadow word: pain");
+    DEBUFF_TRIGGER_OWN(PowerWordPainTrigger, "shadow word: pain");
     DEBUFF_TRIGGER_A(ShadowWordPainActiveTrigger, "shadow word: pain");
-    DEBUFF_ENEMY_TRIGGER(PowerWordPainOnAttackerTrigger, "shadow word: pain");
-    DEBUFF_TRIGGER(VampiricTouchTrigger, "vampiric touch");
-    DEBUFF_ENEMY_TRIGGER(VampiricTouchOnAttackerTrigger, "vampiric touch");
+    DEBUFF_ENEMY_TRIGGER_OWN(PowerWordPainOnAttackerTrigger, "shadow word: pain");
+    DEBUFF_TRIGGER_OWN(VampiricTouchTrigger, "vampiric touch");
+    DEBUFF_ENEMY_TRIGGER_OWN(VampiricTouchOnAttackerTrigger, "vampiric touch");
     BUFF_TRIGGER(VampiricEmbraceTrigger, "vampiric embrace");
     CURE_TRIGGER(DispelMagicTrigger, "dispel magic", DISPEL_MAGIC);
     CURE_PARTY_TRIGGER(DispelMagicPartyMemberTrigger, "dispel magic", DISPEL_MAGIC);
@@ -22,7 +22,7 @@ namespace ai
     INTERRUPT_TRIGGER(PsychicHorrorTrigger, "psychic horror");
     INTERRUPT_TRIGGER(SilenceTrigger, "silence");
     INTERRUPT_HEALER_TRIGGER(SilenceEnemyHealerTrigger, "silence");
-    DEBUFF_TRIGGER(DevouringPlagueTrigger, "devouring plague");
+    DEBUFF_TRIGGER_OWN(DevouringPlagueTrigger, "devouring plague");
     CAN_CAST_TRIGGER_A(ManaBurnTrigger, "mana burn");
 
     // racials

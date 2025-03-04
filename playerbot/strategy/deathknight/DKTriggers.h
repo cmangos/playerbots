@@ -3,35 +3,24 @@
 
 namespace ai
 {
-    
+    // Buff
     BUFF_TRIGGER(HornOfWinterTrigger, "horn of winter");
     BUFF_TRIGGER(BoneShieldTrigger, "bone shield");
     BUFF_TRIGGER(ImprovedIcyTalonsTrigger, "icy talons");
-    DEBUFF_TRIGGER(PlagueStrikeDebuffTrigger, "blood plague");
-    DEBUFF_TRIGGER(IcyTouchDebuffTrigger, "frost fever");
+	BUFF_TRIGGER_A(DKPresenceTrigger, "blood presence");
 
-		class PlagueStrikeDebuffOnAttackerTrigger : public DebuffOnAttackerTrigger
-	{
-	public:
-		PlagueStrikeDebuffOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "blood plague") {}
-	};
-		class IcyTouchDebuffOnAttackerTrigger : public DebuffOnAttackerTrigger
-	{
-	public:
-		IcyTouchDebuffOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "frost fever") {}
-	};
+	// Main abilities
+	DEBUFF_TRIGGER_OWN(PlagueStrikeDebuffTrigger, "blood plague");
+	DEBUFF_TRIGGER_OWN(IcyTouchDebuffTrigger, "frost fever");
+	DEBUFF_ENEMY_TRIGGER_OWN(PlagueStrikeDebuffOnAttackerTrigger, "blood plague");
+	DEBUFF_ENEMY_TRIGGER_OWN(IcyTouchDebuffOnAttackerTrigger, "frost fever");
+	CAN_CAST_TRIGGER(FrostStrikeTrigger, "frost strike");
+	CAN_CAST_TRIGGER_A(ObliterateTrigger, "obliterate");
 
-    class DKPresenceTrigger : public BuffTrigger {
-    public:
-        DKPresenceTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "blood presence") {}
-        virtual bool IsActive();
-    };
-
+	// Cds
 	CAN_CAST_TRIGGER(SummonGargoyleTrigger, "summon gargoyle");
 	CAN_CAST_TRIGGER(DancingWeaponTrigger, "dancing rune weapon");
 	CAN_CAST_TRIGGER(UnholyFrenzyTrigger, "unholy frenzy");
-	CAN_CAST_TRIGGER(FrostStrikeTrigger, "frost strike");
-	CAN_CAST_TRIGGER_A(ObliterateTrigger, "obliterate");
 
 	class BloodTapTrigger : public BuffTrigger {
 	public:
@@ -49,26 +38,10 @@ namespace ai
 		RuneStrikeTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "rune strike") {}
 	};
 
-	class DeathCoilTrigger : public SpellCanBeCastedTrigger {
-	public:
-		DeathCoilTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "death coil") {}
-	};
-
-	class PestilenceTrigger : public DebuffTrigger {
-	public:
-		PestilenceTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "pestilence") {}
-	};
-
-	class BloodStrikeTrigger : public DebuffTrigger {
-	public:
-		BloodStrikeTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "blood strike") {}
-	};
-
-
-	class HowlingBlastTrigger : public DebuffTrigger {
-	public:
-		HowlingBlastTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "howling blast") {}
-	};
+	CAN_CAST_TRIGGER(DeathCoilTrigger, "death coil");
+	CAN_CAST_TRIGGER(PestilenceTrigger, "pestilence");
+	CAN_CAST_TRIGGER(BloodStrikeTrigger, "blood strike");
+	CAN_CAST_TRIGGER(HowlingBlastTrigger, "howling blast");
 
     class MindFreezeInterruptSpellTrigger : public InterruptSpellTrigger
     {

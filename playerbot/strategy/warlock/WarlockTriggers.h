@@ -39,9 +39,9 @@ namespace ai
     BOOST_TRIGGER(DemonicEmpowermentTrigger, "demonic empowerment");
     BOOST_TRIGGER(MetamorphosisTrigger, "metamorphosis");
     DEBUFF_TRIGGER_A(CorruptionTrigger, "corruption");
-    DEBUFF_TRIGGER(SiphonLifeTrigger, "siphon life");
-    DEBUFF_TRIGGER(UnstableAfflictionTrigger, "unstable affliction");
-    DEBUFF_TRIGGER(HauntTrigger, "haunt");
+    DEBUFF_TRIGGER_OWN(SiphonLifeTrigger, "siphon life");
+    DEBUFF_TRIGGER_OWN(UnstableAfflictionTrigger, "unstable affliction");
+    DEBUFF_TRIGGER_OWN(HauntTrigger, "haunt");
 
     INTERRUPT_TRIGGER(DeathCoilInterruptTrigger, "death coil");
     INTERRUPT_HEALER_TRIGGER(DeathCoilInterruptTHealerTrigger, "death coil");
@@ -54,31 +54,31 @@ namespace ai
     class CorruptionOnAttackerTrigger : public DebuffOnAttackerTrigger
     {
     public:
-        CorruptionOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "corruption") {}
+        CorruptionOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "corruption", 1, true) {}
         bool IsActive() override;
     };
 
     class SeedOfCorruptionOnAttackerTrigger : public DebuffOnAttackerTrigger
     {
     public:
-        SeedOfCorruptionOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "seed of corruption") {}
+        SeedOfCorruptionOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "seed of corruption", 1, true) {}
         bool IsActive() override;
     };
 
-    DEBUFF_TRIGGER(CurseOfAgonyTrigger, "curse of agony");
+    DEBUFF_TRIGGER_OWN(CurseOfAgonyTrigger, "curse of agony");
 
     class CurseOfAgonyOnAttackerTrigger : public DebuffOnAttackerTrigger
     {
     public:
-        CurseOfAgonyOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "curse of agony") {}
+        CurseOfAgonyOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "curse of agony", 1, true) {}
     };
 
-    DEBUFF_TRIGGER(CurseOfDoomTrigger, "curse of doom");
+    DEBUFF_TRIGGER_OWN(CurseOfDoomTrigger, "curse of doom");
 
     class CurseOfDoomOnAttackerTrigger : public DebuffOnAttackerTrigger
     {
     public:
-        CurseOfDoomOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "curse of doom") {}
+        CurseOfDoomOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "curse of doom", 1, true) {}
     };
 
     DEBUFF_TRIGGER(CurseOfTheElementsTrigger, "curse of the elements");
@@ -124,16 +124,16 @@ namespace ai
     class SiphonLifeOnAttackerTrigger : public DebuffOnAttackerTrigger
     {
     public:
-        SiphonLifeOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "siphon life") {}
+        SiphonLifeOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "siphon life", 1, true) {}
     };
 
     class UnstableAfflictionOnAttackerTrigger : public DebuffOnAttackerTrigger
     {
     public:
-        UnstableAfflictionOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "unstable affliction") {}
+        UnstableAfflictionOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "unstable affliction", 1, true) {}
     };
 
-    DEBUFF_TRIGGER(ImmolateTrigger, "immolate");
+    DEBUFF_TRIGGER_OWN(ImmolateTrigger, "immolate");
 
     class ShadowTranceTrigger : public HasAuraTrigger
     {

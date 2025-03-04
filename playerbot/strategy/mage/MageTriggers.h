@@ -356,7 +356,7 @@ namespace ai
     class LivingBombTrigger : public DebuffTrigger 
     {
     public:
-        LivingBombTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "living bomb") {}
+        LivingBombTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "living bomb", 1, true) {}
     };
 
     class ColdSnapTrigger : public Trigger

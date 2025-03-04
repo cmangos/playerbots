@@ -166,14 +166,14 @@ namespace ai
     class SerpentStingOnAttackerTrigger : public DebuffOnAttackerTrigger
     {
     public:
-        SerpentStingOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "serpent sting") {}
+        SerpentStingOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "serpent sting", 1, true) {}
         virtual bool IsActive();
     };
 
     class ViperStingOnAttackerTrigger : public DebuffOnAttackerTrigger
     {
     public:
-        ViperStingOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "viper sting") {}
+        ViperStingOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "viper sting", 1, true) {}
         virtual bool IsActive();
     };
 
@@ -282,7 +282,7 @@ namespace ai
     class ViperStingTrigger : public DebuffTrigger
     {
     public:
-        ViperStingTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "viper sting") {}
+        ViperStingTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "viper sting", 1, true) {}
 
         virtual bool IsActive()
         {

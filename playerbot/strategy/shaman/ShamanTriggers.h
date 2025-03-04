@@ -421,22 +421,17 @@ namespace ai
     class ShockTrigger : public DebuffTrigger 
     {
     public:
-        ShockTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "earth shock") {}
+        ShockTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "earth shock", 1, true) {}
         virtual bool IsActive();
     };
 
     class FlameShockTrigger : public DebuffTrigger
     {
     public:
-        FlameShockTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "flame shock") {}
+        FlameShockTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "flame shock", 1, true) {}
     };
-    
-    class FlameShockOnTargetTrigger : public DebuffTrigger
-    {
-    public:
-        FlameShockOnTargetTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "flame shock") {}
-        virtual bool IsActive();
-    };
+
+    CAN_CAST_TRIGGER_A(FlameShockOnTargetTrigger, "flame shock");
 
     class FrostShockSnareTrigger : public SnareTargetTrigger
     {

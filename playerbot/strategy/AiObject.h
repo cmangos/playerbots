@@ -113,6 +113,13 @@ class clazz : public super \
         clazz(PlayerbotAI* ai) : DebuffTrigger(ai, spell) {} \
     }
 
+#define DEBUFF_TRIGGER_OWN(clazz, spell) \
+    class clazz : public DebuffTrigger \
+    { \
+    public: \
+        clazz(PlayerbotAI* ai) : DebuffTrigger(ai, spell, 1, true) {} \
+    }
+
 #define DEBUFF_ONLY_TRIGGER(clazz, spell) \
     class clazz : public DebuffTrigger \
     { \
@@ -133,6 +140,13 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, spell) {} \
+    }
+
+#define DEBUFF_ENEMY_TRIGGER_OWN(clazz, spell) \
+    class clazz : public DebuffOnAttackerTrigger \
+    { \
+    public: \
+        clazz(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, spell, 1, true) {} \
     }
 
 #define DEBUFF_ENEMY_TRIGGER_A(clazz, spell) \

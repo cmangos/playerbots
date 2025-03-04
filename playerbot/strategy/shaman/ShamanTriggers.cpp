@@ -44,7 +44,7 @@ bool ShockTrigger::IsActive()
 
 bool FlameShockOnTargetTrigger::IsActive()
 {
-    return SpellTrigger::IsActive() && ai->HasAura("flame shock", GetTarget(), false, true) && !HasMaxDebuffs();
+    return SpellCanBeCastedTrigger::IsActive() && ai->HasAura("flame shock", GetTarget(), false, true);
 }
 
 bool MaelstromWeaponTrigger::IsActive()

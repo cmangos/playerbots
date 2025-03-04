@@ -459,7 +459,7 @@ namespace ai
         BlessingOfSacrificeTrigger(PlayerbotAI* ai) : PartyMemberLowHealthTrigger(ai, "blessing of sacrifice", sPlayerbotAIConfig.criticalHealth, 0, true) {}
     };
 
-    DEBUFF_TRIGGER(AvengerShieldTrigger, "avenger's shield");
+    DEBUFF_TRIGGER_OWN(AvengerShieldTrigger, "avenger's shield");
     BUFF_PARTY_TRIGGER_A(HandOfFreedomTrigger, "hand of freedom");
     BOOST_TRIGGER(DivineIlluminationBoostTrigger, "divine illumination");
     CAN_CAST_TRIGGER(HammerOfTheRighteousTrigger, "hammer of the righteous");

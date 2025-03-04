@@ -924,7 +924,7 @@ void EnhancementShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("flame shock", ACTION_HIGH + 2), NULL))); 
     
     triggers.push_back(new TriggerNode(
-        "shock",
+        "flame shock on target",
         NextAction::array(0, new NextAction("earth shock", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(

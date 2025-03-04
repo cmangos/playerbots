@@ -7,18 +7,18 @@ namespace ai
     BUFF_TRIGGER(HornOfWinterTrigger, "horn of winter");
     BUFF_TRIGGER(BoneShieldTrigger, "bone shield");
     BUFF_TRIGGER(ImprovedIcyTalonsTrigger, "icy talons");
-    DEBUFF_TRIGGER(PlagueStrikeDebuffTrigger, "plague strike");
-    DEBUFF_TRIGGER(IcyTouchDebuffTrigger, "icy touch");
+    DEBUFF_TRIGGER(PlagueStrikeDebuffTrigger, "blood plague");
+    DEBUFF_TRIGGER(IcyTouchDebuffTrigger, "frost fever");
 
 		class PlagueStrikeDebuffOnAttackerTrigger : public DebuffOnAttackerTrigger
 	{
 	public:
-		PlagueStrikeDebuffOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "plague strike") {}
+		PlagueStrikeDebuffOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "blood plague") {}
 	};
 		class IcyTouchDebuffOnAttackerTrigger : public DebuffOnAttackerTrigger
 	{
 	public:
-		IcyTouchDebuffOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "icy touch") {}
+		IcyTouchDebuffOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "frost fever") {}
 	};
 
     class DKPresenceTrigger : public BuffTrigger {
@@ -30,6 +30,8 @@ namespace ai
 	CAN_CAST_TRIGGER(SummonGargoyleTrigger, "summon gargoyle");
 	CAN_CAST_TRIGGER(DancingWeaponTrigger, "dancing rune weapon");
 	CAN_CAST_TRIGGER(UnholyFrenzyTrigger, "unholy frenzy");
+	CAN_CAST_TRIGGER(FrostStrikeTrigger, "frost strike");
+	CAN_CAST_TRIGGER_A(ObliterateTrigger, "obliterate");
 
 	class BloodTapTrigger : public BuffTrigger {
 	public:

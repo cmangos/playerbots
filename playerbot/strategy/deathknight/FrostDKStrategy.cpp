@@ -68,9 +68,7 @@ FrostDKStrategy::FrostDKStrategy(PlayerbotAI* ai) : GenericDKStrategy(ai)
 NextAction** FrostDKStrategy::GetDefaultCombatActions()
 {
 	return NextAction::array(0, 
-			new NextAction("melee", ACTION_NORMAL), 
-			new NextAction("frost strike", ACTION_NORMAL + 4),
-			new NextAction("obliterate", ACTION_NORMAL + 5), NULL);
+			new NextAction("melee", ACTION_NORMAL), NULL);
 }
 
 void FrostDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
@@ -78,12 +76,20 @@ void FrostDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
     GenericDKStrategy::InitCombatTriggers(triggers);
 
 	triggers.push_back(new TriggerNode(
+		"will of the forsaken",
+		NextAction::array(0, new NextAction("lichborne", ACTION_DISPEL), NULL)));
+
+	triggers.push_back(new TriggerNode(
 		"often",
 		NextAction::array(0, new NextAction("unbreakable armor", ACTION_HIGH), NULL)));
 
 	triggers.push_back(new TriggerNode(
-		"will of the forsaken",
-		NextAction::array(0, new NextAction("lichborne", ACTION_DISPEL), NULL)));
+		"obliterate",
+		NextAction::array(0, new NextAction("obliterate", ACTION_NORMAL + 5), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"frost strike",
+		NextAction::array(0, new NextAction("frost strike", ACTION_NORMAL + 4), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"rune strike",

@@ -12,3 +12,11 @@ bool DKPresenceTrigger::IsActive()
         !ai->HasAura("unholy presence", target) &&
         !ai->HasAura("frost presence", target);
 }
+
+bool ObliterateTrigger::IsActive()
+{
+    Unit* target = GetTarget();
+    return SpellCanBeCastedTrigger::IsActive() &&
+        ai->HasAura("blood plague", target, false, true) &&
+        ai->HasAura("frost fever", target, false, true);
+}

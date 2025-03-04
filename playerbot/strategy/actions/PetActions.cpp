@@ -284,6 +284,7 @@ bool InitializePetSpellsAction::isUseful()
         }
     }
 #endif
+    return false;
 }
 
 bool SetPetAction::Execute(Event& event)

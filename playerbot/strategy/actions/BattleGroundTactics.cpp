@@ -3069,7 +3069,7 @@ bool BGTactics::selectObjective(bool reset)
                         //out << "Attacking " << (bot->GetTeam() == ALLIANCE ? "Horde FC" : "Alliance FC");
                         //bot->Say(out.str(), LANG_UNIVERSAL);
                     }
-                    else
+                    else if (!flagTaken())
                     {
                         if (bot->GetTeam() == ALLIANCE)
                             pos.Set(WS_FLAG_POS_HORDE.x, WS_FLAG_POS_HORDE.y, WS_FLAG_POS_HORDE.z, bot->GetMapId());
@@ -3104,7 +3104,7 @@ bool BGTactics::selectObjective(bool reset)
                         //out << "Patrolling battlefield";
                         //bot->Say(out.str(), LANG_UNIVERSAL);
                     }
-                    else
+                    else if (!flagTaken())
                     {
                         if (bot->GetTeam() == ALLIANCE)
                             pos.Set(WS_FLAG_POS_HORDE.x, WS_FLAG_POS_HORDE.y, WS_FLAG_POS_HORDE.z, bot->GetMapId());

@@ -59,14 +59,6 @@ class HunterPetBuild
             }
         };
 
-        struct HunterPetSpellTrainer
-        {
-            std::string Name;
-            int MinLevel;
-            int MaxLevel;
-            std::string Location;
-        };
-
         std::map<int, HunterPetBuildSpell> spells;
         uint32 tpCost;
 
@@ -111,7 +103,7 @@ class HunterPetBuildPath {
         std::string name = "";
         int probability = 100;
 
-        std::vector<HunterPetBuild> hunterPetBuild;
+        std::vector<HunterPetBuild> hunterPetBuild = {} ;
 };
 
 class FamilyPetBuilds {
@@ -121,9 +113,9 @@ public:
 
 
     uint32 familyId = 0;
-    HunterPetBuild baseBuild;
+    HunterPetBuild baseBuild = HunterPetBuild();
 
-    std::vector<HunterPetBuildPath> hunterPetBuildPaths;
+    std::vector<HunterPetBuildPath> hunterPetBuildPaths = {};
 
     HunterPetBuildPath GetBuildPath(int buildNo);
 };

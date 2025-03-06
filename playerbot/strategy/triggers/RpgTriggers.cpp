@@ -433,7 +433,7 @@ bool RpgHomeBindTrigger::IsActive()
         return false;
 
     //Update if the new bind is closer to the group leaders bind than the old one.
-    if (bot->GetGroup() && !ai->IsGroupLeader() && ai->GetGroupMaster()->GetPlayerbotAI())
+    if (bot->GetGroup() && !ai->IsGroupLeader() && ai->GetGroupMaster() && ai->GetGroupMaster()->GetPlayerbotAI())
     {
         Player* player = ai->GetGroupMaster();
         WorldPosition leaderBind = PAI_VALUE(WorldPosition, "home bind");

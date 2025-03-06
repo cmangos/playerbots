@@ -115,4 +115,21 @@ namespace ai
 	public:
         StayTimeValue(PlayerbotAI* ai) : ManualSetValue<time_t>(ai, 0) {}
     };
+
+    class LastLongMoveValue : public CalculatedValue<WorldPosition>
+    {
+    public:
+        LastLongMoveValue(PlayerbotAI* ai) : CalculatedValue<WorldPosition>(ai, "last long move", 30) {}
+
+        WorldPosition Calculate();
+    };
+
+
+    class HomeBindValue : public CalculatedValue<WorldPosition>
+    {
+    public:
+        HomeBindValue(PlayerbotAI* ai) : CalculatedValue<WorldPosition>(ai, "home bind", 30) {}
+
+        WorldPosition Calculate();
+    };
 }

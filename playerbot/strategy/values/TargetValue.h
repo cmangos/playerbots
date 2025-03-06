@@ -78,22 +78,6 @@ namespace ai
         virtual ~TravelTargetValue() { delete value; }
     };	
 
-    class LastLongMoveValue : public CalculatedValue<WorldPosition>
-    {
-    public:
-        LastLongMoveValue(PlayerbotAI* ai) : CalculatedValue<WorldPosition>(ai, "last long move", 30) {}
-
-        WorldPosition Calculate();
-    };
-
-    class HomeBindValue : public CalculatedValue<WorldPosition>
-    {
-    public:
-        HomeBindValue(PlayerbotAI* ai) : CalculatedValue<WorldPosition>(ai, "home bind", 30) {}
-
-        WorldPosition Calculate();
-    };
-
     class IgnoreRpgTargetValue : public ManualSetValue<std::set<ObjectGuid>& >
     {
     public:

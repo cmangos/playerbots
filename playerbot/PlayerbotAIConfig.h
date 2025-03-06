@@ -176,7 +176,7 @@ public:
     uint32 levelProbability[DEFAULT_MAX_LEVEL + 1];
     ClassSpecs classSpecs[MAX_CLASSES];
 #ifdef MANGOSBOT_ZERO
-    FamilyPetBuilds familyPetBuilds[27];
+    std::map<int, FamilyPetBuilds> familyPetBuilds;
     uint32 familyPetBuildProbability[27][10];
     //std::string premadeLevelFamilyPetBuild[27][10][100]; //lvl 1 - 100
 #endif

@@ -3,7 +3,6 @@
 #include "playerbot/playerbot.h"
 #include <playerbot/ServerFacade.h>
 using namespace ai;
-#define MANGOSBOT_ONE 1
 
 bool InitializePetAction::Execute(Event& event)
 {
@@ -322,7 +321,6 @@ bool SetPetAction::Execute(Event& event)
                                     return true;
                                 }
                             }
-
                             return false;
                         };
 
@@ -339,11 +337,13 @@ bool SetPetAction::Execute(Event& event)
                 else
                 {
                     ai->TellPlayer(requester, "I can't set to autocast that spell.");
+                    return false;
                 }
             }
             else
             {
                 ai->TellPlayer(requester, "Please specify a pet spell to set the autocast.");
+                return false;
             }
         }
         else if (command == "aggressive")
@@ -510,21 +510,25 @@ bool SetPetAction::Execute(Event& event)
                 {
                     listCurrentPath(&out);
                     ai->TellPlayer(requester, out.str());
+                    return true;
                 }
                 else if (parameter.find("list ") != std::string::npos)
                 {
                     listPremadePaths(getPremadePaths(parameter.substr(5)), &out);
                     ai->TellPlayer(requester, out.str());
+                    return true;
                 }
                 else if (parameter.find("list") != std::string::npos)
                 {
                     listPremadePaths(getPremadePaths(""), &out);
                     ai->TellPlayer(requester, out);
+                    return true;
                 }
                 else if (parameter.find("get tp") != std::string::npos || parameter.find("get training points") != std::string::npos)
                 {
                     out << bot->GetPet()->GetName() << " has " << hpb->CalculateTrainingPoints(bot) << " total training points.";
                     ai->TellPlayer(requester, out);
+                    return true;
                 }
                 else if (parameter.find("update") != std::string::npos)
                 {
@@ -534,7 +538,7 @@ bool SetPetAction::Execute(Event& event)
                     {
                         case 0:
                             ai->TellPlayer(requester, "No build saved. Please run 'pet build set random', 'pet build set <path number>', 'pet build set <path name>', or 'pet build <build link>'");
-                            break;
+                            return false;
                         case 1:
                         {
                             HunterPetBuild currentBuild = HunterPetBuild(bot);
@@ -547,7 +551,7 @@ bool SetPetAction::Execute(Event& event)
                                 std::vector<std::string> outGroup;
                                 newBuild.ApplyBuild(bot, outGroup);
                             }
-                            break;
+                            return true;
                         }
                         case 2:
                         {
@@ -560,7 +564,7 @@ bool SetPetAction::Execute(Event& event)
                                 std::vector<std::string> outGroup;
                                 newBuild.ApplyBuild(bot, outGroup);
                             }
-                            break;
+                            return true;
                         }
                     }
                 }
@@ -588,8 +592,8 @@ bool SetPetAction::Execute(Event& event)
                                 out << "Apply spec " << "|h|cffffffff" << path->name;
                                 sPlayerbotDbStore.SavePetBuildPath(pet->GetCharmInfo()->GetPetNumber(), pet->GetCreatureInfo()->Family, path->id);
                                 ai->TellPlayer(requester, out);
-
                             }
+                            return true;
                         }
                     }
                     else
@@ -615,6 +619,7 @@ bool SetPetAction::Execute(Event& event)
                                     out << "Apply spec " << "|h|cffffffff" << path->name;
                                     sPlayerbotDbStore.SavePetBuildPath(pet->GetCharmInfo()->GetPetNumber(), pet->GetCreatureInfo()->Family, path->id);
                                     ai->TellPlayer(requester, out);
+                                    return true;
                                 }
                             }
                         }
@@ -642,6 +647,7 @@ bool SetPetAction::Execute(Event& event)
                                 sPlayerbotDbStore.SavePetBuildPath(pet->GetCharmInfo()->GetPetNumber(), pet->GetCreatureInfo()->Family, path->id);
                                 ai->TellPlayer(requester, out);
                             }
+                            return true;
                         }
                         else if (hpb->CheckBuildLink(parameter.substr(4), pet->GetCreatureInfo()->Family, &out))
                         {
@@ -655,10 +661,12 @@ bool SetPetAction::Execute(Event& event)
                                 sPlayerbotDbStore.SavePetBuildLink(pet->GetCharmInfo()->GetPetNumber(), buildLink);
                                 ai->TellPlayer(requester, out);
                             }
+                            return true;
                         }
                         else
                         {
                             ai->TellPlayer(requester, "Invalid build id, name or build link provided.");
+                            return false;
                         }
                     }
                 }
@@ -666,6 +674,7 @@ bool SetPetAction::Execute(Event& event)
                 {
                     HunterPetBuild hp = HunterPetBuild(bot);
                     ai->TellPlayer(requester, hp.GetBuildLink());
+                    return true;
                 }
                 else if (parameter.find("get planned build link") != std::string::npos)
                 {
@@ -676,7 +685,7 @@ bool SetPetAction::Execute(Event& event)
                     {
                         case 0:
                             ai->TellPlayer(requester, "No build saved. Please run 'pet build set random', 'pet build set <path number>', 'pet build set <path name>', or 'pet build <build link>'");
-                            break;
+                            return false;
                         case 1:
                         {
                             HunterPetBuild currentBuild = HunterPetBuild(bot);
@@ -689,7 +698,7 @@ bool SetPetAction::Execute(Event& event)
                             std::stringstream finalBuildLink;
                             finalBuildLink << "Final Link in Path: " << path.hunterPetBuild.back().GetBuildLink();
                             ai->TellPlayer(requester, finalBuildLink.str());
-                            break;
+                            return true;
                         }
                         case 2:
                         {
@@ -697,7 +706,7 @@ bool SetPetAction::Execute(Event& event)
                             std::string currentBuildString = currentBuild.GetBuildLink();
                             std::string buildLink = sPlayerbotDbStore.LoadPetBuildLink(pet->GetCharmInfo()->GetPetNumber());
                             ai->TellPlayer(requester, buildLink);
-                            break;
+                            return true;
                         }
                     }
                 }
@@ -705,6 +714,7 @@ bool SetPetAction::Execute(Event& event)
             else
             {
                 ai->TellPlayer(requester, "pet build and its sub commands are hunter only commands.");
+                return true;
             }
         }
         else if (command == "spells")
@@ -713,11 +723,13 @@ bool SetPetAction::Execute(Event& event)
             for (std::string spell : spells)
             {
                 ai->TellPlayer(requester, spell, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL);
+                return true;
             }
         }
         else
         {
             ai->TellPlayer(requester, "Please specify a pet command (Like autocast).");
+            return false;
         }
     }
     else if (command == "call")
@@ -732,11 +744,13 @@ bool SetPetAction::Execute(Event& event)
         else
         {
             ai->TellPlayer(requester, "I can't call any pets");
+            return false;
         }
     }
     else
     {
         ai->TellPlayer(requester, "I don't have any pets");
+        return false;
     }
 
     return false;
@@ -762,7 +776,7 @@ bool SetPetAction::AutoSelectBuild(Player* bot, std::ostringstream* out)
         if (buildLink != "")
         {
             HunterPetBuild build = HunterPetBuild(buildLink);
-
+            return true;
         }
     }
     return false;
@@ -770,7 +784,7 @@ bool SetPetAction::AutoSelectBuild(Player* bot, std::ostringstream* out)
 
 std::vector<HunterPetBuildPath*> SetPetAction::getPremadePaths(std::string findName)
 {
-    std::vector<HunterPetBuildPath*> ret;
+    std::vector<HunterPetBuildPath*> ret = std::vector<HunterPetBuildPath*>();
     for (auto& path : sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths)
     {
         if (findName.empty() || path.name.find(findName) != std::string::npos)
@@ -784,7 +798,7 @@ std::vector<HunterPetBuildPath*> SetPetAction::getPremadePaths(std::string findN
 
 std::vector<HunterPetBuildPath*> SetPetAction::getPremadePaths(int id)
 {
-    std::vector<HunterPetBuildPath*> ret;
+    std::vector<HunterPetBuildPath*> ret = std::vector<HunterPetBuildPath*>();
     for (auto& path : sPlayerbotAIConfig.familyPetBuilds[bot->GetPet()->GetCreatureInfo()->Family].hunterPetBuildPaths)
     {
         if (path.id == id)
@@ -816,6 +830,7 @@ void SetPetAction::listPremadePaths(std::vector<HunterPetBuildPath*> paths, std:
 
 HunterPetBuildPath* SetPetAction::PickPremadePath(std::vector<HunterPetBuildPath*> paths, bool useProbability)
 {
+    HunterPetBuildPath* path = nullptr;
     int totalProability = 0;
     int curProbability = 0;
 
@@ -953,7 +968,7 @@ bool SetPetAction::IsValidBuildName(std::string buildName)
 
 std::vector<std::string> SetPetAction::GetCurrentPetSpellNames(Pet* pet)
 {
-    std::vector<std::string> spells;
+    std::vector<std::string> spells = std::vector<std::string>();
     uint32 petGuid = pet->GetCharmInfo()->GetPetNumber();
 
     PetSpellMap creatureSpellList = pet->m_spells;

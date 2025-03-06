@@ -66,7 +66,7 @@ bool TravelAction::isUseful()
 bool MoveToDarkPortalAction::Execute(Event& event)
 {
     if (bot->GetGroup())
-        if (bot->GetGroup()->GetLeaderGuid() != bot->GetObjectGuid() && !bot->GetPlayerbotAI()->GetGroupMaster()->GetPlayerbotAI())
+        if (!ai->IsGroupLeader() && !bot->GetPlayerbotAI()->GetGroupMaster()->GetPlayerbotAI())
             return false;
 
 #ifndef MANGOSBOT_ZERO

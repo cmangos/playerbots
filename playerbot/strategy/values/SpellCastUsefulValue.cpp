@@ -79,3 +79,12 @@ bool SpellCastUsefulValue::Calculate()
 
 	return true;
 }
+
+bool SpellReadyValue::Calculate()
+{
+    uint32 spellid = stoi(qualifier);
+    if (!spellid)
+        return false;
+
+    return bot->IsSpellReady(spellid);
+}

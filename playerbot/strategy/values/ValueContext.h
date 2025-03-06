@@ -211,6 +211,7 @@ namespace ai
             creators["vehicle spell id"] = [](PlayerbotAI* ai) { return new VehicleSpellIdValue(ai); };
             creators["item for spell"] = [](PlayerbotAI* ai) { return new ItemForSpellValue(ai); };
             creators["spell cast useful"] = [](PlayerbotAI* ai) { return new SpellCastUsefulValue(ai); };
+            creators["spell ready"] = [](PlayerbotAI* ai) { return new SpellReadyValue(ai); };
             creators["last spell cast"] = [](PlayerbotAI* ai) { return new LastSpellCastValue(ai); };
             creators["last spell cast time"] = [](PlayerbotAI* ai) { return new LastSpellCastTimeValue(ai); };
             creators["last potion used time"] = [](PlayerbotAI* ai) { return new LastPotionUsedTimeValue(ai); };

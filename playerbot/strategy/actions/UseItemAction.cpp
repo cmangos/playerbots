@@ -1169,7 +1169,12 @@ bool UseHearthStoneAction::Execute(Event& event)
 
 bool UseHearthStoneAction::isUseful() 
 {
-    if (!sServerFacade.IsSpellReady(bot, 8690))
+    if (!ai->HasActivePlayerMaster() && ai->IsGroupLeader()) //Only hearthstone if entire group can use it.
+    {
+        if (AI_VALUE2(bool, "group or", "not::spell ready::8690"))
+            return false;
+    }
+    else if (!AI_VALUE2(bool, "spell ready", "8690"))
         return false;
 
     if (bot->InBattleGround())

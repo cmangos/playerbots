@@ -397,6 +397,7 @@ namespace ai
             creators["available trainers"] = [](PlayerbotAI* ai) { return new AvailableTrainersValue(ai); };
             creators["mount list"] = [](PlayerbotAI* ai) { return new MountListValue(ai); };
             creators["current mount speed"] = [](PlayerbotAI* ai) { return new CurrentMountSpeedValue(ai); };
+            creators["max mount speed"] = [](PlayerbotAI* ai) { return new MaxMountSpeedValue(ai); };
 
             creators["has area debuff"] = [](PlayerbotAI* ai) { return new HasAreaDebuffValue(ai); };
             creators["combat start time"] = [](PlayerbotAI* ai) { return new CombatStartTimeValue(ai); };

@@ -251,6 +251,20 @@ std::vector<MountValue> MountListValue::Calculate()
     return mounts;
 }
 
+uint32 MaxMountSpeedValue::Calculate()
+{
+    bool canFly = !qualifier.empty();
+
+    std::vector<MountValue> mounts = AI_VALUE(std::vector<MountValue>, "mount list");
+
+    uint32 maxSpeed = 0;
+
+    for (auto& mount : mounts)
+        maxSpeed = std::max(maxSpeed, mount.GetSpeed(canFly));
+
+    return maxSpeed;
+}
+
 std::string MountListValue::Format()
 {
     std::ostringstream out; out << "{";

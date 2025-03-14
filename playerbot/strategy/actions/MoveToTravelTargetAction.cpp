@@ -15,7 +15,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
 
     WorldPosition botLocation(bot);
-    WorldLocation location = *target->GetPosition();
+    WorldPosition location = *target->GetPosition();
     
     Group* group = bot->GetGroup();
     if (group && !urand(0, 1) && bot == ai->GetGroupMaster())
@@ -38,7 +38,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
             WorldPosition memberPos(member);
             WorldPosition targetPos = *target->GetPosition();
 
-            float memberDistance = botLocation.distance(memberPos);
+            float memberDistance = std::min(botLocation.distance(memberPos), location.distance(memberPos));
 
             if (memberDistance < 50.0f)
                 continue;
@@ -76,10 +76,10 @@ bool MoveToTravelTargetAction::Execute(Event& event)
     //Evenly distribute around the target.
     float angle = 2 * M_PI * urand(0, 100) / 100.0;
 
-    float x = location.coord_x;
-    float y = location.coord_y;
-    float z = location.coord_z;
-    float mapId = location.mapid;
+    float x = location.getX();
+    float y = location.getY();
+    float z = location.getZ();
+    float mapId = location.getMapId();
 
     //Move between 0.5 and 1.0 times the maxDistance.
     float mod = urand(50, 100)/100.0;   

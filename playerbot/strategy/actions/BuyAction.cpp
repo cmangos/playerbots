@@ -3,7 +3,6 @@
 #include "BuyAction.h"
 #include "playerbot/strategy/ItemVisitors.h"
 #include "playerbot/strategy/values/ItemCountValue.h"
-#include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/strategy/values/BudgetValues.h"
 #include "playerbot/strategy/values/MountValues.h"
 
@@ -25,6 +24,9 @@ bool BuyAction::Execute(Event& event)
 
     std::list<ObjectGuid> vendors = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest npcs")->Get();
     bool vendored = false, result = false;
+
+    UsageBoughtList bought;
+
     for (std::list<ObjectGuid>::iterator i = vendors.begin(); i != vendors.end(); ++i)
     {
         ObjectGuid vendorguid = *i;
@@ -106,7 +108,7 @@ bool BuyAction::Execute(Event& event)
                     if (usage == ItemUsage::ITEM_USAGE_USE && ItemUsageValue::CurrentStacks(ai, proto) >= 1)
                         continue;
 
-                    result |= BuyItem(requester, tItems, vendorguid, proto);
+                    result |= BuyItem(requester, tItems, vendorguid, proto, bought, usage);
 #ifndef MANGOSBOT_ZERO
                     if(!result)
                         result |= BuyItem(requester, vItems, vendorguid, proto);
@@ -138,7 +140,7 @@ bool BuyAction::Execute(Event& event)
                 if (!proto)
                     continue;
 
-                result |= BuyItem(requester, pCreature->GetVendorItems(), vendorguid, proto);
+                result |= BuyItem(requester, pCreature->GetVendorItems(), vendorguid, proto, bought);
 #ifndef MANGOSBOT_ZERO
                 result |= BuyItem(requester, pCreature->GetVendorTemplateItems(), vendorguid, proto);
 #endif
@@ -157,11 +159,27 @@ bool BuyAction::Execute(Event& event)
         ai->TellError(requester, "There are no vendors nearby");
         return false;
     }
+    else
+    {
+        for (auto& [usage, boughtList] : bought)
+        {
+            for (auto& [id, count] : boughtList)
+            {                
+                ItemQualifier qualifier(id);
+
+                std::ostringstream out; 
+                
+                out << "Buying " << ChatHelper::formatItem(qualifier, count) << " ";
+                out << ItemUsageValue::ReasonForNeed(usage, qualifier, count, bot);
+                ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            }
+        }
+    }
 
     return result;
 }
 
-bool BuyAction::BuyItem(Player* requester, VendorItemData const* tItems, ObjectGuid vendorguid, const ItemPrototype* proto)
+bool BuyAction::BuyItem(Player* requester, VendorItemData const* tItems, ObjectGuid vendorguid, const ItemPrototype* proto, UsageBoughtList& bought, ItemUsage usage)
 {
     uint32 oldCount = AI_VALUE2(uint32, "item count", proto->Name1);
 
@@ -193,8 +211,16 @@ bool BuyAction::BuyItem(Player* requester, VendorItemData const* tItems, ObjectG
             {
                 sPlayerbotAIConfig.logEvent(ai, "BuyAction", proto->Name1, std::to_string(proto->ItemId));
 
-                std::ostringstream out; out << "Buying " << ChatHelper::formatItem(proto);
-                ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                if (usage == ItemUsage::ITEM_USAGE_NONE)
+                {
+
+                    std::ostringstream out; out << "Buying " << ChatHelper::formatItem(proto);
+                    ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                }
+                else
+                {
+                    bought[usage][proto->ItemId]++;
+                }
                 return true;
             }
  

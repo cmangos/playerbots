@@ -98,6 +98,22 @@ bool RollAction::Execute(Event& event)
         return true;
     }
 
+    bool rollFeedback = AI_VALUE2(bool, "manual bool", "roll feedback");
+
+    if (type == "feedback")
+    {
+        rollFeedback = !rollFeedback;
+
+        if (!rollFeedback)
+            ai->TellPlayerNoFacing(requester, "Roll feedback disabled.");
+        else
+            ai->TellPlayerNoFacing(requester, "Roll feedback enalbed.");
+
+        SET_AI_VALUE2(bool, "manual bool", "roll feedback", rollFeedback);
+
+        return true;
+    }
+
     if (!bot->GetGroup())
         return false;
 
@@ -175,15 +191,41 @@ RollVote RollAction::CalculateRollVote(ItemQualifier& itemQualifier)
         break;
     case ItemUsage::ITEM_USAGE_SKILL:
     case ItemUsage::ITEM_USAGE_USE:
-    case ItemUsage::ITEM_USAGE_DISENCHANT:
     case ItemUsage::ITEM_USAGE_AH:
     case ItemUsage::ITEM_USAGE_BROKEN_AH:
     case ItemUsage::ITEM_USAGE_VENDOR:
     case ItemUsage::ITEM_USAGE_FORCE_GREED:
         needVote = ROLL_GREED;
         break;
+    case ItemUsage::ITEM_USAGE_DISENCHANT:
+#ifndef MANGOSBOT_TWO
+        needVote = ROLL_GREED;
+#else
+        needVote = ROLL_DISENCHANT;
+#endif
+        break;
     }
-    return StoreLootAction::IsLootAllowed(itemQualifier, bot->GetPlayerbotAI()) ? needVote : ROLL_PASS;
+
+    bool canLoot = StoreLootAction::IsLootAllowed(itemQualifier, bot->GetPlayerbotAI());
+
+    if (AI_VALUE2(bool, "manual bool", "roll feedback"))
+    {
+        std::string reason = "because it can not be looted.";
+        std::string vote = "Passing";
+        if(canLoot)
+            reason = ItemUsageValue::ReasonForNeed(usage, itemQualifier, 1, bot);
+
+        if (needVote == ROLL_GREED)
+            vote = "Rolling greed";
+        else if (needVote == ROLL_NEED)
+            vote = "Rolling need";
+        else if (needVote == ROLL_DISENCHANT)
+            vote = "Rolling disenchant";
+
+         ai->TellPlayerNoFacing(ai->GetMaster(), vote + " on " + ChatHelper::formatItem(itemQualifier) + " " + reason);
+    }
+
+    return canLoot ? needVote : ROLL_PASS;
 }
 
 bool RollAction::RollOnItemInSlot(RollVote vote, ObjectGuid lootGuid, uint32 slot)

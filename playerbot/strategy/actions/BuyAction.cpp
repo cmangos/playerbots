@@ -109,10 +109,6 @@ bool BuyAction::Execute(Event& event)
                         continue;
 
                     result |= BuyItem(requester, tItems, vendorguid, proto, bought, usage);
-#ifndef MANGOSBOT_ZERO
-                    if(!result)
-                        result |= BuyItem(requester, vItems, vendorguid, proto);
-#endif
                     if(!result)
                         break;   
 
@@ -141,10 +137,6 @@ bool BuyAction::Execute(Event& event)
                     continue;
 
                 result |= BuyItem(requester, pCreature->GetVendorItems(), vendorguid, proto, bought);
-#ifndef MANGOSBOT_ZERO
-                result |= BuyItem(requester, pCreature->GetVendorTemplateItems(), vendorguid, proto);
-#endif
-
                 if (!result)
                 {
                     std::ostringstream out; out << "Nobody sells " << ChatHelper::formatItem(proto) << " nearby";

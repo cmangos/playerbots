@@ -1223,8 +1223,11 @@ void RandomItemMgr::BuildItemInfoCache()
                                 uint32 m_value1 = fields[1].GetUInt32();
                                 uint32 m_value2 = fields[2].GetUInt32();
 
-                                FactionEntry const* faction = sFactionStore.LookupEntry(m_value1);
-                                if (faction)
+#ifdef MANGOSBOT_ONE
+                                if (FactionEntry const* faction = sFactionStore.LookupEntry<FactionEntry>(m_value1))
+#else
+                                if (FactionEntry const* faction = sFactionStore.LookupEntry(m_value1))
+#endif
                                 {
                                     cacheInfo->repFaction = m_value1;
                                     cacheInfo->repRank = m_value2;

@@ -60,7 +60,7 @@ std::list<int32> ItemVendorListValue::Calculate()
 bool VendorHasUsefulItemValue::Calculate()
 {
     uint32 entry = stoi(this->getQualifier());
-    static CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(entry);
+    CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(entry);
 
     if (!cInfo)
         return false;

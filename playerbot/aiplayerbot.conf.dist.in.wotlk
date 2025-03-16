@@ -114,7 +114,19 @@ AiPlayerbot.RandomGearMaxLevel = 500
 AiPlayerbot.RandomGearMaxDiff = 11
 
 # Regularly upgrade bots equipment for their level
-AiPlayerbot.RandomGearUpgradeEnabled = 1
+AiPlayerbot.RandomGearUpgradeEnabled = 0
+
+# Enable random tabards on randomisation
+AiPlayerbot.RandomGearTabards = 0
+
+# Chance to get a random tabard
+AiPlayerbot.RandomGearTabardsChance = 0.1
+
+# Replace guild tabard with random one
+AiPlayerbot.RandomGearTabardsReplaceGuild = 0
+
+# Allow use tabards that have no vendors, quests or loot related to it
+AiPlayerbot.RandomGearTabardsUnobtainable = 0
 
 # List of item IDs to exclude from random gear, separated by comma
 AiPlayerbot.RandomGearBlacklist = 0

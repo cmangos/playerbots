@@ -110,6 +110,8 @@ bool BuyAction::Execute(Event& event)
 
                     result |= BuyItem(requester, tItems, vendorguid, proto, bought, usage);
                     if(!result)
+                        result |= BuyItem(requester, vItems, vendorguid, proto, bought, usage);
+                    if(!result)
                         break;   
 
                     RESET_AI_VALUE2(ItemUsage, "item usage", tItem->item);
@@ -137,6 +139,9 @@ bool BuyAction::Execute(Event& event)
                     continue;
 
                 result |= BuyItem(requester, pCreature->GetVendorItems(), vendorguid, proto, bought);
+                if (!result)
+                    result |= BuyItem(requester, pCreature->GetVendorTemplateItems(), vendorguid, proto, bought);
+
                 if (!result)
                 {
                     std::ostringstream out; out << "Nobody sells " << ChatHelper::formatItem(proto) << " nearby";

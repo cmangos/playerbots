@@ -1982,6 +1982,10 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                     if (newStatValue <= 0)
                         continue;
 
+                    // check if already have reward
+                    if (sRandomItemMgr.HasSameQuestRewards(bot, newItemId))
+                        continue;
+
                     // Add random enchant value (the best one)
                     uint32 randomEnchBestId = 0;
                     uint32 randomEnchBestValue = 0;

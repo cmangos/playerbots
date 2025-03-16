@@ -2955,6 +2955,84 @@ bool RandomItemMgr::HasStatWeight(uint32 itemId)
     return itemInfoCache[itemId] != nullptr;
 }
 
+bool RandomItemMgr::CanBuyFromVendor(Player *player, uint32 itemId, uint32 creatureId)
+{
+    CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(creatureId);
+    if (!cInfo)
+        return false;
+
+    VendorItemList vendorItems;
+    VendorItemData const* vItems = sObjectMgr.GetNpcVendorItemList(creatureId);
+    VendorItemData const* tItems = sObjectMgr.GetNpcVendorTemplateItemList(cInfo->VendorTemplateId);
+
+    if (!vItems && !tItems)
+    {
+        return false;
+    }
+
+    uint8 customitems = vItems ? vItems->GetItemCount() : 0;
+    uint8 numitems = customitems + (tItems ? tItems->GetItemCount() : 0);
+
+    for (int i = 0; i < numitems; ++i)
+    {
+        VendorItem const* crItem = i < customitems ? vItems->GetItem(i) : tItems->GetItem(i - customitems);
+
+        if (crItem && crItem->item == itemId)
+        {
+            ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemId);
+            if (pProto)
+            {
+                // when no faction required but rank > 0 will be used faction id from the vendor faction template to compare the rank
+                if (!pProto->RequiredReputationFaction && pProto->RequiredReputationRank > 0 &&
+                    ReputationRank(pProto->RequiredReputationRank) > player->GetReputationRank(sFactionTemplateStore.LookupEntry(cInfo->Faction)->faction))
+                    return false;
+
+                if (crItem->conditionId && !sObjectMgr.IsConditionSatisfied(crItem->conditionId, player, player->GetMap(), nullptr, CONDITION_FROM_VENDOR))
+                    return false;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+bool RandomItemMgr::HasSameQuestRewards(Player *player, uint32 itemId)
+{
+    ItemInfoEntry* info = itemInfoCache[itemId];
+    if (!info)
+        return false;
+    if (info->source != ITEM_SOURCE_QUEST)
+        return false;
+
+    for (auto& questId : info->sourceIds)
+    {
+        Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+        if (!quest)
+            continue;
+
+        uint32 rewItemCount = quest->GetRewItemsCount();
+        for (uint32 i = 0; i < rewItemCount; ++i)
+        {
+            if (!quest->RewItemId[i])
+                continue;
+
+            if (player->HasItemCount(quest->RewItemId[i], 1, true))
+                return true;
+        }
+
+        uint32 rewChoiceItemCount = quest->GetRewChoiceItemsCount();
+        for (uint32 i = 0; i < rewChoiceItemCount; ++i)
+        {
+            if (!quest->RewChoiceItemId[i])
+                continue;
+
+            if (player->HasItemCount(quest->RewChoiceItemId[i], 1, true))
+                return true;
+        }
+    }
+    return false;
+}
+
 uint32 RandomItemMgr::GetMinLevelFromCache(uint32 itemId)
 {
     ItemInfoEntry* info = itemInfoCache[itemId];

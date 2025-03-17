@@ -400,28 +400,26 @@ ItemUsage ItemUsageValue::Calculate()
     if (proto->SellPrice > 0)
     {
         //if item value is significantly higher than its vendor sell price and we actually have money to place the item on ah.
-        if (IsMoreProfitableToSellToAHThanToVendor(proto, bot) && AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah))
-        {
-            Item* item = CurrentItem(proto, bot);
-            if (proto->Bonding == NO_BIND)
-            {
-                if (item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) < item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
-                    return ItemUsage::ITEM_USAGE_BROKEN_AH; //Keep until repaired so we can AH later.
-                return ItemUsage::ITEM_USAGE_AH;
-            }
+        if (!IsMoreProfitableToSellToAHThanToVendor(proto, bot) && AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah))
+            return ItemUsage::ITEM_USAGE_VENDOR;
 
-            if (proto->Bonding == BIND_WHEN_EQUIPPED)
-            {
-                if (!item || !item->IsSoulBound())
-                {
-                    if (item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) < item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
-                        return ItemUsage::ITEM_USAGE_BROKEN_AH; //Keep until repaired so we can AH later.
-                    return ItemUsage::ITEM_USAGE_AH;
-                }
-            }
-        }
+        Item* item = CurrentItem(proto, bot);
 
-        return ItemUsage::ITEM_USAGE_VENDOR;
+        bool soulBound = (proto->Bonding == BIND_WHEN_EQUIPPED) && item && item->IsSoulBound();
+
+        if (!soulBound)
+            return ItemUsage::ITEM_USAGE_VENDOR; //Item is soulbound so can't AH.
+
+        uint32 ahPrice = GetBotAHSellMinPrice(proto);
+        uint32 repairCost = RepairCostValue::RepairCost(item);
+
+        if (ahPrice < proto->SellPrice + repairCost)
+            return ItemUsage::ITEM_USAGE_VENDOR;  //Repairing costs more than the AH profit.
+
+        if (repairCost > 0)
+            return ItemUsage::ITEM_USAGE_BROKEN_AH; //Keep until repaired so we can AH later.
+
+        return ItemUsage::ITEM_USAGE_AH;
     }
 
     //NONE

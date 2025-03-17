@@ -23,19 +23,21 @@ namespace ai
         anything = 12
     };
 
-    class MaxGearRepairCostValue : public Uint32CalculatedValue
+    class RepairCostValue : public Uint32CalculatedValue
     {
     public:
-        MaxGearRepairCostValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai,"max repair cost",60) {}
+        RepairCostValue(PlayerbotAI* ai, std::string name = "repair cost", int checkInterval = 60) : Uint32CalculatedValue(ai, name, checkInterval) {}
+
+        static uint32 RepairCost(const Item* item, bool fullCost = false);
 
         virtual uint32 Calculate();
     };
 
-    class RepairCostValue : public Uint32CalculatedValue
+    class MaxGearRepairCostValue : public RepairCostValue
     {
     public:
-        RepairCostValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "repair cost",60) {}
-        
+        MaxGearRepairCostValue(PlayerbotAI* ai) : RepairCostValue(ai,"max repair cost",checkInterval) {}
+
         virtual uint32 Calculate();
     };
 

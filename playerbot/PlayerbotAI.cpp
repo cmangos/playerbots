@@ -296,6 +296,14 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
         isMoving = false;
     }
 
+#ifdef MANGOSBOT_TWO
+    //Remove gryphon
+    if (!bot->IsMounted() && bot->GetMountID() && !bot->IsTaxiFlying())
+    {
+        Unmount();
+    }
+#endif
+
     // wake up if in combat
     bool isCasting = bot->IsNonMeleeSpellCasted(true);
     if (sServerFacade.IsInCombat(bot))
@@ -836,7 +844,7 @@ bool PlayerbotAI::CanEnterArea(const AreaTrigger* area)
 
 void PlayerbotAI::Unmount()
 {
-    if (bot->IsMounted() && !bot->IsTaxiFlying())
+    if ((bot->IsMounted() || bot->GetMountID()) && !bot->IsTaxiFlying())
     {
         bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         bot->Unmount();
@@ -6208,7 +6216,7 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
             if (target->GetPosition())
             {
                 out << "\nLocation: " << target->GetPosition()->getAreaName();
-                out << " (" << target->GetPosition()->distance(bot) << "y)";
+                out << " (" << (uint32)target->GetPosition()->distance(bot) << "y)";
             }
         }
         out << "\nStatus: ";

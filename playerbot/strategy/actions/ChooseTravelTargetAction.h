@@ -80,7 +80,7 @@ namespace ai
 
     class RequestQuestTravelTargetAction : public RequestTravelTargetAction {
     public:
-        RequestQuestTravelTargetAction(PlayerbotAI* ai, std::string name = "choose async quest travel target") : RequestTravelTargetAction(ai, name) {}
+        RequestQuestTravelTargetAction(PlayerbotAI* ai, std::string name = "request quest travel target") : RequestTravelTargetAction(ai, name) {}
     private:
         virtual bool Execute(Event& event) override;
         virtual bool isAllowed() const override;

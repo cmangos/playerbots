@@ -193,7 +193,7 @@ bool CheckMountStateAction::Execute(Event& event)
                 if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && !IsMounted)
                     ai->TellPlayerNoFacing(requester, "Mount. Near rpg targets.");
 
-                return Mount(requester);
+                return Mount(requester, true);
             }
         }
 

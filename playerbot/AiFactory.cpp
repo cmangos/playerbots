@@ -884,7 +884,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
             nonCombatEngine->addStrategy("lfg");
         }
 
-        if (!player->GetGroup() || player->GetGroup()->GetLeaderGuid() == player->GetObjectGuid())
+        if (!player->GetGroup() || facade->IsGroupLeader())
         {
             // let 25% of random not grouped (or group leader) bots help other players
             if (!urand(0, 3))

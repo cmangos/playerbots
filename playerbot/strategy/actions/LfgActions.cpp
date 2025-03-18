@@ -1119,7 +1119,7 @@ bool LfgLeaveAction::isUseful()
             return false;
     }
 
-    if (bot->GetGroup() && bot->GetGroup()->GetLeaderGuid() != bot->GetObjectGuid())
+    if (bot->GetGroup() && !ai->IsGroupLeader())
     {
         if (sWorld.GetLFGQueue().IsPlayerInQueue(bot->GetGroup()->GetLeaderGuid()))
             return false;
@@ -1171,7 +1171,7 @@ bool LfgJoinAction::isUseful()
 #ifdef MANGOSBOT_ZERO
     if (bot->GetGroup())
 #else
-    if (bot->GetGroup() && bot->GetGroup()->GetLeaderGuid() != bot->GetObjectGuid())
+    if (bot->GetGroup() && !ai->IsGroupLeader())
 #endif
     {
         //ai->ChangeStrategy("-lfg", BotState::BOT_STATE_NON_COMBAT);

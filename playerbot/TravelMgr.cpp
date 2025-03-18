@@ -123,14 +123,20 @@ bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInf
     if(!IsPossible(info))
         return false;
 
-    bool forceThisQuest = info.HasFocusQuest();
+    bool forceThisQuest = info.HasFocusQuest(); //Checked in IsPossible if it's 'this' quest.
 
     if (GetRelation() == 0)
     {
-        if ((!info.HasFocusQuest() && !bot->GetMap()->IsContinent()) || !bot->CanTakeQuest(GetQuestTemplate(), false))
+        if (!bot->GetMap()->IsContinent()) //This gives issues for bot->CanTakeQuest so stop here.
             return false;
 
-        if (!forceThisQuest)
+        if (forceThisQuest)
+        {
+            if (!AI_VALUE2(bool, "group or", "following party,can accept quest npc::" + std::to_string(GetEntry()))) //Noone has yellow exclamation mark.
+                if (!AI_VALUE2(bool, "group or", "following party,can accept quest low level npc::" + std::to_string(GetEntry()))) //Noone can do this quest.
+                    return false;
+        }
+        else
         {
             if (info.GetBoolValue("can fight equal"))
             {
@@ -144,24 +150,11 @@ bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInf
                     return false;
             }
         }
-        else
-        {
-            if (!AI_VALUE2(bool, "can accept quest npc", std::to_string(GetEntry())))
-                return false;
-        }
     }
     else
     {
-        if (!forceThisQuest)
-        {
-            if (!AI_VALUE2(bool, "group or", "following party,can turn in quest npc::" + std::to_string(GetEntry())))
-                return false;
-        }
-        else
-        {
-            if (!AI_VALUE2(bool, "can turn in quest npc", std::to_string(GetEntry())))
-                return false;
-        }
+        if (!AI_VALUE2(bool, "group or", "following party,can turn in quest npc::" + std::to_string(GetEntry())))
+            return false;
     }
 
     if (GetEntry() > 0)

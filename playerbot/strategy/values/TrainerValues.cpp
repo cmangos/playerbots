@@ -66,10 +66,10 @@ trainableSpellMap* TrainableSpellMapValue::Calculate()
                 if (otherTrainerSpell->reqSkillValue != trainerSpell.reqSkillValue)
                     continue;
 
-                if (otherTrainerSpell->reqLevel != trainerSpell.reqSkill)
+                if (otherTrainerSpell->reqLevel != trainerSpell.reqLevel)
                     continue;
 
-                if (otherTrainerSpell->learnedSpell != trainerSpell.reqSkill)
+                if (otherTrainerSpell->learnedSpell != trainerSpell.learnedSpell)
                     continue;
 
                 if (otherTrainerSpell->conditionId != trainerSpell.conditionId)

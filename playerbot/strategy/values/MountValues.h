@@ -48,6 +48,13 @@ namespace ai
         virtual std::string Format();
     };   
 
+    class MaxMountSpeedValue : public Uint32CalculatedValue, public Qualified
+    {
+    public:
+        MaxMountSpeedValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "max mount speed", 1), Qualified() {}
+        virtual uint32 Calculate();
+    };
+
     class MountSkillTypeValue : public CalculatedValue<uint32>
     {
     public:

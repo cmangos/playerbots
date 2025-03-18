@@ -214,6 +214,7 @@ namespace ai
             creators["vehicle spell id"] = [](PlayerbotAI* ai) { return new VehicleSpellIdValue(ai); };
             creators["item for spell"] = [](PlayerbotAI* ai) { return new ItemForSpellValue(ai); };
             creators["spell cast useful"] = [](PlayerbotAI* ai) { return new SpellCastUsefulValue(ai); };
+            creators["spell ready"] = [](PlayerbotAI* ai) { return new SpellReadyValue(ai); };
             creators["last spell cast"] = [](PlayerbotAI* ai) { return new LastSpellCastValue(ai); };
             creators["last spell cast time"] = [](PlayerbotAI* ai) { return new LastSpellCastTimeValue(ai); };
             creators["last potion used time"] = [](PlayerbotAI* ai) { return new LastPotionUsedTimeValue(ai); };
@@ -399,6 +400,7 @@ namespace ai
             creators["available trainers"] = [](PlayerbotAI* ai) { return new AvailableTrainersValue(ai); };
             creators["mount list"] = [](PlayerbotAI* ai) { return new MountListValue(ai); };
             creators["current mount speed"] = [](PlayerbotAI* ai) { return new CurrentMountSpeedValue(ai); };
+            creators["max mount speed"] = [](PlayerbotAI* ai) { return new MaxMountSpeedValue(ai); };
 
             creators["has area debuff"] = [](PlayerbotAI* ai) { return new HasAreaDebuffValue(ai); };
             creators["combat start time"] = [](PlayerbotAI* ai) { return new CombatStartTimeValue(ai); };

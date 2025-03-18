@@ -421,10 +421,31 @@ bool RpgHomeBindTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (AI_VALUE(WorldPosition, "home bind").distance(bot) < 500.0f)
+    //Do not update for realplayers/always online when at max level.
+    if ((ai->IsRealPlayer() || sPlayerbotAIConfig.IsFreeAltBot(bot)) && bot->GetLevel() == DEFAULT_MAX_LEVEL)
         return false;
 
-    if ((ai->IsRealPlayer() || sPlayerbotAIConfig.IsFreeAltBot(bot)) && bot->GetLevel() == DEFAULT_MAX_LEVEL)
+    WorldPosition currentBind = AI_VALUE(WorldPosition, "home bind");
+    WorldPosition newBind = (guidP.sqDistance2d(bot) > INTERACTION_DISTANCE * INTERACTION_DISTANCE) ? guidP : bot;
+
+    //Do not update if there's almost not change.
+    if (newBind.fDist(currentBind) < INTERACTION_DISTANCE * 2) 
+        return false;
+
+    //Update if the new bind is closer to the group leaders bind than the old one.
+    if (bot->GetGroup() && !ai->IsGroupLeader() && ai->GetGroupMaster() && ai->GetGroupMaster()->GetPlayerbotAI())
+    {
+        Player* player = ai->GetGroupMaster();
+        WorldPosition leaderBind = PAI_VALUE(WorldPosition, "home bind");
+
+        float newBindDistanceToMasterBind = newBind.fDist(leaderBind);
+        float oldBindDistanceToMasterBind = currentBind.fDist(leaderBind);
+
+        return newBindDistanceToMasterBind < oldBindDistanceToMasterBind;
+    }
+
+    //Do not update if the new bind is pretty close already.
+    if (currentBind.fDist(bot) < 500.0f)
         return false;
 
     return true;

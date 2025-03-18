@@ -296,6 +296,14 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
         isMoving = false;
     }
 
+#ifdef MANGOSBOT_TWO
+    //Remove gryphon
+    if (!bot->IsMounted() && bot->GetMountID() && !bot->IsTaxiFlying())
+    {
+        Unmount();
+    }
+#endif
+
     // wake up if in combat
     bool isCasting = bot->IsNonMeleeSpellCasted(true);
     if (sServerFacade.IsInCombat(bot))
@@ -829,7 +837,7 @@ bool PlayerbotAI::CanEnterArea(const AreaTrigger* area)
 
 void PlayerbotAI::Unmount()
 {
-    if (bot->IsMounted() && !bot->IsTaxiFlying())
+    if ((bot->IsMounted() || bot->GetMountID()) && !bot->IsTaxiFlying())
     {
         bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         bot->Unmount();
@@ -1167,8 +1175,15 @@ void PlayerbotAI::HandleTeleportAck()
 
 void PlayerbotAI::Reset(bool full)
 {
+    AiObjectContext* context = aiObjectContext;
+
     if (bot->IsTaxiFlying())
         return;
+
+    if (!HasActivePlayerMaster() && sServerFacade.IsInCombat(bot) && time(0) - AI_VALUE(time_t,"combat start time") > 5 * MINUTE)
+    {
+        bot->CombatStop();
+    }
 
     currentEngine = engines[(uint8)BotState::BOT_STATE_NON_COMBAT];
     currentState = BotState::BOT_STATE_NON_COMBAT;
@@ -1180,17 +1195,17 @@ void PlayerbotAI::Reset(bool full)
     if (strategy)
         strategy->OnPullEnded();
 
-    aiObjectContext->GetValue<Unit*>("old target")->Set(nullptr);
-    aiObjectContext->GetValue<Unit*>("current target")->Set(nullptr);
-    aiObjectContext->GetValue<Unit*>("pull target")->Set(nullptr);
-    aiObjectContext->GetValue<ObjectGuid>("attack target")->Set(ObjectGuid());
-    aiObjectContext->GetValue<GuidPosition>("rpg target")->Set(GuidPosition());
-    aiObjectContext->GetValue<LootObject>("loot target")->Set(LootObject());
-    aiObjectContext->GetValue<uint32>("lfg proposal")->Set(0);
-    aiObjectContext->GetValue<time_t>("combat start time")->Set(0);
+    RESET_AI_VALUE(Unit*,"old target");
+    RESET_AI_VALUE(Unit*,"current target");
+    RESET_AI_VALUE(Unit*,"pull target");
+    RESET_AI_VALUE(ObjectGuid,"attack target");
+    RESET_AI_VALUE(GuidPosition,"rpg target");
+    RESET_AI_VALUE(LootObject,"loot target");
+    RESET_AI_VALUE(uint32,"lfg proposal");
+    RESET_AI_VALUE(time_t,"combat start time");
     bot->SetSelectionGuid(ObjectGuid());
 
-    LastSpellCast & lastSpell = aiObjectContext->GetValue<LastSpellCast& >("last spell cast")->Get();
+    LastSpellCast & lastSpell = AI_VALUE(LastSpellCast&,"last spell cast");
     lastSpell.Reset();
 
     if (bot->GetTradeData())
@@ -1198,13 +1213,14 @@ void PlayerbotAI::Reset(bool full)
 
     if (full)
     {
-        aiObjectContext->GetValue<LastMovement& >("last movement")->Get().Set(NULL);
-        aiObjectContext->GetValue<LastMovement& >("last area trigger")->Get().Set(NULL);
-        aiObjectContext->GetValue<LastMovement& >("last taxi")->Get().Set(NULL);
+        RESET_AI_VALUE(LastMovement&,"last movement");
+        RESET_AI_VALUE(LastMovement&,"last area trigger");
+        RESET_AI_VALUE(LastMovement&,"last taxi");
 
-        sTravelMgr.SetNullTravelTarget(aiObjectContext->GetValue<TravelTarget* >("travel target")->Get());
-        aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
-        aiObjectContext->GetValue<TravelTarget* >("travel target")->Get()->SetExpireIn(1000);
+        TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
+        sTravelMgr.SetNullTravelTarget(target);
+        target->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+        target->SetExpireIn(1000);
 
         InterruptSpell();
 
@@ -1226,7 +1242,7 @@ void PlayerbotAI::Reset(bool full)
         }
     }
 
-    aiObjectContext->GetValue<std::set<ObjectGuid>&>("ignore rpg target")->Get().clear();
+    AI_VALUE(std::set<ObjectGuid>&,"ignore rpg target").clear();
 
     if (bot->IsTaxiFlying())
     {
@@ -1242,11 +1258,6 @@ void PlayerbotAI::Reset(bool full)
         {
             engines[i]->Init();
         }
-    }
-
-    if (!HasActivePlayerMaster())
-    {
-        bot->CombatStop();
     }
 }
 
@@ -6257,7 +6268,7 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
             if (target->GetPosition())
             {
                 out << "\nLocation: " << target->GetPosition()->getAreaName();
-                out << " (" << target->GetPosition()->distance(bot) << "y)";
+                out << " (" << (uint32)target->GetPosition()->distance(bot) << "y)";
             }
         }
         out << "\nStatus: ";

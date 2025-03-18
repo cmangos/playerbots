@@ -153,6 +153,10 @@ bool PlayerbotAIConfig::Initialize()
     randomGearMaxLevel = config.GetIntDefault("AiPlayerbot.RandomGearMaxLevel", 500);
     randomGearMaxDiff = config.GetIntDefault("AiPlayerbot.RandomGearMaxDiff", 9);
     randomGearUpgradeEnabled = config.GetBoolDefault("AiPlayerbot.RandomGearUpgradeEnabled", false);
+    randomGearTabards = config.GetBoolDefault("AiPlayerbot.RandomGearTabards", false);
+    randomGearTabardsChance = config.GetFloatDefault("AiPlayerbot.RandomGearTabardsChance", 0.1f);
+    randomGearTabardsReplaceGuild = config.GetBoolDefault("AiPlayerbot.RandomGearTabardsReplaceGuild", false);
+    randomGearTabardsUnobtainable = config.GetBoolDefault("AiPlayerbot.RandomGearTabardsUnobtainable", false);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomGearBlacklist", ""), randomGearBlacklist);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomGearWhitelist", ""), randomGearWhitelist);
     randomGearProgression = config.GetBoolDefault("AiPlayerbot.RandomGearProgression", true);

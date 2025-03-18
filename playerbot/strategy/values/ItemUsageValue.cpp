@@ -397,28 +397,26 @@ ItemUsage ItemUsageValue::Calculate()
     if (proto->SellPrice > 0)
     {
         //if item value is significantly higher than its vendor sell price and we actually have money to place the item on ah.
-        if (IsMoreProfitableToSellToAHThanToVendor(proto, bot) && AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah))
-        {
-            Item* item = CurrentItem(proto, bot);
-            if (proto->Bonding == NO_BIND)
-            {
-                if (item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) < item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
-                    return ItemUsage::ITEM_USAGE_BROKEN_AH; //Keep until repaired so we can AH later.
-                return ItemUsage::ITEM_USAGE_AH;
-            }
+        if (!IsMoreProfitableToSellToAHThanToVendor(proto, bot) && AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah))
+            return ItemUsage::ITEM_USAGE_VENDOR;
 
-            if (proto->Bonding == BIND_WHEN_EQUIPPED)
-            {
-                if (!item || !item->IsSoulBound())
-                {
-                    if (item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) < item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
-                        return ItemUsage::ITEM_USAGE_BROKEN_AH; //Keep until repaired so we can AH later.
-                    return ItemUsage::ITEM_USAGE_AH;
-                }
-            }
-        }
+        Item* item = CurrentItem(proto, bot);
 
-        return ItemUsage::ITEM_USAGE_VENDOR;
+        bool soulBound = (proto->Bonding == BIND_WHEN_EQUIPPED) && item && item->IsSoulBound();
+
+        if (!soulBound)
+            return ItemUsage::ITEM_USAGE_VENDOR; //Item is soulbound so can't AH.
+
+        uint32 ahPrice = GetBotAHSellMinPrice(proto);
+        uint32 repairCost = RepairCostValue::RepairCost(item);
+
+        if (ahPrice < proto->SellPrice + repairCost)
+            return ItemUsage::ITEM_USAGE_VENDOR;  //Repairing costs more than the AH profit.
+
+        if (repairCost > 0)
+            return ItemUsage::ITEM_USAGE_BROKEN_AH; //Keep until repaired so we can AH later.
+
+        return ItemUsage::ITEM_USAGE_AH;
     }
 
     //NONE
@@ -656,6 +654,68 @@ uint32 ItemUsageValue::GetSmallestBagSize(Player* bot)
     }
 
     return curSlots;
+}
+
+std::string ItemUsageValue::ReasonForNeed(ItemUsage usage, ItemQualifier qualifier, uint32 count, Player* bot)
+{
+    std::map<std::string, std::string> placeholders;
+    placeholders["%item"] = ChatHelper::formatItem(qualifier);
+
+    switch (usage)
+    {
+    case ItemUsage::ITEM_USAGE_EQUIP:
+    {
+        if (!qualifier || !bot)
+            return BOT_TEXT2("for equiping as upgrade.", placeholders);
+
+        Item* currentItem = ItemUsageValue::CurrentItem(qualifier.GetProto(), bot);
+        if (!currentItem)
+            return BOT_TEXT2("for equiping as upgrade because the slot is empty.", placeholders);
+
+        placeholders["%current"] = ChatHelper::formatItem(currentItem);
+
+        if (currentItem->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0 && currentItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0)
+            return BOT_TEXT2("for equiping as a replacement of %current because it is broken.", placeholders);
+
+        uint32 currentStatWeight = sRandomItemMgr.ItemStatWeight(bot, currentItem);
+        uint32 newStatWeight = sRandomItemMgr.ItemStatWeight(bot, qualifier);
+        placeholders["%cPower"] = std::to_string(currentStatWeight);
+        placeholders["%nPower"] = std::to_string(newStatWeight);
+        if (newStatWeight && currentStatWeight)
+            return BOT_TEXT2("for equiping as a replacement of %current (%cPower) because it is stronger (%nPower).", placeholders);
+
+        return BOT_TEXT2("for equiping as a replacement of %current because it has a higher level or quality.", placeholders);     
+    }
+    case ItemUsage::ITEM_USAGE_BAD_EQUIP:
+        return BOT_TEXT2("for equiping until I can find something better.", placeholders);
+    case ItemUsage::ITEM_USAGE_USE:
+        return BOT_TEXT2("to use it when I need it.", placeholders);
+    case ItemUsage::ITEM_USAGE_SKILL:
+    case ItemUsage::ITEM_USAGE_DISENCHANT:
+        return BOT_TEXT2("to use it for my profession.", placeholders);
+    case ItemUsage::ITEM_USAGE_AMMO:
+        return BOT_TEXT2("to use as ammo.", placeholders);
+    case ItemUsage::ITEM_USAGE_QUEST:
+        return BOT_TEXT2("to complete an objective for a quest.", placeholders);
+    case ItemUsage::ITEM_USAGE_AH:
+        if (!qualifier)
+            return BOT_TEXT2("to repost on AH.", placeholders);
+
+        placeholders["%price_min"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMinPrice(qualifier.GetProto()) * count);
+        placeholders["%price_max"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMaxPrice(qualifier.GetProto()) * count);
+        return BOT_TEXT2("to repost on AH for %price_min to %price_max.", placeholders);
+    case ItemUsage::ITEM_USAGE_VENDOR:
+        if (!qualifier)
+            return BOT_TEXT2("to sell to a vendor.", placeholders);
+
+        placeholders["%price"] = ChatHelper::formatMoney(qualifier.GetProto()->SellPrice * count);
+        return BOT_TEXT2("to sell to a vendor for %price.", placeholders);
+    case ItemUsage::ITEM_USAGE_FORCE_NEED:
+    case ItemUsage::ITEM_USAGE_FORCE_GREED:
+        return BOT_TEXT2("because I was told to get this item.", placeholders);
+    }
+
+    return "";
 }
 
 bool ItemUsageValue::IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory)

@@ -22,7 +22,7 @@ namespace ai
         float GetAttackDistance() const;
 
     private:
-        bool Mount(Player* requester);
+        bool Mount(Player* requester, bool limitSpeedToGroup = false);
         bool UnMount() const;
     };
 }

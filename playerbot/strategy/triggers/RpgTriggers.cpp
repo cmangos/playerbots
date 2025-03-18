@@ -579,6 +579,9 @@ bool RpgCraftTrigger::IsActive()
     if (AI_VALUE(uint8, "bag space") > 80)
         return false;
 
+    if (ai->HasCheat(BotCheatMask::item) && AI_VALUE(uint8, "bag space") > 60)
+        return false;
+
     if (!guidP.GetWorldObject(bot->GetInstanceId()))
         return false;
 

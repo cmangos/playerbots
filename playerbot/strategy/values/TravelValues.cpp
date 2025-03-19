@@ -273,9 +273,8 @@ bool NeedTravelPurposeValue::Calculate()
     case TravelDestinationPurpose::Explore:
         return ai->HasStrategy("explore", BotState::BOT_STATE_NON_COMBAT);    
     case TravelDestinationPurpose::GenericRpg:
-        return true;
     case TravelDestinationPurpose::Grind:
-        return true;
+        return !AI_VALUE2(bool, "manual bool", "is travel refresh");
     default:
         return false;
     }
@@ -295,6 +294,9 @@ bool ShouldTravelNamedValue::Calculate()
             return false;
 
         if (!botPos.isOverworld())
+            return false;
+
+        if (AI_VALUE2(bool, "manual bool", "is travel refresh"))
             return false;
 
         return true;

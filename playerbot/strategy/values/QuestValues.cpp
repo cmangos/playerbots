@@ -592,6 +592,7 @@ bool CanUseItemOn::Calculate()
 	if (!proto)
 		return false;
 
+	bool tryRandomCast = !urand(0, 20);
 
 	uint32 spellId = proto->Spells[0].SpellId;
 	if (spellId)
@@ -605,15 +606,17 @@ bool CanUseItemOn::Calculate()
 				// 17743 = Lazy Peon Sleep | 10556 = Lazy Peon
 				if (!unit->HasAura(17743) || unit->GetEntry() != 10556)
 					return false;
+
+				return true;
 			}
 
 			if (ai->CanCastSpell(spellId, unit, 0, false, nullptr, true))
-				return true;
+				return tryRandomCast;
 		}
 		else if (gameObject)
 		{
 			if (ai->CanCastSpell(spellId, gameObject, 0, false, true))
-				return true;
+				return tryRandomCast;
 		}
 	}
 

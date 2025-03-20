@@ -214,6 +214,16 @@ bool BuyAction::BuyItem(Player* requester, VendorItemData const* tItems, ObjectG
                     std::ostringstream out; out << "Buying " << ChatHelper::formatItem(proto);
                     ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
                 }
+                else if (usage == ItemUsage::ITEM_USAGE_EQUIP) //We need to put these here since we are only buying 1 (hopefully) and need to report ReasonForNeed with old item still equiped.
+                {
+                    ItemQualifier qualifier(proto->ItemId);
+
+                    std::ostringstream out;
+
+                    out << "Buying " << ChatHelper::formatItem(qualifier) << " ";
+                    out << ItemUsageValue::ReasonForNeed(usage, qualifier, 1, bot);
+                    ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                }
                 else
                 {
                     bought[usage][proto->ItemId]++;

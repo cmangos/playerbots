@@ -526,114 +526,6 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
     return hasTarget;
 }
 
-/*
-char* strstri(const char* haystack, const char* needle);
-
-bool ChooseTravelTargetAction::SetNpcFlagTarget(Player* requester, TravelTarget* target, std::vector<NPCFlags> flags, std::string name, std::vector<uint32> items, bool force)
-{
-    auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "SetNpcFlagTarget", &context->performanceStack);
-    WorldPosition pos = WorldPosition(bot);
-    WorldPosition* botPos = &pos;
-
-    PartitionedTravelList TravelDestinations;
-    uint32 found = 0;
-
-    //Loop over all npcs.
-    for (auto& [partition, points] : sTravelMgr.GetPartitions(pos, travelPartitions, PlayerTravelInfo(bot), (uint32)TravelDestinationPurpose::GenericRpg, 0, false))
-    {
-        for (auto& [dest, position, distance] : points)
-        {
-            if (dest->GetEntry() <= 0)
-                continue;
-
-            CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(dest->GetEntry());
-
-            if (!cInfo)
-                continue;
-
-            //Check if the npc has any of the required flags.
-            bool foundFlag = false;
-            for (auto flag : flags)
-                if (cInfo->NpcFlags & flag)
-                {
-                    foundFlag = true;
-                    break;
-                }
-
-            if (!foundFlag)
-                continue;
-
-            //Check if the npc has (part of) the required name.
-            if (!name.empty() && !strstri(cInfo->Name, name.c_str()) && !strstri(cInfo->SubName, name.c_str()))
-                continue;
-
-            //Check if the npc sells any of the wanted items.
-            if (!items.empty())
-            {
-                bool foundItem = false;
-                VendorItemData const* vItems = nullptr;
-                VendorItemData const* tItems = nullptr;
-
-                vItems = sObjectMgr.GetNpcVendorItemList(dest->GetEntry());
-
-                //#ifndef MANGOSBOT_ZERO    
-                uint32 vendorId = cInfo->VendorTemplateId;
-                if (vendorId)
-                    tItems = sObjectMgr.GetNpcVendorTemplateItemList(vendorId);
-                //#endif
-
-                for (auto item : items)
-                {
-                    if (vItems && !vItems->Empty())
-                        for (auto vitem : vItems->m_items)
-                            if (vitem->item == item)
-                            {
-                                foundItem = true;
-                                break;
-                            }
-                    if (tItems && !tItems->Empty())
-                        for (auto titem : tItems->m_items)
-                            if (titem->item == item)
-                            {
-                                foundItem = true;
-                                break;
-                            }
-                }
-
-                if (!foundItem)
-                    continue;
-            }
-
-            //Check if the npc is friendly.
-            FactionTemplateEntry const* factionEntry = sFactionTemplateStore.LookupEntry(cInfo->Faction);
-            ReputationRank reaction = ai->getReaction(factionEntry);
-
-            if (reaction < REP_NEUTRAL)
-                continue;
-
-            TravelDestinations[partition].push_back(TravelPoint(dest, position, distance));
-            found++;
-        }
-    }
-
-    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT))
-        ai->TellPlayerNoFacing(requester, std::to_string(found) + " npc flag targets found.");
-
-    bool isActive = SetBestTarget(requester, target, TravelDestinations, false);
-
-    if (!target->GetDestination())
-        return false;
-
-    if (force)
-    {
-        target->SetForced(true);
-        return true;
-    }
-
-    return isActive;
-}
-*/
-
 std::vector<std::string> split(const std::string& s, char delim);
 char* strstri(const char* haystack, const char* needle);
 
@@ -853,6 +745,13 @@ bool RefreshTravelTargetAction::isUseful()
         return false;
 
     if (AI_VALUE(TravelTarget*, "travel target")->IsPreparing())
+        return false;
+
+    SET_AI_VALUE2(bool, "manual bool", "is travel refresh", true);
+    bool conditionsStillActive = AI_VALUE(TravelTarget*, "travel target")->IsConditionsActive();
+    RESET_AI_VALUE2(bool, "manual bool", "is travel refresh");
+
+    if (!conditionsStillActive)
         return false;
 
     if (!AI_VALUE(TravelTarget*, "travel target")->GetDestination()->IsActive(bot, PlayerTravelInfo(bot)))

@@ -402,9 +402,12 @@ ItemUsage ItemUsageValue::Calculate()
 
         Item* item = CurrentItem(proto, bot);
 
-        bool soulBound = (proto->Bonding == BIND_WHEN_EQUIPPED) && item && item->IsSoulBound();
+        if(!item)
+            return ItemUsage::ITEM_USAGE_AH;;
 
-        if (!soulBound)
+        bool soulBound = (proto->Bonding == BIND_WHEN_EQUIPPED) && item->IsSoulBound();
+
+        if (soulBound)
             return ItemUsage::ITEM_USAGE_VENDOR; //Item is soulbound so can't AH.
 
         uint32 ahPrice = GetBotAHSellMinPrice(proto);

@@ -178,7 +178,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
             out << " for " << QuestDestination->QuestTravelDestination::GetTitle();
             out << " to " << QuestDestination->GetTitle();
         }
-        if (shortName == "rpg")
+        else if (shortName == "rpg")
         {
             out << " to " << destination->GetTitle();
 
@@ -516,7 +516,7 @@ bool RefreshTravelTargetAction::isUseful()
         return false;
 
     SET_AI_VALUE2(bool, "manual bool", "is travel refresh", true);
-    bool conditionsStillActive = AI_VALUE(TravelTarget*, "travel target")->IsConditionsActive();
+    bool conditionsStillActive = AI_VALUE(TravelTarget*, "travel target")->IsConditionsActive(true); 
     RESET_AI_VALUE2(bool, "manual bool", "is travel refresh");
 
     if (!conditionsStillActive)

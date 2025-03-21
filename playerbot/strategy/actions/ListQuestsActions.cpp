@@ -20,9 +20,13 @@ bool ListQuestsAction::Execute(Event& event)
     {
         ListQuests(requester, QUEST_LIST_FILTER_ALL);
     }
-    else if (event.getParam() == "travel")
+    else if (event.getParam().find("travel") == 0)
     {
-        ListQuests(requester, QUEST_LIST_FILTER_ALL, QUEST_TRAVEL_DETAIL_SUMMARY);
+        std::set<uint32> questIds;
+        if (event.getParam().size() > 8)
+            questIds = ChatHelper::ExtractAllQuestIds(event.getParam());
+
+        ListQuests(requester, QUEST_LIST_FILTER_ALL, QUEST_TRAVEL_DETAIL_SUMMARY, questIds);
     }
     else
     {
@@ -31,18 +35,18 @@ bool ListQuestsAction::Execute(Event& event)
     return true;
 }
 
-void ListQuestsAction::ListQuests(Player* requester, QuestListFilter filter, QuestTravelDetail travelDetail)
+void ListQuestsAction::ListQuests(Player* requester, QuestListFilter filter, QuestTravelDetail travelDetail, std::set<uint32> onlyQuestIds)
 {
     bool showIncompleted = filter & QUEST_LIST_FILTER_INCOMPLETED;
     bool showCompleted = filter & QUEST_LIST_FILTER_COMPLETED;
 
     if (showIncompleted)
         ai->TellPlayer(requester, "--- Incompleted quests ---");
-    int incompleteCount = ListQuests(requester, false, !showIncompleted, travelDetail);
+    int incompleteCount = ListQuests(requester, false, !showIncompleted, travelDetail, onlyQuestIds);
 
     if (showCompleted)
         ai->TellPlayer(requester, "--- Completed quests ---");
-    int completeCount = ListQuests(requester, true, !showCompleted, travelDetail);
+    int completeCount = ListQuests(requester, true, !showCompleted, travelDetail, onlyQuestIds);
 
     ai->TellPlayer(requester, "--- Summary ---");
     std::ostringstream out;
@@ -50,7 +54,7 @@ void ListQuestsAction::ListQuests(Player* requester, QuestListFilter filter, Que
     ai->TellPlayer(requester, out);
 }
 
-int ListQuestsAction::ListQuests(Player* requester, bool completed, bool silent, QuestTravelDetail travelDetail)
+int ListQuestsAction::ListQuests(Player* requester, bool completed, bool silent, QuestTravelDetail travelDetail, std::set<uint32> onlyQuestIds)
 {
     TravelTarget* target;
     WorldPosition botPos(bot);
@@ -92,6 +96,9 @@ int ListQuestsAction::ListQuests(Player* requester, bool completed, bool silent,
             if (!questId)
                 continue;
 
+            if (onlyQuestIds.size() && onlyQuestIds.find(questId) == onlyQuestIds.end())
+                continue;
+
             bool isCompletedQuest = player->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE;
             if (completed != isCompletedQuest)
                 continue;
@@ -109,77 +116,75 @@ int ListQuestsAction::ListQuests(Player* requester, bool completed, bool silent,
 
         if (silent)
             return questIds.size();
+    }
 
-        for (auto& questId : questIds)
+    for (auto& questId : questIds)
+    {
+        std::ostringstream out;
+
+        Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+        out << chat->formatQuest(pQuest);
+
+        if (travelDetail == QUEST_TRAVEL_DETAIL_NONE)
         {
-            std::ostringstream out;
+            ai->TellPlayer(requester, out);
+            continue;
+        }
 
-            Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
-            out << chat->formatQuest(pQuest);
+        if (target->GetDestination() && (typeid(*target->GetDestination()) == typeid(QuestRelationTravelDestination) || typeid(*target->GetDestination()) == typeid(QuestObjectiveTravelDestination)))
+        {
+            QuestTravelDestination* QuestDestination = (QuestTravelDestination*)target->GetDestination();
 
-            if (travelDetail == QUEST_TRAVEL_DETAIL_NONE)
+            if (QuestDestination->GetQuestId() == questId)
+                out << "[Active]" << target->GetPosition()->distance(botPos);
+        }
+
+        DestinationList destinations = sTravelMgr.GetDestinations(info, PurposeFlag, { (int32)questId }, false, 1000000.0f);
+
+        std::sort(destinations.begin(), destinations.end(), [](TravelDestination* i, TravelDestination* j) {return (uint32)static_cast<EntryTravelDestination*>(i)->GetPurpose() < (uint32)static_cast<EntryTravelDestination*>(j)->GetPurpose(); });
+
+        uint32 minDistance = 999999;
+        uint32 inpossiblePoints = 0, possiblePoints = 0, activePoints = 0;
+        out << " dests: [";
+
+        for (auto& destination : destinations)
+        {
+            EntryTravelDestination* entryDestination = static_cast<EntryTravelDestination*>(destination);
+            uint32 points = destination->GetPoints().size();
+            MANGOS_ASSERT(points >= 0 && points < 10000);
+            minDistance = std::min(minDistance, (uint32)destination->DistanceTo(bot));
+
+            if (destination->IsActive(bot, info))
             {
-                ai->TellPlayer(requester, out);
-                continue;
+                out << green;
+                activePoints += points;
             }
-
-            if (target->GetDestination() && (typeid(*target->GetDestination()) == typeid(QuestRelationTravelDestination) || typeid(*target->GetDestination()) == typeid(QuestObjectiveTravelDestination)))
+            else if (destination->IsPossible(info))
             {
-                QuestTravelDestination* QuestDestination = (QuestTravelDestination*)target->GetDestination();
-
-                if (QuestDestination->GetQuestId() == questId)
-                    out << "[Active]" << target->GetPosition()->distance(botPos);
-
-            }
-
-
-            DestinationList destinations = sTravelMgr.GetDestinations(info, PurposeFlag, { (int32)questId }, false, 1000000.0f);
-
-            std::sort(destinations.begin(), destinations.end(), [](TravelDestination* i, TravelDestination* j) {return (uint32)static_cast<EntryTravelDestination*>(i)->GetPurpose() < (uint32)static_cast<EntryTravelDestination*>(j)->GetPurpose(); });
-
-            uint32 minDistance = 999999;
-            uint32 inpossiblePoints = 0, possiblePoints = 0, activePoints = 0;
-            out << " dests: [";
-
-            for (auto& destination : destinations)
-            {
-                EntryTravelDestination* entryDestination = static_cast<EntryTravelDestination*>(destination);
-                uint32 points = destination->GetPoints().size();
-                MANGOS_ASSERT(points >= 0 && points < 10000);
-                minDistance = std::min(minDistance, (uint32)destination->DistanceTo(bot));
-
-                if (destination->IsActive(bot, info))
-                {
-                    out << green;
-                    activePoints += points;
-                }
-                else if (destination->IsPossible(info))
-                {
-                    out << yellow;
-                    possiblePoints += points;
-                }
-                else
-                {
-                    inpossiblePoints += points;
-                    out << red;
-                }
-                out << typeName[entryDestination->GetPurpose()] << "|r";
-            }
-
-            if (destinations.empty())
-            {
-                out << " none]";
+                out << yellow;
+                possiblePoints += points;
             }
             else
             {
-                out << "] point: [";
-                out << green << activePoints << "|r " << yellow << possiblePoints << "|r " << red << inpossiblePoints << "|r";
-                out << "] dist: (" << minDistance << "y)";
+                inpossiblePoints += points;
+                out << red;
             }
-
-            ai->TellPlayer(requester, out);
+            out << typeName[entryDestination->GetPurpose()] << "|r";
         }
-    }
+
+        if (destinations.empty())
+        {
+            out << " none]";
+        }
+        else
+        {
+            out << "] point: [";
+            out << green << activePoints << "|r " << yellow << possiblePoints << "|r " << red << inpossiblePoints << "|r";
+            out << "] dist: (" << minDistance << "y)";
+        }
+
+        ai->TellPlayer(requester, out);
+    }    
 
     return questIds.size();
 }

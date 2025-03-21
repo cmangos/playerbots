@@ -811,6 +811,7 @@ bool TravelTarget::IsActive() {
 
     if ((statusTime > 0 && startTime + statusTime < WorldTimer::getMSTime()))
     {
+        ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
         return false;
     }
@@ -826,6 +827,7 @@ bool TravelTarget::IsActive() {
 
     if (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive()) //Target has become invalid. Stop.
     {
+        ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return true;
     }
@@ -840,12 +842,14 @@ bool TravelTarget::IsTraveling() {
     if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
         if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT))
         {
+            ai->TellDebug(ai->GetMaster(), "The target is cooling down because the bot is following a group leader.", "debug travel");
             SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
             return false;
         }
 
     if ((!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive()) && !forced) //Target has become invalid. Stop.
     {
+        ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination is no longer active or the conditions are no longer valid.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return false;
     }
@@ -856,12 +860,14 @@ bool TravelTarget::IsTraveling() {
 
     if (HasArrived)
     {
+        ai->TellDebug(ai->GetMaster(), "The target is starting to work because the destination has been reached.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_WORK);
         return false;
     }
 
     if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT) && !ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
     {
+        ai->TellDebug(ai->GetMaster(), "The target is clearing because it was a travel once destination.", "debug travel");
         sTravelMgr.SetNullTravelTarget(this);
         return false;
     }
@@ -875,6 +881,7 @@ bool TravelTarget::IsWorking() {
 
     if (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive()) //Target has become invalid. Stop.
     {
+        ai->TellDebug(ai->GetMaster(), "The target is cooling down because " + !tDestination->IsActive(bot, PlayerTravelInfo(bot)) ? "the destination is no longer active." : "the conditions are no longer valid.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
         return false;
     }
@@ -883,6 +890,7 @@ bool TravelTarget::IsWorking() {
 
     if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT) && !ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
     {
+        ai->TellDebug(ai->GetMaster(), "The target is clearing because it was a travel once destination.", "debug travel");
         sTravelMgr.SetNullTravelTarget(this);
         return false;
     }

@@ -721,7 +721,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     target->SetTarget(oldDestination, newPositions.front());
 
     target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
-    target->SetRetry(false, target->GetRetryCount(false) + 1);
+    target->IncRetry(false);
 
     RESET_AI_VALUE(bool, "travel target active");
 

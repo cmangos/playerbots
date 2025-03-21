@@ -400,13 +400,23 @@ ItemUsage ItemUsageValue::Calculate()
     if (proto->SellPrice > 0)
     {
         //if item value is significantly higher than its vendor sell price and we actually have money to place the item on ah.
-        if (!IsMoreProfitableToSellToAHThanToVendor(proto, bot) && AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah))
+        uint32 ahMoney = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah);
+
+        if(!ahMoney && AI_VALUE(uint8, "bag space") > 80)
+            return ItemUsage::ITEM_USAGE_VENDOR;
+
+        if (!IsMoreProfitableToSellToAHThanToVendor(proto, bot))
             return ItemUsage::ITEM_USAGE_VENDOR;
 
         Item* item = CurrentItem(proto, bot);
 
+        uint32 count = item ? item->GetCount() : 1;
+
+        if(GetAhDepositCost(proto, count) > ahMoney && AI_VALUE(uint8, "bag space") > 80) //We simply do not have the money to put this on AH.
+            return ItemUsage::ITEM_USAGE_VENDOR;
+
         if(!item)
-            return ItemUsage::ITEM_USAGE_AH;;
+            return ItemUsage::ITEM_USAGE_AH;        
 
         bool soulBound = (proto->Bonding == BIND_WHEN_EQUIPPED) && item->IsSoulBound();
 
@@ -719,6 +729,29 @@ std::string ItemUsageValue::ReasonForNeed(ItemUsage usage, ItemQualifier qualifi
     }
 
     return "";
+}
+
+uint32 ItemUsageValue::GetAhDepositCost(ItemPrototype const* proto, uint32 count)
+{
+    uint32 time;
+#ifdef MANGOSBOT_ZERO
+    time = 8 * HOUR;
+#else
+    time = 12 * HOUR;
+#endif
+
+    float deposit = float(proto->SellPrice * count * (time / MIN_AUCTION_TIME));
+
+    deposit = deposit * 15 * 3.0f / 100.0f;
+
+    float min_deposit = float(sWorld.getConfig(CONFIG_UINT32_AUCTION_DEPOSIT_MIN));
+
+    if (deposit < min_deposit)
+        deposit = min_deposit;
+
+    deposit *= sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_DEPOSIT);
+
+    return deposit;
 }
 
 bool ItemUsageValue::IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory)

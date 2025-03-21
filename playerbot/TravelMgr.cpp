@@ -793,8 +793,12 @@ void TravelTarget::SetStatus(TravelStatus status) {
     }
 }
 
-bool TravelTarget::IsConditionsActive()
+bool TravelTarget::IsConditionsActive(bool clear)
 {
+    if (clear)
+        for (auto& condition : travelConditions)
+            context->ClearValues(condition);
+
     for (auto& condition : travelConditions)
         if (!AI_VALUE(bool, condition))
             return false;

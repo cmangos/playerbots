@@ -57,6 +57,48 @@ std::vector <WorldPosition*> TravelDestination::NextPoint(const WorldPosition& p
     return pos.GetNextPoint(GetPoints());
 }
 
+std::string EntryTravelDestination::GetShortName() const
+{
+    switch (purpose)
+    {
+    case TravelDestinationPurpose::QuestGiver:
+        return "questgiver";
+    case TravelDestinationPurpose::QuestObjective1:
+    case TravelDestinationPurpose::QuestObjective2:
+    case TravelDestinationPurpose::QuestObjective3:
+    case TravelDestinationPurpose::QuestObjective4:
+        return "questobjective";
+    case TravelDestinationPurpose::QuestTaker:
+        return "questtaker";
+    case TravelDestinationPurpose::Vendor:
+        return "vendor";
+    case TravelDestinationPurpose::AH:
+        return "ah";
+    case TravelDestinationPurpose::Repair:
+        return "repair";
+    case TravelDestinationPurpose::Mail:
+        return "mail";
+    case TravelDestinationPurpose::Trainer:
+        return "trainer";
+    case TravelDestinationPurpose::Explore:
+        return "explore";
+    case TravelDestinationPurpose::GenericRpg:
+        return "rpg";
+    case TravelDestinationPurpose::Grind:
+        return "grind";
+    case TravelDestinationPurpose::Boss:
+        return  "boss";
+    case TravelDestinationPurpose::GatherFishing:
+    case TravelDestinationPurpose::GatherHerbalism:
+    case TravelDestinationPurpose::GatherMining:
+    case TravelDestinationPurpose::GatherSkinning:
+        return "gather";
+    default:
+        return "unknown";
+    }
+    return "none";
+};
+
 std::string QuestTravelDestination::GetTitle() const {
     return ChatHelper::formatQuest(GetQuestTemplate());
 }
@@ -384,11 +426,39 @@ std::string RpgTravelDestination::GetTitle() const
 {
     std::ostringstream out;
 
+    out << GetShortName();
 
     if(GetEntry() > 0)
-        out << "rpg npc ";
+        out << " npc ";
+    else
+        out << " object ";
 
     out << ChatHelper::formatWorldEntry(GetEntry());
+
+    switch (GetPurpose())
+    {    
+    case TravelDestinationPurpose::Vendor:
+        out << " to sell items";
+        break;
+    case TravelDestinationPurpose::AH:
+        out << " to put items on auction";
+        break;
+    case TravelDestinationPurpose::Repair:
+        out << " to repair";
+        break;
+    case TravelDestinationPurpose::Mail:
+        out << " to receive mail";
+        break;
+    case TravelDestinationPurpose::Trainer:
+        out << " to train a skill";
+        break;
+    case TravelDestinationPurpose::GenericRpg: 
+        out << ""; //Named travel purpose.
+        break;
+    default:
+        out << "";
+        break;
+    }
 
     return out.str();
 }
@@ -671,7 +741,7 @@ bool GatherTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info
 std::string GatherTravelDestination::GetTitle() const {
     std::ostringstream out;
 
-    out << "gathering location ";
+    out << "gathering node ";
 
     out << ChatHelper::formatWorldEntry(GetEntry());
 

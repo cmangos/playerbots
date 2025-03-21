@@ -84,6 +84,7 @@ namespace ai
         static ItemUsage QueryItemUsageForEquip(ItemQualifier& itemQualifier, Player* bot);
         static uint32 GetSmallestBagSize(Player* bot);
         static std::string ReasonForNeed(ItemUsage usage, ItemQualifier qualifier = ItemQualifier(), uint32 count = 1, Player* bot = nullptr);
+        static uint32 GetAhDepositCost(ItemPrototype const* proto, uint32 count = 1);
     private:        
         bool IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory = false);
         bool IsItemNeededForSkill(ItemPrototype const* proto);

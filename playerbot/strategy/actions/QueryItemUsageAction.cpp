@@ -86,10 +86,23 @@ bool QueryItemUsageAction::Execute(Event& event)
     }
 
     std::string text = event.getParam();
-    std::set<std::string> qualifiers = chat->parseItemQualifiers(text);
-    for (auto qualifier : qualifiers)
+    std::vector<ItemQualifier> qualifiers;
+    
+    for (auto& stringQualifier : chat->parseItemQualifiers(text))
+        qualifiers.push_back(ItemQualifier(stringQualifier));
+
+    if (qualifiers.empty())
     {
-        ItemQualifier itemQualifier(qualifier);
+        IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BANK);
+
+        std::list<Item*> found = ai->InventoryParseItems(text, mask);
+
+        for (auto& item : found)
+            qualifiers.push_back(item);
+    }
+
+    for (auto itemQualifier : qualifiers)
+    {
         if (!itemQualifier.GetProto()) continue;
 
         ai->TellPlayer(requester, QueryItem(itemQualifier, 0, GetCount(itemQualifier)), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);

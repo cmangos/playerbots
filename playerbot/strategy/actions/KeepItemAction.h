@@ -26,7 +26,7 @@ namespace ai
             return "This command will force bots to keep an item in their inventory.\n"
                 "The command has an optional parameter to specify what the bot should do with the items\n"
                 "Usage: keep <type> [itemlink or item qualifier]\n"
-                "Example: keep equip gear\n"
+                "Example: keep equip equip\n"
                 "Example: keep ? all\n"
                 "Example: keep need [itemlink]\n"
                 "types:\n"

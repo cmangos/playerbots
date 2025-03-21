@@ -147,156 +147,62 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
     if (newTarget->IsForced())
         out << "(Forced) ";
+        
+    std::string futureTravelPurpose = AI_VALUE2(std::string, "manual string", "future travel purpose");
 
-    if (typeid(*destination) == typeid(QuestRelationTravelDestination) || typeid(*destination) == typeid(QuestObjectiveTravelDestination))
+    if (Qualified::isValidNumberString(futureTravelPurpose))
+        futureTravelPurpose = TravelDestinationPurposeName.at(TravelDestinationPurpose(stoi(futureTravelPurpose)));
+
+    std::string shortName = destination->GetShortName();    
+
+    if (typeid(*destination) == typeid(NullTravelDestination))
     {
-        QuestTravelDestination* QuestDestination = (QuestTravelDestination*)destination;
-        WorldPosition botLocation(bot);
-        CreatureInfo const* cInfo = NULL;
-        GameObjectInfo const* gInfo = NULL;
-
-        if (destination->GetEntry() > 0)
-            cInfo = ObjectMgr::GetCreatureTemplate(destination->GetEntry());
-        else
-            gInfo = ObjectMgr::GetGameObjectInfo(destination->GetEntry() * -1);
-
-        std::string Sub;
-
-        if (newTarget->IsGroupCopy())
-            out << "Following group ";
-        else if(oldDestination && oldDestination == destination)
-            out << "Continuing ";
-        else
-            out << "Traveling ";
-
-        out << round(newTarget->GetDestination()->DistanceTo(botLocation)) << "y";
-
-        out << " for " << QuestDestination->QuestTravelDestination::GetTitle();
-
-        out << " to " << QuestDestination->GetTitle();
-    }
-    else if (typeid(*destination) == typeid(RpgTravelDestination))
-    {
-        RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
-
-        WorldPosition botLocation(bot);
-
-        if (newTarget->IsGroupCopy())
-            out << "Following group ";
-        else if (oldDestination && oldDestination == destination)
-            out << "Continuing ";
-        else
-            out << "Traveling ";
-
-        out << round(newTarget->GetDestination()->DistanceTo(botLocation)) << "y";
-
-        out << " for ";
-
-        if (RpgDestination->GetEntry() > 0)
-        {
-            CreatureInfo const* cInfo = RpgDestination->GetCreatureInfo();
-
-            if (cInfo)
-            {
-                if ((cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR ) && AI_VALUE2(bool, "group or", "should sell,can sell"))
-                    out << "selling items";
-                else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
-                    out << "repairing";
-                else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should ah sell,can ah sell"))
-                    out << "posting items on the auctionhouse";
-                else
-                    out << "rpg";
-            }
-            else
-                out << "rpg";
-        }
-        else
-        {
-            GameObjectInfo const* gInfo = RpgDestination->GetGoInfo();
-
-            if (gInfo)
-            {
-                if (gInfo->type == GAMEOBJECT_TYPE_MAILBOX && AI_VALUE(bool, "can get mail"))
-                    out << "getting mail";
-                else
-                    out << "rpg";
-            }
-            else
-                out << "rpg";
-        }
-
-        out << " to " << RpgDestination->GetTitle();        
-    }
-    else if (typeid(*destination) == typeid(ExploreTravelDestination))
-    {
-        ExploreTravelDestination* ExploreDestination = (ExploreTravelDestination*)destination;
-
-        WorldPosition botLocation(bot);
-
-        if (newTarget->IsGroupCopy())
-            out << "Following group ";
-        else if (oldDestination && oldDestination == destination)
-            out << "Continuing ";
-        else
-            out << "Traveling ";
-
-        out << round(newTarget->GetDestination()->DistanceTo(botLocation)) << "y";
-
-        out << " for exploration";
-
-        out << " to " << ExploreDestination->GetTitle();
-    }
-    else if (typeid(*destination) == typeid(GrindTravelDestination))
-    {
-        GrindTravelDestination* GrindDestination = (GrindTravelDestination*)destination;
-
-        WorldPosition botLocation(bot);
-
-        if (newTarget->IsGroupCopy())
-            out << "Following group ";
-        else if (oldDestination && oldDestination == destination)
-            out << "Continuing ";
-        else
-            out << "Traveling ";
-
-        out << round(newTarget->GetDestination()->DistanceTo(botLocation)) << "y";
-
-        out << " for grinding money";
-
-        out << " to " << GrindDestination->GetTitle();
-    }
-    else if (typeid(*destination) == typeid(BossTravelDestination))
-    {
-        BossTravelDestination* BossDestination = (BossTravelDestination*)destination;
-
-        WorldPosition botLocation(bot);
-
-        if (newTarget->IsGroupCopy())
-            out << "Following group ";
-        else if (oldDestination && oldDestination == destination)
-            out << "Continuing ";
-        else
-            out << "Traveling ";
-
-        out << round(newTarget->GetDestination()->DistanceTo(botLocation)) << "y";
-
-        out << " for good loot";
-
-        out << " to " << BossDestination->GetTitle();
-    }
-    else if (typeid(*destination) == typeid(NullTravelDestination))
-    {
-        if (!oldTarget->GetDestination() || typeid(oldTarget->GetDestination()) != typeid(NullTravelDestination))
-        {
-            out.clear();
+        out.clear();
+        if(!oldDestination || typeid(*destination) != typeid(NullTravelDestination))
             out << "No where to travel. Idling a bit.";
+    }
+    else
+    {
+        if (newTarget->IsGroupCopy())
+            out << "Following group ";
+        else if (oldDestination && oldDestination == destination)
+            out << "Continuing ";
+        else
+            out << "Traveling ";
+
+        out << round(newTarget->GetDestination()->DistanceTo(bot)) << "y";
+
+        if (shortName.find("quest") == 0)
+        {
+            QuestTravelDestination* QuestDestination = (QuestTravelDestination*)destination;
+            out << " for " << QuestDestination->QuestTravelDestination::GetTitle();
+            out << " to " << QuestDestination->GetTitle();
+        }
+        if (shortName == "rpg")
+        {
+            out << " to " << destination->GetTitle();
+
+            if (futureTravelPurpose == "city")
+                out << " to hang around in the city";
+            else if (futureTravelPurpose == "tabard")
+                out << " to buy a tabard";
+            else if (futureTravelPurpose == "petition")
+                out << " to hand in a petition";
+            else
+                out << " to roleplay with";
+        }
+        else
+        {
+            out << " to " << destination->GetTitle();
         }
     }
 
+    if (newTarget->GetRetryCount(false))
+        out << " (retry " << newTarget->GetRetryCount(false) << "/5)";
     if (out.str().empty())
         return;
 
-    ai->TellPlayerNoFacing(requester, out,PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+    ai->TellPlayerNoFacing(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 
     std::string message = out.str().c_str();
 
@@ -328,148 +234,9 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
         out << "new," << "\"" << destination->GetTitle() << "\",\"" << message << "\"";
 
-        if (typeid(*destination) == typeid(NullTravelDestination))
-            out << ",none";
-        else if (typeid(*destination) == typeid(QuestTravelDestination))
-            out << ",quest";
-        else if (typeid(*destination) == typeid(QuestRelationTravelDestination))
-            out << ",questgiver";
-        else if (typeid(*destination) == typeid(QuestObjectiveTravelDestination))
-            out << ",objective";
-        else  if (typeid(*destination) == typeid(RpgTravelDestination))
-        {
-            RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
-            if (RpgDestination->GetEntry() > 0)
-            {
-                CreatureInfo const* cInfo = RpgDestination->GetCreatureInfo();
+        out << "," << futureTravelPurpose;
 
-                if (cInfo)
-                {
-                    if ((cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR) && AI_VALUE2(bool, "group or", "should sell,can sell"))
-                        out << ",sell";
-                    else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
-                        out << ",repair";
-                    else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should ah sell,can ah sell"))
-                        out << ",ah";
-                    else
-                        out << ",rpg";
-                }
-                else
-                    out << ",rpg";
-            }
-            else
-            {
-                GameObjectInfo const* gInfo = RpgDestination->GetGoInfo();
-
-                if (gInfo)
-                {
-                    if (gInfo->type == GAMEOBJECT_TYPE_MAILBOX && AI_VALUE(bool, "can get mail"))
-                        out << ",mail";
-                    else
-                        out << ",rpg";
-                }
-                else
-                    out << ",rpg";
-            }
-        }
-        else if (typeid(*destination) == typeid(ExploreTravelDestination))
-            out << ",explore";
-        else if (typeid(*destination) == typeid(GrindTravelDestination))
-            out << ",grind";
-        else if (typeid(*destination) == typeid(BossTravelDestination))
-            out << ",boss";
-        else if (typeid(*destination) == typeid(GatherTravelDestination))
-            out << ",gather";
-        else
-            out << ",unknown";
-
-        sPlayerbotAIConfig.log("travel_map.csv", out.str().c_str());
-
-        WorldPosition lastPos = AI_VALUE2(WorldPosition, "custom position", "last choose travel");
-
-        if (lastPos)
-        {
-            std::ostringstream out;
-            out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
-            out << bot->GetName() << ",";
-            out << std::fixed << std::setprecision(2);
-
-            out << std::to_string(bot->getRace()) << ",";
-            out << std::to_string(bot->getClass()) << ",";
-            float subLevel = ai->GetLevelFloat();
-
-            out << subLevel << ",";
-
-            WorldPosition lastPos = AI_VALUE2(WorldPosition, "custom position", "last choose travel");
-
-            botPos.printWKT({ lastPos, botPos }, out, 1);
-
-            if (typeid(*destination) == typeid(NullTravelDestination))
-                out << "0,";
-            else
-                out << round(newTarget->GetDestination()->DistanceTo(botPos)) << ",";
-
-            out << "previous," << "\"" << destination->GetTitle() << "\",\""<< message << "\"";
-
-            if (typeid(*destination) == typeid(NullTravelDestination))
-                out << ",none";
-            else if (typeid(*destination) == typeid(QuestTravelDestination))
-                out << ",quest";
-            else if (typeid(*destination) == typeid(QuestRelationTravelDestination))
-                out << ",questgiver";
-            else if (typeid(*destination) == typeid(QuestObjectiveTravelDestination))
-                out << ",objective";
-            else  if (typeid(*destination) == typeid(RpgTravelDestination))
-            {
-                RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
-                if (RpgDestination->GetEntry() > 0)
-                {
-                    CreatureInfo const* cInfo = RpgDestination->GetCreatureInfo();
-
-                    if (cInfo)
-                    {
-                        if ((cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR) && AI_VALUE2(bool, "group or", "should sell,can sell"))
-                            out << ",sell";
-                        else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
-                            out << ",repair";
-                        else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should ah sell,can ah sell"))
-                            out << ",ah";
-                        else
-                            out << ",rpg";
-                    }
-                    else
-                        out << ",rpg";
-                }
-                else
-                {
-                    GameObjectInfo const* gInfo = RpgDestination->GetGoInfo();
-
-                    if (gInfo)
-                    {
-                        if (gInfo->type == GAMEOBJECT_TYPE_MAILBOX && AI_VALUE(bool, "can get mail"))
-                            out << ",mail";
-                        else
-                            out << ",rpg";
-                    }
-                    else
-                        out << ",rpg";
-                }
-            }
-            else if (typeid(*destination) == typeid(ExploreTravelDestination))
-                out << ",explore";
-            else if (typeid(*destination) == typeid(GrindTravelDestination))
-                out << ",grind";
-            else if (typeid(*destination) == typeid(BossTravelDestination))
-                out << ",boss";
-            else if (typeid(*destination) == typeid(GatherTravelDestination))
-                out << ",gather";
-            else
-                out << ",unknown";
-
-            sPlayerbotAIConfig.log("travel_map.csv", out.str().c_str());
-        }
-
-        SET_AI_VALUE2(WorldPosition, "custom position", "last choose travel", botPos);
+        sPlayerbotAIConfig.log("travel_map.csv", out.str().c_str());        
     }
 }
 
@@ -721,7 +488,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     target->SetTarget(oldDestination, newPositions.front());
 
     target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
-    target->SetRetry(false, target->GetRetryCount(false) + 1);
+    target->IncRetry(false);
 
     RESET_AI_VALUE(bool, "travel target active");
 
@@ -732,6 +499,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     }
 
     ai->TellDebug(requester, "Refreshed travel target", "debug travel");
+    ReportTravelTarget(requester, target, target);
 
     return false;
 }

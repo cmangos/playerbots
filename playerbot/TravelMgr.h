@@ -123,6 +123,8 @@ namespace ai
 		virtual uint8 GetSubEntry() const { return 0; }
 		WorldPosition* NearestPoint(const WorldPosition& pos) const;
 		std::vector<WorldPosition*> NextPoint(const WorldPosition& pos) const;
+
+		virtual std::string GetShortName() const { return ""; };
 	protected:
 		void SetExpireFast() { expireDelay = 60000; } //1 minute
 		void SetCooldownShort() { cooldownDelay = 1000; } //1 second
@@ -150,6 +152,8 @@ namespace ai
 		virtual std::string GetTitle() const override { return "no destination"; }
 
 		virtual bool IsIn(const WorldPosition& pos, float radius = 0) const override { return true; }
+
+		virtual std::string GetShortName() const { return "idle"; };
 	protected:
 		virtual bool IsOut(const WorldPosition& pos, float radius = 0) const override { return false; }
 	};
@@ -163,6 +167,8 @@ namespace ai
 		virtual CreatureInfo const* GetCreatureInfo() const { return creatureInfo; }
 		TravelDestinationPurpose GetPurpose() const { return purpose; }
 		bool HasNpcFlag(uint32 flag) { if(GetCreatureInfo() && (GetCreatureInfo()->NpcFlags & flag)) return true; return false; }
+
+		virtual std::string GetShortName() const;
 	private:
 		CreatureInfo const* creatureInfo = nullptr;
 		GameObjectInfo const* goInfo = nullptr;
@@ -353,7 +359,7 @@ namespace ai
 		void SetGroupCopy(bool isGroupCopy = true) { groupCopy = isGroupCopy; }
 		void SetRadius(float radius1) { radius = radius1; }
 
-		void IncRetry(bool isMove) { if (isMove) moveRetryCount += 2; else extendRetryCount += 2; }
+		void IncRetry(bool isMove) { if (isMove) moveRetryCount++; else extendRetryCount++; }
 		void DecRetry(bool isMove) { if (isMove && moveRetryCount > 0) moveRetryCount--; else if (extendRetryCount > 0) extendRetryCount--; }
 
 		void CopyTarget(TravelTarget* const target);

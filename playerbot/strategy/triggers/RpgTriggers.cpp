@@ -378,8 +378,29 @@ bool RpgTrainTrigger::IsActive()
                 continue;
         }
 
+        NeedMoneyFor budgetType = NeedMoneyFor::spells;
+
+        switch (cInfo->TrainerType)
+        {
+        case TRAINER_TYPE_CLASS:
+            budgetType = NeedMoneyFor::spells;
+            break;
+        case TRAINER_TYPE_PETS:
+            budgetType = NeedMoneyFor::anything;
+            break;
+        case TRAINER_TYPE_MOUNTS:
+            budgetType = NeedMoneyFor::mount;
+            break;
+        case TRAINER_TYPE_TRADESKILLS:
+            budgetType = NeedMoneyFor::skilltraining;
+            break;
+        default:
+            budgetType = NeedMoneyFor::anything;
+            break;
+        }
+
         uint32 cost = uint32(floor(tSpell->spellCost * fDiscountMod));
-        if (cost > AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::spells))
+        if (cost > AI_VALUE2(uint32, "free money for", (uint32)budgetType))
             continue;
 
         return true;

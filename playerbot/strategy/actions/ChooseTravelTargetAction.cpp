@@ -178,7 +178,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
             out << " for " << QuestDestination->QuestTravelDestination::GetTitle();
             out << " to " << QuestDestination->GetTitle();
         }
-        if (shortName == "rpg")
+        else if (shortName == "rpg")
         {
             out << " to " << destination->GetTitle();
 

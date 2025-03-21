@@ -353,7 +353,7 @@ namespace ai
 		void SetGroupCopy(bool isGroupCopy = true) { groupCopy = isGroupCopy; }
 		void SetRadius(float radius1) { radius = radius1; }
 
-		void IncRetry(bool isMove) { if (isMove) moveRetryCount += 2; else extendRetryCount += 2; }
+		void IncRetry(bool isMove) { if (isMove) moveRetryCount++; else extendRetryCount++; }
 		void DecRetry(bool isMove) { if (isMove && moveRetryCount > 0) moveRetryCount--; else if (extendRetryCount > 0) extendRetryCount--; }
 
 		void CopyTarget(TravelTarget* const target);

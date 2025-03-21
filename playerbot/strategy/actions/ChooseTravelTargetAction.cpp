@@ -732,6 +732,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     }
 
     ai->TellDebug(requester, "Refreshed travel target", "debug travel");
+    ReportTravelTarget(requester, target, target);
 
     return false;
 }

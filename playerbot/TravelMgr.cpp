@@ -2308,7 +2308,7 @@ float TravelMgr::MapTransDistance(const WorldPosition& start, const WorldPositio
     if (sMap == eMap)
         return start.distance(end);
 
-    float minDist = 200000;
+    float minDist = 9000000;
 
     auto mapTransfers = mapTransfersMap.find({ sMap, eMap });
     
@@ -2337,7 +2337,7 @@ float TravelMgr::FastMapTransDistance(const WorldPosition& start, const WorldPos
     if (sMap == eMap)
         return start.fDist(end);
 
-    float minDist = 200000;
+    float minDist = 9000000;
 
     auto mapTransfers = mapTransfersMap.find({ sMap, eMap });
 

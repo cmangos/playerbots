@@ -120,7 +120,6 @@ namespace ai
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const { return false; }
 
 		virtual int32 GetEntry() const { return 0; }
-		virtual uint8 GetSubEntry() const { return 0; }
 		WorldPosition* NearestPoint(const WorldPosition& pos) const;
 		std::vector<WorldPosition*> NextPoint(const WorldPosition& pos) const;
 

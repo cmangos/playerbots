@@ -1390,8 +1390,28 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
             if (ai->HasCheat(BotCheatMask::gold))
                 startStub->currentGold = 10000000;
             else {
-                AiObjectContext* context = ai->GetAiObjectContext();
-                startStub->currentGold = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::travel);
+                startStub->currentGold = 9999999;
+                for (ObjectGuid guid : AI_VALUE(std::list<ObjectGuid>, "group members"))
+                {
+                    Player* player = sObjectMgr.GetPlayer(guid);
+
+                    if (!player)
+                        continue;
+
+                    if (!ai->IsGroupLeader() && player != bot)
+                        continue;
+
+                    if (player->IsBeingTeleported())
+                    {
+                        startStub->currentGold = 0;
+                        continue;
+                    }
+
+                    if (!player->GetPlayerbotAI())
+                        continue;
+
+                    startStub->currentGold = std::min(startStub->currentGold, PAI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::travel));
+                }
             }
 
             if (AI_VALUE2(bool, "action useful", "hearthstone") && bot->IsAlive())

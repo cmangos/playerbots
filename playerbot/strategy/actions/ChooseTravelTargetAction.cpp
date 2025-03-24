@@ -663,10 +663,26 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
     if (travelName == "pvp")
     {
-        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center]()
+        std::string WorldPvpLocation;
+
+        //Number between 0 and 100 synced for all bots that shifts 1 every 10 minutes.
+        uint32 pvpLocationNumber = ai->GetFixedBotNumber(BotTypeNumber::WORLD_PVP_LOCATION, 100, 0.1f, true);
+
+        if (pvpLocationNumber < 20) //First 200 minutes
+            WorldPvpLocation = "Tarren Mill";
+        else if(pvpLocationNumber >= 20 && pvpLocationNumber < 40) //Second 200 minutes
+            WorldPvpLocation = "The Barrens";
+        else if (pvpLocationNumber >= 40 && pvpLocationNumber < 60) //Second 200 minutes
+            WorldPvpLocation = "Sulithus";
+        else if (pvpLocationNumber >= 60 && pvpLocationNumber < 80) //Second 200 minutes
+            WorldPvpLocation = "Eastern Plaguelands";
+        else                                                        //Last 200 minutes
+            WorldPvpLocation = "Strangletorn Vale";
+
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, WorldPvpLocation]()
             {
                 PartitionedTravelList list;
-                for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, "Tarren Mill"))
+                for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, WorldPvpLocation, true, false, false, false, false))
                 {
                     std::vector<WorldPosition*> points = destination->NextPoint(center);
 

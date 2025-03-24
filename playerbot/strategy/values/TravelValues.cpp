@@ -326,6 +326,19 @@ bool ShouldTravelNamedValue::Calculate()
         if (bot->GetLevel() <= 50)
             return false;
 
+        int32 rpgStyle = AI_VALUE2(int32, "manual saved int", "rpg style override");
+
+        if (rpgStyle < 0)
+            rpgStyle = ai->GetFixedBotNumber(BotTypeNumber::RPG_STYLE_NUMBER, 100);
+
+        if (rpgStyle > 10) //Only 10% of the bots like to go to world-pvp.
+            return false;
+
+        uint32 rpgPhase = ai->GetFixedBotNumber(BotTypeNumber::RPG_PHASE_NUMBER, 60, 1);
+
+        if (rpgPhase > 15) //Only first 15 minutes of the hour allow generic rpg.
+            return false;
+
         if (!botPos.isOverworld())
             return false;
 

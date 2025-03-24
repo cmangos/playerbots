@@ -102,7 +102,6 @@ bool FindQuestObjectData::operator()(CreatureDataPair const& dataPair)
 	return false;
 }
 
-
 //GameObject data worker. Checks for a specific gameObject what quest they are needed for and puts them in the proper place in the quest map.
 bool FindQuestObjectData::operator()(GameObjectDataPair const& dataPair)
 {
@@ -115,7 +114,6 @@ bool FindQuestObjectData::operator()(GameObjectDataPair const& dataPair)
 
 	return false;
 }
-
 
 //Goes past all creatures and gameobjects and creatures the full quest guid map.
 questGuidpMap QuestGuidpMapValue::Calculate()
@@ -554,7 +552,23 @@ bool NeedQuestObjectiveValue::Calculate()
 	uint32  hasCount = questStatus.m_itemcount[objective];
 
 	if (reqCount && hasCount < reqCount)
-		return true;
+	{
+		uint32 itemId = pQuest->ReqItemId[objective];
+
+		if (!GAI_VALUE2(std::list<int32>, "item drop list", itemId).empty())
+			return true;
+
+		if (GAI_VALUE2(std::list<int32>, "item vendor list", itemId).empty())
+			return true;
+
+		ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+
+		if (!proto)
+			return true;
+
+		if (bot->GetMoney() > proto->BuyPrice * reqCount) //Bot needs enough money to do quest.
+			return true;
+	}
 
 	reqCount = pQuest->ReqCreatureOrGOCount[objective];
 	hasCount = questStatus.m_creatureOrGOcount[objective];

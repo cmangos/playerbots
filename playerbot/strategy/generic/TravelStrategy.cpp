@@ -107,3 +107,10 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         "val::travel target traveling",
         NextAction::array(0, new NextAction("check mount state", 1), new NextAction("move to travel target", 1), NULL)));
 }
+
+void TravelOnceStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{   
+    triggers.push_back(new TriggerNode(
+        "val::travel target traveling",
+        NextAction::array(0, new NextAction("check mount state", 1), new NextAction("move to travel target", 1), NULL)));
+}

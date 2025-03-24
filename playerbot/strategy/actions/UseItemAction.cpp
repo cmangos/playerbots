@@ -610,6 +610,10 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             // Use triggered flag only for items with many spell casts and for not first cast
             BotUseItemSpell* spell = new BotUseItemSpell(bot, spellInfo, (successCasts > 0) ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
             spell->m_clientCast = true;
+            
+            // used in item_template.spell_2 with spell_id with SPELL_GENERIC_LEARN in spell_1
+            if ((spellInfo->Id == SPELL_ID_GENERIC_LEARN) && proto->Spells[1].SpellTrigger == ITEM_SPELLTRIGGER_LEARN_SPELL_ID)
+                spell->m_currentBasePoints[EFFECT_INDEX_0] = proto->Spells[1].SpellId; 
 
             // Spend the item if used in the spell
             if (itemUsed)
@@ -1197,11 +1201,17 @@ bool UseRandomRecipeAction::isUseful()
 
 bool UseRandomRecipeAction::Execute(Event& event)
 {
-    std::list<Item*> recipes = AI_VALUE2(std::list<Item*>, "inventory items", "recipe");   
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+
+    std::list<Item*> recipes = AI_VALUE2(std::list<Item*>, "inventory items", "recipe"); 
+
     std::string recipeName = "";
     for (auto& recipe : recipes)
     {
-        recipeName = recipe->GetProto()->Name1;
+        if (bot->HasSpell(ItemUsageValue::GetRecipeSpell(recipe->GetProto())))
+            continue;
+
+        recipeName = chat->formatItem(recipe);
         if (!urand(0, 10))
             break;
     }
@@ -1216,7 +1226,12 @@ bool UseRandomRecipeAction::Execute(Event& event)
 
     Event rEvent = Event(name, recipeName);
 
-    return UseAction::Execute(rEvent);
+    bool didUse = UseAction::Execute(rEvent);
+
+    if (didUse && bot->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+        ai->TellPlayerNoFacing(requester, "Learning " + recipeName, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+    return didUse;
 }
 
 bool UseRandomQuestItemAction::isUseful()

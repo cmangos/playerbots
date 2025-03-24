@@ -243,7 +243,10 @@ enum class BotTypeNumber : uint8
     GROUPER_TYPE_NUMBER = 2,
     GUILDER_TYPE_NUMBER = 3,
     CHATFILTER_NUMBER = 4 ,
-    DUMMY_ATTACK_NUMBER = 5
+    DUMMY_ATTACK_NUMBER = 5, 
+    RPG_PHASE_NUMBER = 6,
+    RPG_STYLE_NUMBER = 7,
+    WORLD_PVP_LOCATION = 8
 };
 
 enum class GrouperType : uint8
@@ -585,7 +588,7 @@ public:
     bool IsSafe(WorldObject* obj) { return obj && obj->GetMapId() == bot->GetMapId() && obj->GetInstanceId() == bot->GetInstanceId() && (!obj->IsPlayer() || !((Player*)obj)->IsBeingTeleported()); }
 
     //Returns a semi-random (cycling) number that is fixed for each bot.
-    uint32 GetFixedBotNumer(BotTypeNumber typeNumber, uint32 maxNum = 100, float cyclePerMin = 1); 
+    uint32 GetFixedBotNumber(BotTypeNumber typeNumber, uint32 maxNum = 100, float cyclePerMin = 1, bool ignoreGuid = false); 
 
     GrouperType GetGrouperType();
     GuilderType GetGuilderType();

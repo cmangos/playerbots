@@ -1364,6 +1364,8 @@ void TravelMgr::LoadQuestTravelTable()
     sPlayerbotAIConfig.openLog("activity_pid.csv", "w");
     sPlayerbotAIConfig.openLog("deaths.csv", "w");
     sPlayerbotAIConfig.openLog("player_paths.csv", "w");
+    sPlayerbotAIConfig.openLog("travel_destinations.csv", "w");
+    
 
     if (sPlayerbotAIConfig.hasLog("activity_pid.csv"))
     {
@@ -2087,6 +2089,36 @@ void TravelMgr::LoadQuestTravelTable()
         sRandomPlayerbotMgr.PrintTeleportCache();
     }
 
+    if (sPlayerbotAIConfig.hasLog("travel_destinations.csv"))
+    {
+        sLog.outString("Create travel destinations export.");
+
+        for (auto& [purpose, entryDestinations] : destinationMap)
+        {
+            for (auto& [entry, destinations] : entryDestinations)
+            {
+                for (auto& destination : destinations)
+                {
+                    std::ostringstream out;
+
+                    out << TravelDestinationPurposeName.at(purpose) << ",";
+                    out << entry << ",";
+                    out << destination->GetShortName() << ",";
+                    out << "\"" << destination->GetTitle() << "\",";
+                    out << destination->GetPoints().size() << ",";
+
+                    std::vector<WorldPosition> points;
+                    for (auto& point : destination->GetPoints())
+                        points.push_back(*point);
+
+                    WorldPosition().printWKT(points, out);
+
+                    sPlayerbotAIConfig.log("travel_destinations.csv", out.str().c_str());
+                }
+            }
+        }
+    }
+
 #ifndef MANGOSBOT_TWO    
     sTerrainMgr.Update(60 * 60 * 24);
 #else
@@ -2308,7 +2340,7 @@ float TravelMgr::MapTransDistance(const WorldPosition& start, const WorldPositio
     if (sMap == eMap)
         return start.distance(end);
 
-    float minDist = 200000;
+    float minDist = 9000000;
 
     auto mapTransfers = mapTransfersMap.find({ sMap, eMap });
     
@@ -2337,7 +2369,7 @@ float TravelMgr::FastMapTransDistance(const WorldPosition& start, const WorldPos
     if (sMap == eMap)
         return start.fDist(end);
 
-    float minDist = 200000;
+    float minDist = 9000000;
 
     auto mapTransfers = mapTransfersMap.find({ sMap, eMap });
 

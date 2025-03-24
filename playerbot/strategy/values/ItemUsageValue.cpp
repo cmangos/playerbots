@@ -148,7 +148,7 @@ ItemUsage ItemUsageValue::Calculate()
             bool lowBagSpace = AI_VALUE(uint8, "bag space") > 50;
 
             if (proto->Class == ITEM_CLASS_TRADE_GOODS || proto->Class == ITEM_CLASS_MISC || proto->Class == ITEM_CLASS_REAGENT)
-                needItem = IsItemNeededForUsefullCraft(proto, lowBagSpace);
+                needItem =!ai->HasCheat(BotCheatMask::item) && IsItemNeededForUsefullCraft(proto, lowBagSpace);
             else if (proto->Class == ITEM_CLASS_RECIPE)
             {
                 if (bot->HasSpell(GetRecipeSpell(proto)))

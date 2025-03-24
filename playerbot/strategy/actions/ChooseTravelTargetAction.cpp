@@ -304,7 +304,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Quests
     if (quests)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::QuestGiver, {}, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::QuestGiver, {}, false, 1000000.0f))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -314,7 +314,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Zones
     if (zones)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Explore, {}, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Explore, {}, false, 1000000.0f))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -324,7 +324,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Npcs
     if (npcs)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::GenericRpg, {}, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::GenericRpg, {}, false, 1000000.0f))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -334,7 +334,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Mobs
     if (mobs)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Grind, {}, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Grind, {}, false, 1000000.0f))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -344,7 +344,7 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     //Bosses
     if (bosses)
     {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Boss, {}, false))
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Boss, {}, false, 1000000.0f))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -663,10 +663,26 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
     if (travelName == "pvp")
     {
-        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center]()
+        std::string WorldPvpLocation;
+
+        //Number between 0 and 100 synced for all bots that shifts 1 every 10 minutes.
+        uint32 pvpLocationNumber = ai->GetFixedBotNumber(BotTypeNumber::WORLD_PVP_LOCATION, 100, 0.1f, true);
+
+        if (pvpLocationNumber < 20) //First 200 minutes
+            WorldPvpLocation = "Tarren Mill";
+        else if(pvpLocationNumber >= 20 && pvpLocationNumber < 40) //Second 200 minutes
+            WorldPvpLocation = "The Barrens";
+        else if (pvpLocationNumber >= 40 && pvpLocationNumber < 60) //Second 200 minutes
+            WorldPvpLocation = "Sulithus";
+        else if (pvpLocationNumber >= 60 && pvpLocationNumber < 80) //Second 200 minutes
+            WorldPvpLocation = "Eastern Plaguelands";
+        else                                                        //Last 200 minutes
+            WorldPvpLocation = "Strangletorn Vale";
+
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, WorldPvpLocation]()
             {
                 PartitionedTravelList list;
-                for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, "Tarren Mill"))
+                for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, WorldPvpLocation, true, false, false, false, false))
                 {
                     std::vector<WorldPosition*> points = destination->NextPoint(center);
 

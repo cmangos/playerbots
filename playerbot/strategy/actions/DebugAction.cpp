@@ -1279,7 +1279,6 @@ bool DebugAction::Execute(Event& event)
                     }
                     out << "\",";
                     out << std::to_string(dest->GetEntry()) << ",";
-                    out << std::to_string(dest->GetSubEntry()) << ",";
                     out << "\"" << dest->GetTitle() << "\",";
                     out << isPossible << ",";
                     out << isActive << ",";

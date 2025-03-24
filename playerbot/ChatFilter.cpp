@@ -1097,6 +1097,89 @@ public:
     }
 };
 
+class QuestChatFilter : public ChatFilter
+{
+public:
+    QuestChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
+
+#ifdef GenerateBotHelp
+    virtual std::string GetHelpName() {
+        return "quest";
+    }
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
+    {
+        std::unordered_map<std::string, std::string> retMap;
+        retMap["@quest=[quest link]"] = "All bots that have the quest and have yet finished it will respond.";
+        retMap["@quest=523"] = "All bots that have quest with id 523 will respond.";
+
+        return retMap;
+    }
+    virtual std::string GetHelpDescription() {
+        return "This filter selects bots with a specific quest.";
+    }
+#endif
+
+    inline std::string toLower(const std::string& str) {
+        std::string lowerStr = str;
+        std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), ::tolower);
+        return lowerStr;
+    }
+
+    inline void replaceCaseInsensitive(std::string& str, const std::string& from, const std::string& to) {
+        std::string lowerStr = toLower(str);
+        std::string lowerFrom = toLower(from);
+
+        size_t pos = lowerStr.find(lowerFrom);
+        while (pos != std::string::npos) {
+            str.replace(pos, from.length(), to);
+            lowerStr.replace(pos, from.length(), toLower(to)); // Keep track of lowercase version for further searching
+            pos = lowerStr.find(lowerFrom, pos + to.length()); // Find next occurrence
+        }
+    }
+
+    virtual std::string Filter(std::string message) override
+    {
+        if (message.find("@quest=") == 0)
+        {
+            std::string questString = message.substr(message.find("=") + 1);
+
+            std::set<uint32> questIds = ChatHelper::ExtractAllQuestIds(questString);
+
+            if (questIds.empty() && Qualified::isValidNumberString(questString))
+                questIds.insert(stoi(questString));
+            else
+            {
+                for (auto& questId : questIds)
+                {
+                    Quest const* questTemplate = sObjectMgr.GetQuestTemplate(questId);
+                    if (questTemplate)
+                        replaceCaseInsensitive(message, " " + ChatHelper::formatQuest(questTemplate), "");
+                    replaceCaseInsensitive(message, ChatHelper::formatQuest(questTemplate), "");
+                }
+            }
+
+            Player* bot = ai->GetBot();
+            auto botQuestIds = bot->GetPlayerbotAI()->GetAllCurrentQuestIds();
+
+            std::set<uint32> matchingQuestIds;
+            for (auto botQuestId : botQuestIds)
+            {
+                if (questIds.count(botQuestId) != 0)
+                {
+                    matchingQuestIds.insert(botQuestId);
+                }
+            }
+
+            if (!matchingQuestIds.empty())
+                return ChatFilter::Filter(message);
+
+            return message;
+        }
+
+        return message;
+    }
+};
+
 CompositeChatFilter::CompositeChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
 {
     filters.push_back(new StrategyChatFilter(ai));
@@ -1113,6 +1196,7 @@ CompositeChatFilter::CompositeChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
     filters.push_back(new LocationChatFilter(ai));
     filters.push_back(new RandomChatFilter(ai));
     filters.push_back(new GearChatFilter(ai));
+    filters.push_back(new QuestChatFilter(ai));
     
 }
 

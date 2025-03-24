@@ -5468,20 +5468,15 @@ bool IsAlliance(uint8 race)
            race == RACE_GNOME;
 }
 
-/*
-enum BotTypeNumber
-{
-    GROUPER_TYPE_NUMBER = 1,
-    ACTIVITY_TYPE_NUMBER = 2
-};
-*/
-
-uint32 PlayerbotAI::GetFixedBotNumer(BotTypeNumber typeNumber, uint32 maxNum, float cyclePerMin)
+uint32 PlayerbotAI::GetFixedBotNumber(BotTypeNumber typeNumber, uint32 maxNum, float cyclePerMin, bool ignoreGuid)
 {
     uint8 seedNumber = uint8(typeNumber);
     std::mt19937 rng(seedNumber);
     uint32 randseed = rng();                                       //Seed random number
-    uint32 randnum = bot->GetGUIDLow() + randseed;                 //Semi-random but fixed number for each bot.
+    uint32 randnum = randseed;                                     //Semi-random.
+    
+    if (!ignoreGuid)
+        randnum += bot->GetGUIDLow();                              //but fixed number for each bot.
 
     if (cyclePerMin > 0)
     {
@@ -5502,7 +5497,7 @@ GrouperType PlayerbotAI::GetGrouperType()
         return GrouperType(grouperOverride);
 
     uint32 maxGroupType = sPlayerbotAIConfig.randomBotRaidNearby ? 100 : 95;
-    uint32 grouperNumber = GetFixedBotNumer(BotTypeNumber::GROUPER_TYPE_NUMBER, maxGroupType, 0);
+    uint32 grouperNumber = GetFixedBotNumber(BotTypeNumber::GROUPER_TYPE_NUMBER, maxGroupType, 0);
 
     //20% solo
     //50% member
@@ -5539,7 +5534,7 @@ GuilderType PlayerbotAI::GetGuilderType()
     if (guilderOverride >= 0)
         return GuilderType(guilderOverride);
 
-    uint32 grouperNumber = GetFixedBotNumer(BotTypeNumber::GUILDER_TYPE_NUMBER, 100, 0);
+    uint32 grouperNumber = GetFixedBotNumber(BotTypeNumber::GUILDER_TYPE_NUMBER, 100, 0);
 
     if (grouperNumber < 20 && !HasRealPlayerMaster())
         return GuilderType::SOLO;
@@ -5879,7 +5874,7 @@ bool PlayerbotAI::AllowActive(ActivityType activityType)
 
     activePerc *= (priorityBracket.second == 100) ? sPlayerbotAIConfig.botActiveAlone : 100;
 
-    uint32 ActivityNumber = GetFixedBotNumer(BotTypeNumber::ACTIVITY_TYPE_NUMBER, 100, activePerc * 0.01f); //The last number if the amount it cycles per min. Currently set to 1% of the active bots.
+    uint32 ActivityNumber = GetFixedBotNumber(BotTypeNumber::ACTIVITY_TYPE_NUMBER, 100, activePerc * 0.01f); //The last number if the amount it cycles per min. Currently set to 1% of the active bots.
 
     return ActivityNumber <= (activePerc);           //The given percentage of bots should be active and rotate 1% of those active bots each minute.
 }

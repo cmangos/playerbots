@@ -1082,14 +1082,14 @@ public:
         if (message.find("@fixedrandom=") == 0)
         {
             std::string num = message.substr(message.find("=") + 1, message.find(" ") - message.find("=") - 1);
-            if (ai->GetFixedBotNumer(BotTypeNumber::CHATFILTER_NUMBER) < stoul(num))
+            if (ai->GetFixedBotNumber(BotTypeNumber::CHATFILTER_NUMBER) < stoul(num))
                 return ChatFilter::Filter(message);
 
             return message;
         }
         if (message.find("@fixedrandom") == 0)
         {
-            if (ai->GetFixedBotNumer(BotTypeNumber::CHATFILTER_NUMBER) < 50)
+            if (ai->GetFixedBotNumber(BotTypeNumber::CHATFILTER_NUMBER) < 50)
                 return ChatFilter::Filter(message);
         }
 

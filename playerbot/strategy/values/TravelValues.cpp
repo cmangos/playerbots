@@ -273,8 +273,23 @@ bool NeedTravelPurposeValue::Calculate()
     case TravelDestinationPurpose::Explore:
         return ai->HasStrategy("explore", BotState::BOT_STATE_NON_COMBAT);    
     case TravelDestinationPurpose::GenericRpg:
-    case TravelDestinationPurpose::Grind:
+    {
+        uint32 rpgPhase = ai->GetFixedBotNumber(BotTypeNumber::RPG_PHASE_NUMBER, 60, 1);
+
+        if (rpgPhase < 15) //Only last 45 minutes of the hour allow generic rpg.
+            return false;
+
         return !AI_VALUE2(bool, "manual bool", "is travel refresh");
+    }
+    case TravelDestinationPurpose::Grind:
+    {
+        uint32 rpgPhase = ai->GetFixedBotNumber(BotTypeNumber::RPG_PHASE_NUMBER, 60, 1);
+
+        if (rpgPhase > 45) //Only first 45 minutes of the hour allow generic rpg.
+            return false;
+
+        return !AI_VALUE2(bool, "manual bool", "is travel refresh");
+    }
     default:
         return false;
     }
@@ -294,6 +309,11 @@ bool ShouldTravelNamedValue::Calculate()
             return false;
 
         if (!botPos.isOverworld())
+            return false;
+
+        uint32 rpgPhase = ai->GetFixedBotNumber(BotTypeNumber::RPG_PHASE_NUMBER, 60, 1);
+
+        if (rpgPhase > 20) //Only first 20 minutes of the hour allow generic city pvp without reason.
             return false;
 
         if (AI_VALUE2(bool, "manual bool", "is travel refresh"))

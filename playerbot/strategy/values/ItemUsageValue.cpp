@@ -1129,22 +1129,30 @@ bool ItemUsageValue::IsBandage(ItemPrototype const* proto)
 
 uint32 ItemUsageValue::GetRecipeSpell(ItemPrototype const* proto)
 {
+#ifdef MANGOSBOT_TWO
+    if (proto->Spells[0].SpellId == SPELL_ID_GENERIC_LEARN)
+        return proto->Spells[1].SpellId;
+#endif;
+
     if (proto->Spells[2].SpellId)
         return proto->Spells[2].SpellId;
 
-    if (proto->Spells[0].SpellId)
+    for (uint8 i = 0; i < 4; i++)
     {
-        const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(proto->Spells[0].SpellId);
-
-        if (!pSpellInfo)
-            return 0;
-
-        for (int j = 0; j < 3; ++j)
+        if (proto->Spells[i].SpellId)
         {
-            if (pSpellInfo->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+            const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(proto->Spells[i].SpellId);
+
+            if (!pSpellInfo)
+                return 0;
+
+            for (int j = 0; j < 3; ++j)
             {
-                if (pSpellInfo->EffectTriggerSpell[j])
-                    return pSpellInfo->EffectTriggerSpell[j];
+                if (pSpellInfo->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+                {
+                    if (pSpellInfo->EffectTriggerSpell[j])
+                        return pSpellInfo->EffectTriggerSpell[j];
+                }
             }
         }
     }

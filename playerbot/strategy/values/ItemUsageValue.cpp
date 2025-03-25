@@ -1129,10 +1129,10 @@ bool ItemUsageValue::IsBandage(ItemPrototype const* proto)
 
 uint32 ItemUsageValue::GetRecipeSpell(ItemPrototype const* proto)
 {
-#ifdef MANGOSBOT_TWO
-    if (proto->Spells[0].SpellId == SPELL_ID_GENERIC_LEARN)
+#ifndef MANGOSBOT_ZERO
+    if (proto->Spells[0].SpellId == SPELL_ID_GENERIC_LEARN && proto->Spells[1].SpellTrigger == ITEM_SPELLTRIGGER_LEARN_SPELL_ID)
         return proto->Spells[1].SpellId;
-#endif;
+#endif
 
     if (proto->Spells[2].SpellId)
         return proto->Spells[2].SpellId;

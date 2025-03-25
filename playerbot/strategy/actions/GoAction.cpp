@@ -275,7 +275,7 @@ bool GoAction::TravelTo(TravelDestination* dest, Player* requester) const
 
         target->SetTarget(dest, point);
         target->SetForced(true);
-        target->SetConditions({ "val::not::manual bool::is travel refresh"});
+        target->SetConditions({ "not::manual bool::is travel refresh"});
 
         std::ostringstream out; out << "Traveling to " << dest->GetTitle();
         ai->TellPlayerNoFacing(requester, out.str());

@@ -506,9 +506,6 @@ AreaTableEntry const* ExploreTravelDestination::GetArea() const
 
 bool GrindTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 {
-    if (!urand(0, 10) && !info.GetBoolValue("should get money") && !IsOut(info.GetPosition()))
-        return false;
-
     if (info.GetBoolValue("should sell") && (info.GetBoolValue("can sell") || info.GetBoolValue("can ah sell")))
         return false;
 

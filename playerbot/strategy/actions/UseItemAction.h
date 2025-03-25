@@ -272,7 +272,7 @@ namespace ai
     class UseRandomRecipeAction : public UseAction
     {
     public:
-        UseRandomRecipeAction(PlayerbotAI* ai) : UseAction(ai, "random recipe", 3000U) {}
+        UseRandomRecipeAction(PlayerbotAI* ai) : UseAction(ai, "random recipe", 6000U) {}
 
         virtual bool isUseful() override;
         virtual bool isPossible() override {return AI_VALUE2(uint32,"item count", "recipe") > 0; }

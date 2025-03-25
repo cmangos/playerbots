@@ -6272,7 +6272,7 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
             out << "preparing";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
-            out << "traveling";
+            out << (target->IsForced() ? "forced traveling" : "traveling");
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
             out << "working";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)

@@ -24,10 +24,11 @@ namespace ai
         NextAction** GetDefaultNonCombatActions() override;
     };
 
-    class TravelOnceStrategy : public TravelStrategy
+    class TravelOnceStrategy : public Strategy
     {
     public:
-        TravelOnceStrategy(PlayerbotAI* ai) : TravelStrategy(ai) {}
+        TravelOnceStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
         std::string getName() override { return "travel once"; }
     };
 

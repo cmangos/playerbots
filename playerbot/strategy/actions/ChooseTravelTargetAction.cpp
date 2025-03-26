@@ -485,6 +485,13 @@ bool RefreshTravelTargetAction::Execute(Event& event)
         return false;
     }
 
+    SET_AI_VALUE2(bool, "manual bool", "is travel refresh", true);
+    bool conditionsStillActive = AI_VALUE(TravelTarget*, "travel target")->IsConditionsActive(true);
+    RESET_AI_VALUE2(bool, "manual bool", "is travel refresh");
+
+    if (!conditionsStillActive)
+        return false;
+
     target->SetTarget(oldDestination, newPositions.front());
 
     target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
@@ -515,20 +522,13 @@ bool RefreshTravelTargetAction::isUseful()
     if (AI_VALUE(TravelTarget*, "travel target")->IsPreparing())
         return false;
 
-    SET_AI_VALUE2(bool, "manual bool", "is travel refresh", true);
-    bool conditionsStillActive = AI_VALUE(TravelTarget*, "travel target")->IsConditionsActive(true); 
-    RESET_AI_VALUE2(bool, "manual bool", "is travel refresh");
-
-    if (!conditionsStillActive)
-        return false;
-
-    if (!AI_VALUE(TravelTarget*, "travel target")->GetDestination()->IsActive(bot, PlayerTravelInfo(bot)))
-        return false;
-
     if (!WorldPosition(bot).isOverworld())
         return false;
 
     if (urand(1, 100) <= 10)
+        return false;
+
+    if (!AI_VALUE(TravelTarget*, "travel target")->GetDestination()->IsActive(bot, PlayerTravelInfo(bot)))
         return false;
 
     return true;

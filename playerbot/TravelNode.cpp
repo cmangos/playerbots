@@ -1366,6 +1366,9 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
     if (start == goal)
         return TravelNodeRoute();
 
+    if(!start->hasRouteTo(goal))
+        return TravelNodeRoute();
+
     //Basic A* algoritm
     std::unordered_map<TravelNode*, TravelNodeStub> m_stubs;
 

@@ -70,7 +70,7 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     //Specific named exceptions
     const std::vector<std::tuple<std::string, std::string, float>> StringActions =
     {
-        {"not::travel target active","choose group travel target", 6.97f},                                               //See isAllowed  100%
+        {"val::not::travel target active","choose group travel target", 6.97f},                                               //See isAllowed  100%
         {"val::should travel named::trainer class","request named travel target::trainer class", 6.89f},                                // 25%
         //{"val::should travel named::trainer pet","request named travel target::trainer pet", 6.88f},                                  // 25%
         {"val::should travel named::trainer mount","request named travel target::trainer mount", 6.87f},                                // 25%

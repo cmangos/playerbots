@@ -384,6 +384,8 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
 
     PartitionedTravelList groupTargets;
 
+    std::unordered_map<TravelDestination*, std::vector<std::string>> conditions;
+
     //Find targets of the group.
     for (auto& member : groupPlayers)
     {
@@ -410,6 +412,8 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
             continue;
 
         groupTargets[0].push_back(TravelPoint(groupTarget->GetDestination(), groupTarget->GetPosition(), groupTarget->GetPosition()->distance(bot)));
+
+        conditions[groupTarget->GetDestination()] = groupTarget->GetConditions();
     }
 
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
@@ -431,6 +435,8 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
     //If the new target is not active we failed.
     if (!newTarget.IsActive() && !newTarget.IsForced())
         return false;
+
+    oldTarget->SetConditions(conditions[newTarget.GetDestination()]);
 
     setNewTarget(requester, &newTarget, oldTarget);
 

@@ -108,7 +108,8 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
     else if (oldTarget->IsForced()) //Make sure travel goes into cooldown after getting to the destination.
         oldTarget->SetExpireIn(HOUR * IN_MILLISECONDS);
 
-    AI_VALUE(TravelTarget*, "travel target")->SetConditions({ AI_VALUE2(std::string, "manual string", "future travel condition")});
+    if(!AI_VALUE2(std::string, "manual string", "future travel condition").empty())
+        AI_VALUE(TravelTarget*, "travel target")->SetConditions({ AI_VALUE2(std::string, "manual string", "future travel condition")});
 
     if (QuestObjectiveTravelDestination* dest = dynamic_cast<QuestObjectiveTravelDestination*>(oldTarget->GetDestination()))
     {
@@ -384,6 +385,8 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
 
     PartitionedTravelList groupTargets;
 
+    std::unordered_map<TravelDestination*, std::vector<std::string>> conditions;
+
     //Find targets of the group.
     for (auto& member : groupPlayers)
     {
@@ -410,6 +413,8 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
             continue;
 
         groupTargets[0].push_back(TravelPoint(groupTarget->GetDestination(), groupTarget->GetPosition(), groupTarget->GetPosition()->distance(bot)));
+
+        conditions[groupTarget->GetDestination()] = groupTarget->GetConditions();
     }
 
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
@@ -433,6 +438,8 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
         return false;
 
     setNewTarget(requester, &newTarget, oldTarget);
+
+    oldTarget->SetConditions(conditions[newTarget.GetDestination()]);
 
     return oldTarget->IsActive();
 }
@@ -673,7 +680,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
         else if(pvpLocationNumber >= 20 && pvpLocationNumber < 40) //Second 200 minutes
             WorldPvpLocation = "The Barrens";
         else if (pvpLocationNumber >= 40 && pvpLocationNumber < 60) //Second 200 minutes
-            WorldPvpLocation = "Sulithus";
+            WorldPvpLocation = "Silithus";
         else if (pvpLocationNumber >= 60 && pvpLocationNumber < 80) //Second 200 minutes
             WorldPvpLocation = "Eastern Plaguelands";
         else                                                        //Last 200 minutes

@@ -544,10 +544,10 @@ Strategy* Engine::GetStrategy(const std::string& name) const
 
 void Engine::ProcessTriggers(bool minimal)
 {
-    std::map<Trigger*, Event> fires;
-
-    for (auto& node : triggers)
+    std::unordered_map<Trigger*, Event> fires;
+    for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
     {
+        TriggerNode* node = *i;
         if (!node)
             continue;
 
@@ -560,47 +560,45 @@ void Engine::ProcessTriggers(bool minimal)
         if (!trigger)
             continue;
 
-        if (testMode || (trigger->needCheck() && (!minimal || node->getFirstRelevance() >= 100)))
+        auto it = fires.find(trigger);
+        if (it == fires.end() && (testMode || trigger->needCheck()))
         {
-            auto it = fires.find(trigger);
-            if (it == fires.end())
-            {
-                auto pmo = sPerformanceMonitor.start(PERF_MON_TRIGGER, trigger->getName(), &aiObjectContext->performanceStack);
-                Event event = trigger->Check();
+            if (minimal && node->getFirstRelevance() < 100)
+                continue;
+            auto pmo = sPerformanceMonitor.start(PERF_MON_TRIGGER, trigger->getName(), &aiObjectContext->performanceStack);
+            Event event = trigger->Check();
 
 #ifdef PLAYERBOT_ELUNA 
-                // used by eluna     
-                if (Eluna* e = ai->GetBot()->GetEluna())
-                    e->OnTriggerCheck(ai, trigger->getName(), !event ? false : true);
+            // used by eluna     
+            if (Eluna* e = ai->GetBot()->GetEluna())
+                e->OnTriggerCheck(ai, trigger->getName(), !event ? false : true);
 #endif 
 
-                if (!event)
-                    continue;
+            if (!event)
+                continue;
 
-                fires[trigger] = event;
-                LogAction("T:%s", trigger->getName().c_str());
-            }
+            fires[trigger] = event;
+            LogAction("T:%s", trigger->getName().c_str());
         }
     }
 
-    for (auto& node : triggers)
+    for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
     {
+        TriggerNode* node = *i;
         Trigger* trigger = node->getTrigger();
-        if (!trigger)
+        auto it = fires.find(trigger);
+        if (it == fires.end())
             continue;
 
-        auto it = fires.find(trigger);
-        if (it != fires.end())
-        {
-            MultiplyAndPush(node->getHandlers(), 0.0f, false, it->second, "trigger");
-        }
+        Event& event = it->second;
+
+        MultiplyAndPush(node->getHandlers(), 0.0f, false, event, "trigger");
     }
 
-    for (auto& node : triggers)
+    for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
     {
-        Trigger* trigger = node->getTrigger();
-        if (trigger)
-            trigger->Reset();
+        Trigger* trigger = (*i)->getTrigger();
+        if (trigger) trigger->Reset();
     }
 }
 

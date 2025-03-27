@@ -198,11 +198,15 @@ bool ShouldCraftSpellValue::SpellGivesSkillUp(uint32 spellId, Player* bot)
         SkillLineAbilityEntry const* skill = _spell_idx->second;
         if (skill->skillId)
         {
-            uint32 SkillValue = bot->GetSkillValuePure(skill->skillId);
+            uint32 skillValue = bot->GetSkillValuePure(skill->skillId);
+            uint32 maxSkillValue = bot->GetSkillMaxPure(skill->skillId);
+
+            if (maxSkillValue <= skillValue)
+                continue;
 
             uint32 craft_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_CRAFTING);
 
-            if (SkillGainChance(SkillValue,
+            if (SkillGainChance(skillValue,
                 skill->max_value,
                 (skill->max_value + skill->min_value) / 2,
                 skill->min_value) > 0)

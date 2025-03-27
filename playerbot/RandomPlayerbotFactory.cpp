@@ -475,6 +475,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
                                     continue;
                             }
 
+                            sRandomPlayerbotMgr.OnPlayerLoginError(guidlo);
                             Player::DeleteFromDB(guid, accId, false, true);       // no need to update realm characters
                             //dels.push_back(std::async([guid, accId] {Player::DeleteFromDB(guid, accId, false, true); }));
 
@@ -713,6 +714,20 @@ void RandomPlayerbotFactory::CreateRandomBots()
         bar2.step();
         account_creations[i].wait();
     }    
+
+    std::vector<Player*> players;
+    
+    for (auto pl : sObjectAccessor.GetPlayers())
+        players.push_back(pl.second);
+
+    for (auto player : players)
+    {
+        WorldSession* session = player->GetSession();
+        session->LogoutPlayer();
+        sObjectAccessor.RemoveObject(player);
+        delete player;
+        delete session;
+    }
 
     sLog.outString("%zu random bot accounts with %d characters available", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
 }

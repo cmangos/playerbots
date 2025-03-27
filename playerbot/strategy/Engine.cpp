@@ -567,7 +567,7 @@ Strategy* Engine::GetStrategy(const std::string& name) const
 
 void Engine::ProcessTriggers(bool minimal)
 {
-    std::map<Trigger*, Event> fires;
+    std::unordered_map<Trigger*, Event> fires;
     for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
     {
         TriggerNode* node = *i;
@@ -583,13 +583,13 @@ void Engine::ProcessTriggers(bool minimal)
         if (!trigger)
             continue;
 
-        Event& event = fires[trigger];
-        if (!event && (testMode || trigger->needCheck()))
+        auto it = fires.find(trigger);
+        if (it == fires.end() && (testMode || trigger->needCheck()))
         {
             if (minimal && node->getFirstRelevance() < 100)
                 continue;
             auto pmo = sPerformanceMonitor.start(PERF_MON_TRIGGER, trigger->getName(), &aiObjectContext->performanceStack);
-            event = trigger->Check();
+            Event event = trigger->Check();
 
 #ifdef PLAYERBOT_ELUNA
             // used by eluna    
@@ -609,9 +609,11 @@ void Engine::ProcessTriggers(bool minimal)
     {
         TriggerNode* node = *i;
         Trigger* trigger = node->getTrigger();
-        Event& event = fires[trigger];
-        if (!event)
+        auto it = fires.find(trigger);
+        if (it == fires.end())
             continue;
+
+        Event& event = it->second;
 
         MultiplyAndPush(node->getHandlers(), 0.0f, false, event, "trigger");
     }

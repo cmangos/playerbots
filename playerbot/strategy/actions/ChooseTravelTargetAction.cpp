@@ -108,7 +108,8 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
     else if (oldTarget->IsForced()) //Make sure travel goes into cooldown after getting to the destination.
         oldTarget->SetExpireIn(HOUR * IN_MILLISECONDS);
 
-    AI_VALUE(TravelTarget*, "travel target")->SetConditions({ AI_VALUE2(std::string, "manual string", "future travel condition")});
+    if(!AI_VALUE2(std::string, "manual string", "future travel condition").empty())
+        AI_VALUE(TravelTarget*, "travel target")->SetConditions({ AI_VALUE2(std::string, "manual string", "future travel condition")});
 
     if (QuestObjectiveTravelDestination* dest = dynamic_cast<QuestObjectiveTravelDestination*>(oldTarget->GetDestination()))
     {
@@ -436,9 +437,9 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
     if (!newTarget.IsActive() && !newTarget.IsForced())
         return false;
 
-    oldTarget->SetConditions(conditions[newTarget.GetDestination()]);
-
     setNewTarget(requester, &newTarget, oldTarget);
+
+    oldTarget->SetConditions(conditions[newTarget.GetDestination()]);
 
     return oldTarget->IsActive();
 }

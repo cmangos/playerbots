@@ -680,7 +680,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
         else if(pvpLocationNumber >= 20 && pvpLocationNumber < 40) //Second 200 minutes
             WorldPvpLocation = "The Barrens";
         else if (pvpLocationNumber >= 40 && pvpLocationNumber < 60) //Second 200 minutes
-            WorldPvpLocation = "Sulithus";
+            WorldPvpLocation = "Silithus";
         else if (pvpLocationNumber >= 60 && pvpLocationNumber < 80) //Second 200 minutes
             WorldPvpLocation = "Eastern Plaguelands";
         else                                                        //Last 200 minutes

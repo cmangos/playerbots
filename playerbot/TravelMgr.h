@@ -333,6 +333,8 @@ namespace ai
 
 		bool IsConditionsActive(bool clear = false);
 
+		void CheckStatus();
+
 		bool IsActive();
 		bool IsTraveling();
 		bool IsWorking();

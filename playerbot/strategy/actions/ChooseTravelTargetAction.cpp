@@ -51,9 +51,6 @@ bool ChooseTravelTargetAction::Execute(Event& event)
         return false;
     }
 
-    if (!newTarget.IsActive() && !newTarget.IsForced())
-       return false;    
-
     setNewTarget(requester, &newTarget, travelTarget);
     
     return true;
@@ -100,12 +97,8 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
 
     //Actually apply the new target to the travel target used by the bot.
     oldTarget->CopyTarget(newTarget);
-    oldTarget->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
 
-    //If we are idling but have a master. Idle only 10 seconds.
-    if (ai->GetMaster() && oldTarget->IsActive() && typeid(*oldTarget->GetDestination()) == typeid(NullTravelDestination))
-        oldTarget->SetExpireIn(10 * IN_MILLISECONDS);
-    else if (oldTarget->IsForced()) //Make sure travel goes into cooldown after getting to the destination.
+    if (oldTarget->IsForced()) //Make sure travel goes into cooldown after getting to the destination.
         oldTarget->SetExpireIn(HOUR * IN_MILLISECONDS);
 
     if(!AI_VALUE2(std::string, "manual string", "future travel condition").empty())
@@ -428,20 +421,16 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
 
     TravelTarget newTarget = TravelTarget(ai);
 
-    bool hasTarget = SetBestTarget(requester, &newTarget, groupTargets);
-
-    if (hasTarget)
-        newTarget.SetGroupCopy();
-
-    //If the new target is not active we failed.
-    if (!newTarget.IsActive() && !newTarget.IsForced())
+    if (!SetBestTarget(requester, &newTarget, groupTargets))
         return false;
+    
+    newTarget.SetGroupCopy();
 
     setNewTarget(requester, &newTarget, oldTarget);
 
     oldTarget->SetConditions(conditions[newTarget.GetDestination()]);
 
-    return oldTarget->IsActive();
+    return true;
 }
 
 bool ChooseGroupTravelTargetAction::isUseful()
@@ -504,13 +493,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
     target->IncRetry(false);
 
-    RESET_AI_VALUE(bool, "travel target active");
-
-    if (!target->IsActive())
-    {
-        ai->TellDebug(requester, "Target was not active after refresh.", "debug travel");
-        return true;
-    }
+    RESET_AI_VALUE(bool, "travel target active");    
 
     ai->TellDebug(requester, "Refreshed travel target", "debug travel");
     ReportTravelTarget(requester, target, target);

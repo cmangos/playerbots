@@ -74,6 +74,7 @@ namespace ai
         SetGlyphTrigger(PlayerbotAI* ai, std::string triggerName = "set glyph") : Trigger(ai, triggerName, 60) {}
         virtual bool IsActive()
         {
+#ifdef MANGOSBOT_TWO
             Tokens tokens = getMultiQualifiers(qualifier, ",");
 
             std::string glyphName = "Glyph of " + tokens[0];
@@ -101,7 +102,7 @@ namespace ai
 
             if (SetGlyphAction::GetBestSlotForGlyph(glyphId, bot, MAX_GLYPH_SLOT_INDEX) == MAX_GLYPH_SLOT_INDEX)
                 return false;
-
+#endif;
             return true;
         }
     };    

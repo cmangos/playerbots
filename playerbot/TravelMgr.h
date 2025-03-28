@@ -394,6 +394,7 @@ namespace ai
 		void SetMobAvoidArea();
 
 		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
+		void TravelMgr::GetPartitionsLock(bool getLock = true);
 		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
 		static void ShuffleTravelPoints(std::vector<TravelPoint>& points);
 
@@ -432,6 +433,10 @@ namespace ai
 
 		std::unordered_map<uint64, AsyncGuidPosition> pointsMap;
 		std::unordered_map<uint32, int32> areaLevels;
+
+		std::mutex getDestinationMutex;
+		std::condition_variable getDestinationVar;
+		uint8 availableDestinationWorkers = 5;
 
 		std::vector<std::tuple<uint32, int, int>> badMmap;
 

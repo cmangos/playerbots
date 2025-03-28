@@ -2146,8 +2146,25 @@ DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 
     return retDests;
 }
 
+void TravelMgr::GetPartitionsLock(bool getLock)
+{
+    std::unique_lock<std::mutex> lock(sTravelMgr.getDestinationMutex);
+    if (getLock)
+    {
+        sTravelMgr.getDestinationVar.wait(lock, [&] { return sTravelMgr.availableDestinationWorkers; });
+        sTravelMgr.availableDestinationWorkers--;
+
+        return;
+    }
+    
+    sTravelMgr.availableDestinationWorkers++;
+    sTravelMgr.getDestinationVar.notify_one();
+}
+
 PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
 {
+    sTravelMgr.GetPartitionsLock();
+
     PartitionedTravelList pointMap;
     DestinationList destinations = GetDestinations(info, purposeFlag, entries, onlyPossible, maxDistance);
 
@@ -2209,6 +2226,8 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
         if (minPartition)
             pointMap[minPartition].push_back(point);
     }
+
+    sTravelMgr.GetPartitionsLock(false);
 
     return pointMap;
 }

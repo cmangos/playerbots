@@ -19,7 +19,7 @@ bool TravelAction::Execute(Event& event)
     
     target->CheckStatus();    
 
-    return true;
+    return false;
 }
 
 bool TravelAction::isUseful()

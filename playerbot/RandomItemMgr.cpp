@@ -145,6 +145,9 @@ void RandomItemMgr::Init()
     BuildTradeCache();
     LoadRandomEnchantments();
     BuildRandomItemCache();
+#ifdef MANGOSBOT_TWO
+    BuildGlyphCache();
+#endif
     //BuildRarityCache();
 }
 
@@ -3938,6 +3941,24 @@ void RandomItemMgr::BuildRarityCache()
         sLog.outString("Item rarity cache built from %u items", sItemStorage.GetMaxEntry());
     }
 }
+
+#ifdef MANGOSBOT_TWO
+void RandomItemMgr::BuildGlyphCache()
+{
+    sLog.outString("Building glyphCache", sItemStorage.GetMaxEntry());
+    for (uint32 itemId = 0; itemId < sItemStorage.GetMaxEntry(); ++itemId)
+    {
+        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+        if (!proto)
+            continue;
+
+        if (proto->Class != ITEM_CLASS_GLYPH)
+            continue;
+
+        glyphCache[proto->AllowableClass].push_back(proto->ItemId);
+    }
+}
+#endif
 
 void RandomItemMgr::LoadRandomEnchantments()
 {

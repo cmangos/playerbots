@@ -188,7 +188,7 @@ class RandomItemMgr
         std::vector<uint32> GetQuestIdsForItem(uint32 itemId);
         std::string GetPlayerSpecName(Player* player);
         uint32 GetPlayerSpecId(Player* player);
-
+        std::vector<uint32> GetGlyphs(uint8 playerClass) { return glyphCache.at(playerClass); }
     private:
         void BuildRandomItemCache();
         void BuildEquipCache();
@@ -198,6 +198,7 @@ class RandomItemMgr
         void BuildPotionCache();
         void BuildTradeCache();
         void BuildRarityCache();
+        void BuildGlyphCache();
         void LoadRandomEnchantments();
         bool CanEquipItem(BotEquipKey key, ItemPrototype const* proto);
         bool CanEquipItemNew(ItemPrototype const* proto);
@@ -220,6 +221,7 @@ class RandomItemMgr
         std::map<std::string, uint32 > weightRatingLink;
         std::map<uint32, ItemInfoEntry*> itemInfoCache;
         std::map<uint32, std::vector<uint32> > randomEnchantsCache;
+        std::map<uint8, std::vector<uint32>> glyphCache;
 };
 
 #define sRandomItemMgr RandomItemMgr::instance()

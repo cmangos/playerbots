@@ -1075,6 +1075,14 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 void ProtectionPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Hammer of Justice",
+        NextAction::array(0, new NextAction("set glyph::Hammer of Justice", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::the Wise",
+        NextAction::array(0, new NextAction("set glyph::the Wise", ACTION_NORMAL + 1), NULL)));
 }
 
 void ProtectionPaladinStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

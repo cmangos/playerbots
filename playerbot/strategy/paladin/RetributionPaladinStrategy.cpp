@@ -1087,6 +1087,14 @@ void RetributionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 void RetributionPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Judgement",
+        NextAction::array(0, new NextAction("set glyph::Judgement", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Blessing of Might",
+        NextAction::array(0, new NextAction("set glyph::Blessing of Might", ACTION_NORMAL + 1), NULL)));
 }
 
 void RetributionPaladinStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

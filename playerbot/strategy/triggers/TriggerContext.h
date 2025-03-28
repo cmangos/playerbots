@@ -18,6 +18,7 @@
 #include "MoltenCoreDungeonTriggers.h"
 #include "KarazhanDungeonTriggers.h"
 #include "NaxxramasDungeonTriggers.h"
+#include "GlyphTriggers.h"
 
 namespace ai
 {
@@ -244,6 +245,8 @@ namespace ai
 
             creators["random jump"] = &TriggerContext::random_jump;
             creators["rtsc jump active"] = &TriggerContext::rtsc_jump_active;
+
+            creators["set glyph"] = [](PlayerbotAI* ai) { return new SetGlyphTrigger(ai); };
 
             // racials
             creators["berserking"] = &TriggerContext::berserking;

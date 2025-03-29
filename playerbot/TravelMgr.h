@@ -152,7 +152,7 @@ namespace ai
 
 		virtual bool IsIn(const WorldPosition& pos, float radius = 0) const override { return true; }
 
-		virtual std::string GetShortName() const { return "idle"; };
+		virtual std::string GetShortName() const override { return "idle"; };
 	protected:
 		virtual bool IsOut(const WorldPosition& pos, float radius = 0) const override { return false; }
 	};
@@ -167,7 +167,7 @@ namespace ai
 		TravelDestinationPurpose GetPurpose() const { return purpose; }
 		bool HasNpcFlag(uint32 flag) { if(GetCreatureInfo() && (GetCreatureInfo()->NpcFlags & flag)) return true; return false; }
 
-		virtual std::string GetShortName() const;
+		virtual std::string GetShortName() const override;
 	private:
 		CreatureInfo const* creatureInfo = nullptr;
 		GameObjectInfo const* goInfo = nullptr;
@@ -333,6 +333,8 @@ namespace ai
 
 		bool IsConditionsActive(bool clear = false);
 
+		void CheckStatus();
+
 		bool IsActive();
 		bool IsTraveling();
 		bool IsWorking();
@@ -392,6 +394,7 @@ namespace ai
 		void SetMobAvoidArea();
 
 		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
+		void GetPartitionsLock(bool getLock = true);
 		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
 		static void ShuffleTravelPoints(std::vector<TravelPoint>& points);
 
@@ -430,6 +433,10 @@ namespace ai
 
 		std::unordered_map<uint64, AsyncGuidPosition> pointsMap;
 		std::unordered_map<uint32, int32> areaLevels;
+
+		std::mutex getDestinationMutex;
+		std::condition_variable getDestinationVar;
+		uint8 availableDestinationWorkers = 5;
 
 		std::vector<std::tuple<uint32, int, int>> badMmap;
 

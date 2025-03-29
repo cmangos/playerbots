@@ -14,6 +14,11 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 {
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
 
+    target->CheckStatus();
+
+    if (!target->IsTraveling())
+        return true;
+
     WorldPosition botLocation(bot);
     WorldPosition location = *target->GetPosition();
     

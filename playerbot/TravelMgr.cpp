@@ -803,75 +803,71 @@ bool TravelTarget::IsConditionsActive(bool clear)
     return true;
 }
 
-bool TravelTarget::IsActive() {
-    if (m_status == TravelStatus::TRAVEL_STATUS_NONE || m_status == TravelStatus::TRAVEL_STATUS_EXPIRED || m_status == TravelStatus::TRAVEL_STATUS_PREPARE)
-        return false;
+void TravelTarget::CheckStatus()
+{
+    if (!IsActive())
+        return;
 
-    if (forced && IsTraveling())
-        return true;
+    if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT) && !ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
+    {
+        ai->TellDebug(ai->GetMaster(), "The target is clearing because it was a travel once destination.", "debug travel");
+        sTravelMgr.SetNullTravelTarget(this);
+        return;
+    }
 
     if ((statusTime > 0 && startTime + statusTime < WorldTimer::getMSTime()))
     {
         ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
-        return false;
+        return;
     }
 
-    if (m_status == TravelStatus::TRAVEL_STATUS_COOLDOWN)
-        return true;
-
     if (IsTraveling())
-        return true;
+    {
+        if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT))
+            {
+                ai->TellDebug(ai->GetMaster(), "The target is clearing because the bot is following a group leader.", "debug travel");
+                sTravelMgr.SetNullTravelTarget(this);
+                return;
+            }
 
-    if (IsWorking())
-        return true;   
+        bool HasArrived = tDestination->IsIn(bot, radius);
+
+        if (HasArrived)
+        {
+            if (ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
+            {
+                ai->TellDebug(ai->GetMaster(), "The target is clearing because it was a travel once destination.", "debug travel");
+                ai->ChangeStrategy("nc -travel once", BotState::BOT_STATE_NON_COMBAT);
+                sTravelMgr.SetNullTravelTarget(this);
+                return;
+            }
+
+            ai->TellDebug(ai->GetMaster(), "The target is starting to work because the destination has been reached.", "debug travel");
+            SetStatus(TravelStatus::TRAVEL_STATUS_WORK);
+            return;
+        }
+    }
 
     if (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive()) //Target has become invalid. Stop.
     {
         ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
-        return true;
+        return;
     }
+}
+
+bool TravelTarget::IsActive() {
+    if (m_status == TravelStatus::TRAVEL_STATUS_NONE || m_status == TravelStatus::TRAVEL_STATUS_EXPIRED || m_status == TravelStatus::TRAVEL_STATUS_PREPARE)
+        return false;
 
     return true;
 };
 
 bool TravelTarget::IsTraveling() {
     if (m_status != TravelStatus::TRAVEL_STATUS_TRAVEL)
-        return false;
-
-    if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
-        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT))
-        {
-            ai->TellDebug(ai->GetMaster(), "The target is cooling down because the bot is following a group leader.", "debug travel");
-            SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
-            return false;
-        }
-
-    if ((!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive()) && !forced) //Target has become invalid. Stop.
-    {
-        ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination is no longer active or the conditions are no longer valid.", "debug travel");
-        SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
-        return false;
-    }
-
-    WorldPosition pos(bot);
-
-    bool HasArrived = tDestination->IsIn(pos, radius);
-
-    if (HasArrived)
-    {
-        ai->TellDebug(ai->GetMaster(), "The target is starting to work because the destination has been reached.", "debug travel");
-        SetStatus(TravelStatus::TRAVEL_STATUS_WORK);
-        return false;
-    }
-
-    if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT) && !ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
-    {
-        ai->TellDebug(ai->GetMaster(), "The target is clearing because it was a travel once destination.", "debug travel");
-        sTravelMgr.SetNullTravelTarget(this);
-        return false;
-    }
+        return false;   
 
     return true;
 }
@@ -879,22 +875,6 @@ bool TravelTarget::IsTraveling() {
 bool TravelTarget::IsWorking() {
     if (m_status != TravelStatus::TRAVEL_STATUS_WORK)
         return false;
-
-    if (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive()) //Target has become invalid. Stop.
-    {
-        ai->TellDebug(ai->GetMaster(), "The target is cooling down because " + !tDestination->IsActive(bot, PlayerTravelInfo(bot)) ? "the destination is no longer active." : "the conditions are no longer valid.", "debug travel");
-        SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
-        return false;
-    }
-
-    WorldPosition pos(bot);
-
-    if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT) && !ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
-    {
-        ai->TellDebug(ai->GetMaster(), "The target is clearing because it was a travel once destination.", "debug travel");
-        sTravelMgr.SetNullTravelTarget(this);
-        return false;
-    }
 
     return true;
 }
@@ -2166,8 +2146,25 @@ DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 
     return retDests;
 }
 
+void TravelMgr::GetPartitionsLock(bool getLock)
+{
+    std::unique_lock<std::mutex> lock(sTravelMgr.getDestinationMutex);
+    if (getLock)
+    {
+        sTravelMgr.getDestinationVar.wait(lock, [&] { return sTravelMgr.availableDestinationWorkers; });
+        sTravelMgr.availableDestinationWorkers--;
+
+        return;
+    }
+    
+    sTravelMgr.availableDestinationWorkers++;
+    sTravelMgr.getDestinationVar.notify_one();
+}
+
 PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
 {
+    sTravelMgr.GetPartitionsLock();
+
     PartitionedTravelList pointMap;
     DestinationList destinations = GetDestinations(info, purposeFlag, entries, onlyPossible, maxDistance);
 
@@ -2230,6 +2227,8 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
             pointMap[minPartition].push_back(point);
     }
 
+    sTravelMgr.GetPartitionsLock(false);
+
     return pointMap;
 }
 
@@ -2260,7 +2259,10 @@ void TravelMgr::ShuffleTravelPoints(std::vector<TravelPoint>&points)
 void TravelMgr::SetNullTravelTarget(TravelTarget* target) const
 {
     if (target)
+    {
         target->SetTarget(nullTravelDestination, nullWorldPosition);
+        target->SetStatus(TravelStatus::TRAVEL_STATUS_NONE);
+    }
 }
 
 void TravelMgr::SetNullTravelTarget(Player* player) const

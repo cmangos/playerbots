@@ -85,12 +85,12 @@ namespace ai
         static uint32 GetSmallestBagSize(Player* bot);
         static std::string ReasonForNeed(ItemUsage usage, ItemQualifier qualifier = ItemQualifier(), uint32 count = 1, Player* bot = nullptr);
         static uint32 GetAhDepositCost(ItemPrototype const* proto, uint32 count = 1);
+        static Item* CurrentItem(ItemPrototype const* proto, Player* bot);
     private:        
         bool IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory = false);
         bool IsItemNeededForSkill(ItemPrototype const* proto);
         bool IsItemUsefulForSkill(ItemPrototype const* proto);
         bool IsItemNeededForUsefullCraft(ItemPrototype const* proto, bool checkAllReagents);
-        static Item* CurrentItem(ItemPrototype const* proto, Player* bot);
         float BetterStacks(ItemPrototype const* proto, std::string usageType = "");
 
 #ifdef GenerateBotHelp

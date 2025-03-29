@@ -967,6 +967,26 @@ void MageStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     ClassStrategy::InitNonCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "set glyph::fireball",
+        NextAction::array(0, new NextAction("set glyph::fireball", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::frostbolt",
+        NextAction::array(0, new NextAction("set glyph::frostbolt", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::{living bomb,44457}", //Required Living Bomb talent
+        NextAction::array(0, new NextAction("set glyph::living bomb", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::{mirror image,55342}", //Required Mirror Image
+        NextAction::array(0, new NextAction("set glyph::mirror image", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::{molten armor,30482}", //Required Molten Armor Rank 1
+        NextAction::array(0, new NextAction("set glyph::molten armor", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "learn glyph of fireball",
         NextAction::array(0, new NextAction("learn glyph of fireball", ACTION_NORMAL + 1), NULL)));
 

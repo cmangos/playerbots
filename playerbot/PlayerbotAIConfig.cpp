@@ -374,8 +374,8 @@ bool PlayerbotAIConfig::Initialize()
                 {
                     std::ostringstream os; os << "AiPlayerbot.PremadeSpecLink." << cls << "." << spec << "." << level;
                     std::string specLink = config.GetStringDefault(os.str().c_str(), "");
-                    specLink = specLink.substr(0, specLink.find("#", 0));;
-                    specLink = specLink.substr(0, specLink.find(" ", 0));;
+                    specLink = specLink.substr(0, specLink.find("#", 0));
+                    specLink = specLink.substr(0, specLink.find(" ", 0));
 
                     if (!specLink.empty())
                     {
@@ -403,6 +403,35 @@ bool PlayerbotAIConfig::Initialize()
 
 
                         talentPath.talentSpec.push_back(linkSpec);
+                    }
+
+                    {
+                        //Glyphs
+
+                        using GlyphPriority = std::pair<std::string, uint32>;
+                        using GlyphPriorityList = std::vector<GlyphPriority>;
+                        using GlyphPriorityLevelMap = std::unordered_map<uint32, GlyphPriorityList>;
+                        using GlyphPrioritySpecMap = std::unordered_map<uint32, GlyphPriorityLevelMap>;
+
+                        std::ostringstream os; os << "AiPlayerbot.PremadeSpecGlyp." << cls << "." << spec << "." << level;
+
+                        std::string glyphList = config.GetStringDefault(os.str().c_str(), "");
+                        glyphList = glyphList.substr(0, glyphList.find("#", 0));
+                        boost::trim_right(glyphList);
+
+                        if (!glyphList.empty())
+                        {
+                            Tokens premadeSpecGlyphs = Qualified::getMultiQualifiers(glyphList, ",");
+
+                            for (auto& glyph : premadeSpecGlyphs)
+                            {
+                                Tokens tokens = Qualified::getMultiQualifiers(glyph, "|");
+                                std::string glyphName = tokens[0];
+                                uint32 talentId = tokens.size() > 1 ? stoi(tokens[1]) : 0;
+
+                                glyphPriorityMap[cls][spec][level].push_back(std::make_pair(glyphName, talentId));
+                            }
+                        }
                     }
                 }
 

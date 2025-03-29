@@ -88,6 +88,7 @@ bool SetGlyphAction::Execute(Event& event)
         return false; //Bot already has glyph applied.
     }
 
+    //Refactor to use packet/use item action later.
     bot->ApplyGlyph(glyphSlot, false);
     bot->SetGlyph(glyphSlot, glyphId);
     bot->ApplyGlyph(glyphSlot, true);
@@ -111,7 +112,7 @@ bool SetGlyphAction::isUseful()
 const ItemPrototype* SetGlyphAction::GetGlyphProtoFromName(std::string glyphName, uint32 classId)
 {
     //Glyph of Molten Armor
-    for (auto& itemId : sRandomItemMgr.GetGlyphs(classId))
+    for (auto& itemId : sRandomItemMgr.GetGlyphs(1 << (classId - 1)))
     {
         ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
 
@@ -138,7 +139,7 @@ uint32 SetGlyphAction::GetGlyphIdFromProto(const ItemPrototype* glyphProto)
 const ItemPrototype* SetGlyphAction::GetGlyphProtoFromGlyphId(uint32 glyphId, uint32 classId)
 {
     //Glyph of Molten Armor
-    for (auto& itemId : sRandomItemMgr.GetGlyphs(classId))
+    for (auto& itemId : sRandomItemMgr.GetGlyphs(1<<(classId - 1)))
     {
         ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
 
@@ -171,9 +172,9 @@ bool SetGlyphAction::isGlyphSlotEnabled(uint8 slot, uint32 level)
 bool SetGlyphAction::isGlyphAlreadySet(uint32 glyphId, Player* bot)
 {
 #ifdef MANGOSBOT_TWO
-    for (uint32 i = 0; i < sGlyphSlotStore.GetNumRows(); ++i)
-        if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(i))
-            if (bot->GetGlyph(gs->Id) == glyphId)
+    for (uint32 glyphIndex = 0; glyphIndex < MAX_GLYPH_SLOT_INDEX; ++glyphIndex)
+        if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(bot->GetGlyphSlot(glyphIndex)))
+            if (bot->GetGlyph(glyphIndex) == glyphId)
                 return true;
 #endif;
     return false;
@@ -208,7 +209,7 @@ uint8 SetGlyphAction::GetBestSlotForGlyph(uint32 glyphId, Player* bot, uint8 wan
             if (!currentGlyphProto) //Empty slot put it here.
                 return glyphIndex;
 
-            if(!WantsGlyphFromStrategy(currentGlyphId, bot)) //Strategy doesn't need this glyph so we can replace it.
+            if(!WantsGlyphFromConfig(currentGlyphId, bot)) //Strategy doesn't need this glyph so we can replace it.
                 return glyphIndex;
 
             if (currentGlyphProto->RequiredLevel >= minLevel)
@@ -224,63 +225,106 @@ uint8 SetGlyphAction::GetBestSlotForGlyph(uint32 glyphId, Player* bot, uint8 wan
 #endif;
 }
 
-bool SetGlyphAction::WantsGlyphFromStrategy(uint32 glyphId, Player* bot)
+GlyphPriorityList SetGlyphAction::GetGlyphPriorityList(Player* bot)
 {
-    std::list<TriggerNode*> triggerNodes;
+    GlyphPriorityList glyphPriorityList;
 
-    const ItemPrototype* currentGlyphProto = GetGlyphProtoFromGlyphId(glyphId, bot->getClass());
+    uint32 specNo = sRandomPlayerbotMgr.GetValue(bot->GetGUIDLow(), "specNo");
 
-    bool foundTrigger = false;
+    if (!specNo)
+        return glyphPriorityList;
 
-    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    uint32 specId = specNo ? specNo - 1 : 0;
 
-    for (auto& strategy : ai->GetAiObjectContext()->GetSupportedStrategies())
+    uint32 listLevel = 999;
+
+    for (auto& [level, glyphList] : sPlayerbotAIConfig.glyphPriorityMap[bot->getClass()][specId])
     {
-        if (!ai->HasStrategy(strategy, BotState::BOT_STATE_COMBAT))
-            continue;
-
-        Strategy* combatStrategy = ai->GetAiObjectContext()->GetStrategy(strategy);
-
-        combatStrategy->InitTriggers(triggerNodes, BotState::BOT_STATE_NON_COMBAT);
-
-        //Loop over all triggers of this strategy.
-        for (auto& triggerNode : triggerNodes)
+        if (level < listLevel && level >= bot->GetLevel()) //Find the lowest level list that is above the bots current level.
         {
-            if (triggerNode->getName().find("set glyph::") != 0)
-                continue;
-
-            std::string triggerQualifier = triggerNode->getName().substr(11);
-
-            Tokens tokens = getMultiQualifiers(triggerQualifier, ",");
-
-            std::string glyphName = "glyph of " + tokens[0];
-
-            if (currentGlyphProto->Name1 != glyphName)
-                continue;
-
-            if (tokens.size() > 1)
-            {
-                uint32 requiredTalentSpellId = stoi(tokens[1]);
-
-                if (!bot->HasSpell(requiredTalentSpellId))
-                    continue;
-            }
-
-            foundTrigger = true;
-            break;
+            glyphPriorityList = glyphList;
+            listLevel = level;
         }
-
-        for (std::list<TriggerNode*>::iterator i = triggerNodes.begin(); i != triggerNodes.end(); i++)
-        {
-            TriggerNode* trigger = *i;
-            delete trigger;
-        }
-
-        triggerNodes.clear();
-
-        if (foundTrigger)
-            break;
     }
 
-    return foundTrigger;
+    return glyphPriorityList;
+}
+
+bool SetGlyphAction::WantsGlyphFromConfig(uint32 glyphId, Player* bot)
+{
+    for (auto [glyphConfigName, reqTalentSpellId] : GetGlyphPriorityList(bot))
+    {
+        std::string glyphName = "Glyph of " + glyphConfigName;
+
+        if (reqTalentSpellId && !bot->HasSpell(reqTalentSpellId))
+            continue;
+
+        const ItemPrototype* glyphProto = GetGlyphProtoFromName(glyphName, bot->getClass());
+
+        if (!glyphProto)
+        {
+            sLog.outError("%s is not found for class %d", glyphName.c_str(), bot->getClass());
+            continue;
+        }
+
+        uint32 wantGlyphId = GetGlyphIdFromProto(glyphProto);
+
+        if (wantGlyphId == glyphId)
+            return true;
+    }
+
+    return false;
+}
+
+
+bool AutoSetGlyphAction::Execute(Event& event)
+{
+    bool didGlyph = false;
+#ifdef MANGOSBOT_TWO
+
+    GlyphPriorityList glyphPriorityList = GetGlyphPriorityList(bot);
+
+    std::reverse(glyphPriorityList.begin(), glyphPriorityList.end()); //Try last glyphs first.
+
+    std::vector<uint32> betterGlyphs;
+
+    for (auto& [glyphConfigName, reqTalentSpellId] : glyphPriorityList)
+    {
+        std::string glyphName = "Glyph of " + glyphConfigName;
+
+        //We do not have the talent which is configured to be needed for this glyph.
+        if (reqTalentSpellId && !bot->HasSpell(reqTalentSpellId))
+            continue;
+
+        const ItemPrototype* glyphProto = GetGlyphProtoFromName(glyphName, bot->getClass());
+
+        if (!glyphProto)
+        {
+            sLog.outError("%s is not found for class %d", glyphName.c_str(), bot->getClass());
+            continue;
+        }
+
+        //We can not use this glyph.
+        if (glyphProto->RequiredLevel > bot->GetLevel())
+            continue;
+
+        uint32 glyphId = GetGlyphIdFromProto(glyphProto);
+
+        betterGlyphs.push_back(glyphId);
+
+        uint32 bestSlot = GetBestSlotForGlyph(glyphId, bot, MAX_GLYPH_SLOT_INDEX);
+
+        uint32 currentGlyphId = bot->GetGlyph(bestSlot);
+
+        //A earlier glyph is already in this slot.
+        if (std::find(betterGlyphs.begin(), betterGlyphs.end(), currentGlyphId) != betterGlyphs.end())
+            continue;
+
+        qualifier = glyphConfigName;
+
+        didGlyph = didGlyph || SetGlyphAction::Execute(event);
+    }
+
+#endif;
+    return didGlyph;
 }

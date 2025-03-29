@@ -162,10 +162,10 @@ DropMap* DropMapValue::Calculate()
 			for (LootLootGroupAccess const& group : lTemplateA->Groups)
 			{
 				for (LootStoreItem const& lItem : group.ExplicitlyChanced)
-					dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+					dropMap->insert(std::make_pair(lItem.itemid, -sEntry));
 
 				for (LootStoreItem const& lItem : group.EqualChanced)
-					dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+					dropMap->insert(std::make_pair(lItem.itemid, -sEntry));
 			}
 		}
 	}
@@ -234,9 +234,11 @@ float LootChanceValue::Calculate()
 				if (item.itemid == itemId)
 					return item.chance;
 
+			float equalChance = 100.0f / (float)group.EqualChanced.size();
+
 			for (LootStoreItem const& item : group.EqualChanced)
 				if (item.itemid == itemId)
-					return item.chance;
+					return item.chance ? item.chance : equalChance;
 		}
 	}
 

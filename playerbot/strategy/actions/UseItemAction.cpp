@@ -504,7 +504,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
         if (spellTargets == 0)
         {
             // Unit target
-            if ((spellInfo->EffectImplicitTargetA[0] == TARGET_UNIT) || // Unit Target
+            if ((spellInfo->EffectImplicitTargetA[0] == TARGET_UNIT || spellInfo->EffectImplicitTargetA[0] == TARGET_UNIT_ENEMY) || // Unit Target
                 (proto->Class == ITEM_CLASS_CONSUMABLE && proto->SubClass == ITEM_SUBCLASS_SCROLL) || // Scrolls
                 (proto->Class == ITEM_CLASS_TRADE_GOODS && proto->SubClass == ITEM_SUBCLASS_EXPLOSIVES) || // Explosives
                 (spellData.SpellCategory == 150) || // First aid
@@ -610,6 +610,12 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             // Use triggered flag only for items with many spell casts and for not first cast
             BotUseItemSpell* spell = new BotUseItemSpell(bot, spellInfo, (successCasts > 0) ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
             spell->m_clientCast = true;
+            
+#ifndef MANGOSBOT_ZERO
+            // used in item_template.spell_2 with spell_id with SPELL_GENERIC_LEARN in spell_1
+            if ((spellInfo->Id == SPELL_ID_GENERIC_LEARN) && proto->Spells[1].SpellTrigger == ITEM_SPELLTRIGGER_LEARN_SPELL_ID)
+                spell->m_currentBasePoints[EFFECT_INDEX_0] = proto->Spells[1].SpellId; 
+#endif
 
             // Spend the item if used in the spell
             if (itemUsed)
@@ -980,8 +986,6 @@ bool UseAction::UseGemItem(Player* requester, Item* item, Item* gem, bool replac
 
     if (fits)
     {
-        bot->GetSession()->HandleSocketOpcode(*packet);
-
         if (verbose)
         {
             std::map<std::string, std::string> replyArgs;
@@ -989,6 +993,8 @@ bool UseAction::UseGemItem(Player* requester, Item* item, Item* gem, bool replac
             replyArgs["%gem"] = chat->formatItem(gem);
             ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command_socket", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
+
+        bot->GetSession()->HandleSocketOpcode(*packet);
 
         return true;
     }
@@ -1169,7 +1175,12 @@ bool UseHearthStoneAction::Execute(Event& event)
 
 bool UseHearthStoneAction::isUseful() 
 {
-    if (!sServerFacade.IsSpellReady(bot, 8690))
+    if (!ai->HasActivePlayerMaster() && ai->IsGroupLeader()) //Only hearthstone if entire group can use it.
+    {
+        if (AI_VALUE2(bool, "group or", "not::spell ready::8690"))
+            return false;
+    }
+    else if (!AI_VALUE2(bool, "spell ready", "8690"))
         return false;
 
     if (bot->InBattleGround())
@@ -1192,11 +1203,17 @@ bool UseRandomRecipeAction::isUseful()
 
 bool UseRandomRecipeAction::Execute(Event& event)
 {
-    std::list<Item*> recipes = AI_VALUE2(std::list<Item*>, "inventory items", "recipe");   
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+
+    std::list<Item*> recipes = AI_VALUE2(std::list<Item*>, "inventory items", "recipe"); 
+
     std::string recipeName = "";
     for (auto& recipe : recipes)
     {
-        recipeName = recipe->GetProto()->Name1;
+        if (bot->HasSpell(ItemUsageValue::GetRecipeSpell(recipe->GetProto())))
+            continue;
+
+        recipeName = chat->formatItem(recipe);
         if (!urand(0, 10))
             break;
     }
@@ -1211,7 +1228,12 @@ bool UseRandomRecipeAction::Execute(Event& event)
 
     Event rEvent = Event(name, recipeName);
 
-    return UseAction::Execute(rEvent);
+    bool didUse = UseAction::Execute(rEvent);
+
+    if (didUse && bot->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+        ai->TellPlayerNoFacing(requester, "Learning " + recipeName, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+    return didUse;
 }
 
 bool UseRandomQuestItemAction::isUseful()

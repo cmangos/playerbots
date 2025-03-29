@@ -109,6 +109,18 @@ AiPlayerbot.RandomGearMaxDiff = 9
 # Regularly upgrade bots equipment for their level
 AiPlayerbot.RandomGearUpgradeEnabled = 0
 
+# Enable random tabards on randomisation
+AiPlayerbot.RandomGearTabards = 0
+
+# Chance to get a random tabard
+AiPlayerbot.RandomGearTabardsChance = 0.1
+
+# Replace guild tabard with random one
+AiPlayerbot.RandomGearTabardsReplaceGuild = 0
+
+# Allow use tabards that have no vendors, quests or loot related to it
+AiPlayerbot.RandomGearTabardsUnobtainable = 0
+
 # List of item IDs to exclude from random gear, separated by comma
 AiPlayerbot.RandomGearBlacklist = 0
 
@@ -333,9 +345,13 @@ AiPlayerbot.AutoLearnTrainerSpells = 0
 # Default: 0 (disabled)
 AiPlayerbot.AutoLearnQuestSpells = 0
 
-# Random Bots will pick quests on their own and try to complete
+# Alt Bots automatically learn class spells from books dropped from dungeons and raids when leveled and they reached the required level of the book.
 # Default: 0 (disabled)
-AiPlayerbot.AutoDoQuests = 0
+AiPlayerbot.AutoLearnDroppedSpells = 0
+
+# Random Bots will pick quests on their own and try to complete
+# Default: 1 (enabled)
+# AiPlayerbot.AutoDoQuests = 1
 
 ##################################################################################
 #                                                                                #
@@ -475,6 +491,18 @@ AiPlayerbot.PremadeSpecName.1.4 = pvp fury
 AiPlayerbot.PremadeSpecLink.1.4.60 = 30325001302-05052130025012051
 AiPlayerbot.PremadeSpecName.1.5 = pvp prot
 AiPlayerbot.PremadeSpecLink.1.5.60 = 05003--55255113032021251
+
+AiPlayerbot.PremadeSpecName.1.6 = fury slam
+AiPlayerbot.PremadeSpecLink.1.5.60 = 30305001322-05050005005510051
+
+AiPlayerbot.PremadeSpecName.1.7 = arms axes
+AiPlayerbot.PremadeSpecLink.1.5.60 = 303050213525100001-05050005005
+AiPlayerbot.PremadeSpecName.1.8 = arms maces
+AiPlayerbot.PremadeSpecLink.1.5.60 = 303050213520150001-05050005005
+AiPlayerbot.PremadeSpecName.1.9 = arms swords
+AiPlayerbot.PremadeSpecLink.1.5.60 = 303050213520105001-05050005005
+AiPlayerbot.PremadeSpecName.1.10 = arms polearms
+AiPlayerbot.PremadeSpecLink.1.5.60 = 303050213520100501-05050005005
 
 # Paladin
 AiPlayerbot.PremadeSpecName.2.0 = pve dps ret (basic ret)
@@ -905,7 +933,7 @@ AiPlayerbot.PerfMonEnabled = 0
 
 # Self bot turns your current character into a bot with the command ".bot self"
 # !!DISCLAMER!! Selfbots will work and act like randombots based on their enabled strategies. Your epic mount will be sold to a vendor!
-# Self bot level. Values: 0 (disabled), 1 (Game masters only), 2 (Any player), 3 (Enabled on login), 4 (Enabled even when offline)
+# Self bot level. Values: 0 (disabled), 1 (Game masters only), 2 (Any player), 3 (Allow .bot always command for all players), 4 (Enabled on login), 4 (Enabled even when offline)
 # AiPlayerbot.SelfBotLevel = 1
 
 # Account/character names that are either, always online as bot (SelfBotLevel < 4) or prevented from being always online as bot (SelfBotLevel = 4) 
@@ -952,7 +980,7 @@ AiPlayerbot.PerfMonEnabled = 0
 # The default prompt to send at the beginning of each conversation.
 # AiPlayerbot.LLMPrePrompt = You are a roleplaying character in World of Warcraft: <expansion name>. Your name is <bot name>. The <other type> <other name> is speaking to you <channel name> and is an <other gender> <other race> <other class> of level <other level>. You are level <bot level> and play as a <bot gender> <bot race> <bot class> that is currently in <bot subzone> <bot zone>. Answer as a roleplaying character. Limit responses to 100 characters.
 # The prompt part containing the last message from the player the bot is responding to.
-# AiPlayerbot.LLMPrompt = <player name>:<player message>
+# AiPlayerbot.LLMPrompt = <receiver name>:<initial message>
 # The default prompt to send at the end of each conversation.
 # AiPlayerbot.LLMPostPrompt = <bot name>:
 
@@ -963,9 +991,9 @@ AiPlayerbot.PerfMonEnabled = 0
 # Step1: What pattern the server should look for to find the start of the repsonse the llm gave.
 # AiPlayerbot.LLMResponseStartPattern = ("text":\s*")
 # Step2: What pattern the server should look for that the response has ended.
-# AiPlayerbot.LLMResponseEndPattern = ("|<receiver name>:)
+# AiPlayerbot.LLMResponseEndPattern = ("|\b(?!<sender name>\b)(\w+):)
 # Step3: What pattern the server should look for to remove from the response.
-# AiPlayerbot.LLMResponseDeletePattern = (\\n|<sender name>:)
+# AiPlayerbot.LLMResponseDeletePattern = (\\n|<sender name>:|\\[^ ]+)
 # Step4: What pattern the server should look for to split the repsonse in multiple lines. Note only lines that follow this pattern will be extracted.
 # AiPlayerbot.LLMResponseSplitPattern = (\*.*?\*)|(\[.*?\])|(\'.*\')|([^\*\[\] ][^\*\[\]]+?[.?!])
 

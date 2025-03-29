@@ -3,12 +3,10 @@
 
 namespace ai
 {
-    //                    spell                  , trainers
-    typedef std::unordered_map<TrainerSpell const*, std::vector<CreatureInfo const*>>  spellTrainerMap;
-    //              spellsTypes, spell
+    // trainableSpellMap[TrainerType][required class/race/skill][TrainerSpell] = {trainer entry};
+    typedef std::unordered_map<TrainerSpell const*, std::vector<int32>>  spellTrainerMap;
     typedef std::unordered_map<uint32, spellTrainerMap>          trainableSpellList;
-    //              trainerType, spellsTypes
-    typedef std::unordered_map<uint8, trainableSpellList>         trainableSpellMap;
+    typedef std::unordered_map<TrainerType, trainableSpellList>         trainableSpellMap;
 
     class TrainableSpellMapValue : public SingleCalculatedValue<trainableSpellMap*>
     {
@@ -19,20 +17,28 @@ namespace ai
         virtual ~TrainableSpellMapValue() { delete value; }
     };
 
-    class TrainableClassSpells : public CalculatedValue<std::vector< TrainerSpell const*>>
+    class TrainableSpellsValue : public CalculatedValue<std::vector< TrainerSpell const*>>, public Qualified
     {
     public:
-        TrainableClassSpells(PlayerbotAI* ai) : CalculatedValue<std::vector<TrainerSpell const*>>(ai, "trainable class spells") {}
+        TrainableSpellsValue(PlayerbotAI* ai, std::string name = "trainable spells", int checkInterval = 5) : CalculatedValue<std::vector<TrainerSpell const*>>(ai, name, checkInterval), Qualified(){}
 
         virtual std::vector<TrainerSpell const*> Calculate() override;
 
         virtual std::string Format() override;
     };
 
-    class TrainCostValue : public Uint32CalculatedValue
+    class AvailableTrainersValue : public CalculatedValue<std::vector<int32>>, public Qualified
     {
     public:
-        TrainCostValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "train cost", 60) {}
+        AvailableTrainersValue(PlayerbotAI* ai, std::string name = "available trainers", int checkInterval = 5) : CalculatedValue<std::vector<int32>>(ai, name, checkInterval), Qualified() {}
+
+        virtual std::vector<int32> Calculate() override;
+    };
+
+    class TrainCostValue : public Uint32CalculatedValue, public Qualified
+    {
+    public:
+        TrainCostValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "train cost", 60), Qualified() {}
 
         virtual uint32 Calculate() override;
     };

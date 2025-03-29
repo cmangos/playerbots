@@ -22,6 +22,10 @@ namespace ai
         uint32 GetGem3() { return gem3; }
         uint32 GetGem4() { return gem4; }
 
+        operator bool() const { return itemId != 0; }
+
+        bool operator==(const ItemQualifier& qualifier) const { return itemId == qualifier.itemId && enchantId == qualifier.enchantId && randomPropertyId == qualifier.randomPropertyId && gem1 == qualifier.gem1 && gem2 == qualifier.gem2 && gem3 == qualifier.gem3 && gem4 == qualifier.gem4; }
+
 #ifdef MANGOSBOT_ZERO
         std::string GetLinkQualifier() { return std::to_string(itemId) + ":" + std::to_string(enchantId) + ":" + std::to_string(randomPropertyId) + ":0"; }
 #else
@@ -79,12 +83,14 @@ namespace ai
 
         static ItemUsage QueryItemUsageForEquip(ItemQualifier& itemQualifier, Player* bot);
         static uint32 GetSmallestBagSize(Player* bot);
+        static std::string ReasonForNeed(ItemUsage usage, ItemQualifier qualifier = ItemQualifier(), uint32 count = 1, Player* bot = nullptr);
+        static uint32 GetAhDepositCost(ItemPrototype const* proto, uint32 count = 1);
+        static Item* CurrentItem(ItemPrototype const* proto, Player* bot);
     private:        
         bool IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory = false);
         bool IsItemNeededForSkill(ItemPrototype const* proto);
         bool IsItemUsefulForSkill(ItemPrototype const* proto);
         bool IsItemNeededForUsefullCraft(ItemPrototype const* proto, bool checkAllReagents);
-        static Item* CurrentItem(ItemPrototype const* proto, Player* bot);
         float BetterStacks(ItemPrototype const* proto, std::string usageType = "");
 
 #ifdef GenerateBotHelp

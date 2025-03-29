@@ -530,7 +530,7 @@ bool CastRandomSpellAction::Execute(Event& event)
     }
 
     if (!allTheSame)
-        std::sort(spellList.begin(), spellList.end(), [](std::pair<uint32, std::pair<uint32, WorldObject*>> i, std::pair<uint32, std::pair<uint32, WorldObject*>> j) {return i.first > j.first; });
+        std::sort(spellList.begin(), spellList.end(), [](std::pair<uint32, std::pair<uint32, WorldObject*>> i, std::pair<uint32, std::pair<uint32, WorldObject*>> j) {return i.second.first > j.second.first; });
 
     uint32 rndBound = spellList.size() - 1;
 
@@ -666,7 +666,7 @@ bool CraftRandomItemAction::Execute(Event& event)
             if (GuidPosition(wot).GetGameObjectInfo()->spellFocus.focusId != pSpellInfo->RequiresSpellFocus)
                 continue;
         }
-        else
+        else if(wot != bot)
         {
             wot = nullptr;
         }

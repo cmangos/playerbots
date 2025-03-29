@@ -270,7 +270,7 @@ void ChatReplyAction::GetAIChatPlaceholders(std::map<std::string, std::string>& 
         replace["GOSSIP_OPTION_TRAINER"] = unit->GetName() + std::string(" can train pets.");
         replace["GOSSIP_OPTION_UNLEARNPETSKILLS"] = unit->GetName() + std::string(" can help pets unlearn their skills.");
 
-        PlayerbotTextMgr::GetReplacePlaceholders(gossipText, replace);
+        PlayerbotTextMgr::ReplacePlaceholders(gossipText, replace);
 
         placeholders["<" + preFix + " gossip>"] = gossipText;
     }
@@ -526,8 +526,10 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
 
                 placeholders["<initial message>"] = msg;
 
+                std::string llmPromptCustom = AI_VALUE(std::string, "manual saved string::llmdefaultprompt");
+
                 std::map<std::string, std::string> jsonFill;
-                jsonFill["<pre prompt>"] = sPlayerbotAIConfig.llmPrePrompt;
+                jsonFill["<pre prompt>"] = sPlayerbotAIConfig.llmPrePrompt + " " + llmPromptCustom;
                 jsonFill["<prompt>"] = sPlayerbotAIConfig.llmPrompt;
                 jsonFill["<post prompt>"] = sPlayerbotAIConfig.llmPostPrompt;
 
@@ -590,6 +592,7 @@ void ChatReplyAction::ChatReplyDo(Player* bot, uint32 type, uint32 guid1, uint32
                 case ChatChannelSource::SRC_GUILD:
                 {
                     type = CHAT_MSG_GUILD;
+                    break;
                 }
                 case ChatChannelSource::SRC_WORLD:
                 case ChatChannelSource::SRC_GENERAL:
@@ -1385,7 +1388,7 @@ std::string ChatReplyAction::GenerateReplyMessage(Player* bot, std::string incom
                 msg = "ya %s but thats in the past";
                 break;
             case 2:
-                msg = word[verb_pos - 1] + " will " + word[verb_pos + 1] + " again though %s";
+                msg = word[verb_pos ? verb_pos - 1 : verb_pos + 1] + " will " + word[verb_pos + 1] + " again though %s";
                 break;
             }
             msg = std::regex_replace(msg, std::regex("%s"), name);
@@ -1429,7 +1432,7 @@ std::string ChatReplyAction::GenerateReplyMessage(Player* bot, std::string incom
                 msg = "%s, what will happen %s?";
                 break;
             case 2:
-                msg = "are you saying " + word[verb_pos - 1] + " will " + word[verb_pos + 1] + " " + word[verb_pos + 2] + " %s?";
+                msg = "are you saying " + word[verb_pos ? verb_pos - 1 : verb_pos + 1] + " will " + word[verb_pos + 1] + " " + word[verb_pos + 2] + " %s?";
                 break;
             }
             msg = std::regex_replace(msg, std::regex("%s"), name);

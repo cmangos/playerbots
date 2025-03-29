@@ -85,26 +85,10 @@ namespace ai
 
         uint32 GetAuctionDeposit()
         {
-            uint32 time;
-#ifdef MANGOSBOT_ZERO
-            time = 8 * HOUR;
-#else
-            time = 12 * HOUR;
-#endif
-
             float minDeposit = 0;
             for (auto item : AI_VALUE2(std::list<Item*>, "inventory items", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_AH)))
             {
-                float deposit = float(item->GetProto()->SellPrice * item->GetCount() * (time / MIN_AUCTION_TIME));
-
-                deposit = deposit * 15 * 3.0f / 100.0f;
-
-                float min_deposit = float(sWorld.getConfig(CONFIG_UINT32_AUCTION_DEPOSIT_MIN));
-
-                if (deposit < min_deposit)
-                    deposit = min_deposit;
-
-                deposit *= sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_DEPOSIT);
+                uint32 deposit = ItemUsageValue::GetAhDepositCost(item->GetProto(), item->GetCount());
 
                 if (minDeposit == 0 || deposit < minDeposit)
                     minDeposit = deposit;
@@ -126,6 +110,13 @@ namespace ai
     {
     public:
         CanGetMailValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can get mail", 2) {}
+        virtual bool Calculate();
+    };
+
+    class ShouldGetMailValue : public BoolCalculatedValue
+    {
+    public:
+        ShouldGetMailValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should get mail", 60) {}
         virtual bool Calculate();
     };
 

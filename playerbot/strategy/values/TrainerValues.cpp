@@ -17,97 +17,127 @@ trainableSpellMap* TrainableSpellMapValue::Calculate()
     //Select all trainer lists and their trainers.
     for (uint32 id = 0; id < sCreatureStorage.GetMaxEntry(); ++id)
     {
-        CreatureInfo const* co = sCreatureStorage.LookupEntry<CreatureInfo>(id);
-        if (!co)
+        CreatureInfo const* creatureInfo = sCreatureStorage.LookupEntry<CreatureInfo>(id);
+        if (!creatureInfo)
             continue;
 
-        if (!co->TrainerType && !co->TrainerClass)
+        if (!creatureInfo->TrainerType && !creatureInfo->TrainerClass)
             continue;
 
-        if(co->TrainerTemplateId)
-            trainerTemplateIds[co->TrainerTemplateId].push_back(co);      
+        if(creatureInfo->TrainerTemplateId)
+            trainerTemplateIds[creatureInfo->TrainerTemplateId].push_back(creatureInfo);
         else
-            trainerTemplateIds[id].push_back(co);
+            trainerTemplateIds[id].push_back(creatureInfo);
     }
 
-    for (auto& templateId : trainerTemplateIds)
+    for (auto& [templateOrEntryId, trainers] : trainerTemplateIds)
     {
-        TrainerSpellData const* trainer_spells = sObjectMgr.GetNpcTrainerTemplateSpells(templateId.first);
+        TrainerSpellData const* trainer_spells = sObjectMgr.GetNpcTrainerTemplateSpells(templateOrEntryId);
         if (!trainer_spells)
-            trainer_spells = sObjectMgr.GetNpcTrainerSpells(templateId.first);
+            trainer_spells = sObjectMgr.GetNpcTrainerSpells(templateOrEntryId);
 
         if (!trainer_spells)
             continue;
 
-        uint8 trainerType = templateId.second.front()->TrainerType;
+        CreatureInfo const* firstTrainer = trainers.front();
 
-        uint32 spellType;
+        TrainerType trainerType = (TrainerType)firstTrainer->TrainerType;
+
+        uint32 spellRequirement;
         if (trainerType == TRAINER_TYPE_CLASS || trainerType == TRAINER_TYPE_PETS)
-            spellType = templateId.second.front()->TrainerClass;
+            spellRequirement = firstTrainer->TrainerClass;
         else if (trainerType == TRAINER_TYPE_MOUNTS)
-            spellType = templateId.second.front()->TrainerRace;
+            spellRequirement = firstTrainer->TrainerRace;
 
-        for (TrainerSpellMap::const_iterator itr = trainer_spells->spellList.begin(); itr != trainer_spells->spellList.end(); ++itr)
+        for (auto& [id, trainerSpell] : trainer_spells->spellList)
         {
-            TrainerSpell const* tSpell = &itr->second;
+            const TrainerSpell* sameTrainerSpell = &trainerSpell;
+            for (auto& [otherTrainerSpell, trainers] : (*spellMap)[trainerType][spellRequirement])
+            {
+                if (otherTrainerSpell->spell != trainerSpell.spell)
+                    continue;
 
-            if (!tSpell)
-                continue;
+                if (otherTrainerSpell->spellCost != trainerSpell.spellCost)
+                    continue;
+
+                if (otherTrainerSpell->reqSkill != trainerSpell.reqSkill)
+                    continue;
+
+                if (otherTrainerSpell->reqSkillValue != trainerSpell.reqSkillValue)
+                    continue;
+
+                if (otherTrainerSpell->reqLevel != trainerSpell.reqLevel)
+                    continue;
+
+                if (otherTrainerSpell->learnedSpell != trainerSpell.learnedSpell)
+                    continue;
+
+                if (otherTrainerSpell->conditionId != trainerSpell.conditionId)
+                    continue;
+
+                sameTrainerSpell = otherTrainerSpell;
+                break;
+            }
 
             if (trainerType == TRAINER_TYPE_TRADESKILLS)
             {
-                if (tSpell->reqSkill)
-                    spellType = tSpell->reqSkill;
+                if (trainerSpell.reqSkill)
+                    spellRequirement = trainerSpell.reqSkill;
                 else
                 {
                     // exist, already checked at loading
-                    SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(tSpell->learnedSpell);
+                    SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(trainerSpell.learnedSpell);
 
-                    spellType = spell->EffectMiscValue[1];
+                    spellRequirement = spell->EffectMiscValue[1];
                 }
             }
 
-            for (auto& trainer : templateId.second)
-                (*spellMap)[templateId.second.front()->TrainerType][spellType][tSpell].push_back(trainer);
+            for (auto& trainer : trainers)
+                (*spellMap)[trainerType][spellRequirement][sameTrainerSpell].push_back(trainer->Entry);
         }
     }
 
     return spellMap;
 }
 
-std::vector<TrainerSpell const*> TrainableClassSpells::Calculate()
+std::vector<TrainerSpell const*> TrainableSpellsValue::Calculate()
 {
     std::vector<TrainerSpell const*> trainableSpells;
-    std::unordered_map<uint32, bool> hasSpell;
+
+    int8 qualifierType = getQualifier().empty() ? -1 : stoi(getQualifier());
 
     trainableSpellMap* spellMap = GAI_VALUE(trainableSpellMap*, "trainable spell map");
 
-    for (auto& spells : (*spellMap)[TRAINER_TYPE_CLASS][bot->getClass()])
+    for (auto& [trainerType, spellReqList] : *spellMap)
     {
-        TrainerSpell const* tSpell = spells.first;
-
-        if (!tSpell)
+        if (trainerType >= 0 && trainerType != qualifierType)
             continue;
 
-        if (hasSpell.find(tSpell->spell) != hasSpell.end())
-            continue;
+        for (auto& [requirement, trainerSpellList] : spellReqList)
+        {
+            if (trainerType == TRAINER_TYPE_CLASS && requirement != bot->getClass())
+                continue;
+            if (trainerType == TRAINER_TYPE_MOUNTS && requirement != bot->getRace())
+                continue;
 
-        hasSpell[tSpell->spell] = true;
+            for (auto& [trainerSpell, trainers] : trainerSpellList)
+            {
+                uint32 reqLevel = 0;
 
-        uint32 reqLevel = 0;
+                reqLevel = trainerSpell->isProvidedReqLevel ? trainerSpell->reqLevel : std::max(reqLevel, trainerSpell->reqLevel);
+                TrainerSpellState state = bot->GetTrainerSpellState(trainerSpell, reqLevel);
+                if (state != TRAINER_SPELL_GREEN)
+                    continue;
 
-        reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
-        TrainerSpellState state = bot->GetTrainerSpellState(tSpell, reqLevel);
-        if (state != TRAINER_SPELL_GREEN)
-            continue;
-
-        trainableSpells.push_back(tSpell);
-    }
+                trainableSpells.push_back(trainerSpell);
+            }
+        }
+    }   
 
     return trainableSpells;
 }
 
-std::string TrainableClassSpells::Format()
+std::string TrainableSpellsValue::Format()
 {
     std::vector<std::string> vec;  
     for (auto t : value) {
@@ -120,61 +150,50 @@ std::string TrainableClassSpells::Format()
     return sPlayerbotHelpMgr.makeList(vec, "[<part>]");
 }
 
+std::vector<int32> AvailableTrainersValue::Calculate()
+{
+    std::vector<TrainerSpell const*> trainableSpells = AI_VALUE2(std::vector<TrainerSpell const*>, "trainable spells", getQualifier());;
+    std::vector<int32> retTrainers;
+
+    int8 qualifierType = getQualifier().empty() ? -1 : stoi(getQualifier());
+
+    trainableSpellMap* spellMap = GAI_VALUE(trainableSpellMap*, "trainable spell map");
+
+    for (auto& [trainerType, spellReqList] : *spellMap)
+    {
+        if (trainerType >= 0 && trainerType != qualifierType)
+            continue;
+
+        for (auto& [requirement, trainerSpellList] : spellReqList)
+        {
+            if (trainerType == TRAINER_TYPE_CLASS && requirement != bot->getClass())
+                continue;
+            if (trainerType == TRAINER_TYPE_MOUNTS && requirement != bot->getRace())
+                continue;
+
+            for (auto& [trainerSpell, trainers] : trainerSpellList)
+            {
+                if (std::find(trainableSpells.begin(), trainableSpells.end(), trainerSpell) == trainableSpells.end())
+                    continue;
+
+                for (auto& trainer : trainers)
+                {
+                    if(std::find(retTrainers.begin(), retTrainers.end(), trainer) == retTrainers.end())
+                        retTrainers.push_back(trainer);
+                }
+            }
+        }
+    }
+
+    return retTrainers;
+}
+
 uint32 TrainCostValue::Calculate()
 {
     uint32 TotalCost = 0;
 
-    for (auto& spells : AI_VALUE(std::vector<TrainerSpell const*>, "trainable class spells"))
+    for (auto& spells : AI_VALUE2(std::vector<TrainerSpell const*>, "trainable spells", getQualifier()))
         TotalCost += spells->spellCost;
-
-    /*
-    for (uint32 id = 0; id < sCreatureStorage.GetMaxEntry(); ++id)
-    {
-        CreatureInfo const* co = sCreatureStorage.LookupEntry<CreatureInfo>(id);
-        if (!co)
-            continue;
-
-        if (co->TrainerType != TRAINER_TYPE_CLASS && co->TrainerType != TRAINER_TYPE_TRADESKILLS)
-            continue;
-
-        if (co->TrainerType == TRAINER_TYPE_CLASS && co->TrainerClass != bot->getClass())
-            continue;
-
-        uint32 trainerId = co->TrainerTemplateId;
-        if (!trainerId)
-            trainerId = co->Entry;
-
-        TrainerSpellData const* trainer_spells = sObjectMgr.GetNpcTrainerTemplateSpells(trainerId);
-        if (!trainer_spells)
-            trainer_spells = sObjectMgr.GetNpcTrainerSpells(trainerId);
-
-        if (!trainer_spells)
-            continue;
-
-        for (TrainerSpellMap::const_iterator itr = trainer_spells->spellList.begin(); itr != trainer_spells->spellList.end(); ++itr)
-        {
-            TrainerSpell const* tSpell = &itr->second;
-
-            if (!tSpell)
-                continue;
-
-            uint32 reqLevel = 0;
-
-            reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
-            TrainerSpellState state = bot->GetTrainerSpellState(tSpell, reqLevel);
-            if (state != TRAINER_SPELL_GREEN)
-                continue;
-
-            if (co->TrainerType == TRAINER_TYPE_TRADESKILLS)
-                continue;
-
-            if (spells.find(tSpell->spell) != spells.end())
-                continue;
-
-            TotalCost += tSpell->spellCost;
-            spells.insert(tSpell->spell);
-        }
-    }
-    */
+   
     return TotalCost;
 }

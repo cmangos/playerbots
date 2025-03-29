@@ -82,11 +82,34 @@ bool DebugAction::Execute(Event& event)
 
         return true;
     }
+    else if (text.find("mount") == 0)
+    {
+        std::ostringstream out;
+
+        out << (bot->IsMounted() ? "mounted" : "not mounted");
+        out << (bot->IsTaxiFlying() ? ", taxi flying" : ", not taxi flying");
+
+        out << ", mount speed: " << AI_VALUE2(uint32, "current mount speed", "self target");
+        out << ", mount id: " << bot->GetMountID();        
+
+        if(bot->GetMountInfo())
+            out << ", mount info: " << bot->GetMountInfo()->Name;
+
+        ai->TellPlayerNoFacing(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+
+        return true;
+    }
+    else if (text.find("unmount") == 0)
+    {
+        ai->Unmount();
+
+        return true;
+    }
     else if (text.find("area") == 0 && isMod)
     {       
         WorldPosition point(requester);
 
-        AreaTableEntry const* area = point.getArea();
+        AreaTableEntry const* area = point.GetArea();
 
         std::ostringstream out;
 
@@ -384,7 +407,16 @@ bool DebugAction::Execute(Event& event)
         std::string name = "bot";
 
         std::vector<std::string> args = Qualified::getMultiQualifiers(text.substr(4), " ");
-        TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, args[0]);
+
+        DestinationList dests = ChooseTravelTargetAction::FindDestination(bot, args[0]);
+        TravelDestination* dest = nullptr;
+
+        if (!dests.empty())
+        {
+            WorldPosition botPos(bot);
+
+            dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
+        }
 
         if (dest)
         {
@@ -905,15 +937,15 @@ bool DebugAction::Execute(Event& event)
 
         guidP.printWKT(out);
 
-        out << "[a:" << guidP.getArea()->area_name[0]; 
+        out << "[a:" << guidP.GetArea()->area_name[0]; 
 
-        if (guidP.getArea() && guidP.getAreaLevel())
+        if (guidP.GetArea() && guidP.getAreaLevel())
             out << " level: " << guidP.getAreaLevel();
-        if (guidP.getArea()->zone && GetAreaEntryByAreaID(guidP.getArea()->zone))
+        if (guidP.GetArea()->zone && GetAreaEntryByAreaID(guidP.GetArea()->zone))
         {
-            out << " z:" << GetAreaEntryByAreaID(guidP.getArea()->zone)->area_name[0];
-            if (sTravelMgr.GetAreaLevel(guidP.getArea()->zone))
-                out << " level: " << sTravelMgr.GetAreaLevel(guidP.getArea()->zone);
+            out << " z:" << GetAreaEntryByAreaID(guidP.GetArea()->zone)->area_name[0];
+            if (sTravelMgr.GetAreaLevel(guidP.GetArea()->zone))
+                out << " level: " << sTravelMgr.GetAreaLevel(guidP.GetArea()->zone);
         }
 
         out << "] ";
@@ -1157,7 +1189,16 @@ bool DebugAction::Execute(Event& event)
 
         std::string destination = text.substr(7);
 
-        TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, destination);
+        DestinationList dests = ChooseTravelTargetAction::FindDestination(bot, destination);
+        TravelDestination* dest = nullptr;
+
+        if (!dests.empty())
+        {
+            WorldPosition botPos(bot);
+
+            dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
+        }
+
         if (dest)
         {
             std::vector<WorldPosition*> points = dest->NextPoint(botPos);
@@ -1183,6 +1224,75 @@ bool DebugAction::Execute(Event& event)
         {
             ai->TellPlayerNoFacing(requester, "Destination " + destination + " not found.");
             return true;
+        }
+    }
+    else if (text.find("print travel") == 0)
+    {
+        if (!sPlayerbotAIConfig.isLogOpen("travel.csv"))
+            sPlayerbotAIConfig.openLog("travel.csv", "w", true);
+
+        if (!sPlayerbotAIConfig.isLogOpen("travelActive.csv"))
+            sPlayerbotAIConfig.openLog("travelActive.csv", "w", true);
+
+        PlayerTravelInfo info(bot);
+
+        std::vector<std::type_index> types = { typeid(QuestTravelDestination), typeid(RpgTravelDestination), typeid(ExploreTravelDestination), typeid(GrindTravelDestination), typeid(BossTravelDestination), typeid(GatherTravelDestination) };
+
+        for (auto& type : types)
+        {
+            for (auto& dest : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::None, {}, true, 0))
+            {
+                bool isPossible = dest->IsPossible(info);
+                bool isActive = dest->IsActive(bot, info);
+                for (auto& point : dest->GetPoints())
+                {
+                    GuidPosition* guidP = dynamic_cast<GuidPosition*>(point);
+
+                    if (guidP && guidP->IsEventUnspawned()) //Skip points that are not spawned due to events.
+                    {
+                        continue;
+                    }
+
+                    std::ostringstream out;
+
+                    out << type.name() << ",";
+                    out << (uint32)((EntryTravelDestination*)dest)->GetPurpose() << ",";
+                    out << "\"";
+                    if (type == typeid(QuestTravelDestination))
+                    {
+                        uint32 questId = ((QuestTravelDestination*)dest)->GetQuestId();
+                        Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+                        out << quest->GetTitle();
+                    }
+                    else if (type != typeid(ExploreTravelDestination))
+                    {
+                        if (((EntryTravelDestination*)dest)->GetCreatureInfo())
+                            out << ((EntryTravelDestination*)dest)->GetCreatureInfo()->Name;
+                        else if (((EntryTravelDestination*)dest)->GetGoInfo())
+                            out << ((EntryTravelDestination*)dest)->GetGoInfo()->name;
+                        else
+                            out << "";
+                    }
+                    else
+                    {
+                        out << dest->GetTitle();
+                    }
+                    out << "\",";
+                    out << std::to_string(dest->GetEntry()) << ",";
+                    out << "\"" << dest->GetTitle() << "\",";
+                    out << isPossible << ",";
+                    out << isActive << ",";
+                    point->printWKT(out);
+                    out << point->getAreaLevel();
+
+                    //sPlayerbotAIConfig.log("travel.csv", out.str().c_str());
+                    if(isActive)
+                        sPlayerbotAIConfig.log("travelActive.csv", out.str().c_str());
+                }
+
+                if (dest->GetPoints().empty())
+                    sLog.outError("Destination %s has no points!", dest->GetTitle().c_str());
+            }
         }
     }
     else if (text.find("values ") == 0)

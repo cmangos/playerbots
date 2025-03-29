@@ -378,8 +378,29 @@ bool RpgTrainTrigger::IsActive()
                 continue;
         }
 
+        NeedMoneyFor budgetType = NeedMoneyFor::spells;
+
+        switch (cInfo->TrainerType)
+        {
+        case TRAINER_TYPE_CLASS:
+            budgetType = NeedMoneyFor::spells;
+            break;
+        case TRAINER_TYPE_PETS:
+            budgetType = NeedMoneyFor::anything;
+            break;
+        case TRAINER_TYPE_MOUNTS:
+            budgetType = NeedMoneyFor::mount;
+            break;
+        case TRAINER_TYPE_TRADESKILLS:
+            budgetType = NeedMoneyFor::skilltraining;
+            break;
+        default:
+            budgetType = NeedMoneyFor::anything;
+            break;
+        }
+
         uint32 cost = uint32(floor(tSpell->spellCost * fDiscountMod));
-        if (cost > AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::spells))
+        if (cost > AI_VALUE2(uint32, "free money for", (uint32)budgetType))
             continue;
 
         return true;
@@ -421,10 +442,31 @@ bool RpgHomeBindTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (AI_VALUE(WorldPosition, "home bind").distance(bot) < 500.0f)
+    //Do not update for realplayers/always online when at max level.
+    if ((ai->IsRealPlayer() || sPlayerbotAIConfig.IsFreeAltBot(bot)) && bot->GetLevel() == DEFAULT_MAX_LEVEL)
         return false;
 
-    if ((ai->IsRealPlayer() || sPlayerbotAIConfig.IsFreeAltBot(bot)) && bot->GetLevel() == DEFAULT_MAX_LEVEL)
+    WorldPosition currentBind = AI_VALUE(WorldPosition, "home bind");
+    WorldPosition newBind = (guidP.sqDistance2d(bot) > INTERACTION_DISTANCE * INTERACTION_DISTANCE) ? guidP : bot;
+
+    //Do not update if there's almost not change.
+    if (newBind.fDist(currentBind) < INTERACTION_DISTANCE * 2) 
+        return false;
+
+    //Update if the new bind is closer to the group leaders bind than the old one.
+    if (bot->GetGroup() && !ai->IsGroupLeader() && ai->GetGroupMaster() && ai->GetGroupMaster()->GetPlayerbotAI())
+    {
+        Player* player = ai->GetGroupMaster();
+        WorldPosition leaderBind = PAI_VALUE(WorldPosition, "home bind");
+
+        float newBindDistanceToMasterBind = newBind.fDist(leaderBind);
+        float oldBindDistanceToMasterBind = currentBind.fDist(leaderBind);
+
+        return newBindDistanceToMasterBind < oldBindDistanceToMasterBind;
+    }
+
+    //Do not update if the new bind is pretty close already.
+    if (currentBind.fDist(bot) < 500.0f)
         return false;
 
     return true;
@@ -556,6 +598,9 @@ bool RpgCraftTrigger::IsActive()
     GuidPosition guidP(getGuidP());
 
     if (AI_VALUE(uint8, "bag space") > 80)
+        return false;
+
+    if (ai->HasCheat(BotCheatMask::item) && AI_VALUE(uint8, "bag space") > 60)
         return false;
 
     if (!guidP.GetWorldObject(bot->GetInstanceId()))

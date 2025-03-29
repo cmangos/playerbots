@@ -32,12 +32,12 @@ namespace ai
     class ItemVendorListValue : public SingleCalculatedValue<std::list<int32>>, public Qualified
     {
     public:
-        ItemVendorListValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "vendor sell list"), Qualified() {}
+        ItemVendorListValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "item vendor list"), Qualified() {}
 
         virtual std::list<int32> Calculate();
 
 #ifdef GenerateBotHelp
-        virtual std::string GetHelpName() { return "vendor sell list"; } //Must equal iternal name
+        virtual std::string GetHelpName() { return "item vendor list"; } //Must equal iternal name
         virtual std::string GetHelpTypeName() { return "item"; }
         virtual std::string GetHelpDescription()
         {

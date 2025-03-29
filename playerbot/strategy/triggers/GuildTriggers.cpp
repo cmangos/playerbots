@@ -1,43 +1,9 @@
 
 #include "playerbot/playerbot.h"
 #include "GuildTriggers.h"
-#include "playerbot/ServerFacade.h"
-#include "playerbot/strategy/values/BudgetValues.h"
-#include "playerbot/TravelMgr.h"
 #include "Guilds/GuildMgr.h"
 
 using namespace ai;
-
-bool BuyTabardTrigger::IsActive()
-{
-	if (!bot->GetGuildId())
-		return false;
-
-	if(context->GetValue<TravelTarget*>("travel target")->Get()->IsTraveling())
-		return false;
-
-	bool inCity = false;
-	AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(sServerFacade.GetAreaId(bot));
-	if (areaEntry)
-	{
-		if (areaEntry->zone)
-			areaEntry = GetAreaEntryByAreaID(areaEntry->zone);
-
-		if (areaEntry && areaEntry->flags & AREA_FLAG_CAPITAL)
-			inCity = true;
-	}
-
-	if (!inCity)
-		return false;
-
-	if(AI_VALUE2(uint32, "item count", chat->formatQItem(5976)))
-		return false;
-		
-    if(AI_VALUE2(uint32, "free money for", uint32(NeedMoneyFor::guild)) < 10000)
-		return false;
-
-	return true;
-};
 
 bool LeaveLargeGuildTrigger::IsActive()
 {

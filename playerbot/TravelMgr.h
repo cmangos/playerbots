@@ -40,7 +40,7 @@ namespace ai
 		PlayerTravelInfo() {};
 		PlayerTravelInfo(Player* player);
 		
-		WorldPosition GetPosition() const { return position; }
+		const WorldPosition& GetPosition() const { return position; }
 		Team GetTeam() const { return team; }
 		uint32 GetLevel() const  { return level; }
 		uint16 GetCurrentSkill(SkillType skillType) const  { return currentSkill[skillType]; }
@@ -55,6 +55,7 @@ namespace ai
 		bool GetBoolValue(const std::string& valueName) const {return boolValues.at(valueName);};
 		bool GetBoolValue2(const std::string& valueName, const std::string& qualifier) const { return boolValues.at(valueName + "::" + qualifier); };
 		uint8 GetUint8Value(const std::string& valueName) const { return uint8Values.at(valueName);};
+		uint8 GetUint32Value(const std::string& valueName) const { return uint32Values.at(valueName); };
 
 	private:
 		WorldPosition position;
@@ -69,9 +70,6 @@ namespace ai
 
 		std::unordered_map<std::string, bool> boolValues = 
 		{
-			{"group or::should sell,can sell,following party,near leader", false},
-			{"group or::should repair,can repair,following party,near leader", false},
-			{"group or::should ah sell,can ah sell,following party,near leader", false},
 			{"should get money", false},
 			{"should sell", false},
 			{"can sell", false},
@@ -80,7 +78,6 @@ namespace ai
 			{"should ah sell", false},
 			{"can ah sell", false},
 			{"can get mail", false },
-			{"has strategy::free", false},
 			{"has strategy::rpg quest", false},
 			{"can fight equal", false},
 			{"can fight elite", false},
@@ -92,8 +89,13 @@ namespace ai
 			{"free quest log slots", 0},
 			{"durability",0},
 		};
-	};
 
+		std::unordered_map<std::string, uint32> uint32Values =
+		{
+			{"death count", 0},
+		};
+	};
+	
 	//A destination for a bot to travel to and do something.
 	class TravelDestination
 	{
@@ -112,15 +114,16 @@ namespace ai
 
 		float GetRadiusMin() { return radiusMin; }
 		bool HasPoint(const WorldPosition* pos) { return std::find(points.begin(), points.end(), pos) != points.end(); }
-		std::vector<WorldPosition*> GetPoints() const;
+		const std::vector<WorldPosition*>& GetPoints() const {return points;};
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const { return false; }
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const { return false; }
 
 		virtual int32 GetEntry() const { return 0; }
-		virtual uint8 GetSubEntry() const { return 0; }
 		WorldPosition* NearestPoint(const WorldPosition& pos) const;
 		std::vector<WorldPosition*> NextPoint(const WorldPosition& pos) const;
+
+		virtual std::string GetShortName() const { return ""; };
 	protected:
 		void SetExpireFast() { expireDelay = 60000; } //1 minute
 		void SetCooldownShort() { cooldownDelay = 1000; } //1 second
@@ -148,6 +151,8 @@ namespace ai
 		virtual std::string GetTitle() const override { return "no destination"; }
 
 		virtual bool IsIn(const WorldPosition& pos, float radius = 0) const override { return true; }
+
+		virtual std::string GetShortName() const override { return "idle"; };
 	protected:
 		virtual bool IsOut(const WorldPosition& pos, float radius = 0) const override { return false; }
 	};
@@ -155,80 +160,71 @@ namespace ai
 	class EntryTravelDestination : public TravelDestination
 	{
 	public:
-		EntryTravelDestination(int32 entry) : TravelDestination(), entry(entry) { if (entry > 0) creatureInfo = ObjectMgr::GetCreatureTemplate(entry); else goInfo = ObjectMgr::GetGameObjectInfo(-1 * entry); }
+		EntryTravelDestination(TravelDestinationPurpose purpose, int32 entry) : TravelDestination(), purpose(purpose), entry(entry) { if (entry > 0) creatureInfo = ObjectMgr::GetCreatureTemplate(entry); else goInfo = ObjectMgr::GetGameObjectInfo(-1 * entry); }
 		virtual int32 GetEntry() const override { return entry; }
 		virtual GameObjectInfo const* GetGoInfo() const { return goInfo; }
 		virtual CreatureInfo const* GetCreatureInfo() const { return creatureInfo; }
+		TravelDestinationPurpose GetPurpose() const { return purpose; }
+		bool HasNpcFlag(uint32 flag) { if(GetCreatureInfo() && (GetCreatureInfo()->NpcFlags & flag)) return true; return false; }
+
+		virtual std::string GetShortName() const override;
 	private:
 		CreatureInfo const* creatureInfo = nullptr;
 		GameObjectInfo const* goInfo = nullptr;
 		int32 entry = 0;
+		TravelDestinationPurpose purpose = TravelDestinationPurpose::None;
 	};
 
 	//A travel target specifically related to a quest.
 	class QuestTravelDestination : public EntryTravelDestination
 	{
 	public:
-		QuestTravelDestination(uint32 questId, int32 entry, uint8 subEntry) : EntryTravelDestination(entry), questId(questId), subEntry(subEntry) { questTemplate = sObjectMgr.GetQuestTemplate(questId); };
+		QuestTravelDestination(TravelDestinationPurpose purpose, uint32 questId, int32 entry) : EntryTravelDestination(purpose, entry), questId(questId) { questTemplate = sObjectMgr.GetQuestTemplate(questId); };
 
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override { return bot->IsActiveQuest(questId); }
 
 		virtual std::string GetTitle() const override;
 
 		virtual bool IsClassQuest() const { return questTemplate->GetRequiredClasses(); }
-		virtual int32 GetQuestId() const { return questId; }
+		virtual uint32 GetQuestId() const { return questId; }
 	protected:
 		virtual Quest const* GetQuestTemplate() const { return questTemplate; }
-		virtual uint8 GetSubEntry() const override { return subEntry; }
 	private:
-		uint8 subEntry;
 		uint32 questId;
 		Quest const* questTemplate;
-	};
-
-	enum class QuestTravelSubEntry : uint8
-	{
-		ALL = 0,
-		OBJECTIVE1 = 1,
-		OBJECTIVE2 = 2,
-		OBJECTIVE3 = 3,
-		OBJECTIVE4 = 4,
-		QUESTGIVER = 5,
-		QUESTTAKER = 6,
-		NONE = 7
 	};
 
 	//A quest giver or taker.
 	class QuestRelationTravelDestination : public QuestTravelDestination
 	{
 	public:
-		QuestRelationTravelDestination(uint32 questId, int32 entry, uint8 relation) : QuestTravelDestination(questId, entry, relation + (uint8)QuestTravelSubEntry::QUESTGIVER) {}
+		QuestRelationTravelDestination(TravelDestinationPurpose purpose, uint32 questId, int32 entry) : QuestTravelDestination(purpose, questId, entry) {}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
 		virtual std::string GetTitle() const override;
 
-		virtual uint8 GetRelation() const { return GetSubEntry() - (uint8)QuestTravelSubEntry::QUESTGIVER; }
+		virtual uint8 GetRelation() const { return GetPurpose() == TravelDestinationPurpose::QuestTaker; }
 	};
 
 	//A quest objective (creature/gameobject to grind/loot)
 	class QuestObjectiveTravelDestination : public QuestTravelDestination
 	{
 	public:
-		QuestObjectiveTravelDestination(uint32 questId, int32 entry, uint8 objective) : QuestTravelDestination(questId, entry, objective + (uint8)QuestTravelSubEntry::OBJECTIVE1) { SetExpireFast(); };
+		QuestObjectiveTravelDestination(TravelDestinationPurpose purpose, uint32 questId, int32 entry) : QuestTravelDestination(purpose, questId, entry) { SetExpireFast(); };
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
 		virtual std::string GetTitle() const override;
 
-		virtual uint8 GetObjective() const { return GetSubEntry() - (uint8)QuestTravelSubEntry::OBJECTIVE1; }
+		virtual uint8 GetObjective() const;
 	};
 
 	//A location with rpg target(s) based on race and level
 	class RpgTravelDestination : public EntryTravelDestination
 	{
 	public:
-		RpgTravelDestination(int32 entry) : EntryTravelDestination(entry) {}
+		RpgTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
@@ -239,7 +235,8 @@ namespace ai
 	class ExploreTravelDestination : public EntryTravelDestination
 	{
 	public:
-		ExploreTravelDestination(int32 areaId) : EntryTravelDestination(areaId) { SetExpireFast(); SetCooldownShort(); if(auto area = GetArea()) title = area->area_name[0]; }
+		ExploreTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {
+			SetExpireFast(); SetCooldownShort(); if (auto area = GetArea()) { title = area->area_name[0]; level = area->area_level; }}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
@@ -247,13 +244,14 @@ namespace ai
 	private:
 		AreaTableEntry const* GetArea() const;
 		std::string title = "";
+		int32 level = 0;
 	};
 
 	//A location with zone exploration target(s) 
 	class GrindTravelDestination : public EntryTravelDestination
 	{
 	public:
-		GrindTravelDestination(int32 entry) : EntryTravelDestination(entry) {}
+		GrindTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
@@ -264,7 +262,7 @@ namespace ai
 	class BossTravelDestination : public EntryTravelDestination
 	{
 	public:
-		BossTravelDestination(int32 entry) : EntryTravelDestination(entry) { SetCooldownShort(); }
+		BossTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) { SetCooldownShort(); }
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
@@ -275,7 +273,7 @@ namespace ai
 	class GatherTravelDestination : public EntryTravelDestination
 	{
 	public:
-		GatherTravelDestination(int32 entry) : EntryTravelDestination(entry) {}
+		GatherTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
@@ -333,18 +331,27 @@ namespace ai
 		bool IsGroupCopy() const { return groupCopy; }
 		bool IsForced() const { return forced; }
 
+		bool IsConditionsActive(bool clear = false);
+
+		void CheckStatus();
+
 		bool IsActive();
 		bool IsTraveling();
 		bool IsWorking();
+		bool IsPreparing();
 
 		uint32 GetRetryCount(bool isMove) const { return isMove ? moveRetryCount : extendRetryCount; }
-		uint32 GetTimeLeft() const { return statusTime - GetExpiredTime(); }
-		uint32 GetExpiredTime() const { return WorldTimer::getMSTime() - startTime; }
+		int32 GetTimeLeft() const { return statusTime - GetExpiredTime(); }
+		int32 GetExpiredTime() const { return WorldTimer::getMSTime() - startTime; }
 
 		void SetRetry(bool isMove, uint32 newCount = 0) { if (isMove) moveRetryCount = newCount; else extendRetryCount = newCount; }
 		bool IsMaxRetry(bool isMove) { return isMove ? (moveRetryCount > 10) : (extendRetryCount > 5); }
 
 		void SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1, bool groupCopy1 = false);
+		
+		void AddCondition(std::string condition) { travelConditions.push_back(condition); }
+		void SetConditions(std::vector<std::string> conditions) { travelConditions = conditions; }
+		std::vector<std::string> GetConditions() { return travelConditions; }
 
 		void SetStatus(TravelStatus status);
 		void SetExpireIn(uint32 expireMs) { statusTime = GetExpiredTime() + expireMs; }
@@ -352,14 +359,12 @@ namespace ai
 		void SetGroupCopy(bool isGroupCopy = true) { groupCopy = isGroupCopy; }
 		void SetRadius(float radius1) { radius = radius1; }
 
-		void IncRetry(bool isMove) { if (isMove) moveRetryCount += 2; else extendRetryCount += 2; }
+		void IncRetry(bool isMove) { if (isMove) moveRetryCount+=2; else extendRetryCount++; }
 		void DecRetry(bool isMove) { if (isMove && moveRetryCount > 0) moveRetryCount--; else if (extendRetryCount > 0) extendRetryCount--; }
 
 		void CopyTarget(TravelTarget* const target);
 	private:
 		uint32 GetMaxTravelTime() const { return (1000.0 * Distance(bot)) / bot->GetSpeed(MOVE_RUN); }
-
- 		bool IsPreparing();
 
 		TravelStatus m_status = TravelStatus::TRAVEL_STATUS_NONE;
 
@@ -379,21 +384,19 @@ namespace ai
 		WorldPosition* wPosition = nullptr;
 	};
 
-
-	typedef std::vector<TravelDestination*> DestinationList;
-	//typedef std::unordered_map<int32, DestinationList> DestinationMap;
-	typedef std::unordered_map<std::type_index, DestinationList> TypedDestinationMap;
-
 	//General container for all travel destinations.
 	class TravelMgr
 	{
 	public:
 		TravelMgr() {};
 		void LoadQuestTravelTable();
-		std::vector<TravelDestination*> GetExploreLocs() const {return destinationMap.at(typeid(ExploreTravelDestination));}
+		EntryDestinationMap GetExploreLocs() const { return destinationMap.at(TravelDestinationPurpose::Explore); };
 		void SetMobAvoidArea();
 
-		std::vector<TravelDestination*> GetDestinations(const PlayerTravelInfo& info, std::type_index type, int32 entry = 0, int32 subEntry1 = 0, int32 subEntry2 = 0, bool onlyPossible = true, float maxDistance = 5000) const;
+		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
+		void GetPartitionsLock(bool getLock = true);
+		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
+		static void ShuffleTravelPoints(std::vector<TravelPoint>& points);
 
 		void SetNullTravelTarget(TravelTarget* target) const;
 
@@ -414,33 +417,26 @@ namespace ai
 		void AddMapTransfer(WorldPosition start, WorldPosition end, float portalDistance = 0.1f, bool makeShortcuts = true);
 
 		template<class T>
-		T* AddDestination(int32 entry) {
-			for (auto& dest : destinationMap[typeid(T)])
-				if (dest->GetEntry() == entry)
-					return (T*)dest;
+		T* AddDestination(const int32 entry, const TravelDestinationPurpose purpose, const uint32 questId = 0) {
+			uint32 id = questId ? questId : entry;
+			if(destinationMap[purpose].find(id) != destinationMap[purpose].end())
+					return (T*)destinationMap[purpose][id].front();
 
-			destinationMap[typeid(T)].push_back(new T(entry));
+			destinationMap[purpose][id].push_back(new T(purpose, questId, entry));
 
-			return (T*)destinationMap[typeid(T)].back();
-		}
-
-		template<class T>
-		T* AddQuestDestination(int32 questId, uint32 entry, uint32 subEntry) {
-			for (auto& dest : destinationMap[typeid(QuestTravelDestination)])
-				if (((QuestTravelDestination*)dest)->GetQuestId() == questId && dest->GetEntry() == entry && dest->GetSubEntry() == subEntry)
-					return (T*)dest;
-
-			destinationMap[typeid(QuestTravelDestination)].push_back(new T(questId, entry, subEntry));
-
-			return (T*)destinationMap[typeid(QuestTravelDestination)].back();
+			return (T*)destinationMap[purpose][id].back();
 		}
 
 		NullTravelDestination* nullTravelDestination = new NullTravelDestination();
 		WorldPosition* nullWorldPosition = new WorldPosition();
-		TypedDestinationMap destinationMap;
+		PurposeDestinationMap destinationMap;
 
-		std::unordered_map<uint64, GuidPosition> pointsMap;
+		std::unordered_map<uint64, AsyncGuidPosition> pointsMap;
 		std::unordered_map<uint32, int32> areaLevels;
+
+		std::mutex getDestinationMutex;
+		std::condition_variable getDestinationVar;
+		uint8 availableDestinationWorkers = 5;
 
 		std::vector<std::tuple<uint32, int, int>> badMmap;
 

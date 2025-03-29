@@ -83,7 +83,7 @@ CreatureDataPair const* BgMasterValue::NearestBm(bool allowDead)
         if (ai->getReaction(bmFactionEntry) < REP_NEUTRAL)
             continue;
 
-        AreaTableEntry const* area = bmPos.getArea();
+        AreaTableEntry const* area = bmPos.GetArea();
 
         if (!area)
             continue;
@@ -191,6 +191,9 @@ Unit* FlagCarrierValue::Calculate()
         if (ai->GetBot()->GetBattleGroundTypeId() == BattleGroundTypeId::BATTLEGROUND_EY)
         {
             BattleGroundEY* bg = (BattleGroundEY*)ai->GetBot()->GetBattleGround();
+
+            if (!bg)
+                return nullptr;
 
             if (bg->GetFlagCarrierGuid().IsEmpty())
                 return nullptr;

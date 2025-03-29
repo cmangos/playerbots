@@ -706,6 +706,8 @@ std::string ChatHelper::formatChat(ChatMsg chat)
         return "whisper";
     case CHAT_MSG_RAID:
         return "raid";
+    default:
+        return "unknown";
     }
 
     return "unknown";

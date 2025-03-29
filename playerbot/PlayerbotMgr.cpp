@@ -759,14 +759,14 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
         return messages;
     }
 
-    if (!strcmp(cmd, "reload"))
+    if (!strcmp(cmd, "reload") && master->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
     {
         messages.push_back("Reloading config");
         sPlayerbotAIConfig.Initialize();
         return messages;
     }   
 
-    if (!strcmp(cmd, "tweak"))
+    if (!strcmp(cmd, "tweak") && master->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
     {
         sPlayerbotAIConfig.tweakValue = sPlayerbotAIConfig.tweakValue++;
         if (sPlayerbotAIConfig.tweakValue > 2)
@@ -788,7 +788,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
             messages.push_back("You do not have permission to enable player ai");
             return messages;
         }
-        else if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::ACTIVE_BY_COMMAND && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+        else if (sPlayerbotAIConfig.selfBotLevel < BotSelfBotLevel::ALWAYS_ALLOWED && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
         {
             messages.push_back("Player ai is only available while online");
             return messages;
@@ -920,7 +920,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
        return messages;
      }
 
-    if (command.find("debug ") != std::string::npos)
+    if (command.find("debug ") != std::string::npos && master->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
     {
         bool hasBot = false;
 
@@ -1428,7 +1428,7 @@ void PlayerbotMgr::CheckTellErrors(uint32 elapsed)
         }
         out << "|cfff00000: " << text;
         
-        ChatHandler(master->GetSession()).PSendSysMessage(out.str().c_str());
+        ChatHandler(master->GetSession()).PSendSysMessage("%s", out.str().c_str());
     }
     errors.clear();
 }

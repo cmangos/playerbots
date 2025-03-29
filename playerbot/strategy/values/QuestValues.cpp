@@ -2,42 +2,42 @@
 #include "playerbot/playerbot.h"
 #include "QuestValues.h"
 #include "SharedValueContext.h"
+#include "ItemUsageValue.h"
 #include "playerbot/TravelMgr.h"
 
 using namespace ai;
 
 
 //What kind of a relation does this entry have with this quest.
-entryQuestRelationMap EntryQuestRelationMapValue::Calculate()
+EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 {
-	entryQuestRelationMap rMap;
+	EntryQuestRelationMap rMap;
 
 	//Quest givers takers
 	QuestObjectMgr* questObjectMgr = (QuestObjectMgr*)&sObjectMgr;
 
-	for (auto relation : questObjectMgr->GetCreatureQuestRelationsMap())
-		rMap[relation.first][relation.second] |= (int)QuestRelationFlag::questGiver;
+	for (auto [entry, questId] : questObjectMgr->GetCreatureQuestRelationsMap())
+		rMap[entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
 
-	for (auto relation : questObjectMgr->GetCreatureQuestInvolvedRelationsMap())
-		rMap[relation.first][relation.second] |= (int)QuestRelationFlag::questTaker;
+	for (auto [entry, questId] : questObjectMgr->GetCreatureQuestInvolvedRelationsMap())
+		rMap[entry][questId] |= (uint8)TravelDestinationPurpose::QuestTaker;
 
-	for (auto relation : questObjectMgr->GetGOQuestRelationsMap())
-		rMap[-(int32)relation.first][relation.second] |= (int)QuestRelationFlag::questGiver;
+	for (auto [entry, questId] : questObjectMgr->GetGOQuestRelationsMap())
+		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
 
-	for (auto relation : questObjectMgr->GetGOQuestInvolvedRelationsMap())
-		rMap[-(int32)relation.first][relation.second] |= (int)QuestRelationFlag::questGiver;
+	for (auto [entry, questId] : questObjectMgr->GetGOQuestInvolvedRelationsMap())
+		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
 
 	//Quest objectives
 	ObjectMgr::QuestMap const& questMap = sObjectMgr.GetQuestTemplates();
 
-	for (auto& questItr : questMap)
+	for (auto& [questId, questPtr] : questMap)
 	{
-		uint32 questId = questItr.first;
-		Quest* quest = questItr.second.get();
+		Quest* quest = questPtr.get();
 
 		for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
 		{
-			uint32 relationFlag = 1 << objective;
+			uint32 relationFlag = 1 << (objective+1);
 
 			//Kill objective
 			if (quest->ReqCreatureOrGOId[objective])
@@ -46,8 +46,18 @@ entryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 			//Loot objective
 			if (quest->ReqItemId[objective])
 			{
-				for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", quest->ReqItemId[objective]))
-					rMap[entry][questId] |= relationFlag;
+				uint32 itemId = quest->ReqItemId[objective];
+				ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+
+				if (proto)
+				{
+					for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", itemId))
+					{
+						std::string chanceQualifier = std::to_string(entry) + " " + std::to_string(itemId);
+						if (proto->Class == ITEM_CLASS_QUEST || GAI_VALUE2(float, "loot chance", chanceQualifier) > 5.0f)
+							rMap[entry][questId] |= relationFlag;
+					}
+				}
 			}
 
 			//Buy from vendor objective
@@ -65,7 +75,7 @@ entryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 
 			if (bounds.first != bounds.second) //Add target of source item to second quest objective.
 				for (ItemRequiredTargetMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
-					rMap[itr->second.m_uiTargetEntry][questId] |= (int)QuestRelationFlag::objective2;
+					rMap[itr->second.m_uiTargetEntry][questId] |= (uint8)TravelDestinationPurpose::QuestObjective2;
 		}
 	}
 
@@ -76,7 +86,7 @@ entryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 //Get all the objective entries for a specific quest.
 void FindQuestObjectData::GetObjectiveEntries()
 {
-	relationMap = GAI_VALUE(entryQuestRelationMap, "entry quest relation");
+	relationMap = GAI_VALUE(EntryQuestRelationMap, "entry quest relation");
 }
 
 //Data worker. Checks for a specific creature what quest they are needed for and puts them in the proper place in the quest map.
@@ -84,34 +94,26 @@ bool FindQuestObjectData::operator()(CreatureDataPair const& dataPair)
 {
 	uint32 entry = dataPair.second.id;
 
-	for (auto& relation : relationMap[entry])
+	for (auto& [questId, flag] : relationMap[entry])
 	{
-		uint32 questId = relation.first;
-		uint32 flag = relation.second;
-
 		data[questId][flag][entry].push_back(GuidPosition(&dataPair));
 	}
 
 	return false;
 }
-
 
 //GameObject data worker. Checks for a specific gameObject what quest they are needed for and puts them in the proper place in the quest map.
 bool FindQuestObjectData::operator()(GameObjectDataPair const& dataPair)
 {
 	int32 entry = dataPair.second.id * -1;
 
-	for (auto& relation : relationMap[entry])
+	for (auto& [questId,flag] : relationMap[entry])
 	{
-		uint32 questId = relation.first;
-		uint32 flag = relation.second;
-
 		data[questId][flag][entry].push_back(GuidPosition(&dataPair));
 	}
 
 	return false;
 }
-
 
 //Goes past all creatures and gameobjects and creatures the full quest guid map.
 questGuidpMap QuestGuidpMapValue::Calculate()
@@ -136,19 +138,17 @@ questGiverMap QuestGiversValue::Calculate()
 
 	questGiverMap guidps;
 
-	for (auto& qPair : questMap)
+	for (auto& [questId, questRelationGuidps]: questMap)
 	{
-		for (auto& entry : qPair.second[(int)QuestRelationFlag::questGiver])
+		for (auto& entry : questRelationGuidps[(uint8)TravelDestinationPurpose::QuestGiver])
 		{
 			for (auto& guidp : entry.second)
 			{
-				uint32 questId = qPair.first;
-
 				if (hasQualifier)
 				{
 					Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
 
-					if (quest && (level < quest->GetMinLevel() || (int)level > quest->GetQuestLevel() + 10))
+					if (quest && (level < quest->GetMinLevel() || (int32)level > quest->GetQuestLevel() + 10))
 						continue;
 				}
 
@@ -166,9 +166,8 @@ std::list<GuidPosition> ActiveQuestGiversValue::Calculate()
 
 	std::list<GuidPosition> retQuestGivers;
 
-	for (auto& qGiver : qGivers)
+	for (auto& [questId, guidPs] :qGivers)
 	{
-		uint32 questId = qGiver.first;
 		Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
 
 		if (!quest || !quest->IsActive())
@@ -184,7 +183,7 @@ std::list<GuidPosition> ActiveQuestGiversValue::Calculate()
 		if (status != QUEST_STATUS_NONE)
 			continue;
 
-		for (auto& guidp : qGiver.second)
+		for (auto& guidp : guidPs)
 		{
 			CreatureInfo const* creatureInfo = guidp.GetCreatureTemplate();
 
@@ -212,10 +211,8 @@ std::list<GuidPosition> ActiveQuestTakersValue::Calculate()
 
 	QuestStatusMap& questStatusMap = bot->getQuestStatusMap();
 
-	for (auto& questStatus : questStatusMap)
+	for (auto& [questId, questStatusData]: questStatusMap)
 	{
-		uint32 questId = questStatus.first;
-
 		Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
 
 		if (!quest || !quest->IsActive())
@@ -223,7 +220,7 @@ std::list<GuidPosition> ActiveQuestTakersValue::Calculate()
 			continue;
 		}
 
-		QuestStatus status = questStatus.second.m_status;
+		QuestStatus status = questStatusData.m_status;
 
 		if ((status != QUEST_STATUS_COMPLETE || bot->GetQuestRewardStatus(questId)) && (!quest->IsAutoComplete() || !bot->CanTakeQuest(quest, false)))
 			continue;
@@ -233,16 +230,16 @@ std::list<GuidPosition> ActiveQuestTakersValue::Calculate()
 		if (q == questMap.end())
 			continue;
 
-		auto qt = q->second.find((int)QuestRelationFlag::questTaker);
+		auto qt = q->second.find((uint8)TravelDestinationPurpose::QuestTaker);
 
 		if (qt == q->second.end())
 			continue;		
 
-		for (auto& entry : qt->second)
+		for (auto& [entry, guidps] : qt->second)
 		{
-			if (entry.first > 0)
+			if (entry > 0)
 			{
-				CreatureInfo const* info = sObjectMgr.GetCreatureTemplate(entry.first);
+				CreatureInfo const* info = sObjectMgr.GetCreatureTemplate(entry);
 
 				if (info)
 				{
@@ -251,7 +248,7 @@ std::list<GuidPosition> ActiveQuestTakersValue::Calculate()
 				}
 			}
 
-			for (auto& guidp : entry.second)
+			for (auto& guidp : guidps)
 			{
 				if (guidp.isDead(bot->GetInstanceId()))
 					continue;
@@ -272,10 +269,8 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 
 	QuestStatusMap& questStatusMap = bot->getQuestStatusMap();
 
-	for (auto& questStatus : questStatusMap)
-	{
-		uint32 questId = questStatus.first;
-
+	for (auto& [questId, questStatusData] : questStatusMap)
+	{		
 		Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
 
 		if (!quest || !quest->IsActive())
@@ -283,9 +278,7 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 			continue;
 		}
 
-		QuestStatusData statusData = questStatus.second;
-
-		if (statusData.m_status != QUEST_STATUS_INCOMPLETE)
+		if (questStatusData.m_status != QUEST_STATUS_INCOMPLETE)
 			continue;
 
 		for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
@@ -293,7 +286,7 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 			if (quest->ReqItemCount[objective])
 			{
 				uint32  reqCount = quest->ReqItemCount[objective];
-				uint32  hasCount = statusData.m_itemcount[objective];
+				uint32  hasCount = questStatusData.m_itemcount[objective];
 
 				if (!reqCount || hasCount >= reqCount)
 					continue;
@@ -302,7 +295,7 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 			if (quest->ReqCreatureOrGOCount[objective])
 			{
 				uint32 reqCount = quest->ReqCreatureOrGOCount[objective];
-				uint32 hasCount = statusData.m_creatureOrGOcount[objective];
+				uint32 hasCount = questStatusData.m_creatureOrGOcount[objective];
 
 				if (!reqCount || hasCount >= reqCount)
 					continue;
@@ -313,7 +306,7 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 			if (q == questMap.end())
 				continue;
 
-			auto qt = q->second.find((int)QuestRelationFlag(1<<objective));
+			auto qt = q->second.find((uint8)TravelDestinationPurpose(1<<(objective+1)));
 
 			if (qt == q->second.end())
 				continue;
@@ -375,7 +368,7 @@ bool NeedForQuestValue::Calculate()
 			if (q == questMap.end())
 				continue;
 
-			auto qt = q->second.find((int)QuestRelationFlag(1 << objective));
+			auto qt = q->second.find((uint8)TravelDestinationPurpose(1 << (objective+1)));
 
 			if (qt == q->second.end())
 				continue;
@@ -559,7 +552,23 @@ bool NeedQuestObjectiveValue::Calculate()
 	uint32  hasCount = questStatus.m_itemcount[objective];
 
 	if (reqCount && hasCount < reqCount)
-		return true;
+	{
+		uint32 itemId = pQuest->ReqItemId[objective];
+
+		if (!GAI_VALUE2(std::list<int32>, "item drop list", itemId).empty())
+			return true;
+
+		if (GAI_VALUE2(std::list<int32>, "item vendor list", itemId).empty())
+			return true;
+
+		ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+
+		if (!proto)
+			return true;
+
+		if (bot->GetMoney() > proto->BuyPrice * reqCount) //Bot needs enough money to do quest.
+			return true;
+	}
 
 	reqCount = pQuest->ReqCreatureOrGOCount[objective];
 	hasCount = questStatus.m_creatureOrGOcount[objective];
@@ -597,6 +606,7 @@ bool CanUseItemOn::Calculate()
 	if (!proto)
 		return false;
 
+	bool tryRandomCast = !urand(0, 20);
 
 	uint32 spellId = proto->Spells[0].SpellId;
 	if (spellId)
@@ -610,15 +620,17 @@ bool CanUseItemOn::Calculate()
 				// 17743 = Lazy Peon Sleep | 10556 = Lazy Peon
 				if (!unit->HasAura(17743) || unit->GetEntry() != 10556)
 					return false;
+
+				return true;
 			}
 
 			if (ai->CanCastSpell(spellId, unit, 0, false, nullptr, true))
-				return true;
+				return tryRandomCast;
 		}
 		else if (gameObject)
 		{
 			if (ai->CanCastSpell(spellId, gameObject, 0, false, true))
-				return true;
+				return tryRandomCast;
 		}
 	}
 

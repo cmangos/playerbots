@@ -17,56 +17,20 @@ bool TravelAction::Execute(Event& event)
 {    
     TravelTarget * target = AI_VALUE(TravelTarget *, "travel target");
     
-    if (sServerFacade.isMoving(bot))
-        return false;
+    target->CheckStatus();    
 
-    target->SetStatus(TravelStatus::TRAVEL_STATUS_WORK);
-
-     Unit* newTarget;
-    std::list<Unit*> targets;
-    AnyUnitInObjectRangeCheck u_check(bot, sPlayerbotAIConfig.sightDistance * 2);
-    UnitListSearcher<AnyUnitInObjectRangeCheck> searcher(targets, u_check);
-    Cell::VisitAllObjects(bot, searcher, sPlayerbotAIConfig.sightDistance * 2);
-
-    for (auto& i : targets)
-    {
-        newTarget = i;
-
-        if (!newTarget)
-            continue;
-
-        if (newTarget->GetMapId() != bot->GetMapId())
-            continue;
-
-        if (!newTarget->IsAlive())
-            continue;
-
-        if (newTarget->GetEntry() != target->GetDestination()->GetEntry())
-            continue;
-
-        if (newTarget->IsInCombat())
-            continue;
-
-        if (sServerFacade.IsHostileTo(bot, newTarget))
-            SET_AI_VALUE(ObjectGuid,"attack target", newTarget->GetObjectGuid());
-        else
-            SET_AI_VALUE(GuidPosition,"rpg target",GuidPosition(newTarget));
-
-        break;
-    }
-
-    return true;
+    return false;
 }
 
 bool TravelAction::isUseful()
 {
-    return false && AI_VALUE(TravelTarget *,"travel target")->IsActive() && (!AI_VALUE(GuidPosition,"rpg target") || !AI_VALUE(ObjectGuid,"attack target"));
+    return AI_VALUE(TravelTarget *,"travel target")->IsWorking();
 }
 
 bool MoveToDarkPortalAction::Execute(Event& event)
 {
     if (bot->GetGroup())
-        if (bot->GetGroup()->GetLeaderGuid() != bot->GetObjectGuid() && !bot->GetPlayerbotAI()->GetGroupMaster()->GetPlayerbotAI())
+        if (!ai->IsGroupLeader() && !bot->GetPlayerbotAI()->GetGroupMaster()->GetPlayerbotAI())
             return false;
 
 #ifndef MANGOSBOT_ZERO

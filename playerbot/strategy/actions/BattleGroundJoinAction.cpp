@@ -837,7 +837,7 @@ bool BGJoinAction::JoinQueue(uint32 type)
    }
 #endif
 
-   bot->GetSession()->HandleBattlemasterJoinOpcode(packet);
+   ai->QueuePacket(packet);
    return true;
 }
 
@@ -1331,7 +1331,9 @@ bool BGStatusAction::Execute(Event& event)
         // temp fix for crash
          //return true;
 
-#ifdef MANGOSBOT_TWOx
+/*
+// TO DO: Fix for wotlk
+#ifdef MANGOSBOT_TWO
         BattleGroundQueue& bgQueue = sServerFacade.bgQueue(queueTypeId);
         GroupQueueInfo ginfo;
         if (bgQueue.GetPlayerGroupInfoData(bot->GetObjectGuid(), &ginfo))
@@ -1417,8 +1419,9 @@ bool BGStatusAction::Execute(Event& event)
             return true;
         }
 #else
+*/
         return true;
-#endif
+//#endif
     }
     if (statusid == STATUS_IN_PROGRESS) // placeholder for Leave BG if it takes too long
     {

@@ -18,6 +18,7 @@
 #include "MoltenCoreDungeonTriggers.h"
 #include "KarazhanDungeonTriggers.h"
 #include "NaxxramasDungeonTriggers.h"
+#include "GlyphTriggers.h"
 
 namespace ai
 {
@@ -155,8 +156,6 @@ namespace ai
             creators["has rpg target"] = &TriggerContext::has_rpg_target;
             creators["far from rpg target"] = &TriggerContext::far_from_rpg_target;
             creators["near rpg target"] = &TriggerContext::near_rpg_target;
-            creators["no travel target"] = &TriggerContext::no_travel_target;
-            creators["far from travel target"] = &TriggerContext::far_from_travel_target;
             creators["no rti target"] = &TriggerContext::no_rti;
 
             creators["give food"] = &TriggerContext::give_food;
@@ -246,6 +245,8 @@ namespace ai
 
             creators["random jump"] = &TriggerContext::random_jump;
             creators["rtsc jump active"] = &TriggerContext::rtsc_jump_active;
+
+            creators["set glyph"] = [](PlayerbotAI* ai) { return new SetGlyphTrigger(ai); };
 
             // racials
             creators["berserking"] = &TriggerContext::berserking;
@@ -344,8 +345,6 @@ namespace ai
         static Trigger* near_rpg_target(PlayerbotAI* ai) { return new NearRpgTargetTrigger(ai); }
         static Trigger* no_rpg_target(PlayerbotAI* ai) { return new NoRpgTargetTrigger(ai); }
         static Trigger* has_rpg_target(PlayerbotAI* ai) { return new HasRpgTargetTrigger(ai); }
-        static Trigger* far_from_travel_target(PlayerbotAI* ai) { return new FarFromTravelTargetTrigger(ai); }
-        static Trigger* no_travel_target(PlayerbotAI* ai) { return new NoTravelTargetTrigger(ai); }		
         static Trigger* collision(PlayerbotAI* ai) { return new CollisionTrigger(ai); }
         static Trigger* lfg_proposal_active(PlayerbotAI* ai) { return new LfgProposalActiveTrigger(ai); }
         static Trigger* unknown_dungeon(PlayerbotAI* ai) { return new UnknownDungeonTrigger(ai); }

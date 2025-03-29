@@ -174,7 +174,7 @@ bool CheckMountStateAction::Execute(Event& event)
             if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && !IsMounted)
                 ai->TellPlayerNoFacing(requester, "Mount. Traveling some place.");
 
-            return Mount(requester);
+            return Mount(requester, true);
         }
         else if (!hasAttackers)
         {
@@ -184,7 +184,7 @@ bool CheckMountStateAction::Execute(Event& event)
                 if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && !IsMounted)
                     ai->TellPlayerNoFacing(requester, "Mount. Rpg target far away.");
 
-                return Mount(requester);
+                return Mount(requester, true);
             }
 
             //Mounting in safe place.
@@ -193,7 +193,7 @@ bool CheckMountStateAction::Execute(Event& event)
                 if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && !IsMounted)
                     ai->TellPlayerNoFacing(requester, "Mount. Near rpg targets.");
 
-                return Mount(requester);
+                return Mount(requester, true);
             }
         }
 
@@ -391,11 +391,39 @@ float CheckMountStateAction::GetAttackDistance() const
     return 35.0f;
 }
 
-bool CheckMountStateAction::Mount(Player* requester)
+bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
 {
-    bool canFly = CanFly();
+    bool canFly = CanFly();   
 
     uint32 currentSpeed = AI_VALUE2(uint32, "current mount speed", "self target");
+
+    uint32 maxSpeed = 9999;
+
+    if (limitSpeedToGroup && bot->GetGroup() && ai->IsGroupLeader())
+    {
+        for (GroupReference* ref = bot->GetGroup()->GetFirstMember(); ref; ref = ref->next())
+        {
+            Player* member = ref->getSource();
+            if (member == bot)
+                continue;
+
+            if (!member->GetPlayerbotAI())
+                continue;
+
+            if (!member->IsAlive())
+                continue;
+
+            if (!member->GetPlayerbotAI()->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+                continue;
+
+            if (WorldPosition(bot).distance(member) > sPlayerbotAIConfig.reactDistance * 5)
+                continue;
+
+            Player* player = member;
+
+            maxSpeed = std::min(maxSpeed, PAI_VALUE2(uint32, "max mount speed", canFly ? "fly" : ""));
+        }
+    }
 
     std::vector<MountValue> mountList = AI_VALUE(std::vector<MountValue>, "mount list");
 
@@ -404,6 +432,16 @@ bool CheckMountStateAction::Mount(Player* requester)
 
     for (auto& mount : mountList)
     {
+        if (mount.GetSpeed(canFly) > maxSpeed)
+            continue;
+
+        if (currentSpeed > maxSpeed)
+        {
+            if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
+                ai->TellPlayerNoFacing(requester, "Mounted, unmount to mount slower next time.");
+            return UnMount();
+        }
+
         if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
             ai->TellPlayerNoFacing(requester, "Try to mount with " + chat->formatSpell(mount.GetSpellId()));
 
@@ -431,7 +469,7 @@ bool CheckMountStateAction::Mount(Player* requester)
 
         bool didMount = false;
 
-        if (!mount.IsValidLocation())
+        if (!mount.IsValidLocation(bot))
         {
             if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
                 ai->TellPlayerNoFacing(requester, "Bot can not use this mount here.", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
@@ -440,14 +478,14 @@ bool CheckMountStateAction::Mount(Player* requester)
 
         if (mount.IsItem())
         {
-            if (!mount.GetItem())
+            if (!bot->GetItemByEntry(mount.GetItemProto()->ItemId))
             {
                 if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
                     ai->TellPlayerNoFacing(requester, "Bot does not have this mount.", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
                 continue;
             }
 
-            if (UseItem(requester, mount.GetItem()->GetEntry()))
+            if (UseItem(requester, mount.GetItemProto()->ItemId))
             {
                 SetDuration(3000U); // 3s
                 didMount = true;
@@ -469,6 +507,9 @@ bool CheckMountStateAction::Mount(Player* requester)
 
             if (ai->CastSpell(mount.GetSpellId(), bot))
             {
+#ifdef MANGOSBOT_TWO
+                bot->ResolvePendingMount();
+#endif
                 sPlayerbotAIConfig.logEvent(ai, "CheckMountStateAction", sServerFacade.LookupSpellInfo(mount.GetSpellId())->SpellName[0], std::to_string(mount.GetSpeed(canFly)));
                 SetDuration(GetSpellRecoveryTime(sServerFacade.LookupSpellInfo(mount.GetSpellId())));
                 didMount = true;

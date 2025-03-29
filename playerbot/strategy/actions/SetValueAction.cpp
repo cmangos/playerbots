@@ -109,6 +109,36 @@ bool SetValueAction::Execute(Event& event)
         ai->TellPlayer(requester, "Prefered guild size set to " + std::to_string(type), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         return true;
     }
+    else if (param.find("rpg style ") == 0)
+    {
+        value = param.substr(std::string("rpg style ").size());
+
+        if (!Qualified::isValidNumberString(value))
+        {
+            ai->TellPlayer(requester, "Incorrect value " + value + " needs to be a number.", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            return false;
+        }
+
+        std::vector<int32> ranges = { 0,30,50,70,120,250 };
+
+        uint8 style = stoi(value);
+
+        if (style < -1)
+            style = -1;
+        if (style > 100)
+            style = 100;
+
+        SET_AI_VALUE2(int32, "manual saved int", "rpg style override", uint32(style));
+
+        if (style == -1)
+        {
+            ai->TellPlayer(requester, "Prefered rpg style reset to random:", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+            value = std::to_string((uint8)ai->GetFixedBotNumber(BotTypeNumber::RPG_STYLE_NUMBER, 100));
+        }
+
+        ai->TellPlayer(requester, "Prefered rpg style set to " + std::to_string(style), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        return true;
+    }
 
     ai->TellPlayer(requester, "Correct usage: set value <value name> <value>", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     ai->TellPlayer(requester, "Values supported: group size, guild size", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);

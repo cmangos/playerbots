@@ -81,7 +81,7 @@ void TravelNodePath::calculateCost(bool distanceOnly)
 
             if (lastPoint && point.getMapId() == lastPoint.getMapId())
             {
-                if (!distanceOnly && (point.isInWater() || lastPoint.isInWater()))
+                if (!distanceOnly && (point.isVmapLoaded() && point.isInWater()) || (lastPoint.isVmapLoaded() && lastPoint.isInWater()))
                     swimDistance += point.distance(lastPoint);
 
                 distance += point.distance(lastPoint);
@@ -340,7 +340,7 @@ TravelNodePath* TravelNode::buildPath(TravelNode* endNode, Unit* bot, bool postP
         {
             if (backNodePath->getComplete()) //Reverse works so use that.
             {
-                MANGOS_ASSERT(startPos.isPathTo(backPath));
+                //MANGOS_ASSERT(startPos.isPathTo(backPath));
                 std::reverse(backPath.begin(), backPath.end());
                 path = backPath;
                 canPath = backNodePath->getComplete();
@@ -1366,6 +1366,9 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
     if (start == goal)
         return TravelNodeRoute();
 
+    if(!start->hasRouteTo(goal))
+        return TravelNodeRoute();
+
     //Basic A* algoritm
     std::unordered_map<TravelNode*, TravelNodeStub> m_stubs;
 
@@ -1390,8 +1393,28 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
             if (ai->HasCheat(BotCheatMask::gold))
                 startStub->currentGold = 10000000;
             else {
-                AiObjectContext* context = ai->GetAiObjectContext();
-                startStub->currentGold = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::travel);
+                startStub->currentGold = 9999999;
+                for (ObjectGuid guid : AI_VALUE(std::list<ObjectGuid>, "group members"))
+                {
+                    Player* player = sObjectMgr.GetPlayer(guid);
+
+                    if (!player)
+                        continue;
+
+                    if (!ai->IsGroupLeader() && player != bot)
+                        continue;
+
+                    if (player->IsBeingTeleported())
+                    {
+                        startStub->currentGold = 0;
+                        continue;
+                    }
+
+                    if (!player->GetPlayerbotAI())
+                        continue;
+
+                    startStub->currentGold = std::min(startStub->currentGold, PAI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::travel));
+                }
             }
 
             if (AI_VALUE2(bool, "action useful", "hearthstone") && bot->IsAlive())
@@ -1843,8 +1866,28 @@ void TravelNodeMap::manageNodes(Unit* bot, bool mapFull)
 
 void TravelNodeMap::LoadMaps()
 {
-#ifdef MANGOSBOT_ZERO
     sLog.outError("Trying to load all maps and tiles for node generation. Please ignore any maps that could not be loaded.");
+    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
+        if (!sMapStore.LookupEntry(i))
+            continue;
+
+        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        {
+#ifndef MANGOSBOT_TWO
+            MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), mapId);
+#else
+            MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), mapId, 0);
+#endif
+        }
+        else
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
+        }
+    }
+
+#ifndef MANGOSBOT_TWO
     for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
     {
         if (!sMapStore.LookupEntry(i))
@@ -1865,32 +1908,13 @@ void TravelNodeMap::LoadMaps()
 
                 uint32 x = (fileNameString[3] - '0') * 10 + (fileNameString[4] - '0');
                 uint32 y = (fileNameString[5] - '0') * 10 + (fileNameString[6] - '0');
+
                 if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y))
                     MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
-
             }
         }
     }
 #endif
-#ifdef MANGOSBOT_ONE
-    sLog.outError("Trying to load all maps and tiles for node generation. Please ignore any maps that could not be loaded.");
-    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
-    {
-        if (!sMapStore.LookupEntry(i))
-            continue;
-
-        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
-        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
-        {
-            MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), mapId);
-        }
-        else
-        {
-            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
-        }
-    }
-#endif
-
 }
 
 void TravelNodeMap::generateNpcNodes()
@@ -2123,6 +2147,12 @@ void TravelNodeMap::generatePortalNodes()
             continue;
 
         WorldPosition outPos(pos);
+
+        if (outPos.isOverworld() && outPos.currentHeight() > 0.5f && outPos.currentHeight() < 50.0f)
+        {
+            sLog.outError("%s adjusting height down from %f", pSpellInfo->SpellName[0], outPos.currentHeight());
+            outPos.setZ(outPos.getZ() - outPos.currentHeight() + 0.5f);
+        }
 
         TravelNode* destNode = sTravelNodeMap.addNode(outPos, pSpellInfo->SpellName[0], true, true);
     }
@@ -2377,16 +2407,18 @@ void TravelNodeMap::generateTransportNodes()
 void TravelNodeMap::generateZoneMeanNodes()
 {
     //Zone means   
-    for (auto& loc : sTravelMgr.GetExploreLocs())
+    for (auto& [entry, dests] :sTravelMgr.GetExploreLocs())
     {
         std::vector<WorldPosition*> points;
+        for (auto& dest : dests)
+        {
+            for (auto p : dest->GetPoints())
+                if (!p->isUnderWater())
+                    points.push_back(p);
 
-        for (auto p : loc->GetPoints())
-            if (!p->isUnderWater())
-                points.push_back(p);
-
-        if (points.empty())
-            points = loc->GetPoints();
+            if (points.empty())
+                points = dest->GetPoints();
+        }
 
         WorldPosition  pos = WorldPosition(points, WP_MEAN_CENTROID);
 
@@ -2643,7 +2675,7 @@ void TravelNodeMap::generateHelperNodes()
 
     if (sTravelNodeMap.getNodes().size() > old)
     {
-        sLog.outString("-Calculating walkable paths for %d new nodes.", sTravelNodeMap.getNodes().size() - old);
+        sLog.outString("-Calculating walkable paths for %d new nodes.", uint32(sTravelNodeMap.getNodes().size() - old));
         generateWalkPaths();
     }
 
@@ -2761,7 +2793,7 @@ void TravelNodeMap::removeLowNodes()
     for (auto& node : remNodes)
         sTravelNodeMap.removeNode(node);
 
-    sLog.outString("-Removed %d nodes had below 5 connections to other nodes.", remNodes.size());
+    sLog.outString("-Removed %d nodes had below 5 connections to other nodes.", (uint32)remNodes.size());
 }
 
 void TravelNodeMap::removeUselessPathMap(uint32 mapId)
@@ -3055,7 +3087,7 @@ void TravelNodeMap::saveNodeStore(bool force)
         std::string name = node->getName();
         name.erase(remove(name.begin(), name.end(), '\''), name.end());
 
-        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode` (`id`, `name`, `map_id`, `x`, `y`, `z`, `linked`) VALUES ('%lu', '%s', '%d', '%f', '%f', '%f', '%d%')"
+        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode` (`id`, `name`, `map_id`, `x`, `y`, `z`, `linked`) VALUES ('%lu', '%s', '%d', '%f', '%f', '%f', '%d')"
             , i, name.c_str(), node->getMapId(), node->getX(), node->getY(), node->getZ(), (node->isLinked() ? 1 : 0));
 
         saveNodes.insert(std::make_pair(node, i));
@@ -3088,7 +3120,7 @@ void TravelNodeMap::saveNodeStore(bool force)
             {
                 TravelNodePath* path = link.second;
 
-                WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_link` (`node_id`, `to_node_id`,`type`,`object`,`distance`,`swim_distance`, `extra_cost`,`calculated`, `max_creature_0`,`max_creature_1`,`max_creature_2`) VALUES ('%lu','%lu', '%d', '%lu', '%f', '%f', '%f', '%d', '%d', '%d', '%d')"
+                WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_link` (`node_id`, `to_node_id`,`type`,`object`,`distance`,`swim_distance`, `extra_cost`,`calculated`, `max_creature_0`,`max_creature_1`,`max_creature_2`) VALUES ('%d','%d', '%d', '%lu', '%f', '%f', '%f', '%d', '%d', '%d', '%d')"
                     , i
                     , saveNodes.find(link.first)->second
                     , uint8(path->getPathType())
@@ -3108,7 +3140,7 @@ void TravelNodeMap::saveNodeStore(bool force)
                 for (uint32 j = 0; j < ppath.size(); j++)
                 {
                     WorldPosition point = ppath[j];
-                    WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_path` (`node_id`, `to_node_id`, `nr`, `map_id`, `x`, `y`, `z`) VALUES ('%lu', '%lu', '%d','%d', '%f', '%f', '%f')"
+                    WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode_path` (`node_id`, `to_node_id`, `nr`, `map_id`, `x`, `y`, `z`) VALUES ('%d', '%d', '%d','%d', '%f', '%f', '%f')"
                         , i
                         , saveNodes.find(link.first)->second
                         , j

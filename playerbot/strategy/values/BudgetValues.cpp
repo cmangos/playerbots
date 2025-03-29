@@ -1,8 +1,61 @@
 #include "playerbot/playerbot.h"
 #include "BudgetValues.h"
 #include "ItemUsageValue.h"
+#include "MountValues.h"
 
 using namespace ai;
+
+uint32 RepairCostValue::RepairCost(const Item* item, bool fullCost)
+{
+    uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+    if (!maxDurability)
+        return 0;
+
+    uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+    uint32 LostDurability = maxDurability;
+        
+    if (!fullCost)
+    {
+        LostDurability = LostDurability - curDurability;
+
+        if (LostDurability == 0)
+            return 0;
+    }
+
+    ItemPrototype const* ditemProto = item->GetProto();
+
+    DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
+    if (!dcost)
+        return 0;
+
+    uint32 dQualitymodEntryId = (ditemProto->Quality + 1) * 2;
+    DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
+    if (!dQualitymodEntry)
+        return 0;
+
+    uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
+
+    return uint32(LostDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
+}
+
+uint32 RepairCostValue::Calculate()
+{
+    uint32 TotalCost = 0;
+    for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        uint16 pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        
+        Item* item = bot->GetItemByPos(pos);
+
+        if (!item)
+            continue;
+
+        TotalCost += RepairCost(item);
+    }
+
+    return TotalCost;
+}
 
 uint32 MaxGearRepairCostValue::Calculate()
 {
@@ -22,82 +75,26 @@ uint32 MaxGearRepairCostValue::Calculate()
         uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
 
         if (i >= EQUIPMENT_SLOT_END && curDurability >= maxDurability) //Only count items equiped or already damanged.
-            continue;
+            continue;        
 
-        ItemPrototype const* ditemProto = item->GetProto();
-
-        DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
-        if (!dcost)
-            continue;
-
-        uint32 dQualitymodEntryId = (ditemProto->Quality + 1) * 2;
-        DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
-        if (!dQualitymodEntry)
-            continue;
-
-        uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
-
-        uint32 costs = uint32(maxDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
-
-
-        TotalCost += costs;
+        TotalCost += RepairCost(item, true);
     }
 
     return TotalCost;
 }
 
-uint32 RepairCostValue::Calculate()
-{
-    uint32 TotalCost = 0;
-    for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
-    {
-        uint16 pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-        Item* item = bot->GetItemByPos(pos);
 
-        if (!item)
-            continue;
-
-        uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-        if (!maxDurability)
-            continue;
-
-        uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
-
-        uint32 LostDurability = maxDurability - curDurability;
-
-        if (LostDurability == 0)
-            continue;
-
-        ItemPrototype const* ditemProto = item->GetProto();
-
-        DurabilityCostsEntry const* dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
-        if (!dcost)
-            continue;
-
-        uint32 dQualitymodEntryId = (ditemProto->Quality + 1) * 2;
-        DurabilityQualityEntry const* dQualitymodEntry = sDurabilityQualityStore.LookupEntry(dQualitymodEntryId);
-        if (!dQualitymodEntry)
-            continue;
-
-        uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class, ditemProto->SubClass)];
-        uint32 costs = uint32(LostDurability * dmultiplier * double(dQualitymodEntry->quality_mod));
-
-        TotalCost += costs;
-    }
-
-    return TotalCost;
-}
 
 uint32 MoneyNeededForValue::Calculate()
 {
-	NeedMoneyFor needMoneyFor = NeedMoneyFor(stoi(getQualifier()));
+    NeedMoneyFor needMoneyFor = NeedMoneyFor(stoi(getQualifier()));
 
-	PlayerbotAI* ai = bot->GetPlayerbotAI();
-	AiObjectContext* context = ai->GetAiObjectContext();
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
 
-	uint32 moneyWanted = 0;
+    uint32 moneyWanted = 0;
 
-	uint32 level = bot->GetLevel();
+    uint32 level = bot->GetLevel();
 
     switch (needMoneyFor)
     {
@@ -111,7 +108,7 @@ uint32 MoneyNeededForValue::Calculate()
         moneyWanted = (bot->getClass() == CLASS_HUNTER) ? (level * level * level) / 10 : 0; //Or level^3 (1s @ lvl10, 30s @ lvl30, 2g @ lvl60, 5g @ lvl80): Todo replace (should be best ammo buyable x 8 stacks cost)
         break;
     case NeedMoneyFor::spells:
-        moneyWanted = AI_VALUE(uint32, "train cost");
+        moneyWanted = AI_VALUE2(uint32, "train cost", TRAINER_TYPE_CLASS);
         break;
     case NeedMoneyFor::travel:
         moneyWanted = bot->isTaxiCheater() ? 0 : 1500; //15s for traveling half a continent. Todo: Add better calculation (Should be ???)
@@ -131,10 +128,14 @@ uint32 MoneyNeededForValue::Calculate()
                 moneyWanted = AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) ? 0 : 1000; //10s (guild charter)
         }
         break;
+    case NeedMoneyFor::skilltraining:
+        moneyWanted = AI_VALUE2(uint32, "train cost", TRAINER_TYPE_TRADESKILLS);
+        break;
     case NeedMoneyFor::tradeskill:
         moneyWanted = (level * level * level); //Or level^3 (10s @ lvl10, 3g @ lvl30, 20g @ lvl60, 50g @ lvl80): Todo replace (Should be buyable reagents that combined allow crafting of usefull items)
         break;
     case NeedMoneyFor::ah:
+    {
         //Save deposit needed for all items the bot wants to AH.
         uint32 time;
 #ifdef MANGOSBOT_ZERO
@@ -205,8 +206,45 @@ uint32 MoneyNeededForValue::Calculate()
         return totalDeposit;
         break;
     }
+    case NeedMoneyFor::mount:
+    {
+        uint32 maxMountSpeed = 0;
+        uint32 maxFlyMountSpeed = 0;
 
-	return moneyWanted;
+        moneyWanted = AI_VALUE2(uint32, "train cost", TRAINER_TYPE_MOUNTS);
+
+        for (auto& mount : AI_VALUE(std::vector<MountValue>, "mount list"))
+        {
+            if (mount.GetSpeed(false) > maxMountSpeed)
+            {
+                maxMountSpeed = mount.GetSpeed(false);
+                maxFlyMountSpeed = mount.GetSpeed(true);
+            }
+        }
+
+        if (level >= 40)
+        {
+            if (maxMountSpeed < 59)
+                moneyWanted += 10 * GOLD;
+        }
+        if (level >= 60)
+        {
+            if (maxMountSpeed < 99)
+                moneyWanted += 100 * GOLD;
+        }
+        if (level >= 70)
+        {
+            if (maxFlyMountSpeed < 99)
+                moneyWanted += 100 * GOLD;
+            else if (maxFlyMountSpeed < 279)
+                moneyWanted += 200 * GOLD;
+        }
+        //todo WOTLK
+        break;
+    }
+    }
+
+    return moneyWanted;
 };
 
 uint32 TotalMoneyNeededForValue::Calculate()
@@ -228,6 +266,27 @@ uint32 TotalMoneyNeededForValue::Calculate()
 
     return moneyWanted;
 }
+
+bool HasAllMoneyForValue::Calculate()
+{
+    uint32 money = bot->GetMoney();
+
+    if (ai->HasCheat(BotCheatMask::gold))
+        return true;
+
+    uint32 needMoney;
+
+    if (ai->HasActivePlayerMaster())
+        needMoney = AI_VALUE2(uint32, "money needed for", getQualifier());
+    else
+        needMoney = AI_VALUE2(uint32, "total money needed for", getQualifier());
+
+    if (needMoney <= money)
+        return true;
+
+    return false;
+}
+
 
 uint32 FreeMoneyForValue::Calculate() 
 {

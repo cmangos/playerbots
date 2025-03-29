@@ -71,6 +71,7 @@ namespace ai
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        virtual void InitCombatMultipliers(std::list<Multiplier*>& multipliers) override;
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
 

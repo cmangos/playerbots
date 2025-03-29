@@ -8,7 +8,7 @@ namespace ai
     public:
         GuidPosition() : ObjectGuid(), WorldPosition() {}
         GuidPosition(ObjectGuid guid, WorldPosition pos) : ObjectGuid(guid), WorldPosition(pos) {};
-        GuidPosition(ObjectGuid guid, const uint32 mapId, const uint32 instanceId) : ObjectGuid(guid) { WorldPosition::set(guid, mapId, instanceId); }
+        GuidPosition(ObjectGuid guid, const uint32 mapId, const uint32 instanceId) : ObjectGuid(guid) { WorldPosition::set(guid, mapId, instanceId); if (getX() == 0 && getY() == 0 && getZ() == 0) Set(0); }
         GuidPosition(ObjectGuid guid, const WorldObject* wo) : ObjectGuid(guid), WorldPosition(wo) {}
         GuidPosition(uint64 const& guid, WorldPosition const& pos) : ObjectGuid(guid), WorldPosition(pos) {};
         //template<class T>
@@ -81,4 +81,15 @@ namespace ai
 
         return b;
     }
+
+    class AsyncGuidPosition : public GuidPosition
+    {
+    public:
+        AsyncGuidPosition() : GuidPosition() {}
+        AsyncGuidPosition(GuidPosition guidP) : GuidPosition(guidP) {};
+        virtual void FetchArea() { areaFlag = WorldPosition::getAreaFlag(); }
+        virtual uint16 getAreaFlag() const { return areaFlag.has_value() ? areaFlag.value() : WorldPosition::getAreaFlag(); }
+    private:
+        std::optional<int16> areaFlag;
+    };
 }

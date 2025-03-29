@@ -16,24 +16,28 @@ namespace ai
         consumables = 5,
         gear = 6,
         guild = 7,
-        tradeskill = 8,
-        ah = 9,
-        anything = 10
-    };
-
-    class MaxGearRepairCostValue : public Uint32CalculatedValue
-    {
-    public:
-        MaxGearRepairCostValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai,"max repair cost",60) {}
-
-        virtual uint32 Calculate();
+        skilltraining = 8,
+        tradeskill = 9,
+        ah = 10,
+        mount = 11,
+        anything = 12
     };
 
     class RepairCostValue : public Uint32CalculatedValue
     {
     public:
-        RepairCostValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "repair cost",60) {}
-        
+        RepairCostValue(PlayerbotAI* ai, std::string name = "repair cost", int checkInterval = 60) : Uint32CalculatedValue(ai, name, checkInterval) {}
+
+        static uint32 RepairCost(const Item* item, bool fullCost = false);
+
+        virtual uint32 Calculate();
+    };
+
+    class MaxGearRepairCostValue : public RepairCostValue
+    {
+    public:
+        MaxGearRepairCostValue(PlayerbotAI* ai) : RepairCostValue(ai,"max repair cost",checkInterval) {}
+
         virtual uint32 Calculate();
     };
 
@@ -58,6 +62,13 @@ namespace ai
     public:
         FreeMoneyForValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "free money for"), Qualified() {}
         virtual uint32 Calculate();
+    };
+
+    class HasAllMoneyForValue : public BoolCalculatedValue, public Qualified
+    {
+    public:
+        HasAllMoneyForValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "has all money for"), Qualified() {}
+        virtual bool Calculate();
     };
     
     class ShouldGetMoneyValue : public BoolCalculatedValue

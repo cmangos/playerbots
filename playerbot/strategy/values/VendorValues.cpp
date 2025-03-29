@@ -13,7 +13,7 @@ VendorMap* VendorMapValue::Calculate()
 
     for (uint32 entry = 0; entry < sCreatureStorage.GetMaxEntry(); entry++)
     {
-        static CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(entry);
+        CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(entry);
 
         if (!cInfo)
             continue;
@@ -23,8 +23,18 @@ VendorMap* VendorMapValue::Calculate()
 
         if (vItems)
             for (auto vItem : vItems->m_items)
-                if(!vItem->maxcount) //Ignore limited amount items.
+                if (!vItem->maxcount) //Ignore limited amount items.
                     vendorpMap->insert(std::make_pair(vItem->item, entry));
+
+        uint32 vendorId = cInfo->VendorTemplateId;
+        if (vendorId)
+        {
+            vItems = sObjectMgr.GetNpcVendorTemplateItemList(vendorId);
+            if (vItems)
+                for (auto vItem : vItems->m_items)
+                    if (!vItem->maxcount) //Ignore limited amount items.
+                        vendorpMap->insert(std::make_pair(vItem->item, entry));
+        }
     }
 
     return vendorpMap;
@@ -50,7 +60,7 @@ std::list<int32> ItemVendorListValue::Calculate()
 bool VendorHasUsefulItemValue::Calculate()
 {
     uint32 entry = stoi(this->getQualifier());
-    static CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(entry);
+    CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(entry);
 
     if (!cInfo)
         return false;

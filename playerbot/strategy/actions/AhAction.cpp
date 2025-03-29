@@ -287,6 +287,9 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             if (!auction)
                 continue;
 
+            if (std::find_if(auctionPowers.begin(), auctionPowers.end(), [auction](std::pair<AuctionEntry*, uint32> i){return i.first == auction;}) != auctionPowers.end())
+                continue;
+
             auction = auctionHouse->GetAuction(auction->Id);
 
             if (!auction)
@@ -397,46 +400,10 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             freeMoney[ItemUsage::ITEM_USAGE_SKILL] = freeMoney[ItemUsage::ITEM_USAGE_DISENCHANT] = (uint32)NeedMoneyFor::tradeskill;
             freeMoney[ItemUsage::ITEM_USAGE_AMMO] = (uint32)NeedMoneyFor::ammo;
             freeMoney[ItemUsage::ITEM_USAGE_QUEST] = freeMoney[ItemUsage::ITEM_USAGE_AH] = freeMoney[ItemUsage::ITEM_USAGE_VENDOR] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_NEED] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_GREED] = (uint32)NeedMoneyFor::anything;
-
-            std::map<std::string, std::string> placeholders;
-            std::string reason;
+         
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(auction).GetQualifier());
 
-            switch (usage)
-            {
-            case ItemUsage::ITEM_USAGE_EQUIP:
-                reason = BOT_TEXT2("for equiping as upgrade.", placeholders);
-                break;
-            case ItemUsage::ITEM_USAGE_BAD_EQUIP:
-                reason = BOT_TEXT2("for equiping until I can find something better.", placeholders);
-                break;
-            case ItemUsage::ITEM_USAGE_USE:
-                reason = BOT_TEXT2("to use it when I need it.", placeholders);
-                break;
-            case ItemUsage::ITEM_USAGE_SKILL:
-            case ItemUsage::ITEM_USAGE_DISENCHANT:
-                reason = BOT_TEXT2("to use it for my profession.", placeholders);
-                break;
-            case ItemUsage::ITEM_USAGE_AMMO:
-                BOT_TEXT2("to use as ammo.", placeholders);
-                break;
-            case ItemUsage::ITEM_USAGE_QUEST:
-                reason = BOT_TEXT2("to complete an objective for a quest.", placeholders);
-                break;
-            case ItemUsage::ITEM_USAGE_AH:
-                placeholders["%price_min"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMinPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate)) * auction->itemCount);
-                placeholders["%price_max"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMaxPrice(sObjectMgr.GetItemPrototype(auction->itemTemplate)) * auction->itemCount);
-                reason = BOT_TEXT2("to repost on AH for %price_min to %price_max.", placeholders);
-                break;
-            case ItemUsage::ITEM_USAGE_VENDOR:
-                placeholders["%price"] = ChatHelper::formatMoney(sObjectMgr.GetItemPrototype(auction->itemTemplate)->SellPrice * auction->itemCount);
-                reason = BOT_TEXT2("to sell to a vendor for %price.", placeholders);
-                break;
-            case ItemUsage::ITEM_USAGE_FORCE_NEED:
-            case ItemUsage::ITEM_USAGE_FORCE_GREED:
-                reason = BOT_TEXT2("because I was told to get this item.", placeholders);
-                break;
-            }
+            std::string reason = ItemUsageValue::ReasonForNeed(usage, auction, auction->itemCount, bot);            
 
             bidItems = BidItem(requester, auction, price, auctioneer, price == currentBuyoutPrice, reason);
 

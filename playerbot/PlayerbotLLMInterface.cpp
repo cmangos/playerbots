@@ -12,6 +12,10 @@
 #include <chrono>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <thread>
+#include "Log/Log.h"
+#include "PlayerbotAIConfig.h"
+#include "PlayerbotTextMgr.h"
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -393,7 +397,7 @@ std::vector<std::string> PlayerbotLLMInterface::ParseResponse(const std::string&
     
     actualResponse = extractAfterPattern(actualResponse, startPattern);
 
-    PlayerbotTextMgr::replaceAll(actualResponse, R"(\")", "'");
+    PlayerbotTextMgr::ReplaceAll(actualResponse, R"(\")", "'");
 
     if (debug)
     {
@@ -440,7 +444,7 @@ void PlayerbotLLMInterface::LimitContext(std::string& context, int currentLength
             for (auto& c : context)
             {
                 cutPosition++;
-                if (cutPosition >= cutNeeded && c == ' ' || c == '.')
+                if (cutPosition >= cutNeeded && (c == ' ' || c == '.'))
                     break;
             }
             context = context.substr(cutPosition);

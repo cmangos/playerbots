@@ -13,6 +13,7 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "PlayerbotAIBase.h"
 #include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/WorldPosition.h"
 
 class ServerFacade
 {
@@ -213,6 +214,11 @@ class ServerFacade
 #ifdef CMANGOS
             return bot->IsWithinLOSInMap(wo, true);
 #endif
+        }
+
+        bool IsWithinStaticLOSInMap(Player* bot, WorldObject* wo) const
+        {
+            return wo->IsInMap(bot) ? WorldPosition(wo).IsInStaticLineOfSight(WorldPosition(bot)) : false;
         }
 
         bool IsDistanceLessThan(float dist1, float dist2);

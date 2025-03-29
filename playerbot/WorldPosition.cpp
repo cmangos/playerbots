@@ -5,19 +5,19 @@
 
 #include "Maps/Map.h"
 
-#ifdef MANGOSBOT_TWO
-    #include "Vmap/VMapFactory.h"
-#else
-    #include "vmap/VMapFactory.h"
-#endif
-
-
-#include "MotionGenerators/MoveMap.h"
 #include "World/World.h"
 #include "Grids/CellImpl.h"
 #include "Globals/ObjectAccessor.h"
 #include "Entities/Transports.h"
 #include "MemoryMonitor.h"
+
+#include "MotionGenerators/MoveMap.h"
+
+#ifdef MANGOSBOT_TWO
+#include "Vmap/VMapFactory.h"
+#else
+#include "vmap/VMapFactory.h"
+#endif
 
 #include <numeric>
 #include <iomanip>
@@ -59,30 +59,41 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32
     {
         Player* player = sObjectAccessor.FindPlayer(guid);
         if (player)
+        {
             set(player);
+            return;
+        }
         break;
     }
     case HIGHGUID_GAMEOBJECT:
-    {        
+    {
         GameObjectDataPair const* gpair = sObjectMgr.GetGODataPair(guid.GetCounter());
         if (gpair)
+        {
             set(gpair);
-
+            return;
+        }
         break;
     }
     case HIGHGUID_UNIT:
     {
         setMapId(mapId);
-        Creature* creature = getMap(instanceId)->GetAnyTypeCreature(guid);
-        if (creature)
+        if (Map* map = getMap(instanceId))
         {
-            set(creature);
-            return;
+            Creature* creature = map->GetAnyTypeCreature(guid);
+            if (creature)
+            {
+                set(creature);
+                return;
+            }
         }
 
         CreatureDataPair const* cpair = sObjectMgr.GetCreatureDataPair(guid.GetCounter());
         if (cpair)
+        {
             set(cpair);
+            return;
+        }
         break;
     }
     case HIGHGUID_TRANSPORT:
@@ -91,8 +102,11 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32
     case HIGHGUID_PET:
     case HIGHGUID_DYNAMICOBJECT:
     case HIGHGUID_CORPSE:
+        set(WorldPosition());
         return;
     }
+
+    set(WorldPosition());
 }
 
 WorldPosition::WorldPosition(const std::vector<WorldPosition*>& list, const WorldPositionConst conType)
@@ -329,6 +343,22 @@ std::vector<WorldPosition> WorldPosition::GetNextPoint(std::vector<WorldPosition
     return retVec;
 }
 
+bool WorldPosition::IsInStaticLineOfSight(WorldPosition pos, float heightMod) const
+{
+    if (mapid != pos.mapid)
+    {
+        return false;
+    }
+    
+    float srcX = coord_x;
+    float srcY = coord_y;
+    float srcZ = coord_z + heightMod;
+    float dstX = pos.coord_x;
+    float dstY = pos.coord_y;
+    float dstZ = pos.coord_z + heightMod;
+
+    return VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(mapid, srcX, srcY, srcZ, dstX, dstY, dstZ, true);
+}
 
 bool WorldPosition::canFly() const
 {
@@ -412,10 +442,8 @@ WorldPosition WorldPosition::getDisplayLocation() const
     return offset(mapOffset);
 };
 
-AreaTableEntry const* WorldPosition::getArea() const
+AreaTableEntry const* WorldPosition::GetArea() const
 {
-    loadMapAndVMap(0);
-
     uint16 areaFlag = getAreaFlag();
 
     return GetAreaEntryByAreaFlagAndMap(areaFlag, getMapId());
@@ -430,7 +458,7 @@ std::string WorldPosition::getAreaName(const bool fullName, const bool zoneName)
             return map->name[0];
     }
 
-    AreaTableEntry const* area = getArea();
+    AreaTableEntry const* area = GetArea();
 
     if (!area)
         return "";
@@ -464,15 +492,15 @@ std::string WorldPosition::getAreaName(const bool fullName, const bool zoneName)
 
 int32 WorldPosition::getAreaLevel() const
 {
-    if(getArea())
-        return sTravelMgr.GetAreaLevel(getArea()->ID);
+    if(GetArea())
+        return sTravelMgr.GetAreaLevel(GetArea()->ID);
 
     return 0;
 }
 
-bool WorldPosition::hasAreaFlag(const AreaFlags flag) const
+bool WorldPosition::HasAreaFlag(const AreaFlags flag) const
 {
-    AreaTableEntry const* areaEntry = getArea();
+    AreaTableEntry const* areaEntry = GetArea();
     if (areaEntry)
     {
         if (areaEntry->zone)
@@ -485,9 +513,9 @@ bool WorldPosition::hasAreaFlag(const AreaFlags flag) const
     return false;
 }
 
-bool WorldPosition::hasFaction(const Team team) const
+bool WorldPosition::HasFaction(const Team team) const
 {
-    AreaTableEntry const* areaEntry = getArea();
+    AreaTableEntry const* areaEntry = GetArea();
     if (areaEntry)
     {
         if (areaEntry->team == 2 && team == ALLIANCE)
@@ -668,42 +696,69 @@ std::vector<WorldPosition> WorldPosition::frommGridPair(const mGridPair& gridPai
     return retVec;
 }
 
+bool WorldPosition::isVmapLoaded(uint32 mapId, int x, int y) 
+{
+    return VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(mapId, x, y);
+}
+
+bool WorldPosition::isMmapLoaded(uint32 mapId, uint32 instanceId, int x, int y)
+{
+#ifndef MANGOSBOT_TWO
+    return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y);
+#else
+    return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y);
+#endif
+}
+
 bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y)
 {
     std::string logName = "load_map_grid.csv";
 
-#ifndef MANGOSBOT_TWO
-    if (MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y))
+    bool hasMmap = false;
+    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        hasMmap = isMmapLoaded(mapId, 0, x, y);
+    else
+        hasMmap = isMmapLoaded(mapId, instanceId, x, y);
+
+    if (hasMmap)
         return true;
-#else
-    if (MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y))
-        return true;
-#endif
+
     if (sTravelMgr.IsBadMmap(mapId, x, y))
         return false;
 
     bool isLoaded = false;
 
+    if (!hasMmap)
+    {
 #ifndef MANGOSBOT_TWO
-    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
-        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
-    else
-    {
-        MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0);
-        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
-    }
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
+        else
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, instanceId);
+            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
+        }
 #else
-    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
-        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId,0, x, y, 0);
-    else
-    {
-        if(MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, 0))
-        isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, 0);
-    }
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        {
+            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, 0);
+        }
+        else
+        {
+            if (MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, instanceId))
+                isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, instanceId, x, y, 0);
+        }
 #endif
 
-    if(!isLoaded)
-        sTravelMgr.AddBadMmap(mapId, x, y);
+
+        //if (!isLoaded)
+        //    sTravelMgr.AddBadMmap(mapId, x, y);
+    }
+
+    //if (!hasVmap)
+    //{
+    //    loadVMap(mapId, x, y);
+    //}
 
     if (sPlayerbotAIConfig.hasLog(logName))
     {
@@ -731,6 +786,14 @@ void WorldPosition::unloadMapAndVMaps(uint32 mapId)
     //TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
     //terrain->UnLoadUnused();
 #endif
+}
+
+bool WorldPosition::loadVMap(uint32 mapId, int x, int y)
+{
+    if (isVmapLoaded(mapId, x, y))
+        return true;
+
+    return VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, x, y);
 }
 
 std::vector<WorldPosition> WorldPosition::fromPointsArray(const std::vector<G3D::Vector3>& path) const

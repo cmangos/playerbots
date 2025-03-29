@@ -37,8 +37,9 @@ enum class BotSelfBotLevel : uint32
     DISABLED = 0,
     GM_ONLY = 1,
     ACTIVE_BY_COMMAND = 2,
-    ACTIVE_BY_LOGIN = 3, 
-    ALWAYS_ACTIVE = 4
+    ALWAYS_ALLOWED = 3,
+    ACTIVE_BY_LOGIN = 4, 
+    ALWAYS_ACTIVE = 5
 };
 
 enum class BotAlwaysOnline : uint32
@@ -128,6 +129,10 @@ public:
     uint32 randomGearMaxLevel;
     uint32 randomGearMaxDiff;
     bool randomGearUpgradeEnabled;
+    bool randomGearTabards;
+    bool randomGearTabardsReplaceGuild;
+    bool randomGearTabardsUnobtainable;
+    float randomGearTabardsChance;
     std::list<uint32> randomGearBlacklist;
     std::list<uint32> randomGearWhitelist;
     bool randomGearProgression;
@@ -295,6 +300,7 @@ public:
     std::string autoPickTalents;
     bool autoLearnTrainerSpells;
     bool autoLearnQuestSpells;
+    bool autoLearnDroppedSpells;
     bool autoDoQuests;
     bool syncLevelWithPlayers;
     uint32 syncLevelMaxAbove, syncLevelNoPlayer;

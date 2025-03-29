@@ -243,7 +243,10 @@ enum class BotTypeNumber : uint8
     GROUPER_TYPE_NUMBER = 2,
     GUILDER_TYPE_NUMBER = 3,
     CHATFILTER_NUMBER = 4 ,
-    DUMMY_ATTACK_NUMBER = 5
+    DUMMY_ATTACK_NUMBER = 5, 
+    RPG_PHASE_NUMBER = 6,
+    RPG_STYLE_NUMBER = 7,
+    WORLD_PVP_LOCATION = 8
 };
 
 enum class GrouperType : uint8
@@ -277,20 +280,21 @@ enum class ActivePiorityType : uint8
 {
     IS_REAL_PLAYER = 0,
     HAS_REAL_PLAYER_MASTER = 1,
-    IN_GROUP_WITH_REAL_PLAYER = 2,
-    IN_INSTANCE = 3,
-    VISIBLE_FOR_PLAYER = 4,
-    IS_ALWAYS_ACTIVE = 5,
-    IN_COMBAT = 6,
-    IN_BG_QUEUE = 7,
-    IN_LFG = 8,
-    NEARBY_PLAYER = 9,
-    PLAYER_FRIEND = 10,
-    PLAYER_GUILD = 11,
-    IN_ACTIVE_AREA = 12,
-    IN_ACTIVE_MAP = 13,
-    IN_INACTIVE_MAP = 14,
-    IN_EMPTY_SERVER = 15,
+    IN_GROUP_WITH_REAL_PLAYER,
+    IN_BATTLEGROUND,
+    IN_INSTANCE,
+    VISIBLE_FOR_PLAYER,
+    IS_ALWAYS_ACTIVE,
+    IN_COMBAT,
+    IN_BG_QUEUE,
+    IN_LFG,
+    NEARBY_PLAYER,
+    PLAYER_FRIEND,
+    PLAYER_GUILD,
+    IN_ACTIVE_AREA,
+    IN_ACTIVE_MAP,
+    IN_INACTIVE_MAP,
+    IN_EMPTY_SERVER,
     MAX_TYPE
 };
 
@@ -577,12 +581,14 @@ public:
     //Get the group leader or the master of the bot.
     Player* GetGroupMaster() { return bot->InBattleGround() ? master : bot->GetGroup() ? (sObjectMgr.GetPlayer(bot->GetGroup()->GetLeaderGuid()) ? sObjectMgr.GetPlayer(bot->GetGroup()->GetLeaderGuid()) : master) : master; }
 
+    bool IsGroupLeader() { return bot->GetGroup() && bot->GetGroup()->GetLeaderGuid() == bot->GetObjectGuid(); }
+
     //Check if player is safe to use.
     bool IsSafe(Player* player) { return player && player->GetMapId() == bot->GetMapId() && player->GetInstanceId() == bot->GetInstanceId() && !player->IsBeingTeleported(); }
     bool IsSafe(WorldObject* obj) { return obj && obj->GetMapId() == bot->GetMapId() && obj->GetInstanceId() == bot->GetInstanceId() && (!obj->IsPlayer() || !((Player*)obj)->IsBeingTeleported()); }
 
     //Returns a semi-random (cycling) number that is fixed for each bot.
-    uint32 GetFixedBotNumer(BotTypeNumber typeNumber, uint32 maxNum = 100, float cyclePerMin = 1); 
+    uint32 GetFixedBotNumber(BotTypeNumber typeNumber, uint32 maxNum = 100, float cyclePerMin = 1, bool ignoreGuid = false); 
 
     GrouperType GetGrouperType();
     GuilderType GetGuilderType();

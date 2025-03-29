@@ -1092,12 +1092,28 @@ void ProtectionPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
     PaladinStrategy::InitNonCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "set glyph::Hammer of Justice",
-        NextAction::array(0, new NextAction("set glyph::Hammer of Justice", ACTION_NORMAL + 1), NULL)));
+        "set glyph::Seal of Vengeance",
+        NextAction::array(0, new NextAction("set glyph::Seal of Vengeance", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "set glyph::the Wise",
-        NextAction::array(0, new NextAction("set glyph::the Wise", ACTION_NORMAL + 1), NULL)));
+        "set glyph::Divine Plea",
+        NextAction::array(0, new NextAction("set glyph::Divine Plea", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Righteous Defense",
+        NextAction::array(0, new NextAction("set glyph::Righteous Defense", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Sense Undead",
+        NextAction::array(0, new NextAction("set glyph::Sense Undead", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Lay on Hands",
+        NextAction::array(0, new NextAction("set glyph::Lay on Hands", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Blessing of Kings",
+        NextAction::array(0, new NextAction("set glyph::Blessing of Kings", ACTION_NORMAL + 1), NULL)));
 }
 
 void ProtectionPaladinStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

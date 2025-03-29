@@ -1142,12 +1142,28 @@ void HolyPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
         NextAction::array(0, new NextAction("flash of light on party", ACTION_LIGHT_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "set glyph::Divinity",
-        NextAction::array(0, new NextAction("set glyph::Divinity", ACTION_NORMAL + 1), NULL)));
+        "set glyph::the Wise",
+        NextAction::array(0, new NextAction("set glyph::the Wise", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "set glyph::Blessing of Wisdom",
-        NextAction::array(0, new NextAction("set glyph::Blessing of Wisdom", ACTION_NORMAL + 1), NULL)));
+        "set glyph::Blessing of Kings",
+        NextAction::array(0, new NextAction("set glyph::Blessing of Kings", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Lay on Hands",
+        NextAction::array(0, new NextAction("set glyph::Lay on Hands", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Beacon of Light",
+        NextAction::array(0, new NextAction("set glyph::Beacon of Light", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Holy Light",
+        NextAction::array(0, new NextAction("set glyph::Holy Light", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Seal of Light",
+        NextAction::array(0, new NextAction("set glyph::Seal of Light", ACTION_NORMAL + 1), NULL)));
 }
 
 void HolyPaladinStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

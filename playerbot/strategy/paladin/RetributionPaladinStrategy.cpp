@@ -1101,8 +1101,24 @@ void RetributionPaladinStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& 
         NextAction::array(0, new NextAction("set glyph::Judgement", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "set glyph::Blessing of Might",
-        NextAction::array(0, new NextAction("set glyph::Blessing of Might", ACTION_NORMAL + 1), NULL)));
+        "set glyph::Blessing of Kings",
+        NextAction::array(0, new NextAction("set glyph::Blessing of Kings", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Seal of Vengeance",
+        NextAction::array(0, new NextAction("set glyph::Seal of Vengeance", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Exorcism",
+        NextAction::array(0, new NextAction("set glyph::Exorcism", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Sense Undead",
+        NextAction::array(0, new NextAction("set glyph::Sense Undead", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "set glyph::Lay on Hands",
+        NextAction::array(0, new NextAction("set glyph::Lay on Hands", ACTION_NORMAL + 1), NULL)));
 }
 
 void RetributionPaladinStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

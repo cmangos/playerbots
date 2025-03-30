@@ -62,7 +62,10 @@
 #include "ShareQuestAction.h"
 #include "UpdateGearAction.h"
 #include "SetAvoidAreaAction.h"
+
+#ifdef MANGOSBOT_TWO
 #include "GlyphAction.h"
+#endif
 
 #include "OnyxiasLairDungeonActions.h"
 #include "MoltenCoreDungeonActions.h"
@@ -274,8 +277,10 @@ namespace ai
             creators["rpg duel"] = &ActionContext::rpg_duel;
             creators["rpg item"] = &ActionContext::rpg_item;
 
+#ifdef MANGOSBOT_TWO
             creators["set glyph"] = [](PlayerbotAI* ai) { return new SetGlyphAction(ai); };
             creators["auto set glyph"] = [](PlayerbotAI* ai) { return new AutoSetGlyphAction(ai); };
+#endif
 
             // Bot States
             creators["set combat state"] = &ActionContext::set_combat_state;

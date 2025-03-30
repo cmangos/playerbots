@@ -268,6 +268,7 @@ namespace ai
                 creators["free fireball"] = &TriggerFactoryInternal::free_fireball;
                 creators["finger of frost"] = &TriggerFactoryInternal::finger_of_frost;
                 creators["mirror image"] = &TriggerFactoryInternal::mirror_image;
+#ifdef MANGOSBOT_TWO
                 creators["learn glyph of fireball"] = &TriggerFactoryInternal::learn_glyph_of_fireball;
                 creators["remove glyph of fireball"] = &TriggerFactoryInternal::remove_glyph_of_fireball;
                 creators["learn glyph of frostbolt"] = &TriggerFactoryInternal::learn_glyph_of_frostbolt;
@@ -278,6 +279,7 @@ namespace ai
                 creators["remove glyph of mirror image"] = &TriggerFactoryInternal::remove_glyph_of_mirror_image;
                 creators["learn glyph of molten armor"] = &TriggerFactoryInternal::learn_glyph_of_molten_armor;
                 creators["remove glyph of molten armor"] = &TriggerFactoryInternal::remove_glyph_of_molten_armor;
+#endif
                 creators["no improved scorch"] = &TriggerFactoryInternal::no_improved_scorch;
                 creators["no fire vulnerability"] = &TriggerFactoryInternal::no_fire_vulnerability;
                 creators["living bomb"] = &TriggerFactoryInternal::living_bomb;
@@ -322,6 +324,8 @@ namespace ai
             static Trigger* free_fireball(PlayerbotAI* ai) { return new FireballOrFrostfireBoltFreeTrigger(ai); }
             static Trigger* finger_of_frost(PlayerbotAI* ai) { return new FingersOfFrostTrigger(ai); }
             static Trigger* mirror_image(PlayerbotAI* ai) { return new MirrorImageTrigger(ai); }
+
+#ifdef MANGOSBOT_TWO
             static Trigger* learn_glyph_of_fireball(PlayerbotAI* ai) { return new LearnGlyphOfFireballTrigger(ai); }
             static Trigger* remove_glyph_of_fireball(PlayerbotAI* ai) { return new RemoveGlyphOfFireballTrigger(ai); }
             static Trigger* learn_glyph_of_frostbolt(PlayerbotAI* ai) { return new LearnGlyphOfFrostboltTrigger(ai); }
@@ -332,6 +336,8 @@ namespace ai
             static Trigger* remove_glyph_of_mirror_image(PlayerbotAI* ai) { return new RemoveGlyphOfMirrorImageTrigger(ai); }
             static Trigger* learn_glyph_of_molten_armor(PlayerbotAI* ai) { return new LearnGlyphOfMoltenArmorTrigger(ai); }
             static Trigger* remove_glyph_of_molten_armor(PlayerbotAI* ai) { return new RemoveGlyphOfMoltenArmorTrigger(ai); }
+#endif
+
             static Trigger* no_improved_scorch(PlayerbotAI* ai) { return new NoImprovedScorchDebuffTrigger(ai); }
             static Trigger* no_fire_vulnerability(PlayerbotAI* ai) { return new NoFireVulnerabilityTrigger(ai); }
             static Trigger* living_bomb(PlayerbotAI* ai) { return new LivingBombTrigger(ai); }
@@ -399,6 +405,8 @@ namespace ai
                 creators["frostfire bolt"] = &AiObjectContextInternal::frostfire_bolt;
                 creators["deep freeze"] = &AiObjectContextInternal::deep_freeze;
                 creators["mirror image"] = &AiObjectContextInternal::mirror_image;
+
+#ifdef MANGOSBOT_TWO
                 creators["learn glyph of fireball"] = &AiObjectContextInternal::learn_glyph_of_fireball;
                 creators["remove glyph of fireball"] = &AiObjectContextInternal::remove_glyph_of_fireball;
                 creators["learn glyph of frostbolt"] = &AiObjectContextInternal::learn_glyph_of_frostbolt;
@@ -409,6 +417,8 @@ namespace ai
                 creators["remove glyph of mirror image"] = &AiObjectContextInternal::remove_glyph_of_mirror_image;
                 creators["learn glyph of molten armor"] = &AiObjectContextInternal::learn_glyph_of_molten_armor;
                 creators["remove glyph of molten armor"] = &AiObjectContextInternal::remove_glyph_of_molten_armor;
+#endif
+
                 creators["update pve strats"] = &AiObjectContextInternal::update_pve_strats;
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;

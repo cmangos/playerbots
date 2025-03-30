@@ -1,6 +1,9 @@
 #pragma once
 #include "playerbot/strategy/triggers/GenericTriggers.h"
+
+#ifdef MANGOSBOT_TWO
 #include "playerbot/strategy/triggers/GlyphTriggers.h"
+#endif
 
 namespace ai
 {
@@ -194,6 +197,7 @@ namespace ai
     DEBUFF_TRIGGER_A(NoImprovedScorchDebuffTrigger, "improved scorch");
     HAS_AURA_TRIGGER(FingersOfFrostTrigger, "fingers of frost");
 
+#ifdef MANGOSBOT_TWO
     class LearnGlyphOfFireballTrigger : public LearnGlyphTrigger
     {
     public:
@@ -313,6 +317,7 @@ namespace ai
             ""                              //No strategy required
         ) {}
     };
+#endif
 
     class NoFireVulnerabilityTrigger : public Trigger
     {

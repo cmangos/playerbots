@@ -18,7 +18,8 @@ namespace ai
         static bool isGlyphAlreadySet(uint32 glyphId, Player* bot);
         static uint8 GetBestSlotForGlyph(uint32 glyphId, Player* bot, uint8 wantedSlot = 99);
 
-        static bool WantsGlyphFromStrategy(uint32 glyphId, Player* bot);
+        static GlyphPriorityList GetGlyphPriorityList(Player* bot);
+        static bool WantsGlyphFromConfig(uint32 glyphId, Player* bot);
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "set glyph"; } //Must equal iternal name
         virtual std::string GetHelpDescription()
@@ -29,4 +30,21 @@ namespace ai
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif 
     };    
+
+    class AutoSetGlyphAction : public SetGlyphAction
+    {
+    public:
+        AutoSetGlyphAction(PlayerbotAI* ai, std::string name = "auto set glyph") : SetGlyphAction(ai, name) {}
+        virtual bool Execute(Event& event) override;
+
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "auto set glyph"; } //Must equal iternal name
+        virtual std::string GetHelpDescription()
+        {
+            return "This action will automatically apply new glyphs to the bot based on the config.";
+        }
+        virtual std::vector<std::string> GetUsedActions() { return {}; }
+        virtual std::vector<std::string> GetUsedValues() { return {}; }
+#endif 
+    };
 }

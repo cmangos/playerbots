@@ -150,11 +150,13 @@ void GlyphAction::Set(uint32 itemId, uint8 wantedSlotId, std::ostringstream& msg
     std::map<std::string, std::string> placeholders;
     placeholders["%glyph"] = ChatHelper::formatItem(glyphProto);
 
+#ifdef MANGOSBOT_TWO
     if (glyphProto->Class != ITEM_CLASS_GLYPH || !glyphId)
     {
         msg << BOT_TEXT2("%glyph is not a valid glyph", placeholders);
         return;
     }
+#endif
 
     if (glyphProto->AllowableClass != bot->getClassMask())
     {

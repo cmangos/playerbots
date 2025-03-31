@@ -132,6 +132,7 @@ public:
     bool randomBotTeleportNearPlayer;
     uint32 randomBotTeleportNearPlayerMaxAmount;
     float randomBotTeleportNearPlayerMaxAmountRadius;
+    uint32 randomBotTeleportMinInterval, randomBotTeleportMaxInterval;
     uint32 randomGearMaxLevel;
     uint32 randomGearMaxDiff;
     bool randomGearUpgradeEnabled;

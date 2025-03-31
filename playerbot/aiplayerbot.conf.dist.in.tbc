@@ -93,6 +93,10 @@ AiPlayerbot.DeleteRandomBotArenaTeams = 0
 # Maps to teleport random bots
 AiPlayerbot.RandomBotMaps = 0,1,530,571
 
+# Min and max intervals for random teleports, in seconds (default: 2hrs and 48hrs)
+AiPlayerbot.RandomBotTeleportTeleportMinInterval = 7200
+AiPlayerbot.RandomBotTeleportTeleportMaxInterval = 172800
+
 # Change random bot has lower gear
 AiPlayerbot.RandomGearLoweringChance = 0.15
 

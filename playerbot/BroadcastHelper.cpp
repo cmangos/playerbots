@@ -380,7 +380,7 @@ bool BroadcastHelper::BroadcastQuestUpdateAddKill(
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("broadcast_quest_update_add_kill_objective_completed", placeholders),
-            { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+            { {TO_YELL, 10}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
         );
     }
 
@@ -455,7 +455,7 @@ bool BroadcastHelper::BroadcastQuestUpdateFailedTimer(
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("broadcast_quest_update_failed_timer", placeholders),
-            { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+            { {TO_YELL, 10}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
         );
     }
 
@@ -582,7 +582,7 @@ bool BroadcastHelper::BroadcastCreatureKill(
                 return BroadcastToChannelWithGlobalChance(
                     ai,
                     BOT_TEXT2("broadcast_killed_rareelite", placeholders),
-                    { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+                    { {TO_YELL, 10}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
                 );
             }
             break;
@@ -592,7 +592,7 @@ bool BroadcastHelper::BroadcastCreatureKill(
                 return BroadcastToChannelWithGlobalChance(
                     ai,
                     BOT_TEXT2("broadcast_killed_worldboss", placeholders),
-                    { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+                    { {TO_YELL, 10}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
                 );
             }
             break;
@@ -602,7 +602,7 @@ bool BroadcastHelper::BroadcastCreatureKill(
                 return BroadcastToChannelWithGlobalChance(
                     ai,
                     BOT_TEXT2("broadcast_killed_rare", placeholders),
-                    { {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+                    { {TO_YELL, 10}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
                 );
             }
             break;
@@ -811,7 +811,7 @@ bool BroadcastHelper::BroadcastSuggestInstance(
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("suggest_instance", placeholders),
-            { {TO_LOOKING_FOR_GROUP, 50}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+            { {TO_SAY_CITY, 50}, {TO_YELL_CITY, 10}, {TO_LOOKING_FOR_GROUP, 50}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
         );
     }
 
@@ -842,7 +842,7 @@ bool BroadcastHelper::BroadcastSuggestQuest(
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("suggest_quest", placeholders),
-            { {TO_LOOKING_FOR_GROUP, 50}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+            { {TO_SAY_CITY, 50}, {TO_YELL_CITY, 10}, {TO_LOOKING_FOR_GROUP, 50}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
         );
     }
 
@@ -869,7 +869,7 @@ bool BroadcastHelper::BroadcastSuggestGrindMaterials(
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("suggest_trade", placeholders),
-            { {TO_TRADE, 50}, {TO_LOOKING_FOR_GROUP, 50}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+            { {TO_SAY_CITY, 50}, {TO_YELL_CITY, 10}, {TO_TRADE, 50}, {TO_LOOKING_FOR_GROUP, 50}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
         );
     }
 
@@ -904,7 +904,7 @@ bool BroadcastHelper::BroadcastSuggestGrindReputation(
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("suggest_faction", placeholders),
-            { {TO_LOOKING_FOR_GROUP, 50}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
+            { {TO_SAY_CITY, 50}, {TO_YELL_CITY, 10}, {TO_LOOKING_FOR_GROUP, 50}, {TO_GUILD, 50}, {TO_WORLD, 50}, {TO_GENERAL, 100} }
         );
     }
 
@@ -935,7 +935,7 @@ bool BroadcastHelper::BroadcastSuggestSell(
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("suggest_sell", placeholders),
-            { {TO_TRADE, 90}, {TO_GENERAL, 100} }
+            { {TO_SAY_CITY, 50}, {TO_YELL_CITY, 10}, {TO_TRADE, 90}, {TO_GENERAL, 100} }
         );
     }
 
@@ -963,7 +963,7 @@ bool BroadcastHelper::BroadcastSuggestSomething(
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("suggest_something", placeholders),
-            { {TO_GUILD, 10}, {TO_WORLD, 70}, {TO_GENERAL, 100} }
+            { {TO_SAY, 70}, {TO_YELL, 10},{TO_GUILD, 10}, {TO_WORLD, 70}, {TO_GENERAL, 100} }
         );
     }
 
@@ -996,7 +996,7 @@ bool BroadcastHelper::BroadcastSuggestSomethingToxic(
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("suggest_something_toxic", placeholders),
-            { {TO_GUILD, 10}, {TO_WORLD, 70}, {TO_GENERAL, 100} }
+            { {TO_SAY, 70}, {TO_YELL, 10},{TO_GUILD, 10}, {TO_WORLD, 70}, {TO_GENERAL, 100} }
         );
     }
 
@@ -1056,7 +1056,7 @@ bool BroadcastHelper::BroadcastSuggestToxicLinks(
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("suggest_toxic_links", placeholders),
-            { {TO_GUILD, 10}, {TO_WORLD, 70}, {TO_GENERAL, 100} }
+            { {TO_SAY, 70}, {TO_YELL, 10},{TO_GUILD, 10}, {TO_WORLD, 70}, {TO_GENERAL, 100} }
         );
     }
 
@@ -1070,15 +1070,18 @@ bool BroadcastHelper::BroadcastSuggestThunderfury(
 {
     if (urand(1, sPlayerbotAIConfig.broadcastChanceMaxValue) <= sPlayerbotAIConfig.broadcastChanceSuggestThunderfury)
     {
+        //items
+        std::vector<Item*> botItems = ai->GetInventoryAndEquippedItems();
 
         std::map<std::string, std::string> placeholders;
         ItemPrototype const* thunderfuryProto = sObjectMgr.GetItemPrototype(19019);
         placeholders["%thunderfury_link"] = bot->GetPlayerbotAI()->GetChatHelper()->formatItem(thunderfuryProto);
+        placeholders["%random_inventory_item_link"] = botItems.size() > 0 ? ai->GetChatHelper()->formatItem(botItems[rand() % botItems.size()]) : BOT_TEXT("string_empty_link");
 
         return BroadcastToChannelWithGlobalChance(
             ai,
             BOT_TEXT2("thunderfury_spam", placeholders),
-            { {TO_WORLD, 70}, {TO_GENERAL, 100} }
+            { {TO_SAY, 70}, {TO_YELL, 10},{TO_WORLD, 70}, {TO_GENERAL, 100} }
         );
     }
 

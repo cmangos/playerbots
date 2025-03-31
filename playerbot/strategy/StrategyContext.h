@@ -147,6 +147,7 @@ namespace ai
             creators["wbuff"] = &StrategyContext::world_buff;
             creators["silent"] = &StrategyContext::silent;
             creators["nowar"] = &StrategyContext::nowar;
+            creators["glyph"] = [](PlayerbotAI* ai) { return new GlyphStrategy(ai); };
             creators["ai chat"] = [](PlayerbotAI* ai) { return new AIChatStrategy(ai); };
 
             // Dungeon Strategies

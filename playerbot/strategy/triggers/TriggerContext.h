@@ -250,7 +250,7 @@ namespace ai
             creators["random jump"] = &TriggerContext::random_jump;
             creators["rtsc jump active"] = &TriggerContext::rtsc_jump_active;
 
-            creators["set glyph"] = [](PlayerbotAI* ai) { return new SetGlyphTrigger(ai); };
+            creators["apply glyphs"] = [](PlayerbotAI* ai) { return new ApplyGlyphTrigger(ai); };
 
             // racials
             creators["berserking"] = &TriggerContext::berserking;

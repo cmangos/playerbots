@@ -871,6 +871,9 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         Player* master = facade->GetMaster();
 
         nonCombatEngine->addStrategy("roll");
+#ifdef MANGOSBOT_TWO
+        nonCombatEngine->addStrategy("glyph");
+#endif
 
         // let 25% of free bots start duels.
         if (sPlayerbotAIConfig.autoDuel && (!urand(0, 3) || (player->GetLevel() >= 80 && !urand(0, 1))))

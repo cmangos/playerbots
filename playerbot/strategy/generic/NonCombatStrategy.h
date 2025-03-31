@@ -119,4 +119,21 @@ namespace ai
     protected:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
+
+    class GlyphStrategy : public Strategy
+    {
+    public:
+        GlyphStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "glyph"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "glyph"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "Automatically applies the best glyphs based on the config.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {}; }
+#endif
+    protected:
+        virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+    };
 }

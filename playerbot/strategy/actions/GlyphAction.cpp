@@ -1,286 +1,352 @@
-#include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/playerbot.h"
 #include "GlyphAction.h"
 #include "playerbot/RandomItemMgr.h"
+#include "playerbot/strategy/values/GlyphValues.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
 
 using namespace ai;
 
-bool SetGlyphAction::Execute(Event& event)
+bool GlyphAction::Execute(Event& event)
 {
-#ifdef MANGOSBOT_TWO
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    std::string param = event.getParam();
+    ItemIds ids = ChatHelper::parseItems(param);
+    ProcessGlyphAction glyphAction = &GlyphAction::List;
 
-    uint8 glyphSlot = MAX_GLYPH_SLOT_INDEX;
-    const ItemPrototype* glyphProto = nullptr;
-    std::string glyphName = "Glyph of " + qualifier;
+    std::vector<uint32> glyphs;
+    std::vector<uint8> glyphsSlots;
 
-    if (!event.getParam().empty())
+    if (param == "all")
     {
-        std::string glyphName = event.getParam();
+        glyphs = AI_VALUE(std::vector<uint32>, "available glyphs");
 
-        ItemIds ids = ChatHelper::parseItems(glyphName);
+        for (auto& itemId : glyphs)
+            glyphsSlots.push_back(GetEquipedGlyphSlot(itemId));
+    }
+    else if (param == "wanted")
+    {
+        glyphs = AI_VALUE(std::vector<uint32>, "wanted glyphs");
 
-        if (!ids.empty())
+        for (auto& itemId : glyphs)
+            glyphsSlots.push_back(GetEquipedGlyphSlot(itemId));
+    }
+    else if (param == "equiped")
+    {
+        glyphs = AI_VALUE(std::vector<uint32>, "equiped glyphs");
+
+        for (uint8 glyphSlot = 0; glyphSlot < glyphs.size(); glyphSlot++)
+            if (AvailableGlyphsValue::GetGlyphSlotTypeFromSlot(glyphSlot, bot->GetLevel()) != GlyphSlotType::LOCKED_SLOT)
+                glyphsSlots.push_back(glyphSlot);
+    }
+    else if (param.find("remove") == 0)
+    {
+        std::vector<uint32> equipedGlyphs = AI_VALUE(std::vector<uint32>, "equiped glyphs");
+
+        if (param.size() > 7)
         {
-            glyphProto = sObjectMgr.GetItemPrototype(*ids.begin());
+            std::string removeSlots = param.substr(7);
 
-            if (glyphProto)
-            {
-                if (glyphName.find("|r ") != std::string::npos)
+            for (auto& token : getMultiQualifiers(removeSlots, " "))
+            {               
+                if (isValidNumberString(token))
                 {
-                    if (isValidNumberString(glyphName.substr(glyphName.find("|r ") + 3)))
-                        glyphSlot = stoi(glyphName.substr(glyphName.find("|r ") + 3));
+                    std::ostringstream out;
+                    out << token << " is not a valid slot number";
+                    ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                    return false;
                 }
 
-                glyphName = glyphProto->Name1;
+                uint8 slotId = stoi(token);
+
+                if (slotId > glyphs.size())
+                    glyphs.push_back(0);
+                else
+                    glyphs.push_back(equipedGlyphs[slotId]);
+
+                glyphsSlots.push_back(slotId);
             }
         }
-    }
+        else //Remove all glyphs
+        {
+            for (uint8 glyphSlot = 0; glyphSlot < equipedGlyphs.size(); glyphSlot++)
+                if (AvailableGlyphsValue::GetGlyphSlotTypeFromSlot(glyphSlot, bot->GetLevel()) != GlyphSlotType::LOCKED_SLOT)
+                {
+                    glyphs.push_back(equipedGlyphs[glyphSlot]);
+                    glyphsSlots.push_back(glyphSlot);
+                }
+        }
 
-    if (!glyphProto)
-       glyphProto = GetGlyphProtoFromName(glyphName, bot->getClass());
-    
-    if (!glyphProto)
+        glyphAction = &GlyphAction::Remove;
+    }
+    else if (!ids.empty())
     {
-        ai->TellError(requester, "Glyph " + glyphName + " does not exists");
+        for (auto& id : ids)
+        {
+            if (!id)
+                continue;
+
+            glyphs.push_back(id);
+            if (param.find("|r ") != std::string::npos && isValidNumberString(param.substr(param.find("|r ") + 3)))
+                glyphsSlots.push_back(stoi(param.substr(param.find("|r ") + 3)));
+            else
+                glyphsSlots.push_back(99);
+        }
+
+        glyphAction = &GlyphAction::Set;
+    }
+    else
+    {
+        ai->TellPlayer(requester, "Correct usage: glyph [glyph item link/remove] (optional slotnumber)", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        ai->TellPlayer(requester, "glyph all/wanted/equiped for list of glyphs", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         return false;
     }
 
-    uint32 glyphId = GetGlyphIdFromProto(glyphProto);
+    Iterate(requester, glyphAction, glyphs, glyphsSlots);
 
+    return true;
+}
+
+void GlyphAction::Iterate(Player* requester, ProcessGlyphAction action, const std::vector<uint32> glyphs, const std::vector<uint8> glyphSlots)
+{
+    for (uint32 i = 0; i < glyphs.size(); i++)
+    {
+        std::ostringstream out;
+
+        uint32 glyphItemId = glyphs[i];
+
+        uint8 slotId = (glyphSlots.size() <= i ? 99 : glyphSlots[i]);
+
+        if (action)
+            (this->*action)(glyphItemId, slotId, out);
+
+        if(!out.str().empty())
+            ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+    }
+}
+void GlyphAction::List(uint32 itemId, uint8 slotId, std::ostringstream& msg)
+{
+    GlyphSlotType slotType = EquipedGlyphsValue::GetGlyphSlotTypeFromSlot(slotId);
+    std::string slotTypeName = (slotType == GlyphSlotType::MAJOR_SLOT ? "major" : "minor");
+
+    if (itemId)
+        msg << ChatHelper::formatItem(sObjectMgr.GetItemPrototype(itemId));
+    else if (slotType != GlyphSlotType::LOCKED_SLOT)
+        msg << "no glyph";
+
+    if (slotType != GlyphSlotType::LOCKED_SLOT)
+        msg << " (equiped in "<< slotTypeName << " slot "  << std::to_string(slotId) << ")";
+}
+void GlyphAction::Set(uint32 itemId, uint8 wantedSlotId, std::ostringstream& msg)
+{
+    const ItemPrototype* glyphProto = sObjectMgr.GetItemPrototype(itemId);
+
+    if (!glyphProto)
+        return;
+
+    uint32 glyphId = EquipedGlyphsValue::GetGlyphIdFromProto(glyphProto);
+
+    GlyphSlotType glyphSlotType = EquipedGlyphsValue::GetGlyphSlotTypeFromItemId(itemId);
+
+    std::map<std::string, std::string> placeholders;
+    placeholders["%glyph"] = ChatHelper::formatItem(glyphProto);
+
+#ifdef MANGOSBOT_TWO
     if (glyphProto->Class != ITEM_CLASS_GLYPH || !glyphId)
     {
-        ai->TellError(requester, glyphName + " is not a valid glyph");
-        return false;
+        msg << BOT_TEXT2("%glyph is not a valid glyph", placeholders);
+        return;
+    }
+#endif
+
+    if (glyphProto->AllowableClass != bot->getClassMask())
+    {
+        msg << BOT_TEXT2("%glyph is not a valid glyph for this class", placeholders);
+        return;
     }
 
-    if (glyphProto->AllowableClass != bot->getClass())
+    if (glyphProto->RequiredLevel > bot->GetLevel())
     {
-        ai->TellError(requester, glyphName + " is not a valid glyph for this class");
-        return false;
+        msg << BOT_TEXT2("%glyph can not be equiped for this level", placeholders);
+        return;
     }
 
     Item* glyphItem = ItemUsageValue::CurrentItem(glyphProto, bot);
 
     if (!glyphItem && !ai->HasCheat(BotCheatMask::item))
     {
-        ai->TellError(requester, "Glyph " + glyphName + " not found in inventory");
-        return false;
+        msg << BOT_TEXT2("%glyph is not found in inventory", placeholders);
+        return;
     }
 
-    glyphSlot = GetBestSlotForGlyph(glyphId, bot, glyphSlot);
+    std::vector<uint32> equipedGlyphs = AI_VALUE(std::vector<uint32>, "equiped glyphs");
+    uint8 useSlotId = wantedSlotId;
+    bool detectSlot = wantedSlotId > equipedGlyphs.size();
 
-    if (glyphSlot == MAX_GLYPH_SLOT_INDEX)
+    if (!detectSlot && EquipedGlyphsValue::GetGlyphSlotTypeFromSlot(useSlotId, bot->GetLevel()) == GlyphSlotType::LOCKED_SLOT)
     {
-        ai->TellError(requester, "No proper slot found for Glyph " + glyphName);
-        return false;
+        msg << BOT_TEXT2("Slot %slot is locked", placeholders);
+        return;
     }
 
-    if (!isGlyphSlotEnabled(glyphSlot, bot->GetLevel()))
+    for (uint32 slotId = 0; slotId < equipedGlyphs.size(); slotId++)
     {
-        ai->TellError(requester, "Slot " + std::to_string(glyphSlot) + " is not enabled");
-        return false;
+        if (!detectSlot && useSlotId != slotId)
+            continue;
+
+        if (glyphSlotType != EquipedGlyphsValue::GetGlyphSlotTypeFromSlot(slotId, bot->GetLevel()))
+        {
+            if (detectSlot)
+                continue;
+
+            msg << BOT_TEXT2("%glyph does not fit in slot %slot", placeholders);
+            return;
+        }
+
+        if (!equipedGlyphs[slotId])
+        {
+            useSlotId = slotId;
+            break;
+        }
     }
 
-    if (isGlyphAlreadySet(glyphId, bot))
+    placeholders["%slot"] = std::to_string(useSlotId);
+
+    if (useSlotId > equipedGlyphs.size())
     {
-        ai->TellError(requester, "Glyph " + glyphName + " is already active");
-        return false; //Bot already has glyph applied.
+        msg << BOT_TEXT2("No free slot available for %glyph", placeholders);
+        return;
     }
 
-    bot->ApplyGlyph(glyphSlot, false);
-    bot->SetGlyph(glyphSlot, glyphId);
-    bot->ApplyGlyph(glyphSlot, true);
+    if (std::find(equipedGlyphs.begin(), equipedGlyphs.end(), itemId) != equipedGlyphs.end())
+    {
+        msg << BOT_TEXT2("%glyph is already active", placeholders);
+        return;
+    }
+
+#ifdef MANGOSBOT_TWO
+    //Refactor to use packet/use item action later.
+    bot->ApplyGlyph(useSlotId, false);
+    bot->SetGlyph(useSlotId, glyphId);
+    bot->ApplyGlyph(useSlotId, true);
     bot->SendTalentsInfoData(false);
+#endif
 
     uint32 count = 1;
 
     if (!ai->HasCheat(BotCheatMask::item))
         bot->DestroyItemCount(glyphItem, count, true);
 
-    ai->TellPlayerNoFacing(requester, "Applied " + glyphName, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-#endif;
-    return true;
+    msg << BOT_TEXT2("Applied %glyph to slot %slot", placeholders);
 }
 
-bool SetGlyphAction::isUseful()
+void GlyphAction::Remove(uint32 itemId, uint8 removeSlotId, std::ostringstream& msg)
 {
-    return true;
-}
+    std::map<std::string, std::string> placeholders;
+    placeholders["%slot"] = std::to_string(removeSlotId);
 
-const ItemPrototype* SetGlyphAction::GetGlyphProtoFromName(std::string glyphName, uint32 classId)
-{
-    //Glyph of Molten Armor
-    for (auto& itemId : sRandomItemMgr.GetGlyphs(classId))
+    if (EquipedGlyphsValue::GetGlyphSlotTypeFromSlot(removeSlotId, bot->GetLevel()) == GlyphSlotType::LOCKED_SLOT)
     {
-        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-
-        if (!proto)
-            continue;
-
-        if (proto->Name1 == glyphName)
-            return proto;
+        msg << BOT_TEXT2("Slot %slot is locked", placeholders);
+        return;
     }
 
-    return nullptr;
-}
-
-uint32 SetGlyphAction::GetGlyphIdFromProto(const ItemPrototype* glyphProto)
-{
-    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(glyphProto->Spells[0].SpellId);
-
-    if (!spellInfo)
-        return 0;
-
-    return spellInfo->EffectMiscValue[0];
-}
-
-const ItemPrototype* SetGlyphAction::GetGlyphProtoFromGlyphId(uint32 glyphId, uint32 classId)
-{
-    //Glyph of Molten Armor
-    for (auto& itemId : sRandomItemMgr.GetGlyphs(classId))
+    if (!itemId)
     {
-        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-
-        if (!proto)
-            continue;
-
-        if (GetGlyphIdFromProto(proto) == glyphId)
-            return proto;
+        msg << BOT_TEXT2("No glyph in slot %slot", placeholders);
     }
+        
+    const ItemPrototype* glyphProto = sObjectMgr.GetItemPrototype(itemId);
 
-    return nullptr;
-}
+    if (!glyphProto)
+        return;
 
-bool SetGlyphAction::isGlyphSlotEnabled(uint8 slot, uint32 level)
-{
-    if (level >= 15 && (slot == 0 || slot == 1))
-        return true;
-    if (level >= 30 && slot == 3)
-        return true;
-    if (level >= 50 && slot == 2)
-        return true;
-    if (level >= 70 && slot == 4)
-        return true;
-    if (level >= 80 && slot == 5)
-        return true;
+    placeholders["%glyph"] = ChatHelper::formatItem(glyphProto);
 
-    return false;
-}
-
-bool SetGlyphAction::isGlyphAlreadySet(uint32 glyphId, Player* bot)
-{
+    std::vector<uint32> equipedGlyphs = AI_VALUE(std::vector<uint32>, "equiped glyphs");
 #ifdef MANGOSBOT_TWO
-    for (uint32 i = 0; i < sGlyphSlotStore.GetNumRows(); ++i)
-        if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(i))
-            if (bot->GetGlyph(gs->Id) == glyphId)
-                return true;
-#endif;
-    return false;
+    //Refactor to use packet/use item action later.
+    bot->ApplyGlyph(removeSlotId, false);
+    bot->SetGlyph(removeSlotId, 0);
+    bot->ApplyGlyph(removeSlotId, true);
+    bot->SendTalentsInfoData(false);
+#endif
+
+    msg << BOT_TEXT2("Removed %glyph from slot %slot", placeholders);
 }
 
-uint8 SetGlyphAction::GetBestSlotForGlyph(uint32 glyphId, Player* bot, uint8 wantedSlot)
+uint8 GlyphAction::GetEquipedGlyphSlot(uint32 itemId)
 {
-#ifdef MANGOSBOT_TWO
-    uint32 minLevel = 9999;
-    uint8 bestSlot = MAX_GLYPH_SLOT_INDEX;
-    std::map<uint32, uint8> currentLevelSlot;
+    std::vector<uint32> equipedGlyphs = AI_VALUE(std::vector<uint32>, "equiped glyphs");
 
-    GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyphId);
-
-    for (uint32 glyphIndex = 0; glyphIndex < MAX_GLYPH_SLOT_INDEX; ++glyphIndex)
+    for (uint8 slotId = 0; slotId < equipedGlyphs.size(); slotId++)
     {
-        if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(bot->GetGlyphSlot(glyphIndex)))
-        {
-            if (wantedSlot != MAX_GLYPH_SLOT_INDEX && wantedSlot != glyphIndex)
-                continue;
-
-            if (gp->TypeFlags != gs->TypeFlags) //Glyph doesn't fit in this slot.
-                continue;
-
-            if (!isGlyphSlotEnabled(glyphIndex, bot->GetLevel())) //Glyphslot isn't enabled
-                continue;
-
-            uint32 currentGlyphId = bot->GetGlyph(glyphIndex);
-
-            const ItemPrototype* currentGlyphProto = GetGlyphProtoFromGlyphId(currentGlyphId, bot->getClass());
-
-            if (!currentGlyphProto) //Empty slot put it here.
-                return glyphIndex;
-
-            if(!WantsGlyphFromStrategy(currentGlyphId, bot)) //Strategy doesn't need this glyph so we can replace it.
-                return glyphIndex;
-
-            if (currentGlyphProto->RequiredLevel >= minLevel)
-                continue;
-
-            minLevel = currentGlyphProto->RequiredLevel;
-            bestSlot = glyphIndex;
-        }
+        if (itemId == equipedGlyphs[slotId])
+            return slotId;
     }
-    return bestSlot;
-#else
-    return 0;
-#endif;
+
+    return 99;
 }
 
-bool SetGlyphAction::WantsGlyphFromStrategy(uint32 glyphId, Player* bot)
+bool AutoSetGlyphAction::Execute(Event& event)
 {
-    std::list<TriggerNode*> triggerNodes;
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
-    const ItemPrototype* currentGlyphProto = GetGlyphProtoFromGlyphId(glyphId, bot->getClass());
+    std::vector<uint32> availableGlyphs = AI_VALUE(std::vector<uint32>, "available glyphs");
 
-    bool foundTrigger = false;
+    std::vector<uint32> wantedGlyphs = AI_VALUE(std::vector<uint32>, "wanted glyphs");
 
-    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    std::vector<uint32> equipedGlyphs = AI_VALUE(std::vector<uint32>, "equiped glyphs");
 
-    for (auto& strategy : ai->GetAiObjectContext()->GetSupportedStrategies())
+    std::vector<uint32> newGlyphs;
+    std::vector<uint8> newSlots;    
+
+    std::reverse(wantedGlyphs.begin(), wantedGlyphs.end());
+
+    for (uint32 wantedRank = 0; wantedRank < wantedGlyphs.size(); wantedRank++)
     {
-        if (!ai->HasStrategy(strategy, BotState::BOT_STATE_COMBAT))
+        uint32 useSlot = 999;
+        uint32 itemId = wantedGlyphs[wantedRank];
+        if (std::find(equipedGlyphs.begin(), equipedGlyphs.end(), itemId) != equipedGlyphs.end()) //Already have glyph equiped
             continue;
 
-        Strategy* combatStrategy = ai->GetAiObjectContext()->GetStrategy(strategy);
+        if (std::find(availableGlyphs.begin(), availableGlyphs.end(), itemId) == availableGlyphs.end()) //Do not have the glyph available
+            continue;
 
-        combatStrategy->InitTriggers(triggerNodes, BotState::BOT_STATE_NON_COMBAT);
+        const ItemPrototype* glyphProto = sObjectMgr.GetItemPrototype(itemId);
+        uint32 glyphId = EquipedGlyphsValue::GetGlyphIdFromProto(glyphProto);
+        GlyphSlotType glyphSlotType = EquipedGlyphsValue::GetGlyphSlotTypeFromItemId(itemId);
 
-        //Loop over all triggers of this strategy.
-        for (auto& triggerNode : triggerNodes)
+        for (uint8 newSlot = 0; newSlot < equipedGlyphs.size(); newSlot++)
         {
-            if (triggerNode->getName().find("set glyph::") != 0)
+            GlyphSlotType slotType = EquipedGlyphsValue::GetGlyphSlotTypeFromSlot(newSlot, bot->GetLevel());
+
+            if (slotType == GlyphSlotType::LOCKED_SLOT)
                 continue;
 
-            std::string triggerQualifier = triggerNode->getName().substr(11);
-
-            Tokens tokens = getMultiQualifiers(triggerQualifier, ",");
-
-            std::string glyphName = "glyph of " + tokens[0];
-
-            if (currentGlyphProto->Name1 != glyphName)
+            if (glyphSlotType != slotType)
                 continue;
 
-            if (tokens.size() > 1)
-            {
-                uint32 requiredTalentSpellId = stoi(tokens[1]);
+            uint32 currentWantedRank = 999;
+            for (uint32 cwRank = 0; cwRank < wantedGlyphs.size(); cwRank++)
+                if (wantedGlyphs[cwRank] == equipedGlyphs[newSlot])
+                    currentWantedRank = cwRank;
 
-                if (!bot->HasSpell(requiredTalentSpellId))
-                    continue;
-            }
+            if (currentWantedRank < wantedRank) //Do not replace glyph with a glyph with a better wanted rank.
+                continue;
 
-            foundTrigger = true;
-            break;
+            useSlot = newSlot;
         }
 
-        for (std::list<TriggerNode*>::iterator i = triggerNodes.begin(); i != triggerNodes.end(); i++)
-        {
-            TriggerNode* trigger = *i;
-            delete trigger;
-        }
+        if (useSlot > equipedGlyphs.size())
+            continue;
 
-        triggerNodes.clear();
+        newGlyphs.push_back(itemId);
+        newSlots.push_back(useSlot);
 
-        if (foundTrigger)
-            break;
+        equipedGlyphs[useSlot] = itemId;
     }
 
-    return foundTrigger;
+    Iterate(requester, &GlyphAction::Set, newGlyphs, newSlots);
+
+    return true;
 }

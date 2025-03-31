@@ -3,38 +3,40 @@
 
 namespace ai
 {
-    class SetGlyphAction : public Action, public Qualified
+    class GlyphAction : public Action, public Qualified
     {
     public:
-        SetGlyphAction(PlayerbotAI* ai, std::string name = "set glyph") : Action(ai, name), Qualified() {}
+       GlyphAction(PlayerbotAI* ai, std::string name = "set glyph") : Action(ai, name), Qualified() {}
         virtual bool Execute(Event& event) override;
-        virtual bool isUseful() override;
+        typedef void (GlyphAction::* ProcessGlyphAction)(uint32, uint8, std::ostringstream& msg);
+        void Iterate(Player* requester, ProcessGlyphAction action, const std::vector<uint32> glyphs, const std::vector<uint8> glyphSlots);  
+        void List(uint32 itemId, uint8 slotId, std::ostringstream& msg);
+        void Set(uint32 itemId, uint8 wantedSlotId, std::ostringstream& msg);
+        void Remove(uint32 itemId, uint8 removeSlotId, std::ostringstream& msg);
 
-        static const ItemPrototype* GetGlyphProtoFromName(std::string glyphName, uint32 classId);
-        static uint32 GetGlyphIdFromProto(const ItemPrototype* glyphProto);
-        static const ItemPrototype* GetGlyphProtoFromGlyphId(uint32 glyphId, uint32 classId);
-        
-        static bool isGlyphSlotEnabled(uint8 slot, uint32 level);
-        static bool isGlyphAlreadySet(uint32 glyphId, Player* bot);
-        static uint8 GetBestSlotForGlyph(uint32 glyphId, Player* bot, uint8 wantedSlot = 99);
-
-        static GlyphPriorityList GetGlyphPriorityList(Player* bot);
-        static bool WantsGlyphFromConfig(uint32 glyphId, Player* bot);
+        virtual bool isUsefulWhenStunned() { return true; }
+    private:
+        uint8 GetEquipedGlyphSlot(uint32 itemId);
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "set glyph"; } //Must equal iternal name
         virtual std::string GetHelpDescription()
         {
-            return "This action will apply new glyphs to the bot.";
+            return "This action will list or apply new glyphs to the bot..\n"
+                "glyph [itemlink] : equip glyph in a open slot.\n"
+                "glyph [itemlink] <slotnumber> : replace current glyph in slot with new glyph\n"
+                "glyph remove: remove all current glyphs\n"
+                "glyph remove <slotnumber>: remove glyph from slot\n"
+                "glyph all/wanted/equiped: list glyphs";
         }
         virtual std::vector<std::string> GetUsedActions() { return {}; }
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif 
     };    
 
-    class AutoSetGlyphAction : public SetGlyphAction
+    class AutoSetGlyphAction : public GlyphAction
     {
     public:
-        AutoSetGlyphAction(PlayerbotAI* ai, std::string name = "auto set glyph") : SetGlyphAction(ai, name) {}
+        AutoSetGlyphAction(PlayerbotAI* ai, std::string name = "auto set glyph") : GlyphAction(ai, name) {}
         virtual bool Execute(Event& event) override;
 
 #ifdef GenerateBotHelp

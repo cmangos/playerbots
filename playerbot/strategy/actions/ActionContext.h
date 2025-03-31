@@ -274,7 +274,6 @@ namespace ai
             creators["rpg duel"] = &ActionContext::rpg_duel;
             creators["rpg item"] = &ActionContext::rpg_item;
 
-            creators["set glyph"] = [](PlayerbotAI* ai) { return new SetGlyphAction(ai); };
             creators["auto set glyph"] = [](PlayerbotAI* ai) { return new AutoSetGlyphAction(ai); };
 
             // Bot States

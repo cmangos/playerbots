@@ -141,6 +141,7 @@ namespace ai
             creators["skill"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "skill");  };
             creators["faction"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "faction");  };
             creators["set value"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "set value");  };
+            creators["glyph"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "glyph");  };
         }
 
     private:

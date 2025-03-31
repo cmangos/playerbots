@@ -79,7 +79,7 @@ struct ParsedUrl {
 };
 
 //GlyphPrioritySpecMap[specId][level] = {{glyphItemId, prereqTalentSpell}};
-using GlyphPriority = std::pair<std::string, uint32>;
+using GlyphPriority = std::pair<uint32, uint32>;
 using GlyphPriorityList = std::vector<GlyphPriority>;
 using GlyphPriorityLevelMap = std::unordered_map<uint32, GlyphPriorityList>;
 using GlyphPrioritySpecMap = std::unordered_map<uint32, GlyphPriorityLevelMap>;
@@ -389,6 +389,8 @@ public:
     bool CanLogAction(PlayerbotAI* ai, std::string actionName, bool isExecute, std::string lastActionName);
 
 private:
+    void LoadTalentSpecs();
+
     Config config;
 };
 

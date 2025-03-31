@@ -163,6 +163,52 @@ bool BroadcastHelper::BroadcastToChannelWithGlobalChance(PlayerbotAI* ai, std::s
                 }
                 break;
             }
+            case TO_SAY:
+            {
+                if (ai->HasPlayerNearby(sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY))
+                    && roll <= chance
+                    && broadcastRoll <= sPlayerbotAIConfig.broadcastToSayGlobalChance
+                    && ai->Say(message))
+                {
+                    return true;
+                }
+                break;
+            }
+            case TO_YELL:
+            {
+                if (ai->HasPlayerNearby(sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL))
+                    && roll <= chance
+                    && broadcastRoll <= sPlayerbotAIConfig.broadcastToYellGlobalChance
+                    && ai->Yell(message))
+                {
+                    return true;
+                }
+                break;
+            }
+            case TO_SAY_CITY:
+            {
+                if (ai->HasPlayerNearby(sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY))
+                    && ai->GetBot()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING)
+                    && roll <= chance
+                    && broadcastRoll <= sPlayerbotAIConfig.broadcastToSayGlobalChance
+                    && ai->Say(message))
+                {
+                    return true;
+                }
+                break;
+            }
+            case TO_YELL_CITY:
+            {
+                if (ai->HasPlayerNearby(sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL))
+                    && ai->GetBot()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING)
+                    && roll <= chance
+                    && broadcastRoll <= sPlayerbotAIConfig.broadcastToYellGlobalChance
+                    && ai->Yell(message))
+                {
+                    return true;
+                }
+                break;
+            }
             default:
                 break;
         }

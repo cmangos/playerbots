@@ -242,6 +242,8 @@ public:
     uint32 broadcastToLocalDefenseGlobalChance;
     uint32 broadcastToWorldDefenseGlobalChance;
     uint32 broadcastToGuildRecruitmentGlobalChance;
+    uint32 broadcastToSayGlobalChance;
+    uint32 broadcastToYellGlobalChance;
 
     uint32 broadcastChanceLootingItemPoor;
     uint32 broadcastChanceLootingItemNormal;

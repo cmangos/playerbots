@@ -203,9 +203,6 @@ uint8 SetGlyphAction::GetBestSlotForGlyph(uint32 glyphId, Player* bot, uint8 wan
 
             uint32 currentGlyphId = bot->GetGlyph(glyphIndex);
 
-            if (currentGlyphId && !sRandomPlayerbotMgr.IsRandomBot(bot))
-                continue;
-
             const ItemPrototype* currentGlyphProto = GetGlyphProtoFromGlyphId(currentGlyphId, bot->getClass());
 
             if (!currentGlyphProto) //Empty slot put it here.

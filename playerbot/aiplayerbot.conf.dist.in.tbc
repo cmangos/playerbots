@@ -228,6 +228,8 @@ AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
 # AiPlayerbot.BroadcastToLocalDefenseGlobalChance = 30000
 # AiPlayerbot.BroadcastToWorldDefenseGlobalChance = 30000
 # AiPlayerbot.BroadcastToGuildRecruitmentGlobalChance = 30000
+# AiPlayerbot.BroadcastToSayGlobalChance = 30000
+# AiPlayerbot.BroadcastToYellGlobalChance = 30000
 #
 # individual settings
 # setting one of these to 0 will disable the particular broadcast

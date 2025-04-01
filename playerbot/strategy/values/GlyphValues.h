@@ -14,7 +14,7 @@ namespace ai
     class AvailableGlyphsValue : public CalculatedValue<std::vector<uint32>>
     {
     public:
-        AvailableGlyphsValue(PlayerbotAI* ai, std::string name = "available glyphs") : CalculatedValue<std::vector<uint32>>(ai, name) {}
+        AvailableGlyphsValue(PlayerbotAI* ai, std::string name = "available glyphs") : CalculatedValue<std::vector<uint32>>(ai, name, 30) {}
 
         std::vector<uint32> Calculate();
 

@@ -172,7 +172,7 @@ void GlyphAction::Set(uint32 itemId, uint8 wantedSlotId, std::ostringstream& msg
 
     Item* glyphItem = ItemUsageValue::CurrentItem(glyphProto, bot);
 
-    if (!glyphItem && !ai->HasCheat(BotCheatMask::item))
+    if (!glyphItem && !ai->HasCheat(BotCheatMask::glyph))
     {
         msg << BOT_TEXT2("%glyph is not found in inventory", placeholders);
         return;

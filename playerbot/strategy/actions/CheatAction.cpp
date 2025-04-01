@@ -50,10 +50,9 @@ bool CheatAction::Execute(Event& event)
 
 BotCheatMask CheatAction::GetCheatMask(std::string cheat)
 {
-    std::vector<std::string> cheatName = { "taxi", "gold", "health", "mana", "power", "item", "cooldown", "repair", "movespeed", "attackspeed", "breath", "maxMask"};
     for (int i = 0; i < log2((uint32)BotCheatMask::maxMask); i++)
     {
-        if (cheatName[i] == cheat)
+        if (sPlayerbotAIConfig.BotCheatMaskName[i] == cheat)
             return BotCheatMask(1 << i);
     }
 
@@ -62,8 +61,7 @@ BotCheatMask CheatAction::GetCheatMask(std::string cheat)
 
 std::string CheatAction::GetCheatName(BotCheatMask cheatMask)
 {
-    std::vector<std::string> cheatName = { "taxi", "gold", "health", "mana", "power", "item", "cooldown", "repair", "movespeed", "attackspeed", "breath", "maxMask" };
-    return cheatName[log2(((uint32)cheatMask))];
+    return sPlayerbotAIConfig.BotCheatMaskName[log2(((uint32)cheatMask))];
 }
 
 void CheatAction::ListCheats(Player* requester)

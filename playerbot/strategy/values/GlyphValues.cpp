@@ -14,7 +14,7 @@ std::vector<uint32> AvailableGlyphsValue::Calculate()
         if (glyphProto->RequiredLevel > bot->GetLevel())
             continue;
 
-        if (!ai->HasCheat(BotCheatMask::item) && AI_VALUE2(uint32, "item count", ChatHelper::formatQItem(itemId)) == 0)
+        if (!ai->HasCheat(BotCheatMask::glyph) && AI_VALUE2(uint32, "item count", ChatHelper::formatQItem(itemId)) == 0)
             continue;
 
         glyphList.push_back(itemId);

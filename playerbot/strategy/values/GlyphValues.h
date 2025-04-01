@@ -40,4 +40,14 @@ namespace ai
 
         std::vector<uint32> Calculate();
     };
+
+    class GlyphIsUpgradeValue : public BoolCalculatedValue, public Qualified
+    {
+    public:
+        GlyphIsUpgradeValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "glyph is upgrade"), Qualified() {}
+
+        static size_t GetWantedRank(uint32 itemId, const std::vector<uint32>& wantedGlyhps);
+
+        bool Calculate();
+    };
 }

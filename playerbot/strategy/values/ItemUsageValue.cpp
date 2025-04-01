@@ -274,6 +274,13 @@ ItemUsage ItemUsageValue::Calculate()
     if (equip != ItemUsage::ITEM_USAGE_NONE)
         return equip;
 
+#ifdef MANGOSBOT_TWO
+    if (proto->Class == ITEM_CLASS_GLYPH)
+        if (!ai->HasCheat(BotCheatMask::glyph) && AI_VALUE2(bool, "glyph is upgrade", itemId))
+            return ItemUsage::ITEM_USAGE_EQUIP;
+
+#endif MANGOSBOT_TWO
+
     //DISENCHANT
     if ((proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON) && proto->Bonding != BIND_WHEN_PICKED_UP &&
         ai->HasSkill(SKILL_ENCHANTING) && proto->Quality >= ITEM_QUALITY_UNCOMMON)

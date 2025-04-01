@@ -172,7 +172,7 @@ void GlyphAction::Set(uint32 itemId, uint8 wantedSlotId, std::ostringstream& msg
 
     Item* glyphItem = ItemUsageValue::CurrentItem(glyphProto, bot);
 
-    if (!glyphItem && !ai->HasCheat(BotCheatMask::item))
+    if (!glyphItem && !ai->HasCheat(BotCheatMask::glyph))
     {
         msg << BOT_TEXT2("%glyph is not found in inventory", placeholders);
         return;
@@ -302,10 +302,11 @@ bool AutoSetGlyphAction::Execute(Event& event)
 
     std::reverse(wantedGlyphs.begin(), wantedGlyphs.end());
 
-    for (uint32 wantedRank = 0; wantedRank < wantedGlyphs.size(); wantedRank++)
+    for (size_t wantedRank = 0; wantedRank < wantedGlyphs.size(); wantedRank++)
     {
         uint32 useSlot = 999;
         uint32 itemId = wantedGlyphs[wantedRank];
+
         if (std::find(equipedGlyphs.begin(), equipedGlyphs.end(), itemId) != equipedGlyphs.end()) //Already have glyph equiped
             continue;
 
@@ -317,7 +318,7 @@ bool AutoSetGlyphAction::Execute(Event& event)
         GlyphSlotType glyphSlotType = EquipedGlyphsValue::GetGlyphSlotTypeFromItemId(itemId);
 
         for (uint8 newSlot = 0; newSlot < equipedGlyphs.size(); newSlot++)
-        {
+        {            
             GlyphSlotType slotType = EquipedGlyphsValue::GetGlyphSlotTypeFromSlot(newSlot, bot->GetLevel());
 
             if (slotType == GlyphSlotType::LOCKED_SLOT)
@@ -326,12 +327,9 @@ bool AutoSetGlyphAction::Execute(Event& event)
             if (glyphSlotType != slotType)
                 continue;
 
-            uint32 currentWantedRank = 999;
-            for (uint32 cwRank = 0; cwRank < wantedGlyphs.size(); cwRank++)
-                if (wantedGlyphs[cwRank] == equipedGlyphs[newSlot])
-                    currentWantedRank = cwRank;
+            size_t currentWantedRank = GlyphIsUpgradeValue::GetWantedRank(equipedGlyphs[newSlot], wantedGlyphs);
 
-            if (currentWantedRank < wantedRank) //Do not replace glyph with a glyph with a better wanted rank.
+             if (currentWantedRank < wantedGlyphs.size() && currentWantedRank < wantedRank) //Do not replace glyph with a glyph with a better wanted rank.
                 continue;
 
             useSlot = newSlot;

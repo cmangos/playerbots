@@ -14,7 +14,7 @@ namespace ai
     class AvailableGlyphsValue : public CalculatedValue<std::vector<uint32>>
     {
     public:
-        AvailableGlyphsValue(PlayerbotAI* ai, std::string name = "available glyphs") : CalculatedValue<std::vector<uint32>>(ai, name) {}
+        AvailableGlyphsValue(PlayerbotAI* ai, std::string name = "available glyphs") : CalculatedValue<std::vector<uint32>>(ai, name, 30) {}
 
         std::vector<uint32> Calculate();
 
@@ -39,5 +39,15 @@ namespace ai
         EquipedGlyphsValue(PlayerbotAI* ai) : AvailableGlyphsValue(ai, "equiped glyphs") {}
 
         std::vector<uint32> Calculate();
+    };
+
+    class GlyphIsUpgradeValue : public BoolCalculatedValue, public Qualified
+    {
+    public:
+        GlyphIsUpgradeValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "glyph is upgrade"), Qualified() {}
+
+        static size_t GetWantedRank(uint32 itemId, const std::vector<uint32>& wantedGlyhps);
+
+        bool Calculate();
     };
 }

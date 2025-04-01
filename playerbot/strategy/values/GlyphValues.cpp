@@ -14,7 +14,7 @@ std::vector<uint32> AvailableGlyphsValue::Calculate()
         if (glyphProto->RequiredLevel > bot->GetLevel())
             continue;
 
-        if (!ai->HasCheat(BotCheatMask::item) && AI_VALUE2(uint32, "item count", ChatHelper::formatQItem(itemId)) == 0)
+        if (!ai->HasCheat(BotCheatMask::glyph) && AI_VALUE2(uint32, "item count", ChatHelper::formatQItem(itemId)) == 0)
             continue;
 
         glyphList.push_back(itemId);
@@ -179,4 +179,50 @@ std::vector<uint32> EquipedGlyphsValue::Calculate()
     }
 
     return glyphList;
+}
+
+bool GlyphIsUpgradeValue::Calculate()
+{
+    uint32 itemId = stoi(qualifier);
+
+    std::vector<uint32> wantedGlyphs = AI_VALUE(std::vector<uint32>, "wanted glyphs");
+
+    size_t wantedRank = GetWantedRank(itemId, wantedGlyphs);
+
+    if (wantedRank == wantedGlyphs.size())
+        return false;
+
+    GlyphSlotType slotType = AvailableGlyphsValue::GetGlyphSlotTypeFromItemId(itemId);
+
+    std::vector<uint32> equipedGlyphs = AI_VALUE(std::vector<uint32>, "equiped glyphs");
+
+    for (uint32 slotId = 0; slotId < equipedGlyphs.size(); slotId++)
+    {
+        if (equipedGlyphs[slotId] == itemId)
+            return false;
+
+        if (AvailableGlyphsValue::GetGlyphSlotTypeFromSlot(slotId, bot->GetLevel()) != slotType)
+            continue;
+
+        size_t currentWantedRank = GetWantedRank(equipedGlyphs[slotId], wantedGlyphs);
+
+        if (currentWantedRank < wantedGlyphs.size() && currentWantedRank > wantedRank)
+            continue;
+
+        return true;
+    }
+
+    return false;
+}
+
+size_t GlyphIsUpgradeValue::GetWantedRank(uint32 itemId, const std::vector<uint32>& wantedGlyphs)
+{
+    auto& it = std::find(wantedGlyphs.begin(), wantedGlyphs.end(), itemId);
+
+    if (it == wantedGlyphs.end())
+        return wantedGlyphs.size();
+
+    size_t index = std::distance(wantedGlyphs.begin(), it);
+
+    return index;
 }

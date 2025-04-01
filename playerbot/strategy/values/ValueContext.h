@@ -428,6 +428,7 @@ namespace ai
             creators["available glyphs"] = [](PlayerbotAI* ai) { return new AvailableGlyphsValue(ai); };
             creators["wanted glyphs"] = [](PlayerbotAI* ai) { return new WantedGlyphsValue(ai); };
             creators["equiped glyphs"] = [](PlayerbotAI* ai) { return new EquipedGlyphsValue(ai); };
+            creators["glyph is upgrade"] = [](PlayerbotAI* ai) { return new GlyphIsUpgradeValue(ai); };
 
             //Travel
             creators["focus travel target"] = [](PlayerbotAI* ai) { return new FocusTravelTargetValue(ai); };

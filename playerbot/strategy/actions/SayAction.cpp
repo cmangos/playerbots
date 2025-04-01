@@ -656,6 +656,11 @@ bool ChatReplyAction::HandleThunderfuryReply(Player* bot, ChatChannelSource chat
             bot->GetPlayerbotAI()->SayToGeneral(responseMessage);
             break;
         }
+        case ChatChannelSource::SRC_YELL:
+        {
+            bot->GetPlayerbotAI()->Yell(responseMessage);
+            break;
+        }
     }
 
     bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
@@ -723,6 +728,21 @@ bool ChatReplyAction::HandleToxicLinksReply(Player* bot, ChatChannelSource chatC
         case ChatChannelSource::SRC_GUILD:
         {
             bot->GetPlayerbotAI()->SayToGuild(BOT_TEXT2("suggest_toxic_links", placeholders));
+            break;
+        }
+        case ChatChannelSource::SRC_SAY:
+        {
+            bot->GetPlayerbotAI()->Say(BOT_TEXT2("suggest_toxic_links", placeholders));
+            break;
+        }
+        case ChatChannelSource::SRC_YELL:
+        {
+            bot->GetPlayerbotAI()->Yell(BOT_TEXT2("suggest_toxic_links", placeholders));
+            break;
+        }
+        case ChatChannelSource::SRC_PARTY:
+        {
+            bot->GetPlayerbotAI()->SayToParty(BOT_TEXT2("suggest_toxic_links", placeholders));
             break;
         }
     }
@@ -1443,7 +1463,7 @@ std::string ChatReplyAction::GenerateReplyMessage(Player* bot, std::string incom
         }
     }
 
-    if (!found)
+    if (!found || urand(0, 4))
     {
         // Name Responds
         if (incomingMessage.find(bot->GetName()) != std::string::npos)
@@ -1451,7 +1471,7 @@ std::string ChatReplyAction::GenerateReplyMessage(Player* bot, std::string incom
             replyType = REPLY_NAME;
             found = true;
         }
-        else // Does not understand
+        else if (!found) // Does not understand
         {
             replyType = REPLY_NOT_UNDERSTAND;
             found = true;

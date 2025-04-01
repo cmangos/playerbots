@@ -1794,7 +1794,7 @@ void RandomPlayerbotMgr::ScheduleRandomize(uint32 bot, uint32 time)
 void RandomPlayerbotMgr::ScheduleTeleport(uint32 bot, uint32 time)
 {
     if (!time)
-        time = 60 + urand(sPlayerbotAIConfig.randomBotUpdateInterval, sPlayerbotAIConfig.randomBotUpdateInterval * 3);
+        time = 60 + urand(sPlayerbotAIConfig.randomBotTeleportMinInterval, sPlayerbotAIConfig.randomBotTeleportMaxInterval);
     SetEventValue(bot, "teleport", 1, time);
 }
 

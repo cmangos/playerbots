@@ -8035,7 +8035,7 @@ bool PlayerbotAI::HasPlayerRelation()
 
 void PlayerbotAI::QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name, bool noDelay)
 {
-    chatReplies.push(ChatQueuedReply(msgType, guid1.GetCounter(), guid2.GetCounter(), message, chanName, name, (time(0) + noDelay) ? 0 : urand(inCombat ? 10 : 5, inCombat ? 25 : 15)));
+    chatReplies.push(ChatQueuedReply(msgType, guid1.GetCounter(), guid2.GetCounter(), message, chanName, name, time(0) + (noDelay ? 0 : urand(inCombat ? 15 : 10, inCombat ? 30 : 20))));
 }
 
 bool PlayerbotAI::PlayAttackEmote(float chanceMultiplier)

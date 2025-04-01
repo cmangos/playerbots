@@ -223,6 +223,8 @@ bool PlayerbotAIConfig::Initialize()
     randomBotTeleportNearPlayer = config.GetBoolDefault("AiPlayerbot.RandomBotTeleportNearPlayer", false);
     randomBotTeleportNearPlayerMaxAmount = config.GetIntDefault("AiPlayerbot.RandomBotTeleportNearPlayerMaxAmount", 0);
     randomBotTeleportNearPlayerMaxAmountRadius = config.GetFloatDefault("AiPlayerbot.RandomBotTeleportNearPlayerMaxAmountRadius", 0.0f);
+    randomBotTeleportMinInterval = config.GetIntDefault("AiPlayerbot.RandomBotTeleportTeleportMinInterval", 2 * 3600);
+    randomBotTeleportMaxInterval = config.GetIntDefault("AiPlayerbot.RandomBotTeleportTeleportMaxInterval", 48 * 3600);
     randomBotsPerInterval = config.GetIntDefault("AiPlayerbot.RandomBotsPerInterval", 3);
     randomBotsMaxLoginsPerInterval = config.GetIntDefault("AiPlayerbot.RandomBotsMaxLoginsPerInterval", randomBotsPerInterval);
     minRandomBotsPriceChangeInterval = config.GetIntDefault("AiPlayerbot.MinRandomBotsPriceChangeInterval", 2 * 3600);
@@ -478,6 +480,8 @@ bool PlayerbotAIConfig::Initialize()
     broadcastToLocalDefenseGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToLocalDefenseGlobalChance", 30000);
     broadcastToWorldDefenseGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToWorldDefenseGlobalChance", 30000);
     broadcastToGuildRecruitmentGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToGuildRecruitmentGlobalChance", 30000);
+    broadcastToSayGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToSayGlobalChance", 30000);
+    broadcastToYellGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToYellGlobalChance", 30000);
 
     broadcastChanceLootingItemPoor = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemPoor", 30);
     broadcastChanceLootingItemNormal = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemNormal", 300);

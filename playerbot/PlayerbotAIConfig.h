@@ -132,6 +132,7 @@ public:
     bool randomBotTeleportNearPlayer;
     uint32 randomBotTeleportNearPlayerMaxAmount;
     float randomBotTeleportNearPlayerMaxAmountRadius;
+    uint32 randomBotTeleportMinInterval, randomBotTeleportMaxInterval;
     uint32 randomGearMaxLevel;
     uint32 randomGearMaxDiff;
     bool randomGearUpgradeEnabled;
@@ -243,6 +244,8 @@ public:
     uint32 broadcastToLocalDefenseGlobalChance;
     uint32 broadcastToWorldDefenseGlobalChance;
     uint32 broadcastToGuildRecruitmentGlobalChance;
+    uint32 broadcastToSayGlobalChance;
+    uint32 broadcastToYellGlobalChance;
 
     uint32 broadcastChanceLootingItemPoor;
     uint32 broadcastChanceLootingItemNormal;

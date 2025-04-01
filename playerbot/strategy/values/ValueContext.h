@@ -99,6 +99,7 @@
 #include "playerbot/strategy/druid/DruidValues.h"
 #include "TravelValues.h"
 #include "LootValues.h"
+#include "GlyphValues.h"
 
 namespace ai
 {
@@ -421,6 +422,9 @@ namespace ai
 
             creators["party tank without lifebloom"] = [](PlayerbotAI* ai) { return new PartyTankWithoutLifebloomValue(ai); };
             creators["move style"] = [](PlayerbotAI* ai) { return new MoveStyleValue(ai); };
+            creators["available glyphs"] = [](PlayerbotAI* ai) { return new AvailableGlyphsValue(ai); };
+            creators["wanted glyphs"] = [](PlayerbotAI* ai) { return new WantedGlyphsValue(ai); };
+            creators["equiped glyphs"] = [](PlayerbotAI* ai) { return new EquipedGlyphsValue(ai); };
 
             //Travel
             creators["focus travel target"] = [](PlayerbotAI* ai) { return new FocusTravelTargetValue(ai); };

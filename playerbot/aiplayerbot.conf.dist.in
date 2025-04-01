@@ -93,6 +93,10 @@ AiPlayerbot.DeleteRandomBotArenaTeams = 0
 # Maps to teleport random bots
 AiPlayerbot.RandomBotMaps = 0,1,530,571
 
+# Min and max intervals for random teleports, in seconds (default: 2hrs and 48hrs)
+AiPlayerbot.RandomBotTeleportTeleportMinInterval = 7200
+AiPlayerbot.RandomBotTeleportTeleportMaxInterval = 172800
+
 # Change random bot has lower gear
 AiPlayerbot.RandomGearLoweringChance = 0.15
 
@@ -242,6 +246,8 @@ AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761,9378
 # AiPlayerbot.BroadcastToLocalDefenseGlobalChance = 30000
 # AiPlayerbot.BroadcastToWorldDefenseGlobalChance = 30000
 # AiPlayerbot.BroadcastToGuildRecruitmentGlobalChance = 30000
+# AiPlayerbot.BroadcastToSayGlobalChance = 30000
+# AiPlayerbot.BroadcastToYellGlobalChance = 30000
 #
 # individual settings
 # setting one of these to 0 will disable the particular broadcast

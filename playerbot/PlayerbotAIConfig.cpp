@@ -223,6 +223,8 @@ bool PlayerbotAIConfig::Initialize()
     randomBotTeleportNearPlayer = config.GetBoolDefault("AiPlayerbot.RandomBotTeleportNearPlayer", false);
     randomBotTeleportNearPlayerMaxAmount = config.GetIntDefault("AiPlayerbot.RandomBotTeleportNearPlayerMaxAmount", 0);
     randomBotTeleportNearPlayerMaxAmountRadius = config.GetFloatDefault("AiPlayerbot.RandomBotTeleportNearPlayerMaxAmountRadius", 0.0f);
+    randomBotTeleportMinInterval = config.GetIntDefault("AiPlayerbot.RandomBotTeleportTeleportMinInterval", 2 * 3600);
+    randomBotTeleportMaxInterval = config.GetIntDefault("AiPlayerbot.RandomBotTeleportTeleportMaxInterval", 48 * 3600);
     randomBotsPerInterval = config.GetIntDefault("AiPlayerbot.RandomBotsPerInterval", 3);
     randomBotsMaxLoginsPerInterval = config.GetIntDefault("AiPlayerbot.RandomBotsMaxLoginsPerInterval", randomBotsPerInterval);
     minRandomBotsPriceChangeInterval = config.GetIntDefault("AiPlayerbot.MinRandomBotsPriceChangeInterval", 2 * 3600);
@@ -352,105 +354,6 @@ bool PlayerbotAIConfig::Initialize()
         }
     }
 
-    sLog.outString("Loading TalentSpecs");
-
-    uint32 maxSpecLevel = 0;
-
-    for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
-    {
-        classSpecs[cls] = ClassSpecs(1 << (cls - 1));
-        for (uint32 spec = 0; spec < MAX_LEVEL; ++spec)
-        {
-            std::ostringstream os; os << "AiPlayerbot.PremadeSpecName." << cls << "." << spec;
-            std::string specName = config.GetStringDefault(os.str().c_str(), "");
-            if (!specName.empty())
-            {
-                std::ostringstream os; os << "AiPlayerbot.PremadeSpecProb." << cls << "." << spec;
-                int probability = config.GetIntDefault(os.str().c_str(), 100);
-
-                TalentPath talentPath(spec, specName, probability);
-
-                for (uint32 level = 10; level <= 100; level++)
-                {
-                    std::ostringstream os; os << "AiPlayerbot.PremadeSpecLink." << cls << "." << spec << "." << level;
-                    std::string specLink = config.GetStringDefault(os.str().c_str(), "");
-                    specLink = specLink.substr(0, specLink.find("#", 0));
-                    specLink = specLink.substr(0, specLink.find(" ", 0));
-
-                    if (!specLink.empty())
-                    {
-                        if (maxSpecLevel < level)
-                            maxSpecLevel = level;
-
-                        std::ostringstream out;
-
-                        //Ignore bad specs.
-                        if (!classSpecs[cls].baseSpec.CheckTalentLink(specLink, &out))
-                        {
-                            sLog.outErrorDb("Error with premade spec link: %s", specLink.c_str());
-                            sLog.outErrorDb("%s", out.str().c_str());
-                            continue;
-                        }
-
-                        TalentSpec linkSpec(&classSpecs[cls].baseSpec, specLink);
-
-                        if (!linkSpec.CheckTalents(level, &out))
-                        {
-                            sLog.outErrorDb("Error with premade spec: %s", specLink.c_str());
-                            sLog.outErrorDb("%s", out.str().c_str());
-                            continue;
-                        }
-
-
-                        talentPath.talentSpec.push_back(linkSpec);
-                    }
-
-                    {
-                        //Glyphs
-
-                        using GlyphPriority = std::pair<std::string, uint32>;
-                        using GlyphPriorityList = std::vector<GlyphPriority>;
-                        using GlyphPriorityLevelMap = std::unordered_map<uint32, GlyphPriorityList>;
-                        using GlyphPrioritySpecMap = std::unordered_map<uint32, GlyphPriorityLevelMap>;
-
-                        std::ostringstream os; os << "AiPlayerbot.PremadeSpecGlyp." << cls << "." << spec << "." << level;
-
-                        std::string glyphList = config.GetStringDefault(os.str().c_str(), "");
-                        glyphList = glyphList.substr(0, glyphList.find("#", 0));
-                        boost::trim_right(glyphList);
-
-                        if (!glyphList.empty())
-                        {
-                            Tokens premadeSpecGlyphs = Qualified::getMultiQualifiers(glyphList, ",");
-
-                            for (auto& glyph : premadeSpecGlyphs)
-                            {
-                                Tokens tokens = Qualified::getMultiQualifiers(glyph, "|");
-                                std::string glyphName = tokens[0];
-                                uint32 talentId = tokens.size() > 1 ? stoi(tokens[1]) : 0;
-
-                                glyphPriorityMap[cls][spec][level].push_back(std::make_pair(glyphName, talentId));
-                            }
-                        }
-                    }
-                }
-
-                //Only add paths that have atleast 1 spec.
-                if(talentPath.talentSpec.size() > 0)
-                    classSpecs[cls].talentPath.push_back(talentPath);
-            }
-        }
-    }
-
-    if(classSpecs[1].talentPath.empty())
-        sLog.outErrorDb("No premade specs found!!");
-    else
-    {
-        if(maxSpecLevel < DEFAULT_MAX_LEVEL && randomBotMaxLevel < DEFAULT_MAX_LEVEL)
-            sLog.outErrorDb("!!!!!!!!!!! randomBotMaxLevel and the talentspec levels are below this expansions max level. Please check if you have the correct config file!!!!!!");
-
-    }
-
     botCheats.clear();
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.BotCheats", "taxi,item,breath"), botCheats);
 
@@ -576,6 +479,8 @@ bool PlayerbotAIConfig::Initialize()
     broadcastToLocalDefenseGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToLocalDefenseGlobalChance", 30000);
     broadcastToWorldDefenseGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToWorldDefenseGlobalChance", 30000);
     broadcastToGuildRecruitmentGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToGuildRecruitmentGlobalChance", 30000);
+    broadcastToSayGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToSayGlobalChance", 30000);
+    broadcastToYellGlobalChance = config.GetIntDefault("AiPlayerbot.BroadcastToYellGlobalChance", 30000);
 
     broadcastChanceLootingItemPoor = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemPoor", 30);
     broadcastChanceLootingItemNormal = config.GetIntDefault("AiPlayerbot.BroadcastChanceLootingItemNormal", 300);
@@ -813,6 +718,8 @@ bool PlayerbotAIConfig::Initialize()
     sPlayerbotTextMgr.LoadBotTexts();
     sPlayerbotTextMgr.LoadBotTextChance();
     sPlayerbotHelpMgr.LoadBotHelpTexts();
+
+    LoadTalentSpecs();
 
     if (sPlayerbotAIConfig.autoDoQuests)
     {
@@ -1125,4 +1032,126 @@ bool PlayerbotAIConfig::CanLogAction(PlayerbotAI* ai, std::string actionName, bo
     }
 
     return std::find(debugFilter.begin(), debugFilter.end(), actionName) == debugFilter.end();
+}
+
+void PlayerbotAIConfig::LoadTalentSpecs()
+{
+    sLog.outString("Loading TalentSpecs");
+
+    uint32 maxSpecLevel = 0;
+
+    for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
+    {
+        classSpecs[cls] = ClassSpecs(1 << (cls - 1));
+        for (uint32 spec = 0; spec < MAX_LEVEL; ++spec)
+        {
+            std::ostringstream os; os << "AiPlayerbot.PremadeSpecName." << cls << "." << spec;
+            std::string specName = config.GetStringDefault(os.str().c_str(), "");
+            if (!specName.empty())
+            {
+                std::ostringstream os; os << "AiPlayerbot.PremadeSpecProb." << cls << "." << spec;
+                int probability = config.GetIntDefault(os.str().c_str(), 100);
+
+                TalentPath talentPath(spec, specName, probability);
+
+                for (uint32 level = 10; level <= 100; level++)
+                {
+                    std::ostringstream os; os << "AiPlayerbot.PremadeSpecLink." << cls << "." << spec << "." << level;
+                    std::string specLink = config.GetStringDefault(os.str().c_str(), "");
+                    specLink = specLink.substr(0, specLink.find("#", 0));
+                    specLink = specLink.substr(0, specLink.find(" ", 0));
+
+                    if (!specLink.empty())
+                    {
+                        if (maxSpecLevel < level)
+                            maxSpecLevel = level;
+
+                        std::ostringstream out;
+
+                        //Ignore bad specs.
+                        if (!classSpecs[cls].baseSpec.CheckTalentLink(specLink, &out))
+                        {
+                            sLog.outErrorDb("Error with premade spec link: %s", specLink.c_str());
+                            sLog.outErrorDb("%s", out.str().c_str());
+                            continue;
+                        }
+
+                        TalentSpec linkSpec(&classSpecs[cls].baseSpec, specLink);
+
+                        if (!linkSpec.CheckTalents(level, &out))
+                        {
+                            sLog.outErrorDb("Error with premade spec: %s", specLink.c_str());
+                            sLog.outErrorDb("%s", out.str().c_str());
+                            continue;
+                        }
+
+
+                        talentPath.talentSpec.push_back(linkSpec);
+                    }
+
+                    {
+                        //Glyphs
+
+                        using GlyphPriority = std::pair<std::string, uint32>;
+                        using GlyphPriorityList = std::vector<GlyphPriority>;
+                        using GlyphPriorityLevelMap = std::unordered_map<uint32, GlyphPriorityList>;
+                        using GlyphPrioritySpecMap = std::unordered_map<uint32, GlyphPriorityLevelMap>;
+
+                        std::ostringstream os; os << "AiPlayerbot.PremadeSpecGlyp." << cls << "." << spec << "." << level;
+
+                        std::string glyphList = config.GetStringDefault(os.str().c_str(), "");
+                        glyphList = glyphList.substr(0, glyphList.find("#", 0));
+                        boost::trim_right(glyphList);
+
+                        if (!glyphList.empty())
+                        {
+                            Tokens premadeSpecGlyphs = Qualified::getMultiQualifiers(glyphList, ",");
+
+                            for (auto& glyph : premadeSpecGlyphs)
+                            {
+                                Tokens tokens = Qualified::getMultiQualifiers(glyph, "|");
+                                std::string glyphName = "Glyph of " + tokens[0];
+                                uint32 talentId = tokens.size() > 1 ? stoi(tokens[1]) : 0;
+
+                                bool glyphFound = false;
+                                for (auto& itemId : sRandomItemMgr.GetGlyphs(1 << (cls - 1)))
+                                {
+                                    ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+
+                                    if (!proto)
+                                        continue;
+
+                                    if (proto->Name1 == glyphName)
+                                    {
+                                        glyphPriorityMap[cls][spec][level].push_back(std::make_pair(itemId, talentId));
+                                        glyphFound = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!glyphFound)
+                                {
+                                    sLog.outError("%s is not found for class %d (spec %d level %d)", glyphName.c_str(), cls, spec, level);
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+                //Only add paths that have atleast 1 spec.
+                if (talentPath.talentSpec.size() > 0)
+                    classSpecs[cls].talentPath.push_back(talentPath);
+            }
+        }
+    }
+
+    if (classSpecs[1].talentPath.empty())
+        sLog.outErrorDb("No premade specs found!!");
+    else
+    {
+        if (maxSpecLevel < DEFAULT_MAX_LEVEL && randomBotMaxLevel < DEFAULT_MAX_LEVEL)
+            sLog.outErrorDb("!!!!!!!!!!! randomBotMaxLevel and the talentspec levels are below this expansions max level. Please check if you have the correct config file!!!!!!");
+
+    }
 }

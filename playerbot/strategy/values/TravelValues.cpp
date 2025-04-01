@@ -285,7 +285,7 @@ bool NeedTravelPurposeValue::Calculate()
     {
         uint32 rpgPhase = ai->GetFixedBotNumber(BotTypeNumber::RPG_PHASE_NUMBER, 60, 1);
 
-        if (rpgPhase > 45) //Only first 45 minutes of the hour allow generic rpg.
+        if (rpgPhase > 45) //Only first 45 minutes of the hour allow generic grind.
             return false;
 
         return !AI_VALUE2(bool, "manual bool", "is travel refresh");
@@ -336,7 +336,7 @@ bool ShouldTravelNamedValue::Calculate()
 
         uint32 rpgPhase = ai->GetFixedBotNumber(BotTypeNumber::RPG_PHASE_NUMBER, 60, 1);
 
-        if (rpgPhase > 15) //Only first 15 minutes of the hour allow generic rpg.
+        if (rpgPhase > 15) //Only first 15 minutes of the hour allow world pvp.
             return false;
 
         if (!botPos.isOverworld())

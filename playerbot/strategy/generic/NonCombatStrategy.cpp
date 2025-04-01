@@ -89,7 +89,7 @@ void NoWarStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 void GlyphStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     triggers.push_back(new TriggerNode(
-        "often",
+        "apply glyphs",
         NextAction::array(0, new NextAction("auto set glyph", 1.0f), NULL)));
 }
 

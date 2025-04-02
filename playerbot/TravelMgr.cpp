@@ -850,7 +850,7 @@ void TravelTarget::CheckStatus()
         }
     }
 
-    if (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive()) //Target has become invalid. Stop.
+    if (!IsCooldownDown() && (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive())) //Target has become invalid. Stop.
     {
         ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
@@ -874,6 +874,13 @@ bool TravelTarget::IsTraveling() {
 
 bool TravelTarget::IsWorking() {
     if (m_status != TravelStatus::TRAVEL_STATUS_WORK)
+        return false;
+
+    return true;
+}
+
+bool TravelTarget::IsCooldownDown() {
+    if (m_status != TravelStatus::TRAVEL_STATUS_COOLDOWN)
         return false;
 
     return true;

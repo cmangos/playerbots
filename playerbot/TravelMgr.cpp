@@ -815,7 +815,7 @@ void TravelTarget::CheckStatus()
         return;
     }
 
-    if ((statusTime > 0 && startTime + statusTime < WorldTimer::getMSTime()))
+    if ((statusTime != 0 && GetTimeLeft() <= 0))
     {
         ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);

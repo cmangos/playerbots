@@ -1580,6 +1580,9 @@ TravelNodeRoute TravelNodeMap::getRoute(WorldPosition startPos, WorldPosition en
     std::vector<WorldPosition> newStartPath;
     std::vector<TravelNode*> startNodes = getNodes(startPos), endNodes = getNodes(endPos);
 
+    if(!startNodes.size() || !endNodes.size())
+        return TravelNodeRoute();
+
     uint32 startNr = std::min(5, (int)startNodes.size()-1);
     uint32 endNr = std::min(5, (int)endNodes.size()-1);
 

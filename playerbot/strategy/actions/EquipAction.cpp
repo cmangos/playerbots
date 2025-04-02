@@ -251,6 +251,11 @@ bool EquipUpgradesAction::Execute(Event& event)
 
     for (auto& item : items)
     {
+#ifdef MANGOSBOT_TWO
+        if (item->GetProto()->Class == ITEM_CLASS_GLYPH)
+            continue;
+#endif
+
         ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
         if (usage == ItemUsage::ITEM_USAGE_EQUIP || usage == ItemUsage::ITEM_USAGE_BAD_EQUIP)
         {

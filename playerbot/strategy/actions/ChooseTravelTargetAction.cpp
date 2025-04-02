@@ -662,9 +662,9 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
             WorldPvpLocation = "Tarren Mill";
         else if(pvpLocationNumber >= 20 && pvpLocationNumber < 40) //Second 200 minutes
             WorldPvpLocation = "The Barrens";
-        else if (pvpLocationNumber >= 40 && pvpLocationNumber < 60) //Second 200 minutes
+        else if (pvpLocationNumber >= 40 && pvpLocationNumber < 60) //Third 200 minutes
             WorldPvpLocation = "Silithus";
-        else if (pvpLocationNumber >= 60 && pvpLocationNumber < 80) //Second 200 minutes
+        else if (pvpLocationNumber >= 60 && pvpLocationNumber < 80) //Fourth 200 minutes
             WorldPvpLocation = "Eastern Plaguelands";
         else                                                        //Last 200 minutes
             WorldPvpLocation = "Strangletorn Vale";

@@ -217,7 +217,7 @@ bool GlyphIsUpgradeValue::Calculate()
 
 size_t GlyphIsUpgradeValue::GetWantedRank(uint32 itemId, const std::vector<uint32>& wantedGlyphs)
 {
-    auto& it = std::find(wantedGlyphs.begin(), wantedGlyphs.end(), itemId);
+    auto it = std::find(wantedGlyphs.begin(), wantedGlyphs.end(), itemId);
 
     if (it == wantedGlyphs.end())
         return wantedGlyphs.size();

@@ -671,23 +671,29 @@ bool CraftRandomItemAction::Execute(Event& event)
             wot = nullptr;
         }
 
-        uint32 newItemId = pSpellInfo->EffectItemType[0];
+        uint32 castCount = AI_VALUE2(uint32, "has reagents for", spellId);
 
-        if (!newItemId)
-            continue;
+        if (spellId == 61288) //Crafting random glyph
+        {
+            castCount = 1;
+        }
+        else
+        {
+            uint32 newItemId = pSpellInfo->EffectItemType[0];
 
-        ItemPrototype const* proto = ObjectMgr::GetItemPrototype(newItemId);
+            if (!newItemId)
+                continue;
 
-        if (!proto)
-            continue;
+            ItemPrototype const* proto = ObjectMgr::GetItemPrototype(newItemId);
+
+            if (!proto)
+                continue;
+
+            if (castCount > proto->GetMaxStackSize())
+                castCount = proto->GetMaxStackSize();
+        }
 
         std::ostringstream cmd;
-
-        uint32 castCount = AI_VALUE2(uint32, "has reagents for", spellId); 
-        
-        if (castCount > proto->GetMaxStackSize())
-            castCount = proto->GetMaxStackSize();
-
         cmd << "castnc ";
 
         if (((wot && sServerFacade.IsInFront(bot, wot, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))))

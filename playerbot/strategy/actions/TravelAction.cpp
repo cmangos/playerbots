@@ -24,7 +24,8 @@ bool TravelAction::Execute(Event& event)
 
 bool TravelAction::isUseful()
 {
-    return AI_VALUE(TravelTarget *,"travel target")->IsWorking();
+    TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
+    return target->IsWorking() || target->TravelTarget::IsCooldownDown();
 }
 
 bool MoveToDarkPortalAction::Execute(Event& event)

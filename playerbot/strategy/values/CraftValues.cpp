@@ -22,6 +22,14 @@ std::vector<uint32> CraftSpellsValue::Calculate()
         if (!pSpellInfo)
             continue;
 
+#ifdef MANGOSBOT_TWO
+        if (pSpellInfo->Effect[0] == SPELL_EFFECT_CREATE_ITEM_2 && spellId == 61288 && bot->IsSpellReady(61288)) //Todo handle other item_2 spells
+        {
+            spellIds.push_back(spellId);
+            continue;
+        }
+#endif
+
         if (pSpellInfo->Effect[0] != SPELL_EFFECT_CREATE_ITEM)
             continue;      
 
@@ -124,6 +132,11 @@ bool ShouldCraftSpellValue::Calculate()
     const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
     if (!pSpellInfo)
         return false;
+
+#ifdef MANGOSBOT_TWO
+    if (pSpellInfo->Effect[0] == SPELL_EFFECT_CREATE_ITEM_2) //todo proper check what items are created and if they are needed.
+        return true;
+#endif
 
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; i++)
     {

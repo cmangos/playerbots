@@ -215,7 +215,7 @@ namespace ai
         const MapEntry* getMapEntry() const { return sMapStore.LookupEntry(mapid); }
         uint32 getFirstInstanceId() const { for (auto& map : sMapMgr.Maps()) { if (map.second->GetId() == getMapId()) return map.second->GetInstanceId(); }; return 0; }
         Map* getMap(uint32 instanceId) const { if (!*this) return nullptr; loadMapAndVMap(instanceId); return sMapMgr.FindMap(mapid, instanceId ? instanceId : (getMapEntry()->Instanceable() ? getFirstInstanceId() : 0)); }
-        const TerrainInfo* getTerrain() const { return getMap(getFirstInstanceId()) ? getMap(getFirstInstanceId())->GetTerrain() : sTerrainMgr.LoadTerrain(getMapId()); }
+        const TerrainInfo* getTerrain() const { auto map = getMap(getFirstInstanceId()); return map ? map->GetTerrain() : sTerrainMgr.LoadTerrain(getMapId()); }
         bool isDungeon() { return getMapEntry()->IsDungeon(); }
         float getVisibilityDistance() { return getMap(0) ? getMap(0)->GetVisibilityDistance() : (isOverworld() ? World::GetMaxVisibleDistanceOnContinents() : World::GetMaxVisibleDistanceInInstances()); }
 
@@ -233,8 +233,8 @@ namespace ai
         bool canFly() const;
 
 #if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
-        const float getHeight(bool swim = false) const { if(getMap(getFirstInstanceId())) return getMap(getFirstInstanceId())->GetHeight(0, coord_x, coord_y, coord_z, swim); return 0.0;}
-        float GetHeightInRange(float maxSearchDist = 4.0f) const { float z = coord_z;  return getMap(getFirstInstanceId()) ? (getMap(getFirstInstanceId())->GetHeightInRange(0, coord_x, coord_y, z, maxSearchDist) ? z : coord_z) : coord_z; }
+        const float getHeight(bool swim = false) const { auto map = getMap(getFirstInstanceId()); if(map) return map->GetHeight(0, coord_x, coord_y, coord_z, swim); return 0.0;}
+        float GetHeightInRange(float maxSearchDist = 4.0f) const { float z = coord_z; auto map = getMap(getFirstInstanceId()); return map ? (map->GetHeightInRange(0, coord_x, coord_y, z, maxSearchDist) ? z : coord_z) : coord_z; }
 #else
         float getHeight(bool swim = false) const { return getMap(getFirstInstanceId()) ? getMap(getFirstInstanceId())->GetHeight(coord_x, coord_y, coord_z, swim) : coord_z; }
         float GetHeightInRange(float maxSearchDist = 4.0f) const { float z = coord_z;  return getMap(getFirstInstanceId()) ? (getMap(getFirstInstanceId())->GetHeightInRange(coord_x, coord_y, z, maxSearchDist) ? z : coord_z) : coord_z; }

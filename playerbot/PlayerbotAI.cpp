@@ -426,7 +426,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
     // force fall if not flying
     if (!bot->IsFalling())
     {
-        if (!bot->IsFlying() && !bot->IsTaxiFlying() && !bot->IsFreeFlying() && WorldPosition(bot).currentHeight() >= 0.5f)
+        if (!bot->IsFlying() && !bot->IsTaxiFlying() && !bot->IsFreeFlying() && WorldPosition(bot).currentHeight() > 10.0f)
         {
             float landingHeight = bot->m_movementInfo.pos.z; 
             bot->UpdateAllowedPositionZ(bot->m_movementInfo.pos.x, bot->m_movementInfo.pos.y, landingHeight);
@@ -2102,18 +2102,24 @@ void PlayerbotAI::DoNextAction(bool min)
     else if ((aiInternalUpdateDelay < 1000) && bot->IsSitState()) bot->SetStandState(UNIT_STAND_STATE_STAND);
 
 #ifndef MANGOSBOT_ZERO
-    if (bot->IsFlying() && !bot->IsFreeFlying())
+    bool isFlying = bot->IsFlying();
+    if (isFlying && !bot->IsFreeFlying())
     {
-        if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
-            bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
+        bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
+            
 #ifdef MANGOSBOT_ONE
         if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING2))
             bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING2);
 #endif
         if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_CAN_FLY))
             bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
-        if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
-            bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
+
+        WorldPacket stop(MSG_MOVE_STOP);
+#ifdef MANGOSBOT_TWO
+        stop << bot->GetObjectGuid().WriteAsPacked();
+#endif
+        stop << bot->m_movementInfo;
+        bot->GetSession()->HandleMovementOpcodes(stop);
     }
 #endif
 
@@ -7987,7 +7993,10 @@ void PlayerbotAI::StopMoving()
     if (bot->IsBeingTeleportedFar())
         return;
 
-    bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+    if (bot->IsFalling())
+        return;
+
+    bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_MASK_MOVING);
     bot->InterruptMoving(true);
     MovementInfo mInfo = bot->m_movementInfo;
     float x, y, z;

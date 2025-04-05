@@ -168,14 +168,17 @@ bool MovementAction::FlyDirect(WorldPosition &startPosition, WorldPosition &endP
             data << bot->GetPackGUID();
             bot->SendMessageToSet(data, true);
 
-            if (!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
-                bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
+            bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
 #ifdef MANGOSBOT_ONE
             if (!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING2))
                 bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING2);
 #endif
-            if (!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
-                bot->m_movementInfo.AddMovementFlag(MOVEFLAG_LEVITATING);
+            WorldPacket stop(MSG_MOVE_STOP);
+#ifdef MANGOSBOT_TWO
+            stop << bot->GetObjectGuid().WriteAsPacked();
+#endif
+            stop << bot->m_movementInfo;
+            bot->GetSession()->HandleMovementOpcodes(stop);
         }
     }
     else
@@ -195,14 +198,20 @@ bool MovementAction::FlyDirect(WorldPosition &startPosition, WorldPosition &endP
             data << bot->GetPackGUID();
             bot->SendMessageToSet(data, true);
 
-            if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
+            if (bot->IsFlying())
+            {
                 bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
+                WorldPacket stop(MSG_MOVE_STOP);
+#ifdef MANGOSBOT_TWO
+                stop << bot->GetObjectGuid().WriteAsPacked();
+#endif
+                stop << bot->m_movementInfo;
+                bot->GetSession()->HandleMovementOpcodes(stop);
+            }
 #ifdef MANGOSBOT_ONE
             if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING2))
                 bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING2);
 #endif
-            if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
-                bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
         }
     }
 
@@ -1067,14 +1076,17 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
             data << bot->GetPackGUID();
             bot->SendMessageToSet(data, true);
 
-            if (!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
-                bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
+            bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
 #ifdef MANGOSBOT_ONE
             if (!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING2))
                 bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING2);
 #endif
-            if (!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
-                bot->m_movementInfo.AddMovementFlag(MOVEFLAG_LEVITATING);
+            WorldPacket stop(MSG_MOVE_STOP);
+#ifdef MANGOSBOT_TWO
+            stop << bot->GetObjectGuid().WriteAsPacked();
+#endif
+            stop << bot->m_movementInfo;
+            bot->GetSession()->HandleMovementOpcodes(stop);
         }
 
         if (!isFar && isFly)
@@ -1092,14 +1104,20 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 data << bot->GetPackGUID();
                 bot->SendMessageToSet(data, true);
 
-                if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
+                if (bot->IsFlying())
+                {
                     bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
+                    WorldPacket stop(MSG_MOVE_STOP);
+#ifdef MANGOSBOT_TWO
+                    stop << bot->GetObjectGuid().WriteAsPacked();
+#endif
+                    stop << bot->m_movementInfo;
+                    bot->GetSession()->HandleMovementOpcodes(stop);
+                }
 #ifdef MANGOSBOT_ONE
                 if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING2))
                     bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING2);
 #endif
-                if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
-                    bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
             }
         }
         mm.MovePoint(movePosition.getMapId(), Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f), bot->IsFlying() ? FORCED_MOVEMENT_FLIGHT : FORCED_MOVEMENT_RUN, bot->IsFlying() ? bot->GetSpeed(MOVE_FLIGHT) : 0.f, bot->IsFlying());
@@ -1398,14 +1416,17 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
             data << bot->GetPackGUID();
             bot->SendMessageToSet(data, true);
 
-            if (!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
-                bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
+            bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
 #ifdef MANGOSBOT_ONE
             if (!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING2))
                 bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING2);
 #endif
-            if (!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
-                bot->m_movementInfo.AddMovementFlag(MOVEFLAG_LEVITATING);
+            WorldPacket stop(MSG_MOVE_STOP);
+#ifdef MANGOSBOT_TWO
+            stop << bot->GetObjectGuid().WriteAsPacked();
+#endif
+            stop << bot->m_movementInfo;
+            bot->GetSession()->HandleMovementOpcodes(stop);
         }
 
         if (bot->IsFlying() && !target->IsFlying())
@@ -1426,17 +1447,22 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
                 data << bot->GetPackGUID();
                 bot->SendMessageToSet(data, true);
 
-                if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
+                if (bot->IsFlying())
+                {
                     bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
+                    WorldPacket stop(MSG_MOVE_STOP);
+#ifdef MANGOSBOT_TWO
+                    stop << bot->GetObjectGuid().WriteAsPacked();
+#endif
+                    stop << bot->m_movementInfo;
+                    bot->GetSession()->HandleMovementOpcodes(stop);
+                }
 #ifdef MANGOSBOT_ONE
                 if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING2))
                     bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING2);
 #endif
-                if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
-                    bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
-
-                if(!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
-                    bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FALLING);
+                if (!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
+                    bot->m_movementInfo.AddMovementFlag(MOVEFLAG_FALLING);
             }
         }
     }

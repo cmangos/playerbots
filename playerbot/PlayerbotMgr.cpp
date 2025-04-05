@@ -1318,6 +1318,7 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 }
 void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
 {
+   /*
    ForEachPlayerbot([&](Player* bot)
    {
         if (!bot->GetPlayerbotAI())
@@ -1325,6 +1326,7 @@ void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
 
         bot->GetPlayerbotAI()->HandleMasterOutgoingPacket(packet);
     });
+   */
 
     sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
     {

@@ -2344,9 +2344,9 @@ bool PlayerbotAI::PlayEmote(uint32 emote)
     return false;
 }
 
-bool PlayerbotAI::ContainsStrategy(StrategyType type)
+bool PlayerbotAI::ContainsStrategy(StrategyType type, bool combatOnly)
 {
-    for (uint8 i = 0 ; i < (uint8)BotState::BOT_STATE_ALL; i++)
+    for (uint8 i = 0 ; i < (combatOnly ? (uint8)BotState::BOT_STATE_NON_COMBAT : (uint8)BotState::BOT_STATE_ALL); i++)
     {
         if(engines[i])
         {

@@ -389,7 +389,7 @@ public:
     void PrintStrategies(Player* requester, BotState type);
     void ClearStrategies(BotState type);
     std::list<std::string_view> GetStrategies(BotState type);
-    bool ContainsStrategy(StrategyType type);
+    bool ContainsStrategy(StrategyType type, bool combatOnly = true);
     bool HasStrategy(const std::string& name, BotState type);
     template<class T>
     T* GetStrategy(const std::string& name, BotState type);

@@ -165,12 +165,13 @@ namespace ai
                 name = name.substr(0, found);
             }
 
-            if (creators.find(name) == creators.end())
+            auto it = creators.find(name);
+            if (it == creators.end())
             {
                 return nullptr;
             }
+            ActionCreator& creator = it->second;
 
-            ActionCreator& creator = creators[name];
 
             T* object = creator(ai);
             Qualified *q = dynamic_cast<Qualified *>(object);

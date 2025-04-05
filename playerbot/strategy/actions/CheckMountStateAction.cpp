@@ -247,6 +247,9 @@ bool CheckMountStateAction::isUseful()
     if (!bot->IsInWorld())
         return false;
 
+    if (bot->IsFalling())
+        return false;
+
     bool isOutdoor = bot->GetMap()->GetTerrain()->IsOutdoors(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ());
     if (!isOutdoor)
         return false;

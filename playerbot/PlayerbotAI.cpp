@@ -290,7 +290,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
     }
     else if (isMoving)
     {
-        if (!bot->IsTaxiFlying())
+        if (!bot->IsTaxiFlying() && !bot->IsFalling())
             StopMoving();
 
         isMoving = false;
@@ -332,7 +332,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
 #ifndef MANGOSBOT_TWO
     if (!bot->IsStopped() && !IsJumping() && !CanMove() && !bot->IsTaxiFlying() && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING) && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
 #else
-    if (!bot->IsStopped() && !IsJumping() && !CanMove() && !bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING) && !bot->IsTaxiFlying() && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING) && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
+    if (!bot->IsStopped() && !IsJumping() && !CanMove() && !bot->IsFalling() && !bot->IsTaxiFlying() && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING) && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
 #endif
     {
         StopMoving();
@@ -421,6 +421,22 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
                 sLog.outDetail("%s: Jump: Falling simulated, height: %f, timeToLand %u", bot->GetName(), landingHeight, jumpTime);
             }
         }
+    }
+
+    // force fall if not flying
+    if (!bot->IsFalling())
+    {
+        if (!bot->IsFlying() && !bot->IsTaxiFlying() && !bot->IsFreeFlying() && WorldPosition(bot).currentHeight() >= 0.5f)
+        {
+            float landingHeight = bot->m_movementInfo.pos.z; 
+            bot->UpdateAllowedPositionZ(bot->m_movementInfo.pos.x, bot->m_movementInfo.pos.y, landingHeight);
+            bot->m_movementInfo.SetMovementFlags(MOVEFLAG_FALLING); 
+            bot->GetMotionMaster()->MoveFall();            
+        }
+    }
+    else if (WorldPosition(bot).currentHeight() < 0.5f)
+    {
+        bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FALLING);
     }
 
     // cheat options
@@ -839,6 +855,7 @@ void PlayerbotAI::Unmount()
 {
     if ((bot->IsMounted() || bot->GetMountID()) && !bot->IsTaxiFlying())
     {
+        bool wasFlying = bot->IsFlying();
         bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         bot->Unmount();
 #ifdef MANGOSBOT_TWO
@@ -848,7 +865,7 @@ void PlayerbotAI::Unmount()
         bot->UpdateSpeed(MOVE_RUN, true);
         bot->UpdateSpeed(MOVE_RUN, false);
 
-        if (bot->IsFlying())
+        if (wasFlying)
         {
             bot->GetMotionMaster()->MoveFall();
         }

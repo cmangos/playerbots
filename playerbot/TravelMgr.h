@@ -402,8 +402,8 @@ namespace ai
 		void SetNullTravelTarget(TravelTarget* target) const;
 
 		void LoadMapTransfers();
+		std::vector<std::pair<WorldPosition, float>> sqMapTransDistances(const WorldPosition& start, uint32 endMapId) const;
 		float MapTransDistance(const WorldPosition& start, const WorldPosition& end, bool toMap = false) const;
-		float FastMapTransDistance(const WorldPosition& start, const WorldPosition& end, bool toMap = false) const;
 
 		void AddBadMmap(uint32 mapId, int x, int y) { badMmap.push_back(std::make_tuple(mapId, x, y)); }
 		bool IsBadMmap(uint32 mapId, int x, int y) const { return std::find(badMmap.begin(), badMmap.end(), std::make_tuple(mapId, x, y)) != badMmap.end(); }

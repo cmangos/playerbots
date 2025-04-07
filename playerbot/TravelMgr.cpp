@@ -49,6 +49,7 @@ PlayerTravelInfo::PlayerTravelInfo(Player* player)
         value = AI_VALUE(uint32, valueName);
 }
 
+/*
 WorldPosition* TravelDestination::NearestPoint(const WorldPosition& pos) const {
     return *std::min_element(points.begin(), points.end(), [pos](WorldPosition* i, WorldPosition* j) {return i->distance(pos) < j->distance(pos); });
 }
@@ -56,6 +57,7 @@ WorldPosition* TravelDestination::NearestPoint(const WorldPosition& pos) const {
 std::vector <WorldPosition*> TravelDestination::NextPoint(const WorldPosition& pos) const {
     return pos.GetNextPoint(GetPoints());
 }
+*/
 
 std::string EntryTravelDestination::GetShortName() const
 {
@@ -123,7 +125,7 @@ bool QuestRelationTravelDestination::IsPossible(const PlayerTravelInfo& info) co
         if ((int32)info.GetLevel() < quest->GetMinLevel() || (int32)info.GetLevel() > quest->GetMaxLevel())
             return false;
 
-        if (GetPoints().front()->getMapId() != info.GetPosition().getMapId()) //CanTakeQuest will check required conditions which will fail on a different map.
+        if (OnMap(info.GetPosition())) //CanTakeQuest will check required conditions which will fail on a different map.
             if (quest->GetRequiredCondition())          //So we skip this quest for now.
                 return false;
 
@@ -150,7 +152,7 @@ bool QuestRelationTravelDestination::IsPossible(const PlayerTravelInfo& info) co
         //Do not try to hand-in dungeon/elite quests in instances without a group.
         if ((quest->GetType() == QUEST_TYPE_ELITE || quest->GetType() == QUEST_TYPE_DUNGEON) && !info.GetBoolValue("can fight boss"))
         {
-            if (!this->NearestPoint(info.GetPosition())->isOverworld())
+            if (IsOverWorld(info.GetPosition()))
                 return false;
         }
     }
@@ -265,7 +267,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
             //Do not try to hand-in dungeon/elite quests in instances without a group.
             if (cInfo->Rank > CREATURE_ELITE_NORMAL)
             {
-                if (!this->NearestPoint(info.GetPosition())->isOverworld() && !info.GetBoolValue("can fight boss"))
+                if (!IsOverWorld(info.GetPosition()) && !info.GetBoolValue("can fight boss"))
                     return false;
                 else if (!info.GetBoolValue("can fight elite"))
                     return false;
@@ -281,14 +283,14 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
         //Do not try to do dungeon/elite quests in instances without a group.
         if ((GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE || GetQuestTemplate()->GetType() == QUEST_TYPE_DUNGEON || GetQuestTemplate()->GetType() == QUEST_TYPE_RAID) && !info.GetBoolValue("can fight boss"))
         {
-            if (!this->NearestPoint(info.GetPosition())->isOverworld())
+            if (!IsOverWorld(info.GetPosition()))
                 return false;
         }
 
         //Do not try to do pvp quests in bg's (no way to travel there). 
         if (GetQuestTemplate()->GetType() == QUEST_TYPE_PVP)
         {
-            if (!this->NearestPoint(info.GetPosition())->isOverworld())
+            if (!IsOverWorld(info.GetPosition()))
                 return false;
         }
     }
@@ -327,10 +329,10 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
 
     if (!isVendor && GetEntry() > 0 && !IsOut(botPos))
     {
-        TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
+        TravelTarget* target = AI_VALUE(TravelTarget*,"travel target");
 
         //Only look for the target if it is unique or if we are currently working on it.
-        if (GetPoints().size() == 1 || (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK && target->GetEntry() == GetEntry()))
+        if (IsUnique() || (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK && target->GetEntry() == GetEntry()))
         {
             std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
 
@@ -381,14 +383,12 @@ uint8 QuestObjectiveTravelDestination::GetObjective() const
 
 bool RpgTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 {   
-    WorldPosition firstPoint = *GetPoints().front();
-
     //Horde pvp baracks
-    if (firstPoint.getMapId() == 450 && info.GetTeam() == ALLIANCE)
+    if (ClosestMapId(info.GetPosition()) == 450 && info.GetTeam() == ALLIANCE)
         return false;
 
     //Alliance pvp baracks
-    if (firstPoint.getMapId() == 449 && info.GetTeam() == HORDE)
+    if (ClosestMapId(info.GetPosition()) == 449 && info.GetTeam() == HORDE)
         return false;
 
     return true;
@@ -412,12 +412,6 @@ bool RpgTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) c
             return false;
         }
     }    
-
-    WorldPosition firstPoint = *GetPoints().front();
-
-    //City & Pvp baracks
-    if (firstPoint.getMapId() == info.GetPosition().getMapId() && firstPoint.HasAreaFlag(AREA_FLAG_CAPITAL) && !firstPoint.HasFaction(info.GetTeam()))
-        return false;
 
     return !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot);
 }
@@ -567,34 +561,34 @@ bool BossTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 
     if ((int32)cInfo->MaxLevel > info.GetLevel() + 3)
         return false;
-
-    WorldPosition firstPoint = *GetPoints().front();
-
+    
+    const MapEntry* mapEntry = ClosetMapEntry(info.GetPosition());
+    
     if (info.IsInGroup())
     {
         if (info.IsInRaid())
         {
 #ifndef MANGOSBOT_TWO
-            if (firstPoint.getMapEntry() && firstPoint.getMapEntry()->IsNonRaidDungeon())
+            if (mapEntry && mapEntry->IsNonRaidDungeon())
 #else
-            if (firstPoint.getMapEntry() && firstPoint.getMapEntry()->IsNonRaidDungeon())
+            if (mapEntry && mapEntry->IsNonRaidDungeon())
 #endif
                 return false;
         }
-        else if (firstPoint.getMapEntry() && firstPoint.getMapEntry()->IsRaid())
+        else if (mapEntry && mapEntry->IsRaid())
             return false;
     }
 
     //Ragefire casm
-    if (firstPoint.getMapId() == 389 && info.GetTeam() == ALLIANCE)
+    if (ClosestMapId(info.GetPosition()) == 389 && info.GetTeam() == ALLIANCE)
         return false;
 
     //Stockades
-    if (firstPoint.getMapId() == 34 && info.GetTeam() == HORDE)
+    if (ClosestMapId(info.GetPosition()) == 34 && info.GetTeam() == HORDE)
         return false;
 
     //Do not move to overworld bosses/uniques that are far away.
-    if (firstPoint.isOverworld() && DistanceTo(info.GetPosition()) > 2000.0f)
+    if (mapEntry && mapEntry->IsContinent() && DistanceTo(info.GetPosition()) > 2000.0f)
         return false;
 
     return true;
@@ -610,8 +604,6 @@ bool BossTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) 
 
     if (!GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, GetEntry()), bot->GetInstanceId()))
         return false;
-
-    WorldPosition firstPoint = *GetPoints().front();   
 
     WorldPosition botPos(bot);
 
@@ -2128,13 +2120,9 @@ void TravelMgr::LoadQuestTravelTable()
                     out << entry << ",";
                     out << destination->GetShortName() << ",";
                     out << "\"" << destination->GetTitle() << "\",";
-                    out << destination->GetPoints().size() << ",";
+                    out << destination->GetSize() << ",";
 
-                    std::vector<WorldPosition> points;
-                    for (auto& point : destination->GetPoints())
-                        points.push_back(*point);
-
-                    WorldPosition().printWKT(points, out);
+                    destination->printWKT(out);
 
                     sPlayerbotAIConfig.log("travel_destinations.csv", out.str().c_str());
                 }
@@ -2235,9 +2223,14 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
     for (auto& dest : destinations)
     {
         TravelPoint point(dest, sTravelMgr.nullWorldPosition, 0.0f);
-        uint32 minPartition = 0;
 
-        std::vector<WorldPosition*> points = dest->GetPoints();
+        std::pair<uint32, std::vector<WorldPosition*>> pointRange = dest->GetClosestPartition(center, distancePartitions);
+
+        if (!pointRange.first)
+            continue;
+
+        MANGOS_ASSERT(pointRange.second.size());
+        std::vector<WorldPosition*> points = pointRange.second;
         std::shuffle(points.begin(), points.end(), std::default_random_engine(seed));
 
         for (auto& position : points)
@@ -2251,26 +2244,12 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
                 continue;
 
             float distance = position->distance(center);
-
-            uint32 currentPartition = 0;
-            for (auto& partition : distancePartitions)
-            {
-                if (partition == distancePartitions.back() || distance < partition)
-                {
-                    currentPartition = partition;
-                    break;
-                }
-            }
-
-            if (minPartition && currentPartition >= minPartition)
-                continue;
-
-            minPartition = currentPartition;
+            
             point = TravelPoint(dest, position, distance);
         }
 
-        if (minPartition)
-            pointMap[minPartition].push_back(point);
+        if (std::get<2>(point) > 0)
+            pointMap[sqrt(pointRange.first)].push_back(point);
     }
 
     sTravelMgr.GetPartitionsLock(false);

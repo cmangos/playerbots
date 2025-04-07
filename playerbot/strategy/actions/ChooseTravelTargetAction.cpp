@@ -240,7 +240,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
     for (auto& [partition, travelPointList] : partitionedList)
     {
-        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(partition), "debug travel");
+        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(sqrt(partition)), "debug travel");
 
         for (auto& [destination, position, distance] : travelPointList)
         {
@@ -478,9 +478,9 @@ bool RefreshTravelTargetAction::Execute(Event& event)
         return false;
     }
 
-    std::vector<WorldPosition*> newPositions = oldDestination->NextPoint(*target->GetPosition());
+    WorldPosition* newPosition = oldDestination->GetNextPoint(*target->GetPosition());
 
-    if (newPositions.empty())
+    if (!newPosition)
     {
         ai->TellDebug(requester, "No new locations found for old destination.", "debug travel");
         return false;
@@ -493,7 +493,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     if (!conditionsStillActive)
         return false;
 
-    target->SetTarget(oldDestination, newPositions.front());
+    target->SetTarget(oldDestination, newPosition);
 
     target->SetStatus(TravelStatus::TRAVEL_STATUS_READY);
     target->IncRetry(false);
@@ -679,12 +679,12 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 PartitionedTravelList list;
                 for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, WorldPvpLocation, true, false, false, false, false))
                 {
-                    std::vector<WorldPosition*> points = destination->NextPoint(center);
+                    WorldPosition* point = destination->GetNextPoint(center);
 
-                    if (points.empty())
+                    if (!point)
                         continue;
 
-                    list[0].push_back(TravelPoint(destination, points.front(), points.front()->distance(center)));
+                    list[0].push_back(TravelPoint(destination, point, point->distance(center)));
                 }
 
                 return list;

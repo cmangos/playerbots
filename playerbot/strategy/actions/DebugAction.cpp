@@ -420,10 +420,10 @@ bool DebugAction::Execute(Event& event)
 
         if (dest)
         {
-            std::vector<WorldPosition*> points = dest->NextPoint(botPos);
-            if (!points.empty())
+            WorldPosition* point = dest->GetNextPoint(botPos);
+            if (point)
             {
-                poiPoint = *points.front();
+                poiPoint = *point;
                 name = dest->GetTitle();
             }
         }
@@ -1201,13 +1201,13 @@ bool DebugAction::Execute(Event& event)
 
         if (dest)
         {
-            std::vector<WorldPosition*> points = dest->NextPoint(botPos);
+            WorldPosition* point = dest->GetNextPoint(botPos);
 
-            if (points.empty())
+            if (!point)
                 return false;
 
             std::vector<WorldPosition> beginPath, endPath;
-            TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *points.front(), beginPath, bot);
+            TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *point, beginPath, bot);
 
             std::ostringstream out; out << "Traveling to " << dest->GetTitle() << ": ";
 

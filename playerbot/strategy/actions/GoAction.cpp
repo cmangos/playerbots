@@ -196,7 +196,7 @@ bool GoAction::LeaderAlreadyTraveling(TravelDestination* dest) const
 bool GoAction::TellHowToGo(TravelDestination* dest, Player* requester) const
 {
     WorldPosition botPos = WorldPosition(bot);
-    WorldPosition* point = dest->NearestPoint(botPos);
+    WorldPosition* point = dest->GetClosestPoint(botPos);
 
     std::vector<WorldPosition> beginPath, endPath;
     TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *point, beginPath, bot);
@@ -268,7 +268,7 @@ bool GoAction::TravelTo(TravelDestination* dest, Player* requester) const
     WorldPosition botPos = WorldPosition(bot);
     if (dest)
     {
-        WorldPosition* point = dest->NearestPoint(botPos);
+        WorldPosition* point = dest->GetClosestPoint(botPos);
 
         if (!point)
             return false;

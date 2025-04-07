@@ -713,7 +713,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 uint32 botMoney = bot->GetMoney();
                 if (ai->HasCheat(BotCheatMask::gold) || ai->HasCheat(BotCheatMask::taxi))
                 {
-                    bot->SetMoney(10000000);
+                    bot->SetMoney(botMoney + tEntry->price);
                 }
 #ifdef MANGOSBOT_TWO                
                 bot->OnTaxiFlightEject(true);
@@ -722,11 +722,8 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 #ifdef MANGOSBOT_TWO
                 bot->ResolvePendingMount();
 #endif
-
-                if (ai->HasCheat(BotCheatMask::gold) || ai->HasCheat(BotCheatMask::taxi))
-                {
+                if(!goTaxi)
                     bot->SetMoney(botMoney);
-                }
 
                 return goTaxi;
             }

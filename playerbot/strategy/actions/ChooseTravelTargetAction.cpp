@@ -67,10 +67,6 @@ bool ChooseTravelTargetAction::isUseful()
     if (AI_VALUE(bool, "travel target active"))
         return false;
 
-    if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
-        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
-            return false;
-
     return true;
 }
 
@@ -244,7 +240,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
     for (auto& [partition, travelPointList] : partitionedList)
     {
-        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(partition), "debug travel");
+        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(sqrt(partition)), "debug travel");
 
         for (auto& [destination, position, distance] : travelPointList)
         {
@@ -379,6 +375,9 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
     PartitionedTravelList groupTargets;
 
     std::unordered_map<TravelDestination*, std::vector<std::string>> conditions;
+    std::unordered_map<TravelDestination*, Player*> playerDesitnations;
+
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
     //Find targets of the group.
     for (auto& member : groupPlayers)
@@ -402,15 +401,18 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
         if (!groupTarget->IsActive())
             continue;
 
-        if (!groupTarget->GetDestination()->IsActive(bot, info) || typeid(*groupTarget->GetDestination()) == typeid(RpgTravelDestination))
+        if (!groupTarget->GetDestination()->IsActive(player, info) || typeid(*groupTarget->GetDestination()) == typeid(RpgTravelDestination))
+        {
+            player->GetPlayerbotAI()->TellDebug(requester,"Target is cooldowin down because a group member found it to be inactive.", "debug travel");
+            groupTarget->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
             continue;
+        }
 
         groupTargets[0].push_back(TravelPoint(groupTarget->GetDestination(), groupTarget->GetPosition(), groupTarget->GetPosition()->distance(bot)));
 
         conditions[groupTarget->GetDestination()] = groupTarget->GetConditions();
+        playerDesitnations[groupTarget->GetDestination()] = player;
     }
-
-    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
     ai->TellDebug(requester, std::to_string(groupTargets[0].size()) + " group targets found.", "debug travel");
 
@@ -424,7 +426,7 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
     if (!SetBestTarget(requester, &newTarget, groupTargets))
         return false;
     
-    newTarget.SetGroupCopy();
+    newTarget.SetGroupCopy(playerDesitnations[newTarget.GetDestination()]);
 
     setNewTarget(requester, &newTarget, oldTarget);
 
@@ -447,6 +449,9 @@ bool ChooseGroupTravelTargetAction::isUseful()
     if (AI_VALUE(TravelTarget*, "travel target")->IsPreparing())
         return false;
 
+    if (urand(0, 100) < 50)
+        return false;
+
     return true;
 }
 
@@ -467,15 +472,15 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     if (!oldDestination) //Does this target have a destination?
         return false;
 
-    if (!oldDestination->IsActive(bot, PlayerTravelInfo(bot))) //Is the destination still valid?
+    if (!target->IsDestinationActive()) //Is the destination still valid?
     {
         ai->TellDebug(requester, "Old destination was no longer valid.", "debug travel");
         return false;
     }
 
-    std::vector<WorldPosition*> newPositions = oldDestination->NextPoint(*target->GetPosition());
+    WorldPosition* newPosition = oldDestination->GetNextPoint(*target->GetPosition());
 
-    if (newPositions.empty())
+    if (!newPosition)
     {
         ai->TellDebug(requester, "No new locations found for old destination.", "debug travel");
         return false;
@@ -488,9 +493,9 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     if (!conditionsStillActive)
         return false;
 
-    target->SetTarget(oldDestination, newPositions.front());
+    target->SetTarget(oldDestination, newPosition);
 
-    target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
+    target->SetStatus(TravelStatus::TRAVEL_STATUS_READY);
     target->IncRetry(false);
 
     RESET_AI_VALUE(bool, "travel target active");    
@@ -674,12 +679,12 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 PartitionedTravelList list;
                 for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, WorldPvpLocation, true, false, false, false, false))
                 {
-                    std::vector<WorldPosition*> points = destination->NextPoint(center);
+                    WorldPosition* point = destination->GetNextPoint(center);
 
-                    if (points.empty())
+                    if (!point)
                         continue;
 
-                    list[0].push_back(TravelPoint(destination, points.front(), points.front()->distance(center)));
+                    list[0].push_back(TravelPoint(destination, point, point->distance(center)));
                 }
 
                 return list;

@@ -164,7 +164,7 @@ float WorldPosition::fDist(const WorldPosition& to) const
         return sqrt(sqDistance2d(to));
 
     //this -> mapTransfer | mapTransfer -> center
-    return sTravelMgr.FastMapTransDistance(*this, to);
+    return sTravelMgr.MapTransDistance(*this, to);
 };
 
 //When moving from this along list return last point that falls within range.

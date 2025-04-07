@@ -4,6 +4,7 @@
 #include <boost/functional/hash.hpp>
 #include "GuidPosition.h"
 #include "strategy/values/TravelValues.h"
+#include "WorldSquare.h"
 
 namespace ai
 {
@@ -18,6 +19,8 @@ namespace ai
 		float Distance(const WorldPosition& start, const WorldPosition& end) const { return (isUseful(start, end) ? (start.distance(pointFrom) + portalLength + pointTo.distance(end)) : 200000); }
 
 		float FDist(const WorldPosition& start, const WorldPosition& end) const { return start.fDist(pointFrom) + portalLength + pointTo.fDist(end); }
+
+		float sqDist(const WorldPosition& start, const WorldPosition& end) const { return start.sqDistance2d(pointFrom) + portalLength + pointTo.sqDistance2d(end); }
 
 		WorldPosition GetPointFrom() const { return pointFrom; }
 		WorldPosition GetPointTo() const { return pointTo; }
@@ -97,12 +100,12 @@ namespace ai
 	};
 	
 	//A destination for a bot to travel to and do something.
-	class TravelDestination
+	class TravelDestination : public WorldWpSquare
 	{
 	public:
 		TravelDestination() {}
 
-		void AddPoint(WorldPosition* pos) { points.push_back(pos); }
+		//void AddPoint(WorldPosition* pos) { points.push_back(pos); }
 
 		virtual std::string GetTitle() const { return "generic travel destination"; }
 
@@ -110,18 +113,18 @@ namespace ai
 		uint32 GetCooldownDelay() { return cooldownDelay; }
 
 		virtual bool IsIn(const WorldPosition& pos, float radius = 0) const { return OnMap(pos) && DistanceTo(pos) <= (radius ? radius : radiusMin); }
-		float DistanceTo(const WorldPosition& pos) const { return NearestPoint(pos)->distance(pos); }
+		float DistanceTo(const WorldPosition& pos) const { return sqrt(sqDistance(pos)); }
 
 		float GetRadiusMin() { return radiusMin; }
-		bool HasPoint(const WorldPosition* pos) { return std::find(points.begin(), points.end(), pos) != points.end(); }
-		const std::vector<WorldPosition*>& GetPoints() const {return points;};
+		//bool HasPoint(const WorldPosition* pos) { return std::find(points.begin(), points.end(), pos) != points.end(); }
+		//const std::vector<WorldPosition*>& GetPoints() const {return points;};
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const { return false; }
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const { return false; }
 
 		virtual int32 GetEntry() const { return 0; }
-		WorldPosition* NearestPoint(const WorldPosition& pos) const;
-		std::vector<WorldPosition*> NextPoint(const WorldPosition& pos) const;
+		//WorldPosition* NearestPoint(const WorldPosition& pos) const;
+		//std::vector<WorldPosition*> NextPoint(const WorldPosition& pos) const;
 
 		virtual std::string GetShortName() const { return ""; };
 	protected:
@@ -132,9 +135,9 @@ namespace ai
 
 		virtual bool IsOut(const WorldPosition& pos, float radius = 0) const { return !OnMap(pos) || DistanceTo(pos) > (radius ? radius : radiusMax); }
 	private:
-		bool OnMap(const WorldPosition& pos) const { return NearestPoint(pos)->getMapId() == pos.getMapId(); }
+		//bool OnMap(const WorldPosition& pos) const { return NearestPoint(pos)->getMapId() == pos.getMapId(); }
 
-		std::vector<WorldPosition*> points;
+		//std::vector<WorldPosition*> points;
 		float radiusMin = sPlayerbotAIConfig.tooCloseDistance;
 		float radiusMax = sPlayerbotAIConfig.sightDistance;
 
@@ -149,12 +152,12 @@ namespace ai
 		NullTravelDestination() : TravelDestination() { SetCooldownLong(); };
 
 		virtual std::string GetTitle() const override { return "no destination"; }
-
+		
 		virtual bool IsIn(const WorldPosition& pos, float radius = 0) const override { return true; }
 
 		virtual std::string GetShortName() const override { return "idle"; };
 	protected:
-		virtual bool IsOut(const WorldPosition& pos, float radius = 0) const override { return false; }
+		//virtual bool IsOut(const WorldPosition& pos, float radius = 0) const override { return false; }
 	};
 
 	class EntryTravelDestination : public TravelDestination
@@ -298,10 +301,11 @@ namespace ai
 	{
 		TRAVEL_STATUS_NONE = 0,
 		TRAVEL_STATUS_PREPARE = 1,
-		TRAVEL_STATUS_TRAVEL = 2,
-		TRAVEL_STATUS_WORK = 3,
-		TRAVEL_STATUS_COOLDOWN = 4,
-		TRAVEL_STATUS_EXPIRED = 5,
+		TRAVEL_STATUS_READY = 2,
+		TRAVEL_STATUS_TRAVEL = 3,
+		TRAVEL_STATUS_WORK = 4,
+		TRAVEL_STATUS_COOLDOWN = 5,
+		TRAVEL_STATUS_EXPIRED = 6,
 		MAX_TRAVEL_STATUS
 	};
 
@@ -327,11 +331,13 @@ namespace ai
 		int32 GetEntry() const { if (!tDestination) return 0; return tDestination->GetEntry(); }
 		TravelStatus GetStatus() const { return m_status; }
 		TravelState GetTravelState();
+		GuidPosition GetGroupmember() { return groupMember; }
 
-		bool IsGroupCopy() const { return groupCopy; }
+		bool IsGroupCopy() const { return groupMember; }
 		bool IsForced() const { return forced; }
 
 		bool IsConditionsActive(bool clear = false);
+		bool IsDestinationActive();
 
 		void CheckStatus();
 
@@ -348,7 +354,7 @@ namespace ai
 		void SetRetry(bool isMove, uint32 newCount = 0) { if (isMove) moveRetryCount = newCount; else extendRetryCount = newCount; }
 		bool IsMaxRetry(bool isMove) { return isMove ? (moveRetryCount > 10) : (extendRetryCount > 5); }
 
-		void SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1, bool groupCopy1 = false);
+		void SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1);
 		
 		void AddCondition(std::string condition) { travelConditions.push_back(condition); }
 		void SetConditions(std::vector<std::string> conditions) { travelConditions = conditions; }
@@ -357,7 +363,7 @@ namespace ai
 		void SetStatus(TravelStatus status);
 		void SetExpireIn(uint32 expireMs) { statusTime = GetExpiredTime() + expireMs; }
 		void SetForced(bool forced1) { forced = forced1; }
-		void SetGroupCopy(bool isGroupCopy = true) { groupCopy = isGroupCopy; }
+		void SetGroupCopy(GuidPosition member) { groupMember = member; }
 		void SetRadius(float radius1) { radius = radius1; }
 
 		void IncRetry(bool isMove) { if (isMove) moveRetryCount+=2; else extendRetryCount++; }
@@ -374,7 +380,6 @@ namespace ai
 
 		bool forced = false;
 		float radius = 0;
-		bool groupCopy = false;
 		bool visitor = true;
 
 		uint32 extendRetryCount = 0;
@@ -383,6 +388,7 @@ namespace ai
 		TravelDestination* tDestination = nullptr;
 		std::vector<std::string> travelConditions = {};
 		WorldPosition* wPosition = nullptr;
+		GuidPosition groupMember;
 	};
 
 	//General container for all travel destinations.
@@ -402,8 +408,8 @@ namespace ai
 		void SetNullTravelTarget(TravelTarget* target) const;
 
 		void LoadMapTransfers();
+		std::vector<std::pair<WorldPosition, float>> sqMapTransDistances(const WorldPosition& start, uint32 endMapId) const;
 		float MapTransDistance(const WorldPosition& start, const WorldPosition& end, bool toMap = false) const;
-		float FastMapTransDistance(const WorldPosition& start, const WorldPosition& end, bool toMap = false) const;
 
 		void AddBadMmap(uint32 mapId, int x, int y) { badMmap.push_back(std::make_tuple(mapId, x, y)); }
 		bool IsBadMmap(uint32 mapId, int x, int y) const { return std::find(badMmap.begin(), badMmap.end(), std::make_tuple(mapId, x, y)) != badMmap.end(); }

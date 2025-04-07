@@ -6280,6 +6280,10 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
         std::ostringstream out;
 
         TravelTarget* target = GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
+
+        if (target->GetGroupmember() && target->GetGroupmember().GetPlayer())
+            out << "\n" << target->GetGroupmember().GetPlayer()->GetName() << "'s ";
+
         if (target->GetDestination()) {
             out << "Target: " << target->GetDestination()->GetTitle();
 

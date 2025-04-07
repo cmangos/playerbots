@@ -751,10 +751,10 @@ TravelTarget::TravelTarget(PlayerbotAI* ai) : AiObject(ai)
     SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
 }
 
-void TravelTarget::SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1, bool groupCopy1) {
+void TravelTarget::SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1) {
     wPosition = wPosition1;
     tDestination = tDestination1;
-    groupCopy = groupCopy1;
+    groupMember = GuidPosition();
     forced = false;
     radius = 0;
 
@@ -763,7 +763,7 @@ void TravelTarget::SetTarget(TravelDestination* tDestination1, WorldPosition* wP
 
 void TravelTarget::CopyTarget(TravelTarget* const target) {
     SetTarget(target->tDestination, target->wPosition);
-    groupCopy = target->IsGroupCopy();
+    groupMember = target->groupMember;
     forced = target->forced;
     extendRetryCount = target->extendRetryCount;
 }
@@ -778,6 +778,9 @@ void TravelTarget::SetStatus(TravelStatus status) {
     case TravelStatus::TRAVEL_STATUS_EXPIRED:
         statusTime = 1;
         break;
+    case TravelStatus::TRAVEL_STATUS_READY:
+        statusTime = HOUR;
+        break;
     case TravelStatus::TRAVEL_STATUS_TRAVEL:
         statusTime = GetMaxTravelTime() * 2 + sPlayerbotAIConfig.maxWaitForMove;
         break;
@@ -790,14 +793,47 @@ void TravelTarget::SetStatus(TravelStatus status) {
     }
 }
 
+bool TravelTarget::IsDestinationActive()
+{
+    Player* player = bot;
+    if (groupMember)
+    {
+        Player* member = groupMember.GetPlayer();
+        if (!ai->IsSafe(member)) //unknown
+            return true;
+        else
+            player = member;
+    }
+
+    if (!player->GetPlayerbotAI()) //No ai so clear target.
+        return false;
+
+    return tDestination->IsActive(player, PlayerTravelInfo(player));
+}
+
 bool TravelTarget::IsConditionsActive(bool clear)
 {
+    Player* player = bot;
+    if (groupMember)
+    {
+        Player* member = groupMember.GetPlayer();
+        if (!ai->IsSafe(member)) //unknown
+            return true;
+        else
+            player = member;
+    }
+
+    if (!player->GetPlayerbotAI()) //No ai so clear target.
+        return false;
+        
+    AiObjectContext* playerContext = player->GetPlayerbotAI()->GetAiObjectContext();
+
     if (clear)
         for (auto& condition : travelConditions)
-            context->ClearValues(condition);
+            playerContext->ClearValues(condition);
 
     for (auto& condition : travelConditions)
-        if (!AI_VALUE(bool, condition))
+        if (!PAI_VALUE(bool, condition))
             return false;
 
     return true;
@@ -807,6 +843,17 @@ void TravelTarget::CheckStatus()
 {
     if (!IsActive())
         return;
+
+    if (groupMember)
+    {
+        Player* member = groupMember.GetPlayer();
+        if (!member || (ai->IsSafe(member) && member->GetGroup() != bot->GetGroup()))
+        {
+            ai->TellDebug(ai->GetMaster(), "Travel target expired because it was from a player that is no longer in the group.", "debug travel");
+            SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+            return;
+        }
+    }
 
     if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT) && !ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
     {
@@ -824,14 +871,6 @@ void TravelTarget::CheckStatus()
 
     if (IsTraveling())
     {
-        if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT))
-            {
-                ai->TellDebug(ai->GetMaster(), "The target is clearing because the bot is following a group leader.", "debug travel");
-                sTravelMgr.SetNullTravelTarget(this);
-                return;
-            }
-
         bool HasArrived = tDestination->IsIn(bot, radius);
 
         if (HasArrived)
@@ -850,7 +889,7 @@ void TravelTarget::CheckStatus()
         }
     }
 
-    if (!IsCooldownDown() && (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive())) //Target has become invalid. Stop.
+    if (!IsCooldownDown() && (!IsDestinationActive() || !IsConditionsActive())) //Target has become invalid. Stop.
     {
         ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);

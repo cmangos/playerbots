@@ -771,7 +771,7 @@ void TravelTarget::SetStatus(TravelStatus status) {
         statusTime = 1;
         break;
     case TravelStatus::TRAVEL_STATUS_READY:
-        statusTime = HOUR;
+        statusTime = HOUR *  1000;
         break;
     case TravelStatus::TRAVEL_STATUS_TRAVEL:
         statusTime = GetMaxTravelTime() * 2 + sPlayerbotAIConfig.maxWaitForMove;
@@ -861,7 +861,7 @@ void TravelTarget::CheckStatus()
         return;
     }
 
-    if (IsTraveling())
+    if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
     {
         bool HasArrived = tDestination->IsIn(bot, radius);
 
@@ -881,7 +881,7 @@ void TravelTarget::CheckStatus()
         }
     }
 
-    if (!IsCooldownDown() && (!IsDestinationActive() || !IsConditionsActive())) //Target has become invalid. Stop.
+    if (GetStatus() != TravelStatus::TRAVEL_STATUS_COOLDOWN && (!IsDestinationActive() || !IsConditionsActive())) //Target has become invalid. Stop.
     {
         ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
@@ -896,34 +896,6 @@ bool TravelTarget::IsActive() {
     return true;
 };
 
-bool TravelTarget::IsTraveling() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_TRAVEL)
-        return false;   
-
-    return true;
-}
-
-bool TravelTarget::IsWorking() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_WORK)
-        return false;
-
-    return true;
-}
-
-bool TravelTarget::IsCooldownDown() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_COOLDOWN)
-        return false;
-
-    return true;
-}
-
-bool TravelTarget::IsPreparing() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_PREPARE)
-        return false;
-
-    return true;
-}
-
 TravelState TravelTarget::GetTravelState() {
     if (!tDestination || typeid(*tDestination) == typeid(NullTravelDestination))
         return TravelState::TRAVEL_STATE_IDLE;
@@ -932,24 +904,24 @@ TravelState TravelTarget::GetTravelState() {
     {
         if (((QuestRelationTravelDestination*)tDestination)->GetRelation() == 0)
         {
-            if (IsTraveling() || IsPreparing())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
                 return TravelState::TRAVEL_STATE_TRAVEL_PICK_UP_QUEST;
-            if (IsWorking())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
                 return TravelState::TRAVEL_STATE_WORK_PICK_UP_QUEST;
         }
         else
         {
-            if (IsTraveling() || IsPreparing())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
                 return TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST;
-            if (IsWorking())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
                 return TravelState::TRAVEL_STATE_WORK_HAND_IN_QUEST;
         }
     }
     else if (typeid(*tDestination) == typeid(QuestObjectiveTravelDestination))
     {
-        if (IsTraveling() || IsPreparing())
+        if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
             return TravelState::TRAVEL_STATE_TRAVEL_DO_QUEST;
-        if (IsWorking())
+        if (GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
             return TravelState::TRAVEL_STATE_WORK_DO_QUEST;
     }
     else if (typeid(*tDestination) == typeid(RpgTravelDestination))

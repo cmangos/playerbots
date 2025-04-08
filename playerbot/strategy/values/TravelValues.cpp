@@ -391,7 +391,7 @@ bool TravelTargetActiveValue::Calculate()
 
 bool TravelTargetTravelingValue::Calculate()
 {
-    return AI_VALUE(TravelTarget*, "travel target")->IsTraveling();
+    return AI_VALUE(TravelTarget*, "travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || AI_VALUE(TravelTarget*, "travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_READY;
 };
 
 bool QuestStageActiveValue::Calculate()

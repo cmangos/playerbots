@@ -342,10 +342,6 @@ namespace ai
 		void CheckStatus();
 
 		bool IsActive();
-		bool IsTraveling();
-		bool IsWorking();
-		bool IsCooldownDown();
-		bool IsPreparing();
 
 		uint32 GetRetryCount(bool isMove) const { return isMove ? moveRetryCount : extendRetryCount; }
 		int32 GetTimeLeft() const { return statusTime - GetExpiredTime(); }

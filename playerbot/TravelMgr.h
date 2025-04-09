@@ -398,6 +398,7 @@ namespace ai
 
 		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
 		void GetPartitionsLock(bool getLock = true);
+		static bool IsLocationLevelValid(const WorldPosition& position, const PlayerTravelInfo& info);
 		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
 		static void ShuffleTravelPoints(std::vector<TravelPoint>& points);
 

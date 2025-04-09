@@ -2167,13 +2167,8 @@ void TravelMgr::GetPartitionsLock(bool getLock)
     sTravelMgr.getDestinationVar.notify_one();
 }
 
-PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
+bool TravelMgr::IsLocationLevelValid(const WorldPosition& position, const PlayerTravelInfo& info)
 {
-    sTravelMgr.GetPartitionsLock();
-
-    PartitionedTravelList pointMap;
-    DestinationList destinations = GetDestinations(info, purposeFlag, entries, onlyPossible, maxDistance);
-
     bool canFightElite = info.GetBoolValue("can fight elite");
     uint32 botLevel = info.GetLevel();
 
@@ -2188,6 +2183,26 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
 
     if (botLevel < 6)
         botLevel = 6;
+
+    uint32 areaLevel = position.getAreaLevel();
+
+    if (!position.isOverworld() && !canFightElite)
+        areaLevel += 10;
+
+    if (!areaLevel || botLevel < areaLevel) //Skip points that are in a area that is too high level.
+        return false;
+
+    return true;
+}
+
+PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
+{
+    sTravelMgr.GetPartitionsLock();
+
+    PartitionedTravelList pointMap;
+    DestinationList destinations = GetDestinations(info, purposeFlag, entries, onlyPossible, maxDistance);
+
+
 
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::shuffle(destinations.begin(), destinations.end(), std::default_random_engine(seed));
@@ -2207,12 +2222,7 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
 
         for (auto& position : points)
         {
-            uint32 areaLevel = position->getAreaLevel();
-
-            if (!position->isOverworld() && !canFightElite)
-                areaLevel += 10;
-
-            if (!areaLevel || botLevel < areaLevel) //Skip points that are in a area that is too high level.
+            if (!IsLocationLevelValid(*position, info))
                 continue;
 
             float distance = position->distance(center);

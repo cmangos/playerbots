@@ -480,7 +480,16 @@ bool RefreshTravelTargetAction::Execute(Event& event)
         return false;
     }
 
-    WorldPosition* newPosition = oldDestination->GetNextPoint(*target->GetPosition());
+    PlayerTravelInfo info(bot);
+    
+    WorldPosition* newPosition;
+
+    for (uint8 i = 0; i < 5; i++)
+    {
+        newPosition = oldDestination->GetNextPoint(*target->GetPosition());
+        if (newPosition && sTravelMgr.IsLocationLevelValid(*newPosition, info))
+            break;        
+    }
 
     if (!newPosition)
     {

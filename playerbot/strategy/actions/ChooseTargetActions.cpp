@@ -41,8 +41,7 @@ bool AttackAnythingAction::isUseful()
         }
     }
 
-    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
-    if (travelTarget->IsTraveling() && AI_VALUE2(bool, "can free move to", travelTarget->GetPosStr()))
+    if (AI_VALUE(bool, "travel target traveling") && AI_VALUE2(bool, "can free move to", AI_VALUE(TravelTarget*,"travel target")->GetPosStr())) //Bot is traveling
         return false;
 
     return true;

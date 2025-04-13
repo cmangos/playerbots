@@ -12,7 +12,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
 {
     TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    if(!travelTarget->IsPreparing())
+    if(travelTarget->GetStatus() != TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
@@ -116,6 +116,8 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
 
         oldTarget->AddCondition(condition);
     }
+
+    oldTarget->SetStatus(TravelStatus::TRAVEL_STATUS_READY);
 
     //Clear rpg and attack/grind target. We want to travel, not hang around some more.
     RESET_AI_VALUE(GuidPosition,"rpg target");
@@ -446,7 +448,7 @@ bool ChooseGroupTravelTargetAction::isUseful()
     if (!ChooseTravelTargetAction::isUseful())
         return false;
 
-    if (AI_VALUE(TravelTarget*, "travel target")->IsPreparing())
+    if (AI_VALUE(TravelTarget*, "travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
     if (urand(0, 100) < 50)
@@ -478,7 +480,16 @@ bool RefreshTravelTargetAction::Execute(Event& event)
         return false;
     }
 
-    WorldPosition* newPosition = oldDestination->GetNextPoint(*target->GetPosition());
+    PlayerTravelInfo info(bot);
+    
+    WorldPosition* newPosition;
+
+    for (uint8 i = 0; i < 5; i++)
+    {
+        newPosition = oldDestination->GetNextPoint(*target->GetPosition());
+        if (newPosition && sTravelMgr.IsLocationLevelValid(*newPosition, info))
+            break;        
+    }
 
     if (!newPosition)
     {
@@ -514,7 +525,7 @@ bool RefreshTravelTargetAction::isUseful()
     if (!ChooseTravelTargetAction::isUseful())
         return false;
 
-    if (AI_VALUE(TravelTarget*, "travel target")->IsPreparing())
+    if (AI_VALUE(TravelTarget*, "travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
     if (!WorldPosition(bot).isOverworld())
@@ -552,7 +563,7 @@ bool ResetTargetAction::isUseful()
     if (!ChooseTravelTargetAction::isUseful())
         return false;
 
-    if (AI_VALUE(TravelTarget*, "travel target")->IsPreparing())
+    if (AI_VALUE(TravelTarget*, "travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
     return true;
@@ -582,7 +593,7 @@ bool RequestTravelTargetAction::isUseful() {
     if (!ai->AllowActivity(TRAVEL_ACTIVITY))
         return false;
 
-    if (AI_VALUE(TravelTarget*, "travel target")->IsPreparing())
+    if (AI_VALUE(TravelTarget*, "travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
     if (AI_VALUE(bool, "travel target active"))
@@ -593,10 +604,6 @@ bool RequestTravelTargetAction::isUseful() {
 
     if (!AI_VALUE(bool, "can move around"))
         return false;
-
-    if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
-        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
-            return false;
 
     if (!isAllowed())
     {

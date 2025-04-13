@@ -6282,20 +6282,24 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
         TravelTarget* target = GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
 
         if (target->GetGroupmember() && target->GetGroupmember().GetPlayer())
-            out << "\n" << target->GetGroupmember().GetPlayer()->GetName() << "'s ";
+            out << target->GetGroupmember().GetPlayer()->GetName() << "'s ";
 
         if (target->GetDestination()) {
             out << "Target: " << target->GetDestination()->GetTitle();
 
-            if (target->GetPosition())
+            if (*target->GetPosition())
             {
                 out << "\nLocation: " << target->GetPosition()->getAreaName();
                 out << " (" << (uint32)target->GetPosition()->distance(bot) << "y)";
             }
         }
-        out << "\nStatus: ";
+        
         if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_NONE)
-            out << "none";
+            return out.str();
+        
+        out << "\nStatus: ";
+        if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_READY)
+            out << "ready";        
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
             out << "preparing";
         else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
@@ -6313,19 +6317,22 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
         if(target->GetRetryCount(true) || target->GetRetryCount(false))
             out << "(retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
 
-        out << "\nConditions: ";
-
-        for (auto& condition : target->GetConditions())
+        if (target->GetConditions().size())
         {
-            AiObjectContext* context = GetAiObjectContext();
-            out << condition;
-            if (AI_VALUE(bool, condition))
-                out << " (true)";
-            else
-                out << " (false)";
+            out << "\nConditions: ";
 
-            if (condition != target->GetConditions().back())
-                out << ", ";
+            for (auto& condition : target->GetConditions())
+            {
+                AiObjectContext* context = GetAiObjectContext();
+                out << condition;
+                if (AI_VALUE(bool, condition))
+                    out << " (true)";
+                else
+                    out << " (false)";
+
+                if (condition != target->GetConditions().back())
+                    out << ", ";
+            }
         }
 
         return out.str();

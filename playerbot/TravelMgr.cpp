@@ -771,7 +771,7 @@ void TravelTarget::SetStatus(TravelStatus status) {
         statusTime = 1;
         break;
     case TravelStatus::TRAVEL_STATUS_READY:
-        statusTime = HOUR;
+        statusTime = HOUR *  1000;
         break;
     case TravelStatus::TRAVEL_STATUS_TRAVEL:
         statusTime = GetMaxTravelTime() * 2 + sPlayerbotAIConfig.maxWaitForMove;
@@ -861,7 +861,7 @@ void TravelTarget::CheckStatus()
         return;
     }
 
-    if (IsTraveling())
+    if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
     {
         bool HasArrived = tDestination->IsIn(bot, radius);
 
@@ -881,7 +881,7 @@ void TravelTarget::CheckStatus()
         }
     }
 
-    if (!IsCooldownDown() && (!IsDestinationActive() || !IsConditionsActive())) //Target has become invalid. Stop.
+    if (GetStatus() != TravelStatus::TRAVEL_STATUS_COOLDOWN && (!IsDestinationActive() || !IsConditionsActive())) //Target has become invalid. Stop.
     {
         ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
@@ -896,34 +896,6 @@ bool TravelTarget::IsActive() {
     return true;
 };
 
-bool TravelTarget::IsTraveling() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_TRAVEL)
-        return false;   
-
-    return true;
-}
-
-bool TravelTarget::IsWorking() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_WORK)
-        return false;
-
-    return true;
-}
-
-bool TravelTarget::IsCooldownDown() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_COOLDOWN)
-        return false;
-
-    return true;
-}
-
-bool TravelTarget::IsPreparing() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_PREPARE)
-        return false;
-
-    return true;
-}
-
 TravelState TravelTarget::GetTravelState() {
     if (!tDestination || typeid(*tDestination) == typeid(NullTravelDestination))
         return TravelState::TRAVEL_STATE_IDLE;
@@ -932,24 +904,24 @@ TravelState TravelTarget::GetTravelState() {
     {
         if (((QuestRelationTravelDestination*)tDestination)->GetRelation() == 0)
         {
-            if (IsTraveling() || IsPreparing())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
                 return TravelState::TRAVEL_STATE_TRAVEL_PICK_UP_QUEST;
-            if (IsWorking())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
                 return TravelState::TRAVEL_STATE_WORK_PICK_UP_QUEST;
         }
         else
         {
-            if (IsTraveling() || IsPreparing())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
                 return TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST;
-            if (IsWorking())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
                 return TravelState::TRAVEL_STATE_WORK_HAND_IN_QUEST;
         }
     }
     else if (typeid(*tDestination) == typeid(QuestObjectiveTravelDestination))
     {
-        if (IsTraveling() || IsPreparing())
+        if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
             return TravelState::TRAVEL_STATE_TRAVEL_DO_QUEST;
-        if (IsWorking())
+        if (GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
             return TravelState::TRAVEL_STATE_WORK_DO_QUEST;
     }
     else if (typeid(*tDestination) == typeid(RpgTravelDestination))
@@ -2195,13 +2167,8 @@ void TravelMgr::GetPartitionsLock(bool getLock)
     sTravelMgr.getDestinationVar.notify_one();
 }
 
-PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
+bool TravelMgr::IsLocationLevelValid(const WorldPosition& position, const PlayerTravelInfo& info)
 {
-    sTravelMgr.GetPartitionsLock();
-
-    PartitionedTravelList pointMap;
-    DestinationList destinations = GetDestinations(info, purposeFlag, entries, onlyPossible, maxDistance);
-
     bool canFightElite = info.GetBoolValue("can fight elite");
     uint32 botLevel = info.GetLevel();
 
@@ -2216,6 +2183,26 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
 
     if (botLevel < 6)
         botLevel = 6;
+
+    uint32 areaLevel = position.getAreaLevel();
+
+    if (!position.isOverworld() && !canFightElite)
+        areaLevel += 10;
+
+    if (!areaLevel || botLevel < areaLevel) //Skip points that are in a area that is too high level.
+        return false;
+
+    return true;
+}
+
+PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
+{
+    sTravelMgr.GetPartitionsLock();
+
+    PartitionedTravelList pointMap;
+    DestinationList destinations = GetDestinations(info, purposeFlag, entries, onlyPossible, maxDistance);
+
+
 
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::shuffle(destinations.begin(), destinations.end(), std::default_random_engine(seed));
@@ -2235,12 +2222,7 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
 
         for (auto& position : points)
         {
-            uint32 areaLevel = position->getAreaLevel();
-
-            if (!position->isOverworld() && !canFightElite)
-                areaLevel += 10;
-
-            if (!areaLevel || botLevel < areaLevel) //Skip points that are in a area that is too high level.
+            if (!IsLocationLevelValid(*position, info))
                 continue;
 
             float distance = position->distance(center);

@@ -22,7 +22,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
     target->CheckStatus();
 
-    if (!target->IsTraveling())
+    if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_TRAVEL)
         return true;
 
     WorldPosition botLocation(bot);
@@ -172,7 +172,7 @@ bool MoveToTravelTargetAction::isUseful()
     if (!ai->AllowActivity(TRAVEL_ACTIVITY))
         return false;
 
-    if (!AI_VALUE(TravelTarget*,"travel target")->IsTraveling())
+    if (!AI_VALUE(bool, "travel target traveling"))
         return false;
 
     if (bot->IsTaxiFlying())

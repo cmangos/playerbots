@@ -373,7 +373,16 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
         // If the target is not fighting the player (and if the owner bot is not pulling the target)
         if (checkInCombat && !InCombat(target, player, (player == owner)))
         {
-            return false;
+            bool isRtiTarget = false;
+            if (player->GetPlayerbotAI())
+            {
+                Unit* rtiTarget = PAI_VALUE(Unit*, "rti target");
+                if (target == rtiTarget)
+                    isRtiTarget = true;
+            }
+
+            if(!isRtiTarget)
+                return false;
         }
 
         // If the target is a player's pet and in a PvP prohibited zone

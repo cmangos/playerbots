@@ -6262,59 +6262,51 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
 
         return out.str();
     }
-    else if (command == "budget")
+    else if (command.find("budget") == 0)
     {
+        std::string sub;
+
+        if (command.size() > 7)
+            sub = command.substr(7);
+
         std::ostringstream out;
 
         AiObjectContext* context = GetAiObjectContext();
 
-        out << "Current money: " << ChatHelper::formatMoney(bot->GetMoney()) << " free to use:" << ChatHelper::formatMoney(AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::anything)) << "\n";
-        out << "Purpose | Available / Needed \n";
+        if (sub.empty())
+        {
+            out << "Current money: " << ChatHelper::formatMoney(bot->GetMoney()) << " free to use:" << ChatHelper::formatMoney(AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::anything)) << "\n";
+            out << "Purpose: Needed | Available\n";
+        }
 
         for (uint32 i = 1; i < (uint32)NeedMoneyFor::anything; i++)
         {
             NeedMoneyFor needMoneyFor = NeedMoneyFor(i);
 
-            switch (needMoneyFor)
-            {
-            case NeedMoneyFor::none:
-                out << "nothing";
-                break;
-            case NeedMoneyFor::repair:
-                out << "repair";
-                break;
-            case NeedMoneyFor::ammo:
-                out << "ammo";
-                break;
-            case NeedMoneyFor::spells:
-                out << "spells";
-                break;
-            case NeedMoneyFor::travel:
-                out << "travel";
-                break;
-            case NeedMoneyFor::consumables:
-                out << "consumables";
-                break;
-            case NeedMoneyFor::gear:
-                out << "gear";
-                break;
-            case NeedMoneyFor::guild:
-                out << "guild";
-                break;
-            case NeedMoneyFor::tradeskill:
-                out << "tradeskill";
-                break;
-            case NeedMoneyFor::ah:
-                out << "ah";
-                break;
-            case NeedMoneyFor::mount:
-                out << "mount";
-                break;
-            case NeedMoneyFor::anything:
-                out << "anything";
-                break;
-            }
-            out << " | " << ChatHelper::formatMoney(AI_VALUE2(uint32, "free money for", i)) << " / " << ChatHelper::formatMoney(AI_VALUE2(uint32, "money needed for", i)) << "\n";
+            std::unordered_map<NeedMoneyFor, std::string> needStrMap =
+            { { NeedMoneyFor::none, "nothing"},
+              { NeedMoneyFor::repair, "repair"},
+              { NeedMoneyFor::ammo, "ammo"},
+              { NeedMoneyFor::spells, "spells"},
+              { NeedMoneyFor::travel, "travel"},
+              { NeedMoneyFor::consumables, "consumables"},
+              { NeedMoneyFor::gear, "gear"},
+              { NeedMoneyFor::guild, "guild"},
+              { NeedMoneyFor::tradeskill, "tradeskill"},
+              { NeedMoneyFor::skilltraining, "skilltraining"},
+              { NeedMoneyFor::ah, "ah"},
+              { NeedMoneyFor::mount, "mount"},
+              { NeedMoneyFor::anything, "anything"}};
+
+            if (!sub.empty() && needStrMap.at(needMoneyFor).find(sub) == std::string::npos)
+                continue;
+
+            out <<  needStrMap.at(needMoneyFor);
+
+            out << ": " << ChatHelper::formatMoney(AI_VALUE2(uint32, "money needed for", i)) << " | " << ChatHelper::formatMoney(AI_VALUE2(uint32, "free money for", i));
+
+            if (i != (uint32)NeedMoneyFor::mount)
+                out << "\n";
         }
 
         return out.str();

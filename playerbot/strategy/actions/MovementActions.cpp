@@ -112,20 +112,23 @@ bool MovementAction::FlyDirect(WorldPosition &startPosition, WorldPosition &endP
         std::vector<WorldPosition> path;
         if (movePath.empty()) //Make a path starting at the end backwards to see if we can walk to some better place.
         {
-            path = endPosition.getPathTo(startPosition, bot);
-            std::reverse(path.begin(), path.end());
+            path = endPosition.getPathTo(startPosition, bot);            
         }
         else
+        {
+            std::reverse(path.begin(), path.end());
             path = movePath.getPointPath();
+        }
 
         if (path.empty())
             return false;
 
-        auto pathEnd = path.end();
-        for (auto& p = pathEnd; p-- != path.begin(); ) //Find the furtest point where we can fly to directly.
-            if (p->getMapId() == startPosition.getMapId() && p->isOutside() && p->canFly())
+
+
+        for (auto& p : path) //Find the furtest point where we can fly to directly.
+            if (p.getMapId() == startPosition.getMapId() && p.isOutside() && p.canFly())
             {
-                movePosition = *p;
+                movePosition = p;
                 totalDistance = startPosition.distance(movePosition);
                 break;
             }

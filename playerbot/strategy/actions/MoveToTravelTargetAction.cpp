@@ -64,12 +64,18 @@ bool MoveToTravelTargetAction::Execute(Event& event)
             if (!urand(0, 5))
             {
                 std::ostringstream out;
-                if (ai->GetMaster() && !bot->GetGroup()->IsMember(ai->GetMaster()->GetObjectGuid()))
+                if ((ai->GetMaster() && !bot->GetGroup()->IsMember(ai->GetMaster()->GetObjectGuid())) || !ai->HasActivePlayerMaster())
                     out << "Waiting a bit for ";
                 else
                     out << "Please hurry up ";
 
                 out << member->GetName();
+
+                if (bot->GetPlayerbotAI() && !ai->HasActivePlayerMaster())
+                {    
+                        out << " " << round(memberDistance) << "y";
+                        out << " in " << memberPos.getAreaName();
+                }
 
                 ai->TellPlayerNoFacing(GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             }

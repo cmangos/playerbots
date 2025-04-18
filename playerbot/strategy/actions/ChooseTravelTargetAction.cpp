@@ -246,7 +246,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
     for (auto& [partition, travelPointList] : partitionedList)
     {
-        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(sqrt(partition)), "debug travel");
+        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(round(sqrt(partition))), "debug travel");
 
         for (auto& [destination, position, distance] : travelPointList)
         {

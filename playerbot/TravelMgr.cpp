@@ -748,7 +748,6 @@ void TravelTarget::SetTarget(TravelDestination* tDestination1, WorldPosition* wP
     tDestination = tDestination1;
     groupMember = GuidPosition();
     forced = false;
-    radius = 0;
 
     SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
 }
@@ -863,7 +862,7 @@ void TravelTarget::CheckStatus()
 
     if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
     {
-        bool HasArrived = tDestination->IsIn(bot, radius);
+        bool HasArrived = tDestination->IsIn(bot);
 
         if (HasArrived)
         {

@@ -22,7 +22,7 @@ namespace ai
             float sqX = std::min(std::max(min.getX(), point.getX()), max.getX());
             float sqY = std::min(std::max(min.getY(), point.getY()), max.getY());
 
-            return point.sqDistance(WorldPosition(0, sqX, sqY));
+            return point.sqDistance2d(WorldPosition(0, sqX, sqY));
         }
 
         virtual float sqMaxOutDistance(const WorldPosition& point) const

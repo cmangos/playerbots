@@ -138,7 +138,7 @@ namespace ai
 		//bool OnMap(const WorldPosition& pos) const { return NearestPoint(pos)->getMapId() == pos.getMapId(); }
 
 		//std::vector<WorldPosition*> points;
-		float radiusMin = sPlayerbotAIConfig.tooCloseDistance;
+		float radiusMin = INTERACTION_DISTANCE;
 		float radiusMax = sPlayerbotAIConfig.sightDistance;
 
 		uint32 expireDelay = 300000; //5 minutes
@@ -360,7 +360,6 @@ namespace ai
 		void SetExpireIn(uint32 expireMs) { statusTime = GetExpiredTime() + expireMs; }
 		void SetForced(bool forced1) { forced = forced1; }
 		void SetGroupCopy(GuidPosition member) { groupMember = member; }
-		void SetRadius(float radius1) { radius = radius1; }
 
 		void IncRetry(bool isMove) { if (isMove) moveRetryCount+=2; else extendRetryCount++; }
 		void DecRetry(bool isMove) { if (isMove && moveRetryCount > 0) moveRetryCount--; else if (extendRetryCount > 0) extendRetryCount--; }
@@ -375,7 +374,6 @@ namespace ai
 		uint32 statusTime = 0;
 
 		bool forced = false;
-		float radius = 0;
 		bool visitor = true;
 
 		uint32 extendRetryCount = 0;

@@ -1462,6 +1462,7 @@ void RandomItemMgr::BuildItemInfoCache()
     }
 
     CharacterDatabase.CommitTransaction();
+    delete dropMap;
 }
 
 uint32 RandomItemMgr::CalculateStatWeight(uint8 playerclass, uint8 spec, ItemPrototype const* proto, ItemSpecType& itSpec)

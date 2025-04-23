@@ -1181,7 +1181,7 @@ void RandomItemMgr::BuildItemInfoCache()
             sLog.outDetail("Item: %d, minlevel: %d", proto->ItemId, cacheInfo->minLevel);
 
         // check vendors
-        if (cacheInfo->source == ITEM_SOURCE_NONE)
+        if (cacheInfo->source == ITEM_SOURCE_NONE || cacheInfo->source == ITEM_SOURCE_PVP)
         {
             bool isAlly = false;
             bool isHorde = false;

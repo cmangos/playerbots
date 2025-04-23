@@ -1913,7 +1913,7 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
                     if (slot == EQUIPMENT_SLOT_OFFHAND && (specId == 3 || specId == 5) && !(proto->Class == ITEM_CLASS_ARMOR && proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD))
                         continue;
 
-                    if (slot == EQUIPMENT_SLOT_MAINHAND && proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
+                    if (slot == EQUIPMENT_SLOT_MAINHAND && proto->Class == ITEM_CLASS_ARMOR && proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
                         continue;
 
                     if (slot == EQUIPMENT_SLOT_MAINHAND && proto->InventoryType == INVTYPE_HOLDABLE)

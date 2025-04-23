@@ -2620,7 +2620,6 @@ void PlayerbotFactory::UpdateTradeSkills()
 
 void PlayerbotFactory::InitSkills()
 {
-    uint32 maxValue = level * 5;
     bot->UpdateSkillsForLevel(true);
 
 // Riding skills requirements are different
@@ -2672,7 +2671,9 @@ void PlayerbotFactory::InitSkills()
         SetRandomSkill(SKILL_STAVES);
         SetRandomSkill(SKILL_2H_MACES);
         SetRandomSkill(SKILL_DAGGERS);
+#ifdef MANGOSBOT_TWO
         SetRandomSkill(SKILL_POLEARMS);
+#endif
         SetRandomSkill(SKILL_FIST_WEAPONS);
         break;
     case CLASS_WARRIOR:
@@ -2692,7 +2693,6 @@ void PlayerbotFactory::InitSkills()
         SetRandomSkill(SKILL_THROWN);
         break;
     case CLASS_PALADIN:
-        bot->SetSkill(SKILL_PLATE_MAIL, 0, skillLevel, skillLevel);
         SetRandomSkill(SKILL_SWORDS);
         SetRandomSkill(SKILL_AXES);
         SetRandomSkill(SKILL_MACES);
@@ -2717,11 +2717,6 @@ void PlayerbotFactory::InitSkills()
         SetRandomSkill(SKILL_FIST_WEAPONS);
         break;
     case CLASS_MAGE:
-        SetRandomSkill(SKILL_SWORDS);
-        SetRandomSkill(SKILL_STAVES);
-        SetRandomSkill(SKILL_DAGGERS);
-        SetRandomSkill(SKILL_WANDS);
-        break;
     case CLASS_WARLOCK:
         SetRandomSkill(SKILL_SWORDS);
         SetRandomSkill(SKILL_STAVES);
@@ -2741,7 +2736,6 @@ void PlayerbotFactory::InitSkills()
         SetRandomSkill(SKILL_POLEARMS);
         SetRandomSkill(SKILL_FIST_WEAPONS);
         SetRandomSkill(SKILL_THROWN);
-        bot->SetSkill(SKILL_MAIL, 0, skillLevel, skillLevel);
         break;
     case CLASS_ROGUE:
         SetRandomSkill(SKILL_SWORDS);

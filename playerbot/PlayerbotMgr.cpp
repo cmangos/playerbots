@@ -379,7 +379,7 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
     if (master)
     {
         ObjectGuid masterGuid = master->GetObjectGuid();
-        if (master->GetGroup() && !master->GetGroup()->IsLeader(masterGuid))
+        if (master->GetGroup() && !master->GetGroup()->IsLeader(masterGuid) && !sPlayerbotAIConfig.IsFreeAltBot(bot))
             master->GetGroup()->ChangeLeader(masterGuid);
     }
 

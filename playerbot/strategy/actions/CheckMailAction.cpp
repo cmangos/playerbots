@@ -70,11 +70,7 @@ void CheckMailAction::ProcessMail(Mail* mail, Player* owner)
     if (mail->subject.find("Item(s) you asked for") != std::string::npos)
         return;
         
-    if (mail->messageType != MAIL_NORMAL)
-        return;
-        
-    if (mail->sender == MAILSENDER_AUCTION || 
-        mail->subject.find("Auction") != std::string::npos)
+    if (mail->messageType != MAIL_NORMAL || mail->stationery == MAIL_STATIONERY_AUCTION)
         return;
         
     for (MailItemInfoVec::iterator i = mail->items.begin(); i != mail->items.end(); ++i)

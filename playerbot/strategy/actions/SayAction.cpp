@@ -11,16 +11,11 @@
 
 using namespace ai;
 
-std::unordered_set<std::string> noReplyMsgs = {
-  "join", "leave", "follow", "attack", "pull", "flee", "reset", "reset ai",
-  "all ?", "talents", "talents list", "talents auto", "talk", "stay", "stats",
-  "who", "items", "leave", "join", "repair", "summon", "nc ?", "co ?", "de ?",
-  "dead ?", "follow", "los", "guard", "do accept invitation", "stats", "react ?",
-  "reset strats", "home",
-};
-std::unordered_set<std::string> noReplyMsgParts = { "+", "-","@" , "follow target", "focus heal", "boost target", "buff target", "revive target", "cast ", "accept [", "e [", "destroy [", "go zone" };
+std::unordered_set<std::string> noReplyMsgs = { "all ?", "attack", "co ?", "de ?", "dead ?", "do accept invitation", "flee", "follow", "guard", "home", "items", "join", "leave", "los", "nc ?", "pull", "react ?", "repair", "reset", "reset ai", "reset strats", "stats", "stay", "summon", "talents", "talents auto", "talents list", "talk", "who" };
 
-std::unordered_set<std::string> noReplyMsgStarts = { "e ", "accept ", "cast ", "destroy " };
+std::unordered_set<std::string> noReplyMsgParts = { "+", "-", "@", "accept [", "boost target", "buff target", "cast ", "destroy [", "e [", "focus heal", "follow target", "go zone", "revive target" };
+
+std::unordered_set<std::string> noReplyMsgStarts = { "accept ", "cast ", "destroy ", "e " };
 
 SayAction::SayAction(PlayerbotAI* ai) : Action(ai, "say"), Qualified()
 {

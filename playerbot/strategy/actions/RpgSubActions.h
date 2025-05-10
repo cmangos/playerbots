@@ -5,6 +5,7 @@
 #include "ChooseRpgTargetAction.h"
 #include "UseItemAction.h"
 #include "playerbot/strategy/values/LastMovementValue.h"
+#include "SayAction.h"
 
 namespace ai
 {
@@ -19,7 +20,7 @@ namespace ai
 
         virtual GuidPosition guidP() { return AI_VALUE(GuidPosition, "rpg target"); }
         virtual ObjectGuid guid() { return (ObjectGuid)guidP(); }        
-        void Update() {GuidPosition p = guidP(); p.updatePosition(); if (p != guidP()) SET_AI_VALUE(GuidPosition, "rpg target", p);}
+        void Update() {GuidPosition p = guidP(); p.updatePosition(bot->GetInstanceId()); if (p != guidP()) SET_AI_VALUE(GuidPosition, "rpg target", p);}
         virtual bool InRange() { return guidP() ? (guidP().sqDistance2d(bot) < INTERACTION_DISTANCE * INTERACTION_DISTANCE * 1.5) : false; }
         void setDelay(bool waitForGroup);
     private:
@@ -42,7 +43,7 @@ namespace ai
         RpgSubAction(PlayerbotAI* ai, std::string name = "rpg sub") : Action(ai, name), RpgEnabled(ai) {}
 
         //Long range is possible?
-        virtual bool isPossible() { return rpg->guidP() && rpg->guidP().GetWorldObject();}
+        virtual bool isPossible() { return rpg->guidP() && rpg->guidP().GetWorldObject(bot->GetInstanceId());}
         //Short range can we do the action now?
         virtual bool isUseful() { return rpg->InRange(); }
 
@@ -90,7 +91,7 @@ namespace ai
 
         virtual bool isUseful() {return rpg->InRange();}
 
-        virtual bool Execute(Event& event) { rpg->OnCancel();  AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target")); RESET_AI_VALUE(GuidPosition, "rpg target"); rpg->AfterExecute(false, false, ""); DoDelay(); return true; };
+        virtual bool Execute(Event& event);
     };
 
     class RpgTaxiAction : public RpgSubAction
@@ -246,8 +247,26 @@ namespace ai
 
         virtual bool Execute(Event& event) { rpg->BeforeExecute();  return ai->DoSpecificAction(ActionName(), ActionEvent(event), true); rpg->AfterExecute(true); DoDelay();}
     private:
-        virtual std::string ActionName() { if (rpg->guidP().IsGameObject() && rpg->guidP().GetGameObject()->GetGoType() == GAMEOBJECT_TYPE_CHEST) return "add all loot";  return "use"; }
-        virtual Event ActionEvent(Event event) { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject())); }
+        virtual std::string ActionName() { if (rpg->guidP().IsGameObject() && rpg->guidP().GetGameObject(bot->GetInstanceId())->GetGoType() == GAMEOBJECT_TYPE_CHEST) return "add all loot";  return "use"; }
+        virtual Event ActionEvent(Event event) { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject(bot->GetInstanceId()))); }
+    };
+
+    class RpgAIChatAction : public RpgSubAction
+    {
+    public:
+        RpgAIChatAction(PlayerbotAI* ai, std::string name = "rpg ai chat") : RpgSubAction(ai, name) {}
+
+        void ManualChat(GuidPosition target, const std::string& line);
+    private:
+        virtual bool isUseful() override;
+
+        bool SpeakLine();
+        bool WaitForLines();
+        bool RequestNewLines();
+        virtual bool Execute(Event& event) override;
+
+        std::queue<delayedPacket> packets;
+        futurePackets futPackets;
     };
 
     class RpgSpellAction : public RpgSubAction
@@ -256,9 +275,9 @@ namespace ai
         RpgSpellAction(PlayerbotAI* ai, std::string name = "rpg spell") : RpgSubAction(ai, name) {}
 
     private:
-        virtual bool isUseful() { return !urand(0,10); }
+        virtual bool isUseful() { return true; }
         virtual std::string ActionName() { return "cast random spell"; }
-        virtual Event ActionEvent(Event event) { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject())); }
+        virtual Event ActionEvent(Event event) { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject(bot->GetInstanceId()))); }
     };
 
     class RpgCraftAction : public RpgSubAction
@@ -268,7 +287,7 @@ namespace ai
 
     private:
         virtual std::string ActionName() { return "craft random item"; }
-        virtual Event ActionEvent(Event event) { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject())); }
+        virtual Event ActionEvent(Event event) { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject(bot->GetInstanceId()))); }
     };
 
     class RpgTradeUsefulAction : public RpgSubAction
@@ -277,6 +296,14 @@ namespace ai
         RpgTradeUsefulAction(PlayerbotAI* ai, std::string name = "rpg trade useful") : RpgSubAction(ai, name) {}
 
         bool IsTradingItem(uint32 entry);
+
+        virtual bool Execute(Event& event);
+    };
+
+    class RpgEnchantAction : public RpgTradeUsefulAction
+    {
+    public:
+        RpgEnchantAction(PlayerbotAI* ai, std::string name = "rpg enchant") : RpgTradeUsefulAction(ai, name) {}
 
         virtual bool Execute(Event& event);
     };
@@ -296,7 +323,7 @@ namespace ai
         RpgItemAction(PlayerbotAI* ai, std::string name = "rpg item") : UseAction(ai, name), RpgEnabled(ai) {}
 
         //Long range is possible?
-        virtual bool isPossible() { return rpg->guidP() && rpg->guidP().GetWorldObject(); }
+        virtual bool isPossible() { return rpg->guidP() && rpg->guidP().GetWorldObject(bot->GetInstanceId()); }
         //Short range can we do the action now?
         virtual bool isUseful() { return rpg->InRange(); }
 

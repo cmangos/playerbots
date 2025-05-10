@@ -3,6 +3,9 @@
 
 #include "Common.h"
 #include "PlayerbotAIBase.h"
+#include "Entities/ObjectGuid.h"
+#include "Database/DatabaseEnv.h"
+#include "Globals/SharedDefines.h"
 
 
 class WorldPacket;
@@ -35,7 +38,7 @@ public:
     void LogoutAllBots();
     void JoinChatChannels(Player* bot);
     void OnBotLogin(Player* bot);
-    void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder);
+    virtual void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder);
 
     std::list<std::string> HandlePlayerbotCommand(char const* args, Player* master = NULL);
     std::string ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId);

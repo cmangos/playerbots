@@ -150,4 +150,65 @@ namespace ai
         virtual std::vector<std::string> GetRelatedStrategies() { return { "debug" }; }
 #endif
     };
+
+    class DebugLogStrategy : public Strategy
+    {
+    public:
+        DebugLogStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "debug log"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "debug log"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "This strategy will bots log anything they say to master to a logfile";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "debug" }; }
+#endif
+    };
+
+    class DebugLogNameStrategy : public Strategy
+    {
+    public:
+        DebugLogNameStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "debug logname"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "debug logname"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "This strategy will bots log anything they say to master to a logfile with the bot's name";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "debug" }; }
+#endif
+    };
+
+    class AIChatStrategy : public Strategy
+    {
+    public:
+        AIChatStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "ai chat"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "ai chat"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "Uses the LLM system to respond to player chats.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "" }; }
+#endif
+    };
+
+    class DebugLLMStrategy : public Strategy
+    {
+    public:
+        DebugLLMStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "debug llm"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "debug llm"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "This strategy will give debug output while using the ai chat sytem";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "debug" }; }
+#endif
+    };
+
 }

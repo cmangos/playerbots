@@ -7,20 +7,20 @@
 
 PerformanceMonitor::PerformanceMonitor() 
 {
-
 }
 
 PerformanceMonitor::~PerformanceMonitor()
 {
-
 }
 
-PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric, std::string name, PerformanceStack* stack)
+std::unique_ptr<PerformanceMonitorOperation> PerformanceMonitor::start(PerformanceMetric metric, std::string name, PerformanceStack* stack)
 {
-	if (!sPlayerbotAIConfig.perfMonEnabled) return NULL;    
+   if (!sPlayerbotAIConfig.perfMonEnabled)
+   {
+      return { };
+   }
 
     std::string stackName = name;
-
 
     if (stack)
     {
@@ -45,15 +45,15 @@ PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric,
         data[metric][stackName] = pd;
     }
 
-	return new PerformanceMonitorOperation(pd, name, stack);
+	return std::make_unique<PerformanceMonitorOperation>(pd, name, stack);
 #endif
 }
 
-PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric, std::string name, PlayerbotAI* ai)
+std::unique_ptr<PerformanceMonitorOperation> PerformanceMonitor::start(PerformanceMetric metric, std::string name, PlayerbotAI * ai)
 {
     if (!sPlayerbotAIConfig.perfMonEnabled) return NULL;
 
-    if(ai->GetAiObjectContext())
+    if (ai->GetAiObjectContext())
         return start(metric, name, &ai->GetAiObjectContext()->performanceStack);
     else
         return start(metric, name);
@@ -61,9 +61,8 @@ PerformanceMonitorOperation* PerformanceMonitor::start(PerformanceMetric metric,
 
 void PerformanceMonitor::PrintStats(bool perTick, bool fullStack)
 {
-    if(data.empty())
+    if (data.empty())
         return;
-
 
     uint32 total = 0;
 
@@ -272,18 +271,18 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack)
 
 void PerformanceMonitor::Reset()
 {
-    for (std::map<PerformanceMetric, std::map<std::string, PerformanceData*> >::iterator i = data.begin(); i != data.end(); ++i)
-    {
-        std::map<std::string, PerformanceData*> pdMap = i->second;
-        for (std::map<std::string, PerformanceData*>::iterator j = pdMap.begin(); j != pdMap.end(); ++j)
-        {
+   for (std::map<PerformanceMetric, std::map<std::string, PerformanceData*> >::iterator i = data.begin(); i != data.end(); ++i)
+   {
+      std::map<std::string, PerformanceData*> pdMap = i->second;
+      for (std::map<std::string, PerformanceData*>::iterator j = pdMap.begin(); j != pdMap.end(); ++j)
+      {
 #ifdef CMANGOS
-            PerformanceData* pd = j->second;
-            std::lock_guard<std::mutex> guard(pd->lock);
-            pd->minTime = pd->maxTime = pd->totalTime = pd->count = 0;
+         PerformanceData* pd = j->second;
+         std::lock_guard<std::mutex> guard(pd->lock);
+         pd->minTime = pd->maxTime = pd->totalTime = pd->count = 0;
 #endif
-        }
-    }
+      }
+   }
 }
 
 PerformanceMonitorOperation::PerformanceMonitorOperation(PerformanceData* data, std::string name, PerformanceStack* stack) : data(data), name(name), stack(stack)
@@ -291,6 +290,11 @@ PerformanceMonitorOperation::PerformanceMonitorOperation(PerformanceData* data, 
 #ifdef CMANGOS
     started = (std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now())).time_since_epoch();
 #endif
+}
+
+PerformanceMonitorOperation::~PerformanceMonitorOperation()
+{
+   finish();
 }
 
 void PerformanceMonitorOperation::finish()
@@ -313,7 +317,6 @@ void PerformanceMonitorOperation::finish()
     {
         stack->erase(std::remove(stack->begin(), stack->end(), name), stack->end());
     }
-    delete this;
 }
 
 bool ChatHandler::HandlePerfMonCommand(char* args)

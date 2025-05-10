@@ -27,6 +27,16 @@ namespace ai
 
             return false;
         }
+        
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "accept resurrect"; } //Must equal iternal name
+        virtual std::string GetHelpDescription()
+        {
+            return "This action clicks the accept button asked if it wants to be resurrected by a player.";
+        }
+        virtual std::vector<std::string> GetUsedActions() { return {}; }
+        virtual std::vector<std::string> GetUsedValues() { return {}; }
+#endif 
     };
 
 }

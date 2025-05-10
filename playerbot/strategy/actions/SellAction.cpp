@@ -34,9 +34,16 @@ bool SellAction::Execute(Event& event)
         text = "gray";
 
     std::list<Item*> items = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+
+    if (event.getSource() == "rpg action") 
+        items.sort([](Item* i, Item* j) {return i->GetProto()->SellPrice * i->GetCount() < j->GetProto()->SellPrice * j->GetCount(); }); //Sell cheapest items first.
+
     for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
         Sell(requester, *i);
+
+        if (event.getSource() == "rpg action" && std::distance(i, items.begin()) > std::max(5, int(items.size() / 5))) //Sell 20% or 5 items at once.
+            break;
     }
 
     return true;

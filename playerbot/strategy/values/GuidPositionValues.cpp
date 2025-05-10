@@ -213,7 +213,7 @@ std::list<GuidPosition> GoUsableFilterValue::Calculate()
     {
         if (guid.IsGameObject())
         {
-            GameObject* go = guid.GetGameObject();
+            GameObject* go = guid.GetGameObject(bot->GetInstanceId());
             if(go && !go->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE))
                 result.push_back(guid);
         }
@@ -236,7 +236,7 @@ std::list<GuidPosition> GoTrappedFilterValue::Calculate()
                 result.push_back(guid);
             else
             {
-                GameObject* go = guid.GetGameObject();
+                GameObject* go = guid.GetGameObject(bot->GetInstanceId());
                 if (go && !go->GetLinkedTrap())
                     result.push_back(guid);
             }

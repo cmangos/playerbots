@@ -22,6 +22,14 @@ std::vector<uint32> CraftSpellsValue::Calculate()
         if (!pSpellInfo)
             continue;
 
+#ifdef MANGOSBOT_TWO
+        if (pSpellInfo->Effect[0] == SPELL_EFFECT_CREATE_ITEM_2 && spellId == 61288 && bot->IsSpellReady(61288)) //Todo handle other item_2 spells
+        {
+            spellIds.push_back(spellId);
+            continue;
+        }
+#endif
+
         if (pSpellInfo->Effect[0] != SPELL_EFFECT_CREATE_ITEM)
             continue;      
 
@@ -33,6 +41,34 @@ std::vector<uint32> CraftSpellsValue::Calculate()
                 break;
             }
         }
+    }
+
+    return spellIds;
+}
+
+std::vector<uint32> EnchantSpellsValue::Calculate()
+{
+    std::vector<uint32> spellIds;
+
+    PlayerSpellMap const& spellMap = bot->GetSpellMap();
+
+    for (auto& spell : spellMap)
+    {
+        uint32 spellId = spell.first;
+
+        if (spell.second.state == PLAYERSPELL_REMOVED || spell.second.disabled || IsPassiveSpell(spellId))
+            continue;
+
+        const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
+        if (!pSpellInfo)
+            continue;
+
+        if (pSpellInfo->Effect[0] != SPELL_EFFECT_ENCHANT_ITEM || !pSpellInfo->ReagentCount[0])
+            continue;
+
+
+        spellIds.push_back(spellId);
+        break;
     }
 
     return spellIds;
@@ -97,6 +133,11 @@ bool ShouldCraftSpellValue::Calculate()
     if (!pSpellInfo)
         return false;
 
+#ifdef MANGOSBOT_TWO
+    if (pSpellInfo->Effect[0] == SPELL_EFFECT_CREATE_ITEM_2) //todo proper check what items are created and if they are needed.
+        return true;
+#endif
+
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; i++)
     {
         if (pSpellInfo->EffectItemType[i])
@@ -120,6 +161,7 @@ bool ShouldCraftSpellValue::Calculate()
                 case ItemUsage::ITEM_USAGE_AMMO:
                 case ItemUsage::ITEM_USAGE_DISENCHANT:
                 case ItemUsage::ITEM_USAGE_AH:
+                case ItemUsage::ITEM_USAGE_BROKEN_AH:
                 case ItemUsage::ITEM_USAGE_VENDOR:
                 case ItemUsage::ITEM_USAGE_FORCE_GREED:
                 {
@@ -169,11 +211,15 @@ bool ShouldCraftSpellValue::SpellGivesSkillUp(uint32 spellId, Player* bot)
         SkillLineAbilityEntry const* skill = _spell_idx->second;
         if (skill->skillId)
         {
-            uint32 SkillValue = bot->GetSkillValuePure(skill->skillId);
+            uint32 skillValue = bot->GetSkillValuePure(skill->skillId);
+            uint32 maxSkillValue = bot->GetSkillMaxPure(skill->skillId);
+
+            if (maxSkillValue <= skillValue)
+                continue;
 
             uint32 craft_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_CRAFTING);
 
-            if (SkillGainChance(SkillValue,
+            if (SkillGainChance(skillValue,
                 skill->max_value,
                 (skill->max_value + skill->min_value) / 2,
                 skill->min_value) > 0)

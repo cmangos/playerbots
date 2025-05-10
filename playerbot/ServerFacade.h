@@ -13,6 +13,7 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "PlayerbotAIBase.h"
 #include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/WorldPosition.h"
 
 class ServerFacade
 {
@@ -215,6 +216,11 @@ class ServerFacade
 #endif
         }
 
+        bool IsWithinStaticLOSInMap(Player* bot, WorldObject* wo) const
+        {
+            return wo->IsInMap(bot) ? WorldPosition(wo).IsInStaticLineOfSight(WorldPosition(bot)) : false;
+        }
+
         bool IsDistanceLessThan(float dist1, float dist2);
         bool IsDistanceGreaterThan(float dist1, float dist2);
         bool IsDistanceGreaterOrEqualThan(float dist1, float dist2);
@@ -256,15 +262,6 @@ class ServerFacade
 #endif
         }
 #endif
-        BattleGroundQueue& bgQueue(BattleGroundQueueTypeId queueTypeId)
-        {
-#ifdef MANGOS
-            return sBattleGroundMgr.m_BattleGroundQueues[queueTypeId];
-#endif
-#ifdef CMANGOS
-            return sBattleGroundMgr.m_battleGroundQueues[queueTypeId];
-#endif
-        }
 
         uint32 GetAreaId(WorldObject* wo)
         {

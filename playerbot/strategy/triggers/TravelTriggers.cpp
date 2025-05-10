@@ -7,14 +7,16 @@
 #include "playerbot/ServerFacade.h"
 using namespace ai;
 
-bool NoTravelTargetTrigger::IsActive()
+bool HasNearbyQuestTakerTrigger::IsActive()
 {
-    return !context->GetValue<TravelTarget *>("travel target")->Get()->isActive();
-}
+    TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
+    if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK) //We are not currently working on a target.
+        return false;
 
-bool FarFromTravelTargetTrigger::IsActive()
-{
-    return context->GetValue<TravelTarget*>("travel target")->Get()->isTraveling();
+    if (target->GetExpiredTime() < 2 * MINUTE) //The target was set more than 2 minutes ago.
+        return false;
+
+    return AI_VALUE(bool, "has nearby quest taker");
 }
 
 bool NearDarkPortalTrigger::IsActive()

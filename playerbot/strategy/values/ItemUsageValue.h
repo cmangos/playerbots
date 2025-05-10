@@ -22,6 +22,10 @@ namespace ai
         uint32 GetGem3() { return gem3; }
         uint32 GetGem4() { return gem4; }
 
+        operator bool() const { return itemId != 0; }
+
+        bool operator==(const ItemQualifier& qualifier) const { return itemId == qualifier.itemId && enchantId == qualifier.enchantId && randomPropertyId == qualifier.randomPropertyId && gem1 == qualifier.gem1 && gem2 == qualifier.gem2 && gem3 == qualifier.gem3 && gem4 == qualifier.gem4; }
+
 #ifdef MANGOSBOT_ZERO
         std::string GetLinkQualifier() { return std::to_string(itemId) + ":" + std::to_string(enchantId) + ":" + std::to_string(randomPropertyId) + ":0"; }
 #else
@@ -54,11 +58,12 @@ namespace ai
         ITEM_USAGE_GUILD_TASK = 7,
         ITEM_USAGE_DISENCHANT = 8,
         ITEM_USAGE_AH = 9,
-        ITEM_USAGE_KEEP = 10,
-        ITEM_USAGE_VENDOR = 11,
-        ITEM_USAGE_AMMO = 12,
-        ITEM_USAGE_FORCE_NEED = 13,
-        ITEM_USAGE_FORCE_GREED = 14
+        ITEM_USAGE_BROKEN_AH = 10,
+        ITEM_USAGE_KEEP = 11,
+        ITEM_USAGE_VENDOR = 12,
+        ITEM_USAGE_AMMO = 13,
+        ITEM_USAGE_FORCE_NEED = 14,
+        ITEM_USAGE_FORCE_GREED = 15
     };
 
     enum class ForceItemUsage : uint8
@@ -76,14 +81,16 @@ namespace ai
         ItemUsageValue(PlayerbotAI* ai, std::string name = "item usage") : CalculatedValue<ItemUsage>(ai, name), Qualified() {}
         virtual ItemUsage Calculate();
 
-    private:
-        ItemUsage QueryItemUsageForEquip(ItemQualifier& itemQualifier);
-        uint32 GetSmallestBagSize();
+        static ItemUsage QueryItemUsageForEquip(ItemQualifier& itemQualifier, Player* bot);
+        static uint32 GetSmallestBagSize(Player* bot);
+        static std::string ReasonForNeed(ItemUsage usage, ItemQualifier qualifier = ItemQualifier(), uint32 count = 1, Player* bot = nullptr);
+        static uint32 GetAhDepositCost(ItemPrototype const* proto, uint32 count = 1);
+        static Item* CurrentItem(ItemPrototype const* proto, Player* bot);
+    private:        
         bool IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory = false);
         bool IsItemNeededForSkill(ItemPrototype const* proto);
         bool IsItemUsefulForSkill(ItemPrototype const* proto);
         bool IsItemNeededForUsefullCraft(ItemPrototype const* proto, bool checkAllReagents);
-        Item* CurrentItem(ItemPrototype const* proto);
         float BetterStacks(ItemPrototype const* proto, std::string usageType = "");
 
 #ifdef GenerateBotHelp

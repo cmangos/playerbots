@@ -112,20 +112,23 @@ bool MovementAction::FlyDirect(WorldPosition &startPosition, WorldPosition &endP
         std::vector<WorldPosition> path;
         if (movePath.empty()) //Make a path starting at the end backwards to see if we can walk to some better place.
         {
-            path = endPosition.getPathTo(startPosition, bot);
-            std::reverse(path.begin(), path.end());
+            path = endPosition.getPathTo(startPosition, bot);            
         }
         else
+        {
+            std::reverse(path.begin(), path.end());
             path = movePath.getPointPath();
+        }
 
         if (path.empty())
             return false;
 
-        auto pathEnd = path.end();
-        for (auto& p = pathEnd; p-- != path.begin(); ) //Find the furtest point where we can fly to directly.
-            if (p->getMapId() == startPosition.getMapId() && p->isOutside() && p->canFly())
+
+
+        for (auto& p : path) //Find the furtest point where we can fly to directly.
+            if (p.getMapId() == startPosition.getMapId() && p.isOutside() && p.canFly())
             {
-                movePosition = *p;
+                movePosition = p;
                 totalDistance = startPosition.distance(movePosition);
                 break;
             }
@@ -713,15 +716,17 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 uint32 botMoney = bot->GetMoney();
                 if (ai->HasCheat(BotCheatMask::gold) || ai->HasCheat(BotCheatMask::taxi))
                 {
-                    bot->SetMoney(10000000);
+                    bot->SetMoney(botMoney + tEntry->price);
                 }
-
+#ifdef MANGOSBOT_TWO                
+                bot->OnTaxiFlightEject(true);
+#endif
                 bool goTaxi = bot->ActivateTaxiPathTo({ tEntry->from, tEntry->to }, unit, 1);
-
-                if (ai->HasCheat(BotCheatMask::gold) || ai->HasCheat(BotCheatMask::taxi))
-                {
+#ifdef MANGOSBOT_TWO
+                bot->ResolvePendingMount();
+#endif
+                if(!goTaxi)
                     bot->SetMoney(botMoney);
-                }
 
                 return goTaxi;
             }
@@ -857,7 +862,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         return false;
     }
 
-    if (movePosition.isUnderWater() && !endPosition.isUnderWater()) //Try to swim on the surface.
+    if (movePosition.getMapId() == endPosition.getMapId() && movePosition.isUnderWater() && !endPosition.isUnderWater()) //Try to swim on the surface.
     {
         movePosition.setZ(movePosition.getHeight(true));
 
@@ -990,7 +995,11 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         Movement::PointsArray path;
         if (GeneratePathAvoidingHazards(movePosition, generatePath, path))
         {
+#ifndef MANGOSBOT_TWO  
             mm.MovePath(path, masterWalking ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_RUN, false, false);
+#else
+            mm.MovePath(path, masterWalking ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_RUN, false);
+#endif
             WaitForReach(path);
         }
         else
@@ -1190,7 +1199,7 @@ bool MovementAction::IsMovingAllowed(Unit* target)
 
 bool MovementAction::IsMovingAllowed(uint32 mapId, float x, float y, float z)
 {
-    float distance = sqrt(bot->GetDistance(x, y, z));
+    float distance = bot->GetDistance(x, y, z);
     if (!bot->InBattleGround() && distance > sPlayerbotAIConfig.reactDistance)
         return false;
 
@@ -1556,7 +1565,11 @@ bool MovementAction::ChaseTo(WorldObject* obj, float distance, float angle)
         if (GeneratePathAvoidingHazards(endPosition, true, path))
         {
             mm.Clear(false, true);
+#ifndef MANGOSBOT_TWO  
             mm.MovePath(path, FORCED_MOVEMENT_RUN, false, false);
+#else
+            mm.MovePath(path, FORCED_MOVEMENT_RUN, false);
+#endif
             WaitForReach(path);
             return true;
         }
@@ -2285,7 +2298,11 @@ bool MoveOutOfCollisionAction::Execute(Event& event)
         gx = botPos.getX();
         gy = botPos.getY();
         gz = botPos.getZ();
+#ifndef MANGOSBOT_TWO  
         if (bot->GetMap()->GetReachableRandomPointOnGround(gx, gy, gz, ai->GetRange("follow")))
+#else
+        if (bot->GetMap()->GetReachableRandomPointOnGround(bot->GetPhaseMask(), gx, gy, gz, ai->GetRange("follow")))
+#endif
         {
             return MoveTo(bot->GetMapId(), gx, gy, gz);
         }
@@ -2362,12 +2379,19 @@ bool JumpAction::Execute(ai::Event &event)
     bool jumpBackward = false;
     bool showLanding = false;
     bool isRtsc = false;
+    bool toPosition = false;
 
     // only show landing
     if (options.find("show") != std::string::npos && options.size() > 5)
     {
-        options = param.substr(5);
+        options = options.substr(5);
         showLanding = true;
+    }
+    // to position
+    if (options.find("position") != std::string::npos && options.size() > 9)
+    {
+        options = options.substr(9);
+        toPosition = true;
     }
     // rtsc stuff
     if (options == "rtsc")
@@ -2407,7 +2431,7 @@ bool JumpAction::Execute(ai::Event &event)
     }
 
     // find jump position
-    if (options == "tome" || options == "follow" || options == "chase" || isRtsc)
+    if (options == "tome" || options == "follow" || options == "chase" || isRtsc || toPosition)
     {
         if (options == "follow" && !ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
             return false;
@@ -2504,6 +2528,18 @@ bool JumpAction::Execute(ai::Event &event)
             distanceFrom = sPlayerbotAIConfig.sightDistance;
         }
 
+        if (toPosition)
+        {
+            ai::PositionMap& posMap = context->GetValue<ai::PositionMap&>("position")->Get();
+            ai::PositionEntry pos = context->GetValue<ai::PositionMap&>("position")->Get()[options];
+            if (!pos.isSet())
+                return false;
+
+            dest = WorldPosition(pos.Get());
+            distanceTo = 50.0f;
+            distanceFrom = 50.0f;
+        }
+
         // try nearby random points
         if (!jumpPoint && ai->AllowActivity())
             jumpPoint = GetPossibleJumpStartForInRange(src, dest, possibleLanding, bot, requiredSpeed, distanceTo, distanceFrom);
@@ -2513,7 +2549,7 @@ bool JumpAction::Execute(ai::Event &event)
         if (jumpPoint && requiredSpeed > 0.f)
         {
             // check if jumping is much faster
-            if (options == "follow" || options == "chase")
+            if (options == "follow" || options == "chase" || toPosition)
             {
                 if (!IsJumpFasterThanWalking(src, dest, possibleLanding, bot))
                     return false;
@@ -2743,10 +2779,32 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
 
         if (!foundCollision)
         {
-            fx -= jumper->GetCollisionWidth() * vcos;
-            fy -= jumper->GetCollisionWidth() * vsin;
+            fx += jumper->GetCollisionWidth() * vcos;
+            fy += jumper->GetCollisionWidth() * vsin;
+        }
+
+        if (!foundCollision)
+        {
+            // check distanct collision
             if (ascending)
-                fz -= jumper->GetCollisionHeight();
+                fz += jumper->GetCollisionHeight();
+
+            fx += jumper->GetCollisionWidth() * vcos;
+            fy += jumper->GetCollisionWidth() * vsin;
+
+#ifdef MANGOSBOT_TWO
+            foundCollision = jumper->GetMap()->GetHitPosition(ox, oy, oz, fx, fy, fz, jumper->GetPhaseMask(), -0.5f);
+#else
+            foundCollision = jumper->GetMap()->GetHitPosition(ox, oy, oz, fx, fy, fz, -0.5f);
+#endif
+
+            if (!foundCollision)
+            {
+                fx -= jumper->GetCollisionWidth() * vcos;
+                fy -= jumper->GetCollisionWidth() * vsin;
+                if (ascending)
+                    fz -= jumper->GetCollisionHeight();
+            }
         }
 
         path.push_back(WorldPosition(src.getMapId(), fx, fy, fz));
@@ -2780,7 +2838,12 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
             {
                 goodLanding = false;
                 // reduce landing height by collision height
-                fz = fz - CONTACT_DISTANCE - jumper->GetCollisionHeight();
+                float fz_mod = fz - CONTACT_DISTANCE - jumper->GetCollisionHeight();
+#ifdef MANGOSBOT_TWO
+                jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, jumper->GetPhaseMask(), -0.5f);
+#else
+                jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, -0.5f);
+#endif
             }
 
             WorldPosition destination = WorldPosition(src.getMapId(), fx, fy ,fz);
@@ -3294,7 +3357,11 @@ WorldPosition JumpAction::GetPossibleJumpStartForInRange(const WorldPosition& sr
         gx = src.getX();
         gy = src.getY();
         gz = src.getZ();
+#ifndef MANGOSBOT_TWO  
         if (jumper->GetMap()->GetReachableRandomPointOnGround(gx, gy, gz, distanceTo))
+#else
+        if (jumper->GetMap()->GetReachableRandomPointOnGround(bot->GetPhaseMask(), gx, gy, gz, distanceTo))
+#endif
         {
             WorldPosition p(jumper->GetMapId(), gx, gy, gz);
             ++attempts;

@@ -63,7 +63,7 @@ std::string PlayerbotHelpMgr::makeList(std::vector<std::string>const parts, std:
 }
 
 #ifdef GenerateBotHelp
-string PlayerbotHelpMgr::formatFloat(float num)
+std::string PlayerbotHelpMgr::formatFloat(float num)
 {
     std::ostringstream out;
     out << std::fixed << std::setprecision(3);
@@ -90,12 +90,12 @@ bool PlayerbotHelpMgr::IsGenericSupported(PlayerbotAIAware* object)
     return supported.find(name) != supported.end();
 }
 
-string PlayerbotHelpMgr::GetObjectName(PlayerbotAIAware* object, std::string className)
+std::string PlayerbotHelpMgr::GetObjectName(PlayerbotAIAware* object, std::string className)
 {
     return IsGenericSupported(object) ? object->getName() : className + " " + object->getName();
 }
 
-string PlayerbotHelpMgr::GetObjectLink(PlayerbotAIAware* object, std::string className)
+std::string PlayerbotHelpMgr::GetObjectLink(PlayerbotAIAware* object, std::string className)
 {
     std::string prefix = "unkown";
     if (dynamic_cast<Strategy*>(object))
@@ -235,7 +235,7 @@ void PlayerbotHelpMgr::LoadAllStrategies()
     }
 }
 
-string PlayerbotHelpMgr::GetStrategyBehaviour(std::string className, Strategy* strategy)
+std::string PlayerbotHelpMgr::GetStrategyBehaviour(std::string className, Strategy* strategy)
 {
     std::string behavior;
 
@@ -328,7 +328,7 @@ void PlayerbotHelpMgr::GenerateStrategyHelp()
     }
 }
 
-string PlayerbotHelpMgr::GetTriggerBehaviour(std::string className, Trigger* trigger)
+std::string PlayerbotHelpMgr::GetTriggerBehaviour(std::string className, Trigger* trigger)
 {
     std::string behavior;
 
@@ -441,7 +441,7 @@ void PlayerbotHelpMgr::GenerateTriggerHelp()
     }
 }
 
-string PlayerbotHelpMgr::GetActionBehaviour(std::string className, Action* nextAction)
+std::string PlayerbotHelpMgr::GetActionBehaviour(std::string className, Action* nextAction)
 {
     std::string behavior;
 

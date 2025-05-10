@@ -34,6 +34,32 @@ public:
     }
 };
 
+class ChannelAcces
+{
+public:    
+    struct PlayerInfo
+    {
+        ObjectGuid player;
+        uint8 flags;       
+    };
+
+    typedef std::map<ObjectGuid, PlayerInfo> PlayerList;
+
+    bool IsOn(ObjectGuid who) const { return m_players.find(who) != m_players.end(); }    
+    std::string                 m_name;
+    std::string                 m_password;
+    ObjectGuid                  m_ownerGuid;
+    PlayerList                  m_players;
+    GuidSet                     m_banned;
+    const ChatChannelsEntry* m_entry = nullptr;
+    bool                        m_announcements = false;
+    bool                        m_moderation = false;
+    uint8                       m_flags = 0x00;
+    // Custom features:
+    bool                        m_static = false;
+    bool                        m_realmzone = false;
+};
+
 namespace ai
 {
     class WorldPosition;
@@ -217,7 +243,10 @@ enum class BotTypeNumber : uint8
     GROUPER_TYPE_NUMBER = 2,
     GUILDER_TYPE_NUMBER = 3,
     CHATFILTER_NUMBER = 4 ,
-    DUMMY_ATTACK_NUMBER = 5
+    DUMMY_ATTACK_NUMBER = 5, 
+    RPG_PHASE_NUMBER = 6,
+    RPG_STYLE_NUMBER = 7,
+    WORLD_PVP_LOCATION = 8
 };
 
 enum class GrouperType : uint8
@@ -251,20 +280,21 @@ enum class ActivePiorityType : uint8
 {
     IS_REAL_PLAYER = 0,
     HAS_REAL_PLAYER_MASTER = 1,
-    IN_GROUP_WITH_REAL_PLAYER = 2,
-    IN_INSTANCE = 3,
-    VISIBLE_FOR_PLAYER = 4,
-    IS_ALWAYS_ACTIVE = 5,
-    IN_COMBAT = 6,
-    IN_BG_QUEUE = 7,
-    IN_LFG = 8,
-    NEARBY_PLAYER = 9,
-    PLAYER_FRIEND = 10,
-    PLAYER_GUILD = 11,
-    IN_ACTIVE_AREA = 12,
-    IN_ACTIVE_MAP = 13,
-    IN_INACTIVE_MAP = 14,
-    IN_EMPTY_SERVER = 15,
+    IN_GROUP_WITH_REAL_PLAYER,
+    IN_BATTLEGROUND,
+    IN_INSTANCE,
+    VISIBLE_FOR_PLAYER,
+    IS_ALWAYS_ACTIVE,
+    IN_COMBAT,
+    IN_BG_QUEUE,
+    IN_LFG,
+    NEARBY_PLAYER,
+    PLAYER_FRIEND,
+    PLAYER_GUILD,
+    IN_ACTIVE_AREA,
+    IN_ACTIVE_MAP,
+    IN_INACTIVE_MAP,
+    IN_EMPTY_SERVER,
     MAX_TYPE
 };
 
@@ -346,7 +376,7 @@ public:
     static std::string BotStateToString(BotState state);
 	std::string HandleRemoteCommand(std::string command);
     void HandleCommand(uint32 type, const std::string& text, Player& fromPlayer, const uint32 lang = LANG_UNIVERSAL);
-    void QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name);
+    void QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name, bool noDelay = false);
 	void HandleBotOutgoingPacket(const WorldPacket& packet);
     void HandleMasterIncomingPacket(const WorldPacket& packet);
     void HandleMasterOutgoingPacket(const WorldPacket& packet);
@@ -465,10 +495,10 @@ public:
     bool HasSpellItems(uint32 spellId, const Item* castItem) const;
     void DurabilityLoss(Item* item, double percent);
 
-    virtual bool CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
-    bool CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
-    bool CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effectMask, bool checkHasSpell = true, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
-    bool CanCastSpell(uint32 spellid, float x, float y, float z, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false);
+    virtual bool CanCastSpell(std::string name, Unit* target, uint8 effectMask, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false, SpellCastResult* checkResult = nullptr);
+    bool CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false, SpellCastResult* checkResult = nullptr);
+    bool CanCastSpell(uint32 spellid, GameObject* goTarget, uint8 effectMask, bool checkHasSpell = true, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false, SpellCastResult* checkResult = nullptr);
+    bool CanCastSpell(uint32 spellid, float x, float y, float z, uint8 effectMask, bool checkHasSpell = true, Item* itemTarget = nullptr, bool ignoreRange = false, bool ignoreInCombat = false, bool ignoreMount = false, SpellCastResult* checkResult = nullptr);
     bool CanCastVehicleSpell(uint32 spellid, Unit* target);
 
     virtual bool CastSpell(std::string name, Unit* target, Item* itemTarget = nullptr, bool waitForSpell = true, uint32* outSpellDuration = nullptr);
@@ -510,6 +540,8 @@ public:
     std::list<Unit*> GetAllHostileUnitsAroundWO(WorldObject* wo, float distanceAround);
     std::list<Unit*> GetAllHostileNPCNonPetUnitsAroundWO(WorldObject* wo, float distanceAround);
 
+    static void SendDelayedPacket(WorldSession* session, std::future<std::vector<std::pair<WorldPacket, uint32>>> futurePacket);
+    void ReceiveDelayedPacket(std::future<std::vector<std::pair<WorldPacket, uint32>>> futurePacket);
 public:
     std::vector<Bag*> GetEquippedAnyBags();
     std::vector<Bag*> GetEquippedQuivers();
@@ -549,18 +581,24 @@ public:
     //Get the group leader or the master of the bot.
     Player* GetGroupMaster() { return bot->InBattleGround() ? master : bot->GetGroup() ? (sObjectMgr.GetPlayer(bot->GetGroup()->GetLeaderGuid()) ? sObjectMgr.GetPlayer(bot->GetGroup()->GetLeaderGuid()) : master) : master; }
 
+    bool IsGroupLeader() { return bot->GetGroup() && bot->GetGroup()->GetLeaderGuid() == bot->GetObjectGuid(); }
+
     //Check if player is safe to use.
     bool IsSafe(Player* player) { return player && player->GetMapId() == bot->GetMapId() && player->GetInstanceId() == bot->GetInstanceId() && !player->IsBeingTeleported(); }
     bool IsSafe(WorldObject* obj) { return obj && obj->GetMapId() == bot->GetMapId() && obj->GetInstanceId() == bot->GetInstanceId() && (!obj->IsPlayer() || !((Player*)obj)->IsBeingTeleported()); }
 
     //Returns a semi-random (cycling) number that is fixed for each bot.
-    uint32 GetFixedBotNumer(BotTypeNumber typeNumber, uint32 maxNum = 100, float cyclePerMin = 1); 
+    uint32 GetFixedBotNumber(BotTypeNumber typeNumber, uint32 maxNum = 100, float cyclePerMin = 1, bool ignoreGuid = false); 
 
     GrouperType GetGrouperType();
     GuilderType GetGuilderType();
+    uint32 GetMaxPreferedGuildSize();
+
     bool HasPlayerNearby(WorldPosition pos, float range);
     bool HasPlayerNearby(float range = sPlayerbotAIConfig.reactDistance);
     bool HasManyPlayersNearby(uint32 trigerrValue = 20, float range = sPlayerbotAIConfig.sightDistance);
+    bool ChannelHasRealPlayer(std::string channelName);
+
 
     ActivePiorityType GetPriorityType();
     std::pair<uint32,uint32> GetPriorityBracket(ActivePiorityType type);
@@ -628,6 +666,11 @@ public:
 
     float GetLevelFloat() const;
 
+#ifdef BUILD_ELUNA
+    MaNGOS::unique_weak_ptr<PlayerbotAI> GetWeakPtr() const { return m_weakRef; }
+    void SetWeakPtr(MaNGOS::unique_weak_ptr<PlayerbotAI> weakRef) { m_weakRef = std::move(weakRef); }
+#endif
+
 private:
     bool UpdateAIReaction(uint32 elapsed, bool minimal, bool isStunned);
     void UpdateFaceTarget(uint32 elapsed, bool minimal);
@@ -665,6 +708,10 @@ protected:
     bool isPlayerFriend = false;
     bool isMovingToTransport = false;
     bool shouldLogOut = false;
+
+#ifdef BUILD_ELUNA
+    MaNGOS::unique_weak_ptr<PlayerbotAI> m_weakRef;
+#endif
 };
 
 template<typename T>

@@ -17,4 +17,19 @@ namespace ai
         }
 #endif
     };
+
+    class FocusRtiTargetsStrategy : public Strategy
+    {
+    public:
+        FocusRtiTargetsStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        std::string getName() override { return "focus rti targets"; }
+
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "focus rti targets"; } //Must equal iternal name
+        virtual std::string GetHelpDescription()
+        {
+            return "This strategy will make the bot ignore all targets except it's current rti target.";
+        }
+#endif
+    };    
 }

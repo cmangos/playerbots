@@ -18,6 +18,7 @@ bool ChangeCombatStrategyAction::Execute(Event& event)
        if (event.getSource() == "co")
        {
           std::vector<std::string> splitted = split(text, ',');
+          CharacterDatabase.BeginTransaction();
           for (std::vector<std::string>::iterator i = splitted.begin(); i != splitted.end(); i++)
           {
              const char* name = i->c_str();
@@ -30,6 +31,7 @@ bool ChangeCombatStrategyAction::Execute(Event& event)
                 break;
              }
           }
+          CharacterDatabase.CommitTransaction();
        }
     }
 
@@ -54,6 +56,7 @@ bool ChangeNonCombatStrategyAction::Execute(Event& event)
        if (event.getSource() == "nc")
        {
           std::vector<std::string> splitted = split(text, ',');
+          CharacterDatabase.BeginTransaction();
           for (std::vector<std::string>::iterator i = splitted.begin(); i != splitted.end(); i++)
           {
              const char* name = i->c_str();
@@ -66,6 +69,7 @@ bool ChangeNonCombatStrategyAction::Execute(Event& event)
                 break;
              }
           }
+          CharacterDatabase.CommitTransaction();
        }
     }
 
@@ -122,6 +126,7 @@ bool ChangeAllStrategyAction::Execute(Event& event)
        if (event.getSource() == "nc" || event.getSource() == "co")
        {
           std::vector<std::string> splitted = split(text, ',');
+          CharacterDatabase.BeginTransaction();
           for (std::vector<std::string>::iterator i = splitted.begin(); i != splitted.end(); i++)
           {
              const char* name = i->c_str();
@@ -136,6 +141,7 @@ bool ChangeAllStrategyAction::Execute(Event& event)
              }
              }
           }
+          CharacterDatabase.CommitTransaction();
        }
     }
 

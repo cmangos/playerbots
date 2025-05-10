@@ -18,7 +18,11 @@ namespace ai
             TO_LOOKING_FOR_GROUP = 5,
             TO_LOCAL_DEFENSE = 6,
             TO_WORLD_DEFENSE = 7,
-            TO_GUILD_RECRUITMENT = 8
+            TO_GUILD_RECRUITMENT = 8,
+            TO_SAY = 9,
+            TO_YELL = 10,
+            TO_SAY_CITY = 11,
+            TO_YELL_CITY = 12
         };
 
         static uint8 GetLocale();

@@ -18,6 +18,7 @@
 #include "MoltenCoreDungeonTriggers.h"
 #include "KarazhanDungeonTriggers.h"
 #include "NaxxramasDungeonTriggers.h"
+#include "GlyphTriggers.h"
 
 namespace ai
 {
@@ -155,8 +156,6 @@ namespace ai
             creators["has rpg target"] = &TriggerContext::has_rpg_target;
             creators["far from rpg target"] = &TriggerContext::far_from_rpg_target;
             creators["near rpg target"] = &TriggerContext::near_rpg_target;
-            creators["no travel target"] = &TriggerContext::no_travel_target;
-            creators["far from travel target"] = &TriggerContext::far_from_travel_target;
             creators["no rti target"] = &TriggerContext::no_rti;
 
             creators["give food"] = &TriggerContext::give_food;
@@ -182,6 +181,7 @@ namespace ai
             creators["target of fear cast"] = &TriggerContext::target_of_fear_cast;
             creators["heal target full health"] = &TriggerContext::heal_target_full_health;
             creators["dispel enrage"] = &TriggerContext::dispel_enrage;
+            creators["at war"] = [](PlayerbotAI* ai) { return new AtWarTrigger(ai); };
 
             creators["mounted"] = &TriggerContext::mounted;
             creators["rooted"] = &TriggerContext::rooted;
@@ -235,14 +235,18 @@ namespace ai
             creators["rpg queue bg"] = &TriggerContext::rpg_queue_bg;
             creators["rpg buy petition"] = &TriggerContext::rpg_buy_petition;
             creators["rpg use"] = &TriggerContext::rpg_use;
+            creators["rpg ai chat"] = [](PlayerbotAI* ai) { return new RpgAIChatTrigger(ai); };
             creators["rpg spell"] = &TriggerContext::rpg_spell;
             creators["rpg craft"] = &TriggerContext::rpg_craft;
             creators["rpg trade useful"] = &TriggerContext::rpg_trade_useful;
+            creators["rpg enchant"] = &TriggerContext::rpg_enchant;
             creators["rpg duel"] = &TriggerContext::rpg_duel;
             creators["rpg item"] = &TriggerContext::rpg_item;
 
             creators["random jump"] = &TriggerContext::random_jump;
             creators["rtsc jump active"] = &TriggerContext::rtsc_jump_active;
+
+            creators["apply glyphs"] = [](PlayerbotAI* ai) { return new ApplyGlyphTrigger(ai); };
 
             // racials
             creators["berserking"] = &TriggerContext::berserking;
@@ -332,8 +336,6 @@ namespace ai
         static Trigger* near_rpg_target(PlayerbotAI* ai) { return new NearRpgTargetTrigger(ai); }
         static Trigger* no_rpg_target(PlayerbotAI* ai) { return new NoRpgTargetTrigger(ai); }
         static Trigger* has_rpg_target(PlayerbotAI* ai) { return new HasRpgTargetTrigger(ai); }
-        static Trigger* far_from_travel_target(PlayerbotAI* ai) { return new FarFromTravelTargetTrigger(ai); }
-        static Trigger* no_travel_target(PlayerbotAI* ai) { return new NoTravelTargetTrigger(ai); }		
         static Trigger* collision(PlayerbotAI* ai) { return new CollisionTrigger(ai); }
         static Trigger* lfg_proposal_active(PlayerbotAI* ai) { return new LfgProposalActiveTrigger(ai); }
         static Trigger* unknown_dungeon(PlayerbotAI* ai) { return new UnknownDungeonTrigger(ai); }
@@ -485,6 +487,7 @@ namespace ai
         static Trigger* rpg_spell(PlayerbotAI* ai) { return new RpgSpellTrigger(ai); }
         static Trigger* rpg_craft(PlayerbotAI* ai) { return new RpgCraftTrigger(ai); }
         static Trigger* rpg_trade_useful(PlayerbotAI* ai) { return new RpgTradeUsefulTrigger(ai); }
+        static Trigger* rpg_enchant(PlayerbotAI* ai) { return new RpgEnchantTrigger(ai); }
         static Trigger* rpg_duel(PlayerbotAI* ai) { return new RpgDuelTrigger(ai); }
         static Trigger* rpg_item(PlayerbotAI* ai) { return new RpgItemTrigger(ai); }
 

@@ -153,6 +153,8 @@ namespace ai
         bool isTransport() { for (auto link : *getLinks()) if (link.second->getPathType() == TravelNodePathType::transport) return true; return false; }
         uint32 getTransportId() { for (auto link : *getLinks()) if (link.second->getPathType() == TravelNodePathType::transport) return link.second->getPathObject(); return false; }
         bool isPortal() { for (auto link : *getLinks()) if (link.second->getPathType() == TravelNodePathType::areaTrigger || link.second->getPathType() == TravelNodePathType::staticPortal) return true; return false; }
+        uint32 getAreaTriggerId();
+        bool isAreaTriggerTarget(uint32 areaTriggerId = 0);
 
         //WorldLocation shortcuts
         uint32 getMapId() { return point.getMapId(); }
@@ -190,14 +192,14 @@ namespace ai
 
         //Removes links to other nodes that can also be reached by passing another node.
         bool isUselessLink(TravelNode* farNode);
-        void cropUselessLink(TravelNode* farNode);
         bool cropUselessLinks();
 
         //Returns all nodes that can be reached from this node.
         std::vector<TravelNode*> getNodeMap(bool importantOnly = false, std::vector<TravelNode*> ignoreNodes = {}, bool mapOnly = false);
 
         //Checks if it is even possible to route to this node.
-        bool hasRouteTo(TravelNode* node, bool mapOnly = false) { if (routes.empty()) for (auto mNode : getNodeMap(mapOnly)) routes[mNode] = true; return routes.find(node) != routes.end(); };
+        bool hasRouteTo(TravelNode* node, bool mapOnly = false) { if (routes.empty()) for (auto mNode : getNodeMap(false, {}, mapOnly)) routes[mNode] = true; return routes.find(node) != routes.end(); };
+        uint32 getRouteSize(bool mapOnly = false) { if (routes.empty()) for (auto mNode : getNodeMap(false, {}, mapOnly)) routes[mNode] = true; return routes.size(); }
         void clearRoutes() { routes.clear(); }
 
         void print(bool printFailed = true);
@@ -350,7 +352,7 @@ namespace ai
         std::vector<TravelNode*> getNodes(WorldPosition pos, float range = -1);
 
         //Find nearest node.
-        TravelNode* getNode(TravelNode* sameNode) { for (auto& node : m_nodes) { if (node->getName() == sameNode->getName() && node->getPosition() == sameNode->getPosition()) return node; } return nullptr; }
+        TravelNode* getNode(TravelNode* sameNode) { for (auto& node : m_map_nodes[sameNode->getMapId()]) { if (node->getName() == sameNode->getName() && node->getPosition() == sameNode->getPosition()) return node; } return nullptr; }
         TravelNode* getNode(WorldPosition pos, std::vector<WorldPosition>& ppath, Unit* bot = nullptr, float range = -1);
         TravelNode* getNode(WorldPosition pos, Unit* bot = nullptr, float range = -1) { std::vector<WorldPosition> ppath; return getNode(pos, ppath, bot, range); }
 
@@ -372,22 +374,26 @@ namespace ai
         void setHasToGen() { hasToGen = true; }
         bool gethasToGen() { return hasToGen || hasToFullGen; }
 
+        void LoadMaps();
+
         //Below are the steps to creating the content stored in the node, link and path tables. 
         //Nodes are placed based on key locations based on objects/creatures in the world and paths are generated using the standardpathfinder.
 
         void generateNpcNodes();                  //Creates node at innkeepers, flightmasters, spirithealers and bosses.
         void generateStartNodes();                //Create node at lvl1 players spawn.
         void generateAreaTriggerNodes();          //Create node at area trigger (dungeon portals/teleports) and also link the entry and exit.
+        void makeDockNode(TravelNode* node, WorldPosition pos, std::string dockName); //Create helper node to enter/exit transport.
         void generateTransportNodes();            //Create node at transport (boats/zepelins/elevators) and also create the path they move.
         void generateZoneMeanNodes();             //Create node at zone mean (the avg location of all objects and creatures of a certain area/zone)
         void generatePortalNodes();               //Create node at static portal (ie. dalaran->ironforge) and the desination of teleport spell (ie. teleport to ironforge)
+        void addManualNodes();                    //Nodes manually placed to reach places that can not be pathed automatically.
         void generateNodes();                     //Call all above methods.
 
-        void generateWalkPathMap(uint32 mapId);   //Pathfind from all nodes to all nodes in a specific map. Create a path for all attemps and a link for all paths that actually reach the end node.
+        void generateWalkPathMap(uint32 mapId, BarGoLink* bar);   //Pathfind from all nodes to all nodes in a specific map. Create a path for all attemps and a link for all paths that actually reach the end node.
         void generateWalkPaths();                 //Call above method for all maps async.
 
         //Helper nodes take a long time to generate and have limited impact. Disable is generation time becomes an issue. It does make some places connected to the network though like some caves and tauren start.
-        void generateHelperNodes(uint32 mapId);   //For all nodes, objects and creatures, that can't be directly reached from one of the 5 nearby nodes, place a node on one of the paths of the nearby nodes so they can be reached or else place a node at the object. Also generate walkPaths for each node and the entire map again afterwards.
+        void generateHelperNodes(uint32 mapId, BarGoLink* bar);   //For all nodes, objects and creatures, that can't be directly reached from one of the 5 nearby nodes, place a node on one of the paths of the nearby nodes so they can be reached or else place a node at the object. Also generate walkPaths for each node and the entire map again afterwards.
         void generateHelperNodes();               //Call above method for all maps async.
 
         void removeLowNodes();                    //Remove any node in the overworld that can reach less than 4 nodes directly or indirectly.
@@ -415,6 +421,7 @@ namespace ai
         std::shared_timed_mutex m_nMapMtx;
     private:
         std::vector<TravelNode*> m_nodes;
+        std::unordered_map<uint32, std::vector<TravelNode*>> m_map_nodes;
 
         std::vector<std::pair<uint32, WorldPosition>> mapOffsets;
 

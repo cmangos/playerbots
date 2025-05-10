@@ -13,6 +13,7 @@
 #endif
 #include "playerbot/ServerFacade.h"
 #include "playerbot/TravelMgr.h"
+#include "Guilds/GuildMgr.h"
 
 using namespace ai;
 
@@ -269,23 +270,29 @@ bool PetitionTurnInAction::Execute(Event& event)
         return true;
     }
 
-    TravelTarget* oldTarget = context->GetValue<TravelTarget*>("travel target")->Get();
-
     //Select a new target to travel to. 
     TravelTarget newTarget = TravelTarget(ai);
 
     ai->TellDebug(requester, "Handing in guild petition", "debug travel");
 
-    bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_PETITIONER });
+    TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    if (!foundTarget || !newTarget.isActive())
+    if (oldTarget->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
-    newTarget.setRadius(INTERACTION_DISTANCE);
+    if (oldTarget->GetDestination())
+    {
+        TravelDestination* dest = oldTarget->GetDestination();
 
-    setNewTarget(requester, &newTarget, oldTarget);
+        EntryTravelDestination* eDest = dynamic_cast<EntryTravelDestination*>(dest);
 
-    return true;
+        if (eDest && eDest->HasNpcFlag(UNIT_NPC_FLAG_PETITIONER))
+            return false;
+    }
+
+    oldTarget->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+
+    return ai->DoSpecificAction("request named travel target::petition", Event("can hand in petition"), true);
 };
 
 bool PetitionTurnInAction::isUseful()
@@ -310,7 +317,7 @@ bool PetitionTurnInAction::isUseful()
             inCity = true;
     }
 
-    return inCity && !bot->GetGuildId() && AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) && AI_VALUE(uint8, "petition signs") >= sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS) && !context->GetValue<TravelTarget*>("travel target")->Get()->isTraveling();
+    return inCity && !bot->GetGuildId() && AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) && AI_VALUE(uint8, "petition signs") >= sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS) && !AI_VALUE(bool, "travel target traveling");
 };
 
 bool BuyTabardAction::Execute(Event& event)
@@ -321,23 +328,22 @@ bool BuyTabardAction::Execute(Event& event)
     if (canBuy && AI_VALUE2(uint32, "item count", chat->formatQItem(5976)))
         return true;
 
-    TravelTarget* oldTarget = context->GetValue<TravelTarget*>("travel target")->Get();
+    TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    //Select a new target to travel to. 
-    TravelTarget newTarget = TravelTarget(ai);
-
-    ai->TellDebug(requester, "Buying a tabard", "debug travel");
-
-    bool foundTarget = SetNpcFlagTarget(requester, &newTarget, { UNIT_NPC_FLAG_TABARDDESIGNER }, "Tabard Vendor", { 5976 });
-
-    if (!foundTarget || !newTarget.isActive())
+    if (oldTarget->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
-    newTarget.setRadius(INTERACTION_DISTANCE);
+    if (oldTarget->GetDestination())
+    {
+        TravelDestination* dest = oldTarget->GetDestination();
 
-    setNewTarget(requester, &newTarget, oldTarget);
+        EntryTravelDestination* eDest = dynamic_cast<EntryTravelDestination*>(dest);
 
-    return true;
+        if (eDest && eDest->HasNpcFlag(UNIT_NPC_FLAG_TABARDDESIGNER))
+            return false;
+    }
+
+    return ai->DoSpecificAction("request named travel target::tabard", Event("can buy tabard"), true);  
 };
 
 bool BuyTabardAction::isUseful()
@@ -370,5 +376,5 @@ bool BuyTabardAction::isUseful()
             inCity = true;
     }
 
-    return inCity && bot->GetGuildId() && !AI_VALUE2(uint32, "item count", chat->formatQItem(5976)) && AI_VALUE2(uint32, "free money for", uint32(NeedMoneyFor::guild)) >= 10000 && !context->GetValue<TravelTarget*>("travel target")->Get()->isTraveling();
+    return inCity && bot->GetGuildId() && !AI_VALUE2(uint32, "item count", chat->formatQItem(5976)) && AI_VALUE2(uint32, "free money for", uint32(NeedMoneyFor::guild)) >= 10000 && !AI_VALUE(bool, "travel target traveling");
 };

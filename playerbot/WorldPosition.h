@@ -3,8 +3,8 @@
 
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellMgr.h"
-#include "playerbot/PlayerbotAIConfig.h"
 #include "World/World.h"
+#include "MotionGenerators/PathFinder.h"
 
 class ByteBuffer;
 
@@ -26,6 +26,27 @@ namespace ai
         WP_CLOSEST = 3
     };
 
+    template <class D, class W, class URBG>
+    inline void WeightedShuffle
+    (D first, D last
+        , W first_weight, W last_weight
+        , URBG&& g)
+    {
+        while (first != last && first_weight != last_weight)
+        {
+            std::discrete_distribution<int> dd(first_weight, last_weight);
+            auto i = dd(g);
+
+            if (i)
+            {
+                std::swap(*first, *std::next(first, i));
+                std::swap(*first_weight, *std::next(first_weight, i));
+            }
+            ++first;
+            ++first_weight;
+        }
+    }
+
     class GuidPosition;
 
     typedef std::pair<int, int> mGridPair;
@@ -37,7 +58,7 @@ namespace ai
         //Constructors
         void add();
         void rem();
-        WorldPosition() : WorldLocation() { add(); };
+        WorldPosition() : WorldLocation(0,0,0,0,0) { add(); };
         WorldPosition(const WorldLocation& loc) : WorldLocation(loc) { add(); }
         WorldPosition(const WorldPosition& pos) : WorldLocation(pos) { add(); }
         WorldPosition(const std::string str) {char p; std::stringstream  out(str); out >> mapid >> p >> coord_x >> p >> coord_y >> p >> coord_z >> p >> orientation; add();}
@@ -46,7 +67,7 @@ namespace ai
         WorldPosition(const WorldObject* wo) { if (wo) { set(WorldLocation(wo->GetMapId(), wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ(), wo->GetOrientation())); } add();}
         WorldPosition(const CreatureDataPair* cdPair) { if (cdPair) { set(WorldLocation(cdPair->second.mapid, cdPair->second.posX, cdPair->second.posY, cdPair->second.posZ, cdPair->second.orientation)); } add();}
         WorldPosition(const GameObjectDataPair* cdPair) { if (cdPair) { set(WorldLocation(cdPair->second.mapid, cdPair->second.posX, cdPair->second.posY, cdPair->second.posZ, cdPair->second.orientation)); } add();}
-        WorldPosition(const uint32 mapId, const GuidPosition& guidP);
+        WorldPosition(const uint32 mapId, const GuidPosition& guidP, uint32 instanceId);
         WorldPosition(const std::vector<WorldPosition*>& list, const WorldPositionConst conType);
         WorldPosition(const std::vector<WorldPosition>& list, const WorldPositionConst conType);
         WorldPosition(const uint32 mapid, const GridPair grid) : WorldLocation(mapid, (int32(grid.x_coord) - CENTER_GRID_ID - 0.5)* SIZE_OF_GRIDS + CENTER_GRID_OFFSET, (int32(grid.y_coord) - CENTER_GRID_ID - 0.5)* SIZE_OF_GRIDS + CENTER_GRID_OFFSET, 0, 0) { add(); }
@@ -66,7 +87,7 @@ namespace ai
         void set(const WorldLocation& pos) { mapid = pos.mapid; coord_x = pos.coord_x; coord_y = pos.coord_y; coord_z = pos.coord_z; orientation = pos.orientation; }
         void set(const WorldPosition& pos) { mapid = pos.mapid; coord_x = pos.coord_x; coord_y = pos.coord_y; coord_z = pos.coord_z; orientation = pos.orientation; }
         void set(const WorldObject* wo) { set(WorldLocation(wo->GetMapId(), wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ(), wo->GetOrientation())); }
-        void set(const ObjectGuid& guid, const uint32 mapId);
+        void set(const ObjectGuid& guid, const uint32 mapId, const uint32 instanceId);
         void setMapId(const uint32 id) { mapid = id; }
         void setX(const float x) { coord_x = x; }
         void setY(const float y) { coord_y = y; }
@@ -106,6 +127,8 @@ namespace ai
         void printWKT(std::ostringstream& out) const { printWKT({ *this }, out); }
 
         bool isOverworld() const { return mapid == 0 || mapid == 1 || mapid == 530 || mapid == 571; }
+        bool isBg() const { return mapid == 30 || mapid == 489 || mapid == 529 || mapid == 566 || mapid == 607 || mapid == 628; }
+        bool isArena() const { return mapid == 559 || mapid == 572 || mapid == 562 || mapid == 617 || mapid == 618; }
         bool isInWater() const { return getTerrain() ? getTerrain()->IsInWater(coord_x, coord_y, coord_z) : false; };
         bool isUnderWater() const { return getTerrain() ? getTerrain()->IsUnderWater(coord_x, coord_y, coord_z) : false; };
 
@@ -135,6 +158,7 @@ namespace ai
         template<class T>
         std::pair<T, WorldPosition> closest(const std::vector<T>& list) const { return closest(GetPosVector(list)); }
 
+        bool IsWithinDist(const WorldPosition& other, float dist2compare) const { return sqDistance(other) < dist2compare * dist2compare; }
 
         //Quick square distance in 2d plane.
         float sqDistance2d(const WorldPosition& to) const { return (coord_x - to.coord_x) * (coord_x - to.coord_x) + (coord_y - to.coord_y) * (coord_y - to.coord_y); };
@@ -162,20 +186,46 @@ namespace ai
         void distancePartition(const std::vector<float>& distanceLimits, WorldPosition* to, std::vector<std::vector<WorldPosition*>>& partition) const;
         std::vector<std::vector<WorldPosition*>> distancePartition(const std::vector<float>& distanceLimits, std::vector<WorldPosition*> points) const;
 
+        std::vector <WorldPosition*> GetNextPoint(std::vector<WorldPosition*> points, uint32 amount = 1) const;
+        std::vector <WorldPosition> GetNextPoint(std::vector<WorldPosition> points, uint32 amount = 1) const;
+        
+        template<class T>
+        void GetNextPoint(std::vector <std::pair<T, WorldPosition*>>& data) const
+        {
+            std::vector<uint32> weights;
+
+            std::transform(data.begin(), data.end(), std::back_inserter(weights), [this](std::pair<T, WorldPosition*> point) { return 200000 / (1 + this->distance(*point.second)); });
+
+            //If any weight is 0 add 1 to all weights.
+            for (auto& w : weights)
+            {
+                if (w > 0)
+                    continue;
+
+                std::for_each(weights.begin(), weights.end(), [](uint32& d) { d += 1; });
+                break;
+            }
+
+            std::mt19937 gen(time(0));
+
+            WeightedShuffle(data.begin(), data.end(), weights.begin(), weights.end(), gen);
+        }
+
         //Map functions. Player independent.
         const MapEntry* getMapEntry() const { return sMapStore.LookupEntry(mapid); }
-        uint32 getInstanceId() const { for (auto& map : sMapMgr.Maps()) { if (map.second->GetId() == getMapId()) return map.second->GetInstanceId(); }; return 0; }
-        Map* getMap() const { return sMapMgr.FindMap(mapid, getMapEntry()->Instanceable() ? getInstanceId() : 0); }
-        const TerrainInfo* getTerrain() const { return getMap() ? getMap()->GetTerrain() : sTerrainMgr.LoadTerrain(getMapId()); }
+        uint32 getFirstInstanceId() const { for (auto& map : sMapMgr.Maps()) { if (map.second->GetId() == getMapId()) return map.second->GetInstanceId(); }; return 0; }
+        Map* getMap(uint32 instanceId) const { if (!*this) return nullptr; loadMapAndVMap(instanceId); return sMapMgr.FindMap(mapid, instanceId ? instanceId : (getMapEntry()->Instanceable() ? getFirstInstanceId() : 0)); }
+        const TerrainInfo* getTerrain() const { return getMap(getFirstInstanceId()) ? getMap(getFirstInstanceId())->GetTerrain() : sTerrainMgr.LoadTerrain(getMapId()); }
         bool isDungeon() { return getMapEntry()->IsDungeon(); }
-        float getVisibilityDistance() { return getMap() ? getMap()->GetVisibilityDistance() : (isOverworld() ? World::GetMaxVisibleDistanceOnContinents() : World::GetMaxVisibleDistanceInInstances()); }
+        float getVisibilityDistance() { return getMap(0) ? getMap(0)->GetVisibilityDistance() : (isOverworld() ? World::GetMaxVisibleDistanceOnContinents() : World::GetMaxVisibleDistanceInInstances()); }
 
+        bool IsInStaticLineOfSight(WorldPosition pos, float heightMod = 0.5f) const;
 #if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
-        bool IsInLineOfSight(WorldPosition pos, float heightMod = 0.5f) const { return mapid == pos.mapid && getMap() && getMap()->IsInLineOfSight(coord_x, coord_y, coord_z + heightMod, pos.coord_x, pos.coord_y, pos.coord_z + heightMod, 0, true); }
-        bool GetHitPosition(WorldPosition& pos) const { return getMap()->GetHitPosition(coord_x, coord_y, coord_z, pos.coord_x, pos.coord_y, pos.coord_z,0, 0.0f);};
+        bool IsInLineOfSight(WorldPosition pos, float heightMod = 0.5f) const { return mapid == pos.mapid && getMap(getFirstInstanceId()) && getMap(getFirstInstanceId())->IsInLineOfSight(coord_x, coord_y, coord_z + heightMod, pos.coord_x, pos.coord_y, pos.coord_z + heightMod, 0, true); }
+        bool GetHitPosition(WorldPosition& pos) const { return getMap(getFirstInstanceId())->GetHitPosition(coord_x, coord_y, coord_z, pos.coord_x, pos.coord_y, pos.coord_z,0, 0.0f);};
 #else
-        bool IsInLineOfSight(WorldPosition pos, float heightMod = 0.5f) const { return mapid == pos.mapid && getMap() && getMap()->IsInLineOfSight(coord_x, coord_y, coord_z + heightMod, pos.coord_x, pos.coord_y, pos.coord_z + heightMod, true); }
-        bool GetHitPosition(WorldPosition& pos) { return getMap()->GetHitPosition(coord_x, coord_y, coord_z, pos.coord_x, pos.coord_y, pos.coord_z, 0.0f);};
+        bool IsInLineOfSight(WorldPosition pos, float heightMod = 0.5f) const { return mapid == pos.mapid && getMap(getFirstInstanceId()) && getMap(getFirstInstanceId())->IsInLineOfSight(coord_x, coord_y, coord_z + heightMod, pos.coord_x, pos.coord_y, pos.coord_z + heightMod, true); }
+        bool GetHitPosition(WorldPosition& pos) { return getMap(getFirstInstanceId())->GetHitPosition(coord_x, coord_y, coord_z, pos.coord_x, pos.coord_y, pos.coord_z, 0.0f);};
 #endif
 
 
@@ -183,11 +233,11 @@ namespace ai
         bool canFly() const;
 
 #if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
-        const float getHeight(bool swim = false) const { return getMap()->GetHeight(0, coord_x, coord_y, coord_z, swim); }
-        float GetHeightInRange(float maxSearchDist = 4.0f) const { float z = coord_z;  return getMap() ? (getMap()->GetHeightInRange(0, coord_x, coord_y, z, maxSearchDist) ? z : coord_z) : coord_z; }
+        const float getHeight(bool swim = false) const { if(getMap(getFirstInstanceId())) return getMap(getFirstInstanceId())->GetHeight(0, coord_x, coord_y, coord_z, swim); return 0.0;}
+        float GetHeightInRange(float maxSearchDist = 4.0f) const { float z = coord_z;  return getMap(getFirstInstanceId()) ? (getMap(getFirstInstanceId())->GetHeightInRange(0, coord_x, coord_y, z, maxSearchDist) ? z : coord_z) : coord_z; }
 #else
-        float getHeight(bool swim = false) const { return getMap() ? getMap()->GetHeight(coord_x, coord_y, coord_z, swim) : coord_z; }
-        float GetHeightInRange(float maxSearchDist = 4.0f) const { float z = coord_z;  return getMap() ? (getMap()->GetHeightInRange(coord_x, coord_y, z, maxSearchDist) ? z : coord_z) : coord_z; }
+        float getHeight(bool swim = false) const { return getMap(getFirstInstanceId()) ? getMap(getFirstInstanceId())->GetHeight(coord_x, coord_y, coord_z, swim) : coord_z; }
+        float GetHeightInRange(float maxSearchDist = 4.0f) const { float z = coord_z;  return getMap(getFirstInstanceId()) ? (getMap(getFirstInstanceId())->GetHeightInRange(coord_x, coord_y, z, maxSearchDist) ? z : coord_z) : coord_z; }
 #endif
 
         float currentHeight() const { return coord_z - getHeight(); }
@@ -212,11 +262,21 @@ namespace ai
         std::vector<mGridPair> getmGridPairs(const WorldPosition& secondPos) const;
         static std::vector<WorldPosition> frommGridPair(const mGridPair& gridPair, uint32 mapId);
 
+        static bool isVmapLoaded(uint32 mapId, int x, int y);
+
+        bool isVmapLoaded() const { return isVmapLoaded(getMapId(), getmGridPair().first, getmGridPair().second); }
+
+        static bool isMmapLoaded(uint32 mapId, uint32 instanceId, int x, int y);
+
+        bool isMmapLoaded(uint32 instanceId) const { return isMmapLoaded(getMapId(), instanceId, getmGridPair().first, getmGridPair().second); }
 
         static bool loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y);
         bool loadMapAndVMap(uint32 instanceId) const {return loadMapAndVMap(getMapId(), instanceId, getmGridPair().first, getmGridPair().second); }
         void loadMapAndVMaps(const WorldPosition& secondPos, uint32 instanceId) const;
         static void unloadMapAndVMaps(uint32 mapId);
+
+        static bool loadVMap(uint32 mapId, int x, int y);
+        bool loadVMap() const { return loadVMap(getMapId(), getmGridPair().first, getmGridPair().second); }
 
         //Display functions
         WorldPosition getDisplayLocation() const;
@@ -224,29 +284,32 @@ namespace ai
         float getDisplayY() const { return getDisplayLocation().coord_x; }
 
         bool isValid() const { return MaNGOS::IsValidMapCoord(coord_x, coord_y, coord_z, orientation); };
-        uint16 getAreaFlag() const { return isValid() ? sTerrainMgr.GetAreaFlag(getMapId(), coord_x, coord_y, coord_z) : 0; };
-        AreaTableEntry const* getArea() const;
+        virtual uint16 getAreaFlag() const {
+            loadVMap();
+            return isValid() && isVmapLoaded() ? sTerrainMgr.GetAreaFlag(getMapId(), coord_x, coord_y, coord_z) : 0; };
+        AreaTableEntry const* GetArea() const;
         std::string getAreaName(const bool fullName = true, const bool zoneName = false) const;
+        std::string getAreaOverride() const { if (!getTerrain()) return "";  AreaNameInfo nameInfo = getTerrain()->GetAreaName(coord_x, coord_y, coord_z, 0); return nameInfo.wmoNameOverride ? nameInfo.wmoNameOverride : ""; }
         int32 getAreaLevel() const;
 
-        bool hasAreaFlag(const AreaFlags flag = AREA_FLAG_CAPITAL) const;
-        bool hasFaction(const Team team) const;
+        bool HasAreaFlag(const AreaFlags flag = AREA_FLAG_CAPITAL) const;
+        bool HasFaction(const Team team) const;
 
         std::vector<WorldPosition> fromPointsArray(const std::vector<G3D::Vector3>& path) const;
 
         //Pathfinding
+        std::vector<WorldPosition> getPathStepFrom(const WorldPosition& startPos, std::unique_ptr<PathFinder>& pathfinder, const Unit* bot, bool forceNormalPath = false) const;
         std::vector<WorldPosition> getPathStepFrom(const WorldPosition& startPos, const Unit* bot, bool forceNormalPath = false) const;
         std::vector<WorldPosition> getPathFromPath(const std::vector<WorldPosition>& startPath, const Unit* bot, const uint8 maxAttempt = 40) const;
         std::vector<WorldPosition> getPathFrom(const WorldPosition& startPos, const Unit* bot) { return getPathFromPath({ startPos }, bot); };
         std::vector<WorldPosition> getPathTo(WorldPosition endPos, const Unit* bot) const { return endPos.getPathFrom(*this, bot); }
-        bool isPathTo(const std::vector<WorldPosition>& path, float const maxDistance = sPlayerbotAIConfig.targetPosRecalcDistance) const { return !path.empty() && distance(path.back()) < maxDistance; };
-        bool cropPathTo(std::vector<WorldPosition>& path, const float maxDistance = sPlayerbotAIConfig.targetPosRecalcDistance) const;
-        bool canPathStepTo(WorldPosition& endPos, const Unit* bot) const { std::vector<WorldPosition> path = endPos.getPathStepFrom(*this, bot); bool canPath = endPos.isPathTo(path); if (!path.empty()) endPos = path.back(); return canPath; }
+        bool isPathTo(const std::vector<WorldPosition>& path, float const maxDistance = 0) const;
+        bool cropPathTo(std::vector<WorldPosition>& path, const float maxDistance = 0) const;
         bool canPathTo(const WorldPosition& endPos, const Unit* bot) const { return endPos.isPathTo(getPathTo(endPos, bot)); }
 
         float getPathLength(const std::vector<WorldPosition>& points) const { float dist = 0.0f; for (auto& p : points) if (&p == &points.front()) dist = 0; else dist += std::prev(&p, 1)->distance(p); return dist; }
 
-        bool ClosestCorrectPoint(float maxRange, float maxHeight = 5.0f);
+        bool ClosestCorrectPoint(float maxRange, float maxHeight = 5.0f, uint32 instanceId = 0);
         bool GetReachableRandomPointOnGround(const Player* bot, const float radius, const bool randomRange = true); //Generic terrain.
         std::vector<WorldPosition> ComputePathToRandomPoint(const Player* bot, const float radius, const bool randomRange = true); //For use with transports.
 

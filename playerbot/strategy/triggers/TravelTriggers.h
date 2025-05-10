@@ -3,18 +3,10 @@
 
 namespace ai
 {
-    class NoTravelTargetTrigger : public Trigger
+    class HasNearbyQuestTakerTrigger : public Trigger
     {
     public:
-        NoTravelTargetTrigger(PlayerbotAI* ai) : Trigger(ai, "no travel target", 10) {}
-
-        virtual bool IsActive();
-    };
-
-    class FarFromTravelTargetTrigger : public Trigger
-    {
-    public:
-        FarFromTravelTargetTrigger(PlayerbotAI* ai) : Trigger(ai, "far from travel target") {}
+        HasNearbyQuestTakerTrigger(PlayerbotAI* ai) : Trigger(ai, "has nearby quest taker", 30) {}
 
         virtual bool IsActive();
     };

@@ -88,7 +88,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
             MemberSlot* member = guild->GetMemberSlot(player->GetObjectGuid());
             uint32 dCount = AI_VALUE(uint32, "death count");
 
-            if (!urand(0, 30) && dCount < 2 && guild->HasRankRight(botMember->RankId, GR_RIGHT_PROMOTE))
+            if (!urand(0, 30) && dCount < 2 && guild->HasRankRight(botMember->RankId, GR_RIGHT_PROMOTE) && bot->GetRank() + 1 < player->GetRank())
             {
                 BroadcastHelper::BroadcastGuildMemberPromotion(ai, bot, player);
 
@@ -96,8 +96,7 @@ bool GuildManageNearbyAction::Execute(Event& event)
                 continue;
             }
 
-            if (!urand(0, 30) && dCount > 2 && guild->HasRankRight(botMember->RankId, GR_RIGHT_DEMOTE))
-            {
+            if (!urand(0, 30) && dCount > 2 && guild->HasRankRight(botMember->RankId, GR_RIGHT_DEMOTE) && bot->GetRank() < player->GetRank() && player->GetRank() > guild->GetLowestRank()) {
                 BroadcastHelper::BroadcastGuildMemberDemotion(ai, bot, player);
 
                 ai->DoSpecificAction("guild demote", Event("guild management", guid), true);
@@ -116,6 +115,9 @@ bool GuildManageNearbyAction::Execute(Event& event)
         if (!guild->HasRankRight(botMember->RankId, GR_RIGHT_INVITE))
             continue;
 
+        if (guild->GetMemberSize() >= ai->GetMaxPreferedGuildSize())
+            continue;
+
         if (player->GetGuildIdInvited())
             continue;
 
@@ -126,11 +128,16 @@ bool GuildManageNearbyAction::Execute(Event& event)
 
         if (botAi)
         {            
-            if (botAi->GetGuilderType() == GuilderType::SOLO && !botAi->HasRealPlayerMaster()) //Do not invite solo players.
+            if (botAi->GetGuilderType() == GuilderType::SOLO) //Do not invite solo players.
                 continue;
             
             if (botAi->HasActivePlayerMaster() && !sRandomPlayerbotMgr.IsRandomBot(player)) //Do not invite alts of active players. 
                 continue;
+
+            if (guild->GetMemberSize() >= botAi->GetMaxPreferedGuildSize() || guild->GetMemberSize() < botAi->GetMaxPreferedGuildSize() / 4)
+                continue;
+
+
         }
 
         bool sameGroup = bot->GetGroup() && bot->GetGroup()->IsMember(player->GetObjectGuid());

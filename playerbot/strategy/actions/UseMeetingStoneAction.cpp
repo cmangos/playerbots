@@ -208,7 +208,8 @@ bool SummonAction::Teleport(Player* requester, Player *summoner, Player *player)
 
                 player->GetMotionMaster()->Clear();
                 player->TeleportTo(mapId, x, y, z, 0);
-                player->SendHeartBeat();
+                if(player->isRealPlayer())
+                    player->SendHeartBeat();
 
                 if (summoner->GetTransport())
                     summoner->GetTransport()->AddPassenger(player, false);
@@ -223,7 +224,8 @@ bool SummonAction::Teleport(Player* requester, Player *summoner, Player *player)
         }
     }
 
-    ai->TellPlayerNoFacing(requester, "Not enough place to summon");
+    if(summoner != player)
+        ai->TellPlayerNoFacing(requester, "Not enough place to summon");
     return false;
 }
 

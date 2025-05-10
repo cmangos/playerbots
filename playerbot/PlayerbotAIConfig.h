@@ -22,7 +22,40 @@ enum class BotCheatMask : uint32
     movespeed = 1 << 8,
     attackspeed = 1 << 9,
     breath = 1 << 10,
-    maxMask = 1 << 11
+    glyph = 1 << 11,
+    maxMask = 1 << 12
+};
+
+enum class BotAutoLogin : uint32
+{
+    DISABLED = 0,
+    LOGIN_ALL_WITH_MASTER = 1,
+    LOGIN_ONLY_ALWAYS_ACTIVE = 2
+};
+
+enum class BotSelfBotLevel : uint32
+{
+    DISABLED = 0,
+    GM_ONLY = 1,
+    ACTIVE_BY_COMMAND = 2,
+    ALWAYS_ALLOWED = 3,
+    ACTIVE_BY_LOGIN = 4, 
+    ALWAYS_ACTIVE = 5
+};
+
+enum class BotAlwaysOnline : uint32
+{
+    DISABLED = 0,
+    ACTIVE = 1,
+    DISABLED_BY_COMMAND = 2
+};
+
+enum class BotLoginCriteriaType : uint8
+{
+    RACECLASS = 0,
+    LEVEL = 1,
+    RANGE_TO_PLAYER = 2,
+    MAX_LOGIN_CRITERIA = 3
 };
 
 #define MAX_GEAR_PROGRESSION_LEVEL 6
@@ -38,6 +71,19 @@ public:
     std::vector<std::string> GetValues(const std::string& name) const;
     std::mutex m_configLock;
 };
+
+struct ParsedUrl {
+    std::string hostname;
+    std::string path;
+    int port;
+    bool https;
+};
+
+//GlyphPrioritySpecMap[specId][level] = {{glyphItemId, prereqTalentSpell}};
+using GlyphPriority = std::pair<uint32, uint32>;
+using GlyphPriorityList = std::vector<GlyphPriority>;
+using GlyphPriorityLevelMap = std::unordered_map<uint32, GlyphPriorityList>;
+using GlyphPrioritySpecMap = std::unordered_map<uint32, GlyphPriorityLevelMap>;
 
 class PlayerbotAIConfig
 {
@@ -71,7 +117,7 @@ public:
 
     uint32 openGoSpell;
     bool randomBotAutologin;
-    uint32 botAutologin;
+    BotAutoLogin botAutologin;
     std::string randomBotMapsAsString;
     std::vector<uint32> randomBotMaps;
     std::list<uint32> randomBotQuestItems;
@@ -87,9 +133,14 @@ public:
     bool randomBotTeleportNearPlayer;
     uint32 randomBotTeleportNearPlayerMaxAmount;
     float randomBotTeleportNearPlayerMaxAmountRadius;
+    uint32 randomBotTeleportMinInterval, randomBotTeleportMaxInterval;
     uint32 randomGearMaxLevel;
     uint32 randomGearMaxDiff;
     bool randomGearUpgradeEnabled;
+    bool randomGearTabards;
+    bool randomGearTabardsReplaceGuild;
+    bool randomGearTabardsUnobtainable;
+    float randomGearTabardsChance;
     std::list<uint32> randomGearBlacklist;
     std::list<uint32> randomGearWhitelist;
     bool randomGearProgression;
@@ -116,6 +167,7 @@ public:
     bool botCheckAllAuctionListings;
     //
     bool randomBotJoinLfg;
+    bool logRandomBotJoinLfg;
     bool randomBotJoinBG;
     bool randomBotAutoJoinBG;
     uint32 randomBotBracketCount;
@@ -132,7 +184,9 @@ public:
     std::string premadeLevelSpec[MAX_CLASSES][10][91]; //lvl 10 - 100
     uint32 classRaceProbabilityTotal;
     uint32 classRaceProbability[MAX_CLASSES][MAX_RACES];
+    uint32 levelProbability[DEFAULT_MAX_LEVEL + 1];
     ClassSpecs classSpecs[MAX_CLASSES];
+    GlyphPrioritySpecMap glyphPriorityMap[MAX_CLASSES];
     bool gearProgressionSystemEnabled;
     uint32 gearProgressionSystemItemLevels[MAX_GEAR_PROGRESSION_LEVEL][2];
     int32 gearProgressionSystemItems[MAX_GEAR_PROGRESSION_LEVEL][MAX_CLASSES][4][SLOT_EMPTY];
@@ -190,6 +244,8 @@ public:
     uint32 broadcastToLocalDefenseGlobalChance;
     uint32 broadcastToWorldDefenseGlobalChance;
     uint32 broadcastToGuildRecruitmentGlobalChance;
+    uint32 broadcastToSayGlobalChance;
+    uint32 broadcastToYellGlobalChance;
 
     uint32 broadcastChanceLootingItemPoor;
     uint32 broadcastChanceLootingItemNormal;
@@ -244,7 +300,7 @@ public:
     bool talentsInPublicNote;
     bool nonGmFreeSummon;
 
-    uint32 selfBotLevel;
+    BotSelfBotLevel selfBotLevel;
     uint32 iterationsPerTick;
 
     std::string autoPickReward;
@@ -255,6 +311,7 @@ public:
     std::string autoPickTalents;
     bool autoLearnTrainerSpells;
     bool autoLearnQuestSpells;
+    bool autoLearnDroppedSpells;
     bool autoDoQuests;
     bool syncLevelWithPlayers;
     uint32 syncLevelMaxAbove, syncLevelNoPlayer;
@@ -264,6 +321,11 @@ public:
     bool respawnModForPlayerBots, respawnModForInstances;
 
     bool randomBotLoginWithPlayer;
+    bool asyncBotLogin, preloadHolders;
+    uint32 freeRoomForNonSpareBots;
+    uint32 loginBotsNearPlayerRange;
+    std::vector<std::string> defaultLoginCriteria;
+    std::vector<std::vector<std::string>> loginCriteria;
 
     bool jumpInBg;
     bool jumpWithPlayer;
@@ -289,6 +351,8 @@ public:
     std::list<std::string> botCheats;
     uint32 botCheatMask = 0;
 
+    std::vector<std::string> BotCheatMaskName = { "taxi", "gold", "health", "mana", "power", "item", "cooldown", "repair", "movespeed", "attackspeed", "breath", "glyph", "maxMask" };
+
     struct worldBuff{
         uint32 spellId;
         uint32 factionId = 0;
@@ -296,6 +360,7 @@ public:
         uint32 specId = 0;
         uint32 minLevel = 0;
         uint32 maxLevel = 0;
+        uint32 eventId = 0;
     };
 
     std::vector<worldBuff> worldBuffs;
@@ -303,6 +368,14 @@ public:
     int commandServerPort;
     bool perfMonEnabled;
     bool bExplicitDbStoreSave = false;
+
+    //LM BEGIN
+    std::string llmApiEndpoint, llmApiKey, llmApiJson, llmPrePrompt, llmPreRpgPrompt, llmPrompt, llmPostPrompt, llmResponseStartPattern, llmResponseEndPattern, llmResponseDeletePattern, llmResponseSplitPattern;
+    uint32 llmEnabled, llmContextLength, llmBotToBotChatChance, llmGenerationTimeout, llmMaxSimultaniousGenerations, llmRpgAIChatChance;
+    bool llmGlobalContext;
+    ParsedUrl llmEndPointUrl;
+    std::set<uint32> llmBlockedReplyChannels;
+    //LM END
 
     std::string GetValue(std::string name);
     void SetValue(std::string name, std::string value);
@@ -322,6 +395,8 @@ public:
     bool CanLogAction(PlayerbotAI* ai, std::string actionName, bool isExecute, std::string lastActionName);
 
 private:
+    void LoadTalentSpecs();
+
     Config config;
 };
 

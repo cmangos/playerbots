@@ -1,6 +1,10 @@
 #pragma once
 #include <string>
 
+#ifndef GenerateBotHelp
+//#define GenerateBotHelp //Enable only for help generation
+#endif
+
 class PlayerbotAI;
 
 namespace ai

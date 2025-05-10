@@ -26,6 +26,18 @@ std::list<ObjectGuid> AttackersValue::Calculate()
     if (bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST))
         return result;
 
+    if (ai->HasStrategy("focus rti targets", BotState::BOT_STATE_COMBAT))
+    {
+        Unit* rtiTarget = AI_VALUE(Unit*, "rti target");
+
+        if (rtiTarget && rtiTarget->IsInWorld() && rtiTarget->GetMapId() == bot->GetMapId())
+        {
+            return { rtiTarget->GetObjectGuid() };
+        }
+
+        return result;
+    }
+
     if (!sPlayerbotAIConfig.tweakValue)
     {
         // Try to get the value from nearby friendly bots.
@@ -361,7 +373,16 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
         // If the target is not fighting the player (and if the owner bot is not pulling the target)
         if (checkInCombat && !InCombat(target, player, (player == owner)))
         {
-            return false;
+            bool isRtiTarget = false;
+            if (player->GetPlayerbotAI())
+            {
+                Unit* rtiTarget = PAI_VALUE(Unit*, "rti target");
+                if (target == rtiTarget)
+                    isRtiTarget = true;
+            }
+
+            if(!isRtiTarget)
+                return false;
         }
 
         // If the target is a player's pet and in a PvP prohibited zone
@@ -399,7 +420,7 @@ bool AttackersValue::IgnoreTarget(Unit* target, Player* playerToCheckAgainst)
     if (target->GetLevel() > (playerToCheckAgainst->GetLevel() + 5) && ai->GetState() == BotState::BOT_STATE_NON_COMBAT)
     {
         //When traveling a long distance.
-        if (AI_VALUE(TravelTarget*, "travel target")->isTraveling() && AI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
+        if (AI_VALUE(bool, "travel target traveling") && AI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
             return true;
 
         //When moving to master far away.
@@ -411,7 +432,7 @@ bool AttackersValue::IgnoreTarget(Unit* target, Player* playerToCheckAgainst)
             Player* player = ai->GetMaster();
 
             //When master is traveling a long distance.
-            if (PAI_VALUE(TravelTarget*, "travel target")->isTraveling() && PAI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
+            if (PAI_VALUE(bool, "travel target traveling") && PAI_VALUE2(float, "distance", "travel target") > sPlayerbotAIConfig.reactDistance)
                 return true;
         }
     }
@@ -446,7 +467,7 @@ bool AttackersValue::IgnoreTarget(Unit* target, Player* playerToCheckAgainst)
             isDummy = true;
         }
 
-        if (isDummy && ai->GetFixedBotNumer(BotTypeNumber::DUMMY_ATTACK_NUMBER, 10, 0.2f)) //90% of bots, cycle every 5 min.
+        if (isDummy && ai->GetFixedBotNumber(BotTypeNumber::DUMMY_ATTACK_NUMBER, 10, 0.2f)) //90% of bots, cycle every 5 min.
             return true;
     }
 

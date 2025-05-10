@@ -49,7 +49,18 @@ bool GoAction::Execute(Event& event)
     if (param.find("how") != std::string::npos && param.size() > 4)
     {
         std::string destination = param.substr(4);
-        TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, destination);
+
+        DestinationList dests = ChooseTravelTargetAction::FindDestination(bot, destination);
+        if (dests.empty())
+        {
+            ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + destination);
+            return false;
+        }
+
+        WorldPosition botPos(bot);
+
+        TravelDestination* dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
+
         if (!dest)
         {
             ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + destination);
@@ -67,17 +78,29 @@ bool GoAction::Execute(Event& event)
     for (const auto& option : goTos)
     {
         if (param.find(option.first) == 0 && param.size() > option.second)
-        {
+        {             
             std::string destination = param.substr(option.second);
+            DestinationList dests;
             TravelDestination* dest = nullptr;
             if (option.first == "to")
             {
-                dest = ChooseTravelTargetAction::FindDestination(bot, destination);
+                dests = ChooseTravelTargetAction::FindDestination(bot, destination);
             }
             else
             {
-                dest = ChooseTravelTargetAction::FindDestination(bot, destination, option.first == "zone", option.first == "npc", option.first == "quest", option.first == "mob", option.first == "boss");
+                dests = ChooseTravelTargetAction::FindDestination(bot, destination, option.first == "zone", option.first == "npc", option.first == "quest", option.first == "mob", option.first == "boss");
             }
+
+            if (dests.empty())
+            {
+                ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + destination);
+                return false;
+            }
+
+            WorldPosition botPos(bot);
+
+            dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
+
 
             if (!dest)
             {
@@ -99,7 +122,20 @@ bool GoAction::Execute(Event& event)
     {
         std::string destination = param.substr(7);
 
-        TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, destination);
+        DestinationList dests;
+        TravelDestination* dest = nullptr;
+
+        dests = ChooseTravelTargetAction::FindDestination(bot, destination);
+
+        if (dests.empty())
+        {
+            ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + destination);
+            return false;
+        }
+
+        WorldPosition botPos(bot);
+
+        dest = *std::min_element(dests.begin(), dests.end(), [botPos](TravelDestination* i, TravelDestination* j) {return i->DistanceTo(botPos) < j->DistanceTo(botPos); });
 
         return TravelTo(dest, requester);
     }
@@ -130,43 +166,8 @@ bool GoAction::TellWhereToGo(std::string& param, Player* requester) const
     if (param.size() > 6)
         text = param.substr(6);
 
-    ChooseTravelTargetAction* travelAction = new ChooseTravelTargetAction(ai);
-
-    TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
-
-    target->setStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
-
-    travelAction->getNewTarget(requester, target, target);
-
-    if (!target->getDestination() || target->getDestination()->getTitle().empty())
-    {
-        ai->TellPlayerNoFacing(requester, "I have no place I want to go to.");
-        return false;
-    }
-
-    std::string title = target->getDestination()->getTitle();
-
-    if (title.find('[') != std::string::npos)
-        title = title.substr(title.find("[") + 1, title.find("]") - title.find("[") - 1);
-
-
-    TravelDestination* dest = ChooseTravelTargetAction::FindDestination(bot, title);
-
-    if (!dest)
-        dest = target->getDestination();
-
-    if (!dest)
-    {
-        ai->TellPlayerNoFacing(requester, "I have no place I want to go to");
-        return false;
-    }
-
-    std::string link = ChatHelper::formatValue("command", "go to " + title, title, "FF00FFFF");
-
-    ai->TellPlayerNoFacing(requester, "I would like to travel to " + link + "(" + target->getDestination()->getTitle() + ")");
-
-    delete travelAction;
-    return true;
+    ai->TellPlayerNoFacing(requester, "I have no place I want to go to.");
+    return false;   
 }
 
 bool GoAction::LeaderAlreadyTraveling(TravelDestination* dest) const
@@ -183,10 +184,10 @@ bool GoAction::LeaderAlreadyTraveling(TravelDestination* dest) const
     Player* player = ai->GetGroupMaster();
     TravelTarget* masterTarget = PAI_VALUE(TravelTarget*, "travel target");
 
-    if (!masterTarget->getDestination())
+    if (!masterTarget->GetDestination())
         return false;
 
-    if (masterTarget->getDestination() != dest)
+    if (masterTarget->GetDestination() != dest)
         return false;
 
     return true;
@@ -195,14 +196,14 @@ bool GoAction::LeaderAlreadyTraveling(TravelDestination* dest) const
 bool GoAction::TellHowToGo(TravelDestination* dest, Player* requester) const
 {
     WorldPosition botPos = WorldPosition(bot);
-    WorldPosition* point = dest->nearestPoint(botPos);
+    WorldPosition* point = dest->GetClosestPoint(botPos);
 
     std::vector<WorldPosition> beginPath, endPath;
     TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *point, beginPath, bot);
 
     if (route.isEmpty())
     {
-        ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + dest->getTitle());
+        ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + dest->GetTitle());
         return false;
     }
 
@@ -242,7 +243,7 @@ bool GoAction::TellHowToGo(TravelDestination* dest, Player* requester) const
         if (nearNode)
             ai->TellPlayerNoFacing(requester, "We are now near " + nearNode->getName() + ".");
 
-        ai->TellPlayerNoFacing(requester, "if we want to travel to " + dest->getTitle());
+        ai->TellPlayerNoFacing(requester, "if we want to travel to " + dest->GetTitle());
         if (nextNode->getPosition()->getAreaName(true, true) != botPos.getAreaName(true, true))
             ai->TellPlayerNoFacing(requester, "we should head to " + nextNode->getName() + " in " + nextNode->getPosition()->getAreaName(true, true));
         else
@@ -251,7 +252,7 @@ bool GoAction::TellHowToGo(TravelDestination* dest, Player* requester) const
         pointAngle = botPos.getAngleTo(poi);
     }
     else
-        ai->TellPlayerNoFacing(requester, "We are near " + dest->getTitle());
+        ai->TellPlayerNoFacing(requester, "We are near " + dest->GetTitle());
 
     ai->TellPlayer(requester, "it is " + std::to_string(uint32(round(poi.distance(botPos)))) + " yards to the " + ChatHelper::formatAngle(pointAngle));
     sServerFacade.SetFacingTo(bot, pointAngle, true);
@@ -267,15 +268,16 @@ bool GoAction::TravelTo(TravelDestination* dest, Player* requester) const
     WorldPosition botPos = WorldPosition(bot);
     if (dest)
     {
-        WorldPosition* point = dest->nearestPoint(botPos);
+        WorldPosition* point = dest->GetClosestPoint(botPos);
 
         if (!point)
             return false;
 
-        target->setTarget(dest, point);
-        target->setForced(true);
+        target->SetTarget(dest, point);
+        target->SetForced(true);
+        target->SetConditions({ "not::manual bool::is travel refresh"});
 
-        std::ostringstream out; out << "Traveling to " << dest->getTitle();
+        std::ostringstream out; out << "Traveling to " << dest->GetTitle();
         ai->TellPlayerNoFacing(requester, out.str());
 
         if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT))
@@ -285,8 +287,8 @@ bool GoAction::TravelTo(TravelDestination* dest, Player* requester) const
     }
     else
     {
-        target->setTarget(sTravelMgr.nullTravelDestination, sTravelMgr.nullWorldPosition);
-        target->setForced(false);
+        sTravelMgr.SetNullTravelTarget(target);
+        target->SetForced(false);
         return false;
     }
 }

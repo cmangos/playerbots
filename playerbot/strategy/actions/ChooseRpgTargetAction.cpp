@@ -9,6 +9,7 @@
 #include "RpgSubActions.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/strategy/values/PositionValue.h"
+#include "playerbot/strategy/values/TravelValues.h"
 #include <iomanip>
 
 using namespace ai;
@@ -138,15 +139,13 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+    focusQuestTravelList focusList = AI_VALUE(focusQuestTravelList, "focus travel target");
 
     GuidPosition masterRpgTarget;
     if (requester && requester->GetPlayerbotAI() && requester->GetMapId() == bot->GetMapId() && !requester->IsBeingTeleported())
     {
-        
-    }
-    else
-    {
-        requester = nullptr;
+        Player* player = requester;
+        masterRpgTarget = PAI_VALUE(GuidPosition, "rpg target");
     }
 
     std::unordered_map<ObjectGuid, float> targets;
@@ -203,12 +202,6 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
     std::shuffle(targetList.begin(), targetList.end(), *GetRandomGenerator());
 
-    //In the trigger evaluation to come we want to check what items are needed for tradeskills. We evalulate this value now so it's cached.
-    if(ai->HasStrategy("rpg craft", BotState::BOT_STATE_NON_COMBAT))
-    {
-        AI_VALUE2(std::list<uint32>, "inventory item ids", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_SKILL));
-    }
-
     //We are going to create a number of 'can free move::objectGuid' values. We remove some old ones here to clean up memory.
     context->ClearExpiredValues("can free move",10); //Clean up old free move to.
 
@@ -217,23 +210,23 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     if (ai->HasRealPlayerMaster())
         maxCheck = 500;
 
-    for (auto& guid :targetList)
+    for (auto& guid : targetList)
     {
-        GuidPosition guidP(guid, bot->GetMapId());
+        GuidPosition guidP(guid, bot->GetMapId(), bot->GetInstanceId());
 
         if (!guidP)
             continue;
 
         //Check if we are allowed to move to this position. This is based on movement strategies follow, free, guard, stay. Bots are limited to finding targets near the center of those movement strategies.
         //For bots with real players they are also slightly limited in range unless the player stands still for a while. See free move values.
-        if (guidP.GetWorldObject() && !AI_VALUE2(bool, "can free move to", guidP.to_string()))
+        if (guidP.GetWorldObject(bot->GetInstanceId()) && !AI_VALUE2(bool, "can free move to", guidP.to_string()))
             continue;
 
 
         if (guidP.IsGameObject())
         {
             //Ignore game objects that are not spawned or being used by others.
-            GameObject* go = guidP.GetGameObject();
+            GameObject* go = guidP.GetGameObject(bot->GetInstanceId());
             if (!go || !sServerFacade.isSpawned(go)
                 || go->IsInUse()
                 || go->GetGoState() != GO_STATE_READY)
@@ -266,7 +259,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
                 }
 
                 //Leaders are not allowed to rpg with groupmembers to prevent follow from making members run away.
-                if (bot->GetGroup() && player->GetGroup() == bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid())) 
+                if (bot->GetGroup() && player->GetGroup() == bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
                     continue;
             }
         }
@@ -279,22 +272,32 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         float relevance = getMaxRelevance(guidP);
 
         //If this rpg target is our travel target increase the relevance by 50% to make it more likely to be picked.
-        if (guidP.GetEntry() == travelTarget->getEntry())
-            relevance *= 1.5f;
+        bool isTravelTarget = guidP.GetEntry() == travelTarget->GetEntry();
+        if (isTravelTarget)
+        {
+            if (focusList.empty())
+                relevance *= 1.5f;
+            else
+                relevance *= 10.0f;
+        }
 
         //If we already had a different target with a relevance above 1 and this only has 1 (trivial) skip this target.
         if (!hasGoodRelevance || relevance > 1)
+        {
             targets[guidP] = relevance;
 
-        //If this relevance isn't trivial scale it based on distance. +60 when right ontop and decreasing 1 for each yard down to 2.
-        if (targets[guidP] > 1)
-        {
+            //Scale relevance based on distance
             hasGoodRelevance = true;
-            uint32 mod = guidP.fDist(bot);
+            int32 mod;
+            if (!isTravelTarget || focusList.empty())
+                mod = guidP.fDist(bot);
+            else
+                mod = 0;
+
             if (mod > 60 + targets[guidP])
                 targets[guidP] = 2;
             else
-                targets[guidP] += 60 - (int32)mod;
+                targets[guidP] += 60 - mod;
         }
 
         checked++;
@@ -308,8 +311,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     SET_AI_VALUE(std::string, "next rpg action", "");
 
     for (auto it = begin(targets); it != end(targets);)
-    {
-        
+    {        
         if (it->second == 0) //Remove empty targets.
             it = targets.erase(it);
         else if (hasGoodRelevance && it->second <= 1.0)  //Remove useless targets if there's any good ones.
@@ -348,13 +350,13 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
         for (auto target : sortedTargets)
         {
-            GuidPosition guidP(target.first, bot->GetMapId());
+            GuidPosition guidP(target.first, bot->GetMapId(), bot->GetInstanceId());
 
-            if (!guidP.GetWorldObject())
+            if (!guidP.GetWorldObject(bot->GetInstanceId()))
                 continue;
 
             std::ostringstream out;
-            out << chat->formatWorldobject(guidP.GetWorldObject());
+            out << chat->formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId()));
 
             out << std::fixed << std::setprecision(2);
             out << " " << rgpActionReason[guidP] << " " << target.second;
@@ -388,8 +390,8 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
     //We pick a random target from the list with targets having a higher relevance of being picked.
     std::mt19937 gen(time(0));
-    sTravelMgr.weighted_shuffle(guidps.begin(), guidps.end(), relevances.begin(), relevances.end(), gen);
-    GuidPosition guidP(guidps.front(),bot->GetMapId());
+    WeightedShuffle(guidps.begin(), guidps.end(), relevances.begin(), relevances.end(), gen);
+    GuidPosition guidP(guidps.front(),bot->GetMapId(), bot->GetInstanceId());
 
     //If we can't find a target clear ignore list and try again later.
     if (!guidP)
@@ -400,11 +402,11 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     }
 
     //Report the target that was found.
-    if ((ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT)) && guidP.GetWorldObject())
+    if ((ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT)) && guidP.GetWorldObject(bot->GetInstanceId()))
     {
         std::ostringstream out;
         out << "found: ";
-        out << chat->formatWorldobject(guidP.GetWorldObject());
+        out << chat->formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId()));
 
         out << std::fixed << std::setprecision(2);
         out << " " << rgpActionReason[guidP] << " " << targets[guidP];
@@ -431,7 +433,7 @@ bool ChooseRpgTargetAction::isUseful()
 
     TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    if (travelTarget->isTraveling() && AI_VALUE2(bool, "can free move to", *travelTarget->getPosition()))
+    if (travelTarget->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL && AI_VALUE2(bool, "can free move to", *travelTarget->GetPosition()))
         return false;
 
     if (AI_VALUE(std::list<ObjectGuid>, "possible rpg targets").empty())
@@ -441,104 +443,18 @@ bool ChooseRpgTargetAction::isUseful()
     if (!AI_VALUE(bool, "can move around"))
         return false;
 
+    //Check if nearby rpg targets (max rpg distance) can be inside the free move range at al.
+    float range = AI_VALUE(float, "free move range");
+    if(range)
+    {
+        GuidPosition center(AI_VALUE(GuidPosition, "free move center"));
+
+        if (center.getMapId() != bot->GetMapId())
+            return false;
+
+        if (center.sqDistance2d(bot) > range * range + sPlayerbotAIConfig.rpgDistance * sPlayerbotAIConfig.rpgDistance)
+            return false;
+    }
+
     return true;
 }
-
-/*
-bool ChooseRpgTargetAction::isFollowValid(Player* bot, WorldObject* target)
-{
-    if (!target)
-        return false;
-
-    WorldLocation location;
-    target->GetPosition(location);
-    return isFollowValid(bot, location);
-}
-
-bool ChooseRpgTargetAction::isFollowValid(Player* bot, WorldPosition pos)
-{
-    PlayerbotAI* ai = bot->GetPlayerbotAI();
-    Player* master = ai->GetGroupMaster();
-    Player* realMaster = ai->GetMaster();
-    AiObjectContext* context = ai->GetAiObjectContext();
-
-    if (!master || bot == master || master->IsBeingTeleported() || master->GetMapId() != bot->GetMapId())
-        return true;
-
-    float distance;
-
-    PositionMap& posMap = AI_VALUE(PositionMap&, "position");
-    bool freeMove = false;
-    
-    //Set distance relative to focus position.
-    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
-        distance = sqrt(master->GetDistance2d(pos.getX(), pos.getY(), DIST_CALC_NONE));
-    else if (ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) && posMap["stay"].isSet())
-        distance = sqrt(pos.sqDistance2d(posMap["stay"].Get()));
-    else if (ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT) && posMap["guard"].isSet())
-        distance = sqrt(pos.sqDistance2d(posMap["guard"].Get()));
-    else
-    {
-        distance = sqrt(pos.sqDistance2d(bot));
-        freeMove = true;
-    }
-
-
-    //Check if bot is in dungeon with master.
-    bool inDungeon = false;
-    if (master->IsInWorld() && master->GetMap()->IsDungeon())
-    {
-        if (bot->GetMapId() == master->GetMapId())
-            inDungeon = true;
-    }
-
-    //Restrict distance in combat and in dungeons.
-    if ((inDungeon || master->IsInCombat()) && distance > 5.0f)
-        return false;
-
-    //With a bot master bots have more freedom.
-    if (!ai->HasActivePlayerMaster())
-    {
-        Player* player = master;
-        if (PAI_VALUE(WorldPosition, "last long move").distance(pos) < sPlayerbotAIConfig.reactDistance)
-            return true;
-
-        if (!master->IsInCombat() && distance < sPlayerbotAIConfig.reactDistance * 0.75f)
-            return true;
-
-        if (distance < sPlayerbotAIConfig.reactDistance * 0.25f)
-            return true;
-
-        return false;
-    }
-
-    //Increase distance as master is standing still.
-    float maxDist = INTERACTION_DISTANCE;
-
-    if (freeMove || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT)) //Free and guard start with a base 20y range.
-        maxDist += sPlayerbotAIConfig.lootDistance;
-
-    if (WorldPosition(bot).fDist(master) < sPlayerbotAIConfig.reactDistance)
-    {
-        uint32 lastMasterMove = MEM_AI_VALUE(WorldPosition, "master position")->LastChangeDelay();
-
-        if (lastMasterMove > 30.0f) //After 30 seconds increase the range by 1y each second.
-            maxDist += (lastMasterMove - 30);
-
-        if (maxDist > sPlayerbotAIConfig.reactDistance)
-            if (freeMove)
-                return true;
-            else
-                maxDist = sPlayerbotAIConfig.reactDistance;
-    }
-    else if (freeMove)
-        return true;
-    else
-        maxDist = sPlayerbotAIConfig.reactDistance;
-
-    if (distance < maxDist)
-        return true;
-
-    return false;
-}
-*/

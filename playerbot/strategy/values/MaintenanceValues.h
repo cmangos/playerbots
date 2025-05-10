@@ -52,7 +52,7 @@ namespace ai
     class ShouldSellValue : public BoolCalculatedValue
     {
     public:
-        ShouldSellValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should sell",2) {}
+        ShouldSellValue(PlayerbotAI* ai, std::string name = "should sell", int checkInterval = 2) : BoolCalculatedValue(ai, name , checkInterval) {}
         virtual bool Calculate() { return AI_VALUE(uint8, "bag space") > 80; };
     };
 
@@ -60,7 +60,7 @@ namespace ai
     {
     public:
         CanSellValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can sell",2) {}
-        virtual bool Calculate() { return ai->HasStrategy("rpg vendor", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE2(uint32, "item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_VENDOR)) > 1; };
+        virtual bool Calculate() { return ai->HasStrategy("rpg vendor", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE2(uint32, "item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_VENDOR)) > 0; };
     };
 
     class CanBuyValue : public BoolCalculatedValue
@@ -68,6 +68,13 @@ namespace ai
     public:
         CanBuyValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can buy", 2) {}
         virtual bool Calculate() { return ai->HasStrategy("rpg vendor", BotState::BOT_STATE_NON_COMBAT) && !AI_VALUE(bool, "should repair") && !AI_VALUE(bool, "should sell") && !AI_VALUE(bool, "can get mail") && (AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ammo) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::consumables) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::gear) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill)); };
+    };
+
+    class ShouldAHSellValue : public ShouldSellValue
+    {
+    public:
+        ShouldAHSellValue(PlayerbotAI* ai) : ShouldSellValue(ai, "should ah sell", 2) {}
+        virtual bool Calculate();
     };
 
     class CanAHSellValue : public BoolCalculatedValue
@@ -78,26 +85,10 @@ namespace ai
 
         uint32 GetAuctionDeposit()
         {
-            uint32 time;
-#ifdef MANGOSBOT_ZERO
-            time = 8 * HOUR;
-#else
-            time = 12 * HOUR;
-#endif
-
             float minDeposit = 0;
             for (auto item : AI_VALUE2(std::list<Item*>, "inventory items", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_AH)))
             {
-                float deposit = float(item->GetProto()->SellPrice * item->GetCount() * (time / MIN_AUCTION_TIME));
-
-                deposit = deposit * 15 * 3.0f / 100.0f;
-
-                float min_deposit = float(sWorld.getConfig(CONFIG_UINT32_AUCTION_DEPOSIT_MIN));
-
-                if (deposit < min_deposit)
-                    deposit = min_deposit;
-
-                deposit *= sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_DEPOSIT);
+                uint32 deposit = ItemUsageValue::GetAhDepositCost(item->GetProto(), item->GetCount());
 
                 if (minDeposit == 0 || deposit < minDeposit)
                     minDeposit = deposit;
@@ -119,6 +110,13 @@ namespace ai
     {
     public:
         CanGetMailValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can get mail", 2) {}
+        virtual bool Calculate();
+    };
+
+    class ShouldGetMailValue : public BoolCalculatedValue
+    {
+    public:
+        ShouldGetMailValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should get mail", 60) {}
         virtual bool Calculate();
     };
 

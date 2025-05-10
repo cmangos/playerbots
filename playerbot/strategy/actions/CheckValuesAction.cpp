@@ -38,28 +38,5 @@ bool CheckValuesAction::Execute(Event& event)
     std::list<ObjectGuid> gos = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
     std::list<ObjectGuid> nfp = AI_VALUE(std::list<ObjectGuid>, "nearest friendly players");
 
-    if (ai->HasStrategy("nowar", BotState::BOT_STATE_NON_COMBAT))
-    {
-        ReputationMgr& mgr = bot->GetReputationMgr();
-        for (auto & faction : mgr.GetStateList())
-        {
-            uint32 id = faction.first;
-
-            if (!mgr.IsAtWar(id))
-                continue;
-#ifdef MANGOSBOT_ZERO
-            const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry(id);
-#else
-            const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry<FactionEntry>(id);
-#endif
-
-            if (!thisFactionEntry)
-                continue;
-
-            if (bot->GetReputationMgr().GetRank(thisFactionEntry) < REP_HOSTILE)
-                bot->GetReputationMgr().SetAtWar(id, false);
-        }
-    }
-
     return true;
 }

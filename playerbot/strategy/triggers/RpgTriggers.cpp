@@ -18,7 +18,7 @@ bool RpgTrigger::IsActive()
 
     if (AI_VALUE(GuidPosition, "rpg target").GetEntry())
     {
-        if (AI_VALUE(GuidPosition, "rpg target").GetEntry() == AI_VALUE(TravelTarget*, "travel target")->getEntry())
+        if (AI_VALUE(GuidPosition, "rpg target").GetEntry() == AI_VALUE(TravelTarget*, "travel target")->GetEntry())
             return true;
     }
 
@@ -86,7 +86,7 @@ bool RpgStartQuestTrigger::IsActive()
 
     if (guidP.IsUnit())
     {
-        Unit* unit = guidP.GetUnit();
+        Unit* unit = guidP.GetUnit(bot->GetInstanceId());
         if (unit && !unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
             return false;
     }
@@ -101,7 +101,7 @@ bool RpgStartQuestTrigger::IsActive()
         if (!AI_VALUE2(bool, "can accept quest low level npc", entry) )
             return false;
 
-        if (entry == AI_VALUE(TravelTarget*, "travel target")->getEntry())
+        if (entry == AI_VALUE(TravelTarget*, "travel target")->GetEntry())
             return true;
     }
     else
@@ -150,7 +150,6 @@ bool RpgRepeatQuestTrigger::IsActive()
     return false;
 }
 
-
 bool RpgBuyTrigger::IsActive()
 {
     GuidPosition guidP(getGuidP());
@@ -196,7 +195,7 @@ bool RpgAHSellTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (GuidPosition(bot).IsHostileTo(guidP))
+    if (GuidPosition(bot).IsHostileTo(guidP, bot->GetInstanceId()))
         return false;
 
     if (!AI_VALUE(bool, "can ah sell"))
@@ -215,7 +214,7 @@ bool RpgAHBuyTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (GuidPosition(bot).IsHostileTo(guidP))
+    if (GuidPosition(bot).IsHostileTo(guidP, bot->GetInstanceId()))
         return false;
 
     if (!AI_VALUE(bool, "can ah buy"))
@@ -247,10 +246,10 @@ bool RpgRepairTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && AI_VALUE2_LAZY(bool, "group or", "should repair,can repair,following party,near leader"))
+    if (bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && AI_VALUE2_LAZY(bool, "group or", "can repair,following party,near leader"))
         return true;
 
-    if (AI_VALUE(bool, "should repair") && AI_VALUE(bool, "can repair"))
+    if (AI_VALUE(bool, "can repair"))
         return true;
 
     return false;
@@ -296,7 +295,6 @@ bool RpgTrainTrigger::IsTrainerOf(CreatureInfo const* cInfo, Player* pPlayer)
     }
     return true;
 }
-
 
 bool RpgTrainTrigger::IsActive()
 {
@@ -380,8 +378,29 @@ bool RpgTrainTrigger::IsActive()
                 continue;
         }
 
+        NeedMoneyFor budgetType = NeedMoneyFor::spells;
+
+        switch (cInfo->TrainerType)
+        {
+        case TRAINER_TYPE_CLASS:
+            budgetType = NeedMoneyFor::spells;
+            break;
+        case TRAINER_TYPE_PETS:
+            budgetType = NeedMoneyFor::anything;
+            break;
+        case TRAINER_TYPE_MOUNTS:
+            budgetType = NeedMoneyFor::mount;
+            break;
+        case TRAINER_TYPE_TRADESKILLS:
+            budgetType = NeedMoneyFor::skilltraining;
+            break;
+        default:
+            budgetType = NeedMoneyFor::anything;
+            break;
+        }
+
         uint32 cost = uint32(floor(tSpell->spellCost * fDiscountMod));
-        if (cost > AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::spells))
+        if (cost > AI_VALUE2(uint32, "free money for", (uint32)budgetType))
             continue;
 
         return true;
@@ -399,7 +418,7 @@ bool RpgHealTrigger::IsActive()
     if (guidP.IsPlayer())
         return false;
 
-    Unit* unit = guidP.GetUnit();
+    Unit* unit = guidP.GetUnit(bot->GetInstanceId());
 
     if (!unit)
         return false;
@@ -423,7 +442,31 @@ bool RpgHomeBindTrigger::IsActive()
     if (guidP.IsHostileTo(bot))
         return false;
 
-    if (AI_VALUE(WorldPosition, "home bind").distance(bot) < 500.0f)
+    //Do not update for realplayers/always online when at max level.
+    if ((ai->IsRealPlayer() || sPlayerbotAIConfig.IsFreeAltBot(bot)) && bot->GetLevel() == DEFAULT_MAX_LEVEL)
+        return false;
+
+    WorldPosition currentBind = AI_VALUE(WorldPosition, "home bind");
+    WorldPosition newBind = (guidP.sqDistance2d(bot) > INTERACTION_DISTANCE * INTERACTION_DISTANCE) ? guidP : bot;
+
+    //Do not update if there's almost not change.
+    if (newBind.fDist(currentBind) < INTERACTION_DISTANCE * 2) 
+        return false;
+
+    //Update if the new bind is closer to the group leaders bind than the old one.
+    if (bot->GetGroup() && !ai->IsGroupLeader() && ai->GetGroupMaster() && ai->GetGroupMaster()->GetPlayerbotAI())
+    {
+        Player* player = ai->GetGroupMaster();
+        WorldPosition leaderBind = PAI_VALUE(WorldPosition, "home bind");
+
+        float newBindDistanceToMasterBind = newBind.fDist(leaderBind);
+        float oldBindDistanceToMasterBind = currentBind.fDist(leaderBind);
+
+        return newBindDistanceToMasterBind < oldBindDistanceToMasterBind;
+    }
+
+    //Do not update if the new bind is pretty close already.
+    if (currentBind.fDist(bot) < 500.0f)
         return false;
 
     return true;
@@ -513,11 +556,41 @@ bool RpgUseTrigger::IsActive()
     }   
 }
 
+bool RpgAIChatTrigger::IsActive()
+{
+    if (sPlayerbotAIConfig.llmEnabled == 0)
+        return false;
+
+    if (FarFromRpgTargetTrigger::IsActive())
+        return false;    
+
+    if (!ai->HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) && sPlayerbotAIConfig.llmEnabled < 3)
+        return false;
+
+    if (!sPlayerbotAIConfig.llmRpgAIChatChance || !(urand(0, 99) < sPlayerbotAIConfig.llmRpgAIChatChance))
+        return false;
+
+    if (!ai->HasPlayerNearby(sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY)))
+        return false;
+
+    GuidPosition guidP(getGuidP());
+ 
+    if (guidP.IsPlayer())
+    {
+        Player* player = guidP.GetPlayer();
+
+        if (!player || player->isRealPlayer())
+            return false;
+    }
+
+    return true;
+};
+
 bool RpgSpellTrigger::IsActive()
 {
     //GuidPosition guidP(getGuidP());
 
-    return true;
+    return (!urand(0, 10));
 }
 
 bool RpgCraftTrigger::IsActive()
@@ -527,7 +600,10 @@ bool RpgCraftTrigger::IsActive()
     if (AI_VALUE(uint8, "bag space") > 80)
         return false;
 
-    if (!guidP.GetWorldObject())
+    if (ai->HasCheat(BotCheatMask::item) && AI_VALUE(uint8, "bag space") > 60)
+        return false;
+
+    if (!guidP.GetWorldObject(bot->GetInstanceId()))
         return false;
 
     std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
@@ -609,7 +685,42 @@ bool RpgTradeUsefulTrigger::IsActive()
     if (bot->GetTrader() && bot->GetTrader() != player)
         return false;
 
-    if (AI_VALUE_LAZY(std::list<Item*>, "items useful to give").empty())
+    if (AI_VALUE(std::list<Item*>, "items useful to give").empty())
+        return false;
+
+    return true;
+}
+
+bool RpgEnchantTrigger::IsActive()
+{
+    GuidPosition guidP(getGuidP());
+
+    if (!guidP.IsPlayer())
+        return false;
+
+    Player* player = guidP.GetPlayer();
+
+
+    if (!player)
+        return false;
+
+    //if (player->GetTrader() == bot && bot->GetTrader() == player) //Continue trading please.
+    //    return true;
+
+    if (!isFriend(player))
+        return false;
+
+    if (!player->IsWithinLOSInMap(bot))
+        return false;
+
+    //Trading with someone else
+    //if (player->GetTrader() && player->GetTrader() != bot)
+     //   return false;
+
+    //if (bot->GetTrader() && bot->GetTrader() != player)
+    //    return false;
+
+    if (AI_VALUE(std::list<Item*>, "items useful to enchant").empty())
         return false;
 
     return true;
@@ -679,9 +790,9 @@ bool RpgItemTrigger::IsActive()
     GameObject* gameObject = nullptr;
     
     if(guidP.IsUnit())
-        unit = guidP.GetUnit();
+        unit = guidP.GetUnit(bot->GetInstanceId());
     else if (guidP.IsGameObject())
-        gameObject = guidP.GetGameObject();
+        gameObject = guidP.GetGameObject(bot->GetInstanceId());
 
     std::list<Item*> questItems = AI_VALUE2(std::list<Item*>, "inventory items", "quest");
 

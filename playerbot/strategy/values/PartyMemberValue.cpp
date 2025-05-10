@@ -106,7 +106,7 @@ Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ign
 
     if (GuidPosition rpgTarget = AI_VALUE(GuidPosition, "rpg target"))
     {
-        Unit* target = rpgTarget.GetCreature();
+        Unit* target = rpgTarget.GetCreature(bot->GetInstanceId());
 
         if (target && sServerFacade.IsFriendlyTo(bot, target) && predicate.Check(target) && AI_VALUE2(bool, "can free move to", GuidPosition(target).to_string()))
            return target;

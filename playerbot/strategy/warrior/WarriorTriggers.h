@@ -9,7 +9,6 @@ namespace ai
     BUFF_TRIGGER(BerserkerStanceTrigger, "berserker stance");
     BUFF_TRIGGER(ShieldBlockTrigger, "shield block");
     BUFF_TRIGGER_A(CommandingShoutTrigger, "commanding shout");
-
     DEBUFF_TRIGGER(RendDebuffTrigger, "rend");
     DEBUFF_TRIGGER(DisarmDebuffTrigger, "disarm");
     DEBUFF_TRIGGER_A(SunderArmorDebuffTrigger, "sunder armor");
@@ -63,6 +62,16 @@ namespace ai
         }
     };
 
+    class SweepingStrikesTrigger : public SpellCanBeCastedTrigger
+    {
+    public:
+        SweepingStrikesTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "sweeping strikes") {}
+        bool IsActive() override
+        {
+            return SpellCanBeCastedTrigger::IsActive();
+        }
+    };
+
     class BloodthirstBuffTrigger : public BuffTrigger
     {
     public:
@@ -104,10 +113,20 @@ namespace ai
 #ifdef MANGOSBOT_TWO
             return SpellCanBeCastedTrigger::IsActive();
 #else
-            return SpellCanBeCastedTrigger::IsActive() 
-                && AI_VALUE2(uint8, "rage", "self target") >= 50
-                && (AI_VALUE2(uint8, "health", "current target") > 20 || ai->IsTank(bot));
+            bool hasTalents = bot->HasSpell(12294) || bot->HasSpell(21551) || bot->HasSpell(21552) || bot->HasSpell(21553) || bot->HasSpell(25248) || bot->HasSpell(30330) || bot->HasSpell(23881) || bot->HasSpell(23892) || bot->HasSpell(23893) || bot->HasSpell(23894) || bot->HasSpell(25251) || bot->HasSpell(30335);
+            if ((hasTalents && AI_VALUE2(uint8, "rage", "self target") > 60) || (!hasTalents && AI_VALUE2(uint8, "rage", "self target") >= 15))
+            {
+                return SpellCanBeCastedTrigger::IsActive()
+                    && (AI_VALUE2(uint8, "health", "current target") > 20 || ai->IsTank(bot));
+            }
+            return false;
 #endif
         }
+    };
+
+    class SlamTrigger : public SpellCanBeCastedTrigger
+    {
+    public:
+        SlamTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "slam") {}
     };
 }

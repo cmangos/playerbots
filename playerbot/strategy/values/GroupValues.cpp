@@ -46,7 +46,7 @@ bool IsNearLeaderValue::Calculate()
     if (groupMaster == bot)
         return true;
 
-    return sServerFacade.GetDistance2d(bot, ai->GetGroupMaster()) < sPlayerbotAIConfig.sightDistance;
+    return sServerFacade.GetDistance2d(bot, ai->GetGroupMaster()) < sPlayerbotAIConfig.reactDistance;
 }
 
 uint32 GroupBoolCountValue::Calculate()
@@ -142,8 +142,10 @@ bool GroupReadyValue::Calculate()
         if (ai->GetGroupMaster() && sServerFacade.GetDistance2d(member, ai->GetGroupMaster()) > sPlayerbotAIConfig.sightDistance)
             continue;        
 
+        bool hasAttackers = AI_VALUE_LAZY(bool, "has attackers") || AI_VALUE_LAZY(bool, "has enemy player targets") || AI_VALUE_LAZY(Unit*, "dps target");
+
         //Wait for members to recover health/mana.
-        if (member->GetHealthPercent() < sPlayerbotAIConfig.almostFullHealth && !member->IsInCombat())
+        if (hasAttackers && member->GetHealthPercent() < sPlayerbotAIConfig.almostFullHealth && !member->IsInCombat())
             return false;
 
         if (!member->GetPower(POWER_MANA))

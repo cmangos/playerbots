@@ -5,167 +5,25 @@
 
 #include "Maps/Map.h"
 
-#ifdef MANGOSBOT_TWO
-    #include "Vmap/VMapFactory.h"
-#else
-    #include "vmap/VMapFactory.h"
-#endif
-
-
-#include "MotionGenerators/MoveMap.h"
 #include "World/World.h"
-#include "MotionGenerators/PathFinder.h"
 #include "Grids/CellImpl.h"
 #include "Globals/ObjectAccessor.h"
 #include "Entities/Transports.h"
 #include "MemoryMonitor.h"
+
+#include "MotionGenerators/MoveMap.h"
+
+#ifdef MANGOSBOT_TWO
+#include "Vmap/VMapFactory.h"
+#else
+#include "vmap/VMapFactory.h"
+#endif
 
 #include <numeric>
 #include <iomanip>
 
 using namespace ai;
 using namespace MaNGOS;
-
-#ifndef MANGOSBOT_TWO
-class TerrainInfoAccess : public Referencable<std::atomic_long>
-{
-public:
-    TerrainInfoAccess() : Referencable(), m_mapId(0) {}
-    bool Load(const uint32 x, const uint32 y, bool mapOnly = false);
-    void UnLoadUnused();
-private:
-    GridMap* LoadMapAndVMap(const uint32 x, const uint32 y, bool mapOnly = false);
-private:
-    const uint32 m_mapId;
-    GridMap* m_GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-    bool m_GridMapsLoadAttempted[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-    int16 m_GridRef[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-
-    // global garbage collection timer
-    ShortIntervalTimer i_timer;
-
-    VMAP::IVMapManager* m_vmgr;
-
-    typedef std::mutex LOCK_TYPE;
-    typedef std::lock_guard<LOCK_TYPE> LOCK_GUARD;
-    LOCK_TYPE m_mutex;
-    LOCK_TYPE m_refMutex;
-};
-
-bool TerrainInfoAccess::Load(const uint32 x, const uint32 y, bool mapOnly /*= false*/)
-{
-    LOCK_GUARD lock(m_mutex);
-    if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y))
-    {
-        // load navmesh
-        if (!MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y))
-            return false;
-    }
-
-    return true;
-
-    /*
-    if (x >= MAX_NUMBER_OF_GRIDS || y >= MAX_NUMBER_OF_GRIDS) //just load navmesh                     
-        return MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y);
-
-    //Do not reference the grid.
-    //RefGrid(x, y);
-
-    // quick check if GridMap already loaded
-    GridMap* pMap = m_GridMaps[x][y];
-    if (!pMap)
-    {
-        pMap = LoadMapAndVMap(x, y, mapOnly);
-        m_GridMapsLoadAttempted[x][y] = true;
-    }
-
-    return pMap;
-    */
-};
-
-GridMap* TerrainInfoAccess::LoadMapAndVMap(const uint32 x, const uint32 y, bool mapOnly /*= false*/)
-{
-    if ((m_GridMaps[x][y] && mapOnly)
-        || (VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(m_mapId, x, y) && MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y)))
-    {
-        // nothing to load here
-        return m_GridMaps[x][y];
-    }
-
-        LOCK_GUARD lock(m_mutex);
-
-        // double checked lock pattern
-        if (!m_GridMaps[x][y])
-        {
-            GridMap* map = new GridMap();
-
-            // map file name
-            int len = sWorld.GetDataPath().length() + strlen("maps/%03u%02u%02u.map") + 1;
-            char* tmp = new char[len];
-            snprintf(tmp, len, (char*)(sWorld.GetDataPath() + "maps/%03u%02u%02u.map").c_str(), m_mapId, x, y);
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Loading map %s", tmp);
-
-            if (!map->loadData(tmp))
-            {
-                sLog.outError("Error load map file: %s", tmp);
-                //assert(false);
-            }
-
-            delete[] tmp;
-            m_GridMaps[x][y] = map;
-        }
-
-    // we'll load the rest later
-    if (mapOnly)
-        return m_GridMaps[x][y];
-
-    if (!m_vmgr->IsTileLoaded(m_mapId, x, y))
-    {
-        // load VMAPs for current map/grid...
-        const MapEntry* i_mapEntry = sMapStore.LookupEntry(m_mapId);
-        const char* mapName = i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
-
-        int vmapLoadResult = m_vmgr->loadMap((sWorld.GetDataPath() + "vmaps").c_str(), m_mapId, x, y);
-        switch (vmapLoadResult)
-        {
-        case VMAP::VMAP_LOAD_RESULT_OK:
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "VMAP loaded name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
-            break;
-        case VMAP::VMAP_LOAD_RESULT_ERROR:
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Could not load VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
-            break;
-        case VMAP::VMAP_LOAD_RESULT_IGNORED:
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Ignored VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
-            break;
-        }
-    }
-
-    if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y))
-    {
-        // load navmesh
-        if (!MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y))
-            return nullptr;
-    }
-
-    if (m_GridMaps[x][y])
-        m_GridMaps[x][y]->SetFullyLoaded();
-
-    return m_GridMaps[x][y];
-}
-
-void TerrainInfoAccess::UnLoadUnused()
-{
-    for (uint8 x = 0; x < MAX_NUMBER_OF_GRIDS; x++)
-        for (uint8 y = 0; y < MAX_NUMBER_OF_GRIDS; y++)
-        {
-            if (!m_GridMaps[x][y] && MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y))
-            {
-                LOCK_GUARD lock(m_mutex);
-                MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(m_mapId, x, y);
-            }
-        }
-}
-#endif
 
 void WorldPosition::add()
 {
@@ -181,19 +39,19 @@ void WorldPosition::rem()
 #endif
 }
 
-WorldPosition::WorldPosition(const uint32 mapId, const GuidPosition& guidP)
+WorldPosition::WorldPosition(const uint32 mapId, const GuidPosition& guidP, uint32 instanceId)
 {
     if (guidP.mapid !=0 || guidP.coord_x != 0 || guidP.coord_y != 0 || guidP.coord_z !=0) {
         set(WorldPosition(guidP.mapid, guidP.coord_x, guidP.coord_y, guidP.coord_z, guidP.orientation));
         return;
     }
 
-    set(ObjectGuid(guidP), guidP.mapid);
+    set(ObjectGuid(guidP), guidP.mapid, instanceId);
 
     add();
  }
 
-void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId)
+void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32 instanceId)
 {
     switch (guid.GetHigh())
     {
@@ -201,30 +59,41 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId)
     {
         Player* player = sObjectAccessor.FindPlayer(guid);
         if (player)
+        {
             set(player);
+            return;
+        }
         break;
     }
     case HIGHGUID_GAMEOBJECT:
-    {        
+    {
         GameObjectDataPair const* gpair = sObjectMgr.GetGODataPair(guid.GetCounter());
         if (gpair)
+        {
             set(gpair);
-
+            return;
+        }
         break;
     }
     case HIGHGUID_UNIT:
     {
         setMapId(mapId);
-        Creature* creature = getMap()->GetAnyTypeCreature(guid);
-        if (creature)
+        if (Map* map = getMap(instanceId))
         {
-            set(creature);
-            return;
+            Creature* creature = map->GetAnyTypeCreature(guid);
+            if (creature)
+            {
+                set(creature);
+                return;
+            }
         }
 
         CreatureDataPair const* cpair = sObjectMgr.GetCreatureDataPair(guid.GetCounter());
         if (cpair)
+        {
             set(cpair);
+            return;
+        }
         break;
     }
     case HIGHGUID_TRANSPORT:
@@ -233,8 +102,11 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId)
     case HIGHGUID_PET:
     case HIGHGUID_DYNAMICOBJECT:
     case HIGHGUID_CORPSE:
+        set(WorldPosition());
         return;
     }
+
+    set(WorldPosition());
 }
 
 WorldPosition::WorldPosition(const std::vector<WorldPosition*>& list, const WorldPositionConst conType)
@@ -283,7 +155,7 @@ float WorldPosition::distance(const WorldPosition& to) const
         return relPoint(to).size();
 
     //this -> mapTransfer | mapTransfer -> center
-    return sTravelMgr.mapTransDistance(*this, to);
+    return sTravelMgr.MapTransDistance(*this, to);
 };
 
 float WorldPosition::fDist(const WorldPosition& to) const
@@ -292,7 +164,7 @@ float WorldPosition::fDist(const WorldPosition& to) const
         return sqrt(sqDistance2d(to));
 
     //this -> mapTransfer | mapTransfer -> center
-    return sTravelMgr.fastMapTransDistance(*this, to);
+    return sTravelMgr.MapTransDistance(*this, to);
 };
 
 //When moving from this along list return last point that falls within range.
@@ -399,6 +271,95 @@ std::vector<std::vector<WorldPosition*>> WorldPosition::distancePartition(const 
     return partitions;
 }
 
+std::vector<WorldPosition*> WorldPosition::GetNextPoint(std::vector<WorldPosition*> points, uint32 amount) const {
+    std::vector<WorldPosition*> retVec;
+
+    if (points.size() < 2)
+    {
+        retVec.push_back(points[0]);
+        return retVec;
+    }
+
+    retVec = points;
+
+    std::vector<uint32> weights;
+
+    std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [this](WorldPosition* point) { return 200000 / (1 + this->distance(*point)); });
+
+    //If any weight is 0 add 1 to all weights.
+    for (auto& w : weights)
+    {
+        if (w > 0)
+            continue;
+
+        std::for_each(weights.begin(), weights.end(), [](uint32& d) { d += 1; });
+        break;
+
+    }
+
+    std::mt19937 gen(time(0));
+
+    WeightedShuffle(retVec.begin(), retVec.end(), weights.begin(), weights.end(), gen);
+
+    return retVec;
+}
+
+std::vector<WorldPosition> WorldPosition::GetNextPoint(std::vector<WorldPosition> points, uint32 amount) const {
+    std::vector<WorldPosition> retVec;
+
+    if (points.size() < 2)
+    {
+        if (points.size() == 1)
+            retVec.push_back(points[0]);
+        return retVec;
+    }
+
+    retVec = points;
+
+
+    std::vector<uint32> weights;
+
+    //List of weights based on distance (Gausian curve that starts at 100 and lower to 1 at 1000 distance)
+    //std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [center](WorldPosition point) { return 1 + 1000 * exp(-1 * pow(point.distance(center) / 400.0, 2)); });
+
+    //List of weights based on distance (Twice the distance = half the weight). Caps out at 200.0000 range.
+    std::transform(retVec.begin(), retVec.end(), std::back_inserter(weights), [this](WorldPosition point) { return 200000 / (1 + this->distance(point)); });
+
+    //If any weight is 0 add 1 to all weights.
+    for (auto& w : weights)
+    {
+        if (w > 0)
+            continue;
+
+        std::for_each(weights.begin(), weights.end(), [](uint32& d) { d += 1; });
+        break;
+
+    }
+
+    std::mt19937 gen(time(0));
+
+    WeightedShuffle(retVec.begin(), retVec.end(), weights.begin(), weights.end(), gen);
+
+    return retVec;
+}
+
+bool WorldPosition::IsInStaticLineOfSight(WorldPosition pos, float heightMod) const
+{
+    if (mapid != pos.mapid)
+    {
+        return false;
+    }
+    
+    float srcX = coord_x;
+    float srcY = coord_y;
+    float srcZ = coord_z + heightMod;
+    float dstX = pos.coord_x;
+    float dstY = pos.coord_y;
+    float dstZ = pos.coord_z + heightMod;
+
+    return VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(mapid, srcX, srcY, srcZ, dstX, dstY, dstZ, true);
+}
+
 bool WorldPosition::canFly() const
 {
 #ifdef MANGOSBOT_ZERO
@@ -481,10 +442,8 @@ WorldPosition WorldPosition::getDisplayLocation() const
     return offset(mapOffset);
 };
 
-AreaTableEntry const* WorldPosition::getArea() const
+AreaTableEntry const* WorldPosition::GetArea() const
 {
-    loadMapAndVMap(0);
-
     uint16 areaFlag = getAreaFlag();
 
     return GetAreaEntryByAreaFlagAndMap(areaFlag, getMapId());
@@ -499,7 +458,7 @@ std::string WorldPosition::getAreaName(const bool fullName, const bool zoneName)
             return map->name[0];
     }
 
-    AreaTableEntry const* area = getArea();
+    AreaTableEntry const* area = GetArea();
 
     if (!area)
         return "";
@@ -533,15 +492,15 @@ std::string WorldPosition::getAreaName(const bool fullName, const bool zoneName)
 
 int32 WorldPosition::getAreaLevel() const
 {
-    if(getArea())
-        return sTravelMgr.getAreaLevel(getArea()->ID);
+    if(GetArea())
+        return sTravelMgr.GetAreaLevel(GetArea()->ID);
 
     return 0;
 }
 
-bool WorldPosition::hasAreaFlag(const AreaFlags flag) const
+bool WorldPosition::HasAreaFlag(const AreaFlags flag) const
 {
-    AreaTableEntry const* areaEntry = getArea();
+    AreaTableEntry const* areaEntry = GetArea();
     if (areaEntry)
     {
         if (areaEntry->zone)
@@ -554,9 +513,9 @@ bool WorldPosition::hasAreaFlag(const AreaFlags flag) const
     return false;
 }
 
-bool WorldPosition::hasFaction(const Team team) const
+bool WorldPosition::HasFaction(const Team team) const
 {
-    AreaTableEntry const* areaEntry = getArea();
+    AreaTableEntry const* areaEntry = GetArea();
     if (areaEntry)
     {
         if (areaEntry->team == 2 && team == ALLIANCE)
@@ -572,14 +531,14 @@ bool WorldPosition::hasFaction(const Team team) const
 std::set<GenericTransport*> WorldPosition::getTransports(uint32 entry)
 {
     std::set<GenericTransport*> transports;
-    for (auto transport : getMap()->GetTransports()) //Boats&Zeppelins.
+    for (auto transport : getMap(getFirstInstanceId())->GetTransports()) //Boats&Zeppelins.
         if (!entry || transport->GetEntry() == entry)
             transports.insert(transport);
 
     if (transports.empty() || !entry) //Elevators&rams
     {
         for (auto gopair : getGameObjectsNear(0.0f, entry))
-            if (GameObject* go = getMap()->GetGameObject(gopair->first))
+            if (GameObject* go = getMap(getFirstInstanceId())->GetGameObject(gopair->first))
                 if (GenericTransport* transport = dynamic_cast<GenericTransport*>(go))
                     transports.insert(transport);
     }
@@ -737,53 +696,75 @@ std::vector<WorldPosition> WorldPosition::frommGridPair(const mGridPair& gridPai
     return retVec;
 }
 
+bool WorldPosition::isVmapLoaded(uint32 mapId, int x, int y) 
+{
+    return VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(mapId, x, y);
+}
+
+bool WorldPosition::isMmapLoaded(uint32 mapId, uint32 instanceId, int x, int y)
+{
+#ifndef MANGOSBOT_TWO
+    return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y);
+#else
+    return MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y);
+#endif
+}
+
 bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y)
 {
     std::string logName = "load_map_grid.csv";
 
-#ifndef MANGOSBOT_TWO
-    if (MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(mapId, x, y))
-        return true;
-#else
-    if (MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(mapId, instanceId, x, y))
-        return true;
-#endif
+    bool hasMmap = false;
+    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        hasMmap = isMmapLoaded(mapId, 0, x, y);
+    else
+        hasMmap = isMmapLoaded(mapId, instanceId, x, y);
 
-    if (sTravelMgr.isBadMmap(mapId, x, y))
+    if (hasMmap)
+        return true;
+
+    if (sTravelMgr.IsBadMmap(mapId, x, y))
         return false;
 
     bool isLoaded = false;
 
-#ifndef MANGOSBOT_TWO
-    TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
-    isLoaded = terrain->Load(x, y);
-#else 
-    //Fix to ignore bad mmap files.
-    uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%03i.mmap") + 1;
-    char* fileName = new char[pathLen];
-    snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%03i.mmap").c_str(), mapId);
-
-    FILE* file = fopen(fileName, "rb");
-    if (!file)
+    if (!hasMmap)
     {
-        sTravelMgr.addBadMmap(mapId, x, y);
-        delete[] fileName;
-        return false;
-    }
-
-    fclose(file);
-
-    isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(mapId, instanceId, x, y, 0);
+#ifndef MANGOSBOT_TWO
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
+        else
+        {
+            MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, instanceId);
+            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
+        }
+#else
+        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        {
+            isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, 0);
+        }
+        else
+        {
+            if (MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, instanceId))
+                isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, instanceId, x, y, 0);
+        }
 #endif
 
-    if(!isLoaded)
-        sTravelMgr.addBadMmap(mapId, x, y);
+
+        //if (!isLoaded)
+        //    sTravelMgr.AddBadMmap(mapId, x, y);
+    }
+
+    //if (!hasVmap)
+    //{
+    //    loadVMap(mapId, x, y);
+    //}
 
     if (sPlayerbotAIConfig.hasLog(logName))
     {
         std::ostringstream out;
         out << sPlayerbotAIConfig.GetTimestampStr();
-        out << "+00,\"mmap\", " << x << "," << y << "," << (sTravelMgr.isBadMmap(mapId, x, y) ? "0" : "1") << ",";
+        out << "+00,\"mmap\", " << x << "," << y << "," << (sTravelMgr.IsBadMmap(mapId, x, y) ? "0" : "1") << ",";
         printWKT(frommGridPair(mGridPair(x, y), mapId), out, 1, true);
         sPlayerbotAIConfig.log(logName, out.str().c_str());
     }
@@ -802,9 +783,17 @@ void WorldPosition::loadMapAndVMaps(const WorldPosition& secondPos, uint32 insta
 void WorldPosition::unloadMapAndVMaps(uint32 mapId)
 {
 #ifndef MANGOSBOT_TWO
-    TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
-    terrain->UnLoadUnused();
+    //TerrainInfoAccess* terrain = reinterpret_cast<TerrainInfoAccess*>(const_cast<TerrainInfo*>(sTerrainMgr.LoadTerrain(mapId)));
+    //terrain->UnLoadUnused();
 #endif
+}
+
+bool WorldPosition::loadVMap(uint32 mapId, int x, int y)
+{
+    if (isVmapLoaded(mapId, x, y))
+        return true;
+
+    return VMAP::VMapFactory::createOrGetVMapManager()->loadMap(sWorld.GetDataPath().c_str(), mapId, x, y);
 }
 
 std::vector<WorldPosition> WorldPosition::fromPointsArray(const std::vector<G3D::Vector3>& path) const
@@ -817,7 +806,7 @@ std::vector<WorldPosition> WorldPosition::fromPointsArray(const std::vector<G3D:
 }
 
 //A single pathfinding attempt from one position to another. Returns pathfinding status and path.
-std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& startPos, const Unit* bot, bool forceNormalPath) const
+std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& startPos, std::unique_ptr<PathFinder>& pathfinder, const Unit* bot, bool forceNormalPath) const
 {
     std::hash<std::thread::id> hasher;
     uint32 instanceId;
@@ -834,47 +823,25 @@ std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& s
     PointsArray points;
     PathType type;
 
-    if (bot && instanceId == bot->GetInstanceId())
+    WorldPosition start = startPos, end = *this;
+
+    if (bot && bot->GetTransport())
     {
-        PathFinder path(bot);
-
-        path.setAreaCost(NAV_AREA_WATER, 10.0f);  //Water
-        path.setAreaCost(12, 5.0f);  //Mob proximity
-        path.setAreaCost(13, 20.0f); //Mob agro
-
-        WorldPosition start = startPos, end = *this;
-
-        if (bot->GetTransport())
-        {
-            start.CalculatePassengerOffset(bot->GetTransport());
-            end.CalculatePassengerOffset(bot->GetTransport());
-        }
-
-        path.calculate(start.getVector3(), end.getVector3(), false);
-
-        points = path.getPath();
-
-        if (bot->GetTransport())
-        {
-            for (auto& p : points)
-                bot->GetTransport()->CalculatePassengerPosition(p.x, p.y, p.z);
-        }
-
-        type = path.getPathType();
-
+        start.CalculatePassengerOffset(bot->GetTransport());
+        end.CalculatePassengerOffset(bot->GetTransport());
     }
-    else
+
+    pathfinder->calculate(start.getVector3(), end.getVector3(), false);
+
+    points = pathfinder->getPath();
+
+    if (bot && bot->GetTransport())
     {
-        PathFinder path(getMapId(), instanceId);
-
-        path.setAreaCost(NAV_AREA_WATER, 10.0f);
-        path.setAreaCost(12, 5.0f);
-        path.setAreaCost(13, 20.0f);
-        path.calculate(startPos.getVector3(), getVector3(), false);
-
-        points = path.getPath();
-        type = path.getPathType();
+        for (auto& p : points)
+            bot->GetTransport()->CalculatePassengerPosition(p.x, p.y, p.z);
     }
+
+    type = pathfinder->getPathType();
 
     if (sPlayerbotAIConfig.hasLog("pathfind_attempt_point.csv"))
     {
@@ -891,23 +858,59 @@ std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& s
         out << std::fixed << std::setprecision(1) << type << ",";
         printWKT(fromPointsArray(points), out, 1);
         sPlayerbotAIConfig.log("pathfind_attempt.csv", out.str().c_str());
-    }    
+    }
+
+    std::vector<WorldPosition> retvec = fromPointsArray(points);
+
+    if (type == PATHFIND_INCOMPLETE)
+    {
+        WorldPosition lastPoint = retvec.back();
+
+        float dist = lastPoint.distance(end);
+
+        if (lastPoint.distance(end) < 50.0f && lastPoint.isUnderWater() && end.isUnderWater() && lastPoint.IsInLineOfSight(end))
+        {
+            if (dist < 5.0f)
+                retvec.push_back(end);
+            else
+            {
+                WorldPosition stepPoint = (end - lastPoint) / dist * 5.0f;
+                retvec.push_back(stepPoint);
+            }
+
+            return retvec;
+        }
+    }
 
     if ((!forceNormalPath && type == PATHFIND_INCOMPLETE) || type == PATHFIND_NORMAL)
-        return fromPointsArray(points);
-    else
-        return {};
+        return retvec;
 
+    return {};
 }
+
+std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& startPos, const Unit* bot, bool forceNormalPath) const
+{
+    std::unique_ptr<PathFinder> pathfinder = std::make_unique<PathFinder>(bot);
+    return getPathStepFrom(startPos, pathfinder, bot, forceNormalPath);
+}
+
+bool WorldPosition::isPathTo(const std::vector<WorldPosition>& path, float const maxDistance) const
+{
+    float realMaxDistance = maxDistance ? maxDistance : sPlayerbotAIConfig.targetPosRecalcDistance;
+    return !path.empty() && distance(path.back()) < realMaxDistance;
+};
+
 
 bool WorldPosition::cropPathTo(std::vector<WorldPosition>& path, const float maxDistance) const
 {
+    float realMaxDistance = maxDistance ? maxDistance : sPlayerbotAIConfig.targetPosRecalcDistance; 
+
     if (path.empty())
         return false;
 
    auto bestPos = std::min_element(path.begin(), path.end(), [this](WorldPosition i, WorldPosition j) {return this->sqDistance(i) < this->sqDistance(j); });
 
-   bool insRange = this->sqDistance(*bestPos) <= maxDistance * maxDistance;
+   bool insRange = this->sqDistance(*bestPos) <= realMaxDistance * realMaxDistance;
 
    if (bestPos == path.end())
        return insRange;
@@ -929,18 +932,39 @@ std::vector<WorldPosition> WorldPosition::getPathFromPath(const std::vector<Worl
 
     std::vector<WorldPosition> subPath, fullPath = startPath;
 
+    std::hash<std::thread::id> hasher;
+    uint32 instanceId;
+    if (sTravelNodeMap.gethasToGen())
+        instanceId = 0;
+    else if (!bot || bot->GetMapId() != currentPos.getMapId())
+        instanceId = hasher(std::this_thread::get_id());
+    else
+        instanceId = bot->GetInstanceId();
+    //Load mmaps and vmaps between the two points.
+
+    std::unique_ptr<PathFinder> pathfinder = nullptr;
+
+    if (bot && instanceId == bot->GetInstanceId())
+        pathfinder = std::make_unique<PathFinder>(bot);
+    else
+        pathfinder = std::make_unique<PathFinder>(getMapId(), instanceId);
+
+    pathfinder->setAreaCost(NAV_AREA_WATER, 10.0f);
+    pathfinder->setAreaCost(12, 5.0f);
+    pathfinder->setAreaCost(13, 20.0f);
+
     //Limit the pathfinding attempts
     for (uint32 i = 0; i < maxAttempt; i++)
     {
         //Try to pathfind to this position.
-        subPath = getPathStepFrom(currentPos, bot);
+        subPath = getPathStepFrom(currentPos, pathfinder, bot);
 
         //If we could not find a path return what we have now.
         if (subPath.empty() || currentPos.distance(subPath.back()) < sPlayerbotAIConfig.targetPosRecalcDistance)
             break;
-        
+
         //Append the path excluding the start (this should be the same as the end of the startPath)
-        fullPath.insert(fullPath.end(), std::next(subPath.begin(),1), subPath.end());
+        fullPath.insert(fullPath.end(), std::next(subPath.begin(), 1), subPath.end());
 
         //Are we there yet?
         if (isPathTo(subPath))
@@ -953,10 +977,10 @@ std::vector<WorldPosition> WorldPosition::getPathFromPath(const std::vector<Worl
     return fullPath;
 }
 
-bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight)
+bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight, uint32 instanceId)
 {
     MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
-    dtNavMeshQuery const* query = mmap->GetNavMeshQuery(getMapId(), getInstanceId());
+    dtNavMeshQuery const* query = mmap->GetNavMeshQuery(getMapId(), instanceId);
 
     float curPoint[VERTEX_SIZE] = {coord_y, coord_z, coord_x };
     float extend[VERTEX_SIZE] = { maxRange, maxHeight, maxRange };
@@ -987,9 +1011,9 @@ bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight)
 bool WorldPosition::GetReachableRandomPointOnGround(const Player* bot, const float radius, const bool randomRange) 
 {
 #ifndef MANGOSBOT_TWO         
-    return getMap()->GetReachableRandomPointOnGround(coord_x, coord_y, coord_z, radius, randomRange);
+    return getMap(bot ? bot->GetInstanceId() : getFirstInstanceId())->GetReachableRandomPointOnGround(coord_x, coord_y, coord_z, radius, randomRange);
 #else
-    return getMap()->GetReachableRandomPointOnGround(bot->GetPhaseMask(), coord_x, coord_y, coord_z, radius, randomRange);
+    return getMap(bot ? bot->GetInstanceId() : getFirstInstanceId())->GetReachableRandomPointOnGround(bot->GetPhaseMask(), coord_x, coord_y, coord_z, radius, randomRange);
 #endif
 }
 
@@ -1006,7 +1030,13 @@ std::vector<WorldPosition> WorldPosition::ComputePathToRandomPoint(const Player*
     coord_x += range * cos(angle);
     coord_y += range * sin(angle);
 
-    std::vector<WorldPosition> path = getPathStepFrom(start, bot);
+    std::unique_ptr<PathFinder> pathfinder = std::make_unique<PathFinder>(bot);
+
+    pathfinder->setAreaCost(NAV_AREA_WATER, 10.0f);
+    pathfinder->setAreaCost(12, 5.0f);
+    pathfinder->setAreaCost(13, 20.0f);
+
+    std::vector<WorldPosition> path = getPathStepFrom(start, pathfinder, bot);
     
     if (path.size())
         set(path.back());
@@ -1021,7 +1051,7 @@ uint32 WorldPosition::getUnitsAggro(const std::list<ObjectGuid>& units, const Pl
     uint32 count = 0;
     for (auto guid : units)
     {
-        Unit* unit = GuidPosition(guid,bot->GetMapId()).GetUnit(); 
+        Unit* unit = GuidPosition(guid,bot).GetUnit(bot->GetInstanceId()); 
         
         if (!unit) continue; 
         

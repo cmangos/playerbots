@@ -14,7 +14,3 @@
 #include "DBScripts/ScriptMgr.h"
 
 #include "playerbot/playerbot.h"
-
-#ifndef GenerateBotHelp
-//#define GenerateBotHelp //Enable only for help generation
-#endif

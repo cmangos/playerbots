@@ -55,6 +55,7 @@ namespace ai
             creators["talk to quest giver"] = &WorldPacketActionContext::turn_in_quest;
             creators["accept quest"] = &WorldPacketActionContext::accept_quest;
             creators["confirm quest"] = &WorldPacketActionContext::confirm_quest;
+            creators["quest details"] = &WorldPacketActionContext::quest_details;
             creators["accept all quests"] = &WorldPacketActionContext::accept_all_quests;
             creators["accept quest share"] = &WorldPacketActionContext::accept_quest_share;
             creators["loot start roll"] = &WorldPacketActionContext::loot_start_roll;
@@ -137,6 +138,7 @@ namespace ai
         static Action* turn_in_quest(PlayerbotAI* ai) { return new TalkToQuestGiverAction(ai); }
         static Action* accept_quest(PlayerbotAI* ai) { return new AcceptQuestAction(ai); }
         static Action* confirm_quest(PlayerbotAI* ai) { return new ConfirmQuestAction(ai); }
+        static Action* quest_details(PlayerbotAI* ai) { return new QuestDetailsAction(ai); }
         static Action* accept_all_quests(PlayerbotAI* ai) { return new AcceptAllQuestsAction(ai); }
         static Action* accept_quest_share(PlayerbotAI* ai) { return new AcceptQuestShareAction(ai); }
         static Action* loot_start_roll(PlayerbotAI* ai) { return (QueryItemUsageAction*)new LootStartRollAction(ai); }

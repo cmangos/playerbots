@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        version: [classic, tbc]
+        version: [classic, tbc, wotlk]
         include:
           - os: windows-2022
             EXTRA_BUILD: "-DBUILD_PLAYERBOTS=ON"

@@ -10,6 +10,7 @@ namespace ahbot
     {
     public:
         PricingStrategy(Category* category) : category(category) {}
+        virtual ~PricingStrategy() {}
 
     public:
         virtual uint32 GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket = false, std::ostringstream *explain = NULL);

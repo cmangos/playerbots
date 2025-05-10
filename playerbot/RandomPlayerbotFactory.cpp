@@ -11,6 +11,7 @@
 #include "RandomPlayerbotFactory.h"
 #include "SystemConfig.h"
 #include "Social/SocialMgr.h"
+#include "Guilds/GuildMgr.h"
 
 #ifndef MANGOSBOT_ZERO
 #ifdef CMANGOS
@@ -474,6 +475,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
                                     continue;
                             }
 
+                            sRandomPlayerbotMgr.OnPlayerLoginError(guidlo);
                             Player::DeleteFromDB(guid, accId, false, true);       // no need to update realm characters
                             //dels.push_back(std::async([guid, accId] {Player::DeleteFromDB(guid, accId, false, true); }));
 
@@ -603,6 +605,8 @@ void RandomPlayerbotFactory::CreateRandomBots()
         }
     }
 
+    BarGoLink bar4(static_cast<uint8>(NameRaceAndGender::BloodelfFemale));
+
     for (uint8 raceAndGenderIndex = 0; raceAndGenderIndex <= static_cast<uint8>(NameRaceAndGender::BloodelfFemale); ++raceAndGenderIndex)
     {
         const auto raceAndGender = static_cast<NameRaceAndGender>(raceAndGenderIndex);
@@ -616,8 +620,6 @@ void RandomPlayerbotFactory::CreateRandomBots()
         if (totalCharCount / 2 < freeNames[raceAndGender].size())
             continue;
         uint32 namesNeeded = totalCharCount / 2 - freeNames[raceAndGender].size();
-
-        BarGoLink bar(namesNeeded);
 
         while(namesNeeded)
         {
@@ -635,7 +637,6 @@ void RandomPlayerbotFactory::CreateRandomBots()
                 used[newName] = false;
                 newNames.push_back(newName);
                 namesNeeded--;
-                bar.step();
                 if (!namesNeeded)
                     break;
             }
@@ -643,8 +644,12 @@ void RandomPlayerbotFactory::CreateRandomBots()
             postItt++;
         }
 
+        bar4.step();
+
         freeNames[raceAndGender].insert(freeNames[raceAndGender].end(), newNames.begin(), newNames.end());
     }
+
+    sLog.outString(">> Loaded names for " SIZEFMTD " race/gender combinations.", freeNames.size());
 
 	sLog.outString("Creating random bot characters...");
 	BarGoLink bar1(totalCharCount);
@@ -709,6 +714,20 @@ void RandomPlayerbotFactory::CreateRandomBots()
         bar2.step();
         account_creations[i].wait();
     }    
+
+    std::vector<Player*> players;
+    
+    for (auto pl : sObjectAccessor.GetPlayers())
+        players.push_back(pl.second);
+
+    for (auto player : players)
+    {
+        WorldSession* session = player->GetSession();
+        session->LogoutPlayer();
+        sObjectAccessor.RemoveObject(player);
+        delete player;
+        delete session;
+    }
 
     sLog.outString("%zu random bot accounts with %d characters available", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
 }
@@ -842,7 +861,7 @@ void RandomPlayerbotFactory::CreateRandomGuilds()
     }
 
     if (newGuilds)
-        sLog.outString("Total Random Guilds: %d", sPlayerbotAIConfig.randomBotGuilds.size());
+        sLog.outString("Total Random Guilds: %d", (uint32)sPlayerbotAIConfig.randomBotGuilds.size());
 }
 
 std::string RandomPlayerbotFactory::CreateRandomGuildName()
@@ -980,13 +999,13 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         Player* player = sObjectMgr.GetPlayer(captain);
         if (!player)
         {
-            sLog.outError("Cannot find player for captain %d", (uint64)captain);
+            sLog.outError("Cannot find player for captain %d", player->GetGUIDLow());
             continue;
         }
 
         if (player->GetLevel() < 70)
         {
-            sLog.outError("Bot %d must be level 70 to create an arena team", (uint64)captain);
+            sLog.outError("Bot %d must be level 70 to create an arena team", player->GetGUIDLow());
             continue;
         }
 

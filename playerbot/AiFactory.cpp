@@ -594,7 +594,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 #endif
 
 #ifndef MANGOSBOT_ZERO
-        if (player->InArena())
+        if (!player->IsBeingTeleported() && player->InArena())
         {
             combatEngine->addStrategy("arena");
         }
@@ -838,6 +838,9 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
     nonCombatEngine->addStrategies("wbuff", NULL);
     nonCombatEngine->addStrategy("avoid mobs");
 
+    if(sPlayerbotAIConfig.llmEnabled == 2)
+        nonCombatEngine->addStrategy("ai chat");
+
     if (!player->InBattleGround())
     {
         nonCombatEngine->addStrategies("racials", "nc", "food", "follow", "default", "quest", "loot", "gather", "duel", "emote", "buff", "mount", NULL);
@@ -861,6 +864,9 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         Player* master = facade->GetMaster();
 
         nonCombatEngine->addStrategy("roll");
+#ifdef MANGOSBOT_TWO
+        nonCombatEngine->addStrategy("glyph");
+#endif
 
         // let 25% of free bots start duels.
         if (!urand(0, 3))
@@ -873,7 +879,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
             nonCombatEngine->addStrategy("lfg");
         }
 
-        if (!player->GetGroup() || player->GetGroup()->GetLeaderGuid() == player->GetObjectGuid())
+        if (!player->GetGroup() || facade->IsGroupLeader())
         {
             // let 25% of random not grouped (or group leader) bots help other players
             if (!urand(0, 3))
@@ -969,7 +975,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         bool isArena = false;
 
 #ifndef MANGOSBOT_ZERO
-        if (player->InArena())
+        if (!player->IsBeingTeleported() && player->InArena())
         {
             isArena = true;
         }

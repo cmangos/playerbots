@@ -162,10 +162,10 @@ DropMap* DropMapValue::Calculate()
 			for (LootLootGroupAccess const& group : lTemplateA->Groups)
 			{
 				for (LootStoreItem const& lItem : group.ExplicitlyChanced)
-					dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+					dropMap->insert(std::make_pair(lItem.itemid, -sEntry));
 
 				for (LootStoreItem const& lItem : group.EqualChanced)
-					dropMap->insert(std::make_pair(lItem.itemid, sEntry));
+					dropMap->insert(std::make_pair(lItem.itemid, -sEntry));
 			}
 		}
 	}
@@ -234,9 +234,11 @@ float LootChanceValue::Calculate()
 				if (item.itemid == itemId)
 					return item.chance;
 
+			float equalChance = 100.0f / (float)group.EqualChanced.size();
+
 			for (LootStoreItem const& item : group.EqualChanced)
 				if (item.itemid == itemId)
-					return item.chance;
+					return item.chance ? item.chance : equalChance;
 		}
 	}
 
@@ -255,6 +257,24 @@ itemUsageMap EntryLootUsageValue::Calculate()
 	return items;
 }
 
+bool HasUpgradeValue::Calculate()
+{
+	for (auto itemId : GAI_VALUE2(std::list<uint32>, "entry loot list", getQualifier()))
+	{
+		ForceItemUsage forceUsage = AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", itemId, ForceItemUsage::FORCE_USAGE_NONE);
+
+		if (forceUsage == ForceItemUsage::FORCE_USAGE_NEED)
+			return true;
+
+		ItemQualifier qualifier(itemId);
+
+		ItemUsage equip = ItemUsageValue::QueryItemUsageForEquip(qualifier, bot);
+		if (equip == ItemUsage::ITEM_USAGE_EQUIP)
+			return true;
+	}
+	return false;
+}
+
 //How many (stack) items can be looted while still having free space.
 uint32 StackSpaceForItem::Calculate()
 {
@@ -267,7 +287,7 @@ uint32 StackSpaceForItem::Calculate()
 	if (!proto) 
 		return maxValue;
 
-	if (proto->MaxCount > 0 && AI_VALUE2(uint32, "item count", proto->Name1) >= proto->MaxCount)
+	if (proto->MaxCount > 0)
 		return proto->MaxCount - AI_VALUE2(uint32, "item count", proto->Name1);
 
 	if (ai->HasActivePlayerMaster())
@@ -298,7 +318,7 @@ bool ShouldLootObject::Calculate()
 	if (!guid)
 		return false;
 
-	WorldObject* object = guid.GetWorldObject();
+	WorldObject* object = guid.GetWorldObject(bot->GetInstanceId());
 
 	if (!object)
 		return false;

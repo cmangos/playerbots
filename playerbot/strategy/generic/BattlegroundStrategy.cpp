@@ -22,12 +22,20 @@ void BattlegroundStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigge
         NextAction::array(0, new NextAction("bg move to start", 1.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "player has flag",
+        NextAction::array(0, new NextAction("jump::position bg objective", 3.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "bg active",
         NextAction::array(0, new NextAction("check mount state", 2.0f), new NextAction("bg move to objective", 1.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "very often",
         NextAction::array(0, new NextAction("bg check objective", 10.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "bg active",
+        NextAction::array(0, new NextAction("bg check flag", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "bg ended",
@@ -70,7 +78,10 @@ void WarsongStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "player has flag",
-        NextAction::array(0, new NextAction("bg move to objective", 80.0f), NULL)));
+        NextAction::array(0,
+            new NextAction("jump::position bg objective", 80.5f),
+            new NextAction("bg move to objective", 80.0f),
+            NULL)));
 
     triggers.push_back(new TriggerNode(
         "player has flag",
@@ -88,14 +99,13 @@ void WarsongStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
 void AlteracStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
-    triggers.push_back(new TriggerNode(
-        "very often",
-        NextAction::array(0, new NextAction("bg banner", 10.0f), NULL)));
 }
 
 void AlteracStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
-    InitNonCombatTriggers(triggers);
+    triggers.push_back(new TriggerNode(
+        "very often",
+        NextAction::array(0, new NextAction("bg banner", ACTION_NORMAL), NULL)));
 }
 
 void ArathiStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)

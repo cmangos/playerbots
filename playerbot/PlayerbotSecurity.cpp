@@ -16,10 +16,6 @@ PlayerbotSecurity::PlayerbotSecurity(Player* const bot) : bot(bot), account(0)
 
 PlayerbotSecurityLevel PlayerbotSecurity::LevelFor(Player* from, DenyReason* reason, bool ignoreGroup)
 {
-    if(bot->isRealPlayer())
-    {
-        return PlayerbotSecurityLevel::PLAYERBOT_SECURITY_DENY_ALL;
-    }
 
     // Allow everything if request is from gm account
     if (from->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
@@ -83,11 +79,7 @@ PlayerbotSecurityLevel PlayerbotSecurity::LevelFor(Player* from, DenyReason* rea
         }
 
 #ifdef MANGOSBOT_ONE
-        if (bot->GetPlayerbotAI()->HasRealPlayerMaster() && !bot->m_lookingForGroup.isEmpty() &&
-            (!bot->m_lookingForGroup.group[0].empty() && bot->m_lookingForGroup.group[0].type == LFG_TYPE_DUNGEON ||
-            (!bot->m_lookingForGroup.group[1].empty() && bot->m_lookingForGroup.group[1].type == LFG_TYPE_DUNGEON) ||
-            (!bot->m_lookingForGroup.group[2].empty() && bot->m_lookingForGroup.group[2].type == LFG_TYPE_DUNGEON) ||
-                (!bot->m_lookingForGroup.more.empty() && bot->m_lookingForGroup.more.type == LFG_TYPE_DUNGEON)))
+        if (bot->GetPlayerbotAI()->HasRealPlayerMaster() && bot->GetSession()->m_lfgInfo.queued)
 #endif
 #ifdef MANGOSBOT_ZERO
         if (sWorld.GetLFGQueue().IsPlayerInQueue(bot->GetObjectGuid()))

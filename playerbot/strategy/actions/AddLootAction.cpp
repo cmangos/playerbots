@@ -91,7 +91,6 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
     Group* group = bot->GetGroup();
 
     bool isInGroup = group ? true : false;
-    bool isGroupLeader = isInGroup ? group->GetLeaderGuid() == bot->GetObjectGuid() : false;
     bool isInDungeon = bot->GetMap()->IsDungeon();
 
     if (isInGroup)
@@ -107,7 +106,7 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
             return false;
         }
 
-        if (isGroupLeader)
+        if (ai->IsGroupLeader())
         {
             lootDistanceToUse = sPlayerbotAIConfig.lootDistance;
         }
@@ -136,7 +135,7 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
 
     //check hostile units after distance checks, to avoid unnecessary calculations
 
-    if (isInGroup && !isGroupLeader)
+    if (isInGroup && !ai->IsGroupLeader())
     {
         float MOB_AGGRO_DISTANCE = 30.0f;
         std::list<Unit*> hostiles = ai->GetAllHostileNPCNonPetUnitsAroundWO(wo, MOB_AGGRO_DISTANCE);
@@ -206,10 +205,9 @@ bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)
     Group* group = bot->GetGroup();
 
     bool isInGroup = group ? true : false;
-    bool isGroupLeader = isInGroup ? group->GetLeaderGuid() == bot->GetObjectGuid() : false;
     bool isInDungeon = bot->GetMap()->IsDungeon();
 
-    if (isInGroup && !isGroupLeader)
+    if (isInGroup && !ai->IsGroupLeader())
     {
         if (ai->HasActivePlayerMaster())
         {
@@ -220,7 +218,7 @@ bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)
             gatheringDistanceToUse = sPlayerbotAIConfig.groupMemberGatheringDistance;
         }
     }
-    else if (isInGroup && isGroupLeader)
+    else if (ai->IsGroupLeader())
     {
         gatheringDistanceToUse = sPlayerbotAIConfig.gatheringDistance;
     }
@@ -247,7 +245,7 @@ bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)
         }
     }
 
-    if (isInGroup && !isGroupLeader)
+    if (isInGroup && !ai->IsGroupLeader())
     {
         if (hostiles.size() > 0)
         {

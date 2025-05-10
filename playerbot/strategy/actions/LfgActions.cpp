@@ -234,18 +234,14 @@ bool LfgJoinAction::JoinLFG()
     TravelTarget* target = bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
     if (target)
     {
-        state = target->getTravelState();
-        status = target->getStatus();
+        state = target->GetTravelState();
+        status = target->GetStatus();
         // queue only if quest not completed
         if (state < TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST)
         {
-            Quest const* quest = NULL;
-            if (target->getDestination())
-                quest = target->getDestination()->GetQuestTemplate();
-
-            if (quest)
+            if (typeid(*target) == typeid(QuestTravelDestination))
             {
-                Quest const* qinfo = sObjectMgr.GetQuestTemplate(quest->GetQuestId());
+                Quest const* qinfo = sObjectMgr.GetQuestTemplate(((QuestTravelDestination*)target->GetDestination())->GetQuestId());
                 if (qinfo)
                 {
                     // only group quests are allowed for quest lfg
@@ -386,9 +382,9 @@ bool LfgJoinAction::JoinLFG()
         if (target && group && !group->IsFull())
         {
             // if moving to boss
-            if (target->getDestination() && target->getDestination()->getName() == "BossTravelDestination")
+            if (target->GetDestination() && typeid(*target->GetDestination()) == typeid(BossTravelDestination))
             {
-                WorldPosition* location = target->getPosition();
+                WorldPosition* location = target->GetPosition();
                 uint32 targetAreaFlag = GetAreaFlagByMapId(location->mapid);
                 if (targetAreaFlag)
                 {
@@ -1074,6 +1070,7 @@ bool LfgLeaveAction::Execute(Event& event)
     }
 #endif
 #ifdef MANGOSBOT_ONE
+    /* todo: Fix with new system
     bool isLFG = false;
     bool isLFM = false;
     for (int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
@@ -1097,6 +1094,7 @@ bool LfgLeaveAction::Execute(Event& event)
         p << empty;
         bot->GetSession()->HandleSetLfgCommentOpcode(p);
     }
+    */
 #endif
 #ifdef MANGOSBOT_TWO
     // Don't leave if already invited / in dungeon
@@ -1121,7 +1119,7 @@ bool LfgLeaveAction::isUseful()
             return false;
     }
 
-    if (bot->GetGroup() && bot->GetGroup()->GetLeaderGuid() != bot->GetObjectGuid())
+    if (bot->GetGroup() && !ai->IsGroupLeader())
     {
         if (sWorld.GetLFGQueue().IsPlayerInQueue(bot->GetGroup()->GetLeaderGuid()))
             return false;
@@ -1173,7 +1171,7 @@ bool LfgJoinAction::isUseful()
 #ifdef MANGOSBOT_ZERO
     if (bot->GetGroup())
 #else
-    if (bot->GetGroup() && bot->GetGroup()->GetLeaderGuid() != bot->GetObjectGuid())
+    if (bot->GetGroup() && !ai->IsGroupLeader())
 #endif
     {
         //ai->ChangeStrategy("-lfg", BotState::BOT_STATE_NON_COMBAT);
@@ -1216,6 +1214,7 @@ bool LfgJoinAction::isUseful()
         return false;
 #endif
 #ifdef MANGOSBOT_ONE
+    /* todo: Fix with new system
     bool isLFG = false;
     bool isLFM = false;
     for (int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
@@ -1227,6 +1226,7 @@ bool LfgJoinAction::isUseful()
 
     if ((isLFG || isLFM) && sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()].empty())
         return false;
+        */
 #endif
 #ifdef MANGOSBOT_TWO
     if (sRandomPlayerbotMgr.LfgDungeons[bot->GetTeam()].empty())

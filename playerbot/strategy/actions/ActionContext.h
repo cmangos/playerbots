@@ -62,6 +62,7 @@
 #include "ShareQuestAction.h"
 #include "UpdateGearAction.h"
 #include "SetAvoidAreaAction.h"
+#include "GlyphAction.h"
 
 #include "OnyxiasLairDungeonActions.h"
 #include "MoltenCoreDungeonActions.h"
@@ -82,8 +83,14 @@ namespace ai
             creators["choose rpg target"] = &ActionContext::choose_rpg_target;
             creators["move to rpg target"] = &ActionContext::move_to_rpg_target;
 			creators["travel"] = &ActionContext::travel;
-			creators["choose travel target"] = &ActionContext::choose_travel_target;
-			creators["move to travel target"] = &ActionContext::move_to_travel_target;
+			creators["choose travel target"] = [](PlayerbotAI* ai) { return new ChooseTravelTargetAction(ai); };
+            creators["choose group travel target"] = [](PlayerbotAI* ai) { return new ChooseGroupTravelTargetAction(ai); };
+            creators["refresh travel target"] = [](PlayerbotAI* ai) { return new RefreshTravelTargetAction(ai); };
+            creators["request travel target"] = [](PlayerbotAI* ai) { return new RequestTravelTargetAction(ai); };
+            creators["request named travel target"] = [](PlayerbotAI* ai) { return new RequestNamedTravelTargetAction(ai); };
+            creators["request quest travel target"] = [](PlayerbotAI* ai) { return new RequestQuestTravelTargetAction(ai); };
+            creators["reset travel target"] = [](PlayerbotAI* ai) { return new ResetTargetAction(ai); };
+            creators["move to travel target"] = &ActionContext::move_to_travel_target;
             creators["move out of collision"] = &ActionContext::move_out_of_collision;
             creators["move random"] = &ActionContext::move_random;
             creators["attack"] = &ActionContext::melee;
@@ -259,11 +266,15 @@ namespace ai
             creators["rpg queue bg"] = &ActionContext::rpg_queue_bg;
             creators["rpg buy petition"] = &ActionContext::rpg_buy_petition;
             creators["rpg use"] = &ActionContext::rpg_use;
+            creators["rpg ai chat"] = [](PlayerbotAI* ai) { return new RpgAIChatAction(ai); };
             creators["rpg spell"] = &ActionContext::rpg_spell;
             creators["rpg craft"] = &ActionContext::rpg_craft;
             creators["rpg trade useful"] = &ActionContext::rpg_trade_useful;
+            creators["rpg enchant"] = &ActionContext::rpg_enchant;
             creators["rpg duel"] = &ActionContext::rpg_duel;
             creators["rpg item"] = &ActionContext::rpg_item;
+
+            creators["auto set glyph"] = [](PlayerbotAI* ai) { return new AutoSetGlyphAction(ai); };
 
             // Bot States
             creators["set combat state"] = &ActionContext::set_combat_state;
@@ -305,6 +316,14 @@ namespace ai
             creators["enable onyxia fight strategy"] = &ActionContext::onyxia_enable_fight_strategy;
             creators["disable onyxia fight strategy"] = &ActionContext::onyxia_disable_fight_strategy;
 
+            creators["enable magmadar fight strategy"] = &ActionContext::magmadar_enable_fight_strategy;
+            creators["disable magmadar fight strategy"] = &ActionContext::magmadar_disable_fight_strategy;
+            creators["move away from magmadar"] = &ActionContext::magmadar_move_away;
+
+            creators["move away from hazard"] = &ActionContext::move_away_from_hazard;
+            creators["move to mc rune"] = &ActionContext::move_to_mc_rune;
+            creators["douse mc rune aqual"] = &ActionContext::douse_mc_rune_aqual;
+            creators["douse mc rune eternal"] = &ActionContext::douse_mc_rune_eternal;
 
 
    
@@ -341,7 +360,6 @@ namespace ai
         static Action* choose_rpg_target(PlayerbotAI* ai) { return new ChooseRpgTargetAction(ai); }
         static Action* move_to_rpg_target(PlayerbotAI* ai) { return new MoveToRpgTargetAction(ai); }
         static Action* travel(PlayerbotAI* ai) { return new TravelAction(ai); }
-        static Action* choose_travel_target(PlayerbotAI* ai) { return new ChooseTravelTargetAction(ai); }
         static Action* move_to_travel_target(PlayerbotAI* ai) { return new MoveToTravelTargetAction(ai); }
         static Action* move_out_of_collision(PlayerbotAI* ai) { return new MoveOutOfCollisionAction(ai); }
         static Action* move_random(PlayerbotAI* ai) { return new MoveRandomAction(ai); }
@@ -535,6 +553,8 @@ namespace ai
         static Action* rpg_spell(PlayerbotAI* ai) { return new RpgSpellAction(ai); }
         static Action* rpg_craft(PlayerbotAI* ai) { return new RpgCraftAction(ai); }
         static Action* rpg_trade_useful(PlayerbotAI* ai) { return new RpgTradeUsefulAction(ai); }
+        static Action* rpg_enchant(PlayerbotAI* ai) { return new RpgEnchantAction(ai); }
+        
         static Action* rpg_duel(PlayerbotAI* ai) { return new RpgDuelAction(ai); }
         static Action* rpg_item(PlayerbotAI* ai) { return new RpgItemAction(ai); }
 
@@ -561,6 +581,10 @@ namespace ai
 
 
 
+        static Action* move_away_from_hazard(PlayerbotAI* ai) { return new MoveAwayFromHazard(ai); }
+        static Action* move_to_mc_rune(PlayerbotAI* ai) { return new MoveToMCRuneAction(ai); }
+        static Action* douse_mc_rune_aqual(PlayerbotAI* ai) { return new DouseMCRuneActionAqual(ai); }
+        static Action* douse_mc_rune_eternal(PlayerbotAI* ai) { return new DouseMCRuneActionEternal(ai); }
 
         static Action* netherspite_enable_fight_strategy(PlayerbotAI* ai) { return new NetherspiteEnableFightStrategyAction(ai); }
         static Action* netherspite_disable_fight_strategy(PlayerbotAI* ai) { return new NetherspiteDisableFightStrategyAction(ai); }

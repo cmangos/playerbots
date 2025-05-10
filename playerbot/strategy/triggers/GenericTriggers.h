@@ -561,7 +561,7 @@ namespace ai
     {
     public:
         ValueTrigger(PlayerbotAI* ai, std::string name = "val", int checkInterval = 1) : Trigger(ai, name, checkInterval), Qualified() {}
-        virtual bool IsActive() { return AI_VALUE(bool, getQualifier()); }
+        virtual bool IsActive() { name = getQualifier();  return AI_VALUE(bool, getQualifier()); }
     };
 
     class SnareTargetTrigger : public DebuffTrigger
@@ -1261,6 +1261,14 @@ namespace ai
     {
     public:
         RtscJumpTrigger(PlayerbotAI* ai) : Trigger(ai, "rtsc jump active") {}
+
+        bool IsActive() override;
+    };
+
+    class AtWarTrigger : public Trigger
+    {
+    public:
+        AtWarTrigger(PlayerbotAI* ai) : Trigger(ai, "at war", 60) {}
 
         bool IsActive() override;
     };

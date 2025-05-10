@@ -81,8 +81,7 @@ void FleeManager::calculatePossibleDestinations(std::list<FleePoint*> &points)
 
                 bot->UpdateAllowedPositionZ(x, y, z);
 
-                Map* map = startPosition.getMap();
-                const TerrainInfo* terrain = map->GetTerrain();
+                const TerrainInfo* terrain = startPosition.getTerrain();
                 if (terrain && terrain->IsInWater(x, y, z))
                     continue;
 

@@ -961,46 +961,6 @@ void MageStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     ClassStrategy::InitNonCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "learn glyph of fireball",
-        NextAction::array(0, new NextAction("learn glyph of fireball", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "remove glyph of fireball",
-        NextAction::array(0, new NextAction("remove glyph of fireball", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "learn glyph of frostbolt",
-        NextAction::array(0, new NextAction("learn glyph of frostbolt", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "remove glyph of frostbolt",
-        NextAction::array(0, new NextAction("remove glyph of frostbolt", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "learn glyph of living bomb",
-        NextAction::array(0, new NextAction("learn glyph of living bomb", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "remove glyph of living bomb",
-        NextAction::array(0, new NextAction("remove glyph of living bomb", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "learn glyph of mirror image",
-        NextAction::array(0, new NextAction("learn glyph of mirror image", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "remove glyph of mirror image",
-        NextAction::array(0, new NextAction("remove glyph of mirror image", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "learn glyph of molten armor",
-        NextAction::array(0, new NextAction("learn glyph of molten armor", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "remove glyph of molten armor",
-        NextAction::array(0, new NextAction("remove glyph of molten armor", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "no drink",
         NextAction::array(0, new NextAction("conjure water", ACTION_NORMAL), NULL)));
 

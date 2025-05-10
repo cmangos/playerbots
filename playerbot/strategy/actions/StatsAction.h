@@ -9,6 +9,7 @@ namespace ai
         StatsAction(PlayerbotAI* ai) : ChatCommandAction(ai, "stats") {}
         virtual bool Execute(Event& event) override;
 
+        bool isUsefulWhenStunned() override { return true; }
     private:
         void ListBagSlots(std::ostringstream &out);
         void ListXP(std::ostringstream &out);

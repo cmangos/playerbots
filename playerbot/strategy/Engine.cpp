@@ -154,7 +154,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
             if (!event.getSource().empty())
                 actionName += " <" + event.getSource() + ">";
             
-            PerformanceMonitorOperation* pmo1 = sPerformanceMonitor.start(PERF_MON_ACTION, actionName, &aiObjectContext->performanceStack);
+            auto pmo1 = sPerformanceMonitor.start(PERF_MON_ACTION, actionName, &aiObjectContext->performanceStack);
 
             if(action)
                 action->setRelevance(relevance);
@@ -180,11 +180,15 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
             }
             else
             {
-                PerformanceMonitorOperation* pmo2 = sPerformanceMonitor.start(PERF_MON_ACTION, "isUsefull", &aiObjectContext->performanceStack);
-                bool isUseful = action->isUseful();
-                if (pmo2) pmo2->finish();
+                bool isUseful = false;
+                if (!isStunned || action->isUsefulWhenStunned())
+                {
+                    auto pmo2 = sPerformanceMonitor.start(PERF_MON_ACTION, "isUseful", &aiObjectContext->performanceStack);
+                    isUseful = action->isUseful();
+                    pmo2.reset();
+                }
 
-                if (isUseful && (!isStunned || action->isUsefulWhenStunned()))
+                if (isUseful)
                 {
                     for (std::list<Multiplier*>::iterator i = multipliers.begin(); i != multipliers.end(); i++)
                     {
@@ -203,7 +207,6 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                     if (relevance < oldRelevance && peekAction && peekAction->getRelevance() > relevance) //Relevance changed. Try again.
                     {
                         PushAgain(actionNode, relevance, event);
-                        if (pmo1) pmo1->finish();
                         continue;
                     }
 
@@ -213,25 +216,24 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                         if (MultiplyAndPush(actionNode->getPrerequisites(), relevance + 0.02, false, event, "prereq"))
                         {
                             PushAgain(actionNode, relevance + 0.01, event);
-
-                            if (pmo1) pmo1->finish();
                             continue;
                         }
                     }
 
-                    PerformanceMonitorOperation* pmo3 = sPerformanceMonitor.start(PERF_MON_ACTION, "isPossible", &aiObjectContext->performanceStack);
+                    auto pmo3 = sPerformanceMonitor.start(PERF_MON_ACTION, "isPossible", &aiObjectContext->performanceStack);
                     bool isPossible = action->isPossible();
-                    if (pmo3) pmo3->finish();
+                    pmo3.reset();
 
                     if (isPossible && relevance)
                     {
-                        PerformanceMonitorOperation* pmo4 = sPerformanceMonitor.start(PERF_MON_ACTION, "Execute", &aiObjectContext->performanceStack);
+                        auto pmo4 = sPerformanceMonitor.start(PERF_MON_ACTION, "Execute", &aiObjectContext->performanceStack);
                         actionExecuted = ListenAndExecute(action, event);
-                        if (pmo4) pmo4->finish();
+                        pmo4.reset();
 
 #ifdef PLAYERBOT_ELUNA
                         // used by eluna    
-                        sEluna->OnActionExecute(ai, action->getName(), actionExecuted);
+                        if (Eluna* e = ai->GetBot()->GetEluna())
+                            e->OnActionExecute(ai, action->getName(), actionExecuted);
 #endif
 
                         if (actionExecuted)
@@ -240,7 +242,6 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                             MultiplyAndPush(actionNode->getContinuers(), 0, false, event, "cont");
                             lastRelevance = relevance;
                             delete actionNode;
-                            if (pmo1) pmo1->finish();
                             break;
                         }
                         else
@@ -292,8 +293,6 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                 }
             }
             delete actionNode;
-
-            if (pmo1) pmo1->finish();
         }
     }
     while (basket && ++iterations <= iterationsPerTick);
@@ -411,15 +410,27 @@ ActionResult Engine::ExecuteAction(const std::string& name, Event& event)
     ActionNode* actionNode = CreateActionNode(name);
     if (actionNode)
     {
+        auto pmo1 = sPerformanceMonitor.start(PERF_MON_ACTION, name, &aiObjectContext->performanceStack);
         Action* action = InitializeAction(actionNode);
         if (action)
         {
-            if (action->isUseful())
+            auto pmo2 = sPerformanceMonitor.start(PERF_MON_ACTION, "isUseful", &aiObjectContext->performanceStack);
+            bool isUseful = action->isUseful();
+            pmo2.reset();
+            
+            if (isUseful)
             {
-                if (action->isPossible())
+                auto pmo3 = sPerformanceMonitor.start(PERF_MON_ACTION, "isPossible", &aiObjectContext->performanceStack);
+                bool isPossible = action->isPossible();
+                pmo3.reset();
+
+                if (isPossible)
                 {
-                    action->MakeVerbose(true);
+                    action->MakeVerbose(event.getOwner() != nullptr);
+                    auto pmo4 = sPerformanceMonitor.start(PERF_MON_ACTION, "Execute", &aiObjectContext->performanceStack);
                     bool executionResult = ListenAndExecute(action, event);
+                    pmo4.reset();
+
                     MultiplyAndPush(action->getContinuers(), 0.0f, false, event, "default");
                     actionResult = executionResult ? ACTION_RESULT_OK : ACTION_RESULT_FAILED;
                 }
@@ -433,7 +444,6 @@ ActionResult Engine::ExecuteAction(const std::string& name, Event& event)
                 actionResult = ACTION_RESULT_USELESS;
             }
         }
-
         delete actionNode;
     }
 
@@ -557,7 +567,7 @@ Strategy* Engine::GetStrategy(const std::string& name) const
 
 void Engine::ProcessTriggers(bool minimal)
 {
-    std::map<Trigger*, Event> fires;
+    std::unordered_map<Trigger*, Event> fires;
     for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
     {
         TriggerNode* node = *i;
@@ -573,20 +583,20 @@ void Engine::ProcessTriggers(bool minimal)
         if (!trigger)
             continue;
 
-        Event& event = fires[trigger];
-        if (!event && (testMode || trigger->needCheck()))
+        auto it = fires.find(trigger);
+        if (it == fires.end() && (testMode || trigger->needCheck()))
         {
             if (minimal && node->getFirstRelevance() < 100)
                 continue;
-            PerformanceMonitorOperation* pmo = sPerformanceMonitor.start(PERF_MON_TRIGGER, trigger->getName(), &aiObjectContext->performanceStack);
-            event = trigger->Check();
+            auto pmo = sPerformanceMonitor.start(PERF_MON_TRIGGER, trigger->getName(), &aiObjectContext->performanceStack);
+            Event event = trigger->Check();
 
 #ifdef PLAYERBOT_ELUNA
             // used by eluna    
-            sEluna->OnTriggerCheck(ai, trigger->getName(), !event ? false : true);
+            if (Eluna* e = ai->GetBot()->GetEluna())
+                e->OnTriggerCheck(ai, trigger->getName(), !event ? false : true);
 #endif
 
-            if (pmo) pmo->finish();
             if (!event)
                 continue;
 
@@ -599,9 +609,11 @@ void Engine::ProcessTriggers(bool minimal)
     {
         TriggerNode* node = *i;
         Trigger* trigger = node->getTrigger();
-        Event& event = fires[trigger];
-        if (!event)
+        auto it = fires.find(trigger);
+        if (it == fires.end())
             continue;
+
+        Event& event = it->second;
 
         MultiplyAndPush(node->getHandlers(), 0.0f, false, event, "trigger");
     }

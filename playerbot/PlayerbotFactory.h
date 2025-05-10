@@ -55,7 +55,7 @@ public:
     static std::list<uint32> specialQuestIds;
     void InitSkills();
     void EnchantEquipment();
-    void EquipGear() { return InitEquipment(false, false); }
+    void EquipGear() { InitEquipment(false, false); InitGems(); }
     void EquipGearBest() { return InitEquipment(false, false, false); }
     void EquipGearPartialUpgrade() { return InitEquipment(false, false, true, true); }
     void UpgradeGear(bool syncWithMaster) { return InitEquipment(!syncWithMaster, syncWithMaster); }
@@ -74,7 +74,7 @@ private:
     void InitEquipment(bool incremental, bool syncWithMaster, bool progressive = sPlayerbotAIConfig.randomGearProgression, bool partialUpgrade = false);
     void InitEquipmentNew(bool incremental);
     bool CanEquipItem(ItemPrototype const* proto, uint32 desiredQuality);
-    bool CanEquipUnseenItem(uint8 slot, uint16 &dest, uint32 item);
+    void InitAllSkills();
     void InitTradeSkills();
     void UpdateTradeSkills();
     void SetRandomSkill(uint16 id);

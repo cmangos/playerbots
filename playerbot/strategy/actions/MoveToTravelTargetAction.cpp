@@ -14,8 +14,19 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 {
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
 
+    if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_READY)
+    {
+        ai->TellDebug(ai->GetMaster(), "The target is ready to travel start now.", "debug travel");
+        target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
+    }
+
+    target->CheckStatus();
+
+    if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_TRAVEL)
+        return true;
+
     WorldPosition botLocation(bot);
-    WorldLocation location = *target->getPosition();
+    WorldPosition location = *target->GetPosition();
     
     Group* group = bot->GetGroup();
     if (group && !urand(0, 1) && bot == ai->GetGroupMaster())
@@ -36,9 +47,9 @@ bool MoveToTravelTargetAction::Execute(Event& event)
                 continue;
 
             WorldPosition memberPos(member);
-            WorldPosition targetPos = *target->getPosition();
+            WorldPosition targetPos = *target->GetPosition();
 
-            float memberDistance = botLocation.distance(memberPos);
+            float memberDistance = std::min(botLocation.distance(memberPos), location.distance(memberPos));
 
             if (memberDistance < 50.0f)
                 continue;
@@ -53,17 +64,23 @@ bool MoveToTravelTargetAction::Execute(Event& event)
             if (!urand(0, 5))
             {
                 std::ostringstream out;
-                if (ai->GetMaster() && !bot->GetGroup()->IsMember(ai->GetMaster()->GetObjectGuid()))
+                if ((ai->GetMaster() && !bot->GetGroup()->IsMember(ai->GetMaster()->GetObjectGuid())) || !ai->HasActivePlayerMaster())
                     out << "Waiting a bit for ";
                 else
                     out << "Please hurry up ";
 
                 out << member->GetName();
 
+                if (bot->GetPlayerbotAI() && !ai->HasActivePlayerMaster())
+                {    
+                        out << " " << round(memberDistance) << "y";
+                        out << " in " << memberPos.getAreaName();
+                }
+
                 ai->TellPlayerNoFacing(GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             }
 
-            target->setExpireIn(target->getTimeLeft() + sPlayerbotAIConfig.maxWaitForMove);
+            target->SetExpireIn(target->GetTimeLeft() + sPlayerbotAIConfig.maxWaitForMove);
 
             SetDuration(sPlayerbotAIConfig.maxWaitForMove);
 
@@ -71,15 +88,15 @@ bool MoveToTravelTargetAction::Execute(Event& event)
         }
     }
 
-    float maxDistance = target->getDestination()->getRadiusMin();
+    float maxDistance = target->GetDestination()->GetRadiusMin();
 
     //Evenly distribute around the target.
     float angle = 2 * M_PI * urand(0, 100) / 100.0;
 
-    float x = location.coord_x;
-    float y = location.coord_y;
-    float z = location.coord_z;
-    float mapId = location.mapid;
+    float x = location.getX();
+    float y = location.getY();
+    float z = location.getZ();
+    float mapId = location.getMapId();
 
     //Move between 0.5 and 1.0 times the maxDistance.
     float mod = urand(50, 100)/100.0;   
@@ -89,26 +106,26 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
     bool canMove = false;
 
-    if (ai->HasStrategy("debug travel", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
     {
         std::ostringstream out;
 
         out << "Moving to ";
 
-        out << target->getDestination()->getTitle();
+        out << target->GetDestination()->GetTitle();
 
-        if (!(*target->getPosition() == WorldPosition()))
+        if (!(*target->GetPosition() == WorldPosition()))
         {
-            out << " at " << uint32(target->getPosition()->distance(bot)) << "y";
+            out << " at " << uint32(target->GetPosition()->distance(bot)) << "y";
         }
 
-        if (target->getStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << " for " << (target->getTimeLeft() / 1000) << "s";
+        if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
+            out << " for " << (target->GetTimeLeft() / 1000) << "s";
 
-        if (target->getRetryCount(true))
-            out << " (move retry: " << target->getRetryCount(true) << ")";
-        else if (target->getRetryCount(false))
-            out << " (retry: " << target->getRetryCount(false) << ")";
+        if (target->GetRetryCount(true))
+            out << " (move retry: " << target->GetRetryCount(true) << ")";
+        else if (target->GetRetryCount(false))
+            out << " (retry: " << target->GetRetryCount(false) << ")";
 
         ai->TellPlayerNoFacing(GetMaster(), out);
     }
@@ -117,107 +134,23 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
     if (!canMove)
     {
-        target->incRetry(true);
+        target->IncRetry(true);
 
-        if (target->isMaxRetry(true))
+        if (target->IsMaxRetry(true))
         {
-            target->setStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
-
-            if (sPlayerbotAIConfig.hasLog("travel_map.csv"))
-            {
-                WorldPosition botPos(bot);
-                WorldPosition destPos = *target->getPosition();
-                TravelDestination* destination = target->getDestination();
-
-                std::ostringstream out;
-                out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
-                out << bot->GetName() << ",";
-                out << std::fixed << std::setprecision(2);
-
-                out << std::to_string(bot->getRace()) << ",";
-                out << std::to_string(bot->getClass()) << ",";
-                float subLevel = ai->GetLevelFloat();
-
-                out << subLevel << ",";
-
-                if (!destPos)
-                    destPos = botPos;
-
-                botPos.printWKT({ botPos,destPos }, out, 1);
-
-                if (destination->getName() == "NullTravelDestination")
-                    out << "0,";
-                else
-                    out << round(target->getDestination()->distanceTo(botPos)) << ",";
-
-                out << "2," << "\"" << destination->getTitle() << "\",\"" << "timeout" << "\"";
-
-                if (destination->getName() == "NullTravelDestination")
-                    out << ",none";
-                else if (destination->getName() == "QuestTravelDestination")
-                    out << ",quest";
-                else if (destination->getName() == "QuestRelationTravelDestination")
-                    out << ",questgiver";
-                else if (destination->getName() == "QuestObjectiveTravelDestination")
-                    out << ",objective";
-                else  if (destination->getName() == "RpgTravelDestination")
-                {
-                    RpgTravelDestination* RpgDestination = (RpgTravelDestination*)destination;
-                    if (RpgDestination->getEntry() > 0)
-                    {
-                        CreatureInfo const* cInfo = RpgDestination->getCreatureInfo();
-
-                        if (cInfo)
-                        {
-                            if ((cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR) && AI_VALUE2(bool, "group or", "should sell,can sell"))
-                                out << ",sell";
-                            else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_REPAIR) && AI_VALUE2(bool, "group or", "should repair,can repair"))
-                                out << ",repair";
-                            else if ((cInfo->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER) && AI_VALUE2(bool, "group or", "should sell,can ah sell"))
-                                out << ",ah";
-                            else
-                                out << ",rpg";
-                        }
-                        else
-                            out << ",rpg";
-                    }
-                    else
-                    {
-                        GameObjectInfo const* gInfo = RpgDestination->getGoInfo();
-
-                        if (gInfo)
-                        {
-                            if (gInfo->type == GAMEOBJECT_TYPE_MAILBOX && AI_VALUE(bool, "can get mail"))
-                                out << ",mail";
-                            else
-                                out << ",rpg";
-                        }
-                        else
-                            out << ",rpg";
-                    }
-                }
-                else if (destination->getName() == "ExploreTravelDestination")
-                    out << ",explore";
-                else if (destination->getName() == "GrindTravelDestination")
-                    out << ",grind";
-                else if (destination->getName() == "BossTravelDestination")
-                    out << ",boss";
-                else
-                    out << ",unknown";
-
-                sPlayerbotAIConfig.log("travel_map.csv", out.str().c_str());
-            }
+            ai->TellDebug(ai->GetMaster(), "The target is cooling down because we failed to move to it a few times in a row.", "debug travel");
+            target->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);            
         }
     }
     else
-        target->decRetry(true);
+        target->DecRetry(true);
 
     if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
     {
-        WorldPosition* pos = target->getPosition();
+        WorldPosition* pos = target->GetPosition();
         GuidPosition* guidP = dynamic_cast<GuidPosition*>(pos);
 
-        std::string name = (guidP && guidP->GetWorldObject()) ? chat->formatWorldobject(guidP->GetWorldObject()) : "travel target";
+        std::string name = (guidP && guidP->GetWorldObject(bot->GetInstanceId())) ? chat->formatWorldobject(guidP->GetWorldObject(bot->GetInstanceId())) : "travel target";
 
         if (mapId == bot->GetMapId())
         {
@@ -245,7 +178,7 @@ bool MoveToTravelTargetAction::isUseful()
     if (!ai->AllowActivity(TRAVEL_ACTIVITY))
         return false;
 
-    if (!AI_VALUE(TravelTarget*,"travel target")->isTraveling())
+    if (!AI_VALUE(bool, "travel target traveling"))
         return false;
 
     if (bot->IsTaxiFlying())
@@ -263,9 +196,13 @@ bool MoveToTravelTargetAction::isUseful()
     if (!AI_VALUE(bool, "can move around"))
         return false;
 
-    WorldPosition travelPos(*AI_VALUE(TravelTarget*, "travel target")->getPosition());
+    if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
+            return false;
 
-    if (travelPos.isDungeon() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && sTravelMgr.mapTransDistance(bot, travelPos, true) < sPlayerbotAIConfig.sightDistance && !AI_VALUE2(bool, "group and", "near leader"))
+    WorldPosition travelPos(*AI_VALUE(TravelTarget*, "travel target")->GetPosition());
+
+    if (travelPos.isDungeon() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && sTravelMgr.MapTransDistance(bot, travelPos, true) < sPlayerbotAIConfig.sightDistance && !AI_VALUE2(bool, "group and", "near leader"))
         return false;
      
     if (AI_VALUE(bool, "has available loot"))

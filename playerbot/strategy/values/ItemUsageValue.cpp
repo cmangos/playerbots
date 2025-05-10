@@ -3,6 +3,7 @@
 #include "ItemUsageValue.h"
 #include "CraftValues.h"
 #include "MountValues.h"
+#include "BudgetValues.h"
 
 #include "playerbot/RandomItemMgr.h"
 #include "playerbot/ServerFacade.h"
@@ -146,7 +147,7 @@ ItemUsage ItemUsageValue::Calculate()
             bool lowBagSpace = AI_VALUE(uint8, "bag space") > 50;
 
             if (proto->Class == ITEM_CLASS_TRADE_GOODS || proto->Class == ITEM_CLASS_MISC || proto->Class == ITEM_CLASS_REAGENT)
-                needItem = IsItemNeededForUsefullCraft(proto, lowBagSpace);
+                needItem =!ai->HasCheat(BotCheatMask::item) && IsItemNeededForUsefullCraft(proto, lowBagSpace);
             else if (proto->Class == ITEM_CLASS_RECIPE)
             {
                 if (bot->HasSpell(GetRecipeSpell(proto)))
@@ -215,7 +216,11 @@ ItemUsage ItemUsageValue::Calculate()
             if (stacks < 1)
             {
                 stacks += CurrentStacks(ai, proto);
-                return ItemUsage::ITEM_USAGE_USE; //Buy some to get to 1 stack
+
+                if (stacks < 1)
+                    return ItemUsage::ITEM_USAGE_USE; //Buy some to get to 1 stack
+                else if (stacks < 2)       
+                    return ItemUsage::ITEM_USAGE_KEEP; //Keep the item if less than 2 stack
             }
         }
     }
@@ -265,14 +270,40 @@ ItemUsage ItemUsageValue::Calculate()
             return hasSameMount ? ItemUsage::ITEM_USAGE_KEEP : ItemUsage::ITEM_USAGE_EQUIP;
     }
 
-    ItemUsage equip = QueryItemUsageForEquip(itemQualifier);
+    ItemUsage equip = QueryItemUsageForEquip(itemQualifier, bot);
     if (equip != ItemUsage::ITEM_USAGE_NONE)
         return equip;
+
+#ifdef MANGOSBOT_TWO
+    if (proto->Class == ITEM_CLASS_GLYPH)
+        if (!ai->HasCheat(BotCheatMask::glyph) && AI_VALUE2(bool, "glyph is upgrade", itemId))
+            return ItemUsage::ITEM_USAGE_EQUIP;
+#endif
 
     //DISENCHANT
     if ((proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON) && proto->Bonding != BIND_WHEN_PICKED_UP &&
         ai->HasSkill(SKILL_ENCHANTING) && proto->Quality >= ITEM_QUALITY_UNCOMMON)
-        return ItemUsage::ITEM_USAGE_DISENCHANT;
+    {
+        if (proto->DisenchantID)
+        {
+
+#ifndef MANGOSBOT_ZERO
+            // 2.0.x addon: Check player enchanting level against the item disenchanting requirements
+            int32 item_disenchantskilllevel = proto->RequiredDisenchantSkill;
+            if (item_disenchantskilllevel <= int32(bot->GetSkillValue(SKILL_ENCHANTING)))
+            {
+#endif
+                Item* item = CurrentItem(proto, bot);
+
+                //Bot has budget to replace the item it wants to disenchant.
+                if (!item || !sRandomPlayerbotMgr.IsRandomBot(bot) || AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill) > proto->BuyPrice)
+                    return ItemUsage::ITEM_USAGE_DISENCHANT;
+
+#ifndef MANGOSBOT_ZERO
+            }
+#endif
+        }
+    }
 
     //QUEST
     if (!ai->GetMaster() || !sPlayerbotAIConfig.syncQuestWithPlayer || !IsItemUsefulForQuest(ai->GetMaster(), proto))
@@ -374,29 +405,51 @@ ItemUsage ItemUsageValue::Calculate()
     //VENDOR/AH
     if (proto->SellPrice > 0)
     {
-        //if item value is significantly higher than its vendor sell price
-        if (IsMoreProfitableToSellToAHThanToVendor(proto, bot))
-        {
-            if (proto->Bonding == NO_BIND)
-                return ItemUsage::ITEM_USAGE_AH;
+        //if item value is significantly higher than its vendor sell price and we actually have money to place the item on ah.
+        uint32 ahMoney = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah);
 
-            if (proto->Bonding == BIND_WHEN_EQUIPPED)
-            {
-                Item* item = CurrentItem(proto);
-                if (!item || !item->IsSoulBound())
-                    return ItemUsage::ITEM_USAGE_AH;
-            }
-        }
+        if(!ahMoney && AI_VALUE(uint8, "bag space") > 80)
+            return ItemUsage::ITEM_USAGE_VENDOR;
 
-        return ItemUsage::ITEM_USAGE_VENDOR;
+        if (!IsMoreProfitableToSellToAHThanToVendor(proto, bot))
+            return ItemUsage::ITEM_USAGE_VENDOR;
+
+        Item* item = CurrentItem(proto, bot);
+
+        uint32 count = item ? item->GetCount() : 1;
+
+        if(GetAhDepositCost(proto, count) > ahMoney && AI_VALUE(uint8, "bag space") > 80) //We simply do not have the money to put this on AH.
+            return ItemUsage::ITEM_USAGE_VENDOR;
+
+        if(!item)
+            return ItemUsage::ITEM_USAGE_AH;        
+
+        bool soulBound = (proto->Bonding == BIND_WHEN_EQUIPPED) && item->IsSoulBound();
+
+        if (soulBound)
+            return ItemUsage::ITEM_USAGE_VENDOR; //Item is soulbound so can't AH.
+
+        uint32 ahPrice = GetBotAHSellMinPrice(proto);
+        uint32 repairCost = RepairCostValue::RepairCost(item);
+
+        if (ahPrice < proto->SellPrice + repairCost)
+            return ItemUsage::ITEM_USAGE_VENDOR;  //Repairing costs more than the AH profit.
+
+        if (repairCost > 0)
+            return ItemUsage::ITEM_USAGE_BROKEN_AH; //Keep until repaired so we can AH later.
+
+        return ItemUsage::ITEM_USAGE_AH;
     }
 
     //NONE
     return ItemUsage::ITEM_USAGE_NONE;
 }
 
-ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
+ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, Player* bot)
 {
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+    ChatHelper* chat = ai->GetChatHelper();
     ItemPrototype const* itemProto = itemQualifier.GetProto();
 
     if (bot->CanUseItem(itemProto) != EQUIP_ERR_OK)
@@ -415,13 +468,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
     }
     else
     {
-        Item* pItem = RandomPlayerbotMgr::CreateTempItem(itemProto->ItemId, 1, bot);
-        if (!pItem)
-            return ItemUsage::ITEM_USAGE_NONE;
-
-        result = bot->CanEquipItem(NULL_SLOT, dest, pItem, true, false);
-        pItem->RemoveFromUpdateQueueOf(bot);
-        delete pItem;
+        result = RandomPlayerbotMgr::CanEquipUnseenItem(bot, NULL_SLOT, dest, itemProto->ItemId);
     }
 
     if (result != EQUIP_ERR_OK)
@@ -483,7 +530,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
         if (itemProto->SubClass != ITEM_SUBCLASS_CONTAINER)
             return ItemUsage::ITEM_USAGE_NONE; //Todo add logic for non-bag containers. We want to look at professions/class and only replace if non-bag is larger than bag.
 
-        if (GetSmallestBagSize() >= itemProto->ContainerSlots)
+        if (GetSmallestBagSize(bot) >= itemProto->ContainerSlots)
             return ItemUsage::ITEM_USAGE_NONE;
 
         return ItemUsage::ITEM_USAGE_EQUIP;
@@ -515,6 +562,21 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
 
     const ItemPrototype* oldItemProto = oldItem->GetProto();
 
+    if (itemProto->Class == ITEM_CLASS_ARMOR && itemProto->InventoryType == INVTYPE_TABARD)
+    {
+        uint32 currentStacks = CurrentStacks(ai, itemProto);
+
+        if (currentStacks > 0)
+        {
+            if (itemProto->ItemId != oldItemProto->ItemId && urand(1, 100) <= 10) //Not equiped. Random 10% equip it.
+                return ItemUsage::ITEM_USAGE_EQUIP;
+
+            return ItemUsage::ITEM_USAGE_KEEP;
+        }
+
+        return ItemUsage::ITEM_USAGE_EQUIP; //Do not have it yet. Buy/get it.
+    }
+
     if (AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", oldItemProto->ItemId, ForceItemUsage::FORCE_USAGE_NONE) == ForceItemUsage::FORCE_USAGE_EQUIP) //Current equip is forced. Do not unequip.
     {
         if (AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", itemProto->ItemId, ForceItemUsage::FORCE_USAGE_NONE) == ForceItemUsage::FORCE_USAGE_EQUIP)
@@ -536,6 +598,12 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
     if (AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", itemProto->ItemId, ForceItemUsage::FORCE_USAGE_NONE) == ForceItemUsage::FORCE_USAGE_EQUIP) //New item is forced. Always equip it.
         return ItemUsage::ITEM_USAGE_EQUIP;
 
+    bool existingShouldEquip = true;
+    if (oldItemProto->Class == ITEM_CLASS_WEAPON && !oldStatWeight)
+        existingShouldEquip = false;
+    if (oldItemProto->Class == ITEM_CLASS_ARMOR && !statWeight)
+        existingShouldEquip = false;
+
     //Compare items based on item level, quality.
     bool isBetter = false;
     if (!statWeight || !oldStatWeight)
@@ -549,16 +617,43 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier)
     else if (statWeight == oldStatWeight && itemProto->Quality == oldItemProto->Quality && itemProto->ItemLevel > oldItemProto->ItemLevel)
         isBetter = true;
 
-    if (itemProto->ItemId != oldItemProto->ItemId && shouldEquip && isBetter)
+    Item* item = CurrentItem(itemProto, bot);
+    bool itemIsBroken = item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0 && item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0;
+    bool oldItemIsBroken = oldItem->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0 && oldItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0;
+    if (itemProto->ItemId != oldItemProto->ItemId && (shouldEquip || !existingShouldEquip) && isBetter)
     {
-        return ItemUsage::ITEM_USAGE_EQUIP;
+        switch (itemProto->Class)
+        {
+        case ITEM_CLASS_ARMOR:
+            if (oldItemProto->SubClass <= itemProto->SubClass) {
+                if (itemIsBroken && !oldItemIsBroken)
+                    return ItemUsage::ITEM_USAGE_BROKEN_EQUIP;
+                else
+                    if (shouldEquip)
+                        return ItemUsage::ITEM_USAGE_EQUIP;
+                    else
+                        return ItemUsage::ITEM_USAGE_BAD_EQUIP;
+            }
+            break;
+        default:
+            if (itemIsBroken && !oldItemIsBroken)
+                return ItemUsage::ITEM_USAGE_BROKEN_EQUIP;
+            else
+                if (shouldEquip)
+                    return ItemUsage::ITEM_USAGE_EQUIP;
+                else
+                    return ItemUsage::ITEM_USAGE_BAD_EQUIP;
+        }
     }
+    //Item is not better but current item is broken and new one is not.
+    if (oldItemIsBroken && !itemIsBroken)
+        return ItemUsage::ITEM_USAGE_EQUIP;
 
     return ItemUsage::ITEM_USAGE_NONE;
 }
 
 //Return smaltest bag size equipped
-uint32 ItemUsageValue::GetSmallestBagSize()
+uint32 ItemUsageValue::GetSmallestBagSize(Player* bot)
 {
     int8 curSlot = 0;
     uint32 curSlots = 0;
@@ -578,6 +673,91 @@ uint32 ItemUsageValue::GetSmallestBagSize()
     }
 
     return curSlots;
+}
+
+std::string ItemUsageValue::ReasonForNeed(ItemUsage usage, ItemQualifier qualifier, uint32 count, Player* bot)
+{
+    std::map<std::string, std::string> placeholders;
+    placeholders["%item"] = ChatHelper::formatItem(qualifier);
+
+    switch (usage)
+    {
+    case ItemUsage::ITEM_USAGE_EQUIP:
+    {
+        if (!qualifier || !bot)
+            return BOT_TEXT2("for equiping as upgrade.", placeholders);
+
+        Item* currentItem = ItemUsageValue::CurrentItem(qualifier.GetProto(), bot);
+        if (!currentItem)
+            return BOT_TEXT2("for equiping as upgrade because the slot is empty.", placeholders);
+
+        placeholders["%current"] = ChatHelper::formatItem(currentItem);
+
+        if (currentItem->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0 && currentItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0)
+            return BOT_TEXT2("for equiping as a replacement of %current because it is broken.", placeholders);
+
+        uint32 currentStatWeight = sRandomItemMgr.ItemStatWeight(bot, currentItem);
+        uint32 newStatWeight = sRandomItemMgr.ItemStatWeight(bot, qualifier);
+        placeholders["%cPower"] = std::to_string(currentStatWeight);
+        placeholders["%nPower"] = std::to_string(newStatWeight);
+        if (newStatWeight && currentStatWeight)
+            return BOT_TEXT2("for equiping as a replacement of %current (%cPower) because it is stronger (%nPower).", placeholders);
+
+        return BOT_TEXT2("for equiping as a replacement of %current because it has a higher level or quality.", placeholders);     
+    }
+    case ItemUsage::ITEM_USAGE_BAD_EQUIP:
+        return BOT_TEXT2("for equiping until I can find something better.", placeholders);
+    case ItemUsage::ITEM_USAGE_USE:
+        return BOT_TEXT2("to use it when I need it.", placeholders);
+    case ItemUsage::ITEM_USAGE_SKILL:
+    case ItemUsage::ITEM_USAGE_DISENCHANT:
+        return BOT_TEXT2("to use it for my profession.", placeholders);
+    case ItemUsage::ITEM_USAGE_AMMO:
+        return BOT_TEXT2("to use as ammo.", placeholders);
+    case ItemUsage::ITEM_USAGE_QUEST:
+        return BOT_TEXT2("to complete an objective for a quest.", placeholders);
+    case ItemUsage::ITEM_USAGE_AH:
+        if (!qualifier)
+            return BOT_TEXT2("to repost on AH.", placeholders);
+
+        placeholders["%price_min"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMinPrice(qualifier.GetProto()) * count);
+        placeholders["%price_max"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMaxPrice(qualifier.GetProto()) * count);
+        return BOT_TEXT2("to repost on AH for %price_min to %price_max.", placeholders);
+    case ItemUsage::ITEM_USAGE_VENDOR:
+        if (!qualifier)
+            return BOT_TEXT2("to sell to a vendor.", placeholders);
+
+        placeholders["%price"] = ChatHelper::formatMoney(qualifier.GetProto()->SellPrice * count);
+        return BOT_TEXT2("to sell to a vendor for %price.", placeholders);
+    case ItemUsage::ITEM_USAGE_FORCE_NEED:
+    case ItemUsage::ITEM_USAGE_FORCE_GREED:
+        return BOT_TEXT2("because I was told to get this item.", placeholders);
+    }
+
+    return "";
+}
+
+uint32 ItemUsageValue::GetAhDepositCost(ItemPrototype const* proto, uint32 count)
+{
+    uint32 time;
+#ifdef MANGOSBOT_ZERO
+    time = 8 * HOUR;
+#else
+    time = 12 * HOUR;
+#endif
+
+    float deposit = float(proto->SellPrice * count * (time / MIN_AUCTION_TIME));
+
+    deposit = deposit * 15 * 3.0f / 100.0f;
+
+    float min_deposit = float(sWorld.getConfig(CONFIG_UINT32_AUCTION_DEPOSIT_MIN));
+
+    if (deposit < min_deposit)
+        deposit = min_deposit;
+
+    deposit *= sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_DEPOSIT);
+
+    return deposit;
 }
 
 bool ItemUsageValue::IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory)
@@ -763,8 +943,11 @@ bool ItemUsageValue::IsItemNeededForUsefullCraft(ItemPrototype const* proto, boo
     return false;
 }
 
-Item* ItemUsageValue::CurrentItem(ItemPrototype const* proto)
+Item* ItemUsageValue::CurrentItem(ItemPrototype const* proto, Player* bot)
 {
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+    ChatHelper* chat = ai->GetChatHelper();
     Item* bestItem = nullptr;
     std::list<Item*> found = AI_VALUE2(std::list < Item*>, "inventory items", chat->formatItem(proto));
 
@@ -952,22 +1135,30 @@ bool ItemUsageValue::IsBandage(ItemPrototype const* proto)
 
 uint32 ItemUsageValue::GetRecipeSpell(ItemPrototype const* proto)
 {
+#ifndef MANGOSBOT_ZERO
+    if (proto->Spells[0].SpellId == SPELL_ID_GENERIC_LEARN && proto->Spells[1].SpellTrigger == ITEM_SPELLTRIGGER_LEARN_SPELL_ID)
+        return proto->Spells[1].SpellId;
+#endif
+
     if (proto->Spells[2].SpellId)
         return proto->Spells[2].SpellId;
 
-    if (proto->Spells[0].SpellId)
+    for (uint8 i = 0; i < 4; i++)
     {
-        const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(proto->Spells[0].SpellId);
-
-        if (!pSpellInfo)
-            return 0;
-
-        for (int j = 0; j < 3; ++j)
+        if (proto->Spells[i].SpellId)
         {
-            if (pSpellInfo->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+            const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(proto->Spells[i].SpellId);
+
+            if (!pSpellInfo)
+                return 0;
+
+            for (int j = 0; j < 3; ++j)
             {
-                if (pSpellInfo->EffectTriggerSpell[j])
-                    return pSpellInfo->EffectTriggerSpell[j];
+                if (pSpellInfo->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+                {
+                    if (pSpellInfo->EffectTriggerSpell[j])
+                        return pSpellInfo->EffectTriggerSpell[j];
+                }
             }
         }
     }
@@ -1092,7 +1283,12 @@ std::vector<uint32> ItemUsageValue::GetAllReagentItemIdsForCraftingSkillsVector(
 
 std::vector<std::pair<uint32, uint32>> ItemUsageValue::GetAllReagentItemIdsForCraftingItem(ItemPrototype const* proto)
 {
-    return m_craftingReagentItemIdsForCraftableItem[proto->ItemId];
+    auto items = m_craftingReagentItemIdsForCraftableItem.find(proto->ItemId);
+
+    if (items == m_craftingReagentItemIdsForCraftableItem.end())
+        return {};
+
+    return items->second;
 }
 
 bool ItemUsageValue::IsItemSoldByAnyVendor(ItemPrototype const* proto)
@@ -1119,6 +1315,21 @@ uint32 ItemUsageValue::GetAHMedianBuyoutPricePerItem(ItemPrototype const* proto)
 {
     if (sPlayerbotAIConfig.shouldQueryAHListingsOutsideOfAH)
     {
+        std::vector<float> prices;
+
+        for (auto& auction : sRandomPlayerbotMgr.GetAhPrices(proto->ItemId))
+        {
+            prices.push_back((float)auction.buyout / (float)auction.itemCount);
+        }
+
+        if (prices.empty())
+            return 0;
+
+        size_t n = prices.size() / 2;
+        std::nth_element(prices.begin(), prices.begin() + n, prices.end());
+        return prices[n];
+
+        /*
         auto query = CharacterDatabase.PQuery(
             "  SELECT item_template, AVG(median)"
             "  FROM (SELECT item_template, (buyoutprice / item_count) median"
@@ -1141,6 +1352,7 @@ uint32 ItemUsageValue::GetAHMedianBuyoutPricePerItem(ItemPrototype const* proto)
                 return medianPrice;
             } while (query->NextRow());
         }
+        */
     }
 
     return 0;
@@ -1150,6 +1362,20 @@ uint32 ItemUsageValue::GetAHListingLowestBuyoutPricePerItem(ItemPrototype const*
 {
     if (sPlayerbotAIConfig.shouldQueryAHListingsOutsideOfAH)
     {
+        float minPrice = 0;
+        uint32 minBuyout = 0;
+
+        for (auto& auction : sRandomPlayerbotMgr.GetAhPrices(proto->ItemId))
+        {            
+            if (!minBuyout || minBuyout > auction.buyout)
+            {
+                minBuyout = auction.buyout;
+                minPrice = (float)auction.buyout / (float)auction.itemCount;
+            }
+        }
+       
+        return minBuyout;
+        /*
         auto query = CharacterDatabase.PQuery(
             "SELECT buyoutprice / item_count"
             " FROM auction"
@@ -1169,6 +1395,7 @@ uint32 ItemUsageValue::GetAHListingLowestBuyoutPricePerItem(ItemPrototype const*
                 return lowestBuyoutPrice;
             } while (query->NextRow());
         }
+        */
     }
 
     return 0;

@@ -129,6 +129,14 @@ bool ChangeTalentsAction::Execute(Event& event)
         if (specId)
         {
             specPath = getPremadePath(specId);
+
+            if (!specPath)
+            {
+                ai->TellPlayer(requester, "Default talent spec for this class was not fount. Please check your config",PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                return false;
+            }
+
+
             if (specPath->id == specId)
                 specName = specPath->name;
         }
@@ -189,6 +197,9 @@ TalentPath* ChangeTalentsAction::getPremadePath(int id)
             return &path;
         }
     }
+
+    if (sPlayerbotAIConfig.classSpecs[bot->getClass()].talentPath.empty())
+        return nullptr;
 
     return &sPlayerbotAIConfig.classSpecs[bot->getClass()].talentPath[0];
 }

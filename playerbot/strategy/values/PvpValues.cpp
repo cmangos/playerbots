@@ -83,7 +83,7 @@ CreatureDataPair const* BgMasterValue::NearestBm(bool allowDead)
         if (ai->getReaction(bmFactionEntry) < REP_NEUTRAL)
             continue;
 
-        AreaTableEntry const* area = bmPos.getArea();
+        AreaTableEntry const* area = bmPos.GetArea();
 
         if (!area)
             continue;
@@ -168,6 +168,9 @@ Unit* FlagCarrierValue::Calculate()
         {
             BattleGroundWS *bg = (BattleGroundWS*)ai->GetBot()->GetBattleGround();
 
+            if (!bg)
+                return nullptr;
+
             if ((!sameTeam && bot->GetTeam() == HORDE || (sameTeam && bot->GetTeam() == ALLIANCE)) && !bg->GetFlagCarrierGuid(TEAM_INDEX_HORDE).IsEmpty())
                 carrier = bg->GetBgMap()->GetPlayer(bg->GetFlagCarrierGuid(TEAM_INDEX_HORDE));
 
@@ -188,6 +191,9 @@ Unit* FlagCarrierValue::Calculate()
         if (ai->GetBot()->GetBattleGroundTypeId() == BattleGroundTypeId::BATTLEGROUND_EY)
         {
             BattleGroundEY* bg = (BattleGroundEY*)ai->GetBot()->GetBattleGround();
+
+            if (!bg)
+                return nullptr;
 
             if (bg->GetFlagCarrierGuid().IsEmpty())
                 return nullptr;

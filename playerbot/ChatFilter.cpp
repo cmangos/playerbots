@@ -3,6 +3,7 @@
 #include "strategy/values/RtiTargetValue.h"
 #include "strategy/values/ItemUsageValue.h"
 #include "ChatHelper.h"
+#include "Guilds/GuildMgr.h"
 
 using namespace ai;
 
@@ -155,7 +156,7 @@ public:
     virtual std::string GetHelpName() {
         return "role";
     }
-    virtual std::unordered_map<std::string,string> GetFilterExamples() 
+    virtual std::unordered_map<std::string,std::string> GetFilterExamples() 
     {
         std::unordered_map<std::string, std::string> retMap;
         retMap["@tank"] = "All bots that have a tank spec.";
@@ -753,6 +754,8 @@ public:
     {
         std::unordered_map<std::string, std::string> retMap;
         retMap["@needrepair"] = "All bots that have durability below 20%.";
+        retMap["@bagfull"] = "All bots that have no bagspace.";
+        retMap["@bagalmostfull"] = "All bots that have below 20% bagspace.";
         retMap["@outside"] = "All bots that are outside of an instance.";
         retMap["@inside"] = "All bots that are inside an instance.";
         return retMap;
@@ -787,7 +790,21 @@ public:
                 return message;
 
             return ChatFilter::Filter(message);
-        }        
+        }      
+        if (message.find("@bagfull") == 0)
+        {
+            if (AI_VALUE(uint8,"bag space") <= 99)
+                return message;
+
+            return ChatFilter::Filter(message);
+        }
+        if (message.find("@bagalmostfull") == 0)
+        {
+            if (AI_VALUE(uint8, "bag space") <= 80)
+                return message;
+
+            return ChatFilter::Filter(message);
+        }
 
         return message;
     }
@@ -844,7 +861,7 @@ public:
 
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(*qualifiers.begin()).GetQualifier());
 
-            if (usage != ItemUsage::ITEM_USAGE_NONE && usage != ItemUsage::ITEM_USAGE_AH && usage != ItemUsage::ITEM_USAGE_VENDOR)
+            if (usage != ItemUsage::ITEM_USAGE_NONE && usage != ItemUsage::ITEM_USAGE_AH && usage != ItemUsage::ITEM_USAGE_BROKEN_AH && usage != ItemUsage::ITEM_USAGE_VENDOR)
             {
                 return FilterLink(message);
             }
@@ -865,7 +882,7 @@ public:
 
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(*qualifiers.begin()).GetQualifier());
 
-            if (usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_VENDOR)
+            if (usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_BROKEN_AH || usage == ItemUsage::ITEM_USAGE_VENDOR)
             {
                 return FilterLink(message);
             }
@@ -907,7 +924,7 @@ public:
 
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(*qualifiers.begin()).GetQualifier());
 
-            if (usage == ItemUsage::ITEM_USAGE_SKILL || usage == ItemUsage::ITEM_USAGE_USE || usage == ItemUsage::ITEM_USAGE_DISENCHANT || usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_VENDOR || usage == ItemUsage::ITEM_USAGE_FORCE_GREED)
+            if (usage == ItemUsage::ITEM_USAGE_SKILL || usage == ItemUsage::ITEM_USAGE_USE || usage == ItemUsage::ITEM_USAGE_DISENCHANT || usage == ItemUsage::ITEM_USAGE_BROKEN_AH || usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_VENDOR || usage == ItemUsage::ITEM_USAGE_FORCE_GREED)
             {
                 return FilterLink(message);
             }
@@ -1065,15 +1082,98 @@ public:
         if (message.find("@fixedrandom=") == 0)
         {
             std::string num = message.substr(message.find("=") + 1, message.find(" ") - message.find("=") - 1);
-            if (ai->GetFixedBotNumer(BotTypeNumber::CHATFILTER_NUMBER) < stoul(num))
+            if (ai->GetFixedBotNumber(BotTypeNumber::CHATFILTER_NUMBER) < stoul(num))
                 return ChatFilter::Filter(message);
 
             return message;
         }
         if (message.find("@fixedrandom") == 0)
         {
-            if (ai->GetFixedBotNumer(BotTypeNumber::CHATFILTER_NUMBER) < 50)
+            if (ai->GetFixedBotNumber(BotTypeNumber::CHATFILTER_NUMBER) < 50)
                 return ChatFilter::Filter(message);
+        }
+
+        return message;
+    }
+};
+
+class QuestChatFilter : public ChatFilter
+{
+public:
+    QuestChatFilter(PlayerbotAI* ai) : ChatFilter(ai) {}
+
+#ifdef GenerateBotHelp
+    virtual std::string GetHelpName() {
+        return "quest";
+    }
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
+    {
+        std::unordered_map<std::string, std::string> retMap;
+        retMap["@quest=[quest link]"] = "All bots that have the quest and have yet finished it will respond.";
+        retMap["@quest=523"] = "All bots that have quest with id 523 will respond.";
+
+        return retMap;
+    }
+    virtual std::string GetHelpDescription() {
+        return "This filter selects bots with a specific quest.";
+    }
+#endif
+
+    inline std::string toLower(const std::string& str) {
+        std::string lowerStr = str;
+        std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), ::tolower);
+        return lowerStr;
+    }
+
+    inline void replaceCaseInsensitive(std::string& str, const std::string& from, const std::string& to) {
+        std::string lowerStr = toLower(str);
+        std::string lowerFrom = toLower(from);
+
+        size_t pos = lowerStr.find(lowerFrom);
+        while (pos != std::string::npos) {
+            str.replace(pos, from.length(), to);
+            lowerStr.replace(pos, from.length(), toLower(to)); // Keep track of lowercase version for further searching
+            pos = lowerStr.find(lowerFrom, pos + to.length()); // Find next occurrence
+        }
+    }
+
+    virtual std::string Filter(std::string message) override
+    {
+        if (message.find("@quest=") == 0)
+        {
+            std::string questString = message.substr(message.find("=") + 1);
+
+            std::set<uint32> questIds = ChatHelper::ExtractAllQuestIds(questString);
+
+            if (questIds.empty() && Qualified::isValidNumberString(questString))
+                questIds.insert(stoi(questString));
+            else
+            {
+                for (auto& questId : questIds)
+                {
+                    Quest const* questTemplate = sObjectMgr.GetQuestTemplate(questId);
+                    if (questTemplate)
+                        replaceCaseInsensitive(message, " " + ChatHelper::formatQuest(questTemplate), "");
+                    replaceCaseInsensitive(message, ChatHelper::formatQuest(questTemplate), "");
+                }
+            }
+
+            Player* bot = ai->GetBot();
+            auto botQuestIds = bot->GetPlayerbotAI()->GetAllCurrentQuestIds();
+
+            std::set<uint32> matchingQuestIds;
+            for (auto botQuestId : botQuestIds)
+            {
+                if (questIds.count(botQuestId) != 0)
+                {
+                    matchingQuestIds.insert(botQuestId);
+                }
+            }
+
+            if (!matchingQuestIds.empty())
+                return ChatFilter::Filter(message);
+
+            return message;
         }
 
         return message;
@@ -1096,6 +1196,7 @@ CompositeChatFilter::CompositeChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
     filters.push_back(new LocationChatFilter(ai));
     filters.push_back(new RandomChatFilter(ai));
     filters.push_back(new GearChatFilter(ai));
+    filters.push_back(new QuestChatFilter(ai));
     
 }
 

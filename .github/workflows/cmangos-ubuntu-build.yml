@@ -21,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        version: [classic, tbc]
+        version: [classic, tbc, wotlk]
         include:
           - os: ubuntu-22.04
             EXTRA_BUILD: "-DBUILD_PLAYERBOTS=ON"

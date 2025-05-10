@@ -12,7 +12,7 @@ public:
     {
         creators["earthliving weapon"] = &earthliving_weapon;
         creators["mana tide totem"] = &mana_tide_totem;
-        creators["flametongue totem"] = &flametongue_totem;
+        creators["searing totem"] = &searing_totem;
         creators["magma totem"] = &magma_totem;
         creators["strength of earth totem"] = &strength_of_earth_totem;
         creators["wrath of air totem"] = &wrath_of_air_totem;
@@ -28,13 +28,13 @@ private:
 
     ACTION_NODE_A(mana_tide_totem, "mana tide totem", "mana potion");
 
-    ACTION_NODE_A(flametongue_totem, "flametongue totem", "searing totem");
+    ACTION_NODE_A(searing_totem, "searing totem", "flametongue totem");
 
     ACTION_NODE_C(magma_totem, "magma totem", "fire nova");
 
     ACTION_NODE_A(strength_of_earth_totem, "strength of earth totem", "stoneskin totem");
 
-    ACTION_NODE_A(wrath_of_air_totem, "wrath of air totem", "windfury totem");
+    ACTION_NODE_A(wrath_of_air_totem, "wrath of air totem", "grace of air totem");
 
     ACTION_NODE_A(healing_stream_totem, "healing stream totem", "mana spring totem");
 
@@ -366,7 +366,7 @@ void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "fire totem",
-        NextAction::array(0, new NextAction("flametongue totem", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("searing totem", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanTotemsStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -516,6 +516,10 @@ void RestorationShamanBoostRaidStrategy::InitNonCombatTriggers(std::list<Trigger
 void RestorationShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "low mana",
+        NextAction::array(0, new NextAction("mana tide totem", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
         "critical health",
@@ -987,6 +991,10 @@ void RestorationShamanBoostRaidStrategy::InitNonCombatTriggers(std::list<Trigger
 void RestorationShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "low mana",
+        NextAction::array(0, new NextAction("mana tide totem", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
         "critical health",

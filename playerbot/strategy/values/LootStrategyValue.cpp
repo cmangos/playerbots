@@ -52,7 +52,7 @@ bool LootStrategyValue::CanLoot(ItemQualifier& itemQualifier, PlayerbotAI* ai)
             return true;
         if (strategy == "use" && usage == ItemUsage::ITEM_USAGE_USE)
             return true;
-        if (strategy == "vendor" && (usage == ItemUsage::ITEM_USAGE_BAD_EQUIP || usage == ItemUsage::ITEM_USAGE_VENDOR || usage == ItemUsage::ITEM_USAGE_AH))
+        if (strategy == "vendor" && (usage == ItemUsage::ITEM_USAGE_BAD_EQUIP || usage == ItemUsage::ITEM_USAGE_VENDOR || usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_BROKEN_AH))
             return true;
         if (strategy == "trash" && usage == ItemUsage::ITEM_USAGE_NONE)
             return true;

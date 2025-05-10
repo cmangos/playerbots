@@ -6,7 +6,7 @@
 
 using namespace ai;
 
-void TrainerAction::Learn(uint32 cost, TrainerSpell const* tSpell, std::ostringstream& msg)
+void TrainerAction::Learn(uint32 cost, ObjectGuid trainerGuid, uint32 spellId, TrainerSpell const* tSpell, std::ostringstream& msg)
 {
     if (sPlayerbotAIConfig.autoTrainSpells != "free" &&  !ai->HasCheat(BotCheatMask::gold))
     {
@@ -23,7 +23,7 @@ void TrainerAction::Learn(uint32 cost, TrainerSpell const* tSpell, std::ostrings
     if (!proto)
         return;
 
-#ifdef CMANGOS
+#ifdef MANGOSBOT_ZERO
     if (tSpell->learnedSpell)
     {
         // old code
@@ -42,20 +42,19 @@ void TrainerAction::Learn(uint32 cost, TrainerSpell const* tSpell, std::ostrings
     }
     else
         ai->CastSpell(tSpell->spell, bot);
-#endif
+#else
+    // From NPCHandler
+    bot->GetSession()->SendPlaySpellVisual(trainerGuid, 0xB3);   // visual effect on trainer
 
-#ifdef MANGOS
-    bool learned = false;
-    for (int j = 0; j < 3; ++j)
-    {
-        if (proto->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
-        {
-            uint32 learnedSpell = proto->EffectTriggerSpell[j];
-            bot->learnSpell(learnedSpell, false);
-            learned = true;
-        }
-    }
-    if (!learned) bot->learnSpell(tSpell->spell, false);
+    WorldPacket data(SMSG_PLAY_SPELL_IMPACT, 8 + 4);             // visual effect on player
+    data << bot->GetObjectGuid();
+    data << uint32(0x016A);                                      // index from SpellVisualKit.dbc
+    bot->GetSession()->SendPacket(data);
+
+    if (tSpell->IsCastable())
+        bot->CastSpell(bot, tSpell->spell, TRIGGERED_OLD_TRIGGERED);
+    else
+        bot->learnSpell(spellId, false);
 #endif
 
     sPlayerbotAIConfig.logEvent(ai, "TrainerAction", proto->SpellName[0], std::to_string(proto->Id));
@@ -136,7 +135,7 @@ void TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellA
         out << chat->formatSpell(pSpellInfo) << chat->formatMoney(cost);
 
         if (action)
-            (this->*action)(cost, tSpell, out);
+            (this->*action)(cost, creature->GetObjectGuid(), itr->first, tSpell, out);
 
         if (!hasHeader)
         {

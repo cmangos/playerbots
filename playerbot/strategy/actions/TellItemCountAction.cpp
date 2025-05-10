@@ -60,7 +60,8 @@ bool TellItemCountAction::Execute(Event& event)
         if (text == "equip")
             return true;
 
-        ai->TellPlayer(requester, "=== Inventory ===");
+        if(!itemMap.empty())
+            ai->TellPlayer(requester, "=== Inventory ===");
         for (std::map<uint32, uint32>::iterator i = itemMap.begin(); i != itemMap.end(); ++i)
         {
             if (equiped[i->first] && i->second == 1)

@@ -5,6 +5,7 @@
 #include "PlayerbotAIBase.h"
 #include "PlayerbotMgr.h"
 #include "playerbot/PlayerbotAIConfig.h"
+#include "WorldPosition.h"
 #include <map>
 #include <list>
 
@@ -76,6 +77,10 @@ public:
         void SetDatabaseDelay(std::string db, uint32 delay) {databaseDelay[db] = delay;}
         uint32 GetDatabaseDelay(std::string db) {if(databaseDelay.find(db) == databaseDelay.end()) return 0; return databaseDelay[db];}
 
+        void LoadNamedLocations();
+        bool AddNamedLocation(std::string const& name, WorldLocation const& location);
+        bool GetNamedLocation(std::string const& name, WorldLocation& location);
+
         static bool HandlePlayerbotConsoleCommand(ChatHandler* handler, char const* args);
         bool IsRandomBot(Player* bot);
         bool IsRandomBot(uint32 bot);
@@ -95,7 +100,7 @@ public:
         Player* GetRandomPlayer();
         PlayerBotMap& GetPlayers() { return players; };
         Player* GetPlayer(uint32 playerGuid);
-        void PrintStats();
+        void PrintStats(uint32 requesterGuid);
         double GetBuyMultiplier(Player* bot);
         double GetSellMultiplier(Player* bot);
         void AddTradeDiscount(Player* bot, Player* master, int32 value);
@@ -114,8 +119,8 @@ public:
         uint32 GetValue(uint32 bot, std::string type);
         int32 GetValueValidTime(uint32 bot, std::string event);
         std::string GetData(uint32 bot, std::string type);
-        void SetValue(uint32 bot, std::string type, uint32 value, std::string data = "");
-        void SetValue(Player* bot, std::string type, uint32 value, std::string data = "");
+        void SetValue(uint32 bot, std::string type, uint32 value, std::string data = "", int32 validIn = -1);
+        void SetValue(Player* bot, std::string type, uint32 value, std::string data = "", int32 validIn = -1);
         void Remove(Player* bot);
         void Hotfix(Player* player, uint32 version);
         uint32 GetBattleMasterEntry(Player* bot, BattleGroundTypeId bgTypeId, bool fake = false);
@@ -137,8 +142,10 @@ public:
         void SyncEventTimers();
         void AddOfflineGroupBots();
         static Item* CreateTempItem(uint32 item, uint32 count, Player const* player, uint32 randomPropertyId = 0);
+        static InventoryResult CanEquipUnseenItem(Player* player, uint8 slot, uint16& dest, uint32 item);
 
         bool AddRandomBot(uint32 bot);
+        virtual void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder) override;
 
         std::map<Team, std::map<BattleGroundTypeId, std::list<uint32> > > getBattleMastersCache() { return BattleMastersCache; }
 
@@ -148,14 +155,19 @@ public:
 
         void PrintTeleportCache();
 
-        void AddFacingFix(uint32 mapId, ObjectGuid guid) { facingFix[mapId].push_back(std::make_pair(guid,time(0))); }
+        void AddFacingFix(uint32 mapId, uint32 instanceId, ObjectGuid guid) { facingFix[mapId][instanceId].push_back(std::make_pair(guid,time(0))); }
 
         bool arenaTeamsDeleted, guildsDeleted = false;
 
         std::mutex m_ahActionMutex;
+
+        const std::vector<AuctionEntry>& GetAhPrices(uint32 itemId) {
+            static const std::vector<AuctionEntry> emptyVector; // Avoid returning dangling refs
+            auto it = ahMirror.find(itemId);
+            return (it != ahMirror.end()) ? it->second : emptyVector;}
+        uint32 GetPlayersLevel() { return playersLevel; }
 	protected:
 	    virtual void OnBotLoginInternal(Player * const bot);
-
     private:
         //pid values are set in constructor
         botPID pid = botPID(1, 50, -50, 0, 0, 0);
@@ -180,12 +192,15 @@ public:
         void PrepareTeleportCache();
         typedef void (RandomPlayerbotMgr::*ConsoleCommandHandler) (Player*);
 
+        void MirrorAh();
     private:
         PlayerBotMap players;
         int processTicks;
+        std::unordered_map<std::string, WorldLocation> namedLocations;
         std::map<uint8, std::vector<WorldLocation> > locsPerLevelCache;
         std::map<uint32, std::vector<WorldLocation> > rpgLocsCache;
 		std::map<uint32, std::map<uint32, std::vector<WorldLocation> > > rpgLocsCacheLevel;
+        std::map<uint32, std::map<uint32, std::vector<std::pair<ObjectGuid, WorldLocation>> > > innCacheLevel;
         std::map<Team, std::map<BattleGroundTypeId, std::list<uint32> > > BattleMastersCache;
         std::map<uint32, std::map<std::string, CachedEvent> > eventCache;
         BarGoLink* loginProgressBar;
@@ -193,18 +208,21 @@ public:
         std::list<uint32> arenaTeamMembers;
         uint32 bgBotsCount;
         uint32 playersLevel = 0;
-        uint32 activeBots = 0;
+        uint32 activeBots = 0;        
 
         std::unordered_map<uint32, std::vector<std::pair<int32,int32>>> playerBotMoveLog;
         typedef std::unordered_map <uint32, std::list<float>> botPerformanceMetric;
         std::unordered_map<std::string, botPerformanceMetric> botPerformanceMetrics;
         
-        std::vector<std::pair<uint32, uint32>> RpgLocationsNear(WorldLocation pos, uint32 areaId = 0, uint32 radius = 2000);
+        std::vector<std::pair<uint32, uint32>> RpgLocationsNear(const WorldLocation pos, const std::map<uint32, std::map<uint32, std::vector<std::string>>>& areaNames, uint32 radius = 2000);
         void PushMetric(botPerformanceMetric& metric, const uint32 bot, const float value, const uint32 maxNum = 60) const;
         float GetMetricDelta(botPerformanceMetric& metric) const;
 
         bool showLoginWarning;
-        std::unordered_map<uint32, std::vector<std::pair<ObjectGuid, time_t>>> facingFix;
+        std::unordered_map<uint32, std::unordered_map<uint32, std::vector<std::pair<ObjectGuid, time_t>>>> facingFix;
+
+        //                   itemId,             buyout, count
+        std::unordered_map < uint32, std::vector<AuctionEntry>> ahMirror;
 };
 
 #define sRandomPlayerbotMgr RandomPlayerbotMgr::instance()

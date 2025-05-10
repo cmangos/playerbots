@@ -18,7 +18,7 @@ PlayerbotTextMgr::~PlayerbotTextMgr()
 {
 }
 
-void PlayerbotTextMgr::replaceAll(std::string & str, const std::string & from, const std::string & to) {
+void PlayerbotTextMgr::ReplaceAll(std::string & str, const std::string & from, const std::string & to) {
     if (from.empty())
         return;
     size_t start_pos = 0;
@@ -26,6 +26,12 @@ void PlayerbotTextMgr::replaceAll(std::string & str, const std::string & from, c
         str.replace(start_pos, from.length(), to);
         start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
     }
+}
+
+void PlayerbotTextMgr::ReplacePlaceholders(std::string& text, const std::map<std::string, std::string>& placeholders)
+{
+    for (auto& placeholder : placeholders)
+        ReplaceAll(text, placeholder.first, placeholder.second);
 }
 
 void PlayerbotTextMgr::LoadBotTexts()
@@ -109,8 +115,7 @@ std::string PlayerbotTextMgr::GetBotText(std::string name, std::map<std::string,
     if (botText.empty())
         botText = name;
 
-    for (std::map<std::string, std::string>::iterator i = placeholders.begin(); i != placeholders.end(); ++i)
-        replaceAll(botText, i->first, i->second);
+    ReplacePlaceholders(botText, placeholders);
 
     return botText;
 }
@@ -151,8 +156,7 @@ std::string PlayerbotTextMgr::GetBotText(ChatReplyType replyType, std::map<std::
             botText = textEntry.m_text;
     }
 
-    for (std::map<std::string, std::string>::iterator i = placeholders.begin(); i != placeholders.end(); ++i)
-        replaceAll(botText, i->first, i->second);
+    ReplacePlaceholders(botText, placeholders);
 
     return botText;
 }

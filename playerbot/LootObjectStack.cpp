@@ -355,7 +355,7 @@ std::vector<LootObject> LootObjectStack::OrderByDistance(float maxDistance)
         if (!lootObject.IsLootPossible(bot))
             continue;
 
-        float distance = sqrt(bot->GetDistance(lootObject.GetWorldObject(bot)));
+        float distance = bot->GetDistance(lootObject.GetWorldObject(bot));
         if (!maxDistance || distance <= maxDistance)
             sortedMap[distance] = lootObject;
     }

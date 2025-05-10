@@ -30,6 +30,19 @@ namespace ai
         return true;
     }
 
+    bool BoolOrValue::Calculate()
+    {
+        std::vector<std::string> values = getMultiQualifiers(getQualifier(), ",");
+
+        for (auto value : values)
+        {
+            if (AI_VALUE(bool, value))
+                return true;
+        }
+
+        return false;
+    }
+
     bool GT32Value::Calculate()
     {
         std::vector<std::string> values = getMultiQualifiers(getQualifier(), ",");

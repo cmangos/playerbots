@@ -17,7 +17,6 @@ namespace ai
         uint8 GetMasterAverageProgressionLevel();
         uint8 GetMasterItemProgressionLevel(uint8 slot, uint8 avgProgressionLevel);
        
-        bool CanEquipUnseenItem(uint8 slot, uint16& dest, uint32 itemId);
         void EnchantItem(Item* item);
 
     private:

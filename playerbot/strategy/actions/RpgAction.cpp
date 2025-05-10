@@ -15,7 +15,7 @@ bool RpgAction::Execute(Event& event)
 
     if (!guidP && ai->GetMaster())
     {
-        guidP = GuidPosition(ai->GetMaster()->GetSelectionGuid(), ai->GetMaster()->GetMapId());
+        guidP = GuidPosition(ai->GetMaster()->GetSelectionGuid(), ai->GetMaster());
         if (guidP)
         {
             RemIgnore(guidP);
@@ -112,7 +112,7 @@ bool RpgAction::SetNextRpgAction()
 
         std::sort(sortedActions.begin(), sortedActions.end(), [](std::pair<Action*, uint32>i, std::pair<Action*, uint32> j) {return i.second > j.second; });
 
-        ai->TellPlayerNoFacing(GetMaster(), "------" + chat->formatWorldobject(AI_VALUE(GuidPosition, "rpg target").GetWorldObject()) + "------");
+        ai->TellPlayerNoFacing(GetMaster(), "------" + chat->formatWorldobject(AI_VALUE(GuidPosition, "rpg target").GetWorldObject(bot->GetInstanceId())) + "------");
 
         for (auto action : sortedActions)
         {
@@ -126,7 +126,7 @@ bool RpgAction::SetNextRpgAction()
 
     std::mt19937 gen(time(0));
 
-    sTravelMgr.weighted_shuffle(actions.begin(), actions.end(), relevances.begin(), relevances.end(), gen);
+    WeightedShuffle(actions.begin(), actions.end(), relevances.begin(), relevances.end(), gen);
 
     Action* action = actions.front();
 
@@ -134,7 +134,7 @@ bool RpgAction::SetNextRpgAction()
     {
         std::ostringstream out;
         out << "do: ";
-        out << chat->formatWorldobject(AI_VALUE(GuidPosition, "rpg target").GetWorldObject());
+        out << chat->formatWorldobject(AI_VALUE(GuidPosition, "rpg target").GetWorldObject(bot->GetInstanceId()));
 
         out << " " << action->getName();
 

@@ -853,7 +853,7 @@ void TravelTarget::CheckStatus()
         return;
     }
 
-    if ((statusTime != 0 && GetTimeLeft() <= 0))
+    if (statusTime != 0 && GetTimeLeft() <= 0 && !IsForced())
     {
         ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
@@ -878,6 +878,7 @@ void TravelTarget::CheckStatus()
             SetStatus(TravelStatus::TRAVEL_STATUS_WORK);
             return;
         }
+        else if(IsForced()) return; //While traveling do not go into cooldown
     }
 
     if (GetStatus() != TravelStatus::TRAVEL_STATUS_COOLDOWN && (!IsDestinationActive() || !IsConditionsActive())) //Target has become invalid. Stop.

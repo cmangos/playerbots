@@ -11,16 +11,11 @@
 
 using namespace ai;
 
-std::unordered_set<std::string> noReplyMsgs = {
-  "join", "leave", "follow", "attack", "pull", "flee", "reset", "reset ai",
-  "all ?", "talents", "talents list", "talents auto", "talk", "stay", "stats",
-  "who", "items", "leave", "join", "repair", "summon", "nc ?", "co ?", "de ?",
-  "dead ?", "follow", "los", "guard", "do accept invitation", "stats", "react ?",
-  "reset strats", "home",
-};
-std::unordered_set<std::string> noReplyMsgParts = { "+", "-","@" , "follow target", "focus heal", "boost target", "buff target", "revive target", "cast ", "accept [", "e [", "destroy [", "go zone" };
+std::unordered_set<std::string> noReplyMsgs = { "all ?", "attack", "attack rti", "bank", "c", "co ?", "de ?", "dead ?", "do accept invitation", "faction", "flee", "follow", "give leader", "guard", "guild leave", "help", "home", "items", "join", "jump", "leave", "lfg", "loot", "los", "nc ?", "pet aggressive", "pet defensive", "pet passive", "pet follow", "pet stay", "pet attack", "pet dismiss", "pet call", "pull", "pull rti", "quests", "quests co", "quests in", "quests all", "react ?", "release", "repair", "reset", "reset ai", "reset strats", "revive", "roll feedback", "rtsc", "rtsc cancel", "rtsc select", "skill", "spells", "stats", "stay", "summon", "talents", "talk", "trainer" "trainer learn", "u go", "who" };
 
-std::unordered_set<std::string> noReplyMsgStarts = { "e ", "accept ", "cast ", "destroy " };
+std::unordered_set<std::string> noReplyMsgParts = {  };
+
+std::unordered_set<std::string> noReplyMsgStarts = { "@", "accept [", "accept |", "all +", "all -", "b [", "b |", "bank -", "bank [", "bank |", "boost target ", "buff target ", "cast ", "co +", "co -", "cs ", "d [", "d |", "dead +", "dead -", "destroy [", "destroy |", "drop ", "e [", "e |", "emote ", "faction ", "focus heal ", "follow target ", "go npc ", "go zone ", "items ", "jump ", "keep ", "mail ", "nc +", "nc -", "outfit ", "pet autocast ", "q [", "q |", "r [", "r |", "ra ", "range ", "react +", "react -", "repair [", "repair |", "revive target ", "rti ", "rtsc go ", "rtsc save ", "rtsc unsave ", "s [", "s |", "sendmail [", "sendmail |", "share [", "share |", "skill ", "skill unlearn ", "ss ", "t ", "talents ", "u [", "u |", " ue [", "ue |", "wait for attack time " };
 
 SayAction::SayAction(PlayerbotAI* ai) : Action(ai, "say"), Qualified()
 {

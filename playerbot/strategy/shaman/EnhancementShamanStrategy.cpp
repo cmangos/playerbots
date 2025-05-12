@@ -12,10 +12,11 @@ public:
     {
         creators["stormstrike"] = &stormstrike;
         creators["lava lash"] = &lava_lash;
-        creators["flametongue totem"] = &flametongue_totem;
+        creators["searing totem"] = &searing_totem;
+        creators["mana spring totem"] = &mana_spring_totem;
         creators["magma totem"] = &magma_totem;
         creators["strength of earth totem"] = &strength_of_earth_totem;
-        creators["windfury totem"] = &windfury_totem;
+        creators["grace of air totem"] = &grace_of_air_totem;
         creators["windfury weapon"] = &windfury_weapon;
     }
 
@@ -24,13 +25,15 @@ private:
 
     ACTION_NODE_A(lava_lash, "lava lash", "melee");
 
-    ACTION_NODE_A(flametongue_totem, "flametongue totem", "searing totem");
+    ACTION_NODE_A(searing_totem, "searing totem", "flametongue totem");
+
+    ACTION_NODE_A(mana_spring_totem, "mana spring totem", "healing stream totem");
 
     ACTION_NODE_C(magma_totem, "magma totem", "fire nova");
 
     ACTION_NODE_A(strength_of_earth_totem, "strength of earth totem", "stoneskin totem");
 
-    ACTION_NODE_A(windfury_totem, "windfury totem", "wrath of air totem");
+    ACTION_NODE_A(grace_of_air_totem, "grace of air totem", "windfury totem");
 
     ACTION_NODE_A(windfury_weapon, "windfury weapon", "rockbiter weapon");
 };
@@ -307,7 +310,7 @@ void EnhancementShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "air totem",
-        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("grace of air totem", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "water totem",
@@ -323,7 +326,7 @@ void EnhancementShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "fire totem",
-        NextAction::array(0, new NextAction("flametongue totem", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("searing totem", ACTION_HIGH), NULL)));
 }
 
 void EnhancementShamanTotemsStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

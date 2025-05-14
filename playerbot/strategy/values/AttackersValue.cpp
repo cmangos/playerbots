@@ -374,7 +374,7 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
         if (checkInCombat && !InCombat(target, player, (player == owner)))
         {
             bool isRtiTarget = false;
-            if (player->GetPlayerbotAI())
+            if (player->GetPlayerbotAI() && player->GetPlayerbotAI()->HasActivePlayerMaster())
             {
                 Unit* rtiTarget = PAI_VALUE(Unit*, "rti target");
                 if (target == rtiTarget)

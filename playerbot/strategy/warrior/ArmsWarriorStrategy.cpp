@@ -30,7 +30,7 @@ private:
 
     ACTION_NODE_A(heroic_strike, "heroic strike", "melee");
 
-    ACTION_NODE_A(berserker_rage_fear, "berserker rage");
+    ACTION_NODE_A(berserker_rage_fear, "berserker rage", "death wish");
 
     ACTION_NODE_P(whirlwind, "whirlwind", "berserker stance");
 

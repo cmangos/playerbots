@@ -8,6 +8,7 @@ namespace ai
 	SNARE_ACTION(CastDeathCoilSnareAction, "death coil");
 	ENEMY_HEALER_ACTION(CastDeathCoilOnHealerAction, "death coil");
 	SPELL_ACTION(CastDeathCoilAction, "death coil");
+    BUFF_ACTION(CastShadowWardAction, "shadow ward");
 	
 	class CastDemonSkinAction : public CastBuffSpellAction 
 	{

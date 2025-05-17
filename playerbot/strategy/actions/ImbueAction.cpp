@@ -48,6 +48,25 @@ bool ImbueWithStoneAction::Execute(Event& event)
 
 bool ImbueWithStoneAction::isUseful()
 {
+    // No stone if shaman +30 lvl
+    if (bot->getClass() == CLASS_SHAMAN && bot->GetLevel() > 30)
+        return false;
+
+    // No stone if grouped with shaman +32 lvl
+    if (bot->GetGroup())
+    {
+        Group* group = bot->GetGroup();
+        for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+        {
+            Player* member = ref->getSource();
+            if (!member || member == bot || !member->IsInWorld() || !group->SameSubGroup(bot, member))
+                continue;
+
+            if (member->getClass() == CLASS_SHAMAN && member->GetLevel() > 32)
+                return false;
+        }
+    }
+
     // Search and apply stone to weapons
     // Mainhand
     Item* mainWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);

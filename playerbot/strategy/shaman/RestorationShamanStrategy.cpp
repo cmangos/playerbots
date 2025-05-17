@@ -352,9 +352,18 @@ void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 {
     ShamanTotemsStrategy::InitCombatTriggers(triggers);
 
-    triggers.push_back(new TriggerNode(
-        "air totem",
-        NextAction::array(0, new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
+    if (ai->GetBot()->GetGroup())
+    {
+        triggers.push_back(new TriggerNode(
+            "air totem",
+            NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH), NULL)));
+    }
+    else
+    {
+        triggers.push_back(new TriggerNode(
+            "air totem",
+            NextAction::array(0, new NextAction("grace of air totem", ACTION_HIGH), NULL)));
+    }
 
     triggers.push_back(new TriggerNode(
         "water totem",
@@ -811,9 +820,18 @@ void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 {
     ShamanTotemsStrategy::InitCombatTriggers(triggers);
 
-    triggers.push_back(new TriggerNode(
-        "air totem",
-        NextAction::array(0, new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
+    if (ai->GetBot()->GetGroup())
+    {
+        triggers.push_back(new TriggerNode(
+            "air totem",
+            NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH), NULL)));
+    }
+    else
+    {
+        triggers.push_back(new TriggerNode(
+            "air totem",
+            NextAction::array(0, new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
+    }
 
     triggers.push_back(new TriggerNode(
         "water totem",
@@ -1286,9 +1304,18 @@ void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 {
     ShamanTotemsStrategy::InitCombatTriggers(triggers);
 
-    triggers.push_back(new TriggerNode(
-        "air totem",
-        NextAction::array(0, new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
+    if (ai->GetBot()->GetGroup())
+    {
+        triggers.push_back(new TriggerNode(
+            "air totem",
+            NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH), NULL)));
+    }
+    else
+    {
+        triggers.push_back(new TriggerNode(
+            "air totem",
+            NextAction::array(0, new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
+    }
 
     triggers.push_back(new TriggerNode(
         "water totem",

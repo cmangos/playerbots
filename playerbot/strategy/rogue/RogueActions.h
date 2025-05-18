@@ -371,21 +371,6 @@ namespace ai
 
         bool Execute(Event& event) override
         {
-            // No poison if grouped with shaman +32 lvl
-            if (bot->GetGroup())
-            {
-                Group* group = bot->GetGroup();
-                for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
-                {
-                    Player* member = ref->getSource();
-                    if (!member || member == bot || !group->SameSubGroup(bot, member))
-                        continue;
-
-                    if (member->getClass() == CLASS_SHAMAN && member->GetLevel() > 32)
-                        return false;
-                }
-            }
-
             // Pick a poison item
             uint32 poisonLevel = 0;
             uint32 poisonItemId = 0;

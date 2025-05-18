@@ -354,7 +354,8 @@ void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "air totem",
-        NextAction::array(0, new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH + 1),
+            new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "water totem",
@@ -813,7 +814,8 @@ void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "air totem",
-        NextAction::array(0, new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH + 1),
+            new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "water totem",
@@ -1288,7 +1290,8 @@ void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "air totem",
-        NextAction::array(0, new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH + 1),
+            new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "water totem",

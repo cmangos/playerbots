@@ -230,6 +230,11 @@ namespace ai
     {
     public:
         CastWindfuryTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "windfury totem") {}
+
+        virtual bool isUseful() override
+        {
+            return bot->GetGroup()  && CastTotemAction::isUseful();
+        }
     };
 
     class CastWindwallTotemAction : public CastTotemAction

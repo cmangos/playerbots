@@ -86,6 +86,7 @@ namespace ai
         static std::string ReasonForNeed(ItemUsage usage, ItemQualifier qualifier = ItemQualifier(), uint32 count = 1, Player* bot = nullptr);
         static uint32 GetAhDepositCost(ItemPrototype const* proto, uint32 count = 1);
         static Item* CurrentItem(ItemPrototype const* proto, Player* bot);
+        static Item* CurrentItemInSlot(ItemPrototype const* proto, Player* bot);
     private:        
         bool IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory = false);
         bool IsItemNeededForSkill(ItemPrototype const* proto);

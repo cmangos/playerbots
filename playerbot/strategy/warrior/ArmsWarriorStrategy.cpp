@@ -11,6 +11,7 @@ public:
     {
         creators["charge"] = &charge;
         creators["death wish"] = &death_wish;
+        creators["berserker rage fear"] = &berserker_rage_fear;
         creators["piercing howl"] = &piercing_howl;
         creators["mocking blow"] = &mocking_blow;
         creators["heroic strike"] = &heroic_strike;
@@ -28,6 +29,8 @@ private:
     ACTION_NODE_A(mocking_blow, "mocking blow", "hamstring");
 
     ACTION_NODE_A(heroic_strike, "heroic strike", "melee");
+
+    ACTION_NODE_A(berserker_rage_fear, "berserker rage", "death wish");
 
     ACTION_NODE_P(whirlwind, "whirlwind", "berserker stance");
 
@@ -232,6 +235,10 @@ void ArmsWarriorBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     triggers.push_back(new TriggerNode(
         "berserker stance",
         NextAction::array(0, new NextAction("berserker stance", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "feared",
+        NextAction::array(0, new NextAction("berserker rage fear", ACTION_INTERRUPT), NULL)));
 
 }
 
@@ -552,12 +559,16 @@ void ArmsWarriorBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     WarriorBuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "battle stance",
-        NextAction::array(0, new NextAction("battle stance", ACTION_MOVE), NULL)));
+        "berserker stance",
+        NextAction::array(0, new NextAction("berserker stance", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "death wish",
         NextAction::array(0, new NextAction("death wish", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "feared",
+        NextAction::array(0, new NextAction("berserker rage fear", ACTION_INTERRUPT), NULL)));
 }
 
 void ArmsWarriorBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -894,6 +905,10 @@ void ArmsWarriorBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     triggers.push_back(new TriggerNode(
         "berserker stance",
         NextAction::array(0, new NextAction("berserker stance", ACTION_MOVE), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "feared",
+        NextAction::array(0, new NextAction("berserker rage fear", ACTION_INTERRUPT), NULL)));
 }
 
 void ArmsWarriorBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

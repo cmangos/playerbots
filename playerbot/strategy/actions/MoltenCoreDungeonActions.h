@@ -57,12 +57,15 @@ namespace ai
 
             creators["move away from hazard"] = [](PlayerbotAI* ai){return new MoveAwayFromHazard(ai, "move away from magmadar lava bomb");};
             creators["move to mc rune"] = &MoltenCoreActionContext::move_to_mc_rune;
-            creators["douse mc rune"] = &MoltenCoreActionContext::douse_mc_rune;
+            creators["douse mc run aqual"] = &MoltenCoreActionContext::douse_mc_rune_aqual;
+            creators["douse mc rune eternal"] = &MoltenCoreActionContext::douse_mc_rune_eternal;
         }
     
       
         private:
         static Action* move_to_mc_rune(PlayerbotAI* ai) { return new MoveToMCRuneAction(ai); }
-        static Action* douse_mc_rune(PlayerbotAI* ai) { return new DouseMCRuneAction(ai); }
+        static Action* douse_mc_rune_aqual(PlayerbotAI* ai) { return new DouseMCRuneActionAqual(ai); }
+        static Action* douse_mc_rune_eternal(PlayerbotAI* ai) { return new DouseMCRuneActionEternal(ai); }
+
     };
 }

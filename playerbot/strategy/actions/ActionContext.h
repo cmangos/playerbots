@@ -316,14 +316,10 @@ namespace ai
             creators["enable onyxia fight strategy"] = &ActionContext::onyxia_enable_fight_strategy;
             creators["disable onyxia fight strategy"] = &ActionContext::onyxia_disable_fight_strategy;
 
-            creators["enable magmadar fight strategy"] = &ActionContext::magmadar_enable_fight_strategy;
-            creators["disable magmadar fight strategy"] = &ActionContext::magmadar_disable_fight_strategy;
-            creators["move away from magmadar"] = &ActionContext::magmadar_move_away;
+
 
             creators["move away from hazard"] = &ActionContext::move_away_from_hazard;
-            creators["move to mc rune"] = &ActionContext::move_to_mc_rune;
-            creators["douse mc rune aqual"] = &ActionContext::douse_mc_rune_aqual;
-            creators["douse mc rune eternal"] = &ActionContext::douse_mc_rune_eternal;
+
 
 
    
@@ -582,9 +578,6 @@ namespace ai
 
 
         static Action* move_away_from_hazard(PlayerbotAI* ai) { return new MoveAwayFromHazard(ai); }
-        static Action* move_to_mc_rune(PlayerbotAI* ai) { return new MoveToMCRuneAction(ai); }
-        static Action* douse_mc_rune_aqual(PlayerbotAI* ai) { return new DouseMCRuneActionAqual(ai); }
-        static Action* douse_mc_rune_eternal(PlayerbotAI* ai) { return new DouseMCRuneActionEternal(ai); }
 
         static Action* netherspite_enable_fight_strategy(PlayerbotAI* ai) { return new NetherspiteEnableFightStrategyAction(ai); }
         static Action* netherspite_disable_fight_strategy(PlayerbotAI* ai) { return new NetherspiteDisableFightStrategyAction(ai); }

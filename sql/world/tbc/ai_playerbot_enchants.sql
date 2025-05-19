@@ -54,7 +54,7 @@ INSERT INTO `ai_playerbot_enchants` (`class`, `spec`, `spellid`, `slotid`, `name
 (1, 12, 34004, 14, 'Back: Enchant Cloak - Greater Agility'),
 (1, 12, 27984, 15, 'Main Hand Weapon: Enchant Weapon - Mongoose'),
 (1, 12, 34009, 16, 'Shield: Enchant Shield - Major Stamina'),
-(1, 12, 33999, 17, 'Ranged: Stabilized Eternium Scope');
+(1, 12, 33999, 17, 'Ranged: Stabilized Eternium Scope'),
 
 -- Holy Paladin (Spec ID: 20)
 (2, 20, 28882, 0, 'Glyph of Renewal'),
@@ -96,7 +96,7 @@ INSERT INTO `ai_playerbot_enchants` (`class`, `spec`, `spellid`, `slotid`, `name
 (2, 22, 27944, 16, 'Enchant Shield - Tough Shield'),
 (2, 22, 27984, 15, 'Enchant Weapon - Mongoose'),
 (2, 22, 27920, 10, 'Enchant Ring - Stats'),
-(2, 22, 27920, 11, 'Enchant Ring - Stats');
+(2, 22, 27920, 11, 'Enchant Ring - Stats'),
 
 -- Beast Mastery Hunter (Spec ID: 30)
 (3, 30, 28878, 0, 'Glyph of Ferocity'),
@@ -135,7 +135,7 @@ INSERT INTO `ai_playerbot_enchants` (`class`, `spec`, `spellid`, `slotid`, `name
 (3, 32, 27951, 7, 'Enchant Boots - Dexterity'),
 (3, 32, 27984, 15, 'Enchant Weapon - Greater Agility'),
 (3, 32, 27984, 16, 'Enchant Weapon - Greater Agility'),
-(3, 32, 27832, 17, 'Stabilized Eternium Scope');
+(3, 32, 27832, 17, 'Stabilized Eternium Scope'),
 
 -- Assassination Rogue (Spec ID: 40)
 (4, 40, 35452, 0, 'Head: Glyph of Ferocity'),
@@ -180,7 +180,7 @@ INSERT INTO `ai_playerbot_enchants` (`class`, `spec`, `spellid`, `slotid`, `name
 (4, 42, 27984, 16, 'Off Hand: Enchant Weapon - Mongoose'),
 (4, 42, 33996, 10, 'Ring 1: Enchant Ring - Stats'),
 (4, 42, 33996, 11, 'Ring 2: Enchant Ring - Stats'),
-(4, 42, 33999, 17, 'Ranged: Stabilized Eternium Scope');
+(4, 42, 33999, 17, 'Ranged: Stabilized Eternium Scope'),
 
 -- Discipline Priest (Spec ID: 50)
 (5, 50, 28882, 0, 'Head: Glyph of Renewal'),
@@ -219,7 +219,7 @@ INSERT INTO `ai_playerbot_enchants` (`class`, `spec`, `spellid`, `slotid`, `name
 (5, 52, 27981, 7, 'Boots: Enchant Boots - Vitality'),
 (5, 52, 27967, 15, 'Main Hand: Enchant Weapon - Major Spellpower'),
 (5, 52, 33996, 10, 'Ring 1: Enchant Ring - Stats'),
-(5, 52, 33996, 11, 'Ring 2: Enchant Ring - Stats');
+(5, 52, 33996, 11, 'Ring 2: Enchant Ring - Stats'),
 
 -- Elemental Shaman (Spec ID: 70)
 (7, 70, 28886, 0, 'Head: Glyph of Power'),
@@ -259,7 +259,7 @@ INSERT INTO `ai_playerbot_enchants` (`class`, `spec`, `spellid`, `slotid`, `name
 (7, 72, 27954, 7, 'Boots: Enchant Boots - Surefooted'),
 (7, 72, 27968, 15, 'Main Hand: Enchant Weapon - Major Healing'),
 (7, 72, 33996, 10, 'Ring 1: Enchant Ring - Stats'),
-(7, 72, 33996, 11, 'Ring 2: Enchant Ring - Stats');
+(7, 72, 33996, 11, 'Ring 2: Enchant Ring - Stats'),
 
 -- Arcane Mage (Spec ID: 80)
 (8, 80, 28886, 0, 'Head: Glyph of Power'),
@@ -298,7 +298,7 @@ INSERT INTO `ai_playerbot_enchants` (`class`, `spec`, `spellid`, `slotid`, `name
 (8, 82, 27981, 7, 'Boots: Enchant Boots - Vitality'),
 (8, 82, 27967, 15, 'Main Hand: Enchant Weapon - Major Spellpower'),
 (8, 82, 33996, 10, 'Ring 1: Enchant Ring - Stats'),
-(8, 82, 33996, 11, 'Ring 2: Enchant Ring - Stats');
+(8, 82, 33996, 11, 'Ring 2: Enchant Ring - Stats'),
 
 -- Affliction Warlock (Spec ID: 90)
 (9, 90, 28886, 0, 'Head: Glyph of Power'),
@@ -340,7 +340,7 @@ INSERT INTO `ai_playerbot_enchants` (`class`, `spec`, `spellid`, `slotid`, `name
 (9, 92, 27981, 16, 'Off-hand: Enchant Weapon - Major Spellpower'),
 (9, 92, 27950, 7, 'Boots: Enchant Boots - Boar\'s Speed'),
 (9, 92, 27924, 10, 'Ring: Enchant Ring - Spellpower'),
-(9, 92, 27924, 11, 'Ring: Enchant Ring - Spellpower');
+(9, 92, 27924, 11, 'Ring: Enchant Ring - Spellpower'),
 
 -- Balance Druid (Spec ID 110)
 (11, 110, 35447, 0, 'Glyph of Power'),

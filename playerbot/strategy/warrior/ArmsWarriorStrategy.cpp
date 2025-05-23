@@ -286,6 +286,10 @@ void ArmsWarriorBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>&
 void ArmsWarriorBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarriorBoostStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "recklessness",
+        NextAction::array(0, new NextAction("recklessness", ACTION_HIGH), NULL)));
 }
 
 void ArmsWarriorBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -351,7 +351,7 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
                                             target = member;
                                         }
 
-                                        if (member->GetDistance(bot) <= sPlayerbotAIConfig.reactDistance && ai->IsSafe(member))
+                                        if (ai->IsSafe(member) && member->GetDistance(bot) <= sPlayerbotAIConfig.reactDistance)
                                         {
                                             membersAroundSummoner++;
                                         }

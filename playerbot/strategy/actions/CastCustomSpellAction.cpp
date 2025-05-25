@@ -562,7 +562,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
 
     Item* spellItem = AI_VALUE2(Item*, "item for spell", spellId);
 
-    /*
+
     if (spellItem)
     {
         if (ai->CastSpell(spellId, bot, spellItem, false, &spellDuration))
@@ -620,7 +620,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
             executed = true;
         }
     }
-    */
+
     if (executed)
     {
         SetDuration(spellDuration);

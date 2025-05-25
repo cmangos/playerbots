@@ -266,13 +266,14 @@ bool CastCustomSpellAction::Execute(Event& event)
 
         ai->TellPlayerNoFacing(requester, BOT_TEXT2(replyStr.str(), replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
+    /*
     else
     {
         std::map<std::string, std::string> args;
         args["%spell"] = replyArgs["%spell"];
         ai->TellPlayerNoFacing(requester, BOT_TEXT2("cast_spell_command_error_failed", args));
     }
-
+    */
     return result;
 }
 
@@ -343,14 +344,14 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
                                 for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
                                 {
                                     Player* member = sObjectMgr.GetPlayer(itr->guid);
-                                    if (member && ai->IsSafe(member))
+                                    if (member)
                                     {
                                         if (itr->guid == targetGuid)
                                         {
                                             target = member;
                                         }
 
-                                        if (member->GetDistance(bot) <= sPlayerbotAIConfig.reactDistance)
+                                        if (member->GetDistance(bot) <= sPlayerbotAIConfig.reactDistance && ai->IsSafe(member))
                                         {
                                             membersAroundSummoner++;
                                         }
@@ -561,6 +562,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
 
     Item* spellItem = AI_VALUE2(Item*, "item for spell", spellId);
 
+    /*
     if (spellItem)
     {
         if (ai->CastSpell(spellId, bot, spellItem, false, &spellDuration))
@@ -569,6 +571,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
             executed = true;
         }
     }
+    
 
     if (!executed && wo)
     {
@@ -617,12 +620,12 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
             executed = true;
         }
     }
-
+    */
     if (executed)
     {
         SetDuration(spellDuration);
     }
-
+    
     return executed;
 }
 

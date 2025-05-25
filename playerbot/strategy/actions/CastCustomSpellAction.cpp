@@ -266,14 +266,14 @@ bool CastCustomSpellAction::Execute(Event& event)
 
         ai->TellPlayerNoFacing(requester, BOT_TEXT2(replyStr.str(), replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
-    /*
+
     else
     {
         std::map<std::string, std::string> args;
         args["%spell"] = replyArgs["%spell"];
         ai->TellPlayerNoFacing(requester, BOT_TEXT2("cast_spell_command_error_failed", args));
     }
-    */
+
     return result;
 }
 

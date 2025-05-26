@@ -95,9 +95,7 @@ namespace ai
 
         bool isUseful() override
         {
-            static const std::vector<uint32> battleShoutIds = {
-                6673, 5242, 6192, 11549, 11550, 11551, 25289, 2048, 47436
-            };
+            static const std::vector<uint32> battleShoutIds = {6673, 5242, 6192, 11549, 11550, 11551, 25289, 2048, 47436};
 
             for (uint32 id : battleShoutIds)
             {

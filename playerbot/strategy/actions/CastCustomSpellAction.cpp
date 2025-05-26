@@ -562,7 +562,6 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
 
     Item* spellItem = AI_VALUE2(Item*, "item for spell", spellId);
 
-
     if (spellItem)
     {
         if (ai->CastSpell(spellId, bot, spellItem, false, &spellDuration))
@@ -572,7 +571,6 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
         }
     }
     
-
     if (!executed && wo)
     {
         if (pSpellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
@@ -624,8 +622,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
     if (executed)
     {
         SetDuration(spellDuration);
-    }
-    
+    }    
     return executed;
 }
 

@@ -223,6 +223,10 @@ void WarlockAoeRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trig
 void WarlockBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     BuffStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "shadow ward",
+        NextAction::array(0, new NextAction("shadow ward", ACTION_INTERRUPT), NULL)));
 }
 
 void WarlockBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -675,6 +679,10 @@ void WarlockAoeRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trig
 void WarlockBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     BuffStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "shadow ward",
+        NextAction::array(0, new NextAction("shadow ward", ACTION_INTERRUPT), NULL)));
 }
 
 void WarlockBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1138,6 +1146,10 @@ void WarlockAoeRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trig
 void WarlockBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     BuffStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "shadow ward",
+        NextAction::array(0, new NextAction("shadow ward", ACTION_INTERRUPT), NULL)));
 }
 
 void WarlockBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -13,6 +13,7 @@ namespace ai
     BUFF_ACTION(CastDemonicEmpowerment, "demonic empowerment");
     BUFF_ACTION(CastImmolationAura, "immolation aura");
 	SPELL_ACTION(CastChaosBolt, "chaos bolt");
+    BUFF_ACTION(CastShadowWardAction, "shadow ward");
 	
 	class CastDemonSkinAction : public CastBuffSpellAction 
 	{

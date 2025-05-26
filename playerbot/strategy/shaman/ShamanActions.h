@@ -182,6 +182,11 @@ namespace ai
 	{
 	public:
 		CastWrathOfAirTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "wrath of air totem") {}
+
+        virtual bool isUseful() override
+        {
+            return !bot->GetGroup() && CastTotemAction::isUseful();
+        }
 	};
 
     class CastFrostResistanceTotemAction : public CastTotemAction
@@ -237,6 +242,11 @@ namespace ai
     {
     public:
         CastWindfuryTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "windfury totem") {}
+
+        virtual bool isUseful() override
+        {
+            return bot->GetGroup()  && CastTotemAction::isUseful();
+        }
     };
 
     class CastWindwallTotemAction : public CastTotemAction
@@ -249,6 +259,11 @@ namespace ai
     {
     public:
         CastGraceOfAirTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "grace of air totem") {}
+
+        virtual bool isUseful() override
+        {
+            return !bot->GetGroup() && CastTotemAction::isUseful();
+        }
     };
 
     class CastSearingTotemAction : public CastTotemAction

@@ -478,11 +478,11 @@ AiPlayerbot.PremadeSpecName.1.6 = fury slam
 AiPlayerbot.PremadeSpecLink.1.5.70 = 33005001332-050530020052120531151
 
 AiPlayerbot.PremadeSpecName.1.7 = arms poleaxes
-AiPlayerbot.PremadeSpecLink.1.5.60 = 333005001352510000321-0505300200521202
+AiPlayerbot.PremadeSpecLink.1.5.70 = 333005001352510000321-0505300200521202
 AiPlayerbot.PremadeSpecName.1.8 = arms maces
-AiPlayerbot.PremadeSpecLink.1.5.60 = 33005001352015000321-0505300200521202
+AiPlayerbot.PremadeSpecLink.1.5.70 = 33005001352015000321-0505300200521202
 AiPlayerbot.PremadeSpecName.1.9 = arms swords
-AiPlayerbot.PremadeSpecLink.1.5.60 = 33005001352010500321-0505300200521202
+AiPlayerbot.PremadeSpecLink.1.5.70 = 33005001352010500321-0505300200521202
 
 # Paladin
 AiPlayerbot.PremadeSpecName.2.0 = pve holy

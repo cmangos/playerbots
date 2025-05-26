@@ -687,7 +687,7 @@ std::string ItemUsageValue::ReasonForNeed(ItemUsage usage, ItemQualifier qualifi
         if (!qualifier || !bot)
             return BOT_TEXT2("for equiping as upgrade.", placeholders);
 
-        Item* currentItem = ItemUsageValue::CurrentItem(qualifier.GetProto(), bot);
+        Item* currentItem = ItemUsageValue::CurrentItemInSlot(qualifier.GetProto(), bot);
         if (!currentItem)
             return BOT_TEXT2("for equiping as upgrade because the slot is empty.", placeholders);
 
@@ -965,6 +965,18 @@ Item* ItemUsageValue::CurrentItem(ItemPrototype const* proto, Player* bot)
     return bestItem;
 }
 
+Item* ItemUsageValue::CurrentItemInSlot(ItemPrototype const* proto, Player* bot)
+{
+    uint16 dest;
+
+    InventoryResult result;
+    result = RandomPlayerbotMgr::CanEquipUnseenItem(bot, NULL_SLOT, dest, proto->ItemId);
+
+    if (result != EQUIP_ERR_OK)
+        return nullptr;
+
+    return bot->GetItemByPos(dest);    
+}
 
 float ItemUsageValue::CurrentStacks(PlayerbotAI* ai, ItemPrototype const* proto)
 {

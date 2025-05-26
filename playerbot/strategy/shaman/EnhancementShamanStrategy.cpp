@@ -16,7 +16,7 @@ public:
         creators["mana spring totem"] = &mana_spring_totem;
         creators["magma totem"] = &magma_totem;
         creators["strength of earth totem"] = &strength_of_earth_totem;
-        creators["grace of air totem"] = &grace_of_air_totem;
+        creators["windfury totem"] = &windfury_totem;
         creators["windfury weapon"] = &windfury_weapon;
     }
 
@@ -33,7 +33,7 @@ private:
 
     ACTION_NODE_A(strength_of_earth_totem, "strength of earth totem", "stoneskin totem");
 
-    ACTION_NODE_A(grace_of_air_totem, "grace of air totem", "windfury totem");
+    ACTION_NODE_A(windfury_totem, "windfury totem", "grace of air totem");
 
     ACTION_NODE_A(windfury_weapon, "windfury weapon", "rockbiter weapon");
 };
@@ -307,6 +307,10 @@ void EnhancementShamanCureRaidStrategy::InitNonCombatTriggers(std::list<TriggerN
 void EnhancementShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanTotemsStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "air totem",
+        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "air totem",
@@ -742,7 +746,11 @@ void EnhancementShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "air totem",
-        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "air totem",
+        NextAction::array(0, new NextAction("grace of air totem", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "water totem",
@@ -1184,7 +1192,11 @@ void EnhancementShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "air totem",
-        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "air totem",
+        NextAction::array(0, new NextAction("grace of air totem", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "water totem",

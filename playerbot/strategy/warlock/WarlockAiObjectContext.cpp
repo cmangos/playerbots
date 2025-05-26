@@ -359,6 +359,7 @@ namespace ai
                 creators["metamorphosis"] = &TriggerFactoryInternal::metamorphosis;
                 creators["chaos bolt"] = &TriggerFactoryInternal::chaos_bolt;
                 creators["soulstone"] = &TriggerFactoryInternal::soulstone;
+                creators["shadow ward"] = &TriggerFactoryInternal::shadow_ward;
             }
 
         private:
@@ -423,6 +424,7 @@ namespace ai
             static Trigger* metamorphosis(PlayerbotAI* ai) { return new MetamorphosisTrigger(ai); }
             static Trigger* chaos_bolt(PlayerbotAI* ai) { return new ChaosBoltTrigger(ai); }
             static Trigger* soulstone(PlayerbotAI* ai) { return new SoulstoneTrigger(ai); }
+            static Trigger* shadow_ward(PlayerbotAI* ai) { return new ShadowWardTrigger(ai); }
         };
 
         class AiObjectContextInternal : public NamedObjectContext<Action>
@@ -505,6 +507,7 @@ namespace ai
                 creators["update pvp strats"] = &AiObjectContextInternal::update_pvp_strats;
                 creators["update raid strats"] = &AiObjectContextInternal::update_raid_strats;
                 creators["soulstone"] = &AiObjectContextInternal::soulstone;
+                creators["shadow ward"] = &AiObjectContextInternal::shadow_ward;
             }
 
         private:
@@ -583,6 +586,7 @@ namespace ai
             static Action* update_pvp_strats(PlayerbotAI* ai) { return new UpdateWarlockPvpStrategiesAction(ai); }
             static Action* update_raid_strats(PlayerbotAI* ai) { return new UpdateWarlockRaidStrategiesAction(ai); }
             static Action* soulstone(PlayerbotAI* ai) { return new CastSoulstoneAction(ai); }
+            static Action* shadow_ward(PlayerbotAI* ai) { return new CastShadowWardAction(ai); }
         };
     };
 };

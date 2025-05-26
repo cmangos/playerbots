@@ -3,6 +3,8 @@
 
 namespace ai
 {
+    DEFLECT_TRIGGER(ShadowWardTrigger, "shadow ward");
+
 	class DemonArmorTrigger : public BuffTrigger
 	{
 	public:

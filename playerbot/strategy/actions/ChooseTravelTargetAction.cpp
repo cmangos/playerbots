@@ -297,55 +297,27 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
 {
     DestinationList dests;
 
-    //Quests
-    if (quests)
-    {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::QuestGiver, {}, false, 1000000.0f))
-        {
-            if (strstri(d->GetTitle().c_str(), name.c_str()))
-                dests.push_back(d);
-        }
-    }
+    auto ci_find = [](const std::string& haystack, const std::string& needle) {
+        auto it = std::search(haystack.begin(), haystack.end(),
+            needle.begin(), needle.end(),
+            [](char ch1, char ch2) {
+                return std::tolower(ch1) == std::tolower(ch2);
+            });
+        return it != haystack.end();
+        };
 
-    //Zones
-    if (zones)
-    {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Explore, {}, false, 1000000.0f))
-        {
-            if (strstri(d->GetTitle().c_str(), name.c_str()))
+    auto filterByName = [&](uint32 purpose, bool enabled) {
+        if (!enabled) return;
+        for (auto& d : sTravelMgr.GetDestinations(info, purpose, {}, false, 1000000.0f))
+            if (ci_find(d->GetTitle(), name))
                 dests.push_back(d);
-        }
-    }
+        };
 
-    //Npcs
-    if (npcs)
-    {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::GenericRpg, {}, false, 1000000.0f))
-        {
-            if (strstri(d->GetTitle().c_str(), name.c_str()))
-                dests.push_back(d);
-        }
-    }
-
-    //Mobs
-    if (mobs)
-    {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Grind, {}, false, 1000000.0f))
-        {
-            if (strstri(d->GetTitle().c_str(), name.c_str()))
-                dests.push_back(d);
-        }
-    }
-
-    //Bosses
-    if (bosses)
-    {
-        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Boss, {}, false, 1000000.0f))
-        {
-            if (strstri(d->GetTitle().c_str(), name.c_str()))
-                dests.push_back(d);
-        }
-    }
+    filterByName((uint32)TravelDestinationPurpose::QuestGiver, quests);
+    filterByName((uint32)TravelDestinationPurpose::Explore, zones);
+    filterByName((uint32)TravelDestinationPurpose::GenericRpg, npcs);
+    filterByName((uint32)TravelDestinationPurpose::Grind, mobs);
+    filterByName((uint32)TravelDestinationPurpose::Boss, bosses);
 
     if (dests.empty())
         return {};
@@ -668,7 +640,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
     WorldPosition center = event.getOwner() ? event.getOwner() : (GetMaster() ? GetMaster() : bot);
 
-    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for travel " + getQualifier(), "debug travel");
+    ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for travel " + travelName, "debug travel");
 
     if (travelName == "pvp")
     {
@@ -693,6 +665,9 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 PartitionedTravelList list;
                 for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, WorldPvpLocation, true, false, false, false, false))
                 {
+                    if (!destination)
+                        continue;
+
                     WorldPosition* point = destination->GetNextPoint(center);
 
                     if (!point)
@@ -722,7 +697,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
         if (trainerEntries.empty())
         {
-            ai->TellDebug(ai->GetMaster(), "No trainer entries found for " + getQualifier(), "debug travel");
+            ai->TellDebug(ai->GetMaster(), "No trainer entries found for " + travelName, "debug travel");
             return false;
         }
 
@@ -737,7 +712,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
         if (mountVendorEntries.empty())
         {
-            ai->TellDebug(ai->GetMaster(), "No vendor entries found for " + getQualifier(), "debug travel");
+            ai->TellDebug(ai->GetMaster(), "No vendor entries found for " + travelName, "debug travel");
             return false;
         }
 
@@ -750,12 +725,14 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
     {
         uint32 useFlags;
         
-        if(travelName == "city")
+        if (travelName == "city")
             useFlags = NPCFlags::UNIT_NPC_FLAG_BANKER | NPCFlags::UNIT_NPC_FLAG_BATTLEMASTER | NPCFlags::UNIT_NPC_FLAG_AUCTIONEER;
         else if (travelName == "tabard")
             useFlags = NPCFlags::UNIT_NPC_FLAG_TABARDDESIGNER;
         else if (travelName == "petition")
             useFlags = NPCFlags::UNIT_NPC_FLAG_PETITIONER;
+        else
+            return false;
 
 
         *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [cityFlags = useFlags, partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]()
@@ -766,8 +743,8 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 {
                     travelPoints.erase(std::remove_if(travelPoints.begin(), travelPoints.end(), [cityFlags](TravelPoint point)
                         {
-                            EntryTravelDestination* dest = (EntryTravelDestination*)std::get<TravelDestination*>(point);
-                            if (!dest->GetCreatureInfo())
+                            auto* dest = dynamic_cast<EntryTravelDestination*>(std::get<TravelDestination*>(point));
+                            if (!dest || !dest->GetCreatureInfo()) 
                                 return true;
 
                             if (dest->GetCreatureInfo()->NpcFlags & cityFlags)
@@ -781,7 +758,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
     }
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
-    SET_AI_VALUE2(std::string, "manual string", "future travel purpose", getQualifier());
+    SET_AI_VALUE2(std::string, "manual string", "future travel purpose", travelName);
     SET_AI_VALUE2(std::string, "manual string", "future travel condition", event.getSource());
 
     return true;
@@ -792,31 +769,21 @@ bool RequestNamedTravelTargetAction::isAllowed() const
     std::string name = getQualifier();
     if (name == "city")
     {
-        if (urand(1, 100) > 10)
-            return false;
-        return true;
+        return urand(1, 100) <= 10;
     }
     else if (name == "pvp")
     {
-        if (urand(0, 4))
-            return false;
-        return true;
+        return urand(0, 4) == 0;
     }
     else if (name == "mount")
     {
-        if (urand(1, 100) > 100)
-            return false;
-        return true;
+        return urand(1, 100) <= 10;
     }
     else if (name.find("trainer") == 0)
     {
-        if (urand(1, 100) > 100)
-            return false;
-        return true;
+        return urand(1, 100) <= 10;
     }
-    else if (name == "tabard")
-        return true;
-    else if (name == "petition")
+    else if (name == "tabard" || name == "petition")
         return true;
 
     return false;

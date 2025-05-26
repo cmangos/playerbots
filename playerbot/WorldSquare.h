@@ -312,11 +312,13 @@ namespace ai
 
         virtual WorldPosition* GetNextPoint(const WorldPosition& point) const
         {
-            const T* nextSq = nullptr;
-            if (urand(0, 1))
-                nextSq = GetClosestSquare(point);
-            else
-                nextSq = &(std::next(subSquares.begin(), urand(0, subSquares.size() - 1))->second);
+            if (subSquares.empty())
+                return nullptr;
+
+            const T* nextSq = urand(0, 1) ? GetClosestSquare(point) : &(std::next(subSquares.begin(), urand(0, subSquares.size() - 1))->second);
+
+            if (!nextSq)
+                return nullptr;
 
             return nextSq->GetNextPoint(point);
         }

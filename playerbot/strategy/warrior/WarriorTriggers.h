@@ -3,7 +3,6 @@
 
 namespace ai
 {
-    BUFF_TRIGGER(BattleShoutTrigger, "battle shout");
     BUFF_TRIGGER(BattleStanceTrigger, "battle stance");
     BUFF_TRIGGER(DefensiveStanceTrigger, "defensive stance");
     BUFF_TRIGGER(BerserkerStanceTrigger, "berserker stance");
@@ -44,6 +43,24 @@ namespace ai
     HAS_AURA_TRIGGER(SuddenDeathTrigger, "sudden death");
     HAS_AURA_TRIGGER(SlamInstantTrigger, "slam!");
     HAS_AURA_TRIGGER(TasteForBloodTrigger, "taste for blood");
+
+    class BattleShoutTrigger : public Trigger
+    {
+    public:
+        BattleShoutTrigger(PlayerbotAI* ai) : Trigger(ai, "battle shout") {}
+
+        bool IsActive() override
+        {
+            static const std::vector<uint32> battleShoutIds = {6673, 5242, 6192, 11549, 11550, 11551, 25289, 2048, 47436};
+
+            for (uint32 id : battleShoutIds)
+            {
+                if (bot->HasAura(id))
+                    return false;
+            }
+            return true;
+        }
+    };
 
     class BerserkerRageBuffTrigger : public TargetOfFearCastTrigger
     {

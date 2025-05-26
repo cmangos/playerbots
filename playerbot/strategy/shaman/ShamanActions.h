@@ -146,12 +146,6 @@ namespace ai
         CastTremorTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "tremor totem") {}
     };
 
-    class CastTranquilAirTotemAction : public CastTotemAction
-    {
-    public:
-        CastTranquilAirTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "tranquil air totem") {}
-    };
-
     class CastStrengthOfEarthTotemAction : public CastTotemAction
     {
     public:
@@ -248,6 +242,12 @@ namespace ai
             return bot->GetGroup()  && CastTotemAction::isUseful();
         }
     };
+#ifndef MANGOSBOT_TWO
+    class CastTranquilAirTotemAction : public CastTotemAction
+    {
+    public:
+        CastTranquilAirTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "tranquil air totem") {}
+    };
 
     class CastWindwallTotemAction : public CastTotemAction
     {
@@ -265,7 +265,7 @@ namespace ai
             return !bot->GetGroup() && CastTotemAction::isUseful();
         }
     };
-
+#endif
     class CastSearingTotemAction : public CastTotemAction
     {
     public:

@@ -204,9 +204,12 @@ namespace ai
             }
             else
             {
-                return !AI_VALUE2(bool, "has totem", "grace of air totem") &&
+                return 
+#ifndef MANGOSBOT_TWO
+                    !AI_VALUE2(bool, "has totem", "grace of air totem") &&
                        !AI_VALUE2(bool, "has totem", "windwall totem") &&
                        !AI_VALUE2(bool, "has totem", "tranquil air totem") &&
+#endif
                        !AI_VALUE2(bool, "has totem", "windfury totem") &&
                        !AI_VALUE2(bool, "has totem", "grounding totem") &&
                        !AI_VALUE2(bool, "has totem", "sentry totem") &&

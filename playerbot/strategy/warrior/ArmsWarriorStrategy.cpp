@@ -24,6 +24,8 @@ public:
 private:
     ACTION_NODE_P(charge, "charge", "battle stance");
 
+    ACTION_NODE_A(death_wish, "death wish", "bloodrage");
+
     ACTION_NODE_P(intercept, "intercept", "berserker stance");
 
     ACTION_NODE_A(piercing_howl, "piercing howl", "hamstring");
@@ -623,6 +625,10 @@ void ArmsWarriorBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>&
 void ArmsWarriorBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarriorBoostStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "recklessness",
+        NextAction::array(0, new NextAction("recklessness", ACTION_HIGH), NULL)));
 }
 
 void ArmsWarriorBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -929,7 +935,7 @@ void ArmsWarriorBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 
     triggers.push_back(new TriggerNode(
         "feared",
-        NextAction::array(0, new NextAction("berserker rage fear", ACTION_INTERRUPT), NULL)));
+        NextAction::array(0, new NextAction("berserker rage", ACTION_INTERRUPT), NULL)));
 }
 
 void ArmsWarriorBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -984,6 +990,10 @@ void ArmsWarriorBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>&
 void ArmsWarriorBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarriorBoostStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "recklessness",
+        NextAction::array(0, new NextAction("recklessness", ACTION_HIGH), NULL)));
 }
 
 void ArmsWarriorBoostStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

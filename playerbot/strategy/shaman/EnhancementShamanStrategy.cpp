@@ -33,7 +33,11 @@ private:
 
     ACTION_NODE_A(strength_of_earth_totem, "strength of earth totem", "stoneskin totem");
 
+#ifdef MANGOSBOT_TWO
+    ACTION_NODE_A(windfury_totem, "windfury totem", "wrath of air totem");
+#else
     ACTION_NODE_A(windfury_totem, "windfury totem", "grace of air totem");
+#endif
 
     ACTION_NODE_A(windfury_weapon, "windfury weapon", "rockbiter weapon");
 };
@@ -1193,10 +1197,6 @@ void EnhancementShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
     triggers.push_back(new TriggerNode(
         "air totem",
         NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "air totem",
-        NextAction::array(0, new NextAction("grace of air totem", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "water totem",

@@ -287,12 +287,14 @@ namespace ai
                 creators["totembar elements"] = &shaman::AirTotemStrategyFactoryInternal::totem_bar_elements;
                 creators["totembar ancestors"] = &shaman::AirTotemStrategyFactoryInternal::totem_bar_ancestors;
                 creators["totembar spirits"] = &shaman::AirTotemStrategyFactoryInternal::totem_bar_spirits;
+#ifndef MANGOSBOT_TWO
                 creators["totem air grace"] = &shaman::AirTotemStrategyFactoryInternal::totem_air_grace;
+                creators["totem air tranquil"] = &shaman::AirTotemStrategyFactoryInternal::totem_air_tranquil;
+                creators["totem air windwall"] = &shaman::AirTotemStrategyFactoryInternal::totem_air_windwall;
+#endif
                 creators["totem air grounding"] = &shaman::AirTotemStrategyFactoryInternal::totem_air_grounding;
                 creators["totem air resistance"] = &shaman::AirTotemStrategyFactoryInternal::totem_air_resistance;
-                creators["totem air tranquil"] = &shaman::AirTotemStrategyFactoryInternal::totem_air_tranquil;
                 creators["totem air windfury"] = &shaman::AirTotemStrategyFactoryInternal::totem_air_windfury;
-                creators["totem air windwall"] = &shaman::AirTotemStrategyFactoryInternal::totem_air_windwall;
                 creators["totem air wrath"] = &shaman::AirTotemStrategyFactoryInternal::totem_air_wrath;
             }
 
@@ -301,12 +303,14 @@ namespace ai
             static Strategy* totem_bar_elements(PlayerbotAI* ai) { return new ShamanTotemBarElementsStrategy(ai); }
             static Strategy* totem_bar_ancestors(PlayerbotAI* ai) { return new ShamanTotemBarAncestorsStrategy(ai); }
             static Strategy* totem_bar_spirits(PlayerbotAI* ai) { return new ShamanTotemBarSpiritsStrategy(ai); }
+#ifndef MANGOSBOT_TWO
             static Strategy* totem_air_grace(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem air grace", "air totem", "grace of air totem"); }
+            static Strategy* totem_air_tranquil(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem air tranquil", "air totem", "tranquil air totem"); }
+            static Strategy* totem_air_windwall(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem air windwall", "air totem", "windwall totem"); }
+#endif
             static Strategy* totem_air_grounding(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem air grounding", "air totem", "grounding totem"); }
             static Strategy* totem_air_resistance(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem air resistance", "air totem", "nature resistance totem"); }
-            static Strategy* totem_air_tranquil(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem air tranquil", "air totem", "tranquil air totem"); }
             static Strategy* totem_air_windfury(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem air windfury", "air totem", "windfury totem"); }
-            static Strategy* totem_air_windwall(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem air windwall", "air totem", "windwall totem"); }
             static Strategy* totem_air_wrath(PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem air wrath", "air totem", "wrath of air totem"); }
         };
 
@@ -505,13 +509,15 @@ namespace ai
                 creators["stoneskin totem"] = &AiObjectContextInternal::stoneskin_totem;
                 creators["stoneclaw totem"] = &AiObjectContextInternal::stoneclaw_totem;
                 creators["grounding totem"] = &AiObjectContextInternal::grounding_totem;
+#ifndef MANGOSBOT_TWO
                 creators["grace of air totem"] = &AiObjectContextInternal::grace_of_air_totem;
                 creators["windwall totem"] = &AiObjectContextInternal::windwall_totem;
+                creators["tranquil air totem"] = &AiObjectContextInternal::tranquil_air_totem;
+#endif
                 creators["mana spring totem"] = &AiObjectContextInternal::mana_spring_totem;
                 creators["mana tide totem"] = &AiObjectContextInternal::mana_tide_totem;
                 creators["earthbind totem"] = &AiObjectContextInternal::earthbind_totem;
                 creators["tremor totem"] = &AiObjectContextInternal::tremor_totem;
-                creators["tranquil air totem"] = &AiObjectContextInternal::tranquil_air_totem;
                 creators["healing stream totem"] = &AiObjectContextInternal::healing_stream_totem;
                 creators["wrath of air totem"] = &AiObjectContextInternal::wrath_of_air_totem;
                 creators["frost resistance totem"] = &AiObjectContextInternal::frost_resistance_totem;
@@ -613,13 +619,15 @@ namespace ai
             static Action* stoneclaw_totem(PlayerbotAI* ai) { return new CastStoneclawTotemAction(ai); }
             static Action* grounding_totem(PlayerbotAI* ai) { return new CastGroundingTotemAction(ai); }
             static Action* windfury_totem(PlayerbotAI* ai) { return new CastWindfuryTotemAction(ai); }
+#ifndef MANGOSBOT_TWO
             static Action* windwall_totem(PlayerbotAI* ai) { return new CastWindwallTotemAction(ai); }
             static Action* grace_of_air_totem(PlayerbotAI* ai) { return new CastGraceOfAirTotemAction(ai); }
+            static Action* tranquil_air_totem(PlayerbotAI* ai) { return new CastTranquilAirTotemAction(ai); }
+#endif
             static Action* mana_spring_totem(PlayerbotAI* ai) { return new CastManaSpringTotemAction(ai); }
             static Action* mana_tide_totem(PlayerbotAI* ai) { return new CastManaTideTotemAction(ai); }
             static Action* earthbind_totem(PlayerbotAI* ai) { return new CastEarthbindTotemAction(ai); }
             static Action* tremor_totem(PlayerbotAI* ai) { return new CastTremorTotemAction(ai); }
-            static Action* tranquil_air_totem(PlayerbotAI* ai) { return new CastTranquilAirTotemAction(ai); }
             static Action* healing_stream_totem(PlayerbotAI* ai) { return new CastHealingStreamTotemAction(ai); }
             static Action* wrath_of_air_totem(PlayerbotAI* ai) { return new CastWrathOfAirTotemAction(ai); }
             static Action* frost_resistance_totem(PlayerbotAI* ai) { return new CastFrostResistanceTotemAction(ai); }

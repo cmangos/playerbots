@@ -352,7 +352,7 @@ namespace ai
         : Action(ai, name)
         , mainHand(inMainHand)
         , poisonItemIds(inPoisonItemIds) {}
-
+#ifndef MANGOSBOT_TWO
         bool isUseful() override
         {
             // No poison if grouped with shaman over level 32 in same subgroup
@@ -372,7 +372,7 @@ namespace ai
 
             return true;
         }
-
+#endif
         bool Execute(Event& event) override
         {
             // Pick a poison item

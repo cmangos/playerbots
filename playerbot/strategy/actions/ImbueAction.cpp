@@ -48,6 +48,7 @@ bool ImbueWithStoneAction::Execute(Event& event)
 
 bool ImbueWithStoneAction::isUseful()
 {
+#ifndef MANGOSBOT_TWO
     // No stone if shaman +30 lvl
     if (bot->getClass() == CLASS_SHAMAN && bot->GetLevel() > 30)
         return false;
@@ -66,7 +67,7 @@ bool ImbueWithStoneAction::isUseful()
                 return false;
         }
     }
-
+#endif
     // Search and apply stone to weapons
     // Mainhand
     Item* mainWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);

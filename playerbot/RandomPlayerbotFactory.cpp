@@ -495,9 +495,9 @@ void RandomPlayerbotFactory::CreateRandomBots()
         CharacterDatabase.Execute("DELETE FROM ai_playerbot_random_bots");
         sLog.outString("Random bot characters deleted");
     }
-	int totalAccCount = sPlayerbotAIConfig.randomBotAccountCount;
-	sLog.outString("Creating random bot accounts...");
-    
+    int totalAccCount = sPlayerbotAIConfig.randomBotAccountCount;
+    sLog.outString("Creating random bot accounts...");
+
     std::vector<std::future<void>> account_creations;
 
     BarGoLink bar(totalAccCount);
@@ -543,15 +543,15 @@ void RandomPlayerbotFactory::CreateRandomBots()
     //LoginDatabase.PExecute("UPDATE account SET expansion = '%u' where username like '%s%%'", 2, sPlayerbotAIConfig.randomBotAccountPrefix.c_str());
 
     int totalRandomBotChars = 0;
-	int totalCharCount = sPlayerbotAIConfig.randomBotAccountCount
+    int totalCharCount = sPlayerbotAIConfig.randomBotAccountCount
 #ifdef MANGOSBOT_TWO
-		* 10;
+        * 10;
 #else
-		* 9;
+        * 9;
 #endif
 
     sLog.outString("Loading available names...");
-    
+
     std::unordered_map<NameRaceAndGender, std::vector<std::string>> freeNames, allNames;
     std::unordered_map<std::string, bool> used;
 
@@ -568,7 +568,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
         NameRaceAndGender raceAndGender = static_cast<NameRaceAndGender>(fields[0].GetUInt8());
         std::string bname = fields[1].GetString();
         uint32 guidlo = fields[2].GetUInt32();
-        if(!guidlo)
+        if (!guidlo)
             freeNames[raceAndGender].push_back(bname);
         allNames[raceAndGender].push_back(bname);
         used[bname] = false;
@@ -621,7 +621,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
             continue;
         uint32 namesNeeded = totalCharCount / 2 - freeNames[raceAndGender].size();
 
-        while(namesNeeded)
+        while (namesNeeded)
         {
             std::string post = GetNamePostFix(postItt);
 
@@ -651,8 +651,9 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
     sLog.outString(">> Loaded names for " SIZEFMTD " race/gender combinations.", freeNames.size());
 
-	sLog.outString("Creating random bot characters...");
-	BarGoLink bar1(totalCharCount);
+    sLog.outString("Creating random bot characters...");
+    uint32 botsCreated = 0;
+    BarGoLink bar1(totalCharCount);
     for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
     {
         std::ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
@@ -671,7 +672,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
 #ifdef MANGOSBOT_TWO
         if (count >= 10)
 #else
-		if (count >= 9)
+        if (count >= 9)
 #endif
         {
             totalRandomBotChars += count;
@@ -690,14 +691,22 @@ void RandomPlayerbotFactory::CreateRandomBots()
 #else
             if (cls != 10 && cls != 6)
 #endif
-			{
+            {
                 uint8 rclss = factory.GetRandomClass();
+                botsCreated++;
                 factory.CreateRandomBot(rclss, freeNames);
-				bar1.step();
-			}
+                bar1.step();
+            }
         }
 
         totalRandomBotChars += sAccountMgr.GetCharactersCount(accountId);
+    }
+
+    if (!botsCreated)
+    {
+        sLog.outString("No new random bots needed accounts: %zu, bots: %d.", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
+
+        return;
     }
 
     std::vector<std::future<void>> bot_creations;
@@ -713,10 +722,10 @@ void RandomPlayerbotFactory::CreateRandomBots()
     {
         bar2.step();
         account_creations[i].wait();
-    }    
+    }
 
     std::vector<Player*> players;
-    
+
     for (auto pl : sObjectAccessor.GetPlayers())
         players.push_back(pl.second);
 
@@ -728,7 +737,6 @@ void RandomPlayerbotFactory::CreateRandomBots()
         delete player;
         delete session;
     }
-
     sLog.outString("%zu random bot accounts with %d characters available", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
 }
 

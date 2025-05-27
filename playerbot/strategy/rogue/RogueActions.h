@@ -355,7 +355,12 @@ namespace ai
 #ifndef MANGOSBOT_TWO
         bool isUseful() override
         {
-            // No poison if grouped with shaman over level 32 in same subgroup
+            // Always allow poison on offhand
+            if (!mainHand)
+                return true;
+
+#ifndef MANGOSBOT_TWO
+            // Deny if grouped with shaman over 32 in same subgroup (non-WOTLK)
             if (bot->GetGroup())
             {
                 Group* group = bot->GetGroup();
@@ -369,7 +374,7 @@ namespace ai
                         return false;
                 }
             }
-
+#endif
             return true;
         }
 #endif

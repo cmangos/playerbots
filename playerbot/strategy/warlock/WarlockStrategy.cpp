@@ -639,6 +639,10 @@ void WarlockAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "corruption on attacker",
         NextAction::array(0, new NextAction("corruption on attacker", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "ranged medium aoe",
+        NextAction::array(0, new NextAction("rain of fire", ACTION_HIGH), NULL)));
 }
 
 void WarlockAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

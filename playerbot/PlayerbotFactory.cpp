@@ -3236,7 +3236,7 @@ void PlayerbotFactory::InitMounts()
         90
 #else
 #ifdef MANGOSBOT_ONE
-        68
+        70
 #else
         60
 #endif

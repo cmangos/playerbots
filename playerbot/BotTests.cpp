@@ -37,7 +37,12 @@ void LogAnalysis::AnalysePid()
         if (!line.length())
             continue;
 
+
+
         Tokens tokens = StrSplit(line, ",");
+
+        if (tokens.size() < 7)
+            continue;
         
         if (tokens[0] == "Timestamp") //Header line
             continue;

@@ -359,7 +359,6 @@ namespace ai
             if (!mainHand)
                 return true;
 
-#ifndef MANGOSBOT_TWO
             // Deny if grouped with shaman over 32 in same subgroup (non-WOTLK)
             if (bot->GetGroup())
             {
@@ -374,7 +373,6 @@ namespace ai
                         return false;
                 }
             }
-#endif
             return true;
         }
 #endif

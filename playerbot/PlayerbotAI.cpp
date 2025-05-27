@@ -1916,6 +1916,9 @@ void PlayerbotAI::DoNextAction(bool min)
 
     currentEngine->DoNextAction(NULL, 0, (minimal || min), bot->IsTaxiFlying());
 
+    if (!bot->IsInWorld()) //Teleport out of bg
+        return;
+
     if (minimal)
     {
         if(!bot->isAFK() && !bot->InBattleGround() && !HasRealPlayerMaster())

@@ -20,11 +20,13 @@ bool ImbueWithStoneAction::Execute(Event& event)
     if (bot->getStandState() != UNIT_STAND_STATE_STAND)
         bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    bool canImbueMainhand = true;
+    bool allowMainhand = true;
+
 #ifndef MANGOSBOT_TWO
     // Check if shaman +30 lvl (non-WOTLK)
+
     if (bot->getClass() == CLASS_SHAMAN && bot->GetLevel() > 30)
-        canImbueMainhand = false;
+        allowMainhand = false;
 
     if (bot->GetGroup())
     {
@@ -37,7 +39,7 @@ bool ImbueWithStoneAction::Execute(Event& event)
 
             if (member->getClass() == CLASS_SHAMAN && member->GetLevel() > 32)
             {
-                canImbueMainhand = false;
+                allowMainhand = false;
                 break;
             }
         }
@@ -45,7 +47,7 @@ bool ImbueWithStoneAction::Execute(Event& event)
 #endif
 
     // Mainhand
-    if (canImbueMainhand)
+    if (allowMainhand)
     {
         Item* mainWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
         if (mainWeapon && mainWeapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
@@ -103,7 +105,7 @@ bool ImbueWithStoneAction::isUseful()
             return true;
     }
 
-    // Check Mainhand
+    // Check mainhand only if allowed
     if (allowMainhand)
     {
         Item* mainWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);

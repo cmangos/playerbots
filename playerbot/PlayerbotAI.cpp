@@ -2881,15 +2881,7 @@ ChatChannelSource PlayerbotAI::GetChatChannelSource(Player* bot, uint32 type, st
         {
             return ChatChannelSource::SRC_PARTY;
         }
-        case CHAT_MSG_PARTY_LEADER:
-        {
-            return ChatChannelSource::SRC_PARTY;
-        }
         case CHAT_MSG_RAID:
-        case CHAT_MSG_RAID_LEADER:
-        {
-            return ChatChannelSource::SRC_RAID;
-        }
         case CHAT_MSG_RAID_LEADER:
         {
             return ChatChannelSource::SRC_RAID;

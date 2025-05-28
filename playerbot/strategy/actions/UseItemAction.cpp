@@ -613,7 +613,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             
 #ifndef MANGOSBOT_ZERO
             // used in item_template.spell_2 with spell_id with SPELL_GENERIC_LEARN in spell_1
-            if ((spellInfo->Id == SPELL_ID_GENERIC_LEARN) && proto->Spells[1].SpellTrigger == ITEM_SPELLTRIGGER_LEARN_SPELL_ID)
+            if ((spellInfo->Id == SPELL_ID_GENERIC_LEARN || spellInfo->Id == SPELL_ID_GENERIC_LEARN_PET) && proto->Spells[1].SpellTrigger == ITEM_SPELLTRIGGER_LEARN_SPELL_ID)
                 spell->m_currentBasePoints[EFFECT_INDEX_0] = proto->Spells[1].SpellId; 
 #endif
 

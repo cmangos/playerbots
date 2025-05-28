@@ -405,35 +405,62 @@ ItemUsage ItemUsageValue::Calculate()
     //VENDOR/AH
     if (proto->SellPrice > 0)
     {
+        ItemUsage sellUsage = ItemUsage::ITEM_USAGE_VENDOR;
+
+        if (!ai->HasActivePlayerMaster())
+        {
+            uint32 maxSellPrice = proto->SellPrice;
+
+            if (proto->Stackable)
+                maxSellPrice *= proto->Stackable;
+
+            uint32 minimumSellPrice = bot->GetMoney() / 1000;
+
+            if (maxSellPrice < minimumSellPrice) //Do not loot items less than 0.1% of bot's gold per stack. 
+                sellUsage = ItemUsage::ITEM_USAGE_NONE;
+        }
+
         //if item value is significantly higher than its vendor sell price and we actually have money to place the item on ah.
         uint32 ahMoney = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah);
 
         if(!ahMoney && AI_VALUE(uint8, "bag space") > 80)
-            return ItemUsage::ITEM_USAGE_VENDOR;
+            return sellUsage;
 
         if (!IsMoreProfitableToSellToAHThanToVendor(proto, bot))
-            return ItemUsage::ITEM_USAGE_VENDOR;
+            return sellUsage;
 
         Item* item = CurrentItem(proto, bot);
-
         uint32 count = item ? item->GetCount() : 1;
 
-        if(GetAhDepositCost(proto, count) > ahMoney && AI_VALUE(uint8, "bag space") > 80) //We simply do not have the money to put this on AH.
-            return ItemUsage::ITEM_USAGE_VENDOR;
+        uint32 sellPrice = proto->SellPrice * count;
 
-        if(!item)
-            return ItemUsage::ITEM_USAGE_AH;        
+        uint32 depositCost = GetAhDepositCost(proto, count);
+        uint32 ahPrice = GetBotAHSellMinPrice(proto) * count;
+
+        if (ahPrice < depositCost)
+            return sellUsage; //The AH desposit is higher than the money gained.
+
+        if (ahPrice - depositCost < sellPrice)
+            return sellUsage; //It costs more to AH then sell.
+
+        if (ahPrice - depositCost - sellPrice < bot->GetMoney() / 100)
+            return sellUsage; //Do not move to AH for items with less than 1% of bots gold markup.
+
+        if(depositCost > ahMoney && AI_VALUE(uint8, "bag space") > 80) 
+            return sellUsage; //We simply do not have the money to put this on AH.
+
+        if(!item) 
+            return ItemUsage::ITEM_USAGE_AH;   //We can't determine if this item is soulboud (yet) or broken so we assume we can AH this.      
 
         bool soulBound = (proto->Bonding == BIND_WHEN_EQUIPPED) && item->IsSoulBound();
 
         if (soulBound)
-            return ItemUsage::ITEM_USAGE_VENDOR; //Item is soulbound so can't AH.
+            return sellUsage; //Item is soulbound so can't AH.
 
-        uint32 ahPrice = GetBotAHSellMinPrice(proto);
         uint32 repairCost = RepairCostValue::RepairCost(item);
 
         if (ahPrice < proto->SellPrice + repairCost)
-            return ItemUsage::ITEM_USAGE_VENDOR;  //Repairing costs more than the AH profit.
+            return sellUsage;  //Repairing costs more than the AH profit.
 
         if (repairCost > 0)
             return ItemUsage::ITEM_USAGE_BROKEN_AH; //Keep until repaired so we can AH later.

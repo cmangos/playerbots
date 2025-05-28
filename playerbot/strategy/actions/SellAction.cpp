@@ -35,8 +35,10 @@ bool SellAction::Execute(Event& event)
 
     std::list<Item*> items = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
 
-    if (event.getSource() == "rpg action") 
+    if (event.getSource() == "rpg action")
+    {
         items.sort([](Item* i, Item* j) {return i->GetProto()->SellPrice * i->GetCount() < j->GetProto()->SellPrice * j->GetCount(); }); //Sell cheapest items first.
+    }
 
     for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
@@ -70,6 +72,14 @@ void SellAction::Sell(Player* requester, Item* item)
         Creature *pCreature = bot->GetNPCIfCanInteractWith(vendorguid,UNIT_NPC_FLAG_VENDOR);
         if (!pCreature)
             continue;     
+
+        if (!item->GetProto()->SellPrice)
+        {
+            if(ai->HasActivePlayerMaster())
+                out << "Unable to sell " << chat->formatItem(item);
+
+            continue;
+        }
 
         ObjectGuid itemguid = item->GetObjectGuid();
         uint32 count = item->GetCount();

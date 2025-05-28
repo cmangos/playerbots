@@ -555,4 +555,31 @@ namespace ai
         AiObjectContext* context;
         ItemUsage usage;
     };
+
+    class FindVendorItemsVisitor : public FindItemVisitor
+    {
+    public:
+        FindVendorItemsVisitor(Player* bot, bool includeAH) : FindItemVisitor(), bot(bot), includeAH(includeAH) { context = bot->GetPlayerbotAI()->GetAiObjectContext(); };
+
+        virtual bool Accept(const ItemPrototype* proto) { return false; }
+
+        virtual bool Accept(Item* item)
+        {
+            ItemUsage usage = AI_VALUE2_LAZY(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
+            if (usage == ItemUsage::ITEM_USAGE_VENDOR)
+                return true;
+
+            if (includeAH && (usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_BROKEN_AH))
+                return true;
+
+            if (usage == ItemUsage::ITEM_USAGE_NONE && item->GetProto()->SellPrice)
+                return true;
+
+            return false;
+        }
+    private:
+        Player* bot;
+        AiObjectContext* context;
+        bool includeAH;
+    };
 }

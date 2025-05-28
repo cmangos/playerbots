@@ -59,7 +59,7 @@ namespace ai
             return true;
         }
 
-    private:
+    protected:
         Player* bot;
     };
 
@@ -381,6 +381,12 @@ namespace ai
 
         virtual bool Accept(const ItemPrototype* proto)
         {
+
+#ifndef MANGOSBOT_ZERO
+            if (proto->Spells[0].SpellId == SPELL_ID_GENERIC_LEARN_PET && bot->HasSpell(proto->Spells[1].SpellId))
+                return false; //Do not include mount items the bot already learned.
+#endif
+
             for (int j = 0; j < MAX_ITEM_PROTO_SPELLS; j++)
             {
                 if (proto->Spells[j].SpellId == 26656)

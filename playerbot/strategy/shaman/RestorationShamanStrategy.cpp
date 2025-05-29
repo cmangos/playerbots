@@ -431,7 +431,7 @@ void RestorationShamanBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
-        NextAction::array(0, new NextAction("earthliving weapon", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -451,7 +451,7 @@ void RestorationShamanBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
-        NextAction::array(0, new NextAction("earthliving weapon", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -914,7 +914,7 @@ void RestorationShamanBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
-        NextAction::array(0, new NextAction("earthliving weapon", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -934,7 +934,7 @@ void RestorationShamanBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
-        NextAction::array(0, new NextAction("earthliving weapon", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

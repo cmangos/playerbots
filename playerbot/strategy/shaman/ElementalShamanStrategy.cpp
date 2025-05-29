@@ -386,7 +386,7 @@ void ElementalShamanBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>&
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
-        NextAction::array(0, new NextAction("flametongue weapon", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("flametongue weapon", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -406,7 +406,7 @@ void ElementalShamanBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>&
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
-        NextAction::array(0, new NextAction("flametongue weapon", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("flametongue weapon", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -834,7 +834,7 @@ void ElementalShamanBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>&
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
-        NextAction::array(0, new NextAction("flametongue weapon", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("flametongue weapon", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -854,7 +854,7 @@ void ElementalShamanBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>&
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
-        NextAction::array(0, new NextAction("flametongue weapon", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("flametongue weapon", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1282,7 +1282,7 @@ void ElementalShamanBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>&
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
-        NextAction::array(0, new NextAction("flametongue weapon", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("flametongue weapon", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1302,7 +1302,7 @@ void ElementalShamanBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>&
 
     triggers.push_back(new TriggerNode(
         "shaman weapon",
-        NextAction::array(0, new NextAction("flametongue weapon", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("flametongue weapon", ACTION_HIGH), NULL)));
 }
 
 void ElementalShamanBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

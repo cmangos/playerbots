@@ -245,6 +245,10 @@ void ProtectionPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*
     triggers.push_back(new TriggerNode(
         "righteous fury",
         NextAction::array(0, new NextAction("righteous fury", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -751,6 +755,10 @@ void ProtectionPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*
     triggers.push_back(new TriggerNode(
         "righteous fury",
         NextAction::array(0, new NextAction("righteous fury", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1254,6 +1262,10 @@ void ProtectionPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*
     triggers.push_back(new TriggerNode(
         "righteous fury",
         NextAction::array(0, new NextAction("righteous fury", ACTION_NORMAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

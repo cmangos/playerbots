@@ -445,23 +445,36 @@ namespace ai
 
         virtual uint32 GetItemId() override
         {
-            if (bot->GetSkillValue(129) >= 225)
+            int firstAidSkillValue = bot->GetSkillValue(129);
+#ifdef MANGOSBOT_TWO
+            if (firstAidSkillValue >= 400)
+                return 34722;
+            if (firstAidSkillValue >= 350)
+                return 34721;
+#endif
+#ifndef MANGOSBOT_ZERO
+            if (firstAidSkillValue >= 325)
+                return 21991;
+            if (firstAidSkillValue >= 300)
+                return 21990;
+#endif
+            if (firstAidSkillValue >= 225)
                 return 14530;
-            if (bot->GetSkillValue(129) >= 200)
+            if (firstAidSkillValue >= 200)
                 return 14529;
-            if (bot->GetSkillValue(129) >= 175)
+            if (firstAidSkillValue >= 175)
                 return 8545;
-            if (bot->GetSkillValue(129) >= 150)
+            if (firstAidSkillValue >= 150)
                 return 8544;
-            if (bot->GetSkillValue(129) >= 125)
+            if (firstAidSkillValue >= 125)
                 return 6451;
-            if (bot->GetSkillValue(129) >= 100)
+            if (firstAidSkillValue >= 100)
                 return 6450;
-            if (bot->GetSkillValue(129) >= 75)
+            if (firstAidSkillValue >= 75)
                 return 3531;
-            if (bot->GetSkillValue(129) >= 50)
+            if (firstAidSkillValue >= 50)
                 return 3530;
-            if (bot->GetSkillValue(129) >= 20)
+            if (firstAidSkillValue >= 20)
                 return 2581;
             return 1251;
         }

@@ -384,7 +384,7 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
 
         if (!groupTarget->GetDestination()->IsActive(player, info) || typeid(*groupTarget->GetDestination()) == typeid(RpgTravelDestination))
         {
-            player->GetPlayerbotAI()->TellDebug(requester,"Target is cooldowin down because a group member found it to be inactive.", "debug travel");
+            player->GetPlayerbotAI()->TellDebug(requester,"Target is cooling down because a group member found it to be inactive.", "debug travel");
             groupTarget->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
             continue;
         }

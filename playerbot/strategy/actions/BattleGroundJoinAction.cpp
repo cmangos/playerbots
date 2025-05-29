@@ -280,13 +280,10 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
         if (!member)
             continue;
 
-        if (member->GetLevel() < 70)
-        continue;
-
-        if (!member->GetPlayerbotAI())
+        if (member->GetLevel() < DEFAULT_MAX_LEVEL)
             continue;
 
-        if (member->GetLevel() < 70)
+        if (!member->GetPlayerbotAI())
             continue;
 
         if (member->GetGroup() == leaderGroup)

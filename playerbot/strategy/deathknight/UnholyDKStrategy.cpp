@@ -67,7 +67,9 @@ UnholyDKStrategy::UnholyDKStrategy(PlayerbotAI* ai) : GenericDKStrategy(ai)
 
 NextAction** UnholyDKStrategy::GetDefaultCombatActions()
 {
-	return NextAction::array(0, new NextAction("melee", ACTION_NORMAL), new NextAction("scourge strike" , ACTION_NORMAL + 3), NULL);
+	return NextAction::array(0, 
+		new NextAction("death and decay", ACTION_HIGH), new NextAction("ghoul frenzy", ACTION_IDLE + 2),
+		new NextAction("death coil", ACTION_IDLE + 1), new NextAction("melee" , ACTION_IDLE), NULL);
 }
 
 void UnholyDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
@@ -89,10 +91,6 @@ void UnholyDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 	triggers.push_back(new TriggerNode(
 		"blood strike",
 		NextAction::array(0, new NextAction("blood strike", ACTION_NORMAL + 4), NULL)));
-
-	triggers.push_back(new TriggerNode(
-		"often",
-		NextAction::array(0, new NextAction("ghoul frenzy", ACTION_NORMAL + 2), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"critical health",

@@ -60,7 +60,7 @@ FrostDKStrategy::FrostDKStrategy(PlayerbotAI* ai) : GenericDKStrategy(ai)
 NextAction** FrostDKStrategy::GetDefaultCombatActions()
 {
 	return NextAction::array(0, 
-			new NextAction("melee", ACTION_NORMAL), NULL);
+			new NextAction("melee", ACTION_IDLE), NULL);
 }
 
 void FrostDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)

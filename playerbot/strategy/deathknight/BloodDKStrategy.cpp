@@ -53,7 +53,6 @@ private:
 			/*A*/ NULL,
 			/*C*/ NULL);
 	}
-	
 };
 
 BloodDKStrategy::BloodDKStrategy(PlayerbotAI* ai) : GenericDKStrategy(ai)
@@ -64,10 +63,11 @@ BloodDKStrategy::BloodDKStrategy(PlayerbotAI* ai) : GenericDKStrategy(ai)
 NextAction** BloodDKStrategy::GetDefaultCombatActions()
 {
 	return NextAction::array(0,
-        new NextAction("melee", ACTION_NORMAL),
-		//new NextAction("heart strike", ACTION_NORMAL + 5), // for blood dps, not tank
-		new NextAction("blood strike", ACTION_NORMAL + 2),
-		new NextAction("death strike", ACTION_NORMAL + 4), NULL);
+		new NextAction("rune strike", ACTION_IDLE + 0.8f), new NextAction("icy touch", ACTION_IDLE + 0.7f),
+		new NextAction("heart strike", ACTION_IDLE + 0.6f), new NextAction("blood strike", ACTION_IDLE + 0.5f),
+		new NextAction("dancing rune weapon", ACTION_IDLE + 0.4f),
+		new NextAction("death coil", ACTION_IDLE + 0.3f), new NextAction("plague strike", ACTION_IDLE + 0.2f),
+		new NextAction("horn of winter", ACTION_IDLE + 0.1f), new NextAction("melee", ACTION_IDLE), NULL);
 }
 
 void BloodDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
@@ -98,11 +98,13 @@ void BloodDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 		"lose aggro",
 		NextAction::array(0, new NextAction("icy touch", ACTION_HIGH + 2), NULL)));
 
+	triggers.push_back(new TriggerNode(
+		"critical health", NextAction::array(0, new NextAction("vampiric blood", ACTION_HIGH + 5),
+			new NextAction("death strike", ACTION_HIGH + 1), NULL)));
+
     triggers.push_back(new TriggerNode(
-        "low health",
-        NextAction::array(0,
-            new NextAction("blood tap", ACTION_HIGH + 5),
-            new NextAction("vampiric blood", ACTION_HIGH + 4), NULL)));
+		"low health", NextAction::array(0, new NextAction("vampiric blood", ACTION_HIGH + 5),
+			new NextAction("death strike", ACTION_HIGH + 1), NULL)));
 
 	triggers.push_back(new TriggerNode(
 		"medium health",

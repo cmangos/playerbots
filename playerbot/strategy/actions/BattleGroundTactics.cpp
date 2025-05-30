@@ -4858,11 +4858,13 @@ bool ArenaTactics::Execute(Event& event)
 #ifndef MANGOSBOT_ZERO
     if (!bot->InBattleGround() || bot->IsDead())
     {
+        bool IsRandomBot = sRandomPlayerbotMgr.IsRandomBot(bot->GetGUIDLow()); 
         ai->ChangeStrategy("-arena", BotState::BOT_STATE_COMBAT);
         ai->ChangeStrategy("-arena", BotState::BOT_STATE_NON_COMBAT);
-        ai->ResetStrategies();
+        ai->ResetStrategies(!IsRandomBot);
         return false;
     }
+
     BattleGround* bg = bot->GetBattleGround();
     if (!bg)
         return false;
@@ -4925,7 +4927,7 @@ bool ArenaTactics::Execute(Event& event)
     }
 #endif
 
-    if (getName() == "move to center")
+    if (getName() == "move to center" && !bot->IsInCombat())
     {
         return moveToCenter(bg);
     }

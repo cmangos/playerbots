@@ -343,7 +343,7 @@ ItemUsage ItemUsageValue::Calculate()
                     uint32 currentAmmoId = bot->GetUInt32Value(PLAYER_AMMO_ID);
                     const ItemPrototype* currentAmmoproto = nullptr;
                     if (currentAmmoId)
-                        currentAmmoproto = sObjectMgr.GetItemPrototype(itemId);
+                        currentAmmoproto = sObjectMgr.GetItemPrototype(currentAmmoId);
 
                     float ammo = BetterStacks(proto, "ammo");
                     float needAmmo = (bot->getClass() == CLASS_HUNTER) ? 8 : 2;

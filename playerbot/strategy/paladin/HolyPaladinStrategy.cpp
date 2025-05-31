@@ -1094,7 +1094,8 @@ void HolyPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "medium mana",
-        NextAction::array(0, new NextAction("judgement of wisdom", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("divine illumination", ACTION_NORMAL + 3),
+                             new NextAction("judgement of wisdom", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "judgement of light",

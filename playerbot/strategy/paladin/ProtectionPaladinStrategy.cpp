@@ -245,10 +245,6 @@ void ProtectionPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*
     triggers.push_back(new TriggerNode(
         "righteous fury",
         NextAction::array(0, new NextAction("righteous fury", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "often",
-        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -261,6 +257,10 @@ void ProtectionPaladinBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNo
 {
     ProtectionPaladinBuffStrategy::InitNonCombatTriggers(triggers);
     PaladinBuffPveStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -273,6 +273,10 @@ void ProtectionPaladinBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNo
 {
     ProtectionPaladinBuffStrategy::InitNonCombatTriggers(triggers);
     PaladinBuffPvpStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -289,6 +293,10 @@ void ProtectionPaladinBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerN
 {
     ProtectionPaladinBuffStrategy::InitNonCombatTriggers(triggers);
     PaladinBuffRaidStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply oil", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -755,10 +763,6 @@ void ProtectionPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*
     triggers.push_back(new TriggerNode(
         "righteous fury",
         NextAction::array(0, new NextAction("righteous fury", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "often",
-        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -771,6 +775,10 @@ void ProtectionPaladinBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNo
 {
     ProtectionPaladinBuffStrategy::InitNonCombatTriggers(triggers);
     PaladinBuffPveStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -783,6 +791,10 @@ void ProtectionPaladinBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNo
 {
     ProtectionPaladinBuffStrategy::InitNonCombatTriggers(triggers);
     PaladinBuffPvpStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -795,6 +807,10 @@ void ProtectionPaladinBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerN
 {
     ProtectionPaladinBuffStrategy::InitNonCombatTriggers(triggers);
     PaladinBuffRaidStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply oil", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1262,10 +1278,6 @@ void ProtectionPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*
     triggers.push_back(new TriggerNode(
         "righteous fury",
         NextAction::array(0, new NextAction("righteous fury", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "often",
-        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1278,6 +1290,10 @@ void ProtectionPaladinBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNo
 {
     ProtectionPaladinBuffStrategy::InitNonCombatTriggers(triggers);
     PaladinBuffPveStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1290,6 +1306,10 @@ void ProtectionPaladinBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNo
 {
     ProtectionPaladinBuffStrategy::InitNonCombatTriggers(triggers);
     PaladinBuffPvpStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBuffRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1302,6 +1322,10 @@ void ProtectionPaladinBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerN
 {
     ProtectionPaladinBuffStrategy::InitNonCombatTriggers(triggers);
     PaladinBuffRaidStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply oil", ACTION_NORMAL), NULL)));
 }
 
 void ProtectionPaladinBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

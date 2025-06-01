@@ -611,10 +611,16 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             BotUseItemSpell* spell = new BotUseItemSpell(bot, spellInfo, (successCasts > 0) ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
             spell->m_clientCast = true;
             
-#ifndef MANGOSBOT_ZERO
+#ifdef MANGOSBOT_ONE
             // used in item_template.spell_2 with spell_id with SPELL_GENERIC_LEARN in spell_1
-            if ((spellInfo->Id == SPELL_ID_GENERIC_LEARN || spellInfo->Id == SPELL_ID_GENERIC_LEARN_PET) && proto->Spells[1].SpellTrigger == ITEM_SPELLTRIGGER_LEARN_SPELL_ID)
+            if (spellInfo->Id == SPELL_ID_GENERIC_LEARN && proto->Spells[1].SpellTrigger == ITEM_SPELLTRIGGER_LEARN_SPELL_ID)
                 spell->m_currentBasePoints[EFFECT_INDEX_0] = proto->Spells[1].SpellId; 
+#endif
+#ifdef MANGOSBOT_TWO
+            // used in item_template.spell_2 with spell_id with SPELL_GENERIC_LEARN in spell_1
+            if ((spellInfo->Id == SPELL_ID_GENERIC_LEARN
+                || spellInfo->Id == SPELL_ID_GENERIC_LEARN_PET) && proto->Spells[1].SpellTrigger == ITEM_SPELLTRIGGER_LEARN_SPELL_ID)
+                spell->m_currentBasePoints[EFFECT_INDEX_0] = proto->Spells[1].SpellId;
 #endif
 
             // Spend the item if used in the spell

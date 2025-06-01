@@ -247,6 +247,7 @@ PlayerbotAI::~PlayerbotAI()
 
 void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
 {
+    AiObjectContext* context = aiObjectContext;
     std::string mapString = WorldPosition(bot).isOverworld() ? std::to_string(bot->GetMapId()) : "I";
     auto pmo = sPerformanceMonitor.start(PERF_MON_TOTAL, "PlayerbotAI::UpdateAI " + mapString);
     
@@ -299,6 +300,11 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
 #ifdef MANGOSBOT_TWO
     //Remove gryphon
     if (!bot->IsMounted() && bot->GetMountID() && !bot->IsTaxiFlying())
+    {
+        Unmount();
+    }
+    //Remove bad mount.
+    if (bot->IsMounted() && !bot->IsTaxiFlying() && AI_VALUE2(uint32, "current mount speed", "self target") == 0)
     {
         Unmount();
     }
@@ -464,9 +470,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
         {
             uint32 itemId = bot->GetUInt32Value(PLAYER_AMMO_ID);
             if (itemId && bot->GetItemCount(itemId))
-            {
-                AiObjectContext* context = aiObjectContext;
-
+            {                
                 std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", this->chatHelper.formatQItem(itemId));
 
                 for (auto item : items)

@@ -232,6 +232,10 @@ void HolyPaladinBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 void HolyPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinBuffStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply oil", ACTION_NORMAL), NULL)));
 }
 
 void HolyPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -739,6 +743,10 @@ void HolyPaladinBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 void HolyPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinBuffStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply oil", ACTION_NORMAL), NULL)));
 }
 
 void HolyPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1312,6 +1320,10 @@ void HolyPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tri
     triggers.push_back(new TriggerNode(
         "seal",
         NextAction::array(0, new NextAction("seal of light", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply oil", ACTION_NORMAL), NULL)));
 }
 
 void HolyPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

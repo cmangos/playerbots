@@ -382,7 +382,7 @@ namespace ai
         virtual bool Accept(const ItemPrototype* proto)
         {
 
-#ifndef MANGOSBOT_ZERO
+#ifdef MANGOSBOT_TWO
             if (proto->Spells[0].SpellId == SPELL_ID_GENERIC_LEARN_PET && bot->HasSpell(proto->Spells[1].SpellId))
                 return false; //Do not include mount items the bot already learned.
 #endif

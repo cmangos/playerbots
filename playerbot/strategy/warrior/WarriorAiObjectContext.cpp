@@ -261,7 +261,7 @@ namespace ai
             static Trigger* pummel(PlayerbotAI* ai) { return new PummelInterruptSpellTrigger(ai); }
             static Trigger* pummel_on_enemy_healer(PlayerbotAI* ai) { return new PummelInterruptEnemyHealerSpellTrigger(ai); }
             static Trigger* berserker_rage(PlayerbotAI* ai) { return new BerserkerRageBuffTrigger(ai); }
-            static Trigger* bloodthirst(PlayerbotAI* ai) { return new BloodthirstBuffTrigger(ai); }
+            static Trigger* bloodthirst(PlayerbotAI* ai) { return new BloodthirstTrigger(ai); }
             static Trigger* whirlwind(PlayerbotAI* ai) { return new WhirlwindTrigger(ai); }
             static Trigger* heroic_strike(PlayerbotAI* ai) { return new HeroicStrikeTrigger(ai); }
             static Trigger* thunder_clap_on_snare_target(PlayerbotAI* ai) { return new ThunderClapSnareTrigger(ai); }

@@ -110,6 +110,12 @@ float TravelNodePath::getCost(Unit* unit, uint32 cGold)
     Player* bot = dynamic_cast<Player*>(unit);
     if (bot)
     {
+        if (path.size() && path.back().getMapId() == 530 && bot->GetLevel() < 58) //Outland
+            return -1;
+
+        if (path.size() && path.back().getMapId() == 571 && bot->GetLevel() < 68) //Northrend
+            return -1;
+
         //Check if we can use this area trigger.
         if (getPathType() == TravelNodePathType::areaTrigger && pathObject)
         {

@@ -2172,6 +2172,12 @@ bool TravelMgr::IsLocationLevelValid(const WorldPosition& position, const Player
     bool canFightElite = info.GetBoolValue("can fight elite");
     uint32 botLevel = info.GetLevel();
 
+    if (position.getMapId() == 530 && info.GetLevel() < 58) //Outland
+        return false;
+
+    if (position.getMapId() == 571 && info.GetLevel() < 68) //Northrend
+        return false;
+
     if (info.GetBoolValue("can fight boss"))
         botLevel += 5;
     else if (canFightElite)

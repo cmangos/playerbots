@@ -280,6 +280,9 @@ ItemUsage ItemUsageValue::Calculate()
             return ItemUsage::ITEM_USAGE_EQUIP;
 #endif
 
+    if (forceUsage == ForceItemUsage::FORCE_USAGE_EQUIP)
+        return ItemUsage::ITEM_USAGE_KEEP;
+
     //DISENCHANT
     if ((proto->Class == ITEM_CLASS_ARMOR || proto->Class == ITEM_CLASS_WEAPON) && proto->Bonding != BIND_WHEN_PICKED_UP &&
         ai->HasSkill(SKILL_ENCHANTING) && proto->Quality >= ITEM_QUALITY_UNCOMMON)

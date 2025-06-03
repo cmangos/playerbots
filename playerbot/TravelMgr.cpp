@@ -2172,6 +2172,12 @@ bool TravelMgr::IsLocationLevelValid(const WorldPosition& position, const Player
     bool canFightElite = info.GetBoolValue("can fight elite");
     uint32 botLevel = info.GetLevel();
 
+    if (position.getMapId() == 530 && info.GetLevel() < 58) //Outland
+        return false;
+
+    if (position.getMapId() == 571 && info.GetLevel() < 68) //Northrend
+        return false;
+
     if (info.GetBoolValue("can fight boss"))
         botLevel += 5;
     else if (canFightElite)
@@ -2353,11 +2359,11 @@ std::vector<std::pair<WorldPosition, float>> TravelMgr::sqMapTransDistances(cons
 
     for (auto& mapTrans : mapTransfers->second)
     {
-        WorldPosition realEnd = mapTrans.GetPointTo();
+        WorldPosition portalOnEndMap = mapTrans.GetPointTo();
 
-        float sqDist = mapTrans.Distance(start, realEnd);
+        float sqDist = mapTrans.sqDist(start, portalOnEndMap);
 
-        retPortals.push_back(std::make_pair(realEnd, sqDist));
+        retPortals.push_back(std::make_pair(portalOnEndMap, sqDist));
     }
 
     return retPortals;
@@ -2365,6 +2371,7 @@ std::vector<std::pair<WorldPosition, float>> TravelMgr::sqMapTransDistances(cons
 
 float TravelMgr::MapTransDistance(const WorldPosition& start, const WorldPosition& end, bool toMap) const
 {
+    //These are the portals on the end map that start can reach.
     std::vector<std::pair<WorldPosition, float>> portals = sqMapTransDistances(start, end.getMapId());
 
     if (portals.empty())
@@ -2372,9 +2379,9 @@ float TravelMgr::MapTransDistance(const WorldPosition& start, const WorldPositio
 
     float minsqDist = FLT_MAX;
 
-    for (auto& [portal, distance] : portals)
+    for (auto& [portal, sqDistanceFromStartToPortal] : portals)
     {
-        float sqDist = portal.sqDistance2d(end);
+        float sqDist = sqDistanceFromStartToPortal + portal.sqDistance2d(end);
         if (sqDist < minsqDist)
             minsqDist = sqDist;
     }

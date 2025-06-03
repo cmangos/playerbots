@@ -73,19 +73,19 @@ namespace ai
         }
     };
 
-    class BloodthirstBuffTrigger : public BuffTrigger
+    class BloodthirstTrigger : public SpellCanBeCastedTrigger
     {
     public:
-        BloodthirstBuffTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "bloodthirst") {}
+        BloodthirstTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "bloodthirst") {}
         bool IsActive() override
         {
 #ifdef MANGOSBOT_ZERO
-            return BuffTrigger::IsActive() && (AI_VALUE2(uint8, "health", "current target") > 20 || ai->IsTank(bot));
+            return SpellCanBeCastedTrigger::IsActive() && (AI_VALUE2(uint8, "health", "current target") > 20 || ai->IsTank(bot));
 #elif MANGOSBOT_ONE
-            return BuffTrigger::IsActive() 
+            return SpellCanBeCastedTrigger::IsActive()
                 && (AI_VALUE2(uint8, "health", "current target") > 20 || AI_VALUE2(uint8, "rage", "self target") >= 40);
 #else
-            return BuffTrigger::IsActive();
+            return SpellCanBeCastedTrigger::IsActive();
 #endif
 
         }

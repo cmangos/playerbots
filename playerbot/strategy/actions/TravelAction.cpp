@@ -17,13 +17,23 @@ bool TravelAction::Execute(Event& event)
 {    
     TravelTarget * target = AI_VALUE(TravelTarget *, "travel target");
     
-    target->CheckStatus();    
+    target->CheckStatus();     
 
     return false;
 }
 
 bool TravelAction::isUseful()
 {
+    if (!AI_VALUE(bool,"travel target active"))
+        return false;
+
+    if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
+            return false;
+
+    if (sServerFacade.isMoving(bot))
+        return false;
+
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
     if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
         return true;

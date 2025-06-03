@@ -108,7 +108,7 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("check mount state", 1), new NextAction("move to travel target", 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "val::travel target active",
+        "often",
         NextAction::array(0, new NextAction("travel", 1), NULL)));
 }
 

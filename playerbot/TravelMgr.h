@@ -20,7 +20,7 @@ namespace ai
 
 		float FDist(const WorldPosition& start, const WorldPosition& end) const { return start.fDist(pointFrom) + portalLength + pointTo.fDist(end); }
 
-		float sqDist(const WorldPosition& start, const WorldPosition& end) const { return start.sqDistance2d(pointFrom) + portalLength + pointTo.sqDistance2d(end); }
+		float sqDist(const WorldPosition& start, const WorldPosition& end) const { return start.sqDistance2d(pointFrom) + (portalLength * portalLength) + pointTo.sqDistance2d(end); }
 
 		WorldPosition GetPointFrom() const { return pointFrom; }
 		WorldPosition GetPointTo() const { return pointTo; }

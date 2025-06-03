@@ -596,6 +596,11 @@ bool CanUseItemOn::Calculate()
 		return guidP.IsCreature() && guidP.GetEntry() == 13016; //Deeprun Rat		
 	}
 
+	if(itemId == 52566)
+	{
+		return guidP.IsCreature() && guidP.GetEntry() == 39623; //Gnome Citizen
+	}
+
 	if (guidP.IsUnit())
 		unit = guidP.GetUnit(bot->GetInstanceId());
 	else if (guidP.IsGameObject())

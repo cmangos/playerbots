@@ -747,6 +747,7 @@ void TravelTarget::SetTarget(TravelDestination* tDestination1, WorldPosition* wP
     wPosition = wPosition1;
     tDestination = tDestination1;
     groupMember = GuidPosition();
+    relevance = 0;
     forced = false;
 
     SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
@@ -756,6 +757,7 @@ void TravelTarget::CopyTarget(TravelTarget* const target) {
     SetTarget(target->tDestination, target->wPosition);
     groupMember = target->groupMember;
     forced = target->forced;
+    relevance = target->relevance;
     extendRetryCount = target->extendRetryCount;
 }
 

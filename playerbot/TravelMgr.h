@@ -334,6 +334,10 @@ namespace ai
 		GuidPosition GetGroupmember() { return groupMember; }
 
 		bool IsGroupCopy() const { return groupMember; }
+		void SetRelevance(uint32 rel) { relevance = rel; }
+		uint32 GetRelevance() { return relevance; }
+
+
 		bool IsForced() const { return forced; }
 
 		bool IsConditionsActive(bool clear = false);
@@ -383,6 +387,7 @@ namespace ai
 		std::vector<std::string> travelConditions = {};
 		WorldPosition* wPosition = nullptr;
 		GuidPosition groupMember;
+		uint32 relevance = 0;
 	};
 
 	//General container for all travel destinations.

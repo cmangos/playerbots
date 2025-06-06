@@ -49,16 +49,6 @@ PlayerTravelInfo::PlayerTravelInfo(Player* player)
         value = AI_VALUE(uint32, valueName);
 }
 
-/*
-WorldPosition* TravelDestination::NearestPoint(const WorldPosition& pos) const {
-    return *std::min_element(points.begin(), points.end(), [pos](WorldPosition* i, WorldPosition* j) {return i->distance(pos) < j->distance(pos); });
-}
-
-std::vector <WorldPosition*> TravelDestination::NextPoint(const WorldPosition& pos) const {
-    return pos.GetNextPoint(GetPoints());
-}
-*/
-
 std::string EntryTravelDestination::GetShortName() const
 {
     switch (purpose)
@@ -746,8 +736,6 @@ TravelTarget::TravelTarget(PlayerbotAI* ai) : AiObject(ai)
 void TravelTarget::SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1) {
     wPosition = wPosition1;
     tDestination = tDestination1;
-    groupMember = GuidPosition();
-    forced = false;
 
     SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
 }
@@ -756,6 +744,7 @@ void TravelTarget::CopyTarget(TravelTarget* const target) {
     SetTarget(target->tDestination, target->wPosition);
     groupMember = target->groupMember;
     forced = target->forced;
+    relevance = target->relevance;
     extendRetryCount = target->extendRetryCount;
 }
 
@@ -881,7 +870,7 @@ void TravelTarget::CheckStatus()
         else if(IsForced()) return; //While traveling do not go into cooldown
     }
 
-    if (GetStatus() != TravelStatus::TRAVEL_STATUS_COOLDOWN && (!IsDestinationActive() || !IsConditionsActive())) //Target has become invalid. Stop.
+    if (GetStatus() != TravelStatus::TRAVEL_STATUS_COOLDOWN && ((!IsDestinationActive() && !IsForced()) || !IsConditionsActive())) //Target has become invalid. Stop.
     {
         ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);

@@ -170,7 +170,7 @@ namespace ai
             {
                 float distance = p->sqDistance2d(point);
 
-                if (distance >= minDist)
+                if (distance >= minDist && minPoint)
                     continue;
 
                 minPoint = p;   
@@ -291,32 +291,42 @@ namespace ai
         virtual const T* GetClosestSquare(const WorldPosition& point) const
         {
             float minDist = FLT_MAX;
-            const T* minSq;
+            const T* minSq = nullptr;
 
             for (auto& [id, sq] : subSquares)
             {
                 float distance = sq.sqDistance(point);
-                if (distance >= minDist)
+                if (distance >= minDist && minSq)
                     continue;
 
                 minSq = &sq;
                 minDist = distance;
             }
+
             return minSq;
         }
 
         virtual WorldPosition* GetClosestPoint(const WorldPosition& point) const
         {
-            return GetClosestSquare(point)->GetClosestPoint(point);
+            const T* nextSq = GetClosestSquare(point);
+
+            if (!nextSq)
+                return nullptr;
+
+            return nextSq->GetClosestPoint(point);
         }
 
         virtual WorldPosition* GetNextPoint(const WorldPosition& point) const
         {
             const T* nextSq = nullptr;
+
             if (urand(0, 1))
                 nextSq = GetClosestSquare(point);
             else
                 nextSq = &(std::next(subSquares.begin(), urand(0, subSquares.size() - 1))->second);
+
+            if (!nextSq)
+                return nullptr;
 
             return nextSq->GetNextPoint(point);
         }

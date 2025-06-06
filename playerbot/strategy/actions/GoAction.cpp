@@ -198,6 +198,12 @@ bool GoAction::TellHowToGo(TravelDestination* dest, Player* requester) const
     WorldPosition botPos = WorldPosition(bot);
     WorldPosition* point = dest->GetClosestPoint(botPos);
 
+    if (!point)
+    {
+        ai->TellPlayerNoFacing(requester, "I don't know how to travel to " + dest->GetTitle());
+        return false;
+    }
+
     std::vector<WorldPosition> beginPath, endPath;
     TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *point, beginPath, bot);
 

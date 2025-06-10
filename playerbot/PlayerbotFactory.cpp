@@ -2739,7 +2739,6 @@ void PlayerbotFactory::InitSkills()
         break;
     case CLASS_ROGUE:
         SetRandomSkill(SKILL_SWORDS);
-        SetRandomSkill(SKILL_AXES);
         SetRandomSkill(SKILL_BOWS);
         SetRandomSkill(SKILL_GUNS);
         SetRandomSkill(SKILL_MACES);

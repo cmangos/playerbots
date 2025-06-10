@@ -2757,6 +2757,9 @@ void PlayerbotFactory::InitSkills()
         SetRandomSkill(SKILL_2H_AXES);
         SetRandomSkill(SKILL_POLEARMS);
         break;
+    case CLASS_ROGUE:
+        SetRandomSkill(SKILL_AXES);
+        break;
 #endif
     }
 }

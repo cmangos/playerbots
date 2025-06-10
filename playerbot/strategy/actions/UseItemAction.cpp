@@ -744,7 +744,7 @@ bool UseAction::UseGameObject(Player* requester, Event& event, GameObject* gameO
     }
 
     ObjectGuid guid = gameObject->GetObjectGuid();
-    if (!sServerFacade.isSpawned(gameObject) || gameObject->IsInUse() || gameObject->GetGoState() != GO_STATE_READY)
+    if (!sServerFacade.isSpawned(gameObject) || gameObject->IsInUse() || gameObject->GetGoState() != GO_STATE_READY || gameObject->GetGoType() == GAMEOBJECT_TYPE_GENERIC)
     {
         std::ostringstream out; out << "I can't use " << chat->formatGameobject(gameObject);
         ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);

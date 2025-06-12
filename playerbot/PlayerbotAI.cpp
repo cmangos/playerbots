@@ -771,6 +771,11 @@ void PlayerbotAI::UpdateTalentSpec(PlayerTalentSpec spec)
         }
         else
         {
+            if (!HasRealPlayerMaster() && bot->GetFreeTalentPoints() > 0)
+            {
+                DoSpecificAction("auto talents");
+            }
+
             talentsTab = AiFactory::GetPlayerSpecTab(bot);
         }
 

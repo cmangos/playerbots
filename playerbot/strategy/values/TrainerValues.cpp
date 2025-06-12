@@ -129,6 +129,10 @@ std::vector<TrainerSpell const*> TrainableSpellsValue::Calculate()
                 if (state != TRAINER_SPELL_GREEN)
                     continue;
 
+                //Skip initial profession training.
+                if (bot->GetLevel() < 10 && sSpellMgr.IsProfessionSpell(trainerSpell->learnedSpell) && sSpellMgr.GetSpellRank(trainerSpell->learnedSpell) == 1)
+                    continue;
+
                 trainableSpells.push_back(trainerSpell);
             }
         }

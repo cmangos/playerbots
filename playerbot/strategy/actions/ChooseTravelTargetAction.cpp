@@ -41,8 +41,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
 
     TravelTarget newTarget = TravelTarget(ai);
 
-    if (futureTravelPurpose == "pvp" || futureTravelPurpose == "city" || futureTravelPurpose == "petition" || futureTravelPurpose == "tabard"
-        || futureTravelPurpose.find("trainer") == 0 || futureTravelPurpose == "mount")
+    if (futureTravelPurpose == "pvp")
         newTarget.SetForced(true);
 
     newTarget.SetRelevance(targetRelevance);

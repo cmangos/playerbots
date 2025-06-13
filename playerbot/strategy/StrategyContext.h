@@ -130,6 +130,7 @@ namespace ai
             creators["debug loot"] = &StrategyContext::debug_loot;
             creators["debug log"] = &StrategyContext::debug_log;
             creators["debug llm"] = [](PlayerbotAI* ai) { return new DebugLLMStrategy(ai); };
+            creators["debug stuck"] = [](PlayerbotAI* ai) { return new DebugStuckStrategy(ai); };
             creators["debug logname"] = &StrategyContext::debug_logname;
             creators["rtsc"] = &StrategyContext::rtsc;
             creators["rtsc jump"] = &StrategyContext::rtsc_jump;

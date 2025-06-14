@@ -142,6 +142,11 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
 
     aiObjectContext = AiFactory::createAiObjectContext(bot, this);
 
+    if (!HasRealPlayerMaster() && bot->GetFreeTalentPoints() > 0)
+    {
+        DoSpecificAction("auto talents");
+    }
+
     UpdateTalentSpec();
 
     engines[(uint8)BotState::BOT_STATE_COMBAT] = AiFactory::createCombatEngine(bot, this, aiObjectContext);
@@ -771,11 +776,6 @@ void PlayerbotAI::UpdateTalentSpec(PlayerTalentSpec spec)
         }
         else
         {
-            if (!HasRealPlayerMaster() && bot->GetFreeTalentPoints() > 0)
-            {
-                DoSpecificAction("auto talents");
-            }
-
             talentsTab = AiFactory::GetPlayerSpecTab(bot);
         }
 

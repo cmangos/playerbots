@@ -414,7 +414,10 @@ void RandomPlayerbotMgr::LogPlayerLocation()
                     }
 
                     out << (bot->IsInCombat() ? "combat" : "safe") << ",";
-                    out << (bot->IsDead() ? (bot->GetCorpse() ? "ghost" : "dead") : "alive");
+                    out << (bot->IsDead() ? (bot->GetCorpse() ? "ghost" : "dead") : "alive") << ",";
+
+                    if (bot->GetGroup())
+                        WorldPosition(bot).printWKT({ bot, sObjectMgr.GetPlayer(bot->GetGroup()->GetLeaderGuid()) }, out, 1);
 
 
                     sPlayerbotAIConfig.log("player_location.csv", out.str().c_str());
@@ -488,7 +491,10 @@ void RandomPlayerbotMgr::LogPlayerLocation()
                 }
 
                 out << (bot->IsInCombat() ? "combat" : "safe") << ",";
-                out << (bot->IsDead() ? (bot->GetCorpse() ? "ghost" : "dead") : "alive");
+                out << (bot->IsDead() ? (bot->GetCorpse() ? "ghost" : "dead") : "alive") << ",";
+
+                if (bot->GetGroup())
+                    WorldPosition(bot).printWKT({ bot, sObjectMgr.GetPlayer(bot->GetGroup()->GetLeaderGuid()) }, out, 1);
 
                 sPlayerbotAIConfig.log("player_location.csv", out.str().c_str());
 

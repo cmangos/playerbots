@@ -4,6 +4,19 @@
 
 namespace ai
 {
+    template< typename... Args >
+    std::string string_sprintf(const char* format, Args... args) {
+        int length = std::snprintf(nullptr, 0, format, args...);
+        assert(length >= 0);
+
+        char* buf = new char[length + 1];
+        std::snprintf(buf, length + 1, format, args...);
+
+        std::string str(buf);
+        delete[] buf;
+        return str;
+    }
+
     class MoveStuckTrigger : public Trigger
     {
     public:
@@ -14,49 +27,36 @@ namespace ai
             if (ai->HasActivePlayerMaster())
                 return false;
 
-
             if (ai->GetGroupMaster() && !ai->GetGroupMaster()->GetPlayerbotAI())
                 return false;
 
-            LogCalculatedValue<WorldPosition>* posVal = dynamic_cast<LogCalculatedValue<WorldPosition>*>(context->GetUntypedValue("current position"));
-
             if (!ai->AllowActivity(ALL_ACTIVITY))
             {
-                posVal->Reset();
+                RESET_AI_VALUE(WorldPosition, "current position");
                 return false;
             }
 
             WorldPosition botPos(bot);
 
-            if (posVal->LastChangeDelay() > 5 * MINUTE)
+            uint32 timeSinceLastMove = AI_VALUE2(uint32, "time since last change", "current position");
+
+            if(timeSinceLastMove > 5 * MINUTE)
             {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in the same position for %d seconds", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), posVal->LastChangeDelay());
+                ai->TellDebug(ai->GetMaster(), "Stuck: Position did not change for " + std::to_string(timeSinceLastMove) + " seconds.", "debug stuck");
 
                 return true;
             }
 
-            bool longLog = false;
+            uint32 distanceMoved = AI_VALUE2(uint32, "distance moved since", 10 * MINUTE);
 
-            for (auto tPos : posVal->ValueLog())
+            if (distanceMoved > 0 && distanceMoved < 50.0f)
             {
-                uint32 timePassed = time(0) - tPos.second;
+                ai->TellDebug(ai->GetMaster(), "Stuck: Only moved " + std::to_string(distanceMoved) + " yards in the last 10 minutes.", "debug stuck");
 
-                if (timePassed > 10 * MINUTE)
-                {
-                    if (botPos.fDist(tPos.first) > 50.0f)
-                        return false;
-
-                    longLog = true;
-                }
+                return true;
             }
 
-            if (longLog)
-            {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in the same position for 10mins", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), posVal->LastChangeDelay());
-
-            }
-
-            return longLog;
+            return false;
         }
     };
 
@@ -73,13 +73,10 @@ namespace ai
             if (ai->GetGroupMaster() && !ai->GetGroupMaster()->GetPlayerbotAI())
                 return false;
 
-            LogCalculatedValue<WorldPosition>* posVal = dynamic_cast<LogCalculatedValue<WorldPosition>*>(context->GetUntypedValue("current position"));
-            MemoryCalculatedValue<uint32>* expVal = dynamic_cast<MemoryCalculatedValue<uint32>*>(context->GetUntypedValue("experience"));
-
             if (!ai->AllowActivity(ALL_ACTIVITY))
             {
-                posVal->Reset();
-                expVal->Reset();
+                RESET_AI_VALUE(WorldPosition, "current position");
+                RESET_AI_VALUE(uint32, "experience");
                 return false;
             }
 
@@ -91,14 +88,14 @@ namespace ai
 
             if (grid.x_coord < 0 || grid.x_coord >= MAX_NUMBER_OF_GRIDS)
             {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in grid %d,%d on map %d", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), grid.x_coord, grid.y_coord, botPos.getMapId());
+                ai->TellDebug(ai->GetMaster(), "Stuck: In invalid grid" + std::to_string(grid.x_coord) + "," + std::to_string(grid.y_coord), "debug stuck");
 
                 return true;
             }
 
             if (grid.y_coord < 0 || grid.y_coord >= MAX_NUMBER_OF_GRIDS)
             {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in grid %d,%d on map %d", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), grid.x_coord, grid.y_coord, botPos.getMapId());
+                ai->TellDebug(ai->GetMaster(), "Stuck: In invalid grid" + std::to_string(grid.x_coord) + "," + std::to_string(grid.y_coord), "debug stuck");
 
                 return true;
             }
@@ -106,7 +103,7 @@ namespace ai
 #ifdef MANGOSBOT_TWO
             if (cell.GridX() > 0 && cell.GridY() > 0 && !MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(botPos.getMapId(), 0, cell.GridX(), cell.GridY()) && !MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), botPos.getMapId(), 0, cell.GridX(), cell.GridY(), 0))
             {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in unloaded grid %d,%d on map %d", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), grid.x_coord, grid.y_coord, botPos.getMapId());
+                ai->TellDebug(ai->GetMaster(), "Stuck: In unloaded grid" + std::to_string(grid.x_coord) + "," + std::to_string(grid.y_coord), "debug stuck");
 
                 return true;
             }
@@ -114,43 +111,36 @@ namespace ai
             if (cell.GridX() > 0 && cell.GridY() > 0 && !MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(botPos.getMapId(), cell.GridX(), cell.GridY()) 
                 && !MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), botPos.getMapId(), cell.GridX(), cell.GridY()))
             {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in unloaded grid %d,%d on map %d", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), grid.x_coord, grid.y_coord, botPos.getMapId());
+                ai->TellDebug(ai->GetMaster(), "Stuck: In unloaded grid" + std::to_string(grid.x_coord) + "," + std::to_string(grid.y_coord), "debug stuck");
 
                 return true;
             }
 #endif
 
-            if (posVal->LastChangeDelay() > 10 * MINUTE)
+            uint32 timeSinceLastMove = AI_VALUE2(uint32, "time since last change", "current position");
+
+            if (timeSinceLastMove > 10 * MINUTE)
             {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in the same position for %d seconds", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), posVal->LastChangeDelay());
+                ai->TellDebug(ai->GetMaster(), "Stuck: Position did not change for " + std::to_string(timeSinceLastMove) + " seconds.", "debug stuck");
 
                 return true;
             }
 
-            if (expVal->LastChangeDelay() < 15 * MINUTE)
+            uint32 timeSinceLastXp = AI_VALUE2(uint32, "time since last change", "experience");
+
+            if (timeSinceLastXp < 15 * MINUTE)
                 return false;
 
-            bool longLog = false;
+            uint32 distanceMoved = AI_VALUE2(uint32, "distance moved since", 15 * MINUTE);
 
-            for (auto tPos : posVal->ValueLog())
+            if (distanceMoved > 0 && distanceMoved < 50.0f)
             {
-                uint32 timePassed = time(0) - tPos.second;
+                ai->TellDebug(ai->GetMaster(), "Stuck: Only moved " + std::to_string(distanceMoved) + " yards in the last 10 minutes.", "debug stuck");
 
-                if (timePassed > 15 * MINUTE)
-                {
-                    if (botPos.fDist(tPos.first) > 50.0f)
-                        return false;
-
-                    longLog = true;
-                }
+                return true;
             }
 
-            if (longLog)
-            {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in the same position for 15mins", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), posVal->LastChangeDelay());
-            }
-
-            return longLog;
+            return false;
         }
     };
 
@@ -175,18 +165,18 @@ namespace ai
 
             WorldPosition botPos(bot);
 
-            MemoryCalculatedValue<bool>* combatVal = dynamic_cast<MemoryCalculatedValue<bool>*>(context->GetUntypedValue("combat::self target"));
-
-            if (combatVal->LastChangeDelay() > 5 * MINUTE)
+            uint32 timeSinceCombatChange = AI_VALUE2(uint32, "time since last change", "combat::self target");
+           
+            if (timeSinceCombatChange > 5 * MINUTE)
             {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in combat for %d seconds", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), posVal->LastChangeDelay());
+                ai->TellDebug(ai->GetMaster(), "Stuck: Combat did not change for " + std::to_string(timeSinceCombatChange) + " seconds.", "debug stuck");
 
                 return true;
             }
 
             if (bot->duel && bot->duel->startTime - time(0) > 15 * MINUTE)
             {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in combat for %d seconds", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), posVal->LastChangeDelay());
+                ai->TellDebug(ai->GetMaster(), "Stuck: In Duel for " + std::to_string(bot->duel->startTime - time(0)) + " seconds.", "debug stuck");
 
                 return true;
             }
@@ -216,16 +206,18 @@ namespace ai
 
             WorldPosition botPos(bot);
 
-            if (MEM_AI_VALUE(bool,"combat::self target")->LastChangeDelay() > 15 * MINUTE)
+            uint32 timeSinceCombatChange = AI_VALUE2(uint32, "time since last change", "combat::self target");
+
+            if (timeSinceCombatChange > 15 * MINUTE)
             {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in combat for %d seconds", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), posVal->LastChangeDelay());
+                ai->TellDebug(ai->GetMaster(), "Stuck: Combat did not change for " + std::to_string(timeSinceCombatChange) + " seconds.", "debug stuck");
 
                 return true;
             }
 
             if (bot->duel && bot->duel->startTime - time(0) > 15 * MINUTE)
             {
-                //sLog.outBasic("Bot #%d %s:%d <%s> was in combat for %d seconds", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName(), posVal->LastChangeDelay());
+                ai->TellDebug(ai->GetMaster(), "Stuck: In Duel for " + std::to_string(bot->duel->startTime - time(0)) + " seconds.", "debug stuck");
 
                 return true;
             }

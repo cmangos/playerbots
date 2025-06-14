@@ -27,7 +27,7 @@ namespace ai
     public:
         LfgJoinAction(PlayerbotAI* ai, std::string name = "lfg join") : Action(ai, name) {}
         virtual bool Execute(Event& event) override;
-        virtual bool isUseful();
+        virtual bool isUseful() override;
 
     protected:
         bool JoinLFG();

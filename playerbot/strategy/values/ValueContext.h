@@ -100,6 +100,7 @@
 #include "TravelValues.h"
 #include "LootValues.h"
 #include "GlyphValues.h"
+#include "StuckValues.h"
 
 namespace ai
 {
@@ -444,6 +445,14 @@ namespace ai
             creators["should travel named"] = [](PlayerbotAI* ai) { return new ShouldTravelNamedValue(ai); };
             creators["in overworld"] = [](PlayerbotAI* ai) { return new InOverworldValue(ai); };
             creators["quest stage active"] = [](PlayerbotAI* ai) { return new QuestStageActiveValue(ai); };
+
+            //Stuck
+            creators["time since last change"] = [](PlayerbotAI* ai) { return new TimeSinceLastChangeValue(ai); };
+            creators["distance moved since"] = [](PlayerbotAI* ai) { return new DistanceMovedSinceValue(ai); };
+
+            
+            
+            
         };
     };
 }

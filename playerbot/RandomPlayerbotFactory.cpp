@@ -719,7 +719,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
         account_creations.push_back(std::async([player] {player->SaveToDB(); }));
     }
 
-    for (uint32 i = 0; i < sObjectAccessor.GetPlayers().size(); i++)
+    for (uint32 i = 0; i < account_creations.size(); i++)
     {
         bar2.step();
         account_creations[i].wait();

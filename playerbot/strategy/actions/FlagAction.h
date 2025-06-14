@@ -4,7 +4,7 @@
 
 namespace ai
 {
-    class FlagAction : public ChatCommandAction
+    class FlagAction : public ChatCommandAction, public Qualified
     {
     public:
         FlagAction(PlayerbotAI* ai) : ChatCommandAction(ai, "flag") {}

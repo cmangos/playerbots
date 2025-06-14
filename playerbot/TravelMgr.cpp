@@ -2226,7 +2226,7 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
         }
 
         if (std::get<2>(point) > 0)
-            pointMap[sqrt(pointRange.first)].push_back(point);
+            pointMap[pointRange.first].push_back(point);
     }
 
     sTravelMgr.GetPartitionsLock(false);

@@ -369,7 +369,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
             stop << bot->GetObjectGuid().WriteAsPacked();
 #endif
             stop << bot->m_movementInfo;
-            bot->GetSession()->HandleMovementOpcodes(stop);
+            QueuePacket(stop);
 
             bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
             bot->m_movementInfo.jump = MovementInfo::JumpInfo();
@@ -379,7 +379,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
             land << bot->GetObjectGuid().WriteAsPacked();
 #endif
             land << bot->m_movementInfo;
-            bot->GetSession()->HandleMovementOpcodes(land);
+            QueuePacket(land);
             sLog.outDetail("%s: Jump: Landed, landTime: %u", bot->GetName(), curTime);
 
             jumpTime = 0;
@@ -1822,7 +1822,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 highestPoint = point;
         }
 
-        bot->Relocate(dest_calculated.getX(), dest_calculated.getY(), dest_calculated.getZ());
+        bot->Relocate(highestPoint.getX(), highestPoint.getY(), highestPoint.getZ());
         //bot->m_movementInfo.ChangePosition(dest_calculated.getX(), dest_calculated.getY(), dest_calculated.getZ(), bot->GetOrientation());
         sLog.outDetail("%s: KNOCKBACK x: %f, y: %f, z: %f, time: %f, dist: %f, maxHeight: %f inPlace: %u, landTime: %u", bot->GetName(), dest_calculated.getX(), dest_calculated.getY(), dest_calculated.getZ(), timeToLand, distToLand, maxHeight, jumpInPlace, jumpTime);
         return;

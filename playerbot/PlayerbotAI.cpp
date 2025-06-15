@@ -7890,6 +7890,7 @@ bool PlayerbotAI::CanMove()
         sServerFacade.IsInRoots(bot) ||
         sServerFacade.IsFeared(bot) ||
         sServerFacade.IsCharmed(bot) ||
+        bot->IsStunned() ||
         bot->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION) ||
         bot->IsPolymorphed() ||
         bot->IsTaxiFlying() ||

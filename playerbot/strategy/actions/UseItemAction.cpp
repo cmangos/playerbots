@@ -189,7 +189,7 @@ bool RequiresItemToUse(const ItemPrototype* itemProto, PlayerbotAI* ai, Player* 
         return true;
 
     // Exception items                                  Jujus                                            Holy water
-    const std::unordered_set<uint32> itemExceptions = { 12450, 12451, 12455, 12457, 12458, 12459, 12460, 13180 };
+    const std::unordered_set<uint32> itemExceptions = { 12450, 12451, 12455, 12457, 12458, 12459, 12460, 13180, 7189 };
     if (itemExceptions.find(itemProto->ItemId) != itemExceptions.end())
         return false;
 
@@ -407,8 +407,8 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
     }
 #endif
 
-    // Check for item equipped
-    if (proto->InventoryType != INVTYPE_NON_EQUIP && !(itemUsed || !itemUsed->IsEquipped()))
+    // Check for item equipped, skip exceptions listed in RequiresItemToUse
+    if (proto->InventoryType != INVTYPE_NON_EQUIP && itemUsed && !itemUsed->IsEquipped())
     {
         if (verbose)
         {

@@ -2444,7 +2444,7 @@ bool JumpAction::Execute(ai::Event &event)
     {
         jumpInPlace = frand(0.0f, 1.0f) < sPlayerbotAIConfig.jumpInPlaceChance;
         jumpBackward = frand(0.0f, 1.0f) < sPlayerbotAIConfig.jumpBackwardChance;
-        if (sServerFacade.isMoving(bot))
+        if (sServerFacade.isMoving(bot) || bot->IsMounted())
         {
             jumpInPlace = false;
         }
@@ -2816,12 +2816,6 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
 
         if (!foundCollision)
         {
-            fx += jumper->GetCollisionWidth() * vcos;
-            fy += jumper->GetCollisionWidth() * vsin;
-        }
-
-        if (!foundCollision)
-        {
             // check distanct collision
             if (ascending)
                 fz += jumper->GetCollisionHeight();
@@ -2832,7 +2826,7 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
 #ifdef MANGOSBOT_TWO
             foundCollision = jumper->GetMap()->GetHitPosition(ox, oy, oz, fx, fy, fz, jumper->GetPhaseMask(), -0.5f);
 #else
-            foundCollision = jumper->GetMap()->GetHitPosition(ox, oy, oz, fx, fy, fz, -0.5f);
+            foundCollision = jumper->GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, -0.5f);
 #endif
 
             if (!foundCollision)
@@ -2881,6 +2875,8 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
 #else
                 jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, -0.5f);
 #endif
+                fz = fz_mod;
+                //fz = fz - CONTACT_DISTANCE - jumper->GetCollisionHeight();
             }
 
             WorldPosition destination = WorldPosition(src.getMapId(), fx, fy ,fz);
@@ -3201,7 +3197,7 @@ bool JumpAction::DoJump(const WorldPosition &dest, const WorldPosition& highestP
 
     // write jump info
     uint32 curTime = sWorld.GetCurrentMSTime();
-    uint32 jumpTime = curTime + sWorld.GetAverageDiff() + uint32(timeToLand * IN_MILLISECONDS);
+    uint32 jumpTime = curTime + sWorld.GetAverageDiff() * 2 + uint32(timeToLand * IN_MILLISECONDS);
     ai->SetJumpTime(jumpTime);
     bot->m_movementInfo.jump.zspeed = -vSpeed;
     bot->m_movementInfo.jump.cosAngle = vcos;

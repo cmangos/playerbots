@@ -350,7 +350,7 @@ namespace ai
                 creators["no felhunter"] = &TriggerFactoryInternal::no_felhunter;
                 creators["no felguard"] = &TriggerFactoryInternal::no_felguard;
                 creators["spell lock"] = &TriggerFactoryInternal::spell_lock;
-                creators["spell lock enemy healer"] = &TriggerFactoryInternal::spell_lock_enemy_healer;
+                creators["spell lock on enemy healer"] = &TriggerFactoryInternal::spell_lock_enemy_healer;
                 creators["seed of corruption on attacker"] = &TriggerFactoryInternal::seed_of_corruption_on_attacker;
                 creators["haunt"] = &TriggerFactoryInternal::haunt;
                 creators["molten core"] = &TriggerFactoryInternal::molten_core;

@@ -4045,11 +4045,25 @@ void PlayerbotFactory::InitGems()
                 {
                     ObjectGuid gem_GUID;
                     //uint64 gem_GUID = 0;
-                    uint32 SocketColor = proto->Socket[enchant_slot - SOCK_ENCHANTMENT_SLOT].Color;
-                    //uint32 SocketContent = proto->Socket[enchant_slot - SOCK_ENCHANTMENT_SLOT].Content;
+                    uint32 socketSlot = enchant_slot - SOCK_ENCHANTMENT_SLOT;
+                    uint32 SocketColor = proto->Socket[socketSlot].Color;
+                    if (!SocketColor)
+                    {
+                        // item has prismatic socket?
+                        if (item->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT))
+                        {
+                            // first not-colored socket OR normally used socket
+                            if (socketSlot == 0 || proto->Socket[socketSlot - 1].Color || (socketSlot + 1 < MAX_GEM_SOCKETS && !proto->Socket[socketSlot + 1].Color))
+                            {
+                                SocketColor = SOCKET_COLOR_RED | SOCKET_COLOR_YELLOW | SOCKET_COLOR_BLUE;
+                            }
+                        }
+                    }
+                    //uint32 SocketContent = proto->Socket[socketSlot].Content;
                     uint32 gem_id = 0;
                     uint8 botClass = bot->getClass();
                     uint8 botSpecTab = AiFactory::GetPlayerSpecTab(bot);
+
                     switch (SocketColor) {
                     case SOCKET_COLOR_META:
                         switch (botClass) {
@@ -4202,7 +4216,7 @@ void PlayerbotFactory::InitGems()
                     }
                     if (gem_id > 0)
                     {
-                        gem_placed[enchant_slot - SOCK_ENCHANTMENT_SLOT] = gem_id;
+                        gem_placed[socketSlot] = gem_id;
                         ItemPosCountVec dest;
                         InventoryResult res = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, gem_id, 1);
                         if (res == EQUIP_ERR_OK)

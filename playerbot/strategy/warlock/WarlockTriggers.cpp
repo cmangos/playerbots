@@ -176,34 +176,34 @@ bool FearPvpTrigger::IsActive()
         target->IsImmuneToSpellEffect(spellInfo, EFFECT_INDEX_0, false))
         return false;
 
-    // Check if bot is low on health
-    if (AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.lowHealth)
-        return false;
-
-    // Check if target is attacking the bot
-    if (target->GetSelectionGuid() != bot->GetObjectGuid())
-        return false;
-
+    Player* targetPlayer = dynamic_cast<Player*>(target);
     // Avoid fearing if already under CC
     for (const Aura* aura : ai->GetAuras(target))
     {
-        if (aura)
+        if (!aura)
+            continue;
+
+        const SpellEntry* auraSpell = aura->GetSpellProto();
+        if (!auraSpell)
+            continue;
+
+        for (int i = 0; i < 3; ++i)
         {
-            switch (aura->GetModifier()->m_auraname)
+            uint32 effect = auraSpell->EffectApplyAuraName[i];
+            switch (effect)
             {
-            case SPELL_AURA_MOD_STUN:
-            case SPELL_AURA_MOD_FEAR:
-            case SPELL_AURA_MOD_CHARM:
-            case SPELL_AURA_MOD_CONFUSE:
-            case SPELL_AURA_MOD_PACIFY:
-            case SPELL_AURA_MOD_ROOT:
-                if (aura->GetAuraDuration() >= 1500)
-                {
-                    return false;
-                }
-                break;
-            default:
-                break;
+                case SPELL_AURA_MOD_STUN:
+                case SPELL_AURA_MOD_FEAR:
+                case SPELL_AURA_MOD_CHARM:
+                case SPELL_AURA_MOD_CONFUSE:
+                case SPELL_AURA_MOD_PACIFY:
+                    if (aura->GetAuraDuration() >= 1500)
+                        return false;
+                    break;
+                case SPELL_AURA_MOD_ROOT:
+                    if (aura->GetAuraDuration() >= 1500 && !ai->IsRanged(targetPlayer))
+                        return false;
+                    break;
             }
         }
     }
@@ -218,18 +218,32 @@ bool FearPvpTrigger::IsActive()
 
         for (const Aura* aura : ai->GetAuras(attacker, false, false))
         {
-            const SpellEntry* auraSpellInfo = aura->GetSpellProto();
-            if (auraSpellInfo && auraSpellInfo->Id == spellId && aura->GetCasterGuid() == bot->GetObjectGuid())
+            if (aura && aura->GetSpellProto()->Id == spellId &&
+                aura->GetCasterGuid() == bot->GetObjectGuid() &&
+                aura->GetAuraDuration() > 1500)
             {
-                if (aura->GetAuraDuration() > 1500)
-                    return false; // Already feared
-                break;
+                return false;
             }
         }
     }
 
     // Check if target is within fear range
-    return target->GetDistance(bot) <= 20.0f;
+    if (target->GetDistance(bot) > 20.0f)
+        return false;
+
+    if (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.lowHealth &&
+        target->GetSelectionGuid() == bot->GetObjectGuid())
+        return true;
+
+    // Use fear as interrupt
+    if (target->IsNonMeleeSpellCasted(false, true, true))
+        return true;
+
+    // Use fear against healers
+    if (ai->IsHeal(targetPlayer) && target->IsAlive())
+        return true;
+
+    return false;
 }
 
 bool ConflagrateTrigger::IsActive()

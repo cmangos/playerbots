@@ -7922,9 +7922,11 @@ void PlayerbotAI::EnchantItemT(uint32 spellid, uint8 slot, Item* item)
       return;
    }
 
-   bot->ApplyEnchantment(pItem, PERM_ENCHANTMENT_SLOT, false);
-   pItem->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchantid, 0, 0);
-   bot->ApplyEnchantment(pItem, PERM_ENCHANTMENT_SLOT, true);
+   EnchantmentSlot enchantSlot = spellInfo->Effect[0] == SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC ? PRISMATIC_ENCHANTMENT_SLOT : PERM_ENCHANTMENT_SLOT;
+
+   bot->ApplyEnchantment(pItem, enchantSlot, false);
+   pItem->SetEnchantment(enchantSlot, enchantid, 0, 0);
+   bot->ApplyEnchantment(pItem, enchantSlot, true);
 
    sLog.outDetail("%s: items was enchanted successfully!", bot->GetName());
 }

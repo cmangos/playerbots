@@ -173,7 +173,7 @@ bool FearPvpTrigger::IsActive()
         return false;
 
     if (target->GetDiminishing(DIMINISHING_FEAR_CHARM_BLIND) >= DIMINISHING_LEVEL_IMMUNE ||
-        target->IsImmuneToSpellEffect(spellInfo, EFFECT_INDEX_0, false))
+        target->IsImmuneToSpell(spellInfo, false, (1 << EFFECT_INDEX_0), bot))
         return false;
 
     Player* targetPlayer = dynamic_cast<Player*>(target);

@@ -136,4 +136,37 @@ namespace ai
     protected:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
+
+    class FishStrategy : public Strategy
+    {
+    public:
+        FishStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "fish"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "fish"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "Automatically tries to fish in some water nearby.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {}; }
+#endif
+    protected:
+        virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        std::string modifier = "";
+    };
+
+    class TFishStrategy : public FishStrategy
+    {
+    public:
+        TFishStrategy(PlayerbotAI* ai) : FishStrategy(ai) { modifier = "::travel"; }
+
+        virtual std::string getName() { return "tfish"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "tfish"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "Fishing during travel.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {}; }
+#endif
+    };
 }

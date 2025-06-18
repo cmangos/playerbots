@@ -289,10 +289,26 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
     {
         isMoving = true;
 
-        // release loot if moving
-        if (!bot->GetLootGuid().IsEmpty())
+        GuidPosition lootObject(bot->GetLootGuid(), bot);
+
+        bool shouldRelease = true;
+
+        if (lootObject)
+        {
+            if (lootObject.IsGameObject() && lootObject.GetGameObjectInfo()->type == GAMEOBJECT_TYPE_FISHINGNODE)
+                shouldRelease = false;
+            else if (lootObject.GetWorldObject(bot->GetInstanceId()) && bot->GetDistance(lootObject.GetWorldObject(bot->GetInstanceId())) < INTERACTION_DISTANCE)
+                shouldRelease = false;
+        }
+
+        // release loot if moving and far from object.
+        if (shouldRelease)
+        {
             if (Loot* loot = sLootMgr.GetLoot(bot, bot->GetLootGuid()))
+            {
                 loot->Release(bot);
+            }
+        }
     }
     else if (isMoving)
     {

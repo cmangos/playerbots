@@ -1185,10 +1185,6 @@ void ProtectionWarriorCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& tr
     triggers.push_back(new TriggerNode(
         "shockwave on snare target",
         NextAction::array(0, new NextAction("shockwave on snare target", ACTION_INTERRUPT), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "shockwave",
-        NextAction::array(0, new NextAction("shockwave", ACTION_INTERRUPT), NULL)));
 }
 
 void ProtectionWarriorCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

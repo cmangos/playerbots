@@ -930,10 +930,6 @@ void ArmsWarriorBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
     WarriorBuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "berserker stance",
-        NextAction::array(0, new NextAction("berserker stance", ACTION_MOVE), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "feared",
         NextAction::array(0, new NextAction("berserker rage", ACTION_INTERRUPT), NULL)));
 }

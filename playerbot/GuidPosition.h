@@ -87,6 +87,7 @@ namespace ai
     public:
         AsyncGuidPosition() : GuidPosition() {}
         AsyncGuidPosition(GuidPosition guidP) : GuidPosition(guidP) {};
+        virtual void setAreaFlag(int16 flag) { areaFlag = flag; }
         virtual void FetchArea() { areaFlag = WorldPosition::getAreaFlag(); }
         virtual uint16 getAreaFlag() const { return areaFlag.has_value() ? areaFlag.value() : WorldPosition::getAreaFlag(); }
     private:

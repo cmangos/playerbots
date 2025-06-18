@@ -447,11 +447,25 @@ std::string RpgTravelDestination::GetTitle() const
     return out.str();
 }
 
+AreaTableEntry const* ZoneTravelDestination::GetArea() const
+{
+    for (uint32 areaid = 0; areaid <= sAreaStore.GetNumRows(); ++areaid)
+    {
+        AreaTableEntry const* areaEntry = sAreaStore.LookupEntry(areaid);
+        if (areaEntry && areaEntry->ID == GetEntry())
+        {
+            return areaEntry;
+        }
+    }
+
+    return nullptr;
+}
+
 bool ExploreTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 {
     AreaTableEntry const* area = GetArea();
 
-    if (level && (uint32)level > info.GetLevel() && info.GetLevel() < DEFAULT_MAX_LEVEL)
+    if (GetLevel() && (uint32)GetLevel() > info.GetLevel() && info.GetLevel() < DEFAULT_MAX_LEVEL)
         return false;
 
     return true;
@@ -474,19 +488,35 @@ bool ExploreTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& inf
     return !(currFields & val);    
 }
 
-AreaTableEntry const* ExploreTravelDestination::GetArea() const
-{
-    for (uint32 areaid = 0; areaid <= sAreaStore.GetNumRows(); ++areaid)
-    {
-        AreaTableEntry const* areaEntry = sAreaStore.LookupEntry(areaid);
-        if (areaEntry && areaEntry->ID == GetEntry())
-        {
-            return areaEntry;
-        }
-    }
 
-    return nullptr;
+bool FishTravelDestination::IsPossible(const PlayerTravelInfo& info) const
+{
+    uint16 skillValue = info.GetCurrentSkill((SkillType)SKILL_FISHING);
+    if (!skillValue) //Can not fish.
+        return false;
+
+    if (info.GetSkillMax((SkillType)SKILL_FISHING) <= skillValue) //Not able to increase skill.
+        return false;
+
+    int32 zone_skill = sObjectMgr.GetFishingBaseSkillLevel(GetEntry());    
+
+    if (!zone_skill) //no fishable zone or area should be 0
+        return false;
+
+    if (skillValue + 5 >= zone_skill) //There is some chance for success.
+        return false;
+
+    return true;
 }
+
+bool FishTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) const
+{
+    if (!IsPossible(info))
+        return false;    
+    bot->UpdateFishingSkill();
+    return true;
+}
+
 
 bool GrindTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 {
@@ -946,6 +976,7 @@ void TravelMgr::Clear()
                 delete dest;
     destinationMap.clear();
     pointsMap.clear();
+    fishPoints.clear();
 }
 
 int32 TravelMgr::GetAreaLevel(uint32 area_id)
@@ -1175,7 +1206,6 @@ void TravelMgr::LoadQuestTravelTable()
     GAI_VALUE(trainableSpellMap*, "trainable spell map");
     GAI_VALUE(std::vector<MountValue>, "full mount list");
     
-
     sLog.outString("Loading object locations.");
 
     EntryGuidps guidpMap = GAI_VALUE(EntryGuidps, "entry guidps");
@@ -1254,7 +1284,6 @@ void TravelMgr::LoadQuestTravelTable()
                 case TravelDestinationPurpose::GatherSkinning:
                 case TravelDestinationPurpose::GatherMining:
                 case TravelDestinationPurpose::GatherHerbalism:
-                case TravelDestinationPurpose::GatherFishing:
                     dests.push_back(AddDestination<GatherTravelDestination>(entry, purposeFlag));
                     break;
                 case TravelDestinationPurpose::Grind:
@@ -1281,7 +1310,7 @@ void TravelMgr::LoadQuestTravelTable()
                 tLoc->AddPoint(&pointsMap.at(guidP.GetRawValue()));
             }
         }       
-    }    
+    }     
 
     sLog.outString("Loading Explore locations.");
 
@@ -1310,6 +1339,10 @@ void TravelMgr::LoadQuestTravelTable()
         loc = AddDestination<ExploreTravelDestination>(area->ID, TravelDestinationPurpose::Explore);
         loc->AddPoint(&pointsMap.at(point.GetRawValue()));
     }
+
+    GetPopulatedGrids();
+
+    LoadFishLocations();
 
     //Analyse log files
     if (sPlayerbotAIConfig.hasLog("log_analysis.csv"))
@@ -1402,7 +1435,7 @@ void TravelMgr::LoadQuestTravelTable()
     sTravelNodeMap.printMap();
     sTravelNodeMap.printNodeStore();
     sTravelNodeMap.saveNodeStore();
-
+   
     //Creature/gos/zone export.
     if (sPlayerbotAIConfig.hasLog("creatures.csv"))
     {
@@ -2082,9 +2115,9 @@ void TravelMgr::LoadQuestTravelTable()
                     out << destination->GetShortName() << ",";
                     out << "\"" << destination->GetTitle() << "\",";
                     out << destination->GetSize() << ",";
-
+                    out << "\"GEOMETRYCOLLECTION(";
                     destination->printWKT(out);
-
+                    out << ")\"";
                     sPlayerbotAIConfig.log("travel_destinations.csv", out.str().c_str());
                 }
             }
@@ -2107,6 +2140,266 @@ void TravelMgr::LoadQuestTravelTable()
         WorldPosition::unloadMapAndVMaps(mapId);
     }
 #endif     
+}
+
+void TravelMgr::GetPopulatedGrids()
+{
+    sLog.outString("Finding populated grids.");
+
+    BarGoLink bar(sMapStore.GetNumRows());      
+
+    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
+        bar.step();
+
+        if (!sMapStore.LookupEntry(i))
+            continue;
+
+        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
+
+        GetPopulatedGrids(mapId);
+    }
+}
+
+void TravelMgr::GetPopulatedGrids(uint32 mapId)
+{
+    EntryGuidps guidpMap = GAI_VALUE(EntryGuidps, "entry guidps");
+
+    for (auto& [entry, guidPs] : guidpMap)
+    {
+        for (auto& guidP : guidPs)
+        {
+            if (guidP.getMapId() == mapId)
+            {
+                populatedGrids[guidP.getMapId()][guidP.getGridPair().x_coord][guidP.getGridPair().y_coord] = true;
+            }
+        }
+    }
+}
+
+uint32 TravelMgr::GetFishZone(const AsyncGuidPosition& pos) const
+{
+    uint32 zone, subzone;
+    int32 areaFlag = pos.getAreaFlag();
+
+    TerrainManager::GetZoneAndAreaIdByAreaFlag(zone, subzone, areaFlag, pos.getMapId());
+
+    int32 zone_skill = sObjectMgr.GetFishingBaseSkillLevel(subzone);
+    if (zone_skill)
+        return subzone;
+
+    return zone;
+}
+
+void TravelMgr::LoadFishLocations()
+{
+    sLog.outString("Loading Fish locations.");
+
+    fishPoints.clear();
+    fishMap.clear();
+    destinationMap[TravelDestinationPurpose::GatherFishing].clear();
+
+    auto result = WorldDatabase.Query("SELECT `name`, `map_id`, `position_x`, `position_y`, `position_z`, `orientation`, `description` FROM `ai_playerbot_named_location` WHERE `name` LIKE 'FISH_LOCATION%'");
+
+    if (!result)
+    {
+        GetFishLocations();
+        SaveFishLocations();
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        ++count;
+
+        Field* fields = result->Fetch();
+
+        std::string name = fields[0].GetCppString();
+        uint32 mapId = fields[1].GetUInt32();
+        float positionX = fields[2].GetFloat();
+        float positionY = fields[3].GetFloat();
+        float positionZ = fields[4].GetFloat();
+        float orientation = fields[5].GetFloat();
+        std::string description = fields[6].GetCppString();
+
+        AsyncGuidPosition* point = &fishPoints.emplace_back(GuidPosition(0, WorldPosition(mapId, positionX, positionY, positionZ, orientation)));
+
+        int32 areaFlag = stoi(description);
+        point->setAreaFlag(areaFlag);
+        uint32 zone = GetFishZone(*point);
+
+        TravelDestination* dest = AddDestination<GatherTravelDestination>(zone, TravelDestinationPurpose::GatherFishing);                
+
+        dest->AddPoint(point);
+        fishMap.AddPoint(point);
+
+    } while (result->NextRow());
+
+    sLog.outString(">> Loaded %u fish locations", count);
+    sLog.outString();
+}
+
+void TravelMgr::GetFishLocations()
+{
+    sLog.outString("Generating Fish locations.");
+
+    BarGoLink bar(1000);
+
+    std::vector<std::future<void>> calculations;
+
+    for (uint32 mapId = 0; mapId < 1000; mapId++)
+    {       
+        bool hashFishing = false;
+        for (uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)    // areaflag numbered from 0
+        {
+            AreaTableEntry const* area = sAreaStore.LookupEntry(i);
+
+            if (!area)
+                continue;
+
+            if (area->mapid != mapId)
+                continue;
+
+            if (!sObjectMgr.GetFishingBaseSkillLevel(area->ID))
+                continue;
+
+            hashFishing = true;
+            break;
+        }
+
+        if (!hashFishing)
+            continue;
+
+        calculations.push_back(std::async([this, mapId] { GetFishLocations(mapId); }));
+
+        bar.step();
+    }
+
+    std::reverse(calculations.begin(), calculations.end());
+
+    BarGoLink bar1(calculations.size());   
+
+    for (uint32 i = 0; i < calculations.size(); i++)
+    {
+        calculations[i].wait();
+        bar1.step();
+    }
+}
+
+void TravelMgr::GetFishLocations(uint32 mapId)
+{
+    const int8 subCellPerGrid = 64;
+    const float sizeOfSubCell = SIZE_OF_GRIDS / subCellPerGrid;
+
+    std::unordered_map<uint32, std::vector<AsyncGuidPosition>> fishSpots;
+
+    for (uint8 gridx = 0; gridx < 64; ++gridx)
+    {
+        for (uint8 gridy = 0; gridy < 64; ++gridy)
+        {
+            if (!populatedGrids[mapId][gridx][gridy])
+                continue;
+
+            GridPair grid(gridx, gridy);
+
+            WorldPosition gridPos(mapId, grid);
+
+            for (uint8 cellx = 0; cellx < subCellPerGrid; cellx++)
+            {
+                for (uint8 celly = 0; celly < subCellPerGrid; celly++)
+                {
+                    //Get spot in water.
+                    WorldPosition waterSpot = gridPos + WorldPosition(mapId, sizeOfSubCell * cellx, sizeOfSubCell * celly);
+
+                    waterSpot.setZ(waterSpot.getHeight(true));
+
+                    if (!waterSpot.isInWater())
+                        continue;
+
+                    //Get nearby location on ground.
+                    WorldPosition fishSpot;
+                    float botAngle = urand(0, 360);
+                    bool inWater = true;
+                    for (float angle = 0.0f; angle < 360.0f; angle += 45.0f)
+                    {
+                        fishSpot = waterSpot + WorldPosition(mapId, cos((angle + botAngle) / 180.0f * M_PI_F) * 10, sin((angle + botAngle) / 180.0f * M_PI_F) * 10);
+
+                        fishSpot.setZ(fishSpot.getHeight(false));
+
+                        if (!fishSpot.getTerrain())
+                            continue;
+
+                        if (fabs(fishSpot.getZ() - waterSpot.getZ()) > 10.0f)
+                            continue;
+
+                        inWater = fishSpot.isInWater();
+
+                        if (!inWater)
+                            break;
+                    }
+
+                    if (inWater)
+                        continue;
+
+                    AsyncGuidPosition fishPos(GuidPosition(0, fishSpot));
+                    fishPos.setO(fishPos.getAngleTo(waterSpot));
+
+                    fishPos.FetchArea();
+                    uint32 zone = GetFishZone(fishPos);
+
+                    fishSpots[zone].push_back(fishPos);                    
+                }
+            }
+        }
+    }
+
+    getDestinationMutex.lock();
+    for (auto& [zone, spots] : fishSpots)
+    {
+        TravelDestination* dest = AddDestination<GatherTravelDestination>(zone, TravelDestinationPurpose::GatherFishing);
+
+        for (auto& spot : spots)
+        {
+            WorldPosition* point = &fishPoints.emplace_back(spot);
+            dest->AddPoint(point);
+            fishMap.AddPoint(point);
+        }
+    }
+    getDestinationMutex.unlock();
+}
+
+void TravelMgr::SaveFishLocations()
+{
+    sLog.outString("Saving Fish locations.");
+
+    //Save fishpoints sorted by mapId, areaFlag, X, Y.
+    fishPoints.sort([](AsyncGuidPosition i, AsyncGuidPosition j) {
+        if (i.getMapId() != j.getMapId()) return i.getMapId() > j.getMapId();
+        if (i.getAreaFlag() != j.getAreaFlag()) return i.getAreaFlag() > j.getAreaFlag();
+        if (i.getX() != j.getX()) return i.getX() > j.getX();
+        return i.getY() > j.getY(); });
+
+    WorldDatabase.BeginTransaction();
+
+    BarGoLink bar(fishPoints.size());
+
+    uint32 count = 0;    
+
+    for (auto& fishPoint : fishPoints)
+    {
+        std::string name = "FISH_LOCATION_" + std::to_string(fishPoint.getMapId()) + "_" + std::to_string(fishPoint.getAreaFlag()) + "_" + std::to_string(count);
+        std::string description = std::to_string(fishPoint.getAreaFlag());
+        name.erase(remove(name.begin(), name.end(), '\''), name.end());
+
+        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_named_location` (`name`, `map_id`, `position_x`, `position_y`, `position_z`, `orientation`, `description`) VALUES ('%s', '%d', '%f', '%f', '%f', '%f', '%s')"
+            , name.c_str(), fishPoint.getMapId(), fishPoint.getX(), fishPoint.getY(), fishPoint.getZ(), fishPoint.getO(), description.c_str());
+
+        bar.step();
+        count++;
+    }
+
+    WorldDatabase.CommitTransaction();
 }
 
 DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const

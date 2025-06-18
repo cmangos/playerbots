@@ -231,6 +231,11 @@ namespace ai
     template <class T>
     class WorldPointSquareContainer : public WorldPointSquare {
     public:
+        void clear()
+        {
+            subSquares.clear();
+        }
+
         virtual float sqInDistance(const WorldPosition& point) const
         {
             float minDistSq = FLT_MAX;

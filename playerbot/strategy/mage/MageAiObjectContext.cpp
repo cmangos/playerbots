@@ -261,14 +261,14 @@ namespace ai
                 creators["frost ward"] = &TriggerFactoryInternal::frost_ward;
                 creators["blink"] = &TriggerFactoryInternal::blink;
                 creators["mana shield"] = &TriggerFactoryInternal::mana_shield;
-                creators["summon water frost"] = &TriggerFactoryInternal::summon_water_frost;
+                creators["summon water elemental"] = &TriggerFactoryInternal::summon_water_elemental;
                 creators["ice lance"] = &TriggerFactoryInternal::ice_lance;
                 creators["fire spells locked"] = &TriggerFactoryInternal::fire_spells_locked;
                 creators["cold snap"] = &TriggerFactoryInternal::cold_snap;
                 creators["ice barrier"] = &TriggerFactoryInternal::ice_barrier;
                 creators["hot streak"] = &TriggerFactoryInternal::hot_streak;
                 creators["free fireball"] = &TriggerFactoryInternal::free_fireball;
-                creators["finger of frost"] = &TriggerFactoryInternal::finger_of_frost;
+                creators["fingers of frost"] = &TriggerFactoryInternal::fingers_of_frost;
                 creators["mirror image"] = &TriggerFactoryInternal::mirror_image;                
                 creators["no improved scorch"] = &TriggerFactoryInternal::no_improved_scorch;
                 creators["no fire vulnerability"] = &TriggerFactoryInternal::no_fire_vulnerability;
@@ -282,7 +282,7 @@ namespace ai
             static Trigger* scorch(PlayerbotAI* ai) { return new ScorchTrigger(ai); }
             static Trigger* impact(PlayerbotAI* ai) { return new ImpactTrigger(ai); }
             static Trigger* ice_lance(PlayerbotAI* ai) { return new IceLanceTrigger(ai); }
-            static Trigger* summon_water_frost(PlayerbotAI* ai) { return new WaterElementalBoostTrigger(ai); }
+            static Trigger* summon_water_elemental(PlayerbotAI* ai) { return new WaterElementalBoostTrigger(ai); }
             static Trigger* mana_shield(PlayerbotAI* ai) { return new ManaShieldTrigger(ai); }
             static Trigger* blink(PlayerbotAI* ai) { return new BlinkTrigger(ai); }
             static Trigger* frost_ward(PlayerbotAI* ai) { return new FrostWardTrigger(ai); }
@@ -314,7 +314,7 @@ namespace ai
             static Trigger* ice_barrier(PlayerbotAI* ai) { return new IceBarrierTrigger(ai); }
             static Trigger* hot_streak(PlayerbotAI* ai) { return new HotStreakTrigger(ai); }
             static Trigger* free_fireball(PlayerbotAI* ai) { return new FireballOrFrostfireBoltFreeTrigger(ai); }
-            static Trigger* finger_of_frost(PlayerbotAI* ai) { return new FingersOfFrostTrigger(ai); }
+            static Trigger* fingers_of_frost(PlayerbotAI* ai) { return new FingersOfFrostTrigger(ai); }
             static Trigger* mirror_image(PlayerbotAI* ai) { return new MirrorImageTrigger(ai); }          
             static Trigger* no_improved_scorch(PlayerbotAI* ai) { return new NoImprovedScorchDebuffTrigger(ai); }
             static Trigger* no_fire_vulnerability(PlayerbotAI* ai) { return new NoFireVulnerabilityTrigger(ai); }
@@ -374,7 +374,7 @@ namespace ai
                 creators["mana shield"] = &AiObjectContextInternal::mana_shield;
                 creators["arcane explosion"] = &AiObjectContextInternal::arcane_explosion;
                 creators["cone of cold"] = &AiObjectContextInternal::cone_of_cold;
-                creators["summon water frost"] = &AiObjectContextInternal::summon_water_frost;
+                creators["summon water elemental"] = &AiObjectContextInternal::summon_water_elemental;
                 creators["ice lance"] = &AiObjectContextInternal::ice_lance;
                 creators["cold snap"] = &AiObjectContextInternal::cold_snap;
                 creators["dragon's breath"] = &AiObjectContextInternal::dragons_breath;
@@ -390,7 +390,7 @@ namespace ai
 
         private:
             static Action* ice_lance(PlayerbotAI* ai) { return new CastIceLanceAction(ai); }
-            static Action* summon_water_frost(PlayerbotAI* ai) { return new CastSummonWaterElementalAction(ai); }
+            static Action* summon_water_elemental(PlayerbotAI* ai) { return new CastSummonWaterElementalAction(ai); }
             static Action* cone_of_cold(PlayerbotAI* ai) { return new CastConeOfColdAction(ai); }
             static Action* arcane_explosion(PlayerbotAI* ai) { return new CastArcaneExplosionAction(ai); }
             static Action* mana_shield(PlayerbotAI* ai) { return new CastManaShieldAction(ai); }

@@ -1388,7 +1388,7 @@ void WarlockCursesStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers
 
     triggers.push_back(new TriggerNode(
         "no curse",
-        NextAction::array(0, new NextAction("curse of agony", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("curse of agony", ACTION_NORMAL), NULL)));
 }
 
 void WarlockCursesPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

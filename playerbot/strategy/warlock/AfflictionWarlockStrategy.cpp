@@ -1116,6 +1116,10 @@ void AfflictionWarlockPetRaidStrategy::InitNonCombatTriggers(std::list<TriggerNo
 void AfflictionWarlockCursesStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     WarlockCursesStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "no curse",
+        NextAction::array(0, new NextAction("curse of agony", ACTION_NORMAL + 2), NULL)));
 }
 
 void AfflictionWarlockCursesPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

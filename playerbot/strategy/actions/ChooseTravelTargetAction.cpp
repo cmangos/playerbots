@@ -500,7 +500,8 @@ bool RefreshTravelTargetAction::Execute(Event& event)
 
     for (uint8 i = 0; i < 5; i++)
     {
-        newPosition = oldDestination->GetNextPoint(*target->GetPosition());
+        std::list<uint8> chancesToGoFar = { 10,50,90 }; //Closest map, grid, cell.
+        newPosition = oldDestination->GetNextPoint(*target->GetPosition(), chancesToGoFar);
         if (newPosition && sTravelMgr.IsLocationLevelValid(*newPosition, info))
             break;        
     }
@@ -701,7 +702,8 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 PartitionedTravelList list;
                 for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, WorldPvpLocation, true, false, false, false, false))
                 {
-                    WorldPosition* point = destination->GetNextPoint(center);
+                    std::list<uint8> chancesToGoFar = { 10,50,90 }; //Closest map, grid, cell.
+                    WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
 
                     if (!point)
                         continue;
@@ -715,10 +717,8 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
     }
     else if (travelName.find("trainer") == 0)
     {
-        TrainerType type;
+        TrainerType type = TRAINER_TYPE_CLASS;
 
-        if (travelName == "trainer class")
-            type = TRAINER_TYPE_CLASS;
         if (travelName == "trainer mount")
             type = TRAINER_TYPE_MOUNTS;
         if (travelName == "trainer trade")

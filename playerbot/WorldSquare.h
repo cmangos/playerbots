@@ -8,6 +8,8 @@
 
 namespace ai
 {
+    //A square defined by two points min/max which are calculated when adding points to the child container.
+    //Distance calculations are aproximated outside the min/max range by calculating against the closest point on the square instead of any specific point contained inside of it.
     class WorldPointSquare
     {
     public:
@@ -38,8 +40,8 @@ namespace ai
             if (IsIn(point))
                 return sqInDistance(point);
             else
-                return sqOutDistance(point);   
-        }   
+                return sqOutDistance(point);
+        }
 
         virtual uint32 GetCurrentPartition(const WorldPosition& point, const std::vector<uint32>& distancePartitions) const
         {
@@ -62,7 +64,7 @@ namespace ai
             return 0;
         }
 
-        virtual void AddPoint(WorldPosition* point) 
+        virtual void AddPoint(WorldPosition* point)
         {
             if (min)
             {
@@ -183,14 +185,14 @@ namespace ai
                 if (distance >= minDist && minPoint)
                     continue;
 
-                minPoint = p;   
+                minPoint = p;
                 minDist = distance;
             }
 
             return minPoint;
         }
 
-        virtual WorldPosition* GetNextPoint(const WorldPosition& point) const
+        virtual WorldPosition* GetNextPoint(const WorldPosition& point, std::list<uint8>& chancesToGoFar, bool allowSame = false) const
         {
             WorldPosition* nextPoint = nullptr;
 
@@ -198,34 +200,19 @@ namespace ai
             {
                 nextPoint = points[urand(0, points.size() - 1)];
 
-                if (*nextPoint != point && points.size())
+                if (*nextPoint != point || (allowSame && points.size() == 1))
                     return nextPoint;
+
+                if (points.size() == 1)
+                    return nullptr;
             }
 
-            return nullptr;
-        }
-
-        static uint32 GetGridId(const WorldPosition* point)
-        {
-            uint32 gridX = point->getGridPair().x_coord;
-            uint32 gridY = point->getGridPair().y_coord;
-            return gridX + MAX_NUMBER_OF_GRIDS * gridY;
-        }
-
-        static uint32 GetCellId(const WorldPosition* point)
-        {
-            uint32 gridX = point->getGridPair().x_coord;
-            uint32 gridY = point->getGridPair().y_coord;
-            uint32 cellX = point->getCellPair().x_coord;
-            uint32 cellY = point->getCellPair().y_coord;
-            cellX -= MAX_NUMBER_OF_CELLS * gridX;
-            cellY -= MAX_NUMBER_OF_CELLS * gridY;
-            return cellX + MAX_NUMBER_OF_CELLS * cellY;
+            return nextPoint;
         }
 
         virtual void AddPoint(WorldPosition* point) {
             points.push_back(point);
-           
+
             WorldPointSquare::AddPoint(point);
         }
 
@@ -238,6 +225,7 @@ namespace ai
         std::vector<WorldPosition*> points;
     };
 
+    //A square that contains other squares (used for grid, map and world).
     template <class T>
     class WorldPointSquareContainer : public WorldPointSquare {
     public:
@@ -275,7 +263,7 @@ namespace ai
                     for (auto& [id, sq] : subSquares)
                     {
                         closestPartition.first = currentPartition;
-                        for(auto& p : sq.GetPoints())
+                        for (auto& p : sq.GetPoints())
                             closestPartition.second.push_back(p);
                     }
 
@@ -285,8 +273,8 @@ namespace ai
 
             for (auto& [id, sq] : subSquares) //Check all squares
             {
-                std::pair<uint32,std::vector<WorldPosition*>> subPartitions = sq.GetClosestPartition(point, distancePartitions);
-               
+                std::pair<uint32, std::vector<WorldPosition*>> subPartitions = sq.GetClosestPartition(point, distancePartitions);
+
                 if (closestPartition.first && subPartitions.first >= closestPartition.first)
                     continue;
 
@@ -307,7 +295,6 @@ namespace ai
         {
             float minDist = FLT_MAX;
             const T* minSq = nullptr;
-
             for (auto& [id, sq] : subSquares)
             {
                 float distance = sq.sqDistance(point);
@@ -331,19 +318,44 @@ namespace ai
             return nextSq->GetClosestPoint(point);
         }
 
-        virtual WorldPosition* GetNextPoint(const WorldPosition& point) const
+        virtual WorldPosition* GetNextPoint(const WorldPosition& point, std::list<uint8>& chancesToGoFar, bool allowSame = false) const
         {
             const T* nextSq = nullptr;
 
-            if (urand(0, 1))
-                nextSq = GetClosestSquare(point);
+            bool shouldGoFar = false;
+
+            if (chancesToGoFar.empty())
+                shouldGoFar = urand(0, 1);
             else
-                nextSq = &(std::next(subSquares.begin(), urand(0, subSquares.size() - 1))->second);
+            {
+                uint8 chanceToGoFar = chancesToGoFar.front();
+                shouldGoFar = chanceToGoFar && urand(0, 100) < chanceToGoFar;
+
+                chancesToGoFar.pop_front();
+            }
+
+            WorldPosition* nextPoint;
+
+            if (!shouldGoFar)
+            {
+                nextSq = GetClosestSquare(point);
+                if(nextSq)
+                    nextPoint = nextSq->GetNextPoint(point, chancesToGoFar);
+
+                if(nextPoint)
+                    return nextPoint;
+            }
+            
+            nextSq = &(std::next(subSquares.begin(), urand(0, subSquares.size() - 1))->second);
 
             if (!nextSq)
                 return nullptr;
 
-            return nextSq->GetNextPoint(point);
+            nextPoint = nextSq->GetNextPoint(point, chancesToGoFar, true);
+
+            MANGOS_ASSERT(nextPoint);
+
+            return nextPoint;
         }
 
         virtual void AddPoint(WorldPosition* point) override {

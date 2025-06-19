@@ -931,6 +931,10 @@ void EnhancementShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     ShamanStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
+        "maelstrom weapon heal",
+        NextAction::array(0, new NextAction("healing wave", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "maelstrom weapon",
         NextAction::array(0, new NextAction("lightning bolt", ACTION_HIGH + 3), NULL))); 
     

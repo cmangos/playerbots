@@ -455,6 +455,7 @@ namespace ai
     };
 
     HAS_AURA_TRIGGER_A(MaelstromWeaponTrigger, "maelstrom weapon");
+    HAS_AURA_TRIGGER_A(MaelstromWeaponHealTrigger, "maelstrom weapon");
 
     class WindShearInterruptEnemyHealerSpellTrigger : public InterruptEnemyHealerTrigger
     {

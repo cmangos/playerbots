@@ -52,6 +52,11 @@ bool MaelstromWeaponTrigger::IsActive()
     return ai->HasAura("maelstrom weapon", bot, true);
 }
 
+bool MaelstromWeaponHealTrigger::IsActive()
+{
+    return AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.lowHealth && ai->HasAura("maelstrom weapon", bot, true);
+}
+
 Player* GetLowestHealthPlayer(Group* group)
 {
     float lowestHealth = 100.0f;

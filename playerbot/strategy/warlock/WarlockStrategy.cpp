@@ -970,20 +970,12 @@ void WarlockStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("shadow bolt", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "drain soul",
-        NextAction::array(0, new NextAction("drain soul", ACTION_HIGH + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "target critical health",
         NextAction::array(0, new NextAction("shadowburn", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "corruption",
-        NextAction::array(0, new NextAction("corruption", ACTION_NORMAL + 1), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "no mana",
-        NextAction::array(0, new NextAction("shoot", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("shoot", ACTION_IDLE), NULL)));
 }
 
 void WarlockStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1050,6 +1042,10 @@ void WarlockPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "critical health",
         NextAction::array(0, new NextAction("drain life", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "drain soul",
+        NextAction::array(0, new NextAction("drain soul", ACTION_HIGH + 1), NULL)));
 }
 
 void WarlockPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

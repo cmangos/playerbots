@@ -770,8 +770,12 @@ void DemonologyWarlockStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "decimation",
-        NextAction::array(0, new NextAction("soul fire", ACTION_NORMAL + 2), NULL))); 
+        NextAction::array(0, new NextAction("soul fire", ACTION_NORMAL + 3), NULL))); 
     
+    triggers.push_back(new TriggerNode(
+        "corruption",
+        NextAction::array(0, new NextAction("corruption", ACTION_NORMAL + 2), NULL)));
+
     triggers.push_back(new TriggerNode(
         "molten core",
         NextAction::array(0, new NextAction("incinerate", ACTION_NORMAL + 1), NULL))); 

@@ -15,7 +15,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
     if(travelTarget->GetStatus() != TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
-    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    Player* requester = event.getOwner() ? event.getOwner() : (GetMaster() ? GetMaster() : bot);
     FutureDestinations* futureDestinations = AI_VALUE(FutureDestinations*, "future travel destinations");
     std::string futureTravelPurpose = AI_VALUE2(std::string, "manual string", "future travel purpose");
     uint32 targetRelevance = AI_VALUE2(int, "manual int", "future travel relevance");
@@ -46,7 +46,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
 
     newTarget.SetRelevance(targetRelevance);
 
-    if (!SetBestTarget(bot, &newTarget, destinationList))
+    if (!SetBestTarget(requester, &newTarget, destinationList))
     {
         SET_AI_VALUE2(bool, "no active travel destinations", futureTravelPurpose, true);
         ai->TellDebug(ai->GetMaster(), "No target set", "debug travel");

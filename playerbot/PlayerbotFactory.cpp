@@ -4047,6 +4047,7 @@ void PlayerbotFactory::InitGems()
                     //uint64 gem_GUID = 0;
                     uint32 socketSlot = enchant_slot - SOCK_ENCHANTMENT_SLOT;
                     uint32 SocketColor = proto->Socket[socketSlot].Color;
+#ifdef MANGOSBOT_TWO
                     if (!SocketColor)
                     {
                         // item has prismatic socket?
@@ -4059,6 +4060,7 @@ void PlayerbotFactory::InitGems()
                             }
                         }
                     }
+#endif
                     //uint32 SocketContent = proto->Socket[socketSlot].Content;
                     uint32 gem_id = 0;
                     uint8 botClass = bot->getClass();

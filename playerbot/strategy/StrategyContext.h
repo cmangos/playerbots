@@ -322,4 +322,14 @@ namespace ai
         static Strategy* quest(PlayerbotAI* ai) { return new DefaultQuestStrategy(ai); }
         static Strategy* accept_all_quests(PlayerbotAI* ai) { return new AcceptAllQuestsStrategy(ai); }
     };
+
+    class FishStrategyContext : public NamedObjectContext<Strategy>
+    {
+    public:
+        FishStrategyContext() : NamedObjectContext<Strategy>(false, true)
+        {
+            creators["fish"] = [](PlayerbotAI* ai) { return new FishStrategy(ai); };
+            creators["tfish"] = [](PlayerbotAI* ai) { return new TFishStrategy(ai); };
+        }   
+    };
 };

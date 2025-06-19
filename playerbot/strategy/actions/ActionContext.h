@@ -63,6 +63,7 @@
 #include "UpdateGearAction.h"
 #include "SetAvoidAreaAction.h"
 #include "GlyphAction.h"
+#include "FishAction.h"
 
 #include "OnyxiasLairDungeonActions.h"
 #include "MoltenCoreDungeonActions.h"
@@ -280,6 +281,10 @@ namespace ai
             creators["rpg item"] = &ActionContext::rpg_item;
 
             creators["auto set glyph"] = [](PlayerbotAI* ai) { return new AutoSetGlyphAction(ai); };
+
+            creators["move to fish"] = [](PlayerbotAI* ai) { return new MoveToFishAction(ai); };
+            creators["fish"] = [](PlayerbotAI* ai) { return new FishAction(ai); };
+            creators["use fishing bobber"] = [](PlayerbotAI* ai) { return new UseFishingBobberAction(ai); };
 
             // Bot States
             creators["set combat state"] = &ActionContext::set_combat_state;

@@ -116,15 +116,12 @@ namespace ai
 		float DistanceTo(const WorldPosition& pos) const { return sqrt(sqDistance(pos)); }
 
 		float GetRadiusMin() { return radiusMin; }
-		//bool HasPoint(const WorldPosition* pos) { return std::find(points.begin(), points.end(), pos) != points.end(); }
-		//const std::vector<WorldPosition*>& GetPoints() const {return points;};
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const { return false; }
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const { return false; }
 
 		virtual int32 GetEntry() const { return 0; }
-		//WorldPosition* NearestPoint(const WorldPosition& pos) const;
-		//std::vector<WorldPosition*> NextPoint(const WorldPosition& pos) const;
+		TravelDestinationPurpose GetPurpose() const { return TravelDestinationPurpose::None; }
 
 		virtual std::string GetShortName() const { return ""; };
 	protected:
@@ -234,20 +231,43 @@ namespace ai
 		virtual std::string GetTitle() const override;
 	};
 
-	//A location with zone exploration target(s) 
-	class ExploreTravelDestination : public EntryTravelDestination
+	//A location with zone
+	class ZoneTravelDestination : public EntryTravelDestination
 	{
 	public:
-		ExploreTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {
-			SetExpireFast(); SetCooldownShort(); if (auto area = GetArea()) { title = area->area_name[0]; level = area->area_level; }}
+		ZoneTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {
+			SetExpireFast(); SetCooldownShort(); if (auto area = GetArea()) { title = area->area_name[0]; level = area->area_level; }
+		}
+	protected:
+		virtual std::string GetZoneName() const { return title; }
+		AreaTableEntry const* GetArea() const;
+		int32 GetLevel() const { return level; }
+	private:
+		std::string title = "";
+		int32 level = 0;
+	};
+
+	//A location with zone exploration target(s) 
+	class ExploreTravelDestination : public ZoneTravelDestination
+	{
+	public:
+		ExploreTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : ZoneTravelDestination(purpose, 0, entry) {}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
-		virtual std::string GetTitle() const override { return title; }
-	private:
-		AreaTableEntry const* GetArea() const;
-		std::string title = "";
-		int32 level = 0;
+		virtual std::string GetTitle() const override { return GetZoneName(); }
+	};
+
+	//A travel target has places to fish at.
+	class FishTravelDestination : public ZoneTravelDestination
+	{
+	public:
+		FishTravelDestination() : ZoneTravelDestination(TravelDestinationPurpose::GatherFishing, 0, 0) {}
+		FishTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : ZoneTravelDestination(purpose, 0, entry) {}
+
+		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
+		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
+		virtual std::string GetTitle() const override { return GetZoneName(); }
 	};
 
 	//A location with zone exploration target(s) 
@@ -396,6 +416,19 @@ namespace ai
 	public:
 		TravelMgr() {};
 		void LoadQuestTravelTable();
+
+		void GetPopulatedGrids();
+		void GetPopulatedGrids(uint32 mapId);
+
+		uint32 GetFishZone(const AsyncGuidPosition& pos) const;
+
+		void LoadFishLocations();
+		void GetFishLocations();
+		void GetFishLocations(uint32 mapId);
+		void SaveFishLocations();
+
+		WorldPosition* GetFishSpot(WorldPosition start) { return fishMap.GetClosestPoint(start); }
+
 		EntryDestinationMap GetExploreLocs() const { return destinationMap.at(TravelDestinationPurpose::Explore); };
 		void SetMobAvoidArea();
 
@@ -434,11 +467,16 @@ namespace ai
 			return (T*)destinationMap[purpose][id].back();
 		}
 
+		bool populatedGrids[1024][64][64] = { false };
+
 		NullTravelDestination* nullTravelDestination = new NullTravelDestination();
 		WorldPosition* nullWorldPosition = new WorldPosition();
 		PurposeDestinationMap destinationMap;
 
 		std::unordered_map<uint64, AsyncGuidPosition> pointsMap;
+
+		FishTravelDestination fishMap;
+		std::list<AsyncGuidPosition> fishPoints;
 		std::unordered_map<uint32, int32> areaLevels;
 
 		std::mutex getDestinationMutex;

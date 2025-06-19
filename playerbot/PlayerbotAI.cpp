@@ -7866,7 +7866,11 @@ void PlayerbotAI::EnchantItemT(uint32 spellid, uint8 slot, Item* item)
       return;
    }
 
+#ifdef MANGOSBOT_TWO
    EnchantmentSlot enchantSlot = spellInfo->Effect[0] == SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC ? PRISMATIC_ENCHANTMENT_SLOT : PERM_ENCHANTMENT_SLOT;
+#else
+   EnchantmentSlot enchantSlot = PERM_ENCHANTMENT_SLOT;
+#endif;
 
    bot->ApplyEnchantment(pItem, enchantSlot, false);
    pItem->SetEnchantment(enchantSlot, enchantid, 0, 0);

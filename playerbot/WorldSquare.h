@@ -81,6 +81,16 @@ namespace ai
         }
 
         virtual uint32 GetSize() const = 0;
+
+    protected:
+        WorldPosition GetMin() const { return min; }
+        WorldPosition GetMax() const { return max; }
+        std::vector<WorldPosition> GetSquare() const {
+            WorldPosition omin = min, omax = max;
+            omin.setY(max.getY());
+            omax.setY(min.getY());
+            return { min,omin, max, omax };
+        }
     private:
         WorldPosition min, max;
     };
@@ -221,7 +231,7 @@ namespace ai
 
         const std::vector<WorldPosition*>& GetPoints() const { return points; }
 
-        void printWKT(std::ostringstream& out, const uint32 dim = 0, const bool loop = false) const;
+        void printWKT(std::ostringstream& out, bool squares) const;
 
         virtual uint32 GetSize() const override { return points.size(); }
     private:
@@ -343,7 +353,11 @@ namespace ai
 
         const std::vector<WorldPosition*> GetPoints() const { std::vector<WorldPosition*> points; for (auto& [id, sq] : subSquares) points.insert(points.end(), sq.GetPoints().begin(), sq.GetPoints().end()); return points; }
 
-        void printWKT(std::ostringstream& out, const uint32 dim = 0, const bool loop = false) const {for (auto& [id, sq] : subSquares) sq.printWKT(out, dim, loop);}
+        void printWKT(std::ostringstream& out, bool squares) const
+        {
+            for (auto& [id, sq] : subSquares)
+                sq.printWKT(out, squares);
+        }
 
         virtual uint32 GetSize() const override { return subSquares.begin()->second.GetSize(); }
     protected:

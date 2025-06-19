@@ -2115,8 +2115,9 @@ void TravelMgr::LoadQuestTravelTable()
                     out << destination->GetShortName() << ",";
                     out << "\"" << destination->GetTitle() << "\",";
                     out << destination->GetSize() << ",";
-                    out << "\"GEOMETRYCOLLECTION(";
-                    destination->printWKT(out);
+                    out << "\"MultiPoint(";
+                    destination->printWKT(out, false);
+                    out.seekp(-1, out.cur);
                     out << ")\"";
                     sPlayerbotAIConfig.log("travel_destinations.csv", out.str().c_str());
                 }

@@ -3,29 +3,17 @@
 
 
 using namespace ai;
-void WorldPointContainer::printWKT(std::ostringstream& out, const uint32 dim, const bool loop) const
+void WorldPointContainer::printWKT(std::ostringstream& out, bool squares) const
 {
-    switch (dim) {
-    case 0:
-        if (points.size() == 1)
-            out << "\"POINT(";
-        else
-            out << "\"MULTIPOINT(";
-        break;
-    case 1:
-        out << "\"LINESTRING(";
-        break;
-    case 2:
-        out << "\"POLYGON((";
+    if (!squares)
+    {
+        for (auto& p : points)
+            out << p->getDisplayX() << " " << p->getDisplayY() << ",";
     }
-
-    for (auto& p : points)
-        out << p->getDisplayX() << " " << p->getDisplayY() << (!loop && &p == &points.back() ? "" : ",");
-
-    if (loop)
-        out << points.front()->getDisplayX() << " " << points.front()->getDisplayY();
-
-    out << (dim == 2 ? "))\"," : ")\",");
+    {
+        for (auto& p : GetSquare())
+            out << p.getDisplayX() << " " << p.getDisplayY() << ",";
+    }
 }
 
 float MapWpSquare::sqOutDistance(const WorldPosition& point) const

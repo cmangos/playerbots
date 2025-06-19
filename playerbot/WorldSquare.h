@@ -97,6 +97,8 @@ namespace ai
         WorldPosition min, max;
     };
 
+    //A square that contains actual points (used for same cell storage).
+    //Inside distance calcultions are done against all actual points.
     class WorldPointContainer : public WorldPointSquare
     {
     public:
@@ -293,6 +295,13 @@ namespace ai
 
         virtual const T* GetClosestSquare(const WorldPosition& point) const
         {
+            //Try and find subsquare that has same cell,grid,map
+            uint32 subSquareId = GetSubSquareId(point);
+            auto thisSq = subSquares.find(subSquareId);
+            if (thisSq != subSquares.end() && thisSq->second.IsIn(point))
+                return &thisSq->second;
+
+            //Loop over all squares to find the one closest.
             float minDist = FLT_MAX;
             const T* minSq = nullptr;
             for (auto& [id, sq] : subSquares)
@@ -359,7 +368,7 @@ namespace ai
         }
 
         virtual void AddPoint(WorldPosition* point) override {
-            subSquares[GetSubSquareId(point)].AddPoint(point);
+            subSquares[GetSubSquareId(*point)].AddPoint(point);
             WorldPointSquare::AddPoint(point);
         }
 
@@ -373,7 +382,7 @@ namespace ai
 
         virtual uint32 GetSize() const override { return subSquares.begin()->second.GetSize(); }
     protected:
-        virtual uint32 GetSubSquareId(const WorldPosition* point) const = 0;
+        virtual uint32 GetSubSquareId(const WorldPosition& point) const = 0;
 
         bool HasSubSquare(uint32 id) const { return subSquares.find(id) != subSquares.end(); }
         std::vector<uint32> GetSubSquareIds() const { std::vector<uint32> ids; for (auto& [id, sq] : subSquares) ids.push_back(id); return ids; }
@@ -382,34 +391,38 @@ namespace ai
         std::unordered_map<uint32, T> subSquares;
     };
 
-    class CellWpSquare: public WorldPointContainer
+    //Contains all locations in a single cell. 
+    class CellWpSquare : public WorldPointContainer
     {
     };
 
-    class GridWpSquare : public WorldPointSquareContainer<CellWpSquare> 
+    //Contains all cell squares in a single grid.
+    class GridWpSquare : public WorldPointSquareContainer<CellWpSquare>
     {
     public:
-        virtual void AddPoint(WorldPosition* point) override {            
+        virtual void AddPoint(WorldPosition* point) override {
             WorldPointSquareContainer::AddPoint(point);
-        }  
+        }
     protected:
-        static uint32 GetCellId(const WorldPosition* point)
+        static uint32 GetCellId(const WorldPosition& point)
         {
-            uint32 gridX = point->getGridPair().x_coord;
-            uint32 gridY = point->getGridPair().y_coord;
-            uint32 cellX = point->getCellPair().x_coord;
-            uint32 cellY = point->getCellPair().y_coord;
+            uint32 gridX = point.getGridPair().x_coord;
+            uint32 gridY = point.getGridPair().y_coord;
+            uint32 cellX = point.getCellPair().x_coord;
+            uint32 cellY = point.getCellPair().y_coord;
             cellX -= MAX_NUMBER_OF_CELLS * gridX;
             cellY -= MAX_NUMBER_OF_CELLS * gridY;
             return cellX + MAX_NUMBER_OF_CELLS * cellY;
         }
 
-        virtual uint32 GetSubSquareId(const WorldPosition* point) const override { return GetCellId(point); };
+        virtual uint32 GetSubSquareId(const WorldPosition& point) const override { return GetCellId(point); };
     };
 
+    //Contains all grid squares on a map.
+    //Distance calculations with places out of the map use area triggers and transports.
     class MapWpSquare : public WorldPointSquareContainer<GridWpSquare>
     {
-    public:      
+    public:
         virtual bool IsIn(const WorldPosition& point) const override {
             if (point.getMapId() != mapId) return false; return WorldPointSquareContainer
                 ::IsIn(point);
@@ -422,31 +435,32 @@ namespace ai
             mapId = point->getMapId();
         }
     private:
-        static uint32 GetGridId(const WorldPosition* point)
+        static uint32 GetGridId(const WorldPosition& point)
         {
-            uint32 gridX = point->getGridPair().x_coord;
-            uint32 gridY = point->getGridPair().y_coord;
+            uint32 gridX = point.getGridPair().x_coord;
+            uint32 gridY = point.getGridPair().y_coord;
             return gridX + MAX_NUMBER_OF_GRIDS * gridY;
         }
 
-        virtual uint32 GetSubSquareId(const WorldPosition* point) const override { return GetGridId(point); };
+        virtual uint32 GetSubSquareId(const WorldPosition& point) const override { return GetGridId(point); };
         uint32 mapId;
     };
 
+    //Contains all map squares.
     class WorldWpSquare : public WorldPointSquareContainer<MapWpSquare>
     {
     public:
         virtual void AddPoint(WorldPosition* point) {
             WorldPointSquareContainer::AddPoint(point);
-        }      
+        }
     protected:
         virtual bool IsIn(const WorldPosition& point) const override { return true; }
         virtual bool OnMap(const WorldPosition& point) const { return HasSubSquare(point.getMapId()); }
         virtual uint32 ClosestMapId(const WorldPosition& point) const;
-        const MapEntry* ClosetMapEntry(const WorldPosition& point) const { return sMapStore.LookupEntry(ClosestMapId(point));}
+        const MapEntry* ClosetMapEntry(const WorldPosition& point) const { return sMapStore.LookupEntry(ClosestMapId(point)); }
         virtual bool IsOverWorld(const WorldPosition& point) const { const MapEntry* entry = ClosetMapEntry(point); return entry ? entry->IsContinent() : false; }
         virtual bool IsUnique() const { return GetSize() == 1; }
     private:
-        virtual uint32 GetSubSquareId(const WorldPosition* point) const override { return point->mapid; };
+        virtual uint32 GetSubSquareId(const WorldPosition& point) const override { return point.mapid; };
     };
 }

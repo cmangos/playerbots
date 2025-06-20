@@ -1243,6 +1243,10 @@ void PlayerbotAI::Reset(bool full)
         target->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
         target->SetExpireIn(1000);
 
+        RESET_AI_VALUE(FutureDestinations*, "future travel destinations");        
+        RESET_AI_VALUE2(std::string, "manual string", "future travel purpose");
+        RESET_AI_VALUE2(int, "manual int", "future travel relevance");
+
         InterruptSpell();
 
         StopMoving();

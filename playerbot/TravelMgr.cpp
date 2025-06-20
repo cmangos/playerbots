@@ -2168,11 +2168,13 @@ uint32 TravelMgr::GetFishZone(const AsyncGuidPosition& pos) const
 
     TerrainManager::GetZoneAndAreaIdByAreaFlag(zone, subzone, areaFlag, pos.getMapId());
 
-    int32 zone_skill = sObjectMgr.GetFishingBaseSkillLevel(subzone);
-    if (zone_skill)
+    if (sObjectMgr.GetFishingBaseSkillLevel(subzone))
         return subzone;
 
-    return zone;
+    if (sObjectMgr.GetFishingBaseSkillLevel(zone))
+        return zone;
+
+    return 0;
 }
 
 void TravelMgr::LoadFishLocations()
@@ -2212,6 +2214,9 @@ void TravelMgr::LoadFishLocations()
         int32 areaFlag = stoi(description);
         point->setAreaFlag(areaFlag);
         uint32 zone = GetFishZone(*point);
+
+        if (!zone)
+            continue;
 
         TravelDestination* dest = AddDestination<GatherTravelDestination>(zone, TravelDestinationPurpose::GatherFishing);                
 
@@ -2339,6 +2344,9 @@ void TravelMgr::GetFishLocations(uint32 mapId)
 
                     fishPos.FetchArea();
                     uint32 zone = GetFishZone(fishPos);
+
+                    if (!zone)
+                        continue;
 
                     fishSpots[zone].push_back(fishPos);                    
                 }

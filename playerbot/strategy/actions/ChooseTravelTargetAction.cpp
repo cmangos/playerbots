@@ -885,7 +885,7 @@ bool RequestQuestTravelTargetAction::Execute(Event& event)
             if (!flag)
                 continue;
 
-            destinationFetches.push_back({ flag, questId,0 });
+            destinationFetches.push_back({ flag, questId, 1000 + (bot->GetLevel() * bot->GetLevel()) * 75 });
 
             if (onlyClassQuest && destinationFetches.size() > 1) //Only do class quests if we have any.
             {

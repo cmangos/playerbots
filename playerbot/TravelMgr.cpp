@@ -2417,6 +2417,9 @@ DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 
 
                 if (maxDistance > 0 && dest->DistanceTo(center) > maxDistance)
                     continue;
+
+                if (dest->DistanceTo(center) == FLT_MAX) //Do not return destinations on maps you can't path to.
+                    continue;
                 
                 retDests.push_back(dest);
             }
@@ -2506,6 +2509,9 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
                 continue;
 
             float distance = position->distance(center);
+
+            if (distance > maxDistance)
+                continue;
             
             point = TravelPoint(dest, position, distance);
         }

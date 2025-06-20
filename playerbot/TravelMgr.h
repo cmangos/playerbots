@@ -121,7 +121,7 @@ namespace ai
 		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const { return false; }
 
 		virtual int32 GetEntry() const { return 0; }
-		TravelDestinationPurpose GetPurpose() const { return TravelDestinationPurpose::None; }
+		virtual TravelDestinationPurpose GetPurpose() const { return TravelDestinationPurpose::None; }
 
 		virtual std::string GetShortName() const { return ""; };
 	protected:
@@ -164,7 +164,7 @@ namespace ai
 		virtual int32 GetEntry() const override { return entry; }
 		virtual GameObjectInfo const* GetGoInfo() const { return goInfo; }
 		virtual CreatureInfo const* GetCreatureInfo() const { return creatureInfo; }
-		TravelDestinationPurpose GetPurpose() const { return purpose; }
+		virtual TravelDestinationPurpose GetPurpose() const override { return purpose; }
 		bool HasNpcFlag(uint32 flag) { if(GetCreatureInfo() && (GetCreatureInfo()->NpcFlags & flag)) return true; return false; }
 
 		virtual std::string GetShortName() const override;

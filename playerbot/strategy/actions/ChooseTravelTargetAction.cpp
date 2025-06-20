@@ -8,6 +8,14 @@
 
 using namespace ai;
 
+inline std::string GetTravelPurposeName(std::string purpose)
+{
+    if (Qualified::isValidNumberString(purpose) && TravelDestinationPurposeName.find(TravelDestinationPurpose(stoi(purpose))) != TravelDestinationPurposeName.end())
+        return TravelDestinationPurposeName.at(TravelDestinationPurpose(stoi(purpose)));
+
+    return purpose;
+}
+
 bool ChooseTravelTargetAction::Execute(Event& event)
 {
     TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
@@ -18,10 +26,8 @@ bool ChooseTravelTargetAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : (GetMaster() ? GetMaster() : bot);
     FutureDestinations* futureDestinations = AI_VALUE(FutureDestinations*, "future travel destinations");
     std::string futureTravelPurpose = AI_VALUE2(std::string, "manual string", "future travel purpose");
+    std::string futureTravelPurposeName = GetTravelPurposeName(futureTravelPurpose);
     uint32 targetRelevance = AI_VALUE2(int, "manual int", "future travel relevance");
-
-    if (Qualified::isValidNumberString(futureTravelPurpose))
-        futureTravelPurpose = TravelDestinationPurposeName.at(TravelDestinationPurpose(stoi(futureTravelPurpose)));
 
     if (!futureDestinations->valid())
     {
@@ -37,7 +43,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
 
     travelTarget->SetStatus(TravelStatus::TRAVEL_STATUS_NONE);
 
-    ai->TellDebug(ai->GetMaster(), "Got " + std::to_string(destinationList.size()) + " new destination ranges for " + futureTravelPurpose, "debug travel");
+    ai->TellDebug(ai->GetMaster(), "Got " + std::to_string(destinationList.size()) + " new destination ranges for " + futureTravelPurposeName, "debug travel");
 
     TravelTarget newTarget = TravelTarget(ai);
 
@@ -143,9 +149,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         out << "(Forced) ";
         
     std::string futureTravelPurpose = AI_VALUE2(std::string, "manual string", "future travel purpose");
-
-    if (Qualified::isValidNumberString(futureTravelPurpose))
-        futureTravelPurpose = TravelDestinationPurposeName.at(TravelDestinationPurpose(stoi(futureTravelPurpose)));
+    std::string futureTravelPurposeName = GetTravelPurposeName(futureTravelPurpose);
 
     std::string shortName = destination->GetShortName();    
 
@@ -232,7 +236,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
 
         out << "new," << "\"" << destination->GetTitle() << "\",\"" << message << "\"";
 
-        out << "," << futureTravelPurpose;
+        out << "," << futureTravelPurposeName;
 
         sPlayerbotAIConfig.log("travel_map.csv", out.str().c_str());        
     }
@@ -623,12 +627,7 @@ bool RequestTravelTargetAction::isUseful() {
 
     if (!isAllowed())
     {
-        std::string futureTravelPurpose = AI_VALUE2(std::string, "manual string", "future travel purpose");
-
-        if (Qualified::isValidNumberString(futureTravelPurpose))
-            futureTravelPurpose = TravelDestinationPurposeName.at(TravelDestinationPurpose(stoi(futureTravelPurpose)));
-
-        ai->TellDebug(ai->GetMaster(), "Skipped " + futureTravelPurpose + " because of skip chance", "debug travel");
+        ai->TellDebug(ai->GetMaster(), "Skipped " + GetTravelPurposeName(AI_VALUE2(std::string, "manual string", "future travel purpose")) + " because of skip chance", "debug travel");
         return false;
     }
 

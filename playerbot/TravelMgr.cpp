@@ -687,7 +687,7 @@ bool GatherTravelDestination::IsPossible(const PlayerTravelInfo& info) const
     if (info.GetSkillMax((SkillType)skillId) <= skillValue) //Not able to increase skill.
         return false;
 
-    if (reqSkillValue + 100 < skillValue) //Gray level = no skillup
+    if (GetPurpose() != TravelDestinationPurpose::GatherFishing && reqSkillValue + 100 < skillValue) //Gray level = no skillup
         return false;
 
     return true;

@@ -258,18 +258,6 @@ namespace ai
 		virtual std::string GetTitle() const override { return GetZoneName(); }
 	};
 
-	//A travel target has places to fish at.
-	class FishTravelDestination : public ZoneTravelDestination
-	{
-	public:
-		FishTravelDestination() : ZoneTravelDestination(TravelDestinationPurpose::GatherFishing, 0, 0) {}
-		FishTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : ZoneTravelDestination(purpose, 0, entry) {}
-
-		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
-		virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
-		virtual std::string GetTitle() const override { return GetZoneName(); }
-	};
-
 	//A location with zone exploration target(s) 
 	class GrindTravelDestination : public EntryTravelDestination
 	{
@@ -296,6 +284,7 @@ namespace ai
 	class GatherTravelDestination : public EntryTravelDestination
 	{
 	public:
+		GatherTravelDestination() : EntryTravelDestination(TravelDestinationPurpose::GatherFishing, 0) {}
 		GatherTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) : EntryTravelDestination(purpose, entry) {}
 
 		virtual bool IsPossible(const PlayerTravelInfo& info) const override;
@@ -475,7 +464,7 @@ namespace ai
 
 		std::unordered_map<uint64, AsyncGuidPosition> pointsMap;
 
-		FishTravelDestination fishMap;
+		GatherTravelDestination fishMap;
 		std::list<AsyncGuidPosition> fishPoints;
 		std::unordered_map<uint32, int32> areaLevels;
 

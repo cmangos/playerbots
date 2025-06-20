@@ -488,36 +488,6 @@ bool ExploreTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& inf
     return !(currFields & val);    
 }
 
-
-bool FishTravelDestination::IsPossible(const PlayerTravelInfo& info) const
-{
-    uint16 skillValue = info.GetCurrentSkill((SkillType)SKILL_FISHING);
-    if (!skillValue) //Can not fish.
-        return false;
-
-    if (info.GetSkillMax((SkillType)SKILL_FISHING) <= skillValue) //Not able to increase skill.
-        return false;
-
-    int32 zone_skill = sObjectMgr.GetFishingBaseSkillLevel(GetEntry());    
-
-    if (!zone_skill) //no fishable zone or area should be 0
-        return false;
-
-    if (skillValue + 5 >= zone_skill) //There is some chance for success.
-        return false;
-
-    return true;
-}
-
-bool FishTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) const
-{
-    if (!IsPossible(info))
-        return false;    
-    
-    return true;
-}
-
-
 bool GrindTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 {
     if (info.GetBoolValue("should sell") && (info.GetBoolValue("can sell") || info.GetBoolValue("can ah sell")))
@@ -660,7 +630,19 @@ bool GatherTravelDestination::IsPossible(const PlayerTravelInfo& info) const
     uint32 skillId = SKILL_NONE;
     uint32 reqSkillValue = 0;
 
-    if (GetEntry() > 0)
+    if (GetPurpose() == TravelDestinationPurpose::GatherFishing)
+    {
+        skillId = SKILL_FISHING;
+
+        int32 reqSkillValue = sObjectMgr.GetFishingBaseSkillLevel(GetEntry());
+
+        if (!reqSkillValue) //no fishable zone or area should be 0
+            return false;
+
+        if (reqSkillValue > 5)
+            reqSkillValue -= 5; //Give chance to levelup.
+    }
+    else if (GetEntry() > 0)
     {
         CreatureInfo const* cInfo = GetCreatureInfo();
 
@@ -702,9 +684,6 @@ bool GatherTravelDestination::IsPossible(const PlayerTravelInfo& info) const
     if (reqSkillValue > skillValue)
         return false;
 
-    if (info.GetLevel() * 5 <= skillValue) //Not able to increase skill.
-        return false;
-
     if (info.GetSkillMax((SkillType)skillId) <= skillValue) //Not able to increase skill.
         return false;
 
@@ -722,26 +701,30 @@ bool GatherTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info
     if (!IsPossible(info))
         return false;   
 
-    if (!IsOut(bot))
+
+    if (GetPurpose() != TravelDestinationPurpose::GatherFishing)
     {
-        if (this->GetEntry() > 0)
+        if (!IsOut(bot))
         {
-            std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
+            if (this->GetEntry() > 0)
+            {
+                std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
 
-            for (auto& target : targets)
-                if (target.GetEntry() == GetEntry() && target.IsCreature() && ai->GetCreature(target) && ai->GetCreature(target)->IsAlive())
-                    return true;
+                for (auto& target : targets)
+                    if (target.GetEntry() == GetEntry() && target.IsCreature() && ai->GetCreature(target) && ai->GetCreature(target)->IsAlive())
+                        return true;
+            }
+            else
+            {
+                std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
+
+                for (auto& target : targets)
+                    if (target.GetEntry() == GetEntry())
+                        return true;
+            }
+
+            return false;
         }
-        else
-        {
-            std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
-
-            for (auto& target : targets)
-                if (target.GetEntry() == GetEntry())
-                    return true;
-        }
-
-        return false;
     }
 
     return true;

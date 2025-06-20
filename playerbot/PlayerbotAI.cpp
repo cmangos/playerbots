@@ -6263,7 +6263,7 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
             if (*target->GetPosition())
             {
                 out << "\nLocation: " << target->GetPosition()->getAreaName();
-                out << " (" << (uint32)target->GetPosition()->distance(bot) << "y)";
+                out << " (" << round(target->GetPosition()->distance(bot)) << "y)";
             }
         }
         

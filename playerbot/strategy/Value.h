@@ -401,4 +401,15 @@ namespace ai
         virtual std::string Save() { return value; }
         virtual bool Load(std::string text) { value = text; return true; }
     };
+
+    class TimeManualSetValue : public ManualSetValue<time_t>, public Qualified
+    {
+    public:
+        TimeManualSetValue(PlayerbotAI* ai, int32 defaultValue = 0, std::string name = "manual time") : ManualSetValue<time_t>(ai, defaultValue, name), Qualified() {};
+
+        virtual std::string Format()
+        {
+            return std::to_string(this->value);
+        }
+    };
 }

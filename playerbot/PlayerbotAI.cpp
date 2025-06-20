@@ -1969,7 +1969,6 @@ void PlayerbotAI::DoNextAction(bool min)
     //Remove bot masters not in our group.
     if (master && !HasActivePlayerMaster() && (!group || group->GetLeaderGuid() != master->GetObjectGuid()))
     {
-        if(!IsRealPlayer())
         master = IsRealPlayer() ? bot : nullptr;
         SetMaster(master);
         ResetStrategies();

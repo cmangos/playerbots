@@ -420,7 +420,8 @@ bool DebugAction::Execute(Event& event)
 
         if (dest)
         {
-            WorldPosition* point = dest->GetNextPoint(botPos);
+            std::list<uint8> chancesToGoFar = { 10,50,90 }; //Closest map, grid, cell.
+            WorldPosition* point = dest->GetNextPoint(botPos, chancesToGoFar);
             if (point)
             {
                 poiPoint = *point;
@@ -1201,7 +1202,8 @@ bool DebugAction::Execute(Event& event)
 
         if (dest)
         {
-            WorldPosition* point = dest->GetNextPoint(botPos);
+            std::list<uint8> chancesToGoFar = { 10,50,90 }; //Closest map, grid, cell.
+            WorldPosition* point = dest->GetNextPoint(botPos, chancesToGoFar);
 
             if (!point)
                 return false;

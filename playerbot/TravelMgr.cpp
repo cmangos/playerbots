@@ -2115,8 +2115,9 @@ void TravelMgr::LoadQuestTravelTable()
                     out << destination->GetShortName() << ",";
                     out << "\"" << destination->GetTitle() << "\",";
                     out << destination->GetSize() << ",";
-                    out << "\"GEOMETRYCOLLECTION(";
-                    destination->printWKT(out);
+                    out << "\"MultiPoint(";
+                    destination->printWKT(out, false);
+                    out.seekp(-1, out.cur);
                     out << ")\"";
                     sPlayerbotAIConfig.log("travel_destinations.csv", out.str().c_str());
                 }
@@ -2248,7 +2249,7 @@ void TravelMgr::GetFishLocations()
 
     std::vector<std::future<void>> calculations;
 
-    for (uint32 mapId = 0; mapId < 1000; mapId++)
+    for (int32 mapId = 1000; mapId >= 0; mapId--)
     {       
         bool hashFishing = false;
         for (uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)    // areaflag numbered from 0
@@ -2276,8 +2277,6 @@ void TravelMgr::GetFishLocations()
         bar.step();
     }
 
-    std::reverse(calculations.begin(), calculations.end());
-
     BarGoLink bar1(calculations.size());   
 
     for (uint32 i = 0; i < calculations.size(); i++)
@@ -2289,6 +2288,8 @@ void TravelMgr::GetFishLocations()
 
 void TravelMgr::GetFishLocations(uint32 mapId)
 {
+    PathFinder path(mapId,0);
+
     const int8 subCellPerGrid = 64;
     const float sizeOfSubCell = SIZE_OF_GRIDS / subCellPerGrid;
 
@@ -2333,6 +2334,14 @@ void TravelMgr::GetFishLocations(uint32 mapId)
                         if (fabs(fishSpot.getZ() - waterSpot.getZ()) > 10.0f)
                             continue;
 
+                        uint32 area = path.getArea(mapId, fishSpot.getX(), fishSpot.getY(), fishSpot.getZ());
+
+                        if (!area || area == NAV_AREA_GROUND_STEEP)
+                        {
+                        //    sLog.outError("no area %d %f %f %f", mapId, fishSpot.getX(), fishSpot.getY(), fishSpot.getZ());
+                            continue;
+                        }
+                   
                         inWater = fishSpot.isInWater();
 
                         if (!inWater)

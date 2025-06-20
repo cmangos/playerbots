@@ -513,7 +513,7 @@ bool FishTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) 
 {
     if (!IsPossible(info))
         return false;    
-    bot->UpdateFishingSkill();
+    
     return true;
 }
 

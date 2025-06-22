@@ -1264,6 +1264,10 @@ void PlayerbotAI::Reset(bool full)
         target->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
         target->SetExpireIn(1000);
 
+        RESET_AI_VALUE(FutureDestinations*, "future travel destinations");        
+        RESET_AI_VALUE2(std::string, "manual string", "future travel purpose");
+        RESET_AI_VALUE2(int, "manual int", "future travel relevance");
+
         InterruptSpell();
 
         StopMoving();
@@ -1988,13 +1992,20 @@ void PlayerbotAI::DoNextAction(bool min)
 
 
     Group *group = bot->GetGroup();
+
+    //Remove bot masters not in our group.
+    if (master && !HasActivePlayerMaster() && (!group || group->GetLeaderGuid() != master->GetObjectGuid()))
+    {
+        master = IsRealPlayer() ? bot : nullptr;
+        SetMaster(master);
+        ResetStrategies();
+    }
+
     // test BG master set
     if ((!master || !HasActivePlayerMaster()) && group && !IsRealPlayer())
     {
-        PlayerbotAI* ai = bot->GetPlayerbotAI();
-
         //Ideally we want to have the leader as master.
-        Player* newMaster = ai->GetGroupMaster();
+        Player* newMaster = GetGroupMaster();
         Player* playerMaster = nullptr;
 
         //Are there any non-bot players in the group?
@@ -2081,21 +2092,21 @@ void PlayerbotAI::DoNextAction(bool min)
         if (newMaster && (!master || master != newMaster) && bot != newMaster)
         {
             master = newMaster;
-            ai->SetMaster(newMaster);
-            ai->ResetStrategies();
+            SetMaster(newMaster);
+            ResetStrategies();
 
             if (sRandomPlayerbotMgr.IsFreeBot(bot))
             {
-                ai->ChangeStrategy("+follow", BotState::BOT_STATE_NON_COMBAT);
+                ChangeStrategy("+follow", BotState::BOT_STATE_NON_COMBAT);
             }
 
-            if (ai->GetMaster() == ai->GetGroupMaster())
+            if (GetMaster() == GetGroupMaster())
             {
-                ai->TellPlayer(master, BOT_TEXT("hello_follow"));
+                TellPlayer(master, BOT_TEXT("hello_follow"));
             }
             else
             {
-                ai->TellPlayer(master, BOT_TEXT("hello"));
+                TellPlayer(master, BOT_TEXT("hello"));
             }
         }
     }
@@ -6316,7 +6327,7 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
             if (*target->GetPosition())
             {
                 out << "\nLocation: " << target->GetPosition()->getAreaName();
-                out << " (" << (uint32)target->GetPosition()->distance(bot) << "y)";
+                out << " (" << round(target->GetPosition()->distance(bot)) << "y)";
             }
         }
         

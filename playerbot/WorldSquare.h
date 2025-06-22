@@ -343,7 +343,7 @@ namespace ai
                 chancesToGoFar.pop_front();
             }
 
-            WorldPosition* nextPoint;
+            WorldPosition* nextPoint = nullptr;
 
             if (!shouldGoFar)
             {

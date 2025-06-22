@@ -19,6 +19,8 @@ bool TravelAction::Execute(Event& event)
     
     target->CheckStatus();     
 
+    SET_AI_VALUE2(time_t, "manual time", "next travel check", time(0) + 5);
+
     return false;
 }
 
@@ -32,6 +34,9 @@ bool TravelAction::isUseful()
             return false;
 
     if (sServerFacade.isMoving(bot))
+        return false;
+
+    if (AI_VALUE2(time_t, "manual time", "next travel check") > time(0))
         return false;
 
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");

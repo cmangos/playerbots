@@ -38,6 +38,14 @@ bool MoveToFishAction::Execute(Event& event)
         if (!fishSpot)
         {
             fishSpot = *sTravelMgr.GetFishSpot(bot);
+
+            TravelPath movePath = sTravelNodeMap.getFullPath(bot, fishSpot, bot);
+
+            if(movePath.empty())
+                return false;
+
+            AI_VALUE(LastMovement&, "last movement").setPath(movePath);
+
             SET_AI_VALUE2(WorldPosition, "custom position", "fish spot", fishSpot);
         }
     }

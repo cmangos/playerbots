@@ -38,7 +38,7 @@ bool CastCustomSpellAction::Execute(Event& event)
     Unit* target = nullptr;
     std::string text = getQualifier();
 
-    if(text.empty())
+    if(text.empty() || text == "travel")
         text = event.getParam();
 
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();

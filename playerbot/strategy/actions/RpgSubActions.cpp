@@ -879,7 +879,7 @@ bool RpgItemAction::Execute(Event& event)
         }
     }
 
-    if (used)
+    if (used && !GetDuration())
     {
         SetDuration(sPlayerbotAIConfig.globalCoolDown);
     }

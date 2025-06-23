@@ -786,14 +786,6 @@ bool RpgItemTrigger::IsActive()
     if (guidP.IsPlayer())
         return false;
 
-    Unit* unit = nullptr;
-    GameObject* gameObject = nullptr;
-    
-    if(guidP.IsUnit())
-        unit = guidP.GetUnit(bot->GetInstanceId());
-    else if (guidP.IsGameObject())
-        gameObject = guidP.GetGameObject(bot->GetInstanceId());
-
     std::list<Item*> questItems = AI_VALUE2(std::list<Item*>, "inventory items", "quest");
 
     for (auto item : questItems)

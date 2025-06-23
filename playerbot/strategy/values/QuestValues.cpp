@@ -596,14 +596,14 @@ bool CanUseItemOn::Calculate()
 	if (!guidP)
 		return false;
 
-	if (itemId == 17117) //Rat Catcher's Flute
+	switch (itemId)
 	{
+	case 17117: //Rat Catcher's Flute
 		return guidP.IsCreature() && guidP.GetEntry() == 13016; //Deeprun Rat		
-	}
-
-	if(itemId == 52566)
-	{
+	case 52566: //Motivate-a-Tron (currently broken?)
 		return guidP.IsCreature() && guidP.GetEntry() == 39623; //Gnome Citizen
+	case 38607: //Battle-worn Sword
+		return guidP.IsGameObject() && (guidP.GetEntry() == 190557 || guidP.GetEntry() == 191746 || guidP.GetEntry() == 191747 || guidP.GetEntry() == 191748 || guidP.GetEntry() == 191757 || guidP.GetEntry() == 191758); //Runeforge
 	}
 
 	if (guidP.IsUnit())

@@ -88,6 +88,18 @@ namespace ai
         }
 
         bool isUsefulWhenStunned() override { return true; }
+
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "accept invitation"; }
+        virtual std::string GetHelpDescription()
+        {
+            return "This action makes the bot accept group invitations.\n"
+                   "It will automatically handle AFK status and update strategies.\n"
+                   "For free bots, the inviter becomes the bot's master.";
+        }
+        virtual std::vector<std::string> GetUsedActions() { return {"reset raids", "update gear"}; }
+        virtual std::vector<std::string> GetUsedValues() { return {"formation"}; }
+#endif 
     };
 
 }

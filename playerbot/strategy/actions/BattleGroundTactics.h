@@ -43,6 +43,18 @@ class BGTactics : public MovementAction
 {
 public:
     BGTactics(PlayerbotAI* ai, std::string name = "bg tactics") : MovementAction(ai, name) {}
+
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "bg tactics"; }
+        virtual std::string GetHelpDescription()
+        {
+            return "This action handles the bot's tactical movement in battlegrounds.\n"
+                   "It includes pathfinding for objectives, flag handling, and strategic positioning.\n"
+                   "Supports WSG, AB, AV, EY, and IC battlegrounds with specialized waypoints.";
+        }
+        virtual std::vector<std::string> GetUsedActions() { return {}; }
+        virtual std::vector<std::string> GetUsedValues() { return {}; }
+#endif 
     virtual bool Execute(Event& event);
 private:
     bool SelectAvObjectiveAlliance(WorldLocation& objectiveLocation);
@@ -72,6 +84,17 @@ class ArenaTactics : public MovementAction
 {
 public:
     ArenaTactics(PlayerbotAI* ai, std::string name = "arena tactics") : MovementAction(ai, name) {}
+
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "arena tactics"; }
+        virtual std::string GetHelpDescription()
+        {
+            return "This action handles the bot's movement strategy in arenas.\n"
+                   "Focuses on controlling the center of the arena and maintaining optimal positioning.";
+        }
+        virtual std::vector<std::string> GetUsedActions() { return {}; }
+        virtual std::vector<std::string> GetUsedValues() { return {}; }
+#endif 
     virtual bool Execute(Event& event);
 private:
     bool moveToCenter(BattleGround *bg);

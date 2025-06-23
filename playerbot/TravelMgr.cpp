@@ -733,9 +733,16 @@ bool GatherTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info
 std::string GatherTravelDestination::GetTitle() const {
     std::ostringstream out;
 
-    out << "gathering node ";
+    if (GetPurpose() == TravelDestinationPurpose::GatherFishing)
+    {
+        out << "fishing spot ";
+    }
+    else
+    {        
+        out << "gathering node ";
 
-    out << ChatHelper::formatWorldEntry(GetEntry());
+        out << ChatHelper::formatWorldEntry(GetEntry());
+    }
 
     return out.str();
 }

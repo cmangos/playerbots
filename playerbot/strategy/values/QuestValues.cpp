@@ -47,16 +47,21 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 			if (quest->ReqItemId[objective])
 			{
 				uint32 itemId = quest->ReqItemId[objective];
-				ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-
-				if (proto)
+				while (itemId)
 				{
-					for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", itemId))
+					ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+
+					if (proto)
 					{
-						std::string chanceQualifier = std::to_string(entry) + " " + std::to_string(itemId);
-						if (proto->Class == ITEM_CLASS_QUEST || GAI_VALUE2(float, "loot chance", chanceQualifier) > 5.0f)
-							rMap[entry][questId] |= relationFlag;
+						for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", itemId))
+						{
+							std::string chanceQualifier = std::to_string(entry) + " " + std::to_string(itemId);
+							if (proto->Class == ITEM_CLASS_QUEST || GAI_VALUE2(float, "loot chance", chanceQualifier) > 5.0f)
+								rMap[entry][questId] |= relationFlag;
+						}
 					}
+
+					itemId = ItemUsageValue::ItemCreatedFrom(itemId);
 				}
 			}
 

@@ -309,11 +309,11 @@ ItemUsage ItemUsageValue::Calculate()
     }
 
     //QUEST
-    if (!ai->GetMaster() || !sPlayerbotAIConfig.syncQuestWithPlayer || !IsItemUsefulForQuest(ai->GetMaster(), proto))
+    if (!ai->GetMaster() || !sPlayerbotAIConfig.syncQuestWithPlayer || !IsNeededForQuest(ai->GetMaster(), itemId))
     {
-        if (IsItemUsefulForQuest(bot, proto))
+        if (IsNeededForQuest(bot, itemId))
             return ItemUsage::ITEM_USAGE_QUEST;
-        else if (IsItemUsefulForQuest(bot, proto, true) && CurrentStacks(ai, proto) < 2) //Do not sell quest items unless selling a full stack will stil keep enough in inventory.
+        else if (IsNeededForQuest(bot, itemId, true) && CurrentStacks(ai, proto) < 2) //Do not sell quest items unless selling a full stack will stil keep enough in inventory.
             return ItemUsage::ITEM_USAGE_KEEP;
     }
 
@@ -790,7 +790,19 @@ uint32 ItemUsageValue::GetAhDepositCost(ItemPrototype const* proto, uint32 count
     return deposit;
 }
 
-bool ItemUsageValue::IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory)
+uint32 ItemUsageValue::ItemCreatedFrom(uint32 wantItemId)
+{
+    switch (wantItemId) {
+    case 38631: //Runebladed Sword 
+        return 38607; //Battle-worn Sword
+    default:
+        return 0;
+    }
+
+    return 0;
+}
+
+bool ItemUsageValue::IsNeededForQuest(Player* player, uint32 itemId, bool ignoreInventory)
 {
     for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
     {
@@ -799,12 +811,19 @@ bool ItemUsageValue::IsItemUsefulForQuest(Player* player, ItemPrototype const* p
         if (!quest)
             continue;
 
+        QuestStatusData& qData = player->getQuestStatusMap()[quest->GetQuestId()];
+        if (qData.m_status != QUEST_STATUS_INCOMPLETE)
+            continue;
+
         for (int i = 0; i < 4; i++)
         {
-            if (quest->ReqItemId[i] != proto->ItemId)
+            if (!quest->ReqItemCount[i])
                 continue;
 
-            if (player->GetPlayerbotAI() && AI_VALUE2(uint32, "item count", proto->Name1) >= quest->ReqItemCount[i] && !ignoreInventory)
+            if (quest->ReqItemId[i] != itemId && ItemCreatedFrom(quest->ReqItemId[i]) != itemId)
+                continue;
+
+            if (!ignoreInventory && player->GetItemCount(itemId, false) >= quest->ReqItemCount[i])
                 continue;
 
             return true;

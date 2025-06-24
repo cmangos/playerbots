@@ -103,6 +103,16 @@ bool FishAction::isUseful()
 
 bool FishAction::Execute(Event& event)
 {
+    if (qualifier == "travel")
+    {
+        TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
+
+        target->CheckStatus();
+
+        if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_TRAVEL)
+            return false;
+    }
+
     if (bot->IsMoving())
     {
         ai->StopMoving();

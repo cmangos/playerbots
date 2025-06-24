@@ -34,6 +34,8 @@ set(LIBRARY_SRCS
     ${AHbot_Source}
     ${bots_PCH}
     ${CMAKE_CURRENT_SOURCE_DIR}/botpch.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/PlayerbotAI_rpc.cpp # Added RPC implementation file
+    ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/PlayerbotRpcClientMgr.cpp # Added RPC Client Manager
 )
 
 #Strategy files
@@ -154,6 +156,64 @@ endif()
 
 add_library(${LIBRARY_NAME} STATIC ${LIBRARY_SRCS})
 
+# ==== Playerbot RPC Integration START ====
+if (BUILD_PLAYERBOTS)
+  find_package(Protobuf REQUIRED)
+  find_package(gRPC REQUIRED)
+
+  set(PLAYERBOT_PROTO_FILE ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/rpc/playerbot_rpc.proto)
+  set(PLAYERBOT_PROTO_GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/playerbot_rpc_generated)
+
+  add_custom_command(
+      OUTPUT
+          ${PLAYERBOT_PROTO_GENERATED_DIR}/playerbot_rpc.pb.h
+          ${PLAYERBOT_PROTO_GENERATED_DIR}/playerbot_rpc.pb.cc
+          ${PLAYERBOT_PROTO_GENERATED_DIR}/playerbot_rpc.grpc.pb.h
+          ${PLAYERBOT_PROTO_GENERATED_DIR}/playerbot_rpc.grpc.pb.cc
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${PLAYERBOT_PROTO_GENERATED_DIR}
+      COMMAND ${Protobuf_PROTOC_EXECUTABLE}
+          --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/playerbot/rpc
+          --cpp_out=${PLAYERBOT_PROTO_GENERATED_DIR}
+          --grpc_out=${PLAYERBOT_PROTO_GENERATED_DIR}
+          --plugin=protoc-gen-grpc=`which grpc_cpp_plugin`
+          ${PLAYERBOT_PROTO_FILE}
+      DEPENDS ${PLAYERBOT_PROTO_FILE}
+      COMMENT "Generating Playerbot RPC C++ files from ${PLAYERBOT_PROTO_FILE}"
+  )
+
+  # Add generated source files to the library
+  target_sources(${LIBRARY_NAME} PRIVATE
+      ${PLAYERBOT_PROTO_GENERATED_DIR}/playerbot_rpc.pb.cc
+      ${PLAYERBOT_PROTO_GENERATED_DIR}/playerbot_rpc.grpc.pb.cc
+  )
+
+  # Create a custom target for generating files to manage dependencies correctly
+  # This target will be depended upon by the main library.
+  add_custom_target(generate_playerbot_rpc_files ALL DEPENDS
+      ${PLAYERBOT_PROTO_GENERATED_DIR}/playerbot_rpc.pb.h
+      ${PLAYERBOT_PROTO_GENERATED_DIR}/playerbot_rpc.pb.cc
+      ${PLAYERBOT_PROTO_GENERATED_DIR}/playerbot_rpc.grpc.pb.h
+      ${PLAYERBOT_PROTO_GENERATED_DIR}/playerbot_rpc.grpc.pb.cc
+  )
+
+  # Ensure the library depends on the generation of these files
+  add_dependencies(${LIBRARY_NAME} generate_playerbot_rpc_files)
+
+  # Add include directory for generated headers to the library
+  target_include_directories(${LIBRARY_NAME}
+    PRIVATE ${PLAYERBOT_PROTO_GENERATED_DIR}
+  )
+
+  # Link gRPC and Protobuf libraries to the playerbots library
+  target_link_libraries(${LIBRARY_NAME}
+    PRIVATE
+      ${Protobuf_LIBRARIES}
+      gRPC::grpc++
+      gRPC::grpc++_reflection # Optional, but useful for debugging
+  )
+endif()
+# ==== Playerbot RPC Integration END ====
+
 target_link_libraries(${LIBRARY_NAME}
   PRIVATE shared
   PRIVATE Detour
@@ -168,10 +228,10 @@ target_include_directories(${LIBRARY_NAME}
 # Install config files
 if ( ${CMAKE_PROJECT_NAME} MATCHES "Classic")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/playerbot/aiplayerbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)
-endif()	
+endif()
 if ( ${CMAKE_PROJECT_NAME} MATCHES "TBC")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/playerbot/aiplayerbot.conf.dist.in.tbc ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)
-endif()	
+endif()
 if ( ${CMAKE_PROJECT_NAME} MATCHES "WoTLK")
 	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/playerbot/aiplayerbot.conf.dist.in.wotlk ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist)
 endif()

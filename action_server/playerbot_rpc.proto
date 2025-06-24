@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package playerbot_rpc;
+
+// -------- Enums and Common Structures --------
+
+enum BotClass {
+  CLASS_UNKNOWN = 0;
+  WARRIOR = 1;
+  PALADIN = 2;
+  HUNTER = 3;
+  ROGUE = 4;
+  PRIEST = 5;
+  DEATH_KNIGHT = 6; // If applicable
+  SHAMAN = 7;
+  MAGE = 8;
+  WARLOCK = 9;
+  DRUID = 11;
+}
+
+enum BotRace {
+  RACE_UNKNOWN = 0;
+  HUMAN = 1;
+  ORC = 2;
+  DWARF = 3;
+  NIGHT_ELF = 4;
+  UNDEAD = 5;
+  TAUREN = 6;
+  GNOME = 7;
+  TROLL = 8;
+  GOBLIN = 9; // If applicable
+  BLOOD_ELF = 10; // If applicable
+  DRAENEI = 11; // If applicable
+}
+
+message Position {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+  float orientation = 4;
+  uint32 map_id = 5;
+}
+
+message BotStats {
+  uint32 health = 1;
+  uint32 max_health = 2;
+  uint32 mana = 3; // Or other power type
+  uint32 max_mana = 4;
+  uint32 level = 5;
+  // Add other relevant stats like rage, energy, etc.
+}
+
+message Entity {
+  uint64 guid = 1;
+  string name = 2;
+  Position position = 3;
+  bool is_hostile = 4;
+  uint32 health_percent = 5;
+  // Add more entity details as needed (e.g., type, class for players)
+}
+
+message QuestObjective {
+  uint32 objective_id = 1;
+  string description = 2;
+  uint32 current_count = 3;
+  uint32 required_count = 4;
+  bool completed = 5;
+}
+
+message Quest {
+  uint32 quest_id = 1;
+  string title = 2;
+  string description = 3; // Short summary
+  uint32 level = 4;
+  repeated QuestObjective objectives = 5;
+  bool completed = 6;
+  bool is_active = 7; // Is it in the bot's quest log?
+}
+
+
+// -------- Action Server Service --------
+
+// Service for the Game Server to call the Action Server
+service ActionService {
+  // Requests a macro decision for a bot
+  rpc GetMacroDecision (MacroDecisionRequest) returns (MacroDecisionResponse);
+}
+
+message BotStateSnapshot {
+  uint64 bot_guid = 1;
+  BotClass bot_class = 2;
+  BotRace bot_race = 3;
+  Position current_position = 4;
+  BotStats current_stats = 5;
+  repeated Entity nearby_entities = 6; // Players, NPCs, objects
+  repeated Quest active_quests = 7;
+  // Add other relevant state: inventory highlights, current target, group members, etc.
+  bool is_in_combat = 8;
+  string current_strategy_non_combat = 9; // e.g. "grind", "quest", "travel"
+  string current_strategy_combat = 10;
+}
+
+message MacroDecisionRequest {
+  BotStateSnapshot bot_state = 1;
+}
+
+message MacroDecisionResponse {
+  enum DecisionType {
+    DECIDE_UNKNOWN = 0;
+    CONTINUE_CURRENT = 1; // Continue with whatever the game server is already doing
+    SET_STRATEGY = 2;     // Suggests a new high-level strategy
+    EXECUTE_COMMAND = 3;  // Suggests a specific command string for the bot
+    TRAVEL_TO = 4;        // Suggests traveling to a specific location
+    TARGET_ENTITY = 5;    // Suggests targeting a specific entity
+  }
+  DecisionType decision_type = 1;
+  string strategy_name = 2;     // if decision_type is SET_STRATEGY
+  string command_string = 3;    // if decision_type is EXECUTE_COMMAND
+  Position travel_position = 4; // if decision_type is TRAVEL_TO
+  uint64 target_guid = 5;       // if decision_type is TARGET_ENTITY
+  string justification = 6;     // Optional: why this decision was made
+}
+
+
+// -------- Game Server Service --------
+
+// Service for the Action Server (or other clients) to call the Game Server
+service GameControlService {
+  // Sends a command to a specific bot
+  rpc SendBotCommand (BotCommandRequest) returns (BotCommandResponse);
+
+  // Future: Could add methods to request specific information from the game server
+  // rpc GetBotDetails (GetBotDetailsRequest) returns (GetBotDetailsResponse);
+}
+
+message BotCommandRequest {
+  uint64 bot_guid = 1;
+  string command = 2; // The command string, similar to what's used in chat
+  // Potentially add an originator_id or auth_token for security/logging
+}
+
+message BotCommandResponse {
+  bool success = 1;
+  string message = 2; // e.g., "Command executed", "Bot not found", "Invalid command"
+}

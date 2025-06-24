@@ -13,8 +13,13 @@
 #include "strategy/IterateItemsMask.h"
 #include "RandomPlayerbotMgr.h"
 
+#include <memory> // For std::unique_ptr
+
+// Forward declarations
 class Player;
 class PlayerbotMgr;
+class PlayerbotRpcClient;
+namespace playerbot_rpc { class BotStateSnapshot; class MacroDecisionResponse; } // Forward declare protobuf messages
 class ChatHandler;
 
 using namespace ai;
@@ -712,6 +717,22 @@ protected:
 #ifdef BUILD_ELUNA
     MaNGOS::unique_weak_ptr<PlayerbotAI> m_weakRef;
 #endif
+
+    // RPC Client
+    std::unique_ptr<PlayerbotRpcClient> rpcClient;
+
+private:
+    void InitRpcClient();
+    bool ShouldUseRpcForDecision();
+    bool ProcessRpcDecision(); // Returns true if RPC provided a new action that was taken
+    void PopulateBotStateSnapshot(playerbot_rpc::BotStateSnapshot* snapshot); // Helper to fill snapshot
+
+    // GameControlService (RPC Server on Game Server) related
+    void StartRpcService(); // To start the gRPC server for GameControlService
+    void StopRpcService();  // To stop it
+    // Placeholder for the gRPC server instance for GameControlService
+    // std::unique_ptr<grpc::Server> gameControlServer;
+    // Actual implementation of GameControlServiceImpl would also be needed.
 };
 
 template<typename T>

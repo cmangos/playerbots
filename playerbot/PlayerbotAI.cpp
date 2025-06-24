@@ -17,6 +17,8 @@
 #include "LootObjectStack.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "PlayerbotAI.h"
+#include "PlayerbotRpcClient.h"     // Added for RPC client
+#include "rpc/playerbot_rpc.pb.h"   // Added for protobuf message types
 #include "playerbot/PlayerbotFactory.h"
 #include "PlayerbotSecurity.h"
 #include "Groups/Group.h"
@@ -125,6 +127,8 @@ PlayerbotAI::PlayerbotAI() : PlayerbotAIBase(), bot(NULL), aiObjectContext(NULL)
 PlayerbotAI::PlayerbotAI(Player* bot) :
     PlayerbotAIBase(), chatHelper(this), chatFilter(this), security(bot), master(NULL), faceTargetUpdateDelay(0), jumpTime(0), fallAfterJump(false)
 {
+    InitRpcClient(); // Ensure RPC Client is initialized
+
     this->bot = bot;
     if (!bot->isTaxiCheater() && HasCheat(BotCheatMask::taxi))
         bot->SetTaxiCheater(true);

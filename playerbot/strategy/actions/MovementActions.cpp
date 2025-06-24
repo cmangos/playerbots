@@ -720,6 +720,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 }
 #ifdef MANGOSBOT_TWO                
                 bot->OnTaxiFlightEject(true);
+                ai->Unmount();
 #endif
                 bool goTaxi = bot->ActivateTaxiPathTo({ tEntry->from, tEntry->to }, unit, 1);
 #ifdef MANGOSBOT_TWO

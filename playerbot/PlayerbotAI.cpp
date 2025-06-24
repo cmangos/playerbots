@@ -869,13 +869,14 @@ bool PlayerbotAI::CanEnterArea(const AreaTrigger* area)
 
 void PlayerbotAI::Unmount()
 {
+#ifdef MANGOSBOT_TWO
+        bot->ResolvePendingMount();
+#endif
+
     if ((bot->IsMounted() || bot->GetMountID()) && !bot->IsTaxiFlying())
     {
         bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         bot->Unmount();
-#ifdef MANGOSBOT_TWO
-        bot->ResolvePendingUnmount();
-#endif
 
         bot->UpdateSpeed(MOVE_RUN, true);
         bot->UpdateSpeed(MOVE_RUN, false);
@@ -885,6 +886,11 @@ void PlayerbotAI::Unmount()
             bot->GetMotionMaster()->MoveFall();
         }
     }
+
+#ifdef MANGOSBOT_TWO
+    if(bot->IsPendingDismount())
+        bot->ResolvePendingUnmount();
+#endif
 }
 
 bool PlayerbotAI::IsStateActive(BotState state) const

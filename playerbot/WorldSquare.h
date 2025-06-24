@@ -43,6 +43,17 @@ namespace ai
                 return sqOutDistance(point);
         }
 
+        static bool ShouldGoFar(std::list<uint8>& chancesToGoFar)
+        {
+            if (chancesToGoFar.empty()) //50% chance to go far.
+                return urand(0, 1);
+
+            uint8 chanceToGoFar = chancesToGoFar.front();
+            chancesToGoFar.pop_front();
+
+            return chanceToGoFar && urand(0, 100) < chanceToGoFar;
+        }
+
         virtual uint32 GetCurrentPartition(const WorldPosition& point, const std::vector<uint32>& distancePartitions) const
         {
             float minDist = sqOutDistance(point);
@@ -196,16 +207,19 @@ namespace ai
 
         virtual WorldPosition* GetNextPoint(const WorldPosition& point, std::list<uint8>& chancesToGoFar, bool allowSame = false) const
         {
+            if (!ShouldGoFar(chancesToGoFar))
+                return GetClosestPoint(point);
+
             WorldPosition* nextPoint = nullptr;
 
             for (int i = 0; i < 10; i++)
             {
                 nextPoint = points[urand(0, points.size() - 1)];
 
-                if (*nextPoint != point || (allowSame && points.size() == 1))
+                if (*nextPoint != point || (allowSame && points.size() == 1)) //We want a point futher away if possible.
                     return nextPoint;
 
-                if (points.size() == 1)
+                if (points.size() == 1) //No option to find a futher point. Return nothing so a different square can maybe get something.
                     return nullptr;
             }
 
@@ -331,21 +345,9 @@ namespace ai
         {
             const T* nextSq = nullptr;
 
-            bool shouldGoFar = false;
-
-            if (chancesToGoFar.empty())
-                shouldGoFar = urand(0, 1);
-            else
-            {
-                uint8 chanceToGoFar = chancesToGoFar.front();
-                shouldGoFar = chanceToGoFar && urand(0, 100) < chanceToGoFar;
-
-                chancesToGoFar.pop_front();
-            }
-
             WorldPosition* nextPoint = nullptr;
 
-            if (!shouldGoFar)
+            if (!ShouldGoFar(chancesToGoFar))
             {
                 nextSq = GetClosestSquare(point);
                 if(nextSq)
@@ -355,6 +357,7 @@ namespace ai
                     return nextPoint;
             }
             
+            //Pick a random square to go 'far'.
             nextSq = &(std::next(subSquares.begin(), urand(0, subSquares.size() - 1))->second);
 
             if (!nextSq)

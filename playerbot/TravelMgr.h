@@ -416,7 +416,7 @@ namespace ai
 		void GetFishLocations(uint32 mapId);
 		void SaveFishLocations();
 
-		WorldPosition* GetFishSpot(WorldPosition start) { std::list<uint8> chances = { 0,25,25 }; return fishMap.GetNextPoint(start, chances); }
+		WorldPosition* GetFishSpot(WorldPosition start, bool onlyNearestGrid = false);
 
 		EntryDestinationMap GetExploreLocs() const { return destinationMap.at(TravelDestinationPurpose::Explore); };
 		void SetMobAvoidArea();

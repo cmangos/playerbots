@@ -11,6 +11,7 @@ bool AutoCompleteQuestAction::Execute(Event& event)
 
     // Static list of quest IDs to auto-complete
     static const uint32 autoCompleteQuests[] = {
+        0,     //Dummy quest : please remove when a classic quest is found that needs to be skipped.
 #ifdef MANGOSBOT_TWO  
         25229, // a-few-good-gnomes : Bot uses motivatron but it does nothing in game.
 #endif
@@ -76,11 +77,12 @@ bool AutoCompleteQuestAction::Execute(Event& event)
                                 bot->CastedCreatureOrGO(-creature, ObjectGuid(), 0);
                         }
                     }
-
+#ifdef MANGOSBOT_TWO
                     // player kills
                     if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_PLAYER_KILL))
                         if (uint32 reqPlayers = pQuest->GetPlayersSlain())
                             bot->KilledPlayerCreditForQuest(reqPlayers, pQuest);
+#endif
 
                     // If the quest requires reputation to complete
                     if (uint32 repFaction = pQuest->GetRepObjectiveFaction())

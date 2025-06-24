@@ -217,6 +217,12 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         if (!guidP)
             continue;
 
+        bool isTravelTarget = guidP.GetEntry() == travelTarget->GetEntry();
+
+        //Stop to save peformance.
+        if (checked >= maxCheck && !isTravelTarget)
+            continue;
+
         //Check if we are allowed to move to this position. This is based on movement strategies follow, free, guard, stay. Bots are limited to finding targets near the center of those movement strategies.
         //For bots with real players they are also slightly limited in range unless the player stands still for a while. See free move values.
         if (guidP.GetWorldObject(bot->GetInstanceId()) && !AI_VALUE2(bool, "can free move to", guidP.to_string()))
@@ -272,7 +278,6 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         float relevance = getMaxRelevance(guidP);
 
         //If this rpg target is our travel target increase the relevance by 50% to make it more likely to be picked.
-        bool isTravelTarget = guidP.GetEntry() == travelTarget->GetEntry();
         if (isTravelTarget)
         {
             if (focusList.empty())
@@ -301,10 +306,6 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         }
 
         checked++;
-
-        //Stop to save peformance.
-        if (checked >= maxCheck)
-            break;
     }
 
     //Enable range check for rpg triggers.

@@ -1187,6 +1187,43 @@ bool DebugAction::Execute(Event& event)
 
         return true;
     }
+    else if (text.find("rpg ") == 0)
+    {
+        std::ostringstream out;
+
+        if (text.size() < 4)
+            return false;
+
+        GuidPosition guidP;
+
+        std::string link = text.substr(3);
+
+        if (!link.empty())
+        {
+            std::list<ObjectGuid> gos = chat->parseGameobjects(link);
+            if (!gos.empty())
+            {
+                for (auto go : gos)
+                {
+                    guidP = GuidPosition(go,bot);
+                    guidP.updatePosition(bot->GetInstanceId());
+
+                    if(guidP)
+                        break;
+                }
+            }
+        }
+
+        if (!guidP)
+            return false;
+
+        SET_AI_VALUE(GuidPosition, "rpg target", guidP);
+
+        if (guidP.GetWorldObject(bot->GetInstanceId()))
+            ai->TellPlayerNoFacing(requester, "Setting Rpg target to " + ChatHelper::formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId())));
+
+        return true;
+    }
     else if (text.find("travel ") == 0)
     {
         WorldPosition botPos = WorldPosition(bot);

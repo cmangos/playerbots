@@ -41,6 +41,7 @@ namespace ai
             if (qualifier == "rpg target")
             {
                 GuidPosition rpgTarget = AI_VALUE(GuidPosition, qualifier);
+                rpgTarget.updatePosition(bot->GetInstanceId());
                 return rpgTarget.distance(bot);
             }
             else if (qualifier == "travel target")

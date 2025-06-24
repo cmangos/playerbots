@@ -2474,6 +2474,20 @@ void TravelNodeMap::addManualNodes()
     node = sTravelNodeMap.addNode(WorldPosition(530, 723.74f, 6865.78f, -74.10f), "c6-Coilfang", true, false);
     node = sTravelNodeMap.addNode(WorldPosition(530, 731.57f, 6866.01f, -70.47f), "c7-Coilfang", true, false);
 #endif
+
+#ifdef MANGOSBOT_TWO
+    node = sTravelNodeMap.addNode(WorldPosition(0, -7502.20f, -1152.98f, 269.55f), "c1-Blackrock Mountain", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(0, -7591.31f,-1114.44f,249.91f), "c2-Blackrock Mountain", true, false);
+
+    node = sTravelNodeMap.addNode(WorldPosition(609, 2390.02f, -5640.91f, 377.09f), "c1-Ebon Hold", true, false);
+    otherNode = sTravelNodeMap.addNode(WorldPosition(609, 2383.65f, -5645.20f, 420.77f), "c2-Ebon Hold", true, false);
+
+    TravelNodePath travelPath(0.1f, 3.0f, (uint8)TravelNodePathType::areaTrigger, 0, true);
+    travelPath.setPath({ *node->getPosition(), *otherNode->getPosition() });    
+    node->setPathTo(otherNode, travelPath);
+    travelPath.setPath({ *otherNode->getPosition(), *node->getPosition() });
+    otherNode->setPathTo(node, travelPath);
+#endif
 }
 
 void TravelNodeMap::generateNodes()

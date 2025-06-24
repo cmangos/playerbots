@@ -372,7 +372,15 @@ namespace ai
             WorldPointSquare::AddPoint(point);
         }
 
-        const std::vector<WorldPosition*> GetPoints() const { std::vector<WorldPosition*> points; for (auto& [id, sq] : subSquares) points.insert(points.end(), sq.GetPoints().begin(), sq.GetPoints().end()); return points; }
+        const std::vector<WorldPosition*> GetPoints() const {
+            std::vector<WorldPosition*> allPoints;
+            for (auto& [id, sq] : subSquares) 
+            {          
+                std::vector<WorldPosition*> subPoints = sq.GetPoints();
+                allPoints.insert(allPoints.end(), subPoints.begin(), subPoints.end());
+            } 
+            return allPoints;
+        }
 
         void printWKT(std::ostringstream& out, bool squares) const
         {

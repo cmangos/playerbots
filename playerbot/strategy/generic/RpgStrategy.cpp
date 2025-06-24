@@ -79,7 +79,7 @@ void RpgStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "rpg ai chat",
-        NextAction::array(0, new NextAction("rpg ai chat", 1.002f), NULL)));
+        NextAction::array(0, new NextAction("rpg ai chat", 1.003f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "often",
@@ -196,7 +196,7 @@ void RpgCraftStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "rpg item",
-        NextAction::array(0, new NextAction("rpg item", 1.002f), NULL)));
+        NextAction::array(0, new NextAction("rpg item", 1.003f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "castnc",

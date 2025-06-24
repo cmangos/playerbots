@@ -1,0 +1,119 @@
+#include "playerbot/playerbot.h"
+#include "AutoCompleteQuestAction.h"
+
+using namespace ai;
+
+bool AutoCompleteQuestAction::Execute(Event& event)
+{
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    if (!GetMaster())
+        return false;
+
+    // Static list of quest IDs to auto-complete
+    static const uint32 autoCompleteQuests[] = {
+#ifdef MANGOSBOT_TWO  
+        25229, // a-few-good-gnomes : Bot uses motivatron but it does nothing in game.
+#endif
+    };
+    static const size_t questCount = sizeof(autoCompleteQuests) / sizeof(autoCompleteQuests[0]);
+
+    bool completedQuest = false;
+
+    // Check the bot's quest log for any active quests from the list
+    for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 logQuest = bot->GetQuestSlotQuestId(slot);
+        if (!logQuest)
+            continue;
+
+        // Check if the quest is in the auto-complete list
+        for (size_t i = 0; i < questCount; ++i)
+        {
+            if (logQuest == autoCompleteQuests[i])
+            {
+                Quest const* pQuest = sObjectMgr.GetQuestTemplate(logQuest);
+                if (pQuest)
+                {
+                    // Add quest items for quests that require items
+                    for (uint8 x = 0; x < QUEST_ITEM_OBJECTIVES_COUNT; ++x)
+                    {
+                        uint32 id = pQuest->ReqItemId[x];
+                        uint32 count = pQuest->ReqItemCount[x];
+                        if (!id || !count)
+                            continue;
+
+                        uint32 curItemCount = bot->GetItemCount(id, true);
+
+                        ItemPosCountVec dest;
+                        uint8 msg = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, id, count - curItemCount);
+                        if (msg == EQUIP_ERR_OK)
+                        {
+                            Item* item = bot->StoreNewItem(dest, id, true);
+                            bot->SendNewItem(item, count - curItemCount, true, false);
+                        }
+                    }
+
+                    // All creature/GO slain/casted (not required, but otherwise it will display "Creature slain 0/10")
+                    for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+                    {
+                        int32 creature = pQuest->ReqCreatureOrGOId[i];
+                        uint32 creaturecount = pQuest->ReqCreatureOrGOCount[i];
+
+                        if (uint32 spell_id = pQuest->ReqSpell[i])
+                        {
+                            for (uint16 z = 0; z < creaturecount; ++z)
+                                bot->CastedCreatureOrGO(creature, ObjectGuid((creature > 0 ? HIGHGUID_UNIT : HIGHGUID_GAMEOBJECT), uint32(std::abs(creature)), 1u), spell_id);
+                        }
+                        else if (creature > 0)
+                        {
+                            if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature))
+                                for (uint16 z = 0; z < creaturecount; ++z)
+                                    bot->KilledMonster(cInfo, nullptr);
+                        }
+                        else if (creature < 0)
+                        {
+                            for (uint16 z = 0; z < creaturecount; ++z)
+                                bot->CastedCreatureOrGO(-creature, ObjectGuid(), 0);
+                        }
+                    }
+
+                    // player kills
+                    if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_PLAYER_KILL))
+                        if (uint32 reqPlayers = pQuest->GetPlayersSlain())
+                            bot->KilledPlayerCreditForQuest(reqPlayers, pQuest);
+
+                    // If the quest requires reputation to complete
+                    if (uint32 repFaction = pQuest->GetRepObjectiveFaction())
+                    {
+                        uint32 repValue = pQuest->GetRepObjectiveValue();
+                        uint32 curRep = bot->GetReputationMgr().GetReputation(repFaction);
+                        if (curRep < repValue)
+                            if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(repFaction))
+                                bot->GetReputationMgr().SetReputation(factionEntry, repValue);
+                    }
+
+                    // If the quest requires money
+                    int32 ReqOrRewMoney = pQuest->GetRewOrReqMoney();
+                    if (ReqOrRewMoney < 0)
+                        bot->ModifyMoney(-ReqOrRewMoney);
+
+                    bot->CompleteQuest(logQuest);
+                    completedQuest = true;
+                }
+                break;
+            }
+        }
+    }
+
+    if (completedQuest)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool AutoCompleteQuestAction::isUseful()
+{
+    return sPlayerbotAIConfig.IsFreeAltBot(bot);
+}

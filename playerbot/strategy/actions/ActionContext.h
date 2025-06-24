@@ -64,6 +64,7 @@
 #include "SetAvoidAreaAction.h"
 #include "GlyphAction.h"
 #include "FishAction.h"
+#include "AutoCompleteQuestAction.h"
 
 #include "OnyxiasLairDungeonActions.h"
 #include "MoltenCoreDungeonActions.h"
@@ -276,6 +277,7 @@ namespace ai
             creators["rpg item"] = &ActionContext::rpg_item;
 
             creators["auto set glyph"] = [](PlayerbotAI* ai) { return new AutoSetGlyphAction(ai); };
+            creators["auto complete quest"] = [](PlayerbotAI* ai) { return new AutoCompleteQuestAction(ai); };
 
             creators["move to fish"] = [](PlayerbotAI* ai) { return new MoveToFishAction(ai); };
             creators["fish"] = [](PlayerbotAI* ai) { return new FishAction(ai); };

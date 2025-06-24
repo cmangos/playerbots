@@ -41,4 +41,8 @@ void MaintenanceStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigger
     triggers.push_back(new TriggerNode(
         "random",
         NextAction::array(0, new NextAction("auto share quest", 0.9f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "random",
+        NextAction::array(0, new NextAction("auto complete quest", 1.0f), NULL)));
 }

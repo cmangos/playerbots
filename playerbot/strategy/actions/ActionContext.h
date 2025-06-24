@@ -65,6 +65,7 @@
 #include "GlyphAction.h"
 #include "FishAction.h"
 #include "AutoCompleteQuestAction.h"
+#include "UnstuckAction.h"
 
 #include "OnyxiasLairDungeonActions.h"
 #include "MoltenCoreDungeonActions.h"
@@ -202,6 +203,7 @@ namespace ai
             creators["buy tabard"] = &ActionContext::buy_tabard;
             creators["guild manage nearby"] = &ActionContext::guild_manage_nearby;
             creators["use trinket"] = &ActionContext::use_trinket;
+            creators["unstuck"] = [](PlayerbotAI* ai) { return new UnstuckAction(ai); };
             creators["reset"] = &ActionContext::reset;
             creators["interrupt current spell"] = &ActionContext::interrupt_current_spell;
             creators["initialize pet"] = &ActionContext::initialize_pet;

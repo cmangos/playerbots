@@ -133,6 +133,9 @@ bool FishAction::Execute(Event& event)
 
     std::list<Item*> poles = AI_VALUE2(std::list<Item*>, "inventory items", "fishing pole");
 
+    if (poles.empty())
+        return false;
+
     Item* pole = poles.front();
     uint8 bagIndex = pole->GetBagSlot();
     uint8 slot = pole->GetSlot();

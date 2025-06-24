@@ -256,6 +256,8 @@ bool NeedTravelPurposeValue::Calculate()
             return true;
         break;
     case TravelDestinationPurpose::GatherFishing:
+        if (!AI_VALUE2(bool, "has strategy", "tfish"))
+            return false;
     case TravelDestinationPurpose::GatherSkinning:
     case TravelDestinationPurpose::GatherMining:
     case TravelDestinationPurpose::GatherHerbalism:

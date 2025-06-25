@@ -4,6 +4,7 @@
 #include "playerbot/LootObjectStack.h"
 #include "playerbot/ServerFacade.h"
 #include "PositionValue.h"
+#include "Stances.h"
 
 namespace ai
 {

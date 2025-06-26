@@ -13,7 +13,8 @@ bool AutoCompleteQuestAction::Execute(Event& event)
     static const uint32 autoCompleteQuests[] = {
         0,     //Dummy quest : please remove when a classic quest is found that needs to be skipped.
 #ifdef MANGOSBOT_TWO  
-        25229, // a-few-good-gnomes : Bot uses motivatron but it does nothing in game.
+        25229, // a-few-good-gnomes: Bot uses motivatron but it does nothing in game.
+        12641, // Death Comes From On High: Requires complex vehicle control.
 #endif
     };
     static const size_t questCount = sizeof(autoCompleteQuests) / sizeof(autoCompleteQuests[0]);
@@ -121,5 +122,8 @@ bool AutoCompleteQuestAction::Execute(Event& event)
 
 bool AutoCompleteQuestAction::isUseful()
 {
-    return sPlayerbotAIConfig.IsFreeAltBot(bot);
+    if (ai->HasActivePlayerMaster())
+        return false;
+
+    return true;
 }

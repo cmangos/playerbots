@@ -325,6 +325,31 @@ namespace ai
             // Dungeon Boss Actions
             creators["enable onyxia fight strategy"] = [](PlayerbotAI* ai) { return new OnyxiaEnableFightStrategyAction(ai); };
             creators["disable onyxia fight strategy"] = [](PlayerbotAI* ai) { return new OnyxiaDisableFightStrategyAction(ai); };
+            creators["enable onyxia fight strategy"] = &ActionContext::onyxia_enable_fight_strategy;
+            creators["disable onyxia fight strategy"] = &ActionContext::onyxia_disable_fight_strategy;
+
+
+
+            creators["move away from hazard"] = &ActionContext::move_away_from_hazard;
+
+
+
+   
+
+   
+
+            creators["enable netherspite fight strategy"] = &ActionContext::netherspite_enable_fight_strategy;
+            creators["disable netherspite fight strategy"] = &ActionContext::netherspite_disable_fight_strategy;
+            creators["move away from void zone"] = &ActionContext::voidzone_move_away;
+            creators["add nether portal - perseverence for tank"] = &ActionContext::add_nether_portal_perseverence_for_tank;
+            creators["remove nether portal buffs from netherspite"] = &ActionContext::remove_nether_portal_buffs_from_netherspite;
+            creators["remove nether portal - perseverence"] = &ActionContext::remove_nether_portal_perseverence;
+            creators["remove nether portal - serenity"] = &ActionContext::remove_nether_portal_serenity;
+            creators["remove nether portal - dominance"] = &ActionContext::remove_nether_portal_dominance;
+
+            creators["enable prince malchezaar fight strategy"] = &ActionContext::prince_malchezaar_enable_fight_strategy;
+            creators["disable prince malchezaar fight strategy"] = &ActionContext::prince_malchezaar_disable_fight_strategy;
+            creators["move away from netherspite infernal"] = &ActionContext::netherspite_infernal_move_away;
 
             creators["enable magmadar fight strategy"] = [](PlayerbotAI* ai) { return new MagmadarEnableFightStrategyAction(ai); };
             creators["disable magmadar fight strategy"] = [](PlayerbotAI* ai) { return new MagmadarDisableFightStrategyAction(ai); };

@@ -165,6 +165,125 @@ namespace ai
             creators["prince malchezaar"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarFightStrategy(ai); };
             creators["four horseman"] = [](PlayerbotAI* ai) { return new FourHorsemanFightStrategy(ai); };
         }
+            creators["onyxia"] = &StrategyContext::onyxia;
+            creators["lucifron"] = [](PlayerbotAI* ai){ return new LucifronFightStrategy(ai); };
+            creators["magmadar"] = [](PlayerbotAI* ai){ return new MagmadarFightStrategy(ai); };
+            creators["gehennas"] = [](PlayerbotAI* ai){ return new GehennasFightStrategy(ai); };
+            creators["garr"] = [](PlayerbotAI* ai){ return new GarrFightStrategy(ai); };
+            creators["baron geddon"] = [](PlayerbotAI* ai){ return new BaronGeddonFightStrategy(ai); };
+            creators["shazzrah"] = [](PlayerbotAI* ai){ return new ShazzrahFightStrategy(ai); };
+            creators["sulfuron harbinger"] = [](PlayerbotAI* ai){ return new SulfuronHarbingerFightStrategy(ai); };
+            creators["golemagg"] = [](PlayerbotAI* ai){ return new GolemaggFightStrategy(ai); };
+            creators["ragnaros"] = [](PlayerbotAI* ai){ return new RagnarosFightStrategy(ai); };
+
+            creators["netherspite"] = &StrategyContext::netherspite;
+            creators["prince malchezaar"] = &StrategyContext::prince_malchezaar;
+            creators["four horseman"] = &StrategyContext::fourhorseman;
+        }
+
+    private:
+        static Strategy* mount(PlayerbotAI* ai) { return new MountStrategy(ai); }
+        static Strategy* arena(PlayerbotAI* ai) { return new ArenaStrategy(ai); }
+        static Strategy* bg(PlayerbotAI* ai) { return new BGStrategy(ai); }
+        static Strategy* battleground(PlayerbotAI* ai) { return new BattlegroundStrategy(ai); }
+        static Strategy* warsong(PlayerbotAI* ai) { return new WarsongStrategy(ai); }
+        static Strategy* alterac(PlayerbotAI* ai) { return new AlteracStrategy(ai); }
+        static Strategy* arathi(PlayerbotAI* ai) { return new ArathiStrategy(ai); }
+        static Strategy* eye(PlayerbotAI* ai) { return new EyeStrategy(ai); }
+        static Strategy* isle(PlayerbotAI* ai) { return new IsleStrategy(ai); }
+        static Strategy* behind(PlayerbotAI* ai) { return new SetBehindCombatStrategy(ai); }
+        static Strategy* ranged(PlayerbotAI* ai) { return new RangedCombatStrategy(ai); }
+        static Strategy* close(PlayerbotAI* ai) { return new MeleeCombatStrategy(ai); }
+        static Strategy* mark_rti(PlayerbotAI* ai) { return new MarkRtiStrategy(ai); }
+        static Strategy* tell_target(PlayerbotAI* ai) { return new TellTargetStrategy(ai); }
+        static Strategy* threat(PlayerbotAI* ai) { return new ThreatStrategy(ai); }
+        static Strategy* cast_time(PlayerbotAI* ai) { return new CastTimeStrategy(ai); }
+        static Strategy* potions(PlayerbotAI* ai) { return new UsePotionsStrategy(ai); }
+        static Strategy* kite(PlayerbotAI* ai) { return new KiteStrategy(ai); }
+        static Strategy* duel(PlayerbotAI* ai) { return new DuelStrategy(ai); }
+        static Strategy* start_duel(PlayerbotAI* ai) { return new StartDuelStrategy(ai); }
+        static Strategy* flee(PlayerbotAI* ai) { return new FleeStrategy(ai); }
+        static Strategy* avoid_mobs(PlayerbotAI* ai) { return new AvoidMobsStrategy(ai); }
+        static Strategy* dead(PlayerbotAI* ai) { return new DeadStrategy(ai); }
+        static Strategy* racials(PlayerbotAI* ai) { return new RacialsStrategy(ai); }
+        static Strategy* loot(PlayerbotAI* ai) { return new LootNonCombatStrategy(ai); }
+        static Strategy* gather(PlayerbotAI* ai) { return new GatherStrategy(ai); }
+        static Strategy* roll(PlayerbotAI* ai) { return new RollStrategy(ai); }
+        static Strategy* delayed_roll(PlayerbotAI* ai) { return new DelayedRollStrategy(ai); }
+        static Strategy* emote(PlayerbotAI* ai) { return new EmoteStrategy(ai); }
+        static Strategy* passive(PlayerbotAI* ai) { return new PassiveStrategy(ai); }
+        static Strategy* conserve_mana(PlayerbotAI* ai) { return new ConserveManaStrategy(ai); }
+        static Strategy* food(PlayerbotAI* ai) { return new UseFoodStrategy(ai); }
+        static Strategy* chat(PlayerbotAI* ai) { return new ChatCommandHandlerStrategy(ai); }
+        static Strategy* world_packet(PlayerbotAI* ai) { return new WorldPacketHandlerStrategy(ai); }
+        static Strategy* ready_check(PlayerbotAI* ai) { return new ReadyCheckStrategy(ai); }
+        static Strategy* pvp(PlayerbotAI* ai) { return new AttackEnemyPlayersStrategy(ai); }
+        static Strategy* _return(PlayerbotAI* ai) { return new ReturnStrategy(ai); }
+        static Strategy* lfg(PlayerbotAI* ai) { return new LfgStrategy(ai); }
+        static Strategy* custom(PlayerbotAI* ai) { return new CustomStrategy(ai); }
+        static Strategy* reveal(PlayerbotAI* ai) { return new RevealStrategy(ai); }
+        static Strategy* collision(PlayerbotAI* ai) { return new CollisionStrategy(ai); }
+        static Strategy* rpg(PlayerbotAI* ai) { return new RpgStrategy(ai); }
+        static Strategy* rpg_quest(PlayerbotAI* ai) { return new RpgQuestStrategy(ai); }
+        static Strategy* rpg_vendor(PlayerbotAI* ai) { return new RpgVendorStrategy(ai); }
+        static Strategy* rpg_explore(PlayerbotAI* ai) { return new RpgExploreStrategy(ai); }
+        static Strategy* rpg_maintenance(PlayerbotAI* ai) { return new RpgMaintenanceStrategy(ai); }
+        static Strategy* rpg_guild(PlayerbotAI* ai) { return new RpgGuildStrategy(ai); }
+        static Strategy* rpg_bg(PlayerbotAI* ai) { return new RpgBgStrategy(ai); }
+        static Strategy* rpg_player(PlayerbotAI* ai) { return new RpgPlayerStrategy(ai); }
+        static Strategy* rpg_craft(PlayerbotAI* ai) { return new RpgCraftStrategy(ai); }
+        static Strategy* rpg_jump(PlayerbotAI* ai) { return new RpgJumpStrategy(ai); }
+        static Strategy* follow_jump(PlayerbotAI* ai) { return new FollowJumpStrategy(ai); }
+        static Strategy* chase_jump(PlayerbotAI* ai) { return new ChaseJumpStrategy(ai); }
+		static Strategy* travel(PlayerbotAI* ai) { return new TravelStrategy(ai); }
+        static Strategy* travel_once(PlayerbotAI* ai) { return new TravelOnceStrategy(ai); }
+        static Strategy* explore(PlayerbotAI* ai) { return new ExploreStrategy(ai); }
+        static Strategy* map(PlayerbotAI* ai) { return new MapStrategy(ai); }
+        static Strategy* map_full(PlayerbotAI* ai) { return new MapFullStrategy(ai); }
+        static Strategy* sit(PlayerbotAI* ai) { return new SitStrategy(ai); }
+        static Strategy* possible_ads(PlayerbotAI* ai) { return new PossibleAdsStrategy(ai); }
+        static Strategy* attack_tagged(PlayerbotAI* ai) { return new AttackTaggedStrategy(ai); }
+        static Strategy* debug(PlayerbotAI* ai) { return new DebugStrategy(ai); }
+        static Strategy* debug_action(PlayerbotAI* ai) { return new DebugActionStrategy(ai); }
+        static Strategy* debug_move(PlayerbotAI* ai) { return new DebugMoveStrategy(ai); }
+        static Strategy* debug_rpg(PlayerbotAI* ai) { return new DebugRpgStrategy(ai); }
+        static Strategy* debug_spell(PlayerbotAI* ai) { return new DebugSpellStrategy(ai); }
+        static Strategy* debug_travel(PlayerbotAI* ai) { return new DebugTravelStrategy(ai); }
+        static Strategy* debug_threat(PlayerbotAI* ai) { return new DebugThreatStrategy(ai); }
+        static Strategy* debug_mount(PlayerbotAI* ai) { return new DebugMountStrategy(ai); }
+        static Strategy* debug_grind(PlayerbotAI* ai) { return new DebugGrindStrategy(ai); }
+        static Strategy* debug_loot(PlayerbotAI* ai) { return new DebugLootStrategy(ai); }
+        static Strategy* debug_log(PlayerbotAI* ai) { return new DebugLogStrategy(ai); }
+        static Strategy* debug_logname(PlayerbotAI* ai) { return new DebugLogNameStrategy(ai); }
+        static Strategy* rtsc(PlayerbotAI* ai) { return new RTSCStrategy(ai); }
+        static Strategy* rtsc_jump(PlayerbotAI* ai) { return new RTSCSJumptrategy(ai); }
+        static Strategy* maintenance(PlayerbotAI* ai) { return new MaintenanceStrategy(ai); }
+        static Strategy* group(PlayerbotAI* ai) { return new GroupStrategy(ai); }
+        static Strategy* guild (PlayerbotAI* ai) { return new GuildStrategy(ai); }
+        static Strategy* grind(PlayerbotAI* ai) { return new GrindingStrategy(ai); }
+        static Strategy* avoid_aoe(PlayerbotAI* ai) { return new AvoidAoeStrategy(ai); }
+        static Strategy* wait_for_attack(PlayerbotAI* ai) { return new WaitForAttackStrategy(ai); }
+        static Strategy* pull_back(PlayerbotAI* ai) { return new PullBackStrategy(ai); }
+        static Strategy* focus_heal_targets(PlayerbotAI* ai) { return new FocusHealTargetsStrategy(ai); }
+        static Strategy* heal_interrupt(PlayerbotAI* ai) { return new HealInterruptStrategy(ai); }
+        static Strategy* preheal(PlayerbotAI* ai) { return new PreHealStrategy(ai); }
+        static Strategy* world_buff(PlayerbotAI* ai) { return new WorldBuffStrategy(ai); }
+        static Strategy* silent(PlayerbotAI* ai) { return new SilentStrategy(ai); }
+        static Strategy* nowar(PlayerbotAI* ai) { return new NoWarStrategy(ai); }
+
+        // Dungeon Strategies
+        static Strategy* dungeon(PlayerbotAI* ai) { return new DungeonStrategy(ai); }
+        static Strategy* onyxias_lair(PlayerbotAI* ai) { return new OnyxiasLairDungeonStrategy(ai); }
+        static Strategy* molten_core(PlayerbotAI* ai) { return new MoltenCoreDungeonStrategy(ai); }
+        static Strategy* karazhan(PlayerbotAI* ai) { return new KarazhanDungeonStrategy(ai); }
+        static Strategy* naxxramas(PlayerbotAI* ai) { return new NaxxramasDungeonStrategy(ai); }
+
+        // Dungeon Boss Strategy
+        static Strategy* onyxia(PlayerbotAI* ai) { return new OnyxiaFightStrategy(ai); }
+        static Strategy* magmadar(PlayerbotAI* ai) { return new MagmadarFightStrategy(ai); }
+        static Strategy* netherspite(PlayerbotAI* ai) { return new NetherspiteFightStrategy(ai); }
+        static Strategy* prince_malchezaar(PlayerbotAI* ai) { return new PrinceMalchezaarFightStrategy(ai); }
+        static Strategy* fourhorseman(PlayerbotAI* ai) { return new FourHorsemanFightStrategy(ai); }
     };
 
     class MovementStrategyContext : public NamedObjectContext<Strategy>

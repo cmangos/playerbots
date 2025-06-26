@@ -1586,8 +1586,12 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
             g = currentNode->m_g + linkCost; // stance from start + distance between the two nodes
             if ((childNode->open || childNode->close) && childNode->m_g <= g) // n' is already in opend or closed with a lower cost g(n')
                 continue; // consider next successor
+            float distance = childNode->dataNode->fDist(goal);
 
-            h = childNode->dataNode->fDist(goal) / unitSpeed;
+            if (distance == FLT_MAX)
+                continue;
+
+            h = distance / unitSpeed;
             f = g + h; // compute f(n')
             childNode->m_f = f;
             childNode->m_g = g;

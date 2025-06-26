@@ -100,6 +100,7 @@ void TravelNodePath::calculateCost(bool distanceOnly)
 
 bool TravelNodePath::canClickSpell(Player* bot, uint32 entry)
 {
+#ifdef MANGOSBOT_TWO
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(entry);
 
     if (clickPair.first != clickPair.second)
@@ -123,7 +124,7 @@ bool TravelNodePath::canClickSpell(Player* bot, uint32 entry)
             return true;
         }
     }
-
+#endif
     return false;
 }
 

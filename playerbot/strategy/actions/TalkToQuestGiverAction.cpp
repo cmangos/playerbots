@@ -95,6 +95,9 @@ bool TalkToQuestGiverAction::TurnInQuest(Player* requester, Quest const* quest, 
         RewardMultipleItem(requester, quest, questGiver, out);
     }
 
+    if(quest->GetRewChoiceItemsCount() || quest->GetRewItemsCount())
+        ai->DoSpecificAction("equip upgrades");
+
     return true;
 }
 

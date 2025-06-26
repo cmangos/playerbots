@@ -98,6 +98,35 @@ void TravelNodePath::calculateCost(bool distanceOnly)
     }
 }
 
+bool TravelNodePath::canClickSpell(Player* bot, uint32 entry)
+{
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(entry);
+
+    if (clickPair.first != clickPair.second)
+    {
+        for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+        {
+            if (itr->second.questStart)
+            {
+                // not in expected required quest state
+                if (!bot || ((!itr->second.questStartCanActive || !bot->IsActiveQuest(itr->second.questStart)) && !bot->GetQuestRewardStatus(itr->second.questStart)))
+                    return false;
+            }
+
+            if (itr->second.questEnd)
+            {
+                // not in expected forbidden quest state
+                if (!bot || bot->GetQuestRewardStatus(itr->second.questEnd))
+                    return false;
+            }
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 //The cost to travel this path. 
 float TravelNodePath::getCost(Unit* unit, uint32 cGold)
 {
@@ -154,20 +183,26 @@ float TravelNodePath::getCost(Unit* unit, uint32 cGold)
 
             TaxiPathEntry const* taxiPath = sTaxiPathStore.LookupEntry(pathObject);
 
-            if (!taxiPath)
-                return -1;
+            if (taxiPath)
+            {
 
-            if (!bot->isTaxiCheater() && taxiPath->price > cGold)
-                return -1;
+                if (!bot->isTaxiCheater() && taxiPath->price > cGold)
+                    return -1;
 
-            if (!bot->isTaxiCheater() && !bot->m_taxi.IsTaximaskNodeKnown(taxiPath->to))
-                return -1;
+                if (!bot->isTaxiCheater() && !bot->m_taxi.IsTaximaskNodeKnown(taxiPath->to))
+                    return -1;
 
-            TaxiNodesEntry const* startTaxiNode = sTaxiNodesStore.LookupEntry(taxiPath->from);
-            TaxiNodesEntry const* endTaxiNode = sTaxiNodesStore.LookupEntry(taxiPath->to);
+                TaxiNodesEntry const* startTaxiNode = sTaxiNodesStore.LookupEntry(taxiPath->from);
+                TaxiNodesEntry const* endTaxiNode = sTaxiNodesStore.LookupEntry(taxiPath->to);
 
-            if (!startTaxiNode || !endTaxiNode || !startTaxiNode->MountCreatureID[bot->GetTeam() == ALLIANCE ? 1 : 0] || !endTaxiNode->MountCreatureID[bot->GetTeam() == ALLIANCE ? 1 : 0])
-                return -1;
+                if (!startTaxiNode || !endTaxiNode || !startTaxiNode->MountCreatureID[bot->GetTeam() == ALLIANCE ? 1 : 0] || !endTaxiNode->MountCreatureID[bot->GetTeam() == ALLIANCE ? 1 : 0])
+                    return -1;
+            }
+            else
+            {
+                if (!canClickSpell(bot, pathObject)) //Click Spell flightpath.
+                    return -1;
+            }
         }
 
         speed = bot->GetSpeed(MOVE_RUN);
@@ -2476,6 +2511,7 @@ void TravelNodeMap::addManualNodes()
 #endif
 
 #ifdef MANGOSBOT_TWO
+    //Teleport doodah
     node = sTravelNodeMap.addNode(WorldPosition(0, -7502.20f, -1152.98f, 269.55f), "c1-Blackrock Mountain", true, false);
     node = sTravelNodeMap.addNode(WorldPosition(0, -7591.31f,-1114.44f,249.91f), "c2-Blackrock Mountain", true, false);
 
@@ -2485,6 +2521,28 @@ void TravelNodeMap::addManualNodes()
     TravelNodePath travelPath(0.1f, 3.0f, (uint8)TravelNodePathType::areaTrigger, 0, true);
     travelPath.setPath({ *node->getPosition(), *otherNode->getPosition() });    
     node->setPathTo(otherNode, travelPath);
+    travelPath.setPath({ *otherNode->getPosition(), *node->getPosition() });
+    otherNode->setPathTo(node, travelPath);                         
+
+    //Scourge gryphons. 
+    //These use HandleSpellClick 
+    node = sTravelNodeMap.addNode(WorldPosition(609, 2325.03f, -5659.60f, 382.24f), "c3-Ebon Hold", true, false, false, 29488);
+    otherNode = sTravelNodeMap.addNode(WorldPosition(609, 2409.09f, -5722.37f, 154.00f), "c3-Scarlet Enclave", true, false, false, 29501);
+
+    travelPath = TravelNodePath(0.1f, 3.0f, (uint8)TravelNodePathType::flightPath, 29488, true);
+    travelPath.setPath({ *node->getPosition(), *otherNode->getPosition() });
+    node->setPathTo(otherNode, travelPath);
+    travelPath = TravelNodePath(0.1f, 3.0f, (uint8)TravelNodePathType::flightPath, 29501, true);
+    travelPath.setPath({ *otherNode->getPosition(), *node->getPosition() });
+    otherNode->setPathTo(node, travelPath);
+
+    node = sTravelNodeMap.addNode(WorldPosition(609, 2348.58f, -5695.35f, 382.24f), "c4-Ebon Hold", true, false, false, 29488);    
+    otherNode = sTravelNodeMap.addNode(WorldPosition(609, 2402.86f, -5727.03f, 154.00f), "c4-Scarlet Enclave", true, false, false, 29501);
+
+    travelPath = TravelNodePath(0.1f, 3.0f, (uint8)TravelNodePathType::flightPath, 29488, true);
+    travelPath.setPath({ *node->getPosition(), *otherNode->getPosition() });
+    node->setPathTo(otherNode, travelPath);
+    travelPath = TravelNodePath(0.1f, 3.0f, (uint8)TravelNodePathType::flightPath, 29501, true);
     travelPath.setPath({ *otherNode->getPosition(), *node->getPosition() });
     otherNode->setPathTo(node, travelPath);
 #endif

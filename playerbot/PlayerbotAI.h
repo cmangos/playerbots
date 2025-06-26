@@ -666,6 +666,8 @@ public:
 
     float GetLevelFloat() const;
 
+    bool HandleSpellClick(uint32 entry);
+
 #ifdef BUILD_ELUNA
     MaNGOS::unique_weak_ptr<PlayerbotAI> GetWeakPtr() const { return m_weakRef; }
     void SetWeakPtr(MaNGOS::unique_weak_ptr<PlayerbotAI> weakRef) { m_weakRef = std::move(weakRef); }

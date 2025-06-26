@@ -147,6 +147,12 @@ bool OpenLootAction::DoLoot(LootObject& lootObject)
     if (!lootObject.IsLootPossible(bot)) //Clear loot if bot can't loot it.
         return true;
 
+    //Keys need to use the key 
+    if (spellId == sPlayerbotAIConfig.openGoSpell && go && lootObject.reqItem && bot->HasItemCount(lootObject.reqItem,1,false))
+    {
+        return ai->DoSpecificAction("use", Event("do loot", chat->formatQItem(lootObject.reqItem) + " " + chat->formatGameobject(go)));
+    }
+
     return ai->CastSpell(spellId, bot);
 }
 

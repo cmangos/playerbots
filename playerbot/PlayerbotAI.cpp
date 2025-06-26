@@ -8085,6 +8085,7 @@ float PlayerbotAI::GetLevelFloat() const
 
 bool PlayerbotAI::HandleSpellClick(uint32 entry) 
 {
+#ifdef MANGOSBOT_TWO
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(entry);
 
     if (clickPair.first == clickPair.second)
@@ -8131,6 +8132,6 @@ bool PlayerbotAI::HandleSpellClick(uint32 entry)
                 sLog.outError("WorldSession::HandleSpellClick: npc_spell_click with entry %u has 0 in spell_id. Not handled custom case?", creature->GetEntry());
         }
     }
-
+#endif
     return false;
 }

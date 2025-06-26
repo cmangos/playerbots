@@ -4,6 +4,7 @@
 #include "SharedValueContext.h"
 #include "ItemUsageValue.h"
 #include "playerbot/TravelMgr.h"
+#include "playerbot/strategy/deathknight/DKActions.h"
 
 using namespace ai;
 
@@ -603,7 +604,7 @@ bool CanUseItemOn::Calculate()
 	case 52566: //Motivate-a-Tron (currently broken?)
 		return guidP.IsCreature() && guidP.GetEntry() == 39623; //Gnome Citizen
 	case 38607: //Battle-worn Sword
-		return guidP.IsGameObject() && (guidP.GetEntry() == 190557 || guidP.GetEntry() == 191746 || guidP.GetEntry() == 191747 || guidP.GetEntry() == 191748 || guidP.GetEntry() == 191757 || guidP.GetEntry() == 191758); //Runeforge
+		return guidP.IsGameObject() && (std::find(RUNEFORGES.begin(), RUNEFORGES.end(), guidP.GetEntry()) != RUNEFORGES.end()); //Runeforge
 	}
 
 	if (guidP.IsUnit())

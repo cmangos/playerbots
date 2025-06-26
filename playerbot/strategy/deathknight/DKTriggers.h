@@ -99,4 +99,12 @@ namespace ai
 	public:
 		StrangulateOnEnemyHealerTrigger(PlayerbotAI* ai) : InterruptEnemyHealerTrigger(ai, "strangulate") {}
 	};
+
+    class AutoRuneForgeTrigger : public Trigger {
+    public:
+        AutoRuneForgeTrigger(PlayerbotAI* ai) : Trigger(ai, "auto runeforge") {}
+        virtual bool IsActive() override {
+            return AI_VALUE(bool, "should runeforge");
+        }
+    };
 }

@@ -102,6 +102,7 @@
 #include "GlyphValues.h"
 #include "StuckValues.h"
 #include "FishValues.h"
+#include "RuneForgeValues.h"
 
 namespace ai
 {
@@ -452,6 +453,10 @@ namespace ai
             //Stuck
             creators["time since last change"] = [](PlayerbotAI* ai) { return new TimeSinceLastChangeValue(ai); };
             creators["distance moved since"] = [](PlayerbotAI* ai) { return new DistanceMovedSinceValue(ai); };
+
+            creators["runeforge spells"] = [](PlayerbotAI* ai) { return new RuneForgeSpellsValue(ai); };
+            creators["best runeforge spell"] = [](PlayerbotAI* ai) { return new BestRuneForgeSpellValue(ai); };
+            creators["should runeforge"] = [](PlayerbotAI* ai) { return new ShouldRuneForgeValue(ai); };
         };
     };
 }

@@ -143,11 +143,6 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
 
     aiObjectContext = AiFactory::createAiObjectContext(bot, this);
 
-    if (!HasRealPlayerMaster() && bot->GetFreeTalentPoints() > 0)
-    {
-        DoSpecificAction("auto talents");
-    }
-
     UpdateTalentSpec();
 
     engines[(uint8)BotState::BOT_STATE_COMBAT] = AiFactory::createCombatEngine(bot, this, aiObjectContext);
@@ -237,6 +232,11 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
 #ifndef MANGOSBOT_ZERO
     masterOutgoingPacketHandlers.AddHandler(MSG_RAID_READY_CHECK_FINISHED, "ready check finished");
 #endif
+
+    if (!HasRealPlayerMaster() && bot->GetFreeTalentPoints() > 0)
+    {
+        DoSpecificAction("auto talents");
+    }
 }
 
 PlayerbotAI::~PlayerbotAI()

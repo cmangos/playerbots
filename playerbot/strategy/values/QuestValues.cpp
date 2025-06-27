@@ -85,6 +85,8 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 		}
 	}
 
+	//Hard coded:
+	rMap[28406][12733] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Death Knight Initiate][Death's Challenge]
 	return rMap;
 }
 

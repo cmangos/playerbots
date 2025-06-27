@@ -7,6 +7,7 @@
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/TravelMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
 using namespace ai;
 
@@ -800,4 +801,36 @@ bool RpgItemTrigger::IsActive()
 bool RandomJumpTrigger::IsActive()
 {
     return bot->IsInWorld() && ai->HasPlayerNearby() && !ai->IsJumping() && frand(0.0f, 1.0f) < sPlayerbotAIConfig.jumpRandomChance;
+}
+
+bool RpgGossipTalkTrigger::IsActive()
+{
+    GuidPosition guidP(getGuidP());
+
+    if (!guidP.IsCreature())
+        return false;
+
+    GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(guidP.GetCreatureTemplate()->GossipMenuId);
+    if (pMenuItemBounds.first == pMenuItemBounds.second)
+        return false;
+
+    Creature* creature = guidP.GetCreature(bot->GetInstanceId());
+
+    if (!creature)
+        return false;
+
+    if (!sScriptDevAIMgr.OnGossipHello(bot, creature))
+    {
+        bot->PrepareGossipMenu(creature, creature->GetDefaultGossipMenuId());
+    }
+
+    if (!bot->GetPlayerMenu())
+        return false;
+
+    GossipMenu& menu = bot->GetPlayerMenu()->GetGossipMenu();
+
+    if (!menu.MenuItemCount())
+        return false;
+
+    return true;
 }

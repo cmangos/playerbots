@@ -242,6 +242,7 @@ namespace ai
             creators["rpg enchant"] = [](PlayerbotAI* ai) { return new RpgEnchantTrigger(ai); };
             creators["rpg duel"] = [](PlayerbotAI* ai) { return new RpgDuelTrigger(ai); };
             creators["rpg item"] = [](PlayerbotAI* ai) { return new RpgItemTrigger(ai); };
+            creators["rpg gossip talk"] = [](PlayerbotAI* ai) { return new RpgGossipTalkTrigger(ai); };
 
             creators["random jump"] = [](PlayerbotAI* ai) { return new RandomJumpTrigger(ai); };
             creators["rtsc jump active"] = [](PlayerbotAI* ai) { return new RtscJumpTrigger(ai); };

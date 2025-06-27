@@ -104,6 +104,10 @@ void RpgQuestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "rpg repeat quest",
         NextAction::array(0, new NextAction("rpg start quest", 1.030f), new NextAction("rpg end quest", 1.030f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "rpg gossip talk",
+        NextAction::array(0, new NextAction("rpg gossip talk", 1.003f), NULL)));
 }
 
 void RpgVendorStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

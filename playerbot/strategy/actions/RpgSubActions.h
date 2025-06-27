@@ -329,4 +329,14 @@ namespace ai
 
         virtual bool Execute(Event& event);
     };
+
+    class RpgGossipTalkAction : public RpgSubAction
+    {
+    public:
+        RpgGossipTalkAction(PlayerbotAI* ai, std::string name = "rpg gossip talk") : RpgSubAction(ai, name) {}
+
+    private:
+        virtual std::string ActionName() { return "gossip hello"; }
+        virtual Event ActionEvent(Event event) { WorldPacket p(CMSG_GOSSIP_SELECT_OPTION); p << rpg->guid(); p.rpos(0); return Event("rpg action", p); }
+    };
 }

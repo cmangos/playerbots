@@ -10,6 +10,7 @@ namespace ai
         virtual bool Execute(Event& event) override;
         void EquipItems(Player* requester, ItemIds ids);
         void EquipItem(Player* requester, Item* item);
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "equip"; }
@@ -34,6 +35,7 @@ namespace ai
     public:
         EquipUpgradesAction(PlayerbotAI* ai, std::string name = "equip upgrades") : EquipAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "equip upgrades"; }

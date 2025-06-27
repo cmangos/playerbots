@@ -11,6 +11,8 @@ namespace ai
     public:
         ChangeTalentsAction(PlayerbotAI* ai, std::string name = "talents") : ChatCommandAction(ai, name) {}
 
+        virtual bool isUsefulWhenStunned() override { return true; }
+
     public:
         virtual bool Execute(Event& event) override;
         virtual bool AutoSelectTalents(std::ostringstream* out);
@@ -28,5 +30,6 @@ namespace ai
     public:
         AutoSetTalentsAction(PlayerbotAI* ai) : ChangeTalentsAction(ai, "auto talents") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 }

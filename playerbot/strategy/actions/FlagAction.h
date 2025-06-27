@@ -9,6 +9,7 @@ namespace ai
     public:
         FlagAction(PlayerbotAI* ai) : ChatCommandAction(ai, "flag") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "flag"; }

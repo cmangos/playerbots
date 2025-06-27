@@ -12,6 +12,7 @@ namespace ai
         
     public:
         virtual bool Execute(Event& event);
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     private: 
         void LearnSpells(std::ostringstream* out);

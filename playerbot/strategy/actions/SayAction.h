@@ -12,6 +12,7 @@ namespace ai
         virtual bool Execute(Event& event);
         virtual bool isUseful();
         virtual std::string getName() { return "say::" + qualifier; }
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     private:
     };
@@ -26,6 +27,7 @@ namespace ai
         ChatReplyAction(PlayerbotAI* ai) : Action(ai, "chat message") {}
         virtual bool Execute(Event& event) { return true; }
         bool isUseful();
+        virtual bool isUsefulWhenStunned() override { return true; }
 
         static void GetAIChatPlaceholders(std::map<std::string, std::string>& placeholders, Unit* sender = nullptr, Unit* receiver = nullptr);
         static void GetAIChatPlaceholders(std::map<std::string, std::string>& placeholders, Unit* unit, const std::string preFix = "bot", Player* observer = nullptr);

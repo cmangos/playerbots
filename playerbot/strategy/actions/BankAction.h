@@ -8,6 +8,7 @@ namespace ai
     public:
         BankAction(PlayerbotAI* ai) : ChatCommandAction(ai, "bank") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "bank"; }

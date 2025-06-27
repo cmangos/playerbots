@@ -9,6 +9,7 @@ namespace ai
     public:
         SecurityCheckAction(PlayerbotAI* ai) : Action(ai, "security check") {}
         virtual bool isUseful();
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 }

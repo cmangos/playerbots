@@ -359,7 +359,7 @@ namespace ai
         virtual std::string getName() override { return "remove " + name; }
         virtual bool isUseful() override;
         virtual bool Execute(Event& event) override;
-
+        virtual bool isUsefulWhenStunned() override { return true; }
     private:
         std::string name;
     };

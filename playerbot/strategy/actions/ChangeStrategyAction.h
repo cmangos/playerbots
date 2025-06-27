@@ -8,6 +8,7 @@ namespace ai
 	public:
 		ChangeCombatStrategyAction(PlayerbotAI* ai, std::string name = "co") : ChatCommandAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class ChangeNonCombatStrategyAction : public ChatCommandAction
@@ -15,6 +16,7 @@ namespace ai
     public:
         ChangeNonCombatStrategyAction(PlayerbotAI* ai, std::string name = "nc") : ChatCommandAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class ChangeDeadStrategyAction : public ChatCommandAction
@@ -22,6 +24,7 @@ namespace ai
     public:
         ChangeDeadStrategyAction(PlayerbotAI* ai, std::string name = "de") : ChatCommandAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class ChangeReactionStrategyAction : public ChatCommandAction
@@ -29,6 +32,7 @@ namespace ai
     public:
         ChangeReactionStrategyAction(PlayerbotAI* ai, std::string name = "react") : ChatCommandAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class ChangeAllStrategyAction : public ChatCommandAction
@@ -36,6 +40,7 @@ namespace ai
     public:
         ChangeAllStrategyAction(PlayerbotAI* ai, std::string name = "change strategy from all", std::string strategy = "") : ChatCommandAction(ai, name), strategy(strategy) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     private:
         std::string strategy;

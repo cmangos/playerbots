@@ -9,6 +9,7 @@ namespace ai
     public:
         PositionAction(PlayerbotAI* ai) : ChatCommandAction(ai, "position") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class MoveToPositionAction : public MovementAction
@@ -36,6 +37,7 @@ namespace ai
         SetReturnPositionAction(PlayerbotAI* ai) : Action(ai, "set return position") {}
         virtual bool Execute(Event& event);
         virtual bool isUseful();
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class ReturnAction : public MoveToPositionAction

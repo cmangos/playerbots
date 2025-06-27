@@ -9,6 +9,7 @@ namespace ai
         HelpAction(PlayerbotAI* ai);
         virtual ~HelpAction();
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     private:
         void TellChatCommands(Player* requester);

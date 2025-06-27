@@ -8,5 +8,6 @@ namespace ai
     public:
         WtsAction(PlayerbotAI* ai) : ChatCommandAction(ai, "wts") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 }

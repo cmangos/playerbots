@@ -10,6 +10,7 @@ namespace ai
         AutoCompleteQuestAction(PlayerbotAI* ai) : ChatCommandAction(ai, "auto complete quest") {}
         virtual bool Execute(Event& event) override;
         virtual bool isUseful() override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "auto complete quest"; }

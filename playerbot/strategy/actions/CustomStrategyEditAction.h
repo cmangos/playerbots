@@ -8,6 +8,7 @@ namespace ai
     public:
         CustomStrategyEditAction(PlayerbotAI* ai) : ChatCommandAction(ai, "cs") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     private:
         bool PrintHelp(Player* requester);

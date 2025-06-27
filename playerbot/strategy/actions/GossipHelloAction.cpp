@@ -119,8 +119,12 @@ bool GossipHelloAction::ProcessGossip(Player* requester, ObjectGuid creatureGuid
 {
     GossipMenu& menu = bot->GetPlayerMenu()->GetGossipMenu();
 
+    bool noFeedback = (menuToSelect == -1);
+
     if (menuToSelect == -1)
+    {
         menuToSelect = urand(0, menu.MenuItemCount() - 1);
+    }
 
     if (menuToSelect >= 0 && (unsigned int)menuToSelect >= menu.MenuItemCount())
     {
@@ -139,6 +143,7 @@ bool GossipHelloAction::ProcessGossip(Player* requester, ObjectGuid creatureGuid
     p << code;
     bot->GetSession()->HandleGossipSelectOptionOpcode(p);
 
-    TellGossipMenus(requester);
+    if(!noFeedback)
+        TellGossipMenus(requester);
     return true;
 }

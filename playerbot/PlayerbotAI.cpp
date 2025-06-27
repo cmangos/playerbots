@@ -51,6 +51,7 @@
 #ifdef BUILD_ELUNA
 #include "LuaEngine/LuaEngine.h"
 #endif
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
 using namespace ai;
 
@@ -878,14 +879,15 @@ bool PlayerbotAI::CanEnterArea(const AreaTrigger* area)
 
 void PlayerbotAI::Unmount()
 {
+#ifdef MANGOSBOT_TWO
+        bot->ResolvePendingMount();
+#endif
+
     if ((bot->IsMounted() || bot->GetMountID()) && !bot->IsTaxiFlying())
     {
         bool wasFlying = bot->IsFlying();
         bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         bot->Unmount();
-#ifdef MANGOSBOT_TWO
-        bot->ResolvePendingUnmount();
-#endif
 
         bot->UpdateSpeed(MOVE_RUN, true);
         bot->UpdateSpeed(MOVE_RUN, false);
@@ -895,6 +897,11 @@ void PlayerbotAI::Unmount()
             bot->GetMotionMaster()->MoveFall();
         }
     }
+
+#ifdef MANGOSBOT_TWO
+    if(bot->IsPendingDismount())
+        bot->ResolvePendingUnmount();
+#endif
 }
 
 bool PlayerbotAI::IsStateActive(BotState state) const
@@ -8149,4 +8156,57 @@ float PlayerbotAI::GetLevelFloat() const
     level += float(xp) / float(nextLevelXp);
 
     return level;
+}
+
+bool PlayerbotAI::HandleSpellClick(uint32 entry) 
+{
+#ifdef MANGOSBOT_TWO
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(entry);
+
+    if (clickPair.first == clickPair.second)
+        return false;
+
+    Creature* creature = nullptr;
+
+    AiObjectContext* context = aiObjectContext;
+    std::list<ObjectGuid> guids = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
+    for (auto& guid : guids)
+    {
+        if (!guid.IsCreature())
+            continue;
+
+        if (guid.GetEntry() != entry)
+            continue;
+
+        creature = GetCreature(guid);
+        if (!creature)
+            continue;
+
+        break;
+    }
+
+    if (!creature)
+        return false;
+
+    for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+    {
+        if (itr->second.IsFitToRequirements(bot, creature))
+        {
+            if (sScriptDevAIMgr.OnNpcSpellClick(bot, creature, itr->second.spellId))
+                return true;
+
+            Unit* caster = (itr->second.castFlags & 0x1) ? (Unit*)bot : (Unit*)creature;
+            Unit* target = (itr->second.castFlags & 0x2) ? (Unit*)bot : (Unit*)creature;
+
+            if (itr->second.spellId)
+            {
+                caster->CastSpell(target, itr->second.spellId, TRIGGERED_OLD_TRIGGERED);
+                return true;
+            }
+            else
+                sLog.outError("WorldSession::HandleSpellClick: npc_spell_click with entry %u has 0 in spell_id. Not handled custom case?", creature->GetEntry());
+        }
+    }
+#endif
+    return false;
 }

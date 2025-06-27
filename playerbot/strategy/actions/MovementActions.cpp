@@ -707,6 +707,9 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 
         if (pathType == TravelNodePathType::flightPath && entry)
         {
+            if (ai->HandleSpellClick(entry)) //Source gryphon of ebonhold.
+                return true;
+
             TaxiPathEntry const* tEntry = sTaxiPathStore.LookupEntry(entry);
 
             if (tEntry)
@@ -735,6 +738,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 }
 #ifdef MANGOSBOT_TWO                
                 bot->OnTaxiFlightEject(true);
+                ai->Unmount();
 #endif
                 bool goTaxi = bot->ActivateTaxiPathTo({ tEntry->from, tEntry->to }, unit, 1);
 #ifdef MANGOSBOT_TWO

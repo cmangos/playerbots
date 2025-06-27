@@ -169,8 +169,12 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
     bool couldMove;
 
-    if (false && unit && unit->IsMoving() && bot->GetDistance(unit) < INTERACTION_DISTANCE  * 2 && unit->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
+    if (unit && unit->IsMoving() && bot->GetDistance(unit) < INTERACTION_DISTANCE * 2 && unit->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
+    {
         couldMove = Follow(unit, INTERACTION_DISTANCE * distance, unit->GetOrientation());
+        if(unit->GetSpeedInMotion()) //Speed up walking in case we need to follow in walk.
+            bot->UpdateSpeed(MOVE_WALK, false, unit->GetSpeedInMotion() / bot->GetSpeed(MOVE_WALK));
+    }
     else    
         couldMove = MoveTo(mapId, x, y, z, false, false);
 

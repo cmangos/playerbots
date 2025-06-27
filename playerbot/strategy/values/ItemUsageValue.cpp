@@ -804,6 +804,9 @@ uint32 ItemUsageValue::ItemCreatedFrom(uint32 wantItemId)
 
 bool ItemUsageValue::IsNeededForQuest(Player* player, uint32 itemId, bool ignoreInventory)
 {
+    if (!itemId)
+        return false;
+
     for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
     {
         uint32 entry = player->GetQuestSlotQuestId(slot);

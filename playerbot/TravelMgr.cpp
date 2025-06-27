@@ -2409,6 +2409,17 @@ void TravelMgr::SaveFishLocations()
     WorldDatabase.CommitTransaction();
 }
 
+WorldPosition* TravelMgr::GetFishSpot(WorldPosition start, bool onlyNearestGrid)
+{
+    //0% Different map, 25% different grid, 25% different cell, 100% different point (inside cell)
+    std::list<uint8> chances = { 0, 25, 25, 100 };
+
+    if (onlyNearestGrid)
+        chances = { 0, 0, 0, 100 };
+
+    return fishMap.GetNextPoint(start, chances);
+}
+
 DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
 {
     WorldPosition center = info.GetPosition();

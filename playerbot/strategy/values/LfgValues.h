@@ -1,5 +1,6 @@
 #pragma once
 #include "playerbot/strategy/Value.h"
+#include "playerbot/AiFactory.h"
 
 namespace ai
 {

@@ -6,11 +6,27 @@
 
 using namespace ai;
 
+static TravelTarget* GetTravelTarget(PlayerbotAI* ai, Player* bot)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
+
+    Player* player = ai->GetGroupMaster();
+    if (!player || player == bot || !player->GetPlayerbotAI())
+        return target;
+
+    if (bot->GetGroup() && !ai->IsGroupLeader())
+        if (!ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && !ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) && !ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
+            return target;
+            
+    return PAI_VALUE(TravelTarget*, "travel target");
+}
+
 bool MoveToFishAction::isUseful()
 {
     if (qualifier == "travel")
     {
-        TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
+        TravelTarget* target = GetTravelTarget(ai, bot);
 
         if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_WORK)
             return false;
@@ -25,30 +41,32 @@ bool MoveToFishAction::isUseful()
 bool MoveToFishAction::Execute(Event& event)
 {    
     WorldPosition fishSpot;
+
+    fishSpot = AI_VALUE2(WorldPosition, "custom position", "fish spot");
+
+    if (!fishSpot && qualifier == "travel") //Get travel fish spot if available.
+    {
+        TravelTarget* target = GetTravelTarget(ai, bot);
+        fishSpot = *target->GetPosition();
+
+        if (AI_VALUE(TravelTarget*, "travel target") != target) //Do not fish ontop of master.
+            fishSpot = *sTravelMgr.GetFishSpot(bot, true);
+    }
     
-    if (qualifier == "travel")
+    if (!fishSpot) //Get any fish spot.
     {
-        fishSpot = *AI_VALUE(TravelTarget*, "travel target")->GetPosition();
-        SET_AI_VALUE2(WorldPosition, "custom position", "fish spot", fishSpot);
+        fishSpot = *sTravelMgr.GetFishSpot(bot);
+
+        TravelPath movePath = sTravelNodeMap.getFullPath(bot, fishSpot, bot);
+
+
+        if (movePath.empty())
+            return false;
+
+        AI_VALUE(LastMovement&, "last movement").setPath(movePath);
     }
-    else
-    {
-        fishSpot = AI_VALUE2(WorldPosition, "custom position", "fish spot");
-
-        if (!fishSpot)
-        {
-            fishSpot = *sTravelMgr.GetFishSpot(bot);
-
-            TravelPath movePath = sTravelNodeMap.getFullPath(bot, fishSpot, bot);
-
-            if(movePath.empty())
-                return false;
-
-            AI_VALUE(LastMovement&, "last movement").setPath(movePath);
-
-            SET_AI_VALUE2(WorldPosition, "custom position", "fish spot", fishSpot);
-        }
-    }
+    
+    SET_AI_VALUE2(WorldPosition, "custom position", "fish spot", fishSpot);
    
     if (fishSpot.distance(bot) < 1.0f)
         return false;
@@ -60,7 +78,7 @@ bool FishAction::isUseful()
 {
     if (qualifier == "travel")
     {
-        TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
+        TravelTarget* target = GetTravelTarget(ai, bot);
 
         if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_WORK)
             return false;
@@ -85,6 +103,16 @@ bool FishAction::isUseful()
 
 bool FishAction::Execute(Event& event)
 {
+    if (qualifier == "travel")
+    {
+        TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
+
+        target->CheckStatus();
+
+        if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_TRAVEL)
+            return false;
+    }
+
     if (bot->IsMoving())
     {
         ai->StopMoving();
@@ -92,12 +120,11 @@ bool FishAction::Execute(Event& event)
         return true;
     }
 
-    //WorldPosition* fishSpot = travelTarget->GetPosition();
-    WorldPosition* fishSpot = sTravelMgr.GetFishSpot(bot);
+    WorldPosition fishSpot = AI_VALUE2(WorldPosition, "custom position", "fish spot");
 
-    if (abs(fishSpot->getO() - bot->GetOrientation()) > 0.5)
+    if (abs(fishSpot.getO() - bot->GetOrientation()) > 0.5)
     {
-        bot->SetFacingTo(fishSpot->getO());
+        bot->SetFacingTo(fishSpot.getO());
         SetDuration(100);
         return true;
     }
@@ -105,6 +132,9 @@ bool FishAction::Execute(Event& event)
     ai->StopMoving();
 
     std::list<Item*> poles = AI_VALUE2(std::list<Item*>, "inventory items", "fishing pole");
+
+    if (poles.empty())
+        return false;
 
     Item* pole = poles.front();
     uint8 bagIndex = pole->GetBagSlot();

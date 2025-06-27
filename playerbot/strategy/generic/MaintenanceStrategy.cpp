@@ -28,11 +28,11 @@ void MaintenanceStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigger
 
     triggers.push_back(new TriggerNode(
         "move stuck",
-        NextAction::array(0, new NextAction("reset", 0.7f), NULL)));
+        NextAction::array(0, new NextAction("unstuck", 0.7f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "move long stuck",
-        NextAction::array(0, new NextAction("hearthstone", 0.9f), new NextAction("repop", 0.8f), NULL)));
+        NextAction::array(0, new NextAction("unstuck", 0.9f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "random",
@@ -41,4 +41,8 @@ void MaintenanceStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigger
     triggers.push_back(new TriggerNode(
         "random",
         NextAction::array(0, new NextAction("auto share quest", 0.9f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "random",
+        NextAction::array(0, new NextAction("auto complete quest", 1.0f), NULL)));
 }

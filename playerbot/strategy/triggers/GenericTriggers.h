@@ -984,6 +984,13 @@ namespace ai
     {
     public:
         BloodFuryTrigger(PlayerbotAI* ai) : BoostTrigger(ai, "blood fury") {}
+        
+#ifdef MANGOSBOT_ZERO
+        virtual bool IsActive()
+        {
+            return !ai->IsTank(bot);
+        }
+#endif
     };
 
     class CannibalizeTrigger : public Trigger

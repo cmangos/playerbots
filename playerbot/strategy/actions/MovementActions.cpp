@@ -363,7 +363,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
     {
         movePosition = endPosition;
 
-        if (startPosition.getMapId() != endPosition.getMapId() || totalDistance > maxDist)
+        if (startPosition.getMapId() != endPosition.getMapId() || totalDistance > maxDist || (startPosition.getMapId() == 609 && fabs(startPosition.getZ() - endPosition.getZ()) > 20.0f))
         {
             if (!sTravelNodeMap.getNodes().empty() && !bot->InBattleGround())
             {

@@ -43,6 +43,7 @@
 #include "generic/GuildStrategy.h"
 #include "generic/FocusTargetStrategy.h"
 #include "generic/AvoidMobsStrategy.h"
+#include "generic/CircleFormationStrategy.h"
 
 #include "generic/DungeonStrategy.h"
 #include "generic/OnyxiasLairDungeonStrategies.h"
@@ -150,6 +151,7 @@ namespace ai
             creators["nowar"] = [](PlayerbotAI* ai) { return new NoWarStrategy(ai); };
             creators["glyph"] = [](PlayerbotAI* ai) { return new GlyphStrategy(ai); };
             creators["ai chat"] = [](PlayerbotAI* ai) { return new AIChatStrategy(ai); };
+            creators["circle formation"] = [](PlayerbotAI* ai) { return new CircleFormationStrategy(ai); };
 
             // Dungeon Strategies
             creators["dungeon"] = [](PlayerbotAI* ai) { return new DungeonStrategy(ai); };

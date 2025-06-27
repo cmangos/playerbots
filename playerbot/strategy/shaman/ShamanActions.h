@@ -463,7 +463,11 @@ namespace ai
     class CastTotemicRecall : public CastBuffSpellAction
     {
     public:
+#ifdef MANGOSBOT_ONE
+        CastTotemicRecall(PlayerbotAI* ai) : CastBuffSpellAction(ai, "totemic call") {}
+#else
         CastTotemicRecall(PlayerbotAI* ai) : CastBuffSpellAction(ai, "totemic recall") {}
+#endif
     };
 
     class CastEarthShieldOnPartyTankAction : public BuffOnTankAction

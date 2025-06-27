@@ -15,6 +15,8 @@
 
 #include "triggers/MoltenCoreDungeonTriggers.h"
 #include "actions/MoltenCoreDungeonActions.h"
+#include "triggers/AhnQirajRuinsDungeonTriggers.h"
+#include "actions/AhnQirajRuinsDungeonActions.h"
 using namespace ai;
 
 AiObjectContext::AiObjectContext(PlayerbotAI* ai) : PlayerbotAIAware(ai)
@@ -36,6 +38,8 @@ AiObjectContext::AiObjectContext(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     actionContexts.Add(new MoltenCoreActionContext());
     triggerContexts.Add(new MoltenCoreTriggerContext());
 
+    actionContexts.Add(new AhnQirajRuinsActionContext());
+    triggerContexts.Add(new AhnQirajRuinsTriggerContext());
     valueContexts.Add(new ValueContext());
 
     //valueContexts.Add(&sSharedValueContext);

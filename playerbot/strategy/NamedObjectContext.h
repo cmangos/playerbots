@@ -201,13 +201,18 @@ namespace ai
         NamedObjectContext(bool shared = false, bool supportsSiblings = false) :
             NamedObjectFactory<T>(), shared(shared), supportsSiblings(supportsSiblings) {}
 
-        T* create(std::string name, PlayerbotAI* ai)
-        {
-            if (created.find(name) == created.end())
-                return created[name] = NamedObjectFactory<T>::create(name, ai);
+T* create(std::string name, PlayerbotAI* ai)
+{
+    if (created.find(name) == created.end())
+    {
+        T* val = NamedObjectFactory<T>::create(name, ai);
+        if (!val)
+            return nullptr;
 
-            return created[name];
-        }
+        created[name] = val;
+    }
+    return created[name]; 
+}
 
         virtual ~NamedObjectContext()
         {

@@ -976,28 +976,43 @@ std::vector<WorldPosition> WorldPosition::getPathFromPath(const std::vector<Worl
 
     return fullPath;
 }
-
+#this is from Branch-1
 bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight, uint32 instanceId)
 {
-    MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
-    dtNavMeshQuery const* query = mmap->GetNavMeshQuery(getMapId(), instanceId);
+    if (!std::isfinite(coord_x) || !std::isfinite(coord_y) || !std::isfinite(coord_z))
+    {
+        sLog.outError("WorldPosition::ClosestCorrectPoint: Invalid coordinates! mapId=%u, pos=%.1f %.1f %.1f",
+                      getMapId(), coord_x, coord_y, coord_z);
+        return false;
+    }
 
-    float curPoint[VERTEX_SIZE] = {coord_y, coord_z, coord_x };
+    MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
+
+    if (!mmap)
+    {
+        sLog.outError("WorldPosition::ClosestCorrectPoint: MMapManager is nullptr");
+        return false;
+    }
+
+    const dtNavMeshQuery* query = mmap->GetNavMeshQuery(getMapId(), instanceId);
+
+    if (!query || !query->getAttachedNavMesh())
+    {
+        sLog.outError("WorldPosition::ClosestCorrectPoint: Invalid NavMeshQuery! mapId=%u, instanceId=%u, pos=%.1f %.1f %.1f",
+                      getMapId(), instanceId, coord_x, coord_y, coord_z);
+        return false;
+    }
+
+    float curPoint[VERTEX_SIZE] = { coord_y, coord_z, coord_x };
     float extend[VERTEX_SIZE] = { maxRange, maxHeight, maxRange };
     float newPoint[VERTEX_SIZE];
 
     dtQueryFilter filter;
     dtPolyRef polyRef = INVALID_POLYREF;
 
-    uint16 includeFlags = 0;
-    uint16 excludeFlags = 0;
+    filter.setIncludeFlags(NAV_GROUND);
 
-    includeFlags |= (NAV_GROUND );
-    excludeFlags |= (NAV_MAGMA_SLIME | NAV_GROUND_STEEP | NAV_WATER);
-
-
-    filter.setIncludeFlags(includeFlags);
-    filter.setExcludeFlags(excludeFlags);
+    filter.setExcludeFlags(NAV_MAGMA_SLIME | NAV_GROUND_STEEP | NAV_WATER);
 
     dtStatus dtResult = query->findNearestPoly(curPoint, extend, &filter, &polyRef, newPoint);
 
@@ -1007,6 +1022,7 @@ bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight, uint32 
 
     return dtStatusSucceed(dtResult) && polyRef != INVALID_POLYREF;
 }
+
 
 bool WorldPosition::GetReachableRandomPointOnGround(const Player* bot, const float radius, const bool randomRange) 
 {

@@ -1729,7 +1729,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     }
                 }
 
-                QueueChatResponse(msgtype, guid1, ObjectGuid(), message, chanName, name, isAiChat);
+		if (message.empty() || chanName.empty() || name.empty())
+   		return;
+		QueueChatResponse(msgtype, guid1, ObjectGuid(), message.c_str(), chanName.c_str(), name.c_str(), isAiChat);
                 GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
 
                 return;

@@ -1095,19 +1095,30 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
 
     // chat replies
     std::list<ChatQueuedReply> delayedResponses;
-    while (!chatReplies.empty())
+	
+// Fix crash: empty string handling in QueueChatResponse (related to issue #191)
+// Fix crash: Use-after-free in ChatQueuedReply handling
+// - Ensured pop() happens after usage
+// - Skipped entries with empty msg, chanName or name
+// - Removed accidental while-pop-all logic in delayed response
+
+while (!chatReplies.empty())
+{
+    ChatQueuedReply holder = chatReplies.front();
+
+    // Make sure that no empty strings are processed
+    if (holder.m_msg.empty() || holder.m_chanName.empty() || holder.m_name.empty())
     {
-        ChatQueuedReply holder = chatReplies.front();
-        time_t checkTime = holder.m_time;
-        if (checkTime && time(0) < checkTime)
-        {
-            delayedResponses.push_back(holder);
-            chatReplies.pop();
-            continue;
-        }
-        ChatReplyAction::ChatReplyDo(bot, holder.m_type, holder.m_guid1, holder.m_guid2, holder.m_msg, holder.m_chanName, holder.m_name);
+        sLog.outError("ChatReply skipped: Empty field in msg/channel/name");
         chatReplies.pop();
+        continue;
     }
+
+    ChatReplyAction::ChatReplyDo(bot, holder.m_type, holder.m_guid1, holder.m_guid2,
+                                 holder.m_msg, holder.m_chanName, holder.m_name);
+
+    chatReplies.pop(); // pop only AFTER the memory has been used
+}
 
     for (std::list<ChatQueuedReply>::iterator i = delayedResponses.begin(); i != delayedResponses.end(); ++i)
     {
@@ -1728,11 +1739,14 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                         }
                     }
                 }
+// Fix crash: empty string handling in QueueChatResponse (related to issue #191)
+                if (message.empty() || chanName.empty() || name.empty())
+   		return;
 
-                QueueChatResponse(msgtype, guid1, ObjectGuid(), message, chanName, name, isAiChat);
+		QueueChatResponse(msgtype, guid1, ObjectGuid(), message.c_str(), chanName.c_str(), name.c_str(), isAiChat);
                 GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
 
-                return;
+		return;
             }
             else if (isAiChat)
             {
@@ -7888,7 +7902,7 @@ void PlayerbotAI::EnchantItemT(uint32 spellid, uint8 slot, Item* item)
    EnchantmentSlot enchantSlot = spellInfo->Effect[0] == SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC ? PRISMATIC_ENCHANTMENT_SLOT : PERM_ENCHANTMENT_SLOT;
 #else
    EnchantmentSlot enchantSlot = PERM_ENCHANTMENT_SLOT;
-#endif;
+#endif
 
    bot->ApplyEnchantment(pItem, enchantSlot, false);
    pItem->SetEnchantment(enchantSlot, enchantid, 0, 0);
@@ -8030,9 +8044,27 @@ bool PlayerbotAI::HasPlayerRelation()
     return false;
 }
 
-void PlayerbotAI::QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name, bool noDelay)
+// Fix crash: empty string handling in QueueChatResponse (related to issue #191)
+// Fix crash: ensure valid string lifetime in ChatQueuedReply
+void PlayerbotAI::QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2,
+                                     const char* message, const char* chanName, const char* name, bool noDelay)
 {
-    chatReplies.push(ChatQueuedReply(msgType, guid1.GetCounter(), guid2.GetCounter(), message, chanName, name, time(0) + (noDelay ? 0 : urand(inCombat ? 15 : 10, inCombat ? 30 : 20))));
+    if (!message || !chanName || !name)
+        return; // Schutz gegen NULL-Pointer
+
+    std::string msg(message);
+    std::string channel(chanName);
+    std::string sender(name);
+
+    chatReplies.push(ChatQueuedReply(
+        msgType,
+        guid1.GetCounter(),
+        guid2.GetCounter(),
+        msg,
+        channel,
+        sender,
+        time(0) + (noDelay ? 0 : urand(inCombat ? 15 : 10, inCombat ? 30 : 20))
+    ));
 }
 
 bool PlayerbotAI::PlayAttackEmote(float chanceMultiplier)

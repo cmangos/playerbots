@@ -811,6 +811,12 @@ bool RpgSpellClickTrigger::IsActive()
         return false;
 
 #ifdef MANGOSBOT_TWO
+    switch(guidP.GetEntry())
+    {
+    case 29488: //Scourge gryphon
+    case 29501:
+        return false;
+    }
 
     if (TransportInfo* transportInfo = bot->GetTransportInfo())
     {

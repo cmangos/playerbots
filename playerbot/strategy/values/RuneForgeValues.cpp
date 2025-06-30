@@ -44,12 +44,13 @@ uint32 BestRuneForgeSpellValue::Calculate() {
 
     if (available.empty()) return 0;
 
+    //Todo add 1-handed versions
     const uint32 runeFallenCrusader = 53344;
     const uint32 runeRazorice = 53343;
     const uint32 runeCinderglacier = 53331;
     const uint32 runeStoneskinGargoyle = 62158;
     const uint32 runeSwordshattering = 53323;
-    const uint32 runeSpellbreaking = 54447;
+    const uint32 runeSpellshattering = 53342;
 
     PlayerTalentSpec spec = ai->GetTalentSpec();
 
@@ -68,7 +69,7 @@ uint32 BestRuneForgeSpellValue::Calculate() {
     
     if (isPvp) {
         runeforgePriorityList.push_back(runeSwordshattering);
-        runeforgePriorityList.push_back(runeSpellbreaking);
+        runeforgePriorityList.push_back(runeSpellshattering);
     }
     if (isTank) {
         runeforgePriorityList.push_back(runeStoneskinGargoyle);
@@ -97,7 +98,7 @@ uint32 BestRuneForgeSpellValue::Calculate() {
     runeforgePriorityList.push_back(runeCinderglacier);
     runeforgePriorityList.push_back(runeStoneskinGargoyle);
     runeforgePriorityList.push_back(runeSwordshattering);
-    runeforgePriorityList.push_back(runeSpellbreaking);
+    runeforgePriorityList.push_back(runeSpellshattering);
     
     for (auto& wantRune : runeforgePriorityList)
     {
@@ -122,6 +123,9 @@ bool ShouldRuneForgeValue::Calculate() {
 
     Item* weapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
     if (!weapon) 
+        return false;
+
+    if (weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_SWORD2 && weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_AXE2 && weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_POLEARM)
         return false;
 
     uint32 enchantId = weapon->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);

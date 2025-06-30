@@ -330,6 +330,14 @@ namespace ai
         virtual bool Execute(Event& event);
     };
 
+    class RpgSpellClickAction : public RpgSubAction
+    {
+    public:
+        RpgSpellClickAction(PlayerbotAI* ai, std::string name = "rpg spell click") : RpgSubAction(ai, name) {}
+
+        virtual bool Execute(Event& event);
+    };
+
     class RpgGossipTalkAction : public RpgSubAction
     {
     public:

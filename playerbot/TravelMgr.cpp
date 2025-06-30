@@ -233,11 +233,19 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
     if (info.IsInRaid() != (GetQuestTemplate()->GetType() == QUEST_TYPE_RAID))
         return false;
 
-    bool isVendor = false;
+
+    bool skipKillableCheck = false;
 
     //Check mob level
     if (GetEntry() > 0)
     {
+#ifdef MANGOSBOT_TWO        
+        switch (GetQuestId()) {
+        case 12680: //Grand Theft Palomino
+            skipKillableCheck = true;
+        }
+#endif
+
         CreatureInfo const* cInfo = GetCreatureInfo();
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()])
@@ -246,10 +254,10 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
             if (GetQuestTemplate()->ReqItemCount[GetObjective()] * proto->BuyPrice > info.GetMoney()) //Need more money.
                 return false;
 
-            isVendor = true;
+            skipKillableCheck = true;
         }
 
-        if (!isVendor && !forceThisQuest)
+        if (!skipKillableCheck && !forceThisQuest)
         {
             if (cInfo && (int)cInfo->MaxLevel - (int)info.GetLevel() > 4)
                 return false;
@@ -257,7 +265,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
             //Do not try to hand-in dungeon/elite quests in instances without a group.
             if (cInfo->Rank > CREATURE_ELITE_NORMAL)
             {
-                if (!IsOverWorld(info.GetPosition()) && !info.GetBoolValue("can fight boss"))
+                if (!IsOverWorld(info.GetPosition()) && info.GetPosition().getMapId() != 609 && !info.GetBoolValue("can fight boss"))
                     return false;
                 else if (!info.GetBoolValue("can fight elite"))
                     return false;
@@ -267,7 +275,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
 
     if (!forceThisQuest)
     {
-        if (!isVendor && GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE && !info.GetBoolValue("can fight elite"))
+        if (!skipKillableCheck && GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE && !info.GetBoolValue("can fight elite"))
             return false;
 
         //Do not try to do dungeon/elite quests in instances without a group.
@@ -297,29 +305,49 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
 
     bool forceThisQuest = info.HasFocusQuest();
 
-    bool isVendor = false;
+    bool skipKillableCheck = false;
 
-    //Check mob level
     if (GetEntry() > 0)
     {
+#ifdef MANGOSBOT_TWO        
+        switch (GetQuestId()) {
+        case 12680: //Grand Theft Palomino
+            switch (GetEntry())
+            {
+            case 28605:
+            case 28606:
+            case 28607:
+                skipKillableCheck = !AI_VALUE2(bool, "trigger active", "in vehicle");
+                break;
+            case 28653:
+                skipKillableCheck = AI_VALUE2(bool, "trigger active", "in vehicle");
+                break;
+            }
+            break;
+        }
+#endif
+
         CreatureInfo const* cInfo = GetCreatureInfo();
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()] && !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot))
         {
-            isVendor = true;
+            skipKillableCheck = true;
         }
     }
 
-   std::vector<std::string> qualifier = { std::to_string(GetQuestTemplate()->GetQuestId()), std::to_string(GetObjective()) };
+    if (!skipKillableCheck)
+        skipKillableCheck = ai->CanSpellClick(bot, GetEntry());
 
-    if (!AI_VALUE2(bool, "group or", "following party,need quest objective::" + Qualified::MultiQualify(qualifier,","))) //Noone needs the quest objective.
+    std::vector<std::string> qualifier = { std::to_string(GetQuestTemplate()->GetQuestId()), std::to_string(GetObjective()) };
+
+    if (!AI_VALUE2(bool, "group or", "following party,need quest objective::" + Qualified::MultiQualify(qualifier, ","))) //Noone needs the quest objective.
         return false;
 
     WorldPosition botPos(bot);
 
-    if (!isVendor && GetEntry() > 0 && !IsOut(botPos))
+    if (!skipKillableCheck && GetEntry() > 0 && !IsOut(botPos))
     {
-        TravelTarget* target = AI_VALUE(TravelTarget*,"travel target");
+        TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
 
         //Only look for the target if it is unique or if we are currently working on it.
         if (IsUnique() || (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK && target->GetEntry() == GetEntry()))

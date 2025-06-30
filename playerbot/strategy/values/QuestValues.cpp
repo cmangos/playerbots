@@ -86,7 +86,13 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 	}
 
 	//Hard coded:
+#ifdef MANGOSBOT_TWO
 	rMap[28406][12733] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Death Knight Initiate][Death's Challenge]
+	rMap[28605][12680] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Havenshire Stallion][Grand Theft Palomino]
+	rMap[28606][12680] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Havenshire Mare][Grand Theft Palomino]
+	rMap[28607][12680] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Havenshire Cotl][Grand Theft Palomino]
+	rMap[28653][12680] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Salanar the Horseman][Grand Theft Palomino]	
+#endif
 	return rMap;
 }
 

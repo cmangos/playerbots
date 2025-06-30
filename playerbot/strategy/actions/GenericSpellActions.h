@@ -541,4 +541,13 @@ namespace ai
     public:
         CastBladeSalvoAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "blade salvo") {}
     };
+
+    class CastDeliverStolenHorseAction : public CastVehicleSpellAction
+    {
+    public:
+        CastDeliverStolenHorseAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "deliver stolen horse") {}
+    protected:
+        virtual std::string GetTargetName() override { return "self target"; }
+    };
+
 }

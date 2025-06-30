@@ -98,36 +98,6 @@ void TravelNodePath::calculateCost(bool distanceOnly)
     }
 }
 
-bool TravelNodePath::canClickSpell(Player* bot, uint32 entry)
-{
-#ifdef MANGOSBOT_TWO
-    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(entry);
-
-    if (clickPair.first != clickPair.second)
-    {
-        for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
-        {
-            if (itr->second.questStart)
-            {
-                // not in expected required quest state
-                if (!bot || ((!itr->second.questStartCanActive || !bot->IsActiveQuest(itr->second.questStart)) && !bot->GetQuestRewardStatus(itr->second.questStart)))
-                    return false;
-            }
-
-            if (itr->second.questEnd)
-            {
-                // not in expected forbidden quest state
-                if (!bot || bot->GetQuestRewardStatus(itr->second.questEnd))
-                    return false;
-            }
-
-            return true;
-        }
-    }
-#endif
-    return false;
-}
-
 //The cost to travel this path. 
 float TravelNodePath::getCost(Unit* unit, uint32 cGold)
 {
@@ -201,7 +171,7 @@ float TravelNodePath::getCost(Unit* unit, uint32 cGold)
             }
             else
             {
-                if (!canClickSpell(bot, pathObject)) //Click Spell flightpath.
+                if (!PlayerbotAI::CanSpellClick(bot, pathObject)) //Click Spell flightpath.
                     return -1;
             }
         }

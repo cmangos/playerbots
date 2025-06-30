@@ -73,6 +73,9 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
         if (!unit)
             continue;
 
+        if (unit->GetEntry() == 28605 || unit->GetEntry() == 28606 || unit->GetEntry() == 28607)
+            continue;
+
         if (abs(bot->GetPositionZ() - unit->GetPositionZ()) > sPlayerbotAIConfig.spellDistance)
         {
             if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))

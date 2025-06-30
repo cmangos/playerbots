@@ -998,35 +998,36 @@ bool DebugAction::Execute(Event& event)
             ai->TellPlayerNoFacing(requester, "UNIT_NPC_FLAG_OUTDOORPVP");
 #endif
 
-        std::unordered_map<ReputationRank, std::string> reaction;
 
-        reaction[REP_HATED] = "REP_HATED";
-        reaction[REP_HOSTILE] = "REP_HOSTILE";
-        reaction[REP_UNFRIENDLY] = "REP_UNFRIENDLY";
-        reaction[REP_NEUTRAL] = "REP_NEUTRAL";
-        reaction[REP_FRIENDLY] = "REP_FRIENDLY";
-        reaction[REP_HONORED] = "REP_HONORED";
-        reaction[REP_REVERED] = "REP_REVERED";
-        reaction[REP_EXALTED] = "REP_EXALTED";
-        
-        if (guidP.GetUnit(bot->GetInstanceId()))
+        std::ostringstream out2;
+        FactionTemplateEntry const* requestFaction = sFactionTemplateStore.LookupEntry(requester->GetFaction());
+        FactionTemplateEntry const* objectFaction = nullptr;
+        if(guidP.GetCreatureTemplate() && guidP.GetCreatureTemplate()->Faction)
+            objectFaction = sFactionTemplateStore.LookupEntry(guidP.GetCreatureTemplate()->Faction);
+        FactionTemplateEntry const* humanFaction = sFactionTemplateStore.LookupEntry(1);
+        FactionTemplateEntry const* orcFaction = sFactionTemplateStore.LookupEntry(2);
+
+        std::map<ReputationRank, std::string> rep;
+
+        rep[REP_HATED] = "hated";
+        rep[REP_HOSTILE] = "hostile";
+        rep[REP_UNFRIENDLY] = "unfriendly";
+        rep[REP_NEUTRAL] = "neutral";
+        rep[REP_FRIENDLY] = "friendly";
+        rep[REP_HONORED] = "honored";
+        rep[REP_REVERED] = "revered";
+        rep[REP_EXALTED] = "exalted";
+
+        if (objectFaction)
         {
-            std::ostringstream out;
-            out << "unit to bot:" << reaction[guidP.GetUnit(bot->GetInstanceId())->GetReactionTo(bot)];
+            ReputationRank reactionRequest = PlayerbotAI::GetFactionReaction(requestFaction, objectFaction);
+            ReputationRank reactionHum = PlayerbotAI::GetFactionReaction(humanFaction, objectFaction);
+            ReputationRank reactionOrc = PlayerbotAI::GetFactionReaction(orcFaction, objectFaction);
 
-            Unit* ubot = bot;
-            out << " bot to unit:" << reaction[ubot->GetReactionTo(guidP.GetUnit(bot->GetInstanceId()))];
-
-            out << " npc to bot:" << reaction[guidP.GetReactionTo(bot)];
-            out << " bot to npc:" << reaction[GuidPosition(bot).GetReactionTo(guidP, bot->GetInstanceId())];
-
-            if (GuidPosition(HIGHGUID_UNIT, guidP.GetEntry()).IsHostileTo(bot))
-                out << "[hostile]";
-            if (GuidPosition(HIGHGUID_UNIT, guidP.GetEntry()).IsFriendlyTo(bot))
-                out << "[friendly]";
-
-            ai->TellPlayerNoFacing(requester, out);
+            out2 << " faction:" << guidP.GetCreatureTemplate()->Faction << " reaction me: " << rep[reactionRequest] << ",alliance: " << rep[reactionHum] << " ,horde: " << rep[reactionOrc];
         }
+
+        ai->TellPlayerNoFacing(requester, out2);
 
         return true;
     }  

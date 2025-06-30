@@ -260,6 +260,11 @@ namespace ai
             if (player->GetMapId() != bot->GetMapId())
                 continue;
 
+#ifdef MANGOSBOT_TWO
+            if (player->GetPhaseMask() != bot->GetPhaseMask())
+                continue;
+#endif
+
             if (player->GetGroup())
                 continue;
 
@@ -403,6 +408,11 @@ namespace ai
 
             if (player->GetMapId() != bot->GetMapId() && player->GetLevel() < 30)
                 continue;
+
+#ifdef MANGOSBOT_TWO
+            if (player->GetMapId() == 609 && player->GetMapId() != bot->GetMapId())
+                continue;
+#endif
 
             if (WorldPosition(player).distance(bot) > 1000 && player->GetLevel() < 15)
                 continue;

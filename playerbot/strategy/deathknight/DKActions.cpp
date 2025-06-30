@@ -128,10 +128,15 @@ bool RuneforgeAction::Execute(Event& event)
     else if (runeforge)
     {
         if (MoveTo(WorldPosition(runeforge), false, false))
+        {
+            SetDuration(GetDuration() + 1);
             return true;
+        }
 
         return false;
     }
+
+    SET_AI_VALUE2(time_t, "manual time", "next runeforge check", time(0) + 30);
 
     return false;
 }

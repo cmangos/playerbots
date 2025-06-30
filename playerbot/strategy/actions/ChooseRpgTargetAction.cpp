@@ -183,11 +183,27 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         return false;
     }
 
+    uint32 ignored = 0;
+
     //1 in 10 chance to skip the ignore list. Otherwise remove targets that should be ignored.
     if (urand(0, 9))
     {
         for (auto target : ignoreList)
+        {
             targets.erase(target);
+            ignored++;
+        }
+    }
+
+    if (ai->HasStrategy("debug rpg", BotState::BOT_STATE_NON_COMBAT))
+    {
+        std::ostringstream out;
+        out << "Rpg: found ";
+        out << std::to_string(possibleTargets.size()) + " targets,";
+        out << std::to_string(possibleObjects.size()) + " objects,";
+        out << std::to_string(possiblePlayers.size()) + " player.";
+        out << " Of which " + std::to_string(ignored) + " are ignored.";
+        ai->TellPlayerNoFacing(requester, out);
     }
 
     //Force RpgTrigger to be active even if we aren't currently close to the rpg target.
@@ -206,7 +222,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     context->ClearExpiredValues("can free move",10); //Clean up old free move to.
 
     //Only check up to 50 targets. Selfbots and bots with a real master can check more.
-    uint16 checked = 0, maxCheck = 50;
+    uint16 checked = 0, scanned = 0, found=0, sametarget= 0, maxCheck = 50;
     if (ai->HasRealPlayerMaster())
         maxCheck = 500;
 
@@ -217,11 +233,15 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         if (!guidP)
             continue;
 
+        found++;
+
         bool isTravelTarget = guidP.GetEntry() == travelTarget->GetEntry();
 
         //Stop to save peformance.
         if (checked >= maxCheck && !isTravelTarget)
             continue;
+
+        scanned++;
 
         //Check if we are allowed to move to this position. This is based on movement strategies follow, free, guard, stay. Bots are limited to finding targets near the center of those movement strategies.
         //For bots with real players they are also slightly limited in range unless the player stands still for a while. See free move values.
@@ -272,7 +292,10 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
         //Limit the amount of bots that can rpg with 1 target. Only if the calculation doesn't involve checking 200+ players.
         if (possiblePlayers.size() < 200 && HasSameTarget(guidP, urand(5, 15), possiblePlayers))
+        {
+            sametarget++;
             continue;
+        }
 
         //For all rpg actions that are triggered/possible for this target get the highest relevance.
         float relevance = getMaxRelevance(guidP);
@@ -345,6 +368,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
         std::sort(sortedTargets.begin(), sortedTargets.end(), [](std::pair<ObjectGuid, float>i, std::pair<ObjectGuid, float> j) {return i.second > j.second; });
 
+        ai->TellPlayerNoFacing(requester, std::to_string(scanned) + " scanned, " + std::to_string(found) + " found, " + std::to_string(checked) + " checked (" + std::to_string(sametarget) + " taken by other bots)");
         ai->TellPlayerNoFacing(requester, "------" + std::to_string(targets.size()) + "------");
 
         uint32 checked = 0;

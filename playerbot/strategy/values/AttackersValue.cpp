@@ -457,13 +457,20 @@ bool AttackersValue::IgnoreTarget(Unit* target, Player* playerToCheckAgainst)
 #define TRAINING_DUMMY_NPC_ENTRY3 190015
 #define THERAMORE_COMBAT_DUMMY 4952
 #define NAXXRAMAS_COMBAT_DUMMY 16211
+#ifdef MANGOSBOT_TWO  
+#define INITATES_TRAINING_DUMMY 32541
+#endif
 
-        if (entry == TRAINING_DUMMY_NPC_ENTRY1 ||
-            entry == TRAINING_DUMMY_NPC_ENTRY2 ||
-            entry == TRAINING_DUMMY_NPC_ENTRY3 ||
-            entry == THERAMORE_COMBAT_DUMMY ||
-            entry == NAXXRAMAS_COMBAT_DUMMY)
+        switch (entry)
         {
+        case TRAINING_DUMMY_NPC_ENTRY1:
+        case TRAINING_DUMMY_NPC_ENTRY2:
+        case TRAINING_DUMMY_NPC_ENTRY3:
+        case THERAMORE_COMBAT_DUMMY:
+        case NAXXRAMAS_COMBAT_DUMMY:
+#ifdef MANGOSBOT_TWO     
+        case INITATES_TRAINING_DUMMY:
+#endif
             isDummy = true;
         }
 

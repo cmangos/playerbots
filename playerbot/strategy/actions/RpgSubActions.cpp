@@ -891,8 +891,10 @@ bool RpgSpellClickAction::Execute(Event& event)
     rpg->BeforeExecute();
 
     GuidPosition guidP = rpg->guidP();
-    
+
+#ifdef MANGOSBOT_TWO
     if (!guidP.IsCreatureOrVehicle())
+#endif
         return false;
    
     bool result = ai->HandleSpellClick(guidP);

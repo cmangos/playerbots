@@ -807,10 +807,10 @@ bool RpgSpellClickTrigger::IsActive()
 {
     GuidPosition guidP(getGuidP());
 
+#ifdef MANGOSBOT_TWO
     if (!guidP.IsCreatureOrVehicle())
         return false;
 
-#ifdef MANGOSBOT_TWO
     switch(guidP.GetEntry())
     {
     case 29488: //Scourge gryphon

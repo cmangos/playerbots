@@ -76,7 +76,9 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32
         break;
     }
     case HIGHGUID_UNIT:
+#ifdef MANGOSBOT_TWO
     case HIGHGUID_VEHICLE:
+#endif
     {
         setMapId(mapId);
         if (Map* map = getMap(instanceId))

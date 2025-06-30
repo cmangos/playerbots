@@ -161,7 +161,7 @@ bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInf
 
     if (GetRelation() == 0)
     {
-        if (!bot->GetMap()->IsContinent()) //This gives issues for bot->CanTakeQuest so stop here.
+        if (!bot->GetMap()->IsContinent() && (GetClosestPoint(bot)->getMapId() != bot->GetMapId())) //This gives issues for bot->CanTakeQuest so stop here.
             return false;
 
         if (forceThisQuest)

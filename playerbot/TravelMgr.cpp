@@ -1210,6 +1210,8 @@ void TravelMgr::LoadQuestTravelTable()
 
     for (auto& [entry, relation] : eMap)
     {
+
+
         bar.step();
         for (auto& [questId, flag] : relation)
         {
@@ -1219,7 +1221,6 @@ void TravelMgr::LoadQuestTravelTable()
                 continue;
             }
 
-            QuestTravelDestination* loc;
             std::vector<QuestTravelDestination*> locs;
 
             for (uint32 purposeFlagNr = 0; purposeFlagNr < 6; purposeFlagNr++)
@@ -1227,6 +1228,8 @@ void TravelMgr::LoadQuestTravelTable()
                 TravelDestinationPurpose purposeFlag = (TravelDestinationPurpose)(1 << purposeFlagNr);
                 if (flag & (uint32)purposeFlag)
                 {
+                    QuestTravelDestination* loc = nullptr;
+
                     if (purposeFlag == TravelDestinationPurpose::QuestGiver || purposeFlag == TravelDestinationPurpose::QuestTaker)
                         loc = AddDestination<QuestRelationTravelDestination>(entry, purposeFlag, questId);
                     else
@@ -1234,7 +1237,10 @@ void TravelMgr::LoadQuestTravelTable()
 
                     locs.push_back(loc);
                 }
+            }
 
+            if (!locs.empty())
+            {
                 for (auto& guidP : guidpMap.at(entry))
                 {
                     pointsMap.insert(std::make_pair(guidP.GetRawValue(), guidP));

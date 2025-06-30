@@ -550,4 +550,14 @@ namespace ai
         virtual std::string GetTargetName() override { return "self target"; }
     };
 
+    class CastHorsemansCallAction : public CastVehicleSpellAction
+    {
+    public:
+        CastHorsemansCallAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "horseman call") {
+            range = 120.0f;
+            SetSpellName("Horseman's Call", "vehicle spell id", true);
+        }
+    protected:
+        virtual std::string GetTargetName() override { return "self target"; }
+    };
 }

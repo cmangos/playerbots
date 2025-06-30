@@ -251,6 +251,9 @@ namespace ai
 
             // Quest vehicles
             creators["deliver stolen horse"] = [](PlayerbotAI* ai) { return new CastDeliverStolenHorseAction(ai); };
+            creators["horsemans call"] = [](PlayerbotAI* ai) { return new CastHorsemansCallAction(ai); };
+            
+
             //Rpg
             creators["rpg stay"] = [](PlayerbotAI* ai) { return new RpgStayAction(ai); };
             creators["rpg work"] = [](PlayerbotAI* ai) { return new RpgWorkAction(ai); };

@@ -242,6 +242,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
 #ifdef MANGOSBOT_TWO        
         switch (GetQuestId()) {
         case 12680: //Grand Theft Palomino
+        case 12687: //Into the Realm of Shadows
             skipKillableCheck = true;
         }
 #endif
@@ -322,6 +323,14 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
             case 28653:
                 skipKillableCheck = AI_VALUE2(bool, "trigger active", "in vehicle");
                 break;
+            }
+            break;
+        case 12687: //Into the Realm of Shadows
+            switch (GetEntry())
+            {
+            case 28768:
+            case 28782:
+                return !AI_VALUE2(bool, "trigger active", "in vehicle"); //Objective is not available.
             }
             break;
         }

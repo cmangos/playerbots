@@ -838,6 +838,14 @@ bool RpgGossipTalkTrigger::IsActive()
     if (!creature)
         return false;
 
+#ifdef MANGOSBOT_TWO
+    switch (guidP.GetEntry())
+    {
+    case 28653: //Salanar the Horseman
+        return AI_VALUE2(bool, "need quest objective", "12687,0"); //Only when we need "Into the Realm of Shadows"
+    }
+#endif
+
     if (!sScriptDevAIMgr.OnGossipHello(bot, creature))
     {
         bot->PrepareGossipMenu(creature, creature->GetDefaultGossipMenuId());

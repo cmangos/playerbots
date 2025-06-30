@@ -22,7 +22,7 @@ namespace ai
     protected:
         const uint32& GetSpellID() const { return spellId; }
         const std::string& GetSpellName() const { return spellName; }
-        void SetSpellName(const std::string& name, std::string spellIDContextName = "spell id");
+        void SetSpellName(const std::string& name, std::string spellIDContextName = "spell id", bool force = false);
 
         Unit* GetTarget() override;
         virtual std::string GetTargetName() override { return "current target"; }
@@ -469,7 +469,7 @@ namespace ai
         CastVehicleSpellAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell)
         {
             range = 120.0f;
-            SetSpellName(spell, "vehicle spell id");
+            SetSpellName(spell, "vehicle spell id", !GetSpellID());
         }
 
         virtual bool Execute(Event& event) override;

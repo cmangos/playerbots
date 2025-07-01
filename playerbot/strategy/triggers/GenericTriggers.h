@@ -508,6 +508,7 @@ namespace ai
         {
             this->probability = probability;
             lastCheck = time(0);
+            checkAgainInSameTick = true;             
         }
 
         virtual bool IsActive() override;

@@ -64,13 +64,6 @@ void PossibleTargetsValue::FindPossibleTargets(Player* player, std::list<Unit*>&
                 auto u = dynamic_cast<Unit*>(target);
                 if(u_check(u))
                     targets.push_back(u);
-
-                // ignore totems
-                if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsTotem())
-                    continue;
-
-                if (u->IsAlive() && player->CanAttackSpell(u) && player->IsWithinDistInMap(u, range, false) && player->IsWithinLOSInMap(u))
-                    targets.push_back(u);
             }
         }
     }

@@ -49,9 +49,32 @@ bool PossibleTargetsValue::AcceptUnit(Unit* unit)
 
 void PossibleTargetsValue::FindPossibleTargets(Player* player, std::list<Unit*>& targets, float range)
 {
+    //MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, range);
+    //MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+    //Cell::VisitAllObjects(player, searcher, range);
+
     MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, range);
-    MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
-    Cell::VisitAllObjects(player, searcher, range);
+    auto visibleGuids = player->GetClientGuids();
+    for (auto visibleGuid : visibleGuids)
+    {
+        if (WorldObject* target = player->GetMap()->GetWorldObject(visibleGuid))
+        {
+            if (target->IsUnit())
+            {
+                auto u = dynamic_cast<Unit*>(target);
+                if(u_check(u))
+                    targets.push_back(u);
+
+                // ignore totems
+                if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsTotem())
+                    continue;
+
+                if (u->IsAlive() && player->CanAttackSpell(u) && player->IsWithinDistInMap(u, range, false) && player->IsWithinLOSInMap(u))
+                    targets.push_back(u);
+            }
+        }
+    }
+
 }
 
 bool PossibleTargetsValue::IsFriendly(Unit* target, Player* player)

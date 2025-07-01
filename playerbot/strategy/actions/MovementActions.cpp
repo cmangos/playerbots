@@ -692,18 +692,6 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 
         if (pathType == TravelNodePathType::flightPath && entry)
         {
-#ifdef MANGOSBOT_TWO                
-            bot->OnTaxiFlightEject(true);
-            ai->Unmount();
-#endif
-            bool goClick = ai->HandleSpellClick(entry); //Source gryphon of ebonhold.
-#ifdef MANGOSBOT_TWO
-            bot->ResolvePendingMount();
-#endif
-
-            return goClick;
-
-
             TaxiPathEntry const* tEntry = sTaxiPathStore.LookupEntry(entry);
 
             if (tEntry)
@@ -742,6 +730,19 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                     bot->SetMoney(botMoney);
 
                 return goTaxi;
+            }
+            else
+            {
+#ifdef MANGOSBOT_TWO                
+                bot->OnTaxiFlightEject(true);
+                ai->Unmount();
+#endif
+                bool goClick = ai->HandleSpellClick(entry); //Source gryphon of ebonhold.
+#ifdef MANGOSBOT_TWO
+                bot->ResolvePendingMount();
+#endif
+
+                return goClick;
             }
         }
 

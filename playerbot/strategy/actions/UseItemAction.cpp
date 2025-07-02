@@ -1169,6 +1169,14 @@ bool UseHearthStoneAction::Execute(Event& event)
 
     ai->RemoveShapeshift();
 
+    if (!bot->HasItemCount(6948, 1)) //Hearthstone
+    {
+        if (!bot->HasItemCount(40582, 1)) //Scourgestone
+            return false;
+
+        event = Event(event.getSource(), "scourgestone");
+    }
+
     const bool used = UseAction::Execute(event);
     if (used)
     {
@@ -1181,25 +1189,33 @@ bool UseHearthStoneAction::Execute(Event& event)
 
 bool UseHearthStoneAction::isUseful() 
 {
+    uint32 spellId = 8690;
+    if (!bot->HasItemCount(6948, 1)) //Hearthstone
+    {
+        if (!bot->HasItemCount(40582, 1)) //Scourgestone
+            return false;
+
+        spellId = 54403;
+    }
+
     if (!ai->HasActivePlayerMaster() && ai->IsGroupLeader()) //Only hearthstone if entire group can use it.
     {
-        if (AI_VALUE2(bool, "group or", "not::spell ready::8690"))
+        if (AI_VALUE2(bool, "group or", "not::spell ready::" + std::to_string(spellId)))
             return false;
     }
-    else if (!AI_VALUE2(bool, "spell ready", "8690"))
+    else if (!AI_VALUE2(bool, "spell ready", spellId))
         return false;
 
     if (bot->InBattleGround())
         return false;
 
+    Player* master = ai->GetMaster();
+
     //Do not HS in dungeons when master is inside the dungeon or dead.
-    if (ai->GetMaster() && !WorldPosition(bot).isOverworld() && (bot->GetMapId() == ai->GetMaster()->GetMapId() || !ai->GetMaster()->IsAlive()))
+    if (master && master != bot && !WorldPosition(bot).isOverworld() && (bot->GetMapId() == master->GetMapId() || !master->IsAlive()))
         return false;
 
     if (bot->IsFlying() && WorldPosition(bot).currentHeight() > 10.0f)
-        return false;
-
-    if (!bot->HasItemCount(6948, 1))
         return false;
 
     return true;

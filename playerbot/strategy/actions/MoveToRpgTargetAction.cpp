@@ -217,7 +217,8 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
 bool MoveToRpgTargetAction::isUseful()
 {
-    GuidPosition guidP = AI_VALUE(GuidPosition, "rpg target"), p=guidP;
+    GuidPosition guidP = AI_VALUE(GuidPosition, "rpg target");
+    WorldPosition oldPosition = guidP;
 
     if (!guidP)
         return false;
@@ -243,12 +244,7 @@ bool MoveToRpgTargetAction::isUseful()
     if (AI_VALUE(bool, "travel target traveling") && AI_VALUE2(bool, "can free move to", travelTarget->GetPosStr()))
         return false;
 
-    guidP.updatePosition(bot->GetInstanceId());
-
-    if(WorldPosition(p) != WorldPosition(guidP))
-        SET_AI_VALUE(GuidPosition, "rpg target", guidP);
-
-    if (guidP.distance(bot) < INTERACTION_DISTANCE)
+    if (AI_VALUE2(float, "distance", "rpg target") < INTERACTION_DISTANCE)
         return false;
 
     if (!AI_VALUE(bool, "can move around"))

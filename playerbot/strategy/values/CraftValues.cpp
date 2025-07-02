@@ -142,7 +142,7 @@ bool ShouldCraftSpellValue::Calculate()
     {
         if (pSpellInfo->EffectItemType[i])
         {
-            ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", std::to_string(pSpellInfo->EffectItemType[i]));
+            ItemUsage usage = AI_VALUE2_LAZY(ItemUsage, "item usage", std::to_string(pSpellInfo->EffectItemType[i]));
 
             bool needItem = false;
 

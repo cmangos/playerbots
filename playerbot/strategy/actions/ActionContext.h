@@ -254,6 +254,11 @@ namespace ai
             creators["blade salvo"] = [](PlayerbotAI* ai) { return new CastBladeSalvoAction(ai); };
             creators["glaive throw"] = [](PlayerbotAI* ai) { return new CastGlaiveThrowAction(ai); };
 
+            // Quest vehicles
+            creators["deliver stolen horse"] = [](PlayerbotAI* ai) { return new CastDeliverStolenHorseAction(ai); };
+            creators["horsemans call"] = [](PlayerbotAI* ai) { return new CastHorsemansCallAction(ai); };
+            
+
             //Rpg
             creators["rpg stay"] = [](PlayerbotAI* ai) { return new RpgStayAction(ai); };
             creators["rpg work"] = [](PlayerbotAI* ai) { return new RpgWorkAction(ai); };
@@ -277,11 +282,13 @@ namespace ai
             creators["rpg use"] = [](PlayerbotAI* ai) { return new RpgUseAction(ai); };
             creators["rpg ai chat"] = [](PlayerbotAI* ai) { return new RpgAIChatAction(ai); };
             creators["rpg spell"] = [](PlayerbotAI* ai) { return new RpgSpellAction(ai); };
+            creators["rpg spell click"] = [](PlayerbotAI* ai) { return new RpgSpellClickAction(ai); };
             creators["rpg craft"] = [](PlayerbotAI* ai) { return new RpgCraftAction(ai); };
             creators["rpg trade useful"] = [](PlayerbotAI* ai) { return new RpgTradeUsefulAction(ai); };
             creators["rpg enchant"] = [](PlayerbotAI* ai) { return new RpgEnchantAction(ai); };
             creators["rpg duel"] = [](PlayerbotAI* ai) { return new RpgDuelAction(ai); };
             creators["rpg item"] = [](PlayerbotAI* ai) { return new RpgItemAction(ai); };
+            creators["rpg gossip talk"] = [](PlayerbotAI* ai) { return new RpgGossipTalkAction(ai); };
 
             creators["auto set glyph"] = [](PlayerbotAI* ai) { return new AutoSetGlyphAction(ai); };
             creators["auto complete quest"] = [](PlayerbotAI* ai) { return new AutoCompleteQuestAction(ai); };

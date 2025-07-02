@@ -13,5 +13,6 @@ namespace ai
    private:
        const WorldPosition GetBestPoint(Unit* target, float minDistance, float maxDistance) const;
        bool IsEnemyClose(const WorldPosition& point, const std::list<ObjectGuid>& enemies) const;
+       virtual bool isUsefulWhenStunned() override { return true; }
    };
 }

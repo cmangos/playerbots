@@ -37,7 +37,7 @@ namespace ai
             return ai->IsAlt() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid());
         }
 
-        bool isUsefulWhenStunned() override { return true; }
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     protected:
         std::string message;

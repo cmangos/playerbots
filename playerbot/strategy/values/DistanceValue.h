@@ -42,7 +42,15 @@ namespace ai
             if (qualifier == "rpg target")
             {
                 GuidPosition rpgTarget = AI_VALUE(GuidPosition, qualifier);
+                if (!rpgTarget) return FLT_MAX;
+
+                WorldPosition oldLocation = rpgTarget;
+
                 rpgTarget.updatePosition(bot->GetInstanceId());
+
+                if(oldLocation != rpgTarget)
+                    SET_AI_VALUE(GuidPosition, "rpg target", rpgTarget);
+
                 return rpgTarget.distance(bot);
             }
             else if (qualifier == "travel target")

@@ -9,6 +9,7 @@ namespace ai
     public:
         SkipSpellsListAction(PlayerbotAI* ai) : ChatCommandAction(ai, "skip spells list") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "skip spells list"; } //Must equal iternal name

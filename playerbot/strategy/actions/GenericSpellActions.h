@@ -22,7 +22,7 @@ namespace ai
     protected:
         const uint32& GetSpellID() const { return spellId; }
         const std::string& GetSpellName() const { return spellName; }
-        void SetSpellName(const std::string& name, std::string spellIDContextName = "spell id");
+        void SetSpellName(const std::string& name, std::string spellIDContextName = "spell id", bool force = false);
 
         Unit* GetTarget() override;
         virtual std::string GetTargetName() override { return "current target"; }
@@ -359,7 +359,7 @@ namespace ai
         virtual std::string getName() override { return "remove " + name; }
         virtual bool isUseful() override;
         virtual bool Execute(Event& event) override;
-
+        virtual bool isUsefulWhenStunned() override { return true; }
     private:
         std::string name;
     };
@@ -469,7 +469,7 @@ namespace ai
         CastVehicleSpellAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell)
         {
             range = 120.0f;
-            SetSpellName(spell, "vehicle spell id");
+            SetSpellName(spell, "vehicle spell id", !GetSpellID());
         }
 
         virtual bool Execute(Event& event) override;
@@ -540,5 +540,24 @@ namespace ai
     {
     public:
         CastBladeSalvoAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "blade salvo") {}
+    };
+
+    class CastDeliverStolenHorseAction : public CastVehicleSpellAction
+    {
+    public:
+        CastDeliverStolenHorseAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "deliver stolen horse") {}
+    protected:
+        virtual std::string GetTargetName() override { return "self target"; }
+    };
+
+    class CastHorsemansCallAction : public CastVehicleSpellAction
+    {
+    public:
+        CastHorsemansCallAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "horseman call") {
+            range = 120.0f;
+            SetSpellName("Horseman's Call", "vehicle spell id", true);
+        }
+    protected:
+        virtual std::string GetTargetName() override { return "self target"; }
     };
 }

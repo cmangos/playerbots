@@ -74,7 +74,7 @@ bool TaxiAction::Execute(Event& event)
             bool didTaxi =  bot->ActivateTaxiPathTo({ entry->from, entry->to }, npc, 0);
 #ifdef MANGOSBOT_TWO
             bot->ResolvePendingMount();
-#endif;
+#endif
             return didTaxi;
         }
 #ifdef MANGOSBOT_TWO                

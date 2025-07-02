@@ -161,7 +161,7 @@ bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInf
 
     if (GetRelation() == 0)
     {
-        if (!bot->GetMap()->IsContinent()) //This gives issues for bot->CanTakeQuest so stop here.
+        if (!bot->GetMap()->IsContinent() && (GetClosestPoint(bot)->getMapId() != bot->GetMapId())) //This gives issues for bot->CanTakeQuest so stop here.
             return false;
 
         if (forceThisQuest)
@@ -233,11 +233,20 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
     if (info.IsInRaid() != (GetQuestTemplate()->GetType() == QUEST_TYPE_RAID))
         return false;
 
-    bool isVendor = false;
+
+    bool skipKillableCheck = false;
 
     //Check mob level
     if (GetEntry() > 0)
     {
+#ifdef MANGOSBOT_TWO        
+        switch (GetQuestId()) {
+        case 12680: //Grand Theft Palomino
+        case 12687: //Into the Realm of Shadows
+            skipKillableCheck = true;
+        }
+#endif
+
         CreatureInfo const* cInfo = GetCreatureInfo();
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()])
@@ -246,10 +255,10 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
             if (GetQuestTemplate()->ReqItemCount[GetObjective()] * proto->BuyPrice > info.GetMoney()) //Need more money.
                 return false;
 
-            isVendor = true;
+            skipKillableCheck = true;
         }
 
-        if (!isVendor && !forceThisQuest)
+        if (!skipKillableCheck && !forceThisQuest)
         {
             if (cInfo && (int)cInfo->MaxLevel - (int)info.GetLevel() > 4)
                 return false;
@@ -257,7 +266,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
             //Do not try to hand-in dungeon/elite quests in instances without a group.
             if (cInfo->Rank > CREATURE_ELITE_NORMAL)
             {
-                if (!IsOverWorld(info.GetPosition()) && !info.GetBoolValue("can fight boss"))
+                if (!IsOverWorld(info.GetPosition()) && info.GetPosition().getMapId() != 609 && !info.GetBoolValue("can fight boss"))
                     return false;
                 else if (!info.GetBoolValue("can fight elite"))
                     return false;
@@ -267,7 +276,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
 
     if (!forceThisQuest)
     {
-        if (!isVendor && GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE && !info.GetBoolValue("can fight elite"))
+        if (!skipKillableCheck && GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE && !info.GetBoolValue("can fight elite"))
             return false;
 
         //Do not try to do dungeon/elite quests in instances without a group.
@@ -297,29 +306,57 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
 
     bool forceThisQuest = info.HasFocusQuest();
 
-    bool isVendor = false;
+    bool skipKillableCheck = false;
 
-    //Check mob level
     if (GetEntry() > 0)
     {
+#ifdef MANGOSBOT_TWO        
+        switch (GetQuestId()) {
+        case 12680: //Grand Theft Palomino
+            switch (GetEntry())
+            {
+            case 28605:
+            case 28606:
+            case 28607:
+                skipKillableCheck = !AI_VALUE2(bool, "trigger active", "in vehicle");
+                break;
+            case 28653:
+                skipKillableCheck = AI_VALUE2(bool, "trigger active", "in vehicle");
+                break;
+            }
+            break;
+        case 12687: //Into the Realm of Shadows
+            switch (GetEntry())
+            {
+            case 28768:
+            case 28782:
+                return !AI_VALUE2(bool, "trigger active", "in vehicle"); //Objective is not available.
+            }
+            break;
+        }
+#endif
+
         CreatureInfo const* cInfo = GetCreatureInfo();
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()] && !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot))
         {
-            isVendor = true;
+            skipKillableCheck = true;
         }
     }
 
-   std::vector<std::string> qualifier = { std::to_string(GetQuestTemplate()->GetQuestId()), std::to_string(GetObjective()) };
+    if (!skipKillableCheck)
+        skipKillableCheck = ai->CanSpellClick(bot, GetEntry());
 
-    if (!AI_VALUE2(bool, "group or", "following party,need quest objective::" + Qualified::MultiQualify(qualifier,","))) //Noone needs the quest objective.
+    std::vector<std::string> qualifier = { std::to_string(GetQuestTemplate()->GetQuestId()), std::to_string(GetObjective()) };
+
+    if (!AI_VALUE2(bool, "group or", "following party,need quest objective::" + Qualified::MultiQualify(qualifier, ","))) //Noone needs the quest objective.
         return false;
 
     WorldPosition botPos(bot);
 
-    if (!isVendor && GetEntry() > 0 && !IsOut(botPos))
+    if (!skipKillableCheck && GetEntry() > 0 && !IsOut(botPos))
     {
-        TravelTarget* target = AI_VALUE(TravelTarget*,"travel target");
+        TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
 
         //Only look for the target if it is unique or if we are currently working on it.
         if (IsUnique() || (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK && target->GetEntry() == GetEntry()))
@@ -1210,6 +1247,8 @@ void TravelMgr::LoadQuestTravelTable()
 
     for (auto& [entry, relation] : eMap)
     {
+
+
         bar.step();
         for (auto& [questId, flag] : relation)
         {
@@ -1219,7 +1258,6 @@ void TravelMgr::LoadQuestTravelTable()
                 continue;
             }
 
-            QuestTravelDestination* loc;
             std::vector<QuestTravelDestination*> locs;
 
             for (uint32 purposeFlagNr = 0; purposeFlagNr < 6; purposeFlagNr++)
@@ -1227,6 +1265,8 @@ void TravelMgr::LoadQuestTravelTable()
                 TravelDestinationPurpose purposeFlag = (TravelDestinationPurpose)(1 << purposeFlagNr);
                 if (flag & (uint32)purposeFlag)
                 {
+                    QuestTravelDestination* loc = nullptr;
+
                     if (purposeFlag == TravelDestinationPurpose::QuestGiver || purposeFlag == TravelDestinationPurpose::QuestTaker)
                         loc = AddDestination<QuestRelationTravelDestination>(entry, purposeFlag, questId);
                     else
@@ -1234,7 +1274,10 @@ void TravelMgr::LoadQuestTravelTable()
 
                     locs.push_back(loc);
                 }
+            }
 
+            if (!locs.empty())
+            {
                 for (auto& guidP : guidpMap.at(entry))
                 {
                     pointsMap.insert(std::make_pair(guidP.GetRawValue(), guidP));

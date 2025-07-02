@@ -368,6 +368,9 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
         if (!player)
             continue;
 
+        if (!ai->IsSafe(player))
+            continue;
+
         if (!player->GetPlayerbotAI())
             continue;
 

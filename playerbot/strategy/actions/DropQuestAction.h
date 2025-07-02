@@ -8,6 +8,7 @@ namespace ai
     public:
         DropQuestAction(PlayerbotAI* ai) : ChatCommandAction(ai, "drop quest") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "drop quest"; }
@@ -27,6 +28,7 @@ namespace ai
     public:
         CleanQuestLogAction(PlayerbotAI* ai) : ChatCommandAction(ai, "clean quest log") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
         virtual bool isUseful() { return ai->HasStrategy("rpg quest", BotState::BOT_STATE_NON_COMBAT); }
 

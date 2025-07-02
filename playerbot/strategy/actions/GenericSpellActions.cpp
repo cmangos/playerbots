@@ -186,9 +186,9 @@ NextAction** CastSpellAction::getPrerequisites()
     return Action::getPrerequisites();
 }
 
-void CastSpellAction::SetSpellName(const std::string& name, std::string spellIDContextName /*= "spell id"*/)
+void CastSpellAction::SetSpellName(const std::string& name, std::string spellIDContextName /*= "spell id"*/, bool force)
 {
-    if (spellName != name)
+    if (force || spellName != name)
     {
         spellName = name;
         spellId = ai->GetAiObjectContext()->GetValue<uint32>(spellIDContextName, name)->Get();

@@ -886,3 +886,21 @@ bool RpgItemAction::Execute(Event& event)
 
     return used;
 }
+bool RpgSpellClickAction::Execute(Event& event)
+{
+    rpg->BeforeExecute();
+
+    GuidPosition guidP = rpg->guidP();
+
+#ifdef MANGOSBOT_TWO
+    if (!guidP.IsCreatureOrVehicle())
+#endif
+        return false;
+   
+    bool result = ai->HandleSpellClick(guidP);
+    
+    rpg->AfterExecute(result);
+    DoDelay();
+    
+    return result;
+}

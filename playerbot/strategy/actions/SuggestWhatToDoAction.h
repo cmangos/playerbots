@@ -9,6 +9,7 @@ namespace ai
         SuggestWhatToDoAction(PlayerbotAI* ai, std::string name = "suggest what to do");
         virtual bool Execute(Event& event) override;
         virtual bool isUseful();
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     protected:
         typedef void (SuggestWhatToDoAction::*Suggestion) ();
@@ -36,5 +37,6 @@ namespace ai
         SuggestTradeAction(PlayerbotAI* ai) : SuggestWhatToDoAction(ai) {}
         virtual bool Execute(Event& event) override;
         virtual bool isUseful() override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 }

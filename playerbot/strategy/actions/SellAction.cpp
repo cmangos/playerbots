@@ -26,6 +26,11 @@ private:
 
 bool SellAction::Execute(Event& event)
 {
+    static uint32 minAutoSellItems = 5;
+    static uint8 minAutoSellPercentageOfBag = 20;
+    static uint8 maxAutoSellPercentageOfBag = 80;
+
+
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
     std::string text = event.getParam();
@@ -40,29 +45,37 @@ bool SellAction::Execute(Event& event)
         items.sort([](Item* i, Item* j) {return i->GetProto()->SellPrice * i->GetCount() < j->GetProto()->SellPrice * j->GetCount(); }); //Sell cheapest items first.
     }
 
+    uint32 soldItems = 0;
+    uint32 shouldSell = std::max(minAutoSellItems, uint32(items.size() * urand(minAutoSellPercentageOfBag, maxAutoSellPercentageOfBag) / 100));
     for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
-        Sell(requester, *i);
+        if (Sell(requester, *i))
+            soldItems++;
 
-        if (event.getSource() == "rpg action" && std::distance(i, items.begin()) > std::max(5, int(items.size() / 5))) //Sell 20% or 5 items at once.
+        if (event.getSource() == "rpg action" && soldItems >= shouldSell)
             break;
     }
 
-    return true;
+    return soldItems;
 }
 
-void SellAction::Sell(Player* requester, FindItemVisitor* visitor)
+bool SellAction::Sell(Player* requester, FindItemVisitor* visitor)
 {
+    bool didSell = false;
     ai->InventoryIterateItems(visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
     std::list<Item*> items = visitor->GetResult();
     for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
-        Sell(requester, *i);
+        didSell |= Sell(requester, *i);
     }
+
+    return didSell;
 }
 
-void SellAction::Sell(Player* requester, Item* item)
+bool SellAction::Sell(Player* requester, Item* item)
 {
+    bool didSell = false;
+
     std::ostringstream out;
     std::list<ObjectGuid> vendors = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest npcs")->Get();
 
@@ -101,7 +114,11 @@ void SellAction::Sell(Player* requester, Item* item)
         if (sPlayerbotAIConfig.globalSoundEffects)
             bot->PlayDistanceSound(120);
 
+        didSell = true;
+
         ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         break;
     }
+
+    return didSell;
 }

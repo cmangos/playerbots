@@ -174,7 +174,7 @@ std::vector<uint32> EquipedGlyphsValue::Calculate()
             if (const ItemPrototype* glyphProto = GetGlyphProtoFromGlyphId(glyphId, bot->getClassMask()))
                 glyphItemId = glyphProto->ItemId;
         }
-#endif;
+#endif
         glyphList.push_back(glyphItemId);
     }
 

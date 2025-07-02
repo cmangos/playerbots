@@ -76,6 +76,9 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32
         break;
     }
     case HIGHGUID_UNIT:
+#ifdef MANGOSBOT_TWO
+    case HIGHGUID_VEHICLE:
+#endif
     {
         setMapId(mapId);
         if (Map* map = getMap(instanceId))
@@ -979,8 +982,15 @@ std::vector<WorldPosition> WorldPosition::getPathFromPath(const std::vector<Worl
 
 bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight, uint32 instanceId)
 {
+    MANGOS_ASSERT(std::isfinite(coord_x) && std::isfinite(coord_y) && std::isfinite(coord_z));
+
     MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
+
+    MANGOS_ASSERT(mmap);
+
     dtNavMeshQuery const* query = mmap->GetNavMeshQuery(getMapId(), instanceId);
+
+    MANGOS_ASSERT(query && query->getAttachedNavMesh());
 
     float curPoint[VERTEX_SIZE] = {coord_y, coord_z, coord_x };
     float extend[VERTEX_SIZE] = { maxRange, maxHeight, maxRange };

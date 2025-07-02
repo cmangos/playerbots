@@ -8,7 +8,8 @@ namespace ai
     {
     public:
         XpGainAction(PlayerbotAI* ai) : Action(ai, "xp gain") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     private:
         void GiveXP(int32 xp, Unit* victim);
     };

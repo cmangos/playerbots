@@ -89,7 +89,6 @@ namespace ai
 
         void calculateCost(bool distanceOnly = false);
 
-        bool canClickSpell(Player* bot, uint32 entry);
         float getCost(Unit* unit = nullptr, uint32 cGold = 0);
         uint32 getPrice();
     private:

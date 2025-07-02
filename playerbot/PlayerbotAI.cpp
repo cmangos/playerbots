@@ -143,11 +143,6 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
 
     aiObjectContext = AiFactory::createAiObjectContext(bot, this);
 
-    if (!HasRealPlayerMaster() && bot->GetFreeTalentPoints() > 0)
-    {
-        DoSpecificAction("auto talents");
-    }
-
     UpdateTalentSpec();
 
     engines[(uint8)BotState::BOT_STATE_COMBAT] = AiFactory::createCombatEngine(bot, this, aiObjectContext);
@@ -237,6 +232,11 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
 #ifndef MANGOSBOT_ZERO
     masterOutgoingPacketHandlers.AddHandler(MSG_RAID_READY_CHECK_FINISHED, "ready check finished");
 #endif
+
+    if (!HasRealPlayerMaster() && bot->GetFreeTalentPoints() > 0)
+    {
+        DoSpecificAction("auto talents");
+    }
 }
 
 PlayerbotAI::~PlayerbotAI()
@@ -1756,6 +1756,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     }
                 }
 
+                MANGOS_ASSERT(!message.empty());     
                 QueueChatResponse(msgtype, guid1, ObjectGuid(), message, chanName, name, isAiChat);
                 GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
 
@@ -2001,7 +2002,7 @@ void PlayerbotAI::DoNextAction(bool min)
     Group *group = bot->GetGroup();
 
     //Remove bot masters not in our group.
-    if (master && !HasActivePlayerMaster() && (!group || group->GetLeaderGuid() != master->GetObjectGuid()))
+    if (master && master != bot && !HasActivePlayerMaster() && (!group || group->GetLeaderGuid() != master->GetObjectGuid()))
     {
         master = IsRealPlayer() ? bot : nullptr;
         SetMaster(master);
@@ -2570,7 +2571,7 @@ Unit* PlayerbotAI::GetUnit(CreatureDataPair const* creatureDataPair)
 }
 
 
-Creature* PlayerbotAI::GetCreature(ObjectGuid guid)
+Creature* PlayerbotAI::GetCreature(ObjectGuid guid) const
 {
     if (!guid)
         return NULL;
@@ -2580,6 +2581,18 @@ Creature* PlayerbotAI::GetCreature(ObjectGuid guid)
         return NULL;
 
     return map->GetCreature(guid);
+}
+
+Creature* PlayerbotAI::GetAnyTypeCreature(ObjectGuid guid) const
+{
+    if (!guid)
+        return NULL;
+
+    Map* map = bot->GetMap();
+    if (!map)
+        return NULL;
+
+    return map->GetAnyTypeCreature(guid);
 }
 
 GameObject* PlayerbotAI::GetGameObject(ObjectGuid guid)
@@ -7960,7 +7973,7 @@ void PlayerbotAI::EnchantItemT(uint32 spellid, uint8 slot, Item* item)
    EnchantmentSlot enchantSlot = spellInfo->Effect[0] == SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC ? PRISMATIC_ENCHANTMENT_SLOT : PERM_ENCHANTMENT_SLOT;
 #else
    EnchantmentSlot enchantSlot = PERM_ENCHANTMENT_SLOT;
-#endif;
+#endif
 
    bot->ApplyEnchantment(pItem, enchantSlot, false);
    pItem->SetEnchantment(enchantSlot, enchantid, 0, 0);
@@ -8158,6 +8171,64 @@ float PlayerbotAI::GetLevelFloat() const
     return level;
 }
 
+bool PlayerbotAI::CanSpellClick(Player* bot, uint32 entry)
+{
+#ifdef MANGOSBOT_TWO
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(entry);
+
+    if (clickPair.first != clickPair.second)
+    {
+        for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+        {
+            if (itr->second.questStart)
+            {
+                // not in expected required quest state
+                if (!bot || ((!itr->second.questStartCanActive || !bot->IsActiveQuest(itr->second.questStart)) && !bot->GetQuestRewardStatus(itr->second.questStart)))
+                    return false;
+            }
+
+            if (itr->second.questEnd)
+            {
+                // not in expected forbidden quest state
+                if (!bot || bot->GetQuestRewardStatus(itr->second.questEnd))
+                    return false;
+            }
+
+            return true;
+        }
+    }
+#endif
+    return false;
+}
+
+bool PlayerbotAI::CanSpellClick(ObjectGuid guid) const
+{
+#ifdef MANGOSBOT_TWO
+    if (!guid.IsCreatureOrVehicle())
+        return false;
+
+    Creature* creature = GetAnyTypeCreature(guid);
+
+    if (!creature)
+        return CanSpellClick(bot, guid.GetEntry());
+
+    // Check if there are spell click entries for this creature
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(guid.GetEntry());
+    if (clickPair.first == clickPair.second)
+        return false;
+
+    // Check if any of the spell click entries fit the requirements for this bot
+    for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+    {
+        if (itr->second.IsFitToRequirements(bot, creature))
+        {
+            return true;
+        }
+    }
+#endif
+    return false;
+}
+
 bool PlayerbotAI::HandleSpellClick(uint32 entry) 
 {
 #ifdef MANGOSBOT_TWO
@@ -8172,18 +8243,31 @@ bool PlayerbotAI::HandleSpellClick(uint32 entry)
     std::list<ObjectGuid> guids = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
     for (auto& guid : guids)
     {
-        if (!guid.IsCreature())
+        if (!guid.IsCreatureOrVehicle())
             continue;
 
         if (guid.GetEntry() != entry)
             continue;
 
-        creature = GetCreature(guid);
-        if (!creature)
-            continue;
+        return HandleSpellClick(guid);
 
         break;
-    }
+    }  
+#endif
+    return false;
+}
+
+bool PlayerbotAI::HandleSpellClick(ObjectGuid guid)
+{
+#ifdef MANGOSBOT_TWO
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(guid.GetEntry());
+
+    if (clickPair.first == clickPair.second)
+        return false;
+
+    Creature* creature = nullptr;
+
+    creature = GetAnyTypeCreature(guid);
 
     if (!creature)
         return false;

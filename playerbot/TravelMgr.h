@@ -448,8 +448,20 @@ namespace ai
 		template<class T>
 		T* AddDestination(const int32 entry, const TravelDestinationPurpose purpose, const uint32 questId = 0) {
 			uint32 id = questId ? questId : entry;
-			if(destinationMap[purpose].find(id) != destinationMap[purpose].end())
-					return (T*)destinationMap[purpose][id].front();
+
+			if (questId)
+			{
+				if (destinationMap[purpose].find(questId) != destinationMap[purpose].end())
+					for(auto& dest : destinationMap[purpose][questId])
+						if(dest->GetEntry() == entry)
+							return (T*)dest;
+			}
+			else
+			{
+				if (destinationMap[purpose].find(entry) != destinationMap[purpose].end())
+					for (auto& dest : destinationMap[purpose][entry])
+						return (T*)destinationMap[purpose][entry].front();
+			}
 
 			destinationMap[purpose][id].push_back(new T(purpose, questId, entry));
 

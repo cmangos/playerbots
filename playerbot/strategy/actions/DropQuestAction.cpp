@@ -13,6 +13,7 @@ bool DropQuestAction::Execute(Event& event)
 
     PlayerbotChatHandler handler(GetMaster());
     uint32 entry = handler.extractQuestId(link);
+    bool dropped = false;
 
     // remove all quest entries for 'entry' from quest log
     for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
@@ -22,25 +23,28 @@ bool DropQuestAction::Execute(Event& event)
         if (!quest)
             continue;
 
-        if (logQuest == entry || link.find(quest->GetTitle()) != std::string::npos)
+        if (logQuest == entry || link.find(quest->GetTitle()) != std::string::npos || link == "all")
         {
             bot->SetQuestSlot(slot, 0);
 
             // we ignore unequippable quest items in this case, its' still be equipped
             bot->TakeQuestSourceItem(logQuest, false);
             entry = logQuest;
-            break;
+
+            bot->SetQuestStatus(entry, QUEST_STATUS_NONE);
+            bot->getQuestStatusMap()[entry].m_rewarded = false;
+
+            dropped = true;
+
+            if (link != "all")
+                break;
         }
     }
 
-    if (!entry)
-        return false;
+    if(dropped)
+        ai->TellPlayer(requester, BOT_TEXT("quest_remove"));
 
-    bot->SetQuestStatus(entry, QUEST_STATUS_NONE);
-    bot->getQuestStatusMap()[entry].m_rewarded = false;
-
-    ai->TellPlayer(requester, BOT_TEXT("quest_remove"));
-    return true;
+    return dropped;
 }
 
 bool CleanQuestLogAction::Execute(Event& event)

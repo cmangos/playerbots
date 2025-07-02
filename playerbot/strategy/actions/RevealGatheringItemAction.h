@@ -10,7 +10,8 @@ namespace ai
     public:
         RevealGatheringItemAction(PlayerbotAI* ai) : Action(ai, "reveal gathering item") {}
 
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
 }

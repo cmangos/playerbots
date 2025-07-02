@@ -8,6 +8,7 @@ namespace ai
     public:
         DestroyItemAction(PlayerbotAI* ai, std::string name = "destroy") : ChatCommandAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "destroy"; } //Must equal iternal name
@@ -30,6 +31,7 @@ namespace ai
         SmartDestroyItemAction(PlayerbotAI* ai) : DestroyItemAction(ai, "smart destroy") {}
         virtual bool Execute(Event& event) override;
         virtual bool isUseful() { return !ai->HasActivePlayerMaster(); }
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "smart destroy"; } //Must equal iternal name

@@ -172,8 +172,10 @@ bool MoveToRpgTargetAction::Execute(Event& event)
     if (unit && unit->IsMoving() && bot->GetDistance(unit) < INTERACTION_DISTANCE * 2 && unit->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
     {
         couldMove = Follow(unit, INTERACTION_DISTANCE * distance, unit->GetOrientation());
-        if(unit->GetSpeedInMotion()) //Speed up walking in case we need to follow in walk.
+        if (unit->GetSpeedInMotion() && unit->GetSpeedInMotion() > bot->GetSpeed(MOVE_WALK)) //Speed up walking in case we need to follow in walk.
             bot->UpdateSpeed(MOVE_WALK, false, unit->GetSpeedInMotion() / bot->GetSpeed(MOVE_WALK));
+        bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_WALK_MODE);
+
     }
     else    
         couldMove = MoveTo(mapId, x, y, z, false, false);
@@ -215,7 +217,8 @@ bool MoveToRpgTargetAction::Execute(Event& event)
 
 bool MoveToRpgTargetAction::isUseful()
 {
-    GuidPosition guidP = AI_VALUE(GuidPosition, "rpg target"), p=guidP;
+    GuidPosition guidP = AI_VALUE(GuidPosition, "rpg target");
+    WorldPosition oldPosition = guidP;
 
     if (!guidP)
         return false;
@@ -241,12 +244,7 @@ bool MoveToRpgTargetAction::isUseful()
     if (AI_VALUE(bool, "travel target traveling") && AI_VALUE2(bool, "can free move to", travelTarget->GetPosStr()))
         return false;
 
-    guidP.updatePosition(bot->GetInstanceId());
-
-    if(WorldPosition(p) != WorldPosition(guidP))
-        SET_AI_VALUE(GuidPosition, "rpg target", guidP);
-
-    if (guidP.distance(bot) < INTERACTION_DISTANCE)
+    if (AI_VALUE2(float, "distance", "rpg target") < INTERACTION_DISTANCE)
         return false;
 
     if (!AI_VALUE(bool, "can move around"))

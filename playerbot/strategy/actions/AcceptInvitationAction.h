@@ -87,7 +87,7 @@ namespace ai
             return true;
         }
 
-        bool isUsefulWhenStunned() override { return true; }
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "accept invitation"; }

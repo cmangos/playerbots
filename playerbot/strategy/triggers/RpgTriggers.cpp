@@ -7,6 +7,7 @@
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/TravelMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
 using namespace ai;
 
@@ -800,4 +801,69 @@ bool RpgItemTrigger::IsActive()
 bool RandomJumpTrigger::IsActive()
 {
     return bot->IsInWorld() && ai->HasPlayerNearby() && !ai->IsJumping() && frand(0.0f, 1.0f) < sPlayerbotAIConfig.jumpRandomChance;
+}
+
+bool RpgSpellClickTrigger::IsActive()
+{
+    GuidPosition guidP(getGuidP());
+
+#ifdef MANGOSBOT_TWO
+    if (!guidP.IsCreatureOrVehicle())
+        return false;
+
+    switch(guidP.GetEntry())
+    {
+    case 29488: //Scourge gryphon
+    case 29501:
+        return false;
+    }
+
+    if (TransportInfo* transportInfo = bot->GetTransportInfo())
+    {
+        if (transportInfo && transportInfo->IsOnVehicle())
+            return false;
+    }
+#endif   
+
+    return ai->CanSpellClick(guidP);
+}
+
+bool RpgGossipTalkTrigger::IsActive()
+{
+    GuidPosition guidP(getGuidP());
+
+    if (!guidP.IsCreature())
+        return false;
+
+    GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(guidP.GetCreatureTemplate()->GossipMenuId);
+    if (pMenuItemBounds.first == pMenuItemBounds.second)
+        return false;
+
+    Creature* creature = guidP.GetCreature(bot->GetInstanceId());
+
+    if (!creature)
+        return false;
+
+#ifdef MANGOSBOT_TWO
+    switch (guidP.GetEntry())
+    {
+    case 28653: //Salanar the Horseman
+        return AI_VALUE2(bool, "need quest objective", "12687,0"); //Only when we need "Into the Realm of Shadows"
+    }
+#endif
+
+    if (!sScriptDevAIMgr.OnGossipHello(bot, creature))
+    {
+        bot->PrepareGossipMenu(creature, creature->GetDefaultGossipMenuId());
+    }
+
+    if (!bot->GetPlayerMenu())
+        return false;
+
+    GossipMenu& menu = bot->GetPlayerMenu()->GetGossipMenu();
+
+    if (!menu.MenuItemCount())
+        return false;
+
+    return true;
 }

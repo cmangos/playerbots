@@ -14,7 +14,7 @@ namespace ai
         void Set(uint32 itemId, uint8 wantedSlotId, std::ostringstream& msg);
         void Remove(uint32 itemId, uint8 removeSlotId, std::ostringstream& msg);
 
-        virtual bool isUsefulWhenStunned() { return true; }
+        virtual bool isUsefulWhenStunned() override { return true; }
     private:
         uint8 GetEquipedGlyphSlot(uint32 itemId);
 #ifdef GenerateBotHelp

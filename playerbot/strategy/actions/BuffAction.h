@@ -19,6 +19,7 @@ namespace ai
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif 
         virtual bool Execute(Event& event);
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     private:
         void TellHeader(uint32 subClass, Player* requester);

@@ -241,11 +241,13 @@ namespace ai
             creators["rpg use"] = [](PlayerbotAI* ai) { return new RpgUseTrigger(ai); };
             creators["rpg ai chat"] = [](PlayerbotAI* ai) { return new RpgAIChatTrigger(ai); };
             creators["rpg spell"] = [](PlayerbotAI* ai) { return new RpgSpellTrigger(ai); };
+            creators["rpg spell click"] = [](PlayerbotAI* ai) { return new RpgSpellClickTrigger(ai); };
             creators["rpg craft"] = [](PlayerbotAI* ai) { return new RpgCraftTrigger(ai); };
             creators["rpg trade useful"] = [](PlayerbotAI* ai) { return new RpgTradeUsefulTrigger(ai); };
             creators["rpg enchant"] = [](PlayerbotAI* ai) { return new RpgEnchantTrigger(ai); };
             creators["rpg duel"] = [](PlayerbotAI* ai) { return new RpgDuelTrigger(ai); };
             creators["rpg item"] = [](PlayerbotAI* ai) { return new RpgItemTrigger(ai); };
+            creators["rpg gossip talk"] = [](PlayerbotAI* ai) { return new RpgGossipTalkTrigger(ai); };
 
             creators["random jump"] = [](PlayerbotAI* ai) { return new RandomJumpTrigger(ai); };
             creators["rtsc jump active"] = [](PlayerbotAI* ai) { return new RtscJumpTrigger(ai); };

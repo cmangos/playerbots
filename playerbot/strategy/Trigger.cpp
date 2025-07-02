@@ -10,10 +10,16 @@ using namespace ai;
 Event Trigger::Check()
 {
 	if (triggered)
-		return Event(getName(), param, owner);
+	{
+		if (owner)
+			return Event(getName(), param, owner);
+		else
+			return Event(getName());
+	}
 
 	if (IsActive())
 	{
+		triggered = !checkAgainInSameTick;
 		Event event(getName());
 		return event;
 	}

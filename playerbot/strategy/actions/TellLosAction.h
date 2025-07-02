@@ -24,6 +24,7 @@ namespace ai
     public:
         TellLosAction(PlayerbotAI* ai) : ChatCommandAction(ai, "los") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
         static std::vector<LosModifierStruct> ParseLosModifiers(const std::string& str);
         static std::list<GameObject*> GoGuidListToObjList(PlayerbotAI* ai, const std::list<ObjectGuid>& gos);

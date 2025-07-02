@@ -127,7 +127,14 @@ bool RuneforgeAction::Execute(Event& event)
     }
     else if (runeforge)
     {
-        if (MoveTo(WorldPosition(runeforge), false, false))
+        float angle = runeforge->GetAngle(bot); //Current approuch angle.
+        float distance = frand(0.5, 1);
+
+        WorldPosition runeForgePos(runeforge);
+
+        runeForgePos += WorldPosition(0, cos(angle) * INTERACTION_DISTANCE * distance, sin(angle) * INTERACTION_DISTANCE * distance);
+
+        if (MoveTo(runeForgePos, false, false))
         {
             SetDuration(GetDuration() + 1);
             return true;

@@ -64,6 +64,9 @@ namespace ai
                 return false;
         }
 
+        if (bot->GetGroupInvite())
+            bot->GetGroupInvite()->RemoveInvite(bot);
+
         return Invite(master, bot);
     }
 

@@ -14,7 +14,7 @@ Event Trigger::Check()
 		if (owner)
 			return Event(getName(), param, owner);
 		else
-			Event event(getName());
+			return Event(getName());
 	}
 
 	if (IsActive())

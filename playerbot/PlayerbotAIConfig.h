@@ -184,6 +184,9 @@ public:
     std::string premadeLevelSpec[MAX_CLASSES][10][91]; //lvl 10 - 100
     uint32 classRaceProbabilityTotal;
     uint32 classRaceProbability[MAX_CLASSES][MAX_RACES];
+    bool useFixedClassRaceCounts;
+    using ClassRacePair = std::pair<uint8, uint8>;
+    std::map<ClassRacePair, uint32> fixedClassRaceCounts;
     uint32 levelProbability[DEFAULT_MAX_LEVEL + 1];
     ClassSpecs classSpecs[MAX_CLASSES];
     GlyphPrioritySpecMap glyphPriorityMap[MAX_CLASSES];

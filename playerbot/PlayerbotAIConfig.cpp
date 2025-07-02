@@ -354,6 +354,25 @@ bool PlayerbotAIConfig::Initialize()
         }
     }
 
+    useFixedClassRaceCounts = config.GetBoolDefault("AiPlayerbot.ClassRace.UseFixedClassRaceCounts", false);
+
+    if (useFixedClassRaceCounts)
+    {
+	for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
+	{
+	    for (uint32 race = 1; race < MAX_RACES; ++race)
+	    {
+		std::string key = "AiPlayerbot.ClassRaceProb." + std::to_string(cls) + "." + std::to_string(race);
+		int count = config.GetIntDefault(key, -1);
+
+		if (count >= 0 && factory.isAvailableRace(cls, race))
+		{
+		    fixedClassRaceCounts[{cls, race}] = count;
+		}
+	    }
+	}
+    }
+
     botCheats.clear();
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.BotCheats", "taxi,item,breath"), botCheats);
 

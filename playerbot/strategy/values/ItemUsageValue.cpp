@@ -107,8 +107,8 @@ ItemUsage ItemUsageValue::Calculate()
     if (forceUsage == ForceItemUsage::FORCE_USAGE_KEEP)
         return ItemUsage::ITEM_USAGE_KEEP;
 
-    //KEEP HEARTHSTONE
-    if (proto->ItemId == 6948)
+    //KEEP HEARTHSTONE/SCOURGESTONE
+    if (proto->ItemId == 6948 || proto->ItemId == 40582)
         return ItemUsage::ITEM_USAGE_KEEP;
 
     //WARLOCKS GOT TO KEEP SOULSHARDS (keep at least 10)

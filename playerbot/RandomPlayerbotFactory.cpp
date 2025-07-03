@@ -763,16 +763,24 @@ void RandomPlayerbotFactory::CreateRandomBots()
     if (sPlayerbotAIConfig.useFixedClassRaceCounts && !remaining.empty())
     {
 	sLog.outError("Unable to create all requested fixed class/race bots due to account character limits.");
-	sLog.outError("The following class/race combinations were left uncreated:");
+	sLog.outError("The following class/race combination(s) were left uncreated:");
 
+	uint32 totalCount = 0;
 	for(const auto& entry : remaining)
 	{
 	    uint8 cls = entry.first.first;
 	    uint8 race = entry.first.second;
 	    uint32 count = entry.second;
+	    totalCount += count;
 
 	    sLog.outError(" - Class %u, Race %u: %u bots remaining", cls, race, count);
 	}
+#ifdef MANGOSBOT_TWO
+	uint32 missingAccounts = (totalCount + 9) / 10;
+#else
+        uint32 missingAccounts = (totalCount + 8) / 9;
+#endif
+	sLog.outError("You need at least %u additional account(s) to fill the remaining fixed class/race combinations.", missingAccounts);
     }
 
 
@@ -811,7 +819,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
         delete player;
         delete session;
     }
-    sLog.outString("%zu random bot accounts with %d characters available", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
+    sLog.outString("%zu random bot accounts with %d characters available", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars+botsCreated);
 }
 
 

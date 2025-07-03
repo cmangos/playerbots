@@ -308,69 +308,91 @@ bool PlayerbotAIConfig::Initialize()
 
     classRaceProbabilityTotal = 0;
 
-    for (uint32 race = 1; race < MAX_RACES; ++race)
-    {
-        //Set race defaults
-        if (race > 0)
-        {
-            int rProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb.0." + std::to_string(race), 100);
-
-            for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
-            {
-                classRaceProbability[cls][race] = rProb;
-            }
-        }
-    }
-
-    //Class overrides
-    for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
-    {
-        int cProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb." + std::to_string(cls), -1);
-
-        if (cProb >= 0)
-        {
-            for (uint32 race = 1; race < MAX_RACES; ++race)
-            {
-                classRaceProbability[cls][race] = cProb;
-            }
-        }
-    }
-
+    useFixedClassRaceCounts = config.GetBoolDefault("AiPlayerbot.ClassRace.UseFixedClassRaceCounts", false);
     RandomPlayerbotFactory factory(0);
 
-    //Race Class overrides
-    for (uint32 race = 1; race < MAX_RACES; ++race)
+    if (!useFixedClassRaceCounts)
     {
+        for (uint32 race = 1; race < MAX_RACES; ++race)
+        {
+            //Set race defaults
+            if (race > 0)
+            {
+                int rProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb.0." + std::to_string(race), 100);
+
+                for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
+                {
+                    classRaceProbability[cls][race] = rProb;
+                }
+            }
+        }
+
+        //Class overrides
         for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
         {
-            int rcProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb." + std::to_string(cls) + "." + std::to_string(race), -1);
-            if (rcProb >= 0)
-                classRaceProbability[cls][race] = rcProb;
+            int cProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb." + std::to_string(cls), -1);
 
-            if (!factory.isAvailableRace(cls, race))
-                classRaceProbability[cls][race] = 0;
-            else
-                classRaceProbabilityTotal += classRaceProbability[cls][race];
+            if (cProb >= 0)
+            {
+                for (uint32 race = 1; race < MAX_RACES; ++race)
+                {
+                    classRaceProbability[cls][race] = cProb;
+                }
+            }
+        }
+
+        //Race Class overrides
+        for (uint32 race = 1; race < MAX_RACES; ++race)
+        {
+            for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
+            {
+                int rcProb = config.GetIntDefault("AiPlayerbot.ClassRaceProb." + std::to_string(cls) + "." + std::to_string(race), -1);
+                if (rcProb >= 0)
+                    classRaceProbability[cls][race] = rcProb;
+
+                if (!factory.isAvailableRace(cls, race))
+                    classRaceProbability[cls][race] = 0;
+                else
+                    classRaceProbabilityTotal += classRaceProbability[cls][race];
+            }
         }
     }
-
-    useFixedClassRaceCounts = config.GetBoolDefault("AiPlayerbot.ClassRace.UseFixedClassRaceCounts", false);
-
-    if (useFixedClassRaceCounts)
+    else
     {
-	for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
-	{
-	    for (uint32 race = 1; race < MAX_RACES; ++race)
-	    {
-		std::string key = "AiPlayerbot.ClassRaceProb." + std::to_string(cls) + "." + std::to_string(race);
-		int count = config.GetIntDefault(key, -1);
 
-		if (count >= 0 && factory.isAvailableRace(cls, race))
-		{
-		    fixedClassRaceCounts[{cls, race}] = count;
-		}
+        // Warn about unsupported config keys
+        for (uint32 race = 1; race < MAX_RACES; ++race)
+        {
+            std::string raceKey = "AiPlayerbot.ClassRaceProb.0." + std::to_string(race);
+            int val = config.GetIntDefault(raceKey.c_str(), -1);
+            if (val >= 0)
+                sLog.outError("Fixed class/race counts does not yet support '%s' (race-only). This config entry will be ignored.", raceKey.c_str());
+        }
+
+        for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
+        {
+            std::string classKey = "AiPlayerbot.ClassRaceProb." + std::to_string(cls);
+            int val = config.GetIntDefault(classKey.c_str(), -1);
+            if (val >= 0)
+                sLog.outError("Fixed class/race counts does not yet support '%s' (class-only). This config entry will be ignored.", classKey.c_str());
+        }
+
+        //Parse and build fixedClassRacesCounts
+        {
+            for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
+	    {
+	        for (uint32 race = 1; race < MAX_RACES; ++race)
+	        {
+		    std::string key = "AiPlayerbot.ClassRaceProb." + std::to_string(cls) + "." + std::to_string(race);
+		    int count = config.GetIntDefault(key, -1);
+
+		    if (count >= 0 && factory.isAvailableRace(cls, race))
+		    {
+		        fixedClassRaceCounts[{cls, race}] = count;
+		    }
+	        }
 	    }
-	}
+        }
     }
 
     botCheats.clear();

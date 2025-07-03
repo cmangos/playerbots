@@ -389,7 +389,7 @@ AiPlayerbot.AutoLearnDroppedSpells = 0
 # This will generate random bots based on a fixed total count per class/race combo as defined by:
 # AiPlayerbot.ClassRaceProb.<class>.<race> = <number>
 #
-AiPlayerbot.ClassRace.UseFixedClassRaceCounts = 1
+# AiPlayerbot.ClassRace.UseFixedClassRaceCounts = 0
 
 # AiPlayerbot.ClassRaceProb.1.0 = 178    # Human chance
 # AiPlayerbot.ClassRaceProb.2.0 = 65     # Orc chance

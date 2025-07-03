@@ -599,8 +599,11 @@ namespace ai
             if (!bot->HasMana())
                 return false;
 
+            /*
+            Interrupting drinking is WIP, and will be finished later - Ile
+
             if (bot->GetMaster() && (!bot->IsWithinDist(bot->GetMaster(), 30.0f) && bot->IsWithinDist(bot->GetMaster(), 1000.0f)))
-            {
+            {           
                 // Master is too far, stop drinking
                 bot->RemoveAurasDueToSpell(24355);
                 ai->InterruptSpell();
@@ -609,6 +612,7 @@ namespace ai
                 bot->GetMotionMaster()->Clear();
                 return false;
             }
+            */
 
             if (ai->HasCheat(BotCheatMask::item))
             {
@@ -689,6 +693,9 @@ namespace ai
             if (sServerFacade.IsInCombat(bot))
                 return false;
 
+            /*
+            Interrupting eating is WIP, and will be finished later - Ile
+
             if (bot->GetMaster() && (!bot->IsWithinDist(bot->GetMaster(), 30.0f) && bot->IsWithinDist(bot->GetMaster(), 1000.0f)))
             {
                 // Master is too far, stop eating
@@ -699,6 +706,7 @@ namespace ai
                 bot->GetMotionMaster()->Clear();
                 return false;
             }
+            */
 
             if (ai->HasCheat(BotCheatMask::item))
             {

@@ -49,25 +49,9 @@ bool PossibleTargetsValue::AcceptUnit(Unit* unit)
 
 void PossibleTargetsValue::FindPossibleTargets(Player* player, std::list<Unit*>& targets, float range)
 {
-    //MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, range);
-    //MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
-    //Cell::VisitAllObjects(player, searcher, range);
-
     MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, range);
-    auto visibleGuids = player->GetClientGuids();
-    for (auto visibleGuid : visibleGuids)
-    {
-        if (WorldObject* target = player->GetMap()->GetWorldObject(visibleGuid))
-        {
-            if (target->IsUnit())
-            {
-                auto u = dynamic_cast<Unit*>(target);
-                if(u_check(u))
-                    targets.push_back(u);
-            }
-        }
-    }
-
+    MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+    Cell::VisitAllObjects(player, searcher, range);
 }
 
 bool PossibleTargetsValue::IsFriendly(Unit* target, Player* player)

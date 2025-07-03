@@ -369,8 +369,15 @@ AiPlayerbot.AutoLearnDroppedSpells = 0
 # All non-orc warriors will have a 75% lower chance to be generated.
 # Human mages have a 65% lower chance to generate. 
 # Orc warriors have a 55% lower chance to generate.
-
+#
 # Source https://web.archive.org/web/20090508173437/http://www.warcraftrealms.com/census.php
+
+# As an alternative to probability-based generation, you can enable:
+# AiPlayerbot.ClassRace.UseFixedClassRaceCounts
+# This will generate random bots based on a fixed total count per class/race combo as defined by:
+# AiPlayerbot.ClassRaceProb.<class>.<race> = <number>
+#
+# AiPlayerbot.ClassRace.UseFixedClassRaceCounts = 0
 
 # AiPlayerbot.ClassRaceProb.0.1 =  115  # Human chance
 # AiPlayerbot.ClassRaceProb.0.2 =   36  # Orc chance

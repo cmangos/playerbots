@@ -636,7 +636,7 @@ namespace ai
                 SetDuration(drinkDuration);
                 bot->RemoveSpellCooldown(*pSpellInfo);
 
-                if (bot->GetMaster() || (!bot->IsWithinDist(bot->GetMaster(), 30.0f) && bot->IsWithinDist(bot->GetMaster(), 1000.0f)))
+                if (bot->GetMaster() && (!bot->IsWithinDist(bot->GetMaster(), 30.0f) && bot->IsWithinDist(bot->GetMaster(), 1000.0f)))
                 {
                     // Master is too far, stop eating
                     bot->RemoveAurasDueToSpell(24005);
@@ -725,7 +725,7 @@ namespace ai
                 SetDuration(eatDuration);
                 bot->RemoveSpellCooldown(*pSpellInfo);
 
-                if (bot->GetMaster() || (!bot->IsWithinDist(bot->GetMaster(), 30.0f) && bot->IsWithinDist(bot->GetMaster(), 1000.0f)))
+                if (bot->GetMaster() && (!bot->IsWithinDist(bot->GetMaster(), 30.0f) && bot->IsWithinDist(bot->GetMaster(), 1000.0f)))
                 {
                     // Master is too far, stop drinking
                     bot->RemoveAurasDueToSpell(24355);

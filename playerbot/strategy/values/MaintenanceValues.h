@@ -157,7 +157,7 @@ namespace ai
             if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.followDistance) && master->IsMoving())
                 return false;
 
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup()->IsRaidGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.raidFollowDistance) && master->IsMoving())
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && bot->GetGroup()->IsRaidGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.raidFollowDistance) && master->IsMoving())
                 return false;
 
             return true;
@@ -180,7 +180,7 @@ namespace ai
             if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.followDistance) && master->IsMoving())
                 return false;
 
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup()->IsRaidGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.raidFollowDistance) && master->IsMoving())
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && bot->GetGroup()->IsRaidGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.raidFollowDistance) && master->IsMoving())
                 return false;
 
             return true;

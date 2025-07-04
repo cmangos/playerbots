@@ -1431,7 +1431,7 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
 
             if (AI_VALUE2(bool, "action useful", "hearthstone") && bot->IsAlive())
             {
-                TravelNode* homeNode = sTravelNodeMap.getNode(AI_VALUE(WorldPosition, "home bind"), nullptr, 10.0f);
+                TravelNode* homeNode = sTravelNodeMap.getNode(AI_VALUE(WorldPosition, "home bind"), nullptr, 50.0f);
                 if (homeNode)
                 {
                     PortalNode* portNode = new PortalNode(start);

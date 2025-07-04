@@ -142,7 +142,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     focusQuestTravelList focusList = AI_VALUE(focusQuestTravelList, "focus travel target");
 
     GuidPosition masterRpgTarget;
-    if (requester && ai->IsSafe(requester))
+    if (requester && ai->IsSafe(requester) && requester->GetPlayerbotAI())
     {
         Player* player = requester;
         masterRpgTarget = PAI_VALUE(GuidPosition, "rpg target");

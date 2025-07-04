@@ -140,4 +140,50 @@ namespace ai
         CanFightBossValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can fight boss") {}
         virtual bool Calculate() { return bot->GetGroup() && bot->GetGroup()->GetMembersCount() > 3 && AI_VALUE2(bool, "group and", "can fight equal") && AI_VALUE2(bool, "group and", "following party") && !AI_VALUE2(bool, "group or", "should sell,can sell"); };
     };        
+
+    class ShouldDrinkValue : public BoolCalculatedValue
+    {
+    public:
+        ShouldDrinkValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should drink", 2) {}
+        virtual bool Calculate()
+        {
+            Player* master = ai->GetMaster();
+            if (!master)
+                return true;
+
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance))
+                return true;
+
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.followDistance) && master->IsMoving())
+                return false;
+
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup()->IsRaidGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.raidFollowDistance) && master->IsMoving())
+                return false;
+
+            return true;
+        }
+    };
+
+    class ShouldEatValue : public BoolCalculatedValue
+    {
+    public:
+        ShouldEatValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should eat", 2) {}
+        virtual bool Calculate()
+        {
+            Player* master = ai->GetMaster();
+            if (!master)
+                return true;
+
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance + sPlayerbotAIConfig.followDistance))
+                return true;
+
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.followDistance) && master->IsMoving())
+                return false;
+
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup()->IsRaidGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.raidFollowDistance) && master->IsMoving())
+                return false;
+
+            return true;
+        }
+    };
 }

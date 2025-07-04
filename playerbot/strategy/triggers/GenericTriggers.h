@@ -507,7 +507,6 @@ namespace ai
         RandomTrigger(PlayerbotAI* ai, std::string name, int probability = 7) : Trigger(ai, name)
         {
             this->probability = probability;
-            lastCheck = time(0);
             checkAgainInSameTick = true;             
         }
 
@@ -515,7 +514,6 @@ namespace ai
 
     protected:
         int probability;
-        time_t lastCheck;
     };
 
     class TimeTrigger : public Trigger

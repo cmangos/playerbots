@@ -188,8 +188,8 @@ bool RequiresItemToUse(const ItemPrototype* itemProto, PlayerbotAI* ai, Player* 
     if (!ai->HasCheat(BotCheatMask::item))
         return true;
 
-    // Exception items                                  Jujus                                            Holy water
-    const std::unordered_set<uint32> itemExceptions = { 12450, 12451, 12455, 12457, 12458, 12459, 12460, 13180, 7189 };
+    // Exception items                                  Jujus                                            Holy water    Scourgestone
+    const std::unordered_set<uint32> itemExceptions = { 12450, 12451, 12455, 12457, 12458, 12459, 12460, 13180, 7189 , 40582 };
     if (itemExceptions.find(itemProto->ItemId) != itemExceptions.end())
         return false;
 

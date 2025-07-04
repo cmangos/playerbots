@@ -103,6 +103,24 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
         {
             purpose |= (uint32)TravelDestinationPurpose::Grind;
         }
+        else  //Added these specifically because dk start mobs drop no money but have sellable loot.
+        {
+            for (auto& itemId : GAI_VALUE2(std::list<uint32>, "entry loot list", entry))
+            {
+                const ItemPrototype* proto = sObjectMgr.GetItemPrototype(itemId);
+                if (!proto)
+                    continue;
+
+                if (!proto->SellPrice)
+                    continue;
+
+                if (proto->Quality >= ITEM_QUALITY_RARE)
+                    continue;
+
+                purpose |= (uint32)TravelDestinationPurpose::Grind;
+                break;
+            }
+        }
 
         if (cInfo->Rank == 3 || cInfo->Rank == 4 || cInfo->Rank == 1)
         {

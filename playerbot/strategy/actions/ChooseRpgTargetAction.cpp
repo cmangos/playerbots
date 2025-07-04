@@ -312,20 +312,20 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         //If we already had a different target with a relevance above 1 and this only has 1 (trivial) skip this target.
         if (!hasGoodRelevance || relevance > 1)
         {
-            targets[guidP] = relevance;
-
+            float newRelevance = relevance;
+            
             //Scale relevance based on distance
             hasGoodRelevance = true;
-            int32 mod;
-            if (!isTravelTarget || focusList.empty())
-                mod = guidP.fDist(bot);
-            else
-                mod = 0;
 
-            if (mod > 60 + targets[guidP])
-                targets[guidP] = 2;
-            else
-                targets[guidP] += 60 - mod;
+            if (!isTravelTarget || focusList.empty())
+            {
+                newRelevance = newRelevance / (1 + sqrt(guidP.sqDistance(bot))/30);
+
+                if (relevance > 1.0f && newRelevance <= 1.0f)
+                    newRelevance = 1.01f;
+            }
+
+            targets[guidP] = newRelevance;
         }
 
         checked++;

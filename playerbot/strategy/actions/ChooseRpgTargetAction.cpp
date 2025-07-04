@@ -17,7 +17,7 @@ using namespace ai;
 bool ChooseRpgTargetAction::HasSameTarget(ObjectGuid guid, uint32 max, std::list<ObjectGuid>& nearGuids)
 {
     if (ai->HasRealPlayerMaster())
-        return 0;
+        return false;
 
     uint32 num = 0;
 
@@ -42,10 +42,10 @@ bool ChooseRpgTargetAction::HasSameTarget(ObjectGuid guid, uint32 max, std::list
         num++;
 
         if (num >= max)
-            break;
+            return true;
     }
 
-    return num;
+    return false;
 }
 
 
@@ -142,7 +142,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     focusQuestTravelList focusList = AI_VALUE(focusQuestTravelList, "focus travel target");
 
     GuidPosition masterRpgTarget;
-    if (requester && requester->GetPlayerbotAI() && requester->GetMapId() == bot->GetMapId() && !requester->IsBeingTeleported())
+    if (requester && ai->IsSafe(requester))
     {
         Player* player = requester;
         masterRpgTarget = PAI_VALUE(GuidPosition, "rpg target");
@@ -201,7 +201,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         out << "Rpg: found ";
         out << std::to_string(possibleTargets.size()) + " targets,";
         out << std::to_string(possibleObjects.size()) + " objects,";
-        out << std::to_string(possiblePlayers.size()) + " player.";
+        out << std::to_string(possiblePlayers.size()) + " players.";
         out << " Of which " + std::to_string(ignored) + " are ignored.";
         ai->TellPlayerNoFacing(requester, out);
     }
@@ -235,7 +235,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
         found++;
 
-        bool isTravelTarget = guidP.GetEntry() == travelTarget->GetEntry();
+        bool isTravelTarget = (guidP.GetEntry() == travelTarget->GetEntry());
 
         //Stop to save peformance.
         if (checked >= maxCheck && !isTravelTarget)
@@ -310,7 +310,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
         }
 
         //If we already had a different target with a relevance above 1 and this only has 1 (trivial) skip this target.
-        if (!hasGoodRelevance || relevance > 1)
+        if (!hasGoodRelevance || relevance > 1.0f)
         {
             float newRelevance = relevance;
             
@@ -336,11 +336,15 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
     for (auto it = begin(targets); it != end(targets);)
     {        
+        bool shouldErase = false;
         if (it->second == 0) //Remove empty targets.
-            it = targets.erase(it);
+            shouldErase = true;
         else if (hasGoodRelevance && it->second <= 1.0)  //Remove useless targets if there's any good ones.
-            it = targets.erase(it);
+            shouldErase = true;
         else if (!hasGoodRelevance && requester && requester != bot && (!masterRpgTarget || it->first != masterRpgTarget)) //Remove useless targets if it's not masters target. This prevents group members running all over the place to emote with random npc's which aren't near the master.
+            shouldErase = true;
+
+        if (shouldErase)
             it = targets.erase(it);
         else
             ++it;
@@ -355,7 +359,6 @@ bool ChooseRpgTargetAction::Execute(Event& event)
             out << "found: no targets, " << checked << " checked.";
             ai->TellPlayerNoFacing(requester, out);
         }
-        sLog.outDetail("%s can't choose RPG target: all %zu are not available", bot->GetName(), possibleTargets.size());
         RESET_AI_VALUE(std::set<ObjectGuid>&,"ignore rpg target");
         RESET_AI_VALUE(GuidPosition, "rpg target");
         return false;

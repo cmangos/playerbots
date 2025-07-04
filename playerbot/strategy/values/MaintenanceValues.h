@@ -151,10 +151,13 @@ namespace ai
             if (!master)
                 return true;
 
-            if (!bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance))
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance))
                 return true;
 
-            if (!bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance) && master->IsMoving())
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.followDistance) && master->IsMoving())
+                return false;
+
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup()->IsRaidGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.raidFollowDistance) && master->IsMoving())
                 return false;
 
             return true;
@@ -171,10 +174,13 @@ namespace ai
             if (!master)
                 return true;
 
-            if (!bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance))
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance + sPlayerbotAIConfig.followDistance))
                 return true;
 
-            if (!bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance) && master->IsMoving())
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.followDistance) && master->IsMoving())
+                return false;
+
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup()->IsRaidGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.raidFollowDistance) && master->IsMoving())
                 return false;
 
             return true;

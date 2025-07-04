@@ -845,7 +845,7 @@ AiPlayerbot.RpgDistance = 200
 #AiPlayerbot.ProximityDistance = 20.0
 #Distances to limit bots eating/drinking while following a master.
 #Inside this range eating/drinking is cut short or prevented to stay near master.
-#AiPlayerbot.EatDrinkMinDistance = 10.0
+#AiPlayerbot.EatDrinkMinDistance = 5.0
 #AiPlayerbot.EatDrinkMaxDistance = 1000.0
 
 

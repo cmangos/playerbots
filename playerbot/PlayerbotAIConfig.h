@@ -380,6 +380,9 @@ public:
     std::set<uint32> llmBlockedReplyChannels;
     //LM END
 
+    uint32 EatDrinkMinDistance = 10;
+    uint32 EatDrinkMaxDistance = 1000;
+
     std::string GetValue(std::string name);
     void SetValue(std::string name, std::string value);
 

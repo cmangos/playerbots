@@ -760,7 +760,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
         totalRandomBotChars += sAccountMgr.GetCharactersCount(accountId);
     }
-    if (sPlayerbotAIConfig.useFixedClassRaceCounts && !remaining.empty())
+    if (sPlayerbotAIConfig.useFixedClassRaceCounts && sPlayerbotAIConfig.randomBotAutoCreate && !remaining.empty())
     {
 	sLog.outError("Unable to create all requested fixed class/race bots due to account character limits.");
 	sLog.outError("The following class/race combination(s) were left uncreated:");
@@ -784,9 +784,12 @@ void RandomPlayerbotFactory::CreateRandomBots()
     }
 
 
-    if (!botsCreated)
+    if (!sPlayerbotAIConfig.randomBotAutoCreate || !botsCreated)
     {
-        sLog.outString("No new random bots needed accounts: %zu, bots: %d.", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
+	if (!sPlayerbotAIConfig.randomBotAutoCreate)
+            sLog.outString("Random bot auto-creation disabled. Skipping character generation.");
+	else
+	    sLog.outString("No new random bots needed. Accounts: %zu, bots: %d.", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
 
         return;
     }

@@ -769,7 +769,7 @@ bool BroadcastHelper::BroadcastGuildGroupOrRaidInvite(
         }
         else
         {
-            return ai->SayToGuild(BOT_TEXT2("Hey %name I'm raiding in %zone_name do you wan to join me?", placeholders));
+            return ai->SayToGuild(BOT_TEXT2("Hey %name I'm raiding in %zone_name do you want to join me?", placeholders));
         }
     }
     else

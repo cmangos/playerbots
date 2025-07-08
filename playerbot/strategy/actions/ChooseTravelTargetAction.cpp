@@ -279,6 +279,14 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
                     break;
                 }
 
+#ifdef MANGOSBOT_TWO
+                if (GuidPosition* guidP = static_cast<GuidPosition*>(position))
+                {
+                    if (!bot->InSamePhase(guidP->GetPhaseMask()))
+                        continue;
+                }
+#endif
+
                 target->SetTarget(destination, position);
                 hasTarget = true;
                 break;

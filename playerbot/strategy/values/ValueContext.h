@@ -356,6 +356,8 @@ namespace ai
             creators["can fight boss"] = [](PlayerbotAI* ai) { return new CanFightBossValue(ai); };
             creators["should drink"] = [](PlayerbotAI* ai) { return new ShouldDrinkValue(ai); };
             creators["should eat"] = [](PlayerbotAI* ai) { return new ShouldEatValue(ai); };
+            creators["drink duration"] = [](PlayerbotAI* ai) { return new DrinkDurationValue(ai); };
+            creators["eat duration"] = [](PlayerbotAI* ai) { return new EatDurationValue(ai); };
 
             creators["vendor has useful item"] = [](PlayerbotAI* ai) { return new VendorHasUsefulItemValue(ai); };
             creators["craft spells"] = [](PlayerbotAI* ai) { return new CraftSpellsValue(ai); };

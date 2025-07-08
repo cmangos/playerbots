@@ -147,20 +147,38 @@ namespace ai
         ShouldDrinkValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should drink", 2) {}
         virtual bool Calculate()
         {
+            if (!bot->HasMana())
+                return false;
+
+            if (AI_VALUE2(uint8, "mana", "self target") >= 85)
+                return false;
+
             Player* master = ai->GetMaster();
             if (!master)
                 return true;
 
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance))
+            if (!bot->GetGroup())
                 return true;
 
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.followDistance) && master->IsMoving())
-                return false;
+            if (!ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+                return true;
 
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && bot->GetGroup()->IsRaidGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.raidFollowDistance) && master->IsMoving())
-                return false;
+            if (!bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance))
+                return true;
 
-            return true;
+            if (!master->IsMoving())
+                return true;
+
+            float minDistance = sPlayerbotAIConfig.EatDrinkMinDistance;
+            if (!bot->GetGroup()->IsRaidGroup())
+                minDistance += sPlayerbotAIConfig.followDistance;
+            else
+                minDistance += sPlayerbotAIConfig.raidFollowDistance;
+            
+            if (bot->IsWithinDist(master, minDistance))
+                return true;
+
+            return false;
         }
     };
 
@@ -170,20 +188,123 @@ namespace ai
         ShouldEatValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should eat", 2) {}
         virtual bool Calculate()
         {
+            if (AI_VALUE2(uint8, "health", "self target") >= sPlayerbotAIConfig.lowHealth)
+                return false;
+
             Player* master = ai->GetMaster();
             if (!master)
                 return true;
 
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance + sPlayerbotAIConfig.followDistance))
+            if (!bot->GetGroup())
                 return true;
 
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.followDistance) && master->IsMoving())
-                return false;
+            if (!ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+                return true;
 
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && bot->GetGroup() && bot->GetGroup()->IsRaidGroup() && !bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMinDistance + sPlayerbotAIConfig.raidFollowDistance) && master->IsMoving())
-                return false;
+            if (!bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance))
+                return true;
 
-            return true;
+            if (!master->IsMoving())
+                return true;
+
+            float minDistance = sPlayerbotAIConfig.EatDrinkMinDistance;
+            if (!bot->GetGroup()->IsRaidGroup())
+                minDistance += sPlayerbotAIConfig.followDistance;
+            else
+                minDistance += sPlayerbotAIConfig.raidFollowDistance;
+
+            if (bot->IsWithinDist(master, minDistance))
+                return true;
+
+            return false;
+        }
+    };
+
+    class DrinkDurationValue : public FloatCalculatedValue
+    {
+    public:
+        DrinkDurationValue(PlayerbotAI* ai) : FloatCalculatedValue(ai, "drink duration") {}
+        virtual float Calculate() override
+        {
+            Player* master = ai->GetMaster();
+
+            float mpMissingPct = 100.0f - bot->GetPowerPercent();
+            float multiplier = bot->InBattleGround() ? 20000.0f : 27000.0f;
+            float drinkDuration = multiplier * (mpMissingPct / 100.0f);
+
+            if (!master)
+                return drinkDuration;
+
+            if (!bot->GetGroup())
+                return drinkDuration;
+
+            if (!ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+                return drinkDuration;
+
+            float minDistance = sPlayerbotAIConfig.followDistance;
+
+            if (bot->GetGroup()->IsRaidGroup())
+                minDistance = sPlayerbotAIConfig.raidFollowDistance;
+
+            if (!master->IsMoving())
+                minDistance += sPlayerbotAIConfig.EatDrinkMinDistance;
+
+            if (bot->IsWithinDist(master, minDistance))
+                return drinkDuration;
+
+            float masterOrientation = master->GetOrientation();
+            float angleToBot = master->GetAngle(bot);
+            float angleDiff = fabs(masterOrientation - angleToBot);
+
+            if (angleDiff > M_PI / 2 && angleDiff < 3 * M_PI / 2)
+            {
+                drinkDuration *= 0.25f;
+            }
+            return drinkDuration;
+        }
+    };
+
+    class EatDurationValue : public FloatCalculatedValue
+    {
+    public:
+        EatDurationValue(PlayerbotAI* ai) : FloatCalculatedValue(ai, "eat duration") {}
+        virtual float Calculate() override
+        {
+            Player* master = ai->GetMaster();
+
+            float hpMissingPct = 100.0f - bot->GetHealthPercent();
+            float multiplier = bot->InBattleGround() ? 20000.0f : 27000.0f;
+            float eatDuration = multiplier * (hpMissingPct / 100.0f);
+          
+            if (!master)
+                return eatDuration;
+
+            if (!bot->GetGroup())
+                return eatDuration;
+
+            if (!ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+                return eatDuration;
+
+            float minDistance = sPlayerbotAIConfig.followDistance;
+
+            if (bot->GetGroup()->IsRaidGroup())
+                minDistance = sPlayerbotAIConfig.raidFollowDistance;
+
+            if (!master->IsMoving())
+                minDistance += sPlayerbotAIConfig.EatDrinkMinDistance;
+
+            if (bot->IsWithinDist(master, minDistance))
+                return eatDuration;
+
+            float masterOrientation = master->GetOrientation();
+            float angleToBot = master->GetAngle(bot);
+            float angleDiff = fabs(masterOrientation - angleToBot);
+
+            if (angleDiff > M_PI / 2 && angleDiff < 3 * M_PI / 2)
+            {
+                eatDuration *= 0.25f;
+            }
+            return eatDuration;
         }
     };
 }

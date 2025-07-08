@@ -43,6 +43,9 @@ void LogAnalysis::AnalysePid()
 
         if (tokens.size() < 7)
             continue;
+
+        if (tokens.size() > 50)//Multiple servers running
+            continue;
         
         if (tokens[0] == "Timestamp") //Header line
             continue;

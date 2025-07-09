@@ -493,7 +493,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
             } while (results->NextRow());
         }
 
-        CharacterDatabase.Execute("DELETE FROM ai_playerbot_random_bots");
+        CharacterDatabase.Execute("DELETE FROM ai_playerbot_random_bots WHERE bot NOT IN (SELECT guid FROM characters)");
         sLog.outString("Random bot characters deleted");
     }
 

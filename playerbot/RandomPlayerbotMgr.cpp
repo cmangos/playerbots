@@ -944,8 +944,15 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
             {
                 for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
                 {
-                    if (sPlayerbotAIConfig.classRaceProbability[cls][race])
-                        classRaceAllowed[cls][race] = ((sPlayerbotAIConfig.classRaceProbability[cls][race] * maxAllowedBotCount / sPlayerbotAIConfig.classRaceProbabilityTotal) + 1) * (noCriteria+1);
+                    if (sPlayerbotAIConfig.useFixedClassRaceCounts)
+                    {
+                        classRaceAllowed[cls][race] = sPlayerbotAIConfig.fixedClassRaceCounts[{cls, race}];
+                    }
+                    else
+                    {
+                        if (sPlayerbotAIConfig.classRaceProbability[cls][race])
+                            classRaceAllowed[cls][race] = ((sPlayerbotAIConfig.classRaceProbability[cls][race] * maxAllowedBotCount / sPlayerbotAIConfig.classRaceProbabilityTotal) + 1) * (noCriteria + 1);
+                    }
                 }
             }
 
@@ -1069,13 +1076,23 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
                 {
                     for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
                     {
-                        int32 moreWanted = classRaceAllowed[cls][race];
-                        if (moreWanted > 0)
-                        {
-                            int32 totalWanted = ((sPlayerbotAIConfig.classRaceProbability[cls][race] * maxAllowedBotCount / sPlayerbotAIConfig.classRaceProbabilityTotal) + 1);
-                            float percentage = float(sPlayerbotAIConfig.classRaceProbability[cls][race]) * 100.0f / sPlayerbotAIConfig.classRaceProbabilityTotal;
-                            sLog.outError("%d %s %ss needed to get %3.2f%% of total but only %d found.", totalWanted, chat.formatRace(race).c_str(), chat.formatClass(cls).c_str(), percentage, totalWanted - moreWanted);
-                        }
+
+                            int32 moreWanted = classRaceAllowed[cls][race];
+                            if (moreWanted > 0)
+                            {
+                                if (sPlayerbotAIConfig.useFixedClassRaceCounts)
+                                {
+                                    int32 totalWanted = sPlayerbotAIConfig.fixedClassRaceCounts[{cls, race}];
+                                    sLog.outError("%d %s %ss needed but only %d found.", totalWanted, chat.formatRace(race).c_str(), chat.formatClass(cls).c_str(), totalWanted - moreWanted);
+                                }
+                                else
+                                {
+                                    int32 totalWanted = ((sPlayerbotAIConfig.classRaceProbability[cls][race] * maxAllowedBotCount / sPlayerbotAIConfig.classRaceProbabilityTotal) + 1);
+                                    float percentage = float(sPlayerbotAIConfig.classRaceProbability[cls][race]) * 100.0f / sPlayerbotAIConfig.classRaceProbabilityTotal;
+                                    sLog.outError("%d %s %ss needed to get %3.2f%% of total but only %d found.", totalWanted, chat.formatRace(race).c_str(), chat.formatClass(cls).c_str(), percentage, totalWanted - moreWanted);
+                                }
+                            }
+                        
                     }
                 }
 
@@ -1088,7 +1105,7 @@ uint32 RandomPlayerbotMgr::AddRandomBots()
         if (currentAllowedBotCount)
             currentAllowedBotCount = std::max(int64(GetEventValue(0, "bot_count")) - int64(currentBots.size()), int64(0));
 
-        if(currentAllowedBotCount)
+        if(currentAllowedBotCount && sPlayerbotAIConfig.randomBotAutoCreate && !sPlayerbotAIConfig.useFixedClassRaceCounts)
 #ifdef MANGOSBOT_TWO
             sLog.outError("Not enough random bot accounts available. Need %d more!!", (uint32)ceil(currentAllowedBotCount / 10));
 #else

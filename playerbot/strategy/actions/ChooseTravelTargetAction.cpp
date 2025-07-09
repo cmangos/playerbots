@@ -424,7 +424,7 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
         if (groupTarget->IsForced())
             continue;
 
-        if (!groupTarget->GetDestination()->IsActive(player, PlayerTravelInfo(player)))
+        if (!groupTarget->GetDestination()->IsActive(player, PlayerTravelInfo(player)) || !groupTarget->IsConditionsActive())
         {
             player->GetPlayerbotAI()->TellDebug(requester,"Target is cooling down because a group member found it to be inactive.", "debug travel");
             groupTarget->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);

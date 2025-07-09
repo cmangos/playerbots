@@ -83,6 +83,32 @@ uint32 MaxGearRepairCostValue::Calculate()
     return TotalCost;
 }
 
+uint32 MinRepairCostValue::Calculate()
+{
+    std::vector<uint8> importantSlots = { EQUIPMENT_SLOT_MAINHAND , EQUIPMENT_SLOT_RANGED, EQUIPMENT_SLOT_OFFHAND };
+    for (uint32 slot : importantSlots)
+    {
+        uint16 pos = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
+        Item* item = bot->GetItemByPos(pos);
+
+        if (!item)
+            continue;
+
+        uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+        if (!maxDurability)
+            continue;
+
+        uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+        if (curDurability > 0)
+            continue;
+
+        return RepairCost(item); //The cost to repair the most important broken item.
+    }
+
+    return RepairCostValue::Calculate();
+}
+
 
 
 uint32 MoneyNeededForValue::Calculate()

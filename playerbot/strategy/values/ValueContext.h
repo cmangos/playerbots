@@ -255,6 +255,7 @@ namespace ai
             creators["lowest durability"] = [](PlayerbotAI* ai) { return new LowestDurabilityValue(ai); };
             creators["max repair cost"] = [](PlayerbotAI* ai) { return new MaxGearRepairCostValue(ai); };
             creators["repair cost"] = [](PlayerbotAI* ai) { return new RepairCostValue(ai); };
+            creators["min repair cost"] = [](PlayerbotAI* ai) { return new MinRepairCostValue(ai); };
             creators["train cost"] = [](PlayerbotAI* ai) { return new TrainCostValue(ai); };
             creators["enemy healer target"] = [](PlayerbotAI* ai) { return new EnemyHealerTargetValue(ai); };
             creators["snare target"] = [](PlayerbotAI* ai) { return new SnareTargetValue(ai); };

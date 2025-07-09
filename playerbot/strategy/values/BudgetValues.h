@@ -41,6 +41,14 @@ namespace ai
         virtual uint32 Calculate();
     };
 
+    class MinRepairCostValue : public RepairCostValue
+    {
+    public:
+        MinRepairCostValue(PlayerbotAI* ai) : RepairCostValue(ai, "min repair cost", checkInterval) {}
+
+        virtual uint32 Calculate();
+    };
+
     class MoneyNeededForValue : public Uint32CalculatedValue, public Qualified
     {
     public:

@@ -843,6 +843,11 @@ AiPlayerbot.ShootDistance = 26.0
 #AiPlayerbot.AoeRadius = 10
 AiPlayerbot.RpgDistance = 200
 #AiPlayerbot.ProximityDistance = 20.0
+#Distances to limit bots eating/drinking while following a master.
+#Inside this range eating/drinking is cut short or prevented to stay near master.
+#AiPlayerbot.EatDrinkMinDistance = 5.0
+#AiPlayerbot.EatDrinkMaxDistance = 1000.0
+
 
 # Max distance bot allowed to roam freely around master
 #AiPlayerbot.MaxFreeMoveDistance = 150.0

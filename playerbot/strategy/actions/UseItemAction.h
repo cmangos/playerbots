@@ -628,9 +628,7 @@ namespace ai
                 bot->addUnitState(UNIT_STAND_STATE_SIT);
                 ai->InterruptSpell();
 
-                const float mpMissingPct = 100.0f - bot->GetPowerPercent();
-                const float multiplier = bot->InBattleGround() ? 20000.0f : 27000.0f;
-                const float drinkDuration = multiplier * (mpMissingPct / 100.0f);
+                float drinkDuration = AI_VALUE(float, "drink duration");
 
                 const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(24355);
                 if (!pSpellInfo)
@@ -643,7 +641,8 @@ namespace ai
                 bot->RemoveSpellCooldown(*pSpellInfo);
 
                 // Eat and drink at the same time
-                if (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.lowHealth)
+
+                if (AI_VALUE(bool, "should eat"))
                 {
                     const SpellEntry* pSpellInfo2 = sServerFacade.LookupSpellInfo(24005);
                     if (pSpellInfo2)
@@ -661,7 +660,7 @@ namespace ai
 
         bool isUseful() override
         {
-            return UseAction::isUseful() && bot->HasMana() && (AI_VALUE2(uint8, "mana", "self target") < 85);
+            return UseAction::isUseful() && AI_VALUE(bool, "should drink");
         }
 
         bool isPossible() override
@@ -703,9 +702,7 @@ namespace ai
                 bot->addUnitState(UNIT_STAND_STATE_SIT);
                 ai->InterruptSpell();
 
-                const float hpMissingPct = 100.0f - bot->GetHealthPercent();
-                const float multiplier = bot->InBattleGround() ? 20000.0f : 27000.0f;
-                const float eatDuration = multiplier * (hpMissingPct / 100.0f);
+                float eatDuration = AI_VALUE(float, "eat duration");
 
                 const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(24005);
                 if (!pSpellInfo)
@@ -718,7 +715,7 @@ namespace ai
                 bot->RemoveSpellCooldown(*pSpellInfo);
 
                 // Eat and drink at the same time
-                if (bot->HasMana() && (AI_VALUE2(uint8, "mana", "self target") < 85))
+                if (AI_VALUE(bool, "should drink"))
                 {
                     const SpellEntry* pSpellInfo2 = sServerFacade.LookupSpellInfo(24355);
                     if (pSpellInfo2)
@@ -736,7 +733,7 @@ namespace ai
 
         bool isUseful() override
         {
-            return UseAction::isUseful() && (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.lowHealth);
+            return UseAction::isUseful() && AI_VALUE(bool, "should eat");
         }
 
         bool isPossible() override

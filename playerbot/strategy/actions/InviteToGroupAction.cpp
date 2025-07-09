@@ -264,7 +264,7 @@ namespace ai
                 continue;
 
 #ifdef MANGOSBOT_TWO
-            if (player->GetPhaseMask() != bot->GetPhaseMask())
+            if (player->InSamePhase(bot->GetPhaseMask()))
                 continue;
 #endif
 

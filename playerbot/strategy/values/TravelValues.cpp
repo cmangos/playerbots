@@ -105,18 +105,19 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
         }
         else  //Added these specifically because dk start mobs drop no money but have sellable loot.
         {
-            for (auto& itemId : GAI_VALUE2(std::list<uint32>, "entry loot list", entry))
+            switch (entry)
             {
-                const ItemPrototype* proto = sObjectMgr.GetItemPrototype(itemId);
-                if (!proto)
-                    continue;
-
-                if (!proto->SellPrice)
-                    continue;
-
-                if (proto->Quality >= ITEM_QUALITY_RARE)
-                    continue;
-
+            case 29080: //Scarlet Champion
+            case 29029: //Scarlet Inquisitor
+            case 29000: //Scarlet Commander Rodrick
+            case 28940: //Scarlet Crusader
+            case 28939: //Scarlet Preacher
+            case 28936: //Scarlet Commander
+            case 28898: //Scarlet Captain
+            case 28896: //Scarlet Infantryman
+            case 28895: //Scarlet Medic
+            case 28892: //Scarlet Peasant
+            case 28610: //Scarlet Marksman
                 purpose |= (uint32)TravelDestinationPurpose::Grind;
                 break;
             }

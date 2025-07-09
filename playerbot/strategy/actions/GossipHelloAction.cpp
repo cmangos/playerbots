@@ -3,6 +3,8 @@
 #include "GossipHelloAction.h"
 
 #include "playerbot/ServerFacade.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+
 
 using namespace ai;
 
@@ -41,6 +43,16 @@ bool GossipHelloAction::Execute(Event& event)
 	int menuToSelect = -1;
     if (event.getSource().find("rpg action") == 0)
     {
+        Creature* pCreature = bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
+
+        if (pCreature)
+        {
+            if (!sScriptDevAIMgr.OnGossipHello(bot, pCreature))
+            {
+                bot->PrepareGossipMenu(pCreature, pCreature->GetDefaultGossipMenuId());
+            }
+        }
+
         ProcessGossip(requester, guid, -1);
     }
 	else if (text.empty())
@@ -121,24 +133,26 @@ bool GossipHelloAction::ProcessGossip(Player* requester, ObjectGuid creatureGuid
 
     bool noFeedback = (menuToSelect == -1);
 
-    if (menuToSelect == -1)
+    int actualMenuToSelect = menuToSelect;
+
+    if (actualMenuToSelect == -1)
     {
-        menuToSelect = urand(0, menu.MenuItemCount() - 1);
+        actualMenuToSelect = urand(0, menu.MenuItemCount() - 1);
     }
 
-    if (menuToSelect >= 0 && (unsigned int)menuToSelect >= menu.MenuItemCount())
+    if (actualMenuToSelect >= 0 && (unsigned int)actualMenuToSelect >= menu.MenuItemCount())
     {
         ai->TellError(requester, "Unknown gossip option");
         return false;
     }
-    GossipMenuItem const& item = menu.GetItem(menuToSelect);
+    GossipMenuItem const& item = menu.GetItem(actualMenuToSelect);
     WorldPacket p;
     std::string code;
     p << creatureGuid;
 #ifdef MANGOSBOT_ZERO
-    p << menuToSelect;
+    p << actualMenuToSelect;
 #else
-    p << menu.GetMenuId() << menuToSelect;
+    p << menu.GetMenuId() << actualMenuToSelect;
 #endif
     p << code;
     bot->GetSession()->HandleGossipSelectOptionOpcode(p);

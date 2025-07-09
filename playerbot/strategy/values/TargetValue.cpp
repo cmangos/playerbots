@@ -114,6 +114,12 @@ WorldPosition HomeBindValue::Calculate()
     return WorldPosition(mapId, x, y, z, 0.0);
 }
 
+std::string HomeBindValue::Format()
+{
+    WorldPosition pos = this->Calculate();
+    return chat->formatWorldPosition(pos);
+}
+
 void PullTargetValue::Set(Unit* unit)
 {
     guid = unit ? unit->GetObjectGuid() : ObjectGuid();

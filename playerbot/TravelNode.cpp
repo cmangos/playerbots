@@ -1463,6 +1463,9 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
             if (!bot->IsAlive())
                 continue;
 
+            if (bot->IsInCombat())
+                continue;
+
             if (!bot->HasSpell(spellId))
                 continue;
 

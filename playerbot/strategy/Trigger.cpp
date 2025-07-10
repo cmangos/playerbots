@@ -19,7 +19,7 @@ Event Trigger::Check()
 
 	if (IsActive())
 	{
-		triggered = !checkAgainInSameTick;
+		triggered = true;
 		Event event(getName());
 		return event;
 	}

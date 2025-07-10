@@ -3392,6 +3392,9 @@ void RandomPlayerbotMgr::HandleCommand(uint32 type, const std::string& text, Pla
 
 void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 {
+    if (player->isRealPlayer() && player->GetPlayerbotAI())
+        player->GetSession()->SetOffline(); //Prevent groupkick
+
      DisablePlayerBot(player->GetGUIDLow());
 
      ForEachPlayerbot([&](Player* bot)

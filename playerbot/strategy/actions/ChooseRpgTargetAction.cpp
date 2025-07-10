@@ -444,7 +444,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
 
     //Save the current rpg target and the ignorelist.
     SET_AI_VALUE(GuidPosition, "rpg target", guidP);
-    SET_AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target", ignoreList);
+    ignoreList.clear();
 
     return true;
 }

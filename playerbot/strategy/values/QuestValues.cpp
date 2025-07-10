@@ -554,12 +554,16 @@ bool NeedQuestRewardValue::Calculate()
 bool NeedQuestObjectiveValue::Calculate()
 {
 	uint32 questId = getMultiQualifierInt(getQualifier(),0,",");
-	uint32 objective = getMultiQualifierInt(getQualifier(), 1, ",");
 	if (!bot->IsActiveQuest(questId))
 		return false;
 
-	if (bot->GetQuestStatus(questId) != QUEST_STATUS_INCOMPLETE)
+	QuestStatusData& questStatus = bot->getQuestStatusMap().at(questId);
+
+	if (questStatus.m_status != QUEST_STATUS_INCOMPLETE)
 		return false;
+
+	if (getQualifier().find(",") == std::string::npos) //Status of entire quest.
+		return true;
 
 #ifdef MANGOSBOT_TWO        
 		switch (questId) {
@@ -568,9 +572,9 @@ bool NeedQuestObjectiveValue::Calculate()
 		}
 #endif
 
-	QuestStatusData& questStatus = bot->getQuestStatusMap()[questId];
-
 	Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+
+	uint32 objective = getMultiQualifierInt(getQualifier(), 1, ",");
 
 	uint32  reqCount = pQuest->ReqItemCount[objective];
 	uint32  hasCount = questStatus.m_itemcount[objective];

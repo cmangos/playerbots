@@ -406,7 +406,7 @@ ItemUsage ItemUsageValue::Calculate()
     }
 
     //VENDOR/AH
-    if (proto->SellPrice > 0)
+    if (proto->SellPrice > 0 || GetBotAHSellMinPrice(proto) > 0)
     {
         ItemUsage sellUsage = ItemUsage::ITEM_USAGE_VENDOR;
 

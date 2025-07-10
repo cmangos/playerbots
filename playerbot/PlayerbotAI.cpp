@@ -6278,6 +6278,66 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
 
         if (target->GetDestination()) {
             out << "Target: " << target->GetDestination()->GetTitle();
+        }
+
+        if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_NONE)
+        {
+            out << "\nStatus: ";
+            if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_READY)
+                out << "ready";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
+                out << "preparing";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
+                out << (target->IsForced() ? "forced traveling" : "traveling");
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
+                out << "working";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
+                out << "cooldown";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
+                out << "expired";
+
+            if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
+                out << " [for " << (target->GetTimeLeft() / 1000) << "s]";
+
+            if (target->GetRetryCount(true) || target->GetRetryCount(false))
+                out << "(retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
+
+            if (target->GetConditions().size())
+            {
+                out << "\nConditions: ";
+
+                for (auto& condition : target->GetConditions())
+                {
+                    AiObjectContext* context = GetAiObjectContext();
+                    out << condition;
+                    if (AI_VALUE(bool, condition))
+                        out << " (true)";
+                    else
+                        out << " (false)";
+
+                    if (condition != target->GetConditions().back())
+                        out << ", ";
+                }
+            }
+        }
+
+        return out.str();
+    }
+    else if (command == "travel detail")
+    {
+        std::ostringstream out;
+
+        TravelTarget* target = GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
+
+        if (target->GetGroupmember() && target->GetGroupmember().GetPlayer())
+            out << target->GetGroupmember().GetPlayer()->GetName() << "'s ";
+
+        if (target->GetDestination()) {
+            out << target->GetDestination()->GetShortName() << " travel target";
+
+            out << "\nTarget: " << target->GetDestination()->GetTitle();
+
+            out << "\nDistance " << target->GetDestination()->DistanceTo(bot) << "y";
 
             if (*target->GetPosition())
             {
@@ -6286,44 +6346,44 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
             }
         }
         
-        if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_NONE)
-            return out.str();
-        
-        out << "\nStatus: ";
-        if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_READY)
-            out << "ready";        
-        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
-            out << "preparing";
-        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
-            out << (target->IsForced() ? "forced traveling" : "traveling");
-        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
-            out << "working";
-        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
-            out << "cooldown";
-        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << "expired";
-
-        if(target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << " [for " << (target->GetTimeLeft()/1000) << "s]";
-
-        if(target->GetRetryCount(true) || target->GetRetryCount(false))
-            out << "(retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
-
-        if (target->GetConditions().size())
+        if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_NONE)
         {
-            out << "\nConditions: ";
+            out << "\nStatus: ";
+            if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_READY)
+                out << "ready";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
+                out << "preparing";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
+                out << (target->IsForced() ? "forced traveling" : "traveling");
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
+                out << "working";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
+                out << "cooldown";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
+                out << "expired";
 
-            for (auto& condition : target->GetConditions())
+            if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
+                out << " [for " << (target->GetTimeLeft() / 1000) << "s]";
+
+            if (target->GetRetryCount(true) || target->GetRetryCount(false))
+                out << "(retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
+
+            if (target->GetConditions().size())
             {
-                AiObjectContext* context = GetAiObjectContext();
-                out << condition;
-                if (AI_VALUE(bool, condition))
-                    out << " (true)";
-                else
-                    out << " (false)";
+                out << "\nConditions: ";
 
-                if (condition != target->GetConditions().back())
-                    out << ", ";
+                for (auto& condition : target->GetConditions())
+                {
+                    AiObjectContext* context = GetAiObjectContext();
+                    out << condition;
+                    if (AI_VALUE(bool, condition))
+                        out << " (true)";
+                    else
+                        out << " (false)";
+
+                    if (condition != target->GetConditions().back())
+                        out << ", ";
+                }
             }
         }
 

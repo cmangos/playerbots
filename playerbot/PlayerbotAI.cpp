@@ -6300,30 +6300,12 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
                 out << " [for " << (target->GetTimeLeft() / 1000) << "s]";
 
             if (target->GetRetryCount(true) || target->GetRetryCount(false))
-                out << "(retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
-
-            if (target->GetConditions().size())
-            {
-                out << "\nConditions: ";
-
-                for (auto& condition : target->GetConditions())
-                {
-                    AiObjectContext* context = GetAiObjectContext();
-                    out << condition;
-                    if (AI_VALUE(bool, condition))
-                        out << " (true)";
-                    else
-                        out << " (false)";
-
-                    if (condition != target->GetConditions().back())
-                        out << ", ";
-                }
-            }
+                out << "(retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";           
         }
 
         return out.str();
     }
-    else if (command == "travel detail")
+    else if (command == "traveldetail")
     {
         std::ostringstream out;
 
@@ -6337,7 +6319,7 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
 
             out << "\nTarget: " << target->GetDestination()->GetTitle();
 
-            out << "\nDistance " << target->GetDestination()->DistanceTo(bot) << "y";
+            out << "\nDistance " << round(target->GetDestination()->DistanceTo(bot)) << "y";
 
             if (*target->GetPosition())
             {

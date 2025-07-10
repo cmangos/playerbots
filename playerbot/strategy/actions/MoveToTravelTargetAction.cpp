@@ -29,7 +29,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
     WorldPosition location = *target->GetPosition();
     
     Group* group = bot->GetGroup();
-    if (group && !urand(0, 1) && bot == ai->GetGroupMaster())
+    if (ai->IsGroupLeader() && !urand(0, 1) && !bot->IsInCombat())
     {        
         for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
         {

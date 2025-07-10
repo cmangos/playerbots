@@ -41,8 +41,16 @@ bool SmartDestroyItemAction::Execute(Event& event)
     if (bagSpace < 90)
         return false;
 
-    // only destroy grey items if with real player/guild
+    bool onlyDestroyGray = false;
+
     if (ai->HasRealPlayerMaster() || ai->IsInRealGuild())
+        onlyDestroyGray = true;
+
+    if(sPlayerbotAIConfig.IsFreeAltBot(bot) && !ai->HasActivePlayerMaster())
+        onlyDestroyGray = false;
+
+    // only destroy grey items if with real player/guild
+    if (onlyDestroyGray)
     {
         std::set<Item*> items;
         FindItemsToTradeByQualityVisitor visitor(ITEM_QUALITY_POOR, 5);

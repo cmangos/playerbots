@@ -27,7 +27,7 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
 
 	for (auto [entry, questId] : questObjectMgr->GetGOQuestInvolvedRelationsMap())
-		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
+		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestTaker;
 
 	//Quest objectives
 	ObjectMgr::QuestMap const& questMap = sObjectMgr.GetQuestTemplates();

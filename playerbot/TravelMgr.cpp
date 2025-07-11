@@ -243,6 +243,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
         switch (GetQuestId()) {
         case 12680: //Grand Theft Palomino
         case 12687: //Into the Realm of Shadows
+        case 12698: //The Gift That Keeps On Giving
             skipKillableCheck = true;
         }
 #endif
@@ -339,6 +340,13 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
                 return AI_VALUE2(bool, "trigger active", "in vehicle");
             }
             break;
+        case 12698: //The Gift That Keeps On Giving
+            switch (GetEntry())
+            {
+            case 28819: //Scarlet Miner
+                return !bot->FindGuardianWithEntry(28845);
+            case 28658: //Gothic the Harvester
+                return bot->FindGuardianWithEntry(28845);
             }
             break;
         }

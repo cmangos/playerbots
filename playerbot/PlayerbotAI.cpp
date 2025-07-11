@@ -320,16 +320,10 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
     }
 
 #ifdef MANGOSBOT_TWO
-    //Remove gryphon
-    if (!bot->IsMounted() && bot->GetMountID() && !bot->IsTaxiFlying())
-    {
-        Unmount();
-    }
-    //Remove bad mount.
-    if (bot->IsMounted() && !bot->IsTaxiFlying() && AI_VALUE2(uint32, "current mount speed", "self target") == 0)
-    {
-        Unmount();
-    }
+    if (bot->IsPendingDismount())
+        bot->ResolvePendingUnmount();
+    else
+        bot->ResolvePendingMount();
 #endif
 
     // wake up if in combat
@@ -870,10 +864,6 @@ bool PlayerbotAI::CanEnterArea(const AreaTrigger* area)
 
 void PlayerbotAI::Unmount()
 {
-#ifdef MANGOSBOT_TWO
-        bot->ResolvePendingMount();
-#endif
-
     if ((bot->IsMounted() || bot->GetMountID()) && !bot->IsTaxiFlying())
     {
         bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
@@ -887,11 +877,6 @@ void PlayerbotAI::Unmount()
             bot->GetMotionMaster()->MoveFall();
         }
     }
-
-#ifdef MANGOSBOT_TWO
-    if(bot->IsPendingDismount())
-        bot->ResolvePendingUnmount();
-#endif
 }
 
 bool PlayerbotAI::IsStateActive(BotState state) const

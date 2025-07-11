@@ -459,9 +459,7 @@ bool ChooseRpgTargetAction::isUseful()
     if (guidP && guidP.distance(bot) < sPlayerbotAIConfig.reactDistance * 2)
         return false;
 
-    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
-
-    if (travelTarget->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL && AI_VALUE2(bool, "can free move to", *travelTarget->GetPosition()))
+    if (AI_VALUE(bool, "travel target traveling"))
         return false;
 
     if (AI_VALUE(std::list<ObjectGuid>, "possible rpg targets").empty())

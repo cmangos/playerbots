@@ -172,25 +172,7 @@ bool GoAction::TellWhereToGo(std::string& param, Player* requester) const
 
 bool GoAction::LeaderAlreadyTraveling(TravelDestination* dest) const
 {
-    if (!bot->GetGroup())
-        return false;
-
-    if (bot == ai->GetGroupMaster())
-        return false;
-
-    if (!ai->GetGroupMaster()->GetPlayerbotAI())
-        return false;
-
-    Player* player = ai->GetGroupMaster();
-    TravelTarget* masterTarget = PAI_VALUE(TravelTarget*, "travel target");
-
-    if (!masterTarget->GetDestination())
-        return false;
-
-    if (masterTarget->GetDestination() != dest)
-        return false;
-
-    return true;
+    return AI_VALUE(bool, "travel target traveling");
 }
 
 bool GoAction::TellHowToGo(TravelDestination* dest, Player* requester) const

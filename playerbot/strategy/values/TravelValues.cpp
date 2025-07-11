@@ -407,12 +407,17 @@ bool ShouldTravelNamedValue::Calculate()
 
 bool TravelTargetActiveValue::Calculate() 
 {
-    return AI_VALUE(TravelTarget*, "travel target")->IsActive(); 
+    return AI_VALUE(TravelTarget*, "leader travel target")->IsActive(); 
 };
 
 bool TravelTargetTravelingValue::Calculate()
 {
-    return AI_VALUE(TravelTarget*, "travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || AI_VALUE(TravelTarget*, "travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_READY;
+    return AI_VALUE(TravelTarget*, "leader travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || AI_VALUE(TravelTarget*, "leader travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_READY;
+};
+
+bool TravelTargetWorkingValue::Calculate()
+{
+    return AI_VALUE(TravelTarget*, "leader travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK;
 };
 
 bool QuestStageActiveValue::Calculate()

@@ -78,6 +78,14 @@ namespace ai
         virtual ~TravelTargetValue() { delete value; }
     };	
 
+    class LeaderTravelTargetValue : public CalculatedValue<TravelTarget*>
+    {
+    public:
+        LeaderTravelTargetValue(PlayerbotAI* ai, std::string name = "leader travel target", int checkInterval = 5) : CalculatedValue<TravelTarget*>(ai, name, checkInterval) {};
+
+        virtual TravelTarget* Calculate() override;
+    };
+
     class IgnoreRpgTargetValue : public ManualSetValue<std::set<ObjectGuid>& >
     {
     public:

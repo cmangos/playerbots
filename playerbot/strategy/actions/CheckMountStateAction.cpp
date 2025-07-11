@@ -18,7 +18,6 @@ bool CheckMountStateAction::Execute(Event& event)
 
     bool hasAttackers = AI_VALUE(bool, "has attackers");
     bool hasEnemy = AI_VALUE(bool, "has enemy player targets") || AI_VALUE(Unit*, "dps target");
-    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
     bool canFly = CanFly();
 
@@ -128,7 +127,7 @@ bool CheckMountStateAction::Execute(Event& event)
     }
 
     //Doing stuff nearby.
-    if (travelTarget->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
+    if (AI_VALUE(bool, "travel target working"))
     {
         if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && IsMounted)
             ai->TellPlayerNoFacing(requester, "Unmount. Near travel target.");

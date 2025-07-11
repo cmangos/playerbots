@@ -73,8 +73,28 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
         if (!unit)
             continue;
 
-        if (unit->GetEntry() == 28605 || unit->GetEntry() == 28606 || unit->GetEntry() == 28607)
+        switch (unit->GetEntry())
+        {
+        case 28605: //Havenshire Stallion
+        case 28606: //Havenshire Mare
+        case 28607: //Havenshire Cotl
+        case 28891: //Scarlet Miner
             continue;
+        case 29080: //Scarlet Champion
+        case 29029: //Scarlet Inquisitor
+        case 29000: //Scarlet Commander Rodrick
+        case 28940: //Scarlet Crusader
+        case 28939: //Scarlet Preacher
+        case 28936: //Scarlet Commander
+        case 28898: //Scarlet Captain
+        case 28896: //Scarlet Infantryman
+        case 28895: //Scarlet Medic
+        case 28892: //Scarlet Peasant
+        case 28610: //Scarlet Marksman
+            if (AI_VALUE2(bool, "need quest objective", "12680,0"))
+                continue;
+            break;
+        }
 
         if (abs(bot->GetPositionZ() - unit->GetPositionZ()) > sPlayerbotAIConfig.spellDistance)
         {

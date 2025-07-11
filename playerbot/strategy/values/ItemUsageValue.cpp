@@ -628,7 +628,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
     }
     else
     {
-        shouldEquip = itemProto->Quality >= oldItemProto->Quality && itemProto->ItemLevel >= oldItemProto->ItemLevel;
+        shouldEquip = itemProto->Quality >= oldItemProto->Quality && itemProto->ItemLevel > oldItemProto->ItemLevel;
     }
 
     if (AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", itemProto->ItemId, ForceItemUsage::FORCE_USAGE_NONE) == ForceItemUsage::FORCE_USAGE_EQUIP) //New item is forced. Always equip it.

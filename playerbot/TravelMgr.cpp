@@ -318,13 +318,13 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
         case 12680: //Grand Theft Palomino
             switch (GetEntry())
             {
-            case 28605:
+            case 28605: //Havenshire horse
             case 28606:
             case 28607:
-                skipKillableCheck = !AI_VALUE2(bool, "trigger active", "in vehicle");
+                return !AI_VALUE2(bool, "trigger active", "in vehicle") && ai->CanSpellClick(bot, GetEntry());
                 break;
-            case 28653:
-                skipKillableCheck = AI_VALUE2(bool, "trigger active", "in vehicle");
+            case 28653: //Salanar the Horseman
+                return AI_VALUE2(bool, "trigger active", "in vehicle");
                 break;
             }
             break;

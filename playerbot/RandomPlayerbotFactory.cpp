@@ -497,9 +497,6 @@ void RandomPlayerbotFactory::CreateRandomBots()
         sLog.outString("Random bot characters deleted");
     }
 
-    if (!sPlayerbotAIConfig.randomBotAutoCreate)
-        return;
-
     int totalAccCount = sPlayerbotAIConfig.randomBotAccountCount;
     sLog.outString("Creating random bot accounts...");
 
@@ -538,6 +535,21 @@ void RandomPlayerbotFactory::CreateRandomBots()
         bar.step();
     }
 
+    for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
+    {
+        std::ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
+        std::string accountName = out.str();
+
+        auto results = LoginDatabase.PQuery("SELECT id FROM account where username = '%s'", accountName.c_str());
+        if (!results)
+            continue;
+
+        Field* fields = results->Fetch();
+        uint32 accountId = fields[0].GetUInt32();
+	sPlayerbotAIConfig.randomBotAccounts.push_back(accountId);
+    }
+
+
     BarGoLink bar3(account_creations.size());
     for (uint32 i = 0; i < account_creations.size(); i++)
     {
@@ -546,6 +558,9 @@ void RandomPlayerbotFactory::CreateRandomBots()
     }
 
     //LoginDatabase.PExecute("UPDATE account SET expansion = '%u' where username like '%s%%'", 2, sPlayerbotAIConfig.randomBotAccountPrefix.c_str());
+
+    if (!sPlayerbotAIConfig.randomBotAutoCreate)
+        return;
 
     int totalRandomBotChars = 0;
     int totalCharCount = sPlayerbotAIConfig.randomBotAccountCount
@@ -675,8 +690,6 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
         Field* fields = results->Fetch();
         uint32 accountId = fields[0].GetUInt32();
-
-        sPlayerbotAIConfig.randomBotAccounts.push_back(accountId);
 
         int count = sAccountMgr.GetCharactersCount(accountId);
 #ifdef MANGOSBOT_TWO

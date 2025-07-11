@@ -240,9 +240,7 @@ bool MoveToRpgTargetAction::isUseful()
         if (bot->IsMoving() && bot->GetMotionMaster() && bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
             return false;
 
-    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
-
-    if (AI_VALUE(bool, "travel target traveling") && AI_VALUE2(bool, "can free move to", travelTarget->GetPosStr()))
+    if (AI_VALUE(bool, "travel target traveling"))
         return false;
 
     if (AI_VALUE2(float, "distance", "rpg target") < INTERACTION_DISTANCE)

@@ -168,6 +168,8 @@ namespace ai
         static uint32 GetBotAHSellMinPrice(ItemPrototype const* proto);
         static uint32 GetBotAHSellMaxPrice(ItemPrototype const* proto);
         static uint32 GetCraftingFee(ItemPrototype const* proto);
+
+        static uint32 DesiredPricePerItem(Player* bot, const ItemPrototype* proto, uint32 count, uint32 priceModifier);
     };
 
     class ForceItemUsageValue : public ManualSetValue<ForceItemUsage>, public Qualified

@@ -7100,7 +7100,7 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
 
     //Look for item id's in the command.
     ItemIds ids = GetChatHelper()->parseItems(text);
-    if (!ids.empty())
+    if (!ids.empty() && text.find("usage ") == std::string::npos)
     {
         for (ItemIds::iterator i = ids.begin(); i != ids.end(); i++)
         {

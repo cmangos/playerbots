@@ -44,7 +44,7 @@ AiPlayerbot.RandomBotAutoJoinBG = 0
 # Mark many quests <= Bot level as complete (slows down bot creation)
 AiPlayerbot.PreQuests = 0
 
-# Create random bot characters automatically
+# Create random bot accounts and characters automaticallylly
 AiPlayerbot.RandomBotAutoCreate = 1
 
 # Random bot count

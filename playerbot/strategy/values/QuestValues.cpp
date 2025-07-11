@@ -95,6 +95,7 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 
 	rMap[28909][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Dark Rider of Acherus][Into the Realm of Shadows]	
 	rMap[28782][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Acherus Deathcharger][Into the Realm of Shadows]	
+	rMap[29501][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scourge Gryphon][Into the Realm of Shadows]	
 #endif
 	return rMap;
 }

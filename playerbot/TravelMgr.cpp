@@ -328,9 +328,14 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
         case 12687: //Into the Realm of Shadows
             switch (GetEntry())
             {
-            case 28768:
-            case 28782:
-                return !AI_VALUE2(bool, "trigger active", "in vehicle"); //Objective is not available.
+            case 28768: //Dark Rider of Acherus
+            case 28909:
+            case 28782: //Acherus Deathcharger
+                return !AI_VALUE2(bool, "trigger active", "in vehicle");
+            case 29501: //Scourge Gryphon (return to hand in)
+                return AI_VALUE2(bool, "trigger active", "in vehicle");
+            }
+            break;
             }
             break;
         }

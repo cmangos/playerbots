@@ -312,6 +312,9 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
     {
 #ifdef MANGOSBOT_TWO        
         switch (GetQuestId()) {
+        case 12848: //The Endless Hunger
+            skipKillableCheck = true;
+            break;
         case 12680: //Grand Theft Palomino
             switch (GetEntry())
             {
@@ -343,7 +346,7 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
 
         CreatureInfo const* cInfo = GetCreatureInfo();
 
-        if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()] && !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot))
+        if (!skipKillableCheck && cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()] && !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot))
         {
             skipKillableCheck = true;
         }

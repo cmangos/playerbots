@@ -69,6 +69,9 @@ bool FishAction::isUseful()
 
         if (target->GetDestination()->GetPurpose() != TravelDestinationPurpose::GatherFishing)
             return false;
+
+        if (!bot->GetGroup() || ai->IsGroupLeader())
+            target->CheckStatus();
     }
 
     WorldPosition fishSpot = AI_VALUE2(WorldPosition, "custom position", "fish spot");

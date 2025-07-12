@@ -407,7 +407,7 @@ bool ShouldTravelNamedValue::Calculate()
 
 bool TravelTargetActiveValue::Calculate() 
 {
-    return AI_VALUE(TravelTarget*, "leader travel target")->IsActive(); 
+    return AI_VALUE(TravelTarget*, "travel target")->IsActive(); 
 };
 
 bool TravelTargetTravelingValue::Calculate()

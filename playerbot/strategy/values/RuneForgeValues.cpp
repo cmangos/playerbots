@@ -54,6 +54,13 @@ uint32 BestRuneForgeSpellValue::Calculate() {
 
     PlayerTalentSpec spec = ai->GetTalentSpec();
 
+    if (AI_VALUE2(bool, "need quest objective", 12842))
+    {
+        if (ShouldRuneForgeValue::RuneForgeEnchantFromSpell(runeRazorice) == ShouldRuneForgeValue::CurrentRuneForgeEnchant(bot))
+            return runeCinderglacier;
+        return runeRazorice;            
+    }
+
     bool isPvp = true;
     int32 rpgStyle = AI_VALUE2(int32, "manual saved int", "rpg style override");
 
@@ -121,17 +128,12 @@ bool ShouldRuneForgeValue::Calculate() {
 
     MANGOS_ASSERT(bestEnchantId); //Runeforge spell does not have enchant id.
 
-    Item* weapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-    if (!weapon) 
+    uint32 currentEnchantId = CurrentRuneForgeEnchant(bot);
+
+    if (currentEnchantId < 0) //No (correct) weapon.
         return false;
 
-    if (weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_SWORD2 && weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_AXE2 && weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_POLEARM)
-        return false;
-
-    uint32 enchantId = weapon->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
-
-
-    return enchantId != bestEnchantId;   
+    return currentEnchantId != bestEnchantId;
 } 
 
 uint32 ShouldRuneForgeValue::RuneForgeEnchantFromSpell(uint32 spellId)
@@ -142,4 +144,16 @@ uint32 ShouldRuneForgeValue::RuneForgeEnchantFromSpell(uint32 spellId)
         return 0;
 
     return pSpellInfo->EffectMiscValue[0];
+}
+
+int32 ShouldRuneForgeValue::CurrentRuneForgeEnchant(Player* bot)
+{
+    Item* weapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+    if (!weapon)
+        return -1;
+
+    if (weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_SWORD2 && weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_AXE2 && weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_POLEARM)
+        return -1;
+
+    return weapon->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
 }

@@ -24,5 +24,6 @@ namespace ai
         virtual bool Calculate() override;
 
         static uint32 RuneForgeEnchantFromSpell(uint32 spellId);
+        static int32 CurrentRuneForgeEnchant(Player* bot);
     };
 } 

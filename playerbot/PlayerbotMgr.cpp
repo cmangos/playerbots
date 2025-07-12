@@ -450,6 +450,20 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
             sRandomPlayerbotMgr.InstaRandomize(bot);
         }
     }
+
+    if (!bot->HasItemCount(6948, 1)
+#ifdef MANGOSBOT_TWO
+        && !bot->HasItemCount(40582, 1)
+#endif
+        )
+    {
+#ifdef MANGOSBOT_TWO
+        if (bot->getClass() == CLASS_DEATH_KNIGHT && bot->GetMapId() == 609)
+            bot->StoreNewItemInBestSlots(40582, 1);
+        else
+#endif
+            bot->StoreNewItemInBestSlots(6948, 1);
+    }
 }
 
 std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId)

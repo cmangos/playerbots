@@ -27,7 +27,7 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
 
 	for (auto [entry, questId] : questObjectMgr->GetGOQuestInvolvedRelationsMap())
-		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
+		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestTaker;
 
 	//Quest objectives
 	ObjectMgr::QuestMap const& questMap = sObjectMgr.GetQuestTemplates();
@@ -95,6 +95,11 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 
 	rMap[28909][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Dark Rider of Acherus][Into the Realm of Shadows]	
 	rMap[28782][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Acherus Deathcharger][Into the Realm of Shadows]	
+	rMap[29501][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scourge Gryphon][Into the Realm of Shadows]	
+	
+
+	rMap[28658][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Gothic the Harvester][The Gift That Keeps On Giving]	
+	rMap[28819][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Miner][The Gift That Keeps On Giving]	
 #endif
 	return rMap;
 }
@@ -554,12 +559,16 @@ bool NeedQuestRewardValue::Calculate()
 bool NeedQuestObjectiveValue::Calculate()
 {
 	uint32 questId = getMultiQualifierInt(getQualifier(),0,",");
-	uint32 objective = getMultiQualifierInt(getQualifier(), 1, ",");
 	if (!bot->IsActiveQuest(questId))
 		return false;
 
-	if (bot->GetQuestStatus(questId) != QUEST_STATUS_INCOMPLETE)
+	QuestStatusData& questStatus = bot->getQuestStatusMap().at(questId);
+
+	if (questStatus.m_status != QUEST_STATUS_INCOMPLETE)
 		return false;
+
+	if (getQualifier().find(",") == std::string::npos) //Status of entire quest.
+		return true;
 
 #ifdef MANGOSBOT_TWO        
 		switch (questId) {
@@ -568,9 +577,9 @@ bool NeedQuestObjectiveValue::Calculate()
 		}
 #endif
 
-	QuestStatusData& questStatus = bot->getQuestStatusMap()[questId];
-
 	Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+
+	uint32 objective = getMultiQualifierInt(getQualifier(), 1, ",");
 
 	uint32  reqCount = pQuest->ReqItemCount[objective];
 	uint32  hasCount = questStatus.m_itemcount[objective];
@@ -623,6 +632,8 @@ bool CanUseItemOn::Calculate()
 		return guidP.IsCreature() && guidP.GetEntry() == 39623; //Gnome Citizen
 	case 38607: //Battle-worn Sword
 		return guidP.IsGameObject() && (std::find(RUNEFORGES.begin(), RUNEFORGES.end(), guidP.GetEntry()) != RUNEFORGES.end()); //Runeforge
+	case 39253: //Gift of the Harester
+		return guidP.IsCreature() && guidP.GetEntry() == 28819; //Scarlet Miner
 	}
 
 	if (guidP.IsUnit())

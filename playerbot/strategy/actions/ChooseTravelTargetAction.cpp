@@ -161,8 +161,10 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
     }
     else
     {
-        if (newTarget->IsGroupCopy())
-            out << "Following group ";
+        if (bot->GetGroup() && !ai->IsGroupLeader() && (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT)))
+            out << "I want to travel ";
+        else if (newTarget->IsGroupCopy() && newTarget->GetGroupmember().GetPlayer())
+            out << "Taking " << newTarget->GetGroupmember().GetPlayer()->GetName() << " ";
         else if (oldDestination && oldDestination == destination)
             out << "Continuing ";
         else
@@ -396,7 +398,7 @@ bool ChooseGroupTravelTargetAction::Execute(Event& event)
         if (groupTarget->IsForced())
             continue;
 
-        if (!groupTarget->GetDestination()->IsActive(player, PlayerTravelInfo(player)))
+        if (!groupTarget->GetDestination()->IsActive(player, PlayerTravelInfo(player)) || !groupTarget->IsConditionsActive())
         {
             player->GetPlayerbotAI()->TellDebug(requester,"Target is cooling down because a group member found it to be inactive.", "debug travel");
             groupTarget->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);

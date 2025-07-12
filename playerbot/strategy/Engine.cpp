@@ -559,7 +559,7 @@ void Engine::ProcessTriggers(bool minimal)
         if (!trigger)
             continue;
 
-        if (testMode || trigger->needCheck())
+        if (testMode || trigger->IsAlreadyTriggered() || trigger->needCheck())
         {
             if (minimal && node->getFirstRelevance() < 100)
                 continue;

@@ -36,19 +36,19 @@ bool RepairAllAction::Execute(Event& event)
         }
 
         //Repair weapons first.
-        uint32 totalCost = bot->DurabilityRepair(EQUIPMENT_SLOT_MAINHAND, true, discountMod
+        uint32 totalCost = bot->DurabilityRepair((INVENTORY_SLOT_BAG_0 << 8) | EQUIPMENT_SLOT_MAINHAND, true, discountMod
 #ifndef MANGOSBOT_ZERO
             , false
 #endif
         );
 
-        totalCost += bot->DurabilityRepair(EQUIPMENT_SLOT_RANGED, true, discountMod
+        totalCost += bot->DurabilityRepair((INVENTORY_SLOT_BAG_0 << 8) | EQUIPMENT_SLOT_RANGED, true, discountMod
 #ifndef MANGOSBOT_ZERO
             , false
 #endif
         );
 
-        totalCost += bot->DurabilityRepair(EQUIPMENT_SLOT_OFFHAND, true, discountMod
+        totalCost += bot->DurabilityRepair((INVENTORY_SLOT_BAG_0 << 8) | EQUIPMENT_SLOT_OFFHAND, true, discountMod
 #ifndef MANGOSBOT_ZERO
             , false
 #endif

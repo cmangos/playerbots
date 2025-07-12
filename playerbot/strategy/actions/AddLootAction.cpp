@@ -160,7 +160,7 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
                 usedBagSpacePercent = AI_VALUE(uint8, "bag space");
             }
 
-            if (usedBagSpacePercent > 99 && ai->DoSpecificAction("smart destroy"))
+            if (usedBagSpacePercent > 99 && ai->DoSpecificAction("smart destroy item"))
             {
                 usedBagSpacePercent = AI_VALUE(uint8, "bag space");
             }
@@ -277,7 +277,7 @@ bool AddGatheringLootAction::AddLoot(Player* requester, ObjectGuid guid)
                 usedBagSpacePercent = AI_VALUE(uint8, "bag space");
             }
 
-            if (usedBagSpacePercent > 99 && ai->DoSpecificAction("smart destroy"))
+            if (usedBagSpacePercent > 99 && ai->DoSpecificAction("smart destroy item"))
             {
                 usedBagSpacePercent = AI_VALUE(uint8, "bag space");
             }

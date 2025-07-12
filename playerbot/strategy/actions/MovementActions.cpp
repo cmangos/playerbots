@@ -738,9 +738,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 ai->Unmount();
 #endif
                 bool goTaxi = bot->ActivateTaxiPathTo({ tEntry->from, tEntry->to }, unit, 1);
-#ifdef MANGOSBOT_TWO
-                bot->ResolvePendingMount();
-#endif
+
                 if(!goTaxi)
                     bot->SetMoney(botMoney);
 
@@ -753,9 +751,6 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 ai->Unmount();
 #endif
                 bool goClick = ai->HandleSpellClick(entry); //Source gryphon of ebonhold.
-#ifdef MANGOSBOT_TWO
-                bot->ResolvePendingMount();
-#endif
 
                 return goClick;
             }
@@ -780,8 +775,15 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
             else
             {
                 if (sServerFacade.IsSpellReady(bot, entry) && (!bot->IsFlying() || WorldPosition(bot).currentHeight() < 10.0f) && AI_VALUE2(uint32, "has reagents for", entry) > 0)
+                {
+                    if (AI_VALUE2(uint32, "current mount speed", "self target"))
+                        ai->Unmount();                    
+
+                    ai->RemoveShapeshift();
+
                     if (ai->DoSpecificAction("cast", Event("rpg action", std::to_string(entry)), true))
                         return true;
+                }
 
                 movePath.clear();
                 AI_VALUE(LastMovement&, "last movement").setPath(movePath);

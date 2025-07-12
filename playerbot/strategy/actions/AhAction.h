@@ -11,7 +11,7 @@ namespace ai
 
     private:
         virtual bool ExecuteCommand(Player* requester, std::string text, Unit* auctioneer);
-        bool PostItem(Player* requester, Item* item, uint32 price, Unit* auctioneer, uint32 time, uint32 undercutByInformationalValue = 0);
+        bool PostItem(Player* requester, Item* item, uint32 price, Unit* auctioneer, uint32 time);       
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "ah"; } //Must equal iternal name

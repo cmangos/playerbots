@@ -83,85 +83,11 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
 
             if (!pricePerItemCache[proto->ItemId])
             {
-                //check current AH listing prices for this item and try to set lower (undercut)
-                AuctionEntry lowestPrice;
-
-                lowestPrice.Id = 0;
-
-                // check for the cheapest listing with the same count
-                // (simple dumping protection, can be improved by comparing listing prices but it's a bit complicated)
-
-                std::vector<AuctionEntry> auctions;
-                
-                for (auto& auction : sRandomPlayerbotMgr.GetAhPrices(proto->ItemId))
-                {
-                    if (auction.itemCount != item->GetCount())
-                        continue;
-
-                    if (lowestPrice.Id == 0 || float(auction.buyout) / float(auction.itemCount) < float(lowestPrice.buyout) / float(lowestPrice.itemCount))
-                        lowestPrice = auction;
-                }
-                
-                /*
-                auto lowestBuyoutPriceListing = CharacterDatabase.PQuery(
-                    "SELECT buyoutprice, item_count, itemowner FROM auction WHERE item_template = '%u' AND item_count = '%u' ORDER BY buyoutprice / item_count ASC LIMIT 1",
-                    item->GetProto()->ItemId,
-                    item->GetCount()
-                );
-                if (lowestBuyoutPriceListing)
-                {
-                    do
-                    {
-                        Field* fields = lowestBuyoutPriceListing->Fetch();
-                        float lowestPriceTotal = static_cast<float>(fields[0].GetUInt32());
-                        float lowestPriceItemCount = static_cast<float>(fields[1].GetUInt32());
-                        //itemowner can be 0 I guess if item is posted by AHBot
-                        lowestBuyoutItemPricePerItemOwnerDbGuid = fields[2].GetUInt32();
-                        if (lowestPriceTotal > 0 && lowestPriceItemCount > 0)
-                        {
-                            lowestBuyoutItemPricePerItem = static_cast<uint32>(lowestPriceTotal / lowestPriceItemCount);
-                        }
-                    } while (lowestBuyoutPriceListing->NextRow());
-                }
-                */
-
-                uint32 lowestBuyoutItemPricePerItem = float(lowestPrice.buyout) / float(lowestPrice.itemCount);
-
-                // default desired price if there are no item listings
-                // (is the max price because why not? sounds reasonable to try selling at max price if there are no listings)
-                // make it urand(max, max - 25% of maximum margin) for some randomness
-                uint32 maxAhPrice = ItemUsageValue::GetBotAHSellMaxPrice(proto);
-                uint32 minAhPrice = ItemUsageValue::GetBotAHSellMinPrice(proto);
-                uint32 desiredPricePerItem = maxAhPrice - static_cast<uint32>((maxAhPrice - minAhPrice) * frand(0.0f, 0.25f));
-
-                // check if it would be reasonable to sell lower than current cheapest listing
-                // also check if the item poster is not self to not to undercut yourself
-                if (lowestBuyoutItemPricePerItem > 0 && lowestPrice.owner != bot->GetDbGuid())
-                {
-                    //try to undercut by randomly 1 copper to 10% (may result in not actually undercutting but it's alright, even better)
-                    uint32 undercutByMoney = std::max(static_cast<uint32>(1), static_cast<uint32>(lowestBuyoutItemPricePerItem * frand(0.0f, 0.1f)));
-
-                    if (undercutByMoney < lowestBuyoutItemPricePerItem)
-                    {
-                        desiredPricePerItem = lowestBuyoutItemPricePerItem - undercutByMoney;
-                    }
-                    else
-                    {
-                        desiredPricePerItem = lowestBuyoutItemPricePerItem - 1;
-                    }
-                }
-
-                //price should be reasonable, NEVER cheaper than minimal AH price
-                desiredPricePerItem = std::max(minAhPrice, desiredPricePerItem);
-
-                //store in immediate cache to use the same price for subsequent postings
-                pricePerItemCache[proto->ItemId] = desiredPricePerItem;
-
-                //resulting undercut value for reporting
-                resultingUndercut = (lowestBuyoutItemPricePerItem > 0 && desiredPricePerItem < lowestBuyoutItemPricePerItem) ? lowestBuyoutItemPricePerItem - desiredPricePerItem : 0;
+                uint32 initialPricePerentage = urand(75, 100); //At most 25% below max posting price.
+                pricePerItemCache[proto->ItemId] = ItemUsageValue::DesiredPricePerItem(bot, proto, item->GetCount(), initialPricePerentage);
             }
 
-            bool didPost = PostItem(requester, item, pricePerItemCache[proto->ItemId] * item->GetCount(), auctioneer, time, resultingUndercut);
+            bool didPost = PostItem(requester, item, pricePerItemCache[proto->ItemId] * item->GetCount(), auctioneer, time);
 
             if (didPost)
             {
@@ -191,7 +117,7 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
     return PostItem(requester, item, price, auctioneer, time);
 }
 
-bool AhAction::PostItem(Player* requester, Item* item, uint32 price, Unit* auctioneer, uint32 time, uint32 undercutByInformationalValue)
+bool AhAction::PostItem(Player* requester, Item* item, uint32 price, Unit* auctioneer, uint32 time)
 {
     ObjectGuid itemGuid = item->GetObjectGuid();
     ItemPrototype const* proto = item->GetProto();
@@ -221,14 +147,7 @@ bool AhAction::PostItem(Player* requester, Item* item, uint32 price, Unit* aucti
     sPlayerbotAIConfig.logEvent(ai, "AhAction", proto->Name1, std::to_string(proto->ItemId));
 
     std::ostringstream out;
-    if (undercutByInformationalValue > 0)
-    {
-        out << "Posting " << ChatHelper::formatItem(itemQualifier, cnt) << " for " << ChatHelper::formatMoney(price) << " to the AH (undercutting by " << ChatHelper::formatMoney(undercutByInformationalValue) << " per item)";
-    }
-    else
-    {
-        out << "Posting " << ChatHelper::formatItem(itemQualifier, cnt) << " for " << ChatHelper::formatMoney(price) << " to the AH";
-    }
+    out << "Posting " << ChatHelper::formatItem(itemQualifier, cnt) << " for " << ChatHelper::formatMoney(price) << " to the AH";
     ai->TellPlayerNoFacing(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     return true;
 }

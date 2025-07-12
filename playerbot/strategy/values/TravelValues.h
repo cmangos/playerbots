@@ -146,6 +146,14 @@ namespace ai
         virtual bool Calculate() override;
     };    
 
+    class TravelTargetWorkingValue : public BoolCalculatedValue
+    {
+    public:
+        TravelTargetWorkingValue(PlayerbotAI* ai, std::string name = "travel target working", int checkInterval = 5) : BoolCalculatedValue(ai, name, checkInterval) {};
+
+        virtual bool Calculate() override;
+    };
+
     class NeedTravelPurposeValue : public BoolCalculatedValue, public Qualified
     {
     public:

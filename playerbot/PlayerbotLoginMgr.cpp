@@ -561,7 +561,7 @@ void PlayerBotLoginMgr::FillLoginSpace(BotPool* pool, LoginSpace& space, FillSte
     space.currentSpace = GetMaxOnlineBotCount();
     space.totalSpace = GetMaxOnlineBotCount();
 
-    for (uint32 level = 1; level <= DEFAULT_MAX_LEVEL + 1; ++level)
+    for (uint32 level = 1; level < DEFAULT_MAX_LEVEL + 1; ++level)
     {
         space.levelBucket[level] = GetLevelBucketSize(level);
     }

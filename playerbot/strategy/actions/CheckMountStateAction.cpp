@@ -503,11 +503,11 @@ bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
                     ai->TellPlayerNoFacing(requester, "Bot does not have this mount spell.", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
                 continue;
             }
-
-            if (ai->CastSpell(mount.GetSpellId(), bot))
+            uint32 castDuration;
+            if (ai->CastSpell(mount.GetSpellId(), bot, nullptr, true, &castDuration))
             {
                 sPlayerbotAIConfig.logEvent(ai, "CheckMountStateAction", sServerFacade.LookupSpellInfo(mount.GetSpellId())->SpellName[0], std::to_string(mount.GetSpeed(canFly)));
-                SetDuration(GetSpellRecoveryTime(sServerFacade.LookupSpellInfo(mount.GetSpellId())));
+                SetDuration(castDuration);
                 didMount = true;
             }
             else

@@ -732,6 +732,9 @@ uint32 PlayerBotLoginMgr::GetClassRaceBucketSize(uint8 cls, uint8 race)
     if (prob == 0)
         return 0;
 
+    if (sPlayerbotAIConfig.useFixedClassRaceCounts)
+        return sPlayerbotAIConfig.classRaceProbability[cls][race];
+
     return GetMaxOnlineBotCount() * sPlayerbotAIConfig.classRaceProbability[cls][race] / sPlayerbotAIConfig.classRaceProbabilityTotal;
 }
 

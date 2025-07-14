@@ -9,17 +9,9 @@ class GenericDKNonCombatStrategyActionNodeFactory : public NamedObjectFactory<Ac
 public:
     GenericDKNonCombatStrategyActionNodeFactory()
     {
-        creators["bone shield"] = &bone_shield;
         creators["horn of winter"] = &horn_of_winter;
     }
 private:
-    static ActionNode* bone_shield(PlayerbotAI* ai)
-    {
-        return new ActionNode ("bone shield",
-            /*P*/ NULL,
-            /*A*/ NULL,
-            /*C*/ NULL);
-    }
     static ActionNode* horn_of_winter(PlayerbotAI* ai)
     {
         return new ActionNode ("horn of winter",
@@ -45,10 +37,6 @@ void GenericDKNonCombatStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &
     triggers.push_back(new TriggerNode(
         "horn of winter",
         NextAction::array(0, new NextAction("horn of winter", 21.0f), NULL)));
-
-	triggers.push_back(new TriggerNode(
-		"bone shield",
-		NextAction::array(0, new NextAction("bone shield", 21.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "runeforge",

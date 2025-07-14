@@ -218,10 +218,6 @@ void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 		"pestilence",
 		NextAction::array(0, new NextAction("pestilence", ACTION_NORMAL + 2), NULL)));
 
-    triggers.push_back(new TriggerNode(
-        "bone shield",
-        NextAction::array(0, new NextAction("bone shield", ACTION_NORMAL + 1), NULL)));
-
 	triggers.push_back(new TriggerNode(
 		"horn of winter",
 		NextAction::array(0, new NextAction("horn of winter", ACTION_NORMAL + 1), NULL)));

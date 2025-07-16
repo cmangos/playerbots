@@ -28,7 +28,11 @@ void RpgHelper::BeforeExecute()
 
 void RpgHelper::AfterExecute(bool doDelay, bool waitForGroup, std::string nextAction)
 {
-    if ((ai->HasRealPlayerMaster() || bot->GetGroup() || !urand(0,5)) && nextAction == "rpg") 
+    uint32 goToDifferentTargetChance = 10;
+    if (ai->HasRealPlayerMaster() || bot->GetGroup())
+        goToDifferentTargetChance = 30;
+
+    if (nextAction == "rpg" && urand(0, 100) < goToDifferentTargetChance)
         nextAction = "rpg cancel"; 
     
     SET_AI_VALUE(std::string, "next rpg action", nextAction);

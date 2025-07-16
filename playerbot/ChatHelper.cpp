@@ -464,6 +464,7 @@ std::string ChatHelper::formatWorldobject(const WorldObject* wo)
     std::ostringstream out;
     int loc_idx = sPlayerbotTextMgr.GetLocalePriority();
     std::string name = (wo->IsGameObject() ? ((GameObject*)wo)->GetGOInfo()->name : wo->GetName());
+    if (name.empty()) name = "unknown:" + std::to_string(wo->GetEntry());
     if (loc_idx >= 0 && wo->IsGameObject())
     {
         GameObjectLocale const* gl = sObjectMgr.GetGameObjectLocale(wo->GetEntry());
@@ -496,8 +497,8 @@ std::string ChatHelper::formatWorldEntry(int32 entry)
         name = gInfo->name;
     else if (entry > 0 && cInfo)
         name = cInfo->Name;
-    else
-        name = "unknown";
+    
+    if(name.empty())
 
     if (loc_idx >= 0 && entry < 0)
     {
@@ -982,36 +983,52 @@ std::string ChatHelper::formatAngle(float angle)
     return headings[int32(round(headingAngle / 45)) % 8];
 }
 
-std::string ChatHelper::formatWorldPosition(const WorldPosition& pos)
+std::string ChatHelper::formatWorldPosition(const WorldPosition& pos, const WorldPosition refPos)
 {
     std::ostringstream out;
     out << std::fixed << std::setprecision(2);
-    out << pos.getX() << "," << pos.getY() << "," << pos.getZ();
-    if (pos.getO())
-        out << " facing " << formatAngle(pos.getO());
-    if (pos.getMap(pos.getFirstInstanceId()))
-        out << " in " << pos.getMap(pos.getFirstInstanceId())->GetMapName();
+    if (!refPos || refPos.getMapId() != pos.getMapId())
+    {
+        out << pos.getX() << "," << pos.getY() << "," << pos.getZ();
+
+        if (pos.getMap(pos.getFirstInstanceId()))
+            out << " in " << pos.getMap(pos.getFirstInstanceId())->GetMapName();
+        else
+            out << " map:" << pos.getMapId();
+    }
     else
-        out << " map:" << pos.getMapId();
+    {
+        float distance = refPos.distance(pos);
+        float angle = refPos.getAngleTo(pos);
+
+        out << distance << "y to the " << formatAngle(angle);
+    }
 
     return out.str();
 }
 
 
-std::string ChatHelper::formatGuidPosition(const GuidPosition& guidP)
+std::string ChatHelper::formatGuidPosition(const GuidPosition& guidP, const GuidPosition& ref)
 {
     std::ostringstream out;
     if (guidP.GetWorldObject(guidP.getFirstInstanceId()))
-        out << guidP.GetWorldObject(guidP.getFirstInstanceId())->GetName();
+        out << formatWorldobject(guidP.GetWorldObject(guidP.getFirstInstanceId()));
     else if (guidP.GetCreatureTemplate())
-        out << guidP.GetCreatureTemplate()->Name;
+        out << formatWorldEntry(guidP.GetEntry());
     else if (guidP.GetGameObjectInfo())
-        out << guidP.GetGameObjectInfo()->name;
+        out << formatWorldEntry(guidP.GetEntry()*-1);
     else
-        out << guidP.GetRawValue();
+        out << "|cFFFFFF00|Hfound:" << guidP.GetRawValue() << ":" << guidP.GetEntry() << ":" << "|h[unkown " << guidP.GetTypeName() << " " << guidP.GetRawValue() << "]|h|r";
+
+    out.seekp(-5, out.cur);
 
     if (WorldPosition(guidP))
-        out << " " << formatWorldPosition(guidP);
+        out << " " << formatWorldPosition(guidP, ref);
+
+    if(ref && ref.IsPlayer() && (guidP.IsCreature() || guidP.IsPlayer()))
+        out << " " << formatReaction(guidP.GetReactionTo(ref, ref.getFirstInstanceId()));
+
+    out << "]|h|r";
 
     return out.str();
 }

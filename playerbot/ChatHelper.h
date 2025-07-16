@@ -78,8 +78,8 @@ namespace ai
         uint32 parseSkillName(const std::string& text);
 
         static std::string formatAngle(float angle);
-        static std::string formatWorldPosition(const WorldPosition& pos);
-        static std::string formatGuidPosition(const GuidPosition& guidP);
+        static std::string formatWorldPosition(const WorldPosition& pos, const WorldPosition refPos = WorldPosition());
+        static std::string formatGuidPosition(const GuidPosition& guidP, const GuidPosition& ref);
 
         static std::string formatBoolean(bool flag);       
        

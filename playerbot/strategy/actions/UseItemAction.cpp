@@ -1300,6 +1300,45 @@ bool UseRandomRecipeAction::Execute(Event& event)
     return didUse;
 }
 
+bool OpenRandomItemAction::isUseful()
+{
+    return !bot->IsInCombat() && !ai->HasActivePlayerMaster() && !bot->InBattleGround();
+}
+
+bool OpenRandomItemAction::Execute(Event& event)
+{
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+
+    std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", "open");
+
+    std::string itemName = "";
+    for (auto& item : items)
+    {
+        if (!urand(0, 10))
+            break;
+
+        itemName = chat->formatItem(item);
+    }
+
+    if (itemName.empty())
+        return false;
+
+    if (bot->IsMoving())
+    {
+        ai->StopMoving();
+    }
+
+    Event rEvent = Event(name, itemName);
+
+    bool didUse = UseAction::Execute(rEvent);
+
+    if (didUse)
+        ai->TellPlayerNoFacing(requester, "Opening " + itemName, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+    return didUse;
+}
+
+
 bool UseRandomQuestItemAction::isUseful()
 {
     return !ai->HasActivePlayerMaster() && !bot->InBattleGround() && !bot->IsTaxiFlying();

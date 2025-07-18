@@ -500,6 +500,34 @@ namespace ai
         }
     };
 
+    class FindOpenItemVisitor : public FindUsableItemVisitor
+    {
+    public:
+        FindOpenItemVisitor(Player* bot) : FindUsableItemVisitor(bot) {}
+
+        virtual bool Accept(const ItemPrototype* proto) { return false; }
+
+        virtual bool Accept(Item* item)
+        {
+            const ItemPrototype* proto = item->GetProto();
+
+            if(!(proto->Flags& ITEM_FLAG_HAS_LOOT))
+                return false;
+
+            uint32 spellId = 0;
+            for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+            {
+                if (proto->Spells[i].SpellId > 0)
+                    return false;
+            }
+
+            if (proto->LockID && !item->IsUnlocked())
+                return false;
+
+            return true;
+        }
+    };
+
     class FindRecipeVisitor : public FindUsableItemVisitor
     {
     public:

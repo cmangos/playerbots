@@ -7186,6 +7186,11 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
         FindRecipeVisitor visitor(bot);
         VISIT;
     }
+    else if (text == "open")
+    {
+        FindOpenItemVisitor visitor(bot);
+        VISIT;
+    }
     else if (text == "quest")
     {
         FindQuestItemVisitor visitor(bot);

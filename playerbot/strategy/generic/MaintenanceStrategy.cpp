@@ -16,6 +16,10 @@ void MaintenanceStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigger
 
     triggers.push_back(new TriggerNode(
         "random",
+        NextAction::array(0, new NextAction("open random item", 0.9f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "random",
         NextAction::array(0, new NextAction("disenchant random item", 1.0f), NULL)));
 
     triggers.push_back(new TriggerNode(

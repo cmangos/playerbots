@@ -371,6 +371,15 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
         return false;
     }
 
+    if (proto->Flags & ITEM_FLAG_HAS_LOOT)
+    {
+        std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatQItem(itemId));
+        if (!items.empty())
+        {
+            return OpenItem(requester, items.front());
+        }
+    }
+
     // If bot has no item cheat (or other conditions) it needs to own the item to cast
     Item* itemUsed = nullptr;
     if (RequiresItemToUse(proto, ai, bot))
@@ -911,6 +920,36 @@ bool UseAction::UseQuestGiverItem(Player* requester, Item* item)
 
     return false;
 }
+
+bool UseAction::OpenItem(Player* requester, Item* item)
+{
+    if (!item)
+        return false;
+
+    uint32 spellId = 0;
+    for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+    {
+        if (item->GetProto()->Spells[i].SpellId > 0)
+        {
+            spellId = item->GetProto()->Spells[i].SpellId;
+            break;
+        }
+    }
+
+    if (spellId)
+        return false;
+
+    if (!(item->GetProto()->Flags & ITEM_FLAG_HAS_LOOT))
+        return false;
+
+        // Open quest item in inventory, containing related items (e.g Gnarlpine necklace, containing Tallonkai's Jewel)
+        std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_OPEN_ITEM, 2));
+        *packet << item->GetBagSlot();
+        *packet << item->GetSlot();
+        bot->GetSession()->QueuePacket(std::move(packet)); // queue the packet to get around race condition
+        return true;
+}
+
 
 bool UseAction::HasItemCooldown(uint32 itemId) const
 {

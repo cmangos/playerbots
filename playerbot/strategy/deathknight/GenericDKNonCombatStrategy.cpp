@@ -56,7 +56,7 @@ void GenericDKNonCombatStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &
 
 	triggers.push_back(new TriggerNode(
 		"auto runeforge",
-		NextAction::array(0, new NextAction("runeforge", 1.0f), NULL)));
+		NextAction::array(0, new NextAction("runeforge", 6.0f), NULL)));
 }
 
 void DKBuffDpsStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)

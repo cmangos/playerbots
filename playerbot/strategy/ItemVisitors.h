@@ -521,7 +521,11 @@ namespace ai
                     return false;
             }
 
-            if (proto->LockID && !item->IsUnlocked())
+            if (proto->LockID
+#ifdef MANGOSBOT_TWO                
+                && !item->IsUnlocked()
+#endif
+                )
                 return false;
 
             return true;

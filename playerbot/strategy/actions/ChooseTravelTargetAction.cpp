@@ -273,7 +273,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
                 distanceCheck = false;
             }
 
-            if(target->IsForced() || (isActive[destination] = destination->IsActive(bot, PlayerTravelInfo(bot))))
+            if (target->IsForced() || (isActive[destination] = destination->IsActive(bot, PlayerTravelInfo(bot))))
             {
                 if (partition != std::prev(partitionedList.end())->first && !urand(0, 10)) //10% chance to skip to a longer partition.
                 {
@@ -285,7 +285,10 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
                 if (GuidPosition* guidP = static_cast<GuidPosition*>(position))
                 {
                     if (!bot->InSamePhase(guidP->GetPhaseMask()))
+                    {
+                        ai->TellDebug(requester, "Not same phase: " + destination->GetTitle() + " " + std::to_string(round(destination->DistanceTo(bot))) + "y", "debug travel");
                         continue;
+                    }
                 }
 #endif
 
@@ -293,6 +296,11 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
                 hasTarget = true;
                 break;
             }
+            else
+            {
+                ai->TellDebug(requester, "Not active: " + destination->GetTitle() + " " + std::to_string(round(destination->DistanceTo(bot))) + "y", "debug travel");
+            }
+
         }
 
         if (hasTarget)

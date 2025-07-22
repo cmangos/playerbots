@@ -9,7 +9,7 @@ using namespace ai;
 std::string ObjectGuidCalculatedValue::Format()
 {
     GuidPosition guid = GuidPosition(this->Calculate(), bot);
-    return guid ? chat->formatGuidPosition(guid) : "<none>";
+    return guid ? chat->formatGuidPosition(guid, bot) : "<none>";
 }
 
 std::string ObjectGuidListCalculatedValue::Format()
@@ -19,7 +19,7 @@ std::string ObjectGuidListCalculatedValue::Format()
     for (std::list<ObjectGuid>::iterator i = guids.begin(); i != guids.end(); ++i)
     {
         GuidPosition guid = GuidPosition(*i, bot);
-        out << chat->formatGuidPosition(guid) << ",";
+        out << chat->formatGuidPosition(guid,bot) << ",";
     }
     out << "}";
     return out.str();
@@ -29,7 +29,7 @@ std::string GuidPositionCalculatedValue::Format()
 {
     std::ostringstream out;
     GuidPosition guidP = this->Calculate();
-    return chat->formatGuidPosition(guidP);
+    return chat->formatGuidPosition(guidP,bot);
 }
 
 std::string GuidPositionListCalculatedValue::Format()
@@ -39,7 +39,7 @@ std::string GuidPositionListCalculatedValue::Format()
     for (std::list<GuidPosition>::iterator i = guids.begin(); i != guids.end(); ++i)
     {
         GuidPosition guidP = *i;
-        out << chat->formatGuidPosition(guidP) << ",";
+        out << chat->formatGuidPosition(guidP,bot) << ",";
     }
     out << "}";
     return out.str();
@@ -47,5 +47,5 @@ std::string GuidPositionListCalculatedValue::Format()
 
 std::string GuidPositionManualSetValue::Format()
 {
-    return chat->formatGuidPosition(value);
+    return chat->formatGuidPosition(value,bot);
 }

@@ -40,6 +40,7 @@ namespace ai
     private:
         bool UseItemInternal(Player* requester, uint32 itemId, Unit* target, GameObject* gameObjectTarget, Item* itemTarget);
         bool UseQuestGiverItem(Player* requester, Item* item);
+        bool OpenItem(Player* requester, Item* item);
 #ifndef MANGOSBOT_ZERO
         bool UseGemItem(Player* requester, Item* item, Item* gem, bool replace = false);
 #endif
@@ -277,6 +278,21 @@ namespace ai
         virtual bool isUseful() override;
         virtual bool isPossible() override {return AI_VALUE2(uint32,"item count", "recipe") > 0; }
       
+        virtual bool Execute(Event& event) override;
+
+        // Used when this action is executed as a reaction
+        bool ShouldReactionInterruptMovement() const override { return true; }
+    };
+
+    class OpenRandomItemAction : public UseAction
+    {
+    public:
+        OpenRandomItemAction(PlayerbotAI* ai) : UseAction(ai, "open random item") {}
+
+        virtual bool isUseful() override;
+
+        virtual bool isPossible() override { return AI_VALUE2(uint32, "item count", "open") > 0; }
+
         virtual bool Execute(Event& event) override;
 
         // Used when this action is executed as a reaction

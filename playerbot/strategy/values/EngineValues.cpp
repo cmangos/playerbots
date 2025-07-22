@@ -32,7 +32,7 @@ bool TriggerActiveValue::Calculate()
     if (!trigger)
         return false;
 
-    if (!trigger->Check())
+    if (!trigger->Check() || !trigger->IsActive())
         return false;
 
     return true;

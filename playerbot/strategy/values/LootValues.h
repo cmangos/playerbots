@@ -63,7 +63,24 @@ namespace ai
     //DropMap[itemId] = {entry}
     typedef std::unordered_multimap<uint32, int32> DropMap;    
 
-    //Returns the loot map of all entries
+    class ItemDropMapValue : public SingleCalculatedValue<DropMap*>
+    {
+    public:
+        ItemDropMapValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "item drop map") {}
+
+        virtual DropMap* Calculate();
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "item drop map"; } //Must equal iternal name
+        virtual std::string GetHelpTypeName() { return "loot"; }
+        virtual std::string GetHelpDescription()
+        {
+            return "This value returns all items and the items they contain as loot.";
+        }
+        virtual std::vector<std::string> GetUsedValues() { return {  }; }
+#endif 
+    };
+
+     //Returns the loot map of all entries
     class DropMapValue : public SingleCalculatedValue<DropMap*>
     {
     public:

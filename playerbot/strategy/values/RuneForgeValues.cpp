@@ -128,7 +128,7 @@ bool ShouldRuneForgeValue::Calculate() {
 
     MANGOS_ASSERT(bestEnchantId); //Runeforge spell does not have enchant id.
 
-    uint32 currentEnchantId = CurrentRuneForgeEnchant(bot);
+    int32 currentEnchantId = CurrentRuneForgeEnchant(bot);
 
     if (currentEnchantId < 0) //No (correct) weapon.
         return false;
@@ -150,6 +150,9 @@ int32 ShouldRuneForgeValue::CurrentRuneForgeEnchant(Player* bot)
 {
     Item* weapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
     if (!weapon)
+        return -1;
+
+    if (weapon->GetProto()->ItemLevel < 40)
         return -1;
 
     if (weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_SWORD2 && weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_AXE2 && weapon->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_POLEARM)

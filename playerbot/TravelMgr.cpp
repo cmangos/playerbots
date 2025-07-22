@@ -1465,16 +1465,6 @@ void TravelMgr::LoadQuestTravelTable()
         sPlayerbotAIConfig.log("activity_pid.csv", out.str().c_str());
     }
 
-#ifdef IKE_PATHFINDER
-    bool mmapAvoidMobMod = true;
-
-    if (mmapAvoidMobMod)
-    {
-        //Mob avoidance
-        SetMobAvoidArea();
-    }
-#endif
-
     sLog.outString("Loading travel nodes.");
 
     sTravelNodeMap.loadNodeStore();

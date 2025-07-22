@@ -81,6 +81,7 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32
 #endif
     {
         setMapId(mapId);
+        setX(1); //Pretend to know so map can be loaded.
         if (Map* map = getMap(instanceId))
         {
             Creature* creature = map->GetAnyTypeCreature(guid);

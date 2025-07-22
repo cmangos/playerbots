@@ -67,7 +67,7 @@ namespace ai
 
         virtual std::string Format()
         {
-            return chat->formatGuidPosition(value);
+            return chat->formatGuidPosition(value, bot);
         }
     };
 

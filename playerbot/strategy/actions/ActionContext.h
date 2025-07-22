@@ -188,6 +188,7 @@ namespace ai
             creators["cast random spell"] = [](PlayerbotAI* ai) { return new CastRandomSpellAction(ai); };
             creators["free bg join"] = [](PlayerbotAI* ai) { return new FreeBGJoinAction(ai); };
             creators["use random recipe"] = [](PlayerbotAI* ai) { return new UseRandomRecipeAction(ai); };
+            creators["open random item"] = [](PlayerbotAI* ai) { return new OpenRandomItemAction(ai); };
             creators["use random quest item"] = [](PlayerbotAI* ai) { return new UseRandomQuestItemAction(ai); };
             creators["craft random item"] = [](PlayerbotAI* ai) { return new CraftRandomItemAction(ai); };
             creators["smart destroy item"] = [](PlayerbotAI* ai) { return new SmartDestroyItemAction(ai); };

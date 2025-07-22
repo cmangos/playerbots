@@ -1256,7 +1256,7 @@ void PlayerbotAI::Reset(bool full)
         target->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
         target->SetExpireIn(1000);
 
-        RESET_AI_VALUE(FutureDestinations*, "future travel destinations");        
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = FutureDestinations();
         RESET_AI_VALUE2(std::string, "manual string", "future travel purpose");
         RESET_AI_VALUE2(int, "manual int", "future travel relevance");
 
@@ -7255,6 +7255,11 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
     else if (text == "recipe")
     {
         FindRecipeVisitor visitor(bot);
+        VISIT;
+    }
+    else if (text == "open")
+    {
+        FindOpenItemVisitor visitor(bot);
         VISIT;
     }
     else if (text == "quest")

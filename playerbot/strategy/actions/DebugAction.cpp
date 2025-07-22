@@ -93,6 +93,8 @@ bool DebugAction::Execute(Event& event)
         return HandleGO(event, requester, text);
     else if (text.find("rpg ") == 0)
         return HandleRPG(event, requester, text);
+    else if (text.find("rpgtargets") == 0)
+        return HandleRPGTargets(event, requester, text);    
     else if (text.find("travel ") == 0)
         return HandleTravel(event, requester, text);
     else if (text.find("print travel") == 0)
@@ -1428,6 +1430,23 @@ bool DebugAction::HandleRPG(Event& event, Player* requester, const std::string& 
 
     if (guidP.GetWorldObject(bot->GetInstanceId()))
         ai->TellPlayerNoFacing(requester, "Setting Rpg target to " + ChatHelper::formatWorldobject(guidP.GetWorldObject(bot->GetInstanceId())));
+
+    return true;
+}
+
+bool DebugAction::HandleRPGTargets(Event& event, Player* requester, const std::string& text)
+{
+    Action* action = ai->GetAiObjectContext()->GetAction("choose rpg target");
+
+    if (!action)
+        return false;
+
+    ChooseRpgTargetAction* targetAction = static_cast<ChooseRpgTargetAction*>(action);
+
+    if (!targetAction)
+        return false;
+
+    targetAction->GetTargets(requester, true);
 
     return true;
 }

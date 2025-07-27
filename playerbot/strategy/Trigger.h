@@ -34,6 +34,7 @@ namespace ai
             this->triggered = true;
         }
         virtual bool IsActive() { return false; }
+        virtual bool IsAlreadyTriggered() { return triggered; }
         virtual NextAction** getHandlers() { return NULL; }
         void Update() {}  //Nonfunctional see AiObjectContext::Update() to enable.
         virtual void Reset() { triggered = false; }
@@ -64,7 +65,7 @@ namespace ai
 		time_t lastCheckTime;
         std::string param;
         bool triggered;
-        Player* owner;
+        Player* owner = nullptr;
 	};
 
 

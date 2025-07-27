@@ -18,7 +18,6 @@ bool CheckMountStateAction::Execute(Event& event)
 
     bool hasAttackers = AI_VALUE(bool, "has attackers");
     bool hasEnemy = AI_VALUE(bool, "has enemy player targets") || AI_VALUE(Unit*, "dps target");
-    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
 
     bool canFly = CanFly();
 
@@ -128,7 +127,7 @@ bool CheckMountStateAction::Execute(Event& event)
     }
 
     //Doing stuff nearby.
-    if (travelTarget->IsWorking())
+    if (AI_VALUE(bool, "travel target working"))
     {
         if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && IsMounted)
             ai->TellPlayerNoFacing(requester, "Unmount. Near travel target.");
@@ -169,7 +168,7 @@ bool CheckMountStateAction::Execute(Event& event)
     if (!ai->IsStateActive(BotState::BOT_STATE_COMBAT) && !hasEnemy)
     {
         //Mounting to travel.
-        if (travelTarget->IsTraveling() && AI_VALUE(bool, "can move around"))
+        if (AI_VALUE(bool, "travel target traveling") && AI_VALUE(bool, "can move around"))
         {
             if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && !IsMounted)
                 ai->TellPlayerNoFacing(requester, "Mount. Traveling some place.");
@@ -504,14 +503,11 @@ bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
                     ai->TellPlayerNoFacing(requester, "Bot does not have this mount spell.", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
                 continue;
             }
-
-            if (ai->CastSpell(mount.GetSpellId(), bot))
+            uint32 castDuration;
+            if (ai->CastSpell(mount.GetSpellId(), bot, nullptr, true, &castDuration))
             {
-#ifdef MANGOSBOT_TWO
-                bot->ResolvePendingMount();
-#endif
                 sPlayerbotAIConfig.logEvent(ai, "CheckMountStateAction", sServerFacade.LookupSpellInfo(mount.GetSpellId())->SpellName[0], std::to_string(mount.GetSpeed(canFly)));
-                SetDuration(GetSpellRecoveryTime(sServerFacade.LookupSpellInfo(mount.GetSpellId())));
+                SetDuration(castDuration);
                 didMount = true;
             }
             else
@@ -523,6 +519,9 @@ bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
 
         if (didMount)
         {
+            if(sServerFacade.isMoving(bot))
+                ai->HandleCommand(CHAT_MSG_WHISPER, "do check mount state", *bot);
+
             if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
                 ai->TellPlayerNoFacing(requester, "Mounting.");
 

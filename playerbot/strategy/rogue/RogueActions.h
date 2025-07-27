@@ -349,6 +349,31 @@ namespace ai
         , mainHand(inMainHand)
         , poisonItemIds(inPoisonItemIds) {}
 
+        bool isUseful() override
+        {
+            // Always allow poison on offhand
+            if (!mainHand)
+                return true;
+
+#ifndef MANGOSBOT_TWO
+            // Deny if grouped with shaman over 32 in same subgroup (non-WOTLK)
+            if (bot->GetGroup())
+            {
+                Group* group = bot->GetGroup();
+                for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+                {
+                    Player* member = ref->getSource();
+                    if (!member || member == bot || !member->IsInWorld() || !group->SameSubGroup(bot, member))
+                        continue;
+
+                    if (member->getClass() == CLASS_SHAMAN && member->GetLevel() > 32)
+                        return false;
+                }
+            }
+#endif
+            return true;
+        }
+
         bool Execute(Event& event) override
         {
             // Pick a poison item

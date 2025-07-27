@@ -175,6 +175,11 @@ namespace ai
 	{
 	public:
 		CastWrathOfAirTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "wrath of air totem") {}
+
+        virtual bool isUseful() override
+        {
+            return (!bot->GetGroup() || ai->HasStrategy("totem air wrath", BotState::BOT_STATE_COMBAT)) && CastTotemAction::isUseful();
+        }
 	};
 
     class CastFrostResistanceTotemAction : public CastTotemAction
@@ -230,6 +235,11 @@ namespace ai
     {
     public:
         CastWindfuryTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "windfury totem") {}
+
+        virtual bool isUseful() override
+        {
+            return (bot->GetGroup() || ai->HasStrategy("totem air windfury", BotState::BOT_STATE_COMBAT)) && CastTotemAction::isUseful();
+        }
     };
 
     class CastWindwallTotemAction : public CastTotemAction
@@ -242,6 +252,11 @@ namespace ai
     {
     public:
         CastGraceOfAirTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "grace of air totem") {}
+
+        virtual bool isUseful() override
+        {
+            return (!bot->GetGroup() || ai->HasStrategy("totem air grace", BotState::BOT_STATE_COMBAT)) && CastTotemAction::isUseful();
+        }
     };
 
     class CastSearingTotemAction : public CastTotemAction
@@ -448,7 +463,11 @@ namespace ai
     class CastTotemicRecall : public CastBuffSpellAction
     {
     public:
+#ifdef MANGOSBOT_ONE
+        CastTotemicRecall(PlayerbotAI* ai) : CastBuffSpellAction(ai, "totemic call") {}
+#else
         CastTotemicRecall(PlayerbotAI* ai) : CastBuffSpellAction(ai, "totemic recall") {}
+#endif
     };
 
     class CastEarthShieldOnPartyTankAction : public BuffOnTankAction

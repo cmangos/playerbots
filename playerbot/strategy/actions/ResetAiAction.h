@@ -8,6 +8,7 @@ namespace ai
     public:
         ResetAiAction(PlayerbotAI* ai, bool fullReset = true, std::string name = "reset ai") : ChatCommandAction(ai, name), fullReset(fullReset) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "reset ai"; } //Must equal iternal name
@@ -31,6 +32,7 @@ namespace ai
        SaveAiAction(PlayerbotAI* ai, std::string name = "save ai") : ChatCommandAction(ai, name), Qualified() {}
        virtual bool Execute(Event& event) override;
        bool isUseful() override { return true; };
+       virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class LoadAiAction : public ChatCommandAction, public Qualified
@@ -39,6 +41,7 @@ namespace ai
        LoadAiAction(PlayerbotAI* ai, std::string name = "load ai") : ChatCommandAction(ai, name), Qualified() {}
        virtual bool Execute(Event& event) override;
        bool isUseful() override { return true; };
+       virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class ListAiAction : public ChatCommandAction, public Qualified
@@ -47,6 +50,7 @@ namespace ai
        ListAiAction(PlayerbotAI* ai, std::string name = "list ai") : ChatCommandAction(ai, name), Qualified() {}
        virtual bool Execute(Event& event) override;
        bool isUseful() override { return true; };
+       virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class ResetStratsAction : public ResetAiAction
@@ -54,6 +58,7 @@ namespace ai
     public:
         ResetStratsAction(PlayerbotAI* ai, std::string name = "reset strats", bool fullReset = true) : ResetAiAction(ai, fullReset, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "reset strats"; } //Must equal iternal name
@@ -72,6 +77,7 @@ namespace ai
     public:
         ResetValuesAction(PlayerbotAI* ai, std::string name = "reset values", bool fullReset = true) : ResetAiAction(ai, fullReset, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "reset values"; } //Must equal iternal name
@@ -90,6 +96,7 @@ namespace ai
     public:
         ResetAction(PlayerbotAI* ai, std::string name = "reset") : Action(ai, name) {}
         virtual bool Execute(Event& event) override { ai->Reset(true); return true; };
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "reset"; } //Must equal iternal name

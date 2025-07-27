@@ -282,6 +282,9 @@ bool PossibleAttackTargetsValue::IsValid(Unit* target, Player* player, float ran
     if(!HasIgnoreCCRti(target, player) && (HasBreakableCC(target, player) || HasUnBreakableCC(target, player)))
         return true;
 
+    if (player->GetPlayerbotAI() && !player->GetPlayerbotAI()->HasActivePlayerMaster()&& PAI_VALUE(Unit*, "rti target") == target)
+        return true;
+
     return false;
 }
 

@@ -24,6 +24,7 @@ namespace ai
         CreatureData* GetCreatureData() const { return IsCreature() ? sObjectMgr.GetCreatureData(GetCounter()) : nullptr; }
         CreatureInfo const* GetCreatureTemplate() const { return IsCreature() ? sObjectMgr.GetCreatureTemplate(GetEntry()) : nullptr; };
 
+        GameObjectData const* GetGameObjectData() const { return IsGameObject() ? sObjectMgr.GetGOData(GetCounter()) : nullptr; }
         GameObjectInfo const* GetGameObjectInfo() const { return IsGameObject() ? sObjectMgr.GetGameObjectInfo(GetEntry()) : nullptr; };
 
         WorldObject* GetWorldObject(uint32 m_instanceId) const { return getMap(m_instanceId) ? getMap(m_instanceId)->GetWorldObject(*this) : nullptr; }
@@ -31,6 +32,10 @@ namespace ai
         Unit* GetUnit(uint32 instanceId) const;
         GameObject* GetGameObject(uint32 instanceId) const;
         Player* GetPlayer() const;
+
+#ifdef MANGOSBOT_TWO
+        uint32 GetPhaseMask() const { return IsCreature() ? (GetCreatureData() ? GetCreatureData()->phaseMask : 1) : (GetGameObjectData() ? GetGameObjectData()->phaseMask : 1);}
+#endif
 
         void updatePosition(uint32 m_instanceId) { WorldObject* wo = GetWorldObject(m_instanceId); if (wo) WorldPosition::set(wo); }
 
@@ -87,6 +92,7 @@ namespace ai
     public:
         AsyncGuidPosition() : GuidPosition() {}
         AsyncGuidPosition(GuidPosition guidP) : GuidPosition(guidP) {};
+        virtual void setAreaFlag(int16 flag) { areaFlag = flag; }
         virtual void FetchArea() { areaFlag = WorldPosition::getAreaFlag(); }
         virtual uint16 getAreaFlag() const { return areaFlag.has_value() ? areaFlag.value() : WorldPosition::getAreaFlag(); }
     private:

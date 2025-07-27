@@ -57,12 +57,15 @@ namespace ai
 
         if (bot->GetGroup())
         {
-            if (ai->HasRealPlayerMaster())
+            if (ai->HasRealPlayerMaster() && master != ai->GetMaster())
                 return false;
 
             if (!ai->DoSpecificAction("leave", event, true))
                 return false;
         }
+
+        if (bot->GetGroupInvite())
+            bot->GetGroupInvite()->RemoveInvite(bot);
 
         return Invite(master, bot);
     }
@@ -260,6 +263,11 @@ namespace ai
             if (player->GetMapId() != bot->GetMapId())
                 continue;
 
+#ifdef MANGOSBOT_TWO
+            if (player->InSamePhase(bot->GetPhaseMask()))
+                continue;
+#endif
+
             if (player->GetGroup())
                 continue;
 
@@ -403,6 +411,11 @@ namespace ai
 
             if (player->GetMapId() != bot->GetMapId() && player->GetLevel() < 30)
                 continue;
+
+#ifdef MANGOSBOT_TWO
+            if (player->GetMapId() == 609 && player->GetMapId() != bot->GetMapId())
+                continue;
+#endif
 
             if (WorldPosition(player).distance(bot) > 1000 && player->GetLevel() < 15)
                 continue;

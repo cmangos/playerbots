@@ -87,7 +87,7 @@ void LootObject::Refresh(Player* bot, ObjectGuid guid)
         {
             int itemId = go->GetGOInfo()->questItems[i];
 
-            if (IsNeededForQuest(bot, itemId))
+            if (ItemUsageValue::IsNeededForQuest(bot, itemId))
             {
                 this->guid = guid;
                 return;
@@ -150,37 +150,6 @@ void LootObject::Refresh(Player* bot, ObjectGuid guid)
             }
         }
     }
-}
-
-bool LootObject::IsNeededForQuest(Player* bot, uint32 itemId)
-{
-    for (int qs = 0; qs < MAX_QUEST_LOG_SIZE; ++qs)
-    {
-        uint32 questId = bot->GetQuestSlotQuestId(qs);
-        if (questId == 0)
-            continue;
-
-        QuestStatusData& qData = bot->getQuestStatusMap()[questId];
-        if (qData.m_status != QUEST_STATUS_INCOMPLETE)
-            continue;
-
-        Quest const* qInfo = sObjectMgr.GetQuestTemplate(questId);
-        if (!qInfo)
-            continue;
-
-        for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-        {
-            if (!qInfo->ReqItemCount[i] || (qInfo->ReqItemCount[i] - qData.m_itemcount[i]) <= 0)
-                continue;
-
-            if (qInfo->ReqItemId[i] != itemId)
-                continue;
-
-            return true;
-        }
-    }
-
-    return false;
 }
 
 WorldObject* LootObject::GetWorldObject(Player* bot)
@@ -262,7 +231,7 @@ bool LootObject::IsLootPossible(Player* bot)
                         bool hasQuestItems = false;
                         for (auto& entry : GAI_VALUE2(std::list<uint32>, "entry loot list", -1*int(go->GetEntry())))
                         {
-                            if (IsNeededForQuest(bot, entry))
+                            if (ItemUsageValue::IsNeededForQuest(bot, entry))
                             {
                                 hasQuestItems = true;
                             }

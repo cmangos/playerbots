@@ -40,6 +40,7 @@ namespace ai
     private:
         bool UseItemInternal(Player* requester, uint32 itemId, Unit* target, GameObject* gameObjectTarget, Item* itemTarget);
         bool UseQuestGiverItem(Player* requester, Item* item);
+        bool OpenItem(Player* requester, Item* item);
 #ifndef MANGOSBOT_ZERO
         bool UseGemItem(Player* requester, Item* item, Item* gem, bool replace = false);
 #endif
@@ -283,6 +284,21 @@ namespace ai
         bool ShouldReactionInterruptMovement() const override { return true; }
     };
 
+    class OpenRandomItemAction : public UseAction
+    {
+    public:
+        OpenRandomItemAction(PlayerbotAI* ai) : UseAction(ai, "open random item") {}
+
+        virtual bool isUseful() override;
+
+        virtual bool isPossible() override { return AI_VALUE2(uint32, "item count", "open") > 0; }
+
+        virtual bool Execute(Event& event) override;
+
+        // Used when this action is executed as a reaction
+        bool ShouldReactionInterruptMovement() const override { return true; }
+    };
+
     class UseRandomQuestItemAction : public UseAction
     {
     public:
@@ -445,23 +461,36 @@ namespace ai
 
         virtual uint32 GetItemId() override
         {
-            if (bot->GetSkillValue(129) >= 225)
+            int firstAidSkillValue = bot->GetSkillValue(129);
+#ifdef MANGOSBOT_TWO
+            if (firstAidSkillValue >= 400)
+                return 34722;
+            if (firstAidSkillValue >= 350)
+                return 34721;
+#endif
+#ifndef MANGOSBOT_ZERO
+            if (firstAidSkillValue >= 325)
+                return 21991;
+            if (firstAidSkillValue >= 300)
+                return 21990;
+#endif
+            if (firstAidSkillValue >= 225)
                 return 14530;
-            if (bot->GetSkillValue(129) >= 200)
+            if (firstAidSkillValue >= 200)
                 return 14529;
-            if (bot->GetSkillValue(129) >= 175)
+            if (firstAidSkillValue >= 175)
                 return 8545;
-            if (bot->GetSkillValue(129) >= 150)
+            if (firstAidSkillValue >= 150)
                 return 8544;
-            if (bot->GetSkillValue(129) >= 125)
+            if (firstAidSkillValue >= 125)
                 return 6451;
-            if (bot->GetSkillValue(129) >= 100)
+            if (firstAidSkillValue >= 100)
                 return 6450;
-            if (bot->GetSkillValue(129) >= 75)
+            if (firstAidSkillValue >= 75)
                 return 3531;
-            if (bot->GetSkillValue(129) >= 50)
+            if (firstAidSkillValue >= 50)
                 return 3530;
-            if (bot->GetSkillValue(129) >= 20)
+            if (firstAidSkillValue >= 20)
                 return 2581;
             return 1251;
         }
@@ -609,9 +638,7 @@ namespace ai
                 bot->addUnitState(UNIT_STAND_STATE_SIT);
                 ai->InterruptSpell();
 
-                const float mpMissingPct = 100.0f - bot->GetPowerPercent();
-                const float multiplier = bot->InBattleGround() ? 20000.0f : 27000.0f;
-                const float drinkDuration = multiplier * (mpMissingPct / 100.0f);
+                float drinkDuration = AI_VALUE(float, "drink duration");
 
                 const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(24355);
                 if (!pSpellInfo)
@@ -624,7 +651,8 @@ namespace ai
                 bot->RemoveSpellCooldown(*pSpellInfo);
 
                 // Eat and drink at the same time
-                if (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.lowHealth)
+
+                if (AI_VALUE(bool, "should eat"))
                 {
                     const SpellEntry* pSpellInfo2 = sServerFacade.LookupSpellInfo(24005);
                     if (pSpellInfo2)
@@ -642,7 +670,7 @@ namespace ai
 
         bool isUseful() override
         {
-            return UseAction::isUseful() && bot->HasMana() && (AI_VALUE2(uint8, "mana", "self target") < 85);
+            return UseAction::isUseful() && AI_VALUE(bool, "should drink");
         }
 
         bool isPossible() override
@@ -684,9 +712,7 @@ namespace ai
                 bot->addUnitState(UNIT_STAND_STATE_SIT);
                 ai->InterruptSpell();
 
-                const float hpMissingPct = 100.0f - bot->GetHealthPercent();
-                const float multiplier = bot->InBattleGround() ? 20000.0f : 27000.0f;
-                const float eatDuration = multiplier * (hpMissingPct / 100.0f);
+                float eatDuration = AI_VALUE(float, "eat duration");
 
                 const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(24005);
                 if (!pSpellInfo)
@@ -699,7 +725,7 @@ namespace ai
                 bot->RemoveSpellCooldown(*pSpellInfo);
 
                 // Eat and drink at the same time
-                if (bot->HasMana() && (AI_VALUE2(uint8, "mana", "self target") < 85))
+                if (AI_VALUE(bool, "should drink"))
                 {
                     const SpellEntry* pSpellInfo2 = sServerFacade.LookupSpellInfo(24355);
                     if (pSpellInfo2)
@@ -717,7 +743,7 @@ namespace ai
 
         bool isUseful() override
         {
-            return UseAction::isUseful() && (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.lowHealth);
+            return UseAction::isUseful() && AI_VALUE(bool, "should eat");
         }
 
         bool isPossible() override

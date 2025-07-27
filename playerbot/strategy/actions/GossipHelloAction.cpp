@@ -3,6 +3,8 @@
 #include "GossipHelloAction.h"
 
 #include "playerbot/ServerFacade.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+
 
 using namespace ai;
 
@@ -39,7 +41,21 @@ bool GossipHelloAction::Execute(Event& event)
 
     std::string text = event.getParam();
 	int menuToSelect = -1;
-	if (text.empty())
+    if (event.getSource().find("rpg action") == 0)
+    {
+        Creature* pCreature = bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
+
+        if (pCreature)
+        {
+            if (!sScriptDevAIMgr.OnGossipHello(bot, pCreature))
+            {
+                bot->PrepareGossipMenu(pCreature, pCreature->GetDefaultGossipMenuId());
+            }
+        }
+
+        ProcessGossip(requester, guid, -1);
+    }
+	else if (text.empty())
 	{
         WorldPacket p1;
         p1 << guid;
@@ -60,7 +76,7 @@ bool GossipHelloAction::Execute(Event& event)
 	{
 	    menuToSelect = atoi(text.c_str());
 	    if (menuToSelect > 0) menuToSelect--;
-        ProcessGossip(requester, menuToSelect);
+        ProcessGossip(requester, guid, menuToSelect);
 	}
 
 	bot->TalkedToCreature(pCreature->GetEntry(), pCreature->GetObjectGuid());
@@ -89,7 +105,7 @@ void GossipHelloAction::TellGossipMenus(Player* requester)
 {
     if (!bot->GetPlayerMenu())
         return;
- 
+
      GossipMenu& menu = bot->GetPlayerMenu()->GetGossipMenu();
 
      if (requester)
@@ -111,26 +127,37 @@ void GossipHelloAction::TellGossipMenus(Player* requester)
     }
 }
 
-bool GossipHelloAction::ProcessGossip(Player* requester, int menuToSelect)
+bool GossipHelloAction::ProcessGossip(Player* requester, ObjectGuid creatureGuid, int menuToSelect)
 {
     GossipMenu& menu = bot->GetPlayerMenu()->GetGossipMenu();
-    if (menuToSelect >= 0 && (unsigned int)menuToSelect >= menu.MenuItemCount())
+
+    bool noFeedback = (menuToSelect == -1);
+
+    int actualMenuToSelect = menuToSelect;
+
+    if (actualMenuToSelect == -1)
+    {
+        actualMenuToSelect = urand(0, menu.MenuItemCount() - 1);
+    }
+
+    if (actualMenuToSelect >= 0 && (unsigned int)actualMenuToSelect >= menu.MenuItemCount())
     {
         ai->TellError(requester, "Unknown gossip option");
         return false;
     }
-    GossipMenuItem const& item = menu.GetItem(menuToSelect);
+    GossipMenuItem const& item = menu.GetItem(actualMenuToSelect);
     WorldPacket p;
     std::string code;
-    p << GetMaster()->GetSelectionGuid();
+    p << creatureGuid;
 #ifdef MANGOSBOT_ZERO
-    p << menuToSelect;
+    p << actualMenuToSelect;
 #else
-    p << menu.GetMenuId() << menuToSelect;
+    p << menu.GetMenuId() << actualMenuToSelect;
 #endif
     p << code;
     bot->GetSession()->HandleGossipSelectOptionOpcode(p);
 
-    TellGossipMenus(requester);
+    if(!noFeedback)
+        TellGossipMenus(requester);
     return true;
 }

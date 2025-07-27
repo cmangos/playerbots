@@ -7,6 +7,7 @@ namespace ai
     {
     public:
         TellReputationAction(PlayerbotAI* ai) : ChatCommandAction(ai, "reputation") {}
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     private:
         bool Execute(Event& event) override;

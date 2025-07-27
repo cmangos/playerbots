@@ -10,7 +10,7 @@ using namespace ai;
 bool HasNearbyQuestTakerTrigger::IsActive()
 {
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
-    if (target->IsWorking()) //We are not currently working on a target.
+    if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK) //We are not currently working on a target.
         return false;
 
     if (target->GetExpiredTime() < 2 * MINUTE) //The target was set more than 2 minutes ago.

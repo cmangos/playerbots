@@ -379,7 +379,7 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
     if (master)
     {
         ObjectGuid masterGuid = master->GetObjectGuid();
-        if (master->GetGroup() && !master->GetGroup()->IsLeader(masterGuid))
+        if (master->GetGroup() && !master->GetGroup()->IsLeader(masterGuid) && !sPlayerbotAIConfig.IsFreeAltBot(bot))
             master->GetGroup()->ChangeLeader(masterGuid);
     }
 
@@ -448,6 +448,20 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
         {
             sRandomPlayerbotMgr.InstaRandomize(bot);
         }
+    }
+
+    if (!bot->HasItemCount(6948, 1)
+#ifdef MANGOSBOT_TWO
+        && !bot->HasItemCount(40582, 1)
+#endif
+        )
+    {
+#ifdef MANGOSBOT_TWO
+        if (bot->getClass() == CLASS_DEATH_KNIGHT && bot->GetMapId() == 609)
+            bot->StoreNewItemInBestSlots(40582, 1);
+        else
+#endif
+            bot->StoreNewItemInBestSlots(6948, 1);
     }
 }
 

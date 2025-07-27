@@ -8,6 +8,7 @@ namespace ai
     public:
         UnequipAction(PlayerbotAI* ai) : ChatCommandAction(ai, "unequip") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     private:
         void UnequipItem(Player* requester, Item* item);

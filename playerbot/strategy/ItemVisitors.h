@@ -59,7 +59,7 @@ namespace ai
             return true;
         }
 
-    private:
+    protected:
         Player* bot;
     };
 
@@ -381,6 +381,12 @@ namespace ai
 
         virtual bool Accept(const ItemPrototype* proto)
         {
+
+#ifdef MANGOSBOT_TWO
+            if (proto->Spells[0].SpellId == SPELL_ID_GENERIC_LEARN_PET && bot->HasSpell(proto->Spells[1].SpellId))
+                return false; //Do not include mount items the bot already learned.
+#endif
+
             for (int j = 0; j < MAX_ITEM_PROTO_SPELLS; j++)
             {
                 if (proto->Spells[j].SpellId == 26656)
@@ -494,6 +500,38 @@ namespace ai
         }
     };
 
+    class FindOpenItemVisitor : public FindUsableItemVisitor
+    {
+    public:
+        FindOpenItemVisitor(Player* bot) : FindUsableItemVisitor(bot) {}
+
+        virtual bool Accept(const ItemPrototype* proto) { return false; }
+
+        virtual bool Accept(Item* item)
+        {
+            const ItemPrototype* proto = item->GetProto();
+
+            if(!(proto->Flags& ITEM_FLAG_HAS_LOOT))
+                return false;
+
+            uint32 spellId = 0;
+            for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+            {
+                if (proto->Spells[i].SpellId > 0)
+                    return false;
+            }
+
+            if (proto->LockID
+#ifdef MANGOSBOT_TWO                
+                && !item->IsUnlocked()
+#endif
+                )
+                return false;
+
+            return true;
+        }
+    };
+
     class FindRecipeVisitor : public FindUsableItemVisitor
     {
     public:
@@ -554,5 +592,32 @@ namespace ai
         Player* bot;
         AiObjectContext* context;
         ItemUsage usage;
+    };
+
+    class FindVendorItemsVisitor : public FindItemVisitor
+    {
+    public:
+        FindVendorItemsVisitor(Player* bot, bool includeAH) : FindItemVisitor(), bot(bot), includeAH(includeAH) { context = bot->GetPlayerbotAI()->GetAiObjectContext(); };
+
+        virtual bool Accept(const ItemPrototype* proto) { return false; }
+
+        virtual bool Accept(Item* item)
+        {
+            ItemUsage usage = AI_VALUE2_LAZY(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
+            if (usage == ItemUsage::ITEM_USAGE_VENDOR)
+                return true;
+
+            if (includeAH && (usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_BROKEN_AH))
+                return true;
+
+            if (usage == ItemUsage::ITEM_USAGE_NONE && item->GetProto()->SellPrice)
+                return true;
+
+            return false;
+        }
+    private:
+        Player* bot;
+        AiObjectContext* context;
+        bool includeAH;
     };
 }

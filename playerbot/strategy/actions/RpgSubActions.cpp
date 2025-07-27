@@ -28,7 +28,11 @@ void RpgHelper::BeforeExecute()
 
 void RpgHelper::AfterExecute(bool doDelay, bool waitForGroup, std::string nextAction)
 {
-    if ((ai->HasRealPlayerMaster() || bot->GetGroup() || !urand(0,5)) && nextAction == "rpg") 
+    uint32 goToDifferentTargetChance = 10;
+    if (ai->HasRealPlayerMaster() || bot->GetGroup())
+        goToDifferentTargetChance = 30;
+
+    if (nextAction == "rpg" && urand(0, 100) < goToDifferentTargetChance)
         nextAction = "rpg cancel"; 
     
     SET_AI_VALUE(std::string, "next rpg action", nextAction);
@@ -140,7 +144,7 @@ bool RpgCancelAction::Execute(Event& event)
 {
     rpg->OnCancel();  
 
-    if (!urand(0,3) || AI_VALUE(GuidPosition, "rpg target").GetEntry() != AI_VALUE(TravelTarget*, "travel target")->GetEntry() || !AI_VALUE(TravelTarget*, "travel target")->IsWorking()) //1 out of 4 to ignore current travel target after cancel.
+    if (!urand(0,3) || AI_VALUE(GuidPosition, "rpg target").GetEntry() != AI_VALUE(TravelTarget*, "travel target")->GetEntry() || AI_VALUE(TravelTarget*, "travel target")->GetStatus() != TravelStatus::TRAVEL_STATUS_WORK) //1 out of 4 to ignore current travel target after cancel.
         AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target").insert(AI_VALUE(GuidPosition, "rpg target")); 
 
     RESET_AI_VALUE(GuidPosition, "rpg target"); rpg->AfterExecute(false, false, ""); DoDelay(); 
@@ -879,10 +883,28 @@ bool RpgItemAction::Execute(Event& event)
         }
     }
 
-    if (used)
+    if (used && !GetDuration())
     {
         SetDuration(sPlayerbotAIConfig.globalCoolDown);
     }
 
     return used;
+}
+bool RpgSpellClickAction::Execute(Event& event)
+{
+    rpg->BeforeExecute();
+
+    GuidPosition guidP = rpg->guidP();
+
+#ifdef MANGOSBOT_TWO
+    if (!guidP.IsCreatureOrVehicle())
+#endif
+        return false;
+   
+    bool result = ai->HandleSpellClick(guidP);
+    
+    rpg->AfterExecute(result);
+    DoDelay();
+    
+    return result;
 }

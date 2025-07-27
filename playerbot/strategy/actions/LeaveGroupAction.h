@@ -16,7 +16,7 @@ namespace ai
             return Leave(master);
         }
 
-        bool isUsefulWhenStunned() override { return true; }
+        virtual bool isUsefulWhenStunned() override { return true; }
 
         virtual bool Leave(Player* player);
     };
@@ -96,5 +96,7 @@ namespace ai
         }
 
         virtual bool isUseful();
+
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 }

@@ -37,6 +37,7 @@ namespace ai
         static std::string formatItem(Item* item, int count = 0, int total = 0);
         static std::string formatQItem(uint32 itemId);
         static std::string formatSkill(uint32 skillId, Player* player = nullptr);
+        static std::string formatReaction(ReputationRank rank, Player* player = nullptr);
         static std::string formatFaction(uint32 factionId, Player* player = nullptr);
 
 
@@ -78,8 +79,8 @@ namespace ai
         uint32 parseSkillName(const std::string& text);
 
         static std::string formatAngle(float angle);
-        static std::string formatWorldPosition(const WorldPosition& pos);
-        static std::string formatGuidPosition(const GuidPosition& guidP);
+        static std::string formatWorldPosition(const WorldPosition& pos, const WorldPosition refPos = WorldPosition());
+        static std::string formatGuidPosition(const GuidPosition& guidP, const GuidPosition& ref);
 
         static std::string formatBoolean(bool flag);       
        

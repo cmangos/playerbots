@@ -211,4 +211,19 @@ namespace ai
 #endif
     };
 
+    class DebugStuckStrategy : public Strategy
+    {
+    public:
+        DebugStuckStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "debug stuck"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "debug stuck"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "This strategy will give debug output when the bot is stuck";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "debug" }; }
+#endif
+    };
+
 }

@@ -3377,12 +3377,12 @@ bool BGTactics::selectObjective(bool reset)
                 //sLog.outBasic("Bot #%d %s:%d <%s>: Retreat with flag", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
                 if (rootTeam == HORDE)
                 {
-                    areaTrigger = NULL;
+                    areaTrigger = 0;
                     flagDeliverPoint = EY_FLAG_RETURN_POS_RETREAT_HORDE;
                 }
                 else
                 {
-                    areaTrigger = NULL;
+                    areaTrigger = 0;
                     flagDeliverPoint = EY_FLAG_RETURN_POS_RETREAT_ALLIANCE;
                 }
             }

@@ -44,7 +44,7 @@ AiPlayerbot.RandomBotAutoJoinBG = 0
 # Mark many quests <= Bot level as complete (slows down bot creation)
 AiPlayerbot.PreQuests = 0
 
-# Create random bot characters automatically
+# Create random bot accounts and characters automaticallylly
 AiPlayerbot.RandomBotAutoCreate = 1
 
 # Random bot count
@@ -381,8 +381,15 @@ AiPlayerbot.AutoLearnDroppedSpells = 0
 # All non-orc warriors will have a 75% lower chance to be generated.
 # Human mages have a 65% lower chance to generate. 
 # Orc warriors have a 55% lower chance to generate.
-
+#
 # Source https://web.archive.org/web/20050115034332/http://www.warcraftrealms.com/census.php
+
+# As an alternative to probability-based generation, you can enable:
+# AiPlayerbot.ClassRace.UseFixedClassRaceCounts
+# This will generate random bots based on a fixed total count per class/race combo as defined by:
+# AiPlayerbot.ClassRaceProb.<class>.<race> = <number>
+#
+# AiPlayerbot.ClassRace.UseFixedClassRaceCounts = 0
 
 # AiPlayerbot.ClassRaceProb.1.0 = 178    # Human chance
 # AiPlayerbot.ClassRaceProb.2.0 = 65     # Orc chance
@@ -787,6 +794,11 @@ AiPlayerbot.ShootDistance = 26.0
 #AiPlayerbot.AoeRadius = 10
 AiPlayerbot.RpgDistance = 200
 #AiPlayerbot.ProximityDistance = 20.0
+#Distances to limit bots eating/drinking while following a master.
+#Inside this range eating/drinking is cut short or prevented to stay near master.
+#AiPlayerbot.EatDrinkMinDistance = 5.0
+#AiPlayerbot.EatDrinkMaxDistance = 1000.0
+
 
 # Max distance bot allowed to roam freely around master
 #AiPlayerbot.MaxFreeMoveDistance = 150.0
@@ -849,7 +861,7 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #
 # (0-1) If bot should query current AH listings outside of AH when determining whether the item is worth posting to AH
 # Disabled by default for performance concerns, but you REALLY want to enable it for nicer logic
-# AiPlayerbot.ShouldQueryAHListingsOutsideOfAH = 0
+# AiPlayerbot.ShouldQueryAHListingsOutsideOfAH = 1
 #
 # List of item ids which bot will prefer to put to AH rather than selling to vendor (these are overrides)
 # For example if you want bots to put certain gray/white armor pieces to AH rather than selling to vendor

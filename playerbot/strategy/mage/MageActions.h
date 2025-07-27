@@ -322,7 +322,7 @@ namespace ai
         CastConeOfColdAction(PlayerbotAI* ai) : CastMeleeAoeSpellAction(ai, "cone of cold", 10.0f) {}
     };
     
-    BUFF_ACTION(CastSummonWaterElementalAction, "summon water frost");
+    BUFF_ACTION(CastSummonWaterElementalAction, "summon water elemental");
 
     class CastDragonsBreathAction : public CastMeleeAoeSpellAction
     {

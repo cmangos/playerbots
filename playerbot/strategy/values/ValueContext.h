@@ -100,6 +100,9 @@
 #include "TravelValues.h"
 #include "LootValues.h"
 #include "GlyphValues.h"
+#include "StuckValues.h"
+#include "FishValues.h"
+#include "RuneForgeValues.h"
 
 namespace ai
 {
@@ -252,6 +255,7 @@ namespace ai
             creators["lowest durability"] = [](PlayerbotAI* ai) { return new LowestDurabilityValue(ai); };
             creators["max repair cost"] = [](PlayerbotAI* ai) { return new MaxGearRepairCostValue(ai); };
             creators["repair cost"] = [](PlayerbotAI* ai) { return new RepairCostValue(ai); };
+            creators["min repair cost"] = [](PlayerbotAI* ai) { return new MinRepairCostValue(ai); };
             creators["train cost"] = [](PlayerbotAI* ai) { return new TrainCostValue(ai); };
             creators["enemy healer target"] = [](PlayerbotAI* ai) { return new EnemyHealerTargetValue(ai); };
             creators["snare target"] = [](PlayerbotAI* ai) { return new SnareTargetValue(ai); };
@@ -351,6 +355,10 @@ namespace ai
             creators["can fight equal"] = [](PlayerbotAI* ai) { return new CanFightEqualValue(ai); };
             creators["can fight elite"] = [](PlayerbotAI* ai) { return new CanFightEliteValue(ai); };
             creators["can fight boss"] = [](PlayerbotAI* ai) { return new CanFightBossValue(ai); };
+            creators["should drink"] = [](PlayerbotAI* ai) { return new ShouldDrinkValue(ai); };
+            creators["should eat"] = [](PlayerbotAI* ai) { return new ShouldEatValue(ai); };
+            creators["drink duration"] = [](PlayerbotAI* ai) { return new DrinkDurationValue(ai); };
+            creators["eat duration"] = [](PlayerbotAI* ai) { return new EatDurationValue(ai); };
 
             creators["vendor has useful item"] = [](PlayerbotAI* ai) { return new VendorHasUsefulItemValue(ai); };
             creators["craft spells"] = [](PlayerbotAI* ai) { return new CraftSpellsValue(ai); };
@@ -371,6 +379,7 @@ namespace ai
             creators["manual saved int"] = [](PlayerbotAI* ai) { return new IntManualSetSavedValue(ai); };
             creators["manual string"] = [](PlayerbotAI* ai) { return new StringManualSetValue(ai); };
             creators["manual saved string"] = [](PlayerbotAI* ai) { return new StringManualSetSavedValue(ai); };
+            creators["manual time"] = [](PlayerbotAI* ai) { return new TimeManualSetValue(ai); };
             creators["group count"] = [](PlayerbotAI* ai) { return new GroupBoolCountValue(ai); };
             creators["group and"] = [](PlayerbotAI* ai) { return new GroupBoolANDValue(ai); };
             creators["group or"] = [](PlayerbotAI* ai) { return new GroupBoolORValue(ai); };
@@ -431,16 +440,31 @@ namespace ai
             creators["focus travel target"] = [](PlayerbotAI* ai) { return new FocusTravelTargetValue(ai); };
             creators["has focus travel target"] = [](PlayerbotAI* ai) { return new HasFocusTravelTargetValue(ai); };
 
+            creators["travel target"] = [](PlayerbotAI* ai) { return new TravelTargetValue(ai); };
+            creators["leader travel target"] = [](PlayerbotAI* ai) { return new LeaderTravelTargetValue(ai); };
+
             creators["travel target active"] = [](PlayerbotAI* ai) { return new TravelTargetActiveValue(ai); };            
             creators["travel target traveling"] = [](PlayerbotAI* ai) { return new TravelTargetTravelingValue(ai); };
+            creators["travel target working"] = [](PlayerbotAI* ai) { return new TravelTargetWorkingValue(ai); };
             
-            creators["travel target"] = [](PlayerbotAI* ai) { return new TravelTargetValue(ai); };
             creators["future travel destinations"] = [](PlayerbotAI* ai) { return new FutureTravelDestinationsValue(ai); };
             creators["no active travel destinations"] = [](PlayerbotAI* ai) { return new NoActiveTravelDestinationsValue(ai); };
             creators["need travel purpose"] = [](PlayerbotAI* ai) { return new NeedTravelPurposeValue(ai); };
             creators["should travel named"] = [](PlayerbotAI* ai) { return new ShouldTravelNamedValue(ai); };
             creators["in overworld"] = [](PlayerbotAI* ai) { return new InOverworldValue(ai); };
             creators["quest stage active"] = [](PlayerbotAI* ai) { return new QuestStageActiveValue(ai); };
+
+            creators["can fish"] = [](PlayerbotAI* ai) { return new CanFishValue(ai); };
+            creators["can open fishing dobber"] = [](PlayerbotAI* ai) { return new CanOpenFishingDobberValue(ai); };
+            creators["done fishing"] = [](PlayerbotAI* ai) { return new DoneFishingValue(ai); };
+
+            //Stuck
+            creators["time since last change"] = [](PlayerbotAI* ai) { return new TimeSinceLastChangeValue(ai); };
+            creators["distance moved since"] = [](PlayerbotAI* ai) { return new DistanceMovedSinceValue(ai); };
+
+            creators["runeforge spells"] = [](PlayerbotAI* ai) { return new RuneForgeSpellsValue(ai); };
+            creators["best runeforge spell"] = [](PlayerbotAI* ai) { return new BestRuneForgeSpellValue(ai); };
+            creators["should runeforge"] = [](PlayerbotAI* ai) { return new ShouldRuneForgeValue(ai); };
         };
     };
 }

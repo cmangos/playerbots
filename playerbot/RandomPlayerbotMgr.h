@@ -161,7 +161,10 @@ public:
 
         std::mutex m_ahActionMutex;
 
-        std::vector<AuctionEntry> GetAhPrices(uint32 itemId) { return ahMirror[itemId]; }
+        const std::vector<AuctionEntry>& GetAhPrices(uint32 itemId) {
+            static const std::vector<AuctionEntry> emptyVector; // Avoid returning dangling refs
+            auto it = ahMirror.find(itemId);
+            return (it != ahMirror.end()) ? it->second : emptyVector;}
         uint32 GetPlayersLevel() { return playersLevel; }
 	protected:
 	    virtual void OnBotLoginInternal(Player * const bot);

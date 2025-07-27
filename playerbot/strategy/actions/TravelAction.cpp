@@ -17,15 +17,39 @@ bool TravelAction::Execute(Event& event)
 {    
     TravelTarget * target = AI_VALUE(TravelTarget *, "travel target");
     
-    target->CheckStatus();    
+    target->CheckStatus();     
+
+    SET_AI_VALUE2(time_t, "manual time", "next travel check", time(0) + 5);
 
     return false;
 }
 
 bool TravelAction::isUseful()
 {
+    if (!AI_VALUE(bool,"travel target active"))
+        return false;
+
+    if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
+            return false;
+
+    if (sServerFacade.isMoving(bot))
+        return false;
+
+    if (AI_VALUE2(time_t, "manual time", "next travel check") > time(0))
+        return false;
+
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
-    return target->IsWorking() || target->TravelTarget::IsCooldownDown();
+    if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
+        return true;
+    
+    if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
+        return true;
+
+    if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_READY && !urand(0, 20))
+        return true;
+
+    return false;
 }
 
 bool MoveToDarkPortalAction::Execute(Event& event)

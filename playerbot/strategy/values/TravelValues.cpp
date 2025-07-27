@@ -103,6 +103,25 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
         {
             purpose |= (uint32)TravelDestinationPurpose::Grind;
         }
+        else  //Added these specifically because dk start mobs drop no money but have sellable loot.
+        {
+            switch (entry)
+            {
+            case 29080: //Scarlet Champion
+            case 29029: //Scarlet Inquisitor
+            case 29000: //Scarlet Commander Rodrick
+            case 28940: //Scarlet Crusader
+            case 28939: //Scarlet Preacher
+            case 28936: //Scarlet Commander
+            case 28898: //Scarlet Captain
+            case 28896: //Scarlet Infantryman
+            case 28895: //Scarlet Medic
+            case 28892: //Scarlet Peasant
+            case 28610: //Scarlet Marksman
+                purpose |= (uint32)TravelDestinationPurpose::Grind;
+                break;
+            }
+        }
 
         if (cInfo->Rank == 3 || cInfo->Rank == 4 || cInfo->Rank == 1)
         {
@@ -256,6 +275,8 @@ bool NeedTravelPurposeValue::Calculate()
             return true;
         break;
     case TravelDestinationPurpose::GatherFishing:
+        if (!AI_VALUE2(bool, "has strategy", "tfish"))
+            return false;
     case TravelDestinationPurpose::GatherSkinning:
     case TravelDestinationPurpose::GatherMining:
     case TravelDestinationPurpose::GatherHerbalism:
@@ -391,7 +412,12 @@ bool TravelTargetActiveValue::Calculate()
 
 bool TravelTargetTravelingValue::Calculate()
 {
-    return AI_VALUE(TravelTarget*, "travel target")->IsTraveling();
+    return AI_VALUE(TravelTarget*, "leader travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || AI_VALUE(TravelTarget*, "leader travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_READY;
+};
+
+bool TravelTargetWorkingValue::Calculate()
+{
+    return AI_VALUE(TravelTarget*, "leader travel target")->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK;
 };
 
 bool QuestStageActiveValue::Calculate()

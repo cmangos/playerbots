@@ -131,5 +131,7 @@ namespace ai
         HomeBindValue(PlayerbotAI* ai) : CalculatedValue<WorldPosition>(ai, "home bind", 30) {}
 
         WorldPosition Calculate();
+
+        virtual std::string Format();
     };
 }

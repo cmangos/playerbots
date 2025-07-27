@@ -235,6 +235,20 @@ namespace ai
         virtual bool IsActive();
     };
 
+    class RpgSpellClickTrigger : public RpgTrigger
+    {
+    public:
+        RpgSpellClickTrigger(PlayerbotAI* ai, std::string name = "rpg spell click") : RpgTrigger(ai, name) {}
+        virtual bool IsActive();
+    };
+
+    class RpgGossipTalkTrigger : public RpgTrigger
+    {
+    public:
+        RpgGossipTalkTrigger(PlayerbotAI* ai, std::string name = "rpg gossip talk") : RpgTrigger(ai, name) {}
+        virtual bool IsActive();
+    };
+
     class RandomJumpTrigger : public Trigger
     {
     public:

@@ -4,6 +4,7 @@
 #include "SharedValueContext.h"
 #include "ItemUsageValue.h"
 #include "playerbot/TravelMgr.h"
+#include "playerbot/strategy/deathknight/DKActions.h"
 
 using namespace ai;
 
@@ -26,7 +27,7 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
 
 	for (auto [entry, questId] : questObjectMgr->GetGOQuestInvolvedRelationsMap())
-		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestGiver;
+		rMap[-(int32)entry][questId] |= (uint8)TravelDestinationPurpose::QuestTaker;
 
 	//Quest objectives
 	ObjectMgr::QuestMap const& questMap = sObjectMgr.GetQuestTemplates();
@@ -47,16 +48,21 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 			if (quest->ReqItemId[objective])
 			{
 				uint32 itemId = quest->ReqItemId[objective];
-				ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-
-				if (proto)
+				while (itemId)
 				{
-					for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", itemId))
+					ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+
+					if (proto)
 					{
-						std::string chanceQualifier = std::to_string(entry) + " " + std::to_string(itemId);
-						if (proto->Class == ITEM_CLASS_QUEST || GAI_VALUE2(float, "loot chance", chanceQualifier) > 5.0f)
-							rMap[entry][questId] |= relationFlag;
+						for (auto& entry : GAI_VALUE2(std::list<int32>, "item drop list", itemId))
+						{
+							std::string chanceQualifier = std::to_string(entry) + " " + std::to_string(itemId);
+							if (proto->Class == ITEM_CLASS_QUEST || GAI_VALUE2(float, "loot chance", chanceQualifier) > 5.0f)
+								rMap[entry][questId] |= relationFlag;
+						}
 					}
+
+					itemId = ItemUsageValue::ItemCreatedFrom(itemId);
 				}
 			}
 
@@ -79,6 +85,22 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 		}
 	}
 
+	//Hard coded:
+#ifdef MANGOSBOT_TWO
+	rMap[28406][12733] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Death Knight Initiate][Death's Challenge]
+	rMap[28605][12680] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Havenshire Stallion][Grand Theft Palomino]
+	rMap[28606][12680] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Havenshire Mare][Grand Theft Palomino]
+	rMap[28607][12680] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Havenshire Cotl][Grand Theft Palomino]
+	rMap[28653][12680] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Salanar the Horseman][Grand Theft Palomino]	
+
+	rMap[28909][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Dark Rider of Acherus][Into the Realm of Shadows]	
+	rMap[28782][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Acherus Deathcharger][Into the Realm of Shadows]	
+	rMap[29501][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scourge Gryphon][Into the Realm of Shadows]	
+	
+
+	rMap[28658][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Gothic the Harvester][The Gift That Keeps On Giving]	
+	rMap[28819][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Miner][The Gift That Keeps On Giving]	
+#endif
 	return rMap;
 }
 
@@ -537,16 +559,27 @@ bool NeedQuestRewardValue::Calculate()
 bool NeedQuestObjectiveValue::Calculate()
 {
 	uint32 questId = getMultiQualifierInt(getQualifier(),0,",");
-	uint32 objective = getMultiQualifierInt(getQualifier(), 1, ",");
 	if (!bot->IsActiveQuest(questId))
 		return false;
 
-	if (bot->GetQuestStatus(questId) != QUEST_STATUS_INCOMPLETE)
+	QuestStatusData& questStatus = bot->getQuestStatusMap().at(questId);
+
+	if (questStatus.m_status != QUEST_STATUS_INCOMPLETE)
 		return false;
 
-	QuestStatusData& questStatus = bot->getQuestStatusMap()[questId];
+	if (getQualifier().find(",") == std::string::npos) //Status of entire quest.
+		return true;
+
+#ifdef MANGOSBOT_TWO        
+		switch (questId) {
+		case 12687: //Into the Realm of Shadows
+			return true; //No objectives for this quest.
+		}
+#endif
 
 	Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+
+	uint32 objective = getMultiQualifierInt(getQualifier(), 1, ",");
 
 	uint32  reqCount = pQuest->ReqItemCount[objective];
 	uint32  hasCount = questStatus.m_itemcount[objective];
@@ -591,9 +624,16 @@ bool CanUseItemOn::Calculate()
 	if (!guidP)
 		return false;
 
-	if (itemId == 17117) //Rat Catcher's Flute
+	switch (itemId)
 	{
+	case 17117: //Rat Catcher's Flute
 		return guidP.IsCreature() && guidP.GetEntry() == 13016; //Deeprun Rat		
+	case 52566: //Motivate-a-Tron (currently broken?)
+		return guidP.IsCreature() && guidP.GetEntry() == 39623; //Gnome Citizen
+	case 38607: //Battle-worn Sword
+		return guidP.IsGameObject() && (std::find(RUNEFORGES.begin(), RUNEFORGES.end(), guidP.GetEntry()) != RUNEFORGES.end()); //Runeforge
+	case 39253: //Gift of the Harester
+		return guidP.IsCreature() && guidP.GetEntry() == 28819; //Scarlet Miner
 	}
 
 	if (guidP.IsUnit())

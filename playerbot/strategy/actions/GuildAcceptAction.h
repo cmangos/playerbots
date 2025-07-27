@@ -8,5 +8,6 @@ namespace ai
     public:
         GuildAcceptAction(PlayerbotAI* ai) : Action(ai, "guild accept") {}
         virtual bool Execute(Event& event);
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 }

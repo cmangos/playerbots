@@ -76,8 +76,12 @@ void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32
         break;
     }
     case HIGHGUID_UNIT:
+#ifdef MANGOSBOT_TWO
+    case HIGHGUID_VEHICLE:
+#endif
     {
         setMapId(mapId);
+        setX(1); //Pretend to know so map can be loaded.
         if (Map* map = getMap(instanceId))
         {
             Creature* creature = map->GetAnyTypeCreature(guid);
@@ -164,7 +168,7 @@ float WorldPosition::fDist(const WorldPosition& to) const
         return sqrt(sqDistance2d(to));
 
     //this -> mapTransfer | mapTransfer -> center
-    return sTravelMgr.FastMapTransDistance(*this, to);
+    return sTravelMgr.MapTransDistance(*this, to);
 };
 
 //When moving from this along list return last point that falls within range.
@@ -979,8 +983,15 @@ std::vector<WorldPosition> WorldPosition::getPathFromPath(const std::vector<Worl
 
 bool WorldPosition::ClosestCorrectPoint(float maxRange, float maxHeight, uint32 instanceId)
 {
+    MANGOS_ASSERT(std::isfinite(coord_x) && std::isfinite(coord_y) && std::isfinite(coord_z));
+
     MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
+
+    MANGOS_ASSERT(mmap);
+
     dtNavMeshQuery const* query = mmap->GetNavMeshQuery(getMapId(), instanceId);
+
+    MANGOS_ASSERT(query && query->getAttachedNavMesh());
 
     float curPoint[VERTEX_SIZE] = {coord_y, coord_z, coord_x };
     float extend[VERTEX_SIZE] = { maxRange, maxHeight, maxRange };

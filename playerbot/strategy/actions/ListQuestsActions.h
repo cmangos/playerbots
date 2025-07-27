@@ -21,6 +21,7 @@ namespace ai
     public:
         ListQuestsAction(PlayerbotAI* ai) : ChatCommandAction(ai, "quests") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     private:
         void ListQuests(Player* requester, QuestListFilter filter, QuestTravelDetail travelDetail = QUEST_TRAVEL_DETAIL_NONE, std::set<uint32> onlyQuestIds = {});

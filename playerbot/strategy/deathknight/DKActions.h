@@ -1,6 +1,7 @@
 #pragma once
 
 #include "playerbot/strategy/actions/GenericActions.h"
+#include "playerbot/strategy/actions/MovementActions.h"
 
 namespace ai
 {
@@ -298,5 +299,16 @@ namespace ai
 	class CastBloodTapAction : public CastMeleeSpellAction {
 	public:
 		CastBloodTapAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "blood tap") {}
+	};
+
+	const std::vector<uint32> RUNEFORGES = { 190557, 191746, 191747, 191748, 191757, 191758 };
+
+	class RuneforgeAction : public MovementAction
+	{
+	public:
+		RuneforgeAction(PlayerbotAI* ai) : MovementAction(ai, "runeforge") {}
+
+		virtual bool Execute(Event& event);
+		virtual bool isUseful();
 	};
 }

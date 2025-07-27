@@ -73,6 +73,29 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
         if (!unit)
             continue;
 
+        switch (unit->GetEntry())
+        {
+        case 28605: //Havenshire Stallion
+        case 28606: //Havenshire Mare
+        case 28607: //Havenshire Cotl
+        case 28891: //Scarlet Miner
+            continue;
+        case 29080: //Scarlet Champion
+        case 29029: //Scarlet Inquisitor
+        case 29000: //Scarlet Commander Rodrick
+        case 28940: //Scarlet Crusader
+        case 28939: //Scarlet Preacher
+        case 28936: //Scarlet Commander
+        case 28898: //Scarlet Captain
+        case 28896: //Scarlet Infantryman
+        case 28895: //Scarlet Medic
+        case 28892: //Scarlet Peasant
+        case 28610: //Scarlet Marksman
+            if (AI_VALUE2(bool, "need quest objective", "12680,0"))
+                continue;
+            break;
+        }
+
         if (abs(bot->GetPositionZ() - unit->GetPositionZ()) > sPlayerbotAIConfig.spellDistance)
         {
             if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
@@ -134,7 +157,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
        
         if (unit->GetEntry() && !AI_VALUE2(bool, "need for quest", std::to_string(unit->GetEntry())))
         {
-            if (urand(0, 100) < 99 && AI_VALUE(TravelTarget*, "travel target")->IsWorking() && typeid(AI_VALUE(TravelTarget*, "travel target")->GetDestination()) != typeid(GrindTravelDestination))
+            if (urand(0, 100) < 99 && AI_VALUE(bool, "travel target working") && typeid(AI_VALUE(TravelTarget*, "travel target")->GetDestination()) != typeid(GrindTravelDestination))
             {
                 if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
                     ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (not needed for active quest).");
@@ -144,7 +167,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
             else if (creature && !MaNGOS::XP::Gain(bot, creature) && urand(0, 50))
             {
                 if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
-                    if ((context->GetValue<TravelTarget*>("travel target")->Get()->IsWorking() && typeid(context->GetValue<TravelTarget*>("travel target")->Get()->GetDestination()) != typeid(GrindTravelDestination)))
+                    if ((AI_VALUE(bool, "travel target traveling") && typeid(AI_VALUE(TravelTarget*, "travel target")->GetDestination()) != typeid(GrindTravelDestination)))
                         ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (not xp and not needed for quest).");
 
                 continue;
@@ -152,7 +175,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
             else if (urand(0, 100) < 75)
             {
                 if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
-                    if ((context->GetValue<TravelTarget*>("travel target")->Get()->IsWorking() && typeid(context->GetValue<TravelTarget*>("travel target")->Get()->GetDestination()) != typeid(GrindTravelDestination)))
+                    if (AI_VALUE(bool, "travel target traveling") && typeid(AI_VALUE(TravelTarget*, "travel target")->GetDestination()) != typeid(GrindTravelDestination))
                         ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " increased distance (not needed for quest).");
 
                 newdistance += 20;

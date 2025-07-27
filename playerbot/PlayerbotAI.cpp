@@ -51,6 +51,7 @@
 #ifdef BUILD_ELUNA
 #include "LuaEngine/LuaEngine.h"
 #endif
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
 using namespace ai;
 
@@ -231,6 +232,11 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
 #ifndef MANGOSBOT_ZERO
     masterOutgoingPacketHandlers.AddHandler(MSG_RAID_READY_CHECK_FINISHED, "ready check finished");
 #endif
+
+    if (!HasRealPlayerMaster() && bot->GetFreeTalentPoints() > 0)
+    {
+        DoSpecificAction("auto talents");
+    }
 }
 
 PlayerbotAI::~PlayerbotAI()
@@ -247,6 +253,7 @@ PlayerbotAI::~PlayerbotAI()
 
 void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
 {
+    AiObjectContext* context = aiObjectContext;
     std::string mapString = WorldPosition(bot).isOverworld() ? std::to_string(bot->GetMapId()) : "I";
     auto pmo = sPerformanceMonitor.start(PERF_MON_TOTAL, "PlayerbotAI::UpdateAI " + mapString);
     
@@ -283,10 +290,26 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
     {
         isMoving = true;
 
-        // release loot if moving
-        if (!bot->GetLootGuid().IsEmpty())
+        GuidPosition lootObject(bot->GetLootGuid(), bot);
+
+        bool shouldRelease = true;
+
+        if (lootObject)
+        {
+            if (lootObject.IsGameObject() && lootObject.GetGameObjectInfo()->type == GAMEOBJECT_TYPE_FISHINGNODE)
+                shouldRelease = false;
+            else if (lootObject.GetWorldObject(bot->GetInstanceId()) && bot->GetDistance(lootObject.GetWorldObject(bot->GetInstanceId())) < INTERACTION_DISTANCE)
+                shouldRelease = false;
+        }
+
+        // release loot if moving and far from object.
+        if (shouldRelease)
+        {
             if (Loot* loot = sLootMgr.GetLoot(bot, bot->GetLootGuid()))
+            {
                 loot->Release(bot);
+            }
+        }
     }
     else if (isMoving)
     {
@@ -297,11 +320,10 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
     }
 
 #ifdef MANGOSBOT_TWO
-    //Remove gryphon
-    if (!bot->IsMounted() && bot->GetMountID() && !bot->IsTaxiFlying())
-    {
-        Unmount();
-    }
+    if (bot->IsPendingDismount())
+        bot->ResolvePendingUnmount();
+    else
+        bot->ResolvePendingMount();
 #endif
 
     // wake up if in combat
@@ -358,7 +380,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
             stop << bot->GetObjectGuid().WriteAsPacked();
 #endif
             stop << bot->m_movementInfo;
-            bot->GetSession()->HandleMovementOpcodes(stop);
+            QueuePacket(stop);
 
             bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
             bot->m_movementInfo.jump = MovementInfo::JumpInfo();
@@ -368,7 +390,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
             land << bot->GetObjectGuid().WriteAsPacked();
 #endif
             land << bot->m_movementInfo;
-            bot->GetSession()->HandleMovementOpcodes(land);
+            QueuePacket(land);
             sLog.outDetail("%s: Jump: Landed, landTime: %u", bot->GetName(), curTime);
 
             jumpTime = 0;
@@ -448,9 +470,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
         {
             uint32 itemId = bot->GetUInt32Value(PLAYER_AMMO_ID);
             if (itemId && bot->GetItemCount(itemId))
-            {
-                AiObjectContext* context = aiObjectContext;
-
+            {                
                 std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", this->chatHelper.formatQItem(itemId));
 
                 for (auto item : items)
@@ -848,9 +868,6 @@ void PlayerbotAI::Unmount()
     {
         bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         bot->Unmount();
-#ifdef MANGOSBOT_TWO
-        bot->ResolvePendingUnmount();
-#endif
 
         bot->UpdateSpeed(MOVE_RUN, true);
         bot->UpdateSpeed(MOVE_RUN, false);
@@ -1218,6 +1235,10 @@ void PlayerbotAI::Reset(bool full)
         target->SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
         target->SetExpireIn(1000);
 
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = FutureDestinations();
+        RESET_AI_VALUE2(std::string, "manual string", "future travel purpose");
+        RESET_AI_VALUE2(int, "manual int", "future travel relevance");
+
         InterruptSpell();
 
         StopMoving();
@@ -1522,6 +1543,9 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             case CHAT_MSG_CHANNEL:
             case CHAT_MSG_SAY:
             case CHAT_MSG_PARTY:
+#ifdef MANGOSBOT_TWO
+            case CHAT_MSG_PARTY_LEADER:
+#endif
             case CHAT_MSG_YELL:
             case CHAT_MSG_WHISPER:
             case CHAT_MSG_GUILD:
@@ -1592,6 +1616,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 [[fallthrough]];
             case CHAT_MSG_SAY:
             case CHAT_MSG_PARTY:
+            case CHAT_MSG_PARTY_LEADER:
             case CHAT_MSG_YELL:
             case CHAT_MSG_WHISPER:
             case CHAT_MSG_GUILD:
@@ -1689,6 +1714,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     }
                 }
 
+                MANGOS_ASSERT(!message.empty());     
                 QueueChatResponse(msgtype, guid1, ObjectGuid(), message, chanName, name, isAiChat);
                 GetAiObjectContext()->GetValue<time_t>("last said", "chat")->Set(time(0) + urand(5, 25));
 
@@ -1809,7 +1835,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                 highestPoint = point;
         }
 
-        bot->Relocate(dest_calculated.getX(), dest_calculated.getY(), dest_calculated.getZ());
+        bot->Relocate(highestPoint.getX(), highestPoint.getY(), highestPoint.getZ());
         //bot->m_movementInfo.ChangePosition(dest_calculated.getX(), dest_calculated.getY(), dest_calculated.getZ(), bot->GetOrientation());
         sLog.outDetail("%s: KNOCKBACK x: %f, y: %f, z: %f, time: %f, dist: %f, maxHeight: %f inPlace: %u, landTime: %u", bot->GetName(), dest_calculated.getX(), dest_calculated.getY(), dest_calculated.getZ(), timeToLand, distToLand, maxHeight, jumpInPlace, jumpTime);
         return;
@@ -1916,6 +1942,9 @@ void PlayerbotAI::DoNextAction(bool min)
 
     currentEngine->DoNextAction(NULL, 0, (minimal || min), bot->IsTaxiFlying());
 
+    if (!bot->IsInWorld()) //Teleport out of bg
+        return;
+
     if (minimal)
     {
         if(!bot->isAFK() && !bot->InBattleGround() && !HasRealPlayerMaster())
@@ -1929,13 +1958,20 @@ void PlayerbotAI::DoNextAction(bool min)
 
 
     Group *group = bot->GetGroup();
+
+    //Remove bot masters not in our group.
+    if (master && master != bot && !HasActivePlayerMaster() && (!group || group->GetLeaderGuid() != master->GetObjectGuid()))
+    {
+        master = IsRealPlayer() ? bot : nullptr;
+        SetMaster(master);
+        ResetStrategies();
+    }
+
     // test BG master set
     if ((!master || !HasActivePlayerMaster()) && group && !IsRealPlayer())
     {
-        PlayerbotAI* ai = bot->GetPlayerbotAI();
-
         //Ideally we want to have the leader as master.
-        Player* newMaster = ai->GetGroupMaster();
+        Player* newMaster = GetGroupMaster();
         Player* playerMaster = nullptr;
 
         //Are there any non-bot players in the group?
@@ -2022,21 +2058,21 @@ void PlayerbotAI::DoNextAction(bool min)
         if (newMaster && (!master || master != newMaster) && bot != newMaster)
         {
             master = newMaster;
-            ai->SetMaster(newMaster);
-            ai->ResetStrategies();
+            SetMaster(newMaster);
+            ResetStrategies();
 
             if (sRandomPlayerbotMgr.IsFreeBot(bot))
             {
-                ai->ChangeStrategy("+follow", BotState::BOT_STATE_NON_COMBAT);
+                ChangeStrategy("+follow", BotState::BOT_STATE_NON_COMBAT);
             }
 
-            if (ai->GetMaster() == ai->GetGroupMaster())
+            if (GetMaster() == GetGroupMaster())
             {
-                ai->TellPlayer(master, BOT_TEXT("hello_follow"));
+                TellPlayer(master, BOT_TEXT("hello_follow"));
             }
             else
             {
-                ai->TellPlayer(master, BOT_TEXT("hello"));
+                TellPlayer(master, BOT_TEXT("hello"));
             }
         }
     }
@@ -2485,7 +2521,7 @@ Unit* PlayerbotAI::GetUnit(CreatureDataPair const* creatureDataPair)
 }
 
 
-Creature* PlayerbotAI::GetCreature(ObjectGuid guid)
+Creature* PlayerbotAI::GetCreature(ObjectGuid guid) const
 {
     if (!guid)
         return NULL;
@@ -2495,6 +2531,18 @@ Creature* PlayerbotAI::GetCreature(ObjectGuid guid)
         return NULL;
 
     return map->GetCreature(guid);
+}
+
+Creature* PlayerbotAI::GetAnyTypeCreature(ObjectGuid guid) const
+{
+    if (!guid)
+        return NULL;
+
+    Map* map = bot->GetMap();
+    if (!map)
+        return NULL;
+
+    return map->GetAnyTypeCreature(guid);
 }
 
 GameObject* PlayerbotAI::GetGameObject(ObjectGuid guid)
@@ -2833,10 +2881,14 @@ ChatChannelSource PlayerbotAI::GetChatChannelSource(Player* bot, uint32 type, st
             return ChatChannelSource::SRC_GUILD;
         }
         case CHAT_MSG_PARTY:
+#ifdef MANGOSBOT_TWO
+        case CHAT_MSG_PARTY_LEADER:
+#endif
         {
             return ChatChannelSource::SRC_PARTY;
         }
         case CHAT_MSG_RAID:
+        case CHAT_MSG_RAID_LEADER:
         {
             return ChatChannelSource::SRC_RAID;
         }
@@ -6205,105 +6257,150 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
         std::ostringstream out;
 
         TravelTarget* target = GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
+
+        if (target->GetGroupmember() && target->GetGroupmember().GetPlayer())
+            out << target->GetGroupmember().GetPlayer()->GetName() << "'s ";
+
         if (target->GetDestination()) {
             out << "Target: " << target->GetDestination()->GetTitle();
-
-            if (target->GetPosition())
-            {
-                out << "\nLocation: " << target->GetPosition()->getAreaName();
-                out << " (" << (uint32)target->GetPosition()->distance(bot) << "y)";
-            }
         }
-        out << "\nStatus: ";
-        if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_NONE)
-            out << "none";
-        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
-            out << "preparing";
-        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
-            out << (target->IsForced() ? "forced traveling" : "traveling");
-        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
-            out << "working";
-        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
-            out << "cooldown";
-        else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << "expired";
 
-        if(target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << " [for " << (target->GetTimeLeft()/1000) << "s]";
-
-        if(target->GetRetryCount(true) || target->GetRetryCount(false))
-            out << "(retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
-
-        out << "\nConditions: ";
-
-        for (auto& condition : target->GetConditions())
+        if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_NONE)
         {
-            AiObjectContext* context = GetAiObjectContext();
-            out << condition;
-            if (AI_VALUE(bool, condition))
-                out << " (true)";
-            else
-                out << " (false)";
+            out << "\nStatus: ";
+            if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_READY)
+                out << "ready";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
+                out << "preparing";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
+                out << (target->IsForced() ? "forced traveling" : "traveling");
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
+                out << "working";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
+                out << "cooldown";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
+                out << "expired";
 
-            if (condition != target->GetConditions().back())
-                out << ", ";
+            if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
+                out << " [for " << (target->GetTimeLeft() / 1000) << "s]";
+
+            if (target->GetRetryCount(true) || target->GetRetryCount(false))
+                out << "(retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";           
         }
 
         return out.str();
     }
-    else if (command == "budget")
+    else if (command == "traveldetail")
     {
+        std::ostringstream out;
+
+        TravelTarget* target = GetAiObjectContext()->GetValue<TravelTarget*>("travel target")->Get();
+
+        if (target->GetGroupmember() && target->GetGroupmember().GetPlayer())
+            out << target->GetGroupmember().GetPlayer()->GetName() << "'s ";
+
+        if (target->GetDestination()) {
+            out << target->GetDestination()->GetShortName() << " travel target";
+
+            out << "\nTarget: " << target->GetDestination()->GetTitle();
+
+            out << "\nDistance " << round(target->GetDestination()->DistanceTo(bot)) << "y";
+
+            if (*target->GetPosition())
+            {
+                out << "\nLocation: " << target->GetPosition()->getAreaName();
+                out << " (" << round(target->GetPosition()->distance(bot)) << "y)";
+            }
+        }
+        
+        if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_NONE)
+        {
+            out << "\nStatus: ";
+            if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_READY)
+                out << "ready";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
+                out << "preparing";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
+                out << (target->IsForced() ? "forced traveling" : "traveling");
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
+                out << "working";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN)
+                out << "cooldown";
+            else if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_EXPIRED)
+                out << "expired";
+
+            if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
+                out << " [for " << (target->GetTimeLeft() / 1000) << "s]";
+
+            if (target->GetRetryCount(true) || target->GetRetryCount(false))
+                out << "(retry " << target->GetRetryCount(true) << "/" << target->GetRetryCount(false) << ")";
+
+            if (target->GetConditions().size())
+            {
+                out << "\nConditions: ";
+
+                for (auto& condition : target->GetConditions())
+                {
+                    AiObjectContext* context = GetAiObjectContext();
+                    out << condition;
+                    if (AI_VALUE(bool, condition))
+                        out << " (true)";
+                    else
+                        out << " (false)";
+
+                    if (condition != target->GetConditions().back())
+                        out << ", ";
+                }
+            }
+        }
+
+        return out.str();
+    }
+    else if (command.find("budget") == 0)
+    {
+        std::string sub;
+
+        if (command.size() > 7)
+            sub = command.substr(7);
+
         std::ostringstream out;
 
         AiObjectContext* context = GetAiObjectContext();
 
-        out << "Current money: " << ChatHelper::formatMoney(bot->GetMoney()) << " free to use:" << ChatHelper::formatMoney(AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::anything)) << "\n";
-        out << "Purpose | Available / Needed \n";
+        if (sub.empty())
+        {
+            out << "Current money: " << ChatHelper::formatMoney(bot->GetMoney()) << " free to use:" << ChatHelper::formatMoney(AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::anything)) << "\n";
+            out << "Purpose: Needed | Available\n";
+        }
 
         for (uint32 i = 1; i < (uint32)NeedMoneyFor::anything; i++)
         {
             NeedMoneyFor needMoneyFor = NeedMoneyFor(i);
 
-            switch (needMoneyFor)
-            {
-            case NeedMoneyFor::none:
-                out << "nothing";
-                break;
-            case NeedMoneyFor::repair:
-                out << "repair";
-                break;
-            case NeedMoneyFor::ammo:
-                out << "ammo";
-                break;
-            case NeedMoneyFor::spells:
-                out << "spells";
-                break;
-            case NeedMoneyFor::travel:
-                out << "travel";
-                break;
-            case NeedMoneyFor::consumables:
-                out << "consumables";
-                break;
-            case NeedMoneyFor::gear:
-                out << "gear";
-                break;
-            case NeedMoneyFor::guild:
-                out << "guild";
-                break;
-            case NeedMoneyFor::tradeskill:
-                out << "tradeskill";
-                break;
-            case NeedMoneyFor::ah:
-                out << "ah";
-                break;
-            case NeedMoneyFor::mount:
-                out << "mount";
-                break;
-            case NeedMoneyFor::anything:
-                out << "anything";
-                break;
-            }
-            out << " | " << ChatHelper::formatMoney(AI_VALUE2(uint32, "free money for", i)) << " / " << ChatHelper::formatMoney(AI_VALUE2(uint32, "money needed for", i)) << "\n";
+            std::unordered_map<NeedMoneyFor, std::string> needStrMap =
+            { { NeedMoneyFor::none, "nothing"},
+              { NeedMoneyFor::repair, "repair"},
+              { NeedMoneyFor::ammo, "ammo"},
+              { NeedMoneyFor::spells, "spells"},
+              { NeedMoneyFor::travel, "travel"},
+              { NeedMoneyFor::consumables, "consumables"},
+              { NeedMoneyFor::gear, "gear"},
+              { NeedMoneyFor::guild, "guild"},
+              { NeedMoneyFor::tradeskill, "tradeskill"},
+              { NeedMoneyFor::skilltraining, "skilltraining"},
+              { NeedMoneyFor::ah, "ah"},
+              { NeedMoneyFor::mount, "mount"},
+              { NeedMoneyFor::anything, "anything"}};
+
+            if (!sub.empty() && needStrMap.at(needMoneyFor).find(sub) == std::string::npos)
+                continue;
+
+            out <<  needStrMap.at(needMoneyFor);
+
+            out << ": " << ChatHelper::formatMoney(AI_VALUE2(uint32, "money needed for", i)) << " | " << ChatHelper::formatMoney(AI_VALUE2(uint32, "free money for", i));
+
+            if (i != (uint32)NeedMoneyFor::mount)
+                out << "\n";
         }
 
         return out.str();
@@ -6988,7 +7085,7 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
 
     //Look for item id's in the command.
     ItemIds ids = GetChatHelper()->parseItems(text);
-    if (!ids.empty())
+    if (!ids.empty() && text.find("usage ") == std::string::npos)
     {
         for (ItemIds::iterator i = ids.begin(); i != ids.end(); i++)
         {
@@ -7089,6 +7186,11 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
         FindRecipeVisitor visitor(bot);
         VISIT;
     }
+    else if (text == "open")
+    {
+        FindOpenItemVisitor visitor(bot);
+        VISIT;
+    }
     else if (text == "quest")
     {
         FindQuestItemVisitor visitor(bot);
@@ -7119,17 +7221,9 @@ std::list<Item*> PlayerbotAI::InventoryParseItems(std::string text, IterateItems
     }
     else if (text == "vendor")
     {
-        FindItemUsageVisitor visitor(bot, ItemUsage::ITEM_USAGE_VENDOR);
-        VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
-
-        if (AI_VALUE(uint8, "bag space") > 80 && !urand(0, 10))
-        {
-            FindItemUsageVisitor visitor(bot, ItemUsage::ITEM_USAGE_AH);
-            VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
-
-            visitor = FindItemUsageVisitor(bot, ItemUsage::ITEM_USAGE_BROKEN_AH);
-            VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
-        }
+        bool vendorAH = AI_VALUE(uint8, "bag space") > 80 && !urand(0, 10);
+        FindVendorItemsVisitor visitor(bot, vendorAH);
+        VISIT_MASK(IterateItemsMask::ITERATE_ITEMS_IN_BAGS);      
     }
 
     uint32 quality = GetChatHelper()->parseItemQuality(text);
@@ -7835,9 +7929,15 @@ void PlayerbotAI::EnchantItemT(uint32 spellid, uint8 slot, Item* item)
       return;
    }
 
-   bot->ApplyEnchantment(pItem, PERM_ENCHANTMENT_SLOT, false);
-   pItem->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchantid, 0, 0);
-   bot->ApplyEnchantment(pItem, PERM_ENCHANTMENT_SLOT, true);
+#ifdef MANGOSBOT_TWO
+   EnchantmentSlot enchantSlot = spellInfo->Effect[0] == SPELL_EFFECT_ENCHANT_ITEM_PRISMATIC ? PRISMATIC_ENCHANTMENT_SLOT : PERM_ENCHANTMENT_SLOT;
+#else
+   EnchantmentSlot enchantSlot = PERM_ENCHANTMENT_SLOT;
+#endif
+
+   bot->ApplyEnchantment(pItem, enchantSlot, false);
+   pItem->SetEnchantment(enchantSlot, enchantid, 0, 0);
+   bot->ApplyEnchantment(pItem, enchantSlot, true);
 
    sLog.outDetail("%s: items was enchanted successfully!", bot->GetName());
 }
@@ -7875,6 +7975,7 @@ bool PlayerbotAI::CanMove()
         sServerFacade.IsInRoots(bot) ||
         sServerFacade.IsFeared(bot) ||
         sServerFacade.IsCharmed(bot) ||
+        bot->IsStunned() ||
         bot->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION) ||
         bot->IsPolymorphed() ||
         bot->IsTaxiFlying() ||
@@ -8025,4 +8126,128 @@ float PlayerbotAI::GetLevelFloat() const
     level += float(xp) / float(nextLevelXp);
 
     return level;
+}
+
+bool PlayerbotAI::CanSpellClick(Player* bot, uint32 entry)
+{
+#ifdef MANGOSBOT_TWO
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(entry);
+
+    if (clickPair.first != clickPair.second)
+    {
+        for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+        {
+            if (itr->second.questStart)
+            {
+                // not in expected required quest state
+                if (!bot || ((!itr->second.questStartCanActive || !bot->IsActiveQuest(itr->second.questStart)) && !bot->GetQuestRewardStatus(itr->second.questStart)))
+                    return false;
+            }
+
+            if (itr->second.questEnd)
+            {
+                // not in expected forbidden quest state
+                if (!bot || bot->GetQuestRewardStatus(itr->second.questEnd))
+                    return false;
+            }
+
+            return true;
+        }
+    }
+#endif
+    return false;
+}
+
+bool PlayerbotAI::CanSpellClick(ObjectGuid guid) const
+{
+#ifdef MANGOSBOT_TWO
+    if (!guid.IsCreatureOrVehicle())
+        return false;
+
+    Creature* creature = GetAnyTypeCreature(guid);
+
+    if (!creature)
+        return CanSpellClick(bot, guid.GetEntry());
+
+    // Check if there are spell click entries for this creature
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(guid.GetEntry());
+    if (clickPair.first == clickPair.second)
+        return false;
+
+    // Check if any of the spell click entries fit the requirements for this bot
+    for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+    {
+        if (itr->second.IsFitToRequirements(bot, creature))
+        {
+            return true;
+        }
+    }
+#endif
+    return false;
+}
+
+bool PlayerbotAI::HandleSpellClick(uint32 entry) 
+{
+#ifdef MANGOSBOT_TWO
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(entry);
+
+    if (clickPair.first == clickPair.second)
+        return false;
+
+    Creature* creature = nullptr;
+
+    AiObjectContext* context = aiObjectContext;
+    std::list<ObjectGuid> guids = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
+    for (auto& guid : guids)
+    {
+        if (!guid.IsCreatureOrVehicle())
+            continue;
+
+        if (guid.GetEntry() != entry)
+            continue;
+
+        return HandleSpellClick(guid);
+
+        break;
+    }  
+#endif
+    return false;
+}
+
+bool PlayerbotAI::HandleSpellClick(ObjectGuid guid)
+{
+#ifdef MANGOSBOT_TWO
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(guid.GetEntry());
+
+    if (clickPair.first == clickPair.second)
+        return false;
+
+    Creature* creature = nullptr;
+
+    creature = GetAnyTypeCreature(guid);
+
+    if (!creature)
+        return false;
+
+    for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+    {
+        if (itr->second.IsFitToRequirements(bot, creature))
+        {
+            if (sScriptDevAIMgr.OnNpcSpellClick(bot, creature, itr->second.spellId))
+                return true;
+
+            Unit* caster = (itr->second.castFlags & 0x1) ? (Unit*)bot : (Unit*)creature;
+            Unit* target = (itr->second.castFlags & 0x2) ? (Unit*)bot : (Unit*)creature;
+
+            if (itr->second.spellId)
+            {
+                caster->CastSpell(target, itr->second.spellId, TRIGGERED_OLD_TRIGGERED);
+                return true;
+            }
+            else
+                sLog.outError("WorldSession::HandleSpellClick: npc_spell_click with entry %u has 0 in spell_id. Not handled custom case?", creature->GetEntry());
+        }
+    }
+#endif
+    return false;
 }

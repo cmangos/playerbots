@@ -38,7 +38,7 @@ bool CastCustomSpellAction::Execute(Event& event)
     Unit* target = nullptr;
     std::string text = getQualifier();
 
-    if(text.empty())
+    if(text.empty() || text == "travel")
         text = event.getParam();
 
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
@@ -343,14 +343,14 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
                                 for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
                                 {
                                     Player* member = sObjectMgr.GetPlayer(itr->guid);
-                                    if (member && ai->IsSafe(member))
+                                    if (member)
                                     {
                                         if (itr->guid == targetGuid)
                                         {
                                             target = member;
                                         }
 
-                                        if (member->GetDistance(bot) <= sPlayerbotAIConfig.reactDistance)
+                                        if (ai->IsSafe(member) && member->GetDistance(bot) <= sPlayerbotAIConfig.reactDistance)
                                         {
                                             membersAroundSummoner++;
                                         }
@@ -569,7 +569,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
             executed = true;
         }
     }
-
+    
     if (!executed && wo)
     {
         if (pSpellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
@@ -621,8 +621,7 @@ bool CastRandomSpellAction::castSpell(uint32 spellId, WorldObject* wo, Player* r
     if (executed)
     {
         SetDuration(spellDuration);
-    }
-
+    }    
     return executed;
 }
 

@@ -9,7 +9,7 @@ using namespace ai;
 bool ImbueWithStoneAction::Execute(Event& event)
 {
     Player* requester = event.getOwner();
-    if (bot->IsInCombat())
+    if (bot->IsInCombat() || bot->GetLevel() > 70)
         return false;
 
     // remove stealth
@@ -20,15 +20,41 @@ bool ImbueWithStoneAction::Execute(Event& event)
     if (bot->getStandState() != UNIT_STAND_STATE_STAND)
         bot->SetStandState(UNIT_STAND_STATE_STAND);
 
-    // Search and apply stone to weapons
-    // Mainhand
-    Item* mainWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-    if (mainWeapon && mainWeapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
+    bool allowMainhand = true;
+
+#ifndef MANGOSBOT_TWO
+    // Check if shaman +30 lvl (non-WOTLK)
+
+    if (bot->getClass() == CLASS_SHAMAN && bot->GetLevel() > 30)
+        allowMainhand = false;
+
+    if (bot->GetGroup())
     {
-        Item* stone = ai->FindStoneFor(mainWeapon);
-        if (stone)
+        Group* group = bot->GetGroup();
+        for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
         {
-            return UseItem(requester, stone->GetEntry(), mainWeapon);
+            Player* member = ref->getSource();
+            if (!member || member == bot || !member->IsInWorld() || !group->SameSubGroup(bot, member))
+                continue;
+
+            if (member->getClass() == CLASS_SHAMAN && member->GetLevel() > 32)
+            {
+                allowMainhand = false;
+                break;
+            }
+        }
+    }
+#endif
+
+    // Mainhand
+    if (allowMainhand)
+    {
+        Item* mainWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+        if (mainWeapon && mainWeapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
+        {
+            Item* stone = ai->FindStoneFor(mainWeapon);
+            if (stone)
+                return UseItem(requester, stone->GetEntry(), mainWeapon);
         }
     }
 
@@ -38,9 +64,7 @@ bool ImbueWithStoneAction::Execute(Event& event)
     {
         Item* stone = ai->FindStoneFor(secondaryWeapon);
         if (stone)
-        {
             return UseItem(requester, stone->GetEntry(), secondaryWeapon);
-        }
     }
 
     return false;
@@ -48,24 +72,50 @@ bool ImbueWithStoneAction::Execute(Event& event)
 
 bool ImbueWithStoneAction::isUseful()
 {
-    // Search and apply stone to weapons
-    // Mainhand
-    Item* mainWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-    if (mainWeapon && mainWeapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
+    bool allowMainhand = true;
+
+    if (bot->GetLevel() > 70)
+        return false;
+
+#ifndef MANGOSBOT_TWO
+    // Deny mainhand stone use if bot is a Shaman over 30 or grouped with one over 32 (TBC/Vanilla only)
+    if (bot->getClass() == CLASS_SHAMAN && bot->GetLevel() > 30)
+        allowMainhand = false;
+
+    if (bot->GetGroup())
     {
-        if (ai->FindStoneFor(mainWeapon))
+        Group* group = bot->GetGroup();
+        for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
         {
-            return true;
+            Player* member = ref->getSource();
+            if (!member || member == bot || !member->IsInWorld() || !group->SameSubGroup(bot, member))
+                continue;
+
+            if (member->getClass() == CLASS_SHAMAN && member->GetLevel() > 32)
+            {
+                allowMainhand = false;
+                break;
+            }
         }
     }
+#endif
 
-    // Offhand
+    // Check Offhand always
     Item* secondaryWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
     if (secondaryWeapon && secondaryWeapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {
         if (ai->FindStoneFor(secondaryWeapon))
-        {
             return true;
+    }
+
+    // Check mainhand only if allowed
+    if (allowMainhand)
+    {
+        Item* mainWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+        if (mainWeapon && mainWeapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
+        {
+            if (ai->FindStoneFor(mainWeapon))
+                return true;
         }
     }
 
@@ -75,7 +125,7 @@ bool ImbueWithStoneAction::isUseful()
 bool ImbueWithOilAction::Execute(Event& event)
 {
     Player* requester = event.getOwner();
-    if (bot->IsInCombat())
+    if (bot->IsInCombat() || bot->GetLevel() > 70)
         return false;
 
     // remove stealth
@@ -102,6 +152,9 @@ bool ImbueWithOilAction::Execute(Event& event)
 
 bool ImbueWithOilAction::isUseful()
 {
+    if (bot->GetLevel() > 70)
+        return false;
+    
     Item* weapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
     if (weapon && weapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {

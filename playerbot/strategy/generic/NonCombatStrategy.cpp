@@ -93,3 +93,17 @@ void GlyphStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("auto set glyph", 1.0f), NULL)));
 }
 
+void FishStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "val::can fish",
+        NextAction::array(0, new NextAction("move to fish" + modifier, 5.0f), new NextAction("fish" + modifier, 10.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "val::can open fishing dobber",
+        NextAction::array(0, new NextAction("use fishing bobber", 99.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "val::done fishing",
+        NextAction::array(0, new NextAction("equip upgrades", 6.0f), NULL)));
+}

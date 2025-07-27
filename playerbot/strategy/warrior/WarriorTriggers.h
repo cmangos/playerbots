@@ -3,7 +3,6 @@
 
 namespace ai
 {
-    BUFF_TRIGGER(BattleShoutTrigger, "battle shout");
     BUFF_TRIGGER(BattleStanceTrigger, "battle stance");
     BUFF_TRIGGER(DefensiveStanceTrigger, "defensive stance");
     BUFF_TRIGGER(BerserkerStanceTrigger, "berserker stance");
@@ -45,6 +44,24 @@ namespace ai
     HAS_AURA_TRIGGER(SlamInstantTrigger, "slam!");
     HAS_AURA_TRIGGER(TasteForBloodTrigger, "taste for blood");
 
+    class BattleShoutTrigger : public Trigger
+    {
+    public:
+        BattleShoutTrigger(PlayerbotAI* ai) : Trigger(ai, "battle shout") {}
+
+        bool IsActive() override
+        {
+            static const std::vector<uint32> battleShoutIds = {6673, 5242, 6192, 11549, 11550, 11551, 25289, 2048, 47436};
+
+            for (uint32 id : battleShoutIds)
+            {
+                if (bot->HasAura(id))
+                    return false;
+            }
+            return true;
+        }
+    };
+
     class BerserkerRageBuffTrigger : public TargetOfFearCastTrigger
     {
     public:
@@ -72,19 +89,19 @@ namespace ai
         }
     };
 
-    class BloodthirstBuffTrigger : public BuffTrigger
+    class BloodthirstTrigger : public SpellCanBeCastedTrigger
     {
     public:
-        BloodthirstBuffTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "bloodthirst") {}
+        BloodthirstTrigger(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, "bloodthirst") {}
         bool IsActive() override
         {
 #ifdef MANGOSBOT_ZERO
-            return BuffTrigger::IsActive() && (AI_VALUE2(uint8, "health", "current target") > 20 || ai->IsTank(bot));
+            return SpellCanBeCastedTrigger::IsActive() && (AI_VALUE2(uint8, "health", "current target") > 20 || ai->IsTank(bot));
 #elif MANGOSBOT_ONE
-            return BuffTrigger::IsActive() 
+            return SpellCanBeCastedTrigger::IsActive()
                 && (AI_VALUE2(uint8, "health", "current target") > 20 || AI_VALUE2(uint8, "rage", "self target") >= 40);
 #else
-            return BuffTrigger::IsActive();
+            return SpellCanBeCastedTrigger::IsActive();
 #endif
 
         }

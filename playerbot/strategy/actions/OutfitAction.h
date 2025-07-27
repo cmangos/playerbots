@@ -9,6 +9,7 @@ namespace ai
     public:
         OutfitAction(PlayerbotAI* ai) : EquipAction(ai, "outfit") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
     private:
         void List(Player* requester);

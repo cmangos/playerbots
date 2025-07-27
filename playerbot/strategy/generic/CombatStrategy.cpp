@@ -17,11 +17,11 @@ void CombatStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "combat stuck",
-        NextAction::array(0, new NextAction("reset", 0.7f), NULL)));
+        NextAction::array(0, new NextAction("unstuck", 0.7f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "combat long stuck",
-        NextAction::array(0, new NextAction("hearthstone", 0.9f), new NextAction("repop", 0.8f), NULL)));
+        NextAction::array(0, new NextAction("unstuck", 0.9f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "often",

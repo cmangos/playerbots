@@ -13,8 +13,7 @@ namespace ai
         virtual bool Execute(Event& event);
         virtual bool isUseful();
 
-        //static bool isFollowValid(Player* bot, WorldObject* target);
-        //static bool isFollowValid(Player* bot, WorldPosition pos);
+        std::unordered_map<ObjectGuid, float> GetTargets(Player* requester, bool debug = false);
     private:        
         float getMaxRelevance(GuidPosition guidP);
         bool HasSameTarget(ObjectGuid guid, uint32 max, std::list<ObjectGuid>& nearGuids);

@@ -8,6 +8,7 @@ namespace ai
     public:
         FactionAction(PlayerbotAI* ai) : ChatCommandAction(ai, "faction") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "faction"; } //Must equal iternal name

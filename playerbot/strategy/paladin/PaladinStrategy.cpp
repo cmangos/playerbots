@@ -941,10 +941,6 @@ void PaladinBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 void PaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     BuffStrategy::InitNonCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "often",
-        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void PaladinBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

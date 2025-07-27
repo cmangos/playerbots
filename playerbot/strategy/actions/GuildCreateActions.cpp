@@ -277,7 +277,7 @@ bool PetitionTurnInAction::Execute(Event& event)
 
     TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    if (oldTarget->IsPreparing())
+    if (oldTarget->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
     if (oldTarget->GetDestination())
@@ -317,7 +317,7 @@ bool PetitionTurnInAction::isUseful()
             inCity = true;
     }
 
-    return inCity && !bot->GetGuildId() && AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) && AI_VALUE(uint8, "petition signs") >= sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS) && !context->GetValue<TravelTarget*>("travel target")->Get()->IsTraveling();
+    return inCity && !bot->GetGuildId() && AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) && AI_VALUE(uint8, "petition signs") >= sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS) && !AI_VALUE(bool, "travel target traveling");
 };
 
 bool BuyTabardAction::Execute(Event& event)
@@ -330,7 +330,7 @@ bool BuyTabardAction::Execute(Event& event)
 
     TravelTarget* oldTarget = AI_VALUE(TravelTarget*, "travel target");
 
-    if (oldTarget->IsPreparing())
+    if (oldTarget->GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
 
     if (oldTarget->GetDestination())
@@ -376,5 +376,5 @@ bool BuyTabardAction::isUseful()
             inCity = true;
     }
 
-    return inCity && bot->GetGuildId() && !AI_VALUE2(uint32, "item count", chat->formatQItem(5976)) && AI_VALUE2(uint32, "free money for", uint32(NeedMoneyFor::guild)) >= 10000 && !context->GetValue<TravelTarget*>("travel target")->Get()->IsTraveling();
+    return inCity && bot->GetGuildId() && !AI_VALUE2(uint32, "item count", chat->formatQItem(5976)) && AI_VALUE2(uint32, "free money for", uint32(NeedMoneyFor::guild)) >= 10000 && !AI_VALUE(bool, "travel target traveling");
 };

@@ -255,6 +255,10 @@ void RetributionPaladinBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>&
 void RetributionPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinBuffStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void RetributionPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -742,6 +746,10 @@ void RetributionPaladinBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>&
 void RetributionPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinBuffStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void RetributionPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1245,6 +1253,10 @@ void RetributionPaladinBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>&
 void RetributionPaladinBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinBuffStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply stone", ACTION_NORMAL), NULL)));
 }
 
 void RetributionPaladinBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

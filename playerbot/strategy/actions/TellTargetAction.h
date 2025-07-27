@@ -8,6 +8,7 @@ namespace ai
     public:
         TellTargetAction(PlayerbotAI* ai) : ChatCommandAction(ai, "tell target") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class TellAttackersAction : public ChatCommandAction
@@ -15,6 +16,7 @@ namespace ai
     public:
         TellAttackersAction(PlayerbotAI* ai) : ChatCommandAction(ai, "tell attackers") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class TellPossibleAttackTargetsAction : public ChatCommandAction
@@ -22,5 +24,6 @@ namespace ai
     public:
         TellPossibleAttackTargetsAction(PlayerbotAI* ai) : ChatCommandAction(ai, "tell possible attack targets") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 }

@@ -19,7 +19,7 @@ float RpgActionMultiplier::GetValue(Action* action)
         else if(nextAction.empty() && name == "rpg cancel")
             return 0.1f;
         else
-            return frand(0.8f, 1.0f);
+            return 1.0f - (0.1f * urand(0, 2));
     }
 
     return 1.0f;
@@ -79,11 +79,7 @@ void RpgStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "rpg ai chat",
-        NextAction::array(0, new NextAction("rpg ai chat", 1.002f), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "often",
-        NextAction::array(0, new NextAction("rpg cancel", 0.001f), NULL)));
+        NextAction::array(0, new NextAction("rpg ai chat", 1.003f), NULL)));   
 }
 
 void RpgStrategy::InitNonCombatMultipliers(std::list<Multiplier*>& multipliers)
@@ -104,6 +100,14 @@ void RpgQuestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "rpg repeat quest",
         NextAction::array(0, new NextAction("rpg start quest", 1.030f), new NextAction("rpg end quest", 1.030f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "rpg spell click",
+        NextAction::array(0, new NextAction("rpg spell click", 1.003f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "rpg gossip talk",
+        NextAction::array(0, new NextAction("rpg gossip talk", 1.003f), NULL)));
 }
 
 void RpgVendorStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -196,7 +200,7 @@ void RpgCraftStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "rpg item",
-        NextAction::array(0, new NextAction("rpg item", 1.002f), NULL)));
+        NextAction::array(0, new NextAction("rpg item", 1.003f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "castnc",

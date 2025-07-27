@@ -14,16 +14,22 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 {
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
 
+    if (target->GetStatus() == TravelStatus::TRAVEL_STATUS_READY)
+    {
+        ai->TellDebug(ai->GetMaster(), "The target is ready to travel start now.", "debug travel");
+        target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
+    }
+
     target->CheckStatus();
 
-    if (!target->IsTraveling())
+    if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_TRAVEL)
         return true;
 
     WorldPosition botLocation(bot);
     WorldPosition location = *target->GetPosition();
     
     Group* group = bot->GetGroup();
-    if (group && !urand(0, 1) && bot == ai->GetGroupMaster())
+    if (ai->IsGroupLeader() && !urand(0, 1) && !bot->IsInCombat())
     {        
         for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
         {
@@ -58,19 +64,44 @@ bool MoveToTravelTargetAction::Execute(Event& event)
             if (!urand(0, 5))
             {
                 std::ostringstream out;
-                if (ai->GetMaster() && !bot->GetGroup()->IsMember(ai->GetMaster()->GetObjectGuid()))
+                if ((ai->GetMaster() && !bot->GetGroup()->IsMember(ai->GetMaster()->GetObjectGuid())) || !ai->HasActivePlayerMaster())
                     out << "Waiting a bit for ";
                 else
                     out << "Please hurry up ";
 
                 out << member->GetName();
 
+                if (bot->GetPlayerbotAI() && !ai->HasActivePlayerMaster())
+                {    
+                        out << " who is " << round(memberDistance) << "y away";
+                        out << " in " << memberPos.getAreaName();
+                }
+
                 ai->TellPlayerNoFacing(GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
             }
 
-            target->SetExpireIn(target->GetTimeLeft() + sPlayerbotAIConfig.maxWaitForMove);
+            // Introduce a random delay between 80% and 120% of maxWaitForMove to make waiting more natural
+            uint32 randomDelay = sPlayerbotAIConfig.maxWaitForMove * (urand(80, 120) / 100.0f);
+            target->SetExpireIn(target->GetTimeLeft() + randomDelay);
 
-            SetDuration(sPlayerbotAIConfig.maxWaitForMove);
+            SetDuration(randomDelay);
+
+            // Occasionally face the member and perform an emote
+            if (urand(0, 3) == 0) { // 25% chance to emote
+                bot->SetFacingToObject(member);
+                uint32 emoteChoice = urand(0, 2);
+                switch (emoteChoice) {
+                    case 0:
+                        bot->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
+                        break;
+                    case 1:
+                        bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+                        break;
+                    case 2:
+                        bot->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
+                        break;
+                }
+            }
 
             return true;
         }
@@ -126,6 +157,7 @@ bool MoveToTravelTargetAction::Execute(Event& event)
 
         if (target->IsMaxRetry(true))
         {
+            ai->TellDebug(ai->GetMaster(), "The target is cooling down because we failed to move to it a few times in a row.", "debug travel");
             target->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);            
         }
     }
@@ -165,7 +197,7 @@ bool MoveToTravelTargetAction::isUseful()
     if (!ai->AllowActivity(TRAVEL_ACTIVITY))
         return false;
 
-    if (!AI_VALUE(TravelTarget*,"travel target")->IsTraveling())
+    if (!AI_VALUE(bool, "travel target traveling"))
         return false;
 
     if (bot->IsTaxiFlying())
@@ -182,6 +214,10 @@ bool MoveToTravelTargetAction::isUseful()
 
     if (!AI_VALUE(bool, "can move around"))
         return false;
+
+    if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
+            return false;
 
     WorldPosition travelPos(*AI_VALUE(TravelTarget*, "travel target")->GetPosition());
 

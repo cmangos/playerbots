@@ -165,6 +165,7 @@ namespace ai
         bool isSkipPrerequisites() { return skipPrerequisites; }
         void AmendRelevance(float k) {relevance *= k; }
         void setRelevance(float relevance) { this->relevance = relevance; }
+        void setEvent(Event event) { this->event = event; }
         bool isExpired(time_t secs) { return time(0) - created >= secs; }
 	private:
 		ActionNode* action;

@@ -8,6 +8,7 @@ namespace ai
     public:
         SkillAction(PlayerbotAI* ai) : ChatCommandAction(ai, "skill") {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "skill"; } //Must equal iternal name

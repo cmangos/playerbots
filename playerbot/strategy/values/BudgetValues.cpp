@@ -83,6 +83,32 @@ uint32 MaxGearRepairCostValue::Calculate()
     return TotalCost;
 }
 
+uint32 MinRepairCostValue::Calculate()
+{
+    std::vector<uint8> importantSlots = { EQUIPMENT_SLOT_MAINHAND , EQUIPMENT_SLOT_RANGED, EQUIPMENT_SLOT_OFFHAND };
+    for (uint32 slot : importantSlots)
+    {
+        uint16 pos = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
+        Item* item = bot->GetItemByPos(pos);
+
+        if (!item)
+            continue;
+
+        uint32 maxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+        if (!maxDurability)
+            continue;
+
+        uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+        if (curDurability > 0)
+            continue;
+
+        return RepairCost(item); //The cost to repair the most important broken item.
+    }
+
+    return RepairCostValue::Calculate();
+}
+
 
 
 uint32 MoneyNeededForValue::Calculate()
@@ -222,24 +248,46 @@ uint32 MoneyNeededForValue::Calculate()
             }
         }
 
-        if (level >= 40)
-        {
-            if (maxMountSpeed < 59)
-                moneyWanted += 10 * GOLD;
-        }
-        if (level >= 60)
-        {
-            if (maxMountSpeed < 99)
-                moneyWanted += 100 * GOLD;
-        }
-        if (level >= 70)
-        {
-            if (maxFlyMountSpeed < 99)
-                moneyWanted += 100 * GOLD;
-            else if (maxFlyMountSpeed < 279)
-                moneyWanted += 200 * GOLD;
-        }
-        //todo WOTLK
+#ifdef MANGOSBOT_ZERO
+        const uint8 basicRidingLevel = 40;
+        const uint8 epicRidingLevel = 60;
+        const uint8 basicFlyingRidingLevel = 0;
+        const uint8 EpicFlyingRidingLevel = 0;
+        const uint32 basicMountCost = 40 * GOLD;
+        const uint32 epicMountCost = 1000 * GOLD;
+        const uint32 flyingMountCost = 0;
+        const uint32 epicFlyingMountCost = 0;
+#endif
+#ifdef MANGOSBOT_ONE
+        const uint8 basicRidingLevel = 30;
+        const uint8 epicRidingLevel = 60;
+        const uint8 basicFlyingRidingLevel = 70;
+        const uint8 EpicFlyingRidingLevel = 70;
+        const uint32 basicMountCost = 950 * SILVER;
+        const uint32 epicMountCost = 40 * GOLD;
+        const uint32 flyingMountCost = 100 * GOLD;
+        const uint32 epicFlyingMountCost = 200 * GOLD;
+#endif
+#ifdef MANGOSBOT_TWO
+        const uint8 basicRidingLevel = 20;
+        const uint8 epicRidingLevel = 40;
+        const uint8 basicFlyingRidingLevel = 60;
+        const uint8 EpicFlyingRidingLevel = 70;
+        const uint32 basicMountCost = 90 * SILVER;
+        const uint32 epicMountCost = 9 * GOLD;
+        const uint32 flyingMountCost = 40 * GOLD;
+        const uint32 epicFlyingMountCost = 80 * GOLD;
+#endif
+
+        if (level >= basicRidingLevel && maxMountSpeed < 59)
+                moneyWanted += basicMountCost;
+        if (level >= epicRidingLevel && maxMountSpeed < 99)
+                moneyWanted += epicMountCost;
+        if (level >= flyingMountCost && maxFlyMountSpeed < 99)
+                moneyWanted += basicFlyingRidingLevel;
+        if(level >= epicFlyingMountCost && maxFlyMountSpeed < 279)
+                moneyWanted += EpicFlyingRidingLevel;
+        //todo Wotlk frozen weather flying.
         break;
     }
     }

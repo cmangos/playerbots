@@ -22,11 +22,11 @@ void ClassStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "combat long stuck",
-        NextAction::array(0, new NextAction("hearthstone", ACTION_IDLE - 0.1f), new NextAction("repop", ACTION_IDLE - 0.2f), NULL)));
+        NextAction::array(0, new NextAction("unstuck", ACTION_IDLE - 0.1f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "combat stuck",
-        NextAction::array(0, new NextAction("reset", ACTION_IDLE - 0.3f), NULL)));
+        NextAction::array(0, new NextAction("unstuck", ACTION_IDLE - 0.3f), NULL)));
 }
 
 void ClassStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -492,11 +492,11 @@ void ClassStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "combat long stuck",
-        NextAction::array(0, new NextAction("hearthstone", ACTION_IDLE - 0.1f), new NextAction("repop", ACTION_IDLE - 0.2f), NULL)));
+        NextAction::array(0, new NextAction("unstuck", ACTION_IDLE - 0.1f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "combat stuck",
-        NextAction::array(0, new NextAction("reset", ACTION_IDLE - 0.3f), NULL)));
+        NextAction::array(0, new NextAction("unstuck", ACTION_IDLE - 0.3f), NULL)));
 }
 
 void ClassStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -963,11 +963,11 @@ void ClassStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "combat long stuck",
-        NextAction::array(0, new NextAction("hearthstone", ACTION_IDLE - 0.1f), new NextAction("repop", ACTION_IDLE - 0.2f), NULL)));
+        NextAction::array(0, new NextAction("unstuck", ACTION_IDLE - 0.1f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "combat stuck",
-        NextAction::array(0, new NextAction("reset", ACTION_IDLE - 0.3f), NULL)));
+        NextAction::array(0, new NextAction("unstuck", ACTION_IDLE - 0.3f), NULL)));
 }
 
 void ClassStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

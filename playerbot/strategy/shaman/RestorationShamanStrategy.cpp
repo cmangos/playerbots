@@ -12,10 +12,10 @@ public:
     {
         creators["earthliving weapon"] = &earthliving_weapon;
         creators["mana tide totem"] = &mana_tide_totem;
-        creators["flametongue totem"] = &flametongue_totem;
+        creators["searing totem"] = &searing_totem;
         creators["magma totem"] = &magma_totem;
         creators["strength of earth totem"] = &strength_of_earth_totem;
-        creators["wrath of air totem"] = &wrath_of_air_totem;
+        creators["windfury"] = &windfury_totem;
         creators["healing stream totem"] = &healing_stream_totem;
         creators["riptide"] = &riptide;
         creators["riptide on party"] = &riptide_on_party;
@@ -28,13 +28,13 @@ private:
 
     ACTION_NODE_A(mana_tide_totem, "mana tide totem", "mana potion");
 
-    ACTION_NODE_A(flametongue_totem, "flametongue totem", "searing totem");
+    ACTION_NODE_A(searing_totem, "searing totem", "flametongue totem");
 
     ACTION_NODE_C(magma_totem, "magma totem", "fire nova");
 
     ACTION_NODE_A(strength_of_earth_totem, "strength of earth totem", "stoneskin totem");
 
-    ACTION_NODE_A(wrath_of_air_totem, "wrath of air totem", "windfury totem");
+    ACTION_NODE_A(windfury_totem, "windfury totem", "wrath of air totem");
 
     ACTION_NODE_A(healing_stream_totem, "healing stream totem", "mana spring totem");
 
@@ -354,6 +354,10 @@ void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "air totem",
+        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "air totem",
         NextAction::array(0, new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -366,7 +370,7 @@ void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "fire totem",
-        NextAction::array(0, new NextAction("flametongue totem", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("searing totem", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanTotemsStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -413,43 +417,51 @@ void RestorationShamanTotemsRaidStrategy::InitNonCombatTriggers(std::list<Trigge
 void RestorationShamanBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanBuffStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "shaman weapon",
-        NextAction::array(0, new NextAction("earthliving weapon", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanBuffStrategy::InitNonCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "shaman weapon",
-        NextAction::array(0, new NextAction("earthliving weapon", ACTION_NORMAL), NULL)));
 }
 
 void RestorationShamanBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     RestorationShamanBuffStrategy::InitCombatTriggers(triggers);
     ShamanBuffPveStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "shaman weapon",
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     RestorationShamanBuffStrategy::InitNonCombatTriggers(triggers);
     ShamanBuffPveStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "shaman weapon",
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_NORMAL), NULL)));
 }
 
 void RestorationShamanBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     RestorationShamanBuffStrategy::InitCombatTriggers(triggers);
     ShamanBuffPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "shaman weapon",
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     RestorationShamanBuffStrategy::InitNonCombatTriggers(triggers);
     ShamanBuffPvpStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "shaman weapon",
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_NORMAL), NULL)));
 }
 
 void RestorationShamanBuffRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -462,6 +474,10 @@ void RestorationShamanBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerN
 {
     RestorationShamanBuffStrategy::InitNonCombatTriggers(triggers);
     ShamanBuffRaidStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply oil", ACTION_NORMAL), NULL)));
 }
 
 void RestorationShamanBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -813,6 +829,10 @@ void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>
 
     triggers.push_back(new TriggerNode(
         "air totem",
+        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "air totem",
         NextAction::array(0, new NextAction("wrath of air totem", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -874,10 +894,6 @@ void RestorationShamanBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& 
     ShamanBuffStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "shaman weapon",
-        NextAction::array(0, new NextAction("earthliving weapon", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "water shield",
         NextAction::array(0, new NextAction("water shield", ACTION_HIGH), NULL)));
 }
@@ -885,10 +901,6 @@ void RestorationShamanBuffStrategy::InitCombatTriggers(std::list<TriggerNode*>& 
 void RestorationShamanBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanBuffStrategy::InitNonCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "shaman weapon",
-        NextAction::array(0, new NextAction("earthliving weapon", ACTION_NORMAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "water shield",
@@ -899,24 +911,40 @@ void RestorationShamanBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*
 {
     RestorationShamanBuffStrategy::InitCombatTriggers(triggers);
     ShamanBuffPveStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "shaman weapon",
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     RestorationShamanBuffStrategy::InitNonCombatTriggers(triggers);
     ShamanBuffPveStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "shaman weapon",
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_NORMAL), NULL)));
 }
 
 void RestorationShamanBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     RestorationShamanBuffStrategy::InitCombatTriggers(triggers);
     ShamanBuffPvpStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "shaman weapon",
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_HIGH), NULL)));
 }
 
 void RestorationShamanBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     RestorationShamanBuffStrategy::InitNonCombatTriggers(triggers);
     ShamanBuffPvpStrategy::InitNonCombatTriggers(triggers);
+
+        triggers.push_back(new TriggerNode(
+        "shaman weapon",
+        NextAction::array(0, new NextAction("earthliving weapon", ACTION_NORMAL), NULL)));
 }
 
 void RestorationShamanBuffRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -937,6 +965,10 @@ void RestorationShamanBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerN
     triggers.push_back(new TriggerNode(
         "earth shield on party tank",
         NextAction::array(0, new NextAction("earth shield on party tank", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("apply oil", ACTION_NORMAL), NULL)));
 }
 
 void RestorationShamanBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1285,6 +1317,10 @@ void RestorationShamanCureRaidStrategy::InitNonCombatTriggers(std::list<TriggerN
 void RestorationShamanTotemsStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ShamanTotemsStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "air totem",
+        NextAction::array(0, new NextAction("windfury totem", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "air totem",

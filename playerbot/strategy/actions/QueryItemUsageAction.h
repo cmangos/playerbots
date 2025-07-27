@@ -9,7 +9,7 @@ namespace ai
     {
     public:
         QueryItemUsageAction(PlayerbotAI* ai, std::string name = "query item usage") : ChatCommandAction(ai, name) {}
-
+        virtual bool isUsefulWhenStunned() override { return true; }
     protected:
         virtual bool Execute(Event& event) override;
         uint32 GetCount(ItemQualifier& qualifier);

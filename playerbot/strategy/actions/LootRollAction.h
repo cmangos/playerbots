@@ -10,6 +10,7 @@ namespace ai
     public:
         LootStartRollAction(PlayerbotAI* ai, std::string name = "loot start roll") : ChatCommandAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "loot start roll"; } //Must equal iternal name
@@ -56,6 +57,7 @@ namespace ai
     public:
         LootRollAction(PlayerbotAI* ai, std::string name = "loot roll") : RollAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "loot roll"; } //Must equal internal name

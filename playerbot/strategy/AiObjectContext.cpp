@@ -22,6 +22,7 @@ AiObjectContext::AiObjectContext(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     strategyContexts.Add(new MovementStrategyContext());
     strategyContexts.Add(new AssistStrategyContext());
     strategyContexts.Add(new QuestStrategyContext());
+    strategyContexts.Add(new FishStrategyContext());
 
     actionContexts.Add(new ActionContext());
     actionContexts.Add(new ChatActionContext());
@@ -54,26 +55,27 @@ void AiObjectContext::ClearValues(std::string findName)
 
 void AiObjectContext::ClearExpiredValues(std::string findName, uint32 interval)
 {
+    std::vector<std::string> namesToErase;
     std::set<std::string> names = valueContexts.GetCreated();
-    for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
+
+    for (const auto& name : names)
     {
-        UntypedValue* value = GetUntypedValue(*i);
-        if (!value)
+        UntypedValue* value = GetUntypedValue(name);
+        if (!value || value->Protected())
             continue;
 
-        if (value->Protected())
+        if (!findName.empty() && name.find(findName) == std::string::npos)
             continue;
 
-        if (!findName.empty() && i->find(findName) == std::string::npos)
+        if ((!interval && !value->Expired()) || (interval && !value->Expired(interval)))
             continue;
 
-        if (!interval && !value->Expired())
-            continue;
+        namesToErase.push_back(name);
+    }
 
-        if (interval && !value->Expired(interval))
-            continue;
-
-        valueContexts.Erase(*i);
+    for (const auto& name : namesToErase)
+    {
+        valueContexts.Erase(name);
     }
 }
 

@@ -67,7 +67,7 @@ namespace ai
 
         virtual std::string Format()
         {
-            return chat->formatGuidPosition(value);
+            return chat->formatGuidPosition(value, bot);
         }
     };
 
@@ -77,6 +77,14 @@ namespace ai
         TravelTargetValue(PlayerbotAI* ai, std::string name = "travel target") : ManualSetValue<TravelTarget*>(ai, new TravelTarget(ai), name) {}
         virtual ~TravelTargetValue() { delete value; }
     };	
+
+    class LeaderTravelTargetValue : public CalculatedValue<TravelTarget*>
+    {
+    public:
+        LeaderTravelTargetValue(PlayerbotAI* ai, std::string name = "leader travel target", int checkInterval = 5) : CalculatedValue<TravelTarget*>(ai, name, checkInterval) {};
+
+        virtual TravelTarget* Calculate() override;
+    };
 
     class IgnoreRpgTargetValue : public ManualSetValue<std::set<ObjectGuid>& >
     {

@@ -400,7 +400,8 @@ public:
     bool IsTank(Player* player, bool inGroup = true);
     bool IsHeal(Player* player, bool inGroup = true);
     bool IsRanged(Player* player, bool inGroup = true);
-    Creature* GetCreature(ObjectGuid guid);
+    Creature* GetCreature(ObjectGuid guid) const;
+    Creature* GetAnyTypeCreature(ObjectGuid guid) const;
     Unit* GetUnit(ObjectGuid guid);
     static Unit* GetUnit(CreatureDataPair const* creatureDataPair);
     GameObject* GetGameObject(ObjectGuid guid);
@@ -665,6 +666,11 @@ public:
     void QueuePacket(WorldPacket& pkt);
 
     float GetLevelFloat() const;
+
+    static bool CanSpellClick(Player* bot, uint32 entry);
+    bool CanSpellClick(ObjectGuid guid) const;
+    bool HandleSpellClick(uint32 entry);
+    bool HandleSpellClick(ObjectGuid guid);
 
 #ifdef BUILD_ELUNA
     MaNGOS::unique_weak_ptr<PlayerbotAI> GetWeakPtr() const { return m_weakRef; }

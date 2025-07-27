@@ -22,6 +22,7 @@
 #endif
 #endif
 
+#include <random>
 
 std::map<uint8, std::vector<uint8> > RandomPlayerbotFactory::availableRaces;
 
@@ -206,13 +207,13 @@ uint8 RandomPlayerbotFactory::GetRandomRace(uint8 cls)
     return availableRaces[cls].front();
 }
 
-bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls, std::unordered_map<NameRaceAndGender, std::vector<std::string>>& names)
+bool RandomPlayerbotFactory::CreateRandomBot(uint8 cls, std::unordered_map<NameRaceAndGender, std::vector<std::string>>& names, uint8 inputRace)
 {
     sLog.outDebug( "Creating new random bot for class %d", cls);
 
     uint8 gender = rand() % 2 ? GENDER_MALE : GENDER_FEMALE;
 
-    uint8 race = GetRandomRace(cls);
+    uint8 race = inputRace == 0 ? GetRandomRace(cls) : inputRace;
 
     NameRaceAndGender raceAndGender = CombineRaceAndGender(gender, race);
 
@@ -492,12 +493,33 @@ void RandomPlayerbotFactory::CreateRandomBots()
             } while (results->NextRow());
         }
 
-        CharacterDatabase.Execute("DELETE FROM ai_playerbot_random_bots");
+        CharacterDatabase.Execute("DELETE FROM ai_playerbot_random_bots WHERE bot NOT IN (SELECT guid FROM characters)");
         sLog.outString("Random bot characters deleted");
     }
-	int totalAccCount = sPlayerbotAIConfig.randomBotAccountCount;
-	sLog.outString("Creating random bot accounts...");
-    
+
+    if (!sPlayerbotAIConfig.randomBotAutoCreate)
+    {
+        for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
+        {
+            std::ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
+            std::string accountName = out.str();
+
+            auto results = LoginDatabase.PQuery("SELECT id FROM account where username = '%s'", accountName.c_str());
+            if (!results)
+                continue;
+
+            Field* fields = results->Fetch();
+            uint32 accountId = fields[0].GetUInt32();
+
+            sPlayerbotAIConfig.randomBotAccounts.push_back(accountId);
+        }
+
+        return;
+    }
+
+    int totalAccCount = sPlayerbotAIConfig.randomBotAccountCount;
+    sLog.outString("Creating random bot accounts...");
+
     std::vector<std::future<void>> account_creations;
 
     BarGoLink bar(totalAccCount);
@@ -543,15 +565,15 @@ void RandomPlayerbotFactory::CreateRandomBots()
     //LoginDatabase.PExecute("UPDATE account SET expansion = '%u' where username like '%s%%'", 2, sPlayerbotAIConfig.randomBotAccountPrefix.c_str());
 
     int totalRandomBotChars = 0;
-	int totalCharCount = sPlayerbotAIConfig.randomBotAccountCount
+    int totalCharCount = sPlayerbotAIConfig.randomBotAccountCount
 #ifdef MANGOSBOT_TWO
-		* 10;
+        * 10;
 #else
-		* 9;
+        * 9;
 #endif
 
     sLog.outString("Loading available names...");
-    
+
     std::unordered_map<NameRaceAndGender, std::vector<std::string>> freeNames, allNames;
     std::unordered_map<std::string, bool> used;
 
@@ -568,7 +590,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
         NameRaceAndGender raceAndGender = static_cast<NameRaceAndGender>(fields[0].GetUInt8());
         std::string bname = fields[1].GetString();
         uint32 guidlo = fields[2].GetUInt32();
-        if(!guidlo)
+        if (!guidlo)
             freeNames[raceAndGender].push_back(bname);
         allNames[raceAndGender].push_back(bname);
         used[bname] = false;
@@ -621,7 +643,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
             continue;
         uint32 namesNeeded = totalCharCount / 2 - freeNames[raceAndGender].size();
 
-        while(namesNeeded)
+        while (namesNeeded)
         {
             std::string post = GetNamePostFix(postItt);
 
@@ -651,8 +673,14 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
     sLog.outString(">> Loaded names for " SIZEFMTD " race/gender combinations.", freeNames.size());
 
-	sLog.outString("Creating random bot characters...");
-	BarGoLink bar1(totalCharCount);
+    sLog.outString("Creating random bot characters...");
+    uint32 botsCreated = 0;
+    BarGoLink bar1(totalCharCount);
+
+
+    // Shallow copy of the fixed config so we can modify it
+    std::map<std::pair<uint8, uint8>, uint32> remaining = sPlayerbotAIConfig.fixedClassRaceCounts;
+
     for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
     {
         std::ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
@@ -671,33 +699,117 @@ void RandomPlayerbotFactory::CreateRandomBots()
 #ifdef MANGOSBOT_TWO
         if (count >= 10)
 #else
-		if (count >= 9)
+        if (count >= 9)
 #endif
         {
             totalRandomBotChars += count;
             continue;
         }
 
-        RandomPlayerbotFactory factory(accountId);
-        for (uint8 cls = CLASS_WARRIOR; cls < MAX_CLASSES - count; ++cls)
-        {
-            // skip nonexistent classes
-            if (!((1 << (cls - 1)) & CLASSMASK_ALL_PLAYABLE) || !sChrClassesStore.LookupEntry(cls))
-                continue;
+	RandomPlayerbotFactory factory(accountId);
+	if (sPlayerbotAIConfig.useFixedClassRaceCounts)
+	{
+#ifdef MANGOSBOT_TWO
+	    uint32 maxAllowed = 10 - count;
+#else
+	    uint32 maxAllowed = 9 - count;
+#endif
+	    uint32 created = 0;
+
+	    while (!remaining.empty() && created < maxAllowed)
+	    {
+	        std::vector<std::pair<uint8, uint8>> shuffledKeys;
+	        for (const auto& entry : remaining)
+	            shuffledKeys.push_back(entry.first);
+
+	        // Shuffle the keys of the map
+	        std::random_device rnd;
+		std::mt19937 rng(rnd()); // Mersenne Twister RNG
+		std::shuffle(shuffledKeys.begin(), shuffledKeys.end(), rng);
+
+	        for (const auto& key : shuffledKeys)
+	        {
+	            if (created >= maxAllowed)
+	                break;
+
+	            uint8 cls = key.first;
+	            uint8 race = key.second;
+
+	            if (!((1 << (cls - 1)) & CLASSMASK_ALL_PLAYABLE) || !sChrClassesStore.LookupEntry(cls))
+	                continue;
 
 #ifdef MANGOSBOT_TWO
-            if (cls != 10)
+	            if (cls == 10)
+	                continue;
 #else
-            if (cls != 10 && cls != 6)
+	            if (cls == 10 || cls == 6)
+	                continue;
 #endif
-			{
-                uint8 rclss = factory.GetRandomClass();
-                factory.CreateRandomBot(rclss, freeNames);
-				bar1.step();
-			}
-        }
+
+	            if (factory.CreateRandomBot(cls, freeNames, race))
+	            {
+	                created++;
+	                botsCreated++;
+	                bar1.step();
+	                if (--remaining[key] == 0)
+	                    remaining.erase(key);
+	            }
+	        }
+	    }
+	}
+	else
+	{
+            for (uint8 cls = CLASS_WARRIOR; cls < MAX_CLASSES - count; ++cls)
+            {
+                // skip nonexistent classes
+                if (!((1 << (cls - 1)) & CLASSMASK_ALL_PLAYABLE) || !sChrClassesStore.LookupEntry(cls))
+                    continue;
+
+#ifdef MANGOSBOT_TWO
+                if (cls != 10)
+#else
+                if (cls != 10 && cls != 6)
+#endif
+                {
+                    uint8 rclss = factory.GetRandomClass();
+                    botsCreated++;
+                    factory.CreateRandomBot(rclss, freeNames);
+                    bar1.step();
+                }
+            }
+	}
 
         totalRandomBotChars += sAccountMgr.GetCharactersCount(accountId);
+    }
+    if (sPlayerbotAIConfig.useFixedClassRaceCounts && !remaining.empty())
+    {
+	sLog.outError("Unable to create all requested fixed class/race bots due to account character limits.");
+	sLog.outError("The following class/race combination(s) were left uncreated:");
+
+	uint32 totalCount = 0;
+	for(const auto& entry : remaining)
+	{
+	    uint8 cls = entry.first.first;
+	    uint8 race = entry.first.second;
+	    uint32 count = entry.second;
+	    totalCount += count;
+
+	    sLog.outError(" - Class %u, Race %u: %u bots remaining", cls, race, count);
+	}
+#ifdef MANGOSBOT_TWO
+	uint32 missingAccounts = (totalCount + 9) / 10;
+#else
+        uint32 missingAccounts = (totalCount + 8) / 9;
+#endif
+	sLog.outError("You need at least %u additional account(s) to fill the remaining fixed class/race combinations.", missingAccounts);
+    }
+
+
+    if (!botsCreated)
+    {
+	    sLog.outString("No new random bots needed. Accounts: %zu, bots: %d.", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
+
+        return;
     }
 
     std::vector<std::future<void>> bot_creations;
@@ -709,14 +821,14 @@ void RandomPlayerbotFactory::CreateRandomBots()
         account_creations.push_back(std::async([player] {player->SaveToDB(); }));
     }
 
-    for (uint32 i = 0; i < sObjectAccessor.GetPlayers().size(); i++)
+    for (uint32 i = 0; i < account_creations.size(); i++)
     {
         bar2.step();
         account_creations[i].wait();
-    }    
+    }
 
     std::vector<Player*> players;
-    
+
     for (auto pl : sObjectAccessor.GetPlayers())
         players.push_back(pl.second);
 
@@ -728,8 +840,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
         delete player;
         delete session;
     }
-
-    sLog.outString("%zu random bot accounts with %d characters available", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars);
+    sLog.outString("%zu random bot accounts with %d characters available", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars+botsCreated);
 }
 
 
@@ -945,7 +1056,7 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
         Player* player = sObjectMgr.GetPlayer(captain);
         if (player)
         {
-            if (player->GetLevel() < 70)
+            if (player->GetLevel() < DEFAULT_MAX_LEVEL)
                 continue;
 
             uint8 slot = ArenaTeam::GetSlotByType(ArenaType(ARENA_TYPE_2v2));
@@ -1003,9 +1114,9 @@ void RandomPlayerbotFactory::CreateRandomArenaTeams()
             continue;
         }
 
-        if (player->GetLevel() < 70)
+        if (player->GetLevel() < DEFAULT_MAX_LEVEL)
         {
-            sLog.outError("Bot %d must be level 70 to create an arena team", player->GetGUIDLow());
+            sLog.outError("Bot %d must be level %d to create an arena team", player->GetGUIDLow(), DEFAULT_MAX_LEVEL);
             continue;
         }
 

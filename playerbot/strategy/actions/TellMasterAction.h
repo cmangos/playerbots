@@ -14,6 +14,8 @@ namespace ai
             return true;
         }
 
+        virtual bool isUsefulWhenStunned() override { return true; }
+
     private:
         std::string text;
     };
@@ -38,5 +40,7 @@ namespace ai
 
             return true;
         }
+
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 }

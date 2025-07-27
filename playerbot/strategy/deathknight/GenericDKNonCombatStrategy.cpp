@@ -1,4 +1,3 @@
-
 #include "playerbot/playerbot.h"
 #include "DKMultipliers.h"
 #include "GenericDKNonCombatStrategy.h"
@@ -50,6 +49,14 @@ void GenericDKNonCombatStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &
 	triggers.push_back(new TriggerNode(
 		"bone shield",
 		NextAction::array(0, new NextAction("bone shield", 21.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "runeforge",
+        NextAction::array(0, new NextAction("runeforge", ACTION_PASSTROUGH), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"auto runeforge",
+		NextAction::array(0, new NextAction("runeforge", 6.0f), NULL)));
 }
 
 void DKBuffDpsStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)

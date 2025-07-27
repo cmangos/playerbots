@@ -86,8 +86,10 @@ namespace ai
         static std::string ReasonForNeed(ItemUsage usage, ItemQualifier qualifier = ItemQualifier(), uint32 count = 1, Player* bot = nullptr);
         static uint32 GetAhDepositCost(ItemPrototype const* proto, uint32 count = 1);
         static Item* CurrentItem(ItemPrototype const* proto, Player* bot);
+        static Item* CurrentItemInSlot(ItemPrototype const* proto, Player* bot);
+        static uint32 ItemCreatedFrom(uint32 wantItemId);
+        static bool IsNeededForQuest(Player* player, uint32 itemId, bool ignoreInventory = false);
     private:        
-        bool IsItemUsefulForQuest(Player* player, ItemPrototype const* proto, bool ignoreInventory = false);
         bool IsItemNeededForSkill(ItemPrototype const* proto);
         bool IsItemUsefulForSkill(ItemPrototype const* proto);
         bool IsItemNeededForUsefullCraft(ItemPrototype const* proto, bool checkAllReagents);
@@ -166,6 +168,8 @@ namespace ai
         static uint32 GetBotAHSellMinPrice(ItemPrototype const* proto);
         static uint32 GetBotAHSellMaxPrice(ItemPrototype const* proto);
         static uint32 GetCraftingFee(ItemPrototype const* proto);
+
+        static uint32 DesiredPricePerItem(Player* bot, const ItemPrototype* proto, uint32 count, uint32 priceModifier);
     };
 
     class ForceItemUsageValue : public ManualSetValue<ForceItemUsage>, public Qualified

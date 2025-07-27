@@ -202,6 +202,7 @@ bool PlayerbotAIConfig::Initialize()
 
     botAutologin = BotAutoLogin(config.GetIntDefault("AiPlayerbot.BotAutologin", 0));
     randomBotAutologin = config.GetBoolDefault("AiPlayerbot.RandomBotAutologin", true);
+    randomBotAutoCreate = config.GetBoolDefault("AiPlayerbot.RandomBotAutoCreate", true);
     minRandomBots = config.GetIntDefault("AiPlayerbot.MinRandomBots", 50);
     maxRandomBots = config.GetIntDefault("AiPlayerbot.MaxRandomBots", 200);
     randomBotUpdateInterval = config.GetIntDefault("AiPlayerbot.RandomBotUpdateInterval", 1);
@@ -230,7 +231,7 @@ bool PlayerbotAIConfig::Initialize()
     minRandomBotsPriceChangeInterval = config.GetIntDefault("AiPlayerbot.MinRandomBotsPriceChangeInterval", 2 * 3600);
     maxRandomBotsPriceChangeInterval = config.GetIntDefault("AiPlayerbot.MaxRandomBotsPriceChangeInterval", 48 * 3600);
     //Auction house settings
-    shouldQueryAHListingsOutsideOfAH = config.GetBoolDefault("AiPlayerbot.ShouldQueryAHListingsOutsideOfAH", false);
+    shouldQueryAHListingsOutsideOfAH = config.GetBoolDefault("AiPlayerbot.ShouldQueryAHListingsOutsideOfAH", true);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.AhOverVendorItemIds", ""), ahOverVendorItemIds);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.VendorOverAHItemIds", ""), vendorOverAHItemIds);
     botCheckAllAuctionListings = config.GetBoolDefault("AiPlayerbot.BotCheckAllAuctionListings", false);
@@ -308,6 +309,9 @@ bool PlayerbotAIConfig::Initialize()
 
     classRaceProbabilityTotal = 0;
 
+    useFixedClassRaceCounts = config.GetBoolDefault("AiPlayerbot.ClassRace.UseFixedClassRaceCounts", false);
+    RandomPlayerbotFactory factory(0);
+
     for (uint32 race = 1; race < MAX_RACES; ++race)
     {
         //Set race defaults
@@ -336,8 +340,6 @@ bool PlayerbotAIConfig::Initialize()
         }
     }
 
-    RandomPlayerbotFactory factory(0);
-
     //Race Class overrides
     for (uint32 race = 1; race < MAX_RACES; ++race)
     {
@@ -351,6 +353,44 @@ bool PlayerbotAIConfig::Initialize()
                 classRaceProbability[cls][race] = 0;
             else
                 classRaceProbabilityTotal += classRaceProbability[cls][race];
+        }
+    }
+
+    if (useFixedClassRaceCounts)
+    {
+
+        // Warn about unsupported config keys
+        for (uint32 race = 1; race < MAX_RACES; ++race)
+        {
+            std::string raceKey = "AiPlayerbot.ClassRaceProb.0." + std::to_string(race);
+            int val = config.GetIntDefault(raceKey.c_str(), -1);
+            if (val >= 0)
+                sLog.outError("Fixed class/race counts does not yet support '%s' (race-only). This config entry will be ignored.", raceKey.c_str());
+        }
+
+        for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
+        {
+            std::string classKey = "AiPlayerbot.ClassRaceProb." + std::to_string(cls);
+            int val = config.GetIntDefault(classKey.c_str(), -1);
+            if (val >= 0)
+                sLog.outError("Fixed class/race counts does not yet support '%s' (class-only). This config entry will be ignored.", classKey.c_str());
+        }
+
+        //Parse and build fixedClassRacesCounts
+        {
+            for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
+	    {
+	        for (uint32 race = 1; race < MAX_RACES; ++race)
+	        {
+		    std::string key = "AiPlayerbot.ClassRaceProb." + std::to_string(cls) + "." + std::to_string(race);
+		    int count = config.GetIntDefault(key, -1);
+
+		    if (count >= 0 && factory.isAvailableRace(cls, race))
+		    {
+		        fixedClassRaceCounts[{cls, race}] = count;
+		    }
+	        }
+	    }
         }
     }
 

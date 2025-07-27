@@ -9,6 +9,7 @@ namespace ai
     public:
         KeepItemAction(PlayerbotAI* ai, std::string name = "keep") : ChatCommandAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
 
         std::unordered_map<ForceItemUsage, std::string> keepName = 
         {

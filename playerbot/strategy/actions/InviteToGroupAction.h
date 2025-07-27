@@ -15,6 +15,7 @@ namespace ai
         }
 
         virtual bool Invite(Player* inviter, Player* player);
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class JoinGroupAction : public InviteToGroupAction
@@ -22,6 +23,7 @@ namespace ai
     public:
         JoinGroupAction(PlayerbotAI* ai, std::string name = "join") : InviteToGroupAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class LfgAction : public InviteToGroupAction
@@ -29,6 +31,7 @@ namespace ai
     public:
         LfgAction(PlayerbotAI* ai, std::string name = "lfg") : InviteToGroupAction(ai, name) {}
         virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     class InviteNearbyToGroupAction : public InviteToGroupAction
@@ -37,6 +40,7 @@ namespace ai
         InviteNearbyToGroupAction(PlayerbotAI* ai, std::string name = "invite nearby") : InviteToGroupAction(ai, name) {}
         virtual bool Execute(Event& event) override;
         virtual bool isUseful();
+        virtual bool isUsefulWhenStunned() override { return true; }
     };
 
     //Generic guid member finder

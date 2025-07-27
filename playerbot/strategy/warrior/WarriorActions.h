@@ -9,7 +9,6 @@ namespace ai
     BUFF_ACTION(CastBerserkerStanceAction, "berserker stance");
 
     // shouts
-    BUFF_ACTION(CastBattleShoutAction, "battle shout");
     MELEE_ACTION_U(CastBattleShoutTauntAction, "battle shout", CastSpellAction::isUseful()); // useful to rebuff
     MELEE_DEBUFF_ACTION_R(CastDemoralizingShoutAction, "demoralizing shout", 8.0f); // low range debuff
     MELEE_ACTION(CastChallengingShoutAction, "challenging shout");
@@ -88,6 +87,25 @@ namespace ai
     // protection talents 3.3.5
     MELEE_DEBUFF_ACTION_R(CastShockwaveAction, "shockwave", 8.0f);
     SNARE_ACTION(CastShockwaveSnareAction, "shockwave");
+
+    class CastBattleShoutAction : public CastBuffSpellAction
+    {
+    public:
+        CastBattleShoutAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "battle shout") {}
+
+        bool isUseful() override
+        {
+            static const std::vector<uint32> battleShoutIds = {6673, 5242, 6192, 11549, 11550, 11551, 25289, 2048, 47436};
+
+            for (uint32 id : battleShoutIds)
+            {
+                if (bot->HasAura(id))
+                    return false;
+            }
+
+            return CastSpellAction::isUseful();
+        }
+    };
 
     class CastSunderArmorAction : public CastMeleeDebuffSpellAction
     {

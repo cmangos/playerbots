@@ -895,6 +895,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
             if (sPlayerbotAIConfig.autoDoQuests)
             {
                 nonCombatEngine->addStrategy("travel");
+                nonCombatEngine->addStrategy("tfish");
                 nonCombatEngine->addStrategy("rpg");                
                 nonCombatEngine->removeStrategy("rpg craft");
             }
@@ -927,6 +928,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
                         if (sPlayerbotAIConfig.autoDoQuests)
                         {
                             nonCombatEngine->addStrategy("travel");
+                            nonCombatEngine->addStrategy("tfish");
                             nonCombatEngine->addStrategy("rpg");
                             nonCombatEngine->removeStrategy("rpg craft");
 
@@ -958,6 +960,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         nonCombatEngine->addStrategies("racials", "nc", "default", "buff", "food", "mount", "collision", "dps assist", "attack tagged", "emote", NULL);
         nonCombatEngine->removeStrategy("custom::say");
         nonCombatEngine->removeStrategy("travel");
+        nonCombatEngine->removeStrategy("tfish");
         nonCombatEngine->removeStrategy("rpg");
         nonCombatEngine->removeStrategy("rpg craft");
         nonCombatEngine->removeStrategy("follow");

@@ -352,7 +352,19 @@ bool CanTrainMountValue::Calculate()
 
 bool CanBuyMountValue::Calculate()
 {
-    if (bot->GetLevel() < 40)
+#ifdef MANGOSBOT_ZERO
+    uint8 minRidingLevel = 40;
+#endif
+#ifdef MANGOSBOT_ONE
+    uint8 minRidingLevel = 30;
+#endif
+#ifdef MANGOSBOT_TWO
+    uint8 minRidingLevel = 20;
+#endif
+    if (bot->GetLevel() < minRidingLevel)
+        return false;
+
+    if (!AI_VALUE(bool, "can buy"))
         return false;
 
     if (AI_VALUE2(uint32, "money needed for", (uint32)NeedMoneyFor::mount) == 0)

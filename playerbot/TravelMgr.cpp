@@ -49,14 +49,6 @@ PlayerTravelInfo::PlayerTravelInfo(Player* player)
         value = AI_VALUE(uint32, valueName);
 }
 
-WorldPosition* TravelDestination::NearestPoint(const WorldPosition& pos) const {
-    return *std::min_element(points.begin(), points.end(), [pos](WorldPosition* i, WorldPosition* j) {return i->distance(pos) < j->distance(pos); });
-}
-
-std::vector <WorldPosition*> TravelDestination::NextPoint(const WorldPosition& pos) const {
-    return pos.GetNextPoint(GetPoints());
-}
-
 std::string EntryTravelDestination::GetShortName() const
 {
     switch (purpose)
@@ -123,7 +115,7 @@ bool QuestRelationTravelDestination::IsPossible(const PlayerTravelInfo& info) co
         if ((int32)info.GetLevel() < quest->GetMinLevel() || (int32)info.GetLevel() > quest->GetMaxLevel())
             return false;
 
-        if (GetPoints().front()->getMapId() != info.GetPosition().getMapId()) //CanTakeQuest will check required conditions which will fail on a different map.
+        if (OnMap(info.GetPosition())) //CanTakeQuest will check required conditions which will fail on a different map.
             if (quest->GetRequiredCondition())          //So we skip this quest for now.
                 return false;
 
@@ -150,7 +142,7 @@ bool QuestRelationTravelDestination::IsPossible(const PlayerTravelInfo& info) co
         //Do not try to hand-in dungeon/elite quests in instances without a group.
         if ((quest->GetType() == QUEST_TYPE_ELITE || quest->GetType() == QUEST_TYPE_DUNGEON) && !info.GetBoolValue("can fight boss"))
         {
-            if (!this->NearestPoint(info.GetPosition())->isOverworld())
+            if (IsOverWorld(info.GetPosition()))
                 return false;
         }
     }
@@ -169,7 +161,7 @@ bool QuestRelationTravelDestination::IsActive(Player* bot, const PlayerTravelInf
 
     if (GetRelation() == 0)
     {
-        if (!bot->GetMap()->IsContinent()) //This gives issues for bot->CanTakeQuest so stop here.
+        if (!bot->GetMap()->IsContinent() && (GetClosestPoint(bot)->getMapId() != bot->GetMapId())) //This gives issues for bot->CanTakeQuest so stop here.
             return false;
 
         if (forceThisQuest)
@@ -241,11 +233,21 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
     if (info.IsInRaid() != (GetQuestTemplate()->GetType() == QUEST_TYPE_RAID))
         return false;
 
-    bool isVendor = false;
+
+    bool skipKillableCheck = false;
 
     //Check mob level
     if (GetEntry() > 0)
     {
+#ifdef MANGOSBOT_TWO        
+        switch (GetQuestId()) {
+        case 12680: //Grand Theft Palomino
+        case 12687: //Into the Realm of Shadows
+        case 12698: //The Gift That Keeps On Giving
+            skipKillableCheck = true;
+        }
+#endif
+
         CreatureInfo const* cInfo = GetCreatureInfo();
 
         if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()])
@@ -254,10 +256,10 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
             if (GetQuestTemplate()->ReqItemCount[GetObjective()] * proto->BuyPrice > info.GetMoney()) //Need more money.
                 return false;
 
-            isVendor = true;
+            skipKillableCheck = true;
         }
 
-        if (!isVendor && !forceThisQuest)
+        if (!skipKillableCheck && !forceThisQuest)
         {
             if (cInfo && (int)cInfo->MaxLevel - (int)info.GetLevel() > 4)
                 return false;
@@ -265,7 +267,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
             //Do not try to hand-in dungeon/elite quests in instances without a group.
             if (cInfo->Rank > CREATURE_ELITE_NORMAL)
             {
-                if (!this->NearestPoint(info.GetPosition())->isOverworld() && !info.GetBoolValue("can fight boss"))
+                if (!IsOverWorld(info.GetPosition()) && info.GetPosition().getMapId() != 609 && !info.GetBoolValue("can fight boss"))
                     return false;
                 else if (!info.GetBoolValue("can fight elite"))
                     return false;
@@ -275,20 +277,20 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
 
     if (!forceThisQuest)
     {
-        if (!isVendor && GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE && !info.GetBoolValue("can fight elite"))
+        if (!skipKillableCheck && GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE && !info.GetBoolValue("can fight elite"))
             return false;
 
         //Do not try to do dungeon/elite quests in instances without a group.
         if ((GetQuestTemplate()->GetType() == QUEST_TYPE_ELITE || GetQuestTemplate()->GetType() == QUEST_TYPE_DUNGEON || GetQuestTemplate()->GetType() == QUEST_TYPE_RAID) && !info.GetBoolValue("can fight boss"))
         {
-            if (!this->NearestPoint(info.GetPosition())->isOverworld())
+            if (!IsOverWorld(info.GetPosition()))
                 return false;
         }
 
         //Do not try to do pvp quests in bg's (no way to travel there). 
         if (GetQuestTemplate()->GetType() == QUEST_TYPE_PVP)
         {
-            if (!this->NearestPoint(info.GetPosition())->isOverworld())
+            if (!IsOverWorld(info.GetPosition()))
                 return false;
         }
     }
@@ -305,32 +307,75 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
 
     bool forceThisQuest = info.HasFocusQuest();
 
-    bool isVendor = false;
+    bool skipKillableCheck = false;
 
-    //Check mob level
     if (GetEntry() > 0)
     {
+#ifdef MANGOSBOT_TWO        
+        switch (GetQuestId()) {
+        case 12848: //The Endless Hunger
+            skipKillableCheck = true;
+            break;
+        case 12680: //Grand Theft Palomino
+            switch (GetEntry())
+            {
+            case 28605: //Havenshire horse
+            case 28606:
+            case 28607:
+                return !AI_VALUE2(bool, "trigger active", "in vehicle") && ai->CanSpellClick(bot, GetEntry());
+                break;
+            case 28653: //Salanar the Horseman
+                return AI_VALUE2(bool, "trigger active", "in vehicle");
+                break;
+            }
+            break;
+        case 12687: //Into the Realm of Shadows
+            switch (GetEntry())
+            {
+            case 28768: //Dark Rider of Acherus
+            case 28909:
+            case 28782: //Acherus Deathcharger
+                return !AI_VALUE2(bool, "trigger active", "in vehicle");
+            case 29501: //Scourge Gryphon (return to hand in)
+                return AI_VALUE2(bool, "trigger active", "in vehicle");
+            }
+            break;
+        case 12698: //The Gift That Keeps On Giving
+            switch (GetEntry())
+            {
+            case 28819: //Scarlet Miner
+                return !bot->FindGuardianWithEntry(28845);
+            case 28658: //Gothic the Harvester
+                return bot->FindGuardianWithEntry(28845);
+            }
+            break;
+        }
+#endif
+
         CreatureInfo const* cInfo = GetCreatureInfo();
 
-        if (cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()] && !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot))
+        if (!skipKillableCheck && cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()] && !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot))
         {
-            isVendor = true;
+            skipKillableCheck = true;
         }
     }
 
-   std::vector<std::string> qualifier = { std::to_string(GetQuestTemplate()->GetQuestId()), std::to_string(GetObjective()) };
+    if (!skipKillableCheck)
+        skipKillableCheck = ai->CanSpellClick(bot, GetEntry());
 
-    if (!AI_VALUE2(bool, "group or", "following party,need quest objective::" + Qualified::MultiQualify(qualifier,","))) //Noone needs the quest objective.
+    std::vector<std::string> qualifier = { std::to_string(GetQuestTemplate()->GetQuestId()), std::to_string(GetObjective()) };
+
+    if (!AI_VALUE2(bool, "group or", "following party,need quest objective::" + Qualified::MultiQualify(qualifier, ","))) //Noone needs the quest objective.
         return false;
 
     WorldPosition botPos(bot);
 
-    if (!isVendor && GetEntry() > 0 && !IsOut(botPos))
+    if (!skipKillableCheck && GetEntry() > 0 && !IsOut(botPos))
     {
-        TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
+        TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
 
         //Only look for the target if it is unique or if we are currently working on it.
-        if (GetPoints().size() == 1 || (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK && target->GetEntry() == GetEntry()))
+        if (IsUnique() || (target->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK && target->GetEntry() == GetEntry()))
         {
             std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
 
@@ -381,14 +426,12 @@ uint8 QuestObjectiveTravelDestination::GetObjective() const
 
 bool RpgTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 {   
-    WorldPosition firstPoint = *GetPoints().front();
-
     //Horde pvp baracks
-    if (firstPoint.getMapId() == 450 && info.GetTeam() == ALLIANCE)
+    if (ClosestMapId(info.GetPosition()) == 450 && info.GetTeam() == ALLIANCE)
         return false;
 
     //Alliance pvp baracks
-    if (firstPoint.getMapId() == 449 && info.GetTeam() == HORDE)
+    if (ClosestMapId(info.GetPosition()) == 449 && info.GetTeam() == HORDE)
         return false;
 
     return true;
@@ -412,12 +455,6 @@ bool RpgTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) c
             return false;
         }
     }    
-
-    WorldPosition firstPoint = *GetPoints().front();
-
-    //City & Pvp baracks
-    if (firstPoint.getMapId() == info.GetPosition().getMapId() && firstPoint.HasAreaFlag(AREA_FLAG_CAPITAL) && !firstPoint.HasFaction(info.GetTeam()))
-        return false;
 
     return !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot);
 }
@@ -463,11 +500,25 @@ std::string RpgTravelDestination::GetTitle() const
     return out.str();
 }
 
+AreaTableEntry const* ZoneTravelDestination::GetArea() const
+{
+    for (uint32 areaid = 0; areaid <= sAreaStore.GetNumRows(); ++areaid)
+    {
+        AreaTableEntry const* areaEntry = sAreaStore.LookupEntry(areaid);
+        if (areaEntry && areaEntry->ID == GetEntry())
+        {
+            return areaEntry;
+        }
+    }
+
+    return nullptr;
+}
+
 bool ExploreTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 {
     AreaTableEntry const* area = GetArea();
 
-    if (level && (uint32)level > info.GetLevel() && info.GetLevel() < DEFAULT_MAX_LEVEL)
+    if (GetLevel() && (uint32)GetLevel() > info.GetLevel() && info.GetLevel() < DEFAULT_MAX_LEVEL)
         return false;
 
     return true;
@@ -488,20 +539,6 @@ bool ExploreTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& inf
     uint32 currFields = bot->GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
 
     return !(currFields & val);    
-}
-
-AreaTableEntry const* ExploreTravelDestination::GetArea() const
-{
-    for (uint32 areaid = 0; areaid <= sAreaStore.GetNumRows(); ++areaid)
-    {
-        AreaTableEntry const* areaEntry = sAreaStore.LookupEntry(areaid);
-        if (areaEntry && areaEntry->ID == GetEntry())
-        {
-            return areaEntry;
-        }
-    }
-
-    return nullptr;
 }
 
 bool GrindTravelDestination::IsPossible(const PlayerTravelInfo& info) const
@@ -567,34 +604,34 @@ bool BossTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 
     if ((int32)cInfo->MaxLevel > info.GetLevel() + 3)
         return false;
-
-    WorldPosition firstPoint = *GetPoints().front();
-
+    
+    const MapEntry* mapEntry = ClosetMapEntry(info.GetPosition());
+    
     if (info.IsInGroup())
     {
         if (info.IsInRaid())
         {
 #ifndef MANGOSBOT_TWO
-            if (firstPoint.getMapEntry() && firstPoint.getMapEntry()->IsNonRaidDungeon())
+            if (mapEntry && mapEntry->IsNonRaidDungeon())
 #else
-            if (firstPoint.getMapEntry() && firstPoint.getMapEntry()->IsNonRaidDungeon())
+            if (mapEntry && mapEntry->IsNonRaidDungeon())
 #endif
                 return false;
         }
-        else if (firstPoint.getMapEntry() && firstPoint.getMapEntry()->IsRaid())
+        else if (mapEntry && mapEntry->IsRaid())
             return false;
     }
 
     //Ragefire casm
-    if (firstPoint.getMapId() == 389 && info.GetTeam() == ALLIANCE)
+    if (ClosestMapId(info.GetPosition()) == 389 && info.GetTeam() == ALLIANCE)
         return false;
 
     //Stockades
-    if (firstPoint.getMapId() == 34 && info.GetTeam() == HORDE)
+    if (ClosestMapId(info.GetPosition()) == 34 && info.GetTeam() == HORDE)
         return false;
 
     //Do not move to overworld bosses/uniques that are far away.
-    if (firstPoint.isOverworld() && DistanceTo(info.GetPosition()) > 2000.0f)
+    if (mapEntry && mapEntry->IsContinent() && DistanceTo(info.GetPosition()) > 2000.0f)
         return false;
 
     return true;
@@ -610,8 +647,6 @@ bool BossTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) 
 
     if (!GuidPosition(bot).IsHostileTo(GuidPosition(HIGHGUID_UNIT, GetEntry()), bot->GetInstanceId()))
         return false;
-
-    WorldPosition firstPoint = *GetPoints().front();   
 
     WorldPosition botPos(bot);
 
@@ -648,7 +683,19 @@ bool GatherTravelDestination::IsPossible(const PlayerTravelInfo& info) const
     uint32 skillId = SKILL_NONE;
     uint32 reqSkillValue = 0;
 
-    if (GetEntry() > 0)
+    if (GetPurpose() == TravelDestinationPurpose::GatherFishing)
+    {
+        skillId = SKILL_FISHING;
+
+        int32 reqSkillValue = sObjectMgr.GetFishingBaseSkillLevel(GetEntry());
+
+        if (!reqSkillValue) //no fishable zone or area should be 0
+            return false;
+
+        if (reqSkillValue > 5)
+            reqSkillValue -= 5; //Give chance to levelup.
+    }
+    else if (GetEntry() > 0)
     {
         CreatureInfo const* cInfo = GetCreatureInfo();
 
@@ -690,13 +737,10 @@ bool GatherTravelDestination::IsPossible(const PlayerTravelInfo& info) const
     if (reqSkillValue > skillValue)
         return false;
 
-    if (info.GetLevel() * 5 <= skillValue) //Not able to increase skill.
-        return false;
-
     if (info.GetSkillMax((SkillType)skillId) <= skillValue) //Not able to increase skill.
         return false;
 
-    if (reqSkillValue + 100 < skillValue) //Gray level = no skillup
+    if (GetPurpose() != TravelDestinationPurpose::GatherFishing && reqSkillValue + 100 < skillValue) //Gray level = no skillup
         return false;
 
     return true;
@@ -710,26 +754,30 @@ bool GatherTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info
     if (!IsPossible(info))
         return false;   
 
-    if (!IsOut(bot))
+
+    if (GetPurpose() != TravelDestinationPurpose::GatherFishing)
     {
-        if (this->GetEntry() > 0)
+        if (!IsOut(bot))
         {
-            std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
+            if (this->GetEntry() > 0)
+            {
+                std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "possible targets");
 
-            for (auto& target : targets)
-                if (target.GetEntry() == GetEntry() && target.IsCreature() && ai->GetCreature(target) && ai->GetCreature(target)->IsAlive())
-                    return true;
+                for (auto& target : targets)
+                    if (target.GetEntry() == GetEntry() && target.IsCreature() && ai->GetCreature(target) && ai->GetCreature(target)->IsAlive())
+                        return true;
+            }
+            else
+            {
+                std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
+
+                for (auto& target : targets)
+                    if (target.GetEntry() == GetEntry())
+                        return true;
+            }
+
+            return false;
         }
-        else
-        {
-            std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
-
-            for (auto& target : targets)
-                if (target.GetEntry() == GetEntry())
-                    return true;
-        }
-
-        return false;
     }
 
     return true;
@@ -738,9 +786,16 @@ bool GatherTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info
 std::string GatherTravelDestination::GetTitle() const {
     std::ostringstream out;
 
-    out << "gathering node ";
+    if (GetPurpose() == TravelDestinationPurpose::GatherFishing)
+    {
+        out << "fishing spot ";
+    }
+    else
+    {        
+        out << "gathering node ";
 
-    out << ChatHelper::formatWorldEntry(GetEntry());
+        out << ChatHelper::formatWorldEntry(GetEntry());
+    }
 
     return out.str();
 }
@@ -751,20 +806,18 @@ TravelTarget::TravelTarget(PlayerbotAI* ai) : AiObject(ai)
     SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
 }
 
-void TravelTarget::SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1, bool groupCopy1) {
+void TravelTarget::SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1) {
     wPosition = wPosition1;
     tDestination = tDestination1;
-    groupCopy = groupCopy1;
-    forced = false;
-    radius = 0;
 
     SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
 }
 
 void TravelTarget::CopyTarget(TravelTarget* const target) {
     SetTarget(target->tDestination, target->wPosition);
-    groupCopy = target->IsGroupCopy();
+    groupMember = target->groupMember;
     forced = target->forced;
+    relevance = target->relevance;
     extendRetryCount = target->extendRetryCount;
 }
 
@@ -778,6 +831,9 @@ void TravelTarget::SetStatus(TravelStatus status) {
     case TravelStatus::TRAVEL_STATUS_EXPIRED:
         statusTime = 1;
         break;
+    case TravelStatus::TRAVEL_STATUS_READY:
+        statusTime = HOUR *  1000;
+        break;
     case TravelStatus::TRAVEL_STATUS_TRAVEL:
         statusTime = GetMaxTravelTime() * 2 + sPlayerbotAIConfig.maxWaitForMove;
         break;
@@ -790,14 +846,47 @@ void TravelTarget::SetStatus(TravelStatus status) {
     }
 }
 
+bool TravelTarget::IsDestinationActive()
+{
+    Player* player = bot;
+    if (groupMember)
+    {
+        Player* member = groupMember.GetPlayer();
+        if (!ai->IsSafe(member)) //unknown
+            return true;
+        else
+            player = member;
+    }
+
+    if (!player->GetPlayerbotAI()) //No ai so clear target.
+        return false;
+
+    return tDestination->IsActive(player, PlayerTravelInfo(player));
+}
+
 bool TravelTarget::IsConditionsActive(bool clear)
 {
+    Player* player = bot;
+    if (groupMember)
+    {
+        Player* member = groupMember.GetPlayer();
+        if (!ai->IsSafe(member)) //unknown
+            return true;
+        else
+            player = member;
+    }
+
+    if (!player->GetPlayerbotAI()) //No ai so clear target.
+        return false;
+        
+    AiObjectContext* playerContext = player->GetPlayerbotAI()->GetAiObjectContext();
+
     if (clear)
         for (auto& condition : travelConditions)
-            context->ClearValues(condition);
+            playerContext->ClearValues(condition);
 
     for (auto& condition : travelConditions)
-        if (!AI_VALUE(bool, condition))
+        if (!PAI_VALUE(bool, condition))
             return false;
 
     return true;
@@ -808,6 +897,17 @@ void TravelTarget::CheckStatus()
     if (!IsActive())
         return;
 
+    if (groupMember)
+    {
+        Player* member = groupMember.GetPlayer();
+        if (!member || (ai->IsSafe(member) && member->GetGroup() != bot->GetGroup()))
+        {
+            ai->TellDebug(ai->GetMaster(), "Travel target expired because it was from a player that is no longer in the group.", "debug travel");
+            SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+            return;
+        }
+    }
+
     if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT) && !ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
     {
         ai->TellDebug(ai->GetMaster(), "The target is clearing because it was a travel once destination.", "debug travel");
@@ -815,24 +915,16 @@ void TravelTarget::CheckStatus()
         return;
     }
 
-    if ((statusTime != 0 && GetTimeLeft() <= 0))
+    if (statusTime != 0 && GetTimeLeft() <= 0 && !IsForced())
     {
         ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
         return;
     }
 
-    if (IsTraveling())
+    if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
     {
-        if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
-            if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT))
-            {
-                ai->TellDebug(ai->GetMaster(), "The target is clearing because the bot is following a group leader.", "debug travel");
-                sTravelMgr.SetNullTravelTarget(this);
-                return;
-            }
-
-        bool HasArrived = tDestination->IsIn(bot, radius);
+        bool HasArrived = tDestination->IsIn(bot);
 
         if (HasArrived)
         {
@@ -848,9 +940,10 @@ void TravelTarget::CheckStatus()
             SetStatus(TravelStatus::TRAVEL_STATUS_WORK);
             return;
         }
+        else if(IsForced()) return; //While traveling do not go into cooldown
     }
 
-    if (!IsCooldownDown() && (!tDestination->IsActive(bot, PlayerTravelInfo(bot)) || !IsConditionsActive())) //Target has become invalid. Stop.
+    if (GetStatus() != TravelStatus::TRAVEL_STATUS_COOLDOWN && ((!IsDestinationActive() && !IsForced()) || !IsConditionsActive())) //Target has become invalid. Stop.
     {
         ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
@@ -865,34 +958,6 @@ bool TravelTarget::IsActive() {
     return true;
 };
 
-bool TravelTarget::IsTraveling() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_TRAVEL)
-        return false;   
-
-    return true;
-}
-
-bool TravelTarget::IsWorking() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_WORK)
-        return false;
-
-    return true;
-}
-
-bool TravelTarget::IsCooldownDown() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_COOLDOWN)
-        return false;
-
-    return true;
-}
-
-bool TravelTarget::IsPreparing() {
-    if (m_status != TravelStatus::TRAVEL_STATUS_PREPARE)
-        return false;
-
-    return true;
-}
-
 TravelState TravelTarget::GetTravelState() {
     if (!tDestination || typeid(*tDestination) == typeid(NullTravelDestination))
         return TravelState::TRAVEL_STATE_IDLE;
@@ -901,24 +966,24 @@ TravelState TravelTarget::GetTravelState() {
     {
         if (((QuestRelationTravelDestination*)tDestination)->GetRelation() == 0)
         {
-            if (IsTraveling() || IsPreparing())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
                 return TravelState::TRAVEL_STATE_TRAVEL_PICK_UP_QUEST;
-            if (IsWorking())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
                 return TravelState::TRAVEL_STATE_WORK_PICK_UP_QUEST;
         }
         else
         {
-            if (IsTraveling() || IsPreparing())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
                 return TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST;
-            if (IsWorking())
+            if (GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
                 return TravelState::TRAVEL_STATE_WORK_HAND_IN_QUEST;
         }
     }
     else if (typeid(*tDestination) == typeid(QuestObjectiveTravelDestination))
     {
-        if (IsTraveling() || IsPreparing())
+        if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL || GetStatus() == TravelStatus::TRAVEL_STATUS_PREPARE)
             return TravelState::TRAVEL_STATE_TRAVEL_DO_QUEST;
-        if (IsWorking())
+        if (GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
             return TravelState::TRAVEL_STATE_WORK_DO_QUEST;
     }
     else if (typeid(*tDestination) == typeid(RpgTravelDestination))
@@ -954,6 +1019,7 @@ void TravelMgr::Clear()
                 delete dest;
     destinationMap.clear();
     pointsMap.clear();
+    fishPoints.clear();
 }
 
 int32 TravelMgr::GetAreaLevel(uint32 area_id)
@@ -1183,7 +1249,6 @@ void TravelMgr::LoadQuestTravelTable()
     GAI_VALUE(trainableSpellMap*, "trainable spell map");
     GAI_VALUE(std::vector<MountValue>, "full mount list");
     
-
     sLog.outString("Loading object locations.");
 
     EntryGuidps guidpMap = GAI_VALUE(EntryGuidps, "entry guidps");
@@ -1198,6 +1263,8 @@ void TravelMgr::LoadQuestTravelTable()
 
     for (auto& [entry, relation] : eMap)
     {
+
+
         bar.step();
         for (auto& [questId, flag] : relation)
         {
@@ -1207,7 +1274,6 @@ void TravelMgr::LoadQuestTravelTable()
                 continue;
             }
 
-            QuestTravelDestination* loc;
             std::vector<QuestTravelDestination*> locs;
 
             for (uint32 purposeFlagNr = 0; purposeFlagNr < 6; purposeFlagNr++)
@@ -1215,6 +1281,8 @@ void TravelMgr::LoadQuestTravelTable()
                 TravelDestinationPurpose purposeFlag = (TravelDestinationPurpose)(1 << purposeFlagNr);
                 if (flag & (uint32)purposeFlag)
                 {
+                    QuestTravelDestination* loc = nullptr;
+
                     if (purposeFlag == TravelDestinationPurpose::QuestGiver || purposeFlag == TravelDestinationPurpose::QuestTaker)
                         loc = AddDestination<QuestRelationTravelDestination>(entry, purposeFlag, questId);
                     else
@@ -1222,7 +1290,10 @@ void TravelMgr::LoadQuestTravelTable()
 
                     locs.push_back(loc);
                 }
+            }
 
+            if (!locs.empty())
+            {
                 for (auto& guidP : guidpMap.at(entry))
                 {
                     pointsMap.insert(std::make_pair(guidP.GetRawValue(), guidP));
@@ -1262,7 +1333,6 @@ void TravelMgr::LoadQuestTravelTable()
                 case TravelDestinationPurpose::GatherSkinning:
                 case TravelDestinationPurpose::GatherMining:
                 case TravelDestinationPurpose::GatherHerbalism:
-                case TravelDestinationPurpose::GatherFishing:
                     dests.push_back(AddDestination<GatherTravelDestination>(entry, purposeFlag));
                     break;
                 case TravelDestinationPurpose::Grind:
@@ -1289,7 +1359,7 @@ void TravelMgr::LoadQuestTravelTable()
                 tLoc->AddPoint(&pointsMap.at(guidP.GetRawValue()));
             }
         }       
-    }    
+    }     
 
     sLog.outString("Loading Explore locations.");
 
@@ -1318,6 +1388,10 @@ void TravelMgr::LoadQuestTravelTable()
         loc = AddDestination<ExploreTravelDestination>(area->ID, TravelDestinationPurpose::Explore);
         loc->AddPoint(&pointsMap.at(point.GetRawValue()));
     }
+
+    GetPopulatedGrids();
+
+    LoadFishLocations();
 
     //Analyse log files
     if (sPlayerbotAIConfig.hasLog("log_analysis.csv"))
@@ -1391,16 +1465,6 @@ void TravelMgr::LoadQuestTravelTable()
         sPlayerbotAIConfig.log("activity_pid.csv", out.str().c_str());
     }
 
-#ifdef IKE_PATHFINDER
-    bool mmapAvoidMobMod = true;
-
-    if (mmapAvoidMobMod)
-    {
-        //Mob avoidance
-        SetMobAvoidArea();
-    }
-#endif
-
     sLog.outString("Loading travel nodes.");
 
     sTravelNodeMap.loadNodeStore();
@@ -1410,7 +1474,7 @@ void TravelMgr::LoadQuestTravelTable()
     sTravelNodeMap.printMap();
     sTravelNodeMap.printNodeStore();
     sTravelNodeMap.saveNodeStore();
-
+   
     //Creature/gos/zone export.
     if (sPlayerbotAIConfig.hasLog("creatures.csv"))
     {
@@ -2089,14 +2153,11 @@ void TravelMgr::LoadQuestTravelTable()
                     out << entry << ",";
                     out << destination->GetShortName() << ",";
                     out << "\"" << destination->GetTitle() << "\",";
-                    out << destination->GetPoints().size() << ",";
-
-                    std::vector<WorldPosition> points;
-                    for (auto& point : destination->GetPoints())
-                        points.push_back(*point);
-
-                    WorldPosition().printWKT(points, out);
-
+                    out << destination->GetSize() << ",";
+                    out << "\"MultiPoint(";
+                    destination->printWKT(out, false);
+                    out.seekp(-1, out.cur);
+                    out << ")\"";
                     sPlayerbotAIConfig.log("travel_destinations.csv", out.str().c_str());
                 }
             }
@@ -2119,6 +2180,293 @@ void TravelMgr::LoadQuestTravelTable()
         WorldPosition::unloadMapAndVMaps(mapId);
     }
 #endif     
+}
+
+void TravelMgr::GetPopulatedGrids()
+{
+    sLog.outString("Finding populated grids.");
+
+    BarGoLink bar(sMapStore.GetNumRows());      
+
+    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
+        bar.step();
+
+        if (!sMapStore.LookupEntry(i))
+            continue;
+
+        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
+
+        GetPopulatedGrids(mapId);
+    }
+}
+
+void TravelMgr::GetPopulatedGrids(uint32 mapId)
+{
+    EntryGuidps guidpMap = GAI_VALUE(EntryGuidps, "entry guidps");
+
+    for (auto& [entry, guidPs] : guidpMap)
+    {
+        for (auto& guidP : guidPs)
+        {
+            if (guidP.getMapId() == mapId)
+            {
+                populatedGrids[guidP.getMapId()][guidP.getGridPair().x_coord][guidP.getGridPair().y_coord] = true;
+            }
+        }
+    }
+}
+
+uint32 TravelMgr::GetFishZone(const AsyncGuidPosition& pos) const
+{
+    uint32 zone, subzone;
+    int32 areaFlag = pos.getAreaFlag();
+
+    TerrainManager::GetZoneAndAreaIdByAreaFlag(zone, subzone, areaFlag, pos.getMapId());
+
+    if (sObjectMgr.GetFishingBaseSkillLevel(subzone))
+        return subzone;
+
+    if (sObjectMgr.GetFishingBaseSkillLevel(zone))
+        return zone;
+
+    return 0;
+}
+
+void TravelMgr::LoadFishLocations()
+{
+    sLog.outString("Loading Fish locations.");
+
+    fishPoints.clear();
+    fishMap.clear();
+    destinationMap[TravelDestinationPurpose::GatherFishing].clear();
+
+    auto result = WorldDatabase.Query("SELECT `name`, `map_id`, `position_x`, `position_y`, `position_z`, `orientation`, `description` FROM `ai_playerbot_named_location` WHERE `name` LIKE 'FISH_LOCATION%'");
+
+    if (!result)
+    {
+        GetFishLocations();
+        SaveFishLocations();
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        ++count;
+
+        Field* fields = result->Fetch();
+
+        std::string name = fields[0].GetCppString();
+        uint32 mapId = fields[1].GetUInt32();
+        float positionX = fields[2].GetFloat();
+        float positionY = fields[3].GetFloat();
+        float positionZ = fields[4].GetFloat();
+        float orientation = fields[5].GetFloat();
+        std::string description = fields[6].GetCppString();
+
+        AsyncGuidPosition* point = &fishPoints.emplace_back(GuidPosition(0, WorldPosition(mapId, positionX, positionY, positionZ, orientation)));
+
+        int32 areaFlag = stoi(description);
+        point->setAreaFlag(areaFlag);
+        uint32 zone = GetFishZone(*point);
+
+        if (!zone)
+            continue;
+
+        TravelDestination* dest = AddDestination<GatherTravelDestination>(zone, TravelDestinationPurpose::GatherFishing);                
+
+        dest->AddPoint(point);
+        fishMap.AddPoint(point);
+
+    } while (result->NextRow());
+
+    sLog.outString(">> Loaded %u fish locations", count);
+    sLog.outString();
+}
+
+void TravelMgr::GetFishLocations()
+{
+    sLog.outString("Generating Fish locations.");
+
+    BarGoLink bar(1000);
+
+    std::vector<std::future<void>> calculations;
+
+    for (int32 mapId = 1000; mapId >= 0; mapId--)
+    {       
+        bool hashFishing = false;
+        for (uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)    // areaflag numbered from 0
+        {
+            AreaTableEntry const* area = sAreaStore.LookupEntry(i);
+
+            if (!area)
+                continue;
+
+            if (area->mapid != mapId)
+                continue;
+
+            if (!sObjectMgr.GetFishingBaseSkillLevel(area->ID))
+                continue;
+
+            hashFishing = true;
+            break;
+        }
+
+        if (!hashFishing)
+            continue;
+
+        calculations.push_back(std::async([this, mapId] { GetFishLocations(mapId); }));
+
+        bar.step();
+    }
+
+    BarGoLink bar1(calculations.size());   
+
+    for (uint32 i = 0; i < calculations.size(); i++)
+    {
+        calculations[i].wait();
+        bar1.step();
+    }
+}
+
+void TravelMgr::GetFishLocations(uint32 mapId)
+{
+    PathFinder path(mapId,0);
+
+    const int8 subCellPerGrid = 64;
+    const float sizeOfSubCell = SIZE_OF_GRIDS / subCellPerGrid;
+
+    std::unordered_map<uint32, std::vector<AsyncGuidPosition>> fishSpots;
+
+    for (uint8 gridx = 0; gridx < 64; ++gridx)
+    {
+        for (uint8 gridy = 0; gridy < 64; ++gridy)
+        {
+            if (!populatedGrids[mapId][gridx][gridy])
+                continue;
+
+            GridPair grid(gridx, gridy);
+
+            WorldPosition gridPos(mapId, grid);
+
+            for (uint8 cellx = 0; cellx < subCellPerGrid; cellx++)
+            {
+                for (uint8 celly = 0; celly < subCellPerGrid; celly++)
+                {
+                    //Get spot in water.
+                    WorldPosition waterSpot = gridPos + WorldPosition(mapId, sizeOfSubCell * cellx, sizeOfSubCell * celly);
+
+                    waterSpot.setZ(waterSpot.getHeight(true));
+
+                    if (!waterSpot.isInWater())
+                        continue;
+
+                    //Get nearby location on ground.
+                    WorldPosition fishSpot;
+                    float botAngle = urand(0, 360);
+                    bool inWater = true;
+                    for (float angle = 0.0f; angle < 360.0f; angle += 45.0f)
+                    {
+                        fishSpot = waterSpot + WorldPosition(mapId, cos((angle + botAngle) / 180.0f * M_PI_F) * 10, sin((angle + botAngle) / 180.0f * M_PI_F) * 10);
+
+                        fishSpot.setZ(fishSpot.getHeight(false));
+
+                        if (!fishSpot.getTerrain())
+                            continue;
+
+                        if (fabs(fishSpot.getZ() - waterSpot.getZ()) > 10.0f)
+                            continue;
+
+                        uint32 area = path.getArea(mapId, fishSpot.getX(), fishSpot.getY(), fishSpot.getZ());
+
+                        if (!area || area == NAV_AREA_GROUND_STEEP)
+                        {
+                        //    sLog.outError("no area %d %f %f %f", mapId, fishSpot.getX(), fishSpot.getY(), fishSpot.getZ());
+                            continue;
+                        }
+                   
+                        inWater = fishSpot.isInWater();
+
+                        if (!inWater)
+                            break;
+                    }
+
+                    if (inWater)
+                        continue;
+
+                    AsyncGuidPosition fishPos(GuidPosition(0, fishSpot));
+                    fishPos.setO(fishPos.getAngleTo(waterSpot));
+
+                    fishPos.FetchArea();
+                    uint32 zone = GetFishZone(fishPos);
+
+                    if (!zone)
+                        continue;
+
+                    fishSpots[zone].push_back(fishPos);                    
+                }
+            }
+        }
+    }
+
+    getDestinationMutex.lock();
+    for (auto& [zone, spots] : fishSpots)
+    {
+        TravelDestination* dest = AddDestination<GatherTravelDestination>(zone, TravelDestinationPurpose::GatherFishing);
+
+        for (auto& spot : spots)
+        {
+            WorldPosition* point = &fishPoints.emplace_back(spot);
+            dest->AddPoint(point);
+            fishMap.AddPoint(point);
+        }
+    }
+    getDestinationMutex.unlock();
+}
+
+void TravelMgr::SaveFishLocations()
+{
+    sLog.outString("Saving Fish locations.");
+
+    //Save fishpoints sorted by mapId, areaFlag, X, Y.
+    fishPoints.sort([](AsyncGuidPosition i, AsyncGuidPosition j) {
+        if (i.getMapId() != j.getMapId()) return i.getMapId() > j.getMapId();
+        if (i.getAreaFlag() != j.getAreaFlag()) return i.getAreaFlag() > j.getAreaFlag();
+        if (i.getX() != j.getX()) return i.getX() > j.getX();
+        return i.getY() > j.getY(); });
+
+    WorldDatabase.BeginTransaction();
+
+    BarGoLink bar(fishPoints.size());
+
+    uint32 count = 0;    
+
+    for (auto& fishPoint : fishPoints)
+    {
+        std::string name = "FISH_LOCATION_" + std::to_string(fishPoint.getMapId()) + "_" + std::to_string(fishPoint.getAreaFlag()) + "_" + std::to_string(count);
+        std::string description = std::to_string(fishPoint.getAreaFlag());
+        name.erase(remove(name.begin(), name.end(), '\''), name.end());
+
+        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_named_location` (`name`, `map_id`, `position_x`, `position_y`, `position_z`, `orientation`, `description`) VALUES ('%s', '%d', '%f', '%f', '%f', '%f', '%s')"
+            , name.c_str(), fishPoint.getMapId(), fishPoint.getX(), fishPoint.getY(), fishPoint.getZ(), fishPoint.getO(), description.c_str());
+
+        bar.step();
+        count++;
+    }
+
+    WorldDatabase.CommitTransaction();
+}
+
+WorldPosition* TravelMgr::GetFishSpot(WorldPosition start, bool onlyNearestGrid)
+{
+    //0% Different map, 25% different grid, 25% different cell, 100% different point (inside cell)
+    std::list<uint8> chances = { 0, 25, 25, 100 };
+
+    if (onlyNearestGrid)
+        chances = { 0, 0, 0, 100 };
+
+    return fishMap.GetNextPoint(start, chances);
 }
 
 DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
@@ -2144,6 +2492,9 @@ DestinationList TravelMgr::GetDestinations(const PlayerTravelInfo& info, uint32 
 
                 if (maxDistance > 0 && dest->DistanceTo(center) > maxDistance)
                     continue;
+
+                if (dest->DistanceTo(center) == FLT_MAX) //Do not return destinations on maps you can't path to.
+                    continue;
                 
                 retDests.push_back(dest);
             }
@@ -2168,15 +2519,16 @@ void TravelMgr::GetPartitionsLock(bool getLock)
     sTravelMgr.getDestinationVar.notify_one();
 }
 
-PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
+bool TravelMgr::IsLocationLevelValid(const WorldPosition& position, const PlayerTravelInfo& info)
 {
-    sTravelMgr.GetPartitionsLock();
-
-    PartitionedTravelList pointMap;
-    DestinationList destinations = GetDestinations(info, purposeFlag, entries, onlyPossible, maxDistance);
-
     bool canFightElite = info.GetBoolValue("can fight elite");
     uint32 botLevel = info.GetLevel();
+
+    if (position.getMapId() == 530 && info.GetLevel() < 58) //Outland
+        return false;
+
+    if (position.getMapId() == 571 && info.GetLevel() < 68) //Northrend
+        return false;
 
     if (info.GetBoolValue("can fight boss"))
         botLevel += 5;
@@ -2190,48 +2542,57 @@ PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, cons
     if (botLevel < 6)
         botLevel = 6;
 
+    uint32 areaLevel = position.getAreaLevel();
+
+    if (!position.isOverworld() && !canFightElite)
+        areaLevel += 10;
+
+    if (!areaLevel || botLevel < areaLevel) //Skip points that are in a area that is too high level.
+        return false;
+
+    return true;
+}
+
+PartitionedTravelList TravelMgr::GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag, const std::vector<int32>& entries, bool onlyPossible, float maxDistance) const
+{
+    sTravelMgr.GetPartitionsLock();
+
+    PartitionedTravelList pointMap;
+    DestinationList destinations = GetDestinations(info, purposeFlag, entries, onlyPossible, maxDistance);
+
+
+
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::shuffle(destinations.begin(), destinations.end(), std::default_random_engine(seed));
 
     for (auto& dest : destinations)
     {
         TravelPoint point(dest, sTravelMgr.nullWorldPosition, 0.0f);
-        uint32 minPartition = 0;
 
-        std::vector<WorldPosition*> points = dest->GetPoints();
+        std::pair<uint32, std::vector<WorldPosition*>> pointRange = dest->GetClosestPartition(center, distancePartitions);
+
+        if (!pointRange.first)
+            continue;
+
+        MANGOS_ASSERT(pointRange.second.size());
+        std::vector<WorldPosition*> points = pointRange.second;
         std::shuffle(points.begin(), points.end(), std::default_random_engine(seed));
 
         for (auto& position : points)
         {
-            uint32 areaLevel = position->getAreaLevel();
-
-            if (!position->isOverworld() && !canFightElite)
-                areaLevel += 10;
-
-            if (!areaLevel || botLevel < areaLevel) //Skip points that are in a area that is too high level.
+            if (!IsLocationLevelValid(*position, info))
                 continue;
 
             float distance = position->distance(center);
 
-            uint32 currentPartition = 0;
-            for (auto& partition : distancePartitions)
-            {
-                if (partition == distancePartitions.back() || distance < partition)
-                {
-                    currentPartition = partition;
-                    break;
-                }
-            }
-
-            if (minPartition && currentPartition >= minPartition)
+            if (distance > maxDistance)
                 continue;
-
-            minPartition = currentPartition;
+            
             point = TravelPoint(dest, position, distance);
         }
 
-        if (minPartition)
-            pointMap[minPartition].push_back(point);
+        if (std::get<2>(point) > 0)
+            pointMap[pointRange.first].push_back(point);
     }
 
     sTravelMgr.GetPartitionsLock(false);
@@ -2338,60 +2699,47 @@ void TravelMgr::LoadMapTransfers()
     }
 }
 
-float TravelMgr::MapTransDistance(const WorldPosition& start, const WorldPosition& end, bool toMap) const
+std::vector<std::pair<WorldPosition, float>> TravelMgr::sqMapTransDistances(const WorldPosition& start, uint32 endMapId) const
 {
-    uint32 sMap = start.getMapId();
-    uint32 eMap = end.getMapId();
+    uint32 startMapId = start.getMapId();
+    if (startMapId == endMapId)
+        return { { start, 0.0f } };
 
-    if (sMap == eMap)
-        return start.distance(end);
+    auto mapTransfers = mapTransfersMap.find({ startMapId, endMapId });   
 
-    float minDist = 9000000;
-
-    auto mapTransfers = mapTransfersMap.find({ sMap, eMap });
-    
     if (mapTransfers == mapTransfersMap.end())
-        return minDist;
+        return {};
+
+    std::vector<std::pair<WorldPosition, float>> retPortals;
 
     for (auto& mapTrans : mapTransfers->second)
     {
-        WorldPosition realEnd = end;
-        if (toMap) realEnd = mapTrans.GetPointTo();
+        WorldPosition portalOnEndMap = mapTrans.GetPointTo();
 
-        float dist = mapTrans.Distance(start, realEnd);
+        float sqDist = mapTrans.sqDist(start, portalOnEndMap);
 
-        if (dist < minDist)
-            minDist = dist;
-    }    
-
-    return minDist;
-}
-
-float TravelMgr::FastMapTransDistance(const WorldPosition& start, const WorldPosition& end, bool toMap) const
-{
-    uint32 sMap = start.getMapId();
-    uint32 eMap = end.getMapId();
-
-    if (sMap == eMap)
-        return start.fDist(end);
-
-    float minDist = 9000000;
-
-    auto mapTransfers = mapTransfersMap.find({ sMap, eMap });
-
-    if (mapTransfers == mapTransfersMap.end())
-        return minDist;
-
-    for (auto& mapTrans : mapTransfers->second)
-    {
-        WorldPosition realEnd = end;
-        if (toMap) realEnd = mapTrans.GetPointTo();
-
-        float dist = mapTrans.FDist(start, end);
-
-        if (dist < minDist)
-            minDist = dist;
+        retPortals.push_back(std::make_pair(portalOnEndMap, sqDist));
     }
 
-    return minDist;
+    return retPortals;
+}
+
+float TravelMgr::MapTransDistance(const WorldPosition& start, const WorldPosition& end, bool toMap) const
+{
+    //These are the portals on the end map that start can reach.
+    std::vector<std::pair<WorldPosition, float>> portals = sqMapTransDistances(start, end.getMapId());
+
+    if (portals.empty())
+        return FLT_MAX;
+
+    float minsqDist = FLT_MAX;
+
+    for (auto& [portal, sqDistanceFromStartToPortal] : portals)
+    {
+        float sqDist = sqDistanceFromStartToPortal + portal.sqDistance2d(end);
+        if (sqDist < minsqDist)
+            minsqDist = sqDist;
+    }
+
+    return sqrt(minsqDist);
 }

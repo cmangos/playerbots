@@ -507,14 +507,14 @@ namespace ai
         RandomTrigger(PlayerbotAI* ai, std::string name, int probability = 7) : Trigger(ai, name)
         {
             this->probability = probability;
-            lastCheck = time(0);
+            lastCheck = time(0);         
         }
 
         virtual bool IsActive() override;
 
     protected:
-        int probability;
         time_t lastCheck;
+        int probability;
     };
 
     class TimeTrigger : public Trigger

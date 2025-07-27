@@ -20,8 +20,7 @@ namespace ai
 
         virtual GuidPosition guidP() { return AI_VALUE(GuidPosition, "rpg target"); }
         virtual ObjectGuid guid() { return (ObjectGuid)guidP(); }        
-        void Update() {GuidPosition p = guidP(); p.updatePosition(bot->GetInstanceId()); if (p != guidP()) SET_AI_VALUE(GuidPosition, "rpg target", p);}
-        virtual bool InRange() { return guidP() ? (guidP().sqDistance2d(bot) < INTERACTION_DISTANCE * INTERACTION_DISTANCE * 1.5) : false; }
+        virtual bool InRange() { return AI_VALUE2(float, "distance", "rpg target") <= INTERACTION_DISTANCE * 1.5; }
         void setDelay(bool waitForGroup);
     private:
         void setFacingTo(GuidPosition guidPosition);
@@ -328,5 +327,23 @@ namespace ai
         virtual bool isUseful() { return rpg->InRange(); }
 
         virtual bool Execute(Event& event);
+    };
+
+    class RpgSpellClickAction : public RpgSubAction
+    {
+    public:
+        RpgSpellClickAction(PlayerbotAI* ai, std::string name = "rpg spell click") : RpgSubAction(ai, name) {}
+
+        virtual bool Execute(Event& event);
+    };
+
+    class RpgGossipTalkAction : public RpgSubAction
+    {
+    public:
+        RpgGossipTalkAction(PlayerbotAI* ai, std::string name = "rpg gossip talk") : RpgSubAction(ai, name) {}
+
+    private:
+        virtual std::string ActionName() { return "gossip hello"; }
+        virtual Event ActionEvent(Event event) { WorldPacket p(CMSG_GOSSIP_SELECT_OPTION); p << rpg->guid(); p.rpos(0); return Event("rpg action", p); }
     };
 }

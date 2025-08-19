@@ -5745,7 +5745,7 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
     if (bot->IsBeingTeleported()) //We might end up in a bg so stay active.
         return ActivePiorityType::IN_BATTLEGROUND;
 
-    if (WorldPosition(bot).isBg())
+    if (WorldPosition(bot).isBg() || WorldPosition(bot).isArena())
         return ActivePiorityType::IN_BATTLEGROUND;
 
     if (!WorldPosition(bot).isOverworld())

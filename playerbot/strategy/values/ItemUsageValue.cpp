@@ -1717,7 +1717,10 @@ uint32 ItemUsageValue::GetItemBaseValue(ItemPrototype const* proto, uint8 maxRea
         for (auto idCountPair : GetAllReagentItemIdsForCraftingItem(proto))
         {
             ItemPrototype const* reagentProto = ObjectMgr::GetItemPrototype(idCountPair.first);
-            totalReagentsValue += GetItemBaseValue(reagentProto, maxReagentLevel) * idCountPair.second;
+            if (reagentProto)
+            {
+                totalReagentsValue += GetItemBaseValue(reagentProto, maxReagentLevel) * idCountPair.second;
+            }
         }
 
         if (totalReagentsValue > 0)
@@ -1812,4 +1815,5 @@ uint32 ItemUsageValue::DesiredPricePerItem(Player* bot, const ItemPrototype* pro
     desiredPricePerItem = std::max(minAhPrice, desiredPricePerItem);
 
     return desiredPricePerItem;
+
 }

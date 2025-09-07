@@ -18,7 +18,7 @@ namespace ai
         virtual std::string GetHelpName() { return "accept all quests"; } //Must equal iternal name
         virtual std::string GetHelpDescription()
         {
-            return "This action wil accept all quests from the npc selected by the master\n"
+            return "This action will accept all quests from the npc selected by the master\n"
                 "It will use all nearby quest givers if none is selected.";
         }
         virtual std::vector<std::string> GetUsedActions() { return {}; }

@@ -454,11 +454,22 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     //If we have only trivial targets ignore them all the next time we look for a new target.
     for (auto& target : targets)
     {
+        if (!target.second || target.second < 0)
+            continue;
+
         guidps.push_back(target.first);
         relevances.push_back(target.second);
 
         if (target.second == 1)
             ignoreList.insert(target.first);
+    }
+
+    //If we can't find a target clear ignore list and try again later.
+    if (guidps.empty())
+    {
+        RESET_AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target");
+        RESET_AI_VALUE(GuidPosition, "rpg target");
+        return false;
     }
 
     //We pick a random target from the list with targets having a higher relevance of being picked.

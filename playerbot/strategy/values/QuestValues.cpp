@@ -97,6 +97,8 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 	rMap[28782][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Acherus Deathcharger][Into the Realm of Shadows]	
 	rMap[29501][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scourge Gryphon][Into the Realm of Shadows]	
 	
+	rMap[28577][12678] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Citizen of Havenshire][If Chaos Drives, Let Suffering Hold The Reins]
+	rMap[28576][12678] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Citizen of Havenshire][If Chaos Drives, Let Suffering Hold The Reins]
 
 	rMap[28658][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Gothic the Harvester][The Gift That Keeps On Giving]	
 	rMap[28819][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Miner][The Gift That Keeps On Giving]	

@@ -229,12 +229,12 @@ void GlyphAction::Set(uint32 itemId, uint8 wantedSlotId, std::ostringstream& msg
     bot->SetGlyph(useSlotId, glyphId);
     bot->ApplyGlyph(useSlotId, true);
     bot->SendTalentsInfoData(false);
-#endif
 
     uint32 count = 1;
 
     if (!ai->HasCheat(BotCheatMask::item))
-        bot->DestroyItemCount(glyphItem, count, true);
+        bot->DestroyItemCount(itemId, count, true);
+#endif
 
     msg << BOT_TEXT2("Applied %glyph to slot %slot", placeholders);
 }

@@ -1468,7 +1468,9 @@ bool DebugAction::HandleItem(Event& event, Player* requester, const std::string&
         { ITEM_CLASS_KEY, "Key" },
         { ITEM_CLASS_PERMANENT, "Permanent" },
         { ITEM_CLASS_MISC, "Miscellaneous" },
+#ifdef MANGOSBOT_TWO
         { ITEM_CLASS_GLYPH, "Glyph" }
+#endif
     };
 
     static const std::unordered_map<uint32, std::unordered_map<uint32, std::string>> itemSubclassNames = {
@@ -1533,11 +1535,13 @@ bool DebugAction::HandleItem(Event& event, Player* requester, const std::string&
         { ITEM_CLASS_MISC, {
             { 0, "Junk" }, { 1, "Reagent" }, { 2, "Pet" }, { 3, "Holiday" }, { 4, "Other" }, { 5, "Mount" }
         }},
+#ifdef MANGOSBOT_TWO
         { ITEM_CLASS_GLYPH, {
             { 1, "Glyph Warrior" }, { 2, "Glyph Paladin" }, { 3, "Glyph Hunter" }, { 4, "Glyph Rogue" },
             { 5, "Glyph Priest" }, { 6, "Glyph Death Knight" }, { 7, "Glyph Shaman" }, { 8, "Glyph Mage" },
             { 9, "Glyph Warlock" }, { 11, "Glyph Druid" }
         }}
+#endif
     };
 
 

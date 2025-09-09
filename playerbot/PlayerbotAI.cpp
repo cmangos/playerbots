@@ -5001,7 +5001,7 @@ bool PlayerbotAI::CanCastVehicleSpell(uint32 spellId, Unit* target)
     return false;
 }
 
-bool PlayerbotAI::CastVehicleSpell(uint32 spellId, Unit* target)
+bool PlayerbotAI::CastVehicleSpell(uint32 spellId, Unit* target, float projectileSpeed)
 {
 #ifdef MANGOSBOT_TWO
     if (!spellId)
@@ -5096,7 +5096,7 @@ bool PlayerbotAI::CastVehicleSpell(uint32 spellId, Unit* target)
             return false;
 
         targets.setDestination(dest.coord_x, dest.coord_y, dest.coord_z);
-        targets.setSpeed(30.0f);
+        targets.setSpeed(projectileSpeed);
         float distanceToDest = sqrt(vehicle->GetPosition().GetDistance(Position(dest.coord_x, dest.coord_y, dest.coord_z, 0.0f)));
         float elev = 0.01f;
         if (distanceToDest < 25.0f)
@@ -5157,7 +5157,7 @@ bool PlayerbotAI::CastVehicleSpell(uint32 spellId, Unit* target)
     return false;
 }
 
-bool PlayerbotAI::IsInVehicle(bool canControl, bool canCast, bool canAttack, bool canTurn, bool fixed)
+bool PlayerbotAI::IsInVehicle(bool canControl, bool canCast, bool canAttack, bool canTurn, bool fixed, std::string vehicleName)
 {
 #ifdef MANGOSBOT_TWO
     TransportInfo* transportInfo = bot->GetTransportInfo();
@@ -5168,6 +5168,22 @@ bool PlayerbotAI::IsInVehicle(bool canControl, bool canCast, bool canAttack, boo
     Unit* vehicle = (Unit*)transportInfo->GetTransport();
     if (!vehicle || !vehicle->IsAlive())
         return false;
+
+    if (!vehicleName.empty())
+    {
+        std::wstring wnamepart;
+
+        if (!Utf8toWStr(vehicleName, wnamepart))
+            return 0;
+
+        wstrToLower(wnamepart);
+        char firstSymbol = tolower(vehicleName[0]);
+        int spellLength = wnamepart.length();
+
+        const char* name = vehicle->GetName();
+        if (tolower(name[0]) != firstSymbol || strlen(name) != spellLength || !Utf8FitTo(name, wnamepart))
+            return false;
+    }
 
     if (!vehicle->GetVehicleInfo())
         return false;
@@ -5745,7 +5761,7 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
     if (bot->IsBeingTeleported()) //We might end up in a bg so stay active.
         return ActivePiorityType::IN_BATTLEGROUND;
 
-    if (WorldPosition(bot).isBg() || WorldPosition(bot).isArena())
+    if (WorldPosition(bot).isBg())
         return ActivePiorityType::IN_BATTLEGROUND;
 
     if (!WorldPosition(bot).isOverworld())

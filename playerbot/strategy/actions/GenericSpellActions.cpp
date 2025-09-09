@@ -291,7 +291,7 @@ bool CastVehicleSpellAction::isUseful()
 
 bool CastVehicleSpellAction::Execute(Event& event)
 {
-    return ai->CastVehicleSpell(GetSpellID(), GetTarget());
+    return ai->CastVehicleSpell(GetSpellID(), GetTarget(), speed);
 }
 
 bool CastShootAction::isPossible()

@@ -120,6 +120,8 @@ namespace ai
 
         static double GetRarityPriceMultiplier(ItemPrototype const* proto);
         static double GetLevelPriceMultiplier(ItemPrototype const* proto);
+
+        static bool MustEquipForQuest(ItemPrototype const* proto, Player* bot);
     public:
         static float CurrentStacks(PlayerbotAI* ai, ItemPrototype const* proto);
         static std::vector<uint32> SpellsUsingItem(uint32 itemId, Player* bot);

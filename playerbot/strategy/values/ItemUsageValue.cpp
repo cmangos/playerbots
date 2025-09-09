@@ -507,7 +507,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
         result = RandomPlayerbotMgr::CanEquipUnseenItem(bot, NULL_SLOT, dest, itemProto->ItemId);
     }
 
-    if (result != EQUIP_ERR_OK)
+    if (result != EQUIP_ERR_OK && result != EQUIP_ERR_ITEMS_CANT_BE_SWAPPED)
         return ItemUsage::ITEM_USAGE_NONE;
 
     if (itemProto->Class == ITEM_CLASS_QUIVER)
@@ -597,6 +597,12 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
     }
 
     const ItemPrototype* oldItemProto = oldItem->GetProto();
+
+    if(MustEquipForQuest(itemProto, bot) && !MustEquipForQuest(oldItemProto, bot))
+        return ItemUsage::ITEM_USAGE_EQUIP;
+
+    if (MustEquipForQuest(oldItemProto, bot))
+        return ItemUsage::ITEM_USAGE_KEEP;
 
     if (itemProto->Class == ITEM_CLASS_ARMOR && itemProto->InventoryType == INVTYPE_TABARD)
     {
@@ -1364,6 +1370,20 @@ std::vector<std::pair<uint32, uint32>> ItemUsageValue::GetAllReagentItemIdsForCr
 bool ItemUsageValue::IsItemSoldByAnyVendor(ItemPrototype const* proto)
 {
     return m_allItemIdsSoldByAnyVendors.count(proto->ItemId) > 0;
+}
+
+bool ItemUsageValue::MustEquipForQuest(ItemPrototype const* proto, Player* bot)
+{
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+
+    switch (proto->ItemId)
+    {
+    case 39371:
+        return AI_VALUE2(bool, "need quest objective", 12720);
+    }
+
+    return false;
 }
 
 bool ItemUsageValue::IsItemSoldByAnyVendorButHasLimitedMaxCount(ItemPrototype const* proto)

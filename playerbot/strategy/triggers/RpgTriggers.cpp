@@ -519,7 +519,7 @@ bool RpgBuyPetitionTrigger::IsActive()
 
 bool RpgUseTrigger::IsActive()
 {
-    if (ai->HasRealPlayerMaster())
+    if (ai->HasActivePlayerMaster())
         return false;
 
     GuidPosition guidP(getGuidP());
@@ -555,6 +555,21 @@ bool RpgUseTrigger::IsActive()
     default:
         return false;
     }   
+}
+
+bool RpgQuestUseTrigger::IsActive()
+{
+    if (!RpgUseTrigger::IsActive())
+        return false;
+
+    GuidPosition guidP(getGuidP());
+    
+    switch (guidP.GetEntry())
+    {
+    case 190767: return AI_VALUE2(bool, "need quest objective", "12701"); //Only when we need "Inconspicuous mine car"
+    }
+
+    return false;
 }
 
 bool RpgAIChatTrigger::IsActive()

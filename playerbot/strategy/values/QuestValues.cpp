@@ -100,6 +100,8 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 
 	rMap[28658][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Gothic the Harvester][The Gift That Keeps On Giving]	
 	rMap[28819][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Miner][The Gift That Keeps On Giving]	
+
+	rMap[-190767][12701] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Inconspicuous mine car][Massacre At Light's Point]	
 #endif
 	return rMap;
 }

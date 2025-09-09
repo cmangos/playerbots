@@ -723,7 +723,11 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 ai->Unmount();
 #endif
                 bool goTaxi = bot->ActivateTaxiPathTo({ tEntry->from, tEntry->to }, unit, 1);
-
+#ifdef MANGOSBOT_TWO
+                /*
+                bot->ResolvePendingMount();
+                */
+#endif
                 if(!goTaxi)
                     bot->SetMoney(botMoney);
 
@@ -736,6 +740,11 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 ai->Unmount();
 #endif
                 bool goClick = ai->HandleSpellClick(entry); //Source gryphon of ebonhold.
+#ifdef MANGOSBOT_TWO
+                /*
+                bot->ResolvePendingMount();
+                */
+#endif
 
                 return goClick;
             }

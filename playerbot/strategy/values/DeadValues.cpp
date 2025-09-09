@@ -2,6 +2,8 @@
 #include "playerbot/playerbot.h"
 #include "DeadValues.h"
 #include "playerbot/TravelMgr.h"
+#include "playerbot/PlayerbotMgr.h"
+#include "playerbot/RandomPlayerbotMgr.h"
 
 using namespace ai;
 
@@ -137,15 +139,49 @@ GuidPosition BestGraveyardValue::Calculate()
         GuidPosition anotherGraveyard = AI_VALUE2(GuidPosition, "graveyard", "another closest appropriate");
         if (anotherGraveyard)
         {
+            // Reset failure counter on successful graveyard finding
+            SET_AI_VALUE2(uint32, "graveyard failure count", bot->GetGUIDLow(), 0);
             return anotherGraveyard;
         }
+        
+        // Increment failure counter
+        uint32 currentFailures = AI_VALUE2_EXISTS(uint32, "graveyard failure count", bot->GetGUIDLow(), 0);
+        uint32 newFailures = currentFailures + 1;
+        SET_AI_VALUE2(uint32, "graveyard failure count", bot->GetGUIDLow(), newFailures);
+        
         sLog.outBasic(
-            "ERROR: Unable to find another closest appropriate graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s>",
+            "ERROR: Unable to find another closest appropriate graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s> (failure count: %d)",
             bot->GetGUIDLow(),
             bot->GetTeam() == ALLIANCE ? "A" : "H",
             bot->GetLevel(),
-            bot->GetName()
+            bot->GetName(),
+            newFailures
         );
+
+        // Remove bot after 3 failed attempts
+        if (newFailures >= 3)
+        {
+            sLog.outBasic(
+                "REMOVING BOT: Too many graveyard failures (%d) - removing bot #%d %s:%d <%s> from world",
+                newFailures,
+                bot->GetGUIDLow(),
+                bot->GetTeam() == ALLIANCE ? "A" : "H",
+                bot->GetLevel(),
+                bot->GetName()
+            );
+            
+            // Remove the bot from the world
+            if (PlayerbotMgr* mgr = bot->GetPlayerbotMgr())
+            {
+                mgr->LogoutPlayerBot(bot->GetGUIDLow());
+            }
+            else if (sRandomPlayerbotMgr.GetPlayerBot(bot->GetGUIDLow()))
+            {
+                sRandomPlayerbotMgr.LogoutPlayerBot(bot->GetGUIDLow());
+            }
+            
+            return GuidPosition();
+        }
     }
 
     //Revive near master.

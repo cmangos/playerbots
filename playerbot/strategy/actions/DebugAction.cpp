@@ -91,6 +91,8 @@ bool DebugAction::Execute(Event& event)
         return HandleNPC(event, requester, text);
     else if (text.find("go ") == 0)
         return HandleGO(event, requester, text);
+    else if (text.find("item ") == 0)
+        return HandleItem(event, requester, text);
     else if (text.find("rpg ") == 0)
         return HandleRPG(event, requester, text);
     else if (text.find("rpgtargets") == 0)
@@ -1395,6 +1397,185 @@ bool DebugAction::HandleGO(Event& event, Player* requester, const std::string& t
 
     return true;
 }
+
+bool DebugAction::HandleItem(Event& event, Player* requester, const std::string& text)
+{
+    std::ostringstream out;
+
+    if (text.size() < 4)
+        return false;
+
+    GuidPosition guidP;
+
+    std::string link = text.substr(3);
+
+    if (link.empty())
+        return false;
+
+        ItemIds items = chat->parseItems(link);
+        if (items.empty())
+            return false;
+
+    uint32 itemId = *items.begin();
+
+    Item* item = bot->GetItemByEntry(itemId);
+
+    ItemQualifier qualifier;
+    ItemPrototype const* proto;
+    if (item)
+    {
+        qualifier = ItemQualifier(item);
+        proto = item->GetProto();
+    }
+    else
+    {
+        qualifier = ItemQualifier(itemId);
+        proto = qualifier.GetProto();
+    }
+
+
+    if (item)
+        out << chat->formatItem(item, item->GetCount());
+    else
+        out << chat->formatItem(qualifier);
+
+    out << " (id:" << itemId;
+
+    out << ",reqlev:" << proto->RequiredLevel << " ilev:" << proto->ItemLevel;
+
+    out << ") ";
+    
+
+    ai->TellPlayerNoFacing(requester, out);
+
+    std::ostringstream out2;
+
+    // Print class and subclass string equivalents
+    static const std::unordered_map<uint32, std::string> itemClassNames = {
+        { ITEM_CLASS_CONSUMABLE, "Consumable" },
+        { ITEM_CLASS_CONTAINER, "Container" },
+        { ITEM_CLASS_WEAPON, "Weapon" },
+        { ITEM_CLASS_GEM, "Gem" },
+        { ITEM_CLASS_ARMOR, "Armor" },
+        { ITEM_CLASS_REAGENT, "Reagent" },
+        { ITEM_CLASS_PROJECTILE, "Projectile" },
+        { ITEM_CLASS_TRADE_GOODS, "Trade Goods" },
+        { ITEM_CLASS_GENERIC, "Generic" },
+        { ITEM_CLASS_RECIPE, "Recipe" },
+        { ITEM_CLASS_MONEY, "Money" },
+        { ITEM_CLASS_QUIVER, "Quiver" },
+        { ITEM_CLASS_QUEST, "Quest" },
+        { ITEM_CLASS_KEY, "Key" },
+        { ITEM_CLASS_PERMANENT, "Permanent" },
+        { ITEM_CLASS_MISC, "Miscellaneous" },
+        { ITEM_CLASS_GLYPH, "Glyph" }
+    };
+
+    static const std::unordered_map<uint32, std::unordered_map<uint32, std::string>> itemSubclassNames = {
+        { ITEM_CLASS_CONSUMABLE, {
+            { 0, "Consumable" }, { 1, "Potion" }, { 2, "Elixir" }, { 3, "Flask" }, { 4, "Scroll" }, { 5, "Food" },
+            { 6, "Item Enhancement" }, { 7, "Bandage" }, { 8, "Other" }
+        }},
+        { ITEM_CLASS_CONTAINER, {
+            { 0, "Container" }, { 1, "Soul Container" }, { 2, "Herb Container" }, { 3, "Enchanting Container" },
+            { 4, "Engineering Container" }, { 5, "Gem Container" }, { 6, "Mining Container" },
+            { 7, "Leatherworking Container" }, { 8, "Inscription Container" }
+        }},
+        { ITEM_CLASS_WEAPON, {
+            { 0, "Axe (1H)" }, { 1, "Axe (2H)" }, { 2, "Bow" }, { 3, "Gun" }, { 4, "Mace (1H)" }, { 5, "Mace (2H)" },
+            { 6, "Polearm" }, { 7, "Sword (1H)" }, { 8, "Sword (2H)" }, { 9, "Obsolete" }, { 10, "Staff" },
+            { 11, "Exotic (1H)" }, { 12, "Exotic (2H)" }, { 13, "Fist Weapon" }, { 14, "Miscellaneous" },
+            { 15, "Dagger" }, { 16, "Thrown" }, { 17, "Spear" }, { 18, "Crossbow" }, { 19, "Wand" }, { 20, "Fishing Pole" }
+        }},
+        { ITEM_CLASS_GEM, {
+            { 0, "Red" }, { 1, "Blue" }, { 2, "Yellow" }, { 3, "Purple" }, { 4, "Green" }, { 5, "Orange" },
+            { 6, "Meta" }, { 7, "Simple" }, { 8, "Prismatic" }
+        }},
+        { ITEM_CLASS_ARMOR, {
+            { 0, "Miscellaneous" }, { 1, "Cloth" }, { 2, "Leather" }, { 3, "Mail" }, { 4, "Plate" }, { 5, "Buckler" },
+            { 6, "Shield" }, { 7, "Libram" }, { 8, "Idol" }, { 9, "Totem" }, { 10, "Sigil" }
+        }},
+        { ITEM_CLASS_REAGENT, {
+            { 0, "Reagent" }
+        }},
+        { ITEM_CLASS_PROJECTILE, {
+            { 0, "Wand" }, { 1, "Bolt" }, { 2, "Arrow" }, { 3, "Bullet" }, { 4, "Thrown" }
+        }},
+        { ITEM_CLASS_TRADE_GOODS, {
+            { 0, "Trade Goods" }, { 1, "Parts" }, { 2, "Explosives" }, { 3, "Devices" }, { 4, "Jewelcrafting" },
+            { 5, "Cloth" }, { 6, "Leather" }, { 7, "Metal & Stone" }, { 8, "Meat" }, { 9, "Herb" },
+            { 10, "Elemental" }, { 11, "Other" }, { 12, "Enchanting" }, { 13, "Material" },
+            { 14, "Armor Enchantment" }, { 15, "Weapon Enchantment" }
+        }},
+        { ITEM_CLASS_GENERIC, {
+            { 0, "Generic" }
+        }},
+        { ITEM_CLASS_RECIPE, {
+            { 0, "Book" }, { 1, "Leatherworking Pattern" }, { 2, "Tailoring Pattern" }, { 3, "Engineering Schematic" },
+            { 4, "Blacksmithing" }, { 5, "Cooking Recipe" }, { 6, "Alchemy Recipe" }, { 7, "First Aid Manual" },
+            { 8, "Enchanting Formula" }, { 9, "Fishing Manual" }, { 10, "Jewelcrafting Recipe" }
+        }},
+        { ITEM_CLASS_MONEY, {
+            { 0, "Money" }
+        }},
+        { ITEM_CLASS_QUIVER, {
+            { 0, "Quiver0" }, { 1, "Quiver1" }, { 2, "Quiver" }, { 3, "Ammo Pouch" }
+        }},
+        { ITEM_CLASS_QUEST, {
+            { 0, "Quest" }
+        }},
+        { ITEM_CLASS_KEY, {
+            { 0, "Key" }, { 1, "Lockpick" }
+        }},
+        { ITEM_CLASS_PERMANENT, {
+            { 0, "Permanent" }
+        }},
+        { ITEM_CLASS_MISC, {
+            { 0, "Junk" }, { 1, "Reagent" }, { 2, "Pet" }, { 3, "Holiday" }, { 4, "Other" }, { 5, "Mount" }
+        }},
+        { ITEM_CLASS_GLYPH, {
+            { 1, "Glyph Warrior" }, { 2, "Glyph Paladin" }, { 3, "Glyph Hunter" }, { 4, "Glyph Rogue" },
+            { 5, "Glyph Priest" }, { 6, "Glyph Death Knight" }, { 7, "Glyph Shaman" }, { 8, "Glyph Mage" },
+            { 9, "Glyph Warlock" }, { 11, "Glyph Druid" }
+        }}
+    };
+
+
+
+    out2 << "class: ";
+    auto classIt = itemClassNames.find(proto->Class);
+    if (classIt != itemClassNames.end())
+        out2 << classIt->second;
+    else
+        out2 << "Unknown(" << proto->Class << ")";
+
+    out2 << ", subclass: ";
+    auto subclassMapIt = itemSubclassNames.find(proto->Class);
+    if (subclassMapIt != itemSubclassNames.end())
+    {
+        auto subIt = subclassMapIt->second.find(proto->SubClass);
+        if (subIt != subclassMapIt->second.end())
+            out2 << subIt->second;
+        else
+            out2 << "Unknown(" << proto->SubClass << ")";
+    }
+    else
+    {
+        out2 << "Unknown(" << proto->SubClass << ")";
+    }
+
+    ai->TellPlayerNoFacing(requester, out2);
+
+    std::ostringstream out3;
+
+    //Print the items contained inside item.
+
+
+    ai->TellPlayerNoFacing(requester, out3);
+    
+    return true;
+}
+
 
 bool DebugAction::HandleRPG(Event& event, Player* requester, const std::string& text)
 {

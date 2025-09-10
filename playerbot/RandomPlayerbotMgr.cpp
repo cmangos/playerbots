@@ -3293,7 +3293,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         for (uint32 i = 2; i < params.size(); i++)
             command += command + " ";
 
-        sLog.outString("Sending command %s to player %s",command, player->GetName());
+        sLog.outString("Sending command %s to player %s", command.c_str(), player->GetName());
 
         ai->HandleCommand(CHAT_MSG_WHISPER, command, *player);
 

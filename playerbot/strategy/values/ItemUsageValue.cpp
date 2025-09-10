@@ -1309,7 +1309,7 @@ void ItemUsageValue::PopulateReagentItemIdsForCraftableItemIds()
 
                             uint32 reagentItemId = spellInfo->Reagent[x];
                             uint32 reagentsRequiredCount = spellInfo->ReagentCount[x];
-                            if (reagentItemId)
+                            if (reagentItemId && ObjectMgr::GetItemPrototype(reagentItemId))
                             {
                                 m_craftingReagentItemIdsForCraftableItem[craftedItemId].push_back({ reagentItemId , reagentsRequiredCount });
                             }
@@ -1323,7 +1323,7 @@ void ItemUsageValue::PopulateReagentItemIdsForCraftableItemIds()
 
 void ItemUsageValue::PopulateSoldByVendorItemIds()
 {
-    if (auto result = WorldDatabase.PQuery("%s", "SELECT item, entry FROM npc_vendor"))
+    if (auto result = WorldDatabase.PQuery("%s", "SELECT distinct item FROM npc_vendor"))
     {
         BarGoLink bar(result->GetRowCount());
         do
@@ -1333,11 +1333,15 @@ void ItemUsageValue::PopulateSoldByVendorItemIds()
             uint32 entry = fields[0].GetUInt32();
             if (!entry)
                 continue;
+
+            if (!ObjectMgr::GetItemPrototype(entry))
+                continue;
+
             m_allItemIdsSoldByAnyVendors.insert(fields[0].GetUInt32());
         } while (result->NextRow());
     }
 
-    if (auto result = WorldDatabase.PQuery("%s", "SELECT item, entry FROM npc_vendor WHERE maxcount > 0"))
+    if (auto result = WorldDatabase.PQuery("%s", "SELECT distinct item FROM npc_vendor WHERE maxcount > 0"))
     {
         BarGoLink bar(result->GetRowCount());
         do
@@ -1347,6 +1351,10 @@ void ItemUsageValue::PopulateSoldByVendorItemIds()
             uint32 entry = fields[0].GetUInt32();
             if (!entry)
                 continue;
+
+            if (!ObjectMgr::GetItemPrototype(entry))
+                continue;
+
             m_itemIdsSoldByAnyVendorsWithLimitedMaxCount.insert(fields[0].GetUInt32());
         } while (result->NextRow());
     }

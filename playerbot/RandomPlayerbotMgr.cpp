@@ -3291,7 +3291,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         std::string command;
 
         for (uint32 i = 2; i < params.size(); i++)
-            command += command + " ";
+            command += command + " " + params[i];
 
         sLog.outString("Sending command %s to player %s", command.c_str(), player->GetName());
 
@@ -3310,7 +3310,6 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     handlers["grind"] = &RandomPlayerbotMgr::RandomTeleport;
     handlers["change_strategy"] = &RandomPlayerbotMgr::ChangeStrategy;
     handlers["remove"] = &RandomPlayerbotMgr::Remove;
-    handlers["cmd"] = &RandomPlayerbotMgr::Remove;
 
     for (std::map<std::string, ConsoleCommandHandler>::iterator j = handlers.begin(); j != handlers.end(); ++j)
     {

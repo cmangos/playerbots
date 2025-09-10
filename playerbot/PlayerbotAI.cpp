@@ -4579,7 +4579,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool
     {
         std::ostringstream out;
         out << "Casting " <<ChatHelper::formatSpell(pSpellInfo);
-        TellPlayerNoFacing(GetMaster(), out);
+        TellPlayerNoFacing(GetMaster() ? GetMaster() : bot, out);
     }
 
     return true;
@@ -4713,7 +4713,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId, GameObject* goTarget, Item* itemTarg
     {
         std::ostringstream out;
         out << "Casting " << ChatHelper::formatSpell(pSpellInfo);
-        TellPlayerNoFacing(GetMaster(), out);
+        TellPlayerNoFacing(GetMaster() ? GetMaster() : bot, out);
     }
 
     return true;
@@ -4858,7 +4858,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId, float x, float y, float z, Item* ite
     {
         std::ostringstream out;
         out << "Casting " << ChatHelper::formatSpell(pSpellInfo);
-        TellPlayerNoFacing(GetMaster(), out);
+        TellPlayerNoFacing(GetMaster() ? GetMaster() : bot, out);
     }
 
     return true;
@@ -5148,7 +5148,7 @@ bool PlayerbotAI::CastVehicleSpell(uint32 spellId, Unit* target, float projectil
     {
         std::ostringstream out;
         out << "Casting Vehicle Spell" << ChatHelper::formatSpell(pSpellInfo);
-        TellPlayerNoFacing(GetMaster(), out);
+        TellPlayerNoFacing(GetMaster() ? GetMaster() : bot, out);
     }
 
     return true;

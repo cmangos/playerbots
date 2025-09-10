@@ -109,7 +109,6 @@ void PacketHandlingHelper::AddPacket(const WorldPacket& packet)
     m_botPacketMutex.unlock();
 }
 
-
 PlayerbotAI::PlayerbotAI() : PlayerbotAIBase(), bot(NULL), aiObjectContext(NULL),
     currentEngine(NULL), chatHelper(this), chatFilter(this), accountId(0), security(NULL), master(NULL), currentState(BotState::BOT_STATE_NON_COMBAT), faceTargetUpdateDelay(0), jumpTime(0), fallAfterJump(false)
 {

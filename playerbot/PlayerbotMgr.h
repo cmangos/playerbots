@@ -27,7 +27,7 @@ public:
 	void HandlePlayerBotLoginCallback(QueryResult * dummy, SqlQueryHolder * holder);
 
     void LogoutPlayerBot(uint32 guid);
-    void DisablePlayerBot(uint32 guid);
+    void DisablePlayerBot(uint32 guid, bool logOutPlayer = true);
     Player* GetPlayerBot (uint32 guid) const;
 
     virtual void UpdateAIInternal(uint32 elapsed, bool minimal = false);

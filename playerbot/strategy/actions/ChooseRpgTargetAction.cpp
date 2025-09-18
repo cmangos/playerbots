@@ -449,7 +449,7 @@ bool ChooseRpgTargetAction::Execute(Event& event)
     std::set<ObjectGuid>& ignoreList = AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target");
 
     std::vector<ObjectGuid> guidps;
-    std::vector<int> relevances;
+    std::vector<float> relevances;
 
     //If we have only trivial targets ignore them all the next time we look for a new target.
     for (auto& target : targets)

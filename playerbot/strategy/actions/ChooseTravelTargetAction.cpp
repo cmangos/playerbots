@@ -244,6 +244,20 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
     }
 }
 
+inline std::string PrintPartion(uint32 sqPartition)
+{
+    uint32 prevPartition = 0;
+    for (auto& partition : travelPartitions)
+    {
+        if (sqrt(sqPartition) == partition)
+            return std::to_string(prevPartition) + "-" + std::to_string(partition);
+
+        prevPartition = partition;
+    }
+
+    return "> " + std::to_string(prevPartition);
+}
+
 //Sets the target to the best destination.
 bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* target, PartitionedTravelList& partitionedList, bool onlyActive)
 {
@@ -254,7 +268,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
     for (auto& [partition, travelPointList] : partitionedList)
     {
-        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(round(sqrt(partition))), "debug travel");
+        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + PrintPartion(partition), "debug travel");
 
         for (auto& [destination, position, distance] : travelPointList)
         {
@@ -277,7 +291,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
             {
                 if (partition != std::prev(partitionedList.end())->first && !urand(0, 10)) //10% chance to skip to a longer partition.
                 {
-                    ai->TellDebug(requester, "Skipping range " + std::to_string(partition), "debug travel");
+                    ai->TellDebug(requester, "Skipping range " + PrintPartion(partition), "debug travel");
                     break;
                 }
 
@@ -497,7 +511,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
 
     for (uint8 i = 0; i < 5; i++)
     {
-        std::list<uint8> chancesToGoFar = { 10,50,90 }; //Closest map, grid, cell.
+        std::list<uint8> chancesToGoFar = { 10,20,90 }; //Closest map, grid, cell.
         newPosition = oldDestination->GetNextPoint(*target->GetPosition(), chancesToGoFar);
         if (newPosition && sTravelMgr.IsLocationLevelValid(*newPosition, info))
             break;        

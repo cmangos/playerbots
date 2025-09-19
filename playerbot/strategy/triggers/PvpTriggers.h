@@ -138,10 +138,10 @@ namespace ai
         virtual bool IsActive();
     };
 
-    class InVehicleTrigger : public Trigger
+    class InVehicleTrigger : public Trigger, public Qualified
     {
     public:
-        InVehicleTrigger(PlayerbotAI* ai) : Trigger(ai, "in vehicle") {}
+        InVehicleTrigger(PlayerbotAI* ai) : Trigger(ai, "in vehicle"), Qualified() {}
 
     public:
         virtual bool IsActive();

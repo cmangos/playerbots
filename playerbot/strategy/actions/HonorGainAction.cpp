@@ -24,6 +24,8 @@ bool HonorGainAction::Execute(Event& event)
     //actual signed value
     int honorPointsActual = honorPointsGain < std::numeric_limits<uint32>::max() / 2 ? honorPointsGain : (std::numeric_limits<uint32>::max() - honorPointsGain) * -1;
 
+    ai->TellDebug(requester, "Gained " + std::to_string(honorPointsActual) + " honor points", "debug xp");
+
     //if the bot killed somebody
     if (guid)
     {

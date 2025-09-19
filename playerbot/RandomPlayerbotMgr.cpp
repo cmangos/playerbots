@@ -3206,6 +3206,32 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         return true;
     }
 
+    if (cmd.find("cmd ") == 0)
+    {
+        std::vector<std::string> params = Qualified::getMultiQualifiers(cmd, " ");
+
+        Player* player = sObjectAccessor.FindPlayerByName(params[1].c_str());
+
+        if (!player)
+            return false;
+
+        PlayerbotAI* ai = player->GetPlayerbotAI();
+
+        if (!ai)
+            return false;
+
+        std::string command;
+
+        for (uint32 i = 2; i < params.size(); i++)
+            command += command + " " + params[i];
+
+        sLog.outString("Sending command %s to player %s", command.c_str(), player->GetName());
+
+        ai->HandleCommand(CHAT_MSG_WHISPER, command, *player);
+
+        return true;
+    }
+
     std::map<std::string, ConsoleCommandHandler> handlers;
     handlers["init"] = &RandomPlayerbotMgr::RandomizeFirst;
     handlers["gear"] = &RandomPlayerbotMgr::Randomize;
@@ -3325,9 +3351,6 @@ void RandomPlayerbotMgr::HandleCommand(uint32 type, const std::string& text, Pla
 
 void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 {
-    if (player->isRealPlayer() && player->GetPlayerbotAI())
-        player->GetSession()->SetOffline(); //Prevent groupkick
-
      DisablePlayerBot(player->GetGUIDLow());
 
      ForEachPlayerbot([&](Player* bot)

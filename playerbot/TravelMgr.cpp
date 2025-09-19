@@ -325,7 +325,7 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
                 return !AI_VALUE2(bool, "trigger active", "in vehicle") && ai->CanSpellClick(bot, GetEntry());
                 break;
             case 28653: //Salanar the Horseman
-                return AI_VALUE2(bool, "trigger active", "in vehicle");
+                return true;
                 break;
             }
             break;

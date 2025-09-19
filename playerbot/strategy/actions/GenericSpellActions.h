@@ -469,6 +469,7 @@ namespace ai
         CastVehicleSpellAction(PlayerbotAI* ai, std::string spell) : CastSpellAction(ai, spell)
         {
             range = 120.0f;
+            speed = 30.0f;
             SetSpellName(spell, "vehicle spell id", !GetSpellID());
         }
 
@@ -480,6 +481,7 @@ namespace ai
         virtual ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_NONE; }
         virtual std::string GetTargetName() override { return "current target"; }
         virtual std::string GetReachActionName() override { return ""; }
+        float speed;
     };
 
     class CastHurlBoulderAction : public CastVehicleSpellAction
@@ -557,6 +559,30 @@ namespace ai
             range = 120.0f;
             SetSpellName("Horseman's Call", "vehicle spell id", true);
         }
+    protected:
+        virtual std::string GetTargetName() override { return "self target"; }
+    };
+
+    class CastScarletCannonAction : public CastVehicleSpellAction
+    {
+    public:
+        CastScarletCannonAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "scarlet cannon") { speed = 3000.0f; }
+    protected:
+        virtual std::string GetTargetName() override { return "grind target"; }
+    };
+
+    class CastElectroMagneticPulseAction : public CastVehicleSpellAction
+    {
+    public:
+        CastElectroMagneticPulseAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "electro - magnetic pulse") { range = 20.0f; }
+    protected:
+        virtual std::string GetTargetName() override { return "grind target"; }
+    };
+
+    class CastSkeletalGryphonEscapeAction : public CastVehicleSpellAction
+    {
+    public:
+        CastSkeletalGryphonEscapeAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "skeletal gryphon escape") {}
     protected:
         virtual std::string GetTargetName() override { return "self target"; }
     };

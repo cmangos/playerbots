@@ -24,6 +24,18 @@ void QuestStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "val::and::{need quest objective::{12687,0},trigger active::in vehicle}",
         NextAction::array(0, new NextAction("horsemans call", 1.0f), NULL)));    
+
+    triggers.push_back(new TriggerNode(
+        "val::and::{need quest objective::{12701,0},trigger active::in vehicle::Scarlet Cannon}",
+        NextAction::array(0, new NextAction("scarlet cannon", 1.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "val::and::{need quest objective::{12701,0},trigger active::in vehicle::Scarlet Cannon}",
+        NextAction::array(0, new NextAction("electro - magnetic pulse", 2.0f), NULL)));    
+
+    triggers.push_back(new TriggerNode(
+        "val::and::{not::need quest objective::{12701,0},trigger active::in vehicle::Scarlet Cannon}",
+        NextAction::array(0, new NextAction("skeletal gryphon escape", 1.0f), NULL)));
 }
 
 void DefaultQuestStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)

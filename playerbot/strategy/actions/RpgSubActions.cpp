@@ -220,7 +220,6 @@ bool RpgTaxiAction::Execute(Event& event)
     return true;
 }
 
-
 bool RpgDiscoverAction::Execute(Event& event)
 {
     rpg->BeforeExecute();
@@ -890,6 +889,7 @@ bool RpgItemAction::Execute(Event& event)
 
     return used;
 }
+
 bool RpgSpellClickAction::Execute(Event& event)
 {
     rpg->BeforeExecute();

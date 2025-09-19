@@ -226,4 +226,17 @@ namespace ai
 #endif
     };
 
+    class DebugXpStrategy : public Strategy
+    {
+    public:
+        DebugXpStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() { return "debug xp"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "debug xp"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() { return "This strategy will give debug output when the bot gains xp"; }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {"debug"}; }
+#endif
+    };
+
 }

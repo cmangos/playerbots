@@ -156,8 +156,8 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
     if (typeid(*destination) == typeid(NullTravelDestination))
     {
         out.clear();
-        if(!oldDestination || typeid(*destination) != typeid(NullTravelDestination))
-            out << "No where to travel. Idling a bit.";
+        if (!oldDestination || typeid(*oldDestination) != typeid(NullTravelDestination))
+            out << "Nowhere to travel. Idling a bit.";
     }
     else
     {
@@ -492,7 +492,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
 
     if (target->IsMaxRetry(false))
     {
-        ai->TellDebug(requester, "Old destination was tried to many times.", "debug travel");
+        ai->TellDebug(requester, "Old destination was tried too many times.", "debug travel");
         return false;
     }
 

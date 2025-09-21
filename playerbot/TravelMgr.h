@@ -361,7 +361,7 @@ namespace ai
 		int32 GetExpiredTime() const { return WorldTimer::getMSTime() - startTime; }
 
 		void SetRetry(bool isMove, uint32 newCount = 0) { if (isMove) moveRetryCount = newCount; else extendRetryCount = newCount; }
-		bool IsMaxRetry(bool isMove) { return isMove ? (moveRetryCount > 10) : (extendRetryCount > 5); }
+		bool IsMaxRetry(bool isMove) { return isMove ? (moveRetryCount > 10) : (extendRetryCount >= 5); }
 
 		void SetTarget(TravelDestination* tDestination1, WorldPosition* wPosition1);
 		

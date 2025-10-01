@@ -775,7 +775,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 
                     ai->RemoveShapeshift();
 
-                    if (ai->DoSpecificAction("cast", Event("rpg action", std::to_string(entry)), true))
+                    if (ai->DoSpecificAction("cast", Event("rpg action", chat->formatWorldobject(bot) + " " + std::to_string(entry)), true))
                         return true;
                 }
 

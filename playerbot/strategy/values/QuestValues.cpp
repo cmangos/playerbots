@@ -114,6 +114,10 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
     rMap[29076][12754] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Courier][Ambush At The Overlook]    
 
 
+	rMap[29102][12779] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[HearthglenCrusader][An End To All Things]    
+	rMap[29103][12779] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Tirisfal Crusader][An End To All Things]    
+	rMap[29104][12779] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Scarlet Ballista][An End To All Things]    
+
 #endif
 	return rMap;
 }
@@ -664,6 +668,14 @@ bool CanUseItemOn::Calculate()
             return guidP.IsCreature() && guidP.GetEntry() == 28819;                                                                 //Scarlet Miner
         case 39645:                                                                                                                 //Makeshift Cover
             return guidP.IsCreature() && guidP.GetEntry() == 28936;                                                                 //Scarlet Commander
+        case 39700:                                                                                                                 //Horn of the Frostbrood
+            /*
+			switch (AI_VALUE(TravelTarget*, "travel target")->GetEntry())
+            case 29102: //HearthglenCrusader
+            case 29103: //Tirisfal Crusader
+            case 29104: //Scarlet Ballista
+			*/
+            return !AI_VALUE2(bool, "trigger active", "in vehicle") && AI_VALUE2(bool, "need quest objective", "12779"); //Mount up!
     }
 
 	if (guidP.IsUnit())

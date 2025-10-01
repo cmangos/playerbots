@@ -292,6 +292,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 
     combatEngine->addStrategies("mount", NULL);
     combatEngine->addStrategy("avoid mobs");
+    combatEngine->addStrategy("quest");
 
     if (!player->InBattleGround())
     {

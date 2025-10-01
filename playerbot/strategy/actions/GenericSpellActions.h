@@ -482,6 +482,7 @@ namespace ai
         virtual std::string GetTargetName() override { return "current target"; }
         virtual std::string GetReachActionName() override { return ""; }
         float speed;
+        bool needTurn = true;
     };
 
     class CastHurlBoulderAction : public CastVehicleSpellAction
@@ -585,5 +586,31 @@ namespace ai
         CastSkeletalGryphonEscapeAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "skeletal gryphon escape") {}
     protected:
         virtual std::string GetTargetName() override { return "self target"; }
+    };
+
+    class CastFrozenDeathboltAction : public CastVehicleSpellAction
+    {
+    public:
+        CastFrozenDeathboltAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "frozen deathbolt")
+        {
+            needTurn = false;
+            speed = 3000.0f;
+        };
+        virtual bool isPossible() override;
+    protected:
+        virtual std::string GetTargetName() override { return "grind target"; }
+    };
+
+    class CastDevourHumanoidAction : public CastVehicleSpellAction
+    {
+    public:
+        CastDevourHumanoidAction(PlayerbotAI* ai) : CastVehicleSpellAction(ai, "devour humanoid")
+        {
+            range = 15.0f;
+            needTurn = false;
+        }
+        virtual bool isPossible() override;
+    protected:
+        virtual std::string GetTargetName() override { return "grind target"; }
     };
 }

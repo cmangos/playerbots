@@ -244,6 +244,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
         case 12680: //Grand Theft Palomino
         case 12687: //Into the Realm of Shadows
         case 12698: //The Gift That Keeps On Giving
+        case 12779: //An End To All Things
             skipKillableCheck = true;
         }
 #endif

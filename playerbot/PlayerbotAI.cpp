@@ -5000,7 +5000,7 @@ bool PlayerbotAI::CanCastVehicleSpell(uint32 spellId, Unit* target)
     return false;
 }
 
-bool PlayerbotAI::CastVehicleSpell(uint32 spellId, Unit* target, float projectileSpeed)
+bool PlayerbotAI::CastVehicleSpell(uint32 spellId, Unit* target, float projectileSpeed, bool needTurn)
 {
 #ifdef MANGOSBOT_TWO
     if (!spellId)
@@ -5061,7 +5061,7 @@ bool PlayerbotAI::CastVehicleSpell(uint32 spellId, Unit* target, float projectil
 
     // turn vehicle if target is not in front
     bool failWithDelay = false;
-    if (spellTarget != vehicle && (canControl || canTurn))
+    if (spellTarget != vehicle && (canControl || canTurn) && needTurn)
     {
         if (!sServerFacade.IsInFront(vehicle, spellTarget, 100.0f, CAST_ANGLE_IN_FRONT))
         {

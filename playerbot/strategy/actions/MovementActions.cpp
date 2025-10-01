@@ -771,7 +771,12 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 if (sServerFacade.IsSpellReady(bot, entry) && (!bot->IsFlying() || WorldPosition(bot).currentHeight() < 10.0f) && AI_VALUE2(uint32, "has reagents for", entry) > 0)
                 {
                     if (AI_VALUE2(uint32, "current mount speed", "self target"))
-                        ai->Unmount();                    
+                    {
+                        ai->Unmount();
+#ifdef MANGOSBOT_TWO   
+                        return false;
+#endif
+                    }
 
                     ai->RemoveShapeshift();
 

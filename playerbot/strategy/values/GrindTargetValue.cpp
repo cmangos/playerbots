@@ -82,6 +82,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
             case 28606: //Havenshire Mare
             case 28607: //Havenshire Cotl
             case 28891: //Scarlet Miner
+            case 28819: //Scarlet Miner
             case 28769: //Shadowy tormentor
             case 28768: //Dark Rider of Archeus
                 continue;

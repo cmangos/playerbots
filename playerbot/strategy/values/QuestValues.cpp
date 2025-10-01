@@ -560,6 +560,25 @@ bool NeedQuestRewardValue::Calculate()
 	return false;
 }
 
+bool NeedQuestObjectiveValue::CanGetItemSomewhere(const uint32 itemId, const uint32 reqCount, Player* bot)
+{
+    if (!GAI_VALUE2(std::list<int32>, "item drop list", itemId).empty()) //Can get it from drop.
+        return true;
+
+    if (GAI_VALUE2(std::list<int32>, "item vendor list", itemId).empty()) //Can not get it from vendor.
+        return true;
+
+    ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+
+    if (!proto)
+        return true;
+
+    if (bot->GetMoney() > proto->BuyPrice * reqCount) //Bot has money to buy item from vendor.
+        return true;
+
+	return false;
+}
+
 bool NeedQuestObjectiveValue::Calculate()
 {
 	uint32 questId = getMultiQualifierInt(getQualifier(),0,",");
@@ -588,32 +607,24 @@ bool NeedQuestObjectiveValue::Calculate()
 	uint32  reqCount = pQuest->ReqItemCount[objective];
 	uint32  hasCount = questStatus.m_itemcount[objective];
 
+	bool needItems = false;
+    bool needCreatures = false;
+
 	if (reqCount && hasCount < reqCount)
 	{
 		uint32 itemId = pQuest->ReqItemId[objective];
 
-		if (!GAI_VALUE2(std::list<int32>, "item drop list", itemId).empty())
-			return true;
-
-		if (GAI_VALUE2(std::list<int32>, "item vendor list", itemId).empty())
-			return true;
-
-		ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-
-		if (!proto)
-			return true;
-
-		if (bot->GetMoney() > proto->BuyPrice * reqCount) //Bot needs enough money to do quest.
-			return true;
+        if (CanGetItemSomewhere(itemId, reqCount, bot))
+            needItems = true;
 	}
 
 	reqCount = pQuest->ReqCreatureOrGOCount[objective];
 	hasCount = questStatus.m_creatureOrGOcount[objective];
 
 	if (reqCount && hasCount < reqCount)
-		return true;
+        needCreatures = true;
 
-	return false;
+	return needItems || needCreatures;
 }
 
 bool CanUseItemOn::Calculate()

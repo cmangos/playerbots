@@ -205,6 +205,7 @@ namespace ai
     {
     public:
         NeedQuestObjectiveValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "need quest objective"), Qualified() {}
+        static bool CanGetItemSomewhere(const uint32 itemId, const uint32 reqCount, Player* bot);
         virtual bool Calculate() override;
     };
 

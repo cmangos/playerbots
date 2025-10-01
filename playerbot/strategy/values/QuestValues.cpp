@@ -104,6 +104,10 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 	rMap[28819][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Miner][The Gift That Keeps On Giving]	
 
 	rMap[-190767][12701] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Inconspicuous mine car][Massacre At Light's Point]	
+
+	rMap[28941][12722] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Citizen of New Avalon][Lambs To The Slaughter]
+    rMap[28942][12722] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Citizen of Havenshire][Lambs To The Slaughter]
+
 #endif
 	return rMap;
 }

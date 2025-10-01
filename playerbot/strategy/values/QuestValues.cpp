@@ -110,6 +110,10 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 
 	rMap[28912][12727] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Koltira Deathweaver][Bloody Breakout]
 
+	rMap[28936][12754] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Commander][Ambush At The Overlook]
+    rMap[29076][12754] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Courier][Ambush At The Overlook]    
+
+
 #endif
 	return rMap;
 }
@@ -649,16 +653,18 @@ bool CanUseItemOn::Calculate()
 		return false;
 
 	switch (itemId)
-	{
-	case 17117: //Rat Catcher's Flute
-		return guidP.IsCreature() && guidP.GetEntry() == 13016; //Deeprun Rat		
-	case 52566: //Motivate-a-Tron (currently broken?)
-		return guidP.IsCreature() && guidP.GetEntry() == 39623; //Gnome Citizen
-	case 38607: //Battle-worn Sword
-		return guidP.IsGameObject() && (std::find(RUNEFORGES.begin(), RUNEFORGES.end(), guidP.GetEntry()) != RUNEFORGES.end()); //Runeforge
-	case 39253: //Gift of the Harester
-		return guidP.IsCreature() && guidP.GetEntry() == 28819; //Scarlet Miner
-	}
+    {
+        case 17117:                                                                                                                 //Rat Catcher's Flute
+            return guidP.IsCreature() && guidP.GetEntry() == 13016;                                                                 //Deeprun Rat
+        case 52566:                                                                                                                 //Motivate-a-Tron (currently broken?)
+            return guidP.IsCreature() && guidP.GetEntry() == 39623;                                                                 //Gnome Citizen
+        case 38607:                                                                                                                 //Battle-worn Sword
+            return guidP.IsGameObject() && (std::find(RUNEFORGES.begin(), RUNEFORGES.end(), guidP.GetEntry()) != RUNEFORGES.end()); //Runeforge
+        case 39253:                                                                                                                 //Gift of the Harester
+            return guidP.IsCreature() && guidP.GetEntry() == 28819;                                                                 //Scarlet Miner
+        case 39645:                                                                                                                 //Makeshift Cover
+            return guidP.IsCreature() && guidP.GetEntry() == 28936;                                                                 //Scarlet Commander
+    }
 
 	if (guidP.IsUnit())
 		unit = guidP.GetUnit(bot->GetInstanceId());

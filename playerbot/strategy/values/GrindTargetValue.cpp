@@ -101,6 +101,8 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
                     continue;
                 if (AI_VALUE2(bool, "need quest objective", "12701"))
                     continue;
+                if (AI_VALUE2(bool, "need quest objective", "12727"))
+                    continue;
                 break;
             case 28834: //Scarlet Fleet Defender
             case 28850: //Scarlet Land Canon

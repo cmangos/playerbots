@@ -108,6 +108,8 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 	rMap[28941][12722] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Citizen of New Avalon][Lambs To The Slaughter]
     rMap[28942][12722] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Citizen of Havenshire][Lambs To The Slaughter]
 
+	rMap[28912][12727] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Koltira Deathweaver][Bloody Breakout]
+
 #endif
 	return rMap;
 }
@@ -521,7 +523,6 @@ uint32 DialogStatusValue::getDialogStatus(Player* bot, int32 questgiver, uint32 
 					{
 						dialogStatusNew = DIALOG_STATUS_REWARD_REP;
 					}
-					else if (lowLevelDiff < 0 || bot->GetLevel() <= bot->GetQuestLevelForPlayer(pQuest) + uint32(lowLevelDiff))
 					{
 						dialogStatusNew = DIALOG_STATUS_AVAILABLE;
 					}
@@ -554,6 +555,10 @@ bool NeedQuestRewardValue::Calculate()
 {
 	uint32 questId = stoi(getQualifier());
 	Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+
+	if (pQuest->GetRequiredClasses()) //Always try to do class quests.
+        return true;
+
 	for (uint8 i = 0; i < pQuest->GetRewChoiceItemsCount(); ++i)
 	{
 		ItemUsage usage = AI_VALUE2_LAZY(ItemUsage, "item usage", pQuest->RewChoiceItemId[i]);

@@ -369,7 +369,37 @@ bool ShouldLootObject::Calculate()
 		return false;
 
 	if (!object->m_loot)
-		return true;
+    {
+		if (!object->IsGameObject())
+			return true;
+
+		GameObject* go = static_cast<GameObject*>(object);
+
+		if (go->GetGoType() != GAMEOBJECT_TYPE_GOOBER)
+			return true;
+
+		uint32 spellId = go->GetSpellId();
+
+		if (!spellId)
+            return true;
+
+		SpellEntry const* lootSpell = GetSpellStore()->LookupEntry<SpellEntry>(spellId);
+
+		if (!lootSpell || lootSpell->Effect[0] != SPELL_EFFECT_CREATE_ITEM)
+            return true;
+
+		uint32 itemId = lootSpell->EffectItemType[0];
+
+		if (!AI_VALUE2(uint32, "stack space for item", itemId))
+            return false;
+
+        ItemQualifier ltemQualifier(itemId);
+
+        if (!StoreLootAction::IsLootAllowed(ltemQualifier, ai))
+            return false;
+
+		return true;				
+    }
 
 	if (object->m_loot->GetGoldAmount() > 0)
 		return true;

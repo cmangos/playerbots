@@ -118,6 +118,8 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 	rMap[29103][12779] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Tirisfal Crusader][An End To All Things]    
 	rMap[29104][12779] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Scarlet Ballista][An End To All Things]    
 
+	rMap[29173][12801] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Highlord Darion Mograine][The Light of Dawn]    
+	rMap[29175][12801] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Highlord Tirion Fordring][The Light of Dawn]    
 #endif
 	return rMap;
 }
@@ -531,6 +533,7 @@ uint32 DialogStatusValue::getDialogStatus(Player* bot, int32 questgiver, uint32 
 					{
 						dialogStatusNew = DIALOG_STATUS_REWARD_REP;
 					}
+                    else if (lowLevelDiff < 0 || bot->GetLevel() <= bot->GetQuestLevelForPlayer(pQuest) + uint32(lowLevelDiff) || pQuest->GetRequiredClasses())
 					{
 						dialogStatusNew = DIALOG_STATUS_AVAILABLE;
 					}

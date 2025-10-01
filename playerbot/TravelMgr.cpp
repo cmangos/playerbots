@@ -245,6 +245,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
         case 12687: //Into the Realm of Shadows
         case 12698: //The Gift That Keeps On Giving
         case 12779: //An End To All Things
+        case 12801: //The Light of Dawn
             skipKillableCheck = true;
         }
 #endif

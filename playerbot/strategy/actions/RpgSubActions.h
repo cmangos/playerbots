@@ -324,7 +324,7 @@ namespace ai
         //Long range is possible?
         virtual bool isPossible() { return rpg->guidP() && rpg->guidP().GetWorldObject(bot->GetInstanceId()); }
         //Short range can we do the action now?
-        virtual bool isUseful() { return rpg->InRange(); }
+        virtual bool isUseful() { return !urand(0,3) || rpg->InRange(); }
 
         virtual bool Execute(Event& event);
     };

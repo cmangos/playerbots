@@ -496,6 +496,9 @@ std::string WorldPosition::getAreaName(const bool fullName, const bool zoneName)
 
 int32 WorldPosition::getAreaLevel() const
 {
+    if (mapid == 609)
+        return 1;
+
     if(GetArea())
         return sTravelMgr.GetAreaLevel(GetArea()->ID);
 

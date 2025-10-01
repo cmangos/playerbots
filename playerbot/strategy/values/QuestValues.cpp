@@ -120,6 +120,7 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 
 	rMap[29173][12801] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Highlord Darion Mograine][The Light of Dawn]    
 	rMap[29175][12801] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Highlord Tirion Fordring][The Light of Dawn]    
+	
 #endif
 	return rMap;
 }

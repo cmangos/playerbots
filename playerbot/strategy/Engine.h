@@ -8,6 +8,8 @@
 #include "Strategy.h"
 #include "playerbot/BotState.h"
 
+#include <mutex>
+
 namespace ai
 {
     class ActionExecutionListener
@@ -33,19 +35,20 @@ namespace ai
         virtual bool AllowExecution(Action* action, const Event& event);
         virtual void After(Action* action, bool executed, const Event& event);
         virtual bool OverrideResult(Action* action, bool executed, const Event& event);
-
     public:
         void Add(ActionExecutionListener* listener)
         {
+            std::lock_guard<std::recursive_mutex> lock(mutex);
             listeners.push_back(listener);
         }
         void Remove(ActionExecutionListener* listener)
         {
+            std::lock_guard<std::recursive_mutex> lock(mutex);
             listeners.remove(listener);
         }
-
     private:
         std::list<ActionExecutionListener*> listeners;
+        mutable std::recursive_mutex mutex;
     };
 
     // -----------------------------------------------------------------------------------------------------------------------
@@ -118,6 +121,7 @@ namespace ai
         std::list<Multiplier*> multipliers;
         AiObjectContext* aiObjectContext;
         std::map<std::string, Strategy*> strategies;
+        mutable std::recursive_mutex strategiesMutex;
         float lastRelevance;
         std::string lastAction;
         ActionExecutionListeners actionExecutionListeners;

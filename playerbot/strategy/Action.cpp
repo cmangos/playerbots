@@ -4,6 +4,7 @@
 #include "AiObjectContext.h"
 #include "Action.h"
 #include "Entities/Unit.h"
+#include <vector>
 
 using namespace ai;
 
@@ -38,14 +39,11 @@ NextAction** NextAction::merge(NextAction** left, NextAction** right)
     int rightSize = NextAction::size(right);
 
     NextAction** res = new NextAction*[leftSize + rightSize + 1];
-    for (int i=0; i<leftSize; i++)
+    for (int i = 0; i < leftSize; i++)
         res[i] = new NextAction(*left[i]);
-    for (int i=0; i<rightSize; i++)
+    for (int i = 0; i < rightSize; i++)
         res[leftSize + i] = new NextAction(*right[i]);
     res[leftSize + rightSize] = NULL;
-
-    NextAction::destroy(left);
-    NextAction::destroy(right);
 
     return res;
 }
@@ -56,22 +54,17 @@ NextAction** NextAction::array(uint32 n, ...)
     va_list vl;
     va_start(vl, n);
 
-    int size = 0;
-    NextAction* cur = NULL;
-    do
-    {
-        cur = va_arg(vl, NextAction*);
-        size++;
-    }
-    while (cur);
+    std::vector<NextAction*> tmp;
+    NextAction* cur = nullptr;
+    while ((cur = va_arg(vl, NextAction*)))
+        tmp.push_back(cur);
 
     va_end(vl);
 
-    NextAction** res = new NextAction*[size];
-    va_start(vl, n);
-    for (int i=0; i<size; i++)
-        res[i] = va_arg(vl, NextAction*);
-    va_end(vl);
+    NextAction** res = new NextAction*[tmp.size() + 1];
+    for (size_t i = 0; i < tmp.size(); ++i)
+        res[i] = tmp[i];
+    res[tmp.size()] = nullptr;
 
     return res;
 }

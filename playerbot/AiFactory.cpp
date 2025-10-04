@@ -292,11 +292,10 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 
     combatEngine->addStrategies("mount", NULL);
     combatEngine->addStrategy("avoid mobs");
-    combatEngine->addStrategy("quest");
 
     if (!player->InBattleGround())
     {
-        combatEngine->addStrategies("racials", "default", "duel", "pvp", NULL);
+        combatEngine->addStrategies("racials", "default", "quest", "duel", "pvp", NULL);
     }
 
     switch (player->getClass())

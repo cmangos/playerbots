@@ -37,9 +37,9 @@ void QuestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode("val::and::{need quest objective::12779,trigger active::in vehicle::Frostbrood Vanquisher}",
                                        NextAction::array(0, new NextAction("devour humanoid", 81.0f), NULL)));
 
-    triggers.push_back(new TriggerNode("val::{need quest objective::13165}", NextAction::array(0, new NextAction("cast::death gate", 80.0f), NULL)));
+    triggers.push_back(new TriggerNode("val::need quest objective::13165", NextAction::array(0, new NextAction("cast::death gate", 80.0f), NULL)));
 
-    triggers.push_back(new TriggerNode("val::{need quest objective::13165}", NextAction::array(0, new NextAction("use::death gate", 81.0f), NULL)));
+    triggers.push_back(new TriggerNode("val::need quest objective::13165", NextAction::array(0, new NextAction("use::death gate", 81.0f), NULL)));
 #endif
 };
 

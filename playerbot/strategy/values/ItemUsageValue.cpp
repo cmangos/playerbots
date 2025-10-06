@@ -643,7 +643,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
     bool existingShouldEquip = true;
     if (oldItemProto->Class == ITEM_CLASS_WEAPON && !oldStatWeight)
         existingShouldEquip = false;
-    if (oldItemProto->Class == ITEM_CLASS_ARMOR && !statWeight)
+    if (oldItemProto->Class == ITEM_CLASS_ARMOR && !oldStatWeight)
         existingShouldEquip = false;
 
     //Compare items based on item level, quality.

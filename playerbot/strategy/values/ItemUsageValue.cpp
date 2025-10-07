@@ -648,7 +648,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
 
     //Compare items based on item level, quality.
     bool isBetter = false;
-    if (!statWeight || !oldStatWeight)
+    if (!statWeight && !oldStatWeight)
     {
         isBetter = (itemProto->Quality > oldItemProto->Quality && itemProto->ItemLevel == oldItemProto->ItemLevel) || (itemProto->Quality == oldItemProto->Quality && itemProto->ItemLevel > oldItemProto->ItemLevel);
     }

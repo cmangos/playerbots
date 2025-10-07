@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include "EquipAction.h"
 
+#include "playerbot/RandomItemMgr.h"
 #include "playerbot/strategy/values/ItemCountValue.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 
@@ -248,6 +249,8 @@ bool EquipUpgradesAction::Execute(Event& event)
     items = visitor.GetResult();
 
     bool didEquip = false;
+
+    items.sort([plr = bot](Item* i, Item* j) {return sRandomItemMgr.ItemStatWeight(plr, i) > sRandomItemMgr.ItemStatWeight(plr, j); });
 
     for (auto& item : items)
     {

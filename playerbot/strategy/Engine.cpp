@@ -2,7 +2,7 @@
 #include "playerbot/playerbot.h"
 #include <stdarg.h>
 #include <iomanip>
-
+#include <mutex>
 #include "Engine.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/PerformanceMonitor.h"
@@ -22,17 +22,30 @@ Engine::Engine(PlayerbotAI* ai, AiObjectContext *factory, BotState state) : Play
 
 bool ActionExecutionListeners::Before(Action* action, const Event& event)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     bool result = true;
-    for (std::list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); i++)
+    for (auto i = listeners.begin(); i != listeners.end(); ++i)
     {
         result &= (*i)->Before(action, event);
     }
     return result;
 }
 
+bool ActionExecutionListeners::AllowExecution(Action* action, const Event& event)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    bool result = true;
+    for (auto i = listeners.begin(); i != listeners.end(); ++i)
+    {
+        result &= (*i)->AllowExecution(action, event);
+    }
+    return result;
+}
+
 void ActionExecutionListeners::After(Action* action, bool executed, const Event& event)
 {
-    for (std::list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); i++)
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    for (auto i = listeners.begin(); i != listeners.end(); ++i)
     {
         (*i)->After(action, executed, event);
     }
@@ -40,39 +53,33 @@ void ActionExecutionListeners::After(Action* action, bool executed, const Event&
 
 bool ActionExecutionListeners::OverrideResult(Action* action, bool executed, const Event& event)
 {
+    std::lock_guard<std::recursive_mutex> lock(mutex);
     bool result = executed;
-    for (std::list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); i++)
+    for (auto i = listeners.begin(); i != listeners.end(); ++i)
     {
         result = (*i)->OverrideResult(action, result, event);
     }
     return result;
 }
 
-bool ActionExecutionListeners::AllowExecution(Action* action, const Event& event)
-{
-    bool result = true;
-    for (std::list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); i++)
-    {
-        result &= (*i)->AllowExecution(action, event);
-    }
-    return result;
-}
-
 ActionExecutionListeners::~ActionExecutionListeners()
 {
-    for (std::list<ActionExecutionListener*>::iterator i = listeners.begin(); i!=listeners.end(); i++)
+    std::lock_guard<std::recursive_mutex> lock(mutex);
+    for (auto i = listeners.begin(); i != listeners.end(); ++i)
     {
         delete *i;
     }
     listeners.clear();
 }
 
-
 Engine::~Engine(void)
 {
     Reset();
 
-    strategies.clear();
+    {
+        std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
+        strategies.clear();
+    }
 }
 
 void Engine::Reset()
@@ -329,23 +336,37 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
 
 ActionNode* Engine::CreateActionNode(const std::string& name)
 {
-    ActionNode* actionNode = nullptr;
-    for (std::map<std::string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
+    std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
+
+    for (auto& pair : strategies)
     {
-        Strategy* strategy = i->second;
-        actionNode = strategy->GetAction(name);
-        if (actionNode)
+        Strategy* strategy = pair.second;
+        if (!strategy)
+            continue;
+
+        ActionNode* node = nullptr;
+        try
         {
-            break;
+            node = strategy->GetAction(name);
+        }
+        catch (...)
+        {
+            node = nullptr;
+        }
+
+        if (node)
+        {
+            ActionNode* copy = new ActionNode(node->getName(), ActionNode::CloneNextActions(node->getPrerequisites()), ActionNode::CloneNextActions(node->getAlternatives()),
+                                              ActionNode::CloneNextActions(node->getContinuers()));
+
+            if (node->getAction())
+                copy->setAction(node->getAction());
+
+            return copy;
         }
     }
 
-    if (!actionNode)
-    {
-        actionNode = new ActionNode(name);
-    }
-
-    return actionNode;
+    return new ActionNode(name);
 }
 
 bool Engine::MultiplyAndPush(NextAction** actions, float forceRelevance, bool skipPrerequisites, const Event& event, const char* pushType)
@@ -478,6 +499,7 @@ bool Engine::CanExecuteAction(const std::string& name, bool isUseful, bool isPos
 
 void Engine::addStrategy(const std::string& name)
 {
+    std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
     removeStrategy(name, initMode);
 
     Strategy* strategy = aiObjectContext->GetStrategy(name);
@@ -521,6 +543,7 @@ void Engine::addStrategies(std::string first, ...)
 
 bool Engine::removeStrategy(const std::string& name, bool init)
 {
+    std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
     std::map<std::string, Strategy*>::iterator i = strategies.find(name);
     if (i == strategies.end())
         return false;
@@ -539,6 +562,7 @@ bool Engine::removeStrategy(const std::string& name, bool init)
 
 void Engine::removeAllStrategies()
 {
+    std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
     strategies.clear();
     Init();
 }
@@ -551,11 +575,13 @@ void Engine::toggleStrategy(const std::string& name)
 
 bool Engine::HasStrategy(const std::string& name)
 {
+    std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
     return strategies.find(name) != strategies.end();
 }
 
 Strategy* Engine::GetStrategy(const std::string& name) const
 {
+    std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
     auto i = strategies.find(name);
     if (i != strategies.end())
     {
@@ -564,6 +590,7 @@ Strategy* Engine::GetStrategy(const std::string& name) const
 
     return nullptr;
 }
+
 
 void Engine::ProcessTriggers(bool minimal)
 {
@@ -612,6 +639,7 @@ void Engine::ProcessTriggers(bool minimal)
 
 void Engine::PushDefaultActions()
 {
+    std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
     for (std::map<std::string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
     {
         Strategy* strategy = i->second;
@@ -620,7 +648,8 @@ void Engine::PushDefaultActions()
 }
 
 std::string Engine::ListStrategies()
-{   
+{
+    std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
     std::string s;
     if (strategies.empty())
         return s;
@@ -635,6 +664,7 @@ std::string Engine::ListStrategies()
 
 std::list<std::string_view> Engine::GetStrategies()
 {
+    std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
     std::list<std::string_view> result;
     for (const auto& strategy : strategies)
     {
@@ -654,17 +684,19 @@ void Engine::PushAgain(ActionNode* actionNode, float relevance, const Event& eve
 
 bool Engine::ContainsStrategy(StrategyType type)
 {
-	for (std::map<std::string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
-	{
-		Strategy* strategy = i->second;
-		if (strategy->GetType() & type)
-			return true;
-	}
-	return false;
+    std::lock_guard<std::recursive_mutex> lock(strategiesMutex);
+    for (std::map<std::string, Strategy*>::iterator i = strategies.begin(); i != strategies.end(); i++)
+    {
+        Strategy* strategy = i->second;
+        if (strategy->GetType() & type)
+            return true;
+    }
+    return false;
 }
 
 Action* Engine::InitializeAction(ActionNode* actionNode)
 {
+    if (!actionNode) return nullptr;
     Action* action = actionNode->getAction();
     if (!action)
     {

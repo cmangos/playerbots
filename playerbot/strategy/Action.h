@@ -114,13 +114,9 @@ namespace ai
     class ActionNode
     {
     public:
-        ActionNode(std::string name, NextAction** prerequisites = NULL, NextAction** alternatives = NULL, NextAction** continuers = NULL)
+        ActionNode(std::string name, NextAction** prerequisites = nullptr, NextAction** alternatives = nullptr, NextAction** continuers = nullptr) :
+        name(std::move(name)), action(nullptr), continuers(continuers), alternatives(alternatives), prerequisites(prerequisites)
         {
-            this->action = NULL;
-            this->name = name;
-            this->prerequisites = prerequisites;
-            this->alternatives = alternatives;
-            this->continuers = continuers;
         }
 
         virtual ~ActionNode()
@@ -130,16 +126,32 @@ namespace ai
             NextAction::destroy(continuers);
         }
 
-    public:
-        Action* getAction() { return action; }
-        void setAction(Action* action) { this->action = action; }
-        std::string getName() { return name; }
+        Action* getAction() const { return action; }
+        void setAction(Action* a) { this->action = a; }
+        const std::string& getName() const { return name; }
 
-    public:
-        NextAction** getContinuers() { return NextAction::merge(NextAction::clone(continuers), action->getContinuers()); }
-        NextAction** getAlternatives() { return NextAction::merge(NextAction::clone(alternatives), action->getAlternatives()); }
-        NextAction** getPrerequisites() { return NextAction::merge(NextAction::clone(prerequisites), action->getPrerequisites()); }
+        NextAction** getContinuers() const
+        {
+            NextAction** left = NextAction::clone(continuers);
+            NextAction** right = action ? action->getContinuers() : nullptr;
+            return NextAction::merge(left, right);
+        }
 
+        NextAction** getAlternatives() const
+        {
+            NextAction** left = NextAction::clone(alternatives);
+            NextAction** right = action ? action->getAlternatives() : nullptr;
+            return NextAction::merge(left, right);
+        }
+
+        NextAction** getPrerequisites() const
+        {
+            NextAction** left = NextAction::clone(prerequisites);
+            NextAction** right = action ? action->getPrerequisites() : nullptr;
+            return NextAction::merge(left, right);
+        }
+
+        static NextAction** CloneNextActions(NextAction** source) { return NextAction::clone(source); }
     private:
         std::string name;
         Action* action;

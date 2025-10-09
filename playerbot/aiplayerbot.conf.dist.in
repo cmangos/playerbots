@@ -60,7 +60,7 @@ AiPlayerbot.RandomBotAccountCount = 200
 # Disable core mangos map/bot optimizations which hinders bot activity
 # Works best together with AiPlayerbot.DisableActivityPriorities = 1
 # (0-1), default 0
-# AiPlayerbot.DisableBotOptimizations = 0
+AiPlayerbot.DisableBotOptimizations = 0
 
 # Disable bot activity priorities, to make all bots ACTUALLY active without player in the zones or server (unless AiPlayerbot.DisableBotOptimizations = 0)
 # This setting is added for the sake of having all bots always active regardless of anything
@@ -68,10 +68,10 @@ AiPlayerbot.RandomBotAccountCount = 200
 # This will ingore the AiPlayerbot.botActiveAlone setting, all bots will be active regardless
 # Works best together with AiPlayerbot.DisableBotOptimizations = 1
 # (0-1), default 0
-# AiPlayerbot.DisableActivityPriorities = 0
+AiPlayerbot.DisableActivityPriorities = 0
 
 # Percentage of fully active bots. Default is 10, higher numbers may affect performance
-# AiPlayerbot.botActiveAlone = 10
+AiPlayerbot.botActiveAlone = 10
 
 # Limit random bot max level to online players max level + 5 and uses reference level 1 without a player.
 # AiPlayerbot.SyncLevelWithPlayers = 0
@@ -91,7 +91,7 @@ AiPlayerbot.RandomBotArenaTeamCount = 20
 AiPlayerbot.DeleteRandomBotArenaTeams = 0
 
 # Maps to teleport random bots
-AiPlayerbot.RandomBotMaps = 0,1,530,571
+AiPlayerbot.RandomBotMaps = 0,1
 
 # Min and max intervals for random teleports, in seconds (default: 2hrs and 48hrs)
 AiPlayerbot.RandomBotTeleportTeleportMinInterval = 7200
@@ -104,7 +104,7 @@ AiPlayerbot.RandomGearLoweringChance = 0.15
 # Classic
 # Max iLVL Tier 1 = 66 | Tier 2 = 76 | Tier 2.5 = 81 | Tier 3 = 99
 # Max iLVL Phase 1 = 71(MC, ONY, ZG) | Phase 2(BWL) = 77 | Phase 2.5(AQ) = 88 | Phase 3(NAXX) = 100 (NOT RECOMMENDED SINCE ILVL OVERLAPS BETWEEN TIERS)
-AiPlayerbot.RandomGearMaxLevel = 500
+AiPlayerbot.RandomGearMaxLevel = 100
 
 # Max difference between bot level and item's required level to be used in randomisation
 # Default = 9, means bots level 60 can use items that require (themselves or via quests) level 51 and above
@@ -185,7 +185,7 @@ AiPlayerbot.DisableRandomLevels = 0
 
 # Set minimum level of randombots where gets enchants on items (Maxlevel + 1 to disable)
 # Default: 60
-AiPlayerbot.minEnchantingBotLevel = 81
+AiPlayerbot.minEnchantingBotLevel = 60
 
 # Randombots checking players gear score level and deny the group invite if it's too low
 # Default: 0 (disabled)

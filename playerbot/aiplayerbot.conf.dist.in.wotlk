@@ -60,7 +60,7 @@ AiPlayerbot.RandomBotAccountCount = 200
 # Disable core mangos map/bot optimizations which hinders bot activity
 # Works best together with AiPlayerbot.DisableActivityPriorities = 1
 # (0-1), default 0
-# AiPlayerbot.DisableBotOptimizations = 0
+AiPlayerbot.DisableBotOptimizations = 0
 
 # Disable bot activity priorities, to make all bots ACTUALLY active without player in the zones or server (unless AiPlayerbot.DisableBotOptimizations = 0)
 # This setting is added for the sake of having all bots always active regardless of anything
@@ -68,10 +68,10 @@ AiPlayerbot.RandomBotAccountCount = 200
 # This will ingore the AiPlayerbot.botActiveAlone setting, all bots will be active regardless
 # Works best together with AiPlayerbot.DisableBotOptimizations = 1
 # (0-1), default 0
-# AiPlayerbot.DisableActivityPriorities = 0
+AiPlayerbot.DisableActivityPriorities = 0
 
 # Percentage of fully active bots. Default is 10, higher numbers may affect performance
-# AiPlayerbot.botActiveAlone = 10
+AiPlayerbot.botActiveAlone = 10
 
 # Limit random bot max level to online players max level + 5 and uses reference level 1 without a player.
 # AiPlayerbot.SyncLevelWithPlayers = 0
@@ -111,7 +111,7 @@ AiPlayerbot.RandomGearLoweringChance = 0.15
 # Max iLVL Tier 7(10/25) = 200/213 | Tier 8(10/25) = 225/232 | Tier 9(10/25) = 232/245 | Tier 10(10/25/HC) = 251/264/290
 # Max iLVL Phase 1(Naxx) = 224 | Phase 2(Ulduar) = 245 | Phase 3(ToC) = 258 | Phase 4(ICC) = 290 
 
-AiPlayerbot.RandomGearMaxLevel = 500
+AiPlayerbot.RandomGearMaxLevel = 290
 
 # Max difference between bot level and item's required level to be used in randomisation
 # Default = 11, means bots level 80 can use items that require (themselves or via quests) level 69 and above
@@ -183,7 +183,7 @@ AiPlayerbot.DisableRandomLevels = 0
 
 # Set minimum level of randombots where gets enchants on items (Maxlevel + 1 to disable)
 # Default: 60
-AiPlayerbot.minEnchantingBotLevel = 81
+AiPlayerbot.minEnchantingBotLevel = 80
 
 # Randombots checking players gear score level and deny the group invite if it's too low
 # Default: 1 (enabled)

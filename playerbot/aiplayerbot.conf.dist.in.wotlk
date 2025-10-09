@@ -60,7 +60,7 @@ AiPlayerbot.RandomBotAccountCount = 200
 # Disable core mangos map/bot optimizations which hinders bot activity
 # Works best together with AiPlayerbot.DisableActivityPriorities = 1
 # (0-1), default 0
-AiPlayerbot.DisableBotOptimizations = 0
+# AiPlayerbot.DisableBotOptimizations = 0
 
 # Disable bot activity priorities, to make all bots ACTUALLY active without player in the zones or server (unless AiPlayerbot.DisableBotOptimizations = 0)
 # This setting is added for the sake of having all bots always active regardless of anything

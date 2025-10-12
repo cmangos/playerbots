@@ -1181,6 +1181,10 @@ bool BGStatusAction::Execute(Event& event)
     BattleGroundQueueTypeId queueTypeId = bot->GetBattleGroundQueueTypeId(QueueSlot);
     BattleGroundTypeId _bgTypeId = sServerFacade.BgTemplateId(queueTypeId);
     BattleGroundBracketId bracketId;
+    
+    BattleGroundTypeId bgTypeId = BattleGroundTypeId((arenaByte >> 16) & 0xFFFFFFFF);    
+
+    _bgTypeId = bgTypeId;
 
     if (!queueTypeId)
         return false;

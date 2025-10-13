@@ -141,9 +141,10 @@ bool BuyAction::Execute(Event& event)
                         }
                         if (!itemsOk)
                             break;
-
+#ifdef MANGOSBOT_TWO
                         if (iece->reqpersonalarenarating && bot->GetMaxPersonalArenaRatingRequirement(iece->reqarenaslot) < iece->reqpersonalarenarating)
                             break;
+#endif
                     }
 #endif
 

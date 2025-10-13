@@ -69,7 +69,11 @@ trainableSpellMap* TrainableSpellMapValue::Calculate()
                 if (otherTrainerSpell->reqLevel != trainerSpell.reqLevel)
                     continue;
 
+#ifndef MANGOSBOT_TWO
                 if (otherTrainerSpell->learnedSpell != trainerSpell.learnedSpell)
+#else
+                if (otherTrainerSpell->learnedSpell[0] != trainerSpell.learnedSpell[0])
+#endif
                     continue;
 
                 if (otherTrainerSpell->conditionId != trainerSpell.conditionId)
@@ -86,7 +90,11 @@ trainableSpellMap* TrainableSpellMapValue::Calculate()
                 else
                 {
                     // exist, already checked at loading
+#ifndef MANGOSBOT_TWO
                     SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(trainerSpell.learnedSpell);
+#else
+                    SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(trainerSpell.learnedSpell[0]);
+#endif
 
                     spellRequirement = spell->EffectMiscValue[1];
                 }
@@ -130,7 +138,11 @@ std::vector<TrainerSpell const*> TrainableSpellsValue::Calculate()
                     continue;
 
                 //Skip initial profession training.
+#ifndef MANGOSBOT_TWO
                 if (bot->GetLevel() < 10 && sSpellMgr.IsProfessionSpell(trainerSpell->learnedSpell) && sSpellMgr.GetSpellRank(trainerSpell->learnedSpell) == 1)
+#else
+                if (bot->GetLevel() < 10 && sSpellMgr.IsProfessionSpell(trainerSpell->learnedSpell[0]) && sSpellMgr.GetSpellRank(trainerSpell->learnedSpell[0]) == 1)
+#endif
                     continue;
 
                 trainableSpells.push_back(trainerSpell);

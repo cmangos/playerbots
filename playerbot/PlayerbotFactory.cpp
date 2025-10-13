@@ -2572,7 +2572,7 @@ void PlayerbotFactory::InitTradeSkills()
                 }
             }
 
-#ifdef CMANGOS
+#ifndef MANGOSBOT_TWO
             if (tSpell->learnedSpell)
             {
                 bool learned = false;
@@ -2589,20 +2589,27 @@ void PlayerbotFactory::InitTradeSkills()
             }
             else
                 ai->CastSpell(tSpell->spell, bot);
-#endif
-
-#ifdef MANGOS
-            bool learned = false;
-            for (int j = 0; j < 3; ++j)
+#else
+            if (!tSpell->learnedSpell.empty())
             {
-                if (proto->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+                for (auto learnSpell : tSpell->learnedSpell)
                 {
-                    uint32 learnedSpell = proto->EffectTriggerSpell[j];
-                    bot->learnSpell(learnedSpell, false);
-                    learned = true;
+                    bool learned = false;
+                    for (int j = 0; j < 3; ++j)
+                    {
+                        if (proto->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+                        {
+                            uint32 learnedSpell = proto->EffectTriggerSpell[j];
+                            bot->learnSpell(learnedSpell, false);
+                            learned = true;
+                        }
+                    }
+                    if (!learned)
+                        bot->learnSpell(learnSpell, false);
                 }
             }
-            if (!learned) bot->learnSpell(tSpell->spell, false);
+            else
+                ai->CastSpell(tSpell->spell, bot);
 #endif
         }
     }

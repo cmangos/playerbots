@@ -900,7 +900,7 @@ bool RpgGossipTalkTrigger::IsActive()
     {
     case 28653: //Salanar the Horseman
         return AI_VALUE2(bool, "need quest objective", "12687,0"); //Only when we need "Into the Realm of Shadows"
-    case 29796: //Behsten (xp gain disable) Maybe add back later for some bots?
+    case 35365: //Behsten (xp gain disable) Maybe add back later for some bots?
     case 35364: //Slahtz
         return false;
     }

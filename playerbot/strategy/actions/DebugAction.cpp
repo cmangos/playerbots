@@ -13,10 +13,15 @@
 #include "MotionGenerators/PathFinder.h"
 #include "playerbot/PlayerbotLLMInterface.h"
 
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
+
 #include <iomanip>
 #include "SayAction.h"
 
 using namespace ai;
+using namespace MaNGOS;
 
 bool DebugAction::Execute(Event& event)
 {
@@ -93,6 +98,8 @@ bool DebugAction::Execute(Event& event)
         return HandleGO(event, requester, text);
     else if (text.find("item ") == 0)
         return HandleItem(event, requester, text);
+    else if (text.find("find ") == 0)
+        return HandleFind(event, requester, text);
     else if (text.find("rpg ") == 0)
         return HandleRPG(event, requester, text);
     else if (text.find("rpgtargets") == 0)
@@ -1398,6 +1405,41 @@ bool DebugAction::HandleGO(Event& event, Player* requester, const std::string& t
     return true;
 }
 
+bool DebugAction::HandleFind(Event& event, Player* requester, const std::string& text)
+{
+    std::ostringstream out;
+
+    if (text.size() <= 5)
+        return false;
+
+    std::string link = text.substr(5);
+
+    if (link.empty())
+        return false;
+
+    if (!Qualified::isValidNumberString(link))
+        return false;
+
+    uint32 entry = stoi(link);
+
+    Creature* creature = nullptr;
+    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck creature_check(*bot, entry, true, false, 1000.0f, true);
+    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(creature, creature_check);
+    Cell::VisitGridObjects(bot, searcher, 1000.0f);
+
+    if (!creature)
+        return false;
+
+    out << "Found: ";
+    out << chat->formatWorldobject(creature);
+    out << " at distance ";
+    out << bot->GetDistance(creature);
+
+    ai->TellPlayerNoFacing(requester, out);
+
+    return true;
+}
+
 bool DebugAction::HandleItem(Event& event, Player* requester, const std::string& text)
 {
     std::ostringstream out;
@@ -1982,6 +2024,12 @@ bool DebugAction::HandleNC(Event& event, Player* requester, const std::string& t
                     {
                         ai->TellPlayerNoFacing(requester, "a:  " + nextAction->getName() + triggerNode->getName() + (action->isUseful() ? " [usefull]" : "") + (action->isPossible() ? " [possible]" : "") + "(" + std::to_string(nextAction->getRelevance()) + ")"
                         , PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false, false);
+                    }
+                    else
+                    {
+                        ai->TellPlayerNoFacing(requester,
+                                               "a:  [unknown]" + nextAction->getName() + triggerNode->getName() + " (" + std::to_string(nextAction->getRelevance()) + ")",
+                                               PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false, false);
                     }
                     
                 }

@@ -377,7 +377,7 @@ bool NeedForQuestValue::Calculate()
 
 	int32 entry = stoi(getQualifier());
 
-	questGuidpMap questMap = GAI_VALUE(questGuidpMap, "quest guidp map");
+	const PlayerTravelInfo& info(bot);
 
 	std::list<GuidPosition> retQuestObjectives;
 
@@ -406,19 +406,11 @@ bool NeedForQuestValue::Calculate()
 			if (!AI_VALUE2(bool, "need quest objective", Qualified::MultiQualify(qualifier, ",")))
 				continue;
 
-			auto q = questMap.find(questId);
-
-			if (q == questMap.end())
-				continue;
-
-			auto qt = q->second.find((uint8)TravelDestinationPurpose(1 << (objective+1)));
-
-			if (qt == q->second.end())
-				continue;
-
-			for (auto& [objectiveEntry, guidPs] : qt->second)
+			DestinationList destinations = sTravelMgr.GetDestinations(info, uint32(TravelDestinationPurpose::QuestAllObjective), {int32(questId)}, false, 0);
+			
+			for (auto destination : destinations)
 			{
-				if (entry == objectiveEntry)
+                if (entry == destination->GetEntry())
 					return true;
 
 			}

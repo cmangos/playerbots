@@ -106,10 +106,10 @@ namespace ai
     };
 
     //Check if a specific entry is a quest objective that the bot has to complete.
-    class NeedForQuestValue : public BoolCalculatedValue, Qualified
+    class NeedForQuestValue : public BoolCalculatedValue, public Qualified
     {
     public:
-        NeedForQuestValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "need for quest", 5) {}
+        NeedForQuestValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "need for quest", 5), Qualified() {}
         virtual bool Calculate() override;
     };
     

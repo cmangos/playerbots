@@ -40,6 +40,7 @@ namespace ai
         QuestObjective2 = 1 << 2,
         QuestObjective3 = 1 << 3,
         QuestObjective4 = 1 << 4,
+        QuestAllObjective = QuestObjective1 | QuestObjective2 | QuestObjective3 | QuestObjective4,
         QuestTaker = 1 << 5,
         GenericRpg = 1 << 6,
         Trainer = 1 << 7,

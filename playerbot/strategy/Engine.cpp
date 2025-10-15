@@ -174,7 +174,14 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                     if (!event.getSource().empty())
                         out << " [" << event.getSource() << "]";
 
-                    ai->TellPlayerNoFacing(ai->GetMaster(), out);
+                    if (ai->GetMaster())
+                    {
+                        ai->TellPlayerNoFacing(ai->GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+                    }
+                    else
+                    {
+                        ai->GetBot()->Say(out.str(), (ai->GetBot()->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+                    }
                 }
                 LogAction("A:%s - UNKNOWN", actionNode->getName().c_str());
             }
@@ -265,7 +272,14 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                             if (!event.getSource().empty())
                                 out << " [" << event.getSource() << "]";
 
-                            ai->TellPlayerNoFacing(ai->GetMaster(), out);
+        if (ai->GetMaster())
+                            {
+                                ai->TellPlayerNoFacing(ai->GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+                            }
+                            else
+                            {
+                                ai->GetBot()->Say(out.str(), (ai->GetBot()->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+                            }
                         }
                         LogAction("A:%s - IMPOSSIBLE", action->getName().c_str());
                         MultiplyAndPush(actionNode->getAlternatives(), relevance + 0.03, false, event, "alt");
@@ -286,7 +300,14 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                         if (!event.getSource().empty())
                             out << " [" << event.getSource() << "]";
 
-                        ai->TellPlayerNoFacing(ai->GetMaster(), out);
+        if (ai->GetMaster())
+                        {
+                            ai->TellPlayerNoFacing(ai->GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+                        }
+                        else
+                        {
+                            ai->GetBot()->Say(out.str(), (ai->GetBot()->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+                        }
                     }
                     lastRelevance = relevance;
                     LogAction("A:%s - USELESS", action->getName().c_str());

@@ -144,7 +144,7 @@ bool CheckMountStateAction::Execute(Event& event)
         return UnMount();
     }
 
-    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && groupMaster)
+    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && groupMaster && groupMaster != bot)
     {
         //Mounting with master.
         if (IsLeaderMounted && !hasAttackers)

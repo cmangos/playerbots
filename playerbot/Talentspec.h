@@ -36,9 +36,10 @@ class TalentSpec {
         TalentSpec(Player* bot, std::string link) { GetTalents(bot->getClassMask()); ReadTalents(link); }
 
         bool CheckTalentLink(std::string link, std::ostringstream* out);
-        virtual bool CheckTalents(int maxPoints, std::ostringstream* out);
-        void CropTalents(uint32 level);
-        void ShiftTalents(TalentSpec* oldTalents, uint32 level);
+        virtual bool CheckTalents(uint32 freeTalentPoints, std::ostringstream* out);
+        virtual bool CheckTalents(Player* bot, std::ostringstream* out) { return CheckTalents(bot->GetFreeTalentPoints(), out); }
+        void CropTalents(Player* botl);
+        void ShiftTalents(TalentSpec* oldTalents, Player* botl);
         void ApplyTalents(Player* bot, std::ostringstream* out);
         static void SetPublicNote(Player* bot);
 
@@ -49,8 +50,8 @@ class TalentSpec {
         std::string GetTalentLink();
         int highestTree();
         std::string formatSpec(Player* bot);
+        static uint32 LeveltoPoints(uint32 level);
     protected:
-        uint32 LeveltoPoints(uint32 level) const;
         uint32 PointstoLevel(int points) const;
         void GetTalents(uint32 classMask);
         void SortTalents(std::vector<TalentListEntry>& talents, int sortBy);

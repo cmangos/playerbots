@@ -461,7 +461,9 @@ bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
 
         ai->RemoveShapeshift();
 
-        if (sServerFacade.isMoving(bot))
+        bool wasMoving = sServerFacade.isMoving(bot);
+
+        if (wasMoving)
         {
             ai->StopMoving();
         }
@@ -519,8 +521,11 @@ bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
 
         if (didMount)
         {
-            if(sServerFacade.isMoving(bot))
-                ai->HandleCommand(CHAT_MSG_WHISPER, "do check mount state", *bot);
+            if (wasMoving)
+            {
+                ai->HandleCommand(CHAT_MSG_WHISPER, "queue do check mount state", *bot);
+                ai->TellDebug(requester, "was moving trying to mount again.", "debug mount");
+            }
 
             if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
                 ai->TellPlayerNoFacing(requester, "Mounting.");

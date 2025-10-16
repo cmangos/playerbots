@@ -121,7 +121,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
             case 28856: //Scarlet Fleet Guardian
                 if (AI_VALUE2(bool, "need quest objective", "12701,0"))
                 {
-                    if (AI_VALUE2(bool, "trigger active", "in vehicle") && bot->IsWithinDistInMap(unit, sPlayerbotAIConfig.sightDistance) && !urand(0, 5))
+                    if (AI_VALUE2(bool, "trigger active", "in vehicle::Scarlet Cannon") && !urand(0, 5))
                         return unit;
                     continue;
                 }

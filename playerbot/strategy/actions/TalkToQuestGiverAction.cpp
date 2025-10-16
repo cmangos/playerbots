@@ -52,7 +52,7 @@ bool TalkToQuestGiverAction::ProcessQuest(Player* requester, Quest const* quest,
         case QUEST_STATUS_AVAILABLE:
         case QUEST_STATUS_NONE:
         {
-            if (quest->IsAutoComplete() && bot->CanTakeQuest(quest, false))
+            if (quest->IsAutoComplete() && bot->CanTakeQuest(quest, false) && bot->CanRewardQuest(quest, false))
                 isCompleted |= TurnInQuest(requester, quest, questGiver, outputMessage);
             else
                 outputMessage = BOT_TEXT2("quest_status_available", args);

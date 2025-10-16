@@ -134,6 +134,8 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
     ProcessTriggers(minimal);
     PushDefaultActions();
 
+    std::vector<Action*> modifiedActions;
+
     int iterations = 0;
     int iterationsPerTick = queue.Size() * (minimal ? (uint32)(sPlayerbotAIConfig.iterationsPerTick / 2) : sPlayerbotAIConfig.iterationsPerTick);
     do 
@@ -197,22 +199,26 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
 
                 if (isUseful)
                 {
-                    for (std::list<Multiplier*>::iterator i = multipliers.begin(); i != multipliers.end(); i++)
+                    if (std::find(modifiedActions.begin(), modifiedActions.end(), action) == modifiedActions.end())
                     {
-                        Multiplier* multiplier = *i;
-                        relevance *= multiplier->GetValue(action);
-
-                        action->setRelevance(relevance);
-                        if (!relevance)
+                        for (std::list<Multiplier*>::iterator i = multipliers.begin(); i != multipliers.end(); i++)
                         {
-                            LogAction("Multiplier %s made action %s useless", multiplier->getName().c_str(), action->getName().c_str());
-                            break;
+                            Multiplier* multiplier = *i;
+                            relevance *= multiplier->GetValue(action);
+
+                            action->setRelevance(relevance);
+                            if (!relevance)
+                            {
+                                LogAction("Multiplier %s made action %s useless", multiplier->getName().c_str(), action->getName().c_str());
+                                break;
+                            }
                         }
                     }
 
                     ActionBasket* peekAction = queue.Peek();
                     if (relevance < oldRelevance && peekAction && peekAction->getRelevance() > relevance) //Relevance changed. Try again.
                     {
+                        modifiedActions.push_back(action);
                         PushAgain(actionNode, relevance, event);
                         continue;
                     }

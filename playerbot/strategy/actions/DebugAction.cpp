@@ -1841,7 +1841,11 @@ bool DebugAction::HandleValues(Event& event, Player* requester, const std::strin
 
 bool DebugAction::HandleLoot(Event& event, Player* requester, const std::string& text)
 {
-    bool doAction = ai->DoSpecificAction("add all loot", Event(), true);
+    std::string param = "";
+    if (text.length() > 6)
+        param = text.substr(5);
+
+    bool doAction = ai->DoSpecificAction("add all loot", Event("debug", param), true);
 
     if (doAction)
         ai->TellPlayerNoFacing(requester, "Added new loot");
@@ -1862,7 +1866,8 @@ bool DebugAction::HandleLoot(Event& event, Player* requester, const std::string&
         if (wo)
             ai->TellPlayerNoFacing(requester, chat->formatWorldobject(wo) + " " + (loot.IsLootPossible(bot) ? "can loot" : "can not loot"));
         else
-            ai->TellPlayerNoFacing(requester, std::to_string(loot.guid) + " " + (loot.IsLootPossible(bot) ? "can loot" : "can not loot") + " " + std::to_string(loot.guid.GetEntry()));
+            ai->TellPlayerNoFacing(requester,
+                                   std::to_string(loot.guid) + " " + (loot.IsLootPossible(bot) ? "can loot" : "can not loot") + " " + std::to_string(loot.guid.GetEntry()));
 
         if (loot.guid.IsGameObject())
         {

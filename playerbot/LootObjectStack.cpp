@@ -78,7 +78,7 @@ void LootObject::Refresh(Player* bot, ObjectGuid guid)
     }
 
     GameObject* go = ai->GetGameObject(guid);
-    if (go && sServerFacade.isSpawned(go) && !go->IsInUse() && (go->GetGoState() == GO_STATE_READY || go->GetGoState() == GO_STATE_ACTIVE))
+    if (go && sServerFacade.isSpawned(go) && !go->IsInUse())
     {
         bool isQuestItemOnly = false;
 
@@ -242,7 +242,7 @@ bool LootObject::IsLootPossible(Player* bot)
             }
 
             //Ignore objects that are currently in use.
-            if (go->IsInUse() || go->GetGoState() != GO_STATE_READY)
+            if (go->IsInUse() || go->GetGoState() == GO_STATE_ACTIVE)
                 return false;
         }
     }

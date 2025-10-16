@@ -115,7 +115,7 @@ bool OpenLootAction::DoLoot(LootObject& lootObject)
     if (go && sServerFacade.GetDistance2d(bot, go) > INTERACTION_DISTANCE)
         return false;
 
-    if (go && (go->IsInUse() || go->GetGoState() != GO_STATE_READY))
+    if (go && (go->IsInUse() || go->GetGoState() == GO_STATE_ACTIVE))
         return false;
 
     if (lootObject.skillId == SKILL_MINING)

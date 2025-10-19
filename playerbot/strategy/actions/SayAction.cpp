@@ -369,9 +369,29 @@ delayedPackets ChatReplyAction::LinesToPackets(const std::vector<std::string>& l
                 splitPos = 200;
             }
 
-            if (!sentence.substr(0, splitPos).empty())
-                LineToPacket(delayedPackets, useEmote ? emoteTemplate : packetTemplate, sentence.substr(0, splitPos), MsPerChar, debug);                
             sentence = std::regex_replace(sentence, std::regex("\\*"), "");
+            sentence = std::regex_replace(sentence, std::regex("\\["), "");
+            sentence = std::regex_replace(sentence, std::regex("\\]"), "");
+
+            if ((!isEmote || !emoteTemplate.empty()) && !sentence.substr(0, splitPos).empty())
+            {
+                auto sentenceSplit = sentence.substr(0, splitPos);
+                auto delay = sentenceSplit.size() * MsPerChar;
+                if (timeDiff)
+                {
+                    if (timeDiff >= delay)
+                    {
+                        delay = 0;
+                    }
+                    else
+                    {
+                        delay -= timeDiff;
+                    }
+                    timeDiff = 0;
+                }
+
+                LineToPacket(delayedPackets, isEmote ? emoteTemplate : packetTemplate, sentenceSplit, delay, debug);
+            }
 
             sentence = sentence.substr(splitPos + 1);
         }

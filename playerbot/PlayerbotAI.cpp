@@ -1719,7 +1719,8 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
                 return;
             }
-            else if (isAiChat)
+
+            if (isAiChat)
             {
                 ChatChannelSource chatChannelSource = bot->GetPlayerbotAI()->GetChatChannelSource(bot, msgtype, chanName);
 
@@ -7486,10 +7487,11 @@ void PlayerbotAI::SendDelayedPacket(WorldSession* session, futurePackets futPack
     std::thread t([session, futPacket = std::move(futPackets)]() mutable {
         for (auto& delayedPacket : futPacket.get())
         {
-            std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(delayedPacket.first));
-            session->QueuePacket(std::move(packetPtr));
             if (delayedPacket.second)
                 std::this_thread::sleep_for(std::chrono::milliseconds(delayedPacket.second));
+
+            std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(delayedPacket.first));
+            session->QueuePacket(std::move(packetPtr));
         }
     });
 

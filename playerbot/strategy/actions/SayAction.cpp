@@ -340,7 +340,7 @@ WorldPacket ChatReplyAction::GetPacketTemplate(Opcodes op, uint32 type, Unit* se
     return packetTemplate;
 }
 
-inline void LineToPacket(delayedPackets& delayedPackets, const WorldPacket packetTemplate, const std::string& line, uint32 MsPerChar, bool debug = false)
+inline void LineToPacket(delayedPackets& delayedPackets, const WorldPacket packetTemplate, const std::string& line, uint32 MsDelay, bool debug = false)
 {
     WorldPacket packet(packetTemplate);
     if (packetTemplate.GetOpcode() != CMSG_MESSAGECHAT)
@@ -350,17 +350,17 @@ inline void LineToPacket(delayedPackets& delayedPackets, const WorldPacket packe
     if (packetTemplate.GetOpcode() != CMSG_MESSAGECHAT)
         packet << CHAT_TAG_NONE;
 
-    delayedPackets.push_back(std::make_pair(packet, line.size() * MsPerChar));
+    delayedPackets.push_back(std::make_pair(packet, MsDelay));
 }
 
-delayedPackets ChatReplyAction::LinesToPackets(const std::vector<std::string>& lines, WorldPacket packetTemplate, bool debug, uint32 MsPerChar, WorldPacket emoteTemplate)
+delayedPackets ChatReplyAction::LinesToPackets(const std::vector<std::string>& lines, WorldPacket packetTemplate, bool debug, uint32 MsPerChar, WorldPacket emoteTemplate, uint32 timeDiff)
 {
     delayedPackets delayedPackets;
 
     WorldPacket packet;
     for (auto& line : lines)
     {
-        bool useEmote = !emoteTemplate.empty() && (line.find("*") == 0 || line.find("[") == 0);
+        bool isEmote = line.find('*') == 0 || line.find('[') == 0;
 
         std::string sentence = line;
         while (sentence.length() > 200) {
@@ -371,13 +371,29 @@ delayedPackets ChatReplyAction::LinesToPackets(const std::vector<std::string>& l
 
             if (!sentence.substr(0, splitPos).empty())
                 LineToPacket(delayedPackets, useEmote ? emoteTemplate : packetTemplate, sentence.substr(0, splitPos), MsPerChar, debug);                
+            sentence = std::regex_replace(sentence, std::regex("\\*"), "");
 
             sentence = sentence.substr(splitPos + 1);
         }
 
-        if (!sentence.empty())
+        if ((!isEmote || !emoteTemplate.empty()) && !sentence.empty())
         {
-            LineToPacket(delayedPackets, useEmote ? emoteTemplate : packetTemplate, sentence, MsPerChar, debug);
+            auto delay = sentence.size() * MsPerChar;
+            if (timeDiff)
+            {
+                if (timeDiff >= delay)
+                {
+                    delay = 0;
+                    sLog.outError("delay packet removed: %u", delay);
+                }
+                else
+                {
+                    delay -= timeDiff;
+                    sLog.outError("delay packet reduced to %u", delay);
+                }
+                timeDiff = 0;
+            }
+            LineToPacket(delayedPackets, isEmote ? emoteTemplate : packetTemplate, sentence, delay, debug);
         }
     }
     return delayedPackets;
@@ -391,13 +407,18 @@ delayedPackets ChatReplyAction::GenerateResponsePackets(const std::string json
     if (debug)
         debugLines = { json };
 
+    auto startTime = time(nullptr);
+
     std::string response = PlayerbotLLMInterface::Generate(json, sPlayerbotAIConfig.llmGenerationTimeout, sPlayerbotAIConfig.llmMaxSimultaniousGenerations, debugLines);
+
+    auto timeAfter = time(nullptr);
+    auto timeDiff = (timeAfter - startTime) * IN_MILLISECONDS;
 
     std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, startPattern, endPattern, deletePattern, splitPattern, debugLines);
 
     delayedPackets packets, debugPackets;
 
-    packets = LinesToPackets(lines, chatTemplate, false, 200, emoteTemplate);
+    packets = LinesToPackets(lines, chatTemplate, false, 200, emoteTemplate, timeDiff);
 
     if (!debugLines.empty())
     {

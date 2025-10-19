@@ -99,9 +99,9 @@ bool SayAction::Execute(Event& event)
         return false;
 
     if (text.find("/y ") == 0)
-        bot->Yell(text.substr(3), (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+        ai->Yell(text.substr(3));
     else
-        bot->Say(text, (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+        ai->Say(text);
 
     return true;
 }

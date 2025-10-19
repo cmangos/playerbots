@@ -3251,14 +3251,34 @@ bool PlayerbotAI::SayToRaid(std::string msg)
 
 bool PlayerbotAI::Yell(std::string msg)
 {
+    uint32 lang = LANG_UNIVERSAL;
     if (bot->GetTeam() == ALLIANCE)
     {
-        bot->Yell(msg, LANG_COMMON);
+        lang =  LANG_COMMON;
     }
     else
     {
-        bot->Yell(msg, LANG_ORCISH);
+        lang = LANG_ORCISH;
     }
+
+    if (sPlayerbotAIConfig.llmEnabled > 0 && (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) || sPlayerbotAIConfig.llmEnabled == 3) && sPlayerbotAIConfig.llmBotToBotChatChance)
+    {
+        if (this->HasPlayerNearby(sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL)))
+        {
+            WorldPacket packet_template(CMSG_MESSAGECHAT);
+
+            packet_template << CHAT_MSG_YELL;
+            packet_template << lang;
+            packet_template << msg;
+
+            std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
+
+            bot->GetSession()->QueuePacket(std::move(packetPtr));
+            return true;
+        }
+    }
+
+    bot->Yell(msg, lang);
 
     return true;
 }
@@ -3277,13 +3297,13 @@ bool PlayerbotAI::Say(std::string msg)
 
     if (sPlayerbotAIConfig.llmEnabled > 0 && (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) || sPlayerbotAIConfig.llmEnabled == 3) && sPlayerbotAIConfig.llmBotToBotChatChance)
     {
-        if (this->HasPlayerNearby(35.0f))
+        if (this->HasPlayerNearby(sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY)))
         {
 
             WorldPacket packet_template(CMSG_MESSAGECHAT);
 
             packet_template << CHAT_MSG_SAY;
-            packet_template << LANG_UNIVERSAL;
+            packet_template << lang;
             packet_template << msg;
 
             std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
@@ -3293,14 +3313,7 @@ bool PlayerbotAI::Say(std::string msg)
         }
     }
 
-    if (bot->GetTeam() == ALLIANCE)
-    {
-        bot->Say(msg, LANG_COMMON);
-    }
-    else
-    {
-        bot->Say(msg, LANG_ORCISH);
-    }
+    bot->Say(msg, lang);
 
     return true;
 }

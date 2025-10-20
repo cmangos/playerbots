@@ -404,12 +404,12 @@ delayedPackets ChatReplyAction::LinesToPackets(const std::vector<std::string>& l
                 if (timeDiff >= delay)
                 {
                     delay = 0;
-                    sLog.outError("delay packet removed: %u", delay);
+                    sLog.outError("delay packet removed: %lu", delay);
                 }
                 else
                 {
                     delay -= timeDiff;
-                    sLog.outError("delay packet reduced to %u", delay);
+                    sLog.outError("delay packet reduced to %lu", delay);
                 }
                 timeDiff = 0;
             }

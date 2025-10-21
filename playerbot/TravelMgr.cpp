@@ -246,6 +246,7 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
         case 12698: //The Gift That Keeps On Giving
         case 12779: //An End To All Things
         case 12801: //The Light of Dawn
+        case 12701: //Massacre At Light's Point
             skipKillableCheck = true;
         }
 #endif
@@ -313,50 +314,56 @@ bool QuestObjectiveTravelDestination::IsActive(Player* bot, const PlayerTravelIn
 
     if (GetEntry() > 0)
     {
-#ifdef MANGOSBOT_TWO        
-        switch (GetQuestId()) {
-        case 12848: //The Endless Hunger
-            skipKillableCheck = true;
-            break;
-        case 12680: //Grand Theft Palomino
-            switch (GetEntry())
-            {
-            case 28605: //Havenshire horse
-            case 28606:
-            case 28607:
-                return !AI_VALUE2(bool, "trigger active", "in vehicle") && ai->CanSpellClick(bot, GetEntry());
+#ifdef MANGOSBOT_TWO
+        switch (GetQuestId())
+        {
+            case 12848: //The Endless Hunger
+                skipKillableCheck = true;
                 break;
-            case 28653: //Salanar the Horseman
-                return true;
+            case 12680: //Grand Theft Palomino
+                switch (GetEntry())
+                {
+                    case 28605: //Havenshire horse
+                    case 28606:
+                    case 28607: return !AI_VALUE2(bool, "trigger active", "in vehicle") && ai->CanSpellClick(bot, GetEntry()); break;
+                    case 28653: //Salanar the Horseman
+                        return true;
+                        break;
+                }
                 break;
-            }
-            break;
-        case 12687: //Into the Realm of Shadows
-            switch (GetEntry())
-            {
-            case 28768: //Dark Rider of Acherus
-            case 28909:
-            case 28782: //Acherus Deathcharger
-                return !AI_VALUE2(bool, "trigger active", "in vehicle");
-            case 29501: //Scourge Gryphon (return to hand in)
-                return AI_VALUE2(bool, "trigger active", "in vehicle");
-            }
-            break;
-        case 12698: //The Gift That Keeps On Giving
-            switch (GetEntry())
-            {
-            case 28819: //Scarlet Miner
-                return !bot->FindGuardianWithEntry(28845);
-            case 28658: //Gothic the Harvester
-                return bot->FindGuardianWithEntry(28845);
-            }
-            break;
+            case 12687: //Into the Realm of Shadows
+                switch (GetEntry())
+                {
+                    case 28768: //Dark Rider of Acherus
+                    case 28909:
+                    case 28782: //Acherus Deathcharger
+                        return !AI_VALUE2(bool, "trigger active", "in vehicle");
+                    case 29501: //Scourge Gryphon (return to hand in)
+                        return AI_VALUE2(bool, "trigger active", "in vehicle");
+                }
+                break;
+            case 12698: //The Gift That Keeps On Giving
+                switch (GetEntry())
+                {
+                    case 28819: //Scarlet Miner
+                        return !bot->FindGuardianWithEntry(28845);
+                    case 28658: //Gothic the Harvester
+                        return bot->FindGuardianWithEntry(28845);
+                }
+                break;
+            case 12701: //Massacre At Light's Point
+                switch (GetEntry())
+                {
+                    case 28833: //Scarlet Cannon
+                        return DistanceTo(bot) < 30.0f;
+                }
         }
 #endif
 
         CreatureInfo const* cInfo = GetCreatureInfo();
 
-        if (!skipKillableCheck && cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()] && !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot))
+        if (!skipKillableCheck && cInfo->NpcFlags & UNIT_NPC_FLAG_VENDOR && GetQuestTemplate()->ReqItemId[GetObjective()] &&
+            !GuidPosition(HIGHGUID_UNIT, GetEntry()).IsHostileTo(bot))
         {
             skipKillableCheck = true;
         }

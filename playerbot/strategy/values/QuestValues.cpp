@@ -601,6 +601,11 @@ bool NeedQuestObjectiveValue::Calculate()
 
 	QuestStatusData& questStatus = bot->getQuestStatusMap().at(questId);
 
+	if (getQualifier().find("reward") != std::string::npos)
+    {
+        return !questStatus.m_rewarded; //Still need the reward
+    }
+
 	if (questStatus.m_status != QUEST_STATUS_INCOMPLETE)
 		return false;
 

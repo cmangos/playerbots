@@ -23,7 +23,8 @@ enum class BotCheatMask : uint32
     attackspeed = 1 << 9,
     breath = 1 << 10,
     glyph = 1 << 11,
-    maxMask = 1 << 12
+    quest = 1 << 12,    
+    maxMask = 1 << 13
 };
 
 enum class BotAutoLogin : uint32
@@ -355,7 +356,7 @@ public:
     std::list<std::string> botCheats;
     uint32 botCheatMask = 0;
 
-    std::vector<std::string> BotCheatMaskName = { "taxi", "gold", "health", "mana", "power", "item", "cooldown", "repair", "movespeed", "attackspeed", "breath", "glyph", "maxMask" };
+    std::vector<std::string> BotCheatMaskName = { "taxi", "gold", "health", "mana", "power", "item", "cooldown", "repair", "movespeed", "attackspeed", "breath", "glyph", "quest", "maxMask" };
 
     struct worldBuff{
         uint32 spellId;

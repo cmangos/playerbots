@@ -167,6 +167,7 @@ public:
     std::list<uint32> ahOverVendorItemIds;
     std::list<uint32> vendorOverAHItemIds;
     bool botCheckAllAuctionListings;
+    bool botsSaveEpics;
     //
     bool randomBotJoinLfg;
     bool logRandomBotJoinLfg;

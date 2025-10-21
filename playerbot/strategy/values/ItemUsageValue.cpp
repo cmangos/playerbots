@@ -377,7 +377,7 @@ ItemUsage ItemUsageValue::Calculate()
         }
 
     //KEEP
-    if (proto->Quality >= ITEM_QUALITY_EPIC && !sRandomPlayerbotMgr.IsRandomBot(bot))
+    if (proto->Quality >= ITEM_QUALITY_EPIC && sPlayerbotAIConfig.botsSaveEpics && !sRandomPlayerbotMgr.IsRandomBot(bot))
         return ItemUsage::ITEM_USAGE_KEEP;
 
     if (proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE)

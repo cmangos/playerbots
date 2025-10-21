@@ -285,7 +285,7 @@ bool ChangeTalentsAction::AutoSelectTalents(std::ostringstream* out)
     }
 
     //Spec was not found or not sufficient
-    if (bot->GetFreeTalentPoints() > 0 || (!specNo && specLink.empty()))
+    if (bot->CalculateTalentsPoints() > 0 || (!specNo && specLink.empty()))
     {
         TalentSpec oldSpec(bot);
         int currentTree = oldSpec.highestTree();
@@ -392,7 +392,7 @@ bool AutoSetTalentsAction::Execute(Event& event)
         return false;
     }
 
-    if (bot->GetFreeTalentPoints() <= 0)
+    if (bot->CalculateTalentsPoints() <= 0)
     {
         return false;
     }

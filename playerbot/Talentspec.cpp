@@ -390,7 +390,7 @@ std::string TalentSpec::formatSpec(Player* bot)
 //Removes talentpoints to match the level
 void TalentSpec::CropTalents(Player* bot)
 {
-    if (points <= bot->GetFreeTalentPoints())
+    if (points <= bot->CalculateTalentsPoints())
         return;
 
     SortTalents(talents, SORT_BY_POINTS_TREE);
@@ -399,8 +399,8 @@ void TalentSpec::CropTalents(Player* bot)
 
     for (auto& entry : talents)
     {
-        if (points + entry.rank > (int)bot->GetFreeTalentPoints())
-            entry.rank = std::max(0, (int)(bot->GetFreeTalentPoints() - points));
+        if (points + entry.rank > (int)bot->CalculateTalentsPoints())
+            entry.rank = std::max(0, (int)(bot->CalculateTalentsPoints() - points));
         points += entry.rank;
     }
 
@@ -440,7 +440,7 @@ bool TalentSpec::isEarlierVersionOf(TalentSpec& newSpec)
 void TalentSpec::ShiftTalents(TalentSpec* currentSpec, Player* bot)
 {    
 
-    if (points >= bot->GetFreeTalentPoints()) //We have no more points to spend. Better reset and crop
+    if (points >= bot->CalculateTalentsPoints()) //We have no more points to spend. Better reset and crop
     {
         CropTalents(bot);
         return;
@@ -464,8 +464,8 @@ void TalentSpec::ShiftTalents(TalentSpec* currentSpec, Player* bot)
 
     for (auto& entry : deltaList)
     {
-        if (entry.rank + points > bot->GetFreeTalentPoints()) //Running out of points. Only apply what we have left.
-            entry.rank = std::max(0, int(bot->GetFreeTalentPoints() - points));
+        if (entry.rank + points > bot->CalculateTalentsPoints()) //Running out of points. Only apply what we have left.
+            entry.rank = std::max(0, int(bot->CalculateTalentsPoints() - points));
 
         for (auto& subentry : talents)
             if (entry.entry == subentry.entry)

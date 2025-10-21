@@ -272,6 +272,31 @@ bool RpgHealAction::Execute(Event& event)
     return retVal;
 }
 
+bool RpgUseAction::isUseful()
+{
+    GuidPosition guidP = rpg->guidP();
+
+    switch (guidP.GetEntry())
+    {
+        case 190767: {
+
+            //Do not get in cart if miner is moving some other bot. (This is a core bug, minecart will head to other more distant miner if it exists).
+            Creature* creature = nullptr;
+            MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck creature_check(*bot, 28841, true, false, 500.0f, true);
+            MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(creature, creature_check);
+            Cell::VisitGridObjects(bot, searcher, 500.0f);
+
+            if (!creature || guidP.distance(creature) > 300.0f)
+                return true;
+
+            return false;
+        }            
+    }
+
+    return true;
+}
+
+
 bool RpgAIChatAction::isUseful()
 {
     GuidPosition guidP = rpg->guidP();

@@ -604,6 +604,9 @@ bool ResetTargetAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     setNewTarget(requester, &newTarget, oldTarget);
 
+    oldTarget->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+    oldTarget->SetExpireIn(60000); //1 minute;
+
     ai->TellDebug(requester, "Cleared travel target fetches", "debug travel");
 
     return true;

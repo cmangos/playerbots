@@ -245,7 +245,10 @@ namespace ai
         RpgUseAction(PlayerbotAI* ai, std::string name = "rpg use") : RpgSubAction(ai, name) {}
 
         virtual bool Execute(Event& event) { rpg->BeforeExecute();  return ai->DoSpecificAction(ActionName(), ActionEvent(event), true); rpg->AfterExecute(true); DoDelay();}
+
     private:
+        virtual bool isUseful() override;
+
         virtual std::string ActionName() { if (rpg->guidP().IsGameObject() && rpg->guidP().GetGameObject(bot->GetInstanceId())->GetGoType() == GAMEOBJECT_TYPE_CHEST) return "add all loot";  return "use"; }
         virtual Event ActionEvent(Event event) { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject(bot->GetInstanceId()))); }
     };

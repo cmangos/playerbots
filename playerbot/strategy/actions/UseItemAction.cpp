@@ -302,6 +302,22 @@ bool UseAction::Execute(Event& event)
         {
             targetGameObject = ai->GetGameObject(*gos.begin());
         }
+
+        float closest = 9999.0f;
+        std::list<ObjectGuid> nearestGOs = AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los");
+        for (const ObjectGuid& goGUID : nearestGOs)
+        {
+            GameObject* go = ai->GetGameObject(goGUID);
+            if (go && std::string(go->GetName()).find(useName))
+            {
+                const float distance = bot->GetDistance(go);
+                if (distance < closest)
+                {
+                    targetGameObject = go;
+                    closest = distance;
+                }
+            }
+        }
     }
 
     if (targetGameObject != nullptr)

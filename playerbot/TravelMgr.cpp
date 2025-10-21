@@ -221,12 +221,26 @@ bool QuestObjectiveTravelDestination::IsPossible(const PlayerTravelInfo& info) c
     if (forceThisQuest && !info.IsFocusQuest(GetQuestId()))
         return false;
 
+    bool skipShouldGrindCheck = false;
+
+    //Check mob level
+    if (GetEntry() > 0)
+    {
+#ifdef MANGOSBOT_TWO
+        switch (GetQuestId())
+        {
+            case 12779: //An End To All Things
+                skipShouldGrindCheck = true;
+        }
+#endif
+    }
+
     if (!forceThisQuest)
     {
         if ((int32)GetQuestTemplate()->GetQuestLevel() > (int32)info.GetLevel() + (int32)1)
             return false;
 
-        if (GetQuestTemplate()->GetQuestLevel() + 5 > (int)info.GetLevel() && !info.GetBoolValue("can fight equal"))
+        if (!skipShouldGrindCheck && GetQuestTemplate()->GetQuestLevel() + 5 > (int)info.GetLevel() && !info.GetBoolValue("can fight equal"))
             return false;
     }
 

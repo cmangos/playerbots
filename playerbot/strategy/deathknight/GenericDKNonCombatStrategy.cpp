@@ -91,11 +91,17 @@ void DKStartQuestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigge
     triggers.push_back(new TriggerNode("val::and::{not::need quest objective::{12701,0},trigger active::in vehicle::Scarlet Cannon}",
                                        NextAction::array(0, new NextAction("skeletal gryphon escape", 1.0f), NULL)));
 
+    triggers.push_back(new TriggerNode("val::and::{need quest objective::12779,not::trigger active::in vehicle::Frostbrood Vanquisher}",
+                                       NextAction::array(0, new NextAction("use::39700", 100.0f), NULL)));
+
     triggers.push_back(new TriggerNode("val::and::{need quest objective::12779,trigger active::in vehicle::Frostbrood Vanquisher}",
                                        NextAction::array(0, new NextAction("frozen deathbolt", 80.0f), NULL)));
 
     triggers.push_back(new TriggerNode("val::and::{need quest objective::12779,trigger active::in vehicle::Frostbrood Vanquisher}",
                                        NextAction::array(0, new NextAction("devour humanoid", 81.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{not::need quest objective::12779,trigger active::in vehicle::Frostbrood Vanquisher}",
+                                       NextAction::array(0, new NextAction("leave vehicle", 100.0f), NULL)));
 
     triggers.push_back(new TriggerNode("val::need quest objective::13165,reward", NextAction::array(0, new NextAction("cast::death gate", 80.0f), NULL)));
 

@@ -33,6 +33,7 @@ namespace ai
                 creators["pull"] = [](PlayerbotAI* ai) { return new PullStrategy(ai, "icy touch"); };
 				creators["frost aoe"] = [](PlayerbotAI* ai) { return new FrostDKAoeStrategy(ai); };
 				creators["unholy aoe"] = [](PlayerbotAI* ai) { return new UnholyDKAoeStrategy(ai); };
+                creators["dksquest"] = [](PlayerbotAI* ai) { return new DKStartQuestStrategy(ai); };
             }
         };
 

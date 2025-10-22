@@ -3,7 +3,6 @@
 #include "playerbot/playerbot.h"
 #include "RandomPlayerbotFactory.h"
 #include "Accounts/AccountMgr.h"
-#include "SystemConfig.h"
 #include "playerbot/PlayerbotFactory.h"
 #include "RandomItemMgr.h"
 #include "World/WorldState.h"
@@ -87,7 +86,7 @@ bool PlayerbotAIConfig::Initialize()
 {
     sLog.outString("Initializing AI Playerbot by ike3, based on the original Playerbot by blueboy");
 
-    if (!config.SetSource(SYSCONFDIR"aiplayerbot.conf", "PlayerBots_"))
+    if (!config.SetSource(_D_AIPLAYERBOT_CONFIG, "PlayerBots_"))
     {
         sLog.outString("AI Playerbot is Disabled. Unable to open configuration file aiplayerbot.conf");
         return false;

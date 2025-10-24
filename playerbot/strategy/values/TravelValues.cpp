@@ -107,19 +107,22 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
         {
             switch (entry)
             {
-            case 29080: //Scarlet Champion
-            case 29029: //Scarlet Inquisitor
-            case 29000: //Scarlet Commander Rodrick
-            case 28940: //Scarlet Crusader
-            case 28939: //Scarlet Preacher
-            case 28936: //Scarlet Commander
-            case 28898: //Scarlet Captain
-            case 28896: //Scarlet Infantryman
-            case 28895: //Scarlet Medic
-            case 28892: //Scarlet Peasant
-            case 28610: //Scarlet Marksman
-                purpose |= (uint32)TravelDestinationPurpose::Grind;
-                break;
+                case 28611: //Scarlet Captain           1
+                case 28530: //Scarlet Commander         2
+                case 28936: //Scarlet Commander         4
+                case 29000: //Scarlet Commander Rodrick 4
+                case 28529: //Scarlet Crusader          2
+                case 28940: //Scarlet Crusader          4
+                case 28609: //Scarlet Infantryman       1
+                case 28610: //Scarlet Marksman          4
+                case 28608: //Scarlet Medic             1
+                case 28819: //Scarlet Miner             1
+                case 28822: //Scarlet Miner             1
+                case 28557: //Scarlet Peasant           1
+                case 28594: //Scarlet Preacher          2
+                case 28939: //Scarlet Preacher          4
+                    purpose |= (uint32)TravelDestinationPurpose::Grind;
+                    break;
             }
         }
 

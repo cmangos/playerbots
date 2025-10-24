@@ -571,6 +571,11 @@ bool GrindTravelDestination::IsPossible(const PlayerTravelInfo& info) const
 
     CreatureInfo const* cInfo = GetCreatureInfo();
 
+#ifdef MANGOSBOT_TWO
+    if (cInfo->Rank == CREATURE_ELITE_NORMAL && cInfo->MinLootGold == 0 && info.GetPosition().getMapId() == 609)
+        return true;
+#endif
+
     int32 botLevel = info.GetLevel();
 
     uint8 botPowerLevel = info.GetUint8Value("durability");

@@ -45,4 +45,23 @@ namespace ai
         static bool SendGeneralResponse(Player* bot, ChatChannelSource chatChannelSource, std::string responseMessage, std::string name);
         static std::string GenerateReplyMessage(Player* bot, std::string incomingMessage, uint32 guid1, std::string name);
     };
+
+    class SpeakAction : public Action, public Qualified
+    {
+    public:
+        SpeakAction(PlayerbotAI* ai) : Action(ai, "speak"), Qualified() {};
+        virtual bool Execute(Event& event);
+        virtual bool isUsefulWhenStunned() override { return true; }
+
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "speak"; } //Must equal iternal name
+        virtual std::string GetHelpDescription()
+        {
+            return "This action wil make bots speak a certain line\n"
+                   "Use \\p, \\1 \\y ect to make bots use different channels.";
+        }
+        virtual std::vector<std::string> GetUsedActions() { return {}; }
+        virtual std::vector<std::string> GetUsedValues() { return {""}; }
+#endif    
+    };
 }

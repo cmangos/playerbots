@@ -950,7 +950,11 @@ AiPlayerbot.PerfMonEnabled = 0
 #         movespeed       (very fast movespeed)
 #         attackspeed     (very fast attackspeed)
 #         breath          (underwater breathing)
+#         quest           (quests complete instantly)
+# Cheats for alts
 # AiPlayerbot.BotCheats = taxi,item,breath
+# Cheats for randombots
+# AiPlayerbot.RndBotCheats = taxi,item,breath
 
 # Self bot turns your current character into a bot with the command ".bot self"
 # !!DISCLAMER!! Selfbots will work and act like randombots based on their enabled strategies. Your epic mount will be sold to a vendor!

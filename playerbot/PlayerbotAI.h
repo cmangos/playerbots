@@ -606,7 +606,7 @@ public:
     bool AllowActive(ActivityType activityType);
     bool AllowActivity(ActivityType activityType = ALL_ACTIVITY, bool checkNow = false);
 
-    bool HasCheat(BotCheatMask mask) const { return ((uint32)mask & (uint32)cheatMask) != 0 || ((uint32)mask & (uint32)sPlayerbotAIConfig.botCheatMask) != 0; }
+    bool HasCheat(BotCheatMask mask) const;
     BotCheatMask GetCheat() { return cheatMask; }
     void SetCheat(BotCheatMask mask) { cheatMask = mask; }
 

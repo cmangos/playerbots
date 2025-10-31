@@ -5978,6 +5978,25 @@ bool PlayerbotAI::AllowActivity(ActivityType activityType, bool checkNow)
     return allowed;
 }
 
+bool PlayerbotAI::HasCheat(BotCheatMask mask) const
+{
+    if (((uint32)mask & (uint32)cheatMask) != 0)
+        return true;
+
+    if (sRandomPlayerbotMgr.IsRandomBot(bot))
+    {
+        if (((uint32)mask & sPlayerbotAIConfig.rndBotCheatMask) != 0)
+            return true;
+    }
+    else
+    {
+        if (((uint32)mask & sPlayerbotAIConfig.botCheatMask) != 0)
+            return true;
+    }
+
+    return false;
+}
+
 bool PlayerbotAI::IsOpposing(Player* player)
 {
     return IsOpposing(player->getRace(), bot->getRace());

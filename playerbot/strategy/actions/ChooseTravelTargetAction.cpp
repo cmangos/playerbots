@@ -173,7 +173,8 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         if (newTarget->GetPosition())
         {
             out << round(newTarget->Distance(bot)) << "y";
-            out << " to " << newTarget->GetPosition()->getAreaName();
+            if (out << " to " << newTarget->GetPosition()->getAreaName())
+                out << " to " << newTarget->GetPosition()->getAreaName();
         }
 
         if (shortName.find("quest") == 0)

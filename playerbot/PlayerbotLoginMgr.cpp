@@ -456,7 +456,7 @@ BotPool PlayerBotLoginMgr::LoadBotsFromDb()
 
 void PlayerBotLoginMgr::SendHolders(const BotInfos& queue)
 {  
-    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "select 1 from dual");
+    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "select 1");
 
     for (auto& info : queue)
     {
@@ -468,7 +468,7 @@ void PlayerBotLoginMgr::SendHolders(const BotInfos& queue)
 
 void PlayerBotLoginMgr::SendHolders(BotPool* pool)
 {
-    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "select 1 from dual");
+    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "select 1");
 
     for (auto& [guid, info] : *pool)
     {

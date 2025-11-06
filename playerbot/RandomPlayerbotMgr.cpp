@@ -686,7 +686,7 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     MirrorAh();
 
     //Ping character database.
-    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "SELECT 1 FROM dual");
+    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "SELECT 1");
 }
 
 void RandomPlayerbotMgr::ScaleBotActivity()

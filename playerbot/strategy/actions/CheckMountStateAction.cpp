@@ -270,20 +270,6 @@ bool CheckMountStateAction::isUseful()
     if (!bot->IsMounted() && bot->IsInWater())
         return false;
 
-    bool firstmount = bot->GetLevel() >=
-#ifdef MANGOSBOT_ZERO
-        40
-#else
-#ifdef MANGOSBOT_ONE
-        30
-#else
-        20
-#endif
-#endif
-        ;
-    if (!firstmount)
-        return false;
-
     // Do not use with BG Flags
     if (bot->HasAura(23333) || bot->HasAura(23335) || bot->HasAura(34976))
     {

@@ -496,6 +496,9 @@ std::string WorldPosition::getAreaName(const bool fullName, const bool zoneName)
 
 int32 WorldPosition::getAreaLevel() const
 {
+    if (mapid == 609)
+        return 1;
+
     if(GetArea())
         return sTravelMgr.GetAreaLevel(GetArea()->ID);
 
@@ -749,7 +752,12 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
         }
         else
         {
-            if (MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, instanceId))
+            bool loadedMap = MMAP::MMapFactory::createOrGetMMapManager()->GetNavMesh(mapId, instanceId);
+
+            if (!loadedMap)
+                loadedMap = MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), mapId, instanceId);
+
+            if (loadedMap)
                 isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, instanceId, x, y, 0);
         }
 #endif

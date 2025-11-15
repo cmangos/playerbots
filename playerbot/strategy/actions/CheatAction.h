@@ -23,9 +23,10 @@ namespace ai
 #endif 
         virtual bool Execute(Event& event) override;
         virtual bool isUsefulWhenStunned() override { return true; }
-    private:
+
         static BotCheatMask GetCheatMask(std::string cheat);
         static std::string GetCheatName(BotCheatMask cheatMask);
+    public:
         void ListCheats(Player* requester);
         void AddCheat(BotCheatMask cheatMask);
         void RemCheat(BotCheatMask cheatMask);

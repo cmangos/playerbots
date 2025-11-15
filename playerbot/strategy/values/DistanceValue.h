@@ -42,13 +42,19 @@ namespace ai
             if (qualifier == "rpg target")
             {
                 GuidPosition rpgTarget = AI_VALUE(GuidPosition, qualifier);
-                if (!rpgTarget) return FLT_MAX;
+                if (!rpgTarget)
+                    return FLT_MAX;
 
                 WorldPosition oldLocation = rpgTarget;
 
+                float distance = oldLocation.distance(bot);
+
+                if (oldLocation.getMapId() != bot->GetMapId() || distance > sPlayerbotAIConfig.reactDistance)
+                    return distance;
+
                 rpgTarget.updatePosition(bot->GetInstanceId());
 
-                if(oldLocation != rpgTarget)
+                if (oldLocation != rpgTarget)
                     SET_AI_VALUE(GuidPosition, "rpg target", rpgTarget);
 
                 return rpgTarget.distance(bot);

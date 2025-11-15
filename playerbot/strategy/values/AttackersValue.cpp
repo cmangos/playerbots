@@ -38,7 +38,7 @@ std::list<ObjectGuid> AttackersValue::Calculate()
         return result;
     }
 
-    if (!sPlayerbotAIConfig.tweakValue)
+    if (sPlayerbotAIConfig.shareTargets)
     {
         // Try to get the value from nearby friendly bots.
         std::list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest friendly players")->Get();

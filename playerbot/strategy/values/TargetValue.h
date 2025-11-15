@@ -81,7 +81,7 @@ namespace ai
     class LeaderTravelTargetValue : public CalculatedValue<TravelTarget*>
     {
     public:
-        LeaderTravelTargetValue(PlayerbotAI* ai, std::string name = "leader travel target", int checkInterval = 5) : CalculatedValue<TravelTarget*>(ai, name, checkInterval) {};
+        LeaderTravelTargetValue(PlayerbotAI* ai, std::string name = "leader travel target") : CalculatedValue<TravelTarget*>(ai, name) {};
 
         virtual TravelTarget* Calculate() override;
     };

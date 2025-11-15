@@ -97,9 +97,31 @@ EntryQuestRelationMap EntryQuestRelationMapValue::Calculate()
 	rMap[28782][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Acherus Deathcharger][Into the Realm of Shadows]	
 	rMap[29501][12687] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scourge Gryphon][Into the Realm of Shadows]	
 	
+	rMap[28577][12678] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Citizen of Havenshire][If Chaos Drives, Let Suffering Hold The Reins]
+	rMap[28576][12678] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Citizen of Havenshire][If Chaos Drives, Let Suffering Hold The Reins]
 
 	rMap[28658][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Gothic the Harvester][The Gift That Keeps On Giving]	
 	rMap[28819][12698] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Miner][The Gift That Keeps On Giving]	
+
+	rMap[-190767][12701] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Inconspicuous mine car][Massacre At Light's Point]	
+	rMap[28833][12701] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Cannon][Massacre At Light's Point]	
+
+	rMap[28941][12722] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Citizen of New Avalon][Lambs To The Slaughter]
+    rMap[28942][12722] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Citizen of Havenshire][Lambs To The Slaughter]
+
+	rMap[28912][12727] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Koltira Deathweaver][Bloody Breakout]
+
+	rMap[28936][12754] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Commander][Ambush At The Overlook]
+    rMap[29076][12754] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Scarlet Courier][Ambush At The Overlook]    
+
+
+	rMap[29102][12779] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[HearthglenCrusader][An End To All Things]    
+	rMap[29103][12779] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Tirisfal Crusader][An End To All Things]    
+	rMap[29104][12779] |= (uint8)TravelDestinationPurpose::QuestObjective2; //[Scarlet Ballista][An End To All Things]    
+
+	rMap[29173][12801] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Highlord Darion Mograine][The Light of Dawn]    
+	rMap[29175][12801] |= (uint8)TravelDestinationPurpose::QuestObjective1; //[Highlord Tirion Fordring][The Light of Dawn]    
+	
 #endif
 	return rMap;
 }
@@ -356,7 +378,7 @@ bool NeedForQuestValue::Calculate()
 
 	int32 entry = stoi(getQualifier());
 
-	questGuidpMap questMap = GAI_VALUE(questGuidpMap, "quest guidp map");
+	const PlayerTravelInfo& info(bot);
 
 	std::list<GuidPosition> retQuestObjectives;
 
@@ -385,19 +407,11 @@ bool NeedForQuestValue::Calculate()
 			if (!AI_VALUE2(bool, "need quest objective", Qualified::MultiQualify(qualifier, ",")))
 				continue;
 
-			auto q = questMap.find(questId);
-
-			if (q == questMap.end())
-				continue;
-
-			auto qt = q->second.find((uint8)TravelDestinationPurpose(1 << (objective+1)));
-
-			if (qt == q->second.end())
-				continue;
-
-			for (auto& [objectiveEntry, guidPs] : qt->second)
+			DestinationList destinations = sTravelMgr.GetDestinations(info, uint32(TravelDestinationPurpose::QuestAllObjective), {int32(questId)}, false, 0);
+			
+			for (auto destination : destinations)
 			{
-				if (entry == objectiveEntry)
+                if (entry == destination->GetEntry())
 					return true;
 
 			}
@@ -513,7 +527,7 @@ uint32 DialogStatusValue::getDialogStatus(Player* bot, int32 questgiver, uint32 
 					{
 						dialogStatusNew = DIALOG_STATUS_REWARD_REP;
 					}
-					else if (lowLevelDiff < 0 || bot->GetLevel() <= bot->GetQuestLevelForPlayer(pQuest) + uint32(lowLevelDiff))
+                    else if (lowLevelDiff < 0 || bot->GetLevel() <= bot->GetQuestLevelForPlayer(pQuest) + uint32(lowLevelDiff) || pQuest->GetRequiredClasses())
 					{
 						dialogStatusNew = DIALOG_STATUS_AVAILABLE;
 					}
@@ -546,12 +560,35 @@ bool NeedQuestRewardValue::Calculate()
 {
 	uint32 questId = stoi(getQualifier());
 	Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+
+	if (pQuest->GetRequiredClasses()) //Always try to do class quests.
+        return true;
+
 	for (uint8 i = 0; i < pQuest->GetRewChoiceItemsCount(); ++i)
 	{
 		ItemUsage usage = AI_VALUE2_LAZY(ItemUsage, "item usage", pQuest->RewChoiceItemId[i]);
 		if (usage == ItemUsage::ITEM_USAGE_EQUIP || usage == ItemUsage::ITEM_USAGE_BAD_EQUIP)
 			return true;
 	}
+
+	return false;
+}
+
+bool NeedQuestObjectiveValue::CanGetItemSomewhere(const uint32 itemId, const uint32 reqCount, Player* bot)
+{
+    if (!GAI_VALUE2(std::list<int32>, "item drop list", itemId).empty()) //Can get it from drop.
+        return true;
+
+    if (GAI_VALUE2(std::list<int32>, "item vendor list", itemId).empty()) //Can not get it from vendor.
+        return true;
+
+    ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+
+    if (!proto)
+        return true;
+
+    if (bot->GetMoney() > proto->BuyPrice * reqCount) //Bot has money to buy item from vendor.
+        return true;
 
 	return false;
 }
@@ -563,6 +600,11 @@ bool NeedQuestObjectiveValue::Calculate()
 		return false;
 
 	QuestStatusData& questStatus = bot->getQuestStatusMap().at(questId);
+
+	if (getQualifier().find("reward") != std::string::npos)
+    {
+        return !questStatus.m_rewarded; //Still need the reward
+    }
 
 	if (questStatus.m_status != QUEST_STATUS_INCOMPLETE)
 		return false;
@@ -584,32 +626,24 @@ bool NeedQuestObjectiveValue::Calculate()
 	uint32  reqCount = pQuest->ReqItemCount[objective];
 	uint32  hasCount = questStatus.m_itemcount[objective];
 
+	bool needItems = false;
+    bool needCreatures = false;
+
 	if (reqCount && hasCount < reqCount)
 	{
 		uint32 itemId = pQuest->ReqItemId[objective];
 
-		if (!GAI_VALUE2(std::list<int32>, "item drop list", itemId).empty())
-			return true;
-
-		if (GAI_VALUE2(std::list<int32>, "item vendor list", itemId).empty())
-			return true;
-
-		ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-
-		if (!proto)
-			return true;
-
-		if (bot->GetMoney() > proto->BuyPrice * reqCount) //Bot needs enough money to do quest.
-			return true;
+        if (CanGetItemSomewhere(itemId, reqCount, bot))
+            needItems = true;
 	}
 
 	reqCount = pQuest->ReqCreatureOrGOCount[objective];
 	hasCount = questStatus.m_creatureOrGOcount[objective];
 
 	if (reqCount && hasCount < reqCount)
-		return true;
+        needCreatures = true;
 
-	return false;
+	return needItems || needCreatures;
 }
 
 bool CanUseItemOn::Calculate()
@@ -625,16 +659,27 @@ bool CanUseItemOn::Calculate()
 		return false;
 
 	switch (itemId)
-	{
-	case 17117: //Rat Catcher's Flute
-		return guidP.IsCreature() && guidP.GetEntry() == 13016; //Deeprun Rat		
-	case 52566: //Motivate-a-Tron (currently broken?)
-		return guidP.IsCreature() && guidP.GetEntry() == 39623; //Gnome Citizen
-	case 38607: //Battle-worn Sword
-		return guidP.IsGameObject() && (std::find(RUNEFORGES.begin(), RUNEFORGES.end(), guidP.GetEntry()) != RUNEFORGES.end()); //Runeforge
-	case 39253: //Gift of the Harester
-		return guidP.IsCreature() && guidP.GetEntry() == 28819; //Scarlet Miner
-	}
+    {
+        case 17117:                                                                                                                 //Rat Catcher's Flute
+            return guidP.IsCreature() && guidP.GetEntry() == 13016;                                                                 //Deeprun Rat
+        case 52566:                                                                                                                 //Motivate-a-Tron (currently broken?)
+            return guidP.IsCreature() && guidP.GetEntry() == 39623;                                                                 //Gnome Citizen
+        case 38607:                                                                                                                 //Battle-worn Sword
+            return guidP.IsGameObject() && (std::find(RUNEFORGES.begin(), RUNEFORGES.end(), guidP.GetEntry()) != RUNEFORGES.end()); //Runeforge
+        case 39253:                                                                                                                 //Gift of the Harester
+            return guidP.IsCreature() && guidP.GetEntry() == 28819;                                                                 //Scarlet Miner
+        case 39645:                                                                                                                 //Makeshift Cover
+            return guidP.IsCreature() && guidP.GetEntry() == 28936;                                                                 //Scarlet Commander
+            /*        case 39700:                                                                                                                 //Horn of the Frostbrood
+        
+			switch (AI_VALUE(TravelTarget*, "travel target")->GetEntry())
+            case 29102: //HearthglenCrusader
+            case 29103: //Tirisfal Crusader
+            case 29104: //Scarlet Ballista
+		
+            return !AI_VALUE2(bool, "trigger active", "in vehicle") && AI_VALUE2(bool, "need quest objective", "12779"); //Mount up!
+		*/
+    }
 
 	if (guidP.IsUnit())
 		unit = guidP.GetUnit(bot->GetInstanceId());

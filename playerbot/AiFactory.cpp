@@ -487,7 +487,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
                 combatEngine->addStrategies("unholy", "unholy aoe", "dps assist", NULL);
             }
 
-            combatEngine->addStrategies("dps assist", "flee", "close", "cc", NULL);
+            combatEngine->addStrategies("dksquest", "dps assist", "flee", "close", "cc", NULL);
             break;
         }
 #endif
@@ -823,6 +823,8 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
             {
                 nonCombatEngine->addStrategy("dps assist");
             }
+
+            nonCombatEngine->addStrategy("dksquest");
 
             break;
         }

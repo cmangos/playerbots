@@ -291,7 +291,33 @@ bool CastVehicleSpellAction::isUseful()
 
 bool CastVehicleSpellAction::Execute(Event& event)
 {
-    return ai->CastVehicleSpell(GetSpellID(), GetTarget());
+    return ai->CastVehicleSpell(GetSpellID(), GetTarget(), speed, needTurn);
+}
+
+bool CastFrozenDeathboltAction::isPossible()
+{
+    Unit* target = GetTarget();
+
+    if (!target)
+        return false;
+
+    if (target->GetDistance(bot) > range)
+        return false;
+
+    return CastVehicleSpellAction::isPossible();
+}
+
+bool CastDevourHumanoidAction::isPossible()
+{
+    Unit* target = GetTarget();
+
+    if (!target)
+        return false;
+
+    if (target->GetDistance(bot) > range)
+        return false;
+
+    return CastVehicleSpellAction::isPossible();
 }
 
 bool CastShootAction::isPossible()

@@ -351,6 +351,7 @@ bool RpgTrainTrigger::IsActive()
         if (!pSpellInfo)
             continue;
 
+#ifndef MANGOSBOT_TWO
         if (tSpell->learnedSpell)
         {
             bool learned = true;
@@ -378,6 +379,41 @@ bool RpgTrainTrigger::IsActive()
             if (!learned)
                 continue;
         }
+#else
+        if (!tSpell->learnedSpell.empty())
+        {
+            bool anySpellLearned = false;
+            for (auto& learnedSpell : tSpell->learnedSpell)
+            {
+                bool learned = true;
+                if (bot->HasSpell(learnedSpell))
+                {
+                    learned = false;
+                }
+                else
+                {
+                    for (int j = 0; j < 3; ++j)
+                    {
+                        if (pSpellInfo->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+                        {
+                            learned = false;
+                            uint32 learnedSpell = pSpellInfo->EffectTriggerSpell[j];
+
+                            if (!bot->HasSpell(learnedSpell))
+                            {
+                                learned = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (learned)
+                    anySpellLearned = true;
+            }
+            if (!anySpellLearned)
+                continue;
+        }
+#endif
 
         NeedMoneyFor budgetType = NeedMoneyFor::spells;
 
@@ -519,7 +555,7 @@ bool RpgBuyPetitionTrigger::IsActive()
 
 bool RpgUseTrigger::IsActive()
 {
-    if (ai->HasRealPlayerMaster())
+    if (ai->HasActivePlayerMaster())
         return false;
 
     GuidPosition guidP(getGuidP());
@@ -555,6 +591,21 @@ bool RpgUseTrigger::IsActive()
     default:
         return false;
     }   
+}
+
+bool RpgQuestUseTrigger::IsActive()
+{
+    if (!RpgUseTrigger::IsActive())
+        return false;
+
+    GuidPosition guidP(getGuidP());
+    
+    switch (guidP.GetEntry())
+    {
+    case 190767: return AI_VALUE2(bool, "need quest objective", "12701"); //Only when we need "Inconspicuous mine car"
+    }
+
+    return false;
 }
 
 bool RpgAIChatTrigger::IsActive()
@@ -849,7 +900,7 @@ bool RpgGossipTalkTrigger::IsActive()
     {
     case 28653: //Salanar the Horseman
         return AI_VALUE2(bool, "need quest objective", "12687,0"); //Only when we need "Into the Realm of Shadows"
-    case 29796: //Behsten (xp gain disable) Maybe add back later for some bots?
+    case 35365: //Behsten (xp gain disable) Maybe add back later for some bots?
     case 35364: //Slahtz
         return false;
     }

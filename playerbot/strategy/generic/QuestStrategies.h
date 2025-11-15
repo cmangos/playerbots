@@ -10,7 +10,7 @@ namespace ai
 
     protected:
         virtual void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
-        virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override {}
+        virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override {};
         virtual void InitDeadTriggers(std::list<TriggerNode*>& triggers) override {}
     };
 

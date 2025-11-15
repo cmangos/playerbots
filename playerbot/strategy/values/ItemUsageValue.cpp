@@ -377,7 +377,7 @@ ItemUsage ItemUsageValue::Calculate()
         }
 
     //KEEP
-    if (proto->Quality >= ITEM_QUALITY_EPIC && !sRandomPlayerbotMgr.IsRandomBot(bot))
+    if (proto->Quality >= ITEM_QUALITY_EPIC && sPlayerbotAIConfig.botsSaveEpics && !sRandomPlayerbotMgr.IsRandomBot(bot))
         return ItemUsage::ITEM_USAGE_KEEP;
 
     if (proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE)
@@ -424,6 +424,11 @@ ItemUsage ItemUsageValue::Calculate()
             if (maxSellPrice < minimumSellPrice) //Do not loot items less than 0.1% of bot's gold per stack. 
                 sellUsage = ItemUsage::ITEM_USAGE_NONE;
         }
+
+#ifdef MANGOSBOT_TWO
+        if(bot->GetMapId() == 609)
+            return sellUsage;
+#endif
 
         //if item value is significantly higher than its vendor sell price and we actually have money to place the item on ah.
         uint32 ahMoney = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ah);
@@ -507,7 +512,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
         result = RandomPlayerbotMgr::CanEquipUnseenItem(bot, NULL_SLOT, dest, itemProto->ItemId);
     }
 
-    if (result != EQUIP_ERR_OK)
+    if (result != EQUIP_ERR_OK && result != EQUIP_ERR_ITEMS_CANT_BE_SWAPPED)
         return ItemUsage::ITEM_USAGE_NONE;
 
     if (itemProto->Class == ITEM_CLASS_QUIVER)
@@ -598,6 +603,12 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
 
     const ItemPrototype* oldItemProto = oldItem->GetProto();
 
+    if(MustEquipForQuest(itemProto, bot) && !MustEquipForQuest(oldItemProto, bot))
+        return ItemUsage::ITEM_USAGE_EQUIP;
+
+    if (MustEquipForQuest(oldItemProto, bot))
+        return ItemUsage::ITEM_USAGE_KEEP;
+
     if (itemProto->Class == ITEM_CLASS_ARMOR && itemProto->InventoryType == INVTYPE_TABARD)
     {
         uint32 currentStacks = CurrentStacks(ai, itemProto);
@@ -637,12 +648,12 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
     bool existingShouldEquip = true;
     if (oldItemProto->Class == ITEM_CLASS_WEAPON && !oldStatWeight)
         existingShouldEquip = false;
-    if (oldItemProto->Class == ITEM_CLASS_ARMOR && !statWeight)
+    if (oldItemProto->Class == ITEM_CLASS_ARMOR && !oldStatWeight)
         existingShouldEquip = false;
 
     //Compare items based on item level, quality.
     bool isBetter = false;
-    if (!statWeight || !oldStatWeight)
+    if (!statWeight && !oldStatWeight)
     {
         isBetter = (itemProto->Quality > oldItemProto->Quality && itemProto->ItemLevel == oldItemProto->ItemLevel) || (itemProto->Quality == oldItemProto->Quality && itemProto->ItemLevel > oldItemProto->ItemLevel);
     }
@@ -1303,7 +1314,7 @@ void ItemUsageValue::PopulateReagentItemIdsForCraftableItemIds()
 
                             uint32 reagentItemId = spellInfo->Reagent[x];
                             uint32 reagentsRequiredCount = spellInfo->ReagentCount[x];
-                            if (reagentItemId)
+                            if (reagentItemId && ObjectMgr::GetItemPrototype(reagentItemId))
                             {
                                 m_craftingReagentItemIdsForCraftableItem[craftedItemId].push_back({ reagentItemId , reagentsRequiredCount });
                             }
@@ -1317,7 +1328,7 @@ void ItemUsageValue::PopulateReagentItemIdsForCraftableItemIds()
 
 void ItemUsageValue::PopulateSoldByVendorItemIds()
 {
-    if (auto result = WorldDatabase.PQuery("%s", "SELECT item, entry FROM npc_vendor"))
+    if (auto result = WorldDatabase.PQuery("%s", "SELECT distinct item FROM npc_vendor"))
     {
         BarGoLink bar(result->GetRowCount());
         do
@@ -1327,11 +1338,15 @@ void ItemUsageValue::PopulateSoldByVendorItemIds()
             uint32 entry = fields[0].GetUInt32();
             if (!entry)
                 continue;
+
+            if (!ObjectMgr::GetItemPrototype(entry))
+                continue;
+
             m_allItemIdsSoldByAnyVendors.insert(fields[0].GetUInt32());
         } while (result->NextRow());
     }
 
-    if (auto result = WorldDatabase.PQuery("%s", "SELECT item, entry FROM npc_vendor WHERE maxcount > 0"))
+    if (auto result = WorldDatabase.PQuery("%s", "SELECT distinct item FROM npc_vendor WHERE maxcount > 0"))
     {
         BarGoLink bar(result->GetRowCount());
         do
@@ -1341,6 +1356,10 @@ void ItemUsageValue::PopulateSoldByVendorItemIds()
             uint32 entry = fields[0].GetUInt32();
             if (!entry)
                 continue;
+
+            if (!ObjectMgr::GetItemPrototype(entry))
+                continue;
+
             m_itemIdsSoldByAnyVendorsWithLimitedMaxCount.insert(fields[0].GetUInt32());
         } while (result->NextRow());
     }
@@ -1364,6 +1383,20 @@ std::vector<std::pair<uint32, uint32>> ItemUsageValue::GetAllReagentItemIdsForCr
 bool ItemUsageValue::IsItemSoldByAnyVendor(ItemPrototype const* proto)
 {
     return m_allItemIdsSoldByAnyVendors.count(proto->ItemId) > 0;
+}
+
+bool ItemUsageValue::MustEquipForQuest(ItemPrototype const* proto, Player* bot)
+{
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+
+    switch (proto->ItemId)
+    {
+    case 39371:
+        return AI_VALUE2(bool, "need quest objective", 12720);
+    }
+
+    return false;
 }
 
 bool ItemUsageValue::IsItemSoldByAnyVendorButHasLimitedMaxCount(ItemPrototype const* proto)

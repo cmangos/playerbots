@@ -67,63 +67,109 @@ bool BuyAction::Execute(Event& event)
 
             for (auto& tItem : m_items_sorted)
             {
-                for (uint32 i=0; i<10; i++) //Buy 10 times or until no longer usefull/possible
+                ItemPrototype const* proto = sObjectMgr.GetItemPrototype(tItem->item);
+                if (!proto)
+                    continue;
+
+                // reputation discount 
+                uint32 price = uint32(floor(proto->BuyPrice * bot->GetReputationPriceDiscount(pCreature)));
+
+                auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "IsWorthBuyingFromVendorToResellAtAH", &context->performanceStack);
+
+                // if item is worth selling to AH? 
+                bool canFlipAH = ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(proto, tItem->maxcount > 0);
+
+                pmo.reset();
+
+#ifndef MANGOSBOT_ZERO
+                const ItemExtendedCostEntry* iece = nullptr;
+                if (tItem->ExtendedCost)
+                {
+                    iece = sItemExtendedCostStore.LookupEntry(tItem->ExtendedCost);
+                    if (!iece)
+                        continue;
+                }
+#endif
+
+                for (uint32 n = 0; n < 10; ++n) //Buy 10 times or until no longer usefull/possible 
                 {
                     ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", tItem->item);
-                    ItemPrototype const* proto = sObjectMgr.GetItemPrototype(tItem->item);
 
-                    uint32 price = proto->BuyPrice;
+                    uint32 moneyKey = 0;
+                    bool usageAllowed = true;
+                    switch (usage)
+                    {
+                        case ItemUsage::ITEM_USAGE_EQUIP: moneyKey = (uint32)NeedMoneyFor::gear; break;
+                        case ItemUsage::ITEM_USAGE_USE: moneyKey = (uint32)NeedMoneyFor::consumables; break;
+                        case ItemUsage::ITEM_USAGE_SKILL: moneyKey = (uint32)NeedMoneyFor::tradeskill; break;
+                        case ItemUsage::ITEM_USAGE_AMMO: moneyKey = (uint32)NeedMoneyFor::ammo; break;
+                        case ItemUsage::ITEM_USAGE_QUEST:
+                        case ItemUsage::ITEM_USAGE_FORCE_NEED:
+                        case ItemUsage::ITEM_USAGE_FORCE_GREED: moneyKey = (uint32)NeedMoneyFor::anything; break;
+                        case ItemUsage::ITEM_USAGE_AH:
+                            usageAllowed = canFlipAH;
+                            moneyKey = (uint32)NeedMoneyFor::anything;
+                            break;
+                        default: usageAllowed = false; break;
+                    }
+                    if (!usageAllowed)
+                        break;
 
-                    // reputation discount
-                    price = uint32(floor(price * bot->GetReputationPriceDiscount(pCreature)));
-
-                    NeedMoneyFor needMoneyFor = NeedMoneyFor::none;
-
-                    std::unordered_map <ItemUsage, uint32> freeMoney;
-
-                    freeMoney[ItemUsage::ITEM_USAGE_EQUIP] = (uint32)NeedMoneyFor::gear;
-                    freeMoney[ItemUsage::ITEM_USAGE_USE] = (uint32)NeedMoneyFor::consumables;
-                    freeMoney[ItemUsage::ITEM_USAGE_SKILL] = (uint32)NeedMoneyFor::tradeskill;
-                    freeMoney[ItemUsage::ITEM_USAGE_AMMO] =  (uint32)NeedMoneyFor::ammo;
-                    freeMoney[ItemUsage::ITEM_USAGE_QUEST] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_NEED] = freeMoney[ItemUsage::ITEM_USAGE_FORCE_GREED] = (uint32)NeedMoneyFor::anything;
-
-                    //if item is worth selling to AH?
-
-                    auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "IsWorthBuyingFromVendorToResellAtAH", &context->performanceStack);
-                    bool isWorthBuyingFromVendorToResellAtAH = ItemUsageValue::IsWorthBuyingFromVendorToResellAtAH(proto, tItem->maxcount > 0);
-                    pmo.reset();
-
-                    if (isWorthBuyingFromVendorToResellAtAH)
-                        freeMoney[ItemUsage::ITEM_USAGE_AH] = (uint32)NeedMoneyFor::anything;
-                
-                    if (freeMoney.find(usage) == freeMoney.end())
-                        continue;
-
-                    RESET_AI_VALUE2(uint32, "free money for", freeMoney[usage]);
-                    uint32 money = AI_VALUE2(uint32, "free money for", freeMoney[usage]);
-
+                    // Gold affordability 
+                    RESET_AI_VALUE2(uint32, "free money for", moneyKey);
+                    uint32 money = AI_VALUE2(uint32, "free money for", moneyKey);
                     if (price > money)
-                        continue;
+                        break;
+
+#ifndef MANGOSBOT_ZERO
+                    // ExtendedCost check
+                    if (iece)
+                    {
+                        if (iece->reqhonorpoints && bot->GetHonorPoints() < iece->reqhonorpoints)
+                            break;
+                        if (iece->reqarenapoints && bot->GetArenaPoints() < iece->reqarenapoints)
+                            break;
+
+                        bool itemsOk = true;
+                        for (uint8 k = 0; k < MAX_EXTENDED_COST_ITEMS; ++k)
+                        {
+                            if (iece->reqitem[k] && !bot->HasItemCount(iece->reqitem[k], iece->reqitemcount[k]))
+                            {
+                                itemsOk = false;
+                                break;
+                            }
+                        }
+                        if (!itemsOk)
+                            break;
+#ifdef MANGOSBOT_TWO
+                        if (iece->reqpersonalarenarating && bot->GetMaxPersonalArenaRatingRequirement(iece->reqarenaslot) < iece->reqpersonalarenarating)
+                            break;
+#endif
+                    }
+#endif
 
                     if (usage == ItemUsage::ITEM_USAGE_USE && ItemUsageValue::CurrentStacks(ai, proto) >= 1)
-                        continue;
+                        break;
 
-                    result |= BuyItem(requester, tItems, vendorguid, proto, bought, usage);
-                    if(!result)
-                        result |= BuyItem(requester, vItems, vendorguid, proto, bought, usage);
-                    if(!result)
-                        break;   
+                    bool didBuy = false;
+                    didBuy = BuyItem(requester, tItems, vendorguid, proto, bought, usage);
+                    if (!didBuy)
+                        didBuy = BuyItem(requester, vItems, vendorguid, proto, bought, usage);
+
+                    result |= didBuy;
+                    if (!didBuy)
+                        break;
 
                     RESET_AI_VALUE2(ItemUsage, "item usage", tItem->item);
                     RESET_AI_VALUE(std::vector<MountValue>, "mount list");
 
-                    if (usage == ItemUsage::ITEM_USAGE_EQUIP || usage == ItemUsage::ITEM_USAGE_BAD_EQUIP) //Equip upgrades and stop buying this time.
+                    if (usage == ItemUsage::ITEM_USAGE_EQUIP || usage == ItemUsage::ITEM_USAGE_BAD_EQUIP) //Equip upgrades and stop buying this time. 
                     {
                         RESET_AI_VALUE2(ItemUsage, "item usage", tItem->item);
                         ai->DoSpecificAction("equip upgrades", event, true);
                         break;
                     }
-                } 
+                }
             }
         }
         else

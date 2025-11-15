@@ -12,7 +12,9 @@ using namespace ai;
 
 bool XpGainAction::Execute(Event& event)
 {
-    context->GetValue<uint32>("death count")->Set(0);
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+
+    RESET_AI_VALUE(uint32,"death count");
 
     WorldPacket p(event.getPacket()); // (8+4+1+4+8)
     ObjectGuid guid;
@@ -31,6 +33,18 @@ bool XpGainAction::Execute(Event& event)
         sPlayerbotAIConfig.logEvent(ai, "XpGainAction", guid, std::to_string(xpgain));
     }
 
+    int32 bonusXpgain = (int32)xpgain * (sPlayerbotAIConfig.playerbotsXPrate - 1.0f);
+
+    std::ostringstream out;
+    out << "Gained ";
+    out << std::to_string(xpgain + bonusXpgain);
+    out << " xp, current: ";
+    out << std::to_string(bot->GetUInt32Value(PLAYER_XP) + bonusXpgain);
+    out << "/";
+    out << std::to_string(bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP));
+
+    ai->TellDebug(requester, out.str(),"debug xp");
+    
     AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
     ai->AccelerateRespawn(guid);
 
@@ -54,7 +68,6 @@ bool XpGainAction::Execute(Event& event)
     Unit* victim;
     if (guid)
         victim = ai->GetUnit(guid);
-    int32 bonusXpgain = (int32)xpgain * (sPlayerbotAIConfig.playerbotsXPrate - 1.0f);
     GiveXP(bonusXpgain, victim);
 
     return false;

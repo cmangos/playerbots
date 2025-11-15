@@ -55,6 +55,8 @@ namespace ai
         bool HandleLevel(Event& event, Player* requester, const std::string& text);
         bool HandleNPC(Event& event, Player* requester, const std::string& text);
         bool HandleGO(Event& event, Player* requester, const std::string& text);
+        bool HandleFind(Event& event, Player* requester, const std::string& text);
+        bool HandleItem(Event& event, Player* requester, const std::string& text);
         bool HandleRPG(Event& event, Player* requester, const std::string& text);
         bool HandleRPGTargets(Event& event, Player* requester, const std::string& text);
         bool HandleTravel(Event& event, Player* requester, const std::string& text);

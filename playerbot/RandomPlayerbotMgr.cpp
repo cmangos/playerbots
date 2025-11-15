@@ -686,7 +686,7 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     MirrorAh();
 
     //Ping character database.
-    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "SELECT 1 FROM dual");
+    CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "SELECT 1");
 }
 
 void RandomPlayerbotMgr::ScaleBotActivity()
@@ -3274,6 +3274,32 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         return true;
     }
 
+    if (cmd.find("cmd ") == 0)
+    {
+        std::vector<std::string> params = Qualified::getMultiQualifiers(cmd, " ");
+
+        Player* player = sObjectAccessor.FindPlayerByName(params[1].c_str());
+
+        if (!player)
+            return false;
+
+        PlayerbotAI* ai = player->GetPlayerbotAI();
+
+        if (!ai)
+            return false;
+
+        std::string command;
+
+        for (uint32 i = 2; i < params.size(); i++)
+            command += command + " " + params[i];
+
+        sLog.outString("Sending command %s to player %s", command.c_str(), player->GetName());
+
+        ai->HandleCommand(CHAT_MSG_WHISPER, command, *player);
+
+        return true;
+    }
+
     std::map<std::string, ConsoleCommandHandler> handlers;
     handlers["init"] = &RandomPlayerbotMgr::RandomizeFirst;
     handlers["upgrade"] = &RandomPlayerbotMgr::UpdateGearSpells;
@@ -3392,14 +3418,14 @@ void RandomPlayerbotMgr::HandleCommand(uint32 type, const std::string& text, Pla
 
 void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 {
-    if (player->isRealPlayer() && player->GetPlayerbotAI())
+    bool hadPlayerBot = GetPlayerBot(player->GetGUIDLow());
+
+    DisablePlayerBot(player->GetGUIDLow());
+
+    if (!hadPlayerBot && player->GetPlayerbotAI() && player->GetPlayerbotAI()->IsRealPlayer() && player->GetGroup() && sPlayerbotAIConfig.IsFreeAltBot(player))
         player->GetSession()->SetOffline(); //Prevent groupkick
 
-     DisablePlayerBot(player->GetGUIDLow());
-
-     ForEachPlayerbot([&](Player* bot)
-     {
-
+    ForEachPlayerbot([&](Player* bot) {
         PlayerbotAI* ai = bot->GetPlayerbotAI();
         if (player == ai->GetMaster())
         {
@@ -3416,7 +3442,7 @@ void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 
 void RandomPlayerbotMgr::OnBotLoginInternal(Player * const bot)
 {
-    sLog.outDetail("%lu/%d Bot %s logged in", GetPlayerbotsAmount(), sRandomPlayerbotMgr.GetMaxAllowedBotCount(), bot->GetName());
+    sLog.outDetail("%u/%d Bot %s logged in", GetPlayerbotsAmount(), sRandomPlayerbotMgr.GetMaxAllowedBotCount(), bot->GetName());
 	//if (loginProgressBar && playerBots.size() < sRandomPlayerbotMgr.GetMaxAllowedBotCount()) { loginProgressBar->step(); }
 	//if (loginProgressBar && playerBots.size() >= sRandomPlayerbotMgr.GetMaxAllowedBotCount() - 1) {
     //if (loginProgressBar && playerBots.size() + 1 >= sRandomPlayerbotMgr.GetMaxAllowedBotCount()) {

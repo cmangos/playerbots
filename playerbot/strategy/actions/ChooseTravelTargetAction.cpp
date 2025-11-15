@@ -156,8 +156,8 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
     if (typeid(*destination) == typeid(NullTravelDestination))
     {
         out.clear();
-        if(!oldDestination || typeid(*destination) != typeid(NullTravelDestination))
-            out << "No where to travel. Idling a bit.";
+        if (!oldDestination || typeid(*oldDestination) != typeid(NullTravelDestination))
+            out << "Nowhere to travel. Idling a bit.";
     }
     else
     {
@@ -173,7 +173,8 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
         if (newTarget->GetPosition())
         {
             out << round(newTarget->Distance(bot)) << "y";
-            out << " to " << newTarget->GetPosition()->getAreaName();
+            if (out << " to " << newTarget->GetPosition()->getAreaName())
+                out << " to " << newTarget->GetPosition()->getAreaName();
         }
 
         if (shortName.find("quest") == 0)
@@ -244,6 +245,20 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
     }
 }
 
+inline std::string PrintPartion(uint32 sqPartition)
+{
+    uint32 prevPartition = 0;
+    for (auto& partition : travelPartitions)
+    {
+        if (sqrt(sqPartition) == partition)
+            return std::to_string(prevPartition) + "-" + std::to_string(partition);
+
+        prevPartition = partition;
+    }
+
+    return "> " + std::to_string(prevPartition);
+}
+
 //Sets the target to the best destination.
 bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* target, PartitionedTravelList& partitionedList, bool onlyActive)
 {
@@ -254,7 +269,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
 
     for (auto& [partition, travelPointList] : partitionedList)
     {
-        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + std::to_string(round(sqrt(partition))), "debug travel");
+        ai->TellDebug(requester, "Found " + std::to_string(travelPointList.size()) + " points at range " + PrintPartion(partition), "debug travel");
 
         for (auto& [destination, position, distance] : travelPointList)
         {
@@ -277,7 +292,7 @@ bool ChooseTravelTargetAction::SetBestTarget(Player* requester, TravelTarget* ta
             {
                 if (partition != std::prev(partitionedList.end())->first && !urand(0, 10)) //10% chance to skip to a longer partition.
                 {
-                    ai->TellDebug(requester, "Skipping range " + std::to_string(partition), "debug travel");
+                    ai->TellDebug(requester, "Skipping range " + PrintPartion(partition), "debug travel");
                     break;
                 }
 
@@ -506,7 +521,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
 
     if (target->IsMaxRetry(false))
     {
-        ai->TellDebug(requester, "Old destination was tried to many times.", "debug travel");
+        ai->TellDebug(requester, "Old destination was tried too many times.", "debug travel");
         return false;
     }
 
@@ -525,7 +540,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
 
     for (uint8 i = 0; i < 5; i++)
     {
-        std::list<uint8> chancesToGoFar = { 10,50,90 }; //Closest map, grid, cell.
+        std::list<uint8> chancesToGoFar = { 10,20,90 }; //Closest map, grid, cell.
         newPosition = oldDestination->GetNextPoint(*target->GetPosition(), chancesToGoFar);
         if (newPosition && sTravelMgr.IsLocationLevelValid(*newPosition, info))
             break;        
@@ -589,6 +604,9 @@ bool ResetTargetAction::Execute(Event& event)
     TravelTarget newTarget = TravelTarget(ai);
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     setNewTarget(requester, &newTarget, oldTarget);
+
+    oldTarget->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+    oldTarget->SetExpireIn(60000); //1 minute;
 
     ai->TellDebug(requester, "Cleared travel target fetches", "debug travel");
 

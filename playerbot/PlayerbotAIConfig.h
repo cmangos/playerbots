@@ -3,10 +3,17 @@
 #include "Config/Config.h"
 #include "Talentspec.h"
 #include "Globals/SharedDefines.h"
+#include "SystemConfig.h"
 
 class Player;
 class PlayerbotMgr;
 class ChatHandler;
+
+#if PLATFORM == PLATFORM_WINDOWS
+inline std::string _D_AIPLAYERBOT_CONFIG = "aiplayerbot.conf";
+#else
+inline std::string _D_AIPLAYERBOT_CONFIG = SYSCONFDIR "aiplayerbot.conf";
+#endif
 
 enum class BotCheatMask : uint32
 {
@@ -23,7 +30,8 @@ enum class BotCheatMask : uint32
     attackspeed = 1 << 9,
     breath = 1 << 10,
     glyph = 1 << 11,
-    maxMask = 1 << 12
+    quest = 1 << 12,    
+    maxMask = 1 << 13
 };
 
 enum class BotAutoLogin : uint32
@@ -166,6 +174,7 @@ public:
     std::list<uint32> ahOverVendorItemIds;
     std::list<uint32> vendorOverAHItemIds;
     bool botCheckAllAuctionListings;
+    bool botsSaveEpics;
     //
     bool randomBotJoinLfg;
     bool logRandomBotJoinLfg;
@@ -208,6 +217,7 @@ public:
     bool boostFollow;
     bool turnInRpg;
     bool globalSoundEffects;
+    bool shareTargets;
     std::list<uint32> randomBotGuilds;
 	std::list<uint32> pvpProhibitedZoneIds;
     bool enableGreet;
@@ -352,10 +362,10 @@ public:
 
     std::unordered_map <std::string, std::pair<FILE*, bool>> logFiles;
 
-    std::list<std::string> botCheats;
     uint32 botCheatMask = 0;
+    uint32 rndBotCheatMask = 0;
 
-    std::vector<std::string> BotCheatMaskName = { "taxi", "gold", "health", "mana", "power", "item", "cooldown", "repair", "movespeed", "attackspeed", "breath", "glyph", "maxMask" };
+    std::vector<std::string> BotCheatMaskName = { "taxi", "gold", "health", "mana", "power", "item", "cooldown", "repair", "movespeed", "attackspeed", "breath", "glyph", "quest", "maxMask" };
 
     struct worldBuff{
         uint32 spellId;

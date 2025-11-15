@@ -13,7 +13,7 @@ env:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-2022
     permissions:
       contents: read
 
@@ -39,20 +39,10 @@ jobs:
           cmake -E make_directory ${{ env.BUILD_DIR }}
 
       # install dependencies
-      - name: Install Boost
-        uses: MarkusJx/install-boost@v2.4.5
-        id: install-boost
-        with:
-          # REQUIRED: Specify the required boost version
-          # A list of supported versions can be found here:
-          # https://github.com/MarkusJx/prebuilt-boost/blob/main/versions-manifest.json
-          boost_version: ${{env.BOOST_VERSION}}
-          # OPTIONAL: Specify a platform version
-          platform_version: ${{env.BOOST_PLATFORM_VERSION}}
-          # OPTIONAL: Specify a toolset
-          toolset: ${{env.BOOST_TOOLSET}}
-          # NOTE: If a boost version matching all requirements cannot be found,
-          # this build step will fail
+      - name: Install Boost via Chocolatey
+        run: |
+          choco install boost-msvc-14.3 -y
+        shell: pwsh
 
       - name: Configure
         env:
@@ -91,7 +81,7 @@ jobs:
           echo "GIT_SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
 
       - name: Notify
-        uses: rjstone/discord-webhook-notify@v1.1.1
+        uses: rjstone/discord-webhook-notify@v2.2.1
         with:
           severity: error
           description: |

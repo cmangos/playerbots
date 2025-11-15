@@ -3,11 +3,11 @@
 #include "playerbot/playerbot.h"
 #include "RandomPlayerbotFactory.h"
 #include "Accounts/AccountMgr.h"
-#include "SystemConfig.h"
 #include "playerbot/PlayerbotFactory.h"
 #include "RandomItemMgr.h"
 #include "World/WorldState.h"
 #include "playerbot/PlayerbotHelpMgr.h"
+#include "playerbot/strategy/actions/CheatAction.h"
 
 #include "playerbot/TravelMgr.h"
 
@@ -87,7 +87,7 @@ bool PlayerbotAIConfig::Initialize()
 {
     sLog.outString("Initializing AI Playerbot by ike3, based on the original Playerbot by blueboy");
 
-    if (!config.SetSource(SYSCONFDIR"aiplayerbot.conf", "PlayerBots_"))
+    if (!config.SetSource(_D_AIPLAYERBOT_CONFIG, "PlayerBots_"))
     {
         sLog.outString("AI Playerbot is Disabled. Unable to open configuration file aiplayerbot.conf");
         return false;
@@ -235,6 +235,7 @@ bool PlayerbotAIConfig::Initialize()
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.AhOverVendorItemIds", ""), ahOverVendorItemIds);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.VendorOverAHItemIds", ""), vendorOverAHItemIds);
     botCheckAllAuctionListings = config.GetBoolDefault("AiPlayerbot.BotCheckAllAuctionListings", false);
+    botsSaveEpics = config.GetBoolDefault("AiPlayerbot.BotsSaveEpics", true);
     //
     randomBotJoinLfg = config.GetBoolDefault("AiPlayerbot.RandomBotJoinLfg", true);
     logRandomBotJoinLfg = config.GetBoolDefault("AiPlayerbot.LogRandomBotJoinLfg", false);
@@ -394,33 +395,9 @@ bool PlayerbotAIConfig::Initialize()
         }
     }
 
-    botCheats.clear();
-    LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.BotCheats", "taxi,item,breath"), botCheats);
+    botCheatMask = uint32(CheatAction::GetCheatMask(config.GetStringDefault("AiPlayerbot.BotCheats", "taxi,item,breath")));
 
-    botCheatMask = 0;
-
-    if (std::find(botCheats.begin(), botCheats.end(), "taxi") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::taxi;
-    if (std::find(botCheats.begin(), botCheats.end(), "gold") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::gold;
-    if (std::find(botCheats.begin(), botCheats.end(), "health") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::health;
-    if (std::find(botCheats.begin(), botCheats.end(), "mana") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::mana;
-    if (std::find(botCheats.begin(), botCheats.end(), "power") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::power;
-    if (std::find(botCheats.begin(), botCheats.end(), "item") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::item;
-    if (std::find(botCheats.begin(), botCheats.end(), "cooldown") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::cooldown;
-    if (std::find(botCheats.begin(), botCheats.end(), "repair") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::repair;
-    if (std::find(botCheats.begin(), botCheats.end(), "movespeed") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::movespeed;
-    if (std::find(botCheats.begin(), botCheats.end(), "attackspeed") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::attackspeed;
-    if (std::find(botCheats.begin(), botCheats.end(), "breath") != botCheats.end())
-        botCheatMask |= (uint32)BotCheatMask::breath;
+    rndBotCheatMask = uint32(CheatAction::GetCheatMask(config.GetStringDefault("AiPlayerbot.RndBotCheats", "taxi,item,breath")));    
 
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.AllowedLogFiles", ""), allowedLogFiles);
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.DebugFilter", "add gathering loot,check values,emote,check mount state,jump"), debugFilter);
@@ -578,6 +555,7 @@ bool PlayerbotAIConfig::Initialize()
 
     boostFollow = config.GetBoolDefault("AiPlayerbot.BoostFollow", false);
     turnInRpg = config.GetBoolDefault("AiPlayerbot.TurnInRpg", false);
+    shareTargets = config.GetBoolDefault("AiPlayerbot.ShareTargets", true);
     globalSoundEffects = config.GetBoolDefault("AiPlayerbot.GlobalSoundEffects", false);
     nonGmFreeSummon = config.GetBoolDefault("AiPlayerbot.NonGmFreeSummon", false);
 
@@ -950,7 +928,8 @@ std::string PlayerbotAIConfig::GetTimestampStr()
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
     char buf[20];
-    snprintf(buf, 20, "%04d-%02d-%02d %02d:%02d:%02d", aTm->tm_year + 1900, aTm->tm_mon + 1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", aTm);
+
     return std::string(buf);
 }
 
@@ -1118,7 +1097,7 @@ void PlayerbotAIConfig::LoadTalentSpecs()
 
                         TalentSpec linkSpec(&classSpecs[cls].baseSpec, specLink);
 
-                        if (!linkSpec.CheckTalents(level, &out))
+                        if (!linkSpec.CheckTalents(TalentSpec::LeveltoPoints(level), &out))
                         {
                             sLog.outErrorDb("Error with premade spec: %s", specLink.c_str());
                             sLog.outErrorDb("%s", out.str().c_str());

@@ -116,34 +116,36 @@ void CleanQuestLogAction::DropQuestType(Player* requester, uint8 &numQuest, uint
         if (!quest)
             continue;
 
-        if (quest->GetRequiredClasses()) //Do not drop class specific quests
-            continue;
-
-        if (wantNum == 100)
-            numQuest++;
-
-        int32 lowLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
-        if (lowLevelDiff < 0 || bot->GetLevel() <= bot->GetQuestLevelForPlayer(quest) + uint32(lowLevelDiff)) //Quest is not gray
+        if (bot->GetQuestStatus(questId) != QUEST_STATUS_FAILED)
         {
-            if (bot->GetLevel() + 5 > bot->GetQuestLevelForPlayer(quest))                                     //Quest is not red
-                if (!isGreen)
+            if (quest->GetRequiredClasses()) //Do not drop class specific quests
+                continue;
+
+            if (wantNum == 100)
+                numQuest++;
+
+            int32 lowLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
+            if (lowLevelDiff < 0 || bot->GetLevel() <= bot->GetQuestLevelForPlayer(quest) + uint32(lowLevelDiff)) //Quest is not gray
+            {
+                if (bot->GetLevel() + 5 > bot->GetQuestLevelForPlayer(quest)) //Quest is not red
+                    if (!isGreen)
+                        continue;
+            }
+            else //Quest is gray
+            {
+                if (isGreen)
                     continue;
-        }
-        else //Quest is gray
-        {
-            if (isGreen)
+            }
+
+            if (HasProgress(bot, quest) && !hasProgress && bot->GetQuestStatus(questId) != QUEST_STATUS_FAILED)
+                continue;
+
+            if (bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE && !isComplete)
+                continue;
+
+            if (numQuest <= wantNum)
                 continue;
         }
-
-
-        if (HasProgress(bot, quest) && !hasProgress && bot->GetQuestStatus(questId) != QUEST_STATUS_FAILED)
-            continue;
-
-        if (bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE && !isComplete)
-            continue;
-
-        if (numQuest <= wantNum && bot->GetQuestStatus(questId) != QUEST_STATUS_FAILED)
-            continue;
 
         //Drop quest.
         bot->GetPlayerbotAI()->DropQuest(questId);

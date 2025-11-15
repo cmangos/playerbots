@@ -112,7 +112,7 @@ void StatsAction::ListBagSlots(std::ostringstream &out)
     out << "|h|c" << color << totalfree << "/" << total << "|h|cffffffff Bag";
 }
 
-void StatsAction::ListXP( std::ostringstream &out )
+void StatsAction::ListXP(std::ostringstream& out)
 {
     uint32 curXP = bot->GetUInt32Value(PLAYER_XP);
     uint32 nextLevelXP = bot->GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
@@ -124,6 +124,10 @@ void StatsAction::ListXP( std::ostringstream &out )
     uint32 restPercent = 0;
     if (restXP && nextLevelXP)
         restPercent = 2 * (100 * restXP / nextLevelXP);
+#ifdef MANGOSBOT_TWO
+    if (bot->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_XP_USER_DISABLED))
+        out << "|cffff0000" << "[xp off]";
+#endif
 
     out << "|cff00ff00" << xpPercent << "|cffffd333/|cff00ff00" << restPercent << "%|cffffffff XP";
 }

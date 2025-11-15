@@ -31,7 +31,9 @@ namespace ai
         virtual std::vector<std::string> GetUsedValues() { return {"distance", "rpg target"}; }
 #endif
 
-        virtual bool IsActive() { return !NoRpgTargetTrigger::IsActive() && AI_VALUE2(float, "distance", "rpg target") > INTERACTION_DISTANCE; };
+        virtual bool IsActive() { return !NoRpgTargetTrigger::IsActive() && AI_VALUE2(float, "distance", "rpg target") > maxDistance; };
+    protected:
+        float maxDistance = INTERACTION_DISTANCE;
     };
 
     class NearRpgTargetTrigger : public FarFromRpgTargetTrigger
@@ -184,6 +186,13 @@ namespace ai
         virtual bool IsActive();
     };
 
+    class RpgQuestUseTrigger : public RpgUseTrigger
+    {
+    public:
+        RpgQuestUseTrigger(PlayerbotAI* ai, std::string name = "rpg quest use") : RpgUseTrigger(ai, name) {}
+        virtual bool IsActive();
+    };
+
     class RpgAIChatTrigger : public RpgTrigger
     {
     public:
@@ -231,7 +240,7 @@ namespace ai
     class RpgItemTrigger : public RpgTrigger
     {
     public:
-        RpgItemTrigger(PlayerbotAI* ai, std::string name = "rpg item") : RpgTrigger(ai, name) {}
+        RpgItemTrigger(PlayerbotAI* ai, std::string name = "rpg item") : RpgTrigger(ai, name) { maxDistance = INTERACTION_DISTANCE * 2; }
         virtual bool IsActive();
     };
 

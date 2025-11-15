@@ -7,6 +7,8 @@
 
 namespace ai
 {
+    const std::vector<uint32> travelPartitions = { 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 10000, 50000, 100000, 500000 };
+
     class ChooseTravelTargetAction : public Action {
     public:
         ChooseTravelTargetAction(PlayerbotAI* ai, std::string name = "choose travel target") : Action(ai, name) {}
@@ -62,8 +64,6 @@ namespace ai
     class RequestTravelTargetAction : public Action, public Qualified {
     public:
         RequestTravelTargetAction(PlayerbotAI* ai, std::string name = "request travel target") : Action(ai, name), Qualified() {}
-    protected:
-        const std::vector<uint32> travelPartitions = { 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 10000, 50000, 100000, 500000 };
     private:
         virtual bool Execute(Event& event) override;
         virtual bool isUseful() override;

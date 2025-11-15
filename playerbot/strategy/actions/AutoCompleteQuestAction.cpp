@@ -16,7 +16,18 @@ bool AutoCompleteQuestAction::Execute(Event& event)
 #endif
     };
 
+    static const std::vector<std::pair<uint32, uint8>> autoCompleteObjectives = {
+        {0,     0}
+#ifdef MANGOSBOT_TWO
+        ,
+        //{12779, 1}  // An End To All Things (second objective needs vehicle riding).
+#endif;
+    };
+
     bool completedQuest = false;
+
+    bool isAutoCompleteQuest = false;
+    bool isAutoCompleteObjective = false;
 
     // Check the bot's quest log for any active quests from the list
     for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
@@ -25,8 +36,12 @@ bool AutoCompleteQuestAction::Execute(Event& event)
         if (!questId)
             continue;
 
-        if (std::find(autoCompleteQuests.begin(), autoCompleteQuests.end(), questId) == autoCompleteQuests.end())
-            continue;
+        if (!ai->HasCheat(BotCheatMask::quest))
+        {
+            isAutoCompleteQuest = std::find(autoCompleteQuests.begin(), autoCompleteQuests.end(), questId) != autoCompleteQuests.end();
+        }
+        else
+            isAutoCompleteQuest = true;
 
         Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
         if (!pQuest)
@@ -38,6 +53,11 @@ bool AutoCompleteQuestAction::Execute(Event& event)
         // Add quest items for quests that require items
         for (uint8 x = 0; x < QUEST_ITEM_OBJECTIVES_COUNT; ++x)
         {
+            isAutoCompleteObjective = std::find(autoCompleteObjectives.begin(), autoCompleteObjectives.end(), std::make_pair(questId, x)) != autoCompleteObjectives.end();
+
+            if (!isAutoCompleteQuest && !isAutoCompleteObjective)
+                continue;
+
             uint32 id = pQuest->ReqItemId[x];
             uint32 count = pQuest->ReqItemCount[x];
             if (!id || !count)
@@ -57,6 +77,11 @@ bool AutoCompleteQuestAction::Execute(Event& event)
         // All creature/GO slain/casted (not required, but otherwise it will display "Creature slain 0/10")
         for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         {
+            isAutoCompleteObjective = std::find(autoCompleteObjectives.begin(), autoCompleteObjectives.end(), std::make_pair(questId, i)) != autoCompleteObjectives.end();
+
+            if (!isAutoCompleteQuest && !isAutoCompleteObjective)
+                continue;
+
             int32 creature = pQuest->ReqCreatureOrGOId[i];
             uint32 creaturecount = pQuest->ReqCreatureOrGOCount[i];
 
@@ -77,6 +102,10 @@ bool AutoCompleteQuestAction::Execute(Event& event)
                     bot->CastedCreatureOrGO(-creature, ObjectGuid(), 0);
             }
         }
+
+        if (!isAutoCompleteQuest)
+            continue;
+
 #ifdef MANGOSBOT_TWO
         // player kills
         if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_PLAYER_KILL))
@@ -117,7 +146,7 @@ bool AutoCompleteQuestAction::Execute(Event& event)
 
 bool AutoCompleteQuestAction::isUseful()
 {
-    if (ai->HasActivePlayerMaster())
+    if (ai->HasActivePlayerMaster() && !ai->HasCheat(BotCheatMask::quest))
         return false;
 
     return true;

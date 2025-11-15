@@ -99,13 +99,12 @@ bool SayAction::Execute(Event& event)
         return false;
 
     if (text.find("/y ") == 0)
-        bot->Yell(text.substr(3), (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+        ai->Yell(text.substr(3));
     else
-        bot->Say(text, (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
+        ai->Say(text);
 
     return true;
 }
-
 
 bool SayAction::isUseful()
 {
@@ -340,7 +339,7 @@ WorldPacket ChatReplyAction::GetPacketTemplate(Opcodes op, uint32 type, Unit* se
     return packetTemplate;
 }
 
-inline void LineToPacket(delayedPackets& delayedPackets, const WorldPacket packetTemplate, const std::string& line, uint32 MsPerChar, bool debug = false)
+inline void LineToPacket(delayedPackets& delayedPackets, const WorldPacket packetTemplate, const std::string& line, uint32 MsDelay, bool debug = false)
 {
     WorldPacket packet(packetTemplate);
     if (packetTemplate.GetOpcode() != CMSG_MESSAGECHAT)
@@ -350,17 +349,17 @@ inline void LineToPacket(delayedPackets& delayedPackets, const WorldPacket packe
     if (packetTemplate.GetOpcode() != CMSG_MESSAGECHAT)
         packet << CHAT_TAG_NONE;
 
-    delayedPackets.push_back(std::make_pair(packet, line.size() * MsPerChar));
+    delayedPackets.push_back(std::make_pair(packet, MsDelay));
 }
 
-delayedPackets ChatReplyAction::LinesToPackets(const std::vector<std::string>& lines, WorldPacket packetTemplate, bool debug, uint32 MsPerChar, WorldPacket emoteTemplate)
+delayedPackets ChatReplyAction::LinesToPackets(const std::vector<std::string>& lines, WorldPacket packetTemplate, bool debug, uint32 MsPerChar, WorldPacket emoteTemplate, uint32 timeDiff)
 {
     delayedPackets delayedPackets;
 
     WorldPacket packet;
     for (auto& line : lines)
     {
-        bool useEmote = !emoteTemplate.empty() && (line.find("*") == 0 || line.find("[") == 0);
+        bool isEmote = line.find('*') == 0 || line.find('[') == 0;
 
         std::string sentence = line;
         while (sentence.length() > 200) {
@@ -369,15 +368,51 @@ delayedPackets ChatReplyAction::LinesToPackets(const std::vector<std::string>& l
                 splitPos = 200;
             }
 
-            if (!sentence.substr(0, splitPos).empty())
-                LineToPacket(delayedPackets, useEmote ? emoteTemplate : packetTemplate, sentence.substr(0, splitPos), MsPerChar, debug);                
+            sentence = std::regex_replace(sentence, std::regex("\\*"), "");
+            sentence = std::regex_replace(sentence, std::regex("\\["), "");
+            sentence = std::regex_replace(sentence, std::regex("\\]"), "");
+
+            if ((!isEmote || !emoteTemplate.empty()) && !sentence.substr(0, splitPos).empty())
+            {
+                auto sentenceSplit = sentence.substr(0, splitPos);
+                auto delay = sentenceSplit.size() * MsPerChar;
+                if (timeDiff)
+                {
+                    if (timeDiff >= delay)
+                    {
+                        delay = 0;
+                    }
+                    else
+                    {
+                        delay -= timeDiff;
+                    }
+                    timeDiff = 0;
+                }
+
+                LineToPacket(delayedPackets, isEmote ? emoteTemplate : packetTemplate, sentenceSplit, delay, debug);
+            }
 
             sentence = sentence.substr(splitPos + 1);
         }
 
-        if (!sentence.empty())
+        if ((!isEmote || !emoteTemplate.empty()) && !sentence.empty())
         {
-            LineToPacket(delayedPackets, useEmote ? emoteTemplate : packetTemplate, sentence, MsPerChar, debug);
+            auto delay = sentence.size() * MsPerChar;
+            if (timeDiff)
+            {
+                if (timeDiff >= delay)
+                {
+                    delay = 0;
+                    sLog.outError("delay packet removed: %lu", delay);
+                }
+                else
+                {
+                    delay -= timeDiff;
+                    sLog.outError("delay packet reduced to %lu", delay);
+                }
+                timeDiff = 0;
+            }
+            LineToPacket(delayedPackets, isEmote ? emoteTemplate : packetTemplate, sentence, delay, debug);
         }
     }
     return delayedPackets;
@@ -391,13 +426,18 @@ delayedPackets ChatReplyAction::GenerateResponsePackets(const std::string json
     if (debug)
         debugLines = { json };
 
+    auto startTime = time(nullptr);
+
     std::string response = PlayerbotLLMInterface::Generate(json, sPlayerbotAIConfig.llmGenerationTimeout, sPlayerbotAIConfig.llmMaxSimultaniousGenerations, debugLines);
+
+    auto timeAfter = time(nullptr);
+    auto timeDiff = (timeAfter - startTime) * IN_MILLISECONDS;
 
     std::vector<std::string> lines = PlayerbotLLMInterface::ParseResponse(response, startPattern, endPattern, deletePattern, splitPattern, debugLines);
 
     delayedPackets packets, debugPackets;
 
-    packets = LinesToPackets(lines, chatTemplate, false, 200, emoteTemplate);
+    packets = LinesToPackets(lines, chatTemplate, false, 200, emoteTemplate, timeDiff);
 
     if (!debugLines.empty())
     {
@@ -1491,4 +1531,33 @@ std::string ChatReplyAction::GenerateReplyMessage(Player* bot, std::string incom
 bool ChatReplyAction::isUseful()
 {
     return !ai->HasStrategy("silent", BotState::BOT_STATE_NON_COMBAT);
+}
+
+bool SpeakAction::Execute(Event& event)
+{
+    bool botsTalkLikePlayers = true;
+
+    std::string text = event.getParam();
+    if (text.find("/y ") == 0)
+        ai->Yell(text.substr(3), botsTalkLikePlayers);
+    else if (text.find("/p ") == 0)
+        ai->SayToParty(text.substr(3), botsTalkLikePlayers);
+    else if (text.find("/r ") == 0)
+        ai->SayToRaid(text.substr(3));
+    else if (text.find("/g ") == 0)
+        ai->SayToGuild(text.substr(3), botsTalkLikePlayers);
+    else if (text.find("/s ") == 0)
+        ai->Say(text.substr(3), botsTalkLikePlayers);
+    else if (text.find("/1 ") == 0)
+        ai->SayToGeneral(text.substr(3));
+    else if (text.find("/2 ") == 0)
+        ai->SayToTrade(text.substr(3));
+    else if (text.find("/3 ") == 0)
+        ai->SayToLocalDefense(text.substr(3));
+    else if (text.find("/4 ") == 0)
+        ai->SayToLFG(text.substr(3));
+    else
+        ai->Say(text, botsTalkLikePlayers);
+
+    return true;
 }

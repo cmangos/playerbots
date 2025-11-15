@@ -229,11 +229,13 @@ void PlayerbotHolder::LogoutPlayerBot(uint32 guid)
     }
 }
 
-void PlayerbotHolder::DisablePlayerBot(uint32 guid)
+void PlayerbotHolder::DisablePlayerBot(uint32 guid, bool logOutPlayer)
 {
     Player* bot = GetPlayerBot(guid);
     if (bot)
     {
+        if (logOutPlayer && bot->GetPlayerbotAI()->IsRealPlayer() && bot->GetGroup() && sPlayerbotAIConfig.IsFreeAltBot(guid))
+            bot->GetSession()->SetOffline(); //Prevent groupkick
         bot->GetPlayerbotAI()->TellPlayer(bot->GetPlayerbotAI()->GetMaster(), BOT_TEXT("goodbye"));
         bot->GetPlayerbotAI()->StopMoving();
         MotionMaster& mm = *bot->GetMotionMaster();
@@ -888,7 +890,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
                 }
                 else
                 {
-                    DisablePlayerBot(guid);
+                    DisablePlayerBot(guid, false);
                 }
             }
 
@@ -905,7 +907,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
     {        
         if (master->GetPlayerbotAI())
         {
-            DisablePlayerBot(master->GetGUIDLow());
+            DisablePlayerBot(master->GetGUIDLow(), false);
            
             if (sRandomPlayerbotMgr.GetValue(master->GetObjectGuid().GetCounter(), "selfbot"))
             {

@@ -421,7 +421,7 @@ public:
     std::string GetLocalizedAreaName(const AreaTableEntry* entry);
     bool IsInCapitalCity();
     ChatChannelSource GetChatChannelSource(Player* bot, uint32 type, std::string channelName);
-    bool SayToGuild(std::string msg);
+    bool SayToGuild(std::string msg, bool likePlayer = false);
     bool SayToWorld(std::string msg);
     bool SayToGeneral(std::string msg);
     bool SayToTrade(std::string msg);
@@ -429,16 +429,16 @@ public:
     bool SayToLocalDefense(std::string msg);
     bool SayToWorldDefense(std::string msg);
     bool SayToGuildRecruitment(std::string msg);
-    bool SayToParty(std::string msg);
+    bool SayToParty(std::string msg, bool likePlayer = false);
     bool SayToRaid(std::string msg);
-    bool Yell(std::string msg);
-    bool Say(std::string msg);
-    bool Whisper(std::string msg, std::string receiverName);
+    bool Yell(std::string msg, bool likePlayer = false);
+    bool Say(std::string msg, bool likePlayer = false);
+    bool Whisper(std::string msg, std::string receiverName, bool likePlayer = false);
     bool TellPlayer(Player* player, std::ostringstream &stream, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool ignoreSilent = false) { return TellPlayer(player, stream.str(), securityLevel, isPrivate, ignoreSilent); }
     bool TellPlayer(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool ignoreSilent = false);
     bool TellPlayerNoFacing(Player* player, std::ostringstream& stream, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool noRepeat = true, bool ignoreSilent = false) { return TellPlayerNoFacing(player, stream.str(), securityLevel, isPrivate, noRepeat, ignoreSilent); }
     bool TellPlayerNoFacing(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool isPrivate = true, bool noRepeat = true, bool ignoreSilent = false);
-    bool TellDebug(Player* player, std::string text, std::string strategy = "debug", BotState state = BotState::BOT_STATE_NON_COMBAT) { if (HasStrategy(strategy, state)) return TellPlayerNoFacing(player, text); return false; }
+    bool TellDebug(Player* player, std::string text, std::string strategy = "debug", BotState state = BotState::BOT_STATE_NON_COMBAT){ if (HasStrategy(strategy, state)) return TellPlayerNoFacing(player, text, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false); return false;}
     bool TellError(Player* player, std::string text, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, bool ignoreSilent = false);
     void SpellInterrupted(uint32 spellid);
     int32 CalculateGlobalCooldown(uint32 spellid);
@@ -507,10 +507,10 @@ public:
     bool CastSpell(uint32 spellId, GameObject* goTarget, Item* itemTarget = nullptr, bool waitForSpell = true, uint32* outSpellDuration = nullptr);
     bool CastSpell(uint32 spellId, float x, float y, float z, Item* itemTarget = nullptr, bool waitForSpell = true, uint32* outSpellDuration = nullptr);
     bool CastPetSpell(uint32 spellId, Unit* target);
-    bool CastVehicleSpell(uint32 spellId, Unit* target);
+    bool CastVehicleSpell(uint32 spellId, Unit* target, float projectileSpeed, bool needTurn);
     bool CastVehicleSpell(uint32 spellId, float x, float y, float z);
 
-    bool IsInVehicle(bool canControl = false, bool canCast = false, bool canAttack = false, bool canTurn = false, bool fixed = false);
+    bool IsInVehicle(bool canControl = false, bool canCast = false, bool canAttack = false, bool canTurn = false, bool fixed = false, std::string vehicleName = "");
 
     uint32 GetEquipGearScore(Player* player, bool withBags, bool withBank);
     uint32 GetEquipStatsValue(Player* player);
@@ -606,7 +606,7 @@ public:
     bool AllowActive(ActivityType activityType);
     bool AllowActivity(ActivityType activityType = ALL_ACTIVITY, bool checkNow = false);
 
-    bool HasCheat(BotCheatMask mask) const { return ((uint32)mask & (uint32)cheatMask) != 0 || ((uint32)mask & (uint32)sPlayerbotAIConfig.botCheatMask) != 0; }
+    bool HasCheat(BotCheatMask mask) const;
     BotCheatMask GetCheat() { return cheatMask; }
     void SetCheat(BotCheatMask mask) { cheatMask = mask; }
 

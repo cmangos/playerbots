@@ -2494,38 +2494,43 @@ void TravelNodeMap::addManualNodes()
 #ifdef MANGOSBOT_TWO
     //Teleport doodah
     node = sTravelNodeMap.addNode(WorldPosition(0, -7502.20f, -1152.98f, 269.55f), "c1-Blackrock Mountain", true, false);
-    node = sTravelNodeMap.addNode(WorldPosition(0, -7591.31f,-1114.44f,249.91f), "c2-Blackrock Mountain", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(0, -7591.31f, -1114.44f, 249.91f), "c2-Blackrock Mountain", true, false);
 
     node = sTravelNodeMap.addNode(WorldPosition(609, 2390.02f, -5640.91f, 377.09f), "c1-Ebon Hold", true, false);
     otherNode = sTravelNodeMap.addNode(WorldPosition(609, 2383.65f, -5645.20f, 420.77f), "c2-Ebon Hold", true, false);
 
     TravelNodePath travelPath(0.1f, 3.0f, (uint8)TravelNodePathType::areaTrigger, 0, true);
-    travelPath.setPath({ *node->getPosition(), *otherNode->getPosition() });    
+    travelPath.setPath({*node->getPosition(), *otherNode->getPosition()});
     node->setPathTo(otherNode, travelPath);
-    travelPath.setPath({ *otherNode->getPosition(), *node->getPosition() });
-    otherNode->setPathTo(node, travelPath);                         
+    travelPath.setPath({*otherNode->getPosition(), *node->getPosition()});
+    otherNode->setPathTo(node, travelPath);
 
-    //Scourge gryphons. 
-    //These use HandleSpellClick 
+    //Scourge gryphons.
+    //These use HandleSpellClick
     node = sTravelNodeMap.addNode(WorldPosition(609, 2325.03f, -5659.60f, 382.24f), "c3-Ebon Hold", true, false, false, 29488);
     otherNode = sTravelNodeMap.addNode(WorldPosition(609, 2409.09f, -5722.37f, 154.00f), "c3-Scarlet Enclave", true, false, false, 29501);
 
     travelPath = TravelNodePath(0.1f, 3.0f, (uint8)TravelNodePathType::flightPath, 29488, true);
-    travelPath.setPath({ *node->getPosition(), *otherNode->getPosition() });
+    travelPath.setPath({*node->getPosition(), *otherNode->getPosition()});
     node->setPathTo(otherNode, travelPath);
     travelPath = TravelNodePath(0.1f, 3.0f, (uint8)TravelNodePathType::flightPath, 29501, true);
-    travelPath.setPath({ *otherNode->getPosition(), *node->getPosition() });
+    travelPath.setPath({*otherNode->getPosition(), *node->getPosition()});
     otherNode->setPathTo(node, travelPath);
 
-    node = sTravelNodeMap.addNode(WorldPosition(609, 2348.58f, -5695.35f, 382.24f), "c4-Ebon Hold", true, false, false, 29488);    
+    node = sTravelNodeMap.addNode(WorldPosition(609, 2348.58f, -5695.35f, 382.24f), "c4-Ebon Hold", true, false, false, 29488);
     otherNode = sTravelNodeMap.addNode(WorldPosition(609, 2402.86f, -5727.03f, 154.00f), "c4-Scarlet Enclave", true, false, false, 29501);
 
     travelPath = TravelNodePath(0.1f, 3.0f, (uint8)TravelNodePathType::flightPath, 29488, true);
-    travelPath.setPath({ *node->getPosition(), *otherNode->getPosition() });
+    travelPath.setPath({*node->getPosition(), *otherNode->getPosition()});
     node->setPathTo(otherNode, travelPath);
     travelPath = TravelNodePath(0.1f, 3.0f, (uint8)TravelNodePathType::flightPath, 29501, true);
-    travelPath.setPath({ *otherNode->getPosition(), *node->getPosition() });
+    travelPath.setPath({*otherNode->getPosition(), *node->getPosition()});
     otherNode->setPathTo(node, travelPath);
+
+    node = sTravelNodeMap.addNode(WorldPosition(609, 2528.22f, -5580.44f, 162.02f), "c1-The Noxious Pass", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(609, 2538.35f, -5573.05f, 162.46f), "c2-The Noxious Pass", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(609, 2546.61f, -5563.89f, 162.88f), "c3-The Noxious Pass", true, false);
+    node = sTravelNodeMap.addNode(WorldPosition(609, 2563.52f, -5547.79f, 163.27f), "c4-The Noxious Pass", true, false);
 #endif
 }
 
@@ -3149,7 +3154,7 @@ void TravelNodeMap::saveNodeStore(bool force)
         std::string name = node->getName();
         name.erase(remove(name.begin(), name.end(), '\''), name.end());
 
-        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode` (`id`, `name`, `map_id`, `x`, `y`, `z`, `linked`) VALUES ('%lu', '%s', '%d', '%f', '%f', '%f', '%d')"
+        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_travelnode` (`id`, `name`, `map_id`, `x`, `y`, `z`, `linked`) VALUES ('%u', '%s', '%d', '%f', '%f', '%f', '%d')"
             , i, name.c_str(), node->getMapId(), node->getX(), node->getY(), node->getZ(), (node->isLinked() ? 1 : 0));
 
         saveNodes.insert(std::make_pair(node, i));

@@ -96,6 +96,7 @@ void TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellA
         if (!pSpellInfo)
             continue;
 
+#ifndef MANGOSBOT_TWO
         if (tSpell->learnedSpell)
         {
             bool learned = true;
@@ -124,6 +125,41 @@ void TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellA
             if (!learned)
                 continue;
         }
+#else
+        if (!tSpell->learnedSpell.empty())
+        {
+            bool anySpellLearned = false;
+            for (auto& learnedSpell : tSpell->learnedSpell)
+            {
+                bool learned = true;
+                if (bot->HasSpell(learnedSpell))
+                {
+                    learned = false;
+                }
+                else
+                {
+                    for (int j = 0; j < 3; ++j)
+                    {
+                        if (pSpellInfo->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+                        {
+                            learned = false;
+                            uint32 learnedSpell = pSpellInfo->EffectTriggerSpell[j];
+
+                            if (!bot->HasSpell(learnedSpell))
+                            {
+                                learned = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (learned)
+                    anySpellLearned = true;
+            }
+            if (!anySpellLearned)
+                continue;
+        }
+#endif
 
         if (!spells.empty() && spells.find(tSpell->spell) == spells.end())
             continue;

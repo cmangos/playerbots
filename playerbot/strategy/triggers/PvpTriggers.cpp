@@ -261,5 +261,5 @@ bool VehicleNearTrigger::IsActive()
 
 bool InVehicleTrigger::IsActive()
 {
-    return ai->IsInVehicle();
+    return ai->IsInVehicle(false,false,false,false,false, getQualifier());
 }

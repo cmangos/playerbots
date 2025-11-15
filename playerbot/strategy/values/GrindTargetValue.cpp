@@ -73,28 +73,61 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
         if (!unit)
             continue;
 
-        switch (unit->GetEntry())
+#ifdef MANGOSBOT_TWO 
+        if (bot->GetMapId() == 609)
         {
-        case 28605: //Havenshire Stallion
-        case 28606: //Havenshire Mare
-        case 28607: //Havenshire Cotl
-        case 28891: //Scarlet Miner
-            continue;
-        case 29080: //Scarlet Champion
-        case 29029: //Scarlet Inquisitor
-        case 29000: //Scarlet Commander Rodrick
-        case 28940: //Scarlet Crusader
-        case 28939: //Scarlet Preacher
-        case 28936: //Scarlet Commander
-        case 28898: //Scarlet Captain
-        case 28896: //Scarlet Infantryman
-        case 28895: //Scarlet Medic
-        case 28892: //Scarlet Peasant
-        case 28610: //Scarlet Marksman
-            if (AI_VALUE2(bool, "need quest objective", "12680,0"))
+            switch (unit->GetEntry())
+            {
+            case 28605: //Havenshire Stallion
+            case 28606: //Havenshire Mare
+            case 28607: //Havenshire Cotl
+            case 28891: //Scarlet Miner
+            case 28819: //Scarlet Miner
+            case 28769: //Shadowy tormentor
+            case 28768: //Dark Rider of Archeus
                 continue;
-            break;
+            case 29080: //Scarlet Champion
+            case 29029: //Scarlet Inquisitor
+            case 29000: //Scarlet Commander Rodrick
+            case 28940: //Scarlet Crusader
+            case 28939: //Scarlet Preacher
+            case 28936: //Scarlet Commander
+            case 28898: //Scarlet Captain
+            case 28896: //Scarlet Infantryman
+            case 28895: //Scarlet Medic
+            case 28892: //Scarlet Peasant
+            case 28610: //Scarlet Marksman
+                if (AI_VALUE2(bool, "need quest objective", "12680,0"))
+                    continue;
+                if (AI_VALUE2(bool, "need quest objective", "12701"))
+                    continue;
+                if (AI_VALUE2(bool, "need quest objective", "12727"))
+                    continue;
+                if (AI_VALUE2(bool, "need quest objective", "12754"))
+                    continue;                
+                break;
+            case 29102: //HearthglenCrusader
+            case 29103: //Tirisfal Crusader
+            case 29104: //Scarlet Ballista
+                if (AI_VALUE2(bool, "need quest objective", "12779"))
+                {
+                    if (AI_VALUE2(bool, "trigger active", "in vehicle") && bot->IsWithinDistInMap(unit, sPlayerbotAIConfig.sightDistance))
+                        return unit;
+                    continue;
+                }
+                break;
+            case 28834: //Scarlet Fleet Defender
+            case 28850: //Scarlet Land Canon
+            case 28856: //Scarlet Fleet Guardian
+                if (AI_VALUE2(bool, "need quest objective", "12701,0"))
+                {
+                    if (AI_VALUE2(bool, "trigger active", "in vehicle::Scarlet Cannon") && !urand(0, 5))
+                        return unit;
+                    continue;
+                }
+            }
         }
+#endif
 
         if (abs(bot->GetPositionZ() - unit->GetPositionZ()) > sPlayerbotAIConfig.spellDistance)
         {
@@ -125,7 +158,8 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
         }
 
         Creature* creature = dynamic_cast<Creature*>(unit);
-        if (creature && creature->GetCreatureInfo() && creature->GetCreatureInfo()->Rank > CREATURE_ELITE_NORMAL && !AI_VALUE(bool, "can fight elite"))
+        if (creature && creature->GetCreatureInfo() && creature->GetCreatureInfo()->Rank > CREATURE_ELITE_NORMAL && !AI_VALUE(bool, "can fight elite") &&
+            !AI_VALUE2(bool, "trigger active", "in vehicle"))
         {
             if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
                 ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (can not fight elites currently).");

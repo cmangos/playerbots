@@ -160,6 +160,11 @@ target_link_libraries(${LIBRARY_NAME}
   PRIVATE g3dlite
   PRIVATE zlib
 )
+if(WIN32)
+  target_link_libraries(${LIBRARY_NAME}
+    PRIVATE ws2_32
+  )
+endif()
 
 target_include_directories(${LIBRARY_NAME}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}

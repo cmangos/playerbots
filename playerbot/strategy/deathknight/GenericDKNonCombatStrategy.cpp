@@ -70,3 +70,58 @@ void DKBuffDpsStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     InitNonCombatTriggers(triggers);
 }
+
+void DKStartQuestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(
+        new TriggerNode("val::and::{need quest objective::{12680,0},trigger active::in vehicle}", NextAction::array(0, new NextAction("deliver stolen horse", 1.0f), NULL)));
+
+    triggers.push_back(
+        new TriggerNode("val::and::{need quest objective::{12687,0},trigger active::in vehicle}", NextAction::array(0, new NextAction("horsemans call", 1.0f), NULL)));
+
+    triggers.push_back(
+        new TriggerNode("val::and::{need quest objective::12701,trigger active::in vehicle::Mine Car}", NextAction::array(0, new NextAction("reset travel target", 80.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{need quest objective::{12701,0},trigger active::in vehicle::Scarlet Cannon}",
+                                       NextAction::array(0, new NextAction("scarlet cannon", 1.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{need quest objective::{12701,0},trigger active::in vehicle::Scarlet Cannon}",
+                                       NextAction::array(0, new NextAction("electro - magnetic pulse", 2.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{not::need quest objective::{12701,0},trigger active::in vehicle::Scarlet Cannon}",
+                                       NextAction::array(0, new NextAction("skeletal gryphon escape", 1.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{need quest objective::12779,not::trigger active::in vehicle::Frostbrood Vanquisher}",
+                                       NextAction::array(0, new NextAction("use::39700", 100.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{need quest objective::12779,trigger active::in vehicle::Frostbrood Vanquisher}",
+                                       NextAction::array(0, new NextAction("frozen deathbolt", 80.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{need quest objective::12779,trigger active::in vehicle::Frostbrood Vanquisher}",
+                                       NextAction::array(0, new NextAction("devour humanoid", 81.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{not::need quest objective::12779,trigger active::in vehicle::Frostbrood Vanquisher}",
+                                       NextAction::array(0, new NextAction("leave vehicle", 100.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::need quest objective::13165,reward", NextAction::array(0, new NextAction("cast::death gate", 80.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::need quest objective::13165,reward", NextAction::array(0, new NextAction("use::Death Gate", 81.0f), NULL)));
+};
+
+void DKStartQuestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode("val::and::{need quest objective::{12701,0},trigger active::in vehicle::Scarlet Cannon}",
+                                       NextAction::array(0, new NextAction("scarlet cannon", 1.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{need quest objective::{12701,0},trigger active::in vehicle::Scarlet Cannon}",
+                                       NextAction::array(0, new NextAction("electro - magnetic pulse", 2.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{not::need quest objective::{12701,0},trigger active::in vehicle::Scarlet Cannon}",
+                                       NextAction::array(0, new NextAction("skeletal gryphon escape", 1.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{need quest objective::12779,trigger active::in vehicle::Frostbrood Vanquisher}",
+                                       NextAction::array(0, new NextAction("frozen deathbolt", 81.0f), NULL)));
+
+    triggers.push_back(new TriggerNode("val::and::{need quest objective::12779,trigger active::in vehicle::Frostbrood Vanquisher}",
+                                       NextAction::array(0, new NextAction("devour humanoid", 80.0f), NULL)));
+};

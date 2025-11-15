@@ -20,7 +20,7 @@ namespace ai
     class ShouldRuneForgeValue : public BoolCalculatedValue {
     public:
         ShouldRuneForgeValue(PlayerbotAI* ai, std::string name = "should runeforge")
-            : BoolCalculatedValue(ai, name, checkInterval) {}
+            : BoolCalculatedValue(ai, name) {}
         virtual bool Calculate() override;
 
         static uint32 RuneForgeEnchantFromSpell(uint32 spellId);

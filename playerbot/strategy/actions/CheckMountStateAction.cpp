@@ -144,7 +144,7 @@ bool CheckMountStateAction::Execute(Event& event)
         return UnMount();
     }
 
-    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && groupMaster)
+    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && groupMaster && groupMaster != bot)
     {
         //Mounting with master.
         if (IsLeaderMounted && !hasAttackers)
@@ -268,20 +268,6 @@ bool CheckMountStateAction::isUseful()
         return false;
 
     if (!bot->IsMounted() && bot->IsInWater())
-        return false;
-
-    bool firstmount = bot->GetLevel() >=
-#ifdef MANGOSBOT_ZERO
-        40
-#else
-#ifdef MANGOSBOT_ONE
-        30
-#else
-        20
-#endif
-#endif
-        ;
-    if (!firstmount)
         return false;
 
     // Do not use with BG Flags
@@ -461,7 +447,9 @@ bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
 
         ai->RemoveShapeshift();
 
-        if (sServerFacade.isMoving(bot))
+        bool wasMoving = sServerFacade.isMoving(bot);
+
+        if (wasMoving)
         {
             ai->StopMoving();
         }
@@ -519,8 +507,11 @@ bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
 
         if (didMount)
         {
-            if(sServerFacade.isMoving(bot))
-                ai->HandleCommand(CHAT_MSG_WHISPER, "do check mount state", *bot);
+            if (wasMoving)
+            {
+                ai->HandleCommand(CHAT_MSG_WHISPER, "queue do check mount state", *bot);
+                ai->TellDebug(requester, "was moving trying to mount again.", "debug mount");
+            }
 
             if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
                 ai->TellPlayerNoFacing(requester, "Mounting.");

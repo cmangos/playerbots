@@ -2572,7 +2572,7 @@ void PlayerbotFactory::InitTradeSkills()
                 }
             }
 
-#ifndef MANGOSBOT_TWO
+#ifdef MANGOSBOT_ZERO
             if (tSpell->learnedSpell)
             {
                 bool learned = false;

@@ -90,7 +90,7 @@ trainableSpellMap* TrainableSpellMapValue::Calculate()
                 else
                 {
                     // exist, already checked at loading
-#ifndef MANGOSBOT_TWO
+#ifdef MANGOSBOT_ZERO
                     SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(trainerSpell.learnedSpell);
 #else
                     SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(trainerSpell.learnedSpell[0]);
@@ -138,7 +138,7 @@ std::vector<TrainerSpell const*> TrainableSpellsValue::Calculate()
                     continue;
 
                 //Skip initial profession training.
-#ifndef MANGOSBOT_TWO
+#ifdef MANGOSBOT_ZERO
                 if (bot->GetLevel() < 10 && sSpellMgr.IsProfessionSpell(trainerSpell->learnedSpell) && sSpellMgr.GetSpellRank(trainerSpell->learnedSpell) == 1)
 #else
                 if (bot->GetLevel() < 10 && sSpellMgr.IsProfessionSpell(trainerSpell->learnedSpell[0]) && sSpellMgr.GetSpellRank(trainerSpell->learnedSpell[0]) == 1)

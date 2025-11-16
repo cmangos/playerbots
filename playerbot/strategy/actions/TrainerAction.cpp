@@ -96,7 +96,7 @@ void TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellA
         if (!pSpellInfo)
             continue;
 
-#ifndef MANGOSBOT_TWO
+#ifdef MANGOSBOT_ZERO
         if (tSpell->learnedSpell)
         {
             bool learned = true;

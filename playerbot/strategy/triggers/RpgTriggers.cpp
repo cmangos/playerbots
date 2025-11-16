@@ -351,7 +351,7 @@ bool RpgTrainTrigger::IsActive()
         if (!pSpellInfo)
             continue;
 
-#ifndef MANGOSBOT_TWO
+#ifdef MANGOSBOT_ZERO
         if (tSpell->learnedSpell)
         {
             bool learned = true;

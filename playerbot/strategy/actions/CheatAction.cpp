@@ -50,13 +50,19 @@ bool CheatAction::Execute(Event& event)
 
 BotCheatMask CheatAction::GetCheatMask(std::string cheat)
 {
-    for (int i = 0; i < log2((uint32)BotCheatMask::maxMask); i++)
+    BotCheatMask cheatMask = BotCheatMask::none;
+    std::vector<std::string> cheats = Qualified::getMultiQualifiers(cheat, ",");
+
+    for (auto cheat : cheats)
     {
-        if (sPlayerbotAIConfig.BotCheatMaskName[i] == cheat)
-            return BotCheatMask(1 << i);
+        for (int i = 0; i < log2((uint32)BotCheatMask::maxMask); i++)
+        {
+            if (sPlayerbotAIConfig.BotCheatMaskName[i] == cheat)
+                cheatMask = BotCheatMask(uint32(cheatMask) | uint32(BotCheatMask(1 << i)));
+        }
     }
 
-    return BotCheatMask::none;
+    return cheatMask;
 }
 
 std::string CheatAction::GetCheatName(BotCheatMask cheatMask)

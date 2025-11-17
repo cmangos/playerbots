@@ -4,6 +4,7 @@
 #include "playerbot/strategy/values/ItemCountValue.h"
 #include "playerbot/RandomItemMgr.h"
 #include "playerbot/strategy/values/BudgetValues.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
 
 using namespace ai;
 
@@ -83,8 +84,7 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
 
             if (!pricePerItemCache[proto->ItemId])
             {
-                uint32 initialPricePerentage = urand(75, 100); //At most 25% below max posting price.
-                pricePerItemCache[proto->ItemId] = ItemUsageValue::DesiredPricePerItem(bot, proto, item->GetCount(), initialPricePerentage);
+                pricePerItemCache[proto->ItemId] = ItemUsageValue::GetBotSellPrice(proto, bot);
             }
 
             bool didPost = PostItem(requester, item, pricePerItemCache[proto->ItemId] * item->GetCount(), auctioneer, time);

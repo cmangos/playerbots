@@ -84,7 +84,12 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
 
             if (!pricePerItemCache[proto->ItemId])
             {
-                pricePerItemCache[proto->ItemId] = ItemUsageValue::GetBotSellPrice(proto, bot);
+                uint32 basePerItem = ItemUsageValue::GetBotSellPrice(proto, bot);
+                uint32 initialPricePercentage = urand(75, 100);
+                uint32 pricePerItem = (basePerItem * initialPricePercentage) / 100;
+                if (!pricePerItem)
+                    pricePerItem = 1;
+                pricePerItemCache[proto->ItemId] = pricePerItem;
             }
 
             bool didPost = PostItem(requester, item, pricePerItemCache[proto->ItemId] * item->GetCount(), auctioneer, time);

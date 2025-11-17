@@ -40,6 +40,21 @@ bool KeepItemAction::Execute(Event& event)
    
     if (ids.empty())
     {
+        if (type == "?")
+        {
+            for (auto& value : context->GetValues())
+            {
+                if (value.find("force item usage") == 0)
+                {
+                    uint32 itemId = stoi(value.substr(18));
+                    ids.insert(itemId);
+                }
+            }
+        }
+    }
+
+    if (ids.empty())
+    {
         std::ostringstream out;
 
         if (type == "keep")

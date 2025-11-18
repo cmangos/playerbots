@@ -34,7 +34,9 @@ void MoltenCoreDungeonStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
 
     triggers.push_back(new TriggerNode(
         "mc rune close",
-        NextAction::array(0, new NextAction("douse mc rune", 1.0f), NULL)));
+        NextAction::array(0,
+            new NextAction("douse mc rune eternal", 2.0f),
+            new NextAction("douse mc rune aqual", 1.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "fire protection potion ready",

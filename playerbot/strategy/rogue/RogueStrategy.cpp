@@ -52,12 +52,12 @@ private:
 
 RogueStrategy::RogueStrategy(PlayerbotAI* ai) : ClassStrategy(ai)
 {
-    actionNodeFactories.Add(new RogueStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<RogueStrategyActionNodeFactory>());
 }
 
 RogueStealthStrategy::RogueStealthStrategy(PlayerbotAI* ai) : StealthStrategy(ai)
 {
-    actionNodeFactories.Add(new RogueStealthStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<RogueStealthStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

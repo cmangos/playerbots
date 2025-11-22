@@ -18,7 +18,7 @@ private:
 
 DisciplinePriestStrategy::DisciplinePriestStrategy(PlayerbotAI* ai) : PriestStrategy(ai)
 {
-    actionNodeFactories.Add(new DisciplinePriestStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<DisciplinePriestStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

@@ -93,7 +93,7 @@ private:
 
 DruidStrategy::DruidStrategy(PlayerbotAI* ai) : ClassStrategy(ai)
 {
-    actionNodeFactories.Add(new DruidStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<DruidStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

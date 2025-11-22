@@ -35,7 +35,7 @@ private:
 ElementalShamanStrategy::ElementalShamanStrategy(PlayerbotAI* ai) 
 : ShamanStrategy(ai)
 {
-    actionNodeFactories.Add(new ElementalShamanStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<ElementalShamanStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

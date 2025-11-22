@@ -106,7 +106,7 @@ private:
 
 Strategy::Strategy(PlayerbotAI* ai) : PlayerbotAIAware(ai)
 {
-    actionNodeFactories.Add(new ActionNodeFactoryInternal());
+    actionNodeFactories.Add(std::make_unique<ActionNodeFactoryInternal>());
 }
 
 ActionNode* Strategy::GetAction(std::string name)

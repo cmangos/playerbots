@@ -147,64 +147,61 @@ namespace ai
         std::string qualifier;
     };
 
-    template <class T> class NamedObjectFactory
+    template <class T>
+    class NamedObjectFactory
     {
     protected:
         using ActionCreator = std::function<T* (PlayerbotAI* ai)>;
         std::map<std::string, ActionCreator> creators;
 
     public:
-        T* create(const std::string& inName, PlayerbotAI* ai)
+        T* Create(std::string_view name, PlayerbotAI* ai)
         {
-            std::string name = inName;
-            size_t found = name.find("::");
-            std::string qualifier;
-            if (found != std::string::npos)
+            std::string_view nameView = name;
+            std::string_view qualifierView;
+
+            if (size_t pos = nameView.find("::"); pos != std::string::npos)
             {
-                qualifier = name.substr(found + 2);
-                name = name.substr(0, found);
+                qualifierView = nameView.substr(pos + 2);
+                nameView = nameView.substr(0, pos);
             }
 
-            if (creators.find(name) == creators.end())
-            {
-                return NULL;
-            }
+            auto it = creators.find(std::string(nameView));
+            if (it == creators.end())
+                return nullptr;
 
-            ActionCreator& creator = creators[name];
+            T* object = it->second(ai);
+            if (object == nullptr)
+                return nullptr;
 
-            T* object = creator(ai);
-            Qualified *q = dynamic_cast<Qualified *>(object);
-            if (q && found != std::string::npos)
+            if (!qualifierView.empty())
             {
-                q->Qualify(qualifier);
+                if (auto* q = dynamic_cast<Qualified*>(object))
+                    q->Qualify(std::string(qualifierView));
             }
 
             return object;
         }
 
-        std::set<std::string> supports()
+        void GetSupportedKeys(std::set<std::string>& keys) const
         {
-            std::set<std::string> keys;
-            for (typename std::map<std::string, ActionCreator>::iterator it = creators.begin(); it != creators.end(); it++)
-            {
-                keys.insert(it->first);
-            }
-
-            return keys;
+            for (const auto& entry : creators)
+                keys.insert(entry.first);
         }
     };
 
 
-    template <class T> class NamedObjectContext : public NamedObjectFactory<T>
+    template <class T>
+    class NamedObjectContext : public NamedObjectFactory<T>
     {
     public:
         NamedObjectContext(bool shared = false, bool supportsSiblings = false) :
             NamedObjectFactory<T>(), shared(shared), supportsSiblings(supportsSiblings) {}
 
-        T* create(std::string name, PlayerbotAI* ai)
+        T* Create(std::string name, PlayerbotAI* ai)
         {
             if (created.find(name) == created.end())
-                return created[name] = NamedObjectFactory<T>::create(name, ai);
+                return created[name] = NamedObjectFactory<T>::Create(name, ai);
 
             return created[name];
         }
@@ -293,7 +290,7 @@ namespace ai
         {
             for (typename std::list<NamedObjectContext<T>*>::iterator i = contexts.begin(); i != contexts.end(); i++)
             {
-                T* object = (*i)->create(name, ai);
+                T* object = (*i)->Create(name, ai);
                 if (object) return object;
             }
             return NULL;
@@ -323,7 +320,8 @@ namespace ai
             {
                 if ((*i)->IsSupportsSiblings())
                 {
-                    std::set<std::string> supported = (*i)->supports();
+                    std::set<std::string> supported;
+                    (*i)->GetSupportedKeys(supported);
                     std::set<std::string>::iterator found = supported.find(name);
                     if (found != supported.end())
                     {
@@ -336,23 +334,17 @@ namespace ai
             return siblings;
         }
 
-        std::set<std::string> supports()
+        void GetSupportedKeys(std::set<std::string>& keys) const
         {
-            std::set<std::string> result;
-
-            for (typename std::list<NamedObjectContext<T>*>::iterator i = contexts.begin(); i != contexts.end(); i++)
+            for (typename std::list<NamedObjectContext<T>*>::const_iterator i = contexts.begin(); i != contexts.end(); i++)
             {
-                std::set<std::string> supported = (*i)->supports();
-
-                for (std::set<std::string>::iterator j = supported.begin(); j != supported.end(); j++)
-                    result.insert(*j);
+                (*i)->GetSupportedKeys(keys);
             }
-            return result;
         }
 
-        bool IsCreated(const std::string& name)
+        bool IsCreated(const std::string& name) const
         {
-            for (typename std::list<NamedObjectContext<T>*>::iterator i = contexts.begin(); i != contexts.end(); i++)
+            for (typename std::list<NamedObjectContext<T>*>::const_iterator i = contexts.begin(); i != contexts.end(); i++)
             {
                 if ((*i)->IsCreated(name))
                     return true;
@@ -386,31 +378,26 @@ namespace ai
         std::list<NamedObjectContext<T>*> contexts;
     };
 
-    template <class T> class NamedObjectFactoryList
+    template <class T>
+    class NamedObjectFactoryList
     {
     public:
-        virtual ~NamedObjectFactoryList()
+        void Add(std::unique_ptr<NamedObjectFactory<T>> factory)
         {
-            for (typename std::list<NamedObjectFactory<T>*>::iterator i = factories.begin(); i != factories.end(); i++)
-                delete *i;
+            factories.emplace_back(std::move(factory));
         }
 
-        void Add(NamedObjectFactory<T>* context)
+        T* GetObject(std::string_view name, PlayerbotAI* ai)
         {
-            factories.push_front(context);
-        }
-
-        T* GetObject(const std::string& name, PlayerbotAI* ai)
-        {
-            for (typename std::list<NamedObjectFactory<T>*>::iterator i = factories.begin(); i != factories.end(); i++)
+            for (auto it = factories.rbegin(); it != factories.rend(); ++it)
             {
-                T* object = (*i)->create(name, ai);
-                if (object) return object;
+                if (T* obj = (*it)->Create(name, ai))
+                    return obj;
             }
-            return NULL;
+            return nullptr;
         }
 
     private:
-        std::list<NamedObjectFactory<T>*> factories;
+        std::vector<std::unique_ptr<NamedObjectFactory<T>>> factories;
     };
 };

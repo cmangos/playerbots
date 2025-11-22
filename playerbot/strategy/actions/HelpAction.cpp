@@ -81,22 +81,28 @@ bool HelpAction::Execute(Event& event)
 
 void HelpAction::TellChatCommands(Player* requester)
 {
+    std::set<std::string> keys;
+    chatContext->GetSupportedKeys(keys);
+
     std::ostringstream out;
     out << "Whisper any of: ";
-    out << CombineSupported(chatContext->supports());
+    out << CombineSupported(keys);
     out << ", [item], [quest] or [object] link";
     ai->TellPlayer(requester, out.str());
 }
 
 void HelpAction::TellStrategies(Player* requester)
 {
+    std::set<std::string> strategies;
+    ai->GetAiObjectContext()->GetSupportedStrategies(strategies);
+
     std::ostringstream out;
     out << "Possible strategies (co/nc/dead commands): ";
-    out << CombineSupported(ai->GetAiObjectContext()->GetSupportedStrategies());
+    out << CombineSupported(strategies);
     ai->TellPlayer(requester, out.str());
 }
 
-std::string HelpAction::CombineSupported(std::set<std::string> commands)
+std::string HelpAction::CombineSupported(const std::set<std::string>& commands) const
 {
     std::ostringstream out;
 

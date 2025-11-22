@@ -49,7 +49,7 @@ private:
 
 RestorationShamanStrategy::RestorationShamanStrategy(PlayerbotAI* ai) : ShamanStrategy(ai)
 {
-    actionNodeFactories.Add(new RestorationShamanStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<RestorationShamanStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

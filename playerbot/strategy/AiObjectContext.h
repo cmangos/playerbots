@@ -69,24 +69,24 @@ namespace ai
             return valueContexts.GetCreated();
         }
 
-        std::set<std::string> GetSupportedStrategies()
+        void GetSupportedStrategies(std::set<std::string>& strategies)
         {
-            return strategyContexts.supports();
+            return strategyContexts.GetSupportedKeys(strategies);
         }
 
-        std::set<std::string> GetSupportedTriggers()
+        void GetSupportedTriggers(std::set<std::string>& triggers)
         {
-            return triggerContexts.supports();
+            return strategyContexts.GetSupportedKeys(triggers);
         }
 
-        std::set<std::string> GetSupportedActions()
+        void GetSupportedActions(std::set<std::string>& actions)
         {
-            return actionContexts.supports();
+            return actionContexts.GetSupportedKeys(actions);
         }
 
-        std::set<std::string> GetSupportedValues ()
+        void GetSupportedValues(std::set<std::string>& values)
         {
-            return valueContexts.supports();
+            return valueContexts.GetSupportedKeys(values);
         }
 
         void ClearValues(std::string findName = "");

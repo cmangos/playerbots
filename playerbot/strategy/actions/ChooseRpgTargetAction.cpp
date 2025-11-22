@@ -273,7 +273,9 @@ float ChooseRpgTargetAction::getMaxRelevance(GuidPosition guidP)
     float maxRelevance = 0.0f;
 
     //Loop over all strategies containing rpg that are enabled.
-    for (auto& strategy : ai->GetAiObjectContext()->GetSupportedStrategies())
+    std::set<std::string> strategies;
+    ai->GetAiObjectContext()->GetSupportedStrategies(strategies);
+    for (auto& strategy : strategies)
     {
         if (strategy.find("rpg") == std::string::npos)
             continue;

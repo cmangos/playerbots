@@ -24,7 +24,7 @@ private:
 
 ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTroughStrategy(ai)
 {
-    actionNodeFactories.Add(new ChatCommandActionNodeFactoryInternal());
+    actionNodeFactories.Add(std::make_unique<ChatCommandActionNodeFactoryInternal>());
 
     supported.push_back("quests");
     supported.push_back("quest reward");

@@ -31,7 +31,7 @@ PullStrategy::PullStrategy(PlayerbotAI* ai, std::string pullAction, std::string 
 , pullStartTime(0)
 , petReactState(REACT_DEFENSIVE)
 {
-    actionNodeFactories.Add(new PullStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<PullStrategyActionNodeFactory>());
 
     if (!ai->GetBot())
         return;

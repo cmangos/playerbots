@@ -31,7 +31,7 @@ private:
 
 GenericDKNonCombatStrategy::GenericDKNonCombatStrategy(PlayerbotAI* ai) : NonCombatStrategy(ai)
 {
-    actionNodeFactories.Add(new GenericDKNonCombatStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<GenericDKNonCombatStrategyActionNodeFactory>());
 }
 
 void GenericDKNonCombatStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)

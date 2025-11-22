@@ -21,7 +21,7 @@ private:
 
 HolyPriestStrategy::HolyPriestStrategy(PlayerbotAI* ai) : PriestStrategy(ai)
 {
-    actionNodeFactories.Add(new HolyPriestStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<HolyPriestStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

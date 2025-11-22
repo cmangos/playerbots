@@ -40,7 +40,7 @@ private:
 
 HunterStrategy::HunterStrategy(PlayerbotAI* ai) : ClassStrategy(ai)
 {
-    actionNodeFactories.Add(new HunterStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<HunterStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

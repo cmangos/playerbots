@@ -40,7 +40,7 @@ private:
 
 EnhancementShamanStrategy::EnhancementShamanStrategy(PlayerbotAI* ai) : ShamanStrategy(ai)
 {
-    actionNodeFactories.Add(new EnhancementShamanStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<EnhancementShamanStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

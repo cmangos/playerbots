@@ -27,7 +27,7 @@ private:
 
 FuryWarriorStrategy::FuryWarriorStrategy(PlayerbotAI* ai) : WarriorStrategy(ai)
 {
-    actionNodeFactories.Add(new FuryWarriorStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<FuryWarriorStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

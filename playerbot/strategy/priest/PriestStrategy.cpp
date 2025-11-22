@@ -83,7 +83,7 @@ private:
 
 PriestStrategy::PriestStrategy(PlayerbotAI* ai) : ClassStrategy(ai)
 {
-    actionNodeFactories.Add(new PriestStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<PriestStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

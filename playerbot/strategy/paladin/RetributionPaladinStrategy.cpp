@@ -45,7 +45,7 @@ private:
 
 RetributionPaladinStrategy::RetributionPaladinStrategy(PlayerbotAI* ai) : PaladinStrategy(ai)
 {
-    actionNodeFactories.Add(new RetributionPaladinStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<RetributionPaladinStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

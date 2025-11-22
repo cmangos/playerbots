@@ -38,7 +38,7 @@ private:
 
 DpsFeralDruidStrategy::DpsFeralDruidStrategy(PlayerbotAI* ai) : DruidStrategy(ai)
 {
-    actionNodeFactories.Add(new DpsFeralDruidStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<DpsFeralDruidStrategyActionNodeFactory>());
 }
 
 class DpsFeralDruidStealthStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
@@ -67,7 +67,7 @@ private:
 
 DpsFeralDruidStealthStrategy::DpsFeralDruidStealthStrategy(PlayerbotAI* ai) : StealthStrategy(ai)
 {
-    actionNodeFactories.Add(new DpsFeralDruidStealthStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<DpsFeralDruidStealthStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

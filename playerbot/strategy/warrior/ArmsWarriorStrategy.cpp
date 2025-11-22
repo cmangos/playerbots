@@ -39,7 +39,7 @@ private:
 
 ArmsWarriorStrategy::ArmsWarriorStrategy(PlayerbotAI* ai) : WarriorStrategy(ai)
 {
-    actionNodeFactories.Add(new ArmsWarriorStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<ArmsWarriorStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

@@ -24,7 +24,7 @@ private:
 
 UsePotionsStrategy::UsePotionsStrategy(PlayerbotAI* ai) : Strategy(ai)
 {
-    actionNodeFactories.Add(new UsePotionsStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<UsePotionsStrategyActionNodeFactory>());
 }
 
 void UsePotionsStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)

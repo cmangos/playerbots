@@ -18,7 +18,7 @@ private:
 
 ShadowPriestStrategy::ShadowPriestStrategy(PlayerbotAI* ai) : PriestStrategy(ai)
 {
-    actionNodeFactories.Add(new ShadowPriestStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<ShadowPriestStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

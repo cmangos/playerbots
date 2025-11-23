@@ -42,7 +42,7 @@ private:
 
 ProtectionWarriorStrategy::ProtectionWarriorStrategy(PlayerbotAI* ai) : WarriorStrategy(ai)
 {
-    actionNodeFactories.Add(new ProtectionWarriorStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<ProtectionWarriorStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

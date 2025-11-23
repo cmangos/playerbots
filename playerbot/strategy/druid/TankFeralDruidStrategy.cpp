@@ -28,7 +28,7 @@ private:
 
 TankFeralDruidStrategy::TankFeralDruidStrategy(PlayerbotAI* ai) : DruidStrategy(ai)
 {
-    actionNodeFactories.Add(new TankFeralDruidStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<TankFeralDruidStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

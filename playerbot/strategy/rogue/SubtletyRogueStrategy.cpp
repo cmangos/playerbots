@@ -27,7 +27,7 @@ private:
 
 SubtletyRogueStrategy::SubtletyRogueStrategy(PlayerbotAI* ai) : RogueStrategy(ai)
 {
-    actionNodeFactories.Add(new SubtletyRogueStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<SubtletyRogueStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

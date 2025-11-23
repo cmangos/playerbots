@@ -32,7 +32,7 @@ private:
 
 BalanceDruidStrategy::BalanceDruidStrategy(PlayerbotAI* ai) : DruidStrategy(ai)
 {
-    actionNodeFactories.Add(new BalanceDruidStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<BalanceDruidStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

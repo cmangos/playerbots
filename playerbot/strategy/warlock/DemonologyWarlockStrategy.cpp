@@ -20,7 +20,7 @@ private:
 
 DemonologyWarlockStrategy::DemonologyWarlockStrategy(PlayerbotAI* ai) : WarlockStrategy(ai)
 {
-    actionNodeFactories.Add(new DemonologyWarlockStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<DemonologyWarlockStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

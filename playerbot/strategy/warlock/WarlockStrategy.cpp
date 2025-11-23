@@ -25,7 +25,7 @@ private:
 
 WarlockStrategy::WarlockStrategy(PlayerbotAI* ai) : ClassStrategy(ai)
 {
-    actionNodeFactories.Add(new WarlockStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<WarlockStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

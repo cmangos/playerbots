@@ -1990,8 +1990,9 @@ bool DebugAction::HandleNC(Event& event, Player* requester, const std::string& t
         name = text.substr(3);
 
     std::list<TriggerNode*> triggerNodes;
-
-    for (auto& strategyName : context->GetSupportedStrategies())
+    std::set<std::string> strategies;
+    context->GetSupportedStrategies(strategies);
+    for (auto& strategyName : strategies)
     {
         if (!name.empty() && strategyName.find(name) == std::string::npos)
             continue;

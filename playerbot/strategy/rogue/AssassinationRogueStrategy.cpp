@@ -27,7 +27,7 @@ private:
 
 AssassinationRogueStrategy::AssassinationRogueStrategy(PlayerbotAI* ai) : RogueStrategy(ai)
 {
-    actionNodeFactories.Add(new AssassinationRogueStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<AssassinationRogueStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

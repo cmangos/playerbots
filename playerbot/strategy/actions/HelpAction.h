@@ -14,7 +14,7 @@ namespace ai
     private:
         void TellChatCommands(Player* requester);
         void TellStrategies(Player* requester);
-        std::string CombineSupported(std::set<std::string> commands);
+        std::string CombineSupported(const std::set<std::string>& commands) const;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "help"; } //Must equal iternal name

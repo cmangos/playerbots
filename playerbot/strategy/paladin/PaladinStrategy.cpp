@@ -75,7 +75,7 @@ private:
 
 PaladinStrategy::PaladinStrategy(PlayerbotAI* ai) : ClassStrategy(ai)
 {
-    actionNodeFactories.Add(new PaladinStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<PaladinStrategyActionNodeFactory>());
 }
 
 #ifdef MANGOSBOT_ZERO // Vanilla

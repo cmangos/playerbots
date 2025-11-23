@@ -139,7 +139,7 @@ private:
 
 GenericDKStrategy::GenericDKStrategy(PlayerbotAI* ai) : CombatStrategy(ai)
 {
-    actionNodeFactories.Add(new GenericDKStrategyActionNodeFactory());
+    actionNodeFactories.Add(std::make_unique<GenericDKStrategyActionNodeFactory>());
 }
 
 void GenericDKStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)

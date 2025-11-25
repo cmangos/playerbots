@@ -908,6 +908,9 @@ void PlayerbotFactory::InitPetSpells()
             auto it = hunterPetSpells.find(petType);
             if (it != hunterPetSpells.end())
             {
+                // Find Cower spells
+                static const std::unordered_set<uint32> cowerSpellIds = { 1742, 1753, 1754, 1755, 1756, 16697 };
+
                 for (const auto& pair : it->second)
                 {
                     const uint32& levelRequired = pair.first;
@@ -918,8 +921,13 @@ void PlayerbotFactory::InitPetSpells()
                         if (!pet->HasSpell(spellID))
                         {
                             pet->learnSpell(spellID);
+
                             if (!IsPassiveSpell(spellID))
-                                pet->ToggleAutocast(spellID, true);
+                            {
+                                // Toggle Cower off by default
+                                const bool autocast = (cowerSpellIds.find(spellID) == cowerSpellIds.end());
+                                pet->ToggleAutocast(spellID, autocast);
+                            }
                         }
                     }
                 }

@@ -760,7 +760,7 @@ void PlayerbotFactory::InitPetSpells()
                 // Dash
                 {30, 23099}, {40, 23109}, {50, 23110},
                 // Prowl
-                {10, 24450}, {20, 24452}, {30, 24453}
+                {30, 24450}, {40, 24452}, {50, 24453}
             };
 
             hunterPetSpells[PET_CRAB] = {
@@ -783,7 +783,7 @@ void PlayerbotFactory::InitPetSpells()
                 // Cower
                 {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
                 // Thunderstomp
-                {30, 26090}, {40, 26091}, {50, 26092}
+                {30, 26090}, {40, 26187}, {50, 26188}
             };
 
             hunterPetSpells[PET_HYENA] = {
@@ -803,7 +803,7 @@ void PlayerbotFactory::InitPetSpells()
                 // Dive
                 {15, 23145}, {35, 23146}, {55, 23147},
                 // Screech
-                {8, 24423}, {24, 24577}, {40, 24578}, {56, 27051}
+                {8, 24423}, {24, 24577}, {40, 24578}, {56, 24579}
             };
 
             hunterPetSpells[PET_RAPTOR] = {
@@ -821,7 +821,7 @@ void PlayerbotFactory::InitPetSpells()
                 // Cower
                 {20, 1742},  {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
                 // Scorpid Poison
-                {8, 24640}, {20, 24583}, {30, 24586}, {40, 24587}, {50, 27060}
+                {8, 24640}, {24, 24583}, {40, 24586}, {56, 24587}
             };
 
             hunterPetSpells[PET_SPIDER] = {
@@ -846,7 +846,7 @@ void PlayerbotFactory::InitPetSpells()
                 // Cower
                 {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
                 // Shell Shield
-                {20, 26064}, {40, 26065}, {60, 26066}
+                {20, 26064}
             };
 
             hunterPetSpells[PET_WIND_SERPENT] = {

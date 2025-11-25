@@ -77,6 +77,9 @@ void AutoLearnSpellAction::LearnTrainerSpells(std::ostringstream* out)
             co->TrainerType != TRAINER_TYPE_PETS)
             continue;
 
+        if (co->TrainerType == TRAINER_TYPE_PETS && bot->getClass() == CLASS_HUNTER)
+            continue;
+
         if ((co->TrainerType == TRAINER_TYPE_CLASS || co->TrainerType == TRAINER_TYPE_PETS) && co->TrainerClass != bot->getClass())
             continue;
 

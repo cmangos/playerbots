@@ -46,8 +46,8 @@ jobs:
 
       - name: Configure
         env:
-          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-        run: cmake ${{matrix.EXTRA_BUILD}} -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+            BOOST_ROOT: C:\local\boost_1_83_0
+        run: cmake -DBUILD_PLAYERBOTS=ON -DBoost_NO_BOOST_CMAKE=ON -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build
         env:

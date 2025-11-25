@@ -679,11 +679,276 @@ void PlayerbotFactory::InitPetSpells()
     Pet* pet = bot->GetPet();
     if (pet)
     {
+#ifdef MANGOSBOT_ZERO
         if (bot->getClass() == CLASS_HUNTER)
         {
-            // TO DO
-            // ...
+            enum HunterPetType
+            {
+                PET_WOLF,
+                PET_CAT,
+                PET_SPIDER,
+                PET_BEAR,
+                PET_BOAR,
+                PET_CROCOLISK,
+                PET_CARRION_BIRD,
+                PET_CRAB,
+                PET_GORILLA,
+                PET_RAPTOR,
+                PET_TALLSTRIDER,
+                PET_SCORPID,
+                PET_TURTLE,
+                PET_BAT,
+                PET_HYENA,
+                PET_OWL,
+                PET_WIND_SERPENT,
+                PET_UNKNOWN
+            };
+
+            std::map<HunterPetType, std::vector<std::pair<uint32, uint32>>> hunterPetSpells;
+
+            hunterPetSpells[PET_BAT] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Dive
+                {15, 23145}, {35, 23146}, {55, 23147},
+                // Screech
+                {8, 24423}, {24, 24577}, {40, 24578}, {56, 27051}
+            };
+
+            hunterPetSpells[PET_BEAR] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Claw
+                {1, 16827}, {8, 16828}, {15, 16829}, {22, 16830}, {29, 16831}, {36, 16832}, {43, 16833}, {50, 16834}, {57, 16835}, {64, 16836},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756}
+            };
+
+            hunterPetSpells[PET_BOAR] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Charge
+                {1, 7371}, {12, 26177}, {24, 26178}, {36, 26179}, {48, 26180}, {60, 27685},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Dash
+                {30, 23099}, {40, 23109}, {50, 23110}
+            };
+
+            hunterPetSpells[PET_CARRION_BIRD] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Claw
+                {1, 16827}, {8, 16828}, {15, 16829}, {22, 16830}, {29, 16831}, {36, 16832}, {43, 16833}, {50, 16834}, {57, 16835}, {64, 16836},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Dive
+                {15, 23145}, {35, 23146}, {55, 23147},
+                // Screech
+                {8, 24423}, {24, 24577}, {40, 24578}, {56, 27051}
+            };
+
+            hunterPetSpells[PET_CAT] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Claw
+                {1, 16827}, {8, 16828}, {15, 16829}, {22, 16830}, {29, 16831}, {36, 16832}, {43, 16833}, {50, 16834}, {57, 16835}, {64, 16836},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Dash
+                {30, 23099}, {40, 23109}, {50, 23110},
+                // Prowl
+                {30, 24450}, {40, 24452}, {50, 24453}
+            };
+
+            hunterPetSpells[PET_CRAB] = {
+                // Claw
+                {1, 16827}, {8, 16828}, {15, 16829}, {22, 16830}, {29, 16831}, {36, 16832}, {43, 16833}, {50, 16834}, {57, 16835}, {64, 16836},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756}
+            };
+
+            hunterPetSpells[PET_CROCOLISK] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756}
+            };
+
+            hunterPetSpells[PET_GORILLA] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Thunderstomp
+                {30, 26090}, {40, 26187}, {50, 26188}
+            };
+
+            hunterPetSpells[PET_HYENA] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Dash
+                {30, 23099}, {40, 23109}, {50, 23110}
+            };
+
+            hunterPetSpells[PET_OWL] = {
+                // Claw
+                {1, 16827}, {8, 16828}, {15, 16829}, {22, 16830}, {29, 16831}, {36, 16832}, {43, 16833}, {50, 16834}, {57, 16835}, {64, 16836},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Dive
+                {15, 23145}, {35, 23146}, {55, 23147},
+                // Screech
+                {8, 24423}, {24, 24577}, {40, 24578}, {56, 24579}
+            };
+
+            hunterPetSpells[PET_RAPTOR] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Claw
+                {1, 16827}, {8, 16828}, {15, 16829}, {22, 16830}, {29, 16831}, {36, 16832}, {43, 16833}, {50, 16834}, {57, 16835}, {64, 16836},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756}
+            };
+
+            hunterPetSpells[PET_SCORPID] = {
+                // Claw
+                {1, 16827}, {8, 16828}, {15, 16829}, {22, 16830}, {29, 16831}, {36, 16832}, {43, 16833}, {50, 16834}, {57, 16835}, {64, 16836},
+                // Cower
+                {20, 1742},  {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Scorpid Poison
+                {8, 24640}, {24, 24583}, {40, 24586}, {56, 24587}
+            };
+
+            hunterPetSpells[PET_SPIDER] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756}
+            };
+
+            hunterPetSpells[PET_TALLSTRIDER] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Dash
+                {30, 23099}, {40, 23109}, {50, 23110}
+            };
+
+            hunterPetSpells[PET_TURTLE] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Shell Shield
+                {20, 26064}
+            };
+
+            hunterPetSpells[PET_WIND_SERPENT] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Dive
+                {15, 23145}, {35, 23146}, {55, 23147},
+                // Lightning Breath
+                {1, 24844}, {12, 25008}, {24, 25009}, {36, 25010}, {48, 25011}, {60, 25012}
+            };
+
+            hunterPetSpells[PET_WOLF] = {
+                // Bite
+                {1, 17253}, {10, 17254}, {20, 17255}, {30, 17256}, {40, 17257}, {50, 17258}, {60, 27050},
+                // Cower
+                {20, 1742}, {30, 1753}, {40, 1754}, {50, 1755}, {60, 1756},
+                // Dash
+                {30, 23099}, {40, 23109}, {50, 23110},
+                // Furious Howl
+                {10, 24604}, {20, 24605}, {30, 24603}, {40, 24597}
+            };
+
+
+            // Determine petType from creature template family
+            auto GetHunterPetTypeFromEntry = [](uint32 entry) -> HunterPetType
+                {
+                    CreatureInfo const* ci = sObjectMgr.GetCreatureTemplate(entry);
+                    if (!ci)
+                        return PET_UNKNOWN;
+
+                    switch (ci->Family)
+                    {
+                    case 1:  return PET_WOLF;
+                    case 2:  return PET_CAT;
+                    case 3:  return PET_SPIDER;
+                    case 4:  return PET_BEAR;
+                    case 5:  return PET_BOAR;
+                    case 6:  return PET_CROCOLISK;
+                    case 7:  return PET_CARRION_BIRD;
+                    case 8:  return PET_CRAB;
+                    case 9:  return PET_GORILLA;
+                    case 11: return PET_RAPTOR;
+                    case 12: return PET_TALLSTRIDER;
+                    case 20: return PET_SCORPID;
+                    case 21: return PET_TURTLE;
+                    case 24: return PET_BAT;
+                    case 25: return PET_HYENA;
+                    case 26: return PET_OWL;
+                    case 27: return PET_WIND_SERPENT;
+                    default: return PET_UNKNOWN;
+                    }
+                };
+
+            HunterPetType petType = GetHunterPetTypeFromEntry(pet->GetEntry());
+
+            auto it = hunterPetSpells.find(petType);
+            if (it != hunterPetSpells.end())
+            {
+                for (const auto& pair : it->second)
+                {
+                    const uint32& levelRequired = pair.first;
+                    const uint32& spellID = pair.second;
+
+                    if (pet->GetLevel() >= levelRequired)
+                    {
+                        if (!pet->HasSpell(spellID))
+                        {
+                            pet->learnSpell(spellID);
+                            if (!IsPassiveSpell(spellID))
+                                pet->ToggleAutocast(spellID, true);
+                        }
+                    }
+                }
+            }
+
+            // All pets get Growl (existing logic)
+            struct GrowlRank { uint32 minLevel; uint32 spellId; };
+            static const GrowlRank growlRanks[] = {
+                { 1,  2649 },   // Growl Rank 1
+                { 10, 14916 },  // Growl Rank 2
+                { 20, 14917 },  // Growl Rank 3
+                { 30, 14918 },  // Growl Rank 4
+                { 40, 14919 },  // Growl Rank 5
+                { 50, 14920 },  // Growl Rank 6
+                { 60, 14921 },  // Growl Rank 7
+            };
+            uint32 growlSpellId = 0;
+            for (const auto& rank : growlRanks)
+            {
+                if (pet->GetLevel() >= rank.minLevel)
+                    growlSpellId = rank.spellId;
+            }
+            if (growlSpellId && !pet->HasSpell(growlSpellId))
+            {
+                pet->learnSpell(growlSpellId);
+                pet->ToggleAutocast(growlSpellId, true);
+            }
+#endif
         }
+
 // Warlock pets should auto learn spells in WOTLK
 #ifndef MANGOSBOT_TWO
         else if (bot->getClass() == CLASS_WARLOCK)

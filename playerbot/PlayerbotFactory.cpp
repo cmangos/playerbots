@@ -680,6 +680,7 @@ void PlayerbotFactory::InitPetSpells()
     if (pet)
     {
 #ifdef MANGOSBOT_ZERO
+        // TODO: Proper Training Point calculation for build variety
         if (bot->getClass() == CLASS_HUNTER)
         {
             enum HunterPetType
@@ -924,7 +925,7 @@ void PlayerbotFactory::InitPetSpells()
                 }
             }
 
-            // All pets get Growl (existing logic)
+            // Growl
             struct GrowlRank { uint32 minLevel; uint32 spellId; };
             static const GrowlRank growlRanks[] = {
                 { 1,  2649 },   // Growl Rank 1
@@ -945,6 +946,70 @@ void PlayerbotFactory::InitPetSpells()
             {
                 pet->learnSpell(growlSpellId);
                 pet->ToggleAutocast(growlSpellId, true);
+            }
+
+            // Natural Armor
+            struct NaturalArmorRank { uint32 minLevel; uint32 spellId; };
+            static const NaturalArmorRank naturalArmorRanks[] = {
+                { 1, 24545 },
+                { 12, 24549 },
+                { 18, 24550 },
+                { 24, 24551 }
+            };
+            uint32 naturalArmorSpellId = 0;
+            for (const auto& rank : naturalArmorRanks)
+            {
+                if (pet->GetLevel() >= rank.minLevel)
+                    naturalArmorSpellId = rank.spellId;
+            }
+            if (naturalArmorSpellId && !pet->HasSpell(naturalArmorSpellId))
+            {
+                pet->learnSpell(naturalArmorSpellId);
+                pet->ToggleAutocast(naturalArmorSpellId, true);
+            }
+
+            // Great Stamina
+            struct GreatStaminaRank { uint32 minLevel; uint32 spellId; };
+            static const GreatStaminaRank greatStaminaRanks[] = {
+                { 1, 4187 },
+                { 12, 4188 },
+                { 18, 4189 },
+                { 24, 4190 },
+                { 30, 4191 },
+                { 36, 4192 },
+                { 42, 4193 },
+                { 48, 4194 },
+                { 54, 5041 },
+                { 60, 5042 }
+            };
+            uint32 greatStaminaSpellId = 0;
+            for (const auto& rank : greatStaminaRanks)
+            {
+                if (pet->GetLevel() >= rank.minLevel)
+                    greatStaminaSpellId = rank.spellId;
+            }
+            if (greatStaminaSpellId && !pet->HasSpell(greatStaminaSpellId))
+            {
+                pet->learnSpell(greatStaminaSpellId);
+                pet->ToggleAutocast(greatStaminaSpellId, true);
+            }
+
+            // Resistances
+            if (pet->GetLevel() >= 20)
+            {
+                struct ResistanceSpell { uint32 spellId; };
+                static const ResistanceSpell resistances[] = {
+                    { 24493 }, // Arcane
+                    { 23992 }, // Fire
+                    { 24446 }, // Frost
+                    { 24492 }, // Nature
+                    { 24488 }  // Shadow
+                };
+                for (const auto& res : resistances)
+                {
+                    if (!pet->HasSpell(res.spellId))
+                        pet->learnSpell(res.spellId);
+                }
             }
 #endif
         }

@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           repository: ${{github.repository_owner}}/mangos-${{matrix.version}}
           ref: master
@@ -39,18 +39,24 @@ jobs:
           brew install mysql-client@8.4
           brew install openssl
           brew install boost
-          echo "OPENSSL_ROOT_DIR=$(brew --prefix --installed openssl)" >> $GITHUB_ENV
-          echo "MYSQL_HOME=$(brew --prefix --installed mysql-client@8.4)" >> $GITHUB_ENV      
+          brew install icu4c
+          echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl)" >> $GITHUB_ENV
+          echo "MYSQL_HOME=$(brew --prefix mysql-client@8.4)" >> $GITHUB_ENV
+          echo "ICU_ROOT=$(brew --prefix icu4c)" >> $GITHUB_ENV
 
       - name: Display CMake Version
         run: cmake --version
         
       - name: Configure
         env:
-          CMAKE_PREFIX_PATH: /opt/homebrew        
-          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-          Boost_DIR: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-        run: cmake -DBoost_ARCHITECTURE=-x64 ${{matrix.EXTRA_BUILD}} -DCMAKE_INSTALL_PREFIX=/home/runner/work -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}} -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          CMAKE_PREFIX_PATH: "/opt/homebrew/opt/icu4c;/opt/homebrew/opt/mysql-client@8.4;/opt/homebrew/opt/openssl;/opt/homebrew"
+          BOOST_ROOT: /opt/homebrew/opt/boost
+        run: |
+          cmake -DBoost_ARCHITECTURE=-x64 \
+            ${{matrix.EXTRA_BUILD}} \
+            -DCMAKE_INSTALL_PREFIX=/home/runner/work \
+            -B ${{env.BUILD_DIR}} \
+            -S ${{env.REPO_DIR}}
 
       - name: Build
         env:

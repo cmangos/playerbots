@@ -39,14 +39,24 @@ jobs:
           cmake -E make_directory ${{ env.BUILD_DIR }}
 
       # install dependencies
-      - name: Install Boost via Chocolatey
-        run: |
-          choco install boost-msvc-14.3 -y
-        shell: pwsh
+      - name: Install Boost
+        uses: MarkusJx/install-boost@v2.5.1
+        id: install-boost
+        with:
+          # REQUIRED: Specify the required boost version
+          # A list of supported versions can be found here:
+          # https://github.com/MarkusJx/prebuilt-boost/blob/main/versions-manifest.json
+          boost_version: ${{env.BOOST_VERSION}}
+          # OPTIONAL: Specify a platform version
+          platform_version: ${{env.BOOST_PLATFORM_VERSION}}
+          # OPTIONAL: Specify a toolset
+          toolset: ${{env.BOOST_TOOLSET}}
+          # NOTE: If a boost version matching all requirements cannot be found,
+          # this build step will fail
 
       - name: Configure
         env:
-            BOOST_ROOT: C:\local\boost_1_83_0
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: cmake -DBUILD_PLAYERBOTS=ON -DBoost_NO_BOOST_CMAKE=ON -B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
       - name: Build

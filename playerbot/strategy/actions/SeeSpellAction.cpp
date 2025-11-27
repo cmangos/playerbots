@@ -132,6 +132,10 @@ bool SeeSpellAction::Execute(Event& event)
 
         return inRange;
     }
+    else if (nextAction == "move exact")
+    {
+        return MoveToSpell(requester, spellPosition, false);
+    }
     else if (nextAction == "move")
     {
         return MoveToSpell(requester, spellPosition);
@@ -184,10 +188,15 @@ bool SeeSpellAction::Execute(Event& event)
                 return false;
             locationName = nextAction.substr(14);
         }
+        if (nextAction.find("save exact ") != std::string::npos)
+        {
+            locationName = nextAction.substr(11);
+        }
         else
             locationName = nextAction.substr(5);
 
-        SetFormationOffset(requester, spellPosition);
+        if (nextAction.find("save exact ") == std::string::npos)
+            SetFormationOffset(requester, spellPosition);
 
         SET_AI_VALUE2(WorldPosition, "RTSC saved location", locationName, spellPosition);
         

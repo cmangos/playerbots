@@ -95,7 +95,7 @@ bool RTSCAction::Execute(Event& event)
 
 		return true;
 	}
-	if (command.find("save ") == 0 || command == "move")
+    if (command.find("save ") == 0 || command == "move" || command == "move exact")
 	{	
 		SET_AI_VALUE(std::string, "RTSC next spell action", command);
 

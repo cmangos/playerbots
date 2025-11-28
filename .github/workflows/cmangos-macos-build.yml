@@ -43,6 +43,8 @@ jobs:
           echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl)" >> $GITHUB_ENV
           echo "MYSQL_HOME=$(brew --prefix mysql-client@8.4)" >> $GITHUB_ENV
           echo "ICU_ROOT=$(brew --prefix icu4c)" >> $GITHUB_ENV
+          echo "LDFLAGS=-L$(brew --prefix icu4c)/lib" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I$(brew --prefix icu4c)/include" >> $GITHUB_ENV
 
       - name: Display CMake Version
         run: cmake --version
@@ -55,6 +57,9 @@ jobs:
           cmake -DBoost_ARCHITECTURE=-x64 \
             ${{matrix.EXTRA_BUILD}} \
             -DCMAKE_INSTALL_PREFIX=/home/runner/work \
+            -DCMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}" \
+            -DICU_ROOT="$(brew --prefix icu4c)" \
+            -DCMAKE_EXE_LINKER_FLAGS="-L$(brew --prefix icu4c)/lib" \
             -B ${{env.BUILD_DIR}} \
             -S ${{env.REPO_DIR}}
 

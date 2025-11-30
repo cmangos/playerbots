@@ -1206,11 +1206,14 @@ void PlayerbotFactory::InitPetSpells()
                     if (!pet->HasSpell(spellID))
                     {
                         pet->learnSpell(spellID);
+                    }
 
-                        if (!IsPassiveSpell(spellID))
+                    if (!IsPassiveSpell(spellID))
+                    {
+                        // Toggle Cower off by default
+                        const bool autocast = (cowerSpellIds.find(spellID) == cowerSpellIds.end());
+                        if (pet->HasSpell(spellID))
                         {
-                            // Toggle Cower off by default
-                            const bool autocast = (cowerSpellIds.find(spellID) == cowerSpellIds.end());
                             pet->ToggleAutocast(spellID, autocast);
                         }
                     }
@@ -1242,7 +1245,6 @@ void PlayerbotFactory::InitPetSpells()
         if (growlSpellId && !pet->HasSpell(growlSpellId))
         {
             pet->learnSpell(growlSpellId);
-            pet->ToggleAutocast(growlSpellId, true);
         }
 
         // Natural Armor
@@ -1266,7 +1268,6 @@ void PlayerbotFactory::InitPetSpells()
         if (naturalArmorSpellId && !pet->HasSpell(naturalArmorSpellId))
         {
             pet->learnSpell(naturalArmorSpellId);
-            pet->ToggleAutocast(naturalArmorSpellId, true);
         }
 
         // Great Stamina
@@ -1296,7 +1297,6 @@ void PlayerbotFactory::InitPetSpells()
         if (greatStaminaSpellId && !pet->HasSpell(greatStaminaSpellId))
         {
             pet->learnSpell(greatStaminaSpellId);
-            pet->ToggleAutocast(greatStaminaSpellId, true);
         }
 
         // Resistances

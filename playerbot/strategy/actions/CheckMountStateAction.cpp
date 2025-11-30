@@ -270,11 +270,13 @@ bool CheckMountStateAction::isUseful()
     if (!bot->IsMounted() && bot->IsInWater())
         return false;
 
-    // Do not use with BG Flags
+    // Do not use with BG Flags, except forms like "Travel Form" and "Ghost Wolf"
     if (bot->HasAura(23333) || bot->HasAura(23335) || bot->HasAura(34976))
-    {
+{
+    if (!bot->HasSpell(783) && !bot->HasSpell(2645))
         return false;
-    }
+}
+
 
     // Only mount if BG starts in less than 30 sec
     if (bot->InBattleGround())

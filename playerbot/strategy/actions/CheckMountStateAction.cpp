@@ -277,20 +277,17 @@ bool CheckMountStateAction::isUseful()
         return false;
 }
 
-// Only mount if BG starts in less than 30 sec
-if (bot->InBattleGround())
-{
-    BattleGround* bg = bot->GetBattleGround();
-    if (bg && bg->GetStatus() == STATUS_WAIT_JOIN)
-    {
-        if (bg->GetStartDelayTime() > BG_START_DELAY_30S)
-            return false;
 
-        // Prevent mounting if bot is indoors
-        if (!bot->IsOutdoor())
-            return false;
+    // Only mount if BG starts in less than 30 sec
+    if (bot->InBattleGround())
+    {
+        BattleGround* bg = bot->GetBattleGround();
+        if (bg && bg->GetStatus() == STATUS_WAIT_JOIN)
+        {
+            if (bg->GetStartDelayTime() > BG_START_DELAY_30S)
+                return false;
+        }
     }
-}
 
     if (!bot->GetMap()->IsMountAllowed() && bot->GetMapId() != 531)
         return false;

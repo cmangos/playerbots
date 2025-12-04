@@ -90,7 +90,7 @@ void ShamanPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "player has flag",
-        NextAction::array(0, new NextAction("ghost wolf", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("ghost wolf", ACTION_EMERGENCY), NULL)));
 }
 
 void ShamanPvpStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

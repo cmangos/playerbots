@@ -602,7 +602,7 @@ void PlayerbotAI::UpdateFaceTarget(uint32 elapsed, bool minimal)
         if (IsStateActive(BotState::BOT_STATE_COMBAT))
         {
             // Don't update facing if bot is moving
-            if (bot->IsStopped())
+            if (!sServerFacade.isMoving(bot) && !bot->isMovingOrTurning())
             {
                 AiObjectContext* context = GetAiObjectContext();
                 Unit* target = AI_VALUE(Unit*, "current target");
@@ -626,6 +626,11 @@ void PlayerbotAI::UpdateFaceTarget(uint32 elapsed, bool minimal)
                                 !bot->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
                             {
                                 sServerFacade.SetFacingTo(bot, target);
+                                bot->SetInFront(target);
+                                WorldPacket data(MSG_MOVE_SET_FACING);
+                                data << bot->GetPackGUID();
+                                data << bot->m_movementInfo;
+                                bot->GetMover()->SendMessageToSetExcept(data, bot);
                             }
                         }
                     }

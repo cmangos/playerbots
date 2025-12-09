@@ -578,6 +578,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
     }
 
     bool shouldEquip = false;
+    bool isAllowedForSpec = true;
 
     uint32 specId = sRandomItemMgr.GetPlayerSpecId(bot);
 
@@ -591,6 +592,19 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
         shouldEquip = false;
 
     Item* oldItem = bot->GetItemByPos(dest);
+    Item* oldMH = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+    Item* oldOH = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+
+    bool mhEmpty = !oldMH;
+    bool ohEmpty = !oldOH;
+    bool bothHandsEmpty = mhEmpty && ohEmpty;
+
+    if (itemProto->Class == ITEM_CLASS_WEAPON &&
+        !sRandomItemMgr.ShouldEquipWeaponForSpec(bot->getClass(), specId, itemProto))
+    {
+        if (!bothHandsEmpty)
+            return ItemUsage::ITEM_USAGE_NONE;
+    }
 
     //No item equiped
     if (!oldItem)
@@ -667,7 +681,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
     Item* item = CurrentItem(itemProto, bot);
     bool itemIsBroken = item && item->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0 && item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0;
     bool oldItemIsBroken = oldItem->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0 && oldItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0;
-    if (itemProto->ItemId != oldItemProto->ItemId && (shouldEquip || !existingShouldEquip) && isBetter)
+    if (isAllowedForSpec && itemProto->ItemId != oldItemProto->ItemId && (shouldEquip || !existingShouldEquip) && isBetter)
     {
         switch (itemProto->Class)
         {

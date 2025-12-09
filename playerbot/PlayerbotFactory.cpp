@@ -3083,10 +3083,6 @@ void PlayerbotFactory::InitTradeSkills()
             firstSkills.push_back(SKILL_ENGINEERING);
             secondSkills.push_back(SKILL_LEATHERWORKING);
             break;
-        default:
-            firstSkills.push_back(SKILL_TAILORING);
-            firstSkills.push_back(SKILL_ENGINEERING);
-            secondSkills.push_back(SKILL_ENCHANTING);
         }
 
         if (firstSkills.empty() || secondSkills.empty())

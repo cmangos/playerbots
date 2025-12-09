@@ -42,7 +42,7 @@ Position const AB_WAITING_POS_HORDE = { 702.884f, 703.045f, -16.115f, 0.77f };
 Position const AB_WAITING_POS_ALLIANCE = { 1286.054f, 1282.500f, -15.697f, 3.95f };
 Position const AV_WAITING_POS_ALLIANCE = { 793.627f, -493.814f, 99.689f, 3.09f };
 #ifdef MANGOSBOT_ZERO
-Position const AV_WAITING_POS_HORDE = { -871.196f, -558.407f, 57.239f, 2.14f };
+Position const AV_WAITING_POS_HORDE = { -863.640f, -569.008f, 57.570f, 2.14f };
 #else
 Position const AV_WAITING_POS_HORDE = { -1381.865f, -544.872f, 54.773f, 0.76f };
 #endif

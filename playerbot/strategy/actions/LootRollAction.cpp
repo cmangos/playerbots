@@ -186,7 +186,6 @@ RollVote RollAction::CalculateRollVote(ItemQualifier& itemQualifier)
     case ItemUsage::ITEM_USAGE_EQUIP:
     case ItemUsage::ITEM_USAGE_GUILD_TASK:
     case ItemUsage::ITEM_USAGE_FORCE_NEED:
-    case ItemUsage::ITEM_USAGE_BAD_EQUIP:
         needVote = ROLL_NEED;
         break;
     case ItemUsage::ITEM_USAGE_SKILL:
@@ -204,6 +203,16 @@ RollVote RollAction::CalculateRollVote(ItemQualifier& itemQualifier)
         needVote = ROLL_DISENCHANT;
 #endif
         break;
+    }
+
+    // special case for bad equip
+    if (usage == ItemUsage::ITEM_USAGE_BAD_EQUIP)
+    {
+        bool shouldEquipBadItems = sPlayerbotAIConfig.rollBadItemsWithPlayer || !ai->HasRealPlayerMaster();
+        if (shouldEquipBadItems)
+            needVote == ROLL_NEED;
+        else
+            needVote = ROLL_GREED;
     }
 
     bool canLoot = StoreLootAction::IsLootAllowed(itemQualifier, bot->GetPlayerbotAI());

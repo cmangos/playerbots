@@ -128,6 +128,12 @@ AiPlayerbot.RandomGearTabardsUnobtainable = 0
 # List of item IDs to exclude from random gear, separated by comma
 AiPlayerbot.RandomGearBlacklist = 0
 
+# Roll need on items if slot is empty or broken, even if not appropriate for bot's spec
+# Bots without real player master ignore this config and always roll need in that case
+# 1 - roll need on such items
+# 0 - roll greed on such items (Default)
+AiPlayerbot.RollBadItemsWithPlayer = 0
+
 # Chance random bot has max level on first randomize (default 0.15)
 AiPlayerbot.RandomBotMaxLevelChance = 0.15
 

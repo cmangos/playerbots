@@ -153,6 +153,7 @@ public:
     std::list<uint32> randomGearWhitelist;
     bool randomGearProgression;
     float randomGearLoweringChance;
+    bool rollBadItemsWithPlayer;
     float randomBotMaxLevelChance;
     float randomBotRpgChance;
     float usePotionChance;

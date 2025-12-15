@@ -754,7 +754,6 @@ void PlayerbotFactory::InitPetSpells()
             {29, 16831},
             {36, 16832},
             {48, 3010 },
-            {50, 16834},
             {56, 3009 },
             // Cower
             {5,  1742 },
@@ -813,7 +812,6 @@ void PlayerbotFactory::InitPetSpells()
             {29, 16831},
             {36, 16832},
             {48, 3010 },
-            {50, 16834},
             {56, 3009 },
             // Cower
             {5,  1742 },
@@ -851,7 +849,6 @@ void PlayerbotFactory::InitPetSpells()
             {29, 16831},
             {36, 16832},
             {48, 3010 },
-            {50, 16834},
             {56, 3009 },
             // Cower
             {5,  1742 },
@@ -879,7 +876,6 @@ void PlayerbotFactory::InitPetSpells()
             {29, 16831},
             {36, 16832},
             {48, 3010 },
-            {50, 16834},
             {56, 3009 },
             // Cower
             {5,  1742 },
@@ -964,7 +960,6 @@ void PlayerbotFactory::InitPetSpells()
             {29, 16831},
             {36, 16832},
             {48, 3010 },
-            {50, 16834},
             {56, 3009 },
             // Cower
             {5,  1742 },
@@ -1002,7 +997,6 @@ void PlayerbotFactory::InitPetSpells()
             {29, 16831},
             {36, 16832},
             {48, 3010 },
-            {50, 16834},
             {56, 3009 },
             // Cower
             {5,  1742 },
@@ -1022,7 +1016,6 @@ void PlayerbotFactory::InitPetSpells()
             {29, 16831},
             {36, 16832},
             {48, 3010 },
-            {50, 16834},
             {56, 3009 },
             // Cower
             {5,  1742 },

@@ -177,15 +177,18 @@ bool PossibleAttackTargetsValue::IsImmuneToDamage(Unit* target, Player* player)
     {
         for (const Aura* aura : ai->GetAuras(target))
         {
+            if (!aura->IsPositive())
+                continue;
+
             const SpellEntry* spellInfo = aura->GetSpellProto();
-            if (spellInfo)
+            if (!spellInfo)
+                continue;
+
+            if (spellInfo->Mechanic == MECHANIC_BANISH ||
+                spellInfo->Mechanic == MECHANIC_INVULNERABILITY ||
+                spellInfo->Mechanic == MECHANIC_IMMUNE_SHIELD)
             {
-                if (spellInfo->Mechanic == MECHANIC_BANISH || 
-                    spellInfo->Mechanic == MECHANIC_INVULNERABILITY ||
-                    spellInfo->Mechanic == MECHANIC_IMMUNE_SHIELD)
-                {
-                    return true;
-                }
+                return true;
             }
         }
     }

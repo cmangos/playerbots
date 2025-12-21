@@ -629,8 +629,6 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
 
     uint32 updateBots = sPlayerbotAIConfig.randomBotsPerInterval;
     uint32 maxNewBots = sPlayerbotAIConfig.randomBotsMaxLoginsPerInterval;
-    if (onlineBotCount < sPlayerbotAIConfig.minRandomBots * sPlayerbotAIConfig.loginBoostPercentage / 100)
-        maxNewBots *= 2;
 
     uint32 loginBots = 0;
 

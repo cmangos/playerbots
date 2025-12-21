@@ -948,9 +948,6 @@ AiPlayerbot.PerfMonEnabled = 0
 # Instant randomize: Force randombots to randomize on initial login.
 # AiPlayerbot.InstantRandomize = 0
 
-# Percentage of (min) bots online that speeds up login speed by 2x.
-# AiPlayerbot.LoginBoostPercentage = 90
-
 # Bot cheats. Same as "/w <bot> cheat (+/-/?) <cheatcode>" but only globally for all bots.
 # Values: taxi            (all nodes learned)
 #         item            (unlimited items for spells)

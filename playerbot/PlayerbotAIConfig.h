@@ -167,7 +167,7 @@ public:
     uint32 minRandomBotChangeStrategyTime, maxRandomBotChangeStrategyTime;
     uint32 minRandomBotReviveTime, maxRandomBotReviveTime;
     uint32 minRandomBotPvpTime, maxRandomBotPvpTime;
-    uint32 randomBotsPerInterval, randomBotsMaxLoginsPerInterval;
+    uint32 randomBotsMaxLoginsPerInterval;
     uint32 minRandomBotsPriceChangeInterval, maxRandomBotsPriceChangeInterval;
     //Auction house settings
     bool shouldQueryAHListingsOutsideOfAH;

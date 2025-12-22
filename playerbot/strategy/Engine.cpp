@@ -743,7 +743,7 @@ bool Engine::ListenAndExecute(Action* action, Event& event)
             const uint32 actionDuration = action->GetDuration();
             if (actionDuration > 0)
             {
-                out << " (duration: " << ((float)actionDuration / IN_MILLISECONDS) << "s)";
+                out << " (duration: " << ((float)actionDuration / static_cast<float>(IN_MILLISECONDS)) << "s)";
             }
         }
 

@@ -21,7 +21,7 @@ bool AutoCompleteQuestAction::Execute(Event& event)
 #ifdef MANGOSBOT_TWO
         ,
         //{12779, 1}  // An End To All Things (second objective needs vehicle riding).
-#endif;
+#endif
     };
 
     bool completedQuest = false;

@@ -12,7 +12,7 @@ void MeleeCombatStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 
     triggers.push_back(new TriggerNode(
         "enemy too close for melee",
-        NextAction::array(0, new NextAction("move out of enemy contact", ACTION_NORMAL + 8.0f), NULL)));
+        NextAction::array(0, new NextAction("move out of enemy contact", static_cast<float>(ACTION_NORMAL) + 8.0f), NULL)));
 }
 
 void SetBehindCombatStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
@@ -26,7 +26,7 @@ void ChaseJumpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     triggers.push_back(new TriggerNode(
         "very often",
-        NextAction::array(0, new NextAction("jump::chase", ACTION_MOVE + 9.0f), NULL)));
+        NextAction::array(0, new NextAction("jump::chase", static_cast<float>(ACTION_MOVE) + 9.0f), NULL)));
 }
 
 void ChaseJumpStrategy::InitCombatTriggers(std::list<TriggerNode *> &triggers)

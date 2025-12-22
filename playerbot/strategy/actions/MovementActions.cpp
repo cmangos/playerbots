@@ -3190,7 +3190,7 @@ bool JumpAction::DoJump(const WorldPosition &dest, const WorldPosition& highestP
 
     // write jump info
     uint32 curTime = sWorld.GetCurrentMSTime();
-    uint32 jumpTime = curTime + sWorld.GetAverageDiff() * 2 + uint32(timeToLand * IN_MILLISECONDS);
+    uint32 jumpTime = curTime + sWorld.GetAverageDiff() * 2 + uint32(timeToLand * static_cast<float>(IN_MILLISECONDS));
     ai->SetJumpTime(jumpTime);
     bot->m_movementInfo.jump.zspeed = -vSpeed;
     bot->m_movementInfo.jump.cosAngle = vcos;

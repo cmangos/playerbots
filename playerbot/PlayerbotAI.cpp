@@ -436,7 +436,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
                 else
                     time = sqrtf(2.f * path_length / gravity);
 
-                SetJumpTime(curTime + uint32(time * IN_MILLISECONDS) + 1000);
+                SetJumpTime(curTime + uint32(time * static_cast<uint32>(IN_MILLISECONDS)) + 1000);
                 fallAfterJump = false;
                 jumpDestination = WorldPosition(bot->GetMapId(), bot->m_movementInfo.pos.x, bot->m_movementInfo.pos.y, landingHeight);
                 sLog.outDetail("%s: Jump: Falling simulated, height: %f, timeToLand %u", bot->GetName(), landingHeight, jumpTime);
@@ -1454,7 +1454,7 @@ void PlayerbotAI::HandleCommand(uint32 type, const std::string& text, Player& fr
     else if ((filtered.size() > 5) && (filtered.substr(0, 5) == "wait ") && (filtered.find("wait for attack") == std::string::npos))
     {
         std::string remaining = filtered.substr(filtered.find(" ") + 1);
-        uint32 delay = atof(remaining.c_str()) * IN_MILLISECONDS;
+        uint32 delay = atof(remaining.c_str()) * static_cast<uint32>(IN_MILLISECONDS);
         if (delay > 20000)
         {
             TellPlayer(&fromPlayer, "Max wait time is 20 seconds!");
@@ -1829,7 +1829,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
         // write jump time
         uint32 curTime = sWorld.GetCurrentMSTime();
-        jumpTime = curTime + sWorld.GetAverageDiff() + (uint32)(timeToLand * IN_MILLISECONDS) + 1000;
+        jumpTime = curTime + sWorld.GetAverageDiff() + (uint32)(timeToLand * static_cast<uint32>(IN_MILLISECONDS)) + 1000;
         SetJumpDestination(dest_calculated);
 
         // set highest jump point to relocate
@@ -7462,16 +7462,16 @@ void PlayerbotAI::AccelerateRespawn(Creature* creature, float accelMod)
             }
         }
 
-        defaultDelay *= IN_MILLISECONDS / (1+accelMod);
+        defaultDelay *= static_cast<uint32>(IN_MILLISECONDS) / (1+accelMod);
 
         //We will decrease the loot time by a factor capping at 20 seconds.
-        m_corpseAccelerationDecayDelay = std::max(uint32(20 * IN_MILLISECONDS), defaultDelay);
+        m_corpseAccelerationDecayDelay = std::max(uint32(20 * static_cast<uint32>(IN_MILLISECONDS)), defaultDelay);
         creature->SetCorpseAccelerationDelay(m_corpseAccelerationDecayDelay);
 
         creature->ReduceCorpseDecayTimer();
         return;
     }
-    MANGOS_ASSERT(m_corpseAccelerationDecayDelay < 24 * HOUR* IN_MILLISECONDS);
+    MANGOS_ASSERT(m_corpseAccelerationDecayDelay < 24 * HOUR * static_cast<uint32>(IN_MILLISECONDS));
     creature->SetCorpseAccelerationDelay(m_corpseAccelerationDecayDelay);
 }
 

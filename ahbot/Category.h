@@ -45,21 +45,21 @@ namespace ahbot
     public:
         Consumable() : Category() {}
     public:
-        virtual bool Contains(ItemPrototype const* proto)
+        virtual bool Contains(ItemPrototype const* proto) override
         {
             return proto->Class == ITEM_CLASS_CONSUMABLE;
         }
 
-        virtual std::string GetName() { return typeName; }
-        virtual std::string GetDisplayName() { return GetName(); }
-        virtual std::string GetLabel() { return "consumables"; }
+        virtual std::string GetName() override { return typeName; }
+        virtual std::string GetDisplayName() override { return GetName(); }
+        virtual std::string GetLabel() override { return "consumables"; }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedAuctionCount(typeName, 5));
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedItemAuctionCount(typeName, defaultMaxType));
         }
@@ -73,20 +73,20 @@ namespace ahbot
     public:
         Quest() : Category() {}
     public:
-        virtual bool Contains(ItemPrototype const* proto)
+        virtual bool Contains(ItemPrototype const* proto) override
         {
             return proto->Class == ITEM_CLASS_QUEST;
         }
-        virtual std::string GetName() { return typeName; }
-        virtual std::string GetDisplayName() { return GetName(); }
-        virtual std::string GetLabel() { return "quest items"; }
+        virtual std::string GetName() override { return typeName; }
+        virtual std::string GetDisplayName() override { return GetName(); }
+        virtual std::string GetLabel() override { return "quest items"; }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedAuctionCount(typeName, 5));
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedItemAuctionCount(typeName, defaultMaxType));
         }
@@ -100,7 +100,7 @@ namespace ahbot
     public:
         Trade() : Category() {}
     public:
-        virtual bool Contains(ItemPrototype const* proto)
+        virtual bool Contains(ItemPrototype const* proto) override
         {
             return proto->Class == ITEM_CLASS_TRADE_GOODS ||
                     proto->Class == ITEM_CLASS_MISC ||
@@ -112,15 +112,15 @@ namespace ahbot
                 ;
         }
 
-        virtual std::string GetName() { return typeName; }
-        virtual std::string GetDisplayName() { return GetName(); }
+        virtual std::string GetName() override { return typeName; }
+        virtual std::string GetDisplayName() override { return GetName(); }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedAuctionCount(typeName, 5));
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedItemAuctionCount(typeName, defaultMaxType));
         }
@@ -135,20 +135,20 @@ namespace ahbot
         Reagent() : Category() {}
 
     public:
-        virtual bool Contains(ItemPrototype const* proto)
+        virtual bool Contains(ItemPrototype const* proto) override
         {
             return proto->Class == ITEM_CLASS_REAGENT;
         }
-        virtual std::string GetName() { return typeName; }
-        virtual std::string GetDisplayName() { return GetName(); }
-        virtual std::string GetLabel() { return "reagents"; }
+        virtual std::string GetName() override { return typeName; }
+        virtual std::string GetDisplayName() override { return GetName(); }
+        virtual std::string GetLabel() override { return "reagents"; }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedAuctionCount(typeName, 5));
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedItemAuctionCount(typeName, defaultMaxType));
         }
@@ -163,25 +163,25 @@ namespace ahbot
         Recipe() : Category() {}
 
     public:
-        virtual bool Contains(ItemPrototype const* proto)
+        virtual bool Contains(ItemPrototype const* proto) override
         {
             return proto->Class == ITEM_CLASS_RECIPE;
         }
-        virtual std::string GetName() { return typeName; }
-        virtual std::string GetDisplayName() { return GetName(); }
-        virtual std::string GetLabel() { return "recipes and patterns"; }
+        virtual std::string GetName() override { return typeName; }
+        virtual std::string GetDisplayName() override { return GetName(); }
+        virtual std::string GetLabel() override { return "recipes and patterns"; }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedAuctionCount(typeName, 5));
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedItemAuctionCount(typeName, defaultMaxType));
         }
 
-        virtual uint32 GetStackCount(ItemPrototype const* proto)
+        virtual uint32 GetStackCount(ItemPrototype const* proto) override
         {
             return 1;
         }
@@ -196,26 +196,26 @@ namespace ahbot
         Equip() : Category() {}
 
     public:
-        virtual bool Contains(ItemPrototype const* proto)
+        virtual bool Contains(ItemPrototype const* proto) override
         {
             return (proto->Class == ITEM_CLASS_WEAPON ||
                 proto->Class == ITEM_CLASS_ARMOR) && proto->ItemLevel > 1;
         }
-        virtual std::string GetName() { return typeName; }
-        virtual std::string GetDisplayName() { return GetName(); }
-        virtual std::string GetLabel() { return "armor and weapons"; }
+        virtual std::string GetName() override { return typeName; }
+        virtual std::string GetDisplayName() override { return GetName(); }
+        virtual std::string GetLabel() override { return "armor and weapons"; }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedAuctionCount(typeName, 5));
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedItemAuctionCount(typeName, defaultMaxType));
         }
 
-        virtual uint32 GetStackCount(ItemPrototype const* proto)
+        virtual uint32 GetStackCount(ItemPrototype const* proto) override
         {
             return 1;
         }
@@ -230,26 +230,26 @@ namespace ahbot
         Quiver() : Category() {}
 
     public:
-        virtual bool Contains(ItemPrototype const* proto)
+        virtual bool Contains(ItemPrototype const* proto) override
         {
             return proto->Class == ITEM_CLASS_QUIVER && proto->ItemLevel > 1;
         }
 
-        virtual std::string GetName() { return typeName; }
-        virtual std::string GetDisplayName() { return GetName(); }
-        virtual std::string GetLabel() { return "quivers and ammo poaches"; }
+        virtual std::string GetName() override { return typeName; }
+        virtual std::string GetDisplayName() override { return GetName(); }
+        virtual std::string GetLabel() override { return "quivers and ammo poaches"; }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedAuctionCount(typeName, 5));
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedItemAuctionCount(typeName, defaultMaxType));
         }
 
-        virtual uint32 GetStackCount(ItemPrototype const* proto)
+        virtual uint32 GetStackCount(ItemPrototype const* proto) override
         {
             return 1;
         }
@@ -265,26 +265,26 @@ namespace ahbot
         Projectile() : Category() {}
 
     public:
-        virtual bool Contains(ItemPrototype const* proto)
+        virtual bool Contains(ItemPrototype const* proto) override
         {
             return proto->Class == ITEM_CLASS_PROJECTILE;
         }
 
-        virtual std::string GetName() { return typeName; }
-        virtual std::string GetDisplayName() { return GetName(); }
-        virtual std::string GetLabel() { return "projectiles"; }
+        virtual std::string GetName() override { return typeName; }
+        virtual std::string GetDisplayName() override { return GetName(); }
+        virtual std::string GetLabel() override { return "projectiles"; }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedAuctionCount(typeName, 5));
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedItemAuctionCount(typeName, defaultMaxType));
         }
 
-        virtual uint32 GetStackCount(ItemPrototype const* proto)
+        virtual uint32 GetStackCount(ItemPrototype const* proto) override
         {
             return proto->GetMaxStackSize();
         }
@@ -300,26 +300,26 @@ namespace ahbot
         Container() : Category() {}
 
     public:
-        virtual bool Contains(ItemPrototype const* proto)
+        virtual bool Contains(ItemPrototype const* proto) override
         {
             return proto->Class == ITEM_CLASS_CONTAINER;
         }
 
-        virtual std::string GetName() { return typeName; }
-        virtual std::string GetDisplayName() { return GetName(); }
-        virtual std::string GetLabel() { return "containers"; }
+        virtual std::string GetName() override { return typeName; }
+        virtual std::string GetDisplayName() override { return GetName(); }
+        virtual std::string GetLabel() override { return "containers"; }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedAuctionCount(typeName, 5));
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedItemAuctionCount(typeName, defaultMaxType));
         }
 
-        virtual uint32 GetStackCount(ItemPrototype const* proto)
+        virtual uint32 GetStackCount(ItemPrototype const* proto) override
         {
             return 1;
         }
@@ -335,7 +335,7 @@ namespace ahbot
         DevicesAndParts() : Category() {}
 
     public:
-        virtual bool Contains(ItemPrototype const* proto)
+        virtual bool Contains(ItemPrototype const* proto) override
         {
             return proto->Class == ITEM_CLASS_TRADE_GOODS &&
                     (proto->SubClass == ITEM_SUBCLASS_PARTS ||
@@ -343,16 +343,16 @@ namespace ahbot
                     proto->SubClass == ITEM_SUBCLASS_EXPLOSIVES);
         }
 
-        virtual std::string GetName() { return typeName; }
-        virtual std::string GetDisplayName() { return GetName(); }
-        virtual std::string GetLabel() { return "devices and explosives"; }
+        virtual std::string GetName() override { return typeName; }
+        virtual std::string GetDisplayName() override { return GetName(); }
+        virtual std::string GetLabel() override { return "devices and explosives"; }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedAuctionCount(typeName, 5));
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(GetName(), sAhBotConfig.GetMaxAllowedItemAuctionCount(typeName, defaultMaxType));
         }
@@ -368,20 +368,20 @@ namespace ahbot
         QualityCategoryWrapper(Category* category, uint32 quality);
 
     public:
-        virtual bool Contains(ItemPrototype const* proto);
-        virtual std::string GetName() { return category->GetName(); }
-        virtual std::string GetDisplayName() { return combinedName; }
-        virtual std::string GetLabel() { return category->GetLabel(); }
-        virtual uint32 GetStackCount(ItemPrototype const* proto) { return category->GetStackCount(proto); }
+        virtual bool Contains(ItemPrototype const* proto) override;
+        virtual std::string GetName() override { return category->GetName(); }
+        virtual std::string GetDisplayName() override { return combinedName; }
+        virtual std::string GetLabel() override { return category->GetLabel(); }
+        virtual uint32 GetStackCount(ItemPrototype const* proto) override { return category->GetStackCount(proto); }
         virtual PricingStrategy* GetPricingStrategy() { return category->GetPricingStrategy(); }
         virtual uint32 GetSkillId() { return category->GetSkillId(); }
 
-        virtual uint32 GetMaxAllowedAuctionCount()
+        virtual uint32 GetMaxAllowedAuctionCount() override
         {
             return sAhBotConfig.GetMaxAllowedAuctionCount(combinedName, category->GetMaxAllowedAuctionCount());
         }
 
-        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto)
+        virtual uint32 GetMaxAllowedItemAuctionCount(ItemPrototype const* proto) override
         {
             return sAhBotConfig.GetMaxAllowedItemAuctionCount(combinedName, category->GetMaxAllowedItemAuctionCount(proto));
         }

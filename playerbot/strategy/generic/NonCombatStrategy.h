@@ -92,8 +92,8 @@ namespace ai
     {
     public:
         SilentStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "silent"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "silent"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "wbuff"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -107,8 +107,8 @@ namespace ai
     {
     public:
         NoWarStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "nowar"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "nowar"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "nowar"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -124,8 +124,8 @@ namespace ai
     {
     public:
         GlyphStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "glyph"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "glyph"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "glyph"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -141,8 +141,8 @@ namespace ai
     {
     public:
         FishStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "fish"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "fish"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "fish"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -160,7 +160,7 @@ namespace ai
     public:
         TFishStrategy(PlayerbotAI* ai) : FishStrategy(ai) { modifier = "::travel"; }
 
-        virtual std::string getName() { return "tfish"; }
+        virtual std::string getName() override { return "tfish"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "tfish"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {

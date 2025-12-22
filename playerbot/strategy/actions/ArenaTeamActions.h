@@ -7,6 +7,6 @@ namespace ai
     {
     public:
         ArenaTeamAcceptAction(PlayerbotAI* ai) : Action(ai, "arena team accept") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 }

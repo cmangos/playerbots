@@ -9,14 +9,14 @@ namespace ai
 	{
 	public:
 		DemonArmorTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "demon armor") {}
-		virtual bool IsActive();
+		virtual bool IsActive() override;
 	};
 
     class SpellstoneTrigger : public BuffTrigger
     {
     public:
         SpellstoneTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "spellstone") {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class NoCurseTrigger : public Trigger
@@ -153,7 +153,7 @@ namespace ai
     public:
         WarlockConjuredItemTrigger(PlayerbotAI* ai, std::string item) : ItemCountTrigger(ai, item, 1) {}
 
-        virtual bool IsActive() { return ItemCountTrigger::IsActive() && (ai->HasCheat(BotCheatMask::item) || AI_VALUE2(uint32, "item count", "soul shard") > 0); }
+        virtual bool IsActive() override { return ItemCountTrigger::IsActive() && (ai->HasCheat(BotCheatMask::item) || AI_VALUE2(uint32, "item count", "soul shard") > 0); }
     };
 
     class HasSpellstoneTrigger : public WarlockConjuredItemTrigger
@@ -190,7 +190,7 @@ namespace ai
     {
     public:
         InfernoTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "inferno", 10) {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class LifeTapTrigger : public Trigger

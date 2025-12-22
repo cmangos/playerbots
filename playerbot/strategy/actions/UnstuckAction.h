@@ -9,7 +9,7 @@ class UnstuckAction : public Action
 {
 public:
     UnstuckAction(PlayerbotAI* ai) : Action(ai, "unstuck") {}
-    virtual bool Execute(Event& event);
+    virtual bool Execute(Event& event) override;
 
 #ifdef GenerateBotHelp
     virtual std::string GetHelpName() { return "unstuck"; }

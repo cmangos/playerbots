@@ -8,14 +8,14 @@ namespace ai
     public:
         WorldPacketTrigger(PlayerbotAI* ai, std::string command) : Trigger(ai, command), triggered(false) {}
 
-        virtual void ExternalEvent(WorldPacket &packet, Player* owner = NULL)
+        virtual void ExternalEvent(WorldPacket &packet, Player* owner = NULL) override
         {
             this->packet = packet;
             this->owner = owner;
             triggered = true;
         }
 
-        virtual Event Check()
+        virtual Event Check() override
         {
             if (!triggered)
                 return Event();
@@ -23,7 +23,7 @@ namespace ai
             return Event(getName(), packet, owner);
         }
 
-        virtual void Reset()
+        virtual void Reset() override
         {
             triggered = false;
         }

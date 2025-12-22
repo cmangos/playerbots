@@ -75,7 +75,7 @@ namespace ai
             return true;
         }
 
-        virtual bool isUseful()
+        virtual bool isUseful() override
         {
             if (!sServerFacade.UnitIsDead(bot))
                 return false;
@@ -125,7 +125,7 @@ namespace ai
         RepopAction(PlayerbotAI* ai, std::string name = "repop") : SpiritHealerAction(ai, name) {}
 
     public:
-        virtual bool Execute(Event& event)
+        virtual bool Execute(Event& event) override
         {
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
@@ -186,7 +186,7 @@ namespace ai
             return true;
         }
 
-        virtual bool isUseful()
+        virtual bool isUseful() override
         {
             if (bot->InBattleGround())
                 return false;

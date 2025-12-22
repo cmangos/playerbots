@@ -7,6 +7,6 @@ namespace ai
 	{
 	public:
         InvalidTargetValue(PlayerbotAI* ai, std::string name = "invalid target") : BoolCalculatedValue(ai, name), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 }

@@ -16,8 +16,8 @@ namespace ai
     {
     public:
         MoveToPositionAction(PlayerbotAI* ai, std::string name, std::string qualifier, bool idle = false) : MovementAction(ai, name), qualifier(qualifier), idle(idle) {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
 
     protected:
         std::string qualifier;
@@ -28,15 +28,15 @@ namespace ai
     {
     public:
         GuardAction(PlayerbotAI* ai) : MoveToPositionAction(ai, "move to position", "guard") {}
-        virtual bool isUseful();
+        virtual bool isUseful() override;
     };
 
     class SetReturnPositionAction : public Action
     {
     public:
         SetReturnPositionAction(PlayerbotAI* ai) : Action(ai, "set return position") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
         virtual bool isUsefulWhenStunned() override { return true; }
     };
 
@@ -44,20 +44,20 @@ namespace ai
     {
     public:
         ReturnAction(PlayerbotAI* ai) : MoveToPositionAction(ai, "return", "return", true) {}
-        virtual bool isUseful();
+        virtual bool isUseful() override;
     };
 
     class ReturnToStayPositionAction : public MoveToPositionAction
     {
     public:
         ReturnToStayPositionAction(PlayerbotAI* ai) : MoveToPositionAction(ai, "move to position", "stay") {}
-        virtual bool isPossible();
+        virtual bool isPossible() override;
     };
 
     class ReturnToPullPositionAction : public MoveToPositionAction
     {
     public:
         ReturnToPullPositionAction(PlayerbotAI* ai) : MoveToPositionAction(ai, "return to pull position", "pull") {}
-        virtual bool isPossible();
+        virtual bool isPossible() override;
     };
 }

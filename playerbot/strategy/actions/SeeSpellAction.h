@@ -11,7 +11,7 @@ namespace ai
     {
     public:
         SeeSpellAction(PlayerbotAI* ai, std::string name = "see spell") : MovementAction(ai, name) {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
 
         virtual bool isPossible() override { return true; }
         virtual bool isUseful() override;

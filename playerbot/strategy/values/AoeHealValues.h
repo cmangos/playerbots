@@ -9,6 +9,6 @@ namespace ai
     	AoeHealValue(PlayerbotAI* ai, std::string name = "aoe heal") : Uint8CalculatedValue(ai, name, 3), Qualified() {}
 
     public:
-    	virtual uint8 Calculate();
+    	virtual uint8 Calculate() override;
     };
 }

@@ -11,7 +11,7 @@ namespace ai
         DpsTargetValue(PlayerbotAI* ai, std::string type = "rti", std::string name = "dps target") : RtiTargetValue(ai, type, name) {}
 
     public:
-        Unit* Calculate();
+        Unit* Calculate() override;
     };
 
     class DpsAoeTargetValue : public RtiTargetValue
@@ -20,6 +20,6 @@ namespace ai
         DpsAoeTargetValue(PlayerbotAI* ai, std::string type = "rti", std::string name = "dps aoe target") : RtiTargetValue(ai, type, name) {}
 
     public:
-        Unit* Calculate();
+        Unit* Calculate() override;
     };
 }

@@ -167,14 +167,14 @@ namespace ai
     {
     public:
         SerpentStingOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "serpent sting") {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class ViperStingOnAttackerTrigger : public DebuffOnAttackerTrigger
     {
     public:
         ViperStingOnAttackerTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "viper sting") {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     BEGIN_TRIGGER(HunterPetNotHappy, Trigger)
@@ -198,7 +198,7 @@ namespace ai
     {
     public:
         HunterLowAmmoTrigger(PlayerbotAI* ai) : AmmoCountTrigger(ai, "ammo", 1, 30) {}
-        virtual bool IsActive() { return bot->GetGroup() && (AI_VALUE2(uint32, "item count", "ammo") < 100) && (AI_VALUE2(uint32, "item count", "ammo") > 0); }
+        virtual bool IsActive() override { return bot->GetGroup() && (AI_VALUE2(uint32, "item count", "ammo") < 100) && (AI_VALUE2(uint32, "item count", "ammo") > 0); }
     };
 
     class HunterNoAmmoTrigger : public AmmoCountTrigger
@@ -211,7 +211,7 @@ namespace ai
     {
     public:
         HunterHasAmmoTrigger(PlayerbotAI* ai) : AmmoCountTrigger(ai, "ammo", 1, 10) {}
-        virtual bool IsActive() { return !AmmoCountTrigger::IsActive(); }
+        virtual bool IsActive() override { return !AmmoCountTrigger::IsActive(); }
     };
 
     class SwitchToRangedTrigger : public Trigger
@@ -282,7 +282,7 @@ namespace ai
     public:
         ViperStingTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "viper sting") {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             return DebuffTrigger::IsActive() && AI_VALUE2(uint8, "mana", "current target") >= 10;
         }
@@ -292,9 +292,9 @@ namespace ai
     {
     public:
         AimedShotTrigger(PlayerbotAI* ai) : Trigger(ai, "aimed shot", 2) {}
-        virtual std::string GetTargetName() { return "current target"; }
+        virtual std::string GetTargetName() override { return "current target"; }
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (!bot->HasSpell(19434) || !bot->IsSpellReady(19434))
                 return false;
@@ -321,7 +321,7 @@ namespace ai
     {
     public:
         HunterNoPet(PlayerbotAI* ai) : Trigger(ai, "no beast", 1) {}
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             Unit* target = AI_VALUE(Unit*, "current target");
             if (target && target->GetCreatureType() == CREATURE_TYPE_BEAST && !bot->GetPetGuid() && target->GetLevel() <= bot->GetLevel()) {
@@ -335,7 +335,7 @@ namespace ai
     {
     public:
         StealthedNearbyTrigger(PlayerbotAI* ai) : Trigger(ai, "stealthed nearby", 5) {}
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (!bot->HasSpell(1543))
                 return false;

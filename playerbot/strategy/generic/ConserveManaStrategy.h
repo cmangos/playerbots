@@ -10,7 +10,7 @@ namespace ai
         ConserveManaMultiplier(PlayerbotAI* ai) : Multiplier(ai, "conserve mana") {}
 
     public:
-        virtual float GetValue(Action* action);
+        virtual float GetValue(Action* action) override;
     };
 
     class SaveManaMultiplier : public Multiplier
@@ -19,7 +19,7 @@ namespace ai
         SaveManaMultiplier(PlayerbotAI* ai) : Multiplier(ai, "save mana") {}
 
     public:
-        virtual float GetValue(Action* action);
+        virtual float GetValue(Action* action) override;
     };
 
     class ConserveManaStrategy : public Strategy

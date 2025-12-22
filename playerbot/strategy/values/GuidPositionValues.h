@@ -11,7 +11,7 @@ namespace ai
     public:
         GameObjectsValue(PlayerbotAI* ai, std::string name = "gos") : GuidPositionListCalculatedValue(ai, name, 1) {}
 
-        virtual std::list<GuidPosition> Calculate();
+        virtual std::list<GuidPosition> Calculate() override;
     };
 
 
@@ -20,7 +20,7 @@ namespace ai
     public:
         EntryFilterValue(PlayerbotAI* ai, std::string name = "entry filter") : GuidPositionListCalculatedValue(ai, name, 1), Qualified() {}
 
-        virtual std::list<GuidPosition> Calculate();
+        virtual std::list<GuidPosition> Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "entry filter"; } //Must equal iternal name
@@ -38,7 +38,7 @@ namespace ai
     public:
        GuidFilterValue(PlayerbotAI* ai, std::string name = "guid filter") : GuidPositionListCalculatedValue(ai, name, 1), Qualified() {}
 
-       virtual std::list<GuidPosition> Calculate();
+       virtual std::list<GuidPosition> Calculate() override;
 
 #ifdef GenerateBotHelp
        virtual std::string GetHelpName() { return "guid filter"; } //Must equal iternal name
@@ -59,7 +59,7 @@ namespace ai
     public:
         RangeFilterValue(PlayerbotAI* ai, std::string name = "range filter") : GuidPositionListCalculatedValue(ai, name, 1), Qualified() {}
 
-        virtual std::list<GuidPosition> Calculate();
+        virtual std::list<GuidPosition> Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "range filter"; } //Must equal iternal name
@@ -77,7 +77,7 @@ namespace ai
     public:
         GoUsableFilterValue(PlayerbotAI* ai, std::string name = "go usable filter") : GuidPositionListCalculatedValue(ai, name, 1), Qualified() {}
 
-        virtual std::list<GuidPosition> Calculate();
+        virtual std::list<GuidPosition> Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "go usable filter"; } //Must equal iternal name
@@ -95,7 +95,7 @@ namespace ai
     public:
         GoTrappedFilterValue(PlayerbotAI* ai, std::string name = "go trapped filter") : GuidPositionListCalculatedValue(ai, name, 1), Qualified() {}
 
-        virtual std::list<GuidPosition> Calculate();
+        virtual std::list<GuidPosition> Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "go trapped filter"; } //Must equal iternal name
@@ -114,7 +114,7 @@ namespace ai
 	public:
         GosInSightValue(PlayerbotAI* ai, std::string name = "gos in sight") : GuidPositionListCalculatedValue(ai, name, 3), Qualified() {}
 
-        virtual std::list<GuidPosition> Calculate();
+        virtual std::list<GuidPosition> Calculate() override;
     };
 
     class GoSCloseValue : public GuidPositionListCalculatedValue, public Qualified
@@ -122,7 +122,7 @@ namespace ai
     public:
         GoSCloseValue(PlayerbotAI* ai, std::string name = "gos close") : GuidPositionListCalculatedValue(ai, name, 3), Qualified() {}
 
-        virtual std::list<GuidPosition> Calculate() { return AI_VALUE2(std::list<GuidPosition>, "range filter", "gos," + std::to_string(INTERACTION_DISTANCE)); }
+        virtual std::list<GuidPosition> Calculate() override{ return AI_VALUE2(std::list<GuidPosition>, "range filter", "gos," + std::to_string(INTERACTION_DISTANCE)); }
     };
 
 
@@ -132,6 +132,6 @@ namespace ai
     public:
         HasObjectValue(PlayerbotAI* ai, std::string name = "has object") : BoolCalculatedValue(ai, name, 3), Qualified() {}
 
-        virtual bool Calculate() { return !AI_VALUE(std::list<GuidPosition>, getQualifier()).empty(); }
+        virtual bool Calculate() override { return !AI_VALUE(std::list<GuidPosition>, getQualifier()).empty(); }
     };
 }

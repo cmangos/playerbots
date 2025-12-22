@@ -8,8 +8,8 @@ namespace ai
 	public:
         SkipSpellsListValue(PlayerbotAI* ai, std::string name = "skip spells list") : ManualSetValue<std::set<uint32>&>(ai, list, name) {}
 
-        virtual std::string Save();
-        virtual bool Load(std::string value);
+        virtual std::string Save() override;
+        virtual bool Load(std::string value) override;
 
     private:
         std::set<uint32> list;

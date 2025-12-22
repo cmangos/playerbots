@@ -9,7 +9,7 @@ namespace ai
 
         UseTrinketAction(PlayerbotAI* ai) : UseAction(ai, "use trinket") {}
         virtual bool Execute(Event& event) override;
-        virtual bool isPossible();
-        virtual bool isUseful() { return UseAction::isUseful() && !bot->HasStealthAura(); }
+        virtual bool isPossible() override;
+        virtual bool isUseful() override { return UseAction::isUseful() && !bot->HasStealthAura(); }
     };
 }

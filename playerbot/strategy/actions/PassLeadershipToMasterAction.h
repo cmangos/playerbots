@@ -32,7 +32,7 @@ namespace ai
             return false;
         }
 
-        virtual bool isUseful()
+        virtual bool isUseful() override
         {
             return ai->IsAlt() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid());
         }
@@ -48,7 +48,7 @@ namespace ai
     public:
         GiveLeaderAction(PlayerbotAI* ai, std::string message = "Lead the way!") : PassLeadershipToMasterAction(ai, "give leader", message) {}
 
-        virtual bool isUseful()
+        virtual bool isUseful() override
         {
             return ai->HasRealPlayerMaster() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid());
         }

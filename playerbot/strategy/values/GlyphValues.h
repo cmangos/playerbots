@@ -16,7 +16,7 @@ namespace ai
     public:
         AvailableGlyphsValue(PlayerbotAI* ai, std::string name = "available glyphs") : CalculatedValue<std::vector<uint32>>(ai, name, 30) {}
 
-        std::vector<uint32> Calculate();
+        std::vector<uint32> Calculate() override;
 
         static uint32 GetGlyphIdFromProto(const ItemPrototype* glyphProto);
         static const ItemPrototype* GetGlyphProtoFromGlyphId(uint32 glyphId, uint32 classMask);
@@ -30,7 +30,7 @@ namespace ai
     public:
         WantedGlyphsValue(PlayerbotAI* ai) : AvailableGlyphsValue(ai, "wanted glyphs") {}
 
-        std::vector<uint32> Calculate();
+        std::vector<uint32> Calculate() override;
     };
 
     class EquipedGlyphsValue : public AvailableGlyphsValue
@@ -38,7 +38,7 @@ namespace ai
     public:
         EquipedGlyphsValue(PlayerbotAI* ai) : AvailableGlyphsValue(ai, "equiped glyphs") {}
 
-        std::vector<uint32> Calculate();
+        std::vector<uint32> Calculate() override;
     };
 
     class GlyphIsUpgradeValue : public BoolCalculatedValue, public Qualified
@@ -48,6 +48,6 @@ namespace ai
 
         static size_t GetWantedRank(uint32 itemId, const std::vector<uint32>& wantedGlyhps);
 
-        bool Calculate();
+        bool Calculate() override;
     };
 }

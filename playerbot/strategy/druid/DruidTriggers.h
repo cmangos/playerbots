@@ -7,14 +7,14 @@ namespace ai
     {
     public:
         MarkOfTheWildOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "mark of the wild", 4) {}
-        virtual bool IsActive() { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("gift of the wild", GetTarget()); }
+        virtual bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("gift of the wild", GetTarget()); }
     };
 
     class MarkOfTheWildTrigger : public BuffTrigger 
     {
     public:
         MarkOfTheWildTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "mark of the wild", 4) {}
-        virtual bool IsActive() { return BuffTrigger::IsActive() &&  !ai->HasAura("gift of the wild", GetTarget()); }
+        virtual bool IsActive() override { return BuffTrigger::IsActive() &&  !ai->HasAura("gift of the wild", GetTarget()); }
     };
 
     class GiftOfTheWildOnPartyTrigger : public GreaterBuffOnPartyTrigger
@@ -28,7 +28,7 @@ namespace ai
     public:
         ThornsOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "thorns", 4) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             Unit* target = GetTarget();
             if (target && BuffOnPartyTrigger::IsActive() && (!target->IsPlayer() || !ai->IsRanged((Player*)target)))
@@ -86,7 +86,7 @@ namespace ai
     {
     public:
         MoonfireTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "moonfire") {}
-        virtual bool IsActive() { return DebuffTrigger::IsActive() && !GetTarget()->IsRooted(); }
+        virtual bool IsActive() override { return DebuffTrigger::IsActive() && !GetTarget()->IsRooted(); }
     };
 
     class FaerieFireTrigger : public DebuffTrigger
@@ -129,7 +129,7 @@ namespace ai
     {
     public:
         EntanglingRootsKiteTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "entangling roots") {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class EntanglingRootsSnareTrigger : public SnareTargetTrigger
@@ -163,28 +163,28 @@ namespace ai
     {
     public:
         BearFormTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "bear form") {}
-        virtual bool IsActive() { return !ai->HasAnyAuraOf(bot, "bear form", "dire bear form", NULL); }
+        virtual bool IsActive() override { return !ai->HasAnyAuraOf(bot, "bear form", "dire bear form", NULL); }
     };
 
     class TreeFormTrigger : public BuffTrigger
     {
     public:
         TreeFormTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "tree of life") {}
-        virtual bool IsActive() { return !ai->HasAura("tree of life", bot); }
+        virtual bool IsActive() override { return !ai->HasAura("tree of life", bot); }
     };
 
     class MoonkinFormTrigger : public BuffTrigger
     {
     public:
         MoonkinFormTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "moonkin form") {}
-        virtual bool IsActive() { return !ai->HasAura("moonkin form", bot); }
+        virtual bool IsActive() override { return !ai->HasAura("moonkin form", bot); }
     };
 
     class CatFormTrigger : public BuffTrigger
     {
     public:
         CatFormTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "cat form") {}
-        virtual bool IsActive() { return !ai->HasAura("cat form", bot); }
+        virtual bool IsActive() override { return !ai->HasAura("cat form", bot); }
     };
 
     class EclipseSolarTrigger : public HasAuraTrigger

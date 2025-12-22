@@ -63,7 +63,7 @@ namespace ai
     {
     public:
         FleeAction(PlayerbotAI* ai, float distance = sPlayerbotAIConfig.spellDistance) : MovementAction(ai, "flee"), distance(distance) {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
 
     private:
         float distance;
@@ -73,70 +73,70 @@ namespace ai
     {
     public:
         FleeWithPetAction(PlayerbotAI* ai) : MovementAction(ai, "flee with pet") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
     class RunAwayAction : public MovementAction
     {
     public:
         RunAwayAction(PlayerbotAI* ai) : MovementAction(ai, "runaway") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
     class MoveToLootAction : public MovementAction
     {
     public:
         MoveToLootAction(PlayerbotAI* ai) : MovementAction(ai, "move to loot") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
     class MoveOutOfEnemyContactAction : public MovementAction
     {
     public:
         MoveOutOfEnemyContactAction(PlayerbotAI* ai) : MovementAction(ai, "move out of enemy contact") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 
     class SetFacingTargetAction : public Action
     {
     public:
         SetFacingTargetAction(PlayerbotAI* ai) : Action(ai, "set facing") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
-        virtual bool isPossible();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
+        virtual bool isPossible() override;
     };
 
     class SetBehindTargetAction : public MovementAction
     {
     public:
         SetBehindTargetAction(PlayerbotAI* ai) : MovementAction(ai, "set behind") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
-        virtual bool isPossible();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
+        virtual bool isPossible() override;
     };
 
     class MoveOutOfCollisionAction : public MovementAction
     {
     public:
         MoveOutOfCollisionAction(PlayerbotAI* ai) : MovementAction(ai, "move out of collision") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 
     class MoveRandomAction : public MovementAction
     {
     public:
         MoveRandomAction(PlayerbotAI* ai) : MovementAction(ai, "move random") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 
     class MoveToAction : public MovementAction, public Qualified
     {
     public:
         MoveToAction(PlayerbotAI* ai, std::string name = "move to") : MovementAction(ai, "name"), Qualified() {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
     class JumpAction : public MovementAction, public Qualified

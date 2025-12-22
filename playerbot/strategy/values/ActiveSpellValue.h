@@ -8,7 +8,7 @@ namespace ai
 	public:
         ActiveSpellValue(PlayerbotAI* ai, std::string name = "active spell") : CalculatedValue<uint32>(ai, name) {}
 
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "active spell"; } //Must equal iternal name

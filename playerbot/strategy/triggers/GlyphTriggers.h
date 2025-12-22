@@ -10,7 +10,7 @@ namespace ai
     {
     public:
         ApplyGlyphTrigger(PlayerbotAI* ai, std::string triggerName = "apply glyphs") : RandomTrigger(ai, triggerName, 60) {}
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (bot->GetLevel() < 15)
                 return false;

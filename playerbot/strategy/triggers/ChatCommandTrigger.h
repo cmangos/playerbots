@@ -8,14 +8,14 @@ namespace ai
     public:
         ChatCommandTrigger(PlayerbotAI* ai, std::string command) : Trigger(ai, command) {}
 
-        virtual void ExternalEvent(std::string param, Player* owner = NULL)
+        virtual void ExternalEvent(std::string param, Player* owner = NULL) override
         {
             this->param = param;
             this->owner = owner;
             triggered = true;
         }
 
-        virtual Event Check()
+        virtual Event Check() override
         {
             if (!triggered)
                 return Event();
@@ -23,7 +23,7 @@ namespace ai
             return Event(getName(), param, owner);
         }
 
-        virtual void Reset()
+        virtual void Reset() override
         {
             triggered = false;
         }

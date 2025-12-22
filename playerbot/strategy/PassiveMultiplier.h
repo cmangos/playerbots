@@ -10,7 +10,7 @@ namespace ai
         PassiveMultiplier(PlayerbotAI* ai);
 
     public:
-        virtual float GetValue(Action* action);
+        virtual float GetValue(Action* action) override;
 
     private:
         static std::list<std::string> allowedActions;

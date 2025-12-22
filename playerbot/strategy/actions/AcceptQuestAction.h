@@ -30,7 +30,7 @@ namespace ai
     {
     public:
         AcceptQuestAction(PlayerbotAI* ai) : AcceptAllQuestsAction(ai, "accept quest") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
         virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp
@@ -48,7 +48,7 @@ namespace ai
     {
     public:
         AcceptQuestShareAction(PlayerbotAI* ai) : Action(ai, "accept quest share") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "accept quest share"; } //Must equal iternal name
@@ -64,7 +64,7 @@ namespace ai
     class ConfirmQuestAction : public Action {
     public:
         ConfirmQuestAction(PlayerbotAI* ai) : Action(ai, "confirm quest") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "confirm quest"; } //Must equal iternal name
@@ -80,7 +80,7 @@ namespace ai
     class QuestDetailsAction : public Action {
     public:
         QuestDetailsAction(PlayerbotAI* ai) : Action(ai, "quest details") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "quest details"; } //Must equal iternal name

@@ -67,7 +67,7 @@ namespace ai
     {
     public:
         CastSealSpellAction(PlayerbotAI* ai, std::string name) : CastBuffSpellAction(ai, name) {}
-        virtual bool isUseful() { return AI_VALUE2(bool, "combat", "self target"); }
+        virtual bool isUseful() override { return AI_VALUE2(bool, "combat", "self target"); }
     };
 
     // Pick the aura that is not being used by another paladin
@@ -76,7 +76,7 @@ namespace ai
 	public:
 		CastPaladinAuraAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "paladin aura") {}
 		virtual bool isPossible() { return true; }
-		virtual bool isUseful() { return true; }
+		virtual bool isUseful() override { return true; }
 		virtual bool Execute(Event& event);
 	};
 
@@ -482,7 +482,7 @@ namespace ai
     {
     public:
         CastDivineProtectionOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "divine protection") {}
-        virtual std::string getName() { return "divine protection on party"; }
+        virtual std::string getName() override { return "divine protection on party"; }
     };
 
 	class CastDivineShieldAction: public CastBuffSpellAction
@@ -525,14 +525,14 @@ namespace ai
     {
     public:
         CastPurifyPoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "purify", DISPEL_POISON) {}
-        virtual std::string getName() { return "purify poison on party"; }
+        virtual std::string getName() override { return "purify poison on party"; }
     };
 
 	class CastPurifyDiseaseOnPartyAction : public CurePartyMemberAction
 	{
 	public:
 		CastPurifyDiseaseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "purify", DISPEL_DISEASE) {}
-		virtual std::string getName() { return "purify disease on party"; }
+		virtual std::string getName() override { return "purify disease on party"; }
 	};
 
 	class CastHandOfReckoningAction : public CastSpellAction
@@ -569,21 +569,21 @@ namespace ai
     {
     public:
         CastCleansePoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse", DISPEL_POISON) {}
-        virtual std::string getName() { return "cleanse poison on party"; }
+        virtual std::string getName() override { return "cleanse poison on party"; }
     };
 
 	class CastCleanseDiseaseOnPartyAction : public CurePartyMemberAction
 	{
 	public:
 		CastCleanseDiseaseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse", DISPEL_DISEASE) {}
-		virtual std::string getName() { return "cleanse disease on party"; }
+		virtual std::string getName() override { return "cleanse disease on party"; }
 	};
 
 	class CastCleanseMagicOnPartyAction : public CurePartyMemberAction
 	{
 	public:
 		CastCleanseMagicOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse", DISPEL_MAGIC) {}
-		virtual std::string getName() { return "cleanse magic on party"; }
+		virtual std::string getName() override { return "cleanse magic on party"; }
 	};
 
 	SPELL_ACTION(CastExorcismAction, "exorcism");

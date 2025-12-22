@@ -68,7 +68,7 @@ namespace ai
     public:
         ItemDropMapValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "item drop map") {}
 
-        virtual DropMap* Calculate();
+        virtual DropMap* Calculate() override;
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "item drop map"; } //Must equal iternal name
         virtual std::string GetHelpTypeName() { return "loot"; }
@@ -88,7 +88,7 @@ namespace ai
 
         static LootTemplateAccess const* GetLootTemplate(ObjectGuid guid, LootType type = LOOT_CORPSE);
 
-        virtual DropMap* Calculate();
+        virtual DropMap* Calculate() override;
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "drop map"; } //Must equal iternal name
         virtual std::string GetHelpTypeName() { return "loot"; }
@@ -106,7 +106,7 @@ namespace ai
     public:
         ItemDropListValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "item drop list"), Qualified() {}
 
-        virtual std::list<int32> Calculate();
+        virtual std::list<int32> Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "item drop list"; } //Must equal iternal name
@@ -124,7 +124,7 @@ namespace ai
     {
     public:
         EntryLootListValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "entry loot list"), Qualified() {}
-        virtual std::list<uint32> Calculate();
+        virtual std::list<uint32> Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "entry loot list"; } //Must equal iternal name
@@ -141,7 +141,7 @@ namespace ai
     {
     public:
         LootChanceValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "loot chance"), Qualified() {}
-        virtual float Calculate();
+        virtual float Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "loot chance"; } //Must equal iternal name
@@ -160,7 +160,7 @@ namespace ai
     {
     public:
         EntryLootUsageValue(PlayerbotAI* ai) : CalculatedValue(ai, "entry loot usage",2), Qualified() {}
-        virtual itemUsageMap Calculate();
+        virtual itemUsageMap Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "entry loot usage" ; } //Must equal iternal name
@@ -177,7 +177,7 @@ namespace ai
     {
     public:
         HasUpgradeValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "has upgrade", 2), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "has upgrade"; } //Must equal iternal name
@@ -196,7 +196,7 @@ namespace ai
     {
     public:
         StackSpaceForItem(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "stack space for item", 2), Qualified() {}
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "stack space for item"; } //Must equal iternal name
@@ -214,7 +214,7 @@ namespace ai
     {
     public:
         ShouldLootObject(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should loot object"), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "should loot object"; } //Must equal iternal name
@@ -235,7 +235,7 @@ namespace ai
     public:
         ActiveRolls(PlayerbotAI* ai) : ManualSetValue(ai, {}, "active rolls") {}
         static void CleanUp(Player* bot, LootRollMap& value, ObjectGuid guid = ObjectGuid(), uint32 slot = 0);
-        virtual std::string Format();
+        virtual std::string Format() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "active rolls"; } //Must equal iternal name

@@ -14,7 +14,7 @@ namespace ai
     {
     public:
         BotRolesValue(PlayerbotAI* ai, std::string name = "bot roles") : Uint8CalculatedValue(ai, name, 10), Qualified() {}
-        virtual uint8 Calculate()
+        virtual uint8 Calculate() override
         {
             return AiFactory::GetPlayerRoles(bot);
         }

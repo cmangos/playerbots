@@ -28,8 +28,8 @@ namespace ai
 	{
 	public:
         PositionValue(PlayerbotAI* ai, std::string name = "position");
-        virtual std::string Save();
-        virtual bool Load(std::string value);
+        virtual std::string Save() override;
+        virtual bool Load(std::string value) override;
 
 	private:
         PositionMap positions;
@@ -48,22 +48,22 @@ namespace ai
     {
     public:
         CurrentPositionValue(PlayerbotAI* ai, std::string name = "current position", uint32 checkInterval = 1) : LogCalculatedValue<WorldPosition>(ai, name, checkInterval) { minChangeInterval = 60;  logLength = 30; };
-        virtual bool EqualToLast(WorldPosition value) { return value.fDist(lastValue) < sPlayerbotAIConfig.tooCloseDistance; }
-        virtual WorldPosition Calculate() { return WorldPosition(bot); };
+        virtual bool EqualToLast(WorldPosition value) override { return value.fDist(lastValue) < sPlayerbotAIConfig.tooCloseDistance; }
+        virtual WorldPosition Calculate() override { return WorldPosition(bot); };
     };  
 
     class MasterPositionValue : public MemoryCalculatedValue<WorldPosition>
     {
     public:
         MasterPositionValue(PlayerbotAI* ai, std::string name = "master position", uint32 checkInterval = 1) : MemoryCalculatedValue<WorldPosition>(ai, name, checkInterval) { minChangeInterval = 1; };
-        virtual bool EqualToLast(WorldPosition value) { return value.fDist(lastValue) < sPlayerbotAIConfig.proximityDistance; }
-        virtual WorldPosition Calculate() { Player* master = GetMaster();  if (master) return WorldPosition(master); return WorldPosition(); };
+        virtual bool EqualToLast(WorldPosition value) override { return value.fDist(lastValue) < sPlayerbotAIConfig.proximityDistance; }
+        virtual WorldPosition Calculate() override { Player* master = GetMaster();  if (master) return WorldPosition(master); return WorldPosition(); };
     };
 
     class CustomPositionValue : public ManualSetValue<WorldPosition>, public Qualified
     {
     public:
         CustomPositionValue(PlayerbotAI* ai, std::string name = "custom position") : ManualSetValue<WorldPosition>(ai, WorldPosition(), name), Qualified() { };
-        virtual WorldPosition Calculate() { return WorldPosition(bot); };
+        virtual WorldPosition Calculate() override { return WorldPosition(bot); };
     };
 }

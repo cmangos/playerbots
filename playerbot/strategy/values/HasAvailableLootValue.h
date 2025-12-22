@@ -10,7 +10,7 @@ namespace ai
         HasAvailableLootValue(PlayerbotAI* ai) : BoolCalculatedValue(ai) {}
 
     public:
-        virtual bool Calculate()
+        virtual bool Calculate() override
         {
             return !AI_VALUE(bool, "can loot") &&
                     AI_VALUE(LootObjectStack*, "available loot")->CanLoot(sPlayerbotAIConfig.lootDistance);

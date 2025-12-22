@@ -11,15 +11,15 @@ namespace ai
     {
     public:
         EnterVehicleAction(PlayerbotAI* ai, std::string name = "enter vehicle") : MovementAction(ai, name) {}
-        virtual bool Execute(Event& event);
-        //virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        //virtual bool isUseful() override;
     };
 
     class LeaveVehicleAction : public MovementAction
     {
     public:
         LeaveVehicleAction(PlayerbotAI* ai, std::string name = "leave vehicle") : MovementAction(ai, name) {}
-        virtual bool Execute(Event& event);
-        //virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        //virtual bool isUseful() override;
     };
 }

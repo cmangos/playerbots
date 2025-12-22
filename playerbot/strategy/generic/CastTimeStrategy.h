@@ -10,7 +10,7 @@ namespace ai
         CastTimeMultiplier(PlayerbotAI* ai) : Multiplier(ai, "cast time") {}
 
     public:
-        virtual float GetValue(Action* action);
+        virtual float GetValue(Action* action) override;
     };
 
     class CastTimeStrategy : public Strategy
@@ -25,6 +25,6 @@ namespace ai
         }
         virtual std::vector<std::string> GetRelatedStrategies() { return { }; }
 #endif
-        void InitCombatMultipliers(std::list<Multiplier*>& multipliers);
+        void InitCombatMultipliers(std::list<Multiplier*>& multipliers) override;
     };
 }

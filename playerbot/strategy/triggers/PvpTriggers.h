@@ -9,7 +9,7 @@ namespace ai
         EnemyPlayerNear(PlayerbotAI* ai) : Trigger(ai, "enemy player near") {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class PlayerHasNoFlag : public Trigger
@@ -18,7 +18,7 @@ namespace ai
         PlayerHasNoFlag(PlayerbotAI* ai) : Trigger(ai, "player has no flag") {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class PlayerHasFlag : public Trigger
@@ -27,7 +27,7 @@ namespace ai
         PlayerHasFlag(PlayerbotAI* ai) : Trigger(ai, "player has flag") {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class EnemyFlagCarrierNear : public Trigger
@@ -36,7 +36,7 @@ namespace ai
         EnemyFlagCarrierNear(PlayerbotAI* ai) : Trigger(ai, "enemy flagcarrier near") {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class TeamFlagCarrierNear : public Trigger
@@ -45,7 +45,7 @@ namespace ai
         TeamFlagCarrierNear(PlayerbotAI* ai) : Trigger(ai, "team flagcarrier near") {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class TeamHasFlag : public Trigger
@@ -54,7 +54,7 @@ namespace ai
         TeamHasFlag(PlayerbotAI* ai) : Trigger(ai, "team has flag") {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class EnemyTeamHasFlag : public Trigger
@@ -63,7 +63,7 @@ namespace ai
         EnemyTeamHasFlag(PlayerbotAI* ai) : Trigger(ai, "enemy team has flag") {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class PlayerIsInBattleground : public Trigger
@@ -72,7 +72,7 @@ namespace ai
         PlayerIsInBattleground(PlayerbotAI* ai) : Trigger(ai, "in battleground") {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class BgWaitingTrigger : public Trigger
@@ -81,7 +81,7 @@ namespace ai
         BgWaitingTrigger(PlayerbotAI* ai) : Trigger(ai, "bg waiting", 30) {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class BgActiveTrigger : public Trigger
@@ -90,7 +90,7 @@ namespace ai
         BgActiveTrigger(PlayerbotAI* ai) : Trigger(ai, "bg active", 1) {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class BgInviteActiveTrigger : public Trigger
@@ -99,7 +99,7 @@ namespace ai
         BgInviteActiveTrigger(PlayerbotAI* ai) : Trigger(ai, "bg invite active", 10) {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class BgEndedTrigger : public Trigger
@@ -108,7 +108,7 @@ namespace ai
         BgEndedTrigger(PlayerbotAI* ai) : Trigger(ai, "bg ended", 10) {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class PlayerIsInBattlegroundWithoutFlag : public Trigger
@@ -117,7 +117,7 @@ namespace ai
         PlayerIsInBattlegroundWithoutFlag(PlayerbotAI* ai) : Trigger(ai, "in battleground without flag") {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class PlayerWantsInBattlegroundTrigger : public Trigger
@@ -126,7 +126,7 @@ namespace ai
         PlayerWantsInBattlegroundTrigger(PlayerbotAI* ai) : Trigger(ai, "wants in bg") {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class VehicleNearTrigger : public Trigger
@@ -135,7 +135,7 @@ namespace ai
         VehicleNearTrigger(PlayerbotAI* ai) : Trigger(ai, "vehicle near", 10) {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class InVehicleTrigger : public Trigger, public Qualified
@@ -144,6 +144,6 @@ namespace ai
         InVehicleTrigger(PlayerbotAI* ai) : Trigger(ai, "in vehicle"), Qualified() {}
 
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 }

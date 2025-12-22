@@ -95,7 +95,7 @@ namespace ai
             return Leave(ai->GetGroupMaster());
         }
 
-        virtual bool isUseful();
+        virtual bool isUseful() override;
 
         virtual bool isUsefulWhenStunned() override { return true; }
     };

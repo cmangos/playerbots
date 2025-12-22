@@ -10,8 +10,8 @@ namespace ai
     public:
         MoveToRpgTargetAction(PlayerbotAI* ai) : MovementAction(ai, "move to rpg target") {}
 
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "move to rpg target"; } //Must equal iternal name

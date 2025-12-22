@@ -16,7 +16,7 @@ namespace ai
     public:
         VendorMapValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "vendor map") {}
 
-        virtual VendorMap* Calculate();
+        virtual VendorMap* Calculate() override;
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "vendor map"; } //Must equal iternal name
         virtual std::string GetHelpTypeName() { return "item"; }
@@ -34,7 +34,7 @@ namespace ai
     public:
         ItemVendorListValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "item vendor list"), Qualified() {}
 
-        virtual std::list<int32> Calculate();
+        virtual std::list<int32> Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "item vendor list"; } //Must equal iternal name
@@ -51,7 +51,7 @@ namespace ai
     {
     public:
         VendorHasUsefulItemValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "vendor has useful item",2), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "vendor has useful item"; } //Must equal iternal name

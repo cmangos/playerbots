@@ -11,7 +11,7 @@ namespace ai
         AutoLearnSpellAction(PlayerbotAI* ai, std::string name = "auto learn spell") : Action(ai, name) {}
         
     public:
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
         virtual bool isUsefulWhenStunned() override { return true; }
 
     private: 

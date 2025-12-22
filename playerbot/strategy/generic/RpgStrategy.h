@@ -10,7 +10,7 @@ namespace ai
         RpgActionMultiplier(PlayerbotAI* ai) : Multiplier(ai, "rpg action") {}
 
     public:
-        virtual float GetValue(Action* action);
+        virtual float GetValue(Action* action) override;
     };
 
     class RpgStrategy : public Strategy

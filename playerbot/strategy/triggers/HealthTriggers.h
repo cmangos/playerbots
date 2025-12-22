@@ -16,7 +16,7 @@ namespace ai
     public:
         virtual float GetValue() = 0;
 
-        virtual bool IsActive() 
+        virtual bool IsActive() override
         {
             float value = GetValue();
             return value < maxValue && value >= minValue;
@@ -48,7 +48,7 @@ namespace ai
             float value = sPlayerbotAIConfig.lowHealth, float minValue = sPlayerbotAIConfig.criticalHealth) :
             HealthInRangeTrigger(ai, name, value, minValue) {}
 
-		virtual std::string GetTargetName() { return "self target"; }
+		virtual std::string GetTargetName() override { return "self target"; }
     };
 
     class CriticalHealthTrigger : public LowHealthTrigger
@@ -78,7 +78,7 @@ namespace ai
         PartyMemberLowHealthTrigger(PlayerbotAI* ai, std::string name = "party member low health", float value = sPlayerbotAIConfig.lowHealth, float minValue = sPlayerbotAIConfig.criticalHealth, bool isTankRequired = false) :
             HealthInRangeTrigger(ai, name, value, minValue, isTankRequired) {}
 
-        virtual std::string GetTargetName() { return "party member to heal"; }
+        virtual std::string GetTargetName() override { return "party member to heal"; }
     };
 
     class PartyMemberCriticalHealthTrigger : public PartyMemberLowHealthTrigger
@@ -106,7 +106,7 @@ namespace ai
     {
     public:
         TargetLowHealthTrigger(PlayerbotAI* ai, float value, float minValue = 0) : HealthInRangeTrigger(ai, "target low health", value, minValue) {}
-        virtual std::string GetTargetName() { return "current target"; }
+        virtual std::string GetTargetName() override { return "current target"; }
     };
 
     class TargetCriticalHealthTrigger : public TargetLowHealthTrigger
@@ -119,16 +119,16 @@ namespace ai
     {
 	public:
 		PartyMemberDeadTrigger(PlayerbotAI* ai) : Trigger(ai, "resurrect", 3) {}
-        virtual std::string GetTargetName() { return "party member to resurrect"; }
-		virtual bool IsActive();
+        virtual std::string GetTargetName() override { return "party member to resurrect"; }
+		virtual bool IsActive() override;
 	};
 
     class DeadTrigger : public Trigger 
     {
     public:
         DeadTrigger(PlayerbotAI* ai) : Trigger(ai, "dead") {}
-        virtual std::string GetTargetName() { return "self target"; }
-        virtual bool IsActive();
+        virtual std::string GetTargetName() override { return "self target"; }
+        virtual bool IsActive() override;
     };
 
     class AoeHealTrigger : public Trigger 
@@ -137,7 +137,7 @@ namespace ai
     	AoeHealTrigger(PlayerbotAI* ai, std::string name, std::string type, int count) :
     		Trigger(ai, name), type(type), count(count) {}
     public:
-        virtual bool IsActive();
+        virtual bool IsActive() override;
 
     protected:
         int count;

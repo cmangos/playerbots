@@ -8,7 +8,7 @@ namespace ai
 	public:
         ManaSaveLevelValue(PlayerbotAI* ai) : ManualSetValue<double>(ai, 1.0, "mana save level") {}
 
-        virtual std::string Save() { std::ostringstream out; out << value; return out.str(); }
-        virtual bool Load(std::string text) { value = atof(text.c_str()); return true; }
+        virtual std::string Save() override { std::ostringstream out; out << value; return out.str(); }
+        virtual bool Load(std::string text) override { value = atof(text.c_str()); return true; }
     };
 }

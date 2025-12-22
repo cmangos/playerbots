@@ -9,8 +9,8 @@ namespace ai
     public:
         RpgAction(PlayerbotAI* ai, std::string name = "rpg") : MovementAction(ai, name) {}
 
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
 
     protected:
         virtual bool SetNextRpgAction();
@@ -25,6 +25,6 @@ namespace ai
     public:
         CRpgAction(PlayerbotAI* ai) : RpgAction(ai, "crpg") {}
 
-        virtual bool isUseful() { RESET_AI_VALUE(GuidPosition,"rpg target"); return true; };
+        virtual bool isUseful() override { RESET_AI_VALUE(GuidPosition,"rpg target"); return true; };
     };
 }

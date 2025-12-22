@@ -10,7 +10,7 @@ namespace ai
 	public:
         HaveAnyTotemValue(PlayerbotAI* ai, std::string name = "have any totem") : BoolCalculatedValue(ai, name), Qualified() {}
 
-        bool Calculate()
+        bool Calculate() override
         {
             std::list<ObjectGuid> units = *context->GetValue<std::list<ObjectGuid> >("nearest npcs");
             for (std::list<ObjectGuid>::iterator i = units.begin(); i != units.end(); i++)

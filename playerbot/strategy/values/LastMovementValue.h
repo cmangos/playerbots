@@ -121,7 +121,7 @@ namespace ai
     public:
         LastLongMoveValue(PlayerbotAI* ai) : CalculatedValue<WorldPosition>(ai, "last long move", 30) {}
 
-        WorldPosition Calculate();
+        WorldPosition Calculate() override;
     };
 
 
@@ -130,8 +130,8 @@ namespace ai
     public:
         HomeBindValue(PlayerbotAI* ai) : CalculatedValue<WorldPosition>(ai, "home bind", 30) {}
 
-        WorldPosition Calculate();
+        WorldPosition Calculate() override;
 
-        virtual std::string Format();
+        virtual std::string Format() override;
     };
 }

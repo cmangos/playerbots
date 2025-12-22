@@ -8,7 +8,7 @@ namespace ai
 	public:
         ActionPossibleValue(PlayerbotAI* ai, std::string name = "action possible") : BoolCalculatedValue(ai, name), Qualified() {}
 
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class ActionUsefulValue : public BoolCalculatedValue, public Qualified
@@ -16,7 +16,7 @@ namespace ai
     public:
         ActionUsefulValue(PlayerbotAI* ai, std::string name = "action useful") : BoolCalculatedValue(ai, name), Qualified() {}
 
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class TriggerActiveValue : public BoolCalculatedValue, public Qualified
@@ -24,7 +24,7 @@ namespace ai
     public:
         TriggerActiveValue(PlayerbotAI* ai, std::string name = "trigger active") : BoolCalculatedValue(ai, name), Qualified() {}
 
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class HasStrategyValue : public BoolCalculatedValue, public Qualified
@@ -32,6 +32,6 @@ namespace ai
     public:
         HasStrategyValue(PlayerbotAI* ai, std::string name = "has strategy") : BoolCalculatedValue(ai, name), Qualified() {}
 
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 }

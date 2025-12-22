@@ -7,7 +7,7 @@ namespace ai
 	{
 	public:
         RangeValue(PlayerbotAI* ai);
-        virtual std::string Save();
-        virtual bool Load(std::string value);
+        virtual std::string Save() override;
+        virtual bool Load(std::string value) override;
     };
 }

@@ -8,7 +8,7 @@ namespace ai
 	public:
         IsBehindValue(PlayerbotAI* ai) : BoolCalculatedValue(ai), Qualified() {}
 
-        virtual bool Calculate() 
+        virtual bool Calculate() override
         {
             Unit* target = AI_VALUE(Unit*, qualifier);
             if (!target)

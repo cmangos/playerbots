@@ -28,8 +28,8 @@ namespace ai
 #endif 
 
         virtual bool Execute(Event& event) override;
-        virtual bool isPossible() { return true; }
-        virtual bool isUseful();
+        virtual bool isPossible() override { return true; }
+        virtual bool isUseful() override;
 
     private:
         virtual bool CanFly() const;

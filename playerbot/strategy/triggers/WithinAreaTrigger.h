@@ -8,7 +8,7 @@ namespace ai
     public:
         WithinAreaTrigger(PlayerbotAI* ai) : Trigger(ai, "within area trigger") {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
 		{
 
 

@@ -27,8 +27,8 @@ namespace ai
     {
     public:
         CastCustomNcSpellAction(PlayerbotAI* ai, std::string name = "cast custom nc spell") : CastCustomSpellAction(ai, name) {}
-        virtual bool isUseful() { return !bot->IsMoving(); }
-        virtual std::string castString(WorldObject* target) { return "castnc" +(target ? " "+ chat->formatWorldobject(target):""); }
+        virtual bool isUseful() override { return !bot->IsMoving(); }
+        virtual std::string castString(WorldObject* target) override { return "castnc" +(target ? " "+ chat->formatWorldobject(target):""); }
     };
 
     class CastRandomSpellAction : public ListSpellsAction
@@ -68,7 +68,7 @@ namespace ai
     {
     public:
         DisenchantRandomItemAction(PlayerbotAI* ai) : CastCustomSpellAction(ai, "disenchant random item")  {}
-        virtual bool isUseful() { return ai->HasSkill(SKILL_ENCHANTING) && !bot->IsInCombat() && AI_VALUE2(uint32, "item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_DISENCHANT)) > 0; }
+        virtual bool isUseful() override { return ai->HasSkill(SKILL_ENCHANTING) && !bot->IsInCombat() && AI_VALUE2(uint32, "item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_DISENCHANT)) > 0; }
         virtual bool Execute(Event& event) override;
     };
 
@@ -76,14 +76,14 @@ namespace ai
     {
     public:
         EnchantRandomItemAction(PlayerbotAI* ai) : CastRandomSpellAction(ai, "enchant random item") {}
-        virtual bool isUseful() { return ai->HasSkill(SKILL_ENCHANTING); }
+        virtual bool isUseful() override { return ai->HasSkill(SKILL_ENCHANTING); }
 
-        virtual bool AcceptSpell(const SpellEntry* pSpellInfo)
+        virtual bool AcceptSpell(const SpellEntry* pSpellInfo) override
         {
             return pSpellInfo->Effect[0] == SPELL_EFFECT_ENCHANT_ITEM && pSpellInfo->ReagentCount[0] > 0;
         }
 
-        virtual uint32 GetSpellPriority(const SpellEntry* pSpellInfo)
+        virtual uint32 GetSpellPriority(const SpellEntry* pSpellInfo) override
         {
             if (pSpellInfo->Effect[0] != SPELL_EFFECT_ENCHANT_ITEM)
                 return 0;

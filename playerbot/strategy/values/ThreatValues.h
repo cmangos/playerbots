@@ -7,8 +7,8 @@ namespace ai
     {
     public:
         MyThreatValue(PlayerbotAI* ai, std::string name = "my threat") : LogCalculatedValue(ai, name), Qualified() { minChangeInterval = 1; lastTarget = ObjectGuid(); }
-        virtual bool EqualToLast(float value) { return value == lastValue; }
-        virtual float Calculate();
+        virtual bool EqualToLast(float value) override { return value == lastValue; }
+        virtual float Calculate() override;
 
     public:
         ObjectGuid lastTarget;
@@ -18,14 +18,14 @@ namespace ai
     {
     public:
         TankThreatValue(PlayerbotAI* ai, std::string name = "tank threat") : FloatCalculatedValue(ai, name), Qualified() {}
-        virtual float Calculate();
+        virtual float Calculate() override;
     };
 
     class ThreatValue : public Uint8CalculatedValue, public Qualified
 	{
 	public:
         ThreatValue(PlayerbotAI* ai, std::string name = "threat") : Uint8CalculatedValue(ai, name), Qualified() {}
-    	virtual uint8 Calculate();
+    	virtual uint8 Calculate() override;
         static float GetThreat(Player* player, Unit* target);
         static float GetTankThreat(PlayerbotAI* ai, Unit* target);
 

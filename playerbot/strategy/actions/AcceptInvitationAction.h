@@ -9,7 +9,7 @@ namespace ai
     public:
         AcceptInvitationAction(PlayerbotAI* ai) : Action(ai, "accept invitation") {}
 
-        virtual bool Execute(Event& event)
+        virtual bool Execute(Event& event) override
         {
             Group* grp = bot->GetGroupInvite();
             if (!grp)

@@ -65,7 +65,7 @@ namespace ai
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif 
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             return chat->formatGuidPosition(value, bot);
         }
@@ -75,7 +75,7 @@ namespace ai
     {
     public:
         TravelTargetValue(PlayerbotAI* ai, std::string name = "travel target") : ManualSetValue<TravelTarget*>(ai, new TravelTarget(ai), name) {}
-        virtual ~TravelTargetValue() { delete value; }
+        virtual ~TravelTargetValue() override { delete value; }
     };	
 
     class LeaderTravelTargetValue : public CalculatedValue<TravelTarget*>

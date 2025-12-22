@@ -8,7 +8,7 @@ namespace ai
    public:
       AcceptBgInvitationAction(PlayerbotAI* ai) : Action(ai, "accept bg invitation") {}
 
-      virtual bool Execute(Event& event)
+      virtual bool Execute(Event& event) override
       {
          /*
          uint8 type = 0;                                             // arenatype if arena

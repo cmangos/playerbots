@@ -10,7 +10,7 @@ namespace ai
         AcceptDuelAction(PlayerbotAI* ai) : Action(ai, "accept duel")
         {}
 
-        virtual bool Execute(Event& event)
+        virtual bool Execute(Event& event) override
         {
             WorldPacket p(event.getPacket());
 

@@ -42,7 +42,7 @@ public:
         return AI_VALUE2(uint8, "health", "self target") > sPlayerbotAIConfig.almostFullHealth;
     }
 
-    virtual std::string GetName() { return "HP"; }
+    virtual std::string GetName() override { return "HP"; }
 };
 
 class ManaChecker : public ReadyChecker
@@ -52,7 +52,7 @@ public:
     {
         return !AI_VALUE2(bool, "has mana", "self target") || AI_VALUE2(uint8, "mana", "self target") > sPlayerbotAIConfig.mediumHealth;
     }
-    virtual std::string GetName() { return "MP"; }
+    virtual std::string GetName() override { return "MP"; }
 };
 
 class DistanceChecker : public ReadyChecker
@@ -73,8 +73,8 @@ public:
         return true;
     }
 
-    virtual bool PrintAlways() { return false; }
-    virtual std::string GetName() { return "Far away"; }
+    virtual bool PrintAlways() override { return false; }
+    virtual std::string GetName() override { return "Far away"; }
 };
 
 class HunterChecker : public ReadyChecker
@@ -107,8 +107,8 @@ public:
         return true;
     }
 
-    virtual bool PrintAlways() { return false; }
-    virtual std::string GetName() { return "Far away"; }
+    virtual bool PrintAlways() override { return false; }
+    virtual std::string GetName() override { return "Far away"; }
 };
 
 
@@ -122,7 +122,7 @@ public:
         return AI_VALUE2(uint32, "item count", item) > 0;
     }
 
-    virtual std::string GetName() { return name; }
+    virtual std::string GetName() override { return name; }
 
 private:
     std::string item, name;

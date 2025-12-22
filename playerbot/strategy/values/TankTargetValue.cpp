@@ -14,7 +14,7 @@ public:
     }
 
 public:
-    virtual void CheckAttacker(Unit* creature, ThreatManager* threatManager)
+    virtual void CheckAttacker(Unit* creature, ThreatManager* threatManager) override
     {
         Player* player = ai->GetBot();
         if (IsCcTarget(creature)) return;

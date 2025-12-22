@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         BoolAndValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "bool and"), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "bool and"; } //Must equal iternal name
@@ -24,7 +24,7 @@ namespace ai
     {
     public:
         NotValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "not"), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "not"; } //Must equal iternal name
@@ -41,7 +41,7 @@ namespace ai
     {
     public:
         BoolOrValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "bool or"), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "bool or"; } //Must equal iternal name
@@ -58,7 +58,7 @@ namespace ai
     {
     public:
         GT32Value(PlayerbotAI* ai) : BoolCalculatedValue(ai, "gt32"), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "gt"; } //Must equal iternal name

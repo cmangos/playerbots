@@ -12,7 +12,7 @@ namespace ai
             NearestUnitsValue(ai, "nearest friendly players", range) {}
 
     protected:
-        void FindUnits(std::list<Unit*> &targets);
-        virtual bool AcceptUnit(Unit* unit);
+        void FindUnits(std::list<Unit*> &targets) override;
+        virtual bool AcceptUnit(Unit* unit) override;
 	};
 }

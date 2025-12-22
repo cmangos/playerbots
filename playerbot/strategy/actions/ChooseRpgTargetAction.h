@@ -24,9 +24,6 @@ namespace ai
     class ClearRpgTargetAction : public ChooseRpgTargetAction {
     public:
         ClearRpgTargetAction(PlayerbotAI* ai) : ChooseRpgTargetAction(ai, "clear rpg target") {}
-
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
     };
 
 }

@@ -106,7 +106,7 @@ namespace ai
     {
     public:
         CastTotemAction(PlayerbotAI* ai, std::string spell) : CastBuffSpellAction(ai, spell) {}
-        virtual bool isUseful() { return CastBuffSpellAction::isUseful() && !AI_VALUE2(bool, "has totem", name); }
+        virtual bool isUseful() override { return CastBuffSpellAction::isUseful() && !AI_VALUE2(bool, "has totem", name); }
     };
 
     class CastStoneskinTotemAction : public CastTotemAction
@@ -155,14 +155,14 @@ namespace ai
     {
     public:
         CastManaSpringTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "mana spring totem") {}
-        virtual bool isUseful() { return CastTotemAction::isUseful() && !AI_VALUE2(bool, "has totem", "healing stream totem"); }
+        virtual bool isUseful() override { return CastTotemAction::isUseful() && !AI_VALUE2(bool, "has totem", "healing stream totem"); }
     };
 
 	class CastManaTideTotemAction : public CastTotemAction
 	{
 	public:
 		CastManaTideTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "mana tide totem") {}
-		virtual std::string GetTargetName() { return "self target"; }
+		virtual std::string GetTargetName() override { return "self target"; }
 	};
 
 	class CastHealingStreamTotemAction : public CastTotemAction
@@ -228,7 +228,7 @@ namespace ai
     {
     public:
         CastFlametongueTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "flametongue totem") {}
-        virtual bool isUseful() { return CastTotemAction::isUseful() && !AI_VALUE2(bool, "has totem", "magma totem"); }
+        virtual bool isUseful() override { return CastTotemAction::isUseful() && !AI_VALUE2(bool, "has totem", "magma totem"); }
     };
 
     class CastWindfuryTotemAction : public CastTotemAction
@@ -263,16 +263,16 @@ namespace ai
     {
     public:
         CastSearingTotemAction(PlayerbotAI* ai) : CastTotemAction(ai, "searing totem") {}
-        virtual std::string GetTargetName() { return "self target"; }
-        virtual bool isUseful() { return CastTotemAction::isUseful() && !AI_VALUE2(bool, "has totem", "flametongue totem"); }
+        virtual std::string GetTargetName() override { return "self target"; }
+        virtual bool isUseful() override { return CastTotemAction::isUseful() && !AI_VALUE2(bool, "has totem", "flametongue totem"); }
     };
 
     class CastMagmaTotemAction : public CastMeleeSpellAction
     {
     public:
         CastMagmaTotemAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "magma totem") {}
-        virtual std::string GetTargetName() { return "self target"; }
-        virtual bool isUseful() { return CastMeleeSpellAction::isUseful() && !AI_VALUE2(bool, "has totem", name); }
+        virtual std::string GetTargetName() override { return "self target"; }
+        virtual bool isUseful() override { return CastMeleeSpellAction::isUseful() && !AI_VALUE2(bool, "has totem", name); }
     };
 
     class CastFireNovaAction : public CastSpellAction 
@@ -346,21 +346,21 @@ namespace ai
     public:
         CastCleanseSpiritPoisonOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse spirit", DISPEL_POISON) {}
 
-        virtual std::string getName() { return "cleanse spirit poison on party"; }
+        virtual std::string getName() override { return "cleanse spirit poison on party"; }
     };
     class CastCleanseSpiritCurseOnPartyAction : public CurePartyMemberAction
     {
     public:
         CastCleanseSpiritCurseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse spirit", DISPEL_CURSE) {}
 
-        virtual std::string getName() { return "cleanse spirit curse on party"; }
+        virtual std::string getName() override { return "cleanse spirit curse on party"; }
     };
     class CastCleanseSpiritDiseaseOnPartyAction : public CurePartyMemberAction
     {
     public:
         CastCleanseSpiritDiseaseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cleanse spirit", DISPEL_DISEASE) {}
 
-        virtual std::string getName() { return "cleanse spirit disease on party"; }
+        virtual std::string getName() override { return "cleanse spirit disease on party"; }
     };
 
     class CastFlameShockAction : public CastRangedDebuffSpellAction
@@ -439,7 +439,7 @@ namespace ai
     {
     public:
         CastCureDiseaseOnPartyAction(PlayerbotAI* ai) : CurePartyMemberAction(ai, "cure disease", DISPEL_DISEASE) {}
-        virtual std::string getName() { return "cure disease on party"; }
+        virtual std::string getName() override { return "cure disease on party"; }
     };
 
     class CastCallOfTheElements : public CastBuffSpellAction

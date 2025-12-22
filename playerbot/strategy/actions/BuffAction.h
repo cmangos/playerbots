@@ -18,7 +18,7 @@ namespace ai
         virtual std::vector<std::string> GetUsedActions() { return {}; }
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif 
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
         virtual bool isUsefulWhenStunned() override { return true; }
 
     private:

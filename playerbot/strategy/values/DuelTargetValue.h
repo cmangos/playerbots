@@ -10,6 +10,6 @@ namespace ai
         DuelTargetValue(PlayerbotAI* ai, std::string name = "duel target") : TargetValue(ai, name) {}
 
     public:
-        Unit* Calculate();
+        Unit* Calculate() override;
     };
 }

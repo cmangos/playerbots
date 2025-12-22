@@ -131,7 +131,7 @@ namespace ai
     {
     public:
         CastMendPetAction(PlayerbotAI* ai) : CastAuraSpellAction(ai, "mend pet") {}
-        virtual std::string GetTargetName() { return "pet target"; }
+        virtual std::string GetTargetName() override { return "pet target"; }
     };
 
     class CastRevivePetAction : public CastBuffSpellAction

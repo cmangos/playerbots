@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         PassiveStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        std::string getName() { return "passive"; }
+        std::string getName() override { return "passive"; }
 
     private:
         void InitNonCombatMultipliers(std::list<Multiplier*> &multipliers) override;

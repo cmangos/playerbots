@@ -8,7 +8,7 @@ namespace ai
     public:
         HasNearbyQuestTakerTrigger(PlayerbotAI* ai) : Trigger(ai, "has nearby quest taker", 30) {}
 
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class NearDarkPortalTrigger : public Trigger
@@ -16,7 +16,7 @@ namespace ai
     public:
         NearDarkPortalTrigger(PlayerbotAI* ai) : Trigger(ai, "near dark portal", 10) {}
 
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class AtDarkPortalAzerothTrigger : public Trigger
@@ -24,7 +24,7 @@ namespace ai
     public:
         AtDarkPortalAzerothTrigger(PlayerbotAI* ai) : Trigger(ai, "at dark portal azeroth", 10) {}
 
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class AtDarkPortalOutlandTrigger : public Trigger
@@ -32,6 +32,6 @@ namespace ai
     public:
         AtDarkPortalOutlandTrigger(PlayerbotAI* ai) : Trigger(ai, "at dark portal outland", 10) {}
 
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 }

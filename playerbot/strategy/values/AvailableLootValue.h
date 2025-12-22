@@ -14,7 +14,7 @@ namespace ai
             value = new LootObjectStack(bot);
         }
 
-        virtual ~AvailableLootValue()
+        virtual ~AvailableLootValue() override
         {
             if (value)
                 delete value;
@@ -32,7 +32,7 @@ namespace ai
     public:
         CanLootValue(PlayerbotAI* ai, std::string name = "can loot") : BoolCalculatedValue(ai, name) {}
 
-        virtual bool Calculate()
+        virtual bool Calculate() override
         {
             LootObject loot = AI_VALUE(LootObject, "loot target");
 

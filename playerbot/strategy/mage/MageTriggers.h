@@ -11,7 +11,7 @@ namespace ai
     public:
         BlinkTrigger(PlayerbotAI* ai) : Trigger(ai, "blink", 2) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             return bot->HasAuraType(SPELL_AURA_MOD_ROOT) ||
                    bot->HasAuraType(SPELL_AURA_MOD_STUN);
@@ -22,14 +22,14 @@ namespace ai
     {
     public:
         ArcaneIntellectOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "arcane intellect", 4) {}
-        virtual bool IsActive() { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("arcane brilliance", GetTarget()); }
+        virtual bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("arcane brilliance", GetTarget()); }
     };
 
     class ArcaneIntellectTrigger : public BuffTrigger 
     {
     public:
         ArcaneIntellectTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "arcane intellect", 4) {}
-        virtual bool IsActive() { return BuffTrigger::IsActive() && !ai->HasAura("arcane brilliance", GetTarget()); }
+        virtual bool IsActive() override { return BuffTrigger::IsActive() && !ai->HasAura("arcane brilliance", GetTarget()); }
     };
 
     class ArcaneBrillianceOnPartyTrigger : public GreaterBuffOnPartyTrigger
@@ -42,28 +42,28 @@ namespace ai
     {
     public:
         AnyMageArmorTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "any mage armor", 5) {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class MageArmorTrigger : public BuffTrigger
     {
     public:
         MageArmorTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "mage armor", 5) {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class IceArmorTrigger : public BuffTrigger
     {
     public:
         IceArmorTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "ice armor", 5) {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class MoltenArmorTrigger : public BuffTrigger
     {
     public:
         MoltenArmorTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "molten armor", 5) {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class FireballTrigger : public DebuffTrigger 
@@ -158,7 +158,7 @@ namespace ai
     {
     public:
         ManaShieldTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "mana shield", 5) {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class IceBarrierTrigger : public BuffTrigger
@@ -172,7 +172,7 @@ namespace ai
     public:
         FireSpellsLocked(PlayerbotAI* ai) : Trigger(ai, "fire spells locked", 2) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             return !bot->IsSpellReady(133)      //fireball
                 && !bot->IsSpellReady(2948);    //scorch
@@ -198,7 +198,7 @@ namespace ai
     public:
         NoFireVulnerabilityTrigger(PlayerbotAI* ai) : Trigger(ai, "no fire vulnerability") {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             // Required non-player target
             Unit* target = GetTarget();
@@ -231,7 +231,7 @@ namespace ai
             return false;
         }
 
-        virtual std::string GetTargetName() { return "current target"; }
+        virtual std::string GetTargetName() override { return "current target"; }
     };
 
     class LivingBombTrigger : public DebuffTrigger 
@@ -245,7 +245,7 @@ namespace ai
     public:
         ColdSnapTrigger(PlayerbotAI* ai) : Trigger(ai, "cold snap", 2) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             return !bot->IsSpellReady(12472)    //icy veins on cooldown
                 && bot->IsSpellReady(11958);    //cold snap not on cooldown
@@ -257,7 +257,7 @@ namespace ai
     public:
         NoFoodTrigger(PlayerbotAI* ai) : Trigger(ai, "no food trigger", 5) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             return !ai->HasCheat(BotCheatMask::item) && AI_VALUE2(std::list<Item*>, "inventory items", "conjured food").empty();
         }
@@ -268,7 +268,7 @@ namespace ai
     public:
         NoDrinkTrigger(PlayerbotAI* ai) : Trigger(ai, "no drink trigger", 5) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             return !ai->HasCheat(BotCheatMask::item) && AI_VALUE2(std::list<Item*>, "inventory items", "conjured water").empty();
         }
@@ -279,7 +279,7 @@ namespace ai
     public:
         NoManaGemTrigger(PlayerbotAI* ai) : Trigger(ai, "no mana gem trigger", 5) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (!ai->HasCheat(BotCheatMask::item))
             {

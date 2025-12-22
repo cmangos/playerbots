@@ -36,8 +36,8 @@ namespace ai
         AttackMyTargetAction(PlayerbotAI* ai, std::string name = "attack my target") : AttackAction(ai, name) { MakeVerbose(true); }
 
     public:
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "attack my target"; }
@@ -57,8 +57,8 @@ namespace ai
         AttackRTITargetAction(PlayerbotAI* ai, std::string name = "attack rti target") : AttackAction(ai, name) { MakeVerbose(true); }
 
     public:
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "attack rti target"; }
@@ -78,8 +78,8 @@ namespace ai
         AttackDuelOpponentAction(PlayerbotAI* ai, std::string name = "attack duel opponent") : AttackAction(ai, name) {}
 
     public:
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "attack duel opponent"; }

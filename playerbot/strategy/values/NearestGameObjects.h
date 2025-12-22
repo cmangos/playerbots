@@ -41,7 +41,7 @@ namespace ai
             ObjectGuidListCalculatedValue(ai, name), range(range), lineOfSight(lineOfSight), Qualified() {}
 
     protected:
-        virtual std::list<ObjectGuid> Calculate();
+        virtual std::list<ObjectGuid> Calculate() override;
 
     private:
         float range;
@@ -55,7 +55,7 @@ namespace ai
             ObjectGuidListCalculatedValue(ai, name), range(range), lineOfSight(lineOfSight) {}
 
     protected:
-        virtual std::list<ObjectGuid> Calculate();
+        virtual std::list<ObjectGuid> Calculate() override;
 
     private:
         float range;

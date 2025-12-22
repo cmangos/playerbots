@@ -11,6 +11,6 @@ namespace ai
     {
     public:
         RTSCAction(PlayerbotAI* ai) : SeeSpellAction(ai, "rtsc"), Qualified() {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 }

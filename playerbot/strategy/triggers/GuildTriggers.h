@@ -8,7 +8,7 @@ namespace ai
         PetitionTurnInTrigger(PlayerbotAI* ai) :
             Trigger(ai, "petition turn in trigger", 5) {}
 
-        bool IsActive() { return AI_VALUE(bool, "can hand in petition"); };
+        bool IsActive() override { return AI_VALUE(bool, "can hand in petition"); };
     };
 
     class BuyTabardTrigger : public Trigger {
@@ -16,7 +16,7 @@ namespace ai
         BuyTabardTrigger(PlayerbotAI* ai) :
             Trigger(ai, "buy tabard trigger", 5) {}
 
-        bool IsActive() { return AI_VALUE(bool, "can buy tabard"); };
+        bool IsActive() override { return AI_VALUE(bool, "can buy tabard"); };
     };
 
     class LeaveLargeGuildTrigger : public Trigger {

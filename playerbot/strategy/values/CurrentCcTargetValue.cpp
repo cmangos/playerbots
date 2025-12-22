@@ -13,7 +13,7 @@ public:
     }
 
 public:
-    virtual void CheckAttacker(Unit* attacker, ThreatManager* threatManager)
+    virtual void CheckAttacker(Unit* attacker, ThreatManager* threatManager) override
     {
         if (ai->HasAura(spell, attacker))
             result = attacker;

@@ -7,8 +7,8 @@ namespace ai
 	{
 	public:
         CurrentTargetValue(PlayerbotAI* ai, std::string name = "current target") : UnitManualSetValue(ai, nullptr, name) {}
-        virtual Unit* Get();
-        virtual void Set(Unit* unit);
+        virtual Unit* Get() override;
+        virtual void Set(Unit* unit) override;
 
     private:
         ObjectGuid selection;

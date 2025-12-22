@@ -22,7 +22,7 @@ namespace ai
     public:
         MoveStuckTrigger(PlayerbotAI* ai) : Trigger(ai, "move stuck", 5) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (ai->HasActivePlayerMaster())
                 return false;
@@ -65,7 +65,7 @@ namespace ai
     public:
         MoveLongStuckTrigger(PlayerbotAI* ai) : Trigger(ai, "move long stuck", 5) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (ai->HasActivePlayerMaster())
                 return false;
@@ -149,7 +149,7 @@ namespace ai
     public:
         CombatStuckTrigger(PlayerbotAI* ai) : Trigger(ai, "combat stuck", 5) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (ai->GetState() != BotState::BOT_STATE_COMBAT)
                 return false;
@@ -190,7 +190,7 @@ namespace ai
     public:
         CombatLongStuckTrigger(PlayerbotAI* ai) : Trigger(ai, "combat long stuck", 5) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (ai->GetState() != BotState::BOT_STATE_COMBAT)
                 return false;
@@ -231,7 +231,7 @@ namespace ai
     public:
         LeaderIsAfkTrigger(PlayerbotAI* ai) : Trigger(ai, "leader is afk", 10) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (ai->HasRealPlayerMaster())
                 return false;

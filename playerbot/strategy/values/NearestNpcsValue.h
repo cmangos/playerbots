@@ -12,8 +12,8 @@ namespace ai
           NearestUnitsValue(ai, "nearest npcs", range, ignoreLos) {}
 
     protected:
-        void FindUnits(std::list<Unit*> &targets);
-        bool AcceptUnit(Unit* unit);
+        void FindUnits(std::list<Unit*> &targets) override;
+        bool AcceptUnit(Unit* unit) override;
 	};
 
     class NearestVehiclesValue : public NearestUnitsValue
@@ -23,7 +23,7 @@ namespace ai
             NearestUnitsValue(ai, "nearest vehicles", range) {}
 
     protected:
-        void FindUnits(std::list<Unit*>& targets);
-        bool AcceptUnit(Unit* unit);
+        void FindUnits(std::list<Unit*>& targets) override;
+        bool AcceptUnit(Unit* unit) override;
     };
 }

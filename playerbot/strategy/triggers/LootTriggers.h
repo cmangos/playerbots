@@ -9,7 +9,7 @@ namespace ai
     public:
         LootAvailableTrigger(PlayerbotAI* ai) : Trigger(ai, "loot available") {}
 
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class FarFromCurrentLootTrigger : public Trigger
@@ -17,7 +17,7 @@ namespace ai
     public:
         FarFromCurrentLootTrigger(PlayerbotAI* ai) : Trigger(ai, "far from current loot") {}
 
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
     class CanLootTrigger : public Trigger
@@ -25,6 +25,6 @@ namespace ai
     public:
         CanLootTrigger(PlayerbotAI* ai) : Trigger(ai, "can loot") {}
 
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 }

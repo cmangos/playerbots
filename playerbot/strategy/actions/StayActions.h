@@ -18,15 +18,15 @@ namespace ai
     {
     public:
         StayAction(PlayerbotAI* ai) : StayActionBase(ai, "stay") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 
     class SitAction : public StayActionBase 
     {
     public:
         SitAction(PlayerbotAI* ai) : StayActionBase(ai, "sit") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 }

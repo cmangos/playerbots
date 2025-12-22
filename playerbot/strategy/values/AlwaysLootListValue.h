@@ -8,8 +8,8 @@ namespace ai
 	public:
         AlwaysLootListValue(PlayerbotAI* ai, std::string name = "always loot list") : ManualSetValue<std::set<uint32>&>(ai, list, name) {}
 
-        virtual std::string Save();
-        virtual bool Load(std::string value);
+        virtual std::string Save() override;
+        virtual bool Load(std::string value) override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "always loot list"; } //Must equal iternal name

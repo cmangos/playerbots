@@ -8,7 +8,7 @@ namespace ai
 	public:
         IsFacingValue(PlayerbotAI* ai, std::string name = "is facing") : BoolCalculatedValue(ai, name), Qualified() {}
 
-        virtual bool Calculate()
+        virtual bool Calculate() override
         {
             Unit* target = AI_VALUE(Unit*, qualifier);
             if (!target)

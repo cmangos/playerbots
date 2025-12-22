@@ -122,7 +122,7 @@ namespace ai
     public:
         FutureTravelDestinationsValue(PlayerbotAI* ai, std::string name = "future travel destinations") : ManualSetValue<FutureDestinations*>(ai, new FutureDestinations, name) {}
 
-        ~FutureTravelDestinationsValue() { delete value; }
+        ~FutureTravelDestinationsValue() override { delete value; }
     };
 
     class NoActiveTravelDestinationsValue : public ManualSetValue<bool>, public Qualified

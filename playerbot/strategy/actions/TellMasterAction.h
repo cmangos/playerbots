@@ -25,14 +25,14 @@ namespace ai
     public:
         OutOfReactRangeAction(PlayerbotAI* ai) : MovementAction(ai, "tell out of react range") {}
 
-        virtual bool Execute(Event& event)
+        virtual bool Execute(Event& event) override
         {
             Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
             ai->TellPlayer(requester, BOT_TEXT("wait_travel_close"));
             return true;
         }
 
-        virtual bool isUseful() 
+        virtual bool isUseful() override
         {
             bool canFollow = Follow(AI_VALUE(Unit*, "master target"));
             if (!canFollow)

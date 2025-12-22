@@ -10,7 +10,7 @@ namespace ai
     public:
         ReachAreaTriggerAction(PlayerbotAI* ai) : MovementAction(ai, "reach area trigger") {}
 
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "reach area trigger"; }
@@ -28,7 +28,7 @@ namespace ai
     public:
         AreaTriggerAction(PlayerbotAI* ai) : MovementAction(ai, "area trigger") {}
 
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "area trigger"; }

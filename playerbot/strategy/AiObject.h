@@ -49,7 +49,7 @@ class clazz : public super \
     public: \
         clazz(PlayerbotAI* ai) : super(ai) {} \
     public: \
-        virtual bool IsActive();
+        virtual bool IsActive() override;
 
 #define END_TRIGGER() \
     };
@@ -80,7 +80,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : BuffTrigger(ai, spell) {} \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define MY_BUFF_TRIGGER_A(clazz, spell) \
@@ -88,7 +88,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : MyBuffTrigger(ai, spell) {} \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define BUFF_PARTY_TRIGGER(clazz, spell) \
@@ -103,7 +103,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, spell) {}  \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define DEBUFF_TRIGGER(clazz, spell) \
@@ -125,7 +125,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : DebuffTrigger(ai, spell) {} \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define DEBUFF_ENEMY_TRIGGER(clazz, spell) \
@@ -140,7 +140,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, spell) {} \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define CURE_TRIGGER(clazz, spell, dispel) \
@@ -169,7 +169,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : SpellCanBeCastedTrigger(ai, spell) {} \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define CD_TRIGGER(clazz, spell) \
@@ -191,7 +191,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : InterruptSpellTrigger(ai, spell) {} \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define HAS_AURA_TRIGGER(clazz, spell) \
@@ -206,7 +206,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : HasAuraTrigger(ai, spell) {} \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define HAS_AURA_TRIGGER_TIME(clazz, spell, time) \
@@ -228,7 +228,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : SnareTargetTrigger(ai, spell) {} \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define PROTECT_TRIGGER(clazz, spell) \
@@ -257,7 +257,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : BoostTrigger(ai, spell) {} \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define INTERRUPT_HEALER_TRIGGER(clazz, spell) \
@@ -272,7 +272,7 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : InterruptEnemyHealerTrigger(ai, spell) {} \
-        virtual bool IsActive(); \
+        virtual bool IsActive() override; \
     }
 
 #define CC_TRIGGER(clazz, spell) \

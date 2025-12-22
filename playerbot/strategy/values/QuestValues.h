@@ -152,7 +152,7 @@ namespace ai
     public:
         CanAcceptQuestLowLevelValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can accept quest low level npc"), Qualified() {}
 
-        virtual bool Calculate()
+        virtual bool Calculate() override
         {
             uint32 dialogStatus = AI_VALUE2(uint32, "dialog status", getQualifier());
 #ifndef MANGOSBOT_TWO

@@ -9,7 +9,7 @@ namespace ai
         TravelActionMultiplier(PlayerbotAI* ai) : Multiplier(ai, "travel action") {}
 
     public:
-        virtual float GetValue(Action* action);
+        virtual float GetValue(Action* action) override;
     };
 
     class TravelStrategy : public Strategy

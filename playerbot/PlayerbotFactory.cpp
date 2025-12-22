@@ -1681,7 +1681,7 @@ class DestroyItemsVisitor : public IterateItemsVisitor
 public:
     DestroyItemsVisitor(Player* bot) : IterateItemsVisitor(), bot(bot) {}
 
-    virtual bool Visit(Item* item)
+    virtual bool Visit(Item* item) override
     {
         uint32 id = item->GetProto()->ItemId;
         if (CanKeep(id))

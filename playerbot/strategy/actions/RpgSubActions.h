@@ -244,7 +244,13 @@ namespace ai
     public:
         RpgUseAction(PlayerbotAI* ai, std::string name = "rpg use") : RpgSubAction(ai, name) {}
 
-        virtual bool Execute(Event& event) override { rpg->BeforeExecute();  return ai->DoSpecificAction(ActionName(), ActionEvent(event), true); rpg->AfterExecute(true); DoDelay();}
+        virtual bool Execute(Event& event) override {
+            rpg->BeforeExecute();
+            bool doAction = ai->DoSpecificAction(ActionName(), ActionEvent(event), true);
+            rpg->AfterExecute(true);
+            DoDelay();
+            return doAction;
+        }
 
     private:
         virtual bool isUseful() override;

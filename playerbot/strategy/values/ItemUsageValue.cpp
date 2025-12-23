@@ -1174,7 +1174,6 @@ bool ItemUsageValue::IsHealingPotion(ItemPrototype const* proto)
         (proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE
             || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_POTION
             || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_FLASK
-            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_POTION
             || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE_OTHER))
     {
         for (int j = 0; j < MAX_ITEM_PROTO_SPELLS; j++)
@@ -1198,7 +1197,6 @@ bool ItemUsageValue::IsManaPotion(ItemPrototype const* proto)
         (proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE
             || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_POTION
             || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_FLASK
-            || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_POTION
             || proto->SubClass == ItemSubclassConsumable::ITEM_SUBCLASS_CONSUMABLE_OTHER))
     {
         for (int j = 0; j < MAX_ITEM_PROTO_SPELLS; j++)

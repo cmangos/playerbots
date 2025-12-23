@@ -210,7 +210,7 @@ bool RTSCAction::Execute(Event& event)
 
 				std::string playerName = player->GetName();
 
-				if (args.size() == 5 && args[5] != "*" && playerName.find(args[5]) == std::string::npos)
+				if (args.size() == 5 && args[4] != "*" && playerName.find(args[4]) == std::string::npos)
 					continue;
 
 				std::string fileName = args[2];

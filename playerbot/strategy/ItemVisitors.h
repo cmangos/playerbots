@@ -581,7 +581,7 @@ namespace ai
 
         virtual bool Accept(const ItemPrototype* proto) override { return false; }
 
-        virtual bool Accept(Item* item)
+        virtual bool Accept(Item* item) override
         {
             if (AI_VALUE2_LAZY(ItemUsage, "item usage", ItemQualifier(item).GetQualifier()) == usage)
                 return true;
@@ -601,7 +601,7 @@ namespace ai
 
         virtual bool Accept(const ItemPrototype* proto) override { return false; }
 
-        virtual bool Accept(Item* item)
+        virtual bool Accept(Item* item) override
         {
             ItemUsage usage = AI_VALUE2_LAZY(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
             if (usage == ItemUsage::ITEM_USAGE_VENDOR)

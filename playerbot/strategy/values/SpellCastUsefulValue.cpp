@@ -20,7 +20,7 @@ bool SpellCastUsefulValue::Calculate()
 		return true; // there can be known alternatives
 
 	if (spellInfo->Attributes & SPELL_ATTR_ON_NEXT_SWING ||
-		spellInfo->Attributes & SPELL_ATTR_ON_NEXT_SWING)
+		spellInfo->Attributes & SPELL_ATTR_ON_NEXT_SWING_NO_DAMAGE)
 	{
 		Spell* spell = bot->GetCurrentSpell(CURRENT_MELEE_SPELL);
 #ifdef CMANGOS

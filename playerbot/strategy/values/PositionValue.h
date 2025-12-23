@@ -64,6 +64,6 @@ namespace ai
     {
     public:
         CustomPositionValue(PlayerbotAI* ai, std::string name = "custom position") : ManualSetValue<WorldPosition>(ai, WorldPosition(), name), Qualified() { };
-        virtual WorldPosition Calculate() override { return WorldPosition(bot); };
+        virtual WorldPosition Calculate() { return WorldPosition(bot); };
     };
 }

@@ -12,7 +12,7 @@ namespace ai
 
     public:
         virtual std::string GetTargetName() { return ""; }
-        virtual WorldLocation GetLocation() override { return NullLocation; }
+        virtual WorldLocation GetLocation() { return NullLocation; }
         virtual float GetAngle();
         virtual float GetOffset();
         virtual float GetMaxDistance();

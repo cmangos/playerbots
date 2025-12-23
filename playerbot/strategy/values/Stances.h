@@ -28,7 +28,7 @@ namespace ai
 
     protected:
         virtual WorldLocation GetLocationInternal() override;
-        virtual float GetAngle() = 0 override;
+        virtual float GetAngle() = 0;
 
     public:
     };

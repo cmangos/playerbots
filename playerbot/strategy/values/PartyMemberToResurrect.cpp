@@ -8,7 +8,7 @@ using namespace ai;
 class IsTargetOfResurrectSpell : public SpellEntryPredicate
 {
 public:
-    virtual bool Check(SpellEntry const* spell)
+    virtual bool Check(SpellEntry const* spell) override
     {
         for (int i=0; i<3; i++)
         {
@@ -27,7 +27,7 @@ class FindDeadPlayer : public FindPlayerPredicate, public PlayerbotAIAware
 public:
     FindDeadPlayer(PlayerbotAI* ai, PartyMemberValue* value) : PlayerbotAIAware(ai), value(value) {}
 
-    virtual bool Check(Unit* unit)
+    virtual bool Check(Unit* unit) override
     {
         Player* player = dynamic_cast<Player*>(unit);
 

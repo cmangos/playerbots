@@ -33,7 +33,7 @@ namespace ai
     {
     public:
         CastArcaneBlastAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "arcane blast") {}
-        virtual std::string GetTargetName() { return "current target"; }
+        virtual std::string GetTargetName() override { return "current target"; }
     };
 
     class CastArcaneBarrageAction : public CastSpellAction
@@ -77,7 +77,7 @@ namespace ai
 	public:
 		CastBlizzardAction(PlayerbotAI* ai) : CastSpellAction(ai, "blizzard") {}
         virtual ActionThreatType getThreatType() { return ActionThreatType::ACTION_THREAT_AOE; }
-        virtual bool isUseful() { return CastSpellAction::isUseful() && ai->GetCombatStartTime() && (time(0) - ai->GetCombatStartTime()) > 10; }
+        virtual bool isUseful() override { return CastSpellAction::isUseful() && ai->GetCombatStartTime() && (time(0) - ai->GetCombatStartTime()) > 10; }
 	};
 
 	class CastArcaneIntellectAction : public CastBuffSpellAction
@@ -283,7 +283,7 @@ namespace ai
 	{
 	public:
 	    CastEvocationAction(PlayerbotAI* ai) : CastSpellAction(ai, "evocation") {}
-	    virtual std::string GetTargetName() { return "self target"; }
+	    virtual std::string GetTargetName() override { return "self target"; }
 	};
 
     class CastCounterspellOnEnemyHealerAction : public CastSpellOnEnemyHealerAction

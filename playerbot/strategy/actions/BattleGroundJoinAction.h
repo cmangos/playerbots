@@ -31,8 +31,8 @@ public:
         virtual std::vector<std::string> GetUsedActions() { return {}; }
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif 
-    virtual bool Execute(Event& event);
-    virtual bool isUseful();
+    virtual bool Execute(Event& event) override;
+    virtual bool isUseful() override;
     virtual bool canJoinBg(Player* player, BattleGroundQueueTypeId queueTypeId, BattleGroundBracketId bracketId);
     virtual bool shouldJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroundBracketId bracketId);
 #ifndef MANGOSBOT_ZERO
@@ -77,7 +77,7 @@ public:
         virtual std::vector<std::string> GetUsedActions() { return {}; }
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif 
-    virtual bool Execute(Event& event);
+    virtual bool Execute(Event& event) override;
 };
 
 class BGStatusAction : public Action
@@ -95,8 +95,8 @@ public:
         virtual std::vector<std::string> GetUsedActions() { return {}; }
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif 
-    virtual bool Execute(Event& event);
-    virtual bool isUseful();
+    virtual bool Execute(Event& event) override;
+    virtual bool isUseful() override;
 };
 
 class BGStatusCheckAction : public Action
@@ -113,6 +113,6 @@ public:
         virtual std::vector<std::string> GetUsedActions() { return {}; }
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif 
-    virtual bool Execute(Event& event);
-    virtual bool isUseful();
+    virtual bool Execute(Event& event) override;
+    virtual bool isUseful() override;
 };

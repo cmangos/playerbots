@@ -8,27 +8,27 @@ namespace ai
 	{
 	public:
         ItemCountValue(PlayerbotAI* ai, std::string name = "item count") : Uint32CalculatedValue(ai, name), Qualified() {}
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
 	};
 
     class InventoryItemValue : public CalculatedValue<std::list<Item*> >, public Qualified
     {
     public:
         InventoryItemValue(PlayerbotAI* ai, std::string name = "inventory items") : CalculatedValue<std::list<Item*> >(ai, name), Qualified() {}
-        virtual std::list<Item*> Calculate();
+        virtual std::list<Item*> Calculate() override;
     };
 
     class InventoryItemIdValue : public CalculatedValue<std::list<uint32> >, public Qualified
     {
     public:
         InventoryItemIdValue(PlayerbotAI* ai, std::string name = "inventory item ids") : CalculatedValue<std::list<uint32> >(ai, name), Qualified() {}
-        virtual std::list<uint32> Calculate() { std::list<uint32> retVal;  for (auto& item : AI_VALUE2(std::list<Item*>, "inventory items", getQualifier())) { ItemPrototype const* proto = item->GetProto();  retVal.push_back(proto->ItemId);} return retVal;};
+        virtual std::list<uint32> Calculate() override { std::list<uint32> retVal;  for (auto& item : AI_VALUE2(std::list<Item*>, "inventory items", getQualifier())) { ItemPrototype const* proto = item->GetProto();  retVal.push_back(proto->ItemId);} return retVal;};
     };
 
     class EquipedUsableTrinketValue : public CalculatedValue<std::list<Item*> >, public Qualified
     {
     public:
         EquipedUsableTrinketValue(PlayerbotAI* ai) : CalculatedValue<std::list<Item*> >(ai), Qualified() {}
-        virtual std::list<Item*> Calculate();
+        virtual std::list<Item*> Calculate() override;
     };
 }

@@ -11,7 +11,7 @@ namespace ai
         QuestAction(PlayerbotAI* ai, std::string name = "quest") : Action(ai, name) {}
 
     public:
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
 
     protected:
         virtual bool ProcessQuest(Player* requester, Quest const* quest, WorldObject* questGiver) = 0;
@@ -27,7 +27,7 @@ namespace ai
         QuestUpdateAddKillAction(PlayerbotAI* ai) : Action(ai, "quest update add kill") {}
 
     public:
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
     class QuestUpdateAddItemAction : public Action
@@ -36,7 +36,7 @@ namespace ai
         QuestUpdateAddItemAction(PlayerbotAI* ai) : Action(ai, "quest update add item") {}
 
     public:
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
     class QuestUpdateFailedAction : public Action
@@ -45,7 +45,7 @@ namespace ai
         QuestUpdateFailedAction(PlayerbotAI* ai) : Action(ai, "quest update failed") {}
 
     public:
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
     class QuestUpdateFailedTimerAction : public Action
@@ -54,7 +54,7 @@ namespace ai
         QuestUpdateFailedTimerAction(PlayerbotAI* ai) : Action(ai, "quest update failed timer") {}
 
     public:
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
     class QuestUpdateCompleteAction : public Action
@@ -63,6 +63,6 @@ namespace ai
         QuestUpdateCompleteAction(PlayerbotAI* ai) : Action(ai, "quest update complete") {}
 
     public:
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 }

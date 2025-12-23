@@ -9,9 +9,9 @@ namespace ai
     {
     public:
         SayAction(PlayerbotAI* ai);
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
-        virtual std::string getName() { return "say::" + qualifier; }
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
+        virtual std::string getName() override { return "say::" + qualifier; }
         virtual bool isUsefulWhenStunned() override { return true; }
 
     private:
@@ -25,8 +25,8 @@ namespace ai
     {
     public:
         ChatReplyAction(PlayerbotAI* ai) : Action(ai, "chat message") {}
-        virtual bool Execute(Event& event) { return true; }
-        bool isUseful();
+        virtual bool Execute(Event& event) override { return true; }
+        bool isUseful() override;
         virtual bool isUsefulWhenStunned() override { return true; }
 
         static void GetAIChatPlaceholders(std::map<std::string, std::string>& placeholders, Unit* sender = nullptr, Unit* receiver = nullptr);
@@ -50,7 +50,7 @@ namespace ai
     {
     public:
         SpeakAction(PlayerbotAI* ai) : Action(ai, "speak"), Qualified() {};
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
         virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp

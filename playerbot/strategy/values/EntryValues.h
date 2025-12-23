@@ -10,7 +10,7 @@ namespace ai
     public:
         MCRunesValue(PlayerbotAI* ai, std::string name = "mc runes") : StringCalculatedValue(ai, name, 1), Qualified() {}
 
-        virtual std::string Calculate() { return "176951,176952,176953,176954,176955,176956,176957"; };
+        virtual std::string Calculate() override { return "176951,176952,176953,176954,176955,176956,176957"; };
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "mc runes"; } //Must equal iternal name

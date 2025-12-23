@@ -59,14 +59,14 @@ class RandomPlayerbotMgr : public PlayerbotHolder
 {
     public:
         RandomPlayerbotMgr();
-        virtual ~RandomPlayerbotMgr();
+        virtual ~RandomPlayerbotMgr() override;
         static RandomPlayerbotMgr& instance()
         {
             static RandomPlayerbotMgr instance;
             return instance;
         }
 
-        virtual void UpdateAIInternal(uint32 elapsed, bool minimal = false);
+        virtual void UpdateAIInternal(uint32 elapsed, bool minimal = false) override;
 private:
         void ScaleBotActivity();
         void LogPlayerLocation();
@@ -167,7 +167,7 @@ public:
             return (it != ahMirror.end()) ? it->second : emptyVector;}
         uint32 GetPlayersLevel() { return playersLevel; }
 	protected:
-	    virtual void OnBotLoginInternal(Player * const bot);
+	    virtual void OnBotLoginInternal(Player * const bot) override;
     private:
         //pid values are set in constructor
         botPID pid = botPID(1, 50, -50, 0, 0, 0);

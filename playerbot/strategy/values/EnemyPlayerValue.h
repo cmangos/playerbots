@@ -10,7 +10,7 @@ namespace ai
     {
     public:
         EnemyPlayersValue(PlayerbotAI* ai) : ObjectGuidListCalculatedValue(ai, "enemy players"), Qualified() {}
-        std::list<ObjectGuid> Calculate();
+        std::list<ObjectGuid> Calculate() override;
 
         static bool IsValid(Unit* target, Player* player);
 
@@ -22,14 +22,14 @@ namespace ai
     {
     public:
         HasEnemyPlayersValue(PlayerbotAI* ai, std::string name = "has enemy players") : BoolCalculatedValue(ai, name, 3), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class EnemyPlayerValue : public UnitCalculatedValue
     {
     public:
         EnemyPlayerValue(PlayerbotAI* ai, std::string name = "enemy player") : UnitCalculatedValue(ai, name) {}
-        virtual Unit* Calculate();
+        virtual Unit* Calculate() override;
 
         static float GetMaxAttackDistance(Player* bot);
     };

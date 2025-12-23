@@ -13,7 +13,7 @@ namespace ai
     protected:
         bool Emote(Unit* target, uint32 type, bool textEmote = false);
         bool ReceiveEmote(Player* requester, Player* source, uint32 emote, bool verbal = false);
-        Unit* GetTarget();
+        Unit* GetTarget() override;
         void InitEmotes();
         static std::map<std::string, uint32> emotes;
         static std::map<std::string, uint32> textEmotes;
@@ -24,15 +24,15 @@ namespace ai
     {
     public:
         EmoteAction(PlayerbotAI* ai);
-        virtual bool Execute(Event& event);
-        bool isUseful();
+        virtual bool Execute(Event& event) override;
+        bool isUseful() override;
     };
 
     class TalkAction : public EmoteActionBase
     {
     public:
         TalkAction(PlayerbotAI* ai) : EmoteActionBase(ai, "talk") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
 
         static uint32 GetRandomEmote(Unit* unit, bool textEmote = false);
     };
@@ -42,7 +42,7 @@ namespace ai
     public:
         MountAnimAction(PlayerbotAI* ai, std::string name = "mount anim") : Action(ai, name) {}
 
-        virtual bool isUseful();
-        virtual bool Execute(Event& event);
+        virtual bool isUseful() override;
+        virtual bool Execute(Event& event) override;
     };
 }

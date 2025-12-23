@@ -8,7 +8,7 @@ namespace ai
    {
    public:
        WaitForAttackKeepSafeDistanceAction(PlayerbotAI* ai) : MovementAction(ai, "wait for attack keep safe distance") {}
-       virtual bool Execute(Event& event);
+       virtual bool Execute(Event& event) override;
 
    private:
        const WorldPosition GetBestPoint(Unit* target, float minDistance, float maxDistance) const;

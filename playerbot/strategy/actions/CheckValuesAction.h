@@ -9,6 +9,6 @@ namespace ai
     {
     public:
         CheckValuesAction(PlayerbotAI* ai);
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 }

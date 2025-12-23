@@ -7,6 +7,6 @@ namespace ai
     {
     public:
         SetHomeAction(PlayerbotAI* ai) : MovementAction(ai, "home") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 }

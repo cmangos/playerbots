@@ -13,6 +13,6 @@ namespace ai
             PossibleTargetsValue(ai, "nearest adds", range, true) {}
 
     protected:
-        bool AcceptUnit(Unit* unit);
+        bool AcceptUnit(Unit* unit) override;
 	};
 }

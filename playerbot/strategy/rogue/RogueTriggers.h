@@ -48,7 +48,7 @@ namespace ai
     public:
         TricksOfTheTradeOnTankTrigger(PlayerbotAI* ai) : BuffOnTankTrigger(ai, "tricks of the trade", 1) {}
 
-        virtual bool IsActive() 
+        virtual bool IsActive() override
         {
             return BuffOnTankTrigger::IsActive() &&
                 GetTarget() &&
@@ -125,7 +125,7 @@ namespace ai
     public:
         StealthTrigger(PlayerbotAI* ai) : Trigger(ai, "stealth") {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (ai->HasAura("stealth", bot) || sServerFacade.IsInCombat(bot) || !sServerFacade.IsSpellReady(bot, 1784))
             {
@@ -189,7 +189,7 @@ namespace ai
     public:
         SprintTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "sprint", 2) {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
         {
             if (!sServerFacade.IsSpellReady(bot, 2983))
             {

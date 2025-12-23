@@ -12,7 +12,7 @@ namespace ai
 
     public:
         virtual std::string GetTargetName() { return ""; }
-        virtual WorldLocation GetLocation() { return NullLocation; }
+        virtual WorldLocation GetLocation() override { return NullLocation; }
         virtual float GetAngle();
         virtual float GetOffset();
         virtual float GetMaxDistance();
@@ -44,7 +44,7 @@ namespace ai
     {
     public:
         MoveAheadFormation(PlayerbotAI* ai, std::string name) : MoveFormation(ai, name) {}
-        virtual WorldLocation GetLocation();
+        virtual WorldLocation GetLocation() override;
         virtual WorldLocation GetLocationInternal() { return NullLocation; }
     };
 
@@ -52,10 +52,10 @@ namespace ai
 	{
 	public:
         FormationValue(PlayerbotAI* ai);
-        ~FormationValue() { if (value) { delete value; value = NULL; } }
-        virtual void Reset();
-        virtual std::string Save();
-        virtual bool Load(std::string value);
+        ~FormationValue() override { if (value) { delete value; value = NULL; } }
+        virtual void Reset() override;
+        virtual std::string Save() override;
+        virtual bool Load(std::string value) override;
     };
 
     class FormationPositionValue : public CalculatedValue<WorldPosition>
@@ -63,7 +63,7 @@ namespace ai
     public:
         FormationPositionValue(PlayerbotAI* ai, std::string name = "formation position") : CalculatedValue(ai, name) {}
 
-        virtual WorldPosition Calculate() {
+        virtual WorldPosition Calculate() override {
             Formation* formation = AI_VALUE(Formation*, "formation");
 
             WorldLocation loc = formation->GetLocation();

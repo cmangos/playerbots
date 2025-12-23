@@ -66,8 +66,8 @@ namespace ahbot
         AvailableItemsBag() {}
 
     protected:
-        virtual void Load();
-        virtual std::string GetName() { return "available"; }
+        virtual void Load() override;
+        virtual std::string GetName() override { return "available"; }
     };
 
     class InAuctionItemsBag : public ItemBag
@@ -76,8 +76,8 @@ namespace ahbot
         InAuctionItemsBag(uint32 auctionId) : auctionId(auctionId) {}
 
     protected:
-        virtual void Load();
-        virtual std::string GetName();
+        virtual void Load() override;
+        virtual std::string GetName() override;
 
     private:
         uint32 auctionId;

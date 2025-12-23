@@ -7,7 +7,7 @@ namespace ai
 	{
 	public:
         ItemsUsefulToGiveValue(PlayerbotAI* ai, std::string name = "useful to give") : CalculatedValue(ai, name), Qualified() {}
-        std::list<Item*> Calculate();
+        std::list<Item*> Calculate() override;
 
     private:
         bool IsTradingItem(uint32 entry);
@@ -17,6 +17,6 @@ namespace ai
     {
     public:
         ItemsUsefulToEnchantValue(PlayerbotAI* ai, std::string name = "useful to enchant") : CalculatedValue(ai, name), Qualified() {}
-        std::list<Item*> Calculate();
+        std::list<Item*> Calculate() override;
     };
 }

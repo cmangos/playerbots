@@ -30,7 +30,7 @@ namespace ai
 
         static uint32 RepairCost(const Item* item, bool fullCost = false);
 
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
     };
 
     class MaxGearRepairCostValue : public RepairCostValue
@@ -38,7 +38,7 @@ namespace ai
     public:
         MaxGearRepairCostValue(PlayerbotAI* ai) : RepairCostValue(ai,"max repair cost",checkInterval) {}
 
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
     };
 
     class MinRepairCostValue : public RepairCostValue
@@ -46,21 +46,21 @@ namespace ai
     public:
         MinRepairCostValue(PlayerbotAI* ai) : RepairCostValue(ai, "min repair cost", checkInterval) {}
 
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
     };
 
     class MoneyNeededForValue : public Uint32CalculatedValue, public Qualified
     {
     public:
         MoneyNeededForValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "money needed for", 60), Qualified() {}
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
     };
 
     class TotalMoneyNeededForValue : public Uint32CalculatedValue, public Qualified
     {
     public:
         TotalMoneyNeededForValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "total money needed for", 60), Qualified() {}
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
     private:
         std::vector<NeedMoneyFor> saveMoneyFor = { NeedMoneyFor::repair,NeedMoneyFor::ammo, NeedMoneyFor::ah, NeedMoneyFor::guild, NeedMoneyFor::spells, NeedMoneyFor::travel };
     };
@@ -69,21 +69,21 @@ namespace ai
     {
     public:
         FreeMoneyForValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "free money for"), Qualified() {}
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
     };
 
     class HasAllMoneyForValue : public BoolCalculatedValue, public Qualified
     {
     public:
         HasAllMoneyForValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "has all money for"), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
     
     class ShouldGetMoneyValue : public BoolCalculatedValue
     {
     public:
         ShouldGetMoneyValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "should get money",2) {}
-        virtual bool Calculate() { return bot->GetLevel() > 6 && !AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ammo); };
+        virtual bool Calculate() override { return bot->GetLevel() > 6 && !AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::ammo); };
     };
 }
 

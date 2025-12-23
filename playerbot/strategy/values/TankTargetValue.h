@@ -11,6 +11,6 @@ namespace ai
         TankTargetValue(PlayerbotAI* ai, std::string type = "rti", std::string name = "tank target") : RtiTargetValue(ai, type, name) {}
 
     public:
-        Unit* Calculate();
+        Unit* Calculate() override;
     };
 }

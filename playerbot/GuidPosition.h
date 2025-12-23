@@ -94,7 +94,7 @@ namespace ai
         AsyncGuidPosition(GuidPosition guidP) : GuidPosition(guidP) {};
         virtual void setAreaFlag(int16 flag) { areaFlag = flag; }
         virtual void FetchArea() { areaFlag = WorldPosition::getAreaFlag(); }
-        virtual uint16 getAreaFlag() const { return areaFlag.has_value() ? areaFlag.value() : WorldPosition::getAreaFlag(); }
+        virtual uint16 getAreaFlag() const override { return areaFlag.has_value() ? areaFlag.value() : WorldPosition::getAreaFlag(); }
     private:
         std::optional<int16> areaFlag;
     };

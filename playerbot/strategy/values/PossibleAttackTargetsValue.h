@@ -10,12 +10,12 @@ namespace ai
 	{
 	public:
         PossibleAttackTargetsValue(PlayerbotAI* ai) : ObjectGuidListCalculatedValue(ai, "possible attack targets", 2), Qualified() {}
-        std::list<ObjectGuid> Calculate();
+        std::list<ObjectGuid> Calculate() override;
         static bool IsValid(Unit* target, Player* player, float range = sPlayerbotAIConfig.sightDistance, bool ignoreCC = false, bool checkAttackerValid = true);
         static bool IsPossibleTarget(Unit* target, Player* player, float range, bool ignoreCC);
         static bool HasBreakableCC(Unit* target, Player* player);
         static bool HasUnBreakableCC(Unit* target, Player* player);
-        virtual std::string Format();
+        virtual std::string Format() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "possible attack targets"; } //Must equal iternal name
@@ -39,7 +39,7 @@ namespace ai
     {
     public:
         PossibleAddsValue(PlayerbotAI* const ai, std::string name = "possible adds") : BoolCalculatedValue(ai, name) {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "possible adds"; } //Must equal iternal name

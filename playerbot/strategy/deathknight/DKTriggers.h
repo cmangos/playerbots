@@ -24,7 +24,7 @@ namespace ai
     class DKPresenceTrigger : public BuffTrigger {
     public:
         DKPresenceTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "blood presence") {}
-        virtual bool IsActive();
+        virtual bool IsActive() override;
     };
 
 	class BloodTapTrigger : public BuffTrigger {

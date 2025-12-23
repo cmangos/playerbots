@@ -98,7 +98,7 @@ namespace ai
     public:
         EyeStrategy(PlayerbotAI* ai) : Strategy(ai) {};
         int GetType() override { return STRATEGY_TYPE_GENERIC; }
-        std::string getName() { return "eye"; }
+        std::string getName() override { return "eye"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "eye"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {

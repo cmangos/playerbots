@@ -7,7 +7,7 @@ namespace ai
 	{
 	public:
         NewPlayerNearbyValue(PlayerbotAI* ai) : CalculatedValue<ObjectGuid>(ai, "new player nearby") {}
-        virtual ObjectGuid Calculate();
+        virtual ObjectGuid Calculate() override;
     };
 
     class AlreadySeenPlayersValue : public ManualSetValue<std::set<ObjectGuid>& >

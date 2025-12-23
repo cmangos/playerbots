@@ -113,7 +113,7 @@ namespace ai
     class WorldPointContainer : public WorldPointSquare
     {
     public:
-        virtual float sqInDistance(const WorldPosition& point) const
+        virtual float sqInDistance(const WorldPosition& point) const override
         {
             float minDistSq = FLT_MAX;
             for (auto& p : points)
@@ -126,7 +126,7 @@ namespace ai
             return minDistSq;
         }
 
-        virtual float sqDistance(const WorldPosition& point) const
+        virtual float sqDistance(const WorldPosition& point) const override
         {
             if (IsIn(point))
                 return sqInDistance(point);
@@ -226,7 +226,7 @@ namespace ai
             return nextPoint;
         }
 
-        virtual void AddPoint(WorldPosition* point) {
+        virtual void AddPoint(WorldPosition* point) override {
             points.push_back(point);
 
             WorldPointSquare::AddPoint(point);
@@ -250,7 +250,7 @@ namespace ai
             subSquares.clear();
         }
 
-        virtual float sqInDistance(const WorldPosition& point) const
+        virtual float sqInDistance(const WorldPosition& point) const override
         {
             float minDistSq = FLT_MAX;
             for (auto& [id, sq] : subSquares)
@@ -461,7 +461,7 @@ namespace ai
     class WorldWpSquare : public WorldPointSquareContainer<MapWpSquare>
     {
     public:
-        virtual void AddPoint(WorldPosition* point) {
+        virtual void AddPoint(WorldPosition* point) override {
             WorldPointSquareContainer::AddPoint(point);
         }
     protected:

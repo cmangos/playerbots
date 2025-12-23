@@ -69,7 +69,7 @@ namespace ai
         MultiLineUnitPlacer(float orientation, float range) : UnitPlacer(range), orientation(orientation) {}
 
     public:
-        virtual UnitPosition Place(FormationUnit *unit, uint32 index, uint32 count);
+        virtual UnitPosition Place(FormationUnit *unit, uint32 index, uint32 count) override;
 
     private:
         float orientation;

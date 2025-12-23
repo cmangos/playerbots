@@ -7,28 +7,28 @@ namespace ai
     {
     public:
         AttackersCountValue(PlayerbotAI* ai, std::string name = "attackers count") : Uint8CalculatedValue(ai, name, 4), Qualified() {}
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class PossibleAttackTargetsCountValue : public Uint8CalculatedValue, public Qualified
     {
     public:
         PossibleAttackTargetsCountValue(PlayerbotAI* ai, std::string name = "possible attack targets count") : Uint8CalculatedValue(ai, name, 4), Qualified() {}
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class HasAttackersValue : public BoolCalculatedValue, public Qualified
     {
     public:
         HasAttackersValue(PlayerbotAI* ai, std::string name = "has attackers") : BoolCalculatedValue(ai, name, 4), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class HasPossibleAttackTargetsValue : public BoolCalculatedValue, public Qualified
     {
     public:
         HasPossibleAttackTargetsValue(PlayerbotAI* ai, std::string name = "has possible attack targets") : BoolCalculatedValue(ai, name, 4), Qualified() {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class MyAttackerCountValue : public Uint8CalculatedValue, public Qualified
@@ -41,7 +41,7 @@ namespace ai
             AiObjectContext* ctx = AiObject::context;
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class HasAggroValue : public BoolCalculatedValue, public Qualified
@@ -54,7 +54,7 @@ namespace ai
             AiObjectContext* ctx = AiObject::context;
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class BalancePercentValue : public Uint8CalculatedValue, public Qualified
@@ -67,7 +67,7 @@ namespace ai
             AiObjectContext* ctx = AiObject::context;
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class IncomingDamageValue : public Uint32CalculatedValue, public Qualified
@@ -75,7 +75,7 @@ namespace ai
     public:
         IncomingDamageValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai), Qualified() {}
 
-        virtual uint32 Calculate()
+        virtual uint32 Calculate() override
         {
             Unit* target = AI_VALUE(Unit*, qualifier);
             if (!target)

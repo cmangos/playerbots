@@ -27,14 +27,14 @@ namespace ai
     {
     public:
         BgMastersValue(PlayerbotAI* ai) : SingleCalculatedValue<std::list<CreatureDataPair const*>>(ai, "bg masters"), Qualified() {}
-        virtual std::list<CreatureDataPair const*> Calculate();
+        virtual std::list<CreatureDataPair const*> Calculate() override;
     };
 
     class BgMasterValue : public CDPairCalculatedValue, public Qualified
     {
     public:
         BgMasterValue(PlayerbotAI* ai) : CDPairCalculatedValue(ai, "bg master", 60), Qualified() {}
-        virtual CreatureDataPair const* Calculate();
+        virtual CreatureDataPair const* Calculate() override;
         virtual CreatureDataPair const* NearestBm(bool allowDead = true);
     };
 
@@ -43,7 +43,7 @@ namespace ai
     public:
         RpgBgTypeValue(PlayerbotAI* ai) : CalculatedValue(ai, "rpg bg type") {}
 
-        virtual BattleGroundTypeId Calculate();
+        virtual BattleGroundTypeId Calculate() override;
     };
 
     class FlagCarrierValue : public UnitCalculatedValue
@@ -52,7 +52,7 @@ namespace ai
         FlagCarrierValue(PlayerbotAI* ai, bool sameTeam = false, bool ignoreRange = false) :
             UnitCalculatedValue(ai), sameTeam(sameTeam), ignoreRange(ignoreRange) {}
 
-        virtual Unit* Calculate();
+        virtual Unit* Calculate() override;
 
     private:
         bool sameTeam;

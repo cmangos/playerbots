@@ -8,6 +8,6 @@ namespace ai
     {
     public:
         HonorGainAction(PlayerbotAI* ai) : Action(ai, "honor gain") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 }

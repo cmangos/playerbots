@@ -8,6 +8,6 @@ namespace ai
 	public:
         PetTargetValue(PlayerbotAI* ai, std::string name = "pet target") : UnitCalculatedValue(ai, name) {}
 
-        virtual Unit* Calculate() { return (Unit*)(ai->GetBot()->GetPet()); }
+        virtual Unit* Calculate() override { return (Unit*)(ai->GetBot()->GetPet()); }
     };
 }

@@ -18,7 +18,7 @@ namespace ai
     public:
         FindItemVisitor() : IterateItemsVisitor(), result(0) {}
 
-        virtual bool Visit(Item* item)
+        virtual bool Visit(Item* item) override
         {
             if (!Accept(item->GetProto()) && !Accept(item))
                 return true;
@@ -41,7 +41,7 @@ namespace ai
     public:
         FindAllItemVisitor() : FindItemVisitor() {}
 
-        virtual bool Accept(const ItemPrototype* proto) { return true; };
+        virtual bool Accept(const ItemPrototype* proto) override { return true; };
     };
 
     class FindUsableItemVisitor : public FindItemVisitor {
@@ -51,7 +51,7 @@ namespace ai
             this->bot = bot;
         }
 
-        virtual bool Visit(Item* item)
+        virtual bool Visit(Item* item) override
         {
             if (bot->CanUseItem(item->GetProto()) == EQUIP_ERR_OK)
                 return FindItemVisitor::Visit(item);
@@ -73,7 +73,7 @@ namespace ai
             this->count = count;
         }
 
-        virtual bool Visit(Item* item)
+        virtual bool Visit(Item* item) override
         {
             if (item->GetProto()->Quality != quality)
                 return true;
@@ -101,7 +101,7 @@ namespace ai
     public:
         FindItemsToTradeByQualityVisitor(uint32 quality, int count) : FindItemsByQualityVisitor(quality, count) {}
 
-        virtual bool Visit(Item* item)
+        virtual bool Visit(Item* item) override
         {
             if (item->IsSoulBound())
                 return true;
@@ -116,7 +116,7 @@ namespace ai
         FindItemsByClassVisitor(uint32 itemClass, uint32 itemSubClass)
             : IterateItemsVisitor(), itemClass(itemClass), itemSubClass(itemSubClass) {}
 
-        virtual bool Visit(Item* item)
+        virtual bool Visit(Item* item) override
         {
             if (item->GetProto()->Class != itemClass || item->GetProto()->SubClass != itemSubClass)
                 return true;
@@ -142,7 +142,7 @@ namespace ai
         FindItemsToTradeByClassVisitor(uint32 itemClass, uint32 itemSubClass, int count)
             : IterateItemsVisitor(), count(count), itemClass(itemClass), itemSubClass(itemSubClass) {}
 
-        virtual bool Visit(Item* item)
+        virtual bool Visit(Item* item) override
         {
             if (item->IsSoulBound())
                 return true;
@@ -178,7 +178,7 @@ namespace ai
             this->itemId = itemId;
         }
 
-        virtual bool Visit(Item* item)
+        virtual bool Visit(Item* item) override
         {
             if (item->GetProto()->ItemId == itemId)
                 count += item->GetCount();
@@ -202,7 +202,7 @@ namespace ai
             this->name = name;
         }
 
-        virtual bool Visit(Item* item)
+        virtual bool Visit(Item* item) override
         {
             const ItemPrototype* proto = item->GetProto();
             if (proto && !proto->Name1 && strstri(proto->Name1, name.c_str()))
@@ -222,7 +222,7 @@ namespace ai
             this->name = name;
         }
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
             return proto && proto->Name1 && strstri(proto->Name1, name.c_str());
         }
@@ -238,7 +238,7 @@ namespace ai
             this->id = id;
         }
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
             return proto->ItemId == id;
         }
@@ -254,7 +254,7 @@ namespace ai
             this->ids = ids;
         }
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
             return ids.find(proto->ItemId) != ids.end();
         }
@@ -271,7 +271,7 @@ namespace ai
             this->slot = slot;
         }
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
             uint8 eslot = bot->FindEquipSlot(proto, NULL_SLOT, true);
             return slot == eslot;
@@ -290,7 +290,7 @@ namespace ai
         std::map<uint32, int> items;
         std::map<uint32, bool> soulbound;
 
-        virtual bool Visit(Item* item)
+        virtual bool Visit(Item* item) override
         {
             uint32 id = item->GetProto()->ItemId;
 
@@ -312,7 +312,7 @@ namespace ai
                 count[i] = 0;
         }
 
-        virtual bool Visit(Item* item)
+        virtual bool Visit(Item* item) override
         {
             count[item->GetProto()->Quality]++;
             return true;
@@ -328,7 +328,7 @@ namespace ai
     public:
         FindPotionVisitor(Player* bot, uint32 effectId) : FindUsableItemVisitor(bot), effectId(effectId) {}
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
             if (proto->Class == ITEM_CLASS_CONSUMABLE && (proto->SubClass == ITEM_SUBCLASS_POTION || proto->SubClass == ITEM_SUBCLASS_FLASK))
             {
@@ -361,7 +361,7 @@ namespace ai
             this->conjured = conjured;
         }
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
             return proto->Class == ITEM_CLASS_CONSUMABLE &&
                 (proto->SubClass == ITEM_SUBCLASS_CONSUMABLE || proto->SubClass == ITEM_SUBCLASS_FOOD) &&
@@ -379,7 +379,7 @@ namespace ai
     public:
         FindMountVisitor(Player* bot) : FindUsableItemVisitor(bot) {}
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
 
 #ifdef MANGOSBOT_TWO
@@ -415,7 +415,7 @@ namespace ai
     public:
         FindPetVisitor(Player* bot) : FindUsableItemVisitor(bot) {}
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
             if (proto->Class == ITEM_CLASS_MISC)
             {
@@ -453,7 +453,7 @@ namespace ai
             this->weaponType = weaponType;
         }
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
             if (proto->Class == ITEM_CLASS_PROJECTILE)
             {
@@ -490,7 +490,7 @@ namespace ai
     public:
         FindQuestItemVisitor(Player* bot) : FindUsableItemVisitor(bot) {}
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
             if (proto->Class == ITEM_CLASS_QUEST)
             {
@@ -505,7 +505,7 @@ namespace ai
     public:
         FindOpenItemVisitor(Player* bot) : FindUsableItemVisitor(bot) {}
 
-        virtual bool Accept(const ItemPrototype* proto) { return false; }
+        virtual bool Accept(const ItemPrototype* proto) override { return false; }
 
         virtual bool Accept(Item* item)
         {
@@ -537,7 +537,7 @@ namespace ai
     public:
         FindRecipeVisitor(Player* bot, SkillType skill = SKILL_NONE) : FindUsableItemVisitor(bot), skill(skill) {};
 
-        virtual bool Accept(const ItemPrototype* proto)
+        virtual bool Accept(const ItemPrototype* proto) override
         {
             if (proto->Class == ITEM_CLASS_RECIPE)
             {
@@ -579,7 +579,7 @@ namespace ai
 
         void SetUsage(ItemUsage newUsage = ItemUsage::ITEM_USAGE_NONE) { usage = newUsage; }
 
-        virtual bool Accept(const ItemPrototype* proto) { return false; }
+        virtual bool Accept(const ItemPrototype* proto) override { return false; }
 
         virtual bool Accept(Item* item)
         {
@@ -599,7 +599,7 @@ namespace ai
     public:
         FindVendorItemsVisitor(Player* bot, bool includeAH) : FindItemVisitor(), bot(bot), includeAH(includeAH) { context = bot->GetPlayerbotAI()->GetAiObjectContext(); };
 
-        virtual bool Accept(const ItemPrototype* proto) { return false; }
+        virtual bool Accept(const ItemPrototype* proto) override { return false; }
 
         virtual bool Accept(Item* item)
         {

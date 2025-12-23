@@ -30,29 +30,29 @@ namespace ai
     {
     public:
         CurrentMountSpeedValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "current mount speed", 1), Qualified() {}
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
     };
 
     class FullMountListValue : public SingleCalculatedValue<std::vector<MountValue>>
     {
     public:
         FullMountListValue(PlayerbotAI* ai) : SingleCalculatedValue<std::vector<MountValue>>(ai, "full mount list") {}
-        virtual std::vector<MountValue> Calculate();
+        virtual std::vector<MountValue> Calculate() override;
     };
 
     class MountListValue : public CalculatedValue<std::vector<MountValue>>
     {
     public:
         MountListValue(PlayerbotAI* ai) : CalculatedValue<std::vector<MountValue>>(ai, "mount list", 10) {}
-        virtual std::vector<MountValue> Calculate();
-        virtual std::string Format();
+        virtual std::vector<MountValue> Calculate() override;
+        virtual std::string Format() override;
     };   
 
     class MaxMountSpeedValue : public Uint32CalculatedValue, public Qualified
     {
     public:
         MaxMountSpeedValue(PlayerbotAI* ai) : Uint32CalculatedValue(ai, "max mount speed", 1), Qualified() {}
-        virtual uint32 Calculate();
+        virtual uint32 Calculate() override;
     };
 
     class MountSkillTypeValue : public CalculatedValue<uint32>

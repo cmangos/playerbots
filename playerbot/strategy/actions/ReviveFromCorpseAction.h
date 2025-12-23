@@ -7,22 +7,22 @@ namespace ai
     {
 	public:
 		ReviveFromCorpseAction(PlayerbotAI* ai) : MovementAction(ai, "revive from corpse") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
     class FindCorpseAction : public MovementAction 
     {
     public:
         FindCorpseAction(PlayerbotAI* ai) : MovementAction(ai, "find corpse") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 
 	class SpiritHealerAction : public MovementAction 
     {
 	public:
 	    SpiritHealerAction(PlayerbotAI* ai, std::string name = "spirit healer") : MovementAction(ai,name) {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 }

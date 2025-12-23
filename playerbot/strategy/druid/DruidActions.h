@@ -396,7 +396,7 @@ namespace ai
     public:
         CastProwlAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "prowl") {}
 
-        virtual std::string GetTargetName() { return "self target"; }
+        virtual std::string GetTargetName() override { return "self target"; }
 
         virtual bool isUseful()
         {
@@ -514,7 +514,7 @@ namespace ai
     {
     public:
         CastMaulAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "maul") {}
-        virtual bool isUseful() { return CastMeleeSpellAction::isUseful() && AI_VALUE2(uint8, "rage", "self target") >= 45; }
+        virtual bool isUseful() override { return CastMeleeSpellAction::isUseful() && AI_VALUE2(uint8, "rage", "self target") >= 45; }
     };
 
     class CastBashAction : public CastMeleeSpellAction

@@ -10,7 +10,7 @@ namespace ai
         bool isPossible() override { return true; }
         bool isUseful() override { return true; }
         bool isUsefulWhenStunned() override { return true; }
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
 
     protected:
         bool Teleport(Player* requester, Player *summoner, Player *player);
@@ -22,13 +22,13 @@ namespace ai
     {
     public:
         UseMeetingStoneAction(PlayerbotAI* ai) : SummonAction(ai, "use meeting stone") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
     class AcceptSummonAction : public Action
     {
     public:
         AcceptSummonAction(PlayerbotAI* ai) : Action(ai, "accept summon") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 }

@@ -39,7 +39,7 @@ namespace ai
     public:
         InviteNearbyToGroupAction(PlayerbotAI* ai, std::string name = "invite nearby") : InviteToGroupAction(ai, name) {}
         virtual bool Execute(Event& event) override;
-        virtual bool isUseful();
+        virtual bool isUseful() override;
         virtual bool isUsefulWhenStunned() override { return true; }
     };
 
@@ -60,7 +60,7 @@ namespace ai
     public:
         InviteGuildToGroupAction(PlayerbotAI* ai, std::string name = "invite guild") : InviteNearbyToGroupAction(ai, name) {}
         virtual bool Execute(Event& event) override;
-        virtual bool isUseful() { return bot->GetGuildId() && InviteNearbyToGroupAction::isUseful(); };
+        virtual bool isUseful() override { return bot->GetGuildId() && InviteNearbyToGroupAction::isUseful(); };
 
     private:
         std::vector<Player*> getGuildMembers();

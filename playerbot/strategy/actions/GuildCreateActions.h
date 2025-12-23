@@ -12,7 +12,7 @@ namespace ai
     public:
         BuyPetitionAction(PlayerbotAI* ai) : Action(ai, "buy petition") {}
         virtual bool Execute(Event& event) override;
-        virtual bool isUseful();
+        virtual bool isUseful() override;
         static bool canBuyPetition(Player* bot);
     };
 
@@ -20,31 +20,31 @@ namespace ai
     {
     public:
         PetitionOfferAction(PlayerbotAI* ai, std::string name = "petition offer") : Action(ai, name) {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful() { return sPlayerbotAIConfig.randomBotFormGuild && !bot->GetGuildId(); };
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override { return sPlayerbotAIConfig.randomBotFormGuild && !bot->GetGuildId(); };
     };
 
     class PetitionOfferNearbyAction : public PetitionOfferAction 
     {
     public:
         PetitionOfferNearbyAction(PlayerbotAI* ai) : PetitionOfferAction(ai, "petition offer nearby") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful() { return sPlayerbotAIConfig.randomBotFormGuild && !bot->GetGuildId() && AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) && AI_VALUE(uint8, "petition signs") < sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS); };
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override { return sPlayerbotAIConfig.randomBotFormGuild && !bot->GetGuildId() && AI_VALUE2(uint32, "item count", chat->formatQItem(5863)) && AI_VALUE(uint8, "petition signs") < sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS); };
     };
 
     class PetitionTurnInAction : public ChooseTravelTargetAction 
     {
     public:
         PetitionTurnInAction(PlayerbotAI* ai) : ChooseTravelTargetAction(ai, "turn in petition") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 
     class BuyTabardAction : public ChooseTravelTargetAction 
     {
     public:
         BuyTabardAction(PlayerbotAI* ai) : ChooseTravelTargetAction(ai, "buy tabard") {}
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
     };
 }

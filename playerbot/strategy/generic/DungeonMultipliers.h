@@ -12,6 +12,6 @@ namespace ai
         PreventMoveAwayFromCreatureOnReachToCastMultiplier(PlayerbotAI* ai) : Multiplier(ai, "cast spell after reach") {}
 
     public:
-        virtual float GetValue(Action* action);
+        virtual float GetValue(Action* action) override;
     };
 }

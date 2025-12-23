@@ -16,7 +16,7 @@ namespace ai
         GraveyardValue(PlayerbotAI* ai, std::string name = "graveyard", int checkInterval = 10) : GuidPositionCalculatedValue(ai, name, checkInterval), Qualified() {}
 
     public:
-        GuidPosition Calculate();
+        GuidPosition Calculate() override;
         WorldSafeLocsEntry const* GetAnotherAppropriateClosestGraveyard() const;
     };
 
@@ -26,7 +26,7 @@ namespace ai
         BestGraveyardValue(PlayerbotAI* ai, std::string name = "best graveyard", int checkInterval = 10) : GuidPositionCalculatedValue(ai, name, checkInterval) {}
 
     public:
-        GuidPosition Calculate();
+        GuidPosition Calculate() override;
     };
 
     class ShouldSpiritHealerValue : public BoolCalculatedValue
@@ -35,6 +35,6 @@ namespace ai
         ShouldSpiritHealerValue(PlayerbotAI* ai, std::string name = "should spirit healer") : BoolCalculatedValue(ai, name) {}
 
     public:
-        bool Calculate();
+        bool Calculate() override;
     };
 }

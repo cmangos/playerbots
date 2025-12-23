@@ -8,9 +8,9 @@ namespace ai
     public:
         SeeSpellLocationValue(PlayerbotAI* ai, std::string name = "see spell location") : LogCalculatedValue(ai, name) {};
 
-        virtual bool EqualToLast(WorldPosition value) { return value == lastValue; };
+        virtual bool EqualToLast(WorldPosition value) override { return value == lastValue; };
 
-        WorldPosition Calculate() { return this->value; }
+        WorldPosition Calculate() override { return this->value; }
     };
 
     class RTSCSelectedValue : public ManualSetValue<bool>
@@ -29,7 +29,7 @@ namespace ai
     {
     public:
         RTSCSavedLocationValue(PlayerbotAI* ai, WorldPosition defaultvalue = WorldPosition(), std::string name = "RTSC saved location") : ManualSetValue(ai, defaultvalue, name), Qualified() {};
-        virtual std::string Save() { return value.to_string(); }
-        virtual bool Load(std::string text) { value = WorldPosition(text); return true; }
+        virtual std::string Save() override { return value.to_string(); }
+        virtual bool Load(std::string text) override { value = WorldPosition(text); return true; }
     };
 }

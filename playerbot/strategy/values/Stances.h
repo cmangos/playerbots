@@ -16,9 +16,9 @@ namespace ai
         virtual WorldLocation GetNearLocation(float angle, float distance);
 
     public:
-        virtual WorldLocation GetLocation();
-        virtual std::string GetTargetName() { return "current target"; }
-        virtual float GetMaxDistance() { return sPlayerbotAIConfig.contactDistance; }
+        virtual WorldLocation GetLocation() override;
+        virtual std::string GetTargetName() override { return "current target"; }
+        virtual float GetMaxDistance() override { return sPlayerbotAIConfig.contactDistance; }
     };
 
     class MoveStance : public Stance
@@ -27,8 +27,8 @@ namespace ai
         MoveStance(PlayerbotAI* ai, std::string name) : Stance (ai, name) {}
 
     protected:
-        virtual WorldLocation GetLocationInternal();
-        virtual float GetAngle() = 0;
+        virtual WorldLocation GetLocationInternal() override;
+        virtual float GetAngle() = 0 override;
 
     public:
     };
@@ -38,10 +38,10 @@ namespace ai
 	{
 	public:
         StanceValue(PlayerbotAI* ai);
-        ~StanceValue() { if (value) { delete value; value = NULL; } }
-        virtual void Reset();
-        virtual std::string Save();
-        virtual bool Load(std::string value);
+        ~StanceValue() override { if (value) { delete value; value = NULL; } }
+        virtual void Reset() override;
+        virtual std::string Save() override;
+        virtual bool Load(std::string value) override;
     };
 
     class SetStanceAction : public ChatCommandAction

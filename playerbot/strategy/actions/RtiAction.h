@@ -18,7 +18,7 @@ namespace ai
     {
     public:
         MarkRtiAction(PlayerbotAI* ai) : Action(ai, "mark rti") {}
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
         virtual bool isUsefulWhenStunned() override { return true; }
     };
 }

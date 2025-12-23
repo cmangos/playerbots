@@ -21,8 +21,8 @@ namespace ai
     {
     public:
         CompositeChatFilter(PlayerbotAI* ai);
-        virtual ~CompositeChatFilter();
-        std::string Filter(std::string message);
+        virtual ~CompositeChatFilter() override;
+        std::string Filter(std::string message) override;
 #ifdef GenerateBotHelp
         virtual std::list<ChatFilter*> GetFilters() { return filters;}
 #endif

@@ -56,7 +56,7 @@ namespace ai
         virtual ~CalculatedValue() {}
 
     public:
-        virtual T Get()
+        virtual T Get() override
         {
             time_t now = time(0);
             if (!lastCheckTime || (checkInterval < 2 && (now - lastCheckTime > 0.1)) || now - lastCheckTime >= checkInterval / 2)
@@ -68,17 +68,17 @@ namespace ai
             }
             return value;
         }
-        virtual T LazyGet()
+        virtual T LazyGet() override
         {
             if (!lastCheckTime)
                 return Get();
             return value;
         }
-        virtual void Set(T value) { this->value = value; }
+        virtual void Set(T value) override { this->value = value; }
         virtual void Update() { }
-        virtual void Reset() { lastCheckTime = 0; }
-        virtual bool Expired() { return Expired(checkInterval / 2); }
-        virtual bool Expired(uint32 interval) { return time(0) - lastCheckTime >= interval; }
+        virtual void Reset() override { lastCheckTime = 0; }
+        virtual bool Expired() override { return Expired(checkInterval / 2); }
+        virtual bool Expired(uint32 interval) override { return time(0) - lastCheckTime >= interval; }
     protected:
         virtual T Calculate() = 0;
 
@@ -93,7 +93,7 @@ namespace ai
     public:
         SingleCalculatedValue(PlayerbotAI* ai, std::string name = "value") : CalculatedValue<T>(ai, name) { this->Reset(); }
 
-        virtual T Get()
+        virtual T Get() override
         {
             time_t now = time(0);
             if (!this->lastCheckTime)
@@ -115,8 +115,8 @@ namespace ai
         virtual bool CanCheckChange() { return !lastChangeTime || (time(0) - lastChangeTime > minChangeInterval && !EqualToLast(this->value)); }
         virtual bool UpdateChange() { if (!CanCheckChange()) return false; lastChangeTime = time(0); lastValue = this->value; return true; }
 
-        virtual void Set(T value) { CalculatedValue<T>::Set(value); UpdateChange(); }
-        virtual T Get() { this->value = CalculatedValue<T>::Get(); UpdateChange(); return this->value; }
+        virtual void Set(T value) override { CalculatedValue<T>::Set(value); UpdateChange(); }
+        virtual T Get() override { this->value = CalculatedValue<T>::Get(); UpdateChange(); return this->value; }
 
         time_t LastChangeOn() { Get(); return lastChangeTime; }
         uint32 LastChangeDelay() override { return time(0) - LastChangeOn(); }
@@ -161,7 +161,7 @@ namespace ai
         Uint8CalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<uint8>(ai, name, checkInterval) {}
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             std::ostringstream out; out << (int)this->Calculate();
             return out.str();
@@ -174,7 +174,7 @@ namespace ai
         Uint32CalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<uint32>(ai, name, checkInterval) {}
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             std::ostringstream out; out << (int)this->Calculate();
             return out.str();
@@ -187,7 +187,7 @@ namespace ai
         FloatCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<float>(ai, name, checkInterval) {}
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             std::ostringstream out; out << this->Calculate();
             return out.str();
@@ -200,7 +200,7 @@ namespace ai
         BoolCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<bool>(ai, name, checkInterval) {}
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             return this->Calculate() ? "true" : "false";
         }
@@ -212,7 +212,7 @@ namespace ai
         StringCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<std::string>(ai, name, checkInterval) {}
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             return this->Calculate();
         }
@@ -224,7 +224,7 @@ namespace ai
         UnitCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<Unit*>(ai, name, checkInterval) { this->lastCheckTime = time(0) - checkInterval / 2; }
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             Unit* unit = this->Calculate();
             return unit ? unit->GetName() : "<none>";
@@ -237,7 +237,7 @@ namespace ai
         CDPairCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<CreatureDataPair const*>(ai, name, checkInterval) { this->lastCheckTime = time(0) - checkInterval / 2; }
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             CreatureDataPair const* creatureDataPair = this->Calculate();
             CreatureInfo const* bmTemplate = ObjectMgr::GetCreatureTemplate(creatureDataPair->second.id);
@@ -251,7 +251,7 @@ namespace ai
         CDPairListCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<std::list<CreatureDataPair const*>>(ai, name, checkInterval) { this->lastCheckTime = time(0) - checkInterval / 2; }
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             std::ostringstream out; out << "{";
             std::list<CreatureDataPair const*> cdPairs = this->Calculate();
@@ -271,7 +271,7 @@ namespace ai
         ObjectGuidCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<ObjectGuid>(ai, name, checkInterval) { this->lastCheckTime = time(0) - checkInterval / 2; }
 
-        virtual std::string Format();
+        virtual std::string Format() override;
     };
 
     class ObjectGuidListCalculatedValue : public CalculatedValue<std::list<ObjectGuid> >
@@ -280,7 +280,7 @@ namespace ai
         ObjectGuidListCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<std::list<ObjectGuid> >(ai, name, checkInterval) { this->lastCheckTime = time(0) - checkInterval / 2; }
 
-        virtual std::string Format();
+        virtual std::string Format() override;
     };
 
     class GuidPositionCalculatedValue : public CalculatedValue<GuidPosition>
@@ -289,7 +289,7 @@ namespace ai
         GuidPositionCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<GuidPosition>(ai, name, checkInterval) { this->lastCheckTime = time(0) - checkInterval / 2; }
 
-        virtual std::string Format();
+        virtual std::string Format() override;
     };
 
     class GuidPositionListCalculatedValue : public CalculatedValue<std::list<GuidPosition> >
@@ -298,7 +298,7 @@ namespace ai
         GuidPositionListCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
             CalculatedValue<std::list<GuidPosition> >(ai, name, checkInterval) { this->lastCheckTime = time(0) - checkInterval / 2; }
 
-        virtual std::string Format();
+        virtual std::string Format() override;
     };
 
     template<class T>
@@ -310,11 +310,11 @@ namespace ai
         virtual ~ManualSetValue() {}
 
     public:
-        virtual T Get() { return value; }
-        virtual T LazyGet() { return value; }
-        virtual void Set(T value) { this->value = value; }
+        virtual T Get() override { return value; }
+        virtual T LazyGet() override { return value; }
+        virtual void Set(T value) override { this->value = value; }
         virtual void Update() { }
-        virtual void Reset() { value = defaultValue; }
+        virtual void Reset() override { value = defaultValue; }
 
     protected:
         T value;
@@ -327,7 +327,7 @@ namespace ai
         UnitManualSetValue(PlayerbotAI* ai, Unit* defaultValue, std::string name = "value") :
             ManualSetValue<Unit*>(ai, defaultValue, name) {}
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             Unit* unit = Get();
             return unit ? unit->GetName() : "<none>";
@@ -348,7 +348,7 @@ namespace ai
     public:
         BoolManualSetValue(PlayerbotAI* ai, bool defaultValue = false, std::string name = "manual bool") : ManualSetValue<bool>(ai, defaultValue, name), Qualified() {};
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             return this->value ? "true" : "false";
         }
@@ -359,7 +359,7 @@ namespace ai
     public:
         IntManualSetValue(PlayerbotAI* ai, int32 defaultValue = 0, std::string name = "manual int") : ManualSetValue<int32>(ai, defaultValue, name), Qualified() {};
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             return std::to_string(this->value);
         }
@@ -370,13 +370,13 @@ namespace ai
     public:
         IntManualSetSavedValue(PlayerbotAI* ai, int32 defaultValue = -1, std::string name = "manual saved int") : IntManualSetValue(ai, defaultValue, name){};
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             return std::to_string(this->value);
         }
 
-        virtual std::string Save() { return std::to_string(this->value); }
-        virtual bool Load(std::string text) { value = stoi(text); return true; }
+        virtual std::string Save() override { return std::to_string(this->value); }
+        virtual bool Load(std::string text) override { value = stoi(text); return true; }
     };
 
     class StringManualSetValue : public ManualSetValue<std::string>, public Qualified
@@ -384,7 +384,7 @@ namespace ai
     public:
         StringManualSetValue(PlayerbotAI* ai, std::string defaultValue = "", std::string name = "manual string") : ManualSetValue<std::string>(ai, defaultValue, name), Qualified() {};
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             return this->value;
         }
@@ -394,12 +394,12 @@ namespace ai
     {
     public:
         StringManualSetSavedValue(PlayerbotAI* ai, std::string defaultValue = "", std::string name = "manual saved string") : ManualSetValue<std::string>(ai, defaultValue, name), Qualified() {};
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             return this->value;
         }
-        virtual std::string Save() { return value; }
-        virtual bool Load(std::string text) { value = text; return true; }
+        virtual std::string Save() override { return value; }
+        virtual bool Load(std::string text) override { value = text; return true; }
     };
 
     class TimeManualSetValue : public ManualSetValue<time_t>, public Qualified
@@ -407,7 +407,7 @@ namespace ai
     public:
         TimeManualSetValue(PlayerbotAI* ai, int32 defaultValue = 0, std::string name = "manual time") : ManualSetValue<time_t>(ai, defaultValue, name), Qualified() {};
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             return std::to_string(this->value);
         }

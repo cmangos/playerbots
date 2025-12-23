@@ -25,14 +25,14 @@ namespace ai
     class ActionExecutionListeners : public ActionExecutionListener
     {
     public:
-        virtual ~ActionExecutionListeners();
+        virtual ~ActionExecutionListeners() override;
 
     // ActionExecutionListener
     public:
-        virtual bool Before(Action* action, const Event& event);
-        virtual bool AllowExecution(Action* action, const Event& event);
-        virtual void After(Action* action, bool executed, const Event& event);
-        virtual bool OverrideResult(Action* action, bool executed, const Event& event);
+        virtual bool Before(Action* action, const Event& event) override;
+        virtual bool AllowExecution(Action* action, const Event& event) override;
+        virtual void After(Action* action, bool executed, const Event& event) override;
+        virtual bool OverrideResult(Action* action, bool executed, const Event& event) override;
 
     public:
         void Add(ActionExecutionListener* listener)

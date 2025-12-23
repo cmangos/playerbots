@@ -11,7 +11,7 @@ namespace ai
         RandomBotUpdateAction(PlayerbotAI* ai) : Action(ai, "random bot update")
         {}
 
-        virtual bool Execute(Event& event)
+        virtual bool Execute(Event& event) override
         {
             if (!sRandomPlayerbotMgr.IsRandomBot(bot))
                 return false;
@@ -25,7 +25,7 @@ namespace ai
             return sRandomPlayerbotMgr.ProcessBot(bot);
         }
 
-        virtual bool isUseful()
+        virtual bool isUseful() override
         {
             return AI_VALUE(bool, "random bot update");
         }

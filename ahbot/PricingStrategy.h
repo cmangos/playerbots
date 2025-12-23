@@ -39,8 +39,8 @@ namespace ahbot
         BuyOnlyRarePricingStrategy(Category* category) : PricingStrategy(category) {}
 
     public:
-        virtual uint32 GetBuyPrice(ItemPrototype const* proto, uint32 auctionHouse, std::ostringstream *explain = NULL);
-        virtual uint32 GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket = false, std::ostringstream *explain = NULL);
+        virtual uint32 GetBuyPrice(ItemPrototype const* proto, uint32 auctionHouse, std::ostringstream *explain = NULL) override;
+        virtual uint32 GetSellPrice(ItemPrototype const* proto, uint32 auctionHouse, bool ignoreMarket = false, std::ostringstream *explain = NULL) override;
     };
 
     class PricingStrategyFactory

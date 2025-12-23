@@ -9,8 +9,8 @@ namespace ai
     {
     public:
         UpdateGearAction(PlayerbotAI* ai);
-        virtual bool Execute(Event& event);
-        virtual bool isUseful();
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
 
     private:
         uint8 GetProgressionLevel(uint32 itemLevel);

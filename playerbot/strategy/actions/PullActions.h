@@ -20,7 +20,7 @@ namespace ai
         PullMyTargetAction(PlayerbotAI* ai) : PullRequestAction(ai, "pull my target") {}
     
     private:
-        Unit* GetTarget(Event& event);
+        Unit* GetTarget(Event& event) override;
     };
 
     class PullRTITargetAction : public PullRequestAction
@@ -29,7 +29,7 @@ namespace ai
         PullRTITargetAction(PlayerbotAI* ai) : PullRequestAction(ai, "pull rti target") {}
 
     private:
-        Unit* GetTarget(Event& event);
+        Unit* GetTarget(Event& event) override;
     };
 
     class PullStartAction : public Action

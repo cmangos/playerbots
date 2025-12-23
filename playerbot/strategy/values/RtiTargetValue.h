@@ -28,7 +28,7 @@ namespace ai
             return index;
         }
 
-        Unit *Calculate()
+        Unit *Calculate() override
         {
             Group *group = bot->GetGroup();
             if(!group)

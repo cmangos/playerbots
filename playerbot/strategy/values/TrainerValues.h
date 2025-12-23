@@ -14,7 +14,7 @@ namespace ai
         TrainableSpellMapValue(PlayerbotAI* ai) : SingleCalculatedValue<trainableSpellMap*>(ai, "trainable spell map") {}
 
         virtual trainableSpellMap* Calculate() override;
-        virtual ~TrainableSpellMapValue() { delete value; }
+        virtual ~TrainableSpellMapValue() override { delete value; }
     };
 
     class TrainableSpellsValue : public CalculatedValue<std::vector< TrainerSpell const*>>, public Qualified

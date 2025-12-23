@@ -11,7 +11,7 @@ namespace ai
     public:
         NoRtiTrigger(PlayerbotAI* ai) : Trigger(ai, "no rti target") {}
 
-        virtual bool IsActive()
+        virtual bool IsActive() override
 		{
             if (AI_VALUE(Unit*, "rti target"))
             {

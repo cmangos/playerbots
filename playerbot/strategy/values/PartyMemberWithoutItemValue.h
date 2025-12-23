@@ -12,7 +12,7 @@ namespace ai
           PartyMemberValue(ai, name), Qualified() {}
 
     protected:
-        virtual Unit* Calculate();
+        virtual Unit* Calculate() override;
         virtual FindPlayerPredicate* CreatePredicate();
     };
 
@@ -22,7 +22,7 @@ namespace ai
         PartyMemberWithoutFoodValue(PlayerbotAI* ai, std::string name = "party member without food") : PartyMemberWithoutItemValue(ai, name) {}
 
     protected:
-        virtual FindPlayerPredicate* CreatePredicate();
+        virtual FindPlayerPredicate* CreatePredicate() override;
     };
 
     class PartyMemberWithoutWaterValue : public PartyMemberWithoutItemValue
@@ -31,6 +31,6 @@ namespace ai
         PartyMemberWithoutWaterValue(PlayerbotAI* ai, std::string name = "party member without water") : PartyMemberWithoutItemValue(ai, name) {}
 
     protected:
-        virtual FindPlayerPredicate* CreatePredicate();
+        virtual FindPlayerPredicate* CreatePredicate() override;
     };
 }

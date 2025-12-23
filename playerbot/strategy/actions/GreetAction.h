@@ -10,6 +10,6 @@ namespace ai
     {
     public:
         GreetAction(PlayerbotAI* ai);
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 }

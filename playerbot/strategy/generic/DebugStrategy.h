@@ -6,8 +6,8 @@ namespace ai
     {
     public:
         DebugStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug"; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug"; } //Must equal iternal name
@@ -21,8 +21,8 @@ namespace ai
     {
     public:
         DebugActionStrategy(PlayerbotAI* ai) : DebugStrategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug action"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug action"; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug action"; } //Must equal iternal name
@@ -36,8 +36,8 @@ namespace ai
     {
     public:
         DebugMoveStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug move"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug move"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug move"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -50,8 +50,8 @@ namespace ai
     {
     public:
         DebugRpgStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug rpg"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug rpg"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug rpg"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -65,8 +65,8 @@ namespace ai
     {
     public:
         DebugSpellStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug spell"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug spell"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug spell"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -80,8 +80,8 @@ namespace ai
     {
     public:
         DebugTravelStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug travel"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug travel"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug travel"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -95,8 +95,8 @@ namespace ai
     {
     public:
         DebugThreatStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug threat"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug threat"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug threat"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -110,8 +110,8 @@ namespace ai
     {
     public:
         DebugMountStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug mount"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug mount"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug mount"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -125,8 +125,8 @@ namespace ai
     {
     public:
         DebugGrindStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug grind"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug grind"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug grind"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -140,8 +140,8 @@ namespace ai
     {
     public:
         DebugLootStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug loot"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug loot"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug loot"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -155,8 +155,8 @@ namespace ai
     {
     public:
         DebugLogStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug log"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug log"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug log"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -170,8 +170,8 @@ namespace ai
     {
     public:
         DebugLogNameStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug logname"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug logname"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug logname"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -185,8 +185,8 @@ namespace ai
     {
     public:
         AIChatStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "ai chat"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "ai chat"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "ai chat"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -200,8 +200,8 @@ namespace ai
     {
     public:
         DebugLLMStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug llm"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug llm"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug llm"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -215,8 +215,8 @@ namespace ai
     {
     public:
         DebugStuckStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug stuck"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug stuck"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug stuck"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
@@ -230,8 +230,8 @@ namespace ai
     {
     public:
         DebugXpStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        virtual int GetType() { return STRATEGY_TYPE_NONCOMBAT; }
-        virtual std::string getName() { return "debug xp"; }
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug xp"; }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "debug xp"; } //Must equal iternal name
         virtual std::string GetHelpDescription() { return "This strategy will give debug output when the bot gains xp"; }

@@ -7,7 +7,7 @@ namespace ai
 	{
 	public:
         ItemForSpellValue(PlayerbotAI* ai, std::string name = "item for spell") : CalculatedValue<Item*>(ai, name), Qualified() {}
-        virtual Item* Calculate();
+        virtual Item* Calculate() override;
 
     private:
         Item* GetItemFitsToSpellRequirements(Item* itemForSpell, SpellEntry const* spellInfo);

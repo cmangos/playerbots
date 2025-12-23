@@ -12,7 +12,7 @@ public:
         PlayerbotAIAware(ai), FindPlayerPredicate(), item(item) {}
 
 public:
-    virtual bool Check(Unit* unit)
+    virtual bool Check(Unit* unit) override
     {
         Pet* pet = dynamic_cast<Pet*>(unit);
         if (pet && (pet->getPetType() == MINI_PET || pet->getPetType() == SUMMON_PET))
@@ -63,7 +63,7 @@ public:
     PlayerWithoutFoodPredicate(PlayerbotAI* ai) : PlayerWithoutItemPredicate(ai, "conjured food") {}
 
 public:
-    virtual bool Check(Unit* unit)
+    virtual bool Check(Unit* unit) override
     {
         if (!PlayerWithoutItemPredicate::Check(unit))
             return false;
@@ -83,7 +83,7 @@ public:
     PlayerWithoutWaterPredicate(PlayerbotAI* ai) : PlayerWithoutItemPredicate(ai, "conjured water") {}
 
 public:
-    virtual bool Check(Unit* unit)
+    virtual bool Check(Unit* unit) override
     {
         if (!PlayerWithoutItemPredicate::Check(unit))
             return false;

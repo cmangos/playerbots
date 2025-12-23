@@ -13,7 +13,7 @@ public:
     }
 
 public:
-    virtual void CheckAttacker(Unit* attacker, ThreatManager* threatManager)
+    virtual void CheckAttacker(Unit* attacker, ThreatManager* threatManager) override
     {
         // do not use this logic for pvp
         if (attacker->IsPlayer())
@@ -54,7 +54,7 @@ public:
     }
 
 public:
-    virtual void CheckAttacker(Unit* attacker, ThreatManager* threatManager)
+    virtual void CheckAttacker(Unit* attacker, ThreatManager* threatManager) override
     {
         Group* group = ai->GetBot()->GetGroup();
         if (group)

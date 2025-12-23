@@ -57,7 +57,7 @@ namespace ai
     public:
         NearStance(PlayerbotAI* ai) : MoveStance(ai, "near") {}
 
-        virtual float GetAngle()
+        virtual float GetAngle() override
         {
             Unit* target = GetTarget();
 
@@ -110,7 +110,7 @@ namespace ai
     public:
         TankStance(PlayerbotAI* ai) : MoveStance(ai, "tank") {}
 
-        virtual float GetAngle()
+        virtual float GetAngle() override
         {
             Unit* target = GetTarget();
             return target->GetOrientation();
@@ -122,7 +122,7 @@ namespace ai
     public:
         TurnBackStance(PlayerbotAI* ai) : MoveStance(ai, "turnback") {}
 
-        virtual float GetAngle()
+        virtual float GetAngle() override
         {
             Unit* target = GetTarget();
             Group* group = bot->GetGroup();
@@ -151,7 +151,7 @@ namespace ai
     public:
         BehindStance(PlayerbotAI* ai) : MoveStance(ai, "behind") {}
 
-        virtual float GetAngle()
+        virtual float GetAngle() override
         {
             Unit* target = GetTarget();
             Group* group = bot->GetGroup();

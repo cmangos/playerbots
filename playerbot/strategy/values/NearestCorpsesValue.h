@@ -12,8 +12,8 @@ namespace ai
           NearestUnitsValue(ai, "nearest corpses", range) {}
 
     protected:
-        void FindUnits(std::list<Unit*> &targets);
-        bool AcceptUnit(Unit* unit);
+        void FindUnits(std::list<Unit*> &targets) override;
+        bool AcceptUnit(Unit* unit) override;
 
 	};
 }

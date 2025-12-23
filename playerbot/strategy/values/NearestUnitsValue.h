@@ -16,7 +16,7 @@ namespace ai
             ObjectGuidListCalculatedValue(ai, name, 2), range(range), ignoreLos(ignoreLos) {}
 
 	public:
-        virtual std::list<ObjectGuid> Calculate()
+        virtual std::list<ObjectGuid> Calculate() override
         {
             std::list<Unit*> targets;
             FindUnits(targets);
@@ -50,13 +50,13 @@ namespace ai
             NearestUnitsValue(ai, "nearest stealthed units", range) {}
 
     protected:
-        void FindUnits(std::list<Unit*>& targets)
+        void FindUnits(std::list<Unit*>& targets) override
         {
             MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(bot, range);
             MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
             Cell::VisitAllObjects(bot, searcher, range);
         }
-        bool AcceptUnit(Unit* unit)
+        bool AcceptUnit(Unit* unit) override
         {
             if (!unit || !unit->IsAlive() || !sServerFacade.IsHostileTo(unit, bot))
                 return false;
@@ -77,7 +77,7 @@ namespace ai
         NearestStealthedSingleUnitValue(PlayerbotAI* ai) :
             UnitCalculatedValue(ai, "nearest stealthed unit") {}
 
-        virtual Unit* Calculate()
+        virtual Unit* Calculate() override
         {
             std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "nearest stealthed units");
             if (targets.empty())

@@ -7,7 +7,7 @@ namespace ai
 		RememberTaxiAction(PlayerbotAI* ai) : Action(ai, "remember taxi") {}
 
     public:
-        virtual bool Execute(Event& event);
+        virtual bool Execute(Event& event) override;
     };
 
 }

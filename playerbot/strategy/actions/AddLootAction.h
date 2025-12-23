@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         AddLootAction(PlayerbotAI* ai) : ChatCommandAction(ai, "add loot") {}
-        virtual bool isUseful();
+        virtual bool isUseful() override;
 
     private:
         bool Execute(Event& event) override;
@@ -28,7 +28,7 @@ namespace ai
     {
     public:
         AddAllLootAction(PlayerbotAI* ai, std::string name = "add all loot") : ChatCommandAction(ai, name) {}
-        virtual bool isUseful();
+        virtual bool isUseful() override;
 
     protected:
         virtual bool AddLoot(Player* requester, ObjectGuid guid);

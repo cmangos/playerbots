@@ -8,6 +8,6 @@ namespace ai
 	public:
         SelfTargetValue(PlayerbotAI* ai, std::string name = "self target") : UnitCalculatedValue(ai, name) {}
 
-        virtual Unit* Calculate() { return ai->GetBot(); }
+        virtual Unit* Calculate() override { return ai->GetBot(); }
     };
 }

@@ -14,7 +14,7 @@ namespace ai
         DistanceValue(PlayerbotAI* ai, std::string name = "distance") : FloatCalculatedValue(ai, name), Qualified() {}
 
     public:
-        float Calculate()
+        float Calculate() override
         {
             if (qualifier == "loot target")
             {
@@ -110,7 +110,7 @@ namespace ai
         InsideTargetValue(PlayerbotAI* ai, std::string name = "inside target") : BoolCalculatedValue(ai, name), Qualified() {}
 
     public:
-        bool Calculate()
+        bool Calculate() override
         {
             Unit* target = AI_VALUE(Unit*, qualifier);
 

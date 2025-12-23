@@ -16,7 +16,7 @@ namespace ai
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
 
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class IsDeadValue : public BoolCalculatedValue, public Qualified
@@ -30,21 +30,21 @@ namespace ai
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
 
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class PetIsDeadValue : public BoolCalculatedValue
     {
     public:
         PetIsDeadValue(PlayerbotAI* ai, std::string name = "pet dead") : BoolCalculatedValue(ai, name) {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class PetIsHappyValue : public BoolCalculatedValue
     {
     public:
         PetIsHappyValue(PlayerbotAI* ai, std::string name = "pet happy") : BoolCalculatedValue(ai, name) {}
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class RageValue : public Uint8CalculatedValue, public Qualified
@@ -58,7 +58,7 @@ namespace ai
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
 
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class EnergyValue : public Uint8CalculatedValue, public Qualified
@@ -72,7 +72,7 @@ namespace ai
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
 
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class ManaValue : public Uint8CalculatedValue, public Qualified
@@ -86,7 +86,7 @@ namespace ai
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
 
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class HasManaValue : public BoolCalculatedValue, public Qualified
@@ -100,7 +100,7 @@ namespace ai
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
 
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class ComboPointsValue : public Uint8CalculatedValue, public Qualified
@@ -114,7 +114,7 @@ namespace ai
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
 
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class IsMountedValue : public BoolCalculatedValue, public Qualified
@@ -128,7 +128,7 @@ namespace ai
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
 
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 
     class IsInCombatValue : public MemoryCalculatedValue<bool>, public Qualified
@@ -142,10 +142,10 @@ namespace ai
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
 
-        virtual bool EqualToLast(bool value) { return value == lastValue; }
-        virtual bool Calculate();
+        virtual bool EqualToLast(bool value) override { return value == lastValue; }
+        virtual bool Calculate() override;
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             return this->Calculate() ? "true" : "false";
         }
@@ -155,28 +155,28 @@ namespace ai
     {
     public:
         BagSpaceValue(PlayerbotAI* ai, std::string name = "bag space") : Uint8CalculatedValue(ai, name) {}
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class DurabilityValue : public Uint8CalculatedValue
     {
     public:
         DurabilityValue(PlayerbotAI* ai, std::string name = "durability") : Uint8CalculatedValue(ai, name) {}
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class DurabilityInventoryValue : public Uint8CalculatedValue
     {
     public:
         DurabilityInventoryValue(PlayerbotAI* ai, std::string name = "durability inventory") : Uint8CalculatedValue(ai, name) {}
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class LowestDurabilityValue : public Uint8CalculatedValue
     {
     public:
         LowestDurabilityValue(PlayerbotAI* ai, std::string name = "lowest durability") : Uint8CalculatedValue(ai, name) {}
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
      class SpeedValue : public Uint8CalculatedValue, public Qualified
@@ -190,14 +190,14 @@ namespace ai
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
 
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class IsInGroupValue : public BoolCalculatedValue
     {
     public:
         IsInGroupValue(PlayerbotAI* ai, std::string name = "in group") : BoolCalculatedValue(ai, name) {}
-        virtual bool Calculate() { return bot->GetGroup(); }
+        virtual bool Calculate() override { return bot->GetGroup(); }
     };
 
     class DeathCountValue : public ManualSetValue<uint32>
@@ -205,7 +205,7 @@ namespace ai
     public:
         DeathCountValue(PlayerbotAI* ai, std::string name = "death count") : ManualSetValue<uint32>(ai, 0, name) {}
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             std::ostringstream out; out << (int)this->value;
             return out.str();
@@ -217,10 +217,10 @@ namespace ai
     {
     public:
         ExperienceValue(PlayerbotAI* ai, std::string name = "experience", uint32 checkInterval = 60) : MemoryCalculatedValue<uint32>(ai, name, checkInterval) {}
-        virtual bool EqualToLast(uint32 value) { return value != lastValue; }
-        virtual uint32 Calculate() { return bot->GetUInt32Value(PLAYER_XP);}
+        virtual bool EqualToLast(uint32 value) override { return value != lastValue; }
+        virtual uint32 Calculate() override { return bot->GetUInt32Value(PLAYER_XP);}
 
-        virtual std::string Format()
+        virtual std::string Format() override
         {
             std::ostringstream out; out << (int)this->Calculate() << " last change:" << LastChangeDelay() << "s";
             return out.str();
@@ -231,7 +231,7 @@ namespace ai
     {
     public:
         HonorValue(PlayerbotAI* ai, std::string name = "honor", uint32 checkInterval = 60) : ExperienceValue(ai, name, checkInterval) {}
-        virtual bool EqualToLast(uint32 value) { return value != lastValue; }
-        virtual uint32 Calculate() { return bot->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS); }        
+        virtual bool EqualToLast(uint32 value) override { return value != lastValue; }
+        virtual uint32 Calculate() override { return bot->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS); }        
     };
 }

@@ -30,7 +30,7 @@ namespace ai
         virtual bool Execute(Event& event) override;
         virtual bool isUsefulWhenStunned() override { return true; }
 
-        virtual bool isUseful() { return ai->HasStrategy("rpg quest", BotState::BOT_STATE_NON_COMBAT); }
+        virtual bool isUseful() override { return ai->HasStrategy("rpg quest", BotState::BOT_STATE_NON_COMBAT); }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "clean quest log"; }

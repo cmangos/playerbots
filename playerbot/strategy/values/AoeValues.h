@@ -19,7 +19,7 @@ namespace ai
 
 	public:
         static std::list<ObjectGuid> FindMaxDensity(Player* bot, float range = 100.0f);
-        virtual uint8 Calculate();
+        virtual uint8 Calculate() override;
     };
 
     class HasAreaDebuffValue : public BoolCalculatedValue, public Qualified
@@ -33,6 +33,6 @@ namespace ai
 
             return ctx->GetValue<Unit*>(qualifier)->Get();
         }
-        virtual bool Calculate();
+        virtual bool Calculate() override;
     };
 }

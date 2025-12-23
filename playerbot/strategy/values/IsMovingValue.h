@@ -9,7 +9,7 @@ namespace ai
 	public:
         IsMovingValue(PlayerbotAI* ai, std::string name = "is moving") : BoolCalculatedValue(ai, name), Qualified() {}
 
-        virtual bool Calculate()
+        virtual bool Calculate() override
         {
             Unit* target = AI_VALUE(Unit*, qualifier);
 
@@ -25,7 +25,7 @@ namespace ai
 	public:
         IsSwimmingValue(PlayerbotAI* ai, std::string name = "is swimming") : BoolCalculatedValue(ai, name), Qualified() {}
 
-        virtual bool Calculate()
+        virtual bool Calculate() override
         {
             Unit* target = AI_VALUE(Unit*, qualifier);
 

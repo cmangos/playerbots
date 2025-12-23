@@ -100,10 +100,10 @@ namespace ai
     {
     public:
         CastRemoveShadowformAction(PlayerbotAI* ai) : Action(ai, "remove shadowform") {}
-        virtual bool isUseful() { return ai->HasAura("shadowform", AI_VALUE(Unit*, "self target")); }
+        virtual bool isUseful() override { return ai->HasAura("shadowform", AI_VALUE(Unit*, "self target")); }
         virtual bool isPossible() { return true; }
 
-        virtual bool Execute(Event& event) 
+        virtual bool Execute(Event& event) override
         {
             ai->RemoveAura("shadowform");
             return true;

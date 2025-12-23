@@ -21,7 +21,7 @@ namespace ai
     {
     public:
         RogueBoostBuffTrigger(PlayerbotAI* ai, std::string spellName) : BoostTrigger(ai, spellName, 200.0f) {}
-        virtual bool IsPossible() { return !ai->HasAura("stealth", bot); }
+        virtual bool IsActive() override { if (ai->HasAura("stealth", bot)) return false; return BoostTrigger::IsActive(); }
     };
 
     class RuptureTrigger : public NoDebuffAndComboPointsAvailableTrigger

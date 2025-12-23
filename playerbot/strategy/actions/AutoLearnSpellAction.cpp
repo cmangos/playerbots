@@ -278,7 +278,7 @@ void AutoLearnSpellAction::GetClassQuestItem(Quest const* quest, std::ostringstr
                     else if (result == EQUIP_ERR_INVENTORY_FULL)
                     {
                         MailDraft draft("Item(s) from quest reward", quest->GetTitle());
-                        Item* item = item->CreateItem(itemP->ItemId, quest->RewItemCount[i]);
+                        Item* item = Item::CreateItem(itemP->ItemId, quest->RewItemCount[i]);
                         draft.AddItem(item);
                         draft.SendMailTo(MailReceiver(bot), MailSender(bot));
                         *out << "Could not add item " << chat->formatItem(itemP) << " from " << quest->GetTitle() << ". " << bot->GetName() << "'s inventory is full.";

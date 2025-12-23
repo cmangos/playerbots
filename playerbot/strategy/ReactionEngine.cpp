@@ -243,7 +243,7 @@ bool ReactionEngine::ListenAndExecute(Action* action, Event& event)
         out << " [reaction]";
 
         if(actionExecuted)
-            out << " (duration: " << ((float)incomingReaction.GetDuration() / IN_MILLISECONDS) << "s)";
+            out << " (duration: " << ((float)incomingReaction.GetDuration() / static_cast<float>(IN_MILLISECONDS)) << "s)";
 
         ai->TellPlayerNoFacing(ai->GetMaster(), out);
     }

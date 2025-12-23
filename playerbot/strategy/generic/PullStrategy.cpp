@@ -269,7 +269,7 @@ void PullBackStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     triggers.push_back(new TriggerNode(
         "return to pull position",
-        NextAction::array(0, new NextAction("return to pull position", ACTION_MOVE + 5.0f), NULL)));
+        NextAction::array(0, new NextAction("return to pull position", static_cast<float>(ACTION_MOVE) + 5.0f), NULL)));
 }
 
 void PullBackStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

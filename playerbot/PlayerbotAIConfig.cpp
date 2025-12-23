@@ -206,10 +206,9 @@ bool PlayerbotAIConfig::Initialize()
     randomBotAutoCreate = config.GetBoolDefault("AiPlayerbot.RandomBotAutoCreate", true);
     minRandomBots = config.GetIntDefault("AiPlayerbot.MinRandomBots", 50);
     maxRandomBots = config.GetIntDefault("AiPlayerbot.MaxRandomBots", 200);
-    randomBotUpdateInterval = config.GetIntDefault("AiPlayerbot.RandomBotUpdateInterval", 1);
+    randomBotUpdateInterval = config.GetIntDefault("AiPlayerbot.RandomBotUpdateInterval", 1 * 1000);
     randomBotCountChangeMinInterval = config.GetIntDefault("AiPlayerbot.RandomBotCountChangeMinInterval", 1 * 1800);
     randomBotCountChangeMaxInterval = config.GetIntDefault("AiPlayerbot.RandomBotCountChangeMaxInterval", 2 * 3600);
-    loginBoostPercentage = config.GetFloatDefault("AiPlayerbot.LoginBoostPercentage", 90);
     randomBotTimedLogout = config.GetBoolDefault("AiPlayerbot.RandomBotTimedLogout", true);
     randomBotTimedOffline = config.GetBoolDefault("AiPlayerbot.RandomBotTimedOffline", false);
     minRandomBotInWorldTime = config.GetIntDefault("AiPlayerbot.MinRandomBotInWorldTime", 1 * 1800);
@@ -227,8 +226,7 @@ bool PlayerbotAIConfig::Initialize()
     randomBotTeleportNearPlayerMaxAmountRadius = config.GetFloatDefault("AiPlayerbot.RandomBotTeleportNearPlayerMaxAmountRadius", 0.0f);
     randomBotTeleportMinInterval = config.GetIntDefault("AiPlayerbot.RandomBotTeleportTeleportMinInterval", 2 * 3600);
     randomBotTeleportMaxInterval = config.GetIntDefault("AiPlayerbot.RandomBotTeleportTeleportMaxInterval", 48 * 3600);
-    randomBotsPerInterval = config.GetIntDefault("AiPlayerbot.RandomBotsPerInterval", 3);
-    randomBotsMaxLoginsPerInterval = config.GetIntDefault("AiPlayerbot.RandomBotsMaxLoginsPerInterval", randomBotsPerInterval);
+    randomBotsMaxLoginsPerInterval = config.GetIntDefault("AiPlayerbot.RandomBotsMaxLoginsPerInterval", 10);
     minRandomBotsPriceChangeInterval = config.GetIntDefault("AiPlayerbot.MinRandomBotsPriceChangeInterval", 2 * 3600);
     maxRandomBotsPriceChangeInterval = config.GetIntDefault("AiPlayerbot.MaxRandomBotsPriceChangeInterval", 48 * 3600);
     //Auction house settings

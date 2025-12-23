@@ -161,14 +161,13 @@ public:
     bool randomBotAutoCreate;
     uint32 minRandomBots, maxRandomBots;
     uint32 randomBotUpdateInterval, randomBotCountChangeMinInterval, randomBotCountChangeMaxInterval;
-    uint32 loginBoostPercentage;
     bool randomBotTimedLogout, randomBotTimedOffline;
     uint32 minRandomBotInWorldTime, maxRandomBotInWorldTime;
     uint32 minRandomBotRandomizeTime, maxRandomBotRandomizeTime;
     uint32 minRandomBotChangeStrategyTime, maxRandomBotChangeStrategyTime;
     uint32 minRandomBotReviveTime, maxRandomBotReviveTime;
     uint32 minRandomBotPvpTime, maxRandomBotPvpTime;
-    uint32 randomBotsPerInterval, randomBotsMaxLoginsPerInterval;
+    uint32 randomBotsMaxLoginsPerInterval;
     uint32 minRandomBotsPriceChangeInterval, maxRandomBotsPriceChangeInterval;
     //Auction house settings
     bool shouldQueryAHListingsOutsideOfAH;

@@ -892,15 +892,14 @@ AiPlayerbot.FleeingEnabled = 1
 #AiPlayerbot.OpenGoSpell = 6477
 
 # Intervals
-AiPlayerbot.RandomBotUpdateInterval = 60
+#AiPlayerbot.RandomBotUpdateInterval = 1000
+#AiPlayerbot.RandomBotsMaxLoginsPerInterval = 10
 AiPlayerbot.RandomBotCountChangeMinInterval = 1800
 AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #AiPlayerbot.MinRandomBotInWorldTime = 3600
 #AiPlayerbot.MaxRandomBotInWorldTime = 1209600
 #AiPlayerbot.MinRandomBotRandomizeTime = 7200
 #AiPlayerbot.MaxRandomRandomizeTime = 1209600
-#AiPlayerbot.RandomBotsPerInterval = 60
-#AiPlayerbot.RandomBotsMaxLoginsPerInterval = 30
 #AiPlayerbot.MinRandomBotsPriceChangeInterval = 7200
 #AiPlayerbot.MaxRandomBotsPriceChangeInterval = 172800
 
@@ -953,9 +952,6 @@ AiPlayerbot.PerfMonEnabled = 0
 
 # Instant randomize: Force randombots to randomize on initial login.
 # AiPlayerbot.InstantRandomize = 0
-
-# Percentage of (min) bots online that speeds up login speed by 2x.
-# AiPlayerbot.LoginBoostPercentage = 90
 
 # Bot cheats. Same as "/w <bot> cheat (+/-/?) <cheatcode>" but only globally for all bots.
 # Values: taxi            (all nodes learned)

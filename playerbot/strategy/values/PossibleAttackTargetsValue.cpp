@@ -215,7 +215,7 @@ std::string PossibleAttackTargetsValue::Format()
             out << target;
     }
 
-    return out.str().c_str();
+    return out.str();
 }
 
 bool PossibleAttackTargetsValue::IsTapped(Unit* target, Player* player)

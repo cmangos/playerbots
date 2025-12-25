@@ -291,7 +291,7 @@ std::string QueryItemUsageAction::QueryItemPower(ItemQualifier& qualifier)
         char color[32];
         sprintf(color, "%x", ItemQualityColors[qualifier.GetProto()->Quality]);
         out << "power: |h|c" << color << "|h" << std::to_string(power) << "|h|cffffffff";
-        return out.str().c_str();
+        return out.str();
     }
 
     return "";

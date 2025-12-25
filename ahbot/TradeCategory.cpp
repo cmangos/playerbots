@@ -163,8 +163,6 @@ bool TradeSkill::IsCraftedBy(ItemPrototype const* proto, uint32 spellId)
 
         if (IsCraftedBySpell(proto, craftId))
             return true;
-
-        continue;
     }
 
     return false;

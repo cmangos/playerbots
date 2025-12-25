@@ -56,7 +56,7 @@ bool is_numeric(const std::string& number)
 
 bool is_integer(const std::string& number)
 {
-   return is_numeric(number.c_str()) && std::strchr(number.c_str(), '.') == 0;
+   return is_numeric(number) && std::strchr(number.c_str(), '.') == 0;
 }
 
 std::vector<std::string> GuidFilterValue::QualifierToEntryList(const std::string& qualifier)

@@ -2241,8 +2241,6 @@ void PlayerbotFactory::InitEquipment(bool incremental, bool syncWithMaster, bool
 
     for(uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
     {
-        if (slot == EQUIPMENT_SLOT_END)
-            continue;
         if (slot == EQUIPMENT_SLOT_TABARD)
         {
             if (!sPlayerbotAIConfig.randomGearTabards || (urand(0, 100) < 100 * sPlayerbotAIConfig.randomGearTabardsChance))

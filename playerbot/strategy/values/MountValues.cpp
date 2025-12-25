@@ -271,7 +271,7 @@ std::string MountListValue::Format()
     for (auto& mount : this->Calculate())
     {
         std::string speed = std::to_string(mount.GetSpeed(false) + 1) + "%" + (mount.GetSpeed(true) ? ("/" + (std::to_string(mount.GetSpeed(true) + 1) + "%")) : "");
-        out << (mount.IsItem() ? "(item)" : "(spell)") << chat->formatSpell(mount.GetSpellId()) << "(" << speed.c_str() << "),";
+        out << (mount.IsItem() ? "(item)" : "(spell)") << chat->formatSpell(mount.GetSpellId()) << "(" << speed << "),";
     }
     out << "}";
     return out.str();

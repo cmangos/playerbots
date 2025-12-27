@@ -54,4 +54,27 @@ namespace ai
         virtual std::vector<std::string> GetRelatedStrategies() { return { "follow" }; }
 #endif
     };
+
+    class WanderStrategy : public Strategy
+    {
+    public:
+        WanderStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        std::string getName() override { return "wander"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "wander"; } //Must equal internal name
+        virtual std::string GetHelpDescription() {
+            return "If bot is farther than 30 yd -> follow master. If within 30 yd -> move freely.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "follow", "free", "stay", "guard" }; }
+#endif
+    private:
+        void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
+        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitReactionTriggers(std::list<TriggerNode*>& triggers) override;
+
+        virtual void OnStrategyAdded(BotState state) override;
+        virtual void OnStrategyRemoved(BotState state) override;
+    };
 }

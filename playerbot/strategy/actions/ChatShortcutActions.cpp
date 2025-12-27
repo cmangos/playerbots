@@ -39,8 +39,8 @@ bool FollowChatShortcutAction::Execute(Event& event)
         return false;
 
     ai->Reset();
-    ai->ChangeStrategy("+follow,-passive,-stay", BotState::BOT_STATE_NON_COMBAT);
-    ai->ChangeStrategy("-stay,-guard", BotState::BOT_STATE_COMBAT);
+    ai->ChangeStrategy("+follow,-passive,-stay,-wander,", BotState::BOT_STATE_NON_COMBAT);
+    ai->ChangeStrategy("-stay,-guard,-wander", BotState::BOT_STATE_COMBAT);
 
     if(ai->HasStrategy("passive", BotState::BOT_STATE_COMBAT)) //Remove flee
         ai->ChangeStrategy("-passive,-follow", BotState::BOT_STATE_COMBAT);
@@ -99,8 +99,8 @@ bool StayChatShortcutAction::Execute(Event& event)
         return false;
 
     ai->Reset();
-    ai->ChangeStrategy("+stay,-follow,-passive", BotState::BOT_STATE_NON_COMBAT);
-    ai->ChangeStrategy("+stay,-follow,-passive", BotState::BOT_STATE_COMBAT);
+    ai->ChangeStrategy("+stay,-follow,-wander,-passive", BotState::BOT_STATE_NON_COMBAT);
+    ai->ChangeStrategy("+stay,-follow,-wander,-passive", BotState::BOT_STATE_COMBAT);
 
     SetPosition(bot);
     SetPosition(bot, "stay");
@@ -119,8 +119,8 @@ bool GuardChatShortcutAction::Execute(Event& event)
         return false;
 
     ai->Reset();
-    ai->ChangeStrategy("+guard,-follow,-passive", BotState::BOT_STATE_NON_COMBAT);
-    ai->ChangeStrategy("+guard,-follow,-passive", BotState::BOT_STATE_COMBAT);
+    ai->ChangeStrategy("+guard,-follow,-wander,-passive", BotState::BOT_STATE_NON_COMBAT);
+    ai->ChangeStrategy("+guard,-follow,-wander,-passive", BotState::BOT_STATE_COMBAT);
 
     SetPosition(bot);
     SetPosition(bot, "guard");
@@ -145,6 +145,22 @@ bool FreeChatShortcutAction::Execute(Event& event)
     PrintStrategies(ai, event);
 
     ai->TellPlayerNoFacing(requester, BOT_TEXT("free_moving"));
+    return true;
+}
+
+bool WanderChatShortcutAction::Execute(Event& event)
+{
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    if (!requester)
+        return false;
+
+    ai->Reset();
+    ai->ChangeStrategy("+wander,-follow,-guard,-stay,-passive", BotState::BOT_STATE_NON_COMBAT);
+    ai->ChangeStrategy("-follow,-guard,-stay,-passive", BotState::BOT_STATE_COMBAT);
+
+    PrintStrategies(ai, event);
+
+    ai->TellPlayerNoFacing(requester, BOT_TEXT("wandering"));
     return true;
 }
 

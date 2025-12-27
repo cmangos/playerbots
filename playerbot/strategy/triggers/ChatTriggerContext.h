@@ -74,6 +74,7 @@ namespace ai
             creators["gbank"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "gb"); };
             creators["bank"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "bank"); };
             creators["follow"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "follow"); };
+            creators["wander"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "wander"); };
             creators["stay"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "stay"); };
             creators["guard"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "guard"); };
             creators["free"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "free"); };

@@ -18,9 +18,9 @@ namespace ai
     {
     public:
         FollowChatShortcutAction(PlayerbotAI* ai) : MovementAction(ai, "follow chat shortcut") {}
-        virtual bool Execute(Event& event) override;
-        virtual bool isPossible() override { return true; }
-        virtual bool isUseful() override { return true; }
+        virtual bool Execute(Event& event);
+        virtual bool isPossible() { return true; }
+        virtual bool isUseful() { return true; }
     };
 
     class StayChatShortcutAction : public ReturnPositionResetAction
@@ -43,6 +43,14 @@ namespace ai
     {
     public:
         FreeChatShortcutAction(PlayerbotAI* ai) : ReturnPositionResetAction(ai, "free chat shortcut") {}
+        virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
+    };
+
+    class WanderChatShortcutAction : public ReturnPositionResetAction
+    {
+    public:
+        WanderChatShortcutAction(PlayerbotAI* ai) : ReturnPositionResetAction(ai, "wander chat shortcut") {}
         virtual bool Execute(Event& event) override;
         virtual bool isUsefulWhenStunned() override { return true; }
     };

@@ -47,6 +47,14 @@ namespace ai
         virtual bool isUsefulWhenStunned() override { return true; }
     };
 
+    class WanderChatShortcutAction : public ReturnPositionResetAction
+    {
+    public:
+        WanderChatShortcutAction(PlayerbotAI* ai) : ReturnPositionResetAction(ai, "wander chat shortcut") {}
+        virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
+    };
+
     class FleeChatShortcutAction : public ReturnPositionResetAction
     {
     public:

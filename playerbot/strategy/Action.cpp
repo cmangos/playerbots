@@ -23,12 +23,12 @@ NextAction** NextAction::clone(NextAction** actions)
     if (!actions)
         return NULL;
 
-    int size = NextAction::size(actions);
+    int iSize = NextAction::size(actions);
 
-    NextAction** res = new NextAction*[size + 1];
-    for (int i=0; i<size; i++)
+    NextAction** res = new NextAction*[iSize + 1];
+    for (int i=0; i<iSize; i++)
         res[i] = new NextAction(*actions[i]);
-    res[size] = NULL;
+    res[iSize] = NULL;
     return res;
 }
 
@@ -56,20 +56,20 @@ NextAction** NextAction::array(uint32 n, ...)
     va_list vl;
     va_start(vl, n);
 
-    int size = 0;
+    int iSize = 0;
     NextAction* cur = NULL;
     do
     {
         cur = va_arg(vl, NextAction*);
-        size++;
+        iSize++;
     }
     while (cur);
 
     va_end(vl);
 
-    NextAction** res = new NextAction*[size];
+    NextAction** res = new NextAction*[iSize];
     va_start(vl, n);
-    for (int i=0; i<size; i++)
+    for (int i=0; i<iSize; i++)
         res[i] = va_arg(vl, NextAction*);
     va_end(vl);
 

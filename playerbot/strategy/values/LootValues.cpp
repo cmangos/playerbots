@@ -512,5 +512,5 @@ std::string ActiveRolls::Format()
 		out << ",";
 	}
 
-	return out.str().c_str();
+	return out.str();
 }

@@ -498,7 +498,7 @@ std::string AttackersValue::Format()
             out << target;      
     }
 
-    return out.str().c_str();
+    return out.str();
 }
 
 std::list<ObjectGuid> AttackersTargetingMeValue::Calculate()

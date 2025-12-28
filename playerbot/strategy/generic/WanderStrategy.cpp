@@ -12,7 +12,7 @@ void WanderStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "wander medium",
-        NextAction::array(0, new NextAction("check mount state", ACTION_IDLE), new NextAction("flee to master", ACTION_IDLE), NULL)));
+        NextAction::array(0, new NextAction("check mount state", ACTION_IDLE), new NextAction("follow", ACTION_IDLE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "wander near",
@@ -31,7 +31,7 @@ void WanderStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "wander medium",
-        NextAction::array(0, new NextAction("check mount state", ACTION_IDLE), new NextAction("flee to master", ACTION_IDLE), NULL)));
+        NextAction::array(0, new NextAction("check mount state", ACTION_IDLE), new NextAction("follow", ACTION_IDLE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "wander near",

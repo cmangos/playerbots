@@ -6237,23 +6237,26 @@ std::string PlayerbotAI::BotStateToString(BotState state)
 
 std::string PlayerbotAI::GetDefaultMovementStrategy()
 {
-    Player* master = GetGroupMaster();
-
     // Player master -> follow
-    if (master && master->IsPlayer())
+    if (HasActivePlayerMaster())
         return "follow";
 
-    // Bot master -> wander
+    // Bot/no master -> wander
     return "wander";
 }
 
 void PlayerbotAI::EnsureDefaultMovementStrategy(Player* requester)
 {
-    BotState state = BotState::BOT_STATE_NON_COMBAT;
-    std::string desired = GetDefaultMovementStrategy();
+    std::string movement = GetDefaultMovementStrategy();
 
-    if (HasStrategy(desired, state))
-        return;
+    for (BotState state : { BotState::BOT_STATE_REACTION, BotState::BOT_STATE_NON_COMBAT })
+    {
+        if (HasStrategy("stay", state))
+            ChangeStrategy("-stay", state);
+
+        if (!HasStrategy(movement, state))
+            ChangeStrategy("+" + movement, state);
+    }
 
     if (requester)
     {
@@ -6264,8 +6267,6 @@ void PlayerbotAI::EnsureDefaultMovementStrategy(Player* requester)
             false
         );
     }
-
-    ChangeStrategy("+" + desired + ",-stay", state);
 }
 
 std::string PlayerbotAI::HandleRemoteCommand(std::string command)

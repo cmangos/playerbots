@@ -22,10 +22,12 @@ bool ReviveFromCorpseAction::Execute(Event& event)
     {
         if (sServerFacade.IsDistanceLessThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.farDistance))
         {
-            if (!ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+            std::string defaultMovementStrategy = ai->GetDefaultMovementStrategy();
+
+            if (!ai->HasStrategy(defaultMovementStrategy, BotState::BOT_STATE_NON_COMBAT))
             {
                 ai->TellPlayerNoFacing(requester, "Welcome back!", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-                ai->ChangeStrategy("+follow,-stay", BotState::BOT_STATE_NON_COMBAT);
+                ai->ChangeStrategy("+" + defaultMovementStrategy + ",-stay", BotState::BOT_STATE_NON_COMBAT);
                 return true;
             }
         }

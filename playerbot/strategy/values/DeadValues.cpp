@@ -149,7 +149,9 @@ GuidPosition BestGraveyardValue::Calculate()
     }
 
     //Revive near master.
-    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
+    if ((ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+        ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)) &&
+        ai->GetGroupMaster() && ai->GetGroupMaster() != bot)
     {
         GuidPosition masterGraveyard = AI_VALUE2(GuidPosition, "graveyard", "master");
         if (masterGraveyard)

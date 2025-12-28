@@ -9,7 +9,8 @@ using namespace ai;
 
 GuidPosition FreeMoveCenterValue::Calculate()
 {       
-    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+        ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT))
     {
         Unit* followTarget = AI_VALUE(Unit*, "follow target");
 
@@ -76,8 +77,9 @@ float FreeMoveRangeValue::Calculate()
     float maxDist = INTERACTION_DISTANCE;
 
     bool hasFollow = ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT);
+    bool hasWander = ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT);
     bool hasGuard = ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT);
-    bool hasFree = !hasFollow && !hasGuard;
+    bool hasFree = !hasFollow && !hasGuard && !hasWander;
 
     //When far away from master stop trying to limit the bot.
     if (!hasFollow && (ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT) || (WorldPosition(followTarget).fDist(bot) > (hasFree ? sPlayerbotAIConfig.sightDistance : sPlayerbotAIConfig.maxFreeMoveDistance))))

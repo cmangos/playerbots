@@ -143,7 +143,10 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
             continue;
         }
 
-        if (!bot->InBattleGround() && master && ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && sServerFacade.GetDistance2d(master, unit) > sPlayerbotAIConfig.proximityDistance)
+        if (!bot->InBattleGround() && master &&
+            (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+             ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)) &&
+            sServerFacade.GetDistance2d(master, unit) > sPlayerbotAIConfig.proximityDistance)
         {
             if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
                 ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (far from master).");

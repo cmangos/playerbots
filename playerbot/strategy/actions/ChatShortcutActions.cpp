@@ -171,8 +171,9 @@ bool FleeChatShortcutAction::Execute(Event& event)
         return false;
 
     ai->Reset();
-    ai->ChangeStrategy("+follow,+passive", BotState::BOT_STATE_NON_COMBAT);
-    ai->ChangeStrategy("+follow,+passive", BotState::BOT_STATE_COMBAT);
+    std::string movement = ai->GetDefaultMovementStrategy();
+    ai->ChangeStrategy("+" + movement + ",+passive", BotState::BOT_STATE_NON_COMBAT);
+    ai->ChangeStrategy("+" + movement + ",+passive", BotState::BOT_STATE_COMBAT);
     ResetPosition();
 
     PrintStrategies(ai, event);

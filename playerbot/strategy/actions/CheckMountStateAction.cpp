@@ -84,7 +84,10 @@ bool CheckMountStateAction::Execute(Event& event)
     }
 
     //Following master and close to master that is unmounted.
-    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && groupMaster && groupMaster != bot && !farFromMaster && !IsLeaderMounted)
+    if ((ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+        ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)) &&
+        groupMaster && groupMaster != bot &&
+        !farFromMaster && !IsLeaderMounted)
     {
         if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && IsMounted)
             ai->TellPlayerNoFacing(requester, "Unmount. Near umounted group master.");
@@ -144,7 +147,9 @@ bool CheckMountStateAction::Execute(Event& event)
         return UnMount();
     }
 
-    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && groupMaster && groupMaster != bot)
+    if ((ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+        ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)) &&
+        groupMaster && groupMaster != bot)
     {
         //Mounting with master.
         if (IsLeaderMounted && !hasAttackers)
@@ -400,7 +405,8 @@ bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
             if (!member->IsAlive())
                 continue;
 
-            if (!member->GetPlayerbotAI()->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+            if (!(member->GetPlayerbotAI()->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+                member->GetPlayerbotAI()->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)))
                 continue;
 
             if (WorldPosition(bot).distance(member) > sPlayerbotAIConfig.reactDistance * 5)

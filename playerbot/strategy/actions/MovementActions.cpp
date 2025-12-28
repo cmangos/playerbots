@@ -2463,7 +2463,7 @@ bool JumpAction::Execute(ai::Event &event)
     // find jump position
     if (options == "tome" || options == "follow" || options == "chase" || isRtsc || toPosition)
     {
-        if (options == "follow" && !ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+        if (options == "follow" && !(ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)))
             return false;
 
         WorldPosition const src = WorldPosition(bot);

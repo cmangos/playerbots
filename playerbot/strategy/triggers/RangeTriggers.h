@@ -18,7 +18,9 @@ namespace ai
             Unit* target = AI_VALUE(Unit*, "current target");
             if (target)
             {
-                if (ai->HasStrategy("follow", BotState::BOT_STATE_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_COMBAT))
+                if (ai->HasStrategy("follow", BotState::BOT_STATE_COMBAT) ||
+                    ai->HasStrategy("guard", BotState::BOT_STATE_COMBAT) ||
+                    ai->HasStrategy("wander", BotState::BOT_STATE_COMBAT))
                     if(bot->getClass() != CLASS_HUNTER || sServerFacade.GetDistance2d(bot, target) > 5.0f)
                         return false;                   
 

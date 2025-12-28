@@ -136,6 +136,12 @@ namespace ai
             creators["out of react range"] = [](PlayerbotAI* ai) { return new OutOfReactRangeTrigger(ai); };
             creators["update follow"] = [](PlayerbotAI* ai) { return new UpdateFollowTrigger(ai); };
             creators["stop follow"] = [](PlayerbotAI* ai) { return new StopFollowTrigger(ai); };
+
+            // Register freefollow triggers
+            creators["wander far"] = [](PlayerbotAI* ai) { return new WanderFarTrigger(ai); };
+            creators["wander medium"] = [](PlayerbotAI* ai) { return new WanderMediumTrigger(ai); };
+            creators["wander near"] = [](PlayerbotAI* ai) { return new WanderNearTrigger(ai); };
+
             creators["far from loot target"] = [](PlayerbotAI* ai) { return new FarFromCurrentLootTrigger(ai); };
             creators["can loot"] = [](PlayerbotAI* ai) { return new CanLootTrigger(ai); };
             creators["swimming"] = [](PlayerbotAI* ai) { return new IsSwimmingTrigger(ai); };

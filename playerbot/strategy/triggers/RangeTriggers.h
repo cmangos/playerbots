@@ -397,6 +397,51 @@ namespace ai
         }
     };
 
+    class WanderFarTrigger : public FarFromMasterTrigger
+    {
+    public:
+        WanderFarTrigger(PlayerbotAI* ai, std::string name = "wander far", float distance = 50.0f, int checkInterval = 2)
+            : FarFromMasterTrigger(ai, name, distance, checkInterval) {}
+    };
+
+    class WanderMediumTrigger : public Trigger
+    {
+    public:
+        WanderMediumTrigger(PlayerbotAI* ai, std::string name = "wander medium", int checkInterval = 2) : Trigger(ai, name, checkInterval) {}
+
+        virtual bool IsActive() override
+        {
+            Unit* master = AI_VALUE(Unit*, "master target");
+            if (master && sServerFacade.IsFriendlyTo(bot, master))
+            {
+                if (master->GetTransport() && master->GetTransport() == bot->GetTransport())
+                    return false;
+
+                float dist = AI_VALUE2(float, "distance", "master target");
+                return sServerFacade.IsDistanceGreaterThan(dist, sPlayerbotAIConfig.followDistance) && sServerFacade.IsDistanceLessOrEqualThan(dist, 50.0f);
+            }
+            return false;
+        }
+    };
+
+    class WanderNearTrigger : public Trigger
+    {
+    public:
+        WanderNearTrigger(PlayerbotAI* ai, std::string name = "wander near", int checkInterval = 2) : Trigger(ai, name, checkInterval) {}
+
+        virtual bool IsActive() override
+        {
+            if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
+                return false;
+
+            Unit* master = AI_VALUE(Unit*, "master target");
+            if (!master || !sServerFacade.IsFriendlyTo(bot, master))
+                return false;
+
+            return !sServerFacade.IsDistanceGreaterThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.followDistance);
+        }
+    };
+
     class WaitForAttackSafeDistanceTrigger : public Trigger
     {
     public:

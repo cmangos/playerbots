@@ -420,7 +420,7 @@ namespace ai
                     return false;
 
                 float dist = AI_VALUE2(float, "distance", "master target");
-                return sServerFacade.IsDistanceGreaterThan(dist, sPlayerbotAIConfig.followDistance) && sServerFacade.IsDistanceLessOrEqualThan(dist, 50.0f);
+                return sServerFacade.IsDistanceGreaterThan(dist, sPlayerbotAIConfig.followDistance + 8.0f) && sServerFacade.IsDistanceLessOrEqualThan(dist, 50.0f) && master->IsMoving();
             }
             return false;
         }
@@ -433,14 +433,14 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
-                return false;
-
             Unit* master = AI_VALUE(Unit*, "master target");
             if (!master || !sServerFacade.IsFriendlyTo(bot, master))
                 return false;
 
-            return !sServerFacade.IsDistanceGreaterThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.followDistance);
+            if (master->IsMoving())
+                return false;
+
+            return sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.followDistance + 4.0f);
         }
     };
 

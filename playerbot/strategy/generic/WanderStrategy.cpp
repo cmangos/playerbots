@@ -16,11 +16,7 @@ void WanderStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "wander near",
-        NextAction::array(0, new NextAction("stop follow", ACTION_PASSTROUGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "update follow",
-        NextAction::array(0, new NextAction("follow", ACTION_IDLE), NULL)));
+        NextAction::array(0, new NextAction("stop follow", ACTION_IDLE), NULL)));
 }
 
 void WanderStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -35,11 +31,7 @@ void WanderStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "wander near",
-        NextAction::array(0, new NextAction("stop follow", ACTION_PASSTROUGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "update follow",
-        NextAction::array(0, new NextAction("follow", ACTION_IDLE), NULL)));
+        NextAction::array(0, new NextAction("stop follow", ACTION_IDLE), NULL)));
 }
 
 void WanderStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)

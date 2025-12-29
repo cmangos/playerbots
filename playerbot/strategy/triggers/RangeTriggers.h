@@ -437,10 +437,13 @@ namespace ai
             if (!master || !sServerFacade.IsFriendlyTo(bot, master))
                 return false;
 
+            if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
+                return false;
+
             if (master->IsMoving())
                 return false;
 
-            return sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.followDistance + 4.0f);
+            return sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.followDistance + 4.0f) && (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE);
         }
     };
 

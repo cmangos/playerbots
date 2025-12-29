@@ -160,7 +160,8 @@ namespace ai
             if (!bot->GetGroup())
                 return true;
 
-            if (!ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+            if (!(ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+                ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)))
                 return true;
 
             if (!bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance))
@@ -198,7 +199,8 @@ namespace ai
             if (!bot->GetGroup())
                 return true;
 
-            if (!ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+            if (!(ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+                ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)))
                 return true;
 
             if (!bot->IsWithinDist(master, sPlayerbotAIConfig.EatDrinkMaxDistance))
@@ -238,7 +240,8 @@ namespace ai
             if (!bot->GetGroup())
                 return drinkDuration;
 
-            if (!ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+            if (!(ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+                ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)))
                 return drinkDuration;
 
             float minDistance = sPlayerbotAIConfig.followDistance;
@@ -282,7 +285,8 @@ namespace ai
             if (!bot->GetGroup())
                 return eatDuration;
 
-            if (!ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+            if (!(ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+                ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)))
                 return eatDuration;
 
             float minDistance = sPlayerbotAIConfig.followDistance;

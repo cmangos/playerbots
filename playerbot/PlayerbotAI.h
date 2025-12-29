@@ -374,6 +374,8 @@ private:
 
 public:
     static std::string BotStateToString(BotState state);
+    std::string GetDefaultMovementStrategy();
+    void EnsureDefaultMovementStrategy(Player* requester = nullptr);
 	std::string HandleRemoteCommand(std::string command);
     void HandleCommand(uint32 type, const std::string& text, Player& fromPlayer, const uint32 lang = LANG_UNIVERSAL);
     void QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name, bool noDelay = false);
@@ -576,7 +578,7 @@ public:
     //Bot has a master that is a player.
     bool HasRealPlayerMaster() { return master && (!master->GetPlayerbotAI() || master->GetPlayerbotAI()->IsRealPlayer()); } 
     //Bot has a master that is actively playing.
-    bool HasActivePlayerMaster() { return master && !master->GetPlayerbotAI(); }
+    bool HasActivePlayerMaster() const { return master && !master->GetPlayerbotAI(); }
     //Checks if the bot is summoned as alt of a player
     bool IsAlt() { return HasRealPlayerMaster() && !sRandomPlayerbotMgr.IsRandomBot(bot); }
     //Get the group leader or the master of the bot.

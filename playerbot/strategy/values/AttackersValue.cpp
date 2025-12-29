@@ -424,7 +424,9 @@ bool AttackersValue::IgnoreTarget(Unit* target, Player* playerToCheckAgainst)
             return true;
 
         //When moving to master far away.
-        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && AI_VALUE2(bool, "trigger active", "out of react range"))
+        if ((ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+            ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)) &&
+            AI_VALUE2(bool, "trigger active", "out of react range"))
             return true;
 
         if (ai->GetMaster() && !ai->HasActivePlayerMaster())

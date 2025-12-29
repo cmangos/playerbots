@@ -30,11 +30,12 @@ bool IsFollowingPartyValue::Calculate()
     if (ai->GetGroupMaster() == bot)
         return true;
 
-    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+        ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT))
         return true;
 
     return false;
-};
+}
 
 bool IsNearLeaderValue::Calculate()
 {
@@ -128,16 +129,18 @@ bool GroupReadyValue::Calculate()
         if (!member)
             continue;
 
-        if (inDungeon) //In dungeons all following members need to be alive before continueing.
+        if (inDungeon) // In dungeons all following members need to be alive before continuing.
         {
             PlayerbotAI* memberAi = member->GetPlayerbotAI();
 
-            bool isFollowing = memberAi ? memberAi->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) : true;
+            bool isFollowing = memberAi
+                ? (memberAi->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+                    memberAi->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT))
+                : true;
 
             if (!member->IsAlive() && isFollowing)
                 return false;
         }
-
         //We only wait for members that are in range otherwise we might be waiting for bots stuck in dead loops forever.
         if (ai->GetGroupMaster() && sServerFacade.GetDistance2d(member, ai->GetGroupMaster()) > sPlayerbotAIConfig.sightDistance)
             continue;        

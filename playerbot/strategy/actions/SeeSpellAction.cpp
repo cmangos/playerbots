@@ -243,7 +243,7 @@ bool SeeSpellAction::MoveToSpell(Player* requester, WorldPosition& spellPosition
         posMap["guard"] = guardPosition;
         posMap["return"] = guardPosition;
     }
-    else if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && requester)
+    else if ((ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)) && requester)
     {
         FormationValue* formation = (FormationValue*)context->GetValue<Formation*>("formation");
 

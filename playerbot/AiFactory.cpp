@@ -604,6 +604,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
         combatEngine->removeStrategy("flee");
         combatEngine->removeStrategy("threat");
         combatEngine->removeStrategy("follow");
+        combatEngine->removeStrategy("wander");
         combatEngine->removeStrategy("conserve mana");
         combatEngine->removeStrategy("cast time");
 
@@ -845,7 +846,17 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
 
     if (!player->InBattleGround())
     {
-        nonCombatEngine->addStrategies("racials", "nc", "food", "follow", "default", "quest", "loot", "gather", "duel", "emote", "buff", "mount", NULL);
+        PlayerbotAI* ai = player->GetPlayerbotAI();
+        Player* master = ai ? ai->GetMaster() : nullptr;
+
+        if (master && !master->GetPlayerbotAI())
+        {
+            nonCombatEngine->addStrategies("racials", "nc", "food", "follow", "default", "quest", "loot", "gather", "duel", "emote", "buff", "mount", NULL);
+        }
+        else
+        {
+            nonCombatEngine->addStrategies("racials", "nc", "food", "wander", "default", "quest", "loot", "gather", "duel", "emote", "buff", "mount", NULL);
+        }
     }
 
     if ((facade->HasRealPlayerMaster() && sPlayerbotAIConfig.jumpWithPlayer) ||
@@ -966,6 +977,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         nonCombatEngine->removeStrategy("rpg");
         nonCombatEngine->removeStrategy("rpg craft");
         nonCombatEngine->removeStrategy("follow");
+        nonCombatEngine->removeStrategy("wander");
 
         nonCombatEngine->removeStrategy("grind");
 

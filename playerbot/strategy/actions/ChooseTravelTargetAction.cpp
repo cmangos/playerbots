@@ -161,7 +161,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
     }
     else
     {
-        if (bot->GetGroup() && !ai->IsGroupLeader() && (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT)))
+        if (bot->GetGroup() && !ai->IsGroupLeader() && (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT)))
             out << "I want to travel ";
         else if (newTarget->IsGroupCopy() && newTarget->GetGroupmember().GetPlayer())
             out << "Taking " << newTarget->GetGroupmember().GetPlayer()->GetName() << " ";

@@ -43,7 +43,8 @@ bool MoveToTravelTargetAction::Execute(Event& event)
             if (!member->IsMoving())
                 continue;
 
-            if (member->GetPlayerbotAI() && !member->GetPlayerbotAI()->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT))
+            if (member->GetPlayerbotAI() &&
+                !(member->GetPlayerbotAI()->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || member->GetPlayerbotAI()->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)))
                 continue;
 
             WorldPosition memberPos(member);
@@ -216,7 +217,10 @@ bool MoveToTravelTargetAction::isUseful()
         return false;
 
     if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
-        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
+        if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+            ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) ||
+            ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT) ||
+            ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT))
             return false;
 
     WorldPosition travelPos(*AI_VALUE(TravelTarget*, "travel target")->GetPosition());

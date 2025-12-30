@@ -419,6 +419,9 @@ namespace ai
                 if (master->GetTransport() && master->GetTransport() == bot->GetTransport())
                     return false;
 
+                if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+                    return false;
+
                 float dist = AI_VALUE2(float, "distance", "master target");
                 return sServerFacade.IsDistanceGreaterThan(dist, sPlayerbotAIConfig.followDistance + 8.0f) && sServerFacade.IsDistanceLessOrEqualThan(dist, 50.0f) && master->IsMoving();
             }
@@ -443,7 +446,7 @@ namespace ai
             if (master->IsMoving())
                 return false;
 
-            return sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.followDistance + 4.0f) && (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE);
+            return sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.followDistance + 4.0f);
         }
     };
 

@@ -102,7 +102,7 @@ void ProtectionWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "sunder armor",
-        NextAction::array(0, new NextAction("devastate", ACTION_HIGH + 2), NULL)));
+        NextAction::array(0, new NextAction("devastate", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "revenge",
@@ -114,15 +114,15 @@ void ProtectionWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "bloodthirst",
-        NextAction::array(0, new NextAction("bloodthirst", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("bloodthirst", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "mortal strike",
-        NextAction::array(0, new NextAction("mortal strike", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("mortal strike", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "heroic strike",
-        NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("heroic strike", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "disarm",

@@ -423,7 +423,7 @@ namespace ai
                     return false;
 
                 float dist = AI_VALUE2(float, "distance", "master target");
-                return sServerFacade.IsDistanceGreaterThan(dist, sPlayerbotAIConfig.followDistance + 8.0f) && sServerFacade.IsDistanceLessOrEqualThan(dist, 50.0f) && master->IsMoving();
+                return sServerFacade.IsDistanceGreaterThan(dist, sPlayerbotAIConfig.followDistance + 5.0f) && sServerFacade.IsDistanceLessOrEqualThan(dist, 50.0f) && master->IsMoving();
             }
             return false;
         }

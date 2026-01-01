@@ -402,8 +402,8 @@ namespace ai
     class WanderFarTrigger : public FarFromMasterTrigger
     {
     public:
-        WanderFarTrigger(PlayerbotAI* ai, std::string name = "wander far", float distance = sPlayerbotAIConfig.reactDistance * 0.5f, int checkInterval = 2)
-            : FarFromMasterTrigger(ai, name, distance, checkInterval) {}
+        WanderFarTrigger(PlayerbotAI* ai, std::string name = "wander far", int checkInterval = 2)
+            : FarFromMasterTrigger(ai, name, ai->GetRange("wandermax"), checkInterval) {}
     };
 
     class WanderMediumTrigger : public Trigger
@@ -423,7 +423,7 @@ namespace ai
                     return false;
 
                 float dist = AI_VALUE2(float, "distance", "master target");
-                return sServerFacade.IsDistanceGreaterThan(dist, sPlayerbotAIConfig.followDistance + 5.0f) && sServerFacade.IsDistanceLessOrEqualThan(dist, sPlayerbotAIConfig.reactDistance * 0.5f) && master->IsMoving();
+                return sServerFacade.IsDistanceGreaterThan(dist, ai->GetRange("wandermin")) && sServerFacade.IsDistanceLessOrEqualThan(dist, ai->GetRange("wandermax")) && master->IsMoving();
             }
             return false;
         }
@@ -446,7 +446,7 @@ namespace ai
             if (master->IsMoving())
                 return false;
 
-            return sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.followDistance + 4.0f);
+            return sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "master target"), ai->GetRange("wandermin"));
         }
     };
 

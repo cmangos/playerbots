@@ -82,14 +82,14 @@ float FreeMoveRangeValue::Calculate()
     bool hasFree = !hasFollow && !hasGuard && !hasWander;
 
     //When far away from master stop trying to limit the bot.
-    if (!hasFollow && (ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT) || (WorldPosition(followTarget).fDist(bot) > (hasFree ? sPlayerbotAIConfig.sightDistance : sPlayerbotAIConfig.maxFreeMoveDistance))))
+    if (!hasFollow && (ai->HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT) || (WorldPosition(followTarget).fDist(bot) > (hasFree ? sPlayerbotAIConfig.sightDistance : ai->GetRange("wandermax")))))
         return 0;
 
     if (hasFree || hasGuard)//Free and guard start with a base 20y range.
         maxDist += sPlayerbotAIConfig.proximityDistance;
 
     if (hasWander)
-        return sPlayerbotAIConfig.reactDistance * 0.5f;
+        ai->GetRange("wandermax");
 
     uint32 lastMasterMove = MEM_AI_VALUE(WorldPosition, "master position")->LastChangeDelay();
 

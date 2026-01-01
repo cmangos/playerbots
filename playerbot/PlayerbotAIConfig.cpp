@@ -137,6 +137,8 @@ bool PlayerbotAIConfig::Initialize()
     meleeDistance = config.GetFloatDefault("AiPlayerbot.MeleeDistance", 1.5f);
     followDistance = config.GetFloatDefault("AiPlayerbot.FollowDistance", 1.5f);
     raidFollowDistance = config.GetFloatDefault("AiPlayerbot.RaidFollowDistance", 5.0f);
+    wanderMinDistance = config.GetFloatDefault("AiPlayerbot.WanderMinDistance", 5.0f);
+    wanderMaxDistance = config.GetFloatDefault("AiPlayerbot.WanderMaxDistance", 50.0f);
     whisperDistance = config.GetFloatDefault("AiPlayerbot.WhisperDistance", 6000.0f);
     contactDistance = config.GetFloatDefault("AiPlayerbot.ContactDistance", 0.5f);
     aoeRadius = config.GetFloatDefault("AiPlayerbot.AoeRadius", 5.0f);

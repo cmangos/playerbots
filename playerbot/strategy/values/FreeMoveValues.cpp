@@ -89,7 +89,7 @@ float FreeMoveRangeValue::Calculate()
         maxDist += sPlayerbotAIConfig.proximityDistance;
 
     if (hasWander)
-        return sPlayerbotAIConfig.reactDistance * 0.5f;
+        return sPlayerbotAIConfig.wanderMaxDistance;
 
     uint32 lastMasterMove = MEM_AI_VALUE(WorldPosition, "master position")->LastChangeDelay();
 

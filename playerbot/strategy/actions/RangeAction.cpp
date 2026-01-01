@@ -18,6 +18,8 @@ bool RangeAction::Execute(Event& event)
         PrintRange("follow", requester);
         PrintRange("followraid", requester);
         PrintRange("attack", requester);
+        PrintRange("wandermin", requester);
+        PrintRange("wandermax", requester);
     }
     int pos = param.find(" ");
     if (pos == std::string::npos) return false;

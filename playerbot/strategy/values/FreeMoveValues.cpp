@@ -88,6 +88,9 @@ float FreeMoveRangeValue::Calculate()
     if (hasFree || hasGuard)//Free and guard start with a base 20y range.
         maxDist += sPlayerbotAIConfig.proximityDistance;
 
+    if (hasWander)
+        return sPlayerbotAIConfig.reactDistance * 0.5f;
+
     uint32 lastMasterMove = MEM_AI_VALUE(WorldPosition, "master position")->LastChangeDelay();
 
     if (sPlayerbotAIConfig.freeMoveDelay && lastMasterMove > sPlayerbotAIConfig.freeMoveDelay) //After 30 seconds increase the range by 1y each second.

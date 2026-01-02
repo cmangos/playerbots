@@ -4425,7 +4425,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool
     if (!sServerFacade.IsInFront(bot, faceTo, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))
     {
         sServerFacade.SetFacingTo(bot, faceTo);
-        //failWithDelay = true;
+        if (!HasRealPlayerMaster()) failWithDelay = true;
     }
 
     if (failWithDelay)
@@ -4517,15 +4517,28 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool
     }
 
     // Fail the cast if the bot is moving and the spell is a casting/channeled spell
-    const bool isMoving = !bot->IsStopped() || bot->IsFalling();
-    if (isMoving && ((GetSpellCastTime(pSpellInfo, bot, spell) > 0) || (IsChanneledSpell(pSpellInfo) && (GetSpellDuration(pSpellInfo) > 0))))
+    if (sServerFacade.isMoving(bot) && ((GetSpellCastTime(pSpellInfo, bot, spell) > 0) || (IsChanneledSpell(pSpellInfo) && (GetSpellDuration(pSpellInfo) > 0))))
     {
+        // always fail when jumping
         if (IsJumping() || bot->IsFalling())
         {
             spell->cancel();
             return false;
         }
+
         StopMoving();
+
+        // fail if not with real player to avoid movement glitches
+        if (!HasActivePlayerMaster())
+        {
+            if (waitForSpell)
+            {
+                SetAIInternalUpdateDelay(sPlayerbotAIConfig.globalCoolDown);
+            }
+
+            spell->cancel();
+            return false;
+        }
     }
 
     for (uint32 j = 0; j < MAX_EFFECT_INDEX; ++j)
@@ -4704,15 +4717,28 @@ bool PlayerbotAI::CastSpell(uint32 spellId, GameObject* goTarget, Item* itemTarg
     }
 
     // Fail the cast if the bot is moving and the spell is a casting/channeled spell
-    const bool isMoving = !bot->IsStopped() || bot->IsFalling();
-    if (isMoving && ((GetSpellCastTime(pSpellInfo, bot, spell) > 0) || (IsChanneledSpell(pSpellInfo) && (GetSpellDuration(pSpellInfo) > 0))))
+    if (sServerFacade.isMoving(bot) && ((GetSpellCastTime(pSpellInfo, bot, spell) > 0) || (IsChanneledSpell(pSpellInfo) && (GetSpellDuration(pSpellInfo) > 0))))
     {
+        // always fail when jumping
         if (IsJumping() || bot->IsFalling())
         {
             spell->cancel();
             return false;
         }
+
         StopMoving();
+
+        // fail if not with real player to avoid movement glitches
+        if (!HasActivePlayerMaster())
+        {
+            if (waitForSpell)
+            {
+                SetAIInternalUpdateDelay(sPlayerbotAIConfig.globalCoolDown);
+            }
+
+            spell->cancel();
+            return false;
+        }
     }
 
     SpellCastResult spellSuccess = spell->SpellStart(&targets);
@@ -4777,15 +4803,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId, float x, float y, float z, Item* ite
 
     ObjectGuid oldSel = bot->GetSelectionGuid();
 
-    bool isMoving = false;
-    if (!bot->GetMotionMaster()->empty())
-        if (bot->GetMotionMaster()->top()->GetMovementGeneratorType() != IDLE_MOTION_TYPE)
-            isMoving = true;
-
-    if (!bot->IsStopped() || bot->IsFalling())
-        isMoving = true;
-
-    if (!sServerFacade.isMoving(bot) || isMoving) bot->SetFacingTo(bot->GetAngleAt(bot->GetPositionX(), bot->GetPositionY(), x, y));
+    if (!sServerFacade.isMoving(bot)) sServerFacade.SetFacingTo(bot, bot->GetAngleAt(bot->GetPositionX(), bot->GetPositionY(), x, y));
 
     if (failWithDelay)
     {
@@ -4838,17 +4856,32 @@ bool PlayerbotAI::CastSpell(uint32 spellId, float x, float y, float z, Item* ite
         return false;
     }
 
-    spell->SpellStart(&targets);
-
-    if (sServerFacade.isMoving(bot) && spell->GetCastTime())
+    // Fail the cast if the bot is moving and the spell is a casting/channeled spell
+    if (sServerFacade.isMoving(bot) && ((GetSpellCastTime(pSpellInfo, bot, spell) > 0) || (IsChanneledSpell(pSpellInfo) && (GetSpellDuration(pSpellInfo) > 0))))
     {
+        // always fail when jumping
         if (IsJumping() || bot->IsFalling())
         {
             spell->cancel();
             return false;
         }
-        bot->StopMoving();
+
+        StopMoving();
+
+        // fail if not with real player to avoid movement glitches
+        if (!HasActivePlayerMaster())
+        {
+            if (waitForSpell)
+            {
+                SetAIInternalUpdateDelay(sPlayerbotAIConfig.globalCoolDown);
+            }
+
+            spell->cancel();
+            return false;
+        }
     }
+
+    spell->SpellStart(&targets);
 
     if (pSpellInfo->Effect[0] == SPELL_EFFECT_OPEN_LOCK ||
         pSpellInfo->Effect[0] == SPELL_EFFECT_SKINNING)

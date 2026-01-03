@@ -37,7 +37,7 @@ class TalentSpec {
 
         bool CheckTalentLink(std::string link, std::ostringstream* out);
         virtual bool CheckTalents(uint32 freeTalentPoints, std::ostringstream* out);
-        virtual bool CheckTalents(Player* bot, std::ostringstream* out) { return CheckTalents(bot->GetFreeTalentPoints(), out); }
+        virtual bool CheckTalents(Player* bot, std::ostringstream* out) { return CheckTalents(bot->CalculateTalentsPoints(), out); }
         void CropTalents(Player* botl);
         void ShiftTalents(TalentSpec* oldTalents, Player* botl);
         void ApplyTalents(Player* bot, std::ostringstream* out);

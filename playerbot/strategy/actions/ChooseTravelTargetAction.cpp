@@ -81,7 +81,7 @@ bool ChooseTravelTargetAction::isUseful()
 void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget)
 {
     if(AI_VALUE2(bool, "can free move to", newTarget->GetPosStr()))
-        ReportTravelTarget(requester, newTarget, oldTarget);
+        ReportTravelTarget(bot, requester, newTarget, oldTarget);
 
     //If we are heading to a creature/npc clear it from the ignore list. 
     if (oldTarget && oldTarget == newTarget && newTarget->GetEntry())
@@ -137,11 +137,17 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
 
 //Tell the master what travel target we are moving towards.
 //This should at some point be rewritten to be denser or perhaps logic moved to ->getTitle()
-void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget)
+void ChooseTravelTargetAction::ReportTravelTarget(Player* bot, Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget)
 {
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+
     TravelDestination* destination = newTarget->GetDestination();
 
-    TravelDestination* oldDestination = oldTarget->GetDestination();
+    TravelDestination* oldDestination;
+
+    if (oldTarget)
+        oldDestination = oldTarget->GetDestination();
 
     std::ostringstream out;
 
@@ -161,20 +167,32 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* requester, TravelTarge
     }
     else
     {
-        if (bot->GetGroup() && !ai->IsGroupLeader() && (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT)))
-            out << "I want to travel ";
-        else if (newTarget->IsGroupCopy() && newTarget->GetGroupmember().GetPlayer())
-            out << "Taking " << newTarget->GetGroupmember().GetPlayer()->GetName() << " ";
-        else if (oldDestination && oldDestination == destination)
-            out << "Continuing ";
-        else
-            out << "Traveling ";
-
-        if (newTarget->GetPosition())
+        if (newTarget->GetStatus() == TravelStatus::TRAVEL_STATUS_WORK)
         {
-            out << round(newTarget->Distance(bot)) << "y";
-            if (out << " to " << newTarget->GetPosition()->getAreaName())
-                out << " to " << newTarget->GetPosition()->getAreaName();
+            out << "Currently";
+
+            if (newTarget->GetPosition() && !newTarget->GetPosition()->getAreaName().empty())
+                out << " at " << newTarget->GetPosition()->getAreaName();
+            else
+                out << " working";
+        }
+        else
+        {
+            if (bot->GetGroup() && !ai->IsGroupLeader() && (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT)))
+                out << "I want to travel";
+            else if (newTarget->IsGroupCopy() && newTarget->GetGroupmember().GetPlayer())
+                out << "Taking " << newTarget->GetGroupmember().GetPlayer()->GetName();
+            else if (oldDestination && oldDestination == destination)
+                out << "Continuing";
+            else
+                out << "Traveling";
+
+            if (newTarget->GetPosition())
+            {
+                out << " " << round(newTarget->Distance(bot)) << "y";
+                if (!newTarget->GetPosition()->getAreaName().empty())
+                    out << " to " << newTarget->GetPosition()->getAreaName();
+            }
         }
 
         if (shortName.find("quest") == 0)
@@ -567,7 +585,7 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     RESET_AI_VALUE(bool, "travel target active");    
 
     ai->TellDebug(requester, "Refreshed travel target", "debug travel");
-    ReportTravelTarget(requester, target, target);
+    ReportTravelTarget(bot, requester, target, target);
 
     return false;
 }

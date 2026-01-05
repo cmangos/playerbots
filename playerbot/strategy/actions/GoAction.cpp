@@ -166,8 +166,11 @@ bool GoAction::TellWhereToGo(std::string& param, Player* requester) const
     if (param.size() > 6)
         text = param.substr(6);
 
-    ai->TellPlayerNoFacing(requester, "I have no place I want to go to.");
-    return false;   
+    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+
+    ChooseTravelTargetAction::ReportTravelTarget(bot, requester, travelTarget, nullptr);
+
+    return true;   
 }
 
 bool GoAction::LeaderAlreadyTraveling(TravelDestination* dest) const

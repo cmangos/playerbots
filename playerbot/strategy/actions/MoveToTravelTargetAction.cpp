@@ -73,8 +73,9 @@ bool MoveToTravelTargetAction::Execute(Event& event)
                 out << member->GetName();
 
                 if (bot->GetPlayerbotAI() && !ai->HasActivePlayerMaster())
-                {    
-                        out << " who is " << round(memberDistance) << "y away";
+                {
+                    out << " who is " << round(memberDistance) << "y away";
+                    if (!memberPos.getAreaName().empty())
                         out << " in " << memberPos.getAreaName();
                 }
 

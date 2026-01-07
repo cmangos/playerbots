@@ -195,6 +195,13 @@ AiPlayerbot.minEnchantingBotLevel = 81
 # Default: 1 (enabled)
 AiPlayerbot.GearScoreCheck = 0
 
+# Randombots checking players level difference and deny the group invite if it's too low
+# Default: 30
+# AiPlayerbot.LevelCheck = 30
+
+# Spells that won't affect bots
+# AiPlayerbot.ImmuneSpellIds =
+
 # Quest that will be completed and rewarded to all random bots
 AiPlayerbot.RandomBotQuestIds = 7848,3802,5505,6502,7761
 

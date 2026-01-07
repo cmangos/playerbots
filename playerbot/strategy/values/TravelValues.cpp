@@ -126,13 +126,12 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
             }
         }
 
-        if (cInfo->Rank == 3 || cInfo->Rank == 4 || cInfo->Rank == 1)
+        if (cInfo->Rank == CREATURE_ELITE_ELITE || cInfo->Rank == CREATURE_ELITE_RAREELITE || cInfo->Rank == CREATURE_ELITE_WORLDBOSS || cInfo->Rank == CREATURE_ELITE_RARE)
         {
             if (cInfo->Rank == 1)
             {
                 if (guidpMap[entry].size() == 1)
-                    if (WorldPosition(guidpMap[entry].front()).isOverworld())
-                        purpose |= (uint32)TravelDestinationPurpose::Boss;
+                    purpose |= (uint32)TravelDestinationPurpose::Boss;
             }
             else
                 purpose |= (uint32)TravelDestinationPurpose::Boss;

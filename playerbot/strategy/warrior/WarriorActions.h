@@ -115,7 +115,17 @@ namespace ai
             range = ATTACK_DISTANCE;
         }
 
-        virtual bool isUseful() override { return GetTarget() && !ai->HasAura("sunder armor", GetTarget(), true); }
+        virtual bool isUseful() override
+        {
+            Unit* target = GetTarget();
+            if (!target)
+                return false;
+
+            if (ai->IsTank(bot) && !target->IsPlayer())
+                return true;
+
+            return !ai->HasAura("sunder armor", target, true);
+        }
     };
 
     class UpdateWarriorPveStrategiesAction : public UpdateStrategyDependenciesAction

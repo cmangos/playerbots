@@ -14,7 +14,13 @@ bool BloodrageBuffTrigger::IsActive()
 bool SunderArmorDebuffTrigger::IsActive()
 {
     Unit* target = GetTarget();
-    return target && !ai->HasAura("sunder armor", target, true) && !HasMaxDebuffs();
+    if (!target)
+        return false;
+
+    if (ai->IsTank(bot) && !target->IsPlayer())
+        return true;
+
+    return !ai->HasAura("sunder armor", target, true) && !HasMaxDebuffs();
 }
 
 bool CommandingShoutTrigger::IsActive()

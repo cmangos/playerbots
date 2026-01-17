@@ -110,7 +110,7 @@ void ProtectionWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "light rage available",
-        NextAction::array(0, new NextAction("shield slam", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("shield slam", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "bloodthirst",

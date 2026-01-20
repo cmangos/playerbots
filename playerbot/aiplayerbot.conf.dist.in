@@ -512,16 +512,28 @@ AiPlayerbot.PremadeSpecName.1.5 = pvp prot
 AiPlayerbot.PremadeSpecLink.1.5.60 = 05003--55255113032021251
 
 AiPlayerbot.PremadeSpecName.1.6 = fury slam
-AiPlayerbot.PremadeSpecLink.1.5.60 = 30305001322-05050005005510051
+AiPlayerbot.PremadeSpecLink.1.6.60 = 30305001322-05050005005510051
 
 AiPlayerbot.PremadeSpecName.1.7 = arms axes
-AiPlayerbot.PremadeSpecLink.1.5.60 = 303050213525100001-05050005005
+AiPlayerbot.PremadeSpecLink.1.7.60 = 303050213525100001-05050005005
 AiPlayerbot.PremadeSpecName.1.8 = arms maces
-AiPlayerbot.PremadeSpecLink.1.5.60 = 303050213520150001-05050005005
+AiPlayerbot.PremadeSpecLink.1.8.60 = 303050213520150001-05050005005
 AiPlayerbot.PremadeSpecName.1.9 = arms swords
-AiPlayerbot.PremadeSpecLink.1.5.60 = 303050213520105001-05050005005
+AiPlayerbot.PremadeSpecLink.1.9.60 = 303050213520105001-05050005005
 AiPlayerbot.PremadeSpecName.1.10 = arms polearms
-AiPlayerbot.PremadeSpecLink.1.5.60 = 303050213520100501-05050005005
+AiPlayerbot.PremadeSpecLink.1.10.60 = 303050213520100501-05050005005
+
+AiPlayerbot.PremadeSpecName.1.11 = furyprot
+AiPlayerbot.PremadeSpecLink.1.11.60 = -05050005505010051-502501105
+AiPlayerbot.PremadeSpecName.1.12 = furyprot (slam)
+AiPlayerbot.PremadeSpecLink.1.12.60 = -05500005005510051-502501105
+AiPlayerbot.PremadeSpecName.1.13 = furyprot (demo shout)
+AiPlayerbot.PremadeSpecLink.1.13.60 = -05500005505010051-502501105
+
+AiPlayerbot.PremadeSpecName.1.14 = 2h fury
+AiPlayerbot.PremadeSpecLink.1.14.60 = 3500502103-05050005505010051
+AiPlayerbot.PremadeSpecName.1.15 = fury no deep wounds
+AiPlayerbot.PremadeSpecLink.1.15.60 = 05005001-05053125525010051
 
 # Paladin
 AiPlayerbot.PremadeSpecName.2.0 = pve dps ret (basic ret)

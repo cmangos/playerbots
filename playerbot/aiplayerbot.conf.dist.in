@@ -529,9 +529,9 @@ AiPlayerbot.PremadeSpecName.1.12 = furyprot (slam)
 AiPlayerbot.PremadeSpecLink.1.12.60 = -05500005005510051-502501105
 AiPlayerbot.PremadeSpecName.1.13 = furyprot (demo shout)
 AiPlayerbot.PremadeSpecLink.1.13.60 = -05500005505010051-502501105
-
-AiPlayerbot.PremadeSpecName.1.14 = 2h furyprot
+AiPlayerbot.PremadeSpecName.1.14 = furyprot (two-handed)
 AiPlayerbot.PremadeSpecLink.1.14.60 = -05050005505010051-502501105
+
 AiPlayerbot.PremadeSpecName.1.15 = fury no deep wounds
 AiPlayerbot.PremadeSpecLink.1.15.60 = 05005001-05053125525010051
 

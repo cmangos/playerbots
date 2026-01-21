@@ -13,8 +13,8 @@ namespace ai
     protected:
         virtual bool Execute(Event& event) override;
         uint32 GetCount(ItemQualifier& qualifier);
-        std::string QueryItem(ItemQualifier& qualifier, uint32 count, uint32 total);
-        std::string QueryItemUsage(ItemQualifier& qualifier);
+        std::string QueryItem(ItemQualifier& qualifier, uint32 count, uint32 total, bool reason = false);
+        std::string QueryItemUsage(ItemQualifier& qualifier, bool reason = false);
         std::string QueryItemPrice(ItemQualifier& qualifier);
         std::string QueryQuestItem(uint32 itemId, const Quest *questTemplate, const QuestStatusData *questStatus);
         std::string QueryQuestItem(uint32 itemId);

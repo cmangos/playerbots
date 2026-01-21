@@ -87,9 +87,21 @@ bool QueryItemUsageAction::Execute(Event& event)
 
     std::string text = event.getParam();
     std::vector<ItemQualifier> qualifiers;
+    bool reason = false;
+
+    if (text.find("reason ") == 0)
+    {
+        text = text.substr(8);
+        reason = true;
+    }
+    else if (text.find("reason") == 0)
+    {
+        text.clear();
+        reason = true;
+    }
     
     for (auto& stringQualifier : chat->parseItemQualifiers(text))
-        qualifiers.push_back(ItemQualifier(stringQualifier));
+            qualifiers.push_back(ItemQualifier(stringQualifier));
 
     if (qualifiers.empty())
     {
@@ -105,7 +117,7 @@ bool QueryItemUsageAction::Execute(Event& event)
     {
         if (!itemQualifier.GetProto()) continue;
 
-        ai->TellPlayer(requester, QueryItem(itemQualifier, 0, GetCount(itemQualifier)), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        ai->TellPlayer(requester, QueryItem(itemQualifier, 0, GetCount(itemQualifier), reason), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
     return true;
 }
@@ -126,24 +138,17 @@ uint32 QueryItemUsageAction::GetCount(ItemQualifier& qualifier)
     return total;
 }
 
-std::string QueryItemUsageAction::QueryItem(ItemQualifier& qualifier, uint32 count, uint32 total)
+std::string QueryItemUsageAction::QueryItem(ItemQualifier& qualifier, uint32 count, uint32 total, bool reason)
 {
     std::ostringstream out;
-#ifdef CMANGOS
-    std::string usage = QueryItemUsage(qualifier);
-#endif
-#ifdef MANGOS
-    bool usage = QueryItemUsage(item);
-#endif
+
+    std::string usage = QueryItemUsage(qualifier, reason);
+
     std::string quest = QueryQuestItem(qualifier.GetId());
     std::string price = QueryItemPrice(qualifier);
     std::string power = QueryItemPower(qualifier);
-#ifdef CMANGOS
+
     if (usage.empty())
-#endif
-#ifdef MANGOS
-    if (!usage)
-#endif
         usage = (quest.empty() ? "Useless" : "Quest");
 
     out << chat->formatItem(qualifier, count, total) << ": " << usage;
@@ -156,9 +161,13 @@ std::string QueryItemUsageAction::QueryItem(ItemQualifier& qualifier, uint32 cou
     return out.str();
 }
 
-std::string QueryItemUsageAction::QueryItemUsage(ItemQualifier& qualifier)
+std::string QueryItemUsageAction::QueryItemUsage(ItemQualifier& qualifier, bool reason)
 {
     ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", qualifier.GetQualifier());
+
+    if (reason)
+        return ItemUsageValue::ReasonForNeed(usage, qualifier, 1, bot);
+
     switch (usage)
     {
     case ItemUsage::ITEM_USAGE_EQUIP:

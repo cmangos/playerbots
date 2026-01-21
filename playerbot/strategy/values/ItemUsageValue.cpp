@@ -446,7 +446,7 @@ ItemUsage ItemUsageValue::Calculate()
 
         uint32 depositCost = GetAhDepositCost(proto, count);
         
-        uint32 ahPrice = DesiredPricePerItem(bot, proto, count, 50);
+        uint32 ahPrice = ItemUsageValue::GetBotSellPrice(proto, bot) * count;
 
         if(proto->SellPrice == 0)
             SET_AI_VALUE2(int, "manual int", "expected ah sell price for " + std::to_string(itemId), ahPrice);
@@ -776,8 +776,8 @@ std::string ItemUsageValue::ReasonForNeed(ItemUsage usage, ItemQualifier qualifi
         if (!qualifier)
             return BOT_TEXT2("to repost on AH.", placeholders);
 
-        placeholders["%price_min"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMinPrice(qualifier.GetProto()) * count);
-        placeholders["%price_max"] = ChatHelper::formatMoney(ItemUsageValue::GetBotAHSellMaxPrice(qualifier.GetProto()) * count);
+        placeholders["%price_min"] = ChatHelper::formatMoney(ItemUsageValue::GetBotSellPrice(qualifier.GetProto(), bot) * 0.75 * count);
+        placeholders["%price_max"] = ChatHelper::formatMoney(ItemUsageValue::GetBotSellPrice(qualifier.GetProto(), bot) * count);
         return BOT_TEXT2("to repost on AH for %price_min to %price_max.", placeholders);
     case ItemUsage::ITEM_USAGE_VENDOR:
         if (!qualifier)

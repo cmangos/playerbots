@@ -210,7 +210,7 @@ RollVote RollAction::CalculateRollVote(ItemQualifier& itemQualifier)
     {
         bool shouldEquipBadItems = sPlayerbotAIConfig.rollBadItemsWithPlayer || !ai->HasRealPlayerMaster();
         if (shouldEquipBadItems)
-            needVote == ROLL_NEED;
+            needVote = ROLL_NEED;
         else
             needVote = ROLL_GREED;
     }

@@ -302,7 +302,7 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
 
     if (leaderGroup && leaderGroup->GetMembersCount() >= needMembers)
     {
-        sLog.outBasic("Team #%d <%s>: Group is ready for match", arenateam->GetId(), arenateam->GetName().c_str());
+        sLog.outDetail("Team #%d <%s>: Group is ready for match", arenateam->GetId(), arenateam->GetName().c_str());
         return true;
     }
     else if (leaderGroup && leaderGroup->GetMembersCount() < needMembers)
@@ -503,7 +503,7 @@ bool BGJoinAction::shouldJoinBg(BattleGroundQueueTypeId queueTypeId, BattleGroun
         if ((bot->GetTeam() == ALLIANCE && needAlly) || (bot->GetTeam() == HORDE && needHorde))
         {
             if (BgCount > BracketSize)
-                sLog.outBasic("%s %u, bracket %u needs more bots. Total in queue: %u, BraketSize: %u. Need %u bots more", isArena ? "Arena" : "BG", queueTypeId, bracketId, BgCount, BracketSize, needMoreBots);
+                sLog.outDetail("%s %u, bracket %u needs more bots. Total in queue: %u, BraketSize: %u. Need %u bots more", isArena ? "Arena" : "BG", queueTypeId, bracketId, BgCount, BracketSize, needMoreBots);
 
             return true;
         }
@@ -818,9 +818,10 @@ bool BGJoinAction::JoinQueue(uint32 type)
    WorldPacket packet(CMSG_BATTLEMASTER_JOIN, 20);
 #ifdef MANGOSBOT_ZERO
    packet << unit->GetObjectGuid() << mapId << instanceId << joinAsGroup;
-   sLog.outBasic("Bot #%d %s:%d <%s> queued %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), _bgType.c_str());
+   sLog.outDetail("Bot #%d %s:%d <%s> queued %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), _bgType.c_str());
 #else
-   sLog.outBasic("Bot #%d %s:%d <%s> queued %s %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), _bgType.c_str(), isRated ? "Rated Arena" : isArena ? "Arena" : "");
+   sLog.outDetail("Bot #%d %s:%d <%s> queued %s %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), _bgType.c_str(), isRated ? "Rated Arena" : isArena ? "Arena" :
+                                                                                                                                                                                                      "");
    if (!isArena)
    {
        packet << guid << bgTypeId_ << instanceId << joinAsGroup;
@@ -1305,7 +1306,7 @@ bool BGStatusAction::Execute(Event& event)
         ai->ChangeStrategy("-battleground", BotState::BOT_STATE_NON_COMBAT);
         ai->ChangeStrategy("-arena", BotState::BOT_STATE_COMBAT);
         ai->ChangeStrategy("-arena", BotState::BOT_STATE_NON_COMBAT);
-        sLog.outBasic("Bot #%d %s:%d <%s> leaves %s - %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
+        sLog.outDetail("Bot #%d %s:%d <%s> leaves %s - %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
 
         WorldPacket packet(CMSG_LEAVE_BATTLEFIELD);
         packet << uint8(0);
@@ -1350,7 +1351,7 @@ bool BGStatusAction::Execute(Event& event)
                         _bgTypeId = bg->GetTypeId();
                     }
 #endif
-                    sLog.outBasic("Bot #%u %s:%d <%s>: Force join %s %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
+                    sLog.outDetail("Bot #%u %s:%d <%s>: Force join %s %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
                     
                     ai->Unmount();
 
@@ -1398,7 +1399,7 @@ bool BGStatusAction::Execute(Event& event)
             bool realPlayers = sRandomPlayerbotMgr.BgPlayers[queueTypeId][bracketId][TeamId];
             if (realPlayers)
                 return false;
-            sLog.outBasic("Bot #%u %s:%d <%s> waited too long and leaves queue (%s %s).", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
+            sLog.outDetail("Bot #%u %s:%d <%s> waited too long and leaves queue (%s %s).", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
             WorldPacket packet(CMSG_BATTLEFIELD_PORT, 20);
             action = 0;
 #ifdef MANGOSBOT_ZERO
@@ -1486,9 +1487,9 @@ bool BGStatusAction::Execute(Event& event)
         }
 
 #ifdef MANGOSBOT_ZERO
-        sLog.outBasic("Bot #%d <%s> (%u %s) joined BG (%s)", bot->GetGUIDLow(), bot->GetName(), bot->GetLevel(), bot->GetTeam() == ALLIANCE ? "A" : "H", _bgType.c_str());
+        sLog.outDetail("Bot #%d <%s> (%u %s) joined BG (%s)", bot->GetGUIDLow(), bot->GetName(), bot->GetLevel(), bot->GetTeam() == ALLIANCE ? "A" : "H", _bgType.c_str());
 #else
-        sLog.outBasic("Bot #%d %s:%d <%s> joined %s - %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
+        sLog.outDetail("Bot #%d %s:%d <%s> joined %s - %s", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName(), isArena ? "Arena" : "BG", _bgType.c_str());
 #endif
 
         bot->GetSession()->HandleBattlefieldPortOpcode(packet);

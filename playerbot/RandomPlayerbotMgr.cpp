@@ -369,6 +369,7 @@ void RandomPlayerbotMgr::LogPlayerLocation()
 {
     if (sPlayerbotAIConfig.hasLog("player_location.csv"))
     {
+        botCount = 0;
         activeBots = 0;
 
         try
@@ -395,6 +396,7 @@ void RandomPlayerbotMgr::LogPlayerLocation()
 
                     if (bot->GetPlayerbotAI())
                     {
+                        botCount++;
                         out << std::to_string(uint8(bot->GetPlayerbotAI()->GetGrouperType())) << ",";
                         out << std::to_string(uint8(bot->GetPlayerbotAI()->GetGuilderType())) << ",";
                         out << (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY) ? "active" : "inactive") << ",";
@@ -472,6 +474,7 @@ void RandomPlayerbotMgr::LogPlayerLocation()
                 out << bot->GetMoney() << ",";
                 if (bot->GetPlayerbotAI())
                 {
+                    botCount++;
                     out << std::to_string(uint8(bot->GetPlayerbotAI()->GetGrouperType())) << ",";
                     out << std::to_string(uint8(bot->GetPlayerbotAI()->GetGuilderType())) << ",";
                     out << (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY) ? "active" : "inactive") << ",";
@@ -3214,7 +3217,9 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         ss << "Avg diff: " << sWorld.GetAverageDiff() << "\n";
         ss << "Max diff: " << sWorld.GetMaxDiff() << "\n";
         ss << "char db ping: " << sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") << "\n";
-        ss << "Sessions online: " << sWorld.GetActiveSessionCount();
+        ss << "Sessions online: " << sWorld.GetActiveSessionCount() << "\n";
+        ss << "Bots online: " << sRandomPlayerbotMgr.botCount << " (active: " << sRandomPlayerbotMgr.activeBots << ")";
+        
 
         sLog.outString("%s", ss.str().c_str());
 

@@ -674,7 +674,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             if (successCast)
             {
                 // Only add cooldown if the spell doesn't use a real item
-                if (itemUsed == nullptr)
+                if (itemUsed == nullptr && HasItemCooldown(itemId))
                 {
                     bot->RemoveSpellCooldown(*spellInfo, false);
                     bot->AddCooldown(*spellInfo, proto, false);

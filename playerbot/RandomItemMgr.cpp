@@ -156,6 +156,9 @@ RandomItemMgr::~RandomItemMgr()
     for (std::map<RandomItemType, RandomItemPredicate*>::iterator i = predicates.begin(); i != predicates.end(); ++i)
         delete i->second;
 
+    for (auto& [itemId, info] : itemInfoCache)
+        delete info;
+
     predicates.clear();
 }
 

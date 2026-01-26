@@ -86,6 +86,8 @@ namespace ai
     public:
         DropMapValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "drop map") {}
 
+        virtual ~DropMapValue() { delete value; }
+
         static LootTemplateAccess const* GetLootTemplate(ObjectGuid guid, LootType type = LOOT_CORPSE);
 
         virtual DropMap* Calculate() override;

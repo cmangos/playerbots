@@ -1028,10 +1028,6 @@ TravelState TravelTarget::GetTravelState() {
 
 void TravelMgr::Clear()
 {
-#ifdef MANGOS
-    sObjectAccessor.DoForAllPlayers([this](Player* plr) { TravelMgr::SetNullTravelTarget(plr); });
-#endif
-#ifdef CMANGOS
 #ifndef MANGOSBOT_ZERO
     sObjectAccessor.ExecuteOnAllPlayers([this](Player* plr) { TravelMgr::SetNullTravelTarget(plr); });
 #else
@@ -1039,7 +1035,6 @@ void TravelMgr::Clear()
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
     for (HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
         TravelMgr::SetNullTravelTarget(itr->second);
-#endif
 #endif
     for (auto& [purpose, entries] : destinationMap)
         for (auto& [id, dests] : entries)

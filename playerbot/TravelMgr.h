@@ -404,6 +404,7 @@ namespace ai
 	{
 	public:
 		TravelMgr() {};
+        ~TravelMgr() { Clear(); };
 		void LoadQuestTravelTable();
 
 		void GetPopulatedGrids();

@@ -895,6 +895,9 @@ bool RpgGossipTalkTrigger::IsActive()
     if (!creature)
         return false;
 
+    if (!creature->isGossip())
+        return false;
+
 #ifdef MANGOSBOT_TWO
     switch (guidP.GetEntry())
     {

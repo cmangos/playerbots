@@ -1198,7 +1198,7 @@ void RandomPlayerbotMgr::CheckBgQueue()
         BgCheckTimer = time(nullptr);
     }
 
-    sLog.outBasic("Checking BG Queue...");
+    sLog.outDetail("Checking BG Queue...");
 
     for (int i = BG_BRACKET_ID_FIRST; i < MAX_BATTLEGROUND_BRACKETS; ++i)
     {
@@ -1467,7 +1467,7 @@ void RandomPlayerbotMgr::CheckBgQueue()
 #ifndef MANGOSBOT_ZERO
             if (ArenaType type = sServerFacade.BgArenaType(queueTypeId))
             {
-                sLog.outBasic("ARENA:%s %s: Plr (Skirmish:%d, Rated:%d) Bot (Skirmish:%d, Rated:%d) Total (Skirmish:%d Rated:%d)",
+                sLog.outDetail("ARENA:%s %s: Plr (Skirmish:%d, Rated:%d) Bot (Skirmish:%d, Rated:%d) Total (Skirmish:%d Rated:%d)",
                     type == ARENA_TYPE_2v2 ? "2v2" : type == ARENA_TYPE_3v3 ? "3v3" : "5v5",
                     i == 0 ? "10-19" : i == 1 ? "20-29" : i == 2 ? "30-39" : i == 3 ? "40-49" : i == 4 ? "50-59" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 6 ? (i == 6 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80",
                     BgPlayers[j][i][0],
@@ -1513,7 +1513,7 @@ void RandomPlayerbotMgr::CheckBgQueue()
                 _bgType = "Other";
                 break;
             }
-            sLog.outBasic("BG:%s %s: Plr (%d:%d) Bot (%d:%d) Total (A:%d H:%d)",
+            sLog.outDetail("BG:%s %s: Plr (%d:%d) Bot (%d:%d) Total (A:%d H:%d)",
                 _bgType.c_str(),
                 i == 0 ? "10-19" : i == 1 ? "20-29" : i == 2 ? "30-39" : i == 3 ? "40-49" : i == 4 ? "50-59" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 6) ? "60" : (i == 5 && MAX_BATTLEGROUND_BRACKETS == 7) ? "60-69" : i == 6 ? (i == 6 && MAX_BATTLEGROUND_BRACKETS == 16) ? "70-79" : "70" : "80",
                 BgPlayers[j][i][0],
@@ -1526,7 +1526,7 @@ void RandomPlayerbotMgr::CheckBgQueue()
         }
     }
 
-    sLog.outBasic("BG Queue check finished");
+    sLog.outDetail("BG Queue check finished");
     return;
 }
 
@@ -1537,7 +1537,7 @@ void RandomPlayerbotMgr::CheckLfgQueue()
 
     if (sPlayerbotAIConfig.logRandomBotJoinLfg)
     {
-       sLog.outBasic("Checking LFG Queue...");
+        sLog.outDetail("Checking LFG Queue...");
     }
 
     // Clear LFG list
@@ -1697,9 +1697,9 @@ void RandomPlayerbotMgr::CheckLfgQueue()
     if (sPlayerbotAIConfig.logRandomBotJoinLfg)
     {
        if (LfgDungeons[ALLIANCE].size() || LfgDungeons[HORDE].size())
-          sLog.outBasic("LFG Queue check finished. There are real players in queue.");
+            sLog.outDetail("LFG Queue check finished. There are real players in queue.");
        else
-          sLog.outBasic("LFG Queue check finished. No real players in queue.");
+           sLog.outDetail("LFG Queue check finished. No real players in queue.");
     }
     return;
 }
@@ -1774,7 +1774,7 @@ void RandomPlayerbotMgr::AddOfflineGroupBots()
     }
 
     if (totalCounter)
-        sLog.outBasic("Added %u offline bots from groups", totalCounter);
+        sLog.outDetail("Added %u offline bots from groups", totalCounter);
 }
 
 Item* RandomPlayerbotMgr::CreateTempItem(uint32 item, uint32 count, Player const* player, uint32 randomPropertyId)
@@ -1848,7 +1848,7 @@ void RandomPlayerbotMgr::CheckPlayers()
     if (!PlayersCheckTimer || time(NULL) > (PlayersCheckTimer + 60))
         PlayersCheckTimer = time(NULL);
 
-    sLog.outBasic("Checking Players...");
+    sLog.outDetail("Checking Players...");
 
     uint32 newPlayersLevel = 0;
 
@@ -1867,9 +1867,9 @@ void RandomPlayerbotMgr::CheckPlayers()
     }
 
     if(playersLevel!= newPlayersLevel)
-        sLog.outBasic("Max player level is %d, max bot level changed from %d to %d", newPlayersLevel, playersLevel, newPlayersLevel);
+        sLog.outDetail("Max player level is %d, max bot level changed from %d to %d", newPlayersLevel, playersLevel, newPlayersLevel);
     else
-        sLog.outBasic("Max player level is %d, max bot level set to %d", newPlayersLevel, newPlayersLevel);
+        sLog.outDetail("Max player level is %d, max bot level set to %d", newPlayersLevel, newPlayersLevel);
 
     playersLevel = newPlayersLevel;
 
@@ -1918,7 +1918,7 @@ bool RandomPlayerbotMgr::AddRandomBot(uint32 bot)
         uint32 randomTime = urand(sPlayerbotAIConfig.minRandomBotReviveTime, sPlayerbotAIConfig.maxRandomBotReviveTime);
         SetEventValue(bot, "update", 1, randomTime);
         currentBots.push_back(bot);
-        sLog.outBasic("Random bot added #%d", bot);
+        sLog.outDetail("Random bot added #%d", bot);
     }
 
     return true;
@@ -2119,13 +2119,13 @@ bool RandomPlayerbotMgr::ProcessBot(Player* player)
         {
             if (sPlayerbotAIConfig.enableRandomTeleports)
             {
-                sLog.outBasic("Bot #%d %s:%d <%s>: sent to grind", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+                sLog.outDetail("Bot #%d %s:%d <%s>: sent to grind", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
                 RandomTeleportForLevel(player, true);
                 ScheduleTeleport(bot);
             }
             else
             {
-                sLog.outBasic("Bot #%d %s:%d <%s>: supposed to be sent to grind, but enableRandomTeleports = false", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+                sLog.outDetail("Bot #%d %s:%d <%s>: supposed to be sent to grind, but enableRandomTeleports = false", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
             }
             return true;
         }
@@ -2817,12 +2817,12 @@ void RandomPlayerbotMgr::Randomize(Player* bot)
     if (initialRandom)
     {
         RandomizeFirst(bot);
-        sLog.outBasic("Bot #%d %s:%d <%s>: gear/level randomised", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+        sLog.outDetail("Bot #%d %s:%d <%s>: gear/level randomised", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
     }
     else if (sPlayerbotAIConfig.randomGearUpgradeEnabled)
     {
         UpdateGearSpells(bot);
-        sLog.outBasic("Bot #%d %s:%d <%s>: gear upgraded", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+        sLog.outDetail("Bot #%d %s:%d <%s>: gear upgraded", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
     }
     else
     {
@@ -3842,14 +3842,14 @@ void RandomPlayerbotMgr::ChangeStrategy(Player* player)
 
     if (urand(0, 100) > 100 * sPlayerbotAIConfig.randomBotRpgChance) // select grind / pvp
     {
-        sLog.outBasic("Bot #%d %s:%d <%s>: sent to grind spot", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+        sLog.outDetail("Bot #%d %s:%d <%s>: sent to grind spot", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
         // teleport in different places only if players are online
         RandomTeleportForLevel(player, players.size());
         ScheduleTeleport(bot);
     }
     else
     {
-		sLog.outBasic("Bot #%d %s:%d <%s>: sent to inn", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
+        sLog.outDetail("Bot #%d %s:%d <%s>: sent to inn", bot, player->GetTeam() == ALLIANCE ? "A" : "H", player->GetLevel(), player->GetName());
         RandomTeleportForRpg(player, players.size());
         ScheduleTeleport(bot);
     }
@@ -4033,7 +4033,7 @@ void RandomPlayerbotMgr::Hotfix(Player* bot, uint32 version)
         }
     }
     SetValue(bot, "version", MANGOSBOT_VERSION);
-    sLog.outBasic("Bot %d hotfix v%d applied",
+    sLog.outDetail("Bot %d hotfix v%d applied",
         bot->GetGUIDLow(), MANGOSBOT_VERSION);
 }
 

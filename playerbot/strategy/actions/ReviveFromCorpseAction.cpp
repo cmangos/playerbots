@@ -242,7 +242,7 @@ bool SpiritHealerAction::Execute(Event& event)
     if (!grave)
     {
         //prevent doing weird stuff OR GOING TO 0,0,0
-        sLog.outBasic(
+        sLog.outDetail(
             "ERROR: no graveyard in SpiritHealerAction for bot #%d %s:%d <%s>, evacuating to prevent weird behavior",
             bot->GetGUIDLow(),
             bot->GetTeam() == ALLIANCE ? "A" : "H",
@@ -269,7 +269,7 @@ bool SpiritHealerAction::Execute(Event& event)
 
         if (!foundSpiritHealer)
         {
-            sLog.outBasic("Bot #%d %s:%d <%s> can't find a spirit healer", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
+            sLog.outDetail("Bot #%d %s:%d <%s> can't find a spirit healer", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
             ai->TellPlayerNoFacing(requester, "Cannot find any spirit healer nearby");
         }
 

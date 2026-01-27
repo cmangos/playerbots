@@ -3295,7 +3295,7 @@ bool BGTactics::selectObjective(bool reset)
                 {
                     if (!bg->IsActiveEvent(attackObjectivesFront[0], rootTeamIndex) || !bg->IsActiveEvent(attackObjectivesFront[1], rootTeamIndex))
                     { //Capture front objectives before attacking back objectives
-                        //sLog.outBasic("Bot #%d %s:%d <%s>: Get Front Objectives", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
+                        //sLog.outDetail("Bot #%d %s:%d <%s>: Get Front Objectives", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
                         if (role < 6) {
                             BgObjective = bot->GetMap()->GetGameObject(bg->GetSingleGameObjectGuid(attackObjectivesFront[0], 0));
                         }
@@ -3306,7 +3306,7 @@ bool BGTactics::selectObjective(bool reset)
                     }
                     else
                     { //Now capture all objectives with priority on back
-                        //sLog.outBasic("Bot #%d %s:%d <%s>: Get All Objectives", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
+                        //sLog.outDetail("Bot #%d %s:%d <%s>: Get All Objectives", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
                         if (role < 4)
                         {
                             BgObjective = bot->GetMap()->GetGameObject(bg->GetSingleGameObjectGuid(attackObjectivesFront[0], 0));
@@ -3374,7 +3374,7 @@ bool BGTactics::selectObjective(bool reset)
 
             if (!bg->IsActiveEvent(attackObjectivesFront[0], rootTeamIndex) && !bg->IsActiveEvent(attackObjectivesFront[1], rootTeamIndex) && !bg->IsActiveEvent(attackObjectivesBack[0], rootTeamIndex) && !bg->IsActiveEvent(attackObjectivesBack[1], rootTeamIndex))
             { //Retreat with flag
-                //sLog.outBasic("Bot #%d %s:%d <%s>: Retreat with flag", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
+                //sLog.outDetail("Bot #%d %s:%d <%s>: Retreat with flag", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
                 if (rootTeam == HORDE)
                 {
                     areaTrigger = 0;
@@ -3388,7 +3388,7 @@ bool BGTactics::selectObjective(bool reset)
             }
             else
             { //Deliver flag
-                //sLog.outBasic("Bot #%d %s:%d <%s>: Deliver flag", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
+                //sLog.outDetail("Bot #%d %s:%d <%s>: Deliver flag", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->getLevel(), bot->GetName());
                 if (bg->IsActiveEvent(EY_AttackObjectives[0], rootTeamIndex))
                 {
                     areaTrigger = AREATRIGGER_FEL_REAVER_RUINS_POINT;

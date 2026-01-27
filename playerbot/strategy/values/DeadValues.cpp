@@ -44,7 +44,7 @@ GuidPosition GraveyardValue::Calculate()
 
     if (!ClosestGrave)
     {
-        sLog.outBasic(
+        sLog.outDetail(
             "ERROR: Unable to find closest graveyard in GraveyardValue, will return GuidPosition() which is 0,0,0 - bot #%d %s:%d <%s>",
             bot->GetGUIDLow(),
             bot->GetTeam() == ALLIANCE ? "A" : "H",
@@ -119,7 +119,7 @@ GuidPosition BestGraveyardValue::Calculate()
     Corpse* corpse = bot->GetCorpse();
     if (!corpse)
     {
-        sLog.outBasic(
+        sLog.outDetail(
             "ERROR: Unable to find closest graveyard in BestGraveyardValue, will return GuidPosition() which is 0,0,0 - bot #%d %s:%d <%s>",
             bot->GetGUIDLow(),
             bot->GetTeam() == ALLIANCE ? "A" : "H",
@@ -139,7 +139,7 @@ GuidPosition BestGraveyardValue::Calculate()
         {
             return anotherGraveyard;
         }
-        sLog.outBasic(
+        sLog.outDetail(
             "ERROR: Unable to find another closest appropriate graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s>",
             bot->GetGUIDLow(),
             bot->GetTeam() == ALLIANCE ? "A" : "H",
@@ -158,7 +158,7 @@ GuidPosition BestGraveyardValue::Calculate()
         {
             return masterGraveyard;
         }
-        sLog.outBasic(
+        sLog.outDetail(
             "ERROR: Unable to find master graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s>",
             bot->GetGUIDLow(),
             bot->GetTeam() == ALLIANCE ? "A" : "H",
@@ -175,7 +175,7 @@ GuidPosition BestGraveyardValue::Calculate()
         {
             return travelGraveyard;
         }
-        sLog.outBasic(
+        sLog.outDetail(
             "ERROR: Unable to find travel graveyard in BestGraveyardValue, resorting to self graveyard - bot #%d %s:%d <%s>",
             bot->GetGUIDLow(),
             bot->GetTeam() == ALLIANCE ? "A" : "H",

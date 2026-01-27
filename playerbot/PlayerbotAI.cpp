@@ -18,6 +18,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "PlayerbotAI.h"
 #include "playerbot/PlayerbotFactory.h"
+#include "playerbot/RandomPlayerbotMgr.h"
 #include "PlayerbotSecurity.h"
 #include "Groups/Group.h"
 #include "Entities/Pet.h"
@@ -947,6 +948,15 @@ void PlayerbotAI::OnDeath()
     if (!IsStateActive(BotState::BOT_STATE_DEAD) && !sServerFacade.IsAlive(bot))
     {
         StopMoving();
+
+        if (sPlayerbotAIConfig.deleteRandomBotOnDeath && sRandomPlayerbotMgr.IsRandomBot(bot) && !bot->InBattleGround())
+        {
+            sLog.outDebug("Random bot %s died - scheduling delete", bot->GetName());
+            sRandomPlayerbotMgr.SetValue(bot, "delete", 1);
+            sRandomPlayerbotMgr.SetValue(bot, "add", 0);
+            SetShouldLogOut(true);
+            return;
+        }
 
         Player* master = GetMaster();
         AiObjectContext* context = aiObjectContext;

@@ -627,6 +627,36 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     if (time(nullptr) > (OfflineGroupBotsTimer + 5) && players.size())
         AddOfflineGroupBots();
 
+    // Handle pending deletions safely outside bot AI context
+    for (auto botId : availableBots)
+    {
+        if (!GetEventValue(botId, "delete"))
+            continue;
+
+        Player* bot = GetPlayerBot(botId);
+        if (bot && bot->IsInWorld())
+        {
+            if (bot->GetPlayerbotAI())
+                bot->GetPlayerbotAI()->SetShouldLogOut(true);
+            continue;
+        }
+
+        ObjectGuid botGuid = ObjectGuid(HIGHGUID_PLAYER, botId);
+        uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(botGuid);
+
+        sLog.outDebug("Deleting random bot %u from database", botId);
+        CharacterDatabase.PExecute("DELETE FROM ai_playerbot_random_bots WHERE owner = 0 AND bot = '%u'", botId);
+        eventCache[botId].clear();
+        currentBots.remove(botId);
+
+        if (accountId)
+            Player::DeleteFromDB(botGuid, accountId, false, true);
+
+        SetEventValue(botId, "delete", 0, 0);
+        SetEventValue(botId, "logout", 0, 0);
+        SetEventValue(botId, "login", 0, 0);
+    }
+
     //Update bots
     for (auto bot : availableBots)
     {

@@ -29,6 +29,9 @@ AiPlayerbot.ExplicitDbStoreSave = 0
 # Delete all random bot accounts (reset randombots)
 AiPlayerbot.DeleteRandomBotAccounts = 0
 
+# Delete random bot characters when they die
+AiPlayerbot.DeleteRandomBotOnDeath = 0
+
 # auto-login all player alts as bots on player login
 AiPlayerbot.BotAutologin = 0
 

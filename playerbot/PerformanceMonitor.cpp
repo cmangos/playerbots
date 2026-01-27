@@ -187,7 +187,9 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack, bool showMap)
             stacks.push_back(stack);
         }
 
-        stacks.sort([&namedData](std::vector<std::string> i, std::vector<std::string> j) { return namedData.at(i).totalTime < namedData.at(j).totalTime; });
+        auto& nameD = namedData;
+
+        stacks.sort([&](std::vector<std::string> i, std::vector<std::string> j) { return nameD.at(i).totalTime < nameD.at(j).totalTime; });
 
         float tPerc = 0, tCount = 0;
         uint32 tMin = 99999, tMax = 0, tTime = 0;
@@ -237,7 +239,7 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack, bool showMap)
             }
         }
 
-        uint32 secs = tTime / (perTick ? totalCount : 1000.0f);
+        float secs = tTime / (perTick ? totalCount : 1000.0f);
         float avg = tTime / tCount;
 
         if (metric != PERF_MON_TOTAL)

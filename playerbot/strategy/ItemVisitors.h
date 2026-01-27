@@ -507,7 +507,7 @@ namespace ai
 
         virtual bool Accept(const ItemPrototype* proto) override { return false; }
 
-        virtual bool Accept(Item* item)
+        virtual bool Accept(Item* item) override
         {
             const ItemPrototype* proto = item->GetProto();
 

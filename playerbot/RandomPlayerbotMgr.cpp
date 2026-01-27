@@ -682,6 +682,11 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
 
     MirrorAh();
 
+    for (auto& [mapId, map] : sMapMgr.Maps())
+    {
+        sPerformanceMonitor.Init(map->GetId(), map->GetInstanceId());
+    }
+
     //Ping character database.
     CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "SELECT 1");
 }

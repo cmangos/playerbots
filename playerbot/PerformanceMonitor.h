@@ -14,9 +14,7 @@ typedef std::vector<std::string> PerformanceStack;
 struct PerformanceData
 {
     uint32 minTime, maxTime, totalTime, count;
-#ifdef CMANGOS
     std::mutex lock;
-#endif
 };
 
 enum PerformanceMetric
@@ -31,19 +29,38 @@ enum PerformanceMetric
 class PerformanceMonitorOperation
 {
 public:
-    PerformanceMonitorOperation(PerformanceData* data, std::string name, PerformanceStack* stack);
+    PerformanceMonitorOperation(PerformanceData& data, std::string name, PerformanceStack* stack);
     ~PerformanceMonitorOperation();
 
 private:
     void finish();
 
-    PerformanceData* data;
+    PerformanceData& data;
     std::string name;
     PerformanceStack* stack;
 #ifdef CMANGOS
     std::chrono::milliseconds started;
 #endif
 };
+
+struct VectorStringHash
+{
+    std::size_t operator()(const std::vector<std::string>& v) const
+    {
+        std::size_t seed = 0;
+        for (const auto& str : v)
+        {
+            // Combine with XOR and bit shifting (fast)
+            seed ^= std::hash<std::string> {}(str) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+        return seed;
+    }
+};
+
+using performanceMap = std::unordered_map<std::vector<std::string>, PerformanceData, VectorStringHash>;
+using performanceMetricMap = std::map<PerformanceMetric, performanceMap>;
+using performanceInstanceMap = std::map<uint32, performanceMetricMap>;
+using performanceMapMap = std::map<uint32, performanceInstanceMap>;
 
 class PerformanceMonitor
 {
@@ -57,20 +74,19 @@ class PerformanceMonitor
         }
 
     public:
-        std::unique_ptr<PerformanceMonitorOperation> start(PerformanceMetric metric, std::string name, PerformanceStack* stack = nullptr);
+        std::unique_ptr<PerformanceMonitorOperation> start(PerformanceMetric metric, std::string name, PerformanceStack* stack = nullptr, uint32 mapId = 0, uint32 instanceId = 0);
         std::unique_ptr<PerformanceMonitorOperation> start(PerformanceMetric metric, std::string name, PlayerbotAI* ai);
-        void PrintStats(bool perTick = false,  bool fullStack = false);
+        void PrintStats(bool perTick = false,  bool fullStack = false, bool showMap = false);
         void Reset();
-
+        void Init(uint32 mapId, uint32 instanceId);
     private:
-        std::map<PerformanceMetric, std::map<std::string, PerformanceData*> > data;
-
-#ifdef CMANGOS
-        std::mutex lock;
-#endif
+        performanceMetricMap data;
+        performanceMapMap mapsData;
+        //std::mutex lock;
 };
 
 
 #define sPerformanceMonitor PerformanceMonitor::instance()
 
 #endif
+

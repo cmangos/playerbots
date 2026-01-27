@@ -698,19 +698,24 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
             {
                 Creature* unit = nullptr;
 
-                if (!bot->m_taxi.IsTaximaskNodeKnown(tEntry->from))
+                std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
+                for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
                 {
-                    std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
-                    for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
-                    {
-                        Creature* unit = bot->GetNPCIfCanInteractWith(*i, UNIT_NPC_FLAG_FLIGHTMASTER);
-                        if (!unit)
-                            continue;
+                    unit = bot->GetNPCIfCanInteractWith(*i, UNIT_NPC_FLAG_FLIGHTMASTER);
+                    if (unit)
+                        break;
+                }
 
-                        bot->GetSession()->SendLearnNewTaxiNode(unit);
+                if (!unit)
+                {
+                    return false;
+                }
 
-                        unit->SetFacingTo(unit->GetAngle(bot));
-                    }
+                if (unit && !bot->m_taxi.IsTaximaskNodeKnown(tEntry->from))
+                {
+                    bot->GetSession()->SendLearnNewTaxiNode(unit);
+
+                    unit->SetFacingTo(unit->GetAngle(bot));
                 }
 
                 uint32 botMoney = bot->GetMoney();

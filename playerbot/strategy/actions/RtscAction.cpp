@@ -131,7 +131,7 @@ bool RTSCAction::Execute(Event& event)
 				if (!player)
 					continue;
 
-				if (player->GetMapId() != bot->GetMapId())
+				if (!ai->IsSafe(player))
 					continue;
 
 				if (!player->GetPlayerbotAI())
@@ -199,7 +199,7 @@ bool RTSCAction::Execute(Event& event)
 				if (!player)
 					continue;
 
-				if (player->GetMapId() != bot->GetMapId())
+				if (!ai->IsSafe(player))
 					continue;
 
 				if (!player->GetPlayerbotAI())

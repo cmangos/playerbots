@@ -494,6 +494,10 @@ bool RpgHomeBindTrigger::IsActive()
     if (bot->GetGroup() && !ai->IsGroupLeader() && ai->GetGroupMaster() && ai->GetGroupMaster()->GetPlayerbotAI())
     {
         Player* player = ai->GetGroupMaster();
+
+        if (!ai->IsSafe(player))
+            return false;
+
         WorldPosition leaderBind = PAI_VALUE(WorldPosition, "home bind");
 
         float newBindDistanceToMasterBind = newBind.fDist(leaderBind);

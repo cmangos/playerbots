@@ -399,6 +399,9 @@ bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
             if (member == bot)
                 continue;
 
+            if (!ai->IsSafe(member))
+                continue;
+
             if (!member->GetPlayerbotAI())
                 continue;
 

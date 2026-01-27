@@ -28,6 +28,9 @@ bool ChooseRpgTargetAction::HasSameTarget(ObjectGuid guid, uint32 max, std::list
         if (!player)
             continue;
 
+        if (!ai->IsSafe(player))
+            continue;
+
         PlayerbotAI* ai = player->GetPlayerbotAI();
 
         if (!ai)
@@ -182,6 +185,9 @@ std::unordered_map<ObjectGuid, float> ChooseRpgTargetAction::GetTargets(Player* 
             //Ignore yourself.
             if (player == bot)
                 SkipRpgTarget("Player is bot.");
+
+            if (!ai->IsSafe(player))
+                SkipRpgTarget("Player is not safe.");
 
             if (player->GetPlayerbotAI())
             {

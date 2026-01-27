@@ -1419,7 +1419,7 @@ TravelNodeRoute TravelNodeMap::getRoute(TravelNode* start, TravelNode* goal, Uni
                     if (!ai->IsGroupLeader() && player != bot)
                         continue;
 
-                    if (player->IsBeingTeleported())
+                    if (!ai->IsSafe(player))
                     {
                         startStub->currentGold = 0;
                         continue;
@@ -1652,8 +1652,9 @@ TravelNodeRoute TravelNodeMap::getRoute(WorldPosition startPos, WorldPosition en
     Player* bot = dynamic_cast<Player*>(unit);
     if (bot)
     {
-        Player* player = bot;
-        if (PAI_VALUE2(bool, "action useful", "hearthstone"))
+        PlayerbotAI* ai = bot->GetPlayerbotAI();
+        AiObjectContext* context = ai->GetAiObjectContext();
+        if (AI_VALUE2(bool, "action useful", "hearthstone"))
         {
             startPath.clear();
             TravelNode* botNode = new TravelNode(startPos, "Bot Pos", false);

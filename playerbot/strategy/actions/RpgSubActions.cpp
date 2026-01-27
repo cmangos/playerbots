@@ -758,6 +758,9 @@ bool RpgEnchantAction::Execute(Event& event)
     if (!player)
         return false;
 
+    if (!ai->IsSafe(player))
+        return false;
+
     std::list<Item*> items = AI_VALUE(std::list<Item*>, "items useful to enchant");
 
     if (items.empty())

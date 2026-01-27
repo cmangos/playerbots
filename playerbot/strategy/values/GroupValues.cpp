@@ -61,7 +61,7 @@ uint32 GroupBoolCountValue::Calculate()
         if (!player)
             continue;
 
-        if (player->GetMapId() != bot->GetMapId())
+        if (!ai->IsSafe(player))
             continue;
 
         if (!player->GetPlayerbotAI())
@@ -83,7 +83,7 @@ bool GroupBoolANDValue::Calculate()
         if (!player)
             continue;
 
-        if (player->GetMapId() != bot->GetMapId())
+        if (!ai->IsSafe(player))
             continue;
 
         if (!player->GetPlayerbotAI())
@@ -105,7 +105,7 @@ bool GroupBoolORValue::Calculate()
         if (!player)
             continue;
 
-        if (player->GetMapId() != bot->GetMapId())
+        if (!ai->IsSafe(player))
             continue;
 
         if (!player->GetPlayerbotAI())

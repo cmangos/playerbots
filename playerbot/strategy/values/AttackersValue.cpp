@@ -52,7 +52,7 @@ std::list<ObjectGuid> AttackersValue::Calculate()
             if (player == bot)
                 continue;
 
-            if (player->GetMapId() != bot->GetMapId())
+            if (!ai->IsSafe(player))
                 continue;
 
             if (sServerFacade.GetDistance2d(bot, player) > 10.0f)

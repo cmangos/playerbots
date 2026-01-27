@@ -35,7 +35,7 @@ GuidPosition FreeMoveCenterValue::Calculate()
             return followTarget;
 
         //Move the location to a location around follow targets destination.
-        if (player && player->GetPlayerbotAI() && PAI_VALUE(WorldPosition, "last long move"))
+        if (player && player->GetPlayerbotAI() && ai->IsSafe(player) && PAI_VALUE(WorldPosition, "last long move"))
             loc += (PAI_VALUE(WorldPosition, "last long move") - player);
 
         return loc;

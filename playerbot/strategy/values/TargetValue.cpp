@@ -35,7 +35,7 @@ bool FindNonCcTargetStrategy::IsCcTarget(Unit* attacker)
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *player = sObjectMgr.GetPlayer(itr->guid);
-            if (!player || !sServerFacade.IsAlive(player) || ai->IsSafe(player))
+            if (!player || !sServerFacade.IsAlive(player) || !ai->IsSafe(player))
                 continue;
 
             if (player->GetPlayerbotAI())
@@ -101,7 +101,7 @@ TravelTarget* LeaderTravelTargetValue::Calculate()
     TravelTarget* target = AI_VALUE(TravelTarget*, "travel target");
 
     Player* player = ai->GetGroupMaster();
-    if (!player || player == bot || !player->GetPlayerbotAI())
+    if (!player || player == bot || !player->GetPlayerbotAI() || !ai->IsSafe(player))
         return target;
 
     if (bot->GetGroup() && !ai->IsGroupLeader())

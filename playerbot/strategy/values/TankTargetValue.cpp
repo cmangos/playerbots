@@ -16,17 +16,19 @@ public:
 public:
     virtual void CheckAttacker(Unit* creature, ThreatManager* threatManager) override
     {
-        Player* player = ai->GetBot();
+        Player* bot = ai->GetBot();
+        AiObjectContext* context = ai->GetAiObjectContext();
+
         if (IsCcTarget(creature)) return;
 
-        if (!PossibleAttackTargetsValue::IsValid(creature, player))
+        if (!PossibleAttackTargetsValue::IsValid(creature, bot))
         {
-            std::list<ObjectGuid> attackers = PAI_VALUE(std::list<ObjectGuid>, "possible attack targets");
+            std::list<ObjectGuid> attackers = AI_VALUE(std::list<ObjectGuid>, "possible attack targets");
             if (std::find(attackers.begin(), attackers.end(), creature->GetObjectGuid()) == attackers.end())
                 return;
         }
 
-        float threat = threatManager->getThreat(player);
+        float threat = threatManager->getThreat(bot);
         if (!result || (minThreat - threat) > 0.1f)
         {
             minThreat = threat;

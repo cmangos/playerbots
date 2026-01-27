@@ -30,7 +30,7 @@ bool MoveToRpgTargetAction::Execute(Event& event)
     {
         Player* player = guidP.GetPlayer();
 
-        if (player && player->GetPlayerbotAI())
+        if (player && ai->IsSafe(player) && player->GetPlayerbotAI())
         {
             GuidPosition guidPP = PAI_VALUE(GuidPosition, "rpg target");
 

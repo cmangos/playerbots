@@ -330,6 +330,39 @@ bool AttackersValue::InCombat(Unit* target, Player* player, bool checkPullTarget
 
 bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool checkInCombat, bool validatePossibleTarget)
 {
+    auto isActivelyAttackingPlayerOrPet = [](Unit* enemy, Player* victim) -> bool
+    {
+        if (!enemy || !victim)
+            return false;
+
+        for (Unit* a : victim->getAttackers())
+        {
+            if (a == enemy)
+                return true;
+        }
+
+        if (Pet* pet = victim->GetPet())
+        {
+            for (Unit* a : pet->getAttackers())
+            {
+                if (a == enemy)
+                    return true;
+            }
+        }
+
+        // Fallback: victim pointer can be set even if attacker set isn't populated yet.
+        if (enemy->GetVictim() == victim)
+            return true;
+
+        if (Pet* pet = victim->GetPet())
+        {
+            if (enemy->GetVictim() == pet)
+                return true;
+        }
+
+        return false;
+    };
+
     Player* playerToCheckAgainst = owner != nullptr ? owner : player;
 
     // Validate possible target
@@ -355,6 +388,25 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
         if (inPvPProhibitedZone)
         {
             return false;
+        }
+
+        // World PvP (outside BG/arena): do not initiate on players; only fight if they are actively attacking us (or a group member/pet).
+        const bool duelOpponent = ((player && player->duel && player->duel->opponent == target) ||
+            (owner && owner->duel && owner->duel->opponent == target));
+        bool inWorld = !playerToCheckAgainst->InBattleGround();
+#ifndef MANGOSBOT_ZERO
+        inWorld = inWorld && !playerToCheckAgainst->InArena();
+#endif
+        if (inWorld && !duelOpponent)
+        {
+            bool attacking = isActivelyAttackingPlayerOrPet(target, playerToCheckAgainst);
+            if (!attacking && player && player != playerToCheckAgainst)
+            {
+                attacking = isActivelyAttackingPlayerOrPet(target, player);
+            }
+
+            if (!attacking)
+                return false;
         }
 
         // Don't check distance on duel opponents

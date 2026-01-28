@@ -38,6 +38,7 @@
 #include "strategy/ItemVisitors.h"
 #include "strategy/values/LootValues.h"
 #include "strategy/values/AttackersValue.h"
+#include <fstream>
 #include "Entities/Transports.h"
 #include "Guilds/GuildMgr.h"
 #include "Chat/ChannelMgr.h"
@@ -368,6 +369,13 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
         if (GetJumpDestination())
         {
             bot->Relocate(jumpDestination.getX(), jumpDestination.getY(), jumpDestination.getZ());
+            // #region agent log
+            {
+                std::ofstream logFile("/opt/cmangos/classic-db/.cursor/debug.log", std::ios::app);
+                if (logFile.is_open())
+                    logFile << "{\"sessionId\":\"debug-session\",\"runId\":\"pre-fix\",\"hypothesisId\":\"H2\",\"location\":\"PlayerbotAI.cpp:370\",\"message\":\"Bot jump Relocate\",\"data\":{\"botGuid\":" << bot->GetGUIDLow() << ",\"x\":" << jumpDestination.getX() << ",\"y\":" << jumpDestination.getY() << ",\"z\":" << jumpDestination.getZ() << ",\"fallAfterJump\":" << (fallAfterJump ? 1 : 0) << "},\"timestamp\":" << sWorld.GetCurrentMSTime() << "}\n";
+            }
+            // #endregion
         }
 
         // normal landing

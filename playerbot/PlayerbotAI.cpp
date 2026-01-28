@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include <stdarg.h>
 #include <iomanip>
+#include <map>
 
 #include "playerbot/AiFactory.h"
 
@@ -1057,6 +1058,106 @@ void PlayerbotAI::OnResurrected()
         }
 
         ChangeEngine(BotState::BOT_STATE_NON_COMBAT);
+    }
+}
+
+void PlayerbotAI::RecordRecentPvpAttacker(Unit* victim, Unit* attacker)
+{
+    if (!victim || !attacker)
+        return;
+
+    Player* attackerPlayer = nullptr;
+    if (attacker->IsPlayer())
+        attackerPlayer = static_cast<Player*>(attacker);
+    else
+    {
+        if (Unit* charmer = attacker->GetCharmer())
+        {
+            if (charmer->IsPlayer())
+                attackerPlayer = static_cast<Player*>(charmer);
+        }
+
+        if (!attackerPlayer)
+        {
+            if (Unit* owner = attacker->GetOwner())
+            {
+                if (owner->IsPlayer())
+                    attackerPlayer = static_cast<Player*>(owner);
+            }
+        }
+    }
+
+    if (!attackerPlayer)
+        return;
+
+    Player* victimOwner = nullptr;
+    if (victim->IsPlayer())
+        victimOwner = static_cast<Player*>(victim);
+    else
+    {
+        if (Unit* owner = victim->GetOwner())
+        {
+            if (owner->IsPlayer())
+                victimOwner = static_cast<Player*>(owner);
+        }
+    }
+
+    if (!victimOwner)
+        return;
+
+    auto updateBot = [attackerPlayer](Player* member)
+    {
+        if (!member)
+            return;
+
+        if (PlayerbotAI* memberAi = member->GetPlayerbotAI())
+            memberAi->UpdateRecentPvpAttacker(attackerPlayer);
+    };
+
+    Group* group = victimOwner->GetGroup();
+    if (group)
+    {
+        Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); ++itr)
+        {
+            Player* member = sObjectMgr.GetPlayer(itr->guid);
+            if (!member)
+                continue;
+
+            updateBot(member);
+        }
+        return;
+    }
+
+    updateBot(victimOwner);
+}
+
+void PlayerbotAI::UpdateRecentPvpAttacker(Player* attacker)
+{
+    if (!attacker || !aiObjectContext)
+        return;
+
+    std::map<ObjectGuid, time_t>& recent = aiObjectContext->GetValue<std::map<ObjectGuid, time_t>&>("recent pvp attackers")->Get();
+    time_t now = time(0);
+    recent[attacker->GetObjectGuid()] = now;
+
+    if (!sPlayerbotAIConfig.worldPvpAggroTimeout)
+        return;
+
+    for (auto it = recent.begin(); it != recent.end();)
+    {
+        if (!it->second || now - it->second > sPlayerbotAIConfig.worldPvpAggroTimeout)
+            it = recent.erase(it);
+        else
+            ++it;
+    }
+}
+
+namespace ai
+{
+    void RecordRecentPvpAttacker(Unit* victim, Unit* attacker)
+    {
+        PlayerbotAI::RecordRecentPvpAttacker(victim, attacker);
     }
 }
 

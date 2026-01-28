@@ -2,6 +2,7 @@
 
 #include "playerbot/strategy/Value.h"
 #include "playerbot/strategy/AiObjectContext.h"
+#include <map>
 
 namespace ai
 {
@@ -21,6 +22,15 @@ namespace ai
     {
     public:
         BgRoleValue(PlayerbotAI* ai) : ManualSetValue<uint32>(ai, 0, "bg role") {}
+    };
+
+    class RecentPvpAttackersValue : public ManualSetValue<std::map<ObjectGuid, time_t>&>
+    {
+    public:
+        RecentPvpAttackersValue(PlayerbotAI* ai) : ManualSetValue<std::map<ObjectGuid, time_t>&>(ai, data, "recent pvp attackers") {}
+
+    private:
+        std::map<ObjectGuid, time_t> data;
     };
 
     class BgMastersValue : public SingleCalculatedValue<std::list<CreatureDataPair const*>>, public Qualified

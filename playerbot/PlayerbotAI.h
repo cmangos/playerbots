@@ -566,6 +566,7 @@ private:
 private:
     void _fillGearScoreData(Player *player, Item* item, std::vector<uint32>* gearScore, uint32& twoHandScore);
     bool IsTellAllowed(Player* player, PlayerbotSecurityLevel securityLevel = PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL);
+    void UpdateRecentPvpAttacker(Player* attacker);
 
 public:
 	Player* GetBot() { return bot; }
@@ -641,6 +642,8 @@ public:
     void OnCombatEnded();
     void OnDeath();
     void OnResurrected();
+
+    static void RecordRecentPvpAttacker(Unit* victim, Unit* attacker);
     
     void SetActionDuration(const Action* action);
     void SetActionDuration(uint32 duration);

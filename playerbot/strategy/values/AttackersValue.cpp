@@ -3,6 +3,7 @@
 #include "AttackersValue.h"
 #include "PossibleTargetsValue.h"
 #include "EnemyPlayerValue.h"
+#include <map>
 
 using namespace ai;
 using namespace MaNGOS;
@@ -363,6 +364,36 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
         return false;
     };
 
+    auto wasRecentlyDamagedBy = [target](Player* victim) -> bool
+    {
+        if (!victim || !target || !sPlayerbotAIConfig.worldPvpAggroTimeout)
+            return false;
+
+        PlayerbotAI* victimAi = victim->GetPlayerbotAI();
+        if (!victimAi)
+            return false;
+
+        std::map<ObjectGuid, time_t>& recent = victimAi->GetAiObjectContext()->GetValue<std::map<ObjectGuid, time_t>&>("recent pvp attackers")->Get();
+        auto it = recent.find(target->GetObjectGuid());
+        if (it == recent.end())
+            return false;
+
+        if (!it->second)
+        {
+            recent.erase(it);
+            return false;
+        }
+
+        time_t now = time(0);
+        if (now - it->second > sPlayerbotAIConfig.worldPvpAggroTimeout)
+        {
+            recent.erase(it);
+            return false;
+        }
+
+        return true;
+    };
+
     Player* playerToCheckAgainst = owner != nullptr ? owner : player;
 
     // Validate possible target
@@ -400,9 +431,17 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
         if (inWorld && !duelOpponent)
         {
             bool attacking = isActivelyAttackingPlayerOrPet(target, playerToCheckAgainst);
+            if (!attacking)
+            {
+                attacking = wasRecentlyDamagedBy(playerToCheckAgainst);
+            }
             if (!attacking && player && player != playerToCheckAgainst)
             {
                 attacking = isActivelyAttackingPlayerOrPet(target, player);
+                if (!attacking)
+                {
+                    attacking = wasRecentlyDamagedBy(player);
+                }
             }
 
             if (!attacking)

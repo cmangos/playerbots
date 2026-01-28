@@ -109,6 +109,7 @@ bool PlayerbotAIConfig::Initialize()
     dispelAuraDuration = config.GetIntDefault("AiPlayerbot.DispelAuraDuration", 2000);
     reactDelay = (uint32) config.GetIntDefault("AiPlayerbot.ReactDelay", 100);
     passiveDelay = (uint32) config.GetIntDefault("AiPlayerbot.PassiveDelay", 4000);
+    worldPvpAggroTimeout = (uint32) config.GetIntDefault("AiPlayerbot.WorldPvpAggroTimeout", 10);
     repeatDelay = (uint32) config.GetIntDefault("AiPlayerbot.RepeatDelay", 5000);
     errorDelay = (uint32) config.GetIntDefault("AiPlayerbot.ErrorDelay", 5000);
     rpgDelay = (uint32) config.GetIntDefault("AiPlayerbot.RpgDelay", 3000);
@@ -793,6 +794,8 @@ std::string PlayerbotAIConfig::GetValue(std::string name)
         out << globalCoolDown;
     else if (name == "ReactDelay")
         out << reactDelay;
+    else if (name == "WorldPvpAggroTimeout")
+        out << worldPvpAggroTimeout;
 
     else if (name == "SightDistance")
         out << sightDistance;
@@ -832,6 +835,8 @@ void PlayerbotAIConfig::SetValue(std::string name, std::string value)
         out >> globalCoolDown;
     else if (name == "ReactDelay")
         out >> reactDelay;
+    else if (name == "WorldPvpAggroTimeout")
+        out >> worldPvpAggroTimeout;
 
     else if (name == "SightDistance")
         out >> sightDistance;

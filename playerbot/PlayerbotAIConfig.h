@@ -115,7 +115,7 @@ public:
     bool allowGuildBots;
     bool allowMultiAccountAltBots;
     uint32 globalCoolDown, reactDelay, maxWaitForMove, expireActionTime, dispelAuraDuration, passiveDelay, repeatDelay,
-        errorDelay, rpgDelay, sitDelay, returnDelay, lootDelay, worldPvpAggroTimeout;
+        errorDelay, rpgDelay, sitDelay, returnDelay, lootDelay, worldPvpAggroTimeout, worldPvpAggressiveChance, worldPvpLevelDiff;
     float sightDistance, spellDistance, reactDistance, grindDistance, lootDistance, groupMemberLootDistance, groupMemberLootDistanceWithActiveMaster,
         gatheringDistance, groupMemberGatheringDistance, groupMemberGatheringDistanceWithActiveMaster, shootDistance,
         fleeDistance, tooCloseDistance, meleeDistance, followDistance, raidFollowDistance, wanderMinDistance, wanderMaxDistance, whisperDistance, contactDistance,
@@ -418,5 +418,6 @@ private:
     Config config;
 };
 
-#define sPlayerbotAIConfig MaNGOS::Singleton<PlayerbotAIConfig>::Instance()
+PlayerbotAIConfig& GetPlayerbotAIConfig();
+#define sPlayerbotAIConfig GetPlayerbotAIConfig()
 

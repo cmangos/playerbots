@@ -1419,6 +1419,8 @@ bool PlayerbotAI::IsAllowedCommand(std::string text)
         unsecuredCommands.insert("lfg");
         unsecuredCommands.insert("guild invite");
         unsecuredCommands.insert("guild leave");
+        unsecuredCommands.insert("aggressive");
+        unsecuredCommands.insert("aggression");
     }
 
     for (std::set<std::string>::iterator i = unsecuredCommands.begin(); i != unsecuredCommands.end(); ++i)
@@ -1499,6 +1501,29 @@ void PlayerbotAI::HandleCommand(uint32 type, const std::string& text, Player& fr
         ChatHandler::BuildChatPacket(data, CHAT_MSG_ADDON, response.c_str(), LANG_ADDON,
                 CHAT_TAG_NONE, bot->GetObjectGuid(), bot->GetName());
         sServerFacade.SendPacket(&fromPlayer, data);
+        return;
+    }
+
+    if (filtered == "aggressive" || filtered == "aggression")
+    {
+        std::string response;
+        if (!sRandomPlayerbotMgr.IsRandomBot(bot))
+        {
+            response = "not random bot";
+        }
+        else
+        {
+            uint32 aggressive = sRandomPlayerbotMgr.GetValue(bot, "world_pvp_aggressive");
+            std::string storedChance = sRandomPlayerbotMgr.GetData(bot->GetGUIDLow(), "world_pvp_aggressive");
+            std::ostringstream out;
+            out << "world_pvp_aggressive=" << aggressive
+                << " chance=" << sPlayerbotAIConfig.worldPvpAggressiveChance
+                << " stored=" << (storedChance.empty() ? "?" : storedChance)
+                << " level_diff=" << sPlayerbotAIConfig.worldPvpLevelDiff;
+            response = out.str();
+        }
+
+        Whisper(response, fromPlayer.GetName());
         return;
     }
 
@@ -6490,6 +6515,20 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
     else if (command == "strategy")
     {
         return currentEngine->ListStrategies();
+    }
+    else if (command == "aggressive")
+    {
+        if (!sRandomPlayerbotMgr.IsRandomBot(bot))
+            return "not random bot";
+
+        uint32 aggressive = sRandomPlayerbotMgr.GetValue(bot, "world_pvp_aggressive");
+        std::string storedChance = sRandomPlayerbotMgr.GetData(bot->GetGUIDLow(), "world_pvp_aggressive");
+        std::ostringstream out;
+        out << "world_pvp_aggressive=" << aggressive
+            << " chance=" << sPlayerbotAIConfig.worldPvpAggressiveChance
+            << " stored=" << (storedChance.empty() ? "?" : storedChance)
+            << " level_diff=" << sPlayerbotAIConfig.worldPvpLevelDiff;
+        return out.str();
     }
     else if (command == "action")
     {

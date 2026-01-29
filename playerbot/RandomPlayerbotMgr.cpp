@@ -2922,6 +2922,23 @@ void RandomPlayerbotMgr::RandomizeFirst(Player* bot)
         return;
 
     SetValue(bot, "level", level);
+    uint32 aggressiveChance = sPlayerbotAIConfig.worldPvpAggressiveChance;
+    if (aggressiveChance > 100)
+        aggressiveChance = 100;
+
+    std::string aggressiveChanceStr = std::to_string(aggressiveChance);
+    bool shouldRerollAggressive = (GetValueValidTime(bot->GetGUIDLow(), "world_pvp_aggressive") <= 0);
+    if (!shouldRerollAggressive)
+    {
+        std::string storedChance = GetData(bot->GetGUIDLow(), "world_pvp_aggressive");
+        shouldRerollAggressive = storedChance != aggressiveChanceStr;
+    }
+
+    if (shouldRerollAggressive)
+    {
+        uint32 aggressive = (aggressiveChance > 0 && urand(1, 100) <= aggressiveChance) ? 1 : 0;
+        SetValue(bot, "world_pvp_aggressive", aggressive, aggressiveChanceStr, -1);
+    }
     PlayerbotFactory factory(bot, level);
     factory.Randomize(false, false);
 
@@ -3462,6 +3479,23 @@ void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 void RandomPlayerbotMgr::OnBotLoginInternal(Player * const bot)
 {
     sLog.outDetail("%u/%d Bot %s logged in", GetPlayerbotsAmount(), sRandomPlayerbotMgr.GetMaxAllowedBotCount(), bot->GetName());
+    uint32 aggressiveChance = sPlayerbotAIConfig.worldPvpAggressiveChance;
+    if (aggressiveChance > 100)
+        aggressiveChance = 100;
+
+    std::string aggressiveChanceStr = std::to_string(aggressiveChance);
+    bool shouldRerollAggressive = (GetValueValidTime(bot->GetGUIDLow(), "world_pvp_aggressive") <= 0);
+    if (!shouldRerollAggressive)
+    {
+        std::string storedChance = GetData(bot->GetGUIDLow(), "world_pvp_aggressive");
+        shouldRerollAggressive = storedChance != aggressiveChanceStr;
+    }
+
+    if (shouldRerollAggressive)
+    {
+        uint32 aggressive = (aggressiveChance > 0 && urand(1, 100) <= aggressiveChance) ? 1 : 0;
+        SetValue(bot, "world_pvp_aggressive", aggressive, aggressiveChanceStr, -1);
+    }
 	//if (loginProgressBar && playerBots.size() < sRandomPlayerbotMgr.GetMaxAllowedBotCount()) { loginProgressBar->step(); }
 	//if (loginProgressBar && playerBots.size() >= sRandomPlayerbotMgr.GetMaxAllowedBotCount() - 1) {
     //if (loginProgressBar && playerBots.size() + 1 >= sRandomPlayerbotMgr.GetMaxAllowedBotCount()) {

@@ -28,6 +28,7 @@ bool AhBotConfig::Initialize()
     if (!config.SetSource(SYSCONFDIR"ahbot.conf", "AHBot_"))
     {
         sLog.outString("AhBot is Disabled. Unable to open configuration file ahbot.conf");
+        enabled = false;
         return false;
     }
 

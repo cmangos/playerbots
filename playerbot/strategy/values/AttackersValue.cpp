@@ -394,6 +394,17 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
         return true;
     };
 
+    auto isWorldPvpAggressive = [](Player* bot) -> bool
+    {
+        if (!bot || !bot->GetPlayerbotAI())
+            return false;
+
+        if (!sRandomPlayerbotMgr.IsRandomBot(bot))
+            return false;
+
+        return sRandomPlayerbotMgr.GetValue(bot, "world_pvp_aggressive") != 0;
+    };
+
     Player* playerToCheckAgainst = owner != nullptr ? owner : player;
 
     // Validate possible target
@@ -428,7 +439,15 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
 #ifndef MANGOSBOT_ZERO
         inWorld = inWorld && !playerToCheckAgainst->InArena();
 #endif
-        if (inWorld && !duelOpponent)
+        if (inWorld && !duelOpponent && sPlayerbotAIConfig.worldPvpLevelDiff > 0)
+        {
+            int32 levelDiff = int32(enemyPlayer->GetLevel()) - int32(playerToCheckAgainst->GetLevel());
+            if (levelDiff < 0)
+                levelDiff = -levelDiff;
+            if (levelDiff > int32(sPlayerbotAIConfig.worldPvpLevelDiff))
+                return false;
+        }
+        if (inWorld && !duelOpponent && !isWorldPvpAggressive(playerToCheckAgainst))
         {
             bool attacking = isActivelyAttackingPlayerOrPet(target, playerToCheckAgainst);
             if (!attacking)

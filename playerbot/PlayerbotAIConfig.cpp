@@ -8,6 +8,7 @@
 #include "World/WorldState.h"
 #include "playerbot/PlayerbotHelpMgr.h"
 #include "playerbot/strategy/actions/CheatAction.h"
+#include "Policies/Singleton.h"
 
 #include "playerbot/TravelMgr.h"
 
@@ -29,7 +30,20 @@ std::vector<std::string> ConfigAccess::GetValues(const std::string& name) const
     return values;
 };
 
-INSTANTIATE_SINGLETON_1(PlayerbotAIConfig);
+PlayerbotAIConfig& GetPlayerbotAIConfig()
+{
+    static PlayerbotAIConfig instance;
+    return instance;
+}
+
+namespace MaNGOS
+{
+    template<>
+    PlayerbotAIConfig& Singleton<PlayerbotAIConfig, SingleThreaded<PlayerbotAIConfig>, OperatorNew<PlayerbotAIConfig>, ObjectLifeTime<PlayerbotAIConfig> >::Instance()
+    {
+        return GetPlayerbotAIConfig();
+    }
+}
 
 PlayerbotAIConfig::PlayerbotAIConfig()
 : enabled(false)
@@ -110,6 +124,8 @@ bool PlayerbotAIConfig::Initialize()
     reactDelay = (uint32) config.GetIntDefault("AiPlayerbot.ReactDelay", 100);
     passiveDelay = (uint32) config.GetIntDefault("AiPlayerbot.PassiveDelay", 4000);
     worldPvpAggroTimeout = (uint32) config.GetIntDefault("AiPlayerbot.WorldPvpAggroTimeout", 10);
+    worldPvpAggressiveChance = (uint32) config.GetIntDefault("AiPlayerbot.WorldPvpAggressiveChance", 20);
+    worldPvpLevelDiff = (uint32) config.GetIntDefault("AiPlayerbot.WorldPvpLevelDiff", 5);
     repeatDelay = (uint32) config.GetIntDefault("AiPlayerbot.RepeatDelay", 5000);
     errorDelay = (uint32) config.GetIntDefault("AiPlayerbot.ErrorDelay", 5000);
     rpgDelay = (uint32) config.GetIntDefault("AiPlayerbot.RpgDelay", 3000);
@@ -794,8 +810,12 @@ std::string PlayerbotAIConfig::GetValue(std::string name)
         out << globalCoolDown;
     else if (name == "ReactDelay")
         out << reactDelay;
+    else if (name == "WorldPvpAggressiveChance")
+        out << worldPvpAggressiveChance;
     else if (name == "WorldPvpAggroTimeout")
         out << worldPvpAggroTimeout;
+    else if (name == "WorldPvpLevelDiff")
+        out << worldPvpLevelDiff;
 
     else if (name == "SightDistance")
         out << sightDistance;
@@ -835,8 +855,12 @@ void PlayerbotAIConfig::SetValue(std::string name, std::string value)
         out >> globalCoolDown;
     else if (name == "ReactDelay")
         out >> reactDelay;
+    else if (name == "WorldPvpAggressiveChance")
+        out >> worldPvpAggressiveChance;
     else if (name == "WorldPvpAggroTimeout")
         out >> worldPvpAggroTimeout;
+    else if (name == "WorldPvpLevelDiff")
+        out >> worldPvpLevelDiff;
 
     else if (name == "SightDistance")
         out >> sightDistance;

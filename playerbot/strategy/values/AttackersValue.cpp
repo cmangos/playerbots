@@ -447,24 +447,35 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
             if (levelDiff > int32(sPlayerbotAIConfig.worldPvpLevelDiff))
                 return false;
         }
-        if (inWorld && !duelOpponent && !isWorldPvpAggressive(playerToCheckAgainst))
+        if (inWorld && !duelOpponent)
         {
-            bool attacking = isActivelyAttackingPlayerOrPet(target, playerToCheckAgainst);
-            if (!attacking)
+            // For bot vs bot world PvP, require both to be aggressive.
+            if (sRandomPlayerbotMgr.IsRandomBot(playerToCheckAgainst) &&
+                sRandomPlayerbotMgr.IsRandomBot(enemyPlayer) &&
+                (!isWorldPvpAggressive(playerToCheckAgainst) || !isWorldPvpAggressive(enemyPlayer)))
             {
-                attacking = wasRecentlyDamagedBy(playerToCheckAgainst);
-            }
-            if (!attacking && player && player != playerToCheckAgainst)
-            {
-                attacking = isActivelyAttackingPlayerOrPet(target, player);
-                if (!attacking)
-                {
-                    attacking = wasRecentlyDamagedBy(player);
-                }
+                return false;
             }
 
-            if (!attacking)
-                return false;
+            if (!isWorldPvpAggressive(playerToCheckAgainst))
+            {
+                bool attacking = isActivelyAttackingPlayerOrPet(target, playerToCheckAgainst);
+                if (!attacking)
+                {
+                    attacking = wasRecentlyDamagedBy(playerToCheckAgainst);
+                }
+                if (!attacking && player && player != playerToCheckAgainst)
+                {
+                    attacking = isActivelyAttackingPlayerOrPet(target, player);
+                    if (!attacking)
+                    {
+                        attacking = wasRecentlyDamagedBy(player);
+                    }
+                }
+
+                if (!attacking)
+                    return false;
+            }
         }
 
         // Don't check distance on duel opponents

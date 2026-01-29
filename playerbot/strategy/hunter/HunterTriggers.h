@@ -322,14 +322,28 @@ namespace ai
     public:
         HunterNoPet(PlayerbotAI* ai) : Trigger(ai, "no beast", 1) {}
         virtual bool IsActive() override
-        {
-            Unit* target = AI_VALUE(Unit*, "current target");
-            if (target && target->GetCreatureType() == CREATURE_TYPE_BEAST && !bot->GetPetGuid() && target->GetLevel() <= bot->GetLevel()) {
-                return true;
-            }
-            return false;
-        }
-    };
+{
+    if (AI_VALUE2(bool, "mounted", "self target"))
+        return false;
+
+    if (bot->GetPetGuid())
+        return false;
+
+    if (ai->CanCastSpell("call pet"))
+        return false;
+
+    Unit* target = AI_VALUE(Unit*, "current target");
+    if (!target)
+        return false;
+
+    if (target->GetCreatureType() != CREATURE_TYPE_BEAST)
+        return false;
+
+    if (target->GetLevel() > bot->GetLevel())
+        return false;
+
+    return ai->CanCastSpell("tame beast");
+}
 
     class StealthedNearbyTrigger : public Trigger 
     {
@@ -345,3 +359,4 @@ namespace ai
         }
     };
 }
+

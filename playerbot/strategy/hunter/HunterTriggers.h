@@ -320,7 +320,7 @@ namespace ai
     class HunterNoPet : public Trigger 
     {
     public:
-        HunterNoPet(PlayerbotAI* ai) : Trigger(ai, "no beast", 1) {}
+        HunterNoPet(PlayerbotAI* ai) : Trigger(ai, "no pet", 1) {}
         virtual bool IsActive() override
 {
     if (AI_VALUE2(bool, "mounted", "self target"))
@@ -359,4 +359,5 @@ namespace ai
         }
     };
 }
+
 

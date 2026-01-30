@@ -320,14 +320,19 @@ namespace ai
     class HunterNoPet : public Trigger 
     {
     public:
-        HunterNoPet(PlayerbotAI* ai) : Trigger(ai, "no beast", 1) {}
+        HunterNoPet(PlayerbotAI* ai) : Trigger(ai, "no pet", 1) {}
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, "current target");
-            if (target && target->GetCreatureType() == CREATURE_TYPE_BEAST && !bot->GetPetGuid() && target->GetLevel() <= bot->GetLevel()) {
-                return true;
-            }
+            if (AI_VALUE2(bool, "mounted", "self target"))
             return false;
+
+            if (bot->GetPetGuid())
+            return false;
+
+            if (ai->CanCastSpell("call pet", bot, 0))
+            return false;
+
+            return ai->CanCastSpell("tame beast", bot, 0);
         }
     };
 
@@ -345,3 +350,4 @@ namespace ai
         }
     };
 }
+

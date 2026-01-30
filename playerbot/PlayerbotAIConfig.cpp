@@ -458,7 +458,7 @@ bool PlayerbotAIConfig::Initialize()
     randomBotAccountPrefix = config.GetStringDefault("AiPlayerbot.RandomBotAccountPrefix", "rndbot");
     randomBotAccountCount = config.GetIntDefault("AiPlayerbot.RandomBotAccountCount", 50);
     deleteRandomBotAccounts = config.GetBoolDefault("AiPlayerbot.DeleteRandomBotAccounts", false);
-    deleteRandomBotOnDeath = config.GetBoolDefault("AiPlayerbot.DeleteRandomBotOnDeath", false);
+    logoutRandomBotOnDeath = config.GetBoolDefault("AiPlayerbot.LogoutRandomBotOnDeath", false);
     randomBotGuildCount = config.GetIntDefault("AiPlayerbot.RandomBotGuildCount", 20);
     deleteRandomBotGuilds = config.GetBoolDefault("AiPlayerbot.DeleteRandomBotGuilds", false);
 

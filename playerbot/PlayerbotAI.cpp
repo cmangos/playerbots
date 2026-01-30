@@ -958,11 +958,14 @@ void PlayerbotAI::OnDeath()
     {
         StopMoving();
 
-        if (sPlayerbotAIConfig.deleteRandomBotOnDeath && sRandomPlayerbotMgr.IsRandomBot(bot) && !bot->InBattleGround())
+        if (sPlayerbotAIConfig.logoutRandomBotOnDeath && sRandomPlayerbotMgr.IsRandomBot(bot) && !bot->InBattleGround())
         {
-            sLog.outDebug("Random bot %s died - scheduling delete", bot->GetName());
-            sRandomPlayerbotMgr.SetValue(bot, "delete", 1);
-            sRandomPlayerbotMgr.SetValue(bot, "add", 0);
+            sLog.outDebug("Random bot %s died - logging out", bot->GetName());
+            // Remove from active pool and logout (but don't delete character)
+            sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "add", 0);
+            // Set logout timer so bot stays offline for a while before being eligible to log back in
+            uint32 logoutTime = urand(sPlayerbotAIConfig.minRandomBotInWorldTime, sPlayerbotAIConfig.maxRandomBotInWorldTime);
+            sRandomPlayerbotMgr.SetValue(bot->GetGUIDLow(), "logout", 1, "", logoutTime);
             SetShouldLogOut(true);
             return;
         }

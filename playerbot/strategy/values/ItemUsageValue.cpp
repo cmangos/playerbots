@@ -95,6 +95,9 @@ ItemUsage ItemUsageValue::Calculate()
     if (!proto)
         return ItemUsage::ITEM_USAGE_NONE;
 
+    if (proto->ItemId == 90001)
+        return ItemUsage::ITEM_USAGE_FORCE_NEED;
+
     //FORCE
     ForceItemUsage forceUsage = AI_VALUE2_EXISTS(ForceItemUsage, "force item usage", proto->ItemId, ForceItemUsage::FORCE_USAGE_NONE);
 

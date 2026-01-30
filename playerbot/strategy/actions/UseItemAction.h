@@ -169,6 +169,15 @@ namespace ai
         bool ShouldReactionInterruptMovement() const override { return true; }
     };
 
+    class UseSlamrockAction : public UseAction
+    {
+    public:
+        UseSlamrockAction(PlayerbotAI* ai) : UseAction(ai, "use slamrock") {}
+
+        bool Execute(Event& event) override;
+        bool isUseful() override;
+    };
+
     class UseHealthstoneAction : public UseItemIdAction
     {
     public:

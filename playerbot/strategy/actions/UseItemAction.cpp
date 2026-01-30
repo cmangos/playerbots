@@ -160,6 +160,89 @@ bool IsDrink(const ItemPrototype* proto)
     return IsFoodOrDrink(proto, 59);
 }
 
+namespace
+{
+    constexpr uint32 SLAMROCK_ITEM_ID = 90001;
+    constexpr uint32 SLAMROCK_TARGETING_SPELL_ID = 33394;
+    constexpr uint32 SLAMROCK_MARKER_ENCHANT_ID = 900000;
+
+    constexpr EnchantmentSlot SLAMROCK_PROP_SLOTS[] = {
+        PROP_ENCHANTMENT_SLOT_0,
+        PROP_ENCHANTMENT_SLOT_1,
+        PROP_ENCHANTMENT_SLOT_2,
+        PROP_ENCHANTMENT_SLOT_3
+    };
+
+    bool HasSlamrockMarker(Item* item)
+    {
+        if (!item)
+            return false;
+
+        if (item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT) == SLAMROCK_MARKER_ENCHANT_ID)
+            return true;
+
+        for (EnchantmentSlot slot : SLAMROCK_PROP_SLOTS)
+        {
+            if (item->GetEnchantmentId(slot) == SLAMROCK_MARKER_ENCHANT_ID)
+                return true;
+        }
+
+        return false;
+    }
+
+    bool IsValidSlamrockTarget(Player* bot, Item* item, SpellEntry const* targetingSpell, bool requireUnsLammed)
+    {
+        if (!bot || !item)
+            return false;
+
+        if (!bot->IsEquipmentPos(item->GetBagSlot(), item->GetSlot()))
+            return false;
+
+        ItemPrototype const* proto = item->GetProto();
+        if (!proto)
+            return false;
+
+        if (proto->InventoryType == INVTYPE_NON_EQUIP || proto->InventoryType == INVTYPE_BAG)
+            return false;
+
+        if (item->GetItemRandomPropertyId() != 0)
+            return false;
+
+        if (requireUnsLammed && HasSlamrockMarker(item))
+            return false;
+
+        if (targetingSpell && !item->IsFitToSpellRequirements(targetingSpell))
+            return false;
+
+        return true;
+    }
+
+    Item* FindSlamrockTarget(Player* bot, SpellEntry const* targetingSpell, bool requireUnsLammed)
+    {
+        Item* best = nullptr;
+        uint32 bestIlvl = 0;
+
+        for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+        {
+            Item* item = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            if (!item)
+                continue;
+
+            if (!IsValidSlamrockTarget(bot, item, targetingSpell, requireUnsLammed))
+                continue;
+
+            uint32 itemLevel = item->GetProto() ? item->GetProto()->ItemLevel : 0;
+            if (!best || itemLevel > bestIlvl)
+            {
+                best = item;
+                bestIlvl = itemLevel;
+            }
+        }
+
+        return best;
+    }
+}
+
 bool IsTargetValidForItemUse(uint32 itemID, Unit* target)
 {
     ItemRequiredTargetMapBounds bounds = sObjectMgr.GetItemRequiredTargetMapBounds(itemID);
@@ -1274,6 +1357,73 @@ bool UseHearthStoneAction::isUseful()
         return false;
 
     return true;
+}
+
+bool UseSlamrockAction::Execute(Event& event)
+{
+    MakeVerbose(false);
+
+    uint32 itemId = 0;
+    uint32 itemRandomPropertyId = 0;
+
+    if (!event.getPacket().empty())
+    {
+        WorldPacket& data = event.getPacket();
+        data.rpos(0);
+
+        ObjectGuid guid;
+        data >> guid;
+        if (guid != bot->GetObjectGuid())
+            return false;
+
+        uint32 received, created, isShowChatMessage, slotId, suffixFactor, count;
+        uint8 bagSlot;
+
+        data >> received;
+        data >> created;
+        data >> isShowChatMessage;
+        data >> bagSlot;
+        data >> slotId;
+        data >> itemId;
+        data >> suffixFactor;
+        data >> itemRandomPropertyId;
+        data >> count;
+
+        if (itemId != SLAMROCK_ITEM_ID)
+            return false;
+
+        ItemQualifier qualifier(itemId, static_cast<int32>(itemRandomPropertyId));
+        ai->Say("WELCOME TO " + chat->formatItem(qualifier));
+    }
+    else if (!bot->HasItemCount(SLAMROCK_ITEM_ID, 1))
+    {
+        return false;
+    }
+
+    if (bot->IsInCombat())
+        return false;
+
+    SpellEntry const* targetingSpell = sSpellTemplate.LookupEntry<SpellEntry>(SLAMROCK_TARGETING_SPELL_ID);
+    Item* targetItem = FindSlamrockTarget(bot, targetingSpell, true);
+    if (!targetItem)
+        targetItem = FindSlamrockTarget(bot, targetingSpell, false);
+
+    if (!targetItem)
+        return false;
+
+    return UseItem(nullptr, SLAMROCK_ITEM_ID, targetItem);
+}
+
+bool UseSlamrockAction::isUseful()
+{
+    if (bot->IsInCombat())
+        return false;
+
+    if (!bot->HasItemCount(SLAMROCK_ITEM_ID, 1))
+        return false;
+
+    SpellEntry const* targetingSpell = sSpellTemplate.LookupEntry<SpellEntry>(SLAMROCK_TARGETING_SPELL_ID);
+    return FindSlamrockTarget(bot, targetingSpell, true) || FindSlamrockTarget(bot, targetingSpell, false);
 }
 
 bool UseRandomRecipeAction::isUseful()

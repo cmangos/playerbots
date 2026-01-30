@@ -97,7 +97,11 @@ void WorldPacketHandlerStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &
 
     triggers.push_back(new TriggerNode(
         "item push result",
-        NextAction::array(0, new NextAction("query item usage", relevance), new NextAction("equip upgrades", relevance), NULL)));
+        NextAction::array(0,
+            new NextAction("query item usage", relevance),
+            new NextAction("equip upgrades", relevance),
+            new NextAction("use slamrock", relevance),
+            NULL)));
 
     triggers.push_back(new TriggerNode(
         "ready check finished",

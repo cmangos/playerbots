@@ -112,6 +112,7 @@ namespace ai
             creators["taxi"] = [](PlayerbotAI* ai) { return new TaxiAction(ai); };
             creators["repair"] = [](PlayerbotAI* ai) { return new RepairAllAction(ai); };
             creators["use"] = [](PlayerbotAI* ai) { return new UseAction(ai); };
+            creators["use slamrock"] = [](PlayerbotAI* ai) { return new UseSlamrockAction(ai); };
             creators["item count"] = [](PlayerbotAI* ai) { return new TellItemCountAction(ai); };
             creators["equip"] = [](PlayerbotAI* ai) { return new EquipAction(ai); };
             creators["equip upgrades"] = [](PlayerbotAI* ai) { return new EquipUpgradesAction(ai); };

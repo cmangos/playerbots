@@ -7,6 +7,11 @@
 #define BOOST_STACKTRACE_LINK
 #include <boost/stacktrace.hpp>
 
+#if PLATFORM == PLATFORM_WINDOWS
+#include "psapi.h"
+#include "windows.h"
+#endif
+
 void MemoryMonitor::Add(std::string objectType, uint64_t object, int level, std::string stack)
 {
     if(stack.empty())
@@ -51,6 +56,12 @@ void MemoryMonitor::Print()
     if (objectnumbersHist.size() > 10)
         objectnumbersHist.pop_front();
 
+    #if PLATFORM == PLATFORM_WINDOWS
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+    sLog.outString("MEMORY: %.2fgb", pmc.PrivateUsage/1000000000.0f);
+    #endif
+
     for (auto& num : nums)
     {
         if(num.second > 1000000)
@@ -89,7 +100,11 @@ void MemoryMonitor::LogCount(std::string filename)
     if (objectnumbersHist.size() > 10)
         objectnumbersHist.pop_front();
 
-    std::string line = "time";
+    std::string line = "time,onlinebots";
+
+    #if PLATFORM == PLATFORM_WINDOWS
+    line += ",totalMemory";
+    #endif
 
     if (!headers)
     {
@@ -108,6 +123,14 @@ void MemoryMonitor::LogCount(std::string filename)
         
     //line = timestamp.c_str();
     line = std::to_string(static_cast<uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch() - GetApplicationStartTime().time_since_epoch()).count()));
+
+    line += "," + std::to_string(sRandomPlayerbotMgr.GetPlayerbotsAmount());
+
+    #if PLATFORM == PLATFORM_WINDOWS
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+    line += "," + std::to_string(pmc.PrivateUsage);
+    #endif
 
     for (auto& num : nums)
     {

@@ -174,6 +174,9 @@ uint32 CurrentMountSpeedValue::Calculate()
 {
     Unit* unit = AI_VALUE(Unit*, getQualifier());
 
+    if (!unit)
+        return 0;
+
     uint32 mountSpeed = 0;
 
     for (uint32 auraType = SPELL_AURA_BIND_SIGHT; auraType < TOTAL_AURAS; auraType++)

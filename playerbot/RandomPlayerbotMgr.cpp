@@ -835,6 +835,7 @@ void RandomPlayerbotMgr::DelayedFacingFix()
 void RandomPlayerbotMgr::DatabasePing(QueryResult* result, uint32 pingStart, std::string db)
 {
     sRandomPlayerbotMgr.SetDatabaseDelay(db, sWorld.GetCurrentMSTime() - pingStart);
+    delete result;
 }
 
 void RandomPlayerbotMgr::LoadNamedLocations()

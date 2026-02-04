@@ -343,26 +343,44 @@ int RandomPlayerbotMgr::GetMaxAllowedBotCount()
     return GetEventValue(0, "bot_count");
 }
 
-inline std::ostringstream print_path(Unit* bot, std::vector<std::pair<int, int>>& log, bool is_sqDist_greater_200 = false) {
+inline void print_line(Unit* bot, const std::vector<std::pair<int, int>> line, bool is_sqDist_greater_200)
+{
     std::ostringstream out;
     out << bot->GetName() << ",";
     out << std::fixed << std::setprecision(1);
     out << "\"LINESTRING(";
-    if (is_sqDist_greater_200) {
-        out << log.back().first << " " << log.back().second << ",";
-        out << WorldPosition(bot).getDisplayX() << " " << WorldPosition(bot).getDisplayY();
-    }
-    else {
-        for (auto& p : log) {
-            out << p.first << " " << p.second << (&p == &log.back() ? "" : ",");
-        }
-    }
+    for (auto& p : line)
+    {
+        out << p.first << " " << p.second << (&p == &line.back() ? "" : ",");
+    }    
     out << ")\",";
     out << bot->GetOrientation() << ",";
     out << std::to_string(bot->getRace()) << ",";
     out << std::to_string(bot->getClass()) << ",";
     out << (is_sqDist_greater_200 ? "1" : "0");
-    return out;
+    sPlayerbotAIConfig.log("player_paths.csv", out.str().c_str());
+}
+
+inline void print_path(Unit* bot, std::vector<std::pair<int, int>>& log)
+{
+    std::vector<std::pair<int, int>> line;
+
+    std::pair<int, int> lastP = {0, 0};
+
+    for (auto& p : log)
+    {
+        if (lastP.first && lastP.second && pow(lastP.first - p.first, 2) + pow(lastP.second - p.second, 2) > 200 * 200)
+        {
+            if (line.size()>1)
+                print_line(bot, line, false);      //Print previous path.
+            print_line(bot, {lastP, p}, true); //Print jump.
+            line.clear();
+        }
+        line.push_back(p);
+        lastP = p;
+    }
+    if (line.size() > 1)
+        print_line(bot, line, false); //Print remaining path.
 }
 
 void RandomPlayerbotMgr::LogPlayerLocation()
@@ -424,30 +442,20 @@ void RandomPlayerbotMgr::LogPlayerLocation()
 
                     sPlayerbotAIConfig.log("player_location.csv", out.str().c_str());
 
-                    if (sPlayerbotAIConfig.hasLog("player_paths.csv"))
+                    if (sPlayerbotAIConfig.hasLog("player_paths.csv") && WorldPosition(bot))
                     {
                         auto& botMoveLog = playerBotMoveLog[bot->GetObjectGuid().GetCounter()];
-                        float sqDist = (botMoveLog.empty() ? 1 : (pow(botMoveLog.back().first - int32(WorldPosition(bot).getDisplayX()), 2) + pow(botMoveLog.back().second - int32(WorldPosition(bot).getDisplayY()), 2)));
-                        if (sqDist <= 200 * 200) 
+
+                        std::pair<int32,int32> curDisplayPos = std::make_pair(WorldPosition(bot).getDisplayX(), WorldPosition(bot).getDisplayY());
+
+                        botMoveLog.push_back(curDisplayPos);
+
+                        if (botMoveLog.size() > 100)
                         {
-                            botMoveLog.push_back(std::make_pair(WorldPosition(bot).getDisplayX(), WorldPosition(bot).getDisplayY()));
-                            if (botMoveLog.size() > 100)
-                            {
-                                sPlayerbotAIConfig.log("player_paths.csv", print_path(bot, botMoveLog).str().c_str());
-                                botMoveLog.clear();
-                            }
-                        }
-                        else if (sqDist >= 200 * 200)
-                        {
-                            if (botMoveLog.size() > 1)
-                            {
-                                sPlayerbotAIConfig.log("player_paths.csv", print_path(bot, botMoveLog).str().c_str());
-                            }
-                            
-                            sPlayerbotAIConfig.log("player_paths.csv", print_path(bot, botMoveLog, true).str().c_str());
+                            print_path(bot, botMoveLog);
                             botMoveLog.clear();
-                            botMoveLog.push_back(std::make_pair(WorldPosition(bot).getDisplayX(), WorldPosition(bot).getDisplayY()));
-                        }
+                            botMoveLog.push_back(curDisplayPos); //Start next path at current position.
+                        }                       
                     }
                 });
             }
@@ -501,22 +509,19 @@ void RandomPlayerbotMgr::LogPlayerLocation()
 
                 sPlayerbotAIConfig.log("player_location.csv", out.str().c_str());
 
-                if (sPlayerbotAIConfig.hasLog("player_paths.csv"))
+                if (sPlayerbotAIConfig.hasLog("player_paths.csv") && WorldPosition(bot))
                 {
-                    float sqDist = (playerBotMoveLog[i.first].empty() ? 1 : (pow(playerBotMoveLog[i.first].back().first - int32(WorldPosition(bot).getDisplayX()), 2) + pow(playerBotMoveLog[i.first].back().second - int32(WorldPosition(bot).getDisplayY()), 2)));
-                    if (sqDist <= 200 * 200) {
-                        playerBotMoveLog[i.first].push_back(std::make_pair(WorldPosition(bot).getDisplayX(), WorldPosition(bot).getDisplayY()));
-                        if (playerBotMoveLog[i.first].size() > 100) {
-                            sPlayerbotAIConfig.log("player_paths.csv", print_path(bot, playerBotMoveLog[i.first]).str().c_str());
-                            playerBotMoveLog[i.first].clear();
-                        }
-                    }
-                    else if (sqDist >= 200 * 200) {
-                        if (playerBotMoveLog[i.first].size() > 1)
-                            sPlayerbotAIConfig.log("player_paths.csv", print_path(bot, playerBotMoveLog[i.first]).str().c_str());
-                        sPlayerbotAIConfig.log("player_paths.csv", print_path(bot, playerBotMoveLog[i.first], true).str().c_str());
-                        playerBotMoveLog[i.first].clear();
-                        playerBotMoveLog[i.first].push_back(std::make_pair(WorldPosition(bot).getDisplayX(), WorldPosition(bot).getDisplayY()));
+                    auto& botMoveLog = playerBotMoveLog[bot->GetObjectGuid().GetCounter()];
+
+                    std::pair<int32, int32> curDisplayPos = std::make_pair(WorldPosition(bot).getDisplayX(), WorldPosition(bot).getDisplayY());
+
+                    botMoveLog.push_back(curDisplayPos);
+
+                    if (botMoveLog.size() > 100)
+                    {
+                        print_path(bot, botMoveLog);
+                        botMoveLog.clear();
+                        botMoveLog.push_back(curDisplayPos); //Start next path at current position.
                     }
                 }
             }

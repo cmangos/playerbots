@@ -196,6 +196,7 @@ RandomItemList RandomItemMgr::Query(uint32 level, RandomItemType type, RandomIte
 
 void RandomItemMgr::BuildRandomItemCache()
 {
+    randomItemCache.clear();
     auto results = CharacterDatabase.PQuery("select lvl, type, item from ai_playerbot_rnditem_cache");
     if (results)
     {
@@ -836,6 +837,10 @@ bool RandomItemMgr::CanEquipWeapon(uint8 clazz, ItemPrototype const* proto)
 
 void RandomItemMgr::BuildItemInfoCache()
 {
+    for (auto& [key, itemInfo] : itemInfoCache)
+        if (itemInfo)
+            delete itemInfo;
+
     uint32 maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
 
     for (uint32 i = 0; i <= MAX_STAT_SCALES; ++i)
@@ -3294,6 +3299,8 @@ uint32 RandomItemMgr::GetLiveStatWeight(Player* player, uint32 itemId, uint32 sp
 void RandomItemMgr::BuildEquipCache()
 {
     uint32 maxLevel = DEFAULT_MAX_LEVEL;
+
+    equipCache.clear();
 
     auto results = CharacterDatabase.PQuery("select clazz, spec, lvl, slot, quality, item from ai_playerbot_equip_cache");
     if (results)

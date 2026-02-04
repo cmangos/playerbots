@@ -1101,6 +1101,7 @@ inline std::string toInitCap(const std::string& str) {
 
 void ChatHelper::PopulateSpellNameList()
 {
+    spellIds.clear();
     for (uint32 i = 0; i < GetSpellStore()->GetMaxEntry(); ++i)
     {
         SpellEntry const* tempSpell = GetSpellStore()->LookupEntry<SpellEntry>(i);

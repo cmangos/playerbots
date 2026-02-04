@@ -36,6 +36,7 @@ void PlayerbotTextMgr::ReplacePlaceholders(std::string& text, const std::map<std
 
 void PlayerbotTextMgr::LoadBotTexts()
 {
+    botTexts.clear();
     sLog.outBasic("Loading playerbot texts...");
     auto results = WorldDatabase.PQuery("SELECT `name`, `text`, `say_type`, `reply_type`, `text_loc1`, `text_loc2`, `text_loc3`, `text_loc4`, `text_loc5`, `text_loc6`, `text_loc7`, `text_loc8` FROM `ai_playerbot_texts`");
     int count = 0;

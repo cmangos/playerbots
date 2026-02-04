@@ -1255,6 +1255,8 @@ uint32 ItemUsageValue::GetRecipeSpell(ItemPrototype const* proto)
 
 void ItemUsageValue::PopulateProfessionReagentIds()
 {
+    m_allReagentItemIdsForCraftingSkillsVector.clear();
+
     for (uint32 i = 0; i < sSkillLineStore.GetNumRows(); ++i)
     {
         SkillLineEntry const* skillInfo = sSkillLineStore.LookupEntry(i);
@@ -1295,6 +1297,7 @@ void ItemUsageValue::PopulateProfessionReagentIds()
 
 void ItemUsageValue::PopulateReagentItemIdsForCraftableItemIds()
 {
+    m_craftingReagentItemIdsForCraftableItem.clear();
     for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
     {
         SkillLineAbilityEntry const* skillLine = sSkillLineAbilityStore.LookupEntry(j);

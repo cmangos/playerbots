@@ -79,6 +79,9 @@ void PlayerbotFactory::Init()
         }
     }
 
+    overworldTaxiNodeLevelsH.clear();
+    overworldTaxiNodeLevelsA.clear();
+
     for (uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
     {
         TaxiNodesEntry const* taxiNode = sTaxiNodesStore.LookupEntry(i);

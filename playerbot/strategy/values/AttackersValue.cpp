@@ -273,6 +273,9 @@ void AttackersValue::AddTargetsOf(Player* player, std::set<Unit*>& targets, std:
         // Filter the units that are valid
         for (Unit* unit : units)
         {
+            if (!ai->IsSafe(unit))
+                continue;
+
             // Prevent checking a target that has already been validated
             if((targets.find(unit) == targets.end()))
             {

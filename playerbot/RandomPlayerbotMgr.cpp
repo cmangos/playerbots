@@ -2003,12 +2003,12 @@ bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
         if (!botsAllowedInWorld)
             return false;
 
-        if (!GetEventValue(bot, "login"))
-        {
-            AddPlayerBot(bot, 0);
+        if (GetEventValue(bot, "login"))
+            return true;
 
-            SetEventValue(bot, "login", 1, -1); // This will be reset to 0 on server startup. Check RandomPlayerbotMgr constructor
-        }
+        AddPlayerBot(bot, 0);
+
+        SetEventValue(bot, "login", 1, -1); // This will be reset to 0 on server startup. Check RandomPlayerbotMgr constructor
 
         uint32 randomTime = urand(sPlayerbotAIConfig.minRandomBotReviveTime, sPlayerbotAIConfig.maxRandomBotReviveTime);
         SetEventValue(bot, "update", 1, randomTime);

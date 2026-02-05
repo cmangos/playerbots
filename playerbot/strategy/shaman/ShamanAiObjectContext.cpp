@@ -151,7 +151,7 @@ namespace ai
                 creators["totembar spirits"] = [](PlayerbotAI* ai) { return new ShamanTotemBarSpiritsStrategy(ai); };
                 creators["totem fire nova"] = [](PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire nova", "fire totem", "fire nova"); };
                 creators["totem fire flametongue"] = [](PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire flametongue", "fire totem", "flametongue totem"); };
-                creators["totem fire resistance"] = [](PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire resistance", "fire totem", "frost resistance totem"); };
+                creators["totem fire resistance"] = [](PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire resistance", "fire totem", "fire resistance totem"); };
                 creators["totem fire magma"] = [](PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire magma", "fire totem", "magma totem"); };
                 creators["totem fire searing"] = [](PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire searing", "fire totem", "searing totem"); };
                 creators["totem fire wrath"] = [](PlayerbotAI* ai) { return new ShamanManualTotemStrategy(ai, "totem fire wrath", "fire totem", "totem of wrath"); };

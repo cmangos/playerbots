@@ -399,11 +399,26 @@ namespace ai
         }
     };
 
-    class WanderFarTrigger : public FarFromMasterTrigger
+    class WanderFarTrigger : public Trigger
     {
     public:
         WanderFarTrigger(PlayerbotAI* ai, std::string name = "wander far", int checkInterval = 2)
-            : FarFromMasterTrigger(ai, name, ai->GetRange("wandermax"), checkInterval) {}
+            : Trigger(ai, name, checkInterval) {
+        }
+
+        bool IsActive() override
+        {
+            Unit* master = AI_VALUE(Unit*, "master target");
+            if (!master || !sServerFacade.IsFriendlyTo(bot, master))
+                return false;
+
+            if (master->GetTransport() && master->GetTransport() == bot->GetTransport())
+                return false;
+
+            float dist = AI_VALUE2(float, "distance", "master target");
+
+            return sServerFacade.IsDistanceGreaterThan(dist, ai->GetRange("wandermax"));
+        }
     };
 
     class WanderMediumTrigger : public Trigger

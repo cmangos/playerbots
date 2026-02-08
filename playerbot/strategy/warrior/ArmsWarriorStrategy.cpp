@@ -185,6 +185,9 @@ void ArmsWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
         "melee light aoe",
         NextAction::array(0, new NextAction("whirlwind", ACTION_HIGH + 4), NULL)));
 
+    triggers.push_back(new TriggerNode(
+        "melee high aoe",
+        NextAction::array(0, new NextAction("retaliation", ACTION_HIGH + 5), NULL)));
 }
 
 void ArmsWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

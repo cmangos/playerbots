@@ -74,7 +74,7 @@ namespace ai
             }
             else if (ai->HasStrategy("totem fire resistance", BotState::BOT_STATE_COMBAT))
             {
-                return !AI_VALUE2(bool, "has totem", "frost resistance totem");
+                return !AI_VALUE2(bool, "has totem", "fire resistance totem");
             }
             else if (ai->HasStrategy("totem fire magma", BotState::BOT_STATE_COMBAT))
             {

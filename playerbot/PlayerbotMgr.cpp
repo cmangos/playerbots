@@ -1389,7 +1389,13 @@ void PlayerbotMgr::SaveToDB()
 void PlayerbotMgr::OnBotLoginInternal(Player * const bot)
 {
     bot->GetPlayerbotAI()->SetMaster(master);
-    bot->GetPlayerbotAI()->SetShouldLogOut(false);  // Clear pending logout from random bot death
+    // Clear any pending logout flag from a prior death or random-bot cycle.
+    // Without this, a bot moved from sRandomPlayerbotMgr into a player's
+    // party can carry shouldLogOut=true, causing it to be immediately
+    // logged out from inside UpdateSessions → ForEachPlayerbot, triggering
+    // SpawnPlayerLootCrate / DestroyItem during teardown while sibling bots
+    // in the same group have already been freed.
+    bot->GetPlayerbotAI()->SetShouldLogOut(false);
     bot->GetPlayerbotAI()->ResetStrategies();
     sLog.outDebug("Bot %s logged in", bot->GetName());
 }

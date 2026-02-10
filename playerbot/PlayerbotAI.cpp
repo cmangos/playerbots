@@ -1069,6 +1069,7 @@ void PlayerbotAI::RecordRecentPvpAttacker(Unit* victim, Unit* attacker)
     if (!victim || !attacker)
         return;
 
+    // Resolve attacker to a player (direct, pet owner, or charmer)
     Player* attackerPlayer = nullptr;
     if (attacker->IsPlayer())
         attackerPlayer = static_cast<Player*>(attacker);
@@ -1093,6 +1094,7 @@ void PlayerbotAI::RecordRecentPvpAttacker(Unit* victim, Unit* attacker)
     if (!attackerPlayer)
         return;
 
+    // Resolve victim to a player
     Player* victimOwner = nullptr;
     if (victim->IsPlayer())
         victimOwner = static_cast<Player*>(victim);
@@ -1108,9 +1110,20 @@ void PlayerbotAI::RecordRecentPvpAttacker(Unit* victim, Unit* attacker)
     if (!victimOwner)
         return;
 
+    // Don't record PvP attackers during logout teardown.
+    // During LogoutAllBots → LogoutPlayerBot → LogoutPlayer, item destruction
+    // can trigger reactive damage (thorns, shields) which re-enters here.
+    // At that point, group member slots may reference already-freed Players.
+    if (victimOwner->GetSession()->isLogingOut())
+        return;
+
     auto updateBot = [attackerPlayer](Player* member)
     {
         if (!member)
+            return;
+
+        // Skip members whose sessions are tearing down
+        if (member->GetSession()->isLogingOut())
             return;
 
         if (PlayerbotAI* memberAi = member->GetPlayerbotAI())

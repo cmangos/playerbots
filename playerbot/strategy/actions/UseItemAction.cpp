@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include "UseItemAction.h"
 
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "Database/DBCStore.h"
 #include "playerbot/ServerFacade.h"
@@ -566,6 +567,39 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
         }
 
         return false;
+    }
+
+    // Items with ScriptName (e.g. Slamrock) use OnItemUse instead of the normal spell path.
+    // Real players go through HandleUseItemOpcode which calls OnItemUse; bots bypass that and
+    // must call it directly when using an item-on-item (e.g. Slamrock on gear).
+    // Note: itemUsed can be null when bot has item cheat (RequiresItemToUse returns false for
+    // consumables), but the script needs the actual item to consume it - fetch from inventory.
+    if (item && proto->ScriptId)
+    {
+        Item* scriptItem = itemUsed;
+        if (!scriptItem)
+        {
+            std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatQItem(itemId));
+            if (!items.empty())
+                scriptItem = items.front();
+        }
+        if (scriptItem)
+        {
+            SpellCastTargets targets;
+            targets.setItemTarget(item);
+            if (sScriptDevAIMgr.OnItemUse(bot, scriptItem, targets))
+            {
+                if (verbose)
+                {
+                    std::map<std::string, std::string> replyArgs;
+                    replyArgs["%target"] = chat->formatItem(proto);
+                    replyArgs["%item"] = chat->formatItem(item);
+                    ai->TellPlayerNoFacing(requester, BOT_TEXT2("use_command", replyArgs) + " " + BOT_TEXT("command_target_item"), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                }
+                SetDuration(sPlayerbotAIConfig.globalCoolDown);
+                return true;
+            }
+        }
     }
 
     Unit* unitTarget = nullptr;

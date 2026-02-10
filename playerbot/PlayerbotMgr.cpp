@@ -234,6 +234,12 @@ void PlayerbotHolder::DisablePlayerBot(uint32 guid, bool logOutPlayer)
     Player* bot = GetPlayerBot(guid);
     if (bot)
     {
+        if (!bot->GetPlayerbotAI())
+        {
+            playerBots[guid] = nullptr;
+            return;
+        }
+
         if (logOutPlayer && bot->GetPlayerbotAI()->IsRealPlayer() && bot->GetGroup() && sPlayerbotAIConfig.IsFreeAltBot(guid))
             bot->GetSession()->SetOffline(); //Prevent groupkick
         bot->GetPlayerbotAI()->TellPlayer(bot->GetPlayerbotAI()->GetMaster(), BOT_TEXT("goodbye"));
@@ -1276,6 +1282,9 @@ void PlayerbotMgr::HandleCommand(uint32 type, const std::string& text, uint32 la
 
     ForEachPlayerbot([&](Player *bot)
     {
+        if (!bot->GetPlayerbotAI())
+            return;
+
         if (type == CHAT_MSG_SAY)
             if (bot->GetMapId() != master->GetMapId() || sServerFacade.GetDistance2d(bot, master) > 25)
                 return;
@@ -1289,6 +1298,9 @@ void PlayerbotMgr::HandleCommand(uint32 type, const std::string& text, uint32 la
 
     sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
     {
+        if (!bot->GetPlayerbotAI())
+            return;
+
         if (type == CHAT_MSG_SAY)
             if (bot->GetMapId() != master->GetMapId() || sServerFacade.GetDistance2d(bot, master) > 25)
                return;
@@ -1306,11 +1318,17 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
 {
     ForEachPlayerbot([&](Player* bot)
     {
+        if (!bot->GetPlayerbotAI())
+            return;
+
         bot->GetPlayerbotAI()->HandleMasterIncomingPacket(packet);
     });
 
     sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
     {
+        if (!bot->GetPlayerbotAI())
+            return;
+
         if (bot->GetPlayerbotAI()->GetMaster() == GetMaster())
             bot->GetPlayerbotAI()->HandleMasterIncomingPacket(packet);
     });
@@ -1343,6 +1361,9 @@ void PlayerbotMgr::HandleMasterOutgoingPacket(const WorldPacket& packet)
 
     sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
     {
+        if (!bot->GetPlayerbotAI())
+            return;
+
         if (bot->GetPlayerbotAI()->GetMaster() == GetMaster())
             bot->GetPlayerbotAI()->HandleMasterOutgoingPacket(packet);
     });
@@ -1357,6 +1378,9 @@ void PlayerbotMgr::SaveToDB()
 
     sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot)
     {
+        if (!bot->GetPlayerbotAI())
+            return;
+
         if (bot->GetPlayerbotAI()->GetMaster() == GetMaster())
             bot->SaveToDB();
     });
@@ -1365,6 +1389,7 @@ void PlayerbotMgr::SaveToDB()
 void PlayerbotMgr::OnBotLoginInternal(Player * const bot)
 {
     bot->GetPlayerbotAI()->SetMaster(master);
+    bot->GetPlayerbotAI()->SetShouldLogOut(false);  // Clear pending logout from random bot death
     bot->GetPlayerbotAI()->ResetStrategies();
     sLog.outDebug("Bot %s logged in", bot->GetName());
 }

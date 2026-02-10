@@ -3463,13 +3463,11 @@ void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 
     ForEachPlayerbot([&](Player* bot) {
         PlayerbotAI* ai = bot->GetPlayerbotAI();
-        if (player == ai->GetMaster())
+        if (ai && player == ai->GetMaster())
         {
-            ai->SetMaster(NULL);
             if (!bot->InBattleGround())
-            {
-                ai->ResetStrategies();
-            }
+                ai->ResetStrategies();   // call before SetMaster(null) - strategies may access master
+            ai->SetMaster(NULL);
         }
     });
 

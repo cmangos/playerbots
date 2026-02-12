@@ -722,11 +722,9 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 if (ai->HasCheat(BotCheatMask::gold) || ai->HasCheat(BotCheatMask::taxi))
                 {
                     bot->SetMoney(botMoney + tEntry->price);
-                }
-#ifdef MANGOSBOT_TWO                
+                }                
                 bot->OnTaxiFlightEject(true);
                 ai->Unmount();
-#endif
                 bool goTaxi = bot->ActivateTaxiPathTo({ tEntry->from, tEntry->to }, unit, 1);
 #ifdef MANGOSBOT_TWO
                 /*

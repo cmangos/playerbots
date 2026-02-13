@@ -59,3 +59,34 @@ void RangeAction::PrintRange(std::string type, Player* requester)
     ai->TellPlayer(requester, out.str());
 }
 
+bool WanderFarCanMoveAroundAction::Execute(Event& event)
+{
+    Unit* master = AI_VALUE(Unit*, "master target");
+
+    if (!master || !sServerFacade.IsFriendlyTo(bot, master))
+    {
+        RESET_AI_VALUE(bool, "can move around");
+        return false;
+    }
+
+    if (master->GetTransport() && master->GetTransport() == bot->GetTransport())
+    {
+        RESET_AI_VALUE(bool, "can move around");
+        return false;
+    }
+
+    float dist = AI_VALUE2(float, "distance", "master target");
+    bool active = sServerFacade.IsDistanceGreaterThan(dist, ai->GetRange("wandermax"));
+
+    if (active)
+    {
+        SET_AI_VALUE(bool, "can move around", false);
+        return true;
+    }
+    else
+    {
+        RESET_AI_VALUE(bool, "can move around");
+        return false;
+    }
+}
+

@@ -81,13 +81,11 @@ bool WanderFarCanMoveAroundAction::Execute(Event& event)
     if (active)
     {
         SET_AI_VALUE(bool, "can move around", false);
-        SET_AI_VALUE(bool, "travel target active", false);
         return true;
     }
     else
     {
-        SET_AI_VALUE(bool, "can move around", true);
-        SET_AI_VALUE(bool, "travel target active", true);
+        RESET_AI_VALUE(bool, "can move around");
         return false;
     }
 }

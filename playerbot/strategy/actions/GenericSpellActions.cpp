@@ -706,10 +706,13 @@ bool CastItemTargetAction::Execute(Event& event)
         if (!result)
             return false;
 
-        if (HasSpellCooldown(itemId))
+        if (ai->HasCheat(BotCheatMask::item))
         {
-            bot->RemoveSpellCooldown(*spellInfo, false);
-            bot->AddCooldown(*spellInfo, proto, false);
+            if (!HasSpellCooldown(itemId))
+            {
+                bot->RemoveSpellCooldown(*spellInfo, false);
+                bot->AddCooldown(*spellInfo, proto, false);
+            }
         }
 
         ++count;

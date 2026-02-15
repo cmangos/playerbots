@@ -210,12 +210,6 @@ bool RequiresItemToUse(const ItemPrototype* itemProto, PlayerbotAI* ai, Player* 
     if (itemProto->Class == ITEM_CLASS_QUEST)
         return true;
 
-#ifndef MANGOSBOT_ZERO
-    // If item is a gem
-    if (itemProto->Class == ITEM_CLASS_GEM)
-        return true;
-#endif
-
     return false;
 }
 
@@ -673,11 +667,13 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
 
             if (successCast)
             {
-                // Only add cooldown if the spell doesn't use a real item
-                if (itemUsed == nullptr && HasItemCooldown(itemId))
+                if (itemUsed == nullptr && ai->HasCheat(BotCheatMask::item))
                 {
-                    bot->RemoveSpellCooldown(*spellInfo, false);
-                    bot->AddCooldown(*spellInfo, proto, false);
+                    if (!HasItemCooldown(itemId))
+                    {
+                        bot->RemoveSpellCooldown(*spellInfo, false);
+                        bot->AddCooldown(*spellInfo, proto, false);
+                    }
                 }
 
                 if (IsFood(proto) || IsDrink(proto))

@@ -210,6 +210,12 @@ bool RequiresItemToUse(const ItemPrototype* itemProto, PlayerbotAI* ai, Player* 
     if (itemProto->Class == ITEM_CLASS_QUEST)
         return true;
 
+#ifndef MANGOSBOT_ZERO
+    // If item is a gem
+    if (itemProto->Class == ITEM_CLASS_GEM)
+        return true;
+#endif
+
     return false;
 }
 

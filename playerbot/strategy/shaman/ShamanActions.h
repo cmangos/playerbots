@@ -106,7 +106,52 @@ namespace ai
     {
     public:
         CastTotemAction(PlayerbotAI* ai, std::string spell) : CastBuffSpellAction(ai, spell) {}
-        virtual bool isUseful() override { return CastBuffSpellAction::isUseful() && !AI_VALUE2(bool, "has totem", name); }
+
+        bool isUseful() override
+        {
+            if (!CastBuffSpellAction::isUseful())
+                return false;
+
+            Group* group = bot->GetGroup();
+            if (!group)
+                return !AI_VALUE2(bool, "has totem", name);
+
+            for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+            {
+                Player* member = ref->getSource();
+                if (!member || !sServerFacade.IsAlive(member))
+                    continue;
+
+                if (member == bot)
+                    continue;
+
+                if (!member->IsInWorld() || member->GetMapId() != bot->GetMapId())
+                    continue;
+
+                if (!bot->IsWithinDistInMap(member, 100.0f, false))
+                    continue;
+
+                if (!ai->HasAura(GetSpellName(), member, false, true))
+                    return true;
+            }
+
+            return false;
+        }
+
+    protected:
+        std::string GetTargetName() override { return "self target"; }
+        std::string GetReachActionName() override { return "reach party member for totem"; }
+
+        NextAction** getPrerequisites() override
+        {
+            if (!bot->GetGroup())
+                return CastBuffSpellAction::getPrerequisites();
+
+            const std::string qualifiersStr = Qualified::MultiQualify({ GetSpellName(), "party member for totem" }, "::");
+            return NextAction::merge(
+                NextAction::array(0, new NextAction("reach party member for totem::" + qualifiersStr), nullptr),
+                CastBuffSpellAction::getPrerequisites());
+        }
     };
 
     class CastStoneskinTotemAction : public CastTotemAction

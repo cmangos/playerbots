@@ -105,6 +105,7 @@ namespace ai
             creators["reach melee"] = [](PlayerbotAI* ai) { return new ReachMeleeAction(ai); };
             creators["reach pull"] = [](PlayerbotAI* ai) { return new ReachPullAction(ai); };
             creators["reach party member to heal"] = [](PlayerbotAI* ai) { return new ReachPartyMemberToHealAction(ai); };
+            creators["reach party member for totem"] = [](PlayerbotAI* ai) { return new ReachPartyMemberForTotemAction(ai); };
             creators["flee"] = [](PlayerbotAI* ai) { return new FleeAction(ai); };
             creators["flee with pet"] = [](PlayerbotAI* ai) { return new FleeWithPetAction(ai); };
             creators["wait for attack keep safe distance"] = [](PlayerbotAI* ai) { return new WaitForAttackKeepSafeDistanceAction(ai); };

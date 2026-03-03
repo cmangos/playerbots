@@ -229,6 +229,9 @@ namespace ai
                 if (!member || !sServerFacade.IsAlive(member))
                     continue;
 
+                if (member == bot)
+                    continue;
+
                 if (!member->IsInWorld() || member->GetMapId() != bot->GetMapId())
                     continue;
 

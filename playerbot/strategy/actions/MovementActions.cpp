@@ -1720,6 +1720,8 @@ bool MovementAction::ChaseTo(WorldObject* obj, float distance, float angle)
             sServerFacade.GetChaseTarget(bot) == obj && 
             sServerFacade.GetChaseOffset(bot) == distance)
         {
+            bot->SetTarget(obj); //Needed to keep chase going in combat.
+            bot->Attack((Unit*)obj, false); //Needed to keep chase going in combat.
             return true;
         }
     }

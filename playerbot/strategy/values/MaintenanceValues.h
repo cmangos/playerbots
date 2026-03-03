@@ -26,7 +26,7 @@ namespace ai
             if (ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT))
             {
                 float dist = AI_VALUE2(float, "distance", "master target");
-                bool wanderTooFar = (dist - ai->GetRange("wandermax")) > sPlayerbotAIConfig.wanderMaxDistance;
+                bool wanderTooFar = dist > ai->GetRange("wandermax");
 
                 if (wanderTooFar)
                     return false;

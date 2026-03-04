@@ -1397,6 +1397,9 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
     if (!target)
         return false;
 
+    WorldPosition botPos(bot);
+    WorldPosition tarPos(target);
+
     //Move to target corpse if alive.
     if (!target->IsAlive() && bot->IsAlive() && target->GetObjectGuid().IsPlayer())
     {
@@ -1406,7 +1409,6 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
 
         if (corpse)
         {
-            WorldPosition botPos(bot);
             WorldPosition cPos(corpse);
 
             if(botPos.fDist(cPos) > sPlayerbotAIConfig.spellDistance)
@@ -1415,33 +1417,30 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
         }
     }
 
-    if (sServerFacade.IsDistanceGreaterOrEqualThan(sServerFacade.GetDistance2d(bot, target), sPlayerbotAIConfig.sightDistance) || (target->IsFlying() && !bot->IsFreeFlying()) || target->IsTaxiFlying()/* || bot->GetTransport()*/)
+    float tDist = botPos.fDist(tarPos);
+
+    if (tDist > sPlayerbotAIConfig.sightDistance || (target->IsFlying() && !bot->IsFreeFlying()) || target->IsTaxiFlying())
     {
         if (target->GetObjectGuid().IsPlayer())
         {
-            Player* pTarget = (Player*)target;
+            Player* player = (Player*)target;
 
-            if (pTarget->GetPlayerbotAI()) //Try to move to where the bot is going if it is closer and in the same direction.
+            if (ai->IsSafe(player))
             {
-                WorldPosition botPos(bot);
-                WorldPosition tarPos(target);
-                WorldPosition longMove = pTarget->GetPlayerbotAI()->GetAiObjectContext()->GetValue<WorldPosition>("last long move")->Get();
-
-                if (longMove)
+                if (player->GetPlayerbotAI()) //Try to move to where the bot is going if it is closer and in the same direction.
                 {
-                    float lDist = botPos.fDist(longMove);
-                    float tDist = botPos.fDist(tarPos);
-                    float ang = botPos.getAngleBetween(tarPos, longMove);
-                    if ((lDist * 1.5 < tDist && ang < M_PI_F / 2) || target->IsTaxiFlying())
+                    WorldPosition longMove = PAI_VALUE(WorldPosition, "last long move");
+
+                    if (longMove)
                     {
                         return MoveTo(longMove.getMapId(), longMove.getX(), longMove.getY(), longMove.getZ());
                     }
                 }
             }
 
-            if (pTarget->IsTaxiFlying()) //Move to where the player is flying to.
+            if (player->IsTaxiFlying()) //Move to where the player is flying to.
             {
-                const Taxi::Map tMap = pTarget->GetTaxiPathSpline();
+                const Taxi::Map tMap = player->GetTaxiPathSpline();
                 if (!tMap.empty())
                 {
                     auto tEnd = tMap.back();
@@ -1457,7 +1456,6 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
 
     // Handle water transition
     {
-        WorldPosition tarPos(target);
         bool targetInWater = (tarPos.isInWater() || tarPos.isUnderWater()) && !botPos.isInWater() && !botPos.isUnderWater();
         bool selfInWater = (botPos.isInWater() || botPos.isUnderWater()) && !tarPos.isInWater() && !tarPos.isUnderWater();
         bool targetOnSurface = botPos.isUnderWater() && tarPos.isInWater() && !tarPos.isUnderWater();

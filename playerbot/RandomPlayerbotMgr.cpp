@@ -481,7 +481,8 @@ void RandomPlayerbotMgr::LogPlayerLocation()
                                     out << bot->GetOrientation() << ",";
                                     out << std::to_string(bot->getRace()) << ",";
                                     out << std::to_string(bot->getClass()) << ",";
-                                    out << walkable ? "1" : "0";
+                                    out << (walkable ? "1" : "0") << ",";
+                                    out << lastMove.moveEvent.getSource();
                                     sPlayerbotAIConfig.log("player_route.csv", out.str().c_str());
                                 }
                             }

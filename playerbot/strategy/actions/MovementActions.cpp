@@ -909,7 +909,10 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         return false;
 
     if(!movePath.empty() && movePath.getBack().distance(movePath.getFront()) > maxDist)
+    {
+        lastMove.moveEvent = ai->GetLastEvent();
         lastMove.setPath(movePath);
+    }
 
     if (!movePosition || movePosition.getMapId() != bot->GetMapId())
     {        
@@ -1454,7 +1457,6 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
 
     // Handle water transition
     {
-        WorldPosition botPos(bot);
         WorldPosition tarPos(target);
         bool targetInWater = (tarPos.isInWater() || tarPos.isUnderWater()) && !botPos.isInWater() && !botPos.isUnderWater();
         bool selfInWater = (botPos.isInWater() || botPos.isUnderWater()) && !tarPos.isInWater() && !tarPos.isUnderWater();

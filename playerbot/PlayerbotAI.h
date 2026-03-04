@@ -675,6 +675,9 @@ public:
     bool HandleSpellClick(uint32 entry);
     bool HandleSpellClick(ObjectGuid guid);
 
+    void SetLastEvent(Event& event) { lastEvent = event; }
+    Event& GetLastEvent() { return lastEvent; }
+
 #ifdef BUILD_ELUNA
     MaNGOS::unique_weak_ptr<PlayerbotAI> GetWeakPtr() const { return m_weakRef; }
     void SetWeakPtr(MaNGOS::unique_weak_ptr<PlayerbotAI> weakRef) { m_weakRef = std::move(weakRef); }
@@ -717,6 +720,7 @@ protected:
     bool isPlayerFriend = false;
     bool isMovingToTransport = false;
     bool shouldLogOut = false;
+    Event lastEvent;
 
 #ifdef BUILD_ELUNA
     MaNGOS::unique_weak_ptr<PlayerbotAI> m_weakRef;

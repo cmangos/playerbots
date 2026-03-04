@@ -713,6 +713,7 @@ bool Engine::ListenAndExecute(Action* action, Event& event)
     Action* prevExecutedAction = lastExecutedAction;
     if (actionExecutionListeners.Before(action, event))
     {
+        ai->SetLastEvent(event);
         actionExecuted = actionExecutionListeners.AllowExecution(action, event) ? action->Execute(event) : true;
         if (actionExecuted)
         {

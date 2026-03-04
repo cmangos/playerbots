@@ -156,6 +156,9 @@ AiPlayerbot.RandomBotRpgChance = 0.20
 # Limit whithin what distance between other bots they teleport to points in zones around real player
 # AiPlayerbot.RandomBotTeleportNearPlayerMaxAmountRadius = 0
 
+# Bot transport use style: 0 = walk on transports (currently not available), 1 = teleport on transports and ride it, 2 = teleport from dock to dock bypassing transport.
+# AiPlayerbot.TransportTeleportType = 2
+
 # Chance for bot to use potions
 #AiPlayerbot.UsePotionChance = 1.0
 

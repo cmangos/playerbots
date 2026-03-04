@@ -1000,13 +1000,15 @@ WorldPosition TravelPath::getNextPoint(WorldPosition startPos, float maxDist, Tr
     if (std::next(nextP) != ed)
         nextP = std::next(nextP);
 
+    WorldPosition nextPoint = startP->point;
+
     //We are moving towards a teleport. Move to portal an activate area trigger
     if (startP->type == PathNodeType::NODE_AREA_TRIGGER)
     {
         pathType = TravelNodePathType::areaTrigger;
         entry = startP->entry;
         cutTo(*startP, false);
-        return startP->point;
+        return nextPoint;
     }
 
     //We are moving towards a static portal. Move to portal and use it.
@@ -1015,7 +1017,7 @@ WorldPosition TravelPath::getNextPoint(WorldPosition startPos, float maxDist, Tr
         pathType = TravelNodePathType::staticPortal;
         entry = startP->entry;
         cutTo(*startP, false);
-        return startP->point;
+        return nextPoint;
     }
 
     //We are using a hearthstone
@@ -1024,7 +1026,7 @@ WorldPosition TravelPath::getNextPoint(WorldPosition startPos, float maxDist, Tr
         pathType = TravelNodePathType::teleportSpell;
         entry = startP->entry;
         cutTo(*startP, false);
-        return startP->point;
+        return nextPoint;
     }
 
     //We are moving towards a flight path. Move to flight master and activate flight path.
@@ -1033,7 +1035,7 @@ WorldPosition TravelPath::getNextPoint(WorldPosition startPos, float maxDist, Tr
         pathType = TravelNodePathType::flightPath;
         entry = startP->entry;
         cutTo(*startP, false);
-        return startP->point;
+        return nextPoint;
     }
 
     if (nextP->type == PathNodeType::NODE_TRANSPORT)
@@ -1112,8 +1114,7 @@ WorldPosition TravelPath::getNextPoint(WorldPosition startPos, float maxDist, Tr
         return WorldPosition();
     }
 
-    cutTo(*startP, false);
-    return startP->point;
+    return nextPoint;
 }
 
 std::ostringstream TravelPath::print()

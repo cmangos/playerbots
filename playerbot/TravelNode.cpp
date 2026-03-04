@@ -865,7 +865,7 @@ bool TravelPath::makeShortCut(WorldPosition startPos, float maxDist, Unit* bot)
     WorldPosition beginPos = newPath.begin()->point;
 
     //The old path seems to be the best.
-    if (beginPos.distance(firstNode) < sPlayerbotAIConfig.tooCloseDistance)
+    if (newPath.front() == fullPath.front() || beginPos.distance(firstNode) < sPlayerbotAIConfig.tooCloseDistance)
         return false;
 
     //We are (nearly) on the new path. Just follow the rest.

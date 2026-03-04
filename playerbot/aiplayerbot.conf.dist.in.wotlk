@@ -147,6 +147,15 @@ AiPlayerbot.RandomBotMaxLevelChance = 0.15
 # Chance bot chooses RPG (Teleport to random camp for their level) instead of grinding
 AiPlayerbot.RandomBotRpgChance = 0.20
 
+# Random bots teleport to zones around real player if level is appropriate
+# AiPlayerbot.RandomBotTeleportNearPlayer = 0
+
+# Limit how many random bots teleport to points in zones around real player
+# AiPlayerbot.RandomBotTeleportNearPlayerMaxAmount = 0
+
+# Limit whithin what distance between other bots they teleport to points in zones around real player
+# AiPlayerbot.RandomBotTeleportNearPlayerMaxAmountRadius = 0
+
 # Chance for bot to use potions
 #AiPlayerbot.UsePotionChance = 1.0
 

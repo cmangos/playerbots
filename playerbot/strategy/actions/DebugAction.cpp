@@ -76,6 +76,10 @@ bool DebugAction::Execute(Event& event)
         return HandleMotion(event, requester, text);
     else if (text.find("transport") == 0 && isMod)
         return HandleTransport(event, requester, text);
+    else if (text.find("pointontrans") == 0 && isMod)
+        return HandlePointOnTrans(event, requester, text);
+    else if (text.find("dotrans") == 0 && isMod)
+        return HandleDoTransport(event, requester, text);
     else if (text.find("ontrans") == 0 && isMod)
         return HandleOnTrans(event, requester, text);
     else if (text.find("offtrans") == 0 && isMod)
@@ -763,6 +767,150 @@ bool DebugAction::HandleTransport(Event& event, Player* requester, const std::st
 
         ai->TellPlayer(requester, out);
     }
+
+    return true;
+}
+
+bool DebugAction::HandlePointOnTrans(Event& event, Player* requester, const std::string& text)
+{
+    GenericTransport* transport = bot->GetTransport();
+
+    std::string param;
+
+    if (text.length() > std::string("pointontrans").size())
+        param = text.substr(std::string("pointontrans").size() + 1);
+
+    if (!transport)
+    {
+        std::vector<GenericTransport*> transports;
+
+        for (auto trans : WorldPosition(bot).getTransports())
+            transports.push_back(trans);
+
+        WorldPosition botPos(bot);
+
+        //Closest transport last = below in chat.
+        std::sort(transports.begin(), transports.end(), [botPos](GenericTransport* i, GenericTransport* j) { return botPos.distance(i) > botPos.distance(j); });
+
+        transport = transports.back();
+    }
+
+    GameObjectInfo const* data = sGOStorage.LookupEntry<GameObjectInfo>(transport->GetEntry());
+
+    std::ostringstream out;
+
+    std::string transportName = transport->GetName();
+    if (transportName.empty())
+        transportName = data->name;
+
+    out << "found: " << transportName << " (" << transport->GetEntry() << ")";
+
+    ai->TellPlayer(requester, out);
+
+    uint32 radius = 20;
+
+    for (float x = radius * -1.0f; x < radius; x += 1.0f)
+    {
+        for (float y = radius * -1.0f; y < radius; y += 1.0f)
+        {
+            if (x * x + y * y > radius * radius)
+                continue;
+
+            WorldPosition botPos(bot);
+            WorldPosition transPos(transport);
+
+            WorldPosition pos = transPos + WorldPosition(0, x, y);
+
+            transPos.SetTranpotHeightToFloor(transport->GetEntry());
+
+            //if (param.find("fix") != std::string::npos)
+            pos.SetOnTransport(transport);
+
+            if (pos.getZ() < transPos.getZ() - 2.0f)
+                continue;
+
+            Player* pathBot = bot;
+            GenericTransport* botTrans = bot->GetTransport();
+            GenericTransport* trans = botTrans ? botTrans : transport;
+
+            if (!pos.isOnTransport(trans)) //When trying to calculate a position off the transport, act like the bot is off the transport.
+                pathBot = nullptr;
+            else
+            {
+                    bot->SetTransport(nullptr);
+            }
+
+            bool onTrans = pos.isOnTransport(trans);
+
+            /*
+            if (onTrans) //Summon creature needs to be Summoned on offset coordinates.
+            {
+                pos.CalculatePassengerOffset(trans);
+               // if (param.find("set") != std::string::npos)
+                 //   bot->SetTransport(trans);
+               // if (param.find("rem") != std::string::npos)
+                    bot->SetTransport(nullptr);
+            }
+            else //Generate wp off transport so it doesn't spawn on transport.
+                bot->SetTransport(nullptr);
+               */
+
+            if (!onTrans)
+                continue;
+        
+            Creature* wpCreature = bot->SummonCreature(2334, pos.getX(), pos.getY(), pos.getZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 10000.0f);
+
+            //if (param.find("pas") != std::string::npos)
+                transport->AddPassenger(wpCreature,true);
+            //if (param.find("upd") != std::string::npos)
+            //    transport->UpdatePassengerPosition(wpCreature);
+
+            //if (param.find("off") != std::string::npos)
+            //    pos.CalculatePassengerOffset(transport);
+            //if (param.find("pos") != std::string::npos)
+            //    pos.CalculatePassengerPosition(transport);
+
+            wpCreature->NearTeleportTo(pos.getX(), pos.getY(), pos.getZ(), wpCreature->GetOrientation());
+
+            ai->AddAura(wpCreature, 246);
+
+            if (onTrans)
+                ai->AddAura(wpCreature, 1130);
+
+            //wpCreature->UpdateObjectVisibility();
+
+            bot->SetTransport(botTrans);
+        }
+    }
+
+    return true;
+}
+
+bool DebugAction::HandleDoTransport(Event& event, Player* requester, const std::string& text)
+{
+    std::string param;
+
+    if (text.length() > std::string("dotrans").size())
+        param = text.substr(std::string("dotrans").size() + 1);
+
+    WorldPosition botPos(bot), transPos(bot);
+
+    uint32 entry = 0;
+    float distance = FLT_MAX;
+
+    for (auto trans : botPos.getTransports())
+    {
+        float dist = botPos.distance(trans);
+
+        if (dist < distance)
+        {
+            distance = dist;
+            entry = trans->GetEntry();
+            transPos = trans;
+        }
+    }
+
+    MovementAction::UseTransport(ai, entry, transPos, param.find("tele") != std::string::npos);
 
     return true;
 }

@@ -585,6 +585,149 @@ bool WorldPosition::isOnTransport(GenericTransport* transport)
     return GetHitPosition(below);
 }
 
+float WorldPosition::GetTransporFloorOffset(uint32 entry)
+{
+    auto data = sGOStorage.LookupEntry<GameObjectInfo>(entry);
+    switch (data->displayId)
+    {
+        case 3831: //Subway
+            return -10.0f;
+        case 807: //Vator
+            return -1.25f;
+        case 455: //Undervator
+            return -0.46f;
+        case 3015: //Boat
+            return 6.0f;
+        case 3031: //Zepelin
+            return -17.0f;
+        case 7087: //Moonspray
+            return 4.88f;
+        default:
+            return 0.0f;
+    }
+
+    return 0.0f;
+}
+
+bool WorldPosition::SetOnTransport(GenericTransport* transport, int32 startHeight, int32 endHeight)
+{
+    if (!transport)
+        return false;
+    
+    WorldPosition transPos(transport);
+
+    transPos.SetTranpotHeightToFloor(transport->GetEntry());
+
+    if (sqDistance2d(transPos) > 1600)
+        return false;
+
+    WorldPosition start(*this), below(*this);
+
+    start.setZ(transPos.getZ() + startHeight);
+    below.setZ(transPos.getZ() + endHeight);
+
+    bool result = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, coord_x, coord_y, coord_z, below.getX(), below.getY(), below.getZ(), below.coord_x, below.coord_y, below.coord_z, 0.0f);
+
+    if (result)
+        return false;
+
+    bool gotHit = start.GetHitPosition(below);
+
+    if (gotHit)
+        set(below);
+
+    return gotHit;
+}
+
+WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, float radius, bool findClose, bool useHeight)
+{
+    std::vector<WorldPosition> path;
+    return RandomPointOnTrans(transport, radius, findClose, useHeight, nullptr, path);
+}
+
+WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, float radius, bool findClose, bool useHeight, Player* botForPath, std::vector<WorldPosition>& path)
+{
+    GenericTransport* oldTrans = botForPath ? botForPath->GetTransport() : nullptr;
+
+    if (!transport)
+        return WorldPosition();
+
+    WorldPosition transPos(transport);
+    WorldPosition bestPos;
+    float bestDist = findClose ? FLT_MAX : -1.0f;
+    std::vector<WorldPosition> bestPath;
+
+    for (float x = radius * -1.0f; x < radius; x += 1.0f)
+    {
+        for (float y = radius * -1.0f; y < radius; y += 1.0f)
+        {
+            if (x * x + y * y > radius * radius)
+                continue;
+
+            WorldPosition pos = transPos + WorldPosition(0, x, y);
+
+            if (useHeight)
+                pos.setZ(getZ());
+            else
+                pos.SetTranpotHeightToFloor(transport->GetEntry());
+
+            pos.SetOnTransport(transport);
+
+            if (!useHeight && pos.getZ() < transPos.getZ() - 2.0f)
+                continue;
+
+            if (!pos.isOnTransport(transport))
+                continue;
+
+            if (botForPath)
+            {
+                botForPath->SetTransport(transport);
+
+                std::vector<WorldPosition> posPath = pos.getPathFrom(botForPath, botForPath);
+
+                if (posPath.empty())
+                    continue;
+
+                if (pos.sqDistance(posPath.back()) > 5.0f)
+                    continue;
+
+                if (rand_norm_f() < 0.01f || bestDist < 0.0f)
+                {
+                    bestPath = posPath;
+                }
+            }
+
+            float dist = sqDistance(pos);
+
+            if (findClose)
+            {
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    bestPos = pos;
+                }
+            }
+            else
+            {
+                if (rand_norm_f() < 0.01f || bestDist < 0.0f)
+                {
+                    bestDist = 0.0f;
+                    bestPos = pos;
+
+                    break;
+                }
+            }
+        }
+    }
+
+    if (botForPath)
+        botForPath->SetTransport(oldTrans);
+
+    path = bestPath;
+
+    return bestPos;
+}
+
 std::vector<GridPair> WorldPosition::getGridPairs(const WorldPosition& secondPos) const
 {
     std::vector<GridPair> retVec;
@@ -813,6 +956,15 @@ std::vector<WorldPosition> WorldPosition::fromPointsArray(const std::vector<G3D:
     std::vector<WorldPosition> retVec;
     for (auto p : path)
         retVec.push_back(WorldPosition(getMapId(), p.x, p.y, p.z, getO()));
+
+    return retVec;
+}
+
+std::vector<G3D::Vector3> WorldPosition::toPointsArray(const std::vector<WorldPosition>& path) const
+{
+    std::vector<G3D::Vector3> retVec;
+    for (auto p : path)
+        retVec.push_back(p.getVector3());
 
     return retVec;
 }

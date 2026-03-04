@@ -356,7 +356,7 @@ namespace ai
 
         //Get all nodes
         std::vector<TravelNode*> getNodes() { return m_nodes; }
-        std::vector<TravelNode*> getNodes(WorldPosition pos, float range = -1);
+        std::vector<TravelNode*> getNodes(WorldPosition pos, float range = -1, uint32 transportEntry = 0);
 
         //Find nearest node.
         TravelNode* getNode(TravelNode* sameNode) { for (auto& node : m_map_nodes[sameNode->getMapId()]) { if (node->getName() == sameNode->getName() && node->getPosition() == sameNode->getPosition()) return node; } return nullptr; }

@@ -247,7 +247,12 @@ namespace ai
         void CalculatePassengerPosition(GenericTransport* transport);
         void CalculatePassengerOffset(GenericTransport* transport);
 
+        static float GetTransporFloorOffset(uint32 entry);
+        void SetTranpotHeightToFloor(uint32 entry) { coord_z += GetTransporFloorOffset(entry); }
         bool isOnTransport(GenericTransport* transport);
+        bool SetOnTransport(GenericTransport* transport, int32 startHeight = 10, int32 endHeight = -1);
+        WorldPosition RandomPointOnTrans(GenericTransport* transport, float radius, bool findClose, bool useHeight, Player* botForPath, std::vector<WorldPosition>& path);
+        WorldPosition RandomPointOnTrans(GenericTransport* transport, float radius = 10.0f, bool findClose = false, bool useHeight = false);
 
         GridPair getGridPair() const { return MaNGOS::ComputeGridPair(coord_x, coord_y); };
         std::vector<GridPair> getGridPairs(const WorldPosition& secondPos) const;
@@ -297,6 +302,7 @@ namespace ai
         bool HasFaction(const Team team) const;
 
         std::vector<WorldPosition> fromPointsArray(const std::vector<G3D::Vector3>& path) const;
+        std::vector<G3D::Vector3> toPointsArray(const std::vector<WorldPosition>& path) const;
 
         //Pathfinding
         std::vector<WorldPosition> getPathStepFrom(const WorldPosition& startPos, std::unique_ptr<PathFinder>& pathfinder, const Unit* bot, bool forceNormalPath = false) const;

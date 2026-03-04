@@ -8172,7 +8172,11 @@ void PlayerbotAI::StopMoving()
     if (bot->IsBeingTeleportedFar())
         return;
 
-    bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+    if (bot->GetTransport())
+        bot->m_movementInfo.SetMovementFlags(MOVEFLAG_ONTRANSPORT);
+    else
+        bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+
     bot->InterruptMoving(true);
     MovementInfo mInfo = bot->m_movementInfo;
     float x, y, z;

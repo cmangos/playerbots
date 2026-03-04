@@ -18,6 +18,7 @@ namespace ai
             taxiMaster = other.taxiMaster;
             lastFollow = other.lastFollow;
             lastAreaTrigger = other.lastAreaTrigger;
+            lastTransportEntry = other.lastTransportEntry;
             lastMoveShort = other.lastMoveShort;
             lastMoveShortStart = other.lastMoveShortStart;
             lastPath = other.lastPath;
@@ -32,6 +33,7 @@ namespace ai
             lastPath.clear();
             lastFollow = NULL;
             lastAreaTrigger = 0;
+            lastTransportEntry = 0;
             lastFlee = 0;
             nextTeleport = 0;
             moveEvent = Event();
@@ -56,6 +58,7 @@ namespace ai
         ObjectGuid taxiMaster;
         Unit* lastFollow;
         uint32 lastAreaTrigger;
+        uint32 lastTransportEntry;
         time_t lastFlee;
         WorldPosition lastMoveShortStart;
         WorldPosition lastMoveShort;

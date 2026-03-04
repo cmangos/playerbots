@@ -225,6 +225,7 @@ bool PlayerbotAIConfig::Initialize()
     enableMinimalMove = config.GetBoolDefault("AiPlayerbot.EnableMinimalMove", true);
     
     randomBotTeleportDistance = config.GetIntDefault("AiPlayerbot.RandomBotTeleportDistance", 1000);
+    transportTeleportType = config.GetIntDefault("AiPlayerbot.TransportTeleportType", 2);
     randomBotTeleportNearPlayer = config.GetBoolDefault("AiPlayerbot.RandomBotTeleportNearPlayer", false);
     randomBotTeleportNearPlayerMaxAmount = config.GetIntDefault("AiPlayerbot.RandomBotTeleportNearPlayerMaxAmount", 0);
     randomBotTeleportNearPlayerMaxAmountRadius = config.GetFloatDefault("AiPlayerbot.RandomBotTeleportNearPlayerMaxAmountRadius", 0.0f);

@@ -11,10 +11,6 @@ bool DpsAssistAction::isUseful()
     if (bot->HasAura(23333) || bot->HasAura(23335) || bot->HasAura(34976))
         return false;
 
-    Unit* target = GetTarget();
-    if (!target || !target->IsInWorld() || target->GetMapId() != bot->GetMapId())
-        return false;
-
     return true;
 }
 

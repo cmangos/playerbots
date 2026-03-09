@@ -11,7 +11,7 @@ namespace ai
 
     private:
         typedef void (TrainerAction::*TrainerSpellAction)(uint32, ObjectGuid trainerGuid, uint32 spellId, TrainerSpell const*, std::ostringstream& msg);
-        void Iterate(Player* requester, Creature* creature, TrainerSpellAction action, SpellIds& spells);
+        bool Iterate(Player* requester, Creature* creature, TrainerSpellAction action, SpellIds& spells);
         void Learn(uint32 cost, ObjectGuid trainerGuid, uint32 spellId, TrainerSpell const* tSpell, std::ostringstream& msg);
         void TellHeader(Player* requester, Creature* creature);
         void TellFooter(Player* requester, uint32 totalCost);

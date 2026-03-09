@@ -62,9 +62,10 @@ void TrainerAction::Learn(uint32 cost, ObjectGuid trainerGuid, uint32 spellId, T
     msg << " - learned";
 }
 
-void TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellAction action, SpellIds& spells)
+bool TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellAction action, SpellIds& spells)
 {
     bool hasHeader = false;    
+    bool hasTrainable = false;
 
     TrainerSpellData const* cSpells = creature->GetTrainerSpells();
     TrainerSpellData const* tSpells = creature->GetTrainerTemplateSpells();
@@ -116,6 +117,7 @@ void TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellA
                         if (!bot->HasSpell(learnedSpell))
                         {
                             learned = true;
+                            hasTrainable = true;
                             break;
                         }
                     }
@@ -148,6 +150,7 @@ void TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellA
                             if (!bot->HasSpell(learnedSpell))
                             {
                                 learned = true;
+                                hasTrainable = true;
                                 break;
                             }
                         }
@@ -185,6 +188,8 @@ void TrainerAction::Iterate(Player* requester, Creature* creature, TrainerSpellA
         TellFooter(requester, totalCost);
     else if (!ai->GetMaster() || sServerFacade.GetDistance2d(bot, ai->GetMaster()) < sPlayerbotAIConfig.reactDistance || ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT))
         ai->TellPlayerNoFacing(requester, "No spells can be learned from this trainer");
+
+    return hasTrainable;
 }
 
 bool TrainerAction::Execute(Event& event)
@@ -237,7 +242,10 @@ bool TrainerAction::Execute(Event& event)
         spells.insert(spell);
 
     if (text.find("learn") != std::string::npos || sRandomPlayerbotMgr.IsFreeBot(bot) || (sPlayerbotAIConfig.autoTrainSpells != "no" && (creature->GetCreatureInfo()->TrainerType != TRAINER_TYPE_TRADESKILLS || !ai->HasActivePlayerMaster()))) //Todo rewrite to only exclude start primary profession skills and make config dependent.
-        Iterate(requester, creature, &TrainerAction::Learn, spells);
+    {
+        if(Iterate(requester, creature, &TrainerAction::Learn, spells))
+            context->ClearValues("item usage"); //Bot might be able to use new items.
+    }
     else
         Iterate(requester, creature, NULL, spells);
 

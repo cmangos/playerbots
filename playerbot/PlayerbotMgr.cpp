@@ -488,7 +488,7 @@ std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid,
     {
         return "Can not control alt-bots with this command.";
     }
-
+   
     if (cmd == "add" || cmd == "login")
     {
         if (sObjectMgr.GetPlayer(guid))
@@ -1053,6 +1053,35 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
 			if (sObjectMgr.GetPlayerNameByGUID(member, bot))
 			    bots.insert(bot);
         }
+    }
+
+    if (charnameStr == "guild" && master)
+    {
+        if (!master->GetGuildId())
+        {
+            messages.push_back("you must be in a guild");
+            return messages;
+        }
+
+        auto result = CharacterDatabase.PQuery("SELECT m.guid, (select name from characters c where c.guid = m.guid) FROM guild_member m WHERE guildid = '%u'", master->GetGuildId());
+
+        if (!result)
+        {
+            messages.push_back("No guild members");
+            return messages;
+        }
+
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 guid = fields[0].GetUInt32();
+            std::string bot = fields[1].GetString();
+
+            if (guid == master->GetGUIDLow())
+                continue;
+
+            bots.insert(bot);
+        } while (result->NextRow());
     }
 
     if (charnameStr == "!" && master && master->GetSession()->GetSecurity() > SEC_GAMEMASTER)

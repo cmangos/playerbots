@@ -23,3 +23,21 @@ namespace ai
 #endif 
     };
 }
+
+class SuppressionDevicesValue : public StringCalculatedValue, public Qualified
+{
+public:
+    SuppressionDevicesValue(PlayerbotAI* ai, std::string name = "suppression devices") : StringCalculatedValue(ai, name, 1), Qualified() {}
+
+    virtual std::string Calculate() override { return "179784"; }
+
+#ifdef GenerateBotHelp
+    virtual std::string GetHelpName() { return "suppression devices"; }
+    virtual std::string GetHelpTypeName() { return "entry"; }
+    virtual std::string GetHelpDescription()
+    {
+        return "This value contains the entries of the Blackwing Lair Suppression Devices.";
+    }
+    virtual std::vector<std::string> GetUsedValues() { return { }; }
+#endif 
+};

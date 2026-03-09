@@ -152,7 +152,7 @@ bool SelectNewTargetAction::Execute(Event& event)
     }
 
     // Check if there is any enemy targets available to attack
-    if (AI_VALUE(bool, "has attackers"))
+    if (AI_VALUE(bool, "has possible attack targets"))
     {
         if (ai->HasStrategy("pvp", BotState::BOT_STATE_COMBAT) ||
             ai->HasStrategy("duel", BotState::BOT_STATE_COMBAT))

@@ -1597,6 +1597,9 @@ void MovementAction::UpdateMovementState()
 
 bool MovementAction::Follow(Unit* target, float distance, float angle)
 {
+	if (!ai->IsSafe(target))
+    return false;
+
     MotionMaster &mm = *bot->GetMotionMaster();
 
     distance = distance <= target->GetObjectBoundingRadius() ? 0 : distance - target->GetObjectBoundingRadius();
@@ -1605,9 +1608,6 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
 
     if (FollowOnTransport(target))
         return true;
-
-    if (!target)
-        return false;
 
     WorldPosition botPos(bot);
     WorldPosition tarPos(target);
@@ -3760,3 +3760,4 @@ WorldPosition JumpAction::GetPossibleJumpStartForInRange(const WorldPosition& sr
     sLog.outDetail("%s: GetPossibleJumpStartFor Failed to find jump point!", jumper->GetName());
     return WorldPosition();
 }
+

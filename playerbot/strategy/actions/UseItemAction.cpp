@@ -914,29 +914,37 @@ bool UseAction::UseGameObject(Player* requester, Event& event, GameObject* gameO
 
 bool UseAction::UseQuestGiverItem(Player* requester, Item* item)
 {
-    if (item)
+    if (!item)
+        return false;
+
+    const ItemPrototype* proto = item->GetProto();
+    if (!proto || !proto->StartQuest)
+        return false;
+
+    const Quest* quest = sObjectMgr.GetQuestTemplate(proto->StartQuest);
+    if (!quest)
+        return false;
+
+    if (!bot->CanTakeQuest(quest, false))
+        return false;
+
+    if (item->GetOwnerGuid() != bot->GetObjectGuid())
+        return false;
+
+    WorldPacket packet(CMSG_QUESTGIVER_ACCEPT_QUEST, 8 + 4 + 4);
+    packet << item->GetObjectGuid();
+    packet << quest->GetQuestId();
+    packet << uint32(0);
+    bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(packet);
+
+    if (verbose)
     {
-        const Quest* quest = sObjectMgr.GetQuestTemplate(item->GetProto()->StartQuest);
-        if (quest)
-        {
-            WorldPacket packet(CMSG_QUESTGIVER_ACCEPT_QUEST, 8 + 4 + 4);
-            packet << item->GetObjectGuid();
-            packet << quest->GetQuestId();
-            packet << uint32(0);
-            bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(packet);
-
-            if (verbose)
-            {
-                std::map<std::string, std::string> replyArgs;
-                replyArgs["%quest"] = chat->formatQuest(quest);
-                ai->TellPlayerNoFacing(requester, BOT_TEXT2("quest_accepted", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-            }
-
-            return true;
-        }
+        std::map<std::string, std::string> replyArgs;
+        replyArgs["%quest"] = chat->formatQuest(quest);
+        ai->TellPlayerNoFacing(requester, BOT_TEXT2("quest_accepted", replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
 
-    return false;
+    return true;
 }
 
 bool UseAction::OpenItem(Player* requester, Item* item)
@@ -1136,9 +1144,6 @@ bool UseItemIdAction::isPossible()
         return false;
 
     if (HasItemCooldown(itemId))
-        return false;
-
-    if (!ai->HasCheat(BotCheatMask::item) && !bot->HasItemCount(itemId, 1))
         return false;
 
     uint32 spellCount = 0;

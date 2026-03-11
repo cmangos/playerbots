@@ -940,6 +940,9 @@ AiPlayerbot.JumpChase = 1
 # Allow knockbacks work on bots
 AiPlayerbot.UseKnockback = 1
 
+# Set 'wander' as a default following strategy instead of 'follow' (Bots have freedom to move around while near master)
+#AiPlayerbot.UseWanderAsDefaultFollowStrategy = 0
+
 # Debug switches
 #AiPlayerbot.SpellDump = 0
 #AiPlayerbot.LogInGroupOnly = 1

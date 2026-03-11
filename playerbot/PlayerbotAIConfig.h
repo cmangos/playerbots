@@ -247,6 +247,7 @@ public:
     bool randomBotRandomPassword;
     bool inviteChat;
     bool enableOffSpecStrategies;
+    bool useWanderAsDefaultFollowStrategy;
 
     uint32 guildMaxBotLimit;
 

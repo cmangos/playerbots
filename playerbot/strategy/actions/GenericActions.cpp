@@ -402,16 +402,16 @@ bool SetPetAction::Execute(Event& event)
         {
             // Send pet action packet
             const ObjectGuid& petGuid = pet->GetObjectGuid();
-            const ObjectGuid& targetGuid = ObjectGuid();
             const uint8 flag = ACT_REACTION;
             const uint32 spellId = REACT_AGGRESSIVE;
-            const uint32 command = (flag << 24) | spellId;
+            const uint32 data = (flag << 24) | spellId;
 
-            WorldPacket data(CMSG_PET_ACTION);
-            data << petGuid;
-            data << command;
-            data << targetGuid;
-            bot->GetSession()->HandlePetAction(data);
+            WorldPacket packet(CMSG_PET_ACTION);
+            packet << petGuid;
+            packet << data;
+            packet << uint64(0);
+            bot->GetSession()->HandlePetAction(packet);
+            bot->PetSpellInitialize();
 
             ai->TellPlayer(requester, "Setting pet to aggressive mode");
             return true;
@@ -420,16 +420,16 @@ bool SetPetAction::Execute(Event& event)
         {
             // Send pet action packet
             const ObjectGuid& petGuid = pet->GetObjectGuid();
-            const ObjectGuid& targetGuid = ObjectGuid();
             const uint8 flag = ACT_REACTION;
             const uint32 spellId = REACT_DEFENSIVE;
-            const uint32 command = (flag << 24) | spellId;
+            const uint32 data = (flag << 24) | spellId;
 
-            WorldPacket data(CMSG_PET_ACTION);
-            data << petGuid;
-            data << command;
-            data << targetGuid;
-            bot->GetSession()->HandlePetAction(data);
+            WorldPacket packet(CMSG_PET_ACTION);
+            packet << petGuid;
+            packet << data;
+            packet << uint64(0);
+            bot->GetSession()->HandlePetAction(packet);
+            bot->PetSpellInitialize();
 
             ai->TellPlayer(requester, "Setting pet to defensive mode");
             return true;
@@ -438,16 +438,16 @@ bool SetPetAction::Execute(Event& event)
         {
             // Send pet action packet
             const ObjectGuid& petGuid = pet->GetObjectGuid();
-            const ObjectGuid& targetGuid = ObjectGuid();
             const uint8 flag = ACT_REACTION;
             const uint32 spellId = REACT_PASSIVE;
-            const uint32 command = (flag << 24) | spellId;
+            const uint32 data = (flag << 24) | spellId;
 
-            WorldPacket data(CMSG_PET_ACTION);
-            data << petGuid;
-            data << command;
-            data << targetGuid;
-            bot->GetSession()->HandlePetAction(data);
+            WorldPacket packet(CMSG_PET_ACTION);
+            packet << petGuid;
+            packet << data;
+            packet << uint64(0);
+            bot->GetSession()->HandlePetAction(packet);
+            bot->PetSpellInitialize();
 
             ai->TellPlayer(requester, "Setting pet to passive mode");
             return true;

@@ -415,7 +415,9 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
         {
             if (tab == 1)
             {
-                combatEngine->addStrategies("tank feral", "tank assist", "pull", "pull back", "close", "behind", NULL);
+                combatEngine->addStrategies("dps feral", "dps assist", "pull", "pull back", "close", "behind", NULL);
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offheal");
             }
             else if (tab == 2)
             {
@@ -799,7 +801,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         {
             if (tab == 1)
             {
-                nonCombatEngine->addStrategies("tank feral", "tank assist", NULL);
+                nonCombatEngine->addStrategies("dps feral", "dps assist", NULL);
             }
             else if (tab == 2)
             {
@@ -1204,7 +1206,7 @@ void AiFactory::AddDefaultDeadStrategies(Player* player, PlayerbotAI* const faca
         {
             if (tab == 1)
             {
-                deadEngine->addStrategy("tank feral");
+                deadEngine->addStrategy("dps feral");
             }
             else if (tab == 2)
             {
@@ -1391,7 +1393,7 @@ void AiFactory::AddDefaultReactionStrategies(Player* player, PlayerbotAI* const 
         {
             if (tab == 1)
             {
-                reactionEngine->addStrategy("tank feral");
+                reactionEngine->addStrategy("dps feral");
             }
             else if (tab == 2)
             {

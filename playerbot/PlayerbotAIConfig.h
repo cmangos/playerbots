@@ -246,6 +246,7 @@ public:
     bool randomBotFormGuild;
     bool randomBotRandomPassword;
     bool inviteChat;
+    bool enableOffSpecStrategies;
 
     uint32 guildMaxBotLimit;
 

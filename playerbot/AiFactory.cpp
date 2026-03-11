@@ -305,14 +305,20 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
             if (tab == 0)
             {
                 combatEngine->addStrategy("discipline");
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offheal");
             }
             else if (tab == 1)
             {
                 combatEngine->addStrategy("holy");
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offdps");
             }
             else
             {
                 combatEngine->addStrategy("shadow");
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offheal");
             }
 
             combatEngine->addStrategies("dps assist", "flee", "cure", "ranged", "cc", "buff", "aoe", "boost", NULL);
@@ -362,14 +368,20 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
             if (tab == 0)
             {
                 combatEngine->addStrategies("elemental", "aoe", "cc", "flee", "ranged", NULL);
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offheal");
             }
             else if (tab == 2)
             {
                 combatEngine->addStrategies("restoration", "flee", "ranged", NULL);
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offdps");
             }
             else
             {
                 combatEngine->addStrategies("enhancement", "aoe", "cc", "close", NULL);
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offheal");
             }
 
             combatEngine->addStrategies("dps assist", "cure", "totems", "buff", "boost", NULL);
@@ -385,10 +397,14 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
             else if(tab == 0)
             {
                 combatEngine->addStrategies("holy", "dps assist", "flee", "ranged", NULL);
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offdps");
             }
             else
             {
                 combatEngine->addStrategies("retribution", "dps assist", "close", NULL);
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offheal");
             }
 
             combatEngine->addStrategies("cure", "aoe", "cc", "buff", "boost", "aura", "blessing", NULL);
@@ -404,10 +420,14 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
             else if (tab == 2)
             {
                 combatEngine->addStrategies("restoration", "dps assist", "flee", "ranged", NULL);
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offdps");
             }
             else
             {
                 combatEngine->addStrategies("balance", "dps assist", "flee", "ranged", NULL);
+                if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                    combatEngine->addStrategy("offheal");
             }
 
             combatEngine->addStrategies("cure", "aoe", "cc", "buff", "boost", NULL);

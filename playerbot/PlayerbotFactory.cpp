@@ -617,6 +617,7 @@ void PlayerbotFactory::InitPet()
             pet->GetCharmInfo()->SetPetNumber(pet->GetObjectGuid().GetEntry(), true);
             pet->GetMap()->Add((Creature*)pet);
             pet->AIM_Initialize();
+            pet->AI()->SetReactState(REACT_DEFENSIVE);
             pet->InitPetCreateSpells();
             pet->LearnPetPassives();
             pet->CastPetAuras(true);

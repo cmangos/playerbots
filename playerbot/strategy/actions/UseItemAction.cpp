@@ -1146,6 +1146,10 @@ bool UseItemIdAction::isPossible()
     if (HasItemCooldown(itemId))
         return false;
 
+        if (!ai->HasCheat(BotCheatMask::item) && !bot->HasItemCount(itemId, 1))
+        return false;
+
+
     uint32 spellCount = 0;
 
     for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)

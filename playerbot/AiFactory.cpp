@@ -348,7 +348,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
         {
             if (tab == 2)
             {
-                combatEngine->addStrategies("protection", "tank assist", "pull", "pull back", "mark rti", NULL);
+                combatEngine->addStrategies("protection", "tank assist", "pull", "pull back", NULL);
             }
             else if (player->GetLevel() < 30 || tab == 0)
             {

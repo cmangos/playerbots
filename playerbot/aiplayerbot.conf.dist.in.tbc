@@ -897,7 +897,7 @@ AiPlayerbot.FleeingEnabled = 1
 #AiPlayerbot.DeadStrategies = 
 
 # Toggle offheal and offdps strategies for hybrid classes.
-#AiPlayerbot.EnableOffSpecStrategies = 0
+#AiPlayerbot.EnableOffSpecStrategies = 1
 
 # Quest items to leave (do not destroy)
 #AiPlayerbot.RandomBotQuestItems = 6948,5175,5176,5177,5178,16309,12382,13704,11000

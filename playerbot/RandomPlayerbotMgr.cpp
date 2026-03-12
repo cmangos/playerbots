@@ -727,12 +727,6 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
         {
             ProcessBot(bot);
         }
-        else if (GetEventValue(bot, "login"))
-        {
-            ProcessBot(bot);
-
-            onlineBotCount++;
-        }
     }
 
     uint32 maxLogins = sPlayerbotAIConfig.randomBotsMaxLoginsPerInterval;
@@ -746,15 +740,15 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
                 continue;   
 
             if (GetEventValue(bot, "login"))
-                continue;
+                onlineBotCount++;
 
-            ProcessBot(bot);
-
-            ++onlineBotCount;
             if (onlineBotCount >= maxAllowedBotCount)
                 break;
 
-            --maxLogins;
+            if (ProcessBot(bot)) {
+                --maxLogins;
+            }
+
             if (maxLogins == 0)
                 break;
         }

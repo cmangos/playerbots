@@ -70,6 +70,9 @@ AiPlayerbot.RandomBotAccountCount = 200
 # (0-1), default 0
 # AiPlayerbot.DisableActivityPriorities = 0
 
+# Force bots to become active when a player is nearby
+#AiPlayerbot.ForceActiveWhenNearPlayer = 0
+
 # Limit combat activity for slight performance boost.
 #AiPlayerbot.LimitCombatActivity = 0
 

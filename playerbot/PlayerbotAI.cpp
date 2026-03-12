@@ -6001,8 +6001,10 @@ bool PlayerbotAI::AllowActive(ActivityType activityType)
         case ActivePiorityType::IN_INSTANCE:
         case ActivePiorityType::IS_ALWAYS_ACTIVE:
             return true;
-            break;
         case ActivePiorityType::VISIBLE_FOR_PLAYER:
+            if (sPlayerbotAIConfig.forceActiveWhenNearPlayer)
+                return true;
+            break;
         case ActivePiorityType::IN_COMBAT:
         case ActivePiorityType::NEARBY_PLAYER:
         case ActivePiorityType::IN_BG_QUEUE:

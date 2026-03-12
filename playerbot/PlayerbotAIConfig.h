@@ -234,6 +234,7 @@ public:
     float playerbotsXPrate;
     bool disableBotOptimizations;
     bool disableActivityPriorities;
+    bool forceActiveWhenNearPlayer;
     bool limitCombatActivity;
     uint32 botActiveAlone;
     uint32 diffWithPlayer;

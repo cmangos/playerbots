@@ -464,6 +464,7 @@ bool PlayerbotAIConfig::Initialize()
     playerbotsXPrate = config.GetFloatDefault("AiPlayerbot.XPRate", 1.0f);
     disableBotOptimizations = config.GetBoolDefault("AiPlayerbot.DisableBotOptimizations", false);
     disableActivityPriorities = config.GetBoolDefault("AiPlayerbot.DisableActivityPriorities", false);
+    limitCombatActivity = config.GetBoolDefault("AiPlayerbot.LimitCombatActivity", false);
     botActiveAlone = config.GetIntDefault("AiPlayerbot.botActiveAlone", 10);
     diffWithPlayer = config.GetIntDefault("AiPlayerbot.DiffWithPlayer", 100);
     diffEmpty = config.GetIntDefault("AiPlayerbot.DiffEmpty", 200);

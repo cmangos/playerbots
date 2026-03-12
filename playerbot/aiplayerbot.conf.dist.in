@@ -70,6 +70,9 @@ AiPlayerbot.RandomBotAccountCount = 200
 # (0-1), default 0
 # AiPlayerbot.DisableActivityPriorities = 0
 
+# Limit combat activity for slight performance boost.
+#AiPlayerbot.LimitCombatActivity = 0
+
 # Percentage of fully active bots. Default is 10, higher numbers may affect performance
 # AiPlayerbot.botActiveAlone = 10
 

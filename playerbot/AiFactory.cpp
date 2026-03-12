@@ -415,9 +415,16 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
         {
             if (tab == 1)
             {
-                combatEngine->addStrategies("dps feral", "dps assist", "pull", "pull back", "close", "behind", NULL);
-                if (sPlayerbotAIConfig.enableOffSpecStrategies)
-                    combatEngine->addStrategy("offheal");
+                if (player->HasSpell(16961) || player->HasSpell(16958))
+                {
+                    combatEngine->addStrategies("tank feral", "tank assist", "pull", "pull back", "close", NULL);
+                }
+                else
+                {
+                    combatEngine->addStrategies("dps feral", "dps assist", "close", "behind", NULL);
+                    if (sPlayerbotAIConfig.enableOffSpecStrategies)
+                        combatEngine->addStrategy("offheal");
+                }
             }
             else if (tab == 2)
             {
@@ -532,8 +539,11 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 
             if (player->getClass() == CLASS_DRUID && tab == 1 && urand(0, 100) > 50 && player->GetLevel() >= 20)
             {
-                combatEngine->addStrategies("dps feral", "close" "stealth", "behind", NULL);
-                combatEngine->removeStrategy("ranged");
+                if (!(player->HasSpell(16961) || player->HasSpell(16958)))
+                {
+                    combatEngine->addStrategies("dps feral", "close", "stealth", "behind", NULL);
+                    combatEngine->removeStrategy("ranged");
+                }
             }
 
             if (player->getClass() == CLASS_PRIEST && tab < 2)
@@ -642,7 +652,14 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 
         if (player->getClass() == CLASS_DRUID && tab == 1)
         {
-            combatEngine->addStrategies("behind", "dps feral", "stealth", NULL);
+            if (player->HasSpell(16961) || player->HasSpell(16958))
+            {
+                combatEngine->addStrategies("tank feral", "close", NULL);
+            }
+            else
+            {
+                combatEngine->addStrategies("behind", "dps feral", "stealth", NULL);
+            }
         }
         
         if (player->getClass() == CLASS_ROGUE)
@@ -801,7 +818,14 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         {
             if (tab == 1)
             {
-                nonCombatEngine->addStrategies("dps feral", "dps assist", NULL);
+                if (player->HasSpell(16961) || player->HasSpell(16958))
+                {
+                    nonCombatEngine->addStrategies("tank feral", "tank assist", NULL);
+                }
+                else
+                {
+                    nonCombatEngine->addStrategies("dps feral", "dps assist", NULL);
+                }
             }
             else if (tab == 2)
             {
@@ -1208,7 +1232,14 @@ void AiFactory::AddDefaultDeadStrategies(Player* player, PlayerbotAI* const faca
         {
             if (tab == 1)
             {
-                deadEngine->addStrategy("dps feral");
+                if (player->HasSpell(16961) || player->HasSpell(16958))
+                {
+                    deadEngine->addStrategy("tank feral");
+                }
+                else
+                {
+                    deadEngine->addStrategy("dps feral");
+                }
             }
             else if (tab == 2)
             {
@@ -1395,7 +1426,14 @@ void AiFactory::AddDefaultReactionStrategies(Player* player, PlayerbotAI* const 
         {
             if (tab == 1)
             {
-                reactionEngine->addStrategy("dps feral");
+                if (player->HasSpell(16961) || player->HasSpell(16958))
+                {
+                    reactionEngine->addStrategy("tank feral");
+                }
+                else
+                {
+                    reactionEngine->addStrategy("dps feral");
+                }
             }
             else if (tab == 2)
             {

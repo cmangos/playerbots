@@ -720,7 +720,7 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     if (time(nullptr) > (OfflineGroupBotsTimer + 5) && players.size())
         AddOfflineGroupBots();
 
-    uint32 updateBots = sPlayerbotAIConfig.randomBotsMaxLoginsPerInterval;
+    uint32 updateBots = sPlayerbotAIConfig.randomBotsPerInterval == 0 ? UINT32_MAX : sPlayerbotAIConfig.randomBotsPerInterval;
 
     //Update bots
     for (auto bot : availableBots)

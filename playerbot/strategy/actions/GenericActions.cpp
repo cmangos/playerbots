@@ -490,7 +490,7 @@ bool SetPetAction::Execute(Event& event)
         }
         else if (command == "attack")
         {
-            if (requester->GetTarget())
+            if (requester->GetTarget() && pet->AI() && !pet->AI()->HasReactState(REACT_PASSIVE))
             {
                 // Send pet action packet
                 const ObjectGuid& petGuid = pet->GetObjectGuid();
@@ -510,7 +510,7 @@ bool SetPetAction::Execute(Event& event)
             }
             else
             {
-                ai->TellPlayer(requester, "Please select a target to attack");
+                ai->TellPlayer(requester, "Unable to send pet to attack");
             }
         }
         else if (command == "dismiss")

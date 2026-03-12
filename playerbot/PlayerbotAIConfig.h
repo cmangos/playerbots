@@ -248,6 +248,7 @@ public:
     bool inviteChat;
     bool enableOffSpecStrategies;
     bool useWanderAsDefaultFollowStrategy;
+    std::string defaultFormation;
 
     uint32 guildMaxBotLimit;
 

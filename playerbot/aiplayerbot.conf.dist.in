@@ -943,6 +943,9 @@ AiPlayerbot.UseKnockback = 1
 # Set 'wander' as a default following strategy instead of 'follow' (Bots have freedom to move around while near master)
 #AiPlayerbot.UseWanderAsDefaultFollowStrategy = 1
 
+# Default bot formation
+#AiPlayerbot.DefaultFormation = near
+
 # Debug switches
 #AiPlayerbot.SpellDump = 0
 #AiPlayerbot.LogInGroupOnly = 1

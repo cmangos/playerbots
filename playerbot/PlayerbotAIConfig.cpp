@@ -481,6 +481,7 @@ bool PlayerbotAIConfig::Initialize()
     inviteChat = config.GetBoolDefault("AiPlayerbot.InviteChat", true);
     enableOffSpecStrategies = config.GetBoolDefault("AiPlayerbot.EnableOffSpecStrategies", true);
     useWanderAsDefaultFollowStrategy = config.GetBoolDefault("AiPlayerbot.UseWanderAsDefaultFollowStrategy", true);
+    defaultFormation = config.GetStringDefault("AiPlayerbot.DefaultFormation", "near");
 
     guildMaxBotLimit = config.GetIntDefault("AiPlayerbot.GuildMaxBotLimit", 1000);
 

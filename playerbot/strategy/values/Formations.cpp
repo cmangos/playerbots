@@ -517,14 +517,22 @@ float Formation::GetFollowAngle()
     return start + (0.125f + 1.75f * index / total + (total == 2 ? 0.125f : 0.0f)) * M_PI;
 }
 
-FormationValue::FormationValue(PlayerbotAI* ai) : ManualSetValue<Formation*>(ai, new NearFormation(ai), "formation")
+FormationValue::FormationValue(PlayerbotAI* ai) : ManualSetValue<Formation*>(ai, nullptr, "formation")
 {
+    if (!Load(sPlayerbotAIConfig.defaultFormation))
+    {
+        Load("near");
+    }
 }
 
 void FormationValue::Reset()
 {
     if (value) delete value;
-    value = new NearFormation(ai);
+    value = nullptr;
+    if (!Load(sPlayerbotAIConfig.defaultFormation))
+    {
+        Load("near");
+    }
 }
 
 std::string FormationValue::Save()
@@ -611,11 +619,19 @@ bool SetFormationAction::Execute(Event& event)
         return true;
     }
 
+    if (formation == "default" || formation == "reset")
+    {
+        value->Reset();
+        std::ostringstream str; str << "Formation reset to: " << value->Get()->getName();
+        ai->TellPlayer(requester, str);
+        return true;
+    }
+
     if (!value->Load(formation))
     {
         std::ostringstream str; str << "Invalid formation: |cffff0000" << formation;
         ai->TellPlayer(requester, str);
-        ai->TellPlayer(requester, "Please set to any of:|cffffffff near (default), queue, chaos, circle, line, shield, arrow, melee, far");
+        ai->TellPlayer(requester, "Please set to any of:|cffffffff near, queue, chaos, circle, line, shield, arrow, melee, far, default");
         return false;
     }
 

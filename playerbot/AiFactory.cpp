@@ -539,10 +539,18 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 
             if (player->getClass() == CLASS_DRUID && tab == 1 && urand(0, 100) > 50 && player->GetLevel() >= 20)
             {
-                if (!(player->HasSpell(16961) || player->HasSpell(16958)))
+                if (player->HasSpell(16961) || player->HasSpell(16958))
                 {
                     combatEngine->addStrategies("dps feral", "close", "stealth", "behind", NULL);
-                    combatEngine->removeStrategy("ranged");
+                    combatEngine->removeStrategy("tank feral");
+                    combatEngine->removeStrategy("tank assist");
+                }
+                else
+                {
+                    combatEngine->addStrategies("tank feral", "close", NULL);
+                    combatEngine->removeStrategy("dps feral");
+                    combatEngine->removeStrategy("dps assist");
+                    combatEngine->removeStrategy("behind");
                 }
             }
 

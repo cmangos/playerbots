@@ -547,7 +547,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
                 }
                 else
                 {
-                    combatEngine->addStrategies("tank feral", "close", NULL);
+                    combatEngine->addStrategies("tank feral", "tank assist", "close", NULL);
                     combatEngine->removeStrategy("dps feral");
                     combatEngine->removeStrategy("dps assist");
                     combatEngine->removeStrategy("behind");

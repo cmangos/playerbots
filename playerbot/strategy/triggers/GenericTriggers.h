@@ -1274,6 +1274,27 @@ namespace ai
     };
 }
 
+class PotionCooldownTrigger : public Trigger
+{
+public:
+    PotionCooldownTrigger(PlayerbotAI* ai) : Trigger(ai, "potion cooldown", 5), lastPotionTime(0) {}
+
+    virtual bool IsActive() override
+    {
+        time_t now = time(0);
+        // 120 seconds = 2 minutes cooldown
+        if (now - lastPotionTime >= 120)
+        {
+            lastPotionTime = now;
+            return true;
+        }
+        return false;
+    }
+
+private:
+    time_t lastPotionTime;
+};
+
 #include "RangeTriggers.h"
 #include "HealthTriggers.h"
 #include "CureTriggers.h"

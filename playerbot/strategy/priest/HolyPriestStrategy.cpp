@@ -52,6 +52,24 @@ void HolyPriestStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 void HolyPriestStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PriestStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "party member critical health",
+        NextAction::array(0, new NextAction("power word: shield on party", ACTION_MOVE + 1),
+            new NextAction("flash heal on party", ACTION_MOVE), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0, new NextAction("power word: shield on party", ACTION_HIGH + 2),
+            new NextAction("greater heal on party", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("greater heal on party", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
+        NextAction::array(0, new NextAction("renew on party", ACTION_NORMAL), NULL)));
 }
 
 void HolyPriestStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

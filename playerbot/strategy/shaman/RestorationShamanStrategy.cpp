@@ -105,27 +105,27 @@ void RestorationShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
 
     triggers.push_back(new TriggerNode(
         "critical health",
-        NextAction::array(0, new NextAction("healing wave", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("healing wave", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member critical health",
-        NextAction::array(0, new NextAction("healing wave on party", ACTION_CRITICAL_HEAL), NULL)));
+        NextAction::array(0, new NextAction("healing wave on party", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium health",
-        NextAction::array(0, new NextAction("healing wave", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("healing wave", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member medium health",
-        NextAction::array(0, new NextAction("healing wave on party", ACTION_MEDIUM_HEAL), NULL)));
+        NextAction::array(0, new NextAction("healing wave on party", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "almost full health",
-        NextAction::array(0, new NextAction("lesser healing wave", ACTION_LIGHT_HEAL), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave", ACTION_NORMAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member almost full health",
-        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_LIGHT_HEAL), NULL)));
+        NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_NORMAL), NULL)));
 }
 
 void RestorationShamanStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

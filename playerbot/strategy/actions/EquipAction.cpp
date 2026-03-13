@@ -18,6 +18,18 @@ bool EquipAction::Execute(Event& event)
         return true;
     }
 
+    uint8 targetSlot = NULL_SLOT;
+    if (text.find("mh ") == 0)
+    {
+        targetSlot = EQUIPMENT_SLOT_MAINHAND;
+        text = text.substr(3);
+    }
+    else if (text.find("oh ") == 0)
+    {
+        targetSlot = EQUIPMENT_SLOT_OFFHAND;
+        text = text.substr(3);
+    }
+
     ItemIds ids = chat->parseItems(text);
     if (ids.empty())
     {
@@ -37,7 +49,7 @@ bool EquipAction::Execute(Event& event)
             }
 
             uint16 dest;
-            InventoryResult msg = bot->CanEquipItem(NULL_SLOT, dest, item, true);
+            InventoryResult msg = bot->CanEquipItem(targetSlot, dest, item, true);
 
             if (msg != EQUIP_ERR_OK)
             {
@@ -54,7 +66,14 @@ bool EquipAction::Execute(Event& event)
         }
     }
 
-    EquipItems(requester, ids);
+    if (targetSlot != NULL_SLOT)
+    {
+        EquipItemsToSlot(requester, ids, targetSlot);
+    }
+    else
+    {
+        EquipItems(requester, ids);
+    }
     return true;
 }
 
@@ -80,10 +99,24 @@ void EquipAction::ListItems(Player* requester)
 
 void EquipAction::EquipItems(Player* requester, ItemIds ids)
 {
-    for (ItemIds::iterator i =ids.begin(); i != ids.end(); i++)
+    for (ItemIds::iterator i = ids.begin(); i != ids.end(); i++)
     {
         FindItemByIdVisitor visitor(*i);
         EquipItem(requester, &visitor);        
+    }
+}
+
+void EquipAction::EquipItemsToSlot(Player* requester, ItemIds ids, uint8 targetSlot)
+{
+    for (ItemIds::iterator i = ids.begin(); i != ids.end(); i++)
+    {
+        FindItemByIdVisitor visitor(*i);
+        ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+        std::list<Item*> items = visitor.GetResult();
+        if (!items.empty())
+        {
+            EquipItemToSlot(requester, *items.begin(), targetSlot);
+        }
     }
 }
 
@@ -122,6 +155,39 @@ uint8 EquipAction::GetSmallestBagSlot()
     }
 
     return curBag;
+}
+
+void EquipAction::EquipItemToSlot(Player* requester, Item* item, uint8 targetSlot)
+{
+    uint8 bagIndex = item->GetBagSlot();
+    uint8 slot = item->GetSlot();
+    uint32 itemId = item->GetProto()->ItemId;
+
+    uint16 dest;
+    InventoryResult msg = bot->CanEquipItem(targetSlot, dest, item, true);
+    if (msg != EQUIP_ERR_OK)
+    {
+        bot->SendEquipError(msg, item, nullptr);
+        return;
+    }
+
+    uint8 destSlot = dest & 0xFF;
+    if (destSlot != targetSlot)
+    {
+        ai->TellPlayer(requester, "Cannot equip this item to the specified slot.");
+        return;
+    }
+
+    uint16 src = ((bagIndex << 8) | slot);
+    uint16 dstPos = ((INVENTORY_SLOT_BAG_0 << 8) | targetSlot);
+
+    bot->SwapItem(src, dstPos);
+
+    sPlayerbotAIConfig.logEvent(ai, "EquipAction", item->GetProto()->Name1, std::to_string(item->GetProto()->ItemId));
+
+    std::map<std::string, std::string> args;
+    args["%item"] = chat->formatItem(item);
+    ai->TellPlayer(requester, BOT_TEXT2("equip_command", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 }
 
 void EquipAction::EquipItem(Player* requester, Item* item)

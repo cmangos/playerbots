@@ -9,7 +9,9 @@ namespace ai
         EquipAction(PlayerbotAI* ai, std::string name = "equip") : ChatCommandAction(ai, name) {}
         virtual bool Execute(Event& event) override;
         void EquipItems(Player* requester, ItemIds ids);
+        void EquipItemsToSlot(Player* requester, ItemIds ids, uint8 targetSlot);
         void EquipItem(Player* requester, Item* item);
+        void EquipItemToSlot(Player* requester, Item* item, uint8 targetSlot);
         virtual bool isUsefulWhenStunned() override { return true; }
 
 #ifdef GenerateBotHelp

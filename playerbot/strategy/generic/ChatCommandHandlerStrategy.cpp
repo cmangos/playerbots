@@ -165,6 +165,10 @@ void ChatCommandHandlerStrategy::InitReactionTriggers(std::list<TriggerNode*> &t
         NextAction::array(0, new NextAction("equip", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "equip",
+        NextAction::array(0, new NextAction("equip", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "ue",
         NextAction::array(0, new NextAction("unequip", relevance), NULL)));
 

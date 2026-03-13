@@ -239,4 +239,47 @@ namespace ai
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
     };
+
+    class DruidOffdpsStrategy : public OffdpsStrategy
+    {
+    public:
+        DruidOffdpsStrategy(PlayerbotAI* ai) : OffdpsStrategy(ai) {}
+
+    protected:
+        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+    };
+
+    class DruidOffdpsPvpStrategy : public DruidOffdpsStrategy
+    {
+    public:
+        DruidOffdpsPvpStrategy(PlayerbotAI* ai) : DruidOffdpsStrategy(ai) {}
+        std::string getName() override { return "offdps pvp"; }
+
+    private:
+        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+    };
+
+    class DruidOffdpsPveStrategy : public DruidOffdpsStrategy
+    {
+    public:
+        DruidOffdpsPveStrategy(PlayerbotAI* ai) : DruidOffdpsStrategy(ai) {}
+        std::string getName() override { return "offdps pve"; }
+
+    private:
+        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+    };
+
+    class DruidOffdpsRaidStrategy : public DruidOffdpsStrategy
+    {
+    public:
+        DruidOffdpsRaidStrategy(PlayerbotAI* ai) : DruidOffdpsStrategy(ai) {}
+        std::string getName() override { return "offdps raid"; }
+
+    private:
+        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+    };
 }

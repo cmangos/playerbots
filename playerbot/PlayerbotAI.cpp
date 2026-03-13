@@ -5931,7 +5931,7 @@ std::pair<uint32, uint32> PlayerbotAI::GetPriorityBracket(ActivePiorityType type
     case ActivePiorityType::IN_COMBAT:
     {
         if (sPlayerbotAIConfig.limitCombatActivity)
-            return { 99,109 };
+            return { 99,100 };
 
         return { 0,10 };
     }

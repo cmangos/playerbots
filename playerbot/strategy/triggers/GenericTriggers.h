@@ -3,6 +3,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
 #include "Spells/SpellAuraDefines.h"
+#include "DungeonTriggers.h"
 
 namespace ai
 {
@@ -1274,25 +1275,32 @@ namespace ai
     };
 }
 
-class PotionCooldownTrigger : public Trigger
+class PotionCooldownTrigger : public ai::ItemBuffReadyTrigger
 {
 public:
-    PotionCooldownTrigger(PlayerbotAI* ai) : Trigger(ai, "potion cooldown", 5), lastPotionTime(0) {}
+    PotionCooldownTrigger(PlayerbotAI* ai, uint32 itemID = 0, uint32 buffID = 0)
+        : ai::ItemBuffReadyTrigger(ai, "potion cooldown", itemID, buffID), lastPotionTime(0), localItemID(itemID), localBuffID(buffID) {}
 
     virtual bool IsActive() override
     {
-        time_t now = time(0);
-        // 120 seconds = 2 minutes cooldown
-        if (now - lastPotionTime >= 120)
+        if (localItemID == 0 && localBuffID == 0)
         {
-            lastPotionTime = now;
-            return true;
+            time_t now = time(0);
+            if (now - lastPotionTime >= 120)
+            {
+                lastPotionTime = now;
+                return true;
+            }
+            return false;
         }
-        return false;
+
+        return ai::ItemBuffReadyTrigger::IsActive();
     }
 
 private:
     time_t lastPotionTime;
+    uint32 localItemID;
+    uint32 localBuffID;
 };
 
 #include "RangeTriggers.h"

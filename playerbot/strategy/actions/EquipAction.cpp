@@ -329,8 +329,187 @@ bool EquipUpgradesAction::Execute(Event& event)
         if (usage == ItemUsage::ITEM_USAGE_EQUIP || usage == ItemUsage::ITEM_USAGE_BAD_EQUIP)
         {
             sLog.outDetail("Bot #%d <%s> auto equips item %d (%s)", bot->GetGUIDLow(), bot->GetName(), item->GetProto()->ItemId, usage == ItemUsage::ITEM_USAGE_EQUIP ? "better than current" : usage == ItemUsage::ITEM_USAGE_BAD_EQUIP ? "wrong item but empty slot" : "");
-            EquipItem(GetMaster(), item);   
-            didEquip = true;
+
+            // Calculate which slot to equip main-hand and one-handed weapons.
+            const ItemPrototype* proto = item->GetProto();
+            bool isWeapon = (proto->Class == ItemClass::ITEM_CLASS_WEAPON);
+            bool isMainHandOnly = item->IsMainHandOnlyEnchant(TEMP_ENCHANTMENT_SLOT) || (proto->InventoryType == INVTYPE_WEAPONMAINHAND);
+            bool isOneHandWeapon = isWeapon &&
+                (proto->InventoryType == INVTYPE_WEAPON || proto->InventoryType == INVTYPE_WEAPONMAINHAND || proto->InventoryType == INVTYPE_WEAPONOFFHAND);
+
+            if (isMainHandOnly)
+            {
+                EquipItemToSlot(GetMaster(), item, EQUIPMENT_SLOT_MAINHAND);
+                didEquip = true;
+            }
+            else if (isOneHandWeapon)
+            {
+                bool pendingMainHandOnly = false;
+
+                for (auto& other : items)
+                {
+                    if (other == item)
+                        continue;
+
+                    const ItemPrototype* oproto = other->GetProto();
+                    bool oIsWeapon = (oproto->Class == ItemClass::ITEM_CLASS_WEAPON);
+                    bool oIsMainHandOnly = other->IsMainHandOnlyEnchant(TEMP_ENCHANTMENT_SLOT) || (oproto->InventoryType == INVTYPE_WEAPONMAINHAND);
+                    if (oIsWeapon && oIsMainHandOnly)
+                    {
+                        ItemUsage otherUsage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(other).GetQualifier());
+                        if (otherUsage == ItemUsage::ITEM_USAGE_EQUIP || otherUsage == ItemUsage::ITEM_USAGE_BAD_EQUIP)
+                        {
+                            pendingMainHandOnly = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Check main-hand before off-hand weapons
+                if (!pendingMainHandOnly)
+                {
+                    Item* equippedMain = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                    if (equippedMain && equippedMain != item)
+                    {
+                        const ItemPrototype* eproto = equippedMain->GetProto();
+                        bool eIsWeapon = (eproto->Class == ItemClass::ITEM_CLASS_WEAPON);
+                        bool eIsMainHandOnly = equippedMain->IsMainHandOnlyEnchant(TEMP_ENCHANTMENT_SLOT) || (eproto->InventoryType == INVTYPE_WEAPONMAINHAND);
+                        if (eIsWeapon && eIsMainHandOnly)
+                        {
+                            ItemUsage eUsage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(equippedMain).GetQualifier());
+                            if (eUsage == ItemUsage::ITEM_USAGE_BAD_EQUIP || eUsage == ItemUsage::ITEM_USAGE_EQUIP)
+                                pendingMainHandOnly = true;
+                        }
+                    }
+
+                    Item* equippedOff = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                    if (!pendingMainHandOnly && equippedOff && equippedOff != item)
+                    {
+                        const ItemPrototype* eoproto = equippedOff->GetProto();
+                        bool eoIsWeapon = (eoproto->Class == ItemClass::ITEM_CLASS_WEAPON);
+                        bool eoIsMainHandOnly = equippedOff->IsMainHandOnlyEnchant(TEMP_ENCHANTMENT_SLOT) || (eoproto->InventoryType == INVTYPE_WEAPONMAINHAND);
+                        if (eoIsWeapon && eoIsMainHandOnly)
+                        {
+                            ItemUsage eoUsage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(equippedOff).GetQualifier());
+                            if (eoUsage == ItemUsage::ITEM_USAGE_BAD_EQUIP || eoUsage == ItemUsage::ITEM_USAGE_EQUIP)
+                                pendingMainHandOnly = true;
+                        }
+                    }
+                }
+
+                if (pendingMainHandOnly)
+                {
+                    EquipItemToSlot(GetMaster(), item, EQUIPMENT_SLOT_OFFHAND);
+                    didEquip = true;
+                }
+                else
+                {
+                    EquipItem(GetMaster(), item);
+                    didEquip = true;
+                }
+            }
+            else
+            {
+                EquipItem(GetMaster(), item);
+                didEquip = true;
+            }
+        }
+    }
+
+    // If off-hand slot is empty, retry equipping once
+    if (didEquip)
+    {
+        Item* mainAfter = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+        Item* offAfter = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+
+        if (!mainAfter || !offAfter)
+        {
+            auto retryFillWeaponSlots = [&]()
+                {
+                    FindItemUsageVisitor retryVisitor(bot, ItemUsage::ITEM_USAGE_EQUIP);
+                    ai->InventoryIterateItems(&retryVisitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+                    retryVisitor.SetUsage(ItemUsage::ITEM_USAGE_BAD_EQUIP);
+                    ai->InventoryIterateItems(&retryVisitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+                    std::list<Item*> retryItems = retryVisitor.GetResult();
+
+                    retryItems.sort([plr = bot](Item* i, Item* j) { return sRandomItemMgr.ItemStatWeight(plr, i) > sRandomItemMgr.ItemStatWeight(plr, j); });
+
+                    for (auto& rItem : retryItems)
+                    {
+                        if (mainAfter && offAfter)
+                            break;
+
+#ifdef MANGOSBOT_TWO
+                        if (rItem->GetProto()->Class == ITEM_CLASS_GLYPH)
+                            continue;
+#endif
+                        ItemUsage rUsage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(rItem).GetQualifier());
+                        if (!(rUsage == ItemUsage::ITEM_USAGE_EQUIP || rUsage == ItemUsage::ITEM_USAGE_BAD_EQUIP))
+                            continue;
+
+                        const ItemPrototype* rproto = rItem->GetProto();
+                        bool rIsWeapon = (rproto->Class == ItemClass::ITEM_CLASS_WEAPON);
+                        bool rIsOneHand = rIsWeapon &&
+                            (rproto->InventoryType == INVTYPE_WEAPON || rproto->InventoryType == INVTYPE_WEAPONMAINHAND || rproto->InventoryType == INVTYPE_WEAPONOFFHAND);
+
+                        if (!mainAfter)
+                        {
+                            uint16 dest;
+                            InventoryResult msg = bot->CanEquipItem(EQUIPMENT_SLOT_MAINHAND, dest, rItem, true);
+                            if (msg == EQUIP_ERR_OK)
+                            {
+                                EquipItemToSlot(GetMaster(), rItem, EQUIPMENT_SLOT_MAINHAND);
+                                mainAfter = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                                continue;
+                            }
+                        }
+
+                        if (!offAfter)
+                        {
+                            uint16 dest;
+                            InventoryResult msg = bot->CanEquipItem(EQUIPMENT_SLOT_OFFHAND, dest, rItem, true);
+                            if (msg == EQUIP_ERR_OK)
+                            {
+                                EquipItemToSlot(GetMaster(), rItem, EQUIPMENT_SLOT_OFFHAND);
+                                offAfter = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                                continue;
+                            }
+                        }
+
+                        if (rIsOneHand && !offAfter)
+                        {
+                            bool mainReserved = false;
+                            for (auto& other : retryItems)
+                            {
+                                if (other == rItem) continue;
+                                const ItemPrototype* oproto = other->GetProto();
+                                if (oproto->Class != ItemClass::ITEM_CLASS_WEAPON) continue;
+                                bool oIsMainOnly = other->IsMainHandOnlyEnchant(TEMP_ENCHANTMENT_SLOT) || (oproto->InventoryType == INVTYPE_WEAPONMAINHAND);
+                                if (!oIsMainOnly) continue;
+                                ItemUsage oUsage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(other).GetQualifier());
+                                if (oUsage == ItemUsage::ITEM_USAGE_EQUIP || oUsage == ItemUsage::ITEM_USAGE_BAD_EQUIP)
+                                {
+                                    mainReserved = true;
+                                    break;
+                                }
+                            }
+
+                            if (mainReserved)
+                            {
+                                uint16 dest;
+                                InventoryResult msg = bot->CanEquipItem(EQUIPMENT_SLOT_OFFHAND, dest, rItem, true);
+                                if (msg == EQUIP_ERR_OK)
+                                {
+                                    EquipItemToSlot(GetMaster(), rItem, EQUIPMENT_SLOT_OFFHAND);
+                                    offAfter = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                };
+
+            retryFillWeaponSlots();
         }
     }
 

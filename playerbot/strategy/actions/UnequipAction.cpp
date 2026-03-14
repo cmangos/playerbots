@@ -41,6 +41,7 @@ void UnequipAction::UnequipItem(PlayerbotAI* ai, Player* requester, Item* item, 
     packet << bagIndex << slot << dstBag;
     bot->GetSession()->HandleAutoStoreBagItemOpcode(packet);
 
+    RESET_AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
 
 
     if (!silent)

@@ -179,10 +179,22 @@ void EquipAction::EquipItemToSlot(Player* requester, Item* item, uint8 targetSlo
         return;
     }
 
+    Item* oldItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, targetSlot);
+    Item* oldOffhand = nullptr;
+    if (destSlot == EQUIPMENT_SLOT_MAINHAND && item->GetProto()->InventoryType == INVTYPE_2HWEAPON)
+        oldOffhand = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+
     uint16 src = ((bagIndex << 8) | slot);
     uint16 dstPos = ((INVENTORY_SLOT_BAG_0 << 8) | targetSlot);
 
     bot->SwapItem(src, dstPos);
+
+    RESET_AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
+
+    if (oldItem)
+        RESET_AI_VALUE2(ItemUsage, "item usage", ItemQualifier(oldItem).GetQualifier());
+    if (oldOffhand)
+        RESET_AI_VALUE2(ItemUsage, "item usage", ItemQualifier(oldOffhand).GetQualifier());
 
     sPlayerbotAIConfig.logEvent(ai, "EquipAction", item->GetProto()->Name1, std::to_string(item->GetProto()->ItemId));
 
@@ -199,6 +211,19 @@ void EquipAction::EquipItem(PlayerbotAI* ai, Player* requester, Item* item, bool
     uint8 bagIndex = item->GetBagSlot();
     uint8 slot = item->GetSlot();
     uint32 itemId = item->GetProto()->ItemId;
+
+    uint16 dest;
+    InventoryResult result = bot->CanEquipItem(NULL_SLOT, dest, item, !item->IsBag());
+
+    Item* oldItem = nullptr;
+    Item* oldOffhand = nullptr;
+    if (result == EQUIP_ERR_OK)
+    {
+        oldItem = bot->GetItemByPos(dest);
+
+        if (oldItem && oldItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND && item->GetProto()->InventoryType == INVTYPE_2HWEAPON)
+            oldOffhand = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+    }
 
     if (item->GetProto()->InventoryType == INVTYPE_AMMO)
     {
@@ -235,6 +260,13 @@ void EquipAction::EquipItem(PlayerbotAI* ai, Player* requester, Item* item, bool
             bot->GetSession()->HandleAutoEquipItemOpcode(packet);
         }
     }
+
+    RESET_AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
+
+    if (oldItem)
+        RESET_AI_VALUE2(ItemUsage, "item usage", ItemQualifier(oldItem).GetQualifier());
+    if (oldOffhand)
+        RESET_AI_VALUE2(ItemUsage, "item usage", ItemQualifier(oldOffhand).GetQualifier());
 
     sPlayerbotAIConfig.logEvent(ai, "EquipAction", item->GetProto()->Name1, std::to_string(item->GetProto()->ItemId));
 

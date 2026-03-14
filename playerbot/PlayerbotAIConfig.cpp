@@ -1248,11 +1248,16 @@ void PlayerbotAIConfig::LoadLLMDefaultPrompts(const std::string& fileName)
         try
         {
             sRandomPlayerbotMgr.SetValue(guid, "manual saved string::llmdefaultprompt", 0, text);
-            CharacterDatabase.PExecute("DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%u' AND `key` = '%s'", guid, "llmdefaultprompt");
+
+            CharacterDatabase.PExecute(
+                "DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%u' AND `key` = '%s' AND `value` LIKE '%s'",
+                guid, "value", "manual saved string::llmdefaultprompt>%");
+
+            std::string dbValue = std::string("manual saved string::llmdefaultprompt>") + text;
 
             CharacterDatabase.PExecute(
                 "INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES ('%u', '%s', '%s', '%s')",
-                guid, "", "llmdefaultprompt", text.c_str());
+                guid, "", "value", dbValue.c_str());
 
             sLog.outString("Set llmdefaultprompt for %s (guid %u).", name.c_str(), guid);
             ++loaded;

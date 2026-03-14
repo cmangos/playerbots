@@ -16,6 +16,8 @@
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <regex>
+#include <fstream> // new include needed for file IO
+#include <sstream>
 #include "PlayerbotLoginMgr.h"
 
 std::vector<std::string> ConfigAccess::GetValues(const std::string& name) const
@@ -685,6 +687,13 @@ bool PlayerbotAIConfig::Initialize()
     for (auto& channelName : blockedChannels)
         llmBlockedReplyChannels.insert(sourceName[channelName]);
 
+    // Load per-bot LLM default prompts file (format: "Name::Text")
+    {
+        // default file name changed to "llm_character_personality"
+        std::string promptsFile = config.GetStringDefault("AiPlayerbot.LLMDefaultPromptsFile", "llm_character_personality");
+        LoadLLMDefaultPrompts(promptsFile);
+    }
+
     //LLM END
 
     // Gear progression system
@@ -1183,4 +1192,80 @@ void PlayerbotAIConfig::LoadTalentSpecs()
             sLog.outErrorDb("!!!!!!!!!!! randomBotMaxLevel and the talentspec levels are below this expansions max level. Please check if you have the correct config file!!!!!!");
 
     }
+}
+
+void PlayerbotAIConfig::LoadLLMDefaultPrompts(const std::string& fileName)
+{
+    std::ifstream file(fileName);
+    if (!file.is_open())
+    {
+        sLog.outString("LLM default prompts file '%s' not found or unreadable.", fileName.c_str());
+        return;
+    }
+
+    std::string line;
+    uint32 loaded = 0;
+    while (std::getline(file, line))
+    {
+        boost::trim(line);
+        if (line.empty() || line.front() == '#')
+            continue;
+
+        size_t delim = line.find("::");
+        if (delim == std::string::npos)
+        {
+            sLog.outError("LLM prompts file '%s' contains invalid line (missing '::'): %s", fileName.c_str(), line.c_str());
+            continue;
+        }
+
+        std::string name = line.substr(0, delim);
+        std::string text = line.substr(delim + 2);
+
+        boost::trim(name);
+        boost::trim(text);
+
+        if (name.empty())
+        {
+            sLog.outError("LLM prompts file '%s' contains empty name: %s", fileName.c_str(), line.c_str());
+            continue;
+        }
+
+        if (text.empty())
+        {
+            sLog.outString("Clearing llmdefaultprompt for '%s' (empty value)", name.c_str());
+        }
+
+        auto result = CharacterDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s' LIMIT 1", name.c_str());
+        if (!result)
+        {
+            sLog.outError("Character '%s' not found in characters DB while loading '%s'.", name.c_str(), fileName.c_str());
+            continue;
+        }
+
+        Field* fields = result->Fetch();
+        uint32 guid = fields[0].GetUInt32();
+
+        sLog.outString("Parsed LLM prompt: name='%s' guid=%u text_len=%u text_preview='%s'",
+            name.c_str(), guid, static_cast<uint32_t>(text.size()),
+            text.size() > 128 ? (text.substr(0, 128) + "...").c_str() : text.c_str());
+
+        try
+        {
+            sRandomPlayerbotMgr.SetValue(guid, "manual saved string::llmdefaultprompt", 0, text);
+            CharacterDatabase.PExecute("DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%u' AND `key` = '%s'", guid, "llmdefaultprompt");
+
+            CharacterDatabase.PExecute(
+                "INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES ('%u', '%s', '%s', '%s')",
+                guid, "", "llmdefaultprompt", text.c_str());
+
+            sLog.outString("Set llmdefaultprompt for %s (guid %u).", name.c_str(), guid);
+            ++loaded;
+        }
+        catch (...)
+        {
+            sLog.outError("Failed to set llmdefaultprompt for %s (guid %u).", name.c_str(), guid);
+        }
+    }
+
+    sLog.outString("Loaded %u LLM character personalities from %s", loaded, fileName.c_str());
 }

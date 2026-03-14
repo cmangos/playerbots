@@ -15,7 +15,7 @@ bool UnequipAction::Execute(Event& event)
     std::list<Item*> found = ai->InventoryParseItems(text, IterateItemsMask::ITERATE_ITEMS_IN_EQUIP);
     for (auto& item : found)
     {
-        UnequipItem(requester, item);
+        UnequipItem(ai, requester, item);
     }
 
     return true;
@@ -26,11 +26,13 @@ void UnequipAction::UnequipItem(Player* requester, FindItemVisitor* visitor)
     IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP);
     ai->InventoryIterateItems(visitor, mask);
     std::list<Item*> items = visitor->GetResult();
-	if (!items.empty()) UnequipItem(requester, *items.begin());
+	if (!items.empty()) UnequipItem(ai, requester, *items.begin());
 }
 
-void UnequipAction::UnequipItem(Player* requester, Item* item)
+void UnequipAction::UnequipItem(PlayerbotAI* ai, Player* requester, Item* item, bool silent)
 {
+    Player* bot = ai->GetBot();
+    AiObjectContext* context = ai->GetAiObjectContext();
     uint8 bagIndex = item->GetBagSlot();
     uint8 slot = item->GetSlot();
     uint8 dstBag = NULL_BAG;
@@ -39,7 +41,12 @@ void UnequipAction::UnequipItem(Player* requester, Item* item)
     packet << bagIndex << slot << dstBag;
     bot->GetSession()->HandleAutoStoreBagItemOpcode(packet);
 
-    std::map<std::string, std::string> args;
-    args["%item"] = chat->formatItem(item);
-    ai->TellPlayer(requester, BOT_TEXT2("unequip_command", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+
+
+    if (!silent)
+    {
+        std::map<std::string, std::string> args;
+        args["%item"] = ChatHelper::formatItem(item);
+        ai->TellPlayer(requester, BOT_TEXT2("unequip_command", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+    }
 }

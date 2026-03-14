@@ -10,7 +10,7 @@ namespace ai
         virtual bool Execute(Event& event) override;
         void EquipItems(Player* requester, ItemIds ids);
         void EquipItemsToSlot(Player* requester, ItemIds ids, uint8 targetSlot);
-        void EquipItem(Player* requester, Item* item);
+        static void EquipItem(PlayerbotAI* ai, Player* requester, Item* item, bool silent = false);
         void EquipItemToSlot(Player* requester, Item* item, uint8 targetSlot);
         virtual bool isUsefulWhenStunned() override { return true; }
 
@@ -29,7 +29,7 @@ namespace ai
     private:
         void EquipItem(Player* requester, FindItemVisitor* visitor);
         void ListItems(Player* requester);
-        uint8 GetSmallestBagSlot();
+        static uint8 GetSmallestBagSlot(Player* bot);
     };
 
     class EquipUpgradesAction : public EquipAction

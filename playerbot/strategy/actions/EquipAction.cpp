@@ -363,7 +363,14 @@ bool EquipUpgradesAction::Execute(Event& event)
 
     bool didEquip = false;
 
-    items.sort([plr = bot](Item* i, Item* j) {return sRandomItemMgr.ItemStatWeight(plr, i) > sRandomItemMgr.ItemStatWeight(plr, j); });
+    items.sort([plr = bot](Item* i, Item* j) {
+        bool iMain = i->GetProto()->InventoryType == INVTYPE_WEAPONMAINHAND;
+        bool jMain = j->GetProto()->InventoryType == INVTYPE_WEAPONMAINHAND;
+
+        if (iMain != jMain)
+            return iMain > jMain; // mainhand comes first
+
+        return sRandomItemMgr.ItemStatWeight(plr, i) > sRandomItemMgr.ItemStatWeight(plr, j); });
 
     for (auto& item : items)
     {

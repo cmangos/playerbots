@@ -169,6 +169,9 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* bot, Player* requester
     std::string futureTravelPurpose = AI_VALUE2(std::string, "manual string", "future travel purpose");
     std::string futureTravelPurposeName = GetTravelPurposeName(futureTravelPurpose);
 
+    std::string futureTravelCondition = AI_VALUE2(std::string, "manual string", "future travel condition");
+    bool isGuildMeeting = futureTravelCondition == "guild meeting";
+
     std::string shortName = destination->GetShortName();    
 
     if (typeid(*destination) == typeid(NullTravelDestination))
@@ -244,7 +247,8 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* bot, Player* requester
     if (out.str().empty())
         return;
 
-    ai->TellPlayerNoFacing(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_TALK, false);
+    if (!isGuildMeeting)
+        ai->TellPlayerNoFacing(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_TALK, false);
 
     std::string message = out.str().c_str();
 

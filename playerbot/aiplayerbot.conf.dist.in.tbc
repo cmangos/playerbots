@@ -1080,9 +1080,9 @@ AiPlayerbot.PerfMonEnabled = 0
 # Step4: What pattern the server should look for to split the repsonse in multiple lines. Note only lines that follow this pattern will be extracted.
 # AiPlayerbot.LLMResponseSplitPattern = (\*.*?\*)|(\[.*?\])|(\'.*\')|([^\*\[\] ][^\*\[\]]+?[.?!])
 
-# The file llm_character_personality.txt allows you to define the personality and speaking style of AI bots on the server.
-# You need to create this file in the root folder of your server.
-# Each new line assigns a personality prompt to a specific bot. The format must be as follows:
+# The file llm_character_card.txt allows you to define how individual bots speak. You need to create this file in the root folder.
+# Each new line adds an additional prompt to the specified bot, which can be used to adjust specific bot's personality and speaking style.
+# The format must be as follows:
 # name1::text1
 # name2::text2
 # name3::text3
@@ -1092,7 +1092,7 @@ AiPlayerbot.PerfMonEnabled = 0
 # Mostlikely::I like to travel a lot.
 # Flekz::I hold the power of ancient wizardry.
 
-AiPlayerbot.LLMDefaultPromptsFile = llm_character_personality.txt
+AiPlayerbot.LLMDefaultPromptsFile = llm_character_card.txt
 
 # Should previous conversations from all channels be mixed?
 # AiPlayerbot.LLMGlobalContext = 0

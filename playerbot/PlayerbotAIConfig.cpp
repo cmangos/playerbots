@@ -688,7 +688,7 @@ bool PlayerbotAIConfig::Initialize()
         llmBlockedReplyChannels.insert(sourceName[channelName]);
 
     {
-        std::string promptsFile = config.GetStringDefault("AiPlayerbot.LLMDefaultPromptsFile", "llm_character_personality");
+        std::string promptsFile = config.GetStringDefault("AiPlayerbot.LLMDefaultPromptsFile", "llm_character_card");
         LoadLLMDefaultPrompts(promptsFile);
     }
 

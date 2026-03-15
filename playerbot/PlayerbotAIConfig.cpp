@@ -1201,6 +1201,10 @@ void PlayerbotAIConfig::LoadLLMDefaultPrompts(const std::string& fileName)
 
     std::string line;
     uint32 loaded = 0;
+
+    std::string likePattern = std::string("manual saved string::llmdefaultprompt>%");
+    CharacterDatabase.escape_string(likePattern);
+
     while (std::getline(file, line))
     {
         boost::trim(line);
@@ -1216,7 +1220,6 @@ void PlayerbotAIConfig::LoadLLMDefaultPrompts(const std::string& fileName)
 
         std::string name = line.substr(0, delim);
         std::string text = line.substr(delim + 2);
-
         boost::trim(name);
         boost::trim(text);
 
@@ -1224,11 +1227,6 @@ void PlayerbotAIConfig::LoadLLMDefaultPrompts(const std::string& fileName)
         {
             sLog.outError("LLM prompts file '%s' contains empty name: %s", fileName.c_str(), line.c_str());
             continue;
-        }
-
-        if (text.empty())
-        {
-            sLog.outString("Clearing llmdefaultprompt for '%s' (empty value)", name.c_str());
         }
 
         auto result = CharacterDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s' LIMIT 1", name.c_str());
@@ -1241,31 +1239,18 @@ void PlayerbotAIConfig::LoadLLMDefaultPrompts(const std::string& fileName)
         Field* fields = result->Fetch();
         uint32 guid = fields[0].GetUInt32();
 
-        sLog.outString("Parsed LLM prompt: name='%s' guid=%u text_len=%u text_preview='%s'",
-            name.c_str(), guid, static_cast<uint32_t>(text.size()),
-            text.size() > 128 ? (text.substr(0, 128) + "...").c_str() : text.c_str());
+        CharacterDatabase.PExecute(
+            "DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%u' AND `key` = '%s' AND `value` LIKE '%s'",
+            guid, "value", likePattern.c_str());
 
-        try
-        {
-            sRandomPlayerbotMgr.SetValue(guid, "manual saved string::llmdefaultprompt", 0, text);
+        std::string dbValue = std::string("manual saved string::llmdefaultprompt>") + text;
+        CharacterDatabase.escape_string(dbValue);
 
-            CharacterDatabase.PExecute(
-                "DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%u' AND `key` = '%s' AND `value` LIKE '%s'",
-                guid, "value", "manual saved string::llmdefaultprompt>%");
+        CharacterDatabase.PExecute(
+            "INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES ('%u', '%s', '%s', '%s')",
+            guid, "", "value", dbValue.c_str());
 
-            std::string dbValue = std::string("manual saved string::llmdefaultprompt>") + text;
-
-            CharacterDatabase.PExecute(
-                "INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES ('%u', '%s', '%s', '%s')",
-                guid, "", "value", dbValue.c_str());
-
-            sLog.outString("Set llmdefaultprompt for %s (guid %u).", name.c_str(), guid);
-            ++loaded;
-        }
-        catch (...)
-        {
-            sLog.outError("Failed to set llmdefaultprompt for %s (guid %u).", name.c_str(), guid);
-        }
+        ++loaded;
     }
 
     sLog.outString("Loaded %u LLM character personalities from %s", loaded, fileName.c_str());

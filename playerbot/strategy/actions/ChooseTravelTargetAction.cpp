@@ -54,7 +54,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
     if (AI_VALUE2(std::string, "manual string", "future travel condition") == "guild meeting")
     {
         newTarget.SetForced(true);
-        newTarget.SetRelevance(std::max<uint32>(targetRelevance, 199));
+        newTarget.SetRelevance(std::max<uint32>(targetRelevance, 199u));
     }
     else
     {

@@ -923,18 +923,24 @@ bool TravelTarget::IsConditionsActive(bool clear)
             player = member;
     }
 
-    if (!player->GetPlayerbotAI()) //No ai so clear target.
+    if (!player || !player->GetPlayerbotAI()) //No ai so clear target.
         return false;
         
     AiObjectContext* playerContext = player->GetPlayerbotAI()->GetAiObjectContext();
+
+    if (!playerContext)
+        return false;
 
     if (clear)
         for (auto& condition : travelConditions)
             playerContext->ClearValues(condition);
 
     for (auto& condition : travelConditions)
-        if (!PAI_VALUE(bool, condition))
+    {
+        auto* value = playerContext->GetValue<bool>(condition);
+        if (!value || !value->Get())
             return false;
+    }
 
     return true;
 }
@@ -990,11 +996,17 @@ void TravelTarget::CheckStatus()
         else if(IsForced()) return; //While traveling do not go into cooldown
     }
 
-    if (GetStatus() != TravelStatus::TRAVEL_STATUS_COOLDOWN && ((!IsDestinationActive() && !IsForced()) || !IsConditionsActive())) //Target has become invalid. Stop.
+    if (GetStatus() != TravelStatus::TRAVEL_STATUS_COOLDOWN)
     {
-        ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
-        SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
-        return;
+        bool destinationInactive = !IsDestinationActive() && !IsForced();
+        bool conditionsInactive = !destinationInactive && !IsConditionsActive(); // Only check conditions if destination is still active
+
+        if (destinationInactive || conditionsInactive)
+        {
+            ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
+            SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
+            return;
+        }
     }
 }
 

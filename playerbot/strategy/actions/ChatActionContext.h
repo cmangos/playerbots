@@ -80,6 +80,7 @@
 #include "SetValueAction.h"
 #include "GlyphAction.h"
 #include "SayAction.h"
+#include "TravelToGuildMeetingAction.h"
 
 namespace ai
 {
@@ -207,6 +208,8 @@ namespace ai
             creators["guild remove"] = [](PlayerbotAI* ai) { return new GuildRemoveAction(ai); };
             creators["guild leave"] = [](PlayerbotAI* ai) { return new GuildLeaveAction(ai); };
             creators["guild leader"] = [](PlayerbotAI* ai) { return new GuildLeaderAction(ai); };
+
+            creators["travel to guild meeting"] = [](PlayerbotAI* ai) { return new TravelToGuildMeetingAction(ai); };
 
             creators["bg free"] = [](PlayerbotAI* ai) { return new BGLeaveAction(ai); };
             creators["move style"] = [](PlayerbotAI* ai) { return new MoveStyleAction(ai); };

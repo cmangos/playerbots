@@ -968,10 +968,11 @@ void TravelTarget::CheckStatus()
         return;
     }
 
-    if (statusTime != 0 && GetTimeLeft() <= 0 && (!IsForced() || GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN))
+    if (statusTime != 0 && GetTimeLeft() <= 0 && !IsForced())
     {
         ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+        ai->GetAiObjectContext()->ClearValues("no active travel destinations");
         return;
     }
 
@@ -1004,6 +1005,7 @@ void TravelTarget::CheckStatus()
         if (destinationInactive || conditionsInactive)
         {
             ai->TellDebug(ai->GetMaster(), "The target is cooling down because the destination was no longer active or the conditions are no longer true.", "debug travel");
+            forced = false;
             SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);
             return;
         }

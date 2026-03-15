@@ -14,6 +14,9 @@ inline std::string GetTravelPurposeName(std::string purpose)
     if (Qualified::isValidNumberString(purpose) && TravelDestinationPurposeName.find(TravelDestinationPurpose(stoi(purpose))) != TravelDestinationPurposeName.end())
         return TravelDestinationPurposeName.at(TravelDestinationPurpose(stoi(purpose)));
 
+    if (purpose.empty())
+        return "quest";
+
     return purpose;
 }
 
@@ -700,7 +703,7 @@ bool RequestTravelTargetAction::isUseful() {
 
     if (!isAllowed())
     {
-        ai->TellDebug(ai->GetMaster(), "Skipped " + GetTravelPurposeName(AI_VALUE2(std::string, "manual string", "future travel purpose")) + " because of skip chance", "debug travel");
+        ai->TellDebug(ai->GetMaster(), "Skipped " + GetTravelPurposeName(qualifier) + " because of skip chance", "debug travel");
         return false;
     }
 

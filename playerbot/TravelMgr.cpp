@@ -968,7 +968,7 @@ void TravelTarget::CheckStatus()
         return;
     }
 
-    if (statusTime != 0 && GetTimeLeft() <= 0 && !IsForced())
+    if (statusTime != 0 && GetTimeLeft() <= 0 && (!IsForced() || GetStatus() == TravelStatus::TRAVEL_STATUS_COOLDOWN))
     {
         ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
         SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);

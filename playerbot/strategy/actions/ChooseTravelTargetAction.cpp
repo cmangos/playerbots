@@ -4,6 +4,7 @@
 #include "ChooseTravelTargetAction.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/strategy/values/TravelValues.h"
+#include "Guilds/GuildMgr.h"
 #include <iomanip>
 
 using namespace ai;
@@ -53,7 +54,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
     if (AI_VALUE2(std::string, "manual string", "future travel condition") == "guild meeting")
     {
         newTarget.SetForced(true);
-        newTarget.SetRelevance(std::max<uint32>(targetRelevance, 100000u));
+        newTarget.SetRelevance(std::max<uint32>(targetRelevance, 199));
     }
     else
     {
@@ -786,6 +787,60 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
             }
         );
     }
+    else if (travelName == "guild meeting")
+    {
+        // Parse guild MOTD for the meeting time.
+        // Meeting: <location> <start time> <end time>
+        std::string meetingLocation;
+        if (bot->GetGuildId())
+        {
+            Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
+            if (guild)
+            {
+                std::string motd = guild->GetMOTD();
+                auto pos = motd.find("Meeting:");
+                if (pos != std::string::npos)
+                {
+                    std::string body = motd.substr(pos + 8);
+                    body.erase(body.begin(), std::find_if(body.begin(), body.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+                    std::vector<std::string> tokens;
+                    { std::istringstream iss(body); std::string t; while (iss >> t) tokens.push_back(t); }
+                    if (tokens.size() >= 3)
+                    {
+                        tokens.pop_back(); // end time
+                        tokens.pop_back(); // start time
+                        std::ostringstream loc;
+                        for (size_t i = 0; i < tokens.size(); ++i) { if (i) loc << " "; loc << tokens[i]; }
+                        meetingLocation = loc.str();
+                    }
+                }
+            }
+        }
+
+        if (meetingLocation.empty())
+        {
+            ai->TellDebug(ai->GetMaster(), "No meeting location found in guild MOTD", "debug travel");
+            return false;
+        }
+
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, meetingLocation]()
+            {
+                PartitionedTravelList list;
+                for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, meetingLocation, true, false, false, false, false))
+                {
+                    std::list<uint8> chancesToGoFar = { 10,50,90 };
+                    WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
+
+                    if (!point)
+                        continue;
+
+                    list[0].push_back(TravelPoint(destination, point, point->distance(center)));
+                }
+
+                return list;
+            }
+        );
+    }
     else if (travelName.find("trainer") == 0)
     {
         TrainerType type = TRAINER_TYPE_CLASS;
@@ -861,7 +916,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
     SET_AI_VALUE2(std::string, "manual string", "future travel purpose", getQualifier());
-    SET_AI_VALUE2(std::string, "manual string", "future travel condition", event.getSource());
+    SET_AI_VALUE2(std::string, "manual string", "future travel condition", travelName == "guild meeting" ? "guild meeting" : event.getSource());
     SET_AI_VALUE2(int, "manual int", "future travel relevance", relevance * 100);
 
     return true;
@@ -882,6 +937,8 @@ bool RequestNamedTravelTargetAction::isAllowed() const
             return false;
         return true;
     }
+    else if (name == "guild meeting")
+        return true;
     else if (name == "mount")
     {
         if (urand(1, 100) > 100)

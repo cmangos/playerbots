@@ -11,7 +11,6 @@
 #include "RtiTriggers.h"
 #include "CureTriggers.h"
 #include "GuildTriggers.h"
-#include "GuildMeetingTrigger.h"
 #include "StuckTriggers.h"
 #include "BotStateTriggers.h"
 #include "PullTriggers.h"
@@ -220,7 +219,6 @@ namespace ai
             creators["petition signed"] = [](PlayerbotAI* ai) { return new PetitionTurnInTrigger(ai); };
             creators["buy tabard"] = [](PlayerbotAI* ai) { return new BuyTabardTrigger(ai); };
             creators["leave large guild"] = [](PlayerbotAI* ai) { return new LeaveLargeGuildTrigger(ai); };
-            creators["guild meeting"] = [](PlayerbotAI* ai) { return new GuildMeetingTrigger(ai); };
             creators["in pvp"] = [](PlayerbotAI* ai) { return new InPvpTrigger(ai); };
             creators["in pve"] = [](PlayerbotAI* ai) { return new InPveTrigger(ai); };
             creators["in raid fight"] = [](PlayerbotAI* ai) { return new InRaidFightTrigger(ai); };

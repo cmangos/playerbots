@@ -4,6 +4,7 @@
 #include "QuestValues.h"
 #include "SharedValueContext.h"
 #include "BudgetValues.h"
+#include "Guilds/GuildMgr.h"
 
 using namespace ai;
 
@@ -366,6 +367,59 @@ bool ShouldTravelNamedValue::Calculate()
             return false;
 
         return true;
+    }
+    else if (name == "guild meeting")
+    {
+        if (!bot->GetGuildId())
+            return false;
+
+        Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
+        if (!guild)
+            return false;
+
+        std::string motd = guild->GetMOTD();
+        if (motd.empty()) 
+            return false;
+
+        // Parse guild MOTD for the meeting time.
+        // Meeting: <location> <start time> <end time>
+        auto pos = motd.find("Meeting:");
+        if (pos == std::string::npos)
+            return false;
+
+        std::string body = motd.substr(pos + 8);
+        std::vector<std::string> tokens;
+        { std::istringstream iss(body); std::string t; while (iss >> t) tokens.push_back(t); }
+        if (tokens.size() < 3)
+            return false;
+
+        auto parseTime = [](const std::string& tok, int& h, int& m) -> bool {
+            auto colon = tok.find(':');
+            if (colon == std::string::npos) return false;
+            h = std::stoi(tok.substr(0, colon));
+            std::string rest = tok.substr(colon + 1);
+            std::string digits, suffix;
+            for (char c : rest) { if (std::isdigit(c)) digits += c; else suffix += (char)toupper(c); }
+            m = std::stoi(digits);
+            if (h < 0 || h > 23 || m < 0 || m > 59) return false;
+            if (suffix == "PM" && h != 12) h += 12;
+            if (suffix == "AM" && h == 12) h = 0;
+            return true;
+        };
+
+        int sh, sm, eh, em;
+        if (!parseTime(tokens[tokens.size() - 2], sh, sm)) return false;
+        if (!parseTime(tokens[tokens.size() - 1], eh, em)) return false;
+
+        time_t now = time(nullptr);
+        tm local = *localtime(&now);
+        tm startTm = local; startTm.tm_hour = sh; startTm.tm_min = sm; startTm.tm_sec = 0;
+        tm endTm = local;   endTm.tm_hour = eh;   endTm.tm_min = em;   endTm.tm_sec = 0;
+        time_t start = mktime(&startTm);
+        time_t end = mktime(&endTm);
+        if (end < start) end += 24 * 3600;
+
+        return (now >= start - 30 * 60) && (now <= end);
     }
     else if (name == "mount")
     {

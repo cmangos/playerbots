@@ -25,5 +25,6 @@ namespace ai
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitCombatMultipliers(std::list<Multiplier*>& multipliers) override;
         void InitNonCombatMultipliers(std::list<Multiplier*>& multipliers) override;
+        void OnStrategyAdded(BotState state) override;
     };
 }

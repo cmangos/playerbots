@@ -14,15 +14,15 @@ void BlackwingLairDungeonStrategy::InitNonCombatTriggers(std::list<TriggerNode*>
 {
     triggers.push_back(new TriggerNode(
         "suppression device need stealth",
-        NextAction::array(0, new NextAction("stealth for suppression device", 3.0f), NULL)));
+        NextAction::array(0, new NextAction("stealth for suppression device", ACTION_HIGH + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "suppression device in sight",
-        NextAction::array(0, new NextAction("move to suppression device", 2.0f), NULL)));
+        NextAction::array(0, new NextAction("move to suppression device", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "suppression device close",
-        NextAction::array(0, new NextAction("disarm suppression device", 4.0f), NULL)));
+        NextAction::array(0, new NextAction("disarm suppression device", ACTION_HIGH + 4), NULL)));
 }
 
 class SuppressionRoomPassiveMultiplier : public Multiplier
@@ -95,6 +95,10 @@ void SuppressionRoomStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
         NextAction::array(0, new NextAction("vanish", ACTION_EMERGENCY + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "suppression device in sight",
+        NextAction::array(0, new NextAction("move to suppression device", ACTION_HIGH + 8), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "suppression device close",
         NextAction::array(0, new NextAction("disarm suppression device", 90.0f), NULL)));
 }
@@ -103,15 +107,15 @@ void SuppressionRoomStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tri
 {
     triggers.push_back(new TriggerNode(
         "suppression device need stealth",
-        NextAction::array(0, new NextAction("stealth for suppression device", 10.0f), NULL)));
+        NextAction::array(0, new NextAction("stealth for suppression device", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "suppression device in sight",
-        NextAction::array(0, new NextAction("move to suppression device", 8.0f), NULL)));
+        NextAction::array(0, new NextAction("move to suppression device", ACTION_HIGH + 8), NULL)));
 
     triggers.push_back(new TriggerNode(
         "suppression device close",
-        NextAction::array(0, new NextAction("disarm suppression device", 12.0f), NULL)));
+        NextAction::array(0, new NextAction("disarm suppression device", ACTION_MOVE + 2), NULL)));
 }
 
 void SuppressionRoomStrategy::InitCombatMultipliers(std::list<Multiplier*>& multipliers)
@@ -122,4 +126,17 @@ void SuppressionRoomStrategy::InitCombatMultipliers(std::list<Multiplier*>& mult
 void SuppressionRoomStrategy::InitNonCombatMultipliers(std::list<Multiplier*>& multipliers)
 {
     multipliers.push_back(new SuppressionRoomPassiveMultiplier(ai));
+}
+
+void SuppressionRoomStrategy::OnStrategyAdded(BotState state)
+{
+    if (ai->GetBot()->getClass() == CLASS_ROGUE)
+    {
+        ai->ChangeStrategy("-avoid aoe", BotState::BOT_STATE_COMBAT);
+        ai->ChangeStrategy("-avoid aoe", BotState::BOT_STATE_NON_COMBAT);
+        ai->ChangeStrategy("-avoid aoe", BotState::BOT_STATE_REACTION);
+        ai->ChangeStrategy("-avoid mobs", BotState::BOT_STATE_COMBAT);
+        ai->ChangeStrategy("-avoid mobs", BotState::BOT_STATE_NON_COMBAT);
+        ai->ChangeStrategy("-avoid mobs", BotState::BOT_STATE_REACTION);
+    }
 }

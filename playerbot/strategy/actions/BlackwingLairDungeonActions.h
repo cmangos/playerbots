@@ -65,9 +65,6 @@ namespace ai
 
         bool isUseful() override
         {
-            if (!ai->HasAura("stealth", bot))
-                return false;
-
             std::list<GuidPosition> gos = AI_VALUE(std::list<GuidPosition>, "go usable filter::go trapped filter::entry filter::{gos in sight,suppression devices}");
             return !gos.empty();
         }

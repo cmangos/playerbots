@@ -4,6 +4,7 @@
 #include "ChooseTravelTargetAction.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/strategy/values/TravelValues.h"
+#include "playerbot/strategy/values/SharedValueContext.h"
 #include "Guilds/GuildMgr.h"
 #include <iomanip>
 
@@ -150,6 +151,7 @@ void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* new
     RESET_AI_VALUE(ObjectGuid,"attack target");
     RESET_AI_VALUE(bool, "travel target active");
     context->ClearValues("no active travel destinations");
+    SET_AI_VALUE2(std::string, "manual string", "future travel detail", std::string());
 };
 
 //Tell the master what travel target we are moving towards.
@@ -176,6 +178,8 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* bot, Player* requester
 
     std::string futureTravelCondition = AI_VALUE2(std::string, "manual string", "future travel condition");
     bool isGuildMeeting = futureTravelCondition == "should travel named::guild meeting";
+
+    std::string futureTravelDetail = AI_VALUE2(std::string, "manual string", "future travel detail");
 
     std::string shortName = destination->GetShortName();    
 
@@ -254,6 +258,9 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* bot, Player* requester
 
     if (!isGuildMeeting)
         ai->TellPlayerNoFacing(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_TALK, false);
+
+    if (!futureTravelDetail.empty())
+        ai->TellDebug(requester, "Farming item: " + futureTravelDetail + " from " + destination->GetTitle(), "debug travel");
 
     std::string message = out.str().c_str();
 
@@ -633,6 +640,8 @@ bool RefreshTravelTargetAction::Execute(Event& event)
     target->IncRetry(false);
 
     RESET_AI_VALUE(bool, "travel target active");    
+    context->ClearValues("no active travel destinations");
+    SET_AI_VALUE2(std::string, "manual string", "future travel detail", std::string());
 
     ai->TellDebug(requester, "Refreshed travel target", "debug travel");
     ReportTravelTarget(bot, requester, target, target);
@@ -875,15 +884,16 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
             }
         );
     }
+
+    //TODO: Use values for guild orders
     else if (travelName == "guild order")
     {
         // Parse the bot's Officer's Note for guild orders.
         // Format:
-        // Farm: <item>
-        // Kill: <npc>
+        // Farm: <item or npc>
         // Explore: <zone>
         std::string orderTarget;
-        enum class GuildOrderType { None, Farm, Kill, Explore } orderType = GuildOrderType::None;
+        enum class GuildOrderType { None, Farm, Explore } orderType = GuildOrderType::None;
 
         if (bot->GetGuildId())
         {
@@ -914,7 +924,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                         };
 
                     if (!parseOrder("Farm:", GuildOrderType::Farm))
-                        if (!parseOrder("Kill:", GuildOrderType::Kill))
+                        if (!parseOrder("Kill:", GuildOrderType::Farm))
                             parseOrder("Explore:", GuildOrderType::Explore);
                 }
             }
@@ -926,39 +936,65 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
             return false;
         }
 
-        ai->TellDebug(ai->GetMaster(), "Guild order: " + std::string(orderType == GuildOrderType::Farm ? "Farm" : orderType == GuildOrderType::Kill ? "Kill" : "Explore") + " " + orderTarget, "debug travel");
+        ai->TellDebug(ai->GetMaster(), "Guild order: " + std::string(orderType == GuildOrderType::Farm ? "Farm" : "Explore") + " " + orderTarget, "debug travel");
 
         switch (orderType)
         {
         case GuildOrderType::Farm:
         {
-            *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, orderTarget]()
+            *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, orderTarget, partitions = travelPartitions]()
                 {
                     PartitionedTravelList list;
-                    for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, false, false, false, false, true))
+
+                    uint32 foundItemId = 0;
+                    uint32 substringMatchId = 0;
+                    for (uint32 itemId = 0; itemId < sItemStorage.GetMaxEntry(); ++itemId)
                     {
-                        std::list<uint8> chancesToGoFar = { 10,50,90 };
-                        WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
-                        if (!point) continue;
-                        list[0].push_back(TravelPoint(destination, point, point->distance(center)));
+                        ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(itemId);
+                        if (!proto)
+                            continue;
+
+                        if (orderTarget.size() == strlen(proto->Name1) && strstri(proto->Name1, orderTarget.c_str()))
+                        {
+                            foundItemId = itemId;
+                            break;
+                        }
+
+                        if (!substringMatchId && strstri(proto->Name1, orderTarget.c_str()))
+                            substringMatchId = itemId;
                     }
 
-                    return list;
-                }
-            );
-            break;
-        }
-        case GuildOrderType::Kill:
-        {
-            *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, orderTarget]()
-                {
-                    PartitionedTravelList list;
-                    for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, true, false, true, true, false))
+                    if (!foundItemId)
+                        foundItemId = substringMatchId;
+
+                    if (foundItemId)
                     {
-                        std::list<uint8> chancesToGoFar = { 10,50,90 };
-                        WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
-                        if (!point) continue;
-                        list[0].push_back(TravelPoint(destination, point, point->distance(center)));
+                        // Get all creatures and game objects that drop this item.
+                        std::list<int32> dropEntries = GAI_VALUE2(std::list<int32>, "item drop list", foundItemId);
+
+                        if (!dropEntries.empty())
+                        {
+                            std::vector<int32> entries(dropEntries.begin(), dropEntries.end());
+
+                            uint32 purposeFlags = (uint32)TravelDestinationPurpose::Grind
+                                | (uint32)TravelDestinationPurpose::GatherSkinning
+                                | (uint32)TravelDestinationPurpose::GatherMining
+                                | (uint32)TravelDestinationPurpose::GatherHerbalism;
+
+                            list = sTravelMgr.GetPartitions(center, partitions, travelInfo, purposeFlags, entries, false);
+                        }
+                    }
+
+                    // Fallback: search NPCs, mobs, bosses and gather nodes by name.
+                    if (list.empty())
+                    {
+                        for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, true, false, true, true, true))
+                        {
+                            std::list<uint8> chancesToGoFar = { 10,50,90 };
+                            WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
+                            if (!point) continue;
+                            list[0].push_back(TravelPoint(destination, point, point->distance(center)));
+                        }
                     }
 
                     return list;
@@ -987,6 +1023,8 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
         default:
             return false;
         }
+
+        SET_AI_VALUE2(std::string, "manual string", "future travel detail", orderTarget);
     }
     else if (travelName.find("trainer") == 0)
     {

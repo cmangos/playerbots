@@ -25,4 +25,8 @@ void GuildStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "leave large guild",
         NextAction::array(0, new NextAction("guild leave", 4.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("guild craft order", 10.0f), NULL)));
 }

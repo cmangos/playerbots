@@ -65,6 +65,7 @@
 #include "HireAction.h"
 #include "RangeAction.h"
 #include "SetCraftAction.h"
+#include "GuildCraftOrderAction.h"
 #include "WtsAction.h"
 #include "PassLeadershipToMasterAction.h"
 #include "CheatAction.h"
@@ -184,6 +185,7 @@ namespace ai
             creators["wts"] = [](PlayerbotAI* ai) { return new WtsAction(ai); };
             creators["hire"] = [](PlayerbotAI* ai) { return new HireAction(ai); };
             creators["craft"] = [](PlayerbotAI* ai) { return new SetCraftAction(ai); };
+            creators["guild craft order"] = [](PlayerbotAI* ai) { return new GuildCraftOrderAction(ai); };
             creators["flag"] = [](PlayerbotAI* ai) { return new FlagAction(ai); };
             creators["give leader"] = [](PlayerbotAI* ai) { return new GiveLeaderAction(ai); };
             creators["cheat"] = [](PlayerbotAI* ai) { return new CheatAction(ai); };

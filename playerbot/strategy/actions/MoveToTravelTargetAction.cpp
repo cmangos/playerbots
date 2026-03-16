@@ -160,7 +160,8 @@ bool MoveToTravelTargetAction::Execute(Event& event)
         if (target->IsMaxRetry(true))
         {
             ai->TellDebug(ai->GetMaster(), "The target is cooling down because we failed to move to it a few times in a row.", "debug travel");
-            target->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);            
+            target->SetStatus(TravelStatus::TRAVEL_STATUS_COOLDOWN);      
+            target->SetForced(false);
         }
     }
     else

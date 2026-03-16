@@ -54,7 +54,7 @@ bool ChooseTravelTargetAction::Execute(Event& event)
     if (futureTravelPurpose == "pvp")
         newTarget.SetForced(true);
 
-    if (AI_VALUE2(std::string, "manual string", "future travel condition") == "guild meeting")
+    if (AI_VALUE2(std::string, "manual string", "future travel condition") == "should travel named::guild meeting")
     {
         newTarget.SetForced(true);
         newTarget.SetRelevance(std::max<uint32>(targetRelevance, 199u));
@@ -170,7 +170,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* bot, Player* requester
     std::string futureTravelPurposeName = GetTravelPurposeName(futureTravelPurpose);
 
     std::string futureTravelCondition = AI_VALUE2(std::string, "manual string", "future travel condition");
-    bool isGuildMeeting = futureTravelCondition == "guild meeting";
+    bool isGuildMeeting = futureTravelCondition == "should travel named::guild meeting";
 
     std::string shortName = destination->GetShortName();    
 
@@ -923,7 +923,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
     SET_AI_VALUE2(std::string, "manual string", "future travel purpose", getQualifier());
-    SET_AI_VALUE2(std::string, "manual string", "future travel condition", travelName == "guild meeting" ? "guild meeting" : event.getSource());
+    SET_AI_VALUE2(std::string, "manual string", "future travel condition", travelName == "guild meeting" ? "should travel named::guild meeting" : event.getSource());
     SET_AI_VALUE2(int, "manual int", "future travel relevance", relevance * 100);
 
     return true;

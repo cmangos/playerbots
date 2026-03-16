@@ -59,6 +59,11 @@ bool ChooseTravelTargetAction::Execute(Event& event)
         newTarget.SetForced(true);
         newTarget.SetRelevance(std::max<uint32>(targetRelevance, 199u));
     }
+    else if (AI_VALUE2(std::string, "manual string", "future travel condition") == "should travel named::guild order")
+    {
+        newTarget.SetForced(true);
+        newTarget.SetRelevance(std::max<uint32>(targetRelevance, 198u));
+    }
     else
     {
         newTarget.SetRelevance(targetRelevance);
@@ -373,7 +378,7 @@ std::vector<std::string> split(const std::string& s, char delim);
 char* strstri(const char* haystack, const char* needle);
 
 //Find a destination based on (part of) it's name. Includes zones, ncps and mobs. Picks the closest one that matches.
-DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info, std::string name, bool zones, bool npcs, bool quests, bool mobs, bool bosses)
+DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info, std::string name, bool zones, bool npcs, bool quests, bool mobs, bool bosses, bool gather)
 {
     DestinationList dests;
 
@@ -421,6 +426,28 @@ DestinationList ChooseTravelTargetAction::FindDestination(PlayerTravelInfo info,
     if (bosses)
     {
         for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::Boss, {}, false, 1000000.0f))
+        {
+            if (strstri(d->GetTitle().c_str(), name.c_str()))
+                dests.push_back(d);
+        }
+    }
+
+    //Gather
+    if (gather)
+    {
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::GatherSkinning, {}, false, 1000000.0f))
+        {
+            if (strstri(d->GetTitle().c_str(), name.c_str()))
+                dests.push_back(d);
+        }
+
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::GatherMining, {}, false, 1000000.0f))
+        {
+            if (strstri(d->GetTitle().c_str(), name.c_str()))
+                dests.push_back(d);
+        }
+
+        for (auto& d : sTravelMgr.GetDestinations(info, (uint32)TravelDestinationPurpose::GatherHerbalism, {}, false, 1000000.0f))
         {
             if (strstri(d->GetTitle().c_str(), name.c_str()))
                 dests.push_back(d);
@@ -767,7 +794,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
         if (pvpLocationNumber < 20) //First 200 minutes
             WorldPvpLocation = "Tarren Mill";
-        else if(pvpLocationNumber >= 20 && pvpLocationNumber < 40) //Second 200 minutes
+        else if (pvpLocationNumber >= 20 && pvpLocationNumber < 40) //Second 200 minutes
             WorldPvpLocation = "The Barrens";
         else if (pvpLocationNumber >= 40 && pvpLocationNumber < 60) //Third 200 minutes
             WorldPvpLocation = "Silithus";
@@ -779,7 +806,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
         *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, WorldPvpLocation]()
             {
                 PartitionedTravelList list;
-                for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, WorldPvpLocation, true, false, false, false, false))
+                for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, WorldPvpLocation, true, false, false, false, false, false))
                 {
                     std::list<uint8> chancesToGoFar = { 10,50,90 }; //Closest map, grid, cell.
                     WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
@@ -833,7 +860,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
         *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, meetingLocation]()
             {
                 PartitionedTravelList list;
-                for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, meetingLocation, true, false, false, false, false))
+                for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, meetingLocation, true, false, false, false, false, false))
                 {
                     std::list<uint8> chancesToGoFar = { 10,50,90 };
                     WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
@@ -847,6 +874,119 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 return list;
             }
         );
+    }
+    else if (travelName == "guild order")
+    {
+        // Parse the bot's Officer's Note for guild orders.
+        // Format:
+        // Farm: <item>
+        // Kill: <npc>
+        // Explore: <zone>
+        std::string orderTarget;
+        enum class GuildOrderType { None, Farm, Kill, Explore } orderType = GuildOrderType::None;
+
+        if (bot->GetGuildId())
+        {
+            Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
+            if (guild)
+            {
+                MemberSlot* member = guild->GetMemberSlot(bot->GetObjectGuid());
+                if (member)
+                {
+                    std::string note = member->OFFnote;
+
+                    auto parseOrder = [&](const std::string& prefix, GuildOrderType type) -> bool {
+                        auto pos = note.find(prefix);
+                        if (pos == std::string::npos)
+                            return false;
+                        std::string body = note.substr(pos + prefix.size());
+                        // Trim leading whitespace
+                        body.erase(body.begin(), std::find_if(body.begin(), body.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+                        // Trim trailing whitespace
+                        body.erase(std::find_if(body.rbegin(), body.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), body.end());
+                        if (!body.empty())
+                        {
+                            orderTarget = body;
+                            orderType = type;
+                            return true;
+                        }
+                        return false;
+                        };
+
+                    if (!parseOrder("Farm:", GuildOrderType::Farm))
+                        if (!parseOrder("Kill:", GuildOrderType::Kill))
+                            parseOrder("Explore:", GuildOrderType::Explore);
+                }
+            }
+        }
+
+        if (orderType == GuildOrderType::None || orderTarget.empty())
+        {
+            ai->TellDebug(ai->GetMaster(), "No valid guild order found in officer's note", "debug travel");
+            return false;
+        }
+
+        ai->TellDebug(ai->GetMaster(), "Guild order: " + std::string(orderType == GuildOrderType::Farm ? "Farm" : orderType == GuildOrderType::Kill ? "Kill" : "Explore") + " " + orderTarget, "debug travel");
+
+        switch (orderType)
+        {
+        case GuildOrderType::Farm:
+        {
+            *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, orderTarget]()
+                {
+                    PartitionedTravelList list;
+                    for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, false, false, false, false, true))
+                    {
+                        std::list<uint8> chancesToGoFar = { 10,50,90 };
+                        WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
+                        if (!point) continue;
+                        list[0].push_back(TravelPoint(destination, point, point->distance(center)));
+                    }
+
+                    return list;
+                }
+            );
+            break;
+        }
+        case GuildOrderType::Kill:
+        {
+            *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, orderTarget]()
+                {
+                    PartitionedTravelList list;
+                    for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, true, false, true, true, false))
+                    {
+                        std::list<uint8> chancesToGoFar = { 10,50,90 };
+                        WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
+                        if (!point) continue;
+                        list[0].push_back(TravelPoint(destination, point, point->distance(center)));
+                    }
+
+                    return list;
+                }
+            );
+            break;
+        }
+        case GuildOrderType::Explore:
+        {
+            *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, orderTarget]()
+                {
+                    PartitionedTravelList list;
+                    for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, true, false, false, false, false, false))
+                    {
+                        std::list<uint8> chancesToGoFar = { 10,50,90 };
+                        WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
+                        if (!point) continue;
+                        list[0].push_back(TravelPoint(destination, point, point->distance(center)));
+                    }
+
+                    return list;
+                }
+            );
+            break;
+        }
+        default:
+            return false;
+        }
     }
     else if (travelName.find("trainer") == 0)
     {
@@ -890,8 +1030,8 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
     else
     {
         uint32 useFlags;
-        
-        if(travelName == "city")
+
+        if (travelName == "city")
             useFlags = NPCFlags::UNIT_NPC_FLAG_BANKER | NPCFlags::UNIT_NPC_FLAG_BATTLEMASTER | NPCFlags::UNIT_NPC_FLAG_AUCTIONEER;
         else if (travelName == "tabard")
             useFlags = NPCFlags::UNIT_NPC_FLAG_TABARDDESIGNER;
@@ -923,7 +1063,10 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
     SET_AI_VALUE2(std::string, "manual string", "future travel purpose", getQualifier());
-    SET_AI_VALUE2(std::string, "manual string", "future travel condition", travelName == "guild meeting" ? "should travel named::guild meeting" : event.getSource());
+    SET_AI_VALUE2(std::string, "manual string", "future travel condition",
+        travelName == "guild meeting" ? "should travel named::guild meeting" :
+        travelName == "guild order" ? "should travel named::guild order" :
+        event.getSource());
     SET_AI_VALUE2(int, "manual int", "future travel relevance", relevance * 100);
 
     return true;
@@ -945,6 +1088,8 @@ bool RequestNamedTravelTargetAction::isAllowed() const
         return true;
     }
     else if (name == "guild meeting")
+        return true;
+    else if (name == "guild order")
         return true;
     else if (name == "mount")
     {

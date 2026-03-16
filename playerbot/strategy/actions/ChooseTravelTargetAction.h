@@ -21,7 +21,7 @@ namespace ai
 
         bool SetBestTarget(Player* requester, TravelTarget* target, PartitionedTravelList& travelPartitions, bool onlyActive = true);
     public:
-        static DestinationList FindDestination(PlayerTravelInfo info, std::string name, bool zones = true, bool npcs = true, bool quests = true, bool mobs = true, bool bosses = true);
+        static DestinationList FindDestination(PlayerTravelInfo info, std::string name, bool zones = true, bool npcs = true, bool quests = true, bool mobs = true, bool bosses = true, bool gather = true);
     private:
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "choose travel target"; } //Must equal iternal name

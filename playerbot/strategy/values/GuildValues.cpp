@@ -99,6 +99,23 @@ GuildOrder GuildOrderValue::Calculate()
     else if (ParseOrderPrefix(note, "Farm:", body))
     {
         order.type = GuildOrderType::Farm;
+
+        // Parse optional amount for farm orders:
+        // Farm: <item> <amount>
+        auto lastSpace = body.rfind(' ');
+        if (lastSpace != std::string::npos)
+        {
+            std::string lastToken = body.substr(lastSpace + 1);
+            bool isNumber = !lastToken.empty() && std::all_of(lastToken.begin(), lastToken.end(), ::isdigit);
+
+            if (isNumber)
+            {
+                order.amount = std::stoul(lastToken);
+                order.target = TrimWhitespace(body.substr(0, lastSpace));
+                return order;
+            }
+        }
+
         order.target = body;
     }
     else if (ParseOrderPrefix(note, "Kill:", body))

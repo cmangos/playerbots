@@ -16,7 +16,7 @@ namespace ai
     {
         GuildOrderType type = GuildOrderType::None;
         std::string target;
-        uint32 amount = 0; // Used for Craft orders
+        uint32 amount = 0; // Used for Craft and Farm orders
 
         bool IsValid() const { return type != GuildOrderType::None && !target.empty(); }
         bool IsTravelOrder() const { return type == GuildOrderType::Farm || type == GuildOrderType::Kill || type == GuildOrderType::Explore; }
@@ -61,7 +61,26 @@ namespace ai
     public:
         HasGuildTravelOrderValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "has guild travel order", 10) {}
 
-        bool Calculate() override { return AI_VALUE(GuildOrder, "guild order").IsTravelOrder(); }
+        bool Calculate() override
+        {
+            GuildOrder order = AI_VALUE(GuildOrder, "guild order");
+            if (!order.IsTravelOrder())
+                return false;
+
+            // If a Farm order has an amount, check inventory count.
+            if (order.type == GuildOrderType::Farm && order.amount > 0)
+            {
+                uint32 itemId = GuildOrderValue::FindItemByName(order.target);
+                if (itemId)
+                {
+                    uint32 currentCount = ai->GetInventoryItemsCountWithId(itemId);
+                    if (currentCount >= order.amount)
+                        return false;
+                }
+            }
+
+            return true;
+        }
     };
 
     class HasGuildCraftOrderValue : public BoolCalculatedValue

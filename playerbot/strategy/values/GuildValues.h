@@ -91,6 +91,33 @@ namespace ai
         bool Calculate() override { return AI_VALUE(GuildOrder, "guild order").IsCraftOrder(); }
     };
 
+    // Represents an item a nearby guild member needs, paired with the receiver.
+    struct GuildShareTarget
+    {
+        Player* receiver = nullptr;
+        uint32 itemId = 0;
+
+        bool IsValid() const { return receiver && itemId; }
+    };
+
+    // Finds a nearby guild member who has "keep need" set for an item this bot has in inventory.
+    class GuildShareTargetValue : public CalculatedValue<GuildShareTarget>
+    {
+    public:
+        GuildShareTargetValue(PlayerbotAI* ai) : CalculatedValue<GuildShareTarget>(ai, "guild share target", 5) {}
+
+        GuildShareTarget Calculate() override;
+    };
+
+    // Returns true if there is a valid guild share target nearby.
+    class HasGuildShareTargetValue : public BoolCalculatedValue
+    {
+    public:
+        HasGuildShareTargetValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "has guild share target", 5) {}
+
+        bool Calculate() override { return AI_VALUE(GuildShareTarget, "guild share target").IsValid(); }
+    };
+
     class PetitionSignsValue : public SingleCalculatedValue<uint8>
     {
     public:

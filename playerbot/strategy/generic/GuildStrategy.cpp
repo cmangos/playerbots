@@ -1,4 +1,3 @@
-
 #include "playerbot/playerbot.h"
 #include "GuildStrategy.h"
 
@@ -29,4 +28,8 @@ void GuildStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
     triggers.push_back(new TriggerNode(
         "often",
         NextAction::array(0, new NextAction("guild craft order", 10.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "often",
+        NextAction::array(0, new NextAction("guild share item", 9.0f), NULL)));
 }

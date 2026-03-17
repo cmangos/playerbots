@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include "GuildValues.h"
 #include "playerbot/strategy/values/BudgetValues.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/TravelMgr.h"
 #include "playerbot/ServerFacade.h"
 #include "Guilds/GuildMgr.h"
@@ -130,6 +131,86 @@ GuildOrder GuildOrderValue::Calculate()
     }
 
     return order;
+}
+
+GuildShareTarget GuildShareTargetValue::Calculate()
+{
+    GuildShareTarget result;
+
+    if (!bot->GetGuildId())
+        return result;
+
+    Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
+    if (!guild)
+        return result;
+
+    // Collect items this bot has in bags (potential items to share)
+    std::vector<Item*> botItems = ai->GetInventoryItems();
+    if (botItems.empty())
+        return result;
+
+    // Build a set of item IDs this bot has, excluding items the bot wants to keep
+    std::map<uint32, Item*> sharableItems;
+    for (Item* item : botItems)
+    {
+        uint32 itemId = item->GetProto()->ItemId;
+
+        // Skip items we already checked
+        if (sharableItems.count(itemId))
+            continue;
+
+        // Don't give away items we have set to keep/need/equip/greed ourselves
+        ForceItemUsage botForce = ai->GetAiObjectContext()->GetValue<ForceItemUsage>("force item usage", std::to_string(itemId))->Get();
+        if (botForce != ForceItemUsage::FORCE_USAGE_NONE)
+            continue;
+
+        sharableItems[itemId] = item;
+    }
+
+    if (sharableItems.empty())
+        return result;
+
+    // Check nearby guild members
+    std::list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("nearest friendly players")->Get();
+
+    for (auto& guid : nearGuids)
+    {
+        Player* player = sObjectMgr.GetPlayer(guid);
+        if (!player || player == bot)
+            continue;
+
+        // Must be in the same guild
+        if (player->GetGuildId() != bot->GetGuildId())
+            continue;
+
+        // Must be a bot with AI
+        PlayerbotAI* targetAi = player->GetPlayerbotAI();
+        if (!targetAi)
+            continue;
+
+        // Must be nearby enough to trade
+        if (sServerFacade.GetDistance2d(bot, player) > INTERACTION_DISTANCE)
+            continue;
+
+        // For each sharable item, check if the target has "keep need" set for it
+        for (auto& [itemId, item] : sharableItems)
+        {
+            // Check if the target has "need" set for this item
+            ForceItemUsage targetForce = targetAi->GetAiObjectContext()->GetValue<ForceItemUsage>("force item usage", std::to_string(itemId))->Get();
+            if (targetForce != ForceItemUsage::FORCE_USAGE_NEED)
+                continue;
+
+            // Check if the target doesn't already have the item
+            if (targetAi->GetInventoryItemsCountWithId(itemId) > 0)
+                continue;
+
+            result.receiver = player;
+            result.itemId = itemId;
+            return result;
+        }
+    }
+
+    return result;
 }
 
 uint8 PetitionSignsValue::Calculate()

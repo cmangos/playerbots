@@ -591,21 +591,17 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
         shouldEquip = false;
 
     Item* oldItem = bot->GetItemByPos(dest);
-    Item* oldMH = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-    Item* oldOH = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
     uint8 slot = dest & 255;
 
-    bool mhEmpty = !oldMH;
-    bool ohEmpty = !oldOH;
-    bool bothHandsEmpty = mhEmpty && ohEmpty;
     ai->TellDebug(ai->GetMaster(), "Checking equip: " + chat->formatItem(itemProto) + " to " + chat->formatSlot(slot) + " vs " + (oldItem ? chat->formatItem(oldItem->GetProto()) : "empty"), "debug equip");
 
     if (itemProto->Class == ITEM_CLASS_WEAPON &&
         !sRandomItemMgr.ShouldEquipWeaponForSpec(bot->getClass(), specId, itemProto))
     {
-        if (!bothHandsEmpty)
+        if (oldItem)
             return ItemUsage::ITEM_USAGE_NONE;
     }
+
 
     //No item equiped
     if (!oldItem)

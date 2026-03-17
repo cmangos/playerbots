@@ -914,18 +914,37 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
                         if (!dropEntries.empty())
                         {
-                            std::vector<int32> entries(dropEntries.begin(), dropEntries.end());
+                            // Separate gather nodes from mob drops.
+                            std::vector<int32> gatherEntries, mobEntries;
+                            for (int32 entry : dropEntries)
+                            {
+                                if (entry < 0)
+                                    gatherEntries.push_back(entry);
+                                else
+                                    mobEntries.push_back(entry);
+                            }
 
-                            uint32 purposeFlags = (uint32)TravelDestinationPurpose::Grind
-                                | (uint32)TravelDestinationPurpose::GatherSkinning
-                                | (uint32)TravelDestinationPurpose::GatherMining
-                                | (uint32)TravelDestinationPurpose::GatherHerbalism;
+                            // Prioritize gather nodes over mob drops.
+                            if (!gatherEntries.empty())
+                            {
+                                uint32 gatherPurpose = (uint32)TravelDestinationPurpose::GatherMining
+                                    | (uint32)TravelDestinationPurpose::GatherHerbalism
+                                    | (uint32)TravelDestinationPurpose::GatherSkinning;
 
-                            list = sTravelMgr.GetPartitions(center, partitions, travelInfo, purposeFlags, entries, false);
+                                list = sTravelMgr.GetPartitions(center, partitions, travelInfo, gatherPurpose, gatherEntries, false);
+                            }
+
+                            // Fall back to mob drops if no gather nodes were found.
+                            if (list.empty() && !mobEntries.empty())
+                            {
+                                uint32 mobPurpose = (uint32)TravelDestinationPurpose::Grind;
+
+                                list = sTravelMgr.GetPartitions(center, partitions, travelInfo, mobPurpose, mobEntries, false);
+                            }
                         }
                     }
 
-                    // Fallback: search NPCs, mobs, bosses and gather nodes by name.
+                    // Fall back to mobs, bosses and gather nodes by name.
                     if (list.empty())
                     {
                         for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, true, false, true, true, true))

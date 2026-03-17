@@ -2,88 +2,9 @@
 #include "GuildCraftOrderAction.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/CraftValues.h"
-#include "Guilds/GuildMgr.h"
+#include "playerbot/strategy/values/GuildValues.h"
 
 using namespace ai;
-
-char* strstri(const char* haystack, const char* needle);
-
-GuildCraftOrderAction::CraftOrder GuildCraftOrderAction::ParseCraftOrder(Player* bot)
-{
-    CraftOrder order;
-
-    if (!bot->GetGuildId())
-        return order;
-
-    Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-    if (!guild)
-        return order;
-
-    MemberSlot* member = guild->GetMemberSlot(bot->GetObjectGuid());
-    if (!member)
-        return order;
-
-    std::string note = member->OFFnote;
-    if (note.empty())
-        return order;
-
-    auto pos = note.find("Craft:");
-    if (pos == std::string::npos)
-        return order;
-
-    std::string body = note.substr(pos + 6);
-    // Trim leading whitespace
-    body.erase(body.begin(), std::find_if(body.begin(), body.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-    // Trim trailing whitespace
-    body.erase(std::find_if(body.rbegin(), body.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), body.end());
-
-    if (body.empty())
-        return order;
-
-    // Parse officer's note. Format:
-    // Craft: <item> <amount>
-    // If amount is missing, default to 1.
-    auto lastSpace = body.rfind(' ');
-    if (lastSpace != std::string::npos)
-    {
-        std::string lastToken = body.substr(lastSpace + 1);
-        bool isNumber = !lastToken.empty() && std::all_of(lastToken.begin(), lastToken.end(), ::isdigit);
-
-        if (isNumber)
-        {
-            order.amount = std::stoul(lastToken);
-            order.itemName = body.substr(0, lastSpace);
-
-            order.itemName.erase(std::find_if(order.itemName.rbegin(), order.itemName.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), order.itemName.end());
-            return order;
-        }
-    }
-
-    order.itemName = body;
-    order.amount = 1;
-
-    return order;
-}
-
-uint32 GuildCraftOrderAction::FindItemByName(const std::string& name)
-{
-    uint32 substringMatch = 0;
-
-    for (uint32 itemId = 0; itemId < sItemStorage.GetMaxEntry(); ++itemId)
-    {
-        ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(itemId);
-        if (!proto)
-            continue;
-
-        if (name.size() == strlen(proto->Name1) && strstri(proto->Name1, name.c_str()))
-            return itemId;
-
-        if (!substringMatch && strstri(proto->Name1, name.c_str()))
-            substringMatch = itemId;
-    }
-
-    return substringMatch;
-}
 
 uint32 GuildCraftOrderAction::FindCraftSpell(uint32 itemId)
 {
@@ -108,14 +29,14 @@ uint32 GuildCraftOrderAction::FindCraftSpell(uint32 itemId)
 
 bool GuildCraftOrderAction::Execute(Event& event)
 {
-    CraftOrder order = ParseCraftOrder(bot);
-    if (order.itemName.empty())
+    GuildOrder order = AI_VALUE(GuildOrder, "guild order");
+    if (!order.IsCraftOrder())
         return false;
 
-    uint32 itemId = FindItemByName(order.itemName);
+    uint32 itemId = GuildOrderValue::FindItemByName(order.target);
     if (!itemId)
     {
-        ai->TellDebug(ai->GetMaster(), "Guild craft order: item not found: " + order.itemName, "debug travel");
+        ai->TellDebug(ai->GetMaster(), "Guild craft order: item not found: " + order.target, "debug travel");
         return false;
     }
 
@@ -129,13 +50,13 @@ bool GuildCraftOrderAction::Execute(Event& event)
     uint32 craftSpellId = FindCraftSpell(itemId);
     if (!craftSpellId)
     {
-        ai->TellDebug(ai->GetMaster(), "Guild craft order: I don't know how to craft: " + order.itemName, "debug travel");
+        ai->TellDebug(ai->GetMaster(), "Guild craft order: I don't know how to craft: " + order.target, "debug travel");
         return false;
     }
 
     if (!ai->HasCheat(BotCheatMask::item) && !AI_VALUE2(bool, "can craft spell", craftSpellId))
     {
-        ai->TellDebug(ai->GetMaster(), "Guild craft order: missing reagents for: " + order.itemName, "debug travel");
+        ai->TellDebug(ai->GetMaster(), "Guild craft order: missing reagents for: " + order.target, "debug travel");
         return false;
     }
 
@@ -162,7 +83,7 @@ bool GuildCraftOrderAction::Execute(Event& event)
     ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *bot);
 
     ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-    ai->TellDebug(ai->GetMaster(), "Guild craft order: crafting " + std::to_string(remaining) + "x " + std::string(proto ? proto->Name1 : order.itemName), "debug travel");
+    ai->TellDebug(ai->GetMaster(), "Guild craft order: crafting " + std::to_string(remaining) + "x " + std::string(proto ? proto->Name1 : order.target), "debug travel");
 
     return true;
 }
@@ -178,11 +99,11 @@ bool GuildCraftOrderAction::isUseful()
     if (bot->IsMounted())
         return false;
 
-    CraftOrder order = ParseCraftOrder(bot);
-    if (order.itemName.empty())
+    GuildOrder order = AI_VALUE(GuildOrder, "guild order");
+    if (!order.IsCraftOrder())
         return false;
 
-    uint32 itemId = FindItemByName(order.itemName);
+    uint32 itemId = GuildOrderValue::FindItemByName(order.target);
     if (!itemId)
         return false;
 

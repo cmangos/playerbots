@@ -5,6 +5,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/strategy/values/TravelValues.h"
 #include "playerbot/strategy/values/SharedValueContext.h"
+#include "playerbot/strategy/values/GuildValues.h"
 #include "Guilds/GuildMgr.h"
 #include <iomanip>
 
@@ -884,88 +885,27 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
             }
         );
     }
-
-    //TODO: Use values for guild orders
     else if (travelName == "guild order")
     {
-        // Parse the bot's Officer's Note for guild orders.
-        // Format:
-        // Farm: <item or npc>
-        // Explore: <zone>
-        std::string orderTarget;
-        enum class GuildOrderType { None, Farm, Explore } orderType = GuildOrderType::None;
+        GuildOrder order = AI_VALUE(GuildOrder, "guild order");
 
-        if (bot->GetGuildId())
+        if (!order.IsTravelOrder())
         {
-            Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-            if (guild)
-            {
-                MemberSlot* member = guild->GetMemberSlot(bot->GetObjectGuid());
-                if (member)
-                {
-                    std::string note = member->OFFnote;
-
-                    auto parseOrder = [&](const std::string& prefix, GuildOrderType type) -> bool {
-                        auto pos = note.find(prefix);
-                        if (pos == std::string::npos)
-                            return false;
-                        std::string body = note.substr(pos + prefix.size());
-                        // Trim leading whitespace
-                        body.erase(body.begin(), std::find_if(body.begin(), body.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-                        // Trim trailing whitespace
-                        body.erase(std::find_if(body.rbegin(), body.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), body.end());
-                        if (!body.empty())
-                        {
-                            orderTarget = body;
-                            orderType = type;
-                            return true;
-                        }
-                        return false;
-                        };
-
-                    if (!parseOrder("Farm:", GuildOrderType::Farm))
-                        if (!parseOrder("Kill:", GuildOrderType::Farm))
-                            parseOrder("Explore:", GuildOrderType::Explore);
-                }
-            }
-        }
-
-        if (orderType == GuildOrderType::None || orderTarget.empty())
-        {
-            ai->TellDebug(ai->GetMaster(), "No valid guild order found in officer's note", "debug travel");
+            ai->TellDebug(ai->GetMaster(), "No valid guild travel order found", "debug travel");
             return false;
         }
 
-        ai->TellDebug(ai->GetMaster(), "Guild order: " + std::string(orderType == GuildOrderType::Farm ? "Farm" : "Explore") + " " + orderTarget, "debug travel");
+        std::string orderTarget = order.target;
 
-        switch (orderType)
-        {
-        case GuildOrderType::Farm:
+        ai->TellDebug(ai->GetMaster(), "Guild order: " + order.GetTypeName() + " " + orderTarget, "debug travel");
+
+        if (order.type == GuildOrderType::Farm || order.type == GuildOrderType::Kill)
         {
             *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, orderTarget, partitions = travelPartitions]()
                 {
                     PartitionedTravelList list;
 
-                    uint32 foundItemId = 0;
-                    uint32 substringMatchId = 0;
-                    for (uint32 itemId = 0; itemId < sItemStorage.GetMaxEntry(); ++itemId)
-                    {
-                        ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(itemId);
-                        if (!proto)
-                            continue;
-
-                        if (orderTarget.size() == strlen(proto->Name1) && strstri(proto->Name1, orderTarget.c_str()))
-                        {
-                            foundItemId = itemId;
-                            break;
-                        }
-
-                        if (!substringMatchId && strstri(proto->Name1, orderTarget.c_str()))
-                            substringMatchId = itemId;
-                    }
-
-                    if (!foundItemId)
-                        foundItemId = substringMatchId;
+                    uint32 foundItemId = GuildOrderValue::FindItemByName(orderTarget);
 
                     if (foundItemId)
                     {
@@ -1000,9 +940,8 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                     return list;
                 }
             );
-            break;
         }
-        case GuildOrderType::Explore:
+        else if (order.type == GuildOrderType::Explore)
         {
             *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, orderTarget]()
                 {
@@ -1018,9 +957,9 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                     return list;
                 }
             );
-            break;
         }
-        default:
+        else
+        {
             return false;
         }
 

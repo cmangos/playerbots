@@ -1,9 +1,9 @@
-
 #include "playerbot/playerbot.h"
 #include "TravelValues.h"
 #include "QuestValues.h"
 #include "SharedValueContext.h"
 #include "BudgetValues.h"
+#include "GuildValues.h"
 #include "Guilds/GuildMgr.h"
 
 using namespace ai;
@@ -423,32 +423,7 @@ bool ShouldTravelNamedValue::Calculate()
     }
     else if (name == "guild order")
     {
-        if (!bot->GetGuildId())
-            return false;
-
-        Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
-        if (!guild)
-            return false;
-
-        MemberSlot* member = guild->GetMemberSlot(bot->GetObjectGuid());
-        if (!member)
-            return false;
-
-        std::string note = member->OFFnote;
-        if (note.empty())
-            return false;
-
-        // Check if the officer's note contains a valid guild order.
-        // Format:
-        // Farm: <item>
-        // Kill: <npc>
-        // Explore: <zone>
-        if (note.find("Farm:") != std::string::npos ||
-            note.find("Kill:") != std::string::npos ||
-            note.find("Explore:") != std::string::npos)
-            return true;
-
-        return false;
+        return AI_VALUE(GuildOrder, "guild order").IsTravelOrder();
     }
     else if (name == "mount")
     {

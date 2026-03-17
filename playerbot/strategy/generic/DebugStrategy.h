@@ -239,4 +239,23 @@ namespace ai
 #endif
     };
 
+    class DebugEquipStrategy : public Strategy
+    {
+    public:
+        DebugEquipStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug equip"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName()
+        {
+            return "debug equip";
+        } //Must equal iternal name
+        virtual std::string GetHelpDescription()
+        {
+            return "This strategy will make the bot give chat feedback on equip actions.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {"debug"}; }
+#endif
+    };
+
 }

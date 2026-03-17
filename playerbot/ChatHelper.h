@@ -36,6 +36,7 @@ namespace ai
         static std::string formatItem(ItemPrototype const * proto, int count = 0, int total = 0);
         static std::string formatItem(Item* item, int count = 0, int total = 0);
         static std::string formatQItem(uint32 itemId);
+        static std::string formatSlot(uint8 slotId);
         static std::string formatSkill(uint32 skillId, Player* player = nullptr);
         static std::string formatReaction(ReputationRank rank, Player* player = nullptr);
         static std::string formatFaction(uint32 factionId, Player* player = nullptr);

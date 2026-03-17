@@ -600,6 +600,15 @@ std::string ChatHelper::formatQItem(uint32 itemId)
     return out.str();
 }
 
+std::string ChatHelper::formatSlot(uint8 slotId)
+{
+    for (auto& [name, id] : slots)
+        if (id == slotId)
+            return name;
+
+    return "unknown";
+}
+
 std::string ChatHelper::formatSkill(uint32 skillId, Player* player)
 {
     std::string name = "unknown skill";

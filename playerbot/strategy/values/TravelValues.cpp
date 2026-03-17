@@ -423,7 +423,7 @@ bool ShouldTravelNamedValue::Calculate()
     }
     else if (name == "guild order")
     {
-        return AI_VALUE(GuildOrder, "guild order").IsTravelOrder();
+        return AI_VALUE(bool, "has guild travel order");
     }
     else if (name == "mount")
     {

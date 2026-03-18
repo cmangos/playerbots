@@ -5855,6 +5855,30 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
     if (sPlayerbotAIConfig.IsFreeAltBot(bot) || HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
         return ActivePiorityType::IS_ALWAYS_ACTIVE;
 
+    // TODO: Replace with a proper config later.
+    // For now this is just a proof of concept to test how efficient bots are farming items for guild
+    if (bot->IsInWorld() && bot->GetGuildId())
+    {
+        if (Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId()))
+        {
+            std::string ginfo = guild->GetGINFO();
+            if (ginfo.find("Share:") != std::string::npos)
+                return ActivePiorityType::IS_ALWAYS_ACTIVE;
+
+            if (MemberSlot* member = guild->GetMemberSlot(bot->GetObjectGuid()))
+            {
+                const std::string& note = member->OFFnote;
+                if (note.find("Craft:") != std::string::npos ||
+                    note.find("Farm:") != std::string::npos ||
+                    note.find("Kill:") != std::string::npos ||
+                    note.find("Explore:") != std::string::npos)
+                {
+                    return ActivePiorityType::IS_ALWAYS_ACTIVE;
+                }
+            }
+        }
+    }
+
     if (bot->InBattleGroundQueue())
         return ActivePiorityType::IN_BG_QUEUE;
 

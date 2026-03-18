@@ -393,6 +393,9 @@ namespace ai
             creators["has guild craft order"] = [](PlayerbotAI* ai) { return new HasGuildCraftOrderValue(ai); };
             creators["guild share target"] = [](PlayerbotAI* ai) { return new GuildShareTargetValue(ai); };
             creators["has guild share target"] = [](PlayerbotAI* ai) { return new HasGuildShareTargetValue(ai); };
+            creators["guild share list"] = [](PlayerbotAI* ai) { return new GuildShareListValue(ai); };
+            creators["guild share craft order"] = [](PlayerbotAI* ai) { return new GuildShareCraftOrderValue(ai); };
+            creators["guild share farm order"] = [](PlayerbotAI* ai) { return new GuildShareFarmOrderValue(ai); };
 
             creators["experience"] = [](PlayerbotAI* ai) { return new ExperienceValue(ai); };
             creators["honor"] = [](PlayerbotAI* ai) { return new HonorValue(ai); };

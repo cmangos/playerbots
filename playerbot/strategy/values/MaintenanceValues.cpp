@@ -1,6 +1,7 @@
 
 #include "MaintenanceValues.h"
 #include "Mails/Mail.h"
+#include "playerbot/strategy/values/GuildValues.h"
 
 using namespace ai;
 
@@ -78,17 +79,26 @@ bool CanGetMailValue::Calculate() {
 bool ShouldGetMailValue::Calculate() {
     time_t cur_time = time(0);
 
+    bool hasGuildShareList = !AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list").empty();
+
     for (PlayerMails::iterator itr = bot->GetMailBegin(); itr != bot->GetMailEnd(); ++itr)
     {
         if ((*itr)->state == MAIL_STATE_DELETED || cur_time < (*itr)->deliver_time)
             continue;
 
-        int32 waitingInBoxTime = (*itr)->deliver_time - cur_time;
+        int32 waitingInBoxTime = cur_time - (*itr)->deliver_time;
 
         if (waitingInBoxTime < HOUR) //Let mail sit in the inbox for atleast 1 hour
             return false;
 
         if ((*itr)->has_items && waitingInBoxTime > HOUR * 4) //Items are allowed to sit in the mail for max 4 hours.
+        {
+            return true;
+        }
+
+        if (hasGuildShareList && (*itr)->has_items
+            && (*itr)->stationery == MAIL_STATIONERY_AUCTION
+            && waitingInBoxTime > HOUR)
         {
             return true;
         }

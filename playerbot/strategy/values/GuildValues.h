@@ -91,16 +91,50 @@ namespace ai
         bool Calculate() override { return AI_VALUE(GuildOrder, "guild order").IsCraftOrder(); }
     };
 
+    enum class GuildShareFilter : uint8
+    {
+        FILTER_CLASS = 0,
+        FILTER_ALL,
+        FILTER_MELEE,
+        FILTER_RANGED,
+        FILTER_TANK,
+        FILTER_DPS,
+        FILTER_HEAL,
+    };
+
+    struct GuildShareItemEntry
+    {
+        GuildShareFilter filter = GuildShareFilter::FILTER_CLASS;
+        uint8 playerClass = 0;
+        uint32 itemId = 0;
+        uint32 amount = 0;
+
+        bool MatchesPlayer(Player* player) const;
+    };
+
+    uint32 CountGuildFinishedItemDeficit(Player* bot, uint32 itemId, const std::vector<GuildShareItemEntry>& shareList);
+
+    class GuildShareListValue : public CalculatedValue<std::vector<GuildShareItemEntry>>
+    {
+    public:
+        GuildShareListValue(PlayerbotAI* ai) : CalculatedValue<std::vector<GuildShareItemEntry>>(ai, "guild share list", 30) {}
+
+        std::vector<GuildShareItemEntry> Calculate() override;
+
+        static uint8 ParseClassName(const std::string& name);
+        static GuildShareFilter ParseRoleFilter(const std::string& name);
+    };
+
     // Represents an item a nearby guild member needs, paired with the receiver.
     struct GuildShareTarget
     {
         Player* receiver = nullptr;
         uint32 itemId = 0;
+        uint32 amount = 0;
 
         bool IsValid() const { return receiver && itemId; }
     };
 
-    // Finds a nearby guild member who has "keep need" set for an item this bot has in inventory.
     class GuildShareTargetValue : public CalculatedValue<GuildShareTarget>
     {
     public:
@@ -118,13 +152,29 @@ namespace ai
         bool Calculate() override { return AI_VALUE(GuildShareTarget, "guild share target").IsValid(); }
     };
 
+    class GuildShareCraftOrderValue : public CalculatedValue<GuildOrder>
+    {
+    public:
+        GuildShareCraftOrderValue(PlayerbotAI* ai) : CalculatedValue<GuildOrder>(ai, "guild share craft order", 10) {}
+
+        GuildOrder Calculate() override;
+    };
+
+    class GuildShareFarmOrderValue : public CalculatedValue<GuildOrder>
+    {
+    public:
+        GuildShareFarmOrderValue(PlayerbotAI* ai) : CalculatedValue<GuildOrder>(ai, "guild share farm order", 30) {}
+
+        GuildOrder Calculate() override;
+    };
+
     class PetitionSignsValue : public SingleCalculatedValue<uint8>
     {
     public:
         PetitionSignsValue(PlayerbotAI* ai) : SingleCalculatedValue<uint8>(ai, "petition signs") {}
 
         uint8 Calculate() override;
-    }; 
+    };
 
     class CanHandInPetitionValue : public CalculatedValue<bool>
     {

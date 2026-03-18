@@ -3,6 +3,7 @@
 #include "GuildValues.h"
 #include "playerbot/strategy/values/BudgetValues.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/strategy/values/SharedValueContext.h"
 #include "playerbot/TravelMgr.h"
 #include "playerbot/ServerFacade.h"
 #include "Guilds/GuildMgr.h"
@@ -53,6 +54,57 @@ uint32 GuildOrderValue::FindItemByName(const std::string& name)
     return substringMatch;
 }
 
+uint32 ai::CountGuildFinishedItemDeficit(Player* bot, uint32 itemId, const std::vector<GuildShareItemEntry>& shareList)
+{
+    if (!bot->GetGuildId())
+        return 0;
+
+    Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
+    if (!guild)
+        return 0;
+
+    struct CountOnlineMembers
+    {
+        uint32 itemId;
+        const std::vector<GuildShareItemEntry>& shareList;
+        uint32 deficit;
+
+        CountOnlineMembers(uint32 id, const std::vector<GuildShareItemEntry>& list)
+            : itemId(id), shareList(list), deficit(0) {}
+
+        void operator()(Player* player)
+        {
+            if (!player)
+                return;
+
+            for (const auto& entry : shareList)
+            {
+                if (entry.itemId != itemId)
+                    continue;
+
+                if (!entry.MatchesPlayer(player))
+                    continue;
+
+                uint32 has = 0;
+                if (PlayerbotAI* memberAi = player->GetPlayerbotAI())
+                    has = memberAi->GetInventoryItemsCountWithId(itemId);
+                else
+                    has = player->GetItemCount(itemId, true);
+
+                if (has < entry.amount)
+                    deficit += entry.amount - has;
+
+                break;
+            }
+        }
+    };
+
+    CountOnlineMembers worker(itemId, shareList);
+    guild->BroadcastWorker(worker);
+
+    return worker.deficit;
+}
+
 GuildOrder GuildOrderValue::Calculate()
 {
     GuildOrder order;
@@ -70,7 +122,13 @@ GuildOrder GuildOrderValue::Calculate()
 
     std::string note = member->OFFnote;
     if (note.empty())
-        return order;
+    {
+        GuildOrder craftOrder = AI_VALUE(GuildOrder, "guild share craft order");
+        if (craftOrder.IsValid())
+            return craftOrder;
+
+        return AI_VALUE(GuildOrder, "guild share farm order");
+    }
 
     std::string body;
 
@@ -130,6 +188,452 @@ GuildOrder GuildOrderValue::Calculate()
         order.target = body;
     }
 
+    if (!order.IsValid())
+    {
+        GuildOrder craftOrder = AI_VALUE(GuildOrder, "guild share craft order");
+        if (craftOrder.IsValid())
+            return craftOrder;
+
+        return AI_VALUE(GuildOrder, "guild share farm order");
+    }
+
+    return order;
+}
+
+static std::string TrimWS(const std::string& str)
+{
+    std::string result = str;
+    result.erase(result.begin(), std::find_if(result.begin(), result.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    result.erase(std::find_if(result.rbegin(), result.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), result.end());
+    return result;
+}
+
+uint8 GuildShareListValue::ParseClassName(const std::string& name)
+{
+    std::string lower = name;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    if (lower == "warrior")  return CLASS_WARRIOR;
+    if (lower == "paladin")  return CLASS_PALADIN;
+    if (lower == "hunter")   return CLASS_HUNTER;
+    if (lower == "rogue")    return CLASS_ROGUE;
+    if (lower == "priest")   return CLASS_PRIEST;
+    if (lower == "shaman")   return CLASS_SHAMAN;
+    if (lower == "mage")     return CLASS_MAGE;
+    if (lower == "warlock")  return CLASS_WARLOCK;
+    if (lower == "druid")    return CLASS_DRUID;
+#ifdef CLASS_DEATH_KNIGHT
+    if (lower == "deathknight" || lower == "death knight" || lower == "dk") return CLASS_DEATH_KNIGHT;
+#endif
+    return 0;
+}
+
+GuildShareFilter GuildShareListValue::ParseRoleFilter(const std::string& name)
+{
+    std::string lower = name;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    if (lower == "all")    return GuildShareFilter::FILTER_ALL;
+    if (lower == "melee")  return GuildShareFilter::FILTER_MELEE;
+    if (lower == "ranged") return GuildShareFilter::FILTER_RANGED;
+    if (lower == "tank")   return GuildShareFilter::FILTER_TANK;
+    if (lower == "dps")    return GuildShareFilter::FILTER_DPS;
+    if (lower == "heal")   return GuildShareFilter::FILTER_HEAL;
+
+    return GuildShareFilter::FILTER_CLASS;
+}
+
+bool GuildShareItemEntry::MatchesPlayer(Player* player) const
+{
+    if (!player)
+        return false;
+
+    switch (filter)
+    {
+    case GuildShareFilter::FILTER_CLASS:
+        return player->getClass() == playerClass;
+
+    case GuildShareFilter::FILTER_ALL:
+        return true;
+
+    case GuildShareFilter::FILTER_MELEE:
+    {
+        PlayerbotAI* ai = player->GetPlayerbotAI();
+        return ai && !ai->IsRanged(player, false);
+    }
+
+    case GuildShareFilter::FILTER_RANGED:
+    {
+        PlayerbotAI* ai = player->GetPlayerbotAI();
+        return ai && ai->IsRanged(player, false);
+    }
+
+    case GuildShareFilter::FILTER_TANK:
+    {
+        PlayerbotAI* ai = player->GetPlayerbotAI();
+        return ai && ai->IsTank(player, false);
+    }
+
+    case GuildShareFilter::FILTER_DPS:
+    {
+        PlayerbotAI* ai = player->GetPlayerbotAI();
+        return ai && !ai->IsTank(player, false) && !ai->IsHeal(player, false);
+    }
+
+    case GuildShareFilter::FILTER_HEAL:
+    {
+        PlayerbotAI* ai = player->GetPlayerbotAI();
+        return ai && ai->IsHeal(player, false);
+    }
+
+    default:
+        return false;
+    }
+}
+
+// Parse the guild info tab "Share: <class/role> <item1> <amount>, <item2> <amount>, ..."
+std::vector<GuildShareItemEntry> GuildShareListValue::Calculate()
+{
+    std::vector<GuildShareItemEntry> result;
+
+    if (!bot->GetGuildId())
+        return result;
+
+    Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
+    if (!guild)
+        return result;
+
+    std::string ginfo = guild->GetGINFO();
+    if (ginfo.empty())
+        return result;
+
+    auto sharePos = ginfo.find("Share:");
+    if (sharePos == std::string::npos)
+        return result;
+
+    std::string shareSection = ginfo.substr(sharePos + 6);
+
+    std::istringstream stream(shareSection);
+    std::string line;
+
+    while (std::getline(stream, line))
+    {
+        line = TrimWS(line);
+        if (line.empty())
+            continue;
+
+        auto firstSpace = line.find(' ');
+        if (firstSpace == std::string::npos)
+            continue;
+
+        std::string filterName = TrimWS(line.substr(0, firstSpace));
+
+        if (!filterName.empty() && filterName.back() == ':')
+            filterName.pop_back();
+
+        // Try role filter first (All, Melee, Ranged, Tank, DPS, Heal)
+        GuildShareFilter roleFilter = ParseRoleFilter(filterName);
+        uint8 playerClass = 0;
+
+        if (roleFilter == GuildShareFilter::FILTER_CLASS)
+        {
+            playerClass = ParseClassName(filterName);
+            if (!playerClass)
+                break;
+        }
+
+        std::string itemsSection = TrimWS(line.substr(firstSpace + 1));
+        if (itemsSection.empty())
+            continue;
+
+        std::istringstream itemStream(itemsSection);
+        std::string itemEntry;
+
+        while (std::getline(itemStream, itemEntry, ','))
+        {
+            itemEntry = TrimWS(itemEntry);
+            if (itemEntry.empty())
+                continue;
+
+            auto lastSpace = itemEntry.rfind(' ');
+            if (lastSpace == std::string::npos)
+                continue;
+
+            std::string amountStr = TrimWS(itemEntry.substr(lastSpace + 1));
+            bool isNumber = !amountStr.empty() && std::all_of(amountStr.begin(), amountStr.end(), ::isdigit);
+            if (!isNumber)
+                continue;
+
+            uint32 amount = std::stoul(amountStr);
+            std::string itemName = TrimWS(itemEntry.substr(0, lastSpace));
+            if (itemName.empty() || !amount)
+                continue;
+
+            uint32 itemId = GuildOrderValue::FindItemByName(itemName);
+            if (!itemId)
+            {
+                sLog.outDetail("GuildShareList: item not found: '%s'", itemName.c_str());
+                continue;
+            }
+
+            GuildShareItemEntry entry;
+            entry.filter = roleFilter;
+            entry.playerClass = playerClass;
+            entry.itemId = itemId;
+            entry.amount = amount;
+            result.push_back(entry);
+        }
+    }
+
+    return result;
+}
+
+GuildOrder GuildShareCraftOrderValue::Calculate()
+{
+    GuildOrder order;
+
+    if (!bot->GetGuildId())
+        return order;
+
+    std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");
+    if (shareList.empty())
+        return order;
+
+    std::set<uint32> finishedItemIds;
+    for (const auto& entry : shareList)
+        finishedItemIds.insert(entry.itemId);
+
+    for (uint32 itemId : finishedItemIds)
+    {
+        uint32 guildDeficit = CountGuildFinishedItemDeficit(bot, itemId, shareList);
+        if (guildDeficit == 0)
+            continue;
+
+        uint32 currentCount = ai->GetInventoryItemsCountWithId(itemId);
+        if (currentCount >= guildDeficit)
+            continue;
+
+        uint32 needed = guildDeficit - currentCount;
+
+        uint32 craftSpellId = 0;
+        for (auto& [spellId, spellState] : bot->GetSpellMap())
+        {
+            if (spellState.state == PLAYERSPELL_REMOVED || spellState.disabled || IsPassiveSpell(spellId))
+                continue;
+
+            const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
+            if (!pSpellInfo)
+                continue;
+
+            for (int i = 0; i < 3; ++i)
+            {
+                if (pSpellInfo->Effect[i] == SPELL_EFFECT_CREATE_ITEM && pSpellInfo->EffectItemType[i] == itemId)
+                {
+                    craftSpellId = spellId;
+                    break;
+                }
+            }
+
+            if (craftSpellId)
+                break;
+        }
+
+        if (!craftSpellId)
+            continue;
+
+        if (!ai->HasCheat(BotCheatMask::item) && !AI_VALUE2(bool, "can craft spell", craftSpellId))
+            continue;
+
+        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+        if (!proto)
+            continue;
+
+        order.type = GuildOrderType::Craft;
+        order.target = proto->Name1;
+        order.amount = needed;
+        return order;
+    }
+
+    return order;
+}
+
+GuildOrder GuildShareFarmOrderValue::Calculate()
+{
+    GuildOrder order;
+
+    if (!bot->GetGuildId())
+        return order;
+
+    std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");
+    if (shareList.empty())
+        return order;
+
+    bool hasHerbalism = ai->HasSkill(SKILL_HERBALISM);
+    bool hasMining = ai->HasSkill(SKILL_MINING);
+    bool hasSkinning = ai->HasSkill(SKILL_SKINNING);
+    bool hasAlchemy = ai->HasSkill(SKILL_ALCHEMY);
+    bool hasBlacksmithing = ai->HasSkill(SKILL_BLACKSMITHING);
+    bool hasEngineering = ai->HasSkill(SKILL_ENGINEERING);
+    bool hasLeatherworking = ai->HasSkill(SKILL_LEATHERWORKING);
+    bool hasTailoring = ai->HasSkill(SKILL_TAILORING);
+    bool hasEnchanting = ai->HasSkill(SKILL_ENCHANTING);
+    bool hasCooking = ai->HasSkill(SKILL_COOKING);
+    bool hasFirstAid = ai->HasSkill(SKILL_FIRST_AID);
+    bool hasAnyGathering = hasHerbalism || hasMining || hasSkinning;
+
+    bool hasAnyGatherOrCraft = hasAnyGathering ||
+        hasAlchemy || hasBlacksmithing || hasEngineering || hasLeatherworking ||
+        hasTailoring || hasEnchanting || hasCooking || hasFirstAid;
+
+    if (!hasAnyGatherOrCraft)
+        return order;
+
+    std::set<uint32> finishedItemIds;
+    for (const auto& entry : shareList)
+        finishedItemIds.insert(entry.itemId);
+
+    std::map<uint32, uint32> reagentNeeds;
+
+    for (uint32 itemId : finishedItemIds)
+    {
+        uint32 guildDeficit = CountGuildFinishedItemDeficit(bot, itemId, shareList);
+        if (guildDeficit == 0)
+            continue;
+
+        uint32 currentFinished = ai->GetInventoryItemsCountWithId(itemId);
+        uint32 remaining = (currentFinished >= guildDeficit) ? 0 : guildDeficit - currentFinished;
+        if (remaining == 0)
+            continue;
+
+        ItemPrototype const* shareProto = sObjectMgr.GetItemPrototype(itemId);
+        if (!shareProto)
+            continue;
+
+        std::vector<std::pair<uint32, uint32>> reagents = ItemUsageValue::GetAllReagentItemIdsForCraftingItem(shareProto);
+
+        if (reagents.empty())
+        {
+            reagentNeeds[itemId] += remaining;
+            continue;
+        }
+
+        for (const auto& [reagentId, reagentCount] : reagents)
+        {
+            reagentNeeds[reagentId] += reagentCount * remaining;
+        }
+    }
+
+    if (reagentNeeds.empty())
+        return order;
+
+    // Now find a reagent this bot can farm and still needs more of.
+    // Priority: 0 = gathering nodes, the bot has relevant gathering skill
+    //           1 = nodes and mobs, bot has relevant craft skill
+    //           2 = mobs only, bot has relevant craft skill
+    //           3 = mobs only, any bot can farm
+    struct FarmCandidate
+    {
+        uint32 itemId;
+        uint32 needed;
+        uint32 priority;
+    };
+
+    std::vector<FarmCandidate> candidates;
+
+    for (const auto& [reagentId, totalNeeded] : reagentNeeds)
+    {
+        ItemPrototype const* reagentProto = sObjectMgr.GetItemPrototype(reagentId);
+        if (!reagentProto)
+            continue;
+
+        if (ItemUsageValue::IsItemSoldByAnyVendor(reagentProto))
+            continue;
+
+        uint32 currentCount = ai->GetInventoryItemsCountWithId(reagentId);
+        if (currentCount >= totalNeeded)
+            continue;
+
+        uint32 remaining = totalNeeded - currentCount;
+
+        std::list<int32> dropEntries = GAI_VALUE2(std::list<int32>, "item drop list", reagentId);
+
+        bool dropsFromGatherNode = false;
+        bool dropsFromMob = false;
+        for (int32 entry : dropEntries)
+        {
+            if (entry < 0)
+                dropsFromGatherNode = true;
+            else
+                dropsFromMob = true;
+        }
+
+        // Determine priority based on drop source and bot's skills
+        uint32 priority = 4; // default: cannot farm at all
+
+        if (dropsFromGatherNode && hasAnyGathering)
+        {
+            // Best priority: item comes from herb/ore/skin nodes and bot has a gathering skill
+            priority = 0;
+        }
+        else if (dropsFromMob)
+        {
+            bool hasRelevantCraftSkill = false;
+            if (hasAlchemy && ItemUsageValue::IsItemUsedBySkill(reagentProto, SKILL_ALCHEMY))
+                hasRelevantCraftSkill = true;
+            else if (hasBlacksmithing && ItemUsageValue::IsItemUsedBySkill(reagentProto, SKILL_BLACKSMITHING))
+                hasRelevantCraftSkill = true;
+            else if (hasEngineering && ItemUsageValue::IsItemUsedBySkill(reagentProto, SKILL_ENGINEERING))
+                hasRelevantCraftSkill = true;
+            else if (hasLeatherworking && ItemUsageValue::IsItemUsedBySkill(reagentProto, SKILL_LEATHERWORKING))
+                hasRelevantCraftSkill = true;
+            else if (hasTailoring && ItemUsageValue::IsItemUsedBySkill(reagentProto, SKILL_TAILORING))
+                hasRelevantCraftSkill = true;
+            else if (hasEnchanting && ItemUsageValue::IsItemUsedBySkill(reagentProto, SKILL_ENCHANTING))
+                hasRelevantCraftSkill = true;
+            else if (hasCooking && ItemUsageValue::IsItemUsedBySkill(reagentProto, SKILL_COOKING))
+                hasRelevantCraftSkill = true;
+            else if (hasFirstAid && ItemUsageValue::IsItemUsedBySkill(reagentProto, SKILL_FIRST_AID))
+                hasRelevantCraftSkill = true;
+
+            if (dropsFromGatherNode)
+            {
+                priority = hasRelevantCraftSkill ? 1 : 2;
+            }
+            else
+            {
+                priority = hasRelevantCraftSkill ? 2 : 3;
+            }
+        }
+        else if (dropsFromGatherNode && !hasAnyGathering)
+        {
+            priority = 3;
+        }
+
+        if (priority > 3)
+            continue;
+
+        candidates.push_back({ reagentId, remaining, priority });
+    }
+
+    if (candidates.empty())
+        return order;
+
+    std::sort(candidates.begin(), candidates.end(), [](const FarmCandidate& a, const FarmCandidate& b)
+    {
+        if (a.priority != b.priority)
+            return a.priority < b.priority;
+        return a.needed > b.needed;
+    });
+
+    const FarmCandidate& best = candidates.front();
+    ItemPrototype const* bestProto = sObjectMgr.GetItemPrototype(best.itemId);
+    if (!bestProto)
+        return order;
+
+    order.type = GuildOrderType::Farm;
+    order.target = bestProto->Name1;
+    order.amount = best.needed;
+
     return order;
 }
 
@@ -144,24 +648,16 @@ GuildShareTarget GuildShareTargetValue::Calculate()
     if (!guild)
         return result;
 
-    // Collect items this bot has in bags (potential items to share)
     std::vector<Item*> botItems = ai->GetInventoryItems();
     if (botItems.empty())
         return result;
 
-    // Build a set of item IDs this bot has, excluding items the bot wants to keep
     std::map<uint32, Item*> sharableItems;
     for (Item* item : botItems)
     {
         uint32 itemId = item->GetProto()->ItemId;
 
-        // Skip items we already checked
         if (sharableItems.count(itemId))
-            continue;
-
-        // Don't give away items we have set to keep/need/equip/greed ourselves
-        ForceItemUsage botForce = ai->GetAiObjectContext()->GetValue<ForceItemUsage>("force item usage", std::to_string(itemId))->Get();
-        if (botForce != ForceItemUsage::FORCE_USAGE_NONE)
             continue;
 
         sharableItems[itemId] = item;
@@ -169,6 +665,18 @@ GuildShareTarget GuildShareTargetValue::Calculate()
 
     if (sharableItems.empty())
         return result;
+
+    std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");
+
+    std::map<uint32, uint32> selfNeeded;
+    for (const auto& entry : shareList)
+    {
+        if (entry.MatchesPlayer(bot))
+        {
+            if (entry.amount > selfNeeded[entry.itemId])
+                selfNeeded[entry.itemId] = entry.amount;
+        }
+    }
 
     // Check nearby guild members
     std::list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("nearest friendly players")->Get();
@@ -179,33 +687,55 @@ GuildShareTarget GuildShareTargetValue::Calculate()
         if (!player || player == bot)
             continue;
 
-        // Must be in the same guild
         if (player->GetGuildId() != bot->GetGuildId())
             continue;
 
-        // Must be a bot with AI
         PlayerbotAI* targetAi = player->GetPlayerbotAI();
         if (!targetAi)
             continue;
 
-        // Must be nearby enough to trade
         if (sServerFacade.GetDistance2d(bot, player) > INTERACTION_DISTANCE)
             continue;
 
-        // For each sharable item, check if the target has "keep need" set for it
+        // keep need usage
         for (auto& [itemId, item] : sharableItems)
         {
-            // Check if the target has "need" set for this item
             ForceItemUsage targetForce = targetAi->GetAiObjectContext()->GetValue<ForceItemUsage>("force item usage", std::to_string(itemId))->Get();
             if (targetForce != ForceItemUsage::FORCE_USAGE_NEED)
                 continue;
 
-            // Check if the target doesn't already have the item
             if (targetAi->GetInventoryItemsCountWithId(itemId) > 0)
                 continue;
 
             result.receiver = player;
             result.itemId = itemId;
+            result.amount = 0;
+            return result;
+        }
+
+        for (const auto& entry : shareList)
+        {
+            if (!entry.MatchesPlayer(player))
+                continue;
+
+            auto it = sharableItems.find(entry.itemId);
+            if (it == sharableItems.end())
+                continue;
+
+            uint32 targetCount = targetAi->GetInventoryItemsCountWithId(entry.itemId);
+            if (targetCount >= entry.amount)
+                continue;
+
+            uint32 botCount = ai->GetInventoryItemsCountWithId(entry.itemId);
+            uint32 botNeeds = selfNeeded.count(entry.itemId) ? selfNeeded[entry.itemId] : 0;
+            if (botCount <= botNeeds)
+                continue; // Bot doesn't have surplus beyond its own needs
+
+            uint32 needed = entry.amount - targetCount;
+
+            result.receiver = player;
+            result.itemId = entry.itemId;
+            result.amount = needed;
             return result;
         }
     }

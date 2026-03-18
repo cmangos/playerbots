@@ -909,12 +909,10 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
                     if (foundItemId)
                     {
-                        // Get all creatures and game objects that drop this item.
                         std::list<int32> dropEntries = GAI_VALUE2(std::list<int32>, "item drop list", foundItemId);
 
                         if (!dropEntries.empty())
                         {
-                            // Separate gather nodes from mob drops.
                             std::vector<int32> gatherEntries, mobEntries;
                             for (int32 entry : dropEntries)
                             {
@@ -924,19 +922,21 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                                     mobEntries.push_back(entry);
                             }
 
-                            // Prioritize gather nodes over mob drops.
+                            // If gather nodes exist for this item, ONLY use gather nodes.
                             if (!gatherEntries.empty())
                             {
-                                uint32 gatherPurpose = (uint32)TravelDestinationPurpose::GatherMining
-                                    | (uint32)TravelDestinationPurpose::GatherHerbalism
-                                    | (uint32)TravelDestinationPurpose::GatherSkinning;
-
-                                list = sTravelMgr.GetPartitions(center, partitions, travelInfo, gatherPurpose, gatherEntries, false);
+                                for (uint32 purpose : { (uint32)TravelDestinationPurpose::GatherHerbalism,
+                                                        (uint32)TravelDestinationPurpose::GatherMining,
+                                                        (uint32)TravelDestinationPurpose::GatherSkinning })
+                                {
+                                    PartitionedTravelList gatherList = sTravelMgr.GetPartitions(center, partitions, travelInfo, purpose, gatherEntries, true);
+                                    for (auto& [partition, points] : gatherList)
+                                        list[partition].insert(list[partition].end(), points.begin(), points.end());
+                                }
                             }
-
-                            // Fall back to mob drops if no gather nodes were found.
-                            if (list.empty() && !mobEntries.empty())
+                            else if (!mobEntries.empty())
                             {
+                                // Only fall back to mob drops if the item has NO gather node.
                                 uint32 mobPurpose = (uint32)TravelDestinationPurpose::Grind;
 
                                 list = sTravelMgr.GetPartitions(center, partitions, travelInfo, mobPurpose, mobEntries, false);

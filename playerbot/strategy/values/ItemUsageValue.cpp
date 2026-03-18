@@ -4,6 +4,7 @@
 #include "CraftValues.h"
 #include "MountValues.h"
 #include "BudgetValues.h"
+#include "GuildValues.h"
 
 #include "playerbot/RandomItemMgr.h"
 #include "playerbot/ServerFacade.h"
@@ -106,6 +107,30 @@ ItemUsage ItemUsageValue::Calculate()
 
     if (forceUsage == ForceItemUsage::FORCE_USAGE_KEEP)
         return ItemUsage::ITEM_USAGE_KEEP;
+
+    if (bot->GetGuildId())
+    {
+        std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");
+        if (!shareList.empty())
+        {
+            for (const auto& entry : shareList)
+            {
+                if (entry.itemId == itemId)
+                    return ItemUsage::ITEM_USAGE_KEEP;
+
+                ItemPrototype const* craftProto = sObjectMgr.GetItemPrototype(entry.itemId);
+                if (craftProto)
+                {
+                    std::vector<std::pair<uint32, uint32>> reagents = GetAllReagentItemIdsForCraftingItem(craftProto);
+                    for (const auto& [reagentId, reagentCount] : reagents)
+                    {
+                        if (reagentId == itemId)
+                            return ItemUsage::ITEM_USAGE_KEEP;
+                    }
+                }
+            }
+        }
+    }
 
     //KEEP HEARTHSTONE/SCOURGESTONE
     if (proto->ItemId == 6948 || proto->ItemId == 40582)

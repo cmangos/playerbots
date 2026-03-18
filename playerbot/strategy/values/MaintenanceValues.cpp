@@ -98,7 +98,7 @@ bool ShouldGetMailValue::Calculate() {
 
         if (hasGuildShareList && (*itr)->has_items
             && (*itr)->stationery == MAIL_STATIONERY_AUCTION
-            && waitingInBoxTime > HOUR)
+            && waitingInBoxTime > MINUTE)
         {
             return true;
         }

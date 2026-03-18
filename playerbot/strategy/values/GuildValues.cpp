@@ -697,22 +697,7 @@ GuildShareTarget GuildShareTargetValue::Calculate()
         if (sServerFacade.GetDistance2d(bot, player) > INTERACTION_DISTANCE)
             continue;
 
-        // keep need usage
-        for (auto& [itemId, item] : sharableItems)
-        {
-            ForceItemUsage targetForce = targetAi->GetAiObjectContext()->GetValue<ForceItemUsage>("force item usage", std::to_string(itemId))->Get();
-            if (targetForce != ForceItemUsage::FORCE_USAGE_NEED)
-                continue;
-
-            if (targetAi->GetInventoryItemsCountWithId(itemId) > 0)
-                continue;
-
-            result.receiver = player;
-            result.itemId = itemId;
-            result.amount = 0;
-            return result;
-        }
-
+        // Only share items explicitly listed in the guild info "Share:" section
         for (const auto& entry : shareList)
         {
             if (!entry.MatchesPlayer(player))

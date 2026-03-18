@@ -151,6 +151,9 @@ bool BuyAction::Execute(Event& event)
                     if (usage == ItemUsage::ITEM_USAGE_USE && ItemUsageValue::CurrentStacks(ai, proto) >= 1)
                         break;
 
+                    if (usage == ItemUsage::ITEM_USAGE_SKILL && ItemUsageValue::CurrentStacks(ai, proto) >= 1)
+                        break;
+
                     bool didBuy = false;
                     didBuy = BuyItem(requester, tItems, vendorguid, proto, bought, usage);
                     if (!didBuy)

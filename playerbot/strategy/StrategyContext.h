@@ -44,6 +44,7 @@
 #include "generic/FocusTargetStrategy.h"
 #include "generic/AvoidMobsStrategy.h"
 #include "generic/WanderStrategy.h"
+#include "generic/ConsumableStrategy.h"
 
 #include "generic/DungeonStrategy.h"
 #include "generic/OnyxiasLairDungeonStrategies.h"
@@ -68,6 +69,7 @@ namespace ai
             creators["passive"] = [](PlayerbotAI* ai) { return new PassiveStrategy(ai); };
             creators["conserve mana"] = [](PlayerbotAI* ai) { return new ConserveManaStrategy(ai); };
             creators["food"] = [](PlayerbotAI* ai) { return new UseFoodStrategy(ai); };
+            creators["consumables"] = [](PlayerbotAI* ai) { return new ConsumableStrategy(ai); };
             creators["chat"] = [](PlayerbotAI* ai) { return new ChatCommandHandlerStrategy(ai); };
             creators["default"] = [](PlayerbotAI* ai) { return new WorldPacketHandlerStrategy(ai); };
             creators["ready check"] = [](PlayerbotAI* ai) { return new ReadyCheckStrategy(ai); };

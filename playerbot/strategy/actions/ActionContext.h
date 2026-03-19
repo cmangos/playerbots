@@ -69,6 +69,7 @@
 #include "AutoCompleteQuestAction.h"
 #include "UnstuckAction.h"
 #include "RangeAction.h"
+#include "UseConsumableAction.h"
 
 #include "OnyxiasLairDungeonActions.h"
 #include "MoltenCoreDungeonActions.h"
@@ -227,6 +228,7 @@ namespace ai
             creators["rocket boots"] = [](PlayerbotAI* ai) { return new UseRocketBootsAction(ai); };
             creators["fire protection potion"] = [](PlayerbotAI* ai) { return new UseFireProtectionPotionAction(ai); };
             creators["free action potion"] = [](PlayerbotAI* ai) { return new UseFreeActionPotionAction(ai); };
+            creators["use consumable"] = [](PlayerbotAI* ai) { return new UseConsumableAction(ai); };
 
             // BG Tactics
             creators["bg tactics"] = [](PlayerbotAI* ai) { return new BGTactics(ai); };

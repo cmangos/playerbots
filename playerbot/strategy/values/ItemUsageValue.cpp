@@ -169,7 +169,7 @@ ItemUsage ItemUsageValue::Calculate()
         }
         else
         {
-            bool lowBagSpace = AI_VALUE(uint8, "bag space") > 50;
+            bool lowBagSpace = AI_VALUE(uint8, "bag space") > 80;
 
             if (proto->Class == ITEM_CLASS_TRADE_GOODS || proto->Class == ITEM_CLASS_MISC || proto->Class == ITEM_CLASS_REAGENT)
                 needItem =!ai->HasCheat(BotCheatMask::item) && IsItemNeededForUsefullCraft(proto, lowBagSpace);
@@ -194,9 +194,9 @@ ItemUsage ItemUsageValue::Calculate()
                 return ItemUsage::ITEM_USAGE_SKILL; //Buy exactly one.
             }
 
-            if (stacks < 1)
+            if (stacks < 2)
                 return ItemUsage::ITEM_USAGE_SKILL; //Buy more.
-            else if (stacks == 1)
+            else if (stacks <= 2)
                 return ItemUsage::ITEM_USAGE_KEEP; //Do not buy more.
         }
     }

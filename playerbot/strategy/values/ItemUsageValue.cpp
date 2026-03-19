@@ -189,9 +189,9 @@ ItemUsage ItemUsageValue::Calculate()
             if (proto->Class == ITEM_CLASS_RECIPE && stacks > 0) //Only buy one recipe.
                 return ItemUsage::ITEM_USAGE_KEEP;
 
-            if (stacks < 2)
+            if (stacks < 1)
                 return ItemUsage::ITEM_USAGE_SKILL; //Buy more.
-            else if (stacks == 2)
+            else if (stacks == 1)
                 return ItemUsage::ITEM_USAGE_KEEP; //Do not buy more.
         }
     }

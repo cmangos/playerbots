@@ -151,6 +151,10 @@ bool BuyAction::Execute(Event& event)
                     if (usage == ItemUsage::ITEM_USAGE_USE && ItemUsageValue::CurrentStacks(ai, proto) >= 1)
                         break;
 
+                    // Stop buying reagents/recipes once we have 1 stack
+                    if (usage == ItemUsage::ITEM_USAGE_SKILL && ItemUsageValue::CurrentStacks(ai, proto) >= 1)
+                        break;
+
                     bool didBuy = false;
                     didBuy = BuyItem(requester, tItems, vendorguid, proto, bought, usage);
                     if (!didBuy)
@@ -161,6 +165,7 @@ bool BuyAction::Execute(Event& event)
                         break;
 
                     RESET_AI_VALUE2(ItemUsage, "item usage", tItem->item);
+                    RESET_AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatItem(proto));
                     RESET_AI_VALUE(std::vector<MountValue>, "mount list");
 
                     if (usage == ItemUsage::ITEM_USAGE_EQUIP || usage == ItemUsage::ITEM_USAGE_BAD_EQUIP) //Equip upgrades and stop buying this time. 

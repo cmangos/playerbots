@@ -403,6 +403,15 @@ GuildOrder GuildShareCraftOrderValue::Calculate()
     for (const auto& entry : shareList)
         finishedItemIds.insert(entry.itemId);
 
+    struct CraftCandidate
+    {
+        uint32 itemId;
+        uint32 needed;
+        std::string name;
+    };
+
+    std::vector<CraftCandidate> candidates;
+
     for (uint32 itemId : finishedItemIds)
     {
         uint32 guildDeficit = CountGuildFinishedItemDeficit(bot, itemId, shareList);
@@ -448,12 +457,17 @@ GuildOrder GuildShareCraftOrderValue::Calculate()
         if (!proto)
             continue;
 
-        order.type = GuildOrderType::Craft;
-        order.target = proto->Name1;
-        order.amount = needed;
-        return order;
+        candidates.push_back({ itemId, needed, proto->Name1 });
     }
 
+    if (candidates.empty())
+        return order;
+
+    const CraftCandidate& chosen = candidates[urand(0, candidates.size() - 1)];
+
+    order.type = GuildOrderType::Craft;
+    order.target = chosen.name;
+    order.amount = chosen.needed;
     return order;
 }
 
@@ -618,21 +632,30 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
     if (candidates.empty())
         return order;
 
-    std::sort(candidates.begin(), candidates.end(), [](const FarmCandidate& a, const FarmCandidate& b)
+    // Calculate nodes > mobs if possible.
+    uint32 bestPriority = candidates.front().priority;
+    for (const auto& c : candidates)
     {
-        if (a.priority != b.priority)
-            return a.priority < b.priority;
-        return a.needed > b.needed;
-    });
+        if (c.priority < bestPriority)
+            bestPriority = c.priority;
+    }
 
-    const FarmCandidate& best = candidates.front();
-    ItemPrototype const* bestProto = sObjectMgr.GetItemPrototype(best.itemId);
+    std::vector<FarmCandidate> bestCandidates;
+    for (const auto& c : candidates)
+    {
+        if (c.priority == bestPriority)
+            bestCandidates.push_back(c);
+    }
+
+    // Pick random valid item to farm
+    const FarmCandidate& chosen = bestCandidates[urand(0, bestCandidates.size() - 1)];
+    ItemPrototype const* bestProto = sObjectMgr.GetItemPrototype(chosen.itemId);
     if (!bestProto)
         return order;
 
     order.type = GuildOrderType::Farm;
     order.target = bestProto->Name1;
-    order.amount = best.needed;
+    order.amount = chosen.needed;
 
     return order;
 }

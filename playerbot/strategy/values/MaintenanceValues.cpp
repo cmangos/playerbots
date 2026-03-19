@@ -88,17 +88,17 @@ bool ShouldGetMailValue::Calculate() {
 
         int32 waitingInBoxTime = cur_time - (*itr)->deliver_time;
 
-        if (waitingInBoxTime < HOUR) //Let mail sit in the inbox for atleast 1 hour
+        if (!hasGuildShareList && waitingInBoxTime < HOUR) //Let mail sit in the inbox for atleast 1 hour
+        {
             return false;
+        }
 
         if ((*itr)->has_items && waitingInBoxTime > HOUR * 4) //Items are allowed to sit in the mail for max 4 hours.
         {
             return true;
         }
 
-        if (hasGuildShareList && (*itr)->has_items
-            && (*itr)->stationery == MAIL_STATIONERY_AUCTION
-            && waitingInBoxTime > MINUTE)
+        if (hasGuildShareList && (*itr)->has_items && (*itr)->stationery == MAIL_STATIONERY_AUCTION && waitingInBoxTime > MINUTE) //If bot has guild share list and mail is from AH, take mail immediately.
         {
             return true;
         }

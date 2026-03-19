@@ -164,7 +164,7 @@ ItemUsage ItemUsageValue::Calculate()
             float stacks = CurrentStacks(ai, proto);
             if (stacks < 1)
                 return ItemUsage::ITEM_USAGE_SKILL; //Buy more.
-            else if (stacks == 1)
+            else if (stacks <= 1)
                 return ItemUsage::ITEM_USAGE_KEEP; //Keep in inventory.
         }
         else
@@ -194,9 +194,9 @@ ItemUsage ItemUsageValue::Calculate()
                 return ItemUsage::ITEM_USAGE_SKILL; //Buy exactly one.
             }
 
-            if (stacks < 1)
+            if (stacks < 2)
                 return ItemUsage::ITEM_USAGE_SKILL; //Buy more.
-            else if (stacks == 1)
+            else if (stacks <= 2)
                 return ItemUsage::ITEM_USAGE_KEEP; //Do not buy more.
         }
     }

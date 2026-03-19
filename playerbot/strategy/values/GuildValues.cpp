@@ -560,9 +560,6 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
         if (!reagentProto)
             continue;
 
-        if (ItemUsageValue::IsItemSoldByAnyVendor(reagentProto))
-            continue;
-
         uint32 currentCount = ai->GetInventoryItemsCountWithId(reagentId);
         if (currentCount >= totalNeeded)
             continue;

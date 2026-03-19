@@ -24,7 +24,8 @@ bool GuildShareAhBuyAction::isUseful()
     if (!FindNearbyAuctioneer())
         return false;
 
-    if (AI_VALUE2(uint32, "free money for", uint32(NeedMoneyFor::guild)) < 100)
+    uint32 money = bot->GetMoney();
+    if (money < 100)
         return false;
 
     if (AI_VALUE(uint8, "bag space") > 90)

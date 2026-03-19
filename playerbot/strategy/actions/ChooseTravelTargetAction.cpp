@@ -922,21 +922,39 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                                     mobEntries.push_back(entry);
                             }
 
-                            // If gather nodes exist for this item, ONLY use gather nodes.
-                            if (!gatherEntries.empty())
+                            // Check which gathering skills the bot actually has.
+                            bool hasHerbalism = travelInfo.GetCurrentSkill(SKILL_HERBALISM) > 0;
+                            bool hasMining = travelInfo.GetCurrentSkill(SKILL_MINING) > 0;
+                            bool hasSkinning = travelInfo.GetCurrentSkill(SKILL_SKINNING) > 0;
+                            bool hasAnyGathering = hasHerbalism || hasMining || hasSkinning;
+
+                            // Bot has a gathering skill: prioritize gather nodes.
+                            if (!gatherEntries.empty() && hasAnyGathering)
                             {
-                                for (uint32 purpose : { (uint32)TravelDestinationPurpose::GatherHerbalism,
-                                                        (uint32)TravelDestinationPurpose::GatherMining,
-                                                        (uint32)TravelDestinationPurpose::GatherSkinning })
+                                // Only query gather purposes the bot can actually use.
+                                if (hasHerbalism)
                                 {
-                                    PartitionedTravelList gatherList = sTravelMgr.GetPartitions(center, partitions, travelInfo, purpose, gatherEntries, true);
+                                    PartitionedTravelList gatherList = sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GatherHerbalism, gatherEntries, true);
+                                    for (auto& [partition, points] : gatherList)
+                                        list[partition].insert(list[partition].end(), points.begin(), points.end());
+                                }
+                                if (hasMining)
+                                {
+                                    PartitionedTravelList gatherList = sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GatherMining, gatherEntries, true);
+                                    for (auto& [partition, points] : gatherList)
+                                        list[partition].insert(list[partition].end(), points.begin(), points.end());
+                                }
+                                if (hasSkinning)
+                                {
+                                    PartitionedTravelList gatherList = sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GatherSkinning, gatherEntries, true);
                                     for (auto& [partition, points] : gatherList)
                                         list[partition].insert(list[partition].end(), points.begin(), points.end());
                                 }
                             }
-                            else if (!mobEntries.empty())
+
+                            // Only fall back to mob drops if the bot has no gathering skill at all.
+                            if (list.empty() && !mobEntries.empty() && !hasAnyGathering)
                             {
-                                // Only fall back to mob drops if the item has NO gather node.
                                 uint32 mobPurpose = (uint32)TravelDestinationPurpose::Grind;
 
                                 list = sTravelMgr.GetPartitions(center, partitions, travelInfo, mobPurpose, mobEntries, false);

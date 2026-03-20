@@ -952,8 +952,32 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                                 }
                             }
 
-                            // Only fall back to mob drops if the bot has no gathering skill at all.
-                            if (list.empty() && !mobEntries.empty() && !hasAnyGathering)
+                            // If entry-based gather lookup failed, try unfiltered gather by purpose
+                            // (the travel manager may index nodes by their own entry, not drop-source entry).
+                            if (list.empty() && hasAnyGathering && !gatherEntries.empty())
+                            {
+                                if (hasHerbalism)
+                                {
+                                    PartitionedTravelList gatherList = sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GatherHerbalism);
+                                    for (auto& [partition, points] : gatherList)
+                                        list[partition].insert(list[partition].end(), points.begin(), points.end());
+                                }
+                                if (list.empty() && hasMining)
+                                {
+                                    PartitionedTravelList gatherList = sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GatherMining);
+                                    for (auto& [partition, points] : gatherList)
+                                        list[partition].insert(list[partition].end(), points.begin(), points.end());
+                                }
+                                if (list.empty() && hasSkinning)
+                                {
+                                    PartitionedTravelList gatherList = sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GatherSkinning);
+                                    for (auto& [partition, points] : gatherList)
+                                        list[partition].insert(list[partition].end(), points.begin(), points.end());
+                                }
+                            }
+
+                            // Fall back to mob drops only if no gather nodes were found or bot has no gathering skill.
+                            if (list.empty() && !mobEntries.empty())
                             {
                                 uint32 mobPurpose = (uint32)TravelDestinationPurpose::Grind;
 
@@ -962,15 +986,36 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                         }
                     }
 
-                    // Fall back to mobs, bosses and gather nodes by name.
+                    // Fall back by name: if bot has gathering skills, try gather-only first.
                     if (list.empty())
                     {
-                        for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, true, false, true, true, true))
+                        bool hasHerbalism = travelInfo.GetCurrentSkill(SKILL_HERBALISM) > 0;
+                        bool hasMining = travelInfo.GetCurrentSkill(SKILL_MINING) > 0;
+                        bool hasSkinning = travelInfo.GetCurrentSkill(SKILL_SKINNING) > 0;
+                        bool hasAnyGathering = hasHerbalism || hasMining || hasSkinning;
+
+                        // Try gather nodes by name first if bot can gather.
+                        if (hasAnyGathering)
                         {
-                            std::list<uint8> chancesToGoFar = { 10,50,90 };
-                            WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
-                            if (!point) continue;
-                            list[0].push_back(TravelPoint(destination, point, point->distance(center)));
+                            for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, false, false, false, false, true))
+                            {
+                                std::list<uint8> chancesToGoFar = { 10,50,90 };
+                                WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
+                                if (!point) continue;
+                                list[0].push_back(TravelPoint(destination, point, point->distance(center)));
+                            }
+                        }
+
+                        // If still empty, fall back to mobs, bosses and gather nodes.
+                        if (list.empty())
+                        {
+                            for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, true, false, true, true, true))
+                            {
+                                std::list<uint8> chancesToGoFar = { 10,50,90 };
+                                WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);
+                                if (!point) continue;
+                                list[0].push_back(TravelPoint(destination, point, point->distance(center)));
+                            }
                         }
                     }
 
@@ -1065,30 +1110,6 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Vendor, entries, false);
             });
     }
-    else if (travelName == "reagent vendor")
-    {
-        std::set<int32> reagentVendorEntrySet;
-        std::vector<uint32> missingReagents = NeedsProfessionReagentsValue::GetMissingReagents(ai);
-        for (uint32 reagentId : missingReagents)
-        {
-            std::list<int32> vendorEntries = GAI_VALUE2(std::list<int32>, "item vendor list", reagentId);
-            for (int32 entry : vendorEntries)
-                reagentVendorEntrySet.insert(entry);
-        }
-
-        std::vector<int32> reagentVendorEntries(reagentVendorEntrySet.begin(), reagentVendorEntrySet.end());
-
-        if (reagentVendorEntries.empty())
-        {
-            ai->TellDebug(ai->GetMaster(), "No reagent vendor entries found", "debug travel");
-            return false;
-        }
-
-        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [entries = reagentVendorEntries, partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]()
-            {
-                return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Vendor, entries, false);
-            });
-    }
     else
     {
         uint32 useFlags;
@@ -1150,8 +1171,6 @@ bool RequestNamedTravelTargetAction::isAllowed() const
         return true;
     }
     else if (name == "guild meeting")
-        return true;
-    else if (name == "reagent vendor")
         return true;
     else if (name == "reagent vendor")
         return true;

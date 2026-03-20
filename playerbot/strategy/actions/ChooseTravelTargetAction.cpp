@@ -977,7 +977,7 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                             }
 
                             // Fall back to mob drops only if no gather nodes were found or bot has no gathering skill.
-                            if (list.empty() && !mobEntries.empty())
+                            if (list.empty() && !mobEntries.empty() && !hasAnyGathering)
                             {
                                 uint32 mobPurpose = (uint32)TravelDestinationPurpose::Grind;
 
@@ -1009,7 +1009,8 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                         // If still empty, fall back to mobs, bosses and gather nodes.
                         if (list.empty())
                         {
-                            for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, true, false, true, true, true))
+                            bool includeMobs = !hasAnyGathering;
+                            for (auto& destination : ChooseTravelTargetAction::FindDestination(travelInfo, orderTarget, false, includeMobs, false, includeMobs, includeMobs, true))
                             {
                                 std::list<uint8> chancesToGoFar = { 10,50,90 };
                                 WorldPosition* point = destination->GetNextPoint(center, chancesToGoFar);

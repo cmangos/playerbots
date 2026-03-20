@@ -753,50 +753,84 @@ std::vector<uint32> NeedsProfessionReagentsValue::GetMissingReagents(PlayerbotAI
     std::vector<uint32> missing;
     Player* bot = ai->GetBot();
 
-    std::vector<uint32> allReagentIds = ItemUsageValue::GetAllReagentItemIdsForCraftingSkillsVector();
+    std::vector<GuildShareItemEntry> shareList = ai->GetAiObjectContext()->GetValue<std::vector<GuildShareItemEntry>>("guild share list")->Get();
+    if (shareList.empty())
+        return missing;
+
+    std::set<uint32> finishedItemIds;
+    for (const auto& entry : shareList)
+        finishedItemIds.insert(entry.itemId);
 
     std::unordered_set<uint32> seen;
-    for (uint32 reagentId : allReagentIds)
+    for (uint32 itemId : finishedItemIds)
     {
-        if (!seen.insert(reagentId).second)
-            continue;
-
-        const ItemPrototype* proto = sObjectMgr.GetItemPrototype(reagentId);
+        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
         if (!proto)
             continue;
 
-        if (!ItemUsageValue::IsItemSoldByAnyVendor(proto))
+        std::vector<std::pair<uint32, uint32>> reagents = ItemUsageValue::GetAllReagentItemIdsForCraftingItem(proto);
+        if (reagents.empty())
             continue;
 
-        if (ItemUsageValue::IsItemSoldByAnyVendorButHasLimitedMaxCount(proto))
+        bool canCraftItem = false;
+        for (auto& [spellId, spellState] : bot->GetSpellMap())
+        {
+            if (spellState.state == PLAYERSPELL_REMOVED || spellState.disabled || IsPassiveSpell(spellId))
+                continue;
+
+            const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
+            if (!pSpellInfo)
+                continue;
+
+            for (int i = 0; i < 3; ++i)
+            {
+                if (pSpellInfo->Effect[i] == SPELL_EFFECT_CREATE_ITEM && pSpellInfo->EffectItemType[i] == itemId)
+                {
+                    canCraftItem = true;
+                    break;
+                }
+            }
+
+            if (canCraftItem)
+                break;
+        }
+
+        if (!canCraftItem)
             continue;
 
-        bool botUses = false;
-        if (ai->HasSkill(SKILL_ALCHEMY) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_ALCHEMY))
-            botUses = true;
-        else if (ai->HasSkill(SKILL_BLACKSMITHING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_BLACKSMITHING))
-            botUses = true;
-        else if (ai->HasSkill(SKILL_ENGINEERING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_ENGINEERING))
-            botUses = true;
-        else if (ai->HasSkill(SKILL_LEATHERWORKING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_LEATHERWORKING))
-            botUses = true;
-        else if (ai->HasSkill(SKILL_TAILORING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_TAILORING))
-            botUses = true;
-        else if (ai->HasSkill(SKILL_ENCHANTING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_ENCHANTING))
-            botUses = true;
-        else if (ai->HasSkill(SKILL_COOKING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_COOKING))
-            botUses = true;
-        else if (ai->HasSkill(SKILL_FIRST_AID) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_FIRST_AID))
-            botUses = true;
-
-        if (!botUses)
+        uint32 guildDeficit = CountGuildFinishedItemDeficit(bot, itemId, shareList);
+        if (guildDeficit == 0)
             continue;
 
-        uint32 maxStack = proto->GetMaxStackSize();
-        uint32 currentCount = ai->GetInventoryItemsCountWithId(reagentId);
+        uint32 currentFinished = ai->GetInventoryItemsCountWithId(itemId);
+        uint32 remaining = (currentFinished >= guildDeficit) ? 0 : guildDeficit - currentFinished;
+        if (remaining == 0)
+            continue;
 
-        if (currentCount < maxStack)
-            missing.push_back(reagentId);
+        for (const auto& [reagentId, reagentCount] : reagents)
+        {
+            if (!seen.insert(reagentId).second)
+                continue;
+
+            const ItemPrototype* reagentProto = sObjectMgr.GetItemPrototype(reagentId);
+            if (!reagentProto)
+                continue;
+
+            if (!ItemUsageValue::IsItemSoldByAnyVendor(reagentProto))
+                continue;
+
+            if (ItemUsageValue::IsItemSoldByAnyVendorButHasLimitedMaxCount(reagentProto))
+                continue;
+
+            uint32 totalNeeded = reagentCount * remaining;
+            uint32 maxStack = reagentProto->GetMaxStackSize();
+            uint32 target = std::min(totalNeeded, maxStack);
+
+            uint32 currentCount = ai->GetInventoryItemsCountWithId(reagentId);
+
+            if (currentCount < target)
+                missing.push_back(reagentId);
+        }
     }
 
     return missing;

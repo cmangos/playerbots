@@ -178,41 +178,41 @@ bool BuyAction::Execute(Event& event)
                 }
             }
 
-            // Exception for alchemist bots with guild order - Make alchemist buy vials for more efficient crafting.
-            if (AI_VALUE(bool, "needs alchemy vials"))
+            // Exception for crafting bots with guild order - Buy profession reagents from vendor first for more efficient crafting.
+            if (AI_VALUE(bool, "needs profession reagents"))
             {
-                std::vector<uint32> missingVials = NeedsAlchemyVialsValue::GetMissingVials(ai);
+                std::vector<uint32> missingReagents = NeedsProfessionReagentsValue::GetMissingReagents(ai);
 
-                for (uint32 vialId : missingVials)
+                for (uint32 reagentId : missingReagents)
                 {
-                    const ItemPrototype* vialProto = sObjectMgr.GetItemPrototype(vialId);
-                    if (!vialProto)
+                    const ItemPrototype* reagentProto = sObjectMgr.GetItemPrototype(reagentId);
+                    if (!reagentProto)
                         continue;
 
-                    uint32 maxStack = vialProto->GetMaxStackSize();
-                    uint32 currentCount = ai->GetInventoryItemsCountWithId(vialId);
+                    uint32 maxStack = reagentProto->GetMaxStackSize();
+                    uint32 currentCount = ai->GetInventoryItemsCountWithId(reagentId);
                     if (currentCount >= maxStack)
                         continue;
 
-                    uint32 vialPrice = uint32(floor(vialProto->BuyPrice * bot->GetReputationPriceDiscount(pCreature)));
+                    uint32 reagentPrice = uint32(floor(reagentProto->BuyPrice * bot->GetReputationPriceDiscount(pCreature)));
 
                     while (currentCount < maxStack)
                     {
                         RESET_AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill);
                         uint32 money = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill);
-                        if (vialPrice > money)
+                        if (reagentPrice > money)
                             break;
 
-                        bool didBuy = BuyItem(requester, tItems, vendorguid, vialProto, bought, ItemUsage::ITEM_USAGE_SKILL);
+                        bool didBuy = BuyItem(requester, tItems, vendorguid, reagentProto, bought, ItemUsage::ITEM_USAGE_SKILL);
                         if (!didBuy)
-                            didBuy = BuyItem(requester, vItems, vendorguid, vialProto, bought, ItemUsage::ITEM_USAGE_SKILL);
+                            didBuy = BuyItem(requester, vItems, vendorguid, reagentProto, bought, ItemUsage::ITEM_USAGE_SKILL);
 
                         result |= didBuy;
                         if (!didBuy)
                             break;
 
-                        currentCount = ai->GetInventoryItemsCountWithId(vialId);
-                        RESET_AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatItem(vialProto));
+                        currentCount = ai->GetInventoryItemsCountWithId(reagentId);
+                        RESET_AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatItem(reagentProto));
                     }
                 }
             }

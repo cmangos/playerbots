@@ -748,38 +748,76 @@ GuildShareTarget GuildShareTargetValue::Calculate()
     return result;
 }
 
-std::vector<uint32> NeedsAlchemyVialsValue::GetMissingVials(PlayerbotAI* ai)
+std::vector<uint32> NeedsProfessionReagentsValue::GetMissingReagents(PlayerbotAI* ai)
 {
     std::vector<uint32> missing;
     Player* bot = ai->GetBot();
 
-    for (uint32 i = 0; i < ALCHEMY_VIAL_COUNT; ++i)
+    std::vector<uint32> allReagentIds = ItemUsageValue::GetAllReagentItemIdsForCraftingSkillsVector();
+
+    std::unordered_set<uint32> seen;
+    for (uint32 reagentId : allReagentIds)
     {
-        uint32 vialId = ALCHEMY_VIAL_IDS[i];
-        const ItemPrototype* proto = sObjectMgr.GetItemPrototype(vialId);
+        if (!seen.insert(reagentId).second)
+            continue;
+
+        const ItemPrototype* proto = sObjectMgr.GetItemPrototype(reagentId);
         if (!proto)
             continue;
 
+        if (!ItemUsageValue::IsItemSoldByAnyVendor(proto))
+            continue;
+
+        if (ItemUsageValue::IsItemSoldByAnyVendorButHasLimitedMaxCount(proto))
+            continue;
+
+        bool botUses = false;
+        if (ai->HasSkill(SKILL_ALCHEMY) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_ALCHEMY))
+            botUses = true;
+        else if (ai->HasSkill(SKILL_BLACKSMITHING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_BLACKSMITHING))
+            botUses = true;
+        else if (ai->HasSkill(SKILL_ENGINEERING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_ENGINEERING))
+            botUses = true;
+        else if (ai->HasSkill(SKILL_LEATHERWORKING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_LEATHERWORKING))
+            botUses = true;
+        else if (ai->HasSkill(SKILL_TAILORING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_TAILORING))
+            botUses = true;
+        else if (ai->HasSkill(SKILL_ENCHANTING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_ENCHANTING))
+            botUses = true;
+        else if (ai->HasSkill(SKILL_COOKING) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_COOKING))
+            botUses = true;
+        else if (ai->HasSkill(SKILL_FIRST_AID) && ItemUsageValue::IsItemUsedBySkill(proto, SKILL_FIRST_AID))
+            botUses = true;
+
+        if (!botUses)
+            continue;
+
         uint32 maxStack = proto->GetMaxStackSize();
-        uint32 currentCount = ai->GetInventoryItemsCountWithId(vialId);
+        uint32 currentCount = ai->GetInventoryItemsCountWithId(reagentId);
 
         if (currentCount < maxStack)
-            missing.push_back(vialId);
+            missing.push_back(reagentId);
     }
 
     return missing;
 }
 
-bool NeedsAlchemyVialsValue::Calculate()
+bool NeedsProfessionReagentsValue::Calculate()
 {
-    if (!ai->HasSkill(SKILL_ALCHEMY))
+    bool hasAnyCraftingSkill =
+        ai->HasSkill(SKILL_ALCHEMY) || ai->HasSkill(SKILL_BLACKSMITHING) ||
+        ai->HasSkill(SKILL_ENGINEERING) || ai->HasSkill(SKILL_LEATHERWORKING) ||
+        ai->HasSkill(SKILL_TAILORING) || ai->HasSkill(SKILL_ENCHANTING) ||
+        ai->HasSkill(SKILL_COOKING) || ai->HasSkill(SKILL_FIRST_AID);
+
+    if (!hasAnyCraftingSkill)
         return false;
 
     GuildOrder order = AI_VALUE(GuildOrder, "guild order");
     if (!order.IsValid())
         return false;
 
-    return !GetMissingVials(ai).empty();
+    return !GetMissingReagents(ai).empty();
 }
 
 uint8 PetitionSignsValue::Calculate()

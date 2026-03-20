@@ -1041,25 +1041,50 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Vendor, entries, false);
             });
     }
-    else if (travelName == "vial vendor")
+    else if (travelName == "reagent vendor")
     {
-        std::set<int32> vialVendorEntrySet;
-        for (uint32 vialId : ALCHEMY_VIAL_IDS)
+        std::set<int32> reagentVendorEntrySet;
+        std::vector<uint32> missingReagents = NeedsProfessionReagentsValue::GetMissingReagents(ai);
+        for (uint32 reagentId : missingReagents)
         {
-            std::list<int32> vendorEntries = GAI_VALUE2(std::list<int32>, "item vendor list", vialId);
+            std::list<int32> vendorEntries = GAI_VALUE2(std::list<int32>, "item vendor list", reagentId);
             for (int32 entry : vendorEntries)
-                vialVendorEntrySet.insert(entry);
+                reagentVendorEntrySet.insert(entry);
         }
 
-        std::vector<int32> vialVendorEntries(vialVendorEntrySet.begin(), vialVendorEntrySet.end());
+        std::vector<int32> reagentVendorEntries(reagentVendorEntrySet.begin(), reagentVendorEntrySet.end());
 
-        if (vialVendorEntries.empty())
+        if (reagentVendorEntries.empty())
         {
-            ai->TellDebug(ai->GetMaster(), "No vial vendor entries found", "debug travel");
+            ai->TellDebug(ai->GetMaster(), "No reagent vendor entries found", "debug travel");
             return false;
         }
 
-        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [entries = vialVendorEntries, partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]()
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [entries = reagentVendorEntries, partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]()
+            {
+                return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Vendor, entries, false);
+            });
+    }
+    else if (travelName == "reagent vendor")
+    {
+        std::set<int32> reagentVendorEntrySet;
+        std::vector<uint32> missingReagents = NeedsProfessionReagentsValue::GetMissingReagents(ai);
+        for (uint32 reagentId : missingReagents)
+        {
+            std::list<int32> vendorEntries = GAI_VALUE2(std::list<int32>, "item vendor list", reagentId);
+            for (int32 entry : vendorEntries)
+                reagentVendorEntrySet.insert(entry);
+        }
+
+        std::vector<int32> reagentVendorEntries(reagentVendorEntrySet.begin(), reagentVendorEntrySet.end());
+
+        if (reagentVendorEntries.empty())
+        {
+            ai->TellDebug(ai->GetMaster(), "No reagent vendor entries found", "debug travel");
+            return false;
+        }
+
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [entries = reagentVendorEntries, partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]()
             {
                 return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Vendor, entries, false);
             });
@@ -1126,7 +1151,9 @@ bool RequestNamedTravelTargetAction::isAllowed() const
     }
     else if (name == "guild meeting")
         return true;
-    else if (name == "vial vendor")
+    else if (name == "reagent vendor")
+        return true;
+    else if (name == "reagent vendor")
         return true;
     else if (name == "guild order")
         return true;

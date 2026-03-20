@@ -1041,6 +1041,29 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Vendor, entries, false);
             });
     }
+    else if (travelName == "vial vendor")
+    {
+        std::set<int32> vialVendorEntrySet;
+        for (uint32 vialId : ALCHEMY_VIAL_IDS)
+        {
+            std::list<int32> vendorEntries = GAI_VALUE2(std::list<int32>, "item vendor list", vialId);
+            for (int32 entry : vendorEntries)
+                vialVendorEntrySet.insert(entry);
+        }
+
+        std::vector<int32> vialVendorEntries(vialVendorEntrySet.begin(), vialVendorEntrySet.end());
+
+        if (vialVendorEntries.empty())
+        {
+            ai->TellDebug(ai->GetMaster(), "No vial vendor entries found", "debug travel");
+            return false;
+        }
+
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [entries = vialVendorEntries, partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]()
+            {
+                return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Vendor, entries, false);
+            });
+    }
     else
     {
         uint32 useFlags;
@@ -1102,6 +1125,8 @@ bool RequestNamedTravelTargetAction::isAllowed() const
         return true;
     }
     else if (name == "guild meeting")
+        return true;
+    else if (name == "vial vendor")
         return true;
     else if (name == "guild order")
         return true;

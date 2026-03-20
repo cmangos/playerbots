@@ -91,6 +91,19 @@ namespace ai
         bool Calculate() override { return AI_VALUE(GuildOrder, "guild order").IsCraftOrder(); }
     };
 
+    static constexpr uint32 ALCHEMY_VIAL_IDS[] = { 3371, 3372, 8925, 18256 };
+    static constexpr uint32 ALCHEMY_VIAL_COUNT = 4;
+
+    class NeedsAlchemyVialsValue : public BoolCalculatedValue
+    {
+    public:
+        NeedsAlchemyVialsValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "needs alchemy vials", 10) {}
+
+        bool Calculate() override;
+
+        static std::vector<uint32> GetMissingVials(PlayerbotAI* ai);
+    };
+
     enum class GuildShareFilter : uint8
     {
         FILTER_CLASS = 0,

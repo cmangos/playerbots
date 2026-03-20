@@ -748,6 +748,40 @@ GuildShareTarget GuildShareTargetValue::Calculate()
     return result;
 }
 
+std::vector<uint32> NeedsAlchemyVialsValue::GetMissingVials(PlayerbotAI* ai)
+{
+    std::vector<uint32> missing;
+    Player* bot = ai->GetBot();
+
+    for (uint32 i = 0; i < ALCHEMY_VIAL_COUNT; ++i)
+    {
+        uint32 vialId = ALCHEMY_VIAL_IDS[i];
+        const ItemPrototype* proto = sObjectMgr.GetItemPrototype(vialId);
+        if (!proto)
+            continue;
+
+        uint32 maxStack = proto->GetMaxStackSize();
+        uint32 currentCount = ai->GetInventoryItemsCountWithId(vialId);
+
+        if (currentCount < maxStack)
+            missing.push_back(vialId);
+    }
+
+    return missing;
+}
+
+bool NeedsAlchemyVialsValue::Calculate()
+{
+    if (!ai->HasSkill(SKILL_ALCHEMY))
+        return false;
+
+    GuildOrder order = AI_VALUE(GuildOrder, "guild order");
+    if (!order.IsValid())
+        return false;
+
+    return !GetMissingVials(ai).empty();
+}
+
 uint8 PetitionSignsValue::Calculate()
 {
     if (bot->GetGuildId())

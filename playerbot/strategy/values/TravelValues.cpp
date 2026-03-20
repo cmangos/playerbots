@@ -425,6 +425,10 @@ bool ShouldTravelNamedValue::Calculate()
     {
         return AI_VALUE(bool, "has guild travel order");
     }
+    else if (name == "vial vendor")
+    {
+        return AI_VALUE(bool, "needs alchemy vials");
+    }
     else if (name == "mount")
     {
         if (AI_VALUE(bool, "can buy mount"))

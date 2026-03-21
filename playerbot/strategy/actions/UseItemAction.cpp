@@ -1330,7 +1330,7 @@ bool UseRandomRecipeAction::Execute(Event& event)
 
 bool OpenRandomItemAction::isUseful()
 {
-    return !bot->IsInCombat()  && !bot->InBattleGround();
+    return !bot->IsInCombat() && !ai->HasActivePlayerMaster() && !bot->InBattleGround();
 }
 
 bool OpenRandomItemAction::Execute(Event& event)

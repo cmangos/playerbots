@@ -76,6 +76,12 @@ bool SellAction::Sell(Player* requester, Item* item)
 {
     bool didSell = false;
 
+    ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
+    if (usage == ItemUsage::ITEM_USAGE_KEEP || usage == ItemUsage::ITEM_USAGE_EQUIP)
+    {
+        return false;
+    }
+
     std::ostringstream out;
     std::list<ObjectGuid> vendors = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest npcs")->Get();
 

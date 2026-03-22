@@ -209,6 +209,28 @@ static std::unordered_map<uint32, uint32> BuildCraftSpellMap(Player* bot, const 
     return craftMap;
 }
 
+static std::unordered_map<uint32, uint32> ComputeRemainingNeeds(
+    PlayerbotAI* ai,
+    const std::set<uint32>& itemIds,
+    const std::unordered_map<uint32, uint32>& deficits)
+{
+    std::unordered_map<uint32, uint32> remaining;
+    for (uint32 itemId : itemIds)
+    {
+        auto deficitIt = deficits.find(itemId);
+        uint32 guildDeficit = (deficitIt != deficits.end()) ? deficitIt->second : 0;
+        if (guildDeficit == 0)
+            continue;
+
+        uint32 currentCount = ai->GetInventoryItemsCountWithId(itemId);
+        if (currentCount >= guildDeficit)
+            continue;
+
+        remaining[itemId] = guildDeficit - currentCount;
+    }
+    return remaining;
+}
+
 static bool HasSkipOrderNote(Player* bot)
 {
     if (!bot->GetGuildId())
@@ -546,9 +568,16 @@ GuildOrder GuildShareCraftOrderValue::Calculate()
     for (const auto& entry : shareList)
         finishedItemIds.insert(entry.itemId);
 
-    std::unordered_map<uint32, uint32> deficits = CountGuildFinishedItemDeficits(bot, finishedItemIds, shareList);
-
     std::unordered_map<uint32, uint32> craftSpells = BuildCraftSpellMap(bot, finishedItemIds);
+    if (craftSpells.empty())
+        return order;
+
+    std::set<uint32> craftableIds;
+    for (const auto& [itemId, spellId] : craftSpells)
+        craftableIds.insert(itemId);
+
+    std::unordered_map<uint32, uint32> deficits = CountGuildFinishedItemDeficits(bot, craftableIds, shareList);
+    std::unordered_map<uint32, uint32> remaining = ComputeRemainingNeeds(ai, craftableIds, deficits);
 
     struct CraftCandidate
     {
@@ -559,19 +588,8 @@ GuildOrder GuildShareCraftOrderValue::Calculate()
 
     std::vector<CraftCandidate> candidates;
 
-    for (uint32 itemId : finishedItemIds)
+    for (const auto& [itemId, needed] : remaining)
     {
-        auto deficitIt = deficits.find(itemId);
-        uint32 guildDeficit = (deficitIt != deficits.end()) ? deficitIt->second : 0;
-        if (guildDeficit == 0)
-            continue;
-
-        uint32 currentCount = ai->GetInventoryItemsCountWithId(itemId);
-        if (currentCount >= guildDeficit)
-            continue;
-
-        uint32 needed = guildDeficit - currentCount;
-
         auto craftIt = craftSpells.find(itemId);
         if (craftIt == craftSpells.end())
             continue;
@@ -635,21 +653,12 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
         finishedItemIds.insert(entry.itemId);
 
     std::unordered_map<uint32, uint32> deficits = CountGuildFinishedItemDeficits(bot, finishedItemIds, shareList);
+    std::unordered_map<uint32, uint32> itemRemaining = ComputeRemainingNeeds(ai, finishedItemIds, deficits);
 
     std::map<uint32, uint32> reagentNeeds;
 
-    for (uint32 itemId : finishedItemIds)
+    for (const auto& [itemId, remaining] : itemRemaining)
     {
-        auto deficitIt = deficits.find(itemId);
-        uint32 guildDeficit = (deficitIt != deficits.end()) ? deficitIt->second : 0;
-        if (guildDeficit == 0)
-            continue;
-
-        uint32 currentFinished = ai->GetInventoryItemsCountWithId(itemId);
-        uint32 remaining = (currentFinished >= guildDeficit) ? 0 : guildDeficit - currentFinished;
-        if (remaining == 0)
-            continue;
-
         ItemPrototype const* shareProto = sObjectMgr.GetItemPrototype(itemId);
         if (!shareProto)
             continue;
@@ -684,6 +693,7 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
     };
 
     std::vector<FarmCandidate> candidates;
+    uint32 bestPriority = 4;
 
     for (const auto& [reagentId, totalNeeded] : reagentNeeds)
     {
@@ -707,6 +717,9 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
                 dropsFromGatherNode = true;
             else
                 dropsFromMob = true;
+
+            if (dropsFromGatherNode && dropsFromMob)
+                break;
         }
 
         // Determine priority based on drop source and bot's skills
@@ -754,19 +767,14 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
         if (priority > 3)
             continue;
 
+        if (priority < bestPriority)
+            bestPriority = priority;
+
         candidates.push_back({ reagentId, remaining, priority });
     }
 
     if (candidates.empty())
         return order;
-
-    // Calculate nodes > mobs if possible.
-    uint32 bestPriority = candidates.front().priority;
-    for (const auto& c : candidates)
-    {
-        if (c.priority < bestPriority)
-            bestPriority = c.priority;
-    }
 
     std::vector<FarmCandidate> bestCandidates;
     for (const auto& c : candidates)
@@ -799,25 +807,26 @@ GuildShareTarget GuildShareTargetValue::Calculate()
     if (!guild)
         return result;
 
-    std::vector<Item*> botItems = ai->GetInventoryItems();
-    if (botItems.empty())
+    std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");
+    if (shareList.empty())
         return result;
 
-    std::map<uint32, Item*> sharableItems;
-    for (Item* item : botItems)
+    std::unordered_set<uint32> shareItemIds;
+    for (const auto& entry : shareList)
+        shareItemIds.insert(entry.itemId);
+
+    bool hasAnyShareItem = false;
+    for (uint32 itemId : shareItemIds)
     {
-        uint32 itemId = item->GetProto()->ItemId;
-
-        if (sharableItems.count(itemId))
-            continue;
-
-        sharableItems[itemId] = item;
+        if (ai->GetInventoryItemsCountWithId(itemId) > 0)
+        {
+            hasAnyShareItem = true;
+            break;
+        }
     }
 
-    if (sharableItems.empty())
+    if (!hasAnyShareItem)
         return result;
-
-    std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");
 
     std::map<uint32, uint32> selfNeeded;
     for (const auto& entry : shareList)
@@ -854,18 +863,17 @@ GuildShareTarget GuildShareTargetValue::Calculate()
             if (!entry.MatchesPlayer(player))
                 continue;
 
-            auto it = sharableItems.find(entry.itemId);
-            if (it == sharableItems.end())
+            uint32 botCount = ai->GetInventoryItemsCountWithId(entry.itemId);
+            if (botCount == 0)
                 continue;
+
+            uint32 botNeeds = selfNeeded.count(entry.itemId) ? selfNeeded[entry.itemId] : 0;
+            if (botCount <= botNeeds)
+                continue; // Bot doesn't have surplus beyond its own needs
 
             uint32 targetCount = targetAi->GetInventoryItemsCountWithId(entry.itemId);
             if (targetCount >= entry.amount)
                 continue;
-
-            uint32 botCount = ai->GetInventoryItemsCountWithId(entry.itemId);
-            uint32 botNeeds = selfNeeded.count(entry.itemId) ? selfNeeded[entry.itemId] : 0;
-            if (botCount <= botNeeds)
-                continue; // Bot doesn't have surplus beyond its own needs
 
             uint32 needed = entry.amount - targetCount;
 
@@ -902,22 +910,15 @@ std::vector<uint32> NeedsProfessionReagentsValue::GetMissingReagents(PlayerbotAI
     if (craftableItemIds.empty())
         return missing;
 
-    // Batch: single BroadcastWorker pass for all craftable item deficits
     std::unordered_map<uint32, uint32> deficits = CountGuildFinishedItemDeficits(bot, craftableItemIds, shareList);
+    std::unordered_map<uint32, uint32> remainingMap = ComputeRemainingNeeds(ai, craftableItemIds, deficits);
+
+    if (remainingMap.empty())
+        return missing;
 
     std::unordered_set<uint32> seen;
-    for (uint32 itemId : craftableItemIds)
+    for (const auto& [itemId, remaining] : remainingMap)
     {
-        auto deficitIt = deficits.find(itemId);
-        uint32 guildDeficit = (deficitIt != deficits.end()) ? deficitIt->second : 0;
-        if (guildDeficit == 0)
-            continue;
-
-        uint32 currentFinished = ai->GetInventoryItemsCountWithId(itemId);
-        uint32 remaining = (currentFinished >= guildDeficit) ? 0 : guildDeficit - currentFinished;
-        if (remaining == 0)
-            continue;
-
         ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
         if (!proto)
             continue;
@@ -941,14 +942,11 @@ std::vector<uint32> NeedsProfessionReagentsValue::GetMissingReagents(PlayerbotAI
             if (ItemUsageValue::IsItemSoldByAnyVendorButHasLimitedMaxCount(reagentProto))
                 continue;
 
-            uint32 totalNeeded = reagentCount * remaining;
-            uint32 maxStack = reagentProto->GetMaxStackSize();
-            uint32 target = std::min(totalNeeded, maxStack);
-
             uint32 currentCount = ai->GetInventoryItemsCountWithId(reagentId);
+            if (currentCount > 0)
+                continue;
 
-            if (currentCount < target)
-                missing.push_back(reagentId);
+            missing.push_back(reagentId);
         }
     }
 

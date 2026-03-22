@@ -94,7 +94,7 @@ namespace ai
     class NeedsProfessionReagentsValue : public BoolCalculatedValue
     {
     public:
-        NeedsProfessionReagentsValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "needs profession reagents", 60) {}
+        NeedsProfessionReagentsValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "needs profession reagents", 120) {}
 
         bool Calculate() override;
 

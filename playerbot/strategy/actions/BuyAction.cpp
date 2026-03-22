@@ -215,6 +215,8 @@ bool BuyAction::Execute(Event& event)
                         RESET_AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatItem(reagentProto));
                     }
                 }
+
+                RESET_AI_VALUE(bool, "needs profession reagents");
             }
         }
         else

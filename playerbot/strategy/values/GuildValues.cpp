@@ -901,8 +901,9 @@ std::vector<uint32> NeedsProfessionReagentsValue::GetMissingReagents(PlayerbotAI
         finishedItemIds.insert(entry.itemId);
 
     std::unordered_map<uint32, uint32> craftSpells = BuildCraftSpellMap(bot, finishedItemIds);
+    if (craftSpells.empty())
+        return missing;
 
-    // Only keep items the bot can actually craft
     std::set<uint32> craftableItemIds;
     for (const auto& [itemId, spellId] : craftSpells)
         craftableItemIds.insert(itemId);
@@ -916,19 +917,93 @@ std::vector<uint32> NeedsProfessionReagentsValue::GetMissingReagents(PlayerbotAI
     if (remainingMap.empty())
         return missing;
 
-    std::unordered_set<uint32> seen;
-    for (const auto& [itemId, remaining] : remainingMap)
+    GuildOrder order = ai->GetAiObjectContext()->GetValue<GuildOrder>("guild order")->Get();
+    std::set<uint32> itemsToCheck;
+
+    if (order.IsValid())
     {
-        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-        if (!proto)
-            continue;
+        uint32 orderItemId = GuildOrderValue::FindItemByName(order.target);
 
-        std::vector<std::pair<uint32, uint32>> reagents = ItemUsageValue::GetAllReagentItemIdsForCraftingItem(proto);
-        if (reagents.empty())
-            continue;
-
-        for (const auto& [reagentId, reagentCount] : reagents)
+        if (order.IsCraftOrder())
         {
+            if (orderItemId && remainingMap.count(orderItemId) && craftSpells.count(orderItemId))
+                itemsToCheck.insert(orderItemId);
+        }
+        else if (order.IsTravelOrder())
+        {
+            if (orderItemId)
+            {
+                for (const auto& [itemId, needed] : remainingMap)
+                {
+                    auto craftIt = craftSpells.find(itemId);
+                    if (craftIt == craftSpells.end())
+                        continue;
+
+                    const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(craftIt->second);
+                    if (!pSpellInfo)
+                        continue;
+
+                    bool usesFarmedItem = false;
+                    for (uint8 i = 0; i < MAX_SPELL_REAGENTS; i++)
+                    {
+                        if (pSpellInfo->Reagent[i] == static_cast<int32>(orderItemId))
+                        {
+                            usesFarmedItem = true;
+                            break;
+                        }
+                    }
+
+                    if (!usesFarmedItem)
+                    {
+                        ItemPrototype const* craftProto = sObjectMgr.GetItemPrototype(itemId);
+                        if (craftProto)
+                        {
+                            auto reagents = ItemUsageValue::GetAllReagentItemIdsForCraftingItem(craftProto);
+                            for (const auto& [reagentId, count] : reagents)
+                            {
+                                if (reagentId == orderItemId)
+                                {
+                                    usesFarmedItem = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (usesFarmedItem)
+                        itemsToCheck.insert(itemId);
+                }
+            }
+        }
+    }
+
+    if (itemsToCheck.empty())
+    {
+        for (const auto& [itemId, needed] : remainingMap)
+        {
+            if (craftSpells.count(itemId))
+                itemsToCheck.insert(itemId);
+        }
+    }
+
+    std::unordered_set<uint32> seen;
+    for (uint32 itemId : itemsToCheck)
+    {
+        auto craftIt = craftSpells.find(itemId);
+        if (craftIt == craftSpells.end())
+            continue;
+
+        const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(craftIt->second);
+        if (!pSpellInfo)
+            continue;
+
+        for (uint8 i = 0; i < MAX_SPELL_REAGENTS; i++)
+        {
+            if (!pSpellInfo->ReagentCount[i] || !pSpellInfo->Reagent[i])
+                continue;
+
+            uint32 reagentId = pSpellInfo->Reagent[i];
+
             if (!seen.insert(reagentId).second)
                 continue;
 

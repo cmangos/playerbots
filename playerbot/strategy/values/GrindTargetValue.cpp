@@ -65,7 +65,29 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
     float distance = 0;
     Unit* result = NULL;
 
-    std::unordered_map<uint32, bool> needForQuestMap;
+    bool travelTargetWorking = AI_VALUE(bool, "travel target working");
+    bool travelTargetTraveling = AI_VALUE(bool, "travel target traveling");
+    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+    bool isGrindTravelDest = travelTarget && typeid(travelTarget->GetDestination()) == typeid(GrindTravelDestination);
+
+    struct MemberInfo {
+        Player* player;
+        float x, y;
+    };
+    std::vector<MemberInfo> groupMembers;
+    if (group)
+    {
+        Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
+        groupMembers.reserve(groupSlot.size());
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player* member = sObjectMgr.GetPlayer(itr->guid);
+            if (member && sServerFacade.IsAlive(member))
+                groupMembers.push_back({ member, member->GetPositionX(), member->GetPositionY() });
+        }
+    }
+
+    std::unordered_map<uint32, bool> needForQuestCache;
 
     for (std::list<ObjectGuid>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
     {
@@ -191,10 +213,26 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
         }
 
         float newdistance = sServerFacade.GetDistance2d(bot, unit);
-       
-        if (unit->GetEntry() && !AI_VALUE2(bool, "need for quest", std::to_string(unit->GetEntry())))
+
+        uint32 entry = unit->GetEntry();
+        bool needForQuest = false;
+        if (entry)
         {
-            if (urand(0, 100) < 99 && AI_VALUE(bool, "travel target working") && typeid(AI_VALUE(TravelTarget*, "travel target")->GetDestination()) != typeid(GrindTravelDestination))
+            auto cacheIt = needForQuestCache.find(entry);
+            if (cacheIt != needForQuestCache.end())
+            {
+                needForQuest = cacheIt->second;
+            }
+            else
+            {
+                needForQuest = AI_VALUE2(bool, "need for quest", std::to_string(entry));
+                needForQuestCache[entry] = needForQuest;
+            }
+        }
+
+        if (entry && !needForQuest)
+        {
+            if (urand(0, 100) < 99 && travelTargetWorking && !isGrindTravelDest)
             {
                 if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
                     ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " ignored (not needed for active quest).");

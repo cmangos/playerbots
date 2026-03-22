@@ -52,6 +52,7 @@
 #include "LuaEngine/LuaEngine.h"
 #endif
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+#include "strategy/values/GuildValues.h"
 
 using namespace ai;
 
@@ -5846,28 +5847,12 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
     if (HasPlayerNearby())
         return ActivePiorityType::VISIBLE_FOR_PLAYER;
 
-    // TODO: Replace with a proper config later.
-    // For now this is just a proof of concept to test how efficient bots are farming items for guild
-    if (bot->IsInWorld() && bot->GetGuildId())
+    if (sPlayerbotAIConfig.guildOrderAlwaysActive && bot->IsInWorld() && bot->GetGuildId())
     {
-        if (Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId()))
-        {
-            std::string ginfo = guild->GetGINFO();
-            if (ginfo.find("Share:") != std::string::npos)
-                return ActivePiorityType::IS_ALWAYS_ACTIVE;
-
-            if (MemberSlot* member = guild->GetMemberSlot(bot->GetObjectGuid()))
-            {
-                const std::string& note = member->OFFnote;
-                if (note.find("Craft:") != std::string::npos ||
-                    note.find("Farm:") != std::string::npos ||
-                    note.find("Kill:") != std::string::npos ||
-                    note.find("Explore:") != std::string::npos)
-                {
-                    return ActivePiorityType::IS_ALWAYS_ACTIVE;
-                }
-            }
-        }
+        AiObjectContext* context = GetAiObjectContext();
+        GuildOrder guildOrder = AI_VALUE(GuildOrder, "guild order");
+        if (guildOrder.IsValid())
+            return ActivePiorityType::IS_ALWAYS_ACTIVE;
     }
 
     if (sServerFacade.IsInCombat(bot))
@@ -5952,6 +5937,7 @@ std::pair<uint32, uint32> PlayerbotAI::GetPriorityBracket(ActivePiorityType type
     case ActivePiorityType::IN_INSTANCE:
         return { 0,5 };
     case ActivePiorityType::IS_ALWAYS_ACTIVE:
+        return { 0,0 };
     case ActivePiorityType::IN_COMBAT:
     {
         if (sPlayerbotAIConfig.limitCombatActivity)

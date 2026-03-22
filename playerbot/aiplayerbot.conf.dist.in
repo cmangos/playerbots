@@ -73,6 +73,9 @@ AiPlayerbot.RandomBotAccountCount = 200
 # Force bots to become active when a player is nearby
 #AiPlayerbot.ForceActiveWhenNearPlayer = 0
 
+# Force bots to become active when guild orders are enabled
+#AiPlayerbot.GuildOrderAlwaysActive = 1
+
 # Limit combat activity for slight performance boost.
 #AiPlayerbot.LimitCombatActivity = 0
 

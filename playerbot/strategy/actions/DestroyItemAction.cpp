@@ -27,11 +27,6 @@ void DestroyItemAction::DestroyItem(FindItemVisitor* visitor, Player* requester)
 	for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
     {
 		Item* item = *i;
-
-        ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", item->GetProto()->ItemId);
-        if (usage == ItemUsage::ITEM_USAGE_KEEP || usage == ItemUsage::ITEM_USAGE_EQUIP)
-            continue;
-
         std::ostringstream out; out << chat->formatItem(item) << " destroyed";
         bot->DestroyItem(item->GetBagSlot(),item->GetSlot(), true);
         ai->TellPlayer(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
@@ -138,10 +133,6 @@ bool DestroyAllGrayItemsAction::Execute(Event& event)
                     {
                         if (proto->Quality == ITEM_QUALITY_POOR)
                         {
-                            ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", proto->ItemId);
-                            if (usage == ItemUsage::ITEM_USAGE_KEEP || usage == ItemUsage::ITEM_USAGE_EQUIP)
-                                continue;
-
                             std::ostringstream out; out << ai->GetChatHelper()->formatItem(pItem->GetProto()) << " destroyed";
                             sLog.outDetail("%s via DestroyAllGrayItemsAction", out.str().c_str());
                             bot->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
@@ -163,10 +154,6 @@ bool DestroyAllGrayItemsAction::Execute(Event& event)
             {
                 if (proto->Quality == ITEM_QUALITY_POOR)
                 {
-                    ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", proto->ItemId);
-                    if (usage == ItemUsage::ITEM_USAGE_KEEP || usage == ItemUsage::ITEM_USAGE_EQUIP)
-                        continue;
-
                     std::ostringstream out; out << ai->GetChatHelper()->formatItem(pItem->GetProto()) << " destroyed";
                     sLog.outDetail("%s via DestroyAllGrayItemsAction", out.str().c_str());
                     bot->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);

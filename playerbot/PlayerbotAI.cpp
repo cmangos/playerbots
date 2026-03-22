@@ -5846,15 +5846,6 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
     if (HasPlayerNearby())
         return ActivePiorityType::VISIBLE_FOR_PLAYER;
 
-    if (sServerFacade.IsInCombat(bot))
-        return ActivePiorityType::IN_COMBAT;
-
-    if (HasPlayerNearby(WorldPosition(bot).getVisibilityDistance() + sPlayerbotAIConfig.reactDistance))
-        return ActivePiorityType::NEARBY_PLAYER;
-
-    if (sPlayerbotAIConfig.IsFreeAltBot(bot) || HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
-        return ActivePiorityType::IS_ALWAYS_ACTIVE;
-
     // TODO: Replace with a proper config later.
     // For now this is just a proof of concept to test how efficient bots are farming items for guild
     if (bot->IsInWorld() && bot->GetGuildId())
@@ -5878,6 +5869,15 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
             }
         }
     }
+
+    if (sServerFacade.IsInCombat(bot))
+        return ActivePiorityType::IN_COMBAT;
+
+    if (HasPlayerNearby(WorldPosition(bot).getVisibilityDistance() + sPlayerbotAIConfig.reactDistance))
+        return ActivePiorityType::NEARBY_PLAYER;
+
+    if (sPlayerbotAIConfig.IsFreeAltBot(bot) || HasStrategy("travel once", BotState::BOT_STATE_NON_COMBAT))
+        return ActivePiorityType::IS_ALWAYS_ACTIVE;
 
     if (bot->InBattleGroundQueue())
         return ActivePiorityType::IN_BG_QUEUE;

@@ -36,6 +36,15 @@ char* strstri(const char* haystack, const char* needle);
 
 uint32 GuildOrderValue::FindItemByName(const std::string& name)
 {
+    static std::unordered_map<std::string, uint32> s_cache;
+
+    std::string lowerName = name;
+    std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    auto it = s_cache.find(lowerName);
+    if (it != s_cache.end())
+        return it->second;
+
     uint32 substringMatch = 0;
 
     for (uint32 itemId = 0; itemId < sItemStorage.GetMaxEntry(); ++itemId)
@@ -45,12 +54,16 @@ uint32 GuildOrderValue::FindItemByName(const std::string& name)
             continue;
 
         if (name.size() == strlen(proto->Name1) && strstri(proto->Name1, name.c_str()))
+        {
+            s_cache[lowerName] = itemId;
             return itemId;
+        }
 
         if (!substringMatch && strstri(proto->Name1, name.c_str()))
             substringMatch = itemId;
     }
 
+    s_cache[lowerName] = substringMatch;
     return substringMatch;
 }
 
@@ -103,6 +116,61 @@ uint32 ai::CountGuildFinishedItemDeficit(Player* bot, uint32 itemId, const std::
     guild->BroadcastWorker(worker);
 
     return worker.deficit;
+}
+
+static std::unordered_map<uint32, uint32> CountGuildFinishedItemDeficits(
+    Player* bot,
+    const std::set<uint32>& itemIds,
+    const std::vector<GuildShareItemEntry>& shareList)
+{
+    std::unordered_map<uint32, uint32> deficits;
+
+    if (!bot->GetGuildId())
+        return deficits;
+
+    Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
+    if (!guild)
+        return deficits;
+
+    struct CountAllDeficits
+    {
+        const std::set<uint32>& itemIds;
+        const std::vector<GuildShareItemEntry>& shareList;
+        std::unordered_map<uint32, uint32>& deficits;
+
+        CountAllDeficits(const std::set<uint32>& ids, const std::vector<GuildShareItemEntry>& list,
+                         std::unordered_map<uint32, uint32>& out)
+            : itemIds(ids), shareList(list), deficits(out) {}
+
+        void operator()(Player* player)
+        {
+            if (!player)
+                return;
+
+            for (const auto& entry : shareList)
+            {
+                if (itemIds.find(entry.itemId) == itemIds.end())
+                    continue;
+
+                if (!entry.MatchesPlayer(player))
+                    continue;
+
+                uint32 has = 0;
+                if (PlayerbotAI* memberAi = player->GetPlayerbotAI())
+                    has = memberAi->GetInventoryItemsCountWithId(entry.itemId);
+                else
+                    has = player->GetItemCount(entry.itemId, true);
+
+                if (has < entry.amount)
+                    deficits[entry.itemId] += entry.amount - has;
+            }
+        }
+    };
+
+    CountAllDeficits worker(itemIds, shareList, deficits);
+    guild->BroadcastWorker(worker);
+
+    return deficits;
 }
 
 static bool HasSkipOrderNote(Player* bot)

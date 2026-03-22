@@ -38,7 +38,7 @@ namespace ai
     class GuildOrderValue : public CalculatedValue<GuildOrder>
     {
     public:
-        GuildOrderValue(PlayerbotAI* ai) : CalculatedValue<GuildOrder>(ai, "guild order", 10) {}
+        GuildOrderValue(PlayerbotAI* ai) : CalculatedValue<GuildOrder>(ai, "guild order", 60) {}
 
         GuildOrder Calculate() override;
 
@@ -94,7 +94,7 @@ namespace ai
     class NeedsProfessionReagentsValue : public BoolCalculatedValue
     {
     public:
-        NeedsProfessionReagentsValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "needs profession reagents", 10) {}
+        NeedsProfessionReagentsValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "needs profession reagents", 60) {}
 
         bool Calculate() override;
 
@@ -165,7 +165,7 @@ namespace ai
     class GuildShareCraftOrderValue : public CalculatedValue<GuildOrder>
     {
     public:
-        GuildShareCraftOrderValue(PlayerbotAI* ai) : CalculatedValue<GuildOrder>(ai, "guild share craft order", 10) {}
+        GuildShareCraftOrderValue(PlayerbotAI* ai) : CalculatedValue<GuildOrder>(ai, "guild share craft order", 60) {}
 
         GuildOrder Calculate() override;
     };
@@ -173,7 +173,7 @@ namespace ai
     class GuildShareFarmOrderValue : public CalculatedValue<GuildOrder>
     {
     public:
-        GuildShareFarmOrderValue(PlayerbotAI* ai) : CalculatedValue<GuildOrder>(ai, "guild share farm order", 30) {}
+        GuildShareFarmOrderValue(PlayerbotAI* ai) : CalculatedValue<GuildOrder>(ai, "guild share farm order", 60) {}
 
         GuildOrder Calculate() override;
     };

@@ -83,7 +83,8 @@ uint32 ai::CountGuildFinishedItemDeficit(Player* bot, uint32 itemId, const std::
         uint32 deficit;
 
         CountOnlineMembers(uint32 id, const std::vector<GuildShareItemEntry>& list)
-            : itemId(id), shareList(list), deficit(0) {}
+            : itemId(id), shareList(list), deficit(0) {
+        }
 
         void operator()(Player* player)
         {
@@ -139,8 +140,9 @@ static std::unordered_map<uint32, uint32> CountGuildFinishedItemDeficits(
         std::unordered_map<uint32, uint32>& deficits;
 
         CountAllDeficits(const std::set<uint32>& ids, const std::vector<GuildShareItemEntry>& list,
-                         std::unordered_map<uint32, uint32>& out)
-            : itemIds(ids), shareList(list), deficits(out) {}
+            std::unordered_map<uint32, uint32>& out)
+            : itemIds(ids), shareList(list), deficits(out) {
+        }
 
         void operator()(Player* player)
         {
@@ -171,6 +173,40 @@ static std::unordered_map<uint32, uint32> CountGuildFinishedItemDeficits(
     guild->BroadcastWorker(worker);
 
     return deficits;
+}
+
+static std::unordered_map<uint32, uint32> BuildCraftSpellMap(Player* bot, const std::set<uint32>& itemIds)
+{
+    std::unordered_map<uint32, uint32> craftMap;
+    std::set<uint32> remaining = itemIds;
+
+    for (auto& [spellId, spellState] : bot->GetSpellMap())
+    {
+        if (remaining.empty())
+            break;
+
+        if (spellState.state == PLAYERSPELL_REMOVED || spellState.disabled || IsPassiveSpell(spellId))
+            continue;
+
+        const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
+        if (!pSpellInfo)
+            continue;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            if (pSpellInfo->Effect[i] == SPELL_EFFECT_CREATE_ITEM)
+            {
+                uint32 createdItem = pSpellInfo->EffectItemType[i];
+                if (remaining.count(createdItem))
+                {
+                    craftMap[createdItem] = spellId;
+                    remaining.erase(createdItem);
+                }
+            }
+        }
+    }
+
+    return craftMap;
 }
 
 static bool HasSkipOrderNote(Player* bot)
@@ -510,6 +546,10 @@ GuildOrder GuildShareCraftOrderValue::Calculate()
     for (const auto& entry : shareList)
         finishedItemIds.insert(entry.itemId);
 
+    std::unordered_map<uint32, uint32> deficits = CountGuildFinishedItemDeficits(bot, finishedItemIds, shareList);
+
+    std::unordered_map<uint32, uint32> craftSpells = BuildCraftSpellMap(bot, finishedItemIds);
+
     struct CraftCandidate
     {
         uint32 itemId;
@@ -521,7 +561,8 @@ GuildOrder GuildShareCraftOrderValue::Calculate()
 
     for (uint32 itemId : finishedItemIds)
     {
-        uint32 guildDeficit = CountGuildFinishedItemDeficit(bot, itemId, shareList);
+        auto deficitIt = deficits.find(itemId);
+        uint32 guildDeficit = (deficitIt != deficits.end()) ? deficitIt->second : 0;
         if (guildDeficit == 0)
             continue;
 
@@ -531,31 +572,11 @@ GuildOrder GuildShareCraftOrderValue::Calculate()
 
         uint32 needed = guildDeficit - currentCount;
 
-        uint32 craftSpellId = 0;
-        for (auto& [spellId, spellState] : bot->GetSpellMap())
-        {
-            if (spellState.state == PLAYERSPELL_REMOVED || spellState.disabled || IsPassiveSpell(spellId))
-                continue;
-
-            const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
-            if (!pSpellInfo)
-                continue;
-
-            for (int i = 0; i < 3; ++i)
-            {
-                if (pSpellInfo->Effect[i] == SPELL_EFFECT_CREATE_ITEM && pSpellInfo->EffectItemType[i] == itemId)
-                {
-                    craftSpellId = spellId;
-                    break;
-                }
-            }
-
-            if (craftSpellId)
-                break;
-        }
-
-        if (!craftSpellId)
+        auto craftIt = craftSpells.find(itemId);
+        if (craftIt == craftSpells.end())
             continue;
+
+        uint32 craftSpellId = craftIt->second;
 
         if (!ai->HasCheat(BotCheatMask::item) && !AI_VALUE2(bool, "can craft spell", craftSpellId))
             continue;
@@ -613,11 +634,14 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
     for (const auto& entry : shareList)
         finishedItemIds.insert(entry.itemId);
 
+    std::unordered_map<uint32, uint32> deficits = CountGuildFinishedItemDeficits(bot, finishedItemIds, shareList);
+
     std::map<uint32, uint32> reagentNeeds;
 
     for (uint32 itemId : finishedItemIds)
     {
-        uint32 guildDeficit = CountGuildFinishedItemDeficit(bot, itemId, shareList);
+        auto deficitIt = deficits.find(itemId);
+        uint32 guildDeficit = (deficitIt != deficits.end()) ? deficitIt->second : 0;
         if (guildDeficit == 0)
             continue;
 
@@ -868,50 +892,38 @@ std::vector<uint32> NeedsProfessionReagentsValue::GetMissingReagents(PlayerbotAI
     for (const auto& entry : shareList)
         finishedItemIds.insert(entry.itemId);
 
+    std::unordered_map<uint32, uint32> craftSpells = BuildCraftSpellMap(bot, finishedItemIds);
+
+    // Only keep items the bot can actually craft
+    std::set<uint32> craftableItemIds;
+    for (const auto& [itemId, spellId] : craftSpells)
+        craftableItemIds.insert(itemId);
+
+    if (craftableItemIds.empty())
+        return missing;
+
+    // Batch: single BroadcastWorker pass for all craftable item deficits
+    std::unordered_map<uint32, uint32> deficits = CountGuildFinishedItemDeficits(bot, craftableItemIds, shareList);
+
     std::unordered_set<uint32> seen;
-    for (uint32 itemId : finishedItemIds)
+    for (uint32 itemId : craftableItemIds)
     {
-        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-        if (!proto)
-            continue;
-
-        std::vector<std::pair<uint32, uint32>> reagents = ItemUsageValue::GetAllReagentItemIdsForCraftingItem(proto);
-        if (reagents.empty())
-            continue;
-
-        bool canCraftItem = false;
-        for (auto& [spellId, spellState] : bot->GetSpellMap())
-        {
-            if (spellState.state == PLAYERSPELL_REMOVED || spellState.disabled || IsPassiveSpell(spellId))
-                continue;
-
-            const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
-            if (!pSpellInfo)
-                continue;
-
-            for (int i = 0; i < 3; ++i)
-            {
-                if (pSpellInfo->Effect[i] == SPELL_EFFECT_CREATE_ITEM && pSpellInfo->EffectItemType[i] == itemId)
-                {
-                    canCraftItem = true;
-                    break;
-                }
-            }
-
-            if (canCraftItem)
-                break;
-        }
-
-        if (!canCraftItem)
-            continue;
-
-        uint32 guildDeficit = CountGuildFinishedItemDeficit(bot, itemId, shareList);
+        auto deficitIt = deficits.find(itemId);
+        uint32 guildDeficit = (deficitIt != deficits.end()) ? deficitIt->second : 0;
         if (guildDeficit == 0)
             continue;
 
         uint32 currentFinished = ai->GetInventoryItemsCountWithId(itemId);
         uint32 remaining = (currentFinished >= guildDeficit) ? 0 : guildDeficit - currentFinished;
         if (remaining == 0)
+            continue;
+
+        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
+        if (!proto)
+            continue;
+
+        std::vector<std::pair<uint32, uint32>> reagents = ItemUsageValue::GetAllReagentItemIdsForCraftingItem(proto);
+        if (reagents.empty())
             continue;
 
         for (const auto& [reagentId, reagentCount] : reagents)
@@ -964,7 +976,7 @@ bool NeedsProfessionReagentsValue::Calculate()
 uint8 PetitionSignsValue::Calculate()
 {
     if (bot->GetGuildId())
-       return 0;
+        return 0;
 
     std::list<Item*> petitions = AI_VALUE2(std::list<Item*>, "inventory items", chat->formatQItem(5863));
 

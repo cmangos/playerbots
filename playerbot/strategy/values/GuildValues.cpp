@@ -105,6 +105,32 @@ uint32 ai::CountGuildFinishedItemDeficit(Player* bot, uint32 itemId, const std::
     return worker.deficit;
 }
 
+static bool HasSkipOrderNote(Player* bot)
+{
+    if (!bot->GetGuildId())
+        return false;
+
+    Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());
+    if (!guild)
+        return false;
+
+    MemberSlot* member = guild->GetMemberSlot(bot->GetObjectGuid());
+    if (!member)
+        return false;
+
+    std::string note = member->OFFnote;
+    if (note.empty())
+        return false;
+
+    std::string lower = note;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    lower.erase(lower.begin(), std::find_if(lower.begin(), lower.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    lower.erase(std::find_if(lower.rbegin(), lower.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), lower.end());
+
+    return lower == "skip order";
+}
+
 GuildOrder GuildOrderValue::Calculate()
 {
     GuildOrder order;
@@ -121,6 +147,16 @@ GuildOrder GuildOrderValue::Calculate()
         return order;
 
     std::string note = member->OFFnote;
+
+    if (!note.empty())
+    {
+        std::string lower = note;
+        std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
+        std::string trimmed = TrimWhitespace(lower);
+        if (trimmed == "skip order")
+            return order;
+    }
+
     if (note.empty())
     {
         GuildOrder craftOrder = AI_VALUE(GuildOrder, "guild share craft order");
@@ -297,6 +333,9 @@ std::vector<GuildShareItemEntry> GuildShareListValue::Calculate()
     std::vector<GuildShareItemEntry> result;
 
     if (!bot->GetGuildId())
+        return result;
+
+    if (HasSkipOrderNote(bot))
         return result;
 
     Guild* guild = sGuildMgr.GetGuildById(bot->GetGuildId());

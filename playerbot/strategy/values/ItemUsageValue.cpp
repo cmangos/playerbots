@@ -537,7 +537,7 @@ ItemUsage ItemUsageValue::QueryItemUsageForEquip(ItemQualifier& itemQualifier, P
         result = RandomPlayerbotMgr::CanEquipUnseenItem(bot, NULL_SLOT, dest, itemProto->ItemId);
     }
 
-    if (result != EQUIP_ERR_OK && result != EQUIP_ERR_ITEMS_CANT_BE_SWAPPED)
+    if (result != EQUIP_ERR_OK)
         return ItemUsage::ITEM_USAGE_NONE;
 
     if (itemProto->Class == ITEM_CLASS_QUIVER)

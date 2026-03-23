@@ -218,13 +218,16 @@ bool MoveToTravelTargetAction::isUseful()
     if (!AI_VALUE(bool, "can move around"))
         return false;
 
+    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+
     if (bot->GetGroup() && !bot->GetGroup()->IsLeader(bot->GetObjectGuid()))
         if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
             ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) ||
             ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
-            return false;
+            if (!travelTarget->IsForced())
+                return false;
 
-    WorldPosition travelPos(*AI_VALUE(TravelTarget*, "travel target")->GetPosition());
+    WorldPosition travelPos(*travelTarget->GetPosition());
 
     if (travelPos.isDungeon() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && sTravelMgr.MapTransDistance(bot, travelPos, true) < sPlayerbotAIConfig.sightDistance && !AI_VALUE2(bool, "group and", "near leader"))
         return false;
@@ -236,8 +239,9 @@ bool MoveToTravelTargetAction::isUseful()
             return false;
     }
 
-    if (!AI_VALUE2(bool, "can free move to", AI_VALUE(TravelTarget*,"travel target")->GetPosStr()))
-        return false;
+    if (!travelTarget->IsForced())
+        if (!AI_VALUE2(bool, "can free move to", travelTarget->GetPosStr()))
+            return false;
 
     return true;
 }

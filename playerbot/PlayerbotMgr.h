@@ -58,6 +58,8 @@ public:
     std::list<std::string> HandleReload(Player* master, const std::string param, AccountTypes security);
     std::list<std::string> HandleTweak(Player* master, const std::string param, AccountTypes security);
     std::list<std::string> HandleSelf(Player* master, const std::string param, AccountTypes security);
+    std::list<std::string> HandleSpoof(Player* master, const std::string param, AccountTypes security);
+    ObjectGuid GetSpoofGuid() const { return m_spoofGuid; }
 
     std::string HandleBotAlways(Player* bot, Player* master, const std::string param);
     std::string HandleBotDebug(Player* bot, Player* master, const std::string param);
@@ -93,6 +95,7 @@ private:
     PlayerBotMap playerBots;
     std::map<std::string, HolderCommandHandler> m_holderHandlers;
     std::map<std::string, BotCommandHandler> m_botCommandHandlers;
+    ObjectGuid m_spoofGuid;
 };
 
 class PlayerbotMgr : public PlayerbotHolder

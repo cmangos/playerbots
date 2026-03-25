@@ -18,6 +18,7 @@ PlayerbotHolder::PlayerbotHolder() : PlayerbotAIBase()
     m_holderHandlers["reload"] = &PlayerbotHolder::HandleReload;
     m_holderHandlers["tweak"] = &PlayerbotHolder::HandleTweak;
     m_holderHandlers["self"] = &PlayerbotHolder::HandleSelf;
+    m_holderHandlers["spoof"] = &PlayerbotHolder::HandleSpoof;
 
     m_botCommandHandlers["add"] = &PlayerbotHolder::HandleBotAddLogin;
     m_botCommandHandlers["login"] = &PlayerbotHolder::HandleBotAddLogin;
@@ -515,7 +516,11 @@ std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid,
 {
     Player* bot = sObjectMgr.GetPlayer(guid);
     Player* master = nullptr;
-    if (masterguid)
+
+    if (m_spoofGuid)
+        master = sObjectMgr.GetPlayer(m_spoofGuid);
+
+    if (!master && masterguid)
         master = sObjectMgr.GetPlayer(masterguid);
 
     if (!sPlayerbotAIConfig.enabled || guid.IsEmpty())
@@ -1766,4 +1771,55 @@ std::unordered_map<std::string, std::string> PlayerbotHolder::GetCommandTexts()
         
         {"clear", "Clear recorded messages without retrieving.\nUsage: .rndbot clear <bot>"}
     };
+}
+
+std::list<std::string> PlayerbotHolder::HandleSpoof(Player* master, const std::string param, AccountTypes security)
+{
+    std::list<std::string> messages;
+    
+    if (param.empty())
+    {
+        // Clear the spoof
+        if (m_spoofGuid)
+        {
+            std::string playerName;
+            if (sObjectMgr.GetPlayerNameByGUID(m_spoofGuid, playerName))
+            {
+                messages.push_back("Spoof cleared. Was spoofing: " + playerName);
+            }
+            else
+            {
+                messages.push_back("Spoof cleared.");
+            }
+            m_spoofGuid = ObjectGuid();
+        }
+        else
+        {
+            messages.push_back("Spoof is not set.");
+        }
+        return messages;
+    }
+    
+    // Look up player by name
+    ObjectGuid guid = sObjectMgr.GetPlayerGuidByName(param);
+    if (!guid)
+    {
+        messages.push_back("Player '" + param + "' not found.");
+        return messages;
+    }
+    
+    // Get the player to verify they exist
+    Player* player = sObjectMgr.GetPlayer(guid, false);
+    if (!player)
+    {
+        messages.push_back("Player '" + param + "' found but is not online.");
+        return messages;
+    }
+    
+    std::string playerName;
+    sObjectMgr.GetPlayerNameByGUID(guid, playerName);
+    m_spoofGuid = guid;
+    
+    messages.push_back("Spoof set to: " + playerName + " (" + std::to_string(guid.GetCounter()) + ")");
+    return messages;
 }

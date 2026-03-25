@@ -63,7 +63,7 @@ bool WhoAction::Execute(Event& event)
         return false;
 
     // ignore random bot chat filter
-	bot->Whisper(tell, LANG_UNIVERSAL, owner->GetObjectGuid());
+    ai->TellPlayer(owner, tell);
     return true;
 }
 

@@ -24,7 +24,7 @@ bool AttackAnythingAction::isUseful()
 
     Unit* target = GetTarget();
 
-    if (!target)
+    if (!target || !ai->IsSafe(target))
         return false;
 
     if (ai->ContainsStrategy(STRATEGY_TYPE_HEAL) && !ai->HasStrategy("offdps", BotState::BOT_STATE_COMBAT))

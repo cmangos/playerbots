@@ -708,27 +708,30 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string
         }
     }
 
-    std::vector<std::string> chars = split(charname, ',');
-    for (auto name : chars)
+    if (bots.empty())
     {
-        uint32 accountId = GetAccountId(name);
-        if (!accountId)
+        std::vector<std::string> chars = split(charname, ',');
+        for (auto name : chars)
         {
-            bots.insert(name);
-            continue;
-        }
-
-        auto results = CharacterDatabase.PQuery(
-            "SELECT name FROM characters WHERE account = '%u'",
-            accountId);
-        if (results)
-        {
-            do
+            uint32 accountId = GetAccountId(name);
+            if (!accountId)
             {
-                Field* fields = results->Fetch();
-                std::string charName = fields[0].GetString();
-                bots.insert(charName);
-            } while (results->NextRow());
+                bots.insert(name);
+                continue;
+            }
+
+            auto results = CharacterDatabase.PQuery(
+                "SELECT name FROM characters WHERE account = '%u'",
+                accountId);
+            if (results)
+            {
+                do
+                {
+                    Field* fields = results->Fetch();
+                    std::string charName = fields[0].GetString();
+                    bots.insert(charName);
+                } while (results->NextRow());
+            }
         }
     }
 

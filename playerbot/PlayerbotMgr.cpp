@@ -52,6 +52,7 @@ PlayerbotHolder::PlayerbotHolder() : PlayerbotAIBase()
     m_botCommandHandlers["always"] = &PlayerbotHolder::HandleBotAlways;
     m_botCommandHandlers["debug"] = &PlayerbotHolder::HandleBotDebug;
     m_botCommandHandlers["c"] = &PlayerbotHolder::HandleBotC;
+    m_botCommandHandlers["w"] = &PlayerbotHolder::HandleConsoleWhisper;
     m_botCommandHandlers["cmd"] = &PlayerbotHolder::HandleConsoleCmd;
     m_botCommandHandlers["do"] = &PlayerbotHolder::HandleBotDo;
     m_botCommandHandlers["record"] = &PlayerbotHolder::HandleBotRecord;
@@ -1338,6 +1339,33 @@ std::string PlayerbotHolder::HandleBotC(Player* bot, Player* master, const std::
 
     ai->DoSpecificAction("cdebug", Event(".bot", "monstertalk " + param, bot), true);
     return "ok";
+}
+
+std::string PlayerbotHolder::HandleConsoleWhisper(Player* bot, Player* master, const std::string param)
+{
+    if (!bot)
+        return "do requires a bot";
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return "Bot has no AI";
+
+    Player* sender = master ? master : bot;
+
+    WorldPacket packet_template(CMSG_MESSAGECHAT);
+
+    packet_template << CHAT_MSG_WHISPER;
+    packet_template << LANG_UNIVERSAL;
+    packet_template << bot->GetName();
+    packet_template << param;
+
+    std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
+
+    sender->GetSession()->QueuePacket(std::move(packetPtr));
+
+    std::string msg = "Sending whisper " + param + " to player " + bot->GetName() + " from " + sender->GetName();
+
+    return msg;
 }
 
 

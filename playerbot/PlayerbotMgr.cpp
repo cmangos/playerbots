@@ -558,7 +558,7 @@ std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid,
         
         if (!subType.empty())
             realParam = subType;
-        else if (it->second == &PlayerbotHolder::HandleBotAddLogin)
+        else if (it->second == &PlayerbotHolder::HandleBotAddLogin || it->second == &PlayerbotHolder::HandleBotAlways)
             realParam = std::to_string(guid.GetRawValue());        
         else
             realParam = param;            

@@ -4388,9 +4388,7 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleDiff(std::string param)
         ss << "Sessions online: " << sWorld.GetActiveSessionCount() << "\n";
         ss << "Bots online: " << sRandomPlayerbotMgr.botCount << " (active: " << sRandomPlayerbotMgr.activeBots << ")";
 
-        std::string msg = ss.str();
-        sLog.outString("%s", msg.c_str());
-        messages.push_back(msg);
+        messages.push_back(ss.str());
         return messages;
     }
     else if (param.find(" ") != std::string::npos)
@@ -4404,7 +4402,6 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleDiff(std::string param)
         sPlayerbotAIConfig.diffEmpty = stoi(diff[1]);
 
         std::string msg = "Diff set to " + std::to_string(stoi(diff[0])) + " (player), " + std::to_string(stoi(diff[1])) + " (empty)";
-        sLog.outString("%s", msg.c_str());
         messages.push_back(msg);
         return messages;
     }

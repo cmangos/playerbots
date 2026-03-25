@@ -3386,10 +3386,10 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         sLog.outString("%s", i->c_str());
         if (isRA)
             handler->SendSysMessage(i->c_str());
-
-        if (!messages.empty())
-            return true;
     }
+
+    if (!messages.empty())
+        return true;
 
     if (isRA)
         handler->SendSysMessage("usage: help/list/reload/more.. or add/init/remove/more.. PLAYERNAME");

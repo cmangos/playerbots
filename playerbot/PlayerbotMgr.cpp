@@ -13,6 +13,50 @@ class CharacterHandler;
 
 PlayerbotHolder::PlayerbotHolder() : PlayerbotAIBase()
 {
+    m_holderHandlers["list"] = &PlayerbotHolder::HandleList;
+    m_holderHandlers["help"] = &PlayerbotHolder::HandleHelp;
+    m_holderHandlers["reload"] = &PlayerbotHolder::HandleReload;
+    m_holderHandlers["tweak"] = &PlayerbotHolder::HandleTweak;
+    m_holderHandlers["self"] = &PlayerbotHolder::HandleSelf;
+
+    m_botCommandHandlers["add"] = &PlayerbotHolder::HandleBotAddLogin;
+    m_botCommandHandlers["login"] = &PlayerbotHolder::HandleBotAddLogin;
+    m_botCommandHandlers["remove"] = &PlayerbotHolder::HandleBotRemoveLogout;
+    m_botCommandHandlers["logout"] = &PlayerbotHolder::HandleBotRemoveLogout;
+    m_botCommandHandlers["rm"] = &PlayerbotHolder::HandleBotRemoveLogout;
+    m_botCommandHandlers["gear"] = &PlayerbotHolder::HandleBotGear;
+    m_botCommandHandlers["equip"] = &PlayerbotHolder::HandleBotGear;
+    m_botCommandHandlers["train"] = &PlayerbotHolder::HandleBotTrainLearn;
+    m_botCommandHandlers["learn"] = &PlayerbotHolder::HandleBotTrainLearn;
+    m_botCommandHandlers["food"] = &PlayerbotHolder::HandleBotFoodDrink;
+    m_botCommandHandlers["drink"] = &PlayerbotHolder::HandleBotFoodDrink;
+    m_botCommandHandlers["potions"] = &PlayerbotHolder::HandleBotPotions;
+    m_botCommandHandlers["pots"] = &PlayerbotHolder::HandleBotPotions;
+    m_botCommandHandlers["consumes"] = &PlayerbotHolder::HandleBotConsumes;
+    m_botCommandHandlers["consumables"] = &PlayerbotHolder::HandleBotConsumes;
+    m_botCommandHandlers["consums"] = &PlayerbotHolder::HandleBotConsumes;
+    m_botCommandHandlers["regs"] = &PlayerbotHolder::HandleBotReagents;
+    m_botCommandHandlers["reg"] = &PlayerbotHolder::HandleBotReagents;
+    m_botCommandHandlers["reagents"] = &PlayerbotHolder::HandleBotReagents;
+    m_botCommandHandlers["prepare"] = &PlayerbotHolder::HandleBotPrepare;
+    m_botCommandHandlers["prep"] = &PlayerbotHolder::HandleBotPrepare;
+    m_botCommandHandlers["refresh"] = &PlayerbotHolder::HandleBotPrepare;
+    m_botCommandHandlers["init"] = &PlayerbotHolder::HandleBotInit;
+    m_botCommandHandlers["enchants"] = &PlayerbotHolder::HandleBotEnchants;
+    m_botCommandHandlers["ammo"] = &PlayerbotHolder::HandleBotAmmo;
+    m_botCommandHandlers["pet"] = &PlayerbotHolder::HandleBotPet;
+    m_botCommandHandlers["levelup"] = &PlayerbotHolder::HandleBotLevelUp;
+    m_botCommandHandlers["level"] = &PlayerbotHolder::HandleBotLevelUp;
+    m_botCommandHandlers["random"] = &PlayerbotHolder::HandleBotRandom;
+
+    m_botCommandHandlers["always"] = &PlayerbotHolder::HandleBotAlways;
+    m_botCommandHandlers["debug"] = &PlayerbotHolder::HandleBotDebug;
+    m_botCommandHandlers["c"] = &PlayerbotHolder::HandleBotC;
+    m_botCommandHandlers["do"] = &PlayerbotHolder::HandleBotDo;
+    m_botCommandHandlers["record"] = &PlayerbotHolder::HandleBotRecord;
+    m_botCommandHandlers["read"] = &PlayerbotHolder::HandleBotRead;
+    m_botCommandHandlers["clear"] = &PlayerbotHolder::HandleBotClear;
+
     for (uint32 spellId = 0; spellId < sServerFacade.GetSpellInfoRows(); spellId++)
     {
         sServerFacade.LookupSpellInfo(spellId);
@@ -467,13 +511,17 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
     }
 }
 
-std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId)
+std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId, const std::string param)
 {
+    Player* bot = sObjectMgr.GetPlayer(guid);
+    Player* master;
+    if (masterguid)
+        master = sObjectMgr.GetPlayer(masterguid);
+
     if (!sPlayerbotAIConfig.enabled || guid.IsEmpty())
         return "Bot system is disabled";
 
     uint32 botAccount = sObjectMgr.GetPlayerAccountIdByGUID(guid);
-    bool isRandomBot = sRandomPlayerbotMgr.IsRandomBot(guid);
     bool isRandomAccount = sPlayerbotAIConfig.IsInRandomAccountList(botAccount);
     bool isMasterAccount = (masterAccountId == botAccount);
 
@@ -488,226 +536,28 @@ std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid,
     {
         return "Can not control alt-bots with this command.";
     }
-   
-    if (cmd == "add" || cmd == "login")
+
+    std::string subType;
+    size_t eqPos = cmd.find('=');
+    if (eqPos != std::string::npos)
     {
-        if (sObjectMgr.GetPlayer(guid))
-            return "Player already logged in";
-
-        // Only allow bots that are on the same account or same guild (if enabled)
-        Player* master = sObjectMgr.GetPlayer(masterguid);
-        uint32 guildId = Player::GetGuildIdFromDB(guid);
-        if (master && (isMasterAccount || (sPlayerbotAIConfig.allowGuildBots && masterGuildId && guildId == masterGuildId) || admin))
-        {
-            if (isRandomAccount)
-                sRandomPlayerbotMgr.AddRandomBot(guid.GetCounter());
-            else if (isMasterAccount || sPlayerbotAIConfig.allowMultiAccountAltBots)
-                AddPlayerBot(guid.GetCounter(), masterAccountId);
-            else
-                return "Not in your account";
-        }
-        else
-        {
-            return "Not in your guild or account";
-        }
-
-        return "ok";
-    }
-    else if (cmd == "remove" || cmd == "logout" || cmd == "rm")
-    {
-        Player* player = sObjectMgr.GetPlayer(guid);
-        if (!player)
-            return "Player is offline";
-
-        Player* master = sObjectMgr.GetPlayer(masterguid);
-        uint32 guildId = Player::GetGuildIdFromDB(guid);
-        if (master && (isMasterAccount || (sPlayerbotAIConfig.allowGuildBots && masterGuildId && guildId == masterGuildId) || admin))
-        {
-            if (isRandomAccount)
-                sRandomPlayerbotMgr.Remove(player);
-            else if (GetPlayerBot(guid.GetCounter()))
-                LogoutPlayerBot(guid.GetCounter());
-            else
-                return "Not your bot";
-        }
-        else
-        {
-            return "Not in your guild or account";
-        }
-
-        return "ok";
+        subType = cmd.substr(eqPos + 1);
+        cmd = cmd.substr(0, eqPos);
     }
 
-    if (admin)
+    auto it = m_botCommandHandlers.find(cmd);
+    if (it != m_botCommandHandlers.end())
     {
-        Player* bot = GetPlayerBot(guid.GetCounter());
-        if (!bot) bot = sRandomPlayerbotMgr.GetPlayerBot(guid.GetCounter());
-        if (!bot)
-            return "bot not found";
+        std::string realParam;
+        
+        if (!subType.empty())
+            realParam = subType;
+        else if (!param.empty())
+            realParam = param;
+        else
+            realParam = std::to_string(guid.GetRawValue());
 
-        Player* master = bot->GetPlayerbotAI()->GetMaster();
-        if (master)
-        {
-            if (cmd == "gear" || cmd == "equip")
-            {
-                PlayerbotFactory factory(bot, bot->GetLevel());
-                factory.EquipGear();
-                return "random gear equipped";
-            }
-            if (cmd == "gear=green" || cmd == "gear=uncommon")
-            {
-                PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_UNCOMMON);
-                factory.EquipGear();
-                return "random green gear equipped";
-            }
-            if (cmd == "gear=blue" || cmd == "gear=rare")
-            {
-                PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_RARE);
-                factory.EquipGear();
-                return "random blue gear equipped";
-            }
-            if (cmd == "gear=purple" || cmd == "gear=epic")
-            {
-                PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_EPIC);
-                factory.EquipGear();
-                return "random epic gear equipped";
-            }
-            if (cmd == "equip=upgrade" || cmd == "gear=upgrade" || cmd == "upgrade" || cmd == "equip=sync")
-            {
-                const bool syncWithMaster = cmd == "equip=sync";
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_NORMAL);
-                factory.UpgradeGear(syncWithMaster);
-                return "gear upgraded";
-            }
-            if (cmd == "equip=best" || cmd == "gear=best")
-            {
-                PlayerbotFactory factory(bot, bot->GetLevel());
-                factory.EquipGearBest();
-                return "random best gear equipped";
-            }
-            if (cmd == "equip=partial" || cmd == "gear=partial")
-            {
-                PlayerbotFactory factory(bot, bot->GetLevel());
-                factory.EquipGearPartialUpgrade();
-                return "random gear upgraded to some slots";
-            }
-            if (cmd == "train" || cmd == "learn")
-            {
-#ifndef MANGOSBOT_ONE
-                bot->learnClassLevelSpells();
-#endif
-                return "class level spells learned";
-            }
-            if (cmd == "food" || cmd == "drink")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_NORMAL);
-                factory.AddFood();
-                return "food added";
-            }
-            if (cmd == "potions" || cmd == "pots")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_NORMAL);
-                factory.AddPotions();
-                return "potions added";
-            }
-            if (cmd == "consumes" || cmd == "consumables" || cmd == "consums")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_NORMAL);
-                factory.AddConsumes();
-                return "consumables added";
-            }
-            if (cmd == "regs" || cmd == "reg" || cmd == "reagents")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_NORMAL);
-                factory.AddReagents();
-                return "reagents added";
-            }
-            if (cmd == "prepare" || cmd == "prep" || cmd == "refresh")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_NORMAL);
-                factory.Refresh();
-                return "consumes/regs added";
-            }
-            if (cmd == "init")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_NORMAL);
-                factory.Randomize(true, false);
-                return "ok";
-            }
-            if (cmd == "init=white" || cmd == "init=common")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_NORMAL);
-                factory.Randomize(false, false);
-                return "ok";
-            }
-            else if (cmd == "init=green" || cmd == "init=uncommon")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_UNCOMMON);
-                factory.Randomize(false, false);
-                return "ok";
-            }
-            else if (cmd == "init=blue" || cmd == "init=rare")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_RARE);
-                factory.Randomize(false, false);
-                return "ok";
-            }
-            else if (cmd == "init=epic" || cmd == "init=purple")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_EPIC);
-                factory.Randomize(false, false);
-                return "ok";
-            }
-            else if (cmd == "init=legendary" || cmd == "init=yellow")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_LEGENDARY);
-                factory.Randomize(false, false);
-                return "ok";
-            }
-            else if (cmd == "init=sync")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_LEGENDARY);
-                factory.Randomize(false, true);
-                return "ok";
-            }
-            else if (cmd == "enchants")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_LEGENDARY);
-                factory.EnchantEquipment();
-                return "ok";
-            }
-            else if (cmd == "ammo")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_LEGENDARY);
-                factory.InitAmmo();
-                return "ok";
-            }
-            else if (cmd == "pet")
-            {
-                PlayerbotFactory factory(bot, master->GetLevel(), ITEM_QUALITY_LEGENDARY);
-                factory.InitPet();
-                factory.InitPetSpells();
-                return "ok";
-            }
-        }
-
-        if (cmd == "levelup" || cmd == "level")
-        {
-            PlayerbotFactory factory(bot, bot->GetLevel());
-            factory.Randomize(true, false);
-            return "ok";
-        }
-        else if (cmd == "refresh")
-        {
-            PlayerbotFactory factory(bot, bot->GetLevel());
-            factory.Refresh();
-            return "ok";
-        }
-        else if (cmd == "random")
-        {
-            sRandomPlayerbotMgr.Randomize(bot);
-            return "ok";
-        }
+        return (this->*it->second)(bot, master, realParam);
     }
 
     return "unknown command";
@@ -749,290 +599,54 @@ bool PlayerbotMgr::HandlePlayerbotMgrCommand(ChatHandler* handler, char const* a
     return true;
 }
 
-std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args, Player* master)
+std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string args, Player* master, AccountTypes security)
 {
+    std::vector<std::string> params = Qualified::getMultiQualifiers(args, " ");
+
     std::list<std::string> messages;
 
-    if (!*args)
+    if (params.empty())
     {
-        messages.push_back("usage: list/reload or add/init/remove PLAYERNAME");
+        std::string helpText = GetCommandTexts("");
+        messages.push_back(helpText);
         return messages;
     }
 
-    std::string command = args;
+    std::string command = params[0];
+    std::string param, charname;
 
-    char *cmd = strtok ((char*)args, " ");
-    const char *charname = strtok (NULL, " ");
-    if (!cmd)
+    if (params.size() > 1)
     {
-        messages.push_back("usage: list/reload or add/init/remove PLAYERNAME");
+        param = args.substr(params[0].size() + 1);
+        charname = params[1];
+    }
+    
+    for (auto& [prefix, handler] : m_holderHandlers)
+    {
+        if (command != prefix)
+            continue;
+
+        messages = (this->*handler)(master, param, security);
         return messages;
     }
 
-    if (!strcmp(cmd, "list"))
-    {
-        messages.push_back(ListBots(master));
-        return messages;
-    }
+    std::set<std::string> bots;
 
-    if (!strcmp(cmd, "reload") && master->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
-    {
-        messages.push_back("Reloading config");
-        sPlayerbotAIConfig.Initialize();
-        return messages;
-    }   
-
-    if (!strcmp(cmd, "tweak") && master->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
-    {
-        sPlayerbotAIConfig.tweakValue = sPlayerbotAIConfig.tweakValue++;
-        if (sPlayerbotAIConfig.tweakValue > 2)
-            sPlayerbotAIConfig.tweakValue = 0;
-
-        messages.push_back("Set tweakvalue to " + std::to_string(sPlayerbotAIConfig.tweakValue));
-        return messages;
-    }
-
-    if (!strcmp(cmd, "always"))
-    {
-        if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::DISABLED)
-        {
-            messages.push_back("Self-bot is disabled");
-            return messages;
-        }
-        else if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::GM_ONLY && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
-        {
-            messages.push_back("You do not have permission to enable player ai");
-            return messages;
-        }
-        else if (sPlayerbotAIConfig.selfBotLevel < BotSelfBotLevel::ALWAYS_ALLOWED && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
-        {
-            messages.push_back("Player ai is only available while online");
-            return messages;
-        }
-
-        ObjectGuid guid;
-        uint32 accountId;
-        std::string alwaysName;
-
-        if (!charname)
-        {
-            guid = master->GetObjectGuid(); 
-            accountId = master->GetSession()->GetAccountId();
-            alwaysName = master->GetName();
-        }
-        else
-        {
-            guid = sObjectMgr.GetPlayerGuidByName(charname);
-            if (!guid)
-            {
-                messages.push_back("character not found");
-                return messages;
-            }
-
-            accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
-
-            if (accountId != master->GetSession()->GetAccountId() && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
-            {
-                messages.push_back("Player ai can not be forced for characters from a different account.");
-                return messages;
-            }
-
-            alwaysName = charname;
-        }
-
-        BotAlwaysOnline always = BotAlwaysOnline(sRandomPlayerbotMgr.GetValue(guid.GetCounter(), "always"));
-
-        if (always == BotAlwaysOnline::DISABLED || always == BotAlwaysOnline::DISABLED_BY_COMMAND)
-        {
-            sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", (uint32)BotAlwaysOnline::ACTIVE);
-            messages.push_back("Enable offline player ai for " + alwaysName);
-            sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, guid.GetCounter()));
-
-            if (!charname)
-            {
-                if (!master->GetPlayerbotAI())
-                    OnBotLogin(master);
-            }
-            else
-            {
-                Player* bot = sRandomPlayerbotMgr.GetPlayerBot(guid);
-
-                if (bot)
-                {
-                    ProcessBotCommand("add", guid,
-                        master->GetObjectGuid(),
-                        master->GetSession()->GetSecurity() >= SEC_GAMEMASTER,
-                        master->GetSession()->GetAccountId(),
-                        master->GetGuildId());
-                }
-                else
-                {
-                    Player* player = sObjectMgr.GetPlayer(guid, false);
-
-                    if(player)
-                        OnBotLogin(player);
-                }
-            }
-        }
-        else
-        {
-            sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", (uint32)BotAlwaysOnline::DISABLED_BY_COMMAND);
-            messages.push_back("Disable offline player ai for " + alwaysName);
-
-            Player* bot = sObjectMgr.GetPlayer(guid, false);
-
-            if (bot && bot->GetPlayerbotAI())
-            {
-                if (guid != master->GetObjectGuid() && !bot->isRealPlayer())
-                {
-                    if (sPlayerbotAIConfig.IsFreeAltBot(bot))
-                        sRandomPlayerbotMgr.LogoutPlayerBot(guid);
-                }
-                else
-                {
-                    DisablePlayerBot(guid, false);
-                }
-            }
-
-            auto it = remove_if(sPlayerbotAIConfig.freeAltBots.begin(), sPlayerbotAIConfig.freeAltBots.end(), [guid](std::pair<uint32, uint32> i) {return i.second == guid.GetCounter(); });
-
-            if (it != sPlayerbotAIConfig.freeAltBots.end())
-                sPlayerbotAIConfig.freeAltBots.erase(it, sPlayerbotAIConfig.freeAltBots.end());
-        }
-        
-        return messages;
-    }
-
-    if (!strcmp(cmd, "self"))
-    {        
-        if (master->GetPlayerbotAI())
-        {
-            DisablePlayerBot(master->GetGUIDLow(), false);
-           
-            if (sRandomPlayerbotMgr.GetValue(master->GetObjectGuid().GetCounter(), "selfbot"))
-            {
-                messages.push_back("Disable player ai (on login)");
-                sRandomPlayerbotMgr.SetValue(master->GetObjectGuid().GetCounter(), "selfbot", (uint32)BotAlwaysOnline::DISABLED);
-            }
-            else
-                messages.push_back("Disable player ai");
-        }
-        else if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::DISABLED)
-            messages.push_back("Self-bot is disabled");
-        else if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::GM_ONLY && master->GetSession()->GetSecurity() < SEC_GAMEMASTER)
-            messages.push_back("You do not have permission to enable player ai");
-        else
-        {
-            OnBotLogin(master);
-
-            if (charname && !strcmp(charname, "login"))
-            {
-                messages.push_back("Enable player ai (on login)");
-                sRandomPlayerbotMgr.SetValue(master->GetObjectGuid().GetCounter(), "selfbot", 1);
-            }
-            else
-                messages.push_back("Enable player ai");
-        }
-       return messages;
-     }
-
-    if (command.find("debug ") != std::string::npos && master->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
-    {
-        bool hasBot = false;
-
-        PlayerbotAI* ai;
-
-        if (master)
-        {
-            ai = master->GetPlayerbotAI();
-        }
-
-        if (ai)
-        {
-            hasBot = true;
-        }
-        else
-        {
-            master->CreatePlayerbotAI();
-            ai = master->GetPlayerbotAI();
-            ai->SetMaster(master);
-            ai->ResetStrategies();
-        }
-
-        command = command.substr(6);
-
-        if(!ai->DoSpecificAction("cdebug", Event(".bot",command,master), true))
-        {
-            messages.push_back("debug failed");
-        }
-
-        if (!hasBot)
-        {
-            if (master->GetPlayerbotAI()) 
-            {
-                master->RemovePlayerbotAI();
-            }
-        }
-
-        return messages;
-    }
-
-    if (command.find("c ") != std::string::npos)
-    {
-        bool hasBot = false;
-
-        PlayerbotAI* ai;
-
-        if (master)
-        {
-            ai = master->GetPlayerbotAI();
-        }
-
-        if (ai)
-        {
-            hasBot = true;
-        }
-        else
-        {
-            master->CreatePlayerbotAI();
-            ai = master->GetPlayerbotAI();
-            ai->SetMaster(master);
-            ai->ResetStrategies();
-        }
-
-        command = command.substr(2);
-
-        ai->DoSpecificAction("cdebug", Event(".bot", "monstertalk " + command, master), true);
-        
-        if (!hasBot)
-        {
-            if (master->GetPlayerbotAI())
-            {
-                master->RemovePlayerbotAI();
-            }
-        }
-
-        return messages;
-    }
-
-    if (!charname)
+    if (charname.empty())
     {
         if (master && master->GetTarget() && master->GetTarget()->IsPlayer() && !((Player*)master->GetTarget())->isRealPlayer())
         {
-            charname = master->GetTarget()->GetName();
+            bots.insert(master->GetTarget()->GetName());
         }
         else
         {
-            messages.push_back("usage: list or add/init/remove PLAYERNAME");
+            std::string helpText = GetCommandTexts("");
+            messages.push_back(helpText);
             return messages;
         }
-    }
+    }    
 
-    std::string cmdStr = cmd;
-    std::string charnameStr = charname;
-
-    std::set<std::string> bots;
-    if (charnameStr == "*" && master)
+    if (charname == "*" && master)
     {
         Group* group = master->GetGroup();
         if (!group)
@@ -1044,18 +658,18 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
         Group::MemberSlotList slots = group->GetMemberSlots();
         for (Group::member_citerator i = slots.begin(); i != slots.end(); i++)
         {
-			ObjectGuid member = i->guid;
+            ObjectGuid member = i->guid;
 
-			if (member.GetRawValue() == master->GetObjectGuid().GetRawValue())
-				continue;
+            if (member.GetRawValue() == master->GetObjectGuid().GetRawValue())
+                continue;
 
             std::string bot;
-			if (sObjectMgr.GetPlayerNameByGUID(member, bot))
-			    bots.insert(bot);
+            if (sObjectMgr.GetPlayerNameByGUID(member, bot))
+                bots.insert(bot);
         }
     }
 
-    if (charnameStr == "guild" && master)
+    if (charname == "guild" && master)
     {
         if (!master->GetGuildId())
         {
@@ -1084,25 +698,23 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
         } while (result->NextRow());
     }
 
-    if (charnameStr == "!" && master && master->GetSession()->GetSecurity() > SEC_GAMEMASTER)
+    if (charname == "!" && master && master->GetSession()->GetSecurity() > SEC_GAMEMASTER)
     {
-       for (auto& itr : playerBots)
-       {
+        for (auto& itr : playerBots)
+        {
             Player* bot = itr.second;
             if (bot && bot->IsInWorld())
                 bots.insert(bot->GetName());
         }
     }
 
-    std::vector<std::string> chars = split(charnameStr, ',');
-    for (std::vector<std::string>::iterator i = chars.begin(); i != chars.end(); i++)
+    std::vector<std::string> chars = split(charname, ',');
+    for (auto name : chars)
     {
-        std::string s = *i;
-
-        uint32 accountId = GetAccountId(s);
+        uint32 accountId = GetAccountId(name);
         if (!accountId)
         {
-            bots.insert(s);
+            bots.insert(name);
             continue;
         }
 
@@ -1118,13 +730,17 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
                 bots.insert(charName);
             } while (results->NextRow());
         }
-	}
+    }
 
-    for (std::set<std::string>::iterator i = bots.begin(); i != bots.end(); ++i)
+    if (bots.size() && params.size() > 2)
     {
-        std::string bot = *i;
+        param = args.substr(params[0].size() + params[1].size() + 2);
+    }
+
+    for (auto bot :  bots)
+    {
         std::ostringstream out;
-        out << cmdStr << ": " << bot << " - ";
+        out << command << ": " << bot << " - ";
 
         ObjectGuid member = sObjectMgr.GetPlayerGuidByName(bot);
         if (!member)
@@ -1133,20 +749,17 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(char const* args,
         }
         else if (master && member.GetRawValue() != master->GetObjectGuid().GetRawValue())
         {
-            out << ProcessBotCommand(cmdStr, member,
-                    master->GetObjectGuid(),
-                    master->GetSession()->GetSecurity() >= SEC_GAMEMASTER,
-                    master->GetSession()->GetAccountId(),
-                    master->GetGuildId());
+            out << ProcessBotCommand(command, member, master->GetObjectGuid(), master->GetSession()->GetSecurity() >= SEC_GAMEMASTER, master->GetSession()->GetAccountId(), master->GetGuildId(), param);
         }
         else if (!master)
         {
-            out << ProcessBotCommand(cmdStr, member, ObjectGuid(), true, -1, -1);
+            out << ProcessBotCommand(command, member, ObjectGuid(), true, -1, -1, param);
         }
 
         messages.push_back(out.str());
     }
 
+    messages.push_back("Unknown command. Use 'help' for more information.");
     return messages;
 }
 
@@ -1164,7 +777,7 @@ uint32 PlayerbotHolder::GetAccountId(std::string name)
     return accountId;
 }
 
-std::string PlayerbotHolder::ListBots(Player* master)
+std::string PlayerbotHolder::ListBots(Player* master, const std::string param)
 {
     std::set<std::string> bots;
     std::map<uint8, std::string> classNames;
@@ -1190,11 +803,14 @@ std::string PlayerbotHolder::ListBots(Player* master)
         Player* bot = itr.second;
 
         if (!bot)
-          continue;
+            continue;
 
         std::string name = bot->GetName();
-        bots.insert(name);
 
+        if (!param.empty() && name.find(param) != 0)
+            continue;
+
+        bots.insert(name);
         names.push_back(name);
         online[name] = "+";
         classes[name] = classNames[bot->getClass()];
@@ -1203,7 +819,7 @@ std::string PlayerbotHolder::ListBots(Player* master)
     if (master)
     {
         auto results = CharacterDatabase.PQuery("SELECT class,name FROM characters where account = '%u'",
-                master->GetSession()->GetAccountId());
+            master->GetSession()->GetAccountId());
         if (results != NULL)
         {
             do
@@ -1211,6 +827,10 @@ std::string PlayerbotHolder::ListBots(Player* master)
                 Field* fields = results->Fetch();
                 uint8 cls = fields[0].GetUInt8();
                 std::string name = fields[1].GetString();
+
+                if (!param.empty() && name.find(param) != 0)
+                    continue;
+
                 if (bots.find(name) == bots.end() && name != master->GetSession()->GetPlayerName())
                 {
                     names.push_back(name);
@@ -1223,20 +843,27 @@ std::string PlayerbotHolder::ListBots(Player* master)
 
     names.sort();
 
-    Group* group = master->GetGroup();
-    if (group)
+    if (master)
     {
-        Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        Group* group = master->GetGroup();
+        if (group)
         {
-            Player *member = sObjectMgr.GetPlayer(itr->guid);
-            if (member && sRandomPlayerbotMgr.IsFreeBot(member))
+            Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
+            for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
             {
-                std::string name = member->GetName();
+                Player* member = sObjectMgr.GetPlayer(itr->guid);
 
-                names.push_back(name);
-                online[name] = "+";
-                classes[name] = classNames[member->getClass()];
+                if (member && sRandomPlayerbotMgr.IsFreeBot(member))
+                {
+                    std::string name = member->GetName();
+
+                    if (!param.empty() && name.find(param) != 0)
+                        continue;
+
+                    names.push_back(name);
+                    online[name] = "+";
+                    classes[name] = classNames[member->getClass()];
+                }
             }
         }
     }
@@ -1246,7 +873,10 @@ std::string PlayerbotHolder::ListBots(Player* master)
     out << "Bot roster: ";
     for (std::list<std::string>::iterator i = names.begin(); i != names.end(); ++i)
     {
-        if (first) first = false; else out << ", ";
+        if (first)
+            first = false;
+        else
+            out << ", ";
         std::string name = *i;
         out << online[name] << name << " " << classes[name];
     }
@@ -1476,4 +1106,598 @@ void PlayerbotMgr::CheckTellErrors(uint32 elapsed)
         ChatHandler(master->GetSession()).PSendSysMessage("%s", out.str().c_str());
     }
     errors.clear();
+}
+
+std::list<std::string> PlayerbotHolder::HandleList(Player* master, const std::string param, AccountTypes security)
+{
+    std::list<std::string> messages;
+    messages.push_back(ListBots(master, param));
+    return messages;
+}
+
+std::list<std::string> PlayerbotHolder::HandleHelp(Player* master, const std::string param, AccountTypes security)
+{
+    std::list<std::string> messages;
+    
+    if (param.empty())
+    {
+        messages.push_back("Available commands: list, reload, tweak, always, self, debug, c, do, record, read, clear");
+        messages.push_back("Type 'help <command>' for more information on a specific command.");
+        return messages;
+    }
+
+    if (param == "commands")
+    {
+        std::string commands = "Commands: ";
+        for (auto& [command, help] : GetCommandTexts())
+        {
+            commands += command + ", ";
+        }
+
+        commands = commands.substr(0, commands.size() - 2);
+        messages.push_back(commands);
+        return messages;
+    }
+    
+    std::string helpText = GetCommandTexts(param);
+    if (helpText.empty())
+    {
+        messages.push_back("No help available for '" + param + "'");
+    }
+    else
+    {
+        messages.push_back(helpText);
+    }
+    
+    return messages;
+}
+
+std::list<std::string> PlayerbotHolder::HandleReload(Player* master, const std::string param, AccountTypes security)
+{
+    std::list<std::string> messages;
+    if (security < SEC_GAMEMASTER)
+    {
+        messages.push_back("You do not have permission to use this command.");
+        return messages;
+    }
+    messages.push_back("Reloading config");
+    sPlayerbotAIConfig.Initialize();
+    return messages;
+}
+
+std::list<std::string> PlayerbotHolder::HandleTweak(Player* master, const std::string param, AccountTypes security)
+{
+    std::list<std::string> messages;
+    if (security < SEC_GAMEMASTER)
+    {
+        messages.push_back("You do not have permission to use this command.");
+        return messages;
+    }
+    sPlayerbotAIConfig.tweakValue = sPlayerbotAIConfig.tweakValue++;
+    if (sPlayerbotAIConfig.tweakValue > 2)
+        sPlayerbotAIConfig.tweakValue = 0;
+    messages.push_back("Set tweakvalue to " + std::to_string(sPlayerbotAIConfig.tweakValue));
+    return messages;
+}
+
+std::string PlayerbotHolder::HandleBotAlways(Player* bot, Player* master, const std::string param)
+{
+    if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::DISABLED)
+    {
+        return "Self-bot is disabled";
+    }
+
+    if (!bot)
+    {
+        return "always requires a target player";
+    }
+
+    ObjectGuid guid = bot->GetObjectGuid();
+    uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
+    std::string alwaysName = bot->GetName();
+
+    BotAlwaysOnline always = BotAlwaysOnline(sRandomPlayerbotMgr.GetValue(guid.GetCounter(), "always"));
+
+    if (always == BotAlwaysOnline::DISABLED || always == BotAlwaysOnline::DISABLED_BY_COMMAND)
+    {
+        sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", (uint32)BotAlwaysOnline::ACTIVE);
+        sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, guid.GetCounter()));
+
+        Player* existingBot = sRandomPlayerbotMgr.GetPlayerBot(guid);
+        if (existingBot)
+        {
+            if (master)
+            {
+                ProcessBotCommand("add", guid, master->GetObjectGuid(), false, master->GetSession()->GetAccountId(), master->GetGuildId());
+            }
+        }
+        else
+        {
+            Player* player = sObjectMgr.GetPlayer(guid, false);
+            if (player)
+                OnBotLogin(player);
+        }
+
+        return "Enabled offline player ai for " + alwaysName;
+    }
+    else
+    {
+        sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", (uint32)BotAlwaysOnline::DISABLED_BY_COMMAND);
+
+        Player* onlineBot = sObjectMgr.GetPlayer(guid, false);
+        if (onlineBot && onlineBot->GetPlayerbotAI())
+        {
+            if (!master || guid != master->GetObjectGuid())
+            {
+                if (sPlayerbotAIConfig.IsFreeAltBot(onlineBot))
+                    sRandomPlayerbotMgr.LogoutPlayerBot(guid);
+                else
+                    DisablePlayerBot(guid, false);
+            }
+            else if (master)
+            {
+                DisablePlayerBot(guid, false);
+            }
+        }
+
+        auto it = std::remove_if(sPlayerbotAIConfig.freeAltBots.begin(), sPlayerbotAIConfig.freeAltBots.end(), [guid](std::pair<uint32, uint32> i) { return i.second == guid.GetCounter(); });
+        sPlayerbotAIConfig.freeAltBots.erase(it, sPlayerbotAIConfig.freeAltBots.end());
+
+        return "Disabled offline player ai for " + alwaysName;
+    }
+}
+
+std::list<std::string> PlayerbotHolder::HandleSelf(Player* master, const std::string param, AccountTypes security)
+{
+    std::list<std::string> messages;
+    if (!master)
+    {
+        messages.push_back("self requires a master (in-game)");
+        return messages;
+    }
+
+    if (master->GetPlayerbotAI())
+    {
+        DisablePlayerBot(master->GetGUIDLow(), false);
+       
+        if (sRandomPlayerbotMgr.GetValue(master->GetObjectGuid().GetCounter(), "selfbot"))
+        {
+            messages.push_back("Disable player ai (on login)");
+            sRandomPlayerbotMgr.SetValue(master->GetObjectGuid().GetCounter(), "selfbot", (uint32)BotAlwaysOnline::DISABLED);
+        }
+        else
+            messages.push_back("Disable player ai");
+    }
+    else if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::DISABLED)
+        messages.push_back("Self-bot is disabled");
+    else if (sPlayerbotAIConfig.selfBotLevel == BotSelfBotLevel::GM_ONLY && security < SEC_GAMEMASTER)
+        messages.push_back("You do not have permission to enable player ai");
+    else
+    {
+        OnBotLogin(master);
+
+        if (!param.empty() && param == "login")
+        {
+            messages.push_back("Enable player ai (on login)");
+            sRandomPlayerbotMgr.SetValue(master->GetObjectGuid().GetCounter(), "selfbot", 1);
+        }
+        else
+            messages.push_back("Enable player ai");
+    }
+   return messages;
+}
+
+std::string PlayerbotHolder::HandleBotDebug(Player* bot, Player* master, const std::string param)
+{
+    if (!bot)
+        return "debug requires a bot";
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return "Bot has no AI";
+
+    ai->RecordMessages(true);
+
+    std::string command = param;
+
+    if(!ai->DoSpecificAction("cdebug", Event(".bot", command, bot), true))
+    {
+        return "debug failed";
+    }
+
+    std::vector<std::string> output = ai->GetRecordedMessages();
+    if (output.empty())
+        return "(no output)";
+
+    std::string result;
+    for (const auto& line : output)
+    {
+        result += line + "\n";
+    }
+    return result;
+}
+
+std::string PlayerbotHolder::HandleBotC(Player* bot, Player* master, const std::string param)
+{
+    if (!bot)
+        return "c requires a bot";
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return "Bot has no AI";
+
+    ai->DoSpecificAction("cdebug", Event(".bot", "monstertalk " + param, bot), true);
+    return "ok";
+}
+
+std::string PlayerbotHolder::HandleBotDo(Player* bot, Player* master, const std::string param)
+{
+    if (!bot)
+        return "do requires a bot";
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return "Bot has no AI";
+
+    std::string action = param.substr(0, param.find(' '));
+    std::string subparam = param.substr(param.find(' ') + 1);
+
+    if (param.find(' ') == std::string::npos)
+        subparam = "";
+
+    ai->RecordMessages(true);
+
+    if(!ai->DoSpecificAction(action, Event(".bot", subparam, bot), true))
+    {
+        return "action failed";
+    }
+
+    std::vector<std::string> output = ai->GetRecordedMessages();
+    if (output.empty())
+        return "(no output)";
+
+    std::string result;
+    for (const auto& line : output)
+    {
+        result += line + "\n";
+    }
+    return result;
+}
+
+std::string PlayerbotHolder::HandleBotRecord(Player* bot, Player* master, const std::string param)
+{
+    if (!bot)
+        return "record requires a bot";
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return "Bot has no AI";
+
+    ai->RecordMessages(true);
+    return "Recording enabled on " + std::string(bot->GetName());
+}
+
+std::string PlayerbotHolder::HandleBotRead(Player* bot, Player* master, const std::string param)
+{
+    if (!bot)
+        return "read requires a bot";
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return "Bot has no AI";
+
+    ai->RecordMessages(false);
+    std::vector<std::string> output = ai->GetRecordedMessages();
+
+    if (output.empty())
+        return "(no messages)";
+
+    std::string result;
+    for (const auto& line : output)
+    {
+        result += line + "\n";
+    }
+    return result;
+}
+
+std::string PlayerbotHolder::HandleBotClear(Player* bot, Player* master, const std::string param)
+{
+    if (!bot)
+        return "clear requires a bot";
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return "Bot has no AI";
+
+    ai->ClearRecordedMessages();
+    return "Messages cleared";
+}
+
+std::string PlayerbotHolder::HandleBotAddLogin(Player* bot, Player* master, const std::string param)
+{
+    ObjectGuid guid;
+    if (!bot)
+    {
+        if (!param.empty())
+        {
+            guid = ObjectGuid(uint64(std::stoull(param)));
+        }
+        if (!guid)
+            return "Bot not found - provide guid in param";
+        bot = sObjectMgr.GetPlayer(guid);
+    }
+
+    if (!bot)
+        return "Bot not found";
+
+    if (sObjectMgr.GetPlayer(bot->GetObjectGuid()))
+        return "Player already logged in";
+
+    uint32 guildId = Player::GetGuildIdFromDB(bot->GetObjectGuid());
+    uint32 masterAccountId = master ? master->GetSession()->GetAccountId() : 0;
+    uint32 masterGuildId = master ? master->GetGuildId() : 0;
+    uint32 botAccount = sObjectMgr.GetPlayerAccountIdByGUID(bot->GetObjectGuid());
+    bool isMasterAccount = (masterAccountId == botAccount);
+    bool isRandomAccount = sPlayerbotAIConfig.IsInRandomAccountList(botAccount);
+
+    if (master && (isMasterAccount || (sPlayerbotAIConfig.allowGuildBots && masterGuildId && guildId == masterGuildId) || false))
+    {
+        if (isRandomAccount)
+            sRandomPlayerbotMgr.AddRandomBot(bot->GetGUIDLow());
+        else if (isMasterAccount || sPlayerbotAIConfig.allowMultiAccountAltBots)
+            AddPlayerBot(bot->GetGUIDLow(), masterAccountId);
+        else
+            return "Not in your account";
+    }
+    else
+    {
+        return "Not in your guild or account";
+    }
+
+    return "ok";
+}
+
+std::string PlayerbotHolder::HandleBotRemoveLogout(Player* bot, Player* master, const std::string param)
+{
+    Player* player = sObjectMgr.GetPlayer(bot->GetObjectGuid());
+    if (!player)
+        return "Player is offline";
+
+    uint32 guildId = Player::GetGuildIdFromDB(bot->GetObjectGuid());
+    uint32 masterAccountId = master ? master->GetSession()->GetAccountId() : 0;
+    uint32 masterGuildId = master ? master->GetGuildId() : 0;
+    uint32 botAccount = sObjectMgr.GetPlayerAccountIdByGUID(bot->GetObjectGuid());
+    bool isMasterAccount = (masterAccountId == botAccount);
+    bool isRandomAccount = sPlayerbotAIConfig.IsInRandomAccountList(botAccount);
+
+    if (master && (isMasterAccount || (sPlayerbotAIConfig.allowGuildBots && masterGuildId && guildId == masterGuildId) || false))
+    {
+        if (isRandomAccount)
+            sRandomPlayerbotMgr.Remove(player);
+        else if (GetPlayerBot(bot->GetGUIDLow()))
+            LogoutPlayerBot(bot->GetGUIDLow());
+        else
+            return "Not your bot";
+    }
+    else
+    {
+        return "Not in your guild or account";
+    }
+
+    return "ok";
+}
+
+std::string PlayerbotHolder::HandleBotGear(Player* bot, Player* master, const std::string param)
+{
+    if (param.empty())
+    {
+        PlayerbotFactory factory(bot, bot->GetLevel());
+        factory.EquipGear();
+        return "random gear equipped";
+    }
+    if (param == "green" || param == "uncommon")
+    {
+        PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_UNCOMMON);
+        factory.EquipGear();
+        return "random green gear equipped";
+    }
+    if (param == "blue" || param == "rare")
+    {
+        PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_RARE);
+        factory.EquipGear();
+        return "random blue gear equipped";
+    }
+    if (param == "purple" || param == "epic")
+    {
+        PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_EPIC);
+        factory.EquipGear();
+        return "random epic gear equipped";
+    }
+    if (param == "upgrade")
+    {
+        PlayerbotFactory factory(bot, master ? master->GetLevel() : bot->GetLevel(), ITEM_QUALITY_NORMAL);
+        factory.UpgradeGear(false);
+        return "gear upgraded";
+    }
+    if (param == "sync")
+    {
+        PlayerbotFactory factory(bot, master ? master->GetLevel() : bot->GetLevel(), ITEM_QUALITY_NORMAL);
+        factory.UpgradeGear(true);
+        return "gear upgraded";
+    }
+    if (param == "best")
+    {
+        PlayerbotFactory factory(bot, bot->GetLevel());
+        factory.EquipGearBest();
+        return "random best gear equipped";
+    }
+    if (param == "partial")
+    {
+        PlayerbotFactory factory(bot, bot->GetLevel());
+        factory.EquipGearPartialUpgrade();
+        return "random gear upgraded to some slots";
+    }
+
+    return "unknown gear command";
+}
+
+std::string PlayerbotHolder::HandleBotTrainLearn(Player* bot, Player* master, const std::string param)
+{
+#ifndef MANGOSBOT_ONE
+    bot->learnClassLevelSpells();
+#endif
+    return "class level spells learned";
+}
+
+std::string PlayerbotHolder::HandleBotFoodDrink(Player* bot, Player* master, const std::string param)
+{
+    uint32 level = master ? master->GetLevel() : bot->GetLevel();
+    PlayerbotFactory factory(bot, level, ITEM_QUALITY_NORMAL);
+    factory.AddFood();
+    return "food added";
+}
+
+std::string PlayerbotHolder::HandleBotPotions(Player* bot, Player* master, const std::string param)
+{
+    uint32 level = master ? master->GetLevel() : bot->GetLevel();
+    PlayerbotFactory factory(bot, level, ITEM_QUALITY_NORMAL);
+    factory.AddPotions();
+    return "potions added";
+}
+
+std::string PlayerbotHolder::HandleBotConsumes(Player* bot, Player* master, const std::string param)
+{
+    uint32 level = master ? master->GetLevel() : bot->GetLevel();
+    PlayerbotFactory factory(bot, level, ITEM_QUALITY_NORMAL);
+    factory.AddConsumes();
+    return "consumables added";
+}
+
+std::string PlayerbotHolder::HandleBotReagents(Player* bot, Player* master, const std::string param)
+{
+    uint32 level = master ? master->GetLevel() : bot->GetLevel();
+    PlayerbotFactory factory(bot, level, ITEM_QUALITY_NORMAL);
+    factory.AddReagents();
+    return "reagents added";
+}
+
+std::string PlayerbotHolder::HandleBotPrepare(Player* bot, Player* master, const std::string param)
+{
+    uint32 level = master ? master->GetLevel() : bot->GetLevel();
+    PlayerbotFactory factory(bot, level, ITEM_QUALITY_NORMAL);
+    factory.Refresh();
+    return "consumes/regs added";
+}
+
+std::string PlayerbotHolder::HandleBotInit(Player* bot, Player* master, const std::string param)
+{
+    uint32 level = master ? master->GetLevel() : bot->GetLevel();
+
+    if (param.empty())
+    {
+        PlayerbotFactory factory(bot, level, ITEM_QUALITY_NORMAL);
+        factory.Randomize(true, false);
+    }
+    else if (param == "white" || param == "common")
+    {
+        PlayerbotFactory factory(bot, level, ITEM_QUALITY_NORMAL);
+        factory.Randomize(false, false);
+    }
+    else if (param == "green" || param == "uncommon")
+    {
+        PlayerbotFactory factory(bot, level, ITEM_QUALITY_UNCOMMON);
+        factory.Randomize(false, false);
+    }
+    else if (param == "blue" || param == "rare")
+    {
+        PlayerbotFactory factory(bot, level, ITEM_QUALITY_RARE);
+        factory.Randomize(false, false);
+    }
+    else if (param == "epic" || param == "purple")
+    {
+        PlayerbotFactory factory(bot, level, ITEM_QUALITY_EPIC);
+        factory.Randomize(false, false);
+    }
+    else if (param == "legendary" || param == "yellow")
+    {
+        PlayerbotFactory factory(bot, level, ITEM_QUALITY_LEGENDARY);
+        factory.Randomize(false, false);
+    }
+    else if (param == "sync")
+    {
+        PlayerbotFactory factory(bot, level, ITEM_QUALITY_LEGENDARY);
+        factory.Randomize(false, true);
+    }
+
+    return "ok";
+}
+
+std::string PlayerbotHolder::HandleBotEnchants(Player* bot, Player* master, const std::string param)
+{
+    PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_LEGENDARY);
+    factory.EnchantEquipment();
+    return "ok";
+}
+
+std::string PlayerbotHolder::HandleBotAmmo(Player* bot, Player* master, const std::string param)
+{
+    PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_LEGENDARY);
+    factory.InitAmmo();
+    return "ok";
+}
+
+std::string PlayerbotHolder::HandleBotPet(Player* bot, Player* master, const std::string param)
+{
+    PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_LEGENDARY);
+    factory.InitPet();
+    factory.InitPetSpells();
+    return "ok";
+}
+
+std::string PlayerbotHolder::HandleBotLevelUp(Player* bot, Player* master, const std::string param)
+{
+    PlayerbotFactory factory(bot, bot->GetLevel());
+    factory.Randomize(true, false);
+    return "ok";
+}
+
+std::string PlayerbotHolder::HandleBotRefresh(Player* bot, Player* master, const std::string param)
+{
+    PlayerbotFactory factory(bot, bot->GetLevel());
+    factory.Refresh();
+    return "ok";
+}
+
+std::string PlayerbotHolder::HandleBotRandom(Player* bot, Player* master, const std::string param)
+{
+    sRandomPlayerbotMgr.Randomize(bot);
+    return "ok";
+}
+
+std::string PlayerbotHolder::GetCommandTexts(const std::string& command)
+{
+    auto texts = GetCommandTexts();
+    auto it = texts.find(command);
+    if (it != texts.end())
+        return it->second;
+    return "";
+}
+
+std::unordered_map<std::string, std::string> PlayerbotHolder::GetCommandTexts()
+{
+    return std::unordered_map<std::string, std::string>
+    {
+        {"list", "List all active player bots.\nUsage: list"},
+        {"reload", "Reload the playerbot config (GM only).\nUsage: reload"},
+        {"tweak", "Adjust the tweak value for testing (GM only).\nUsage: tweak"},
+        {"always", "Enable offline AI for a player.\nUsage: always [playername]"},
+        {"self", "Enable self-bot mode for a player.\nUsage: self [playername]"},
+        {"debug", "Run debug commands on the bot (GM only).\nUsage: debug <command>"},
+        {"c", "Execute a chat command on the bot.\nUsage: c <command>"},
+        {"do", "Execute a bot action.\nUsage: do <action>"},
+        {"record", "Enable message recording for a bot.\nUsage: record"},
+        {"read", "Get recorded messages and disable recording.\nUsage: read"},
+        {"clear", "Clear recorded messages without retrieving them.\nUsage: clear"},
+        {"help", "Show help for commands.\nUsage: help [command]"}
+    };
 }

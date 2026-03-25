@@ -190,7 +190,34 @@ public:
         void RandomTeleport(Player* bot, std::vector<WorldLocation> &locs, bool hearth = false, bool activeOnly = false);
         uint32 GetZoneLevel(uint16 mapId, float teleX, float teleY, float teleZ);
         void PrepareTeleportCache();
-        typedef void (RandomPlayerbotMgr::*ConsoleCommandHandler) (Player*);
+        typedef std::list<std::string> (RandomPlayerbotMgr::*ConsoleCommandHandler) (std::string param);
+        typedef std::list<std::string> (RandomPlayerbotMgr::*ConsolePlayerCommandHandler) (Player*);
+
+        std::string consoleCmdParams;
+
+        std::list<std::string> HandleHelp(std::string param);
+        std::list<std::string> HandleConsoleReset(std::string param);
+        std::list<std::string> HandleConsoleStats(std::string param);
+        std::list<std::string> HandleConsoleReload(std::string param);
+        std::list<std::string> HandleConsoleUpdate(std::string param);
+        std::list<std::string> HandleConsolePid(std::string param);
+        std::list<std::string> HandleConsoleDiff(std::string param);
+        std::list<std::string> HandleConsoleCleanMap(std::string param);
+        std::list<std::string> HandleConsoleLoginDebug(std::string param);
+
+    public:
+        static std::string GetCommandTexts(const std::string& command);
+        static std::unordered_map<std::string, std::string> GetCommandTexts();
+        std::list<std::string> HandleRandomizeFirst(Player* bot);
+        std::list<std::string> HandleUpdateGearSpells(Player* bot);
+        std::list<std::string> HandleRefresh(Player* bot);
+        std::list<std::string> HandleRandomTeleportForLevel(Player* bot);
+        std::list<std::string> HandleRandomTeleportForRpg(Player* bot);
+        std::list<std::string> HandleRevive(Player* bot);
+        std::list<std::string> HandleRandomTeleport(Player* bot);
+        std::list<std::string> HandleChangeStrategy(Player* bot);
+        std::list<std::string> HandleRemove(Player* bot);
+        std::list<std::string> HandleConsoleCmd(Player* bot);
 
         void MirrorAh();
     private:

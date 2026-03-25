@@ -3260,209 +3260,137 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         return false;
     }
 
+    bool isRA = false;
+
+    if (!handler->GetSession() && static_cast<CliHandler*>(handler) && static_cast<CliHandler*>(handler)->GetAccountId())
+        isRA = true;        
+
     if (!args || !*args)
     {
-        sLog.outError("Usage: rndbot stats/update/reset/init/refresh/add/remove");
-        return false;
+        sLog.outError("Usage: rndbot help/stats/update/reset/init/refresh/add/remove/more..");
+        if (isRA)
+            handler->SendSysMessage("Usage: rndbot help/stats/update/reset/init/refresh/add/remove/more..");
+
+        std::list<std::string> messages = sRandomPlayerbotMgr.HandleHelp("");
+
+        for (auto& msg : messages)
+        {
+            sLog.outString("%s", msg.c_str());
+            if (isRA)
+                handler->SendSysMessage(msg.c_str());
+        }
+
+        return true;
     }
 
     std::string cmd = args;
 
-    if (cmd == "reset")
-    {
-        CharacterDatabase.PExecute("delete from ai_playerbot_random_bots");
-        sRandomPlayerbotMgr.eventCache.clear();
-        sLog.outString("Random bots were reset for all players. Please restart the Server.");
-        return true;
-    }
-
-    if (cmd == "stats")
-    {
-        Player* requester = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
-        activatePrintStatsThread(requester ? requester->GetGUIDLow() : 0);
-        return true;
-    }
-
-    if (cmd == "reload")
-    {
-        sPlayerbotAIConfig.Initialize();
-        return true;
-    }
-
-    if (cmd == "update")
-    {
-        sRandomPlayerbotMgr.UpdateAIInternal(0);
-        return true;
-    }
-
-    if (cmd.find("pid ") != std::string::npos)
-    {
-        std::string pids = cmd.substr(4);
-        std::vector<std::string> pid = Qualified::getMultiQualifiers(pids, " ");
-
-        if (pid.size() == 0)
-            pid.push_back("0");
-        if (pid.size() == 1)
-            pid.push_back("0");
-        if (pid.size() == 2)
-            pid.push_back("0");
-        sRandomPlayerbotMgr.pid.adjust(stof(pid[0]), stof(pid[1]), stof(pid[2]));
-
-        sLog.outString("Pid set to p:%f i:%f d:%f", stof(pid[0]), stof(pid[1]), stof(pid[2]));
-
-        return true;
-    }
-
-    if (cmd == "diff")
-    {
-        std::stringstream ss;
-        ss << "Avg diff: " << sWorld.GetAverageDiff() << "\n";
-        ss << "Max diff: " << sWorld.GetMaxDiff() << "\n";
-        ss << "char db ping: " << sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") << "\n";
-        ss << "Sessions online: " << sWorld.GetActiveSessionCount() << "\n";
-        ss << "Bots online: " << sRandomPlayerbotMgr.botCount << " (active: " << sRandomPlayerbotMgr.activeBots << ")";
-        
-
-        sLog.outString("%s", ss.str().c_str());
-
-        Player* requester = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
-        if (requester)
-        {
-            requester->SendMessageToPlayer(ss.str());
-        }
-
-        return true;
-    }
-    else if (cmd.find("diff ") != std::string::npos)
-    {
-        std::string diffs = cmd.substr(5);
-        std::vector<std::string> diff = Qualified::getMultiQualifiers(diffs, " ");
-        if (diff.size() == 0)
-            diff.push_back("100");
-        if (diff.size() == 1)
-            diff.push_back(diff[0]);
-        sPlayerbotAIConfig.diffWithPlayer = stoi(diff[0]);
-        sPlayerbotAIConfig.diffEmpty = stoi(diff[1]);
-
-        sLog.outString("Diff set to %d (player), %d (empty)", stoi(diff[0]), stoi(diff[1]));
-
-        return true;
-    }
-
-    if (cmd.find("clean map") == 0)
-    {
-        for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
-        {
-            if (!sMapStore.LookupEntry(i))
-                continue;
-
-            uint32 mapId = sMapStore.LookupEntry(i)->MapID;
-            boost::thread t([mapId]() {WorldPosition::unloadMapAndVMaps(mapId); });
-            t.detach();
-        }
-
-        return true;
-    }
-
-    if (cmd.find("login debug") == 0)
-    {
-        sPlayerBotLoginMgr.ToggleDebug();
-        return true;
-    }
-
-    if (cmd.find("cmd ") == 0)
-    {
-        std::vector<std::string> params = Qualified::getMultiQualifiers(cmd, " ");
-
-        Player* player = sObjectAccessor.FindPlayerByName(params[1].c_str());
-
-        if (!player)
-            return false;
-
-        PlayerbotAI* ai = player->GetPlayerbotAI();
-
-        if (!ai)
-            return false;
-
-        std::string command;
-
-        for (uint32 i = 2; i < params.size(); i++)
-            command += command + " " + params[i];
-
-        sLog.outString("Sending command %s to player %s", command.c_str(), player->GetName());
-
-        ai->HandleCommand(CHAT_MSG_WHISPER, command, *player);
-
-        return true;
-    }
-
     std::map<std::string, ConsoleCommandHandler> handlers;
-    handlers["init"] = &RandomPlayerbotMgr::RandomizeFirst;
-    handlers["upgrade"] = &RandomPlayerbotMgr::UpdateGearSpells;
-    handlers["refresh"] = &RandomPlayerbotMgr::Refresh;
-    handlers["teleport"] = &RandomPlayerbotMgr::RandomTeleportForLevel;
-    handlers["rpg"] = &RandomPlayerbotMgr::RandomTeleportForRpg;
-    handlers["revive"] = &RandomPlayerbotMgr::Revive;
-    handlers["grind"] = &RandomPlayerbotMgr::RandomTeleport;
-    handlers["change_strategy"] = &RandomPlayerbotMgr::ChangeStrategy;
-    handlers["remove"] = &RandomPlayerbotMgr::Remove;
+    handlers["help"] = &RandomPlayerbotMgr::HandleHelp;
+    handlers["reset"] = &RandomPlayerbotMgr::HandleConsoleReset;
+    handlers["stats"] = &RandomPlayerbotMgr::HandleConsoleStats;
+    handlers["update"] = &RandomPlayerbotMgr::HandleConsoleUpdate;
+    handlers["pid "] = &RandomPlayerbotMgr::HandleConsolePid;
+    handlers["diff"] = &RandomPlayerbotMgr::HandleConsoleDiff;
+    handlers["diff "] = &RandomPlayerbotMgr::HandleConsoleDiff;
+    handlers["clean map"] = &RandomPlayerbotMgr::HandleConsoleCleanMap;
+    handlers["login debug"] = &RandomPlayerbotMgr::HandleConsoleLoginDebug;
 
-    for (std::map<std::string, ConsoleCommandHandler>::iterator j = handlers.begin(); j != handlers.end(); ++j)
+    for (auto& [prefix, consoleHandler] : handlers)
     {
-        std::string prefix = j->first;
-        if (cmd.find(prefix) != 0) continue;
-        std::string name = cmd.size() > prefix.size() + 1 ? cmd.substr(1 + prefix.size()) : "%";
+        if (cmd.find(prefix) != 0)
+            continue;
 
-        std::list<uint32> botIds;
-        for (std::list<uint32>::iterator i = sPlayerbotAIConfig.randomBotAccounts.begin(); i != sPlayerbotAIConfig.randomBotAccounts.end(); ++i)
+        size_t prefixLen = prefix.size();
+        std::string param = cmd.size() > prefixLen + 1 ? cmd.substr(prefixLen + 1) : "";
+
+        std::list<std::string> messages = (sRandomPlayerbotMgr.*consoleHandler)(param);
+        for (auto& msg : messages)
         {
-            uint32 account = *i;
-            if (auto results = CharacterDatabase.PQuery("SELECT guid FROM characters WHERE account = '%u' AND name LIKE '%s'",
-                    account, name.c_str()))
+            sLog.outString("%s", msg.c_str());
+            if(isRA)
+                handler->SendSysMessage(msg.c_str());
+        }
+
+        if (!messages.empty() && (prefix != "help" || param != "commands"))
+            return true;
+    }
+
+    std::map<std::string, ConsolePlayerCommandHandler> playerHandlers;
+    playerHandlers["init"] = &RandomPlayerbotMgr::HandleRandomizeFirst;
+    playerHandlers["upgrade"] = &RandomPlayerbotMgr::HandleUpdateGearSpells;
+    playerHandlers["refresh"] = &RandomPlayerbotMgr::HandleRefresh;
+    playerHandlers["teleport"] = &RandomPlayerbotMgr::HandleRandomTeleportForLevel;
+    playerHandlers["rpg"] = &RandomPlayerbotMgr::HandleRandomTeleportForRpg;
+    playerHandlers["revive"] = &RandomPlayerbotMgr::HandleRevive;
+    playerHandlers["grind"] = &RandomPlayerbotMgr::HandleRandomTeleport;
+    playerHandlers["change_strategy"] = &RandomPlayerbotMgr::HandleChangeStrategy;
+    playerHandlers["remove"] = &RandomPlayerbotMgr::HandleRemove;
+    playerHandlers["cmd"] = &RandomPlayerbotMgr::HandleConsoleCmd;
+
+    for (auto& [prefix, playerHandler] : playerHandlers)
+    {
+        if (cmd.find(prefix) != 0)
+            continue;
+
+        size_t prefixLen = prefix.size();
+        std::string nameAndParams = cmd.size() > prefixLen + 1 ? cmd.substr(prefixLen + 1) : "";
+
+        std::string name = "%";
+        std::string params = "";
+
+        if (!nameAndParams.empty())
+        {
+            size_t spacePos = nameAndParams.find(' ');
+            if (spacePos != std::string::npos)
             {
-                do
+                name = nameAndParams.substr(0, spacePos);
+                params = nameAndParams.substr(spacePos + 1);
+            }
+            else
+            {
+                name = nameAndParams;
+            }
+        }
+
+        sRandomPlayerbotMgr.consoleCmdParams = params;
+
+        bool hasRandomBotCommand = false;
+
+        sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot) {
+            std::string botName = bot->GetName();
+            if (botName.find(name) == 0)
+            {
+
+                std::list<std::string> messages = (sRandomPlayerbotMgr.*playerHandler)(bot);
+                for (auto& msg : messages)
                 {
-                    Field* fields = results->Fetch();
+                    sLog.outString("%s", msg.c_str());
+                    if(isRA)
+                        handler->SendSysMessage(msg.c_str());
+                    hasRandomBotCommand = true;
+                }
+            }
+        });
 
-                    uint32 botId = fields[0].GetUInt32();
-                    ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, botId);
-                    Player* bot = sObjectMgr.GetPlayer(guid);
-                    if (!bot)
-                        continue;
-
-                    botIds.push_back(botId);
-                } while (results->NextRow());
-			}
-        }
-
-        if (botIds.empty())
-        {
-            sLog.outString("Nothing to do");
-            return false;
-        }
-
-        int processed = 0;
-        for (std::list<uint32>::iterator i = botIds.begin(); i != botIds.end(); ++i)
-        {
-            ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, *i);
-            Player* bot = sObjectMgr.GetPlayer(guid);
-            if (!bot)
-                continue;
-
-            sLog.outString("[%u/%zu] Processing command '%s' for bot '%s'",
-                    processed++, botIds.size(), cmd.c_str(), bot->GetName());
-
-            ConsoleCommandHandler handler = j->second;
-            (sRandomPlayerbotMgr.*handler)(bot);
-        }
-        return true;
+        if (hasRandomBotCommand)
+            return true;
     }
 
     std::list<std::string> messages = sRandomPlayerbotMgr.HandlePlayerbotCommand(args, NULL);
     for (std::list<std::string>::iterator i = messages.begin(); i != messages.end(); ++i)
     {
-        sLog.outString("%s",i->c_str());
+        sLog.outString("%s", i->c_str());
+        if(isRA)
+            handler->SendSysMessage(i->c_str());
+
+        if (!messages.empty())
+            return true;
     }
+
+    if (isRA)
+        handler->SendSysMessage("usage: help/list/reload/more.. or add/init/remove/more.. PLAYERNAME");
+
     return true;
 }
 
@@ -4198,4 +4126,344 @@ float RandomPlayerbotMgr::GetMetricDelta(botPerformanceMetric& metric) const
         return 0;
 
     return deltaMetric / metric.size();
+}
+
+std::string RandomPlayerbotMgr::GetCommandTexts(const std::string& command)
+{
+    auto texts = GetCommandTexts();
+    auto it = texts.find(command);
+    if (it != texts.end())
+        return it->second;
+    return "";
+}
+
+std::unordered_map<std::string, std::string> RandomPlayerbotMgr::GetCommandTexts()
+{
+    return std::unordered_map<std::string, std::string>
+    {
+        {"init", "Randomize the first available bot.\nUsage: init"},
+        {"upgrade", "Update gear and spells for all random bots.\nUsage: upgrade"},
+        {"refresh", "Log out and log in all random bots to refresh their status.\nUsage: refresh"},
+        {"teleport", "Teleport all random bots to a location suitable for their level.\nUsage: teleport"},
+        {"rpg", "Teleport all random bots to a location for RPG activities.\nUsage: rpg"},
+        {"revive", "Revive all dead random bots.\nUsage: revive"},
+        {"grind", "Teleport all random bots to a grinding location.\nUsage: grind"},
+        {"change_strategy", "Change the AI strategy for random bots.\nUsage: change_strategy <botname> <strategy>"},
+        {"remove", "Remove a random bot from the server.\nUsage: remove <botname>"},
+        {"record", "Enable message recording for a bot.\nUsage: record <botname>"},
+        {"read", "Get recorded messages and disable recording.\nUsage: read <botname>"},
+        {"clear", "Clear recorded messages without retrieving them.\nUsage: clear <botname>"},
+        {"diff", "Show server performance metrics.\nUsage: diff [player_diff] [empty_diff]"},
+        {"stats", "Print bot statistics.\nUsage: stats"},
+        {"reload", "Reload playerbot config.\nUsage: reload"},
+        {"update", "Trigger immediate bot AI update.\nUsage: update"},
+        {"pid", "Adjust PID controller values.\nUsage: pid p i d"},
+        {"clean map", "Unload and reload map files.\nUsage: clean map"},
+        {"login debug", "Toggle login debug mode.\nUsage: login debug"},
+        {"cmd", "Send command to a bot.\nUsage: cmd <botname> <command>"},
+        {"listbots", "List all online bot names.\nUsage: listbots"},
+        {"help", "Show help for commands.\nUsage: help [command]"}
+    };
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleHelp(std::string param)
+{
+    std::list<std::string> messages;
+        
+    if (param.empty())
+    {
+        messages.push_back("Type 'help commands for all available commands.");
+        messages.push_back("Type 'help <command>' for more information on a specific command.");
+        return messages;
+    }
+
+    if (param == "commands")
+    {
+        std::string commands = "Commands: ";
+        for (auto& [command, help] : GetCommandTexts())
+        {
+            commands += command + ", ";
+        }
+
+        commands = commands.substr(0, commands.size() - 2);
+        messages.push_back(commands);
+        return messages;
+    }
+    
+    
+    std::string helpText = GetCommandTexts(param);
+    if (!helpText.empty())
+    {
+        messages.push_back(helpText);
+    }  
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleRandomizeFirst(Player* bot)
+{
+    std::list<std::string> messages;
+    if (!bot)
+    {
+        messages.push_back("Bot not found");
+        return messages;
+    }
+    RandomizeFirst(bot);
+    messages.push_back("init applied to " + std::string(bot->GetName()));
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleUpdateGearSpells(Player* bot)
+{
+    std::list<std::string> messages;
+    if (!bot)
+    {
+        messages.push_back("Bot not found");
+        return messages;
+    }
+    UpdateGearSpells(bot);
+    messages.push_back("upgrade applied to " + std::string(bot->GetName()));
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleRefresh(Player* bot)
+{
+    std::list<std::string> messages;
+    if (!bot)
+    {
+        messages.push_back("Bot not found");
+        return messages;
+    }
+    Refresh(bot);
+    messages.push_back("refresh applied to " + std::string(bot->GetName()));
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleRandomTeleportForLevel(Player* bot)
+{
+    std::list<std::string> messages;
+    if (!bot)
+    {
+        messages.push_back("Bot not found");
+        return messages;
+    }
+    RandomTeleportForLevel(bot);
+    messages.push_back("teleport applied to " + std::string(bot->GetName()));
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleRandomTeleportForRpg(Player* bot)
+{
+    std::list<std::string> messages;
+    if (!bot)
+    {
+        messages.push_back("Bot not found");
+        return messages;
+    }
+    RandomTeleportForRpg(bot);
+    messages.push_back("rpg applied to " + std::string(bot->GetName()));
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleRevive(Player* bot)
+{
+    std::list<std::string> messages;
+    if (!bot)
+    {
+        messages.push_back("Bot not found");
+        return messages;
+    }
+    Revive(bot);
+    messages.push_back("revive applied to " + std::string(bot->GetName()));
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleRandomTeleport(Player* bot)
+{
+    std::list<std::string> messages;
+    if (!bot)
+    {
+        messages.push_back("Bot not found");
+        return messages;
+    }
+    RandomTeleport(bot);
+    messages.push_back("grind applied to " + std::string(bot->GetName()));
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleChangeStrategy(Player* bot)
+{
+    std::list<std::string> messages;
+    if (!bot)
+    {
+        messages.push_back("Bot not found");
+        return messages;
+    }
+    ChangeStrategy(bot);
+    messages.push_back("change_strategy applied to " + std::string(bot->GetName()));
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleRemove(Player* bot)
+{
+    std::list<std::string> messages;
+    if (!bot)
+    {
+        messages.push_back("Bot not found");
+        return messages;
+    }
+    Remove(bot);
+    messages.push_back("remove applied to " + std::string(bot->GetName()));
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleReset(std::string param)
+{
+    std::list<std::string> messages;
+    CharacterDatabase.PExecute("delete from ai_playerbot_random_bots");
+    sRandomPlayerbotMgr.eventCache.clear();
+    std::string msg = "Random bots were reset for all players. Please restart the Server.";
+    sLog.outString("%s", msg.c_str());
+    messages.push_back(msg);
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleStats(std::string param)
+{
+    std::list<std::string> messages;
+    std::string msg = "Stats requested - use 'rndbot diff' to see results.";
+    sLog.outString("%s", msg.c_str());
+    messages.push_back(msg);
+    activatePrintStatsThread(0);
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleReload(std::string param)
+{
+    std::list<std::string> messages;
+    sPlayerbotAIConfig.Initialize();
+    std::string msg = "Playerbot config reloaded.";
+    sLog.outString("%s", msg.c_str());
+    messages.push_back(msg);
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleUpdate(std::string param)
+{
+    std::list<std::string> messages;
+    sRandomPlayerbotMgr.UpdateAIInternal(0);
+    std::string msg = "Playerbot update triggered.";
+    sLog.outString("%s", msg.c_str());
+    messages.push_back(msg);
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsolePid(std::string param)
+{
+    std::list<std::string> messages;
+    std::string pids = param.substr(4);
+    std::vector<std::string> pid = Qualified::getMultiQualifiers(pids, " ");
+
+    if (pid.size() == 0)
+        pid.push_back("0");
+    if (pid.size() == 1)
+        pid.push_back("0");
+    if (pid.size() == 2)
+        pid.push_back("0");
+    sRandomPlayerbotMgr.pid.adjust(stof(pid[0]), stof(pid[1]), stof(pid[2]));
+
+    std::string msg = "Pid set to p:" + std::to_string(stof(pid[0])) + " i:" + std::to_string(stof(pid[1])) + " d:" + std::to_string(stof(pid[2]));
+    sLog.outString("%s", msg.c_str());
+    messages.push_back(msg);
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleDiff(std::string param)
+{
+    std::list<std::string> messages;
+    if (param.empty())
+    {
+        std::stringstream ss;
+        ss << "Avg diff: " << sWorld.GetAverageDiff() << "\n";
+        ss << "Max diff: " << sWorld.GetMaxDiff() << "\n";
+        ss << "char db ping: " << sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") << "\n";
+        ss << "Sessions online: " << sWorld.GetActiveSessionCount() << "\n";
+        ss << "Bots online: " << sRandomPlayerbotMgr.botCount << " (active: " << sRandomPlayerbotMgr.activeBots << ")";
+
+        std::string msg = ss.str();
+        sLog.outString("%s", msg.c_str());
+        messages.push_back(msg);
+        return messages;
+    }
+    else if (param.find(" ") != std::string::npos)
+    {
+        std::vector<std::string> diff = Qualified::getMultiQualifiers(param, " ");
+        if (diff.size() == 0)
+            diff.push_back("100");
+        if (diff.size() == 1)
+            diff.push_back(diff[0]);
+        sPlayerbotAIConfig.diffWithPlayer = stoi(diff[0]);
+        sPlayerbotAIConfig.diffEmpty = stoi(diff[1]);
+
+        std::string msg = "Diff set to " + std::to_string(stoi(diff[0])) + " (player), " + std::to_string(stoi(diff[1])) + " (empty)";
+        sLog.outString("%s", msg.c_str());
+        messages.push_back(msg);
+        return messages;
+    }
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleCleanMap(std::string param)
+{
+    std::list<std::string> messages;
+    for (uint32 i = 0; i < sMapStore.GetNumRows(); ++i)
+    {
+        if (!sMapStore.LookupEntry(i))
+            continue;
+
+        uint32 mapId = sMapStore.LookupEntry(i)->MapID;
+        boost::thread t([mapId]() {WorldPosition::unloadMapAndVMaps(mapId); });
+        t.detach();
+    }
+
+    std::string msg = "Map cleaning initiated.";
+    sLog.outString("%s", msg.c_str());
+    messages.push_back(msg);
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleLoginDebug(std::string param)
+{
+    std::list<std::string> messages;
+    sPlayerBotLoginMgr.ToggleDebug();
+    std::string msg = "Login debug toggled.";
+    sLog.outString("%s", msg.c_str());
+    messages.push_back(msg);
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleCmd(Player* bot)
+{
+    std::list<std::string> messages;
+
+    if (consoleCmdParams.empty())
+    {
+        messages.push_back("Usage: rndbot cmd <botname> <command>");
+        return messages;
+    }
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+
+    if (!ai)
+    {
+        messages.push_back("Player has no bot AI");
+        return messages;
+    }
+
+    std::string msg = "Sending command " + consoleCmdParams + " to player " + bot->GetName();
+    sLog.outString("%s", msg.c_str());
+    messages.push_back(msg);
+
+    ai->HandleCommand(CHAT_MSG_WHISPER, consoleCmdParams, *bot);
+
+    return messages;
 }

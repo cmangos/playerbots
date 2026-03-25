@@ -3378,6 +3378,11 @@ bool PlayerbotAI::TellPlayerNoFacing(Player* player, std::string text, Playerbot
     {
         whispers[text] = time(0);
 
+        if (m_recordMessages)
+        {
+            m_recordedMessages.push_back(text);
+        }
+
         std::vector<Player*> recievers;
 
         ChatMsg type = CHAT_MSG_SYSTEM;

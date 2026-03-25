@@ -720,7 +720,15 @@ protected:
     bool isPlayerFriend = false;
     bool isMovingToTransport = false;
     bool shouldLogOut = false;
+    bool m_recordMessages = false;
+    std::vector<std::string> m_recordedMessages;
     Event lastEvent;
+
+public:
+    void RecordMessages(bool record) { m_recordMessages = record; if (!record) m_recordedMessages.clear(); }
+    bool IsRecordingMessages() const { return m_recordMessages; }
+    std::vector<std::string> GetRecordedMessages() { m_recordMessages = false; auto msgs = m_recordedMessages; m_recordedMessages.clear(); return msgs; }
+    void ClearRecordedMessages() { m_recordedMessages.clear(); m_recordMessages = false; }
 
 #ifdef BUILD_ELUNA
     MaNGOS::unique_weak_ptr<PlayerbotAI> m_weakRef;

@@ -3260,9 +3260,13 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         return false;
     }
 
-    bool isRA = handler->GetSession();
-    if (!handler->GetSession() && static_cast<CliHandler*>(handler) && static_cast<CliHandler*>(handler)->GetAccountId())
-        isRA = true;        
+    bool isRA = false;
+    
+    if (handler->GetSession()) //Client command
+        isRA = true;
+    else if (static_cast<CliHandler*>(handler) && static_cast<CliHandler*>(handler)->GetAccountId()) //RA call with account.
+        isRA = true;
+
 
     if (!args || !*args)
     {
@@ -3367,7 +3371,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
                 for (auto& msg : messages)
                 {
                     sLog.outString("%s", msg.c_str());
-                    if(isRA)
+                    if (isRA)
                         handler->SendSysMessage(msg.c_str());
                     hasRandomBotCommand = true;
                 }
@@ -3382,7 +3386,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     for (std::list<std::string>::iterator i = messages.begin(); i != messages.end(); ++i)
     {
         sLog.outString("%s", i->c_str());
-        if(isRA)
+        if (isRA)
             handler->SendSysMessage(i->c_str());
 
         if (!messages.empty())
@@ -4151,18 +4155,14 @@ std::unordered_map<std::string, std::string> RandomPlayerbotMgr::GetCommandTexts
         {"grind", "Teleport all random bots to a grinding location.\nUsage: grind"},
         {"change_strategy", "Change the AI strategy for random bots.\nUsage: change_strategy <botname> <strategy>"},
         {"remove", "Remove a random bot from the server.\nUsage: remove <botname>"},
-        {"record", "Enable message recording for a bot.\nUsage: record <botname>"},
-        {"read", "Get recorded messages and disable recording.\nUsage: read <botname>"},
-        {"clear", "Clear recorded messages without retrieving them.\nUsage: clear <botname>"},
+        {"reset", "Reset all random bots and clear event cache.\nUsage: reset"},
         {"diff", "Show server performance metrics.\nUsage: diff [player_diff] [empty_diff]"},
         {"stats", "Print bot statistics.\nUsage: stats"},
-        {"reload", "Reload playerbot config.\nUsage: reload"},
         {"update", "Trigger immediate bot AI update.\nUsage: update"},
         {"pid", "Adjust PID controller values.\nUsage: pid p i d"},
         {"clean map", "Unload and reload map files.\nUsage: clean map"},
         {"login debug", "Toggle login debug mode.\nUsage: login debug"},
         {"cmd", "Send command to a bot.\nUsage: cmd <botname> <command>"},
-        {"listbots", "List all online bot names.\nUsage: listbots"},
         {"help", "Show help for commands.\nUsage: help [command]"}
     };
 }

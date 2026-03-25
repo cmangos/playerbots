@@ -40,7 +40,6 @@ PlayerbotHolder::PlayerbotHolder() : PlayerbotAIBase()
     m_botCommandHandlers["reagents"] = &PlayerbotHolder::HandleBotReagents;
     m_botCommandHandlers["prepare"] = &PlayerbotHolder::HandleBotPrepare;
     m_botCommandHandlers["prep"] = &PlayerbotHolder::HandleBotPrepare;
-    m_botCommandHandlers["refresh"] = &PlayerbotHolder::HandleBotPrepare;
     m_botCommandHandlers["init"] = &PlayerbotHolder::HandleBotInit;
     m_botCommandHandlers["enchants"] = &PlayerbotHolder::HandleBotEnchants;
     m_botCommandHandlers["ammo"] = &PlayerbotHolder::HandleBotAmmo;
@@ -1391,8 +1390,8 @@ std::string PlayerbotHolder::HandleBotRead(Player* bot, Player* master, const st
     if (!ai)
         return "Bot has no AI";
 
-    ai->RecordMessages(false);
     std::vector<std::string> output = ai->GetRecordedMessages();
+    ai->RecordMessages(false);
 
     if (output.empty())
         return "(no messages)";
@@ -1667,17 +1666,70 @@ std::unordered_map<std::string, std::string> PlayerbotHolder::GetCommandTexts()
 {
     return std::unordered_map<std::string, std::string>
     {
-        {"list", "List all active player bots.\nUsage: list"},
-        {"reload", "Reload the playerbot config (GM only).\nUsage: reload"},
-        {"tweak", "Adjust the tweak value for testing (GM only).\nUsage: tweak"},
-        {"always", "Enable offline AI for a player.\nUsage: always [playername]"},
-        {"self", "Enable self-bot mode for a player.\nUsage: self [playername]"},
-        {"debug", "Run debug commands on the bot (GM only).\nUsage: debug <command>"},
-        {"c", "Execute a chat command on the bot.\nUsage: c <command>"},
-        {"do", "Execute a bot action.\nUsage: do <action>"},
-        {"record", "Enable message recording for a bot.\nUsage: record"},
-        {"read", "Get recorded messages and disable recording.\nUsage: read"},
-        {"clear", "Clear recorded messages without retrieving them.\nUsage: clear"},
-        {"help", "Show help for commands.\nUsage: help [command]"}
+        // Holder commands (used with .rndbot)
+        {"list", "List all active player bots.\nUsage: .rndbot list"},
+        {"help", "Show help for commands.\nUsage: .rndbot help [command]"},
+        {"reload", "Reload the playerbot config (GM only).\nUsage: .rndbot reload"},
+        {"tweak", "Adjust the tweak value for testing (GM only).\nUsage: .rndbot tweak"},
+        {"self", "Enable self-bot mode for a player.\nUsage: .rndbot self [playername]"},
+        
+        // Bot commands (used with .rndbot <bot> ...)
+        {"add", "Add a bot to the player's group.\nUsage: .rndbot add <playername>"},
+        {"login", "Add a bot to the player's group.\nUsage: .rndbot login <playername>"},
+        {"remove", "Remove a bot from the player's group.\nUsage: .rndbot remove <botname>"},
+        {"logout", "Remove a bot from the player's group.\nUsage: .rndbot logout <botname>"},
+        {"rm", "Remove a bot from the player's group.\nUsage: .rndbot rm <botname>"},
+        
+        {"gear", "Equip best gear on bot.\nUsage: .rndbot <bot> gear"},
+        {"equip", "Equip best gear on bot.\nUsage: .rndbot <bot> equip"},
+        
+        {"train", "Train bot spells at trainer.\nUsage: .rndbot <bot> train"},
+        {"learn", "Train bot spells at trainer.\nUsage: .rndbot <bot> learn"},
+        
+        {"food", "Buy food/drink for bot.\nUsage: .rndbot <bot> food"},
+        {"drink", "Buy food/drink for bot.\nUsage: .rndbot <bot> drink"},
+        
+        {"potions", "Buy potions for bot.\nUsage: .rndbot <bot> potions"},
+        {"pots", "Buy potions for bot.\nUsage: .rndbot <bot> pots"},
+        
+        {"consumes", "Buy all consumables for bot.\nUsage: .rndbot <bot> consumes"},
+        {"consumables", "Buy all consumables for bot.\nUsage: .rndbot <bot> consumables"},
+        
+        {"regs", "Buy reagents for bot.\nUsage: .rndbot <bot> regs"},
+        {"reg", "Buy reagents for bot.\nUsage: .rndbot <bot> reg"},
+        {"reagents", "Buy reagents for bot.\nUsage: .rndbot <bot> reagents"},
+        
+        {"prepare", "Prepare bot (gear, food, pots, etc).\nUsage: .rndbot <bot> prepare"},
+        {"prep", "Prepare bot (gear, food, pots, etc).\nUsage: .rndbot <bot> prep"},
+        {"refresh", "Refresh bot gear and items.\nUsage: .rndbot <bot> refresh"},
+        
+        {"init", "Initialize bot with default actions.\nUsage: .rndbot <bot> init"},
+        
+        {"enchants", "Apply enchants to bot's gear.\nUsage: .rndbot <bot> enchants"},
+        
+        {"ammo", "Buy ammo for bot.\nUsage: .rndbot <bot> ammo"},
+        
+        {"pet", "Summon/dismiss pet for bot.\nUsage: .rndbot <bot> pet"},
+        
+        {"levelup", "Level up bot.\nUsage: .rndbot <bot> levelup"},
+        {"level", "Level up bot.\nUsage: .rndbot <bot> level"},
+        
+        {"random", "Randomize bot appearance and gear.\nUsage: .rndbot <bot> random"},
+        
+        {"always", "Enable offline AI for a player.\nUsage: .rndbot always [playername]"},
+        
+        {"debug", "Run debug commands on the bot (GM only).\nUsage: .rndbot <bot> debug <command>"},
+        
+        {"c", "Execute a chat command on the bot.\nUsage: .rndbot <bot> c <command>"},
+        
+        {"do", "Execute a bot action (sync, immediate response).\nUsage: .rndbot <bot> do <action>\nExample: .rndbot <bot> do stats, where, quests, who"},
+        
+        {"cmd", "Execute a bot action (async, queued).\nUsage: .rndbot cmd <bot> do <action>\nNote: Use with record to capture output."},
+        
+        {"record", "Enable message recording for async commands.\nUsage: .rndbot record <bot> enable\n       .rndbot record <bot> disable"},
+        
+        {"read", "Get recorded async command output.\nUsage: .rndbot read <bot>"},
+        
+        {"clear", "Clear recorded messages without retrieving.\nUsage: .rndbot clear <bot>"}
     };
 }

@@ -1410,11 +1410,13 @@ std::string PlayerbotHolder::HandleBotDo(Player* bot, Player* master, const std:
     if (!ai)
         return "Bot has no AI";
 
-    std::string action = param.substr(0, param.find(' '));
-    std::string subparam = param.substr(param.find(' ') + 1);
+    Action* action = ai->GetAiObjectContext()->GetAction(param);
 
-    if (param.find(' ') == std::string::npos)
-        subparam = "";
+    std::string actionName = action->getName();
+    std::string subparam = "";
+
+    if (param.find(actionName) == 0 && param.size() > actionName.size()+1)
+        subparam = param.substr(actionName.size() + 1);
 
     ai->RecordMessages(true);
 

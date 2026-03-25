@@ -759,7 +759,9 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string
         messages.push_back(out.str());
     }
 
-    messages.push_back("Unknown command. Use 'help' for more information.");
+    if (messages.empty())
+        messages.push_back("Unknown command. Use 'help' for more information.");
+
     return messages;
 }
 

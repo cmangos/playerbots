@@ -206,7 +206,7 @@ inline void TellPosition(PlayerbotAI* ai, Player* requester)
     {
         WorldPosition botPos(bot);
 
-        if (botPos.distance(requester) < 60.0f)
+        if (requester != bot && botPos.distance(requester) < 60.0f)
         {
             out << uint32(botPos.distance(requester)) << " yards " << ChatHelper::formatAngle(WorldPosition(requester).getAngleTo(bot)) << " from you.";
         }

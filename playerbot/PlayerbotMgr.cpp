@@ -552,10 +552,10 @@ std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid,
         
         if (!subType.empty())
             realParam = subType;
-        else if (!param.empty())
-            realParam = param;
+        else if (it->second == &PlayerbotHolder::HandleBotAddLogin)
+            realParam = std::to_string(guid.GetRawValue());        
         else
-            realParam = std::to_string(guid.GetRawValue());
+            realParam = param;            
 
         return (this->*it->second)(bot, master, realParam);
     }
@@ -1417,19 +1417,13 @@ std::string PlayerbotHolder::HandleBotClear(Player* bot, Player* master, const s
 
 std::string PlayerbotHolder::HandleBotAddLogin(Player* bot, Player* master, const std::string param)
 {
-    ObjectGuid guid;
-    if (!bot)
-    {
-        if (!param.empty())
-        {
-            guid = sObjectMgr.GetPlayerGuidByName(param);
-        }
-        if (!guid)
-            return "Bot not found - provide guid in param";
-    }
-
-    if (sObjectMgr.GetPlayer(guid))
+    if (bot)
         return "Player already logged in";
+
+    if(!Qualified::isValidNumberString(param))
+        return "Add: Error parsing " + param;
+
+    ObjectGuid guid = ObjectGuid(uint64(std::stoull(param)));
 
     uint32 guildId = Player::GetGuildIdFromDB(guid);
     uint32 masterAccountId = master ? master->GetSession()->GetAccountId() : 0;

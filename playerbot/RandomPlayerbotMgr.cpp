@@ -3380,7 +3380,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
             return true;
     }
 
-    std::list<std::string> messages = sRandomPlayerbotMgr.HandlePlayerbotCommand(args, NULL);
+    std::list<std::string> messages = sRandomPlayerbotMgr.HandlePlayerbotCommand(args, NULL, static_cast<CliHandler*>(handler) ? static_cast<CliHandler*>(handler)->GetAccessLevel() : SEC_PLAYER);
     for (std::list<std::string>::iterator i = messages.begin(); i != messages.end(); ++i)
     {
         sLog.outString("%s", i->c_str());

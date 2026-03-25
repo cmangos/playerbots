@@ -1199,14 +1199,13 @@ std::string PlayerbotHolder::HandleBotAlways(Player* bot, Player* master, const 
         return "Self-bot is disabled";
     }
 
-    if (!bot)
-    {
-        return "always requires a target player";
-    }
-
-    ObjectGuid guid = bot->GetObjectGuid();
+    ObjectGuid guid = ObjectGuid(uint64(std::stoull(param)));
     uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
-    std::string alwaysName = bot->GetName();
+    std::string alwaysName;    
+
+    if (!sObjectMgr.GetPlayerNameByGUID(guid, alwaysName))
+        return "Unable to find player.";
+
 
     BotAlwaysOnline always = BotAlwaysOnline(sRandomPlayerbotMgr.GetValue(guid.GetCounter(), "always"));
 

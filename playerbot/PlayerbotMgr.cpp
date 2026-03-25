@@ -538,7 +538,7 @@ std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid,
             return "Not in your guild or account";
     }
 
-    if (!isRandomAccount && this == &sRandomPlayerbotMgr)
+    if (!isRandomAccount && this == &sRandomPlayerbotMgr && !admin)
     {
         return "Can not control alt-bots with this command.";
     }

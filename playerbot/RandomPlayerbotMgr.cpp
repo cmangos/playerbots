@@ -3267,7 +3267,6 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     else if (static_cast<CliHandler*>(handler) && static_cast<CliHandler*>(handler)->GetAccountId()) //RA call with account.
         isRA = true;
 
-
     if (!args || !*args)
     {
         sLog.outError("Usage: rndbot help/stats/update/reset/init/refresh/add/remove/more..");
@@ -3329,7 +3328,6 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     playerHandlers["grind"] = &RandomPlayerbotMgr::HandleRandomTeleport;
     playerHandlers["change_strategy"] = &RandomPlayerbotMgr::HandleChangeStrategy;
     playerHandlers["remove"] = &RandomPlayerbotMgr::HandleRemove;
-    playerHandlers["cmd"] = &RandomPlayerbotMgr::HandleConsoleCmd;
 
     for (auto& [prefix, playerHandler] : playerHandlers)
     {
@@ -4439,32 +4437,5 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleLoginDebug(std::string p
     std::string msg = "Login debug toggled.";
     sLog.outString("%s", msg.c_str());
     messages.push_back(msg);
-    return messages;
-}
-
-std::list<std::string> RandomPlayerbotMgr::HandleConsoleCmd(Player* bot)
-{
-    std::list<std::string> messages;
-
-    if (consoleCmdParams.empty())
-    {
-        messages.push_back("Usage: rndbot cmd <botname> <command>");
-        return messages;
-    }
-
-    PlayerbotAI* ai = bot->GetPlayerbotAI();
-
-    if (!ai)
-    {
-        messages.push_back("Player has no bot AI");
-        return messages;
-    }
-
-    std::string msg = "Sending command " + consoleCmdParams + " to player " + bot->GetName();
-    sLog.outString("%s", msg.c_str());
-    messages.push_back(msg);
-
-    ai->HandleCommand(CHAT_MSG_WHISPER, consoleCmdParams, *bot);
-
     return messages;
 }

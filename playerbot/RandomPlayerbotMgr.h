@@ -217,7 +217,6 @@ public:
         std::list<std::string> HandleRandomTeleport(Player* bot);
         std::list<std::string> HandleChangeStrategy(Player* bot);
         std::list<std::string> HandleRemove(Player* bot);
-        std::list<std::string> HandleConsoleCmd(Player* bot);
 
         void MirrorAh();
     private:

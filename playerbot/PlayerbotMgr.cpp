@@ -51,6 +51,7 @@ PlayerbotHolder::PlayerbotHolder() : PlayerbotAIBase()
     m_botCommandHandlers["always"] = &PlayerbotHolder::HandleBotAlways;
     m_botCommandHandlers["debug"] = &PlayerbotHolder::HandleBotDebug;
     m_botCommandHandlers["c"] = &PlayerbotHolder::HandleBotC;
+    m_botCommandHandlers["cmd"] = &PlayerbotHolder::HandleConsoleCmd;
     m_botCommandHandlers["do"] = &PlayerbotHolder::HandleBotDo;
     m_botCommandHandlers["record"] = &PlayerbotHolder::HandleBotRecord;
     m_botCommandHandlers["read"] = &PlayerbotHolder::HandleBotRead;
@@ -1332,6 +1333,39 @@ std::string PlayerbotHolder::HandleBotC(Player* bot, Player* master, const std::
 
     ai->DoSpecificAction("cdebug", Event(".bot", "monstertalk " + param, bot), true);
     return "ok";
+}
+
+
+std::string PlayerbotHolder::HandleConsoleCmd(Player* bot, Player* master, const std::string param)
+{
+    if (!bot)
+        return "do requires a bot";
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return "Bot has no AI";
+
+    ExternalEventHelper helper(ai->GetAiObjectContext());
+
+    std::string msg = "Sending command " + param + " to player " + bot->GetName();
+
+    ai->RecordMessages(true);
+
+    if (!helper.HandleCommand(param, "", master))
+    {
+        return "command failed";
+    }    
+
+    std::vector<std::string> output = ai->GetRecordedMessages();
+    if (output.empty())
+        return "(no output)";
+
+    std::string result;
+    for (const auto& line : output)
+    {
+        result += line + "\n";
+    }
+    return result;
 }
 
 std::string PlayerbotHolder::HandleBotDo(Player* bot, Player* master, const std::string param)

@@ -1420,32 +1420,28 @@ std::string PlayerbotHolder::HandleBotAddLogin(Player* bot, Player* master, cons
     {
         if (!param.empty())
         {
-            guid = ObjectGuid(uint64(std::stoull(param)));
+            guid = sObjectMgr.GetPlayerGuidByName(param);
         }
         if (!guid)
             return "Bot not found - provide guid in param";
-        bot = sObjectMgr.GetPlayer(guid);
     }
 
-    if (!bot)
-        return "Bot not found";
-
-    if (sObjectMgr.GetPlayer(bot->GetObjectGuid()))
+    if (sObjectMgr.GetPlayer(guid))
         return "Player already logged in";
 
-    uint32 guildId = Player::GetGuildIdFromDB(bot->GetObjectGuid());
+    uint32 guildId = Player::GetGuildIdFromDB(guid);
     uint32 masterAccountId = master ? master->GetSession()->GetAccountId() : 0;
     uint32 masterGuildId = master ? master->GetGuildId() : 0;
-    uint32 botAccount = sObjectMgr.GetPlayerAccountIdByGUID(bot->GetObjectGuid());
+    uint32 botAccount = sObjectMgr.GetPlayerAccountIdByGUID(guid);
     bool isMasterAccount = (masterAccountId == botAccount);
     bool isRandomAccount = sPlayerbotAIConfig.IsInRandomAccountList(botAccount);
 
     if (master && (isMasterAccount || (sPlayerbotAIConfig.allowGuildBots && masterGuildId && guildId == masterGuildId) || false))
     {
         if (isRandomAccount)
-            sRandomPlayerbotMgr.AddRandomBot(bot->GetGUIDLow());
+            sRandomPlayerbotMgr.AddRandomBot(guid);
         else if (isMasterAccount || sPlayerbotAIConfig.allowMultiAccountAltBots)
-            AddPlayerBot(bot->GetGUIDLow(), masterAccountId);
+            AddPlayerBot(guid, masterAccountId);
         else
             return "Not in your account";
     }

@@ -1382,23 +1382,12 @@ std::string PlayerbotHolder::HandleConsoleCmd(Player* bot, Player* master, const
 
     std::string msg = "Sending command " + param + " to player " + bot->GetName();
 
-    ai->RecordMessages(true);
-
     if (!helper.HandleCommand(param, "", master))
     {
         return "command failed";
     }    
 
-    std::vector<std::string> output = ai->GetRecordedMessages();
-    if (output.empty())
-        return "(no output)";
-
-    std::string result;
-    for (const auto& line : output)
-    {
-        result += line + "\n";
-    }
-    return result;
+    return msg;
 }
 
 std::string PlayerbotHolder::HandleBotDo(Player* bot, Player* master, const std::string param)

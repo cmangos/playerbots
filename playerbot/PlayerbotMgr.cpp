@@ -514,7 +514,7 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
 std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId, const std::string param)
 {
     Player* bot = sObjectMgr.GetPlayer(guid);
-    Player* master;
+    Player* master = nullptr;
     if (masterguid)
         master = sObjectMgr.GetPlayer(masterguid);
 
@@ -1423,7 +1423,7 @@ std::string PlayerbotHolder::HandleBotAddLogin(Player* bot, Player* master, cons
     if (bot)
         return "Player already logged in";
 
-    if(!Qualified::isValidNumberString(param))
+    if (!Qualified::isValidNumberString(param))
         return "Add: Error parsing " + param;
 
     ObjectGuid guid = ObjectGuid(uint64(std::stoull(param)));
@@ -1435,19 +1435,12 @@ std::string PlayerbotHolder::HandleBotAddLogin(Player* bot, Player* master, cons
     bool isMasterAccount = (masterAccountId == botAccount);
     bool isRandomAccount = sPlayerbotAIConfig.IsInRandomAccountList(botAccount);
 
-    if (master && (isMasterAccount || (sPlayerbotAIConfig.allowGuildBots && masterGuildId && guildId == masterGuildId) || false))
-    {
-        if (isRandomAccount)
-            sRandomPlayerbotMgr.AddRandomBot(guid);
-        else if (isMasterAccount || sPlayerbotAIConfig.allowMultiAccountAltBots)
-            AddPlayerBot(guid, masterAccountId);
-        else
-            return "Not in your account";
-    }
+    if (isRandomAccount)
+        sRandomPlayerbotMgr.AddRandomBot(guid);
+    else if (isMasterAccount || sPlayerbotAIConfig.allowMultiAccountAltBots)
+        AddPlayerBot(guid, masterAccountId);
     else
-    {
-        return "Not in your guild or account";
-    }
+        return "Not in your account";
 
     return "ok";
 }
@@ -1464,19 +1457,12 @@ std::string PlayerbotHolder::HandleBotRemoveLogout(Player* bot, Player* master, 
     bool isMasterAccount = (masterAccountId == botAccount);
     bool isRandomAccount = sPlayerbotAIConfig.IsInRandomAccountList(botAccount);
 
-    if (master && (isMasterAccount || (sPlayerbotAIConfig.allowGuildBots && masterGuildId && guildId == masterGuildId) || false))
-    {
-        if (isRandomAccount)
-            sRandomPlayerbotMgr.Remove(bot);
-        else if (GetPlayerBot(bot->GetGUIDLow()))
-            LogoutPlayerBot(bot->GetGUIDLow());
-        else
-            return "Not your bot";
-    }
+    if (isRandomAccount)
+        sRandomPlayerbotMgr.Remove(bot);
+    else if (GetPlayerBot(bot->GetGUIDLow()))
+        LogoutPlayerBot(bot->GetGUIDLow());
     else
-    {
-        return "Not in your guild or account";
-    }
+        return "Not your bot";
 
     return "ok";
 }

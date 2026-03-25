@@ -3356,12 +3356,14 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
 
         bool hasRandomBotCommand = false;
 
+        ConsolePlayerCommandHandler handler_copy = playerHandler;
+
         sRandomPlayerbotMgr.ForEachPlayerbot([&](Player* bot) {
             std::string botName = bot->GetName();
             if (botName.find(name) == 0)
             {
 
-                std::list<std::string> messages = (sRandomPlayerbotMgr.*playerHandler)(bot);
+                std::list<std::string> messages = (sRandomPlayerbotMgr.*handler_copy)(bot);
                 for (auto& msg : messages)
                 {
                     sLog.outString("%s", msg.c_str());

@@ -533,7 +533,6 @@ std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid,
 
     if (!isRandomAccount && (!isMasterAccount && !admin && masterguid))
     {
-        Player* master = sObjectMgr.GetPlayer(masterguid);
         if (master && (!sPlayerbotAIConfig.allowGuildBots || !masterGuildId || (masterGuildId && master->GetGuildIdFromDB(guid) != masterGuildId)))
             return "Not in your guild or account";
     }
@@ -607,6 +606,8 @@ bool PlayerbotMgr::HandlePlayerbotMgrCommand(ChatHandler* handler, char const* a
 
 std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string args, Player* master, AccountTypes security)
 {
+    AccountTypes useSecurity = master ? master->GetSession()->GetSecurity() : security;
+
     std::vector<std::string> params = Qualified::getMultiQualifiers(args, " ");
 
     std::list<std::string> messages;
@@ -632,7 +633,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string
         if (command != prefix)
             continue;
 
-        messages = (this->*handler)(master, param, security);
+        messages = (this->*handler)(master, param, useSecurity);
         return messages;
     }
 
@@ -704,7 +705,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string
         } while (result->NextRow());
     }
 
-    if (charname == "!" && master && master->GetSession()->GetSecurity() > SEC_GAMEMASTER)
+    if (charname == "!" && useSecurity > SEC_GAMEMASTER)
     {
         for (auto& itr : playerBots)
         {
@@ -758,11 +759,11 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string
         }
         else if (master && member.GetRawValue() != master->GetObjectGuid().GetRawValue())
         {
-            out << ProcessBotCommand(command, member, master->GetObjectGuid(), master->GetSession()->GetSecurity() >= SEC_GAMEMASTER, master->GetSession()->GetAccountId(), master->GetGuildId(), param);
+            out << ProcessBotCommand(command, member, master->GetObjectGuid(), useSecurity >= SEC_GAMEMASTER, master->GetSession()->GetAccountId(), master->GetGuildId(), param);
         }
         else if (!master)
         {
-            out << ProcessBotCommand(command, member, ObjectGuid(), true, -1, -1, param);
+            out << ProcessBotCommand(command, member, ObjectGuid(), useSecurity >= SEC_GAMEMASTER, -1, -1, param);
         }
 
         messages.push_back(out.str());

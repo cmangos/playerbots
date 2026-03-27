@@ -1323,7 +1323,7 @@ std::string PlayerbotHolder::HandleBotDebug(Player* bot, Player* master, const s
 
     std::string command = param;
 
-    if(!ai->DoSpecificAction("cdebug", Event(".bot", command, master), true))
+    if(!ai->DoSpecificAction("cdebug", Event(".bot", command, master ? master : bot), true))
     {
         return "debug failed";
     }
@@ -1349,7 +1349,7 @@ std::string PlayerbotHolder::HandleBotC(Player* bot, Player* master, const std::
     if (!ai)
         return "Bot has no AI";
 
-    ai->DoSpecificAction("cdebug", Event(".bot", "monstertalk " + param, master), true);
+    ai->DoSpecificAction("cdebug", Event(".bot", "monstertalk " + param, master ? master : bot), true);
     return "ok";
 }
 

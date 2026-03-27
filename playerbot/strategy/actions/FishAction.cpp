@@ -71,7 +71,7 @@ bool FishAction::isUseful()
         if (target->GetDestination()->GetPurpose() != TravelDestinationPurpose::GatherFishing)
             return false;
 
-        if (!bot->GetGroup() || ai->IsGroupLeader())
+        if (!bot->GetGroup() || ai->IsGroupLeader() || target->GetTimeLeft() < 0)
             target->CheckStatus();
     }
 

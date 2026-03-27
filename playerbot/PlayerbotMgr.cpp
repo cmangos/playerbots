@@ -757,11 +757,11 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string
         {
             out << "character not found";
         }
-        else if (master && member.GetRawValue() != master->GetObjectGuid().GetRawValue())
+        else if (master)
         {
             out << ProcessBotCommand(command, member, master->GetObjectGuid(), useSecurity >= SEC_GAMEMASTER, master->GetSession()->GetAccountId(), master->GetGuildId(), param);
         }
-        else if (!master)
+        else
         {
             out << ProcessBotCommand(command, member, ObjectGuid(), useSecurity >= SEC_GAMEMASTER, -1, -1, param);
         }

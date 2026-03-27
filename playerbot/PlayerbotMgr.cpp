@@ -710,7 +710,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string
         for (auto& itr : playerBots)
         {
             Player* bot = itr.second;
-            if (bot && bot->IsInWorld())
+            if (bot && (bot->IsInWorld() || param.find("add") == 0 || param.find("login") == 0))
                 bots.insert(bot->GetName());
         }
     }

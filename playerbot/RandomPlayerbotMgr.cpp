@@ -4319,7 +4319,6 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleReset(std::string param)
     CharacterDatabase.PExecute("delete from ai_playerbot_random_bots");
     sRandomPlayerbotMgr.eventCache.clear();
     std::string msg = "Random bots were reset for all players. Please restart the Server.";
-    sLog.outString("%s", msg.c_str());
     messages.push_back(msg);
     return messages;
 }
@@ -4332,7 +4331,6 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleStats(std::string param)
     }
 
     std::list<std::string> messages;
-    sLog.outString("%s", msg.c_str());
     std::string msg = "Stats requested.";
     messages.push_back(msg);
 
@@ -4346,7 +4344,6 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleReload(std::string param
     std::list<std::string> messages;
     sPlayerbotAIConfig.Initialize();
     std::string msg = "Playerbot config reloaded.";
-    sLog.outString("%s", msg.c_str());
     messages.push_back(msg);
     return messages;
 }
@@ -4356,7 +4353,6 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleUpdate(std::string param
     std::list<std::string> messages;
     sRandomPlayerbotMgr.UpdateAIInternal(0);
     std::string msg = "Playerbot update triggered.";
-    sLog.outString("%s", msg.c_str());
     messages.push_back(msg);
     return messages;
 }
@@ -4376,7 +4372,6 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsolePid(std::string param)
     sRandomPlayerbotMgr.pid.adjust(stof(pid[0]), stof(pid[1]), stof(pid[2]));
 
     std::string msg = "Pid set to p:" + std::to_string(stof(pid[0])) + " i:" + std::to_string(stof(pid[1])) + " d:" + std::to_string(stof(pid[2]));
-    sLog.outString("%s", msg.c_str());
     messages.push_back(msg);
     return messages;
 }
@@ -4427,7 +4422,6 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleCleanMap(std::string par
     }
 
     std::string msg = "Map cleaning initiated.";
-    sLog.outString("%s", msg.c_str());
     messages.push_back(msg);
     return messages;
 }
@@ -4437,7 +4431,6 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleLoginDebug(std::string p
     std::list<std::string> messages;
     sPlayerBotLoginMgr.ToggleDebug();
     std::string msg = "Login debug toggled.";
-    sLog.outString("%s", msg.c_str());
     messages.push_back(msg);
     return messages;
 }

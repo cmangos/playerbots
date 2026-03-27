@@ -1355,27 +1355,54 @@ std::string PlayerbotHolder::HandleBotC(Player* bot, Player* master, const std::
 
 std::string PlayerbotHolder::HandleConsoleWhisper(Player* bot, Player* master, const std::string param)
 {
-    if (!bot)
+    Player* sender = master;
+    Player* reciever = bot;
+
+
+    if (!reciever)
         return "do requires a bot";
 
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     if (!ai)
         return "Bot has no AI";
 
-    Player* sender = master ? master : bot;
+    std::string message = param;
+
+    if (!sender)
+    {
+        //Try format .(rnd)bot w <sender> <reciever> <message>
+
+        std::string botName = param.substr(0, param.find(" "));
+
+        master = sObjectAccessor.FindPlayerByName(botName.c_str());
+
+        if (master)
+        {
+            if (message.size() > param.find(" ") + 1)
+                message = param.substr(param.find(" ") + 1);
+            else
+                message = "";
+
+            sender = bot; //Switch sender reciever
+            reciever = master; 
+        }
+    }
+
+    if (!sender)
+        sender = bot;
 
     WorldPacket packet_template(CMSG_MESSAGECHAT);
 
     packet_template << CHAT_MSG_WHISPER;
     packet_template << LANG_UNIVERSAL;
-    packet_template << bot->GetName();
-    packet_template << param;
+    packet_template << reciever->GetName();
+    packet_template << message;
 
     std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
 
     sender->GetSession()->QueuePacket(std::move(packetPtr));
 
-    std::string msg = "Sending whisper " + param + " to player " + bot->GetName() + " from " + sender->GetName();
+    std::string msg = "Sending whisper " + message + " to player " + reciever->GetName() + " from " + sender->GetName();
 
     return msg;
 }

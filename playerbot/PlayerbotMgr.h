@@ -115,6 +115,7 @@ public:
 
     virtual void UpdateAIInternal(uint32 elapsed, bool minimal = false) override;
     void TellError(std::string botName, std::string text);
+    virtual std::vector<std::string> GetBotErrors(std::string botName) override;
 
     Player* GetMaster() const { return master; };
 

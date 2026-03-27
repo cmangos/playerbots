@@ -743,9 +743,12 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string
         }
     }
 
-    if (bots.size() && params.size() > 2)
+    if (bots.size())
     {
-        param = args.substr(params[0].size() + params[1].size() + 2);
+        if (params.size() > 2)
+            param = args.substr(params[0].size() + params[1].size() + 2);
+        else
+            param = "";
     }
 
     for (auto bot :  bots)
@@ -1361,7 +1364,7 @@ std::string PlayerbotHolder::HandleConsoleWhisper(Player* bot, Player* master, c
 
 
     if (!reciever)
-        return "do requires a bot";
+        return "d requires a bot";
 
     PlayerbotAI* ai = bot->GetPlayerbotAI();
     if (!ai)
@@ -1391,6 +1394,31 @@ std::string PlayerbotHolder::HandleConsoleWhisper(Player* bot, Player* master, c
 
     if (!sender)
         sender = bot;
+
+    if (message.empty())
+    {
+        std::ostringstream out;
+        if (!sender->GetPlayerbotAI())
+            out << "Player ";
+        if (!sender->GetPlayerbotAI()->IsRealPlayer())
+            out << "Player bot ";
+        else if (sRandomPlayerbotMgr.IsRandomBot(sender))
+            out << "Random bot ";
+        else if (sPlayerbotAIConfig.IsFreeAltBot(sender))
+            out << "Free alt bot ";
+        else
+            out << "Bot ";
+
+        out << reciever->GetName();
+        out << " level " << std::to_string(reciever->GetLevel());
+        out << " " << ChatHelper::formatRace(reciever->getRace());
+        out << " " << ChatHelper::formatClass(reciever->getClass());
+
+        if (sender->GetPlayerbotAI() && sender->GetPlayerbotAI()->GetMaster())
+            out << " (master " << sender->GetPlayerbotAI()->GetMaster()->GetName() << ")";
+
+        return out.str(); 
+    }
 
     WorldPacket packet_template(CMSG_MESSAGECHAT);
 

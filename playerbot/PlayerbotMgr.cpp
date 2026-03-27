@@ -1981,74 +1981,83 @@ std::unordered_map<std::string, std::string> PlayerbotHolder::GetCommandTexts()
 {
     return std::unordered_map<std::string, std::string>
     {
-        // Holder commands (used with .rndbot)
-        {"list", "List all active player bots.\nUsage: .rndbot list"},
-        {"help", "Show help for commands.\nUsage: .rndbot help [command]"},
-        {"reload", "Reload the playerbot config (GM only).\nUsage: .rndbot reload"},
-        {"tweak", "Adjust the tweak value for testing (GM only).\nUsage: .rndbot tweak"},
-        {"self", "Enable self-bot mode for a player.\nUsage: .rndbot self [playername]"},
+        // Holder commands (used with .(rnd)bot)
+        {"list", "List all active player bots.\nUsage: .(rnd)bot list"},
+        {"help", "Show help for commands.\nUsage: .(rnd)bot help <command>"},
+        {"reload", "Reload the playerbot config (GM only).\nUsage: .(rnd)bot reload"},
+        {"tweak", "Adjust the tweak value for testing (GM only).\nUsage: .(rnd)bot tweak"},
+        {"self", "Enable self-bot mode for a player.\nUsage: .(rnd)bot self <playername>"},
         
-        // Bot commands (used with .rndbot <bot> ...)
-        {"add", "Add a bot to the player's group.\nUsage: .rndbot add <playername>"},
-        {"login", "Add a bot to the player's group.\nUsage: .rndbot login <playername>"},
-        {"remove", "Remove a bot from the player's group.\nUsage: .rndbot remove <botname>"},
-        {"logout", "Remove a bot from the player's group.\nUsage: .rndbot logout <botname>"},
-        {"rm", "Remove a bot from the player's group.\nUsage: .rndbot rm <botname>"},
+        // Bot commands (used with .(rnd)bot <bot> ...)
+        {"add", "Add a bot to the player's group.\nUsage: .(rnd)bot add <playername>"},
+        {"login", "Add a bot to the player's group.\nUsage: .(rnd)bot login <playername>"},
+        {"remove", "Remove a bot from the player's group.\nUsage: .(rnd)bot remove <botname>"},
+        {"logout", "Remove a bot from the player's group.\nUsage: .(rnd)bot logout <botname>"},
+        {"rm", "Remove a bot from the player's group.\nUsage: .(rnd)bot rm <botname>"},
         
-        {"gear", "Equip best gear on bot.\nUsage: .rndbot <bot> gear"},
-        {"equip", "Equip best gear on bot.\nUsage: .rndbot <bot> equip"},
+        {"gear", "Equip best gear on bot.\nUsage: .(rnd)bot gear <bot> "},
+        {"equip", "Equip best gear on bot.\nUsage: .(rnd)bot equip  <bot> "},
         
-        {"train", "Train bot spells at trainer.\nUsage: .rndbot <bot> train"},
-        {"learn", "Train bot spells at trainer.\nUsage: .rndbot <bot> learn"},
+        {"train", "Train bot spells at trainer.\nUsage: .(rnd)bot train <bot> "},
+        {"learn", "Train bot spells at trainer.\nUsage: .(rnd)bot learn <bot> "},
         
-        {"food", "Buy food/drink for bot.\nUsage: .rndbot <bot> food"},
-        {"drink", "Buy food/drink for bot.\nUsage: .rndbot <bot> drink"},
+        {"food", "Buy food/drink for bot.\nUsage: .(rnd)bot food <bot> "},
+        {"drink", "Buy food/drink for bot.\nUsage: .(rnd)bot drink <bot> "},
         
-        {"potions", "Buy potions for bot.\nUsage: .rndbot <bot> potions"},
-        {"pots", "Buy potions for bot.\nUsage: .rndbot <bot> pots"},
+        {"potions", "Buy potions for bot.\nUsage: .(rnd)bot potions <bot> "},
+        {"pots", "Buy potions for bot.\nUsage: .(rnd)bot pots <bot> "},
         
-        {"consumes", "Buy all consumables for bot.\nUsage: .rndbot <bot> consumes"},
-        {"consumables", "Buy all consumables for bot.\nUsage: .rndbot <bot> consumables"},
+        {"consumes", "Buy all consumables for bot.\nUsage: .(rnd)bot consumes <bot> "},
+        {"consumables", "Buy all consumables for bot.\nUsage: .(rnd)bot consumables <bot> "},
         
-        {"regs", "Buy reagents for bot.\nUsage: .rndbot <bot> regs"},
-        {"reg", "Buy reagents for bot.\nUsage: .rndbot <bot> reg"},
-        {"reagents", "Buy reagents for bot.\nUsage: .rndbot <bot> reagents"},
+        {"regs", "Buy reagents for bot.\nUsage: .(rnd)bot regs <bot> "},
+        {"reg", "Buy reagents for bot.\nUsage: .(rnd)bot reg <bot> "},
+        {"reagents", "Buy reagents for bot.\nUsage: .(rnd)bot reagents  <bot> "},
         
-        {"prepare", "Prepare bot (gear, food, pots, etc).\nUsage: .rndbot <bot> prepare"},
-        {"prep", "Prepare bot (gear, food, pots, etc).\nUsage: .rndbot <bot> prep"},
-        {"refresh", "Refresh bot gear and items.\nUsage: .rndbot <bot> refresh"},
+        {"prepare", "Prepare bot (gear, food, pots, etc).\nUsage: .(rnd)bot prepare <bot> "},
+        {"prep", "Prepare bot (gear, food, pots, etc).\nUsage: .(rnd)bot prep <bot>"},
+        {"refresh", "Refresh bot gear and items.\nUsage: .(rnd)bot refresh <bot> "},
         
-        {"init", "Initialize bot with default actions.\nUsage: .rndbot <bot> init"},
+        {"init", "Initialize bot with default actions.\nUsage: .(rnd)bot init <bot> "},
         
-        {"enchants", "Apply enchants to bot's gear.\nUsage: .rndbot <bot> enchants"},
+        {"enchants", "Apply enchants to bot's gear.\nUsage: .(rnd)bot enchants <bot> "},
         
-        {"ammo", "Buy ammo for bot.\nUsage: .rndbot <bot> ammo"},
+        {"ammo", "Buy ammo for bot.\nUsage: .(rnd)bot ammo <bot> "},
         
-        {"pet", "Summon/dismiss pet for bot.\nUsage: .rndbot <bot> pet"},
+        {"pet", "Summon/dismiss pet for bot.\nUsage: .(rnd)bot pet <bot> "},
         
-        {"levelup", "Level up bot.\nUsage: .rndbot <bot> levelup"},
-        {"level", "Level up bot.\nUsage: .rndbot <bot> level"},
+        {"levelup", "Level up bot.\nUsage: .(rnd)bot levelup <bot>"},
+        {"level", "Level up bot.\nUsage: .(rnd)bot level <bot>"},
+        
+        {"random", "Randomize bot appearance and gear.\nUsage: .(rnd)bot random <bot>"},
+        
+        {"always", "Enable offline AI for a player.\nUsage: .(rnd)bot always <playername>"},
+        
+        {"debug", "Run debug commands on the bot (GM only).\nUsage: .(rnd)bot debug <bot> <command>"},
+        
+        {"c", "Execute a chat command on the bot.\nUsage: .(rnd)bot c <bot> <command>"},
+        
+        {"w", "Send a whisper.\nUsage: .(rnd)bot w <bot> <message> (while spoofing as sender)\nUsage: .(rnd)bot <sender> <reciever> "},
+        
         {"p", "Send a party message as the bot.\nUsage: .(rnd)bot p <message> (while spoofing as sender)\n .(rnd)bot p <botname> <message>\nNote: No message = party info.\nExample: .rndbot p Dunpriest (shows party info)"},
         
-        {"random", "Randomize bot appearance and gear.\nUsage: .rndbot <bot> random"},
         {"g", "Send a guild message as the bot.\nUsage: .(rnd)bot g <message> (while spoofing as sender)\n .(rnd)bot g <botname> <message>\nNote: No message = guild info.\nExample: .rndbot g Dunpriest (shows guild info)"},
         
-        {"always", "Enable offline AI for a player.\nUsage: .rndbot always [playername]"},
         {"r", "Send a raid message as the bot.\nUsage: .(rnd)bot r <message> (while spoofing as sender)\n .(rnd)bot r <botname> <message>"},
         
-        {"debug", "Run debug commands on the bot (GM only).\nUsage: .rndbot <bot> debug <command>"},
+        {"rl", "Transfer raid leadership.\nUsage: .(rnd)bot rl <message> (while spoofing as sender)\n .(rnd)bot rl <botname>"},
         
-        {"c", "Execute a chat command on the bot.\nUsage: .rndbot <bot> c <command>"},
+        {"do", "Execute a bot action (sync, immediate response).\nUsage: .(rnd)bot do <bot> <action>\nExample: .(rnd)bot do <bot> stats, where, quests, who"},
         
-        {"do", "Execute a bot action (sync, immediate response).\nUsage: .rndbot <bot> do <action>\nExample: .rndbot <bot> do stats, where, quests, who"},
+        {"cmd", "Execute a bot action (async, queued).\nUsage: .(rnd)bot cmd <bot> do <action>\nNote: Use with record to capture output."},
         
-        {"cmd", "Execute a bot action (async, queued).\nUsage: .rndbot cmd <bot> do <action>\nNote: Use with record to capture output."},
+        {"record", "Enable message recording for async commands.\nUsage: .(rnd)bot record <bot> enable\nUsage: .(rnd)bot record <bot> disable"},
         
-        {"record", "Enable message recording for async commands.\nUsage: .rndbot record <bot> enable\n       .rndbot record <bot> disable"},
+        {"read", "Get recorded async command output.\nUsage: .(rnd)bot read <bot>"},
         
-        {"read", "Get recorded async command output.\nUsage: .rndbot read <bot>"},
+        {"clear", "Clear recorded messages without retrieving.\nUsage: .(rnd)bot clear <bot>"},
         
-        {"clear", "Clear recorded messages without retrieving.\nUsage: .rndbot clear <bot>"}
+        {"spoof", "Spoof as another bot for command routing.\nUsage: .(rnd)bot spoof <botname>\nUsage: .(rnd)bot spoof (to clear)"}
     };
 }
 

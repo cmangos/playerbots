@@ -20,6 +20,9 @@ PlayerbotHolder::PlayerbotHolder() : PlayerbotAIBase()
     m_holderHandlers["self"] = &PlayerbotHolder::HandleSelf;
     m_holderHandlers["spoof"] = &PlayerbotHolder::HandleSpoof;
     m_holderHandlers["p"] = &PlayerbotHolder::HandleParty;
+    m_holderHandlers["g"] = &PlayerbotHolder::HandleGuild;
+    m_holderHandlers["r"] = &PlayerbotHolder::HandleRaid;
+    m_holderHandlers["rl"] = &PlayerbotHolder::HandleRaidLeader;
 
     m_botCommandHandlers["add"] = &PlayerbotHolder::HandleBotAddLogin;
     m_botCommandHandlers["login"] = &PlayerbotHolder::HandleBotAddLogin;
@@ -1600,6 +1603,135 @@ std::list<std::string> PlayerbotHolder::HandleParty(Player* master, const std::s
     return {"Sent party message \"" + message + "\" as " + master->GetName()};
 }
 
+std::list<std::string> PlayerbotHolder::HandleGuild(Player* master, const std::string param, AccountTypes security)
+{
+    std::string message;
+    std::string botName;
+
+    if (!master)
+    {
+        botName = param.substr(0, param.find(" "));
+        master = sObjectAccessor.FindPlayerByName(botName.c_str());
+    }
+
+    if (!master)
+        return {"No sender found"};
+
+    if (param.find(" ") == std::string::npos)
+        message = "";
+    else if (param.size() > param.find(" ") + 1)
+        message = param.substr(param.find(" ") + 1);
+
+    if (!master->GetGuildId())
+        return {"Sender is not in a guild"};
+
+    if (message.empty())
+    {
+        Guild* guild = sGuildMgr.GetGuildById(master->GetGuildId());
+        if (!guild)
+            return {"Guild info not found"};
+
+        std::string guildName = guild->GetName();
+        std::string guildLeader;
+        sObjectMgr.GetPlayerNameByGUID(guild->GetLeaderGuid(), guildLeader);
+        uint32 memberCount = guild->GetMemberSize();
+
+        return {"Guild: " + guildName + ", Leader: " + guildLeader + ", Members: " + std::to_string(memberCount)};
+    }
+
+    WorldPacket packet_template(CMSG_MESSAGECHAT);
+    packet_template << CHAT_MSG_GUILD;
+    packet_template << LANG_UNIVERSAL;
+    packet_template << message;
+
+    std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
+    master->GetSession()->QueuePacket(std::move(packetPtr));
+    return {"Sent guild message \"" + message + "\" as " + master->GetName()};
+}
+
+std::list<std::string> PlayerbotHolder::HandleRaid(Player* master, const std::string param, AccountTypes security)
+{
+    std::string message = param;
+
+    if (!master)
+    {
+        std::string botName = param.substr(0, param.find(" "));
+
+        master = sObjectAccessor.FindPlayerByName(botName.c_str());
+        if (message.size() > param.find(" ") + 1)
+            message = param.substr(param.find(" ") + 1);
+    }
+
+    if (!master)
+        return {"No sender found"};
+
+    if (!master->GetGroup() || !master->GetGroup()->IsRaidGroup())
+        return {"Sender is not in a raid group"};
+
+    if (message.empty())
+    {
+        Group* group = master->GetGroup();
+        Group::MemberSlotList const& members = group->GetMemberSlots();
+        Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
+
+        std::string leaderName = leader ? leader->GetName() : "Unknown";
+        std::string otherMembers;
+
+        for (auto const& slot : members)
+        {
+            if (slot.guid == master->GetObjectGuid())
+                continue;
+
+            Player* member = sObjectMgr.GetPlayer(slot.guid);
+            if (member)
+            {
+                if (!otherMembers.empty())
+                    otherMembers += ", ";
+                otherMembers += member->GetName();
+            }
+        }
+
+        return {"Raid with " + leaderName + " as leader" + (otherMembers.empty() ? "" : " and " + otherMembers)};
+    }
+
+    WorldPacket packet_template(CMSG_MESSAGECHAT);
+    packet_template << CHAT_MSG_RAID;
+    packet_template << LANG_UNIVERSAL;
+    packet_template << message;
+
+    std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
+    master->GetSession()->QueuePacket(std::move(packetPtr));
+    return {"Sent raid message \"" + message + "\" as " + master->GetName()};
+}
+
+std::list<std::string> PlayerbotHolder::HandleRaidLeader(Player* master, const std::string param, AccountTypes security)
+{
+    std::string message = "give leader";
+
+    if (!master)
+    {
+        std::string botName = param.substr(0, param.find(" "));
+
+        master = sObjectAccessor.FindPlayerByName(botName.c_str());
+    }
+
+    if (!master)
+        return {"No sender found"};
+
+    if (!master->GetGroup() || !master->GetGroup()->IsRaidGroup())
+        return {"Sender is not in a raid group"};
+
+    WorldPacket packet_template(CMSG_MESSAGECHAT);
+    packet_template << CHAT_MSG_RAID;
+    packet_template << LANG_UNIVERSAL;
+    packet_template << message;
+
+    std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
+    master->GetSession()->QueuePacket(std::move(packetPtr));
+    std::string result = "Sent raid leader transfer request as " + std::string(master->GetName());
+    return {result};
+}
+
 std::string PlayerbotHolder::HandleBotAddLogin(Player* bot, Player* master, const std::string param)
 {
     if (bot)
@@ -1899,8 +2031,10 @@ std::unordered_map<std::string, std::string> PlayerbotHolder::GetCommandTexts()
         {"p", "Send a party message as the bot.\nUsage: .(rnd)bot p <message> (while spoofing as sender)\n .(rnd)bot p <botname> <message>\nNote: No message = party info.\nExample: .rndbot p Dunpriest (shows party info)"},
         
         {"random", "Randomize bot appearance and gear.\nUsage: .rndbot <bot> random"},
+        {"g", "Send a guild message as the bot.\nUsage: .(rnd)bot g <message> (while spoofing as sender)\n .(rnd)bot g <botname> <message>\nNote: No message = guild info.\nExample: .rndbot g Dunpriest (shows guild info)"},
         
         {"always", "Enable offline AI for a player.\nUsage: .rndbot always [playername]"},
+        {"r", "Send a raid message as the bot.\nUsage: .(rnd)bot r <message> (while spoofing as sender)\n .(rnd)bot r <botname> <message>"},
         
         {"debug", "Run debug commands on the bot (GM only).\nUsage: .rndbot <bot> debug <command>"},
         

@@ -516,13 +516,7 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
 std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId, const std::string param)
 {
     Player* bot = sObjectMgr.GetPlayer(guid);
-    Player* master = nullptr;
-
-    if (m_spoofGuid)
-        master = sObjectMgr.GetPlayer(m_spoofGuid);
-
-    if (!master && masterguid)
-        master = sObjectMgr.GetPlayer(masterguid);
+    Player* master = masterguid ? sObjectMgr.GetPlayer(masterguid) : nullptr;
 
     if (!sPlayerbotAIConfig.enabled || guid.IsEmpty())
         return "Bot system is disabled";
@@ -607,6 +601,9 @@ bool PlayerbotMgr::HandlePlayerbotMgrCommand(ChatHandler* handler, char const* a
 std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string args, Player* master, AccountTypes security)
 {
     AccountTypes useSecurity = master ? master->GetSession()->GetSecurity() : security;
+
+    if (!master && m_spoofGuid)
+        master = sObjectMgr.GetPlayer(m_spoofGuid);
 
     std::vector<std::string> params = Qualified::getMultiQualifiers(args, " ");
 

@@ -387,11 +387,38 @@ inline void print_path(Unit* bot, std::vector<std::pair<int, int>>& log)
 
 void RandomPlayerbotMgr::LogPlayerLocation()
 {
+    botCount = 0;
+    activeBots = 0;
+    if (sPlayerbotAIConfig.randomBotAutologin)
+    {
+        ForEachPlayerbot([&](Player* bot) {
+            if (bot->GetPlayerbotAI())
+            {
+
+                botCount++;
+                if (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY))
+                {
+                    activeBots++;
+                }
+            }
+        });
+    }
+
+    for (auto i : GetPlayers())
+    {
+        Player* bot = i.second;
+        if (!bot)
+            continue;
+        if (bot->GetPlayerbotAI())
+        {
+            botCount++;
+            if (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY))
+                activeBots++;
+        }
+    }
+
     if (sPlayerbotAIConfig.hasLog("player_location.csv"))
     {
-        botCount = 0;
-        activeBots = 0;
-
         try
         {
             sPlayerbotAIConfig.openLog("player_location.csv", "w");
@@ -419,7 +446,6 @@ void RandomPlayerbotMgr::LogPlayerLocation()
 
                     if (bot->GetPlayerbotAI())
                     {
-                        botCount++;
                         out << std::to_string(uint8(bot->GetPlayerbotAI()->GetGrouperType())) << ",";
                         out << std::to_string(uint8(bot->GetPlayerbotAI()->GetGuilderType())) << ",";
                         out << (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY) ? "active" : "inactive") << ",";
@@ -429,9 +455,6 @@ void RandomPlayerbotMgr::LogPlayerLocation()
                         AiObjectContext* context = ai->GetAiObjectContext();
 
                         out << (AI_VALUE(bool, "should get money") ? "should get money" : "has enough money") << ",";
-
-                        if (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY))
-                            activeBots++;
 
                         if (sPlayerbotAIConfig.hasLog("player_route.csv") && WorldPosition(bot))
                         {
@@ -541,7 +564,6 @@ void RandomPlayerbotMgr::LogPlayerLocation()
                 out << bot->GetMoney() << ",";
                 if (bot->GetPlayerbotAI())
                 {
-                    botCount++;
                     out << std::to_string(uint8(bot->GetPlayerbotAI()->GetGrouperType())) << ",";
                     out << std::to_string(uint8(bot->GetPlayerbotAI()->GetGuilderType())) << ",";
                     out << (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY) ? "active" : "inactive") << ",";
@@ -551,9 +573,6 @@ void RandomPlayerbotMgr::LogPlayerLocation()
                     AiObjectContext* context = ai->GetAiObjectContext();
 
                     out << (AI_VALUE(bool, "should get money") ? "should get money" : "has enough money") << ",";
-
-                    if (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY))
-                        activeBots++;
                 }
                 else
                 {
@@ -592,35 +611,11 @@ void RandomPlayerbotMgr::LogPlayerLocation()
             //We really don't care here. Just skip a log. Making this thread-safe is not worth the effort.
         }
     }
-    else if (sPlayerbotAIConfig.hasLog("activity_pid.csv"))
-    {
-        activeBots = 0;
-        if (sPlayerbotAIConfig.randomBotAutologin)
-        {
-            ForEachPlayerbot([&](Player* bot) {
-                if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY))
-                {
-                    activeBots++;
-                }
-            });
-        }
-
-        for (auto i : GetPlayers())
-        {
-            Player* bot = i.second;
-            if (!bot)
-                continue;
-            if (bot->GetPlayerbotAI())
-                if (bot->GetPlayerbotAI()->AllowActivity(ALL_ACTIVITY))
-                    activeBots++;
-        }
-    }
-
     if (sPlayerbotAIConfig.hasLog("transport.csv"))
     {
         sPlayerbotAIConfig.openLog("transport.csv", "w");
         for (auto& [mapId, map] : sMapMgr.Maps())
-        {         
+        {
             for (auto& transport : WorldPosition(map->GetId(), 1, 1).getTransports())
             {
                 std::ostringstream out;

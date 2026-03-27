@@ -49,9 +49,16 @@ public:
 
     static std::string GetCommandTexts(const std::string& command);
     static std::unordered_map<std::string, std::string> GetCommandTexts();
-
+protected:
+    virtual void OnBotLoginInternal(Player * const bot) = 0;
+    void Cleanup();   
+private:
     typedef std::list<std::string> (PlayerbotHolder::*HolderCommandHandler)(Player* master, const std::string param, AccountTypes security);
-    typedef std::string (PlayerbotHolder::*BotCommandHandler) (Player* bot, Player* master, const std::string param);
+    typedef std::string (PlayerbotHolder::*BotCommandHandler)(Player* bot, Player* master, const std::string param);
+
+    ObjectGuid GetSpoofGuid() const { return m_spoofGuid; }
+
+    virtual std::vector<std::string> GetBotErrors(std::string botName) { return {}; }
 
     std::list<std::string> HandleList(Player* master, const std::string param, AccountTypes security);
     std::list<std::string> HandleHelp(Player* master, const std::string param, AccountTypes security);
@@ -59,7 +66,6 @@ public:
     std::list<std::string> HandleTweak(Player* master, const std::string param, AccountTypes security);
     std::list<std::string> HandleSelf(Player* master, const std::string param, AccountTypes security);
     std::list<std::string> HandleSpoof(Player* master, const std::string param, AccountTypes security);
-    ObjectGuid GetSpoofGuid() const { return m_spoofGuid; }
 
     std::string HandleBotAlways(Player* bot, Player* master, const std::string param);
     std::string HandleBotDebug(Player* bot, Player* master, const std::string param);
@@ -88,11 +94,6 @@ public:
     std::string HandleBotRefresh(Player* bot, Player* master, const std::string param);
     std::string HandleBotRandom(Player* bot, Player* master, const std::string param);
 
-protected:
-    virtual void OnBotLoginInternal(Player * const bot) = 0;
-    void Cleanup();
-
-private:
     PlayerBotMap playerBots;
     std::map<std::string, HolderCommandHandler> m_holderHandlers;
     std::map<std::string, BotCommandHandler> m_botCommandHandlers;

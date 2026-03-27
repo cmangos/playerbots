@@ -1093,6 +1093,18 @@ void PlayerbotMgr::TellError(std::string botName, std::string text)
     errors[text] = names;
 }
 
+std::vector<std::string> PlayerbotMgr::GetBotErrors(std::string botName)
+{
+    std::vector<std::string> botErrors;
+    for (auto& [error, names] : errors)
+    {
+        if (names.find(botName) != names.end())
+            botErrors.push_back(error);
+    }
+
+    return botErrors;
+}
+
 void PlayerbotMgr::CheckTellErrors(uint32 elapsed)
 {
     time_t now = time(0);
@@ -1399,22 +1411,52 @@ std::string PlayerbotHolder::HandleBotDo(Player* bot, Player* master, const std:
     if (!ai)
         return "Bot has no AI";
 
-    Action* action = ai->GetAiObjectContext()->GetAction(param);
-
-    std::string actionName = action->getName();
+    std::string actionName = param;
     std::string subparam = "";
 
-    if (param.find(actionName) == 0 && param.size() > actionName.size()+1)
-        subparam = param.substr(actionName.size() + 1);
+    Action* action = nullptr;
+
+    size_t i = std::string::npos;
+    while (true)
+    {
+        action = ai->GetAiObjectContext()->GetAction(param);
+
+        if (action)
+            break;
+
+        size_t found = param.rfind(" ", i);
+        if (found == std::string::npos || !found)
+            break;
+
+        actionName = param.substr(0, found);
+        subparam = param.substr(found + 1);
+
+        i = found - 1;
+    }
+
+    if (!action)
+        return "action not found";
 
     ai->RecordMessages(true);
 
-    if (!ai->DoSpecificAction(actionName, Event(".bot", subparam, master), true))
+    std::vector<std::string> output;
+
+    if (!ai->DoSpecificAction(actionName, Event(".bot", subparam, master ? master : bot), true))
     {
-        return "action failed";
+        output = GetBotErrors(bot->GetName());
+
+        if (output.empty())
+            return "action failed";
+
+        std::string result;
+        for (const auto& line : output)
+        {
+            result += line + "\n";
+        }
+        return result;
     }
 
-    std::vector<std::string> output = ai->GetRecordedMessages();
+    output = ai->GetRecordedMessages();
     if (output.empty())
         return "(no output)";
 

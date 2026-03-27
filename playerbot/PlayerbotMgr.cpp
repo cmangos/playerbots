@@ -1394,7 +1394,7 @@ std::string PlayerbotHolder::HandleConsoleCmd(Player* bot, Player* master, const
 
     std::string msg = "Sending command " + param + " to player " + bot->GetName();
 
-    if (!helper.HandleCommand(param, "", master))
+    if (!helper.ParseChatCommand(param, master ? master : bot))
     {
         return "command failed";
     }    

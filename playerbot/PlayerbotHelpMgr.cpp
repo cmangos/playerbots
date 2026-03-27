@@ -948,24 +948,6 @@ void PlayerbotHelpMgr::LoadBotHelpTexts()
     }
     sLog.outBasic("%d playerbot helptexts loaded", count);
 
-    for (auto& [name, text] : RandomPlayerbotMgr::GetCommandTexts())
-    {
-        std::string nameWithPrefix = "console:" + name;
-        std::string escapedText = text;
-        replace(escapedText, "'", "''");
-        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_help_texts` (`name`, `template_text`) VALUES ('%s', '%s') ON DUPLICATE KEY UPDATE `template_text` = '%s'", 
-            nameWithPrefix.c_str(), escapedText.c_str(), escapedText.c_str());
-    }
-
-    for (auto& [name, text] : PlayerbotHolder::GetCommandTexts())
-    {
-        std::string nameWithPrefix = "holder:" + name;
-        std::string escapedText = text;
-        replace(escapedText, "'", "''");
-        WorldDatabase.PExecute("INSERT INTO `ai_playerbot_help_texts` (`name`, `template_text`) VALUES ('%s', '%s') ON DUPLICATE KEY UPDATE `template_text` = '%s'", 
-            nameWithPrefix.c_str(), escapedText.c_str(), escapedText.c_str());
-    }
-
 #ifdef GenerateBotHelp
     GenerateHelp();
 #endif

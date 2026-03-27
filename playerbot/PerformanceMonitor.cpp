@@ -261,13 +261,13 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack, bool showMap)
     uint32 maxMapTime = 0;
 
     for (auto& [stack, performanceData] : data[PERF_MON_TOTAL])
-        if (stack[0].find("PlayerbotAI::UpdateAI ") == 0 && stack[0].find(" I") == stack[0].size() - 2)
+        if (stack[0].find("PlayerbotAI::UpdateAI ") == 0)
             maxMapTime = std::max(performanceData.totalTime, maxMapTime);
 
     if (total)
     {
         float avgDiff = data[PERF_MON_TOTAL][{"PlayerbotAIBase::FullTick"}].totalTime / data[PERF_MON_TOTAL][{"PlayerbotAIBase::FullTick"}].count;
-        float aiPerc = (maxMapTime * 100.0f) / (float)(total);
+        float aiPerc = (maxMapTime * 100.0f) / (float)(data[PERF_MON_TOTAL][{"PlayerbotAIBase::FullTick"}].totalTime);
 
         sLog.outString("Estimated avg diff: %3.2f with ai load at least: %5.2f%%", avgDiff, aiPerc);
 

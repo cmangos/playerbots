@@ -19,6 +19,7 @@ PlayerbotHolder::PlayerbotHolder() : PlayerbotAIBase()
     m_holderHandlers["tweak"] = &PlayerbotHolder::HandleTweak;
     m_holderHandlers["self"] = &PlayerbotHolder::HandleSelf;
     m_holderHandlers["spoof"] = &PlayerbotHolder::HandleSpoof;
+    m_holderHandlers["p"] = &PlayerbotHolder::HandleParty;
 
     m_botCommandHandlers["add"] = &PlayerbotHolder::HandleBotAddLogin;
     m_botCommandHandlers["login"] = &PlayerbotHolder::HandleBotAddLogin;
@@ -1541,6 +1542,64 @@ std::string PlayerbotHolder::HandleBotClear(Player* bot, Player* master, const s
     return "Messages cleared";
 }
 
+std::list<std::string> PlayerbotHolder::HandleParty(Player* master, const std::string param, AccountTypes security)
+{
+    std::string message;
+    std::string botName;
+
+    if (!master)
+    {
+        botName = param.substr(0, param.find(" "));
+        master = sObjectAccessor.FindPlayerByName(botName.c_str());
+    }
+
+    if (!master)
+        return {"No sender found"};
+
+    if (param.find(" ") == std::string::npos)
+        message = "";
+    else if (param.size() > param.find(" ") + 1)
+        message = param.substr(param.find(" ") + 1);
+
+    if (!master->GetGroup())
+        return {"Sender is not in a group"};
+
+    if (message.empty())
+    {
+        Group* group = master->GetGroup();
+        Group::MemberSlotList const& members = group->GetMemberSlots();
+        Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
+
+        std::string leaderName = leader ? leader->GetName() : "Unknown";
+        std::string otherMembers;
+
+        for (auto const& slot : members)
+        {
+            if (slot.guid == master->GetObjectGuid())
+                continue;
+
+            Player* member = sObjectMgr.GetPlayer(slot.guid);
+            if (member)
+            {
+                if (!otherMembers.empty())
+                    otherMembers += ", ";
+                otherMembers += member->GetName();
+            }
+        }
+
+        return {"Party with " + leaderName + " as leader" + (otherMembers.empty() ? "" : " and " + otherMembers)};
+    }
+
+    WorldPacket packet_template(CMSG_MESSAGECHAT);
+    packet_template << CHAT_MSG_PARTY;
+    packet_template << LANG_UNIVERSAL;
+    packet_template << message;
+
+    std::unique_ptr<WorldPacket> packetPtr(new WorldPacket(packet_template));
+    master->GetSession()->QueuePacket(std::move(packetPtr));
+    return {"Sent party message \"" + message + "\" as " + master->GetName()};
+}
+
 std::string PlayerbotHolder::HandleBotAddLogin(Player* bot, Player* master, const std::string param)
 {
     if (bot)
@@ -1837,6 +1896,7 @@ std::unordered_map<std::string, std::string> PlayerbotHolder::GetCommandTexts()
         
         {"levelup", "Level up bot.\nUsage: .rndbot <bot> levelup"},
         {"level", "Level up bot.\nUsage: .rndbot <bot> level"},
+        {"p", "Send a party message as the bot.\nUsage: .(rnd)bot p <message> (while spoofing as sender)\n .(rnd)bot p <botname> <message>\nNote: No message = party info.\nExample: .rndbot p Dunpriest (shows party info)"},
         
         {"random", "Randomize bot appearance and gear.\nUsage: .rndbot <bot> random"},
         

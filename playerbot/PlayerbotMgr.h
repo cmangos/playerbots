@@ -59,6 +59,7 @@ private:
     ObjectGuid GetSpoofGuid() const { return m_spoofGuid; }
 
     virtual std::vector<std::string> GetBotErrors(std::string botName) { return {}; }
+ 
 
     std::list<std::string> HandleList(Player* master, const std::string param, AccountTypes security);
     std::list<std::string> HandleHelp(Player* master, const std::string param, AccountTypes security);
@@ -66,6 +67,7 @@ private:
     std::list<std::string> HandleTweak(Player* master, const std::string param, AccountTypes security);
     std::list<std::string> HandleSelf(Player* master, const std::string param, AccountTypes security);
     std::list<std::string> HandleSpoof(Player* master, const std::string param, AccountTypes security);
+    std::list<std::string> HandleParty(Player* master, const std::string param, AccountTypes security);
 
     std::string HandleBotAlways(Player* bot, Player* master, const std::string param);
     std::string HandleBotDebug(Player* bot, Player* master, const std::string param);

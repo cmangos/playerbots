@@ -3301,12 +3301,15 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
         size_t prefixLen = prefix.size();
         std::string param = cmd.size() > prefixLen + 1 ? cmd.substr(prefixLen + 1) : "";
 
+        if (prefix == "stats")
+            param = handler->GetSession() ? std::to_string(handler->GetSession()->GetPlayer()->GetObjectGuid()) : "";
+
         std::list<std::string> messages = (sRandomPlayerbotMgr.*consoleHandler)(param);
         for (auto& msg : messages)
         {
             sLog.outString("%s", msg.c_str());
             if(isRA)
-                handler->SendSysMessage(msg.c_str());
+                handler->SendSysMessage(msg.c_str());      
         }
 
         if (!messages.empty() && (prefix != "help" || param != "commands"))
@@ -4323,11 +4326,18 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleReset(std::string param)
 
 std::list<std::string> RandomPlayerbotMgr::HandleConsoleStats(std::string param)
 {
+    if (!Qualified::isValidNumberString(param))
+    {
+        return {"Stats: Error parsing " + param};
+    }
+
     std::list<std::string> messages;
-    std::string msg = "Stats requested - use 'rndbot diff' to see results.";
     sLog.outString("%s", msg.c_str());
+    std::string msg = "Stats requested.";
     messages.push_back(msg);
-    activatePrintStatsThread(0);
+
+    ObjectGuid guid = ObjectGuid(uint64(std::stoull(param)));
+    activatePrintStatsThread(guid);
     return messages;
 }
 

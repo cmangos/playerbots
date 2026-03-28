@@ -195,6 +195,7 @@ namespace ai
                 creators["shadow trance"] = [](PlayerbotAI* ai) { return new ShadowTranceTrigger(ai); };
                 creators["demon armor"] = [](PlayerbotAI* ai) { return new DemonArmorTrigger(ai); };
                 creators["no healthstone"] = [](PlayerbotAI* ai) { return new HasHealthstoneTrigger(ai); };
+                creators["no soulstone"] = [](PlayerbotAI* ai) { return new HasSoulstoneTrigger(ai); };
                 creators["no firestone"] = [](PlayerbotAI* ai) { return new HasFirestoneTrigger(ai); };
                 creators["no spellstone"] = [](PlayerbotAI* ai) { return new HasSpellstoneTrigger(ai); };
                 creators["corruption"] = [](PlayerbotAI* ai) { return new CorruptionTrigger(ai); };
@@ -258,6 +259,7 @@ namespace ai
                 creators["demon armor"] = [](PlayerbotAI* ai) { return new CastDemonArmorAction(ai); };
                 creators["demon skin"] = [](PlayerbotAI* ai) { return new CastDemonSkinAction(ai); };
                 creators["create healthstone"] = [](PlayerbotAI* ai) { return new CastCreateHealthstoneAction(ai); };
+                creators["create soulstone"] = [](PlayerbotAI* ai) { return new CastCreateSoulstoneAction(ai); };
                 creators["create firestone"] = [](PlayerbotAI* ai) { return new CastCreateFirestoneAction(ai); };
                 creators["create spellstone"] = [](PlayerbotAI* ai) { return new CastCreateSpellstoneAction(ai); };
                 creators["spellstone"] = [](PlayerbotAI* ai) { return new UseSpellItemAction(ai, "spellstone"); };

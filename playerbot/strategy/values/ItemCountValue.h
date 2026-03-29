@@ -7,21 +7,21 @@ namespace ai
     class ItemCountValue : public Uint32CalculatedValue, public Qualified
 	{
 	public:
-        ItemCountValue(PlayerbotAI* ai, std::string name = "item count") : Uint32CalculatedValue(ai, name, 2), Qualified() {}
+        ItemCountValue(PlayerbotAI* ai, std::string name = "item count") : Uint32CalculatedValue(ai, name), Qualified() {}
         virtual uint32 Calculate() override;
 	};
 
     class InventoryItemValue : public CalculatedValue<std::list<Item*> >, public Qualified
     {
     public:
-        InventoryItemValue(PlayerbotAI* ai, std::string name = "inventory items") : CalculatedValue<std::list<Item*> >(ai, name, 2), Qualified() {}
+        InventoryItemValue(PlayerbotAI* ai, std::string name = "inventory items") : CalculatedValue<std::list<Item*> >(ai, name), Qualified() {}
         virtual std::list<Item*> Calculate() override;
     };
 
     class InventoryItemIdValue : public CalculatedValue<std::list<uint32> >, public Qualified
     {
     public:
-        InventoryItemIdValue(PlayerbotAI* ai, std::string name = "inventory item ids") : CalculatedValue<std::list<uint32> >(ai, name, 2), Qualified() {}
+        InventoryItemIdValue(PlayerbotAI* ai, std::string name = "inventory item ids") : CalculatedValue<std::list<uint32> >(ai, name), Qualified() {}
         virtual std::list<uint32> Calculate() override { std::list<uint32> retVal;  for (auto& item : AI_VALUE2(std::list<Item*>, "inventory items", getQualifier())) { ItemPrototype const* proto = item->GetProto();  retVal.push_back(proto->ItemId);} return retVal;};
     };
 

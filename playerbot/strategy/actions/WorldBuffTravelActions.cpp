@@ -767,9 +767,9 @@ bool WorldBuffTravelDMTakePortalAction::Execute(Event& event)
             return MoveTo(portalGO->GetMapId(), portalGO->GetPositionX(),
                 portalGO->GetPositionY(), portalGO->GetPositionZ());
 
-        WorldPacket data(CMSG_GAMEOBJ_USE, 8);
-        data << portalGO->GetObjectGuid();
-        bot->GetSession()->HandleGameObjectUseOpcode(data);
+        std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
+        *packet << portalGO->GetObjectGuid();
+        bot->GetSession()->QueuePacket(std::move(packet));
 
         ai->TellPlayer(GetMaster(), std::string("Taking the portal to ") + keyword + "!");
         context->GetValue<uint8>("world buff travel step")->Set(
@@ -816,6 +816,7 @@ bool WorldBuffTravelCastPortalAction::Execute(Event& event)
     ai->TellPlayer(GetMaster(), std::string("Cannot cast Portal: ") + keyword + " yet...");
     return false;
 }
+
 bool WorldBuffTravelTakePortalAction::Execute(Event& event)
 {
     if (bot->IsNonMeleeSpellCasted(false, false, true))
@@ -835,9 +836,9 @@ bool WorldBuffTravelTakePortalAction::Execute(Event& event)
             return MoveTo(portalGO->GetMapId(), portalGO->GetPositionX(),
                 portalGO->GetPositionY(), portalGO->GetPositionZ());
 
-        WorldPacket data(CMSG_GAMEOBJ_USE, 8);
-        data << portalGO->GetObjectGuid();
-        bot->GetSession()->HandleGameObjectUseOpcode(data);
+        std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_GAMEOBJ_USE));
+        *packet << portalGO->GetObjectGuid();
+        bot->GetSession()->QueuePacket(std::move(packet));
 
         ai->TellPlayer(GetMaster(), "Taking the portal home!");
         context->GetValue<uint8>("world buff travel step")->Set(

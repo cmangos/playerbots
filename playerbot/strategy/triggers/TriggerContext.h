@@ -20,6 +20,7 @@
 #include "KarazhanDungeonTriggers.h"
 #include "NaxxramasDungeonTriggers.h"
 #include "GlyphTriggers.h"
+#include "WorldBuffTravelTriggers.h"
 
 namespace ai
 {
@@ -208,6 +209,18 @@ namespace ai
             creators["in vehicle"] = [](PlayerbotAI* ai) { return new InVehicleTrigger(ai); };
 
             creators["need world buff"] = [](PlayerbotAI* ai) { return new NeedWorldBuffTrigger(ai); };
+
+            // World Buff Travel triggers
+            creators["world buff travel zone reached"] = [](PlayerbotAI* ai) { return new WorldBuffTravelZoneReachedTrigger(ai); };
+            creators["world buff travel need move"] = [](PlayerbotAI* ai) { return new WorldBuffTravelNeedMoveTrigger(ai); };
+            creators["world buff travel portal step"] = [](PlayerbotAI* ai) { return new WorldBuffTravelPortalStepTrigger(ai); };
+            creators["world buff travel use portal"] = [](PlayerbotAI* ai) { return new WorldBuffTravelUsePortalTrigger(ai); };
+            creators["world buff travel done"] = [](PlayerbotAI* ai) { return new WorldBuffTravelDoneTrigger(ai); };
+            creators["world buff travel dm buffed"] = [](PlayerbotAI* ai) { return new WorldBuffTravelDMBuffedTrigger(ai); };
+            creators["world buff travel dm exited"] = [](PlayerbotAI* ai) { return new WorldBuffTravelDMExitedTrigger(ai); };
+            creators["world buff travel dm portal cast"] = [](PlayerbotAI* ai) { return new WorldBuffTravelDMPortalCastTrigger(ai); };
+            creators["world buff travel dm portal use"] = [](PlayerbotAI* ai) { return new WorldBuffTravelDMPortalUseTrigger(ai); };
+
             creators["falling"] = [](PlayerbotAI* ai) { return new IsFallingTrigger(ai); };
             creators["falling far"] = [](PlayerbotAI* ai) { return new IsFallingFarTrigger(ai); };
             creators["move stuck"] = [](PlayerbotAI* ai) { return new MoveStuckTrigger(ai); };

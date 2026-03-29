@@ -70,6 +70,7 @@
 #include "UnstuckAction.h"
 #include "RangeAction.h"
 #include "UseConsumableAction.h"
+#include "WorldBuffTravelActions.h"
 
 #include "OnyxiasLairDungeonActions.h"
 #include "MoltenCoreDungeonActions.h"
@@ -190,6 +191,15 @@ namespace ai
             creators["move from dark portal"] = [](PlayerbotAI* ai) { return new MoveFromDarkPortalAction(ai); };
             creators["use dark portal azeroth"] = [](PlayerbotAI* ai) { return new DarkPortalAzerothAction(ai); };
             creators["world buff"] = [](PlayerbotAI* ai) { return new WorldBuffAction(ai); };
+            creators["world buff travel apply"] = [](PlayerbotAI* ai) { return new WorldBuffTravelApplyAction(ai); };
+            creators["world buff travel cast portal"] = [](PlayerbotAI* ai) { return new WorldBuffTravelCastPortalAction(ai); };
+            creators["world buff travel take portal"] = [](PlayerbotAI* ai) { return new WorldBuffTravelTakePortalAction(ai); };
+            creators["world buff travel finish"] = [](PlayerbotAI* ai) { return new WorldBuffTravelFinishAction(ai); };
+            creators["world buff travel set target"] = [](PlayerbotAI* ai) { return new WorldBuffTravelSetTargetAction(ai); };
+            creators["world buff travel dm buffed"] = [](PlayerbotAI* ai) { return new WorldBuffTravelDMBuffedAction(ai); };
+            creators["world buff travel dm exited"] = [](PlayerbotAI* ai) { return new WorldBuffTravelDMExitedAction(ai); };
+            creators["world buff travel dm cast portal"] = [](PlayerbotAI* ai) { return new WorldBuffTravelDMCastPortalAction(ai); };
+            creators["world buff travel dm take portal"] = [](PlayerbotAI* ai) { return new WorldBuffTravelDMTakePortalAction(ai); };
             creators["hearthstone"] = [](PlayerbotAI* ai) { return new UseHearthStoneAction(ai); };
             creators["cast random spell"] = [](PlayerbotAI* ai) { return new CastRandomSpellAction(ai); };
             creators["free bg join"] = [](PlayerbotAI* ai) { return new FreeBGJoinAction(ai); };

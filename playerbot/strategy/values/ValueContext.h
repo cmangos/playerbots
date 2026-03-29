@@ -103,6 +103,7 @@
 #include "StuckValues.h"
 #include "FishValues.h"
 #include "RuneForgeValues.h"
+#include "WorldBuffTravelValues.h"
 
 namespace ai
 {
@@ -466,6 +467,7 @@ namespace ai
             creators["can fish"] = [](PlayerbotAI* ai) { return new CanFishValue(ai); };
             creators["can open fishing dobber"] = [](PlayerbotAI* ai) { return new CanOpenFishingDobberValue(ai); };
             creators["done fishing"] = [](PlayerbotAI* ai) { return new DoneFishingValue(ai); };
+            creators["world buff travel step"] = [](PlayerbotAI* ai) { return new WorldBuffTravelStepValue(ai); };
 
             //Stuck
             creators["time since last change"] = [](PlayerbotAI* ai) { return new TimeSinceLastChangeValue(ai); };

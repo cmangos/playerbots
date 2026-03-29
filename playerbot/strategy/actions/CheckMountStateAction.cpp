@@ -16,6 +16,14 @@ bool CheckMountStateAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     Player* groupMaster = ai->GetGroupMaster();
 
+    if (bot->IsMounted() && (bot->GetTransport() || bot->IsTaxiFlying() || bot->IsBeingTeleported()))
+    {
+        if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
+            ai->TellPlayerNoFacing(requester, "Unmount. On a taxi or a boat/zeppelin.");
+
+        return UnMount();
+    }
+
     bool hasAttackers = AI_VALUE(bool, "has attackers");
     bool hasEnemy = AI_VALUE(bool, "has enemy player targets") || AI_VALUE(Unit*, "dps target");
 

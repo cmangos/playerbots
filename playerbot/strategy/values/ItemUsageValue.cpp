@@ -123,6 +123,9 @@ ItemUsage ItemUsageValue::Calculate()
         return ItemUsage::ITEM_USAGE_KEEP;
     }
 
+    if (forceUsage == ForceItemUsage::FORCE_USAGE_BAG)
+        return ItemUsage::ITEM_USAGE_KEEP;
+
     if (bot->GetGuildId())
     {
         std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");

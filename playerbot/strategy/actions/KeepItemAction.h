@@ -11,13 +11,14 @@ namespace ai
         virtual bool Execute(Event& event) override;
         virtual bool isUsefulWhenStunned() override { return true; }
 
-        std::unordered_map<ForceItemUsage, std::string> keepName = 
+        std::unordered_map<ForceItemUsage, std::string> keepName =
         {
             {ForceItemUsage::FORCE_USAGE_NONE, "do not keep"},
             {ForceItemUsage::FORCE_USAGE_KEEP, "keep"},
             {ForceItemUsage::FORCE_USAGE_EQUIP, "equip"},
             {ForceItemUsage::FORCE_USAGE_GREED, "buy or greed"},
-            {ForceItemUsage::FORCE_USAGE_NEED, "buy or need"}
+            {ForceItemUsage::FORCE_USAGE_NEED, "buy or need"},
+            {ForceItemUsage::FORCE_USAGE_BAG, "keep in bag"}
         };
 
 #ifdef GenerateBotHelp
@@ -35,6 +36,7 @@ namespace ai
                 "none: the item will not be kept by the bot.\n"
                 "keep: the item will not be sold or destroyed.\n"
                 "equip: the item will be equipped over other items.\n"
+                "bag: the item will be kept in bags and never equipped.\n"
                 "greed: the bot will try to get more of this item and roll greed.\n"
                 "need: the bot will try to get more of this item and roll need.\n";
         }

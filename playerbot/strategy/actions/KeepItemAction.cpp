@@ -21,7 +21,7 @@ bool KeepItemAction::Execute(Event& event)
         ai->TellPlayer(requester, out.str());
         return false;
     }
-    else if (std::string("none,keep,equip,greed,need,?,").find(type + ",") == std::string::npos) //Non type = using keep.
+    else if (std::string("none,keep,equip,bag,greed,need,?,").find(type + ",") == std::string::npos) //Non type = using keep.
         type = "keep";
     else if(text.find(" ") != std::string::npos) //Remove type from param.
         text = text.substr(text.find(" ") + 1);
@@ -87,6 +87,8 @@ bool KeepItemAction::Execute(Event& event)
         usage = ForceItemUsage::FORCE_USAGE_KEEP;
     else if (type == "equip")
         usage = ForceItemUsage::FORCE_USAGE_EQUIP;
+    else if (type == "bag")
+        usage = ForceItemUsage::FORCE_USAGE_BAG;
     else if (type == "greed")
         usage = ForceItemUsage::FORCE_USAGE_GREED;
     else if (type == "need")

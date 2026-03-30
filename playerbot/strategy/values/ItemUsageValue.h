@@ -72,7 +72,8 @@ namespace ai
         FORCE_USAGE_KEEP = 1,  //Do not sell item.
         FORCE_USAGE_EQUIP = 2, //Equip item if no other forced equipped.
         FORCE_USAGE_GREED = 3,  //Get more and greed for rolls.
-        FORCE_USAGE_NEED = 4    //Get more and need for rolls.
+        FORCE_USAGE_NEED = 4,   //Get more and need for rolls.
+        FORCE_USAGE_BAG = 5     //Keep in bags, never equip.
     };
 
     class ItemUsageValue : public CalculatedValue<ItemUsage>, public Qualified

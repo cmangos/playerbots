@@ -132,6 +132,7 @@ namespace ai
         static bool IsHealingPotion(ItemPrototype const* proto);
         static bool IsManaPotion(ItemPrototype const* proto);
         static bool IsBandage(ItemPrototype const* proto);
+        static bool IsAntiVenom(ItemPrototype const* proto);
 
         static uint32 GetRecipeSpell(ItemPrototype const* proto);
 

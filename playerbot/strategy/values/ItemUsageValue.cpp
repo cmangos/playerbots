@@ -1262,6 +1262,27 @@ bool ItemUsageValue::IsBandage(ItemPrototype const* proto)
     return false;
 }
 
+bool ItemUsageValue::IsAntiVenom(ItemPrototype const* proto)
+{
+    if (proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE)
+    {
+        for (int j = 0; j < MAX_ITEM_PROTO_SPELLS; j++)
+        {
+            const SpellEntry* const spellInfo = sServerFacade.LookupSpellInfo(proto->Spells[j].SpellId);
+            if (spellInfo)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (spellInfo->Effect[i] == SPELL_EFFECT_DISPEL && spellInfo->EffectMiscValue[i] == DISPEL_POISON)
+                        return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 uint32 ItemUsageValue::GetRecipeSpell(ItemPrototype const* proto)
 {
 #ifndef MANGOSBOT_ZERO

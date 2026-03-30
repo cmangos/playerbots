@@ -1258,6 +1258,17 @@ namespace ai
         DispelEnrageOnTargetTrigger(PlayerbotAI* ai, std::string name = "dispel enrage") : DispelOnTargetTrigger(ai, name, DISPEL_ENRAGE) {}
     };
 
+    class HasPoisonDebuffTrigger : public Trigger
+    {
+    public:
+        HasPoisonDebuffTrigger(PlayerbotAI* ai) : Trigger(ai, "has poison debuff", 3) {}
+
+        bool IsActive() override
+        {
+            return ai->HasAuraToDispel(bot, DISPEL_POISON);
+        }
+    };
+
     class RtscJumpTrigger : public Trigger
     {
     public:

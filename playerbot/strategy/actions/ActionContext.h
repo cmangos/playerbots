@@ -239,6 +239,7 @@ namespace ai
             creators["fire protection potion"] = [](PlayerbotAI* ai) { return new UseFireProtectionPotionAction(ai); };
             creators["free action potion"] = [](PlayerbotAI* ai) { return new UseFreeActionPotionAction(ai); };
             creators["use consumable"] = [](PlayerbotAI* ai) { return new UseConsumableAction(ai); };
+            creators["anti-venom"] = [](PlayerbotAI* ai) { return new UseAntiVenomAction(ai); };
 
             // BG Tactics
             creators["bg tactics"] = [](PlayerbotAI* ai) { return new BGTactics(ai); };

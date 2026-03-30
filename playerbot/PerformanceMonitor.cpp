@@ -210,7 +210,7 @@ void PerformanceMonitor::PrintStats(bool perTick, bool fullStack, bool showMap)
             float avg = (float)pd.totalTime / (float)pd.count;
             float amount = (float)pd.count / (perTick ? (float)totalCount : 1);
 
-            std::string disName = StackString(stack);
+            std::string disName = StackString(stack, fullStack);
             if (!fullStack && disName.find("|") != std::string::npos)
                 disName = disName.substr(0, disName.find("|")) + disName.substr(disName.find("]"));
 

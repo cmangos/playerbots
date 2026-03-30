@@ -312,12 +312,14 @@ bool WorldBuffTravelApplyAction::TrySummonFarAwayMembers(WorldBuffTravelStep ste
             botsToSummon.push_back(member);
     }
 
-    // Summon real players first, then bots
     Player* toSummon = nullptr;
-    if (!realPlayersToSummon.empty())
-        toSummon = realPlayersToSummon.front();
-    else if (!botsToSummon.empty())
-        toSummon = botsToSummon.front();
+    {
+        std::vector<Player*> allToSummon;
+        allToSummon.insert(allToSummon.end(), realPlayersToSummon.begin(), realPlayersToSummon.end());
+        allToSummon.insert(allToSummon.end(), botsToSummon.begin(), botsToSummon.end());
+        if (!allToSummon.empty())
+            toSummon = allToSummon[urand(0, allToSummon.size() - 1)];
+    }
 
     bool didSummon = false;
     if (toSummon)

@@ -89,7 +89,7 @@ namespace ai
 
     constexpr uint32 AREATRIGGER_DM_NORTH = 3193;
 
-    constexpr float PORTAL_REGROUP_DISTANCE = 50.0f;
+    constexpr float PORTAL_REGROUP_DISTANCE = 100.0f;
 
     inline bool IsHordeFaction(Player* player)
     {

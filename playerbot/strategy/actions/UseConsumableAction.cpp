@@ -136,7 +136,7 @@ bool UseConsumableAction::IsStatBuffSpell(uint32 spellId) const
             {
                 std::string name = spellInfo->SpellName[0];
                 if (name == "Food" || name == "Drink")
-                    break;
+                    continue;
             }
             return true;
         }

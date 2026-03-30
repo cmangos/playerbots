@@ -14,6 +14,15 @@ namespace ai
         Count
     };
 
+    enum class BotConsumableRole : uint8
+    {
+        MeleeDps,
+        RangedPhysDps,
+        CasterDps,
+        Healer,
+        Tank,
+    };
+
     struct ConsumableCandidate
     {
         Item* item = nullptr;
@@ -61,6 +70,8 @@ namespace ai
         float ScoreCandidate(const ConsumableCandidate& candidate) const;
 
         float ScoreSpellStats(uint32 spellId) const;
+
+        BotConsumableRole GetBotRole() const;
 
         float GetStatWeight(uint32 statType) const;
 

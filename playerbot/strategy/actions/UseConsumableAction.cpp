@@ -2,6 +2,7 @@
 #include "UseConsumableAction.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/AiFactory.h"
 
 using namespace ai;
 
@@ -448,51 +449,145 @@ bool UseConsumableAction::HasAnyCandidateAura(const ConsumableCandidate& candida
     return false;
 }
 
-//Calculate stat weights
+BotConsumableRole UseConsumableAction::GetBotRole() const
+{
+    const uint8 cls = bot->getClass();
+    const int tab = AiFactory::GetPlayerSpecTab(bot);
+
+    switch (cls)
+    {
+        // --- Warrior -----------------------------------------------------------
+    case CLASS_WARRIOR:
+        if (tab == 2)                           // Protection
+            return BotConsumableRole::Tank;
+        return BotConsumableRole::MeleeDps;     // Arms / Fury
+
+        // --- Paladin -----------------------------------------------------------
+    case CLASS_PALADIN:
+        if (tab == 0)                           // Holy
+            return BotConsumableRole::Healer;
+        if (tab == 1)                           // Protection
+            return BotConsumableRole::Tank;
+        return BotConsumableRole::MeleeDps;     // Retribution
+
+        // --- Hunter ------------------------------------------------------------
+    case CLASS_HUNTER:
+        return BotConsumableRole::RangedPhysDps; // All specs
+
+        // --- Rogue -------------------------------------------------------------
+    case CLASS_ROGUE:
+        return BotConsumableRole::MeleeDps;     // All specs
+
+        // --- Priest ------------------------------------------------------------
+    case CLASS_PRIEST:
+        if (tab == 2)                           // Shadow
+            return BotConsumableRole::CasterDps;
+        return BotConsumableRole::Healer;       // Discipline / Holy
+
+        // --- Shaman ------------------------------------------------------------
+    case CLASS_SHAMAN:
+        if (tab == 0)                           // Elemental
+            return BotConsumableRole::CasterDps;
+        if (tab == 1)                           // Enhancement
+            return BotConsumableRole::MeleeDps;
+        return BotConsumableRole::Healer;       // Restoration
+
+        // --- Mage --------------------------------------------------------------
+    case CLASS_MAGE:
+        return BotConsumableRole::CasterDps;    // All specs
+
+        // --- Warlock -----------------------------------------------------------
+    case CLASS_WARLOCK:
+        return BotConsumableRole::CasterDps;    // All specs
+
+        // --- Druid -------------------------------------------------------------
+    case CLASS_DRUID:
+        if (tab == 0)                           // Balance
+            return BotConsumableRole::CasterDps;
+        if (tab == 1)                           // Feral
+        {
+            // Thick Hide / feral tank talents → tank; otherwise melee DPS
+            if (ai->IsTank(bot))
+                return BotConsumableRole::Tank;
+            return BotConsumableRole::MeleeDps;
+        }
+        return BotConsumableRole::Healer;       // Restoration
+
+    default:
+        return BotConsumableRole::MeleeDps;
+    }
+}
+
 float UseConsumableAction::GetStatWeight(uint32 statType) const
 {
-    uint8 cls = bot->getClass();
-    bool isTank = ai->IsTank(bot);
-    bool isHealer = ai->IsHeal(bot);
+    const BotConsumableRole role = GetBotRole();
+
+    //                              STR   AGI   STA   INT   SPI
+    // MeleeDps  — wants str/agi  1.0   1.0   0.3   0.1   0.05
+    // RangedPhysDps — agi focus  0.1   1.0   0.3   0.3   0.05
+    // CasterDps — int/sp         0.05  0.05  0.3   1.0   0.4
+    // Healer    — int/spi/+heal  0.05  0.05  0.3   1.0   0.6
+    // Tank      — sta/str/agi    0.6   0.8   1.0   0.1   0.05
 
     switch (statType)
     {
     case 0: // Strength
-        if (cls == CLASS_WARRIOR || cls == CLASS_PALADIN || cls == CLASS_ROGUE)
-            return isTank ? 0.5f : 1.0f;
-        return 0.1f;
+        switch (role)
+        {
+        case BotConsumableRole::MeleeDps:       return 1.0f;
+        case BotConsumableRole::RangedPhysDps:  return 0.1f;
+        case BotConsumableRole::CasterDps:      return 0.05f;
+        case BotConsumableRole::Healer:         return 0.05f;
+        case BotConsumableRole::Tank:           return 0.6f;
+        }
+        break;
 
     case 1: // Agility
-        if (cls == CLASS_WARRIOR || cls == CLASS_ROGUE || cls == CLASS_HUNTER)
-            return 1.0f;
-        if (cls == CLASS_DRUID && !isHealer)
-            return 0.8f;
-        return 0.1f;
+        switch (role)
+        {
+        case BotConsumableRole::MeleeDps:       return 1.0f;
+        case BotConsumableRole::RangedPhysDps:  return 1.0f;
+        case BotConsumableRole::CasterDps:      return 0.05f;
+        case BotConsumableRole::Healer:         return 0.05f;
+        case BotConsumableRole::Tank:           return 0.8f;
+        }
+        break;
 
     case 2: // Stamina
-        if (isTank)
-            return 1.0f;
-        return 0.3f;
+        switch (role)
+        {
+        case BotConsumableRole::MeleeDps:       return 0.3f;
+        case BotConsumableRole::RangedPhysDps:  return 0.3f;
+        case BotConsumableRole::CasterDps:      return 0.3f;
+        case BotConsumableRole::Healer:         return 0.3f;
+        case BotConsumableRole::Tank:           return 1.0f;
+        }
+        break;
 
     case 3: // Intellect
-        if (cls == CLASS_MAGE || cls == CLASS_WARLOCK)
-            return 1.0f;
-        if (isHealer)
-            return 0.9f;
-        if (cls == CLASS_HUNTER || cls == CLASS_SHAMAN || cls == CLASS_PALADIN)
-            return 0.4f;
-        return 0.05f;
+        switch (role)
+        {
+        case BotConsumableRole::MeleeDps:       return 0.1f;
+        case BotConsumableRole::RangedPhysDps:  return 0.3f;
+        case BotConsumableRole::CasterDps:      return 1.0f;
+        case BotConsumableRole::Healer:         return 1.0f;
+        case BotConsumableRole::Tank:           return 0.1f;
+        }
+        break;
 
     case 4: // Spirit
-        if (cls == CLASS_PRIEST || cls == CLASS_MAGE)
-            return 0.5f;
-        if (isHealer)
-            return 0.4f;
-        return 0.05f;
-
-    default:
-        return 0.1f;
+        switch (role)
+        {
+        case BotConsumableRole::MeleeDps:       return 0.05f;
+        case BotConsumableRole::RangedPhysDps:  return 0.05f;
+        case BotConsumableRole::CasterDps:      return 0.4f;
+        case BotConsumableRole::Healer:         return 0.6f;
+        case BotConsumableRole::Tank:           return 0.05f;
+        }
+        break;
     }
+
+    return 0.1f;
 }
 
 float UseConsumableAction::ScoreSpellStats(uint32 spellId) const
@@ -501,6 +596,7 @@ float UseConsumableAction::ScoreSpellStats(uint32 spellId) const
     if (!spellInfo)
         return 0.0f;
 
+    const BotConsumableRole role = GetBotRole();
     float score = 0.0f;
 
     for (int i = 0; i < 3; ++i)
@@ -527,17 +623,26 @@ float UseConsumableAction::ScoreSpellStats(uint32 spellId) const
         }
         case SPELL_AURA_MOD_ATTACK_POWER:
         {
-            uint8 cls = bot->getClass();
-            float w = (cls == CLASS_WARRIOR || cls == CLASS_ROGUE || cls == CLASS_HUNTER || cls == CLASS_PALADIN) ? 0.8f : 0.1f;
+            float w;
+            switch (role)
+            {
+            case BotConsumableRole::MeleeDps:       w = 1.0f;  break;
+            case BotConsumableRole::RangedPhysDps:  w = 0.8f;  break;
+            case BotConsumableRole::Tank:           w = 0.5f;  break;
+            default:                                w = 0.05f; break;
+            }
             score += amount * w;
             break;
         }
         case SPELL_AURA_MOD_DAMAGE_DONE:
         {
-            uint8 cls = bot->getClass();
-            float w = (cls == CLASS_MAGE || cls == CLASS_WARLOCK || cls == CLASS_PRIEST || cls == CLASS_SHAMAN || cls == CLASS_DRUID) ? 1.0f : 0.1f;
-            if (ai->IsHeal(bot))
-                w *= 0.3f;
+            float w;
+            switch (role)
+            {
+            case BotConsumableRole::CasterDps:      w = 1.0f;  break;
+            case BotConsumableRole::Healer:         w = 0.3f;  break;
+            default:                                w = 0.1f;  break;
+            }
             score += amount * w;
             break;
         }
@@ -549,13 +654,20 @@ float UseConsumableAction::ScoreSpellStats(uint32 spellId) const
         }
         case SPELL_AURA_MOD_HEALING_DONE:
         {
-            float w = ai->IsHeal(bot) ? 1.0f : 0.05f;
+            float w = (role == BotConsumableRole::Healer) ? 1.0f : 0.05f;
             score += amount * w;
             break;
         }
         case SPELL_AURA_MOD_POWER_REGEN:
         {
-            score += amount * 2.0f;
+            float w;
+            switch (role)
+            {
+            case BotConsumableRole::Healer:         w = 3.0f; break;
+            case BotConsumableRole::CasterDps:      w = 2.0f; break;
+            default:                                w = 0.5f; break;
+            }
+            score += amount * w;
             break;
         }
         case SPELL_AURA_MOD_RESISTANCE:

@@ -106,7 +106,22 @@ ItemUsage ItemUsageValue::Calculate()
         return ItemUsage::ITEM_USAGE_FORCE_NEED;
 
     if (forceUsage == ForceItemUsage::FORCE_USAGE_KEEP)
+    {
+        ItemUsage equip = QueryItemUsageForEquip(itemQualifier, bot);
+        if (equip == ItemUsage::ITEM_USAGE_EQUIP || equip == ItemUsage::ITEM_USAGE_BAD_EQUIP || equip == ItemUsage::ITEM_USAGE_BROKEN_EQUIP)
+            return equip;
         return ItemUsage::ITEM_USAGE_KEEP;
+    }
+
+    if (forceUsage == ForceItemUsage::FORCE_USAGE_EQUIP)
+    {
+        ItemUsage equip = QueryItemUsageForEquip(itemQualifier, bot);
+        if (equip == ItemUsage::ITEM_USAGE_EQUIP || equip == ItemUsage::ITEM_USAGE_BAD_EQUIP || equip == ItemUsage::ITEM_USAGE_BROKEN_EQUIP)
+            return equip;
+        if (bot->CanUseItem(proto) == EQUIP_ERR_OK && proto->InventoryType != INVTYPE_NON_EQUIP)
+            return ItemUsage::ITEM_USAGE_EQUIP;
+        return ItemUsage::ITEM_USAGE_KEEP;
+    }
 
     if (bot->GetGuildId())
     {

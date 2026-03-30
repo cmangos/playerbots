@@ -268,16 +268,55 @@ bool UseConsumableAction::ClassifyConsumable(const ItemPrototype* proto, Consuma
 
     if (proto->SubClass == ITEM_SUBCLASS_FLASK)
     {
+        bool isRealFlask = false;
+        uint32 firstSpellId = 0;
         for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
         {
-            if (proto->Spells[i].SpellId)
+            uint32 spellId = proto->Spells[i].SpellId;
+            if (!spellId)
+                continue;
+
+            if (!firstSpellId)
+                firstSpellId = spellId;
+
+            std::vector<uint32> possibleAuras;
+            CollectPossibleAuraIds(spellId, possibleAuras);
+            for (uint32 auraId : possibleAuras)
             {
-                outSpellId = proto->Spells[i].SpellId;
-                outType = ConsumableType::Flask;
-                return true;
+                for (uint32 flaskAura : knownFlaskAuras)
+                {
+                    if (auraId == flaskAura)
+                    {
+                        isRealFlask = true;
+                        break;
+                    }
+                }
+                if (isRealFlask)
+                    break;
             }
+            if (isRealFlask)
+                break;
         }
-        return false;
+
+        if (!firstSpellId)
+            return false;
+
+        if (isRealFlask)
+        {
+            outSpellId = firstSpellId;
+            outType = ConsumableType::Flask;
+            return true;
+        }
+
+        if (IsPotionLike(proto))
+            return false;
+
+        if (IsProtectionConsumable(proto))
+            return false;
+
+        outSpellId = firstSpellId;
+        outType = ConsumableType::Elixir;
+        return true;
     }
 
     if (proto->SubClass == ITEM_SUBCLASS_ELIXIR)

@@ -81,6 +81,10 @@ static bool BotIsAlreadySoulstoned(Player* bot)
 
 Unit* PartyMemberToSoulstone::Calculate()
 {
+    // If a master player has manually assigned revive targets, defer to that
+    if (!AI_VALUE(std::list<ObjectGuid>, "revive targets").empty())
+        return nullptr;
+
     Group* group = bot->GetGroup();
 
     if (group)

@@ -390,5 +390,31 @@ bool EquipUpgradesAction::Execute(Event& event)
         }
     }
 
+    // Check if main-hand has higher top-end damage than off-hand
+    if (didEquip && bot->CanDualWield())
+    {
+        Item* mh = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+        Item* oh = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+
+        if (mh && oh
+            && mh->GetProto()->Class == ITEM_CLASS_WEAPON
+            && oh->GetProto()->Class == ITEM_CLASS_WEAPON
+            && mh->GetProto()->InventoryType != INVTYPE_2HWEAPON)
+        {
+            float mhMaxDmg = mh->GetProto()->Damage[0].DamageMax;
+            float ohMaxDmg = oh->GetProto()->Damage[0].DamageMax;
+
+            if (ohMaxDmg > mhMaxDmg)
+            {
+                uint16 srcPos = ((INVENTORY_SLOT_BAG_0 << 8) | EQUIPMENT_SLOT_MAINHAND);
+                uint16 dstPos = ((INVENTORY_SLOT_BAG_0 << 8) | EQUIPMENT_SLOT_OFFHAND);
+                bot->SwapItem(srcPos, dstPos);
+
+                sLog.outDetail("Bot #%d <%s> swapped MH/OH weapons to put higher top-end damage (%.1f) in main hand",
+                    bot->GetGUIDLow(), bot->GetName(), ohMaxDmg);
+            }
+        }
+    }
+
     return didEquip;
 }

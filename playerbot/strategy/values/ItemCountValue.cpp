@@ -8,6 +8,9 @@
 
 using namespace ai;
 
+struct CacheEntry { uint32 count; time_t tick; };
+static std::unordered_map<Player*, std::unordered_map<std::string, CacheEntry>> g_itemCountCache;
+
 static std::list<Item*> Find(PlayerbotAI* ai, std::string qualifier)
 {
     std::list<Item*> result;
@@ -19,14 +22,10 @@ static std::list<Item*> Find(PlayerbotAI* ai, std::string qualifier)
 
 uint32 ItemCountValue::Calculate()
 {
-    struct CacheEntry { uint32 count; time_t tick; };
-
-    static std::unordered_map<Player*, std::unordered_map<std::string, CacheEntry>> cache;
-
     Player* bot = ai->GetBot();
     time_t currentTick = std::time(nullptr);
 
-    auto& botCache = cache[bot];
+    auto& botCache = g_itemCountCache[bot];
     auto it = botCache.find(qualifier);
     if (it != botCache.end())
     {
@@ -80,4 +79,20 @@ std::list<Item*> EquipedUsableTrinketValue::Calculate()
 	}
 
 	return result;
+}
+
+namespace ai {
+    void InvalidateItemCountCache(Player* bot)
+    {
+        if (!bot) return;
+        g_itemCountCache.erase(bot);
+    }
+
+    void InvalidateItemCountCache(Player* bot, const std::string& qualifier)
+    {
+        if (!bot) return;
+        auto it = g_itemCountCache.find(bot);
+        if (it != g_itemCountCache.end())
+            it->second.erase(qualifier);
+    }
 }

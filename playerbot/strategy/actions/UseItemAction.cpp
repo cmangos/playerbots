@@ -9,6 +9,9 @@
 #include "playerbot/TravelMgr.h"
 #include "CheckMountStateAction.h"
 #include "TellLosAction.h"
+#include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/strategy/values/ItemCountValue.h"
+#include "playerbot/TravelMgr.h"
 
 using namespace ai;
 
@@ -729,7 +732,6 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
                 replyStr << " " << BOT_TEXT("command_target_self");
             }
 
-            // Stackable
             if (itemUsed && proto->Stackable > 1)
             {
                 uint32 count = itemUsed->GetCount();
@@ -746,7 +748,9 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
 
             ai->TellPlayerNoFacing(requester, BOT_TEXT2(replyStr.str(), replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
-        
+
+        ai::InvalidateItemCountCache(bot);
+
         return true;
     }
     else

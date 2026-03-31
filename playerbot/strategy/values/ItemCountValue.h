@@ -31,4 +31,7 @@ namespace ai
         EquipedUsableTrinketValue(PlayerbotAI* ai) : CalculatedValue<std::list<Item*> >(ai), Qualified() {}
         virtual std::list<Item*> Calculate() override;
     };
+
+    void InvalidateItemCountCache(Player* bot);
+    void InvalidateItemCountCache(Player* bot, const std::string& qualifier);
 }

@@ -174,6 +174,12 @@ namespace ai
         HasHealthstoneTrigger(PlayerbotAI* ai) : WarlockConjuredItemTrigger(ai, "healthstone") {}
     };
 
+    class HasSoulstoneTrigger : public WarlockConjuredItemTrigger
+    {
+    public:
+        HasSoulstoneTrigger(PlayerbotAI* ai) : WarlockConjuredItemTrigger(ai, "soulstone") {}
+    };
+
     class FearTrigger : public HasCcTargetTrigger
     {
     public:
@@ -296,7 +302,7 @@ namespace ai
     {
     public:
         SoulstoneTrigger(PlayerbotAI* ai) : ItemTargetTrigger(ai, "revive targets", true, true) {}
-        std::string GetTargetName() override { return "self target"; }
+        std::string GetTargetName() override { return "party member to soulstone"; }
         uint32 GetItemId() override;
     };
 }

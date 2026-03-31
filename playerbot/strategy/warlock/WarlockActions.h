@@ -71,6 +71,7 @@ namespace ai
     {
     public:
         CastSoulstoneAction(PlayerbotAI* ai) : CastItemTargetAction(ai, "revive targets", true, true) {}
+        std::string GetTargetName() override { return "party member to soulstone"; }
 
     private:
         uint32 GetItemId() override 
@@ -388,6 +389,13 @@ namespace ai
 		CastCreateHealthstoneAction(PlayerbotAI* ai) : CastSpellAction(ai, "create healthstone") {}
         std::string GetTargetName() override { return "self target"; }
 	};
+
+        class CastCreateSoulstoneAction : public CastSpellAction
+        {
+        public:
+                CastCreateSoulstoneAction(PlayerbotAI* ai) : CastSpellAction(ai, "create soulstone") {}
+        std::string GetTargetName() override { return "self target"; }
+        };
 
 	class CastCreateFirestoneAction : public CastSpellAction
 	{

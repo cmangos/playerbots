@@ -53,6 +53,13 @@ bool ImbueWithStoneAction::Execute(Event& event)
         if (mainWeapon && mainWeapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
         {
             Item* stone = ai->FindStoneFor(mainWeapon);
+            // Do not use Elemental Sharpening Stone outside instances
+            if (stone && stone->GetProto())
+            {
+                if (stone->GetProto()->DisplayInfoID == ELEMENTAL_SHARPENING_DISPLAYID && bot->GetInstanceId() == 0)
+                    stone = nullptr;
+            }
+
             if (stone)
                 return UseItem(requester, stone->GetEntry(), mainWeapon);
         }
@@ -63,6 +70,13 @@ bool ImbueWithStoneAction::Execute(Event& event)
     if (secondaryWeapon && secondaryWeapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {
         Item* stone = ai->FindStoneFor(secondaryWeapon);
+        // Do not use Elemental Sharpening Stone outside instances
+        if (stone && stone->GetProto())
+        {
+            if (stone->GetProto()->DisplayInfoID == ELEMENTAL_SHARPENING_DISPLAYID && bot->GetInstanceId() == 0)
+                stone = nullptr;
+        }
+
         if (stone)
             return UseItem(requester, stone->GetEntry(), secondaryWeapon);
     }
@@ -104,7 +118,14 @@ bool ImbueWithStoneAction::isUseful()
     Item* secondaryWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
     if (secondaryWeapon && secondaryWeapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
     {
-        if (ai->FindStoneFor(secondaryWeapon))
+        Item* stone = ai->FindStoneFor(secondaryWeapon);
+        if (stone && stone->GetProto())
+        {
+            if (stone->GetProto()->DisplayInfoID == ELEMENTAL_SHARPENING_DISPLAYID && bot->GetInstanceId() == 0)
+                stone = nullptr;
+        }
+
+        if (stone)
             return true;
     }
 
@@ -114,7 +135,14 @@ bool ImbueWithStoneAction::isUseful()
         Item* mainWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
         if (mainWeapon && mainWeapon->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT) == 0)
         {
-            if (ai->FindStoneFor(mainWeapon))
+            Item* stone = ai->FindStoneFor(mainWeapon);
+            if (stone && stone->GetProto())
+            {
+                if (stone->GetProto()->DisplayInfoID == ELEMENTAL_SHARPENING_DISPLAYID && bot->GetInstanceId() == 0)
+                    stone = nullptr;
+            }
+
+            if (stone)
                 return true;
         }
     }

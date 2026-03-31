@@ -1,9 +1,10 @@
-
 #include "playerbot/playerbot.h"
 #include "ItemCountValue.h"
 #include "Entities/Item.h"
 #include "Entities/ItemPrototype.h"
 #include "Entities/Player.h"
+#include <unordered_map>
+#include <ctime>
 
 using namespace ai;
 
@@ -18,14 +19,27 @@ static std::list<Item*> Find(PlayerbotAI* ai, std::string qualifier)
 
 uint32 ItemCountValue::Calculate()
 {
-    uint32 count = 0;
-    std::list<Item*> items = Find(ai, qualifier);
-    for (std::list<Item*>::iterator i = items.begin(); i != items.end(); ++i)
+    struct CacheEntry { uint32 count; time_t tick; };
+
+    static std::unordered_map<Player*, std::unordered_map<std::string, CacheEntry>> cache;
+
+    Player* bot = ai->GetBot();
+    time_t currentTick = std::time(nullptr);
+
+    auto& botCache = cache[bot];
+    auto it = botCache.find(qualifier);
+    if (it != botCache.end())
     {
-        Item* item = *i;
-        count += item->GetCount();
+        if (it->second.tick == currentTick)
+            return it->second.count;
     }
 
+    uint32 count = 0;
+    std::list<Item*> items = Find(ai, qualifier);
+    for (Item* item : items)
+        count += item->GetCount();
+
+    botCache[qualifier] = CacheEntry{ count, currentTick };
     return count;
 }
 

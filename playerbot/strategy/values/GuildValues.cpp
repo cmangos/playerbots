@@ -853,6 +853,16 @@ GuildShareTarget GuildShareTargetValue::Calculate()
     if (!hasAnyShareItem)
         return result;
 
+    std::map<uint32, uint32> selfNeeded;
+    for (const auto& entry : shareList)
+    {
+        if (entry.MatchesPlayer(bot))
+        {
+            if (entry.amount > selfNeeded[entry.itemId])
+                selfNeeded[entry.itemId] = entry.amount;
+        }
+    }
+
     // Check nearby guild members
     std::list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("nearest friendly players")->Get();
 
@@ -882,37 +892,15 @@ GuildShareTarget GuildShareTargetValue::Calculate()
             if (botCount == 0)
                 continue;
 
+            uint32 botNeeds = selfNeeded.count(entry.itemId) ? selfNeeded[entry.itemId] : 0;
+            if (botCount <= botNeeds)
+                continue; // Bot doesn't have surplus beyond its own needs
+
             uint32 targetCount = targetAi->GetInventoryItemsCountWithId(entry.itemId);
             if (targetCount >= entry.amount)
                 continue;
 
-            // If the bot also matches this share entry, distribute evenly.
-            // Stop if the bot has at most 1 more than the target to prevent
-            // trading back and forth indefinitely.
-            bool botMatchesEntry = entry.MatchesPlayer(bot);
-            if (botMatchesEntry)
-            {
-                if (botCount <= targetCount + 1)
-                    continue;
-            }
-
             uint32 needed = entry.amount - targetCount;
-
-            // When distributing evenly, cap the amount so the bot doesn't
-            // give away more than what would equalize both counts.
-            if (botMatchesEntry)
-            {
-                uint32 evenShare = (botCount + targetCount) / 2;
-                uint32 canGive = (botCount > evenShare) ? botCount - evenShare : 0;
-
-                // Ensure we keep at least targetCount+1 so we never reverse
-                // who has more and cause a loop.
-                if (canGive == 0)
-                    continue;
-
-                if (needed > canGive)
-                    needed = canGive;
-            }
 
             result.receiver = player;
             result.itemId = entry.itemId;

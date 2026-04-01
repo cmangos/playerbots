@@ -705,11 +705,6 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
         }
     }
 
-    // Now find a reagent this bot can farm and still needs more of.
-    // Priority: 0 = gathering nodes, the bot has relevant gathering skill
-    //           1 = nodes and mobs, bot has relevant craft skill
-    //           2 = mobs only, bot has relevant craft skill
-    //           3 = mobs only, any bot can farm
     struct FarmCandidate
     {
         uint32 itemId;
@@ -747,12 +742,10 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
                 break;
         }
 
-        // Determine priority based on drop source and bot's skills
-        uint32 priority = 4; // default: cannot farm at all
+        uint32 priority = 4;
 
         if (dropsFromGatherNode && hasAnyGathering)
         {
-            // Best priority: item comes from herb/ore/skin nodes and bot has a gathering skill
             priority = 0;
         }
         else if (dropsFromMob)
@@ -808,7 +801,6 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
             bestCandidates.push_back(c);
     }
 
-    // Pick random valid item to farm
     const FarmCandidate& chosen = bestCandidates[urand(0, bestCandidates.size() - 1)];
     ItemPrototype const* bestProto = sObjectMgr.GetItemPrototype(chosen.itemId);
     if (!bestProto)
@@ -853,17 +845,6 @@ GuildShareTarget GuildShareTargetValue::Calculate()
     if (!hasAnyShareItem)
         return result;
 
-    std::map<uint32, uint32> selfNeeded;
-    for (const auto& entry : shareList)
-    {
-        if (entry.MatchesPlayer(bot))
-        {
-            if (entry.amount > selfNeeded[entry.itemId])
-                selfNeeded[entry.itemId] = entry.amount;
-        }
-    }
-
-    // Check nearby guild members
     std::list<ObjectGuid> nearGuids = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("nearest friendly players")->Get();
 
     for (auto& guid : nearGuids)
@@ -882,7 +863,6 @@ GuildShareTarget GuildShareTargetValue::Calculate()
         if (sServerFacade.GetDistance2d(bot, player) > INTERACTION_DISTANCE)
             continue;
 
-        // Only share items explicitly listed in the guild info "Share:" section
         for (const auto& entry : shareList)
         {
             if (!entry.MatchesPlayer(player))
@@ -892,15 +872,30 @@ GuildShareTarget GuildShareTargetValue::Calculate()
             if (botCount == 0)
                 continue;
 
-            uint32 botNeeds = selfNeeded.count(entry.itemId) ? selfNeeded[entry.itemId] : 0;
-            if (botCount <= botNeeds)
-                continue; // Bot doesn't have surplus beyond its own needs
-
             uint32 targetCount = targetAi->GetInventoryItemsCountWithId(entry.itemId);
             if (targetCount >= entry.amount)
                 continue;
 
+            bool botMatchesEntry = entry.MatchesPlayer(bot);
+            if (botMatchesEntry)
+            {
+                if (botCount <= targetCount + 1)
+                    continue;
+            }
+
             uint32 needed = entry.amount - targetCount;
+
+            if (botMatchesEntry)
+            {
+                uint32 evenShare = (botCount + targetCount) / 2;
+                uint32 canGive = (botCount > evenShare) ? botCount - evenShare : 0;
+
+                if (canGive == 0)
+                    continue;
+
+                if (needed > canGive)
+                    needed = canGive;
+            }
 
             result.receiver = player;
             result.itemId = entry.itemId;

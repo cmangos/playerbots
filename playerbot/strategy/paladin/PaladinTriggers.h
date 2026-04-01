@@ -86,6 +86,7 @@ namespace ai
     {
     public:
         GreaterBlessingOfMightOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "greater blessing of might", "blessing of might", 4) {}
+        bool IsActive() override { return (bot->GetMap()->IsDungeon() || bot->GetMap()->IsBattleGround()) && GreaterBuffOnPartyTrigger::IsActive(); }
     };
 
     class BlessingOfWisdomOnPartyTrigger : public BuffOnPartyTrigger
@@ -105,6 +106,7 @@ namespace ai
     {
     public:
         GreaterBlessingOfWisdomOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "greater blessing of wisdom", "blessing of wisdom", 4) {}
+        bool IsActive() override { return (bot->GetMap()->IsDungeon() || bot->GetMap()->IsBattleGround()) && GreaterBuffOnPartyTrigger::IsActive(); }
     };
 
     class BlessingOfKingsOnPartyTrigger : public BuffOnPartyTrigger
@@ -124,6 +126,7 @@ namespace ai
     {
     public:
         GreaterBlessingOfKingsOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "greater blessing of kings", "blessing of kings", 4) {}
+        bool IsActive() override { return (bot->GetMap()->IsDungeon() || bot->GetMap()->IsBattleGround()) && GreaterBuffOnPartyTrigger::IsActive(); }
     };
 
     class BlessingOfLightOnPartyTrigger : public BuffOnPartyTrigger
@@ -143,6 +146,7 @@ namespace ai
     {
     public:
         GreaterBlessingOfLightOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "greater blessing of light", "blessing of light", 4) {}
+        bool IsActive() override { return (bot->GetMap()->IsDungeon() || bot->GetMap()->IsBattleGround()) && GreaterBuffOnPartyTrigger::IsActive(); }
     };
 
     class BlessingOfSalvationOnPartyTrigger : public BuffOnPartyTrigger
@@ -162,6 +166,7 @@ namespace ai
     {
     public:
         GreaterBlessingOfSalvationOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "greater blessing of salvation", "blessing of salvation", 4, true) {}
+        bool IsActive() override { return (bot->GetMap()->IsDungeon() || bot->GetMap()->IsBattleGround()) && GreaterBuffOnPartyTrigger::IsActive(); }
     };
 
     class BlessingOfSanctuaryOnPartyTrigger : public BuffOnPartyTrigger
@@ -181,6 +186,7 @@ namespace ai
     {
     public:
         GreaterBlessingOfSanctuaryOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "greater blessing of sanctuary", "blessing of sanctuary", 4) {}
+        bool IsActive() override { return (bot->GetMap()->IsDungeon() || bot->GetMap()->IsBattleGround()) && GreaterBuffOnPartyTrigger::IsActive(); }
     };
 
     class BlessingTrigger : public BuffTrigger
@@ -211,6 +217,9 @@ namespace ai
 
         bool IsActive() override
         {
+            if (!bot->GetMap()->IsDungeon() && !bot->GetMap()->IsBattleGround())
+                return false;
+
             Unit* target = GetTarget();
             if (target && target->IsPlayer())
             {
@@ -239,6 +248,9 @@ namespace ai
 
         bool IsActive() override
         {
+            if (!bot->GetMap()->IsDungeon() && !bot->GetMap()->IsBattleGround())
+                return false;
+
             Unit* target = GetTarget();
             if (target && target->IsPlayer())
             {
@@ -267,6 +279,9 @@ namespace ai
 
         bool IsActive() override
         {
+            if (!bot->GetMap()->IsDungeon() && !bot->GetMap()->IsBattleGround())
+                return false;
+
             Unit* target = GetTarget();
             if (target && target->IsPlayer())
             {
@@ -295,6 +310,9 @@ namespace ai
 
         bool IsActive() override
         {
+            if (!bot->GetMap()->IsDungeon() && !bot->GetMap()->IsBattleGround())
+                return false;
+
             Unit* target = GetTarget();
             if (target && target->IsPlayer())
             {
@@ -323,6 +341,9 @@ namespace ai
 
         bool IsActive() override
         {
+            if (!bot->GetMap()->IsDungeon() && !bot->GetMap()->IsBattleGround())
+                return false;
+
             Unit* target = GetTarget();
             if (target && target->IsPlayer())
             {
@@ -351,6 +372,9 @@ namespace ai
 
         bool IsActive() override
         {
+            if (!bot->GetMap()->IsDungeon() && !bot->GetMap()->IsBattleGround())
+                return false;
+
             Unit* target = GetTarget();
             if (target && target->IsPlayer())
             {

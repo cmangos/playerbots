@@ -70,6 +70,9 @@ bool GreaterBlessingTrigger::IsActive()
     Unit* target = GetTarget();
     if (target)
     {
+        if (!bot->GetMap()->IsDungeon() && !bot->GetMap()->IsBattleGround())
+            return false;
+
         std::vector<std::string> altBlessings;
         std::vector<std::string> haveBlessings;
         altBlessings.push_back("blessing of might");
@@ -154,6 +157,9 @@ bool BlessingOnPartyTrigger::IsActive()
 
 bool GreaterBlessingOnPartyTrigger::IsActive()
 {
+    if (!bot->GetMap()->IsDungeon() && !bot->GetMap()->IsBattleGround())
+        return false;
+
     std::vector<std::string> altBlessings;
     std::vector<std::string> haveBlessings;
     altBlessings.push_back("blessing of might");

@@ -257,9 +257,11 @@ bool WorldBuffTravelApplyAction::TrySummonFarAwayMembers(WorldBuffTravelStep ste
     time_t now = time(nullptr);
     ObjectGuid botGuid = bot->GetObjectGuid();
     auto it = lastSummonAttempt.find(botGuid);
-    if (it != lastSummonAttempt.end() && (now - it->second) < 2)
+    if (it != lastSummonAttempt.end() && now < it->second)
         return true;
-    lastSummonAttempt[botGuid] = now;
+
+    uint32 cooldownSeconds = urand(1, 5);
+    lastSummonAttempt[botGuid] = now + cooldownSeconds;
 
     uint8 warlockStep = static_cast<uint8>(step);
     uint32 pendingCount = 0;

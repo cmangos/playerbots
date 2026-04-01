@@ -9,7 +9,8 @@ namespace ai
         Farm,
         Kill,
         Explore,
-        Craft
+        Craft,
+        AuctionHouse
     };
 
     struct GuildOrder
@@ -19,18 +20,19 @@ namespace ai
         uint32 amount = 0; // Used for Craft and Farm orders
 
         bool IsValid() const { return type != GuildOrderType::None && !target.empty(); }
-        bool IsTravelOrder() const { return type == GuildOrderType::Farm || type == GuildOrderType::Kill || type == GuildOrderType::Explore; }
+        bool IsTravelOrder() const { return type == GuildOrderType::Farm || type == GuildOrderType::Kill || type == GuildOrderType::Explore || type == GuildOrderType::AuctionHouse; }
         bool IsCraftOrder() const { return type == GuildOrderType::Craft; }
 
         std::string GetTypeName() const
         {
             switch (type)
             {
-            case GuildOrderType::Farm:    return "Farm";
-            case GuildOrderType::Kill:    return "Kill";
-            case GuildOrderType::Explore: return "Explore";
-            case GuildOrderType::Craft:   return "Craft";
-            default:                      return "None";
+            case GuildOrderType::Farm:         return "Farm";
+            case GuildOrderType::Kill:         return "Kill";
+            case GuildOrderType::Explore:      return "Explore";
+            case GuildOrderType::Craft:        return "Craft";
+            case GuildOrderType::AuctionHouse: return "AuctionHouse";
+            default:                           return "None";
             }
         }
     };

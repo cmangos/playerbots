@@ -1041,6 +1041,29 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 }
             );
         }
+        else if (order.type == GuildOrderType::AuctionHouse)
+        {
+            *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]()
+                {
+                    PartitionedTravelList list = sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::GenericRpg);
+
+                    for (auto& [partition, travelPoints] : list)
+                    {
+                        travelPoints.erase(std::remove_if(travelPoints.begin(), travelPoints.end(), [](TravelPoint point)
+                            {
+                                EntryTravelDestination* dest = (EntryTravelDestination*)std::get<TravelDestination*>(point);
+                                if (!dest->GetCreatureInfo())
+                                    return true;
+
+                                if (dest->GetCreatureInfo()->NpcFlags & UNIT_NPC_FLAG_AUCTIONEER)
+                                    return false;
+
+                                return true;
+                            }), travelPoints.end());
+                    }
+                    return list;
+                });
+        }
         else
         {
             return false;

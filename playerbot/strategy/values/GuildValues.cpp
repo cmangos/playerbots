@@ -680,6 +680,31 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
     if (reagentNeeds.empty())
         return order;
 
+    // 20% chance to move to auctioneer instead of farming
+    if (urand(1, 100) <= 20 && bot->GetMoney() >= 100)
+    {
+        std::vector<uint32> neededItemIds;
+        for (const auto& [reagentId, totalNeeded] : reagentNeeds)
+        {
+            uint32 currentCount = ai->GetInventoryItemsCountWithId(reagentId);
+            if (currentCount < totalNeeded)
+                neededItemIds.push_back(reagentId);
+        }
+
+        if (!neededItemIds.empty())
+        {
+            uint32 chosenId = neededItemIds[urand(0, neededItemIds.size() - 1)];
+            ItemPrototype const* chosenProto = sObjectMgr.GetItemPrototype(chosenId);
+            if (chosenProto)
+            {
+                order.type = GuildOrderType::AuctionHouse;
+                order.target = chosenProto->Name1;
+                order.amount = reagentNeeds[chosenId] - ai->GetInventoryItemsCountWithId(chosenId);
+                return order;
+            }
+        }
+    }
+
     // Now find a reagent this bot can farm and still needs more of.
     // Priority: 0 = gathering nodes, the bot has relevant gathering skill
     //           1 = nodes and mobs, bot has relevant craft skill

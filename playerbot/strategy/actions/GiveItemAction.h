@@ -22,12 +22,13 @@ namespace ai
         virtual Unit* GetTarget() override;
         virtual bool isUseful() override
         {
-            if (!GetTarget())
+            Unit* target = GetTarget();
+            if (!target)
                 return false;
 
-            bool isBot = GetTarget()->IsPlayer() && ((Player*)GetTarget())->GetPlayerbotAI();
+            bool isBot = target->IsPlayer() && ((Player*)target)->GetPlayerbotAI();
 
-            return !isBot || (isBot && !((Player*)GetTarget())->GetPlayerbotAI()->HasCheat(BotCheatMask::item));
+            return !isBot || (isBot && !((Player*)target)->GetPlayerbotAI()->HasCheat(BotCheatMask::item));
         }
     };
 
@@ -38,12 +39,13 @@ namespace ai
         virtual Unit* GetTarget() override;
         virtual bool isUseful() override
         {
-            if (!GetTarget())
+            Unit* target = GetTarget();
+            if (!target)
                 return false;
 
-            bool isBot = GetTarget()->IsPlayer() && ((Player*)GetTarget())->GetPlayerbotAI();
+            bool isBot = target->IsPlayer() && ((Player*)target)->GetPlayerbotAI();
 
-            return !isBot || (isBot && !((Player*)GetTarget())->GetPlayerbotAI()->HasCheat(BotCheatMask::item));
+            return !isBot || (isBot && !((Player*)target)->GetPlayerbotAI()->HasCheat(BotCheatMask::item));
         }
     };
 }

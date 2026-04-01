@@ -50,7 +50,7 @@ HunterStrategy::HunterStrategy(PlayerbotAI* ai) : ClassStrategy(ai)
 
 NextAction** HunterStrategy::GetDefaultCombatActions()
 {
-    return NextAction::array(0, new NextAction("auto shot", ACTION_IDLE), NULL);
+    return NextAction::array(0, new NextAction("auto shot", ACTION_NORMAL), NULL);
 }
 
 void HunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -205,7 +205,7 @@ void HunterAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "multi-shot",
-        NextAction::array(0, new NextAction("multi-shot", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("multi-shot", ACTION_HIGH + 1), NULL)));
 }
 
 void HunterAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -202,11 +202,39 @@ namespace ai
     };
 
     class HunterNoAmmoTrigger : public AmmoCountTrigger
+{
+public:
+    HunterNoAmmoTrigger(PlayerbotAI* ai)
+        : AmmoCountTrigger(ai, "ammo", 1, 10), lastCheckTime(0)
     {
-    public:
-        HunterNoAmmoTrigger(PlayerbotAI* ai) : AmmoCountTrigger(ai, "ammo", 1, 10) {}
-    };
+    }
 
+    virtual bool IsActive() override
+    {
+        uint32 now = time(nullptr);
+
+        // Only check every 3 seconds to avoid spamming
+        if (now - lastCheckTime < 3)
+            return false;
+
+        lastCheckTime = now;
+
+        uint32 ammoId = bot->GetUInt32Value(PLAYER_AMMO_ID);
+
+        // No ammo equipped at all
+        if (ammoId == 0)
+            return AI_VALUE2(uint32, "item count", "ammo") > 0;
+
+        // Check if we still have THIS ammo in inventory
+        uint32 count = AI_VALUE2(uint32, "item count", std::to_string(ammoId));
+
+        // If equipped ammo is gone, but we have other ammo → trigger
+        return count == 0 && AI_VALUE2(uint32, "item count", "ammo") > 0;
+    }
+
+private:
+    time_t lastCheckTime;
+};
     class HunterHasAmmoTrigger : public AmmoCountTrigger
     {
     public:

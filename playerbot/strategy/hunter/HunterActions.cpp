@@ -44,24 +44,23 @@ bool HunterEquipAmmoAction::Execute(Event& event)
 
     switch (ranged->GetProto()->SubClass)
     {
-        case ITEM_SUBCLASS_WEAPON_GUN:
-            subClass = ITEM_SUBCLASS_BULLET;
-            break;
-        case ITEM_SUBCLASS_WEAPON_BOW:
-        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
-            subClass = ITEM_SUBCLASS_ARROW;
-            break;
-        case ITEM_SUBCLASS_WEAPON_THROWN:
-            ammoClass = ITEM_CLASS_WEAPON;
-            subClass = ITEM_SUBCLASS_WEAPON_THROWN;
-            break;
+    case ITEM_SUBCLASS_WEAPON_GUN:
+        subClass = ITEM_SUBCLASS_BULLET;
+        break;
+    case ITEM_SUBCLASS_WEAPON_BOW:
+    case ITEM_SUBCLASS_WEAPON_CROSSBOW:
+        subClass = ITEM_SUBCLASS_ARROW;
+        break;
+    case ITEM_SUBCLASS_WEAPON_THROWN:
+        ammoClass = ITEM_CLASS_WEAPON;
+        subClass = ITEM_SUBCLASS_WEAPON_THROWN;
+        break;
     }
 
     uint32 currentAmmoId = bot->GetUInt32Value(PLAYER_AMMO_ID);
-
     const ItemPrototype* bestAmmoProto = nullptr;
 
-    // Scan inventory
+    // Scan inventory for best ammo
     for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
     {
         if (Bag* bag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
@@ -76,29 +75,15 @@ bool HunterEquipAmmoAction::Execute(Event& event)
 
                     if (proto->Class == ammoClass && proto->SubClass == subClass)
                     {
-                        float betterAmmoStacks = BetterStacks(proto, "ammo");
-
-                        // Best ammo possible (nothing better exists)
-                        if (betterAmmoStacks <= 0)
-                        {
-                            bestAmmoProto = proto;
-                            break;
-                        }
-
-                        // Fallback if no better found yet
-                        if (!bestAmmoProto)
+                        if (!bestAmmoProto || proto->ItemLevel > bestAmmoProto->ItemLevel)
                             bestAmmoProto = proto;
                     }
                 }
             }
-
-            // Stop outer loop if best ammo found
-            if (bestAmmoProto && BetterStacks(bestAmmoProto, "ammo") <= 0)
-                break;
         }
     }
 
-    // Equip best ammo found
+    // Equip best ammo if not already equipped
     if (bestAmmoProto && currentAmmoId != bestAmmoProto->ItemId)
     {
         bot->SetUInt32Value(PLAYER_AMMO_ID, bestAmmoProto->ItemId);

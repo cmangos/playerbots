@@ -941,11 +941,22 @@ bool UseAction::UseQuestGiverItem(Player* requester, Item* item)
     if (item->GetOwnerGuid() != bot->GetObjectGuid())
         return false;
 
-    WorldPacket packet(CMSG_QUESTGIVER_ACCEPT_QUEST, 8 + 4 + 4);
-    packet << item->GetObjectGuid();
-    packet << quest->GetQuestId();
-    packet << uint32(0);
-    bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(packet);
+    if (!bot->HasItemCount(proto->ItemId, 1))
+        return false;
+
+    Item* validItem = bot->GetItemByGuid(item->GetObjectGuid());
+    if (!validItem || validItem != item)
+        return false;
+
+    if (!bot->CanAddQuest(quest, true))
+        return false;
+
+    bot->AddQuest(quest, nullptr);
+
+    if (bot->CanCompleteQuest(quest->GetQuestId()))
+        bot->CompleteQuest(quest->GetQuestId());
+
+    bot->DestroyItemCount(proto->ItemId, 1, true);
 
     if (verbose)
     {

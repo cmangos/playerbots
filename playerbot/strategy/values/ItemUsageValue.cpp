@@ -360,17 +360,23 @@ ItemUsage ItemUsageValue::Calculate()
             return ItemUsage::ITEM_USAGE_KEEP;
     }
 
-    //AMMO
-    if ((proto->Class == ITEM_CLASS_PROJECTILE || (proto->Class == ITEM_CLASS_WEAPON && proto->SubClass == ITEM_SUBCLASS_WEAPON_THROWN)) && bot->CanUseItem(proto) == EQUIP_ERR_OK)
-        if ((bot->getClass() == CLASS_HUNTER && proto->Class != ITEM_CLASS_WEAPON) || bot->getClass() == CLASS_ROGUE || bot->getClass() == CLASS_WARRIOR)
+    // AMMO
+if ((proto->Class == ITEM_CLASS_PROJECTILE || 
+     (proto->Class == ITEM_CLASS_WEAPON && proto->SubClass == ITEM_SUBCLASS_WEAPON_THROWN)) &&
+    bot->CanUseItem(proto) == EQUIP_ERR_OK)
+{
+    if ((bot->getClass() == CLASS_HUNTER && proto->Class != ITEM_CLASS_WEAPON) ||
+        bot->getClass() == CLASS_ROGUE ||
+        bot->getClass() == CLASS_WARRIOR)
+    {
+        Item* const pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+        if (pItem)
         {
-            Item* const pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            if (pItem)
+            uint32 ammoClass = ITEM_CLASS_PROJECTILE;
+            uint32 subClass = 0;
+
+            switch (pItem->GetProto()->SubClass)
             {
-                uint32 ammoClass = ITEM_CLASS_PROJECTILE;
-                uint32 subClass = 0;
-                switch (pItem->GetProto()->SubClass)
-                {
                 case ITEM_SUBCLASS_WEAPON_GUN:
                     subClass = ITEM_SUBCLASS_BULLET;
                     break;
@@ -382,42 +388,48 @@ ItemUsage ItemUsageValue::Calculate()
                     ammoClass = ITEM_CLASS_WEAPON;
                     subClass = ITEM_SUBCLASS_WEAPON_THROWN;
                     break;
-                }
+            }
 
-                if (proto->Class == ammoClass && proto->SubClass == subClass)
+            if (proto->Class == ammoClass && proto->SubClass == subClass)
+            {
+                uint32 currentAmmoId = bot->GetUInt32Value(PLAYER_AMMO_ID);
+                const ItemPrototype* currentAmmoProto = nullptr;
+                if (currentAmmoId)
+                    currentAmmoProto = sObjectMgr.GetItemPrototype(currentAmmoId);
+
+                float betterAmmoStacks = BetterStacks(proto, "ammo"); // how much better ammo we have
+                float needAmmo = (bot->getClass() == CLASS_HUNTER) ? 8 : 2;
+
+                if (ai->HasCheat(BotCheatMask::item))
+                    needAmmo = 1;
+
+                                    // fallback: equip any ammo if no ammo equipped
+                if (!currentAmmoId)
                 {
-                    uint32 currentAmmoId = bot->GetUInt32Value(PLAYER_AMMO_ID);
-                    const ItemPrototype* currentAmmoproto = nullptr;
-                    if (currentAmmoId)
-                        currentAmmoproto = sObjectMgr.GetItemPrototype(currentAmmoId);
-
-                    float ammo = BetterStacks(proto, "ammo");
-                    float needAmmo = (bot->getClass() == CLASS_HUNTER) ? 8 : 2;
-
-                    if (ai->HasCheat(BotCheatMask::item))
-                        needAmmo = 1;
-
-                    if (ammo < 0) //No current better ammo.
-                    {
-                        if (!currentAmmoId)
-                            return ItemUsage::ITEM_USAGE_EQUIP;
-
-                        if (currentAmmoproto->ItemLevel > proto->ItemLevel)
-                            return ItemUsage::ITEM_USAGE_EQUIP;
-                    }
-
-                    if (ammo < needAmmo) //We already have enough of the current ammo.
-                    {
-                        ammo += CurrentStacks(ai, proto);
-
-                        if (ammo < needAmmo)         //Buy ammo to get to the proper supply
-                            return ItemUsage::ITEM_USAGE_AMMO;
-                        else if (ammo < needAmmo + 1)
-                            return ItemUsage::ITEM_USAGE_KEEP;  //Keep the ammo until we have too much.
-                    }
+                                    // check if this proto exists in bags
+                if (ai->HasItemInInventory(proto->ItemId))
+                return ItemUsage::ITEM_USAGE_EQUIP;
                 }
+
+                // If no better ammo exists
+                if (betterAmmoStacks <= 0)
+                {
+                    // Equip this ammo if not already equipped
+                    if (currentAmmoId != proto->ItemId)
+                        return ItemUsage::ITEM_USAGE_EQUIP;
+                }
+
+                // If this ammo is already equipped or after equipping
+                float totalStacks = betterAmmoStacks + CurrentStacks(ai, proto);
+
+                if (totalStacks < needAmmo)            // Not enough ammo, buy more
+                    return ItemUsage::ITEM_USAGE_AMMO;
+                else if (totalStacks < needAmmo + 1)   // Enough ammo, but keep it
+                    return ItemUsage::ITEM_USAGE_KEEP;
             }
         }
+    }
+}
 
     //KEEP
     if (proto->Quality >= ITEM_QUALITY_EPIC && sPlayerbotAIConfig.botsSaveEpics && !sRandomPlayerbotMgr.IsRandomBot(bot))

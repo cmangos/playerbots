@@ -4,6 +4,7 @@
 #include "TalkToQuestGiverAction.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/strategy/values/QuestValues.h"
+#include "playerbot/strategy/values/GuildValues.h"
 
 using namespace ai;
 
@@ -158,6 +159,18 @@ ItemIds TalkToQuestGiverAction::BestRewards(Quest const* quest)
     }
     else
     {
+        uint32 guildShareRewardItemId = AI_VALUE(uint32, "guild share quest reward item");
+        if (guildShareRewardItemId)
+        {
+            for (uint8 i = 0; i < quest->GetRewChoiceItemsCount(); ++i)
+            {
+                if (quest->RewChoiceItemId[i] == guildShareRewardItemId)
+                {
+                    return { i };
+                }
+            }
+        }
+
         for (uint8 i = 0; i < quest->GetRewChoiceItemsCount(); ++i)
         {
             ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", quest->RewChoiceItemId[i]);

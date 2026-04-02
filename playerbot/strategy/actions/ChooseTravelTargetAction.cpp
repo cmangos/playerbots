@@ -899,7 +899,49 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
 
         ai->TellDebug(ai->GetMaster(), "Guild order: " + order.GetTypeName() + " " + orderTarget, "debug travel");
 
-        if (order.type == GuildOrderType::Farm || order.type == GuildOrderType::Kill)
+        if (order.type == GuildOrderType::QuestReward)
+        {
+            uint32 questId = order.questId;
+            if (!questId)
+            {
+                ai->TellDebug(ai->GetMaster(), "QuestReward order has no questId", "debug travel");
+                return false;
+            }
+
+            *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center, questId]()
+                {
+                    PartitionedTravelList list;
+
+                    Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+                    if (!quest)
+                        return list;
+
+                    std::vector<std::tuple<uint32, int32, float>> destinationFetches;
+
+                    destinationFetches.push_back({ (uint32)TravelDestinationPurpose::QuestGiver, (int32)questId, 1000000.0f });
+
+                    for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
+                    {
+                        uint32 purposeFlag = 1 << (objective + 1);
+                        destinationFetches.push_back({ purposeFlag, (int32)questId, 1000000.0f });
+                    }
+
+                    destinationFetches.push_back({ (uint32)TravelDestinationPurpose::QuestTaker, (int32)questId, 1000000.0f });
+
+                    for (auto [purpose, qId, range] : destinationFetches)
+                    {
+                        PartitionedTravelList subList = sTravelMgr.GetPartitions(center, partitions, travelInfo, purpose, { qId }, true, range);
+                        for (auto& [partition, points] : subList)
+                            list[partition].insert(list[partition].end(), points.begin(), points.end());
+                    }
+
+                    return list;
+                }
+            );
+
+            SET_AI_VALUE2(std::string, "manual string", "future travel detail", orderTarget);
+        }
+        else if (order.type == GuildOrderType::Farm || order.type == GuildOrderType::Kill)
         {
             *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [travelInfo = PlayerTravelInfo(bot), center, orderTarget, partitions = travelPartitions]()
                 {

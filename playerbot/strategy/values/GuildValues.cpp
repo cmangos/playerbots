@@ -72,6 +72,49 @@ uint32 GuildOrderValue::FindItemByName(const std::string& name)
     return substringMatch;
 }
 
+std::vector<std::pair<uint32, int8>> ai::FindRepeatableQuestsRewardingItem(uint32 itemId)
+{
+    static std::unordered_map<uint32, std::vector<std::pair<uint32, int8>>> s_cache;
+
+    auto cacheIt = s_cache.find(itemId);
+    if (cacheIt != s_cache.end())
+        return cacheIt->second;
+
+    std::vector<std::pair<uint32, int8>> result;
+
+    ObjectMgr::QuestMap const& questMap = sObjectMgr.GetQuestTemplates();
+    for (auto& [questId, questPtr] : questMap)
+    {
+        Quest* quest = questPtr.get();
+        if (!quest || !quest->IsActive())
+            continue;
+
+        if (!quest->IsRepeatable())
+            continue;
+
+        for (uint8 i = 0; i < quest->GetRewChoiceItemsCount(); ++i)
+        {
+            if (quest->RewChoiceItemId[i] == itemId)
+            {
+                result.push_back({ questId, (int8)i });
+                break;
+            }
+        }
+
+        for (uint8 i = 0; i < quest->GetRewItemsCount(); ++i)
+        {
+            if (quest->RewItemId[i] == itemId)
+            {
+                result.push_back({ questId, -1 });
+                break;
+            }
+        }
+    }
+
+    s_cache[itemId] = result;
+    return result;
+}
+
 uint32 ai::CountGuildFinishedItemDeficit(Player* bot, uint32 itemId, const std::vector<GuildShareItemEntry>& shareList)
 {
     if (!bot->GetGuildId())
@@ -294,6 +337,10 @@ GuildOrder GuildOrderValue::Calculate()
         if (craftOrder.IsValid())
             return craftOrder;
 
+        GuildOrder questRewardOrder = AI_VALUE(GuildOrder, "guild share quest reward order");
+        if (questRewardOrder.IsValid())
+            return questRewardOrder;
+
         return AI_VALUE(GuildOrder, "guild share farm order");
     }
 
@@ -360,6 +407,10 @@ GuildOrder GuildOrderValue::Calculate()
         GuildOrder craftOrder = AI_VALUE(GuildOrder, "guild share craft order");
         if (craftOrder.IsValid())
             return craftOrder;
+
+        GuildOrder questRewardOrder = AI_VALUE(GuildOrder, "guild share quest reward order");
+        if (questRewardOrder.IsValid())
+            return questRewardOrder;
 
         return AI_VALUE(GuildOrder, "guild share farm order");
     }
@@ -816,6 +867,136 @@ GuildOrder GuildShareFarmOrderValue::Calculate()
     order.amount = chosen.needed;
 
     return order;
+}
+
+GuildOrder GuildShareQuestRewardOrderValue::Calculate()
+{
+    GuildOrder order;
+
+    if (!bot->GetGuildId())
+        return order;
+
+    std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");
+    if (shareList.empty())
+        return order;
+
+    struct QuestRewardCandidate
+    {
+        uint32 itemId;
+        uint32 questId;
+        int8 rewardChoiceIndex;
+        uint32 needed;
+        std::string questTitle;
+    };
+
+    std::vector<QuestRewardCandidate> candidates;
+
+    for (const auto& entry : shareList)
+    {
+        if (!entry.MatchesPlayer(bot))
+            continue;
+
+        uint32 currentCount = ai->GetInventoryItemsCountWithId(entry.itemId);
+        if (currentCount >= entry.amount)
+            continue;
+
+        uint32 needed = entry.amount - currentCount;
+
+        auto questRewards = FindRepeatableQuestsRewardingItem(entry.itemId);
+        if (questRewards.empty())
+            continue;
+
+        std::list<int32> dropEntries = GAI_VALUE2(std::list<int32>, "item drop list", entry.itemId);
+        if (!dropEntries.empty())
+            continue;
+
+        std::set<uint32> singleItemSet = { entry.itemId };
+        std::unordered_map<uint32, uint32> craftSpells = BuildCraftSpellMap(bot, singleItemSet);
+        if (!craftSpells.empty())
+            continue;
+
+        for (const auto& [questId, rewardIdx] : questRewards)
+        {
+            Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+            if (!quest)
+                continue;
+
+            if (!bot->CanTakeQuest(quest, false) &&
+                bot->GetQuestStatus(questId) != QUEST_STATUS_INCOMPLETE &&
+                bot->GetQuestStatus(questId) != QUEST_STATUS_COMPLETE)
+                continue;
+
+            candidates.push_back({ entry.itemId, questId, rewardIdx, needed, quest->GetTitle() });
+        }
+    }
+
+    if (candidates.empty())
+        return order;
+
+    const QuestRewardCandidate& chosen = candidates[urand(0, candidates.size() - 1)];
+
+    order.type = GuildOrderType::QuestReward;
+    order.target = chosen.questTitle;
+    order.amount = chosen.needed;
+    order.questId = chosen.questId;
+    order.rewardItemId = chosen.itemId;
+
+    return order;
+}
+
+uint32 GuildShareQuestRewardItemValue::Calculate()
+{
+    if (!bot->GetGuildId())
+        return 0;
+
+    std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");
+    if (shareList.empty())
+        return 0;
+
+    std::unordered_map<uint32, uint32> neededItems;
+    for (const auto& entry : shareList)
+    {
+        if (!entry.MatchesPlayer(bot))
+            continue;
+
+        uint32 currentCount = ai->GetInventoryItemsCountWithId(entry.itemId);
+        if (currentCount < entry.amount)
+            neededItems[entry.itemId] = entry.amount - currentCount;
+    }
+
+    if (neededItems.empty())
+        return 0;
+
+    for (uint16 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        uint32 questId = bot->GetQuestSlotQuestId(slot);
+        if (!questId)
+            continue;
+
+        QuestStatus status = bot->GetQuestStatus(questId);
+        if (status != QUEST_STATUS_COMPLETE)
+            continue;
+
+        Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+        if (!quest)
+            continue;
+
+        for (uint8 i = 0; i < quest->GetRewChoiceItemsCount(); ++i)
+        {
+            uint32 rewItemId = quest->RewChoiceItemId[i];
+            if (neededItems.find(rewItemId) != neededItems.end())
+                return rewItemId;
+        }
+
+        for (uint8 i = 0; i < quest->GetRewItemsCount(); ++i)
+        {
+            uint32 rewItemId = quest->RewItemId[i];
+            if (neededItems.find(rewItemId) != neededItems.end())
+                return rewItemId;
+        }
+    }
+
+    return 0;
 }
 
 GuildShareTarget GuildShareTargetValue::Calculate()

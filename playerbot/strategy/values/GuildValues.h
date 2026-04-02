@@ -10,7 +10,8 @@ namespace ai
         Kill,
         Explore,
         Craft,
-        AuctionHouse
+        AuctionHouse,
+        QuestReward
     };
 
     struct GuildOrder
@@ -18,10 +19,13 @@ namespace ai
         GuildOrderType type = GuildOrderType::None;
         std::string target;
         uint32 amount = 0; // Used for Craft and Farm orders
+        uint32 questId = 0;
+        uint32 rewardItemId = 0;
 
         bool IsValid() const { return type != GuildOrderType::None && !target.empty(); }
-        bool IsTravelOrder() const { return type == GuildOrderType::Farm || type == GuildOrderType::Kill || type == GuildOrderType::Explore || type == GuildOrderType::AuctionHouse; }
+        bool IsTravelOrder() const { return type == GuildOrderType::Farm || type == GuildOrderType::Kill || type == GuildOrderType::Explore || type == GuildOrderType::AuctionHouse || type == GuildOrderType::QuestReward; }
         bool IsCraftOrder() const { return type == GuildOrderType::Craft; }
+        bool IsQuestRewardOrder() const { return type == GuildOrderType::QuestReward; }
 
         std::string GetTypeName() const
         {
@@ -32,6 +36,7 @@ namespace ai
             case GuildOrderType::Explore:      return "Explore";
             case GuildOrderType::Craft:        return "Craft";
             case GuildOrderType::AuctionHouse: return "AuctionHouse";
+            case GuildOrderType::QuestReward:  return "QuestReward";
             default:                           return "None";
             }
         }
@@ -81,6 +86,13 @@ namespace ai
                 }
             }
 
+            if (order.type == GuildOrderType::QuestReward && order.amount > 0 && order.rewardItemId)
+            {
+                uint32 currentCount = ai->GetInventoryItemsCountWithId(order.rewardItemId);
+                if (currentCount >= order.amount)
+                    return false;
+            }
+
             return true;
         }
     };
@@ -125,6 +137,8 @@ namespace ai
     };
 
     uint32 CountGuildFinishedItemDeficit(Player* bot, uint32 itemId, const std::vector<GuildShareItemEntry>& shareList);
+
+    std::vector<std::pair<uint32, int8>> FindRepeatableQuestsRewardingItem(uint32 itemId);
 
     class GuildShareListValue : public CalculatedValue<std::vector<GuildShareItemEntry>>
     {
@@ -178,6 +192,22 @@ namespace ai
         GuildShareFarmOrderValue(PlayerbotAI* ai) : CalculatedValue<GuildOrder>(ai, "guild share farm order", 60) {}
 
         GuildOrder Calculate() override;
+    };
+
+    class GuildShareQuestRewardOrderValue : public CalculatedValue<GuildOrder>
+    {
+    public:
+        GuildShareQuestRewardOrderValue(PlayerbotAI* ai) : CalculatedValue<GuildOrder>(ai, "guild share quest reward order", 60) {}
+
+        GuildOrder Calculate() override;
+    };
+
+    class GuildShareQuestRewardItemValue : public CalculatedValue<uint32>
+    {
+    public:
+        GuildShareQuestRewardItemValue(PlayerbotAI* ai) : CalculatedValue<uint32>(ai, "guild share quest reward item", 5) {}
+
+        uint32 Calculate() override;
     };
 
     class PetitionSignsValue : public SingleCalculatedValue<uint8>

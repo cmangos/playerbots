@@ -15,6 +15,13 @@ namespace ai
         bool isUseful() override;
     };
 
+    class HunterEquipAmmoAction : public Action
+{
+public:
+    HunterEquipAmmoAction(PlayerbotAI* ai) : Action(ai, "equip ammo") {}
+    virtual bool Execute(Event& event) override;
+};
+
     BEGIN_RANGED_SPELL_ACTION(CastTranquilizingShotAction, "tranquilizing shot")
     END_SPELL_ACTION()
 

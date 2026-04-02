@@ -246,6 +246,7 @@ namespace ai
             AiObjectContextInternal()
             {
                 creators["auto shot"] = [](PlayerbotAI* ai) { return new CastAutoShotAction(ai); };
+                creators["equip ammo"] = [](PlayerbotAI* ai) { return new HunterEquipAmmoAction(ai); };
                 creators["aimed shot"] = [](PlayerbotAI* ai) { return new CastAimedShotAction(ai); };
                 creators["chimera shot"] = [](PlayerbotAI* ai) { return new CastChimeraShotAction(ai); };
                 creators["explosive shot"] = [](PlayerbotAI* ai) { return new CastExplosiveShotAction(ai); };

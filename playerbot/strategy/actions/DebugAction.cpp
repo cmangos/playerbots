@@ -34,7 +34,10 @@ bool DebugAction::Execute(Event& event)
     }
 
     std::string text = event.getParam();
-    if (text == "avoid scan" && isMod)
+    
+    if (text == "help" || text.find("help ") == 0)
+        return HandleDebugHelp(event, requester, text, isMod);
+    else if (text == "avoid scan" && isMod)
         return HandleAvoidScan(event, requester, text);
     else if (text.find("avoid add") == 0 && isMod)
         return HandleAvoidAdd(event, requester, text);
@@ -188,6 +191,799 @@ bool DebugAction::Execute(Event& event)
     // Fallback/default behavior
     std::string response = ai->HandleRemoteCommand(text);
     ai->TellPlayer(requester, response);
+    return true;
+}
+
+bool DebugAction::HandleDebugHelp(Event& event, Player* requester, const std::string& text, bool isMod)
+{
+    std::string cmd = text;
+    if (cmd.find("help ") == 0)
+        cmd = cmd.substr(5);
+    else
+        cmd = "";
+    
+    while (cmd.size() > 0 && cmd[0] == ' ')
+        cmd = cmd.substr(1);
+    
+    if (cmd.empty())
+    {
+        ai->TellPlayer(requester, "=== Debug Commands ===");
+        ai->TellPlayer(requester, "Usage: debug help <command>");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "General: position, quest, values, level, who, stats, spells");
+        ai->TellPlayer(requester, "Movement: route, path, distance, teleport, zone");
+        ai->TellPlayer(requester, "Info: target, movement, corpse, logouttime, taxi");
+        ai->TellPlayer(requester, "Interaction: npc, go, rpg, travel, loot, trade, mail");
+        ai->TellPlayer(requester, "Quest: quest list|complete|drop|add|travel");
+        ai->TellPlayer(requester, "Nodes: nodes");
+        
+        if (isMod)
+        {
+            ai->TellPlayer(requester, "Mod Only: llm, area, avoid, motion, transport, nc, gps");
+        }
+        
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Type 'debug help <command>' for detailed help.");
+        return true;
+    }
+    
+    std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
+    
+    if (cmd == "position" || cmd == "pos")
+    {
+        ai->TellPlayer(requester, "=== debug position ===");
+        ai->TellPlayer(requester, "Get position info and manipulate position-related data.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage:");
+        ai->TellPlayer(requester, "  debug position                    - Bot's GPS coordinates");
+        ai->TellPlayer(requester, "  debug position zone [loc]          - Zone info (bot or location)");
+        ai->TellPlayer(requester, "  debug position teleport [loc]     - Teleport to master or location");
+        ai->TellPlayer(requester, "  debug position distance [loc]    - Distance to master or location");
+        ai->TellPlayer(requester, "  debug position path <from>|<to>  - Full path with movement breakdown");
+        ai->TellPlayer(requester, "  debug position path <loc> full   - Show all path points");
+        ai->TellPlayer(requester, "  debug position route <from>|<to> - Route nodes with map/area");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Location formats:");
+        ai->TellPlayer(requester, "  x y                    - Coordinates (uses bot's map/z)");
+        ai->TellPlayer(requester, "  map x y                - 3 params");
+        ai->TellPlayer(requester, "  map x y z              - 4 params");
+        ai->TellPlayer(requester, "  LocationName           - Named location (case sensitive)");
+        ai->TellPlayer(requester, "  from|to                - Pipe separates start and end");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Examples:");
+        ai->TellPlayer(requester, "  debug position");
+        ai->TellPlayer(requester, "  debug position teleport Stormwind");
+        ai->TellPlayer(requester, "  debug position distance Orgrimmar");
+        ai->TellPlayer(requester, "  debug position path Orgrimmar|Stormwind");
+        ai->TellPlayer(requester, "  debug position route Orgrimmar|Stormwind full");
+    }
+    else if (cmd == "quest")
+    {
+        ai->TellPlayer(requester, "=== debug quest ===");
+        ai->TellPlayer(requester, "Manage and view quest information.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage:");
+        ai->TellPlayer(requester, "  debug quest                   - List all quests in bot's log");
+        ai->TellPlayer(requester, "  debug quest <id>              - Show quest details");
+        ai->TellPlayer(requester, "  debug quest complete <id>     - Complete a quest");
+        ai->TellPlayer(requester, "  debug quest drop <id>         - Abandon a quest");
+        ai->TellPlayer(requester, "  debug quest add <id>          - Add quest to log");
+        ai->TellPlayer(requester, "  debug quest travel <id>       - Show quest objectives");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Examples:");
+        ai->TellPlayer(requester, "  debug quest");
+        ai->TellPlayer(requester, "  debug quest 1");
+        ai->TellPlayer(requester, "  debug quest complete 1");
+    }
+    else if (cmd == "route")
+    {
+        ai->TellPlayer(requester, "=== debug position route ===");
+        ai->TellPlayer(requester, "Show travel nodes between two locations.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug position route <from>|<to>");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Output:");
+        ai->TellPlayer(requester, "  - List of travel nodes with names, zone, map");
+        ai->TellPlayer(requester, "  - Distance between each node");
+        ai->TellPlayer(requester, "  - Total route distance");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Examples:");
+        ai->TellPlayer(requester, "  debug position route Orgrimmar|Stormwind");
+        ai->TellPlayer(requester, "  debug position route ThunderBluff|Stormwind");
+    }
+    else if (cmd == "path")
+    {
+        ai->TellPlayer(requester, "=== debug position path ===");
+        ai->TellPlayer(requester, "Show full pathfinding route with movement breakdown.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage:");
+        ai->TellPlayer(requester, "  debug position path <loc>              - Summary only");
+        ai->TellPlayer(requester, "  debug position path <loc> full          - All points");
+        ai->TellPlayer(requester, "  debug position path <from>|<to>        - Between two locations");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Output:");
+        ai->TellPlayer(requester, "  - Total distance");
+        ai->TellPlayer(requester, "  - Walk/Fly/Transport/Teleport breakdown");
+        ai->TellPlayer(requester, "  - Map transitions");
+        ai->TellPlayer(requester, "  - Next waypoint coordinates");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Node Types: 0=prepath, 1=walk, 4=transport, 5=flight, 6=teleport");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Examples:");
+        ai->TellPlayer(requester, "  debug position path Stormwind");
+        ai->TellPlayer(requester, "  debug position path Orgrimmar|Stormwind full");
+    }
+    else if (cmd == "distance" || cmd == "dist")
+    {
+        ai->TellPlayer(requester, "=== debug position distance ===");
+        ai->TellPlayer(requester, "Calculate distance to a location.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug position distance [location]");
+        ai->TellPlayer(requester, "  Without location: distance to master");
+        ai->TellPlayer(requester, "  With location: distance to that point");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Examples:");
+        ai->TellPlayer(requester, "  debug position distance");
+        ai->TellPlayer(requester, "  debug position distance Orgrimmar");
+    }
+    else if (cmd == "teleport")
+    {
+        ai->TellPlayer(requester, "=== debug position teleport ===");
+        ai->TellPlayer(requester, "Teleport bot to a location.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug position teleport [location|coords]");
+        ai->TellPlayer(requester, "  Without params: teleport to master");
+        ai->TellPlayer(requester, "  With location: teleport to named location");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Examples:");
+        ai->TellPlayer(requester, "  debug position teleport");
+        ai->TellPlayer(requester, "  debug position teleport Stormwind");
+        ai->TellPlayer(requester, "  debug position teleport -8944 0.5");
+    }
+    else if (cmd == "zone")
+    {
+        ai->TellPlayer(requester, "=== debug position zone ===");
+        ai->TellPlayer(requester, "Get zone information for a location.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug position zone [location]");
+        ai->TellPlayer(requester, "  Without params: bot's current zone");
+        ai->TellPlayer(requester, "  With location: zone at that location");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Examples:");
+        ai->TellPlayer(requester, "  debug position zone");
+        ai->TellPlayer(requester, "  debug position zone Stormwind");
+    }
+    else if (cmd == "values")
+    {
+        ai->TellPlayer(requester, "=== debug values ===");
+        ai->TellPlayer(requester, "List and get bot AI values.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage:");
+        ai->TellPlayer(requester, "  debug values                    - List all values");
+        ai->TellPlayer(requester, "  debug values <name>            - Get value by name");
+        ai->TellPlayer(requester, "  debug setvalueuin32 <name> <v> - Set uint32 value");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Examples:");
+        ai->TellPlayer(requester, "  debug values");
+        ai->TellPlayer(requester, "  debug values last movement");
+    }
+    else if (cmd == "gps")
+    {
+        ai->TellPlayer(requester, "=== debug gps ===");
+        ai->TellPlayer(requester, "Get detailed position information (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug gps");
+        ai->TellPlayer(requester, "  Shows: X, Y, Z, Map, Area, Zone, Orientation");
+    }
+    else if (cmd == "level")
+    {
+        ai->TellPlayer(requester, "=== debug level ===");
+        ai->TellPlayer(requester, "Get or set bot level.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage:");
+        ai->TellPlayer(requester, "  debug level          - Show current level");
+        ai->TellPlayer(requester, "  debug level <n>     - Set level to n");
+    }
+    else if (cmd == "who")
+    {
+        ai->TellPlayer(requester, "=== debug who ===");
+        ai->TellPlayer(requester, "Show detailed bot information.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug who");
+        ai->TellPlayer(requester, "  Shows: Name, Level, Class, HP, Mana, Gold, Location");
+    }
+    else if (cmd == "stats")
+    {
+        ai->TellPlayer(requester, "=== debug stats ===");
+        ai->TellPlayer(requester, "Show bot statistics.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug stats");
+        ai->TellPlayer(requester, "  Shows: Gold, Bag slots, Durability, XP, Mana");
+    }
+    else if (cmd == "spells")
+    {
+        ai->TellPlayer(requester, "=== debug spells ===");
+        ai->TellPlayer(requester, "List bot's known spells.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug spells");
+    }
+    else if (cmd == "target")
+    {
+        ai->TellPlayer(requester, "=== debug target ===");
+        ai->TellPlayer(requester, "Show bot's current target.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug target");
+        ai->TellPlayer(requester, "  Shows: Target name, GUID, type");
+    }
+    else if (cmd == "movement")
+    {
+        ai->TellPlayer(requester, "=== debug movement ===");
+        ai->TellPlayer(requester, "Show last movement coordinates.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug movement");
+    }
+    else if (cmd == "mount")
+    {
+        ai->TellPlayer(requester, "=== debug mount ===");
+        ai->TellPlayer(requester, "Mount the bot.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug mount");
+    }
+    else if (cmd == "unmount")
+    {
+        ai->TellPlayer(requester, "=== debug unmount ===");
+        ai->TellPlayer(requester, "Dismount the bot.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug unmount");
+    }
+    else if (cmd == "who")
+    {
+        ai->TellPlayer(requester, "=== debug who ===");
+        ai->TellPlayer(requester, "Show detailed bot information.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug who");
+        ai->TellPlayer(requester, "  Shows: Name, Level, Class, HP, Mana, Gold, Location");
+    }
+    else if (cmd == "stats")
+    {
+        ai->TellPlayer(requester, "=== debug stats ===");
+        ai->TellPlayer(requester, "Show bot statistics.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug stats");
+        ai->TellPlayer(requester, "  Shows: Gold, Bag slots, Durability, XP, Mana");
+    }
+    else if (cmd == "spells")
+    {
+        ai->TellPlayer(requester, "=== debug spells ===");
+        ai->TellPlayer(requester, "List bot's known spells.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug spells");
+    }
+    else if (cmd == "gps" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug gps ===");
+        ai->TellPlayer(requester, "Get detailed position information (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug gps");
+        ai->TellPlayer(requester, "  Shows: X, Y, Z, Map, Area, Zone, Orientation");
+    }
+    else if (cmd == "llm" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug llm ===");
+        ai->TellPlayer(requester, "LLM interaction (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug llm <prompt>");
+    }
+    else if (cmd == "area" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug area ===");
+        ai->TellPlayer(requester, "Area debugging (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug area");
+    }
+    else if (cmd == "avoid" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug avoid ===");
+        ai->TellPlayer(requester, "Avoidance management (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage:");
+        ai->TellPlayer(requester, "  debug avoid scan");
+        ai->TellPlayer(requester, "  debug avoid add <spellId>");
+    }
+    else if (cmd == "trade")
+    {
+        ai->TellPlayer(requester, "=== debug trade ===");
+        ai->TellPlayer(requester, "Manage trade window with bot.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage:");
+        ai->TellPlayer(requester, "  debug trade       - Show trade status");
+        ai->TellPlayer(requester, "  debug trade <item> - Use item in trade");
+    }
+    else if (cmd == "mail")
+    {
+        ai->TellPlayer(requester, "=== debug mail ===");
+        ai->TellPlayer(requester, "Send mail to bot.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug mail <subject>");
+    }
+    else if (cmd == "taxi")
+    {
+        ai->TellPlayer(requester, "=== debug taxi ===");
+        ai->TellPlayer(requester, "Show taxi/fly routes.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug taxi");
+    }
+    else if (cmd == "rpg")
+    {
+        ai->TellPlayer(requester, "=== debug rpg ===");
+        ai->TellPlayer(requester, "Roleplay interaction.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug rpg <action>");
+    }
+    else if (cmd == "travel")
+    {
+        ai->TellPlayer(requester, "=== debug travel ===");
+        ai->TellPlayer(requester, "Travel to a location.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug travel <location>");
+    }
+    else if (cmd == "loot")
+    {
+        ai->TellPlayer(requester, "=== debug loot ===");
+        ai->TellPlayer(requester, "Loot information.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage:");
+        ai->TellPlayer(requester, "  debug loot");
+        ai->TellPlayer(requester, "  debug loot <target>");
+    }
+    else if (cmd == "npc")
+    {
+        ai->TellPlayer(requester, "=== debug npc ===");
+        ai->TellPlayer(requester, "Interact with NPC.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug npc <npc>");
+    }
+    else if (cmd == "go" || cmd == "goto")
+    {
+        ai->TellPlayer(requester, "=== debug go ===");
+        ai->TellPlayer(requester, "Go to location or object.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage:");
+        ai->TellPlayer(requester, "  debug go <coords>");
+        ai->TellPlayer(requester, "  debug go <gameobject>");
+    }
+    else if (cmd == "corpse")
+    {
+        ai->TellPlayer(requester, "=== debug corpse ===");
+        ai->TellPlayer(requester, "Show corpse location.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug corpse");
+    }
+    else if (cmd == "nc" || cmd == "nocombat")
+    {
+        ai->TellPlayer(requester, "=== debug nc ===");
+        ai->TellPlayer(requester, "Toggle non-combat mode.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug nc");
+    }
+    else if (cmd == "motion" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug motion ===");
+        ai->TellPlayer(requester, "Motion controller (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug motion <params>");
+    }
+    else if (cmd == "transport" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug transport ===");
+        ai->TellPlayer(requester, "Transport debugging (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug transport");
+    }
+    else if (cmd == "do")
+    {
+        ai->TellPlayer(requester, "=== debug do ===");
+        ai->TellPlayer(requester, "Execute bot action directly.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug do <action>");
+    }
+    else if (cmd == "item")
+    {
+        ai->TellPlayer(requester, "=== debug item ===");
+        ai->TellPlayer(requester, "Use or manage items.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug item <item>");
+    }
+    else if (cmd == "find")
+    {
+        ai->TellPlayer(requester, "=== debug find ===");
+        ai->TellPlayer(requester, "Find objects or NPCs.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug find <name>");
+    }
+    else if (cmd == "drops")
+    {
+        ai->TellPlayer(requester, "=== debug drops ===");
+        ai->TellPlayer(requester, "Show loot drops from creatures.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug drops <creature>");
+    }
+    else if (cmd == "price")
+    {
+        ai->TellPlayer(requester, "=== debug price ===");
+        ai->TellPlayer(requester, "Show item vendor price.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug price <item>");
+    }
+    else if (cmd == "logouttime")
+    {
+        ai->TellPlayer(requester, "=== debug logouttime ===");
+        ai->TellPlayer(requester, "Show logout timer.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug logouttime");
+    }
+    else if (cmd == "rpgtargets")
+    {
+        ai->TellPlayer(requester, "=== debug rpgtargets ===");
+        ai->TellPlayer(requester, "Show RPG interaction targets.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug rpgtargets");
+    }
+    else if (cmd == "poi")
+    {
+        ai->TellPlayer(requester, "=== debug poi ===");
+        ai->TellPlayer(requester, "Show point of interest.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug poi <poiId>");
+    }
+    else if (cmd == "setvalue" || cmd == "setvalueuin32")
+    {
+        ai->TellPlayer(requester, "=== debug setvalue ===");
+        ai->TellPlayer(requester, "Set bot AI value.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug setvalueuin32 <name> <value>");
+    }
+    // MOD ONLY - avoid
+    else if (cmd == "avoid scan" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug avoid scan ===");
+        ai->TellPlayer(requester, "Scan for avoidance targets (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug avoid scan");
+    }
+    else if (cmd == "avoid add" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug avoid add ===");
+        ai->TellPlayer(requester, "Add avoidance target (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug avoid add <spellId>");
+    }
+    // MOD ONLY - travel nodes
+    else if (cmd == "add node" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug add node ===");
+        ai->TellPlayer(requester, "Add travel node (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug add node");
+    }
+    else if (cmd == "rem node" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug rem node ===");
+        ai->TellPlayer(requester, "Remove travel node (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug rem node");
+    }
+    else if (cmd == "reset node" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug reset node ===");
+        ai->TellPlayer(requester, "Reset travel nodes (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug reset node");
+    }
+    else if (cmd == "reset path" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug reset path ===");
+        ai->TellPlayer(requester, "Reset travel path (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug reset path");
+    }
+    else if (cmd == "gen node" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug gen node ===");
+        ai->TellPlayer(requester, "Generate travel node (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug gen node");
+    }
+    else if (cmd == "gen path" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug gen path ===");
+        ai->TellPlayer(requester, "Generate travel path (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug gen path");
+    }
+    else if (cmd == "crop path" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug crop path ===");
+        ai->TellPlayer(requester, "Crop travel path (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug crop path");
+    }
+    else if (cmd == "save node" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug save node ===");
+        ai->TellPlayer(requester, "Save travel node (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug save node");
+    }
+    else if (cmd == "load node" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug load node ===");
+        ai->TellPlayer(requester, "Load travel node (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug load node");
+    }
+    else if (cmd == "show node" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug show node ===");
+        ai->TellPlayer(requester, "Show travel nodes (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug show node");
+    }
+    else if (cmd == "print travel" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug print travel ===");
+        ai->TellPlayer(requester, "Print travel info (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug print travel");
+    }
+    // MOD ONLY - transport
+    else if (cmd == "pointontrans" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug pointontrans ===");
+        ai->TellPlayer(requester, "Point on transport (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug pointontrans");
+    }
+    else if (cmd == "dotrans" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug dotrans ===");
+        ai->TellPlayer(requester, "Do transport action (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug dotrans");
+    }
+    else if (cmd == "ontrans" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug ontrans ===");
+        ai->TellPlayer(requester, "On transport (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug ontrans");
+    }
+    else if (cmd == "offtrans" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug offtrans ===");
+        ai->TellPlayer(requester, "Off transport (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug offtrans");
+    }
+    // MOD ONLY - map
+    else if (cmd == "pathable" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug pathable ===");
+        ai->TellPlayer(requester, "Check if location is pathable (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug pathable");
+    }
+    else if (cmd == "randomspot" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug randomspot ===");
+        ai->TellPlayer(requester, "Show random spot (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug randomspot");
+    }
+    else if (cmd == "printmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug printmap ===");
+        ai->TellPlayer(requester, "Print map info (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug printmap");
+    }
+    // MOD ONLY - spells
+    else if (cmd == "dspell" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug dspell ===");
+        ai->TellPlayer(requester, "Debug spell (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug dspell <spellId>");
+    }
+    else if (cmd == "vspell" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug vspell ===");
+        ai->TellPlayer(requester, "Validate spell (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug vspell <spellId>");
+    }
+    else if (cmd == "aspell" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug aspell ===");
+        ai->TellPlayer(requester, "Add spell (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug aspell <spellId>");
+    }
+    else if (cmd == "cspell" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug cspell ===");
+        ai->TellPlayer(requester, "Cast spell (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug cspell <spellId>");
+    }
+    else if (cmd == "fspell" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug fspell ===");
+        ai->TellPlayer(requester, "Fake spell (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug fspell <spellId>");
+    }
+    else if (cmd == "spell" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug spell ===");
+        ai->TellPlayer(requester, "Spell action (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug spell <spellId>");
+    }
+    // MOD ONLY - spell maps
+    else if (cmd == "tspellmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug tspellmap ===");
+        ai->TellPlayer(requester, "Test spell map (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug tspellmap");
+    }
+    else if (cmd == "uspellmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug uspellmap ===");
+        ai->TellPlayer(requester, "Use spell map (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug uspellmap");
+    }
+    else if (cmd == "dspellmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug dspellmap ===");
+        ai->TellPlayer(requester, "Debug spell map (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug dspellmap");
+    }
+    else if (cmd == "vspellmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug vspellmap ===");
+        ai->TellPlayer(requester, "Validate spell map (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug vspellmap");
+    }
+    else if (cmd == "ispellmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug ispellmap ===");
+        ai->TellPlayer(requester, "Info spell map (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug ispellmap");
+    }
+    else if (cmd == "cspellmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug cspellmap ===");
+        ai->TellPlayer(requester, "Cast spell map (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug cspellmap");
+    }
+    else if (cmd == "aspellmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug aspellmap ===");
+        ai->TellPlayer(requester, "Add spell map (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug aspellmap");
+    }
+    else if (cmd == "gspellmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug gspellmap ===");
+        ai->TellPlayer(requester, "Get spell map (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug gspellmap");
+    }
+    else if (cmd == "mspellmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug mspellmap ===");
+        ai->TellPlayer(requester, "Modify spell map (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug mspellmap");
+    }
+    // MOD ONLY - sounds
+    else if (cmd == "soundmap" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug soundmap ===");
+        ai->TellPlayer(requester, "Sound map (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug soundmap");
+    }
+    else if (cmd == "sounds" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug sounds ===");
+        ai->TellPlayer(requester, "List sounds (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug sounds");
+    }
+    else if (cmd == "dsound" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug dsound ===");
+        ai->TellPlayer(requester, "Debug sound (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug dsound");
+    }
+    else if (cmd == "sound" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug sound ===");
+        ai->TellPlayer(requester, "Play sound (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug sound <soundId>");
+    }
+    // MOD ONLY - other
+    else if (cmd == "chatreplydo" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug chatreplydo ===");
+        ai->TellPlayer(requester, "Chat reply action (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug chatreplydo <text>");
+    }
+    else if (cmd == "monstertalk" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug monstertalk ===");
+        ai->TellPlayer(requester, "Monster talk (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug monstertalk <text>");
+    }
+    else if (cmd == "gy" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug gy ===");
+        ai->TellPlayer(requester, "Graveyard info (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug gy");
+    }
+    else if (cmd == "grid" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug grid ===");
+        ai->TellPlayer(requester, "Grid info (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug grid");
+    }
+    else if (cmd == "test" && isMod)
+    {
+        ai->TellPlayer(requester, "=== debug test ===");
+        ai->TellPlayer(requester, "Testing command (mod only).");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug test");
+    }
+    else if (cmd == "nodes")
+    {
+        ai->TellPlayer(requester, "=== debug nodes ===");
+        ai->TellPlayer(requester, "Debug travel node connection - why bots get stuck.");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Usage: debug nodes");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "This command checks:");
+        ai->TellPlayer(requester, "  - Nodes within 100y of bot");
+        ai->TellPlayer(requester, "  - If pathfinding works to each node");
+        ai->TellPlayer(requester, "  - What getNode() returns (the actual function used)");
+        ai->TellPlayer(requester, "  - Why pathfinding fails if it does");
+        ai->TellPlayer(requester, "");
+        ai->TellPlayer(requester, "Output:");
+        ai->TellPlayer(requester, "  - Step-by-step pathfinding results");
+        ai->TellPlayer(requester, "  - Path type and point count");
+        ai->TellPlayer(requester, "  - Distance reached vs total distance");
+        ai->TellPlayer(requester, "  - Suggested fixes");
+    }
+    else
+    {
+        ai->TellPlayer(requester, "Unknown command: " + cmd);
+        ai->TellPlayer(requester, "Type 'debug help' for list of commands.");
+    }
+    
     return true;
 }
 

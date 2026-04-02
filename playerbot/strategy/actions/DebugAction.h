@@ -25,6 +25,7 @@ namespace ai
         void addAura(uint32 spellId, Unit* target);
     private:
         // Handler methods for each debug command
+        bool HandleDebugHelp(Event& event, Player* requester, const std::string& text, bool isMod);
         bool HandleAvoidScan(Event& event, Player* requester, const std::string& text);
         bool HandleAvoidAdd(Event& event, Player* requester, const std::string& text);
         bool HandleMount(Event& event, Player* requester, const std::string& text);

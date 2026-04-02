@@ -105,6 +105,45 @@ namespace ai
         bool Calculate() override { return AI_VALUE(GuildOrder, "guild order").IsCraftOrder(); }
     };
 
+    // Returns true if the bot has a QuestReward guild order whose quest is not yet in the quest log.
+    class NeedsGuildQuestOrderAcceptValue : public BoolCalculatedValue
+    {
+    public:
+        NeedsGuildQuestOrderAcceptValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "needs guild quest order accept", 5) {}
+
+        bool Calculate() override
+        {
+            GuildOrder order = AI_VALUE(GuildOrder, "guild order");
+            if (!order.IsQuestRewardOrder() || !order.questId)
+                return false;
+
+            // Already have enough of the reward item.
+            if (order.amount > 0 && order.rewardItemId)
+            {
+                uint32 currentCount = ai->GetInventoryItemsCountWithId(order.rewardItemId);
+                if (currentCount >= order.amount)
+                    return false;
+            }
+
+            QuestStatus status = bot->GetQuestStatus(order.questId);
+            // Quest already in log (incomplete or complete) — no need to accept.
+            if (status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_COMPLETE)
+                return false;
+
+            Quest const* quest = sObjectMgr.GetQuestTemplate(order.questId);
+            if (!quest)
+                return false;
+
+            if (!bot->CanTakeQuest(quest, false))
+                return false;
+
+            if (!bot->SatisfyQuestLog(false))
+                return false;
+
+            return true;
+        }
+    };
+
     class NeedsProfessionReagentsValue : public BoolCalculatedValue
     {
     public:

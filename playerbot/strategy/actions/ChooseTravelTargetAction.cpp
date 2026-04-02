@@ -908,7 +908,57 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 return false;
             }
 
-            *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center, questId]()
+            QuestStatus questStatus = bot->GetQuestStatus(questId);
+            bool questComplete = false;
+            bool questInProgress = false;
+
+            if (questStatus == QUEST_STATUS_COMPLETE)
+                questComplete = true;
+            else if (questStatus == QUEST_STATUS_INCOMPLETE)
+                questInProgress = true;
+
+            if (!questComplete && questStatus == QUEST_STATUS_INCOMPLETE)
+            {
+                Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+                if (quest && bot->CanRewardQuest(quest, false))
+                    questComplete = true;
+            }
+
+            std::vector<int32> objectiveEntries;
+            std::vector<int32> questGiverEntries;
+            std::vector<int32> questTakerEntries;
+
+            if (questInProgress && !questComplete)
+            {
+                Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+                if (quest)
+                {
+                    for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
+                    {
+                        std::vector<std::string> qualifier = { std::to_string(questId), std::to_string(objective) };
+                        if (!AI_VALUE2(bool, "need quest objective", Qualified::MultiQualify(qualifier, ",")))
+                            continue;
+
+                        if (quest->ReqCreatureOrGOId[objective])
+                            objectiveEntries.push_back(quest->ReqCreatureOrGOId[objective]);
+
+                        if (quest->ReqItemId[objective])
+                        {
+                            std::list<int32> dropList = GAI_VALUE2(std::list<int32>, "item drop list", quest->ReqItemId[objective]);
+                            for (int32 entry : dropList)
+                                objectiveEntries.push_back(entry);
+
+                            std::list<int32> vendorList = GAI_VALUE2(std::list<int32>, "item vendor list", quest->ReqItemId[objective]);
+                            for (int32 entry : vendorList)
+                                objectiveEntries.push_back(entry);
+                        }
+                    }
+                }
+            }
+
+            *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async,
+                [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center, questId,
+                questComplete, questInProgress, objectiveEntries]()
                 {
                     PartitionedTravelList list;
 
@@ -916,23 +966,49 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                     if (!quest)
                         return list;
 
-                    std::vector<std::tuple<uint32, int32, float>> destinationFetches;
-
-                    destinationFetches.push_back({ (uint32)TravelDestinationPurpose::QuestGiver, (int32)questId, 1000000.0f });
-
-                    for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
+                    if (questComplete)
                     {
-                        uint32 purposeFlag = 1 << (objective + 1);
-                        destinationFetches.push_back({ purposeFlag, (int32)questId, 1000000.0f });
+                        PartitionedTravelList subList = sTravelMgr.GetPartitions(center, partitions, travelInfo,
+                            (uint32)TravelDestinationPurpose::QuestTaker, {}, false, 1000000.0f);
+                        for (auto& [partition, points] : subList)
+                        {
+                            for (auto& point : points)
+                            {
+                                QuestTravelDestination* questDest = dynamic_cast<QuestTravelDestination*>(std::get<TravelDestination*>(point));
+                                if (questDest && questDest->GetQuestId() == questId)
+                                    list[partition].push_back(point);
+                            }
+                        }
                     }
-
-                    destinationFetches.push_back({ (uint32)TravelDestinationPurpose::QuestTaker, (int32)questId, 1000000.0f });
-
-                    for (auto [purpose, qId, range] : destinationFetches)
+                    else if (questInProgress && !objectiveEntries.empty())
                     {
-                        PartitionedTravelList subList = sTravelMgr.GetPartitions(center, partitions, travelInfo, purpose, { qId }, true, range);
+                        uint32 allObjectiveFlags = (uint32)TravelDestinationPurpose::QuestAllObjective;
+                        PartitionedTravelList subList = sTravelMgr.GetPartitions(center, partitions, travelInfo,
+                            allObjectiveFlags, objectiveEntries, false, 1000000.0f);
                         for (auto& [partition, points] : subList)
                             list[partition].insert(list[partition].end(), points.begin(), points.end());
+
+                        if (list.empty())
+                        {
+                            subList = sTravelMgr.GetPartitions(center, partitions, travelInfo,
+                                (uint32)TravelDestinationPurpose::Grind, objectiveEntries, false, 1000000.0f);
+                            for (auto& [partition, points] : subList)
+                                list[partition].insert(list[partition].end(), points.begin(), points.end());
+                        }
+                    }
+                    else
+                    {
+                        PartitionedTravelList subList = sTravelMgr.GetPartitions(center, partitions, travelInfo,
+                            (uint32)TravelDestinationPurpose::QuestGiver, {}, false, 1000000.0f);
+                        for (auto& [partition, points] : subList)
+                        {
+                            for (auto& point : points)
+                            {
+                                QuestTravelDestination* questDest = dynamic_cast<QuestTravelDestination*>(std::get<TravelDestination*>(point));
+                                if (questDest && questDest->GetQuestId() == questId)
+                                    list[partition].push_back(point);
+                            }
+                        }
                     }
 
                     return list;

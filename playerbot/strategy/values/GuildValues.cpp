@@ -53,6 +53,11 @@ uint32 GuildOrderValue::FindItemByName(const std::string& name)
         if (!proto)
             continue;
 
+        if (proto->Class == ITEM_CLASS_RECIPE ||
+            proto->Class == ITEM_CLASS_WEAPON ||
+            proto->Class == ITEM_CLASS_ARMOR)
+            continue;
+
         if (name.size() == strlen(proto->Name1) && strstri(proto->Name1, name.c_str()))
         {
             s_cache[lowerName] = itemId;

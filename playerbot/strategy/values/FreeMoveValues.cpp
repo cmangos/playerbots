@@ -67,13 +67,7 @@ float FreeMoveRangeValue::Calculate()
 
     if (!ai->HasActivePlayerMaster())
     {
-        if (ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT))
-            return sPlayerbotAIConfig.wanderMaxDistance;
-
-        if (followTarget->IsInCombat())
-            return sPlayerbotAIConfig.reactDistance * 0.25f;
-
-        return sPlayerbotAIConfig.reactDistance * 0.75f;
+        return 0; // Free bots without a master can travel anywhere
     }
 
     //Increase distance as master is standing still.

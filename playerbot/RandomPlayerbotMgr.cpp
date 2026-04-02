@@ -674,7 +674,7 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     
     SetAIInternalUpdateDelay(sPlayerbotAIConfig.randomBotUpdateInterval);
 
-    auto pmo = sPerformanceMonitor.start(PERF_MON_TOTAL,
+    auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT,
         onlineBotCount < maxAllowedBotCount ? "RandomPlayerbotMgr::Login" : "RandomPlayerbotMgr::UpdateAIInternal");
 
     if (time(nullptr) > (EventTimeSyncTimer + 30))
@@ -760,8 +760,6 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
                 break;
         }
     }
-
-    pmo.reset();
 
     LoginFreeBots();
 

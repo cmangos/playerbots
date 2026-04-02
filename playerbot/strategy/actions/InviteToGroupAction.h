@@ -11,7 +11,20 @@ namespace ai
         virtual bool Execute(Event& event) override
         {
             Player* master = event.getOwner();
-            return Invite(bot, master);
+            std::string param = event.getParam();
+            
+            Player* target = nullptr;
+            if (!param.empty())
+            {
+                target = sObjectMgr.GetPlayer(param.c_str());
+            }
+            
+            if (!target)
+            {
+                target = master;
+            }
+            
+            return Invite(bot, target);
         }
 
         virtual bool Invite(Player* inviter, Player* player);

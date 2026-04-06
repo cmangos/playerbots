@@ -187,6 +187,8 @@ bool DebugAction::Execute(Event& event)
         return HandleDSound(event, requester, text);
     else if (text.find("sound") == 0 && isMod)
         return HandleSound(event, requester, text);
+    else if (text.find("activity") == 0)
+        return HandleActivity(event, requester, text);
 
     // Fallback/default behavior
     std::string response = ai->HandleRemoteCommand(text);
@@ -3723,3 +3725,58 @@ bool DebugAction::HandleSound(Event& event, Player* requester, const std::string
     bot->PlayDistanceSound(soundEffect);
     return true;
 }
+bool DebugAction::HandleActivity(Event& event, Player* requester, const std::string& text)
+{
+    std::string action = ai->HandleRemoteCommand("action");
+
+    bool isActive = ai->AllowActivity();
+
+    std::string stateName;
+    switch (ai->GetState())
+    {
+        case BotState::BOT_STATE_COMBAT: stateName = "combat"; break;
+        case BotState::BOT_STATE_NON_COMBAT: stateName = "non-combat"; break;
+        case BotState::BOT_STATE_DEAD: stateName = "dead"; break;
+        case BotState::BOT_STATE_REACTION: stateName = "reaction"; break;
+        default: stateName = "unknown"; break;
+    }
+
+    std::string priorityTypeName;
+    switch (ai->GetPriorityType())
+    {
+        case ActivePiorityType::IS_REAL_PLAYER: priorityTypeName = "real_player"; break;
+        case ActivePiorityType::HAS_REAL_PLAYER_MASTER: priorityTypeName = "has_master"; break;
+        case ActivePiorityType::IN_GROUP_WITH_REAL_PLAYER: priorityTypeName = "group_with_player"; break;
+        case ActivePiorityType::IN_BATTLEGROUND: priorityTypeName = "battleground"; break;
+        case ActivePiorityType::IN_INSTANCE: priorityTypeName = "instance"; break;
+        case ActivePiorityType::VISIBLE_FOR_PLAYER: priorityTypeName = "visible_for_player"; break;
+        case ActivePiorityType::IS_ALWAYS_ACTIVE: priorityTypeName = "always_active"; break;
+        case ActivePiorityType::IN_COMBAT: priorityTypeName = "combat"; break;
+        case ActivePiorityType::IN_BG_QUEUE: priorityTypeName = "bg_queue"; break;
+        case ActivePiorityType::IN_LFG: priorityTypeName = "lfg"; break;
+        case ActivePiorityType::NEARBY_PLAYER: priorityTypeName = "nearby_player"; break;
+        case ActivePiorityType::PLAYER_FRIEND: priorityTypeName = "friend"; break;
+        case ActivePiorityType::PLAYER_GUILD: priorityTypeName = "guild"; break;
+        case ActivePiorityType::NO_PATH: priorityTypeName = "no_path"; break;
+        case ActivePiorityType::IN_ACTIVE_AREA: priorityTypeName = "active_area"; break;
+        case ActivePiorityType::IN_ACTIVE_MAP: priorityTypeName = "active_map"; break;
+        case ActivePiorityType::IN_INACTIVE_MAP: priorityTypeName = "inactive_map"; break;
+        case ActivePiorityType::IN_EMPTY_SERVER: priorityTypeName = "empty_server"; break;
+        default: priorityTypeName = "unknown"; break;
+    }
+
+    auto bracket = ai->GetPriorityBracket(ai->GetPriorityType());
+    float activityPct = sRandomPlayerbotMgr.getActivityPercentage();
+
+    std::ostringstream out;
+    out << "State: " << stateName << ", Active: " << (isActive ? "yes" : "no");
+    out << ", PriorityType: " << priorityTypeName;
+    out << ", Bracket: " << bracket.first << "-" << bracket.second;
+    out << ", Activity%: " << std::fixed << std::setprecision(1) << activityPct;
+    if (!action.empty())
+        out << ", Action: " << action;
+
+    ai->TellPlayer(requester, out.str());
+    return true;
+}
+

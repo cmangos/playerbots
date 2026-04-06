@@ -755,7 +755,7 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             ai->TellPlayerNoFacing(requester, BOT_TEXT2(replyStr.str(), replyArgs), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
         }
 
-        ai::InvalidateItemCountCache(bot);
+        RESET_AI_VALUE2(uint32, "item count", itemId);
 
         return true;
     }

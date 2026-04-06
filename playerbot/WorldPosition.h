@@ -310,7 +310,7 @@ namespace ai
         std::vector<WorldPosition> getPathFromPath(const std::vector<WorldPosition>& startPath, const Unit* bot, const uint8 maxAttempt = 40) const;
         std::vector<WorldPosition> getPathFrom(const WorldPosition& startPos, const Unit* bot) { return getPathFromPath({ startPos }, bot); };
         std::vector<WorldPosition> getPathTo(WorldPosition endPos, const Unit* bot) const { return endPos.getPathFrom(*this, bot); }
-        bool isPathTo(const std::vector<WorldPosition>& path, float const maxDistance = 0) const;
+        bool isPathTo(const std::vector<WorldPosition>& path, float const maxDistance = 0, float const maxZDistance = 2.0f) const;
         bool cropPathTo(std::vector<WorldPosition>& path, const float maxDistance = 0) const;
         bool canPathTo(const WorldPosition& endPos, const Unit* bot) const { return endPos.isPathTo(getPathTo(endPos, bot)); }
 

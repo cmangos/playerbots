@@ -1058,10 +1058,10 @@ std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& s
     return getPathStepFrom(startPos, pathfinder, bot, forceNormalPath);
 }
 
-bool WorldPosition::isPathTo(const std::vector<WorldPosition>& path, float const maxDistance) const
+bool WorldPosition::isPathTo(const std::vector<WorldPosition>& path, float const maxDistance, float const maxZDistance) const
 {
     float realMaxDistance = maxDistance ? maxDistance : sPlayerbotAIConfig.targetPosRecalcDistance;
-    return !path.empty() && distance(path.back()) < realMaxDistance;
+    return !path.empty() && path.back().getMapId() == getMapId() && sqDistance2d(path.back()) < realMaxDistance * realMaxDistance && abs(path.back().getZ() - getZ()) < maxZDistance;
 };
 
 

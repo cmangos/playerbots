@@ -8,7 +8,7 @@
 
 INSTANTIATE_SINGLETON_1(PlayerbotCommandServer);
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/smart_ptr.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>

@@ -109,49 +109,41 @@ bool MoveToTravelTargetAction::Execute(Event& event)
         }
     }
 
-    float maxDistance = target->GetDestination()->GetRadiusMin();
-
-    //Evenly distribute around the target.
-    float angle = 2 * M_PI * urand(0, 100) / 100.0;
-
     float x = location.getX();
     float y = location.getY();
     float z = location.getZ();
     float mapId = location.getMapId();
 
-    //Move between 0.5 and 1.0 times the maxDistance.
-    float mod = urand(50, 100)/100.0;   
-
-    x += cos(angle) * maxDistance * mod;
-    y += sin(angle) * maxDistance * mod;
-
-    bool canMove = false;
-
-    if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+    if (botLocation.getMapId() == location.getMapId() && botLocation.sqDistance2d(location) < 10000.0f)
     {
-        std::ostringstream out;
+        float maxDistance = target->GetDestination()->GetRadiusMin();
 
-        out << "Moving to ";
+        float angle = 2 * M_PI * urand(0, 100) / 100.0;
+        float mod = urand(50, 100) / 100.0;
 
-        out << target->GetDestination()->GetTitle();
+        x += cos(angle) * maxDistance * mod;
+        y += sin(angle) * maxDistance * mod;
 
-        if (!(*target->GetPosition() == WorldPosition()))
+        if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
         {
-            out << " at " << uint32(target->GetPosition()->distance(bot)) << "y";
+            std::ostringstream out;
+            out << "Moving to ";
+            out << target->GetDestination()->GetTitle();
+            if (!(*target->GetPosition() == WorldPosition()))
+            {
+                out << " at " << uint32(target->GetPosition()->distance(bot)) << "y";
+            }
+            if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
+                out << " for " << (target->GetTimeLeft() / 1000) << "s";
+            if (target->GetRetryCount(true))
+                out << " (move retry: " << target->GetRetryCount(true) << ")";
+            else if (target->GetRetryCount(false))
+                out << " (retry: " << target->GetRetryCount(false) << ")";
+            ai->TellPlayerNoFacing(GetMaster(), out);
         }
-
-        if (target->GetStatus() != TravelStatus::TRAVEL_STATUS_EXPIRED)
-            out << " for " << (target->GetTimeLeft() / 1000) << "s";
-
-        if (target->GetRetryCount(true))
-            out << " (move retry: " << target->GetRetryCount(true) << ")";
-        else if (target->GetRetryCount(false))
-            out << " (retry: " << target->GetRetryCount(false) << ")";
-
-        ai->TellPlayerNoFacing(GetMaster(), out);
     }
 
-    canMove = MoveTo(mapId, x, y, z, false, false);
+    bool canMove = MoveTo(mapId, x, y, z, false, false);
 
     if (!canMove)
     {

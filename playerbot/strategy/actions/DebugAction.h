@@ -99,6 +99,7 @@ namespace ai
         bool HandleSounds(Event& event, Player* requester, const std::string& text);
         bool HandleDSound(Event& event, Player* requester, const std::string& text);
         bool HandleSound(Event& event, Player* requester, const std::string& text);
+        bool HandleCombat(Event& event, Player* requester, const std::string& text);
         bool HandleActivity(Event& event, Player* requester, const std::string& text);
     };
 }

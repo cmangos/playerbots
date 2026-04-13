@@ -189,6 +189,8 @@ bool DebugAction::Execute(Event& event)
         return HandleDSound(event, requester, text);
     else if (text.find("sound") == 0 && isMod)
         return HandleSound(event, requester, text);
+    else if (text.find("combat") == 0)
+        return HandleCombat(event, requester, text);
     else if (text.find("activity") == 0)
         return HandleActivity(event, requester, text);
 
@@ -4171,3 +4173,43 @@ bool DebugAction::HandleActivity(Event& event, Player* requester, const std::str
     return true;
 }
 
+bool DebugAction::HandleCombat(Event& event, Player* requester, const std::string& text)
+{
+    ai->TellPlayer(requester, "=== Combat State Diagnostic ===");
+
+    bool unitFlagInCombat = bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+    ai->TellPlayer(requester, std::string("UNIT_FLAG_IN_COMBAT: ") + (unitFlagInCombat ? "SET" : "clear"));
+
+    bool isInCombat = bot->IsInCombat();
+    ai->TellPlayer(requester, std::string("IsInCombat(): ") + (isInCombat ? "true" : "false"));
+
+    ai->TellPlayer(requester, "CMaNGOS attackers: " + std::to_string(bot->getAttackers().size()));
+
+    Unit* victim = bot->GetVictim();
+    ai->TellPlayer(requester, std::string("victim: ") + (victim ? victim->GetName() : "none"));
+
+    ai->TellPlayer(requester, "--- BotAI State ---");
+
+    Unit* aiTarget = *ai->GetAiObjectContext()->GetValue<Unit*>("current target");
+    if (aiTarget)
+    {
+        std::ostringstream targetOut;
+        targetOut << "current target: " << aiTarget->GetName() 
+            << " (" << aiTarget->GetObjectGuid().GetCounter() << ")";
+        ai->TellPlayer(requester, targetOut.str());
+
+        bool isInvalid = ai->GetAiObjectContext()->GetValue<bool>("invalid target", "current target")->Get();
+        ai->TellPlayer(requester, std::string("invalid: ") + (isInvalid ? "YES" : "no"));
+    }
+    else
+    {
+        ai->TellPlayer(requester, "current target: none");
+    }
+
+    bool hasAttackers = ai->GetAiObjectContext()->GetValue<bool>("has attackers")->Get();
+    ai->TellPlayer(requester, std::string("has attackers: ") + (hasAttackers ? "true" : "false"));
+
+    ai->TellPlayer(requester, "Selection: " + std::to_string(bot->GetSelectionGuid().GetCounter()));
+
+    return true;
+}

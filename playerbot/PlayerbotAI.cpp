@@ -1087,25 +1087,27 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
 
     // chat replies
     std::list<ChatQueuedReply> delayedResponses;
-    while (!chatReplies.empty())
     {
-        ChatQueuedReply holder = chatReplies.front();
-        time_t checkTime = holder.m_time;
-        if (checkTime && time(0) < checkTime)
+        std::scoped_lock lock(chatRepliesMutex);
+        while (!chatReplies.empty())
         {
-            delayedResponses.push_back(holder);
+            ChatQueuedReply holder = chatReplies.front();
+            time_t checkTime = holder.m_time;
+            if (checkTime && time(0) < checkTime)
+            {
+                delayedResponses.push_back(holder);
+                chatReplies.pop();
+                continue;
+            }
+            ChatReplyAction::ChatReplyDo(bot, holder.m_type, holder.m_guid1, holder.m_guid2, holder.m_msg, holder.m_chanName, holder.m_name);
             chatReplies.pop();
-            continue;
         }
-        ChatReplyAction::ChatReplyDo(bot, holder.m_type, holder.m_guid1, holder.m_guid2, holder.m_msg, holder.m_chanName, holder.m_name);
-        chatReplies.pop();
-    }
 
-    for (std::list<ChatQueuedReply>::iterator i = delayedResponses.begin(); i != delayedResponses.end(); ++i)
-    {
-        chatReplies.push(*i);
+        for (std::list<ChatQueuedReply>::iterator i = delayedResponses.begin(); i != delayedResponses.end(); ++i)
+        {
+            chatReplies.push(*i);
+        }
     }
-
     // logout if logout timer is ready or if instant logout is possible
     if (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut())
     {
@@ -8263,6 +8265,7 @@ bool PlayerbotAI::HasPlayerRelation()
 
 void PlayerbotAI::QueueChatResponse(uint32 msgType, ObjectGuid guid1, ObjectGuid guid2, std::string message, std::string chanName, std::string name, bool noDelay)
 {
+    std::scoped_lock lock(chatRepliesMutex);
     chatReplies.push(ChatQueuedReply(msgType, guid1.GetCounter(), guid2.GetCounter(), message, chanName, name, time(0) + (noDelay ? 0 : urand(inCombat ? 15 : 10, inCombat ? 30 : 20))));
 }
 

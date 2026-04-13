@@ -642,6 +642,8 @@ std::string ChatHelper::formatSkill(uint32 skillId, Player* player)
 
         if (tempValue)
             out << " +temp " << permValue;
+
+        out << ")";
     }
 
     return out.str();

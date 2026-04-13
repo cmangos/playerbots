@@ -99,6 +99,8 @@ bool DebugAction::Execute(Event& event)
         return HandleLogoutTime(event, requester, text);
     else if (text.find("level") == 0)
         return HandleLevel(event, requester, text);
+    else if (text.find("quest") == 0)
+        return HandleQuest(event, requester, text);
     else if (text.find("npc") == 0)
         return HandleNPC(event, requester, text);
     else if (text.find("go ") == 0)
@@ -2057,6 +2059,395 @@ bool DebugAction::HandleLevel(Event& event, Player* requester, const std::string
 
     bot->Whisper(out.str().c_str(), LANG_UNIVERSAL, event.getOwner()->GetObjectGuid());
 
+    return true;
+}
+
+bool DebugAction::HandleQuest(Event& event, Player* requester, const std::string& text)
+{
+    std::string param = text.substr(5); // skip "quest"
+    while (param.size() > 0 && param[0] == ' ')
+        param = param.substr(1);
+
+    std::string subcmd;
+    std::string questParam;
+
+    // Parse subcommand
+    size_t spacePos = param.find(' ');
+    if (spacePos != std::string::npos)
+    {
+        subcmd = param.substr(0, spacePos);
+        questParam = param.substr(spacePos + 1);
+        while (questParam.size() > 0 && questParam[0] == ' ')
+            questParam = questParam.substr(1);
+    }
+    else
+    {
+        subcmd = param;
+    }
+
+    // Handle 'list' subcommand
+    if (subcmd == "list")
+    {
+        std::ostringstream out;
+        out << "=== Quest Log ===";
+        int count = 0;
+        for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+        {
+            uint32 questId = bot->GetQuestSlotQuestId(slot);
+            if (!questId)
+                continue;
+
+            Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+            std::string name = pQuest ? pQuest->GetTitle() : "Unknown";
+            QuestStatus status = bot->GetQuestStatus(questId);
+            std::string statusStr = (status == QUEST_STATUS_COMPLETE) ? "[COMPLETE]" : "[INCOMPLETE]";
+            
+            out << "\n" << questId << ": " << statusStr << " " << name;
+            count++;
+        }
+        if (count == 0)
+            out << "\nNo quests in log";
+        ai->TellPlayer(requester, out.str());
+        return true;
+    }
+
+    // Parse quest ID - try both subcmd and questParam
+    uint32 questId = 0;
+
+    // First try questParam (if provided with subcommand like "complete 123")
+    if (!questParam.empty())
+    {
+        try
+        {
+            questId = std::stoul(questParam);
+        }
+        catch (...)
+        {
+            if (questParam.find("|Hquest:") != std::string::npos)
+            {
+                size_t start = questParam.find(":") + 1;
+                size_t end = questParam.find(":", start);
+                if (end != std::string::npos)
+                {
+                    try
+                    {
+                        questId = std::stoul(questParam.substr(start, end - start));
+                    }
+                    catch (...) {}
+                }
+            }
+        }
+    }
+
+    // If no questId yet, try subcmd directly (for "quest 745" syntax)
+    if (!questId && !subcmd.empty())
+    {
+        try
+        {
+            questId = std::stoul(subcmd);
+        }
+        catch (...)
+        {
+            if (subcmd.find("|Hquest:") != std::string::npos)
+            {
+                size_t start = subcmd.find(":") + 1;
+                size_t end = subcmd.find(":", start);
+                if (end != std::string::npos)
+                {
+                    try
+                    {
+                        questId = std::stoul(subcmd.substr(start, end - start));
+                    }
+                    catch (...) {}
+                }
+            }
+        }
+    }
+
+    // Handle 'complete' subcommand
+    if (subcmd == "complete")
+    {
+        if (!questId)
+        {
+            ai->TellPlayer(requester, "Usage: quest complete <questId>");
+            return true;
+        }
+
+        // Find the quest in bot's quest log
+        bool found = false;
+        bool completed = false;
+
+        for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+        {
+            uint32 logQuestId = bot->GetQuestSlotQuestId(slot);
+            if (!logQuestId)
+                continue;
+
+            if (logQuestId != questId)
+                continue;
+
+            found = true;
+
+            if (bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE)
+            {
+                completed = true;
+                break;
+            }
+
+            Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+            if (!pQuest)
+                break;
+
+            // Add required items
+            for (uint8 x = 0; x < QUEST_ITEM_OBJECTIVES_COUNT; ++x)
+            {
+                uint32 id = pQuest->ReqItemId[x];
+                uint32 count = pQuest->ReqItemCount[x];
+                if (!id || !count)
+                    continue;
+
+                uint32 curItemCount = bot->GetItemCount(id, true);
+                if (curItemCount >= count)
+                    continue;
+
+                ItemPosCountVec dest;
+                uint8 msg = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, id, count - curItemCount);
+                if (msg == EQUIP_ERR_OK)
+                {
+                    Item* item = bot->StoreNewItem(dest, id, true);
+                    bot->SendNewItem(item, count - curItemCount, true, false);
+                }
+            }
+
+            // Complete kill objectives
+            for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+            {
+                int32 creature = pQuest->ReqCreatureOrGOId[i];
+                uint32 creaturecount = pQuest->ReqCreatureOrGOCount[i];
+
+                if (uint32 spell_id = pQuest->ReqSpell[i])
+                {
+                    for (uint16 z = 0; z < creaturecount; ++z)
+                        bot->CastedCreatureOrGO(creature, ObjectGuid((creature > 0 ? HIGHGUID_UNIT : HIGHGUID_GAMEOBJECT), uint32(std::abs(creature)), 1u), spell_id);
+                }
+                else if (creature > 0)
+                {
+                    if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature))
+                        for (uint16 z = 0; z < creaturecount; ++z)
+                            bot->KilledMonster(cInfo, nullptr);
+                }
+                else if (creature < 0)
+                {
+                    for (uint16 z = 0; z < creaturecount; ++z)
+                        bot->CastedCreatureOrGO(-creature, ObjectGuid(), 0);
+                }
+            }
+
+            // Complete reputation
+            if (uint32 repFaction = pQuest->GetRepObjectiveFaction())
+            {
+                uint32 repValue = pQuest->GetRepObjectiveValue();
+                uint32 curRep = bot->GetReputationMgr().GetReputation(repFaction);
+                if (curRep < repValue)
+                {
+#ifndef MANGOSBOT_ONE
+                    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(repFaction))
+#else
+                    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry<FactionEntry>(repFaction))
+#endif
+                        bot->GetReputationMgr().SetReputation(factionEntry, repValue);
+                }
+            }
+
+            // Complete money requirement
+            int32 ReqOrRewMoney = pQuest->GetRewOrReqMoney();
+            if (ReqOrRewMoney < 0)
+                bot->ModifyMoney(-ReqOrRewMoney);
+
+            bot->CompleteQuest(questId);
+            completed = true;
+            break;
+        }
+
+        if (completed)
+        {
+            std::ostringstream out;
+            out << "Quest " << questId << " completed!";
+            ai->TellPlayer(requester, out.str());
+        }
+        else if (found)
+        {
+            std::ostringstream out;
+            out << "Quest " << questId << " already completed.";
+            ai->TellPlayer(requester, out.str());
+        }
+        else
+        {
+            std::ostringstream out;
+            out << "Quest " << questId << " not found in quest log.";
+            ai->TellPlayer(requester, out.str());
+        }
+        return true;
+    }
+
+    // Handle 'drop' subcommand (abandon quest)
+    if (subcmd == "drop")
+    {
+        if (!questId)
+        {
+            ai->TellPlayer(requester, "Usage: quest drop <questId>");
+            return true;
+        }
+
+        for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+        {
+            uint32 logQuestId = bot->GetQuestSlotQuestId(slot);
+            if (!logQuestId || logQuestId != questId)
+                continue;
+
+            bot->SetQuestSlot(slot, 0);
+            bot->SetQuestSlotState(slot, QUEST_STATE_NONE);
+            
+            std::ostringstream out;
+            out << "Quest " << questId << " dropped.";
+            ai->TellPlayer(requester, out.str());
+            return true;
+        }
+
+        std::ostringstream out;
+        out << "Quest " << questId << " not found in quest log.";
+        ai->TellPlayer(requester, out.str());
+        return true;
+    }
+
+    // Handle 'add' subcommand (add quest to log)
+    if (subcmd == "add")
+    {
+        if (!questId)
+        {
+            ai->TellPlayer(requester, "Usage: quest add <questId>");
+            return true;
+        }
+
+        Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+        if (!pQuest)
+        {
+            std::ostringstream out;
+            out << "Quest " << questId << " not found in database.";
+            ai->TellPlayer(requester, out.str());
+            return true;
+        }
+
+        // Find empty slot
+        for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+        {
+            if (bot->GetQuestSlotQuestId(slot))
+                continue;
+
+            bot->SetQuestSlot(slot, questId);
+            bot->SetQuestSlotState(slot, QUEST_STATE_NONE);
+            
+            std::ostringstream out;
+            out << "Quest " << questId << " (" << pQuest->GetTitle() << ") added.";
+            ai->TellPlayer(requester, out.str());
+            return true;
+        }
+
+        ai->TellPlayer(requester, "Quest log is full");
+        return true;
+    }
+
+    // Handle 'travel' subcommand (show travel info for quest)
+    if (subcmd == "travel")
+    {
+        if (!questId)
+        {
+            ai->TellPlayer(requester, "Usage: quest travel <questId>");
+            return true;
+        }
+
+        Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+        if (!pQuest)
+        {
+            std::ostringstream out;
+            out << "Quest " << questId << " not found in database.";
+            ai->TellPlayer(requester, out.str());
+            return true;
+        }
+
+        std::ostringstream out;
+        out << "=== Quest: " << questId << " ===";
+        out << "\n" << pQuest->GetTitle();
+        
+        // Show objectives
+        out << "\n--- Objectives ---";
+        for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+        {
+            int32 creature = pQuest->ReqCreatureOrGOId[i];
+            uint32 count = pQuest->ReqCreatureOrGOCount[i];
+            if (!creature || !count)
+                continue;
+
+            std::string targetType = (creature > 0) ? "Kill" : "Collect";
+            out << "\n" << targetType << " " << abs(creature) << " x" << count;
+        }
+        for (uint8 x = 0; x < QUEST_ITEM_OBJECTIVES_COUNT; ++x)
+        {
+            uint32 item = pQuest->ReqItemId[x];
+            uint32 count = pQuest->ReqItemCount[x];
+            if (!item || !count)
+                continue;
+
+            out << "\nCollect item " << item << " x" << count;
+        }
+
+        ai->TellPlayer(requester, out.str());
+        return true;
+    }
+
+    // Handle 'info' or just quest ID - show info about quest
+    if (!subcmd.empty() && questId)
+    {
+        Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+        if (!pQuest)
+        {
+            std::ostringstream out;
+            out << "Quest " << questId << " not found in database.";
+            ai->TellPlayer(requester, out.str());
+            return true;
+        }
+
+        // Check if in quest log
+        bool inLog = false;
+        QuestStatus status = QUEST_STATUS_NONE;
+        for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+        {
+            if (bot->GetQuestSlotQuestId(slot) == questId)
+            {
+                inLog = true;
+                status = bot->GetQuestStatus(questId);
+                break;
+            }
+        }
+
+        std::ostringstream out;
+        out << "=== Quest: " << questId << " ===";
+        out << "\n" << pQuest->GetTitle();
+        out << "\nLevel: " << pQuest->GetQuestLevel();
+        out << "\nStatus: ";
+        if (!inLog)
+            out << "NOT IN LOG";
+        else if (status == QUEST_STATUS_COMPLETE)
+            out << "COMPLETE";
+        else
+            out << "IN PROGRESS";
+
+        ai->TellPlayer(requester, out.str());
+        return true;
+    }
+
+    // No valid subcommand - show usage
+    ai->TellPlayer(requester, "Usage: quest <complete|drop|add|list|travel> [questId]");
     return true;
 }
 

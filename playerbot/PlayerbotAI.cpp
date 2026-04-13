@@ -6421,6 +6421,40 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
         out << " / " << pct << "%";
         return out.str();
     }
+    else if (command == "combat")
+    {
+        std::ostringstream out;
+
+        bool unitFlagInCombat = bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+        out << "UNIT_FLAG_IN_COMBAT: " << (unitFlagInCombat ? "SET" : "clear");
+
+        out << ", IsInCombat(): " << (bot->IsInCombat() ? "true" : "false");
+
+        out << ", CMaNGOS attackers: " << bot->getAttackers().size();
+
+        Unit* victim = bot->GetVictim();
+        out << ", victim: " << (victim ? victim->GetName() : "none");
+
+        out << " | BotAI: current target: ";
+        Unit* aiTarget = *GetAiObjectContext()->GetValue<Unit*>("current target");
+        if (aiTarget)
+        {
+            out << aiTarget->GetName() << " (" << aiTarget->GetObjectGuid().GetCounter() << ")";
+            bool isInvalid = GetAiObjectContext()->GetValue<bool>("invalid target", "current target")->Get();
+            out << ", invalid: " << (isInvalid ? "YES" : "no");
+        }
+        else
+        {
+            out << "none";
+        }
+
+        bool hasAttackers = GetAiObjectContext()->GetValue<bool>("has attackers")->Get();
+        out << ", has attackers: " << (hasAttackers ? "true" : "false");
+
+        out << " | Selection: " << bot->GetSelectionGuid().GetCounter();
+
+        return out.str();
+    }
     else if (command == "strategy")
     {
         return currentEngine->ListStrategies();

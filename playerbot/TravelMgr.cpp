@@ -1479,6 +1479,7 @@ void TravelMgr::LoadQuestTravelTable()
     sPlayerbotAIConfig.openLog("deaths.csv", "w");
     sPlayerbotAIConfig.openLog("player_paths.csv", "w");
     sPlayerbotAIConfig.openLog("travel_destinations.csv", "w");
+    sPlayerbotAIConfig.openLog("deadzone.csv", "w"); 
     
 
     if (sPlayerbotAIConfig.hasLog("activity_pid.csv"))

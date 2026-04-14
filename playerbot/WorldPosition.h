@@ -132,6 +132,10 @@ namespace ai
         bool isInstance() const { return !isOverworld() || mapid == 609;}
         bool isInWater() const { return getTerrain() ? getTerrain()->IsInWater(coord_x, coord_y, coord_z) : false; };
         bool isUnderWater() const { return getTerrain() ? getTerrain()->IsUnderWater(coord_x, coord_y, coord_z) : false; };
+        bool setAtWaterSurface();
+        bool isUnderground() const;
+        float getWaterLevel() const { return getTerrain() ? getTerrain()->GetWaterLevel(coord_x, coord_y, coord_z) : -200000.0f; };
+        float getGroundLevel() const { float ground = 0.0f; getTerrain()->GetWaterLevel(coord_x, coord_y, coord_z, &ground); return ground; };
 
         WorldPosition relPoint(const WorldPosition& center) const { return WorldPosition(mapid, coord_x - center.coord_x, coord_y - center.coord_y, coord_z - center.coord_z, orientation); }
         WorldPosition offset(const WorldPosition& center) const { return WorldPosition(mapid, coord_x + center.coord_x, coord_y + center.coord_y, coord_z + center.coord_z, orientation); }

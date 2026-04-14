@@ -8187,36 +8187,98 @@ bool PlayerbotAI::CanMove()
 {
     // do not allow if not vehicle driver
     if (IsInVehicle() && !IsInVehicle(true))
+    {
         return false;
+    }
 
-    if (sServerFacade.IsFrozen(bot) ||
-        sServerFacade.IsInRoots(bot) ||
-        sServerFacade.IsFeared(bot) ||
-        sServerFacade.IsCharmed(bot) ||
-        bot->IsStunned() ||
-        bot->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION) ||
-        bot->IsPolymorphed() ||
-        bot->IsTaxiFlying() ||
-        (sServerFacade.UnitIsDead(bot) && !bot->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST)) ||
-        bot->IsBeingTeleported() ||
-        bot->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL) ||
-        bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST) ||
-        IsJumping() ||
-#ifdef MANGOSBOT_ONE
-        bot->IsFalling() ||
-        bot->IsJumping())
-#else
-        bot->IsFalling())
-#endif
+    if (sServerFacade.IsFrozen(bot))
+    {
         return false;
+    }
+    if (sServerFacade.IsInRoots(bot))
+    {
+        return false;
+    }
+    if (sServerFacade.IsFeared(bot))
+    {
+        return false;
+    }
+    if (sServerFacade.IsCharmed(bot))
+    {
+        return false;
+    }
+    if (bot->IsStunned())
+    {
+        return false;
+    }
+    if (bot->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
+    {
+        return false;
+    }
+    if (bot->IsPolymorphed())
+    {
+        return false;
+    }
+    if (bot->IsTaxiFlying())
+    {
+        return false;
+    }
+    if (sServerFacade.UnitIsDead(bot) && !bot->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    {
+        return false;
+    }
+    if (bot->IsBeingTeleported())
+    {
+        return false;
+    }
+    if (bot->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
+    {
+        return false;
+    }
+    if (bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CLIENT_CONTROL_LOST))
+    {
+        return false;
+    }
+    if (IsJumping())
+    {
+        return false;
+    }
+#ifdef MANGOSBOT_ONE
+    if (bot->IsFalling())
+    {
+        return false;
+    }
+    if (bot->IsJumping())
+    {
+        return false;
+    }
+#else
+    if (bot->IsFalling())
+    {
+        return false;
+    }
+#endif
 
     MotionMaster& mm = *bot->GetMotionMaster();
+    MovementGeneratorType currentMotion = mm.GetCurrentMovementGeneratorType();
+    
 #ifdef CMANGOS
-    return mm.GetCurrentMovementGeneratorType() != TAXI_MOTION_TYPE && mm.GetCurrentMovementGeneratorType() != FALL_MOTION_TYPE;
+    if (currentMotion == TAXI_MOTION_TYPE)
+    {
+        return false;
+    }
+    if (currentMotion == FALL_MOTION_TYPE)
+    {
+        return false;
+    }
 #endif
 #ifdef MANGOS
-    return mm.GetCurrentMovementGeneratorType() != FLIGHT_MOTION_TYPE;
+    if (currentMotion == FLIGHT_MOTION_TYPE)
+    {
+        return false;
+    }
 #endif
+    return true;
 }
 
 void PlayerbotAI::StopMoving()

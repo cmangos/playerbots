@@ -1007,23 +1007,6 @@ std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& s
 
     type = pathfinder->getPathType();
 
-    if (sPlayerbotAIConfig.hasLog("pathfind_attempt_point.csv"))
-    {
-        std::ostringstream out;
-        out << std::fixed << std::setprecision(1);
-        printWKT({ startPos, *this }, out);
-        sPlayerbotAIConfig.log("pathfind_attempt_point.csv", out.str().c_str());
-    }
-
-    if (sPlayerbotAIConfig.hasLog("pathfind_attempt.csv") && (type == PATHFIND_INCOMPLETE || type == PATHFIND_NORMAL))
-    {
-        std::ostringstream out;
-        out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
-        out << std::fixed << std::setprecision(1) << type << ",";
-        printWKT(fromPointsArray(points), out, 1);
-        sPlayerbotAIConfig.log("pathfind_attempt.csv", out.str().c_str());
-    }
-
     std::vector<WorldPosition> retvec = fromPointsArray(points);
 
     if (type == PATHFIND_INCOMPLETE)
@@ -1063,6 +1046,20 @@ bool WorldPosition::isPathTo(const std::vector<WorldPosition>& path, float const
     float realMaxDistance = maxDistance ? maxDistance : sPlayerbotAIConfig.targetPosRecalcDistance;
     return !path.empty() && path.back().getMapId() == getMapId() && sqDistance2d(path.back()) < realMaxDistance * realMaxDistance && abs(path.back().getZ() - getZ()) < maxZDistance;
 };
+
+bool WorldPosition::setAtWaterSurface()
+{
+    if (!isInWater() && !isUnderWater())
+        return false;
+
+    float waterLevel = getWaterLevel();
+    if (waterLevel > -100000.0f)
+    {
+        coord_z = waterLevel + 0.5f;
+        return true;
+    }
+    return false;
+}
 
 
 bool WorldPosition::cropPathTo(std::vector<WorldPosition>& path, const float maxDistance) const
@@ -1186,6 +1183,14 @@ bool WorldPosition::GetReachableRandomPointOnGround(const Player* bot, const flo
 #else
     return getMap(bot ? bot->GetInstanceId() : getFirstInstanceId())->GetReachableRandomPointOnGround(bot->GetPhaseMask(), coord_x, coord_y, coord_z, radius, randomRange);
 #endif
+}
+
+bool WorldPosition::isUnderground() const
+{
+    float ground = 0.0f;
+    if (getTerrain())
+        getTerrain()->GetWaterLevel(coord_x, coord_y, coord_z, &ground);
+    return coord_z < ground - 0.5f;
 }
 
 std::vector<WorldPosition> WorldPosition::ComputePathToRandomPoint(const Player* bot, const float radius, const bool randomRange)

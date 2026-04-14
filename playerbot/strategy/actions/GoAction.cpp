@@ -528,7 +528,7 @@ bool GoAction::TellHowToGo(TravelDestination* dest, Player* requester) const
     }
 
     std::vector<WorldPosition> beginPath, endPath;
-    TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *point, beginPath, bot);
+    TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *point, beginPath, endPath, bot);
 
     if (route.isEmpty())
     {

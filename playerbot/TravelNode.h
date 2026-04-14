@@ -2,6 +2,7 @@
 
 #include <shared_mutex>
 #include "WorldPosition.h"
+#include "MotionGenerators/PathFinder.h"
 
 //THEORY
 // 
@@ -370,7 +371,7 @@ namespace ai
         TravelNodeRoute getRoute(TravelNode* start, TravelNode* goal, Unit* unit = nullptr);
 
         //Find the best node between two positions
-        TravelNodeRoute getRoute(WorldPosition startPos, WorldPosition endPos, std::vector<WorldPosition>& startPath, Unit* unit = nullptr);
+        TravelNodeRoute getRoute(WorldPosition startPos, WorldPosition endPos, std::vector<WorldPosition>& startPath, std::vector<WorldPosition>& endPath, Unit* unit = nullptr);
 
         //Find the full path between those locations
         static TravelPath getFullPath(WorldPosition startPos, WorldPosition endPos, Unit* unit = nullptr);
@@ -382,6 +383,13 @@ namespace ai
         bool gethasToGen() { return hasToGen || hasToFullGen; }
 
         void LoadMaps();
+
+        struct PathFindResult {
+            PathType type;
+            std::vector<WorldPosition> path;
+        };
+        
+        PathFindResult testPathToLoop(const WorldPosition& startPos, const WorldPosition& endPos, const Unit* bot, uint64 uid = 0, std::vector<WorldPosition> route = std::vector<WorldPosition>(), std::string type = "debug") const;
 
         //Below are the steps to creating the content stored in the node, link and path tables. 
         //Nodes are placed based on key locations based on objects/creatures in the world and paths are generated using the standardpathfinder.

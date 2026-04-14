@@ -6,6 +6,7 @@
 #include "playerbot/TravelNode.h"
 #include "MotionGenerators/WaypointMovementGenerator.h"
 #include "playerbot/strategy/values/HazardsValue.h"
+#include "playerbot/strategy/values/LastMovementValue.h"
 
 namespace ai
 {
@@ -30,6 +31,48 @@ namespace ai
 
 
         bool WaitForTransport();
+
+
+        enum class PathHandleResult
+        {
+            Continue,
+            ReturnTrue,
+            ReturnFalse
+        };
+
+        bool ResolveMovePath(const WorldPosition& startPosition,
+            const WorldPosition& endPosition,
+            Unit* mover,
+            float minDist,
+            float maxDist,
+            WorldPosition& outMovePosition,
+            TravelPath& outMovePath);
+
+        PathHandleResult HandlePathNodeType(TravelNodePathType pathType,
+            uint32 entry,
+            const WorldPosition& movePosition,
+            const WorldPosition& telePosition,
+            const WorldPosition& startPosition,
+            LastMovement& lastMove,
+            bool& outIsWalking);
+
+        void ClipMovePositionForAggro(WorldPosition& movePosition,
+            Unit* mover,
+            const WorldPosition& startPosition);
+
+        void UpdateFlyingState(WorldPosition& movePosition,
+            float totalDistance,
+            float originalZ,
+            float maxDist,
+            bool isWalking);
+
+        void DispatchMovement(MotionMaster& mm,
+            const WorldPosition& movePosition,
+            bool generatePath,
+            bool masterWalking);
+
+        // (existing private members below)
+        bool MoveTo2(uint32 mapId, float x, float y, float z, bool idle, bool react, bool noPath, bool ignoreEnemyTargets);
 
         bool MoveTo(uint32 mapId, float x, float y, float z, bool idle = false, bool react = false, bool noPath = false, bool ignoreEnemyTargets = false);
         bool MoveTo(Unit* target, float distance = 0.0f);

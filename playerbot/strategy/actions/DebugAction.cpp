@@ -3045,7 +3045,7 @@ bool DebugAction::HandleTravel(Event& event, Player* requester, const std::strin
             return false;
 
         std::vector<WorldPosition> beginPath, endPath;
-        TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *point, beginPath, bot);
+        TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *point, beginPath, endPath, bot);
 
         std::ostringstream out; out << "Traveling to " << dest->GetTitle() << ": ";
 

@@ -379,7 +379,7 @@ namespace ai
         //Manage/update nodes
         void manageNodes(Unit* bot, bool mapFull = false);
 
-        void setHasToGen() { hasToGen = true; }
+        void setHasToGen(bool enable = true) { hasToGen = enable; }
         bool gethasToGen() { return hasToGen || hasToFullGen; }
 
         void LoadMaps();

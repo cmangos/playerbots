@@ -1447,8 +1447,6 @@ void TravelMgr::LoadQuestTravelTable()
 
     GetPopulatedGrids();
 
-    LoadFishLocations();
-
     //Analyse log files
     if (sPlayerbotAIConfig.hasLog("log_analysis.csv"))
     {
@@ -1531,6 +1529,8 @@ void TravelMgr::LoadQuestTravelTable()
     sTravelNodeMap.printMap();
     sTravelNodeMap.printNodeStore();
     sTravelNodeMap.saveNodeStore();
+
+    LoadFishLocations();
    
     //Creature/gos/zone export.
     if (sPlayerbotAIConfig.hasLog("creatures.csv"))
@@ -2302,7 +2302,9 @@ void TravelMgr::LoadFishLocations()
 
     if (!result)
     {
+        sTravelNodeMap.setHasToGen();
         GetFishLocations();
+        sTravelNodeMap.setHasToGen(false);
         SaveFishLocations();
         return;
     }
@@ -2389,6 +2391,10 @@ void TravelMgr::GetFishLocations()
 
 void TravelMgr::GetFishLocations(uint32 mapId)
 {
+    WorldPosition ironForge(0, -4832.27, -1069.64, 502.268);
+    TravelNode* ironForgeNode = sTravelNodeMap.getNode(ironForge);
+    WorldPosition orgrimmar(1, 1845.49, -4395.95, 5.19264);
+
     PathFinder path(mapId,0);
 
     const int8 subCellPerGrid = 64;
@@ -2460,6 +2466,34 @@ void TravelMgr::GetFishLocations(uint32 mapId)
 
                     if (!zone)
                         continue;
+
+                    std::vector<WorldPosition> startPath;
+                    std::vector<WorldPosition> endPath;
+
+                    if (fishPos.getMapId() == 0 && sTravelNodeMap.getRoute(ironForge, fishPos, startPath, endPath, nullptr).isEmpty())
+                        continue;
+
+                    if (fishPos.getMapId() == 1 && sTravelNodeMap.getRoute(orgrimmar, fishPos, startPath, endPath, nullptr).isEmpty())
+                        continue;
+
+                    if (fishPos.getMapId() > 1)
+                    {
+                        bool noPath = true;
+                        for (auto& node : sTravelNodeMap.getNodes(fishPos))
+                        {
+                            if (!node->hasRouteTo(ironForgeNode))
+                                continue;
+
+                            if (!sTravelNodeMap.getFullPath(*node->getPosition(), fishPos).empty())
+                            {
+                                noPath = false;
+                                break;
+                            }
+                        }
+
+                        if (noPath)
+                            continue;
+                    }
 
                     fishSpots[zone].push_back(fishPos);                    
                 }

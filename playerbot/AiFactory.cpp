@@ -966,7 +966,6 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
                 nonCombatEngine->addStrategy("travel");
                 nonCombatEngine->addStrategy("tfish");
                 nonCombatEngine->addStrategy("rpg");                
-                nonCombatEngine->removeStrategy("rpg craft");
             }
 
             if (sPlayerbotAIConfig.randomBotJoinBG)
@@ -999,8 +998,6 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
                             nonCombatEngine->addStrategy("travel");
                             nonCombatEngine->addStrategy("tfish");
                             nonCombatEngine->addStrategy("rpg");
-                            nonCombatEngine->removeStrategy("rpg craft");
-
                         }
 
                         if (!master || master->GetPlayerbotAI())
@@ -1031,7 +1028,6 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         nonCombatEngine->removeStrategy("travel");
         nonCombatEngine->removeStrategy("tfish");
         nonCombatEngine->removeStrategy("rpg");
-        nonCombatEngine->removeStrategy("rpg craft");
         nonCombatEngine->removeStrategy("follow");
         nonCombatEngine->removeStrategy("wander");
 

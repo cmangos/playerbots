@@ -43,6 +43,10 @@ namespace ai
     {
     public:
         LfgAction(PlayerbotAI* ai, std::string name = "lfg") : InviteToGroupAction(ai, name) {}
+
+        static std::unordered_map<uint8, std::unordered_map<BotRoles, uint32>> AllowedClassRoleNr(uint8 groupSize = 5);
+        static std::unordered_map<uint8, std::unordered_map<BotRoles, uint32>> AllowedClassRoleNr(Player* player, uint8 groupSize = 5);
+
         virtual bool Execute(Event& event) override;
         virtual bool isUsefulWhenStunned() override { return true; }
     };

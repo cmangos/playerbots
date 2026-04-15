@@ -49,7 +49,15 @@ namespace ai
         if (group)
         {
             if (group->IsFull())
-                return false;
+            {
+                if(group->IsRaidGroup())
+                    return false;
+
+                if(event.getSource() == "create group")
+                    group->ConvertToRaid();
+                else 
+                    return false;
+            }
 
             if (bot->GetGroup() == group)
                 return false;
@@ -67,7 +75,121 @@ namespace ai
         if (bot->GetGroupInvite())
             bot->GetGroupInvite()->RemoveInvite(bot);
 
-        return Invite(master, bot);
+        bool invite = Invite(master, bot);
+
+        if (invite and event.getSource() == "create group")
+        {
+            if (!ai->DoSpecificAction("accept invitation", event, true))
+                return false;
+        }
+
+        return invite;
+    }
+
+    std::unordered_map<uint8, std::unordered_map<BotRoles, uint32>> LfgAction::AllowedClassRoleNr(uint8 groupSize)
+    {
+        std::unordered_map<uint8, std::unordered_map<BotRoles, uint32>> allowedClassNr;
+
+        if (groupSize == 5)
+        {
+            allowedClassNr[0][BOT_ROLE_TANK] = 1;
+            allowedClassNr[0][BOT_ROLE_HEALER] = 1;
+            allowedClassNr[0][BOT_ROLE_DPS] = 3;
+        }
+        else if (groupSize == 40)
+        {
+            allowedClassNr[0][BOT_ROLE_TANK] = 4;
+            allowedClassNr[0][BOT_ROLE_HEALER] = 16;
+            allowedClassNr[0][BOT_ROLE_DPS] = 20;
+
+            allowedClassNr[CLASS_PALADIN][BOT_ROLE_TANK] = 0;
+            allowedClassNr[CLASS_DRUID][BOT_ROLE_TANK] = 1;
+
+            allowedClassNr[CLASS_DRUID][BOT_ROLE_HEALER] = 3;
+            allowedClassNr[CLASS_PALADIN][BOT_ROLE_HEALER] = 4;
+            allowedClassNr[CLASS_SHAMAN][BOT_ROLE_HEALER] = 4;
+            allowedClassNr[CLASS_PRIEST][BOT_ROLE_HEALER] = 11;
+
+            allowedClassNr[CLASS_WARRIOR][BOT_ROLE_DPS] = 8;
+            allowedClassNr[CLASS_PALADIN][BOT_ROLE_DPS] = 4;
+            allowedClassNr[CLASS_HUNTER][BOT_ROLE_DPS] = 4;
+            allowedClassNr[CLASS_ROGUE][BOT_ROLE_DPS] = 6;
+            allowedClassNr[CLASS_PRIEST][BOT_ROLE_DPS] = 1;
+            allowedClassNr[CLASS_SHAMAN][BOT_ROLE_DPS] = 4;
+            allowedClassNr[CLASS_MAGE][BOT_ROLE_DPS] = 15;
+            allowedClassNr[CLASS_WARLOCK][BOT_ROLE_DPS] = 4;
+            allowedClassNr[CLASS_DRUID][BOT_ROLE_DPS] = 1;
+        }
+        else if (groupSize == 25)
+        {
+            allowedClassNr[0][BOT_ROLE_TANK] = 3;
+            allowedClassNr[0][BOT_ROLE_HEALER] = 7;
+            allowedClassNr[0][BOT_ROLE_DPS] = 15;
+        }
+        else if (groupSize == 20)
+        {
+            allowedClassNr[0][BOT_ROLE_TANK] = 2;
+            allowedClassNr[0][BOT_ROLE_HEALER] = 5;
+            allowedClassNr[0][BOT_ROLE_DPS] = 13;
+        }
+        else if (groupSize == 10)
+        {
+            allowedClassNr[0][BOT_ROLE_TANK] = 2;
+            allowedClassNr[0][BOT_ROLE_HEALER] = 3;
+            allowedClassNr[0][BOT_ROLE_DPS] = 5;
+        }
+        else
+        {
+            allowedClassNr[0][BOT_ROLE_TANK] = groupSize;
+            allowedClassNr[0][BOT_ROLE_HEALER] = groupSize;
+            allowedClassNr[0][BOT_ROLE_DPS] = groupSize;
+        }
+        return allowedClassNr;
+    }
+
+    std::unordered_map<uint8, std::unordered_map<BotRoles, uint32>> LfgAction::AllowedClassRoleNr(Player* player, uint8 groupSize)
+    {
+        std::unordered_map<uint8, std::unordered_map<BotRoles, uint32>> allowedClassNr = AllowedClassRoleNr(groupSize);
+
+        Group* group = player->GetGroup();
+
+        if (!group)
+        {
+            BotRoles role = PlayerbotAI::IsTank(player, false) ? BOT_ROLE_TANK : PlayerbotAI::IsHeal(player, false) ? BOT_ROLE_HEALER :
+                                                                                                                      BOT_ROLE_DPS;
+            uint8 cls = (Classes)player->getClass();
+
+            if (allowedClassNr[0][role] > 0)
+                allowedClassNr[0][role]--;
+
+            if (allowedClassNr[cls].find(role) != allowedClassNr[cls].end() && allowedClassNr[cls][role] > 0)
+                allowedClassNr[cls][role]--;
+
+            return allowedClassNr;
+        }
+
+        Player* groupMaster = sObjectMgr.GetPlayer(group->GetLeaderGuid());
+
+        Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
+        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            // Only add group member targets that are alive and near the player
+            Player* player = sObjectMgr.GetPlayer(itr->guid);
+
+            if (!PlayerbotAI::IsSafe(groupMaster, player))
+                continue;
+
+            BotRoles role = PlayerbotAI::IsTank(player, false) ? BOT_ROLE_TANK : PlayerbotAI::IsHeal(player, false) ? BOT_ROLE_HEALER : BOT_ROLE_DPS;
+            uint8 cls = (Classes)player->getClass();
+
+            if (allowedClassNr[0][role] > 0)
+                allowedClassNr[0][role]--;
+
+            if (allowedClassNr[cls].find(role) != allowedClassNr[cls].end() && allowedClassNr[cls][role] > 0)
+                allowedClassNr[cls][role]--;
+        }
+
+        return allowedClassNr;
     }
 
     bool LfgAction::Execute(Event& event)
@@ -98,15 +220,13 @@ namespace ai
 
         Group* group = requester->GetGroup();
 
-        std::unordered_map<Classes, std::unordered_map<BotRoles,uint32>> allowedClassNr;
-        std::unordered_map<BotRoles, uint32> allowedRoles;
-
-        allowedRoles[BOT_ROLE_TANK] = 1;
-        allowedRoles[BOT_ROLE_HEALER] = 1;
-        allowedRoles[BOT_ROLE_DPS] = 3;
+        std::unordered_map<uint8, std::unordered_map<BotRoles, uint32>> allowedClassNr = AllowedClassRoleNr(5);
 
         BotRoles role = ai->IsTank(requester, false) ? BOT_ROLE_TANK : (ai->IsHeal(requester, false) ? BOT_ROLE_HEALER : BOT_ROLE_DPS);
         Classes cls = (Classes)requester->getClass();
+
+        if (!Qualified::isValidNumberString(param))
+           param = "5";
 
         if (group)
         {
@@ -115,94 +235,25 @@ namespace ai
 #ifdef MANGOSBOT_ZERO
                 param = "40";
 #else
-            /// Default to TBC Raiding. Max size 25
+                /// Default to TBC Raiding. Max size 25
                 param = "25";
 #endif
 
-            //Select optimal group layout.
-            if (param == "40")
-            {
-                allowedRoles[BOT_ROLE_TANK] = 4;
-                allowedRoles[BOT_ROLE_HEALER] = 16;
-                allowedRoles[BOT_ROLE_DPS] = 20;
-
-                allowedClassNr[CLASS_PALADIN][BOT_ROLE_TANK] = 0;
-                allowedClassNr[CLASS_DRUID][BOT_ROLE_TANK] = 1;
-
-                allowedClassNr[CLASS_DRUID][BOT_ROLE_HEALER] = 3;
-                allowedClassNr[CLASS_PALADIN][BOT_ROLE_HEALER] = 4;
-                allowedClassNr[CLASS_SHAMAN][BOT_ROLE_HEALER] = 4;
-                allowedClassNr[CLASS_PRIEST][BOT_ROLE_HEALER] = 11;
-
-                allowedClassNr[CLASS_WARRIOR][BOT_ROLE_DPS] = 8;
-                allowedClassNr[CLASS_PALADIN][BOT_ROLE_DPS] = 4;
-                allowedClassNr[CLASS_HUNTER][BOT_ROLE_DPS] = 4;
-                allowedClassNr[CLASS_ROGUE][BOT_ROLE_DPS] = 6;
-                allowedClassNr[CLASS_PRIEST][BOT_ROLE_DPS] = 1;
-                allowedClassNr[CLASS_SHAMAN][BOT_ROLE_DPS] = 4;
-                allowedClassNr[CLASS_MAGE][BOT_ROLE_DPS] = 15;
-                allowedClassNr[CLASS_WARLOCK][BOT_ROLE_DPS] = 4;
-                allowedClassNr[CLASS_DRUID][BOT_ROLE_DPS] = 1;
-            }
-            else if (param == "25")
-            {
-                allowedRoles[BOT_ROLE_TANK] = 3;
-                allowedRoles[BOT_ROLE_HEALER] = 7;
-                allowedRoles[BOT_ROLE_DPS] = 15;
-            }
-            else if (param == "20")
-            {
-                allowedRoles[BOT_ROLE_TANK] = 2;
-                allowedRoles[BOT_ROLE_HEALER] = 5;
-                allowedRoles[BOT_ROLE_DPS] = 13;
-            }
-            else if (param == "10")
-            {
-                allowedRoles[BOT_ROLE_TANK] = 2;
-                allowedRoles[BOT_ROLE_HEALER] = 3;
-                allowedRoles[BOT_ROLE_DPS] = 5;
-            }
-
             if (group->IsFull())
             {
-                if (param.empty() || param == "5"  || group->IsRaidGroup())
+                if (param.empty() || param == "5" || group->IsRaidGroup())
                     return false; //Group or raid is full so stop trying.
                 else
                     group->ConvertToRaid(); //We want a raid but are in a group so convert and continue.
             }
-
-            Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
-            for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
-            {
-                // Only add group member targets that are alive and near the player
-                Player* player = sObjectMgr.GetPlayer(itr->guid);
-
-                if (!ai->IsSafe(player))
-                    return false;
-
-                role = ai->IsTank(player, false) ? BOT_ROLE_TANK : (ai->IsHeal(player, false) ? BOT_ROLE_HEALER : BOT_ROLE_DPS);
-                cls = (Classes)player->getClass();
-
-                if (allowedRoles[role] > 0)
-                    allowedRoles[role]--;
-
-                if (allowedClassNr[cls].find(role) != allowedClassNr[cls].end() && allowedClassNr[cls][role] > 0)
-                    allowedClassNr[cls][role]--;
-            }
         }
-        else
-        {
-            if (allowedRoles[role] > 0)
-                allowedRoles[role]--;
 
-            if (allowedClassNr[cls].find(role) != allowedClassNr[cls].end() && allowedClassNr[cls][role] > 0)
-                allowedClassNr[cls][role]--;
-        }
+        allowedClassNr = AllowedClassRoleNr(requester, stoi(param));  
 
         role = ai->IsTank(bot, false) ? BOT_ROLE_TANK : (ai->IsHeal(bot, false) ? BOT_ROLE_HEALER : BOT_ROLE_DPS);
         cls = (Classes)bot->getClass();
 
-        if (allowedRoles[role] == 0)
+        if (allowedClassNr[0][role] == 0)
             return false;
 
         if (allowedClassNr[cls].find(role) != allowedClassNr[cls].end() && allowedClassNr[cls][role] == 0)
@@ -226,9 +277,9 @@ namespace ai
 
             std::map<std::string, std::string> placeholders;
             placeholders["%role"] = (role == BOT_ROLE_TANK ? "tank" : (role == BOT_ROLE_HEALER ? "healer" : "dps"));
-            placeholders["%spotsleft"] = std::to_string(allowedRoles[role] - 1);
+            placeholders["%spotsleft"] = std::to_string(allowedClassNr[0][role] - 1);
 
-            if(allowedRoles[role] > 1)
+            if (allowedClassNr[0][role] > 1)
                 ai->TellPlayer(requester, BOT_TEXT2("Joining as %role, %spotsleft %role spots left.", placeholders));
             else
                 ai->TellPlayer(requester, BOT_TEXT2("Joining as %role.", placeholders));

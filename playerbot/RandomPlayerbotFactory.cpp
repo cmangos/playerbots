@@ -26,28 +26,6 @@
 
 std::map<uint8, std::vector<uint8> > RandomPlayerbotFactory::availableRaces;
 
-constexpr RandomPlayerbotFactory::NameRaceAndGender RandomPlayerbotFactory::CombineRaceAndGender(uint8 gender, uint8 race)
-{
-    switch(race)
-    {
-    case RACE_HUMAN:    return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::GenericMale)  + gender);
-    case RACE_ORC:      return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::OrcMale)      + gender);
-    case RACE_DWARF:    return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::DwarfMale)    + gender);
-    case RACE_NIGHTELF: return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::NightelfMale) + gender);
-    case RACE_UNDEAD:   return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::GenericMale)  + gender);
-    case RACE_TAUREN:   return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::TaurenMale)   + gender);
-    case RACE_GNOME:    return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::GnomeMale)    + gender);
-    case RACE_TROLL:    return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::TrollMale)    + gender);
-#ifndef MANGOSBOT_ZERO
-    case RACE_DRAENEI:  return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::DraeneiMale)  + gender);
-    case RACE_BLOODELF: return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::BloodelfMale) + gender);
-#endif
-    default:
-        sLog.outError("The race with ID %d does not have a naming category", race);
-        return static_cast<NameRaceAndGender>(static_cast<uint8>(NameRaceAndGender::GenericMale) + gender);
-    }
-}
-
 RandomPlayerbotFactory::RandomPlayerbotFactory(uint32 accountId) : accountId(accountId)
 {
     availableRaces[CLASS_WARRIOR].push_back(RACE_HUMAN);
@@ -155,14 +133,49 @@ bool RandomPlayerbotFactory::isAvailableRace(uint8 cls, uint8 race)
     return std::find(availableRaces[cls].begin(), availableRaces[cls].end(), race) != availableRaces[cls].end();
 }
 
-uint8 RandomPlayerbotFactory::GetRandomClass()
+bool RandomPlayerbotFactory::isAvailableRole(uint8 cls, BotRoles role)
+{
+    if (role == BotRoles::BOT_ROLE_NONE)
+        return true;
+
+    switch (cls)
+    {
+        case CLASS_WARRIOR:
+#ifdef MANGOSBOT_TWO
+        case CLASS_DEATH_KNIGHT:
+#endif
+            return role == BotRoles::BOT_ROLE_TANK || role == BotRoles::BOT_ROLE_DPS;
+        case CLASS_PALADIN:
+        case CLASS_DRUID:
+            return true;
+        case CLASS_HUNTER:
+        case CLASS_ROGUE:
+        case CLASS_MAGE:
+        case CLASS_WARLOCK:
+            return role == BotRoles::BOT_ROLE_DPS;
+        case CLASS_PRIEST:
+        case CLASS_SHAMAN:
+            return role == BotRoles::BOT_ROLE_HEALER || role == BotRoles::BOT_ROLE_DPS;
+        default:
+            return false;
+    }
+}
+
+uint8 RandomPlayerbotFactory::GetRandomClass(uint8 useRace, BotRoles role)
 {
     uint32 classProb[MAX_CLASSES] = { 0 };
 
+
     for (uint32 race = 1; race < MAX_RACES; ++race)
     {
+        if (useRace && useRace != race)
+            continue;
+
         for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
         {
+            if (!isAvailableRole(cls, role))
+                continue;
+
             classProb[cls] += sPlayerbotAIConfig.classRaceProbability[cls][race];
         }
     }
@@ -171,6 +184,9 @@ uint8 RandomPlayerbotFactory::GetRandomClass()
 
     for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
     {
+        if (!isAvailableRole(cls, role))
+            continue;
+
         if (classProb[cls] > 0 && randomProb < classProb[cls])
             return cls;
 
@@ -179,6 +195,9 @@ uint8 RandomPlayerbotFactory::GetRandomClass()
 
     for (uint32 cls = 1; cls < MAX_CLASSES; ++cls)
     {
+        if (!isAvailableRole(cls, role))
+            continue;
+
         if (classProb[cls] > 0)
             return cls;
     }
@@ -186,11 +205,29 @@ uint8 RandomPlayerbotFactory::GetRandomClass()
     return 1;
 }
 
-uint8 RandomPlayerbotFactory::GetRandomRace(uint8 cls)
+bool RandomPlayerbotFactory::isRaceForTeam(uint8 race, Team team)
+{
+    if (team == Team::TEAM_BOTH_ALLOWED)
+        return true;
+
+    uint32 raceBit = 1 << (race - 1);
+
+    if (team == Team::ALLIANCE && (raceBit & RACEMASK_ALLIANCE))
+        return true;
+
+    if (team == Team::HORDE && (raceBit & RACEMASK_HORDE))
+        return true;
+
+    return false;
+}
+
+uint8 RandomPlayerbotFactory::GetRandomRace(uint8 cls, Team team)
 {
     uint32 totalClassProb = 0;
     for (uint32 race = 1; race < MAX_RACES; ++race)
     {
+        if (!isRaceForTeam(race,team))
+            continue;
         totalClassProb += sPlayerbotAIConfig.classRaceProbability[cls][race];
     }
 
@@ -198,6 +235,9 @@ uint8 RandomPlayerbotFactory::GetRandomRace(uint8 cls)
 
     for (uint32 race = 1; race < MAX_RACES; ++race)
     {
+        if (!isRaceForTeam(race, team))
+            continue;
+
         if (sPlayerbotAIConfig.classRaceProbability[cls][race] > 0 && randomProb < sPlayerbotAIConfig.classRaceProbability[cls][race])
             return race;
 

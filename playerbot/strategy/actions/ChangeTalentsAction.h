@@ -15,14 +15,14 @@ namespace ai
 
     public:
         virtual bool Execute(Event& event) override;
-        virtual bool AutoSelectTalents(std::ostringstream* out);
+        static bool AutoSelectTalents(Player* bot, std::ostringstream* out, BotRoles role = BotRoles::BOT_ROLE_NONE);
     private:
-        std::vector<TalentPath*> getPremadePaths(std::string findName);
-        std::vector<TalentPath*> getPremadePaths(TalentSpec* oldSpec);
-        TalentPath* getPremadePath(int id);
-        void listPremadePaths(std::vector<TalentPath*> paths, std::ostringstream* out);
-        TalentPath* PickPremadePath(std::vector<TalentPath*> paths, bool useProbability);
-        TalentSpec* GetBestPremadeSpec(int spec);
+        static std::vector<TalentPath*> getPremadePaths(uint8 cls, std::string findName, BotRoles role = BotRoles::BOT_ROLE_NONE);
+        static std::vector<TalentPath*> getPremadePaths(Player* bot, TalentSpec* oldSpec);
+        static TalentPath* getPremadePath(uint8 cls, int id);
+        static void listPremadePaths(uint8 cls, std::vector<TalentPath*> paths, std::ostringstream* out);
+        static TalentPath* PickPremadePath(std::vector<TalentPath*> paths, bool useProbability);
+        static TalentSpec* GetBestPremadeSpec(Player* bot, int spec);
     };
 
     class AutoSetTalentsAction : public ChangeTalentsAction 

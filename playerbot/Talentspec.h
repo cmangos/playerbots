@@ -49,7 +49,7 @@ class TalentSpec {
 
         std::string GetTalentLink();
         int highestTree();
-        std::string formatSpec(Player* bot);
+        std::string formatSpec(uint8 cls);
         static uint32 LeveltoPoints(uint32 level);
     protected:
         uint32 PointstoLevel(int points) const;

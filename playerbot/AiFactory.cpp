@@ -164,14 +164,12 @@ std::map<uint32, int32> AiFactory::GetPlayerSpecTabs(const Player* bot)
     return tabs;
 }
 
-BotRoles AiFactory::GetPlayerRoles(const Player* player)
+BotRoles AiFactory::GetPlayerRoles(uint8 cls, uint8 tab)
 {
     BotRoles role = BOT_ROLE_NONE;
-    int tab = GetPlayerSpecTab(player);
-    switch (player->getClass())
+    switch (cls)
     {
-        case CLASS_PRIEST:
-        {
+        case CLASS_PRIEST: {
             if (tab == 2)
             {
                 role = BOT_ROLE_DPS;
@@ -184,8 +182,7 @@ BotRoles AiFactory::GetPlayerRoles(const Player* player)
             break;
         }
 
-        case CLASS_SHAMAN:
-        {
+        case CLASS_SHAMAN: {
             if (tab == 2)
             {
                 role = BOT_ROLE_HEALER;
@@ -198,9 +195,8 @@ BotRoles AiFactory::GetPlayerRoles(const Player* player)
             break;
         }
 
-        case CLASS_WARRIOR:
-        {
-            if (tab == 2 || player->HasAura(71)) // Defensive stance
+        case CLASS_WARRIOR: {
+            if (tab == 2)
             {
                 role = BOT_ROLE_TANK;
             }
@@ -212,15 +208,14 @@ BotRoles AiFactory::GetPlayerRoles(const Player* player)
             break;
         }
 
-        case CLASS_PALADIN:
-        {
-            if (tab == 1 || player->HasAura(25780)) // Righteous fury
+        case CLASS_PALADIN: {
+            if (tab == 1)
             {
                 role = BOT_ROLE_TANK;
             }
             else if (tab == 0)
             {
-                role = BOT_ROLE_HEALER;  
+                role = BOT_ROLE_HEALER;
             }
             else if (tab == 2)
             {
@@ -230,13 +225,8 @@ BotRoles AiFactory::GetPlayerRoles(const Player* player)
             break;
         }
 
-        case CLASS_DRUID:
-        {
-            if (player->HasAura(5487) || player->HasAura(9634)) // Bear form, Dire bear form
-            {
-                role = BOT_ROLE_TANK;
-            }
-            else if (tab == 0)
+        case CLASS_DRUID: {
+            if (tab == 0)
             {
                 role = BOT_ROLE_DPS;
             }
@@ -253,13 +243,8 @@ BotRoles AiFactory::GetPlayerRoles(const Player* player)
         }
 
 #ifdef MANGOSBOT_TWO
-        case CLASS_DEATH_KNIGHT:
-        {
-            if (player->HasAura(48263)) // Frost presence
-            {
-                role = BOT_ROLE_TANK;
-            }
-            else if (tab == 0)
+        case CLASS_DEATH_KNIGHT: {
+            if (tab == 0)
             {
                 role = BOT_ROLE_TANK;
             }
@@ -275,15 +260,66 @@ BotRoles AiFactory::GetPlayerRoles(const Player* player)
             break;
         }
 #endif
-        default:
-        {
+        default: {
             role = BOT_ROLE_DPS;
             break;
         }
     }
 
-
     return role;
+}
+
+BotRoles AiFactory::GetPlayerRoles(const Player* player)
+{
+    uint8 cls = player->getClass();
+    uint8 tab = GetPlayerSpecTab(player);
+
+    BotRoles role = BOT_ROLE_NONE;
+    switch (cls)
+    {
+        case CLASS_WARRIOR: {
+            if (tab == 2 || player->HasAura(71)) // Defensive stance
+            {
+                role = BOT_ROLE_TANK;
+            }
+            break;
+        }
+
+        case CLASS_PALADIN: {
+            if (tab == 1 || player->HasAura(25780)) // Righteous fury
+            {
+                role = BOT_ROLE_TANK;
+            }
+
+            break;
+        }
+
+        case CLASS_DRUID: {
+            if (player->HasAura(5487) || player->HasAura(9634)) // Bear form, Dire bear form
+            {
+                role = BOT_ROLE_TANK;
+            }
+
+            break;
+        }
+
+#ifdef MANGOSBOT_TWO
+        case CLASS_DEATH_KNIGHT: {
+            if (player->HasAura(48263)) // Frost presence
+            {
+                role = BOT_ROLE_TANK;
+            }
+
+            break;
+        }
+#endif
+        default: {
+            role = GetPlayerRoles(cls,tab);
+            break;
+        }
+    }
+
+    return GetPlayerRoles(cls, tab);
 }
 
 void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const facade, Engine* combatEngine)

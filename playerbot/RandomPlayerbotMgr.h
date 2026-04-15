@@ -145,6 +145,8 @@ public:
         static InventoryResult CanEquipUnseenItem(Player* player, uint8 slot, uint16& dest, uint32 item);
 
         bool AddRandomBot(uint32 bot);
+        bool CreateRandomBot(const std::string& name, uint8 race, uint8 cls, uint32 level);
+        bool DeleteRandomBot(ObjectGuid guid);
         virtual void MovePlayerBot(uint32 guid, PlayerbotHolder* newHolder) override;
 
         std::map<Team, std::map<BattleGroundTypeId, std::list<uint32> > > getBattleMastersCache() { return BattleMastersCache; }
@@ -166,8 +168,8 @@ public:
             auto it = ahMirror.find(itemId);
             return (it != ahMirror.end()) ? it->second : emptyVector;}
         uint32 GetPlayersLevel() { return playersLevel; }
-	protected:
-	    virtual void OnBotLoginInternal(Player * const bot) override;
+    protected:
+        virtual void OnBotLoginInternal(Player * const bot) override;
     private:
         //pid values are set in constructor
         botPID pid = botPID(1, 50, -50, 0, 0, 0);
@@ -204,6 +206,10 @@ public:
         std::list<std::string> HandleConsoleDiff(std::string param);
         std::list<std::string> HandleConsoleCleanMap(std::string param);
         std::list<std::string> HandleConsoleLoginDebug(std::string param);
+        std::list<std::string> HandleConsolePathCheck(std::string param);
+        // Override virtual methods from PlayerbotHolder
+        virtual uint32 GetOrCreateAccount(Player* master, std::string& error) override;
+        virtual void OnBotDeleted(uint32 botGuid, uint32 accountId) override;
 
     public:
         static std::string GetCommandTexts(const std::string& command);

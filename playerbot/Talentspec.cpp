@@ -360,10 +360,8 @@ int TalentSpec::highestTree()
     return 0;
 }
 
-std::string TalentSpec::formatSpec(Player* bot)
+std::string TalentSpec::formatSpec(uint8 cls)
 {
-    uint8 cls = bot->getClass();
-
     std::ostringstream out;
     //out << chathelper:: specs[cls][highestTree()] << " (";
 

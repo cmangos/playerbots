@@ -37,8 +37,6 @@ void LogAnalysis::AnalysePid()
         if (!line.length())
             continue;
 
-
-
         Tokens tokens = StrSplit(line, ",");
 
         if (tokens.size() < 7)
@@ -55,6 +53,9 @@ void LogAnalysis::AnalysePid()
         avgDiff.push_back(stoi(tokens[2]));
         if (tokens[0][0] == '.')
             tokens[0] = "0" + tokens[0];
+
+        if (!Qualified::isValidNumberString(tokens[0]))
+            continue;
 
         runTime = stoi(tokens[0]);
 

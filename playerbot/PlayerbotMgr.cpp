@@ -1950,7 +1950,11 @@ std::list<std::string> PlayerbotHolder::HandleCreate(Player* master, const std::
         newBot->SetLevel(level);
         newBot->SetUInt32Value(PLAYER_XP, 0);
         newBot->InitStatsForLevel(true);
+#ifdef MANGOSBOT_ZERO
         newBot->InitTaxiNodes();
+#else
+        newBot->InitTaxiNodesForLevel();
+#endif
         newBot->InitTalentForLevel();
         newBot->InitPrimaryProfessions();
         newBot->learnDefaultSpells();

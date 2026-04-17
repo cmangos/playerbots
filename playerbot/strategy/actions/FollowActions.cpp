@@ -4,6 +4,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/Formations.h"
+#include "playerbot/strategy/values/FreeMoveValues.h"
 #include "playerbot/TravelMgr.h"
 #include "playerbot/LootObjectStack.h"
 
@@ -43,7 +44,7 @@ bool FollowAction::isUseful()
 
     if (followTarget && followTarget->IsPlayer())
     {
-        if (AI_VALUE(GuidPosition, "rpg target") && AI_VALUE2(bool, "can free move to", AI_VALUE(GuidPosition, "rpg target").to_string()))
+        if (AI_VALUE(GuidPosition, "rpg target") && CanFreeMoveValue::CanFreeMoveTo(ai, AI_VALUE(GuidPosition, "rpg target")))
         {
             return false;
         }
@@ -174,7 +175,7 @@ bool FleeToMasterAction::isUseful()
 
     if (fTarget && fTarget->IsPlayer())
     {
-        if (AI_VALUE(GuidPosition, "rpg target") && AI_VALUE2(bool, "can free move to", AI_VALUE(GuidPosition, "rpg target").to_string()))
+        if (AI_VALUE(GuidPosition, "rpg target") && CanFreeMoveValue::CanFreeMoveTo(ai, AI_VALUE(GuidPosition, "rpg target")))
             return false;
     }
 

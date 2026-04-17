@@ -14,9 +14,6 @@ namespace ai
             if (bot->GetTradeData())
                 return false;
 
-            //if (ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT))
-            //    return false;
-
             if (!AI_VALUE(bool, "group ready"))
                 return false;
 
@@ -34,6 +31,13 @@ namespace ai
 
             return true;
         }
+
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "can move around"; } //Must equal iternal name
+        virtual std::string GetHelpTypeName() { return "movement"; }
+        virtual std::string GetHelpDescription() { return "This value indicates whether the bot should wait for a trade to complete, a crafting cast or for the group to have enough health/mana before moving to rpg, grind or travel targets."; }
+        virtual std::vector<std::string> GetUsedValues() { return {"group ready", "trigger active"}; }
+#endif 
     };
 
     class ShouldHomeBindValue : public BoolCalculatedValue

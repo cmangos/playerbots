@@ -3,6 +3,7 @@
 #include "PartyMemberValue.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
+#include "FreeMoveValues.h"
 
 using namespace ai;
 
@@ -18,7 +19,8 @@ Unit* PartyMemberValue::FindPartyMember(std::list<Player*>* party, FindPlayerPre
         if (ignoreTanks && ai->IsTank(player))
             continue;
 
-        if (bot->GetGroup() && !player->IsInGroup(bot) && !AI_VALUE2(bool, "can free move to", GuidPosition(player).to_string())) continue;
+        if (bot->GetGroup() && !player->IsInGroup(bot) && !CanFreeMoveValue::CanFreeMoveTo(ai, player))
+            continue;
 
         if (Check(player) && predicate.Check(player))
             return player;
@@ -108,7 +110,7 @@ Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ign
     {
         Unit* target = rpgTarget.GetCreature(bot->GetInstanceId());
 
-        if (target && sServerFacade.IsFriendlyTo(bot, target) && predicate.Check(target) && AI_VALUE2(bool, "can free move to", GuidPosition(target).to_string()))
+        if (target && sServerFacade.IsFriendlyTo(bot, target) && predicate.Check(target) && CanFreeMoveValue::CanFreeMoveTo(ai, target))
            return target;
     }
 

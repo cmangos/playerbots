@@ -7,8 +7,8 @@ using namespace ai;
 void FollowMasterStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
-        "out of react range",
-        NextAction::array(0, new NextAction("check mount state", ACTION_HIGH), new NextAction("flee to master", ACTION_HIGH), NULL)));
+        "out of free move range",
+        NextAction::array(0, new NextAction("check mount state", ACTION_HIGH), new NextAction("follow", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "update follow",
@@ -17,13 +17,7 @@ void FollowMasterStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigge
 
 void FollowMasterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
-    triggers.push_back(new TriggerNode(
-        "out of react range",
-        NextAction::array(0, new NextAction("check mount state", ACTION_HIGH), new NextAction("flee to master", ACTION_HIGH), NULL)));
-
-    triggers.push_back(new TriggerNode(
-        "update follow",
-        NextAction::array(0, new NextAction("follow", ACTION_IDLE), NULL)));
+    InitNonCombatTriggers(triggers);
 }
 
 void FollowMasterStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
@@ -42,7 +36,7 @@ void FollowMasterStrategy::OnStrategyAdded(BotState state)
 {
     if (state != BotState::BOT_STATE_REACTION)
     {
-        ai->ChangeStrategy("+follow", BotState::BOT_STATE_REACTION);
+        ai->ChangeStrategy("+" + getName(), BotState::BOT_STATE_REACTION);
     }
 }
 
@@ -56,26 +50,19 @@ void FollowMasterStrategy::OnStrategyRemoved(BotState state)
     if (state == BotState::BOT_STATE_REACTION)
         return;
 
-    BotState checkState1, checkState2;
+    bool hasFollow = false;
 
-    if (state == BotState::BOT_STATE_COMBAT)
+    for (uint8 checkState = (uint8)BotState::BOT_STATE_COMBAT; checkState < (uint8)BotState::BOT_STATE_REACTION; checkState++)
     {
-        checkState1 = BotState::BOT_STATE_NON_COMBAT;
-        checkState2 = BotState::BOT_STATE_DEAD;
-    }
-    else if (state == BotState::BOT_STATE_NON_COMBAT)
-    {
-        checkState1 = BotState::BOT_STATE_COMBAT;
-        checkState2 = BotState::BOT_STATE_DEAD;
-    }
-    else
-    {
-        checkState1 = BotState::BOT_STATE_NON_COMBAT;
-        checkState2 = BotState::BOT_STATE_COMBAT;
+        if (ai->HasStrategy(getName(), BotState(checkState)))
+        {
+            hasFollow = true;
+            break;
+        }
     }
 
-    if (!ai->HasStrategy("follow", checkState1) && !ai->HasStrategy("follow", checkState2))
+    if (!hasFollow)
     {
-        ai->ChangeStrategy("-follow", BotState::BOT_STATE_REACTION);
+        ai->ChangeStrategy("-" + getName(), BotState::BOT_STATE_REACTION);
     }
 }

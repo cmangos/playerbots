@@ -33,7 +33,7 @@ namespace ai
                 "The current destination or those of group members are also options.";
         }
         virtual std::vector<std::string> GetUsedActions() { return {}; }
-        virtual std::vector<std::string> GetUsedValues() { return { "travel target", "group or", "should sell","can sell","can ah sell","should repair","can repair","following party","near leader","should get money","can fight equal","can fight elite","can fight boss","can free move to","rpg target","attack target",}; }
+        virtual std::vector<std::string> GetUsedValues() { return { "travel target", "group or", "should sell","can sell","can ah sell","should repair","can repair","following party","near leader","should get money","can fight equal","can fight elite","can fight boss","can free move","rpg target","attack target",}; }
 #endif 
     };
 

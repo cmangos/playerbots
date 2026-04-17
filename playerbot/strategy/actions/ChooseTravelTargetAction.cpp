@@ -6,6 +6,7 @@
 #include "playerbot/strategy/values/TravelValues.h"
 #include "playerbot/strategy/values/SharedValueContext.h"
 #include "playerbot/strategy/values/GuildValues.h"
+#include "playerbot/strategy/values/FreeMoveValues.h"
 #include "Guilds/GuildMgr.h"
 #include <iomanip>
 
@@ -99,7 +100,7 @@ bool ChooseTravelTargetAction::isUseful()
 
 void ChooseTravelTargetAction::setNewTarget(Player* requester, TravelTarget* newTarget, TravelTarget* oldTarget)
 {
-    if(AI_VALUE2(bool, "can free move to", newTarget->GetPosStr()))
+    if (CanFreeMoveValue::CanFreeMoveTo(ai, newTarget->GetPosStr()))
         ReportTravelTarget(bot, requester, newTarget, oldTarget);
 
     //If we are heading to a creature/npc clear it from the ignore list. 

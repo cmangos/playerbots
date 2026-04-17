@@ -17,28 +17,18 @@ namespace ai
         virtual float Calculate() override;
     };
 
-    class CanFreeMoveToValue : public BoolCalculatedValue, public Qualified
+    class CanFreeMoveValue : public BoolCalculatedValue, public Qualified
     {
     public:
-        CanFreeMoveToValue(PlayerbotAI* ai, std::string name = "can free move to", int checkInterval = 2) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {};
-        virtual bool Calculate() override;
-    protected:
-        virtual float GetRange() { return AI_VALUE(float, "free move range"); }
-    };
+        CanFreeMoveValue(PlayerbotAI* ai, std::string name = "can free move", int checkInterval = 2) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {};
+        static bool CanFreeMoveTo(PlayerbotAI* ai, WorldPosition dest);
+        static bool CanFreeTarget(PlayerbotAI* ai, WorldPosition dest);
+        static bool CanFreeAttack(PlayerbotAI* ai, WorldPosition dest);
 
-    class CanFreeTargetValue : public CanFreeMoveToValue
-    {
-    public:
-        CanFreeTargetValue(PlayerbotAI* ai) : CanFreeMoveToValue(ai, "can free target") {};
-        virtual float GetRange() override { return ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) ? std::min(ai->GetRange("spell"), AI_VALUE(float, "free move range")) : AI_VALUE(float, "free move range"); }
-    };
-
-    class CanFreeAttackValue : public CanFreeMoveToValue
-    {
-    public:
-        CanFreeAttackValue(PlayerbotAI* ai) : CanFreeMoveToValue(ai, "can free attack", 1) {};
-        virtual float GetRange() override { return ai->GetRange("attack"); }
-    };
-
+        bool Calculate() override;
+    private:
+        //Actual caculation functions used.
+        static bool CanFreeMove(PlayerbotAI* ai, WorldPosition dest, float range);
+    }; 
 };
 

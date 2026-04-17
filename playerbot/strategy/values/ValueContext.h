@@ -339,9 +339,7 @@ namespace ai
 
             creators["free move center"] = [](PlayerbotAI* ai) { return new FreeMoveCenterValue(ai); };
             creators["free move range"] = [](PlayerbotAI* ai) { return new FreeMoveRangeValue(ai); };
-            creators["can free move to"] = [](PlayerbotAI* ai) { return new CanFreeMoveToValue(ai); };
-            creators["can free attack"] = [](PlayerbotAI* ai) { return new CanFreeAttackValue(ai); };
-            creators["can free target"] = [](PlayerbotAI* ai) { return new CanFreeTargetValue(ai); };
+            creators["can free move"] = [](PlayerbotAI* ai) { return new CanFreeMoveValue(ai); };           
 
             creators["can move around"] = [](PlayerbotAI* ai) { return new CanMoveAroundValue(ai); };
             creators["should home bind"] = [](PlayerbotAI* ai) { return new ShouldHomeBindValue(ai); };

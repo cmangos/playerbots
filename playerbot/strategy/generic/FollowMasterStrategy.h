@@ -16,8 +16,9 @@ namespace ai
         }
         virtual std::vector<std::string> GetRelatedStrategies() { return { "stay", "runaway","flee from adds", "guard", "free"}; }
 #endif
-    private:
+    protected:
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
+    private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
         void InitReactionTriggers(std::list<TriggerNode*>& triggers) override;

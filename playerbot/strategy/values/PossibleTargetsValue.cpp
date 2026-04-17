@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include "PossibleTargetsValue.h"
 #include "PossibleAttackTargetsValue.h"
+#include "FreeMoveValues.h"
 
 #include "playerbot/ServerFacade.h"
 #include "Grids/GridNotifiers.h"
@@ -121,8 +122,7 @@ bool PossibleTargetsValue::IsValid(Unit* target, Player* player, bool ignoreLos)
                 return false;
             }
         }
-
-        if (!PAI_VALUE2(bool, "can free attack", GuidPosition(target).to_string()))
+        if (!CanFreeMoveValue::CanFreeAttack(player->GetPlayerbotAI(), target))
             return false;
 
         return true;

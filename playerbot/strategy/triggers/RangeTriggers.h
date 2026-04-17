@@ -328,10 +328,6 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            //We are not near target. Move closer
-            if (NotNearMasterTrigger::IsActive())
-                return true;
-
             Unit* followTarget = AI_VALUE(Unit*, "follow target");
 
             if (!followTarget || !ai->IsSafe(followTarget))
@@ -402,22 +398,13 @@ namespace ai
     class WanderFarTrigger : public Trigger
     {
     public:
-        WanderFarTrigger(PlayerbotAI* ai, std::string name = "wander far", int checkInterval = 2)
+        WanderFarTrigger(PlayerbotAI * ai, std::string name = "wander far", int checkInterval = 2)
             : Trigger(ai, name, checkInterval) {
         }
 
         bool IsActive() override
         {
-            Unit* master = AI_VALUE(Unit*, "master target");
-            if (!master || !sServerFacade.IsFriendlyTo(bot, master))
-                return false;
-
-            if (master->GetTransport() && master->GetTransport() == bot->GetTransport())
-                return false;
-
-            float dist = AI_VALUE2(float, "distance", "master target");
-
-            return sServerFacade.IsDistanceGreaterThan(dist, ai->GetRange("wandermax"));
+            return !AI_VALUE2(bool, "can free move", "wandermax");
         }
     };
 
@@ -426,21 +413,9 @@ namespace ai
     public:
         WanderMediumTrigger(PlayerbotAI* ai, std::string name = "wander medium", int checkInterval = 2) : Trigger(ai, name, checkInterval) {}
 
-        virtual bool IsActive() override
+        bool IsActive() override
         {
-            Unit* master = AI_VALUE(Unit*, "master target");
-            if (master && sServerFacade.IsFriendlyTo(bot, master))
-            {
-                if (master->GetTransport() && master->GetTransport() == bot->GetTransport())
-                    return false;
-
-                if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
-                    return false;
-
-                float dist = AI_VALUE2(float, "distance", "master target");
-                return sServerFacade.IsDistanceGreaterThan(dist, ai->GetRange("wandermin")) && sServerFacade.IsDistanceLessOrEqualThan(dist, ai->GetRange("wandermax")) && master->IsMoving();
-            }
-            return false;
+            return !AI_VALUE2(bool, "can free move", "wandermin") && AI_VALUE2(bool, "can free move", "wandermaz");
         }
     };
 
@@ -449,19 +424,9 @@ namespace ai
     public:
         WanderNearTrigger(PlayerbotAI* ai, std::string name = "wander near", int checkInterval = 2) : Trigger(ai, name, checkInterval) {}
 
-        virtual bool IsActive() override
+        bool IsActive() override
         {
-            Unit* master = AI_VALUE(Unit*, "master target");
-            if (!master || !sServerFacade.IsFriendlyTo(bot, master))
-                return false;
-
-            if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
-                return false;
-
-            if (master->IsMoving())
-                return false;
-
-            return sServerFacade.IsDistanceLessOrEqualThan(AI_VALUE2(float, "distance", "master target"), ai->GetRange("wandermin"));
+            return AI_VALUE2(bool, "can free move", "wandermin");
         }
     };
 
@@ -496,5 +461,16 @@ namespace ai
 
             return false;
         }
+    };
+
+    class OutOfFreeMoveRangeTrigger : public Trigger
+    {
+    public:
+        OutOfFreeMoveRangeTrigger(PlayerbotAI* ai, std::string name = "out of free move range") : Trigger(ai, name) {}
+
+        virtual bool IsActive() override
+        {
+            return !AI_VALUE(bool, "can free move");
+        };
     };
 }

@@ -4,6 +4,7 @@
 #include "AI/BaseAI/CreatureAI.h"
 #include "playerbot/TravelMgr.h"
 #include "playerbot/strategy/generic/PullStrategy.h"
+#include "playerbot/strategy/values/FreeMoveValues.h"
 
 bool DpsAssistAction::isUseful()
 {
@@ -33,7 +34,7 @@ bool AttackAnythingAction::isUseful()
     if(!target->IsPlayer() && bot->isInFront(target,target->GetAttackDistance(bot)*1.5f, M_PI_F*0.5f) && target->CanAttackOnSight(bot) && target->GetLevel() < bot->GetLevel() + 3.0) //Attack before being attacked.
         return true;
 
-    if (AI_VALUE(bool, "travel target traveling") && AI_VALUE2(bool, "can free move to", AI_VALUE(TravelTarget*,"travel target")->GetPosStr())) //Bot is traveling
+    if (AI_VALUE(bool, "travel target traveling") && CanFreeMoveValue::CanFreeMoveTo(ai, *AI_VALUE(TravelTarget*,"travel target")->GetPosition())) //Bot is traveling
         return false;
 
     return true;
@@ -52,8 +53,6 @@ bool ai::AttackAnythingAction::Execute(Event& event)
         Unit* grindTarget = GetTarget();
         if (grindTarget)
         {
-            context->ClearExpiredValues("can free target", 10); //Clean up old free targets.
-
             std::string grindName = grindTarget->GetName();
             if (!grindName.empty())
             {

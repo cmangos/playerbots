@@ -138,6 +138,7 @@ namespace ai
             creators["far from master"] = [](PlayerbotAI* ai) { return new FarFromMasterTrigger(ai); };
             creators["not near master"] = [](PlayerbotAI* ai) { return new NotNearMasterTrigger(ai); };
             creators["out of react range"] = [](PlayerbotAI* ai) { return new OutOfReactRangeTrigger(ai); };
+            creators["out of free move range"] = [](PlayerbotAI* ai) { return new OutOfFreeMoveRangeTrigger(ai); };
             creators["update follow"] = [](PlayerbotAI* ai) { return new UpdateFollowTrigger(ai); };
             creators["stop follow"] = [](PlayerbotAI* ai) { return new StopFollowTrigger(ai); };
 

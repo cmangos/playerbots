@@ -1,15 +1,13 @@
 
 #pragma once
-#include "playerbot/strategy/Strategy.h"
+#include "playerbot/strategy/generic/FollowMasterStrategy.h"
 
 namespace ai
-{
-    class TriggerNode;
-
-    class WanderStrategy : public Strategy
+{   
+    class WanderStrategy : public FollowMasterStrategy
     {
     public:
-        WanderStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        WanderStrategy(PlayerbotAI* ai) : FollowMasterStrategy(ai) {}
 
         int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
         std::string getName() override { return "wander"; }
@@ -28,11 +26,5 @@ namespace ai
 
     private:
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
-        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
-        void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
-        void InitReactionTriggers(std::list<TriggerNode*>& triggers) override;
-
-        void OnStrategyAdded(BotState state) override;
-        void OnStrategyRemoved(BotState state) override;
     };
 }

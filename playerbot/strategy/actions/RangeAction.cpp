@@ -16,6 +16,7 @@ bool RangeAction::Execute(Event& event)
         PrintRange("shoot", requester);
         PrintRange("flee", requester);
         PrintRange("follow", requester);
+        PrintRange("guard", requester);
         PrintRange("followraid", requester);
         PrintRange("attack", requester);
         PrintRange("wandermin", requester);
@@ -40,7 +41,7 @@ bool RangeAction::Execute(Event& event)
     }
 
     float newVal = (float) atof(value.c_str());
-    context->GetValue<float>("range", qualifier)->Set(newVal);
+    SET_AI_VALUE2(float,"range", qualifier, newVal);
     std::ostringstream out;
     out << qualifier << " range set to: " << newVal;
     ai->TellPlayer(requester, out.str());

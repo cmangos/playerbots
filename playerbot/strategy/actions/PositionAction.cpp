@@ -1,6 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "playerbot/strategy/values/PositionValue.h"
+#include "playerbot/strategy/values/FreeMoveValues.h"
 #include "PositionAction.h"
 
 using namespace ai;
@@ -130,6 +131,13 @@ bool GuardAction::isUseful()
 
         if (formationPosition.sqDistance2d(target) > ai->GetRange("spell")) //Do not move to guard if we can't attack from that position.
             return false;
+    }
+    else
+    {
+        if (AI_VALUE(GuidPosition, "rpg target") && CanFreeMoveValue::CanFreeMoveTo(ai, AI_VALUE(GuidPosition, "rpg target")))
+        {
+            return false;
+        }
     }
             
     return true;

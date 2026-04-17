@@ -6660,6 +6660,7 @@ float PlayerbotAI::GetRange(std::string type)
     if (type == "flee") return sPlayerbotAIConfig.fleeDistance;
     if (type == "heal") return sPlayerbotAIConfig.healDistance;
     if (type == "follow") return sPlayerbotAIConfig.followDistance;
+    if (type == "guard") return sPlayerbotAIConfig.sightDistance;
     if (type == "followraid") return sPlayerbotAIConfig.raidFollowDistance;
     if (type == "wandermin") return sPlayerbotAIConfig.wanderMinDistance;
     if (type == "wandermax") return sPlayerbotAIConfig.wanderMaxDistance;

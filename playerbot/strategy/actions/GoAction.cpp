@@ -322,10 +322,23 @@ inline bool TellGrouped(PlayerbotAI* ai, Player* requester)
     else
         out << "Grouped with ";
 
-    out << ai->GetGroupMaster()->GetName();
-    out << " at ";
-    out << uint32(WorldPosition(bot).distance(ai->GetGroupMaster()));
-    out << "y";
+    Player* groupLeader = sObjectMgr.GetPlayer(bot->GetGroup()->GetLeaderGuid());
+
+    if (groupLeader)
+    {
+        out << groupLeader->GetName();
+        out << " at ";
+        out << uint32(WorldPosition(bot).distance(groupLeader));
+        out << "y";
+    }
+    else
+    {
+        std::string leaderName;
+        if (sObjectMgr.GetPlayerNameByGUID(bot->GetGroup()->GetLeaderGuid(), leaderName))
+            out << "offline player " << leaderName;
+        else
+            out << "unknown player " << bot->GetGroup()->GetLeaderGuid();
+    }
 
     ai->TellPlayerNoFacing(requester, out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_TALK, false);
 

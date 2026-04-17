@@ -3,6 +3,16 @@
 
 namespace ai
 {
+    struct PositionTarget
+    {
+        bool valid;
+        uint32 mapId;
+        float x, y, z;
+        std::string name;
+        
+        PositionTarget() : valid(false), mapId(0), x(0), y(0), z(0) {}
+    };
+
     class DebugAction : public ChatCommandAction
     {
     public:
@@ -23,6 +33,7 @@ namespace ai
 
         void FakeSpell(uint32 spellId, Unit* truecaster, Unit* caster, ObjectGuid target = ObjectGuid(), std::list<ObjectGuid> otherTargets = {}, std::list<ObjectGuid> missTargets = {}, WorldPosition source = WorldPosition(), WorldPosition dest = WorldPosition(), bool forceDest = false);
         void addAura(uint32 spellId, Unit* target);
+        PositionTarget ParseLocation(const std::string& param, Player* bot);
     private:
         // Handler methods for each debug command
         bool HandleDebugHelp(Event& event, Player* requester, const std::string& text, bool isMod);
@@ -57,6 +68,7 @@ namespace ai
         bool HandleLogoutTime(Event& event, Player* requester, const std::string& text);
         bool HandleLevel(Event& event, Player* requester, const std::string& text);
         bool HandleQuest(Event& event, Player* requester, const std::string& text);
+        bool HandlePosition(Event& event, Player* requester, const std::string& text);
         bool HandleNPC(Event& event, Player* requester, const std::string& text);
         bool HandleGO(Event& event, Player* requester, const std::string& text);
         bool HandleFind(Event& event, Player* requester, const std::string& text);
@@ -99,7 +111,9 @@ namespace ai
         bool HandleSounds(Event& event, Player* requester, const std::string& text);
         bool HandleDSound(Event& event, Player* requester, const std::string& text);
         bool HandleSound(Event& event, Player* requester, const std::string& text);
+        bool HandleStuck(Event& event, Player* requester, const std::string& text);
         bool HandleCombat(Event& event, Player* requester, const std::string& text);
+        bool HandleNodes(Event& event, Player* requester, const std::string& text);
         bool HandleActivity(Event& event, Player* requester, const std::string& text);
     };
 }

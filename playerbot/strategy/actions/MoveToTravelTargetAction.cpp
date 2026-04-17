@@ -6,6 +6,7 @@
 #include "playerbot/LootObjectStack.h"
 #include "MotionGenerators/PathFinder.h"
 #include "playerbot/TravelMgr.h"
+#include "playerbot/strategy/values/FreeMoveValues.h"
 #include <iomanip>
 
 using namespace ai;
@@ -192,7 +193,7 @@ bool MoveToTravelTargetAction::isUseful()
     if (!ai->AllowActivity(TRAVEL_ACTIVITY))
         return false;
 
-    if (!AI_VALUE(bool, "travel target traveling"))
+    if (!AI_VALUE(bool, "travel target traveling") && AI_VALUE(TravelTarget*, "travel target")->GetStatus() != TravelStatus::TRAVEL_STATUS_READY)
         return false;
 
     if (bot->IsTaxiFlying())

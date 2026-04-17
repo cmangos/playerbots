@@ -114,6 +114,10 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("reset travel target", 6.99f), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "val::travel target ready",
+        NextAction::array(0, new NextAction("check mount state", 1), new NextAction("move to travel target", 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "val::travel target traveling",
         NextAction::array(0, new NextAction("check mount state", 1), new NextAction("move to travel target", 1), NULL)));
 

@@ -456,6 +456,7 @@ namespace ai
             creators["travel target"] = [](PlayerbotAI* ai) { return new TravelTargetValue(ai); };
             creators["leader travel target"] = [](PlayerbotAI* ai) { return new LeaderTravelTargetValue(ai); };
 
+            creators["travel target ready"] = [](PlayerbotAI* ai) { return new TravelTargetReadyValue(ai); };            
             creators["travel target active"] = [](PlayerbotAI* ai) { return new TravelTargetActiveValue(ai); };            
             creators["travel target traveling"] = [](PlayerbotAI* ai) { return new TravelTargetTravelingValue(ai); };
             creators["travel target working"] = [](PlayerbotAI* ai) { return new TravelTargetWorkingValue(ai); };

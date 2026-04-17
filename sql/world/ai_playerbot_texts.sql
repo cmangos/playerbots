@@ -4551,29 +4551,29 @@ INSERT INTO `ai_playerbot_texts` (`name`,`text`,`say_type`,`reply_type`) VALUES
 ('reply','par for the course',0,0),
 ('reply','what else is new %s',0,0),
 ('reply','same old same old',0,0),
-('reply','deja vu %s',0,0);
-('reply','I\'ve heard that one before',0,0);
-('reply','original %s',0,0);
-('reply','very creative %s',0,0);
-('reply','never heard that one before... said nobody ever',0,0);
-('reply','groundbreaking stuff %s',0,0);
-('reply','pioneering commentary right there',0,0);
-('reply','the scholars will study this',0,0);
-('reply','Nobel prize incoming for %s',0,0);
-('reply','are you always this entertaining %s',0,0);
-('reply','you should do standup %s',0,0);
-('reply','comedy gold %s',0,0);
-('reply','I\'m stealing that one %s',0,0);
-('reply','saving that for later',0,0);
-('reply','screenshot taken %s',0,0);
-('reply','this is going in my scrapbook',0,0);
-('reply','I\'m telling everyone about this %s',0,0);
-('reply','the chat needs more of this energy',0,0);
-('reply','peak chat performance %s',0,0);
-('reply','chat is popping off today',0,0);
-('reply','we are cooking in chat',0,0);
-('reply','chat is on fire',0,0);
-('reply','someone put chat in the microwave',0,0);
+('reply','deja vu %s',0,0),
+('reply','I\'ve heard that one before',0,0),
+('reply','original %s',0,0),
+('reply','very creative %s',0,0),
+('reply','never heard that one before... said nobody ever',0,0),
+('reply','groundbreaking stuff %s',0,0),
+('reply','pioneering commentary right there',0,0),
+('reply','the scholars will study this',0,0),
+('reply','Nobel prize incoming for %s',0,0),
+('reply','are you always this entertaining %s',0,0),
+('reply','you should do standup %s',0,0),
+('reply','comedy gold %s',0,0),
+('reply','I\'m stealing that one %s',0,0),
+('reply','saving that for later',0,0),
+('reply','screenshot taken %s',0,0),
+('reply','this is going in my scrapbook',0,0),
+('reply','I\'m telling everyone about this %s',0,0),
+('reply','the chat needs more of this energy',0,0),
+('reply','peak chat performance %s',0,0),
+('reply','chat is popping off today',0,0),
+('reply','we are cooking in chat',0,0),
+('reply','chat is on fire',0,0),
+('reply','someone put chat in the microwave',0,0),
 ('reply','chat needs to calm down',0,0);
 ('reply','I can\'t keep up with chat',0,0);
 ('reply','too much chat not enough killing',0,0);

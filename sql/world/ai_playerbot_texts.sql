@@ -4574,91 +4574,91 @@ INSERT INTO `ai_playerbot_texts` (`name`,`text`,`say_type`,`reply_type`) VALUES
 ('reply','we are cooking in chat',0,0),
 ('reply','chat is on fire',0,0),
 ('reply','someone put chat in the microwave',0,0),
-('reply','chat needs to calm down',0,0);
-('reply','I can\'t keep up with chat',0,0);
-('reply','too much chat not enough killing',0,0);
-('reply','less chatting more fighting %s',0,0);
-('reply','focus on the game people',0,0);
-('reply','can we focus please %s',0,0);
-('reply','I\'m trying to play here %s',0,0);
-('reply','the game isn\'t going to play itself',0,0);
-('reply','I came here to smash not chat',0,0);
-('reply','enough talk %s',0,0);
-('reply','less talky more smashy',0,0);
-('reply','actions speak louder than words %s',0,0);
-('reply','prove it on the battlefield %s',0,0);
-('reply','talk is cheap %s',0,0);
-('reply','put your money where your mouth is',0,0);
-('reply','I\'ll believe it when I see it %s',0,0);
-('reply','show don\'t tell %s',0,0);
-('reply','words are wind %s',0,0);
-('reply','that\'s just your opinion %s',0,0);
-('reply','everyone\'s entitled to their wrong opinion %s',0,0);
-('reply','agree to disagree %s',0,0);
-('reply','let\'s agree that you\'re wrong %s',0,0);
-('reply','I\'ll allow it',0,0);
-('reply','denied %s',0,0);
-('reply','objection sustained',0,0);
-('reply','overruled %s',0,0);
-('reply','the court of chat has spoken',0,0);
-('reply','I rest my case %s',0,0);
-('reply','no further questions %s',0,0);
-('reply','take it to the judge',0,0);
-('reply','jury\'s still out on that one %s',0,0);
-('reply','that was a cheap shot %s',0,1);
-('reply','you\'ll pay for that %s',0,1);
-('reply','I\'ll remember this %s',0,1);
-('reply','you got lucky %s',0,1);
-('reply','enjoy it while it lasts %s',0,1);
-('reply','that won\'t happen again %s',0,1);
-('reply','you fight like a coward %s',0,1);
-('reply','next time you won\'t be so lucky',0,1);
-('reply','I was lagging, I swear',0,1);
-('reply','my cat walked on my keyboard',0,1);
-('reply','I wasn\'t ready %s',0,1);
-('reply','rematch? right now %s',0,1);
-('reply','you only won because of gear %s',0,1);
-('reply','I was at 1% health already %s',0,1);
-('reply','that was a fluke %s',0,1);
-('reply','I demand a rematch %s',0,1);
-('reply','you haven\'t seen the last of me %s',0,1);
-('reply','I\'ll be back %s, and I won\'t be alone',0,1);
-('reply','count your days %s',0,1);
-('reply','this isn\'t over %s',0,1);
-('reply','I\'m adding you to my list %s',0,1);
-('reply','congrats on the only kill you\'ll ever get %s',0,1);
-('reply','must feel good winning once %s',0,1);
-('reply','I went easy on you %s',0,1);
-('reply','you should thank your healer %s',0,1);
-('reply','are you kidding me',0,2);
-('reply','this is ridiculous',0,2);
-('reply','I can\'t believe this',0,2);
-('reply','unbelievable',0,2);
-('reply','you\'ve got to be joking',0,2);
-('reply','seriously?!',0,2);
-('reply','come on now',0,2);
-('reply','that\'s just unfair',0,2);
-('reply','how is that even possible',0,2);
-('reply','I\'m done with this',0,2);
-('reply','I can\'t even right now',0,2);
-('reply','this game sometimes...',0,2);
-('reply','what a joke',0,2);
-('reply','bruh moment',0,2);
-('reply','I need a break after that',0,2);
-('reply','that was some nonsense',0,2);
-('reply','too easy %s',0,3);
-('reply','sit down %s',0,3);
-('reply','back to the graveyard %s',0,3);
-('reply','take a seat %s',0,3);
-('reply','get rekt %s',0,3);
-('reply','outplayed %s',0,3);
-('reply','skill difference %s',0,3);
-('reply','ez clap %s',0,3);
-('reply','down you go %s',0,3);
-('reply','better luck next life %s',0,3);
-('reply','that all you got %s?',0,3);
-('reply','I expected more from you %s',0,3);
-('reply','was that supposed to hurt %s',0,3);
+('reply','chat needs to calm down',0,0),
+('reply','I can\'t keep up with chat',0,0),
+('reply','too much chat not enough killing',0,0),
+('reply','less chatting more fighting %s',0,0),
+('reply','focus on the game people',0,0),
+('reply','can we focus please %s',0,0),
+('reply','I\'m trying to play here %s',0,0),
+('reply','the game isn\'t going to play itself',0,0),
+('reply','I came here to smash not chat',0,0),
+('reply','enough talk %s',0,0),
+('reply','less talky more smashy',0,0),
+('reply','actions speak louder than words %s',0,0),
+('reply','prove it on the battlefield %s',0,0),
+('reply','talk is cheap %s',0,0),
+('reply','put your money where your mouth is',0,0),
+('reply','I\'ll believe it when I see it %s',0,0),
+('reply','show don\'t tell %s',0,0),
+('reply','words are wind %s',0,0),
+('reply','that\'s just your opinion %s',0,0),
+('reply','everyone\'s entitled to their wrong opinion %s',0,0),
+('reply','agree to disagree %s',0,0),
+('reply','let\'s agree that you\'re wrong %s',0,0),
+('reply','I\'ll allow it',0,0),
+('reply','denied %s',0,0),
+('reply','objection sustained',0,0),
+('reply','overruled %s',0,0),
+('reply','the court of chat has spoken',0,0),
+('reply','I rest my case %s',0,0),
+('reply','no further questions %s',0,0),
+('reply','take it to the judge',0,0),
+('reply','jury\'s still out on that one %s',0,0),
+('reply','that was a cheap shot %s',0,1),
+('reply','you\'ll pay for that %s',0,1),
+('reply','I\'ll remember this %s',0,1),
+('reply','you got lucky %s',0,1),
+('reply','enjoy it while it lasts %s',0,1),
+('reply','that won\'t happen again %s',0,1),
+('reply','you fight like a coward %s',0,1),
+('reply','next time you won\'t be so lucky',0,1),
+('reply','I was lagging, I swear',0,1),
+('reply','my cat walked on my keyboard',0,1),
+('reply','I wasn\'t ready %s',0,1),
+('reply','rematch? right now %s',0,1),
+('reply','you only won because of gear %s',0,1),
+('reply','I was at 1% health already %s',0,1),
+('reply','that was a fluke %s',0,1),
+('reply','I demand a rematch %s',0,1),
+('reply','you haven\'t seen the last of me %s',0,1),
+('reply','I\'ll be back %s, and I won\'t be alone',0,1),
+('reply','count your days %s',0,1),
+('reply','this isn\'t over %s',0,1),
+('reply','I\'m adding you to my list %s',0,1),
+('reply','congrats on the only kill you\'ll ever get %s',0,1),
+('reply','must feel good winning once %s',0,1),
+('reply','I went easy on you %s',0,1),
+('reply','you should thank your healer %s',0,1),
+('reply','are you kidding me',0,2),
+('reply','this is ridiculous',0,2),
+('reply','I can\'t believe this',0,2),
+('reply','unbelievable',0,2),
+('reply','you\'ve got to be joking',0,2),
+('reply','seriously?!',0,2),
+('reply','come on now',0,2),
+('reply','that\'s just unfair',0,2),
+('reply','how is that even possible',0,2),
+('reply','I\'m done with this',0,2),
+('reply','I can\'t even right now',0,2),
+('reply','this game sometimes...',0,2),
+('reply','what a joke',0,2),
+('reply','bruh moment',0,2),
+('reply','I need a break after that',0,2),
+('reply','that was some nonsense',0,2),
+('reply','too easy %s',0,3),
+('reply','sit down %s',0,3),
+('reply','back to the graveyard %s',0,3),
+('reply','take a seat %s',0,3),
+('reply','get rekt %s',0,3),
+('reply','outplayed %s',0,3),
+('reply','skill difference %s',0,3),
+('reply','ez clap %s',0,3),
+('reply','down you go %s',0,3),
+('reply','better luck next life %s',0,3),
+('reply','that all you got %s?',0,3),
+('reply','I expected more from you %s',0,3),
+('reply','was that supposed to hurt %s',0,3),
 ('reply','I barely felt you %s',0,3);
 ('reply','thanks for the honor %s',0,3);
 ('reply','free honor kill %s',0,3);

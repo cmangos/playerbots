@@ -542,6 +542,48 @@ private:
     std::map<std::string, uint8> classNames;
 };
 
+class RaceChatFilter : public ChatFilter
+{
+public:
+    RaceChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
+    {
+    }
+
+#ifdef GenerateBotHelp
+    virtual std::string GetHelpName()
+    {
+        return "race";
+    }
+    virtual std::unordered_map<std::string, std::string> GetFilterExamples()
+    {
+        std::unordered_map<std::string, std::string> retMap;
+        retMap["@human"] = "All human bots.";
+        retMap["@tauren"] = "All tauren bots.";
+        return retMap;
+    }
+    virtual std::string GetHelpDescription()
+    {
+        return "This filter selects bots have a certain race.";
+    }
+#endif
+
+    virtual std::string Filter(std::string message) override
+    {
+        Player* bot = ai->GetBot();
+
+        std::string filter = "@" + ChatHelper::formatRace(bot->getRace());
+
+        filter[1] = tolower(filter[1]);
+
+        if (message.find(filter) == 0)
+        {
+            return ChatFilter::Filter(message);
+        }
+
+        return message;
+    }
+};
+
 class GroupChatFilter : public ChatFilter
 {
 public:
@@ -961,7 +1003,6 @@ public:
     {
         Player* bot = ai->GetBot();
 
-        AiObjectContext* context = ai->GetAiObjectContext();
         std::string filter = "@" + ChatHelper::specName(bot);
 
         if (message.find(filter) == 0)
@@ -1185,6 +1226,7 @@ CompositeChatFilter::CompositeChatFilter(PlayerbotAI* ai) : ChatFilter(ai)
     filters.push_back(new StrategyChatFilter(ai));
     filters.push_back(new RoleChatFilter(ai));
     filters.push_back(new ClassChatFilter(ai));
+    filters.push_back(new RaceChatFilter(ai));
     filters.push_back(new RtiChatFilter(ai));
     filters.push_back(new CombatTypeChatFilter(ai));
     filters.push_back(new LevelChatFilter(ai));

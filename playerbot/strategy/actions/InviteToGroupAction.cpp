@@ -77,7 +77,7 @@ namespace ai
 
         bool invite = Invite(master, bot);
 
-        if (invite and event.getSource() == "create group")
+        if (invite && (event.getSource() == "create group"))
         {
             if (!ai->DoSpecificAction("accept invitation", event, true))
                 return false;

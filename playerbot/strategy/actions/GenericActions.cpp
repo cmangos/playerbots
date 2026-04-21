@@ -563,6 +563,29 @@ bool SetPetAction::Execute(Event& event)
                 return true;
             }
         }
+        else if (command == "abandon")
+        {
+            if (bot->getClass() == CLASS_HUNTER)
+            {
+                //std::unique_ptr<WorldPacket> packet(new WorldPacket(CMSG_PET_ABANDON, 8));
+                //*packet << pet->GetObjectGuid();
+                //bot->GetSession()->QueuePacket(std::move(packet));
+
+                // Send pet action packet
+                const ObjectGuid& petGuid = pet->GetObjectGuid();
+
+                WorldPacket packet(CMSG_PET_ABANDON);
+                packet << petGuid;
+
+                bot->GetSession()->HandlePetAbandon(packet);
+
+                return true;
+            }
+            else
+            {
+                ai->TellPlayer(requester, "Please specify a pet command (Like autocast).");
+            }
+        }
         else
         {
             ai->TellPlayer(requester, "Please specify a pet command (Like autocast).");

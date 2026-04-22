@@ -338,6 +338,7 @@ public:
     bool autoDoQuests;
     bool syncLevelWithPlayers;
     uint32 syncLevelMaxAbove, syncLevelNoPlayer;
+    bool syncAltLevelToMaster;
     uint32 tweakValue; //Debugging config
     float respawnModNeutral, respawnModHostile;
     uint32 respawnModThreshold, respawnModMax;

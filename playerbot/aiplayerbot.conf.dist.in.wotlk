@@ -87,6 +87,10 @@ AiPlayerbot.RandomBotAccountCount = 200
 # AiPlayerbot.SyncLevelMaxAbove = 5
 # AiPlayerbot.SyncLevelNoPlayer = 1
 
+# Sync non-random bot alt levels to master level automatically
+# When enabled, bot alts will level up one level at a time to match their master's level
+# AiPlayerbot.SyncAltLevelToMaster = 0
+
 # Random bot guild count
 AiPlayerbot.RandomBotGuildCount = 20
 

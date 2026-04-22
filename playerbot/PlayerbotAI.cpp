@@ -496,6 +496,27 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
         }
     }
 
+    // Alt level sync - level up non-random bots to match master level
+    if (sPlayerbotAIConfig.syncAltLevelToMaster && bot->IsAlive() && master && !sRandomPlayerbotMgr.IsRandomBot(bot)
+        && bot->GetGroup() && master->GetGroup() && IsSafe(master) && bot->GetGroup()->GetLeaderGuid() == master->GetObjectGuid())
+    {
+        uint32 botLevel = bot->GetLevel();
+        uint32 masterLevel = master->GetLevel();
+        uint32 maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
+
+        if (botLevel < masterLevel && botLevel < maxLevel)
+        {
+            bot->GiveLevel(botLevel + 1);
+         
+            if (sPlayerbotAIConfig.hasLog("bot_events.csv"))
+            {
+                sPlayerbotAIConfig.logEvent(this, "AltLevelSync", ObjectGuid(),
+                    "Leveled from " + std::to_string(botLevel) + " to " + std::to_string(bot->GetLevel()) +
+                    " (master: " + std::to_string(masterLevel) + ")");
+            }
+        }
+    }
+
     if (master && IsSafe(master) && bot->GetDistance(master) < INTERACTION_DISTANCE * 2.5 && master->GetTransport() != bot->GetTransport() && bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
     {
         bot->StopMoving();

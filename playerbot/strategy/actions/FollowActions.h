@@ -16,7 +16,8 @@ namespace ai
 	class StopFollowAction : public MovementAction {
 	public:
 		StopFollowAction(PlayerbotAI* ai, std::string name = "stop follow") : MovementAction(ai, name) {}
-		virtual bool Execute(Event& event) override { ai->StopMoving(); return true; };
+		virtual bool Execute(Event& event) override { ai->StopMoving(); return true; }
+        virtual bool isUseful() override;
 	};
 
     class FleeToMasterAction : public FollowAction {

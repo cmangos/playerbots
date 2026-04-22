@@ -103,6 +103,17 @@ bool FollowAction::CanDeadFollow(Unit* target)
     return true;
 }
 
+bool StopFollowAction::isUseful()
+{
+    if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
+        return false;
+
+    if (sServerFacade.GetChaseTarget(bot) && !sServerFacade.GetChaseTarget(bot)->IsPlayer() && sServerFacade.GetChaseTarget(bot)->IsMoving())
+        return false;
+
+    return true;
+}
+
 bool FleeToMasterAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();

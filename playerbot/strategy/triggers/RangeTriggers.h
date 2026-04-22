@@ -369,16 +369,10 @@ namespace ai
     class StopFollowTrigger : public Trigger
     {
     public:
-        StopFollowTrigger(PlayerbotAI* ai) : Trigger(ai, "stop follow", 1) {}
+        StopFollowTrigger(PlayerbotAI* ai, std::string name = "stop follow", int checkInterval = 2) : Trigger(ai, name, checkInterval) {}
 
         virtual bool IsActive() override
         {
-            if (bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
-                return false;
-
-            if (sServerFacade.GetChaseTarget(bot) && !sServerFacade.GetChaseTarget(bot)->IsPlayer() && sServerFacade.GetChaseTarget(bot)->IsMoving())
-                return false;
-
             Unit* followTarget = AI_VALUE(Unit*, "follow target");
 
             if (!followTarget)
@@ -419,13 +413,16 @@ namespace ai
         }
     };
 
-    class WanderNearTrigger : public Trigger
+    class WanderNearTrigger : public StopFollowTrigger
     {
     public:
-        WanderNearTrigger(PlayerbotAI* ai, std::string name = "wander near", int checkInterval = 2) : Trigger(ai, name, checkInterval) {}
+        WanderNearTrigger(PlayerbotAI* ai, std::string name = "wander near", int checkInterval = 2) : StopFollowTrigger(ai, name, checkInterval) {}
 
         bool IsActive() override
         {
+            if (StopFollowTrigger::IsActive())
+                return true;
+
             return AI_VALUE2(bool, "can free move", "wandermin");
         }
     };

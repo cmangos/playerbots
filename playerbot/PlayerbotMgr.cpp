@@ -1331,7 +1331,7 @@ std::string PlayerbotHolder::HandleBotDebug(Player* bot, Player* master, const s
     if (!ai)
         return "Bot has no AI";
 
-    ai->RecordMessages(true);
+    ai->RecordMessages(true, true);
 
     std::string command = param;
 
@@ -1501,7 +1501,7 @@ std::string PlayerbotHolder::HandleBotDo(Player* bot, Player* master, const std:
     if (!action)
         return "action not found";
 
-    ai->RecordMessages(true);
+    ai->RecordMessages(true, true);
 
     std::vector<std::string> output;
 
@@ -1541,7 +1541,7 @@ std::string PlayerbotHolder::HandleBotRecord(Player* bot, Player* master, const 
     if (!ai)
         return "Bot has no AI";
 
-    ai->RecordMessages(true);
+    ai->RecordMessages(true, !param.empty());
     return "Recording enabled on " + std::string(bot->GetName());
 }
 
@@ -1555,7 +1555,6 @@ std::string PlayerbotHolder::HandleBotRead(Player* bot, Player* master, const st
         return "Bot has no AI";
 
     std::vector<std::string> output = ai->GetRecordedMessages();
-    ai->RecordMessages(false);
 
     if (output.empty())
         return "(no messages)";

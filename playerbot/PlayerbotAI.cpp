@@ -1661,6 +1661,55 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
 
             bool isAiChat = sPlayerbotAIConfig.llmEnabled > 0 && (HasStrategy("ai chat", BotState::BOT_STATE_NON_COMBAT) || sPlayerbotAIConfig.llmEnabled == 3);
 
+            if (m_recordIncommingMessages)
+            {
+                std::string recievedMessage = message;
+
+                std::string senderName;
+                if(!sObjectMgr.GetPlayerNameByGUID(guid1, senderName))
+                    senderName = "unknown";
+
+                std::string recievedChatType;
+
+                //Add chat type prefix before recieved message. Ie. for Guilg "guild:".
+                switch (msgtype)
+                {
+                    case CHAT_MSG_SAY:
+                        recievedChatType = "says";
+                        break;
+                    case CHAT_MSG_YELL:
+                        recievedChatType = "yells";
+                        break;
+                    case CHAT_MSG_PARTY:
+                        recievedChatType = "party";
+                        break;
+#ifdef MANGOSBOT_TWO
+                    case CHAT_MSG_PARTY_LEADER:
+                        recievedChatType = "party leader";
+                        break;
+#endif
+                    case CHAT_MSG_GUILD:
+                        recievedChatType = "guild";
+                        break;
+                    case CHAT_MSG_OFFICER:
+                        recievedChatType = "officer";
+                        break;
+                    case CHAT_MSG_WHISPER:
+                        //Get player name for whisper and add "<whispe:" before message.
+                        recievedChatType = "whispers";
+                        break;
+                    case CHAT_MSG_CHANNEL: //Channel needs channel name to be added as prefix, so we add "c:" before channel name.
+                        recievedChatType = chanName;
+                        break;
+                    default:
+                        break;
+                }
+
+                recievedMessage = "[" + senderName + "] " + recievedChatType + ": " + recievedMessage;
+
+                m_recordedMessages.push_back(recievedMessage);
+            }
+
             if (isAiChat && (lang == LANG_ADDON || message.find("d:") == 0))
                 return;
 

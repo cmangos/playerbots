@@ -719,10 +719,11 @@ protected:
     Event lastEvent;
 
 public:
-    void RecordMessages(bool record) { m_recordMessages = record; if (!record) m_recordedMessages.clear(); }
+    void RecordMessages(bool record, bool incomming = false) { m_recordMessages = record; m_recordIncommingMessages = incomming; if (!record) m_recordedMessages.clear(); }
     bool IsRecordingMessages() const { return m_recordMessages; }
-    std::vector<std::string> GetRecordedMessages() { m_recordMessages = false; auto msgs = m_recordedMessages; m_recordedMessages.clear(); return msgs; }
-    void ClearRecordedMessages() { m_recordedMessages.clear(); m_recordMessages = false; }
+    bool IsRecordingIncommingMessages() const { return m_recordIncommingMessages; }
+    std::vector<std::string> GetRecordedMessages() { m_recordMessages = false; m_recordIncommingMessages= false; auto msgs = m_recordedMessages; m_recordedMessages.clear(); return msgs; }
+    void ClearRecordedMessages() { m_recordedMessages.clear(); m_recordMessages = false; m_recordIncommingMessages = false;}
 
 #ifdef BUILD_ELUNA
     MaNGOS::unique_weak_ptr<PlayerbotAI> m_weakRef;

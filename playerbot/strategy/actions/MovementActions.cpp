@@ -980,7 +980,7 @@ void MovementAction::DispatchMovement(TravelPath movePath, bool generatePath, bo
             moveMode,
             generatePath);
 #else
-            mm.MovePoint(movePosition.getMapId(),
+        mm.MovePoint(movePosition.getMapId(),
             Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f),
             moveMode,
             bot->IsFlying() ? bot->GetSpeed(MOVE_FLIGHT) : 0.f,
@@ -989,19 +989,19 @@ void MovementAction::DispatchMovement(TravelPath movePath, bool generatePath, bo
     }
 
     GeneratePathAvoidingHazards(path);
-    
+
     std::vector<G3D::Vector3> pointPath = WorldPosition().toPointsArray(path);
-    float size = WorldPosition().getPathLength(path);   
+    float size = WorldPosition().getPathLength(path);
 
-
+    /*
 #ifndef MANGOSBOT_TWO
     mm.MovePath(pointPath, moveMode, false, false);
 #else
     mm.MovePath(pointPath, moveMode, false);
 #endif
+    */
 
-    /*
-        WorldPosition movePosition = path.back();
+    WorldPosition movePosition = path.back();
 
 #ifdef MANGOSBOT_ZERO
     mm.MovePoint(movePosition.getMapId(),
@@ -1017,8 +1017,7 @@ void MovementAction::DispatchMovement(TravelPath movePath, bool generatePath, bo
         bot->IsFlying() ? bot->GetSpeed(MOVE_FLIGHT) : 0.f,
         bot->IsFlying());
 #endif
-*/
-    
+
     WaitForReach(size);
 }
 

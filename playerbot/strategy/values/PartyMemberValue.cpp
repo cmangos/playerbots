@@ -36,11 +36,8 @@ Unit* PartyMemberValue::FindPartyMember(std::list<Player*>* party, FindPlayerPre
 Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ignoreOutOfGroup, bool ignoreTanks)
 {
     Player* master = GetMaster();
-    std::list<ObjectGuid> nearestPlayers;
-    if(ai->AllowActivity(OUT_OF_PARTY_ACTIVITY))
-        nearestPlayers = AI_VALUE(std::list<ObjectGuid>, "nearest friendly players");      
 
-    std::list<ObjectGuid> nearestGroupPlayers;
+    std::list<ObjectGuid> nearestPlayers;
 
     Group* group = bot->GetGroup();
     if (group)
@@ -53,20 +50,36 @@ Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ign
             {
                 if (ref->getSubGroup() != bot->GetSubGroup())
                 {
-                    nearestGroupPlayers.push_back(ref->getSource()->GetObjectGuid());
+                    nearestPlayers.push_back(ref->getSource()->GetObjectGuid());
                 }
                 else
                 {
-                    nearestGroupPlayers.push_front(ref->getSource()->GetObjectGuid());
+                    nearestPlayers.push_front(ref->getSource()->GetObjectGuid());
                 }
             }
         }
     }
     
-    if (!ignoreOutOfGroup && !nearestPlayers.empty() && nearestPlayers.size() < 100  && sServerFacade.IsDistanceLessThan(AI_VALUE2(float, "distance", "master target"), sPlayerbotAIConfig.sightDistance))
-        nearestGroupPlayers.insert(nearestGroupPlayers.end(), nearestPlayers.begin(), nearestPlayers.end());
+    bool allowBufOutOfGroupPlayers = !ignoreOutOfGroup;
 
-    nearestPlayers = nearestGroupPlayers;
+    if (allowBufOutOfGroupPlayers && !ai->AllowActivity(OUT_OF_PARTY_ACTIVITY))
+        allowBufOutOfGroupPlayers = false;
+
+    if (allowBufOutOfGroupPlayers && AI_VALUE2(float, "distance", "master target") > sPlayerbotAIConfig.sightDistance)
+        allowBufOutOfGroupPlayers = false;
+
+    if (allowBufOutOfGroupPlayers && AI_VALUE2(uint32, "current mount speed", "self target"))
+        allowBufOutOfGroupPlayers = false;
+
+    if (allowBufOutOfGroupPlayers)
+    {
+        std::list<ObjectGuid> nearestOutOfGroupPlayers;
+        if (ai->AllowActivity(OUT_OF_PARTY_ACTIVITY))
+            nearestOutOfGroupPlayers = AI_VALUE(std::list<ObjectGuid>, "nearest friendly players");
+
+        if (nearestOutOfGroupPlayers.size() < 100)
+            nearestPlayers.insert(nearestPlayers.end(), nearestOutOfGroupPlayers.begin(), nearestOutOfGroupPlayers.end());
+    }
 
     std::list<Player*> healers, tanks, others, masters;
     if (master) masters.push_back(master);

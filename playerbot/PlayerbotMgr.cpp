@@ -1812,6 +1812,7 @@ std::list<std::string> PlayerbotHolder::HandleCreate(Player* master, const std::
     uint8 cls = 0;
     uint32 level = 0;
     bool autoAdd = master;
+    bool temporary = false;
     uint8 gender = GENDER_NONE;
     Team team = Team::TEAM_BOTH_ALLOWED;
     BotRoles role = BotRoles::BOT_ROLE_NONE;

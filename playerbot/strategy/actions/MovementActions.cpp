@@ -381,7 +381,11 @@ bool MovementAction::MoveOnTransport(PlayerbotAI* ai, GenericTransport* transpor
     bot->GetMotionMaster()->Clear();
 
     std::vector<G3D::Vector3> pointPath = transPos.toPointsArray(path);
+#ifndef MANGOSBOT_TWO
     bot->GetMotionMaster()->MovePath(pointPath, FORCED_MOVEMENT_RUN, false, false);
+#else
+    bot->GetMotionMaster()->MovePath(pointPath, FORCED_MOVEMENT_RUN, false);
+#endif
 
     return true;
 }
@@ -424,7 +428,11 @@ bool MovementAction::MoveOffTransport(PlayerbotAI* ai, WorldPosition exitPos, bo
     bot->GetMotionMaster()->Clear();
 
     std::vector<G3D::Vector3> pointPath = exitPos.toPointsArray(path);
+#ifndef MANGOSBOT_TWO
     bot->GetMotionMaster()->MovePath(pointPath, FORCED_MOVEMENT_RUN, false, false);
+#else
+    bot->GetMotionMaster()->MovePath(pointPath, FORCED_MOVEMENT_RUN, false);
+#endif
 
     return true;
 }
@@ -830,7 +838,7 @@ bool MovementAction::HandleSpecialMovement(TravelPath& path)
             {
                 ai->Unmount();
 #ifdef MANGOSBOT_TWO
-                return PathHandleResult::ReturnFalse;
+                return false;
 #endif
             }
 
@@ -989,7 +997,7 @@ void MovementAction::DispatchMovement(TravelPath movePath, bool generatePath, bo
 #ifndef MANGOSBOT_TWO
     mm.MovePath(pointPath, moveMode, false, false);
 #else
-    mm.MovePath(path, moveMode, false);
+    mm.MovePath(pointPath, moveMode, false);
 #endif
 
     /*
@@ -1027,9 +1035,9 @@ Unit* MovementAction::GetMover(Player* bot)
             {
                 VehicleSeatEntry const* seat = vehicle->GetVehicleInfo()->GetSeatEntry(transportInfo->GetTransportSeat());
                 if (!seat || !seat->HasFlag(SEAT_FLAG_CAN_CONTROL))
-                    return false;
+                    return bot;
             }
-            return mover = vehicle;
+            return vehicle;
         }
     }
 #endif

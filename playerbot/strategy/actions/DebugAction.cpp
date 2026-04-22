@@ -1885,7 +1885,11 @@ bool DebugAction::HandleOnTrans(Event& event, Player* requester, const std::stri
     bot->GetMotionMaster()->Clear();
 
     std::vector<G3D::Vector3> pointPath = transPos.toPointsArray(path);
+#ifndef MANGOSBOT_TWO
     bot->GetMotionMaster()->MovePath(pointPath, FORCED_MOVEMENT_RUN, false, false);
+#else
+    bot->GetMotionMaster()->MovePath(pointPath, FORCED_MOVEMENT_RUN, false);
+#endif  
 
     return true;
 }
@@ -1923,7 +1927,12 @@ bool DebugAction::HandleOffTrans(Event& event, Player* requester, const std::str
     bot->GetMotionMaster()->Clear();
 
     std::vector<G3D::Vector3> pointPath = exitPos.toPointsArray(path);
+
+#ifndef MANGOSBOT_TWO
     bot->GetMotionMaster()->MovePath(pointPath, FORCED_MOVEMENT_RUN, false, false);
+#else
+    bot->GetMotionMaster()->MovePath(pointPath, FORCED_MOVEMENT_RUN, false);
+#endif  
 
     return true;
 }
@@ -5395,7 +5404,11 @@ bool DebugAction::HandleTransanal(Event& event, Player* requester, const std::st
 
                             float hx = x, hy = y, hz = z - 50;
 
+#ifndef MANGOSBOT_TWO
                             bool hasHit = map->GetHitPosition(testPos.getX(), testPos.getY(), testPos.getZ(), hx, hy, hz, 0.0f);
+#else
+                            bool hasHit = map->GetHitPosition(testPos.getX(), testPos.getY(), testPos.getZ(), hx, hy, hz, 0, 0.0f);
+#endif
 
                             if (!hasHit)
                                 continue;
@@ -5658,7 +5671,11 @@ bool DebugAction::HandleUpdownspace(Event& event, Player* requester, const std::
     VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(bot->GetMapId(), botX, botY, startZ, destX_down, destY_down, destZ_down, vmapDestX_down, vmapDestY_down, vmapDestZ_down, 0);
     bool vmapHitDown = (vmapDestX_down != botX || vmapDestY_down != botY || fabs(vmapDestZ_down - (startZ - 50.0f)) > 0.1f);
 
+#ifndef MANGOSBOT_TWO
     bool combinedHitDown = bot->GetMap()->GetHitPosition(botX, botY, startZ, destX_down, destY_down, destZ_down, 0);
+#else
+    bool combinedHitDown = bot->GetMap()->GetHitPosition(botX, botY, startZ, destX_down, destY_down, destZ_down, 0, 0);
+#endif
 
     if (vmapHitDown)
         out << "VMAP DOWN hit at z: " << vmapDestZ_down << "\n";
@@ -5680,7 +5697,11 @@ bool DebugAction::HandleUpdownspace(Event& event, Player* requester, const std::
     VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(bot->GetMapId(), botX, botY, startZ, destX_up, destY_up, destZ_up, vmapDestX_up, vmapDestY_up, vmapDestZ_up, 0);
     bool vmapHitUp = (vmapDestX_up != botX || vmapDestY_up != botY || fabs(vmapDestZ_up - (startZ + 50.0f)) > 0.1f);
 
+#ifndef MANGOSBOT_TWO
     bool combinedHitUp = bot->GetMap()->GetHitPosition(botX, botY, startZ, destX_up, destY_up, destZ_up, 0);
+#else
+    bool combinedHitUp = bot->GetMap()->GetHitPosition(botX, botY, startZ, destX_up, destY_up, destZ_up, 0, 0);
+#endif
 
     if (vmapHitUp)
         out << "VMAP UP hit at z: " << vmapDestZ_up << "\n";

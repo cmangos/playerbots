@@ -49,6 +49,8 @@ public:
 
     static std::string GetCommandTexts(const std::string& command);
     static std::unordered_map<std::string, std::string> GetCommandTexts();
+
+    bool DeleteBot(ObjectGuid guid, bool allowInstant = true);
 protected:
     virtual void OnBotLoginInternal(Player * const bot) = 0;
     virtual void OnBotDeleted(uint32 botGuid, uint32 accountId);

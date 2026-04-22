@@ -5908,13 +5908,17 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
     if (WorldPosition(bot).isBg())
         return ActivePiorityType::IN_BATTLEGROUND;
 
+    AiObjectContext* context = GetAiObjectContext();
+
+    if (AI_VALUE2(bool, "manual bool", "is running test"))
+        return ActivePiorityType::IS_RUNNING_TEST;
+
     if (!WorldPosition(bot).isOverworld())
     {
         if (!sPlayerbotAIConfig.enableMinimalMove)
             return ActivePiorityType::IN_INSTANCE;
         else
         {
-            AiObjectContext* context = GetAiObjectContext();
             LastMovement& lastMove = AI_VALUE(LastMovement&, "last movement");
             if (lastMove.lastPath.empty())
                 return ActivePiorityType::IN_INSTANCE;
@@ -6010,6 +6014,7 @@ std::pair<uint32, uint32> PlayerbotAI::GetPriorityBracket(ActivePiorityType type
     case ActivePiorityType::IN_GROUP_WITH_REAL_PLAYER:
     case ActivePiorityType::VISIBLE_FOR_PLAYER:
     case ActivePiorityType::IN_BATTLEGROUND:
+    case ActivePiorityType::IS_RUNNING_TEST:
         return { 0,0 };
     case ActivePiorityType::IN_INSTANCE:
         return { 0,5 };
@@ -6460,12 +6465,6 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
         }
 
         std::ostringstream out; out << target->GetPositionX() << " " << target->GetPositionY() << " " << target->GetPositionZ() << " " << target->GetMapId() << " " << target->GetOrientation();
-        return out.str();
-    }
-    else if (command == "movement")
-    {
-        LastMovement& data = *GetAiObjectContext()->GetValue<LastMovement&>("last movement");
-        std::ostringstream out; out << data.lastMoveShort.getX() << " " << data.lastMoveShort.getY() << " " << data.lastMoveShort.getZ() << " " << data.lastMoveShort.getMapId() << " " << data.lastMoveShort.getO();
         return out.str();
     }
     else if (command == "target")
@@ -7770,6 +7769,17 @@ void PlayerbotAI::ReceiveDelayedPacket(futurePackets futPackets)
         });
 
     t.detach();
+}
+
+PlayerbotHolder* PlayerbotAI::GetHolder() const
+{
+    if (sRandomPlayerbotMgr.IsRandomBot(bot))
+        return &sRandomPlayerbotMgr;
+
+    if (bot->GetMaster())
+        return static_cast<Player*>(bot->GetMaster())->GetPlayerbotMgr();
+
+    return bot->GetPlayerbotMgr();
 }
 
 std::string PlayerbotAI::InventoryParseOutfitName(std::string outfit)

@@ -281,6 +281,7 @@ enum class ActivePiorityType : uint8
     IS_REAL_PLAYER = 0,
     HAS_REAL_PLAYER_MASTER = 1,
     IN_GROUP_WITH_REAL_PLAYER,
+    IS_RUNNING_TEST,
     IN_BATTLEGROUND,
     IN_INSTANCE,
     VISIBLE_FOR_PLAYER,
@@ -364,8 +365,7 @@ public:
     void HandleCommands();
 private:
     void UpdateAIInternal(uint32 elapsed, bool minimal = false) override;
-
-public:
+public:    
     static std::string BotStateToString(BotState state);
     std::string GetDefaultMovementStrategy();
     void EnsureDefaultMovementStrategy(Player* requester = nullptr);
@@ -395,6 +395,7 @@ public:
     static bool IsTank(Player* player, bool inGroup = true);
     static bool IsHeal(Player* player, bool inGroup = true);
     bool IsRanged(Player* player, bool inGroup = true);
+    bool IsMelee(Player* player, bool inGroup = true);
     Creature* GetCreature(ObjectGuid guid) const;
     Creature* GetAnyTypeCreature(ObjectGuid guid) const;
     Unit* GetUnit(ObjectGuid guid);
@@ -538,7 +539,7 @@ public:
 
     static void SendDelayedPacket(WorldSession* session, std::future<std::vector<std::pair<WorldPacket, uint32>>> futurePacket);
     void ReceiveDelayedPacket(std::future<std::vector<std::pair<WorldPacket, uint32>>> futurePacket);
-public:
+ public:
     std::vector<Bag*> GetEquippedAnyBags();
     std::vector<Bag*> GetEquippedQuivers();
     std::vector<Item*> GetInventoryAndEquippedItems();
@@ -549,7 +550,7 @@ public:
     bool HasQuestItemsInLootList(LootItemList &questLootItemList);
     bool HasQuestItemsInWOLootList(WorldObject* wo);
     bool CanLootSomethingFromWO(WorldObject* wo);
-
+    PlayerbotHolder* GetHolder() const;
 private:
     void InventoryIterateItemsInBags(IterateItemsVisitor* visitor);
     void InventoryIterateItemsInEquip(IterateItemsVisitor* visitor);   
@@ -580,7 +581,7 @@ public:
     bool IsGroupLeader() { return bot->GetGroup() && bot->GetGroup()->GetLeaderGuid() == bot->GetObjectGuid(); }
 
     //Check if player is safe to use.    
-    static bool IsSafe(Player* player, WorldObject* obj) { return obj && obj->GetMapId() == player->GetMapId() && obj->GetInstanceId() == player->GetInstanceId() && (!obj->IsPlayer() || !((Player*)obj)->IsBeingTeleported()); }
+    static bool IsSafe(Player* player, WorldObject* obj) {return obj && obj->GetMapId() == player->GetMapId() && obj->GetInstanceId() == player->GetInstanceId() && (!obj->IsPlayer() || !((Player*)obj)->IsBeingTeleported() || !((Player*)obj)->GetSession()->GetPlayer()); }
     bool IsSafe(WorldObject* obj) { return IsSafe(bot, obj); }
     bool IsSafe(Player* player) { return IsSafe(bot, player); }
 

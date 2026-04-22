@@ -113,6 +113,11 @@ file(GLOB Playerbot_DeathKnight ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/d
     source_group("Player Bot\\Strategies\\DeathKnight" FILES ${Playerbot_DeathKnight})
     LIST(APPEND LIBRARY_SRCS ${Playerbot_DeathKnight})
 
+#Test framework
+file(GLOB Playerbot_Tests ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/tests/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/playerbot/strategy/tests/*.h)
+    source_group("Player Bot\\Strategies\\Tests" FILES ${Playerbot_Tests})
+    LIST(APPEND LIBRARY_SRCS ${Playerbot_Tests})
+
 # Define ENABLE_PLAYERBOTS if need
 if (BUILD_PLAYERBOTS)
   add_definitions(-DENABLE_PLAYERBOTS)

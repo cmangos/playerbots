@@ -5,6 +5,10 @@
 //#define GenerateBotHelp //Enable only for help generation
 #endif
 
+#ifndef GenerateBotTests
+//#define GenerateBotTests //Enable only for test generation
+#endif
+
 class PlayerbotAI;
 
 namespace ai

@@ -153,9 +153,22 @@ namespace ai
 		virtual bool IsIn(const WorldPosition& pos, float radius = 0) const override { return true; }
 
 		virtual std::string GetShortName() const override { return "idle"; };
-	protected:
-		//virtual bool IsOut(const WorldPosition& pos, float radius = 0) const override { return false; }
 	};
+
+	class TemporaryTravelDestination : public TravelDestination
+    {
+    public:
+        TemporaryTravelDestination(WorldPosition destination) : TravelDestination(), destination(destination) {};
+
+        virtual std::string GetTitle() const override { return destination.print(); }
+
+        virtual std::string GetShortName() const override { return "temp"; };
+
+		WorldPosition* GetPosition() { return &destination; }
+        void SetPosition(WorldPosition newDestination) { destination = newDestination; }
+    private:
+        WorldPosition destination;
+    };
 
 	class EntryTravelDestination : public TravelDestination
 	{

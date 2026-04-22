@@ -1,6 +1,7 @@
 #include "GuidPosition.h"
 #include <numeric>
 #include <iomanip>
+#include <regex>
 
 #include "GameEvents/GameEventMgr.h"
 #include "Globals/ObjectAccessor.h"
@@ -24,6 +25,32 @@ GuidPosition::GuidPosition(std::string qualifier)
 
     ObjectGuid guid(g);
     ObjectGuid::Set(guid);
+}
+
+GuidPosition::GuidPosition(CreationMask type, const std::string& qualifier, const WorldPosition& referencePos, uint32 instanceId)
+{
+    if (type & CreationMask::COORDINATES)
+    {
+        static const std::regex pattern(
+            R"(^\d+;-?\d+(\.\d+)?;-?\d+(\.\d+)?;-?\d+(\.\d+)?;-?\d+(\.\d+)?$)");
+        if (std::regex_match(qualifier, pattern))
+        {
+            WorldPosition::set(WorldPosition(qualifier));
+            GuidPosition::Set(0);
+            return;
+        }
+    }
+
+    if (type & CreationMask::GAMETELE)
+    {
+        GameTele const* tele = sObjectMgr.GetGameTele(qualifier);
+        if (tele)
+        {
+            set(WorldPosition(tele->mapId, tele->position_x, tele->position_y, tele->position_z, referencePos.orientation));
+            GuidPosition::Set(0);
+            return;
+        }
+    }
 }
 
 std::string GuidPosition::to_string() const

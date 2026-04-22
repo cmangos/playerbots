@@ -778,6 +778,8 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
 
     //Ping character database.
     CharacterDatabase.AsyncPQuery(&RandomPlayerbotMgr::DatabasePing, sWorld.GetCurrentMSTime(), std::string("CharacterDatabase"), "SELECT 1");
+
+    PlayerbotHolder::UpdateAIInternal(elapsed, minimal);
 }
 
 void RandomPlayerbotMgr::ScaleBotActivity()
@@ -899,6 +901,17 @@ void RandomPlayerbotMgr::LoginFreeBots()
                     }
 
                     sRandomPlayerbotMgr.SetValue(botGuid, "create group", 0);
+                }
+
+                if (GetEventValue(botGuid, "test"))
+                {
+                    PlayerbotAI* ai = player->GetPlayerbotAI();
+                    AiObjectContext* context = ai->GetAiObjectContext();
+                    std::string strategyName = "test::" + GetEventData(botGuid, "test");
+                    ai->ChangeStrategy("+" + strategyName, BotState::BOT_STATE_NON_COMBAT);
+                    SET_AI_VALUE2(bool, "manual bool", "is running test", true);
+
+                    sRandomPlayerbotMgr.SetValue(botGuid, "test", 0);
                 }
 
                 if (!IsRandomBot(player) && GetPlayerBot(guid)) //Place bot in player manager.

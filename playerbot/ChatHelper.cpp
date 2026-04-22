@@ -6,6 +6,7 @@
 #include <numeric>
 #include <iomanip>
 #include <regex>
+#include <boost/algorithm/string.hpp>
 
 using namespace ai;
 

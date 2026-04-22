@@ -19,6 +19,18 @@ namespace ai
         GuidPosition(HighGuid hi, uint32 entry, uint32 counter = 1, WorldPosition pos = WorldPosition()) : ObjectGuid(hi, entry, counter), WorldPosition(pos) {};
         GuidPosition(std::string qualifier);
 
+        enum CreationMask
+        {
+            NONE = 0,
+            COORDINATES = 1 << 0,
+            GAMETELE = 1 << 1,
+            CREATURE_GUID = 1 << 2,
+            OBJECT_GUID = 1 << 3,
+            UNKNOWN = (COORDINATES | GAMETELE | CREATURE_GUID | OBJECT_GUID)
+        };
+
+        GuidPosition(CreationMask type, const std::string& qualifier, const WorldPosition& referencePos = WorldPosition(), uint32 instanceId = 0);
+
         virtual std::string to_string() const override;
 
         CreatureData* GetCreatureData() const { return IsCreature() ? sObjectMgr.GetCreatureData(GetCounter()) : nullptr; }

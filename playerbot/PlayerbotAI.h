@@ -715,6 +715,7 @@ protected:
     bool isMovingToTransport = false;
     bool shouldLogOut = false;
     bool m_recordMessages = false;
+    bool m_recordIncommingMessages = false;
     std::vector<std::string> m_recordedMessages;
     Event lastEvent;
 

@@ -2504,6 +2504,11 @@ bool PlayerbotAI::IsRanged(Player* player, bool inGroup)
     return true;
 }
 
+bool PlayerbotAI::IsMelee(Player* player, bool inGroup)
+{
+    return !IsRanged(player, inGroup);
+}
+
 bool PlayerbotAI::IsTank(Player* player, bool inGroup)
 {
     PlayerbotAI* botAi = player->GetPlayerbotAI();

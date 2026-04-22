@@ -1,8 +1,6 @@
 
 #include "playerbot/playerbot.h"
 #include "MovementActions.h"
-//#include <cstdio>
-//#include <cstring>
 #include "MotionGenerators/MotionMaster.h"
 #include "MotionGenerators/MovementGenerator.h"
 #include "playerbot/FleeManager.h"

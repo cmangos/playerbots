@@ -115,5 +115,9 @@ namespace ai
         bool HandleCombat(Event& event, Player* requester, const std::string& text);
         bool HandleNodes(Event& event, Player* requester, const std::string& text);
         bool HandleActivity(Event& event, Player* requester, const std::string& text);
+        bool HandleTransanal(Event& event, Player* requester, const std::string& text);
+        bool HandleUpdownspace(Event& event, Player* requester, const std::string& text);
+        bool HandlePatharound(Event& event, Player* requester, const std::string& text);
+        bool HandleHeightForLos(Event& event, Player* requester, const std::string& text);
     };
 }

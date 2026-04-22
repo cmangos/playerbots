@@ -177,7 +177,6 @@ namespace ai
             creators["netherspite"] = [](PlayerbotAI* ai) { return new NetherspiteFightStrategy(ai); };
             creators["prince malchezaar"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarFightStrategy(ai); };
             creators["four horseman"] = [](PlayerbotAI* ai) { return new FourHorsemanFightStrategy(ai); };
-            creators["jeklik"] = [](PlayerbotAI* ai) { return new JeklikFightStrategy(ai); };
 
 #ifdef GenerateBotTests
             creators["test"] = [](PlayerbotAI* ai) { return new TestStrategy(ai); };

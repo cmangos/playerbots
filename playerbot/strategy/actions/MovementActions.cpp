@@ -244,7 +244,7 @@ bool MovementAction::FlyDirect(const WorldPosition &startPosition, const WorldPo
     mm.Clear(false, true);
     mm.MovePoint(movePosition.getMapId(), Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f), bot->IsFlying() ? FORCED_MOVEMENT_FLIGHT : FORCED_MOVEMENT_RUN, bot->IsFlying() ? bot->GetSpeed(MOVE_FLIGHT) : 0.f, bot->IsFlying());
 
-    AI_VALUE(LastMovement&, "last movement").setShort(startPosition, movePosition);
+    AI_VALUE(LastMovement&, "last movement").lastAreaTrigger = movePosition;
 
     return true;
 #endif
@@ -1198,19 +1198,22 @@ bool MovementAction::MoveTo2(const WorldPosition& endPos, bool idle, bool react,
         }
     }
 
+    bool generatePath = !noPath && !bot->IsFlying() && !bot->HasMovementFlag(MOVEFLAG_SWIMMING) && !bot->IsInWater() && !sServerFacade.IsUnderwater(bot);
+
 #ifndef MANGOSBOT_ZERO
     if (bot->IsFreeFlying())
     {
-        if (bot->HasMovementFlag(MOVEFLAG_SWIMMING) && startPosition.isInWater() && !startPosition.isUnderWater() && !movePosition.isInWater())
+        if (bot->HasMovementFlag(MOVEFLAG_SWIMMING) && startPos.isInWater() && !startPos.isUnderWater() && !endPos.isInWater())
         {
             generatePath = true;
         }
 
-        UpdateFlyingState(movePosition, totalDistance, originalZ, sPlayerbotAIConfig.reactDistance, isWalking);
+        WorldPosition movePosition = movePath.getBack();
+        //Todo fix this for paths.
+        UpdateFlyingState(movePosition, totalDistance, startPos.getZ(), sPlayerbotAIConfig.reactDistance, isWalking);
     }
 #endif
 
-    bool generatePath = !noPath && !bot->IsFlying() && !bot->HasMovementFlag(MOVEFLAG_SWIMMING) && !bot->IsInWater() && !sServerFacade.IsUnderwater(bot);
 
     // DEBUG: Check for Ironforge AH roof climbing bug
     // IF Auction House is at approx -4900, -950, 500 (Military Ward)
@@ -2056,28 +2059,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
         if (bot->HasMovementFlag(MOVEFLAG_SWIMMING) && startPosition.isInWater() && !startPosition.isUnderWater() && !movePosition.isInWater())
             generatePath = true;
 
-        Movement::PointsArray path;
-        if (GeneratePathAvoidingHazards(movePosition, generatePath, path))
-        {
-            // DEBUG: Before MotionMaster
-            if (ai->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
-            {
-                std::ostringstream out;
-                out << "[Bot " << bot->GetName() << "] DEBUG: Before MotionMaster, path.size=" << path.size();
-                ai->TellDebug(ai->GetMaster(), out.str(), "debug move");
-            }
-
-#ifndef MANGOSBOT_TWO
-            mm.MovePath(path, masterWalking ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_RUN, false, false);
-#else
-            mm.MovePath(path, masterWalking ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_RUN, false);
-#endif
-            WaitForReach(path);
-        }
-        else
-        {
-            mm.MovePoint(movePosition.getMapId(), movePosition.getX(), movePosition.getY(), movePosition.getZ(), masterWalking ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_RUN, generatePath);
-        }
+        mm.MovePoint(movePosition.getMapId(), movePosition.getX(), movePosition.getY(), movePosition.getZ(), masterWalking ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_RUN, generatePath);
     }
     else
     {

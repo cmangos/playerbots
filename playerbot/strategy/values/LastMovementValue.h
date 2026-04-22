@@ -19,39 +19,30 @@ namespace ai
             lastFollow = other.lastFollow;
             lastAreaTrigger = other.lastAreaTrigger;
             lastTransportEntry = other.lastTransportEntry;
-            lastMoveShort = other.lastMoveShort;
-            lastMoveShortStart = other.lastMoveShortStart;
             lastPath = other.lastPath;
+            lastMoveShort = other.lastMoveShort;
             nextTeleport = other.nextTeleport;
             moveEvent = Event();
         }
 
         void clear()
         {
-            lastMoveShort = WorldPosition();
-            lastMoveShortStart = WorldPosition();
             lastPath.clear();
             lastFollow = NULL;
             lastAreaTrigger = 0;
             lastTransportEntry = 0;
             lastFlee = 0;
+            lastMoveShort = WorldPosition();
             nextTeleport = 0;
             moveEvent = Event();
         }
 
         void Set(Unit* lastFollow)
         {
-            setShort(WorldPosition(),WorldPosition());
             setPath(TravelPath());
             this->lastFollow = lastFollow;
         }
 
-        void setShort(WorldPosition start, WorldPosition end)
-        {
-            lastMoveShortStart = start;
-            lastMoveShort = end;
-            lastFollow = NULL;
-        }
         void setPath(TravelPath path) { lastPath = path; }
     public:
         std::vector<uint32> taxiNodes;
@@ -60,9 +51,8 @@ namespace ai
         uint32 lastAreaTrigger;
         uint32 lastTransportEntry;
         time_t lastFlee;
-        WorldPosition lastMoveShortStart;
-        WorldPosition lastMoveShort;
         TravelPath lastPath;
+        WorldPosition lastMoveShort;
         time_t nextTeleport;
         Event moveEvent;
     };

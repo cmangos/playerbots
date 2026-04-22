@@ -138,7 +138,7 @@ bool AttackAction::Attack(Player* requester, Unit* target)
             }
         }
 
-        if (IsMovingAllowed() && !sServerFacade.IsInFront(bot, target, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))
+        if (ai->CanMove() && !sServerFacade.IsInFront(bot, target, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))
         {
             sServerFacade.SetFacingTo(bot, target);
         }

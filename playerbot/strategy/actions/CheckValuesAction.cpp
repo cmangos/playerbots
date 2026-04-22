@@ -22,8 +22,8 @@ bool CheckValuesAction::Execute(Event& event)
 
         LastMovement& lastMove = AI_VALUE(LastMovement&, "last movement");
 
-        if (lastMove.lastMoveShort)
-            ai->Ping(lastMove.lastMoveShort.getX() - 7.5, lastMove.lastMoveShort.getY() + 7.5);
+        if (!lastMove.lastPath.empty())
+            ai->Ping(lastMove.lastPath.getFront().getX() - 7.5, lastMove.lastPath.getFront().getY() + 7.5);
     }
 
     if (ai->HasStrategy("map", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("map full", BotState::BOT_STATE_NON_COMBAT))

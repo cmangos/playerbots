@@ -11,6 +11,7 @@
 #include "psapi.h"
 #include "windows.h"
 #endif
+#include "RandomPlayerbotMgr.h"
 
 void MemoryMonitor::Add(std::string objectType, uint64_t object, int level, std::string stack)
 {

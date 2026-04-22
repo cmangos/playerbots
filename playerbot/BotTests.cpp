@@ -1,4 +1,5 @@
 #include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/strategy/NamedObjectContext.h"
 #include "BotTests.h"
 #include <fstream>
 

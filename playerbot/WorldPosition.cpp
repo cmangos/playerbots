@@ -9,7 +9,6 @@
 #include "Grids/CellImpl.h"
 #include "Globals/ObjectAccessor.h"
 #include "Entities/Transports.h"
-#include "MemoryMonitor.h"
 
 #include "MotionGenerators/MoveMap.h"
 
@@ -25,20 +24,6 @@
 using namespace ai;
 using namespace MaNGOS;
 
-void WorldPosition::add()
-{
-#ifdef MEMORY_MONITOR
-    sMemoryMonitor.Add("WorldPosition", (int64)this);
-#endif
-}
-
-void WorldPosition::rem()
-{
-#ifdef MEMORY_MONITOR
-    sMemoryMonitor.Rem("WorldPosition", (int64)this);
-#endif
-}
-
 WorldPosition::WorldPosition(const uint32 mapId, const GuidPosition& guidP, uint32 instanceId)
 {
     if (guidP.mapid !=0 || guidP.coord_x != 0 || guidP.coord_y != 0 || guidP.coord_z !=0) {
@@ -47,8 +32,6 @@ WorldPosition::WorldPosition(const uint32 mapId, const GuidPosition& guidP, uint
     }
 
     set(ObjectGuid(guidP), guidP.mapid, instanceId);
-
-    add();
  }
 
 void WorldPosition::set(const ObjectGuid& guid, const uint32 mapId, const uint32 instanceId)
@@ -129,8 +112,6 @@ WorldPosition::WorldPosition(const std::vector<WorldPosition*>& list, const Worl
         WorldPosition pos = WorldPosition(list, WP_CENTROID);
         set(*pos.closestSq(list));
     }
-
-    add();
 }
 
 WorldPosition::WorldPosition(const std::vector<WorldPosition>& list, const WorldPositionConst conType)
@@ -149,8 +130,6 @@ WorldPosition::WorldPosition(const std::vector<WorldPosition>& list, const World
         WorldPosition pos = WorldPosition(list, WP_CENTROID);
         set(pos.closestSq(list));
     }    
-
-    add();
 }
 
 float WorldPosition::distance(const WorldPosition& to) const
@@ -398,19 +377,41 @@ bool WorldPosition::canFly() const
     return true;
 }
 
+float WorldPosition::projectOnSegment(const WorldPosition& p1, const WorldPosition& p2) const
+{
+    if (p1.getMapId() != p2.getMapId() || p1.getMapId() != getMapId())
+        return 0.0f;
+
+    float dx = p2.coord_x - p1.coord_x;
+    float dy = p2.coord_y - p1.coord_y;
+    float dz = p2.coord_z - p1.coord_z;
+
+    float lenSq = dx * dx + dy * dy + dz * dz;
+    if (lenSq == 0.0f)
+        return 0.0f; // p1 and p2 are the same point
+
+    return ((coord_x - p1.coord_x) * dx + (coord_y - p1.coord_y) * dy + (coord_z - p1.coord_z) * dz) / lenSq;
+}
+
 G3D::Vector3 WorldPosition::getVector3() const
 {
     return G3D::Vector3(coord_x, coord_y, coord_z); 
 }
 
-std::string WorldPosition::print() const
+std::string WorldPosition::print(uint8 precision, bool onlyXyz) const
 {
     std::ostringstream out;
-    out << mapid << std::fixed << std::setprecision(2);
-    out << ';'<< coord_x;
+
+    if (!onlyXyz)
+        out << mapid << ";";
+
+    out << std::fixed << std::setprecision(precision);
+    out << coord_x;
     out << ';' << coord_y;
     out << ';' << coord_z;
-    out << ';' << orientation;
+
+    if (!onlyXyz)
+        out << ';' << orientation;
 
     return out.str();
 }
@@ -639,13 +640,13 @@ bool WorldPosition::SetOnTransport(GenericTransport* transport, int32 startHeigh
     return gotHit;
 }
 
-WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, float radius, bool findClose, bool useHeight)
+WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, uint32 radius)
 {
     std::vector<WorldPosition> path;
-    return RandomPointOnTrans(transport, radius, findClose, useHeight, nullptr, path);
+    return RandomPointOnTrans(transport, radius, nullptr, path);
 }
 
-WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, float radius, bool findClose, bool useHeight, Player* botForPath, std::vector<WorldPosition>& path)
+WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, uint32 radius, Player* botForPath, std::vector<WorldPosition>& path)
 {
     GenericTransport* oldTrans = botForPath ? botForPath->GetTransport() : nullptr;
 
@@ -653,71 +654,55 @@ WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, flo
         return WorldPosition();
 
     WorldPosition transPos(transport);
+    transPos.SetTranpotHeightToFloor(transport->GetEntry());
     WorldPosition bestPos;
-    float bestDist = findClose ? FLT_MAX : -1.0f;
     std::vector<WorldPosition> bestPath;
 
-    for (float x = radius * -1.0f; x < radius; x += 1.0f)
+    bool wantThisPoint = false;
+
+    uint32 tries = 0;
+
+    for (uint32 i = 0; i < 100; i++)
     {
-        for (float y = radius * -1.0f; y < radius; y += 1.0f)
+        WorldPosition pos = transPos + WorldPosition(0, irand(-radius, radius), irand(-radius, radius));
+
+        pos.SetOnTransport(transport, 1, -1);
+
+        tries++;
+
+        if (pos.getZ() < transPos.getZ() - 1.0f)
+            continue;
+
+        if (pos.getZ() > transPos.getZ() + 1.0f)
+            continue;
+
+        pos += WorldPosition(0, 0, 0, 0.1f);
+
+        if (!pos.isOnTransport(transport))
+            continue;
+
+        bestPos = pos;
+
+        if (botForPath)
         {
-            if (x * x + y * y > radius * radius)
+            botForPath->SetTransport(transport);
+
+            std::vector<WorldPosition> posPath = pos.getPathStepFrom(botForPath, botForPath, false);
+
+            if (posPath.empty())
                 continue;
 
-            WorldPosition pos = transPos + WorldPosition(0, x, y);
+            WorldPosition wantedEnd = pos;
+            wantedEnd.CalculatePassengerOffset(transport);
 
-            if (useHeight)
-                pos.setZ(getZ());
-            else
-                pos.SetTranpotHeightToFloor(transport->GetEntry());
-
-            pos.SetOnTransport(transport);
-
-            if (!useHeight && pos.getZ() < transPos.getZ() - 2.0f)
+            if (wantedEnd.sqDistance(posPath.back()) > 5.0f)
                 continue;
 
-            if (!pos.isOnTransport(transport))
-                continue;
-
-            if (botForPath)
-            {
-                botForPath->SetTransport(transport);
-
-                std::vector<WorldPosition> posPath = pos.getPathFrom(botForPath, botForPath);
-
-                if (posPath.empty())
-                    continue;
-
-                if (pos.sqDistance(posPath.back()) > 5.0f)
-                    continue;
-
-                if (rand_norm_f() < 0.01f || bestDist < 0.0f)
-                {
-                    bestPath = posPath;
-                }
-            }
-
-            float dist = sqDistance(pos);
-
-            if (findClose)
-            {
-                if (dist < bestDist)
-                {
-                    bestDist = dist;
-                    bestPos = pos;
-                }
-            }
-            else
-            {
-                if (rand_norm_f() < 0.01f || bestDist < 0.0f)
-                {
-                    bestDist = 0.0f;
-                    bestPos = pos;
-
-                    break;
-                }
-            }
+            bestPath = posPath;
         }
+
+        if (bestPath.size() > 2)
+            break;
     }
 
     if (botForPath)

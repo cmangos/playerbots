@@ -294,12 +294,15 @@ namespace ai
 
         std::vector<WorldPosition> getPointPath() { std::vector<WorldPosition> retVec; for (const auto& p : fullPath) retVec.push_back(p.point); return retVec; };
 
-        bool makeShortCut(WorldPosition startPos, float maxDist, Unit* bot);
+        void makeShortCut(WorldPosition startPos, float maxDist, Unit* bot);
         bool shouldMoveToNextPoint(WorldPosition startPos, std::vector<PathNodePoint>::iterator beg, std::vector<PathNodePoint>::iterator ed, std::vector<PathNodePoint>::iterator p, float& moveDist, float maxDist);
-        WorldPosition getNextPoint(WorldPosition startPos, float maxDist, TravelNodePathType& pathType, uint32& entry, bool onTransport, WorldPosition& telePosition);
+        bool UpcommingSpecialMovement(WorldPosition startPos, float maxDist, bool onTransport);
 
+        void ClipPath(PlayerbotAI* ai, Unit* mover, bool ignoreEnemyTargets);
         std::ostringstream print();
     private:
+        std::vector<PathNodePoint>::iterator getNextPoint(WorldPosition startPos, float maxDist, bool onTransport);
+
         std::vector<PathNodePoint> fullPath;
     };
 

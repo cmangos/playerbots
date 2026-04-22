@@ -16,11 +16,14 @@ namespace ai
         MovementAction(PlayerbotAI* ai, std::string name) : Action(ai, name) {}
 
         static bool MinimalMove(PlayerbotAI* ai);
-        static bool UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition dockPosition, bool doTeleport = true);
+        static bool UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition dockPosition, WorldPosition exitPosition, bool doTeleport);
     protected:
+        static bool MoveOnTransport(PlayerbotAI* ai, GenericTransport* transport, bool doTeleport);
+        static bool MoveOffTransport(PlayerbotAI* ai, WorldPosition exitPos, bool doTeleport);
+
         bool ChaseTo(WorldObject *obj, float distance = 0.0f, float angle = 0.0f);
         bool MoveNear(uint32 mapId, float x, float y, float z, float distance = sPlayerbotAIConfig.contactDistance);
-        bool FlyDirect(WorldPosition &startPosition,  WorldPosition &endPosition , WorldPosition& movePosition, TravelPath movePath, bool idle);
+        bool FlyDirect(const WorldPosition &startPosition,  const WorldPosition &endPosition , WorldPosition& movePosition, TravelPath movePath);
 
         inline bool MoveTo(const WorldLocation& location, bool idle = false, bool react = false, bool noPath = false, bool ignoreEnemyTargets = false)
         {
@@ -33,32 +36,12 @@ namespace ai
         bool WaitForTransport();
 
 
-        enum class PathHandleResult
-        {
-            Continue,
-            ReturnTrue,
-            ReturnFalse
-        };
-
-        bool ResolveMovePath(const WorldPosition& startPosition,
+        TravelPath ResolveMovePath(const WorldPosition& startPosition,
             const WorldPosition& endPosition,
             Unit* mover,
-            float minDist,
-            float maxDist,
-            WorldPosition& outMovePosition,
-            TravelPath& outMovePath);
+            LastMovement& lastMove);
 
-        PathHandleResult HandlePathNodeType(TravelNodePathType pathType,
-            uint32 entry,
-            const WorldPosition& movePosition,
-            const WorldPosition& telePosition,
-            const WorldPosition& startPosition,
-            LastMovement& lastMove,
-            bool& outIsWalking);
-
-        void ClipMovePositionForAggro(WorldPosition& movePosition,
-            Unit* mover,
-            const WorldPosition& startPosition);
+        bool HandleSpecialMovement(TravelPath& path);
 
         void UpdateFlyingState(WorldPosition& movePosition,
             float totalDistance,
@@ -66,13 +49,11 @@ namespace ai
             float maxDist,
             bool isWalking);
 
-        void DispatchMovement(MotionMaster& mm,
-            const WorldPosition& movePosition,
-            bool generatePath,
-            bool masterWalking);
+        void DispatchMovement(TravelPath movePath, bool generatePath, bool masterWalking);
 
-        // (existing private members below)
-        bool MoveTo2(uint32 mapId, float x, float y, float z, bool idle, bool react, bool noPath, bool ignoreEnemyTargets);
+        Unit* GetMover(Player* bot);
+
+        bool MoveTo2(const WorldPosition& endPos, bool idle = false, bool react = false, bool noPath = false, bool ignoreEnemyTargets = false);
 
         bool MoveTo(uint32 mapId, float x, float y, float z, bool idle = false, bool react = false, bool noPath = false, bool ignoreEnemyTargets = false);
         bool MoveTo(Unit* target, float distance = 0.0f);
@@ -88,7 +69,6 @@ namespace ai
 
         bool IsMovingAllowed(Unit* target);
         bool IsMovingAllowed(uint32 mapId, float x, float y, float z);
-        bool IsMovingAllowed();
         bool Flee(Unit *target);
         void ClearIdleState();
         void UpdateMovementState();
@@ -106,7 +86,7 @@ namespace ai
     private:
         bool IsValidPosition(const WorldPosition& position, const WorldPosition& visibleFromPosition);
         bool IsHazardNearPosition(const WorldPosition& position, HazardPosition* outHazard = nullptr);
-        bool GeneratePathAvoidingHazards(const WorldPosition& endPosition, bool generatePath, Movement::PointsArray& outPath);
+        bool GeneratePathAvoidingHazards(std::vector<WorldPosition>& movePath);
     };
 
     class FleeAction : public MovementAction

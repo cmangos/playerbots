@@ -13,6 +13,7 @@
 #include "strategy/values/LastMovementValue.h"
 #include "playerbot/ServerFacade.h"
 #include "MotionGenerators/MoveMap.h"
+#include "strategy/values/HazardsValue.h"
 
 using namespace ai;
 using namespace MaNGOS;
@@ -799,9 +800,15 @@ void TravelNode::print(bool printFailed)
 bool TravelPath::cutTo(PathNodePoint point, bool including)
 {
     auto it = std::find(fullPath.begin(), fullPath.end(), point);
+
     if (it != fullPath.end())
     {
         auto cutIt = including ? std::next(it) : it;
+
+        if (cutIt != fullPath.begin())
+            if (std::prev(cutIt)->type == PathNodeType::NODE_FLIGHTPATH)
+                MANGOS_ASSERT(cutIt->type != PathNodeType::NODE_FLIGHTPATH || cutIt->entry != std::prev(cutIt)->entry);
+                
 
         fullPath.erase(fullPath.begin(), cutIt);
         return true;
@@ -811,10 +818,11 @@ bool TravelPath::cutTo(PathNodePoint point, bool including)
 }
 
 //Attempts to move ahead of the path.
-bool TravelPath::makeShortCut(WorldPosition startPos, float maxDist, Unit* bot)
+void TravelPath::makeShortCut(WorldPosition startPos, float maxDist, Unit* bot)
 {
     if (getPath().empty())
-        return false;
+        return;
+
     float maxDistSq = maxDist * maxDist;
     float minDist = -1;
     float totalDist = fullPath.begin()->point.sqDistance(startPos);
@@ -826,7 +834,7 @@ bool TravelPath::makeShortCut(WorldPosition startPos, float maxDist, Unit* bot)
         //if (p.point.getMapId() != startPos.getMapId())
         //    continue;
 
-        if (p.point.getMapId() == startPos.getMapId())
+        if (p.point.getMapId() == startPos.getMapId() && p.isWalkable())
         {
             float curDist = p.point.sqDistance(startPos);
 
@@ -860,34 +868,34 @@ bool TravelPath::makeShortCut(WorldPosition startPos, float maxDist, Unit* bot)
     if (newPath.empty() || minDist > maxDistSq || newPath.front().point.getMapId() != startPos.getMapId())
     {
         clear();
-        return false;
+        return;
     }
 
     WorldPosition beginPos = newPath.begin()->point;
 
     //The old path seems to be the best.
     if (newPath.front() == fullPath.front() || beginPos.distance(firstNode) < sPlayerbotAIConfig.tooCloseDistance)
-        return false;
+        return;
 
     //We are (nearly) on the new path. Just follow the rest.
     if (beginPos.distance(startPos) < sPlayerbotAIConfig.tooCloseDistance)
     {
         fullPath = newPath;
-        return true;
+        return;
     }
 
     std::vector<WorldPosition> toPath = startPos.getPathTo(beginPos, bot);
 
     //We can not reach the new begin position. Follow the complete path.
     if (!beginPos.isPathTo(toPath))
-        return false;
+        return;
 
     //Move to the new path and continue.
     fullPath.clear();
     addPath(toPath);
     addPath(newPath);
 
-    return true;
+    return;
 }
 
 bool TravelPath::shouldMoveToNextPoint(WorldPosition startPos, std::vector<PathNodePoint>::iterator beg, std::vector<PathNodePoint>::iterator ed, std::vector<PathNodePoint>::iterator p, float& moveDist, float maxDist)
@@ -953,21 +961,15 @@ bool TravelPath::shouldMoveToNextPoint(WorldPosition startPos, std::vector<PathN
 }
 
 //Next position to move to
-WorldPosition TravelPath::getNextPoint(WorldPosition startPos, float maxDist, TravelNodePathType& pathType, uint32& entry, bool onTransport, WorldPosition& telePosition)
+std::vector<PathNodePoint>::iterator TravelPath::getNextPoint(WorldPosition startPos, float maxDist, bool onTransport)
 {
-    if (getPath().empty())
-        return WorldPosition();
-
-    auto beg = fullPath.begin();
-    auto ed = fullPath.end();
-
-    float minDist = 0.0f;
-    auto startP = beg;
+    float minDist = FLT_MAX;
+    auto startP = fullPath.begin();
 
     if (!onTransport)
     {
         //Get the closest point on the path to start from.
-        for (auto p = startP; p != ed; p++)
+        for (auto p = startP; p != fullPath.end(); p++)
         {
             if (p->point.getMapId() != startPos.getMapId())
                 continue;
@@ -977,7 +979,7 @@ WorldPosition TravelPath::getNextPoint(WorldPosition startPos, float maxDist, Tr
             if (!p->isWalkable())
                 continue;
 
-            if (curDist <= minDist || p == beg)
+            if (curDist <= minDist)
             {
                 minDist = curDist;
                 startP = p;
@@ -985,12 +987,15 @@ WorldPosition TravelPath::getNextPoint(WorldPosition startPos, float maxDist, Tr
         }
     }
 
+    if (startP == fullPath.end())
+        return startP;
+
     float moveDist = startP->point.distance(startPos);
 
     //Move as far as we are allowed
-    for (auto p = startP; p != ed; p++)
+    for (auto p = startP; p != fullPath.end(); p++)
     {
-        if (shouldMoveToNextPoint(startPos, beg, ed, p, moveDist, maxDist))
+        if (shouldMoveToNextPoint(startPos, fullPath.begin(), fullPath.end(), p, moveDist, maxDist))
             continue;
 
         startP = p;
@@ -998,103 +1003,193 @@ WorldPosition TravelPath::getNextPoint(WorldPosition startPos, float maxDist, Tr
         break;
     }
 
-    auto prevP = startP, nextP = startP;
-    if (startP != beg)
-        prevP = std::prev(prevP);
-    if (std::next(nextP) != ed)
-        nextP = std::next(nextP);
+    if (startP == fullPath.end() || !startP->isWalkable())
+        return startP;
 
-    WorldPosition nextPoint = startP->point;
+    auto nextP = std::next(startP);
+
+    if (nextP == fullPath.end())
+        return startP;
+
+    //If startPos is between startP and nextP we want to move to NextP instead.
+    float project = startPos.projectOnSegment(startP->point, nextP->point);
+    if (project > 0.0f && project < 1.0f)
+        return nextP;
+
+    return startP;
+}
+
+bool TravelPath::UpcommingSpecialMovement(WorldPosition startPos, float maxDist, bool onTransport)
+{
+    if (getPath().empty())
+        return false;
+
+    auto startP = getNextPoint(startPos, maxDist, onTransport);
+
+    auto prevP = startP, nextP = startP;
+    if (startP != fullPath.begin())
+        prevP = std::prev(prevP);
+    if (std::next(nextP) != fullPath.end())
+        nextP = std::next(nextP);
 
     //We are moving towards a teleport. Move to portal an activate area trigger
     if (startP->type == PathNodeType::NODE_AREA_TRIGGER)
     {
-        pathType = TravelNodePathType::areaTrigger;
-        entry = startP->entry;
+        if (startP->entry) //For area triggers we need to be close enough to trigger it's activation.
+        {
+            AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(startP->entry);
+            if (!atEntry)
+                return false;
+
+            AreaTrigger const* at = sObjectMgr.GetAreaTrigger(startP->entry);
+            if (!at)
+                return false;
+
+            if(!IsPointInAreaTriggerZone(atEntry, startPos.getMapId(), startPos.getX(), startPos.getY(), startPos.getZ(), 0.5f))
+                return false;
+        }
+
         cutTo(*startP, false);
-        return nextPoint;
+
+        return true;
     }
 
     //We are moving towards a static portal. Move to portal and use it.
     if (startP->type == PathNodeType::NODE_STATIC_PORTAL && startPos.distance(startP->point) < INTERACTION_DISTANCE)
     {
-        pathType = TravelNodePathType::staticPortal;
-        entry = startP->entry;
         cutTo(*startP, false);
-        return nextPoint;
+
+        return true;
     }
 
     //We are using a hearthstone
     if (nextP->type == PathNodeType::NODE_TELEPORT)
     {
-        pathType = TravelNodePathType::teleportSpell;
-        entry = startP->entry;
-        cutTo(*startP, false);
-        return nextPoint;
+        cutTo(*nextP, false);
+        return true;
     }
 
     //We are moving towards a flight path. Move to flight master and activate flight path.
     if (startP->type == PathNodeType::NODE_FLIGHTPATH && startPos.distance(startP->point) < INTERACTION_DISTANCE)
     {
-        pathType = TravelNodePathType::flightPath;
-        entry = startP->entry;
         cutTo(*startP, false);
-        return nextPoint;
+        return true;
     }
 
     //Walk on / teleport to transport.
     if (sPlayerbotAIConfig.transportTeleportType < 2 && startP->type == PathNodeType::NODE_TRANSPORT)
     {
-        pathType = TravelNodePathType::transport;
-        entry = nextP->entry;
+        uint32 entry = nextP->entry;
 
-        if (!onTransport)
+        if (!onTransport) 
         {
-            telePosition = prevP->point; //We want stand here to walk on boat?
-            cutTo(*startP, false);
-            return nextPoint; //Bot should dock here.
+            cutTo(*prevP, false); //Previous point = dock, startP = where transport will stop.
+            return true;
         }
 
-        for (auto p = startP; p != ed; p++) //Move along the transport path to the end of the boat ride.
+        for (auto p = startP; p != fullPath.end(); p++) //Move along the transport path to the end of the boat ride.
         {
             if (p->type != PathNodeType::NODE_TRANSPORT || (p->entry && p->entry != entry))
             {
-                telePosition = p->point; //We want to teleport here.
-                cutTo(*prevP, false);
-                return nextPoint;        //Bot should dock here.
+                cutTo(*p, false); //PrevP = where transport will stop, startP = dock where we want to walk to.
+                return true;
             }
 
-            if (p->entry == entry)
-                nextPoint = p->point;
+            prevP = p;
         }
     }
         
     //Teleport to end of transport.
     if (sPlayerbotAIConfig.transportTeleportType == 2 && nextP->type == PathNodeType::NODE_TRANSPORT)
     {
-        pathType = TravelNodePathType::areaTrigger;
-        entry = 0;
-
-        for (auto p = startP + 1; p != ed; p++) //Move along the transport path to the end of the boat ride. 
+        for (auto p = startP + 1; p != fullPath.end(); p++) //Move along the transport path to the end of the boat ride. 
         {
             if (p->type != PathNodeType::NODE_TRANSPORT)
             {
-                nextPoint = p->point;
-                cutTo(*p, false);
-                return nextPoint; //We want to move here.
+                cutTo(*prevP, false); //PrevP = where transport will stop, startP = dock where we want to walk to.
+                return true;
             }
         }
-    }
+    }    
 
-    //We have to move far for next point. Try to make a cropped path.
-    if (moveDist < sPlayerbotAIConfig.targetPosRecalcDistance && std::next(startP) != ed)
+    return false;
+}
+
+void TravelPath::ClipPath(PlayerbotAI* ai, Unit* mover, bool ignoreEnemyTargets)
+{
+    auto startP = getNextPoint(mover, 0.0f, false);
+
+    cutTo(*startP, false);
+
+    if (startP == fullPath.end())
+        return;
+
+    AiObjectContext* context = ai->GetAiObjectContext();
+    std::list<ObjectGuid> targets;
+    if (!ai->IsStateActive(BotState::BOT_STATE_COMBAT) && !ai->GetBot()->IsDead() && !ignoreEnemyTargets)
+        targets = AI_VALUE_LAZY(std::list<ObjectGuid>, "possible attack targets");
+
+    std::list<HazardPosition> hazards = AI_VALUE(std::list<HazardPosition>, "hazards");
+
+    auto endP = fullPath.end();
+
+    for (auto p = fullPath.begin(); p != fullPath.end(); p++)
     {
-        //vector<WorldPosition> path = startPos.getPathTo(std::next(startP)->point, nullptr);
-        //startP->point = startPos.lastInRange(path, -1, maxDist);
-        return WorldPosition();
+        for (auto& targetGuid : targets)
+        {
+            if (!targetGuid.IsCreature())
+                continue;
+
+            Unit* unit = ai->GetUnit(targetGuid);
+            if (!unit || unit->IsDead())
+                continue;
+
+            if (unit->GetLevel() > mover->GetLevel() + 5)
+                continue;
+
+            float range = unit->GetAttackDistance(mover);
+            if (WorldPosition(unit).sqDistance(p->point) > range * range)
+                continue;
+
+            if (!unit->CanAttackOnSight(mover) || !unit->IsWithinLOSInMap(mover))
+                continue;
+
+            endP = p;
+            break;
+        }
+
+        if (endP != fullPath.end())
+            break;
+
+        for (const HazardPosition& hazard : hazards)
+        {
+            const WorldPosition& hazardPosition = hazard.first;
+            const float hazardRange = hazard.second;
+            const float distance = p->point.sqDistance(hazardPosition);
+            if (distance <= hazardRange * hazardRange)
+            {
+
+                endP = p;
+                break;
+            }
+        }
+
+        if (endP != fullPath.end())
+            break;
+
+        if (p->point.sqDistance(fullPath.begin()->point) > sPlayerbotAIConfig.reactDistance * sPlayerbotAIConfig.reactDistance)
+            endP = p;
+        else if (!p->isWalkable())
+            endP = p;
+
+        if (endP != fullPath.end())
+            break;
     }
 
-    return nextPoint;
+    if (endP == fullPath.end())
+        return;
+
+    fullPath.erase(std::next(endP), fullPath.end());
 }
 
 std::ostringstream TravelPath::print()
@@ -1622,40 +1717,8 @@ TravelNodeRoute TravelNodeMap::getRoute(WorldPosition startPos, WorldPosition en
     std::vector<WorldPosition> newStartPath;
     std::vector<TravelNode*> startNodes = getNodes(startPos, -1, transportEntry), endNodes = getNodes(endPos);
 
-    // Debug: Log start/end nodes
-    Player* debugBot = dynamic_cast<Player*>(unit);
-    if (debugBot && debugBot->GetPlayerbotAI() && debugBot->GetPlayerbotAI()->HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
-    {
-        if (!startNodes.empty())
-        {
-            // Show the top 3 closest start nodes and their route counts
-            std::vector<TravelNode*> sorted = startNodes;
-            std::partial_sort(sorted.begin(), sorted.begin() + std::min(3u, (uint32)sorted.size()), sorted.end(), 
-                [startPos](TravelNode* i, TravelNode* j) { return i->getPosition()->sqDistance(startPos) < j->getPosition()->sqDistance(startPos); });
-            
-            for (uint32 i = 0; i < std::min(3u, (uint32)sorted.size()); i++)
-            {
-                sLog.outString("[Bot %s]   startNode[%u]: '%s' at (%.1f,%.1f), routes=%u", 
-                    debugBot->GetName(), i, sorted[i]->getName().c_str(), 
-                    sorted[i]->getPosition()->getX(), sorted[i]->getPosition()->getY(),
-                    sorted[i]->getRouteSize());
-            }
-        }
-        if (!endNodes.empty())
-        {
-            std::vector<TravelNode*> sorted = endNodes;
-            std::partial_sort(sorted.begin(), sorted.begin() + std::min(3u, (uint32)sorted.size()), sorted.end(), 
-                [endPos](TravelNode* i, TravelNode* j) { return i->getPosition()->sqDistance(endPos) < j->getPosition()->sqDistance(endPos); });
-            
-            for (uint32 i = 0; i < std::min(3u, (uint32)sorted.size()); i++)
-            {
-                sLog.outString("[Bot %s]   endNode[%u]: '%s' at (%.1f,%.1f), routes=%u", 
-                    debugBot->GetName(), i, sorted[i]->getName().c_str(), 
-                    sorted[i]->getPosition()->getX(), sorted[i]->getPosition()->getY(),
-                    sorted[i]->getRouteSize());
-            }
-        }
-    }
+    if (startNodes.empty())
+        return TravelNodeRoute();    
 
     uint32 startNr = std::min(5, (int)startNodes.size()-1);
     uint32 endNr = std::min(5, (int)endNodes.size()-1);
@@ -3467,7 +3530,7 @@ void TravelNodeMap::loadNodeStore()
                 if (path.getPath().front() != *endNode->getPosition() || path.getPath().back() != *node->getPosition())
                     continue;
                 
-                auto newPath = path.getPath();
+                std::vector<WorldPosition> newPath = path.getPath();
                 std::reverse(newPath.begin(), newPath.end());
                 path.setPath(newPath);
             }
@@ -3490,7 +3553,6 @@ void TravelNodeMap::loadNodeStore()
                 std::vector<WorldPosition> oldPath = path.getPath();
                 std::vector<WorldPosition> newPath;
                 
-
                 newPath.push_back(*node->getPosition());
                     
                 newPath.insert(newPath.end(), oldPath.begin(), oldPath.end());

@@ -4365,7 +4365,7 @@ std::list<std::string> RandomPlayerbotMgr::HandleRemove(Player* bot)
 std::list<std::string> RandomPlayerbotMgr::HandleConsoleReset(std::string param)
 {
     std::list<std::string> messages;
-    CharacterDatabase.PExecute("delete from ai_playerbot_random_bots");
+    CharacterDatabase.PExecute("delete from ai_playerbot_random_bots where event not in ('temporary')");
     sRandomPlayerbotMgr.eventCache.clear();
     std::string msg = "Random bots were reset for all players. Please restart the Server.";
     messages.push_back(msg);
@@ -4597,5 +4597,3 @@ void RandomPlayerbotMgr::OnBotDeleted(uint32 botGuid, uint32 accountId)
     
     CharacterDatabase.PExecute("DELETE FROM ai_playerbot_random_bots WHERE bot = '%u'", botGuid);
 }
-
-// This function is now properly overridden from PlayerbotHolder

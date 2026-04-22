@@ -195,7 +195,7 @@ void PlayerbotMgr::CancelLogout()
     });
 }
 
-void PlayerbotHolder::LogoutPlayerBot(uint32 guid)
+void PlayerbotHolder::LogoutPlayerBot(uint32 guid, bool allowInstant, bool forDelete)
 {
     Player* bot = GetPlayerBot(guid);
     if (bot)
@@ -213,7 +213,8 @@ void PlayerbotHolder::LogoutPlayerBot(uint32 guid)
            }
         }
         sLog.outDebug("Bot %s logging out", bot->GetName());
-        bot->SaveToDB();
+        if (!forDelete)
+            bot->SaveToDB();
 
         WorldSession* botWorldSessionPtr = bot->GetSession();
         WorldSession* masterWorldSessionPtr = nullptr;
@@ -225,29 +226,8 @@ void PlayerbotHolder::LogoutPlayerBot(uint32 guid)
         // check for instant logout
         bool logout = botWorldSessionPtr->ShouldLogOut(time(nullptr));
 
-        // make instant logout for now
-        logout = true;
-
-        if (masterWorldSessionPtr && masterWorldSessionPtr->ShouldLogOut(time(nullptr)))
-            logout = true;
-        
-        if (masterWorldSessionPtr && masterWorldSessionPtr->GetState() != WORLD_SESSION_STATE_READY)
-            logout = true;
-
-        if (bot->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || bot->IsTaxiFlying() ||
-            botWorldSessionPtr->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))
-        {
-            logout = true;
-        }
-
-        if (master && (master->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || master->IsTaxiFlying() ||
-            (masterWorldSessionPtr && masterWorldSessionPtr->GetSecurity() >= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_INSTANT_LOGOUT))))
-        {
-            logout = true;
-        }
-
         // if no instant logout, request normal logout
-        if (!logout)
+        if (!allowInstant)
         {
             if (bot && (bot->IsStunnedByLogout() || bot->GetSession()->isLogingOut()))
             {
@@ -256,8 +236,13 @@ void PlayerbotHolder::LogoutPlayerBot(uint32 guid)
             else if (bot)
             {
                 ai->TellPlayer(ai->GetMaster(), BOT_TEXT("logout_start"));
-                WorldPacket p;
-                botWorldSessionPtr->HandleLogoutRequestOpcode(p);
+
+                WorldPacket p(CMSG_LOGOUT_REQUEST);
+                std::unique_ptr<WorldPacket> packet(new WorldPacket(p));
+                botWorldSessionPtr->QueuePacket(std::move(packet));
+
+                //WorldPacket p;
+                //botWorldSessionPtr->HandleLogoutRequestOpcode(p);
                 if (!bot)
                 {
                     playerBots[guid] = nullptr;
@@ -1444,7 +1429,6 @@ std::string PlayerbotHolder::HandleConsoleWhisper(Player* bot, Player* master, c
     return msg;
 }
 
-
 std::string PlayerbotHolder::HandleConsoleCmd(Player* bot, Player* master, const std::string param)
 {
     if (!bot)
@@ -1861,6 +1845,8 @@ std::list<std::string> PlayerbotHolder::HandleCreate(Player* master, const std::
             autoAdd = (value == "1" || value == "true" || value == "yes");
         else if (key == "group")
             groupWith = value;
+        else if (key == "temporary")
+            temporary = (value == "1" || value == "true" || value == "yes");
     }
 
     std::string error;
@@ -2118,12 +2104,34 @@ void PlayerbotHolder::OnBotDeleted(uint32 botGuid, uint32 accountId)
 {
 }
 
+bool PlayerbotHolder::DeleteBot(ObjectGuid guid, bool allowInstant)
+{
+    uint32 botAccount = sObjectMgr.GetPlayerAccountIdByGUID(guid);
+
+    if (sObjectMgr.GetPlayer(guid, true))
+        LogoutPlayerBot(guid, allowInstant, true);
+
+    Player::DeleteFromDB(guid, botAccount, true, true);
+
+    OnBotDeleted(guid, botAccount);
+
+    return true;
+}
+
 std::string PlayerbotHolder::HandleBotDelete(Player* bot, Player* master, const std::string param)
 {
-    if (!Qualified::isValidNumberString(param))
-        return "Add: Error parsing " + param;
+    ObjectGuid guid;
+    if (!bot)
+    {
+        if (!Qualified::isValidNumberString(param))
+            return "Add: Error parsing " + param;
 
-    ObjectGuid guid = ObjectGuid(uint64(std::stoull(param)));
+        guid = ObjectGuid(uint64(std::stoull(param)));
+    }
+    else
+    {
+        guid = bot->GetObjectGuid();
+    }
 
     uint32 masterAccountId = master ? master->GetSession()->GetAccountId() : 0;
     PlayerbotMgr* mgr = master ? master->GetPlayerbotMgr() : nullptr;
@@ -2137,12 +2145,7 @@ std::string PlayerbotHolder::HandleBotDelete(Player* bot, Player* master, const 
     if (isRandomAccount && mgr == this)
         return "Not your bot";
 
-    if (bot)
-        LogoutPlayerBot(guid);
-
-    Player::DeleteFromDB(guid, botAccount, true, true);
-
-    OnBotDeleted(guid, botAccount);
+    DeleteBot(guid);
 
     return "ok";
 }

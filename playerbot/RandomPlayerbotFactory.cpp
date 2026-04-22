@@ -537,6 +537,25 @@ void RandomPlayerbotFactory::CreateRandomBots()
         sLog.outString("Random bot characters deleted");
     }
 
+    //Delete temporary bots.
+
+    auto temporarybots = CharacterDatabase.Query("SELECT characters.guid, characters.account FROM ai_playerbot_random_bots JOIN characters ON (characters.guid = ai_playerbot_random_bots.bot AND characters.name = ai_playerbot_random_bots.data) WHERE ai_playerbot_random_bots.event = 'temporary'");
+
+    if (temporarybots)
+    {
+        sLog.outString("Deleting temporary bots");
+
+        do
+        {
+            Field* fields = temporarybots->Fetch();
+            uint32 guid = fields[0].GetUInt32();
+            uint32 accountId = fields[1].GetUInt32();
+
+            CharacterDatabase.PExecute("DELETE FROM ai_playerbot_random_bots WHERE bot = %d", guid);
+            Player::DeleteFromDB(ObjectGuid(HIGHGUID_PLAYER, guid), accountId, true, true);
+        } while (temporarybots->NextRow());
+    }
+
     if (!sPlayerbotAIConfig.randomBotAutoCreate)
     {
         for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)

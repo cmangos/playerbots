@@ -3131,6 +3131,35 @@ bool DebugAction::HandlePosition(Event& event, Player* requester, const std::str
         return true;
     }
 
+    // Check if position is above ground or underground
+    if (param.substr(0, 6) == "ground")
+    {
+        std::string groundParam = param.size() > 5 ? param.substr(5) : "";
+        while (groundParam.size() > 0 && groundParam[0] == ' ')
+            groundParam = groundParam.substr(1);
+
+        WorldPosition pos(bot);
+        if (!groundParam.empty())
+        {
+            PositionTarget target = ParseLocation(groundParam, bot);
+            if (target.valid)
+            {
+                pos = WorldPosition(target.mapId, target.x, target.y, target.z);
+            }
+            else
+            {
+                ai->TellPlayer(requester, "Usage: position ground [x y | map x y | map x y z | location]");
+                return true;
+            }
+        }
+
+        std::ostringstream out;
+        out << pos.getX() << ", " << pos.getY() << ", " << pos.getZ() << " m" << pos.getMapId() << ": ";
+        out << (pos.isUnderground() ? "Underground" : "Above ground");
+        ai->TellPlayer(requester, out.str());
+        return true;
+    }
+
     // If param is empty, show bot's position
     if (param.empty())
     {

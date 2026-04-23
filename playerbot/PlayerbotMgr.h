@@ -50,9 +50,9 @@ public:
     static std::string GetCommandTexts(const std::string& command);
     static std::unordered_map<std::string, std::string> GetCommandTexts();
 
+    void CreateBot(Player* master, const std::string param, std::list<std::string>& messages, ObjectGuid& guid);
     bool DeleteBot(ObjectGuid guid, bool allowInstant = true);
 #ifdef GenerateBotTests
-    void CreateBot(Player* master, const std::string param, std::list<std::string>& messages, ObjectGuid& guid);
     void DepositTestResult(const std::string& testName, const std::string& result);
 #endif
 

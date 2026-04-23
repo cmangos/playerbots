@@ -216,7 +216,7 @@ void LogAnalysis::AnalyseQuests()
         }
         else if (tokens[2] == "QueryItemUsageAction" || tokens[3] == "QuestUpdateAddKillAction")
         {
-            questId[tokens[7]] = questId[tokens[7]];
+            questId[tokens[7]] = stoi(tokens[8]);
             questObjective[tokens[7]]++;
             if (stof(tokens[8]) == 1)
                 questCompletedCount[tokens[7]]++;

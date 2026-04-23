@@ -13,11 +13,13 @@ namespace ai
         static bool HasTest(const std::string& name);
         static std::vector<std::string> GetTestScript(const std::string& name);
         static std::vector<std::string> GetAvailableTests();
+        static void GenerateMovementTests(int maxTests, float minDist, float maxDist);
 
         static bool ParseLocation(const std::string& str, GuidPosition& out);
         static bool LookupNamedLocation(const std::string& name, GuidPosition& out);
 
     private:
+        static void GenerateMovementTestsImpl(int maxTests, float minDist, float maxDist);
         static void EnsureTestsRegistered();
         static void EnsureLocationsInit();
     };

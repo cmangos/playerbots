@@ -1,10 +1,19 @@
 #include "playerbot/playerbot.h"
 #include "TestRegistry.h"
+#include "Globals/ObjectMgr.h"
 
 static std::map<std::string, std::vector<std::string>> sTestRegistry;
 static bool sTestsRegistered = false;
 
 static std::map<std::string, GuidPosition> sTestLocations;
+
+struct TeleLoc
+{
+    std::string name;
+    GuidPosition pos;
+};
+
+static std::vector<TeleLoc> sTeleLocations;
 
 static void InitTestLocations()
 {
@@ -13,13 +22,101 @@ static void InitTestLocations()
     sTestLocations["zg_boss1_room"] = GuidPosition(ObjectGuid(), WorldPosition(309, -11900.0f, -1650.0f, 92.0f));
 }
 
+static void InitTeleLocations()
+{
+    for (auto const& [id, tele] : sObjectMgr.GetGameTeleMap())
+    {
+        GuidPosition pos(ObjectGuid(), WorldPosition(tele.mapId, tele.position_x, tele.position_y, tele.position_z, tele.orientation));
+        sTeleLocations.push_back({ tele.name, pos });
+    }
+}
+
 static void EnsureLocationsInit()
 {
     static bool initialized = false;
     if (!initialized)
     {
         InitTestLocations();
+        InitTeleLocations();
         initialized = true;
+    }
+}
+
+void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float maxDist)
+{
+    if (sTeleLocations.size() < 2)
+        return;
+
+    std::string gmInvisible = "gm visible off";
+    std::string gmVisible = "gm visible on";
+    std::string needAlive = "monitor bot dead => abort \"Bot died test interupted\"";
+    std::string needAboveGRound = "monitor underground => fail \"Bot is underground at <current position>\"";
+    std::string needCanReachNode = "monitor can reach node => fail \"Bot cannot reach travel network at <current position>\"";
+
+    int count = 0;
+    for (size_t i = 0; i < sTeleLocations.size() && count < maxTests; ++i)
+    {
+        for (size_t j = 0; j < sTeleLocations.size() && count < maxTests; ++j)
+        {
+            if (i == j)
+                continue;
+
+            float dist = sTeleLocations[i].pos.distance(sTeleLocations[j].pos);
+            if (dist < minDist || dist > maxDist)
+                continue;
+
+            std::string prefix;
+            int timeoutSecs = dist + 600;
+            if (dist < 500)
+            {
+                prefix = "short";
+            }
+            else if (dist < 2000)
+            {
+                prefix = "medium";
+            }
+            else
+            {
+                prefix = "far";
+            }
+
+
+
+            std::string startName = sTeleLocations[i].name;
+            std::transform(startName.begin(), startName.end(), startName.begin(), ::tolower);
+            startName.erase(remove(startName.begin(), startName.end(), '\''), startName.end());
+            std::string endName = sTeleLocations[j].name;
+            std::transform(endName.begin(), endName.end(), endName.begin(), ::tolower);
+            endName.erase(remove(endName.begin(), endName.end(), '\''), endName.end());
+
+            std::ostringstream testName;
+            testName << "movement_" << prefix << "_" << startName << "_" << endName;
+
+            std::ostringstream timeout;
+            timeout << "monitor time > " << timeoutSecs << " => fail \"Timeout: bot did not reach destination after <time elapsed>\"";
+
+            std::ostringstream reachCheck;
+            reachCheck << "monitor distance to " << endName << " < 100 => pass \"Bot arrived at " << endName << " after <time elapsed>\"";
+
+            std::vector<std::string> script = {
+                gmInvisible,
+                needAlive,
+                needAboveGRound,
+                needCanReachNode,
+                timeout.str(),
+                reachCheck.str(),
+                "teleport " + startName,
+                "set destination " + endName,
+                "observe",
+                gmVisible
+            };
+
+            RegisterTest(testName.str(), script);
+            count++;
+
+            if ((j % 10) == 0 && i < sTeleLocations.size())
+                i++;
+        }
     }
 }
 
@@ -52,6 +149,12 @@ std::vector<std::string> TestRegistry::GetAvailableTests()
     for (const auto& pair : sTestRegistry)
         tests.push_back(pair.first);
     return tests;
+}
+
+void TestRegistry::GenerateMovementTests(int maxTests, float minDist, float maxDist)
+{
+    EnsureLocationsInit();
+    GenerateMovementTestsImpl(maxTests, minDist, maxDist);
 }
 
 bool TestRegistry::LookupNamedLocation(const std::string& name, GuidPosition& out)
@@ -121,6 +224,8 @@ void TestRegistry::EnsureTestsRegistered()
     RegisterTest("movement_walk_long_redridge_to_stormwind", {gmInvisible, needAlive, Timeout10Min, "monitor distance to stormwind < 100 => pass \"Bot arrived at Stormwind\"", "teleport redridge", "set destination stormwind", "observe", gmVisible});
 
     RegisterTest("movement_walk_long_duskwood_to_stormwind", {gmInvisible, needAlive, Timeout10Min, "monitor distance to stormwind < 100 => pass \"Bot arrived at Stormwind\"", "teleport duskwood", "set destination stormwind", "observe", gmVisible});
+
+    GenerateMovementTests(1000, 5.0f, 100000.0f);
 }
 
 void TestRegistry::EnsureLocationsInit()

@@ -570,6 +570,11 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
             CharacterDatabase.PExecute("DELETE FROM ai_playerbot_random_bots WHERE bot = %d", guid);
             Player::DeleteFromDB(ObjectGuid(HIGHGUID_PLAYER, guid), accountId, true, true);
+
+            if (sAccountMgr.GetCharactersCount(accountId) == 0)
+            {
+                sAccountMgr.DeleteAccount(accountId);
+            }
         } while (temporarybots->NextRow());
     }
 

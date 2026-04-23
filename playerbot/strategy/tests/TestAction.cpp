@@ -272,7 +272,6 @@ void TestAction::ReportResult()
             bot->GetName() + " | deleting bot";
 
         LogToConsole(logLine);
-        LogToFile(logLine);
 
         sRandomPlayerbotMgr.SetValue(bot, "temporary", 0);
 

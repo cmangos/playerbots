@@ -4,6 +4,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
 #include "FreeMoveValues.h"
+#include "LastMovementValue.h"
 
 using namespace ai;
 
@@ -69,6 +70,9 @@ Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ign
         allowBufOutOfGroupPlayers = false;
 
     if (allowBufOutOfGroupPlayers && AI_VALUE2(uint32, "current mount speed", "self target"))
+        allowBufOutOfGroupPlayers = false;
+
+    if (allowBufOutOfGroupPlayers && !AI_VALUE(LastMovement&, "last movement").lastPath.empty() && AI_VALUE(LastMovement&, "last movement").lastPath.getBack().distance(bot) > sPlayerbotAIConfig.sightDistance)
         allowBufOutOfGroupPlayers = false;
 
     if (allowBufOutOfGroupPlayers)

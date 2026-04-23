@@ -442,7 +442,24 @@ void RandomPlayerbotFactory::CreateRandomBots()
         std::list<uint32> botAccounts;
         std::list<uint32> botFriends;
 
-        for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
+        uint32 maxAccountNum = 0;
+
+        auto accountNrQr = LoginDatabase.PQuery("SELECT max(replace(lower(username), lower('%s'), '') + 1 - 1) maxAccountNr FROM account WHERE replace(lower(username), lower('%s'), '') != 0", sPlayerbotAIConfig.randomBotAccountPrefix.c_str(), sPlayerbotAIConfig.randomBotAccountPrefix.c_str());
+        
+        if (!accountNrQr)
+        {
+            sLog.outError("Failed to find last %s account nr.", sPlayerbotAIConfig.randomBotAccountPrefix.c_str());
+        }
+        else
+        {
+            Field* fields = accountNrQr->Fetch();
+            uint32 accountNumber = sPlayerbotAIConfig.randomBotAccountCount + 1;
+            maxAccountNum = fields[0].GetUInt32();
+        }
+
+        maxAccountNum = std::max(maxAccountNum, sPlayerbotAIConfig.randomBotAccountCount);
+
+        for (uint32 accountNumber = 0; accountNumber < maxAccountNum; ++accountNumber)
         {
             std::ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
             std::string accountName = out.str();

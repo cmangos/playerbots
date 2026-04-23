@@ -50,6 +50,7 @@ TestAction::TestAction(PlayerbotAI* ai, std::string name)
     commands.push_back(std::make_unique<HandleSpawnBot>());
     commands.push_back(std::make_unique<HandleDespawnBot>());
     commands.push_back(std::make_unique<HandleFormParty>());
+    commands.push_back(std::make_unique<HandleSpawnGroup>());
     commands.push_back(std::make_unique<HandleObserve>());
     commands.push_back(std::make_unique<HandleCleanup>());
     commands.push_back(std::make_unique<HandleAssert>());

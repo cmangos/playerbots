@@ -4,6 +4,7 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
 #include "TestContext.h"
+#include "playerbot/PlayerbotMgr.h"
 
 using namespace ai;
 
@@ -28,5 +29,23 @@ bool HandleDespawnBot::Execute(const std::string& params, Player* bot,
 bool HandleFormParty::Execute(const std::string& params, Player* bot,
                     PlayerbotAI* ai, TestContext& ctx, std::string& error)
 {
+    return true;
+}
+
+bool HandleSpawnGroup::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& error)
+{
+    uint32 groupSize = atoi(params.c_str());
+    if (groupSize == 0 || groupSize > 50)
+    {
+        error = "Invalid group size: " + params + ". Use 1-50.";
+        return false;
+    }
+
+    std::ostringstream paramStr;
+    paramStr << "group=" << groupSize;
+
+    sRandomPlayerbotMgr.HandleGroup(bot, paramStr.str(), SEC_PLAYER);
+
     return true;
 }

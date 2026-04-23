@@ -30,4 +30,13 @@ namespace ai
     protected:
         std::string GetName() const override { return "form"; }
     };
+
+    class HandleSpawnGroup : public TestCommand
+    {
+    public:
+        bool Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& error) override;
+    protected:
+        std::string GetName() const override { return "mgroup"; }
+    };
 }

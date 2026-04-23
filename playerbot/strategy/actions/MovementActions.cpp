@@ -115,8 +115,8 @@ bool MovementAction::FlyDirect(const WorldPosition &startPosition, const WorldPo
         }
         else
         {
-            std::reverse(path.begin(), path.end());
             path = movePath.getPointPath();
+            std::reverse(path.begin(), path.end());
         }
 
         if (path.empty())
@@ -1543,14 +1543,9 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 if (sPlayerbotAIConfig.hasLog("bot_movement.csv"))
                 {
                     WorldPosition telePos;
-                    if (entry)
-                    {
-                        AreaTrigger const* at = sObjectMgr.GetAreaTrigger(entry);
-                        if (at)
-                            telePos = WorldPosition(at->target_mapId, at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
-                    }
-                    else
-                        telePos = movePosition;
+                    AreaTrigger const* at = sObjectMgr.GetAreaTrigger(entry);
+                    if (at)
+                        telePos = WorldPosition(at->target_mapId, at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
 
                     std::ostringstream out;
                     out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
@@ -4123,9 +4118,6 @@ bool JumpAction::CanJumpTo(const WorldPosition& src, const WorldPosition& dest, 
 bool JumpAction::JumpTowards(const ai::WorldPosition &src, const ai::WorldPosition &dest, Unit* jumper, float jumpSpeed, bool preSetLanding)
 {
     if (src.getMapId() != dest.getMapId())
-        return false;
-
-    if (src.fDist(dest) > sPlayerbotAIConfig.sightDistance)
         return false;
 
     if (src.fDist(dest) > sPlayerbotAIConfig.sightDistance)

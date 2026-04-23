@@ -33,6 +33,9 @@ TestAction::TestAction(PlayerbotAI* ai, std::string name)
     monitors.push_back(std::make_unique<CheckTimeMonitor>());
     monitors.push_back(std::make_unique<CheckHpMonitor>());
     monitors.push_back(std::make_unique<CheckDistanceMonitor>());
+    monitors.push_back(std::make_unique<CheckUndergroundMonitor>());
+    monitors.push_back(std::make_unique<CheckCanReachNodesMonitor>());
+    monitors.push_back(std::make_unique<CheckSpeedMonitor>());
     monitors.push_back(std::make_unique<CheckMobMonitor>());
     monitors.push_back(std::make_unique<CheckPartyWipedMonitor>());
     monitors.push_back(std::make_unique<FactionMonitor>());

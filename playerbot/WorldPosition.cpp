@@ -1172,10 +1172,18 @@ bool WorldPosition::GetReachableRandomPointOnGround(const Player* bot, const flo
 
 bool WorldPosition::isUnderground() const
 {
-    float ground = 0.0f;
-    if (getTerrain())
-        getTerrain()->GetWaterLevel(coord_x, coord_y, coord_z, &ground);
-    return coord_z < ground - 0.5f;
+    float groundZ = getMap(getFirstInstanceId())->GetHeight(coord_x, coord_y, coord_z+0.5f, true), maxZ;
+    maxZ = getTerrain()->GetWaterOrGroundLevel(coord_x, coord_y, coord_z + 0.5f, groundZ, true, 1.0f);
+
+    if (maxZ > INVALID_HEIGHT)
+    {
+        if (coord_z + 0.5f > maxZ)
+            return false;
+        else if (coord_z < groundZ)
+            return true;
+    }
+
+    return true;
 }
 
 std::vector<WorldPosition> WorldPosition::ComputePathToRandomPoint(const Player* bot, const float radius, const bool randomRange)

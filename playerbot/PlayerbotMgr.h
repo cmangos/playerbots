@@ -51,8 +51,8 @@ public:
     static std::unordered_map<std::string, std::string> GetCommandTexts();
 
     bool DeleteBot(ObjectGuid guid, bool allowInstant = true);
-#ifdef GenerateBotTests
     void CreateBot(Player* master, const std::string param, std::list<std::string>& messages, ObjectGuid& guid);
+#ifdef GenerateBotTests
     void DepositTestResult(const std::string& testName, const std::string& result);
 #endif
 

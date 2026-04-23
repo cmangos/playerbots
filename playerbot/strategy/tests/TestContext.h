@@ -32,17 +32,6 @@ namespace ai
 
         TestContext() : pc(0), observing(false), testStartTime(0), result(TestResult::PENDING) {}
 
-        void Reset()
-        {
-            script.clear();
-            pc = 0;
-            observing = false;
-            testStartTime = 0;
-            spawnedBots.clear();
-            monitors.clear();
-            result = TestResult::PENDING;
-            resultMessage.clear();
-            testName.clear();
-        }
+        void Reset();
     };
 }

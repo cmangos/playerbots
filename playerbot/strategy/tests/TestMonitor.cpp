@@ -1,4 +1,6 @@
 #include "TestMonitor.h"
+#include "playerbot/WorldPosition.h"
+#include "playerbot/PlayerbotTextMgr.h"
 
 using namespace ai;
 
@@ -19,6 +21,20 @@ TestResult TestMonitor::Check(const std::string& monitorStr, Player* bot, TestCo
             return TestResult::PENDING;
 
         message = monitorStr.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
+
+        // Replace dynamic placeholders in message
+        std::map<std::string, std::string> placeholders;
+        if (bot->IsInWorld())
+        {
+            WorldPosition pos(bot);
+            placeholders["<current position>"] = pos.print(2, true) + " m" + std::to_string(pos.getMapId());
+        }
+        placeholders["<time elapsed>"] = std::to_string((WorldTimer::getMSTime() - ctx.testStartTime) / 1000) + "s";
+        
+        if (!placeholders.empty())
+        {
+            PlayerbotTextMgr::ReplacePlaceholders(message, placeholders);
+        }
 
         std::string resultType = monitorStr.substr(arrowPos + 3, quoteStart - (arrowPos + 2)-2);        
 

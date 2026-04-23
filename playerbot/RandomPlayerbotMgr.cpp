@@ -4542,7 +4542,7 @@ uint32 RandomPlayerbotMgr::GetOrCreateAccount(Player* master, std::string& error
 #else
             AccountOpResult result = sAccountMgr.CreateAccount(accountName, password);
 #endif
-            LoginDatabase.CommitTransaction();
+            LoginDatabase.CommitTransactionDirect();
 
             if (result == AOR_OK)
             {

@@ -2231,6 +2231,15 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
                 continue;
         }
 
+        uint32 runningTests = 0;
+        for (const auto& test : pendingTests)
+        {
+            if (test.pending)
+                runningTests++;
+        }
+        if (runningTests >= 50)
+            continue;
+
         std::ostringstream createParams;
         createParams << "level=1 login=0 temporary=1 test=" + pt.testName;
         std::list<std::string> createMsgs = HandleCreate(nullptr, createParams.str(), SEC_PLAYER);
@@ -2250,6 +2259,7 @@ void PlayerbotHolder::DepositTestResult(const std::string& testName, const std::
 
         if (pt.testName == testName && !pt.completed)
         {
+            pt.pending = false;
             if (result == "ABORT") //Failed this time but might work next time.
             {
                 pt.result = result;

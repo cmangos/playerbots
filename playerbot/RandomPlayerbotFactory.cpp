@@ -578,6 +578,8 @@ void RandomPlayerbotFactory::CreateRandomBots()
         } while (temporarybots->NextRow());
     }
 
+    CharacterDatabase.PExecute("DELETE FROM ai_playerbot_random_bots WHERE ai_playerbot_random_bots.event = 'temporary'");
+
     if (!sPlayerbotAIConfig.randomBotAutoCreate)
     {
         for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)

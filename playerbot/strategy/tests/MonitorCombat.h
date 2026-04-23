@@ -1,31 +1,34 @@
 #pragma once
 
-#include "TestMonitor.h"
+#include "TestComponent.h"
 
 namespace ai
 {
-    class CheckHpMonitor : public TestMonitor
+    // =====================================================
+    // MonitorCombat - combat-related monitors
+    // =====================================================
+    class MonitorCombatHp : public TestMonitor
     {
     private:
         bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
         std::string GetName() const override { return "hp"; }
     };
 
-    class CheckMobMonitor : public TestMonitor
+    class MonitorCombatMob : public TestMonitor
     {
     private:
         bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
         std::string GetName() const override { return "mob"; }
     };
 
-    class CheckPartyWipedMonitor : public TestMonitor
+    class MonitorCombatPartyWiped : public TestMonitor
     {
     private:
         bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
         std::string GetName() const override { return "party wiped"; }
     };
 
-    class CheckDeadMobsMonitor : public TestMonitor
+    class MonitorCombatDeadMobs : public TestMonitor
     {
     private:
         bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;

@@ -1,0 +1,46 @@
+#include "playerbot/playerbot.h"
+#include "CommandFlow.h"
+#include "TestAction.h"
+#include "TestRegistry.h"
+
+using namespace ai;
+
+TestResult CommandFlowObserve::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    ctx.observing = true;
+    return TestResult::PASS;
+}
+
+TestResult CommandFlowPreconditions::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    return TestResult::PASS;
+}
+
+TestResult CommandFlowMonitor::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    ctx.monitors.push_back(params);
+    return TestResult::PASS;
+}
+
+TestResult CommandFlowWait::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    if (!ctx.waitTime)
+        ctx.waitTime = WorldTimer::getMSTime();
+
+    if (!Qualified::isValidNumberString(params))
+    {
+        message = "Invalid wait time: " + params;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    uint32 waitDuration = static_cast<uint32>(std::strtoul(params.c_str(), nullptr, 10));
+    if (WorldTimer::getMSTimeDiff(ctx.waitTime, WorldTimer::getMSTime()) >= waitDuration)
+    {
+        ctx.waitTime = 0;
+        return TestResult::PASS;
+    }
+    
+    return TestResult::PENDING;
+}

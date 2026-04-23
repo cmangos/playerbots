@@ -1,9 +1,9 @@
 #include "playerbot/playerbot.h"
-#include "StateMonitors.h"
+#include "MonitorState.h"
 
 using namespace ai;
 
-bool CheckTimeMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorStateTime::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     uint32 elapsed = (WorldTimer::getMSTime() - ctx.testStartTime) / 1000;
 
@@ -23,12 +23,12 @@ bool CheckTimeMonitor::IsConditionMet(const std::string& monitorStr, Player* bot
     return false;
 }
 
-bool BotDeadMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorStateDead::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     return !bot->IsAlive();
 }
 
-bool FactionMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorStateFaction::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     size_t arrowPos = monitorStr.find("=>");
     std::string faction = monitorStr.substr(GetName().length() + 1, arrowPos - GetName().length()-2);
@@ -41,7 +41,7 @@ bool FactionMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, 
     return false;
 }
 
-bool GroupSizeMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorStateGroupSize::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     Group* group = bot->GetGroup();
     uint32 size = group ? group->GetMembersCount() : 1;
@@ -51,7 +51,7 @@ bool GroupSizeMonitor::IsConditionMet(const std::string& monitorStr, Player* bot
         return false;
 
     size_t gtPos = monitorStr.find(">");
-    if (gtPos != std::string::npos)
+    if (gtPos != std::string::npos && gtPos < arrowPos)
     {
         uint32 threshold = atoi(monitorStr.substr(gtPos + 1, arrowPos - gtPos - 1).c_str());
         return size > threshold;
@@ -67,7 +67,7 @@ bool GroupSizeMonitor::IsConditionMet(const std::string& monitorStr, Player* bot
     return false;
 }
 
-bool LootGuidMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorStateLootGuid::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     uint64 lootGuid = bot->GetLootGuid().GetRawValue();
 

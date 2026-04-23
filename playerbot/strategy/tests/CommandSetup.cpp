@@ -1,5 +1,5 @@
 #include "playerbot/playerbot.h"
-#include "SetupCommands.h"
+#include "CommandSetup.h"
 #include "playerbot/WorldPosition.h"
 #include "playerbot/TravelMgr.h"
 #include "Grids/GridNotifiers.h"
@@ -11,106 +11,106 @@
 
 using namespace ai;
 
-bool HandleTeleport::Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& error)
+TestResult CommandSetupTeleport::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
     GuidPosition loc;
     if (!TestRegistry::ParseLocation(params, loc))
     {
-        error = "Invalid teleport location: " + params;
-        return false;
+        message = "Invalid teleport location: " + params;
+        return TestResult::IMPOSSIBLE;
     }
 
     if (bot->TeleportTo(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, bot->GetOrientation()))
     {
-        return true;
+        return TestResult::PASS;
     }
     else
     {
-        error = "Teleport failed to " + params;
-        return false;
+        message = "Teleport failed to " + params;
+        return TestResult::IMPOSSIBLE;
     }
 }
 
-bool HandleSetGM::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& error)
+TestResult CommandSetupGM::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
     if (params == "on")
     {
         bot->SetGameMaster(true);
         bot->GetSession()->SendNotification(LANG_GM_ON);
-        return true;
+        return TestResult::PASS;
     }
     else if (params == "off")
     {
         bot->SetGameMaster(false);
         bot->GetSession()->SendNotification(LANG_GM_ON);
-        return true;
+        return TestResult::PASS;
     }
     else if (params == "visible on")
     {
         bot->SetGMVisible(true);
         bot->GetSession()->SendNotification(LANG_INVISIBLE_VISIBLE);
-        return true;
+        return TestResult::PASS;
     }
     else if (params == "visible off")
     {
         bot->SetGMVisible(false);
         bot->GetSession()->SendNotification(LANG_INVISIBLE_INVISIBLE);
-        return true;
+        return TestResult::PASS;
     }
     else if (params == "fly on")
     {
         bot->SetCanFly(true);
         bot->GetSession()->SendNotification(LANG_COMMAND_FLYMODE_STATUS);
-        return true;
+        return TestResult::PASS;
     }
     else if (params == "fly off")
     {
         bot->SetCanFly(false);
         bot->GetSession()->SendNotification(LANG_COMMAND_FLYMODE_STATUS);
-        return true;
+        return TestResult::PASS;
     }
     else
     {
-        error = "Invalid parameter for setgm: " + params + ". Use 'on' or 'off'.";
-        return false;
+        message = "Invalid parameter for setgm: " + params + ". Use 'on' or 'off'.";
+        return TestResult::IMPOSSIBLE;
     }
 }
 
-bool HandleGiveItem::Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& error)
+TestResult CommandSetupGiveItem::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
     uint32 itemId = atoi(params.c_str());
     if (itemId > 0)
     {
         bot->StoreNewItemInInventorySlot(itemId, 1);
-        return true;
+        return TestResult::PASS;
     }
     else
     {
-        error = "Invalid item ID: " + params;
-        return false;
+        message = "Invalid item ID: " + params;
+        return TestResult::IMPOSSIBLE;
     }
 }
 
-bool HandleEquipItem::Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& error)
+TestResult CommandSetupEquipItem::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
     uint32 itemId = atoi(params.c_str());
     if (itemId > 0)
     {
         bot->StoreNewItemInInventorySlot(itemId, 1);
-        return true;
+        return TestResult::PASS;
     }
     else
     {
-        error = "Invalid item ID: " + params;
-        return false;
+        message = "Invalid item ID: " + params;
+        return TestResult::IMPOSSIBLE;
     }
 }
 
-bool HandleClearMobs::Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& error)
+TestResult CommandSetupClearMobs::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
     float radius = 50.0f;
     size_t pos = params.find("radius");
@@ -134,16 +134,11 @@ bool HandleClearMobs::Execute(const std::string& params, Player* bot,
             cleared++;
         }
     }
-    return true;
+    return TestResult::PASS;
 }
 
-bool HandleSetDestination::Matches(const std::string& cmd, const std::string& params) const
-{
-    return cmd == "set" && params.find("destination") == 0;
-}
-
-bool HandleSetDestination::Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& error)
+TestResult CommandSetupSetDestination::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
     std::string dest = params;
     if (params.find("destination ") == 0)
@@ -152,9 +147,11 @@ bool HandleSetDestination::Execute(const std::string& params, Player* bot,
     GuidPosition loc;
     if (!TestRegistry::ParseLocation(dest, loc))
     {
-        error = "Invalid destination: " + dest;
-        return false;
+        message = "Invalid destination: " + dest;
+        return TestResult::IMPOSSIBLE;
     }
+
+    ctx.destinationPosition = loc;
 
     AiObjectContext* context = ai->GetAiObjectContext();
     TravelTarget* target = AI_VALUE(TravelTarget*,"travel target");
@@ -171,8 +168,8 @@ bool HandleSetDestination::Execute(const std::string& params, Player* bot,
     }
     else
     {
-        error = "Could not get travel target value";
-        return false;
+        message = "Could not get travel target value";
+        return TestResult::IMPOSSIBLE;
     }
-    return true;
+    return TestResult::PASS;
 }

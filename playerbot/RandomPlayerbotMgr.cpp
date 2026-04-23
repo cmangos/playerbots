@@ -880,12 +880,25 @@ void RandomPlayerbotMgr::LoginFreeBots()
             }
             else if (!player->IsBeingTeleported())
             {
+                PlayerbotFactory factory(player, player->GetLevel());
                 if (sRandomPlayerbotMgr.GetValue(botGuid, "create levelup"))
                 {
-                    PlayerbotFactory factory(player, player->GetLevel());
-                    factory.Randomize(false, false);
+                    factory.Randomize(false, false);                    
 
                     sRandomPlayerbotMgr.SetValue(botGuid, "create levelup", 0);
+                }
+
+                if (sRandomPlayerbotMgr.GetValue(botGuid, "create gear"))
+                {
+                    std::string gear = sRandomPlayerbotMgr.GetData(botGuid, "create gear");
+                    if (gear == "empty")
+                    {
+                        for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
+                        {
+                            player->DestroyItem(INVENTORY_SLOT_BAG_0, slot, true);
+                        }
+                    }
+
                 }
 
                 if (sRandomPlayerbotMgr.GetValue(botGuid, "create group"))

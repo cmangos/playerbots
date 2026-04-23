@@ -1,38 +1,41 @@
 #pragma once
 
-#include "TestMonitor.h"
+#include "TestComponent.h"
 
 namespace ai
 {
-    class CheckDistanceMonitor : public TestMonitor
+    // =====================================================
+    // MonitorMovement - movement-related monitors
+    // =====================================================
+    class MonitorMovementDistance : public TestMonitor
     {
     private:
         bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
         std::string GetName() const override { return "distance to"; }
     };
 
-    class CheckUndergroundMonitor : public TestMonitor
+    class MonitorMovementUnderground : public TestMonitor
     {
     private:
         bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
         std::string GetName() const override { return "underground"; }
     };
 
-    class CheckCanReachNodesMonitor : public TestMonitor
+    class MonitorMovementCanReachNodes : public TestMonitor
     {
     private:
         bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
         std::string GetName() const override { return "can reach nodes"; }
     };
 
-    class CheckSpeedMonitor : public TestMonitor
+    class MonitorMovementSpeed : public TestMonitor
     {
     private:
         bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
         std::string GetName() const override { return "speed"; }
     };
 
-    class CheckSpawnDistanceMonitor : public TestMonitor
+    class MonitorMovementSpawnDistance : public TestMonitor
     {
     private:
         bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;

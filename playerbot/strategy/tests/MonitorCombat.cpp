@@ -1,12 +1,12 @@
 #include "playerbot/playerbot.h"
-#include "CombatMonitors.h"
+#include "MonitorCombat.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
 
 using namespace ai;
 
-bool CheckHpMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorCombatHp::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     uint8 hp = bot->GetHealthPercent();
 
@@ -36,7 +36,7 @@ bool CheckHpMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, 
     return false;
 }
 
-bool CheckMobMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorCombatMob::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     size_t entryStart = monitorStr.find("mob") + 3;
     size_t entryEnd = monitorStr.find("is dead");
@@ -71,7 +71,7 @@ bool CheckMobMonitor::IsConditionMet(const std::string& monitorStr, Player* bot,
     return false;
 }
 
-bool CheckPartyWipedMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorCombatPartyWiped::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     Group* group = bot->GetGroup();
     if (!group)
@@ -91,7 +91,7 @@ bool CheckPartyWipedMonitor::IsConditionMet(const std::string& monitorStr, Playe
     return false;
 }
 
-bool CheckDeadMobsMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorCombatDeadMobs::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     size_t arrowPos = monitorStr.find("=>");
     if (arrowPos == std::string::npos)

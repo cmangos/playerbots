@@ -1852,6 +1852,7 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
     Team team = Team::TEAM_BOTH_ALLOWED;
     BotRoles role = BotRoles::BOT_ROLE_NONE;
     std::string groupWith = master ? master->GetName() : "";
+    std::string gear = "default";
 
     std::vector<std::string> args = Qualified::getMultiQualifiers(param, " ");
     for (const auto& arg : args)
@@ -1881,6 +1882,8 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
             autoAdd = (value == "1" || value == "true" || value == "yes");
         else if (key == "group")
             groupWith = value;
+        else if (key == "gear")
+            gear = value;
         else if (key == "test")
         {
             testName = value;
@@ -1997,6 +2000,7 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
 
             sRandomPlayerbotMgr.SetValue(botGuid, "create levelup", 1);
             sRandomPlayerbotMgr.SetValue(botGuid, "create group", 1, groupWith);
+            sRandomPlayerbotMgr.SetValue(botGuid, "create gear", 1, gear);
         }
         else
             newBot->SetLevel(1);
@@ -2268,9 +2272,11 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
         if (runningTests >= 50)
             continue;
 
-        std::ostringstream createParams;
-        createParams << "level=1 login=0 temporary=1 test=" + pt.testName;
-        std::list<std::string> createMsgs = HandleCreate(nullptr, createParams.str(), SEC_PLAYER);
+        std::string createParams = TestRegistry::GetBotCreationRequirement(pt.testName);
+
+        createParams += " login=0 temporary=1 test=" + pt.testName;       
+
+        std::list<std::string> createMsgs = HandleCreate(nullptr, createParams, SEC_PLAYER);
 
         pt.pending = true;
     }

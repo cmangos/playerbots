@@ -1,8 +1,35 @@
-#include "TestMonitor.h"
+#include "TestComponent.h"
 #include "playerbot/WorldPosition.h"
 #include "playerbot/PlayerbotTextMgr.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 
 using namespace ai;
+
+// =====================================================
+// TestMonitor implementation
+// =====================================================
+
+namespace
+{
+    uint32 CountNearbyDeadMobs(Player* bot, float radius)
+    {
+        std::list<Creature*> creatures;
+        MaNGOS::AnyUnitInObjectRangeCheck checker(bot, radius);
+        MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(creatures, checker);
+        Cell::VisitWorldObjects(bot, searcher, radius);
+
+        uint32 deadCount = 0;
+        for (Creature* creature : creatures)
+        {
+            if (!creature->IsAlive())
+                ++deadCount;
+        }
+
+        return deadCount;
+    }
+}
 
 TestResult TestMonitor::Check(const std::string& monitorStr, Player* bot, TestContext& ctx, std::string& message) const
 {
@@ -28,7 +55,16 @@ TestResult TestMonitor::Check(const std::string& monitorStr, Player* bot, TestCo
         {
             WorldPosition pos(bot);
             placeholders["<current position>"] = pos.print(2, true) + " m" + std::to_string(pos.getMapId());
+
+            if (ctx.testStartPosition)
+                placeholders["<distance traveled>"] = std::to_string(static_cast<uint32>(ctx.testStartPosition.distance(pos))) + "m";
+
+            placeholders["<mobs killed>"] = std::to_string(CountNearbyDeadMobs(bot, 120.0f));
         }
+
+        if (ctx.testStartPosition && ctx.destinationPosition)
+            placeholders["<distance wanted>"] = std::to_string(static_cast<uint32>(ctx.testStartPosition.distance(WorldPosition(ctx.destinationPosition)))) + "m";
+
         placeholders["<time elapsed>"] = std::to_string((WorldTimer::getMSTime() - ctx.testStartTime) / 1000) + "s";
         
         if (!placeholders.empty())

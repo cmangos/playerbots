@@ -2,8 +2,7 @@
 
 #include "playerbot/strategy/Action.h"
 #include "TestContext.h"
-#include "TestMonitor.h"
-#include "TestCommand.h"
+#include "TestComponent.h"
 #include <vector>
 #include <memory>
 
@@ -36,9 +35,10 @@ namespace ai
         static std::vector<std::string> GetTestScript(const std::string& name);
         static std::vector<std::string> GetAvailableTests();
     private:
-        void ExecuteCommand(const std::string& line);
+        TestResult ExecuteCommand(const std::string& line, std::string& message);
         void CheckPreconditions();
         void CheckMonitors();
+        void RunCleanup();
         void SetResult(TestResult result, const std::string& message);
         void ReportResult();
         void TellMaster(const std::string& msg);

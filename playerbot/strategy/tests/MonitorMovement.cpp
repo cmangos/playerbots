@@ -1,5 +1,5 @@
 #include "playerbot/playerbot.h"
-#include "MovementMonitors.h"
+#include "MonitorMovement.h"
 #include "playerbot/WorldPosition.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
@@ -9,7 +9,7 @@
 
 using namespace ai;
 
-bool CheckDistanceMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorMovementDistance::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     size_t arrowPos = monitorStr.find("=>");
     if (arrowPos == std::string::npos)
@@ -52,14 +52,14 @@ bool CheckDistanceMonitor::IsConditionMet(const std::string& monitorStr, Player*
     return false;
 }
 
-bool CheckUndergroundMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorMovementUnderground::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     if (!bot->IsInWorld())
         return false;
 
     WorldPosition botpos(bot);
 
-    if (botpos) //empty position is underground.
+    if (!botpos) //empty position is underground.
         return true;
 
     botpos += WorldPosition(0, 0, 0, 1); //Give some leeway.
@@ -67,7 +67,7 @@ bool CheckUndergroundMonitor::IsConditionMet(const std::string& monitorStr, Play
     return botpos;
 }
 
-bool CheckCanReachNodesMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorMovementCanReachNodes::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     if (!bot->IsInWorld())
         return false;
@@ -85,7 +85,7 @@ bool CheckCanReachNodesMonitor::IsConditionMet(const std::string& monitorStr, Pl
     return false;
 }
 
-bool CheckSpeedMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorMovementSpeed::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     static std::map<ObjectGuid, WorldPosition> lastPositions;
     static std::map<ObjectGuid, uint32> lastTimes;
@@ -157,7 +157,7 @@ bool CheckSpeedMonitor::IsConditionMet(const std::string& monitorStr, Player* bo
     return false;
 }
 
-bool CheckSpawnDistanceMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorMovementSpawnDistance::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     if (ctx.spawnedBots.empty())
         return false;

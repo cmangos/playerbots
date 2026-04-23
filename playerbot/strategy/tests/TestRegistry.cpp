@@ -1,5 +1,6 @@
 #include "playerbot/playerbot.h"
 #include "TestRegistry.h"
+#include "playerbot/ChatHelper.h"
 #include "Globals/ObjectMgr.h"
 #include <regex>
 
@@ -21,7 +22,6 @@ static void InitTestLocations()
     sTestLocations["ironforge_outside"] = GuidPosition(ObjectGuid(), WorldPosition(0, -5150.0f, -856.0f, 508.4f));
     sTestLocations["coldridge"] = GuidPosition(ObjectGuid(), WorldPosition(0, -5634.0f, -497.0f, 396.0f));
     sTestLocations["darnassus"] = GuidPosition(ObjectGuid(), WorldPosition(1, 9951.0f, 2280.0f, 1342.0f));
-    sTestLocations["zg_entrance"] = GuidPosition(ObjectGuid(), WorldPosition(309, -11917.0f, -1233.0f, 92.0f));
     sTestLocations["zg_boss1_room"] = GuidPosition(ObjectGuid(), WorldPosition(309, -11900.0f, -1650.0f, 92.0f));
 }
 
@@ -87,7 +87,7 @@ void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float 
         return;
 
     std::string gmInvisible = "gm visible off";
-    std::string gmVisible = "gm visible on";
+    std::string gmVisible = "cleanup gm visible on";
     std::string needAlive = "monitor bot dead => abort \"Bot died test interupted\"";
     std::string needAboveGRound = "monitor underground => fail \"Bot is underground at <current position>\"";
     std::string needCanReachNode = "monitor can reach node => fail \"Bot cannot reach travel network at <current position>\"";
@@ -146,7 +146,7 @@ void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float 
             testName << "movement_" << prefix << "_" << startName << "_" << endName;
 
             std::ostringstream timeout;
-            timeout << "monitor time > " << timeoutSecs << " => fail \"Timeout: bot did not reach destination after <time elapsed>\"";
+            timeout << "monitor time > " << timeoutSecs << " => fail \"Timeout: bot did not reach destination after <time elapsed> (traveled <distance traveled> / wanted <distance wanted>)\"";
 
             std::ostringstream reachCheck;
             reachCheck << "monitor distance to " << endName << " < 100 => pass \"Bot arrived at " << endName << " after <time elapsed>\"";
@@ -174,6 +174,22 @@ void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float 
 }
 
 using namespace ai;
+
+std::string TestRegistry::GetBotCreationRequirement(const std::string& testName)
+{
+    std::vector<std::string> script = GetTestScript(testName);
+
+    for (const std::string& line : script)
+    {
+        if (line.find("require bot is") != 0)
+            continue;
+
+        std::string params = line.substr(std::string("require bot is ").length());
+        return params;
+    }
+
+    return "";
+}
 
 void TestRegistry::RegisterTest(const std::string& name, const std::vector<std::string>& script)
 {
@@ -247,13 +263,13 @@ void TestRegistry::EnsureTestsRegistered()
     sTestsRegistered = true;
 
     static std::string gmInvisible = "gm visible off";
-    static std::string gmVisible = "gm visible on";
+    static std::string gmVisible = "cleanup gm visible on";
 
     static std::string needAlliance = "monitor faction horde => abort \"Bot needs to be alliance\"";
     static std::string needAlive = "monitor bot dead => abort \"Bot died test interupted\"";
 
-    static std::string Timeout2Min = "monitor time > 120 => fail \"Timeout: bot did not reach destination\"";
-    static std::string Timeout10Min = "monitor time > 600 => fail \"Timeout: bot did not reach destination\"";
+    static std::string Timeout2Min = "monitor time > 120 => fail \"Timeout: bot did not reach destination (traveled <distance traveled> / wanted <distance wanted>)\"";
+    static std::string Timeout10Min = "monitor time > 600 => fail \"Timeout: bot did not reach destination (traveled <distance traveled> / wanted <distance wanted>)\"";
 
     //Movement tests
     RegisterTest("movement_walk_short_inside_ironforge", {gmInvisible, needAlive, Timeout2Min, "monitor distance to ironforge < 50 => pass \"Bot reached Ironforge gate\"", "teleport ironforge_outside", "set destination ironforge", "observe", gmVisible});
@@ -284,7 +300,9 @@ void TestRegistry::EnsureTestsRegistered()
         "monitor time > $(hold_s) => pass \"Group stayed stable during loot hold window\"",
         "monitor time > $(timeout_s) => fail \"Timeout in grouped skinning scenario\"",
         "spawn level=$(level) temporary=1 login=1",
+        "wait 5",
         "form party",
+        "wait 5",
         "teleport $(start_location)",
         "set destination $(walk_location)",
         "observe"
@@ -299,32 +317,44 @@ void TestRegistry::EnsureTestsRegistered()
         });
 
     std::vector<std::string> furyEquipTemplate = {
-        "# Fury warrior equip upgrades with explicit MH/OH checks",
+        "# Fury warrior equip upgrades with setup and expected equipment lists",
         gmInvisible,
         needAlive,
-        "monitor time > $(timeout_s) => fail \"Timeout while waiting for equip upgrades\"",
+        "require bot is level=$(level) class=$(class) role=$(role) gear=empty",
+        "monitor time > $(timeout_s) => pass \"Test complete items properly equiped",
         "teleport $(location)",
-        "give $(mh_item)",
-        "give $(oh_item)",
+        "give $(setup_equip_item_1)",
+        "give $(setup_equip_item_2)",
         "do equip upgrades",
-        "assert slot mainhand == $(mh_item)",
-        "assert slot offhand == $(oh_item)",
+        "give $(bag_item_1)",
+        "give $(bag_item_2)",
+        "do equip upgrades",
+        "require equip main hand=$(expected_item_1)",
+        "require equip off hand=$(expected_item_2)",
+        "observe",
         gmVisible
     };
     RegisterScenarioVariant("scenario_fury_equip_upgrades", "default", furyEquipTemplate,
         {
-            {"timeout_s", "120"},
+            {"timeout_s", "10"},
             {"location", "ironforge"},
-            {"mh_item", "17015"}, //dark-iron-reaver
-            {"oh_item", "18805"} //core-hound-tooth
+            {"level", "60"},
+            {"class", "warrior"},
+            {"role", "dps"},
+            {"setup_equip_item_1", "8190"},
+            {"setup_equip_item_2", "7687"},
+            {"bag_item_1", "17015"},
+            {"bag_item_2", "18805"},
+            {"expected_item_1", "17015"},
+            {"expected_item_2", "18805"}
         });
 
     std::vector<std::string> zgGroupTemplate = {
         "# ZG progression with large group and dead-mob observation",
         "monitor dead mobs > $(dead_mobs_min) => pass \"Observed dead mobs in instance\"",
-        "monitor time > $(timeout_s) => fail \"Timeout while traversing instance\"",
-        "mgroup size=$(group_size)",
+        "monitor time > $(timeout_s) => fail \"Timeout while traversing instance after <time elapsed> (mobs <mobs killed>, traveled <distance traveled> / wanted <distance wanted>)\"",
         "teleport $(instance_entry)",
+        "mgroup size=$(group_size)",
         "set destination $(boss_destination)",
         "observe"
     };
@@ -333,7 +363,7 @@ void TestRegistry::EnsureTestsRegistered()
             {"timeout_s", "600"},
             {"group_size", "20"},
             {"dead_mobs_min", "0"},
-            {"instance_entry", "zg_entrance"},
+            {"instance_entry", "zul'gurub"},
             {"boss_destination", "zg_boss1_room"}
         });
 
@@ -344,10 +374,17 @@ void TestRegistry::EnsureTestsRegistered()
         "monitor spawn distance < $(follow_distance) => pass \"Follower caught up\"",
         "monitor time > $(timeout_s) => fail \"Timeout waiting for follower catch-up\"",
         "spawn level=$(level) temporary=1 login=1",
+        "wait 5",
         "form party",
+        "wait 5",
         "teleport $(leader_start)",
         "set destination $(leader_dest_a)",
+        "wait 600",
         "set destination $(leader_dest_b)",
+        "wait 600",
+        "set destination $(leader_dest_a)",
+        "wait 600",
+        "set destination $(leader_dest_a)",
         "observe",
         gmVisible
     };
@@ -364,7 +401,7 @@ void TestRegistry::EnsureTestsRegistered()
     std::vector<std::string> pullWhileTravelTemplate = {
         "# Pull progression while moving to destination behind mobs",
         "monitor dead mobs > $(kills_min) => pass \"Killed mobs while traveling\"",
-        "monitor time > $(timeout_s) => fail \"Timeout while traversing mob route\"",
+        "monitor time > $(timeout_s) => fail \"Timeout while traversing mob route after <time elapsed> (mobs <mobs killed>, traveled <distance traveled> / wanted <distance wanted>)\"",
         "teleport $(start_location)",
         "set destination $(behind_mobs_destination)",
         "observe"

@@ -10,17 +10,21 @@
 #include "Grids/CellImpl.h"
 #include "Entities/Unit.h"
 #include "Spells/Spell.h"
-#include "MovementMonitors.h"
-#include "CombatMonitors.h"
-#include "StateMonitors.h"
-#include "SetupCommands.h"
-#include "PartyCommands.h"
-#include "FlowCommands.h"
+#include "MonitorCombat.h"
+#include "MonitorState.h"
+#include "CommandSetup.h"
+#include "CommandParty.h"
+#include "CommandFlow.h"
+#include "CleanupParty.h"
+#include "RequireState.h"
 
 #include <sstream>
 #include <fstream>
 #include <ctime>
 #include <iomanip>
+#include <algorithm>
+#include <cctype>
+#include "MonitorMovement.h"
 
 using namespace ai;
 
@@ -29,36 +33,40 @@ TestAction::TestAction(PlayerbotAI* ai, std::string name)
     , result(TestResult::PENDING)
     , pc(0)
 {
-    monitors.push_back(std::make_unique<BotDeadMonitor>());
-    monitors.push_back(std::make_unique<CheckTimeMonitor>());
-    monitors.push_back(std::make_unique<CheckHpMonitor>());
-    monitors.push_back(std::make_unique<CheckDistanceMonitor>());
-    monitors.push_back(std::make_unique<CheckUndergroundMonitor>());
-    monitors.push_back(std::make_unique<CheckCanReachNodesMonitor>());
-    monitors.push_back(std::make_unique<CheckSpeedMonitor>());
-    monitors.push_back(std::make_unique<CheckSpawnDistanceMonitor>());
-    monitors.push_back(std::make_unique<CheckMobMonitor>());
-    monitors.push_back(std::make_unique<CheckDeadMobsMonitor>());
-    monitors.push_back(std::make_unique<CheckPartyWipedMonitor>());
-    monitors.push_back(std::make_unique<FactionMonitor>());
-    monitors.push_back(std::make_unique<GroupSizeMonitor>());
-    monitors.push_back(std::make_unique<LootGuidMonitor>());
+    commands.push_back(std::make_unique<RequireBotIs>());
 
+    commands.push_back(std::make_unique<CommandSetupTeleport>());
+    commands.push_back(std::make_unique<CommandSetupGM>());
+    commands.push_back(std::make_unique<CommandSetupSetDestination>());
+    commands.push_back(std::make_unique<CommandSetupGiveItem>());
+    commands.push_back(std::make_unique<CommandSetupEquipItem>());
+    commands.push_back(std::make_unique<CommandSetupClearMobs>());
+    commands.push_back(std::make_unique<CommandPartySpawnBot>());
+    commands.push_back(std::make_unique<CommandPartyDespawnBot>());
+    commands.push_back(std::make_unique<CommandPartyForm>());
+    commands.push_back(std::make_unique<CommandPartySpawnGroup>());
+    commands.push_back(std::make_unique<CommandFlowObserve>());
+    commands.push_back(std::make_unique<CommandFlowMonitor>());
+    commands.push_back(std::make_unique<CommandFlowWait>());
 
-    commands.push_back(std::make_unique<HandleTeleport>());
-    commands.push_back(std::make_unique<HandleSetGM>());
-    commands.push_back(std::make_unique<HandleSetDestination>());
-    commands.push_back(std::make_unique<HandleGiveItem>());
-    commands.push_back(std::make_unique<HandleEquipItem>());
-    commands.push_back(std::make_unique<HandleClearMobs>());
-    commands.push_back(std::make_unique<HandleSpawnBot>());
-    commands.push_back(std::make_unique<HandleDespawnBot>());
-    commands.push_back(std::make_unique<HandleFormParty>());
-    commands.push_back(std::make_unique<HandleSpawnGroup>());
-    commands.push_back(std::make_unique<HandleObserve>());
-    commands.push_back(std::make_unique<HandleCleanup>());
-    commands.push_back(std::make_unique<HandleAssert>());
-    commands.push_back(std::make_unique<HandleMonitor>());
+    monitors.push_back(std::make_unique<MonitorStateDead>());
+    monitors.push_back(std::make_unique<MonitorStateTime>());
+    monitors.push_back(std::make_unique<MonitorCombatHp>());
+    monitors.push_back(std::make_unique<MonitorMovementDistance>());
+    monitors.push_back(std::make_unique<MonitorMovementUnderground>());
+    monitors.push_back(std::make_unique<MonitorMovementCanReachNodes>());
+    monitors.push_back(std::make_unique<MonitorMovementSpeed>());
+    monitors.push_back(std::make_unique<MonitorMovementSpawnDistance>());
+    monitors.push_back(std::make_unique<MonitorCombatMob>());
+    monitors.push_back(std::make_unique<MonitorCombatDeadMobs>());
+    monitors.push_back(std::make_unique<MonitorCombatPartyWiped>());
+    monitors.push_back(std::make_unique<MonitorStateFaction>());
+    monitors.push_back(std::make_unique<MonitorStateGroupSize>());
+    monitors.push_back(std::make_unique<MonitorStateLootGuid>());
+
+    commands.push_back(std::make_unique<RequireEquip>());
+
+    commands.push_back(std::make_unique<CleanupParty>());
 
     TestRegistry::GetAvailableTests();
 }
@@ -117,6 +125,8 @@ bool TestAction::Execute(Event& event)
         ctx.testName = testName;
         ctx.script = TestRegistry::GetTestScript(testName);
         ctx.testStartTime = WorldTimer::getMSTime();
+        if (bot->IsInWorld())
+            ctx.testStartPosition = WorldPosition(bot);
 
         TellMaster(std::string("Starting test: ") + testName);
         LogToConsole(std::string("[TestAction] Bot ") + bot->GetName() + " starting test: " + testName);
@@ -126,13 +136,13 @@ bool TestAction::Execute(Event& event)
 
     if (result != TestResult::PENDING)
     {
+        RunCleanup();
         ReportResult();
         return true;
     }
 
     if (ctx.observing)
     {
-        //LogToConsole("[TestAction] Observe mode, checking monitors...");
         CheckMonitors();
         if (result != TestResult::PENDING)
         {
@@ -143,51 +153,66 @@ bool TestAction::Execute(Event& event)
 
     if (pc >= (int)ctx.script.size())
     {
+        RunCleanup();
         SetResult(TestResult::PASS, "Script completed without explicit result");
         return true;
     }
 
-    ExecuteCommand(ctx.script[pc++]);
-    return true;
-}
+    std::string message;
+    TestResult commandResult = ExecuteCommand(ctx.script[pc], message);
 
-void TestAction::ExecuteCommand(const std::string& line)
-{
-    if (line.empty() || line[0] == '#')
-        return;
-
-    std::string cmd;
-    std::string params;
-
-    size_t spacePos = line.find(' ');
-    if (spacePos != std::string::npos)
+    if (commandResult == TestResult::PASS)
     {
-        cmd = line.substr(0, spacePos);
-        params = line.substr(spacePos + 1);
+        pc++;
+    }
+    else if (commandResult == TestResult::PENDING)
+    {
+        // Retry the same command on the next update tick.
     }
     else
     {
-        cmd = line;
-        params = "";
+        RunCleanup();
+        SetResult(commandResult, message.empty() ? "Command " + ctx.script[pc] + " failed" : message);
     }
+
+    return true;
+}
+
+TestResult TestAction::ExecuteCommand(const std::string& line, std::string& message)
+{
+    if (line.empty() || line[0] == '#')
+        return TestResult::PASS;
 
     for (const auto& command : commands)
     {
-        if (command->Matches(cmd, params))
+        if (command->Matches(line))
         {
-            std::string error;
-            if (!command->Execute(params, bot, ai, ctx, error))
-            {
-                if (!error.empty())
-                    SetResult(TestResult::IMPOSSIBLE, error);
-            }
-            return;
+            std::string params;
+            if (line.size() > command->GetNameSize())
+                params = line.substr(command->GetNameSize());
+
+            return command->Execute(params, bot, ai, ctx, message);
         }
     }
 
     LogToConsole("[TestAction] Unknown command, falling through to bot: " + line);
     TellMaster("Executing command: " + line);
     ai->HandleCommand(CHAT_MSG_WHISPER, line, *bot);
+
+    return TestResult::PASS;
+}
+
+void TestAction::RunCleanup()
+{   
+    for (size_t i = static_cast<size_t>(std::max(0, pc)); i < ctx.script.size(); ++i)
+    {
+        std::string message;
+
+        if (!dynamic_cast<TestCleanup*>(commands[i].get()))
+            continue;
+
+        TestResult commandResult = ExecuteCommand(ctx.script[pc], message);        
+    }
 }
 
 void TestAction::CheckMonitors()

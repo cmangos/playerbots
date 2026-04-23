@@ -40,3 +40,54 @@ bool FactionMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, 
 
     return false;
 }
+
+bool GroupSizeMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    Group* group = bot->GetGroup();
+    uint32 size = group ? group->GetMembersCount() : 1;
+
+    size_t arrowPos = monitorStr.find("=>");
+    if (arrowPos == std::string::npos)
+        return false;
+
+    size_t gtPos = monitorStr.find(">");
+    if (gtPos != std::string::npos)
+    {
+        uint32 threshold = atoi(monitorStr.substr(gtPos + 1, arrowPos - gtPos - 1).c_str());
+        return size > threshold;
+    }
+
+    size_t ltPos = monitorStr.find("<");
+    if (ltPos != std::string::npos)
+    {
+        uint32 threshold = atoi(monitorStr.substr(ltPos + 1, arrowPos - ltPos - 1).c_str());
+        return size < threshold;
+    }
+
+    return false;
+}
+
+bool LootGuidMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    uint64 lootGuid = bot->GetLootGuid().GetRawValue();
+
+    size_t arrowPos = monitorStr.find("=>");
+    if (arrowPos == std::string::npos)
+        return false;
+
+    size_t gtPos = monitorStr.find(">");
+    if (gtPos != std::string::npos)
+    {
+        uint64 threshold = static_cast<uint64>(atoll(monitorStr.substr(gtPos + 1, arrowPos - gtPos - 1).c_str()));
+        return lootGuid > threshold;
+    }
+
+    size_t ltPos = monitorStr.find("<");
+    if (ltPos != std::string::npos)
+    {
+        uint64 threshold = static_cast<uint64>(atoll(monitorStr.substr(ltPos + 1, arrowPos - ltPos - 1).c_str()));
+        return lootGuid < threshold;
+    }
+
+    return false;
+}

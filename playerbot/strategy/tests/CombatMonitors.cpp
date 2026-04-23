@@ -90,3 +90,38 @@ bool CheckPartyWipedMonitor::IsConditionMet(const std::string& monitorStr, Playe
 
     return false;
 }
+
+bool CheckDeadMobsMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    size_t arrowPos = monitorStr.find("=>");
+    if (arrowPos == std::string::npos)
+        return false;
+
+    std::list<Creature*> creatures;
+    MaNGOS::AnyUnitInObjectRangeCheck checker(bot, 120.0f);
+    MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(creatures, checker);
+    Cell::VisitWorldObjects(bot, searcher, 120.0f);
+
+    uint32 deadCount = 0;
+    for (auto& creature : creatures)
+    {
+        if (!creature->IsAlive())
+            deadCount++;
+    }
+
+    size_t gtPos = monitorStr.find(">");
+    if (gtPos != std::string::npos)
+    {
+        uint32 threshold = atoi(monitorStr.substr(gtPos + 1, arrowPos - gtPos - 1).c_str());
+        return deadCount > threshold;
+    }
+
+    size_t ltPos = monitorStr.find("<");
+    if (ltPos != std::string::npos)
+    {
+        uint32 threshold = atoi(monitorStr.substr(ltPos + 1, arrowPos - ltPos - 1).c_str());
+        return deadCount < threshold;
+    }
+
+    return false;
+}

@@ -4513,7 +4513,7 @@ uint32 RandomPlayerbotMgr::GetOrCreateAccount(Player* master, std::string& error
     }
 
     Field* fields = accountNrQr->Fetch();
-    uint32 accountNumber = sPlayerbotAIConfig.randomBotAccountCount + 1;
+    uint32 accountNumber = sPlayerbotAIConfig.randomBotAccountCount;
     uint32 maxAccountNum = fields[0].GetUInt32();
 
     for (uint32 i = 0; i < 10000; i++)

@@ -36,9 +36,13 @@ TestAction::TestAction(PlayerbotAI* ai, std::string name)
     monitors.push_back(std::make_unique<CheckUndergroundMonitor>());
     monitors.push_back(std::make_unique<CheckCanReachNodesMonitor>());
     monitors.push_back(std::make_unique<CheckSpeedMonitor>());
+    monitors.push_back(std::make_unique<CheckSpawnDistanceMonitor>());
     monitors.push_back(std::make_unique<CheckMobMonitor>());
+    monitors.push_back(std::make_unique<CheckDeadMobsMonitor>());
     monitors.push_back(std::make_unique<CheckPartyWipedMonitor>());
     monitors.push_back(std::make_unique<FactionMonitor>());
+    monitors.push_back(std::make_unique<GroupSizeMonitor>());
+    monitors.push_back(std::make_unique<LootGuidMonitor>());
 
 
     commands.push_back(std::make_unique<HandleTeleport>());
@@ -272,8 +276,6 @@ void TestAction::ReportResult()
             bot->GetName() + " | deleting bot";
 
         LogToConsole(logLine);
-
-        sRandomPlayerbotMgr.SetValue(bot, "temporary", 0);
 
         if (ai->GetHolder())
             ai->GetHolder()->DeleteBot(bot->GetObjectGuid(), false);        

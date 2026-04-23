@@ -57,7 +57,14 @@ bool CheckUndergroundMonitor::IsConditionMet(const std::string& monitorStr, Play
     if (!bot->IsInWorld())
         return false;
 
-    return WorldPosition(bot).isUnderground();
+    WorldPosition botpos(bot);
+
+    if (botpos) //empty position is underground.
+        return true;
+
+    botpos += WorldPosition(0, 0, 0, 1); //Give some leeway.
+
+    return botpos;
 }
 
 bool CheckCanReachNodesMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
@@ -146,6 +153,38 @@ bool CheckSpeedMonitor::IsConditionMet(const std::string& monitorStr, Player* bo
 
     if (speed > expectedSpeed * 3.0f)
         return true;
+
+    return false;
+}
+
+bool CheckSpawnDistanceMonitor::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    if (ctx.spawnedBots.empty())
+        return false;
+
+    Player* spawned = sObjectMgr.GetPlayer(ctx.spawnedBots.front());
+    if (!spawned)
+        return false;
+
+    size_t arrowPos = monitorStr.find("=>");
+    if (arrowPos == std::string::npos)
+        return false;
+
+    float dist = bot->GetDistance(spawned);
+
+    size_t ltPos = monitorStr.find("<");
+    if (ltPos != std::string::npos)
+    {
+        float threshold = atof(monitorStr.substr(ltPos + 1, arrowPos - ltPos - 1).c_str());
+        return dist < threshold;
+    }
+
+    size_t gtPos = monitorStr.find(">");
+    if (gtPos != std::string::npos)
+    {
+        float threshold = atof(monitorStr.substr(gtPos + 1, arrowPos - gtPos - 1).c_str());
+        return dist > threshold;
+    }
 
     return false;
 }

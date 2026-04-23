@@ -24,4 +24,18 @@ namespace ai
         virtual bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
         virtual std::string GetName() const override { return "faction"; }
     };
+
+    class GroupSizeMonitor : public TestMonitor
+    {
+    private:
+        virtual bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
+        virtual std::string GetName() const override { return "group size"; }
+    };
+
+    class LootGuidMonitor : public TestMonitor
+    {
+    private:
+        virtual bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
+        virtual std::string GetName() const override { return "loot guid"; }
+    };
 }

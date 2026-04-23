@@ -1,6 +1,7 @@
 #include "playerbot/playerbot.h"
 #include "TestRegistry.h"
 #include "Globals/ObjectMgr.h"
+#include <regex>
 
 static std::map<std::string, std::vector<std::string>> sTestRegistry;
 static bool sTestsRegistered = false;
@@ -18,6 +19,8 @@ static std::vector<TeleLoc> sTeleLocations;
 static void InitTestLocations()
 {
     sTestLocations["ironforge_outside"] = GuidPosition(ObjectGuid(), WorldPosition(0, -5150.0f, -856.0f, 508.4f));
+    sTestLocations["coldridge"] = GuidPosition(ObjectGuid(), WorldPosition(0, -5634.0f, -497.0f, 396.0f));
+    sTestLocations["darnassus"] = GuidPosition(ObjectGuid(), WorldPosition(1, 9951.0f, 2280.0f, 1342.0f));
     sTestLocations["zg_entrance"] = GuidPosition(ObjectGuid(), WorldPosition(309, -11917.0f, -1233.0f, 92.0f));
     sTestLocations["zg_boss1_room"] = GuidPosition(ObjectGuid(), WorldPosition(309, -11900.0f, -1650.0f, 92.0f));
 }
@@ -42,6 +45,42 @@ static void EnsureLocationsInit()
     }
 }
 
+namespace
+{
+    using ScenarioParams = std::map<std::string, std::string>;
+
+    std::string ApplyScenarioParams(const std::string& line, const ScenarioParams& params)
+    {
+        std::string expanded = line;
+        for (const auto& pair : params)
+        {
+            const std::string token = "$(" + pair.first + ")";
+            size_t pos = 0;
+            while ((pos = expanded.find(token, pos)) != std::string::npos)
+            {
+                expanded.replace(pos, token.length(), pair.second);
+                pos += pair.second.length();
+            }
+        }
+        return expanded;
+    }
+
+    std::vector<std::string> ApplyScenarioParams(const std::vector<std::string>& script, const ScenarioParams& params)
+    {
+        std::vector<std::string> expanded;
+        expanded.reserve(script.size());
+        for (const std::string& line : script)
+            expanded.push_back(ApplyScenarioParams(line, params));
+        return expanded;
+    }
+
+    void RegisterScenarioVariant(const std::string& namePrefix, const std::string& variant,
+                                 const std::vector<std::string>& scriptTemplate, const ScenarioParams& params)
+    {
+        TestRegistry::RegisterTest(namePrefix + "_" + variant, ApplyScenarioParams(scriptTemplate, params));
+    }
+}
+
 void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float maxDist)
 {
     if (sTeleLocations.size() < 2)
@@ -61,7 +100,23 @@ void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float 
             if (i == j)
                 continue;
 
-            float dist = sTeleLocations[i].pos.distance(sTeleLocations[j].pos);
+            WorldPosition startPos = sTeleLocations[i].pos;
+            WorldPosition endPos = sTeleLocations[j].pos;
+
+            if (!startPos || !endPos)
+                continue;
+
+            if (startPos.isBg() || endPos.isBg())
+                continue;
+
+            if (startPos.isDungeon() && startPos.getMapEntry()->IsRaid())
+                continue;
+
+            if (endPos.isDungeon() && endPos.getMapEntry()->IsRaid())
+                continue;
+
+            float dist = startPos.distance(endPos);
+
             if (dist < minDist || dist > maxDist)
                 continue;
 
@@ -80,14 +135,12 @@ void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float 
                 prefix = "far";
             }
 
-
-
             std::string startName = sTeleLocations[i].name;
             std::transform(startName.begin(), startName.end(), startName.begin(), ::tolower);
-            startName.erase(remove(startName.begin(), startName.end(), '\''), startName.end());
+            startName = std::regex_replace(startName, std::regex("'"), "\\'");
             std::string endName = sTeleLocations[j].name;
             std::transform(endName.begin(), endName.end(), endName.begin(), ::tolower);
-            endName.erase(remove(endName.begin(), endName.end(), '\''), endName.end());
+            endName = std::regex_replace(endName, std::regex("'"), "\\'");
 
             std::ostringstream testName;
             testName << "movement_" << prefix << "_" << startName << "_" << endName;
@@ -213,7 +266,7 @@ void TestRegistry::EnsureTestsRegistered()
 
     RegisterTest("movement_walk_long_westfall_to_stormwind", {gmInvisible, needAlive, Timeout10Min, "monitor distance to stormwind < 100 => pass \"Bot arrived at Stormwind\"", "teleport westfall", "set destination stormwind", "observe", gmVisible});
 
-    RegisterTest("movement_walk_long_loch_modan_to_ironforge", {gmInvisible, needAlive, Timeout10Min, "monitor distance to ironforge < 100 => pass \"Bot arrived at Ironforge\"", "teleport loch modan", "set destination ironforge", "observe", gmVisible});
+    RegisterTest("movement_walk_long_wetlands_to_ironforge", {gmInvisible, needAlive, Timeout10Min, "monitor distance to ironforge < 100 => pass \"Bot arrived at Ironforge\"", "teleport wetlands", "set destination ironforge", "observe", gmVisible});
 
     RegisterTest("movement_walk_to_zg_entrance", {gmInvisible, needAlive, Timeout2Min, "monitor distance to zg_entrance < 50 => pass \"Bot reached ZG entrance\"", "teleport elwynn", "set destination zg_entrance", "observe", gmVisible});
 
@@ -224,6 +277,105 @@ void TestRegistry::EnsureTestsRegistered()
     RegisterTest("movement_walk_long_redridge_to_stormwind", {gmInvisible, needAlive, Timeout10Min, "monitor distance to stormwind < 100 => pass \"Bot arrived at Stormwind\"", "teleport redridge", "set destination stormwind", "observe", gmVisible});
 
     RegisterTest("movement_walk_long_duskwood_to_stormwind", {gmInvisible, needAlive, Timeout10Min, "monitor distance to stormwind < 100 => pass \"Bot arrived at Stormwind\"", "teleport duskwood", "set destination stormwind", "observe", gmVisible});
+
+    std::vector<std::string> skinningLootTemplate = {
+        "# Grouped skinning/loot hold scenario",
+        "monitor group size < 2 => fail \"Expected second bot in group\"",
+        "monitor time > $(hold_s) => pass \"Group stayed stable during loot hold window\"",
+        "monitor time > $(timeout_s) => fail \"Timeout in grouped skinning scenario\"",
+        "spawn level=$(level) temporary=1 login=1",
+        "form party",
+        "teleport $(start_location)",
+        "set destination $(walk_location)",
+        "observe"
+    };
+    RegisterScenarioVariant("scenario_group_skinning_wait_loot", "default", skinningLootTemplate,
+        {
+            {"level", "60"},
+            {"hold_s", "20"},
+            {"timeout_s", "300"},
+            {"start_location", "elwynn"},
+            {"walk_location", "elwynn"}
+        });
+
+    std::vector<std::string> furyEquipTemplate = {
+        "# Fury warrior equip upgrades with explicit MH/OH checks",
+        gmInvisible,
+        needAlive,
+        "monitor time > $(timeout_s) => fail \"Timeout while waiting for equip upgrades\"",
+        "teleport $(location)",
+        "give $(mh_item)",
+        "give $(oh_item)",
+        "do equip upgrades",
+        "assert slot mainhand == $(mh_item)",
+        "assert slot offhand == $(oh_item)",
+        gmVisible
+    };
+    RegisterScenarioVariant("scenario_fury_equip_upgrades", "default", furyEquipTemplate,
+        {
+            {"timeout_s", "120"},
+            {"location", "ironforge"},
+            {"mh_item", "17015"}, //dark-iron-reaver
+            {"oh_item", "18805"} //core-hound-tooth
+        });
+
+    std::vector<std::string> zgGroupTemplate = {
+        "# ZG progression with large group and dead-mob observation",
+        "monitor dead mobs > $(dead_mobs_min) => pass \"Observed dead mobs in instance\"",
+        "monitor time > $(timeout_s) => fail \"Timeout while traversing instance\"",
+        "mgroup size=$(group_size)",
+        "teleport $(instance_entry)",
+        "set destination $(boss_destination)",
+        "observe"
+    };
+    RegisterScenarioVariant("scenario_instance_group_progress", "zg_default", zgGroupTemplate,
+        {
+            {"timeout_s", "600"},
+            {"group_size", "20"},
+            {"dead_mobs_min", "0"},
+            {"instance_entry", "zg_entrance"},
+            {"boss_destination", "zg_boss1_room"}
+        });
+
+    std::vector<std::string> followTemplate = {
+        "# Follow catch-up between leader and spawned follower",
+        gmInvisible,
+        needAlive,
+        "monitor spawn distance < $(follow_distance) => pass \"Follower caught up\"",
+        "monitor time > $(timeout_s) => fail \"Timeout waiting for follower catch-up\"",
+        "spawn level=$(level) temporary=1 login=1",
+        "form party",
+        "teleport $(leader_start)",
+        "set destination $(leader_dest_a)",
+        "set destination $(leader_dest_b)",
+        "observe",
+        gmVisible
+    };
+    RegisterScenarioVariant("scenario_follow_cross_zone", "default", followTemplate,
+        {
+            {"timeout_s", "1800"},
+            {"follow_distance", "40"},
+            {"level", "60"},
+            {"leader_start", "ironforge_outside"},
+            {"leader_dest_a", "ironforge"},
+            {"leader_dest_b", "coldridge"}
+        });
+
+    std::vector<std::string> pullWhileTravelTemplate = {
+        "# Pull progression while moving to destination behind mobs",
+        "monitor dead mobs > $(kills_min) => pass \"Killed mobs while traveling\"",
+        "monitor time > $(timeout_s) => fail \"Timeout while traversing mob route\"",
+        "teleport $(start_location)",
+        "set destination $(behind_mobs_destination)",
+        "observe"
+    };
+    RegisterScenarioVariant("scenario_pull_while_traveling", "default", pullWhileTravelTemplate,
+        {
+            {"timeout_s", "600"},
+            {"kills_min", "0"},
+            {"start_location", "westfall"},
+            {"behind_mobs_destination", "elwynn"}
+        });
 
     GenerateMovementTests(1000, 5.0f, 100000.0f);
 }

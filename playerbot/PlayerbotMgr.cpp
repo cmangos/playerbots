@@ -1836,10 +1836,8 @@ std::string PlayerbotHolder::HandleBotRemoveLogout(Player* bot, Player* master, 
     return "ok";
 }
 
-std::list<std::string> PlayerbotHolder::HandleCreate(Player* master, const std::string param, AccountTypes security)
-{
-    std::list<std::string> messages;
-
+void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::list<std::string>& messages, ObjectGuid& guid)
+{    
     // Allow null master for RA/console usage
     // Player* master can be null when called via .rndbot commands
 
@@ -1897,7 +1895,7 @@ std::list<std::string> PlayerbotHolder::HandleCreate(Player* master, const std::
     if (accountId == 0)
     {
         messages.push_back(error);
-        return messages;
+        return;
     }
 
     uint32 maxCharsPerAccount = 9;
@@ -1908,7 +1906,7 @@ std::list<std::string> PlayerbotHolder::HandleCreate(Player* master, const std::
     if (sAccountMgr.GetCharactersCount(accountId) >= maxCharsPerAccount)
     {
         messages.push_back("Account has max characters");
-        return messages;
+        return;
     }
 
     uint8 skin = 0, face = 0, hairStyle = 0, hairColor = 0, facialHair = 0;
@@ -1919,7 +1917,7 @@ std::list<std::string> PlayerbotHolder::HandleCreate(Player* master, const std::
         if (result)
         {
             messages.push_back("Name already exists");
-            return messages;
+            return;
         }
     }
 
@@ -1942,12 +1940,18 @@ std::list<std::string> PlayerbotHolder::HandleCreate(Player* master, const std::
     if (name.empty())
     {
         RandomPlayerbotFactory::NameRaceAndGender raceAndGender = RandomPlayerbotFactory::CombineRaceAndGender(gender, race);
-        name =  RandomPlayerbotFactory::CreateRandomBotName(raceAndGender);
+        name = RandomPlayerbotFactory::CreateRandomBotName(raceAndGender);
     }
 
     WorldSession* botSession = new WorldSession(accountId, NULL, SEC_PLAYER,
 #ifdef MANGOSBOT_TWO
-        2, 0, LOCALE_enUS, "", 0, 0, false);
+        2,
+        0,
+        LOCALE_enUS,
+        "",
+        0,
+        0,
+        false);
 #endif
 #ifdef MANGOSBOT_ONE
         2, 0, LOCALE_enUS, "", 0, 0, false);
@@ -1956,79 +1960,90 @@ std::list<std::string> PlayerbotHolder::HandleCreate(Player* master, const std::
         0, LOCALE_enUS, "", 0);
 #endif
 
-    botSession->SetNoAnticheat();
+        botSession->SetNoAnticheat();
 
-    Player* newBot = new Player(botSession);
-    if (!newBot->Create(sObjectMgr.GeneratePlayerLowGuid(), name, race, cls, gender, skin, face, hairStyle, hairColor, facialHair, 0))
-    {
-        delete botSession;
-        delete newBot;
-        messages.push_back("Failed to create character");
-        return messages;
-    }
+        Player* newBot = new Player(botSession);
+        if (!newBot->Create(sObjectMgr.GeneratePlayerLowGuid(), name, race, cls, gender, skin, face, hairStyle, hairColor, facialHair, 0))
+        {
+            delete botSession;
+            delete newBot;
+            messages.push_back("Failed to create character");
+            return;
+        }
 
-    newBot->setCinematic(2);
-    newBot->SetAtLoginFlag(AT_LOGIN_NONE);
-    sObjectAccessor.AddObject(newBot);
+        newBot->setCinematic(2);
+        newBot->SetAtLoginFlag(AT_LOGIN_NONE);
+        sObjectAccessor.AddObject(newBot);
 
-    uint32 botGuid = newBot->GetGUIDLow();
+        uint32 botGuid = newBot->GetGUIDLow();
+        guid = newBot->GetObjectGuid();
 
-    if (level > 1)
-    {
-        newBot->SetLevel(level);
-        newBot->SetUInt32Value(PLAYER_XP, 0);
-        newBot->InitStatsForLevel(true);
+        if (level > 1)
+        {
+            newBot->SetLevel(level);
+            newBot->SetUInt32Value(PLAYER_XP, 0);
+            newBot->InitStatsForLevel(true);
 #ifdef MANGOSBOT_ZERO
-        newBot->InitTaxiNodes();
+            newBot->InitTaxiNodes();
 #else
         newBot->InitTaxiNodesForLevel();
 #endif
-        newBot->InitTalentForLevel();
-        newBot->InitPrimaryProfessions();
-        newBot->learnDefaultSpells();
-        
-        std::ostringstream out;
-        ChangeTalentsAction::AutoSelectTalents(newBot, &out, role);
+            newBot->InitTalentForLevel();
+            newBot->InitPrimaryProfessions();
+            newBot->learnDefaultSpells();
 
-        sRandomPlayerbotMgr.SetValue(botGuid, "create levelup", 1);
-        sRandomPlayerbotMgr.SetValue(botGuid, "create group", 1, groupWith);
-    }
-    else
-        newBot->SetLevel(1);
+            std::ostringstream out;
+            ChangeTalentsAction::AutoSelectTalents(newBot, &out, role);
 
-    if (!testName.empty())
-    {
-        sRandomPlayerbotMgr.SetValue(botGuid, "test", 1, testName);
-    }
-    if (temporary)
-    {
-        sRandomPlayerbotMgr.SetValue(botGuid, "temporary", 1, name);
-    }
+            sRandomPlayerbotMgr.SetValue(botGuid, "create levelup", 1);
+            sRandomPlayerbotMgr.SetValue(botGuid, "create group", 1, groupWith);
+        }
+        else
+            newBot->SetLevel(1);
 
-    if (master)
-    {
-        newBot->SetMap(master->GetMap());
-        newBot->SetPosition(master->GetPositionX(), master->GetPositionY(), master->GetPositionZ(), master->GetOrientation());
-    }
+        if (!testName.empty())
+        {
+            sRandomPlayerbotMgr.SetValue(botGuid, "test", 1, testName);
+        }
+        if (temporary)
+        {
+            sRandomPlayerbotMgr.SetValue(botGuid, "temporary", 1, name);
+        }
 
-    newBot->SaveToDB();
+        if (master)
+        {
+            newBot->SetMap(master->GetMap());
+            newBot->SetPosition(master->GetPositionX(), master->GetPositionY(), master->GetPositionZ(), master->GetOrientation());
+        }
 
-    messages.push_back("Bot created: " + name);
+        newBot->SaveToDB();
 
-    botSession->LogoutPlayer();
-    sObjectAccessor.RemoveObject(newBot);
-    delete newBot;
-    delete botSession;
+        messages.push_back("Bot created: " + name);
 
-    if (autoAdd)
-    {
-        sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, botGuid));
-        messages.push_back("Bot is now online");
-    }
-    else
-    {
-        messages.push_back("Use '.rndbot add " + name + "' to bring this bot online");
-    }
+        botSession->LogoutPlayer();
+        sObjectAccessor.RemoveObject(newBot);
+        delete newBot;
+        delete botSession;
+
+        if (autoAdd)
+        {
+            sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, botGuid));
+            messages.push_back("Bot is now online");
+        }
+        else
+        {
+            messages.push_back("Use '.rndbot add " + name + "' to bring this bot online");
+        }
+
+        return;
+}
+
+std::list<std::string> PlayerbotHolder::HandleCreate(Player* master, const std::string param, AccountTypes security)
+{
+    std::list<std::string> messages;
+    ObjectGuid guid;
+
+    CreateBot(master, param, messages, guid);
 
     return messages;
 }
@@ -2297,8 +2312,12 @@ bool PlayerbotHolder::DeleteBot(ObjectGuid guid, bool allowInstant)
 {
     uint32 botAccount = sObjectMgr.GetPlayerAccountIdByGUID(guid);
 
-    if (sObjectMgr.GetPlayer(guid, true))
+    if (Player* player = sObjectMgr.GetPlayer(guid, true))
+    {
+        //Attempt instant logout.
+        player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING); 
         LogoutPlayerBot(guid, allowInstant, true);
+    }
 
     Player::DeleteFromDB(guid, botAccount, true, true);
 

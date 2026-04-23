@@ -8,19 +8,40 @@
 
 using namespace ai;
 
-bool HandleSpawnBot::Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& error)
+bool HandleSpawnBot::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& error)
 {
+    if (!ai->GetHolder())
+    {
+        error = "Failed to spawn bot with params: " + params;
+        return false;
+    }
+    std::list<std::string> messages;
+    ObjectGuid guid;
+    ai->GetHolder()->CreateBot(bot, params, messages, guid);
+
+    if (!guid)
+    {
+        error = "Failed to spawn bot with params: " + params;
+        return false;
+    }
+
+    ctx.spawnedBots.push_back(guid);
+
     return true;
 }
 
 bool HandleDespawnBot::Execute(const std::string& params, Player* bot,
                     PlayerbotAI* ai, TestContext& ctx, std::string& error)
 {
+    if (!ai->GetHolder())
+    {
+        error = "Failed to delete spawned bots";
+        return false;
+    }
+
     for (auto& guid : ctx.spawnedBots)
     {
-        if (Creature* creature = ai->GetCreature(guid))
-            creature->ForcedDespawn();
+        ai->GetHolder()->DeleteBot(guid);
     }
     ctx.spawnedBots.clear();
     return true;

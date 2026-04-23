@@ -52,8 +52,11 @@ public:
 
     bool DeleteBot(ObjectGuid guid, bool allowInstant = true);
 #ifdef GenerateBotTests
+    void CreateBot(Player* master, const std::string param, std::list<std::string>& messages, ObjectGuid& guid);
     void DepositTestResult(const std::string& testName, const std::string& result);
 #endif
+
+    std::list<std::string> HandleGroup(Player* master, const std::string param, AccountTypes security);
 protected:
     virtual void OnBotLoginInternal(Player * const bot) = 0;
     virtual void OnBotDeleted(uint32 botGuid, uint32 accountId);
@@ -79,7 +82,6 @@ private:
     std::list<std::string> HandleRaid(Player* master, const std::string param, AccountTypes security);
     std::list<std::string> HandleRaidLeader(Player* master, const std::string param, AccountTypes security);
     std::list<std::string> HandleCreate(Player* master, const std::string param, AccountTypes security);
-    std::list<std::string> HandleGroup(Player* master, const std::string param, AccountTypes security);   
 #ifdef GenerateBotTests
     std::list<std::string> HandleRunTest(Player* master, const std::string param, AccountTypes security);
 

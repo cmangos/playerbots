@@ -918,6 +918,48 @@ void RandomPlayerbotMgr::LoginFreeBots()
                         }
                     }
 
+                    else if (gear == "green" || gear == "uncommon")
+                    {
+                        PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_UNCOMMON);
+                        factory.EquipGear();
+                    }
+                    else if (gear == "blue" || gear == "rare")
+                    {
+                        PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_RARE);
+                        factory.EquipGear();
+                    }
+                    else if (gear == "purple" || gear == "epic")
+                    {
+                        PlayerbotFactory factory(bot, bot->GetLevel(), ITEM_QUALITY_EPIC);
+                        factory.EquipGear();
+                    }
+                    else if (gear == "upgrade")
+                    {
+                        PlayerbotFactory factory(bot, master ? master->GetLevel() : bot->GetLevel(), ITEM_QUALITY_NORMAL);
+                        factory.UpgradeGear(false);
+                    }
+                    else if (gear == "sync")
+                    {
+                        PlayerbotFactory factory(bot, master ? master->GetLevel() : bot->GetLevel(), ITEM_QUALITY_NORMAL);
+                        factory.UpgradeGear(true);
+                    }
+                    else if (gear == "best")
+                    {
+                        PlayerbotFactory factory(bot, bot->GetLevel());
+                        factory.EquipGearBest();
+                    }
+                    else if (gear == "partial")
+                    {
+                        PlayerbotFactory factory(bot, bot->GetLevel());
+                        factory.EquipGearPartialUpgrade();
+                    }
+                    else
+                    {
+                        PlayerbotFactory factory(bot, bot->GetLevel());
+                        factory.EquipGear();
+                    }
+                }
+
                 if (GetEventValue(botGuid, "test"))
                 {
                     PlayerbotAI* ai = bot->GetPlayerbotAI();

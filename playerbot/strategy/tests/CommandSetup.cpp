@@ -43,7 +43,7 @@ TestResult CommandSetupGM::Execute(const std::string& params, Player* bot, Playe
     else if (params == "off")
     {
         bot->SetGameMaster(false);
-        bot->GetSession()->SendNotification(LANG_GM_ON);
+        bot->GetSession()->SendNotification(LANG_GM_OFF);
         return TestResult::PASS;
     }
     else if (params == "visible on")

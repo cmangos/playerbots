@@ -46,16 +46,13 @@ namespace ai
         void LogToFile(const std::string& msg);
         void DeactivateStrategy();
 
-        TestResult GetResult() const { return result; }
+        TestResult GetResult() const { return ctx.result; }
         bool IsObserving() const { return ctx.observing; }
 
     private:
         std::vector<std::unique_ptr<TestMonitor>> monitors;
         std::vector<std::unique_ptr<TestCommand>> commands;
         
-        TestResult result;
         TestContext ctx;
-        int pc;
-        std::string testName;
-    };
+   };
 }

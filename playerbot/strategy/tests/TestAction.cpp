@@ -29,9 +29,7 @@
 using namespace ai;
 
 TestAction::TestAction(PlayerbotAI* ai, std::string name)
-    : Action(ai, name, 1000)
-    , result(TestResult::PENDING)
-    , pc(0)
+    : Action(ai, name, 1000), ctx()
 {
     commands.push_back(std::make_unique<RequireBotIs>());
 
@@ -79,7 +77,7 @@ bool TestAction::Execute(Event& event)
 
     std::string testParam = param;
 
-    if (result == TestResult::PENDING && !ctx.observing && pc == 0)
+    if (ctx.result == TestResult::PENDING && !ctx.observing && ctx.pc == 0)
     {
         if (testParam.empty())
         {
@@ -103,7 +101,7 @@ bool TestAction::Execute(Event& event)
             for (const auto& t : tests)
                 TellMaster("  - " + t);
 
-            result = TestResult::IMPOSSIBLE;
+            ctx.result = TestResult::IMPOSSIBLE;
             ReportResult();
             return true;
         }
@@ -116,25 +114,24 @@ bool TestAction::Execute(Event& event)
             for (const auto& t : tests)
                 TellMaster("  - " + t);
 
-            result = TestResult::IMPOSSIBLE;
+            ctx.result = TestResult::IMPOSSIBLE;
             ReportResult();
             return true;
         }
 
-        testName = testParam;
-        ctx.testName = testName;
-        ctx.script = TestRegistry::GetTestScript(testName);
+        ctx.testName = testParam;
+        ctx.script = TestRegistry::GetTestScript(ctx.testName);
         ctx.testStartTime = WorldTimer::getMSTime();
         if (bot->IsInWorld())
             ctx.testStartPosition = WorldPosition(bot);
 
-        TellMaster(std::string("Starting test: ") + testName);
-        LogToConsole(std::string("[TestAction] Bot ") + bot->GetName() + " starting test: " + testName);
+        TellMaster(std::string("Starting test: ") + ctx.testName);
+        LogToConsole(std::string("[TestAction] Bot ") + bot->GetName() + " starting test: " + ctx.testName);
     }
 
     SET_AI_VALUE2(bool, "manual bool", "is running test", true);
 
-    if (result != TestResult::PENDING)
+    if (ctx.result != TestResult::PENDING)
     {
         RunCleanup();
         ReportResult();
@@ -144,14 +141,14 @@ bool TestAction::Execute(Event& event)
     if (ctx.observing)
     {
         CheckMonitors();
-        if (result != TestResult::PENDING)
+        if (ctx.result != TestResult::PENDING)
         {
             return true;
         }
         return false;
     }
 
-    if (pc >= (int)ctx.script.size())
+    if (ctx.pc >= (int)ctx.script.size())
     {
         RunCleanup();
         SetResult(TestResult::PASS, "Script completed without explicit result");
@@ -159,11 +156,11 @@ bool TestAction::Execute(Event& event)
     }
 
     std::string message;
-    TestResult commandResult = ExecuteCommand(ctx.script[pc], message);
+    TestResult commandResult = ExecuteCommand(ctx.script[ctx.pc], message);
 
     if (commandResult == TestResult::PASS)
     {
-        pc++;
+        ctx.pc++;
     }
     else if (commandResult == TestResult::PENDING)
     {
@@ -172,7 +169,7 @@ bool TestAction::Execute(Event& event)
     else
     {
         RunCleanup();
-        SetResult(commandResult, message.empty() ? "Command " + ctx.script[pc] + " failed" : message);
+        SetResult(commandResult, message.empty() ? "Command " + ctx.script[ctx.pc] + " failed" : message);
     }
 
     return true;
@@ -204,14 +201,14 @@ TestResult TestAction::ExecuteCommand(const std::string& line, std::string& mess
 
 void TestAction::RunCleanup()
 {   
-    for (size_t i = static_cast<size_t>(std::max(0, pc)); i < ctx.script.size(); ++i)
+    for (size_t i = static_cast<size_t>(std::max(0, ctx.pc)); i < ctx.script.size(); ++i)
     {
         std::string message;
 
         if (!dynamic_cast<TestCleanup*>(commands[i].get()))
             continue;
 
-        TestResult commandResult = ExecuteCommand(ctx.script[pc], message);        
+        TestResult commandResult = ExecuteCommand(ctx.script[ctx.pc], message);        
     }
 }
 
@@ -239,10 +236,9 @@ void TestAction::CheckMonitors()
 
 void TestAction::SetResult(TestResult newResult, const std::string& msg)
 {
-    if (result != TestResult::PENDING)
+    if (ctx.result != TestResult::PENDING)
         return;
 
-    result = newResult;
     ctx.result = newResult;
     ctx.resultMessage = msg;
 
@@ -279,7 +275,7 @@ void TestAction::ReportResult()
     strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", localtime(&now));
 
     std::string logLine = "[BOTTEST] " + std::string(timestamp) + " | " +
-                          bot->GetName() + " | " + testName + " | " + resultStr + " | " +
+        bot->GetName() + " | " + ctx.testName + " | " + resultStr + " | " +
                           ctx.resultMessage;
     LogToConsole(logLine);
     LogToFile(logLine);
@@ -288,7 +284,7 @@ void TestAction::ReportResult()
 
 #ifdef GenerateBotTests 
     if (ai->GetHolder())
-        ai->GetHolder()->DepositTestResult(testName, resultStr);
+        ai->GetHolder()->DepositTestResult(ctx.testName, resultStr);
 #endif
 
     DeactivateStrategy();
@@ -333,14 +329,11 @@ void TestAction::LogToFile(const std::string& msg)
 
 void TestAction::DeactivateStrategy()
 {       
-    std::string strategyName = "test::" + testName;
+    std::string strategyName = "test::" + ctx.testName;
     ai->ChangeStrategy("-" + strategyName, BotState::BOT_STATE_COMBAT);
     ai->ChangeStrategy("-" + strategyName, BotState::BOT_STATE_NON_COMBAT);
             
     ctx.Reset();
-    result = TestResult::PENDING;    
-    pc = 0;
-    testName.clear();
 }
 
 void TestAction::RegisterTest(const std::string& name, const std::vector<std::string>& script)

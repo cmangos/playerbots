@@ -2189,6 +2189,15 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
     }
 
     std::string testNamePart = param;
+
+    bool listTests = false;
+
+    if (testNamePart[0] == '?')
+    {
+        listTests = true;
+        testNamePart = testNamePart.substr(2);
+    }
+
     std::transform(testNamePart.begin(), testNamePart.end(), testNamePart.begin(), ::tolower);
 
     std::vector<std::string> matchingTests;
@@ -2204,6 +2213,14 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
     if (matchingTests.empty())
     {
         messages.push_back("No tests matching '" + param + "' found");
+        return messages;
+    }
+
+    if (listTests)
+    {
+        messages.push_back("Tests matching '" + param + "':");
+        for (const auto& test : matchingTests)
+            messages.push_back("  " + test);
         return messages;
     }
 

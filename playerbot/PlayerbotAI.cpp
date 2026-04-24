@@ -318,7 +318,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
                 }
                 else if (lootObject.IsGameObject())
                 {
-                    Unit* gameobjectTarget = (Unit*)loot->GetLootTarget();
+                    GameObject* gameobjectTarget = (GameObject*)loot->GetLootTarget();
                     LootAccess const* lootAccess = reinterpret_cast<LootAccess const*>(gameobjectTarget->m_loot);
                     // If the bot is actually one of the players looting
                     if (!lootAccess->m_playersLooting.contains(bot->GetObjectGuid()))

@@ -260,7 +260,7 @@ void TestRegistry::EnsureTestsRegistered()
     sTestsRegistered = true;
 
     static std::string gmInvisible = "gm visible off";
-    static std::string gmVisible = "cleanup gm visible on";
+    static std::string gmVisible = "gm visible on";
 
     static std::string needAlliance = "monitor faction horde => abort \"Bot needs to be alliance\"";
     static std::string needAlive = "monitor bot dead => abort \"Bot died test interupted\"";

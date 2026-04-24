@@ -2007,7 +2007,7 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
 
         if (!testName.empty())
         {
-            testName = std::regex_replace(testName, std::regex("'"), "\'");
+            testName = std::regex_replace(testName, std::regex("'"), "\\'");
 
             sRandomPlayerbotMgr.SetValue(botGuid, "test", 1, testName);
         }

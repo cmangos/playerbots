@@ -965,7 +965,7 @@ void RandomPlayerbotMgr::LoginFreeBots()
                     PlayerbotAI* ai = bot->GetPlayerbotAI();
                     AiObjectContext* context = ai->GetAiObjectContext();
                     std::string testName = GetEventData(botGuid, "test");
-                    testName = std::regex_replace(testName, std::regex("\'"), "'");
+                    testName = std::regex_replace(testName, std::regex("\\'"), "'");
                     std::string strategyName = "test::" + testName;
                     ai->ChangeStrategy("+" + strategyName, BotState::BOT_STATE_NON_COMBAT);
                     SET_AI_VALUE2(bool, "manual bool", "is running test", true);

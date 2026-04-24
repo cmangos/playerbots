@@ -10,30 +10,20 @@ bool MonitorCombatHp::IsConditionMet(const std::string& monitorStr, Player* bot,
 {
     uint8 hp = bot->GetHealthPercent();
 
-    size_t ltPos = monitorStr.find("<");
-    size_t gtPos = monitorStr.find(">");
-    size_t arrowPos = monitorStr.find("=>");
+    char op = 0;
+    std::string valueStr;
+    std::string parseMessage;
+    if (TryParseComparisonValue(monitorStr, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+        return false;
 
-    if (ltPos != std::string::npos && arrowPos != std::string::npos)
-    {
-        std::string percentStr = monitorStr.substr(ltPos + 1, arrowPos - ltPos - 1);
-        uint32 threshold = atoi(percentStr.c_str());
+    uint32 threshold = 0;
+    if (TryParseUInt32Strict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+        return false;
 
-        if (hp < threshold)
-        {
-            return true;
-        }
-    }
-    else if (gtPos != std::string::npos && arrowPos != std::string::npos)
-    {
-        std::string percentStr = monitorStr.substr(gtPos + 1, arrowPos - gtPos - 1);
-        uint32 threshold = atoi(percentStr.c_str());
-        if (hp > threshold)
-        {
-            return true;
-        }
-    }
-    return false;
+    if (op == '<')
+        return hp < threshold;
+
+    return hp > threshold;
 }
 
 bool MonitorCombatMob::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
@@ -93,10 +83,6 @@ bool MonitorCombatPartyWiped::IsConditionMet(const std::string& monitorStr, Play
 
 bool MonitorCombatDeadMobs::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
-    size_t arrowPos = monitorStr.find("=>");
-    if (arrowPos == std::string::npos)
-        return false;
-
     std::list<Creature*> creatures;
     MaNGOS::AnyUnitInObjectRangeCheck checker(bot, 120.0f);
     MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(creatures, checker);
@@ -109,19 +95,19 @@ bool MonitorCombatDeadMobs::IsConditionMet(const std::string& monitorStr, Player
             deadCount++;
     }
 
-    size_t gtPos = monitorStr.find(">");
-    if (gtPos != std::string::npos)
-    {
-        uint32 threshold = atoi(monitorStr.substr(gtPos + 1, arrowPos - gtPos - 1).c_str());
+    char op = 0;
+    std::string valueStr;
+    std::string parseMessage;
+    if (TryParseComparisonValue(monitorStr, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    uint32 threshold = 0;
+    if (TryParseUInt32Strict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    if (op == '>')
         return deadCount > threshold;
-    }
 
-    size_t ltPos = monitorStr.find("<");
-    if (ltPos != std::string::npos)
-    {
-        uint32 threshold = atoi(monitorStr.substr(ltPos + 1, arrowPos - ltPos - 1).c_str());
-        return deadCount < threshold;
-    }
+    return deadCount < threshold;
 
-    return false;
 }

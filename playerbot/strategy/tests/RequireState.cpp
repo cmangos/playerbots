@@ -11,15 +11,17 @@ TestResult RequireBotIs::Execute(const std::string& params, Player* bot,
     std::vector<std::string> args = Qualified::getMultiQualifiers(params, " ");
     for (const auto& arg : args)
     {
-        size_t eqPos = arg.find('=');
-        if (eqPos == std::string::npos)
-            continue;
+        std::string key;
+        std::string value;
+        if (TrySplitOnce(arg, "=", key, value, message, GetName()) != TestResult::PASS)
+            return TestResult::IMPOSSIBLE;
 
-        std::string key = arg.substr(0, eqPos);
-        std::string value = arg.substr(eqPos + 1);
         if (key == "level")
         {
-            uint32 expectedLevel = static_cast<uint32>(std::strtoul(value.c_str(), nullptr, 10));
+            uint32 expectedLevel = 0;
+            if (TryParseUInt32Strict(value, expectedLevel, message, GetName()) != TestResult::PASS)
+                return TestResult::IMPOSSIBLE;
+
             if (bot->GetLevel() != expectedLevel)
             {
                 return TestResult::FAIL;
@@ -59,24 +61,14 @@ TestResult RequireBotIs::Execute(const std::string& params, Player* bot,
 
 TestResult RequireEquip::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
-    size_t eqPos = params.find('=');
-
-    if (eqPos == std::string::npos)
-    {
-        message = "wrong equip requirement " + params;
+    std::string key;
+    std::string value;
+    if (TrySplitOnce(params, "=", key, value, message, GetName()) != TestResult::PASS)
         return TestResult::IMPOSSIBLE;
-    }
 
-    std::string key = params.substr(0, eqPos);
-    std::string value = params.substr(eqPos + 1);
-
-    if (!Qualified::isValidNumberString(value))
-    {
-        message = value + " is not a valid item Id";
+    uint32 itemId = 0;
+    if (TryParseUInt32Strict(value, itemId, message, GetName()) != TestResult::PASS)
         return TestResult::IMPOSSIBLE;
-    }
-
-    uint32 itemId = stoi(value);
 
     uint32 slotId = ChatHelper::parseSlot(key);
 

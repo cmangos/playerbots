@@ -11,43 +11,55 @@ using namespace ai;
 
 bool MonitorMovementDistance::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
-    size_t arrowPos = monitorStr.find("=>");
-    if (arrowPos == std::string::npos)
+    std::string locPart;
+    std::string outcomePart;
+    std::string parseMessage;
+    if (TrySplitOnce(monitorStr, "=>", locPart, outcomePart, parseMessage, GetName(), true) != TestResult::PASS)
         return false;
 
-    std::string locPart = monitorStr.substr(GetName().length() + 1,
-                                       arrowPos - GetName().length());
-
     GuidPosition loc;
-    size_t ltPos = locPart.find("<");
-    size_t gtPos = locPart.find(">");
+    char op = 0;
+    std::string valueStr;
+    if (TryParseComparisonValue(monitorStr, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+        return false;
 
-    if (ltPos != std::string::npos)
-    {
-        std::string name = locPart.substr(0, ltPos-1);
-        float threshold = atof(locPart.substr(ltPos + 1).c_str());
+    float threshold = 0.0f;
+    if (TryParseFloatStrict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+        return false;
 
-        if (!TestRegistry::ParseLocation(name, loc))
-            return false;
+    const size_t opPos = locPart.find(op);
+    if (opPos == std::string::npos)
+        return false;
 
-        float dist = bot->GetDistance(loc.coord_x, loc.coord_y, loc.coord_z);
-        if (dist < threshold)
-            return true;
-    }
-    else if (gtPos != std::string::npos)
-    {
-        std::string name = locPart.substr(0, gtPos-1);
-        float threshold = atof(locPart.substr(gtPos + 1).c_str());
+    const std::string name = locPart.substr(0, opPos > 0 ? opPos - 1 : 0);
+    if (!TestRegistry::ParseLocation(name, loc))
+        return false;
 
-        if (!TestRegistry::ParseLocation(name, loc))
-            return false;
+    const float dist = bot->GetDistance(loc.coord_x, loc.coord_y, loc.coord_z);
+    if (op == '<')
+        return dist < threshold;
 
-        float dist = bot->GetDistance(loc.coord_x, loc.coord_y, loc.coord_z);
-        if (dist > threshold)
-        {
-            return true;
-        }
-    }
+    return dist > threshold;
+
+}
+bool MonitorNotOnMap::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    std::string wantMapName, rightSide, parseMessage;
+    if (TrySplitOnce(monitorStr, "=>", wantMapName, rightSide, parseMessage, GetName(), true) != TestResult::PASS)
+        return false;
+
+    if (!bot->IsAlive()) //Allow offmap corpse runs
+        return false;
+
+    WorldPosition botPos(bot);
+
+    if (!botPos)
+        return true;
+
+    std::string currentMapName = botPos.getMapEntry()->name[0];
+
+    if (currentMapName != wantMapName)
+        return true;
 
     return false;
 }
@@ -171,25 +183,25 @@ bool MonitorMovementSpawnDistance::IsConditionMet(const std::string& monitorStr,
     if (!spawned)
         return false;
 
-    size_t arrowPos = monitorStr.find("=>");
-    if (arrowPos == std::string::npos)
+    std::string leftSide;
+    std::string rightSide;
+    std::string parseMessage;
+    if (TrySplitOnce(monitorStr, "=>", leftSide, rightSide, parseMessage, GetName(), true) != TestResult::PASS)
         return false;
 
     float dist = bot->GetDistance(spawned);
 
-    size_t ltPos = monitorStr.find("<");
-    if (ltPos != std::string::npos)
-    {
-        float threshold = atof(monitorStr.substr(ltPos + 1, arrowPos - ltPos - 1).c_str());
+    char op = 0;
+    std::string valueStr;
+    if (TryParseComparisonValue(monitorStr, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    float threshold = 0.0f;
+    if (TryParseFloatStrict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    if (op == '<')
         return dist < threshold;
-    }
 
-    size_t gtPos = monitorStr.find(">");
-    if (gtPos != std::string::npos)
-    {
-        float threshold = atof(monitorStr.substr(gtPos + 1, arrowPos - gtPos - 1).c_str());
-        return dist > threshold;
-    }
-
-    return false;
+    return dist > threshold;
 }

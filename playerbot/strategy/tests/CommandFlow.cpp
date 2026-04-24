@@ -29,13 +29,10 @@ TestResult CommandFlowWait::Execute(const std::string& params, Player* bot, Play
     if (!ctx.waitTime)
         ctx.waitTime = WorldTimer::getMSTime();
 
-    if (!Qualified::isValidNumberString(params))
-    {
-        message = "Invalid wait time: " + params;
+    uint32 waitDuration = 0;
+    if (TryParseUInt32Strict(params, waitDuration, message, GetName()) != TestResult::PASS)
         return TestResult::IMPOSSIBLE;
-    }
 
-    uint32 waitDuration = static_cast<uint32>(std::strtoul(params.c_str(), nullptr, 10));
     if (WorldTimer::getMSTimeDiff(ctx.waitTime, WorldTimer::getMSTime()) >= waitDuration)
     {
         ctx.waitTime = 0;
@@ -53,13 +50,10 @@ TestResult CommandFlowWaitDestination::Execute(const std::string& params, Player
     if (!ctx.waitTime)
         ctx.waitTime = WorldTimer::getMSTime();
 
-    if (!Qualified::isValidNumberString(params))
-    {
-        message = "Invalid wait time: " + params;
+    uint32 waitDuration = 0;
+    if (TryParseUInt32Strict(params, waitDuration, message, GetName()) != TestResult::PASS)
         return TestResult::IMPOSSIBLE;
-    }
 
-    uint32 waitDuration = static_cast<uint32>(std::strtoul(params.c_str(), nullptr, 10));
     if (WorldTimer::getMSTimeDiff(ctx.waitTime, WorldTimer::getMSTime()) >= waitDuration)
     {
         ctx.waitTime = 0;
@@ -77,13 +71,11 @@ TestResult CommandFlowRepeat::Execute(const std::string& params, Player* bot, Pl
         return TestResult::PENDING;
     }
 
-    if (!Qualified::isValidNumberString(params))
-    {
-        message = "Invalid wait time: " + params;
+    uint32 pc = 0;
+    if (TryParseUInt32Strict(params, pc, message, GetName()) != TestResult::PASS)
         return TestResult::IMPOSSIBLE;
-    }
 
-    ctx.pc = stoi(params);
+    ctx.pc = static_cast<int>(pc);
 
     return TestResult::PENDING;
 }

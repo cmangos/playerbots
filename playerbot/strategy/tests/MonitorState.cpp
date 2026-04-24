@@ -7,20 +7,20 @@ bool MonitorStateTime::IsConditionMet(const std::string& monitorStr, Player* bot
 {
     uint32 elapsed = (WorldTimer::getMSTime() - ctx.testStartTime) / 1000;
 
-    size_t gtPos = monitorStr.find(">");
-    size_t arrowPos = monitorStr.find("=>");
+    char op = 0;
+    std::string valueStr;
+    std::string parseMessage;
+    if (TryParseComparisonValue(monitorStr, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+        return false;
 
-    if (gtPos != std::string::npos && arrowPos != std::string::npos)
-    {
-        std::string secondsStr = monitorStr.substr(gtPos+2, arrowPos - gtPos - 3);
-        uint32 threshold = atoi(secondsStr.c_str());
+    uint32 threshold = 0;
+    if (TryParseUInt32Strict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+        return false;
 
-        if (elapsed >= threshold)
-        {
-            return true;
-        }
-    }
-    return false;
+    if (op == '>')
+        return elapsed >= threshold;
+
+    return elapsed <= threshold;
 }
 
 bool MonitorStateDead::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
@@ -46,48 +46,38 @@ bool MonitorStateGroupSize::IsConditionMet(const std::string& monitorStr, Player
     Group* group = bot->GetGroup();
     uint32 size = group ? group->GetMembersCount() : 1;
 
-    size_t arrowPos = monitorStr.find("=>");
-    if (arrowPos == std::string::npos)
+    char op = 0;
+    std::string valueStr;
+    std::string parseMessage;
+    if (TryParseComparisonValue(monitorStr, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
         return false;
 
-    size_t gtPos = monitorStr.find(">");
-    if (gtPos != std::string::npos && gtPos < arrowPos)
-    {
-        uint32 threshold = atoi(monitorStr.substr(gtPos + 1, arrowPos - gtPos - 1).c_str());
+    uint32 threshold = 0;
+    if (TryParseUInt32Strict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    if (op == '>')
         return size > threshold;
-    }
 
-    size_t ltPos = monitorStr.find("<");
-    if (ltPos != std::string::npos)
-    {
-        uint32 threshold = atoi(monitorStr.substr(ltPos + 1, arrowPos - ltPos - 1).c_str());
-        return size < threshold;
-    }
-
-    return false;
+    return size < threshold;
 }
 
 bool MonitorStateLootGuid::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     uint64 lootGuid = bot->GetLootGuid().GetRawValue();
 
-    size_t arrowPos = monitorStr.find("=>");
-    if (arrowPos == std::string::npos)
+    char op = 0;
+    std::string valueStr;
+    std::string parseMessage;
+    if (TryParseComparisonValue(monitorStr, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
         return false;
 
-    size_t gtPos = monitorStr.find(">");
-    if (gtPos != std::string::npos)
-    {
-        uint64 threshold = static_cast<uint64>(atoll(monitorStr.substr(gtPos + 1, arrowPos - gtPos - 1).c_str()));
+    uint64 threshold = 0;
+    if (TryParseUInt64Strict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    if (op == '>')
         return lootGuid > threshold;
-    }
 
-    size_t ltPos = monitorStr.find("<");
-    if (ltPos != std::string::npos)
-    {
-        uint64 threshold = static_cast<uint64>(atoll(monitorStr.substr(ltPos + 1, arrowPos - ltPos - 1).c_str()));
-        return lootGuid < threshold;
-    }
-
-    return false;
+    return lootGuid < threshold;
 }

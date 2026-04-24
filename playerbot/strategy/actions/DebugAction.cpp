@@ -3134,9 +3134,7 @@ bool DebugAction::HandlePosition(Event& event, Player* requester, const std::str
     // Check if position is above ground or underground
     if (param.substr(0, 6) == "ground")
     {
-        std::string groundParam = param.size() > 5 ? param.substr(5) : "";
-        while (groundParam.size() > 0 && groundParam[0] == ' ')
-            groundParam = groundParam.substr(1);
+        std::string groundParam = param.size() > 7 ? param.substr(7) : "";
 
         WorldPosition pos(bot);
         if (!groundParam.empty())

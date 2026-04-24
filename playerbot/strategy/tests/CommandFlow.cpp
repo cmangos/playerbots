@@ -44,3 +44,46 @@ TestResult CommandFlowWait::Execute(const std::string& params, Player* bot, Play
     
     return TestResult::PENDING;
 }
+
+TestResult CommandFlowWaitDestination::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    if (ctx.destinationPosition.distance(bot) < 10.0f)
+        return TestResult::PASS;
+
+    if (!ctx.waitTime)
+        ctx.waitTime = WorldTimer::getMSTime();
+
+    if (!Qualified::isValidNumberString(params))
+    {
+        message = "Invalid wait time: " + params;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    uint32 waitDuration = static_cast<uint32>(std::strtoul(params.c_str(), nullptr, 10));
+    if (WorldTimer::getMSTimeDiff(ctx.waitTime, WorldTimer::getMSTime()) >= waitDuration)
+    {
+        ctx.waitTime = 0;
+        return TestResult::PASS;
+    }
+
+    return TestResult::PENDING;
+}
+
+TestResult CommandFlowRepeat::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    if (params.empty())
+    {
+        ctx.pc = 0;
+        return TestResult::PENDING;
+    }
+
+    if (!Qualified::isValidNumberString(params))
+    {
+        message = "Invalid wait time: " + params;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    ctx.pc = stoi(params);
+
+    return TestResult::PENDING;
+}

@@ -46,7 +46,9 @@ TestAction::TestAction(PlayerbotAI* ai, std::string name)
     commands.push_back(std::make_unique<CommandFlowObserve>());
     commands.push_back(std::make_unique<CommandFlowMonitor>());
     commands.push_back(std::make_unique<CommandFlowWait>());
-
+    commands.push_back(std::make_unique<CommandFlowWaitDestination>());
+    commands.push_back(std::make_unique<CommandFlowRepeat>());
+    
     monitors.push_back(std::make_unique<MonitorStateDead>());
     monitors.push_back(std::make_unique<MonitorStateTime>());
     monitors.push_back(std::make_unique<MonitorCombatHp>());

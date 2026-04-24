@@ -53,6 +53,7 @@ TestAction::TestAction(PlayerbotAI* ai, std::string name)
     monitors.push_back(std::make_unique<MonitorStateTime>());
     monitors.push_back(std::make_unique<MonitorCombatHp>());
     monitors.push_back(std::make_unique<MonitorMovementDistance>());
+    monitors.push_back(std::make_unique<MonitorNotOnMap>());
     monitors.push_back(std::make_unique<MonitorMovementUnderground>());
     monitors.push_back(std::make_unique<MonitorMovementCanReachNodes>());
     monitors.push_back(std::make_unique<MonitorMovementSpeed>());

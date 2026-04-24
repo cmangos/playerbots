@@ -14,6 +14,13 @@ namespace ai
         std::string GetName() const override { return "distance to"; }
     };
 
+    class MonitorNotOnMap : public TestMonitor
+    {
+    private:
+        bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
+        std::string GetName() const override { return "not on map"; }
+    };
+
     class MonitorMovementUnderground : public TestMonitor
     {
     private:

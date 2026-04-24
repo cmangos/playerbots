@@ -280,11 +280,12 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
 
     // Leontiesh - fix movement desync
     bool botMoving = false;
-    if (!bot->IsStopped() || bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
+    if (!bot->IsStopped() || bot->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE) 
         botMoving = true;
     if (!bot->GetMotionMaster()->empty())
         if (MovementGenerator* movgen = bot->GetMotionMaster()->top())
             botMoving = true;
+
 
     if (botMoving && !bot->IsBeingTeleported() && bot->IsInWorld())
     {
@@ -300,14 +301,43 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
                 shouldRelease = false;
             else if (lootObject.GetWorldObject(bot->GetInstanceId()) && bot->GetDistance(lootObject.GetWorldObject(bot->GetInstanceId())) < INTERACTION_DISTANCE)
                 shouldRelease = false;
-        }
 
-        // release loot if moving and far from object.
-        if (shouldRelease)
-        {
+            
             if (Loot* loot = sLootMgr.GetLoot(bot, bot->GetLootGuid()))
             {
-                loot->Release(bot);
+                if (lootObject.IsUnit())
+                {
+                    Unit* unitTarget = (Unit*)loot->GetLootTarget();
+                    LootAccess const* lootAccess = reinterpret_cast<LootAccess const*>(unitTarget->m_loot);
+                    // If the bot is actually one of the players looting
+                    if (!lootAccess->m_playersLooting.contains(bot->GetObjectGuid()))
+                    {
+                        // You shouldn't release if you aren't looting already
+                        shouldRelease = false;
+                    }    
+                }
+                else if (lootObject.IsGameObject())
+                {
+                    GameObject* gameobjectTarget = (GameObject*)loot->GetLootTarget();
+                    LootAccess const* lootAccess = reinterpret_cast<LootAccess const*>(gameobjectTarget->m_loot);
+                    // If the bot is actually one of the players looting
+                    if (!lootAccess->m_playersLooting.contains(bot->GetObjectGuid()))
+                    {
+                        // You shouldn't release if you aren't looting already
+                        shouldRelease = false;
+                    }
+                }
+                else
+                {
+                    // If it's not a unit or GO, what looting would this be?
+                    // safe to assume you probably shouldn't release
+                    shouldRelease = false;
+                }
+                // release loot if moving and far from object.
+                if (shouldRelease)
+                {
+                    loot->Release(bot);
+                }
             }
         }
     }

@@ -20,9 +20,7 @@ static std::vector<TeleLoc> sTeleLocations;
 static void InitTestLocations()
 {
     sTestLocations["ironforge_outside"] = GuidPosition(ObjectGuid(), WorldPosition(0, -5150.0f, -856.0f, 508.4f));
-    sTestLocations["coldridge"] = GuidPosition(ObjectGuid(), WorldPosition(0, -5634.0f, -497.0f, 396.0f));
-    sTestLocations["darnassus"] = GuidPosition(ObjectGuid(), WorldPosition(1, 9951.0f, 2280.0f, 1342.0f));
-    sTestLocations["zg_boss1_room"] = GuidPosition(ObjectGuid(), WorldPosition(309, -11900.0f, -1650.0f, 92.0f));
+    sTestLocations["zg_boss1_room"] = GuidPosition(ObjectGuid(), WorldPosition(309, -12276.0f, -1399.0f, 130.9f));
 }
 
 static void InitTeleLocations()
@@ -348,23 +346,28 @@ void TestRegistry::EnsureTestsRegistered()
             {"expected_item_2", "18805"}
         });
 
-    std::vector<std::string> zgGroupTemplate = {
-        "# ZG progression with large group and dead-mob observation",
+    std::vector<std::string> instanceGroupTemplate = {
+        "# instance progression with large group and dead-mob observation",
+        "require bot is level=60",
         "monitor dead mobs > $(dead_mobs_min) => pass \"Observed dead mobs in instance\"",
         "monitor time > $(timeout_s) => fail \"Timeout while traversing instance after <time elapsed> (mobs <mobs killed>, traveled <distance traveled> / wanted <distance wanted>)\"",
         "teleport $(instance_entry)",
-        "mgroup size=$(group_size)",
+        "mgroup size=$(group_size) gear=best",
+        gmVisible,
+        "gm off",
+        "wait 10",
+        ".bot r @tank co +mark rti",
         "set destination $(boss_destination)",
         "observe"
     };
-    RegisterScenarioVariant("scenario_instance_group_progress", "zg_default", zgGroupTemplate,
+    RegisterScenarioVariant("scenario_instance_group_progress", "zg_default", instanceGroupTemplate,
         {
-            {"timeout_s", "600"},
+            {"timeout_s", "1200"},
             {"group_size", "20"},
             {"dead_mobs_min", "0"},
             {"instance_entry", "zul'gurub"},
             {"boss_destination", "zg_boss1_room"}
-        });
+        });  
 
     std::vector<std::string> followTemplate = {
         "# Follow catch-up between leader and spawned follower",

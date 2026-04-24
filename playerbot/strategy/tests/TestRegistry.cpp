@@ -313,28 +313,27 @@ void TestRegistry::EnsureTestsRegistered()
             {"walk_location", "elwynn"}
         });
 
-    std::vector<std::string> furyEquipTemplate = {
-        "# Fury warrior equip upgrades with setup and expected equipment lists",
+    std::vector<std::string> EquipTemplate = {
+        "# equip upgrades with setup and expected equipment lists",
         gmInvisible,
         needAlive,
         "require bot is level=$(level) class=$(class) role=$(role) gear=empty",
-        "monitor time > $(timeout_s) => pass \"Test complete items properly equiped",
-        "teleport $(location)",
+        "monitor time > $(timeout_s) => pass \"Test complete items properly equiped\"",
         "give $(setup_equip_item_1)",
         "give $(setup_equip_item_2)",
         "do equip upgrades",
         "give $(bag_item_1)",
         "give $(bag_item_2)",
         "do equip upgrades",
+        "wait 5",
         "require equip main hand=$(expected_item_1)",
         "require equip off hand=$(expected_item_2)",
         "observe",
         gmVisible
     };
-    RegisterScenarioVariant("scenario_fury_equip_upgrades", "default", furyEquipTemplate,
+    RegisterScenarioVariant("scenario_fury_equip_upgrades", "default", EquipTemplate,
         {
             {"timeout_s", "10"},
-            {"location", "ironforge"},
             {"level", "60"},
             {"class", "warrior"},
             {"role", "dps"},

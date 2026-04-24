@@ -192,8 +192,10 @@ TestResult TestAction::ExecuteCommand(const std::string& line, std::string& mess
         }
     }
 
-    LogToConsole("[TestAction] Unknown command, falling through to bot: " + line);
-    TellMaster("Executing command: " + line);
+    if (line[0] == '.')
+        if (ChatHandler(bot).ParseCommands(line.c_str()))
+            return TestResult::PASS;
+
     ai->HandleCommand(CHAT_MSG_WHISPER, line, *bot);
 
     return TestResult::PASS;

@@ -19,7 +19,7 @@ GuidPosition FreeMoveCenterValue::Calculate()
 
         //Use bot as center when follow target is on a different map.
         if (followTarget->GetMapId() != bot->GetMapId()) 
-            return bot;
+            return followTarget;
 
         Player* player = dynamic_cast<Player*>(followTarget);
 

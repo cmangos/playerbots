@@ -3,6 +3,8 @@
 #include "playerbot/ChatHelper.h"
 #include "Globals/ObjectMgr.h"
 #include <regex>
+#include "playerbot/TravelMgr.h"
+#include <playerbot/TravelNode.h>
 
 static std::map<std::string, std::vector<std::string>> sTestRegistry;
 static bool sTestsRegistered = false;
@@ -225,6 +227,122 @@ void TestRegistry::GenerateMovementTests(int maxTests, float minDist, float maxD
     GenerateMovementTestsImpl(maxTests, minDist, maxDist);
 }
 
+void TestRegistry::GenerateBossWalkTest()
+{    
+    DestinationList bossDestinations = sTravelMgr.GetDestinations(PlayerTravelInfo(), (uint32)TravelDestinationPurpose::Boss, {}, false);
+
+     std::vector<std::string> instanceGroupTemplate = {
+        "# instance progression with large group and dead-mob observation",
+        "require bot is level=$(level)",
+        "monitor dead mobs > $(dead_mobs_min) => pass \"Observed dead mobs in instance\"",
+        "monitor time > $(timeout_s) => fail \"Timeout while traversing instance after <time elapsed> (mobs <mobs killed>, traveled <distance traveled> / wanted <distance wanted>)\"",
+        "teleport $(instance_entry)",
+        "mgroup size=$(group_size) gear=best",
+        "gm visible on",
+        "gm off",
+        "wait 10",
+        "${start_command}",
+        "set destination $(boss_destination)",
+        "wait 60",
+        "not on map $(instance_entry) => abort \"Bot left instance map\"",
+        "observe"};
+
+    for (auto & destination : bossDestinations)
+    {
+        for (auto& point : destination->GetPoints())
+        {
+            if (!point->getMapEntry())
+                continue;
+
+            const MapEntry * mapEntry = point->getMapEntry();
+
+            if (!mapEntry->IsDungeon())
+                continue;
+
+            const InstanceTemplate* instanceTemplate = point->getInstanceTemplate();
+            if (!instanceTemplate)
+                continue;
+
+            CreatureInfo const* bossInfo = static_cast<BossTravelDestination*>(destination)->GetCreatureInfo();
+
+            if (!bossInfo)
+                continue;
+
+            GuidPosition entry;
+
+            std::string mapName = mapEntry->name[0];
+
+            if (!ParseLocation(mapName, entry))
+            {
+                //strip spaces from mapName
+                mapName.erase(remove_if(mapName.begin(), mapName.end(), isspace), mapName.end());
+            }
+
+            if (!ParseLocation(mapName, entry))
+            {
+                if (mapName.find(" ") != std::string::npos)
+                    mapName = mapName.substr(0, mapName.find(" "));
+            }
+
+            if (!ParseLocation(mapName, entry))
+            {
+                for (auto& node : sTravelNodeMap.getNodes())
+                {
+                    if (node->getMapId() != mapEntry->MapID)
+                        continue;
+
+                    if (!node->isPortal())
+                        continue;
+
+                    for (auto& [otherNode, path] : *node->getLinks())
+                    {
+                        if (path->getPathType() != TravelNodePathType::areaTrigger)
+                            continue;
+
+                        mapName = mapEntry->name[0];
+                        sTestLocations[mapName] = GuidPosition(ObjectGuid(),*otherNode->getPosition());
+                    }
+                }
+            }
+
+            if (!ParseLocation(mapName, entry))
+                continue;
+
+            std::string startCommand = ".bot p @tank co + mark rti";
+
+            std::string maxPlayers = "5";
+
+            if (mapEntry->IsRaid())
+            {
+                maxPlayers = std::to_string(instanceTemplate->maxPlayers);
+                startCommand = ".bot r @tank co + mark rti";
+            }
+
+            std::string bossName = mapEntry->name[0] + std::string("_") + bossInfo->Name;
+
+            std::replace(bossName.begin(), bossName.end(), ' ', '_');
+            std::replace(bossName.begin(), bossName.end(), '\'', '_');
+
+            std::transform(bossName.begin(), bossName.end(), bossName.begin(), ::tolower);
+
+            sTestLocations[bossName] = GuidPosition(ObjectGuid(), *point);
+
+            RegisterScenarioVariant("scenario_trash", bossName, instanceGroupTemplate, {
+               {"timeout_s",        "1200"                                         },
+               {"start_command",    startCommand                                   },
+               {"level",            std::to_string(instanceTemplate->levelMin + 10)},
+               {"group_size",       maxPlayers                                     },
+               {"dead_mobs_min",    "5"                                            },
+               {"instance_entry",   mapName                                        },
+               {"boss_destination", bossName                                       }
+            });
+            
+        }
+    }
+
+    
+}
+
 bool TestRegistry::LookupNamedLocation(const std::string& name, GuidPosition& out)
 {
     EnsureLocationsInit();
@@ -306,7 +424,7 @@ void TestRegistry::EnsureTestsRegistered()
         "set destination $(walk_location)",
         "observe"
     };
-    RegisterScenarioVariant("scenario_group_skinning_wait_loot", "default", skinningLootTemplate,
+    ::RegisterScenarioVariant("scenario_group_skinning_wait_loot", "default", skinningLootTemplate,
         {
             {"level", "60"},
             {"hold_s", "20"},
@@ -346,7 +464,8 @@ void TestRegistry::EnsureTestsRegistered()
             {"expected_item_1", "17015"},
             {"expected_item_2", "18805"}
         });
-
+    
+    /*
     std::vector<std::string> instanceGroupTemplate = {
         "# instance progression with large group and dead-mob observation",
         "require bot is level=60",
@@ -368,7 +487,8 @@ void TestRegistry::EnsureTestsRegistered()
             {"dead_mobs_min", "0"},
             {"instance_entry", "zul'gurub"},
             {"boss_destination", "zg_boss1_room"}
-        });  
+        }); 
+     */
 
     std::vector<std::string> followTemplate = {
         "# Follow catch-up between leader and spawned follower",
@@ -418,6 +538,7 @@ void TestRegistry::EnsureTestsRegistered()
         });
 
     GenerateMovementTests(1000, 5.0f, 100000.0f);
+    GenerateBossWalkTest();
 }
 
 void TestRegistry::EnsureLocationsInit()

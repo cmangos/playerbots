@@ -216,6 +216,8 @@ namespace ai
         //Map functions. Player independent.
         const MapEntry* getMapEntry() const { return sMapStore.LookupEntry(mapid); }
         uint32 getFirstInstanceId() const { for (auto& map : sMapMgr.Maps()) { if (map.second->GetId() == getMapId()) return map.second->GetInstanceId(); }; return 0; }
+
+        InstanceTemplate const* getInstanceTemplate() { return sObjectMgr.GetInstanceTemplate(mapid); }
         Map* getMap(uint32 instanceId) const { if (!*this) return nullptr; loadMapAndVMap(instanceId); return sMapMgr.FindMap(mapid, instanceId ? instanceId : (getMapEntry()->Instanceable() ? getFirstInstanceId() : 0)); }
         const TerrainInfo* getTerrain() const { return getMap(getFirstInstanceId()) ? getMap(getFirstInstanceId())->GetTerrain() : sTerrainMgr.LoadTerrain(getMapId()); }
         bool isDungeon() { return getMapEntry()->IsDungeon(); }

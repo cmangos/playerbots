@@ -62,9 +62,14 @@ bool MonitorMovementUnderground::IsConditionMet(const std::string& monitorStr, P
     if (!botpos) //empty position is underground.
         return true;
 
-    botpos += WorldPosition(0, 0, 0, 1); //Give some leeway.
+    botpos += WorldPosition(0, 0, 0, 0.5); //Give some leeway.
 
-    return botpos;
+    if (botpos.isUnderground())
+        ctx.undergroundCount++;
+    else if (ctx.undergroundCount > 0)
+        ctx.undergroundCount--;
+
+    return ctx.undergroundCount > 10;
 }
 
 bool MonitorMovementCanReachNodes::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const

@@ -1613,7 +1613,7 @@ std::list<std::string> PlayerbotHolder::HandleParty(Player* master, const std::s
         return {"No sender found"};
 
     if (param.find(" ") == std::string::npos)
-        message = "";
+        message = param;
     else if (param.size() > param.find(" ") + 1)
         message = param.substr(param.find(" ") + 1);
 
@@ -1671,7 +1671,7 @@ std::list<std::string> PlayerbotHolder::HandleGuild(Player* master, const std::s
         return {"No sender found"};
 
     if (param.find(" ") == std::string::npos)
-        message = "";
+        message = param;
     else if (param.size() > param.find(" ") + 1)
         message = param.substr(param.find(" ") + 1);
 

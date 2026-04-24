@@ -74,6 +74,10 @@ TestAction::TestAction(PlayerbotAI* ai, std::string name)
 
 bool TestAction::Execute(Event& event)
 {
+    Player* requester = event.getOwner();
+    if (!requester)
+        requester = GetMaster();
+
     std::string param = event.getParam();
 
     //LogToConsole("[TestAction] Execute called with param: " + param + " step" + std::to_string(pc));
@@ -160,6 +164,17 @@ bool TestAction::Execute(Event& event)
 
     std::string message;
     TestResult commandResult = ExecuteCommand(ctx.script[ctx.pc], message);
+
+    if (ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT))
+    {
+        std::string result = (commandResult == TestResult::PASS ? "PASS" :
+                commandResult == TestResult::FAIL               ? "FAIL" :
+                commandResult == TestResult::ABORT              ? "ABORT" :
+                commandResult == TestResult::IMPOSSIBLE         ? "IMPOSSIBLE" :
+                                                                  "PENDING");
+
+        ai->TellPlayer(requester, std::string("[TestAction] Executed command: ") + ctx.script[ctx.pc] + " => " + result + (message.empty() ? "" : (" (" + message + ")")));
+    }
 
     if (commandResult == TestResult::PASS)
     {

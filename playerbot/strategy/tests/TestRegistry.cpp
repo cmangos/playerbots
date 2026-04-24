@@ -137,10 +137,9 @@ void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float 
 
             std::string startName = sTeleLocations[i].name;
             std::transform(startName.begin(), startName.end(), startName.begin(), ::tolower);
-            startName = std::regex_replace(startName, std::regex("'"), "\\'");
             std::string endName = sTeleLocations[j].name;
             std::transform(endName.begin(), endName.end(), endName.begin(), ::tolower);
-            endName = std::regex_replace(endName, std::regex("'"), "\\'");
+
 
             std::ostringstream testName;
             testName << "movement_" << prefix << "_" << startName << "_" << endName;

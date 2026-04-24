@@ -12,7 +12,7 @@ bool MonitorStateTime::IsConditionMet(const std::string& monitorStr, Player* bot
 
     if (gtPos != std::string::npos && arrowPos != std::string::npos)
     {
-        std::string secondsStr = monitorStr.substr(gtPos+2, arrowPos - gtPos - 1);
+        std::string secondsStr = monitorStr.substr(gtPos+2, arrowPos - gtPos - 3);
         uint32 threshold = atoi(secondsStr.c_str());
 
         if (elapsed >= threshold)

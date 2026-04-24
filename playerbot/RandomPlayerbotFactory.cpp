@@ -580,6 +580,25 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
     CharacterDatabase.PExecute("DELETE FROM ai_playerbot_random_bots WHERE ai_playerbot_random_bots.event = 'temporary'");
 
+    //Loop over randombot accounts that have no characters and delete them as well, to clean up after temporary bots.
+    auto temporaryAccounts = LoginDatabase.PQuery("SELECT id FROM account WHERE username like '%s%%' and id >= %u", sPlayerbotAIConfig.randomBotAccountPrefix.c_str(), sPlayerbotAIConfig.randomBotAccountCount);
+
+    if (temporaryAccounts)
+    {
+        sLog.outString("Deleting temporary empty bot accounts");
+        do
+        {
+            Field* fields = temporaryAccounts->Fetch();
+            uint32 accountId = fields[0].GetUInt32();
+            sAccountMgr.GetCharactersCount(accountId);
+
+            if (sAccountMgr.GetCharactersCount(accountId) == 0)
+            {
+                sAccountMgr.DeleteAccount(accountId);
+            }
+        } while (temporaryAccounts->NextRow());
+    }
+
     if (!sPlayerbotAIConfig.randomBotAutoCreate)
     {
         for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)

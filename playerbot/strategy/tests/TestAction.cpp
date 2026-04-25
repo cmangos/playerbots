@@ -343,12 +343,7 @@ void TestAction::LogToConsole(const std::string& msg)
 
 void TestAction::LogToFile(const std::string& msg)
 {
-    std::ofstream file("bot_test_results.log", std::ios::app);
-    if (file.is_open())
-    {
-        file << msg << std::endl;
-        file.close();
-    }
+    sPlayerbotAIConfig.log("bot_test_results.log", msg.c_str());
 }
 
 void TestAction::DeactivateStrategy()

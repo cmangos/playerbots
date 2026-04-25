@@ -123,12 +123,15 @@ Unit* PartyMemberValue::FindPartyMember(FindPlayerPredicate &predicate, bool ign
             return target;
     }
 
-    if (GuidPosition rpgTarget = AI_VALUE(GuidPosition, "rpg target"))
+    if (allowBufOutOfGroupPlayers)
     {
-        Unit* target = rpgTarget.GetCreature(bot->GetInstanceId());
+        if (GuidPosition rpgTarget = AI_VALUE(GuidPosition, "rpg target"))
+        {
+            Unit* target = rpgTarget.GetCreature(bot->GetInstanceId());
 
-        if (target && sServerFacade.IsFriendlyTo(bot, target) && predicate.Check(target) && CanFreeMoveValue::CanFreeMoveTo(ai, target))
-           return target;
+            if (target && sServerFacade.IsFriendlyTo(bot, target) && predicate.Check(target) && CanFreeMoveValue::CanFreeMoveTo(ai, target))
+                return target;
+        }
     }
 
     return NULL;

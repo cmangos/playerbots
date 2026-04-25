@@ -242,8 +242,12 @@ void TestAction::CheckMonitors()
         {
             if (monitor->Matches(monitorStr))
             {
-                std::string message;
-                TestResult r = monitor->Check(monitorStr, bot, ctx, message);
+                std::string message, params;
+
+                if (monitorStr.size() > monitor->GetNameSize())
+                    params = monitorStr.substr(monitor->GetNameSize());
+
+                TestResult r = monitor->Check(params, bot, ctx, message);
                 if (r != TestResult::PENDING)
                 {
                     SetResult(r, message);

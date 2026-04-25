@@ -314,7 +314,11 @@ void TestRegistry::GenerateBossWalkTest()
 
             if (mapEntry->IsRaid())
             {
+#ifdef MANGOS_TWO
                 maxPlayers = std::to_string(instanceTemplate->maxPlayers);
+#else
+                maxPlayers = "25";
+#endif
                 startCommand = ".bot r @tank co + mark rti";
             }
 

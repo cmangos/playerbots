@@ -90,7 +90,7 @@ void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float 
     std::string gmVisible = "cleanup gm visible on";
     std::string needAlive = "monitor bot dead => abort \"Bot died test interupted\"";
     std::string needAboveGRound = "monitor underground => fail \"Bot is underground at <current position>\"";
-    std::string needCanReachNode = "monitor can reach node => fail \"Bot cannot reach travel network at <current position>\"";
+    std::string needCanReachNode = "monitor can not reach node => fail \"Bot cannot reach travel network at <current position>\"";
 
     int count = 0;
     for (size_t i = 0; i < sTeleLocations.size() && count < maxTests; ++i)

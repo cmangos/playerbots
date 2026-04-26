@@ -84,7 +84,7 @@ bool MonitorMovementUnderground::IsConditionMet(const std::string& monitorStr, P
     return ctx.undergroundCount > 10;
 }
 
-bool MonitorMovementCanReachNodes::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+bool MonitorMovementCanNotReachNodes::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     if (!bot->IsInWorld())
         return false;
@@ -96,10 +96,10 @@ bool MonitorMovementCanReachNodes::IsConditionMet(const std::string& monitorStr,
     {
         WorldPosition nodePos = *startNodes[i]->getPosition();
         if (nodePos.isPathTo(pos.getPathTo(nodePos, bot),1.0f))
-            return true;
+            return false;
     }
 
-    return false;
+    return true;
 }
 
 bool MonitorMovementSpeed::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const

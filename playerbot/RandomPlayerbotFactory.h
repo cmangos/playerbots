@@ -3,6 +3,7 @@
 
 #include "Common.h"
 #include "PlayerbotAIBase.h"
+#include <mutex>
 
 class WorldPacket;
 class Player;
@@ -62,7 +63,7 @@ class RandomPlayerbotFactory
 		virtual ~RandomPlayerbotFactory() {}
 
 	public:
-        bool CreateRandomBot(uint8 cls, std::unordered_map<NameRaceAndGender, std::vector<std::string>>& names, uint8 inputRace = 0);
+        bool CreateRandomBot(uint8 cls, uint8 inputRace = 0);
         static void CreateRandomBots();
         static void CreateRandomGuilds();
         static void CreateRandomArenaTeams();
@@ -73,8 +74,13 @@ class RandomPlayerbotFactory
         static bool isRaceForTeam(uint8 race, Team team = Team::TEAM_BOTH_ALLOWED);
         uint8 GetRandomRace(uint8 cls, Team team = Team::TEAM_BOTH_ALLOWED);
         static std::string CreateRandomBotName(NameRaceAndGender raceAndGender);
+        static void EnsureNamesInitialized();
     private:
         static std::string CreateRandomArenaTeamName();
+        static std::unordered_map<NameRaceAndGender, std::vector<std::string>> freeNames;
+        static std::unordered_map<NameRaceAndGender, std::vector<std::string>> allNames;
+        static std::mutex nameMutex;
+        static bool namesInitialized;
 
         uint32 accountId;
         static std::map<uint8, std::vector<uint8> > availableRaces;

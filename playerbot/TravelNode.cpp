@@ -1132,6 +1132,7 @@ void TravelPath::ClipPath(PlayerbotAI* ai, Unit* mover, bool ignoreEnemyTargets)
     std::list<HazardPosition> hazards = AI_VALUE(std::list<HazardPosition>, "hazards");
 
     auto endP = fullPath.end();
+    auto prevP = fullPath.begin();
 
     for (auto p = fullPath.begin(); p != fullPath.end(); p++)
     {
@@ -1181,9 +1182,18 @@ void TravelPath::ClipPath(PlayerbotAI* ai, Unit* mover, bool ignoreEnemyTargets)
             endP = p;
         else if (!p->isWalkable())
             endP = p;
+        else if (p->point.sqDistance(prevP->point) > 125)
+        {           
+            endP = prevP;
+        }
+
 
         if (endP != fullPath.end())
             break;
+
+
+
+        prevP = p;
     }
 
     if (endP == fullPath.end())

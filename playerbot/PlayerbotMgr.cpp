@@ -2180,7 +2180,7 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
 
     if (param.empty())
     {
-        messages.push_back("Usage: .rndbot runtest <testnamepart>");
+        messages.push_back("Usage: .rndbot runtest <testnamepart> [count]");
         messages.push_back("Available tests:");
         std::vector<std::string> availableTests = TestRegistry::GetAvailableTests();
         for (const auto& test : availableTests)
@@ -2189,6 +2189,45 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
     }
 
     std::string testNamePart = param;
+    size_t maxTests = 0;
+
+    size_t lastSpace = param.find_last_of(" \t");
+    if (lastSpace != std::string::npos)
+    {
+        std::string maybeLimit = param.substr(lastSpace + 1);
+        if (!maybeLimit.empty())
+        {
+            bool numericLimit = std::all_of(maybeLimit.begin(), maybeLimit.end(), ::isdigit);
+            if (numericLimit)
+            {
+                try
+                {
+                    maxTests = std::stoul(maybeLimit);
+                }
+                catch (...)
+                {
+                    messages.push_back("Invalid count '" + maybeLimit + "'");
+                    return messages;
+                }
+
+                if (!maxTests)
+                {
+                    messages.push_back("Count must be greater than 0");
+                    return messages;
+                }
+
+                testNamePart = param.substr(0, lastSpace);
+                size_t nameEnd = testNamePart.find_last_not_of(" \t");
+                testNamePart = (nameEnd == std::string::npos) ? "" : testNamePart.substr(0, nameEnd + 1);
+            }
+        }
+    }
+
+    if (testNamePart.empty())
+    {
+        messages.push_back("Usage: .rndbot runtest <testnamepart> [count]");
+        return messages;
+    }
 
     bool listTests = false;
 
@@ -2207,7 +2246,11 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
         std::string lowerTest = test;
         std::transform(lowerTest.begin(), lowerTest.end(), lowerTest.begin(), ::tolower);
         if (lowerTest.find(testNamePart) != std::string::npos || testNamePart == "*")
+        {
             matchingTests.push_back(test);
+            if (maxTests && matchingTests.size() >= maxTests)
+                break;
+        }
     }
 
     if (matchingTests.empty())
@@ -2605,7 +2648,7 @@ std::unordered_map<std::string, std::string> PlayerbotHolder::GetCommandTexts()
         {"group", "Create 4 bots with complementary classes at master's level.\nUsage: .(rnd)bot group"},
         {"create", "Create a new bot character.\nUsage: .(rnd)bot create level=<n> class=<class> race=<race>"},
         {"spoof", "Spoof as another bot for command routing.\nUsage: .(rnd)bot spoof <botname>"},
-        {"runtest", "Run bot tests.\nUsage: .rndbot runtest <testnamepart>"},
+        {"runtest", "Run bot tests.\nUsage: .rndbot runtest <testnamepart> [count]"},
         
         // Bot commands (used with .(rnd)bot <bot> ...)
         {"add", "Add a bot to the player's group.\nUsage: .(rnd)bot add <playername>"},

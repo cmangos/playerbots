@@ -91,6 +91,7 @@ private:
         std::string result;
         bool pending;
         bool completed;
+        uint32 expectedBotSpawnCount = 1;
         uint8 retry = 0;
     };
 

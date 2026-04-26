@@ -2276,6 +2276,7 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
             pt.result = "";
             pt.pending = false;
             pt.completed = false;
+            pt.expectedBotSpawnCount = TestRegistry::ExpectedBotSpawnCount(test);
             pt.retry = 0;
             pendingTests.push_back(pt);
         }
@@ -2325,13 +2326,16 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
                 continue;
         }
 
-        uint32 runningTests = 0;
+        static constexpr uint32 maxActiveTestBots = 50;
+        uint32 activeTestBots = 0;
         for (const auto& test : pendingTests)
         {
-            if (test.pending)
-                runningTests++;
+            if (test.pending && !test.completed)
+                activeTestBots += std::max<uint32>(1, test.expectedBotSpawnCount);
         }
-        if (runningTests >= 50)
+
+        uint32 newTestBotCount = std::max<uint32>(1, pt.expectedBotSpawnCount);
+        if (activeTestBots + newTestBotCount >= maxActiveTestBots)
             continue;
 
         std::string createParams = TestRegistry::GetBotCreationRequirement(pt.testName);

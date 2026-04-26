@@ -3,6 +3,7 @@
 #include "playerbot/ChatHelper.h"
 #include "Globals/ObjectMgr.h"
 #include <regex>
+#include <sstream>
 #include "playerbot/TravelMgr.h"
 #include <playerbot/TravelNode.h>
 
@@ -48,6 +49,35 @@ static void EnsureLocationsInit()
 namespace
 {
     using ScenarioParams = std::map<std::string, std::string>;
+
+    uint32 ParseUintOrDefault(const std::string& value, uint32 fallback)
+    {
+        if (value.empty())
+            return fallback;
+
+        for (char c : value)
+            if (!std::isdigit(static_cast<unsigned char>(c)))
+                return fallback;
+
+        return static_cast<uint32>(std::stoul(value));
+    }
+
+    uint32 ParseMGroupSize(const std::string& line)
+    {
+        static const uint32 defaultGroupSize = 5;
+        std::istringstream iss(line);
+        std::string token;
+
+        while (iss >> token)
+        {
+            if (token.find("size=") != 0)
+                continue;
+
+            return ParseUintOrDefault(token.substr(std::string("size=").length()), defaultGroupSize);
+        }
+
+        return defaultGroupSize;
+    }
 
     std::string ApplyScenarioParams(const std::string& line, const ScenarioParams& params)
     {
@@ -190,6 +220,29 @@ std::string TestRegistry::GetBotCreationRequirement(const std::string& testName)
     }
 
     return "";
+}
+
+uint32 TestRegistry::ExpectedBotSpawnCount(const std::string& testName)
+{
+    std::vector<std::string> script = GetTestScript(testName);
+
+    uint32 expectedBots = 1;
+
+    for (const std::string& line : script)
+    {
+        if (line.find("spawn") == 0)
+        {
+            expectedBots++;
+            continue;
+        }
+
+        if (line.find("mgroup") == 0)
+        {
+            expectedBots = std::max(expectedBots, ParseMGroupSize(line));
+        }
+    }
+
+    return expectedBots;
 }
 
 void TestRegistry::RegisterTest(const std::string& name, const std::vector<std::string>& script)

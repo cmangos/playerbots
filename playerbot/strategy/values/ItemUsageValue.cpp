@@ -20,25 +20,14 @@ std::unordered_map<uint32, std::vector<std::pair<uint32, uint32>>> ItemUsageValu
 std::unordered_set<uint32> ItemUsageValue::m_allItemIdsSoldByAnyVendors;
 std::unordered_set<uint32> ItemUsageValue::m_itemIdsSoldByAnyVendorsWithLimitedMaxCount;
 
-ItemQualifier::ItemQualifier(std::string qualifier, bool linkQualifier)
-{
-    itemId = 0;
-    enchantId = 0;
-    randomPropertyId = 0;
-    gem1 = 0;
-    gem2 = 0;
-    gem3 = 0;
-    gem4 = 0;
-    proto = nullptr;
-
+ItemQualifier::ItemQualifier(std::string qualifier, bool linkQualifier) : itemId(0), enchantId(0), randomPropertyId(0), gem1(0), gem2(0), gem3(0), gem4(0), proto(nullptr) {
     std::vector<std::string> numbers = Qualified::getMultiQualifiers(qualifier, ":");
 
     if (numbers.empty())
         return;
 
-    for (char& d : numbers[0]) //Check if itemId contains only numbers
-        if (!isdigit(d))
-            return;
+    if (!std::all_of(numbers[0].begin(), numbers[0].end(), ::isdigit))
+        return;
 
     itemId = stoi(numbers[0]);
 

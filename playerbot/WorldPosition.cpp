@@ -1056,10 +1056,10 @@ bool WorldPosition::cropPathTo(std::vector<WorldPosition>& path, const float max
 
    auto bestPos = std::min_element(path.begin(), path.end(), [this](WorldPosition i, WorldPosition j) {return this->sqDistance(i) < this->sqDistance(j); });
 
-   bool insRange = this->sqDistance(*bestPos) <= realMaxDistance * realMaxDistance;
-
    if (bestPos == path.end())
-       return insRange;
+       return false;
+
+   bool insRange = this->sqDistance(*bestPos) <= realMaxDistance * realMaxDistance;
 
    path.erase(std::next(bestPos), path.end());
 

@@ -557,7 +557,7 @@ bool MovementAction::MinimalMove(PlayerbotAI* ai)
     }
 
    //Transport handling: If not on transport wait for transport and teleport on it when it's near (and cut to last transport point). If on transport wait until it is near exit and teleport to exit.
-    if (nextStep->type == PathNodeType::NODE_TRANSPORT && nextStep != path.end())
+    if (nextStep != path.end() && nextStep->type == PathNodeType::NODE_TRANSPORT)
     {
         auto exitStep = std::next(nextStep);
 

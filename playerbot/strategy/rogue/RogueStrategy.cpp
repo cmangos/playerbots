@@ -1441,7 +1441,6 @@ public:
             (actionName == "bg check objective") ||
             (actionName == "bg check flag") ||
             (actionName == "attack enemy flag carrier") ||
-            (actionName == "attack enemy flag carrier") ||
             (actionName == "travel") ||
             (actionName == "move to suppression device") ||
             (actionName == "disarm suppression device"))

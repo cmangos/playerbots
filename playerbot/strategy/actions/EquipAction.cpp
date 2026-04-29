@@ -368,7 +368,7 @@ bool EquipUpgradesAction::Execute(Event& event)
         bool jMain = j->GetProto()->InventoryType == INVTYPE_WEAPONMAINHAND;
 
         if (iMain != jMain)
-            return iMain > jMain; // mainhand comes first
+            return iMain; // mainhand comes first
 
         return sRandomItemMgr.ItemStatWeight(plr, i) > sRandomItemMgr.ItemStatWeight(plr, j); });
 

@@ -1727,11 +1727,11 @@ TravelNodeRoute TravelNodeMap::getRoute(WorldPosition startPos, WorldPosition en
     std::vector<WorldPosition> newStartPath;
     std::vector<TravelNode*> startNodes = getNodes(startPos, -1, transportEntry), endNodes = getNodes(endPos);
 
-    if (startNodes.empty())
+    if (startNodes.empty() || endNodes.empty())
         return TravelNodeRoute();    
 
-    uint32 startNr = std::min(5, (int)startNodes.size()-1);
-    uint32 endNr = std::min(5, (int)endNodes.size()-1);
+    uint32 startNr = std::min(5, (int)startNodes.size());
+    uint32 endNr = std::min(5, (int)endNodes.size());
 
     //Partial sort to get the closest 5 nodes at the begin of the array.        
     std::partial_sort(startNodes.begin(), startNodes.begin() + startNr, startNodes.end(), [startPos](TravelNode* i, TravelNode* j) {return i->getPosition()->sqDistance(startPos) < j->getPosition()->sqDistance(startPos); });

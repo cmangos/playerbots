@@ -70,6 +70,8 @@ std::string EntryTravelDestination::GetShortName() const
         return "repair";
     case TravelDestinationPurpose::Mail:
         return "mail";
+    case TravelDestinationPurpose::Bank:
+        return "bank";
     case TravelDestinationPurpose::Trainer:
         return "trainer";
     case TravelDestinationPurpose::Explore:
@@ -1375,7 +1377,9 @@ void TravelMgr::LoadQuestTravelTable()
         if (guidpMap.find(entry) == guidpMap.end())
             continue;
 
-        for (uint32 purposeFlagNr = 6; purposeFlagNr < 18; purposeFlagNr++)
+        static uint32 maxPurposeFlag = std::countr_zero((uint32)TravelDestinationPurpose::MaxFlag); 
+
+        for (uint32 purposeFlagNr = 0; purposeFlagNr < maxPurposeFlag; purposeFlagNr++)
         {
             TravelDestinationPurpose purposeFlag = (TravelDestinationPurpose)(1 << purposeFlagNr);
             if (purpose & (uint32)purposeFlag)
@@ -1387,6 +1391,7 @@ void TravelMgr::LoadQuestTravelTable()
                 case TravelDestinationPurpose::Vendor:
                 case TravelDestinationPurpose::AH:
                 case TravelDestinationPurpose::Mail:
+                case TravelDestinationPurpose::Bank:
                     dests.push_back(AddDestination<RpgTravelDestination>(entry, purposeFlag));
                     break;
                 case TravelDestinationPurpose::GatherSkinning:

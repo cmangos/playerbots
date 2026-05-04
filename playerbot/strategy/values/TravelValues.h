@@ -54,8 +54,8 @@ namespace ai
         GatherMining = 1 << 15,
         GatherHerbalism = 1 << 16,
         GatherFishing = 1 << 17,
-        Explore = 1 << 18,
-        Bank = 1 << 19,
+        Bank = 1 << 18,
+        Explore = 1 << 19,
         MaxFlag = 1 << 20
     };
 

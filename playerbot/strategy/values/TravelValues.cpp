@@ -59,11 +59,12 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
     allowedNpcFlags.push_back(UNIT_NPC_FLAG_REPAIR);
 
     std::unordered_map<NPCFlags, TravelDestinationPurpose> npcPurposeMap =
-    {
-        { UNIT_NPC_FLAG_REPAIR, TravelDestinationPurpose::Repair },
-        { UNIT_NPC_FLAG_VENDOR, TravelDestinationPurpose::Vendor },
-        { UNIT_NPC_FLAG_TRAINER, TravelDestinationPurpose::Trainer },
-        { UNIT_NPC_FLAG_AUCTIONEER, TravelDestinationPurpose::AH }
+        {
+            {UNIT_NPC_FLAG_REPAIR,     TravelDestinationPurpose::Repair },
+            {UNIT_NPC_FLAG_VENDOR,     TravelDestinationPurpose::Vendor },
+            {UNIT_NPC_FLAG_TRAINER,    TravelDestinationPurpose::Trainer},
+            {UNIT_NPC_FLAG_AUCTIONEER, TravelDestinationPurpose::AH     },
+            {UNIT_NPC_FLAG_BANKER,     TravelDestinationPurpose::Bank   }
     };
 
     for (uint32 entry = 0; entry < sCreatureStorage.GetMaxEntry(); ++entry)

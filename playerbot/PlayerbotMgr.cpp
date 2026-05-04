@@ -2276,9 +2276,13 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
         if (lowerTest.find(testNamePart) == 0 || testNamePart == "*")
         {
             matchingTests.push_back(test);
-            if (maxTests && matchingTests.size() >= maxTests)
-                break;
         }
+    }
+
+    if (maxTests && matchingTests.size() > maxTests)
+    {
+        std::shuffle(matchingTests.begin(), matchingTests.end(), *GetRandomGenerator());
+        matchingTests.resize(maxTests);
     }
 
     if (matchingTests.empty())

@@ -6,6 +6,32 @@
 
 using namespace ai;
 
+namespace
+{
+    void ResetBankActionItemCaches(PlayerbotAI* ai, const std::string& itemId, const std::string& itemQualifier,
+        const std::string& usageQualifier = "")
+    {
+        if (!ai || itemId.empty() || itemQualifier.empty())
+            return;
+
+        AiObjectContext* context = ai->GetAiObjectContext();
+        if (!context)
+            return;
+
+        RESET_AI_VALUE(uint8,"bag space");
+        RESET_AI_VALUE2(uint32,"item count", itemId);
+        RESET_AI_VALUE2(uint32,"bank item count", itemId);
+        RESET_AI_VALUE2(ItemUsage,"item usage", itemQualifier);
+        RESET_AI_VALUE2(std::list<Item*>, "inventory items", itemQualifier);
+
+        if (!usageQualifier.empty())
+        {
+            RESET_AI_VALUE2(uint32,"item count", usageQualifier);
+            RESET_AI_VALUE2(std::list<Item*>, "inventory items", usageQualifier);
+        }
+    }
+}
+
 bool BankAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
@@ -68,6 +94,16 @@ bool BankAction::Withdraw(Player* requester, const uint32 itemid)
     if (!pItem)
         return false;
 
+    const ItemPrototype* proto = pItem->GetProto();
+    if (!proto)
+        return false;
+
+    const std::string itemId = std::to_string(proto->ItemId);
+    const std::string itemQualifier = ItemQualifier(pItem).GetQualifier();
+    const std::string itemText = chat->formatItem(pItem, pItem->GetCount());
+
+    ResetBankActionItemCaches(ai, itemId, itemQualifier);
+
     ItemPosCountVec dest;
 #ifdef MANGOSBOT_TWO
     uint8 bagSlot;
@@ -84,9 +120,10 @@ bool BankAction::Withdraw(Player* requester, const uint32 itemid)
 
     bot->RemoveItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
     bot->StoreItem(dest, pItem, true);
+    ResetBankActionItemCaches(ai, itemId, itemQualifier);
 
     std::ostringstream out;
-    out << "got " << chat->formatItem(pItem, pItem->GetCount()) << " from bank";
+    out << "got " << itemText << " from bank";
     ai->TellPlayer(requester, out.str());
     return true;
 }
@@ -94,6 +131,16 @@ bool BankAction::Withdraw(Player* requester, const uint32 itemid)
 bool BankAction::Deposit(Player* requester, Item* pItem)
 {
     std::ostringstream out;
+
+    const ItemPrototype* proto = pItem ? pItem->GetProto() : nullptr;
+    if (!proto)
+        return false;
+
+    const std::string itemId = std::to_string(proto->ItemId);
+    const std::string itemQualifier = ItemQualifier(pItem).GetQualifier();
+    const std::string itemText = chat->formatItem(pItem, pItem->GetCount());
+
+    ResetBankActionItemCaches(ai, itemId, itemQualifier);
 
     ItemPosCountVec dest;
 #ifdef MANGOSBOT_TWO
@@ -111,8 +158,9 @@ bool BankAction::Deposit(Player* requester, Item* pItem)
 
     bot->RemoveItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
     bot->BankItem(dest, pItem, true);
+    ResetBankActionItemCaches(ai, itemId, itemQualifier);
 
-    out << "put " << chat->formatItem(pItem, pItem->GetCount()) << " to bank";
+    out << "put " << itemText << " to bank";
     ai->TellPlayer(requester, out.str());
 	return true;
 }
@@ -233,6 +281,7 @@ bool BankAction::AutoDeposit()
             bot->BankItem(dest, item, true);
             deposited = true;
         }
+        ResetBankActionItemCaches(ai, itemId, itemQualifier, itemusageQualifier);
     }
 
     return deposited;
@@ -291,6 +340,7 @@ bool BankAction::AutoWithdraw()
 
         bot->RemoveItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
         bot->StoreItem(dest, pItem, true);
+        ResetBankActionItemCaches(ai, itemId, itemQualifier);
         return true;
     };
 

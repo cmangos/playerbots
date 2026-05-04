@@ -200,6 +200,8 @@ std::string QueryItemUsageAction::QueryItemUsage(ItemQualifier& qualifier, bool 
         return "(forced) need";
     case ItemUsage::ITEM_USAGE_FORCE_GREED:
         return "(forced) greed";
+    case ItemUsage::ITEM_USAGE_BANK:
+        return "Bank for later use";
     }
 
     return "";

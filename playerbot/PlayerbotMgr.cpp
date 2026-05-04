@@ -2190,14 +2190,29 @@ std::list<std::string> PlayerbotHolder::HandleGroup(Player* master, const std::s
 std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std::string param, AccountTypes security)
 {    
     std::list<std::string> messages;
+    static constexpr size_t maxListLines = 200;
 
     if (param.empty())
     {
         messages.push_back("Usage: .rndbot runtest <testnamepart> [count]");
         messages.push_back("Available tests:");
         std::vector<std::string> availableTests = TestRegistry::GetAvailableTests();
+        size_t shown = 0;
         for (const auto& test : availableTests)
+        {
+            if (shown >= maxListLines)
+                break;
             messages.push_back("  " + test);
+            ++shown;
+        }
+
+        if (availableTests.size() > shown)
+        {
+            std::ostringstream out;
+            out << "... " << (availableTests.size() - shown) << " more tests not shown. Use '.rndbot runtest ?<namepart> [count]' to narrow results.";
+            messages.push_back(out.str());
+        }
+
         return messages;
     }
 

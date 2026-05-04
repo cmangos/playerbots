@@ -165,7 +165,7 @@ void ChooseTravelTargetAction::ReportTravelTarget(Player* bot, Player* requester
 
     TravelDestination* destination = newTarget->GetDestination();
 
-    TravelDestination* oldDestination;
+    TravelDestination* oldDestination = nullptr;
 
     if (oldTarget)
         oldDestination = oldTarget->GetDestination();

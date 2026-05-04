@@ -10,6 +10,16 @@
 
 using namespace ai;
 
+static std::string NormalizeChatToken(const std::string& text)
+{
+    std::string normalized = text;
+    boost::algorithm::to_lower(normalized);
+    boost::replace_all(normalized, "_", " ");
+    boost::replace_all(normalized, "-", " ");
+    boost::trim(normalized);
+    return normalized;
+}
+
 std::map<std::string, uint32> ChatHelper::consumableSubClasses;
 std::map<std::string, uint32> ChatHelper::tradeSubClasses;
 std::map<std::string, uint32> ChatHelper::itemQualities;
@@ -1047,13 +1057,15 @@ std::string ChatHelper::formatTeam(Team team)
 
 uint32 ChatHelper::parseClass(const std::string& text)
 {
+    std::string normalized = NormalizeChatToken(text);
+
     for (auto& [classId, className] : classes)
-        if (boost::iequals(className, text))
+        if (NormalizeChatToken(className) == normalized)
             return classId;
 
-    if (Qualified::isValidNumberString(text))
+    if (Qualified::isValidNumberString(normalized))
     {
-        uint32 id = static_cast<uint32>(stoi(text));
+        uint32 id = static_cast<uint32>(stoi(normalized));
         if (classes.count(id))
             return id;
     }
@@ -1068,13 +1080,15 @@ std::string ChatHelper::formatClass(uint8 cls)
 
 uint32 ChatHelper::parseRace(const std::string& text)
 {
+    std::string normalized = NormalizeChatToken(text);
+
     for (auto& [raceId, raceName] : races)
-        if (boost::iequals(raceName, text))
+        if (NormalizeChatToken(raceName) == normalized)
             return raceId;
 
-    if (Qualified::isValidNumberString(text))
+    if (Qualified::isValidNumberString(normalized))
     {
-        uint32 id = static_cast<uint32>(stoi(text));
+        uint32 id = static_cast<uint32>(stoi(normalized));
         if (races.count(id))
             return id;
     }

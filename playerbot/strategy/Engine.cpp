@@ -176,14 +176,8 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                     if (!event.getSource().empty())
                         out << " [" << event.getSource() << "]";
 
-                    if (ai->GetMaster())
-                    {
-                        ai->TellPlayerNoFacing(ai->GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
-                    }
-                    else
-                    {
-                        ai->GetBot()->Say(out.str(), (ai->GetBot()->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
-                    }
+                    ai->TellPlayerNoFacing(ai->GetMaster() ? ai->GetMaster() : ai->GetBot(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+
                 }
                 LogAction("A:%s - UNKNOWN", actionNode->getName().c_str());
             }
@@ -265,7 +259,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                     }
                     else
                     {
-                        if (sPlayerbotAIConfig.CanLogAction(ai,actionNode->getName(), false, ""))
+                        if (sPlayerbotAIConfig.CanLogAction(ai, actionNode->getName(), false, ""))
                         {
                             std::ostringstream out;
                             out << "try: ";
@@ -278,14 +272,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                             if (!event.getSource().empty())
                                 out << " [" << event.getSource() << "]";
 
-        if (ai->GetMaster())
-                            {
-                                ai->TellPlayerNoFacing(ai->GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
-                            }
-                            else
-                            {
-                                ai->GetBot()->Say(out.str(), (ai->GetBot()->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
-                            }
+                            ai->TellPlayerNoFacing(ai->GetMaster() ? ai->GetMaster() : ai->GetBot(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
                         }
                         LogAction("A:%s - IMPOSSIBLE", action->getName().c_str());
                         MultiplyAndPush(actionNode->getAlternatives(), relevance + 0.03, false, event, "alt");
@@ -293,7 +280,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                 }
                 else
                 {
-                    if (sPlayerbotAIConfig.CanLogAction(ai,actionNode->getName(), false, ""))
+                    if (sPlayerbotAIConfig.CanLogAction(ai, actionNode->getName(), false, ""))
                     {
                         std::ostringstream out;
                         out << "try: ";
@@ -306,14 +293,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                         if (!event.getSource().empty())
                             out << " [" << event.getSource() << "]";
 
-        if (ai->GetMaster())
-                        {
-                            ai->TellPlayerNoFacing(ai->GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
-                        }
-                        else
-                        {
-                            ai->GetBot()->Say(out.str(), (ai->GetBot()->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
-                        }
+                        ai->TellPlayerNoFacing(ai->GetMaster() ? ai->GetMaster() : ai->GetBot(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
                     }
                     lastRelevance = relevance;
                     LogAction("A:%s - USELESS", action->getName().c_str());
@@ -748,14 +728,7 @@ bool Engine::ListenAndExecute(Action* action, Event& event)
             }
         }
 
-        if (ai->GetMaster())
-        {
-            ai->TellPlayerNoFacing(ai->GetMaster(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
-        }
-        else
-        {
-            ai->GetBot()->Say(out.str(), (ai->GetBot()->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
-        }
+        ai->TellPlayerNoFacing(ai->GetMaster() ? ai->GetMaster() : ai->GetBot(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
     }
 
     if (ai->HasStrategy("debug threat", BotState::BOT_STATE_NON_COMBAT))
@@ -771,7 +744,7 @@ bool Engine::ListenAndExecute(Action* action, Event& event)
 
         out << "threat: " << int32(currentThreat)<< "+" << int32(deltaThreat) << " / " << int32(tankThreat) << " ||| " << relThreat;
 
-        ai->TellPlayerNoFacing(ai->GetMaster(), out);
+        ai->TellPlayerNoFacing(ai->GetMaster() ? ai->GetMaster() : ai->GetBot(), out);
     }
 
     actionExecuted = actionExecutionListeners.OverrideResult(action, actionExecuted, event);

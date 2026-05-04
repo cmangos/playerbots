@@ -2258,7 +2258,7 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
     {
         std::string lowerTest = test;
         std::transform(lowerTest.begin(), lowerTest.end(), lowerTest.begin(), ::tolower);
-        if (lowerTest.find(testNamePart) != std::string::npos || testNamePart == "*")
+        if (lowerTest.find(testNamePart) == 0 || testNamePart == "*")
         {
             matchingTests.push_back(test);
             if (maxTests && matchingTests.size() >= maxTests)

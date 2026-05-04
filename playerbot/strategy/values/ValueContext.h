@@ -210,8 +210,10 @@ namespace ai
             creators["behind"] = [](PlayerbotAI* ai) { return new IsBehindValue(ai); };
             creators["facing"] = [](PlayerbotAI* ai) { return new IsFacingValue(ai); };
 
-            creators["item count"] = [](PlayerbotAI* ai) { return new ItemCountValue(ai); };
+            creators["item count"] = [](PlayerbotAI* ai) { return new ItemCountValue(ai); };           
             creators["inventory items"] = [](PlayerbotAI* ai) { return new InventoryItemValue(ai); };
+            creators["bank item count"] = [](PlayerbotAI* ai) { return new BankItemCountValue(ai); };
+            creators["bank items"] = [](PlayerbotAI* ai) { return new BankItemValue(ai); };
             creators["inventory item ids"] = [](PlayerbotAI* ai) { return new InventoryItemIdValue(ai); };
             creators["trinkets on use"] = [](PlayerbotAI* ai) { return new EquipedUsableTrinketValue(ai); };
 
@@ -254,6 +256,7 @@ namespace ai
             creators["combat"] = [](PlayerbotAI* ai) { return new IsInCombatValue(ai); };
             creators["lfg proposal"] = [](PlayerbotAI* ai) { return new LfgProposalValue(ai); };
             creators["bag space"] = [](PlayerbotAI* ai) { return new BagSpaceValue(ai); };
+            creators["bank space"] = [](PlayerbotAI* ai) { return new BankSpaceValue(ai); };
             creators["durability"] = [](PlayerbotAI* ai) { return new DurabilityValue(ai); };
             creators["durability inventory"] = [](PlayerbotAI* ai) { return new DurabilityInventoryValue(ai); };
             creators["lowest durability"] = [](PlayerbotAI* ai) { return new LowestDurabilityValue(ai); };

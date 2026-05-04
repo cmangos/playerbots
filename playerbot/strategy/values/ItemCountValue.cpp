@@ -8,11 +8,10 @@
 
 using namespace ai;
 
-static std::list<Item*> Find(PlayerbotAI* ai, std::string qualifier)
+static std::list<Item*> Find(PlayerbotAI* ai, std::string qualifier, IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS))
 {
     std::list<Item*> result;
-    Player* bot = ai->GetBot();
-	IterateItemsMask mask = IterateItemsMask((uint8)IterateItemsMask::ITERATE_ITEMS_IN_EQUIP | (uint8)IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+    Player* bot = ai->GetBot();	
     result = ai->InventoryParseItems(qualifier, mask);
     return result;
 }
@@ -30,6 +29,21 @@ uint32 ItemCountValue::Calculate()
 std::list<Item*> InventoryItemValue::Calculate()
 {
     return Find(ai, qualifier);
+}
+
+uint32 BankItemCountValue::Calculate()
+{
+    uint32 count = 0;
+    std::list<Item*> items = Find(ai, qualifier, IterateItemsMask(IterateItemsMask::ITERATE_ITEMS_IN_BANK));
+    for (Item* item : items)
+        count += item->GetCount();
+
+    return count;
+}
+
+std::list<Item*> BankItemValue::Calculate()
+{
+    return Find(ai, qualifier, IterateItemsMask(IterateItemsMask::ITERATE_ITEMS_IN_BANK));
 }
 
 std::list<Item*> EquipedUsableTrinketValue::Calculate()

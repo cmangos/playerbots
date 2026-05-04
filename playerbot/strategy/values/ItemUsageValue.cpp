@@ -428,10 +428,10 @@ if ((proto->Class == ITEM_CLASS_PROJECTILE ||
     if (!ai->HasActivePlayerMaster() && sRandomPlayerbotMgr.IsFreeBot(bot))
     {
         if (IsItemUsefulForFutureEquip(proto))
-            return ItemUsage::ITEM_USAGE_BANK_EQUIP;
+            return ItemUsage::ITEM_USAGE_BANK;
 
         if (IsItemUsefulForFutureCraft(proto))
-            return ItemUsage::ITEM_USAGE_BANK_CRAFT;
+            return ItemUsage::ITEM_USAGE_BANK;
     }
 
     if (proto->Class == ItemClass::ITEM_CLASS_CONSUMABLE)
@@ -840,10 +840,8 @@ std::string ItemUsageValue::ReasonForNeed(ItemUsage usage, ItemQualifier qualifi
     case ItemUsage::ITEM_USAGE_FORCE_NEED:
     case ItemUsage::ITEM_USAGE_FORCE_GREED:
         return BOT_TEXT2("because I was told to get this item.", placeholders);
-    case ItemUsage::ITEM_USAGE_BANK_EQUIP:
-        return BOT_TEXT2("to bank for future equipping.", placeholders);
-    case ItemUsage::ITEM_USAGE_BANK_CRAFT:
-        return BOT_TEXT2("to bank for future crafting.", placeholders);
+    case ItemUsage::ITEM_USAGE_BANK:
+        return BOT_TEXT2("to bank for future use.", placeholders);
     }
 
     return "";

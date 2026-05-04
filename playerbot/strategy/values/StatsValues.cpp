@@ -155,7 +155,6 @@ uint8 BagSpaceValue::Calculate()
             totalused++;
     }
 
-    uint32 totalfree = 16 - totalused;
     for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
     {
         const Bag* const pBag = (Bag*) bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
@@ -165,7 +164,6 @@ uint8 BagSpaceValue::Calculate()
             if (pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass == ITEM_SUBCLASS_CONTAINER)
             {
                 total += pBag->GetBagSize();
-                totalfree += pBag->GetFreeSlots();
                 totalused += pBag->GetBagSize() - pBag->GetFreeSlots();
             }
         }
@@ -173,6 +171,32 @@ uint8 BagSpaceValue::Calculate()
     }
 
     return (static_cast<float> (totalused) / total) * 100;
+}
+
+uint8 BankSpaceValue::Calculate()
+{
+    uint32 totalused = 0, total = 16;
+    for (uint8 slot = BANK_SLOT_ITEM_START; slot < BANK_SLOT_ITEM_END; slot++)
+    {
+        if (bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+            totalused++;
+    }
+
+    for (uint8 bag = BANK_SLOT_BAG_START; bag < BANK_SLOT_BAG_END; ++bag)
+    {
+        const Bag* const pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
+        if (pBag)
+        {
+            ItemPrototype const* pBagProto = pBag->GetProto();
+            if (pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass == ITEM_SUBCLASS_CONTAINER)
+            {
+                total += pBag->GetBagSize();
+                totalused += pBag->GetBagSize() - pBag->GetFreeSlots();
+            }
+        }
+    }
+
+    return (static_cast<float>(totalused) / total) * 100;
 }
 
 uint8 DurabilityValue::Calculate()

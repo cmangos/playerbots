@@ -251,37 +251,42 @@ bool BankAction::AutoDeposit()
 {
     bool deposited = false;
 
-    // Deposit items tagged for banking (future equip or future craft)
-    for (uint8 usageType : {(uint8)ItemUsage::ITEM_USAGE_BANK_EQUIP, (uint8)ItemUsage::ITEM_USAGE_BANK_CRAFT})
+    std::string itemusageQualifier = "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_BANK);
+
+    std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", itemusageQualifier);
+    for (auto item : items)
     {
-        std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", "usage " + std::to_string(usageType));
-        for (auto item : items)
-        {
-            if (!item)
-                continue;
+        if (!item)
+            continue;
 
-            // Don't bank items needed for guild orders
-            ItemQualifier qualifier(item);
-            std::string qualStr = qualifier.GetQualifier();
-            ItemUsage currentUsage = AI_VALUE2(ItemUsage, "item usage", qualStr);
-            if (currentUsage == ItemUsage::ITEM_USAGE_GUILD_TASK)
-                continue;
+        const ItemPrototype* proto = item->GetProto();
+        if (!proto)
+            continue;
 
-            ItemPosCountVec dest;
+        const std::string itemId = std::to_string(proto->ItemId);
+        const std::string itemQualifier = ItemQualifier(item).GetQualifier();
+
+        // Don't bank items needed for guild orders
+        ItemQualifier qualifier(item);
+        std::string qualStr = qualifier.GetQualifier();
+        ItemUsage currentUsage = AI_VALUE2(ItemUsage, "item usage", qualStr);
+        if (currentUsage == ItemUsage::ITEM_USAGE_GUILD_TASK)
+            continue;
+
+        ItemPosCountVec dest;
 #ifdef MANGOSBOT_TWO
-            uint8 bagSlot;
-            InventoryResult msg = bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, item, false, bagSlot);
-#else   
-            InventoryResult msg = bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, item, false);
+        uint8 bagSlot;
+        InventoryResult msg = bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, item, false, bagSlot);
+#else
+        InventoryResult msg = bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, item, false);
 #endif
-            if (msg != EQUIP_ERR_OK)
-                continue;
+        if (msg != EQUIP_ERR_OK)
+            continue;
 
-            bot->RemoveItem(item->GetBagSlot(), item->GetSlot(), true);
-            bot->BankItem(dest, item, true);
-            deposited = true;
-        }
+        bot->RemoveItem(item->GetBagSlot(), item->GetSlot(), true);
+        bot->BankItem(dest, item, true);
         ResetBankActionItemCaches(ai, itemId, itemQualifier, itemusageQualifier);
+        deposited = true;
     }
 
     return deposited;
@@ -303,30 +308,12 @@ bool BankAction::AutoWithdraw()
         if (!proto)
             return false;
 
-        bool shouldWithdraw = false;
+        const std::string itemId = std::to_string(proto->ItemId);
+        const std::string itemQualifier = ItemQualifier(pItem).GetQualifier();
 
-        // Check if item is now equippable
-        if (proto->InventoryType != INVTYPE_NON_EQUIP && proto->RequiredLevel <= bot->GetLevel()
-            && bot->CanUseItem(proto) == EQUIP_ERR_OK)
-        {
-            ItemQualifier qualifier(pItem);
-            ItemUsage equipUsage = ItemUsageValue::QueryItemUsageForEquip(qualifier, bot);
-            if (equipUsage == ItemUsage::ITEM_USAGE_EQUIP || equipUsage == ItemUsage::ITEM_USAGE_BAD_EQUIP)
-                shouldWithdraw = true;
-        }
-
-        // Check if item is now needed for crafting
-        if (!shouldWithdraw && (proto->Class == ITEM_CLASS_TRADE_GOODS || proto->Class == ITEM_CLASS_MISC || proto->Class == ITEM_CLASS_REAGENT))
-        {
-            ItemQualifier qualifier(pItem);
-            std::string qualStr = qualifier.GetQualifier();
-            ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", qualStr);
-            if (usage == ItemUsage::ITEM_USAGE_SKILL)
-                shouldWithdraw = true;
-        }
-
-        if (!shouldWithdraw)
-            return false;
+        ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", itemId);
+        if (usage == ItemUsage::ITEM_USAGE_BANK)
+            return false;        
 
         ItemPosCountVec dest;
 #ifdef MANGOSBOT_TWO
@@ -344,26 +331,11 @@ bool BankAction::AutoWithdraw()
         return true;
     };
 
-    // Check main bank slots
-    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+    for (auto& item : AI_VALUE2(std::list<Item*>, "bank items", "all"))
     {
-        if (checkAndWithdraw(bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i)))
+        if (checkAndWithdraw(item))
             withdrew = true;
-    }
-
-    // Check bank bags
-    for (int bag = BANK_SLOT_BAG_START; bag < BANK_SLOT_BAG_END; ++bag)
-    {
-        Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-        if (!pBag)
-            continue;
-
-        for (uint32 slot = 0; slot < pBag->GetBagSize(); ++slot)
-        {
-            if (checkAndWithdraw(pBag->GetItemByPos(slot)))
-                withdrew = true;
-        }
-    }
+    }    
 
     return withdrew;
 }

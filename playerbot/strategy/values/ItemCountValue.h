@@ -18,6 +18,21 @@ namespace ai
         virtual std::list<Item*> Calculate() override;
     };
 
+    class BankItemCountValue : public Uint32CalculatedValue, public Qualified
+    {
+    public:
+        BankItemCountValue(PlayerbotAI* ai, std::string name = "bank item count") : Uint32CalculatedValue(ai, name), Qualified() {}
+        virtual uint32 Calculate() override;
+    };
+
+    class BankItemValue : public CalculatedValue<std::list<Item*>>,
+                               public Qualified
+    {
+    public:
+        BankItemValue(PlayerbotAI* ai, std::string name = "bank items") : CalculatedValue<std::list<Item*>>(ai, name), Qualified() {}
+        virtual std::list<Item*> Calculate() override;
+    };
+
     class InventoryItemIdValue : public CalculatedValue<std::list<uint32> >, public Qualified
     {
     public:
@@ -31,7 +46,4 @@ namespace ai
         EquipedUsableTrinketValue(PlayerbotAI* ai) : CalculatedValue<std::list<Item*> >(ai), Qualified() {}
         virtual std::list<Item*> Calculate() override;
     };
-
-    void InvalidateItemCountCache(Player* bot);
-    void InvalidateItemCountCache(Player* bot, const std::string& qualifier);
 }

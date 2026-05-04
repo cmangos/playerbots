@@ -158,6 +158,13 @@ namespace ai
         virtual uint8 Calculate() override;
     };
 
+    class BankSpaceValue : public Uint8CalculatedValue
+    {
+    public:
+        BankSpaceValue(PlayerbotAI* ai, std::string name = "bank space") : Uint8CalculatedValue(ai, name) {}
+        virtual uint8 Calculate() override;
+    };
+
     class DurabilityValue : public Uint8CalculatedValue
     {
     public:

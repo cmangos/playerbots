@@ -10,25 +10,13 @@ using namespace ai;
 
 bool ShouldBankDepositValue::Calculate()
 {
-    if (!ai->HasStrategy("rpg vendor", BotState::BOT_STATE_NON_COMBAT))
+    if (AI_VALUE(uint8, "bank space") > 80)
         return false;
 
     // Check if we have items worth banking
-    uint32 bankEquipCount = AI_VALUE2(uint32, "item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_BANK_EQUIP));
-    uint32 bankCraftCount = AI_VALUE2(uint32, "item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_BANK_CRAFT));
+    uint32 toBankCount = AI_VALUE2(uint32, "item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_BANK));
 
-    if (bankEquipCount == 0 && bankCraftCount == 0)
-        return false;
-
-    // Check if bank has free space (approximate check)
-    uint32 bankItemCount = 0;
-    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
-    {
-        if (bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            bankItemCount++;
-    }
-
-    if (bankItemCount >= (BANK_SLOT_ITEM_END - BANK_SLOT_ITEM_START))
+    if (toBankCount == 0)
         return false;
 
     return true;
@@ -36,82 +24,16 @@ bool ShouldBankDepositValue::Calculate()
 
 bool ShouldBankWithdrawValue::Calculate()
 {
-    if (!ai->HasStrategy("rpg vendor", BotState::BOT_STATE_NON_COMBAT))
-        return false;
-
     if (AI_VALUE(uint8, "bag space") > 80)
         return false;
 
-    // Check bank for items that are now equippable
-    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
-    {
-        Item* pItem = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (!pItem)
-            continue;
+    uint32 inBankCount = AI_VALUE2(uint32, "bank item count", "all");
+    uint32 stayInBankCount = AI_VALUE2(uint32, "bank item count", "usage " + std::to_string((uint8)ItemUsage::ITEM_USAGE_BANK));
 
-        ItemPrototype const* proto = pItem->GetProto();
-        if (!proto)
-            continue;
+    if (inBankCount == stayInBankCount)
+        return false;    
 
-        // Check if item is now equippable (was banked because too high level)
-        if (proto->InventoryType != INVTYPE_NON_EQUIP && proto->RequiredLevel <= bot->GetLevel()
-            && bot->CanUseItem(proto) == EQUIP_ERR_OK)
-        {
-            ItemQualifier qualifier(pItem);
-            ItemUsage equipUsage = ItemUsageValue::QueryItemUsageForEquip(qualifier, bot);
-            if (equipUsage == ItemUsage::ITEM_USAGE_EQUIP || equipUsage == ItemUsage::ITEM_USAGE_BAD_EQUIP)
-                return true;
-        }
-
-        // Check if item is now needed for crafting
-        if (proto->Class == ITEM_CLASS_TRADE_GOODS || proto->Class == ITEM_CLASS_MISC || proto->Class == ITEM_CLASS_REAGENT)
-        {
-            ItemQualifier qualifier(pItem);
-            std::string qualStr = qualifier.GetQualifier();
-            ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", qualStr);
-            if (usage == ItemUsage::ITEM_USAGE_SKILL)
-                return true;
-        }
-    }
-
-    // Also check bank bags
-    for (int bag = BANK_SLOT_BAG_START; bag < BANK_SLOT_BAG_END; ++bag)
-    {
-        Bag* pBag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-        if (!pBag)
-            continue;
-
-        for (uint32 slot = 0; slot < pBag->GetBagSize(); ++slot)
-        {
-            Item* pItem = pBag->GetItemByPos(slot);
-            if (!pItem)
-                continue;
-
-            ItemPrototype const* proto = pItem->GetProto();
-            if (!proto)
-                continue;
-
-            if (proto->InventoryType != INVTYPE_NON_EQUIP && proto->RequiredLevel <= bot->GetLevel()
-                && bot->CanUseItem(proto) == EQUIP_ERR_OK)
-            {
-                ItemQualifier qualifier(pItem);
-                ItemUsage equipUsage = ItemUsageValue::QueryItemUsageForEquip(qualifier, bot);
-                if (equipUsage == ItemUsage::ITEM_USAGE_EQUIP || equipUsage == ItemUsage::ITEM_USAGE_BAD_EQUIP)
-                    return true;
-            }
-
-            if (proto->Class == ITEM_CLASS_TRADE_GOODS || proto->Class == ITEM_CLASS_MISC || proto->Class == ITEM_CLASS_REAGENT)
-            {
-                ItemQualifier qualifier(pItem);
-                std::string qualStr = qualifier.GetQualifier();
-                ItemUsage usage = AI_VALUE2(ItemUsage, "item usage", qualStr);
-                if (usage == ItemUsage::ITEM_USAGE_SKILL)
-                    return true;
-            }
-        }
-    }
-
-    return false;
+    return true;
 }
 
 #ifndef MANGOSBOT_ZERO

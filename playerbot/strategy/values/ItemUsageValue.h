@@ -64,8 +64,7 @@ namespace ai
         ITEM_USAGE_AMMO = 13,
         ITEM_USAGE_FORCE_NEED = 14,
         ITEM_USAGE_FORCE_GREED = 15,
-        ITEM_USAGE_BANK_EQUIP = 16,
-        ITEM_USAGE_BANK_CRAFT = 17
+        ITEM_USAGE_BANK = 16
     };
 
     enum class ForceItemUsage : uint8

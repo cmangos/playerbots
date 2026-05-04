@@ -188,7 +188,11 @@ TestResult CommandSetupClearMobs::Execute(const std::string& params, Player* bot
         }
 
         // Skip critters and non-combat pets
+#ifndef MANGOSBOT_ZERO 
         if (creature->GetCreatureType() == CREATURE_TYPE_CRITTER || creature->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET)
+#else          
+        if (creature->GetCreatureType() == CREATURE_TYPE_CRITTER)
+#endif
             continue;
 
         creature->SetDeathState(JUST_DIED);

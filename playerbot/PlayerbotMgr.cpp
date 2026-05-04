@@ -2294,8 +2294,22 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
     if (listTests)
     {
         messages.push_back("Tests matching '" + param + "':");
+        size_t shown = 0;
         for (const auto& test : matchingTests)
+        {
+            if (shown >= maxListLines)
+                break;
             messages.push_back("  " + test);
+            ++shown;
+        }
+
+        if (matchingTests.size() > shown)
+        {
+            std::ostringstream out;
+            out << "... " << (matchingTests.size() - shown) << " more tests not shown. Add [count] to limit, e.g. '.rndbot runtest " << testNamePart << " 20'.";
+            messages.push_back(out.str());
+        }
+
         return messages;
     }
 

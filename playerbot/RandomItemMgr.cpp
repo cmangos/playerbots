@@ -837,6 +837,13 @@ bool RandomItemMgr::CanEquipWeapon(uint8 clazz, ItemPrototype const* proto)
 
 void RandomItemMgr::BuildItemInfoCache()
 {
+    struct CachedConditionEntry
+    {
+        uint32 type;
+        uint32 value1;
+        uint32 value2;
+    };
+
     for (auto& [key, itemInfo] : itemInfoCache)
         if (itemInfo)
             delete itemInfo;
@@ -972,6 +979,22 @@ void RandomItemMgr::BuildItemInfoCache()
     }
 
     sLog.outString("Loaded %d loot templates...", (uint32)dropMap->size());
+
+    std::map<uint32, std::vector<CachedConditionEntry> > conditionCache;
+    if (auto result = WorldDatabase.PQuery("SELECT condition_entry, type, value1, value2 FROM conditions"))
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+
+            CachedConditionEntry condition;
+            condition.type = fields[1].GetUInt32();
+            condition.value1 = fields[2].GetUInt32();
+            condition.value2 = fields[3].GetUInt32();
+
+            conditionCache[fields[0].GetUInt32()].push_back(condition);
+        } while (result->NextRow());
+    }
 
     sLog.outString("Calculating stat weights for %d items...", sItemStorage.GetMaxEntry());
     BarGoLink bar(sItemStorage.GetMaxEntry());
@@ -1223,28 +1246,24 @@ void RandomItemMgr::BuildItemInfoCache()
                         if (!crItem || !crItem->conditionId)
                             continue;
 
-                        if (auto result = WorldDatabase.PQuery("SELECT type, value1, value2 FROM conditions WHERE condition_entry = '%u'", crItem->conditionId))
+                        auto conditionItr = conditionCache.find(crItem->conditionId);
+                        if (conditionItr != conditionCache.end())
                         {
-                            do
+                            for (CachedConditionEntry const& condition : conditionItr->second)
                             {
-                                Field *fields = result->Fetch();
-                                uint32 m_type = fields[0].GetUInt32();
-                                if (m_type != CONDITION_REPUTATION_RANK_MIN)
+                                if (condition.type != CONDITION_REPUTATION_RANK_MIN)
                                     continue;
 
-                                uint32 m_value1 = fields[1].GetUInt32();
-                                uint32 m_value2 = fields[2].GetUInt32();
-
 #ifdef MANGOSBOT_ONE
-                                if (FactionEntry const* faction = sFactionStore.LookupEntry<FactionEntry>(m_value1))
+                                if (FactionEntry const* faction = sFactionStore.LookupEntry<FactionEntry>(condition.value1))
 #else
-                                if (FactionEntry const* faction = sFactionStore.LookupEntry(m_value1))
+                                if (FactionEntry const* faction = sFactionStore.LookupEntry(condition.value1))
 #endif
                                 {
-                                    cacheInfo->repFaction = m_value1;
-                                    cacheInfo->repRank = m_value2;
+                                    cacheInfo->repFaction = condition.value1;
+                                    cacheInfo->repRank = condition.value2;
                                 }
-                            } while (result->NextRow());
+                            }
                         }
                     }
                 }

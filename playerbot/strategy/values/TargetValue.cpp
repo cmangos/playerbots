@@ -224,3 +224,54 @@ std::list<ObjectGuid> FriendlyManualTargetsValue::LazyGet()
 {
     return Get();
 }
+
+GuidPosition ClosestEntryValue::Calculate()
+{
+    // Implement the logic to calculate the closest entry target
+    WorldPosition botPos(bot);
+
+    if (!Qualified::isValidNumberString(qualifier))
+        return GuidPosition();
+
+    int32 entry = stoi(qualifier);
+
+    if (entry > 0)
+    {
+        std::vector<CreatureDataPair const*> creatures = botPos.getCreaturesNear(0.0f, entry);
+
+        float minDistance = std::numeric_limits<float>::max();
+        GuidPosition closestTarget;
+
+        for (auto& creature : creatures)
+        {
+            GuidPosition target(creature);
+            float distance = botPos.sqDistance2d(target);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestTarget = target;
+            }
+        }
+
+        return closestTarget;
+    }
+    else
+    {
+        std::vector<GameObjectDataPair const*> gameObjects = botPos.getGameObjectsNear(0.0f, -entry);
+        float minDistance = std::numeric_limits<float>::max();
+        GuidPosition closestTarget;
+        for (auto& gameObject : gameObjects)
+        {
+            GuidPosition target(gameObject);
+            float distance = botPos.sqDistance2d(target);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestTarget = target;
+            }
+        }
+        return closestTarget;
+    }
+
+    return GuidPosition();
+}

@@ -15,6 +15,7 @@
 #include "CommandSetup.h"
 #include "CommandParty.h"
 #include "CommandFlow.h"
+#include "CommandDebug.h"
 #include "CleanupParty.h"
 #include "RequireState.h"
 
@@ -25,17 +26,28 @@
 #include <algorithm>
 #include <cctype>
 #include "MonitorMovement.h"
+#include "BossFocusManager.h"
 
 using namespace ai;
 
 TestAction::TestAction(PlayerbotAI* ai, std::string name)
-    : Action(ai, name, 1000), ctx()
+    : Action(ai, name, 1), ctx(), bossFocusMgr(std::make_unique<BossFocusManager>(bot, ai, ctx))
+{
+    RegisterCommands();
+    RegisterMonitors();
+    commands.push_back(std::make_unique<RequireEquip>());
+    commands.push_back(std::make_unique<CleanupParty>());
+    TestRegistry::GetAvailableTests();
+}
+
+void TestAction::RegisterCommands()
 {
     commands.push_back(std::make_unique<RequireBotIs>());
-
+    commands.push_back(std::make_unique<CommandSetupTeleportGroup>());
     commands.push_back(std::make_unique<CommandSetupTeleport>());
     commands.push_back(std::make_unique<CommandSetupGM>());
     commands.push_back(std::make_unique<CommandSetupSetDestination>());
+    commands.push_back(std::make_unique<CommandSetupPull>());
     commands.push_back(std::make_unique<CommandSetupGiveItem>());
     commands.push_back(std::make_unique<CommandSetupEquipItem>());
     commands.push_back(std::make_unique<CommandSetupClearMobs>());
@@ -48,7 +60,14 @@ TestAction::TestAction(PlayerbotAI* ai, std::string name)
     commands.push_back(std::make_unique<CommandFlowWait>());
     commands.push_back(std::make_unique<CommandFlowWaitDestination>());
     commands.push_back(std::make_unique<CommandFlowRepeat>());
-    
+    commands.push_back(std::make_unique<CommandSetValue>());
+    commands.push_back(std::make_unique<CommandDebug>());
+    commands.push_back(std::make_unique<CommandRecord>());
+    commands.push_back(std::make_unique<CommandRead>());
+}
+
+void TestAction::RegisterMonitors()
+{
     monitors.push_back(std::make_unique<MonitorStateDead>());
     monitors.push_back(std::make_unique<MonitorStateTime>());
     monitors.push_back(std::make_unique<MonitorCombatHp>());
@@ -64,12 +83,11 @@ TestAction::TestAction(PlayerbotAI* ai, std::string name)
     monitors.push_back(std::make_unique<MonitorStateFaction>());
     monitors.push_back(std::make_unique<MonitorStateGroupSize>());
     monitors.push_back(std::make_unique<MonitorStateLootGuid>());
-
-    commands.push_back(std::make_unique<RequireEquip>());
-
-    commands.push_back(std::make_unique<CleanupParty>());
-
-    TestRegistry::GetAvailableTests();
+    monitors.push_back(std::make_unique<MonitorStateStarterGearCount>());
+    monitors.push_back(std::make_unique<MonitorStateEquipQuality>());
+    monitors.push_back(std::make_unique<MonitorStateAreaLevelDiff>());
+    monitors.push_back(std::make_unique<MonitorAiValue>());
+    monitors.push_back(std::make_unique<MonitorOutgoingMessage>());
 }
 
 bool TestAction::Execute(Event& event)
@@ -77,6 +95,8 @@ bool TestAction::Execute(Event& event)
     Player* requester = event.getOwner();
     if (!requester)
         requester = GetMaster();
+    if (!requester)
+        requester = bot;
 
     std::string param = event.getParam();
 
@@ -147,6 +167,7 @@ bool TestAction::Execute(Event& event)
 
     if (ctx.observing)
     {
+        bossFocusMgr->Update();
         CheckMonitors();
         if (ctx.result != TestResult::PENDING)
         {
@@ -165,7 +186,19 @@ bool TestAction::Execute(Event& event)
     std::string message;
     TestResult commandResult = ExecuteCommand(ctx.script[ctx.pc], message);
 
-    if (ai->HasStrategy("debug", BotState::BOT_STATE_NON_COMBAT))
+    // Log command execution for boss tests
+    if (ctx.testName.find("scenario_boss") != std::string::npos)
+    {
+        std::string result = (commandResult == TestResult::PASS ? "PASS" :
+                commandResult == TestResult::FAIL               ? "FAIL" :
+                commandResult == TestResult::ABORT              ? "ABORT" :
+                commandResult == TestResult::IMPOSSIBLE         ? "IMPOSSIBLE" :
+                                                                  "PENDING");
+        sLog.outString("[TestAction] Bot %s cmd[%d]: %s => %s %s", bot->GetName(), ctx.pc,
+            ctx.script[ctx.pc].c_str(), result.c_str(), message.c_str());
+    }
+
+    if (ctx.debug)
     {
         std::string result = (commandResult == TestResult::PASS ? "PASS" :
                 commandResult == TestResult::FAIL               ? "FAIL" :
@@ -174,6 +207,8 @@ bool TestAction::Execute(Event& event)
                                                                   "PENDING");
 
         ai->TellPlayer(requester, std::string("[TestAction] Executed command: ") + ctx.script[ctx.pc] + " => " + result + (message.empty() ? "" : (" (" + message + ")")));
+
+        sLog.outString("[TestAction] Bot %s cmd[%d]: %s => %s %s", bot->GetName(), ctx.pc, ctx.script[ctx.pc].c_str(), result.c_str(), message.c_str());
     }
 
     if (commandResult == TestResult::PASS)
@@ -182,7 +217,7 @@ bool TestAction::Execute(Event& event)
     }
     else if (commandResult == TestResult::PENDING)
     {
-        // Retry the same command on the next update tick.
+        return false;
     }
     else
     {
@@ -214,9 +249,11 @@ TestResult TestAction::ExecuteCommand(const std::string& line, std::string& mess
         if (ChatHandler(bot).ParseCommands(line.c_str()))
             return TestResult::PASS;
 
-    ai->HandleCommand(CHAT_MSG_WHISPER, line, *bot);
+    ExternalEventHelper helper(context);
+    if (helper.ParseChatCommand(line, bot))  
+        return TestResult::PASS;       
 
-    return TestResult::PASS;
+    return TestResult::FAIL;
 }
 
 void TestAction::RunCleanup()
@@ -349,8 +386,7 @@ void TestAction::LogToFile(const std::string& msg)
 void TestAction::DeactivateStrategy()
 {       
     std::string strategyName = "test::" + ctx.testName;
-    ai->ChangeStrategy("-" + strategyName, BotState::BOT_STATE_COMBAT);
-    ai->ChangeStrategy("-" + strategyName, BotState::BOT_STATE_NON_COMBAT);
+    ai->ChangeStrategy("-" + strategyName, BotState::BOT_STATE_ALL);
             
     ctx.Reset();
 }

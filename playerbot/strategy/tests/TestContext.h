@@ -22,24 +22,31 @@ namespace ai
 
     struct TestContext
     {
-        std::vector<std::string> script;        // the test DSL lines
-        int pc;                                  // program counter
-        bool observing;                          // true = observe mode
-        uint32 testStartTime;                    // getMSTime() at test start
-        uint32 waitTime;                         // time to wait in current wait command
+        std::vector<std::string> script;        
+        int pc;                                 
+        bool observing;                         
+        uint32 testStartTime;                   
+        uint32 monitorTime;
+        uint32 waitTime;                        
         uint32 undergroundCount;
-        std::vector<ObjectGuid> spawnedBots;     // for cleanup
-        std::vector<std::string> monitors;       // active monitor expressions
+        uint32 focusMobEntry;                   
+        ObjectGuid focusMobGuid;                
+        bool focusMobKilled;                    
+        std::vector<ObjectGuid> spawnedBots;    
+        std::vector<std::string> monitors;      
         std::vector<std::string> deferredCleanups;
         size_t cleanupPc;
         bool cleanupPrepared;
-        TestResult result;                       // PENDING / IMPOSSIBLE / ABORT / PASS / FAIL
+        bool whoResponded;
+        TestResult result;                       
         std::string resultMessage;
-        std::string testName;                    // name of the running test
+        std::string testName;                    
         WorldPosition testStartPosition;
         GuidPosition destinationPosition;
 
-        TestContext() : pc(0), observing(false), testStartTime(0), waitTime(0), undergroundCount(0), cleanupPc(0), cleanupPrepared(false), result(TestResult::PENDING) {}
+        bool debug = false; // enable extra logging for debugging
+
+        TestContext() : pc(0), observing(false), testStartTime(0), monitorTime(0), waitTime(0), undergroundCount(0), focusMobEntry(0), focusMobKilled(false), cleanupPc(0), cleanupPrepared(false), whoResponded(false), result(TestResult::PENDING) {}
 
         void Reset();
     };

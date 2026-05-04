@@ -10,8 +10,7 @@ namespace ai
     class CommandSetupTeleport : public TestCommand
     {
     public:
-        TestResult Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
     protected:
         std::string GetName() const override { return "teleport"; }
     };
@@ -27,8 +26,7 @@ namespace ai
     class CommandSetupGiveItem : public TestCommand
     {
     public:
-        TestResult Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
     protected:
         std::string GetName() const override { return "give"; }
     };
@@ -36,8 +34,7 @@ namespace ai
     class CommandSetupEquipItem : public TestCommand
     {
     public:
-        TestResult Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
     protected:
         std::string GetName() const override { return "equip"; }
     };
@@ -45,8 +42,7 @@ namespace ai
     class CommandSetupClearMobs : public TestCommand
     {
     public:
-        TestResult Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
     protected:
         std::string GetName() const override { return "clear"; }
     };
@@ -54,9 +50,32 @@ namespace ai
     class CommandSetupSetDestination : public TestCommand
     {
     public:
-        TestResult Execute(const std::string& params, Player* bot,
-                    PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
     protected:
         std::string GetName() const override { return "set destination"; }
+    };
+
+    class CommandSetupTeleportGroup : public TestCommand
+    {
+    public:
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+    protected:
+        std::string GetName() const override { return "teleport group"; }
+    };
+
+    class CommandSetupPull : public TestCommand
+    {
+    public:
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+    protected:
+        std::string GetName() const override { return "pull"; }
+    };
+
+    class CommandSetValue : public TestCommand
+    {
+    public:
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+    protected:
+        std::string GetName() const override { return "set value"; }
     };
 }

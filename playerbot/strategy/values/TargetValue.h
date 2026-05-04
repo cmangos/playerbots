@@ -169,4 +169,12 @@ namespace ai
     public:
         BuffTargetsValue(PlayerbotAI* ai) : FriendlyManualTargetsValue(ai) {}
     };
+
+    class ClosestEntryValue : public CalculatedValue<GuidPosition>,
+                                    public Qualified
+    {
+    public:
+        ClosestEntryValue(PlayerbotAI* ai, std::string name = "closest entry") : CalculatedValue<GuidPosition>(ai, name), Qualified() {}
+        GuidPosition Calculate() override;
+    };
 }

@@ -18,9 +18,10 @@ bool MonitorMovementDistance::IsConditionMet(const std::string& monitorStr, Play
         return false;
 
     GuidPosition loc;
-    char op = 0;
+    std::string valueName;
+    std::string op;
     std::string valueStr;
-    if (TryParseComparisonValue(monitorStr, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+    if (TryParseComparisonValue(monitorStr, valueName, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
         return false;
 
     float threshold = 0.0f;
@@ -36,7 +37,7 @@ bool MonitorMovementDistance::IsConditionMet(const std::string& monitorStr, Play
         return false;
 
     const float dist = bot->GetDistance(loc.coord_x, loc.coord_y, loc.coord_z);
-    if (op == '<')
+    if (op == "<")
         return dist < threshold;
 
     return dist > threshold;
@@ -191,16 +192,17 @@ bool MonitorMovementSpawnDistance::IsConditionMet(const std::string& monitorStr,
 
     float dist = bot->GetDistance(spawned);
 
-    char op = 0;
+    std::string valueName;
+    std::string op;
     std::string valueStr;
-    if (TryParseComparisonValue(monitorStr, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+    if (TryParseComparisonValue(monitorStr, valueName, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
         return false;
 
     float threshold = 0.0f;
     if (TryParseFloatStrict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
         return false;
 
-    if (op == '<')
+    if (op == "<")
         return dist < threshold;
 
     return dist > threshold;

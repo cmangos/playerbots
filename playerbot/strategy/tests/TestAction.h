@@ -3,6 +3,7 @@
 #include "playerbot/strategy/Action.h"
 #include "TestContext.h"
 #include "TestComponent.h"
+#include "BossFocusManager.h"
 #include <vector>
 #include <memory>
 
@@ -16,8 +17,7 @@ namespace ai
         TestAction(PlayerbotAI* ai, std::string name = "test");
         virtual bool Execute(Event& event) override;
         virtual bool isUseful() override { return true; }
-        virtual bool isPossible() override { return bot && bot->IsAlive(); }
-
+        virtual bool isPossible() override { return bot != nullptr; }
         virtual void Reset() override { ctx.Reset(); }
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "test"; }
@@ -36,8 +36,9 @@ namespace ai
         static std::vector<std::string> GetTestScript(const std::string& name);
         static std::vector<std::string> GetAvailableTests();
     private:
+        void RegisterCommands();
+        void RegisterMonitors();
         TestResult ExecuteCommand(const std::string& line, std::string& message);
-        void CheckPreconditions();
         void CheckMonitors();
         void RunCleanup();
         void SetResult(TestResult result, const std::string& message);
@@ -53,6 +54,7 @@ namespace ai
     private:
         std::vector<std::unique_ptr<TestMonitor>> monitors;
         std::vector<std::unique_ptr<TestCommand>> commands;
+        std::unique_ptr<BossFocusManager> bossFocusMgr;
         
         TestContext ctx;
    };

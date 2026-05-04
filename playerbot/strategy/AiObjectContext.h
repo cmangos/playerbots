@@ -63,6 +63,20 @@ namespace ai
             return HasValue(name, out.str());
         }
 
+        bool HasSupportedValue(const std::string& name)
+        {
+            std::string nameView = name;
+            std::string qualifierView;
+            if (size_t pos = nameView.find("::"); pos != std::string::npos)
+            {
+                qualifierView = nameView.substr(pos + 2);
+                nameView = nameView.substr(0, pos);
+            }
+
+            std::set<std::string> supportedKeys;
+            GetSupportedValues(supportedKeys);
+            return supportedKeys.find(nameView) != supportedKeys.end();
+        }
 
         std::set<std::string> GetValues()
         {
@@ -76,7 +90,7 @@ namespace ai
 
         void GetSupportedTriggers(std::set<std::string>& triggers)
         {
-            return strategyContexts.GetSupportedKeys(triggers);
+            return triggerContexts.GetSupportedKeys(triggers);
         }
 
         void GetSupportedActions(std::set<std::string>& actions)

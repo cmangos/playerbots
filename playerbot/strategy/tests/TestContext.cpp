@@ -9,11 +9,13 @@ void TestContext::Reset()
     pc = 0;
     observing = false;
     testStartTime = 0;
+    monitorTime = 0;
     waitTime = 0;
     monitors.clear();
     deferredCleanups.clear();
     cleanupPc = 0;
     cleanupPrepared = false;
+    whoResponded = false;
     result = TestResult::PENDING;
     resultMessage.clear();
     testName.clear();

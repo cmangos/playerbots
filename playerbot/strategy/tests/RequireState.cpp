@@ -40,6 +40,19 @@ TestResult RequireBotIs::Execute(const std::string& params, Player* bot,
                 return TestResult::FAIL;
             }
         }
+        else if (key == "race")
+        {
+            uint32 expectedRace = ChatHelper::parseRace(value);
+            if (!expectedRace)
+            {
+                return TestResult::FAIL;
+            }
+
+            if (bot->getRace() != expectedRace)
+            {
+                return TestResult::FAIL;
+            }
+        }
         else if (key == "role")
         {
             BotRoles expectedRole = ChatHelper::parseRole(value);

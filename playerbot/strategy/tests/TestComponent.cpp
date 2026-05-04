@@ -73,8 +73,8 @@ TestResult TextComponent::TrySplitOnce(const std::string& input, const std::stri
         return TestResult::IMPOSSIBLE;
     }
 
-    left = input.substr(0, pos);
-    right = input.substr(pos + delimiter.size());
+    left = Trim(input.substr(0, pos));
+    right = Trim(input.substr(pos + delimiter.size()));
     if (!allowEmptyRight && right.empty())
     {
         message = "Invalid format in " + componentName + ": " + input;
@@ -107,8 +107,7 @@ TestResult TextComponent::TryExtractBetween(const std::string& input, const std:
     return TestResult::PASS;
 }
 
-TestResult TextComponent::TryParseComparisonValue(const std::string& input, char& op, std::string& value,
-    std::string& message, const std::string& componentName)
+TestResult TextComponent::TryParseComparisonValue(const std::string& input, std::string& valueName, std::string& op, std::string& valueToCompareTo, std::string& message, const std::string& componentName)
 {
     std::string leftSide;
     std::string rightSide;
@@ -116,35 +115,23 @@ TestResult TextComponent::TryParseComparisonValue(const std::string& input, char
     if (splitResult != TestResult::PASS)
         return splitResult;
 
-    const size_t ltPos = leftSide.find('<');
-    const size_t gtPos = leftSide.find('>');
+    std::vector<std::string> validOps = {"<", ">", "==", "!="};
 
-    if (ltPos == std::string::npos && gtPos == std::string::npos)
+    for (auto& validOp : validOps)
     {
-        message = "Invalid format in " + componentName + ": " + input;
-        return TestResult::IMPOSSIBLE;
+        size_t opPos = leftSide.find(validOp);
+        if (opPos != std::string::npos)
+        {
+            op = validOp;
+            valueName = Trim(leftSide.substr(0, opPos));
+            valueToCompareTo = Trim(leftSide.substr(opPos + op.size()));
+
+            return TestResult::PASS;
+        }
     }
 
-    size_t opPos = std::string::npos;
-    if (ltPos != std::string::npos && (gtPos == std::string::npos || ltPos < gtPos))
-    {
-        op = '<';
-        opPos = ltPos;
-    }
-    else
-    {
-        op = '>';
-        opPos = gtPos;
-    }
-
-    value = leftSide.substr(opPos + 1);
-    if (value.empty() || IsWhitespaceOnly(value))
-    {
-        message = "Invalid format in " + componentName + ": " + input;
-        return TestResult::IMPOSSIBLE;
-    }
-
-    return TestResult::PASS;
+    message = "Invalid format in " + componentName + ": " + input;
+    return TestResult::IMPOSSIBLE;
 }
 
 TestResult TextComponent::TryParseUInt32Strict(const std::string& input, uint32& outValue,

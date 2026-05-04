@@ -827,8 +827,13 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
     sLog.outString("Creating random bot characters...");
     uint32 botsCreated = 0;
-    BarGoLink bar1(totalCharCount);
-
+    BarGoLink bar1(sPlayerbotAIConfig.randomBotAccountCount*
+#ifdef MANGOSBOT_TWO
+        10
+#else
+        9
+#endif
+    );
 
     // Shallow copy of the fixed config so we can modify it
     std::map<std::pair<uint8, uint8>, uint32> remaining = sPlayerbotAIConfig.fixedClassRaceCounts;

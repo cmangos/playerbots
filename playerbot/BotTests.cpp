@@ -397,67 +397,176 @@ namespace
 
     std::vector<TestTreeNode*> BuildTestTree(const std::vector<TestRecord>& records)
     {
-        std::map<std::string, TestTreeNode*> nodeMap;
-        std::vector<TestTreeNode*> rootNodes;
+        struct RawTestTreeNode
+        {
+            std::string name;
+            std::string fullName;
+            TestResultCounts counts;
+            bool isLeaf = false;
+            std::vector<RawTestTreeNode*> children;
+            std::map<std::string, RawTestTreeNode*> childMap;
+            RawTestTreeNode* parent = nullptr;
+        };
+
+        auto addResultCount = [](TestResultCounts& counts, const std::string& result)
+        {
+            counts.pass += (result == "PASS") ? 1 : 0;
+            counts.fail += (result == "FAIL") ? 1 : 0;
+            counts.abortCount += (result == "ABORT") ? 1 : 0;
+            counts.impossible += (result == "IMPOSSIBLE") ? 1 : 0;
+        };
+
+        auto addCounts = [](TestResultCounts& target, const TestResultCounts& source)
+        {
+            target.pass += source.pass;
+            target.fail += source.fail;
+            target.abortCount += source.abortCount;
+            target.impossible += source.impossible;
+        };
+
+        auto joinParts = [](const std::vector<std::string>& parts)
+        {
+            if (parts.empty())
+                return std::string();
+
+            std::string value = parts[0];
+            for (size_t i = 1; i < parts.size(); ++i)
+                value += "_" + parts[i];
+
+            return value;
+        };
+
+        std::function<void(RawTestTreeNode*)> aggregateCounts = [&](RawTestTreeNode* node)
+        {
+            for (RawTestTreeNode* child : node->children)
+            {
+                aggregateCounts(child);
+                addCounts(node->counts, child->counts);
+            }
+        };
+
+        std::function<TestTreeNode*(RawTestTreeNode*, TestTreeNode*)> buildCompressedNode = [&](RawTestTreeNode* rawNode, TestTreeNode* parent)
+        {
+            RawTestTreeNode* collapsedNode = rawNode;
+            std::vector<std::string> labelParts;
+            labelParts.push_back(rawNode->name);
+
+            while (!collapsedNode->isLeaf && collapsedNode->children.size() == 1)
+            {
+                RawTestTreeNode* next = collapsedNode->children.front();
+                collapsedNode = next;
+
+                if (collapsedNode->children.empty())
+                    break;
+
+                labelParts.push_back(collapsedNode->name);
+            }
+
+            TestTreeNode* node = new TestTreeNode();
+            node->parent = parent;
+            node->counts = collapsedNode->counts;
+            node->fullName = collapsedNode->fullName;
+
+            if (collapsedNode->children.empty())
+            {
+                node->name = collapsedNode->fullName;
+                return node;
+            }
+
+            node->name = joinParts(labelParts);
+            node->hasChildren = true;
+
+            for (RawTestTreeNode* child : collapsedNode->children)
+                node->children.push_back(buildCompressedNode(child, node));
+
+            return node;
+        };
+
+        std::function<void(RawTestTreeNode*)> deleteRawTree = [&](RawTestTreeNode* node)
+        {
+            for (RawTestTreeNode* child : node->children)
+                deleteRawTree(child);
+
+            delete node;
+        };
+
+        std::map<std::string, RawTestTreeNode*> rootMap;
+        std::vector<RawTestTreeNode*> rawRoots;
 
         for (const TestRecord& record : records)
         {
             const std::string& testName = record.testName;
             std::vector<std::string> parts = SplitBy(testName, "_");
+            if (parts.empty())
+                parts.push_back(testName);
 
-            std::string prefix = parts.empty() ? testName : parts[0];
-            std::string currentPath = prefix;
+            RawTestTreeNode* parentNode = nullptr;
+            RawTestTreeNode* currentNode = nullptr;
+            std::string currentPath;
 
-            if (nodeMap.find(currentPath) == nodeMap.end())
+            for (size_t i = 0; i < parts.size(); ++i)
             {
-                TestTreeNode* node = new TestTreeNode();
-                node->name = prefix;
-                node->fullName = prefix;
-                node->parent = nullptr;
-                nodeMap[currentPath] = node;
-                rootNodes.push_back(node);
-            }
+                currentPath = currentPath.empty() ? parts[i] : currentPath + "_" + parts[i];
 
-            TestTreeNode* parentNode = nodeMap[currentPath];
-
-            for (size_t i = 1; i < parts.size(); ++i)
-            {
-                currentPath += "_" + parts[i];
-
-                if (nodeMap.find(currentPath) == nodeMap.end())
+                if (!parentNode)
                 {
-                    TestTreeNode* node = new TestTreeNode();
-                    node->name = parts[i];
-                    node->fullName = currentPath;
-                    node->parent = parentNode;
-                    nodeMap[currentPath] = node;
-                    parentNode->children.push_back(node);
-                    parentNode->hasChildren = true;
+                    auto rootIt = rootMap.find(parts[i]);
+                    if (rootIt == rootMap.end())
+                    {
+                        currentNode = new RawTestTreeNode();
+                        currentNode->name = parts[i];
+                        currentNode->fullName = currentPath;
+                        rootMap[parts[i]] = currentNode;
+                        rawRoots.push_back(currentNode);
+                    }
+                    else
+                    {
+                        currentNode = rootIt->second;
+                    }
+                }
+                else
+                {
+                    auto childIt = parentNode->childMap.find(parts[i]);
+                    if (childIt == parentNode->childMap.end())
+                    {
+                        currentNode = new RawTestTreeNode();
+                        currentNode->name = parts[i];
+                        currentNode->fullName = currentPath;
+                        currentNode->parent = parentNode;
+                        parentNode->childMap[parts[i]] = currentNode;
+                        parentNode->children.push_back(currentNode);
+                    }
+                    else
+                    {
+                        currentNode = childIt->second;
+                    }
                 }
 
-                parentNode = nodeMap[currentPath];
+                currentNode->fullName = currentPath;
+                parentNode = currentNode;
             }
 
-            parentNode->counts.pass += (record.result == "PASS") ? 1 : 0;
-            parentNode->counts.fail += (record.result == "FAIL") ? 1 : 0;
-            parentNode->counts.abortCount += (record.result == "ABORT") ? 1 : 0;
-            parentNode->counts.impossible += (record.result == "IMPOSSIBLE") ? 1 : 0;
+            if (!currentNode)
+                continue;
 
-            TestTreeNode* countNode = parentNode;
-            while (countNode->parent)
-            {
-                countNode = countNode->parent;
-                countNode->counts.pass += (record.result == "PASS") ? 1 : 0;
-                countNode->counts.fail += (record.result == "FAIL") ? 1 : 0;
-                countNode->counts.abortCount += (record.result == "ABORT") ? 1 : 0;
-                countNode->counts.impossible += (record.result == "IMPOSSIBLE") ? 1 : 0;
-            }
+            currentNode->isLeaf = true;
+            currentNode->fullName = testName;
+            addResultCount(currentNode->counts, record.result);
         }
 
-        for (TestTreeNode* root : rootNodes)
+        for (RawTestTreeNode* root : rawRoots)
+            aggregateCounts(root);
+
+        std::vector<TestTreeNode*> rootNodes;
+        for (RawTestTreeNode* root : rawRoots)
         {
-            root->isExpanded = true;
+            TestTreeNode* finalRoot = buildCompressedNode(root, nullptr);
+            finalRoot->isExpanded = true;
+            rootNodes.push_back(finalRoot);
         }
+
+        for (RawTestTreeNode* root : rawRoots)
+            deleteRawTree(root);
 
         return rootNodes;
     }

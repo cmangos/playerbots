@@ -602,7 +602,20 @@ bool PlayerbotMgr::HandlePlayerbotMgrCommand(ChatHandler* handler, char const* a
 
     for (std::list<std::string>::iterator i = messages.begin(); i != messages.end(); ++i)
     {
-        handler->PSendSysMessage("%s",i->c_str());
+        WorldSession* activeSession = handler->GetSession();
+        if (!activeSession || !activeSession->GetPlayer())
+            break;
+
+        try
+        {
+            handler->PSendSysMessage("%s", i->c_str());
+        }
+        catch (...)
+        {
+            // RA/client can disconnect while a long response is being streamed.
+            // Stop sending remaining lines instead of risking a server-side crash.
+            break;
+        }
     }
 
     return true;

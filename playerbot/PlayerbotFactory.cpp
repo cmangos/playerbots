@@ -3887,58 +3887,74 @@ void PlayerbotFactory::InitTradeSkills()
     {
         std::vector<uint32> firstSkills;
         std::vector<uint32> secondSkills;
-        switch (bot->getClass())
+        switch (urand(0, 4))
         {
-        case CLASS_WARRIOR:
-        case CLASS_PALADIN:
-#ifdef MANGOSBOT_TWO
-        case CLASS_DEATH_KNIGHT:
-#endif
-            firstSkills.push_back(SKILL_BLACKSMITHING);
-            secondSkills.push_back(SKILL_ENGINEERING);
-            break;
-        case CLASS_SHAMAN:
-        case CLASS_DRUID:
-        case CLASS_HUNTER:
-        case CLASS_ROGUE:
-            firstSkills.push_back(SKILL_SKINNING);
-            firstSkills.push_back(SKILL_ENGINEERING);
-            secondSkills.push_back(SKILL_LEATHERWORKING);
-            break;
-        }
-
-        if (firstSkills.empty() || secondSkills.empty())
-        {
-            switch (urand(0, 6))
-            {
             case 0:
-                firstSkill = SKILL_HERBALISM;
-                secondSkill = SKILL_ALCHEMY;
-                break;
-            case 1:
-                firstSkill = SKILL_HERBALISM;
-                secondSkill = SKILL_MINING;
-                break;
-            case 2:
-                firstSkill = SKILL_MINING;
-                secondSkill = SKILL_SKINNING;
-                break;
-            case 3:
+                switch (urand(0, 7))
+                {
+                    case 0:
+                        firstSkill = SKILL_HERBALISM;
+                        secondSkill = SKILL_ALCHEMY;
+                        break;
+                    case 1:
+                        firstSkill = SKILL_HERBALISM;
+                        secondSkill = SKILL_MINING;
+                        break;
+                    case 2:
+                        firstSkill = SKILL_MINING;
+                        secondSkill = SKILL_SKINNING;
+                        break;
+                    case 3:
 #ifdef MANGOSBOT_ZERO
-                firstSkill = SKILL_HERBALISM;
-                secondSkill = SKILL_SKINNING;
+                        firstSkill = SKILL_HERBALISM;
+                        secondSkill = SKILL_SKINNING;
 #else
-                firstSkill = SKILL_JEWELCRAFTING;
-                secondSkill = SKILL_MINING;
+                        firstSkill = SKILL_JEWELCRAFTING;
+                        secondSkill = SKILL_MINING;
 #endif
-            }
+                        break;
+                    case 4:
+                        firstSkill = SKILL_ENCHANTING;
+                        secondSkill = SKILL_SKINNING;
+                        break;
+                    case 5:
+                        firstSkill = SKILL_ENCHANTING;
+                        secondSkill = SKILL_HERBALISM;
+                        break;
+                }
+                break;
+            default:
+                switch (bot->getClass())
+                {
+                    case CLASS_WARRIOR:
+                    case CLASS_PALADIN:
+#ifdef MANGOSBOT_TWO
+                    case CLASS_DEATH_KNIGHT:
+#endif
+                        firstSkills.push_back(SKILL_BLACKSMITHING);
+                        secondSkills.push_back(SKILL_ENGINEERING);
+                        break;
+                    case CLASS_SHAMAN:
+                    case CLASS_DRUID:
+                    case CLASS_HUNTER:
+                    case CLASS_ROGUE:
+                        firstSkills.push_back(SKILL_SKINNING);
+                        firstSkills.push_back(SKILL_ENGINEERING);
+                        secondSkills.push_back(SKILL_LEATHERWORKING);
+                        break;
+                    case CLASS_WARLOCK:
+                    case CLASS_MAGE:
+                    case CLASS_PRIEST:
+                        firstSkills.push_back(SKILL_TAILORING);
+#ifndef MANGOSBOT_ZERO
+                        firstSkills.push_back(SKILL_JEWELCRAFTING);
+#endif
+                        secondSkills.push_back(SKILL_ENCHANTING);
+                }
+                firstSkill = firstSkills[urand(0, firstSkills.size() - 1)];
+                secondSkill = secondSkills[urand(0, secondSkills.size() - 1)];
+                break;
         }
-        else
-        {
-            firstSkill = firstSkills[urand(0, firstSkills.size() - 1)];
-            secondSkill = secondSkills[urand(0, secondSkills.size() - 1)];
-        }
-
         sRandomPlayerbotMgr.SetValue(bot, "firstSkill", firstSkill);
         sRandomPlayerbotMgr.SetValue(bot, "secondSkill", secondSkill);
     }

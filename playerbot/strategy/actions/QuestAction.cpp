@@ -234,10 +234,13 @@ bool QuestAction::AcceptQuest(Player* requester, Quest const* quest, uint64 ques
         p.rpos(0);
         bot->GetSession()->HandleQuestgiverAcceptQuestOpcode(p);
 
-        if (bot->GetQuestStatus(questId) == QUEST_STATUS_NONE && sPlayerbotAIConfig.syncQuestWithPlayer)
+        if (bot->CanAddQuest(quest, false) && bot->GetQuestStatus(questId) == QUEST_STATUS_NONE && sPlayerbotAIConfig.syncQuestWithPlayer)
         {
             Object* pObject = bot->GetObjectByTypeMask((ObjectGuid)questGiver, TYPEMASK_CREATURE_GAMEOBJECT_PLAYER_OR_ITEM);
-            bot->AddQuest(quest, pObject);
+            if (quest->HasQuestFlag(QUEST_FLAGS_PARTY_ACCEPT))
+                bot->AddQuest(quest, nullptr); //prevent double dbscript call if player is doing it
+            else
+                bot->AddQuest(quest, pObject );
         }
 
         if (bot->GetQuestStatus(questId) != QUEST_STATUS_NONE && bot->GetQuestStatus(questId) != QUEST_STATUS_AVAILABLE)

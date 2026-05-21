@@ -393,7 +393,12 @@ float CheckMountStateAction::GetAttackDistance() const
 
 bool CheckMountStateAction::Mount(Player* requester, bool limitSpeedToGroup)
 {
-    bool canFly = CanFly();   
+    Player* groupMaster = ai->GetGroupMaster();
+    // only use a flying mount if master has a flying mount, to avoid laggards on ground (TBC flying is 60% ground speed)
+    bool canFly = groupMaster && groupMaster != bot ? CanFly() && (groupMaster->HasAuraType(SPELL_AURA_FLY) || 
+        groupMaster->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)) : CanFly();
+    if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT))
+        ai->TellPlayerNoFacing(requester, canFly ? "I should fly" : "I shouldn't fly");
 
     uint32 currentSpeed = AI_VALUE2(uint32, "current mount speed", "self target");
 

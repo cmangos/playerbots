@@ -919,11 +919,10 @@ bool PlayerbotAI::CanEnterArea(const AreaTrigger* area)
 
 void PlayerbotAI::Unmount()
 {
+    bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     if ((bot->IsMounted() || bot->GetMountID()) && !bot->IsTaxiFlying())
     {
-        bot->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         bot->Unmount();
-
         bot->UpdateSpeed(MOVE_RUN, true);
         bot->UpdateSpeed(MOVE_RUN, false);
 

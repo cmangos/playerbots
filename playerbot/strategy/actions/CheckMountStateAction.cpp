@@ -70,8 +70,8 @@ bool CheckMountStateAction::Execute(Event& event)
         }
     }
 
-    //Unmounted when able to attack target
-    if (canAttackTarget)
+    //Unmounted when able to attack target and not fleeing
+    if (canAttackTarget && !ai->HasStrategy("passive", BotState::BOT_STATE_COMBAT))
     {
         if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && IsMounted)
             ai->TellPlayerNoFacing(requester, "Unmount. Able to attack target.");

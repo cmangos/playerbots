@@ -186,7 +186,7 @@ uint32 CurrentMountSpeedValue::Calculate()
         if (auras.empty())
             continue;
 
-        for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); i++)
+        for (Unit::AuraList::const_iterator i = auras.begin(); i != auras.end(); ++i)
         {
             Aura* aura = *i;
             if (!aura)

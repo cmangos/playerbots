@@ -4246,17 +4246,68 @@ void PlayerbotFactory::SetRandomSkill(uint16 id)
 {
     uint32 maxValue = level * 5; // vanilla 60*5 = 300
 
-// do not let skill go beyond limit even if maxlevel > blizzlike
-#ifndef MANGOSBOT_ZERO
-	if (level > 60)
+    SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(id);
+    if (!pSkill)
+        return;
+
+    SkillRangeType skillType = GetSkillRangeType(pSkill, false);
+
+    // if this is not a profession type of skill or skill that is 1/1
+    if (skillType != SKILL_RANGE_LEVEL && skillType != SKILL_RANGE_MONO)
     {
+        // do not let skill go beyond limit even if maxlevel > blizzlike
+#ifndef MANGOSBOT_ZERO
+            if (level > 60)
+            {
 #ifdef MANGOSBOT_ONE
-        maxValue = (level + 5) * 5;   // tbc (70 + 5)*5 = 375
+                maxValue = (level + 5) * 5;   // tbc (70 + 5)*5 = 375
 #else
-        maxValue = (level + 10) * 5;  // wotlk (80 + 10)*5 = 450
+                maxValue = (level + 10) * 5;  // wotlk (80 + 10)*5 = 450
 #endif
-	}
+            }
 #endif
+    }
+    else
+    {
+        // profession based levels. They should learn ranks from trainers, but for now assume
+        // scaling similar to riding skill
+#ifdef MANGOSBOT_ZERO
+        if (bot->GetLevel() >= 35)
+            maxValue = 300;
+        else if (bot->GetLevel() >= 20)
+            maxValue = 225;
+        else if (bot->GetLevel() >= 10)
+            maxValue = 150;
+        else 
+            maxValue = 75;
+#endif
+#ifdef MANGOSBOT_ONE
+        if (bot->GetLevel() >= 50)
+            maxValue = 375;
+        else if (bot->GetLevel() >= 35)
+            maxValue = 300;
+        else if (bot->GetLevel() >= 20)
+            maxValue = 225;
+        else if (bot->GetLevel() >= 10)
+            maxValue = 150;
+        else 
+            maxValue = 75;
+#endif
+#ifdef MANGOSBOT_TWO
+        if (bot->GetLevel() >= 65)
+            maxValue = 450;
+        else if (bot->GetLevel() >= 50)
+            maxValue = 375;
+        else if (bot->GetLevel() >= 35)
+            maxValue = 300;
+        else if (bot->GetLevel() >= 20)
+            maxValue = 225;
+        else if (bot->GetLevel() >= 10)
+            maxValue = 150;
+        else 
+            maxValue = 75;
+#endif
+    }
 
     uint32 value = urand(maxValue - level, maxValue);
     uint32 curValue = bot->GetSkillValue(id);

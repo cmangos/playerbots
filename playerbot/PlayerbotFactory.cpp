@@ -4022,27 +4022,45 @@ void PlayerbotFactory::InitTradeSkills()
             SpellEntry const* proto = sServerFacade.LookupSpellInfo(tSpell->spell);
             if (!proto)
                 continue;
-
+            
             SpellEntry const* spell = sServerFacade.LookupSpellInfo(tSpell->spell);
             if (spell)
             {
                 std::string SpellName = spell->SpellName[0];
+#ifdef MANGOSBOT_ZERO
                 if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
+#elif defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
+                if (spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL || spell->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_SKILL_STEP)
+#endif
                 {
                     uint32 skill = spell->EffectMiscValue[EFFECT_INDEX_1];
 
-                    if (skill && !bot->HasSkill(skill))
+                    if (skill)
                     {
                         SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(skill);
                         if (pSkill)
                         {
-                            if (SpellName.find("Apprentice") != std::string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
-                                continue;
+                            if (!bot->HasSkill(skill))
+                            {
+#ifdef MANGOSBOT_ZERO
+                                if (SpellName.find("Apprentice") != std::string::npos && pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
+                                    continue;
+#elif defined(MANGOSBOT_ONE) || defined(MANGOSBOT_TWO) // TBC OR WOTLK
+                                std::string SpellRank = spell->Rank[0];
+                                if (SpellName.find("Apprentice") != std::string::npos && (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY))
+                                    continue;
+                                else if (SpellRank.find("Apprentice") != std::string::npos && (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY))
+                                    continue;
+#endif
+                            }
+                            else
+                                bot->learnSpell(spell->Id, false);
                         }
                     }
+                    
                 }
             }
-
+            
 #ifdef MANGOSBOT_ZERO
             if (tSpell->learnedSpell)
             {

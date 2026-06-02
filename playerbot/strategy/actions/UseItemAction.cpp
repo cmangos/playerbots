@@ -423,14 +423,6 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
             return false;
         }
     }
-    else
-    {
-        std::list<Item*> items = AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatQItem(itemId));
-        if (!items.empty())
-        {
-            itemUsed = items.front();
-        }
-    }
 
     // Check for items that give quests on use (must have item in inventory)
     if (proto->StartQuest > 0)

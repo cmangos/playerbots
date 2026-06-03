@@ -665,6 +665,10 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string
         {
             bots.insert(master->GetTarget()->GetName());
         }
+        if (args == "always")
+        {
+            bots.insert(master->GetName());
+        }
         else
         {
             std::string helpText = GetCommandTexts("");

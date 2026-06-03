@@ -960,18 +960,18 @@ void MovementAction::DispatchMovement(TravelPath movePath, bool generatePath, bo
 
     mm.Clear();
 
+    std::vector<WorldPosition> path = movePath.getPointPath();
+    WorldPosition movePosition = path.back();
+    float size = WorldPosition().getPathLength(path);    
+
     ForcedMovement moveMode = masterWalking ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_RUN;
 #ifndef MANGOSBOT_ZERO
     if (bot->IsFlying())
         moveMode = FORCED_MOVEMENT_FLIGHT;
 #endif
 
-    std::vector<WorldPosition> path = movePath.getPointPath();
-
-    if (!generatePath || !bot->IsFreeFlying())
+    if (!generatePath || bot->IsFreeFlying())
     {
-        WorldPosition movePosition = path.back();
-
 #ifdef MANGOSBOT_ZERO
         mm.MovePoint(movePosition.getMapId(),
             movePosition.getX(),
@@ -985,53 +985,55 @@ void MovementAction::DispatchMovement(TravelPath movePath, bool generatePath, bo
             moveMode,
             bot->IsFlying() ? bot->GetSpeed(MOVE_FLIGHT) : 0.f,
             bot->IsFlying());
-#endif
-    }
-
-    GeneratePathAvoidingHazards(path);
-
-    std::vector<G3D::Vector3> pointPath = WorldPosition().toPointsArray(path);
-    float size = WorldPosition().getPathLength(path);
-
-    bool usePath = true;
-
-    if (usePath)
-    {
-        bool normalizeZ = true;
-
-        for (auto& p : pointPath)
-        {
-            if (bot->GetTransport())
-                bot->GetTransport()->CalculatePassengerPosition(p.x, p.y, p.z);
-            bot->UpdateAllowedPositionZ(p.x, p.y, p.z);
-            if (bot->GetTransport())
-                bot->GetTransport()->CalculatePassengerOffset(p.x, p.y, p.z);
-        }
-
-#ifndef MANGOSBOT_TWO
-        mm.MovePath(pointPath, moveMode, false, false);
-#else
-        mm.MovePath(pointPath, moveMode, false);
 #endif
     }
     else
     {
-        WorldPosition movePosition = path.back();
+        GeneratePathAvoidingHazards(path);
+
+        std::vector<G3D::Vector3> pointPath = WorldPosition().toPointsArray(path);
+        pointPath.insert(pointPath.begin(), WorldPosition(bot).getVector3());
+
+        bool usePath = false;
+
+        if (usePath)
+        {
+            bool normalizeZ = true;
+
+            for (auto& p : pointPath)
+            {
+                if (bot->GetTransport())
+                    bot->GetTransport()->CalculatePassengerPosition(p.x, p.y, p.z);
+                bot->UpdateAllowedPositionZ(p.x, p.y, p.z);
+                if (bot->GetTransport())
+                    bot->GetTransport()->CalculatePassengerOffset(p.x, p.y, p.z);
+            }
+
+#ifndef MANGOSBOT_TWO
+            mm.MovePath(pointPath, moveMode, false, false);
+#else
+        mm.MovePath(pointPath, moveMode, false);
+#endif
+        }
+        else
+        {
+            WorldPosition movePosition = path.back();
 
 #ifdef MANGOSBOT_ZERO
-        mm.MovePoint(movePosition.getMapId(),
-            movePosition.getX(),
-            movePosition.getY(),
-            movePosition.getZ(),
-            moveMode,
-            generatePath);
+            mm.MovePoint(movePosition.getMapId(),
+                movePosition.getX(),
+                movePosition.getY(),
+                movePosition.getZ(),
+                moveMode,
+                generatePath);
 #else
-        mm.MovePoint(movePosition.getMapId(),
-            Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f),
-            moveMode,
-            bot->IsFlying() ? bot->GetSpeed(MOVE_FLIGHT) : 0.f,
-            bot->IsFlying());
+            mm.MovePoint(movePosition.getMapId(),
+                Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f),
+                moveMode,
+                bot->IsFlying() ? bot->GetSpeed(MOVE_FLIGHT) : 0.f,
+                !bot->IsFlying());
 #endif
+        }
     }
     WaitForReach(size);
 }

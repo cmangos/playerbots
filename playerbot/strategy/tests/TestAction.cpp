@@ -12,10 +12,12 @@
 #include "Spells/Spell.h"
 #include "MonitorCombat.h"
 #include "MonitorState.h"
+#include "MonitorQuest.h"
 #include "CommandSetup.h"
 #include "CommandParty.h"
 #include "CommandFlow.h"
 #include "CommandDebug.h"
+#include "CommandQuest.h"
 #include "CleanupParty.h"
 #include "RequireState.h"
 
@@ -64,6 +66,10 @@ void TestAction::RegisterCommands()
     commands.push_back(std::make_unique<CommandDebug>());
     commands.push_back(std::make_unique<CommandRecord>());
     commands.push_back(std::make_unique<CommandRead>());
+    commands.push_back(std::make_unique<CommandSetupAcceptQuest>());
+    commands.push_back(std::make_unique<CommandSetupForceCompleteQuest>());
+    commands.push_back(std::make_unique<CommandSetupRewardQuest>());
+    commands.push_back(std::make_unique<CommandSetupDo>());
 }
 
 void TestAction::RegisterMonitors()
@@ -88,6 +94,13 @@ void TestAction::RegisterMonitors()
     monitors.push_back(std::make_unique<MonitorStateAreaLevelDiff>());
     monitors.push_back(std::make_unique<MonitorAiValue>());
     monitors.push_back(std::make_unique<MonitorOutgoingMessage>());
+    monitors.push_back(std::make_unique<MonitorQuestComplete>());
+    monitors.push_back(std::make_unique<MonitorQuestRewarded>());
+    monitors.push_back(std::make_unique<MonitorQuestActive>());
+    monitors.push_back(std::make_unique<MonitorQuestObjective>());
+    monitors.push_back(std::make_unique<MonitorHasItem>());
+    monitors.push_back(std::make_unique<MonitorOnMap>());
+    monitors.push_back(std::make_unique<MonitorHasMount>());
 }
 
 bool TestAction::Execute(Event& event)
@@ -151,6 +164,16 @@ bool TestAction::Execute(Event& event)
         ctx.testStartTime = WorldTimer::getMSTime();
         if (bot->IsInWorld())
             ctx.testStartPosition = WorldPosition(bot);
+
+        if (TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target"))
+            sTravelMgr.SetNullTravelTarget(travelTarget);
+
+        RESET_AI_VALUE(GuidPosition, "rpg target");
+        RESET_AI_VALUE(std::set<ObjectGuid>&, "ignore rpg target");
+        RESET_AI_VALUE(bool, "travel target active");
+        RESET_AI_VALUE2(std::string, "manual string", "future travel purpose");
+        RESET_AI_VALUE2(std::string, "manual string", "future travel detail");
+        RESET_AI_VALUE2(std::string, "manual string", "future travel condition");
 
         TellMaster(std::string("Starting test: ") + ctx.testName);
         LogToConsole(std::string("[TestAction] Bot ") + bot->GetName() + " starting test: " + ctx.testName);

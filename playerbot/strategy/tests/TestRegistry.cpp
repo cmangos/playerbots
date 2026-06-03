@@ -323,6 +323,7 @@ void TestRegistry::EnsureTestsRegistered()
     RegisterRandomizeTests();
     RegisterInstanceTests();
     RegisterBankTests();
+    RegisterQuestDkStartTests();
 }
 
 void TestRegistry::EnsureLocationsInit()

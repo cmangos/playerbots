@@ -1437,6 +1437,9 @@ bool RequestQuestTravelTargetAction::Execute(Event& event)
 
 bool RequestQuestTravelTargetAction::isAllowed() const
 {
+    if (AI_VALUE2(bool, "manual bool", "is running test") || AI_VALUE(bool, "has focus travel target"))
+        return true;
+
     if (AI_VALUE(bool, "should get money"))
         return urand(1, 100) < 90;
     else

@@ -671,7 +671,7 @@ std::list<std::string> PlayerbotHolder::HandlePlayerbotCommand(const std::string
         }
         else
         {
-            std::string helpText = GetCommandTexts("");
+            std::string helpText = GetCommandTexts("help");
             messages.push_back(helpText);
             return messages;
         }

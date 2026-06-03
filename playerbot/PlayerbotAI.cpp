@@ -7328,6 +7328,11 @@ void PlayerbotAI::InventoryTellItems(Player* player, std::map<uint32, int> itemM
             case ITEM_CLASS_WEAPON:
                 TellPlayer(player, "--- weapon ---");
                 break;
+#ifndef MANGOSBOT_ZERO
+            case ITEM_CLASS_GEM:
+                TellPlayer(player, "--- gems ---");
+                break;
+#endif
             case ITEM_CLASS_ARMOR:
                 TellPlayer(player, "--- armor ---");
                 break;

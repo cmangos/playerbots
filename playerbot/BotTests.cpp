@@ -939,7 +939,7 @@ void LogAnalysis::AnalysePid()
 
         Tokens tokens = StrSplit(line, ",");
 
-        if (tokens.size() < 7)
+        if (tokens.size() < 8)
             continue;
 
         if (tokens.size() > 50)//Multiple servers running

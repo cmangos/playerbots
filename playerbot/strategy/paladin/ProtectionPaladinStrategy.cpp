@@ -181,11 +181,11 @@ void ProtectionPaladinAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 
     triggers.push_back(new TriggerNode(
         "melee light aoe",
-        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH + 2), NULL)));
+        NextAction::array(0, new NextAction("consecration", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "melee light aoe",
-        NextAction::array(0, new NextAction("consecration", ACTION_HIGH + 1), NULL)));
+        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
         "consecration",
@@ -692,18 +692,18 @@ void ProtectionPaladinRaidStrategy::InitDeadTriggers(std::list<TriggerNode*>& tr
 void ProtectionPaladinAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     PaladinAoeStrategy::InitCombatTriggers(triggers);
+    triggers.push_back(new TriggerNode(
+        "consecration",
+        NextAction::array(0, new NextAction("consecration", ACTION_HIGH + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "melee light aoe",
-        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH + 4), NULL)));
+        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "melee light aoe",
         NextAction::array(0, new NextAction("consecration", ACTION_HIGH + 1), NULL)));
 
-    triggers.push_back(new TriggerNode(
-        "consecration",
-        NextAction::array(0, new NextAction("consecration", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "avenger's shield",

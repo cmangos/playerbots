@@ -409,7 +409,7 @@ namespace ai
 
         bool IsActive() override
         {
-            return !AI_VALUE2(bool, "can free move", "wandermin") && AI_VALUE2(bool, "can free move", "wandermaz");
+            return !AI_VALUE2(bool, "can free move", "wandermin") && AI_VALUE2(bool, "can free move", "wandermax");
         }
     };
 

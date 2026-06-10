@@ -22,11 +22,20 @@ namespace ai
                 creators["cc"] = [](PlayerbotAI* ai) { return new CcPlaceholderStrategy(ai); };
                 creators["offheal"] = [](PlayerbotAI* ai) { return new OffhealPlaceholderStrategy(ai); };
                 creators["boost"] = [](PlayerbotAI* ai) { return new BoostPlaceholderStrategy(ai); };
+                creators["pull"] = [](PlayerbotAI* ai) {
 #ifdef MANGOSBOT_TWO
-                creators["pull"] = [](PlayerbotAI* ai) { return new PullStrategy(ai, "judgement of light", "seal of righteousness"); };
-#else
-                creators["pull"] = [](PlayerbotAI* ai) { return new PullStrategy(ai, "judgement", "seal of righteousness"); };
+                    return new PullStrategy(ai, "judgement of light", "seal of righteousness");
 #endif
+#ifdef MANGOSBOT_ONE
+                    if (ai->HasSpell(31935))
+                        return new PullStrategy(ai, "avenger's shield"); 
+                    else
+                        return new PullStrategy(ai, "judgement", "seal of righteousness");
+#endif
+#ifdef MANGOSBOT_ZERO
+                    return new PullStrategy(ai, "judgement", "seal of righteousness");      
+#endif
+                };
             }
         };
 

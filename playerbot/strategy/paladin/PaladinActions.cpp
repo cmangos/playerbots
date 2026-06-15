@@ -101,7 +101,7 @@ std::vector<std::string> CastPveBlessingAction::GetPossibleBlessingsForTarget(Un
         {
             if (player->getClass() == CLASS_PALADIN)
             {
-                blessings = { "blessing of wisdom", "blessing of kings", "blessing of might", "blessing of sanctuary", "blessing of light" };
+                blessings = { "blessing of sanctuary", "blessing of kings", "blessing of wisdom", , "blessing of light", "blessing of might"  };
             }
             else
             {
@@ -120,7 +120,7 @@ std::vector<std::string> CastPveBlessingAction::GetPossibleBlessingsForTarget(Un
             }
             else
             {
-                blessings = { "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
+                blessings = { "blessing of salvation", "blessing of might", "blessing of kings", "blessing of light", "blessing of wisdom", "blessing of sanctuary" };
             }
         }
     }

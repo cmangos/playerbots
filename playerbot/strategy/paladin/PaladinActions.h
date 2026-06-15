@@ -10,6 +10,8 @@ namespace ai
 	BUFF_ACTION(CastSealOfWisdomAction, "seal of wisdom");
 	BUFF_ACTION(CastSealOfCommandAction, "seal of command");
 	BUFF_ACTION(CastSealOfVengeanceAction, "seal of vengeance");
+    BUFF_ACTION(CastSealOfTheCrusaderAction, "seal of the crusader");
+    BUFF_ACTION(CastSealOfBloodAction, "seal of blood");
 
 	class CastJudgementAction : public CastMeleeDebuffSpellAction
 	{
@@ -17,7 +19,34 @@ namespace ai
 		CastJudgementAction(PlayerbotAI* ai) : CastMeleeDebuffSpellAction(ai, "judgement") { range = 10.0f; }
 		virtual bool isUseful() 
 		{
-			return ai->HasAnyAuraOf(bot, "seal of justice", "seal of command", "seal of vengeance", "seal of blood", "seal of righteousness", "seal of light", "seal of wisdom", NULL);
+            Unit* target = bot->GetTarget();
+            if (target && target->IsAlive())
+            {
+                if (ai->HasAnyAuraOf(bot, "seal of vengeance", NULL))
+                    return target->GetAuraCount(31803) > 2; // pointless to judge with no stacks!
+                else if (ai->HasAnyAuraOf(bot, "seal of wisdom", NULL))
+                {
+                    return !target->HasAura(20186) && !target->HasAura(20354) &&
+                        !target->HasAura(20355) && !target->HasAura(27164); 
+                }
+                else if (ai->HasAnyAuraOf(bot, "seal of light", NULL))
+                {
+                    return !target->HasAura(20185) && !target->HasAura(20344) &&
+                        !target->HasAura(20345) && !target->HasAura(20346) &&
+                        !target->HasAura(27162); 
+                }
+                else if (ai->HasAnyAuraOf(bot, "seal of the crusader", NULL))
+                {
+                    return !target->HasAura(21183) && !target->HasAura(20188) && 
+                        !target->HasAura(20300) && !target->HasAura(20301) &&
+                        !target->HasAura(20302) && !target->HasAura(20303) &&
+                        !target->HasAura(27159);
+                }
+                else
+                    return ai->HasAnyAuraOf(bot, "seal of justice", "seal of command", "seal of blood", "seal of righteousness", NULL);
+            }
+            else
+                return false;
 		}
 	};
 

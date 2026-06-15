@@ -4737,7 +4737,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool
     if (HasStrategy("debug spell", BotState::BOT_STATE_NON_COMBAT))
     {
         std::ostringstream out;
-        out << "Casting " << ChatHelper::formatSpell(pSpellInfo) << " spellid " << pSpellInfo->Id << " target " << target->GetDbGuid();
+        out << "Casting " << ChatHelper::formatSpell(pSpellInfo) << " spellid " << pSpellInfo->Id;
         TellPlayerNoFacing(GetMaster() ? GetMaster() : bot, out);
     }
 
@@ -5326,7 +5326,7 @@ bool PlayerbotAI::CastVehicleSpell(uint32 spellId, Unit* target, float projectil
     if (HasStrategy("debug spell", BotState::BOT_STATE_NON_COMBAT))
     {
         std::ostringstream out;
-        out << "Casting " << ChatHelper::formatSpell(pSpellInfo) << " spellid " << pSpellInfo->Id << " target " << target->GetDbGuid();
+        out << "Casting " << ChatHelper::formatSpell(pSpellInfo) << " spellid " << pSpellInfo->Id;
         TellPlayerNoFacing(GetMaster() ? GetMaster() : bot, out);
     }
 

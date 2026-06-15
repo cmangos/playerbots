@@ -4177,6 +4177,12 @@ bool PlayerbotAI::CanCastSpell(uint32 spellid, Unit* target, uint8 effectMask, b
         if (!damage)
         {
             bool immune = target->IsImmuneToSpell(spellInfo, false, effectMask, bot);
+            if (!immune)
+            {
+                for (int32 i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; i++)
+                    immune = target->IsImmuneToSpellEffect(spellInfo, SpellEffectIndex(i), false);
+            }
+
             if (immune)
             {
                 if (checkResult)
@@ -5445,7 +5451,7 @@ bool PlayerbotAI::IsInterruptableSpellCasting(Unit* target, std::string spell, u
 			return true;
 
 		if ((spellInfo->Effect[i] == SPELL_EFFECT_INTERRUPT_CAST) &&
-            !target->IsImmuneToSpell(spellInfo, true, effectMask, bot))
+            (!target->IsImmuneToSpell(spellInfo, true, effectMask, bot) || !target->IsImmuneToSpellEffect(spellInfo, SpellEffectIndex(i), true)))
             return true;
 
         if ((spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA) && spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SILENCE)

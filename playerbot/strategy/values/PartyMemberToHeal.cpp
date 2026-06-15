@@ -298,7 +298,7 @@ Unit* PartyMemberToRemoveRoots::Calculate()
 
                 if (player->HasAuraType(SPELL_AURA_MOD_ROOT) || player->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED))
                 {
-                    if (!ai->HasAura("stealth", player) && !ai->HasAura("prowl", player))
+                    if (!ai->HasAura("stealth", player) && !ai->HasAura("prowl", player) && !ai->HasAura("tree of life", player))
                     {
                         target = player;
                         break;

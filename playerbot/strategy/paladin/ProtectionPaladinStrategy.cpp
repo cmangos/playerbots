@@ -21,7 +21,14 @@ private:
 
     ACTION_NODE_A(hand_of_reckoning, "hand of reckoning", "righteous defense");
 
-    ACTION_NODE_C(righteous_defense, "righteous defense", "avenger's shield");
+    static ActionNode* righteous_defense(PlayerbotAI* ai)
+    {
+        return new ActionNode("righteous defense",
+            /*P*/ NULL,
+            /*A*/ NULL,
+            /*C*/ NextAction::array(0, new NextAction("avenger's shield"), 
+                                       new NextAction("judgement"), NULL));
+    }
 
     ACTION_NODE_A(judgement, "judgement", "exorcism");
 };

@@ -24,8 +24,11 @@ public:
 private:
     ACTION_NODE_A(seal_of_vengeance, "seal of vengeance", "seal of command");
 
+#ifndef MANGOSBOT_ONE
     ACTION_NODE_A(seal_of_command, "seal of command", "seal of righteousness");
-
+#else
+    ACTION_NODE_A(seal_of_command, "seal of blood", "seal of command");
+#endif
     ACTION_NODE_A(crusader_strike, "crusader strike", "melee");
 
     ACTION_NODE_A(repentance, "repentance", "hammer of justice");

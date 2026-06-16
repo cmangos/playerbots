@@ -166,7 +166,7 @@ bool PossibleAttackTargetsValue::HasUnBreakableCC(Unit* target, Player* player)
 bool PossibleAttackTargetsValue::IsImmuneToDamage(Unit* target, Player* player)
 {
     // Charmed
-    if (sServerFacade.IsCharmed(target) && target->IsInTeam(player, true))
+    if (sServerFacade.IsCharmed(target) && (target->IsInTeam(player, true) || target->IsInGroup(player, true, true)))
     {
         return true;
     }

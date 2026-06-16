@@ -12,6 +12,7 @@ public:
     {
         creators["seal of vengeance"] = &seal_of_vengeance;
         creators["hand of reckoning"] = &hand_of_reckoning;
+        creators["righteous defense"] = &righteous_defense;
         creators["judgement"] = &judgement;
     }
 
@@ -19,6 +20,15 @@ private:
     ACTION_NODE_A(seal_of_vengeance, "seal of vengeance", "seal of righteousness");
 
     ACTION_NODE_A(hand_of_reckoning, "hand of reckoning", "righteous defense");
+
+    static ActionNode* righteous_defense(PlayerbotAI* ai)
+    {
+        return new ActionNode("righteous defense",
+            /*P*/ NULL,
+            /*A*/ NULL,
+            /*C*/ NextAction::array(0, new NextAction("avenger's shield"), 
+                                       new NextAction("judgement"), NULL));
+    }
 
     ACTION_NODE_A(judgement, "judgement", "exorcism");
 };
@@ -563,7 +573,7 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "lose aggro",
-        NextAction::array(0, new NextAction("hand of reckoning", ACTION_MOVE), NULL)));
+        NextAction::array(0, new NextAction("righteous defense", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "holy shield",
@@ -617,6 +627,7 @@ void ProtectionPaladinPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     triggers.push_back(new TriggerNode(
         "target critical health",
         NextAction::array(0, new NextAction("hammer of wrath", ACTION_HIGH), NULL)));
+    
 }
 
 void ProtectionPaladinPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -696,18 +707,18 @@ void ProtectionPaladinAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
         "consecration",
         NextAction::array(0, new NextAction("consecration", ACTION_HIGH + 4), NULL)));
 
-    triggers.push_back(new TriggerNode(
+    /*triggers.push_back(new TriggerNode(
         "melee light aoe",
         NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH), NULL)));
-
+    */
     triggers.push_back(new TriggerNode(
         "melee light aoe",
         NextAction::array(0, new NextAction("consecration", ACTION_HIGH + 1), NULL)));
 
-
-    triggers.push_back(new TriggerNode(
+    /*triggers.push_back(new TriggerNode(
         "avenger's shield",
         NextAction::array(0, new NextAction("avenger's shield", ACTION_HIGH), NULL)));
+    */
 }
 
 void ProtectionPaladinAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

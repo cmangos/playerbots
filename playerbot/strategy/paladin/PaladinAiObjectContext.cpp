@@ -28,7 +28,7 @@ namespace ai
 #endif
 #ifdef MANGOSBOT_ONE
                     if (ai->HasSpell(31935))
-                        return new PullStrategy(ai, "avenger's shield"); 
+                        return new PullStrategy(ai, "avenger's shield", "seal of wisdom"); 
                     else
                         return new PullStrategy(ai, "judgement", "seal of righteousness");
 #endif
@@ -312,6 +312,8 @@ namespace ai
             {
                 creators["seal of command"] = [](PlayerbotAI* ai) { return new CastSealOfCommandAction(ai); };
                 creators["seal of vengeance"] = [](PlayerbotAI* ai) { return new CastSealOfVengeanceAction(ai); };
+                creators["seal of blood"] = [](PlayerbotAI* ai) { return new CastSealOfBloodAction(ai); };
+                creators["seal of the crusader"] = [](PlayerbotAI* ai) { return new CastSealOfTheCrusaderAction(ai); };
                 creators["pve blessing"] = [](PlayerbotAI* ai) { return new CastPveBlessingAction(ai); };
                 creators["pve greater blessing"] = [](PlayerbotAI* ai) { return new CastPveGreaterBlessingAction(ai); };
                 creators["pvp blessing"] = [](PlayerbotAI* ai) { return new CastPvpBlessingAction(ai); };

@@ -1040,7 +1040,7 @@ namespace ai
         bool IsActive() override
         {
             return bot->HasAuraType(SPELL_AURA_MOD_ROOT) ||
-                   bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED);
+                   (bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) && !ai->HasAnyAuraOf(bot, "tree of life", NULL));
         }
     };
 

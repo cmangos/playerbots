@@ -12,7 +12,9 @@ bool SealTrigger::IsActive()
         !ai->HasAura("seal of command", target) &&
         !ai->HasAura("seal of vengeance", target) &&
 		!ai->HasAura("seal of righteousness", target) &&
+        !ai->HasAura("seal of the crusader", target) &&
 		!ai->HasAura("seal of light", target) &&
+        !ai->HasAura("seal of blood", target) &&
         !ai->HasAura("seal of wisdom", target) &&
         AI_VALUE2(bool, "combat", "self target");
 }

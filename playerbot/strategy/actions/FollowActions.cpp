@@ -60,7 +60,12 @@ bool FollowAction::isUseful()
 
     if (followTarget)
     {
-        distance = sServerFacade.GetDistance2d(bot, followTarget);
+#ifndef MANGOSBOT_ZERO
+        if (bot->IsFreeFlying() || bot->IsFlying())
+            distance = sServerFacade.GetDistance(bot, followTarget);
+        else
+#endif
+            distance = sServerFacade.GetDistance2d(bot, followTarget);
     }
     else
     {

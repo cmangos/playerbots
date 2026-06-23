@@ -241,9 +241,11 @@ bool MovementAction::FlyDirect(const WorldPosition &startPosition, const WorldPo
             mm.Clear();
         }
     }
-    mm.Clear(false, true);
-    mm.MovePoint(movePosition.getMapId(), Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f), bot->IsFlying() ? FORCED_MOVEMENT_FLIGHT : FORCED_MOVEMENT_RUN, bot->IsFlying() ? bot->GetSpeed(MOVE_FLIGHT) : 0.f, bot->IsFlying());
 
+    bool flying = bot->IsFlying() || bot->IsFreeFlying();
+    mm.MovePoint(movePosition.getMapId(), Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f), flying  ? FORCED_MOVEMENT_FLIGHT : FORCED_MOVEMENT_RUN, flying ? bot->GetSpeed(MOVE_FLIGHT) : 0.f, flying);
+    WaitForReach(movePosition.distance(WorldPosition(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f)));
+    
     AI_VALUE(LastMovement&, "last movement").lastAreaTrigger = movePosition;
 
     return true;
@@ -1241,6 +1243,7 @@ bool MovementAction::MoveTo2(const WorldPosition& endPos, bool idle, bool react,
 
     // DEBUG: Check for Ironforge AH roof climbing bug
     // IF Auction House is at approx -4900, -950, 500 (Military Ward)
+    /**
     const float IF_AH_X = -4900.0f;
     const float IF_AH_Y = -950.0f;
     const float IF_AH_Z = 500.0f;
@@ -1300,6 +1303,7 @@ bool MovementAction::MoveTo2(const WorldPosition& endPos, bool idle, bool react,
             sLog.outError("%s", pathBuf);
         }
     }
+    */
     // END DEBUG
 
     DispatchMovement(movePath, generatePath, masterWalking);
@@ -2207,8 +2211,15 @@ bool MovementAction::MoveTo(Unit* target, float distance)
         ty = loc.coord_y;
         tz = loc.coord_z;
     }
-
-    float distanceToTarget = sServerFacade.GetDistance2d(bot, tx, ty);
+    float distanceToTarget = 0;
+#ifndef MANGOSBOT_ZERO
+    if (bot->IsFlying() || bot->IsFreeFlying())
+        distanceToTarget = sServerFacade.GetDistance(bot, tx, ty, tz);
+    else
+        distanceToTarget = sServerFacade.GetDistance2d(bot, tx, ty);
+#else
+    distanceToTarget = sServerFacade.GetDistance2d(bot, tx, ty);
+#endif
     if (sServerFacade.IsDistanceGreaterThan(distanceToTarget, sPlayerbotAIConfig.targetPosRecalcDistance))
     {
         /*
@@ -2492,6 +2503,31 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
                     bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FALLING);
             }
         }
+        WorldPosition moveToPos = tarPos;
+        PathFinder pathfinder(bot);
+        //Use standard pathfinder to find a route.
+        WorldPosition prevPoint = botPos;
+        pathfinder.calculate(moveToPos.getVector3(), tarPos.getVector3());
+        Movement::PointsArray& pathPoints = pathfinder.getPath();
+        if (pathPoints.size() >= 2)
+        {
+            for (uint32 i = 1; i < pathPoints.size() - 1; i++)
+            {
+                WorldPosition pathPoint(bot->GetMapId(), pathPoints[i].x, pathPoints[i].y, pathPoints[i].z);
+                if (pathPoint.canFly())
+                {
+                    prevPoint = pathPoint;
+                    continue;
+                }
+                if (!MoveTo(prevPoint))
+                {
+                    return MoveTo(pathPoint);
+                }
+                return true;
+            }
+        }
+        moveToPos = tarPos;
+        return MoveTo(moveToPos);
     }
 #endif
 

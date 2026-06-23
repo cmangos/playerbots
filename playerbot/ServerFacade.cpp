@@ -11,6 +11,33 @@
 ServerFacade::ServerFacade() {}
 ServerFacade::~ServerFacade() {}
 
+float ServerFacade::GetDistance(Unit *unit, WorldObject* wo)
+{
+    if (!unit || !wo)
+        return false;
+
+    float dist =
+#ifdef MANGOS
+    unit->GetDistance(wo);
+#endif
+#ifdef CMANGOS
+    sqrt(unit->GetDistance(wo->GetPositionX(), wo->GetPositionY(), wo->GetPositionZ(), DIST_CALC_NONE));
+#endif
+    return round(dist * 10.0f) / 10.0f;
+}
+
+float ServerFacade::GetDistance(Unit *unit, float x, float y, float z)
+{
+    float dist =
+#ifdef MANGOS
+    unit->GetDistance(x, y, z);
+#endif
+#ifdef CMANGOS
+    sqrt(unit->GetDistance(x, y, z, DIST_CALC_NONE));
+#endif
+    return round(dist * 10.0f) / 10.0f;
+}
+
 float ServerFacade::GetDistance2d(Unit *unit, WorldObject* wo)
 {
     if (!unit || !wo)

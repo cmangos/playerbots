@@ -36,9 +36,9 @@ class ServerFacade
             return unit->IsDead();
 #endif
         }
-
+        float GetDistance(Unit *unit, WorldObject* wo);
         float GetDistance2d(Unit *unit, WorldObject* wo);
-
+        float GetDistance(Unit *unit, float x, float y, float z);
         float GetDistance2d(Unit *unit, float x, float y);
 
         DeathState GetDeathState(Unit *unit)

@@ -23,67 +23,29 @@ AiObjectContext* AiFactory::createAiObjectContext(Player* player, PlayerbotAI* a
     switch (player->getClass())
     {
         case CLASS_PRIEST:
-        {
             return new PriestAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_MAGE:
-        {
             return new MageAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_WARLOCK:
-        {
             return new WarlockAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_WARRIOR:
-        {
             return new WarriorAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_SHAMAN:
-        {
             return new ShamanAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_PALADIN:
-        {
             return new PaladinAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_DRUID:
-        {
             return new DruidAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_HUNTER:
-        {
             return new HunterAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_ROGUE:
-        {
             return new RogueAiObjectContext(ai);
-            break;
-        }
-
 #ifdef MANGOSBOT_TWO
         case CLASS_DEATH_KNIGHT:
-        {
             return new DKAiObjectContext(ai);
-            break;
-        }
 #endif
     }
+    
     return new AiObjectContext(ai);
 }
 

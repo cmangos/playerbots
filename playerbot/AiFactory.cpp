@@ -23,67 +23,29 @@ AiObjectContext* AiFactory::createAiObjectContext(Player* player, PlayerbotAI* a
     switch (player->getClass())
     {
         case CLASS_PRIEST:
-        {
             return new PriestAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_MAGE:
-        {
             return new MageAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_WARLOCK:
-        {
             return new WarlockAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_WARRIOR:
-        {
             return new WarriorAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_SHAMAN:
-        {
             return new ShamanAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_PALADIN:
-        {
             return new PaladinAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_DRUID:
-        {
             return new DruidAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_HUNTER:
-        {
             return new HunterAiObjectContext(ai);
-            break;
-        }
-
         case CLASS_ROGUE:
-        {
             return new RogueAiObjectContext(ai);
-            break;
-        }
-
 #ifdef MANGOSBOT_TWO
         case CLASS_DEATH_KNIGHT:
-        {
             return new DKAiObjectContext(ai);
-            break;
-        }
 #endif
     }
+    
     return new AiObjectContext(ai);
 }
 
@@ -155,8 +117,10 @@ std::map<uint32, int32> AiFactory::GetPlayerSpecTabs(const Player* bot)
 
             uint32 spellid = talentInfo->RankID[rank];
             if (spellid && bot->HasSpell(spellid))
+            {
                 maxRank = rank + 1;
-
+                break;
+            }
         }
         tabs[talentTabInfo->tabpage] += maxRank;
     }
@@ -1016,37 +980,34 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
 
             nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.randomBotNonCombatStrategies);
         }
-        else 
+        else
         {
-            if (facade)
+            if (master)
             {
-                if (master)
+                if (master->GetPlayerbotAI() || sRandomPlayerbotMgr.IsFreeBot(player))
                 {
-                    if (master->GetPlayerbotAI() || sRandomPlayerbotMgr.IsFreeBot(player))
+                    nonCombatEngine->addStrategy("collision");
+                    nonCombatEngine->addStrategy("grind");
+                    nonCombatEngine->addStrategy("group");
+                    nonCombatEngine->addStrategy("guild");
+
+                    if (sPlayerbotAIConfig.autoDoQuests)
                     {
-                        nonCombatEngine->addStrategy("collision");
-                        nonCombatEngine->addStrategy("grind");
-                        nonCombatEngine->addStrategy("group");
-                        nonCombatEngine->addStrategy("guild");
-
-                        if (sPlayerbotAIConfig.autoDoQuests)
-                        {
-                            nonCombatEngine->addStrategy("travel");
-                            nonCombatEngine->addStrategy("tfish");
-                            nonCombatEngine->addStrategy("rpg");
-                        }
-
-                        if (!master || master->GetPlayerbotAI())
-                        {
-                            nonCombatEngine->addStrategy("maintenance");
-                        }
-
-                        nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.randomBotNonCombatStrategies);
+                        nonCombatEngine->addStrategy("travel");
+                        nonCombatEngine->addStrategy("tfish");
+                        nonCombatEngine->addStrategy("rpg");
                     }
-                    else
+
+                    if (master->GetPlayerbotAI())
                     {
-                        nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.nonCombatStrategies);
+                        nonCombatEngine->addStrategy("maintenance");
                     }
+
+                    nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.randomBotNonCombatStrategies);
+                }
+                else
+                {
+                    nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.nonCombatStrategies);
                 }
             }
         }

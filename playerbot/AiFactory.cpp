@@ -980,37 +980,34 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
 
             nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.randomBotNonCombatStrategies);
         }
-        else 
+        else
         {
-            if (facade)
+            if (master)
             {
-                if (master)
+                if (master->GetPlayerbotAI() || sRandomPlayerbotMgr.IsFreeBot(player))
                 {
-                    if (master->GetPlayerbotAI() || sRandomPlayerbotMgr.IsFreeBot(player))
+                    nonCombatEngine->addStrategy("collision");
+                    nonCombatEngine->addStrategy("grind");
+                    nonCombatEngine->addStrategy("group");
+                    nonCombatEngine->addStrategy("guild");
+
+                    if (sPlayerbotAIConfig.autoDoQuests)
                     {
-                        nonCombatEngine->addStrategy("collision");
-                        nonCombatEngine->addStrategy("grind");
-                        nonCombatEngine->addStrategy("group");
-                        nonCombatEngine->addStrategy("guild");
-
-                        if (sPlayerbotAIConfig.autoDoQuests)
-                        {
-                            nonCombatEngine->addStrategy("travel");
-                            nonCombatEngine->addStrategy("tfish");
-                            nonCombatEngine->addStrategy("rpg");
-                        }
-
-                        if (!master || master->GetPlayerbotAI())
-                        {
-                            nonCombatEngine->addStrategy("maintenance");
-                        }
-
-                        nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.randomBotNonCombatStrategies);
+                        nonCombatEngine->addStrategy("travel");
+                        nonCombatEngine->addStrategy("tfish");
+                        nonCombatEngine->addStrategy("rpg");
                     }
-                    else
+
+                    if (master->GetPlayerbotAI())
                     {
-                        nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.nonCombatStrategies);
+                        nonCombatEngine->addStrategy("maintenance");
                     }
+
+                    nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.randomBotNonCombatStrategies);
+                }
+                else
+                {
+                    nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.nonCombatStrategies);
                 }
             }
         }

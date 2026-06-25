@@ -117,8 +117,10 @@ std::map<uint32, int32> AiFactory::GetPlayerSpecTabs(const Player* bot)
 
             uint32 spellid = talentInfo->RankID[rank];
             if (spellid && bot->HasSpell(spellid))
+            {
                 maxRank = rank + 1;
-
+                break;
+            }
         }
         tabs[talentTabInfo->tabpage] += maxRank;
     }

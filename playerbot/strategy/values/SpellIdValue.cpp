@@ -145,7 +145,9 @@ uint32 SpellIdValue::Calculate()
         for (int32 i = EFFECT_INDEX_0; i <= EFFECT_INDEX_2; i++)
         {
             if (pSpellInfo->Effect[i] == SPELL_EFFECT_HEAL || pSpellInfo->Effect[i] == SPELL_EFFECT_SCHOOL_DAMAGE ||
-                pSpellInfo->Effect[i] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+                pSpellInfo->Effect[i] == SPELL_EFFECT_PERSISTENT_AREA_AURA || 
+               (pSpellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && (pSpellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_DAMAGE ||
+                pSpellInfo->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_HEAL))
             {
                 damageOrHeal = true;
                 break;

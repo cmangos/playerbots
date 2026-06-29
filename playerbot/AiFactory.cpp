@@ -295,6 +295,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 
     combatEngine->addStrategies("mount", NULL);
     combatEngine->addStrategy("avoid mobs");
+    combatEngine->addStrategy("dungeon");
 
     if (!player->InBattleGround())
     {
@@ -897,6 +898,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
 
     nonCombatEngine->addStrategies("wbuff", NULL);
     nonCombatEngine->addStrategy("avoid mobs");
+    nonCombatEngine->addStrategy("dungeon");
 
     if(sPlayerbotAIConfig.llmEnabled == 2)
         nonCombatEngine->addStrategy("ai chat");
@@ -1115,7 +1117,7 @@ Engine* AiFactory::createNonCombatEngine(Player* player, PlayerbotAI* const faca
 
 void AiFactory::AddDefaultDeadStrategies(Player* player, PlayerbotAI* const facade, Engine* deadEngine)
 {
-    deadEngine->addStrategies("dead", "stay", "default", "follow", "group", NULL);
+    deadEngine->addStrategies("dead", "stay", "default", "follow", "group", "dungeon", NULL);
     if (sRandomPlayerbotMgr.IsFreeBot(player) && !player->GetGroup())
     {
         deadEngine->removeStrategy("follow");
@@ -1313,7 +1315,7 @@ Engine* AiFactory::createDeadEngine(Player* player, PlayerbotAI* const facade, A
 
 void AiFactory::AddDefaultReactionStrategies(Player* player, PlayerbotAI* const facade, ReactionEngine* reactionEngine)
 {
-    reactionEngine->addStrategies("react", "chat", "avoid aoe", "potions", NULL);
+    reactionEngine->addStrategies("react", "chat", "avoid aoe", "potions", "dungeon", NULL);
 
     const int tab = GetPlayerSpecTab(player);
     switch (player->getClass())

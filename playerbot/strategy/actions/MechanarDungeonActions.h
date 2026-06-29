@@ -14,7 +14,7 @@ namespace ai
     class MechanarDisableDungeonStrategyAction : public ChangeAllStrategyAction
     {
     public:
-        MechanarDisableDungeonStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable mechanar strategy", "-tempest keep") {}
+        MechanarDisableDungeonStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable mechanar strategy", "-mechanar") {}
     };
 
     class NethermancerSepethreaEnableFightStrategyAction : public ChangeAllStrategyAction

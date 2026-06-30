@@ -61,7 +61,7 @@ bool SerpentStingOnAttackerTrigger::IsActive()
                               !ai->HasAura("viper sting", target);
         if (noStings)
         {
-            if (target->GetPower(POWER_MANA) < 10)
+            if (target->GetPower(POWER_MANA) < 10 || ai->HasStrategy("sting serpent", BotState::BOT_STATE_COMBAT))
             {
                 return DebuffOnAttackerTrigger::IsActive();
             }

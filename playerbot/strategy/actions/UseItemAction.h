@@ -496,6 +496,10 @@ namespace ai
                 }
             }
 
+            // Do not use consumable if bot can heal self
+            if (ai->IsHeal(bot) && ai->GetManaPercent() > 20)
+                return false;
+
             return true;
         }
 

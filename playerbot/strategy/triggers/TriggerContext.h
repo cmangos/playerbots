@@ -19,6 +19,11 @@
 #include "BlackwingLairDungeonTriggers.h"
 #include "KarazhanDungeonTriggers.h"
 #include "NaxxramasDungeonTriggers.h"
+#include "GruulsLairDungeonTriggers.h"
+#include "MagtheridonDungeonTriggers.h"
+#include "SerpentshrineCavernDungeonTriggers.h"
+#include "TempestKeepDungeonTriggers.h"
+#include "ZulAmanDungeonTriggers.h"
 #include "GlyphTriggers.h"
 #include "WorldBuffTravelTriggers.h"
 
@@ -309,6 +314,17 @@ namespace ai
             creators["enter blackwing lair"] = [](PlayerbotAI* ai) { return new BlackwingLairEnterDungeonTrigger(ai); };
             creators["leave blackwing lair"] = [](PlayerbotAI* ai) { return new BlackwingLairLeaveDungeonTrigger(ai); };
 
+            creators["enter gruul's lair"] = [](PlayerbotAI* ai) { return new GruulsLairEnterDungeonTrigger(ai); };
+            creators["leave gruul's lair"] = [](PlayerbotAI* ai) { return new GruulsLairLeaveDungeonTrigger(ai); };
+            creators["enter magtheridon's lair"] = [](PlayerbotAI* ai) { return new MagtheridonEnterDungeonTrigger(ai); };
+            creators["leave magtheridon's lair"] = [](PlayerbotAI* ai) { return new MagtheridonLeaveDungeonTrigger(ai); };
+            creators["enter serpentshrine cavern"] = [](PlayerbotAI* ai) { return new SSCEnterDungeonTrigger(ai); };
+            creators["leave serpentshrine cavern"] = [](PlayerbotAI* ai) { return new SSCLeaveDungeonTrigger(ai); };
+            creators["enter tempest keep"] = [](PlayerbotAI* ai) { return new TKEnterDungeonTrigger(ai); };
+            creators["leave tempest keep"] = [](PlayerbotAI* ai) { return new TKLeaveDungeonTrigger(ai); };
+            creators["enter zul'aman"] = [](PlayerbotAI* ai) { return new ZAEnterDungeonTrigger(ai); };
+            creators["leave zul'aman"] = [](PlayerbotAI* ai) { return new ZALeaveDungeonTrigger(ai); };
+
             // Dungeon Boss Triggers
             creators["start onyxia fight"] = [](PlayerbotAI* ai) { return new OnyxiaStartFightTrigger(ai); };
             creators["end onyxia fight"] = [](PlayerbotAI* ai) { return new OnyxiaEndFightTrigger(ai); };
@@ -322,6 +338,56 @@ namespace ai
 
             creators["mc rune in sight"] = [](PlayerbotAI* ai) { return new MCRuneInSightTrigger(ai); };
             creators["mc rune close"] = [](PlayerbotAI* ai) { return new MCRuneCloseTrigger(ai); };
+
+            creators["start baron geddon fight"] = [](PlayerbotAI* ai) { return new BaronGeddonStartFightTrigger(ai); };
+            creators["end baron geddon fight"] = [](PlayerbotAI* ai) { return new BaronGeddonEndFightTrigger(ai); };
+            creators["mc living bomb debuff"] = [](PlayerbotAI* ai) { return new MCLivingBombDebuffTrigger(ai); };
+            creators["mc baron geddon inferno"] = [](PlayerbotAI* ai) { return new MCBaronGeddonInfernoTrigger(ai); };
+
+            creators["start golemagg fight"] = [](PlayerbotAI* ai) { return new GolemaggStartFightTrigger(ai); };
+            creators["end golemagg fight"] = [](PlayerbotAI* ai) { return new GolemaggEndFightTrigger(ai); };
+
+            // Gruul's Lair Boss Triggers
+            creators["start gruul fight"] = [](PlayerbotAI* ai) { return new GruulStartFightTrigger(ai); };
+            creators["end gruul fight"] = [](PlayerbotAI* ai) { return new GruulEndFightTrigger(ai); };
+            creators["gruul incoming shatter"] = [](PlayerbotAI* ai) { return new GruulIncomingShatterTrigger(ai); };
+
+            // Magtheridon Boss Triggers
+            creators["start magtheridon fight"] = [](PlayerbotAI* ai) { return new MagtheridonStartFightTrigger(ai); };
+            creators["end magtheridon fight"] = [](PlayerbotAI* ai) { return new MagtheridonEndFightTrigger(ai); };
+            creators["magtheridon blast nova"] = [](PlayerbotAI* ai) { return new MagtheridonBlastNovaTrigger(ai); };
+
+            // SSC Boss Triggers
+            creators["start lurker below fight"] = [](PlayerbotAI* ai) { return new LurkerBelowStartFightTrigger(ai); };
+            creators["end lurker below fight"] = [](PlayerbotAI* ai) { return new LurkerBelowEndFightTrigger(ai); };
+            creators["ssc lurker spout"] = [](PlayerbotAI* ai) { return new SSCLurkerSpoutTrigger(ai); };
+            creators["start leotheras fight"] = [](PlayerbotAI* ai) { return new LeotherasStartFightTrigger(ai); };
+            creators["end leotheras fight"] = [](PlayerbotAI* ai) { return new LeotherasEndFightTrigger(ai); };
+            creators["ssc leotheras whirlwind"] = [](PlayerbotAI* ai) { return new SSCLeotherasWhirlwindTrigger(ai); };
+            creators["start vashj fight"] = [](PlayerbotAI* ai) { return new VashjStartFightTrigger(ai); };
+            creators["end vashj fight"] = [](PlayerbotAI* ai) { return new VashjEndFightTrigger(ai); };
+            creators["ssc vashj static charge"] = [](PlayerbotAI* ai) { return new SSCVashjStaticChargeTrigger(ai); };
+
+            // TK Boss Triggers
+            creators["start void reaver fight"] = [](PlayerbotAI* ai) { return new VoidReaverStartFightTrigger(ai); };
+            creators["end void reaver fight"] = [](PlayerbotAI* ai) { return new VoidReaverEndFightTrigger(ai); };
+            creators["tk void reaver arcane orb"] = [](PlayerbotAI* ai) { return new TKVoidReaverArcaneOrbTrigger(ai); };
+            creators["start solarian fight"] = [](PlayerbotAI* ai) { return new SolarianStartFightTrigger(ai); };
+            creators["end solarian fight"] = [](PlayerbotAI* ai) { return new SolarianEndFightTrigger(ai); };
+            creators["tk solarian wrath debuff"] = [](PlayerbotAI* ai) { return new TKSolarianWrathDebuffTrigger(ai); };
+            creators["start kaelthas fight"] = [](PlayerbotAI* ai) { return new KaelthasStartFightTrigger(ai); };
+            creators["end kaelthas fight"] = [](PlayerbotAI* ai) { return new KaelthasEndFightTrigger(ai); };
+
+            // ZA Boss Triggers
+            creators["start akilzon fight"] = [](PlayerbotAI* ai) { return new AkilzonStartFightTrigger(ai); };
+            creators["end akilzon fight"] = [](PlayerbotAI* ai) { return new AkilzonEndFightTrigger(ai); };
+            creators["za akilzon static disruption"] = [](PlayerbotAI* ai) { return new ZAAkilzonStaticDisruptionTrigger(ai); };
+            creators["za akilzon electrical storm"] = [](PlayerbotAI* ai) { return new ZAAkilzonElectricalStormTrigger(ai); };
+            creators["start janalai fight"] = [](PlayerbotAI* ai) { return new JanalaiStartFightTrigger(ai); };
+            creators["end janalai fight"] = [](PlayerbotAI* ai) { return new JanalaiEndFightTrigger(ai); };
+            creators["za janalai fire bombs"] = [](PlayerbotAI* ai) { return new ZAJanalaiFireBombsTrigger(ai); };
+            creators["start zuljin fight"] = [](PlayerbotAI* ai) { return new ZuljinStartFightTrigger(ai); };
+            creators["end zuljin fight"] = [](PlayerbotAI* ai) { return new ZuljinEndFightTrigger(ai); };
 
             creators["suppression device need stealth"] = [](PlayerbotAI* ai) { return new SuppressionDeviceNeedStealthTrigger(ai); };
             creators["suppression device in sight"] = [](PlayerbotAI* ai) { return new SuppressionDeviceInSightTrigger(ai); };

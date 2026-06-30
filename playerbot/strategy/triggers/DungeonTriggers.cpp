@@ -233,8 +233,8 @@ bool CloseToCreatureTrigger::IsActive()
             Creature* creature = (Creature*)unit;
             if (creature)
             {
-                // Check if the bot is not being targeted by the creature
-                if (!creature->GetVictim() || (creature->GetVictim()->GetObjectGuid() != bot->GetObjectGuid()))
+                // Check if the bot is not being targeted by the creature, unless we don't care
+                if ((!creature->GetVictim() || (creature->GetVictim()->GetObjectGuid() != bot->GetObjectGuid())) || ignoreVictim)
                 {
                     // See if the creature is within the specified distance
                     if (bot->IsWithinDist(creature, range))

@@ -166,7 +166,7 @@ bool MoveAwayFromCreature::Execute(Event& event)
     float angleLeft = creaturePosition.getAngleTo(botPosition);
     float angleRight = angleLeft;
 
-    const uint8 attempts = 20;
+    const uint8 attempts = 60;
     const uint8 halfAtempts = (uint8)(attempts * 0.5f);
     float angleIncrement = (float)((M_PI) / halfAtempts);
 

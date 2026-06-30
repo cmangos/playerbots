@@ -32,6 +32,6 @@ namespace ai
     class RagingFlamesMoveAwayAction : public MoveAwayFromCreature
     {
     public:
-        RagingFlamesMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from raging flames", 20481, 10.0f) {}
+        RagingFlamesMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from raging flames", 20481, 20.0f) {}
     };
 }

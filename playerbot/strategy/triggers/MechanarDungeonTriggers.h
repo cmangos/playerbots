@@ -31,6 +31,6 @@ namespace ai
 	class RagingFlamesTooCloseTrigger : public CloseToCreatureTrigger
 	{
 	public:
-		RagingFlamesTooCloseTrigger(PlayerbotAI* ai) : CloseToCreatureTrigger(ai, "raging flames too close", 20481, 10.0f) {}
+		RagingFlamesTooCloseTrigger(PlayerbotAI* ai) : CloseToCreatureTrigger(ai, "raging flames too close", 20481, 15.0f, true) {}
 	};
 }

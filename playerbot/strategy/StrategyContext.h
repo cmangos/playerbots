@@ -56,6 +56,11 @@
 #include "generic/BlackwingLairDungeonStrategies.h"
 #include "generic/KarazhanDungeonStrategies.h"
 #include "generic/NaxxramasDungeonStrategies.h"
+#include "generic/GruulsLairDungeonStrategies.h"
+#include "generic/MagtheridonDungeonStrategies.h"
+#include "generic/SerpentshrineCavernDungeonStrategies.h"
+#include "generic/TempestKeepDungeonStrategies.h"
+#include "generic/ZulAmanDungeonStrategies.h"
 
 namespace ai
 {
@@ -174,6 +179,34 @@ namespace ai
             // Dungeon Boss Strategies
             creators["onyxia"] = [](PlayerbotAI* ai) { return new OnyxiaFightStrategy(ai); };
             creators["magmadar"] = [](PlayerbotAI* ai) { return new MagmadarFightStrategy(ai); };
+            creators["baron geddon"] = [](PlayerbotAI* ai) { return new BaronGeddonFightStrategy(ai); };
+            creators["golemagg"] = [](PlayerbotAI* ai) { return new GolemaggFightStrategy(ai); };
+
+            // Gruul's Lair
+            creators["gruul's lair"] = [](PlayerbotAI* ai) { return new GruulsLairDungeonStrategy(ai); };
+            creators["gruul"] = [](PlayerbotAI* ai) { return new GruulFightStrategy(ai); };
+
+            // Magtheridon's Lair
+            creators["magtheridon's lair"] = [](PlayerbotAI* ai) { return new MagtheridonDungeonStrategy(ai); };
+            creators["magtheridon"] = [](PlayerbotAI* ai) { return new MagtheridonFightStrategy(ai); };
+
+            // Serpentshrine Cavern
+            creators["serpentshrine cavern"] = [](PlayerbotAI* ai) { return new SerpentshrineCavernDungeonStrategy(ai); };
+            creators["lurker below"] = [](PlayerbotAI* ai) { return new LurkerBelowFightStrategy(ai); };
+            creators["leotheras"] = [](PlayerbotAI* ai) { return new LeotherasFightStrategy(ai); };
+            creators["vashj"] = [](PlayerbotAI* ai) { return new VashjFightStrategy(ai); };
+
+            // Tempest Keep
+            creators["tempest keep"] = [](PlayerbotAI* ai) { return new TempestKeepDungeonStrategy(ai); };
+            creators["void reaver"] = [](PlayerbotAI* ai) { return new VoidReaverFightStrategy(ai); };
+            creators["solarian"] = [](PlayerbotAI* ai) { return new SolarianFightStrategy(ai); };
+            creators["kaelthas"] = [](PlayerbotAI* ai) { return new KaelthasFightStrategy(ai); };
+
+            // Zul'Aman
+            creators["zul'aman"] = [](PlayerbotAI* ai) { return new ZulAmanDungeonStrategy(ai); };
+            creators["akilzon"] = [](PlayerbotAI* ai) { return new AkilzonFightStrategy(ai); };
+            creators["janalai"] = [](PlayerbotAI* ai) { return new JanalaiFightStrategy(ai); };
+            creators["zuljin"] = [](PlayerbotAI* ai) { return new ZuljinFightStrategy(ai); };
             creators["suppression room"] = [](PlayerbotAI* ai) { return new SuppressionRoomStrategy(ai); };
             creators["netherspite"] = [](PlayerbotAI* ai) { return new NetherspiteFightStrategy(ai); };
             creators["prince malchezaar"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarFightStrategy(ai); };

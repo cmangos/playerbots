@@ -4489,7 +4489,7 @@ uint8 PlayerbotAI::GetHealthPercent() const
 
 uint8 PlayerbotAI::GetManaPercent(const Unit& target) const
 {
-   return (static_cast<float>(target.GetPower(POWER_MANA)) / target.GetMaxPower(POWER_MANA)) * 100;
+   return target.GetPowerPercent();
 }
 
 uint8 PlayerbotAI::GetManaPercent() const

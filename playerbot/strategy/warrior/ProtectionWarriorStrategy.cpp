@@ -86,7 +86,7 @@ void ProtectionWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "lose aggro",
-        NextAction::array(0, new NextAction("heroic throw taunt", ACTION_MOVE + 4), NULL)));
+        NextAction::array(0, new NextAction("heroic throw taunt", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "taunt on snare target",
@@ -486,7 +486,7 @@ void ProtectionWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "lose aggro",
-        NextAction::array(0, new NextAction("heroic throw taunt", ACTION_MOVE + 4), NULL)));
+        NextAction::array(0, new NextAction("heroic throw taunt", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "spell reflection",
@@ -882,7 +882,7 @@ void ProtectionWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "lose aggro",
-        NextAction::array(0, new NextAction("heroic throw taunt", ACTION_MOVE + 4), NULL)));
+        NextAction::array(0, new NextAction("heroic throw taunt", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "spell reflection",

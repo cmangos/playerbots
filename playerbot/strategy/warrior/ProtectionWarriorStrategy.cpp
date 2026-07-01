@@ -492,9 +492,9 @@ void ProtectionWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         "spell reflection",
         NextAction::array(0, new NextAction("spell reflection", ACTION_MOVE + 1), NULL)));
 
-    triggers.push_back(new TriggerNode(
-        "taunt on snare target",
-        NextAction::array(0, new NextAction("heroic throw on snare target", ACTION_MOVE), NULL)));
+    //triggers.push_back(new TriggerNode(
+        //"taunt on snare target",
+        //NextAction::array(0, new NextAction("heroic throw on snare target", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
         "demoralizing shout",

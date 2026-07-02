@@ -98,7 +98,7 @@ bool PullStartAction::Execute(Event& event)
             {
                 result = ai->DoSpecificAction(strategy->GetPreActionName(), event, true);
                 if(result)
-                    SetDuration(sPlayerbotAIConfig.globalCoolDown);
+                    SetDuration((sPlayerbotAIConfig.globalCoolDown * 2) + sPlayerbotAIConfig.reactDelay);
             }
 
             // Set the pet on passive mode during the pull

@@ -7,7 +7,7 @@ using namespace ai;
 
 bool CastSerpentStingAction::isUseful()
 {
-    return CastRangedDebuffSpellAction::isUseful() && AI_VALUE2(uint8, "health", GetTargetName()) > 50 && !(AI_VALUE2(uint8, "mana", GetTargetName()) >= 10);
+    return CastRangedDebuffSpellAction::isUseful() && AI_VALUE2(uint8, "health", GetTargetName()) > 50 && (!(AI_VALUE2(uint8, "mana", GetTargetName()) >= 10) || (ai->HasStrategy("sting serpent", BotState::BOT_STATE_COMBAT)));
 }
 
 bool CastViperStingAction::isUseful()

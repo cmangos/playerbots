@@ -59,7 +59,7 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "lose aggro",
-        NextAction::array(0, new NextAction("hand of reckoning", ACTION_MOVE), NULL)));
+        NextAction::array(0, new NextAction("hand of reckoning", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "holy shield",
@@ -573,7 +573,7 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "lose aggro",
-        NextAction::array(0, new NextAction("righteous defense", ACTION_MOVE), NULL)));
+        NextAction::array(0, new NextAction("righteous defense", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "holy shield",
@@ -1080,7 +1080,7 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
     triggers.push_back(new TriggerNode(
         "lose aggro",
-        NextAction::array(0, new NextAction("hand of reckoning", ACTION_MOVE), NULL)));
+        NextAction::array(0, new NextAction("hand of reckoning", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "holy shield",
@@ -1214,9 +1214,9 @@ void ProtectionPaladinAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
 {
     PaladinAoeStrategy::InitCombatTriggers(triggers);
 
-    triggers.push_back(new TriggerNode(
-        "melee light aoe",
-        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH + 4), NULL)));
+    //triggers.push_back(new TriggerNode(
+        //"melee light aoe",
+        //NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
         "melee light aoe",

@@ -265,13 +265,13 @@ Unit* PartyMemberToProtect::Calculate()
         if (sServerFacade.GetDistance2d(pVictim, unit) > attackDistance)
             continue;
 
-        if (ai->IsTank((Player*)pVictim) && pVictim->GetHealthPercent() > 10)
+        if (ai->IsTank((Player*)pVictim) && pVictim->GetHealthPercent() > 25)
             continue;
-        else if (pVictim->GetHealthPercent() > 30)
-            continue;
+        //else if (pVictim->GetHealthPercent() > 90)
+            //continue;
 
         if (find(needProtect.begin(), needProtect.end(), pVictim) == needProtect.end())
-        needProtect.push_back(pVictim);
+            needProtect.push_back(pVictim);
     }
 
     if (needProtect.empty())

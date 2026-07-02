@@ -533,9 +533,9 @@ void CombatRogueAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
         "melee light aoe",
         NextAction::array(0, new NextAction("blade flurry", ACTION_HIGH + 4), NULL)));
 
-    triggers.push_back(new TriggerNode(
-        "melee light aoe",
-        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH + 4), NULL)));
+    //triggers.push_back(new TriggerNode(
+        //"melee light aoe",
+        //NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH + 4), NULL)));
 }
 
 void CombatRogueAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -940,9 +940,9 @@ void CombatRogueAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
         "melee light aoe",
         NextAction::array(0, new NextAction("blade flurry", ACTION_HIGH + 4), NULL)));
 
-    triggers.push_back(new TriggerNode(
-        "melee light aoe",
-        NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH + 4), NULL)));
+    //triggers.push_back(new TriggerNode(
+        //"melee light aoe",
+        //NextAction::array(0, new NextAction("oil of immolation", ACTION_HIGH + 4), NULL)));
 }
 
 void CombatRogueAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

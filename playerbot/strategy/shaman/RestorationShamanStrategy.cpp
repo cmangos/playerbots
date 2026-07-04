@@ -572,6 +572,10 @@ void RestorationShamanStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     triggers.push_back(new TriggerNode(
         "party member almost full health",
         NextAction::array(0, new NextAction("lesser healing wave on party", ACTION_LIGHT_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "pull start",
+        NextAction::array(0, new NextAction("fire totem", ACTION_MEDIUM_HEAL), new NextAction("air totem", ACTION_MEDIUM_HEAL), new NextAction("water totem", ACTION_MEDIUM_HEAL), new NextAction("earth totem", ACTION_MEDIUM_HEAL) NULL)));
 }
 
 void RestorationShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

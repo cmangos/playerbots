@@ -901,6 +901,10 @@ void ShamanBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers
     triggers.push_back(new TriggerNode(
         "water walking on party",
         NextAction::array(0, new NextAction("water walking on party", ACTION_NORMAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "totemic recall",
+        NextAction::array(0, new NextAction("totemic recall", ACTION_NORMAL), NULL)));
 }
 
 void ShamanBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -35,7 +35,7 @@ private:
 
     ACTION_NODE_A(heroic_throw_taunt, "heroic throw", "taunt");
 
-    ACTION_NODE_A(taunt, "taunt", "battle shout taunt");
+    ACTION_NODE_A(taunt, "taunt", "mocking blow");
 
     ACTION_NODE_A(berserker_rage_fear, "berserker rage", "death wish");
 };

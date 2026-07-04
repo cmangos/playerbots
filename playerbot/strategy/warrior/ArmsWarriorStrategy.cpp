@@ -24,7 +24,7 @@ private:
 
     ACTION_NODE_A(death_wish, "death wish", "bloodrage");
 
-    ACTION_NODE_A(piercing_howl, "piercing howl", "mocking blow");
+    ACTION_NODE_A(piercing_howl, "piercing howl", "hamstring");
 
     ACTION_NODE_A(mocking_blow, "mocking blow", "hamstring");
 

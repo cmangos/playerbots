@@ -499,7 +499,7 @@ void WarlockStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("sacrifice", ACTION_EMERGENCY), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "life tap",
+        "medium mana",
         NextAction::array(0, new NextAction("life tap", ACTION_HIGH + 3), NULL)));
 
     triggers.push_back(new TriggerNode(

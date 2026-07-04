@@ -2817,8 +2817,9 @@ bool MovementAction::Flee(Unit *target)
     time_t now = time(0);
     uint32 fleeDelay = urand(2, sPlayerbotAIConfig.returnDelay / 1000);
 
-    // let hunter kite mob
-    if (isTarget && bot->getClass() == CLASS_HUNTER)
+    // let hunter/kiter kite mob
+    if (isTarget && (bot->getClass() == CLASS_HUNTER || ai->HasStrategy("kite", BotState::BOT_STATE_COMBAT)
+        || ai->HasStrategy("kite", BotState::BOT_STATE_REACTION)))
     {
         fleeDelay = 1;
     }

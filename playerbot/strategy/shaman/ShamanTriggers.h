@@ -15,12 +15,38 @@ namespace ai
     class ReadyToRemoveTotemsTrigger : public Trigger 
     {
     public:
-        ReadyToRemoveTotemsTrigger(PlayerbotAI* ai) : Trigger(ai, "ready to remove totems", 30) {}
+        ReadyToRemoveTotemsTrigger(PlayerbotAI* ai) : Trigger(ai, "ready to remove totems", 5) {}
 
         virtual bool IsActive() override
         {
+            bool totemIsNear = false;
+            std::list<ObjectGuid> units = *context->GetValue<std::list<ObjectGuid>>("nearest npcs");
+            for (std::list<ObjectGuid>::iterator i = units.begin(); i != units.end(); i++)
+            {
+                Unit* unit = ai->GetUnit(*i);
+                if (!unit)
+                    continue;
+
+                Creature* totem = dynamic_cast<Creature*>(unit);
+                if (!totem || !totem->IsTotem())
+                    continue;
+
+                const bool totemIsInRange = strstri(totem->GetName(), qualifier.c_str()) &&
+                    sServerFacade.GetDistance2d(bot, totem) <= ai->GetRange("spell");
+
+                Unit* totemOwner = totem->GetCreator(totem);
+                if (!totemOwner)
+                    continue;
+                
+                if (totemIsInRange && totemOwner == bot) 
+                {
+                    totemIsNear = true;
+                    break;
+                }
+            }
             // Avoid removing any of the big cooldown totems.
             return AI_VALUE(bool, "have any totem")
+                && !totemIsNear;
                 && !AI_VALUE2(bool, "has totem", "mana tide totem")
                 && !AI_VALUE2(bool, "has totem", "earth elemental totem")
                 && !AI_VALUE2(bool, "has totem", "fire elemental totem");

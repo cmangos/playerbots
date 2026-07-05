@@ -52,5 +52,6 @@ namespace ai
 #endif 
     private:
         void EnchantItem(Item* item);
+        std::vector<EnchantTemplate> enchants;
     };
 }

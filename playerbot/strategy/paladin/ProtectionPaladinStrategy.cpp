@@ -62,6 +62,10 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("hand of reckoning", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "protect party member",
+        NextAction::array(0, new NextAction("blessing of protection on party", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "holy shield",
         NextAction::array(0, new NextAction("holy shield", ACTION_HIGH + 3), NULL)));
 
@@ -576,6 +580,10 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
         NextAction::array(0, new NextAction("righteous defense", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "protect party member",
+        NextAction::array(0, new NextAction("blessing of protection on party", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "holy shield",
         NextAction::array(0, new NextAction("holy shield", ACTION_HIGH + 3), NULL)));
 
@@ -1081,6 +1089,10 @@ void ProtectionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     triggers.push_back(new TriggerNode(
         "lose aggro",
         NextAction::array(0, new NextAction("hand of reckoning", ACTION_PASSTROUGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "protect party member",
+        NextAction::array(0, new NextAction("blessing of protection on party", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "holy shield",

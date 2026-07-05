@@ -15,7 +15,7 @@ namespace ai
     class ReadyToRemoveTotemsTrigger : public Trigger 
     {
     public:
-        ReadyToRemoveTotemsTrigger(PlayerbotAI* ai) : Trigger(ai, "ready to remove totems", 5) {}
+        ReadyToRemoveTotemsTrigger(PlayerbotAI* ai) : Trigger(ai, "ready to remove totems", 10) {}
 
         virtual bool IsActive() override
         {

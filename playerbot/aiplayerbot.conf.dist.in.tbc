@@ -353,6 +353,10 @@ AiPlayerbot.AutoPickReward = yes
 # Default: 0 (disabled)
 AiPlayerbot.AutoEquipUpgradeLoot = 1
 
+# Bots enchant upgrades automatically
+# Default: 0 (disabled)
+AiPlayerbot.AutoEnchantUpgradeLoot = 0
+
 # Sync quests with player (Bots will complete quests the moment you hand them in. Bots will ignore looting quest items.)
 # Default: 0 (disabled)
 AiPlayerbot.SyncQuestWithPlayer = 0

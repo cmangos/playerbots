@@ -422,3 +422,41 @@ bool EquipUpgradesAction::Execute(Event& event)
 
     return didEquip;
 }
+
+void EquipUpgradesAction::EnchantItem(Item* item)
+{
+    if (item)
+    {
+        int tab = AiFactory::GetPlayerSpecTab(bot);
+        uint32 tempId = uint32((uint32)bot->getClass() * (uint32)10);
+        uint8 spec = tempId += (uint32)tab;
+
+        if (enchants.empty())
+        {
+            auto result = WorldDatabase.PQuery("SELECT class, spec, spellid, slotid FROM ai_playerbot_enchants");
+            if (result)
+            {
+                do
+                {
+                    Field* fields = result->Fetch();
+
+                    EnchantTemplate pEnchant;
+                    pEnchant.ClassId = fields[0].GetUInt8();
+                    pEnchant.SpecId = fields[1].GetUInt8();
+                    pEnchant.SpellId = fields[2].GetUInt32();
+                    pEnchant.SlotId = fields[3].GetUInt8();
+                    enchants.push_back(pEnchant);
+                } 
+                while (result->NextRow());
+            }
+        }
+
+        for (const auto& enchant : enchants)
+        {
+            if (enchant.ClassId == bot->getClass() && enchant.SpecId == spec)
+            {
+                ai->EnchantItemT(enchant.SpellId, enchant.SlotId, item);
+            }
+        }
+    }
+}

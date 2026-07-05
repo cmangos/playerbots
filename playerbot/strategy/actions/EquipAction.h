@@ -29,6 +29,7 @@ namespace ai
     private:
         void EquipItem(Player* requester, FindItemVisitor* visitor);
         void ListItems(Player* requester);
+        void EnchantItem(Item* item);
         static uint8 GetSmallestBagSlot(Player* bot);
     };
 

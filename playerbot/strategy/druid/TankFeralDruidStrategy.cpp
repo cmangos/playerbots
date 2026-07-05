@@ -60,7 +60,7 @@ void TankFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "lose aggro",
-        NextAction::array(0, new NextAction("growl", ACTION_MOVE), NULL)));
+        NextAction::array(0, new NextAction("growl", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "faerie fire (feral)",
@@ -506,7 +506,7 @@ void TankFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "lose aggro",
-        NextAction::array(0, new NextAction("growl", ACTION_MOVE), NULL)));
+        NextAction::array(0, new NextAction("growl", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "faerie fire (feral)",
@@ -952,7 +952,7 @@ void TankFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
 
     triggers.push_back(new TriggerNode(
         "lose aggro",
-        NextAction::array(0, new NextAction("growl", ACTION_MOVE), NULL)));
+        NextAction::array(0, new NextAction("growl", ACTION_PASSTROUGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "faerie fire (feral)",

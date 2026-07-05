@@ -12,7 +12,7 @@ namespace ai
         static std::list<std::string> spells;
     };
 
-    class ReadyToRemoveTotemsTrigger : public Trigger 
+    class ReadyToRemoveTotemsTrigger : public Trigger
     {
     public:
         ReadyToRemoveTotemsTrigger(PlayerbotAI* ai) : Trigger(ai, "ready to remove totems", 10) {}
@@ -31,14 +31,13 @@ namespace ai
                 if (!totem || !totem->IsTotem())
                     continue;
 
-                const bool totemIsInRange = strstri(totem->GetName(), qualifier.c_str()) &&
-                    sServerFacade.GetDistance2d(bot, totem) <= ai->GetRange("spell");
-
                 Unit* totemOwner = totem->GetCreator(totem);
-                if (!totemOwner)
+                if (!totemOwner || totemOwner != bot)
                     continue;
-                
-                if (totemIsInRange && totemOwner == bot) 
+
+                const bool totemIsInRange = sServerFacade.GetDistance2d(totemOwner, totem) <= ai->GetRange("spell");
+
+                if (totemIsInRange) 
                 {
                     totemIsNear = true;
                     break;

@@ -100,7 +100,8 @@ void EquipAction::ListItems(Player* requester)
 
 bool EquipAction::IsEnchantable(Item* item)
 {
-    return !(item->GetProto()->Class == ITEM_CLASS_CONTAINER || item->GetProto()->Class == ITEM_CLASS_QUIVER || item->GetProto()->InventoryType == INVTYPE_AMMO)
+    return !(item->GetProto()->Class == ITEM_CLASS_CONTAINER || item->GetProto()->Class == ITEM_CLASS_QUIVER 
+        || item->GetProto()->InventoryType == INVTYPE_AMMO || item->GetProto()->InventoryType == INVTYPE_RELIC);
 }
 
 void EquipAction::EnchantItem(Item* item)
@@ -158,7 +159,12 @@ void EquipAction::EquipItemsToSlot(Player* requester, ItemIds ids, uint8 targetS
         std::list<Item*> items = visitor.GetResult();
         if (!items.empty())
         {
+            Item* item = *items.begin();
+            
             EquipItemToSlot(requester, *items.begin(), targetSlot);
+            // auto enchant if cheat is turned on
+            if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item) && !item->GetEnchantmentId(EnchantmentSlot(0)))
+                EnchantItem(item);
         }
     }
 }
@@ -169,7 +175,12 @@ void EquipAction::EquipItem(Player* requester, FindItemVisitor* visitor)
     std::list<Item*> items = visitor->GetResult();
 	if (!items.empty()) 
     {
-        EquipItem(ai, requester, *items.begin());
+        Item* item = *items.begin();
+
+        EquipItem(ai, requester, item);
+        // auto enchant if cheat is turned on
+        if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item) && !item->GetEnchantmentId(EnchantmentSlot(0)))
+            EnchantItem(item);
     }
 }
 
@@ -229,9 +240,6 @@ void EquipAction::EquipItemToSlot(Player* requester, Item* item, uint8 targetSlo
     uint16 src = ((bagIndex << 8) | slot);
     uint16 dstPos = ((INVENTORY_SLOT_BAG_0 << 8) | targetSlot);
 
-    // auto enchant if cheat is turned on
-    if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item))
-        EnchantItem(item);
     bot->SwapItem(src, dstPos);
 
     RESET_AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
@@ -300,9 +308,6 @@ void EquipAction::EquipItem(PlayerbotAI* ai, Player* requester, Item* item, bool
 
         if (!equipedBag) 
         {
-            // auto enchant if cheat is turned on
-            if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item))
-                EnchantItem(item);
             WorldPacket packet(CMSG_AUTOEQUIP_ITEM, 2);
             packet << bagIndex << slot;
             bot->GetSession()->HandleAutoEquipItemOpcode(packet);
@@ -432,13 +437,13 @@ bool EquipUpgradesAction::Execute(Event& event)
         {
             sLog.outDetail("Bot #%d <%s> auto equips item %d (%s)", bot->GetGUIDLow(), bot->GetName(), item->GetProto()->ItemId, usage == ItemUsage::ITEM_USAGE_EQUIP ? "better than current" : usage == ItemUsage::ITEM_USAGE_BAD_EQUIP ? "wrong item but empty slot" : "");
             ai->TellDebug(ai->GetMaster(), "Equipping: " + chat->formatItem(item) + " - " + ItemUsageValue::ReasonForNeed(usage, item, 1, bot), "debug equip");
-            
-            // auto enchant if cheat is turned on
-            if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item))
-                EnchantItem(item);
 
-            EquipItem(ai, GetMaster(), item, item == oldMainhand || item == oldOffhand);   
+            EquipItem(ai, GetMaster(), item, item == oldMainhand || item == oldOffhand);  
             didEquip = true;
+
+            // auto enchant if cheat is turned on
+            if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item) && !item->GetEnchantmentId(EnchantmentSlot(0)))
+                EnchantItem(item); 
         }
     }
 

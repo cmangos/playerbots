@@ -14,6 +14,10 @@ namespace ai
         void EquipItemToSlot(Player* requester, Item* item, uint8 targetSlot);
         virtual bool isUsefulWhenStunned() override { return true; }
 
+        bool IsEnchantable(Item* item);
+        void EnchantItem(Item* item);
+
+        std::vector<EnchantTemplate> enchants;
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "equip"; }
         virtual std::string GetHelpDescription()
@@ -29,11 +33,7 @@ namespace ai
     private:
         void EquipItem(Player* requester, FindItemVisitor* visitor);
         void ListItems(Player* requester);
-        bool IsEnchantable(Item* item);
-        void EnchantItem(Item* item);
         static uint8 GetSmallestBagSlot(Player* bot);
-
-        std::vector<EnchantTemplate> enchants;
     };
 
     class EquipUpgradesAction : public EquipAction

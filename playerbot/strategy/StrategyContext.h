@@ -56,6 +56,7 @@
 #include "generic/BlackwingLairDungeonStrategies.h"
 #include "generic/KarazhanDungeonStrategies.h"
 #include "generic/NaxxramasDungeonStrategies.h"
+#include "generic/MechanarDungeonStrategies.h"
 
 namespace ai
 {
@@ -170,6 +171,7 @@ namespace ai
             creators["blackwing lair"] = [](PlayerbotAI* ai) { return new BlackwingLairDungeonStrategy(ai); };
             creators["karazhan"] = [](PlayerbotAI* ai) { return new KarazhanDungeonStrategy(ai); };
             creators["naxxramas"] = [](PlayerbotAI* ai) { return new NaxxramasDungeonStrategy(ai); };
+            creators["mechanar"] = [](PlayerbotAI* ai) { return new MechanarDungeonStrategy(ai); };
 
             // Dungeon Boss Strategies
             creators["onyxia"] = [](PlayerbotAI* ai) { return new OnyxiaFightStrategy(ai); };
@@ -178,6 +180,7 @@ namespace ai
             creators["netherspite"] = [](PlayerbotAI* ai) { return new NetherspiteFightStrategy(ai); };
             creators["prince malchezaar"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarFightStrategy(ai); };
             creators["four horseman"] = [](PlayerbotAI* ai) { return new FourHorsemanFightStrategy(ai); };
+            creators["nethermancer sepethrea"] = [](PlayerbotAI* ai) { return new NethermancerSepethreaFightStrategy(ai); };
 
 #ifdef GenerateBotTests
             creators["test"] = [](PlayerbotAI* ai) { return new TestStrategy(ai); };

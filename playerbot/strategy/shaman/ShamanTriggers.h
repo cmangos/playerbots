@@ -46,7 +46,7 @@ namespace ai
             }
             // Avoid removing any of the big cooldown totems.
             return AI_VALUE(bool, "have any totem")
-                && !totemIsNear;
+                && !totemIsNear
                 && !AI_VALUE2(bool, "has totem", "mana tide totem")
                 && !AI_VALUE2(bool, "has totem", "earth elemental totem")
                 && !AI_VALUE2(bool, "has totem", "fire elemental totem");

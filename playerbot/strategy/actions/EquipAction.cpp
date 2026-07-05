@@ -98,6 +98,48 @@ void EquipAction::ListItems(Player* requester)
     ai->InventoryTellItems(requester, items, soulbound);
 }
 
+bool EquipAction::IsEnchantable(Item* item)
+{
+    return !(item->GetProto()->Class == ITEM_CLASS_CONTAINER || item->GetProto()->Class == ITEM_CLASS_QUIVER || item->GetProto()->InventoryType == INVTYPE_AMMO)
+}
+
+void EquipAction::EnchantItem(Item* item)
+{
+    if (item)
+    {
+        int tab = AiFactory::GetPlayerSpecTab(bot);
+        uint32 tempId = uint32((uint32)bot->getClass() * (uint32)10);
+        uint8 spec = tempId += (uint32)tab;
+
+        if (enchants.empty())
+        {
+            auto result = WorldDatabase.PQuery("SELECT class, spec, spellid, slotid FROM ai_playerbot_enchants");
+            if (result)
+            {
+                do
+                {
+                    Field* fields = result->Fetch();
+
+                    EnchantTemplate pEnchant;
+                    pEnchant.ClassId = fields[0].GetUInt8();
+                    pEnchant.SpecId = fields[1].GetUInt8();
+                    pEnchant.SpellId = fields[2].GetUInt32();
+                    pEnchant.SlotId = fields[3].GetUInt8();
+                    enchants.push_back(pEnchant);
+                } while (result->NextRow());
+            }
+        }
+
+        for (const auto& enchant : enchants)
+        {
+            if (enchant.ClassId == bot->getClass() && enchant.SpecId == spec)
+            {
+                ai->EnchantItemT(enchant.SpellId, enchant.SlotId, item);
+            }
+        }
+    }
+}
+
 void EquipAction::EquipItems(Player* requester, ItemIds ids)
 {
     for (ItemIds::iterator i = ids.begin(); i != ids.end(); i++)
@@ -187,6 +229,9 @@ void EquipAction::EquipItemToSlot(Player* requester, Item* item, uint8 targetSlo
     uint16 src = ((bagIndex << 8) | slot);
     uint16 dstPos = ((INVENTORY_SLOT_BAG_0 << 8) | targetSlot);
 
+    // auto enchant if cheat is turned on
+    if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item))
+        EnchantItem(item);
     bot->SwapItem(src, dstPos);
 
     RESET_AI_VALUE2(ItemUsage, "item usage", ItemQualifier(item).GetQualifier());
@@ -255,6 +300,9 @@ void EquipAction::EquipItem(PlayerbotAI* ai, Player* requester, Item* item, bool
 
         if (!equipedBag) 
         {
+            // auto enchant if cheat is turned on
+            if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item))
+                EnchantItem(item);
             WorldPacket packet(CMSG_AUTOEQUIP_ITEM, 2);
             packet << bagIndex << slot;
             bot->GetSession()->HandleAutoEquipItemOpcode(packet);
@@ -275,43 +323,6 @@ void EquipAction::EquipItem(PlayerbotAI* ai, Player* requester, Item* item, bool
         std::map<std::string, std::string> args;
         args["%item"] = ChatHelper::formatItem(item);
         ai->TellPlayer(requester, BOT_TEXT2("equip_command", args), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
-    }
-}
-
-void EquipUpgradesAction::EnchantItem(Item* item)
-{
-    if (item)
-    {
-        int tab = AiFactory::GetPlayerSpecTab(bot);
-        uint32 tempId = uint32((uint32)bot->getClass() * (uint32)10);
-        uint8 spec = tempId += (uint32)tab;
-
-        if (enchants.empty())
-        {
-            auto result = WorldDatabase.PQuery("SELECT class, spec, spellid, slotid FROM ai_playerbot_enchants");
-            if (result)
-            {
-                do
-                {
-                    Field* fields = result->Fetch();
-
-                    EnchantTemplate pEnchant;
-                    pEnchant.ClassId = fields[0].GetUInt8();
-                    pEnchant.SpecId = fields[1].GetUInt8();
-                    pEnchant.SpellId = fields[2].GetUInt32();
-                    pEnchant.SlotId = fields[3].GetUInt8();
-                    enchants.push_back(pEnchant);
-                } while (result->NextRow());
-            }
-        }
-
-        for (const auto& enchant : enchants)
-        {
-            if (enchant.ClassId == bot->getClass() && enchant.SpecId == spec)
-            {
-                ai->EnchantItemT(enchant.SpellId, enchant.SlotId, item);
-            }
-        }
     }
 }
 
@@ -422,8 +433,8 @@ bool EquipUpgradesAction::Execute(Event& event)
             sLog.outDetail("Bot #%d <%s> auto equips item %d (%s)", bot->GetGUIDLow(), bot->GetName(), item->GetProto()->ItemId, usage == ItemUsage::ITEM_USAGE_EQUIP ? "better than current" : usage == ItemUsage::ITEM_USAGE_BAD_EQUIP ? "wrong item but empty slot" : "");
             ai->TellDebug(ai->GetMaster(), "Equipping: " + chat->formatItem(item) + " - " + ItemUsageValue::ReasonForNeed(usage, item, 1, bot), "debug equip");
             
-            // add an auto enchant if cheat is turned on
-            if (sPlayerbotAIConfig.autoEnchantUpgradeLoot)
+            // auto enchant if cheat is turned on
+            if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item))
                 EnchantItem(item);
 
             EquipItem(ai, GetMaster(), item, item == oldMainhand || item == oldOffhand);   

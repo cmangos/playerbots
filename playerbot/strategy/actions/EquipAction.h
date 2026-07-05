@@ -29,7 +29,11 @@ namespace ai
     private:
         void EquipItem(Player* requester, FindItemVisitor* visitor);
         void ListItems(Player* requester);
+        bool IsEnchantable(Item* item);
+        void EnchantItem(Item* item);
         static uint8 GetSmallestBagSlot(Player* bot);
+
+        std::vector<EnchantTemplate> enchants;
     };
 
     class EquipUpgradesAction : public EquipAction
@@ -50,8 +54,5 @@ namespace ai
         virtual std::vector<std::string> GetUsedActions() { return {}; }
         virtual std::vector<std::string> GetUsedValues() { return {}; }
 #endif 
-    private:
-        void EnchantItem(Item* item);
-        std::vector<EnchantTemplate> enchants;
     };
 }

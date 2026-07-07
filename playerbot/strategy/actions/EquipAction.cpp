@@ -162,9 +162,6 @@ void EquipAction::EquipItemsToSlot(Player* requester, ItemIds ids, uint8 targetS
             Item* item = *items.begin();
             
             EquipItemToSlot(requester, *items.begin(), targetSlot);
-            // auto enchant if cheat is turned on
-            if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item) && !item->GetEnchantmentId(EnchantmentSlot(0)))
-                EnchantItem(item);
         }
     }
 }
@@ -178,9 +175,6 @@ void EquipAction::EquipItem(Player* requester, FindItemVisitor* visitor)
         Item* item = *items.begin();
 
         EquipItem(ai, requester, item);
-        // auto enchant if cheat is turned on
-        if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item) && !item->GetEnchantmentId(EnchantmentSlot(0)))
-            EnchantItem(item);
     }
 }
 

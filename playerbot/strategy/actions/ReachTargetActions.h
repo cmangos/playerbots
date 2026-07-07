@@ -238,7 +238,7 @@ namespace ai
                 if (!bot->IsWithinDistInMap(member, 100.0f, false))
                     continue;
 
-                if (!ai->HasAura(totemSpell, member, false, true))
+                if (!ai->HasAura(totemSpell, member))
                     return member;
             }
 

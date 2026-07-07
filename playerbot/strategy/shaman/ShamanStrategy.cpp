@@ -1567,4 +1567,15 @@ void ShamanManualTotemStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
     triggers.push_back(new TriggerNode(
         triggerName,
         NextAction::array(0, new NextAction(actionName, ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "place totems",
+        NextAction::array(0, new NextAction(actionName, ACTION_MEDIUM_HEAL + 5), NULL)));
+}
+
+void ShamanManualTotemStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "place totems",
+        NextAction::array(0, new NextAction(actionName, ACTION_MEDIUM_HEAL + 5), NULL)));
 }

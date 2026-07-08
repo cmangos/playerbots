@@ -399,7 +399,7 @@ void MageCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "polymorph",
-        NextAction::array(0, new NextAction("polymorph", ACTION_INTERRUPT), NULL)));
+        NextAction::array(0, new NextAction("polymorph", ACTION_EMERGENCY + 5), NULL)));
 }
 
 void MageCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -618,7 +618,7 @@ void MageRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "has aggro",
-        NextAction::array(0, new NextAction("shoot", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("shoot", ACTION_NORMAL), NULL)));
 }
 
 void MageRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -822,7 +822,7 @@ void MageCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "polymorph",
-        NextAction::array(0, new NextAction("polymorph", ACTION_INTERRUPT), NULL)));
+        NextAction::array(0, new NextAction("polymorph", ACTION_EMERGENCY + 5), NULL)));
 }
 
 void MageCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1249,7 +1249,7 @@ void MageCcStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "polymorph",
-        NextAction::array(0, new NextAction("polymorph", ACTION_INTERRUPT), NULL)));
+        NextAction::array(0, new NextAction("polymorph", ACTION_EMERGENCY + 5), NULL)));
 }
 
 void MageCcStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

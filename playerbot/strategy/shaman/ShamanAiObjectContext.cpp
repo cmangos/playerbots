@@ -4,6 +4,7 @@
 #include "ShamanAiObjectContext.h"
 #include "ShamanTriggers.h"
 #include "playerbot/strategy/NamedObjectContext.h"
+#include "playerbot/strategy/triggers/ChatCommandTrigger.h"
 #include "ElementalShamanStrategy.h"
 #include "RestorationShamanStrategy.h"
 #include "EnhancementShamanStrategy.h"
@@ -283,6 +284,7 @@ namespace ai
                 creators["earth totem"] = [](PlayerbotAI* ai) { return new EarthTotemTrigger(ai); };
                 creators["water totem"] = [](PlayerbotAI* ai) { return new WaterTotemTrigger(ai); };
                 creators["air totem"] = [](PlayerbotAI* ai) { return new AirTotemTrigger(ai); };
+                creators["place totems"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "place totems"); };
                 creators["call of the elements"] = [](PlayerbotAI* ai) { return new TotemsAreNotSummonedTrigger(ai); };
                 creators["call of the ancestors"] = [](PlayerbotAI* ai) { return new TotemsAreNotSummonedTrigger(ai); };
                 creators["call of the spirits"] = [](PlayerbotAI* ai) { return new TotemsAreNotSummonedTrigger(ai); };

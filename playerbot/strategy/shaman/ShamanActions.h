@@ -128,11 +128,18 @@ namespace ai
                 if (!member->IsInWorld() || member->GetMapId() != bot->GetMapId())
                     continue;
 
-                if (!bot->IsWithinDistInMap(member, 100.0f, false))
+                if (!bot->IsWithinDistInMap(member, 30.0f, false))
                     continue;
 
-                if (!ai->HasAura(GetSpellName(), member, false, true))
-                    return true;
+                // TODO: Implement a better check if member is affected
+                // The aura we want to check is not the same as the spell to summon the totem
+                // While all totems give an aura, aura behavior and naming is not consistent.
+                // The consistent option between all totems is to check if the member is in range to the totem
+                
+                // This is somewhat inaccurate but a much simpler check: if the totem is down already,
+                // then casting the totem is useless. This also checks proximity to owner. 
+                // And if we are not within 30 yd of other members, then dropping the totem won't help them. 
+                return !AI_VALUE2(bool, "has totem", name);
             }
 
             return false;

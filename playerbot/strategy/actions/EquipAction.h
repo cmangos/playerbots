@@ -14,7 +14,7 @@ namespace ai
         void EquipItemToSlot(Player* requester, Item* item, uint8 targetSlot);
         virtual bool isUsefulWhenStunned() override { return true; }
 
-        bool IsEnchantable(Item* item);
+        bool IsEnchantable(Item* item, uint32 spellid);
         void EnchantItem(Item* item);
 
         std::vector<EnchantTemplate> enchants;

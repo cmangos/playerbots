@@ -267,7 +267,7 @@ Unit* PartyMemberToProtect::Calculate()
 
         if (ai->IsTank((Player*)pVictim) && pVictim->GetHealthPercent() > 25)
             continue;
-        else if ((ai->IsMelee((Player*)target) || target->getClass() != CLASS_HUNTER) && pVictim->GetHealthPercent() > 50)
+        else if ((ai->IsMelee((Player*)pVictim) || pVictim->getClass() != CLASS_HUNTER) && pVictim->GetHealthPercent() > 50)
             continue;
 
         if (find(needProtect.begin(), needProtect.end(), pVictim) == needProtect.end())

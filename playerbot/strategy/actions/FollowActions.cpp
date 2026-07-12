@@ -61,11 +61,11 @@ bool FollowAction::isUseful()
     if (followTarget)
     {
 #ifndef MANGOSBOT_ZERO
-        if (bot->IsFreeFlying() || bot->IsFlying())
+        if (bot->IsFreeFlying() || bot->IsFlying() || bot->IsSwimming())
             distance = sServerFacade.GetDistance(bot, followTarget);
         else
 #endif
-            distance = sServerFacade.GetDistance2d(bot, followTarget);
+        distance = sServerFacade.GetDistance2d(bot, followTarget);
     }
     else
     {
@@ -74,7 +74,11 @@ bool FollowAction::isUseful()
         {
             return false;
         }
-
+#ifndef MANGOSBOT_ZERO
+        if (bot->IsFreeFlying() || bot->IsFlying() || bot->IsSwimming())
+            distance = sServerFacade.GetDistance(bot, loc.coord_x, loc.coord_y, loc.coord_z);
+        else
+#endif
         distance = sServerFacade.GetDistance2d(bot, loc.coord_x, loc.coord_y);
     }
 

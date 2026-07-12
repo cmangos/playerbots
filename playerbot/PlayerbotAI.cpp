@@ -8427,7 +8427,7 @@ void PlayerbotAI::StopMoving()
     else
     {
 #ifndef MANGOSBOT_ZERO
-        if (!bot->IsFlying() && !bot->IsFreeFlying())
+        if (!bot->IsFlying())
             bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
 #else
         bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);

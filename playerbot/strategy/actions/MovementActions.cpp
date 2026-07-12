@@ -228,7 +228,7 @@ bool MovementAction::FlyDirect(const WorldPosition &startPosition, const WorldPo
         mm.Clear();
     }
     
-    bool flying = bot->IsFlying() || bot->IsFreeFlying();
+    bool flying = bot->IsFlying() && bot->IsFreeFlying();
     mm.MovePoint(movePosition.getMapId(), Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f), flying  ? FORCED_MOVEMENT_FLIGHT : FORCED_MOVEMENT_RUN, flying ? bot->GetSpeed(MOVE_FLIGHT) : 0.f, flying);
     WaitForReach(25.0f);
     

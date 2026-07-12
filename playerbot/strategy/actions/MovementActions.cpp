@@ -178,7 +178,7 @@ bool MovementAction::FlyDirect(const WorldPosition &startPosition, const WorldPo
         {
             float height = terrain->GetHeightStatic(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ());
             float ground = terrain->GetWaterOrGroundLevel(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), height);
-            if (bot->GetPositionZ() < ground + 1.0f)
+            if (bot->GetPositionZ() < ground + 5.0f)
                 needLand = true;
         }
         if (needLand)

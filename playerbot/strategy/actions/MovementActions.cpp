@@ -221,13 +221,13 @@ bool MovementAction::FlyDirect(const WorldPosition &startPosition, const WorldPo
     MotionMaster& mm = *bot->GetMotionMaster();
 
     //Clean movement if not already moving the same way.
-    /*
-    if (mm.GetCurrent()->GetMovementGeneratorType() != POINT_MOTION_TYPE && mm.GetCurrent()->GetMovementGeneratorType() != IDLE_MOTION_TYPE)
+    
+    if (mm.GetCurrent()->GetMovementGeneratorType() != POINT_MOTION_TYPE)
     {
         ai->StopMoving();
         mm.Clear();
     }
-    */
+    
     bool flying = bot->IsFlying() || bot->IsFreeFlying();
     mm.MovePoint(movePosition.getMapId(), Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f), flying  ? FORCED_MOVEMENT_FLIGHT : FORCED_MOVEMENT_RUN, flying ? bot->GetSpeed(MOVE_FLIGHT) : 0.f, flying);
     WaitForReach(25.0f);

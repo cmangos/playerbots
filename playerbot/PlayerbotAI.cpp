@@ -8425,8 +8425,15 @@ void PlayerbotAI::StopMoving()
     if (bot->GetTransport())
         bot->m_movementInfo.SetMovementFlags(MOVEFLAG_ONTRANSPORT);
     else
+    {
+#ifndef MANGOSBOT_ZERO
+        if (!bot->IsFlying() && !bot->IsFreeFlying())
+            bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+#else
         bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
-
+#endif        
+    }
+    
     bot->InterruptMoving(true);
     MovementInfo mInfo = bot->m_movementInfo;
     float x, y, z;

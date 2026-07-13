@@ -679,7 +679,7 @@ namespace ai
         bool isUseful() override 
         { 
             Unit* target = GetTarget();
-            if(target && target->IsPlayer() && (!ai->IsTank((Player*)target) && !ai->IsMelee((Player*)target) && target->getClass() != CLASS_HUNTER))
+            if(target && target->IsPlayer() && !ai->IsTank((Player*)target))
             {
                 return CastProtectSpellAction::isUseful();
             }

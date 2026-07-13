@@ -98,10 +98,20 @@ void EquipAction::ListItems(Player* requester)
     ai->InventoryTellItems(requester, items, soulbound);
 }
 
-bool EquipAction::IsEnchantable(Item* item)
+bool EquipAction::IsEnchantable(Item* item, uint32 spellid)
 {
-    return !(item->GetProto()->Class == ITEM_CLASS_CONTAINER || item->GetProto()->Class == ITEM_CLASS_QUIVER 
-        || item->GetProto()->InventoryType == INVTYPE_AMMO || item->GetProto()->InventoryType == INVTYPE_RELIC);
+
+#ifdef MANGOS
+   SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
+#else
+   SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellid);
+#endif
+   if (!spellInfo)
+      return false;
+
+    return ((1 << item->GetProto()->SubClass) & spellInfo->EquippedItemSubClassMask) &&
+      ((1 << item->GetProto()->InventoryType) & spellInfo->EquippedItemInventoryTypeMask);
+
 }
 
 void EquipAction::EnchantItem(Item* item)
@@ -135,7 +145,8 @@ void EquipAction::EnchantItem(Item* item)
         {
             if (enchant.ClassId == bot->getClass() && enchant.SpecId == spec)
             {
-                ai->EnchantItemT(enchant.SpellId, enchant.SlotId, item);
+                if (IsEnchantable(item, enchant.SpellId))
+                    ai->EnchantItemT(enchant.SpellId, enchant.SlotId, item);
             }
         }
     }
@@ -436,7 +447,7 @@ bool EquipUpgradesAction::Execute(Event& event)
             didEquip = true;
 
             // auto enchant if cheat is turned on
-            if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && IsEnchantable(item) && !item->GetEnchantmentId(EnchantmentSlot(0)))
+            if (sPlayerbotAIConfig.autoEnchantUpgradeLoot && !item->GetEnchantmentId(EnchantmentSlot(0)))
                 EnchantItem(item); 
         }
     }

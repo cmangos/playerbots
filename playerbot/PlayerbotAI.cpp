@@ -384,7 +384,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
 #ifndef MANGOSBOT_TWO
     if (!bot->IsStopped() && !IsJumping() && !CanMove() && !bot->IsTaxiFlying() && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING) && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
 #else
-    if (!bot->IsStopped() && !IsJumping() && !CanMove() && !bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING) && !bot->IsTaxiFlying() && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING) && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
+    if (!bot->IsStopped() && !IsJumping() && !CanMove() && !bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING) && !bot->IsTaxiFlying() && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING) && !bot->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED) && !bot->IsFreeFlying())
 #endif
     {
         StopMoving();
@@ -8425,8 +8425,15 @@ void PlayerbotAI::StopMoving()
     if (bot->GetTransport())
         bot->m_movementInfo.SetMovementFlags(MOVEFLAG_ONTRANSPORT);
     else
+    {
+#ifndef MANGOSBOT_ZERO
+        if (!bot->IsFlying())
+            bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+#else
         bot->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
-
+#endif        
+    }
+    
     bot->InterruptMoving(true);
     MovementInfo mInfo = bot->m_movementInfo;
     float x, y, z;

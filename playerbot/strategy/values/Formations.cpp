@@ -153,15 +153,7 @@ namespace ai
             float x = followTarget->GetPositionX() + cos(angle) * range;
             float y = followTarget->GetPositionY() + sin(angle) * range;
             float z = followTarget->GetPositionZ();
-#ifdef MANGOSBOT_TWO
-            float ground = followTarget->GetMap()->GetHeight(followTarget->GetPhaseMask(), x, y, z);
-#else
-            float ground = followTarget->GetMap()->GetHeight(x, y, z);
-#endif
-            //if (ground <= INVALID_HEIGHT)
-            //    return Formation::NullLocation;
 
-            // prevent going into terrain
             float ox, oy, oz;
             followTarget->GetPosition(ox, oy, oz);
 #ifdef MANGOSBOT_TWO

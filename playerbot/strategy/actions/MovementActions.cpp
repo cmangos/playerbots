@@ -227,6 +227,17 @@ bool MovementAction::FlyDirect(const WorldPosition &startPosition, const WorldPo
         ai->StopMoving();
         mm.Clear();
     }
+    else
+    {
+        float x, y, z;
+        mm.GetDestination(x, y, z);
+
+        if (movePosition.distance(WorldPosition(movePosition.getMapId(), x, y, z, 0)) > minDist)
+        {
+            ai->StopMoving();
+            mm.Clear();
+        }
+    }
     
     bool flying = bot->IsFlying() && bot->IsFreeFlying();
     mm.MovePoint(movePosition.getMapId(), Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f), flying  ? FORCED_MOVEMENT_FLIGHT : FORCED_MOVEMENT_RUN, flying ? bot->GetSpeed(MOVE_FLIGHT) : 0.f, flying);

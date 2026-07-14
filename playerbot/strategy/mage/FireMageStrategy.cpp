@@ -137,7 +137,7 @@ void FireMageAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     MageAoeStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "ranged medium aoe",
+        "ranged high aoe",
         NextAction::array(0, new NextAction("flamestrike", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -499,7 +499,7 @@ void FireMageAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("living bomb", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "ranged medium aoe",
+        "ranged high aoe",
         NextAction::array(0, new NextAction("flamestrike", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
@@ -869,7 +869,7 @@ void FireMageAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("living bomb", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "ranged medium aoe",
+        "ranged high aoe",
         NextAction::array(0, new NextAction("flamestrike", ACTION_HIGH + 1), NULL)));
 
     triggers.push_back(new TriggerNode(

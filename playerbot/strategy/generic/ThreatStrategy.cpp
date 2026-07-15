@@ -8,7 +8,7 @@ using namespace ai;
 
 float ThreatMultiplier::GetValue(Action* action)
 {
-    if (action == NULL || action->getThreatType() == ActionThreatType::ACTION_THREAT_NONE)
+    if (action == NULL || action->getThreatType() == ActionThreatType::ACTION_THREAT_NONE || action->getThreatType() == ActionThreatType::ACTION_THREAT_LOW)
         return 1.0f;
 
     if (!AI_VALUE(bool, "group"))

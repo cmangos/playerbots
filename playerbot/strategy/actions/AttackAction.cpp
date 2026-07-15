@@ -113,7 +113,8 @@ bool AttackAction::Attack(Player* requester, Unit* target)
         SET_AI_VALUE(Unit*, "current target", target);
         AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
 
-        const bool isWaitingForAttack = WaitForAttackStrategy::ShouldWait(ai);
+        WaitForAttackStrategy* strategy = WaitForAttackStrategy::Get(ai);
+        const bool isWaitingForAttack = strategy->ShouldWait(ai);
         Pet* pet = bot->GetPet();
         if (pet)
         {
@@ -130,10 +131,18 @@ bool AttackAction::Attack(Player* requester, Unit* target)
                     }
 
                     // Don't send the pet to attack if set to passive
-                    if (creatureAI->GetReactState() != REACT_PASSIVE)
+                    if (strategy->GetPetReactState() != REACT_PASSIVE)
                     {
+                        creatureAI->SetReactState(strategy->GetPetReactState());
                         creatureAI->AttackStart(target);
                     }
+                }
+                else
+                {
+                    if (creatureAI->GetReactState() != REACT_PASSIVE)
+                        // Set the pet on passive mode during the pull
+                        strategy->SetPetReactState(creatureAI->GetReactState());
+                        creatureAI->SetReactState(REACT_PASSIVE);
                 }
             }
         }

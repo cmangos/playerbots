@@ -7,6 +7,9 @@ using namespace ai;
 
 bool WaitForAttackKeepSafeDistanceAction::Execute(Event& event)
 {
+    if (AI_VALUE(Unit*, "rti cc target"))
+        return false;
+        
     Unit* target = AI_VALUE(Unit*, "current target");
 
     if (target && !target->IsStopped() && target->GetTarget() && target->GetTarget()->IsStopped())

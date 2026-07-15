@@ -8,6 +8,7 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
 #include "AttackersValue.h"
+#include "RtiTargetValue.h"
 #include "EnemyPlayerValue.h"
 
 using namespace ai;
@@ -163,6 +164,46 @@ bool PossibleAttackTargetsValue::HasUnBreakableCC(Unit* target, Player* player)
     return false;
 }
 
+bool PossibleAttackTargetsValue::IsCcTarget(Unit* attacker, Player* player)
+{
+    PlayerbotAI* ai = player->GetPlayerbotAI();
+    if (ai)
+    {
+        Group* group = ai->GetBot()->GetGroup();
+        if (group)
+        {
+            Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
+            for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+            {
+                Player *player = sObjectMgr.GetPlayer(itr->guid);
+                if (!player || !sServerFacade.IsAlive(player) || !ai->IsSafe(player))
+                    continue;
+
+                if (player->GetPlayerbotAI())
+                {
+                    if (PAI_VALUE(Unit*,"rti cc target") == attacker)
+                        return true;
+
+                    std::string rti = PAI_VALUE(std::string,"rti cc");
+                    int index = RtiTargetValue::GetRtiIndex(rti);
+                    if (index != -1)
+                    {
+                        uint64 guid = group->GetTargetIcon(index);
+                        if (guid && attacker->GetObjectGuid() == ObjectGuid(guid))
+                            return true;
+                    }
+                }
+            }
+
+            uint64 guid = group->GetTargetIcon(4);
+            if (guid && attacker->GetObjectGuid() == ObjectGuid(guid))
+                return true;
+        }
+    }
+
+    return false;
+}
+
 bool PossibleAttackTargetsValue::IsImmuneToDamage(Unit* target, Player* player)
 {
     // Charmed
@@ -313,8 +354,8 @@ bool PossibleAttackTargetsValue::IsPossibleTarget(Unit* target, Player* player, 
             return false;
         }
 
-        // If the target is CC'ed
-        if(!ignoreCC && !HasIgnoreCCRti(target, player) && (HasBreakableCC(target, player) || HasUnBreakableCC(target, player)))
+        // If the target is CC'ed or is a CC target (don't place a dot before we recast cc...)
+        if(!ignoreCC && !HasIgnoreCCRti(target, player) && (HasBreakableCC(target, player) || HasUnBreakableCC(target, player)) || IsCcTarget(target, player))
         {
             return false;
         }

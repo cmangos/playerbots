@@ -30,9 +30,10 @@ bool PullEndTrigger::IsActive()
             else
             {
                 float distanceToPullTarget = target->GetDistance(ai->GetBot());
+                // sometimes creatures can reach slightly more than normal attack distance
+                float creatureMeleeRange = ATTACK_DISTANCE + BASE_MELEERANGE_OFFSET + 1;
 
-
-                if (distanceToPullTarget <= ATTACK_DISTANCE || target->IsNonMeleeSpellCasted(true) || (ai->IsRanged(bot) && distanceToPullTarget <= ai->GetRange("spell")))
+                if (distanceToPullTarget <= creatureMeleeRange || (target->IsNonMeleeSpellCasted(true) && target->IsInCombat()) || (secondsSincePullStarted >= 10 && target->GetTarget() != bot) || (ai->IsRanged(bot) && distanceToPullTarget <= ai->GetRange("spell")))
                 {
                     if (ai->HasStrategy("pull back", BotState::BOT_STATE_COMBAT))
                     {

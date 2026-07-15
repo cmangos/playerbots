@@ -114,37 +114,41 @@ bool AttackAction::Attack(Player* requester, Unit* target)
         AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
 
         WaitForAttackStrategy* strategy = WaitForAttackStrategy::Get(ai);
-        const bool isWaitingForAttack = strategy->ShouldWait(ai);
-        Pet* pet = bot->GetPet();
-        if (pet)
+        if (strategy)
         {
-            UnitAI* creatureAI = ((Creature*)pet)->AI();
-            if (creatureAI)
+            const bool isWaitingForAttack = strategy->ShouldWait(ai);
+            Pet* pet = bot->GetPet();
+            if (pet)
             {
-                // Don't send the pet to attack if the bot is waiting for attack
-                if (!isWaitingForAttack && (!ai->HasStrategy("stay", BotState::BOT_STATE_COMBAT) || AI_VALUE2(float, "distance", "current target") < ai->GetRange("spell")))
+                UnitAI* creatureAI = ((Creature*)pet)->AI();
+                if (creatureAI)
                 {
-                    // Reset the pet state if no master
-                    if (creatureAI->GetReactState() == REACT_PASSIVE && !ai->GetMaster())
+                    // Don't send the pet to attack if the bot is waiting for attack
+                    if (!isWaitingForAttack && (!ai->HasStrategy("stay", BotState::BOT_STATE_COMBAT) || AI_VALUE2(float, "distance", "current target") < ai->GetRange("spell")))
                     {
-                        creatureAI->SetReactState(REACT_DEFENSIVE);
-                    }
+                        // Reset the pet state if no master
+                        if (creatureAI->GetReactState() == REACT_PASSIVE && !ai->GetMaster())
+                        {
+                            creatureAI->SetReactState(REACT_DEFENSIVE);
+                        }
 
-                    // Don't send the pet to attack if set to passive
-                    if (strategy->GetPetReactState() != REACT_PASSIVE)
-                    {
-                        creatureAI->SetReactState(strategy->GetPetReactState());
-                        creatureAI->AttackStart(target);
+                        // Don't send the pet to attack if set to passive
+                        if (strategy->GetPetReactState() != REACT_PASSIVE)
+                        {
+                            creatureAI->SetReactState(strategy->GetPetReactState());
+                            creatureAI->AttackStart(target);
+                        }
                     }
-                }
-                else
-                {
-                    if (creatureAI->GetReactState() != REACT_PASSIVE)
-                        // Set the pet on passive mode during the pull
-                        strategy->SetPetReactState(creatureAI->GetReactState());
-                        creatureAI->SetReactState(REACT_PASSIVE);
+                    else
+                    {
+                        if (creatureAI->GetReactState() != REACT_PASSIVE)
+                            // Set the pet on passive mode during the pull
+                            strategy->SetPetReactState(creatureAI->GetReactState());
+                            creatureAI->SetReactState(REACT_PASSIVE);
+                    }
                 }
             }
+
         }
 
         if (ai->CanMove() && !sServerFacade.IsInFront(bot, target, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))

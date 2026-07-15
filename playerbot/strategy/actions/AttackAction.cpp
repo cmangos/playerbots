@@ -114,9 +114,10 @@ bool AttackAction::Attack(Player* requester, Unit* target)
         AI_VALUE(LootObjectStack*, "available loot")->Add(guid);
 
         WaitForAttackStrategy* strategy = WaitForAttackStrategy::Get(ai);
+        bool isWaitingForAttack = false;
         if (strategy)
         {
-            const bool isWaitingForAttack = strategy->ShouldWait(ai);
+            isWaitingForAttack = strategy->ShouldWait(ai);
             Pet* pet = bot->GetPet();
             if (pet)
             {

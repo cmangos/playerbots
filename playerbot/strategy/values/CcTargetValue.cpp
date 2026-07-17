@@ -23,8 +23,6 @@ public:
 
         AiObjectContext* context = ai->GetAiObjectContext();
 
-
-
         if (AI_VALUE(Unit*,"rti cc target") && AI_VALUE(Unit*,"rti cc target")->GetObjectGuid() == creature->GetObjectGuid())
         {
             result = creature;
@@ -54,6 +52,9 @@ public:
         }
 
         if (creature->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) && !(spell == "fear" || spell == "banish"))
+            return;
+
+        if (!ai->CanCastSpell(spell, creature, true, nullptr, false, true))
             return;
         /*
         // Here we try to cc stuff that is not marked. This is not suggested because randomly cc'ing things with no

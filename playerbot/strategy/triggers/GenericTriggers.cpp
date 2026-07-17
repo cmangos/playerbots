@@ -586,6 +586,36 @@ bool TankAssistTrigger::IsActive()
 #endif
 }
 
+bool DpsAssistTrigger::IsActive()
+{
+    if (!AI_VALUE(bool, "has attackers"))
+        return false;
+
+    Unit* currentTarget = AI_VALUE(Unit*, "current target");
+    if (!currentTarget)
+        return false;
+
+    // If owner is waiting this will trigger attack again to call for pet
+    WaitForAttackStrategy* strategy = WaitForAttackStrategy::Get(ai);
+    bool isWaitingForAttack = false;
+    if (strategy)
+    {
+        isWaitingForAttack = strategy->ShouldWait(ai);
+        Pet* pet = bot->GetPet();
+        if (pet)
+        {
+            UnitAI* creatureAI = ((Creature*)pet)->AI();
+            if (creatureAI)
+            {
+                if (creatureAI->GetReactState() == REACT_PASSIVE && !isWaitingForAttack)
+                    return true;
+            }
+        }
+    }               
+
+    return false;
+}
+
 bool IsBehindTargetTrigger::IsActive()
 {
     Unit* target = AI_VALUE(Unit*, "current target");

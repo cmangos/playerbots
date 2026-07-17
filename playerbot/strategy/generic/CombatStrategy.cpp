@@ -111,7 +111,7 @@ bool WaitForAttackStrategy::ShouldWait(PlayerbotAI* ai)
         {
             // Don't wait if the current target is an enemy player
             bool enemyPlayer = false;
-            Unit* target = ai->GetAiObjectContext()->GetValue<Unit*>("current target")->Get();
+            Unit* target = context->GetValue<Unit*>("current target")->Get();
             if (target)
             {
                 Player* player = dynamic_cast<Player*>(target);

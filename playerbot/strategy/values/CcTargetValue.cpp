@@ -13,7 +13,7 @@ public:
     FindTargetForCcStrategy(PlayerbotAI* ai, std::string spell) : FindTargetStrategy(ai)
     {
         this->spell = spell;
-        maxDistance = 0;
+        maxDistance = sPlayerbotAIConfig.sightDistance;
     }
 
 public:
@@ -23,8 +23,7 @@ public:
 
         AiObjectContext* context = ai->GetAiObjectContext();
 
-        if (!ai->CanCastSpell(spell, creature, true, nullptr, false, true))
-            return;
+
 
         if (AI_VALUE(Unit*,"rti cc target") && AI_VALUE(Unit*,"rti cc target")->GetObjectGuid() == creature->GetObjectGuid())
         {

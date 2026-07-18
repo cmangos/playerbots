@@ -185,7 +185,7 @@ bool CastCustomSpellAction::Execute(Event& event)
 
     std::ostringstream replyStr;
     std::map<std::string, std::string> replyArgs;
-    if (!pSpellInfo->EffectItemType[0])
+    if (!pSpellInfo->EffectItemType[0] || (pSpellInfo->EffectItemType[0] && pSpellInfo->Effect[0] != SPELL_EFFECT_CREATE_ITEM))
     {
         replyStr << BOT_TEXT("cast_spell_command_spell");
 

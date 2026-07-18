@@ -57,6 +57,9 @@ float FreeMoveRangeValue::Calculate()
     if (ai->HasStrategy("stay", ai->GetState()))
         return INTERACTION_DISTANCE;
 
+    if (AI_VALUE(Unit*, "rti cc target"))
+        return ai->GetRange("spell");
+
     Unit* followTarget = AI_VALUE(Unit*, "follow target");
 
     if (!followTarget || followTarget == bot)

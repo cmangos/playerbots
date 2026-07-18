@@ -701,6 +701,13 @@ namespace ai
 		virtual bool IsActive() override;
 	};
 
+    class DpsAssistTrigger : public Trigger
+	{
+	public:
+        DpsAssistTrigger(PlayerbotAI* ai) : Trigger(ai, "dps assist", 2) {}
+		virtual bool IsActive() override;
+	};
+
     class IsBehindTargetTrigger : public Trigger
     {
     public:

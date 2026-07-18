@@ -20,7 +20,7 @@ bool SpellstoneTrigger::IsActive()
 
 bool InfernoTrigger::IsActive()
 {
-	return AI_VALUE(uint8, "attackers count") > 1 && bot->HasSpell(1122) && bot->HasItemCount(5565, 1) && !urand(0, 2);
+	return AI_VALUE(uint8, "possible attack targets count") > 1 && bot->HasSpell(1122) && bot->HasItemCount(5565, 1) && !urand(0, 2);
 }
 
 bool CorruptionTrigger::IsActive()
@@ -82,7 +82,7 @@ bool SeedOfCorruptionOnAttackerTrigger::IsActive()
 {
     if (DebuffOnAttackerTrigger::IsActive())
     {
-        return AI_VALUE(uint8, "attackers count") >= 3;
+        return AI_VALUE(uint8, "possible attack targets count") >= 3;
     }
 
     return false;

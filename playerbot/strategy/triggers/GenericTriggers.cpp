@@ -586,6 +586,36 @@ bool TankAssistTrigger::IsActive()
 #endif
 }
 
+bool DpsAssistTrigger::IsActive()
+{
+    if (!AI_VALUE(bool, "has attackers"))
+        return false;
+
+    Unit* currentTarget = AI_VALUE(Unit*, "current target");
+    if (!currentTarget)
+        return false;
+
+    // If owner is waiting this will trigger attack again to call for pet
+    WaitForAttackStrategy* strategy = WaitForAttackStrategy::Get(ai);
+    bool isWaitingForAttack = false;
+    if (strategy)
+    {
+        isWaitingForAttack = strategy->ShouldWait(ai);
+        Pet* pet = bot->GetPet();
+        if (pet)
+        {
+            UnitAI* creatureAI = ((Creature*)pet)->AI();
+            if (creatureAI)
+            {
+                if (creatureAI->GetReactState() == REACT_PASSIVE && !isWaitingForAttack)
+                    return true;
+            }
+        }
+    }               
+
+    return false;
+}
+
 bool IsBehindTargetTrigger::IsActive()
 {
     Unit* target = AI_VALUE(Unit*, "current target");
@@ -608,7 +638,7 @@ bool HasCcTargetTrigger::IsActive()
     uint32 spellid = AI_VALUE2(uint32, "spell id", getName());
     if (spellid && sServerFacade.IsSpellReady(bot, spellid))
     {
-        return AI_VALUE2(Unit*, "cc target", getName()) && !AI_VALUE2(Unit*, "current cc target", getName());
+        return AI_VALUE(Unit*,"rti cc target")  || (AI_VALUE2(Unit*, "cc target", getName()) && !AI_VALUE2(Unit*, "current cc target", getName()));
     }
 
     return false;

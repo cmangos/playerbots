@@ -44,7 +44,7 @@ namespace ai
             if (!guid)
                 return NULL;
 
-            std::list<ObjectGuid> attackers = context->GetValue<std::list<ObjectGuid>>("possible targets")->Get();
+            std::list<ObjectGuid> attackers = context->GetValue<std::list<ObjectGuid>>("possible targets no los")->Get();
             if (std::find(attackers.begin(), attackers.end(), guid) == attackers.end()) return NULL;
 
             Unit* unit = ai->GetUnit(ObjectGuid(guid));

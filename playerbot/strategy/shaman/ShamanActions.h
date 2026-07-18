@@ -128,7 +128,7 @@ namespace ai
                 if (!member->IsInWorld() || member->GetMapId() != bot->GetMapId())
                     continue;
 
-                if (!bot->IsWithinDistInMap(member, 30.0f, false))
+                if (!bot->IsWithinDistInMap(member, sPlayerbotAIConfig.spellDistance, false))
                     continue;
 
                 // TODO: Implement a better check if member is affected
@@ -138,7 +138,7 @@ namespace ai
                 
                 // This is somewhat inaccurate but a much simpler check: if the totem is down already,
                 // then casting the totem is useless. This also checks proximity to owner. 
-                // And if we are not within 30 yd of other members, then dropping the totem won't help them. 
+                // And if we are not within spell distance of other members, then dropping the totem won't help them. 
                 return !AI_VALUE2(bool, "has totem", name);
             }
 

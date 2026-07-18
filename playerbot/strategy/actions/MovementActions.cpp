@@ -227,17 +227,6 @@ bool MovementAction::FlyDirect(const WorldPosition &startPosition, const WorldPo
         ai->StopMoving();
         mm.Clear();
     }
-    else
-    {
-        float x, y, z;
-        mm.GetDestination(x, y, z);
-
-        if (movePosition.distance(WorldPosition(movePosition.getMapId(), x, y, z, 0)) > minDist)
-        {
-            ai->StopMoving();
-            mm.Clear();
-        }
-    }
     
     bool flying = bot->IsFlying() && bot->IsFreeFlying();
     mm.MovePoint(movePosition.getMapId(), Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f), flying  ? FORCED_MOVEMENT_FLIGHT : FORCED_MOVEMENT_RUN, flying ? bot->GetSpeed(MOVE_FLIGHT) : 0.f, flying);
@@ -2450,6 +2439,16 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
     ClearIdleState();
 
 #ifndef MANGOSBOT_ZERO
+    //Land
+    bool needLand = false;
+
+    if (const TerrainInfo* terrain = bot->GetTerrain())
+    {
+        float height = terrain->GetHeightStatic(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ());
+        float ground = terrain->GetWaterOrGroundLevel(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), height);
+        if (bot->GetPositionZ() < ground + 5.0f)
+            needLand = true;
+    }
     if (bot->IsFreeFlying())
     {
         if (!bot->IsFlying() && target->IsFlying())
@@ -2471,16 +2470,6 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
 
         if (bot->IsFlying() && !target->IsFlying())
         {
-            //Land
-            bool needLand = false;
-
-            if (const TerrainInfo* terrain = bot->GetTerrain())
-            {
-                float height = terrain->GetHeightStatic(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ());
-                float ground = terrain->GetWaterOrGroundLevel(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), height);
-                if (bot->GetPositionZ() < ground + 5.0f)
-                    needLand = true;
-            }
             if (needLand)
             {
                 WorldPacket data(SMSG_SPLINE_MOVE_UNSET_FLYING, 9);
@@ -2510,6 +2499,27 @@ bool MovementAction::Follow(Unit* target, float distance, float angle)
         }
 
         return MoveTo(moveToPos);
+    }
+    else
+    {
+        if (needLand)
+        {
+            WorldPacket data(SMSG_SPLINE_MOVE_UNSET_FLYING, 9);
+            data << bot->GetPackGUID();
+            bot->SendMessageToSet(data, true);
+
+            if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING))
+                bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING);
+#ifdef MANGOSBOT_ONE
+            if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING2))
+                bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FLYING2);
+#endif
+            if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
+                bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
+
+            if(!bot->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
+                bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_FALLING);
+        }
     }
 #endif
 

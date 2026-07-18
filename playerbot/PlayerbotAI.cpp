@@ -929,6 +929,8 @@ void PlayerbotAI::Unmount()
         if (bot->IsFlying())
         {
             bot->GetMotionMaster()->MoveFall();
+            if (bot->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
+                bot->m_movementInfo.RemoveMovementFlag(MOVEFLAG_LEVITATING);
         }
     }
 }

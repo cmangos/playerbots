@@ -238,8 +238,8 @@ namespace ai
                 if (!bot->IsWithinDistInMap(member, 100.0f, false))
                     continue;
 
-                if (bot->IsWithinDistInMap(member, range, false) && !AI_VALUE2(bool, "has totem", name))
-                    return member;
+                if (!bot->IsWithinDistInMap(member, range, false) || !AI_VALUE2(bool, "has totem", name))
+                    return member; 
             }
 
             return nullptr;

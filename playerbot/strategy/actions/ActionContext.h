@@ -415,6 +415,8 @@ namespace ai
             creators["disable nethermancer sepethrea fight strategy"] = [](PlayerbotAI* ai) { return new NethermancerSepethreaDisableFightStrategyAction(ai); };
             creators["move away from raging flames"] = [](PlayerbotAI* ai) { return new RagingFlamesMoveAwayAction(ai); };
 
+            creators["move away from specific creatures"] = [](PlayerbotAI* ai) { return new MoveAwayFromSpecificCreatures(ai, 15); };
+
 #ifdef GenerateBotTests
             creators["test"] = [](PlayerbotAI* ai) { return new TestAction(ai); };
 #endif

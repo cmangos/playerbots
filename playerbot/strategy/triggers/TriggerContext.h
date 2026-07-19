@@ -350,6 +350,8 @@ namespace ai
             creators["end nethermancer sepethrea fight"] = [](PlayerbotAI* ai) { return new NethermancerSepethreaEndFightTrigger(ai); };
             creators["raging flames too close"] = [](PlayerbotAI* ai) { return new RagingFlamesTooCloseTrigger(ai); };
 
+            creators["specific creature too close"] = [](PlayerbotAI* ai) { return new CloseToSpecificCreaturesTrigger(ai, "specific creature too close", 10.0f, true); };
+
             // Test framework triggers
 #ifdef GenerateBotTests
             creators["test ready"] = [](PlayerbotAI* ai) { return new TestReadyTrigger(ai); };

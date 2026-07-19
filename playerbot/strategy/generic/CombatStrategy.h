@@ -36,6 +36,28 @@ namespace ai
         void InitReactionTriggers(std::list<TriggerNode*>& triggers) override;
     };
 
+    class AvoidSpecificCreaturesStrategy : public Strategy
+    {
+    public:
+        AvoidSpecificCreaturesStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        std::string getName() override { return "avoid specific creatures"; }
+
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "avoid specific creatures"; } //Must equal iternal name
+        virtual std::string GetHelpDescription() 
+        {
+            return "This strategy will make bots move away from specific creatures.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { }; }
+#endif
+
+    private:
+        void InitCombatMultipliers(std::list<Multiplier*>& multipliers) override;
+        void InitReactionMultipliers(std::list<Multiplier*>& multipliers) override;
+        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitReactionTriggers(std::list<TriggerNode*>& triggers) override;
+    };
+
     class AvoidAoeStrategyMultiplier : public Multiplier
     {
     public:
@@ -46,6 +68,21 @@ namespace ai
         virtual std::string GetHelpName() { return "run away on area debuff"; } //Must equal iternal name
         virtual std::string GetHelpDescription() {
             return "This stops bots from casting certain (cast-time) spells when affected by an area debuf.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return {}; }
+#endif
+    };
+
+    class AvoidSpecificCreaturesStrategyMultiplier : public Multiplier
+    {
+    public:
+        AvoidSpecificCreaturesStrategyMultiplier(PlayerbotAI* ai) : Multiplier(ai, "avoid specific creatures";) {}
+        float GetValue(Action* action) { return 1.0f; }
+        
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "avoid specific creatures";; } //Must equal iternal name
+        virtual std::string GetHelpDescription() {
+            return "This makes bots run away from specific creatures.";
         }
         virtual std::vector<std::string> GetRelatedStrategies() { return {}; }
 #endif

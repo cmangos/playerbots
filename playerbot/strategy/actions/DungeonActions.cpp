@@ -117,7 +117,7 @@ bool MoveAwayFromHazard::IsHazardNearby(const WorldPosition& point, const std::l
     return false;
 }
 
-bool MoveAwayFromCreature::Execute(Event& event)
+bool MoveAwayFromCreature::CreatureSearchHelperFunction(Event& event, uint32 creatureId)
 {
     // Get the active attacking creatures
     std::list<Creature*> creatures;
@@ -223,6 +223,11 @@ bool MoveAwayFromCreature::Execute(Event& event)
     return false;
 }
 
+bool MoveAwayFromCreature::Execute(Event& event)
+{
+    return CreatureSearchHelperFunction(event, creatureID);
+}
+
 bool MoveAwayFromCreature::isPossible()
 {
     if (MovementAction::isPossible())
@@ -275,5 +280,17 @@ bool MoveAwayFromCreature::IsHazardNearby(const WorldPosition& point, const std:
         }
     }
 
+    return false;
+}
+
+bool MoveAwayFromSpecificCreatures::Execute(Event& event)
+{
+    std::list<uint32> creatureIDList = AI_VALUE(std::list<uint32>, "avoid creature list");
+    for (const uint32 creatureToCheck : creatureIDList)
+    {
+        bool result = CreatureSearchHelperFunction(event, creatureToCheck);
+        if (result)
+            return result;
+    }
     return false;
 }

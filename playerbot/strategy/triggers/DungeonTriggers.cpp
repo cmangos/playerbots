@@ -249,6 +249,44 @@ bool CloseToCreatureTrigger::IsActive()
     return false;
 }
 
+bool CloseToSpecificCreaturesTrigger::IsActive()
+{
+    // If the bot is ready
+    if (bot->IsInWorld() && !bot->IsBeingTeleported())
+    {
+        AiObjectContext* context = ai->GetAiObjectContext();
+        std::list<uint32> creatureIDList = AI_VALUE(std::list<uint32>, "avoid creature list");
+        // Check if any of the creatures listed is nearby
+        for (const uint32 creatureToCheck : creatureIDList)
+        {
+            // Iterate through the near creatures
+            std::list<Unit*> creatures;
+            MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(bot, creatureToCheck, range);
+            MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
+            Cell::VisitAllObjects(bot, searcher, range);
+            for (Unit* unit : creatures)
+            {
+                Creature* creature = (Creature*)unit;
+                if (creature)
+                {
+                    // Check if the bot is not being targeted by the creature, unless we don't care
+                    if ((!creature->GetVictim() || (creature->GetVictim()->GetObjectGuid() != bot->GetObjectGuid())) || ignoreVictim)
+                    {
+                        // See if the creature is within the specified distance
+                        if (bot->IsWithinDist(creature, range))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    return false;
+}
+
 bool ItemReadyTrigger::IsActive()
 {
     // Check if the bot has the item or if it has cheats enabled

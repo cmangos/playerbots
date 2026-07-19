@@ -181,6 +181,17 @@ class ServerFacade
 #endif
         }
 
+        CreatureInfo const* LookupCreatureInfo(uint32 creatureId)
+        {
+#ifdef MANGOS
+            return sCreatureStore.LookupEntry(creatureId);
+#endif
+#ifdef CMANGOS
+            return sCreatureStorage.LookupEntry<CreatureInfo>(creatureId);
+#endif
+        } 
+        
+
         SpellEntry const* LookupSpellInfo(uint32 spellId)
         {
 #ifdef MANGOS

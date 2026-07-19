@@ -231,7 +231,7 @@ bool CloseToCreatureTrigger::IsActive()
         for (Unit* unit : creatures)
         {
             Creature* creature = (Creature*)unit;
-            if (creature)
+            if (creature && creature->IsAlive())
             {
                 // Check if the bot is not being targeted by the creature, unless we don't care
                 if ((!creature->GetVictim() || (creature->GetVictim()->GetObjectGuid() != bot->GetObjectGuid())) || ignoreVictim)
@@ -267,7 +267,7 @@ bool CloseToSpecificCreaturesTrigger::IsActive()
             for (Unit* unit : creatures)
             {
                 Creature* creature = (Creature*)unit;
-                if (creature)
+                if (creature && creature->IsAlive())
                 {
                     // Check if the bot is not being targeted by the creature, unless we don't care
                     if ((!creature->GetVictim() || (creature->GetVictim()->GetObjectGuid() != bot->GetObjectGuid())) || ignoreVictim)

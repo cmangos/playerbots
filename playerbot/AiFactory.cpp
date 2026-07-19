@@ -296,6 +296,7 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
     combatEngine->addStrategies("mount", NULL);
     combatEngine->addStrategy("avoid mobs");
     combatEngine->addStrategy("dungeon");
+    combatEngine->addStrategy("avoid specific creatures");
 
     if (!player->InBattleGround())
     {
@@ -1315,7 +1316,7 @@ Engine* AiFactory::createDeadEngine(Player* player, PlayerbotAI* const facade, A
 
 void AiFactory::AddDefaultReactionStrategies(Player* player, PlayerbotAI* const facade, ReactionEngine* reactionEngine)
 {
-    reactionEngine->addStrategies("react", "chat", "avoid aoe", "potions", "dungeon", NULL);
+    reactionEngine->addStrategies("react", "chat", "avoid aoe", "avoid speciifc creatures", "potions", "dungeon", NULL);
 
     const int tab = GetPlayerSpecTab(player);
     switch (player->getClass())

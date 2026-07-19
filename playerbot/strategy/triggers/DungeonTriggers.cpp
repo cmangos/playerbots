@@ -255,7 +255,7 @@ bool CloseToSpecificCreaturesTrigger::IsActive()
     if (bot->IsInWorld() && !bot->IsBeingTeleported())
     {
         AiObjectContext* context = ai->GetAiObjectContext();
-        std::list<uint32> creatureIDList = AI_VALUE(std::list<uint32>, "avoid creature list");
+        std::set<uint32>&creatureIDList = AI_VALUE(std::set<uint32>&, "avoid creature list");
         // Check if any of the creatures listed is nearby
         for (const uint32 creatureToCheck : creatureIDList)
         {

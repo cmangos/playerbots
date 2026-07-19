@@ -76,11 +76,11 @@ namespace ai
     class AvoidSpecificCreaturesStrategyMultiplier : public Multiplier
     {
     public:
-        AvoidSpecificCreaturesStrategyMultiplier(PlayerbotAI* ai) : Multiplier(ai, "avoid specific creatures";) {}
+        AvoidSpecificCreaturesStrategyMultiplier(PlayerbotAI* ai) : Multiplier(ai, "avoid specific creatures") {}
         float GetValue(Action* action) { return 1.0f; }
         
 #ifdef GenerateBotHelp
-        virtual std::string GetHelpName() { return "avoid specific creatures";; } //Must equal iternal name
+        virtual std::string GetHelpName() { return "avoid specific creatures" } //Must equal iternal name
         virtual std::string GetHelpDescription() {
             return "This makes bots run away from specific creatures.";
         }

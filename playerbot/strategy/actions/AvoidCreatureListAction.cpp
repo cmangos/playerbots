@@ -11,7 +11,7 @@ bool AvoidCreatureListAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     std::string cmd = event.getParam();
-    std::set<uint32>& avoidCreatures = AI_VALUE(std::set<uint32>&, "avoid creature list");
+    std::set<uint32>&avoidCreatures = AI_VALUE(std::set<uint32>&, "avoid creature list");
 
     if (cmd == "reset")
     {
@@ -39,7 +39,7 @@ bool AvoidCreatureListAction::Execute(Event& event)
                 }
 
                 if (first) first = false; else out << ", ";
-                out << chat->formatSpell(creatureEntry);
+                out << *i;
             }
 
             ai->TellPlayer(requester, out);
@@ -60,8 +60,8 @@ bool AvoidCreatureListAction::Execute(Event& event)
                     // Remove the -
                     creature = creature.substr(1);
                 }
-
-                uint32 creatureId = chat->parseCreature(creature);
+                PlayerbotChatHandler handler(bot);
+                uint32 creatureId = handler.extractCreatureId(creature);
                 if (!creatureId)
                 {
                     creatureId = AI_VALUE2(uint32, "creature id", creature);
@@ -87,7 +87,7 @@ bool AvoidCreatureListAction::Execute(Event& event)
                     {
                         avoidCreatures.erase(j);
                         std::ostringstream out;
-                        out << chat->formatSpell(spellEntry) << " removed from avoid creature list";
+                        out << creatureId << " removed from avoid creature list";
                         ai->TellPlayer(requester, out);
                     }
                 }
@@ -98,7 +98,7 @@ bool AvoidCreatureListAction::Execute(Event& event)
                     {
                         avoidCreatures.insert(creatureId);
                         std::ostringstream out;
-                        out << chat->formatSpell(spellEntry) << " added to avoid creature list";
+                        out << creatureId << " added to avoid creature list";
                         ai->TellPlayer(requester, out);
                     }
                 }

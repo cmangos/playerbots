@@ -285,7 +285,7 @@ bool MoveAwayFromCreature::IsHazardNearby(const WorldPosition& point, const std:
 
 bool MoveAwayFromSpecificCreatures::Execute(Event& event)
 {
-    std::list<uint32> creatureIDList = AI_VALUE(std::list<uint32>, "avoid creature list");
+    std::set<uint32>&creatureIDList = AI_VALUE(std::set<uint32>&, "avoid creature list");
     for (const uint32 creatureToCheck : creatureIDList)
     {
         bool result = CreatureSearchHelperFunction(event, creatureToCheck);

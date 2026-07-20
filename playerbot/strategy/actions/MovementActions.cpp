@@ -230,9 +230,9 @@ bool MovementAction::FlyDirect(const WorldPosition &startPosition, const WorldPo
     
     bool flying = bot->IsFlying() && bot->IsFreeFlying();
     mm.MovePoint(movePosition.getMapId(), Position(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f), flying  ? FORCED_MOVEMENT_FLIGHT : FORCED_MOVEMENT_RUN, flying ? bot->GetSpeed(MOVE_FLIGHT) : 0.f, flying);
-    WaitForReach(25.0f);
+    WaitForReach(movePosition.distance(WorldPosition(movePosition.getX(), movePosition.getY(), movePosition.getZ(), 0.f)));
     
-    AI_VALUE(LastMovement&, "last movement").lastAreaTrigger = WorldPosition(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), bot->GetOrientation());
+    AI_VALUE(LastMovement&, "last movement").lastAreaTrigger = movePosition;
 
     return true;
 #endif

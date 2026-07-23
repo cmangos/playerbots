@@ -60,6 +60,7 @@
 #include "SendMailAction.h"
 #include "ShareQuestAction.h"
 #include "SkipSpellsListAction.h"
+#include "AvoidCreatureListAction.h"
 #include "CustomStrategyEditAction.h"
 #include "FlagAction.h"
 #include "HireAction.h"
@@ -104,6 +105,7 @@ namespace ai
             creators["query item usage"] = [](PlayerbotAI* ai) { return new QueryItemUsageAction(ai); };
             creators["ll"] = [](PlayerbotAI* ai) { return new LootStrategyAction(ai); };
             creators["ss"] = [](PlayerbotAI* ai) { return new SkipSpellsListAction(ai); };
+            creators["avoid creature"] = [](PlayerbotAI* ai) { return new AvoidCreatureListAction(ai); };
             creators["loot"] = [](PlayerbotAI* ai) { return new AddAllLootAction(ai); };
             creators["add all loot"] = [](PlayerbotAI* ai) { return new AddAllLootAction(ai); };
             creators["roll"] = [](PlayerbotAI* ai) { return new RollAction(ai); };

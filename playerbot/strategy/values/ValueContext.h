@@ -106,6 +106,8 @@
 #include "FishValues.h"
 #include "RuneForgeValues.h"
 #include "WorldBuffTravelValues.h"
+#include "AvoidCreatureListValue.h"
+#include "CreatureIdValue.h"
 
 namespace ai
 {
@@ -118,6 +120,7 @@ namespace ai
             creators["craft"] = [](PlayerbotAI* ai) { return new CraftValue(ai); };
             creators["collision"] = [](PlayerbotAI* ai) { return new CollisionValue(ai); };
             creators["skip spells list"] = [](PlayerbotAI* ai) { return new SkipSpellsListValue(ai); };
+            creators["avoid creature list"] = [](PlayerbotAI* ai) { return new AvoidCreatureListValue(ai); };
             creators["nearest game objects"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai); };
             creators["nearest game objects no los"] = [](PlayerbotAI* ai) { return new NearestGameObjects(ai, sPlayerbotAIConfig.sightDistance, LOS_IGNORE); };
             creators["nearest dynamic objects"] = [](PlayerbotAI* ai) { return new NearestDynamicObjects(ai); };
@@ -241,6 +244,8 @@ namespace ai
             creators["my threat"] = [](PlayerbotAI* ai) { return new MyThreatValue(ai); };
             creators["tank threat"] = [](PlayerbotAI* ai) { return new TankThreatValue(ai); };
             creators["threat"] = [](PlayerbotAI* ai) { return new ThreatValue(ai); };
+
+            creators["creature id"] = [](PlayerbotAI* ai) { return new CreatureIdValue(ai); };
 
             creators["incoming damage"] = [](PlayerbotAI* ai) { return new IncomingDamageValue(ai); };
             creators["balance"] = [](PlayerbotAI* ai) { return new BalancePercentValue(ai); };

@@ -179,6 +179,17 @@ namespace ai
         }
     };
 
+    class FrostSpellsLocked : public Trigger
+    {
+    public:
+        FrostSpellsLocked(PlayerbotAI* ai) : Trigger(ai, "frost spells locked", 2) {}
+
+        virtual bool IsActive() override
+        {
+            return !bot->IsSpellReady(116);      //frostbolt
+        }
+    };
+
     class IceLanceTrigger : public Trigger
     {
     public:

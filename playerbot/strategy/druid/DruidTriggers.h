@@ -17,10 +17,11 @@ namespace ai
         virtual bool IsActive() override { return BuffTrigger::IsActive() &&  !ai->HasAura("gift of the wild", GetTarget()); }
     };
 
-    class GiftOfTheWildOnPartyTrigger : public GreaterBuffOnPartyTrigger
+    class GiftOfTheWildOnPartyTrigger : public BuffOnPartyTrigger
     {
     public:
-        GiftOfTheWildOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "gift of the wild", "mark of the wild", 4) {}
+        GiftOfTheWildOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "gift of the wild", 4) {}
+        virtual bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("gift of the wild", GetTarget()); }
     };
 
     class ThornsOnPartyTrigger : public BuffOnPartyTrigger

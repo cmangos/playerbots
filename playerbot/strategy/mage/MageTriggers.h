@@ -35,7 +35,7 @@ namespace ai
     class ArcaneBrillianceOnPartyTrigger : public GreaterBuffOnPartyTrigger
     {
     public:
-        ArcaneBrillianceOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "arcane brilliance", "arcane intellect", 4) {}
+        ArcaneBrillianceOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "arcane brilliance", 4) {}
     };
 
     class AnyMageArmorTrigger : public BuffTrigger 

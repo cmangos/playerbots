@@ -23,15 +23,15 @@ namespace ai
         GiftOfTheWildOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "gift of the wild", "mark of the wild", 4) {}
     };
 
-    class ThornsOnPartyTrigger : public BuffOnPartyTrigger
+    class ThornsOnPartyTrigger : public BuffOnTankTrigger
     {
     public:
-        ThornsOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "thorns", 4) {}
+        ThornsOnPartyTrigger(PlayerbotAI* ai) : BuffOnTankTrigger(ai, "thorns", 4) {}
 
         virtual bool IsActive() override
         {
             Unit* target = GetTarget();
-            if (target && BuffOnPartyTrigger::IsActive() && (!target->IsPlayer() || !ai->IsRanged((Player*)target)))
+            if (target && BuffOnTankTrigger::IsActive() && (!target->IsPlayer() || !ai->IsRanged((Player*)target)))
             {
                 // Don't apply thorns if fire shield (conflict) is on the target
                 return !ai->HasAura("fire shield", target);

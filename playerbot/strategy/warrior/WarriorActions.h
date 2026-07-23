@@ -83,7 +83,7 @@ namespace ai
     MELEE_ACTION(CastShieldSlamAction, "shield slam");
     MELEE_ACTION(CastConcussionBlowAction, "concussion blow");
     // protection talents 2.4.3
-    MELEE_ACTION(CastDevastateAction, "devastate");
+    // MELEE_ACTION(CastDevastateAction, "devastate");
     // protection talents 3.3.5
     MELEE_DEBUFF_ACTION_R(CastShockwaveAction, "shockwave", 8.0f);
     SNARE_ACTION(CastShockwaveSnareAction, "shockwave");
@@ -141,6 +141,30 @@ namespace ai
                 return true;
 
             return !ai->HasAura("sunder armor", target, true);
+        }
+    };
+
+    class CastDevastateAction : public CastMeleeSpellAction
+    {
+    public:
+        CastDevastateAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "devastate") {}
+
+        virtual bool isUseful() override
+        {
+            Unit* target = GetTarget();
+            if (!target)
+                return false;
+
+            const bool isTank = ai->IsTank(bot);
+
+            uint32 shieldSlam = AI_VALUE2(uint32, "spell id", "shield slam");
+
+            if (shieldSlam)
+            {
+                return !bot->IsSpellReady(shieldSlam);
+            }
+
+            return true;
         }
     };
 

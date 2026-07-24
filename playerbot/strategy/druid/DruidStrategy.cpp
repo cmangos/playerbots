@@ -85,7 +85,7 @@ private:
     ACTION_NODE_P(mark_of_the_wild_on_party, "mark of the wild on party", "caster form");
 
     ACTION_NODE_P(gift_of_the_wild_on_party, "gift of the wild on party", "caster form");
-    
+
     ACTION_NODE_P(cat_form, "cat form", "caster form");
 
     ACTION_NODE_P(travel_form, "travel form", "caster form");

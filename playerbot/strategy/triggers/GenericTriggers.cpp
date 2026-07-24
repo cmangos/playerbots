@@ -163,7 +163,7 @@ Value<Unit*>* BuffOnPartyTrigger::GetTargetValue()
 
 Value<Unit*>* GreaterBuffOnPartyTrigger::GetTargetValue()
 {
-    const std::string qualifier = spell + "-" + (ignoreTanks ? "1" : "0");
+    const std::string qualifier = spell + "," + lowerSpell + "-" + (ignoreTanks ? "1" : "0");
     return context->GetValue<Unit*>("party member without aura", qualifier);
 }
 
@@ -814,7 +814,7 @@ bool InRaidFightTrigger::IsActive()
 bool GreaterBuffOnPartyTrigger::IsActive()
 {
     Unit* target = GetTarget();
-    return target && bot->IsInGroup(target) && BuffOnPartyTrigger::IsActive() && !ai->HasAura(lowerSpell, target, false, checkIsOwner);
+    return target && bot->IsInGroup(target);
 }
 
 bool TargetOfAttacker::IsActive()

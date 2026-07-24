@@ -298,15 +298,16 @@ namespace ai
     class GreaterBuffOnPartyAction : public CastBuffSpellAction, public PartyMemberActionNameSupport
     {
     public:
-        GreaterBuffOnPartyAction(PlayerbotAI* ai, std::string spell, bool ignoreTanks = false) : CastBuffSpellAction(ai, spell), PartyMemberActionNameSupport(spell), ignoreTanks(ignoreTanks) {}
+        GreaterBuffOnPartyAction(PlayerbotAI* ai, std::string spell, std::string lowerSpell, bool ignoreTanks = false) : CastBuffSpellAction(ai, spell), PartyMemberActionNameSupport(spell), lowerSpell(lowerSpell), ignoreTanks(ignoreTanks) {}
 
     protected:
         virtual std::string getName() override { return PartyMemberActionNameSupport::getName(); }
         virtual std::string GetTargetName() override { return "party member without aura"; }
-        virtual std::string GetTargetQualifier() override { return GetSpellName() + "-" + (ignoreTanks ? "1" : "0"); }
+        virtual std::string GetTargetQualifier() override { return GetSpellName() + "," + lowerSpell + "-" + (ignoreTanks ? "1" : "0"); }
 
     private:
         bool ignoreTanks;
+        std::string lowerSpell;
     };
 
     //---------------------------------------------------------------------------------------------------------------------

@@ -14,7 +14,7 @@ namespace ai
     {
     public:
         MarkOfTheWildTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "mark of the wild", 4) {}
-        virtual bool IsActive() override { return BuffTrigger::IsActive() &&  !ai->HasAura("gift of the wild", GetTarget()); }
+        virtual bool IsActive() override { return BuffTrigger::IsActive() && !ai->HasAura("gift of the wild", GetTarget()); }
     };
 
     class GiftOfTheWildOnPartyTrigger : public GreaterBuffOnPartyTrigger

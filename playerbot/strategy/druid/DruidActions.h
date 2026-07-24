@@ -72,7 +72,7 @@ namespace ai
 
 	BUFF_ACTION(CastMarkOfTheWildAction, "mark of the wild");
 	BUFF_PARTY_ACTION(CastMarkOfTheWildOnPartyAction, "mark of the wild");
-	GREATER_BUFF_PARTY_ACTION(CastGiftOfTheWildOnPartyAction, "gift of the wild");
+	GREATER_BUFF_PARTY_ACTION(CastGiftOfTheWildOnPartyAction, "gift of the wild", "mark of the wild");
 
 	class CastSurvivalInstinctsAction : public CastBuffSpellAction 
 	{

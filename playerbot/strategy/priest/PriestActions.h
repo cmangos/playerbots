@@ -6,7 +6,7 @@ namespace ai
     // disc
     BUFF_ACTION(CastPowerWordFortitudeAction, "power word: fortitude");
     BUFF_PARTY_ACTION(CastPowerWordFortitudeOnPartyAction, "power word: fortitude");
-    GREATER_BUFF_PARTY_ACTION(CastPrayerOfFortitudeOnPartyAction, "prayer of fortitude");
+    GREATER_BUFF_PARTY_ACTION(CastPrayerOfFortitudeOnPartyAction, "prayer of fortitude", "power word: fortitude");
     BUFF_ACTION(CastPowerWordShieldAction, "power word: shield");
     HEAL_PARTY_ACTION(CastPowerWordShieldOnPartyAction, "power word: shield");
     BUFF_ACTION(CastInnerFireAction, "inner fire");
@@ -18,7 +18,7 @@ namespace ai
     BUFF_ACTION(CastLevitateAction, "levitate");
     BUFF_ACTION(CastDivineSpiritAction, "divine spirit");
     BUFF_PARTY_ACTION(CastDivineSpiritOnPartyAction, "divine spirit");
-    GREATER_BUFF_PARTY_ACTION(CastPrayerOfSpiritOnPartyAction, "prayer of spirit");
+    GREATER_BUFF_PARTY_ACTION(CastPrayerOfSpiritOnPartyAction, "prayer of spirit", "divine spirit");
     //disc 2.4.3
     SPELL_ACTION(CastMassDispelAction, "mass dispel");
 
@@ -68,7 +68,7 @@ namespace ai
     BUFF_ACTION_U(CastFadeAction, "fade", bot->GetGroup());
     BUFF_ACTION(CastShadowProtectionAction, "shadow protection");
     BUFF_PARTY_ACTION(CastShadowProtectionOnPartyAction, "shadow protection");
-    GREATER_BUFF_PARTY_ACTION(CastPrayerOfShadowProtectionAction, "prayer of shadow protection");
+    GREATER_BUFF_PARTY_ACTION(CastPrayerOfShadowProtectionAction, "prayer of shadow protection", "shadow protection");
     // shadow 2.4.3
     BUFF_ACTION(CastShadowfiendAction, "shadowfiend");
     SPELL_ACTION(CastShadowWordDeathAction, "shadow word: death");

@@ -14,14 +14,13 @@ namespace ai
     {
     public:
         MarkOfTheWildTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "mark of the wild", 4) {}
-        virtual bool IsActive() override { return BuffTrigger::IsActive() &&  !ai->HasAura("gift of the wild", GetTarget()); }
+        virtual bool IsActive() override { return BuffTrigger::IsActive() && !ai->HasAura("gift of the wild", GetTarget()); }
     };
 
-    class GiftOfTheWildOnPartyTrigger : public BuffOnPartyTrigger
+    class GiftOfTheWildOnPartyTrigger : public GreaterBuffOnPartyTrigger
     {
     public:
-        GiftOfTheWildOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "gift of the wild", 4) {}
-        virtual bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("gift of the wild", GetTarget()); }
+        GiftOfTheWildOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "gift of the wild", "mark of the wild", 4) {}
     };
 
     class ThornsOnPartyTrigger : public BuffOnPartyTrigger

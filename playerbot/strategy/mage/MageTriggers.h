@@ -32,11 +32,10 @@ namespace ai
         virtual bool IsActive() override { return BuffTrigger::IsActive() && !ai->HasAura("arcane brilliance", GetTarget()); }
     };
 
-    class ArcaneBrillianceOnPartyTrigger : public BuffOnPartyTrigger
+    class ArcaneBrillianceOnPartyTrigger : public GreaterBuffOnPartyTrigger
     {
     public:
-        ArcaneBrillianceOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "arcane brilliance", 4) {}
-        virtual bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("arcane brilliance", GetTarget()); }
+        ArcaneBrillianceOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "arcane brilliance", "arcane intellect", 4) {}
     };
 
     class AnyMageArmorTrigger : public BuffTrigger 

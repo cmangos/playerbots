@@ -76,25 +76,22 @@ namespace ai
         virtual bool IsActive() override { return BuffTrigger::IsActive() && !ai->HasAura("prayer of shadow protection", GetTarget()); }
     };
 
-    class PrayerOfFortitudeOnPartyTrigger : public BuffOnPartyTrigger
+    class PrayerOfFortitudeOnPartyTrigger : public GreaterBuffOnPartyTrigger
     {
     public:
-        PrayerOfFortitudeOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "prayer of fortitude", 4) {}
-        virtual bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("prayer of fortitude", GetTarget()); }
+        PrayerOfFortitudeOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "prayer of fortitude", "power word: fortitude", 4) {}
     };
 
-    class PrayerOfSpiritOnPartyTrigger : public BuffOnPartyTrigger
+    class PrayerOfSpiritOnPartyTrigger : public GreaterBuffOnPartyTrigger
     {
     public:
-        PrayerOfSpiritOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "prayer of spirit", 4) {}
-        virtual bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("prayer of spirit", GetTarget()); }
+        PrayerOfSpiritOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "prayer of spirit", "divine spirit", 4) {}
     };
 
-    class PrayerOfShadowProtectionOnPartyTrigger : public BuffOnPartyTrigger
+    class PrayerOfShadowProtectionOnPartyTrigger : public GreaterBuffOnPartyTrigger
     {
     public:
-        PrayerOfShadowProtectionOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "prayer of shadow protection", 4) {}
-        virtual bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("prayer of shadow protection", GetTarget()); }
+        PrayerOfShadowProtectionOnPartyTrigger(PlayerbotAI* ai) : GreaterBuffOnPartyTrigger(ai, "prayer of shadow protection", "shadow protection", 4) {}
     };
 
     class BindingHealTrigger : public PartyMemberLowHealthTrigger 

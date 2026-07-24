@@ -85,7 +85,7 @@ private:
     ACTION_NODE_P(mark_of_the_wild_on_party, "mark of the wild on party", "caster form");
 
     ACTION_NODE_P(gift_of_the_wild_on_party, "gift of the wild on party", "caster form");
-
+    
     ACTION_NODE_P(cat_form, "cat form", "caster form");
 
     ACTION_NODE_P(travel_form, "travel form", "caster form");
@@ -358,11 +358,11 @@ void DruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "gift of the wild on party",
-        NextAction::array(0, new NextAction("gift of the wild on party", ACTION_NORMAL + 3), NULL)));
+        NextAction::array(0, new NextAction("gift of the wild on party", ACTION_NORMAL + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
         "mark of the wild on party",
-        NextAction::array(0, new NextAction("mark of the wild on party", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("mark of the wild on party", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "thorns on party",
@@ -830,11 +830,11 @@ void DruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "gift of the wild on party",
-        NextAction::array(0, new NextAction("gift of the wild on party", ACTION_NORMAL + 3), NULL)));
+        NextAction::array(0, new NextAction("gift of the wild on party", ACTION_NORMAL + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
         "mark of the wild on party",
-        NextAction::array(0, new NextAction("mark of the wild on party", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("mark of the wild on party", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "thorns on party",
@@ -1244,11 +1244,11 @@ void DruidBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 
     triggers.push_back(new TriggerNode(
         "gift of the wild on party",
-        NextAction::array(0, new NextAction("gift of the wild on party", ACTION_NORMAL + 3), NULL)));
+        NextAction::array(0, new NextAction("gift of the wild on party", ACTION_NORMAL + 5), NULL)));
 
     triggers.push_back(new TriggerNode(
         "mark of the wild on party",
-        NextAction::array(0, new NextAction("mark of the wild on party", ACTION_NORMAL + 2), NULL)));
+        NextAction::array(0, new NextAction("mark of the wild on party", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
         "thorns on party",

@@ -173,7 +173,7 @@ bool PossibleAttackTargetsValue::IsImmuneToDamage(Unit* target, Player* player)
 
     // Immune to damage
     // Before we check auras, check school derived immunity
-    if (target->IsImmuneToDamage(SPELL_SCHOOL_MASK_ALL))
+    if (target->m_spellImmune[IMMUNITY_SCHOOL] == SPELL_SCHOOL_MASK_ALL || target->m_spellImmune[IMMUNITY_DAMAGE] == SPELL_SCHOOL_MASK_ALL)
         return true;
 
     PlayerbotAI* ai = player->GetPlayerbotAI();

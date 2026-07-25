@@ -158,23 +158,27 @@ bool CastSpellAction::isUseful()
     if (!spellTarget->IsInWorld() || spellTarget->GetMapId() != bot->GetMapId())
         return false;
 
-    std::set<Aura*> alreadyDone;
-    Unit::AuraList const& vDamageShields = spellTarget->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
-    for (Unit::AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)
+    // check if the damage we'd take from damage shields is too harmful, only for melee spells
+    if (range == ATTACK_DISTANCE)
     {
-        if (alreadyDone.find(*i) == alreadyDone.end())
+        std::set<Aura*> alreadyDone;
+        Unit::AuraList const& vDamageShields = spellTarget->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
+        for (Unit::AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)
         {
-            alreadyDone.insert(*i);
-            uint32 damage = (*i)->GetModifier()->m_amount;
+            if (alreadyDone.find(*i) == alreadyDone.end())
+            {
+                alreadyDone.insert(*i);
+                uint32 damage = (*i)->GetModifier()->m_amount;
 
-            // If the damage shield does 25% of our max hp on each hit we do, we shouldn't cast a melee spell
-            if (damage >= bot->GetMaxHealth() * 0.25f && range == ATTACK_DISTANCE)
-                return false;
+                // If the damage shield does 25% of our max hp on each hit we do, we shouldn't cast a melee spell
+                if (damage >= bot->GetMaxHealth() * 0.25f)
+                    return false;
 
-            i = vDamageShields.begin();
+                i = vDamageShields.begin();
+            }
+            else
+                ++i;
         }
-        else
-            ++i;
     }
 
     return true;

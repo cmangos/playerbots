@@ -158,14 +158,24 @@ bool CastSpellAction::isUseful()
     if (!spellTarget->IsInWorld() || spellTarget->GetMapId() != bot->GetMapId())
         return false;
 
+    // victim's damage shield
+    std::set<Aura*> alreadyDone;
     Unit::AuraList const& vDamageShields = spellTarget->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
     for (Unit::AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)
     {
-        uint32 damage = (*i)->GetModifier()->m_amount;
+        if (alreadyDone.find(*i) == alreadyDone.end())
+        {
+            alreadyDone.insert(*i);
+            uint32 damage = (*i)->GetModifier()->m_amount;
 
-        // If the damage shield does 25% of our max hp on each hit we do, we shouldn't cast a melee spell
-        if (damage >= bot->GetMaxHealth() * 0.25f && range == ATTACK_DISTANCE)
-            return false;
+            // If the damage shield does 25% of our max hp on each hit we do, we shouldn't cast a melee spell
+            if (damage >= bot->GetMaxHealth() * 0.25f && range == ATTACK_DISTANCE)
+                return false;
+
+            i = vDamageShields.begin();
+        }
+        else
+            ++i;
     }
 
     return true;

@@ -144,11 +144,19 @@ bool CastSpellAction::isUseful()
     if (ai->IsInVehicle() && !ai->IsInVehicle(false, false, true))
         return false;
 
+    const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
+    if (!pSpellInfo)
+        return false;
+
     if(!AI_VALUE2(bool, "spell cast useful", spellName))
         return false;
 
     Unit* spellTarget = GetTarget();
     if (!spellTarget)
+        return false;
+
+    // If target is more likely than not to reflect and our spell is reflectable, don't cast
+    if (spellTarget->GetReflectChance(GetSpellSchoolMask(pSpellInfo)) > 50.0f && IsReflectableSpell(pSpellInfo))
         return false;
 
     if (!spellTarget->IsInWorld() || spellTarget->GetMapId() != bot->GetMapId())

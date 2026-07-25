@@ -162,7 +162,11 @@ bool AttackAction::Attack(Player* requester, Unit* target)
 
                         // If the damage shield does at least 10% of our max hp on each hit we do, we shouldn't attack
                         if (damage >= bot->GetMaxHealth() * 0.10f)
+                        {
+                            bot->AttackStop();
                             return false;
+                        }
+                            
 
                         i = vDamageShields.begin();
                     }

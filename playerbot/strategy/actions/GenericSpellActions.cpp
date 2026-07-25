@@ -172,7 +172,11 @@ bool CastSpellAction::isUseful()
 
                 // If the damage shield does at least 10% of our max hp on each hit we do, we shouldn't cast a melee spell
                 if (damage >= bot->GetMaxHealth() * 0.10f)
+                {
+                    bot->AttackStop();
                     return false;
+                }
+                    
 
                 i = vDamageShields.begin();
             }

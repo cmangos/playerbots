@@ -24,9 +24,12 @@ bool MeleeAction::isUseful()
                 alreadyDone.insert(*i);
                 uint32 damage = (*i)->GetModifier()->m_amount;
 
-                // If the damage shield does at least 10% of our max hp on each hit we do, we shouldn't cast a melee spell
+                // If the damage shield does at least 10% of our max hp on each hit we do, we shouldn't melee
                 if (damage >= bot->GetMaxHealth() * 0.10f)
+                {
+                    bot->AttackStop();
                     return false;
+                }
 
                 i = vDamageShields.begin();
             }

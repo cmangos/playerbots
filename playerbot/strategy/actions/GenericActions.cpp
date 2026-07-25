@@ -11,6 +11,21 @@ bool MeleeAction::isUseful()
     if (ai->IsInVehicle() && !ai->IsInVehicle(false, false, true))
         return false;
 
+    Unit* target = GetTarget();
+
+    if (target)
+    {
+        Unit::AuraList const& vDamageShields = target->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
+        for (Unit::AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)
+        {
+            uint32 damage = (*i)->GetModifier()->m_amount;
+
+            // If the damage shield does 25% of our max hp on each hit we do, we shouldn't melee
+            if (damage >= bot->GetMaxHealth() * 0.25f)
+                return false;
+        }
+    }
+
     return true;
 }
 

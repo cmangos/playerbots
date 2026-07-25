@@ -144,6 +144,10 @@ bool CastSpellAction::isUseful()
     if (ai->IsInVehicle() && !ai->IsInVehicle(false, false, true))
         return false;
 
+    const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
+    if (!pSpellInfo)
+        return false;
+
     if(!AI_VALUE2(bool, "spell cast useful", spellName))
         return false;
 
@@ -153,6 +157,16 @@ bool CastSpellAction::isUseful()
 
     if (!spellTarget->IsInWorld() || spellTarget->GetMapId() != bot->GetMapId())
         return false;
+
+    Unit::AuraList const& vDamageShields = spellTarget->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
+    for (Unit::AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)
+    {
+        uint32 damage = (*i)->GetModifier()->m_amount;
+
+        // If the damage shield does 25% of our max hp on each hit we do, we shouldn't cast a melee spell
+        if (damage >= bot->GetMaxHealth() * 0.25f && range == ATTACK_DISTANCE)
+            return false;
+    }
 
     return true;
 }

@@ -155,11 +155,11 @@ bool CastSpellAction::isUseful()
     if (!spellTarget)
         return false;
 
-    // If target is more likely than not to reflect and our spell is reflectable, don't cast
-    if (spellTarget->GetReflectChance(GetSpellSchoolMask(pSpellInfo)) > 50.0f && IsReflectableSpell(pSpellInfo))
+    if (!spellTarget->IsInWorld() || spellTarget->GetMapId() != bot->GetMapId())
         return false;
 
-    if (!spellTarget->IsInWorld() || spellTarget->GetMapId() != bot->GetMapId())
+    // If target is more likely than not to reflect and our spell is reflectable, don't cast
+    if (spellTarget->GetReflectChance(GetSpellSchoolMask(pSpellInfo)) > 50.0f && IsReflectableSpell(pSpellInfo))
         return false;
 
     return true;

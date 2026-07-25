@@ -158,7 +158,6 @@ bool CastSpellAction::isUseful()
     if (!spellTarget->IsInWorld() || spellTarget->GetMapId() != bot->GetMapId())
         return false;
 
-    // victim's damage shield
     std::set<Aura*> alreadyDone;
     Unit::AuraList const& vDamageShields = spellTarget->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
     for (Unit::AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)

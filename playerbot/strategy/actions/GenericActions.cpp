@@ -15,7 +15,6 @@ bool MeleeAction::isUseful()
 
     if (target)
     {
-        // victim's damage shield
         std::set<Aura*> alreadyDone;
         Unit::AuraList const& vDamageShields = target->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
         for (Unit::AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)

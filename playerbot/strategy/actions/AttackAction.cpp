@@ -171,7 +171,6 @@ bool AttackAction::Attack(Player* requester, Unit* target)
                 }
             }
 
-
             ai->PlayAttackEmote(1);
             result = bot->Attack(target, !ai->IsRanged(bot) || (sServerFacade.GetDistance2d(bot, target) < 5.0f));
         }

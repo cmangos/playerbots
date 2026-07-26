@@ -309,7 +309,7 @@ bool CastFrozenDeathboltAction::isPossible()
 
 bool CastWarStompAction::isUseful()
 {
-    // only close the gap if we have pvp on
+    // ignore distance check in pvp or duel
     if (!ai->HasStrategy("pvp", BotState::BOT_STATE_COMBAT) &&
         !ai->HasStrategy("duel", BotState::BOT_STATE_COMBAT))
     {

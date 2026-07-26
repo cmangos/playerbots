@@ -41,7 +41,7 @@ bool GuildShareItemAction::Execute(Event& event)
         if (giveCount == stackCount)
         {
             ItemPosCountVec dest;
-#ifdef MANGOSBOT_TWO
+#ifndef MANGOSBOT_ZERO
             uint8 bagSlot;
             InventoryResult msg = receiver->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, bagSlot, false);
 #else

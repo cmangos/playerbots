@@ -104,7 +104,7 @@ TestResult CommandSetupGiveItem::Execute(const std::string& params, Player* bot,
         if (isBank)
         {
             ItemPosCountVec dest;
-#ifdef MANGOSBOT_TWO
+#ifndef MANGOSBOT_ZERO
             uint8 bagSlot;
             InventoryResult msg = bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false, bagSlot);
 #else

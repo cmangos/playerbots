@@ -20,17 +20,23 @@ namespace ai
             {
                 if (ai->HasStrategy("follow", BotState::BOT_STATE_COMBAT) ||
                     ai->HasStrategy("guard", BotState::BOT_STATE_COMBAT) ||
+                    ai->HasStrategy("stay", BotState::BOT_STATE_COMBAT) ||
                     ai->HasStrategy("wander", BotState::BOT_STATE_COMBAT))
                     if(bot->getClass() != CLASS_HUNTER || sServerFacade.GetDistance2d(bot, target) > 5.0f)
                         return false;                   
 
                 const bool canMove = !PossibleAttackTargetsValue::HasBreakableCC(target, bot) && !PossibleAttackTargetsValue::HasUnBreakableCC(target, bot);
 
-                // Don't move if the target is targeting you and you can't add distance between you and the target
+                // Don't move if the target is targeting you and you can't add distance between you and the target (how fast bot runs)
                 if (target->GetTarget() == bot && canMove && target->GetSpeedInMotion() > (bot->GetSpeedInMotion() * 0.65))
                 {
                     return false;
                 }
+
+                // Don't move if our flee range (how far bot runs) is too low to escape attack distance
+                // This is good if you don't want a bot to run away from an enemy that can't be cc or tanked
+                if (ai->GetRange("flee") <= ATTACK_DISTANCE)
+                    return false;
 
                 float const combatReach = bot->GetCombinedCombatReach(target, false);
                 float const minDistance = ai->GetRange("spell") + combatReach;

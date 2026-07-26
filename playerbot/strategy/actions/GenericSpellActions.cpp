@@ -307,6 +307,21 @@ bool CastFrozenDeathboltAction::isPossible()
     return CastVehicleSpellAction::isPossible();
 }
 
+bool CastWarStompAction::isUseful()
+{
+    // only close the gap if we have pvp on
+    if (!ai->HasStrategy("pvp", BotState::BOT_STATE_COMBAT) &&
+        !ai->HasStrategy("duel", BotState::BOT_STATE_COMBAT))
+    {
+        Unit* target = AI_VALUE(Unit*, "current target");
+        if (target)
+            return AI_VALUE2(float, "distance", "current target") <= 8.0f;
+        return false;
+    }
+
+    return true;
+}
+
 bool CastDevourHumanoidAction::isPossible()
 {
     Unit* target = GetTarget();

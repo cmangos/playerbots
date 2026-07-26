@@ -105,7 +105,7 @@ bool BankAction::Withdraw(Player* requester, const uint32 itemid)
     ResetBankActionItemCaches(ai, itemId, itemQualifier);
 
     ItemPosCountVec dest;
-#ifdef MANGOSBOT_TWO
+#ifndef MANGOSBOT_ZERO
     uint8 bagSlot;
     InventoryResult msg = bot->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, bagSlot, false);
 #else
@@ -143,7 +143,7 @@ bool BankAction::Deposit(Player* requester, Item* pItem)
     ResetBankActionItemCaches(ai, itemId, itemQualifier);
 
     ItemPosCountVec dest;
-#ifdef MANGOSBOT_TWO
+#ifndef MANGOSBOT_ZERO
     uint8 bagSlot;
     InventoryResult msg = bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false, bagSlot);
 #else
@@ -274,7 +274,7 @@ bool BankAction::AutoDeposit()
             continue;
 
         ItemPosCountVec dest;
-#ifdef MANGOSBOT_TWO
+#ifndef MANGOSBOT_ZERO
         uint8 bagSlot;
         InventoryResult msg = bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, item, false, bagSlot);
 #else
@@ -316,7 +316,7 @@ bool BankAction::AutoWithdraw()
             return false;        
 
         ItemPosCountVec dest;
-#ifdef MANGOSBOT_TWO
+#ifndef MANGOSBOT_ZERO
         uint8 bagSlot;
         InventoryResult msg = bot->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItem, bagSlot, false);
 #else

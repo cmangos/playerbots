@@ -51,14 +51,18 @@ namespace ai
 
         bool IsActive() override
         {
-            static const std::vector<uint32> battleShoutIds = {6673, 5242, 6192, 11549, 11550, 11551, 25289, 2048, 47436};
+            uint32 comShout = AI_VALUE2(uint32, "spell id", "commanding shout");
+            uint32 batShout = AI_VALUE2(uint32, "spell id", "battle shout");
+            if (!batShout)
+                return false;
 
-            for (uint32 id : battleShoutIds)
-            {
-                if (bot->HasAura(id))
-                    return false;
-            }
-            return true;
+            if (comShout && bot->HasSpell(comShout))
+                return !ai->HasAura("battle shout", bot) && !ai->HasMyAura("commanding shout", bot);
+
+            if (bot->HasSpell(batShout))
+                return !ai->HasAura("battle shout", bot);
+
+            return false;
         }
     };
 

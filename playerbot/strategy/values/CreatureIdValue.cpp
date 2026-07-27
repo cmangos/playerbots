@@ -16,8 +16,6 @@ CreatureIdValue::CreatureIdValue(PlayerbotAI* ai) : CalculatedValue<uint32>(ai, 
 uint32 CreatureIdValue::Calculate()
 {
     std::string namepart = qualifier;
-    ItemIds itemIds = ChatHelper::parseItems(namepart);
-
     PlayerbotChatHandler handler(bot);
     uint32 extractedCreatureId = handler.extractCreatureId(namepart);
     if (extractedCreatureId)

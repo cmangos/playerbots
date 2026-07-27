@@ -151,6 +151,7 @@ namespace ai
             creators["guild"] = [](PlayerbotAI* ai) { return new GuildStrategy(ai); };
             creators["grind"] = [](PlayerbotAI* ai) { return new GrindingStrategy(ai); };
             creators["avoid aoe"] = [](PlayerbotAI* ai) { return new AvoidAoeStrategy(ai); };
+            creators["avoid specific creatures"] = [](PlayerbotAI* ai) { return new AvoidSpecificCreaturesStrategy(ai); };
             creators["wait for attack"] = [](PlayerbotAI* ai) { return new WaitForAttackStrategy(ai); };
             creators["pull back"] = [](PlayerbotAI* ai) { return new PullBackStrategy(ai); };
             creators["focus heal targets"] = [](PlayerbotAI* ai) { return new FocusHealTargetsStrategy(ai); };

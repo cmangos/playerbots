@@ -303,7 +303,11 @@ namespace ai
     protected:
         virtual std::string getName() override { return PartyMemberActionNameSupport::getName(); }
         virtual std::string GetTargetName() override { return "party member without aura"; }
-        virtual std::string GetTargetQualifier() override { return GetSpellName() + "," + lowerSpell + "-" + (ignoreTanks ? "1" : "0"); }
+        virtual std::string GetTargetQualifier() override 
+        { 
+            const std::string spells = !lowerSpell.empty() ? GetSpellName() + "," + lowerSpell : GetSpellName();
+            return spells + "-" + (ignoreTanks ? "1" : "0"); 
+        }
 
     private:
         bool ignoreTanks;

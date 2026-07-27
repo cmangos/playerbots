@@ -163,7 +163,8 @@ Value<Unit*>* BuffOnPartyTrigger::GetTargetValue()
 
 Value<Unit*>* GreaterBuffOnPartyTrigger::GetTargetValue()
 {
-    const std::string qualifier = spell + "," + lowerSpell + "-" + (ignoreTanks ? "1" : "0");
+    const std::string spells = !lowerSpell.empty() ? spell + "," + lowerSpell : spell;
+    const std::string qualifier = spells + "-" + (ignoreTanks ? "1" : "0");
     return context->GetValue<Unit*>("party member without aura", qualifier);
 }
 

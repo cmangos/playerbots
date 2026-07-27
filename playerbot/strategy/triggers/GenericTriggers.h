@@ -306,7 +306,7 @@ namespace ai
     class RangedHighAoeTrigger : public AoeTrigger
     {
     public:
-        RangedHighAoeTrigger(PlayerbotAI* ai) : AoeTrigger(ai, 6) {}
+        RangedHighAoeTrigger(PlayerbotAI* ai) : AoeTrigger(ai, 5) {}
     };
 
     class RangedVeryHighAoeTrigger : public AoeTrigger

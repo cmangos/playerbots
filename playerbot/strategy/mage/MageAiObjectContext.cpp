@@ -183,6 +183,7 @@ namespace ai
                 creators["summon water elemental"] = [](PlayerbotAI* ai) { return new WaterElementalBoostTrigger(ai); };
                 creators["ice lance"] = [](PlayerbotAI* ai) { return new IceLanceTrigger(ai); };
                 creators["fire spells locked"] = [](PlayerbotAI* ai) { return new FireSpellsLocked(ai); };
+                creators["frost spells locked"] = [](PlayerbotAI* ai) { return new FrostSpellsLocked(ai); };
                 creators["cold snap"] = [](PlayerbotAI* ai) { return new ColdSnapTrigger(ai); };
                 creators["ice barrier"] = [](PlayerbotAI* ai) { return new IceBarrierTrigger(ai); };
                 creators["hot streak"] = [](PlayerbotAI* ai) { return new HotStreakTrigger(ai); };

@@ -55,12 +55,15 @@ namespace ai
     {
     public:
         WaitForAttackStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        static WaitForAttackStrategy* Get(PlayerbotAI* ai);
         std::string getName() override { return "wait for attack"; }
 
         static bool ShouldWait(PlayerbotAI* ai);
         static uint8 GetWaitTime(PlayerbotAI* ai);
         static float GetSafeDistance() { return sPlayerbotAIConfig.spellDistance; }
         static float GetSafeDistanceThreshold() { return 2.5f; }
+        ReactStates GetPetReactState() const { return petReactState; }
+        void SetPetReactState(ReactStates reactState) { petReactState = reactState; }
 
 #ifdef GenerateBotHelp
         virtual std::string GetHelpName() { return "wait for attack"; } //Must equal iternal name
@@ -73,6 +76,9 @@ namespace ai
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitCombatMultipliers(std::list<Multiplier*>& multipliers) override;
+
+    private:
+        ReactStates petReactState;
     };
 
     class WaitForAttackMultiplier : public Multiplier

@@ -336,7 +336,7 @@ namespace ai
     {
     public:
         CastShootAction(PlayerbotAI* ai) : CastSpellAction(ai, "shoot"), rangedWeapon(nullptr), weaponDelay(0), needsAmmo(false) {}
-        ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_NONE; }
+        ActionThreatType getThreatType() override { return ActionThreatType::ACTION_THREAT_LOW; }
         bool Execute(Event& event) override;
         bool isPossible() override;
 

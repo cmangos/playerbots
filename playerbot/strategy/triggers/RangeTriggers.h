@@ -434,7 +434,8 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            if (WaitForAttackStrategy::ShouldWait(ai))
+            // we can't let them run away from the targets we need to cc at the start
+            if (WaitForAttackStrategy::ShouldWait(ai) && !AI_VALUE(Unit*, "rti cc target"))
             {
                 // Do not move if stay strategy is set
                 if (!ai->HasStrategy("stay", ai->GetState()))

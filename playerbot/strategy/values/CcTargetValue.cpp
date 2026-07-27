@@ -13,7 +13,7 @@ public:
     FindTargetForCcStrategy(PlayerbotAI* ai, std::string spell) : FindTargetStrategy(ai)
     {
         this->spell = spell;
-        maxDistance = 0;
+        maxDistance = sPlayerbotAIConfig.sightDistance;
     }
 
 public:
@@ -23,10 +23,7 @@ public:
 
         AiObjectContext* context = ai->GetAiObjectContext();
 
-        if (!ai->CanCastSpell(spell, creature, true, nullptr, false, true))
-            return;
-
-        if (AI_VALUE(Unit*,"rti cc target") == creature)
+        if (AI_VALUE(Unit*,"rti cc target") && AI_VALUE(Unit*,"rti cc target")->GetObjectGuid() == creature->GetObjectGuid())
         {
             result = creature;
             return;
@@ -57,6 +54,11 @@ public:
         if (creature->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) && !(spell == "fear" || spell == "banish"))
             return;
 
+        if (!ai->CanCastSpell(spell, creature, true, nullptr, false, true))
+            return;
+        /*
+        // Here we try to cc stuff that is not marked. This is not suggested because randomly cc'ing things with no
+        // reason can lead to bad outcomes (cc'ing the mob that isn't marked for you, rebanishing the only mob left nonstop)
         if (!creature->IsPlayer())
         {
             int tankCount, dpsCount;
@@ -68,26 +70,32 @@ public:
             }
         }
 
-        Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
-        for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        // This only makese sense if we don't have a target of our own to cc. 
+        // Since we use this function in a search of attackers, first result may not be our rti cc target
+        if (!context->GetValue<Unit*>("rti cc target")->Get())
         {
-            Player *member = sObjectMgr.GetPlayer(itr->guid);
-            if(!member || !sServerFacade.IsAlive(member) || member == bot || bot->GetMapId() != member->GetMapId())
-                continue;
+            Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
+            for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+            {
+                Player *member = sObjectMgr.GetPlayer(itr->guid);
+                if(!member || !sServerFacade.IsAlive(member) || member == bot || bot->GetMapId() != member->GetMapId())
+                    continue;
 
-            if (!ai->IsTank(member))
-                continue;
+                if (!ai->IsTank(member))
+                    continue;
 
-            float distance = sServerFacade.GetDistance2d(member, creature);
-            if (distance < minDistance)
-                minDistance = distance;
-        }
+                float distance = sServerFacade.GetDistance2d(member, creature);
+                if (distance < minDistance)
+                    minDistance = distance;
+            }
 
-        if ((!result && !creature->IsPlayer()) || minDistance > maxDistance)
-        {
-            result = creature;
-            maxDistance = minDistance;
-        }
+            if ((!result && !creature->IsPlayer()) || minDistance > maxDistance)
+            {
+                result = creature;
+                maxDistance = minDistance;
+            }
+        */
+
     }
 
 private:

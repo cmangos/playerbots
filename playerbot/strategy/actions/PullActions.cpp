@@ -225,6 +225,9 @@ bool PullEndAction::Execute(Event& event)
             if (creatureAI)
             {
                 creatureAI->SetReactState(strategy->GetPetReactState());
+                Unit* target = AI_VALUE(Unit*, "current target");
+                if (creatureAI->GetReactState() != REACT_PASSIVE && target)
+                    creatureAI->AttackStart(target);
             }
         }
 

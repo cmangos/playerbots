@@ -94,6 +94,11 @@ void WaitForAttackStrategy::InitCombatMultipliers(std::list<Multiplier*>& multip
     multipliers.push_back(new WaitForAttackMultiplier(ai));
 }
 
+WaitForAttackStrategy* WaitForAttackStrategy::Get(PlayerbotAI* ai)
+{
+    return ai ? ai->GetStrategy<WaitForAttackStrategy>("wait for attack", BotState::BOT_STATE_COMBAT) : nullptr;
+}
+
 bool WaitForAttackStrategy::ShouldWait(PlayerbotAI* ai)
 {
     // Only check if the bot has the strategy enabled
@@ -106,7 +111,7 @@ bool WaitForAttackStrategy::ShouldWait(PlayerbotAI* ai)
         {
             // Don't wait if the current target is an enemy player
             bool enemyPlayer = false;
-            Unit* target = ai->GetAiObjectContext()->GetValue<Unit*>("current target")->Get();
+            Unit* target = context->GetValue<Unit*>("current target")->Get();
             if (target)
             {
                 Player* player = dynamic_cast<Player*>(target);
@@ -141,7 +146,7 @@ uint8 WaitForAttackStrategy::GetWaitTime(PlayerbotAI* ai)
 
 float WaitForAttackMultiplier::GetValue(Action* action)
 {
-    // Allow some movement and targeting actions
+    // Allow some movement and targeting actions and non threat actions (like cc!)
     const std::string& actionName = action->getName();
     if ((actionName != "wait for attack keep safe distance") && 
         (actionName != "dps assist") && 
@@ -150,7 +155,8 @@ float WaitForAttackMultiplier::GetValue(Action* action)
         (actionName != "pull rti target") &&
         (actionName != "pull start") &&
         (actionName != "pull action") &&
-        (actionName != "pull end"))
+        (actionName != "pull end") &&
+        (action->getThreatType() != ActionThreatType::ACTION_THREAT_NONE))
     {
         return WaitForAttackStrategy::ShouldWait(ai) ? 0.0f : 1.0f;
     }

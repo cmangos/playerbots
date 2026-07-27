@@ -50,8 +50,8 @@ bool PossibleTargetsValue::AcceptUnit(Unit* unit)
 
 void PossibleTargetsValue::FindPossibleTargets(Player* player, std::list<Unit*>& targets, float range)
 {
-    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(player, range);
-    MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+    MaNGOS::AnyUnitInObjectRangeCheck u_check(player, range);
+    MaNGOS::UnitListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(targets, u_check);
     Cell::VisitAllObjects(player, searcher, range);
 }
 
@@ -85,7 +85,8 @@ bool PossibleTargetsValue::IsAttackable(Unit* target, Player* player)
     return !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1) &&
            !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNTARGETABLE) &&
            (inVehicle || !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE)) &&
-           !target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION);
+           !target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION) &&
+           player->CanAttack(target);
 }
 
 bool PossibleTargetsValue::IsValid(Unit* target, Player* player, bool ignoreLos)

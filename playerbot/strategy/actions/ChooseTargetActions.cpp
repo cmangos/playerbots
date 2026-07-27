@@ -127,7 +127,27 @@ bool SelectNewTargetAction::Execute(Event& event)
     bot->SetSelectionGuid(ObjectGuid());
     ai->InterruptSpell();
     bot->AttackStop();
+    // Stop pet attacking
+    Pet* pet = bot->GetPet();
+    if (pet)
+    {
+        UnitAI* creatureAI = ((Creature*)pet)->AI();
+        if (creatureAI)
+        {
+            // Send pet action packet
+            const ObjectGuid& petGuid = pet->GetObjectGuid();
+            const ObjectGuid& targetGuid = ObjectGuid();
+            const uint8 flag = ACT_COMMAND;
+            const uint32 spellId = COMMAND_FOLLOW;
+            const uint32 command = (flag << 24) | spellId;
 
+            WorldPacket data(CMSG_PET_ACTION);
+            data << petGuid;
+            data << command;
+            data << targetGuid;
+            bot->GetSession()->HandlePetAction(data);
+        }
+    }
 
     bool moreAttackers = false;
     // Check if there is any enemy targets available to attack
@@ -154,31 +174,6 @@ bool SelectNewTargetAction::Execute(Event& event)
         {
             moreAttackers = true;
             return ai->DoSpecificAction("tank assist", event, true);
-        }
-    }
-    
-    if (!moreAttackers)
-    {
-        // Stop pet attacking
-        Pet* pet = bot->GetPet();
-        if (pet)
-        {
-            UnitAI* creatureAI = ((Creature*)pet)->AI();
-            if (creatureAI)
-            {
-                // Send pet action packet
-                const ObjectGuid& petGuid = pet->GetObjectGuid();
-                const ObjectGuid& targetGuid = ObjectGuid();
-                const uint8 flag = ACT_COMMAND;
-                const uint32 spellId = COMMAND_FOLLOW;
-                const uint32 command = (flag << 24) | spellId;
-
-                WorldPacket data(CMSG_PET_ACTION);
-                data << petGuid;
-                data << command;
-                data << targetGuid;
-                bot->GetSession()->HandlePetAction(data);
-            }
         }
     }
 

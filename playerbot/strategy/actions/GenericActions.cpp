@@ -15,6 +15,7 @@ bool MeleeAction::isUseful()
 
     if (target)
     {
+        // If the target has a damage shield, melee action not useful and we should actually stop attacking
         std::set<Aura*> alreadyDone;
         Unit::AuraList const& vDamageShields = target->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
         for (Unit::AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)

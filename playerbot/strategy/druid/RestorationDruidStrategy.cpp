@@ -5,10 +5,10 @@
 
 using namespace ai;
 
-class BalanceDruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
+class RestorationDruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
 {
 public:
-    BalanceDruidStrategyActionNodeFactory()
+    RestorationDruidStrategyActionNodeFactory()
     {
         creators["innervate"] = &innervate;
     }
@@ -17,7 +17,7 @@ private:
     static ActionNode* innervate(PlayerbotAI* ai)
     {
         return new ActionNode("innervate",
-            /*P*/ NextAction::array(0, new NextAction("caster form"), NULL),
+            /*P*/ NextAction::array(0, new NextAction("restoration caster form"), NULL),
             /*A*/ NextAction::array(0, new NextAction("mana potion"), NULL),
             /*C*/ NULL);
     }

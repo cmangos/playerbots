@@ -260,6 +260,9 @@ namespace ai
                 creators["travel form"] = [](PlayerbotAI* ai) { return new CastTravelFormAction(ai); };
                 creators["aquatic form"] = [](PlayerbotAI* ai) { return new CastAquaticFormAction(ai); };
                 creators["caster form"] = [](PlayerbotAI* ai) { return new CastCasterFormAction(ai); };
+                creators["balance caster form"] = [](PlayerbotAI* ai) { return new CastBalanceCasterFormAction(ai); };
+                creators["restoration caster form"] = [](PlayerbotAI* ai) { return new CastRestorationCasterFormAction(ai); };
+                creators["balance or restoration caster form"] = [](PlayerbotAI* ai) { return new CastBalanceOrRestorationCasterFormAction(ai); };
                 creators["mangle (bear)"] = [](PlayerbotAI* ai) { return new CastMangleBearAction(ai); };
                 creators["maul"] = [](PlayerbotAI* ai) { return new CastMaulAction(ai); };
                 creators["bash"] = [](PlayerbotAI* ai) { return new CastBashAction(ai); };

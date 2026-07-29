@@ -11,6 +11,7 @@ public:
     RestorationDruidStrategyActionNodeFactory()
     {
         creators["innervate"] = &innervate;
+        creators["tranquility"] = &tranquility;
     }
 
 private:
@@ -21,6 +22,11 @@ private:
             /*A*/ NextAction::array(0, new NextAction("mana potion"), NULL),
             /*C*/ NULL);
     }
+#ifdef MANGOSBOT_TWO
+    ACTION_NODE_P(tranquility, "tranquility", "restoration caster form");
+#else
+    ACTION_NODE_P(tranquility, "tranquility", "caster form");
+#endif
 };
 
 #ifdef MANGOSBOT_ZERO // Vanilla

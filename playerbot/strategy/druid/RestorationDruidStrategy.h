@@ -14,7 +14,7 @@ namespace ai
     class RestorationDruidStrategy : public DruidStrategy
     {
     public:
-        RestorationDruidStrategy(PlayerbotAI* ai) : DruidStrategy(ai) {}
+        RestorationDruidStrategy(PlayerbotAI* ai);
 
     protected:
         virtual void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

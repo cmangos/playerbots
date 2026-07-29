@@ -315,7 +315,7 @@ namespace ai
 	public:
 		CastCasterFormAction(PlayerbotAI* ai, std::string spell = "caster form") : CastBuffSpellAction(ai, spell) {}
 
-		virtual bool isUseful()
+		virtual bool isUseful() override
 		{
 			return ai->HasAnyAuraOf(GetTarget(), "dire bear form", "bear form", "cat form", "travel form", "aquatic form", "flight form", "swift flight form", "moonkin form", "tree of life", NULL);
 		}
@@ -330,7 +330,7 @@ namespace ai
 	public:
 		CastBalanceCasterFormAction(PlayerbotAI* ai) : CastCasterFormAction(ai, "balance caster form") {}
 
-		virtual bool isUseful() override
+		bool isUseful() override
 		{
 			return ai->HasAnyAuraOf(GetTarget(), "dire bear form", "bear form", "cat form", "travel form", "aquatic form", "flight form", "swift flight form", "tree of life", NULL);
 		}
@@ -341,7 +341,7 @@ namespace ai
 	public:
 		CastRestorationCasterFormAction(PlayerbotAI* ai) : CastCasterFormAction(ai, "restoration caster form") {}
 
-		virtual bool isUseful() override
+		bool isUseful() override
 		{
 			return ai->HasAnyAuraOf(GetTarget(), "dire bear form", "bear form", "cat form", "travel form", "aquatic form", "flight form", "swift flight form", "moonkin form", NULL);
 		}
@@ -352,7 +352,7 @@ namespace ai
 	public:
 		CastBalanceOrRestorationCasterFormAction(PlayerbotAI* ai) : CastCasterFormAction(ai, "balance or restoration caster form") {}
 
-		virtual bool isUseful() override
+		bool isUseful() override
 		{
 			return ai->HasAnyAuraOf(GetTarget(), "dire bear form", "bear form", "cat form", "travel form", "aquatic form", "flight form", "swift flight form", NULL);
 		}

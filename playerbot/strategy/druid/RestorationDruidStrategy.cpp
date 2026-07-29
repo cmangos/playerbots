@@ -29,6 +29,11 @@ private:
 #endif
 };
 
+RestorationDruidStrategy::RestorationDruidStrategy(PlayerbotAI* ai) : DruidStrategy(ai)
+{
+    actionNodeFactories.Add(std::make_unique<RestorationDruidStrategyActionNodeFactory>());
+}
+
 #ifdef MANGOSBOT_ZERO // Vanilla
 
 void RestorationDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

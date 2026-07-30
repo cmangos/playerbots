@@ -300,9 +300,11 @@ namespace ai
                 creators["mark of the wild on party"] = [](PlayerbotAI* ai) { return new CastMarkOfTheWildOnPartyAction(ai); };
                 creators["gift of the wild on party"] = [](PlayerbotAI* ai) { return new CastGiftOfTheWildOnPartyAction(ai); };
                 creators["regrowth"] = [](PlayerbotAI* ai) { return new CastRegrowthAction(ai); };
+                creators["swiftmend"] = [](PlayerbotAI* ai) { return new CastSwiftmendAction(ai); };
                 creators["rejuvenation"] = [](PlayerbotAI* ai) { return new CastRejuvenationAction(ai); };
                 creators["healing touch"] = [](PlayerbotAI* ai) { return new CastHealingTouchAction(ai); };
                 creators["regrowth on party"] = [](PlayerbotAI* ai) { return new CastRegrowthOnPartyAction(ai); };
+                creators["swiftmend on party"] = [](PlayerbotAI* ai) { return new CastSwiftmendOnPartyAction(ai); };
                 creators["rejuvenation on party"] = [](PlayerbotAI* ai) { return new CastRejuvenationOnPartyAction(ai); };
                 creators["healing touch on party"] = [](PlayerbotAI* ai) { return new CastHealingTouchOnPartyAction(ai); };
                 creators["rebirth"] = [](PlayerbotAI* ai) { return new CastRebirthAction(ai); };

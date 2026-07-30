@@ -242,6 +242,7 @@ namespace ai
                 creators["seal"] = [](PlayerbotAI* ai) { return new SealTrigger(ai); };
                 creators["art of war"] = [](PlayerbotAI* ai) { return new ArtOfWarTrigger(ai); };
                 creators["blessing"] = [](PlayerbotAI* ai) { return new BlessingTrigger(ai); };
+                creators["target no judgement"] = [](PlayerbotAI* ai) { return new TargetNoJudgementTrigger(ai); };
                 creators["greater blessing"] = [](PlayerbotAI* ai) { return new GreaterBlessingTrigger(ai); };
                 creators["blessing of might"] = [](PlayerbotAI* ai) { return new BlessingOfMightTrigger(ai); };
                 creators["blessing of wisdom"] = [](PlayerbotAI* ai) { return new BlessingOfWisdomTrigger(ai); };

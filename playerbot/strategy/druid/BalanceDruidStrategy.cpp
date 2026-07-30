@@ -39,7 +39,7 @@ BalanceDruidStrategy::BalanceDruidStrategy(PlayerbotAI* ai) : DruidStrategy(ai)
 
 NextAction** BalanceDruidStrategy::GetDefaultCombatActions()
 {
-    return NextAction::array(0, new NextAction("wrath", ACTION_IDLE), NULL);
+    return NextAction::array(0, new NextAction("starfire", ACTION_IDLE), NULL);
 }
 
 void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -448,7 +448,7 @@ void BalanceDruidCureRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>
 
 NextAction** BalanceDruidStrategy::GetDefaultCombatActions()
 {
-    return NextAction::array(0, new NextAction("wrath", ACTION_IDLE), NULL);
+    return NextAction::array(0, new NextAction("starfire", ACTION_IDLE), NULL);
 }
 
 void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -90,7 +90,7 @@ void RetributionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 
     triggers.push_back(new TriggerNode(
         "target no judgement",
-        NextAction::array(0, new NextAction("seal of the crusader"), ACTION_NORMAL + 8), NULL)));
+        NextAction::array(0, new NextAction("seal of the crusader", ACTION_NORMAL + 8), NULL)));
 
     triggers.push_back(new TriggerNode(
         "seal",
@@ -589,7 +589,7 @@ void RetributionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
 
     triggers.push_back(new TriggerNode(
         "target no judgement",
-        NextAction::array(0, new NextAction("seal of the crusader"), ACTION_NORMAL + 8), NULL)));
+        NextAction::array(0, new NextAction("seal of the crusader", ACTION_NORMAL + 8), NULL)));
 
     triggers.push_back(new TriggerNode(
         "seal",

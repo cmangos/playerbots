@@ -481,7 +481,7 @@ void BalanceDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("moonfire", ACTION_NORMAL + 1), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "often",
+        "very often",
         NextAction::array(0, new NextAction("starfire", ACTION_NORMAL), NULL)));
 }
 

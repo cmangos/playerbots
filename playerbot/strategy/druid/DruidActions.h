@@ -30,7 +30,7 @@ namespace ai
     class CastSwiftmendAction : public CastHealingSpellAction 
 	{
 	public:
-		CastRegrowthAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "swiftmend") {}
+        CastSwiftmendAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "swiftmend") {}
 	};
 
     class CastHealingTouchAction : public CastHealingSpellAction 

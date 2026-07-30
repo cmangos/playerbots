@@ -79,9 +79,11 @@ private:
 
     ACTION_NODE_P(rebirth, "rebirth", "restoration caster form");
 
-#ifdef MANGOSBOT_TWO
     ACTION_NODE_P(regrowth, "regrowth", "restoration caster form");
+
     ACTION_NODE_P(regrowth_on_party, "regrowth on party", "restoration caster form");
+
+#ifdef MANGOSBOT_TWO
     ACTION_NODE_P(healing_touch, "healing touch", "restoration caster form");
     ACTION_NODE_P(healing_touch_on_party, "healing touch on party", "restoration caster form");
     ACTION_NODE_P(thorns, "thorns", "restoration caster form");
@@ -90,8 +92,6 @@ private:
     ACTION_NODE_P(mark_of_the_wild_on_party, "mark of the wild on party", "restoration caster form");
     ACTION_NODE_P(gift_of_the_wild_on_party, "gift of the wild on party", "restoration caster form");
 #else
-    ACTION_NODE_P(regrowth, "regrowth", "caster form");
-    ACTION_NODE_P(regrowth_on_party, "regrowth on party", "caster form");
     ACTION_NODE_P(healing_touch, "healing touch", "caster form");
     ACTION_NODE_P(healing_touch_on_party, "healing touch on party", "caster form");
     ACTION_NODE_P(thorns, "thorns", "caster form");

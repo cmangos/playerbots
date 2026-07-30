@@ -196,10 +196,16 @@ namespace ai
         bool IsActive() override 
         {
             Unit* target = bot->GetTarget();
-            return !target->HasAura(21183) && !target->HasAura(20188) && 
-                !target->HasAura(20300) && !target->HasAura(20301) &&
-                !target->HasAura(20302) && !target->HasAura(20303) &&
-                !target->HasAura(27159);
+            if (target)
+            {
+                return !target->HasAura(21183) && !target->HasAura(20188) &&
+                    !target->HasAura(20300) && !target->HasAura(20301) &&
+                    !target->HasAura(20302) && !target->HasAura(20303) &&
+                    !target->HasAura(27159);
+            }
+
+            return false;
+
         }
     };
 

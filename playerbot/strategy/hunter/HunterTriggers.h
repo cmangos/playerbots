@@ -295,7 +295,11 @@ private:
     CAN_CAST_TRIGGER(ExplosiveShotCanCastTrigger, "explosive shot");
     CAN_CAST_TRIGGER(MultishotCanCastTrigger, "multi-shot");
     CAN_CAST_TRIGGER(SteadyShotCanCastTrigger, "steady shot");
+#ifdef MANGOSBOT_TWO
     BOOST_TRIGGER(KillCommandBoostTrigger, "kill command");
+#else
+    CAN_CAST_TRIGGER(KillCommandBoostTrigger, "kill command");
+#endif
     SNARE_TRIGGER(IntimidationSnareTrigger, "intimidation");
     CAN_CAST_TRIGGER(CounterattackCanCastTrigger, "counterattack");
     SNARE_TRIGGER(WybernStingSnareTrigger, "wyvern sting");

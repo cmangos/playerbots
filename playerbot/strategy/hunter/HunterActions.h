@@ -167,11 +167,15 @@ public:
         CastRapidFireAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "rapid fire") {}
     };
 
+#ifdef MANGOSBOT_TWO
     class CastKillCommandAction : public CastBuffSpellAction
     {
     public:
         CastKillCommandAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "kill command") {}
     };
+#else
+    SPELL_ACTION(CastKillCommandAction, "kill command");
+#endif
 
     class CastBlackArrow : public CastRangedDebuffSpellAction
     {

@@ -195,6 +195,32 @@ bool AttackAction::Attack(Player* requester, Unit* target)
         // Don't attack target if it is waiting for attack or in stealth
         if (!ai->HasStrategy("stealthed", BotState::BOT_STATE_COMBAT) && !isWaitingForAttack)
         {
+            // Don't attack a target that has a high damage shield in melee
+            if (!ai->IsRanged(bot) || (sServerFacade.GetDistance2d(bot, target) < 5.0f))
+            {
+                std::set<Aura*> alreadyDone;
+                Unit::AuraList const& vDamageShields = target->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
+                for (Unit::AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)
+                {
+                    if (alreadyDone.find(*i) == alreadyDone.end())
+                    {
+                        alreadyDone.insert(*i);
+                        uint32 damage = (*i)->GetModifier()->m_amount;
+
+                        // If the damage shield does at least 10% of our max hp on each hit we do, we shouldn't attack
+                        if (damage >= bot->GetMaxHealth() * 0.10f)
+                        {
+                            bot->AttackStop();
+                            return false;
+                        }
+
+                        i = vDamageShields.begin();
+                    }
+                    else
+                        ++i;
+                }
+            }
+
             ai->PlayAttackEmote(1);
             result = bot->Attack(target, !ai->IsRanged(bot) || (sServerFacade.GetDistance2d(bot, target) < 5.0f));
         }

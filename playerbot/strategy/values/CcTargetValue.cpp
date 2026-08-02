@@ -4,6 +4,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/Action.h"
+#include "playerbot/strategy/values/RtiTargetValue.h"
 
 using namespace ai;
 
@@ -56,23 +57,11 @@ public:
 
         if (!ai->CanCastSpell(spell, creature, true, nullptr, false, true))
             return;
-        /*
-        // Here we try to cc stuff that is not marked. This is not suggested because randomly cc'ing things with no
-        // reason can lead to bad outcomes (cc'ing the mob that isn't marked for you, rebanishing the only mob left nonstop)
-        if (!creature->IsPlayer())
-        {
-            int tankCount, dpsCount;
-            GetPlayerCount(creature, &tankCount, &dpsCount);
-            if (!tankCount || !dpsCount)
-            {
-                result = creature;
-                return;
-            }
-        }
 
-        // This only makese sense if we don't have a target of our own to cc. 
-        // Since we use this function in a search of attackers, first result may not be our rti cc target
-        if (!context->GetValue<Unit*>("rti cc target")->Get())
+        // If we have rti cc none but have cc strategy, then we'll cc something we're able to
+        std::string rti = AI_VALUE(std::string, "rti cc");
+        int index = RtiTargetValue::GetRtiIndex(rti);
+        if (index == -1 && ai->HasStrategy("cc", BotState::BOT_STATE_COMBAT))
         {
             Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
             for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
@@ -94,8 +83,7 @@ public:
                 result = creature;
                 maxDistance = minDistance;
             }
-        */
-
+        }
     }
 
 private:

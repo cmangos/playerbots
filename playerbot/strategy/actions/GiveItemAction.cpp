@@ -34,6 +34,7 @@ bool GiveItemAction::Execute(Event& event)
             continue;
 
         ItemPosCountVec dest;
+        uint8 bagSlot;
         InventoryResult msg = receiver->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, bagSlot, false);
 
         if (msg == EQUIP_ERR_OK)

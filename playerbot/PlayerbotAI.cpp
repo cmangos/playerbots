@@ -1989,7 +1989,7 @@ int32 PlayerbotAI::CalculateGlobalCooldown(uint32 spellid)
         globalCooldown = spellEntry->StartRecoveryTime;
     }
 
-    return globalCooldown > 0 ? globalCooldown : sPlayerbotAIConfig.reactDelay;
+    return globalCooldown;
 }
 
 void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet)

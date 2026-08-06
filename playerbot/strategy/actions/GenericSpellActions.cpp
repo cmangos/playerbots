@@ -154,6 +154,40 @@ bool CastSpellAction::isUseful()
     if (!spellTarget->IsInWorld() || spellTarget->GetMapId() != bot->GetMapId())
         return false;
 
+    const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
+    if (pSpellInfo)
+    {
+        // check if the damage we'd take from damage shields is too harmful, only for melee spells
+        if (range == ATTACK_DISTANCE)
+        {
+            std::set<Aura*> alreadyDone;
+            Unit::AuraList const& vDamageShields = spellTarget->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
+            for (Unit::AuraList::const_iterator i = vDamageShields.begin(); i != vDamageShields.end();)
+            {
+                if (alreadyDone.find(*i) == alreadyDone.end())
+                {
+                    alreadyDone.insert(*i);
+                    uint32 damage = (*i)->GetModifier()->m_amount;
+
+                    // If the damage shield does at least 10% of our max hp on each hit we do, we shouldn't cast a melee spell
+                    if (damage >= bot->GetMaxHealth() * 0.10f)
+                    {
+                        bot->AttackStop();
+                        return false;
+                    }
+
+                    i = vDamageShields.begin();
+                }
+                else
+                    ++i;
+            }
+        }
+
+        // If target is more likely than not to reflect and our spell is reflectable, don't cast
+        if (spellTarget->GetReflectChance(GetSpellSchoolMask(pSpellInfo)) > 50.0f && IsReflectableSpell(pSpellInfo))
+            return false;
+    }
+
     return true;
 }
 
@@ -305,6 +339,21 @@ bool CastFrozenDeathboltAction::isPossible()
         return false;
 
     return CastVehicleSpellAction::isPossible();
+}
+
+bool CastWarStompAction::isUseful()
+{
+    // ignore distance check in pvp or duel
+    if (!ai->HasStrategy("pvp", BotState::BOT_STATE_COMBAT) &&
+        !ai->HasStrategy("duel", BotState::BOT_STATE_COMBAT))
+    {
+        Unit* target = AI_VALUE(Unit*, "current target");
+        if (target)
+            return AI_VALUE2(float, "distance", "current target") <= 8.0f;
+        return false;
+    }
+
+    return true;
 }
 
 bool CastDevourHumanoidAction::isPossible()

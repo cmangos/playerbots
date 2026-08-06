@@ -112,6 +112,14 @@ void RestorationShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
         NextAction::array(0, new NextAction("healing wave on party", ACTION_MOVE), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("riptide", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0, new NextAction("riptide on party", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "medium health",
         NextAction::array(0, new NextAction("healing wave", ACTION_HIGH), NULL)));
 
@@ -585,6 +593,14 @@ void RestorationShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
     triggers.push_back(new TriggerNode(
         "party member critical health",
         NextAction::array(0, new NextAction("healing wave on party", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("riptide", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0, new NextAction("riptide on party", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium health",
@@ -1076,6 +1092,14 @@ void RestorationShamanStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& t
     triggers.push_back(new TriggerNode(
         "party member critical health",
         NextAction::array(0, new NextAction("healing wave on party", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "low health",
+        NextAction::array(0, new NextAction("riptide", ACTION_CRITICAL_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member low health",
+        NextAction::array(0, new NextAction("riptide on party", ACTION_CRITICAL_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium health",

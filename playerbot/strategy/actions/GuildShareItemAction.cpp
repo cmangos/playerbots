@@ -41,12 +41,8 @@ bool GuildShareItemAction::Execute(Event& event)
         if (giveCount == stackCount)
         {
             ItemPosCountVec dest;
-#ifndef MANGOSBOT_ZERO
             uint8 bagSlot;
             InventoryResult msg = receiver->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, bagSlot, false);
-#else
-            InventoryResult msg = receiver->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, false);
-#endif
             if (msg != EQUIP_ERR_OK)
             {
                 sLog.outDetail("Bot #%d <%s> cannot give %s to %s - bags full",

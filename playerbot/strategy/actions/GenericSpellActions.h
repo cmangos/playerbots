@@ -396,6 +396,8 @@ namespace ai
     {
     public:
         CastWarStompAction(PlayerbotAI* ai) : CastSpellAction(ai, "war stomp") {}
+        bool isUseful() override;
+
     };
 
     //cc breakers

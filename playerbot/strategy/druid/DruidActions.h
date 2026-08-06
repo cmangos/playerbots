@@ -27,6 +27,12 @@ namespace ai
 		CastRegrowthAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "regrowth") {}
 	};
 
+    class CastSwiftmendAction : public CastHealingSpellAction 
+	{
+	public:
+        CastSwiftmendAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "swiftmend") {}
+	};
+
     class CastHealingTouchAction : public CastHealingSpellAction 
 	{
     public:
@@ -43,6 +49,12 @@ namespace ai
     {
     public:
         CastRegrowthOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "regrowth") {}
+    };
+
+    class CastSwiftmendOnPartyAction : public HealPartyMemberAction
+    {
+    public:
+        CastSwiftmendOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "swiftmend") {}
     };
 
     class CastHealingTouchOnPartyAction : public HealPartyMemberAction

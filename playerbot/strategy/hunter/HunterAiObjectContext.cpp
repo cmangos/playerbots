@@ -232,6 +232,7 @@ namespace ai
                 creators["mongoose bite"] = [](PlayerbotAI* ai) { return new MongooseBiteCastTrigger(ai); };
                 creators["viper sting"] = [](PlayerbotAI* ai) { return new ViperStingTrigger(ai); };
                 creators["aimed shot"] = [](PlayerbotAI* ai) { return new AimedShotTrigger(ai); };
+                creators["arcane shot"] = [](PlayerbotAI* ai) { return new ArcaneShotTrigger(ai); };
                 creators["bestial wrath"] = [](PlayerbotAI* ai) { return new BestialWrathBoostTrigger(ai); };
                 creators["silencing shot interrupt"] = [](PlayerbotAI* ai) { return new SilencingShotInterruptTrigger(ai); };
                 creators["silencing shot on enemy healer"] = [](PlayerbotAI* ai) { return new SilencingShotInterruptHealerTrigger(ai); };

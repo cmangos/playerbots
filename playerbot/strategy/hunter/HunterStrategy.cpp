@@ -547,6 +547,10 @@ void HunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("hunter's mark", ACTION_NORMAL + 6), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "arcane shot",
+        NextAction::array(0, new NextAction("arcane shot", ACTION_NORMAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "kill command",
         NextAction::array(0, new NextAction("kill command", ACTION_NORMAL + 6), NULL)));
 
@@ -1011,6 +1015,10 @@ void HunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "hunter's mark",
         NextAction::array(0, new NextAction("hunter's mark", ACTION_NORMAL + 6), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "kill command",
+        NextAction::array(0, new NextAction("kill command", ACTION_NORMAL + 6), NULL)));
 
     triggers.push_back(new TriggerNode(
         "aimed shot",

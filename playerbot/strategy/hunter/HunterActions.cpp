@@ -111,9 +111,7 @@ bool CastSteadyShotAction::Execute(Event& event)
         const Item* equippedWeapon = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
         if (equippedWeapon)
         {
-            const ItemPrototype* itemPrototype = equippedWeapon->GetProto();
-            weaponDelay = itemPrototype->Delay + sPlayerbotAIConfig.globalCoolDown;
-            SetDuration(weaponDelay);
+            SetDuration(GetDuration() + sPlayerbotAIConfig.globalCoolDown);
         }
 
         return true;

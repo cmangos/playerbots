@@ -104,12 +104,9 @@ TestResult CommandSetupGiveItem::Execute(const std::string& params, Player* bot,
         if (isBank)
         {
             ItemPosCountVec dest;
-#ifndef MANGOSBOT_ZERO
             uint8 bagSlot;
             InventoryResult msg = bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false, bagSlot);
-#else
-            InventoryResult msg = bot->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
-#endif
+
             if (msg != EQUIP_ERR_OK)
             {
                 message = "Item can not be stored in bank: " + params;

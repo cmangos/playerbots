@@ -173,6 +173,7 @@ namespace ai
             creators["far from rpg target"] = [](PlayerbotAI* ai) { return new FarFromRpgTargetTrigger(ai); };
             creators["near rpg target"] = [](PlayerbotAI* ai) { return new NearRpgTargetTrigger(ai); };
             creators["no rti target"] = [](PlayerbotAI* ai) { return new NoRtiTrigger(ai); };
+            creators["no rti cc target"] = [](PlayerbotAI* ai) { return new NoRtiCCTrigger(ai); };
 
             creators["give food"] = [](PlayerbotAI* ai) { return new GiveFoodTrigger(ai); };
             creators["give water"] = [](PlayerbotAI* ai) { return new GiveWaterTrigger(ai); };

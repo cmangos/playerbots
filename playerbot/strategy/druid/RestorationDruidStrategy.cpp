@@ -5,10 +5,10 @@
 
 using namespace ai;
 
-class BalanceDruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
+class RestorationDruidStrategyActionNodeFactory : public NamedObjectFactory<ActionNode>
 {
 public:
-    BalanceDruidStrategyActionNodeFactory()
+    RestorationDruidStrategyActionNodeFactory()
     {
         creators["innervate"] = &innervate;
         creators["tranquility"] = &tranquility;
@@ -20,7 +20,7 @@ private:
     static ActionNode* innervate(PlayerbotAI* ai)
     {
         return new ActionNode("innervate",
-            /*P*/ NextAction::array(0, new NextAction("caster form"), NULL),
+            /*P*/ NextAction::array(0, new NextAction("restoration caster form"), NULL),
             /*A*/ NextAction::array(0, new NextAction("mana potion"), NULL),
             /*C*/ NULL);
     }
@@ -46,6 +46,11 @@ private:
     ACTION_NODE_P(tranquility, "tranquility", "caster form");
 #endif
 };
+
+RestorationDruidStrategy::RestorationDruidStrategy(PlayerbotAI* ai) : DruidStrategy(ai)
+{
+    actionNodeFactories.Add(std::make_unique<RestorationDruidStrategyActionNodeFactory>());
+}
 
 #ifdef MANGOSBOT_ZERO // Vanilla
 

@@ -70,7 +70,7 @@ namespace ai
 
 		virtual NextAction** getPrerequisites() 
 		{
-			return NextAction::merge( NextAction::array(0, new NextAction("caster form"), NULL), ResurrectPartyMemberAction::getPrerequisites());
+			return NextAction::merge( NextAction::array(0, new NextAction("restoration caster form"), NULL), ResurrectPartyMemberAction::getPrerequisites());
 		}
 	};
 
@@ -325,9 +325,9 @@ namespace ai
 	class CastCasterFormAction : public CastBuffSpellAction
 	{
 	public:
-		CastCasterFormAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "caster form") {}
+		CastCasterFormAction(PlayerbotAI* ai, std::string spell = "caster form") : CastBuffSpellAction(ai, spell) {}
 
-		virtual bool isUseful()
+		virtual bool isUseful() override
 		{
 			return ai->HasAnyAuraOf(GetTarget(), "dire bear form", "bear form", "cat form", "travel form", "aquatic form", "flight form", "swift flight form", "moonkin form", "tree of life", NULL);
 		}
@@ -335,6 +335,39 @@ namespace ai
 		virtual bool isPossible() { return true; }
 
 		virtual bool Execute(Event& event);
+	};
+
+    class CastBalanceCasterFormAction : public CastCasterFormAction
+	{
+	public:
+		CastBalanceCasterFormAction(PlayerbotAI* ai) : CastCasterFormAction(ai, "balance caster form") {}
+
+		bool isUseful() override
+		{
+			return ai->HasAnyAuraOf(GetTarget(), "dire bear form", "bear form", "cat form", "travel form", "aquatic form", "flight form", "swift flight form", "tree of life", NULL);
+		}
+	};
+
+    class CastRestorationCasterFormAction : public CastCasterFormAction
+	{
+	public:
+		CastRestorationCasterFormAction(PlayerbotAI* ai) : CastCasterFormAction(ai, "restoration caster form") {}
+
+		bool isUseful() override
+		{
+			return ai->HasAnyAuraOf(GetTarget(), "dire bear form", "bear form", "cat form", "travel form", "aquatic form", "flight form", "swift flight form", "moonkin form", NULL);
+		}
+	};
+
+    class CastBalanceOrRestorationCasterFormAction : public CastCasterFormAction
+	{
+	public:
+		CastBalanceOrRestorationCasterFormAction(PlayerbotAI* ai) : CastCasterFormAction(ai, "balance or restoration caster form") {}
+
+		bool isUseful() override
+		{
+			return ai->HasAnyAuraOf(GetTarget(), "dire bear form", "bear form", "cat form", "travel form", "aquatic form", "flight form", "swift flight form", NULL);
+		}
 	};
 
     class CastFeralChargeCatAction : public CastReachTargetSpellAction

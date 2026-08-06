@@ -20,7 +20,7 @@ private:
     static ActionNode* innervate(PlayerbotAI* ai)
     {
         return new ActionNode("innervate",
-            /*P*/ NextAction::array(0, new NextAction("caster form"), NULL),
+            /*P*/ NextAction::array(0, new NextAction("balance caster form"), NULL),
             /*A*/ NextAction::array(0, new NextAction("mana potion"), NULL),
             /*C*/ NULL);
     }

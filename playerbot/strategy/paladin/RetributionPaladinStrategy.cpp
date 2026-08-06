@@ -89,6 +89,10 @@ void RetributionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
         NextAction::array(0, new NextAction("exorcism", ACTION_NORMAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "target no judgement",
+        NextAction::array(0, new NextAction("seal of the crusader", ACTION_HIGH + 8), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "seal",
         NextAction::array(0, new NextAction("seal of command", ACTION_NORMAL + 3), NULL)));
 
@@ -582,6 +586,10 @@ void RetributionPaladinStrategy::InitCombatTriggers(std::list<TriggerNode*>& tri
     triggers.push_back(new TriggerNode(
         "exorcism",
         NextAction::array(0, new NextAction("exorcism", ACTION_NORMAL + 4), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "target no judgement",
+        NextAction::array(0, new NextAction("seal of the crusader", ACTION_HIGH + 8), NULL)));
 
     triggers.push_back(new TriggerNode(
         "seal",

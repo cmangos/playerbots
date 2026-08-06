@@ -189,6 +189,26 @@ namespace ai
         bool IsActive() override { return (bot->GetMap()->IsDungeon() || bot->GetMap()->IsBattleGround()) && GreaterBuffOnPartyTrigger::IsActive(); }
     };
 
+    class TargetNoJudgementTrigger : public DebuffOnAttackerTrigger
+    {
+    public:
+        TargetNoJudgementTrigger(PlayerbotAI* ai) : DebuffOnAttackerTrigger(ai, "judgement of the crusader") {}
+        bool IsActive() override 
+        {
+            Unit* target = bot->GetTarget();
+            if (target)
+            {
+                return !target->HasAura(21183) && !target->HasAura(20188) &&
+                    !target->HasAura(20300) && !target->HasAura(20301) &&
+                    !target->HasAura(20302) && !target->HasAura(20303) &&
+                    !target->HasAura(27159);
+            }
+
+            return false;
+
+        }
+    };
+
     class BlessingTrigger : public BuffTrigger
     {
     public:

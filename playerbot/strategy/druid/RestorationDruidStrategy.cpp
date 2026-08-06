@@ -112,11 +112,31 @@ void RestorationDruidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tr
 
     triggers.push_back(new TriggerNode(
         "low health",
-        NextAction::array(0, new NextAction("regrowth", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL), NULL)));
 
     triggers.push_back(new TriggerNode(
         "party member low health",
-        NextAction::array(0, new NextAction("regrowth on party", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("regrowth on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium aoe heal",
+        NextAction::array(0, new NextAction("tranquility", ACTION_MEDIUM_HEAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("regrowth on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("rejuvenation", ACTION_LIGHT_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
+        NextAction::array(0, new NextAction("rejuvenation on party", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void RestorationDruidStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
@@ -531,6 +551,26 @@ void RestorationDruidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tr
     triggers.push_back(new TriggerNode(
         "party member low health",
         NextAction::array(0, new NextAction("regrowth on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium aoe heal",
+        NextAction::array(0, new NextAction("tranquility", ACTION_MEDIUM_HEAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("regrowth on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("rejuvenation", ACTION_LIGHT_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
+        NextAction::array(0, new NextAction("rejuvenation on party", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void RestorationDruidStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
@@ -949,6 +989,26 @@ void RestorationDruidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& tr
     triggers.push_back(new TriggerNode(
         "party member low health",
         NextAction::array(0, new NextAction("regrowth on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium aoe heal",
+        NextAction::array(0, new NextAction("tranquility", ACTION_MEDIUM_HEAL + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "medium health",
+        NextAction::array(0, new NextAction("regrowth", ACTION_MEDIUM_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member medium health",
+        NextAction::array(0, new NextAction("regrowth on party", ACTION_MEDIUM_HEAL), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "almost full health",
+        NextAction::array(0, new NextAction("rejuvenation", ACTION_LIGHT_HEAL + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "party member almost full health",
+        NextAction::array(0, new NextAction("rejuvenation on party", ACTION_LIGHT_HEAL), NULL)));
 }
 
 void RestorationDruidStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)

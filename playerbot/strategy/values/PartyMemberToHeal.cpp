@@ -89,6 +89,10 @@ Unit* PartyMemberToHeal::Calculate()
                 continue;
             }
 
+            // do not heal if they will not receive healing due to debuff
+            if (player->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT) <= -100)
+                continue;
+
             uint32 incomingDamage = 0;
             if (ai->HasStrategy("preheal", BotState::BOT_STATE_COMBAT))
                 incomingDamage = getIncomingdamage(player);

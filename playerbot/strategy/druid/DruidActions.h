@@ -31,6 +31,10 @@ namespace ai
 	{
 	public:
         CastSwiftmendAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "swiftmend") {}
+        virtual bool isPossible() override
+		{
+            return CastHealingSpellAction::isPossible() && (ai->HasAura("regrowth", GetTarget()) || ai->HasAura("rejuvenation", GetTarget()));
+		}
 	};
 
     class CastHealingTouchAction : public CastHealingSpellAction 
@@ -55,6 +59,10 @@ namespace ai
     {
     public:
         CastSwiftmendOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "swiftmend") {}
+        virtual bool isPossible() override
+        {
+            return HealPartyMemberAction::isPossible() && (ai->HasAura("regrowth", GetTarget()) || ai->HasAura("rejuvenation", GetTarget()));
+        }
     };
 
     class CastHealingTouchOnPartyAction : public HealPartyMemberAction

@@ -229,6 +229,7 @@ namespace ai
                 creators["claw"] = [](PlayerbotAI* ai) { return new SpellCanBeCastedTrigger(ai, "claw"); };
                 creators["rip"] = [](PlayerbotAI* ai) { return new RipTrigger(ai, 3); };
                 creators["enrage"] = [](PlayerbotAI* ai) { return new EnrageTrigger(ai); };
+                creators["demoralizing roar"] = [](PlayerbotAI* ai) { return new DemoralizingRoarTrigger(ai); };
                 creators["lacerate"] = [](PlayerbotAI* ai) { return new LacerateTrigger(ai); };
                 creators["unstealth"] = [](PlayerbotAI* ai) { return new DruidUnstealthTrigger(ai); };
                 creators["in stealth"] = [](PlayerbotAI* ai) { return new InStealthTrigger(ai); };

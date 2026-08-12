@@ -16,7 +16,7 @@ namespace ai
     CURE_PARTY_TRIGGER(PartyMemberCureDiseaseTrigger, "cure disease", DISPEL_DISEASE);
     BUFF_TRIGGER_A(InnerFireTrigger, "inner fire");
     BUFF_TRIGGER_A(ShadowformTrigger, "shadowform");
-    BUFF_TRIGGER(InnerFocusTrigger, "inner focus");
+    BOOST_TRIGGER_A(InnerFocusTrigger, "inner focus");
     CC_TRIGGER(ShackleUndeadTrigger, "shackle undead");
     INTERRUPT_TRIGGER(SilenceTrigger, "silence");
     INTERRUPT_HEALER_TRIGGER(SilenceEnemyHealerTrigger, "silence");
@@ -25,7 +25,6 @@ namespace ai
     DEBUFF_TRIGGER(DevouringPlagueTrigger, "devouring plague");
     BUFF_TRIGGER(TouchOfWeaknessTrigger, "touch of weakness");
     DEBUFF_TRIGGER(HexOfWeaknessTrigger, "hex of weakness");
-    BUFF_TRIGGER(ShadowguardTrigger, "shadowguard");
     DEFLECT_TRIGGER(FeedbackTrigger, "feedback");
     SNARE_TRIGGER(ChastiseTrigger, "chastise");
     DEBUFF_TRIGGER(StarshardsTrigger, "starshards");
@@ -33,6 +32,13 @@ namespace ai
     BOOST_TRIGGER_A(ShadowfiendTrigger, "shadowfiend");
     CAN_CAST_TRIGGER(MindBlastTrigger, "mind blast");
     CAN_CAST_TRIGGER(SmiteTrigger, "smite");
+
+    class ShadowguardTrigger : public BuffTrigger
+    {
+    public:
+        ShadowguardTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "shadowguard", 4) {}
+        virtual bool IsActive() override { return BuffTrigger::IsActive() && bot->getRace() == RACE_TROLL; }
+    };
 
     class PowerWordFortitudeOnPartyTrigger : public BuffOnPartyTrigger 
     {

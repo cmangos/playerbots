@@ -20,3 +20,8 @@ bool ShadowfiendTrigger::IsActive()
 {
     return BoostTrigger::IsActive() && bot->IsSpellReady(34433);
 }
+
+bool InnerFocusTrigger::IsActive()
+{
+    return BoostTrigger::IsActive() && bot->IsSpellReady(14751);
+}

@@ -140,7 +140,7 @@ namespace ai
             if (isTank && !target->IsPlayer())
                 return true;
 
-            return !ai->HasAura("sunder armor", target, true);
+            return !ai->HasAura("sunder armor", target, true) && !ai->HasAura("expose armor", target);
         }
     };
 

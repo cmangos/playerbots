@@ -67,6 +67,10 @@ void TankFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
         NextAction::array(0, new NextAction("faerie fire (feral)", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "demoralizing roar",
+        NextAction::array(0, new NextAction("demoralizing roar", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "medium rage available",
         NextAction::array(0, new NextAction("mangle (bear)", ACTION_NORMAL + 1), NULL)));
 
@@ -521,6 +525,10 @@ void TankFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
         NextAction::array(0, new NextAction("mangle (bear)", ACTION_NORMAL + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "demoralizing roar",
+        NextAction::array(0, new NextAction("demoralizing roar", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "enemy too close for melee",
         NextAction::array(0, new NextAction("move out of enemy contact", ACTION_NORMAL), NULL)));
 }
@@ -961,6 +969,10 @@ void TankFeralDruidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigger
     triggers.push_back(new TriggerNode(
         "lacerate",
         NextAction::array(0, new NextAction("lacerate", ACTION_HIGH), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "demoralizing roar",
+        NextAction::array(0, new NextAction("demoralizing roar", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "medium rage available",

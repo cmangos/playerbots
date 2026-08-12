@@ -3782,8 +3782,8 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
     float const m_gravity = 19.2911f;
     float const timeForMaxHeight = vSpeed / m_gravity;
     float velocity = sqrt(vSpeed * vSpeed + hSpeed * hSpeed);
-    double jumpVerticalAngle = 48.f * M_PI / 180; // approximate
-    maxHeight = vSpeed * timeForMaxHeight - m_gravity * timeForMaxHeight * timeForMaxHeight / 2;   
+    double jumpVerticalAngle = hSpeed != 0.f ? atan(vSpeed / hSpeed) : 90.f * M_PI / 180;
+    maxHeight = vSpeed * timeForMaxHeight - m_gravity * timeForMaxHeight * timeForMaxHeight / 2;  
 
     // jump in place
     if (hSpeed == 0.f)
@@ -3876,7 +3876,6 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
 #else
             foundCollision = jumper->GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, -0.5f);
 #endif
-
             if (!foundCollision)
             {
                 fx -= jumper->GetCollisionWidth() * vcos;
@@ -3914,18 +3913,16 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
         {
             // hit something while ascending
             if (ascending)
-            {
                 goodLanding = false;
-                // reduce landing height by collision height
-                float fz_mod = fz - CONTACT_DISTANCE - jumper->GetCollisionHeight();
+            // reduce landing height by collision height
+            float fz_mod = fz - CONTACT_DISTANCE - jumper->GetCollisionHeight();
 #ifdef MANGOSBOT_TWO
-                jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, jumper->GetPhaseMask(), -0.5f);
+            jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, jumper->GetPhaseMask(), -0.5f);
 #else
-                jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, -0.5f);
+            jumper->GetMap()->GetHitPosition(fx, fy, fz, fx, fy, fz_mod, -0.5f);
 #endif
-                fz = fz_mod;
-                //fz = fz - CONTACT_DISTANCE - jumper->GetCollisionHeight();
-            }
+            fz = fz_mod;
+            //fz = fz - CONTACT_DISTANCE - jumper->GetCollisionHeight();
 
             WorldPosition destination = WorldPosition(src.getMapId(), fx, fy ,fz);
             if (!IsJumpSafe(src, destination, jumper))
@@ -3935,7 +3932,7 @@ WorldPosition JumpAction::CalculateJumpParameters(const WorldPosition& src, Unit
             timeToLand = CalculateJumpTime(fz - (src.getZ() + 0.5f), vSpeed, ascending);
 
             // some error in time calculations - cancel the jump
-            if (timeToLand == 0.f)
+            if (timeToLand <= 0.f)
                 return WorldPosition();
 
             // maybe hit a wall while descending

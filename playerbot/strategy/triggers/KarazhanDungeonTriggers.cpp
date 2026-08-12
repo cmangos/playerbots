@@ -25,6 +25,9 @@ bool NetherspiteBeamsCheatNeedRefreshTrigger::IsActive()
 
 bool PrinceMalchezaarTooCloseTrigger::IsActive()
 {
+    PullStrategy* strategy = PullStrategy::Get(ai);
+    if (strategy && strategy->HasPullStarted())
+        return false;
     Unit* target = AI_VALUE(Unit*, "tank target");
     if (!target) target = AI_VALUE(Unit*, "current target");
     if (bot->HasAura(30843) || (EnfeeblePart() && target && target->GetVictim() != bot) || MeleeWaitCheck(target)) 

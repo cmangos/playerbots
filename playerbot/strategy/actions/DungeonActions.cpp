@@ -148,7 +148,7 @@ bool MoveAwayFromCreature::CreatureSearchHelperFunction(Event& event, uint32 cre
         }
     }
 
-    if (creatures.empty())
+    if (creatures.empty() || closestCreatureDistance >= range)
     {
         return false;
     }

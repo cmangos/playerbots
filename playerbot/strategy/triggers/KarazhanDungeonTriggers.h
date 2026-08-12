@@ -82,7 +82,7 @@ namespace ai
 	class NetherspiteInfernalTooCloseTrigger : public CloseToCreatureTrigger
 	{
 	public:
-		NetherspiteInfernalTooCloseTrigger(PlayerbotAI* ai) : CloseToCreatureTrigger(ai, "netherspite infernal too close", 17646, 20.0f) {}
+		NetherspiteInfernalTooCloseTrigger(PlayerbotAI* ai) : CloseToCreatureTrigger(ai, "netherspite infernal too close", 17646, 21.0f) {}
 	};
 
 	class PrinceMalchezaarTooCloseTrigger : public CloseToCreatureTrigger

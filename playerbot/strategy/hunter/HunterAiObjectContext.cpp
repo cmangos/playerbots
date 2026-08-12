@@ -19,7 +19,13 @@ namespace ai
             {
                 creators["aoe"] = [](PlayerbotAI* ai) { return new AoePlaceholderStrategy(ai); };
                 creators["buff"] = [](PlayerbotAI* ai) { return new BuffPlaceholderStrategy(ai); };
-                creators["pull"] = [](PlayerbotAI* ai) { return new PullStrategy(ai, "serpent sting"); };
+                creators["pull"] = [](PlayerbotAI* ai) {
+#ifndef MANGOSBOT_ZERO
+                    return new PullStrategy(ai, "steady shot", "misdirection on party tank");      
+#else 
+                    return new PullStrategy(ai, "serpent sting");
+#endif
+                };
                 creators["cc"] = [](PlayerbotAI* ai) { return new CcPlaceholderStrategy(ai); };
                 creators["boost"] = [](PlayerbotAI* ai) { return new BoostPlaceholderStrategy(ai); };
                 creators["pet"] = [](PlayerbotAI* ai) { return new HunterPetStrategy(ai); };
@@ -264,6 +270,7 @@ namespace ai
                 creators["viper sting"] = [](PlayerbotAI* ai) { return new CastViperStingAction(ai); };
                 creators["scorpid sting"] = [](PlayerbotAI* ai) { return new CastScorpidStingAction(ai); };
                 creators["hunter's mark"] = [](PlayerbotAI* ai) { return new CastHuntersMarkAction(ai); };
+                creators["misdirection on party tank"] = [](PlayerbotAI* ai) { return new MisdirectionOnPartyTankAction(ai); };
                 creators["mend pet"] = [](PlayerbotAI* ai) { return new CastMendPetAction(ai); };
                 creators["revive pet"] = [](PlayerbotAI* ai) { return new CastRevivePetAction(ai); };
                 creators["call pet"] = [](PlayerbotAI* ai) { return new CastCallPetAction(ai); };

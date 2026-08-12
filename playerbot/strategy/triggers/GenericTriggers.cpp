@@ -600,21 +600,20 @@ bool DpsAssistTrigger::IsActive()
     WaitForAttackStrategy* strategy = WaitForAttackStrategy::Get(ai);
     bool isWaitingForAttack = false;
     if (strategy)
+        isWaitingForAttack = strategy->ShouldWait(ai); 
+        
+    Pet* pet = bot->GetPet();
+    if (pet)
     {
-        isWaitingForAttack = strategy->ShouldWait(ai);
-        Pet* pet = bot->GetPet();
-        if (pet)
+        UnitAI* creatureAI = ((Creature*)pet)->AI();
+        if (creatureAI)
         {
-            UnitAI* creatureAI = ((Creature*)pet)->AI();
-            if (creatureAI)
-            {
-                if (creatureAI->GetReactState() == REACT_PASSIVE && !isWaitingForAttack)
-                    return true;
-            }
+            if (isWaitingForAttack)
+                return false;
         }
-    }               
+    }
 
-    return false;
+    return true;
 }
 
 bool IsBehindTargetTrigger::IsActive()

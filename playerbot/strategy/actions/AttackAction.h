@@ -16,6 +16,7 @@ namespace ai
 
     protected:
         bool Attack(Player* requester, Unit* target);
+        bool PetAttack(Player* requester, Unit* target);
         bool IsTargetValid(Player* requester, Unit* target);
 
 #ifdef GenerateBotHelp

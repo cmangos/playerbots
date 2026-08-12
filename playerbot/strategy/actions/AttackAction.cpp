@@ -115,10 +115,10 @@ bool AttackAction::Attack(Player* requester, Unit* target)
 
         WaitForAttackStrategy* strategy = WaitForAttackStrategy::Get(ai);
         bool isWaitingForAttack = false;
+        Pet* pet = bot->GetPet();
         if (strategy)
         {
             isWaitingForAttack = strategy->ShouldWait(ai);
-            Pet* pet = bot->GetPet();
             if (pet)
             {
                 UnitAI* creatureAI = ((Creature*)pet)->AI();
@@ -129,61 +129,38 @@ bool AttackAction::Attack(Player* requester, Unit* target)
                     {
                         // Reset the pet state if no master
                         if (creatureAI->GetReactState() == REACT_PASSIVE && !ai->GetMaster())
-                        {
                             creatureAI->SetReactState(REACT_DEFENSIVE);
-                        }
                         else 
-                        {
-                            // If we're done waiting to attack and there's mobs to cc, we can't use defensive/aggressive
-                            // because non passive pets will ignore our cc
-                            // Therefore, we'll keep passive so we can only attack the current target specifically
-                            // In other words, pet only attacks what owner can attack
-                            Unit* ccTarget = AI_VALUE(Unit*, "rti cc target");
-                            if (!ccTarget || (ccTarget && target->GetObjectGuid() != ccTarget->GetObjectGuid()))
-                            {
-                                constexpr uint32 PET_IMP = 416;
-                                constexpr uint32 PHASE_SHIFT = 4511;
-                                if (!(bot->getClass() == CLASS_WARLOCK &&
-                                    pet->AI() && pet->AI()->HasReactState(REACT_PASSIVE) &&
-                                    pet->GetEntry() == PET_IMP && pet->HasAura(PHASE_SHIFT)))
-                                {
-                                    // Send pet action packet
-                                    const ObjectGuid& petGuid = pet->GetObjectGuid();
-                                    const ObjectGuid& targetGuid = target->GetObjectGuid();
-                                    const uint8 flag = ACT_COMMAND;
-                                    const uint32 spellId = COMMAND_ATTACK;
-                                    const uint32 command = (flag << 24) | spellId;
-
-                                    WorldPacket data(CMSG_PET_ACTION);
-                                    data << petGuid;
-                                    data << command;
-                                    data << targetGuid;
-                                    bot->GetSession()->HandlePetAction(data);
-                                }
-                            }
-                        }
+                            PetAttack(requester, target);
                     }
                     else
                     {
-                        strategy->SetPetReactState(creatureAI->GetReactState() != REACT_PASSIVE ? creatureAI->GetReactState() : REACT_PASSIVE);
-                        creatureAI->SetReactState(REACT_PASSIVE);
+                        if (!isWaitingForAttack)
+                            PetAttack(requester, target);
+                        else
+                        {
+                            strategy->SetPetReactState(creatureAI->GetReactState() != REACT_PASSIVE ? creatureAI->GetReactState() : REACT_PASSIVE);
+                            creatureAI->SetReactState(REACT_PASSIVE);
 
-                        // Send pet action packet
-                        const ObjectGuid& petGuid = pet->GetObjectGuid();
-                        const uint8 flag = ACT_REACTION;
-                        const uint32 spellId = REACT_PASSIVE;
-                        const uint32 data = (flag << 24) | spellId;
+                            // Send pet action packet
+                            const ObjectGuid& petGuid = pet->GetObjectGuid();
+                            const uint8 flag = ACT_REACTION;
+                            const uint32 spellId = REACT_PASSIVE;
+                            const uint32 data = (flag << 24) | spellId;
 
-                        WorldPacket packet(CMSG_PET_ACTION);
-                        packet << petGuid;
-                        packet << data;
-                        packet << uint64(0);
-                        bot->GetSession()->HandlePetAction(packet);
-                        bot->PetSpellInitialize();
+                            WorldPacket packet(CMSG_PET_ACTION);
+                            packet << petGuid;
+                            packet << data;
+                            packet << uint64(0);
+                            bot->GetSession()->HandlePetAction(packet);
+                            bot->PetSpellInitialize();
+                        }
                     }
                 }
             }
         }
+        else
+            PetAttack(requester, target);
 
         if (ai->CanMove() && !sServerFacade.IsInFront(bot, target, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))
         {
@@ -235,6 +212,43 @@ bool AttackAction::Attack(Player* requester, Unit* target)
     }
 
     return false;
+}
+
+bool AttackAction::PetAttack(Player* requester, Unit* target)
+{
+    // If we're done waiting to attack and there's mobs to cc, we can't use defensive/aggressive
+    // because non passive pets will ignore our cc
+    // Therefore, we'll keep passive so we can only attack the current target specifically
+    // In other words, pet only attacks what owner can attack
+    Pet* pet = bot->GetPet();
+    Unit* ccTarget = AI_VALUE(Unit*, "rti cc target");
+    if (pet && (!ccTarget || (ccTarget && target->GetObjectGuid() != ccTarget->GetObjectGuid())))
+    {
+        constexpr uint32 PET_IMP = 416;
+        constexpr uint32 PHASE_SHIFT = 4511;
+        if (!(bot->getClass() == CLASS_WARLOCK &&
+            pet->AI() && pet->AI()->HasReactState(REACT_PASSIVE) &&
+            pet->GetEntry() == PET_IMP && pet->HasAura(PHASE_SHIFT)))
+        {
+            // Send pet action packet
+            const ObjectGuid& petGuid = pet->GetObjectGuid();
+            const ObjectGuid& targetGuid = target->GetObjectGuid();
+            const uint8 flag = ACT_COMMAND;
+            const uint32 spellId = COMMAND_ATTACK;
+            const uint32 command = (flag << 24) | spellId;
+
+            WorldPacket data(CMSG_PET_ACTION);
+            data << petGuid;
+            data << command;
+            data << targetGuid;
+            bot->GetSession()->HandlePetAction(data);
+        }
+
+        return true;
+    }
+
+    return false;
+    
 }
 
 bool AttackAction::IsTargetValid(Player* requester, Unit* target)

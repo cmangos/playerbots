@@ -84,4 +84,16 @@ namespace ai
 	public:
 		NetherspiteInfernalTooCloseTrigger(PlayerbotAI* ai) : CloseToCreatureTrigger(ai, "netherspite infernal too close", 17646, 20.0f) {}
 	};
+
+	class PrinceMalchezaarTooCloseTrigger : public CloseToCreatureTrigger
+	{
+	public:
+		PrinceMalchezaarTooCloseTrigger(PlayerbotAI* ai) : CloseToCreatureTrigger(ai, "prince malchezaar too close", 15690, ai->HasStrategy("ranged", BotState::BOT_STATE_COMBAT) ? 30.0f : 32.0f, false, ai->HasStrategy("ranged", BotState::BOT_STATE_COMBAT) ? 2 : 1)  {}
+
+		bool IsActive() override;
+
+		bool MeleeWaitCheck(Unit* target);
+
+		bool EnfeeblePart();
+	};
 }

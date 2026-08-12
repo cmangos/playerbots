@@ -131,8 +131,8 @@ namespace ai
     class CloseToCreatureTrigger : public Trigger
     {
     public:
-        CloseToCreatureTrigger(PlayerbotAI* ai, std::string name, uint32 creatureID, float range, bool ignoreVictim = false)
-        : Trigger(ai, name, 1)
+        CloseToCreatureTrigger(PlayerbotAI* ai, std::string name, uint32 creatureID, float range, bool ignoreVictim = false, uint32 timeInterval = 1)
+        : Trigger(ai, name, timeInterval)
         , creatureID(creatureID)
         , range(range)
         , ignoreVictim(ignoreVictim) {}

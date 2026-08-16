@@ -30,7 +30,7 @@ namespace ai
     class MoveAwayFromCreature : public MovementAction
     {
     public:
-        MoveAwayFromCreature(PlayerbotAI* ai, std::string name, uint32 creatureID, float range, bool ignoreVictim = false) : MovementAction(ai, name), creatureID(creatureID), range(range), ignoreVictim(ignoreVictim) {}
+        MoveAwayFromCreature(PlayerbotAI* ai, std::string name, uint32 creatureID, float range, bool ignoreVictim = false, bool healersSafe = false) : MovementAction(ai, name), creatureID(creatureID), range(range), ignoreVictim(ignoreVictim), healersSafe(healersSafe) {}
         bool Execute(Event& event) override;
         bool isPossible() override;
 
@@ -55,6 +55,7 @@ namespace ai
         uint32 creatureID;
         float range;
         bool ignoreVictim;
+        bool healersSafe;
     };
 
     class MoveAwayFromSpecificCreatures : public MoveAwayFromCreature

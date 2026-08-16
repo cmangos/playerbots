@@ -2,6 +2,7 @@
 #include "playerbot/strategy/values/PositionValue.h"
 #include "playerbot/strategy/AiObjectContext.h"
 #include "playerbot/PlayerbotAI.h"
+#include "playerbot/ServerFacade.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
@@ -129,6 +130,7 @@ bool MoveAwayFromCreature::CreatureSearchHelperFunction(Event& event, uint32 cre
     MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(bot, creatureID, range);
     MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(units, u_check);
     Cell::VisitAllObjects(bot, searcher, range);
+
     for (Unit* unit : units)
     {
         Creature* creature = (Creature*)unit;
@@ -146,7 +148,7 @@ bool MoveAwayFromCreature::CreatureSearchHelperFunction(Event& event, uint32 cre
         }
     }
 
-    if (creatures.empty())
+    if (creatures.empty() || closestCreatureDistance >= range)
     {
         return false;
     }
@@ -161,12 +163,47 @@ bool MoveAwayFromCreature::CreatureSearchHelperFunction(Event& event, uint32 cre
     creatures.erase(it);
 
     // Generate the initial angle directly behind the bot looking at the closest creature
-    const WorldPosition botPosition(bot);
-    const WorldPosition creaturePosition(closestCreature);
-    float angleLeft = creaturePosition.getAngleTo(botPosition);
+    WorldPosition botPosition(bot);
+    WorldPosition targetPosition(closestCreature);
+    float angleLeft = targetPosition.getAngleTo(botPosition);
     float angleRight = angleLeft;
 
-    const uint8 attempts = 60;
+    Group* group = bot->GetGroup();
+    bool shouldRunToHeal = group && healersSafe && !ai->IsHeal(bot, true);
+    if (shouldRunToHeal)
+    {
+        std::list<WorldPosition> points;
+        for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+        {
+            Player* member = ref->getSource();
+            if (!member || !sServerFacade.IsAlive(member))
+                continue;
+
+            if (ai->IsHeal(member, true))
+            {
+                WorldPosition healPosition(member);
+                points.push_back(healPosition);
+            }
+        }
+        // Use a minimal move from where we are to a safe spot.
+        if (!points.empty())
+        {
+            points.sort([botPosition](WorldPosition i, WorldPosition j) { return botPosition.fDist(i) < botPosition.fDist(j); });
+            WorldPosition* validPoint = &points.front();
+            if (IsValidPoint(points.front(), creatures, hazards))
+            {
+                if (MoveTo(bot->GetMapId(), validPoint->getX(), validPoint->getY(), validPoint->getZ(), false, IsReaction(), false, false))
+                {
+                    if (IsReaction())
+                        WaitForReach(validPoint->distance(botPosition));
+                    return true;
+                }
+            }
+
+        }
+    }
+
+    const uint8 attempts = 20;
     const uint8 halfAtempts = (uint8)(attempts * 0.5f);
     float angleIncrement = (float)((M_PI) / halfAtempts);
 
@@ -178,9 +215,9 @@ bool MoveAwayFromCreature::CreatureSearchHelperFunction(Event& event, uint32 cre
         WorldPosition* validPoint = nullptr;
 
         // Calculate a point to the left and right
-        WorldPosition pointLeft = creaturePosition + WorldPosition(0, distance * cos(angleLeft), distance * sin(angleLeft), 1.0f);
+        WorldPosition pointLeft = targetPosition + WorldPosition(0, distance * cos(angleLeft), distance * sin(angleLeft), 1.0f);
         pointLeft.setZ(pointLeft.getHeight());
-        WorldPosition pointRight = creaturePosition + WorldPosition(0, distance * cos(angleRight), distance * sin(angleRight), 1.0f);
+        WorldPosition pointRight = targetPosition + WorldPosition(0, distance * cos(angleRight), distance * sin(angleRight), 1.0f);
         pointRight.setZ(pointRight.getHeight());
 
         if (IsValidPoint(pointLeft, creatures, hazards))

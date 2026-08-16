@@ -62,6 +62,10 @@ void PrinceMalchezaarFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& 
 	triggers.push_back(new TriggerNode(
 		"netherspite infernal too close",
 		NextAction::array(0, new NextAction("move away from netherspite infernal", 100.0f), NULL)));
+		
+	triggers.push_back(new TriggerNode(
+		"prince malchezaar too close",
+		NextAction::array(0, new NextAction("move away from prince malchezaar", 100.0f), NULL)));
 }
 
 void PrinceMalchezaarFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

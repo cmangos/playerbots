@@ -70,6 +70,10 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("overpower", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "sunder armor",
+        NextAction::array(0, new NextAction("sunder armor", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "mortal strike",
         NextAction::array(0, new NextAction("mortal strike", ACTION_NORMAL + 3), NULL)));
 
@@ -412,6 +416,10 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("execute", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "sunder armor",
+        NextAction::array(0, new NextAction("sunder armor", ACTION_HIGH + 2), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "overpower",
         NextAction::array(0, new NextAction("overpower", ACTION_HIGH), NULL)));
 
@@ -746,6 +754,10 @@ void ArmsWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "sudden death",
         NextAction::array(0, new NextAction("execute", ACTION_HIGH + 1), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "sunder armor",
+        NextAction::array(0, new NextAction("sunder armor", ACTION_HIGH + 2), NULL)));
 
     triggers.push_back(new TriggerNode(
         "overpower",

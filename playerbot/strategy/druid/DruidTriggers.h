@@ -101,6 +101,13 @@ namespace ai
         FaerieFireFeralTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "faerie fire (feral)") {}
     };
 
+    class DemoralizingRoarTrigger : public DebuffTrigger
+    {
+    public:
+        DemoralizingRoarTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "demoralizing roar") {}
+        virtual bool IsActive() override { return DebuffTrigger::IsActive() && !ai->HasAura("demoralizing shout", GetTarget()); }
+    };
+
     class BashInterruptSpellTrigger : public InterruptSpellTrigger
     {
     public:

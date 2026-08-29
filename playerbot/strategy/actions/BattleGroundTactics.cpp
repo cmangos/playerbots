@@ -2656,38 +2656,117 @@ bool BGTactics::eotsJump()
     bool atAllyIsle = bot->GetPositionX() > 2496.f && bot->GetPositionZ() > 1250.0f;
     bool atHordeIsle = bot->GetPositionX() < 1834.0f && bot->GetPositionZ() > 1250.0f;
 
+    MotionMaster& mm = *bot->GetMotionMaster();
+
     if (bot->GetTeam() == ALLIANCE)
     {
         if (atAllyIsle) // move to island end
             return urand(0, 1) ? MoveTo(bg->GetMapId(), 2492.0f, 1597.0f + frand(-2, +2), 1255.0f) : MoveTo(bg->GetMapId(), 2495.0f, 1604.0f + frand(-2, +2), 1256.0f);
+
         if (bot->GetPositionX() < 2500.f && bot->GetPositionZ() > 1245.0f) // jump on first island
-            return role < 7 ? MoveTo(bg->GetMapId(), 2484.0f, 1607.0f + frand(-2, +2), 1238.0f, false, false, true) : MoveTo(bg->GetMapId(), 2474.0f, 1602.0f + frand(-2, +2), 1240.0f, false, false, true);
+        {
+            if (role < 7)
+            {
+                mm.MovePoint(
+                    bg->GetMapId(),
+                    Position(2484.0f, 1607.0f + frand(-2, +2), 1238.0f, 0.f),
+                    FORCED_MOVEMENT_RUN,
+                    0.0f,
+                    false);
+            }
+            else
+            {
+                mm.MovePoint(
+                    bg->GetMapId(),
+                    Position(2474.0f, 1602.0f + frand(-2, +2), 1240.0f, 0.f),
+                    FORCED_MOVEMENT_RUN,
+                    0.0f,
+                    false);
+            }
+
+            return true;
+        }
+
         if (bot->GetPositionX() > 2470.f && bot->GetPositionZ() > 1230.0f) // jump on ground
         {
             if (bot->GetPositionX() > 2480.f)
-                return MoveTo(bg->GetMapId(), 2486.0f, 1624.0f + frand(-2, +2), 1226.0f, false, false, true);
+            {
+                mm.MovePoint(
+                    bg->GetMapId(),
+                    Position(2486.0f, 1624.0f + frand(-2, +2), 1226.0f, 0.f),
+                    FORCED_MOVEMENT_RUN,
+                    0.0f,
+                    false);
+            }
             else
-                return MoveTo(bg->GetMapId(), 2458.0f, 1601.0f + frand(-2, +2), 1207.0f, false, false, true);
+            {
+                mm.MovePoint(
+                    bg->GetMapId(),
+                    Position(2458.0f, 1601.0f + frand(-2, +2), 1207.0f, 0.f),
+                    FORCED_MOVEMENT_RUN,
+                    0.0f,
+                    false);
+            }
+
+            return true;
         }
     }
     else
     {
         if (atHordeIsle) // move to island end
             return urand(0, 1) ? MoveTo(bg->GetMapId(), 1835.0f, 1544.0f + frand(-2, +2), 1255.0f) : MoveTo(bg->GetMapId(), 1835.0f, 1534.0f + frand(-2, +2), 1254.0f);
+
         if (bot->GetPositionX() > 1830.f && bot->GetPositionZ() > 1250.0f) // jump on first island
-            return role < 7 ? MoveTo(bg->GetMapId(), 1853.0f, 1530.0f + frand(-2, +2), 1239.0f, false, false, true) : MoveTo(bg->GetMapId(), 1854.0f, 1542.0f + frand(-2, +2), 1241.0f, false, false, true);
+        {
+            if (role < 7)
+            {
+                mm.MovePoint(
+                    bg->GetMapId(),
+                    Position(1853.0f, 1530.0f + frand(-2, +2), 1239.0f, 0.f),
+                    FORCED_MOVEMENT_RUN,
+                    0.0f,
+                    false);
+            }
+            else
+            {
+                mm.MovePoint(
+                    bg->GetMapId(),
+                    Position(1854.0f, 1542.0f + frand(-2, +2), 1241.0f, 0.f),
+                    FORCED_MOVEMENT_RUN,
+                    0.0f,
+                    false);
+            }
+
+            return true;
+        }
+
         if (bot->GetPositionX() < 1859.f && bot->GetPositionZ() > 1230.0f) // jump on ground
         {
             if (bot->GetPositionY() > 1535.f)
-                return MoveTo(bg->GetMapId(), 1867.0f, 1533.0f + frand(-2, +2), 1210.0f, false, false, true);
+            {
+                mm.MovePoint(
+                    bg->GetMapId(),
+                    Position(1867.0f, 1533.0f + frand(-2, +2), 1210.0f, 0.f),
+                    FORCED_MOVEMENT_RUN,
+                    0.0f,
+                    false);
+            }
             else
-                return MoveTo(bg->GetMapId(), 1848.0f, 1512.0f + frand(-2, +2), 1225.0f, false, false, true);
+            {
+                mm.MovePoint(
+                    bg->GetMapId(),
+                    Position(1848.0f, 1512.0f + frand(-2, +2), 1225.0f, 0.f),
+                    FORCED_MOVEMENT_RUN,
+                    0.0f,
+                    false);
+            }
+
+            return true;
         }
     }
 
     return false;
 }
-
 
 //
 // actual bg tactics below

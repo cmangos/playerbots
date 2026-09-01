@@ -230,6 +230,19 @@ bool BuyAction::Execute(Event& event)
                 const ItemPrototype* proto = sObjectMgr.GetItemPrototype(itemId);
                 if (!proto)
                     continue;
+                
+                if (!ai->HasCheat(BotCheatMask::gold))
+                {
+                    uint32 price = uint32(floor(proto->BuyPrice * bot->GetReputationPriceDiscount(pCreature)));
+                    uint32 botMoney = bot->GetMoney();
+                    if (price > botMoney)
+                    {
+                        std::ostringstream out;
+                        out << "I don't have enough to buy " << ChatHelper::formatItem(proto);
+                        ai->TellPlayer(requester, out.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+                        continue;
+                    }
+                }
 
                 result |= BuyItem(requester, pCreature->GetVendorItems(), vendorguid, proto, bought);
                 if (!result)

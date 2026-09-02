@@ -270,6 +270,7 @@ namespace ai
                 creators["party member cleanse spirit curse"] = [](PlayerbotAI* ai) { return new PartyMemberCleanseSpiritCurseTrigger(ai); };
                 creators["party member cleanse spirit disease"] = [](PlayerbotAI* ai) { return new PartyMemberCleanseSpiritDiseaseTrigger(ai); };
                 creators["shock"] = [](PlayerbotAI* ai) { return new ShockTrigger(ai); };
+                creators["flame shock"] = [](PlayerbotAI* ai) { return new FlameShockTrigger(ai); };
                 creators["frost shock snare"] = [](PlayerbotAI* ai) { return new FrostShockSnareTrigger(ai); };
                 creators["heroism"] = [](PlayerbotAI* ai) { return new HeroismTrigger(ai); };
                 creators["bloodlust"] = [](PlayerbotAI* ai) { return new BloodlustTrigger(ai); };

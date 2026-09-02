@@ -5,7 +5,7 @@
 
 using namespace ai;
 
-Unit* AttackerWithoutAuraTargetValue::Calculate()
+ObjectGuid AttackerWithoutAuraTargetValue::Calculate()
 {
     std::list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
     Unit* target = ai->GetAiObjectContext()->GetValue<Unit*>("current target")->Get();
@@ -19,7 +19,7 @@ Unit* AttackerWithoutAuraTargetValue::Calculate()
             continue;
 
         if (!ai->HasAura(qualifier, unit))
-            return unit;
+            return unit->GetObjectGuid();
     }
 
     return NULL;

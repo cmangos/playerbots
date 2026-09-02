@@ -104,12 +104,12 @@ bool HasEnemyPlayersValue::Calculate()
     return !context->GetValue<std::list<ObjectGuid>>("enemy player targets", 1)->Get().empty();
 }
 
-Unit* EnemyPlayerValue::Calculate()
+ObjectGuid EnemyPlayerValue::Calculate()
 {
     // Prioritize the duel opponent
     if(bot->duel && bot->duel->opponent && !sServerFacade.IsFriendlyTo(bot->duel->opponent, bot))
     {
-        return bot->duel->opponent;
+        return bot->duel->opponent->GetObjectGuid();
     }
 
     Unit* bestEnemyPlayer = nullptr;
@@ -166,7 +166,7 @@ Unit* EnemyPlayerValue::Calculate()
         }
     }
 
-    return bestEnemyPlayer;
+    return bestEnemyPlayer ? bestEnemyPlayer->GetObjectGuid() : ObjectGuid();
 }
 
 

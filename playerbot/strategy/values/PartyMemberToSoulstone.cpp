@@ -79,11 +79,11 @@ static bool BotIsAlreadySoulstoned(Player* bot)
     return false;
 }
 
-Unit* PartyMemberToSoulstone::Calculate()
+ObjectGuid PartyMemberToSoulstone::Calculate()
 {
     // If a master player has manually assigned revive targets, defer to that
     if (!AI_VALUE(std::list<ObjectGuid>, "revive targets").empty())
-        return nullptr;
+        return NULL;
 
     Group* group = bot->GetGroup();
 
@@ -94,22 +94,22 @@ Unit* PartyMemberToSoulstone::Calculate()
         Unit* target = FindPartyMember(finder);
 
         if (!target)
-            return nullptr;
+            return NULL;
 
         // Multiple warlocks in group may target same player. Each roll D20 to stagger casts.
         if (HasOtherWarlockInGroup(bot, group))
         {
             if (urand(1, 20) != 20)
-                return nullptr;
+                return NULL;
         }
 
-        return target;
+        return target ? target->GetObjectGuid() : ObjectGuid();
     }
     else
     {
         if (BotIsAlreadySoulstoned(bot))
-            return nullptr;
+            return NULL;
 
-        return ai->GetBot();
+        return ai->GetBot() ? ai->GetBot()->GetObjectGuid() : ObjectGuid();
     }
 }

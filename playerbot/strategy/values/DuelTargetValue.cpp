@@ -4,7 +4,13 @@
 
 using namespace ai;
 
-Unit* DuelTargetValue::Calculate()
+ObjectGuid DuelTargetValue::Calculate()
 {
-    return bot->duel ? bot->duel->opponent : NULL;
+    if (bot->duel)
+    {
+        Player* player = bot->duel->opponent;
+        if (player) return player->GetObjectGuid();
+    }
+    
+    return NULL;
 }

@@ -41,11 +41,12 @@ protected:
 };
 
 
-Unit* TankTargetValue::Calculate()
+ObjectGuid TankTargetValue::Calculate()
 {
-    Unit* rti = RtiTargetValue::Calculate();
+    ObjectGuid rti = RtiTargetValue::Calculate();
     if (rti) return rti;
 
     FindTargetForTankStrategy strategy(ai);
-    return FindTarget(&strategy);
+    Unit* target = FindTarget(&strategy);
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }

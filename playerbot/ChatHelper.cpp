@@ -1195,7 +1195,7 @@ std::string ChatHelper::formatGuidPosition(const GuidPosition& guidP, const Guid
     if (WorldPosition(guidP))
         out << " " << formatWorldPosition(guidP, ref);
 
-    if(ref && ref.IsPlayer() && (guidP.IsCreature() || guidP.IsPlayer()))
+    if(ref && ref.IsPlayer() && (guidP.IsCreature() || (guidP.IsPlayer() && guidP.GetPlayer())))
         out << " " << formatReaction(guidP.GetReactionTo(ref, ref.getFirstInstanceId()));
 
     out << "]|h|r";

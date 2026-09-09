@@ -244,7 +244,7 @@ namespace ai
                 return "<none>";
 
             CreatureInfo const* bmTemplate = ObjectMgr::GetCreatureTemplate(creatureDataPair->second.id);
-            return creatureDataPair ? bmTemplate->Name : "<none>";
+            return bmTemplate ? bmTemplate->Name : "<none>";
         }
     };
 

@@ -119,6 +119,10 @@ const FactionTemplateEntry* GuidPosition::GetFactionTemplateEntry() const
 
 const ReputationRank GuidPosition::GetReactionTo(const GuidPosition& other, uint32 instanceId) const
 {
+    // A diagnostic GUID can outlive its player or creature-template metadata.
+    if (!GetFactionTemplateEntry() || !other.GetFactionTemplateEntry())
+        return REP_NEUTRAL;
+
     if(other.IsUnit() && other.GetUnit(instanceId))
         if (other.GetUnit(instanceId)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {

@@ -25,8 +25,9 @@ private:
 	std::vector<std::string> auras;
 };
 
-Unit* PartyTankWithoutLifebloomValue::Calculate()
+ObjectGuid PartyTankWithoutLifebloomValue::Calculate()
 {
 	TankWithoutLifebloomPredicate predicate(ai);
-	return FindPartyMember(predicate);
+	Unit* tank = FindPartyMember(predicate);
+	return tank ? tank->GetObjectGuid() : ObjectGuid();
 }

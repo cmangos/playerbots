@@ -12,7 +12,7 @@
 
 using namespace ai;
 
-Unit* GrindTargetValue::Calculate()
+ObjectGuid GrindTargetValue::Calculate()
 {
     uint32 memberCount = 1;
     Group* group = bot->GetGroup();
@@ -26,7 +26,7 @@ Unit* GrindTargetValue::Calculate()
         target = FindTargetForGrinding(assistCount++);
     }
 
-    return target;
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }
 
 Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)

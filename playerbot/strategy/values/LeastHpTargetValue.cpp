@@ -5,8 +5,9 @@
 
 using namespace ai;
 
-Unit* LeastHpTargetValue::Calculate()
+ObjectGuid LeastHpTargetValue::Calculate()
 {
     FindLeastHpTargetStrategy strategy(ai);
-    return FindTarget(&strategy);
+    Unit* target = FindTarget(&strategy);
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }

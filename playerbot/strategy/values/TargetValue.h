@@ -122,7 +122,7 @@ namespace ai
     {
     public:
         FollowTargetValue(PlayerbotAI* ai, std::string name = "follow target") : UnitCalculatedValue(ai, name) {}
-        Unit* Calculate() override;
+        ObjectGuid Calculate() override;
     };
 
     class ManualFollowTargetValue : public GuidPositionManualSetValue
@@ -135,7 +135,7 @@ namespace ai
     {
     public:
         ClosestAttackerTargetingMeTargetValue(PlayerbotAI* ai, std::string name = "closest attacker targeting me") : UnitCalculatedValue(ai, name) {}
-        Unit* Calculate() override;
+        ObjectGuid Calculate() override;
     };
 
     class FriendlyManualTargetsValue : public ManualSetValue<std::list<ObjectGuid>>

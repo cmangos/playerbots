@@ -5,7 +5,7 @@
 #include "playerbot/ServerFacade.h"
 using namespace ai;
 
-Unit* CurrentTargetValue::Get()
+ObjectGuid CurrentTargetValue::Get()
 {
     if (selection.IsEmpty())
         return NULL;
@@ -14,7 +14,7 @@ Unit* CurrentTargetValue::Get()
     if (unit && !bot->IsWithinDistInMap(unit, sPlayerbotAIConfig.sightDistance))
         return NULL;
 
-    return unit;
+    return unit->GetObjectGuid();
 }
 
 void CurrentTargetValue::Set(Unit* target)

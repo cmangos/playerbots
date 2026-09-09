@@ -6,12 +6,12 @@
 
 using namespace ai;
 
-Unit* EnemyHealerTargetValue::Calculate()
+ObjectGuid EnemyHealerTargetValue::Calculate()
 {
     std::string spell = qualifier;
 
     std::list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
-    Unit* target = ai->GetAiObjectContext()->GetValue<Unit*>("current target")->Get();
+    Unit* target = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
     for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
     {
         Unit* unit = ai->GetUnit(*i);
@@ -26,11 +26,11 @@ Unit* EnemyHealerTargetValue::Calculate()
 
         Spell* spell = unit->GetCurrentSpell(CURRENT_GENERIC_SPELL);
         if (spell && IsPositiveSpell(spell->m_spellInfo))
-            return unit;
+            return unit->GetObjectGuid();
 
         spell = unit->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
         if (spell && IsPositiveSpell(spell->m_spellInfo))
-            return unit;
+            return unit->GetObjectGuid();
     }
 
     return NULL;

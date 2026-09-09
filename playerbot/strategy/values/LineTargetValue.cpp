@@ -5,7 +5,7 @@
 #include "playerbot/ServerFacade.h"
 using namespace ai;
 
-Unit* LineTargetValue::Calculate()
+ObjectGuid LineTargetValue::Calculate()
 {
     Player* master = GetMaster();
     if (!master)
@@ -24,11 +24,11 @@ Unit* LineTargetValue::Calculate()
             continue;
 
         if (player == bot)
-            return prev;
+            return prev ? prev->GetObjectGuid() : ObjectGuid();
 
         prev = player;
     }
 
-    return master;
+    return master ? master->GetObjectGuid() : ObjectGuid();
 }
 

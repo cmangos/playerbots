@@ -39,7 +39,7 @@ bool compareByMissingHealth(const Unit* u1, const Unit* u2, bool incomingDamage 
     return (hpmax1 - hp1) > (hpmax2 - hp2);
 }
 
-Unit* PartyMemberToHeal::Calculate()
+ObjectGuid PartyMemberToHeal::Calculate()
 {
     std::vector<Unit*> needHeals;
     std::vector<Unit*> tankTargets;
@@ -68,7 +68,7 @@ Unit* PartyMemberToHeal::Calculate()
     const std::vector<Player*> partyMembers = GetPartyMembers();
     if (partyMembers.empty() && needHeals.empty())
     {
-        return nullptr;
+        return NULL;
     }
 
     if (!partyMembers.empty() || !needHeals.empty())
@@ -122,7 +122,7 @@ Unit* PartyMemberToHeal::Calculate()
 
     if (needHeals.empty() && tankTargets.empty())
     {
-        return nullptr;
+        return NULL;
     }
 
     if (needHeals.empty() && !tankTargets.empty())
@@ -162,7 +162,8 @@ Unit* PartyMemberToHeal::Calculate()
     }
 
     healerIndex = healerIndex % needHeals.size();
-    return needHeals[healerIndex];
+    Unit* unit = needHeals[healerIndex];
+    return unit ? unit->GetObjectGuid() : ObjectGuid();
 }
 
 bool PartyMemberToHeal::CanHealPet(Pet* pet)
@@ -233,7 +234,7 @@ std::vector<Player*> PartyMemberToHeal::GetPartyMembers()
     return partyMembers;
 }
 
-Unit* PartyMemberToProtect::Calculate()
+ObjectGuid PartyMemberToProtect::Calculate()
 {
     Group* group = bot->GetGroup();
     if (!group)
@@ -283,10 +284,11 @@ Unit* PartyMemberToProtect::Calculate()
 
     sort(needProtect.begin(), needProtect.end(), compareByHealth);
 
-    return needProtect[0];
+    Unit* unit = needProtect[0];
+    return unit ? unit->GetObjectGuid() : ObjectGuid();
 }
 
-Unit* PartyMemberToRemoveRoots::Calculate()
+ObjectGuid PartyMemberToRemoveRoots::Calculate()
 {
     Unit* target = nullptr;
     Group* group = bot->GetGroup();
@@ -312,5 +314,5 @@ Unit* PartyMemberToRemoveRoots::Calculate()
         }
     }
 
-    return target;
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }

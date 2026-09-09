@@ -28,7 +28,7 @@ namespace ai
             return index;
         }
 
-        Unit *Calculate() override
+        ObjectGuid Calculate() override
         {
             Group *group = bot->GetGroup();
             if(!group)
@@ -52,7 +52,7 @@ namespace ai
                 !bot->IsWithinDistInMap(unit, sPlayerbotAIConfig.sightDistance, false))
                 return NULL;
 
-            return unit;
+            return unit ? unit->GetObjectGuid() : ObjectGuid();
         }
 
     private:

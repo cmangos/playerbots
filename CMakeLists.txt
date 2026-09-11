@@ -190,6 +190,16 @@ if (NOT CONF_INSTALL_DIR)
 endif()
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aiplayerbot.conf.dist DESTINATION ${CONF_INSTALL_DIR})
 
+# The bundled AhBot replaces the core AuctionHouseBot whenever BUILD_AHBOT is
+# off, which is the default for a playerbots build. Its config template was
+# never installed, so AhBotConfig::Initialize() could not find ahbot.conf and
+# AhBot disabled itself on startup. Guarded so it cannot collide with the
+# core's own ahbot.conf.dist when the AuctionHouseBot module is selected.
+if (NOT BUILD_AHBOT)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/ahbot/ahbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/ahbot.conf.dist)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ahbot.conf.dist DESTINATION ${CONF_INSTALL_DIR})
+endif()
+
 set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "PlayerBots")
 
 # Generate PCH

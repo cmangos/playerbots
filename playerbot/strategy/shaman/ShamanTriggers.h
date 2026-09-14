@@ -450,6 +450,13 @@ namespace ai
         virtual bool IsActive() override;
     };
 
+    class FlameShockTrigger : public DebuffTrigger 
+    {
+    public:
+        FlameShockTrigger(PlayerbotAI* ai) : DebuffTrigger(ai, "flame shock") {}
+        virtual bool IsActive() override;
+    };
+
     class FrostShockSnareTrigger : public SnareTargetTrigger
     {
     public:

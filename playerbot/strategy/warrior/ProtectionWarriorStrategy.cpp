@@ -629,12 +629,18 @@ void ProtectionWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     WarriorAoeStrategy::InitCombatTriggers(triggers);
 
     triggers.push_back(new TriggerNode(
-        "melee medium aoe",
-        NextAction::array(0, new NextAction("challenging shout", ACTION_HIGH + 1), NULL)));
+        "melee light aoe",
+        NextAction::array(0, new NextAction("thunder clap threat", ACTION_HIGH + 7), NULL)));
 
     triggers.push_back(new TriggerNode(
         "melee medium aoe",
+        NextAction::array(0, new NextAction("challenging shout", ACTION_HIGH + 1), NULL)));
+
+    /*
+    triggers.push_back(new TriggerNode(
+        "melee medium aoe",
         NextAction::array(0, new NextAction("battle shout taunt", ACTION_HIGH), NULL)));
+    */
 }
 
 void ProtectionWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1019,10 +1025,14 @@ void ProtectionWarriorAoeStrategy::InitCombatTriggers(std::list<TriggerNode*>& t
     triggers.push_back(new TriggerNode(
         "melee medium aoe",
         NextAction::array(0, new NextAction("challenging shout", ACTION_HIGH + 1), NULL)));
-
+    
     triggers.push_back(new TriggerNode(
+        "melee light aoe",
+        NextAction::array(0, new NextAction("thunder clap threat", ACTION_HIGH + 7), NULL)));
+
+    /*triggers.push_back(new TriggerNode(
         "melee medium aoe",
-        NextAction::array(0, new NextAction("battle shout taunt", ACTION_HIGH), NULL)));
+        NextAction::array(0, new NextAction("battle shout taunt", ACTION_HIGH), NULL)));*/
 }
 
 void ProtectionWarriorAoeStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

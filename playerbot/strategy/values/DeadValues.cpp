@@ -67,6 +67,10 @@ WorldSafeLocsEntry const* GraveyardValue::GetAnotherAppropriateClosestGraveyard(
     WorldSafeLocsEntry const* entryFar = nullptr;
 
     Corpse* corpse = bot->GetCorpse(); //
+
+    if (!corpse)
+        return nullptr;
+
     uint32 botMapId = corpse->GetMapId();
     uint32 botZoneId = corpse->GetZoneId();
 
@@ -204,7 +208,7 @@ bool ShouldSpiritHealerValue::Calculate()
         return true;
 
     Corpse* corpse = bot->GetCorpse();
-    if (!corpse)
+    if (!corpse || !WorldPosition(corpse))
     {
         //if no corpse (?) then definitely should revive at spirit healer
         return true;

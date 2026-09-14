@@ -210,6 +210,7 @@ namespace ai
                 creators["battle shout"] = [](PlayerbotAI* ai) { return new CastBattleShoutAction(ai); };
                 creators["battle shout taunt"] = [](PlayerbotAI* ai) { return new CastBattleShoutTauntAction(ai); };
                 creators["thunder clap"] = [](PlayerbotAI* ai) { return new CastThunderClapAction(ai); };
+                creators["thunder clap threat"] = [](PlayerbotAI* ai) { return new CastThunderClapThreatAction(ai); };
                 creators["taunt"] = [](PlayerbotAI* ai) { return new CastTauntAction(ai); };
                 creators["revenge"] = [](PlayerbotAI* ai) { return new CastRevengeAction(ai); };
                 creators["slam"] = [](PlayerbotAI* ai) { return new CastSlamAction(ai); };

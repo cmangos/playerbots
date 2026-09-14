@@ -1233,13 +1233,30 @@ void PlayerbotAI::HandleTeleportAck()
         // add delay to simulate teleport delay
         SetAIInternalUpdateDelay(urand(1000, 2000));
 	}
-	else if (bot->IsBeingTeleportedFar())
-	{
-        bot->GetSession()->HandleMoveWorldportAckOpcode();
+    else if (bot->IsBeingTeleportedFar())
+    {
+        // guard BG race - bot-only fix for MapManager::CreateInstance assert
+        WorldLocation const& loc = bot->GetTeleportDest();
+        if (MapEntry const* mEntry = sMapStore.LookupEntry(loc.mapid))
+        {
+            if (mEntry->IsBattleGround())
+            {
+                uint32 bgId = bot->GetBattleGroundId();
+                if (!bgId || !sMapMgr.FindMap(loc.mapid, bgId))
+                {
+                    sLog.outError("PlayerbotAI::HandleTeleportAck: bot %s BG %u aborted bgId=%u", bot->GetName(), loc.mapid, bgId);
+                    bot->SetSemaphoreTeleportFar(false);
+                    Reset();
+                    if (IsRealPlayer())
+                        bot->SendHeartBeat();
+                    return;
+                }
+            }
+        }
 
-        // add delay to simulate teleport delay
+        bot->GetSession()->HandleMoveWorldportAckOpcode();
         SetAIInternalUpdateDelay(urand(2000, 5000));
-	}
+    }
 
     if (IsRealPlayer())
         bot->SendHeartBeat();

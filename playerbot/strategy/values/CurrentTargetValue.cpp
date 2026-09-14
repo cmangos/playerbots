@@ -14,7 +14,7 @@ ObjectGuid CurrentTargetValue::Get()
     if (unit && !bot->IsWithinDistInMap(unit, sPlayerbotAIConfig.sightDistance))
         return ObjectGuid();
 
-    return unit->GetObjectGuid();
+    return unit ? unit->GetObjectGuid() : ObjectGuid();
 }
 
 void CurrentTargetValue::Set(ObjectGuid unitGuid)

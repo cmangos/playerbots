@@ -235,12 +235,19 @@ bool MoveToTravelTargetAction::isUseful()
     if (travelPos.isDungeon() && bot->GetGroup() && bot->GetGroup()->IsLeader(bot->GetObjectGuid()) && sTravelMgr.MapTransDistance(bot, travelPos, true) < sPlayerbotAIConfig.sightDistance && !AI_VALUE2(bool, "group and", "near leader"))
         return false;
      
+    //Should the bot still loot something?
     if (AI_VALUE(bool, "has available loot"))
     {
         LootObject lootObject = AI_VALUE(LootObjectStack*, "available loot")->GetLoot(sPlayerbotAIConfig.lootDistance);
         if (lootObject.IsLootPossible(bot))
             return false;
     }
+
+    //Is the bot still going to loot something?
+    LootObject loot = AI_VALUE(LootObject, "loot target");
+
+    if (loot.IsLootPossible(bot))
+        return false;
 
     if (!travelTarget->IsForced())
         if (!CanFreeMoveValue::CanFreeMoveTo(ai, *travelTarget->GetPosition()))

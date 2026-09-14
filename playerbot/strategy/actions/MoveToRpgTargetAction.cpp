@@ -251,12 +251,19 @@ bool MoveToRpgTargetAction::isUseful()
     if (!AI_VALUE(bool, "can move around"))
         return false;
 
+    //Should the bot still loot something?
     if (AI_VALUE(bool, "has available loot"))
     {
         LootObject lootObject = AI_VALUE(LootObjectStack*, "available loot")->GetLoot(sPlayerbotAIConfig.lootDistance);
         if (lootObject.IsLootPossible(bot))
             return false;
     }
+
+    //Is the bot still going to loot something?
+    LootObject loot = AI_VALUE(LootObject, "loot target");
+
+    if (loot.IsLootPossible(bot))
+        return false;
 
     return true;
 }

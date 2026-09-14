@@ -7,7 +7,7 @@ using namespace ai;
 
 bool HunterNoStingsActiveTrigger::IsActive()
 {
-	Unit* target = AI_VALUE(Unit*, "current target");
+	Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
     return target && AI_VALUE2(uint8, "health", "current target") > 40 &&
         !ai->HasAura("serpent sting", target) &&
         !ai->HasAura("scorpid sting", target) &&
@@ -21,7 +21,7 @@ bool HuntersPetDeadTrigger::IsActive()
 
 bool HuntersPetLowHealthTrigger::IsActive()
 {
-    Unit* pet = AI_VALUE(Unit*, "pet target");
+    Unit* pet = ai->GetUnit(AI_VALUE(ObjectGuid, "pet target"));
     return pet && AI_VALUE2(uint8, "health", "pet target") < 40 &&
         !AI_VALUE2(bool, "dead", "pet target") && !AI_VALUE2(bool, "mounted", "self target");
 }

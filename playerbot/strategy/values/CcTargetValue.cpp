@@ -24,16 +24,16 @@ public:
 
         AiObjectContext* context = ai->GetAiObjectContext();
 
-        if (AI_VALUE(Unit*,"rti cc target") && AI_VALUE(Unit*,"rti cc target")->GetObjectGuid() == creature->GetObjectGuid())
+        if (ai->GetUnit(AI_VALUE(ObjectGuid,"rti cc target")) && ai->GetUnit(AI_VALUE(ObjectGuid,"rti cc target"))->GetObjectGuid() == creature->GetObjectGuid())
         {
             result = creature;
             return;
         }
 
-        if (AI_VALUE(Unit*,"current target") == creature)
+        if (AI_VALUE(ObjectGuid,"current target") == creature->GetObjectGuid())
             return;
 
-        if (AI_VALUE(Unit*,"rti target") == creature)
+        if (AI_VALUE(ObjectGuid,"rti target") == creature->GetObjectGuid())
             return;
 
         uint8 health = creature->GetHealthPercent();
@@ -106,14 +106,14 @@ ObjectGuid CcTargetValue::Calculate()
             continue;
 
         if (ai->HasMyAura(qualifier, add))
-            return NULL;
+            return ObjectGuid();
 
         if (qualifier == "polymorph")
         {
             if (ai->HasMyAura("polymorph: pig", add))
-                return NULL;
+                return ObjectGuid();
             if (ai->HasMyAura("polymorph: turtle", add))
-                return NULL;
+                return ObjectGuid();
         }
     }
 

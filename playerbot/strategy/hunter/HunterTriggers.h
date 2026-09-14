@@ -257,7 +257,7 @@ private:
             if (!hasAmmo)
                 return false;
 
-            Unit* target = AI_VALUE(Unit*, "current target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             float distance = AI_VALUE2(float, "distance", "current target");
             return target && ai->HasStrategy("close", BotState::BOT_STATE_COMBAT) &&
                 (target->GetVictim() != bot ||
@@ -282,7 +282,7 @@ private:
             if (!hasAmmo)
                 return true;
 
-            Unit* target = AI_VALUE(Unit*, "current target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             return target && ((target->GetSpeed(MOVE_RUN) > (bot->GetSpeed(MOVE_RUN) / 2)) || ((!bot->GetPet() || bot->GetPet()->IsDead()) && target->GetHealthPercent() < 50.f && target->IsCreature() && target->GetHealth() < bot->GetHealth())) &&
                 !target->IsImmobilizedState() &&
                 ai->HasStrategy("ranged", BotState::BOT_STATE_COMBAT) &&
@@ -378,7 +378,7 @@ private:
             if (!bot->HasSpell(1543))
                 return false;
 
-            Unit* target = AI_VALUE(Unit*, "nearest stealthed unit");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "nearest stealthed unit"));
             return target;
         }
     };

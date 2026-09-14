@@ -33,5 +33,5 @@ ObjectGuid EnemyHealerTargetValue::Calculate()
             return unit->GetObjectGuid();
     }
 
-    return NULL;
+    return ObjectGuid();
 }

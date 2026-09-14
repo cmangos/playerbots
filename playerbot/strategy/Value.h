@@ -218,17 +218,12 @@ namespace ai
         }
     };
 
-    class UnitCalculatedValue : public CalculatedValue<Unit*>
+    class UnitCalculatedValue : public CalculatedValue<ObjectGuid>
     {
     public:
-        UnitCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) :
-            CalculatedValue<Unit*>(ai, name, checkInterval) { this->lastCheckTime = time(0) - checkInterval / 2; }
+        UnitCalculatedValue(PlayerbotAI* ai, std::string name = "value", int checkInterval = 1) : CalculatedValue<ObjectGuid>(ai, name, checkInterval) { this->lastCheckTime = time(0) - checkInterval / 2; }
 
-        virtual std::string Format() override
-        {
-            Unit* unit = ai->GetUnit(this->Calculate());
-            return unit ? unit->GetName() : "<none>";
-        }
+        virtual std::string Format() override;
     };
 
     class CDPairCalculatedValue : public CalculatedValue<CreatureDataPair const*>
@@ -321,17 +316,13 @@ namespace ai
         T defaultValue;
     };
 
-    class UnitManualSetValue : public ManualSetValue<Unit*>
+    class UnitManualSetValue : public ManualSetValue<ObjectGuid>
     {
     public:
-        UnitManualSetValue(PlayerbotAI* ai, Unit* defaultValue, std::string name = "value") :
-            ManualSetValue<Unit*>(ai, defaultValue, name) {}
+        UnitManualSetValue(PlayerbotAI* ai, ObjectGuid defaultValue, std::string name = "value") :
+            ManualSetValue<ObjectGuid>(ai, defaultValue, name) {}
 
-        virtual std::string Format() override
-        {
-            Unit* unit = ai->GetUnit(Get());
-            return unit ? unit->GetName() : "<none>";
-        }
+        virtual std::string Format() override;
     };
 
     class GuidPositionManualSetValue : public ManualSetValue<GuidPosition>

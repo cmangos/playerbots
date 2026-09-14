@@ -49,3 +49,15 @@ std::string GuidPositionManualSetValue::Format()
 {
     return chat->formatGuidPosition(value,bot);
 }
+
+std::string UnitCalculatedValue::Format()
+{
+    Unit* unit = ai->GetUnit(Calculate());
+    return unit ? unit->GetName() : "<none>";
+}
+
+std::string UnitManualSetValue::Format()
+{
+    Unit* unit = ai->GetUnit(Get());
+    return unit ? unit->GetName() : "<none>";
+}

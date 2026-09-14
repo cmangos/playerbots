@@ -81,7 +81,7 @@ namespace ai
         {
             std::list<ObjectGuid> targets = AI_VALUE(std::list<ObjectGuid>, "nearest stealthed units");
             if (targets.empty())
-                return NULL;
+                return ObjectGuid();
 
             std::vector<Unit*> units;
             for (std::list<ObjectGuid>::iterator i = targets.begin(); i != targets.end(); ++i)
@@ -94,7 +94,7 @@ namespace ai
             }
 
             if (units.empty())
-                return NULL;
+                return ObjectGuid();
 
             Unit* unit = units[urand(0, units.size() - 1)];
             return unit ? unit->GetObjectGuid() : ObjectGuid();

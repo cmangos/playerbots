@@ -40,7 +40,7 @@ bool FindNonCcTargetStrategy::IsCcTarget(Unit* attacker)
 
             if (player->GetPlayerbotAI())
             {
-                if (PAI_VALUE(Unit*,"rti cc target") == attacker)
+                if (PAI_VALUE(ObjectGuid,"rti cc target") == attacker->GetObjectGuid())
                     return true;
 
                 std::string rti = PAI_VALUE(std::string,"rti cc");
@@ -137,26 +137,25 @@ WorldPosition HomeBindValue::Calculate()
     return WorldPosition(mapId, x, y, z, 0.0);
 }
 
+std::string RpgTargetValue::Format()
+{
+    return chat->formatGuidPosition(value, bot);
+}
+
 std::string HomeBindValue::Format()
 {
     WorldPosition pos = this->Calculate();
     return chat->formatWorldPosition(pos);
 }
 
-void PullTargetValue::Set(Unit* unit)
+void PullTargetValue::Set(ObjectGuid unitGuid)
 {
-    guid = unit ? unit->GetObjectGuid() : ObjectGuid();
+    guid = unitGuid;
 }
 
 ObjectGuid PullTargetValue::Get()
-{
-    Unit* unit = nullptr;
-    if (!guid.IsEmpty())
-    {
-        unit = sObjectAccessor.GetUnit(*bot, guid);
-    }
-    
-    return unit;
+{   
+    return guid;
 }
 
 ObjectGuid FollowTargetValue::Calculate()
@@ -167,11 +166,11 @@ ObjectGuid FollowTargetValue::Calculate()
         Formation* formation = AI_VALUE(Formation*, "formation");
         if (formation && !formation->GetTargetName().empty())
         {
-            followTarget = AI_VALUE(Unit*, formation->GetTargetName());
+            followTarget = ai->GetUnit(AI_VALUE(ObjectGuid, formation->GetTargetName()));
         }
         else
         {
-            followTarget = AI_VALUE(Unit*, "master target");
+            followTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "master target"));
         }
     }
 

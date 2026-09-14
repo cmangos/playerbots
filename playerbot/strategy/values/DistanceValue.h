@@ -82,7 +82,7 @@ namespace ai
             }
             else
             {
-                target = AI_VALUE(Unit*, qualifier);
+                target = ai->GetUnit(AI_VALUE(ObjectGuid, qualifier));
                 if (target && target == GetMaster() && target != bot)
                 {
                     Formation* formation = AI_VALUE(Formation*, "formation");
@@ -112,7 +112,7 @@ namespace ai
     public:
         bool Calculate() override
         {
-            Unit* target = AI_VALUE(Unit*, qualifier);
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, qualifier));
 
             if (!target || !target->IsInWorld() || target == ai->GetBot())
                 return false;

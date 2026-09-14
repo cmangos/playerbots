@@ -75,10 +75,10 @@ namespace ai
         BlessingOfMightOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "blessing of might", 4) {}
         bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("greater " + spell, GetTarget()); }
 
-        Value<Unit*>* GetTargetValue() override
+        Value<ObjectGuid>* GetTargetValue() override
         {
             const std::string qualifier = spell + ",greater " + spell + "-" + (ignoreTanks ? "1" : "0");
-            return context->GetValue<Unit*>("friendly unit without aura", qualifier);
+            return context->GetValue<ObjectGuid>("friendly unit without aura", qualifier);
         }
     };
 
@@ -95,10 +95,10 @@ namespace ai
         BlessingOfWisdomOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "blessing of wisdom", 4) {}
         bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("greater " + spell, GetTarget()); }
 
-        Value<Unit*>* GetTargetValue() override
+        Value<ObjectGuid>* GetTargetValue() override
         {
             const std::string qualifier = spell + ",greater " + spell + "-" + (ignoreTanks ? "1" : "0");
-            return context->GetValue<Unit*>("friendly unit without aura", qualifier);
+            return context->GetValue<ObjectGuid>("friendly unit without aura", qualifier);
         }
     };
 
@@ -115,10 +115,10 @@ namespace ai
         BlessingOfKingsOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "blessing of kings", 4) {}
         bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("greater " + spell, GetTarget()); }
 
-        Value<Unit*>* GetTargetValue() override
+        Value<ObjectGuid>* GetTargetValue() override
         {
             const std::string qualifier = spell + ",greater " + spell + "-" + (ignoreTanks ? "1" : "0");
-            return context->GetValue<Unit*>("friendly unit without aura", qualifier);
+            return context->GetValue<ObjectGuid>("friendly unit without aura", qualifier);
         }
     };
 
@@ -135,10 +135,10 @@ namespace ai
         BlessingOfLightOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "blessing of light", 4) {}
         bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("greater " + spell, GetTarget()); }
 
-        Value<Unit*>* GetTargetValue() override
+        Value<ObjectGuid>* GetTargetValue() override
         {
             const std::string qualifier = spell + ",greater " + spell + "-" + (ignoreTanks ? "1" : "0");
-            return context->GetValue<Unit*>("friendly unit without aura", qualifier);
+            return context->GetValue<ObjectGuid>("friendly unit without aura", qualifier);
         }
     };
 
@@ -155,10 +155,10 @@ namespace ai
         BlessingOfSalvationOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "blessing of salvation", 4, true) {}
         bool IsActive() override { return BuffOnPartyTrigger::IsActive(); }
 
-        Value<Unit*>* GetTargetValue() override
+        Value<ObjectGuid>* GetTargetValue() override
         {
             const std::string qualifier = spell + ",greater " + spell + "-" + (ignoreTanks ? "1" : "0");
-            return context->GetValue<Unit*>("friendly unit without aura", qualifier);
+            return context->GetValue<ObjectGuid>("friendly unit without aura", qualifier);
         }
     };
 
@@ -175,10 +175,10 @@ namespace ai
         BlessingOfSanctuaryOnPartyTrigger(PlayerbotAI* ai) : BuffOnPartyTrigger(ai, "blessing of sanctuary", 4) {}
         bool IsActive() override { return BuffOnPartyTrigger::IsActive() && !ai->HasAura("greater " + spell, GetTarget()); }
 
-        Value<Unit*>* GetTargetValue() override
+        Value<ObjectGuid>* GetTargetValue() override
         {
             const std::string qualifier = spell + ",greater " + spell + "-" + (ignoreTanks ? "1" : "0");
-            return context->GetValue<Unit*>("friendly unit without aura", qualifier);
+            return context->GetValue<ObjectGuid>("friendly unit without aura", qualifier);
         }
     };
 

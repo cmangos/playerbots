@@ -9,7 +9,7 @@ using namespace ai;
 
 float MyThreatValue::Calculate()
 {
-    Unit* target = AI_VALUE(Unit*, qualifier);
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, qualifier));
     
     if (target->GetObjectGuid() != lastTarget) //Reset history if we switched target.
         LogCalculatedValue::Reset();
@@ -21,7 +21,7 @@ float MyThreatValue::Calculate()
 
 float TankThreatValue::Calculate()
 {
-    Unit* target = AI_VALUE(Unit*, qualifier);
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, qualifier));
 
     return ThreatValue::GetTankThreat(ai, target);
 }
@@ -46,7 +46,7 @@ uint8 ThreatValue::Calculate()
         return maxThreat;
     }
 
-    Unit* target = AI_VALUE(Unit*, qualifier);
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, qualifier));
 
     if (target && target->IsFriend(bot))
         target = target->GetTarget();

@@ -15,7 +15,7 @@ namespace ai
         
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, "current target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             if (target)
             {
                 if (ai->HasStrategy("follow", BotState::BOT_STATE_COMBAT) ||
@@ -99,7 +99,7 @@ namespace ai
         
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, "current target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             if (target)
             {
                 // Don't move if the target is targeting you and you can't add distance between you and the target
@@ -170,7 +170,7 @@ namespace ai
         
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, "current target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             if (target && target->IsPlayer())
                 return false;
 
@@ -189,7 +189,7 @@ namespace ai
         
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, "current target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             if (target)
             {
                 if (enemyMustBePlayer && !target->IsPlayer())
@@ -230,7 +230,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, GetTargetName());
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, GetTargetName()));
             return target &&
                 sServerFacade.IsDistanceGreaterThan(AI_VALUE2(float, "distance", GetTargetName()), distance);
         }
@@ -248,7 +248,7 @@ namespace ai
         
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, GetTargetName());
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, GetTargetName()));
             if (!target)
                 return false;
 
@@ -263,7 +263,7 @@ namespace ai
         
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, GetTargetName());
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, GetTargetName()));
             if (!target)
                 return false;
 
@@ -279,7 +279,7 @@ namespace ai
         
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, GetTargetName());
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, GetTargetName()));
             if (!target)
                 return false;
 
@@ -294,7 +294,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            Unit* master = AI_VALUE(Unit*, "master target");
+            Unit* master = ai->GetUnit(AI_VALUE(ObjectGuid, "master target"));
             if (master && sServerFacade.IsFriendlyTo(bot, master))
             {
                 if (master->GetTransport() && master->GetTransport() == bot->GetTransport())
@@ -334,7 +334,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            Unit* followTarget = AI_VALUE(Unit*, "follow target");
+            Unit* followTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "follow target"));
 
             if (!followTarget || !ai->IsSafe(followTarget))
                 return false;
@@ -352,7 +352,7 @@ namespace ai
             if (!ai->IsStateActive(BotState::BOT_STATE_COMBAT))
                 return true;
 
-            Unit* target = AI_VALUE(Unit*, "current target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
 
             if (!target)
                 return true;
@@ -379,7 +379,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            Unit* followTarget = AI_VALUE(Unit*, "follow target");
+            Unit* followTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "follow target"));
 
             if (!followTarget)
                 return true;
@@ -441,7 +441,7 @@ namespace ai
         virtual bool IsActive() override
         {
             // we can't let them run away from the targets we need to cc at the start
-            if (WaitForAttackStrategy::ShouldWait(ai) && !AI_VALUE(Unit*, "rti cc target"))
+            if (WaitForAttackStrategy::ShouldWait(ai) && !ai->GetUnit(AI_VALUE(ObjectGuid, "rti cc target")))
             {
                 // Do not move if stay strategy is set
                 if (!ai->HasStrategy("stay", ai->GetState()))
@@ -450,7 +450,7 @@ namespace ai
                     const bool isBeingTargeted = !bot->getAttackers().empty();
                     if (!isBeingTargeted)
                     {
-                        Unit* target = AI_VALUE(Unit*, "current target");
+                        Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
                         if (target)
                         {
                             const float safeDistance = WaitForAttackStrategy::GetSafeDistance();

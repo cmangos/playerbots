@@ -9,11 +9,11 @@ ObjectGuid LineTargetValue::Calculate()
 {
     Player* master = GetMaster();
     if (!master)
-        return NULL;
+        return ObjectGuid();
 
     Group* group = master->GetGroup();
     if (!group)
-        return NULL;
+        return ObjectGuid();
 
     Player *prev = master;
     Group::MemberSlotList const& groupSlot = group->GetMemberSlots();

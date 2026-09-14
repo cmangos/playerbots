@@ -68,7 +68,7 @@ ObjectGuid PartyMemberToHeal::Calculate()
     const std::vector<Player*> partyMembers = GetPartyMembers();
     if (partyMembers.empty() && needHeals.empty())
     {
-        return NULL;
+        return ObjectGuid();
     }
 
     if (!partyMembers.empty() || !needHeals.empty())
@@ -122,7 +122,7 @@ ObjectGuid PartyMemberToHeal::Calculate()
 
     if (needHeals.empty() && tankTargets.empty())
     {
-        return NULL;
+        return ObjectGuid();
     }
 
     if (needHeals.empty() && !tankTargets.empty())
@@ -238,7 +238,7 @@ ObjectGuid PartyMemberToProtect::Calculate()
 {
     Group* group = bot->GetGroup();
     if (!group)
-        return NULL;
+        return ObjectGuid();
 
     std::vector<Unit*> needProtect;
 
@@ -280,7 +280,7 @@ ObjectGuid PartyMemberToProtect::Calculate()
     }
 
     if (needProtect.empty())
-        return NULL;
+        return ObjectGuid();
 
     sort(needProtect.begin(), needProtect.end(), compareByHealth);
 

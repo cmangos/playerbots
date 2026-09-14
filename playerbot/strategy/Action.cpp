@@ -87,12 +87,12 @@ void NextAction::destroy(NextAction** actions)
     delete[] actions;
 }
 
-Value<Unit*>* Action::GetTargetValue()
+Value<ObjectGuid>* Action::GetTargetValue()
 {
-    return context->GetValue<Unit*>(GetTargetName());
+    return context->GetValue<ObjectGuid>(GetTargetName());
 }
 
 Unit* Action::GetTarget()
 {
-    return GetTargetValue()->Get();
+    return bot->GetPlayerbotAI()->GetUnit(GetTargetValue()->Get());
 }

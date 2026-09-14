@@ -42,7 +42,8 @@ bool intersectsOri(float angle, std::list<float>& angles, float angleIncrement)
 
 void FleeManager::calculatePossibleDestinations(std::list<FleePoint*> &points)
 {
-    Unit *target = *bot->GetPlayerbotAI()->GetAiObjectContext()->GetValue<Unit*>("current target");
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    Unit *target = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
 
     float botPosX = startPosition.getX();
     float botPosY = startPosition.getY();

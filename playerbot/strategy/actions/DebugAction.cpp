@@ -5123,7 +5123,8 @@ bool DebugAction::HandleCombat(Event& event, Player* requester, const std::strin
 
     ai->TellPlayer(requester, "--- BotAI State ---");
 
-    Unit* aiTarget = *ai->GetAiObjectContext()->GetValue<Unit*>("current target");
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    Unit* aiTarget = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
     if (aiTarget)
     {
         std::ostringstream targetOut;

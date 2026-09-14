@@ -13,7 +13,7 @@ using namespace ai;
 bool FollowAction::Execute(Event& event)
 {
     bool moved = false;
-    Unit* followTarget = AI_VALUE(Unit*, "follow target");
+    Unit* followTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "follow target"));
     Formation* formation = AI_VALUE(Formation*, "formation");
 
     if (ai->IsSafe(followTarget))
@@ -39,7 +39,7 @@ bool FollowAction::isUseful()
         return false;
 
     float distance = 0;
-    Unit* followTarget = AI_VALUE(Unit*, "follow target");
+    Unit* followTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "follow target"));
     Formation* formation = AI_VALUE(Formation*, "formation");
 
     if (followTarget && followTarget->IsPlayer())
@@ -126,7 +126,7 @@ bool StopFollowAction::isUseful()
 bool FleeToMasterAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    Unit* fTarget = AI_VALUE(Unit*, "master target");
+    Unit* fTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "master target"));
     bool canFollow = Follow(fTarget);
     if (!canFollow)
     {
@@ -179,7 +179,7 @@ bool FleeToMasterAction::isUseful()
     if (ai->GetGroupMaster() == bot)
         return false;
 
-    Unit* target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
 
     if (target && ai->GetGroupMaster()->HasTarget(target->GetObjectGuid()))
         return false;
@@ -188,7 +188,7 @@ bool FleeToMasterAction::isUseful()
       ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)))
         return false;
 
-    Unit* fTarget = AI_VALUE(Unit*, "master target");
+    Unit* fTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "master target"));
     
     if (!CanDeadFollow(fTarget))
         return false;

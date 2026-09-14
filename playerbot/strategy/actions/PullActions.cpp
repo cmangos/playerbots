@@ -80,7 +80,7 @@ Unit* PullMyTargetAction::GetTarget(Event& event)
 
 Unit* PullRTITargetAction::GetTarget(Event& event)
 {
-    return AI_VALUE(Unit*, "rti target");
+    return ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
 }
 
 bool PullStartAction::Execute(Event& event)
@@ -151,7 +151,7 @@ bool PullAction::Execute(Event& event)
                 std::string actionName = strategy->GetPullActionName();
 
                 // Execute the pull action
-                SET_AI_VALUE(Unit*, "current target", GetTarget());
+                SET_AI_VALUE(ObjectGuid, "current target", GetTarget()->GetObjectGuid());
                 if (ai->DoSpecificAction(actionName, event, true))
                 {
                     strategy->RequestPull(target); //extend pull timer to walk back.
@@ -225,7 +225,7 @@ bool PullEndAction::Execute(Event& event)
             if (creatureAI)
             {
                 creatureAI->SetReactState(strategy->GetPetReactState());
-                Unit* target = AI_VALUE(Unit*, "current target");
+                Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
                 if (creatureAI->GetReactState() != REACT_PASSIVE && target)
                     creatureAI->AttackStart(target);
             }

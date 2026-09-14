@@ -14,7 +14,7 @@ float CastTimeMultiplier::GetValue(Action* action)
     uint8 targetHealth = AI_VALUE2(uint8, "health", "current target");
     std::string name = action->getName();
 
-    if (action->GetTarget() != AI_VALUE(Unit*, "current target"))
+    if (action->GetTarget() != ai->GetUnit(AI_VALUE(ObjectGuid, "current target")))
         return 1.0f;
 
     if (targetHealth < sPlayerbotAIConfig.criticalHealth && dynamic_cast<CastSpellAction*>(action))

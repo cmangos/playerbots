@@ -75,7 +75,7 @@ namespace ai
         void Update() {}  //Nonfunctional see AiObjectContext::Update() to enable.
         virtual void Reset() {}
         virtual Unit* GetTarget();
-        virtual Value<Unit*>* GetTargetValue();
+        virtual Value<ObjectGuid>* GetTargetValue();
         virtual std::string GetTargetName() { return "self target"; }
         void MakeVerbose(bool enabled) { verbose = enabled; }
 

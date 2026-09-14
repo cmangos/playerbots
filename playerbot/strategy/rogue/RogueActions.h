@@ -224,9 +224,9 @@ namespace ai
     public:
         CastSapAction(PlayerbotAI* ai) : CastMeleeSpellAction(ai, "sap") {}
 
-        virtual Value<Unit*>* GetTargetValue()
+        virtual Value<ObjectGuid>* GetTargetValue()
         {
-            return context->GetValue<Unit*>("cc target", getName());
+            return context->GetValue<ObjectGuid>("cc target", getName());
         }
 
         virtual bool isUseful() override { return true; }

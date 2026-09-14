@@ -6,6 +6,6 @@ using namespace ai;
 
 bool NearestAddsValue::AcceptUnit(Unit* unit)
 {
-    Unit* target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
     return unit != target && PossibleTargetsValue::AcceptUnit(unit);
 }

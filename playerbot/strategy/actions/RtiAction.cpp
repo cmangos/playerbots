@@ -40,7 +40,7 @@ void RtiAction::AppendRti(std::ostringstream & out, std::string type)
     out << AI_VALUE(std::string, type);
 
     std::ostringstream n; n << type << " target";
-    Unit* target = AI_VALUE(Unit*, n.str());
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, n.str()));
     if (target)
         out << " (" << target->GetName() << ")";
 }

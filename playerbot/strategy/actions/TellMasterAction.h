@@ -34,7 +34,7 @@ namespace ai
 
         virtual bool isUseful() override
         {
-            bool canFollow = Follow(AI_VALUE(Unit*, "master target"));
+            bool canFollow = Follow(ai->GetUnit(AI_VALUE(ObjectGuid, "master target")));
             if (!canFollow)
                 return false;
 

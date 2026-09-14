@@ -12,9 +12,9 @@ bool NeedCureTrigger::IsActive()
 	return target && ai->HasAuraToDispel(target, dispelType);
 }
 
-Value<Unit*>* PartyMemberNeedCureTrigger::GetTargetValue()
+Value<ObjectGuid>* PartyMemberNeedCureTrigger::GetTargetValue()
 {
-	return context->GetValue<Unit*>("party member to dispel", dispelType);
+	return context->GetValue<ObjectGuid>("party member to dispel", dispelType);
 }
 
 bool NeedWorldBuffTrigger::IsActive()

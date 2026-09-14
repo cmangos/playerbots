@@ -11,7 +11,7 @@ ObjectGuid SnareTargetValue::Calculate()
 {
     std::string spell = qualifier;
 
-    Unit* enemy = AI_VALUE(Unit*, "enemy player target");
+    Unit* enemy = ai->GetUnit(AI_VALUE(ObjectGuid, "enemy player target"));
     if (enemy)
     {
         Player* plr = dynamic_cast<Player*>(enemy);
@@ -20,7 +20,8 @@ ObjectGuid SnareTargetValue::Calculate()
     }
 
     std::list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
-    Unit* target = ai->GetAiObjectContext()->GetValue<Unit*>("current target")->Get();
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    Unit* target = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
     for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
     {
         Unit* unit = ai->GetUnit(*i);
@@ -78,5 +79,5 @@ ObjectGuid SnareTargetValue::Calculate()
         }
     }
 
-    return NULL;
+    return ObjectGuid();
 }

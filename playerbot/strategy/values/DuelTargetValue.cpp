@@ -12,5 +12,5 @@ ObjectGuid DuelTargetValue::Calculate()
         if (player) return player->GetObjectGuid();
     }
     
-    return NULL;
+    return ObjectGuid();
 }

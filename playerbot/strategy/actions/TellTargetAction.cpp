@@ -10,14 +10,15 @@ using namespace ai;
 bool TellTargetAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    Unit* target = context->GetValue<Unit*>("current target")->Get();
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    Unit* target = ai->GetUnit(context->GetValue<ObjectGuid>("current target")->Get());
     if (target)
     {
         std::ostringstream out;
 		out << "Attacking " << target->GetName();
         ai->TellPlayer(requester, out);
 
-        context->GetValue<Unit*>("old target")->Set(target);
+        context->GetValue<ObjectGuid>("old target")->Set(target->GetObjectGuid());
     }
     return true;
 }

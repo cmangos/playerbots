@@ -9,7 +9,7 @@ using namespace ai;
 
 Unit* Stance::GetTarget()
 {
-    Unit *target = AI_VALUE(Unit*, GetTargetName());
+    Unit *target = ai->GetUnit(AI_VALUE(ObjectGuid, GetTargetName()));
     if (target) return target;
 
     ObjectGuid attackTarget = context->GetValue<ObjectGuid>("attack target")->Get();

@@ -25,8 +25,8 @@ bool SayAction::Execute(Event& event)
 {
     std::string text = "";
     std::map<std::string, std::string> placeholders;
-    Unit* target = AI_VALUE(Unit*, "tank target");
-    if (!target) target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "tank target"));
+    if (!target) target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
 
     // set replace std::strings
     if (target) placeholders["<target>"] = target->GetName();

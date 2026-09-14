@@ -169,7 +169,7 @@ ObjectGuid FlagCarrierValue::Calculate()
             BattleGroundWS *bg = (BattleGroundWS*)ai->GetBot()->GetBattleGround();
 
             if (!bg)
-                return NULL;
+                return ObjectGuid();
 
             if ((!sameTeam && bot->GetTeam() == HORDE || (sameTeam && bot->GetTeam() == ALLIANCE)) && !bg->GetFlagCarrierGuid(TEAM_INDEX_HORDE).IsEmpty())
                 carrier = bg->GetBgMap()->GetPlayer(bg->GetFlagCarrierGuid(TEAM_INDEX_HORDE));
@@ -184,7 +184,7 @@ ObjectGuid FlagCarrierValue::Calculate()
                     return carrier ? carrier->GetObjectGuid() : ObjectGuid();
                 }
                 else
-                    return NULL;
+                    return ObjectGuid();
             }
         }
 #ifndef MANGOSBOT_ZERO
@@ -193,14 +193,14 @@ ObjectGuid FlagCarrierValue::Calculate()
             BattleGroundEY* bg = (BattleGroundEY*)ai->GetBot()->GetBattleGround();
 
             if (!bg)
-                return NULL;
+                return ObjectGuid();
 
             if (bg->GetFlagCarrierGuid().IsEmpty())
-                return NULL;
+                return ObjectGuid();
 
             Player* fc = bg->GetBgMap()->GetPlayer(bg->GetFlagCarrierGuid());
             if (!fc)
-                return NULL;
+                return ObjectGuid();
 
             if (!sameTeam && (fc->GetTeam() != bot->GetTeam()))
                 carrier = fc;
@@ -215,7 +215,7 @@ ObjectGuid FlagCarrierValue::Calculate()
                     return carrier ? carrier->GetObjectGuid() : ObjectGuid();
                 }
                 else
-                    return NULL;
+                    return ObjectGuid();
             }
         }
 #endif

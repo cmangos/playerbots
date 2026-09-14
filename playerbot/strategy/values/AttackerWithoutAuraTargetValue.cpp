@@ -8,7 +8,8 @@ using namespace ai;
 ObjectGuid AttackerWithoutAuraTargetValue::Calculate()
 {
     std::list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
-    Unit* target = ai->GetAiObjectContext()->GetValue<Unit*>("current target")->Get();
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    Unit* target = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
     for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
     {
         Unit* unit = ai->GetUnit(*i);
@@ -22,5 +23,5 @@ ObjectGuid AttackerWithoutAuraTargetValue::Calculate()
             return unit->GetObjectGuid();
     }
 
-    return NULL;
+    return ObjectGuid();
 }

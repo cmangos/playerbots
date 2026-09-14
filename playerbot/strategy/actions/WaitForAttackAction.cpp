@@ -8,7 +8,7 @@ using namespace ai;
 
 bool WaitForAttackKeepSafeDistanceAction::Execute(Event& event)
 {  
-    Unit* target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
     if (target)
     {
         WorldPosition basePos = WorldPosition(target);

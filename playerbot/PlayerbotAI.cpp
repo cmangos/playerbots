@@ -656,11 +656,11 @@ void PlayerbotAI::UpdateFaceTarget(uint32 elapsed, bool minimal)
             if (!sServerFacade.isMoving(bot) && !bot->isMovingOrTurning())
             {
                 AiObjectContext* context = GetAiObjectContext();
-                Unit* target = AI_VALUE(Unit*, "current target");
+                Unit* target = bot->GetPlayerbotAI()->GetUnit(AI_VALUE(ObjectGuid, "current target"));
                 if(target)
                 {
                     // Do not update the facing while pulling
-                    Unit* pullTarget = AI_VALUE(Unit*, "pull target");
+                    Unit* pullTarget = bot->GetPlayerbotAI()->GetUnit(AI_VALUE(ObjectGuid, "pull target"));
                     if (pullTarget == nullptr)
                     {
                         if (!AI_VALUE2(bool, "facing", "current target"))
@@ -1026,7 +1026,7 @@ void PlayerbotAI::OnDeath()
 
                 AiObjectContext* context = GetAiObjectContext();
 
-                Unit* ctarget = AI_VALUE(Unit*, "current target");
+                Unit* ctarget = bot->GetPlayerbotAI()->GetUnit(AI_VALUE(ObjectGuid, "current target"));
 
                 if (ctarget)
                 {
@@ -1067,9 +1067,9 @@ void PlayerbotAI::OnDeath()
             }
         }
 
-        SET_AI_VALUE(Unit*, "current target", nullptr);
-        SET_AI_VALUE(Unit*, "enemy player target", nullptr);
-        SET_AI_VALUE(Unit*, "pull target", nullptr);
+        SET_AI_VALUE(ObjectGuid, "current target", ObjectGuid());
+        SET_AI_VALUE(ObjectGuid, "enemy player target", ObjectGuid());
+        SET_AI_VALUE(ObjectGuid, "pull target", ObjectGuid());
         SET_AI_VALUE(ObjectGuid, "attack target", ObjectGuid());
         SET_AI_VALUE(LootObject, "loot target", LootObject());
         SET_AI_VALUE(time_t, "combat start time", 0);
@@ -1269,9 +1269,9 @@ void PlayerbotAI::Reset(bool full)
     if (strategy)
         strategy->OnPullEnded();
 
-    RESET_AI_VALUE(Unit*,"old target");
-    RESET_AI_VALUE(Unit*,"current target");
-    RESET_AI_VALUE(Unit*,"pull target");
+    RESET_AI_VALUE(ObjectGuid,"old target");
+    RESET_AI_VALUE(ObjectGuid,"current target");
+    RESET_AI_VALUE(ObjectGuid,"pull target");
     RESET_AI_VALUE(ObjectGuid,"attack target");
     RESET_AI_VALUE(GuidPosition,"rpg target");
     RESET_AI_VALUE(LootObject,"loot target");
@@ -2043,9 +2043,9 @@ void PlayerbotAI::DoNextAction(bool min)
     // if in combat but stuck with old data - clear targets
     if (currentEngine == engines[(uint8)BotState::BOT_STATE_NON_COMBAT] && sServerFacade.IsInCombat(bot))
     {
-        if (aiObjectContext->GetValue<Unit*>("current target")->Get() != NULL ||
+        if (aiObjectContext->GetValue<ObjectGuid>("current target")->Get() != NULL ||
             aiObjectContext->GetValue<ObjectGuid>("attack target")->Get() != ObjectGuid() ||
-            aiObjectContext->GetValue<Unit*>("dps target")->Get() != NULL)
+            aiObjectContext->GetValue<ObjectGuid>("dps target")->Get() != NULL)
         {
             Reset();
         }
@@ -6521,7 +6521,8 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
     }
     else if (command == "tpos")
     {
-        Unit* target = *GetAiObjectContext()->GetValue<Unit*>("current target");
+        PlayerbotAI* ai = bot->GetPlayerbotAI();
+        Unit* target = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
         if (!target) {
             return "";
         }
@@ -6531,7 +6532,8 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
     }
     else if (command == "target")
     {
-        Unit* target = *GetAiObjectContext()->GetValue<Unit*>("current target");
+        PlayerbotAI* ai = bot->GetPlayerbotAI();
+        Unit* target = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
         if (!target) {
             return "";
         }
@@ -6543,7 +6545,8 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
         int pct = (int)((static_cast<float> (bot->GetHealth()) / bot->GetMaxHealth()) * 100);
         std::ostringstream out; out << pct << "%";
 
-        Unit* target = *GetAiObjectContext()->GetValue<Unit*>("current target");
+        PlayerbotAI* ai = bot->GetPlayerbotAI();
+        Unit* target = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
         if (!target) {
             return out.str();
         }
@@ -6567,7 +6570,8 @@ std::string PlayerbotAI::HandleRemoteCommand(std::string command)
         out << ", victim: " << (victim ? victim->GetName() : "none");
 
         out << " | BotAI: current target: ";
-        Unit* aiTarget = *GetAiObjectContext()->GetValue<Unit*>("current target");
+        PlayerbotAI* ai = bot->GetPlayerbotAI();
+        Unit* aiTarget = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
         if (aiTarget)
         {
             out << aiTarget->GetName() << " (" << aiTarget->GetObjectGuid().GetCounter() << ")";

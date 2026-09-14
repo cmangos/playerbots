@@ -27,14 +27,14 @@ Event Trigger::Check()
 	return event;
 }
 
-Value<Unit*>* Trigger::GetTargetValue()
+Value<ObjectGuid>* Trigger::GetTargetValue()
 {
-    return context->GetValue<Unit*>(GetTargetName());
+    return context->GetValue<ObjectGuid>(GetTargetName());
 }
 
 Unit* Trigger::GetTarget()
 {
-    return GetTargetValue()->Get();
+    return ai->GetUnit(GetTargetValue()->Get());
 }
 
 TriggerNode::~TriggerNode()

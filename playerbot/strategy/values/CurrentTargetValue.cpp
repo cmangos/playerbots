@@ -8,16 +8,16 @@ using namespace ai;
 ObjectGuid CurrentTargetValue::Get()
 {
     if (selection.IsEmpty())
-        return NULL;
+        return ObjectGuid();
 
     Unit* unit = sObjectAccessor.GetUnit(*bot, selection);
     if (unit && !bot->IsWithinDistInMap(unit, sPlayerbotAIConfig.sightDistance))
-        return NULL;
+        return ObjectGuid();
 
     return unit->GetObjectGuid();
 }
 
-void CurrentTargetValue::Set(Unit* target)
+void CurrentTargetValue::Set(ObjectGuid unitGuid)
 {
-    selection = target ? target->GetObjectGuid() : ObjectGuid();
+    selection = unitGuid;
 }

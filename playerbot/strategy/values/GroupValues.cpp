@@ -145,7 +145,7 @@ bool GroupReadyValue::Calculate()
         if (ai->GetGroupMaster() && sServerFacade.GetDistance2d(member, ai->GetGroupMaster()) > sPlayerbotAIConfig.sightDistance)
             continue;        
 
-        bool hasAttackers = AI_VALUE_LAZY(bool, "has attackers") || AI_VALUE_LAZY(bool, "has enemy player targets") || AI_VALUE_LAZY(Unit*, "dps target");
+        bool hasAttackers = AI_VALUE_LAZY(bool, "has attackers") || AI_VALUE_LAZY(bool, "has enemy player targets") || ai->GetUnit(AI_VALUE_LAZY(ObjectGuid, "dps target"));
 
         //Wait for members to recover health/mana.
         if (hasAttackers && member->GetHealthPercent() < sPlayerbotAIConfig.almostFullHealth && !member->IsInCombat())

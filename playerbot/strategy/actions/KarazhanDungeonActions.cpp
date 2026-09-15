@@ -7,7 +7,7 @@ using namespace ai;
 
 bool RemoveNetherPortalBuffsFromNetherspiteAction::Execute(Event& event)
 {
-	Unit* target = AI_VALUE(Unit*, "current target");
+	Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
 	if (target && ai->HasAura(30466, target))
 		target->RemoveAurasDueToSpell(30466);
 

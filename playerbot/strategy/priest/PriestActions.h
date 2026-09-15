@@ -89,7 +89,7 @@ namespace ai
     RANGED_DEBUFF_ACTION(CastHexOfWeaknessAction, "hex of weakness");
     BUFF_ACTION(CastShadowguardAction, "shadowguard");
     HEAL_ACTION(CastDesperatePrayerAction, "desperate prayer");
-    SPELL_ACTION_U(CastStarshardsAction, "starshards", (AI_VALUE2(uint8, "mana", "self target") > 50 && AI_VALUE(Unit*, "current target") && AI_VALUE2(float, "distance", "current target") > 15.0f));
+    SPELL_ACTION_U(CastStarshardsAction, "starshards", (AI_VALUE2(uint8, "mana", "self target") > 50 && ai->GetUnit(AI_VALUE(ObjectGuid, "current target")) && AI_VALUE2(float, "distance", "current target") > 15.0f));
     BUFF_ACTION(CastElunesGraceAction, "elune's grace");
     BUFF_ACTION(CastFeedbackAction, "feedback");
     BUFF_ACTION(CastSymbolOfHopeAction, "symbol of hope");
@@ -100,7 +100,7 @@ namespace ai
     {
     public:
         CastRemoveShadowformAction(PlayerbotAI* ai) : Action(ai, "remove shadowform") {}
-        virtual bool isUseful() override { return ai->HasAura("shadowform", AI_VALUE(Unit*, "self target")); }
+        virtual bool isUseful() override { return ai->HasAura("shadowform", ai->GetUnit(AI_VALUE(ObjectGuid, "self target"))); }
         virtual bool isPossible() { return true; }
 
         virtual bool Execute(Event& event) override

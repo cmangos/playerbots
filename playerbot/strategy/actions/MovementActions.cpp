@@ -2761,8 +2761,8 @@ void MovementAction::WaitForReach(float distance)
     if (duration > sPlayerbotAIConfig.maxWaitForMove)
         duration = sPlayerbotAIConfig.maxWaitForMove;
 
-    /*Unit* target = *ai->GetAiObjectContext()->GetValue<Unit*>("current target");
-    Unit* player = *ai->GetAiObjectContext()->GetValue<Unit*>("enemy player target");
+    /*Unit* target = *ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target");
+    Unit* player = *ai->GetAiObjectContext()->GetValue<ObjectGuid>("enemy player target");
     if ((player || target) && duration > sPlayerbotAIConfig.globalCoolDown)
         duration = sPlayerbotAIConfig.globalCoolDown;*/
 
@@ -3188,7 +3188,7 @@ bool MovementAction::GeneratePathAvoidingHazards(std::vector<WorldPosition>& mov
 
 bool FleeAction::Execute(Event& event)
 {
-    return Flee(AI_VALUE(Unit*, "current target"));
+    return Flee(ai->GetUnit(AI_VALUE(ObjectGuid, "current target")));
 }
 
 bool FleeWithPetAction::Execute(Event& event)
@@ -3204,12 +3204,12 @@ bool FleeWithPetAction::Execute(Event& event)
         }
     }
 
-    return Flee(AI_VALUE(Unit*, "current target"));
+    return Flee(ai->GetUnit(AI_VALUE(ObjectGuid, "current target")));
 }
 
 bool RunAwayAction::Execute(Event& event)
 {
-    return Flee(AI_VALUE(Unit*, "master target"));
+    return Flee(ai->GetUnit(AI_VALUE(ObjectGuid, "master target")));
 }
 
 bool MoveToLootAction::Execute(Event& event)
@@ -3251,7 +3251,7 @@ bool MoveToLootAction::Execute(Event& event)
 
 bool MoveOutOfEnemyContactAction::Execute(Event& event)
 {
-    Unit* target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
     if (!target)
         return false;
 
@@ -3265,7 +3265,7 @@ bool MoveOutOfEnemyContactAction::isUseful()
 
 bool SetFacingTargetAction::Execute(Event& event)
 {
-    Unit* target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
     if (!target)
         return false;
 
@@ -3297,7 +3297,7 @@ bool SetFacingTargetAction::isPossible()
 
 bool SetBehindTargetAction::Execute(Event& event)
 {
-    Unit* target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
     if (!target)
         return false;
 
@@ -3338,7 +3338,7 @@ bool SetBehindTargetAction::isUseful()
     if(!MovementAction::isUseful())
         return false;
 
-    Unit* target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
     if (target && !bot->IsFacingTargetsBack(target))
     {
         // Don't move behind if the target is too far away
@@ -3354,7 +3354,7 @@ bool SetBehindTargetAction::isPossible()
     if(MovementAction::isPossible())
     {
         // Check if the target is targeting the bot
-        Unit* target = AI_VALUE(Unit*, "current target");
+        Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
         if (target)
         {
             // If the target is a player
@@ -3572,7 +3572,7 @@ bool JumpAction::Execute(ai::Event &event)
             if (!ai->HasRealPlayerMaster())
                 return false;
 
-            Unit* followTarget = AI_VALUE(Unit*, "follow target");
+            Unit* followTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "follow target"));
             if (!followTarget || !ai->IsSafe(followTarget))
                 return false;
 
@@ -3602,7 +3602,7 @@ bool JumpAction::Execute(ai::Event &event)
 
         if (options == "chase")
         {
-            Unit* chaseTarget = AI_VALUE(Unit*, "current target");
+            Unit* chaseTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             if (!chaseTarget || !ai->IsSafe(chaseTarget))
                 return false;
 

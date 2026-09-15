@@ -151,7 +151,7 @@ uint8 BalancePercentValue::Calculate()
         }
     }
 
-    Unit* enemy = AI_VALUE(Unit*, "enemy player target");
+    Unit* enemy = ai->GetUnit(AI_VALUE(ObjectGuid, "enemy player target"));
     if (enemy)
         attackerLevel += enemy->GetLevel() * 3;
 

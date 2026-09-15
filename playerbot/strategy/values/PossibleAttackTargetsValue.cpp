@@ -181,7 +181,7 @@ bool PossibleAttackTargetsValue::IsCcTarget(Unit* attacker, Player* player)
 
                 if (player->GetPlayerbotAI())
                 {
-                    if (PAI_VALUE(Unit*,"rti cc target") == attacker)
+                    if (PAI_VALUE(ObjectGuid,"rti cc target") == attacker->GetObjectGuid())
                         return true;
 
                     std::string rti = PAI_VALUE(std::string,"rti cc");
@@ -336,7 +336,7 @@ bool PossibleAttackTargetsValue::IsValid(Unit* target, Player* player, float ran
     if(!HasIgnoreCCRti(target, player) && (HasBreakableCC(target, player) || HasUnBreakableCC(target, player)))
         return true;
 
-    if (player->GetPlayerbotAI() && !player->GetPlayerbotAI()->HasActivePlayerMaster()&& PAI_VALUE(Unit*, "rti target") == target)
+    if (player->GetPlayerbotAI() && !player->GetPlayerbotAI()->HasActivePlayerMaster()&& PAI_VALUE(ObjectGuid, "rti target") == target->GetObjectGuid())
         return true;
 
     return false;

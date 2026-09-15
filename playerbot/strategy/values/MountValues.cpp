@@ -172,7 +172,7 @@ bool MountValue::IsValidLocation(Player* bot)
 
 uint32 CurrentMountSpeedValue::Calculate()
 {
-    Unit* unit = AI_VALUE(Unit*, getQualifier());
+    Unit* unit = ai->GetUnit(AI_VALUE(ObjectGuid, getQualifier()));
 
     if (!unit)
         return 0;

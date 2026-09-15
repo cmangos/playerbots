@@ -39,7 +39,7 @@ namespace ai
         void Update() {}  //Nonfunctional see AiObjectContext::Update() to enable.
         virtual void Reset() { triggered = false; }
         virtual Unit* GetTarget();
-        virtual Value<Unit*>* GetTargetValue();
+        virtual Value<ObjectGuid>* GetTargetValue();
         virtual std::string GetTargetName() { return "self target"; }
 
 		bool needCheck() {

@@ -239,7 +239,7 @@ Unit* CastSpellAction::GetTarget()
 {
     std::string targetName = GetTargetName();
     std::string targetNameQualifier = GetTargetQualifier();
-    return targetNameQualifier.empty() ? AI_VALUE(Unit*, targetName) : AI_VALUE2(Unit*, targetName, targetNameQualifier);
+    return targetNameQualifier.empty() ? ai->GetUnit(AI_VALUE(ObjectGuid, targetName)) : ai->GetUnit(AI_VALUE2(ObjectGuid, targetName, targetNameQualifier));
 }
 
 bool CastPetSpellAction::isPossible()
@@ -248,7 +248,7 @@ bool CastPetSpellAction::isPossible()
     if (!spellTarget)
         return false;
 
-    Unit* pet = AI_VALUE(Unit*, "pet target");
+    Unit* pet = ai->GetUnit(AI_VALUE(ObjectGuid, "pet target"));
     if (pet && ai->IsSafe(pet))
     {
         const uint32& spellId = GetSpellID();
@@ -347,7 +347,7 @@ bool CastWarStompAction::isUseful()
     if (!ai->HasStrategy("pvp", BotState::BOT_STATE_COMBAT) &&
         !ai->HasStrategy("duel", BotState::BOT_STATE_COMBAT))
     {
-        Unit* target = AI_VALUE(Unit*, "current target");
+        Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
         if (target)
             return AI_VALUE2(float, "distance", "current target") <= 8.0f;
         return false;

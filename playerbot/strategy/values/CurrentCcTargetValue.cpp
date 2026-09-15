@@ -24,8 +24,9 @@ private:
 };
 
 
-Unit* CurrentCcTargetValue::Calculate()
+ObjectGuid CurrentCcTargetValue::Calculate()
 {
     FindCurrentCcTargetStrategy strategy(ai, qualifier);
-    return FindTarget(&strategy);
+    Unit* target = FindTarget(&strategy);
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }

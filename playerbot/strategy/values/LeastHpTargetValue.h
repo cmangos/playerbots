@@ -41,6 +41,6 @@ namespace ai
         LeastHpTargetValue(PlayerbotAI* ai, std::string name = "least hp target") : TargetValue(ai, name) {}
 
     public:
-        Unit* Calculate() override;
+        ObjectGuid Calculate() override;
     };
 }

@@ -343,7 +343,7 @@ namespace ai
         BuffOnPartyTrigger(PlayerbotAI* ai, std::string spell, int checkInterval = 2, bool ignoreTanks = false) : BuffTrigger(ai, spell, checkInterval), ignoreTanks(ignoreTanks) {}
 
     public:
-		virtual Value<Unit*>* GetTargetValue() override;
+		virtual Value<ObjectGuid>* GetTargetValue() override;
 		virtual std::string getName() override { return spell + " on party"; }
 
     protected:
@@ -354,7 +354,7 @@ namespace ai
     {
     public:
         GreaterBuffOnPartyTrigger(PlayerbotAI* ai, std::string spell, std::string lowerSpell, int checkInterval = 2, bool ignoreTanks = false) : BuffOnPartyTrigger(ai, spell, checkInterval, ignoreTanks), lowerSpell(lowerSpell) {}
-        virtual Value<Unit*>* GetTargetValue() override;
+        virtual Value<ObjectGuid>* GetTargetValue() override;
         virtual bool IsActive() override;
 
     private:
@@ -367,7 +367,7 @@ namespace ai
         BuffOnTankTrigger(PlayerbotAI* ai, std::string spell, int checkInterval = 2) : BuffTrigger(ai, spell, checkInterval) {}
 
     public:
-        virtual Value<Unit*>* GetTargetValue() override;
+        virtual Value<ObjectGuid>* GetTargetValue() override;
         virtual std::string getName() override { return spell + " on tank"; }
     };
 
@@ -377,7 +377,7 @@ namespace ai
         MyBuffOnPartyTrigger(PlayerbotAI* ai, std::string spell, int checkInterval = 2, bool ignoreTanks = false) : BuffOnPartyTrigger(ai, spell, checkInterval, ignoreTanks) {}
 
     public:
-        virtual Value<Unit*>* GetTargetValue() override;
+        virtual Value<ObjectGuid>* GetTargetValue() override;
         virtual std::string getName() override { return spell + " on party"; }
     };
 
@@ -437,7 +437,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            return AI_VALUE(Unit*, "party member to protect");
+            return ai->GetUnit(AI_VALUE(ObjectGuid, "party member to protect"));
         }
     };
 
@@ -466,7 +466,7 @@ namespace ai
     {
     public:
         TargetInSightTrigger(PlayerbotAI* ai) : Trigger(ai, "target in sight") {}
-        virtual bool IsActive() override { return AI_VALUE(Unit*, "grind target"); }
+        virtual bool IsActive() override { return ai->GetUnit(AI_VALUE(ObjectGuid, "grind target")); }
     };
 
     class DebuffTrigger : public BuffTrigger
@@ -488,7 +488,7 @@ namespace ai
         DebuffOnAttackerTrigger(PlayerbotAI* ai, std::string spell) : DebuffTrigger(ai, spell) {}
 
     public:
-        virtual Value<Unit*>* GetTargetValue() override;
+        virtual Value<ObjectGuid>* GetTargetValue() override;
         virtual std::string getName() override { return spell + " on attacker"; }
     };
 
@@ -570,7 +570,7 @@ namespace ai
     public:
         SnareTargetTrigger(PlayerbotAI* ai, std::string spell, int interval = 1) : DebuffTrigger(ai, spell, interval) {}
         virtual std::string getName() override { return spell + " on snare target"; }
-        virtual Value<Unit*>* GetTargetValue() override;
+        virtual Value<ObjectGuid>* GetTargetValue() override;
     };
 
     class NoManaTrigger : public Trigger
@@ -628,7 +628,7 @@ namespace ai
 
 		virtual bool IsActive() override
         {
-			return !AI_VALUE(Unit*, "pet target") && !AI_VALUE2(bool, "mounted", "self target");
+			return !ai->GetUnit(AI_VALUE(ObjectGuid, "pet target")) && !AI_VALUE2(bool, "mounted", "self target");
 		}
 	};
 
@@ -803,7 +803,7 @@ namespace ai
     {
     public:
         InterruptEnemyHealerTrigger(PlayerbotAI* ai, std::string spell) : SpellTrigger(ai, spell) {}
-        virtual Value<Unit*>* GetTargetValue() override;
+        virtual Value<ObjectGuid>* GetTargetValue() override;
         virtual std::string getName() override { return spell + " on enemy healer"; }
     };
 
@@ -901,7 +901,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            return AI_VALUE2(Unit*, "party member without item", item) && AI_VALUE2(uint32, "item count", item);
+            return ai->GetUnit(AI_VALUE2(ObjectGuid, "party member without item", item)) && AI_VALUE2(uint32, "item count", item);
         }
 
     protected:
@@ -915,7 +915,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            return AI_VALUE(Unit*, "party member without food") && AI_VALUE2(uint32, "item count", item);
+            return ai->GetUnit(AI_VALUE(ObjectGuid, "party member without food")) && AI_VALUE2(uint32, "item count", item);
         }
     };
 
@@ -926,7 +926,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            return AI_VALUE(Unit*, "party member without water") && AI_VALUE2(uint32, "item count", item);
+            return ai->GetUnit(AI_VALUE(ObjectGuid, "party member without water")) && AI_VALUE2(uint32, "item count", item);
         }
     };
 
@@ -1058,7 +1058,7 @@ namespace ai
 
         bool IsActive() override
         {
-            return AI_VALUE(Unit*, "party member to remove roots");
+            return ai->GetUnit(AI_VALUE(ObjectGuid, "party member to remove roots"));
         }
     };
 
@@ -1142,7 +1142,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, "current target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             return target && AI_VALUE2(bool, "has mana", "current target");
         }
     };
@@ -1154,7 +1154,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, "current target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             return InterruptSpellTrigger::IsActive() && target && AI_VALUE2(float, "distance", "current target") <= 8.0f;
         }
     };
@@ -1166,7 +1166,7 @@ namespace ai
 
         virtual bool IsActive() override
         {
-            Unit* target = AI_VALUE(Unit*, "current target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             return target && AI_VALUE2(bool, "combat", "self target") && AI_VALUE2(float, "distance", "current target") <= 8.0f &&
                 (AI_VALUE2(uint8, "health", "self target") < sPlayerbotAIConfig.mediumHealth ||
                     AI_VALUE(uint8, "my attacker count") >= 3 ||

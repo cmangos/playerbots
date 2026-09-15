@@ -23,7 +23,7 @@ float ConserveManaMultiplier::GetValue(Action* action)
     if (health < sPlayerbotAIConfig.lowHealth)
         return 1.0f;
 
-    Unit* target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
     if (action->GetTarget() != target)
         return 1.0f;
 
@@ -54,7 +54,7 @@ float SaveManaMultiplier::GetValue(Action* action)
     if (action == NULL)
         return 1.0f;
 
-    if (action->GetTarget() != AI_VALUE(Unit*, "current target"))
+    if (action->GetTarget() != ai->GetUnit(AI_VALUE(ObjectGuid, "current target")))
         return 1.0f;
 
     double saveLevel = AI_VALUE(double, "mana save level");

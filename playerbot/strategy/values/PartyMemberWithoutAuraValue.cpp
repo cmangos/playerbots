@@ -46,7 +46,7 @@ private:
     std::vector<std::string> auras;
 };
 
-Unit* FriendlyUnitWithoutAuraValue::Calculate()
+ObjectGuid FriendlyUnitWithoutAuraValue::Calculate()
 {
     bool ignoreTank = false;
     std::string auras = qualifier;
@@ -59,10 +59,11 @@ Unit* FriendlyUnitWithoutAuraValue::Calculate()
     }
 
     PlayerWithoutAuraPredicate predicate(ai, auras);
-    return FindPartyMember(predicate, false, ignoreTank);
+    Unit* target = FindPartyMember(predicate, false, ignoreTank);
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }
 
-Unit* PartyMemberWithoutAuraValue::Calculate()
+ObjectGuid PartyMemberWithoutAuraValue::Calculate()
 {
     bool ignoreTank = false;
     std::string auras = qualifier;
@@ -75,7 +76,8 @@ Unit* PartyMemberWithoutAuraValue::Calculate()
     }
 
 	PlayerWithoutAuraPredicate predicate(ai, auras);
-    return FindPartyMember(predicate, true, ignoreTank);
+    Unit* target = FindPartyMember(predicate, true, ignoreTank);
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }
 
 class PlayerWithoutMyAuraPredicate : public FindPlayerPredicate, public PlayerbotAIAware
@@ -107,7 +109,7 @@ private:
     std::vector<std::string> auras;
 };
 
-Unit* PartyMemberWithoutMyAuraValue::Calculate()
+ObjectGuid PartyMemberWithoutMyAuraValue::Calculate()
 {
     bool ignoreTank = false;
     std::string auras = qualifier;
@@ -120,7 +122,8 @@ Unit* PartyMemberWithoutMyAuraValue::Calculate()
     }
 
     PlayerWithoutMyAuraPredicate predicate(ai, auras);
-    return FindPartyMember(predicate, false, ignoreTank);
+    Unit* target = FindPartyMember(predicate, false, ignoreTank);
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }
 
 class TankWithoutAuraPredicate : public FindPlayerPredicate, public PlayerbotAIAware
@@ -157,8 +160,9 @@ private:
     std::vector<std::string> auras;
 };
 
-Unit* PartyTankWithoutAuraValue::Calculate()
+ObjectGuid PartyTankWithoutAuraValue::Calculate()
 {
     TankWithoutAuraPredicate predicate(ai, qualifier);
-    return FindPartyMember(predicate);
+    Unit* target = FindPartyMember(predicate);
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }

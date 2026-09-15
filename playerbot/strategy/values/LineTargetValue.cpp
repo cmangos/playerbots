@@ -5,15 +5,15 @@
 #include "playerbot/ServerFacade.h"
 using namespace ai;
 
-Unit* LineTargetValue::Calculate()
+ObjectGuid LineTargetValue::Calculate()
 {
     Player* master = GetMaster();
     if (!master)
-        return NULL;
+        return ObjectGuid();
 
     Group* group = master->GetGroup();
     if (!group)
-        return NULL;
+        return ObjectGuid();
 
     Player *prev = master;
     Group::MemberSlotList const& groupSlot = group->GetMemberSlots();
@@ -24,11 +24,11 @@ Unit* LineTargetValue::Calculate()
             continue;
 
         if (player == bot)
-            return prev;
+            return prev ? prev->GetObjectGuid() : ObjectGuid();
 
         prev = player;
     }
 
-    return master;
+    return master ? master->GetObjectGuid() : ObjectGuid();
 }
 

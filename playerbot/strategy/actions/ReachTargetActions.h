@@ -53,7 +53,7 @@ namespace ai
                     chaseDist = (chaseDist - sPlayerbotAIConfig.contactDistance);
                 }
 
-                if (MoveStyleValue::WaitForEnemy(ai) && !AI_VALUE(Unit*, "rti cc target") && target->m_movementInfo.HasMovementFlag(movementFlagsMask) &&
+                if (MoveStyleValue::WaitForEnemy(ai) && !ai->GetUnit(AI_VALUE(ObjectGuid, "rti cc target")) && target->m_movementInfo.HasMovementFlag(movementFlagsMask) &&
                         sServerFacade.IsInFront(target, bot, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT) &&
                         sServerFacade.IsDistanceGreaterThan(distanceToTarget, sPlayerbotAIConfig.tooCloseDistance))
                 {
@@ -127,11 +127,11 @@ namespace ai
                     targetQualifier = Qualified::getMultiQualifierStr(qualifier, 2, "::");
                 }
 
-                return targetQualifier.empty() ? AI_VALUE(Unit*, targetName) : AI_VALUE2(Unit*, targetName, targetQualifier);
+                return targetQualifier.empty() ? ai->GetUnit(AI_VALUE(ObjectGuid, targetName)) : ai->GetUnit(AI_VALUE2(ObjectGuid, targetName, targetQualifier));
             }
             else
             {
-                return AI_VALUE(Unit*, GetTargetName());
+                return ai->GetUnit(AI_VALUE(ObjectGuid, GetTargetName()));
             }
         }
 
@@ -221,7 +221,7 @@ namespace ai
 
             Group* group = bot->GetGroup();
             if (!group || totemSpell.empty())
-                return AI_VALUE(Unit*, "master target");
+                return ai->GetUnit(AI_VALUE(ObjectGuid, "master target"));
 
             for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
             {

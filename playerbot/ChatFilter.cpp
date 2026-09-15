@@ -458,7 +458,7 @@ public:
             if (bot->GetObjectGuid() == rtiTarget)
                 return ChatFilter::Filter(message);
 
-            Unit* target = *ai->GetAiObjectContext()->GetValue<Unit*>("current target");
+            Unit* target = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
             if (!target)
                 return "";
 

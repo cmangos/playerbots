@@ -45,8 +45,9 @@ private:
     IsTargetOfResurrectSpell predicate;
 };
 
-Unit* PartyMemberToResurrect::Calculate()
+ObjectGuid PartyMemberToResurrect::Calculate()
 {
 	FindDeadPlayer finder(ai, this);
-    return FindPartyMember(finder);
+    Unit* target = FindPartyMember(finder);
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }

@@ -3127,7 +3127,7 @@ bool BGTactics::selectObjective(bool reset)
 
             if (supporter)
             {
-                Unit* teamFC = AI_VALUE(Unit*, "team flag carrier");
+                Unit* teamFC = ai->GetUnit(AI_VALUE(ObjectGuid, "team flag carrier"));
                 if (teamFC)
                 {
                     //ostringstream out;
@@ -3139,7 +3139,7 @@ bool BGTactics::selectObjective(bool reset)
                 }
                 else
                 {
-                    Unit* enemyFC = AI_VALUE(Unit*, "enemy flag carrier");
+                    Unit* enemyFC = ai->GetUnit(AI_VALUE(ObjectGuid, "enemy flag carrier"));
                     if (enemyFC)
                     {
                         pos.Set(enemyFC->GetPositionX(), enemyFC->GetPositionY(), enemyFC->GetPositionZ(), bot->GetMapId());
@@ -3163,7 +3163,7 @@ bool BGTactics::selectObjective(bool reset)
             }
             else
             {
-                Unit* enemyFC = AI_VALUE(Unit*, "enemy flag carrier");
+                Unit* enemyFC = ai->GetUnit(AI_VALUE(ObjectGuid, "enemy flag carrier"));
                 if (enemyFC)
                 {
                     pos.Set(enemyFC->GetPositionX(), enemyFC->GetPositionY(), enemyFC->GetPositionZ(), bot->GetMapId());
@@ -3417,7 +3417,7 @@ bool BGTactics::selectObjective(bool reset)
                 }
             }
             else if (role < 10) { //Get the flag or defend flag carrier
-                Unit* teamFC = AI_VALUE(Unit*, "team flag carrier");
+                Unit* teamFC = ai->GetUnit(AI_VALUE(ObjectGuid, "team flag carrier"));
                 if (teamFC)
                 {
                     BgObjective = teamFC;
@@ -3427,7 +3427,7 @@ bool BGTactics::selectObjective(bool reset)
                 }
                 else
                 {
-                    Unit* enemyFC = AI_VALUE(Unit*, "enemy flag carrier");
+                    Unit* enemyFC = ai->GetUnit(AI_VALUE(ObjectGuid, "enemy flag carrier"));
                     if (enemyFC)
                     {
                         BgObjective = enemyFC;
@@ -4694,7 +4694,7 @@ bool BGTactics::protectFC()
     if (!bg)
         return false;
 
-    Unit* teamFC = AI_VALUE(Unit*, "team flag carrier");
+    Unit* teamFC = ai->GetUnit(AI_VALUE(ObjectGuid, "team flag carrier"));
     if (teamFC && bot->IsWithinDistInMap(teamFC, VISIBILITY_DISTANCE_SMALL))
         return Follow(teamFC);
 

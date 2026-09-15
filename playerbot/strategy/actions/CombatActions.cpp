@@ -14,7 +14,7 @@ bool SwitchToMeleeAction::isUseful()
 
 bool SwitchToMeleeAction::Execute(Event &event)
 {
-    if (Unit* target = AI_VALUE(Unit*, "current target"))
+    if (Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target")))
     {
         bot->MeleeAttackStart(target);
         return ChangeCombatStrategyAction::Execute(event);
@@ -30,7 +30,7 @@ bool SwitchToRangedAction::isUseful()
 
 bool SwitchToRangedAction::Execute(Event &event)
 {
-    if (Unit* target = AI_VALUE(Unit*, "current target"))
+    if (Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target")))
     {
         bot->MeleeAttackStop(target);
         return ChangeCombatStrategyAction::Execute(event);

@@ -459,7 +459,7 @@ private:
 
         bool isUseful() override
         {
-            return AI_VALUE(Unit*, "pet target");
+            return ai->GetUnit(AI_VALUE(ObjectGuid, "pet target"));
         }
     };
 

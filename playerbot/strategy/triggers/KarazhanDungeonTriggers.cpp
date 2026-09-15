@@ -28,8 +28,8 @@ bool PrinceMalchezaarTooCloseTrigger::IsActive()
     PullStrategy* strategy = PullStrategy::Get(ai);
     if (strategy && strategy->HasPullStarted())
         return false;
-    Unit* target = AI_VALUE(Unit*, "tank target");
-    if (!target) target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "tank target"));
+    if (!target) target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
     if (bot->HasAura(30843) || (EnfeeblePart() && target && target->GetVictim() != bot) || MeleeWaitCheck(target)) 
         return true;
     if (ai->IsRanged(bot, true))
@@ -59,7 +59,7 @@ bool PrinceMalchezaarTooCloseTrigger::EnfeeblePart()
 {
     Group* group = bot->GetGroup();
     if (!group)
-        return AI_VALUE(Unit*, "master target");
+        return ai->GetUnit(AI_VALUE(ObjectGuid, "master target"));
 
     for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
     {

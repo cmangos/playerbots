@@ -31,7 +31,7 @@ namespace ai
         {
             AiObjectContext* ctx = AiObject::context;
 
-            return ctx->GetValue<Unit*>(qualifier)->Get();
+            return ai->GetUnit(ctx->GetValue<ObjectGuid>(qualifier)->Get());
         }
         virtual bool Calculate() override;
     };

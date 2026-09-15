@@ -13,7 +13,7 @@ namespace ai
 
         virtual bool IsActive() override
 		{
-            if (AI_VALUE(Unit*, "rti target"))
+            if (ai->GetUnit(AI_VALUE(ObjectGuid, "rti target")))
             {
                 return false;
             }
@@ -50,7 +50,7 @@ namespace ai
 
         virtual bool IsActive() override
 		{
-            if (AI_VALUE(Unit*, "rti cc target"))
+            if (ai->GetUnit(AI_VALUE(ObjectGuid, "rti cc target")))
             {
                 return false;
             }

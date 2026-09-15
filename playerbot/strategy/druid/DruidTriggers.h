@@ -300,14 +300,14 @@ namespace ai
                 return false;
             }
 
-            Unit* target = AI_VALUE(Unit*, "enemy player target");
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "enemy player target"));
             if (!target)
             {
-                target = AI_VALUE(Unit*, "grind target");
+                target = ai->GetUnit(AI_VALUE(ObjectGuid, "grind target"));
             }
             if (!target)
             {
-                target = AI_VALUE(Unit*, "dps target");
+                target = ai->GetUnit(AI_VALUE(ObjectGuid, "dps target"));
             }
             if (!target)
             {
@@ -405,7 +405,7 @@ namespace ai
     public:
         explicit LifebloomTankTrigger(PlayerbotAI* ai) : Trigger(ai, "lifebloom", 1) {}
 
-        Value<Unit*>* GetTargetValue() override;
+        Value<ObjectGuid>* GetTargetValue() override;
         bool IsActive() override
         {
             Unit* target = GetTarget();

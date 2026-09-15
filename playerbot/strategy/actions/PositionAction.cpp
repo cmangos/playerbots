@@ -116,7 +116,7 @@ bool GuardAction::isUseful()
 {
     if (ai->IsStateActive(BotState::BOT_STATE_COMBAT))
     {
-        Unit* target = AI_VALUE(Unit*, "current target");
+        Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
 
         if (!target)
             return true;

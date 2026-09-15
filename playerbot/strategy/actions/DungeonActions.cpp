@@ -37,7 +37,7 @@ bool MoveAwayFromHazard::Execute(Event& event)
             const WorldPosition initialPosition(closestHazard->first);
             const float distance = frand(hazardRadius, hazardRadius * 1.5f);
 
-            Unit* currentTarget = AI_VALUE(Unit*, "current target");
+            Unit* currentTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             if (currentTarget)
             {
                 const int8 startDir = urand(0, 1) * 2 - 1;

@@ -91,13 +91,14 @@ bool AttackEnemyPlayerAction::isUseful()
 
 bool AttackEnemyFlagCarrierAction::isUseful()
 {
-    Unit* target = context->GetValue<Unit*>("enemy flag carrier")->Get();
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    Unit* target = ai->GetUnit(context->GetValue<ObjectGuid>("enemy flag carrier")->Get());
     return target && sServerFacade.IsDistanceLessOrEqualThan(sServerFacade.GetDistance2d(bot, target), 75.0f) && (bot->HasAura(23333) || bot->HasAura(23335) || bot->HasAura(34976));
 }
 
 bool SelectNewTargetAction::Execute(Event& event)
 {
-    Unit* target = AI_VALUE(Unit*, "current target");
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
     if (target && sServerFacade.UnitIsDead(target))
     {
         // Save the dead target for later looting
@@ -119,8 +120,8 @@ bool SelectNewTargetAction::Execute(Event& event)
     // Save the old target and clear the current target
     if(target)
     {
-        SET_AI_VALUE(Unit*, "old target", target);
-        SET_AI_VALUE(Unit*, "current target", nullptr);
+        SET_AI_VALUE(ObjectGuid, "old target", target->GetObjectGuid());
+        SET_AI_VALUE(ObjectGuid, "current target", ObjectGuid());
     }
     
     // Stop attacking

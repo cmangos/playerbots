@@ -52,7 +52,7 @@ namespace ai
         FlagCarrierValue(PlayerbotAI* ai, bool sameTeam = false, bool ignoreRange = false) :
             UnitCalculatedValue(ai), sameTeam(sameTeam), ignoreRange(ignoreRange) {}
 
-        virtual Unit* Calculate() override;
+        virtual ObjectGuid Calculate() override;
 
     private:
         bool sameTeam;

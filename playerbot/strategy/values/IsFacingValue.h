@@ -10,7 +10,7 @@ namespace ai
 
         virtual bool Calculate() override
         {
-            Unit* target = AI_VALUE(Unit*, qualifier);
+            Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, qualifier));
             if (!target)
                 return false;
 

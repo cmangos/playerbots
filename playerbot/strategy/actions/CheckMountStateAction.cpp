@@ -25,7 +25,7 @@ bool CheckMountStateAction::Execute(Event& event)
     }
 
     bool hasAttackers = AI_VALUE(bool, "has attackers");
-    bool hasEnemy = AI_VALUE(bool, "has enemy player targets") || AI_VALUE(Unit*, "dps target");
+    bool hasEnemy = AI_VALUE(bool, "has enemy player targets") || ai->GetUnit(AI_VALUE(ObjectGuid, "dps target"));
 
     bool canFly = CanFly();
 
@@ -40,7 +40,7 @@ bool CheckMountStateAction::Execute(Event& event)
 
     if (hasEnemy)
     {
-        float distToTarget = AI_VALUE(Unit*, "current target") ? AI_VALUE2(float, "distance", "current target") : 0;
+        float distToTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "current target")) ? AI_VALUE2(float, "distance", "current target") : 0;
         canAttackTarget = sServerFacade.IsDistanceLessThan(distToTarget, GetAttackDistance());
         shouldChaseTarget = sServerFacade.IsDistanceGreaterThan(distToTarget, 45.0f) && AI_VALUE2(bool, "moving", "current target");
         farFromTarget = sServerFacade.IsDistanceGreaterThan(distToTarget, 40.0f);

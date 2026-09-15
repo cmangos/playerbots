@@ -40,7 +40,7 @@ bool FindNonCcTargetStrategy::IsCcTarget(Unit* attacker)
 
             if (player->GetPlayerbotAI())
             {
-                if (PAI_VALUE(Unit*,"rti cc target") == attacker)
+                if (PAI_VALUE(ObjectGuid,"rti cc target") == attacker->GetObjectGuid())
                     return true;
 
                 std::string rti = PAI_VALUE(std::string,"rti cc");
@@ -137,29 +137,28 @@ WorldPosition HomeBindValue::Calculate()
     return WorldPosition(mapId, x, y, z, 0.0);
 }
 
+std::string RpgTargetValue::Format()
+{
+    return chat->formatGuidPosition(value, bot);
+}
+
 std::string HomeBindValue::Format()
 {
     WorldPosition pos = this->Calculate();
     return chat->formatWorldPosition(pos);
 }
 
-void PullTargetValue::Set(Unit* unit)
+void PullTargetValue::Set(ObjectGuid unitGuid)
 {
-    guid = unit ? unit->GetObjectGuid() : ObjectGuid();
+    guid = unitGuid;
 }
 
-Unit* PullTargetValue::Get()
-{
-    Unit* unit = nullptr;
-    if (!guid.IsEmpty())
-    {
-        unit = sObjectAccessor.GetUnit(*bot, guid);
-    }
-    
-    return unit;
+ObjectGuid PullTargetValue::Get()
+{   
+    return guid;
 }
 
-Unit* FollowTargetValue::Calculate()
+ObjectGuid FollowTargetValue::Calculate()
 {
     Unit* followTarget = AI_VALUE(GuidPosition, "manual follow target").GetUnit(bot->GetInstanceId());
     if (followTarget == nullptr)
@@ -167,18 +166,18 @@ Unit* FollowTargetValue::Calculate()
         Formation* formation = AI_VALUE(Formation*, "formation");
         if (formation && !formation->GetTargetName().empty())
         {
-            followTarget = AI_VALUE(Unit*, formation->GetTargetName());
+            followTarget = ai->GetUnit(AI_VALUE(ObjectGuid, formation->GetTargetName()));
         }
         else
         {
-            followTarget = AI_VALUE(Unit*, "master target");
+            followTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "master target"));
         }
     }
 
-    return followTarget;
+    return followTarget ? followTarget->GetObjectGuid() : ObjectGuid();
 }
 
-Unit* ClosestAttackerTargetingMeTargetValue::Calculate()
+ObjectGuid ClosestAttackerTargetingMeTargetValue::Calculate()
 {
     Unit* result = nullptr;
     float closest = 9999.0f;
@@ -198,7 +197,7 @@ Unit* ClosestAttackerTargetingMeTargetValue::Calculate()
         }
     }
 
-    return result;
+    return result ? result->GetObjectGuid() : ObjectGuid();
 }
 
 std::list<ObjectGuid> FriendlyManualTargetsValue::Get()

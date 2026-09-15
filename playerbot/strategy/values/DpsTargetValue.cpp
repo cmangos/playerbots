@@ -6,13 +6,14 @@
 using namespace ai;
 
 
-Unit* DpsTargetValue::Calculate()
+ObjectGuid DpsTargetValue::Calculate()
 {
-    Unit* rti = RtiTargetValue::Calculate();
+    ObjectGuid rti = RtiTargetValue::Calculate();
     if (rti) return rti;
 
     FindLeastHpTargetStrategy strategy(ai);
-    return TargetValue::FindTarget(&strategy);
+    Unit* target = TargetValue::FindTarget(&strategy);
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }
 
 class FindMaxHpTargetStrategy : public FindTargetStrategy
@@ -41,11 +42,12 @@ protected:
     float maxHealth;
 };
 
-Unit* DpsAoeTargetValue::Calculate()
+ObjectGuid DpsAoeTargetValue::Calculate()
 {
-    Unit* rti = RtiTargetValue::Calculate();
+    ObjectGuid rti = RtiTargetValue::Calculate();
     if (rti) return rti;
 
     FindMaxHpTargetStrategy strategy(ai);
-    return TargetValue::FindTarget(&strategy);
+    Unit* target = TargetValue::FindTarget(&strategy);
+    return target ? target->GetObjectGuid() : ObjectGuid();
 }

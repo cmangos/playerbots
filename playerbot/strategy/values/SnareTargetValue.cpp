@@ -7,20 +7,21 @@
 
 using namespace ai;
 
-Unit* SnareTargetValue::Calculate()
+ObjectGuid SnareTargetValue::Calculate()
 {
     std::string spell = qualifier;
 
-    Unit* enemy = AI_VALUE(Unit*, "enemy player target");
+    Unit* enemy = ai->GetUnit(AI_VALUE(ObjectGuid, "enemy player target"));
     if (enemy)
     {
         Player* plr = dynamic_cast<Player*>(enemy);
         if (plr && !(plr->HasAuraType(SPELL_AURA_MOD_ROOT) || plr->HasAuraType(SPELL_AURA_MOD_STUN)) && (!plr->IsStopped() || plr->IsNonMeleeSpellCasted(false) || (plr->GetVictim() && plr->GetVictim()->GetObjectGuid() == bot->GetObjectGuid())))
-            return enemy;
+            return enemy ? enemy->GetObjectGuid() : ObjectGuid();
     }
 
     std::list<ObjectGuid> attackers = ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
-    Unit* target = ai->GetAiObjectContext()->GetValue<Unit*>("current target")->Get();
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    Unit* target = ai->GetUnit(ai->GetAiObjectContext()->GetValue<ObjectGuid>("current target")->Get());
     for (std::list<ObjectGuid>::iterator i = attackers.begin(); i != attackers.end(); ++i)
     {
         Unit* unit = ai->GetUnit(*i);
@@ -46,7 +47,7 @@ Unit* SnareTargetValue::Calculate()
                     shouldSnare = false;
 
                 if (victim && shouldSnare)
-                    return unit;
+                    return unit ? unit->GetObjectGuid() : ObjectGuid();
             }
         }
 
@@ -54,7 +55,7 @@ Unit* SnareTargetValue::Calculate()
         switch (unit->GetMotionMaster()->GetCurrentMovementGeneratorType())
         {
         case FLEEING_MOTION_TYPE:
-            return unit;
+            return unit ? unit->GetObjectGuid() : ObjectGuid();
         case CHASE_MOTION_TYPE:
             chaseTarget = sServerFacade.GetChaseTarget(unit);
             if (!chaseTarget) continue;
@@ -74,9 +75,9 @@ Unit* SnareTargetValue::Calculate()
                 shouldSnare = false;
 
             if (chaseTargetPlayer && shouldSnare && !ai->IsTank(chaseTargetPlayer))
-                return unit;
+                return unit ? unit->GetObjectGuid() : ObjectGuid();
         }
     }
 
-    return NULL;
+    return ObjectGuid();
 }

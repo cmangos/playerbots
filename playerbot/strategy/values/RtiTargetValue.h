@@ -28,31 +28,31 @@ namespace ai
             return index;
         }
 
-        Unit *Calculate() override
+        ObjectGuid Calculate() override
         {
             Group *group = bot->GetGroup();
             if(!group)
-                return NULL;
+                return ObjectGuid();
 
             std::string rti = AI_VALUE(std::string, type);
             int index = GetRtiIndex(rti);
 
             if (index == -1)
-                return NULL;
+                return ObjectGuid();
 
             ObjectGuid guid = group->GetTargetIcon(index);
             if (!guid)
-                return NULL;
+                return ObjectGuid();
 
             std::list<ObjectGuid> attackers = context->GetValue<std::list<ObjectGuid>>("possible targets no los")->Get();
-            if (std::find(attackers.begin(), attackers.end(), guid) == attackers.end()) return NULL;
+            if (std::find(attackers.begin(), attackers.end(), guid) == attackers.end()) return ObjectGuid();
 
             Unit* unit = ai->GetUnit(ObjectGuid(guid));
             if (!unit || sServerFacade.UnitIsDead(unit) ||
                 !bot->IsWithinDistInMap(unit, sPlayerbotAIConfig.sightDistance, false))
-                return NULL;
+                return ObjectGuid();
 
-            return unit;
+            return unit ? unit->GetObjectGuid() : ObjectGuid();
         }
 
     private:

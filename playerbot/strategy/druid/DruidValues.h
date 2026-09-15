@@ -11,6 +11,6 @@ namespace ai
             PartyMemberValue(ai, name), Qualified() {}
 
     protected:
-        Unit* Calculate() override;
+        ObjectGuid Calculate() override;
     };
 }

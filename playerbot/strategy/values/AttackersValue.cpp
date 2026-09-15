@@ -28,7 +28,7 @@ std::list<ObjectGuid> AttackersValue::Calculate()
 
     if (ai->HasStrategy("focus rti targets", BotState::BOT_STATE_COMBAT))
     {
-        Unit* rtiTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
+        Unit* rtiTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "rti target"));
 
         if (rtiTarget && rtiTarget->IsInWorld() && rtiTarget->GetMapId() == bot->GetMapId())
         {

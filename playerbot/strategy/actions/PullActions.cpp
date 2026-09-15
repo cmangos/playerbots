@@ -80,7 +80,7 @@ Unit* PullMyTargetAction::GetTarget(Event& event)
 
 Unit* PullRTITargetAction::GetTarget(Event& event)
 {
-    return ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
+    return ai->GetUnit(AI_VALUE(ObjectGuid, "rti target"));
 }
 
 bool PullStartAction::Execute(Event& event)

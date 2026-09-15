@@ -48,7 +48,7 @@ bool AttackMyTargetAction::Execute(Event& event)
 bool AttackRTITargetAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    Unit* rtiTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
+    Unit* rtiTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "rti target"));
 
     if (rtiTarget && rtiTarget->IsInWorld() && rtiTarget->GetMapId() == bot->GetMapId())
     {

@@ -10,6 +10,7 @@
 #include "BotState.h"
 #include "PlayerTalentSpec.h"
 #include <stack>
+#include <deque>
 #include "strategy/IterateItemsMask.h"
 #include "RandomPlayerbotMgr.h"
 
@@ -20,6 +21,41 @@ class ChatHandler;
 using namespace ai;
 
 bool IsAlliance(uint8 race);
+
+// Bounded per-bot record of executed actions/reactions (populated by ActionHistoryListener).
+struct ActionHistoryEntry
+{
+    uint32 tick = 0;            // per-bot AI update counter
+    uint32 timeMs = 0;          // WorldTimer::getMSTime() at execution
+    uint32 elapsedMs = 0;       // execution duration
+    uint32 targetCounter = 0;   // current target guid counter at execution
+    uint32 mapId = 0;
+    float x = 0.0f, y = 0.0f, z = 0.0f;
+    bool executed = false;
+    bool reaction = false;
+    std::string action;
+};
+
+class PlayerbotAI;
+
+// Records every action the engines actually attempt into the owning bot's history.
+// Attached to the normal engines and to the reaction engine (two instances, so entries
+// can be tagged as reactions); looks after itself via Engine's listener ownership.
+class ActionHistoryListener : public ActionExecutionListener
+{
+public:
+    ActionHistoryListener(PlayerbotAI* ai, bool reaction) : ai(ai), reaction(reaction) {}
+
+    virtual bool Before(Action* action, const Event& event) override;
+    virtual bool AllowExecution(Action* action, const Event& event) override { return true; }
+    virtual void After(Action* action, bool executed, const Event& event) override;
+    virtual bool OverrideResult(Action* action, bool executed, const Event& event) override { return executed; }
+
+private:
+    PlayerbotAI* ai;
+    bool reaction;
+    uint32 startMs = 0;
+};
 
 class PlayerbotChatHandler: protected ChatHandler
 {
@@ -398,6 +434,12 @@ public:
     template<class T>
     T* GetStrategy(const std::string& name, BotState type);
     BotState GetState() { return currentState; };
+    void SetActionHistorySize(uint32 size);
+    uint32 GetActionHistorySize() const { return actionHistorySize; }
+    const std::deque<ActionHistoryEntry>& GetActionHistory() const { return actionHistory; }
+    void ClearActionHistory() { actionHistory.clear(); }
+    void RecordActionHistory(Action* action, bool executed, bool reaction, uint32 elapsedMs);
+    uint32 GetAITick() const { return aiTick; }
     void ResetStrategies(bool autoLoad = true);
     void ReInitCurrentEngine();
     void Reset(bool full = false);
@@ -702,6 +744,10 @@ protected:
     ReactionEngine* reactionEngine;
     Engine* engines[(uint8)BotState::BOT_STATE_ALL];
     BotState currentState;
+
+    std::deque<ActionHistoryEntry> actionHistory;
+    uint32 actionHistorySize = 0;
+    uint32 aiTick = 0;
     ChatHelper chatHelper;
     std::queue<ChatCommandHolder> chatCommands;
     std::queue<ChatQueuedReply> chatReplies;

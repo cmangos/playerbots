@@ -206,6 +206,8 @@ bool DebugAction::Execute(Event& event)
         return HandleWhy(event, requester, text);
     else if (text.find("engine") == 0)
         return HandleEngine(event, requester, text);
+    else if (text.find("history") == 0)
+        return HandleHistory(event, requester, text);
     else if (text.find("stuck") == 0)
         return HandleStuck(event, requester, text);
     else if (text.find("combat") == 0)
@@ -245,7 +247,7 @@ bool DebugAction::HandleDebugHelp(Event& event, Player* requester, const std::st
         ai->TellPlayer(requester, "=== Debug Commands ===");
         ai->TellPlayer(requester, "Usage: debug help <command>");
         ai->TellPlayer(requester, "");
-        ai->TellPlayer(requester, "General: position, quest, values, level, who, stats, spells, why, engine");
+        ai->TellPlayer(requester, "General: position, quest, values, level, who, stats, spells, why, engine, history");
         ai->TellPlayer(requester, "Movement: route, path, distance, teleport, zone");
         ai->TellPlayer(requester, "Info: target, movement, corpse, logouttime, taxi");
         ai->TellPlayer(requester, "Interaction: npc, go, rpg, travel, loot, trade, mail");
@@ -5369,6 +5371,31 @@ bool DebugAction::HandleWhy(Event& event, Player* requester, const std::string& 
         ai->TellPlayerNoFacing(requester, values.str());
     }
 
+    // recent history (last 3 attempted actions, if the ring buffer is enabled)
+    {
+        const std::deque<ActionHistoryEntry>& history = ai->GetActionHistory();
+        std::ostringstream recent;
+        recent << "recent: ";
+
+        if (history.empty())
+        {
+            recent << "(none; enable with '.rndbot history on')";
+        }
+        else
+        {
+            size_t startIdx = history.size() > 3 ? history.size() - 3 : 0;
+            bool first = true;
+            for (size_t i = startIdx; i < history.size(); ++i)
+            {
+                if (!first) recent << " <- ";
+                recent << history[i].action << (history[i].executed ? "" : "(x)");
+                first = false;
+            }
+        }
+
+        ai->TellPlayerNoFacing(requester, recent.str());
+    }
+
     return true;
 }
 
@@ -5525,6 +5552,52 @@ bool DebugAction::HandleEngine(Event& event, Player* requester, const std::strin
         ai->TellPlayerNoFacing(requester, "trace: truncated (earliest candidates lost to the 512-char log cap)");
 
     ai->TellPlayerNoFacing(requester, "raw: " + (log.empty() ? std::string("(empty)") : log));
+
+    return true;
+}
+
+bool DebugAction::HandleHistory(Event& event, Player* requester, const std::string& text)
+{
+    const std::deque<ActionHistoryEntry>& history = ai->GetActionHistory();
+
+    size_t limit = 20;
+    std::string param = text.size() > 8 ? text.substr(8) : "";
+    size_t firstNonSpace = param.find_first_not_of(" \t");
+    if (firstNonSpace != std::string::npos)
+    {
+        param = param.substr(firstNonSpace);
+        if (Qualified::isValidNumberString(param))
+            limit = (size_t)std::stoi(param);
+    }
+
+    ai->TellPlayerNoFacing(requester, std::string("=== history ") + bot->GetName() + " (" + std::to_string(bot->GetGUIDLow()) + ") ===");
+    ai->TellPlayerNoFacing(requester, "size=" + std::to_string(ai->GetActionHistorySize()) + " entries=" + std::to_string(history.size()) + " tick=" + std::to_string(ai->GetAITick()));
+
+    if (history.empty())
+    {
+        ai->TellPlayerNoFacing(requester, "(empty - enable with '.rndbot history on' or 'cdebug history on')");
+        return true;
+    }
+
+    uint32 now = WorldTimer::getMSTime();
+    size_t startIdx = history.size() > limit ? history.size() - limit : 0;
+
+    for (size_t i = startIdx; i < history.size(); ++i)
+    {
+        const ActionHistoryEntry& e = history[i];
+
+        std::ostringstream line;
+        line << "  t" << e.tick
+             << " " << (WorldTimer::getMSTimeDiff(e.timeMs, now) / 1000) << "s ago"
+             << (e.reaction ? " [reaction]" : "")
+             << " " << e.action
+             << " " << (e.executed ? "OK" : "FAILED")
+             << " " << e.elapsedMs << "ms"
+             << " target=" << e.targetCounter
+             << " pos=" << (int)e.x << "," << (int)e.y << "," << (int)e.z
+             << " map " << e.mapId;
+        ai->TellPlayerNoFacing(requester, line.str());
+    }
 
     return true;
 }

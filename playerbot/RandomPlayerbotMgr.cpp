@@ -3430,6 +3430,7 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     handlers["diff "] = &RandomPlayerbotMgr::HandleConsoleDiff;
     handlers["sample"] = &RandomPlayerbotMgr::HandleConsoleSample;
     handlers["find"] = &RandomPlayerbotMgr::HandleConsoleFind;
+    handlers["history"] = &RandomPlayerbotMgr::HandleConsoleHistory;
     handlers["clean map"] = &RandomPlayerbotMgr::HandleConsoleCleanMap;
     handlers["login debug"] = &RandomPlayerbotMgr::HandleConsoleLoginDebug;
 
@@ -3608,6 +3609,8 @@ void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
 void RandomPlayerbotMgr::OnBotLoginInternal(Player * const bot)
 {
     sLog.outDetail("%u/%d Bot %s logged in", GetPlayerbotsAmount(), sRandomPlayerbotMgr.GetMaxAllowedBotCount(), bot->GetName());
+
+    ApplyActionHistorySize(bot);
 	//if (loginProgressBar && playerBots.size() < sRandomPlayerbotMgr.GetMaxAllowedBotCount()) { loginProgressBar->step(); }
 	//if (loginProgressBar && playerBots.size() >= sRandomPlayerbotMgr.GetMaxAllowedBotCount() - 1) {
     //if (loginProgressBar && playerBots.size() + 1 >= sRandomPlayerbotMgr.GetMaxAllowedBotCount()) {
@@ -4707,6 +4710,7 @@ std::unordered_map<std::string, std::string> RandomPlayerbotMgr::GetCommandTexts
         {"stats", "Print bot statistics.\nUsage: stats"},
         {"sample", "Show a compact row for the first N bots.\nUsage: sample [N] [filter]"},
         {"find", "Show a compact row for every bot matching a filter.\nUsage: find [filter] [N]"},
+        {"history", "Set per-bot action history size (0 = off).\nUsage: history <off|on|N> | history <botname> <off|on|N>"},
         {"update", "Trigger immediate bot AI update.\nUsage: update"},
         {"pid", "Adjust PID controller values.\nUsage: pid p i d"},
         {"clean map", "Unload and reload map files.\nUsage: clean map"},
@@ -4873,6 +4877,93 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleReset(std::string param)
     sRandomPlayerbotMgr.eventCache.clear();
     std::string msg = "Random bots were reset for all players. Please restart the Server.";
     messages.push_back(msg);
+    return messages;
+}
+
+uint32 RandomPlayerbotMgr::ResolveActionHistorySize(Player* bot)
+{
+    // Stored as size + 1, so 0 means "inherit the global setting" and >=1 is explicit.
+    uint32 stored = GetEventValue(bot->GetGUIDLow(), "action_history");
+    if (!stored)
+        return sPlayerbotAIConfig.actionHistorySize;
+
+    return stored - 1;
+}
+
+void RandomPlayerbotMgr::ApplyActionHistorySize(Player* bot)
+{
+    if (PlayerbotAI* ai = bot->GetPlayerbotAI())
+        ai->SetActionHistorySize(ResolveActionHistorySize(bot));
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleHistory(std::string param)
+{
+    std::list<std::string> messages;
+
+    std::vector<std::string> tokens;
+    for (auto& token : Qualified::getMultiQualifiers(param, " "))
+        if (!token.empty())
+            tokens.push_back(token);
+
+    if (tokens.empty() || tokens.size() > 2)
+    {
+        uint32 on = 0, total = 0;
+        ForEachPlayerbot([&](Player* bot)
+        {
+            total++;
+            if (bot->GetPlayerbotAI() && bot->GetPlayerbotAI()->GetActionHistorySize())
+                on++;
+        });
+
+        messages.push_back("Usage: history <off|on|N> | history <botname> <off|on|N>");
+        messages.push_back("Action history enabled on " + std::to_string(on) + " / " + std::to_string(total) + " bots (global default " + std::to_string(sPlayerbotAIConfig.actionHistorySize) + ").");
+        return messages;
+    }
+
+    std::string name = "%";
+    std::string setting = tokens[0];
+    if (tokens.size() == 2)
+    {
+        name = tokens[0];
+        setting = tokens[1];
+    }
+
+    int size = -1;
+    if (setting == "off")
+        size = 0;
+    else if (setting == "on")
+        size = sPlayerbotAIConfig.actionHistorySize ? (int)sPlayerbotAIConfig.actionHistorySize : 64;
+    else if (Qualified::isValidNumberString(setting))
+        size = std::stoi(setting);
+    else
+    {
+        messages.push_back("Unknown setting: " + setting);
+        messages.push_back("Usage: history <off|on|N> | history <botname> <off|on|N>");
+        return messages;
+    }
+
+    if (size < 0)
+        size = 0;
+
+    uint32 stored = (uint32)size + 1;
+    uint32 applied = 0;
+
+    ForEachPlayerbot([&](Player* bot)
+    {
+        const char* botName = bot->GetName();
+        if (name != "%" && (!botName || std::string(botName).find(name) != 0))
+            return;
+
+        // validIn must be huge: GetEventValue() expires any event where (now - lastChange) >= validIn,
+        // and validIn == 0 would therefore read back as 0 immediately.
+        SetEventValue(bot->GetGUIDLow(), "action_history", stored, 0xFFFFFFFF);
+        if (PlayerbotAI* ai = bot->GetPlayerbotAI())
+            ai->SetActionHistorySize((uint32)size);
+
+        applied++;
+    });
+
+    messages.push_back("Action history = " + std::to_string(size) + " for " + std::to_string(applied) + " bot(s).");
     return messages;
 }
 

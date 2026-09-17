@@ -231,6 +231,9 @@ public:
         std::list<std::string> HandleConsoleFind(std::string param);
 
         std::list<std::string> HandleConsoleStats(std::string param);
+        uint32 ResolveActionHistorySize(Player* bot);
+        void ApplyActionHistorySize(Player* bot);
+        std::list<std::string> HandleConsoleHistory(std::string param);
         std::list<std::string> HandleConsoleReload(std::string param);
         std::list<std::string> HandleConsoleUpdate(std::string param);
         std::list<std::string> HandleConsolePid(std::string param);

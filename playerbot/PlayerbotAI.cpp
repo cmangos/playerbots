@@ -156,6 +156,12 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
         engines[e]->Init();
     }
 
+    // Action history listeners. Engines own and delete these (ActionExecutionListeners dtor).
+    engines[(uint8)BotState::BOT_STATE_COMBAT]->AddActionExecutionListener(new ActionHistoryListener(this, false));
+    engines[(uint8)BotState::BOT_STATE_NON_COMBAT]->AddActionExecutionListener(new ActionHistoryListener(this, false));
+    engines[(uint8)BotState::BOT_STATE_DEAD]->AddActionExecutionListener(new ActionHistoryListener(this, false));
+    engines[(uint8)BotState::BOT_STATE_REACTION]->AddActionExecutionListener(new ActionHistoryListener(this, true));
+
     currentEngine = engines[(uint8)BotState::BOT_STATE_NON_COMBAT];
     currentState = BotState::BOT_STATE_NON_COMBAT;
     
@@ -764,6 +770,54 @@ std::string PlayerbotAI::GetLastActionDecision(BotState state)
     return segment.substr(begin, end - begin + 1);
 }
 
+void PlayerbotAI::SetActionHistorySize(uint32 size)
+{
+    actionHistorySize = size;
+
+    if (!size)
+        actionHistory.clear();
+    else
+        while (actionHistory.size() > size)
+            actionHistory.pop_front();
+}
+
+void PlayerbotAI::RecordActionHistory(Action* action, bool executed, bool reaction, uint32 elapsedMs)
+{
+    if (!actionHistorySize || !action)
+        return;
+
+    ActionHistoryEntry entry;
+    entry.tick = aiTick;
+    entry.timeMs = WorldTimer::getMSTime();
+    entry.elapsedMs = elapsedMs;
+    entry.action = action->getName();
+    entry.executed = executed;
+    entry.reaction = reaction;
+    entry.targetCounter = aiObjectContext->GetValue<ObjectGuid>("current target")->Get().GetCounter();
+
+    WorldPosition pos(bot);
+    entry.x = pos.getX();
+    entry.y = pos.getY();
+    entry.z = pos.getZ();
+    entry.mapId = pos.getMapId();
+
+    actionHistory.push_back(entry);
+
+    while (actionHistory.size() > actionHistorySize)
+        actionHistory.pop_front();
+}
+
+bool ActionHistoryListener::Before(Action* action, const Event& event)
+{
+    startMs = WorldTimer::getMSTime();
+    return true;
+}
+
+void ActionHistoryListener::After(Action* action, bool executed, const Event& event)
+{
+    ai->RecordActionHistory(action, executed, reaction, WorldTimer::getMSTimeDiff(startMs, WorldTimer::getMSTime()));
+}
+
 bool PlayerbotAI::IsImmuneToSpell(uint32 spellId) const
 {
     for (std::list<uint32>::iterator i = sPlayerbotAIConfig.immuneSpellIds.begin(); i != sPlayerbotAIConfig.immuneSpellIds.end(); ++i)
@@ -1171,6 +1225,8 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
 {
     if (bot->IsBeingTeleported() || !bot->IsInWorld())
         return;
+
+    aiTick++;
 
     std::string mapString = WorldPosition(bot).isInstance() ? "I" : std::to_string(bot->GetMapId());
     auto pmo = sPerformanceMonitor.start(PERF_MON_TOTAL, "PlayerbotAI::UpdateAIInternal " + mapString, nullptr, bot->GetMapId(), bot->GetInstanceId());

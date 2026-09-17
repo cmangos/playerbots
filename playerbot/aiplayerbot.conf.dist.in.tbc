@@ -989,8 +989,11 @@ AiPlayerbot.RandomBotTeleportDistance = 100
 # Command server port, 0 - disabled
 #AiPlayerbot.CommandServerPort = 8888
 
-AiPlayerbot.PerfMonEnabled = 0
+#Enables performance monitor
+#AiPlayerbot.PerfMonEnabled = 0
 
+# Default action logging history for cdebug history.
+#AiPlayerbot.ActionHistorySize = 0
 
 ##################################################################################
 #                                                                                #

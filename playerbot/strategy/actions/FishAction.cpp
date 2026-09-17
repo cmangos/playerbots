@@ -149,7 +149,12 @@ bool UseFishingBobberAction::Execute(Event& event)
 
         if (obj->GetLootState() != GO_READY)
         {
+#ifdef MANGOSBOT_TWO
+            TimePoint bobberActiveTimePoint = obj->GetRespawnTime() - std::chrono::seconds(FISHING_BOBBER_READY_TIME);
+            time_t bobberActiveTime = std::chrono::system_clock::to_time_t(bobberActiveTimePoint);
+#else
             time_t bobberActiveTime = obj->GetRespawnTime() - FISHING_BOBBER_READY_TIME;
+#endif            
             if (bobberActiveTime > time(0))
                 SetDuration((bobberActiveTime - time(0)) * IN_MILLISECONDS + 500);
             else

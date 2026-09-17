@@ -113,6 +113,7 @@ namespace ai
         bool HandleSound(Event& event, Player* requester, const std::string& text);
         bool HandleStuck(Event& event, Player* requester, const std::string& text);
         bool HandleWhy(Event& event, Player* requester, const std::string& text);
+        bool HandleEngine(Event& event, Player* requester, const std::string& text);
 
         // Shared debug snapshot helpers (used by HandleStuck and HandleWhy)
         struct StuckFacts

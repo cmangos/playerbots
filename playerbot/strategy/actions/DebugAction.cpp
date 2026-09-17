@@ -204,6 +204,8 @@ bool DebugAction::Execute(Event& event)
         return HandleSound(event, requester, text);
     else if (text.find("why") == 0)
         return HandleWhy(event, requester, text);
+    else if (text.find("engine") == 0)
+        return HandleEngine(event, requester, text);
     else if (text.find("stuck") == 0)
         return HandleStuck(event, requester, text);
     else if (text.find("combat") == 0)
@@ -243,7 +245,7 @@ bool DebugAction::HandleDebugHelp(Event& event, Player* requester, const std::st
         ai->TellPlayer(requester, "=== Debug Commands ===");
         ai->TellPlayer(requester, "Usage: debug help <command>");
         ai->TellPlayer(requester, "");
-        ai->TellPlayer(requester, "General: position, quest, values, level, who, stats, spells, why");
+        ai->TellPlayer(requester, "General: position, quest, values, level, who, stats, spells, why, engine");
         ai->TellPlayer(requester, "Movement: route, path, distance, teleport, zone");
         ai->TellPlayer(requester, "Info: target, movement, corpse, logouttime, taxi");
         ai->TellPlayer(requester, "Interaction: npc, go, rpg, travel, loot, trade, mail");
@@ -5366,6 +5368,163 @@ bool DebugAction::HandleWhy(Event& event, Player* requester, const std::string& 
         }
         ai->TellPlayerNoFacing(requester, values.str());
     }
+
+    return true;
+}
+
+bool DebugAction::HandleEngine(Event& event, Player* requester, const std::string& text)
+{
+    BotState state = ai->GetState();
+    std::string log = ai->GetLastAction(state);
+
+    ai->TellPlayerNoFacing(requester, std::string("=== engine ") + bot->GetName() + " (" + std::to_string(bot->GetGUIDLow()) + ") [" + PlayerbotAI::BotStateToString(state) + "] ===");
+
+    std::vector<std::string> segments = Qualified::getMultiQualifiers(log, "|");
+
+    // The engine's lastAction is a rolling text log (capped at 512 chars, trimmed from the front).
+    // Parse from the most recent tick marker; if it is gone, the trace was truncated.
+    int start = -1;
+    for (int i = 0; i < (int)segments.size(); ++i)
+        if (segments[i] == "--- AI Tick ---")
+            start = i;
+
+    bool truncated = (start < 0);
+    if (start < 0)
+        start = 0;
+
+    std::vector<std::string> triggers;                          // "name (score)"
+    std::vector<std::string> order;                             // action first-seen order
+    std::map<std::string, std::string> pushInfo;                // action -> "PUSH <type> <rel>"
+    std::map<std::string, std::vector<std::string>> results;    // action -> outcomes
+    std::vector<std::string> multipliers;
+
+    for (int i = start; i < (int)segments.size(); ++i)
+    {
+        const std::string& seg = segments[i];
+        if (seg.empty() || seg == "--- AI Tick ---")
+            continue;
+
+        if (seg.compare(0, 2, "T:") == 0)
+        {
+            std::string body = seg.substr(2);
+            size_t dash = body.rfind(" - ");
+            if (dash == std::string::npos)
+                triggers.push_back(body);
+            else
+                triggers.push_back(body.substr(0, dash) + " (" + body.substr(dash + 3) + ")");
+        }
+        else if (seg.compare(0, 5, "PUSH:") == 0)
+        {
+            std::string body = seg.substr(5);
+            std::string name = body, rel, type;
+
+            size_t dash = body.rfind(" - ");
+            if (dash != std::string::npos)
+            {
+                name = body.substr(0, dash);
+                std::string tail = body.substr(dash + 3);
+
+                size_t paren = tail.find(" (");
+                if (paren != std::string::npos)
+                {
+                    rel = tail.substr(0, paren);
+                    type = tail.substr(paren + 2);
+                    if (!type.empty() && type.back() == ')')
+                        type.pop_back();
+                }
+                else
+                {
+                    rel = tail;
+                }
+            }
+
+            if (pushInfo.find(name) == pushInfo.end())
+                order.push_back(name);
+
+            std::string info = "PUSH";
+            if (!type.empty()) info += " " + type;
+            if (!rel.empty()) info += " " + rel;
+            pushInfo[name] = info;
+        }
+        else if (seg.compare(0, 2, "A:") == 0)
+        {
+            std::string body = seg.substr(2);
+            size_t dash = body.rfind(" - ");
+            std::string name = (dash == std::string::npos) ? body : body.substr(0, dash);
+            std::string result = (dash == std::string::npos) ? "" : body.substr(dash + 3);
+
+            if (pushInfo.find(name) == pushInfo.end())
+                order.push_back(name);
+
+            results[name].push_back(result.empty() ? std::string("?") : result);
+        }
+        else if (seg.compare(0, 11, "Multiplier ") == 0)
+        {
+            multipliers.push_back(seg.substr(11));
+        }
+    }
+
+    // Derive what actually ran *this tick* from the trace: GetLastExecutedActionName can carry
+    // over from a previous tick when nothing ran, which would misreport the current tick.
+    std::string executed = "none";
+    for (auto& name : order)
+    {
+        auto r = results.find(name);
+        if (r == results.end())
+            continue;
+
+        for (auto& result : r->second)
+            if (result == "OK" || result == "FAILED")
+                executed = name;
+    }
+
+    ai->TellPlayerNoFacing(requester, "considered: " + std::to_string(order.size()) + " (executed: " + executed + ")");
+
+    if (!triggers.empty())
+    {
+        std::ostringstream t;
+        t << "  triggers: ";
+        for (size_t i = 0; i < triggers.size(); ++i)
+        {
+            if (i) t << ", ";
+            t << triggers[i];
+        }
+        ai->TellPlayerNoFacing(requester, t.str());
+    }
+
+    for (auto& name : order)
+    {
+        std::ostringstream line;
+        line << "  " << name;
+
+        auto p = pushInfo.find(name);
+        if (p != pushInfo.end())
+            line << "  " << p->second;
+
+        auto r = results.find(name);
+        if (r != results.end() && !r->second.empty())
+        {
+            line << "  -> ";
+            for (size_t i = 0; i < r->second.size(); ++i)
+            {
+                if (i) line << " -> ";
+                line << r->second[i];
+            }
+        }
+
+        ai->TellPlayerNoFacing(requester, line.str());
+    }
+
+    if (order.empty())
+        ai->TellPlayerNoFacing(requester, "  (no candidate actions recorded)");
+
+    for (auto& m : multipliers)
+        ai->TellPlayerNoFacing(requester, "  multiplier: " + m);
+
+    if (truncated)
+        ai->TellPlayerNoFacing(requester, "trace: truncated (earliest candidates lost to the 512-char log cap)");
+
+    ai->TellPlayerNoFacing(requester, "raw: " + (log.empty() ? std::string("(empty)") : log));
 
     return true;
 }

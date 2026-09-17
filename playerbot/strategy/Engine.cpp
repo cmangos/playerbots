@@ -606,7 +606,7 @@ void Engine::ProcessTriggers(bool minimal)
                 continue;
 
             MultiplyAndPush(node->getHandlers(), 0.0f, false, event, "trigger");
-            LogAction("T:%s", trigger->getName().c_str());
+            LogAction("T:%s - %f", trigger->getName().c_str(), node->getFirstRelevance());
         }
     }
 

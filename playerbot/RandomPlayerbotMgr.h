@@ -219,6 +219,17 @@ public:
         BotStats GatherBotStats();
         std::list<std::string> FormatBotStats(const BotStats& stats, bool includeAllZones = false);
 
+        // Shared per-bot classification (used by stats, sample and find so they cannot drift)
+        std::string GetBotActivity(Player* bot);
+        bool GetBotStuck(Player* bot);
+
+        // Per-bot row output
+        std::string FormatBotLine(Player* bot);
+        bool BotMatchesFilter(Player* bot, const std::string& filter);
+        std::list<std::string> SampleBots(std::string param, bool exhaustive);
+        std::list<std::string> HandleConsoleSample(std::string param);
+        std::list<std::string> HandleConsoleFind(std::string param);
+
         std::list<std::string> HandleConsoleStats(std::string param);
         std::list<std::string> HandleConsoleReload(std::string param);
         std::list<std::string> HandleConsoleUpdate(std::string param);

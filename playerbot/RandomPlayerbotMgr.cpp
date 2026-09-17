@@ -3428,6 +3428,8 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     handlers["pid "] = &RandomPlayerbotMgr::HandleConsolePid;
     handlers["diff"] = &RandomPlayerbotMgr::HandleConsoleDiff;
     handlers["diff "] = &RandomPlayerbotMgr::HandleConsoleDiff;
+    handlers["sample"] = &RandomPlayerbotMgr::HandleConsoleSample;
+    handlers["find"] = &RandomPlayerbotMgr::HandleConsoleFind;
     handlers["clean map"] = &RandomPlayerbotMgr::HandleConsoleCleanMap;
     handlers["login debug"] = &RandomPlayerbotMgr::HandleConsoleLoginDebug;
 
@@ -3775,35 +3777,13 @@ RandomPlayerbotMgr::BotStats RandomPlayerbotMgr::GatherBotStats()
         AiObjectContext* context = ai->GetAiObjectContext();
 
         TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
-        bool traveling = false;
-        bool travelActive = false;
         if (target)
-        {
             stats.perTravelState[(uint8)target->GetTravelState()]++;
-            traveling = context->GetValue<bool>("travel target traveling")->Get();
-            travelActive = context->GetValue<bool>("travel target active")->Get();
-        }
 
-        // Activity: exactly one bucket per bot (priority: combat > traveling > moving > idle).
-        if (bot->IsInCombat())
-            stats.activity["combat"]++;
-        else if (traveling)
-            stats.activity["traveling"]++;
-        else if (isMoving)
-            stats.activity["moving"]++;
-        else
-            stats.activity["idle"]++;
-
-        // Stuck: active travel target and no position change for > 60s (same rule as 'stuck'/'why').
-        if (travelActive)
-        {
-            uint32 posLastChange = 0;
-            if (MemoryCalculatedValue<WorldPosition>* pos = dynamic_cast<MemoryCalculatedValue<WorldPosition>*>(context->GetUntypedValue("current position")))
-                posLastChange = pos->LastChangeDelay();
-
-            if (posLastChange > 60)
-                stats.stuck++;
-        }
+        // Shared classification (also used by 'find'/'sample') so the definitions cannot drift.
+        stats.activity[GetBotActivity(bot)]++;
+        if (GetBotStuck(bot))
+            stats.stuck++;
 
         stats.perZone[bot->GetZoneId()]++;
     });
@@ -3982,6 +3962,303 @@ std::list<std::string> RandomPlayerbotMgr::FormatBotStats(const BotStats& stats,
     }
 
     return lines;
+}
+
+namespace
+{
+    std::string BotTravelStatusText(int status)
+    {
+        switch ((TravelStatus)status)
+        {
+            case TravelStatus::TRAVEL_STATUS_NONE: return "none";
+            case TravelStatus::TRAVEL_STATUS_PREPARE: return "prepare";
+            case TravelStatus::TRAVEL_STATUS_WORK: return "work";
+            case TravelStatus::TRAVEL_STATUS_TRAVEL: return "travel";
+            case TravelStatus::TRAVEL_STATUS_READY: return "ready";
+            case TravelStatus::TRAVEL_STATUS_EXPIRED: return "expired";
+            case TravelStatus::TRAVEL_STATUS_COOLDOWN: return "cooldown";
+            default: return "unknown";
+        }
+    }
+
+    bool IsValidBotFilter(const std::string& filter)
+    {
+        static const char* valid[] =
+        {
+            "stuck", "idle", "moving", "traveling", "travel", "combat",
+            "dead", "notarget", "nomove", "nofree", "group", "quest"
+        };
+
+        for (auto v : valid)
+            if (filter == v)
+                return true;
+
+        return false;
+    }
+
+    std::string ValidBotFilters()
+    {
+        return "stuck, idle, moving, traveling, travel, combat, dead, notarget, nomove, nofree, group, quest";
+    }
+}
+
+std::string RandomPlayerbotMgr::GetBotActivity(Player* bot)
+{
+    if (bot->IsInCombat())
+        return "combat";
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return "idle";
+
+    AiObjectContext* context = ai->GetAiObjectContext();
+    TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
+    if (target && context->GetValue<bool>("travel target traveling")->Get())
+        return "traveling";
+
+    if (bot->IsMoving() && !bot->IsTaxiFlying() && !bot->IsFlying())
+        return "moving";
+
+    return "idle";
+}
+
+bool RandomPlayerbotMgr::GetBotStuck(Player* bot)
+{
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return false;
+
+    AiObjectContext* context = ai->GetAiObjectContext();
+
+    TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
+    if (!target)
+        return false;
+
+    if (!context->GetValue<bool>("travel target active")->Get())
+        return false;
+
+    uint32 posLastChange = 0;
+    if (MemoryCalculatedValue<WorldPosition>* pos = dynamic_cast<MemoryCalculatedValue<WorldPosition>*>(context->GetUntypedValue("current position")))
+        posLastChange = pos->LastChangeDelay();
+
+    return posLastChange > 60;
+}
+
+std::string RandomPlayerbotMgr::FormatBotLine(Player* bot)
+{
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    BotState state = ai->GetState();
+    AiObjectContext* context = ai->GetAiObjectContext();
+
+    std::string zone = "unknown";
+    if (AreaTableEntry const* area = GetAreaEntryByAreaID(bot->GetZoneId()))
+        zone = area->area_name[0];
+
+    std::string lastExecuted = ai->GetLastExecutedActionName(state);
+    if (lastExecuted.empty()) lastExecuted = "none";
+
+    std::string decision = ai->GetLastActionDecision(state);
+
+    // The engine tick log's final segment is usually "A:<action> - <RESULT>"; keep just the result.
+    std::string decisionResult;
+    size_t dash = decision.rfind(" - ");
+    if (decision.compare(0, 2, "A:") == 0 && dash != std::string::npos)
+        decisionResult = decision.substr(dash + 3);
+
+    Unit* target = ai->GetUnit(context->GetValue<ObjectGuid>("current target")->Get());
+
+    int selfHp = bot->GetMaxHealth() ? (int)((float)bot->GetHealth() / bot->GetMaxHealth() * 100) : 0;
+    std::string hp = std::to_string(selfHp) + "%";
+    if (target && target->GetMaxHealth())
+        hp += "/" + std::to_string((int)((float)target->GetHealth() / target->GetMaxHealth() * 100)) + "%";
+
+    std::ostringstream out;
+    out << bot->GetName() << " lv" << (uint32)bot->GetLevel() << " " << ChatHelper::formatClass(bot->getClass())
+        << " " << PlayerbotAI::BotStateToString(state)
+        << " | zone=" << zone
+        << " | act=" << lastExecuted;
+    if (!decisionResult.empty())
+        out << " (" << decisionResult << ")";
+    out << " | tgt=" << (target ? target->GetName() : "none")
+        << " | hp=" << hp;
+
+    TravelTarget* travel = context->GetValue<TravelTarget*>("travel target")->Get();
+    if (travel)
+    {
+        int travelStatus = (int)travel->GetStatus();
+        out << " | travel=" << BotTravelStatusText(travelStatus);
+
+        // Only show time/distance for a live target; NONE/EXPIRED carry stale position data.
+        if (travelStatus != (int)TravelStatus::TRAVEL_STATUS_NONE && travelStatus != (int)TravelStatus::TRAVEL_STATUS_EXPIRED)
+        {
+            if (travel->GetTimeLeft() > 0)
+                out << " " << (travel->GetTimeLeft() / 1000) << "s";
+            if (travel->GetPosition())
+            {
+                WorldPosition botPos(bot);
+                out << " " << (uint32)botPos.distance(*travel->GetPosition()) << "y";
+            }
+        }
+    }
+    else
+    {
+        out << " | travel=none";
+    }
+
+    out << " | stuck=" << (GetBotStuck(bot) ? "yes" : "no");
+
+    return out.str();
+}
+
+bool RandomPlayerbotMgr::BotMatchesFilter(Player* bot, const std::string& filter)
+{
+    if (filter.empty())
+        return true;
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return false;
+
+    AiObjectContext* context = ai->GetAiObjectContext();
+
+    for (auto& f : Qualified::getMultiQualifiers(filter, ","))
+    {
+        if (f == "stuck")
+        {
+            if (!GetBotStuck(bot)) return false;
+        }
+        else if (f == "idle" || f == "moving" || f == "traveling")
+        {
+            if (GetBotActivity(bot) != f) return false;
+        }
+        else if (f == "travel")
+        {
+            if (!context->GetValue<bool>("travel target active")->Get()) return false;
+        }
+        else if (f == "combat")
+        {
+            if (!bot->IsInCombat()) return false;
+        }
+        else if (f == "dead")
+        {
+            if (!sServerFacade.UnitIsDead(bot)) return false;
+        }
+        else if (f == "notarget")
+        {
+            if (ai->GetUnit(context->GetValue<ObjectGuid>("current target")->Get())) return false;
+        }
+        else if (f == "nomove")
+        {
+            if (context->GetValue<bool>("can move around")->Get()) return false;
+        }
+        else if (f == "nofree")
+        {
+            TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
+            if (!target) return false;
+            if (context->GetValue<bool>("can free move", target->GetPosStr())->Get()) return false;
+        }
+        else if (f == "group")
+        {
+            if (!bot->GetGroup()) return false;
+        }
+        else if (f == "quest")
+        {
+            TravelTarget* target = context->GetValue<TravelTarget*>("travel target")->Get();
+            if (!target) return false;
+
+            switch (target->GetTravelState())
+            {
+                case TravelState::TRAVEL_STATE_TRAVEL_PICK_UP_QUEST:
+                case TravelState::TRAVEL_STATE_WORK_PICK_UP_QUEST:
+                case TravelState::TRAVEL_STATE_TRAVEL_DO_QUEST:
+                case TravelState::TRAVEL_STATE_WORK_DO_QUEST:
+                case TravelState::TRAVEL_STATE_TRAVEL_HAND_IN_QUEST:
+                case TravelState::TRAVEL_STATE_WORK_HAND_IN_QUEST:
+                    break;
+                default:
+                    return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+std::list<std::string> RandomPlayerbotMgr::SampleBots(std::string param, bool exhaustive)
+{
+    int limit = -1;
+    std::string filter;
+
+    for (auto& token : Qualified::getMultiQualifiers(param, " "))
+    {
+        if (token.empty())
+            continue;
+
+        if (Qualified::isValidNumberString(token))
+            limit = std::stoi(token);
+        else
+            filter = filter.empty() ? token : (filter + "," + token);
+    }
+
+    if (!filter.empty())
+    {
+        for (auto& f : Qualified::getMultiQualifiers(filter, ","))
+        {
+            if (!IsValidBotFilter(f))
+            {
+                std::list<std::string> messages;
+                messages.push_back("Unknown filter: " + f);
+                messages.push_back("Valid filters: " + ValidBotFilters());
+                return messages;
+            }
+        }
+    }
+
+    int defaultLimit = exhaustive ? 100 : 10;
+    int maxLimit = exhaustive ? 200 : 100;
+    if (limit <= 0)
+        limit = defaultLimit;
+    if (limit > maxLimit)
+        limit = maxLimit;
+
+    std::list<std::string> lines;
+    uint32 matched = 0;
+
+    ForEachPlayerbot([&](Player* bot)
+    {
+        if (!bot->GetPlayerbotAI())
+            return;
+
+        if (!BotMatchesFilter(bot, filter))
+            return;
+
+        matched++;
+
+        if ((int)lines.size() < limit)
+            lines.push_back(FormatBotLine(bot));
+    });
+
+    std::ostringstream summary;
+    summary << "showing " << lines.size() << " of " << matched << (filter.empty() ? " online" : " matches");
+    if ((int)lines.size() < (int)matched)
+        summary << " (truncated; raise N or narrow filter)";
+    lines.push_back(summary.str());
+
+    return lines;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleSample(std::string param)
+{
+    return SampleBots(param, false);
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleFind(std::string param)
+{
+    return SampleBots(param, true);
 }
 
 void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)
@@ -4428,6 +4705,8 @@ std::unordered_map<std::string, std::string> RandomPlayerbotMgr::GetCommandTexts
         {"reset", "Reset all random bots and clear event cache.\nUsage: reset"},
         {"diff", "Show server performance metrics.\nUsage: diff [player_diff] [empty_diff]"},
         {"stats", "Print bot statistics.\nUsage: stats"},
+        {"sample", "Show a compact row for the first N bots.\nUsage: sample [N] [filter]"},
+        {"find", "Show a compact row for every bot matching a filter.\nUsage: find [filter] [N]"},
         {"update", "Trigger immediate bot AI update.\nUsage: update"},
         {"pid", "Adjust PID controller values.\nUsage: pid p i d"},
         {"clean map", "Unload and reload map files.\nUsage: clean map"},

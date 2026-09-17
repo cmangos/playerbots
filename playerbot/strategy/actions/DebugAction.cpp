@@ -4964,20 +4964,6 @@ namespace
 
         return out;
     }
-
-    // The engine's lastAction is a tick log joined by '|'; the last segment is the final decision.
-    std::string LastActionSegment(const std::string& log)
-    {
-        size_t pos = log.find_last_of('|');
-        std::string seg = (pos == std::string::npos) ? log : log.substr(pos + 1);
-
-        size_t b = seg.find_first_not_of(" \t\r\n");
-        size_t e = seg.find_last_not_of(" \t\r\n");
-        if (b == std::string::npos)
-            return "";
-
-        return seg.substr(b, e - b + 1);
-    }
 }
 
 std::string DebugAction::TravelStatusName(int status, bool lower)
@@ -5123,12 +5109,10 @@ bool DebugAction::HandleWhy(Event& event, Player* requester, const std::string& 
     BotState state = ai->GetState();
 
     // --- gather decision data up front (the derived summary needs it) ---
-    std::string lastAction = ai->GetLastAction(state);
     std::string lastExecuted = ai->GetLastExecutedActionName(state);
-    if (lastAction.empty()) lastAction = "none";
     if (lastExecuted.empty()) lastExecuted = "none";
 
-    std::string lastDecision = LastActionSegment(lastAction);
+    std::string lastDecision = ai->GetLastActionDecision(state);
     if (lastDecision.empty()) lastDecision = "none";
 
     bool actionKnown = (lastExecuted != "none");

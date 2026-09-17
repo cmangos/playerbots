@@ -112,6 +112,44 @@ namespace ai
         bool HandleDSound(Event& event, Player* requester, const std::string& text);
         bool HandleSound(Event& event, Player* requester, const std::string& text);
         bool HandleStuck(Event& event, Player* requester, const std::string& text);
+        bool HandleWhy(Event& event, Player* requester, const std::string& text);
+
+        // Shared debug snapshot helpers (used by HandleStuck and HandleWhy)
+        struct StuckFacts
+        {
+            WorldPosition pos;
+            bool isMoving = false;
+            bool isMounted = false;
+            bool isTaxiFlying = false;
+            bool isInCombat = false;
+            bool isDead = false;
+
+            bool hasTravel = false;
+            int travelStatus = 0;                 // cast of TravelStatus
+            int32 travelTimeLeft = 0;             // ms
+            bool hasTravelPos = false;
+            WorldPosition travelPos;
+            float travelDistance = 0.0f;
+            uint32 travelRetryMove = 0;
+            uint32 travelRetryTarget = 0;
+            bool canFreeMove = false;
+            bool differentMap = false;
+            std::string travelTitle;
+            std::vector<std::pair<std::string, bool>> travelConditions;
+
+            bool canMoveAround = true;
+            bool travelTargetActive = false;
+            bool travelTargetTraveling = false;
+
+            uint32 posLastChange = 0;
+            bool isStuck = false;
+
+            bool hasGroup = false;
+            bool groupIsLeader = false;
+        };
+        StuckFacts GatherStuckFacts();
+        std::vector<std::string> FormatStuckFactsLines(const StuckFacts& facts);
+        static std::string TravelStatusName(int status, bool lower = false);
         bool HandleCombat(Event& event, Player* requester, const std::string& text);
         bool HandleNodes(Event& event, Player* requester, const std::string& text);
         bool HandleActivity(Event& event, Player* requester, const std::string& text);

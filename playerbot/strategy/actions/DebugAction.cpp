@@ -202,6 +202,8 @@ bool DebugAction::Execute(Event& event)
         return HandleDSound(event, requester, text);
     else if (text.find("sound") == 0 && isMod)
         return HandleSound(event, requester, text);
+    else if (text.find("why") == 0)
+        return HandleWhy(event, requester, text);
     else if (text.find("stuck") == 0)
         return HandleStuck(event, requester, text);
     else if (text.find("combat") == 0)
@@ -241,7 +243,7 @@ bool DebugAction::HandleDebugHelp(Event& event, Player* requester, const std::st
         ai->TellPlayer(requester, "=== Debug Commands ===");
         ai->TellPlayer(requester, "Usage: debug help <command>");
         ai->TellPlayer(requester, "");
-        ai->TellPlayer(requester, "General: position, quest, values, level, who, stats, spells");
+        ai->TellPlayer(requester, "General: position, quest, values, level, who, stats, spells, why");
         ai->TellPlayer(requester, "Movement: route, path, distance, teleport, zone");
         ai->TellPlayer(requester, "Info: target, movement, corpse, logouttime, taxi");
         ai->TellPlayer(requester, "Interaction: npc, go, rpg, travel, loot, trade, mail");
@@ -4911,128 +4913,501 @@ bool DebugAction::HandleSound(Event& event, Player* requester, const std::string
     return true;
 }
 
+namespace
+{
+    // Remove WoW chat markup (|cAARRGGBB, |H...|h, |h, |r, |T...|t) from a string.
+    std::string StripWowMarkup(const std::string& s)
+    {
+        std::string out;
+        out.reserve(s.size());
+
+        for (size_t i = 0; i < s.size(); )
+        {
+            if (s[i] == '|' && i + 1 < s.size())
+            {
+                char c = s[i + 1];
+
+                if (c == 'c')
+                {
+                    i += 2;
+                    size_t n = 0;
+                    while (i < s.size() && n < 8 &&
+                           ((s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'f') || (s[i] >= 'A' && s[i] <= 'F')))
+                    {
+                        ++i;
+                        ++n;
+                    }
+                    continue;
+                }
+                if (c == 'H')
+                {
+                    i += 2;
+                    while (i < s.size() && s[i] != '|') ++i;
+                    continue;
+                }
+                if (c == 'h' || c == 'r')
+                {
+                    i += 2;
+                    continue;
+                }
+                if (c == 'T')
+                {
+                    i += 2;
+                    while (i < s.size() && s[i] != '|') ++i;
+                    if (i < s.size()) i += 2;
+                    continue;
+                }
+            }
+
+            out += s[i++];
+        }
+
+        return out;
+    }
+
+    // The engine's lastAction is a tick log joined by '|'; the last segment is the final decision.
+    std::string LastActionSegment(const std::string& log)
+    {
+        size_t pos = log.find_last_of('|');
+        std::string seg = (pos == std::string::npos) ? log : log.substr(pos + 1);
+
+        size_t b = seg.find_first_not_of(" \t\r\n");
+        size_t e = seg.find_last_not_of(" \t\r\n");
+        if (b == std::string::npos)
+            return "";
+
+        return seg.substr(b, e - b + 1);
+    }
+}
+
+std::string DebugAction::TravelStatusName(int status, bool lower)
+{
+    std::string name;
+    switch ((TravelStatus)status)
+    {
+        case TravelStatus::TRAVEL_STATUS_NONE: name = "NONE"; break;
+        case TravelStatus::TRAVEL_STATUS_PREPARE: name = "PREPARE"; break;
+        case TravelStatus::TRAVEL_STATUS_WORK: name = "WORK"; break;
+        case TravelStatus::TRAVEL_STATUS_TRAVEL: name = "TRAVEL"; break;
+        case TravelStatus::TRAVEL_STATUS_READY: name = "READY"; break;
+        case TravelStatus::TRAVEL_STATUS_EXPIRED: name = "EXPIRED"; break;
+        case TravelStatus::TRAVEL_STATUS_COOLDOWN: name = "COOLDOWN"; break;
+        default: name = "UNKNOWN"; break;
+    }
+
+    if (lower)
+        std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
+    return name;
+}
+
+DebugAction::StuckFacts DebugAction::GatherStuckFacts()
+{
+    StuckFacts f;
+
+    f.pos = WorldPosition(bot);
+    f.isMoving = bot->IsMoving();
+    f.isMounted = bot->IsMounted();
+    f.isTaxiFlying = bot->IsTaxiFlying();
+    f.isInCombat = bot->IsInCombat();
+    f.isDead = !bot->IsAlive();
+
+    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+    if (travelTarget)
+    {
+        f.hasTravel = true;
+        f.travelStatus = (int)travelTarget->GetStatus();
+        f.travelTimeLeft = travelTarget->GetTimeLeft();
+        f.travelRetryMove = travelTarget->GetRetryCount(true);
+        f.travelRetryTarget = travelTarget->GetRetryCount(false);
+
+        if (travelTarget->GetDestination())
+            f.travelTitle = travelTarget->GetDestination()->GetTitle();
+
+        if (travelTarget->GetPosition())
+        {
+            f.hasTravelPos = true;
+            f.travelPos = *travelTarget->GetPosition();
+            f.travelDistance = f.pos.distance(f.travelPos);
+            f.differentMap = (f.travelPos.getMapId() != bot->GetMapId());
+        }
+
+        for (auto& condition : travelTarget->GetConditions())
+            f.travelConditions.push_back(std::make_pair(condition, AI_VALUE(bool, condition)));
+
+        f.canFreeMove = CanFreeMoveValue::CanFreeMoveTo(ai, travelTarget->GetPosStr());
+    }
+
+    f.canMoveAround = AI_VALUE(bool, "can move around");
+    f.travelTargetActive = AI_VALUE(bool, "travel target active");
+    f.travelTargetTraveling = AI_VALUE(bool, "travel target traveling");
+    f.posLastChange = MEM_AI_VALUE(WorldPosition, "current position")->LastChangeDelay();
+    f.isStuck = (f.posLastChange > 60 && f.travelTargetActive);
+
+    Group* group = bot->GetGroup();
+    if (group)
+    {
+        f.hasGroup = true;
+        f.groupIsLeader = group->IsLeader(bot->GetObjectGuid());
+    }
+
+    return f;
+}
+
+std::vector<std::string> DebugAction::FormatStuckFactsLines(const StuckFacts& f)
+{
+    std::vector<std::string> lines;
+
+    std::ostringstream posOut;
+    posOut << "Pos: " << f.pos.getX() << "," << f.pos.getY() << "," << f.pos.getZ() << " (" << f.pos.getAreaName() << ")";
+    lines.push_back(posOut.str());
+
+    lines.push_back(std::string("IsMoving: ") + (f.isMoving ? "yes" : "no"));
+    lines.push_back(std::string("IsMounted: ") + (f.isMounted ? "yes" : "no"));
+    lines.push_back(std::string("IsTaxiFlying: ") + (f.isTaxiFlying ? "yes" : "no"));
+    lines.push_back(std::string("IsInCombat: ") + (f.isInCombat ? "yes" : "no"));
+    lines.push_back(std::string("IsDead: ") + (f.isDead ? "yes" : "no"));
+
+    if (f.hasTravel)
+    {
+        lines.push_back("Travel Target: " + TravelStatusName(f.travelStatus) + " (" + std::to_string(f.travelTimeLeft / 1000) + "s left)");
+
+        if (f.hasTravelPos)
+        {
+            std::ostringstream ss;
+            ss << "Target: " << f.travelPos.getX() << "," << f.travelPos.getY() << "," << f.travelPos.getZ()
+               << " (" << f.travelPos.getAreaName() << ")";
+            lines.push_back(ss.str());
+            lines.push_back("Distance to target: " + std::to_string((uint32)f.travelDistance) + "y");
+        }
+
+        lines.push_back("Retry: " + std::to_string(f.travelRetryMove) + " (move), " + std::to_string(f.travelRetryTarget) + " (target)");
+    }
+
+    lines.push_back(std::string("can move around: ") + (f.canMoveAround ? "true" : "FALSE!"));
+    lines.push_back(std::string("travel target active: ") + (f.travelTargetActive ? "true" : "false"));
+    lines.push_back(std::string("travel target traveling: ") + (f.travelTargetTraveling ? "true" : "FALSE!"));
+
+    if (f.hasTravel && f.hasTravelPos)
+    {
+        lines.push_back(std::string("can free move to target: ") + (f.canFreeMove ? "true" : "FALSE!"));
+        if (f.differentMap)
+        {
+            lines.push_back(">>> TARGET IS ON DIFFERENT MAP! Needs taxi/transport.");
+            lines.push_back("    Bot map: " + std::to_string(bot->GetMapId()) + ", Target map: " + std::to_string(f.travelPos.getMapId()));
+        }
+    }
+
+    lines.push_back("Position last changed: " + std::to_string(f.posLastChange) + "s ago");
+    if (f.isStuck)
+        lines.push_back(">>> BOT IS STUCK! Position unchanged for > 60s with active travel target!");
+
+    if (f.hasGroup)
+    {
+        lines.push_back(std::string("In group, is leader: ") + (f.groupIsLeader ? "yes" : "no"));
+        if (!f.groupIsLeader)
+        {
+            bool hasFollow = ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT);
+            bool hasStay = ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT);
+            lines.push_back(std::string("Has follow strategy: ") + (hasFollow ? "yes" : "no"));
+            lines.push_back(std::string("Has stay strategy: ") + (hasStay ? "yes" : "no"));
+        }
+    }
+
+    return lines;
+}
+
+bool DebugAction::HandleWhy(Event& event, Player* requester, const std::string& text)
+{
+    StuckFacts facts = GatherStuckFacts();
+    BotState state = ai->GetState();
+
+    // --- gather decision data up front (the derived summary needs it) ---
+    std::string lastAction = ai->GetLastAction(state);
+    std::string lastExecuted = ai->GetLastExecutedActionName(state);
+    if (lastAction.empty()) lastAction = "none";
+    if (lastExecuted.empty()) lastExecuted = "none";
+
+    std::string lastDecision = LastActionSegment(lastAction);
+    if (lastDecision.empty()) lastDecision = "none";
+
+    bool actionKnown = (lastExecuted != "none");
+    bool actionUseful = actionKnown ? AI_VALUE2(bool, "action useful", lastExecuted) : false;
+    bool actionPossible = actionKnown ? AI_VALUE2(bool, "action possible", lastExecuted) : false;
+
+    Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
+    bool invalidTarget = target ? context->GetValue<bool>("invalid target", "current target")->Get() : false;
+
+    ai->TellPlayerNoFacing(requester, std::string("=== why ") + bot->GetName() + " (" + std::to_string(bot->GetGUIDLow()) + ") ===");
+
+    // --- derived causal summary (the part that makes this a "why") ---
+    {
+        std::ostringstream why;
+        why << "because: ";
+        why << PlayerbotAI::BotStateToString(state);
+        if (state == BotState::BOT_STATE_DEAD)
+            why << " (dead)";
+        else if (state == BotState::BOT_STATE_COMBAT)
+            why << " (in combat)";
+        else if (state == BotState::BOT_STATE_REACTION)
+            why << " (reaction)";
+        else
+            why << " (not in combat)";
+
+        why << " | action=" << lastExecuted;
+        if (actionKnown)
+            why << " [useful=" << (actionUseful ? "1" : "0") << " possible=" << (actionPossible ? "1" : "0") << "]";
+        why << " -> " << lastDecision;
+
+        if (facts.hasTravel)
+        {
+            why << " | travel=" << TravelStatusName(facts.travelStatus, true);
+
+            std::vector<std::string> trueConds;
+            for (auto& c : facts.travelConditions)
+                if (c.second)
+                    trueConds.push_back(StripWowMarkup(c.first));
+
+            if (!trueConds.empty())
+            {
+                why << " (";
+                for (size_t i = 0; i < trueConds.size() && i < 3; ++i)
+                {
+                    if (i) why << ", ";
+                    why << trueConds[i];
+                }
+                if (trueConds.size() > 3) why << ", +" << (trueConds.size() - 3);
+                why << ")";
+            }
+        }
+
+        why << " | progress=";
+        if (facts.isDead)
+        {
+            why << "dead";
+        }
+        else
+        {
+            why << (facts.canMoveAround ? "can move around" : "CANNOT move around");
+            if (facts.hasTravel)
+            {
+                why << ", " << (facts.canFreeMove ? "free path" : "NO free path");
+                why << ", " << (facts.differentMap ? "other map" : "same map");
+            }
+        }
+
+        ai->TellPlayerNoFacing(requester, why.str());
+    }
+
+    {
+        std::vector<std::string> blockers;
+        if (facts.isDead)
+        {
+            blockers.push_back("dead");
+        }
+        else
+        {
+            if (!facts.canMoveAround)
+                blockers.push_back("cannot move around");
+            if (facts.isStuck)
+                blockers.push_back("stuck (no position change for " + std::to_string(facts.posLastChange) + "s)");
+            if (facts.hasTravel && !facts.canFreeMove)
+                blockers.push_back("no free path to travel target");
+            if (facts.differentMap)
+                blockers.push_back("travel target on different map");
+            if (invalidTarget)
+                blockers.push_back("current target invalid");
+            if (facts.hasTravel && (facts.travelRetryMove >= 2 || facts.travelRetryTarget >= 1))
+                blockers.push_back("travel retries move=" + std::to_string(facts.travelRetryMove) + " target=" + std::to_string(facts.travelRetryTarget));
+        }
+
+        std::ostringstream blocked;
+        blocked << "blocked: ";
+        if (blockers.empty())
+        {
+            blocked << "none";
+        }
+        else
+        {
+            for (size_t i = 0; i < blockers.size(); ++i)
+            {
+                if (i) blocked << ", ";
+                blocked << blockers[i];
+            }
+        }
+        ai->TellPlayerNoFacing(requester, blocked.str());
+    }
+
+    // identity
+    std::string groupRole = "-";
+    if (Group* group = bot->GetGroup())
+        groupRole = group->IsLeader(bot->GetObjectGuid()) ? "leader" : "member";
+
+    std::ostringstream id;
+    id << "level: " << bot->GetLevel() << " " << ChatHelper::formatClass(bot->getClass()) << " / " << ChatHelper::formatRace(bot->getRace())
+       << " | group: " << groupRole
+       << " | master: " << (ai->GetMaster() ? ai->GetMaster()->GetName() : "-")
+       << " | state: " << PlayerbotAI::BotStateToString(state);
+    ai->TellPlayerNoFacing(requester, id.str());
+
+    // position / movement
+    std::ostringstream pos;
+    pos << "pos: " << facts.pos.getX() << " " << facts.pos.getY() << " " << facts.pos.getZ()
+        << " map " << facts.pos.getMapId() << " (" << (int)facts.pos.getX() << "," << (int)facts.pos.getY() << ")"
+        << " | zone: " << facts.pos.getAreaName() << " | orient: " << bot->GetOrientation();
+    ai->TellPlayerNoFacing(requester, pos.str());
+
+    std::ostringstream move;
+    move << "move: moving=" << (facts.isMoving ? "yes" : "no")
+         << " mounted=" << (facts.isMounted ? "yes" : "no")
+         << " taxi=" << (facts.isTaxiFlying ? "yes" : "no")
+         << " | last position change: " << facts.posLastChange << "s ago";
+    ai->TellPlayerNoFacing(requester, move.str());
+
+    // strategies (active engine)
+    {
+        std::ostringstream st;
+        st << "strategies: [" << PlayerbotAI::BotStateToString(state) << "] ";
+        bool first = true;
+        for (auto& s : ai->GetStrategies(state))
+        {
+            if (!first) st << ", ";
+            st << std::string(s);
+            first = false;
+        }
+        if (first) st << "none";
+        ai->TellPlayerNoFacing(requester, st.str());
+    }
+
+    // action
+    std::ostringstream act;
+    act << "action: lastExecuted=" << lastExecuted << " | lastDecision=" << lastDecision;
+    ai->TellPlayerNoFacing(requester, act.str());
+
+    // target / combat
+    std::ostringstream tgt;
+    if (target)
+    {
+        int targetHp = target->GetMaxHealth() ? (int)((float)target->GetHealth() / target->GetMaxHealth() * 100) : 0;
+        tgt << "target: " << target->GetName() << " (" << target->GetObjectGuid().GetCounter() << ") hp=" << targetHp << "% invalid=" << (invalidTarget ? "YES" : "no");
+    }
+    else
+    {
+        tgt << "target: none";
+    }
+    ai->TellPlayerNoFacing(requester, tgt.str());
+
+    int selfHp = bot->GetMaxHealth() ? (int)((float)bot->GetHealth() / bot->GetMaxHealth() * 100) : 0;
+    std::ostringstream hp;
+    hp << "hp: self=" << selfHp << "% target=";
+    if (target && target->GetMaxHealth())
+        hp << (int)((float)target->GetHealth() / target->GetMaxHealth() * 100) << "%";
+    else
+        hp << "-";
+    ai->TellPlayerNoFacing(requester, hp.str());
+
+    std::ostringstream combat;
+    combat << "combat: in-combat=" << (facts.isInCombat ? "yes" : "no")
+           << " attackers=" << bot->getAttackers().size()
+           << " victim=" << (bot->GetVictim() ? bot->GetVictim()->GetName() : "none")
+           << " invalid-target=" << (invalidTarget ? "yes" : "no");
+    ai->TellPlayerNoFacing(requester, combat.str());
+
+    // travel
+    if (facts.hasTravel)
+    {
+        std::ostringstream tr;
+        tr << "travel: " << (facts.travelTitle.empty() ? std::string("-") : StripWowMarkup(facts.travelTitle))
+           << " | status: " << TravelStatusName(facts.travelStatus, true);
+        if (facts.travelTimeLeft > 0)
+            tr << " [for " << (facts.travelTimeLeft / 1000) << "s]";
+        tr << " | retry " << facts.travelRetryMove << "/" << facts.travelRetryTarget;
+        ai->TellPlayerNoFacing(requester, tr.str());
+
+        std::ostringstream tr2;
+        tr2 << "        dist " << (uint32)facts.travelDistance << "y"
+            << " | can free move: " << (facts.canFreeMove ? "yes" : "no")
+            << " | same map: " << (facts.differentMap ? "no" : "yes");
+        ai->TellPlayerNoFacing(requester, tr2.str());
+
+        if (!facts.travelConditions.empty())
+        {
+            std::ostringstream tr3;
+            tr3 << "        conditions: ";
+            bool first = true;
+            for (auto& c : facts.travelConditions)
+            {
+                if (!first) tr3 << ", ";
+                tr3 << c.first << " (" << (c.second ? "true" : "false") << ")";
+                first = false;
+            }
+            ai->TellPlayerNoFacing(requester, tr3.str());
+        }
+    }
+    else
+    {
+        ai->TellPlayerNoFacing(requester, "travel: none");
+    }
+
+    // stuck
+    std::ostringstream stuck;
+    stuck << "stuck: " << (facts.isStuck ? "YES" : "no")
+          << " (position changed " << facts.posLastChange << "s ago; can move around=" << (facts.canMoveAround ? "yes" : "NO") << ")";
+    ai->TellPlayerNoFacing(requester, stuck.str());
+
+    // curated value shortlist
+    {
+        std::vector<std::pair<std::string, std::string>> vals;
+        vals.push_back(std::make_pair(std::string("can move around"), facts.canMoveAround ? std::string("1") : std::string("0")));
+        vals.push_back(std::make_pair(std::string("travel target active"), facts.travelTargetActive ? std::string("1") : std::string("0")));
+        vals.push_back(std::make_pair(std::string("travel target traveling"), facts.travelTargetTraveling ? std::string("1") : std::string("0")));
+        vals.push_back(std::make_pair(std::string("dead"), facts.isDead ? std::string("1") : std::string("0")));
+        vals.push_back(std::make_pair(std::string("has attackers"), AI_VALUE(bool, "has attackers") ? std::string("1") : std::string("0")));
+        vals.push_back(std::make_pair(std::string("current target"), target ? target->GetName() : std::string("none")));
+
+        if (actionKnown)
+        {
+            vals.push_back(std::make_pair(std::string("action useful"), actionUseful ? std::string("1") : std::string("0")));
+            vals.push_back(std::make_pair(std::string("action possible"), actionPossible ? std::string("1") : std::string("0")));
+        }
+
+        std::ostringstream values;
+        values << "values: ";
+        bool first = true;
+        for (auto& kv : vals)
+        {
+            if (!first) values << ", ";
+            values << kv.first << "=" << kv.second;
+            first = false;
+        }
+        ai->TellPlayerNoFacing(requester, values.str());
+    }
+
+    return true;
+}
+
 bool DebugAction::HandleStuck(Event& event, Player* requester, const std::string& text)
 {
     bool shouldReset = (text.find("reset") != std::string::npos);
 
     ai->TellPlayer(requester, "=== Stuck Bot Diagnostic ===");
 
-    WorldPosition botPos(bot);
-    std::ostringstream posOut;
-    posOut << "Pos: " << botPos.getX() << "," << botPos.getY() << "," << botPos.getZ() << " (" << botPos.getAreaName() << ")";
-    ai->TellPlayer(requester, posOut.str());
+    StuckFacts facts = GatherStuckFacts();
+    for (const auto& line : FormatStuckFactsLines(facts))
+        ai->TellPlayer(requester, line);
 
-    bool isMoving = bot->IsMoving();
-    ai->TellPlayer(requester, std::string("IsMoving: ") + (isMoving ? "yes" : "no"));
-
-    bool isMounted = bot->IsMounted();
-    ai->TellPlayer(requester, std::string("IsMounted: ") + (isMounted ? "yes" : "no"));
-
-    bool isTaxiFlying = bot->IsTaxiFlying();
-    ai->TellPlayer(requester, std::string("IsTaxiFlying: ") + (isTaxiFlying ? "yes" : "no"));
-
-    bool isInCombat = bot->IsInCombat();
-    ai->TellPlayer(requester, std::string("IsInCombat: ") + (isInCombat ? "yes" : "no"));
-
-    bool isDead = !bot->IsAlive();
-    ai->TellPlayer(requester, std::string("IsDead: ") + (isDead ? "yes" : "no"));
-
-    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
-    bool canFreeMove = false;
-    if (travelTarget)
+    if (shouldReset && facts.hasTravel)
     {
-        std::ostringstream ss;
-        ss << "Travel Target: ";
-        switch (travelTarget->GetStatus())
+        TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+        if (travelTarget)
         {
-            case TravelStatus::TRAVEL_STATUS_NONE: ss << "NONE"; break;
-            case TravelStatus::TRAVEL_STATUS_PREPARE: ss << "PREPARE"; break;
-            case TravelStatus::TRAVEL_STATUS_WORK: ss << "WORK"; break;
-            case TravelStatus::TRAVEL_STATUS_TRAVEL: ss << "TRAVEL"; break;
-            case TravelStatus::TRAVEL_STATUS_READY: ss << "READY"; break;
-            case TravelStatus::TRAVEL_STATUS_EXPIRED: ss << "EXPIRED"; break;
-            case TravelStatus::TRAVEL_STATUS_COOLDOWN: ss << "COOLDOWN"; break;
-            default: ss << "UNKNOWN"; break;
+            ai->TellPlayer(requester, "");
+            ai->TellPlayer(requester, ">>> Resetting travel target...");
+            travelTarget->SetStatus(TravelStatus::TRAVEL_STATUS_NONE);
+            travelTarget->SetForced(false);
+            RESET_AI_VALUE(TravelTarget*, "travel target");
+            ai->TellPlayer(requester, ">>> Travel target reset! Bot should find new target.");
         }
-        ss << " (" << travelTarget->GetTimeLeft() / 1000 << "s left)";
-        ai->TellPlayer(requester, ss.str());
-
-        if (travelTarget->GetPosition())
-        {
-            std::ostringstream ss2;
-            ss2 << "Target: " << travelTarget->GetPosition()->getX() << "," 
-                << travelTarget->GetPosition()->getY() << "," << travelTarget->GetPosition()->getZ() 
-                << " (" << travelTarget->GetPosition()->getAreaName() << ")";
-            ai->TellPlayer(requester, ss2.str());
-
-            float dist = botPos.distance(*travelTarget->GetPosition());
-            std::ostringstream ss3;
-            ss3 << "Distance to target: " << uint32(dist) << "y";
-            ai->TellPlayer(requester, ss3.str());
-        }
-
-        std::ostringstream ss4;
-        ss4 << "Retry: " << travelTarget->GetRetryCount(true) << " (move), " << travelTarget->GetRetryCount(false) << " (target)";
-        ai->TellPlayer(requester, ss4.str());
-
-        canFreeMove = CanFreeMoveValue::CanFreeMoveTo(ai, travelTarget->GetPosStr());
-    }
-
-    bool canMoveAround = AI_VALUE(bool, "can move around");
-    ai->TellPlayer(requester, std::string("can move around: ") + (canMoveAround ? "true" : "FALSE!"));
-
-    bool travelTargetActive = AI_VALUE(bool, "travel target active");
-    ai->TellPlayer(requester, std::string("travel target active: ") + (travelTargetActive ? "true" : "false"));
-
-    bool travelTargetTraveling = AI_VALUE(bool, "travel target traveling");
-    ai->TellPlayer(requester, std::string("travel target traveling: ") + (travelTargetTraveling ? "true" : "FALSE!"));
-
-    if (travelTarget && travelTarget->GetPosition())
-    {
-        ai->TellPlayer(requester, std::string("can free move to target: ") + (canFreeMove ? "true" : "FALSE!"));
-        
-        bool differentMap = (travelTarget->GetPosition()->getMapId() != bot->GetMapId());
-        if (differentMap)
-        {
-            ai->TellPlayer(requester, ">>> TARGET IS ON DIFFERENT MAP! Needs taxi/transport.");
-            ai->TellPlayer(requester, "    Bot map: " + std::to_string(bot->GetMapId()) + ", Target map: " + std::to_string(travelTarget->GetPosition()->getMapId()));
-        }
-    }
-
-    uint32 posLastChange = MEM_AI_VALUE(WorldPosition, "current position")->LastChangeDelay();
-    std::ostringstream ss;
-    ss << "Position last changed: " << posLastChange << "s ago";
-    ai->TellPlayer(requester, ss.str());
-
-    bool isStuck = (posLastChange > 60 && travelTargetActive);
-    if (isStuck)
-    {
-        ai->TellPlayer(requester, ">>> BOT IS STUCK! Position unchanged for > 60s with active travel target!");
-    }
-
-    Group* group = bot->GetGroup();
-    if (group)
-    {
-        bool isLeader = group->IsLeader(bot->GetObjectGuid());
-        ai->TellPlayer(requester, std::string("In group, is leader: ") + (isLeader ? "yes" : "no"));
-
-        if (!isLeader)
-        {
-            bool hasFollow = ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT);
-            bool hasStay = ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT);
-            ai->TellPlayer(requester, std::string("Has follow strategy: ") + (hasFollow ? "yes" : "no"));
-            ai->TellPlayer(requester, std::string("Has stay strategy: ") + (hasStay ? "yes" : "no"));
-        }
-    }
-
-    if (shouldReset && travelTarget)
-    {
-        ai->TellPlayer(requester, "");
-        ai->TellPlayer(requester, ">>> Resetting travel target...");
-        travelTarget->SetStatus(TravelStatus::TRAVEL_STATUS_NONE);
-        travelTarget->SetForced(false);
-        RESET_AI_VALUE(TravelTarget*, "travel target");
-        ai->TellPlayer(requester, ">>> Travel target reset! Bot should find new target.");
     }
 
     ai->TellPlayer(requester, "");
@@ -5081,27 +5456,16 @@ bool DebugAction::HandleStuck(Event& event, Player* requester, const std::string
     bool hasGuard = ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT);
     ai->TellPlayer(requester, std::string("Has guard strategy: ") + (hasGuard ? "yes" : "no"));
 
-    //uint32 auraCount = bot->GetAuraCount();
-    //ai->TellPlayer(requester, "Aura count: " + std::to_string(auraCount));
-
     ai->TellPlayer(requester, "");
     ai->TellPlayer(requester, "=== Suggested Actions ===");
-    if (!canMoveAround)
-    {
+    if (!facts.canMoveAround)
         ai->TellPlayer(requester, "- Check: is bot in combat? Is bot dead? Is bot rooted?");
-    }
-    if (travelTarget && travelTarget->GetStatus() == TravelStatus::TRAVEL_STATUS_READY && !isMoving)
-    {
+    if (facts.hasTravel && facts.travelStatus == (int)TravelStatus::TRAVEL_STATUS_READY && !facts.isMoving)
         ai->TellPlayer(requester, "- Try: .rndbot cmd <bot> reset travel target");
-    }
-    if (posLastChange > 120)
-    {
+    if (facts.posLastChange > 120)
         ai->TellPlayer(requester, "- Bot may need teleportation: .rndbot debug <bot> position teleport");
-    }
-    if (pathEmpty && travelTargetActive)
-    {
+    if (pathEmpty && facts.travelTargetActive)
         ai->TellPlayer(requester, "- Try: .rndbot debug <bot> position route <destination>");
-    }
 
     return true;
 }

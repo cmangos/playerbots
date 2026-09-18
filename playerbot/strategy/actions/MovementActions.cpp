@@ -1160,14 +1160,15 @@ bool MovementAction::MoveTo2(const WorldPosition& endPos, bool idle, bool react,
         return false;
     }
 
-    if (movePath.getFront().getMapId() == endPos.getMapId() && !endPos.isUnderWater())
+    // Only touch points on the map the bot is actually on, so a cross-map destination can never
+    // resolve another map's terrain/VMap. (The old front-map guard did not imply the bot's map.)
+    // Keep the "don't surface a deliberate dive" rule, but only for a destination on our own map.
+    bool endUnderwater = endPos.getMapId() == bot->GetMapId() && endPos.isUnderWater();
+    for (auto& p : movePath.getPath())
     {
-        for (auto& p : movePath.getPath())
+        if (p.point.getMapId() == bot->GetMapId() && p.point.isUnderWater() && !endUnderwater)
         {
-            if (p.point.isUnderWater())
-            {
-                p.point.setAtWaterSurface();
-            }
+            p.point.setAtWaterSurface();
         }
     }
 
@@ -1220,7 +1221,8 @@ bool MovementAction::MoveTo2(const WorldPosition& endPos, bool idle, bool react,
 #ifndef MANGOSBOT_ZERO
     if (bot->IsFreeFlying())
     {
-        if (bot->HasMovementFlag(MOVEFLAG_SWIMMING) && startPos.isInWater() && !startPos.isUnderWater() && !endPos.isInWater())
+        if (bot->HasMovementFlag(MOVEFLAG_SWIMMING) && startPos.isInWater() && !startPos.isUnderWater() &&
+            (endPos.getMapId() != bot->GetMapId() || !endPos.isInWater()))
         {
             generatePath = true;
         }

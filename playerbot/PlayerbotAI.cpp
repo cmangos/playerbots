@@ -1221,6 +1221,82 @@ void PlayerbotAI::HandleCommands()
     }
 }
 
+void PlayerbotAI::RunOnOwningThread(Player* target, std::function<void(Player*)> action)
+{
+    if (!target || !action)
+        return;
+
+    // IsSafe() bundles the same-map/same-instance check and excludes targets that are mid-teleport,
+    // so when it holds we are on the target's own thread and can run inline.
+    if (target->IsInWorld() && IsSafe(target))
+    {
+        action(target);
+        return;
+    }
+
+    // The target belongs to another map: defer to the world thread. The action must not
+    // trust the raw pointer, so the target is resolved again by guid when it runs.
+    ObjectGuid targetGuid = target->GetObjectGuid();
+    sWorld.GetMessager().AddMessage([targetGuid, action](World* /*world*/)
+    {
+        Player* p = sObjectAccessor.FindPlayer(targetGuid);
+        if (p && p->IsInWorld() && !p->IsBeingTeleported())
+            action(p);
+    });
+}
+
+bool PlayerbotAI::SendSummonRequest(Player* summoner, Player* target)
+{
+    if (!summoner)
+        return false;
+
+    float x, y, z;
+    summoner->GetPosition(x, y, z);
+    return SendSummonRequest(summoner, target, summoner->GetMapId(), x, y, z);
+}
+
+bool PlayerbotAI::SendSummonRequest(Player* summoner, Player* target, uint32 mapId, float x, float y, float z)
+{
+    if (!summoner || !target || !target->GetSession())
+        return false;
+
+    // The normal summon response path (WorldSession::HandleSummonResponseOpcode) refuses dead or
+    // in-combat players, so let the caller fall back to a direct teleport in those cases.
+    if (!target->IsAlive() || target->IsInCombat())
+        return false;
+
+    target->SetSummonPoint(mapId, x, y, z, summoner->GetObjectGuid());
+
+    WorldPacket data(SMSG_SUMMON_REQUEST, 8 + 4 + 4);
+    data << summoner->GetObjectGuid();
+    data << uint32(summoner->GetZoneId());
+    data << uint32(MAX_PLAYER_SUMMON_DELAY * IN_MILLISECONDS);
+    target->GetSession()->SendPacket(data);
+    return true;
+}
+
+bool PlayerbotAI::SendResurrectRequest(Player* summoner, Player* target, uint32 mapId, float x, float y, float z)
+{
+    if (!summoner || !target || !target->GetSession())
+        return false;
+
+    // Only dead targets without an already pending request can be resurrected.
+    if (target->IsAlive() || target->isRessurectRequested())
+        return false;
+
+    // Any valid SpellEntry works - AddResurrectRequest only reads SPELL_ATTR_EX3_NO_RES_TIMER from
+    // it; health/mana are supplied explicitly below.
+    SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(2008); // Ancestral Spirit
+    if (!spellInfo)
+        return false;
+
+    // The caster is a player, so ResurrectUsingRequestDataInit teleports the target to the stored
+    // location before resurrecting it. The target accepts and applies both on its own map thread.
+    target->AddResurrectRequest(summoner->GetObjectGuid(), spellInfo, Position(x, y, z, 0.0f), mapId,
+        target->GetMaxHealth(), target->GetMaxPower(POWER_MANA), false, "", false);
+    return true;
+}
+
 void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
 {
     if (bot->IsBeingTeleported() || !bot->IsInWorld())

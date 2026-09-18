@@ -365,23 +365,21 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
                 {
                     if (membersAroundSummoner >= 3)
                     {
-                        if (target->isRealPlayer())
+                        // Preferred path: let the target accept a normal summon request. Only if it
+                        // cannot (dead / in combat) fall back to a thread-safe direct teleport.
+                        if (!PlayerbotAI::SendSummonRequest(bot, target))
                         {
-                            float x, y, z;
-                            bot->GetPosition(x, y, z);
-                            target->SetSummonPoint(bot->GetMapId(), x, y, z, bot->GetObjectGuid());
-
-                            WorldPacket data(SMSG_SUMMON_REQUEST, 8 + 4 + 4);
-                            data << bot->GetObjectGuid();
-                            data << uint32(bot->GetZoneId());
-                            data << uint32(MAX_PLAYER_SUMMON_DELAY * IN_MILLISECONDS);
-                            target->GetSession()->SendPacket(data);
-                        }
-                        else
-                        {
-                            target->TeleportTo(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), bot->GetOrientation());
-                            if (target->isRealPlayer())
-                                target->SendHeartBeat();
+                            uint32 destMapId = bot->GetMapId();
+                            float destX = bot->GetPositionX();
+                            float destY = bot->GetPositionY();
+                            float destZ = bot->GetPositionZ();
+                            float destO = bot->GetOrientation();
+                            ai->RunOnOwningThread(target, [destMapId, destX, destY, destZ, destO](Player* t)
+                            {
+                                t->TeleportTo(destMapId, destX, destY, destZ, destO);
+                                if (t->isRealPlayer())
+                                    t->SendHeartBeat();
+                            });
                         }
 
                         std::ostringstream msg;

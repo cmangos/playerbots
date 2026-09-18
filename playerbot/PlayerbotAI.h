@@ -11,6 +11,7 @@
 #include "PlayerTalentSpec.h"
 #include <stack>
 #include <deque>
+#include <functional>
 #include "strategy/IterateItemsMask.h"
 #include "RandomPlayerbotMgr.h"
 
@@ -412,6 +413,27 @@ private:
     void UpdateAIInternal(uint32 elapsed, bool minimal = false) override;
 public:    
     static std::string BotStateToString(BotState state);
+
+    // Runs action(target) on the thread that owns target's map. This AI's bot is the player whose
+    // map thread we are currently running on (the acting bot). If the acting bot and the target
+    // are on the same map (or target is the acting bot), the action runs inline. Otherwise the
+    // target belongs to a different map and the action is queued to the world thread messager,
+    // which is executed while all map updater threads are idle. This prevents mutating another
+    // map's player (teleports, resets, ...) from a foreign map thread.
+    void RunOnOwningThread(Player* target, std::function<void(Player*)> action);
+
+    // Uses the normal summon path: sets the summon point and sends SMSG_SUMMON_REQUEST so the
+    // target accepts and teleports itself on its own map thread. Works for bots and real players.
+    // Returns false when target cannot accept a summon (dead, in combat, no session) and the
+    // caller should fall back to a direct teleport.
+    static bool SendSummonRequest(Player* summoner, Player* target);
+    static bool SendSummonRequest(Player* summoner, Player* target, uint32 mapId, float x, float y, float z);
+
+    // Uses the normal resurrect path: creates a resurrect request for a dead target. Because the
+    // caster is a player, core's ResurrectUsingRequestDataInit teleports the target to the given
+    // location before resurrecting it. The target accepts and does all of it on its own map thread.
+    // Returns false if the target is alive, already has a pending request, or no rez spell resolves.
+    static bool SendResurrectRequest(Player* summoner, Player* target, uint32 mapId, float x, float y, float z);
     std::string GetDefaultMovementStrategy();
     void EnsureDefaultMovementStrategy(Player* requester = nullptr);
 	std::string HandleRemoteCommand(std::string command);

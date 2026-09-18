@@ -2654,20 +2654,22 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
                 for (GroupReference* gref = bot->GetGroup()->GetFirstMember(); gref; gref = gref->next())
                 {
                     Player* member = gref->getSource();
-                    PlayerbotAI* ai = bot->GetPlayerbotAI();
-                    if (ai && bot != member)
-                    {
-                        if (member->IsTaxiFlying())
-                            member->GetMotionMaster()->MovementExpired();
-                        if (hearth)
-                            member->SetHomebindToLocation(loc, area->ID);
+                    if (!member || member == bot)
+                        continue;
 
-                        member->GetMotionMaster()->Clear();
-                        member->TeleportTo(loc.mapid, x, y, z, 0);
-                        member->SendHeartBeat();
-                        member->GetPlayerbotAI()->Reset(true);
-                    }
+                    // RandomTeleport is only reached from ProcessBot, which runs on the world
+                    // thread with every map worker parked, so members can be touched directly
+                    // even when they are on another map.
+                    if (member->IsTaxiFlying())
+                        member->GetMotionMaster()->MovementExpired();
+                    if (hearth)
+                        member->SetHomebindToLocation(loc, area->ID);
 
+                    member->GetMotionMaster()->Clear();
+                    member->TeleportTo(loc.mapid, x, y, z, 0);
+                    member->SendHeartBeat();
+                    if (PlayerbotAI* memberAi = member->GetPlayerbotAI())
+                        memberAi->Reset(true);
                 }
             }
             return;

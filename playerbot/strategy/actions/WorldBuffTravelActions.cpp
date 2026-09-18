@@ -147,22 +147,19 @@ static bool SummonPlayerToSummoner(Player* summoner, Player* target, PlayerbotAI
     if (summoner->IsBeingTeleported() || target->IsBeingTeleported())
         return false;
 
-    float x, y, z;
-    summoner->GetPosition(x, y, z);
-
-    if (target->isRealPlayer())
+    // Preferred path: let the target accept a normal summon request. Only if it cannot
+    // (dead / in combat) fall back to a thread-safe direct teleport.
+    if (!PlayerbotAI::SendSummonRequest(summoner, target))
     {
-        target->SetSummonPoint(summoner->GetMapId(), x, y, z, summoner->GetObjectGuid());
-
-        WorldPacket data(SMSG_SUMMON_REQUEST, 8 + 4 + 4);
-        data << summoner->GetObjectGuid();
-        data << uint32(summoner->GetZoneId());
-        data << uint32(MAX_PLAYER_SUMMON_DELAY * IN_MILLISECONDS);
-        target->GetSession()->SendPacket(data);
-    }
-    else
-    {
-        target->TeleportTo(summoner->GetMapId(), x, y, z, summoner->GetOrientation());
+        uint32 destMapId = summoner->GetMapId();
+        float destX = summoner->GetPositionX();
+        float destY = summoner->GetPositionY();
+        float destZ = summoner->GetPositionZ();
+        float destO = summoner->GetOrientation();
+        summonerAI->RunOnOwningThread(target, [destMapId, destX, destY, destZ, destO](Player* t)
+        {
+            t->TeleportTo(destMapId, destX, destY, destZ, destO);
+        });
     }
 
     return true;

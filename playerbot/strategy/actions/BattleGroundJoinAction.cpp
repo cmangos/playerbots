@@ -222,9 +222,9 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
             if (member->GetGroup() && member->GetGroup() != leaderGroup)
                 member->GetGroup()->RemoveMember(member->GetObjectGuid(), 0);
 
-            member->TeleportTo(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), 0);
-
-            member->GetPlayerbotAI()->Reset();
+            // No gather teleport: the arena queue only needs group/team membership (no distance
+            // check), and the battleground system ports everyone in on the world thread when the
+            // match starts. Members can queue from wherever they are.
         }
 
         if (member)
@@ -293,9 +293,6 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
             continue;
 
         member->GetPlayerbotAI()->Reset(true);
-
-        if (!member->IsWithinDistInMap(bot, sPlayerbotAIConfig.sightDistance, false))
-            member->TeleportTo(bot->GetMapId(), bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), 0);
 
         sLog.outDetail("Bot #%d <%s>: Member of <%s>", member->GetGUIDLow(), member->GetName(), arenateam->GetName().c_str());
     }

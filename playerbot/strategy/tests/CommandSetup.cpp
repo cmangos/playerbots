@@ -260,7 +260,12 @@ TestResult CommandSetupTeleportGroup::Execute(const std::string& params, Player*
         if (!member || member == bot)
             continue;
 
-        member->TeleportTo(mapId, x, y, z, orient);
+        // Test bots normally share the host's map, but route through the owning thread anyway so
+        // the helper stays safe (and consistent with the rest of the codebase) if a test spans maps.
+        ai->RunOnOwningThread(member, [mapId, x, y, z, orient](Player* m)
+        {
+            m->TeleportTo(mapId, x, y, z, orient);
+        });
         count++;
     }
 

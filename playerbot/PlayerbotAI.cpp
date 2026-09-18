@@ -1292,8 +1292,12 @@ bool PlayerbotAI::SendResurrectRequest(Player* summoner, Player* target, uint32 
 
     // The caster is a player, so ResurrectUsingRequestDataInit teleports the target to the stored
     // location before resurrecting it. The target accepts and applies both on its own map thread.
+#ifdef MANGOSBOT_TWO
     target->AddResurrectRequest(summoner->GetObjectGuid(), spellInfo, Position(x, y, z, 0.0f), mapId,
         target->GetMaxHealth(), target->GetMaxPower(POWER_MANA), false, "", false);
+#else
+    target->AddResurrectRequest(summoner->GetObjectGuid(), spellInfo, Position(x, y, z, 0.0f), mapId, target->GetMaxHealth(), target->GetMaxPower(POWER_MANA), false, "");
+#endif
     return true;
 }
 

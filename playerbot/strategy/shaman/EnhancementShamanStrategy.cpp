@@ -14,6 +14,7 @@ public:
         creators["lava lash"] = &lava_lash;
         creators["searing totem"] = &searing_totem;
         creators["mana spring totem"] = &mana_spring_totem;
+        creators["water shield"] = &water_shield;
         creators["magma totem"] = &magma_totem;
         creators["strength of earth totem"] = &strength_of_earth_totem;
         creators["windfury totem"] = &windfury_totem;
@@ -36,6 +37,8 @@ private:
     ACTION_NODE_A(windfury_totem, "windfury totem", "grace of air totem");
 
     ACTION_NODE_A(windfury_weapon, "windfury weapon", "rockbiter weapon");
+
+    ACTION_NODE_A(water_shield, "water shield", "lightning shield");
 };
 
 EnhancementShamanStrategy::EnhancementShamanStrategy(PlayerbotAI* ai) : ShamanStrategy(ai)
@@ -833,7 +836,7 @@ void EnhancementShamanBuffStrategy::InitNonCombatTriggers(std::list<TriggerNode*
 
     triggers.push_back(new TriggerNode(
         "lightning shield",
-        NextAction::array(0, new NextAction("lightning shield", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("water shield", ACTION_NORMAL), NULL)));
 }
 
 void EnhancementShamanBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

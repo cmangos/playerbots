@@ -881,12 +881,20 @@ void EnhancementShamanBuffRaidStrategy::InitCombatTriggers(std::list<TriggerNode
 {
     EnhancementShamanBuffStrategy::InitCombatTriggers(triggers);
     ShamanBuffRaidStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "lightning shield",
+        NextAction::array(0, new NextAction("water shield", ACTION_NORMAL), NULL)));
 }
 
 void EnhancementShamanBuffRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     EnhancementShamanBuffStrategy::InitNonCombatTriggers(triggers);
     ShamanBuffRaidStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "lightning shield",
+        NextAction::array(0, new NextAction("water shield", ACTION_NORMAL), NULL)));
 }
 
 void EnhancementShamanBoostStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

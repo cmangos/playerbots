@@ -844,7 +844,7 @@ void EnhancementShamanBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*
 
     triggers.push_back(new TriggerNode(
         "lightning shield",
-        NextAction::array(0, new NextAction("water shield", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("lightning shield", ACTION_NORMAL), NULL)));
 }
 
 void EnhancementShamanBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -854,7 +854,7 @@ void EnhancementShamanBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNo
 
     triggers.push_back(new TriggerNode(
         "lightning shield",
-        NextAction::array(0, new NextAction("water shield", ACTION_NORMAL), NULL)));
+        NextAction::array(0, new NextAction("lightning shield", ACTION_NORMAL), NULL)));
 }
 
 void EnhancementShamanBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

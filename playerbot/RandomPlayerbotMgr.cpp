@@ -2450,8 +2450,9 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation> 
                         uint32 botsNearTeleportPoint = 0;
                         ForEachPlayerbot([&](Player* otherBot)
                         {
-                            // Only check the bots that are on the same zone
-                            if (otherBot && !otherBot->IsBeingTeleported() && zoneId == otherBot->GetZoneId())
+                            // Only check the bots that are on the same zone. IsInWorld() first:
+                            // GetZoneId() asserts m_currMap, and a bot being teleported has no map.
+                            if (otherBot && otherBot->IsInWorld() && !otherBot->IsBeingTeleported() && zoneId == otherBot->GetZoneId())
                             {
                                 if (l.fDist(WorldPosition(otherBot)) <= sPlayerbotAIConfig.randomBotTeleportNearPlayerMaxAmountRadius)
                                 {
@@ -3790,7 +3791,12 @@ RandomPlayerbotMgr::BotStats RandomPlayerbotMgr::GatherBotStats()
         if (GetBotStuck(bot))
             stats.stuck++;
 
-        stats.perZone[bot->GetZoneId()]++;
+        // Only in-world bots have a map. GetZoneId() -> GetTerrain() asserts m_currMap, so a bot that
+        // is mid-teleport / logging out aborts the whole process. Skip it (and count it separately).
+        if (bot->IsInWorld())
+            stats.perZone[bot->GetZoneId()]++;
+        else
+            stats.notInWorld++;
     });
 
     return stats;
@@ -3853,6 +3859,10 @@ std::list<std::string> RandomPlayerbotMgr::FormatBotStats(const BotStats& stats,
     }
 
     lines.push_back("  stuck:    " + std::to_string(stats.stuck));
+
+    // Bots counted in the total but excluded from the zone histogram because they have no map.
+    if (stats.notInWorld)
+        lines.push_back("  not in world: " + std::to_string(stats.notInWorld) + " (excluded from zone counts)");
 
     // Level bands
     {
@@ -4056,8 +4066,13 @@ std::string RandomPlayerbotMgr::FormatBotLine(Player* bot)
     AiObjectContext* context = ai->GetAiObjectContext();
 
     std::string zone = "unknown";
-    if (AreaTableEntry const* area = GetAreaEntryByAreaID(bot->GetZoneId()))
-        zone = area->area_name[0];
+    // GetZoneId() -> GetTerrain() asserts m_currMap. A bot that is mid-teleport or logging out has no
+    // map, and this runs for every bot over RA ('find'/'sample'), so guard before touching it.
+    if (bot->IsInWorld())
+    {
+        if (AreaTableEntry const* area = GetAreaEntryByAreaID(bot->GetZoneId()))
+            zone = area->area_name[0];
+    }
 
     std::string lastExecuted = ai->GetLastExecutedActionName(state);
     if (lastExecuted.empty()) lastExecuted = "none";

@@ -4066,6 +4066,7 @@ std::string RandomPlayerbotMgr::FormatBotLine(Player* bot)
     AiObjectContext* context = ai->GetAiObjectContext();
 
     std::string zone = "unknown";
+
     // GetZoneId() -> GetTerrain() asserts m_currMap. A bot that is mid-teleport or logging out has no
     // map, and this runs for every bot over RA ('find'/'sample'), so guard before touching it.
     if (bot->IsInWorld())

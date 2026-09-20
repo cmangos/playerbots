@@ -20,6 +20,7 @@
 #include "CommandQuest.h"
 #include "CleanupParty.h"
 #include "RequireState.h"
+#include "TeleportTests.h"
 
 #include <sstream>
 #include <fstream>
@@ -59,8 +60,8 @@ void TestAction::RegisterCommands()
     commands.push_back(std::make_unique<CommandPartySpawnGroup>());
     commands.push_back(std::make_unique<CommandFlowObserve>());
     commands.push_back(std::make_unique<CommandFlowMonitor>());
-    commands.push_back(std::make_unique<CommandFlowWait>());
     commands.push_back(std::make_unique<CommandFlowWaitDestination>());
+    commands.push_back(std::make_unique<CommandFlowWait>());
     commands.push_back(std::make_unique<CommandFlowRepeat>());
     commands.push_back(std::make_unique<CommandSetValue>());
     commands.push_back(std::make_unique<CommandDebug>());
@@ -70,6 +71,11 @@ void TestAction::RegisterCommands()
     commands.push_back(std::make_unique<CommandSetupForceCompleteQuest>());
     commands.push_back(std::make_unique<CommandSetupRewardQuest>());
     commands.push_back(std::make_unique<CommandSetupDo>());
+    commands.push_back(std::make_unique<CommandSummonRequest>());
+    commands.push_back(std::make_unique<CommandResurrectRequest>());
+    commands.push_back(std::make_unique<CommandKillSpawn>());
+    commands.push_back(std::make_unique<CommandMoveSpawn>());
+    commands.push_back(std::make_unique<CommandEngageSpawn>());
 }
 
 void TestAction::RegisterMonitors()
@@ -101,6 +107,9 @@ void TestAction::RegisterMonitors()
     monitors.push_back(std::make_unique<MonitorHasItem>());
     monitors.push_back(std::make_unique<MonitorOnMap>());
     monitors.push_back(std::make_unique<MonitorHasMount>());
+    monitors.push_back(std::make_unique<MonitorSpawnOnMap>());
+    monitors.push_back(std::make_unique<MonitorSpawnAlive>());
+    monitors.push_back(std::make_unique<MonitorSpawnDead>());
 }
 
 bool TestAction::Execute(Event& event)

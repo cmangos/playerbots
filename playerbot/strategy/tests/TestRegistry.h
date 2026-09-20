@@ -15,6 +15,7 @@ namespace ai
         static void RegisterInstanceTests();
         static void RegisterBankTests();
         static void RegisterQuestDkStartTests();
+        static void RegisterTeleportTests();
 
         static void RegisterTest(const std::string& name, const std::vector<std::string>& script);
         static void RegisterNamedLocation(const std::string& name, const GuidPosition& pos);

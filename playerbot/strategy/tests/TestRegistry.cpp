@@ -324,6 +324,7 @@ void TestRegistry::EnsureTestsRegistered()
     RegisterInstanceTests();
     RegisterBankTests();
     RegisterQuestDkStartTests();
+    RegisterTeleportTests();
 }
 
 void TestRegistry::EnsureLocationsInit()

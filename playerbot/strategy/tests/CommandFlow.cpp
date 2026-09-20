@@ -29,11 +29,17 @@ TestResult CommandFlowWait::Execute(const std::string& params, Player* bot, Play
     if (!ctx.waitTime)
         ctx.waitTime = WorldTimer::getMSTime();
 
-    uint32 waitDuration = 0;
-    if (TryParseUInt32Strict(params, waitDuration, message, GetName()) != TestResult::PASS)
+    // Scripts are written as "wait <seconds>" (e.g. "wait 5"). The older spelling is still accepted
+    // as "wait time <seconds>".
+    std::string value = params;
+    if (value.find("time ") == 0)
+        value = value.substr(5);
+
+    uint32 waitSeconds = 0;
+    if (TryParseUInt32Strict(value, waitSeconds, message, GetName()) != TestResult::PASS)
         return TestResult::IMPOSSIBLE;
 
-    if (WorldTimer::getMSTimeDiff(ctx.waitTime, WorldTimer::getMSTime()) >= waitDuration)
+    if (WorldTimer::getMSTimeDiff(ctx.waitTime, WorldTimer::getMSTime()) >= waitSeconds * 1000)
     {
         ctx.waitTime = 0;
         return TestResult::PASS;
@@ -50,11 +56,16 @@ TestResult CommandFlowWaitDestination::Execute(const std::string& params, Player
     if (!ctx.waitTime)
         ctx.waitTime = WorldTimer::getMSTime();
 
-    uint32 waitDuration = 0;
-    if (TryParseUInt32Strict(params, waitDuration, message, GetName()) != TestResult::PASS)
+    // Seconds, like "wait" - scripts use "wait destination 600" to mean ten minutes.
+    std::string value = params;
+    if (value.find("time ") == 0)
+        value = value.substr(5);
+
+    uint32 waitSeconds = 0;
+    if (TryParseUInt32Strict(value, waitSeconds, message, GetName()) != TestResult::PASS)
         return TestResult::IMPOSSIBLE;
 
-    if (WorldTimer::getMSTimeDiff(ctx.waitTime, WorldTimer::getMSTime()) >= waitDuration)
+    if (WorldTimer::getMSTimeDiff(ctx.waitTime, WorldTimer::getMSTime()) >= waitSeconds * 1000)
     {
         ctx.waitTime = 0;
         return TestResult::PASS;

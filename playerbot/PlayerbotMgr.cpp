@@ -2033,10 +2033,20 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
             sRandomPlayerbotMgr.SetValue(botGuid, "temporary", 1, name);
         }
 
-        if (master)
+        // Where the master is standing. Captured here rather than applied to newBot, because newBot
+        // is NOT in the world yet: SetMap() would hand it a live map pointer borrowed from an
+        // in-world player, and SetPosition() would then operate on a map the bot does not belong to.
+        // That pair corrupted state and killed the server a few seconds after every spawn/mgroup.
+        const bool hasMaster = (master != nullptr);
+        uint32 masterMapId = 0;
+        float masterX = 0.0f, masterY = 0.0f, masterZ = 0.0f, masterO = 0.0f;
+        if (hasMaster)
         {
-            newBot->SetMap(master->GetMap());
-            newBot->SetPosition(master->GetPositionX(), master->GetPositionY(), master->GetPositionZ(), master->GetOrientation());
+            masterMapId = master->GetMapId();
+            masterX = master->GetPositionX();
+            masterY = master->GetPositionY();
+            masterZ = master->GetPositionZ();
+            masterO = master->GetOrientation();
         }
 
         newBot->SaveToDB();
@@ -2044,9 +2054,23 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
         messages.push_back("Bot created: " + name);
 
         botSession->LogoutPlayer();
+        // NOTE: these two are NOT redundant. Removing them (on the theory that LogoutPlayer()
+        // already frees the player via Map::DeleteFromWorld) did not fix anything - it replaced
+        // the libmysql breakpoint with a deterministic access violation in mangosd.exe
+        // (c0000005 @0x1203a34). So the player is still live and owned here.
         sObjectAccessor.RemoveObject(newBot);
         delete newBot;
         delete botSession;
+
+        // Apply the placement by writing the saved row - which is all the old SetMap()/SetPosition()
+        // pair ever achieved, since the character is loaded from these columns on login. Done after
+        // the logout so LogoutPlayer()'s own SaveToDB() cannot overwrite it.
+        if (hasMaster)
+        {
+            CharacterDatabase.PExecute("UPDATE characters SET map = '%u', position_x = '%f', position_y = '%f', position_z = '%f', orientation = '%f' WHERE guid = '%u'",
+                masterMapId, masterX, masterY, masterZ, masterO, botGuid);
+            sLog.outString("[SPAWN] CreateBot: placed saved character on map %u at (%.1f, %.1f, %.1f)", masterMapId, masterX, masterY, masterZ);
+        }
 
         if (autoAdd)
         {

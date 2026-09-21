@@ -35,6 +35,12 @@ namespace
             << " inWorld=" << (target->IsInWorld() ? 1 : 0)
             << " session=" << (target->GetSession() ? 1 : 0)
             << " hp=" << target->GetHealth()
+            << " maxhp=" << target->GetMaxHealth()
+            << " lvl=" << target->GetLevel()
+            << " race=" << target->getRace()
+            << " class=" << target->getClass()
+            << " team=" << uint32(target->GetTeam())
+            << " gm=" << (target->IsGameMaster() ? 1 : 0)
             << " map=" << target->GetMapId();
         return out.str();
     }
@@ -142,6 +148,10 @@ TestResult CommandResurrectRequest::Execute(const std::string& params, Player* b
     bot->GetPosition(x, y, z);
 
     const bool sent = PlayerbotAI::SendResurrectRequest(bot, target, bot->GetMapId(), x, y, z);
+    sLog.outString("[REZ] request %s -> %s: sent=%d alive=%d requested=%d beingTeleported=%d map=%u gm=%d team=%u",
+        bot->GetName(), target->GetName(), sent ? 1 : 0, target->IsAlive() ? 1 : 0,
+        target->isRessurectRequested() ? 1 : 0, target->IsBeingTeleported() ? 1 : 0, target->GetMapId(),
+        target->IsGameMaster() ? 1 : 0, uint32(target->GetTeam()));
 
     return RunRequest(params, "resurrect request", sent, DescribeTarget(target), message);
 }
@@ -197,6 +207,21 @@ TestResult CommandMoveSpawn::Execute(const std::string& params, Player* bot, Pla
     sLog.outString("[SUMMON] move spawn: %s -> %s (resolved map %u @ %.1f, %.1f, %.1f); now map=%u inWorld=%d beingTeleported=%d",
         target->GetName(), params.c_str(), mapId, x, y, z,
         target->GetMapId(), target->IsInWorld() ? 1 : 0, target->IsBeingTeleported() ? 1 : 0);
+    return TestResult::PASS;
+}
+
+TestResult CommandHideSpawn::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    Player* target = GetSpawnedBot(ctx);
+    if (!target)
+        return TestResult::PENDING; // still entering the world
+
+    // GM mode is what stops the guards engaging; the combat stop clears anything that already
+    // landed in the tick before this ran.
+    target->SetGMVisible(false);
+    target->CombatStopWithPets(true, true);
+    sLog.outString("[REZ] hide spawn applied to %s: gm=%d alive=%d team=%u map=%u", target->GetName(),
+        target->IsGameMaster() ? 1 : 0, target->IsAlive() ? 1 : 0, uint32(target->GetTeam()), target->GetMapId());
     return TestResult::PASS;
 }
 
@@ -301,6 +326,7 @@ void TestRegistry::RegisterTeleportTests()
         "monitor time > 120 => fail \"Timeout: summoned bot never arrived (same map)\"",
         "teleport stormwind",
         "spawn level=60 temporary=1 login=1",
+        "hide spawn",
         "wait 5",
         "teleport elwynn",
         "summon request",
@@ -317,6 +343,7 @@ void TestRegistry::RegisterTeleportTests()
         "monitor time > 120 => fail \"Timeout: summoned bot never crossed maps\"",
         "teleport stormwind",
         "spawn level=60 temporary=1 login=1",
+        "hide spawn",
         "wait 5",
         "teleport orgrimmar",
         "summon request",
@@ -332,6 +359,7 @@ void TestRegistry::RegisterTeleportTests()
         "monitor time > 120 => fail \"Timeout: summoned corpse was not resurrected (same map)\"",
         "teleport stormwind",
         "spawn level=60 temporary=1 login=1",
+        "hide spawn",
         "wait 5",
         "teleport elwynn",
         "kill spawn",
@@ -348,6 +376,7 @@ void TestRegistry::RegisterTeleportTests()
         "monitor time > 120 => fail \"Timeout: summoned corpse was not resurrected (cross map)\"",
         "teleport stormwind",
         "spawn level=60 temporary=1 login=1",
+        "hide spawn",
         "wait 5",
         "teleport orgrimmar",
         "kill spawn",

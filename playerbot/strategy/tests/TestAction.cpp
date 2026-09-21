@@ -76,6 +76,7 @@ void TestAction::RegisterCommands()
     commands.push_back(std::make_unique<CommandKillSpawn>());
     commands.push_back(std::make_unique<CommandMoveSpawn>());
     commands.push_back(std::make_unique<CommandEngageSpawn>());
+    commands.push_back(std::make_unique<CommandHideSpawn>());
 }
 
 void TestAction::RegisterMonitors()

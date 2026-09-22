@@ -34,9 +34,12 @@ void DeadStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
         "corpse near",
         NextAction::array(0, new NextAction("revive from corpse", relevance-1.0f), NULL)));
 
+    // The bot's own recovery (auto release / spirit healer / repop, relevance 100-104) must not win
+    // the tick over an offered resurrection: the engine runs one action per tick, and a request that
+    // keeps losing is never answered.
     triggers.push_back(new TriggerNode(
         "resurrect request",
-        NextAction::array(0, new NextAction("accept resurrect", relevance), NULL)));
+        NextAction::array(0, new NextAction("accept resurrect", relevance + 10.0f), NULL)));
 
     triggers.push_back(new TriggerNode(
         "falling far",

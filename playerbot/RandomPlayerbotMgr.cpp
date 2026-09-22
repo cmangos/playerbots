@@ -1005,6 +1005,20 @@ void RandomPlayerbotMgr::LoginFreeBots()
 
                 if (master)
                     bot->TeleportTo(WorldPosition(master));
+                {
+                    // Only move the bot when it is genuinely not with its master. A freshly created bot is
+                    // saved at the master's position - CreateBot flags a pending teleport so SaveToDB()
+                    // persists that destination - so teleporting unconditionally here would be a second
+                    // movement to the spot the bot is already standing on. The gate also makes the
+                    // repeated per-pass teleport a no-op once the bot is in place, instead of re-issuing
+                    // it every pass.
+                    const bool sameMap = (bot->GetMapId() == master->GetMapId());
+                    const float masterDistance = sameMap ? bot->GetDistance(master) : -1.0f;
+                    if (!sameMap || masterDistance > INTERACTION_DISTANCE)
+                    {
+                        bot->TeleportTo(WorldPosition(master));
+                    }
+                }
 
                 BotAlwaysOnline always = BotAlwaysOnline(sRandomPlayerbotMgr.GetValue(botGuid, "always"));
                 if (always != BotAlwaysOnline::ACTIVE)

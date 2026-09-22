@@ -6,6 +6,7 @@
 #include "playerbot/RandomPlayerbotMgr.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/TravelMgr.h"
+#include "playerbot/WorldPosition.h"
 #include "Chat/ChannelMgr.h"
 #include "Social/SocialMgr.h"
 #include "Accounts/AccountMgr.h"
@@ -2016,11 +2017,15 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
             ChangeTalentsAction::AutoSelectTalents(newBot, &out, role);
 
             sRandomPlayerbotMgr.SetValue(botGuid, "create levelup", 1);
-            sRandomPlayerbotMgr.SetValue(botGuid, "create group", 1, groupWith);
-            sRandomPlayerbotMgr.SetValue(botGuid, "create gear", 1, gear);
         }
         else
             newBot->SetLevel(1);
+
+        // [BL-42] The group join and the gear request are not part of the level-up path: a master below
+        // level 2 must still get its group formed and its "gear=" request honoured. Keeping these inside
+        // the level>1 branch silently dropped both, which is why "mgroup" never formed a group.
+        sRandomPlayerbotMgr.SetValue(botGuid, "create group", 1, groupWith);
+        sRandomPlayerbotMgr.SetValue(botGuid, "create gear", 1, gear);
 
         if (!testName.empty())
         {
@@ -2049,6 +2054,19 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
             masterO = master->GetOrientation();
         }
 
+        // Place the character where the master stands by flagging a pending teleport: SaveToDB()
+        // persists the pending destination instead of the live position while that flag is set, so the
+        // row the login reads already points at the master. This replaces the raw
+        // "UPDATE characters SET map = ..." that used to run after the logout, and removes the second
+        // movement with it - the bot now logs in where it belongs instead of being teleported there
+        // afterwards. Only the cached destination and the flag are touched; no live map pointer is
+        // installed, which is what made the old SetMap()/SetPosition() pair corrupt state here.
+        if (hasMaster)
+        {
+            newBot->GetTeleportDest() = WorldLocation(masterMapId, masterX, masterY, masterZ, masterO);
+            newBot->SetSemaphoreTeleportNear(true);
+        }
+
         newBot->SaveToDB();
 
         messages.push_back("Bot created: " + name);
@@ -2062,15 +2080,8 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
         delete newBot;
         delete botSession;
 
-        // Apply the placement by writing the saved row - which is all the old SetMap()/SetPosition()
-        // pair ever achieved, since the character is loaded from these columns on login. Done after
-        // the logout so LogoutPlayer()'s own SaveToDB() cannot overwrite it.
-        if (hasMaster)
-        {
-            CharacterDatabase.PExecute("UPDATE characters SET map = '%u', position_x = '%f', position_y = '%f', position_z = '%f', orientation = '%f' WHERE guid = '%u'",
-                masterMapId, masterX, masterY, masterZ, masterO, botGuid);
-            sLog.outString("[SPAWN] CreateBot: placed saved character on map %u at (%.1f, %.1f, %.1f)", masterMapId, masterX, masterY, masterZ);
-        }
+        // The placement itself already happened above, through the pending teleport destination that
+        // SaveToDB() persists - there is deliberately no direct UPDATE of the characters row here.
 
         if (autoAdd)
         {

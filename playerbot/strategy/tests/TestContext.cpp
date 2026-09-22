@@ -21,6 +21,9 @@ void TestContext::Reset()
     testName.clear();
     testStartPosition = WorldPosition();
     destinationPosition = GuidPosition();
+    resurrectMapId = 0;
+    resurrectX = resurrectY = resurrectZ = 0.0f;
+    hasResurrectRequest = false;
 
     for (ObjectGuid const& guid : spawnedBots)
     {

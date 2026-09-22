@@ -116,7 +116,9 @@ TestResult CommandSummonRequest::Execute(const std::string& params, Player* bot,
     // Expecting a rejection: the in-combat precondition must be forced in THIS tick. A separate
     // "engage spawn" command cannot hold combat across an AI tick - the bot's own AI drops it, so by
     // the time this command runs the target is out of combat again and the request is accepted.
-    if (ExpectsRejection(params) && !target->IsInCombat())
+    // A DEAD target is its own rejection precondition (SendSummonRequest refuses corpses outright),
+    // so combat only needs forcing while the target is alive.
+    if (ExpectsRejection(params) && target->IsAlive() && !target->IsInCombat())
     {
         if (!ForceCombat(target, 299))
         {
@@ -148,10 +150,17 @@ TestResult CommandResurrectRequest::Execute(const std::string& params, Player* b
     bot->GetPosition(x, y, z);
 
     const bool sent = PlayerbotAI::SendResurrectRequest(bot, target, bot->GetMapId(), x, y, z);
-    sLog.outString("[REZ] request %s -> %s: sent=%d alive=%d requested=%d beingTeleported=%d map=%u gm=%d team=%u",
-        bot->GetName(), target->GetName(), sent ? 1 : 0, target->IsAlive() ? 1 : 0,
-        target->isRessurectRequested() ? 1 : 0, target->IsBeingTeleported() ? 1 : 0, target->GetMapId(),
-        target->IsGameMaster() ? 1 : 0, uint32(target->GetTeam()));
+
+    // Remember where we told the corpse to land: the monitor must measure against this, not against
+    // the acting bot, which may random-teleport away long before the resurrect completes.
+    if (sent)
+    {
+        ctx.resurrectMapId = bot->GetMapId();
+        ctx.resurrectX = x;
+        ctx.resurrectY = y;
+        ctx.resurrectZ = z;
+        ctx.hasResurrectRequest = true;
+    }
 
     return RunRequest(params, "resurrect request", sent, DescribeTarget(target), message);
 }
@@ -220,8 +229,6 @@ TestResult CommandHideSpawn::Execute(const std::string& params, Player* bot, Pla
     // landed in the tick before this ran.
     target->SetGMVisible(false);
     target->CombatStopWithPets(true, true);
-    sLog.outString("[REZ] hide spawn applied to %s: gm=%d alive=%d team=%u map=%u", target->GetName(),
-        target->IsGameMaster() ? 1 : 0, target->IsAlive() ? 1 : 0, uint32(target->GetTeam()), target->GetMapId());
     return TestResult::PASS;
 }
 
@@ -297,6 +304,43 @@ bool MonitorSpawnAlive::IsConditionMet(const std::string& monitorStr, Player* bo
     return spawned->IsAlive();
 }
 
+bool MonitorSpawnResurrected::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    Player* spawned = GetSpawnedBot(ctx);
+    if (!spawned)
+        return false;
+
+    const bool requestedBy = spawned->isRessurectRequestedBy(bot->GetObjectGuid());
+
+    // Measure the landing against the position our request specified, never against the acting bot:
+    // the caller is a random bot that can random-teleport thousands of yards (or into a battleground)
+    // while the 120 s observe window runs. The comparison is optional - without one the monitor
+    // asserts only that the corpse was revived onto the map our request named while still carrying
+    // it. Cross-map has to use that weaker form: the target is itself a roaming random bot, so the
+    // manager can teleport it on while the resurrect's far teleport is in flight, and the core then
+    // applies the resurrect wherever that teleport delivered it (Player::ResurrectUsingRequestDataInit
+    // defers to a pending teleport), leaving a correct resurrect at an uncontrollable position.
+    const bool onRequestMap = ctx.hasResurrectRequest && spawned->GetMapId() == ctx.resurrectMapId;
+    const bool alive = spawned->IsAlive();
+
+    std::string valueName;
+    std::string op;
+    std::string valueStr;
+    std::string parseMessage;
+    float threshold = 0.0f;
+    const bool hasThreshold =
+        TryParseComparisonValue(monitorStr, valueName, op, valueStr, parseMessage, GetName()) == TestResult::PASS &&
+        TryParseFloatStrict(valueStr, threshold, parseMessage, GetName()) == TestResult::PASS;
+
+    const float dist = onRequestMap ? spawned->GetDistance(ctx.resurrectX, ctx.resurrectY, ctx.resurrectZ) : -1.0f;
+    const bool closeEnough = !hasThreshold || (onRequestMap && ((op == "<") ? (dist < threshold) : (dist > threshold)));
+
+    if (!alive || !requestedBy)
+        return false;
+
+    return closeEnough;
+}
+
 bool MonitorSpawnDead::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     Player* spawned = GetSpawnedBot(ctx);
@@ -351,11 +395,13 @@ void TestRegistry::RegisterTeleportTests()
         gmVisible
     });
 
-    // BL-16 - dead bot summoned on the same map. Must be resurrected, not merely teleported.
+    // BL-16 - dead bot summoned on the same map. Must be resurrected by our request, not merely
+    // teleported or revived by the bot's own dead strategy (spirit healer), so the monitor requires
+    // the resurrect to have landed the corpse next to the summoner.
     RegisterTest("teleport_summon_dead_same_map", {
         gmInvisible,
         needAlive,
-        "monitor spawn alive => pass \"Summoned corpse resurrected and arrived\"",
+        "monitor spawn resurrected < 30 => pass \"Summoned corpse resurrected next to the summoner (same map)\"",
         "monitor time > 120 => fail \"Timeout: summoned corpse was not resurrected (same map)\"",
         "teleport stormwind",
         "spawn level=60 temporary=1 login=1",
@@ -368,11 +414,42 @@ void TestRegistry::RegisterTeleportTests()
         gmVisible
     });
 
+    // BL-22 - the plain summon path must never resurrect a corpse. `PlayerbotAI::SendSummonRequest`
+    // refuses a dead target outright, and the only code that rezzes on this path is the *explicit*
+    // `resurrectPlayer` branch of `SummonAction::Teleport` (covered by BL-16/BL-17). So a summon
+    // request aimed at a corpse must be refused, and the corpse must stay dead. Note this asserts the
+    // refusal, not "the summon path is rez-free" - the meeting-stone/`SummonAction` path deliberately
+    // DOES resurrect a dead target so it can be summoned; driving that end-to-end needs an innkeeper
+    // or meeting stone in the world and is not expressible from this harness yet.
+    RegisterTest("teleport_summon_dead_refused", {
+        gmInvisible,
+        needAlive,
+        "monitor spawn alive => fail \"A refused summon resurrected the corpse\"",
+        "monitor time > 20 => pass \"Corpse stayed dead; the summon request was refused, not converted into a resurrect\"",
+        "teleport stormwind",
+        "spawn level=60 temporary=1 login=1",
+        "hide spawn",
+        "wait 5",
+        "teleport elwynn",
+        "kill spawn",
+        "summon request expect rejected",
+        "observe",
+        gmVisible
+    });
+
     // BL-17 - dead bot summoned across maps.
+    //
+    // No distance assertion here, unlike BL-16: the spawned target is a free-alt random bot, so
+    // RandomPlayerbotMgr keeps roaming it (random teleport / arena queue) and can move it on while
+    // the resurrect's far teleport is in flight. The core then applies the resurrect at wherever
+    // that teleport delivered the corpse (Player::ResurrectUsingRequestDataInit defers to a pending
+    // teleport), so the landing point is correct but not controllable. "Alive on the map our request
+    // named, still carrying that request" is still sound causality for the cross-map case: a spirit
+    // healer or self-resurrect cannot move a map-0 corpse onto map 1.
     RegisterTest("teleport_summon_dead_cross_map", {
         gmInvisible,
         needAlive,
-        "monitor spawn alive => pass \"Summoned corpse resurrected across maps\"",
+        "monitor spawn resurrected => pass \"Summoned corpse resurrected onto the summoner's map (cross map)\"",
         "monitor time > 120 => fail \"Timeout: summoned corpse was not resurrected (cross map)\"",
         "teleport stormwind",
         "spawn level=60 temporary=1 login=1",

@@ -110,6 +110,7 @@ void TestAction::RegisterMonitors()
     monitors.push_back(std::make_unique<MonitorHasMount>());
     monitors.push_back(std::make_unique<MonitorSpawnOnMap>());
     monitors.push_back(std::make_unique<MonitorSpawnAlive>());
+    monitors.push_back(std::make_unique<MonitorSpawnResurrected>());
     monitors.push_back(std::make_unique<MonitorSpawnDead>());
 }
 

@@ -58,7 +58,7 @@ void TestRegistry::GenerateBossWalkTest()
         "$(start_command)",
         "set destination $(boss_destination)",
         "wait 60",
-        "not on map $(instance_entry) => abort \"Bot left instance map\"",
+        "monitor not on map $(instance_entry) => abort \"Bot left instance map\"",
         "observe"};
 
     for (auto& destination : bossDestinations)

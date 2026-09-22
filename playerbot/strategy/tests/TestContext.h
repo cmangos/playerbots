@@ -44,6 +44,16 @@ namespace ai
         WorldPosition testStartPosition;
         GuidPosition destinationPosition;
 
+        // Where the most recent resurrect request told its target to land, and on which map. Monitors
+        // must measure against this rather than the acting bot: the caller is a random bot that can
+        // random-teleport thousands of yards (or into a battleground) while the observe window runs,
+        // which made a proximity check against it report a false failure.
+        uint32 resurrectMapId = 0;
+        float resurrectX = 0.0f;
+        float resurrectY = 0.0f;
+        float resurrectZ = 0.0f;
+        bool hasResurrectRequest = false;
+
         bool debug = false; // enable extra logging for debugging
 
         TestContext() : pc(0), observing(false), testStartTime(0), monitorTime(0), waitTime(0), undergroundCount(0), focusMobEntry(0), focusMobKilled(false), cleanupPc(0), cleanupPrepared(false), whoResponded(false), result(TestResult::PENDING) {}

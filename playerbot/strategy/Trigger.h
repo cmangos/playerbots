@@ -35,6 +35,10 @@ namespace ai
         }
         virtual bool IsActive() { return false; }
         virtual bool IsAlreadyTriggered() { return triggered; }
+        // True for a trigger fed by an external packet (WorldPacketTrigger). Such an event is a
+        // one-shot obligation the bot has to answer, so the engine must not drop it just because its
+        // action did not get to run in the tick that delivered it.
+        virtual bool IsExternalEvent() const { return false; }
         virtual NextAction** getHandlers() { return NULL; }
         void Update() {}  //Nonfunctional see AiObjectContext::Update() to enable.
         virtual void Reset() { triggered = false; }

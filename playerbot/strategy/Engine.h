@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+
 #include "Action.h"
 #include "Queue.h"
 #include "Trigger.h"
@@ -107,6 +109,11 @@ namespace ai
         ActionNode* CreateActionNode(const std::string& name);
         virtual Action* InitializeAction(ActionNode* actionNode);
         virtual bool ListenAndExecute(Action* action, Event& event);
+        // Hands an external (packet) trigger back once its action has had its turn.
+        void ReleaseExternalEvent(const std::string& source);
+        // Drops armed entries whose TriggerNode is gone, so they cannot suppress later packets of the
+        // same opcode forever. Called from Init() once the trigger list has been rebuilt.
+        void PruneUnhandledExternalEvents();
 
     private:
         void LogAction(const char* format, ...);
@@ -123,6 +130,13 @@ namespace ai
         ActionExecutionListeners actionExecutionListeners;
         BotState state;
         Action* lastExecutedAction;
+
+        // External (packet) triggers whose event has been queued but not yet handed to its action,
+        // keyed by trigger name (= the event source). They are exempt from the end-of-tick trigger
+        // reset, so a request that loses the tick (the engine runs one action per tick) or whose
+        // basket is dropped from the queue is re-pushed instead of silently lost. Entries are removed
+        // by ReleaseExternalEvent() as soon as the action has had its turn.
+        std::map<std::string, Trigger*> unhandledExternalEvents;
 
     public:
 		bool testMode;

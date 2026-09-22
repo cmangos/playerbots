@@ -63,6 +63,11 @@ bool ReactionEngine::FindReaction(bool isStunned)
 
                 // Extract the reaction from the queue (removed)
                 ActionNode* reactionNode = queue.Pop(reactionItem);
+
+                // Pairs with Engine::ProcessTriggers(): a reaction that consumed an external packet
+                // event must hand its trigger back, or the armed trigger would suppress every later
+                // packet of the same opcode (there is no other release path on this engine).
+                ReleaseExternalEvent(reactionEvent.getSource());
                 if (reactionNode)
                 {
                     Action* reaction = InitializeAction(reactionNode);

@@ -112,6 +112,8 @@ void Engine::Init()
         MultiplyAndPush(strategy->getDefaultActions(state), 0.0f, false, Event(), "default");
     }
 
+    PruneUnhandledExternalEvents();
+
 	if (testMode)
 	{
         FILE* file = fopen("test.log", "w");
@@ -150,6 +152,13 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                 continue;
             // NOTE: queue.Pop() deletes basket
             ActionNode* actionNode = queue.Pop();
+
+            // The event has had its turn now, so the trigger can be handed back - even if the action
+            // turns out to be unknown/useless/impossible, or deliberately does nothing with the
+            // packet (e.g. an already-alive bot declining a resurrect). Leaving it armed would have
+            // the same packet re-queued on every subsequent tick.
+            ReleaseExternalEvent(event.getSource());
+
             Action* action = InitializeAction(actionNode);
 
             std::string actionName = (action ? action->getName() : "unknown");
@@ -332,6 +341,42 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
 
     queue.RemoveExpired();
     return actionExecuted;
+}
+
+void Engine::ReleaseExternalEvent(const std::string& source)
+{
+    auto it = unhandledExternalEvents.find(source);
+    if (it == unhandledExternalEvents.end())
+        return;
+
+    it->second->Reset();
+    unhandledExternalEvents.erase(it);
+}
+
+void Engine::PruneUnhandledExternalEvents()
+{
+    for (auto it = unhandledExternalEvents.begin(); it != unhandledExternalEvents.end();)
+    {
+        bool held = false;
+        for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
+        {
+            if ((*i)->getName() == it->first)
+            {
+                held = true;
+                break;
+            }
+        }
+
+        // Its node is gone (strategy teardown), so nothing can ever release it again - hand the
+        // trigger back rather than let the armed state suppress later packets of the same opcode.
+        if (!held)
+        {
+            it->second->Reset();
+            it = unhandledExternalEvents.erase(it);
+        }
+        else
+            ++it;
+    }
 }
 
 ActionNode* Engine::CreateActionNode(const std::string& name)
@@ -605,7 +650,13 @@ void Engine::ProcessTriggers(bool minimal)
             if (!event)
                 continue;
 
-            MultiplyAndPush(node->getHandlers(), 0.0f, false, event, "trigger");
+            // An external (packet) event is a one-shot obligation: keep the trigger armed until its
+            // action has had its turn, so a basket that loses this tick or is dropped from the queue
+            // is re-pushed instead of being silently lost. Only arm it when the event actually made
+            // it into the queue - a handler list with nothing pushable must not leave it armed.
+            if (MultiplyAndPush(node->getHandlers(), 0.0f, false, event, "trigger") && trigger->IsExternalEvent())
+                unhandledExternalEvents[trigger->getName()] = trigger;
+
             LogAction("T:%s - %f", trigger->getName().c_str(), node->getFirstRelevance());
         }
     }
@@ -613,7 +664,14 @@ void Engine::ProcessTriggers(bool minimal)
     for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
     {
         Trigger* trigger = (*i)->getTrigger();
-        if (trigger) trigger->Reset();
+        if (!trigger)
+            continue;
+
+        // Deliberately left armed: its event has not reached an action yet (see above).
+        if (unhandledExternalEvents.find(trigger->getName()) != unhandledExternalEvents.end())
+            continue;
+
+        trigger->Reset();
     }
 }
 

@@ -24,6 +24,7 @@ void TestContext::Reset()
     resurrectMapId = 0;
     resurrectX = resurrectY = resurrectZ = 0.0f;
     hasResurrectRequest = false;
+    groupMembersSeenOnMap.clear();
 
     for (ObjectGuid const& guid : spawnedBots)
     {

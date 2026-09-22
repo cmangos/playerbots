@@ -539,6 +539,53 @@ void TestRegistry::RegisterTeleportTests()
         "wait 5",
         "observe"
     });
+    // =========================================================================================
+    // BL-25 / BL-26 / BL-28 - a bot teleporting *other* bots must not run another map's work on its
+    // own thread. "teleport group" routes every member through PlayerbotAI::RunOnOwningThread, so a
+    // group split across maps exercises the world-thread hop (the case that used to abort inside
+    // WorldObject::GetMap()), while members already sharing the host's map take the inline path.
+    // =========================================================================================
+
+    // Cross-map group teleport. The group is formed first and the host only leaves afterwards:
+    // "mgroup" creates the members asynchronously, and the deferred join (RandomPlayerbotMgr's
+    // "create group" value, RandomPlayerbotMgr.cpp:909) is consumed on the tick it is first seen -
+    // so a host that teleports away while the members are still logging in loses the join silently
+    // (see BL-42).
+    //
+    // The pass condition pins map 1 (Kalimdor, where Orgrimmar is) so that it cannot be satisfied
+    // while the whole group still sits in Stormwind: without the pin, "group on map" is already true
+    // the moment the group forms. The first "teleport group" is same-map (the inline path); the
+    // second is cross-map (the world-thread hop this test exists for).
+    //
+    // Caveat (raised in review, and it is the important one): this asserts the *outcome* - every member
+    // was observed on the host's map during the observe window - and NOT that the hop delivered them.
+    // Members are roamed random bots, and MovementAction::MoveTo2/FlyDirect can teleport a bot to a far
+    // destination, so removing both cross-map "teleport group" lines would still pass this test once the
+    // members catch up. Do not cite it as the regression guard for the cross-map RunOnOwningThread hop
+    // until that is made causal (see BL-44).
+    //
+    // What the run does record: the visible summary line
+    // "[TestAction] teleport group: issued N to map M at (x, y, z); <member>(map..,inWorld..,tp..) ..."
+    // gives every member's map and state at issue time, and with LogLevel = 2 the per-member
+    // "teleport group: delivering ... -> moved=1" line confirms an actual delivery.
+    RegisterTest("teleport_group_cross_map", {
+        gmInvisible,
+        needAlive,
+        "monitor bot dead => abort \"Bot died, test interrupted\"",
+        "monitor group on map 1 => pass \"All group members crossed to the host's map\"",
+        "monitor time > 240 => fail \"Timeout: group never rejoined the host after the cross-map teleport\"",
+        "teleport stormwind",
+        "mgroup size=4",
+        "wait 60",
+        "teleport group",
+        "wait 5",
+        "teleport orgrimmar",
+        "wait 5",
+        "teleport group",
+        "wait 10",
+        "teleport group",
+        "observe"
+    });
 }
 
 // ---------------------------------------------------------------------------------------------

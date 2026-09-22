@@ -95,6 +95,7 @@ void TestAction::RegisterMonitors()
     monitors.push_back(std::make_unique<MonitorCombatPartyWiped>());
     monitors.push_back(std::make_unique<MonitorStateFaction>());
     monitors.push_back(std::make_unique<MonitorStateGroupSize>());
+    monitors.push_back(std::make_unique<MonitorStateGroupOnMap>());
     monitors.push_back(std::make_unique<MonitorStateLootGuid>());
     monitors.push_back(std::make_unique<MonitorStateStarterGearCount>());
     monitors.push_back(std::make_unique<MonitorStateEquipQuality>());

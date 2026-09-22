@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <set>
 #include <cstdint>
 #include "Globals/ObjectMgr.h"
 #include "playerbot/GuidPosition.h"
@@ -53,6 +54,12 @@ namespace ai
         float resurrectY = 0.0f;
         float resurrectZ = 0.0f;
         bool hasResurrectRequest = false;
+
+        // Latched by the "group on map" monitor: each member is recorded the first time it is observed on
+        // the bot's map. Per member rather than a single snapshot, because group members are roamed random
+        // bots and are rarely all settled on the same map on the same tick - the monitor asserts that the
+        // delivery happened, not that it held.
+        std::set<ObjectGuid> groupMembersSeenOnMap;
 
         bool debug = false; // enable extra logging for debugging
 

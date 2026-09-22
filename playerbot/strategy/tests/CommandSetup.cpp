@@ -254,6 +254,7 @@ TestResult CommandSetupTeleportGroup::Execute(const std::string& params, Player*
     float orient = bot->GetOrientation();
 
     uint32 count = 0;
+    std::string states;
     for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
     {
         Player* member = ref->getSource();
@@ -262,14 +263,36 @@ TestResult CommandSetupTeleportGroup::Execute(const std::string& params, Player*
 
         // Test bots normally share the host's map, but route through the owning thread anyway so
         // the helper stays safe (and consistent with the rest of the codebase) if a test spans maps.
+        //
+        // The delivery is logged from *inside* the callback, because that is the only place that knows it
+        // happened: RunOnOwningThread runs the callback inline when the member is on this map and defers
+        // it to the world thread otherwise, and it silently skips a member that is out of world or
+        // mid-teleport. The previous version counted the call instead, so "Teleported 3 group members"
+        // could mean three no-ops. Logging inside the callback is also race-free: it runs on whichever
+        // thread actually performs the move.
+        states += " " + std::string(member->GetName()) + "(map" + std::to_string(member->GetMapId()) +
+                  ",inWorld=" + (member->IsInWorld() ? "1" : "0") +
+                  ",tp=" + (member->IsBeingTeleported() ? "1" : "0") + ")";
+
         ai->RunOnOwningThread(member, [mapId, x, y, z, orient](Player* m)
         {
-            m->TeleportTo(mapId, x, y, z, orient);
+            // The return value matters: Player::TeleportTo refuses a charmed player, an invalid
+            // coordinate, or a map the player may not enter - reporting the attempt without it was the
+            // original over-claim. outDetail because one line per member per call is too much noise for
+            // the generated instance scenarios; run with LogLevel = 2 to see it.
+            const uint32 fromMap = m->GetMapId();
+            const bool wasInWorld = m->IsInWorld();
+            const bool wasTeleporting = m->IsBeingTeleported();
+            const bool moved = m->TeleportTo(mapId, x, y, z, orient);
+
+            sLog.outDetail("[TestAction] teleport group: delivering %s to map %u (from map %u, inWorld=%d, tp=%d) -> moved=%d",
+                m->GetName(), mapId, fromMap, wasInWorld ? 1 : 0, wasTeleporting ? 1 : 0, moved ? 1 : 0);
         });
-        count++;
+        ++count;
     }
 
-    sLog.outString("[TestAction] Teleported %u group members to bot position (map %u, %.1f, %.1f, %.1f)", count, mapId, x, y, z);
+    sLog.outString("[TestAction] teleport group: issued %u to map %u at (%.1f, %.1f, %.1f);%s",
+        count, mapId, x, y, z, states.c_str());
     return TestResult::PASS;
 }
 

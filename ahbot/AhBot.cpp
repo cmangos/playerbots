@@ -91,6 +91,9 @@ void activateAhbotThread()
 
 void AhBot::Update()
 {
+    if (!sAhBotConfig.enabled)
+        return;
+
     if (sWorld.IsShutdowning())
         return;
 

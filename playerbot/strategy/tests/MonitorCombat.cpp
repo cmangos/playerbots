@@ -108,9 +108,11 @@ bool MonitorCombatPartyWiped::IsConditionMet(const std::string& monitorStr, Play
 bool MonitorCombatDeadMobs::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     std::list<Creature*> creatures;
-    MaNGOS::AnyUnitInObjectRangeCheck checker(bot, 120.0f);
-    MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(creatures, checker);
-    Cell::VisitWorldObjects(bot, searcher, 120.0f);
+    // Count DEAD creatures: AnyUnitInObjectRangeCheck requires u->IsAlive() and would filter out
+    // exactly the units we want, and VisitWorldObjects only sees players/transports, not creatures.
+    MaNGOS::AnyUnitFulfillingConditionInRangeCheck checker(bot, [](Unit* u) { return !u->IsAlive(); }, 120.0f, DIST_CALC_NONE);
+    MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitFulfillingConditionInRangeCheck> searcher(creatures, checker);
+    Cell::VisitAllObjects(bot, searcher, 120.0f);
 
     uint32 deadCount = 0;
     for (auto& creature : creatures)

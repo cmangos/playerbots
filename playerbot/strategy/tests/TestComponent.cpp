@@ -47,9 +47,11 @@ namespace
     uint32 CountNearbyDeadMobs(Player* bot, float radius)
     {
         std::list<Creature*> creatures;
-        MaNGOS::AnyUnitInObjectRangeCheck checker(bot, radius);
-        MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(creatures, checker);
-        Cell::VisitWorldObjects(bot, searcher, radius);
+        // Count DEAD creatures: AnyUnitInObjectRangeCheck requires u->IsAlive() (it would filter out
+        // exactly what we count) and VisitWorldObjects only sees players/transports, not creatures.
+        MaNGOS::AnyUnitFulfillingConditionInRangeCheck checker(bot, [](Unit* u) { return !u->IsAlive(); }, radius, DIST_CALC_NONE);
+        MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitFulfillingConditionInRangeCheck> searcher(creatures, checker);
+        Cell::VisitAllObjects(bot, searcher, radius);
 
         uint32 deadCount = 0;
         for (Creature* creature : creatures)

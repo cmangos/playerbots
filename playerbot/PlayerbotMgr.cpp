@@ -1498,6 +1498,11 @@ std::string PlayerbotHolder::HandleBotTest(Player* bot, Player* master, const st
     // Activate test strategy which will run the test over multiple ticks
     std::string strategyName = "test::" + param;
     ai->ChangeStrategy("+" + strategyName, BotState::BOT_STATE_NON_COMBAT);
+    // Also register on the dead engine: on death ChangeEngine(BOT_STATE_DEAD) swaps engines and
+    // without the strategy there the test - and all its monitors - goes silent for the whole
+    // death/ghost/revive window, so a bot dying mid-test bleeds out to the timeout instead of
+    // aborting with a cause. TestStrategy::InitDeadTriggers already serves the same triggers.
+    ai->ChangeStrategy("+" + strategyName, BotState::BOT_STATE_DEAD);
     
     return "Test '" + param + "' started for bot " + bot->GetName();
 }

@@ -1049,6 +1049,11 @@ void LogAnalysis::AnalyseEvents()
 
         Tokens tokens = StrSplit(line, ",");
 
+        // A hard-killed server can leave a truncated/garbage line at the end of the log.
+        // Indexing tokens[2] on such a line reads past the vector and crashes startup.
+        if (tokens.size() < 3)
+            continue;
+
         eventCount[tokens[2]]++;
     } while (in.good());
 
@@ -1092,6 +1097,10 @@ void LogAnalysis::AnalyseQuests()
             continue;
 
         Tokens tokens = StrSplit(line, ",");
+
+        // See AnalyseEvents: skip malformed/truncated lines instead of indexing out of bounds.
+        if (tokens.size() < 9)
+            continue;
 
         if (tokens.size() == 10) //Some quest names have a "," so add an extra element.
         {
@@ -1188,6 +1197,10 @@ void LogAnalysis::AnalyseCounts()
             continue;
 
         Tokens tokens = StrSplit(line, ",");
+
+        // See AnalyseEvents: skip malformed/truncated lines instead of indexing out of bounds.
+        if (tokens.size() < 9)
+            continue;
 
         if (tokens.size() == 10) //Some quest names have a "," so add an extra element. 
         {

@@ -420,7 +420,22 @@ bool BoostTrigger::IsActive()
         }
         else
         {
-            return true;
+            // in instance, use the boost if we are on a boss
+            if (bot->GetMap()->IsRaid() || bot->GetMap()->IsDungeon())
+            {
+                std::list<ObjectGuid> v = context->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
+                for (std::list<ObjectGuid>::iterator i = v.begin(); i!=v.end(); i++)
+                {
+                    Unit* unit = ai->GetUnit(*i);
+                    if (!unit || !sServerFacade.IsAlive(unit) || unit->IsPlayer())
+                        continue;
+
+                    if (sObjectMgr.IsEncounter(unit->GetEntry(), unit->GetMapId()))
+                        return true;
+                }
+            }
+            else
+                return true;
         }
     }
 

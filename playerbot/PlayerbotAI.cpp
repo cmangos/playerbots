@@ -2688,6 +2688,18 @@ bool PlayerbotAI::HasStrategy(const std::string& name, BotState type)
 
 void PlayerbotAI::ResetStrategies(bool autoLoad)
 {
+#ifdef GenerateBotTests
+    std::map<uint8, std::vector<std::string>> testStrategies;
+    for (uint8 i = 0; i < (uint8)BotState::BOT_STATE_ALL; i++)
+    {
+        for (std::string_view strat : engines[i]->GetStrategies())
+        {
+            if (strat.rfind("test::", 0) == 0)
+                testStrategies[i].push_back(std::string(strat));
+        }
+    }
+#endif
+
     for (uint8 i = 0; i < (uint8)BotState::BOT_STATE_ALL; i++)
     {
         engines[i]->initMode = true;
@@ -2699,6 +2711,14 @@ void PlayerbotAI::ResetStrategies(bool autoLoad)
     AiFactory::AddDefaultDeadStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_DEAD]);
     AiFactory::AddDefaultReactionStrategies(bot, this, reactionEngine);
     if (autoLoad && HasPlayerRelation()) sPlayerbotDbStore.Load(this);
+
+#ifdef GenerateBotTests
+    for (auto& [state, strats] : testStrategies)
+    {
+        for (const auto& strat : strats)
+            engines[state]->addStrategy(strat);
+    }
+#endif
 
     for (uint8 i = 0; i < (uint8)BotState::BOT_STATE_ALL; i++)
     {
@@ -6163,8 +6183,10 @@ ActivePiorityType PlayerbotAI::GetPriorityType()
 
     AiObjectContext* context = GetAiObjectContext();
 
+#ifdef GenerateBotTests
     if (AI_VALUE2(bool, "manual bool", "is running test"))
         return ActivePiorityType::IS_RUNNING_TEST;
+#endif
 
     if (!WorldPosition(bot).isOverworld())
     {

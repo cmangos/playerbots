@@ -76,7 +76,9 @@ PlayerbotHolder::PlayerbotHolder() : PlayerbotAIBase()
     m_botCommandHandlers["c"] = &PlayerbotHolder::HandleBotC;
     m_botCommandHandlers["w"] = &PlayerbotHolder::HandleConsoleWhisper;
     m_botCommandHandlers["cmd"] = &PlayerbotHolder::HandleConsoleCmd;
+#ifdef GenerateBotTests
     m_botCommandHandlers["test"] = &PlayerbotHolder::HandleBotTest;
+#endif
     m_botCommandHandlers["do"] = &PlayerbotHolder::HandleBotDo;
     m_botCommandHandlers["record"] = &PlayerbotHolder::HandleBotRecord;
     m_botCommandHandlers["read"] = &PlayerbotHolder::HandleBotRead;
@@ -1481,6 +1483,7 @@ std::string PlayerbotHolder::HandleConsoleCmd(Player* bot, Player* master, const
     return msg;
 }
 
+#ifdef GenerateBotTests
 std::string PlayerbotHolder::HandleBotTest(Player* bot, Player* master, const std::string param)
 {
     if (!bot)
@@ -1495,17 +1498,11 @@ std::string PlayerbotHolder::HandleBotTest(Player* bot, Player* master, const st
         return "Usage: test <testName>. Available tests: walk_to_ironforge, flight_ratchet_to_booty_bay";
     }
 
-    // Activate test strategy which will run the test over multiple ticks
-    std::string strategyName = "test::" + param;
-    ai->ChangeStrategy("+" + strategyName, BotState::BOT_STATE_NON_COMBAT);
-    // Also register on the dead engine: on death ChangeEngine(BOT_STATE_DEAD) swaps engines and
-    // without the strategy there the test - and all its monitors - goes silent for the whole
-    // death/ghost/revive window, so a bot dying mid-test bleeds out to the timeout instead of
-    // aborting with a cause. TestStrategy::InitDeadTriggers already serves the same triggers.
-    ai->ChangeStrategy("+" + strategyName, BotState::BOT_STATE_DEAD);
-    
+    TestRegistry::StartTest(ai, param);
+
     return "Test '" + param + "' started for bot " + bot->GetName();
 }
+#endif
 
 std::string PlayerbotHolder::HandleBotDo(Player* bot, Player* master, const std::string param)
 {
@@ -2026,9 +2023,6 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
         else
             newBot->SetLevel(1);
 
-        // [BL-42] The group join and the gear request are not part of the level-up path: a master below
-        // level 2 must still get its group formed and its "gear=" request honoured. Keeping these inside
-        // the level>1 branch silently dropped both, which is why "mgroup" never formed a group.
         sRandomPlayerbotMgr.SetValue(botGuid, "create group", 1, groupWith);
         sRandomPlayerbotMgr.SetValue(botGuid, "create gear", 1, gear);
 
@@ -2043,10 +2037,6 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
             sRandomPlayerbotMgr.SetValue(botGuid, "temporary", 1, name);
         }
 
-        // Where the master is standing. Captured here rather than applied to newBot, because newBot
-        // is NOT in the world yet: SetMap() would hand it a live map pointer borrowed from an
-        // in-world player, and SetPosition() would then operate on a map the bot does not belong to.
-        // That pair corrupted state and killed the server a few seconds after every spawn/mgroup.
         const bool hasMaster = (master != nullptr);
         uint32 masterMapId = 0;
         float masterX = 0.0f, masterY = 0.0f, masterZ = 0.0f, masterO = 0.0f;
@@ -2059,13 +2049,6 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
             masterO = master->GetOrientation();
         }
 
-        // Place the character where the master stands by flagging a pending teleport: SaveToDB()
-        // persists the pending destination instead of the live position while that flag is set, so the
-        // row the login reads already points at the master. This replaces the raw
-        // "UPDATE characters SET map = ..." that used to run after the logout, and removes the second
-        // movement with it - the bot now logs in where it belongs instead of being teleported there
-        // afterwards. Only the cached destination and the flag are touched; no live map pointer is
-        // installed, which is what made the old SetMap()/SetPosition() pair corrupt state here.
         if (hasMaster)
         {
             newBot->GetTeleportDest() = WorldLocation(masterMapId, masterX, masterY, masterZ, masterO);
@@ -2077,16 +2060,9 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
         messages.push_back("Bot created: " + name);
 
         botSession->LogoutPlayer();
-        // NOTE: these two are NOT redundant. Removing them (on the theory that LogoutPlayer()
-        // already frees the player via Map::DeleteFromWorld) did not fix anything - it replaced
-        // the libmysql breakpoint with a deterministic access violation in mangosd.exe
-        // (c0000005 @0x1203a34). So the player is still live and owned here.
         sObjectAccessor.RemoveObject(newBot);
         delete newBot;
         delete botSession;
-
-        // The placement itself already happened above, through the pending teleport destination that
-        // SaveToDB() persists - there is deliberately no direct UPDATE of the characters row here.
 
         if (autoAdd)
         {

@@ -106,7 +106,9 @@ private:
     std::string HandleBotC(Player* bot, Player* master, const std::string param);
     std::string HandleConsoleWhisper(Player* bot, Player* master, const std::string param);
     std::string HandleConsoleCmd(Player* bot, Player* master, const std::string param);
+#ifdef GenerateBotTests
     std::string HandleBotTest(Player* bot, Player* master, const std::string param);
+#endif
     std::string HandleBotDo(Player* bot, Player* master, const std::string param);
     std::string HandleBotRecord(Player* bot, Player* master, const std::string param);
     std::string HandleBotRead(Player* bot, Player* master, const std::string param);

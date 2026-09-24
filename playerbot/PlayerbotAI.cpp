@@ -7995,7 +7995,7 @@ std::list<Unit*> PlayerbotAI::GetAllHostileNPCNonPetUnitsAroundWO(WorldObject* w
             if (hostileUnit->IsCreature())
             {
                 Creature* creature = GetCreature(hostileUnit->GetObjectGuid());
-                if (!creature || (creature && creature->IsPet()))
+                if (!creature || (creature && creature->IsPet()) || sServerFacade.IsFriendlyTo(bot, creature) || !sServerFacade.IsHostileTo(bot, creature))
                 {
                     continue;
                 }

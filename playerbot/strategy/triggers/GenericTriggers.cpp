@@ -423,7 +423,7 @@ bool BoostTrigger::IsActive()
             uint32 spellId = AI_VALUE2(uint32, "spell id", spell);
             SpellEntry const* spellInfo = sServerFacade.LookupSpellInfo(spellId);
             // in instances, save long cd boosts for bosses
-            if ((bot->GetMap()->IsRaid() || bot->GetMap()->IsDungeon()) && spellInfo->RecoveryTime >= 5 * MINUTE * IN_MILLISECONDS)
+            if ((bot->GetMap()->IsRaid() || bot->GetMap()->IsDungeon()) && spellInfo && spellInfo->RecoveryTime >= 5 * MINUTE * IN_MILLISECONDS)
             {
                 std::list<ObjectGuid> v = context->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
                 for (std::list<ObjectGuid>::iterator i = v.begin(); i!=v.end(); i++)

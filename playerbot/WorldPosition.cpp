@@ -655,6 +655,15 @@ WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, uin
 
     WorldPosition transPos(transport);
     transPos.SetTranpotHeightToFloor(transport->GetEntry());
+
+    GameObjectInfo const* transportInfo =
+        sGOStorage.LookupEntry<GameObjectInfo>(transport->GetEntry());
+
+    // Mesa elevators (Elevatorcar.m2, display 360) expose contradictory
+    // results between SetOnTransport() and isOnTransport(). For this
+    // model, a successful SetOnTransport() is the authoritative floor test.
+    bool mesaElevatorGeometryFix =
+        transportInfo && transportInfo->displayId == 360;
     WorldPosition bestPos;
     std::vector<WorldPosition> bestPath;
 
@@ -666,9 +675,12 @@ WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, uin
     {
         WorldPosition pos = transPos + WorldPosition(0, irand(-radius, radius), irand(-radius, radius));
 
-        pos.SetOnTransport(transport, 1, -1);
+        bool setResult = pos.SetOnTransport(transport, 1, -1);
 
         tries++;
+
+        if (mesaElevatorGeometryFix && !setResult)
+            continue;
 
         if (pos.getZ() < transPos.getZ() - 1.0f)
             continue;
@@ -678,7 +690,7 @@ WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, uin
 
         pos += WorldPosition(0, 0, 0, 0.1f);
 
-        if (!pos.isOnTransport(transport))
+        if (!mesaElevatorGeometryFix && !pos.isOnTransport(transport))
             continue;
 
         bestPos = pos;

@@ -58,10 +58,6 @@ void FuryWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("bloodthirst", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "sunder armor",
-        NextAction::array(0, new NextAction("sunder armor", ACTION_HIGH + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "whirlwind",
         NextAction::array(0, new NextAction("whirlwind", ACTION_NORMAL + 2), NULL)));
 
@@ -141,6 +137,10 @@ void FuryWarriorRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 {
     FuryWarriorStrategy::InitCombatTriggers(triggers);
     WarriorRaidStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "sunder armor",
+        NextAction::array(0, new NextAction("sunder armor", ACTION_HIGH + 2), NULL)));
 }
 
 void FuryWarriorRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -410,10 +410,6 @@ void FuryWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("execute", ACTION_NORMAL + 4), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "sunder armor",
-        NextAction::array(0, new NextAction("sunder armor", ACTION_HIGH + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "bloodthirst",
         NextAction::array(0, new NextAction("bloodthirst", ACTION_NORMAL + 3), NULL)));
 
@@ -497,6 +493,10 @@ void FuryWarriorRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 {
     FuryWarriorStrategy::InitCombatTriggers(triggers);
     WarriorRaidStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "sunder armor",
+        NextAction::array(0, new NextAction("sunder armor", ACTION_HIGH + 2), NULL)));
 }
 
 void FuryWarriorRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -774,10 +774,6 @@ void FuryWarriorStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
         NextAction::array(0, new NextAction("whirlwind", ACTION_NORMAL + 3), NULL)));
 
     triggers.push_back(new TriggerNode(
-        "sunder armor",
-        NextAction::array(0, new NextAction("sunder armor", ACTION_HIGH + 2), NULL)));
-
-    triggers.push_back(new TriggerNode(
         "heroic strike",
         NextAction::array(0, new NextAction("heroic strike", ACTION_NORMAL + 2), NULL)));
 
@@ -857,6 +853,10 @@ void FuryWarriorRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 {
     FuryWarriorStrategy::InitCombatTriggers(triggers);
     WarriorRaidStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "sunder armor",
+        NextAction::array(0, new NextAction("sunder armor", ACTION_HIGH + 2), NULL)));
 }
 
 void FuryWarriorRaidStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -10,6 +10,6 @@ RtiValue::RtiValue(PlayerbotAI* ai)
 }
 
 RtiCcValue::RtiCcValue(PlayerbotAI* ai)
-    : ManualSetValue<std::string>(ai, "moon", "rti cc")
+    : ManualSetValue<std::string>(ai, "none", "rti cc")
 {
 }

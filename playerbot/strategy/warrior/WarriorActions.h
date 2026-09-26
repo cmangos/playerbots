@@ -22,6 +22,7 @@ namespace ai
     MELEE_DEBUFF_ACTION(CastRendAction, "rend");
     MELEE_DEBUFF_ENEMY_ACTION(CastRendOnAttackerAction, "rend");
     MELEE_DEBUFF_ACTION_R(CastThunderClapAction, "thunder clap", 8.0f);
+    SPELL_ACTION(CastThunderClapThreatAction, "thunder clap");
     SNARE_ACTION(CastThunderClapSnareAction, "thunder clap");
     SNARE_ACTION(CastHamstringAction, "hamstring");
     MELEE_ACTION(CastOverpowerAction, "overpower");

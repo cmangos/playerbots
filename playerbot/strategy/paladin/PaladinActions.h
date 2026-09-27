@@ -103,6 +103,8 @@ namespace ai
     {
     public:
         ProtSealAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "prot seal") {}
+        virtual bool isPossible() { return true; }
+        virtual bool isUseful() override { return AI_VALUE2(bool, "combat", "self target"); }
         virtual bool Execute(Event& event);
     };
 

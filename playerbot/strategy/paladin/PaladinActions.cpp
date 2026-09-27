@@ -35,7 +35,7 @@ bool ProtSealAction::Execute(Event& event)
             break;
         }    
     }
-    if (isEncounter)
+    if (isEncounter && bot->HasSpell(AI_VALUE2(uint32, "spell id", "seal of vengeance")))
         SetSpellName("seal of vengeance");
     else
         SetSpellName("seal of righteousness");

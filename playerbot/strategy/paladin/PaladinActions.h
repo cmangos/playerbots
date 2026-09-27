@@ -99,6 +99,13 @@ namespace ai
         virtual bool isUseful() override { return AI_VALUE2(bool, "combat", "self target"); }
     };
 
+    class ProtSealAction : public CastBuffSpellAction
+    {
+    public:
+        ProtSealAction(PlayerbotAI* ai) : CastBuffSpellAction(ai, "prot seal") {}
+        virtual bool Execute(Event& event);
+    };
+
     // Pick the aura that is not being used by another paladin
 	class CastPaladinAuraAction : public CastBuffSpellAction
 	{

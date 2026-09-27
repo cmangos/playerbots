@@ -315,6 +315,7 @@ namespace ai
                 creators["seal of vengeance"] = [](PlayerbotAI* ai) { return new CastSealOfVengeanceAction(ai); };
                 creators["seal of blood"] = [](PlayerbotAI* ai) { return new CastSealOfBloodAction(ai); };
                 creators["seal of the crusader"] = [](PlayerbotAI* ai) { return new CastSealOfTheCrusaderAction(ai); };
+                creators["prot seal"] = [](PlayerbotAI* ai) { return new ProtSealAction(ai); };
                 creators["pve blessing"] = [](PlayerbotAI* ai) { return new CastPveBlessingAction(ai); };
                 creators["pve greater blessing"] = [](PlayerbotAI* ai) { return new CastPveGreaterBlessingAction(ai); };
                 creators["pvp blessing"] = [](PlayerbotAI* ai) { return new CastPvpBlessingAction(ai); };

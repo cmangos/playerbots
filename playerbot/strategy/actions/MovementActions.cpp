@@ -3259,8 +3259,12 @@ bool MoveToLootAction::Execute(Event& event)
         ai->TellPlayerNoFacing(GetMaster(), out);
     }
 
-    if(sServerFacade.IsWithinLOSInMap(bot, wo))
-        return MoveNear(wo, sPlayerbotAIConfig.contactDistance);
+    if (sServerFacade.IsWithinLOSInMap(bot, wo))
+    {
+        bool move = MoveNear(wo, sPlayerbotAIConfig.contactDistance);
+        WaitForReach(bot->GetDistance(wo));
+        return move;
+    }
 
     return MoveTo(WorldPosition(wo));
 }

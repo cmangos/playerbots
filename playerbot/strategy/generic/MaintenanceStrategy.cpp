@@ -7,6 +7,10 @@ using namespace ai;
 void MaintenanceStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
+        "val::can craft profession",
+        NextAction::array(0, new NextAction("craft random item", 1.2f), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "random",
         NextAction::array(0, new NextAction("clean quest log", 6.0f), NULL)));
 

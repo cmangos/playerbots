@@ -2,6 +2,7 @@
 #include "ItemUsageValue.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/PlayerbotAI.h"
+#include "playerbot/PlayerbotAIConfig.h"
 
 using namespace ai;
 
@@ -228,4 +229,124 @@ bool ShouldCraftSpellValue::SpellGivesSkillUp(uint32 spellId, Player* bot)
     }
 
     return false;
+}
+
+ProfessionCraftingPlanValue::ProfessionCraftingPlanValue(PlayerbotAI* ai) :
+    CalculatedValue<ProfessionCraftingPlan>(ai, "profession crafting plan", sPlayerbotAIConfig.professionPlanCheckInterval)
+{
+}
+
+bool ProfessionCraftingPlanValue::IsEnabledFor(PlayerbotAI* ai)
+{
+    if (!sPlayerbotAIConfig.professionProgressionEnabled || !sPlayerbotAIConfig.professionProgressionCanaryPercent)
+        return false;
+
+    Player* bot = ai->GetBot();
+    if (!bot || ai->HasActivePlayerMaster() || !sRandomPlayerbotMgr.IsFreeBot(bot))
+        return false;
+
+    // Stable assignment keeps the canary cohort unchanged across restarts.
+    uint32 bucket = (bot->GetGUIDLow() * 2654435761u) % 100;
+    return bucket < sPlayerbotAIConfig.professionProgressionCanaryPercent;
+}
+
+ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
+{
+    ProfessionCraftingPlan bestPlan;
+    if (!IsEnabledFor(ai))
+        return bestPlan;
+
+    int64 bestScore = std::numeric_limits<int64>::min();
+    std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
+
+    for (uint32 spellId : spellIds)
+    {
+        if (!ShouldCraftSpellValue::SpellGivesSkillUp(spellId, bot))
+            continue;
+
+        SpellEntry const* spell = sServerFacade.LookupSpellInfo(spellId);
+        if (!spell)
+            continue;
+
+        uint32 skillId = 0;
+        uint32 recipeMinSkill = 0;
+        SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(spellId);
+        for (SkillLineAbilityMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            SkillLineAbilityEntry const* ability = itr->second;
+            SkillLineEntry const* skill = ability ? sSkillLineStore.LookupEntry(ability->skillId) : nullptr;
+            if (!ability || !skill || !bot->HasSkill(ability->skillId))
+                continue;
+            if (skill->categoryId != SKILL_CATEGORY_PROFESSION && skill->categoryId != SKILL_CATEGORY_SECONDARY)
+                continue;
+
+            skillId = ability->skillId;
+            recipeMinSkill = ability->min_value;
+            break;
+        }
+
+        if (!skillId)
+            continue;
+
+        ProfessionCraftingPlan candidate;
+        candidate.spellId = spellId;
+        candidate.skillId = skillId;
+        candidate.craftCount = sPlayerbotAIConfig.professionCraftBatchSize;
+
+        for (uint8 effect = 0; effect < MAX_EFFECT_INDEX; ++effect)
+        {
+            if (spell->EffectItemType[effect])
+            {
+                candidate.itemId = spell->EffectItemType[effect];
+                break;
+            }
+        }
+
+        uint32 missingUnits = 0;
+        for (uint8 reagent = 0; reagent < MAX_SPELL_REAGENTS; ++reagent)
+        {
+            if (spell->Reagent[reagent] <= 0 || spell->ReagentCount[reagent] <= 0)
+                continue;
+
+            uint32 reagentId = spell->Reagent[reagent];
+            uint32 desired = std::min<uint32>(
+                spell->ReagentCount[reagent] * candidate.craftCount,
+                sPlayerbotAIConfig.professionMaterialTarget);
+            uint32 current = ai->GetInventoryItemsCountWithId(reagentId);
+
+            candidate.required[reagentId] = desired;
+            if (current < desired)
+            {
+                candidate.missing[reagentId] = desired - current;
+                missingUnits += desired - current;
+            }
+        }
+
+        // Prefer a recipe that can be crafted now, then the highest relevant
+        // recipe with the smallest bounded material deficit.
+        int64 score = candidate.missing.empty() ? 1000000000LL : 0;
+        score += static_cast<int64>(recipeMinSkill) * 1000;
+        score -= static_cast<int64>(missingUnits) * 10;
+
+        if (score > bestScore)
+        {
+            bestScore = score;
+            bestPlan = candidate;
+        }
+    }
+
+    return bestPlan;
+}
+
+bool CanCraftProfessionValue::Calculate()
+{
+    ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    if (!plan.HasMaterials() || AI_VALUE(uint8, "bag space") > 80)
+        return false;
+
+    SpellEntry const* spell = sServerFacade.LookupSpellInfo(plan.spellId);
+    if (!spell || spell->RequiresSpellFocus)
+        return false;
+
+    return AI_VALUE2(bool, "can craft spell", plan.spellId);
 }

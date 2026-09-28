@@ -628,6 +628,13 @@ bool CraftRandomItemAction::Execute(Event& event)
     std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
     std::shuffle(spellIds.begin(), spellIds.end(),*GetRandomGenerator());
 
+    ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    if (professionPlan.IsValid())
+    {
+        spellIds.erase(std::remove(spellIds.begin(), spellIds.end(), professionPlan.spellId), spellIds.end());
+        spellIds.insert(spellIds.begin(), professionPlan.spellId);
+    }
+
     std::list<ObjectGuid> wos = chat->parseGameobjects(event.getParam());
     WorldObject* wot = nullptr;
 
@@ -669,6 +676,9 @@ bool CraftRandomItemAction::Execute(Event& event)
         }
 
         uint32 castCount = AI_VALUE2(uint32, "has reagents for", spellId);
+
+        if (spellId == professionPlan.spellId)
+            castCount = std::min(castCount, professionPlan.craftCount);
 
         if (spellId == 61288) //Crafting random glyph
         {

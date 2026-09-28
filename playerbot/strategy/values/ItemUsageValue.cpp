@@ -115,6 +115,14 @@ ItemUsage ItemUsageValue::Calculate()
     if (forceUsage == ForceItemUsage::FORCE_USAGE_BAG)
         return ItemUsage::ITEM_USAGE_KEEP;
 
+    ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    auto plannedReagent = professionPlan.required.find(itemId);
+    if (plannedReagent != professionPlan.required.end())
+    {
+        uint32 current = ai->GetInventoryItemsCountWithId(itemId);
+        return current < plannedReagent->second ? ItemUsage::ITEM_USAGE_SKILL : ItemUsage::ITEM_USAGE_KEEP;
+    }
+
     if (bot->GetGuildId())
     {
         std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");
@@ -978,6 +986,10 @@ bool ItemUsageValue::IsItemUsefulForSkill(ItemPrototype const* proto)
             return true;
 #ifndef MANGOSBOT_ZERO
         if (ai->HasSkill(SKILL_JEWELCRAFTING) && IsItemUsedBySkill(proto, SKILL_JEWELCRAFTING))
+            return true;
+#endif
+#ifdef MANGOSBOT_TWO
+        if (ai->HasSkill(SKILL_INSCRIPTION) && IsItemUsedBySkill(proto, SKILL_INSCRIPTION))
             return true;
 #endif
         if (ai->HasSkill(SKILL_MINING) &&

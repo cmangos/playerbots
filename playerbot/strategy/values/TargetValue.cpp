@@ -53,10 +53,6 @@ bool FindNonCcTargetStrategy::IsCcTarget(Unit* attacker)
                 }
             }
         }
-
-        uint64 guid = group->GetTargetIcon(4);
-        if (guid && attacker->GetObjectGuid() == ObjectGuid(guid))
-            return true;
     }
 
     return false;

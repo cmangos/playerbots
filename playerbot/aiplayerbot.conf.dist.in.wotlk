@@ -977,7 +977,7 @@ AiPlayerbot.ProfessionProgression.AHSearchCooldown = 600
 AiPlayerbot.ProfessionProgression.AHPurchaseLimit = 2
 AiPlayerbot.ProfessionProgression.AHBudgetPercent = 10
 AiPlayerbot.ProfessionProgression.AHMaxPriceMultiplier = 1.25
-# Maximum profession-generated stacks posted in one AH interaction.
+# Maximum stacks posted in one AH interaction by a bot in the rollout.
 AiPlayerbot.ProfessionProgression.AuctionPostLimit = 3
 #
 #######################################

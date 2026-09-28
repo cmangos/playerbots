@@ -1,6 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "RpgTriggers.h"
+#include "playerbot/strategy/values/CraftValues.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/strategy/actions/GuildCreateActions.h"
 #include "Social/SocialMgr.h"
@@ -218,7 +219,8 @@ bool RpgAHBuyTrigger::IsActive()
     if (GuidPosition(bot).IsHostileTo(guidP, bot->GetInstanceId()))
         return false;
 
-    if (!AI_VALUE(bool, "can ah buy"))
+    ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    if (!AI_VALUE(bool, "can ah buy") && (!plan.IsValid() || plan.missing.empty()))
         return false;
 
     return true;

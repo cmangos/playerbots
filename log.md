@@ -6,11 +6,14 @@ Last updated: 2026-09-29 (Europe/Amsterdam)
 
 - Local branch: `feature/playerbot-profession-economy`
 - Base commit: `99e6f15eb154bec2c8602e8b425fef87e67de501`
-- Current committed tip preceding the live material revalidation change:
-  `ebe036e0` (`playerbots: add profession progression diagnostics`)
+- Current source tip preceding the final GitHub handoff update:
+  `537e4a97` (`playerbots: revalidate cached profession material needs`)
 - Official upstream: `upstream` -> `https://github.com/cmangos/playerbots.git`
 - Writable fork: `origin` -> `https://github.com/goakiller900/playerbots.git`
-- The branch has not been pushed and no pull request exists yet.
+- Remote branch: `origin/feature/playerbot-profession-economy`
+- Pull request: <https://github.com/goakiller900/playerbots/pull/1>
+- The pull request targets the writable fork's `master` branch and is intentionally
+  left unmerged.
 
 Do not add or clean the untracked `.core-reference/` and `.validation-tools/`
 directories. They predate this feature work. `.core-reference/` contains unrelated
@@ -69,6 +72,9 @@ material deficits from live inventory while retaining the cached recipe choice.
 This prevents vendor purchases made inside the plan-cache interval from causing
 unnecessary AH purchases, and keeps crafting readiness and diagnostics current.
 
+Commit `537e4a97` (`playerbots: revalidate cached profession material needs`)
+contains that live-deficit correction.
+
 ## Configuration defaults
 
 - Enabled: `1`
@@ -94,18 +100,19 @@ unnecessary AH purchases, and keeps crafting readiness and diagnostics current.
 - A Classic/TBC compile probe is not authoritative in this workspace because only
   WotLK core headers are available. It stops on pre-existing cross-core API
   differences in `PlayerbotFactory.cpp`, not on the new profession code.
+- The fork's three Actions workflows are marked active, but the feature-branch
+  push did not enqueue a run and GitHub reports zero checks for the source tip.
 
 The compile objects are under `.validation-tools/` and must not be committed.
 
 ## Remaining work
 
-1. Run final repository/configuration validation and review the complete branch
-   diff.
-2. Fetch remote metadata again and verify the branch is based on the intended
-   upstream commit.
-3. Push without force to `origin/feature/playerbot-profession-economy`.
-4. Create (but do not merge) the requested pull request targeting the normal
-   development branch, then record its URL here.
+1. Review pull request #1; do not merge it automatically.
+2. Before merge/deployment, run the repository's full Classic/TBC/WotLK CI matrix
+   in an environment where the matching core checkouts are available.
+3. For deployment, rebuild and restart the worldserver, copy the desired
+   `AiPlayerbot.ProfessionProgression.*` settings, and retain the default 10%
+   canary until live diagnostics are satisfactory.
 
 ## Recovery commands
 

@@ -236,6 +236,22 @@ ProfessionCraftingPlanValue::ProfessionCraftingPlanValue(PlayerbotAI* ai) :
 {
 }
 
+std::map<uint32, uint32> ProfessionCraftingPlan::GetMissingReagents(PlayerbotAI* ai) const
+{
+    std::map<uint32, uint32> liveMissing;
+    if (!ai)
+        return liveMissing;
+
+    for (const auto& [itemId, desiredCount] : required)
+    {
+        uint32 currentCount = ai->GetInventoryItemsCountWithId(itemId);
+        if (currentCount < desiredCount)
+            liveMissing[itemId] = desiredCount - currentCount;
+    }
+
+    return liveMissing;
+}
+
 bool ProfessionCraftingPlanValue::IsEnabledFor(PlayerbotAI* ai)
 {
     if (!sPlayerbotAIConfig.professionProgressionEnabled || !sPlayerbotAIConfig.professionProgressionCanaryPercent)
@@ -341,7 +357,7 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
 bool CanCraftProfessionValue::Calculate()
 {
     ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
-    if (!plan.HasMaterials() || AI_VALUE(uint8, "bag space") > 80)
+    if (!plan.IsValid() || !plan.GetMissingReagents(ai).empty() || AI_VALUE(uint8, "bag space") > 80)
         return false;
 
     SpellEntry const* spell = sServerFacade.LookupSpellInfo(plan.spellId);

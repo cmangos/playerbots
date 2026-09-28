@@ -183,7 +183,8 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
     if (text == "profession")
     {
         ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
-        if (!plan.IsValid() || plan.missing.empty())
+        std::map<uint32, uint32> remaining = plan.GetMissingReagents(ai);
+        if (!plan.IsValid() || remaining.empty())
             return false;
 
         time_t now = time(nullptr);
@@ -210,8 +211,8 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             if (!candidate || candidate->owner == bot->GetGUIDLow() || !candidate->buyout || !candidate->itemCount)
                 continue;
 
-            auto missing = plan.missing.find(candidate->itemTemplate);
-            if (missing == plan.missing.end() || candidate->itemCount > missing->second)
+            auto missing = remaining.find(candidate->itemTemplate);
+            if (missing == remaining.end() || candidate->itemCount > missing->second)
                 continue;
 
             ItemPrototype const* proto = sObjectMgr.GetItemPrototype(candidate->itemTemplate);
@@ -234,7 +235,6 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             });
 
         uint32 purchases = 0;
-        std::map<uint32, uint32> remaining = plan.missing;
         for (const auto& candidate : candidates)
         {
             if (purchases >= sPlayerbotAIConfig.professionAhPurchaseLimit)

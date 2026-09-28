@@ -16,6 +16,7 @@ namespace ai
         bool IsValid() const { return spellId != 0 && skillId != 0; }
         bool HasMaterials() const { return IsValid() && missing.empty(); }
         bool Needs(uint32 reagentId) const { return missing.find(reagentId) != missing.end(); }
+        std::map<uint32, uint32> GetMissingReagents(PlayerbotAI* ai) const;
     };
 
     class CraftData

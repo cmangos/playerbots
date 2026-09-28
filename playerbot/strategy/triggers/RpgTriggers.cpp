@@ -220,7 +220,7 @@ bool RpgAHBuyTrigger::IsActive()
         return false;
 
     ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
-    if (!AI_VALUE(bool, "can ah buy") && (!plan.IsValid() || plan.missing.empty()))
+    if (!AI_VALUE(bool, "can ah buy") && (!plan.IsValid() || plan.GetMissingReagents(ai).empty()))
         return false;
 
     return true;

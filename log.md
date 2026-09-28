@@ -6,10 +6,8 @@ Last updated: 2026-09-29 (Europe/Amsterdam)
 
 - Local branch: `feature/playerbot-profession-economy`
 - Base commit: `99e6f15eb154bec2c8602e8b425fef87e67de501`
-- Current source tip preceding the diagnostics/log commit:
-  `1430cec5` (`playerbots: integrate profession Auction House economy`)
-- This file is part of the following diagnostics commit; use `git rev-parse HEAD`
-  for its post-amend hash.
+- Current committed tip preceding the live material revalidation change:
+  `ebe036e0` (`playerbots: add profession progression diagnostics`)
 - Official upstream: `upstream` -> `https://github.com/cmangos/playerbots.git`
 - Writable fork: `origin` -> `https://github.com/goakiller900/playerbots.git`
 - The branch has not been pushed and no pull request exists yet.
@@ -60,11 +58,16 @@ Commit `1430cec5` (`playerbots: integrate profession Auction House economy`):
 The implementation deliberately reuses the existing trainer progression and
 crafted-item equip/use/keep/sell behavior rather than duplicating those systems.
 
-## Implemented but not yet committed
+Commit `ebe036e0` (`playerbots: add profession progression diagnostics`):
 
 - `profession` chat diagnostic showing rollout state, persisted skills, selected
   recipe, and missing materials.
 - This implementation log.
+
+The final correctness change recorded with this version of the log recalculates
+material deficits from live inventory while retaining the cached recipe choice.
+This prevents vendor purchases made inside the plan-cache interval from causing
+unnecessary AH purchases, and keeps crafting readiness and diagnostics current.
 
 ## Configuration defaults
 
@@ -96,13 +99,12 @@ The compile objects are under `.validation-tools/` and must not be committed.
 
 ## Remaining work
 
-1. Commit the chat diagnostic and this log.
-2. Run final repository/configuration validation and review the complete branch
+1. Run final repository/configuration validation and review the complete branch
    diff.
-3. Fetch remote metadata again and verify the branch is based on the intended
+2. Fetch remote metadata again and verify the branch is based on the intended
    upstream commit.
-4. Push without force to `origin/feature/playerbot-profession-economy`.
-5. Create (but do not merge) the requested pull request targeting the normal
+3. Push without force to `origin/feature/playerbot-profession-economy`.
+4. Create (but do not merge) the requested pull request targeting the normal
    development branch, then record its URL here.
 
 ## Recovery commands

@@ -195,7 +195,7 @@ namespace ai
         virtual Event ActionEvent(Event event) override
         {
             ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
-            return Event("rpg action", plan.IsValid() && !plan.missing.empty() ? "profession" : "vendor");
+            return Event("rpg action", plan.IsValid() && !plan.GetMissingReagents(ai).empty() ? "profession" : "vendor");
         }
     };
 

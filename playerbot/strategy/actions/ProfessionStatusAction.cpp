@@ -45,7 +45,7 @@ bool ProfessionStatusAction::Execute(Event& event)
         << " x" << plan.craftCount;
     ai->TellPlayerNoFacing(requester, planText.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 
-    for (const auto& [itemId, count] : plan.missing)
+    for (const auto& [itemId, count] : plan.GetMissingReagents(ai))
     {
         ItemQualifier qualifier(itemId);
         std::ostringstream missing;

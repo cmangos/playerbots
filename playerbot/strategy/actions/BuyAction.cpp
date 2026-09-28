@@ -6,6 +6,7 @@
 #include "playerbot/strategy/values/BudgetValues.h"
 #include "playerbot/strategy/values/MountValues.h"
 #include "playerbot/strategy/values/GuildValues.h"
+#include "playerbot/strategy/values/CraftValues.h"
 
 using namespace ai;
 
@@ -175,6 +176,42 @@ bool BuyAction::Execute(Event& event)
                         ai->DoSpecificAction("equip upgrades", event, true);
                         break;
                     }
+                }
+            }
+
+            // Buy bounded quantities for the current autonomous profession
+            // plan. The plan is cached, but inventory counts are read live so
+            // a single vendor interaction cannot over-purchase.
+            ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+            uint32 professionPurchases = 0;
+            for (const auto& [reagentId, desiredCount] : professionPlan.required)
+            {
+                if (professionPurchases >= sPlayerbotAIConfig.professionVendorPurchaseLimit)
+                    break;
+
+                const ItemPrototype* reagentProto = sObjectMgr.GetItemPrototype(reagentId);
+                if (!reagentProto)
+                    continue;
+
+                uint32 currentCount = ai->GetInventoryItemsCountWithId(reagentId);
+                while (currentCount < desiredCount && professionPurchases < sPlayerbotAIConfig.professionVendorPurchaseLimit)
+                {
+                    uint32 reagentPrice = uint32(floor(reagentProto->BuyPrice * bot->GetReputationPriceDiscount(pCreature)));
+                    RESET_AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill);
+                    if (reagentPrice > AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill))
+                        break;
+
+                    bool didBuy = BuyItem(requester, tItems, vendorguid, reagentProto, bought, ItemUsage::ITEM_USAGE_SKILL);
+                    if (!didBuy)
+                        didBuy = BuyItem(requester, vItems, vendorguid, reagentProto, bought, ItemUsage::ITEM_USAGE_SKILL);
+                    if (!didBuy)
+                        break;
+
+                    result = true;
+                    professionPurchases++;
+                    currentCount = ai->GetInventoryItemsCountWithId(reagentId);
+                    RESET_AI_VALUE2(ItemUsage, "item usage", reagentId);
+                    RESET_AI_VALUE2(std::list<Item*>, "inventory items", ChatHelper::formatItem(reagentProto));
                 }
             }
 

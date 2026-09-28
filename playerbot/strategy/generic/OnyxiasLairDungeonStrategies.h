@@ -7,7 +7,7 @@ namespace ai
     {
     public:
         OnyxiasLairDungeonStrategy(PlayerbotAI* ai) : Strategy(ai) {}
-        std::string getName() override { return "onyxia's lair"; }
+        std::string getName() override { return "onyxias lair"; }
 
     private:
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;

@@ -184,3 +184,13 @@ Required next decision: inspect the single upstream commit for overlap, then
 either rebase/merge it into the feature branch after approval or leave this PR
 on its original base and push the correction commits as-is. After that, finish
 the still-open correction work and complete a full WotLK worldserver link.
+
+### Upstream integration completed
+
+The user approved syncing the fork. The upstream commit only changed
+`WaitForAttackAction.cpp`, `WaitForAttackAction.h`, and `CombatStrategy.h`, with
+no overlap with the profession correction files. `origin/master` was
+fast-forwarded to official upstream `0b3e77f5`, then `upstream/master` was merged
+into the feature branch with merge commit `71a08202`. No rebase, history rewrite,
+or force-push was used. The correction commits remain intact and the feature
+branch is now based on current official upstream.

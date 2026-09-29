@@ -974,11 +974,14 @@ AiPlayerbot.ProfessionProgression.CanaryPercent = 10
 AiPlayerbot.ProfessionProgression.PlanCheckInterval = 60
 # Maximum crafts planned at once and maximum units retained per reagent.
 AiPlayerbot.ProfessionProgression.CraftBatchSize = 5
+# Minimum seconds between autonomous profession crafting batches.
+AiPlayerbot.ProfessionProgression.CraftCooldown = 30
 AiPlayerbot.ProfessionProgression.MaterialTarget = 20
 # Maximum vendor purchase operations during one interaction.
 AiPlayerbot.ProfessionProgression.VendorPurchaseLimit = 10
 # AH scans are per-bot throttled; purchases require buyout price validation.
 AiPlayerbot.ProfessionProgression.AHSearchCooldown = 600
+# Set AHPurchaseLimit or AHBudgetPercent to 0 to disable profession AH buying.
 AiPlayerbot.ProfessionProgression.AHPurchaseLimit = 2
 AiPlayerbot.ProfessionProgression.AHBudgetPercent = 10
 AiPlayerbot.ProfessionProgression.AHMaxPriceMultiplier = 1.25

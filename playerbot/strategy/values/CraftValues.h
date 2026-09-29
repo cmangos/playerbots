@@ -4,11 +4,23 @@
 
 namespace ai
 {
+    struct ProfessionMaterialSources
+    {
+        std::map<uint32, std::vector<int32>> gatherEntries;
+        std::vector<int32> vendorEntries;
+        std::vector<uint32> auctionItems;
+
+        bool HasGathering() const { return !gatherEntries.empty(); }
+        bool HasVendor() const { return !vendorEntries.empty(); }
+        bool HasAuctionHouse() const { return !auctionItems.empty(); }
+    };
+
     struct ProfessionCraftingPlan
     {
         uint32 spellId = 0;
         uint32 skillId = 0;
         uint32 itemId = 0;
+        uint32 spellFocusId = 0;
         uint32 craftCount = 0;
         std::map<uint32, uint32> required;
         std::map<uint32, uint32> missing;
@@ -17,6 +29,7 @@ namespace ai
         bool HasMaterials() const { return IsValid() && missing.empty(); }
         bool Needs(uint32 reagentId) const { return missing.find(reagentId) != missing.end(); }
         std::map<uint32, uint32> GetMissingReagents(PlayerbotAI* ai) const;
+        ProfessionMaterialSources GetMaterialSources(PlayerbotAI* ai) const;
     };
 
     class CraftData
@@ -123,6 +136,13 @@ namespace ai
         virtual ProfessionCraftingPlan Calculate() override;
 
         static bool IsEnabledFor(PlayerbotAI* ai);
+        static bool IsCraftCooldownReady(PlayerbotAI* ai);
+        static bool IsAhSearchReady(PlayerbotAI* ai);
+        static uint32 GetAhBudget(PlayerbotAI* ai);
+        static bool ShouldTravelForGathering(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);
+        static bool ShouldTravelToVendor(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);
+        static bool ShouldTravelToAuctionHouse(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);
+        static bool ShouldTravelToSpellFocus(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);
     };
 
     class CanCraftProfessionValue : public BoolCalculatedValue
@@ -130,5 +150,13 @@ namespace ai
     public:
         CanCraftProfessionValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can craft profession", 10) {}
         virtual bool Calculate() override;
+    };
+
+    class ProfessionMaterialSourcesValue : public CalculatedValue<ProfessionMaterialSources>
+    {
+    public:
+        ProfessionMaterialSourcesValue(PlayerbotAI* ai) :
+            CalculatedValue<ProfessionMaterialSources>(ai, "profession material sources", 15) {}
+        virtual ProfessionMaterialSources Calculate() override;
     };
 }

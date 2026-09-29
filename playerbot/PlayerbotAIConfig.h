@@ -182,6 +182,7 @@ public:
     uint32 professionProgressionCanaryPercent;
     uint32 professionPlanCheckInterval;
     uint32 professionCraftBatchSize;
+    uint32 professionCraftCooldown;
     uint32 professionMaterialTarget;
     uint32 professionVendorPurchaseLimit;
     uint32 professionAhSearchCooldown;

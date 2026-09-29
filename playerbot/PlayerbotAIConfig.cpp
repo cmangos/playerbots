@@ -251,6 +251,8 @@ bool PlayerbotAIConfig::Initialize()
         std::max(10, config.GetIntDefault("AiPlayerbot.ProfessionProgression.PlanCheckInterval", 60)));
     professionCraftBatchSize =
         static_cast<uint32>(std::max(1, config.GetIntDefault("AiPlayerbot.ProfessionProgression.CraftBatchSize", 5)));
+    professionCraftCooldown =
+        static_cast<uint32>(std::max(1, config.GetIntDefault("AiPlayerbot.ProfessionProgression.CraftCooldown", 30)));
     professionMaterialTarget =
         static_cast<uint32>(std::max(1, config.GetIntDefault("AiPlayerbot.ProfessionProgression.MaterialTarget", 20)));
     professionVendorPurchaseLimit = static_cast<uint32>(
@@ -258,7 +260,7 @@ bool PlayerbotAIConfig::Initialize()
     professionAhSearchCooldown = static_cast<uint32>(
         std::max(60, config.GetIntDefault("AiPlayerbot.ProfessionProgression.AHSearchCooldown", 600)));
     professionAhPurchaseLimit =
-        static_cast<uint32>(std::max(1, config.GetIntDefault("AiPlayerbot.ProfessionProgression.AHPurchaseLimit", 2)));
+        static_cast<uint32>(std::max(0, config.GetIntDefault("AiPlayerbot.ProfessionProgression.AHPurchaseLimit", 2)));
     professionAhBudgetPercent = static_cast<uint32>(
         std::max(0, std::min(100, config.GetIntDefault("AiPlayerbot.ProfessionProgression.AHBudgetPercent", 10))));
     professionAhMaxPriceMultiplier = std::max<float>(0.1f, config.GetFloatDefault("AiPlayerbot.ProfessionProgression.AHMaxPriceMultiplier", 1.25f));

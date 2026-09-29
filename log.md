@@ -126,3 +126,44 @@ git diff 99e6f15eb154bec2c8602e8b425fef87e67de501
 
 Before committing, ensure `.core-reference/` and `.validation-tools/` remain
 untracked and unstaged.
+
+## Correction pass checkpoint (2026-09-29)
+
+Work is continuing on `feature/playerbot-profession-economy` from published head
+`65ac8666d69083f33f6cb65c4e7a2189a0fde5ec`. A fresh fetch confirmed that
+`upstream/master` and `origin/master` remain at the original base
+`99e6f15eb154bec2c8602e8b425fef87e67de501`; no merge, rebase, or pull was done.
+
+The review findings were confirmed: missing profession materials did not activate
+vendor/AH travel, spell-focus recipes were excluded from autonomous crafting, AH
+stacks larger than the exact deficit were rejected, assignment reconciliation had
+a stale-metadata edge case, and `CraftBatchSize` was not a durable pacing limit.
+
+Uncommitted correction work currently includes:
+
+- a small testable policy layer for metadata reconciliation, deterministic canary
+  selection, cooldown checks, and bounded AH overbuying;
+- authoritative reconciliation of persisted real professions;
+- a 30-second autonomous profession craft cooldown configuration;
+- cached material acquisition classification for mining, herbalism, skinning,
+  fishing, vendor reagents, and AH fallback;
+- profession-specific travel activation values plus a real spell-focus travel
+  purpose;
+- compile-time policy tests, including WotLK Inscription guards and AH/cooldown
+  cases.
+
+Still to complete after this checkpoint: wire the new named travel requests into
+TravelMgr/TravelStrategy, record successful craft cooldowns, finish AH reasonable
+overbuy safeguards, scope crafted-output posting limits, compile/link the complete
+WotLK worldserver, commit/push follow-up commits, and update PR #1. Full autonomous
+Enchanting and targeted arbitrary cloth/drop farming are being evaluated as
+explicit limitations rather than implemented unsafely.
+
+The untracked `.core-reference/` and `.validation-tools/` directories remain
+preserved and must not be added to Git. Nothing has been deployed or restarted.
+
+Checkpoint validation: `git diff --check` passes apart from Git's existing
+line-ending notices. WotLK compile probes succeeded for `PlayerbotAIConfig.cpp`,
+`PlayerbotFactory.cpp`, `CraftValues.cpp`, `LootValues.cpp`, `TravelValues.cpp`,
+and `ProfessionProgressionPolicyTests.cpp`. This is not the required full
+worldserver build/link, so the branch remains **not ready for a live canary**.

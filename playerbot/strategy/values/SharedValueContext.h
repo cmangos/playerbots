@@ -20,6 +20,7 @@ namespace ai
 
             creators["item drop map"] = [](PlayerbotAI* ai) { return new ItemDropMapValue(ai); };
             creators["drop map"] = [](PlayerbotAI* ai) { return new DropMapValue(ai); };
+            creators["gather source map"] = [](PlayerbotAI* ai) { return new GatherSourceMapValue(ai); };
             creators["item drop list"] = [](PlayerbotAI* ai) { return new ItemDropListValue(ai); };
             creators["entry loot list"] = [](PlayerbotAI* ai) { return new EntryLootListValue(ai); };
             creators["loot chance"] = [](PlayerbotAI* ai) { return new LootChanceValue(ai); };

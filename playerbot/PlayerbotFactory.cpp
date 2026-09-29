@@ -12,6 +12,7 @@
 #include "RandomPlayerbotFactory.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/AiFactory.h"
+#include "playerbot/strategy/values/ProfessionProgressionPolicy.h"
 #include "Guilds/GuildMgr.h"
 
 #ifndef MANGOSBOT_ZERO
@@ -3900,17 +3901,18 @@ void PlayerbotFactory::InitTradeSkills()
             knownPrimarySkills.push_back(tradeSkill);
     }
 
-    if (!knownPrimarySkills.empty())
-    {
-        if (std::find(knownPrimarySkills.begin(), knownPrimarySkills.end(), firstSkill) == knownPrimarySkills.end())
-            firstSkill = knownPrimarySkills[0];
-
-        if (knownPrimarySkills.size() > 1 &&
-            std::find(knownPrimarySkills.begin(), knownPrimarySkills.end(), secondSkill) == knownPrimarySkills.end())
-        {
-            secondSkill = knownPrimarySkills[0] == firstSkill ? knownPrimarySkills[1] : knownPrimarySkills[0];
-        }
-    }
+    // Normalize invalid metadata before applying the tested reconciliation
+    // policy. Two real character professions always win. With exactly one,
+    // only its previously stored companion can be restored; unrelated stale
+    // metadata is discarded and the normal assignment path fills the vacancy.
+    uint16 normalizedFirstSkill = IsPrimaryProfession(firstSkill) ? firstSkill : 0;
+    uint16 normalizedSecondSkill = IsPrimaryProfession(secondSkill) ? secondSkill : 0;
+    uint16 actualFirstSkill = knownPrimarySkills.empty() ? 0 : knownPrimarySkills[0];
+    uint16 actualSecondSkill = knownPrimarySkills.size() < 2 ? 0 : knownPrimarySkills[1];
+    profession::AssignmentPair assignments = profession::ReconcileAssignments(
+        normalizedFirstSkill, normalizedSecondSkill, actualFirstSkill, actualSecondSkill);
+    firstSkill = assignments.first;
+    secondSkill = assignments.second;
 
     if (!firstSkill || !secondSkill)
     {
@@ -3997,9 +3999,14 @@ void PlayerbotFactory::InitTradeSkills()
         if (preservedSecondSkill)
             secondSkill = preservedSecondSkill;
 
-        // Avoid assigning the same primary profession twice when recovering
-        // metadata for a character that only had one profession.
-        if (firstSkill == secondSkill)
+        // Avoid assigning the same or an invalid primary profession when
+        // recovering incomplete metadata.
+        if (!IsPrimaryProfession(firstSkill))
+            firstSkill = 0;
+        if (!IsPrimaryProfession(secondSkill) || firstSkill == secondSkill)
+            secondSkill = 0;
+
+        if (!firstSkill || !secondSkill)
         {
             static const uint16 primarySkills[] = {
                 SKILL_ALCHEMY, SKILL_BLACKSMITHING, SKILL_ENCHANTING,
@@ -4015,11 +4022,13 @@ void PlayerbotFactory::InitTradeSkills()
 
             for (uint16 candidate : primarySkills)
             {
-                if (candidate != firstSkill)
-                {
+                if (!firstSkill)
+                    firstSkill = candidate;
+                else if (!secondSkill && candidate != firstSkill)
                     secondSkill = candidate;
+
+                if (firstSkill && secondSkill)
                     break;
-                }
             }
         }
     }

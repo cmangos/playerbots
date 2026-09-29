@@ -3,6 +3,11 @@
 #include "playerbot/ServerFacade.h"
 #include "playerbot/PlayerbotAI.h"
 #include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/TravelMgr.h"
+#include "playerbot/strategy/values/BudgetValues.h"
+#include "playerbot/strategy/values/LootValues.h"
+#include "playerbot/strategy/values/ProfessionProgressionPolicy.h"
+#include "playerbot/strategy/values/SharedValueContext.h"
 
 using namespace ai;
 
@@ -252,6 +257,70 @@ std::map<uint32, uint32> ProfessionCraftingPlan::GetMissingReagents(PlayerbotAI*
     return liveMissing;
 }
 
+ProfessionMaterialSources ProfessionCraftingPlan::GetMaterialSources(PlayerbotAI* ai) const
+{
+    ProfessionMaterialSources sources;
+    if (!ai || !IsValid())
+        return sources;
+
+    Player* bot = ai->GetBot();
+    PlayerTravelInfo travelInfo(bot);
+    GatherSourceMap* gatherSourceMap = GAI_VALUE(GatherSourceMap*, "gather source map");
+    std::set<int32> vendorEntries;
+    std::map<uint32, std::set<int32>> gatherEntries;
+
+    for (const auto& missingReagent : GetMissingReagents(ai))
+    {
+        uint32 itemId = missingReagent.first;
+        bool hasPracticalGatherSource = false;
+        auto gatherRange = gatherSourceMap->equal_range(itemId);
+        for (auto itr = gatherRange.first; itr != gatherRange.second; ++itr)
+        {
+            GatherSource const& source = itr->second;
+            if (!bot->HasSkill(source.skillId))
+                continue;
+
+            TravelDestinationPurpose purpose = TravelDestinationPurpose::None;
+            switch (source.skillId)
+            {
+                case SKILL_MINING: purpose = TravelDestinationPurpose::GatherMining; break;
+                case SKILL_HERBALISM: purpose = TravelDestinationPurpose::GatherHerbalism; break;
+                case SKILL_SKINNING: purpose = TravelDestinationPurpose::GatherSkinning; break;
+                case SKILL_FISHING: purpose = TravelDestinationPurpose::GatherFishing; break;
+                default: continue;
+            }
+
+            GatherTravelDestination destination(purpose, 0, source.entry);
+            if (!destination.IsPossible(travelInfo))
+                continue;
+
+            gatherEntries[static_cast<uint32>(purpose)].insert(source.entry);
+            hasPracticalGatherSource = true;
+        }
+
+        if (hasPracticalGatherSource)
+            continue;
+
+        std::list<int32> itemVendors = GAI_VALUE2(std::list<int32>, "item vendor list", itemId);
+        if (!itemVendors.empty())
+        {
+            vendorEntries.insert(itemVendors.begin(), itemVendors.end());
+            continue;
+        }
+
+        // Deliberate dropped-material farming is intentionally not inferred
+        // here: arbitrary creature loot would require expensive probability
+        // and level filtering. Normal loot remains active; AH is the targeted
+        // fallback for non-gatherable, non-vendor reagents.
+        sources.auctionItems.push_back(itemId);
+    }
+
+    for (const auto& [purpose, entries] : gatherEntries)
+        sources.gatherEntries[purpose] = std::vector<int32>(entries.begin(), entries.end());
+    sources.vendorEntries.assign(vendorEntries.begin(), vendorEntries.end());
+    return sources;
+}
+
 bool ProfessionCraftingPlanValue::IsEnabledFor(PlayerbotAI* ai)
 {
     if (!sPlayerbotAIConfig.professionProgressionEnabled || !sPlayerbotAIConfig.professionProgressionCanaryPercent)
@@ -262,8 +331,70 @@ bool ProfessionCraftingPlanValue::IsEnabledFor(PlayerbotAI* ai)
         return false;
 
     // Stable assignment keeps the canary cohort unchanged across restarts.
-    uint32 bucket = (bot->GetGUIDLow() * 2654435761u) % 100;
-    return bucket < sPlayerbotAIConfig.professionProgressionCanaryPercent;
+    return profession::IsInCanary(bot->GetGUIDLow(), sPlayerbotAIConfig.professionProgressionCanaryPercent);
+}
+
+bool ProfessionCraftingPlanValue::IsCraftCooldownReady(PlayerbotAI* ai)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    uint32 now = static_cast<uint32>(time(nullptr));
+    uint32 lastCraft = static_cast<uint32>(std::max<int32>(0,
+        AI_VALUE2(int32, "manual int", "last profession craft")));
+    return profession::IsCooldownReady(now, lastCraft, sPlayerbotAIConfig.professionCraftCooldown);
+}
+
+bool ProfessionCraftingPlanValue::IsAhSearchReady(PlayerbotAI* ai)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    uint32 now = static_cast<uint32>(time(nullptr));
+    uint32 lastSearch = static_cast<uint32>(std::max<int32>(0,
+        AI_VALUE2(int32, "manual int", "last profession ah search")));
+    return profession::IsCooldownReady(now, lastSearch, sPlayerbotAIConfig.professionAhSearchCooldown);
+}
+
+uint32 ProfessionCraftingPlanValue::GetAhBudget(PlayerbotAI* ai)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    Player* bot = ai->GetBot();
+    uint32 tradeskillBudget = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill);
+    uint32 percentageBudget = static_cast<uint32>(
+        static_cast<uint64>(bot->GetMoney()) * sPlayerbotAIConfig.professionAhBudgetPercent / 100);
+    return std::min(tradeskillBudget, percentageBudget);
+}
+
+bool ProfessionCraftingPlanValue::ShouldTravelForGathering(PlayerbotAI* ai, const ProfessionCraftingPlan& plan)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    ProfessionMaterialSources sources = AI_VALUE(ProfessionMaterialSources, "profession material sources");
+    return profession::ShouldTravelForSources(IsEnabledFor(ai), plan.IsValid(), sources.HasGathering(), true,
+        AI_VALUE(uint8, "bag space") <= 80, ai->HasActivePlayerMaster());
+}
+
+bool ProfessionCraftingPlanValue::ShouldTravelToVendor(PlayerbotAI* ai, const ProfessionCraftingPlan& plan)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    ProfessionMaterialSources sources = AI_VALUE(ProfessionMaterialSources, "profession material sources");
+    uint32 tradeskillBudget = AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill);
+    return profession::ShouldTravelForSources(IsEnabledFor(ai), plan.IsValid(), sources.HasVendor(),
+        tradeskillBudget > 0, AI_VALUE(uint8, "bag space") <= 80, ai->HasActivePlayerMaster());
+}
+
+bool ProfessionCraftingPlanValue::ShouldTravelToAuctionHouse(PlayerbotAI* ai, const ProfessionCraftingPlan& plan)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    ProfessionMaterialSources sources = AI_VALUE(ProfessionMaterialSources, "profession material sources");
+    bool ahBuyingEnabled = sPlayerbotAIConfig.professionAhPurchaseLimit > 0 &&
+        sPlayerbotAIConfig.professionAhBudgetPercent > 0;
+    return profession::ShouldTravelToAuctionHouse(IsEnabledFor(ai), plan.IsValid(), sources.HasAuctionHouse(),
+        ahBuyingEnabled, GetAhBudget(ai) > 0, IsAhSearchReady(ai), AI_VALUE(uint8, "bag space") <= 80,
+        ai->HasActivePlayerMaster());
+}
+
+bool ProfessionCraftingPlanValue::ShouldTravelToSpellFocus(PlayerbotAI* ai, const ProfessionCraftingPlan& plan)
+{
+    return IsEnabledFor(ai) && plan.IsValid() && plan.spellFocusId &&
+        plan.GetMissingReagents(ai).empty() && IsCraftCooldownReady(ai) &&
+        !ai->HasActivePlayerMaster();
 }
 
 ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
@@ -307,6 +438,7 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
         ProfessionCraftingPlan candidate;
         candidate.spellId = spellId;
         candidate.skillId = skillId;
+        candidate.spellFocusId = spell->RequiresSpellFocus;
         candidate.craftCount = sPlayerbotAIConfig.professionCraftBatchSize;
 
         for (uint8 effect = 0; effect < MAX_EFFECT_INDEX; ++effect)
@@ -357,7 +489,8 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
 bool CanCraftProfessionValue::Calculate()
 {
     ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
-    if (!plan.IsValid() || !plan.GetMissingReagents(ai).empty() || AI_VALUE(uint8, "bag space") > 80)
+    if (!plan.IsValid() || !ProfessionCraftingPlanValue::IsCraftCooldownReady(ai) ||
+        !plan.GetMissingReagents(ai).empty() || AI_VALUE(uint8, "bag space") > 80)
         return false;
 
     SpellEntry const* spell = sServerFacade.LookupSpellInfo(plan.spellId);
@@ -365,4 +498,9 @@ bool CanCraftProfessionValue::Calculate()
         return false;
 
     return AI_VALUE2(bool, "can craft spell", plan.spellId);
+}
+
+ProfessionMaterialSources ProfessionMaterialSourcesValue::Calculate()
+{
+    return AI_VALUE(ProfessionCraftingPlan, "profession crafting plan").GetMaterialSources(ai);
 }

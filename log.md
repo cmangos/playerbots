@@ -194,3 +194,21 @@ fast-forwarded to official upstream `0b3e77f5`, then `upstream/master` was merge
 into the feature branch with merge commit `71a08202`. No rebase, history rewrite,
 or force-push was used. The correction commits remain intact and the feature
 branch is now based on current official upstream.
+
+## Final correction validation (2026-09-29)
+
+Current official upstream `c1193bcb4fdb9c1e0bc758471022776c141e6f73` was
+merged normally as `23996e38`; Git preserved both profession-focus travel and
+upstream quest-target behavior. Portable include fixes and immediate live-gate
+checks were committed as `1202d0253b9be813d4f0e303bca9ad4066bff944`.
+
+The complete Release WotLK build then completed all 739 candidate-build steps
+and linked `bin/x64_Release/mangosd.exe` against CMaNGOS WotLK core
+`1cd9d566ae83c1a88f1b057514697055055f419c`. The executable is 28,948,992 bytes
+with SHA-256 `98C78755C7FAAEDBF955CD385E4906B8E795295F1E3B4BEA802A890805F6C57B`.
+CTest found no registered runtime tests; compile-time profession policy checks
+compiled in `libplayerbots.a`. No deployment occurred.
+
+Publication remains pending because the visible repository's `.git` directory
+is read-only to this session and the saved GitHub CLI token is invalid. PR #1
+has therefore not yet been updated.

@@ -61,6 +61,11 @@ bool EnemyPlayersValue::IsValid(Unit* target, Player* player)
                 }
             }
 
+            if (!IsReachable(target, player))
+            {
+                return false;
+            }
+
             /*
             // Check if too far away (Do we need this?)
             const float maxPvPDistance = GetMaxAttackDistance(player);
@@ -77,6 +82,25 @@ bool EnemyPlayersValue::IsValid(Unit* target, Player* player)
     }
 
     return false;
+}
+
+bool EnemyPlayersValue::IsReachable(Unit* target, Player* player)
+{
+    // Only check targets far above or below the player. A player standing under the map
+    // (or on a ledge with no way up) is close in 2D but can never be reached, and would
+    // otherwise keep the bot in combat with it indefinitely. The height gate keeps the
+    // pathfinder out of the common case.
+    if (!target || !player || target->GetMapId() != player->GetMapId())
+    {
+        return true;
+    }
+
+    if (std::abs(target->GetPositionZ() - player->GetPositionZ()) <= 10.0f)
+    {
+        return true;
+    }
+
+    return WorldPosition(player).canPathTo(WorldPosition(target), player);
 }
 
 void EnemyPlayersValue::ApplyFilter(std::list<ObjectGuid>& targets, bool getOne)

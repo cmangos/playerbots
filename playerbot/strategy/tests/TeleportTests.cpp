@@ -577,13 +577,13 @@ void TestRegistry::RegisterTeleportTests()
         "teleport stormwind",
         "mgroup size=4",
         "wait 60",
-        "teleport group",
+        "teleport group expect=4",
         "wait 5",
         "teleport orgrimmar",
         "wait 5",
-        "teleport group",
+        "teleport group expect=4",
         "wait 10",
-        "teleport group",
+        "teleport group expect=4",
         "observe"
     });
 }

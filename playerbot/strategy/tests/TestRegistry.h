@@ -28,6 +28,7 @@ namespace ai
         static void GenerateMovementTests(int maxTests, float minDist, float maxDist);
         static void GenerateTransportTests(int maxTests);
         static void GenerateBossWalkTest();
+        static void GenerateBossReachTest();
         static void GenerateBossEncounterTest();
         static std::string GetBotCreationRequirement(const std::string& testName);
         static uint32 ExpectedBotSpawnCount(const std::string& testName);

@@ -69,6 +69,26 @@ bool MonitorStateGroupSize::IsConditionMet(const std::string& monitorStr, Player
 
     const bool met = (op == ">") ? (size > threshold) : (size < threshold);
 
+    // BL-45 soak: group dissolutions were completely silent (no deaths logged, no logout lines), so
+    // log the full member state at fire time - who is missing, online, on which map.
+    if (met && group)
+    {
+        std::string members;
+        for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+        {
+            Player* member = ref->getSource();
+            if (!member)
+            {
+                members += " <null-slot>";
+                continue;
+            }
+            members += " " + std::string(member->GetName()) + "(map" + std::to_string(member->GetMapId()) +
+                ",inWorld=" + (member->IsInWorld() ? "1" : "0") + ",alive=" + (member->IsAlive() ? "1" : "0") + ")";
+        }
+        sLog.outError("[TESTGEN] group size monitor fired: size=%u threshold %s %s; members:%s", size,
+            op.c_str(), valueStr.c_str(), members.c_str());
+    }
+
     return met;
 }
 
@@ -93,10 +113,30 @@ bool MonitorStateGroupOnMap::IsConditionMet(const std::string& monitorStr, Playe
 
     // GetFirstMember() walks live GroupReference links, so an offline member is invisible there while
     // GetMembersCount() still counts its slot - hence the slot count rather than a live-member count.
-    const uint32 expectedMembers = group->GetMembersCount() > 0 ? group->GetMembersCount() - 1 : 0;
+    // BL-44: snapshot the expectation at the FIRST tick. Recomputing it from the live group every tick
+    // let a mid-window member loss silently lower the bar (a member leaving reduced the threshold),
+    // while an offline member slot made the condition unsatisfiable.
+    if (ctx.groupOnMapExpected == 0)
+        ctx.groupOnMapExpected = group->GetMembersCount() > 0 ? group->GetMembersCount() - 1 : 0;
+    const uint32 expectedMembers = ctx.groupOnMapExpected;
 
-    // Already complete: sticky, so later roaming cannot un-prove a delivery that was observed.
-    if (expectedMembers > 0 && ctx.groupMembersSeenOnMap.size() >= expectedMembers)
+    // BL-44: causal mode. When the "teleport group" helper recorded deliveries, only THOSE members
+    // count - a member that roams to the host's map by coincidence can no longer satisfy the pass.
+    const std::set<ObjectGuid> delivered = ctx.GetDeliveredGroupMembers();
+    const bool causal = !delivered.empty();
+
+    // Already complete: sticky. Non-causal: all expected member slots latched. Causal: every member
+    // the helper actually delivered has been observed on the host's map at least once.
+    if (causal)
+    {
+        bool allDeliveredSeen = true;
+        for (ObjectGuid guid : delivered)
+            if (ctx.groupMembersSeenOnMap.find(guid) == ctx.groupMembersSeenOnMap.end())
+                allDeliveredSeen = false;
+        if (allDeliveredSeen)
+            return true;
+    }
+    else if (expectedMembers > 0 && ctx.groupMembersSeenOnMap.size() >= expectedMembers)
         return true;
 
     // Optional map gate, e.g. "1" in "monitor group on map 1 => pass ...". The framework hands this
@@ -154,6 +194,11 @@ bool MonitorStateGroupOnMap::IsConditionMet(const std::string& monitorStr, Playe
 
         // GetMapId()/GetInstanceId() read cached members, so unlike GetMap() they cannot assert.
         if (member->GetMapId() != mapId || member->GetInstanceId() != instanceId)
+            continue;
+
+        // BL-44: in causal mode a member that was NOT delivered by the helper is ignored - it may be
+        // a roamed random bot that happens to be on this map, and latching it would fake a delivery.
+        if (causal && delivered.find(member->GetObjectGuid()) == delivered.end())
             continue;
 
         ctx.groupMembersSeenOnMap.insert(member->GetObjectGuid());

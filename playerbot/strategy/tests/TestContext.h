@@ -4,6 +4,7 @@
 #include <string>
 #include <set>
 #include <cstdint>
+#include <mutex>
 #include "Globals/ObjectMgr.h"
 #include "playerbot/GuidPosition.h"
 #include "playerbot/WorldPosition.h"
@@ -77,6 +78,21 @@ namespace ai
         // bots and are rarely all settled on the same map on the same tick - the monitor asserts that the
         // delivery happened, not that it held.
         std::set<ObjectGuid> groupMembersSeenOnMap;
+
+        // BL-44: thread-safe record of the members the "teleport group" helper ACTUALLY delivered
+        // (moved=true inside the RunOnOwningThread callback, which runs on the world thread). Written
+        // from the callback, read by the "group on map" monitor on the bot's update thread - hence the
+        // mutex. Non-empty switches the monitor to causal mode: only delivered members count toward the
+        // pass, so roaming a member to the host's map by coincidence can no longer satisfy it.
+        std::mutex groupDeliveryMutex;
+        std::set<ObjectGuid> deliveredGroupMembers;
+        void RecordDeliveredGroupMember(ObjectGuid guid);
+        std::set<ObjectGuid> GetDeliveredGroupMembers();
+
+        // BL-44: snapshot of the expected group-member count, taken at the monitor's first tick. The
+        // live group can shrink mid-window (a member leaves), which would silently lower the bar; the
+        // snapshot keeps the original assertion strength for the whole observe window.
+        uint32 groupOnMapExpected = 0;
 
         bool debug = false; // enable extra logging for debugging
 

@@ -288,8 +288,33 @@ TestResult CommandSetupTeleportGroup::Execute(const std::string& params, Player*
     Group* group = bot->GetGroup();
     if (!group)
     {
-        sLog.outString("[TestAction] teleport group: bot has no group, skipping");
-        return TestResult::PASS;
+        // BL-44: a missing group used to be a silent PASS ("skipping"), which let a lost group join
+        // (BL-42) surface later as the hop monitor's timeout. Fail honestly at the moment of the hop.
+        message = "teleport group: group never formed (bot has no group)";
+        return TestResult::ABORT;
+    }
+
+    // BL-44: optional "expect=<n>" - abort when the group never reached the expected size instead of
+    // delivering to a fragment and letting the pass monitor time out.
+    uint32 expect = 0;
+    {
+        std::string expectKey = "expect=";
+        size_t pos = params.find(expectKey);
+        if (pos != std::string::npos)
+        {
+            std::string valueStr = params.substr(pos + expectKey.length());
+            size_t end = valueStr.find(' ');
+            if (end != std::string::npos)
+                valueStr = valueStr.substr(0, end);
+            if (!valueStr.empty() && std::all_of(valueStr.begin(), valueStr.end(), ::isdigit))
+                expect = (uint32)atoi(valueStr.c_str());
+        }
+    }
+    if (expect && group->GetMembersCount() < expect)
+    {
+        message = "teleport group: group never formed (size " + std::to_string(group->GetMembersCount()) +
+                  " < expected " + std::to_string(expect) + ")";
+        return TestResult::ABORT;
     }
 
     float x = bot->GetPositionX();
@@ -319,7 +344,7 @@ TestResult CommandSetupTeleportGroup::Execute(const std::string& params, Player*
                   ",inWorld=" + (member->IsInWorld() ? "1" : "0") +
                   ",tp=" + (member->IsBeingTeleported() ? "1" : "0") + ")";
 
-        ai->RunOnOwningThread(member, [mapId, x, y, z, orient](Player* m)
+        ai->RunOnOwningThread(member, [&ctx, mapId, x, y, z, orient](Player* m)
         {
             // The return value matters: Player::TeleportTo refuses a charmed player, an invalid
             // coordinate, or a map the player may not enter - reporting the attempt without it was the
@@ -329,6 +354,14 @@ TestResult CommandSetupTeleportGroup::Execute(const std::string& params, Player*
             const bool wasInWorld = m->IsInWorld();
             const bool wasTeleporting = m->IsBeingTeleported();
             const bool moved = m->TeleportTo(mapId, x, y, z, orient);
+
+            // BL-44: record the members that were ACTUALLY delivered (moved=true). The "group on map"
+            // monitor switches to causal mode when this sink is non-empty, so a member that roams to
+            // the host's map by coincidence can no longer satisfy the pass condition. ctx (TestAction's
+            // member) outlives the deferred callback: callbacks run on the next world tick while the
+            // test is still in its observe window.
+            if (moved)
+                ctx.RecordDeliveredGroupMember(m->GetObjectGuid());
 
             sLog.outDetail("[TestAction] teleport group: delivering %s to map %u (from map %u, inWorld=%d, tp=%d) -> moved=%d",
                 m->GetName(), mapId, fromMap, wasInWorld ? 1 : 0, wasTeleporting ? 1 : 0, moved ? 1 : 0);

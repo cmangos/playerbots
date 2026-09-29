@@ -210,6 +210,22 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
     return entryPurposeMap;
 }
 
+SpellFocusEntryMap* SpellFocusEntryMapValue::Calculate()
+{
+    SpellFocusEntryMap* focusEntries = new SpellFocusEntryMap;
+    EntryTravelPurposeMap const& purposeMap = GAI_VALUE(EntryTravelPurposeMap, "entry travel purpose");
+    for (const auto& [entry, purpose] : purposeMap)
+    {
+        if (entry >= 0 || !(purpose & static_cast<uint32>(TravelDestinationPurpose::CraftingFocus)))
+            continue;
+
+        GameObjectInfo const* goInfo = ObjectMgr::GetGameObjectInfo(-entry);
+        if (goInfo && goInfo->type == GAMEOBJECT_TYPE_SPELL_FOCUS && goInfo->spellFocus.focusId)
+            (*focusEntries)[goInfo->spellFocus.focusId].push_back(entry);
+    }
+    return focusEntries;
+}
+
 uint32 EntryTravelPurposeMapValue::SkillIdToGatherEntry(int32 entry)
 {
     if (entry > 0)

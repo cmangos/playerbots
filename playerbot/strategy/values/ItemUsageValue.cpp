@@ -120,7 +120,17 @@ ItemUsage ItemUsageValue::Calculate()
     if (plannedReagent != professionPlan.required.end())
     {
         uint32 current = ai->GetInventoryItemsCountWithId(itemId);
-        return current < plannedReagent->second ? ItemUsage::ITEM_USAGE_SKILL : ItemUsage::ITEM_USAGE_KEEP;
+        if (current < plannedReagent->second)
+            return ItemUsage::ITEM_USAGE_SKILL;
+
+        // Keep a useful but bounded reserve. If inventory exceeds it, fall
+        // through to normal equip/use/AH/vendor handling; sellers re-evaluate
+        // after each stack, so they stop once the reserve remains.
+        uint32 reserve = std::max(plannedReagent->second,
+            std::min<uint32>(sPlayerbotAIConfig.professionMaterialTarget,
+                std::max<uint32>(1, proto->GetMaxStackSize())));
+        if (current <= reserve)
+            return ItemUsage::ITEM_USAGE_KEEP;
     }
 
     if (bot->GetGuildId())

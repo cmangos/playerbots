@@ -38,6 +38,7 @@ namespace ai
           
 
             creators["entry travel purpose"] = [](PlayerbotAI* ai) { return new EntryTravelPurposeMapValue(ai); };
+            creators["spell focus entry map"] = [](PlayerbotAI* ai) { return new SpellFocusEntryMapValue(ai); };
             creators["entry guidps"] = [](PlayerbotAI* ai) { return new EntryGuidpsValue(ai); };
 
             creators["full mount list"] = [](PlayerbotAI* ai) { return new FullMountListValue(ai); };

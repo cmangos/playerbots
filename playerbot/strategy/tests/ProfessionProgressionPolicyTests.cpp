@@ -21,6 +21,11 @@ namespace
     static_assert(Same(ai::profession::ReconcileAssignments(164, 164, 0, 0), 164, 0),
         "the same profession must never be assigned twice");
 
+    static_assert(ai::profession::CanaryBucket(12345) == ai::profession::CanaryBucket(12345),
+        "canary selection must be deterministic");
+    static_assert(!ai::profession::IsInCanary(12345, 0), "a zero-percent canary must be empty");
+    static_assert(ai::profession::IsInCanary(12345, 100), "a full canary must include every bot");
+
     static_assert(ai::profession::IsReasonableAuctionStack(4, 0, 4, 20, 20),
         "an exact stack must be accepted");
     static_assert(ai::profession::IsReasonableAuctionStack(20, 0, 4, 20, 20),
@@ -42,6 +47,14 @@ namespace
         "a real-player master must suppress autonomous travel");
     static_assert(ai::profession::ShouldTravelForSources(true, true, true, true, true, false),
         "a valid vendor or gathering source should drive travel");
+    static_assert(!ai::profession::ShouldTravelForSources(true, true, false, true, true, false),
+        "vendor travel requires a real vendor source");
+    static_assert(!ai::profession::ShouldTravelForSources(true, true, true, true, true, true),
+        "gather travel excludes a real-player-master bot");
+    static_assert(ai::profession::ShouldTravelToSpellFocus(true, true, 3, false, true, false),
+        "a ready recipe with materials should travel to its real spell focus");
+    static_assert(!ai::profession::ShouldTravelToSpellFocus(true, true, 3, true, true, false),
+        "a focus trip must wait until recipe materials are present");
 
 #ifdef MANGOSBOT_TWO
     static_assert(SKILL_INSCRIPTION > 0, "WotLK builds must expose Inscription");

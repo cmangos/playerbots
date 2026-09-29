@@ -42,15 +42,31 @@ bool ProfessionStatusAction::Execute(Event& event)
     SpellEntry const* spell = sServerFacade.LookupSpellInfo(plan.spellId);
     std::ostringstream planText;
     planText << "Plan: " << (spell ? ChatHelper::formatSpell(spell) : std::to_string(plan.spellId))
-        << " x" << plan.craftCount;
+        << " x" << plan.craftCount
+        << ", craft cooldown "
+        << (ProfessionCraftingPlanValue::IsCraftCooldownReady(ai) ? "ready" : "waiting");
+    if (plan.spellFocusId)
+        planText << ", spell focus " << plan.spellFocusId;
     ai->TellPlayerNoFacing(requester, planText.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
 
-    for (const auto& [itemId, count] : plan.GetMissingReagents(ai))
+    std::map<uint32, uint32> missingReagents = plan.GetMissingReagents(ai);
+    for (const auto& [itemId, count] : missingReagents)
     {
         ItemQualifier qualifier(itemId);
         std::ostringstream missing;
         missing << "Missing: " << ChatHelper::formatItem(qualifier) << " x" << count;
         ai->TellPlayerNoFacing(requester, missing.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+    }
+
+    if (!missingReagents.empty())
+    {
+        ProfessionMaterialSources sources = AI_VALUE(ProfessionMaterialSources, "profession material sources");
+        std::ostringstream acquisition;
+        acquisition << "Acquisition: " << sources.gatherEntries.size() << " gather purpose(s), "
+            << sources.vendorEntries.size() << " vendor(s), "
+            << sources.auctionItems.size() << " AH material(s); AH cooldown "
+            << (ProfessionCraftingPlanValue::IsAhSearchReady(ai) ? "ready" : "waiting");
+        ai->TellPlayerNoFacing(requester, acquisition.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }
 
     return true;

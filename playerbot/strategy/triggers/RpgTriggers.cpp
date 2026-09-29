@@ -220,7 +220,8 @@ bool RpgAHBuyTrigger::IsActive()
         return false;
 
     ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
-    if (!AI_VALUE(bool, "can ah buy") && (!plan.IsValid() || plan.GetMissingReagents(ai).empty()))
+    bool canBuyProfessionMaterials = ProfessionCraftingPlanValue::ShouldTravelToAuctionHouse(ai, plan);
+    if (!AI_VALUE(bool, "can ah buy") && !canBuyProfessionMaterials)
         return false;
 
     return true;
@@ -663,6 +664,18 @@ bool RpgCraftTrigger::IsActive()
 
     if (!guidP.GetWorldObject(bot->GetInstanceId()))
         return false;
+
+    ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    if (ProfessionCraftingPlanValue::IsEnabledFor(ai) && professionPlan.IsValid() &&
+        professionPlan.spellFocusId && guidP.IsGameObject() &&
+        guidP.GetGameObjectInfo()->type == GAMEOBJECT_TYPE_SPELL_FOCUS &&
+        guidP.GetGameObjectInfo()->spellFocus.focusId == professionPlan.spellFocusId)
+    {
+        return ProfessionCraftingPlanValue::IsCraftCooldownReady(ai) &&
+            professionPlan.GetMissingReagents(ai).empty() &&
+            AI_VALUE2(bool, "can craft spell", professionPlan.spellId) &&
+            AI_VALUE2(bool, "should craft spell", professionPlan.spellId);
+    }
 
     std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
 

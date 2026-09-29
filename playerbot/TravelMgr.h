@@ -305,6 +305,18 @@ namespace ai
 		virtual std::string GetTitle() const override;
 	};
 
+    // A real spell-focus game object used by a planned profession recipe.
+    class CraftingFocusTravelDestination : public EntryTravelDestination
+    {
+    public:
+        CraftingFocusTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) :
+            EntryTravelDestination(purpose, entry) { SetExpireFast(); }
+
+        virtual bool IsPossible(const PlayerTravelInfo& info) const override;
+        virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
+        virtual std::string GetTitle() const override;
+    };
+
 	enum class TravelState : uint8
 	{
 		TRAVEL_STATE_IDLE = 0,

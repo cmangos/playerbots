@@ -32,6 +32,18 @@ namespace ai
         static uint32 SkillIdToGatherEntry(int32 entry);
     };
 
+    // Spell focus ID -> signed game-object template entries. Built once from
+    // the same cached entry metadata used by TravelMgr.
+    using SpellFocusEntryMap = std::unordered_map<uint32, std::vector<int32>>;
+
+    class SpellFocusEntryMapValue : public SingleCalculatedValue<SpellFocusEntryMap*>
+    {
+    public:
+        SpellFocusEntryMapValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "spell focus entry map") {}
+        virtual ~SpellFocusEntryMapValue() { delete value; }
+        virtual SpellFocusEntryMap* Calculate() override;
+    };
+
     enum class TravelDestinationPurpose : uint32
     {
         None = 0,

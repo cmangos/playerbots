@@ -127,6 +127,8 @@ bool CastCustomSpellAction::Execute(Event& event)
     SpellEntry const* pSpellInfo = sServerFacade.LookupSpellInfo(spell);
     if (!pSpellInfo)
     {
+        if (AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(spell))
+            SET_AI_VALUE2(int32, "manual int", "pending profession craft", 0);
         std::map<std::string, std::string> args;
         args["%spell"] = text;
         ai->TellPlayerNoFacing(requester, BOT_TEXT2("cast_spell_command_error_unknown_spell", args));
@@ -176,7 +178,11 @@ bool CastCustomSpellAction::Execute(Event& event)
     if (AI_VALUE2(uint32, "current mount speed", "self target"))
     {
         if (bot->IsFlying() && WorldPosition(bot).currentHeight() > 10.0f)
+        {
+            if (AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(spell))
+                SET_AI_VALUE2(int32, "manual int", "pending profession craft", 0);
             return false;
+        }
 
         ai->Unmount();
     }
@@ -239,6 +245,8 @@ bool CastCustomSpellAction::Execute(Event& event)
     const bool canCast = gameObjectTarget ? ai->CanCastSpell(spell, gameObjectTarget, 0, true, false, false, false, &checkResult) : ai->CanCastSpell(spell, target, 0, true, itemTarget, false, false, false, &checkResult);
     if (!bot->GetTrader() && !canCast)
     {
+        if (AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(spell))
+            SET_AI_VALUE2(int32, "manual int", "pending profession craft", 0);
         std::map<std::string, std::string> args;
         args["%spell"] = replyArgs["%spell"];
         args["%fail_reason"] = BOT_TEXT2(GetSpellCastResultString(checkResult), args);
@@ -250,6 +258,17 @@ bool CastCustomSpellAction::Execute(Event& event)
     uint32 spellDuration = sPlayerbotAIConfig.globalCoolDown;
 
     bool result = gameObjectTarget ? ai->CastSpell(spell, gameObjectTarget, itemTarget, true, &spellDuration) : ai->CastSpell(spell, target, itemTarget, true, &spellDuration);
+    if (AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(spell))
+    {
+        SET_AI_VALUE2(int32, "manual int", "pending profession craft", 0);
+        if (result)
+        {
+            SET_AI_VALUE2(int32, "manual int", "last profession craft", static_cast<int32>(time(nullptr)));
+            context->ClearValues("can craft profession");
+            context->ClearValues("profession crafting plan");
+            context->ClearValues("profession material sources");
+        }
+    }
     if (result)
     {
         SetDuration(spellDuration);
@@ -632,7 +651,8 @@ bool CraftRandomItemAction::Execute(Event& event)
     if (professionPlan.IsValid())
     {
         spellIds.erase(std::remove(spellIds.begin(), spellIds.end(), professionPlan.spellId), spellIds.end());
-        spellIds.insert(spellIds.begin(), professionPlan.spellId);
+        if (ProfessionCraftingPlanValue::IsCraftCooldownReady(ai))
+            spellIds.insert(spellIds.begin(), professionPlan.spellId);
     }
 
     std::list<ObjectGuid> wos = chat->parseGameobjects(event.getParam());
@@ -709,6 +729,9 @@ bool CraftRandomItemAction::Execute(Event& event)
         }
 
         cmd << spellId << " " << castCount;
+
+        if (spellId == professionPlan.spellId)
+            SET_AI_VALUE2(int32, "manual int", "pending profession craft", static_cast<int32>(spellId));
 
         ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *bot);
         SetDuration(1.0f); //Spel was not cast yet so no delay is needed.

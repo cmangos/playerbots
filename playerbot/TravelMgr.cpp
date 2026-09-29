@@ -4,6 +4,7 @@
 
 #include "playerbot/strategy/values/SharedValueContext.h"
 #include "playerbot/strategy/values/TravelValues.h"
+#include "playerbot/strategy/values/CraftValues.h"
 #include "MotionGenerators/PathFinder.h"
 #include "TravelNode.h"
 #include "PlayerbotAI.h"
@@ -849,6 +850,29 @@ std::string GatherTravelDestination::GetTitle() const {
     return out.str();
 }
 
+bool CraftingFocusTravelDestination::IsPossible(const PlayerTravelInfo& /*info*/) const
+{
+    GameObjectInfo const* goInfo = GetGoInfo();
+    return goInfo && goInfo->type == GAMEOBJECT_TYPE_SPELL_FOCUS && goInfo->spellFocus.focusId;
+}
+
+bool CraftingFocusTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) const
+{
+    if (!bot || !bot->GetPlayerbotAI() || !IsPossible(info))
+        return false;
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+    ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    return ProfessionCraftingPlanValue::ShouldTravelToSpellFocus(ai, plan) &&
+        plan.spellFocusId == GetGoInfo()->spellFocus.focusId;
+}
+
+std::string CraftingFocusTravelDestination::GetTitle() const
+{
+    return "craft at " + ChatHelper::formatWorldEntry(GetEntry());
+}
+
 TravelTarget::TravelTarget(PlayerbotAI* ai) : AiObject(ai)
 {
     sTravelMgr.SetNullTravelTarget(this);
@@ -1398,6 +1422,9 @@ void TravelMgr::LoadQuestTravelTable()
                 case TravelDestinationPurpose::GatherMining:
                 case TravelDestinationPurpose::GatherHerbalism:
                     dests.push_back(AddDestination<GatherTravelDestination>(entry, purposeFlag));
+                    break;
+                case TravelDestinationPurpose::CraftingFocus:
+                    dests.push_back(AddDestination<CraftingFocusTravelDestination>(entry, purposeFlag));
                     break;
                 case TravelDestinationPurpose::Grind:
                     dests.push_back(AddDestination<GrindTravelDestination>(entry, purposeFlag));

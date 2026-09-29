@@ -74,7 +74,6 @@ std::vector<uint32> EnchantSpellsValue::Calculate()
 
 
         spellIds.push_back(spellId);
-        break;
     }
 
     return spellIds;
@@ -392,9 +391,8 @@ bool ProfessionCraftingPlanValue::ShouldTravelToAuctionHouse(PlayerbotAI* ai, co
 
 bool ProfessionCraftingPlanValue::ShouldTravelToSpellFocus(PlayerbotAI* ai, const ProfessionCraftingPlan& plan)
 {
-    return IsEnabledFor(ai) && plan.IsValid() && plan.spellFocusId &&
-        plan.GetMissingReagents(ai).empty() && IsCraftCooldownReady(ai) &&
-        !ai->HasActivePlayerMaster();
+    return profession::ShouldTravelToSpellFocus(IsEnabledFor(ai), plan.IsValid(), plan.spellFocusId,
+        !plan.GetMissingReagents(ai).empty(), IsCraftCooldownReady(ai), ai->HasActivePlayerMaster());
 }
 
 ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()

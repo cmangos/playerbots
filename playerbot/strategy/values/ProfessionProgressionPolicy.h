@@ -88,5 +88,13 @@ namespace ai
                        hasBudget, bagSpaceAvailable, activeRealPlayerMaster) &&
                 ahBuyingEnabled && cooldownReady;
         }
+
+        constexpr bool ShouldTravelToSpellFocus(
+            bool featureEnabledForBot, bool validPlan, uint32_t spellFocusId,
+            bool hasMissingReagents, bool cooldownReady, bool activeRealPlayerMaster)
+        {
+            return featureEnabledForBot && validPlan && spellFocusId &&
+                !hasMissingReagents && cooldownReady && !activeRealPlayerMaster;
+        }
     }
 }

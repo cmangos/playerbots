@@ -130,8 +130,8 @@ untracked and unstaged.
 ## Correction pass checkpoint (2026-09-29)
 
 Work is continuing on `feature/playerbot-profession-economy` from published head
-`65ac8666d69083f33f6cb65c4e7a2189a0fde5ec`. A fresh fetch confirmed that
-`upstream/master` and `origin/master` remain at the original base
+`65ac8666d69083f33f6cb65c4e7a2189a0fde5ec`. The initial audit found
+`upstream/master` and `origin/master` at the original base
 `99e6f15eb154bec2c8602e8b425fef87e67de501`; no merge, rebase, or pull was done.
 
 The review findings were confirmed: missing profession materials did not activate
@@ -167,3 +167,20 @@ line-ending notices. WotLK compile probes succeeded for `PlayerbotAIConfig.cpp`,
 `PlayerbotFactory.cpp`, `CraftValues.cpp`, `LootValues.cpp`, `TravelValues.cpp`,
 and `ProfessionProgressionPolicyTests.cpp`. This is not the required full
 worldserver build/link, so the branch remains **not ready for a live canary**.
+
+### Upstream movement detected before push
+
+A second safety fetch immediately before pushing detected that official
+`upstream/master` had advanced by one commit to
+`0b3e77f5dae92c2eb304288ed0d6c8139c3b7fdc` (`Fix problems with
+Waitforattackkeepsafedistance`). The push was deliberately aborted before any
+remote branch was changed, in accordance with the instruction to report an
+upstream change before merging, rebasing, or pulling. Local correction commit
+`12b47d8c` is one commit ahead of the published feature branch. The feature is
+8 commits ahead and 1 commit behind current official upstream. PR #1 still
+points to published head `65ac8666` and has no checks.
+
+Required next decision: inspect the single upstream commit for overlap, then
+either rebase/merge it into the feature branch after approval or leave this PR
+on its original base and push the correction commits as-is. After that, finish
+the still-open correction work and complete a full WotLK worldserver link.

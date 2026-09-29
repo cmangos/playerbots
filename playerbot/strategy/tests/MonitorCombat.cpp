@@ -107,19 +107,23 @@ bool MonitorCombatPartyWiped::IsConditionMet(const std::string& monitorStr, Play
 
 bool MonitorCombatDeadMobs::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
+    // Sweep a wide radius around the bot and latch every dead creature GUID into ctx. A corpse only
+    // needs to be observed once: bots loot kills almost immediately, so simultaneous-corpses counts
+    // collapse to 0-2 in sparse-start instances even though the party is killing continuously.
     std::list<Creature*> creatures;
-    // Count DEAD creatures: AnyUnitInObjectRangeCheck requires u->IsAlive() and would filter out
-    // exactly the units we want, and VisitWorldObjects only sees players/transports, not creatures.
-    MaNGOS::AnyUnitFulfillingConditionInRangeCheck checker(bot, [](Unit* u) { return !u->IsAlive(); }, 120.0f, DIST_CALC_NONE);
+    // GetDistance(..., DIST_CALC_NONE) returns the SQUARED distance, so the checker range must be
+    // squared too; VisitAllObjects keeps the linear radius for the cell visit.
+    MaNGOS::AnyUnitFulfillingConditionInRangeCheck checker(bot, [](Unit* u) { return !u->IsAlive(); }, 300.0f * 300.0f, DIST_CALC_NONE);
     MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitFulfillingConditionInRangeCheck> searcher(creatures, checker);
-    Cell::VisitAllObjects(bot, searcher, 120.0f);
+    Cell::VisitAllObjects(bot, searcher, 300.0f);
 
-    uint32 deadCount = 0;
     for (auto& creature : creatures)
     {
-        if (!creature->IsAlive())
-            deadCount++;
+        if (!creature->IsAlive() && !creature->IsPet() && !creature->IsTotem())
+            ctx.observedDeadMobs.insert(creature->GetObjectGuid());
     }
+
+    uint32 deadCount = static_cast<uint32>(ctx.observedDeadMobs.size());
 
     std::string valueName;
     std::string op;
@@ -137,4 +141,31 @@ bool MonitorCombatDeadMobs::IsConditionMet(const std::string& monitorStr, Player
 
     return deadCount < threshold;
 
+}
+
+bool MonitorCombatPartyXp::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    if (!ctx.partyXpCaptured)
+        return false;
+
+    uint64 current = GetPartyXpTotal(bot);
+    uint64 start = ctx.partyXpStart;
+    // Members can leave (or be logged out) mid-run and drop the summed total below the baseline.
+    uint64 gained = current > start ? current - start : 0;
+
+    std::string valueName;
+    std::string op;
+    std::string valueStr;
+    std::string parseMessage;
+    if (TryParseComparisonValue(monitorStr, valueName, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    uint32 threshold = 0;
+    if (TryParseUInt32Strict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    if (op == ">")
+        return gained > threshold;
+
+    return gained < threshold;
 }

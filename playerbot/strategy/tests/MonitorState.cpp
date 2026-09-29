@@ -67,10 +67,9 @@ bool MonitorStateGroupSize::IsConditionMet(const std::string& monitorStr, Player
     if (TryParseUInt32Strict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
         return false;
 
-    if (op == ">")
-        return size > threshold;
+    const bool met = (op == ">") ? (size > threshold) : (size < threshold);
 
-    return size < threshold;
+    return met;
 }
 
 // Every group member has been observed on the bot's map, in its instance, and settled (not

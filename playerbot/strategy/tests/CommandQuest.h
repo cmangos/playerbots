@@ -38,6 +38,18 @@ namespace ai
         std::string GetName() const override { return "reward quest"; }
     };
 
+    // "force objectives <id> except <objIndex>" - Force-complete all objectives of an active quest
+    // except the given one (used by the quest-clear test flavor so a single objective can be tested
+    // in isolation). objIndex must parse as a number ('' empties to: satisfy every objective).
+    class CommandSetupForceObjectives : public TestCommand
+    {
+    public:
+        TestResult Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+    protected:
+        std::string GetName() const override { return "force objectives"; }
+    };
+
     // "do <chatcommand>" - Execute any bot chat command  
     class CommandSetupDo : public TestCommand
     {

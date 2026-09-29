@@ -2,6 +2,7 @@
 #include "CommandQuest.h"
 #include "Quests/QuestDef.h"
 #include "Globals/ObjectMgr.h"
+#include <sstream>
 
 using namespace ai;
 
@@ -244,8 +245,105 @@ TestResult CommandSetupRewardQuest::Execute(const std::string& params, Player* b
 }
 
 // =====================================================
-// CommandSetupDo
-// Format: "do <chat command>"
+// CommandSetupForceObjectives
+// Format: "force objectives <questId> except <objIndex>"
+// Satisfies every objective of an ACTIVE quest except the given creature/GO objective index
+// (items get injected, creature counts credited). Used by the quest-clear test flavor.
+// =====================================================
+TestResult CommandSetupForceObjectives::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    // params: "<questId> except <objIndex>"
+    std::istringstream in(params);
+    std::string questStr;
+    std::string exceptKeyword;
+    std::string objStr;
+    in >> questStr >> exceptKeyword >> objStr;
+
+    uint32 questId = static_cast<uint32>(std::strtoul(questStr.c_str(), nullptr, 10));
+    if (!questId)
+    {
+        message = "Invalid quest ID: " + questStr;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+    if (!quest)
+    {
+        message = "Quest template not found: " + questStr;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    int32 exceptIndex = -1;
+    if (!objStr.empty())
+        exceptIndex = static_cast<int32>(std::strtol(objStr.c_str(), nullptr, 10));
+
+    QuestStatus status = bot->GetQuestStatus(questId);
+    if (status != QUEST_STATUS_INCOMPLETE && status != QUEST_STATUS_COMPLETE)
+    {
+        message = "Bot does not have quest " + questStr + " active";
+        return TestResult::IMPOSSIBLE;
+    }
+
+    // Satisfy item objectives
+    for (uint8 i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
+    {
+        if (static_cast<int32>(i) == exceptIndex)
+            continue;
+
+        uint32 itemId = quest->ReqItemId[i];
+        uint32 count = quest->ReqItemCount[i];
+        if (!itemId || !count)
+            continue;
+
+        uint32 curCount = bot->GetItemCount(itemId, true);
+        if (curCount >= count)
+            continue;
+
+        ItemPosCountVec dest;
+        uint8 msg = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count - curCount);
+        if (msg == EQUIP_ERR_OK)
+        {
+            Item* item = bot->StoreNewItem(dest, itemId, true);
+            bot->SendNewItem(item, count - curCount, true, false);
+        }
+    }
+
+    // Satisfy creature/GO objectives
+    for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+    {
+        if (static_cast<int32>(i) == exceptIndex)
+            continue;
+
+        int32 creature = quest->ReqCreatureOrGOId[i];
+        uint32 creatureCount = quest->ReqCreatureOrGOCount[i];
+        if (!creature || !creatureCount)
+            continue;
+
+        if (uint32 spellId = quest->ReqSpell[i])
+        {
+            for (uint32 z = 0; z < creatureCount; ++z)
+                bot->CastedCreatureOrGO(creature, ObjectGuid((creature > 0 ? HIGHGUID_UNIT : HIGHGUID_GAMEOBJECT), uint32(std::abs(creature)), 1u), spellId);
+        }
+        else if (creature > 0)
+        {
+            CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature);
+            if (cInfo)
+                for (uint32 z = 0; z < creatureCount; ++z)
+                    bot->KilledMonster(cInfo, nullptr);
+        }
+        else if (creature < 0)
+        {
+            for (uint32 z = 0; z < creatureCount; ++z)
+                bot->CastedCreatureOrGO(creature, ObjectGuid(HIGHGUID_GAMEOBJECT, uint32(std::abs(creature)), 1u), 0);
+        }
+    }
+
+    return TestResult::PASS;
+}
+
+// =====================================================
+// CommandSetupDo// Format: "do <chat command>"
 // Executes a bot chat command (like equip upgrades, accept quest, etc.)
 // =====================================================
 TestResult CommandSetupDo::Execute(const std::string& params, Player* bot,

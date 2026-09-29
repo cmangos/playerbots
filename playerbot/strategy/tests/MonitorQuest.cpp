@@ -133,6 +133,46 @@ bool MonitorQuestObjective::IsConditionMet(const std::string& monitorStr, Player
 
     const QuestStatusData& statusData = it->second;
 
+    // Optional "count <op> <N>" form (partial progress), e.g. "quest objective 123 2 count > 0 => pass".
+    // Without it the objective must be fully satisfied ("done").
+    size_t tokStart = monitorStr.find_first_not_of(" \t", objEnd == std::string::npos ? monitorStr.size() : objEnd);
+    if (tokStart != std::string::npos && monitorStr.compare(tokStart, 5, "count") == 0)
+    {
+        size_t cmpStart = monitorStr.find_first_not_of(" \t", tokStart + 5);
+        if (cmpStart == std::string::npos)
+            return false;
+
+        std::string op;
+        std::string valueStr;
+        std::string valueName;
+        std::string parseMessage;
+        if (TryParseComparisonValue(monitorStr.substr(cmpStart), valueName, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+            return false;
+
+        uint32 threshold = 0;
+        if (TryParseUInt32Strict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+            return false;
+
+        uint32 progress = 0;
+        if (quest->ReqCreatureOrGOId[objIndex])
+            progress = statusData.m_creatureOrGOcount[objIndex];
+        else if (objIndex < QUEST_ITEM_OBJECTIVES_COUNT && quest->ReqItemId[objIndex])
+            progress = bot->GetItemCount(quest->ReqItemId[objIndex], true);
+        else
+            return false;
+
+        if (op == ">")
+            return progress > threshold;
+        if (op == "<")
+            return progress < threshold;
+        if (op == "==")
+            return progress == threshold;
+        if (op == "!=")
+            return progress != threshold;
+
+        return false;
+    }
+
     // Check creature/GO count objective
     if (quest->ReqCreatureOrGOId[objIndex])
     {

@@ -158,15 +158,28 @@ namespace ai
 	class TemporaryTravelDestination : public TravelDestination
     {
     public:
-        TemporaryTravelDestination(WorldPosition destination) : TravelDestination(), destination(destination) {};
+        TemporaryTravelDestination(WorldPosition destination, int32 destEntry = 0) : TravelDestination(), destination(destination), entry(destEntry) {};
 
         virtual std::string GetTitle() const override { return destination.print(); }
+
+        virtual bool IsPossible(const PlayerTravelInfo& info) const override { return true; }
+        virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override { return true; }
+
+        virtual bool IsIn(const WorldPosition& pos, float radius = 0) const override { return destination.getMapId() == pos.getMapId() && destination.distance(pos) <= (radius ? radius : INTERACTION_DISTANCE); }
+        virtual bool IsOut(const WorldPosition& pos, float radius = 0) const override { return destination.getMapId() != pos.getMapId() || destination.distance(pos) > (radius ? radius : sPlayerbotAIConfig.sightDistance); }
+
+        virtual float sqDistance(const WorldPosition& point) const override { return destination.sqDistance(point); }
+        virtual WorldPosition* GetNextPoint(const WorldPosition& point, std::list<uint8>& chancesToGoFar, bool allowSame = false) const override { return const_cast<WorldPosition*>(&destination); }
+        virtual WorldPosition* GetClosestPoint(const WorldPosition& point) const override { return const_cast<WorldPosition*>(&destination); }
+
+        virtual int32 GetEntry() const override { return entry; }
 
         virtual std::string GetShortName() const override { return "temp"; };
 
 		WorldPosition* GetPosition() { return &destination; }
         void SetPosition(WorldPosition newDestination) { destination = newDestination; }
     private:
+        int32 entry = 0;
         WorldPosition destination;
     };
 

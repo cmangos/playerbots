@@ -487,7 +487,8 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
 bool CanCraftProfessionValue::Calculate()
 {
     ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
-    if (!plan.IsValid() || !ProfessionCraftingPlanValue::IsCraftCooldownReady(ai) ||
+    if (!ProfessionCraftingPlanValue::IsEnabledFor(ai) || !plan.IsValid() ||
+        !ProfessionCraftingPlanValue::IsCraftCooldownReady(ai) ||
         !plan.GetMissingReagents(ai).empty() || AI_VALUE(uint8, "bag space") > 80)
         return false;
 

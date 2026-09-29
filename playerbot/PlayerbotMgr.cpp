@@ -15,6 +15,8 @@
 #include "AiFactory.h"
 #include "Guilds/GuildMgr.h"
 
+#include <regex>
+
 #ifdef GenerateBotTests
 #include "strategy/tests/TestAction.h"
 #include "strategy/tests/TestRegistry.h"

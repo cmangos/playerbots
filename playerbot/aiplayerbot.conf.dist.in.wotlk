@@ -963,6 +963,8 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #
 # Autonomous profession progression. CanaryPercent deterministically enables
 # only that percentage of free random bots (0 disables rollout, 100 enables all).
+# Disabling this stops autonomous planning/economy behavior; corrective
+# profession metadata preservation in PlayerbotFactory remains active.
 AiPlayerbot.ProfessionProgression.Enabled = 1
 AiPlayerbot.ProfessionProgression.CanaryPercent = 10
 # Seconds between cached recipe plans for each bot.
@@ -980,7 +982,7 @@ AiPlayerbot.ProfessionProgression.AHSearchCooldown = 600
 AiPlayerbot.ProfessionProgression.AHPurchaseLimit = 2
 AiPlayerbot.ProfessionProgression.AHBudgetPercent = 10
 AiPlayerbot.ProfessionProgression.AHMaxPriceMultiplier = 1.25
-# Maximum stacks posted in one AH interaction by a bot in the rollout.
+# Maximum current planned-output stacks posted in one AH interaction.
 AiPlayerbot.ProfessionProgression.AuctionPostLimit = 3
 #
 #######################################

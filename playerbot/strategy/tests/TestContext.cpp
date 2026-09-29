@@ -1,5 +1,6 @@
 #include "TestContext.h"
 #include "playerbot/PlayerbotMgr.h"
+#include "playerbot/RandomPlayerbotMgr.h"
 
 using namespace ai;
 

@@ -648,7 +648,8 @@ bool CraftRandomItemAction::Execute(Event& event)
     std::shuffle(spellIds.begin(), spellIds.end(),*GetRandomGenerator());
 
     ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
-    if (professionPlan.IsValid())
+    bool autonomousProfessionPlan = ProfessionCraftingPlanValue::IsEnabledFor(ai) && professionPlan.IsValid();
+    if (autonomousProfessionPlan)
     {
         spellIds.erase(std::remove(spellIds.begin(), spellIds.end(), professionPlan.spellId), spellIds.end());
         if (ProfessionCraftingPlanValue::IsCraftCooldownReady(ai))
@@ -697,7 +698,7 @@ bool CraftRandomItemAction::Execute(Event& event)
 
         uint32 castCount = AI_VALUE2(uint32, "has reagents for", spellId);
 
-        if (spellId == professionPlan.spellId)
+        if (autonomousProfessionPlan && spellId == professionPlan.spellId)
             castCount = std::min(castCount, professionPlan.craftCount);
 
         if (spellId == 61288) //Crafting random glyph
@@ -730,7 +731,7 @@ bool CraftRandomItemAction::Execute(Event& event)
 
         cmd << spellId << " " << castCount;
 
-        if (spellId == professionPlan.spellId)
+        if (autonomousProfessionPlan && spellId == professionPlan.spellId)
             SET_AI_VALUE2(int32, "manual int", "pending profession craft", static_cast<int32>(spellId));
 
         ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *bot);

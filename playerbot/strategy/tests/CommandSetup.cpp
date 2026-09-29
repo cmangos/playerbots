@@ -204,9 +204,21 @@ TestResult CommandSetupSetDestination::Execute(const std::string& params, Player
                     PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
     std::string dest = params;
+    bool nonForced = false;
     if (params.find("destination ") == 0)
         dest = params.substr(std::string("destination ").length());
-    
+
+    // Optional trailing qualifier: "... nonforced" lets the bot genuinely travel to the
+    // destination instead of pinning it (a forced target fights the arrival check that
+    // teleported-delivery bypasses).
+    const std::string nonForcedTag = " nonforced";
+    if (dest.size() > nonForcedTag.size() &&
+        dest.compare(dest.size() - nonForcedTag.size(), nonForcedTag.size(), nonForcedTag) == 0)
+    {
+        nonForced = true;
+        dest.erase(dest.size() - nonForcedTag.size());
+    }
+
     GuidPosition loc;
     if (!TestRegistry::ParseLocation(dest, loc))
     {
@@ -220,13 +232,24 @@ TestResult CommandSetupSetDestination::Execute(const std::string& params, Player
     TravelTarget* target = AI_VALUE(TravelTarget*,"travel target");
     if (target)
     {
-        TemporaryTravelDestination* tempDest = new TemporaryTravelDestination(loc);
+        // Pass the guid-backed entry through: rpg triggers match "rpg target entry == travel
+        // target entry" for gray/low-level quests, and a coords-only destination reports 0.
+        TemporaryTravelDestination* tempDest = new TemporaryTravelDestination(loc, (int32)loc.GetEntry());
         target->SetTarget(tempDest, tempDest->GetPosition());
         target->SetStatus(TravelStatus::TRAVEL_STATUS_TRAVEL);
-        target->SetForced(true);
+        target->SetForced(!nonForced);
         target->SetConditions({"not::manual bool::is travel refresh"});
 
-        if (!ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT))
+        // The default TRAVEL budget is distance-based (2x theoretical walk time + 3 s), sized for
+        // destinations the bot itself picks from far away. A test's 90 yd drop computes to ~16 s,
+        // so any real-world delay on the leg (one combat, a mount-up, the 10 s re-path gate)
+        // expires the target before the arrival flip can happen and the default re-roll machinery
+        // steals the destination (BL-47(a)). Grant a real leg budget instead; the arrival flip to
+        // WORK then uses the destination's fixed 5-minute expire, as designed.
+        if (nonForced)
+            target->SetExpireIn(20 * MINUTE * IN_MILLISECONDS); // reviewer P3: stay above the test monitor's 900 s fail line so a late arrival still finds a live target
+
+        if (!nonForced && !ai->HasStrategy("travel", BotState::BOT_STATE_NON_COMBAT))
             ai->ChangeStrategy("+travel once", BotState::BOT_STATE_NON_COMBAT);
     }
     else
@@ -234,6 +257,28 @@ TestResult CommandSetupSetDestination::Execute(const std::string& params, Player
         message = "Could not get travel target value";
         return TestResult::IMPOSSIBLE;
     }
+    return TestResult::PASS;
+}
+
+// BL-46: aim the bot's rpg machinery at a specific world object. After this step the normal
+// chain runs: arrival flips the travel target to WORK, the rpg trigger fires, and the
+// accept/hand-in action runs - the bot decides, the step only points it.
+TestResult CommandSetupRpgTarget::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    std::string target = params;
+    if (target.find("rpg target ") == 0)
+        target = target.substr(std::string("rpg target ").length());
+
+    GuidPosition loc;
+    if (!TestRegistry::ParseLocation(target, loc))
+    {
+        message = "Invalid rpg target: " + target;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    AiObjectContext* context = ai->GetAiObjectContext();
+    SET_AI_VALUE(GuidPosition, "rpg target", loc);
     return TestResult::PASS;
 }
 
@@ -437,4 +482,73 @@ TestResult CommandSetValue::Execute(const std::string& params, Player* bot, Play
 
     message = "Unsupported datatype for set value: " + datatype;
     return TestResult::IMPOSSIBLE;
+}
+// BL-47(a) follow-up: honest setup check for "is the giver/taker actually alive in the world".
+// five_signets evidence: the bot teleported to the giver's exact coords and the travel flip fired,
+// but the creature was not found by an 80-yd unit search - the run then burned 900 s on an accept
+// that could never happen. This command fails fast instead. Usage:
+//   "require creature alive <location> [yd]"   (yd defaults to 300; searches around the bot)
+TestResult CommandRequireCreatureAlive::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    std::string locName = params;
+    float radius = 300.0f;
+
+    // Optional trailing numeric radius: "<location> <yd>"
+    size_t lastSpace = locName.find_last_of(" \t");
+    if (lastSpace != std::string::npos)
+    {
+        std::string maybeRadius = locName.substr(lastSpace + 1);
+        if (!maybeRadius.empty() && std::all_of(maybeRadius.begin(), maybeRadius.end(), ::isdigit))
+        {
+            radius = (float)atoi(maybeRadius.c_str());
+            if (radius <= 0.0f)
+                radius = 300.0f;
+            locName = locName.substr(0, lastSpace);
+        }
+    }
+
+    // Trim leading whitespace left over from the command-name split.
+    size_t nameStart = locName.find_first_not_of(" \t");
+    if (nameStart == std::string::npos)
+    {
+        message = "require creature alive: missing location";
+        return TestResult::IMPOSSIBLE;
+    }
+    locName = locName.substr(nameStart);
+
+    GuidPosition loc;
+    if (!TestRegistry::ParseLocation(locName, loc))
+    {
+        message = "Invalid location: " + locName;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    if (!loc || !loc.IsCreature() || !loc.GetEntry())
+    {
+        // GameObject locations (rare givers/takers) are not covered by this check - skip honestly.
+        message = "Location " + locName + " is not a creature - alive check skipped";
+        return TestResult::PASS;
+    }
+
+    uint32 entry = loc.GetEntry();
+
+    std::list<Creature*> found;
+    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck checker(*bot, entry, true, false, radius);
+    MaNGOS::CreatureListSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(found, checker);
+    Cell::VisitAllObjects(bot, searcher, radius);
+
+    if (found.empty())
+    {
+        message = "Creature " + std::to_string(entry) + " (" + locName + ") not found ALIVE within "
+            + std::to_string((uint32)radius) + " yd of the bot - giver/taker missing from the world";
+        return TestResult::ABORT;
+    }
+
+    Creature* creature = found.front();
+    std::ostringstream out;
+    out << "Creature " << entry << " (" << (creature->GetName() ? creature->GetName() : "?")
+        << ") alive at " << (uint32)bot->GetDistance(creature) << " yd";
+    message = out.str();
+    return TestResult::PASS;
 }

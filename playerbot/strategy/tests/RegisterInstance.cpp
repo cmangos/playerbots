@@ -11,6 +11,45 @@ using namespace ai;
 namespace
 {
     using ScenarioParams = std::map<std::string, std::string>;
+
+    bool ResolveInstanceEntry(const MapEntry* mapEntry, std::string& mapName, GuidPosition& entry)
+    {
+        if (TestRegistry::ParseLocation(mapName, entry) && entry.getMapId() == mapEntry->MapID)
+            return true;
+
+        TravelNode* best = nullptr;
+        for (auto& node : sTravelNodeMap.getNodes())
+        {
+            if (node->getMapId() != mapEntry->MapID)
+                continue;
+
+            std::string nodeName = node->getName();
+            std::transform(nodeName.begin(), nodeName.end(), nodeName.begin(), ::tolower);
+            if (nodeName.find("entrance") != std::string::npos)
+            {
+                best = node;
+                break;
+            }
+
+            if (!best && node->isPortal())
+                best = node;
+        }
+
+        if (!best)
+        {
+            static std::set<uint32> loggedMaps;
+            if (loggedMaps.insert(mapEntry->MapID).second)
+                sLog.outError("[TESTGEN] no travel node on instance map %u (%s) - scenario tests skipped for it",
+                    mapEntry->MapID, mapEntry->name[0]);
+            return false;
+        }
+
+        mapName = mapEntry->name[0];
+        mapName.erase(std::remove_if(mapName.begin(), mapName.end(), ::isspace), mapName.end());
+        mapName += "_inside";
+        TestRegistry::RegisterNamedLocation(mapName, GuidPosition(ObjectGuid(), *best->getPosition()));
+        return TestRegistry::ParseLocation(mapName, entry) && entry.getMapId() == mapEntry->MapID;
+    }
 }
 
 std::string TestRegistry::ApplyScenarioParams(const std::string& line, const std::map<std::string, std::string>& params)
@@ -49,6 +88,7 @@ void TestRegistry::GenerateBossWalkTest()
         "# instance progression with large group and dead-mob observation",
         "require bot is level=$(level)",
         "monitor dead mobs > $(dead_mobs_min) => pass \"Observed dead mobs in instance\"",
+        "monitor party xp > $(party_xp_min) => pass \"Party gained xp clearing trash\"",
         "monitor time > $(timeout_s) => fail \"Timeout while traversing instance after <time elapsed> (mobs <mobs killed>, traveled <distance traveled> / wanted <distance wanted>)\"",
         "mgroup size=$(group_size) gear=best",
         "gm visible on",
@@ -98,28 +138,7 @@ void TestRegistry::GenerateBossWalkTest()
                     mapName = mapName.substr(0, mapName.find(" "));
             }
 
-            if (!ParseLocation(mapName, entry))
-            {
-                for (auto& node : sTravelNodeMap.getNodes())
-                {
-                    if (node->getMapId() != mapEntry->MapID)
-                        continue;
-
-                    if (!node->isPortal())
-                        continue;
-
-                    for (auto& [otherNode, path] : *node->getLinks())
-                    {
-                        if (path->getPathType() != TravelNodePathType::areaTrigger)
-                            continue;
-
-                        mapName = mapEntry->name[0];
-                        RegisterNamedLocation(mapName, GuidPosition(ObjectGuid(), *otherNode->getPosition()));
-                    }
-                }
-            }
-
-            if (!ParseLocation(mapName, entry))
+            if (!ResolveInstanceEntry(mapEntry, mapName, entry))
                 continue;
 
             std::string startCommand = ".bot p @tank co + mark rti";
@@ -148,6 +167,7 @@ void TestRegistry::GenerateBossWalkTest()
                 {"level",            std::to_string(instanceTemplate->levelMin + 10)},
                 {"group_size",       maxPlayers                                     },
                 {"dead_mobs_min",    "5"                                            },
+                {"party_xp_min",     "5000"                                         },
                 {"instance_entry",   mapName                                        },
                 {"boss_destination", bossName                                       }
             }));
@@ -219,7 +239,7 @@ void TestRegistry::GenerateBossEncounterTest()
                     mapName = mapName.substr(0, mapName.find(" "));
             }
 
-            if (!ParseLocation(mapName, entry))
+            if (!ResolveInstanceEntry(mapEntry, mapName, entry))
                 continue;
 
             std::ostringstream bossCoords;

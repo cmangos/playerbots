@@ -21,6 +21,10 @@
 
 #include "BattleGround/BattleGround.h"
 #include "BattleGround/BattleGroundMgr.h"
+
+#ifdef GenerateBotTests
+#include "strategy/tests/TestRegistry.h"
+#endif
 #include "Chat/ChannelMgr.h"
 #include "Guilds/GuildMgr.h"
 #include "World/WorldState.h"
@@ -974,18 +978,16 @@ void RandomPlayerbotMgr::LoginFreeBots()
                     }
                 }
 
+#ifdef GenerateBotTests
                 if (GetEventValue(botGuid, "test"))
                 {
-                    PlayerbotAI* ai = bot->GetPlayerbotAI();
-                    AiObjectContext* context = ai->GetAiObjectContext();
                     std::string testName = GetEventData(botGuid, "test");
                     testName = std::regex_replace(testName, std::regex("\\'"), "'");
-                    std::string strategyName = "test::" + testName;
-                    ai->ChangeStrategy("+" + strategyName, BotState::BOT_STATE_NON_COMBAT);
-                    SET_AI_VALUE2(bool, "manual bool", "is running test", true);
+                    TestRegistry::StartTest(bot->GetPlayerbotAI(), testName);
 
                     sRandomPlayerbotMgr.SetValue(botGuid, "test", 0);
                 }
+#endif
 
                 if (!IsRandomBot(bot) && GetPlayerBot(guid)) //Place bot in player manager.
                 {
@@ -2191,6 +2193,30 @@ bool RandomPlayerbotMgr::ProcessBot(uint32 bot)
     }
 
     PlayerbotAI* ai = player ? player->GetPlayerbotAI() : NULL;
+
+#ifdef GenerateBotTests
+    if (player && ai)
+    {
+        // Suppress the roam lifecycle (logout / randomize / strategy churn / grind teleports) for
+        // scenario hosts AND their party members: a mid-run member logout leaves the group short a
+        // slot and trips the "group size" abort monitor with everyone still alive in the instance.
+        bool isTestProtected = false;
+        AiObjectContext* ctx = ai->GetAiObjectContext();
+        if (ctx && ctx->GetValue<bool>("manual bool", "is running test")->Get())
+            isTestProtected = true;
+        else if (Group* group = player->GetGroup())
+        {
+            Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
+            PlayerbotAI* leaderAi = leader ? leader->GetPlayerbotAI() : NULL;
+            AiObjectContext* leaderCtx = leaderAi ? leaderAi->GetAiObjectContext() : NULL;
+            if (leaderCtx && leaderCtx->GetValue<bool>("manual bool", "is running test")->Get())
+                isTestProtected = true;
+        }
+
+        if (isTestProtected)
+            return false;
+    }
+#endif
 
     bool botsAllowedInWorld = !sPlayerbotAIConfig.randomBotLoginWithPlayer || (!players.empty() && sWorld.GetActiveSessionCount() > 0);
 

@@ -47,21 +47,46 @@ namespace
     uint32 CountNearbyDeadMobs(Player* bot, float radius)
     {
         std::list<Creature*> creatures;
-        // Count DEAD creatures: AnyUnitInObjectRangeCheck requires u->IsAlive() (it would filter out
-        // exactly what we count) and VisitWorldObjects only sees players/transports, not creatures.
-        MaNGOS::AnyUnitFulfillingConditionInRangeCheck checker(bot, [](Unit* u) { return !u->IsAlive(); }, radius, DIST_CALC_NONE);
+        // GetDistance(..., DIST_CALC_NONE) returns the SQUARED distance, so the checker range must
+        // be squared too; VisitAllObjects keeps the linear radius for the cell visit.
+        MaNGOS::AnyUnitFulfillingConditionInRangeCheck checker(bot, [](Unit* u) { return !u->IsAlive(); }, radius * radius, DIST_CALC_NONE);
         MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitFulfillingConditionInRangeCheck> searcher(creatures, checker);
         Cell::VisitAllObjects(bot, searcher, radius);
 
         uint32 deadCount = 0;
         for (Creature* creature : creatures)
         {
-            if (!creature->IsAlive())
+            if (!creature->IsAlive() && !creature->IsPet() && !creature->IsTotem())
                 ++deadCount;
         }
 
         return deadCount;
     }
+}
+
+uint32 ai::GetPartyXpTotal(Player* bot)
+{
+    if (!bot || !bot->IsInWorld())
+        return 0;
+
+    uint64 total = 0;
+    if (Group* group = bot->GetGroup())
+    {
+        for (auto itr = group->GetMemberSlots().begin(); itr != group->GetMemberSlots().end(); ++itr)
+        {
+            Player* member = sObjectMgr.GetPlayer(itr->guid);
+            if (!member || !member->IsInWorld())
+                continue;
+
+            total += sObjectMgr.GetXPForLevel(member->GetLevel()) + member->GetUInt32Value(PLAYER_XP);
+        }
+    }
+    else
+    {
+        total += sObjectMgr.GetXPForLevel(bot->GetLevel()) + bot->GetUInt32Value(PLAYER_XP);
+    }
+
+    return static_cast<uint32>(total > UINT32_MAX ? UINT32_MAX : total);
 }
 
 TestResult TextComponent::TrySplitOnce(const std::string& input, const std::string& delimiter,
@@ -219,7 +244,7 @@ TestResult TestMonitor::Check(const std::string& monitorStr, Player* bot, TestCo
             if (ctx.testStartPosition)
                 placeholders["<distance traveled>"] = std::to_string(static_cast<uint32>(ctx.testStartPosition.distance(pos))) + "m";
 
-            placeholders["<mobs killed>"] = std::to_string(CountNearbyDeadMobs(bot, 120.0f));
+            placeholders["<mobs killed>"] = std::to_string(static_cast<uint32>(ctx.observedDeadMobs.size()));
         }
 
         if (ctx.testStartPosition && ctx.destinationPosition)

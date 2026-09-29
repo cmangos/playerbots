@@ -10,6 +10,23 @@ void TestRegistry::RegisterMoveTests()
     static const std::string needAlive = "monitor bot dead => abort \"Bot died test interupted\"";
     static const std::string timeout2Min = "monitor time > 120 => fail \"Timeout: bot did not reach destination (traveled <distance traveled> / wanted <distance wanted>)\"";
     static const std::string timeout10Min = "monitor time > 600 => fail \"Timeout: bot did not reach destination (traveled <distance traveled> / wanted <distance wanted>)\"";
+    static const std::string timeout20Min = "monitor time > 1200 => fail \"Timeout: bot did not reach the other side (traveled <distance traveled> / wanted <distance wanted>)\"";
+
+    // Transport ride: Menethil Harbor -> Theramore boat. Bot waits at the pier, boards,
+    // rides, disembarks and walks to Theramore. Hand-written because the generated
+    // transport suite needs dock nodes the travel mesh did not create for this pier.
+    RegisterTest("movement_transport_boat_menethil_theramore", {
+        gmInvisible,
+        needAlive,
+        "monitor can not reach nodes => fail \"Bot cannot reach travel network at <current position>\"",
+        timeout20Min,
+        "monitor distance to theramore < 100 => pass \"Bot arrived at Theramore after <time elapsed>\"",
+        "require bot is faction=alliance",
+        "teleport menethilharbor",
+        "set destination theramore",
+        "observe",
+        gmVisible
+    });
 
     RegisterTest("movement_walk_short_inside_ironforge", {gmInvisible, needAlive, timeout2Min, "monitor distance to ironforge < 50 => pass \"Bot reached Ironforge gate\"", "teleport ironforge_outside", "set destination ironforge", "observe", gmVisible});
     RegisterTest("movement_walk_long_coldridge_ironforge", {gmInvisible, needAlive, timeout10Min, "monitor distance to ironforge < 100 => pass \"Bot arrived at Ironforge\"", "teleport coldridge", "set destination ironforge", "observe", gmVisible});
@@ -84,4 +101,8 @@ void TestRegistry::RegisterMoveTests()
     });
 
     GenerateMovementTests(1000, 5.0f, 100000.0f);
+
+    //Special movement: transport rides (boats/zeppelins/elevators/trams). One test per ride edge:
+    //teleport to one dock, send the bot to the other side, it must wait/board/ride/disembark.
+    GenerateTransportTests(100);
 }

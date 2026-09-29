@@ -30,6 +30,11 @@ namespace ai
         uint32 monitorTime;
         uint32 waitTime;                        
         uint32 undergroundCount;
+
+        // Consecutive ticks the "can not reach nodes" monitor saw no pathable node. Right after
+        // a teleport the target grid/mmaps may not be loaded yet, so the monitor only fails after
+        // a grace period instead of on the first tick (same pattern as undergroundCount).
+        uint32 cannotReachCount;
         uint32 focusMobEntry;                   
         ObjectGuid focusMobGuid;                
         bool focusMobKilled;                    
@@ -44,6 +49,18 @@ namespace ai
         std::string testName;                    
         WorldPosition testStartPosition;
         GuidPosition destinationPosition;
+
+        // Party XP total (all group members) captured when the test starts. The "party xp" monitor
+        // measures the gain against this baseline: kill/loot-driven corpses near the host are too
+        // transient (bots loot instantly) for sparse-start instances, so "party cleared trash" is
+        // asserted on accumulated party XP instead.
+        uint32 partyXpStart = 0;
+        bool partyXpCaptured = false;
+
+        // Every dead creature GUID the "dead mobs" monitor has ever observed this run. Counted
+        // cumulatively per unique GUID because corpses despawn on loot - a "6 corpses at once"
+        // snapshot rarely happens in sparse-start instances even under heavy killing.
+        std::set<ObjectGuid> observedDeadMobs;
 
         // Where the most recent resurrect request told its target to land, and on which map. Monitors
         // must measure against this rather than the acting bot: the caller is a random bot that can
@@ -63,7 +80,7 @@ namespace ai
 
         bool debug = false; // enable extra logging for debugging
 
-        TestContext() : pc(0), observing(false), testStartTime(0), monitorTime(0), waitTime(0), undergroundCount(0), focusMobEntry(0), focusMobKilled(false), cleanupPc(0), cleanupPrepared(false), whoResponded(false), result(TestResult::PENDING) {}
+        TestContext() : pc(0), observing(false), testStartTime(0), monitorTime(0), waitTime(0), undergroundCount(0), cannotReachCount(0), focusMobEntry(0), focusMobKilled(false), cleanupPc(0), cleanupPrepared(false), whoResponded(false), result(TestResult::PENDING) {}
 
         void Reset();
     };

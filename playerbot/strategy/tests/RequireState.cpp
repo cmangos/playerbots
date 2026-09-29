@@ -67,6 +67,19 @@ TestResult RequireBotIs::Execute(const std::string& params, Player* bot,
                 return TestResult::FAIL;
             }
         }
+        else if (key == "faction")
+        {
+            Team expectedTeam = ChatHelper::parseTeam(value);
+            if (expectedTeam == TEAM_BOTH_ALLOWED) // unknown faction string
+            {
+                return TestResult::FAIL;
+            }
+
+            if (bot->GetTeam() != expectedTeam)
+            {
+                return TestResult::FAIL;
+            }
+        }
     }
 
     return TestResult::PASS;

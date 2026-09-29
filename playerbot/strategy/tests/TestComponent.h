@@ -10,6 +10,10 @@ namespace ai
 {
     class TestContext;
 
+    // Summed XP total (level floor + current XP) over all in-world group members, or just the bot
+    // when ungrouped. Monotonic per member; callers measure the delta against a captured baseline.
+    uint32 GetPartyXpTotal(Player* bot);
+
     class TextComponent
     {
     public:

@@ -37,4 +37,18 @@ void TestContext::Reset()
         }
     }
     spawnedBots.clear();
+    deliveredGroupMembers.clear();
+    groupOnMapExpected = 0;
+}
+
+void TestContext::RecordDeliveredGroupMember(ObjectGuid guid)
+{
+    std::lock_guard<std::mutex> lock(groupDeliveryMutex);
+    deliveredGroupMembers.insert(guid);
+}
+
+std::set<ObjectGuid> TestContext::GetDeliveredGroupMembers()
+{
+    std::lock_guard<std::mutex> lock(groupDeliveryMutex);
+    return deliveredGroupMembers;
 }

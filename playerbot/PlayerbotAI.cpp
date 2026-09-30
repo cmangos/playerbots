@@ -1060,8 +1060,9 @@ void PlayerbotAI::OnCombatStarted()
 {
     if(!IsStateActive(BotState::BOT_STATE_COMBAT))
     {
-        // Reset the combat start timestamp
-        aiObjectContext->GetValue<time_t>("combat start time")->Set(time(0));
+        // Reset the combat start timestamp, unless Reset() kept it because the bot never left combat
+        if (!aiObjectContext->GetValue<time_t>("combat start time")->Get())
+            aiObjectContext->GetValue<time_t>("combat start time")->Set(time(0));
 
         // Update stay position on location when combat starts
         if (HasStrategy("stay", BotState::BOT_STATE_COMBAT) && !HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT))
@@ -1550,7 +1551,9 @@ void PlayerbotAI::Reset(bool full)
     RESET_AI_VALUE(GuidPosition,"rpg target");
     RESET_AI_VALUE(LootObject,"loot target");
     RESET_AI_VALUE(uint32,"lfg proposal");
-    RESET_AI_VALUE(time_t,"combat start time");
+    // Keep the combat clock running while still in combat, so the 5 minute CombatStop() above can trigger
+    if (!sServerFacade.IsInCombat(bot))
+        RESET_AI_VALUE(time_t,"combat start time");
     bot->SetSelectionGuid(ObjectGuid());
 
     LastSpellCast & lastSpell = AI_VALUE(LastSpellCast&,"last spell cast");
@@ -2355,6 +2358,12 @@ void PlayerbotAI::DoNextAction(bool min)
         {
             Reset();
         }
+    }
+
+    // left combat after a Reset() kept the combat start time - clear it so the next fight starts fresh
+    if (currentEngine == engines[(uint8)BotState::BOT_STATE_NON_COMBAT] && !sServerFacade.IsInCombat(bot) && aiObjectContext->GetValue<time_t>("combat start time")->Get())
+    {
+        aiObjectContext->GetValue<time_t>("combat start time")->Set(0);
     }
 
     bool minimal = !AllowActivity();

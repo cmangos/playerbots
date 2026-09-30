@@ -358,8 +358,11 @@ void TestRegistry::RegisterQuestSuiteTests()
         if (!quest)
             continue;
 
-        if (quest->HasQuestFlag(QUEST_FLAGS_DAILY) || quest->HasQuestFlag(QUEST_FLAGS_WEEKLY) ||
-            quest->HasQuestFlag(QUEST_FLAGS_UNAVAILABLE) || quest->HasQuestFlag(QUEST_FLAGS_AUTO_REWARDED) ||
+        if (quest->HasQuestFlag(QUEST_FLAGS_WEEKLY) ||
+#ifndef MANGOSBOT_ZERO
+            quest->HasQuestFlag(QUEST_FLAGS_DAILY) || quest->HasQuestFlag(QUEST_FLAGS_UNAVAILABLE) ||
+#endif
+            quest->HasQuestFlag(QUEST_FLAGS_AUTO_REWARDED) ||
             quest->HasSpecialFlag(QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT) ||
             quest->HasQuestFlag(QUEST_FLAGS_RAID))
         {
@@ -444,9 +447,12 @@ void TestRegistry::RegisterQuestSuiteTests()
 
         // Raid/escort/legendary/dungeon-finder quest types are out of scope for the first pass.
         uint32 questType = quest->GetType();
-        if (questType == QUEST_TYPE_RAID || questType == QUEST_TYPE_RAID_10 || questType == QUEST_TYPE_RAID_25 ||
+        if (questType == QUEST_TYPE_RAID ||
+#ifdef MANGOSBOT_TWO
+            questType == QUEST_TYPE_RAID_10 || questType == QUEST_TYPE_RAID_25 || quest->IsDungeonFinderQuest() ||
+#endif
             questType == QUEST_TYPE_ESCORT || questType == QUEST_TYPE_LEGENDARY ||
-            questType == QUEST_TYPE_WORLD_EVENT || quest->IsDungeonFinderQuest())
+            questType == QUEST_TYPE_WORLD_EVENT)
         {
             ++skipGated;
             logSkip("raid/escort/legendary/event quest type", questId);

@@ -719,7 +719,21 @@ TravelPath MovementAction::ResolveMovePath(const WorldPosition& startPosition, c
         outMovePath = lastMove.lastPath;
 
     if (outMovePath.empty())
+    {
+        // No route. MovePoint ignores the map, and the navmesh pathfinder can't build a path this long, so the bot
+        // would walk a straight line toward the destination's coordinates and height, through terrain and under the map.
+        if (startPosition.getMapId() != endPosition.getMapId() || (!bot->InBattleGround() && sServerFacade.IsDistanceGreaterThan(totalDistance, sPlayerbotAIConfig.sightDistance * 3)))
+        {
+            if (mover == bot)
+                ai->StopMoving();
+            else
+                mover->InterruptMoving(true);
+
+            return outMovePath;
+        }
+
         outMovePath.addPoint(endPosition);
+    }
 
     return outMovePath;
 }

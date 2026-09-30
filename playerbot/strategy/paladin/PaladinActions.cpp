@@ -18,6 +18,30 @@ namespace
     }
 }
 
+bool ProtSealAction::Execute(Event& event)
+{
+    bool isEncounter = false;
+    // Use seal of vengeance if on a boss, seal of righteousness otherwise, trash, world etc.
+    std::list<ObjectGuid> v = context->GetValue<std::list<ObjectGuid>>("possible attack targets")->Get();
+    for (std::list<ObjectGuid>::iterator i = v.begin(); i!=v.end(); i++)
+    {
+        Unit* unit = ai->GetUnit(*i);
+        if (!unit || !sServerFacade.IsAlive(unit) || unit->IsPlayer())
+            continue;
+
+        if (sObjectMgr.IsEncounter(unit->GetEntry(), unit->GetMapId()))
+        {
+            isEncounter = true;
+            break;
+        }    
+    }
+    if (isEncounter && bot->HasSpell(AI_VALUE2(uint32, "spell id", "seal of vengeance")))
+        SetSpellName("seal of vengeance");
+    else
+        SetSpellName("seal of righteousness");
+    return CastBuffSpellAction::Execute(event);
+}
+
 bool CastPaladinAuraAction::Execute(Event& event)
 {
     std::vector<std::string> altAuras;

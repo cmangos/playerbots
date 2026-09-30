@@ -61,6 +61,11 @@ bool EnemyPlayersValue::IsValid(Unit* target, Player* player)
                 }
             }
 
+            if (!IsReachable(target, player))
+            {
+                return false;
+            }
+
             /*
             // Check if too far away (Do we need this?)
             const float maxPvPDistance = GetMaxAttackDistance(player);
@@ -77,6 +82,29 @@ bool EnemyPlayersValue::IsValid(Unit* target, Player* player)
     }
 
     return false;
+}
+
+bool EnemyPlayersValue::IsReachable(Unit* target, Player* player)
+{
+    // A player standing under the map (or on a ledge with no way up) is close in 2D but can
+    // never be reached, and would otherwise keep the bot in combat with it indefinitely.
+    if (!player || !PlayerbotAI::IsSafe(player, target))
+    {
+        return true;
+    }
+
+    // The path check below decides reachability. This height gate only decides when it is
+    // worth running: normal fights (slopes, stairs, small ledges) stay within a few yards
+    // of height, so skipping them keeps the pathfinder out of the common case. The cases
+    // this targets are far outside it (e.g. a player that fell ~30 yd under the map).
+    // A lower value only costs more path checks, a higher one only misses shallower cases.
+    const float maxHeightWithoutPathCheck = 10.0f;
+    if (std::abs(target->GetPositionZ() - player->GetPositionZ()) <= maxHeightWithoutPathCheck)
+    {
+        return true;
+    }
+
+    return WorldPosition(player).canPathTo(WorldPosition(target), player);
 }
 
 void EnemyPlayersValue::ApplyFilter(std::list<ObjectGuid>& targets, bool getOne)
@@ -124,7 +152,7 @@ ObjectGuid EnemyPlayerValue::Calculate()
         Unit* firstTarget = ai->GetUnit(enemyPlayers.front());
         if (firstTarget)
         {
-            bestEnemyPlayerDistance = firstTarget->GetDistance(bot, false);
+            bestEnemyPlayerDistance = firstTarget->GetDistance(bot, true);
             bestEnemyPlayerHealth = firstTarget->GetHealth();
             bestEnemyPlayer = firstTarget;
         }
@@ -145,7 +173,7 @@ ObjectGuid EnemyPlayerValue::Calculate()
                 if (isMelee)
                 {
                     // Score best enemy player based on lowest distance
-                    const float distanceToEnemyPlayer = target->GetDistance(bot, false);
+                    const float distanceToEnemyPlayer = target->GetDistance(bot, true);
                     if (distanceToEnemyPlayer < bestEnemyPlayerDistance)
                     {
                         bestEnemyPlayerDistance = distanceToEnemyPlayer;

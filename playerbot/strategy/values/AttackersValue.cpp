@@ -369,6 +369,12 @@ bool AttackersValue::IsValid(Unit* target, Player* player, Player* owner, bool c
             {
                 return false;
             }
+
+            // If the enemy player can't be reached (e.g. under the map)
+            if (!EnemyPlayersValue::IsReachable(enemyPlayer, playerToCheckAgainst))
+            {
+                return false;
+            }
         }
     }
     // If the target is a NPC

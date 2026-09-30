@@ -124,7 +124,7 @@ ObjectGuid EnemyPlayerValue::Calculate()
         Unit* firstTarget = ai->GetUnit(enemyPlayers.front());
         if (firstTarget)
         {
-            bestEnemyPlayerDistance = firstTarget->GetDistance(bot, false);
+            bestEnemyPlayerDistance = firstTarget->GetDistance(bot, true);
             bestEnemyPlayerHealth = firstTarget->GetHealth();
             bestEnemyPlayer = firstTarget;
         }
@@ -145,7 +145,7 @@ ObjectGuid EnemyPlayerValue::Calculate()
                 if (isMelee)
                 {
                     // Score best enemy player based on lowest distance
-                    const float distanceToEnemyPlayer = target->GetDistance(bot, false);
+                    const float distanceToEnemyPlayer = target->GetDistance(bot, true);
                     if (distanceToEnemyPlayer < bestEnemyPlayerDistance)
                     {
                         bestEnemyPlayerDistance = distanceToEnemyPlayer;

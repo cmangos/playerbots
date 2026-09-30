@@ -86,16 +86,20 @@ bool EnemyPlayersValue::IsValid(Unit* target, Player* player)
 
 bool EnemyPlayersValue::IsReachable(Unit* target, Player* player)
 {
-    // Only check targets far above or below the player. A player standing under the map
-    // (or on a ledge with no way up) is close in 2D but can never be reached, and would
-    // otherwise keep the bot in combat with it indefinitely. The height gate keeps the
-    // pathfinder out of the common case.
-    if (!target || !player || target->GetMapId() != player->GetMapId())
+    // A player standing under the map (or on a ledge with no way up) is close in 2D but can
+    // never be reached, and would otherwise keep the bot in combat with it indefinitely.
+    if (!player || !PlayerbotAI::IsSafe(player, target))
     {
         return true;
     }
 
-    if (std::abs(target->GetPositionZ() - player->GetPositionZ()) <= 10.0f)
+    // The path check below decides reachability. This height gate only decides when it is
+    // worth running: normal fights (slopes, stairs, small ledges) stay within a few yards
+    // of height, so skipping them keeps the pathfinder out of the common case. The cases
+    // this targets are far outside it (e.g. a player that fell ~30 yd under the map).
+    // A lower value only costs more path checks, a higher one only misses shallower cases.
+    const float maxHeightWithoutPathCheck = 10.0f;
+    if (std::abs(target->GetPositionZ() - player->GetPositionZ()) <= maxHeightWithoutPathCheck)
     {
         return true;
     }

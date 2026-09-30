@@ -82,10 +82,12 @@ AiPlayerbot.RandomBotAccountCount = 200
 # Percentage of fully active bots. Default is 10, higher numbers may affect performance
 # AiPlayerbot.botActiveAlone = 10
 
-# Limit random bot max level to online players max level + 5 and uses reference level 1 without a player.
+# Limit random bot max level to online players max level + SyncLevelMaxAbove.
+# SyncLevelNoPlayer is the reference level used while no player is online.
+# It defaults to AiPlayerbot.randombotStartingLevel.
 # AiPlayerbot.SyncLevelWithPlayers = 0
 # AiPlayerbot.SyncLevelMaxAbove = 5
-# AiPlayerbot.SyncLevelNoPlayer = 1
+# AiPlayerbot.SyncLevelNoPlayer = 5
 
 # Sync non-random bot alt levels to master level automatically
 # When enabled, bot alts will level up one level at a time to match their master's level
@@ -201,8 +203,14 @@ AiPlayerbot.RandomBotShowCloak = 1
 # Every bots started on the specified level and level up by killing mobs.
 AiPlayerbot.DisableRandomLevels = 0
 
-# Set randombots starting level here if "AiPlayerbot.DisableRandomLevels" enabled
-# Recommended: 5+
+# Random bots at or below this level are treated as new characters: when they are
+# randomized they get a full reroll of level, gear, spells and talents. Bots above it
+# only get gear upgrades (if AiPlayerbot.RandomGearUpgradeEnabled = 1), unless
+# AiPlayerbot.SyncLevelWithPlayers finds them outside the allowed level range.
+# With AiPlayerbot.DisableRandomLevels = 1 the reroll keeps the bot's current level.
+# 0 disables the full reroll. This does not set the level new bots start at.
+# Also the default for AiPlayerbot.SyncLevelNoPlayer.
+# Default: 5
 #AiPlayerbot.randombotStartingLevel = 5
 
 # Set XP rate for bots (default: 1)

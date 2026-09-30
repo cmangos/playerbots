@@ -1,6 +1,6 @@
 # Profession economy implementation log
 
-Last updated: 2026-09-29 (Europe/Amsterdam)
+Last updated: 2026-09-30 (Europe/Amsterdam)
 
 ## Repository checkpoint
 
@@ -212,3 +212,40 @@ compiled in `libplayerbots.a`. No deployment occurred.
 Publication remains pending because the visible repository's `.git` directory
 is read-only to this session and the saved GitHub CLI token is invalid. PR #1
 has therefore not yet been updated.
+
+
+## Live canary validation (2026-09-30)
+
+The profession branch was deployed to a Linux CMaNGOS WotLK test server and
+validated with the autonomous rollout temporarily raised to 100% for observation.
+
+Test conditions deliberately excluded the two easiest false positives:
+
+- `AiPlayerbot.RndBotCheats` was empty, so profession materials were not supplied
+  by the item cheat.
+- `AiPlayerbot.RandomBotNonCombatStrategies` did not include `+rpg craft`, so
+  the existing optional RPG crafting strategy was not responsible for the
+  profession planner output.
+
+The live `.rndbot do <name> profession` diagnostic successfully reported an
+active random bot with persisted profession state and a concrete crafting plan.
+For example, Beanezoth reported Alchemy 1/75, Herbalism 58/75 and a planned
+`Elixir of Minor Defense` batch of 5 with the craft cooldown ready. Live bots
+were also observed performing profession-related world activity while the
+feature was enabled.
+
+Live testing found two omissions in the new chat diagnostic path:
+
+- commit `6153723b477860a1bfe853bfaf7db9c183ac3c10`
+  (`playerbots: register profession chat trigger`) registers the
+  `profession` chat trigger;
+- commit `2b5a18c00e25f286a7790967bb638278ecf7715d`
+  (`playerbots: route profession chat command`) adds `profession` to the
+  chat-command handler's supported action list.
+
+The direct console diagnostic worked before those chat fixes. The final whisper
+path should be runtime-retested after rebuilding/restarting with both commits.
+
+The Linux deployment used the normal CMaNGOS build and restart path; no database
+migration was required. Long-running progression, economy behavior under a
+smaller canary, and Classic/TBC build coverage remain follow-up validation work.

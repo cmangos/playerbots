@@ -109,11 +109,13 @@ TestResult CommandSetupForceCompleteQuest::Execute(const std::string& params, Pl
 
         ItemPosCountVec dest;
         uint8 msg = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count - curCount);
-        if (msg == EQUIP_ERR_OK)
+        if (msg != EQUIP_ERR_OK)
         {
-            Item* item = bot->StoreNewItem(dest, itemId, true);
-            bot->SendNewItem(item, count - curCount, true, false);
+            message = "Cannot store quest item " + std::to_string(itemId) + " (bag full?)";
+            return TestResult::IMPOSSIBLE;
         }
+        Item* item = bot->StoreNewItem(dest, itemId, true);
+        bot->SendNewItem(item, count - curCount, true, false);
     }
 
     // Satisfy creature/GO kill objectives
@@ -205,11 +207,13 @@ TestResult CommandSetupRewardQuest::Execute(const std::string& params, Player* b
 
         ItemPosCountVec dest;
         uint8 msg = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count - curCount);
-        if (msg == EQUIP_ERR_OK)
+        if (msg != EQUIP_ERR_OK)
         {
-            Item* item = bot->StoreNewItem(dest, itemId, true);
-            bot->SendNewItem(item, count - curCount, true, false);
+            message = "Cannot store quest item " + std::to_string(itemId) + " (bag full?)";
+            return TestResult::IMPOSSIBLE;
         }
+        Item* item = bot->StoreNewItem(dest, itemId, true);
+        bot->SendNewItem(item, count - curCount, true, false);
     }
 
     for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
@@ -274,9 +278,24 @@ TestResult CommandSetupForceObjectives::Execute(const std::string& params, Playe
         return TestResult::IMPOSSIBLE;
     }
 
-    int32 exceptIndex = -1;
-    if (!objStr.empty())
-        exceptIndex = static_cast<int32>(std::strtol(objStr.c_str(), nullptr, 10));
+    if (exceptKeyword != "except")
+    {
+        message = "Usage: force objectives <questId> except <objIndex>";
+        return TestResult::IMPOSSIBLE;
+    }
+
+    if (objStr.empty() || objStr.find_first_not_of("0123456789") != std::string::npos)
+    {
+        message = "Invalid objective index: " + objStr;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    int32 exceptIndex = static_cast<int32>(std::strtol(objStr.c_str(), nullptr, 10));
+    if (exceptIndex >= QUEST_ITEM_OBJECTIVES_COUNT)
+    {
+        message = "Objective index out of range: " + objStr;
+        return TestResult::IMPOSSIBLE;
+    }
 
     QuestStatus status = bot->GetQuestStatus(questId);
     if (status != QUEST_STATUS_INCOMPLETE && status != QUEST_STATUS_COMPLETE)
@@ -302,11 +321,13 @@ TestResult CommandSetupForceObjectives::Execute(const std::string& params, Playe
 
         ItemPosCountVec dest;
         uint8 msg = bot->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count - curCount);
-        if (msg == EQUIP_ERR_OK)
+        if (msg != EQUIP_ERR_OK)
         {
-            Item* item = bot->StoreNewItem(dest, itemId, true);
-            bot->SendNewItem(item, count - curCount, true, false);
+            message = "Cannot store quest item " + std::to_string(itemId) + " (bag full?)";
+            return TestResult::IMPOSSIBLE;
         }
+        Item* item = bot->StoreNewItem(dest, itemId, true);
+        bot->SendNewItem(item, count - curCount, true, false);
     }
 
     // Satisfy creature/GO objectives

@@ -311,15 +311,14 @@ TestResult TestAction::ExecuteCommand(const std::string& line, std::string& mess
 }
 
 void TestAction::RunCleanup()
-{   
+{
     for (size_t i = static_cast<size_t>(std::max(0, ctx.pc)); i < ctx.script.size(); ++i)
     {
-        if (!dynamic_cast<TestCleanup*>(commands[i].get()))
+        if (ctx.script[i].find("cleanup ") != 0)
             continue;
 
-        // Execute THIS script line's cleanup command, not the line the test stopped on.
         std::string message;
-        TestResult commandResult = ExecuteCommand(ctx.script[i], message);
+        TestResult commandResult = ExecuteCommand(ctx.script[i].substr(8), message);
         (void)commandResult;
     }
 }

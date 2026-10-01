@@ -13,6 +13,7 @@
 
 static std::map<std::string, std::vector<std::string>> sTestRegistry;
 static bool sTestsRegistered = false;
+static bool sTestsRegistering = false;
 static std::recursive_mutex sTestsRegisterMutex;
 
 static std::map<std::string, GuidPosition> sNamedTestLocations;
@@ -838,10 +839,10 @@ void TestRegistry::EnsureTestsRegistered()
     // concurrently while sTestRegistry is written - guard the whole init.
     std::lock_guard<std::recursive_mutex> guard(sTestsRegisterMutex);
 
-    if (sTestsRegistered)
+    if (sTestsRegistered || sTestsRegistering)
         return;
 
-    sTestsRegistered = true;
+    sTestsRegistering = true;
 
     RegisterMoveTests();
     RegisterSpawnTests();
@@ -851,6 +852,9 @@ void TestRegistry::EnsureTestsRegistered()
     RegisterQuestDkStartTests();
     RegisterQuestSuiteTests();
     RegisterTeleportTests();
+
+    sTestsRegistered = true;
+    sTestsRegistering = false;
 }
 
 void TestRegistry::EnsureLocationsInit()

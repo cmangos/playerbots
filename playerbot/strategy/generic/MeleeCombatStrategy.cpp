@@ -17,9 +17,11 @@ void MeleeCombatStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 
 void SetBehindCombatStrategy::InitCombatTriggers(std::list<TriggerNode*> &triggers)
 {
+    /* Disabled by default. Bots can use proper 'combat stances' to position themselves behind targets.
     triggers.push_back(new TriggerNode(
         "not behind target",
         NextAction::array(0, new NextAction("set behind", ACTION_HIGH), NULL)));
+    */
 }
 
 void ChaseJumpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

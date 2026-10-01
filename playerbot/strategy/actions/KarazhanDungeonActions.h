@@ -28,6 +28,7 @@ namespace ai
     public:
         NetherspiteDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable netherspite fight strategy", "-netherspite") {}
     };
+    
 
     class VoidZoneMoveAwayAction : public MoveAwayFromCreature
     {
@@ -84,6 +85,24 @@ namespace ai
             bot->RemoveAurasDueToSpell(30423);
             return true;
         }
+    };
+
+    class BigBadWolfEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        BigBadWolfEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable big bad wolf fight strategy", "+big bad wolf") {}
+    };
+
+    class BigBadWolfDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        BigBadWolfDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable big bad wolf fight strategy", "-big bad wolf") {}
+    };
+
+    class BigBadWolfMoveAwayAction : public MoveAwayFromCreature
+    {
+    public:
+        BigBadWolfMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from big bad wolf", 17521, 28.0f, true) {}
     };
 
     class PrinceMalchezaarEnableFightStrategyAction : public ChangeAllStrategyAction

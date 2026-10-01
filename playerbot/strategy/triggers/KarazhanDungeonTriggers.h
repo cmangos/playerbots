@@ -61,6 +61,29 @@ namespace ai
 		}
 	};
 
+	class BigBadWolfStartFightTrigger : public StartBossFightTrigger
+	{
+	public:
+		BigBadWolfStartFightTrigger(PlayerbotAI* ai) : StartBossFightTrigger(ai, "start big bad wolf fight", "big bad wolf", 17521) {}
+	};
+
+	class BigBadWolfEndFightTrigger : public EndBossFightTrigger
+	{
+	public:
+		BigBadWolfEndFightTrigger(PlayerbotAI* ai) : EndBossFightTrigger(ai, "end big bad wolf fight", "big bad wolf", 17521) {}
+	};
+
+	class BigBadWolfTooCloseTrigger : public CloseToCreatureTrigger
+	{
+	public:
+		BigBadWolfTooCloseTrigger(PlayerbotAI* ai) : CloseToCreatureTrigger(ai, "big bad wolf too close", 17521, 20.0f, true) {}
+
+		bool IsActive() override
+		{
+			return ai->HasAura(30756, bot) && CloseToCreatureTrigger::IsActive();
+		}
+	};
+
 	class RemoveNetherPortalSerenityTrigger : public HasAuraTrigger
 	{
 	public:

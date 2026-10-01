@@ -528,6 +528,20 @@ void RandomPlayerbotMgr::LogPlayerLocation()
 
                     sPlayerbotAIConfig.log("player_location.csv", out.str().c_str());
 
+                    if (sPlayerbotAIConfig.hasLog("bot_heartbeat.csv"))
+                    {
+                        std::ostringstream hb;
+                        hb << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
+                        hb << bot->GetName() << ",";
+                        hb << bot->GetLevel() << ",";
+                        hb << bot->GetHealth() << ",";
+                        hb << bot->GetPowerPercent() << ",";
+                        hb << (bot->IsInCombat() ? "combat" : "non-combat") << ",";
+                        WorldPosition(bot).printWKT(hb);
+
+                        sPlayerbotAIConfig.log("bot_heartbeat.csv", hb.str().c_str());
+                    }
+
                     if (sPlayerbotAIConfig.hasLog("player_paths.csv") && WorldPosition(bot))
                     {
                         auto& botMoveLog = playerBotMoveLog[bot->GetObjectGuid().GetCounter()];

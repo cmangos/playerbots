@@ -2205,6 +2205,38 @@ void PlayerbotAI::ChangeEngine(BotState type)
 
     if (currentEngine != engine)
     {
+        if (sPlayerbotAIConfig.hasLog("bot_states.csv"))
+        {
+            Engine* previous = currentEngine;
+
+            std::ostringstream out;
+            out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
+            out << bot->GetName() << ",";
+            out << (previous == engines[(uint8)BotState::BOT_STATE_COMBAT] ? "combat" :
+                    previous == engines[(uint8)BotState::BOT_STATE_NON_COMBAT] ? "non-combat" :
+                    previous == engines[(uint8)BotState::BOT_STATE_DEAD] ? "dead" :
+                    previous == engines[(uint8)BotState::BOT_STATE_REACTION] ? "reaction" : "none")
+                << ",";
+            switch (type)
+            {
+            case BotState::BOT_STATE_COMBAT: out << "combat"; break;
+            case BotState::BOT_STATE_NON_COMBAT: out << "non-combat"; break;
+            case BotState::BOT_STATE_DEAD: out << "dead"; break;
+            case BotState::BOT_STATE_REACTION: out << "reaction"; break;
+            default: out << "?"; break;
+            }
+            out << ",";
+            out << (bot->IsInCombat() ? "combat" : "safe") << ",";
+            out << (!sServerFacade.IsAlive(bot) ? (bot->GetCorpse() ? "ghost" : "dead") : "alive") << ",";
+            ObjectGuid target = aiObjectContext->GetValue<ObjectGuid>("current target")->Get();
+            if (Unit* t = GetUnit(target))
+                out << t->GetName();
+            out << ",";
+            WorldPosition(bot).printWKT(out);
+
+            sPlayerbotAIConfig.log("bot_states.csv", out.str().c_str());
+        }
+
         currentEngine = engine;
         currentState = type;
         ReInitCurrentEngine();

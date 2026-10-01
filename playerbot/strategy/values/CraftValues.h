@@ -2,6 +2,8 @@
 #include "playerbot/strategy/Value.h"
 #include "playerbot/strategy/NamedObjectContext.h"
 
+class GameObject;
+
 namespace ai
 {
     struct ProfessionMaterialSources
@@ -143,6 +145,7 @@ namespace ai
         static bool ShouldTravelToVendor(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);
         static bool ShouldTravelToAuctionHouse(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);
         static bool ShouldTravelToSpellFocus(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);
+        static GameObject* GetCurrentSpellFocus(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);
     };
 
     class CanCraftProfessionValue : public BoolCalculatedValue

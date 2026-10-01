@@ -651,6 +651,9 @@ bool CraftRandomItemAction::Execute(Event& event)
     bool autonomousProfessionPlan = ProfessionCraftingPlanValue::IsEnabledFor(ai) && professionPlan.IsValid();
     if (autonomousProfessionPlan)
     {
+        if (AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(professionPlan.spellId))
+            return false;
+
         spellIds.erase(std::remove(spellIds.begin(), spellIds.end(), professionPlan.spellId), spellIds.end());
         if (ProfessionCraftingPlanValue::IsCraftCooldownReady(ai))
             spellIds.insert(spellIds.begin(), professionPlan.spellId);
@@ -666,6 +669,9 @@ bool CraftRandomItemAction::Execute(Event& event)
         if (wot)
             break;
     }
+
+    if (!wot && autonomousProfessionPlan && professionPlan.spellFocusId)
+        wot = ProfessionCraftingPlanValue::GetCurrentSpellFocus(ai, professionPlan);
 
     if (!wot)
         wot = bot;
@@ -732,7 +738,10 @@ bool CraftRandomItemAction::Execute(Event& event)
         cmd << spellId << " " << castCount;
 
         if (autonomousProfessionPlan && spellId == professionPlan.spellId)
+        {
             SET_AI_VALUE2(int32, "manual int", "pending profession craft", static_cast<int32>(spellId));
+            context->ClearValues("can craft profession");
+        }
 
         ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *bot);
         SetDuration(1.0f); //Spel was not cast yet so no delay is needed.

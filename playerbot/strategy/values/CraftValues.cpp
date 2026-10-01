@@ -395,6 +395,30 @@ bool ProfessionCraftingPlanValue::ShouldTravelToSpellFocus(PlayerbotAI* ai, cons
         !plan.GetMissingReagents(ai).empty(), IsCraftCooldownReady(ai), ai->HasActivePlayerMaster());
 }
 
+GameObject* ProfessionCraftingPlanValue::GetCurrentSpellFocus(
+    PlayerbotAI* ai, const ProfessionCraftingPlan& plan)
+{
+    if (!ai || !plan.IsValid() || !plan.spellFocusId)
+        return nullptr;
+
+    AiObjectContext* context = ai->GetAiObjectContext();
+    TravelTarget* travelTarget = AI_VALUE(TravelTarget*, "travel target");
+    if (!travelTarget || travelTarget->GetStatus() != TravelStatus::TRAVEL_STATUS_WORK ||
+        !travelTarget->GetDestination() ||
+        travelTarget->GetDestination()->GetPurpose() != TravelDestinationPurpose::CraftingFocus)
+        return nullptr;
+
+    GuidPosition* focusPosition = dynamic_cast<GuidPosition*>(travelTarget->GetPosition());
+    Player* bot = ai->GetBot();
+    GameObject* focus = focusPosition && bot ? focusPosition->GetGameObject(bot->GetInstanceId()) : nullptr;
+    GameObjectInfo const* focusInfo = focus ? focus->GetGOInfo() : nullptr;
+    if (!focusInfo || focusInfo->type != GAMEOBJECT_TYPE_SPELL_FOCUS ||
+        focusInfo->spellFocus.focusId != plan.spellFocusId)
+        return nullptr;
+
+    return focus;
+}
+
 ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
 {
     ProfessionCraftingPlan bestPlan;
@@ -493,7 +517,11 @@ bool CanCraftProfessionValue::Calculate()
         return false;
 
     SpellEntry const* spell = sServerFacade.LookupSpellInfo(plan.spellId);
-    if (!spell || spell->RequiresSpellFocus)
+    if (!spell || AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(plan.spellId))
+        return false;
+
+    bool atMatchingSpellFocus = ProfessionCraftingPlanValue::GetCurrentSpellFocus(ai, plan) != nullptr;
+    if (!profession::IsCraftLocationReady(spell->RequiresSpellFocus, atMatchingSpellFocus))
         return false;
 
     return AI_VALUE2(bool, "can craft spell", plan.spellId);

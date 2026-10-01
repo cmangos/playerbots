@@ -1,5 +1,7 @@
 #include "playerbot/playerbot.h"
+#include "playerbot/strategy/generic/ChatCommandHandlerStrategy.h"
 #include "playerbot/strategy/values/ProfessionProgressionPolicy.h"
+#include <string_view>
 
 using ai::profession::AssignmentPair;
 
@@ -55,6 +57,19 @@ namespace
         "a ready recipe with materials should travel to its real spell focus");
     static_assert(!ai::profession::ShouldTravelToSpellFocus(true, true, 3, true, true, false),
         "a focus trip must wait until recipe materials are present");
+
+    static_assert(ai::profession::IsCraftLocationReady(0, false),
+        "recipes without a spell focus must keep the existing direct craft path");
+    static_assert(!ai::profession::IsCraftLocationReady(4, false),
+        "a focus recipe must not craft before reaching its matching focus");
+    static_assert(ai::profession::IsCraftLocationReady(4, true),
+        "a focus recipe must become craftable at its matching real focus");
+
+    static_assert(std::string_view(ai::ChatCommandHandlerStrategy::ProfessionTrigger) ==
+            std::string_view(ai::ChatCommandHandlerStrategy::ProfessionAction),
+        "the profession trigger must resolve directly to ProfessionStatusAction");
+    static_assert(std::string_view(ai::ChatCommandHandlerStrategy::CastNcAction) == "cast custom nc spell",
+        "the castnc trigger must resolve to CastCustomNcSpellAction");
 
 #ifdef MANGOSBOT_TWO
     static_assert(SKILL_INSCRIPTION > 0, "WotLK builds must expose Inscription");

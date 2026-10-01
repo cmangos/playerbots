@@ -109,7 +109,7 @@ ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("jump");
     supported.push_back("doquest");
     supported.push_back("skill");
-    supported.push_back("profession");
+    supported.push_back(ProfessionTrigger);
     supported.push_back("faction");
     supported.push_back("set value");
     supported.push_back("glyph");
@@ -119,6 +119,10 @@ ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTr
 void ChatCommandHandlerStrategy::InitReactionTriggers(std::list<TriggerNode*> &triggers)
 {
     PassTroughStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        CastNcTrigger,
+        NextAction::array(0, new NextAction(CastNcAction, relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
         "rep",

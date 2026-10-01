@@ -17,7 +17,7 @@ bool ProfessionStatusAction::Execute(Event& event)
         << (sPlayerbotAIConfig.professionProgressionEnabled ? "enabled" : "disabled")
         << ", rollout " << sPlayerbotAIConfig.professionProgressionCanaryPercent << "%"
         << ", this bot " << (inCanary ? "active" : "inactive");
-    ai->TellPlayerNoFacing(requester, status.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+    ai->TellPlayerNoFacing(requester, status.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
 
     bool foundProfession = false;
     for (uint32 id = 0; id < sSkillLineStore.GetNumRows(); ++id)
@@ -28,14 +28,14 @@ bool ProfessionStatusAction::Execute(Event& event)
         if (skill->categoryId != SKILL_CATEGORY_PROFESSION && skill->categoryId != SKILL_CATEGORY_SECONDARY)
             continue;
 
-        ai->TellPlayerNoFacing(requester, ChatHelper::formatSkill(id, bot), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        ai->TellPlayerNoFacing(requester, ChatHelper::formatSkill(id, bot), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
         foundProfession = true;
     }
 
     ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
     if (!plan.IsValid())
     {
-        ai->TellPlayerNoFacing(requester, "No skill-up recipe is currently planned.", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        ai->TellPlayerNoFacing(requester, "No skill-up recipe is currently planned.", PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
         return foundProfession;
     }
 
@@ -47,7 +47,7 @@ bool ProfessionStatusAction::Execute(Event& event)
         << (ProfessionCraftingPlanValue::IsCraftCooldownReady(ai) ? "ready" : "waiting");
     if (plan.spellFocusId)
         planText << ", spell focus " << plan.spellFocusId;
-    ai->TellPlayerNoFacing(requester, planText.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+    ai->TellPlayerNoFacing(requester, planText.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
 
     std::map<uint32, uint32> missingReagents = plan.GetMissingReagents(ai);
     for (const auto& [itemId, count] : missingReagents)
@@ -55,7 +55,7 @@ bool ProfessionStatusAction::Execute(Event& event)
         ItemQualifier qualifier(itemId);
         std::ostringstream missing;
         missing << "Missing: " << ChatHelper::formatItem(qualifier) << " x" << count;
-        ai->TellPlayerNoFacing(requester, missing.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        ai->TellPlayerNoFacing(requester, missing.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
     }
 
     if (!missingReagents.empty())
@@ -66,7 +66,7 @@ bool ProfessionStatusAction::Execute(Event& event)
             << sources.vendorEntries.size() << " vendor(s), "
             << sources.auctionItems.size() << " AH material(s); AH cooldown "
             << (ProfessionCraftingPlanValue::IsAhSearchReady(ai) ? "ready" : "waiting");
-        ai->TellPlayerNoFacing(requester, acquisition.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+        ai->TellPlayerNoFacing(requester, acquisition.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
     }
 
     return true;

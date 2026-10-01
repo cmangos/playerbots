@@ -96,5 +96,10 @@ namespace ai
             return featureEnabledForBot && validPlan && spellFocusId &&
                 !hasMissingReagents && cooldownReady && !activeRealPlayerMaster;
         }
+
+        constexpr bool IsCraftLocationReady(uint32_t spellFocusId, bool atMatchingSpellFocus)
+        {
+            return !spellFocusId || atMatchingSpellFocus;
+        }
     }
 }

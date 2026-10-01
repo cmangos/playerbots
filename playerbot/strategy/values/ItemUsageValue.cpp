@@ -936,6 +936,18 @@ bool ItemUsageValue::IsNeededForQuest(Player* player, uint32 itemId, bool ignore
 
 bool ItemUsageValue::IsItemNeededForSkill(ItemPrototype const* proto)
 {
+    // Recipe-defined tools belong in the existing buy/keep policy. This also
+    // covers professions added after the historical fixed tool list.
+    CraftToolRequirements tools = AI_VALUE(CraftToolRequirements, "craft tool requirements");
+    if (tools.items.count(proto->ItemId))
+        return true;
+#ifndef MANGOSBOT_ZERO
+    if (proto->TotemCategory)
+        for (uint32 category : tools.categories)
+            if (IsTotemCategoryCompatiableWith(proto->TotemCategory, category))
+                return true;
+#endif
+
     switch (proto->ItemId)
     {
     case 2901: //Mining pick

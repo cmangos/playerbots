@@ -461,6 +461,17 @@ namespace ai
 		void SetMobAvoidArea();
 
 		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
+
+        // Read the existing index for one entry without scanning all world
+        // destinations. The index has the same lifetime as GetDestinations.
+        const DestinationList* GetEntryDestinations(TravelDestinationPurpose purpose, int32 entry) const
+        {
+            auto purposeItr = destinationMap.find(purpose);
+            if (purposeItr == destinationMap.end())
+                return nullptr;
+            auto entryItr = purposeItr->second.find(entry);
+            return entryItr == purposeItr->second.end() ? nullptr : &entryItr->second;
+        }
 		void GetPartitionsLock(bool getLock = true);
 		static bool IsLocationLevelValid(const WorldPosition& position, const PlayerTravelInfo& info);
 		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;

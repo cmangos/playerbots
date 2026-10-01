@@ -54,6 +54,48 @@ namespace ai
             return !lastAttempt || now < lastAttempt || now - lastAttempt >= cooldown;
         }
 
+        constexpr bool IsPendingCraftExpired(
+            uint32_t now, uint32_t queuedAt, uint32_t timeout, bool casting)
+        {
+            return !casting && IsCooldownReady(now, queuedAt, timeout);
+        }
+
+        constexpr bool IsNcCraftUseful(bool moving, bool autonomousPending)
+        {
+            // Execute already stops movement before the normal spell check.
+            return !moving || autonomousPending;
+        }
+
+        constexpr bool KeepsPendingCraft(bool accepted, uint32_t remainingCasts)
+        {
+            return accepted && remainingCasts > 1;
+        }
+
+        constexpr bool CanDispatchProfessionPlan(bool knownRecipe, bool cooldownReady,
+            bool pending, bool casting)
+        {
+            return knownRecipe && cooldownReady && !pending && !casting;
+        }
+
+        constexpr uint32_t BoundCraftBatch(uint32_t batch, uint32_t perCast, uint32_t target)
+        {
+            return perCast ? std::min(batch, std::max(1u, target / perCast)) : batch;
+        }
+
+        constexpr uint32_t AvailableCraftBatch(uint32_t batch, uint32_t available)
+        {
+            // With no complete cast, keep the acquisition plan. Otherwise do
+            // not require five casts' materials before making any progress.
+            return available ? std::min(batch, available) : batch;
+        }
+
+        constexpr bool IsCashVendorStock(bool matchesItem, bool limitedStock, uint32_t extendedCost)
+        {
+            // Existing vendor usefulness excludes currency offers; classification
+            // must not suppress AH fallback for an unusable cash-source route.
+            return matchesItem && !limitedStock && !extendedCost;
+        }
+
         constexpr uint32_t AuctionPurchaseCapacity(
             uint32_t currentCount, uint32_t requiredNow, uint32_t materialTarget, uint32_t maxStack)
         {

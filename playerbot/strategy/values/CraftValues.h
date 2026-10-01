@@ -1,8 +1,11 @@
 #pragma once
 #include "playerbot/strategy/Value.h"
 #include "playerbot/strategy/NamedObjectContext.h"
+#include "ProfessionCraftingFairness.h"
 
 class GameObject;
+class Player;
+struct SpellEntry;
 
 namespace ai
 {
@@ -102,6 +105,30 @@ namespace ai
         virtual std::vector<uint32> Calculate() override;
     };
 
+    struct CraftToolRequirements
+    {
+        std::set<uint32> items;
+        std::set<uint32> categories;
+    };
+
+    class CraftToolRequirementsValue : public CalculatedValue<CraftToolRequirements>
+    {
+    public:
+        CraftToolRequirementsValue(PlayerbotAI* ai) :
+            CalculatedValue<CraftToolRequirements>(ai, "craft tool requirements", 10) {}
+        virtual CraftToolRequirements Calculate() override;
+    };
+
+    class ProfessionCraftingFairnessValue : public ManualSetValue<profession::CraftingFairness&>
+    {
+    public:
+        ProfessionCraftingFairnessValue(PlayerbotAI* ai) :
+            ManualSetValue<profession::CraftingFairness&>(ai, state, "profession fairness") {}
+        virtual void Reset() override { state = {}; }
+    private:
+        profession::CraftingFairness state;
+    };
+
     class EnchantSpellsValue : public CalculatedValue<std::vector<uint32>> //All enchanting spells
     {
     public:
@@ -121,6 +148,7 @@ namespace ai
     public:
         CanCraftSpellValue(PlayerbotAI* ai, std::string name = "can craft spell", int checkInterval = 10) : BoolCalculatedValue(ai, name, checkInterval), Qualified() {}
         virtual bool Calculate() override;
+        static bool HasRequiredTools(const SpellEntry* spell, Player* player);
     };
 
     class ShouldCraftSpellValue : public BoolCalculatedValue, public Qualified
@@ -139,6 +167,9 @@ namespace ai
 
         static bool IsEnabledFor(PlayerbotAI* ai);
         static bool IsCraftCooldownReady(PlayerbotAI* ai);
+        static bool HasPendingCraft(PlayerbotAI* ai);
+        static void QueuePendingCraft(PlayerbotAI* ai, uint32 spellId);
+        static void ClearPendingCraft(PlayerbotAI* ai, uint32 spellId);
         static bool IsAhSearchReady(PlayerbotAI* ai);
         static uint32 GetAhBudget(PlayerbotAI* ai);
         static bool ShouldTravelForGathering(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);

@@ -8,6 +8,7 @@
 #include "playerbot/strategy/values/LootValues.h"
 #include "playerbot/strategy/values/ProfessionProgressionPolicy.h"
 #include "playerbot/strategy/values/SharedValueContext.h"
+#include "Grids/GridNotifiers.h"
 
 using namespace ai;
 
@@ -50,6 +51,26 @@ std::vector<uint32> CraftSpellsValue::Calculate()
     }
 
     return spellIds;
+}
+
+CraftToolRequirements CraftToolRequirementsValue::Calculate()
+{
+    CraftToolRequirements requirements;
+    for (uint32 spellId : AI_VALUE(std::vector<uint32>, "craft spells"))
+    {
+        SpellEntry const* spell = sServerFacade.LookupSpellInfo(spellId);
+        if (!spell)
+            continue;
+        for (uint32 tool : spell->Totem)
+            if (tool)
+                requirements.items.insert(tool);
+#ifndef MANGOSBOT_ZERO
+        for (uint32 category : spell->TotemCategory)
+            if (category)
+                requirements.categories.insert(category);
+#endif
+    }
+    return requirements;
 }
 
 std::vector<uint32> EnchantSpellsValue::Calculate()
@@ -123,6 +144,22 @@ bool CanCraftSpellValue::Calculate()
 
     if (AI_VALUE2(uint32, "has reagents for", spellId) == 0)
         return false;
+
+    return HasRequiredTools(pSpellInfo, bot);
+}
+
+bool CanCraftSpellValue::HasRequiredTools(const SpellEntry* spell, Player* player)
+{
+    if (!spell || !player)
+        return false;
+    for (uint32 tool : spell->Totem)
+        if (tool && !player->HasItemCount(tool, 1))
+            return false;
+#ifndef MANGOSBOT_ZERO
+    for (uint32 category : spell->TotemCategory)
+        if (category && !player->HasItemTotemCategory(category))
+            return false;
+#endif
 
     return true;
 }
@@ -256,6 +293,53 @@ std::map<uint32, uint32> ProfessionCraftingPlan::GetMissingReagents(PlayerbotAI*
     return liveMissing;
 }
 
+namespace
+{
+    bool HasCashVendorStock(const VendorItemData* stock, uint32 itemId)
+    {
+        if (!stock)
+            return false;
+        for (auto item : stock->m_items)
+        {
+            if (item->item != itemId)
+                continue;
+            uint32 extendedCost = 0;
+#ifndef MANGOSBOT_ZERO
+            extendedCost = item->ExtendedCost;
+#endif
+            // BuyAction::BuyItem attempts the first matching slot and returns,
+            // including on failure. A later cash offer cannot rescue that slot.
+            return profession::IsCashVendorStock(true, item->maxcount != 0, extendedCost);
+        }
+        return false;
+    }
+
+    bool IsPracticalProfessionVendor(int32 entry, uint32 itemId, Player* bot,
+        const PlayerTravelInfo& travelInfo)
+    {
+        CreatureInfo const* info = sObjectMgr.GetCreatureTemplate(entry);
+        if (!info || GuidPosition(HIGHGUID_UNIT, entry).IsHostileTo(bot))
+            return false;
+        if (!HasCashVendorStock(sObjectMgr.GetNpcVendorItemList(entry), itemId) &&
+            (!info->VendorTemplateId ||
+                !HasCashVendorStock(sObjectMgr.GetNpcVendorTemplateItemList(info->VendorTemplateId), itemId)))
+            return false;
+
+        const DestinationList* destinations = sTravelMgr.GetEntryDestinations(TravelDestinationPurpose::Vendor, entry);
+        if (!destinations)
+            return false;
+        for (TravelDestination* destination : *destinations)
+        {
+            if (!destination->IsPossible(travelInfo) || destination->DistanceTo(travelInfo.GetPosition()) == FLT_MAX)
+                continue;
+            for (WorldPosition* point : destination->GetPoints())
+                if (point && TravelMgr::IsLocationLevelValid(*point, travelInfo))
+                    return true;
+        }
+        return false;
+    }
+}
+
 ProfessionMaterialSources ProfessionCraftingPlan::GetMaterialSources(PlayerbotAI* ai) const
 {
     ProfessionMaterialSources sources;
@@ -301,11 +385,15 @@ ProfessionMaterialSources ProfessionCraftingPlan::GetMaterialSources(PlayerbotAI
             continue;
 
         std::list<int32> itemVendors = GAI_VALUE2(std::list<int32>, "item vendor list", itemId);
-        if (!itemVendors.empty())
-        {
-            vendorEntries.insert(itemVendors.begin(), itemVendors.end());
+        bool hasPracticalVendor = false;
+        for (int32 entry : itemVendors)
+            if (IsPracticalProfessionVendor(entry, itemId, bot, travelInfo))
+            {
+                vendorEntries.insert(entry);
+                hasPracticalVendor = true;
+            }
+        if (hasPracticalVendor)
             continue;
-        }
 
         // Deliberate dropped-material farming is intentionally not inferred
         // here: arbitrary creature loot would require expensive probability
@@ -340,6 +428,45 @@ bool ProfessionCraftingPlanValue::IsCraftCooldownReady(PlayerbotAI* ai)
     uint32 lastCraft = static_cast<uint32>(std::max<int32>(0,
         AI_VALUE2(int32, "manual int", "last profession craft")));
     return profession::IsCooldownReady(now, lastCraft, sPlayerbotAIConfig.professionCraftCooldown);
+}
+
+bool ProfessionCraftingPlanValue::HasPendingCraft(PlayerbotAI* ai)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    uint32 pending = static_cast<uint32>(std::max<int32>(0,
+        AI_VALUE2(int32, "manual int", "pending profession craft")));
+    if (!pending)
+        return false;
+
+    uint32 queuedAt = static_cast<uint32>(std::max<int32>(0,
+        AI_VALUE2(int32, "manual int", "profession craft queued at")));
+    uint32 timeout = std::max<uint32>(120, sPlayerbotAIConfig.expireActionTime / 1000 + 60);
+    if (!profession::IsPendingCraftExpired(static_cast<uint32>(time(nullptr)), queuedAt,
+            timeout, ai->GetBot()->IsNonMeleeSpellCasted(false)))
+        return true;
+
+    ClearPendingCraft(ai, pending);
+    return false;
+}
+
+void ProfessionCraftingPlanValue::QueuePendingCraft(PlayerbotAI* ai, uint32 spellId)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    SET_AI_VALUE2(int32, "manual int", "pending profession craft", static_cast<int32>(spellId));
+    SET_AI_VALUE2(int32, "manual int", "profession craft queued at", static_cast<int32>(time(nullptr)));
+    RESET_AI_VALUE(bool, "can craft profession");
+}
+
+void ProfessionCraftingPlanValue::ClearPendingCraft(PlayerbotAI* ai, uint32 spellId)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    if (AI_VALUE2(int32, "manual int", "pending profession craft") != static_cast<int32>(spellId))
+        return;
+    SET_AI_VALUE2(int32, "manual int", "pending profession craft", 0);
+    SET_AI_VALUE2(int32, "manual int", "profession craft queued at", 0);
+    // This can be called from CanCraftProfessionValue::Calculate itself.
+    // Reset its cache; ClearValues would delete the value while it executes.
+    RESET_AI_VALUE(bool, "can craft profession");
 }
 
 bool ProfessionCraftingPlanValue::IsAhSearchReady(PlayerbotAI* ai)
@@ -410,13 +537,22 @@ GameObject* ProfessionCraftingPlanValue::GetCurrentSpellFocus(
 
     GuidPosition* focusPosition = dynamic_cast<GuidPosition*>(travelTarget->GetPosition());
     Player* bot = ai->GetBot();
-    GameObject* focus = focusPosition && bot ? focusPosition->GetGameObject(bot->GetInstanceId()) : nullptr;
-    GameObjectInfo const* focusInfo = focus ? focus->GetGOInfo() : nullptr;
-    if (!focusInfo || focusInfo->type != GAMEOBJECT_TYPE_SPELL_FOCUS ||
-        focusInfo->spellFocus.focusId != plan.spellFocusId)
+    if (!bot)
         return nullptr;
+    GameObject* focus = focusPosition && bot ? focusPosition->GetGameObject(bot->GetInstanceId()) : nullptr;
+    MaNGOS::GameObjectFocusCheck matches(bot, plan.spellFocusId);
+    if (focus && focus->GetGOInfo() && matches(focus))
+        return focus;
 
-    return focus;
+    // Entry destinations can report arrival at another spawn of the same
+    // entry. Reuse the existing cached local GO list, not the distant point.
+    for (ObjectGuid guid : AI_VALUE(std::list<ObjectGuid>, "nearest game objects no los"))
+    {
+        GameObject* nearby = ai->GetGameObject(guid);
+        if (nearby && nearby->GetGOInfo() && matches(nearby))
+            return nearby;
+    }
+    return nullptr;
 }
 
 ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
@@ -425,7 +561,8 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
     if (!IsEnabledFor(ai))
         return bestPlan;
 
-    int64 bestScore = std::numeric_limits<int64>::min();
+    std::vector<ProfessionCraftingPlan> plans;
+    std::vector<profession::CraftCandidate> candidates;
     std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
 
     for (uint32 spellId : spellIds)
@@ -463,6 +600,20 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
         candidate.spellFocusId = spell->RequiresSpellFocus;
         candidate.craftCount = sPlayerbotAIConfig.professionCraftBatchSize;
 
+        uint32 availableCasts = std::numeric_limits<uint32>::max();
+        uint32 currentCounts[MAX_SPELL_REAGENTS] = {};
+        for (uint8 reagent = 0; reagent < MAX_SPELL_REAGENTS; ++reagent)
+        {
+            if (spell->Reagent[reagent] <= 0 || spell->ReagentCount[reagent] <= 0)
+                continue;
+            uint32 perCast = spell->ReagentCount[reagent];
+            candidate.craftCount = profession::BoundCraftBatch(candidate.craftCount,
+                perCast, sPlayerbotAIConfig.professionMaterialTarget);
+            currentCounts[reagent] = ai->GetInventoryItemsCountWithId(spell->Reagent[reagent]);
+            availableCasts = std::min(availableCasts, currentCounts[reagent] / perCast);
+        }
+        candidate.craftCount = profession::AvailableCraftBatch(candidate.craftCount, availableCasts);
+
         for (uint8 effect = 0; effect < MAX_EFFECT_INDEX; ++effect)
         {
             if (spell->EffectItemType[effect])
@@ -479,10 +630,8 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
                 continue;
 
             uint32 reagentId = spell->Reagent[reagent];
-            uint32 desired = std::min<uint32>(
-                spell->ReagentCount[reagent] * candidate.craftCount,
-                sPlayerbotAIConfig.professionMaterialTarget);
-            uint32 current = ai->GetInventoryItemsCountWithId(reagentId);
+            uint32 desired = spell->ReagentCount[reagent] * candidate.craftCount;
+            uint32 current = currentCounts[reagent];
 
             candidate.required[reagentId] = desired;
             if (current < desired)
@@ -498,14 +647,16 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
         score += static_cast<int64>(recipeMinSkill) * 1000;
         score -= static_cast<int64>(missingUnits) * 10;
 
-        if (score > bestScore)
-        {
-            bestScore = score;
-            bestPlan = candidate;
-        }
+        candidates.push_back({skillId, spellId, score,
+            candidate.missing.empty() && CanCraftSpellValue::HasRequiredTools(spell, bot)});
+        plans.push_back(candidate);
     }
 
-    return bestPlan;
+    // The ledger lives outside this calculated value so cast-driven cache
+    // invalidation does not erase another ready skill's accumulated wait.
+    profession::CraftingFairness& fairness = AI_VALUE(profession::CraftingFairness&, "profession fairness");
+    size_t selected = fairness.Select(candidates, static_cast<uint32>(time(nullptr)), HasPendingCraft(ai));
+    return selected == profession::CraftingFairness::NoCandidate ? bestPlan : plans[selected];
 }
 
 bool CanCraftProfessionValue::Calculate()
@@ -517,14 +668,14 @@ bool CanCraftProfessionValue::Calculate()
         return false;
 
     SpellEntry const* spell = sServerFacade.LookupSpellInfo(plan.spellId);
-    if (!spell || AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(plan.spellId))
+    if (!spell || ProfessionCraftingPlanValue::HasPendingCraft(ai) || bot->IsNonMeleeSpellCasted(false))
         return false;
 
     bool atMatchingSpellFocus = ProfessionCraftingPlanValue::GetCurrentSpellFocus(ai, plan) != nullptr;
     if (!profession::IsCraftLocationReady(spell->RequiresSpellFocus, atMatchingSpellFocus))
         return false;
 
-    return AI_VALUE2(bool, "can craft spell", plan.spellId);
+    return bot->HasSpell(plan.spellId) && CanCraftSpellValue::HasRequiredTools(spell, bot);
 }
 
 ProfessionMaterialSources ProfessionMaterialSourcesValue::Calculate()

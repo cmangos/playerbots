@@ -119,6 +119,7 @@ namespace ai
             creators["active spell"] = [](PlayerbotAI* ai) { return new ActiveSpellValue(ai); };
             creators["craft"] = [](PlayerbotAI* ai) { return new CraftValue(ai); };
             creators["profession crafting plan"] = [](PlayerbotAI* ai) { return new ProfessionCraftingPlanValue(ai); };
+            creators["profession fairness"] = [](PlayerbotAI* ai) { return new ProfessionCraftingFairnessValue(ai); };
             creators["profession material sources"] = [](PlayerbotAI* ai) { return new ProfessionMaterialSourcesValue(ai); };
             creators["can craft profession"] = [](PlayerbotAI* ai) { return new CanCraftProfessionValue(ai); };
             creators["collision"] = [](PlayerbotAI* ai) { return new CollisionValue(ai); };
@@ -381,6 +382,7 @@ namespace ai
 
             creators["vendor has useful item"] = [](PlayerbotAI* ai) { return new VendorHasUsefulItemValue(ai); };
             creators["craft spells"] = [](PlayerbotAI* ai) { return new CraftSpellsValue(ai); };
+            creators["craft tool requirements"] = [](PlayerbotAI* ai) { return new CraftToolRequirementsValue(ai); };
             creators["enchant spells"] = [](PlayerbotAI* ai) { return new EnchantSpellsValue(ai); };
             creators["has reagents for"] = [](PlayerbotAI* ai) { return new HasReagentsForValue(ai); };
             creators["can craft spell"] = [](PlayerbotAI* ai) { return new CanCraftSpellValue(ai); };

@@ -5,8 +5,16 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
 #include "CheckMountStateAction.h"
+#include "playerbot/strategy/values/ProfessionProgressionPolicy.h"
 
 using namespace ai;
+
+bool CastCustomNcSpellAction::isUseful()
+{
+    return profession::IsNcCraftUseful(bot->IsMoving(),
+        !bot->IsInCombat() && ProfessionCraftingPlanValue::IsEnabledFor(ai) &&
+        ProfessionCraftingPlanValue::HasPendingCraft(ai));
+}
 
 int FindLastSeparator(std::string text, std::string sep)
 {
@@ -125,10 +133,11 @@ bool CastCustomSpellAction::Execute(Event& event)
     }
 
     SpellEntry const* pSpellInfo = sServerFacade.LookupSpellInfo(spell);
+    const bool professionCraft =
+        AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(spell);
     if (!pSpellInfo)
     {
-        if (AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(spell))
-            SET_AI_VALUE2(int32, "manual int", "pending profession craft", 0);
+        ProfessionCraftingPlanValue::ClearPendingCraft(ai, spell);
         std::map<std::string, std::string> args;
         args["%spell"] = text;
         ai->TellPlayerNoFacing(requester, BOT_TEXT2("cast_spell_command_error_unknown_spell", args));
@@ -165,7 +174,14 @@ bool CastCustomSpellAction::Execute(Event& event)
         sServerFacade.SetFacingTo(bot, woTarget);
         SetDuration(sPlayerbotAIConfig.globalCoolDown);
         std::ostringstream msg;
-        msg << "cast " << text;
+        msg << castString(woTarget) << " ";
+        if (gameObjectTarget && getName() != "cast custom nc spell")
+            msg << chat->formatWorldobject(gameObjectTarget) << " ";
+        msg << text;
+        if (castCount > 1)
+            msg << " " << castCount;
+        if (professionCraft)
+            ProfessionCraftingPlanValue::QueuePendingCraft(ai, spell);
         ai->HandleCommand(CHAT_MSG_WHISPER, msg.str(), event.getOwner() ? *event.getOwner() : *bot);
         return true;
     }
@@ -179,8 +195,7 @@ bool CastCustomSpellAction::Execute(Event& event)
     {
         if (bot->IsFlying() && WorldPosition(bot).currentHeight() > 10.0f)
         {
-            if (AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(spell))
-                SET_AI_VALUE2(int32, "manual int", "pending profession craft", 0);
+            ProfessionCraftingPlanValue::ClearPendingCraft(ai, spell);
             return false;
         }
 
@@ -245,8 +260,7 @@ bool CastCustomSpellAction::Execute(Event& event)
     const bool canCast = gameObjectTarget ? ai->CanCastSpell(spell, gameObjectTarget, 0, true, false, false, false, &checkResult) : ai->CanCastSpell(spell, target, 0, true, itemTarget, false, false, false, &checkResult);
     if (!bot->GetTrader() && !canCast)
     {
-        if (AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(spell))
-            SET_AI_VALUE2(int32, "manual int", "pending profession craft", 0);
+        ProfessionCraftingPlanValue::ClearPendingCraft(ai, spell);
         std::map<std::string, std::string> args;
         args["%spell"] = replyArgs["%spell"];
         args["%fail_reason"] = BOT_TEXT2(GetSpellCastResultString(checkResult), args);
@@ -258,11 +272,17 @@ bool CastCustomSpellAction::Execute(Event& event)
     uint32 spellDuration = sPlayerbotAIConfig.globalCoolDown;
 
     bool result = gameObjectTarget ? ai->CastSpell(spell, gameObjectTarget, itemTarget, true, &spellDuration) : ai->CastSpell(spell, target, itemTarget, true, &spellDuration);
-    if (AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(spell))
+    if (professionCraft)
     {
-        SET_AI_VALUE2(int32, "manual int", "pending profession craft", 0);
+        // Keep ownership through continuations; otherwise another maintenance
+        // or optional RPG craft can enqueue a competing batch mid-cast.
+        if (!profession::KeepsPendingCraft(result, castCount))
+            ProfessionCraftingPlanValue::ClearPendingCraft(ai, spell);
         if (result)
         {
+            if (!profession::KeepsPendingCraft(result, castCount))
+                AI_VALUE(profession::CraftingFairness&, "profession fairness").FinishOpportunity(
+                    static_cast<uint32>(time(nullptr)));
             SET_AI_VALUE2(int32, "manual int", "last profession craft", static_cast<int32>(time(nullptr)));
             context->ClearValues("can craft profession");
             context->ClearValues("profession crafting plan");
@@ -276,7 +296,12 @@ bool CastCustomSpellAction::Execute(Event& event)
         if (castCount > 1)
         {
             std::ostringstream cmd;
-            cmd << castString(target) << " " << text << " " << (castCount - 1);
+            cmd << castString(woTarget) << " ";
+            if (gameObjectTarget && getName() != "cast custom nc spell")
+                cmd << chat->formatWorldobject(gameObjectTarget) << " ";
+            cmd << text << " " << (castCount - 1);
+            if (professionCraft)
+                ProfessionCraftingPlanValue::QueuePendingCraft(ai, spell);
             ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *requester);
 
             replyStr << " " << BOT_TEXT("cast_spell_command_amount");
@@ -649,13 +674,24 @@ bool CraftRandomItemAction::Execute(Event& event)
 
     ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
     bool autonomousProfessionPlan = ProfessionCraftingPlanValue::IsEnabledFor(ai) && professionPlan.IsValid();
-    if (autonomousProfessionPlan)
+    bool maintenanceRequest = event.getSource() == "can craft profession";
+    if (maintenanceRequest)
     {
-        if (AI_VALUE2(int32, "manual int", "pending profession craft") == static_cast<int32>(professionPlan.spellId))
+        bool knownRecipe = bot->HasSpell(professionPlan.spellId) &&
+            std::find(spellIds.begin(), spellIds.end(), professionPlan.spellId) != spellIds.end();
+        if (!autonomousProfessionPlan || !profession::CanDispatchProfessionPlan(knownRecipe,
+            ProfessionCraftingPlanValue::IsCraftCooldownReady(ai),
+            ProfessionCraftingPlanValue::HasPendingCraft(ai), bot->IsNonMeleeSpellCasted(false)))
+            return false;
+        spellIds.assign(1, professionPlan.spellId);
+    }
+    else if (autonomousProfessionPlan)
+    {
+        if (ProfessionCraftingPlanValue::HasPendingCraft(ai))
             return false;
 
         spellIds.erase(std::remove(spellIds.begin(), spellIds.end(), professionPlan.spellId), spellIds.end());
-        if (ProfessionCraftingPlanValue::IsCraftCooldownReady(ai))
+        if (bot->HasSpell(professionPlan.spellId) && ProfessionCraftingPlanValue::IsCraftCooldownReady(ai))
             spellIds.insert(spellIds.begin(), professionPlan.spellId);
     }
 
@@ -686,6 +722,16 @@ bool CraftRandomItemAction::Execute(Event& event)
 
         const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
 
+        if (!pSpellInfo)
+            continue;
+        if (autonomousProfessionPlan && spellId == professionPlan.spellId &&
+            (!bot->HasSpell(spellId) || !professionPlan.GetMissingReagents(ai).empty() ||
+                !CanCraftSpellValue::HasRequiredTools(pSpellInfo, bot)))
+        {
+            RESET_AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+            continue;
+        }
+
         if (pSpellInfo->RequiresSpellFocus)
         {
             if (!GuidPosition(wot).IsGameObject())
@@ -706,6 +752,9 @@ bool CraftRandomItemAction::Execute(Event& event)
 
         if (autonomousProfessionPlan && spellId == professionPlan.spellId)
             castCount = std::min(castCount, professionPlan.craftCount);
+
+        if (!castCount)
+            continue;
 
         if (spellId == 61288) //Crafting random glyph
         {
@@ -730,7 +779,7 @@ bool CraftRandomItemAction::Execute(Event& event)
         std::ostringstream cmd;
         cmd << "castnc ";
 
-        if (((wot && sServerFacade.IsInFront(bot, wot, sPlayerbotAIConfig.sightDistance, CAST_ANGLE_IN_FRONT))))
+        if (wot && wot != bot)
         {
             cmd << chat->formatWorldobject(wot) << " ";
         }
@@ -739,8 +788,7 @@ bool CraftRandomItemAction::Execute(Event& event)
 
         if (autonomousProfessionPlan && spellId == professionPlan.spellId)
         {
-            SET_AI_VALUE2(int32, "manual int", "pending profession craft", static_cast<int32>(spellId));
-            context->ClearValues("can craft profession");
+            ProfessionCraftingPlanValue::QueuePendingCraft(ai, spellId);
         }
 
         ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *bot);

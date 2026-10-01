@@ -2363,6 +2363,14 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
 {
     std::lock_guard<std::mutex> lock(testResultsMutex);
 
+    static constexpr uint32 maxActiveTestBots = 50;
+    uint32 activeTestBots = 0;
+    for (const auto& test : pendingTests)
+    {
+        if (test.pending && !test.completed)
+            activeTestBots += std::max<uint32>(1, test.expectedBotSpawnCount);
+    }
+
     for (auto& pt : pendingTests)
     {
         if (pt.pending)
@@ -2380,24 +2388,20 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
 
         if (dynamic_cast<PlayerbotMgr*>(this))
         {
+            Player* master = (dynamic_cast<PlayerbotMgr*>(this))->GetMaster();
+            if (!master)
+                continue;
+
             uint32 maxCharsPerAccount = 9;
 #ifdef MANGOSBOT_TWO
             maxCharsPerAccount = 10;
 #endif
-            uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID((dynamic_cast<PlayerbotMgr*>(this))->GetMaster()->GetObjectGuid());
+            uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(master->GetObjectGuid());
                 if (accountId == 0) continue;
 
             uint32 currentChars = sAccountMgr.GetCharactersCount(accountId);
             if (currentChars >= maxCharsPerAccount)
                 continue;
-        }
-
-        static constexpr uint32 maxActiveTestBots = 50;
-        uint32 activeTestBots = 0;
-        for (const auto& test : pendingTests)
-        {
-            if (test.pending && !test.completed)
-                activeTestBots += std::max<uint32>(1, test.expectedBotSpawnCount);
         }
 
         uint32 newTestBotCount = std::max<uint32>(1, pt.expectedBotSpawnCount);
@@ -2410,7 +2414,27 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
 
         std::list<std::string> createMsgs = HandleCreate(nullptr, createParams, SEC_PLAYER);
 
-        pt.pending = true;
+        bool created = false;
+        for (auto const& msg : createMsgs)
+        {
+            if (msg.find("Bot created: ") == 0)
+            {
+                created = true;
+                break;
+            }
+        }
+
+        if (created)
+        {
+            pt.pending = true;
+            activeTestBots += newTestBotCount;
+        }
+        else if (++pt.retry >= 20)
+        {
+            pt.result = "FAILED: host bot creation failed";
+            pt.completed = true;
+            testResults.push_back(pt);
+        }
     }
 }
 
@@ -2429,8 +2453,8 @@ void PlayerbotHolder::DepositTestResult(const std::string& testName, const std::
             if (result == "ABORT") //Failed this time but might work next time.
             {
                 pt.result = result;
-                pt.retry++;
-                break;
+                if (++pt.retry < 3)
+                    break;
             }
 
             pt.result = result;

@@ -822,3 +822,19 @@ Profession travel requests6.965-6.99 rank above ordinary quest travel6.3; active
 target and normal multipliers still gate them. Recipe scores do not arbitrate
 combat/quest actions. The short interrupted observation does not justify changing
 these base priorities; fix stale target lifecycle and known packet failure first.
+
+### Implemented lifecycle corrections and reset scope
+
+Expiry now runs once from TravelTarget::IsActive, retaining forced/unlimited and
+inactive states. CheckStatus reuses that path through its existing opening call.
+ResetTargetAction itself is deliberately unchanged: TravelStrategy automatically
+schedules it at a nearby quest taker as well as when inactive. Removing its
+active-target gate globally would repeatedly discard healthy targets. Expired
+targets now become inactive and can pass the existing reset gate naturally.
+The diagnostic reset recommendation is still unsuitable for a healthy active
+target; no full AI reset or live reset was used.
+
+Empty parsed chat is ignored before recording, response and LLM paths; the fatal
+assertion is removed. Separate production-body C++ fixtures cover these two
+generic fixes. No profession priorities, recipe identifiers or sampled identities
+were introduced.

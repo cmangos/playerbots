@@ -997,14 +997,6 @@ void TravelTarget::CheckStatus()
         return;
     }
 
-    if (statusTime != 0 && GetTimeLeft() <= 0 && !IsForced())
-    {
-        ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
-        SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
-        ai->GetAiObjectContext()->ClearValues("no active travel destinations");
-        return;
-    }
-
     if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
     {
         bool HasArrived = tDestination->IsIn(bot);
@@ -1044,6 +1036,15 @@ void TravelTarget::CheckStatus()
 bool TravelTarget::IsActive() {
     if (m_status == TravelStatus::TRAVEL_STATUS_NONE || m_status == TravelStatus::TRAVEL_STATUS_EXPIRED || m_status == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
+
+    // Activity reads also enforce the deadline when movement is not scheduled.
+    if (statusTime != 0 && GetTimeLeft() <= 0 && !IsForced())
+    {
+        SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+        ai->GetAiObjectContext()->ClearValues("no active travel destinations");
+        ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
+        return false;
+    }
 
     return true;
 };

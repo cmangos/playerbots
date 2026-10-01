@@ -73,3 +73,21 @@ milling/prospecting. Tool acquisition still requires affordable legitimate suppl
 the AH fallback currently selects one metadata-compatible alternative, and cannot
 guarantee that alternative is listed. Generic stale travel
 expiry/reset usefulness and the reset-command bad_alloc were not patched.
+
+The tool/retry patch subsequently compiled in the isolated 37/37 full mangosd
+build and was installed at the owner's explicit request. Live observation found
+additional generic travel expiry and empty-chat defects. The separate fixtures
+execute the production deadline/status/reset predicates (59 cases) and the
+post-parse outgoing-chat guard (6 cases):
+
+```sh
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/TravelTargetLifecycleTests.py"
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/OutgoingChatRegressionTests.py"
+```
+
+They require a C++17 compiler but no running realm. Expiry applies on activity
+reads without a movement action; forced/unlimited targets, inactive phases,
+clock wrap, cleanup once and existing reset safety gates are covered. Empty chat
+returns before recording or reply handling; nonempty payloads still pass.
+Earlier NOT BUILT and NOT PATCHED statements above describe the earlier snapshot,
+not the final lifecycle fixes.

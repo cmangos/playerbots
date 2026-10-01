@@ -29,6 +29,12 @@ namespace
         "the last accepted cast must release the pending request");
     static_assert(!KeepsPendingCraft(false, 5),
         "a rejected cast must release the pending request even in a batch");
+    static_assert(!ShouldRenewCraftLease(123, 123, false),
+        "facing/retry loops must not renew a lease without an accepted cast");
+    static_assert(ShouldRenewCraftLease(123, 123, true),
+        "a genuine accepted batch continuation may renew ownership");
+    static_assert(ShouldRenewCraftLease(0, 123, false) && ShouldRenewCraftLease(123, 456, false),
+        "a new request starts a new lease");
     static_assert(CanDispatchProfessionPlan(true, true, false, false),
         "a known ready plan may use the shared maintenance action");
     static_assert(!CanDispatchProfessionPlan(false, true, false, false),
@@ -59,6 +65,13 @@ namespace
     static_assert(!IsCashVendorStock(true, false, 42), "currency-only stock must not suppress AH fallback");
     static_assert(!IsCashVendorStock(true, true, 0), "the existing index excludes limited stock");
     static_assert(!IsCashVendorStock(false, false, 0), "unrelated stock is not a reagent source");
+    static_assert(SupplyReserveTarget(true, false, 20) == 1,
+        "nonconsumable tools must not use reagent reserve stacks");
+    static_assert(SupplyReserveTarget(false, true, 20) == 20 && SupplyReserveTarget(true, true, 20) == 20,
+        "consumable and dual-use reagents retain configured reserves");
+    static_assert(IsReasonableAuctionStack(1, 0, 1, SupplyReserveTarget(true, false, 20), 20) &&
+        !IsReasonableAuctionStack(2, 0, 1, SupplyReserveTarget(true, false, 20), 20),
+        "one missing tool accepts a singleton auction and rejects surplus stacks");
 }
 
 #ifdef PROFESSION_POLICY_TEST_MAIN

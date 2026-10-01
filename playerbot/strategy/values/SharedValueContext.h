@@ -7,6 +7,7 @@
 #include "TravelValues.h"
 #include "LootValues.h"
 #include "MountValues.h"
+#include "CraftValues.h"
 #include "playerbot/PlayerbotAI.h"
 
 namespace ai
@@ -27,6 +28,7 @@ namespace ai
 
             creators["vendor map"] = [](PlayerbotAI* ai) { return new VendorMapValue(ai); };
             creators["item vendor list"] = [](PlayerbotAI* ai) { return new ItemVendorListValue(ai); };
+            creators["craft tool items"] = [](PlayerbotAI* ai) { return new CraftToolItemsValue(ai); };
 
             creators["entry quest relation"] = [](PlayerbotAI* ai) { return new EntryQuestRelationMapValue(ai); };
 

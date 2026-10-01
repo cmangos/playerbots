@@ -184,7 +184,7 @@ bool BuyAction::Execute(Event& event)
             // a single vendor interaction cannot over-purchase.
             ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
             uint32 professionPurchases = 0;
-            for (const auto& [reagentId, desiredCount] : professionPlan.required)
+            for (const auto& [reagentId, missingCount] : professionPlan.GetMissingSupplies(ai))
             {
                 if (professionPurchases >= sPlayerbotAIConfig.professionVendorPurchaseLimit)
                     break;
@@ -194,6 +194,7 @@ bool BuyAction::Execute(Event& event)
                     continue;
 
                 uint32 currentCount = ai->GetInventoryItemsCountWithId(reagentId);
+                uint32 desiredCount = currentCount + missingCount;
                 while (currentCount < desiredCount && professionPurchases < sPlayerbotAIConfig.professionVendorPurchaseLimit)
                 {
                     uint32 reagentPrice = uint32(floor(reagentProto->BuyPrice * bot->GetReputationPriceDiscount(pCreature)));

@@ -122,6 +122,7 @@ namespace ai
             creators["profession fairness"] = [](PlayerbotAI* ai) { return new ProfessionCraftingFairnessValue(ai); };
             creators["profession material sources"] = [](PlayerbotAI* ai) { return new ProfessionMaterialSourcesValue(ai); };
             creators["can craft profession"] = [](PlayerbotAI* ai) { return new CanCraftProfessionValue(ai); };
+            creators["profession tool purchases"] = [](PlayerbotAI* ai) { return new ProfessionToolPurchasesValue(ai); };
             creators["collision"] = [](PlayerbotAI* ai) { return new CollisionValue(ai); };
             creators["skip spells list"] = [](PlayerbotAI* ai) { return new SkipSpellsListValue(ai); };
             creators["avoid creature list"] = [](PlayerbotAI* ai) { return new AvoidCreatureListValue(ai); };

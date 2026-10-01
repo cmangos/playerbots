@@ -6,6 +6,7 @@
 class GameObject;
 class Player;
 struct SpellEntry;
+struct ItemPrototype;
 
 namespace ai
 {
@@ -34,6 +35,7 @@ namespace ai
         bool HasMaterials() const { return IsValid() && missing.empty(); }
         bool Needs(uint32 reagentId) const { return missing.find(reagentId) != missing.end(); }
         std::map<uint32, uint32> GetMissingReagents(PlayerbotAI* ai) const;
+        std::map<uint32, uint32> GetMissingSupplies(PlayerbotAI* ai) const;
         ProfessionMaterialSources GetMaterialSources(PlayerbotAI* ai) const;
     };
 
@@ -109,6 +111,26 @@ namespace ai
     {
         std::set<uint32> items;
         std::set<uint32> categories;
+        bool UsesItem(const ItemPrototype* item) const;
+        bool NeedsItem(const ItemPrototype* item, Player* player) const;
+    };
+
+    using CraftToolItemMap = std::map<uint32, std::vector<uint32>>;
+
+    // Shared metadata only; do not scan all items once per bot/category.
+    class CraftToolItemsValue : public SingleCalculatedValue<CraftToolItemMap*>
+    {
+    public:
+        CraftToolItemsValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "craft tool items") {}
+        virtual CraftToolItemMap* Calculate() override;
+    };
+
+    class ProfessionToolPurchasesValue : public CalculatedValue<std::set<uint32>>
+    {
+    public:
+        ProfessionToolPurchasesValue(PlayerbotAI* ai) :
+            CalculatedValue<std::set<uint32>>(ai, "profession tool purchases", 30) {}
+        virtual std::set<uint32> Calculate() override;
     };
 
     class CraftToolRequirementsValue : public CalculatedValue<CraftToolRequirements>
@@ -168,10 +190,11 @@ namespace ai
         static bool IsEnabledFor(PlayerbotAI* ai);
         static bool IsCraftCooldownReady(PlayerbotAI* ai);
         static bool HasPendingCraft(PlayerbotAI* ai);
-        static void QueuePendingCraft(PlayerbotAI* ai, uint32 spellId);
+        static void QueuePendingCraft(PlayerbotAI* ai, uint32 spellId, bool acceptedCast = false);
         static void ClearPendingCraft(PlayerbotAI* ai, uint32 spellId);
         static bool IsAhSearchReady(PlayerbotAI* ai);
         static uint32 GetAhBudget(PlayerbotAI* ai);
+        static std::map<uint32, uint32> GetMissingTools(PlayerbotAI* ai);
         static bool ShouldTravelForGathering(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);
         static bool ShouldTravelToVendor(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);
         static bool ShouldTravelToAuctionHouse(PlayerbotAI* ai, const ProfessionCraftingPlan& plan);

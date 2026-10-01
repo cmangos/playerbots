@@ -133,6 +133,16 @@ ItemUsage ItemUsageValue::Calculate()
             return ItemUsage::ITEM_USAGE_KEEP;
     }
 
+    CraftToolRequirements recipeTools = AI_VALUE(CraftToolRequirements, "craft tool requirements");
+    if (recipeTools.UsesItem(proto))
+    {
+        // Tools are prerequisites, not consumable stacks. An owned compatible
+        // replacement satisfies the category without buying every alternative.
+        if (ai->GetInventoryItemsCountWithId(itemId))
+            return ItemUsage::ITEM_USAGE_KEEP;
+        return recipeTools.NeedsItem(proto, bot) ? ItemUsage::ITEM_USAGE_SKILL : ItemUsage::ITEM_USAGE_NONE;
+    }
+
     if (bot->GetGuildId())
     {
         std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");

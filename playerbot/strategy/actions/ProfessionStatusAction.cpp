@@ -32,6 +32,14 @@ bool ProfessionStatusAction::Execute(Event& event)
         foundProfession = true;
     }
 
+    for (const auto& tool : ProfessionCraftingPlanValue::GetMissingTools(ai))
+    {
+        ItemQualifier qualifier(tool.first);
+        std::ostringstream missing;
+        missing << "Missing tool: " << ChatHelper::formatItem(qualifier) << " x" << tool.second;
+        ai->TellPlayerNoFacing(requester, missing.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
+    }
+
     ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
     if (!plan.IsValid())
     {
@@ -58,7 +66,7 @@ bool ProfessionStatusAction::Execute(Event& event)
         ai->TellPlayerNoFacing(requester, missing.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
     }
 
-    if (!missingReagents.empty())
+    if (!plan.GetMissingSupplies(ai).empty())
     {
         ProfessionMaterialSources sources = AI_VALUE(ProfessionMaterialSources, "profession material sources");
         std::ostringstream acquisition;

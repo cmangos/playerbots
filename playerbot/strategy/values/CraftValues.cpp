@@ -56,7 +56,10 @@ std::vector<uint32> CraftSpellsValue::Calculate()
 CraftToolRequirements CraftToolRequirementsValue::Calculate()
 {
     CraftToolRequirements requirements;
-    for (uint32 spellId : AI_VALUE(std::vector<uint32>, "craft spells"))
+    std::vector<uint32> recipes = AI_VALUE(std::vector<uint32>, "craft spells");
+    std::vector<uint32> enchants = AI_VALUE(std::vector<uint32>, "enchant spells");
+    recipes.insert(recipes.end(), enchants.begin(), enchants.end());
+    for (uint32 spellId : recipes)
     {
         SpellEntry const* spell = sServerFacade.LookupSpellInfo(spellId);
         if (!spell)
@@ -71,6 +74,49 @@ CraftToolRequirements CraftToolRequirementsValue::Calculate()
 #endif
     }
     return requirements;
+}
+
+bool CraftToolRequirements::UsesItem(const ItemPrototype* item) const
+{
+    if (!item)
+        return false;
+    if (items.count(item->ItemId))
+        return true;
+#ifndef MANGOSBOT_ZERO
+    for (uint32 category : categories)
+        if (item->TotemCategory && IsTotemCategoryCompatiableWith(item->TotemCategory, category))
+            return true;
+#endif
+    return false;
+}
+
+bool CraftToolRequirements::NeedsItem(const ItemPrototype* item, Player* player) const
+{
+    if (!item || !player || player->HasItemCount(item->ItemId, 1))
+        return false;
+    if (items.count(item->ItemId))
+        return true;
+#ifndef MANGOSBOT_ZERO
+    for (uint32 category : categories)
+        if (!player->HasItemTotemCategory(category) && item->TotemCategory &&
+            IsTotemCategoryCompatiableWith(item->TotemCategory, category))
+            return true;
+#endif
+    return false;
+}
+
+CraftToolItemMap* CraftToolItemsValue::Calculate()
+{
+    CraftToolItemMap* result = new CraftToolItemMap;
+#ifndef MANGOSBOT_ZERO
+    for (uint32 id = 0; id < sItemStorage.GetMaxEntry(); ++id)
+    {
+        ItemPrototype const* item = sObjectMgr.GetItemPrototype(id);
+        if (item && item->TotemCategory)
+            (*result)[item->TotemCategory].push_back(id);
+    }
+#endif
+    return result;
 }
 
 std::vector<uint32> EnchantSpellsValue::Calculate()
@@ -293,6 +339,14 @@ std::map<uint32, uint32> ProfessionCraftingPlan::GetMissingReagents(PlayerbotAI*
     return liveMissing;
 }
 
+std::map<uint32, uint32> ProfessionCraftingPlan::GetMissingSupplies(PlayerbotAI* ai) const
+{
+    std::map<uint32, uint32> supplies = GetMissingReagents(ai);
+    for (const auto& tool : ProfessionCraftingPlanValue::GetMissingTools(ai))
+        supplies[tool.first] = std::max(supplies[tool.first], tool.second);
+    return supplies;
+}
+
 namespace
 {
     bool HasCashVendorStock(const VendorItemData* stock, uint32 itemId)
@@ -340,6 +394,79 @@ namespace
     }
 }
 
+std::set<uint32> ProfessionToolPurchasesValue::Calculate()
+{
+    std::set<uint32> purchases;
+    if (!ProfessionCraftingPlanValue::IsEnabledFor(ai))
+        return purchases;
+    CraftToolRequirements requirements = AI_VALUE(CraftToolRequirements, "craft tool requirements");
+    for (uint32 item : requirements.items)
+        if (!bot->HasItemCount(item, 1))
+            purchases.insert(item);
+#ifndef MANGOSBOT_ZERO
+    CraftToolItemMap* toolItems = GAI_VALUE(CraftToolItemMap*, "craft tool items");
+    PlayerTravelInfo travelInfo(bot);
+    for (uint32 category : requirements.categories)
+    {
+        if (bot->HasItemTotemCategory(category))
+            continue;
+        bool alreadyPlanned = false;
+        for (uint32 itemId : purchases)
+        {
+            ItemPrototype const* item = sObjectMgr.GetItemPrototype(itemId);
+            if (item && IsTotemCategoryCompatiableWith(item->TotemCategory, category))
+                alreadyPlanned = true;
+        }
+        if (alreadyPlanned)
+            continue;
+
+        ItemPrototype const* best = nullptr;
+        bool bestHasVendor = false;
+        for (const auto& group : *toolItems)
+        {
+            if (!IsTotemCategoryCompatiableWith(group.first, category))
+                continue;
+            for (uint32 itemId : group.second)
+            {
+                ItemPrototype const* item = sObjectMgr.GetItemPrototype(itemId);
+                if (!item)
+                    continue;
+                bool hasVendor = false;
+                for (int32 entry : GAI_VALUE2(std::list<int32>, "item vendor list", itemId))
+                    if (IsPracticalProfessionVendor(entry, itemId, bot, travelInfo))
+                    {
+                        hasVendor = true;
+                        break;
+                    }
+                if (!best || (hasVendor && !bestHasVendor) ||
+                    (hasVendor == bestHasVendor && (item->BuyPrice < best->BuyPrice ||
+                        (item->BuyPrice == best->BuyPrice && itemId < best->ItemId))))
+                {
+                    best = item;
+                    bestHasVendor = hasVendor;
+                }
+            }
+        }
+        if (best)
+            purchases.insert(best->ItemId);
+    }
+#endif
+    return purchases;
+}
+
+std::map<uint32, uint32> ProfessionCraftingPlanValue::GetMissingTools(PlayerbotAI* ai)
+{
+    std::map<uint32, uint32> missing;
+    if (!ai || !IsEnabledFor(ai))
+        return missing;
+    AiObjectContext* context = ai->GetAiObjectContext();
+    CraftToolRequirements requirements = AI_VALUE(CraftToolRequirements, "craft tool requirements");
+    for (uint32 itemId : AI_VALUE(std::set<uint32>, "profession tool purchases"))
+        if (requirements.NeedsItem(sObjectMgr.GetItemPrototype(itemId), ai->GetBot()))
+            missing[itemId] = 1;
+    return missing;
+}
+
 ProfessionMaterialSources ProfessionCraftingPlan::GetMaterialSources(PlayerbotAI* ai) const
 {
     ProfessionMaterialSources sources;
@@ -352,7 +479,7 @@ ProfessionMaterialSources ProfessionCraftingPlan::GetMaterialSources(PlayerbotAI
     std::set<int32> vendorEntries;
     std::map<uint32, std::set<int32>> gatherEntries;
 
-    for (const auto& missingReagent : GetMissingReagents(ai))
+    for (const auto& missingReagent : GetMissingSupplies(ai))
     {
         uint32 itemId = missingReagent.first;
         bool hasPracticalGatherSource = false;
@@ -449,11 +576,16 @@ bool ProfessionCraftingPlanValue::HasPendingCraft(PlayerbotAI* ai)
     return false;
 }
 
-void ProfessionCraftingPlanValue::QueuePendingCraft(PlayerbotAI* ai, uint32 spellId)
+void ProfessionCraftingPlanValue::QueuePendingCraft(PlayerbotAI* ai, uint32 spellId, bool acceptedCast)
 {
     AiObjectContext* context = ai->GetAiObjectContext();
+    uint32 pending = static_cast<uint32>(std::max<int32>(0,
+        AI_VALUE2(int32, "manual int", "pending profession craft")));
+    // Facing/requeued requests are not progress. Only an accepted cast may
+    // extend ownership of an existing batch; otherwise its lease must expire.
+    if (profession::ShouldRenewCraftLease(pending, spellId, acceptedCast))
+        SET_AI_VALUE2(int32, "manual int", "profession craft queued at", static_cast<int32>(time(nullptr)));
     SET_AI_VALUE2(int32, "manual int", "pending profession craft", static_cast<int32>(spellId));
-    SET_AI_VALUE2(int32, "manual int", "profession craft queued at", static_cast<int32>(time(nullptr)));
     RESET_AI_VALUE(bool, "can craft profession");
 }
 
@@ -518,6 +650,11 @@ bool ProfessionCraftingPlanValue::ShouldTravelToAuctionHouse(PlayerbotAI* ai, co
 
 bool ProfessionCraftingPlanValue::ShouldTravelToSpellFocus(PlayerbotAI* ai, const ProfessionCraftingPlan& plan)
 {
+    // Acquire learned-recipe tools even when a different skill owns the plan.
+    // Leave an active target alone; normal travel request arbitration applies.
+    if (sPlayerbotAIConfig.professionVendorPurchaseLimit && !GetMissingTools(ai).empty() &&
+        ShouldTravelToVendor(ai, plan))
+        return false;
     return profession::ShouldTravelToSpellFocus(IsEnabledFor(ai), plan.IsValid(), plan.spellFocusId,
         !plan.GetMissingReagents(ai).empty(), IsCraftCooldownReady(ai), ai->HasActivePlayerMaster());
 }

@@ -71,6 +71,11 @@ namespace ai
             return accepted && remainingCasts > 1;
         }
 
+        constexpr bool ShouldRenewCraftLease(uint32_t pendingSpell, uint32_t requestedSpell, bool acceptedCast)
+        {
+            return pendingSpell != requestedSpell || acceptedCast;
+        }
+
         constexpr bool CanDispatchProfessionPlan(bool knownRecipe, bool cooldownReady,
             bool pending, bool casting)
         {
@@ -94,6 +99,11 @@ namespace ai
             // Existing vendor usefulness excludes currency offers; classification
             // must not suppress AH fallback for an unusable cash-source route.
             return matchesItem && !limitedStock && !extendedCost;
+        }
+
+        constexpr uint32_t SupplyReserveTarget(bool tool, bool reagent, uint32_t materialTarget)
+        {
+            return tool && !reagent ? 1 : materialTarget;
         }
 
         constexpr uint32_t AuctionPurchaseCapacity(

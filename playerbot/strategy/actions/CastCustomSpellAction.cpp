@@ -301,7 +301,7 @@ bool CastCustomSpellAction::Execute(Event& event)
                 cmd << chat->formatWorldobject(gameObjectTarget) << " ";
             cmd << text << " " << (castCount - 1);
             if (professionCraft)
-                ProfessionCraftingPlanValue::QueuePendingCraft(ai, spell);
+                ProfessionCraftingPlanValue::QueuePendingCraft(ai, spell, true);
             ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *requester);
 
             replyStr << " " << BOT_TEXT("cast_spell_command_amount");

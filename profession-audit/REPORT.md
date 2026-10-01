@@ -1,5 +1,57 @@
 # Profession progression: local source review
 
+## Current continuation status — 2026-10-01 15:41 CEST
+
+Local branch and fetched GitHub feature both point to ff775621; existing local
+changes were preserved (0 ahead / 0 behind before the new uncommitted edits).
+The published 258c1f7e/ff775621 patch was subsequently built successfully,
+848/848, on the isolated two-job server build. Build/installed/running SHA256
+was verified as 215f5320c72ebcd8cf2f0c8d702f77c3bfc27e8e0aa431e36fa5df57ce6d77f0.
+That result does not validate the new local tool-acquisition/retry-lease edits.
+Read the dated continuation sections below for current changes/results;
+earlier Git/test/scope snapshots are historical.
+
+## Owner-authorized server build continuation
+
+On 2026-10-01 the owner subsequently authorized pushing the patch, a two-job
+server build and restarting WoW services. Production profession changes were
+published as `258c1f7e802a56e61bc5fae58e675ac304fc67e3`. Master and the closed
+upstream PR were not modified. The current C++ policy/fairness executable passed
+all cases, including 1,050,000 batch combinations; all 30 component cases and
+13 source checks passed on the server.
+
+The first full build compiled the changed production files and profession policy
+test sources, then failed in the unchanged baseline `TestContext.cpp:42-44`.
+`Reset()` closes before its delivery cleanup, leaving two statements and another
+closing brace at file scope. The same malformed source is present in `c0100429`,
+so this is a pre-existing test-framework build blocker, not a profession failure.
+Both services were restored automatically and the installed binary remained
+unchanged. The build peaked at 81C; temperature warnings did not stop it.
+
+Smallest proposed unblock, kept in a separate commit: move that delivery cleanup
+inside Reset by removing the premature brace, and use the existing
+groupDeliveryMutex that already protects RecordDeliveredGroupMember and
+GetDeliveredGroupMembers. No profession/engine/travel behavior changes. This
+executes only when the test context resets, adding no normal-bot planning cost.
+The cached full build will verify the actual translation unit before deployment.
+
+The next full two-job build linked successfully, but initial startup aborted in
+PlayerbotAIConfig::Initialize. The deployment coordinator restored the previous
+binary and both services. Offline core analysis identifies Config::Reload under
+that initializer; source inspection proved a build setup error: game/CMakeLists.txt
+exports the canonical `src/modules/PlayerBots` include path before the overridden
+module path. Core code therefore used upstream `1bafc213` headers while the linked
+library used the audited feature. Compiled layout probes measured
+sizeof(PlayerbotAIConfig)=377088 versus377136 bytes. This violates the C++ class
+layout contract and is distinct from the earlier full-AI-reset bad_alloc.
+
+Smallest operational correction: preserve the older module directory inside the
+isolated audit area and make its canonical header path resolve to the audited
+module. Recompile core translation units/PCH against the same headers, retaining
+the already correctly compiled module objects. No live checkout or CMaNGOS
+source behavior is changed. A FetchContent source override alone is insufficient
+on this core; every canonical module include must resolve to the same source.
+
 Scope: `C:/Users/Gebruiker/Documents/GitHub/playerbots`, feature branch at
 `c0100429a9b80b3b571d663399ac8a278d91cfbf`, with the existing uncommitted audit
 patch preserved. No SSH, live access, CMake/full build, commit or push is part of
@@ -126,9 +178,9 @@ limits are legitimate blockers, not permission to create materials.
   merely by this finding.
 - Ink sourcing: the generic vendor-index/AH inconsistency above is actionable.
 - Parchment: ordinary direct vendor reagent under existing buying/budgets.
-- Tools: existing generic learned-tool readiness/retention is retained. A missing
-  tool alone still has no dedicated acquisition/travel demand; do not claim that
-  recognizing a tool manufactures or guarantees it.
+- Tools: the earlier patch recognized and retained tools without an acquisition
+  demand. The dated one-copy continuation below now adds that demand through the
+  existing vendor/AH routes; actual supply and affordability remain necessary.
 
 ## Separate investigations preserved
 
@@ -324,10 +376,13 @@ the explicit source override is:
 $PlayerBots = 'C:\Users\Gebruiker\Documents\GitHub\playerbots'
 $Core = Read-Host 'Absolute path to your compatible CMaNGOS WotLK core checkout'
 $Build = Join-Path $Core 'build-profession-audit'
+$Module = Join-Path $Core 'src/modules/PlayerBots'
+if (Test-Path $Module) { throw 'Use a fresh isolated core checkout; do not overwrite an existing module' }
+git clone --no-hardlinks "$PlayerBots" "$Module"
 git -C $PlayerBots diff --check
 python -B "$PlayerBots\playerbot\strategy\tests\ProfessionProgressionSourceTests.py"
-cmake -S "$Core" -B "$Build" -DBUILD_PLAYERBOTS=ON "-DFETCHCONTENT_SOURCE_DIR_PLAYERBOTS=$PlayerBots" -DFETCHCONTENT_UPDATES_DISCONNECTED=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-cmake --build "$Build" --target mangosd --parallel 5
+cmake -S "$Core" -B "$Build" -DBUILD_PLAYERBOTS=ON "-DFETCHCONTENT_SOURCE_DIR_PLAYERBOTS=$Module" -DFETCHCONTENT_UPDATES_DISCONNECTED=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --build "$Build" --target mangosd --parallel 2
 ```
 
 If your core integrates `src/modules/PlayerBots` directly instead, point that
@@ -338,6 +393,16 @@ these edited sources. Do not use an unrelated configured build directory. On
 the Linux build machine use your established thermal/offline build safeguards.
 These are owner instructions, not agent-executed commands; no install/restart
 commands are included.
+
+The local clone command copies committed changes only. Include any reviewed
+uncommitted changes before building if running these instructions on a dirty
+checkout. The current CMaNGOS FetchContent integration calls add_subdirectory
+without an explicit binary directory, so the override must be nested under the
+core source tree. An external override produces a configure error; this is a
+core CMake constraint, not a profession compile failure.
+This core also hard-codes the canonical module header path. Use that exact
+directory in the isolated core, so core and library compile against identical
+class definitions; never leave a different upstream checkout on that include path.
 
 On a C++17 compiler-equipped build machine, run the lightweight executables too:
 
@@ -384,7 +449,7 @@ waits. Observe orphan recovery only if it naturally occurs; do not reset bots,
 give items, teleport, mutate skills or use cheats to manufacture a successful test.
 Keep stale travel and reset-crash observations separate from profession results.
 
-## Final Git snapshot
+## Earlier pre-publication Git snapshot (superseded)
 
 Branch: `feature/playerbot-profession-economy`.
 HEAD: `c0100429a9b80b3b571d663399ac8a278d91cfbf`.
@@ -410,3 +475,350 @@ Exact `git status --porcelain=v1 --untracked-files=all`:
 ?? playerbot/strategy/values/ProfessionCraftingFairness.h
 ?? profession-audit/REPORT.md
 ```
+
+## 2026-10-01: one-copy tool acquisition continuation (before source edits)
+
+Fork feature HEAD and origin/feature/playerbot-profession-economy both resolve to
+ff7756216c2e332d0eea806305a19afa7e1c8eca after fetch (0 ahead / 0 behind).
+The existing two uncommitted test/documentation files are preserved.
+The successful two-job build and current live observation are recorded in
+C:/Users/Gebruiker/codex-homelab/profession-audit/POSTBUILD-VALIDATION.md.
+
+Demonstrated generic cause: CraftToolRequirementsValue reads actual learned
+recipe Totem/TotemCategory requirements, HasRequiredTools rejects missing tools,
+and ItemUsage recognizes them when already at a vendor. However GetMaterialSources,
+the bounded BuyAction profession pass and AhAction profession pass use only
+selected direct reagents. A missing tool cannot request an acquisition trip.
+The generic ItemUsage stack rule also asks for one full stack and treats every
+compatible tool as needed even when another owned tool satisfies the category.
+
+Smallest proposed correction: add a shared item-category index (one metadata
+scan for the realm lifetime), plus a cached per-bot selection of missing learned
+recipe tools. Exact Totem items require one copy; TotemCategory accepts the core
+compatibility predicate, including upgraded/superset tools. Choose a practical
+cash-vendor alternative when available, otherwise a bounded compatible-item AH
+fallback. Reuse the existing material sources, profession vendor/AH requests,
+BuyAction and AhAction. Recheck live inventory/category satisfaction before buying;
+request quantity is one, independent of craft batch or MaterialTarget. ItemUsage
+keeps owned usable tools and stops requesting interchangeable duplicates.
+A feasible tool vendor request takes priority over a new crafting-focus trip,
+using existing travel requests; no target reset or travel lifecycle rewrite.
+Tool demands come from all currently known craft spells, so a losing profession
+can acquire its prerequisite without waiting to win the recipe score first.
+
+Affected files: CraftValues.h/.cpp, SharedValueContext.h, ValueContext.h,
+ItemUsageValue.cpp, BuyAction.cpp, AhAction.cpp, ProfessionStatusAction.cpp and
+existing source/component regression suites. Keep recipe scoring unchanged.
+
+Performance: one shared item metadata scan; subsequent bot work considers only
+cached learned requirements and the small matching-tool set, plus existing
+indexed vendor destinations. Cache tool choice for30 seconds; live ownership
+rechecks avoid stale duplicate purchases. No per-tick item/DBC/world scan,
+recursive production planner, free recipe/item, bot/profession/recipe exception,
+or additional AH scan policy is introduced.
+
+Limits: buying an inking set does not produce pigments or ink. Milling/prospecting
+still lack demand-driven processing; upgraded crafted tools without vendor/AH
+supply can still require production dependencies. Existing RPG crafting can
+craft useful known tools, including grey recipes, but this proposal does not
+silently add recursive arbitrary production. Jewelcrafting's observed ready
+ring recipes need no tool/focus, so its pending-request blocker is separate.
+The live continuously renewed bandage request is not claimed fixed by this work.
+
+Coverage: missing exact tools, one-copy demand, owned and upgraded compatible
+tools, category alternatives, newly learned advanced requirements, no-vendor
+fallback, no tool/reagent demand collision, unchanged score and shared-action
+wiring. Source checks run locally; lightweight C++ component execution requires
+a compiler, and is not a substitute for the full owner CMaNGOS build.
+
+## 2026-10-01: renewed pending lease — evidence before editing
+
+Live observations show the same pending recipe repeatedly receiving a newer
+queued-at marker without a newer accepted-craft marker. Current source confirms
+QueuePendingCraft always overwrites the timestamp. CastCustomSpellAction calls
+it from both the facing retry (no accepted cast) and an accepted batch
+continuation. Thus retries can perpetually renew the recovery deadline. Pending
+ownership in CraftingFairness::Select then defers other ready skills regardless
+of the five-minute opportunity. The exact live renewal branch was not logged;
+this proves an unbounded source path, not that every observed stall uses it.
+
+Smallest fix: QueuePendingCraft preserves an existing same-spell lease on a
+retry. A new request starts a lease; an accepted continuation explicitly renews
+it. Existing actual-casting protection, normal spell checks, nc routing, cleanup
+and shared action remain authoritative. No bot/recipe/profession exception,
+Engine rewrite or travel reset. Cost is one manual-value comparison per queue
+operation; no recipe/item/world scan or added per-bot cache. Regression cases:
+same request retry does not renew, accepted continuation does, new spell/new
+request starts ownership; production QueuePendingCraft exercised directly.
+This removes one mechanism that can block ready Jewelcrafting and other skills;
+it does not prove live completion or solve unrelated casting/travel failures.
+
+### Tool quantity at the Auction House: source evidence before editing
+
+GetMissingTools requests one copy, but AhBidAction passes the configured
+MaterialTarget to IsReasonableAuctionStack. That permits a whole reserve stack
+even when a nonconsumable tool needs only one. Reuse the existing auction capacity
+policy with reserve target one for tool-only supplies; preserve MaterialTarget
+for actual recipe reagents, including an item used both as a tool and reagent.
+Apply the same rule at candidate filtering and before purchase. No auction scan,
+new purchasing action or additional inventory lookup is needed. Regression
+assertions cover one-copy tools, unchanged reagent reserves and dual-use items.
+
+## Current implemented fixes and validation
+
+- CraftValues.h/.cpp: cached learned craft/enchant tool requirements, core
+  compatible ownership checks, shared item-category index, cached alternative
+  selection, one-copy missing tools merged with direct reagents, and preservation
+  of the same-spell retry lease. The accepted continuation explicitly renews it.
+- SharedValueContext.h / ValueContext.h: register the shared metadata index and
+  per-bot 30-second purchase selection through existing value infrastructure.
+- ItemUsageValue.cpp: retain owned tools, use one-copy readiness rather than a
+  reagent stack, and stop requesting an alternative after category satisfaction.
+- BuyAction.cpp / AhAction.cpp: consume the combined missing supplies through
+  existing bounded normal purchases. Tool-only auctions have a reserve of one;
+  consumable and dual-use reagent reserves retain their configured behavior.
+- CastCustomSpellAction.cpp / ProfessionProgressionPolicy.h: accepted casts
+  renew continuation ownership; facing/requeued requests preserve lease age.
+  Core checks, real spell execution and actual-casting protection remain intact.
+- ProfessionStatusAction.cpp: privately show missing tools and combined source
+  diagnostics. A tool prerequisite can be diagnosed separately from pigments/ink.
+- The three regression suites, test README and this report document and cover
+  the changes. The pre-existing uncommitted source-test baseline hardening and
+  report updates were preserved.
+
+Validation of current sources:
+
+```text
+Python source checks: PASS, 18 tests
+C++ policy/regression: PASS, including 1,050,000 batch cases
+Production-body components: PASS, 54 cases; core focus/category predicates
+git diff --check: PASS
+Current tool/retry patch full mangosd build: NOT RUN
+Current tool/retry patch live validation: NOT RUN
+```
+
+Lightweight C++ execution only used copied test inputs in
+/srv/cmangos/audit/profession-tool-tests-mi4mjjyz and read the compatible isolated
+core predicates. It did not change the original deployment checkout, binary,
+services, configuration, database or running bots. Source changes remain local,
+uncommitted and unpushed. Component doubles do not establish scheduler behavior,
+translation-unit integration or natural skill gain.
+
+### Working versus still blocked
+
+The earlier installed patch produced directly observed Engineering skill gain
+and persisted gains in Blacksmithing and Tailoring; their original skill-1
+population result is therefore historical, not the current universal state.
+The later read-only snapshot still showed all sampled Inscription and
+Jewelcrafting records at1. Those professions need independent validation:
+
+| Path | Current source result | Remaining evidence/blocker |
+| --- | --- | --- |
+| Any learned tool/category | One-copy legitimate vendor/AH demand, including advanced craft/enchant requirements, independent of the shared winning recipe | Gold, practical destinations, stock, selected AH alternative and real arrival are still required. Crafted upgrades can lack supply. |
+| Jewelcrafting ready direct crafts | Generic nonprogressing retry lease now has a bounded recovery deadline | Sampled ring recipes needed no tool/focus. The exact live renewal branch was not logged; real cast/skill gain remains unproven after this edit. |
+| Inscription tools/parchment | Tools use the new common supply path; parchment retains normal reagent buying | An inking set does not supply pigment or ink. Milling demand and grey ink-production dependency are still absent. |
+| Blacksmithing/Engineering/Tailoring direct inputs | Existing eligible learned smelt/bolt/component recipes and direct gathering/vendor/AH sources remain authoritative | Ore is not a bar, cloth is not a bolt. Grey/nested prerequisite demand and unavailable AH supply remain real blockers. |
+| Other skills competing with Cooking | Existing runtime-skill aging/ownership fairness is unchanged; retry loops can no longer extend one lease indefinitely | Fairness grants a bounded opportunity, not a guaranteed cast. Active casts, travel, missing inputs and core rejection can still prevent progress. |
+
+No recursive production was added. Existing smelt/bolt/component/ink CREATE_ITEM
+execution is reusable; demand for grey prerequisites is not modeled. Milling and
+prospecting have core item-processing/loot mechanisms but need a separately
+designed demand/eligibility/completion bridge. This remains outside these fixes.
+Trainer/rank paths, stale travel/reset-target lifecycle, and the original reset
+bad_alloc remain as separately documented findings, without speculative changes.
+
+### Fairness and performance
+
+Recipe scores are unchanged. The existing per-runtime-skill ready aging and
+five-minute bounded opportunity remain intact; accepted batch continuation owns
+its pending request. A same-spell retry now preserves its deadline so it cannot
+indefinitely defeat recovery. No fixed profession rotation or identity exception.
+
+New costs: one realm-shared item-category metadata scan, a small per-bot set of
+chosen tools cached for30 seconds, and live checks of cached learned requirements
+and ownership. Vendor checks use existing item/destination indexes; they can
+visit matching vendor points during a selection refresh, not all world spawns
+per AI tick. Requirement enumeration uses existing cached craft/enchant spells.
+AH scanning retains its existing cooldown, budget and purchase limits. There is
+no measured 1,500-bot benchmark for this new patch; cache interval and indexed
+work bound frequency but do not prove a latency target.
+
+### Genericity and remaining risks
+
+Added production branches derive exact tools/categories/compatible alternatives
+from spell/item metadata and inventory. No sampled names, GUID/account/realm
+checks, recipe exceptions, cheats or fabricated availability were added.
+The baseline canary hash and legacy special spell handling are unchanged.
+Tools in the bank do not satisfy carried-tool requirements. Known advanced
+requirements refresh through normal value caches, rather than free training.
+
+The tool-choice AH fallback currently chooses one compatible metadata item,
+without searching all interchangeable alternatives for current auction supply.
+Normal purchases require money and actual stock; a positive tradeskill budget
+is not proof that every requested tool is affordable. Tool trips can compete
+with focus travel, and a stale active travel target can still suppress either.
+Pending lease expiry releases the marker; it does not cancel every already
+queued generic chat command. End-to-end continuation ordering and acquisition
+remain live-validation requirements. No guarantee of arbitrary advanced chains.
+
+### Specific next validation
+
+After a reviewed isolated full build, use existing read-only `profession`,
+`spells`, item-count and travel/debug diagnostics on any ordinary random bots:
+
+1. Missing tool: expect a private tool x1 diagnostic and vendor/AH source request.
+   Observe normal payment, one tool in inventory, live satisfaction and no
+   duplicate request. Repeat with an already-owned compatible upgraded tool;
+   expect no missing-tool demand. Use any known advanced recipe as another case.
+2. Jewelcrafting control: choose a bot with a known, reagent-complete direct
+   recipe. A nonprogressing retry must preserve queued-at; accepted continuation
+   may advance it. If no cast is active, expect expired pending to clear after
+   max(120, expireActionTime/1000+60) seconds. Then observe bounded competition,
+   actual cast, item/skill change, cleanup and replan. Do not reset to create it.
+3. Inscription: record tool, parchment, pigment and ink separately. If tool
+   acquisition succeeds but pigment/ink remains absent, report the production
+   limitation honestly; do not infer that buying a tool fixed milling.
+4. Blacksmithing/Engineering/Tailoring: repeat normal direct-craft checks with
+   real input inventory and eligible known producers. Record grey/nested missing
+   chains separately. Keep expired travel observations separate from cast results.
+
+### Manual full-build validation
+
+Stage these reviewed uncommitted sources in an isolated compatible core first.
+Git clone/fetch alone will omit the current working-tree edits. The canonical
+src/modules/PlayerBots header path and FetchContent source must resolve to the
+same staged module, as the previous header-layout failure proved. With that
+prerequisite satisfied, the existing isolated build paths are:
+
+```sh
+CORE=/srv/cmangos/audit/profession-20261001/source
+PLAYERBOTS="$CORE/src/modules/PlayerBots"
+BUILD=/srv/cmangos/audit/profession-20261001/build
+git -C "$PLAYERBOTS" diff --check
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/ProfessionProgressionSourceTests.py"
+cmake -S "$CORE" -B "$BUILD" -DBUILD_PLAYERBOTS=ON \
+  -DFETCHCONTENT_SOURCE_DIR_PLAYERBOTS="$PLAYERBOTS" \
+  -DFETCHCONTENT_UPDATES_DISCONNECTED=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --build "$BUILD" --target mangosd --parallel 2
+```
+
+Preserve the verified cache/dependency options and normal offline/thermal build
+procedure. These commands validate sources; they contain no install or restart.
+
+### Current Git snapshot
+
+Branch: feature/playerbot-profession-economy.
+HEAD: ff7756216c2e332d0eea806305a19afa7e1c8eca.
+Fetched origin feature: same commit, 0 ahead / 0 behind. All15 modified files
+are unstaged; there are no untracked files, commits or pushes from this continuation.
+The first source-test/report modifications predated this continuation.
+
+```text
+ M playerbot/strategy/actions/AhAction.cpp
+ M playerbot/strategy/actions/BuyAction.cpp
+ M playerbot/strategy/actions/CastCustomSpellAction.cpp
+ M playerbot/strategy/actions/ProfessionStatusAction.cpp
+ M playerbot/strategy/tests/ProfessionProgressionComponentTests.py
+ M playerbot/strategy/tests/ProfessionProgressionRegressionTests.cpp
+ M playerbot/strategy/tests/ProfessionProgressionSourceTests.py
+ M playerbot/strategy/tests/README.profession-progression.md
+ M playerbot/strategy/values/CraftValues.cpp
+ M playerbot/strategy/values/CraftValues.h
+ M playerbot/strategy/values/ItemUsageValue.cpp
+ M playerbot/strategy/values/ProfessionProgressionPolicy.h
+ M playerbot/strategy/values/SharedValueContext.h
+ M playerbot/strategy/values/ValueContext.h
+ M profession-audit/REPORT.md
+```
+
+## Owner-confirmed full build result — 2026-10-01 17:05 +02:00
+
+The owner supplied the final background job output: the incremental CMake build
+completed37/37 with Linking CXX executable src/mangosd/mangosd and job exit-code0.
+The log includes CraftValues.cpp, ItemUsageValue.cpp and both existing
+ProfessionProgressionPolicyTests.cpp and ProfessionProgressionRegressionTests.cpp
+translation units, followed by the PlayerBots library and mangosd link.
+This supersedes the earlier NOT RUN full-build status for the tool/retry patch.
+37 is the incremental dependency count, not the previous clean-build848 count.
+No new remote inspection was performed to confirm this owner-provided output.
+The job was build-only: the newly compiled binary has not been installed by it,
+and these new fixes are not claimed active or validated on live bots.
+
+## Owner-authorized installation — 2026-10-01 17:10 +02:00
+
+Read-only inspection proved the successful new build (SHA256
+6c3ffb4c878a5080caba1a0563519e695d7b6a159a267175a552c08178c2d5e9)
+was not installed; the installed and running binary still had the earlier hash.
+At the owner's explicit request it was installed using the updater lock, normal
+graceful service stops, a previous-binary backup, atomic replacement and rollback
+if startup verification failed. Installation completed with exit0 at17:09:31 CEST.
+Build, installed and running-process hashes now match. Both world/realm services
+are active/running and TCP8085/3724 listen. The original live source checkout and
+PlayerBots configuration are unchanged; no commit, push or DB mutation occurred.
+Backup and deployment evidence:
+/srv/cmangos/audit/profession-tool-install-20261001-170801/backup/mangosd,
+operation.log, verified.sha256 and exit-code in that directory.
+This supersedes the preceding not-installed status. Actual autonomous tool
+acquisition, cast completion and natural skill gain still require live observation.
+
+## Live observation and next source-proven corrections — 2026-10-01
+
+An explicitly READ ONLY population/diagnostic window17:20:55 to17:28:48 captured
+new persisted gains in5 Blacksmiths,4 Engineers,1 Alchemist,16 Leatherworkers,
+2 Enchanters and82 Cooks. No sampled Inscription gain;15/15 remain1. Jewelcrafting
+is now2 on one of four bots but did not gain further within this window. These
+counts span an unexpected crash and delayed saves; they do not prove a clean
+eight-minute run or attribute every gain to this patch. Full private evidence
+is in the owner's homelab profession-audit/LIVE-TOOLS-20261001.md.
+
+The one-copy tool diagnostic/source bridge is live. Sampled scribes request an
+inking set x1; cash vendors exist. Its DB base cost is750 copper, while two sampled
+bots have only148/155. Another has1447 but has an expired quest travel target.
+No purchase was observed. Pigment/ink is absent, ink vendor stock is currency-only
+and the checked AH supply is empty. Buying a tool alone cannot close that chain.
+
+### Generic travel expiry — demonstrated cause and proposal before editing
+
+Multiple live TRAVEL/WORK/COOLDOWN targets remain marked active hundreds of seconds
+past deadline. TravelTargetActiveValue calls IsActive, which only checks the
+status enum. The normal expiry branch lives inside CheckStatus and therefore
+depends on movement/travel execution. TravelActionMultiplier then suppresses
+new requests, including legitimate tool acquisition. This is generic across
+quest/vendor/AH/trainer/focus purposes, not a profession-specific rule.
+
+Smallest correction: make IsActive expire an elapsed, timed, nonforced target
+using the same SetStatus/failed-destination invalidation already used by
+CheckStatus; reuse that path rather than adding a tick or destination scan.
+Preserve forced destinations, zero/unlimited timers and already inactive states.
+Keep CheckStatus's group/destination/arrival logic where it is. Correct reset
+action eligibility separately if source proves active-state rejection prevents
+its manual purpose; do not run a live reset. Tests must execute the production
+methods with clock/status/context doubles, covering all phases, forced targets,
+no timer, cache read expiry, cleanup once and reset safety conditions.
+Cost: constant-time status/deadline checks on existing reads, no world scan or
+new per-bot cache. Stage this generic travel change in a separate commit.
+
+### Empty-chat abort — demonstrated cause and proposal before editing
+
+The new core records SIGABRT in HandleBotOutgoingPacket's cold path, called by
+WorldSession::SendPacket. The matching installed binary's unique abort branch
+is preceded by fprintf arguments naming `!message.empty()` and
+HandleBotOutgoingPacket; source has exactly that assertion before QueueChatResponse.
+Thus empty parsed chat can terminate the whole server. This is not the earlier
+reset bad_alloc, and the source of the empty text is not proven.
+
+Smallest correction: ignore an empty parsed chat payload before message recording,
+reply selection and response queueing. Normal nonempty packet handling remains.
+Replace the fatal assumption with input validation; no catch-all exception mask,
+profession/name/packet-ID exception or free craft. Regression must exercise
+the same production guard and prove an empty message cannot reach the response
+path while nonempty text still can. No extra scan/cache; one string emptiness
+check per relevant packet. Keep this fix in a separate chat-handling commit.
+
+### Priority finding
+
+Craft dispatch1.2 is above quest accept1.08/turn-in1.09 but below attack anything5.
+Profession travel requests6.965-6.99 rank above ordinary quest travel6.3; active
+target and normal multipliers still gate them. Recipe scores do not arbitrate
+combat/quest actions. The short interrupted observation does not justify changing
+these base priorities; fix stale target lifecycle and known packet failure first.

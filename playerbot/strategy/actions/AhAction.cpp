@@ -190,7 +190,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
     if (text == "profession")
     {
         ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
-        std::map<uint32, uint32> remaining = plan.GetMissingReagents(ai);
+        std::map<uint32, uint32> remaining = plan.GetMissingSupplies(ai);
         if (!ProfessionCraftingPlanValue::IsEnabledFor(ai) || !plan.IsValid() || remaining.empty() ||
             sPlayerbotAIConfig.professionAhPurchaseLimit == 0 ||
             sPlayerbotAIConfig.professionAhBudgetPercent == 0)
@@ -202,6 +202,12 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             return false;
 
         std::unordered_set<uint32> auctionItems(sources.auctionItems.begin(), sources.auctionItems.end());
+        const auto missingTools = ProfessionCraftingPlanValue::GetMissingTools(ai);
+        auto reserveTarget = [&](uint32 itemId)
+        {
+            return profession::SupplyReserveTarget(missingTools.count(itemId) != 0,
+                plan.required.count(itemId) != 0, sPlayerbotAIConfig.professionMaterialTarget);
+        };
 
         time_t now = time(nullptr);
         // Record attempts as well as purchases so an empty AH cannot cause a
@@ -236,7 +242,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             uint32 maxStack = std::max<uint32>(1, proto->GetMaxStackSize());
             if (!profession::IsReasonableAuctionStack(candidate->itemCount,
                 currentCounts[candidate->itemTemplate], missing->second,
-                sPlayerbotAIConfig.professionMaterialTarget, maxStack))
+                reserveTarget(candidate->itemTemplate), maxStack))
                 continue;
 
             uint32 unitPrice = candidate->buyout / candidate->itemCount;
@@ -272,7 +278,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             ItemPrototype const* proto = sObjectMgr.GetItemPrototype(auction->itemTemplate);
             if (!proto || !profession::IsReasonableAuctionStack(auction->itemCount,
                 currentCounts[auction->itemTemplate], remainingItem->second,
-                sPlayerbotAIConfig.professionMaterialTarget,
+                reserveTarget(auction->itemTemplate),
                 std::max<uint32>(1, proto->GetMaxStackSize())))
                 continue;
 

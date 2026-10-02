@@ -23,10 +23,10 @@ namespace
     static_assert(Same(ai::profession::ReconcileAssignments(164, 164, 0, 0), 164, 0),
         "the same profession must never be assigned twice");
 
-    static_assert(ai::profession::CanaryBucket(12345) == ai::profession::CanaryBucket(12345),
-        "canary selection must be deterministic");
-    static_assert(!ai::profession::IsInCanary(12345, 0), "a zero-percent canary must be empty");
-    static_assert(ai::profession::IsInCanary(12345, 100), "a full canary must include every bot");
+    static_assert(ai::profession::ParticipationBucket(12345) == ai::profession::ParticipationBucket(12345),
+        "participation selection must be deterministic");
+    static_assert(!ai::profession::Participates(12345, 0), "zero-percent participation must be empty");
+    static_assert(ai::profession::Participates(12345, 100), "full participation must include every bot");
 
     static_assert(ai::profession::IsReasonableAuctionStack(4, 0, 4, 20, 20),
         "an exact stack must be accepted");

@@ -36,6 +36,8 @@ After successful build get aiplayerbot.conf file from "src/modules/Bots/playerbo
 After you complete all steps above you can check bots config and start your server. It'll take some time for the first time, as gear/characters for bots will be generated at first launch. Have fun! 🥳
 
 ## How to Use
+
+- [Profession progression configuration](docs/PROFESSION_PROGRESSION.md)
 - [List of Commands](https://docs.google.com/document/d/1xIdu5l5lAKLSKhqZ2Hb6vaU8qJgbbLwCw4MxmhCW_gI/edit#heading=h.vsmxe9r82yc7)
 - [Playerbots Behavior AddOn](https://github.com/celguar/mangosbot-addon)
 - [Playerbot Inventory AddOn](https://github.com/davidonete/mangosbot-EngBags)

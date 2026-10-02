@@ -120,6 +120,7 @@ namespace ai
             creators["craft"] = [](PlayerbotAI* ai) { return new CraftValue(ai); };
             creators["profession crafting plan"] = [](PlayerbotAI* ai) { return new ProfessionCraftingPlanValue(ai); };
             creators["profession fairness"] = [](PlayerbotAI* ai) { return new ProfessionCraftingFairnessValue(ai); };
+            creators["profession craft request"] = [](PlayerbotAI* ai) { return new ProfessionCraftRequestValue(ai); };
             creators["profession material sources"] = [](PlayerbotAI* ai) { return new ProfessionMaterialSourcesValue(ai); };
             creators["can craft profession"] = [](PlayerbotAI* ai) { return new CanCraftProfessionValue(ai); };
             creators["profession tool purchases"] = [](PlayerbotAI* ai) { return new ProfessionToolPurchasesValue(ai); };

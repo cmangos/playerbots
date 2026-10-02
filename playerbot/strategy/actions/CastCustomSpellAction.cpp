@@ -163,6 +163,27 @@ bool CastCustomSpellAction::Execute(Event& event)
     if ((pSpellInfo->Targets & TARGET_FLAG_ITEM) || (pSpellInfo->Targets & TARGET_FLAG_SELF))
         target = bot;
 
+    ProfessionCraftRequest& professionRequest = AI_VALUE(ProfessionCraftRequest&, "profession craft request");
+    const bool processingCraft = professionCraft && professionRequest.plan.processingInputId;
+    const bool completesProfessionGoal = !professionRequest.plan.goalSpellId ||
+        professionRequest.plan.goalSpellId == spell;
+    if (processingCraft)
+    {
+        // Bind the actual owned stack selected at dispatch. An arbitrary fitting
+        // herb/ore or another player's trade item is not this production step.
+        itemTarget = ProfessionCraftingPlanValue::GetProcessingTarget(ai,
+            professionRequest.plan, professionRequest.inputGuid);
+        if (!itemTarget || professionRequest.accepted)
+        {
+            if (!professionRequest.accepted)
+                ProfessionCraftingPlanValue::ClearPendingCraft(ai, spell);
+            return false;
+        }
+        target = bot;
+        gameObjectTarget = nullptr;
+        castCount = 1;
+    }
+
     WorldObject* woTarget = nullptr;
     if (gameObjectTarget)
         woTarget = gameObjectTarget;
@@ -276,11 +297,17 @@ bool CastCustomSpellAction::Execute(Event& event)
     {
         // Keep ownership through continuations; otherwise another maintenance
         // or optional RPG craft can enqueue a competing batch mid-cast.
-        if (!profession::KeepsPendingCraft(result, castCount))
+        if (!result || (!processingCraft && !profession::KeepsPendingCraft(result, castCount)))
             ProfessionCraftingPlanValue::ClearPendingCraft(ai, spell);
         if (result)
         {
-            if (!profession::KeepsPendingCraft(result, castCount))
+            if (processingCraft)
+            {
+                professionRequest.accepted = true;
+                ProfessionCraftingPlanValue::QueuePendingCraft(ai, spell, true);
+            }
+            if (!processingCraft && !profession::KeepsPendingCraft(result, castCount) &&
+                completesProfessionGoal)
                 AI_VALUE(profession::CraftingFairness&, "profession fairness").FinishOpportunity(
                     static_cast<uint32>(time(nullptr)));
             SET_AI_VALUE2(int32, "manual int", "last profession craft", static_cast<int32>(time(nullptr)));
@@ -678,7 +705,8 @@ bool CraftRandomItemAction::Execute(Event& event)
     if (maintenanceRequest)
     {
         bool knownRecipe = bot->HasSpell(professionPlan.spellId) &&
-            std::find(spellIds.begin(), spellIds.end(), professionPlan.spellId) != spellIds.end();
+            (professionPlan.processingInputId ||
+                std::find(spellIds.begin(), spellIds.end(), professionPlan.spellId) != spellIds.end());
         if (!autonomousProfessionPlan || !profession::CanDispatchProfessionPlan(knownRecipe,
             ProfessionCraftingPlanValue::IsCraftCooldownReady(ai),
             ProfessionCraftingPlanValue::HasPendingCraft(ai), bot->IsNonMeleeSpellCasted(false)))
@@ -717,7 +745,10 @@ bool CraftRandomItemAction::Execute(Event& event)
         if (!AI_VALUE2(bool, "can craft spell", spellId))
             continue;
 
-        if (!AI_VALUE2(bool, "should craft spell", spellId))
+        bool selectedStep = autonomousProfessionPlan && spellId == professionPlan.spellId;
+        bool prerequisite = selectedStep && (professionPlan.processingInputId ||
+            (professionPlan.goalSpellId && professionPlan.goalSpellId != spellId));
+        if (!prerequisite && !AI_VALUE2(bool, "should craft spell", spellId))
             continue;
 
         const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(spellId);
@@ -756,7 +787,17 @@ bool CraftRandomItemAction::Execute(Event& event)
         if (!castCount)
             continue;
 
-        if (spellId == 61288) //Crafting random glyph
+        Item* processingTarget = nullptr;
+        if (selectedStep && professionPlan.processingInputId)
+        {
+            processingTarget = ProfessionCraftingPlanValue::GetProcessingTarget(ai, professionPlan);
+            if (!processingTarget)
+                continue;
+            // Processing opens item loot. Completion belongs to StoreLootAction,
+            // not to a chain of queued casts against a consumed stack.
+            castCount = 1;
+        }
+        else if (spellId == 61288) //Crafting random glyph
         {
             castCount = 1;
         }
@@ -788,7 +829,7 @@ bool CraftRandomItemAction::Execute(Event& event)
 
         if (autonomousProfessionPlan && spellId == professionPlan.spellId)
         {
-            ProfessionCraftingPlanValue::QueuePendingCraft(ai, spellId);
+            ProfessionCraftingPlanValue::QueuePlan(ai, professionPlan, processingTarget);
         }
 
         ai->HandleCommand(CHAT_MSG_WHISPER, cmd.str(), *bot);

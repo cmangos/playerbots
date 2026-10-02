@@ -29,6 +29,7 @@ namespace ai
             creators["vendor map"] = [](PlayerbotAI* ai) { return new VendorMapValue(ai); };
             creators["item vendor list"] = [](PlayerbotAI* ai) { return new ItemVendorListValue(ai); };
             creators["craft tool items"] = [](PlayerbotAI* ai) { return new CraftToolItemsValue(ai); };
+            creators["processing sources"] = [](PlayerbotAI* ai) { return new ProcessingSourcesValue(ai); };
 
             creators["entry quest relation"] = [](PlayerbotAI* ai) { return new EntryQuestRelationMapValue(ai); };
 

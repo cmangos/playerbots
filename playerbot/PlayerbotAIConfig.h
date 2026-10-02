@@ -179,7 +179,7 @@ public:
     bool botCheckAllAuctionListings;
     bool botsSaveEpics;
     bool professionProgressionEnabled;
-    uint32 professionProgressionCanaryPercent;
+    uint32 professionProgressionPercent;
     uint32 professionPlanCheckInterval;
     uint32 professionCraftBatchSize;
     uint32 professionCraftCooldown;

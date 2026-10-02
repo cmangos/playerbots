@@ -46,7 +46,7 @@ class ProfessionSourceTests(unittest.TestCase):
                         self.dispatch.index('spellIds.assign'))
 
     def test_fresh_readiness_checks_precede_pending_queue(self):
-        queue = self.dispatch.index('QueuePendingCraft')
+        queue = self.dispatch.index('QueuePlan')
         for check in ('bot->HasSpell(spellId)', 'professionPlan.GetMissingReagents(ai).empty()',
                       'CanCraftSpellValue::HasRequiredTools(pSpellInfo, bot)', 'if (!castCount)'):
             self.assertLess(self.dispatch.index(check), queue)
@@ -200,13 +200,72 @@ class ProfessionSourceTests(unittest.TestCase):
         self.assertIn('CastNcAction = "cast custom nc spell"', common)
         self.assertNotIn('"castnc"', rpg)
 
+    def test_processing_uses_owned_input_and_normal_cast(self):
+        cast = extract(self.actions, 'bool CastCustomSpellAction::Execute')
+        for token in ('professionRequest.inputGuid', 'GetProcessingTarget',
+                      'professionRequest.accepted', 'castCount = 1',
+                      'ai->CanCastSpell', 'ai->CastSpell', 'itemTarget'):
+            self.assertIn(token, cast)
+        self.assertLess(cast.index('GetProcessingTarget'), cast.index('ai->CanCastSpell'))
+        self.assertLess(cast.index('ai->CastSpell'), cast.index('professionRequest.accepted = true'))
+        self.assertIn('if (!result || (!processingCraft &&', cast)
+
+    def test_processing_completion_belongs_to_real_loot_release(self):
+        loot = extract(source('playerbot/strategy/actions/LootAction.cpp'), 'bool StoreLootAction::Execute')
+        self.assertIn('loot->GetLootType() == LOOT_MILLING', loot)
+        self.assertIn('loot->GetLootType() == LOOT_PROSPECTING', loot)
+        self.assertLess(loot.index('HandleAutostoreLootItemOpcode'), loot.index('CompleteProcessingLoot'))
+        self.assertLess(loot.index('HandleLootReleaseOpcode'), loot.index('CompleteProcessingLoot'))
+        complete = extract(self.crafts, 'void ProfessionCraftingPlanValue::CompleteProcessingLoot')
+        self.assertIn('request.accepted', complete)
+        self.assertIn('request.inputGuid != inputGuid', complete)
+
+    def test_prerequisites_keep_goal_snapshot_and_bounded_reserves(self):
+        self.assertIn('return request.plan', self.plan)
+        self.assertIn('candidate.goalSpellId = spellId', self.plan)
+        self.assertIn('candidate.retained = step.retained', self.plan)
+        self.assertIn('NextProductionStep', self.plan)
+        usage = source('playerbot/strategy/values/ItemUsageValue.cpp')
+        self.assertIn('professionPlan.retained.find(itemId)', usage)
+        helper = source('playerbot/strategy/values/ProfessionProduction.h')
+        self.assertIn('depth >= 2', helper)
+        self.assertIn('ancestors.count(producer.spellId)', helper)
+        self.assertIn('producer.maxCasts', helper)
+
+    def test_processing_metadata_is_shared_and_demand_indexed(self):
+        self.assertIn('creators["processing sources"]', source('playerbot/strategy/values/SharedValueContext.h'))
+        self.assertNotIn('sItemStorage', self.plan)
+        self.assertIn('processing->find(output)', self.plan)
+        self.assertIn('known.second.disabled', self.plan)
+        self.assertIn('candidate.processingInputId || GetProcessingTarget(ai, candidate)', self.plan)
+
+    def test_published_options_use_participation_with_ten_percent_default(self):
+        template = source('playerbot/aiplayerbot.conf.dist.in')
+        self.assertIn('AiPlayerbot.ProfessionProgressionEnabled = 1', template)
+        self.assertIn('AiPlayerbot.ProfessionProgressionPercent = 10', template)
+        self.assertNotIn('Canary', template)
+        status = source('playerbot/strategy/actions/ProfessionStatusAction.cpp')
+        self.assertIn(', participation ', status)
+        self.assertNotRegex(status, '(?i)canary|rollout')
+
     def test_added_production_code_has_no_sample_or_cheat_branches(self):
         diff = subprocess.check_output(['git', '-C', str(REPO), 'diff', BASELINE, '--',
                                        'playerbot/TravelMgr.h', 'playerbot/strategy/actions',
                                        'playerbot/strategy/values'], text=True)
         additions = '\n'.join(line[1:] for line in diff.splitlines()
                               if line.startswith('+') and not line.startswith('+++'))
+        # A moved inherited line is not a newly introduced recipe exception.
+        inherited = set(subprocess.check_output(['git', '-C', str(REPO), 'show',
+            BASELINE + ':playerbot/strategy/actions/CastCustomSpellAction.cpp'],
+            text=True).splitlines())
+        inherited = {line.strip() for line in inherited}
+        additions = '\n'.join(line for line in additions.splitlines()
+                              if line.strip().removeprefix('else ') not in inherited)
         additions += source('playerbot/strategy/values/ProfessionCraftingFairness.h')
+        additions += source('playerbot/strategy/values/ProfessionProduction.h')
+        # The existing generic percentage hash is inherited policy, not a
+        # comparison to a sampled bot GUID. No other added GUID lookup is allowed.
+        additions = additions.replace('return profession::Participates(bot->GetGUIDLow(), sPlayerbotAIConfig.professionProgressionPercent);', '')
         self.assertNotRegex(additions, r'(?i)Beanezoth|Feleil|Kedis|Amorniar|Roxanna|192\.168\.|SetSkill\s*\(|AddItem\s*\(|TeleportTo\s*\(|GetAccountId\s*\(|GetGUIDLow\s*\(')
         self.assertNotRegex(additions, r'(?:spellId|skillId|itemId)\s*==\s*[1-9][0-9]+')
 

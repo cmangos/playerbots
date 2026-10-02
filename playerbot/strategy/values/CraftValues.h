@@ -2,9 +2,11 @@
 #include "playerbot/strategy/Value.h"
 #include "playerbot/strategy/NamedObjectContext.h"
 #include "ProfessionCraftingFairness.h"
+#include "ProfessionProduction.h"
 
 class GameObject;
 class Player;
+class Item;
 struct SpellEntry;
 struct ItemPrototype;
 
@@ -28,6 +30,9 @@ namespace ai
         uint32 itemId = 0;
         uint32 spellFocusId = 0;
         uint32 craftCount = 0;
+        uint32 goalSpellId = 0;
+        uint32 processingInputId = 0;
+        std::map<uint32, uint32> retained;
         std::map<uint32, uint32> required;
         std::map<uint32, uint32> missing;
 
@@ -115,6 +120,37 @@ namespace ai
         bool NeedsItem(const ItemPrototype* item, Player* player) const;
     };
 
+    struct ProfessionCraftRequest
+    {
+        ProfessionCraftingPlan plan;
+        ObjectGuid inputGuid;
+        bool accepted = false;
+    };
+
+    class ProfessionCraftRequestValue : public ManualSetValue<ProfessionCraftRequest&>
+    {
+    public:
+        ProfessionCraftRequestValue(PlayerbotAI* ai) :
+            ManualSetValue<ProfessionCraftRequest&>(ai, state, "profession craft request") {}
+        virtual void Reset() override { state = {}; }
+    private:
+        ProfessionCraftRequest state;
+    };
+
+    struct ProcessingSource
+    {
+        uint32 inputId;
+        uint32 effect;
+    };
+    using ProcessingSourceMap = std::map<uint32, std::vector<ProcessingSource>>;
+
+    class ProcessingSourcesValue : public SingleCalculatedValue<ProcessingSourceMap*>
+    {
+    public:
+        ProcessingSourcesValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "processing sources") {}
+        virtual ProcessingSourceMap* Calculate() override;
+    };
+
     using CraftToolItemMap = std::map<uint32, std::vector<uint32>>;
 
     // Shared metadata only; do not scan all items once per bot/category.
@@ -192,6 +228,10 @@ namespace ai
         static bool HasPendingCraft(PlayerbotAI* ai);
         static void QueuePendingCraft(PlayerbotAI* ai, uint32 spellId, bool acceptedCast = false);
         static void ClearPendingCraft(PlayerbotAI* ai, uint32 spellId);
+        static void QueuePlan(PlayerbotAI* ai, const ProfessionCraftingPlan& plan, Item* input);
+        static Item* GetProcessingTarget(PlayerbotAI* ai, const ProfessionCraftingPlan& plan,
+            ObjectGuid ownedGuid = ObjectGuid());
+        static void CompleteProcessingLoot(PlayerbotAI* ai, ObjectGuid inputGuid);
         static bool IsAhSearchReady(PlayerbotAI* ai);
         static uint32 GetAhBudget(PlayerbotAI* ai);
         static std::map<uint32, uint32> GetMissingTools(PlayerbotAI* ai);

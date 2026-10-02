@@ -12,6 +12,120 @@
 
 using namespace ai;
 
+ProcessingSourceMap* ProcessingSourcesValue::Calculate()
+{
+    auto* sources = new ProcessingSourceMap;
+#ifdef MANGOSBOT_TWO
+    // One shared metadata scan. Random yields remain possible sources only;
+    // references/conditions are not guessed to be available to every bot.
+    for (uint32 itemId = 0; itemId < sItemStorage.GetMaxEntry(); ++itemId)
+    {
+        const ItemPrototype* proto = sItemStorage.LookupEntry<ItemPrototype>(itemId);
+        if (!proto)
+            continue;
+        for (uint32 effect : {uint32(SPELL_EFFECT_MILLING), uint32(SPELL_EFFECT_PROSPECTING)})
+        {
+            uint32 flag = effect == SPELL_EFFECT_MILLING ? ITEM_FLAG_IS_MILLABLE : ITEM_FLAG_IS_PROSPECTABLE;
+            if (!(proto->Flags & flag))
+                continue;
+            const LootTemplateAccess* loot = DropMapValue::GetLootTemplate(
+                ObjectGuid(HIGHGUID_ITEM, itemId, uint32(1)),
+                effect == SPELL_EFFECT_MILLING ? LOOT_MILLING : LOOT_PROSPECTING);
+            if (!loot)
+                continue;
+            std::set<uint32> outputs;
+            auto add = [&](const LootStoreItemList& entries)
+            {
+                for (const auto& entry : entries)
+                    if (entry.mincountOrRef > 0 && !entry.conditionId && !entry.needs_quest)
+                        outputs.insert(entry.itemid);
+            };
+            add(loot->Entries);
+            for (const auto& group : loot->Groups)
+            {
+                add(group.ExplicitlyChanced);
+                add(group.EqualChanced);
+            }
+            for (uint32 output : outputs)
+                (*sources)[output].push_back({itemId, effect});
+        }
+    }
+#endif
+    return sources;
+}
+
+namespace
+{
+    bool ProcessingInput(const SpellEntry* spell, const ItemPrototype* proto,
+        Player* player, uint32& count)
+    {
+#ifdef MANGOSBOT_TWO
+        if (!spell || !proto)
+            return false;
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            uint32 effect = spell->Effect[i];
+            if (effect != SPELL_EFFECT_MILLING && effect != SPELL_EFFECT_PROSPECTING)
+                continue;
+            uint32 flag = effect == SPELL_EFFECT_MILLING ? ITEM_FLAG_IS_MILLABLE : ITEM_FLAG_IS_PROSPECTABLE;
+            uint32 skill = effect == SPELL_EFFECT_MILLING ? SKILL_INSCRIPTION : SKILL_JEWELCRAFTING;
+            int32 required = spell->CalculateSimpleValue(SpellEffectIndex(i));
+            if (!(proto->Flags & flag) || !player->HasSkill(skill) ||
+                player->GetSkillValue(skill) < proto->RequiredSkillRank || required <= 0)
+                return false;
+            count = uint32(required);
+            return true;
+        }
+#endif
+        return false;
+    }
+}
+
+Item* ProfessionCraftingPlanValue::GetProcessingTarget(PlayerbotAI* ai,
+    const ProfessionCraftingPlan& plan, ObjectGuid ownedGuid)
+{
+    if (!plan.processingInputId || ai->GetBot()->GetTrader())
+        return nullptr;
+    auto matches = [&](Item* item)
+    {
+        uint32 count = 0;
+        return item && item->GetOwnerGuid() == ai->GetBot()->GetObjectGuid() &&
+            item->GetEntry() == plan.processingInputId && !item->HasTemporaryLoot() &&
+            ProcessingInput(sServerFacade.LookupSpellInfo(plan.spellId), item->GetProto(), ai->GetBot(), count) &&
+            item->GetCount() >= count;
+    };
+    if (ownedGuid)
+    {
+        Item* item = ai->GetBot()->GetItemByGuid(ownedGuid);
+        return matches(item) ? item : nullptr;
+    }
+    for (Item* item : ai->GetInventoryItems())
+        if (matches(item))
+            return item;
+    return nullptr;
+}
+
+void ProfessionCraftingPlanValue::QueuePlan(PlayerbotAI* ai,
+    const ProfessionCraftingPlan& plan, Item* input)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    ProfessionCraftRequest& request = AI_VALUE(ProfessionCraftRequest&, "profession craft request");
+    request = {};
+    request.plan = plan;
+    if (input)
+        request.inputGuid = input->GetObjectGuid();
+    QueuePendingCraft(ai, plan.spellId);
+}
+
+void ProfessionCraftingPlanValue::CompleteProcessingLoot(PlayerbotAI* ai, ObjectGuid inputGuid)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+    const ProfessionCraftRequest& request = AI_VALUE(ProfessionCraftRequest&, "profession craft request");
+    if (!request.accepted || !request.plan.processingInputId || request.inputGuid != inputGuid)
+        return;
+    ClearPendingCraft(ai, request.plan.spellId);
+}
+
 std::vector<uint32> CraftSpellsValue::Calculate()
 {
     std::vector<uint32> spellIds;
@@ -537,15 +651,15 @@ ProfessionMaterialSources ProfessionCraftingPlan::GetMaterialSources(PlayerbotAI
 
 bool ProfessionCraftingPlanValue::IsEnabledFor(PlayerbotAI* ai)
 {
-    if (!sPlayerbotAIConfig.professionProgressionEnabled || !sPlayerbotAIConfig.professionProgressionCanaryPercent)
+    if (!sPlayerbotAIConfig.professionProgressionEnabled || !sPlayerbotAIConfig.professionProgressionPercent)
         return false;
 
     Player* bot = ai->GetBot();
     if (!bot || ai->HasActivePlayerMaster() || !sRandomPlayerbotMgr.IsFreeBot(bot))
         return false;
 
-    // Stable assignment keeps the canary cohort unchanged across restarts.
-    return profession::IsInCanary(bot->GetGUIDLow(), sPlayerbotAIConfig.professionProgressionCanaryPercent);
+    // Stable assignment keeps the participating cohort unchanged across restarts.
+    return profession::Participates(bot->GetGUIDLow(), sPlayerbotAIConfig.professionProgressionPercent);
 }
 
 bool ProfessionCraftingPlanValue::IsCraftCooldownReady(PlayerbotAI* ai)
@@ -596,6 +710,9 @@ void ProfessionCraftingPlanValue::ClearPendingCraft(PlayerbotAI* ai, uint32 spel
         return;
     SET_AI_VALUE2(int32, "manual int", "pending profession craft", 0);
     SET_AI_VALUE2(int32, "manual int", "profession craft queued at", 0);
+    RESET_AI_VALUE(ProfessionCraftRequest&, "profession craft request");
+    RESET_AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    RESET_AI_VALUE(ProfessionMaterialSources, "profession material sources");
     // This can be called from CanCraftProfessionValue::Calculate itself.
     // Reset its cache; ClearValues would delete the value while it executes.
     RESET_AI_VALUE(bool, "can craft profession");
@@ -698,9 +815,98 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
     if (!IsEnabledFor(ai))
         return bestPlan;
 
+    if (HasPendingCraft(ai))
+    {
+        const ProfessionCraftRequest& request = AI_VALUE(ProfessionCraftRequest&, "profession craft request");
+        if (request.plan.IsValid())
+            return request.plan;
+    }
+
     std::vector<ProfessionCraftingPlan> plans;
     std::vector<profession::CraftCandidate> candidates;
     std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
+
+    // Index this bot's cached learned producers, including grey prerequisites.
+    std::vector<profession::ProductionRecipe> recipes;
+    profession::ProducerIndex producers;
+    std::map<uint32, size_t> ordinary;
+    for (uint32 id : spellIds)
+    {
+        const SpellEntry* spell = sServerFacade.LookupSpellInfo(id);
+        if (!spell || !bot->HasSpell(id) || spell->Effect[0] != SPELL_EFFECT_CREATE_ITEM)
+            continue;
+        profession::ProductionRecipe recipe;
+        recipe.spellId = id;
+        recipe.toolsReady = CanCraftSpellValue::HasRequiredTools(spell, bot);
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            if (spell->Effect[i] == SPELL_EFFECT_CREATE_ITEM && spell->EffectItemType[i])
+            {
+                recipe.itemId = spell->EffectItemType[i];
+                recipe.yield = std::max<int32>(1, spell->CalculateSimpleValue(SpellEffectIndex(i)));
+                break;
+            }
+        for (uint8 i = 0; i < MAX_SPELL_REAGENTS; ++i)
+            if (spell->Reagent[i] > 0 && spell->ReagentCount[i] > 0)
+                recipe.reagents[spell->Reagent[i]] += spell->ReagentCount[i];
+        if (!recipe.itemId || recipe.reagents.empty())
+            continue;
+        recipe.maxCasts = sPlayerbotAIConfig.professionCraftBatchSize;
+        for (const auto& input : recipe.reagents)
+            recipe.maxCasts = profession::BoundCraftBatch(recipe.maxCasts,
+                input.second, sPlayerbotAIConfig.professionMaterialTarget);
+        ordinary[id] = recipes.size();
+        producers[recipe.itemId].push_back(recipes.size());
+        recipes.push_back(recipe);
+    }
+#ifdef MANGOSBOT_TWO
+    std::set<uint32> demandedOutputs;
+    for (const auto& recipe : recipes)
+        for (const auto& reagent : recipe.reagents)
+            demandedOutputs.insert(reagent.first);
+    ProcessingSourceMap* processing = GAI_VALUE(ProcessingSourceMap*, "processing sources");
+    for (const auto& known : bot->GetSpellMap())
+    {
+        if (known.second.state == PLAYERSPELL_REMOVED || known.second.disabled || IsPassiveSpell(known.first))
+            continue;
+        const SpellEntry* spell = sServerFacade.LookupSpellInfo(known.first);
+        if (!spell)
+            continue;
+        for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        {
+            if (spell->Effect[i] != SPELL_EFFECT_MILLING && spell->Effect[i] != SPELL_EFFECT_PROSPECTING)
+                continue;
+            for (uint32 output : demandedOutputs)
+            {
+                auto found = processing->find(output);
+                if (found == processing->end())
+                    continue;
+                for (const auto& source : found->second)
+                {
+                    uint32 count = 0;
+                    if (source.effect != spell->Effect[i] ||
+                        !ProcessingInput(spell, ObjectMgr::GetItemPrototype(source.inputId), bot, count))
+                        continue;
+                    profession::ProductionRecipe recipe;
+                    recipe.spellId = known.first;
+                    recipe.itemId = output;
+                    recipe.processing = true;
+                    recipe.toolsReady = CanCraftSpellValue::HasRequiredTools(spell, bot);
+                    recipe.reagents[source.inputId] = count;
+                    producers[recipe.itemId].push_back(recipes.size());
+                    recipes.push_back(recipe);
+                }
+            }
+        }
+    }
+#endif
+    std::map<uint32, uint32> counts;
+    auto inventory = [&](uint32 id)
+    {
+        auto found = counts.find(id);
+        if (found != counts.end())
+            return found->second;
+        return counts[id] = ai->GetInventoryItemsCountWithId(id);
+    };
 
     for (uint32 spellId : spellIds)
     {
@@ -746,7 +952,7 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
             uint32 perCast = spell->ReagentCount[reagent];
             candidate.craftCount = profession::BoundCraftBatch(candidate.craftCount,
                 perCast, sPlayerbotAIConfig.professionMaterialTarget);
-            currentCounts[reagent] = ai->GetInventoryItemsCountWithId(spell->Reagent[reagent]);
+            currentCounts[reagent] = inventory(spell->Reagent[reagent]);
             availableCasts = std::min(availableCasts, currentCounts[reagent] / perCast);
         }
         candidate.craftCount = profession::AvailableCraftBatch(candidate.craftCount, availableCasts);
@@ -778,6 +984,32 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
             }
         }
 
+        candidate.goalSpellId = spellId;
+        candidate.retained = candidate.required;
+        auto producer = ordinary.find(spellId);
+        if (producer != ordinary.end())
+        {
+            profession::ProductionStep step = profession::NextProductionStep(recipes, producers,
+                producer->second, candidate.craftCount, sPlayerbotAIConfig.professionCraftBatchSize, inventory);
+            const auto& next = recipes[step.recipe];
+            candidate.spellId = next.spellId;
+            candidate.itemId = next.itemId;
+            candidate.craftCount = step.casts;
+            candidate.required = step.required;
+            candidate.retained = step.retained;
+            candidate.spellFocusId = sServerFacade.LookupSpellInfo(next.spellId)->RequiresSpellFocus;
+            if (next.processing)
+                candidate.processingInputId = next.reagents.begin()->first;
+            candidate.missing.clear();
+            missingUnits = 0;
+            for (const auto& input : candidate.required)
+                if (inventory(input.first) < input.second)
+                {
+                    candidate.missing[input.first] = input.second - inventory(input.first);
+                    missingUnits += candidate.missing[input.first];
+                }
+        }
+
         // Prefer a recipe that can be crafted now, then the highest relevant
         // recipe with the smallest bounded material deficit.
         int64 score = candidate.missing.empty() ? 1000000000LL : 0;
@@ -785,7 +1017,9 @@ ProfessionCraftingPlan ProfessionCraftingPlanValue::Calculate()
         score -= static_cast<int64>(missingUnits) * 10;
 
         candidates.push_back({skillId, spellId, score,
-            candidate.missing.empty() && CanCraftSpellValue::HasRequiredTools(spell, bot)});
+            candidate.missing.empty() && CanCraftSpellValue::HasRequiredTools(
+                sServerFacade.LookupSpellInfo(candidate.spellId), bot) &&
+                (!candidate.processingInputId || GetProcessingTarget(ai, candidate))});
         plans.push_back(candidate);
     }
 
@@ -812,7 +1046,8 @@ bool CanCraftProfessionValue::Calculate()
     if (!profession::IsCraftLocationReady(spell->RequiresSpellFocus, atMatchingSpellFocus))
         return false;
 
-    return bot->HasSpell(plan.spellId) && CanCraftSpellValue::HasRequiredTools(spell, bot);
+    return bot->HasSpell(plan.spellId) && CanCraftSpellValue::HasRequiredTools(spell, bot) &&
+        (!plan.processingInputId || GetProcessingTarget(ai, plan));
 }
 
 ProfessionMaterialSources ProfessionMaterialSourcesValue::Calculate()

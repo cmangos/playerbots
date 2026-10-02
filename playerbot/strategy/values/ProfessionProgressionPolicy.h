@@ -39,14 +39,14 @@ namespace ai
             return {storedFirst, storedSecond};
         }
 
-        constexpr uint32_t CanaryBucket(uint32_t guidLow)
+        constexpr uint32_t ParticipationBucket(uint32_t guidLow)
         {
             return (guidLow * 2654435761u) % 100u;
         }
 
-        constexpr bool IsInCanary(uint32_t guidLow, uint32_t percent)
+        constexpr bool Participates(uint32_t guidLow, uint32_t percent)
         {
-            return percent > 0 && CanaryBucket(guidLow) < std::min<uint32_t>(percent, 100u);
+            return percent > 0 && ParticipationBucket(guidLow) < std::min<uint32_t>(percent, 100u);
         }
 
         constexpr bool IsCooldownReady(uint32_t now, uint32_t lastAttempt, uint32_t cooldown)

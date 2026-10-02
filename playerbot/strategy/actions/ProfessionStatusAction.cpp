@@ -10,13 +10,13 @@ using namespace ai;
 bool ProfessionStatusAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
-    bool inCanary = ProfessionCraftingPlanValue::IsEnabledFor(ai);
+    bool enabledForBot = ProfessionCraftingPlanValue::IsEnabledFor(ai);
 
     std::ostringstream status;
     status << "Profession progression: "
         << (sPlayerbotAIConfig.professionProgressionEnabled ? "enabled" : "disabled")
-        << ", rollout " << sPlayerbotAIConfig.professionProgressionCanaryPercent << "%"
-        << ", this bot " << (inCanary ? "active" : "inactive");
+        << ", participation " << sPlayerbotAIConfig.professionProgressionPercent << "%"
+        << ", this bot " << (enabledForBot ? "active" : "inactive");
     ai->TellPlayerNoFacing(requester, status.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
 
     bool foundProfession = false;
@@ -55,6 +55,13 @@ bool ProfessionStatusAction::Execute(Event& event)
         << (ProfessionCraftingPlanValue::IsCraftCooldownReady(ai) ? "ready" : "waiting");
     if (plan.spellFocusId)
         planText << ", spell focus " << plan.spellFocusId;
+    if (plan.goalSpellId && plan.goalSpellId != plan.spellId)
+    {
+        const SpellEntry* goal = sServerFacade.LookupSpellInfo(plan.goalSpellId);
+        planText << ", prerequisite for " << (goal ? ChatHelper::formatSpell(goal) : std::to_string(plan.goalSpellId));
+    }
+    if (plan.processingInputId)
+        planText << ", input " << ChatHelper::formatItem(ItemQualifier(plan.processingInputId));
     ai->TellPlayerNoFacing(requester, planText.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
 
     std::map<uint32, uint32> missingReagents = plan.GetMissingReagents(ai);

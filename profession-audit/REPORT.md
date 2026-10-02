@@ -838,3 +838,242 @@ Empty parsed chat is ignored before recording, response and LLM paths; the fatal
 assertion is removed. Separate production-body C++ fixtures cover these two
 generic fixes. No profession priorities, recipe identifiers or sampled identities
 were introduced.
+
+## 2026-10-02 — local configuration and production-demand follow-up
+
+Scope: local checkout only; no live inspection, deployment, commit or full build.
+The previously recorded Inscription inventory is historical evidence, not a
+claim about current online bots. Participation remains 10% by default.
+
+### Demonstrated root causes and proposed bounded correction
+
+`ProfessionCraftingPlanValue::Calculate` considers only skill-up item creation
+spells. It neither follows a missing reagent to another learned creation spell
+nor represents item-targeted Milling/Prospecting. Thus a scroll's missing ink
+does not request learned ink creation; missing pigment does not request Milling.
+Grey ink/bolt/bar recipes are also excluded even when needed by a useful recipe.
+`ItemForSpellValue` chooses arbitrary fitting inventory items without checking
+processing stack size, flags or skill rank. Reusing that selection blindly would
+target the wrong herbs/ores. Processing produces real loot, not EffectItemType.
+
+Smallest proposed bridge: expand demand by at most two prerequisite steps, using
+only known ordinary creation recipes and known processing effects. Infer possible
+processing inputs from the existing loot-template access and item flags. Reuse
+normal `craft random item`, `castnc`, core spell checks/casts and `store loot`.
+No arbitrary-depth production planner, guaranteed-output assumption, recipe ID
+exception, injected item or profession skill mutation. Conditional/reference-only
+loot sources are conservatively unsupported by the initial metadata index.
+
+Preserve root recipe scoring and existing bounded fairness, but give a useful
+recipe a materially ready prerequisite when available. Keep the root identity
+through prerequisite changes. Bound processing to one real cast and keep its
+owned input/request through the actual loot response/release before replanning.
+Reserve demanded outputs so normal item usage does not sell or reject them.
+Absent herbs, money, tools, learned recipes or reachable sources remain real
+blockers; the bridge does not promise to solve those world/economy conditions.
+
+Performance: build a realm-shared processing input/output index once, alongside
+existing shared item/loot indices. Expand only the bot's cached known recipes at
+the existing plan interval, with a strict depth bound; cache inventory counts
+within that calculation. No full item/spawn/DBC scan per bot or AI update.
+
+Configuration: publish flat `AiPlayerbot.Profession...` options matching nearby
+PlayerBots settings, replace user-facing rollout terminology with participation,
+and keep the percentage default at 10. Read old dotted settings as fallback so
+existing configured budgets/intervals/participation survive migration; the new
+setting takes precedence. The old percentage spelling remains only as a legacy
+configuration input. Test defaults, overrides, bounds, production chains, cycles,
+processing ownership/cleanup and the existing policy/focus/tool regressions.
+
+### Implemented behavior and evidence
+
+The bounded bridge is implemented locally. `CraftValues.cpp` indexes only known
+ordinary producers, including grey recipes, and known WotLK processing effects.
+`ProfessionProduction.h::NextProductionStep` follows at most two prerequisite
+edges, detects repeated spell identities and requests one processing cast at a
+time. Ordinary prerequisite batches obey the existing batch/material bounds and
+use partial available inputs. A processing output is a possible loot outcome;
+selection and accepted casts never credit that output to inventory.
+
+The normal shared craft action dispatches the selected execution spell. Its
+ordinary skill-up filter is waived only for a selected demanded prerequisite;
+known-spell, reagent, tool and exact focus checks remain in place. Processing
+targets are actual owned bag stacks with matching item flags, skill rank,
+metadata-derived quantity and no temporary loot; trade targets are rejected.
+The core's normal CanCastSpell/CastSpell checks still decide actual success.
+
+A manual `profession craft request` stores the goal/step snapshot and selected
+input GUID. This GUID identifies the runtime inventory object, never a special
+bot identity. Pending processing stays owned until `StoreLootAction` handles the
+matching real Milling/Prospecting loot and releases it normally. Failure or the
+existing bounded pending timeout resets the request and plan/source caches.
+Unrelated loot and unaccepted requests cannot complete the step. Planned output
+ingredients stay visible to existing item usage/retention during loot handling.
+
+The previous historical WotLK evidence shows learned Ivory Ink needs Alabaster
+Pigment, while the learned scrolls need Ivory Ink and parchment. The old source
+had no connecting production path. The compiled planner fixture now proves the
+same *generic metadata shape*: useful final recipe -> grey learned producer ->
+known Milling, then actual observed pigment -> partial ink batch -> final recipe.
+It also proves unknown recipes are not invented and missing herbs remain a real
+acquisition request. This is source/component validation, not live skill evidence.
+
+### Cross-profession scope and remaining blockers
+
+| Path | Local change | Remaining world/data requirement |
+| --- | --- | --- |
+| Inscription | Milling/pigment/learned ink can satisfy useful recipe demand | Compatible herb stack, learned Milling/ink, tools, parchment, cash and normal loot response |
+| Jewelcrafting | Known Prospecting can supply a demanded gem; normal owned-item cast/loot | Prospectable ore, sufficient JC skill, known spell and a real probabilistic gem result |
+| Tailoring | Learned bolts remain eligible as demanded prerequisites after becoming grey | Cloth, learned bolt recipe, thread and tools where metadata requires them |
+| Engineering | Learned components can be demanded prerequisites | Raw bars/materials, tools/focus; chains deeper than two edges remain unsupported |
+| Blacksmithing | A known bar-producing recipe can supply missing bars | Learned smelting/mining conditions, ore and real forge; no ore/bar substitution or fake availability |
+| Alchemy / Leatherworking / Enchanting / Cooking | Existing direct path retained; same score formula and fairness | Existing acquisition, focus/tool/trainer and natural core skill-gain rules still apply |
+
+This does not provide arbitrary mob-drop farming, learn recipes for free, fund
+vendors/AH, bypass rank training or guarantee rare processing outputs. Loot
+sources whose only relevant output is conditional/reference-based are not added
+to the conservative shared index; direct acquisition/AH remains available.
+Processing stack size uses spell base metadata, with the core checking final
+cast requirements; custom spell modifiers still require integration validation.
+
+### Fairness and performance
+
+The existing five-minute bounded ready-skill opportunity remains unchanged.
+Candidates retain their useful root spell/skill identity while the execution
+step changes. Accepting a prerequisite does not finish the root opportunity;
+finishing the final batch does. Pending requests prevent competing continuations.
+Recipe value scoring is preserved; material readiness now reflects the next real
+production step. No profession-name rotation or sampled recipe exception exists.
+
+Fairness ages ready candidates. A profession with no viable ready input can
+still lose to a ready profession: this change does not assert that scarce-material
+acquisition is fair or sufficient. Expanding arbitration to blocked acquisition
+would be a separate policy change requiring evidence, not an implicit part of
+the Inscription fix.
+
+For 1,500 bots, the only full item/processing-loot scan is realm-shared and runs
+once. Per-plan work uses cached ordinary recipes plus one known-spell enumeration
+for processing, an output-key lookup restricted to demanded known reagents, and
+memoized inventory counts. Depth is at most two prerequisite edges. The existing
+CalculatedValue interval of 60 uses its inherited half-interval semantics (~30s)
+and accepted-cast invalidation; no new per-tick world scan or timer is introduced.
+There is no production load benchmark in this local-only task. Processing target
+validation scans bag inventory, and full population profiling remains advisable.
+
+### Changed files
+
+- `PlayerbotAIConfig.cpp/.h`, `aiplayerbot.conf.dist.in`: canonical flat options,
+  legacy fallback, bounded 10% default and renamed percentage member.
+- `ProfessionProgressionPolicy.h`, `ProfessionProgressionPolicyTests.cpp`:
+  participation terminology, unchanged stable selection policy.
+- `CraftValues.cpp/.h`, new `ProfessionProduction.h`: bounded production demand,
+  shared processing metadata, live target validation and owned request lifecycle.
+- `ValueContext.h`, `SharedValueContext.h`: register request and shared index.
+- `CastCustomSpellAction.cpp`: selected prerequisite dispatch, owned processing
+  item, one cast/loot lifecycle and root opportunity preservation.
+- `LootAction.cpp`: complete only processing requests after normal loot release.
+- `ItemUsageValue.cpp`: retain demanded intermediate and goal ingredients.
+- `ProfessionStatusAction.cpp`: participation, prerequisite goal and input details.
+- `ProfessionProgressionSourceTests.py`, new `ProfessionProductionTests.py`:
+  integration-boundary and compiled production-body regressions.
+- `profession-audit/REPORT.md`: evidence, proposal, implementation and limits.
+
+### Validation on the Windows workstation
+
+- `git diff --check`: PASS.
+- Standalone policy regression: PASS, including 1,050,000 quantity combinations
+  and existing fairness/pending policy cases.
+- Static policy assertions: PASS using actual policy code and extracted route
+  constants, with core-dependent includes replaced by a local declaration shim.
+- Existing component fixture: PASS, 54 focus/tool/vendor/index cases, with the
+  upstream core focus/category predicate bodies.
+- New production fixture: PASS, 2,087 cases. Includes the actual whole planner,
+  processing index/target/request bodies, post-cast cleanup block and all actual
+  configuration assignments. Doubles supply world state, not cast skill gains.
+- Source wiring: PASS, 23 cases, including normal cast/loot integration,
+  participation options and absence of new sampled identity/recipe exceptions.
+- Existing separate travel lifecycle / outgoing chat fixtures: PASS, 59 / 6.
+
+Portable official Zig 0.13.0 is stored only under `.git/profession-test-tools`,
+with its archive SHA256 verified against the official download index. No global
+compiler installation was made. Reference core headers under `.git` are upstream
+WotLK sources, not proof of binary compatibility with the deployment's exact core.
+Primary references checked: [CMaNGOS item/temporary-loot API](https://github.com/cmangos/mangos-wotlk/blob/master/src/game/Entities/Item.h),
+[CMaNGOS loot metadata](https://github.com/cmangos/mangos-wotlk/blob/master/src/game/Loot/LootMgr.h)
+and the [official portable compiler manifest](https://ziglang.org/download/index.json).
+No CMake, full mangosd build, SSH, deployment, database mutation, restart, commit
+or push was performed. Existing bad_alloc/travel findings are not expanded here.
+
+Local rerun (portable compiler already present, PowerShell):
+
+```powershell
+Set-Location C:\Users\Gebruiker\Documents\GitHub\playerbots
+$Compiler = (Resolve-Path .git/profession-test-tools/cxx.cmd).Path
+git diff --check
+python -B playerbot/strategy/tests/ProfessionProgressionSourceTests.py
+python -B playerbot/strategy/tests/ProfessionProductionTests.py --compiler $Compiler
+python -B playerbot/strategy/tests/ProfessionProgressionComponentTests.py --compiler $Compiler --core-source .git/profession-core-reference
+```
+
+### Manual full build and later live validation
+
+First stage these exact local sources into the existing isolated module yourself;
+the current server/GitHub do not contain this uncommitted patch. Verify the module
+include alias and FetchContent path resolve to the same staged source. These are
+build-only commands for that isolated layout, preserving its existing cache and
+normal offline/thermal procedure; no install/restart command is included:
+
+```sh
+CORE=/srv/cmangos/audit/profession-20261001/source
+MODULE="$CORE/src/modules/PlayerBotsDeploy"
+BUILD=/srv/cmangos/audit/profession-20261001/build
+git -C "$MODULE" diff --check
+readlink -f "$CORE/src/modules/PlayerBots"
+readlink -f "$MODULE"
+cmake -S "$CORE" -B "$BUILD" -DBUILD_PLAYERBOTS=ON \
+  -DFETCHCONTENT_SOURCE_DIR_PLAYERBOTS="$MODULE" \
+  -DFETCHCONTENT_UPDATES_DISCONNECTED=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --build "$BUILD" --target mangosd --parallel 2
+```
+
+After separately authorized deployment, retain 10% participation and pick any
+normal free scribe reported active by `rndbot do <bot> profession`. Record known
+recipes, tool/skill, inventory, selected goal/step and acquisition/travel state.
+With a legitimate compatible herb stack, expect one Milling cast, real herb
+consumption and actual pigment loot; only that inventory observation should lead
+to learned ink creation, then a normal useful final cast and natural skill gain.
+When pigment is already present, expect Milling to be skipped. Repeat after ink
+becomes grey but a useful final recipe remains. Observe another ready profession
+across five-minute opportunities. Test a JC bot's compatible ore/gem path, and
+grey learned bolts/bars/components with actual inputs. No giving items, reset,
+teleport, skill manipulation or recipe-ID exception is part of validation.
+
+The implementation snapshot above retains branch/HEAD `feature/playerbot-profession-economy` /
+`bce49806a05edb6dfc0c7b37d89a9dd44907f841`. All edits are local and unstaged:
+15 modified tracked files listed above, plus the two new source/test files.
+Live 10% configuration and installed binary were untouched in this task.
+
+### Configuration guide follow-up
+
+Added [the user-facing configuration guide](../docs/PROFESSION_PROGRESSION.md)
+and linked it from README and the distributed configuration. It explains all 12
+options/defaults, loader bounds, stable 10% participation, inherited half-interval
+cache behavior, cast/item quantity distinctions, tools, real vendor/AH budgets,
+buying-disable options, legacy precedence and current production/fairness limits.
+Comments were clarified without changing runtime behavior. Documentation was
+checked against all 12 current option names/defaults and the actual loader/buying
+paths; whitespace/link checks and `git diff --check` passed. No build/deployment,
+commit, push or live configuration change was involved.
+
+### Owner-authorized GitHub publication
+
+The owner subsequently authorized committing and pushing this reviewed local
+implementation and documentation to the fork's existing
+`feature/playerbot-profession-economy` branch. A fresh fetch confirmed the remote
+and local starting revision both remained `bce49806` (0 ahead / 0 behind).
+The publication includes the configuration guide, source/regression changes,
+updated regression instructions and this audit record. Publication does not
+constitute a full build or live validation, and does not change fork master,
+the closed upstream PR, live sources/configuration, binaries or services.
+The resulting commit and verified remote parity are recorded in the operator's
+operational memory after pushing.

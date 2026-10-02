@@ -1,5 +1,8 @@
 # Offline profession regressions
 
+The 2026-10-02 follow-up below supersedes older staging/build notes for the
+current production-demand and configuration patch.
+
 These tests require no realm, database, service, items or skill modification.
 All implementation decisions use learned spells, inventory, tool/category and
 focus data, and runtime action state. Live bot names and recipe IDs are evidence
@@ -24,6 +27,35 @@ quantities. Its fairness cases cover repeated high-score batches, opportunity
 expiry, pending ownership, disappeared recipes, changing readiness, clock rollback
 and arbitrary runtime IDs/candidate order. Assertions also
 compile as part of the normal PlayerBots source build without a standalone main.
+
+## 2026-10-02 production-demand follow-up
+
+```sh
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/ProfessionProductionTests.py" \
+  --compiler c++
+```
+
+This runs 2,087 C++ cases with world doubles, including the actual full planner,
+processing input/output metadata index, owned input target/request lifecycle,
+post-cast cleanup block and configuration assignments. It checks bounded learned
+prerequisite expansion, grey producers, partial quantities, alternate processing
+inputs, unknown recipes, cycles/depth limits, root fairness ownership, real-stack
+requirements, matching loot completion and canonical/legacy setting precedence.
+No test credits a processing output just because a cast was accepted.
+
+The separate source suite now has 23 wiring checks. Existing policy, 54 component,
+59 travel and 6 outgoing-chat cases remain relevant. A portable checksum-verified
+Zig compiler under the local repository's `.git/profession-test-tools` can run the
+Windows fixtures without installing a compiler globally. It is not a repository
+dependency; the scripts accept an ordinary compatible C++17 compiler.
+
+The current patch has passed these lightweight tests. It has **not** undergone a
+full CMaNGOS build or live skill-progression validation. Earlier successful full
+build/deployment records below refer to earlier revisions. The bounded bridge
+supports at most two prerequisite steps, not arbitrary-depth production; missing
+raw materials/tools/money/recipes and unsupported processing loot sources remain
+real blockers. See [configuration options](../../../docs/PROFESSION_PROGRESSION.md)
+and [the audit report](../../../profession-audit/REPORT.md).
 
 The component test extracts actual source bodies for focus resolution, spell
 readiness and tool usefulness, plus the core focus and category predicates. It

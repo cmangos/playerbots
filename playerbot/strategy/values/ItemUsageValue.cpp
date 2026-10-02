@@ -116,8 +116,8 @@ ItemUsage ItemUsageValue::Calculate()
         return ItemUsage::ITEM_USAGE_KEEP;
 
     ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
-    auto plannedReagent = professionPlan.required.find(itemId);
-    if (ProfessionCraftingPlanValue::IsEnabledFor(ai) && plannedReagent != professionPlan.required.end())
+    auto plannedReagent = professionPlan.retained.find(itemId);
+    if (ProfessionCraftingPlanValue::IsEnabledFor(ai) && plannedReagent != professionPlan.retained.end())
     {
         uint32 current = ai->GetInventoryItemsCountWithId(itemId);
         if (current < plannedReagent->second)

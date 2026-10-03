@@ -28,7 +28,6 @@ namespace ai
     public:
         NetherspiteDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable netherspite fight strategy", "-netherspite") {}
     };
-    
 
     class VoidZoneMoveAwayAction : public MoveAwayFromCreature
     {

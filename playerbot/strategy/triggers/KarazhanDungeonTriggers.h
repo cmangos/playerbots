@@ -67,7 +67,6 @@ namespace ai
 		RemoveNetherPortalSerenityTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "remove nether portal - serenity", 5) {}
 	};
 
-
 	class BigBadWolfStartFightTrigger : public StartBossFightTrigger
 	{
 	public:

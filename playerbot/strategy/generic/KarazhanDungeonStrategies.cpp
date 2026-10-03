@@ -12,6 +12,10 @@ void KarazhanDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 		NextAction::array(0, new NextAction("enable netherspite fight strategy", 100.0f), NULL)));
 
 	triggers.push_back(new TriggerNode(
+		"start big bad wolf fight",
+		NextAction::array(0, new NextAction("enable big bad wolf fight strategy", 100.0f), NULL)));
+
+	triggers.push_back(new TriggerNode(
 		"start prince malchezaar fight",
 		NextAction::array(0, new NextAction("enable prince malchezaar fight strategy", 100.0f), NULL)));
 }
@@ -55,6 +59,27 @@ void NetherspiteFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& trigger
 	triggers.push_back(new TriggerNode(
 		"end netherspite fight",
 		NextAction::array(0, new NextAction("disable netherspite fight strategy", 100.0f), NULL)));
+}
+
+void BigBadWolfFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"big bad wolf too close",
+		NextAction::array(0, new NextAction("move away from big bad wolf", 100.0f), NULL)));
+}
+
+void BigBadWolfFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"end big bad wolf fight",
+		NextAction::array(0, new NextAction("disable big bad wolf fight strategy", 100.0f), NULL)));
+}
+
+void BigBadWolfFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"end big bad wolf fight",
+		NextAction::array(0, new NextAction("disable big bad wolf fight strategy", 100.0f), NULL)));
 }
 
 void PrinceMalchezaarFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

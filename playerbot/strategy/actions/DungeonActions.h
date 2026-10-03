@@ -61,7 +61,7 @@ namespace ai
     class MoveAwayFromSpecificCreatures : public MoveAwayFromCreature
     {
     public:
-        MoveAwayFromSpecificCreatures(PlayerbotAI* ai, float range, bool ignoreVictim = true, std::string name = "move away from specific creatures") : MoveAwayFromCreature(ai, name, 0, range, ignoreVictim) {}
+        MoveAwayFromSpecificCreatures(PlayerbotAI* ai, bool ignoreVictim = true, std::string name = "move away from specific creatures") : MoveAwayFromCreature(ai, name, 0, ai->GetRange("spell") + 6.0f , ignoreVictim) {}
         bool Execute(Event& event) override;
 
 #ifdef GenerateBotHelp

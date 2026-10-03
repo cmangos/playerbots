@@ -61,6 +61,13 @@ namespace ai
 		}
 	};
 
+	class RemoveNetherPortalSerenityTrigger : public HasAuraTrigger
+	{
+	public:
+		RemoveNetherPortalSerenityTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "remove nether portal - serenity", 5) {}
+	};
+
+
 	class BigBadWolfStartFightTrigger : public StartBossFightTrigger
 	{
 	public:
@@ -82,12 +89,6 @@ namespace ai
 		{
 			return ai->HasAura(30756, bot) && CloseToCreatureTrigger::IsActive();
 		}
-	};
-
-	class RemoveNetherPortalSerenityTrigger : public HasAuraTrigger
-	{
-	public:
-		RemoveNetherPortalSerenityTrigger(PlayerbotAI* ai) : HasAuraTrigger(ai, "remove nether portal - serenity", 5) {}
 	};
 
 	class PrinceMalchezaarStartFightTrigger : public StartBossFightTrigger

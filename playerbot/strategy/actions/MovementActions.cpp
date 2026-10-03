@@ -2610,8 +2610,28 @@ bool MovementAction::ChaseTo(WorldObject* obj, float distance, float angle)
     }
 #endif
 
+    /* Disabled: the active combat stance determines melee chase positioning.
     if (ai->HasStrategy("behind", BotState::BOT_STATE_COMBAT))
         angle = GetFollowAngle() / 3 + obj->GetOrientation() + M_PI;
+    */
+
+    if (!ai->IsRanged(bot) && obj->IsUnit() && sServerFacade.IsHostileTo(bot, static_cast<Unit*>(obj)))
+    {
+        Unit* target = static_cast<Unit*>(obj);
+        Stance* stance = AI_VALUE(Stance*, "stance");
+
+        if (stance && stance->getName() != "turnback")
+        {
+            WorldLocation stanceLoc = stance->GetLocation();
+
+            if (!Formation::IsNullLocation(stanceLoc) && stanceLoc.mapid != uint32(-1))
+            {
+                float absAngle = atan2(stanceLoc.coord_y - target->GetPositionY(), stanceLoc.coord_x - target->GetPositionX());
+
+                angle = absAngle - target->GetOrientation();
+            }
+        }
+    }
 
     UpdateMovementState();
 

@@ -6,6 +6,10 @@ participation at **10%** and uses the current defaults for all other settings.
 The latest source changes still require a full core build and live validation
 before their behavior can be confirmed on a running realm.
 
+Optional [remote AH, mail and personal-bank access](REMOTE_SERVICES.md) is a
+separate setting and requires its companion core bridge. It does not change
+profession participation or crafting requirements.
+
 ```ini
 AiPlayerbot.ProfessionProgressionEnabled = 1
 AiPlayerbot.ProfessionProgressionPercent = 10

@@ -3,6 +3,12 @@
 The 2026-10-02 follow-up below supersedes older staging/build notes for the
 current production-demand and configuration patch.
 
+The separate opt-in remote-service access patch is documented in
+[REMOTE_SERVICES.md](../../../docs/REMOTE_SERVICES.md). Its `RemoteServicesTests.py`
+requires an unpatched compatible WotLK core reference and a C++17 compiler; it
+applies the companion core patch to temporary files only. Run it alongside the
+existing profession tests. No full build or live remote transaction is claimed.
+
 These tests require no realm, database, service, items or skill modification.
 All implementation decisions use learned spells, inventory, tool/category and
 focus data, and runtime action state. Live bot names and recipe IDs are evidence

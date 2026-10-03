@@ -7,6 +7,7 @@
 #include "playerbot/strategy/values/ItemUsageValue.h"
 #include "playerbot/strategy/values/CraftValues.h"
 #include "playerbot/strategy/values/ProfessionProgressionPolicy.h"
+#include "playerbot/RemoteServiceAccess.h"
 
 using namespace ai;
 
@@ -15,6 +16,13 @@ bool AhAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     std::string text = event.getParam();
 
+    RemoteServiceAccess access(ai, RemoteService::Auction);
+    if (RemoteServiceAccess::IsAllowed(bot, RemoteService::Auction))
+    {
+        std::unique_lock<std::mutex> lock(sRandomPlayerbotMgr.m_ahActionMutex, std::try_to_lock);
+        return lock.owns_lock() && ExecuteCommand(requester, text, bot);
+    }
+
     std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
     for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
     {
@@ -22,14 +30,11 @@ bool AhAction::Execute(Event& event)
         if (!npc)
             continue;
 
-        if (!sRandomPlayerbotMgr.m_ahActionMutex.try_lock()) //Another bot is using the Auction right now. Try again later.
+        std::unique_lock<std::mutex> lock(sRandomPlayerbotMgr.m_ahActionMutex, std::try_to_lock);
+        if (!lock.owns_lock()) //Another bot is using the Auction right now. Try again later.
             return false;
 
-        bool doneAuction = ExecuteCommand(requester, text, npc);
-
-        sRandomPlayerbotMgr.m_ahActionMutex.unlock();
-
-        return doneAuction;
+        return ExecuteCommand(requester, text, npc);
     }
 
     ai->TellPlayerNoFacing(requester, "Cannot find auctioneer nearby");

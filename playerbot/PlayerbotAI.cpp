@@ -41,6 +41,7 @@
 #include "Guilds/GuildMgr.h"
 #include "Chat/ChannelMgr.h"
 #include "PlayerbotLLMInterface.h"
+#include "strategy/values/Stances.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -149,6 +150,18 @@ PlayerbotAI::PlayerbotAI(Player* bot) :
     engines[(uint8)BotState::BOT_STATE_NON_COMBAT] = AiFactory::createNonCombatEngine(bot, this, aiObjectContext);
     engines[(uint8)BotState::BOT_STATE_DEAD] = AiFactory::createDeadEngine(bot, this, aiObjectContext);
     engines[(uint8)BotState::BOT_STATE_REACTION] = reactionEngine = AiFactory::createReactionEngine(bot, this, aiObjectContext);
+
+    StanceValue* stanceValue = (StanceValue*)aiObjectContext->GetValue<Stance*>("stance");
+
+    if (stanceValue)
+    {
+        if (IsTank(bot))
+            stanceValue->Load("turnback");
+        else if (!IsRanged(bot))
+            stanceValue->Load("behind");
+        else
+            stanceValue->Load("near");
+    }
 
     for (uint8 e = 0; e < (uint8)BotState::BOT_STATE_ALL; e++)
     {
@@ -2208,6 +2221,38 @@ void PlayerbotAI::ChangeEngine(BotState type)
 
     if (currentEngine != engine)
     {
+        if (sPlayerbotAIConfig.hasLog("bot_states.csv"))
+        {
+            Engine* previous = currentEngine;
+
+            std::ostringstream out;
+            out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
+            out << bot->GetName() << ",";
+            out << (previous == engines[(uint8)BotState::BOT_STATE_COMBAT] ? "combat" :
+                    previous == engines[(uint8)BotState::BOT_STATE_NON_COMBAT] ? "non-combat" :
+                    previous == engines[(uint8)BotState::BOT_STATE_DEAD] ? "dead" :
+                    previous == engines[(uint8)BotState::BOT_STATE_REACTION] ? "reaction" : "none")
+                << ",";
+            switch (type)
+            {
+            case BotState::BOT_STATE_COMBAT: out << "combat"; break;
+            case BotState::BOT_STATE_NON_COMBAT: out << "non-combat"; break;
+            case BotState::BOT_STATE_DEAD: out << "dead"; break;
+            case BotState::BOT_STATE_REACTION: out << "reaction"; break;
+            default: out << "?"; break;
+            }
+            out << ",";
+            out << (bot->IsInCombat() ? "combat" : "safe") << ",";
+            out << (!sServerFacade.IsAlive(bot) ? (bot->GetCorpse() ? "ghost" : "dead") : "alive") << ",";
+            ObjectGuid target = aiObjectContext->GetValue<ObjectGuid>("current target")->Get();
+            if (Unit* t = GetUnit(target))
+                out << t->GetName();
+            out << ",";
+            WorldPosition(bot).printWKT(out);
+
+            sPlayerbotAIConfig.log("bot_states.csv", out.str().c_str());
+        }
+
         currentEngine = engine;
         currentState = type;
         ReInitCurrentEngine();
@@ -2713,6 +2758,19 @@ void PlayerbotAI::ResetStrategies(bool autoLoad)
     AiFactory::AddDefaultNonCombatStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_NON_COMBAT]);
     AiFactory::AddDefaultDeadStrategies(bot, this, engines[(uint8)BotState::BOT_STATE_DEAD]);
     AiFactory::AddDefaultReactionStrategies(bot, this, reactionEngine);
+
+    StanceValue* stanceValue = (StanceValue*)aiObjectContext->GetValue<Stance*>("stance");
+
+    if (stanceValue)
+    {
+        if (IsTank(bot))
+            stanceValue->Load("turnback");
+        else if (!IsRanged(bot))
+            stanceValue->Load("behind");
+        else
+            stanceValue->Load("near");
+    }
+
     if (autoLoad && HasPlayerRelation()) sPlayerbotDbStore.Load(this);
 
 #ifdef GenerateBotTests

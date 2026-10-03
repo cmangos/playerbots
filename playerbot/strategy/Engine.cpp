@@ -187,6 +187,8 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
 
                     ai->TellPlayerNoFacing(ai->GetMaster() ? ai->GetMaster() : ai->GetBot(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
 
+                    if (sPlayerbotAIConfig.hasLog("bot_events.csv"))
+                        sPlayerbotAIConfig.logEvent(ai, "try", actionNode->getName(), "unknown r=" + std::to_string(relevance));
                 }
                 LogAction("A:%s - UNKNOWN", actionNode->getName().c_str());
             }
@@ -243,8 +245,25 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                     if (isPossible && relevance)
                     {
                         auto pmo4 = sPerformanceMonitor.start(PERF_MON_ACTION, "Execute", ai);
+                        uint32 reactionStart = WorldTimer::getMSTime();
                         actionExecuted = ListenAndExecute(action, event);
+                        uint32 reactionElapsed = WorldTimer::getMSTimeDiff(reactionStart, WorldTimer::getMSTime());
                         pmo4.reset();
+
+                        if (actionExecuted && sPlayerbotAIConfig.hasLog("bot_reactions.csv"))
+                        {
+                            std::ostringstream out;
+                            out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
+                            out << ai->GetBot()->GetName() << ",";
+                            out << (event.getSource().empty() ? "default" : event.getSource()) << ",";
+                            out << std::fixed << std::setprecision(2) << relevance << ",";
+                            out << actionName << ",";
+                            out << reactionElapsed << ",";
+                            out << (ai->GetBot()->IsInCombat() ? "combat" : "non-combat") << ",";
+                            WorldPosition(ai->GetBot()).printWKT(out);
+
+                            sPlayerbotAIConfig.log("bot_reactions.csv", out.str().c_str());
+                        }
 
 #ifdef PLAYERBOT_ELUNA
                         // used by eluna    
@@ -282,6 +301,9 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                                 out << " [" << event.getSource() << "]";
 
                             ai->TellPlayerNoFacing(ai->GetMaster() ? ai->GetMaster() : ai->GetBot(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+
+                            if (sPlayerbotAIConfig.hasLog("bot_events.csv"))
+                                sPlayerbotAIConfig.logEvent(ai, "try", action->getName(), "impossible r=" + std::to_string(action->getRelevance()));
                         }
                         LogAction("A:%s - IMPOSSIBLE", action->getName().c_str());
                         MultiplyAndPush(actionNode->getAlternatives(), relevance + 0.03, false, event, "alt");
@@ -303,6 +325,9 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                             out << " [" << event.getSource() << "]";
 
                         ai->TellPlayerNoFacing(ai->GetMaster() ? ai->GetMaster() : ai->GetBot(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+
+                        if (sPlayerbotAIConfig.hasLog("bot_events.csv"))
+                            sPlayerbotAIConfig.logEvent(ai, "try", action->getName(), "useless r=" + std::to_string(action->getRelevance()));
                     }
                     lastRelevance = relevance;
                     LogAction("A:%s - USELESS", action->getName().c_str());
@@ -787,6 +812,21 @@ bool Engine::ListenAndExecute(Action* action, Event& event)
         }
 
         ai->TellPlayerNoFacing(ai->GetMaster() ? ai->GetMaster() : ai->GetBot(), out, PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true, false);
+
+        if (sPlayerbotAIConfig.hasLog("bot_events.csv"))
+        {
+            std::ostringstream info;
+            info << "r=" << std::fixed << std::setprecision(2) << action->getRelevance();
+            if (!event.getSource().empty())
+                info << " [" << event.getSource() << "]";
+            const uint32 actionDuration = action->GetDuration();
+            if (actionDuration > 0)
+                info << " dur=" << ((float)actionDuration / static_cast<float>(IN_MILLISECONDS)) << "s";
+            if (!actionExecuted)
+                info << " (not executed)";
+
+            sPlayerbotAIConfig.logEvent(ai, "do", action->getName(), info.str());
+        }
     }
 
     if (ai->HasStrategy("debug threat", BotState::BOT_STATE_NON_COMBAT))

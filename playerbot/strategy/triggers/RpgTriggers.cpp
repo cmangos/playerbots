@@ -1,6 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "RpgTriggers.h"
+#include "playerbot/RemoteServiceAccess.h"
 #include "playerbot/strategy/values/CraftValues.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/strategy/actions/GuildCreateActions.h"
@@ -189,6 +190,8 @@ bool RpgSellTrigger::IsActive()
 
 bool RpgAHSellTrigger::IsActive()
 {
+    if (RemoteServiceAccess::IsEnabledFor(ai))
+        return false;
     GuidPosition guidP(getGuidP());
 
     if (!guidP.HasNpcFlag(UNIT_NPC_FLAG_AUCTIONEER))
@@ -208,6 +211,8 @@ bool RpgAHSellTrigger::IsActive()
 
 bool RpgAHBuyTrigger::IsActive()
 {
+    if (RemoteServiceAccess::IsEnabledFor(ai))
+        return false;
     GuidPosition guidP(getGuidP());
 
     if (!guidP.HasNpcFlag(UNIT_NPC_FLAG_AUCTIONEER))
@@ -229,6 +234,8 @@ bool RpgAHBuyTrigger::IsActive()
 
 bool RpgGetMailTrigger::IsActive()
 {
+    if (RemoteServiceAccess::IsEnabledFor(ai))
+        return false;
     GuidPosition guidP(getGuidP());
 
     if (!guidP.isGoType(GAMEOBJECT_TYPE_MAILBOX))
@@ -946,6 +953,8 @@ bool RpgGossipTalkTrigger::IsActive()
 
 bool RpgBankDepositTrigger::IsActive()
 {
+    if (RemoteServiceAccess::IsEnabledFor(ai))
+        return false;
     GuidPosition guidP(getGuidP());
 
     if (!guidP.HasNpcFlag(UNIT_NPC_FLAG_BANKER))
@@ -962,6 +971,8 @@ bool RpgBankDepositTrigger::IsActive()
 
 bool RpgBankWithdrawTrigger::IsActive()
 {
+    if (RemoteServiceAccess::IsEnabledFor(ai))
+        return false;
     GuidPosition guidP(getGuidP());
 
     if (!guidP.HasNpcFlag(UNIT_NPC_FLAG_BANKER))

@@ -242,6 +242,8 @@ public:
         std::list<std::string> HandleConsoleCleanMap(std::string param);
         std::list<std::string> HandleConsoleLoginDebug(std::string param);
         std::list<std::string> HandleConsolePathCheck(std::string param);
+        std::list<std::string> HandleConsoleTaxTest(std::string param);
+        std::list<std::string> HandleConsoleZoneUpd(std::string param);
         // Override virtual methods from PlayerbotHolder
         virtual uint32 GetOrCreateAccount(Player* master, std::string& error) override;
         virtual void OnBotDeleted(uint32 botGuid, uint32 accountId) override;

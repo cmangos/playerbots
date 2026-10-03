@@ -7,6 +7,10 @@ using namespace ai;
 void MaintenanceStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(
+        "val::remote services ready",
+        NextAction::array(0, new NextAction("remote services", 1.1f), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "val::can craft profession",
         NextAction::array(0, new NextAction("craft random item", 1.2f), NULL)));
 

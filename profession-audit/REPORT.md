@@ -1077,3 +1077,104 @@ constitute a full build or live validation, and does not change fork master,
 the closed upstream PR, live sources/configuration, binaries or services.
 The resulting commit and verified remote parity are recorded in the operator's
 operational memory after pushing.
+
+## 2026-10-03: remote personal services, before implementation
+
+The owner discarded the proposed auction retry/bank-cooldown economy and instead
+authorized remote AH, mailbox and personal-bank access with the existing policies.
+All work remains local; no full build, deployment, server access or publication.
+
+Demonstrated root cause: AhAction::Execute requires an interactable nearby
+auctioneer, MailAction::Execute/FindMailbox require a nearby mailbox, and bank
+automation is scheduled through in-range RPG targets. Removing these checks alone
+cannot enable AH/mail: CMaNGOS GetCheckedAuctionHouseForAuctioneer and CheckMailBox
+also reject remote access. Upstream WotLK core reference was pinned read-only at
+2fc8161eeddfce737766d449d0ff94f48b3df2e0; this is not the verified live core revision.
+
+Smallest proposed implementation: an opt-in RandomBotRemoteServices flag, scoped
+service authorization and a throttled maintenance dispatcher. Reuse AhAction,
+AhBidAction, MailAction and BankAction::AutoDeposit/AutoWithdraw; preserve their
+selection, budgets, prices, delivery gates and capacity checks. Include a companion
+core patch allowing only the owning bot's self-GUID during the corresponding scoped
+AH/mail call. No GM/security elevation, arbitrary NPC access, fabricated objects,
+cross-faction auction mode, free items or direct economic database implementation.
+The bridge must advertise availability; an unpatched core retains normal travel.
+
+Remote eligibility is independent of the existing 10% profession participation:
+only free random bots with artificial bot sessions and no real-player master are
+eligible. Profession recipe/material policy and participation remain unchanged.
+Prevent redundant AH/mail/bank destination requests only when remote access works.
+Guild banks, crafting focuses, vendors, gathering and trainers remain world actions.
+
+Performance plan for approximately 1,500 bots: cheap cached eligibility/deadline
+checks, at most one maintenance pass per minute and one generic remote AH browse
+per ten minutes per bot. Profession AH browsing keeps its existing configured
+cooldown. Failed/empty attempts also advance deadlines. Existing AH mutex remains
+authoritative. Do not add auction history, recursive production, retry policy,
+bank-reason persistence, market forecasting or bot-to-bot transfers.
+
+Planned regressions: actual scoped authorization and normal core access predicates;
+own-player/service/thread isolation, nesting/exception cleanup and unchanged auction
+mode/security; opt-out/unpatched-core fallback; action dispatch without world
+targets; cooldown and combat/cast/trade gates; preservation of ordinary transaction
+handlers and existing profession tests. Full compatible-core build and live
+transaction validation remain manual and necessary.
+
+### Remote-service implementation and local validation
+
+Implemented the proposed opt-in access bridge and maintenance path. The default
+`AiPlayerbot.RandomBotRemoteServices = 0` preserves ordinary behavior; set it to 1
+with the companion core bridge to enable remote services. Configuration loading
+logs a normal-access fallback if the bridge is missing. Existing profession
+participation remains 10%; remote eligibility does not change that cohort.
+
+Files by role:
+
+- `playerbot/RemoteServiceAccess.{h,cpp}`: thread-local, synchronous service scope,
+  artificial/free/random eligibility, busy-state gates and own-faction mode restore.
+- `playerbot/strategy/actions/RemoteServicesAction.{h,cpp}`: throttled maintenance
+  using existing actions and bank helpers, pending-craft protection and cache refresh.
+- `AhAction.cpp`, `MailAction.cpp`, `BankAction.cpp`: remote dispatch through the
+  existing transaction paths; the AH mutex now unwinds automatically on exceptions.
+- `ActionContext.h`, `ValueContext.h`, `MaintenanceStrategy.cpp`: shared dispatch
+  registration, independent of optional RPG crafting and town targets.
+- `RpgTriggers.cpp`, `TravelValues.cpp`: avoid redundant personal-service world
+  requests only when the configured bridge supports the eligible bot.
+- `PlayerbotAIConfig.{h,cpp}` and the three distributed configuration templates:
+  one Boolean access option and explicit unsupported-core diagnostics.
+- `patches/cmangos-wotlk-remote-services.patch`: three-file core bridge artifact;
+  `.gitignore` permits this exact maintained patch while retaining other exclusions;
+  `.gitattributes` keeps its unified-diff content LF across platforms.
+- `RemoteServicesTests.py`: actual access/header/dispatch/AH routing/mailbox/bank
+  command bodies plus patched core access/faction predicates, compiled with doubles.
+- `docs/REMOTE_SERVICES.md`, `docs/PROFESSION_PROGRESSION.md` and the regression
+  README: configuration, limitations, manual isolated core build and live checks.
+
+One additional causal defect was demonstrated in BankAction::ExecuteCommand:
+`result` started false and accumulated with `&=`, so successful deposit/withdraw
+commands always reported failure. It now accumulates successful operations with
+logical OR; regressions execute the actual command body. Core bank item movement
+and capacity routines were not replaced.
+
+Local validation results:
+
+- Remote-service C++ fixtures: **84 checks with the bridge, 7 without**; companion
+  patch applies cleanly to temporary copies of the pinned WotLK reference.
+- Baseline comparison against 4541a89e: AH posting/bidding, mail collection and bank
+  auto-movement bodies unchanged; planner, production, fairness and policy files
+  unchanged. Optional `--baseline-ref` keeps this audit separate from future work.
+- Existing production/config/processing tests: **2,087 passed**.
+- Existing source wiring: **23 passed**.
+- Existing component/core focus/tool/vendor predicates: **54 passed**.
+- Existing travel/outgoing-chat tests: **59 and 6 passed**.
+- Standalone policy regression: **1,050,000 quantity cases and lifecycle/fairness
+  assertions passed**. Policy static assertions also compile with a lightweight
+  adapter reading the actual chat constants. Direct compilation of the full policy
+  translation unit was unavailable because this standalone checkout lacks core
+  headers (`Spells/Spell.h`); this is not a full-core validation result.
+
+There was no CMake/full build, installation, deployment, SSH, database or live
+configuration mutation, commit or push. The core patch has not been applied to
+the owner's real source/build. Full ABI/link/build and live settlement, returned
+mail, capacity and natural profession progression still require manual validation.
+The discarded AH retry/bank-cooldown economy was not implemented.

@@ -39,6 +39,7 @@
 *.o.*
 *.orig
 *.patch
+!/patches/cmangos-wotlk-remote-services.patch
 *.rej
 *.so
 *.so.dbg

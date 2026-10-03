@@ -4,6 +4,7 @@
 #include "MailAction.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/Helpers.h"
+#include "playerbot/RemoteServiceAccess.h"
 
 using namespace ai;
 
@@ -268,6 +269,7 @@ bool MailAction::Execute(Event& event)
     if (!requester && event.getSource() != "rpg action")
         return false;
 
+    RemoteServiceAccess access(ai, RemoteService::Mail);
     if (!MailProcessor::FindMailbox(ai) && event.getSource() != "debug")
     {
         ai->TellError(requester, "There is no mailbox nearby");
@@ -340,6 +342,9 @@ void MailProcessor::RemoveMail(Player* bot, uint32 id, ObjectGuid mailbox)
 
 ObjectGuid MailProcessor::FindMailbox(PlayerbotAI* ai)
 {
+    if (RemoteServiceAccess::IsAllowed(ai->GetBot(), RemoteService::Mail))
+        return ai->GetBot()->GetObjectGuid();
+
     std::list<ObjectGuid> gos = *ai->GetAiObjectContext()->GetValue<std::list<ObjectGuid> >("nearest game objects no los");
     ObjectGuid mailbox;
     for (std::list<ObjectGuid>::iterator i = gos.begin(); i != gos.end(); ++i)

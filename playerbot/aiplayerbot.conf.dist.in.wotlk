@@ -952,6 +952,12 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #
 # Auction house settings
 #
+# Remote personal AH/mail/bank for autonomous random bots (0/1, default 0).
+# Requires patches/cmangos-wotlk-remote-services.patch in the core; without it,
+# normal world interactions remain active. No change to profession participation.
+# AiPlayerbot.RandomBotRemoteServices = 0
+#
+#
 # (0-1) If bot should query current AH listings outside of AH when determining whether the item is worth posting to AH
 # Disabled by default for performance concerns, but you REALLY want to enable it for nicer logic
 # AiPlayerbot.ShouldQueryAHListingsOutsideOfAH = 1

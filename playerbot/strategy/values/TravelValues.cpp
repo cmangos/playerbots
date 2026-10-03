@@ -6,6 +6,7 @@
 #include "GuildValues.h"
 #include "CraftValues.h"
 #include "Guilds/GuildMgr.h"
+#include "playerbot/RemoteServiceAccess.h"
 
 using namespace ai;
 
@@ -293,6 +294,8 @@ bool NeedTravelPurposeValue::Calculate()
             return true;
         break;
     case TravelDestinationPurpose::AH:
+        if (RemoteServiceAccess::IsEnabledFor(ai))
+            return false;
         if (AI_VALUE2(bool, "group or", "should ah sell,can ah sell,following party"))
             return true;
         if (AI_VALUE2(bool, "has strategy", "free") && AI_VALUE(bool, "should ah sell") && AI_VALUE(bool, "can ah sell"))
@@ -319,6 +322,8 @@ bool NeedTravelPurposeValue::Calculate()
     case TravelDestinationPurpose::Boss:
         return AI_VALUE(bool, "can fight boss");
     case TravelDestinationPurpose::Mail:
+        if (RemoteServiceAccess::IsEnabledFor(ai))
+            return false;
         return AI_VALUE(bool, "can get mail") && AI_VALUE(bool, "should get mail");
     case TravelDestinationPurpose::Explore:
         return ai->HasStrategy("explore", BotState::BOT_STATE_NON_COMBAT);    
@@ -467,6 +472,8 @@ bool ShouldTravelNamedValue::Calculate()
     }
     else if (name == "profession auction house")
     {
+        if (RemoteServiceAccess::IsEnabledFor(ai))
+            return false;
         ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
         return ProfessionCraftingPlanValue::ShouldTravelToAuctionHouse(ai, plan);
     }

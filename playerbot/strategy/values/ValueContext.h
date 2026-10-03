@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ActiveSpellValue.h"
+#include "playerbot/strategy/actions/RemoteServicesAction.h"
 #include "NearestGameObjects.h"
 #include "LogLevelValue.h"
 #include "NearestNpcsValue.h"
@@ -373,6 +374,7 @@ namespace ai
             creators["should guild bank withdraw"] = [](PlayerbotAI* ai) { return new ShouldGuildBankWithdrawValue(ai); };
 #endif
             creators["can get mail"] = [](PlayerbotAI* ai) { return new CanGetMailValue(ai); };
+            creators["remote services ready"] = [](PlayerbotAI* ai) { return new RemoteServicesReadyValue(ai); };
             creators["should get mail"] = [](PlayerbotAI* ai) { return new ShouldGetMailValue(ai); };
             creators["can fight equal"] = [](PlayerbotAI* ai) { return new CanFightEqualValue(ai); };
             creators["can fight elite"] = [](PlayerbotAI* ai) { return new CanFightEliteValue(ai); };

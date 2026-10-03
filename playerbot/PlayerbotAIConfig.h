@@ -178,6 +178,7 @@ public:
     std::list<uint32> vendorOverAHItemIds;
     bool botCheckAllAuctionListings;
     bool botsSaveEpics;
+    bool randomBotRemoteServices = false;
     bool professionProgressionEnabled;
     uint32 professionProgressionPercent;
     uint32 professionPlanCheckInterval;

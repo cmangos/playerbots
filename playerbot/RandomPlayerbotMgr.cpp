@@ -530,6 +530,20 @@ void RandomPlayerbotMgr::LogPlayerLocation()
 
                     sPlayerbotAIConfig.log("player_location.csv", out.str().c_str());
 
+                    if (sPlayerbotAIConfig.hasLog("bot_heartbeat.csv"))
+                    {
+                        std::ostringstream hb;
+                        hb << sPlayerbotAIConfig.GetTimestampStr() << "+00,";
+                        hb << bot->GetName() << ",";
+                        hb << bot->GetLevel() << ",";
+                        hb << bot->GetHealth() << ",";
+                        hb << bot->GetPowerPercent() << ",";
+                        hb << (bot->IsInCombat() ? "combat" : "non-combat") << ",";
+                        WorldPosition(bot).printWKT(hb);
+
+                        sPlayerbotAIConfig.log("bot_heartbeat.csv", hb.str().c_str());
+                    }
+
                     if (sPlayerbotAIConfig.hasLog("player_paths.csv") && WorldPosition(bot))
                     {
                         auto& botMoveLog = playerBotMoveLog[bot->GetObjectGuid().GetCounter()];
@@ -1008,7 +1022,6 @@ void RandomPlayerbotMgr::LoginFreeBots()
                 }
 
                 if (master)
-                    bot->TeleportTo(WorldPosition(master));
                 {
                     // Only move the bot when it is genuinely not with its master. A freshly created bot is
                     // saved at the master's position - CreateBot flags a pending teleport so SaveToDB()
@@ -3478,6 +3491,8 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     handlers["history"] = &RandomPlayerbotMgr::HandleConsoleHistory;
     handlers["clean map"] = &RandomPlayerbotMgr::HandleConsoleCleanMap;
     handlers["login debug"] = &RandomPlayerbotMgr::HandleConsoleLoginDebug;
+    handlers["taxtest"] = &RandomPlayerbotMgr::HandleConsoleTaxTest;
+    handlers["zoneupd"] = &RandomPlayerbotMgr::HandleConsoleZoneUpd;
 
     for (auto& [prefix, consoleHandler] : handlers)
     {
@@ -4322,6 +4337,78 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleSample(std::string param
 std::list<std::string> RandomPlayerbotMgr::HandleConsoleFind(std::string param)
 {
     return SampleBots(param, true);
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleTaxTest(std::string param)
+{
+    std::list<std::string> messages;
+
+    std::vector<std::string> parts = Qualified::getMultiQualifiers(param, " ");
+    if (parts.size() < 2)
+    {
+        messages.push_back("usage: taxtest <bot> <node> [node...]");
+        return messages;
+    }
+
+    Player* bot = sObjectAccessor.FindPlayerByName(parts[0].c_str());
+    if (!bot || !bot->GetPlayerbotAI())
+    {
+        messages.push_back("taxtest: bot not found: " + parts[0]);
+        return messages;
+    }
+
+    std::vector<uint32> nodes;
+    for (size_t i = 1; i < parts.size(); ++i)
+        nodes.push_back(uint32(atoi(parts[i].c_str())));
+
+    TaxiNodesEntry const* start = sTaxiNodesStore.LookupEntry(nodes[0]);
+    if (!start)
+    {
+        messages.push_back("taxtest: bad start node");
+        return messages;
+    }
+
+    if (bot->GetMapId() != start->map_id)
+    {
+        bot->TeleportTo(start->map_id, start->x, start->y, start->z, bot->GetOrientation());
+        messages.push_back("taxtest: teleported to start map; rerun the command");
+        return messages;
+    }
+
+    bot->CombatStop(true);
+    bot->GetMotionMaster()->Clear();
+    bot->SetPosition(start->x, start->y, start->z, bot->GetOrientation(), true);
+
+    bool ok = bot->ActivateTaxiPathTo(nodes, nullptr, 0);
+    messages.push_back(std::string("taxtest ") + bot->GetName() + ": " + (ok ? "taxi started" : "ActivateTaxiPathTo FAILED"));
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleZoneUpd(std::string param)
+{
+    std::list<std::string> messages;
+
+    std::vector<std::string> parts = Qualified::getMultiQualifiers(param, " ");
+    if (parts.size() < 2)
+    {
+        messages.push_back("usage: zoneupd <bot> <zone>");
+        return messages;
+    }
+
+    Player* bot = sObjectAccessor.FindPlayerByName(parts[0].c_str());
+    if (!bot || !bot->GetSession())
+    {
+        messages.push_back("zoneupd: bot not found: " + parts[0]);
+        return messages;
+    }
+
+    uint32 zone = uint32(atoi(parts[1].c_str()));
+    WorldPacket data(CMSG_ZONEUPDATE, 4);
+    data << zone;
+    bot->GetSession()->HandleZoneUpdateOpcode(data);
+
+    messages.push_back("zoneupd " + std::string(bot->GetName()) + ": sent CMSG_ZONEUPDATE " + std::to_string(zone));
+    return messages;
 }
 
 void RandomPlayerbotMgr::PrintStats(uint32 requesterGuid)

@@ -1,5 +1,6 @@
 
 #include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/RemoteServiceAccess.h"
 #include "playerbot/playerbot.h"
 #include "RandomPlayerbotFactory.h"
 #include "Accounts/AccountMgr.h"
@@ -244,6 +245,9 @@ bool PlayerbotAIConfig::Initialize()
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.VendorOverAHItemIds", ""), vendorOverAHItemIds);
     botCheckAllAuctionListings = config.GetBoolDefault("AiPlayerbot.BotCheckAllAuctionListings", false);
     botsSaveEpics = config.GetBoolDefault("AiPlayerbot.BotsSaveEpics", true);
+    randomBotRemoteServices = config.GetBoolDefault("AiPlayerbot.RandomBotRemoteServices", false);
+    if (randomBotRemoteServices && !ai::RemoteServiceAccess::HasCoreBridge())
+        sLog.outString("PlayerBots: RandomBotRemoteServices needs the companion core patch; retaining normal world access.");
     professionProgressionEnabled = config.GetBoolDefault("AiPlayerbot.ProfessionProgressionEnabled", config.GetBoolDefault("AiPlayerbot.ProfessionProgression.Enabled", true));
     professionProgressionPercent = static_cast<uint32>(
         std::max(0, std::min(100, config.GetIntDefault("AiPlayerbot.ProfessionProgressionPercent", config.GetIntDefault("AiPlayerbot.ProfessionProgression.CanaryPercent", 10)))));

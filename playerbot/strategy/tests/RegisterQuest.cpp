@@ -248,13 +248,13 @@ void TestRegistry::RegisterQuestSuiteTests()
     // accept can never fire and every pickup run burned its full timeout. Load creature-spawn ->
     // event links once; giver/taker spawns and objective spawns that are event-gated with no active
     // event are treated as missing below.
-    std::unordered_map<uint32, std::vector<uint16>> creatureSpawnEvents;
+    std::unordered_map<uint32, std::vector<int16>> creatureSpawnEvents;
     if (auto result = WorldDatabase.Query("SELECT guid, event FROM game_event_creature"))
     {
         do
         {
             Field* fields = result->Fetch();
-            creatureSpawnEvents[fields[0].GetUInt32()].push_back(fields[1].GetUInt16());
+            creatureSpawnEvents[fields[0].GetUInt32()].push_back(fields[1].GetInt16());
         } while (result->NextRow());
     }
 
@@ -264,9 +264,13 @@ void TestRegistry::RegisterQuestSuiteTests()
         auto it = creatureSpawnEvents.find(spawnGuid);
         if (it == creatureSpawnEvents.end())
             return true;
-        for (uint16 eventId : it->second)
-            if (sGameEventMgr.IsActiveEvent(eventId))
+        for (int16 eventId : it->second)
+        {
+            if (eventId <= 0)
                 return true;
+            if (sGameEventMgr.IsActiveEvent(static_cast<uint16>(eventId)))
+                return true;
+        }
         return false;
     };
 
@@ -323,13 +327,13 @@ void TestRegistry::RegisterQuestSuiteTests()
     // CanSeeStartQuest, so the dialog status stays NONE and the accept chain can never fire).
     // A force-complete spoof cannot fix that. Load quest -> event links once and pre-skip quests
     // whose events are all inactive (the childrens_week 172 case).
-    std::unordered_map<uint32, std::vector<uint16>> questEvents;
+    std::unordered_map<uint32, std::vector<int16>> questEvents;
     if (auto result = WorldDatabase.Query("SELECT quest, event FROM game_event_quest"))
     {
         do
         {
             Field* fields = result->Fetch();
-            questEvents[fields[0].GetUInt32()].push_back(fields[1].GetUInt16());
+            questEvents[fields[0].GetUInt32()].push_back(fields[1].GetInt16());
         } while (result->NextRow());
     }
 
@@ -340,7 +344,7 @@ void TestRegistry::RegisterQuestSuiteTests()
     uint32 pickupTravelTests = 0, pickupAimedTests = 0;
     uint32 skipNoGiver = 0, skipNoTaker = 0, skipNoSpawn = 0, skipGated = 0, skipChain = 0, skipGatedCombo = 0, skipNoLevel = 0;
     uint32 skipEventSpawn = 0;
-    uint32 skipEventQuest = 0, skipCondition = 0, skipBreadcrumb = 0;
+    uint32 skipEventQuest = 0, skipCondition = 0, skipBreadcrumb = 0, skipZeroCount = 0;
     uint32 skipLogs = 0;
 
     auto logSkip = [&](char const* reason, uint32 questId)
@@ -417,8 +421,11 @@ void TestRegistry::RegisterQuestSuiteTests()
             if (evIt != questEvents.end())
             {
                 bool anyActive = false;
-                for (uint16 eventId : evIt->second)
-                    if (sGameEventMgr.IsActiveEvent(eventId)) { anyActive = true; break; }
+                for (int16 eventId : evIt->second)
+                {
+                    if (eventId <= 0) { anyActive = true; break; }
+                    if (sGameEventMgr.IsActiveEvent(static_cast<uint16>(eventId))) { anyActive = true; break; }
+                }
                 if (!anyActive)
                 {
                     ++skipEventQuest;
@@ -521,6 +528,14 @@ void TestRegistry::RegisterQuestSuiteTests()
             // make 'set rpg target' useless for the accept chain (BL-46 accept-deadlock).
             RegisterNamedLocation(locName.str(), GuidPosition(ObjectGuid(HIGHGUID_UNIT, giver->second.entry, giver->second.guid), WorldPosition(giver->second.mapId, giver->second.x, giver->second.y, giver->second.z)));
 
+            QuestSpawn const& gp = giver->second;
+            float ang = (questId % 100) * 0.0628f; // deterministic spread
+            float ox = gp.x + 90.0f * cos(ang);
+            float oy = gp.y + 90.0f * sin(ang);
+            std::ostringstream nearName;
+            nearName << "quest_" << questId << "_giver_near";
+            RegisterNamedLocation(nearName.str(), GuidPosition(ObjectGuid(), WorldPosition(gp.mapId, ox, oy, gp.z)));
+
             for (uint32 level : levels)
             {
                 std::vector<std::string> lines;
@@ -546,14 +561,6 @@ void TestRegistry::RegisterQuestSuiteTests()
                 // travel back. The arrival flip then happens inside MoveToTravelTargetAction
                 // itself, so the rpg chain gets a fair chance instead of fighting a forced pin.
                 {
-                    QuestSpawn const& gp = giver->second;
-                    float ang = (questId % 100) * 0.0628f; // deterministic spread
-                    float ox = gp.x + 90.0f * cos(ang);
-                    float oy = gp.y + 90.0f * sin(ang);
-                    std::ostringstream nearName;
-                    nearName << "quest_" << questId << "_giver_near";
-                    RegisterNamedLocation(nearName.str(), GuidPosition(ObjectGuid(), WorldPosition(gp.mapId, ox, oy, gp.z)));
-
                     std::vector<std::string> tlines;
                     tlines.push_back("# quest pickup travel test " + std::to_string(questId));
                     tlines.push_back(RequireLine(level, quest));
@@ -600,10 +607,12 @@ void TestRegistry::RegisterQuestSuiteTests()
                     alines.push_back("require creature alive quest_" + std::to_string(questId) + "_giver 150");
                     // Bot teleports INSIDE the radius: the first 'move to travel target' poll runs
                     // CheckStatus, sees IsIn(bot) true, and flips the nonforced destination
-                    // TRAVEL -> WORK within the first ticks (fixed 5-minute window). The standard
-                    // rpg chain then picks the giver (entry-carrying destination => travel-target
-                    // relevance bonus) and accepts - no rpg injection or pin (BL-47(a)).
+                    // TRAVEL -> WORK within the first ticks (fixed 5-minute window). The rpg target
+                    // is injected (BL-47(a) destination carries the entry) and 'next rpg action' is
+                    // pinned so vendor/repair/discover triggers cannot outrun the accept.
                     alines.push_back("set destination quest_" + std::to_string(questId) + "_giver nonforced");
+                    alines.push_back("set rpg target quest_" + std::to_string(questId) + "_giver");
+                    alines.push_back("set value string next rpg action => rpg start quest");
                     alines.push_back("observe");
 
                     std::ostringstream aname;
@@ -673,6 +682,11 @@ void TestRegistry::RegisterQuestSuiteTests()
             RegisterNamedLocation(locName.str(), GuidPosition(ObjectGuid(), WorldPosition(spawn->second.mapId, spawn->second.x, spawn->second.y, spawn->second.z)));
 
             uint32 count = quest->ReqCreatureOrGOCount[i];
+            if (!count)
+            {
+                ++skipZeroCount;
+                continue;
+            }
             uint32 clearTimeout = std::min<uint32>(1800, 600 + count * 60);
 
             for (uint32 level : levels)
@@ -723,7 +737,7 @@ void TestRegistry::RegisterQuestSuiteTests()
     sLog.outString("[QUESTGEN] generated %u pickup, %u pickup_travel, %u pickup_aimed, %u handin, %u objective tests",
         pickupTests, pickupTravelTests, pickupAimedTests, handinTests, objTests);
     sLog.outError("[QUESTGEN] skips: %u no-giver, %u no-taker, %u no-spawn, %u gated, %u chain, %u race+class, %u level, "
-        "%u event-inactive, %u condition, %u breadcrumb, %u event-gated-spawn, %u event-gated-objspawns",
+        "%u event-inactive, %u condition, %u breadcrumb, %u event-gated-spawn, %u event-gated-objspawns, %u zero-count",
         skipNoGiver, skipNoTaker, skipNoSpawn, skipGated, skipChain, skipGatedCombo, skipNoLevel,
-        skipEventQuest, skipCondition, skipBreadcrumb, skipEventSpawn, skipEventSpawnObj);
+        skipEventQuest, skipCondition, skipBreadcrumb, skipEventSpawn, skipEventSpawnObj, skipZeroCount);
 }

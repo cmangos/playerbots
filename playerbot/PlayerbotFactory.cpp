@@ -24,6 +24,8 @@
 #endif
 #include "strategy/ItemVisitors.h"
 
+#include <unordered_set>
+
 using namespace ai;
 
 #define PLAYER_SKILL_INDEX(x)       (PLAYER_SKILL_INFO_1_1 + ((x)*3))
@@ -544,6 +546,56 @@ void PlayerbotFactory::AddConsumables()
    }
 }
 
+// Collects every creature entry that has a world spawn, including the random,
+// conditional and spawn group entries a spawn can resolve to.
+static std::unordered_set<uint32> BuildSpawnedCreatureEntries()
+{
+    std::unordered_set<uint32> entries;
+
+    auto worker = [&entries](CreatureDataPair const& dataPair)
+    {
+        entries.insert(dataPair.second.id);
+#ifdef CMANGOS
+        if (std::vector<uint32> const* randomEntries = sObjectMgr.GetAllRandomCreatureEntries(dataPair.first))
+            entries.insert(randomEntries->begin(), randomEntries->end());
+
+        if (CreatureConditionalSpawn const* cSpawn = ObjectMgr::GetCreatureConditionalSpawn(dataPair.first))
+        {
+            entries.insert(cSpawn->EntryAlliance);
+            entries.insert(cSpawn->EntryHorde);
+        }
+#endif
+        return false;
+    };
+    sObjectMgr.DoCreatureData(worker);
+
+#ifdef CMANGOS
+    if (auto container = sObjectMgr.GetSpawnGroupContainer())
+    {
+        for (auto const& [groupId, group] : container->spawnGroupMap)
+        {
+            if (group.Type != SPAWN_GROUP_CREATURE || group.DbGuids.empty())
+                continue;
+
+            for (SpawnGroupRandomEntry const& randomEntry : group.RandomEntries)
+                entries.insert(randomEntry.Entry);
+        }
+    }
+#endif
+
+    entries.erase(0);
+    return entries;
+}
+
+// Tameable templates without a spawn (test, placeholder and unused rows) can
+// never be tamed by a player, so hunter bots should not get them as pets.
+// Built once on first use; empty spawn data disables the filter.
+static bool HasWorldSpawn(uint32 entry)
+{
+    static std::unordered_set<uint32> const spawnedEntries = BuildSpawnedCreatureEntries();
+    return spawnedEntries.empty() || spawnedEntries.count(entry);
+}
+
 void PlayerbotFactory::InitPet()
 {
     // Randomize a new pet (only for hunters)
@@ -572,6 +624,9 @@ void PlayerbotFactory::InitPet()
                 continue;
 
             if ((int)co->MinLevel > (int)bot->GetLevel())
+                continue;
+
+            if (!HasWorldSpawn(id))
                 continue;
 
 			ids.push_back(id);

@@ -340,6 +340,12 @@ namespace ai
             creators["remove nether portal - perseverence"] = [](PlayerbotAI* ai) { return new RemoveNetherPortalPerseverenceTrigger(ai); };
             creators["remove nether portal - serenity"] = [](PlayerbotAI* ai) { return new RemoveNetherPortalSerenityTrigger(ai); };
 
+            creators["start shade of aran fight"] = [](PlayerbotAI* ai) { return new ShadeOfAranStartFightTrigger(ai); };
+            creators["end shade of aran fight"] = [](PlayerbotAI* ai) { return new ShadeOfAranEndFightTrigger(ai); };
+            creators["shade of aran casting arcane explosion"] = [](PlayerbotAI* ai) { return new ShadeOfAranCastingArcaneExplosionTrigger(ai); };
+            creators["shade of aran casting flame wreath"] = [](PlayerbotAI* ai) { return new ShadeOfAranCastingFlameWreathTrigger(ai); };
+            creators["flame wreath ended"] = [](PlayerbotAI* ai) { return new StayTimeTrigger(ai, 20000, "flame wreath ended"); };
+
             creators["start prince malchezaar fight"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarStartFightTrigger(ai); };
             creators["end prince malchezaar fight"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarEndFightTrigger(ai); };
             creators["netherspite infernal too close"] = [](PlayerbotAI* ai) { return new NetherspiteInfernalTooCloseTrigger(ai); };

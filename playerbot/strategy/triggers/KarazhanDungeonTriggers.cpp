@@ -23,6 +23,48 @@ bool NetherspiteBeamsCheatNeedRefreshTrigger::IsActive()
     return AI_VALUE2(bool, "has aggro", "current target");
 }
 
+bool ShadeOfAranCastingArcaneExplosionTrigger::IsActive()
+{
+    //Checking that Shade of Aran is casting arcane explosion
+    std::list<Unit*> creatures;
+    MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(bot, 16524, 100);
+    MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
+    Cell::VisitAllObjects(bot, searcher, 100);
+
+    if (creatures.empty())
+        return false;
+
+    Unit* target = creatures.front();
+    if (Spell const* genericSpell = target->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+    {
+        if (genericSpell->m_spellInfo->Id == 29973 && genericSpell->getState() != SPELL_STATE_FINISHED)
+            return true;
+    }
+
+    return false;
+}
+
+bool ShadeOfAranCastingFlameWreathTrigger::IsActive()
+{
+    //Checking that Shade of Aran is casting Flame Wreath
+    std::list<Unit*> creatures;
+    MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(bot, 16524, 100);
+    MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
+    Cell::VisitAllObjects(bot, searcher, 100);
+
+    if (creatures.empty())
+        return false;
+
+    Unit* target = creatures.front();
+    if (Spell const* genericSpell = target->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+    {
+        if (genericSpell->m_spellInfo->Id == 30004 && genericSpell->getState() != SPELL_STATE_FINISHED)
+            return true;
+    }
+
+    return false;
+}
+
 bool PrinceMalchezaarTooCloseTrigger::IsActive()
 {
     PullStrategy* strategy = PullStrategy::Get(ai);

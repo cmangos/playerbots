@@ -404,10 +404,11 @@ namespace ai
             creators["remove nether portal - serenity"] = [](PlayerbotAI* ai) { return new RemoveNetherPortalSerenityAction(ai); };
             creators["remove nether portal - dominance"] = [](PlayerbotAI* ai) { return new RemoveNetherPortalDominanceAction(ai); };
 
-            creators["enable shade of aran strategy"] = [](PlayerbotAI* ai) { return new ShadeOfAranEnableFightStrategyAction(ai); };
-            creators["disable shade of aran strategy"] = [](PlayerbotAI* ai) { return new ShadeOfAranDisableFightStrategyAction(ai); };
-            creators["handle flame wreath"] = [](PlayerbotAI* ai) { return new ShadeOfAranHandleFlameWreathAction(ai); };
-            creators["handle arcane explosion"] = [](PlayerbotAI* ai) { return new ShadeOfAranHandleArcaneExplosionAction(ai); };
+            creators["enable shade of aran fight strategy"] = [](PlayerbotAI* ai) { return new ShadeOfAranEnableFightStrategyAction(ai); };
+            creators["disable shade of aran fight strategy"] = [](PlayerbotAI* ai) { return new ShadeOfAranDisableFightStrategyAction(ai); };
+            creators["start flame wreath"] = [](PlayerbotAI* ai) { return new StayAction(ai); };
+            creators["end flame wreath"] = [](PlayerbotAI* ai) { return new FollowAction(ai); };
+            creators["move away from shade of aran"] = [](PlayerbotAI* ai) { return new ShadeOfAranMoveAwayAction(ai); };
 
             creators["enable prince malchezaar fight strategy"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarEnableFightStrategyAction(ai); };
             creators["disable prince malchezaar fight strategy"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarDisableFightStrategyAction(ai); };

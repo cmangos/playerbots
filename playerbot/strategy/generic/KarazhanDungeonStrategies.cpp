@@ -12,6 +12,10 @@ void KarazhanDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 		NextAction::array(0, new NextAction("enable netherspite fight strategy", 100.0f), NULL)));
 
 	triggers.push_back(new TriggerNode(
+		"start shade of aran fight",
+		NextAction::array(0, new NextAction("enable shade of aran fight strategy", 100.0f), NULL)));
+
+	triggers.push_back(new TriggerNode(
 		"start prince malchezaar fight",
 		NextAction::array(0, new NextAction("enable prince malchezaar fight strategy", 100.0f), NULL)));
 }
@@ -55,6 +59,38 @@ void NetherspiteFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& trigger
 	triggers.push_back(new TriggerNode(
 		"end netherspite fight",
 		NextAction::array(0, new NextAction("disable netherspite fight strategy", 100.0f), NULL)));
+}
+
+void ShadeOfAranFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"shade of aran casting flame wreath",
+		NextAction::array(0, new NextAction("start flame wreath", 100.0f), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"flame wreath ended",
+		NextAction::array(0, new NextAction("end flame wreath", 100.0f), NULL)));
+}
+
+void ShadeOfAranFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"end shade of aran fight",
+		NextAction::array(0, new NextAction("disable shade of aran fight strategy", 100.0f), NULL)));
+}
+
+void ShadeOfAranFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"end shade of aran fight",
+		NextAction::array(0, new NextAction("disable shade of aran fight strategy", 100.0f), NULL)));
+}
+
+void ShadeOfAranFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"shade of aran casting arcane explosion",
+		NextAction::array(0, new NextAction("move away from shade of aran", 100.0f), NULL)));
 }
 
 void PrinceMalchezaarFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -406,8 +406,8 @@ namespace ai
 
             creators["enable shade of aran fight strategy"] = [](PlayerbotAI* ai) { return new ShadeOfAranEnableFightStrategyAction(ai); };
             creators["disable shade of aran fight strategy"] = [](PlayerbotAI* ai) { return new ShadeOfAranDisableFightStrategyAction(ai); };
-            creators["start flame wreath"] = [](PlayerbotAI* ai) { return new StayAction(ai); };
-            creators["end flame wreath"] = [](PlayerbotAI* ai) { return new FollowAction(ai); };
+            creators["start flame wreath"] = [](PlayerbotAI* ai) { return new FlameWreathStartedAction(ai); };
+            creators["end flame wreath"] = [](PlayerbotAI* ai) { return new FlameWreathEndedAction(ai); };
             creators["move away from shade of aran"] = [](PlayerbotAI* ai) { return new ShadeOfAranMoveAwayAction(ai); };
 
             creators["enable prince malchezaar fight strategy"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarEnableFightStrategyAction(ai); };

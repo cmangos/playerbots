@@ -104,6 +104,26 @@ namespace ai
         ShadeOfAranMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from shade of aran", 16524, 22.0f, false, false) {}
     };
 
+    class FlameWreathStartedAction : public Action
+    {
+    public:
+        FlameWreathStartedAction(PlayerbotAI* ai) : Action(ai, "flame wreath started") {}
+        bool Execute(Event& event) override
+        {
+            ai->ChangeStrategy("+stay", BotState::BOT_STATE_COMBAT);
+        }
+    };
+
+    class FlameWreathEndedAction : public Action
+    {
+    public:
+        FlameWreathEndedAction(PlayerbotAI* ai) : Action(ai, "flame wreath ended") {}
+        bool Execute(Event& event) override
+        {
+            ai->ChangeStrategy("-stay", BotState::BOT_STATE_COMBAT);
+        }
+    };
+
     class PrinceMalchezaarEnableFightStrategyAction : public ChangeAllStrategyAction
     {
     public:

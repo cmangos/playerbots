@@ -2790,6 +2790,52 @@ bool MovementAction::FollowOnTransport(Unit* target)
     return false;
 }
 
+// just calculates average position of group and runs away from that position
+bool MovementAction::MoveFromGroup(float distance)
+{
+    if (Group* group = bot->GetGroup())
+    {
+        uint32 mapId = bot->GetMapId();
+        float closestDist = FLT_MAX;
+        float x = 0.0f;
+        float y = 0.0f;
+        uint32 count = 0;
+
+        for (GroupReference* gref = group->GetFirstMember(); gref; gref = gref->next())
+        {
+            Player* player = gref->getSource();
+            if (!player || player == bot || !player->IsAlive() || player->GetMapId() != mapId)
+                continue;
+            float dist = bot->GetDistance2d(player->GetPositionX(), player->GetPositionY());
+            if (closestDist > dist)
+                closestDist = dist;
+            x += player->GetPositionX();
+            y += player->GetPositionY();
+            count++;
+        }
+
+        if (count && closestDist < distance)
+        {
+            x /= count;
+            y /= count;
+            // x and y are now average position of the group members
+            float angle = bot->GetAngle(x, y) + M_PI;
+            return Move(angle, distance - closestDist);
+        }
+    }
+    return false;
+}
+
+bool MovementAction::Move(float angle, float distance)
+{
+    float x = bot->GetPositionX() + cos(angle) * distance;
+    float y = bot->GetPositionY() + sin(angle) * distance;
+    float z = bot->GetPositionZ();
+
+    bot->UpdateGroundPositionZ(x, y, z);
+
+    return MoveTo(bot->GetMapId(), x, y, z);
+}
 
 void MovementAction::WaitForReach(float distance)
 {

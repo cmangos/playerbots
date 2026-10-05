@@ -340,6 +340,13 @@ namespace ai
             creators["remove nether portal - perseverence"] = [](PlayerbotAI* ai) { return new RemoveNetherPortalPerseverenceTrigger(ai); };
             creators["remove nether portal - serenity"] = [](PlayerbotAI* ai) { return new RemoveNetherPortalSerenityTrigger(ai); };
 
+            creators["start shade of aran fight"] = [](PlayerbotAI* ai) { return new ShadeOfAranStartFightTrigger(ai); };
+            creators["end shade of aran fight"] = [](PlayerbotAI* ai) { return new ShadeOfAranEndFightTrigger(ai); };
+            creators["shade of aran casting arcane explosion"] = [](PlayerbotAI* ai) { return new ShadeOfAranCastingArcaneExplosionTrigger(ai); };
+            creators["shade of aran done casting arcane explosion"] = [](PlayerbotAI* ai) { return new ShadeOfAranDoneCastingArcaneExplosionTrigger(ai); };
+            creators["shade of aran casting flame wreath"] = [](PlayerbotAI* ai) { return new ShadeOfAranCastingFlameWreathTrigger(ai); };
+            creators["shade of aran casting blizzard"] = [](PlayerbotAI* ai) { return new ShadeOfAranCastingBlizzardTrigger(ai); };
+            creators["shade of aran elementals out"] = [](PlayerbotAI* ai) { return new ShadeOfAranElementalsTrigger(ai); };
             creators["start big bad wolf fight"] = [](PlayerbotAI* ai) { return new BigBadWolfStartFightTrigger(ai); };
             creators["end big bad wolf fight"] = [](PlayerbotAI* ai) { return new BigBadWolfEndFightTrigger(ai); };
             creators["big bad wolf too close"] = [](PlayerbotAI* ai) { return new BigBadWolfTooCloseTrigger(ai); };

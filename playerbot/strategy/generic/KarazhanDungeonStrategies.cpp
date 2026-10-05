@@ -12,6 +12,10 @@ void KarazhanDungeonStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 		NextAction::array(0, new NextAction("enable netherspite fight strategy", 100.0f), NULL)));
 
 	triggers.push_back(new TriggerNode(
+		"start shade of aran fight",
+		NextAction::array(0, new NextAction("enable shade of aran fight strategy", 100.0f), NULL)));
+
+triggers.push_back(new TriggerNode(
 		"start big bad wolf fight",
 		NextAction::array(0, new NextAction("enable big bad wolf fight strategy", 100.0f), NULL)));
 
@@ -59,6 +63,91 @@ void NetherspiteFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& trigger
 	triggers.push_back(new TriggerNode(
 		"end netherspite fight",
 		NextAction::array(0, new NextAction("disable netherspite fight strategy", 100.0f), NULL)));
+}
+
+void ShadeOfAranFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"shade of aran casting flame wreath",
+		NextAction::array(0, new NextAction("start aran fire phase", 100.0f), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"shade of aran casting arcane explosion",
+		NextAction::array(0, new NextAction("start aran arcane phase", 100.0f), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"shade of aran elementals out",
+		NextAction::array(0, new NextAction("start aran elementals", 100.0f), NULL)));
+}
+
+void ShadeOfAranFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"end shade of aran fight",
+		NextAction::array(0, new NextAction("disable shade of aran fight strategy", 100.0f), NULL)));
+}
+
+void ShadeOfAranFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"end shade of aran fight",
+		NextAction::array(0, new NextAction("disable shade of aran fight strategy", 100.0f), NULL)));
+}
+
+void ShadeOfAranFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
+{
+	triggers.push_back(new TriggerNode(
+		"shade of aran casting blizzard",
+		NextAction::array(0, new NextAction("start aran frost phase", 100.0f), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"shade of aran done casting arcane explosion",
+		NextAction::array(0, new NextAction("end aran arcane phase", 100.0f), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"shade of aran casting arcane explosion",
+		NextAction::array(0, new NextAction("move away from shade of aran", 100.0f), NULL)));
+}
+
+ShadeOfAranFightStrategy* ShadeOfAranFightStrategy::Get(PlayerbotAI* ai)
+{
+    return ai ? ai->GetStrategy<ShadeOfAranFightStrategy>("shade of aran", BotState::BOT_STATE_COMBAT) : nullptr;
+}
+
+void ShadeOfAranFightStrategy::OnStrategyAdded(BotState state)
+{
+	if (!Get(ai)->GetBossGuid())
+	{
+		// Find Shade of aran and store him
+		std::list<Unit*> creatures;
+        MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(ai->GetBot(), 16524, 100);
+		MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
+        Cell::VisitAllObjects(ai->GetBot(), searcher, 100);
+
+		if (creatures.empty())
+            return;
+
+		Unit* target = creatures.front();
+
+		ShadeOfAranFightStrategy* strategy = ShadeOfAranFightStrategy::Get(ai);
+		if (strategy)
+		{
+			if (target && target->GetEntry() == 16524)
+			{
+				strategy->SetBossGuid(target->GetObjectGuid());
+				// fight starts with unknown phase
+				strategy->SetPhase(AranPhase::PHASE_NONE);
+				strategy->SetRangedBot(ai->IsRanged(ai->GetBot()));
+				if (target->GetHealthPercent() <= 40.0f && !strategy->GetElementals())
+					strategy->SetElementals(true);
+				else
+					strategy->SetElementals(false);
+				if (ai->GetRange("flee") < 5.0f)
+                    ai->GetAiObjectContext()->GetValue<float>("range", "flee")->Set(20.0f);
+                
+			}
+		}
+	}
 }
 
 void BigBadWolfFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

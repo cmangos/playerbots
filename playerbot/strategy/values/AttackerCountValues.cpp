@@ -18,6 +18,9 @@ bool HasAggroValue::Calculate()
     // Player targets don't have aggro
     if (target && !target->IsPlayer())
     {
+        // Shade of Aran has a threat table but he casts randomly anyway, so don't worry about aggro
+        if (target->GetEntry() == 16524)
+            return false;
         HostileReference* ref = sServerFacade.GetHostileRefManager(bot).getFirst();
         if (ref)
         {

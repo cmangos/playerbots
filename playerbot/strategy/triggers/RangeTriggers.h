@@ -15,16 +15,14 @@ namespace ai
         
         virtual bool IsActive() override
         {
+            if (ai->HasStrategy("follow", BotState::BOT_STATE_COMBAT) ||
+                ai->HasStrategy("guard", BotState::BOT_STATE_COMBAT) ||
+                ai->HasStrategy("stay", BotState::BOT_STATE_COMBAT) ||
+                ai->HasStrategy("wander", BotState::BOT_STATE_COMBAT))
+                        return false; 
             Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
             if (target)
             {
-                if (ai->HasStrategy("follow", BotState::BOT_STATE_COMBAT) ||
-                    ai->HasStrategy("guard", BotState::BOT_STATE_COMBAT) ||
-                    ai->HasStrategy("stay", BotState::BOT_STATE_COMBAT) ||
-                    ai->HasStrategy("wander", BotState::BOT_STATE_COMBAT))
-                    if(bot->getClass() != CLASS_HUNTER || sServerFacade.GetDistance2d(bot, target) > 5.0f)
-                        return false;                   
-
                 const bool canMove = !PossibleAttackTargetsValue::HasBreakableCC(target, bot) && !PossibleAttackTargetsValue::HasUnBreakableCC(target, bot);
 
                 // Don't move if the target is targeting you and you can't add distance between you and the target (how fast bot runs)

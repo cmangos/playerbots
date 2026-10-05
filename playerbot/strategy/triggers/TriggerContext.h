@@ -343,8 +343,10 @@ namespace ai
             creators["start shade of aran fight"] = [](PlayerbotAI* ai) { return new ShadeOfAranStartFightTrigger(ai); };
             creators["end shade of aran fight"] = [](PlayerbotAI* ai) { return new ShadeOfAranEndFightTrigger(ai); };
             creators["shade of aran casting arcane explosion"] = [](PlayerbotAI* ai) { return new ShadeOfAranCastingArcaneExplosionTrigger(ai); };
+            creators["shade of aran done casting arcane explosion"] = [](PlayerbotAI* ai) { return new ShadeOfAranDoneCastingArcaneExplosionTrigger(ai); };
             creators["shade of aran casting flame wreath"] = [](PlayerbotAI* ai) { return new ShadeOfAranCastingFlameWreathTrigger(ai); };
-            creators["flame wreath ended"] = [](PlayerbotAI* ai) { return new StayTimeTrigger(ai, 20000, "flame wreath ended"); };
+            creators["shade of aran casting blizzard"] = [](PlayerbotAI* ai) { return new ShadeOfAranCastingBlizzardTrigger(ai); };
+            creators["shade of aran elementals out"] = [](PlayerbotAI* ai) { return new ShadeOfAranElementalsTrigger(ai); };
 
             creators["start prince malchezaar fight"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarStartFightTrigger(ai); };
             creators["end prince malchezaar fight"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarEndFightTrigger(ai); };

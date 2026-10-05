@@ -65,11 +65,15 @@ void ShadeOfAranFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
 {
 	triggers.push_back(new TriggerNode(
 		"shade of aran casting flame wreath",
-		NextAction::array(0, new NextAction("start flame wreath", 100.0f), NULL)));
+		NextAction::array(0, new NextAction("start aran fire phase", 100.0f), NULL)));
 
 	triggers.push_back(new TriggerNode(
-		"flame wreath ended",
-		NextAction::array(0, new NextAction("end flame wreath", 100.0f), NULL)));
+		"shade of aran casting arcane explosion",
+		NextAction::array(0, new NextAction("start aran arcane phase", 100.0f), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"shade of aran elementals out",
+		NextAction::array(0, new NextAction("start aran elementals", 100.0f), NULL)));
 }
 
 void ShadeOfAranFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -89,8 +93,57 @@ void ShadeOfAranFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& trigger
 void ShadeOfAranFightStrategy::InitReactionTriggers(std::list<TriggerNode*>& triggers)
 {
 	triggers.push_back(new TriggerNode(
+		"shade of aran casting blizzard",
+		NextAction::array(0, new NextAction("start aran frost phase", 100.0f), NULL)));
+
+	triggers.push_back(new TriggerNode(
+		"shade of aran done casting arcane explosion",
+		NextAction::array(0, new NextAction("end aran arcane phase", 100.0f), NULL)));
+
+	triggers.push_back(new TriggerNode(
 		"shade of aran casting arcane explosion",
 		NextAction::array(0, new NextAction("move away from shade of aran", 100.0f), NULL)));
+}
+
+ShadeOfAranFightStrategy* ShadeOfAranFightStrategy::Get(PlayerbotAI* ai)
+{
+    return ai ? ai->GetStrategy<ShadeOfAranFightStrategy>("shade of aran", BotState::BOT_STATE_COMBAT) : nullptr;
+}
+
+void ShadeOfAranFightStrategy::OnStrategyAdded(BotState state)
+{
+	if (!Get(ai)->GetBossGuid())
+	{
+		// Find Shade of aran and store him
+		std::list<Unit*> creatures;
+        MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(ai->GetBot(), 16524, 100);
+		MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
+        Cell::VisitAllObjects(ai->GetBot(), searcher, 100);
+
+		if (creatures.empty())
+            return;
+
+		Unit* target = creatures.front();
+
+		ShadeOfAranFightStrategy* strategy = ShadeOfAranFightStrategy::Get(ai);
+		if (strategy)
+		{
+			if (target && target->GetEntry() == 16524)
+			{
+				strategy->SetBossGuid(target->GetObjectGuid());
+				// fight starts with unknown phase
+				strategy->SetPhase(AranPhase::PHASE_NONE);
+				strategy->SetRangedBot(ai->IsRanged(ai->GetBot()));
+				if (target->GetHealthPercent() <= 40.0f && !strategy->GetElementals())
+					strategy->SetElementals(true);
+				else
+					strategy->SetElementals(false);
+				if (ai->GetRange("flee") < 5.0f)
+                    ai->GetAiObjectContext()->GetValue<float>("range", "flee")->Set(20.0f);
+                
+			}
+		}
+	}
 }
 
 void PrinceMalchezaarFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -86,12 +86,33 @@ namespace ai
 		virtual bool IsActive() override;
 	};
 
+	class ShadeOfAranDoneCastingArcaneExplosionTrigger : public Trigger
+	{
+	public:
+		ShadeOfAranDoneCastingArcaneExplosionTrigger(PlayerbotAI* ai, int checkInteval = 1) : Trigger(ai, "shade of aran done casting arcane explosion", checkInteval) {}
+		virtual bool IsActive() override;
+	};
+
 	class ShadeOfAranCastingFlameWreathTrigger : public Trigger
 	{
 	public:
-		ShadeOfAranCastingFlameWreathTrigger(PlayerbotAI* ai, int checkInteval = 1) : Trigger(ai, "shade of aran casting flame wreath", checkInteval) {}
+        ShadeOfAranCastingFlameWreathTrigger(PlayerbotAI* ai, int checkInteval = 3) : Trigger(ai, "shade of aran casting flame wreath", checkInteval) {}
 		virtual bool IsActive() override;
 	};
+
+	class ShadeOfAranCastingBlizzardTrigger : public Trigger
+	{
+	public:
+        ShadeOfAranCastingBlizzardTrigger(PlayerbotAI* ai, int checkInteval = 1) : Trigger(ai, "shade of aran casting blizzard", checkInteval) {}
+		virtual bool IsActive() override;
+	};
+
+	class ShadeOfAranElementalsTrigger : public Trigger
+    {
+    public:
+        ShadeOfAranElementalsTrigger(PlayerbotAI* ai, int checkInteval = 1) : Trigger(ai, "shade of aran elementals out", checkInteval) {}
+        virtual bool IsActive() override;
+    };
 
 	class PrinceMalchezaarStartFightTrigger : public StartBossFightTrigger
 	{

@@ -1,5 +1,6 @@
 #pragma once
 #include "DungeonActions.h"
+#include "playerbot/strategy/generic/KarazhanDungeonStrategies.h"
 #include "ChangeStrategyAction.h"
 #include "UseItemAction.h"
 
@@ -104,24 +105,39 @@ namespace ai
         ShadeOfAranMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from shade of aran", 16524, 22.0f, false, false) {}
     };
 
-    class FlameWreathStartedAction : public Action
+    class ShadeOfAranFirePhaseStartedAction : public Action
     {
     public:
-        FlameWreathStartedAction(PlayerbotAI* ai) : Action(ai, "flame wreath started") {}
-        bool Execute(Event& event) override
-        {
-            ai->ChangeStrategy("+stay", BotState::BOT_STATE_COMBAT);
-        }
+        ShadeOfAranFirePhaseStartedAction(PlayerbotAI* ai) : Action(ai, "start aran fire phase") {}
+        bool Execute(Event& event) override;
     };
 
-    class FlameWreathEndedAction : public Action
+    class ShadeOfAranFrostPhaseStartedAction : public Action
     {
     public:
-        FlameWreathEndedAction(PlayerbotAI* ai) : Action(ai, "flame wreath ended") {}
-        bool Execute(Event& event) override
-        {
-            ai->ChangeStrategy("-stay", BotState::BOT_STATE_COMBAT);
-        }
+        ShadeOfAranFrostPhaseStartedAction(PlayerbotAI* ai) : Action(ai, "start aran frost phase") {}
+        bool Execute(Event& event) override;
+    };
+
+    class ShadeOfAranArcanePhaseStartedAction : public Action
+    {
+    public:
+        ShadeOfAranArcanePhaseStartedAction(PlayerbotAI* ai) : Action(ai, "start aran arcane phase") {}
+        bool Execute(Event& event) override;
+    };
+
+    class ShadeOfAranArcanePhaseEndedAction : public Action
+    {
+    public:
+        ShadeOfAranArcanePhaseEndedAction(PlayerbotAI* ai) : Action(ai, "end aran arcane phase") {}
+        bool Execute(Event& event) override;
+    };
+
+    class ShadeOfAranElementalsAction : public Action
+    {
+    public:
+        ShadeOfAranElementalsAction(PlayerbotAI* ai) : Action(ai, "start aran elementals") {}
+        bool Execute(Event& event) override;
     };
 
     class PrinceMalchezaarEnableFightStrategyAction : public ChangeAllStrategyAction

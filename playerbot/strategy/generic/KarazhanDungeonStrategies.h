@@ -58,6 +58,17 @@ namespace ai
         void InitReactionTriggers(std::list<TriggerNode*> &triggers) override;
         void OnStrategyAdded(BotState state) override;
     };
+  
+    class BigBadWolfFightStrategy : public Strategy
+    {
+    public:
+        BigBadWolfFightStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        std::string getName() override { return "big bad wolf"; }
+    private:
+        void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
+        void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
+    };
 
     class PrinceMalchezaarFightStrategy : public Strategy
     {

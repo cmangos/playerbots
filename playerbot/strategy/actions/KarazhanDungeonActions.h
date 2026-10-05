@@ -102,6 +102,8 @@ namespace ai
     {
     public:
         NetherspiteInfernalMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from netherspite infernal", 17646, 22.0f, false, true) {}
+
+        bool Execute(Event& event) override;
     };
 
     class PrinceMalchezaarMoveAwayAction : public MoveAwayFromCreature

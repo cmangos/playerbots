@@ -122,3 +122,18 @@ bool ShadeOfAranElementalsAction::Execute(Event& event)
 	else
 		return false;
 }
+
+bool NetherspiteInfernalMoveAwayAction::Execute(Event& event)
+{
+	Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
+	if (target && target->GetEntry() == 15690)
+	{
+		Unit* tot = target->GetVictim();
+		if (tot && tot == bot)
+		{
+			healersSafe = false;
+		}
+	}
+
+	return MoveAwayFromCreature::Execute(event);
+}

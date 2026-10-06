@@ -39,15 +39,15 @@ void NetherspiteFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigg
 		NextAction::array(0, new NextAction("remove nether portal buffs from netherspite", 101.0f), NULL)));
 
 	triggers.push_back(new TriggerNode(
-		"nether portal - perseverence",
+		"remove nether portal - perseverence",
 		NextAction::array(0, new NextAction("remove nether portal - perseverence", 101.0f), NULL)));
 
 	triggers.push_back(new TriggerNode(
-		"nether portal - serenity",
+		"remove nether portal - serenity",
 		NextAction::array(0, new NextAction("remove nether portal - serenity", 101.0f), NULL)));
 
 	triggers.push_back(new TriggerNode(
-		"nether portal - dominance",
+		"remove nether portal - dominance",
 		NextAction::array(0, new NextAction("remove nether portal - dominance", 101.0f), NULL)));
 }
 
@@ -63,6 +63,37 @@ void NetherspiteFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& trigger
 	triggers.push_back(new TriggerNode(
 		"end netherspite fight",
 		NextAction::array(0, new NextAction("disable netherspite fight strategy", 100.0f), NULL)));
+}
+
+void NetherspiteFightStrategy::OnStrategyAdded(BotState state)
+{
+	if (!Get(ai)->GetBossGuid())
+	{
+		// Find Netherspite and store him
+		std::list<Unit*> creatures;
+        MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(ai->GetBot(), 15689, 100);
+		MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
+        Cell::VisitAllObjects(ai->GetBot(), searcher, 100);
+
+		if (creatures.empty())
+            return;
+
+		Unit* target = creatures.front();
+
+		NetherspiteFightStrategy* strategy = NetherspiteFightStrategy::Get(ai);
+		if (strategy)
+		{
+			if (target && target->GetEntry() == 15689)
+			{
+				strategy->SetBossGuid(target->GetObjectGuid());
+			}
+		}
+	}
+}
+
+NetherspiteFightStrategy* NetherspiteFightStrategy::Get(PlayerbotAI* ai)
+{
+    return ai ? ai->GetStrategy<NetherspiteFightStrategy>("netherspite", BotState::BOT_STATE_COMBAT) : nullptr;
 }
 
 void ShadeOfAranFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

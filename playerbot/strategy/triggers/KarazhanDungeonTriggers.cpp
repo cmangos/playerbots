@@ -12,6 +12,26 @@ using namespace ai;
 bool NetherspiteBeamsCheatNeedRefreshTrigger::IsActive()
 {
     //Checking that is portal phase
+    NetherspiteFightStrategy* strategy = NetherspiteFightStrategy::Get(ai);
+    std::list<Unit*> creatures;
+    MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(bot, 17369, 100);
+    MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
+    Cell::VisitAllObjects(bot, searcher, 100);
+
+    Unit* boss = ai->GetUnit(strategy->GetBossGuid());
+    if (creatures.empty())
+        return false;
+    if (!strategy || !boss)
+        return false;
+
+    //Checking that this bot is not Netherspite target to prevent overloading tank trigger
+    return boss->GetVictim() != bot && (ai->HasAura(30468, boss) || ai->HasAura(30467, boss) || ai->HasAura(30466, boss));
+}
+
+bool NetherspiteBeamsPlayerCheatNeedRefreshTrigger::IsActive()
+{
+    //Checking that is portal phase
+    NetherspiteFightStrategy* strategy = NetherspiteFightStrategy::Get(ai);
     std::list<Unit*> creatures;
     MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(bot, 17369, 100);
     MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
@@ -19,9 +39,11 @@ bool NetherspiteBeamsCheatNeedRefreshTrigger::IsActive()
 
     if (creatures.empty())
         return false;
+    if (!strategy || !strategy->GetBossGuid())
+        return false;
 
-    //Checking that is Netherspite target
-    return AI_VALUE2(bool, "has aggro", "current target");
+    //Checking that this bot is Netherspite target
+    return ai->IsTank(bot) && ai->GetUnit(strategy->GetBossGuid())->GetVictim() == bot;
 }
 
 bool ShadeOfAranCastingArcaneExplosionTrigger::IsActive()

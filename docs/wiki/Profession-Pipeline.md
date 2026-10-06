@@ -85,7 +85,7 @@ not prove that tools, location or spell execution are ready.
 `CraftingFairness` keeps an independent ready-since timestamp per runtime skill:
 
 1. Scores choose normally when no ready skill is overdue.
-2. A selected ready owner can retain an opportunity for up to 300 seconds.
+2. A selected ready skill can retain an opportunity for up to 300 seconds.
 3. Another ready skill waiting at least 300 seconds can take priority. The oldest
    wait wins; scores break equal-age ties.
 4. A pending continuation keeps ownership through its cleanup.

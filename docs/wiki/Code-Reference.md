@@ -12,7 +12,7 @@ targets live in the separate CMaNGOS repository and are represented by the patch
 | [CraftValues.h](../../playerbot/strategy/values/CraftValues.h) | Plan, source, tool, request and processing structures; cached/manual AI value declarations. |
 | [CraftValues.cpp](../../playerbot/strategy/values/CraftValues.cpp) | `ProfessionCraftingPlanValue::Calculate`, source classification, live tools/reagents, focus resolution, pending recovery and processing targets. |
 | [ProfessionProgressionPolicy.h](../../playerbot/strategy/values/ProfessionProgressionPolicy.h) | Small pure policies: participation, batches, cooldowns, pending leases, supply bounds, dispatch/location and acquisition gates. |
-| [ProfessionCraftingFairness.h](../../playerbot/strategy/values/ProfessionCraftingFairness.h) | Per-runtime-skill ready-age ledger, owner opportunity and `FinishOpportunity`. |
+| [ProfessionCraftingFairness.h](../../playerbot/strategy/values/ProfessionCraftingFairness.h) | Per-runtime-skill ready-age ledger, bounded goal opportunity and `FinishOpportunity`. |
 | [ProfessionProduction.h](../../playerbot/strategy/values/ProfessionProduction.h) | Learned producer structures and depth-bounded `NextProductionStep`. |
 | [ValueContext.h](../../playerbot/strategy/values/ValueContext.h) | Registration of AI values so existing strategies/actions can request them by name. |
 

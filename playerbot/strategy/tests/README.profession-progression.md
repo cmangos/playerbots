@@ -1,131 +1,80 @@
-# Offline profession regressions
+# Profession progression regression tests
 
-The 2026-10-02 follow-up below supersedes older staging/build notes for the
-current production-demand and configuration patch.
+The lightweight suites require Python 3 and a compatible C++17 compiler. Some
+fixtures additionally extract predicates from a compatible CMaNGOS WotLK core.
+They use temporary files and world doubles, without a running realm or database.
 
-The separate opt-in remote-service access patch is documented in
-[REMOTE_SERVICES.md](../../../docs/REMOTE_SERVICES.md). Its `RemoteServicesTests.py`
-requires an unpatched compatible WotLK core reference and a C++17 compiler; it
-applies the companion core patch to temporary files only. Run it alongside the
-existing profession tests. No full build or live remote transaction is claimed.
+## Run the tests
 
-These tests require no realm, database, service, items or skill modification.
-All implementation decisions use learned spells, inventory, tool/category and
-focus data, and runtime action state. Live bot names and recipe IDs are evidence
-labels, not dispatch exceptions.
-
-With `PLAYERBOTS` pointing to this checkout and `CORE` to compatible CMaNGOS:
+Set PLAYERBOTS to this module checkout, CORE to a compatible WotLK core, and
+CORE_REFERENCE to an unpatched compatible reference for remote bridge testing.
 
 ```sh
+PLAYERBOTS=/path/to/playerbots
+CORE=/path/to/compatible/mangos-wotlk
+CORE_REFERENCE=/path/to/unpatched/compatible/mangos-wotlk
+
+git -C "$PLAYERBOTS" diff --check
 c++ -std=c++17 -DPROFESSION_POLICY_TEST_MAIN -I "$PLAYERBOTS" \
   "$PLAYERBOTS/playerbot/strategy/tests/ProfessionProgressionRegressionTests.cpp" \
   -o /tmp/profession-policy-tests
 /tmp/profession-policy-tests
-python3 "$PLAYERBOTS/playerbot/strategy/tests/ProfessionProgressionComponentTests.py" \
-  --core-source "$CORE"
-```
 
-The policy executable covers pending leases, clock rollback, active-cast
-protection, continuation ownership, nonrenewing same-spell retries, one-copy
-tool auction reserves, maintenance dispatch eligibility, practical
-cash-vendor policy and 1,050,000 combinations of batch/reagent/target/stock
-quantities. Its fairness cases cover repeated high-score batches, opportunity
-expiry, pending ownership, disappeared recipes, changing readiness, clock rollback
-and arbitrary runtime IDs/candidate order. Assertions also
-compile as part of the normal PlayerBots source build without a standalone main.
-
-## 2026-10-02 production-demand follow-up
-
-```sh
-python3 -B "$PLAYERBOTS/playerbot/strategy/tests/ProfessionProductionTests.py" \
-  --compiler c++
-```
-
-This runs 2,087 C++ cases with world doubles, including the actual full planner,
-processing input/output metadata index, owned input target/request lifecycle,
-post-cast cleanup block and configuration assignments. It checks bounded learned
-prerequisite expansion, grey producers, partial quantities, alternate processing
-inputs, unknown recipes, cycles/depth limits, root fairness ownership, real-stack
-requirements, matching loot completion and canonical/legacy setting precedence.
-No test credits a processing output just because a cast was accepted.
-
-The separate source suite now has 23 wiring checks. Existing policy, 54 component,
-59 travel and 6 outgoing-chat cases remain relevant. A portable checksum-verified
-Zig compiler under the local repository's `.git/profession-test-tools` can run the
-Windows fixtures without installing a compiler globally. It is not a repository
-dependency; the scripts accept an ordinary compatible C++17 compiler.
-
-The current patch has passed these lightweight tests. It has **not** undergone a
-full CMaNGOS build or live skill-progression validation. Earlier successful full
-build/deployment records below refer to earlier revisions. The bounded bridge
-supports at most two prerequisite steps, not arbitrary-depth production; missing
-raw materials/tools/money/recipes and unsupported processing loot sources remain
-real blockers. See [configuration options](../../../docs/PROFESSION_PROGRESSION.md)
-and [the audit report](../../../profession-audit/REPORT.md).
-
-The component test extracts actual source bodies for focus resolution, spell
-readiness and tool usefulness, plus the core focus and category predicates. It
-compiles these with small inventory/world/context doubles. The current patch
-adds actual vendor-stock, indexed destination lookup, learned craft/enchant
-requirements, tool selection/supplies and pending queue bodies for 54 cases.
-These include duplicate offers aligned with BuyItem's first matching stock slot,
-compatible upgraded tools, newly learned requirements, one-copy demands,
-live ownership after a cached selection and 100 retries preserving lease age.
-It does not simulate the AI scheduler or establish live skill gain.
-
-For a negative baseline comparison:
-
-```sh
-python3 "$PLAYERBOTS/playerbot/strategy/tests/ProfessionProgressionComponentTests.py" \
-  --core-source "$CORE" --baseline-ref c0100429
-```
-
-This is expected to fail on a distant selected focus with a valid nearby focus.
-
-Source wiring checks require only Python and Git:
-
-```sh
 python3 -B "$PLAYERBOTS/playerbot/strategy/tests/ProfessionProgressionSourceTests.py"
-git -C "$PLAYERBOTS" diff --check
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/ProfessionProductionTests.py" --compiler c++
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/ProfessionProgressionComponentTests.py" \
+  --compiler c++ --core-source "$CORE"
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/ProfessionReadinessTests.py" --compiler c++
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/TravelTargetLifecycleTests.py" --compiler c++
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/OutgoingChatRegressionTests.py" --compiler c++
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/RemoteServicesTests.py" \
+  --compiler c++ --core-source "$CORE_REFERENCE"
 ```
 
-These check integration boundaries, including unchanged score coefficients,
-live-readiness checks before queueing, single-plan maintenance dispatch,
-continuations, retained focus/tool checks, independent fairness state and
-vendor fallback, common tool acquisition and one-copy auction filtering. They do
-not execute C++ or simulate the scheduler.
+The remote suite applies the companion core patch to temporary copies only.
+Standalone ProfessionProgressionPolicyTests.cpp needs core headers; use the
+standalone regression executable above for independent policy testing.
+Scripts accept --compiler for a compatible platform-specific compiler wrapper.
 
-On 2026-10-01 the current local patch passed 18 Python source checks, the C++17
-policy/regression executable (including 1,050,000 batch cases) and all 54 component
-cases. Windows has no C++ compiler on PATH; lightweight C++ execution used an
-isolated temporary directory on the existing Linux compiler host and read-only
-compatible core predicates. This was not a CMaNGOS build. The new tool/retry patch
-has not been fully compiled or deployed; the earlier successful 848/848 core build
-predates these edits. Full core compilation and live validation remain required.
+## Coverage and recorded results
 
-The patch addresses dispatch/pending lifecycle, real focus resolution, honest
-batch quantities, learned tool requirements, bounded ready-skill fairness and
-practical vendor fallback and one-copy tool demands through existing vendor/AH
-actions. It does not implement grey intermediate production or autonomous
-milling/prospecting. Tool acquisition still requires affordable legitimate supply;
-the AH fallback currently selects one metadata-compatible alternative, and cannot
-guarantee that alternative is listed. Generic stale travel
-expiry/reset usefulness and the reset-command bad_alloc were not patched.
+| Suite | Coverage | Recorded result |
+| --- | --- | --- |
+| Policy/regression | Assignment, pending leases, cooldown/clock rollback, whole-cast quantities, one-copy tools, practical vendor policy and runtime-skill fairness. | PASS, including 1,050,000 quantity combinations. |
+| Production | Actual planner/processing/config bodies, grey producers, partial quantities, alternate inputs, cycles/depth, retained root state, real input stacks and loot cleanup. | 2,087 cases PASS. |
+| Component | Actual focus/tool/vendor/readiness bodies, core category/focus predicates, duplicate vendor slots, upgraded tools, changed inventory and bounded retries. | 54 cases PASS. |
+| Complete readiness | Actual CanCraftProfessionValue::Calculate with the processing helper available only through its real class boundary; material/tool/focus/cast/participation/space/input gates. | 17 cases PASS. |
+| Source | Shared command/action wiring, selected-plan dispatch, live checks, preserved score, separate fairness state, bounded tool acquisition and config integration. | 23 checks PASS. |
+| Travel | Actual expiry/activity/reset predicates, timed/forced/unlimited phases, clock wrap and cleanup. | 59 cases PASS. |
+| Outgoing chat | Actual post-parse guard; empty messages stop before recording/reply, nonempty messages proceed. | 6 cases PASS. |
+| Remote services | Service/player/thread isolation, nesting/exception restoration, eligibility/busy guards, existing handlers, disabled/unpatched fallback and empty-attempt throttles. | 84 bridge + 7 fallback checks PASS. |
 
-The tool/retry patch subsequently compiled in the isolated 37/37 full mangosd
-build and was installed at the owner's explicit request. Live observation found
-additional generic travel expiry and empty-chat defects. The separate fixtures
-execute the production deadline/status/reset predicates (59 cases) and the
-post-parse outgoing-chat guard (6 cases):
+## Negative baseline checks
+
+Where the historical commits are available, these optional comparisons establish
+that the fixtures reject the earlier defects:
 
 ```sh
-python3 -B "$PLAYERBOTS/playerbot/strategy/tests/TravelTargetLifecycleTests.py"
-python3 -B "$PLAYERBOTS/playerbot/strategy/tests/OutgoingChatRegressionTests.py"
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/ProfessionReadinessTests.py" \
+  --compiler c++ --baseline-ref d6482097
+python3 -B "$PLAYERBOTS/playerbot/strategy/tests/ProfessionProgressionComponentTests.py" \
+  --compiler c++ --core-source "$CORE" --baseline-ref c0100429
 ```
 
-They require a C++17 compiler but no running realm. Expiry applies on activity
-reads without a movement action; forced/unlimited targets, inactive phases,
-clock wrap, cleanup once and existing reset safety gates are covered. Empty chat
-returns before recording or reply handling; nonempty payloads still pass.
-Earlier NOT BUILT and NOT PATCHED statements above describe the earlier snapshot,
-not the final lifecycle fixes.
+The readiness script reports success when the old unqualified helper fails to
+compile. The older component baseline is expected to fail the focus regression.
+The optional remote --baseline-ref 4541a89e comparison checks unchanged transaction
+and profession-policy bodies; omit it when testing later intentional changes.
+
+## Full build and gameplay limits
+
+Profession revision be2fa8a4 completed a compatible WotLK mangosd build and startup.
+The subsequent upstream Netherspite merge was not part of that full build.
+See [the technical review](../../../profession-audit/REPORT.md) and
+[build guide](../../../docs/wiki/Build-and-Tests.md) for evidence and instructions.
+
+Fixtures complement full core compilation; extracted bodies do not reproduce the
+complete scheduler, database, live economy or every trainer/rank transition.
+A queued cast is not completed output. Milling/Prospecting tests never credit
+random loot merely because a cast was accepted. Sustained natural progression
+across every profession and live remote transactions require observation.

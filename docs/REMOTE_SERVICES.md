@@ -109,7 +109,7 @@ checks that dispatch still uses the real AH/mail/bank handlers. The audit also r
 bodies; that optional comparison avoids imposing a historical planner on future
 development. This does not replace a full compatible-core build or real transactions.
 
-After an owner-authorized build/deployment, choose eligible random bots away from
+After building and deploying a compatible version, choose eligible random bots away from
 service NPCs, record real bag/bank/mail/gold/auction state, and verify:
 
 - A worthwhile selected stack becomes a real faction auction and pays its deposit.

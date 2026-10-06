@@ -1,5 +1,8 @@
 # Profession progression configuration
 
+For the complete architecture, usage and troubleshooting guide, see the
+[profession build wiki](wiki/Home.md).
+
 This guide describes the autonomous profession settings in the feature branch.
 Place the options in your active `aiplayerbot.conf`. The block below keeps
 participation at **10%** and uses the current defaults for all other settings.

@@ -1,5 +1,8 @@
 # Remote personal services for random bots
 
+See the [profession build wiki](wiki/Home.md) for the component map, operating
+guide and build/test reference for the complete feature.
+
 This is an access option, not a new economy or profession planner. It lets an
 autonomous random bot use its personal bank, mailbox and faction Auction House
 without traveling to an NPC or mailbox. The existing item selection, reserve,

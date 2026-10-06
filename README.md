@@ -37,6 +37,7 @@ After you complete all steps above you can check bots config and start your serv
 
 ## How to Use
 
+- [Profession build wiki: architecture, usage, diagnostics and build validation](docs/wiki/Home.md)
 - [Profession progression configuration](docs/PROFESSION_PROGRESSION.md)
 - [List of Commands](https://docs.google.com/document/d/1xIdu5l5lAKLSKhqZ2Hb6vaU8qJgbbLwCw4MxmhCW_gI/edit#heading=h.vsmxe9r82yc7)
 - [Playerbots Behavior AddOn](https://github.com/celguar/mangosbot-addon)

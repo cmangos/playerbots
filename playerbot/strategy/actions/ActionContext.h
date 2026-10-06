@@ -406,6 +406,18 @@ namespace ai
             creators["remove nether portal - serenity"] = [](PlayerbotAI* ai) { return new RemoveNetherPortalSerenityAction(ai); };
             creators["remove nether portal - dominance"] = [](PlayerbotAI* ai) { return new RemoveNetherPortalDominanceAction(ai); };
 
+            creators["enable shade of aran fight strategy"] = [](PlayerbotAI* ai) { return new ShadeOfAranEnableFightStrategyAction(ai); };
+            creators["disable shade of aran fight strategy"] = [](PlayerbotAI* ai) { return new ShadeOfAranDisableFightStrategyAction(ai); };
+            creators["start aran fire phase"] = [](PlayerbotAI* ai) { return new ShadeOfAranFirePhaseStartedAction(ai); };
+            creators["start aran frost phase"] = [](PlayerbotAI* ai) { return new ShadeOfAranFrostPhaseStartedAction(ai); };
+            creators["start aran arcane phase"] = [](PlayerbotAI* ai) { return new ShadeOfAranArcanePhaseStartedAction(ai); };
+            creators["end aran arcane phase"] = [](PlayerbotAI* ai) { return new ShadeOfAranArcanePhaseEndedAction(ai); };
+            creators["start aran elementals"] = [](PlayerbotAI* ai) { return new ShadeOfAranElementalsAction(ai); };
+            creators["move away from shade of aran"] = [](PlayerbotAI* ai) { return new ShadeOfAranMoveAwayAction(ai); };
+            creators["enable big bad wolf fight strategy"] = [](PlayerbotAI* ai) { return new BigBadWolfEnableFightStrategyAction(ai); };
+            creators["disable big bad wolf fight strategy"] = [](PlayerbotAI* ai) { return new BigBadWolfDisableFightStrategyAction(ai); };
+            creators["move away from big bad wolf"] = [](PlayerbotAI* ai) { return new BigBadWolfMoveAwayAction(ai); };
+
             creators["enable prince malchezaar fight strategy"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarEnableFightStrategyAction(ai); };
             creators["disable prince malchezaar fight strategy"] = [](PlayerbotAI* ai) { return new PrinceMalchezaarDisableFightStrategyAction(ai); };
             creators["move away from netherspite infernal"] = [](PlayerbotAI* ai) { return new NetherspiteInfernalMoveAwayAction(ai); };
@@ -418,7 +430,7 @@ namespace ai
             creators["disable nethermancer sepethrea fight strategy"] = [](PlayerbotAI* ai) { return new NethermancerSepethreaDisableFightStrategyAction(ai); };
             creators["move away from raging flames"] = [](PlayerbotAI* ai) { return new RagingFlamesMoveAwayAction(ai); };
 
-            creators["move away from specific creatures"] = [](PlayerbotAI* ai) { return new MoveAwayFromSpecificCreatures(ai, 15); };
+            creators["move away from specific creatures"] = [](PlayerbotAI* ai) { return new MoveAwayFromSpecificCreatures(ai); };
 
 #ifdef GenerateBotTests
             creators["test"] = [](PlayerbotAI* ai) { return new TestAction(ai); };

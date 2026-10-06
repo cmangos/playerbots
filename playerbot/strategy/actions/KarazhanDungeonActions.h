@@ -1,5 +1,6 @@
 #pragma once
 #include "DungeonActions.h"
+#include "playerbot/strategy/generic/KarazhanDungeonStrategies.h"
 #include "ChangeStrategyAction.h"
 #include "UseItemAction.h"
 
@@ -86,6 +87,77 @@ namespace ai
         }
     };
 
+    class ShadeOfAranEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        ShadeOfAranEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable shade of aran fight strategy", "+shade of aran") {}
+    };
+
+    class ShadeOfAranDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        ShadeOfAranDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable shade of aran fight strategy", "-shade of aran") {}
+    };
+
+    class ShadeOfAranMoveAwayAction : public MoveAwayFromCreature
+    {
+    public:
+        ShadeOfAranMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from shade of aran", 16524, 22.0f, false, false) {}
+    };
+
+    class ShadeOfAranFirePhaseStartedAction : public Action
+    {
+    public:
+        ShadeOfAranFirePhaseStartedAction(PlayerbotAI* ai) : Action(ai, "start aran fire phase") {}
+        bool Execute(Event& event) override;
+    };
+
+    class ShadeOfAranFrostPhaseStartedAction : public Action
+    {
+    public:
+        ShadeOfAranFrostPhaseStartedAction(PlayerbotAI* ai) : Action(ai, "start aran frost phase") {}
+        bool Execute(Event& event) override;
+    };
+
+    class ShadeOfAranArcanePhaseStartedAction : public Action
+    {
+    public:
+        ShadeOfAranArcanePhaseStartedAction(PlayerbotAI* ai) : Action(ai, "start aran arcane phase") {}
+        bool Execute(Event& event) override;
+    };
+
+    class ShadeOfAranArcanePhaseEndedAction : public Action
+    {
+    public:
+        ShadeOfAranArcanePhaseEndedAction(PlayerbotAI* ai) : Action(ai, "end aran arcane phase") {}
+        bool Execute(Event& event) override;
+    };
+
+    class ShadeOfAranElementalsAction : public Action
+    {
+    public:
+        ShadeOfAranElementalsAction(PlayerbotAI* ai) : Action(ai, "start aran elementals") {}
+        bool Execute(Event& event) override;
+    };
+
+    class BigBadWolfEnableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        BigBadWolfEnableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "enable big bad wolf fight strategy", "+big bad wolf") {}
+    };
+
+    class BigBadWolfDisableFightStrategyAction : public ChangeAllStrategyAction
+    {
+    public:
+        BigBadWolfDisableFightStrategyAction(PlayerbotAI* ai) : ChangeAllStrategyAction(ai, "disable big bad wolf fight strategy", "-big bad wolf") {}
+    };
+
+    class BigBadWolfMoveAwayAction : public MoveAwayFromCreature
+    {
+    public:
+        BigBadWolfMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from big bad wolf", 17521, 28.0f, true) {}
+    };
+
     class PrinceMalchezaarEnableFightStrategyAction : public ChangeAllStrategyAction
     {
     public:
@@ -102,6 +174,8 @@ namespace ai
     {
     public:
         NetherspiteInfernalMoveAwayAction(PlayerbotAI* ai) : MoveAwayFromCreature(ai, "move away from netherspite infernal", 17646, 22.0f, false, true) {}
+
+        bool Execute(Event& event) override;
     };
 
     class PrinceMalchezaarMoveAwayAction : public MoveAwayFromCreature

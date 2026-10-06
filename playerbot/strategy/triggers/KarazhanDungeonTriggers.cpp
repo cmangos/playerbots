@@ -1,6 +1,7 @@
 
 #include "playerbot/playerbot.h"
 #include "KarazhanDungeonTriggers.h"
+#include "playerbot/strategy/generic/KarazhanDungeonStrategies.h"
 #include "GenericTriggers.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
@@ -21,6 +22,124 @@ bool NetherspiteBeamsCheatNeedRefreshTrigger::IsActive()
 
     //Checking that is Netherspite target
     return AI_VALUE2(bool, "has aggro", "current target");
+}
+
+bool ShadeOfAranCastingArcaneExplosionTrigger::IsActive()
+{
+    //Checking that Shade of Aran is casting arcane explosion
+    ShadeOfAranFightStrategy* strategy = ShadeOfAranFightStrategy::Get(ai);
+
+    if (strategy)
+    {
+        // No need to check if we are on arcane currently
+        if (strategy->GetPhase() == AranPhase::PHASE_ARCANE)
+            return true;
+            
+        Unit* aran = ai->GetUnit(strategy->GetBossGuid());
+        if (aran)
+        {
+            if (Spell const* genericSpell = aran->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+            {
+                if (genericSpell->m_spellInfo->Id == 29973 && genericSpell->getState() != SPELL_STATE_FINISHED)
+                    return true;
+            } 
+        }
+    }
+
+    return false;
+}
+
+bool ShadeOfAranDoneCastingArcaneExplosionTrigger::IsActive()
+{
+    //Checking that Shade of Aran is done casting arcane explosion
+    ShadeOfAranFightStrategy* strategy = ShadeOfAranFightStrategy::Get(ai);
+
+    if (strategy)
+    {
+        Unit* aran = ai->GetUnit(strategy->GetBossGuid());
+        if (aran && strategy->GetPhase() == AranPhase::PHASE_ARCANE)
+        {
+            if (Spell const* genericSpell = aran->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+            {
+                if (genericSpell->m_spellInfo->Id == 29973 && genericSpell->getState() == SPELL_STATE_FINISHED)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return true;
+        }
+    }
+
+    return false;
+}
+
+bool ShadeOfAranCastingFlameWreathTrigger::IsActive()
+{
+    //Checking that Shade of Aran is casting flame wreath
+    ShadeOfAranFightStrategy* strategy = ShadeOfAranFightStrategy::Get(ai);
+
+    if (strategy)
+    {
+        // No need to check if we are on fire currently
+        if (strategy->GetPhase() == AranPhase::PHASE_FIRE)
+            return false;
+
+        Unit* aran = ai->GetUnit(strategy->GetBossGuid());
+        if (aran)
+        {
+            if (Spell const* genericSpell = aran->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+            {
+                if (genericSpell->m_spellInfo->Id == 30004)
+                    return true;
+            } 
+        }
+    }
+
+    return false;
+}
+
+bool ShadeOfAranCastingBlizzardTrigger::IsActive()
+{
+    //Checking that Shade of Aran is casting blizzard
+    ShadeOfAranFightStrategy* strategy = ShadeOfAranFightStrategy::Get(ai);
+
+    if (strategy)
+    {
+        // No need to check if we are on frost currently
+        if (strategy->GetPhase() == AranPhase::PHASE_FROST)
+            return false;
+
+        Unit* aran = ai->GetUnit(strategy->GetBossGuid());
+        if (aran)
+        {
+            if (Spell const* genericSpell = aran->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+            {
+                if (genericSpell->m_spellInfo->Id == 29969)
+                    return true;
+            } 
+        }
+    }
+
+    return false;
+}
+
+bool ShadeOfAranElementalsTrigger::IsActive()
+{
+    //Checking that the water elementals are out
+    ShadeOfAranFightStrategy* strategy = ShadeOfAranFightStrategy::Get(ai);
+
+    if (strategy && !strategy->GetElementals())
+    {
+        Unit* aran = ai->GetUnit(strategy->GetBossGuid());
+        if (aran)
+        {
+            if (aran->GetHealthPercent() <= 40.0f)
+                return true;
+        }
+    }
+
+    return false;
 }
 
 bool PrinceMalchezaarTooCloseTrigger::IsActive()

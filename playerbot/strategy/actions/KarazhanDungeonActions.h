@@ -49,8 +49,23 @@ namespace ai
         AddNetherPortalPerseverenceForTankAction(PlayerbotAI* ai) : Action(ai, "add nether portal - perseverence for tank") {}
         bool Execute(Event& event) override
         {
-            ai->AddAura(bot, 30421);
-            return true;
+            if (ai->IsTank(bot))
+            {
+                ai->AddAura(bot, 30421);
+                NetherspiteFightStrategy* strategy = NetherspiteFightStrategy::Get(ai);
+                if (strategy)
+                {
+                    // Need to fixate aggro to mimic red beam spell hit script
+                    Unit* target = ai->GetUnit(strategy->GetBossGuid());
+                    if (target)
+                        target->FixateTarget(bot);
+                }
+                    
+                return true;
+            }
+            
+            return false;
+
         }
     };
 

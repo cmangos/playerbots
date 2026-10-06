@@ -8,15 +8,20 @@ using namespace ai;
 
 bool RemoveNetherPortalBuffsFromNetherspiteAction::Execute(Event& event)
 {
-	Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
-	if (target && ai->HasAura(30466, target))
-		target->RemoveAurasDueToSpell(30466);
+	NetherspiteFightStrategy* strategy = NetherspiteFightStrategy::Get(ai);
+	if (strategy)
+	{
+		Unit* target = ai->GetUnit(strategy->GetBossGuid());
+		if (target && ai->HasAura(30466, target))
+			target->RemoveAurasDueToSpell(30466);
 
-	if (target && ai->HasAura(30467, target))
-		target->RemoveAurasDueToSpell(30467);
+		if (target && ai->HasAura(30467, target))
+			target->RemoveAurasDueToSpell(30467);
 
-	if (target && ai->HasAura(30468, target))
-		target->RemoveAurasDueToSpell(30468);
+		if (target && ai->HasAura(30468, target))
+			target->RemoveAurasDueToSpell(30468);
+	}
+
 
 	return true;
 }

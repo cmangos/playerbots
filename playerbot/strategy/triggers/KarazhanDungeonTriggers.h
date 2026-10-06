@@ -1,6 +1,7 @@
 #pragma once
 #include "DungeonTriggers.h"
 #include "GenericTriggers.h"
+#include "playerbot/strategy/generic/KarazhanDungeonStrategies.h"
 
 namespace ai
 {
@@ -37,7 +38,14 @@ namespace ai
 	class NetherspiteBeamsCheatNeedRefreshTrigger : public Trigger
 	{
 	public:
-		NetherspiteBeamsCheatNeedRefreshTrigger(PlayerbotAI* ai, int checkInteval = 2) : Trigger(ai, "netherspite beams cheat need refresh", checkInteval) {}
+		NetherspiteBeamsCheatNeedRefreshTrigger(PlayerbotAI* ai, int checkInteval = 1) : Trigger(ai, "netherspite beams cheat need refresh", checkInteval) {}
+		bool IsActive() override;
+	};
+
+	class NetherspiteBeamsPlayerCheatNeedRefreshTrigger : public Trigger
+	{
+	public:
+		NetherspiteBeamsPlayerCheatNeedRefreshTrigger(PlayerbotAI* ai, int checkInteval = 2) : Trigger(ai, "netherspite beams player cheat need refresh", checkInteval) {}
 		bool IsActive() override;
 	};
 

@@ -25,12 +25,16 @@ namespace ai
     {
     public:
         NetherspiteFightStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        static NetherspiteFightStrategy* Get(PlayerbotAI* ai);
+        void SetBossGuid(ObjectGuid guid) { netherspiteGuid = guid; }
+        ObjectGuid GetBossGuid() { return netherspiteGuid; }
         std::string getName() override { return "netherspite"; }
-
     private:
+        ObjectGuid netherspiteGuid;
         void InitCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitNonCombatTriggers(std::list<TriggerNode*>& triggers) override;
         void InitDeadTriggers(std::list<TriggerNode*>& triggers) override;
+        void OnStrategyAdded(BotState state) override;
     };
 
     class ShadeOfAranFightStrategy : public Strategy

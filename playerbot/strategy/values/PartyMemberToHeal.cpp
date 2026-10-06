@@ -4,6 +4,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/LootObjectStack.h"
+#include "playerbot/strategy/generic/KarazhanDungeonStrategies.h"
 
 using namespace ai;
 
@@ -201,6 +202,11 @@ bool PartyMemberToHeal::Check(Unit* player)
         return false;
                                                      
     if (sServerFacade.GetDistance2d(bot, player) > maxDist)
+        return false;
+    
+    // Ignore players who have netherspite tank aura to avoid heal canceling
+    NetherspiteFightStrategy* strategy = NetherspiteFightStrategy::Get(ai);
+    if (strategy && player->HasAura(30421))
         return false;
 
     return true;

@@ -1047,7 +1047,7 @@ bool CanCraftProfessionValue::Calculate()
         return false;
 
     return bot->HasSpell(plan.spellId) && CanCraftSpellValue::HasRequiredTools(spell, bot) &&
-        (!plan.processingInputId || GetProcessingTarget(ai, plan));
+        (!plan.processingInputId || ProfessionCraftingPlanValue::GetProcessingTarget(ai, plan));
 }
 
 ProfessionMaterialSources ProfessionMaterialSourcesValue::Calculate()

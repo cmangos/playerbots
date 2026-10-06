@@ -1206,3 +1206,16 @@ The isolated source retains its separately preserved AH money-delivery diff.
 The failed attempt did not install a binary or alter the original checkout.
 The normal 20:00 scheduled guest reboot subsequently brought the previous
 installed binary back online; active services do not establish build success.
+
+The retry then exposed a second independent full-build error in
+`CanCraftProfessionValue::Calculate`: `GetProcessingTarget(ai, plan)` was called
+without the owning `ProfessionCraftingPlanValue::` qualification. The same
+unqualified call inside `ProfessionCraftingPlanValue::Calculate` is valid because
+that function is a member of the owning class; the readiness value is a different
+class. The smallest correction qualifies the existing static helper, keeping
+real input-stack ownership validation intact and introducing no new mechanism
+or runtime work. Existing fixtures compiled processing helpers and spell
+readiness, but omitted this complete profession-readiness method. A focused
+fixture must now compile its actual body with the processing helper available
+only as the declared static class member, and exercise the normal readiness
+gates. The pre-fix body should fail this fixture at compilation.

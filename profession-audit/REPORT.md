@@ -1178,3 +1178,31 @@ configuration mutation, commit or push. The core patch has not been applied to
 the owner's real source/build. Full ABI/link/build and live settlement, returned
 mail, capacity and natural profession progression still require manual validation.
 The discarded AH retry/bank-cooldown economy was not implemented.
+
+## 2026-10-06 full-build compatibility finding
+
+The isolated full `mangosd` build of module `933b1feb` against the deployed
+CMaNGOS core `2cce0b2e` stopped at step 241/1327. The compiler rejected
+`ProfessionStatusAction::Execute` passing a temporary
+`ItemQualifier(plan.processingInputId)` to `ChatHelper::formatItem`.
+`ChatHelper.h` declares that overload with a non-const `ItemQualifier&`, so the
+temporary cannot bind. This is a diagnostic formatting compile error, not a
+profession, recipe, bot identity, material availability or thermal failure.
+The recorded package peak was 73C; the abort threshold was not reached.
+
+The smallest proposed correction is a named local `ItemQualifier` inside the
+existing `processingInputId` diagnostic branch, then passing that variable to
+the existing formatter. Other tool/reagent messages in the same action already
+use this pattern. No formatter API change, duplicated formatter, planner change
+or sampled recipe exception is needed. The common PlayerBots item-link formatter
+remains authoritative. Only this action and this audit explanation need changes.
+
+Performance for approximately 1,500 bots is unchanged: the local qualifier is
+created only when an explicit profession diagnostic reports processing input;
+there is no new scan, cache, scheduler action or recurring background work.
+Validation: diff check, existing source regressions and the actual full core
+compilation of this translation unit, followed by the complete target/link.
+The isolated source retains its separately preserved AH money-delivery diff.
+The failed attempt did not install a binary or alter the original checkout.
+The normal 20:00 scheduled guest reboot subsequently brought the previous
+installed binary back online; active services do not establish build success.

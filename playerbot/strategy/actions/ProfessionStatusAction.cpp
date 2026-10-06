@@ -61,7 +61,10 @@ bool ProfessionStatusAction::Execute(Event& event)
         planText << ", prerequisite for " << (goal ? ChatHelper::formatSpell(goal) : std::to_string(plan.goalSpellId));
     }
     if (plan.processingInputId)
-        planText << ", input " << ChatHelper::formatItem(ItemQualifier(plan.processingInputId));
+    {
+        ItemQualifier inputQualifier(plan.processingInputId);
+        planText << ", input " << ChatHelper::formatItem(inputQualifier);
+    }
     ai->TellPlayerNoFacing(requester, planText.str(), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, true);
 
     std::map<uint32, uint32> missingReagents = plan.GetMissingReagents(ai);

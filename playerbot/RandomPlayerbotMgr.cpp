@@ -528,7 +528,8 @@ void RandomPlayerbotMgr::LogPlayerLocation()
 
                     sPlayerbotAIConfig.log("player_location.csv", out.str().c_str());
 
-                    if (sPlayerbotAIConfig.hasLog("bot_heartbeat.csv"))
+                    PlayerbotAI* heartbeatAi = bot->GetPlayerbotAI();
+                    if (sPlayerbotAIConfig.hasLog("bot_heartbeat.csv") && heartbeatAi && heartbeatAi->HasStrategy("debug heartbeat", BotState::BOT_STATE_NON_COMBAT))
                     {
                         std::ostringstream hb;
                         hb << sPlayerbotAIConfig.GetTimestampStr() << "+00,";

@@ -144,6 +144,8 @@ namespace ai
             creators["debug xp"] = [](PlayerbotAI* ai) { return new DebugXpStrategy(ai); };
             creators["debug equip"] = [](PlayerbotAI* ai) { return new DebugEquipStrategy(ai); };
             creators["debug logname"] = [](PlayerbotAI* ai) { return new DebugLogNameStrategy(ai); };
+            creators["debug heartbeat"] = [](PlayerbotAI* ai) { return new DebugHeartbeatStrategy(ai); };
+            creators["debug reactions"] = [](PlayerbotAI* ai) { return new DebugReactionsStrategy(ai); };
             creators["rtsc"] = [](PlayerbotAI* ai) { return new RTSCStrategy(ai); };
             creators["rtsc jump"] = [](PlayerbotAI* ai) { return new RTSCSJumptrategy(ai); };
             creators["maintenance"] = [](PlayerbotAI* ai) { return new MaintenanceStrategy(ai); };

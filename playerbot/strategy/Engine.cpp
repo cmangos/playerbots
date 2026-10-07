@@ -250,7 +250,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                         uint32 reactionElapsed = WorldTimer::getMSTimeDiff(reactionStart, WorldTimer::getMSTime());
                         pmo4.reset();
 
-                        if (actionExecuted && sPlayerbotAIConfig.hasLog("bot_reactions.csv"))
+                        if (actionExecuted && sPlayerbotAIConfig.hasLog("bot_reactions.csv") && ai->HasStrategy("debug reactions", BotState::BOT_STATE_NON_COMBAT))
                         {
                             std::ostringstream out;
                             out << sPlayerbotAIConfig.GetTimestampStr() << "+00,";

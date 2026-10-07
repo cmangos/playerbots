@@ -91,6 +91,36 @@ namespace ai
 #endif
     };
 
+    class DebugHeartbeatStrategy : public Strategy
+    {
+    public:
+        DebugHeartbeatStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug heartbeat"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "debug heartbeat"; }
+        virtual std::string GetHelpDescription() {
+            return "This strategy makes the bot write per-tick rows to bot_heartbeat.csv.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "debug"}; }
+#endif
+    };
+
+    class DebugReactionsStrategy : public Strategy
+    {
+    public:
+        DebugReactionsStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        virtual int GetType() override { return STRATEGY_TYPE_NONCOMBAT; }
+        virtual std::string getName() override { return "debug reactions"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "debug reactions"; }
+        virtual std::string GetHelpDescription() {
+            return "This strategy makes the bot write executed-action rows to bot_reactions.csv.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "debug"}; }
+#endif
+    };
+
     class DebugThreatStrategy : public Strategy
     {
     public:

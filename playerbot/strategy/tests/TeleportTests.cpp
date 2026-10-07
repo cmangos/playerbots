@@ -504,6 +504,31 @@ void TestRegistry::RegisterTeleportTests()
         "observe"
     });
 
+    RegisterTest("diag_mgroup_raid_40_stationary", {
+        gmInvisible,
+        needAlive,
+        "require bot is level=80",
+        "monitor group size > 39 => pass \"Raid fully formed (40 members)\"",
+        "monitor time > 900 => fail \"Timeout: raid formation never reached 40 (traveled <distance traveled>)\"",
+        "teleport stormwind",
+        "mgroup size=40 gear=best",
+        "observe"
+    });
+
+    RegisterTest("diag_mgroup_raid_40_host_roams", {
+        gmInvisible,
+        needAlive,
+        "require bot is level=80",
+        "monitor group size > 39 => pass \"Raid fully formed despite host roaming\"",
+        "monitor time > 900 => fail \"Timeout: raid formation never reached 40 with roaming host (traveled <distance traveled>)\"",
+        "teleport stormwind",
+        "mgroup size=40 gear=best",
+        "teleport orgrimmar",
+        "wait 120",
+        "teleport group expect=40",
+        "observe"
+    });
+
     // =========================================================================================
     // Tests for the primitives added for BL-20 / BL-26 / BL-28: move spawn, engage spawn, spawn dead
     // =========================================================================================

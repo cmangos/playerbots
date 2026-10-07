@@ -7,6 +7,8 @@
 #include <functional>
 #include <sstream>
 
+#include "Server/DBCStores.h"
+
 using namespace ai;
 
 namespace
@@ -238,11 +240,15 @@ namespace
                                   const std::function<void(ScenarioParams&, uint32 botLevel)>& adjustPerVariant = {})
     {
         struct Variant { const char* suffix; uint32 level; };
-        const Variant variants[3] = {
+        std::vector<Variant> variants = {
             { "_min", levelMin },
             { "",     levelMin + 10 },
             { "_max", uint32(DEFAULT_MAX_LEVEL) },
         };
+#ifdef MANGOSBOT_TWO
+        if (70 <= DEFAULT_MAX_LEVEL)
+            variants.push_back({ "_70", 70 });
+#endif
 
         for (const Variant& variant : variants)
         {
@@ -279,7 +285,7 @@ void TestRegistry::GenerateBossWalkTest()
         "mgroup size=$(group_size) gear=best",
         "gm visible on",
         "gm off",
-        "wait 30",
+        "wait group $(group_size) 180",
         "teleport $(instance_entry)",
         // BL-42 follow-up: a lost mgroup join used to surface as the group-size monitor's
         // misleading "Group dissolved" (party formed one short but otherwise healthy).
@@ -335,10 +341,13 @@ void TestRegistry::GenerateBossWalkTest()
 
             if (mapEntry->IsRaid())
             {
-#ifdef MANGOS_TWO
+#if defined(MANGOSBOT_ZERO) || defined(MANGOSBOT_ONE)
                 maxPlayers = std::to_string(instanceTemplate->maxPlayers);
 #else
-                maxPlayers = "25";
+                if (MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mapEntry->MapID, REGULAR_DIFFICULTY))
+                    maxPlayers = std::to_string(mapDiff->maxPlayers);
+                else
+                    maxPlayers = "25";
 #endif
                 startCommand = ".bot r @tank co + mark rti";
             }
@@ -383,7 +392,7 @@ void TestRegistry::GenerateBossEncounterTest()
         "monitor group size < $(group_size) => abort \"Group dissolved\"",
         "mgroup size=$(group_size) gear=best",
         "gm on",
-        "wait 30",
+        "wait group $(group_size) 180",
         "teleport $(instance_entry)",
         "wait 5",
         "teleport $(boss_destination)",
@@ -440,10 +449,13 @@ void TestRegistry::GenerateBossEncounterTest()
 
             if (mapEntry->IsRaid())
             {
-#ifdef MANGOS_TWO
+#if defined(MANGOSBOT_ZERO) || defined(MANGOSBOT_ONE)
                 maxPlayers = std::to_string(instanceTemplate->maxPlayers);
 #else
-                maxPlayers = "25";
+                if (MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mapEntry->MapID, REGULAR_DIFFICULTY))
+                    maxPlayers = std::to_string(mapDiff->maxPlayers);
+                else
+                    maxPlayers = "25";
 #endif
                 startCommand = ".bot r @tank co + mark rti";
             }
@@ -487,11 +499,11 @@ void TestRegistry::GenerateBossReachTest()
         "monitor party wiped => fail \"Party wiped on the way to $(boss_name)\"",
         "monitor bot dead => abort \"Bot died on the way to $(boss_name)\"",
         "monitor not on map $(instance_entry) => abort \"Bot left instance map\"",
-        "monitor group size < $(group_size) => abort \"Group dissolved\"",
+        "monitor group size < 2 => abort \"Group dissolved\"",
         "mgroup size=$(group_size) gear=best",
         "gm visible on",
         "gm off",
-        "wait 30",
+        "wait group $(group_size) 180",
         "teleport $(instance_entry)",
         // BL-42 follow-up: see instanceGroupTemplate - abort honestly on a short group.
         "teleport group expect=$(group_size)",
@@ -531,10 +543,13 @@ void TestRegistry::GenerateBossReachTest()
 
             if (mapEntry->IsRaid())
             {
-#ifdef MANGOS_TWO
+#if defined(MANGOSBOT_ZERO) || defined(MANGOSBOT_ONE)
                 maxPlayers = std::to_string(instanceTemplate->maxPlayers);
 #else
-                maxPlayers = "25";
+                if (MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mapEntry->MapID, REGULAR_DIFFICULTY))
+                    maxPlayers = std::to_string(mapDiff->maxPlayers);
+                else
+                    maxPlayers = "25";
 #endif
                 startCommand = ".bot r @tank co + mark rti";
             }

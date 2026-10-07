@@ -38,7 +38,24 @@ bool MonitorMovementDistance::IsConditionMet(const std::string& monitorStr, Play
     if (!TestRegistry::ParseLocation(name, loc))
         return false;
 
-    const float dist = bot->GetDistance(loc.coord_x, loc.coord_y, loc.coord_z);
+    float dist = bot->GetDistance(loc.coord_x, loc.coord_y, loc.coord_z);
+
+    const bool straightMeets = (op == "<") ? (dist < threshold) : (dist > threshold);
+    if (straightMeets && bot->GetMapId() == loc.mapid)
+    {
+        TravelPath path = TravelNodeMap::getFullPath(loc, WorldPosition(bot), bot);
+        if (!path.empty())
+        {
+            std::vector<WorldPosition> points = path.getPointPath();
+            float pathLength = 0.0f;
+            for (size_t i = 1; i < points.size(); ++i)
+                pathLength += points[i - 1].distance(points[i]);
+
+            if (pathLength > 0.0f)
+                dist = pathLength;
+        }
+    }
+
     if (op == "<")
         return dist < threshold;
 

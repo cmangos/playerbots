@@ -813,6 +813,7 @@ void TestRegistry::StartTest(PlayerbotAI* ai, const std::string& testName)
     ai->ChangeStrategy("+" + strategyName, BotState::BOT_STATE_NON_COMBAT);
     ai->ChangeStrategy("+" + strategyName, BotState::BOT_STATE_COMBAT);
     ai->ChangeStrategy("+" + strategyName, BotState::BOT_STATE_DEAD);
+    ai->ChangeStrategy("+debug heartbeat,+debug reactions", BotState::BOT_STATE_NON_COMBAT);
     ai->GetAiObjectContext()->GetValue<bool>("manual bool", "is running test")->Set(true);
 }
 

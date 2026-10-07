@@ -62,6 +62,7 @@ void TestAction::RegisterCommands()
     commands.push_back(std::make_unique<CommandPartySpawnGroup>());
     commands.push_back(std::make_unique<CommandFlowObserve>());
     commands.push_back(std::make_unique<CommandFlowMonitor>());
+    commands.push_back(std::make_unique<CommandFlowWaitGroup>());
     commands.push_back(std::make_unique<CommandFlowWaitDestination>());
     commands.push_back(std::make_unique<CommandFlowWait>());
     commands.push_back(std::make_unique<CommandFlowRepeat>());

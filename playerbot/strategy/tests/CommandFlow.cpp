@@ -89,6 +89,43 @@ TestResult CommandFlowWaitDestination::Execute(const std::string& params, Player
     return TestResult::PENDING;
 }
 
+TestResult CommandFlowWaitGroup::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    std::string value = params;
+    size_t space = value.find(' ');
+
+    std::string sizePart = space == std::string::npos ? value : value.substr(0, space);
+    std::string timeoutPart = space == std::string::npos ? std::string() : value.substr(space + 1);
+
+    uint32 expected = 0;
+    if (TryParseUInt32Strict(sizePart, expected, message, GetName()) != TestResult::PASS)
+        return TestResult::IMPOSSIBLE;
+
+    uint32 waitSeconds = 180;
+    if (!timeoutPart.empty() && TryParseUInt32Strict(timeoutPart, waitSeconds, message, GetName()) != TestResult::PASS)
+        return TestResult::IMPOSSIBLE;
+
+    if (!ctx.waitTime)
+        ctx.waitTime = WorldTimer::getMSTime();
+
+    Group* group = bot->GetGroup();
+
+    if (group && group->GetMembersCount() >= expected)
+    {
+        ctx.waitTime = 0;
+        return TestResult::PASS;
+    }
+
+    uint32 elapsed = WorldTimer::getMSTimeDiff(ctx.waitTime, WorldTimer::getMSTime());
+    if (elapsed >= waitSeconds * 1000)
+    {
+        ctx.waitTime = 0;
+        return TestResult::PASS;
+    }
+
+    return TestResult::PENDING;
+}
+
 TestResult CommandFlowRepeat::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
     if (params.empty())

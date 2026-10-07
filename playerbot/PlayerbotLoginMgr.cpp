@@ -460,7 +460,7 @@ void PlayerBotLoginMgr::SendHolders(const BotInfos& queue)
 
     for (auto& info : queue)
     {
-        if (sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") > 100)
+        if (sRandomPlayerbotMgr.GetDatabaseDelay("CharacterDatabase") > sPlayerbotAIConfig.loginDatabaseDelayMs)
             break;
         info->SendHolder();
     }

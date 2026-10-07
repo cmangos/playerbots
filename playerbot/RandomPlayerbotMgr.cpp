@@ -895,6 +895,18 @@ void RandomPlayerbotMgr::ScaleBotActivity()
     }
 }
 
+bool RandomPlayerbotMgr::BumpDeferredJoinTries(uint32 botGuid)
+{
+    uint32 tries = GetValue(botGuid, "create group tries") + 1;
+    SetValue(botGuid, "create group tries", tries);
+
+    if (tries < 300)
+        return false;
+
+    SetValue(botGuid, "create group tries", 0);
+    return true;
+}
+
 void RandomPlayerbotMgr::LoginFreeBots()
 {
     if (!sPlayerbotAIConfig.freeAltBots.empty() && sPlayerbotAIConfig.botAutologin != BotAutoLogin::LOGIN_ONLY_ALWAYS_ACTIVE)
@@ -933,11 +945,33 @@ void RandomPlayerbotMgr::LoginFreeBots()
 
                         if (master)
                         {
-                            bot->GetPlayerbotAI()->DoSpecificAction("join", Event("create group", "", master));
+                            Group* masterGroup = master->GetGroup();
+                            bool joined = masterGroup && bot->GetGroup() == masterGroup;
+
+                            if (!joined)
+                                joined = bot->GetPlayerbotAI()->DoSpecificAction("join", Event("create group", "", master));
+
+                            if (joined)
+                            {
+                                if (master->GetPlayerbotAI() && master->GetPlayerbotAI()->HasStrategy("debug heartbeat", BotState::BOT_STATE_NON_COMBAT))
+                                    bot->GetPlayerbotAI()->ChangeStrategy("+debug heartbeat,+debug reactions", BotState::BOT_STATE_NON_COMBAT);
+                                sRandomPlayerbotMgr.SetValue(botGuid, "create group tries", 0);
+                                sRandomPlayerbotMgr.SetValue(botGuid, "create group", 0);
+                            }
+                            else if (sRandomPlayerbotMgr.BumpDeferredJoinTries(botGuid))
+                            {
+                                sRandomPlayerbotMgr.SetValue(botGuid, "create group", 0);
+                            }
+                        }
+                        else if (sRandomPlayerbotMgr.BumpDeferredJoinTries(botGuid))
+                        {
+                            sRandomPlayerbotMgr.SetValue(botGuid, "create group", 0);
                         }
                     }
-
-                    sRandomPlayerbotMgr.SetValue(botGuid, "create group", 0);
+                    else
+                    {
+                        sRandomPlayerbotMgr.SetValue(botGuid, "create group", 0);
+                    }
                 }
 
                 if (sRandomPlayerbotMgr.GetValue(botGuid, "create gear"))
@@ -1037,7 +1071,7 @@ void RandomPlayerbotMgr::LoginFreeBots()
                 }
 
                 BotAlwaysOnline always = BotAlwaysOnline(sRandomPlayerbotMgr.GetValue(botGuid, "always"));
-                if (always != BotAlwaysOnline::ACTIVE)
+                if (always != BotAlwaysOnline::ACTIVE && !sRandomPlayerbotMgr.GetValue(botGuid, "create group"))
                 {
                     botsToRemove.push_back({accountId, botGuid});
                 }

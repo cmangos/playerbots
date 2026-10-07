@@ -2129,7 +2129,7 @@ std::list<std::string> PlayerbotHolder::HandleGroup(Player* master, const std::s
 
     RandomPlayerbotFactory factory(0);
 
-    uint32 maxTries = 10*groupSize;
+    uint32 maxTries = 100*groupSize;
 
     uint32 botsCreated = 0;
     uint32 continue_role = 0, continue_race = 0, continue_class = 0;
@@ -2141,13 +2141,18 @@ std::list<std::string> PlayerbotHolder::HandleGroup(Player* master, const std::s
         if (!maxTries)
             break;
 
-        BotRoles role = BotRoles(urand(BotRoles::BOT_ROLE_TANK, BotRoles::BOT_ROLE_DPS));
-
-        if (allowedClassNr[0][role] == 0)
+        static const BotRoles roleValues[] = { BOT_ROLE_TANK, BOT_ROLE_HEALER, BOT_ROLE_DPS };
+        std::vector<BotRoles> availableRoles;
+        for (BotRoles candidate : roleValues)
         {
-            continue_role++;
-            continue;
+            if (allowedClassNr[0][candidate] > 0)
+                availableRoles.push_back(candidate);
         }
+
+        if (availableRoles.empty())
+            break;
+
+        BotRoles role = availableRoles[urand(0, (uint32)availableRoles.size() - 1)];
 
         uint8 cls = factory.GetRandomClass(0, role);
 
@@ -2174,17 +2179,14 @@ std::list<std::string> PlayerbotHolder::HandleGroup(Player* master, const std::s
         paramStr << "level=" << masterLevel << " class=" << ChatHelper::formatClass(cls) << " group=" << master->GetName() << " " << passThroughParam; //Passthrough will override.
 
         auto result = HandleCreate(master, paramStr.str(), security);
+        bool created = !result.empty() && result.front().find("Bot created:") == 0;
         messages.splice(messages.end(), result);
 
-        if (!messages.empty())
+        if (created)
         {
-            auto lastMsg = messages.front();
-            if (lastMsg.find("Bot created:") != std::string::npos)
-            {
-                classesCreated[cls]++;
-                botsCreated++;
-                currentGroupSize++;
-            }
+            classesCreated[cls]++;
+            botsCreated++;
+            currentGroupSize++;
         }
     
         allowedClassNr[0][role]--; 
@@ -2309,6 +2311,23 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
     {
         messages.push_back("No tests matching '" + param + "' found");
         return messages;
+    }
+
+    if (!listTests && matchingTests.size() > 1)
+    {
+        std::vector<std::string> exact;
+        for (const auto& test : matchingTests)
+        {
+            std::string lowerTest = test;
+            std::transform(lowerTest.begin(), lowerTest.end(), lowerTest.begin(), ::tolower);
+            if (lowerTest == testNamePart)
+            {
+                exact.push_back(test);
+                break;
+            }
+        }
+        if (!exact.empty())
+            matchingTests = exact;
     }
 
     if (listTests)

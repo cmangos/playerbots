@@ -1318,6 +1318,69 @@ bool PlayerbotAI::SendResurrectRequest(Player* summoner, Player* target, uint32 
     return true;
 }
 
+namespace
+{
+    std::mutex killLogMutex;
+    std::map<uint32, time_t> killLogRegistry;
+
+    bool MarkKillLogged(ObjectGuid guid)
+    {
+        time_t now = time(nullptr);
+        std::scoped_lock lock(killLogMutex);
+        for (auto it = killLogRegistry.begin(); it != killLogRegistry.end();)
+        {
+            if (now - it->second > 60)
+                it = killLogRegistry.erase(it);
+            else
+                ++it;
+        }
+        if (killLogRegistry.find(guid.GetCounter()) != killLogRegistry.end())
+            return false;
+        killLogRegistry[guid.GetCounter()] = now;
+        return true;
+    }
+}
+
+void PlayerbotAI::LogKillEvents()
+{
+    if (!sPlayerbotAIConfig.hasLog("bot_events.csv"))
+        return;
+
+    if (!bot->IsInWorld())
+        return;
+
+    Map* map = bot->GetMap();
+    if (!map)
+        return;
+
+    AiObjectContext* context = GetAiObjectContext();
+    ObjectGuid target = AI_VALUE(ObjectGuid, "current target");
+
+    auto logIfDead = [this, map](ObjectGuid guid)
+    {
+        if (!guid.IsCreature())
+            return;
+
+        Creature* creature = map->GetCreature(guid);
+        if (!creature || creature->IsAlive())
+            return;
+
+        if (!MarkKillLogged(guid))
+            return;
+
+        sPlayerbotAIConfig.logEvent(this, "KillCreature", creature->GetName(), std::to_string(creature->GetEntry()));
+    };
+
+    if (target != m_killWatchTarget)
+    {
+        ObjectGuid previous = m_killWatchTarget;
+        m_killWatchTarget = target;
+        logIfDead(previous);
+    }
+
+    logIfDead(target);
+}
+
 void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
 {
     if (bot->IsBeingTeleported() || !bot->IsInWorld())
@@ -1395,6 +1458,7 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
     masterOutgoingPacketHandlers.Handle(helper);
 
 	DoNextAction(minimal);
+    LogKillEvents();
 }
 
 void PlayerbotAI::HandleTeleportAck()

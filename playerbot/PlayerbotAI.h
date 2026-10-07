@@ -709,6 +709,7 @@ public:
     void OnCombatEnded();
     void OnDeath();
     void OnResurrected();
+    void LogKillEvents();
     
     void SetActionDuration(const Action* action);
     void SetActionDuration(uint32 duration);
@@ -761,6 +762,7 @@ protected:
 	Player* bot;
 	Player* master;
 	uint32 accountId;
+    ObjectGuid m_killWatchTarget;
     AiObjectContext* aiObjectContext;
     Engine* currentEngine;
     ReactionEngine* reactionEngine;

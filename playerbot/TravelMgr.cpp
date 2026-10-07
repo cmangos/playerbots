@@ -1,4 +1,6 @@
 #include "playerbot/TravelMgr.h"
+#include <ctime>
+#include <cstdio>
 #include <numeric>
 #include <iomanip>
 
@@ -1468,6 +1470,7 @@ void TravelMgr::LoadQuestTravelTable()
     sPlayerbotAIConfig.openLog("zones.csv", "w");
     sPlayerbotAIConfig.openLog("creatures.csv", "w");
     sPlayerbotAIConfig.openLog("gos.csv", "w");
+    sPlayerbotAIConfig.openLog("map_offsets.csv", "w");
     sPlayerbotAIConfig.openLog("bot_movement.csv", "w");
     sPlayerbotAIConfig.openLog("bot_pathfinding.csv", "w");
     sPlayerbotAIConfig.openLog("pathfind_attempt.csv", "w");
@@ -1479,6 +1482,8 @@ void TravelMgr::LoadQuestTravelTable()
     sPlayerbotAIConfig.openLog("unload_grid.csv", "w");
     sPlayerbotAIConfig.openLog("unload_obj.csv", "w");
     sPlayerbotAIConfig.openLog("bot_events.csv", "w");
+    sPlayerbotAIConfig.openLog("bot_heartbeat.csv", "w");
+    sPlayerbotAIConfig.openLog("bot_reactions.csv", "w");
     sPlayerbotAIConfig.openLog("travel_map.csv", "w");
     sPlayerbotAIConfig.openLog("quest_map.csv", "w");
     sPlayerbotAIConfig.openLog("activity_pid.csv", "w");
@@ -1486,6 +1491,15 @@ void TravelMgr::LoadQuestTravelTable()
     sPlayerbotAIConfig.openLog("player_paths.csv", "w");
     sPlayerbotAIConfig.openLog("travel_destinations.csv", "w");
     sPlayerbotAIConfig.openLog("deadzone.csv", "w"); 
+    std::string logsDir = sConfig.GetStringDefault("LogsDir");
+    if (!logsDir.empty() && logsDir.back() != '/' && logsDir.back() != '\\')
+        logsDir.append("/");
+    time_t t = time(nullptr);
+    tm* aTm = localtime(&t);
+    char stamp[24];
+    std::strftime(stamp, sizeof(stamp), "%Y%m%d_%H%M%S", aTm);
+    std::rename((logsDir + "bot_test_results.log").c_str(),
+                (logsDir + "bot_test_results_" + stamp + ".log").c_str());
     sPlayerbotAIConfig.openLog("bot_test_results.log", "w", true);
     
 
@@ -1540,7 +1554,39 @@ void TravelMgr::LoadQuestTravelTable()
     sTravelNodeMap.saveNodeStore();
 
     LoadFishLocations();
-   
+
+    if (sPlayerbotAIConfig.hasLog("map_offsets.csv"))
+    {
+        std::vector<uint32> mapIds;
+        auto addMapId = [&mapIds](uint32 mapId)
+        {
+            for (uint32 seen : mapIds)
+                if (seen == mapId)
+                    return;
+            mapIds.push_back(mapId);
+        };
+
+        addMapId(0);
+        addMapId(1);
+        addMapId(530);
+        addMapId(571);
+
+        for (auto& node : sTravelNodeMap.getNodes())
+            if (!node->getPosition()->isOverworld())
+                addMapId(node->getMapId());
+
+        std::ostringstream out;
+        out << "mapId,offsetX,offsetY\n";
+        out << std::fixed << std::setprecision(4);
+        for (uint32 mapId : mapIds)
+        {
+            WorldPosition offset = sTravelNodeMap.getMapOffset(mapId);
+            out << mapId << "," << offset.getX() << "," << offset.getY() << "\n";
+        }
+
+        sPlayerbotAIConfig.log("map_offsets.csv", out.str().c_str());
+    }
+
     //Creature/gos/zone export.
     if (sPlayerbotAIConfig.hasLog("creatures.csv"))
     {

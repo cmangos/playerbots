@@ -78,6 +78,7 @@
 #include "QuestRewardActions.h"
 #include "ChooseTravelTargetAction.h"
 #include "SkillAction.h"
+#include "ProfessionStatusAction.h"
 #include "FactionAction.h"
 #include "SetValueAction.h"
 #include "GlyphAction.h"
@@ -218,6 +219,7 @@ namespace ai
             creators["jump"] = [](PlayerbotAI* ai) { return new JumpAction(ai); };
             creators["doquest"] = [](PlayerbotAI* ai) { return new FocusTravelTargetAction(ai); };
             creators["skill"] = [](PlayerbotAI* ai) { return new SkillAction(ai); };
+            creators["profession"] = [](PlayerbotAI* ai) { return new ProfessionStatusAction(ai); };
             creators["faction"] = [](PlayerbotAI* ai) { return new FactionAction(ai); };
             creators["set value"] = [](PlayerbotAI* ai) { return new SetValueAction(ai); };
             creators["glyph"] = [](PlayerbotAI* ai) { return new GlyphAction(ai); };

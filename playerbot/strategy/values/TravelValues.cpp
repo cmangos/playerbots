@@ -4,7 +4,9 @@
 #include "SharedValueContext.h"
 #include "BudgetValues.h"
 #include "GuildValues.h"
+#include "CraftValues.h"
 #include "Guilds/GuildMgr.h"
+#include "playerbot/RemoteServiceAccess.h"
 
 using namespace ai;
 
@@ -189,6 +191,9 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
             }
         }
 
+        if (gInfo->type == GAMEOBJECT_TYPE_SPELL_FOCUS && gInfo->spellFocus.focusId)
+            purpose |= (uint32)TravelDestinationPurpose::CraftingFocus;
+
         if (uint32 skillId = SkillIdToGatherEntry(goEntry))
         {
             if (skillId == SKILL_SKINNING)
@@ -204,6 +209,22 @@ EntryTravelPurposeMap EntryTravelPurposeMapValue::Calculate()
     }
 
     return entryPurposeMap;
+}
+
+SpellFocusEntryMap* SpellFocusEntryMapValue::Calculate()
+{
+    SpellFocusEntryMap* focusEntries = new SpellFocusEntryMap;
+    EntryTravelPurposeMap const& purposeMap = GAI_VALUE(EntryTravelPurposeMap, "entry travel purpose");
+    for (const auto& [entry, purpose] : purposeMap)
+    {
+        if (entry >= 0 || !(purpose & static_cast<uint32>(TravelDestinationPurpose::CraftingFocus)))
+            continue;
+
+        GameObjectInfo const* goInfo = ObjectMgr::GetGameObjectInfo(-entry);
+        if (goInfo && goInfo->type == GAMEOBJECT_TYPE_SPELL_FOCUS && goInfo->spellFocus.focusId)
+            (*focusEntries)[goInfo->spellFocus.focusId].push_back(entry);
+    }
+    return focusEntries;
 }
 
 uint32 EntryTravelPurposeMapValue::SkillIdToGatherEntry(int32 entry)
@@ -273,6 +294,8 @@ bool NeedTravelPurposeValue::Calculate()
             return true;
         break;
     case TravelDestinationPurpose::AH:
+        if (RemoteServiceAccess::IsEnabledFor(ai))
+            return false;
         if (AI_VALUE2(bool, "group or", "should ah sell,can ah sell,following party"))
             return true;
         if (AI_VALUE2(bool, "has strategy", "free") && AI_VALUE(bool, "should ah sell") && AI_VALUE(bool, "can ah sell"))
@@ -291,9 +314,16 @@ bool NeedTravelPurposeValue::Calculate()
         }
 
         return false;
+    case TravelDestinationPurpose::CraftingFocus:
+    {
+        ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+        return ProfessionCraftingPlanValue::ShouldTravelToSpellFocus(ai, plan);
+    }
     case TravelDestinationPurpose::Boss:
         return AI_VALUE(bool, "can fight boss");
     case TravelDestinationPurpose::Mail:
+        if (RemoteServiceAccess::IsEnabledFor(ai))
+            return false;
         return AI_VALUE(bool, "can get mail") && AI_VALUE(bool, "should get mail");
     case TravelDestinationPurpose::Explore:
         return ai->HasStrategy("explore", BotState::BOT_STATE_NON_COMBAT);    
@@ -429,6 +459,23 @@ bool ShouldTravelNamedValue::Calculate()
     else if (name == "reagent vendor")
     {
         return AI_VALUE(bool, "needs profession reagents");
+    }
+    else if (name == "profession gathering")
+    {
+        ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+        return ProfessionCraftingPlanValue::ShouldTravelForGathering(ai, plan);
+    }
+    else if (name == "profession vendor")
+    {
+        ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+        return ProfessionCraftingPlanValue::ShouldTravelToVendor(ai, plan);
+    }
+    else if (name == "profession auction house")
+    {
+        if (RemoteServiceAccess::IsEnabledFor(ai))
+            return false;
+        ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+        return ProfessionCraftingPlanValue::ShouldTravelToAuctionHouse(ai, plan);
     }
     else if (name == "mount")
     {

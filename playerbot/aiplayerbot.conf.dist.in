@@ -911,6 +911,10 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 
 #######################################
 #
+# Remote personal AH/mail/bank for autonomous random bots (0/1, default 0).
+# Requires patches/cmangos-wotlk-remote-services.patch in the core; without it,
+# normal world interactions remain active. No change to profession participation.
+# AiPlayerbot.RandomBotRemoteServices = 0
 # Auction house settings
 #
 # (0-1) If bot should query current AH listings outside of AH when determining whether the item is worth posting to AH
@@ -929,6 +933,32 @@ AiPlayerbot.RandomBotCountChangeMaxInterval = 7200
 #
 # (0-1) Whether bot should check ALL auction house listings when browsing (by default only checks a small amount)
 # AiPlayerbot.BotCheckAllAuctionListings = 0
+#
+# Autonomous profession progression. ProfessionProgressionPercent selects a stable
+# percentage of free random bots (0 disables participation, 100 enables all).
+# Guide: docs/PROFESSION_PROGRESSION.md in the PlayerBots source.
+# Disabling this stops autonomous planning/economy behavior; corrective
+# profession metadata preservation in PlayerbotFactory remains active.
+AiPlayerbot.ProfessionProgressionEnabled = 1
+AiPlayerbot.ProfessionProgressionPercent = 10
+# Planning cache check interval in seconds; the shared value cache uses half
+# this interval for periodic checks. Accepted casts may invalidate it sooner.
+AiPlayerbot.ProfessionPlanCheckInterval = 60
+# Maximum recipe casts planned at once.
+AiPlayerbot.ProfessionCraftBatchSize = 5
+# Minimum seconds between autonomous profession crafting batches.
+AiPlayerbot.ProfessionCraftCooldown = 30
+AiPlayerbot.ProfessionMaterialTarget = 20
+# Maximum vendor purchase operations during one interaction.
+AiPlayerbot.ProfessionVendorPurchaseLimit = 10
+# AH scans are per-bot throttled; purchases require buyout price validation.
+AiPlayerbot.ProfessionAHSearchCooldown = 600
+# Set AHPurchaseLimit or AHBudgetPercent to 0 to disable profession AH buying.
+AiPlayerbot.ProfessionAHPurchaseLimit = 2
+AiPlayerbot.ProfessionAHBudgetPercent = 10
+AiPlayerbot.ProfessionAHMaxPriceMultiplier = 1.25
+# Maximum current planned-output stacks posted in one AH interaction.
+AiPlayerbot.ProfessionAuctionPostLimit = 3
 #
 #######################################
 

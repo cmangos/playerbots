@@ -31,6 +31,8 @@
 #include "PlayerbotLoginMgr.h"
 #include "Entities/Transports.h"
 
+#include <regex>
+
 #ifndef MANGOSBOT_ZERO
 #ifdef CMANGOS
 #include "Arena/ArenaTeam.h"

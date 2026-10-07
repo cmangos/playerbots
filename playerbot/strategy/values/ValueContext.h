@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ActiveSpellValue.h"
+#include "playerbot/strategy/actions/RemoteServicesAction.h"
 #include "NearestGameObjects.h"
 #include "LogLevelValue.h"
 #include "NearestNpcsValue.h"
@@ -118,6 +119,12 @@ namespace ai
         {
             creators["active spell"] = [](PlayerbotAI* ai) { return new ActiveSpellValue(ai); };
             creators["craft"] = [](PlayerbotAI* ai) { return new CraftValue(ai); };
+            creators["profession crafting plan"] = [](PlayerbotAI* ai) { return new ProfessionCraftingPlanValue(ai); };
+            creators["profession fairness"] = [](PlayerbotAI* ai) { return new ProfessionCraftingFairnessValue(ai); };
+            creators["profession craft request"] = [](PlayerbotAI* ai) { return new ProfessionCraftRequestValue(ai); };
+            creators["profession material sources"] = [](PlayerbotAI* ai) { return new ProfessionMaterialSourcesValue(ai); };
+            creators["can craft profession"] = [](PlayerbotAI* ai) { return new CanCraftProfessionValue(ai); };
+            creators["profession tool purchases"] = [](PlayerbotAI* ai) { return new ProfessionToolPurchasesValue(ai); };
             creators["collision"] = [](PlayerbotAI* ai) { return new CollisionValue(ai); };
             creators["skip spells list"] = [](PlayerbotAI* ai) { return new SkipSpellsListValue(ai); };
             creators["avoid creature list"] = [](PlayerbotAI* ai) { return new AvoidCreatureListValue(ai); };
@@ -367,6 +374,7 @@ namespace ai
             creators["should guild bank withdraw"] = [](PlayerbotAI* ai) { return new ShouldGuildBankWithdrawValue(ai); };
 #endif
             creators["can get mail"] = [](PlayerbotAI* ai) { return new CanGetMailValue(ai); };
+            creators["remote services ready"] = [](PlayerbotAI* ai) { return new RemoteServicesReadyValue(ai); };
             creators["should get mail"] = [](PlayerbotAI* ai) { return new ShouldGetMailValue(ai); };
             creators["can fight equal"] = [](PlayerbotAI* ai) { return new CanFightEqualValue(ai); };
             creators["can fight elite"] = [](PlayerbotAI* ai) { return new CanFightEliteValue(ai); };
@@ -378,6 +386,7 @@ namespace ai
 
             creators["vendor has useful item"] = [](PlayerbotAI* ai) { return new VendorHasUsefulItemValue(ai); };
             creators["craft spells"] = [](PlayerbotAI* ai) { return new CraftSpellsValue(ai); };
+            creators["craft tool requirements"] = [](PlayerbotAI* ai) { return new CraftToolRequirementsValue(ai); };
             creators["enchant spells"] = [](PlayerbotAI* ai) { return new EnchantSpellsValue(ai); };
             creators["has reagents for"] = [](PlayerbotAI* ai) { return new HasReagentsForValue(ai); };
             creators["can craft spell"] = [](PlayerbotAI* ai) { return new CanCraftSpellValue(ai); };

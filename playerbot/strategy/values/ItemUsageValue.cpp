@@ -115,6 +115,34 @@ ItemUsage ItemUsageValue::Calculate()
     if (forceUsage == ForceItemUsage::FORCE_USAGE_BAG)
         return ItemUsage::ITEM_USAGE_KEEP;
 
+    ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    auto plannedReagent = professionPlan.retained.find(itemId);
+    if (ProfessionCraftingPlanValue::IsEnabledFor(ai) && plannedReagent != professionPlan.retained.end())
+    {
+        uint32 current = ai->GetInventoryItemsCountWithId(itemId);
+        if (current < plannedReagent->second)
+            return ItemUsage::ITEM_USAGE_SKILL;
+
+        // Keep a useful but bounded reserve. If inventory exceeds it, fall
+        // through to normal equip/use/AH/vendor handling; sellers re-evaluate
+        // after each stack, so they stop once the reserve remains.
+        uint32 reserve = std::max(plannedReagent->second,
+            std::min<uint32>(sPlayerbotAIConfig.professionMaterialTarget,
+                std::max<uint32>(1, proto->GetMaxStackSize())));
+        if (current <= reserve)
+            return ItemUsage::ITEM_USAGE_KEEP;
+    }
+
+    CraftToolRequirements recipeTools = AI_VALUE(CraftToolRequirements, "craft tool requirements");
+    if (recipeTools.UsesItem(proto))
+    {
+        // Tools are prerequisites, not consumable stacks. An owned compatible
+        // replacement satisfies the category without buying every alternative.
+        if (ai->GetInventoryItemsCountWithId(itemId))
+            return ItemUsage::ITEM_USAGE_KEEP;
+        return recipeTools.NeedsItem(proto, bot) ? ItemUsage::ITEM_USAGE_SKILL : ItemUsage::ITEM_USAGE_NONE;
+    }
+
     if (bot->GetGuildId())
     {
         std::vector<GuildShareItemEntry> shareList = AI_VALUE(std::vector<GuildShareItemEntry>, "guild share list");
@@ -918,6 +946,18 @@ bool ItemUsageValue::IsNeededForQuest(Player* player, uint32 itemId, bool ignore
 
 bool ItemUsageValue::IsItemNeededForSkill(ItemPrototype const* proto)
 {
+    // Recipe-defined tools belong in the existing buy/keep policy. This also
+    // covers professions added after the historical fixed tool list.
+    CraftToolRequirements tools = AI_VALUE(CraftToolRequirements, "craft tool requirements");
+    if (tools.items.count(proto->ItemId))
+        return true;
+#ifndef MANGOSBOT_ZERO
+    if (proto->TotemCategory)
+        for (uint32 category : tools.categories)
+            if (IsTotemCategoryCompatiableWith(proto->TotemCategory, category))
+                return true;
+#endif
+
     switch (proto->ItemId)
     {
     case 2901: //Mining pick
@@ -978,6 +1018,10 @@ bool ItemUsageValue::IsItemUsefulForSkill(ItemPrototype const* proto)
             return true;
 #ifndef MANGOSBOT_ZERO
         if (ai->HasSkill(SKILL_JEWELCRAFTING) && IsItemUsedBySkill(proto, SKILL_JEWELCRAFTING))
+            return true;
+#endif
+#ifdef MANGOSBOT_TWO
+        if (ai->HasSkill(SKILL_INSCRIPTION) && IsItemUsedBySkill(proto, SKILL_INSCRIPTION))
             return true;
 #endif
         if (ai->HasSkill(SKILL_MINING) &&

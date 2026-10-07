@@ -6,6 +6,7 @@
 
 #include "playerbot/strategy/values/SharedValueContext.h"
 #include "playerbot/strategy/values/TravelValues.h"
+#include "playerbot/strategy/values/CraftValues.h"
 #include "MotionGenerators/PathFinder.h"
 #include "TravelNode.h"
 #include "PlayerbotAI.h"
@@ -851,6 +852,29 @@ std::string GatherTravelDestination::GetTitle() const {
     return out.str();
 }
 
+bool CraftingFocusTravelDestination::IsPossible(const PlayerTravelInfo& /*info*/) const
+{
+    GameObjectInfo const* goInfo = GetGoInfo();
+    return goInfo && goInfo->type == GAMEOBJECT_TYPE_SPELL_FOCUS && goInfo->spellFocus.focusId;
+}
+
+bool CraftingFocusTravelDestination::IsActive(Player* bot, const PlayerTravelInfo& info) const
+{
+    if (!bot || !bot->GetPlayerbotAI() || !IsPossible(info))
+        return false;
+
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    AiObjectContext* context = ai->GetAiObjectContext();
+    ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    return ProfessionCraftingPlanValue::ShouldTravelToSpellFocus(ai, plan) &&
+        plan.spellFocusId == GetGoInfo()->spellFocus.focusId;
+}
+
+std::string CraftingFocusTravelDestination::GetTitle() const
+{
+    return "craft at " + ChatHelper::formatWorldEntry(GetEntry());
+}
+
 TravelTarget::TravelTarget(PlayerbotAI* ai) : AiObject(ai)
 {
     sTravelMgr.SetNullTravelTarget(this);
@@ -975,14 +999,6 @@ void TravelTarget::CheckStatus()
         return;
     }
 
-    if (statusTime != 0 && GetTimeLeft() <= 0 && !IsForced())
-    {
-        ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
-        SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
-        ai->GetAiObjectContext()->ClearValues("no active travel destinations");
-        return;
-    }
-
     if (GetStatus() == TravelStatus::TRAVEL_STATUS_TRAVEL)
     {
         bool HasArrived = tDestination->IsIn(bot);
@@ -1022,6 +1038,15 @@ void TravelTarget::CheckStatus()
 bool TravelTarget::IsActive() {
     if (m_status == TravelStatus::TRAVEL_STATUS_NONE || m_status == TravelStatus::TRAVEL_STATUS_EXPIRED || m_status == TravelStatus::TRAVEL_STATUS_PREPARE)
         return false;
+
+    // Activity reads also enforce the deadline when movement is not scheduled.
+    if (statusTime != 0 && GetTimeLeft() <= 0 && !IsForced())
+    {
+        SetStatus(TravelStatus::TRAVEL_STATUS_EXPIRED);
+        ai->GetAiObjectContext()->ClearValues("no active travel destinations");
+        ai->TellDebug(ai->GetMaster(), "Travel target expired because the status time was exceeded.", "debug travel");
+        return false;
+    }
 
     return true;
 };
@@ -1400,6 +1425,9 @@ void TravelMgr::LoadQuestTravelTable()
                 case TravelDestinationPurpose::GatherMining:
                 case TravelDestinationPurpose::GatherHerbalism:
                     dests.push_back(AddDestination<GatherTravelDestination>(entry, purposeFlag));
+                    break;
+                case TravelDestinationPurpose::CraftingFocus:
+                    dests.push_back(AddDestination<CraftingFocusTravelDestination>(entry, purposeFlag));
                     break;
                 case TravelDestinationPurpose::Grind:
                     dests.push_back(AddDestination<GrindTravelDestination>(entry, purposeFlag));

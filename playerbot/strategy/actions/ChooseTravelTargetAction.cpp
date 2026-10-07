@@ -7,6 +7,7 @@
 #include "playerbot/strategy/values/SharedValueContext.h"
 #include "playerbot/strategy/values/GuildValues.h"
 #include "playerbot/strategy/values/FreeMoveValues.h"
+#include "playerbot/strategy/values/CraftValues.h"
 #include "Guilds/GuildMgr.h"
 #include <iomanip>
 
@@ -714,7 +715,23 @@ bool RequestTravelTargetAction::Execute(Event& event)
 
     ai->TellDebug(ai->GetMaster(), "Getting new destination ranges for " + TravelDestinationPurposeName.at(actionPurpose), "debug travel");
 
-    *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async, [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center, purpose = actionPurpose]() { return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)purpose); });
+    std::vector<int32> entries;
+    if (actionPurpose == TravelDestinationPurpose::CraftingFocus)
+    {
+        ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+        SpellFocusEntryMap* focusEntryMap = GAI_VALUE(SpellFocusEntryMap*, "spell focus entry map");
+        auto focusEntries = focusEntryMap->find(plan.spellFocusId);
+        if (!plan.spellFocusId || focusEntries == focusEntryMap->end() || focusEntries->second.empty())
+            return false;
+        entries = focusEntries->second;
+    }
+
+    *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async,
+        [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center,
+        purpose = actionPurpose, entries]()
+        {
+            return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)purpose, entries);
+        });
 
     AI_VALUE(TravelTarget*, "travel target")->SetStatus(TravelStatus::TRAVEL_STATUS_PREPARE);
     SET_AI_VALUE2(std::string, "manual string", "future travel purpose", getQualifier());
@@ -1253,6 +1270,54 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
                 return sTravelMgr.GetPartitions(center, partitions, travelInfo, (uint32)TravelDestinationPurpose::Vendor, entries, false);
             });
     }
+    else if (travelName == "profession gathering")
+    {
+        ProfessionMaterialSources sources = AI_VALUE(ProfessionMaterialSources, "profession material sources");
+        if (!sources.HasGathering())
+            return false;
+
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async,
+            [gatherEntries = sources.gatherEntries, partitions = travelPartitions,
+            travelInfo = PlayerTravelInfo(bot), center]()
+            {
+                PartitionedTravelList list;
+                for (const auto& [purpose, entries] : gatherEntries)
+                {
+                    PartitionedTravelList subList = sTravelMgr.GetPartitions(center, partitions, travelInfo,
+                        purpose, entries, false);
+                    for (auto& [partition, points] : subList)
+                        list[partition].insert(list[partition].end(), points.begin(), points.end());
+                }
+                return list;
+            });
+    }
+    else if (travelName == "profession vendor")
+    {
+        ProfessionMaterialSources sources = AI_VALUE(ProfessionMaterialSources, "profession material sources");
+        if (!sources.HasVendor())
+            return false;
+
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async,
+            [entries = sources.vendorEntries, partitions = travelPartitions,
+            travelInfo = PlayerTravelInfo(bot), center]()
+            {
+                return sTravelMgr.GetPartitions(center, partitions, travelInfo,
+                    (uint32)TravelDestinationPurpose::Vendor, entries, false);
+            });
+    }
+    else if (travelName == "profession auction house")
+    {
+        ProfessionMaterialSources sources = AI_VALUE(ProfessionMaterialSources, "profession material sources");
+        if (!sources.HasAuctionHouse())
+            return false;
+
+        *AI_VALUE(FutureDestinations*, "future travel destinations") = std::async(std::launch::async,
+            [partitions = travelPartitions, travelInfo = PlayerTravelInfo(bot), center]()
+            {
+                return sTravelMgr.GetPartitions(center, partitions, travelInfo,
+                    (uint32)TravelDestinationPurpose::AH, {}, false);
+            });
+    }
     else
     {
         uint32 useFlags;
@@ -1316,6 +1381,9 @@ bool RequestNamedTravelTargetAction::isAllowed() const
     else if (name == "guild meeting")
         return true;
     else if (name == "reagent vendor")
+        return true;
+    else if (name == "profession gathering" || name == "profession vendor" ||
+        name == "profession auction house")
         return true;
     else if (name == "guild order")
         return true;

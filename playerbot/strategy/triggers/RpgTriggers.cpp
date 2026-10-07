@@ -1,6 +1,8 @@
 
 #include "playerbot/playerbot.h"
 #include "RpgTriggers.h"
+#include "playerbot/RemoteServiceAccess.h"
+#include "playerbot/strategy/values/CraftValues.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/strategy/actions/GuildCreateActions.h"
 #include "Social/SocialMgr.h"
@@ -188,6 +190,8 @@ bool RpgSellTrigger::IsActive()
 
 bool RpgAHSellTrigger::IsActive()
 {
+    if (RemoteServiceAccess::IsEnabledFor(ai))
+        return false;
     GuidPosition guidP(getGuidP());
 
     if (!guidP.HasNpcFlag(UNIT_NPC_FLAG_AUCTIONEER))
@@ -207,6 +211,8 @@ bool RpgAHSellTrigger::IsActive()
 
 bool RpgAHBuyTrigger::IsActive()
 {
+    if (RemoteServiceAccess::IsEnabledFor(ai))
+        return false;
     GuidPosition guidP(getGuidP());
 
     if (!guidP.HasNpcFlag(UNIT_NPC_FLAG_AUCTIONEER))
@@ -218,7 +224,9 @@ bool RpgAHBuyTrigger::IsActive()
     if (GuidPosition(bot).IsHostileTo(guidP, bot->GetInstanceId()))
         return false;
 
-    if (!AI_VALUE(bool, "can ah buy"))
+    ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    bool canBuyProfessionMaterials = ProfessionCraftingPlanValue::ShouldTravelToAuctionHouse(ai, plan);
+    if (!AI_VALUE(bool, "can ah buy") && !canBuyProfessionMaterials)
         return false;
 
     return true;
@@ -226,6 +234,8 @@ bool RpgAHBuyTrigger::IsActive()
 
 bool RpgGetMailTrigger::IsActive()
 {
+    if (RemoteServiceAccess::IsEnabledFor(ai))
+        return false;
     GuidPosition guidP(getGuidP());
 
     if (!guidP.isGoType(GAMEOBJECT_TYPE_MAILBOX))
@@ -662,6 +672,18 @@ bool RpgCraftTrigger::IsActive()
     if (!guidP.GetWorldObject(bot->GetInstanceId()))
         return false;
 
+    ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+    if (ProfessionCraftingPlanValue::IsEnabledFor(ai) && professionPlan.IsValid() &&
+        professionPlan.spellFocusId && guidP.IsGameObject() &&
+        guidP.GetGameObjectInfo()->type == GAMEOBJECT_TYPE_SPELL_FOCUS &&
+        guidP.GetGameObjectInfo()->spellFocus.focusId == professionPlan.spellFocusId)
+    {
+        return ProfessionCraftingPlanValue::IsCraftCooldownReady(ai) &&
+            professionPlan.GetMissingReagents(ai).empty() &&
+            AI_VALUE2(bool, "can craft spell", professionPlan.spellId) &&
+            AI_VALUE2(bool, "should craft spell", professionPlan.spellId);
+    }
+
     std::vector<uint32> spellIds = AI_VALUE(std::vector<uint32>, "craft spells");
 
     for (uint32 spellId : spellIds)
@@ -931,6 +953,8 @@ bool RpgGossipTalkTrigger::IsActive()
 
 bool RpgBankDepositTrigger::IsActive()
 {
+    if (RemoteServiceAccess::IsEnabledFor(ai))
+        return false;
     GuidPosition guidP(getGuidP());
 
     if (!guidP.HasNpcFlag(UNIT_NPC_FLAG_BANKER))
@@ -947,6 +971,8 @@ bool RpgBankDepositTrigger::IsActive()
 
 bool RpgBankWithdrawTrigger::IsActive()
 {
+    if (RemoteServiceAccess::IsEnabledFor(ai))
+        return false;
     GuidPosition guidP(getGuidP());
 
     if (!guidP.HasNpcFlag(UNIT_NPC_FLAG_BANKER))

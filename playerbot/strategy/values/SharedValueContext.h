@@ -7,6 +7,7 @@
 #include "TravelValues.h"
 #include "LootValues.h"
 #include "MountValues.h"
+#include "CraftValues.h"
 #include "playerbot/PlayerbotAI.h"
 
 namespace ai
@@ -20,12 +21,15 @@ namespace ai
 
             creators["item drop map"] = [](PlayerbotAI* ai) { return new ItemDropMapValue(ai); };
             creators["drop map"] = [](PlayerbotAI* ai) { return new DropMapValue(ai); };
+            creators["gather source map"] = [](PlayerbotAI* ai) { return new GatherSourceMapValue(ai); };
             creators["item drop list"] = [](PlayerbotAI* ai) { return new ItemDropListValue(ai); };
             creators["entry loot list"] = [](PlayerbotAI* ai) { return new EntryLootListValue(ai); };
             creators["loot chance"] = [](PlayerbotAI* ai) { return new LootChanceValue(ai); };
 
             creators["vendor map"] = [](PlayerbotAI* ai) { return new VendorMapValue(ai); };
             creators["item vendor list"] = [](PlayerbotAI* ai) { return new ItemVendorListValue(ai); };
+            creators["craft tool items"] = [](PlayerbotAI* ai) { return new CraftToolItemsValue(ai); };
+            creators["processing sources"] = [](PlayerbotAI* ai) { return new ProcessingSourcesValue(ai); };
 
             creators["entry quest relation"] = [](PlayerbotAI* ai) { return new EntryQuestRelationMapValue(ai); };
 
@@ -37,6 +41,7 @@ namespace ai
           
 
             creators["entry travel purpose"] = [](PlayerbotAI* ai) { return new EntryTravelPurposeMapValue(ai); };
+            creators["spell focus entry map"] = [](PlayerbotAI* ai) { return new SpellFocusEntryMapValue(ai); };
             creators["entry guidps"] = [](PlayerbotAI* ai) { return new EntryGuidpsValue(ai); };
 
             creators["full mount list"] = [](PlayerbotAI* ai) { return new FullMountListValue(ai); };

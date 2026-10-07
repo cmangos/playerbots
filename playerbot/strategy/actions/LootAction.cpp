@@ -8,6 +8,7 @@
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/LootStrategyValue.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/strategy/values/CraftValues.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/SharedValueContext.h"
 
@@ -277,6 +278,12 @@ bool StoreLootAction::Execute(Event& event)
     if (!loot)
         return false;
 
+    bool professionProcessingLoot = false;
+#ifdef MANGOSBOT_TWO
+    professionProcessingLoot = loot->GetLootType() == LOOT_MILLING ||
+        loot->GetLootType() == LOOT_PROSPECTING;
+#endif
+
     if (gold > 0)
     {
         WorldPacket packet(CMSG_LOOT_MONEY, 0);
@@ -363,6 +370,9 @@ bool StoreLootAction::Execute(Event& event)
     WorldPacket packet(CMSG_LOOT_RELEASE, 8);
     packet << guid;
     bot->GetSession()->HandleLootReleaseOpcode(packet);
+
+    if (professionProcessingLoot)
+        ProfessionCraftingPlanValue::CompleteProcessingLoot(ai, guid);
 
     ai->AccelerateRespawn(guid);
 

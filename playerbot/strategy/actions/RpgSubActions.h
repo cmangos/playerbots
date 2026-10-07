@@ -5,6 +5,7 @@
 #include "ChooseRpgTargetAction.h"
 #include "UseItemAction.h"
 #include "playerbot/strategy/values/LastMovementValue.h"
+#include "playerbot/strategy/values/CraftValues.h"
 #include "SayAction.h"
 
 namespace ai
@@ -191,7 +192,12 @@ namespace ai
         virtual std::string GetRpgActionName() const override { return "bidding on items on ah at"; };
     private:
         virtual std::string ActionName() override { return "ah bid"; }
-        virtual Event ActionEvent(Event event) override { return Event("rpg action", "vendor"); }
+        virtual Event ActionEvent(Event event) override
+        {
+            ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+            return Event("rpg action",
+                ProfessionCraftingPlanValue::ShouldTravelToAuctionHouse(ai, plan) ? "profession" : "vendor");
+        }
     };
 
     class RpgGetMailAction : public RpgSubAction

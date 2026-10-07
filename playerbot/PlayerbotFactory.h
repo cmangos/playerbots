@@ -78,6 +78,8 @@ private:
     void InitTradeSkills();
     void UpdateTradeSkills();
     void SetRandomSkill(uint16 id);
+    bool IsPrimaryProfession(uint16 id) const;
+    bool IsAssignedProfession(uint16 id) const;
     void InitReputations();
     void InitSpells();
     void ClearSpells();

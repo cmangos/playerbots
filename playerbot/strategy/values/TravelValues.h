@@ -32,6 +32,18 @@ namespace ai
         static uint32 SkillIdToGatherEntry(int32 entry);
     };
 
+    // Spell focus ID -> signed game-object template entries. Built once from
+    // the same cached entry metadata used by TravelMgr.
+    using SpellFocusEntryMap = std::unordered_map<uint32, std::vector<int32>>;
+
+    class SpellFocusEntryMapValue : public SingleCalculatedValue<SpellFocusEntryMap*>
+    {
+    public:
+        SpellFocusEntryMapValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "spell focus entry map") {}
+        virtual ~SpellFocusEntryMapValue() { delete value; }
+        virtual SpellFocusEntryMap* Calculate() override;
+    };
+
     enum class TravelDestinationPurpose : uint32
     {
         None = 0,
@@ -56,7 +68,8 @@ namespace ai
         GatherFishing = 1 << 17,
         Bank = 1 << 18,
         Explore = 1 << 19,
-        MaxFlag = 1 << 20
+        CraftingFocus = 1 << 20,
+        MaxFlag = 1 << 21
     };
 
     const std::unordered_map<TravelDestinationPurpose, std::string> TravelDestinationPurposeName =
@@ -82,6 +95,7 @@ namespace ai
         {TravelDestinationPurpose::GatherFishing, "GatherFishing"},
         {TravelDestinationPurpose::Explore, "Explore"},
         {TravelDestinationPurpose::Bank, "Bank"},
+        {TravelDestinationPurpose::CraftingFocus, "CraftingFocus"},
         {TravelDestinationPurpose::MaxFlag, "MaxFlag"}
     };
 

@@ -18,10 +18,12 @@ bool NetherspiteBeamsCheatNeedRefreshTrigger::IsActive()
     MaNGOS::UnitListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatures, u_check);
     Cell::VisitAllObjects(bot, searcher, 100);
 
-    Unit* boss = ai->GetUnit(strategy->GetBossGuid());
     if (creatures.empty())
         return false;
-    if (!strategy || !boss)
+    if (!strategy)
+        return false;
+    Unit* boss = ai->GetUnit(strategy->GetBossGuid());
+    if (!boss)
         return false;
 
     //Checking that this bot is not Netherspite target to prevent overloading tank trigger
@@ -41,9 +43,12 @@ bool NetherspiteBeamsPlayerCheatNeedRefreshTrigger::IsActive()
         return false;
     if (!strategy || !strategy->GetBossGuid())
         return false;
+    Unit* boss = ai->GetUnit(strategy->GetBossGuid());
+    if (!boss)
+        return false;
 
     //Checking that this bot is Netherspite target
-    return ai->IsTank(bot) && ai->GetUnit(strategy->GetBossGuid())->GetVictim() == bot;
+    return ai->IsTank(bot) && boss->GetVictim() == bot;
 }
 
 bool ShadeOfAranCastingArcaneExplosionTrigger::IsActive()

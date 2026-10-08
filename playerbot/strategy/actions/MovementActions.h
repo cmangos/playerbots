@@ -67,6 +67,9 @@ namespace ai
         void WaitForReach(float distance);
         void WaitForReach(const Movement::PointsArray& path);
 
+        bool MoveFromGroup(float distance);
+        bool Move(float angle, float distance);
+
         bool IsMovingAllowed(Unit* target);
         bool IsMovingAllowed(uint32 mapId, float x, float y, float z);
         bool Flee(Unit *target);

@@ -154,6 +154,33 @@ ObjectGuid PullTargetValue::Get()
     return guid;
 }
 
+ObjectGuid FindTargetValue::Calculate()
+{
+    if (qualifier == "")
+    {
+        return ObjectGuid();
+    }
+    Group* group = bot->GetGroup();
+    if (!group)
+    {
+        return ObjectGuid();
+    }
+    for (auto const guid : context->GetValue<std::list<ObjectGuid>>("possible targets no los")->Get())
+    {
+        Unit* unit = ai->GetUnit(guid);
+        if (!unit)
+            continue;
+
+        std::wstring wnamepart;
+        Utf8toWStr(unit->GetName(), wnamepart);
+        wstrToLower(wnamepart);
+        if (!qualifier.empty() && qualifier.length() == wnamepart.length() && Utf8FitTo(qualifier, wnamepart))
+            return unit->GetObjectGuid();
+    }
+
+    return ObjectGuid();
+}
+
 ObjectGuid FollowTargetValue::Calculate()
 {
     Unit* followTarget = AI_VALUE(GuidPosition, "manual follow target").GetUnit(bot->GetInstanceId());

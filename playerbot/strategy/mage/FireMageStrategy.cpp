@@ -562,12 +562,20 @@ void FireMageBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& trigge
 {
     FireMageBuffStrategy::InitCombatTriggers(triggers);
     MageBuffPveStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "molten armor",
+        NextAction::array(0, new NextAction("molten armor", ACTION_HIGH), NULL)));
 }
 
 void FireMageBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     FireMageBuffStrategy::InitNonCombatTriggers(triggers);
     MageBuffPveStrategy::InitNonCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "molten armor",
+        NextAction::array(0, new NextAction("molten armor", ACTION_HIGH), NULL)));
 }
 
 void FireMageBuffPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

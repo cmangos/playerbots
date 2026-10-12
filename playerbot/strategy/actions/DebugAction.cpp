@@ -3866,6 +3866,9 @@ bool DebugAction::HandlePrintTravel(Event& event, Player* requester, const std::
             bool isActive = dest->IsActive(bot, info);
             for (auto& point : dest->GetPoints())
             {
+                if (!point)
+                    continue;
+
                 GuidPosition* guidP = dynamic_cast<GuidPosition*>(point);
 
                 if (guidP && guidP->IsEventUnspawned()) //Skip points that are not spawned due to events.
@@ -3880,9 +3883,16 @@ bool DebugAction::HandlePrintTravel(Event& event, Player* requester, const std::
                 out << "\"";
                 if (type == typeid(QuestTravelDestination))
                 {
-                    uint32 questId = ((QuestTravelDestination*)dest)->GetQuestId();
-                    Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
-                    out << quest->GetTitle();
+                    if (QuestTravelDestination const* questDest = dynamic_cast<QuestTravelDestination const*>(dest))
+                    {
+                        uint32 questId = questDest->GetQuestId();
+                        Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+                        out << (quest ? quest->GetTitle() : (std::to_string(questId) + " (no template)"));
+                    }
+                    else
+                    {
+                        out << "0";
+                    }
                 }
                 else if (type != typeid(ExploreTravelDestination))
                 {

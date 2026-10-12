@@ -1518,26 +1518,27 @@ std::string PlayerbotHolder::HandleBotDo(Player* bot, Player* master, const std:
 
     Action* action = nullptr;
 
-    size_t i = std::string::npos;
+    std::string probe = param;
     while (true)
     {
-        action = ai->GetAiObjectContext()->GetAction(param);
+        action = ai->GetAiObjectContext()->GetAction(probe);
 
         if (action)
             break;
 
-        size_t found = param.rfind(" ", i);
+        size_t found = probe.rfind(' ');
         if (found == std::string::npos || !found)
             break;
 
-        actionName = param.substr(0, found);
-        subparam = param.substr(found + 1);
-
-        i = found - 1;
+        actionName = probe.substr(0, found);
+        probe = actionName;
     }
 
     if (!action)
         return "action not found";
+
+    if (param.size() > probe.size() && param.compare(0, probe.size(), probe) == 0 && param[probe.size()] == ' ')
+        subparam = param.substr(probe.size() + 1);
 
     ai->RecordMessages(true, true);
 

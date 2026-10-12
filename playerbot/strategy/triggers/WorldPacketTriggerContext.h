@@ -13,8 +13,7 @@ namespace ai
             creators["gossip hello"] = [](PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "gossip hello"); };
             creators["group invite"] = [](PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "group invite"); };
             creators["group set leader"] = [](PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "group set leader"); };
-            creators["not enough money"] = [](PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "not enough money"); };
-            creators["not enough reputation"] = [](PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "not enough reputation"); };
+            creators["buy failed"] = [](PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "buy failed"); };
             creators["cannot equip"] = [](PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "cannot equip"); };
             creators["use game object"] = [](PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "use game object"); };
             creators["complete quest"] = [](PlayerbotAI* ai) { return new WorldPacketTrigger(ai, "complete quest"); };

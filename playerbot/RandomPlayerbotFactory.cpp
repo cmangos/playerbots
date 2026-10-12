@@ -692,21 +692,7 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
     if (!sPlayerbotAIConfig.randomBotAutoCreate)
     {
-        for (uint32 accountNumber = 0; accountNumber < sPlayerbotAIConfig.randomBotAccountCount; ++accountNumber)
-        {
-            std::ostringstream out; out << sPlayerbotAIConfig.randomBotAccountPrefix << accountNumber;
-            std::string accountName = out.str();
-
-            auto results = LoginDatabase.PQuery("SELECT id FROM account where username = '%s'", accountName.c_str());
-            if (!results)
-                continue;
-
-            Field* fields = results->Fetch();
-            uint32 accountId = fields[0].GetUInt32();
-
-            sPlayerbotAIConfig.randomBotAccounts.push_back(accountId);
-        }
-
+        LoadRandomBotAccounts();
         return;
     }
 
@@ -944,6 +930,9 @@ void RandomPlayerbotFactory::CreateRandomBots()
 
         totalRandomBotChars += sAccountMgr.GetCharactersCount(accountId);
     }
+
+    LoadRandomBotAccounts();
+
     if (sPlayerbotAIConfig.useFixedClassRaceCounts && !remaining.empty())
     {
 	sLog.outError("Unable to create all requested fixed class/race bots due to account character limits.");
@@ -1006,6 +995,22 @@ void RandomPlayerbotFactory::CreateRandomBots()
     sLog.outString("%zu random bot accounts with %d characters available", sPlayerbotAIConfig.randomBotAccounts.size(), totalRandomBotChars+botsCreated);
 }
 
+void RandomPlayerbotFactory::LoadRandomBotAccounts()
+{
+    sPlayerbotAIConfig.randomBotAccounts.clear();
+
+    auto results = LoginDatabase.PQuery(
+        "SELECT id FROM account WHERE username LIKE '%s%%'",
+        sPlayerbotAIConfig.randomBotAccountPrefix.c_str());
+    if (!results)
+        return;
+
+    do
+    {
+        Field* fields = results->Fetch();
+        sPlayerbotAIConfig.randomBotAccounts.push_back(fields[0].GetUInt32());
+    } while (results->NextRow());
+}
 
 void RandomPlayerbotFactory::CreateRandomGuilds()
 {

@@ -65,6 +65,7 @@ class RandomPlayerbotFactory
 	public:
         bool CreateRandomBot(uint8 cls, uint8 inputRace = 0);
         static void CreateRandomBots();
+        static void LoadRandomBotAccounts();
         static void CreateRandomGuilds();
         static void CreateRandomArenaTeams();
         static std::string CreateRandomGuildName();

@@ -9,7 +9,7 @@ std::map<BuyResult, std::string> BuyFailedAction::messages;
 
 bool BuyFailedAction::Execute(Event& event)
 {
-    Player* requester = GetMaster(); 
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     if (!requester)
         return false;
 

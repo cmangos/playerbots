@@ -862,7 +862,7 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
     std::string logName = "load_map_grid.csv";
 
     bool hasMmap = false;
-    if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+    if (isSharedNavmeshMap(mapId))
         hasMmap = isMmapLoaded(mapId, 0, x, y);
     else
         hasMmap = isMmapLoaded(mapId, instanceId, x, y);
@@ -878,7 +878,7 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
     if (!hasMmap)
     {
 #ifndef MANGOSBOT_TWO
-        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        if (isSharedNavmeshMap(mapId))
             isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
         else
         {
@@ -886,7 +886,7 @@ bool WorldPosition::loadMapAndVMap(uint32 mapId, uint32 instanceId, int x, int y
             isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, x, y);
         }
 #else
-        if (mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571)
+        if (isSharedNavmeshMap(mapId))
         {
             isLoaded = MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), mapId, 0, x, y, 0);
         }
@@ -974,7 +974,7 @@ std::vector<WorldPosition> WorldPosition::getPathStepFrom(const WorldPosition& s
     if (sTravelNodeMap.gethasToGen())
         instanceId = 0;
     else if (!bot || bot->GetMapId() != startPos.getMapId())
-        instanceId = hasher(std::this_thread::get_id());
+        instanceId = isSharedNavmeshMap(startPos.getMapId()) ? 0 : hasher(std::this_thread::get_id());
     else
         instanceId = bot->GetInstanceId();
     //Load mmaps and vmaps between the two points.
@@ -1095,14 +1095,14 @@ std::vector<WorldPosition> WorldPosition::getPathFromPath(const std::vector<Worl
     if (sTravelNodeMap.gethasToGen())
         instanceId = 0;
     else if (!bot || bot->GetMapId() != currentPos.getMapId())
-        instanceId = hasher(std::this_thread::get_id());
+        instanceId = isSharedNavmeshMap(currentPos.getMapId()) ? 0 : hasher(std::this_thread::get_id());
     else
         instanceId = bot->GetInstanceId();
     //Load mmaps and vmaps between the two points.
 
     std::unique_ptr<PathFinder> pathfinder = nullptr;
 
-    if (bot && instanceId == bot->GetInstanceId())
+    if (bot && bot->GetMapId() == getMapId() && instanceId == bot->GetInstanceId())
         pathfinder = std::make_unique<PathFinder>(bot);
     else
         pathfinder = std::make_unique<PathFinder>(getMapId(), instanceId);

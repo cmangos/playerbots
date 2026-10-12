@@ -124,6 +124,7 @@ namespace ai
         void printWKT(std::ostringstream& out) const { printWKT({ *this }, out); }
 
         bool isOverworld() const { return mapid == 0 || mapid == 1 || mapid == 530 || mapid == 571 || mapid == 609; }
+        static bool isSharedNavmeshMap(uint32 mapId) { return mapId == 0 || mapId == 1 || mapId == 530 || mapId == 571; }
         bool isBg() const { return mapid == 30 || mapid == 489 || mapid == 529 || mapid == 566 || mapid == 607 || mapid == 628; }
         bool isArena() const { return mapid == 559 || mapid == 572 || mapid == 562 || mapid == 617 || mapid == 618; }
         bool isInstance() const { return !isOverworld() || mapid == 609;}

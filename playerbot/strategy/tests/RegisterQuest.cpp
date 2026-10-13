@@ -83,9 +83,15 @@ namespace
         return out;
     }
 
-    // "a"/"h"/"n" from the RequiredRaces mask; 0 (both/all) counts as neutral.
-    std::string FactionToken(uint32 requiredRaces)
+    // "a"/"h"/"n" from the RequiredRaces mask plus giver/taker faction hostility; 0 (both/all)
+    // counts as neutral when no NPC of the quest rules out a team.
+    std::string FactionToken(uint32 requiredRaces, bool teamAlliance, bool teamHorde)
     {
+        if (!teamHorde)
+            return "a";
+        if (!teamAlliance)
+            return "h";
+
         bool horde = (requiredRaces & RACEMASK_HORDE) != 0;
         bool alliance = (requiredRaces & RACEMASK_ALLIANCE) != 0;
 
@@ -98,6 +104,20 @@ namespace
         return "n";
     }
 
+    bool NpcHostileToTeam(uint32 creatureEntry, bool horde)
+    {
+        CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(creatureEntry);
+        if (!cInfo)
+            return false;
+
+        FactionTemplateEntry const* npcFaction = sFactionTemplateStore.LookupEntry(cInfo->Faction);
+        FactionTemplateEntry const* teamFaction = sFactionTemplateStore.LookupEntry(horde ? 2 : 1);
+        if (!npcFaction || !teamFaction)
+            return false;
+
+        return npcFaction->IsHostileTo(*teamFaction);
+    }
+
     // One require line drives both the in-test assertions (RequireBotIs) and the bot creation
     // parameters (GetBotCreationRequirement feeds CreateBot, which takes the same key=value
     // tokens). Classes/races are emitted numerically - ChatHelper parses ids as well.
@@ -105,7 +125,7 @@ namespace
     // Defaults: no class restriction -> paladin (solid solo class). Race is left to the factory
     // (GetRandomRace keeps race/class valid) unless the quest restricts the race; a quest that
     // restricts BOTH race and class is skipped by the caller (combination risk).
-    std::string RequireLine(uint32 level, Quest const* quest)
+    std::string RequireLine(uint32 level, Quest const* quest, bool teamAlliance, bool teamHorde)
     {
         std::ostringstream out;
         out << "require bot is level=" << level;
@@ -144,7 +164,11 @@ namespace
             }
         }
 
-        if ((raceMask & RACEMASK_ALLIANCE) && !(raceMask & RACEMASK_HORDE))
+        if (!teamHorde)
+            out << " faction=alliance";
+        else if (!teamAlliance)
+            out << " faction=horde";
+        else if ((raceMask & RACEMASK_ALLIANCE) && !(raceMask & RACEMASK_HORDE))
             out << " faction=alliance";
         else if ((raceMask & RACEMASK_HORDE) && !(raceMask & RACEMASK_ALLIANCE))
             out << " faction=horde";
@@ -343,6 +367,8 @@ void TestRegistry::RegisterQuestSuiteTests()
     uint32 pickupTests = 0, handinTests = 0, objTests = 0;
     uint32 pickupTravelTests = 0, pickupAimedTests = 0;
     uint32 skipNoGiver = 0, skipNoTaker = 0, skipNoSpawn = 0, skipGated = 0, skipChain = 0, skipGatedCombo = 0, skipNoLevel = 0;
+    uint32 skipAutoRewardHandin = 0;
+    uint32 skipEnemyNpc = 0;
     uint32 skipEventSpawn = 0;
     uint32 skipEventQuest = 0, skipCondition = 0, skipBreadcrumb = 0, skipZeroCount = 0;
     uint32 skipLogs = 0;
@@ -485,9 +511,6 @@ void TestRegistry::RegisterQuestSuiteTests()
         levels.insert(edgeLevel);
         levels.insert(QUEST_LEVEL_CAP);
 
-        std::string base = "quest_" + FactionToken(raceMask) + "_" + std::to_string(minLevel) + "_" +
-            std::to_string(questLevel) + "_" + SanitizeQuestName(quest->GetTitle()) + "_" + std::to_string(questId);
-
         auto const& giver = giverSpawns.find(questId);
         auto const& taker = takerSpawns.find(questId);
 
@@ -508,6 +531,28 @@ void TestRegistry::RegisterQuestSuiteTests()
             logSkip("taker spawn event-gated (event not active)", questId);
             haveTaker = false;
         }
+
+        bool questTeamAlliance = !(raceMask & RACEMASK_HORDE) || (raceMask & RACEMASK_ALLIANCE);
+        bool questTeamHorde = !(raceMask & RACEMASK_ALLIANCE) || (raceMask & RACEMASK_HORDE);
+        if (haveGiver && NpcHostileToTeam(giver->second.entry, true))
+            questTeamHorde = false;
+        if (haveGiver && NpcHostileToTeam(giver->second.entry, false))
+            questTeamAlliance = false;
+        if (haveTaker && NpcHostileToTeam(taker->second.entry, true))
+            questTeamHorde = false;
+        if (haveTaker && NpcHostileToTeam(taker->second.entry, false))
+            questTeamAlliance = false;
+
+        if (!questTeamAlliance && !questTeamHorde)
+        {
+            ++skipEnemyNpc;
+            logSkip("giver/taker hostile to both player teams", questId);
+            continue;
+        }
+
+        std::string token = FactionToken(raceMask, questTeamAlliance, questTeamHorde);
+        std::string base = "quest_" + token + "_" + std::to_string(minLevel) + "_" +
+            std::to_string(questLevel) + "_" + SanitizeQuestName(quest->GetTitle()) + "_" + std::to_string(questId);
 
         std::vector<std::string> chainLines;
         bool chainOk = ChainSpoofLines(quest, chainLines);
@@ -540,7 +585,7 @@ void TestRegistry::RegisterQuestSuiteTests()
             {
                 std::vector<std::string> lines;
                 lines.push_back("# quest pickup test " + std::to_string(questId));
-                lines.push_back(RequireLine(level, quest));
+                lines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
                 for (auto const& line : chainLines)
                     lines.push_back(line);
                 lines.push_back("monitor quest active " + std::to_string(questId) + " => pass \"Quest picked up\"");
@@ -563,7 +608,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                 {
                     std::vector<std::string> tlines;
                     tlines.push_back("# quest pickup travel test " + std::to_string(questId));
-                    tlines.push_back(RequireLine(level, quest));
+                    tlines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
                     for (auto const& line : chainLines)
                         tlines.push_back(line);
                     tlines.push_back("monitor quest active " + std::to_string(questId) + " => pass \"Quest picked up on arrival\"");
@@ -597,7 +642,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                 {
                     std::vector<std::string> alines;
                     alines.push_back("# quest pickup aimed test " + std::to_string(questId));
-                    alines.push_back(RequireLine(level, quest));
+                    alines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
                     for (auto const& line : chainLines)
                         alines.push_back(line);
                     alines.push_back("monitor quest active " + std::to_string(questId) + " => pass \"Quest picked up (aimed)\"");
@@ -628,7 +673,20 @@ void TestRegistry::RegisterQuestSuiteTests()
         }
 
         // ---- handin (state-injected accept + complete; AI must turn in at the taker) ----
-        if (haveTaker)
+        bool hasObjectives = false;
+        for (uint8 i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT && !hasObjectives; ++i)
+            hasObjectives = quest->ReqItemId[i] || quest->ReqItemCount[i];
+        for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT && !hasObjectives; ++i)
+            hasObjectives = quest->ReqCreatureOrGOId[i] || quest->ReqSpell[i];
+        bool autoRewardHandin = haveTaker && quest->IsAutoComplete() && !hasObjectives;
+
+        if (autoRewardHandin)
+        {
+            ++skipAutoRewardHandin;
+            logSkip("objective-free auto-reward handin (instant transact quest)", questId);
+        }
+
+        if (haveTaker && !autoRewardHandin)
         {
             std::ostringstream locName;
             locName << "quest_" << questId << "_taker";
@@ -637,7 +695,7 @@ void TestRegistry::RegisterQuestSuiteTests()
 
             std::vector<std::string> lines;
             lines.push_back("# quest handin test " + std::to_string(questId));
-            lines.push_back(RequireLine(atLevel, quest));
+            lines.push_back(RequireLine(atLevel, quest, questTeamAlliance, questTeamHorde));
             lines.push_back("accept quest " + std::to_string(questId));
             lines.push_back("complete quest " + std::to_string(questId));
             lines.push_back("monitor quest rewarded " + std::to_string(questId) + " => pass \"Quest handed in\"");
@@ -646,6 +704,8 @@ void TestRegistry::RegisterQuestSuiteTests()
             lines.push_back("teleport quest_" + std::to_string(questId) + "_taker");
             lines.push_back("require creature alive quest_" + std::to_string(questId) + "_taker");
             lines.push_back("set destination quest_" + std::to_string(questId) + "_taker");
+            lines.push_back("set rpg target quest_" + std::to_string(questId) + "_taker");
+            lines.push_back("set value string next rpg action => rpg end quest");
             lines.push_back("wait 15");
             lines.push_back("observe");
 
@@ -654,7 +714,7 @@ void TestRegistry::RegisterQuestSuiteTests()
             RegisterTest(testName.str(), lines);
             ++handinTests;
         }
-        else
+        else if (!haveTaker)
         {
             ++skipNoTaker;
         }
@@ -694,7 +754,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                 {
                     std::vector<std::string> lines;
                     lines.push_back("# quest objective tick test " + std::to_string(questId) + " obj " + std::to_string(i));
-                    lines.push_back(RequireLine(level, quest));
+                    lines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
                     lines.push_back("accept quest " + std::to_string(questId));
                     lines.push_back("monitor quest objective " + std::to_string(questId) + " " + std::to_string(i) + " count > 0 => pass \"Objective ticked\"");
                     lines.push_back("monitor time > 420 => fail \"Timeout: objective not ticked after <time elapsed>\"");
@@ -713,7 +773,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                 {
                     std::vector<std::string> lines;
                     lines.push_back("# quest objective clear test " + std::to_string(questId) + " obj " + std::to_string(i));
-                    lines.push_back(RequireLine(level, quest));
+                    lines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
                     lines.push_back("accept quest " + std::to_string(questId));
                     if (count > 1)
                         lines.push_back("force objectives " + std::to_string(questId) + " except " + std::to_string(i));
@@ -737,7 +797,8 @@ void TestRegistry::RegisterQuestSuiteTests()
     sLog.outString("[QUESTGEN] generated %u pickup, %u pickup_travel, %u pickup_aimed, %u handin, %u objective tests",
         pickupTests, pickupTravelTests, pickupAimedTests, handinTests, objTests);
     sLog.outError("[QUESTGEN] skips: %u no-giver, %u no-taker, %u no-spawn, %u gated, %u chain, %u race+class, %u level, "
-        "%u event-inactive, %u condition, %u breadcrumb, %u event-gated-spawn, %u event-gated-objspawns, %u zero-count",
+        "%u event-inactive, %u condition, %u breadcrumb, %u event-gated-spawn, %u event-gated-objspawns, %u zero-count, %u auto-reward-handin, %u enemy-npc",
         skipNoGiver, skipNoTaker, skipNoSpawn, skipGated, skipChain, skipGatedCombo, skipNoLevel,
-        skipEventQuest, skipCondition, skipBreadcrumb, skipEventSpawn, skipEventSpawnObj, skipZeroCount);
+        skipEventQuest, skipCondition, skipBreadcrumb, skipEventSpawn, skipEventSpawnObj, skipZeroCount, skipAutoRewardHandin,
+        skipEnemyNpc);
 }

@@ -556,6 +556,39 @@ uint32 DialogStatusValue::getDialogStatus(Player* bot, int32 questgiver, uint32 
 	return dialogStatus;
 }
 
+bool CanAcceptQuestValue::CanAcceptAutoCompleteQuest(Player* bot, int32 questgiver)
+{
+	QuestRelationsMapBounds rbounds;
+
+	if (questgiver > 0)
+		rbounds = sObjectMgr.GetCreatureQuestRelationsMapBounds(questgiver);
+	else
+		rbounds = sObjectMgr.GetGOQuestRelationsMapBounds(questgiver * -1);
+
+	for (QuestRelationsMap::const_iterator itr = rbounds.first; itr != rbounds.second; ++itr)
+	{
+		Quest const* pQuest = sObjectMgr.GetQuestTemplate(itr->second);
+
+		if (!pQuest || !pQuest->IsActive() || !pQuest->IsAutoComplete())
+			continue;
+
+		if (bot->GetQuestStatus(itr->second) != QUEST_STATUS_NONE)
+			continue;
+
+		if (bot->CanRewardQuest(pQuest, false))
+			continue;
+
+		if (pQuest->IsRepeatable() && bot->getQuestStatusMap()[itr->second].m_rewarded)
+			continue;
+
+		if (bot->CanSeeStartQuest(pQuest) && bot->SatisfyQuestLevel(pQuest, false))
+			return true;
+	}
+
+	return false;
+}
+
+
 bool NeedQuestRewardValue::Calculate()
 {
 	uint32 questId = stoi(getQualifier());

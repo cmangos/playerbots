@@ -143,7 +143,8 @@ namespace ai
     {
     public:
         CanAcceptQuestValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can accept quest npc"), Qualified() {}
-        virtual bool Calculate() override  { return AI_VALUE2(uint32, "dialog status", getQualifier()) == DIALOG_STATUS_AVAILABLE;};
+        static bool CanAcceptAutoCompleteQuest(Player* bot, int32 questgiver);
+        virtual bool Calculate() override  { return AI_VALUE2(uint32, "dialog status", getQualifier()) == DIALOG_STATUS_AVAILABLE || CanAcceptAutoCompleteQuest(bot, stoi(getQualifier()));};
     };
 
     //Can accept low level quest from npc
@@ -155,10 +156,11 @@ namespace ai
         virtual bool Calculate() override
         {
             uint32 dialogStatus = AI_VALUE2(uint32, "dialog status", getQualifier());
+            bool autoComplete = CanAcceptQuestValue::CanAcceptAutoCompleteQuest(bot, stoi(getQualifier()));
 #ifndef MANGOSBOT_TWO
-            return dialogStatus == DIALOG_STATUS_CHAT;
+            return dialogStatus == DIALOG_STATUS_CHAT || autoComplete;
 #else
-            return dialogStatus == DIALOG_STATUS_LOW_LEVEL_AVAILABLE;
+            return dialogStatus == DIALOG_STATUS_LOW_LEVEL_AVAILABLE || autoComplete;
 #endif   
         };
     };

@@ -147,7 +147,9 @@ TestResult CommandSetupForceCompleteQuest::Execute(const std::string& params, Pl
         }
     }
 
-    return TestResult::PASS;
+    bot->CompleteQuest(questId);
+
+    return bot->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE ? TestResult::PASS : TestResult::IMPOSSIBLE;
 }
 
 // =====================================================

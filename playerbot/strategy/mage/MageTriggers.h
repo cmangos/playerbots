@@ -88,6 +88,14 @@ namespace ai
     {
     public:
         ArcaneBlastTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "arcane blast") {}
+        virtual bool IsActive() override;
+    };
+
+    class ArcaneBlastFullTrigger : public BuffTrigger
+    {
+    public:
+        ArcaneBlastFullTrigger(PlayerbotAI* ai) : BuffTrigger(ai, "arcane blast") {}
+        virtual bool IsActive() override;
     };
 
     class CounterspellInterruptSpellTrigger : public InterruptSpellTrigger

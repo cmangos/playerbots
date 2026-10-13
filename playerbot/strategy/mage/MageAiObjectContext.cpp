@@ -172,6 +172,7 @@ namespace ai
                 creators["spellsteal"] = [](PlayerbotAI* ai) { return new SpellstealTrigger(ai); };
                 creators["missile barrage"] = [](PlayerbotAI* ai) { return new MissileBarrageTrigger(ai); };
                 creators["arcane blast"] = [](PlayerbotAI* ai) { return new ArcaneBlastTrigger(ai); };
+                creators["arcane blast full"] = [](PlayerbotAI* ai) { return new ArcaneBlastFullTrigger(ai); };
                 creators["counterspell on enemy healer"] = [](PlayerbotAI* ai) { return new CounterspellEnemyHealerTrigger(ai); };
                 creators["arcane power"] = [](PlayerbotAI* ai) { return new ArcanePowerTrigger(ai); };
                 creators["presence of mind"] = [](PlayerbotAI* ai) { return new PresenceOfMindTrigger(ai); };
@@ -239,6 +240,7 @@ namespace ai
                 creators["lesser invisibility"] = [](PlayerbotAI* ai) { return new CastLesserInvisibilityAction(ai); };
                 creators["evocation"] = [](PlayerbotAI* ai) { return new CastEvocationAction(ai); };
                 creators["arcane blast"] = [](PlayerbotAI* ai) { return new CastArcaneBlastAction(ai); };
+                creators["arcane blast tbc"] = [](PlayerbotAI* ai) { return new CastArcaneBlastTBCAction(ai); };
                 creators["arcane barrage"] = [](PlayerbotAI* ai) { return new CastArcaneBarrageAction(ai); };
                 creators["arcane missiles"] = [](PlayerbotAI* ai) { return new CastArcaneMissilesAction(ai); };
                 creators["counterspell on enemy healer"] = [](PlayerbotAI* ai) { return new CastCounterspellOnEnemyHealerAction(ai); };

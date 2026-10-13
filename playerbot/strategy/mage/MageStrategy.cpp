@@ -739,19 +739,11 @@ void MageBuffPvpStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& trigger
 void MageBuffPveStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     BuffPveStrategy::InitCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "molten armor",
-        NextAction::array(0, new NextAction("molten armor", ACTION_HIGH), NULL)));
 }
 
 void MageBuffPveStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     BuffPveStrategy::InitNonCombatTriggers(triggers);
-
-    triggers.push_back(new TriggerNode(
-        "molten armor",
-        NextAction::array(0, new NextAction("molten armor", ACTION_NORMAL), NULL)));
 }
 
 void MageBuffRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)

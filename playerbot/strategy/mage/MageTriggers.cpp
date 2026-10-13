@@ -64,3 +64,21 @@ bool NoImprovedScorchDebuffTrigger::IsActive()
 
     return false;
 }
+
+bool ArcaneBlastTrigger::IsActive()
+{
+    // when not max stacks of arcane blast, this is true
+    Unit* target = GetTarget();
+#ifdef MANGOSBOT_TWO
+	return target && !ai->HasAura(spell, target, true, checkIsOwner) && target->IsAlive();
+#else
+	return target && (!ai->HasAura(spell, target, true, checkIsOwner) || AI_VALUE2(uint8, "mana", "self target") > sPlayerbotAIConfig.mediumMana) && target->IsAlive();
+#endif
+}
+
+bool ArcaneBlastFullTrigger::IsActive()
+{
+    // when max stacks of arcane blast, this is true
+    Unit* target = GetTarget();
+	return target && (ai->HasAura(spell, target, true, checkIsOwner) && AI_VALUE2(uint8, "mana", "self target") <= sPlayerbotAIConfig.mediumMana) && target->IsAlive();
+}

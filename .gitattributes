@@ -9,3 +9,4 @@
 
 # special files which must ignore whitespace
 *.patch      whitespace=-trailing-space
+/patches/cmangos-wotlk-remote-services.patch text eol=lf

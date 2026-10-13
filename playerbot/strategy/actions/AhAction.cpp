@@ -5,6 +5,9 @@
 #include "playerbot/RandomItemMgr.h"
 #include "playerbot/strategy/values/BudgetValues.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/strategy/values/CraftValues.h"
+#include "playerbot/strategy/values/ProfessionProgressionPolicy.h"
+#include "playerbot/RemoteServiceAccess.h"
 
 using namespace ai;
 
@@ -13,6 +16,13 @@ bool AhAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     std::string text = event.getParam();
 
+    RemoteServiceAccess access(ai, RemoteService::Auction);
+    if (RemoteServiceAccess::IsAllowed(bot, RemoteService::Auction))
+    {
+        std::unique_lock<std::mutex> lock(sRandomPlayerbotMgr.m_ahActionMutex, std::try_to_lock);
+        return lock.owns_lock() && ExecuteCommand(requester, text, bot);
+    }
+
     std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs");
     for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
     {
@@ -20,14 +30,11 @@ bool AhAction::Execute(Event& event)
         if (!npc)
             continue;
 
-        if (!sRandomPlayerbotMgr.m_ahActionMutex.try_lock()) //Another bot is using the Auction right now. Try again later.
+        std::unique_lock<std::mutex> lock(sRandomPlayerbotMgr.m_ahActionMutex, std::try_to_lock);
+        if (!lock.owns_lock()) //Another bot is using the Auction right now. Try again later.
             return false;
 
-        bool doneAuction = ExecuteCommand(requester, text, npc);
-
-        sRandomPlayerbotMgr.m_ahActionMutex.unlock();
-
-        return doneAuction;
+        return ExecuteCommand(requester, text, npc);
     }
 
     ai->TellPlayerNoFacing(requester, "Cannot find auctioneer nearby");
@@ -58,6 +65,9 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
         //resulting undercut value for reporting
         uint32 resultingUndercut = 0;
         uint32 postedItems = 0;
+        uint32 postedProfessionItems = 0;
+        bool professionEconomyActive = ProfessionCraftingPlanValue::IsEnabledFor(ai);
+        ProfessionCraftingPlan professionPlan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
 
         for (auto item : items)
         {
@@ -81,6 +91,11 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
                 return false;
 
             const ItemPrototype* proto = item->GetProto();
+            bool plannedProfessionOutput = professionEconomyActive && professionPlan.IsValid() &&
+                professionPlan.itemId && proto->ItemId == professionPlan.itemId;
+            if (plannedProfessionOutput &&
+                postedProfessionItems >= sPlayerbotAIConfig.professionAuctionPostLimit)
+                continue;
 
             if (!pricePerItemCache[proto->ItemId])
             {
@@ -96,8 +111,10 @@ bool AhAction::ExecuteCommand(Player* requester, std::string text, Unit* auction
 
             if (didPost)
             {
-                    postedItem |= true;
-                    postedItems++;
+                postedItem = true;
+                postedItems++;
+                if (plannedProfessionOutput)
+                    postedProfessionItems++;
             }
 
             if (!urand(0, 5 + (items.size()- postedItems)/10))
@@ -171,12 +188,129 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
 
     AuctionHouseObject::AuctionEntryMap const& map = auctionHouse->GetAuctions();
 
-    if (map.empty())
-        return false;
-
     AuctionEntry* auction = nullptr;
 
     std::vector<std::pair<AuctionEntry*, uint32>> auctionPowers;
+
+    if (text == "profession")
+    {
+        ProfessionCraftingPlan plan = AI_VALUE(ProfessionCraftingPlan, "profession crafting plan");
+        std::map<uint32, uint32> remaining = plan.GetMissingSupplies(ai);
+        if (!ProfessionCraftingPlanValue::IsEnabledFor(ai) || !plan.IsValid() || remaining.empty() ||
+            sPlayerbotAIConfig.professionAhPurchaseLimit == 0 ||
+            sPlayerbotAIConfig.professionAhBudgetPercent == 0)
+            return false;
+
+        ProfessionMaterialSources sources = AI_VALUE(ProfessionMaterialSources, "profession material sources");
+        if (!sources.HasAuctionHouse() ||
+            !ProfessionCraftingPlanValue::ShouldTravelToAuctionHouse(ai, plan))
+            return false;
+
+        std::unordered_set<uint32> auctionItems(sources.auctionItems.begin(), sources.auctionItems.end());
+        const auto missingTools = ProfessionCraftingPlanValue::GetMissingTools(ai);
+        auto reserveTarget = [&](uint32 itemId)
+        {
+            return profession::SupplyReserveTarget(missingTools.count(itemId) != 0,
+                plan.required.count(itemId) != 0, sPlayerbotAIConfig.professionMaterialTarget);
+        };
+
+        time_t now = time(nullptr);
+        // Record attempts as well as purchases so an empty AH cannot cause a
+        // large bot population to rescan every update tick.
+        SET_AI_VALUE2(int32, "manual int", "last profession ah search", static_cast<int32>(now));
+
+        RESET_AI_VALUE2(uint32, "free money for", (uint32)NeedMoneyFor::tradeskill);
+        uint32 budget = ProfessionCraftingPlanValue::GetAhBudget(ai);
+        if (!budget)
+            return false;
+
+        std::unordered_map<uint32, uint32> currentCounts;
+        for (const auto& [itemId, missingCount] : remaining)
+            currentCounts[itemId] = ai->GetInventoryItemsCountWithId(itemId);
+
+        std::vector<std::pair<uint32, uint32>> candidates; // auction id, unit price
+        for (const auto& entry : map)
+        {
+            AuctionEntry* candidate = entry.second;
+            if (!candidate || candidate->owner == bot->GetGUIDLow() || !candidate->buyout || !candidate->itemCount)
+                continue;
+
+            auto missing = remaining.find(candidate->itemTemplate);
+            if (missing == remaining.end() || !missing->second ||
+                auctionItems.find(candidate->itemTemplate) == auctionItems.end())
+                continue;
+
+            ItemPrototype const* proto = sObjectMgr.GetItemPrototype(candidate->itemTemplate);
+            if (!proto)
+                continue;
+
+            uint32 maxStack = std::max<uint32>(1, proto->GetMaxStackSize());
+            if (!profession::IsReasonableAuctionStack(candidate->itemCount,
+                currentCounts[candidate->itemTemplate], missing->second,
+                reserveTarget(candidate->itemTemplate), maxStack))
+                continue;
+
+            uint32 unitPrice = candidate->buyout / candidate->itemCount;
+            uint64 maxUnitPrice = static_cast<uint64>(ItemUsageValue::GetBotBuyPrice(proto, bot)) *
+                sPlayerbotAIConfig.professionAhMaxPriceMultiplier;
+            if (!unitPrice || !maxUnitPrice || unitPrice > maxUnitPrice || candidate->buyout > budget)
+                continue;
+
+            candidates.push_back(std::make_pair(candidate->Id, unitPrice));
+        }
+
+        std::sort(candidates.begin(), candidates.end(),
+            [](const std::pair<uint32, uint32>& left, const std::pair<uint32, uint32>& right)
+            {
+                return left.second < right.second;
+            });
+
+        uint32 purchases = 0;
+        for (const auto& candidate : candidates)
+        {
+            if (purchases >= sPlayerbotAIConfig.professionAhPurchaseLimit)
+                break;
+
+            auction = auctionHouse->GetAuction(candidate.first);
+            if (!auction || !auction->itemCount || auction->buyout > budget)
+                continue;
+
+            auto remainingItem = remaining.find(auction->itemTemplate);
+            if (remainingItem == remaining.end() || !remainingItem->second ||
+                auctionItems.find(auction->itemTemplate) == auctionItems.end())
+                continue;
+
+            ItemPrototype const* proto = sObjectMgr.GetItemPrototype(auction->itemTemplate);
+            if (!proto || !profession::IsReasonableAuctionStack(auction->itemCount,
+                currentCounts[auction->itemTemplate], remainingItem->second,
+                reserveTarget(auction->itemTemplate),
+                std::max<uint32>(1, proto->GetMaxStackSize())))
+                continue;
+
+            ItemQualifier qualifier(auction);
+            std::string reason = ItemUsageValue::ReasonForNeed(
+                ItemUsage::ITEM_USAGE_SKILL, qualifier, auction->itemCount, bot);
+            uint32 itemId = auction->itemTemplate;
+            uint32 itemCount = auction->itemCount;
+            uint32 price = auction->buyout;
+
+            if (!BidItem(requester, auction, price, auctioneer, true, reason))
+                continue;
+
+            budget -= price;
+            currentCounts[itemId] += itemCount;
+            remainingItem->second = itemCount >= remainingItem->second ? 0 : remainingItem->second - itemCount;
+            purchases++;
+        }
+
+        if (purchases)
+            context->ClearValues("profession material sources");
+
+        return purchases > 0;
+    }
+
+    if (map.empty())
+        return false;
 
     if (text == "vendor")
     {

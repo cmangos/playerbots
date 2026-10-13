@@ -3,6 +3,7 @@
 #include "BankAction.h"
 #include "playerbot/strategy/values/ItemCountValue.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/RemoteServiceAccess.h"
 
 using namespace ai;
 
@@ -37,6 +38,9 @@ bool BankAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
     std::string text = event.getParam();
 
+    if (RemoteServiceAccess::IsUsableNow(ai))
+        return ExecuteCommand(requester, text, bot);
+
     std::list<ObjectGuid> npcs = AI_VALUE(std::list<ObjectGuid>, "nearest npcs no los");
     for (std::list<ObjectGuid>::iterator i = npcs.begin(); i != npcs.end(); i++)
     {
@@ -53,6 +57,7 @@ bool BankAction::Execute(Event& event)
 
 bool BankAction::ExecuteCommand(Player* requester, const std::string& text, Unit* bank)
 {
+    (void)bank; // Access is validated by Execute; item movement uses core inventory APIs.
     if (text.empty() || text == "?")
     {
         ListItems(requester);
@@ -66,7 +71,7 @@ bool BankAction::ExecuteCommand(Player* requester, const std::string& text, Unit
         for (std::list<Item*>::iterator i = found.begin(); i != found.end(); i++)
         {
             Item* item = *i;
-            result &= Withdraw(requester, item->GetProto()->ItemId);
+            result = Withdraw(requester, item->GetProto()->ItemId) || result;
         }
     }
     else
@@ -81,7 +86,7 @@ bool BankAction::ExecuteCommand(Player* requester, const std::string& text, Unit
             if (!item)
                 continue;
 
-            result &= Deposit(requester, item);
+            result = Deposit(requester, item) || result;
         }
     }
 

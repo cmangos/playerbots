@@ -1,4 +1,5 @@
 #include "CommandDebug.h"
+#include "playerbot/PlayerbotAI.h"
 
 using namespace ai;
 

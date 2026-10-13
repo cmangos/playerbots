@@ -1,0 +1,77 @@
+diff --git a/src/game/Server/WorldSession.h b/src/game/Server/WorldSession.h
+--- a/src/game/Server/WorldSession.h
++++ b/src/game/Server/WorldSession.h
+@@ -21,8 +21,13 @@
+ /// \file
+ 
+ #ifndef __WORLDSESSION_H
+ #define __WORLDSESSION_H
++
++// Scoped PlayerBots remote-service bridge; transaction validation stays in core.
++#ifdef ENABLE_PLAYERBOTS
++#define CMANGOS_PLAYERBOT_REMOTE_SERVICES 1
++#endif
+ 
+ #include "Common.h"
+ #include "Globals/Locales.h"
+ #include "Globals/SharedDefines.h"
+diff --git a/src/game/AuctionHouse/AuctionHouseHandler.cpp b/src/game/AuctionHouse/AuctionHouseHandler.cpp
+--- a/src/game/AuctionHouse/AuctionHouseHandler.cpp
++++ b/src/game/AuctionHouse/AuctionHouseHandler.cpp
+@@ -27,8 +27,11 @@
+ #include "AuctionHouse/AuctionHouseMgr.h"
+ #include "Mails/Mail.h"
+ #include "Util/Util.h"
+ #include "Chat/Chat.h"
++#ifdef ENABLE_PLAYERBOTS
++#include "playerbot/RemoteServiceAccess.h"
++#endif
+ 
+ // please DO NOT use iterator++, because it is slower than ++iterator!!!
+ // post-incrementation is always slower than pre-incrementation !
+ 
+@@ -201,9 +204,13 @@
+     if (guid == GetPlayer()->GetObjectGuid())
+     {
+         // command case will return only if player have real access to command
+         // using special access modes (1,-1) done at mode set in command, so not need recheck
+-        if (GetPlayer()->GetAuctionAccessMode() == 0 && !ChatHandler(GetPlayer()).FindCommand("auction"))
++        bool remoteAccess = false;
++#ifdef ENABLE_PLAYERBOTS
++        remoteAccess = ai::RemoteServiceAccess::IsAllowed(GetPlayer(), ai::RemoteService::Auction);
++#endif
++        if (!remoteAccess && GetPlayer()->GetAuctionAccessMode() == 0 && !ChatHandler(GetPlayer()).FindCommand("auction"))
+         {
+             DEBUG_LOG("%s attempt open auction in cheating way.", guid.GetString().c_str());
+             return nullptr;
+         }
+diff --git a/src/game/Mails/MailHandler.cpp b/src/game/Mails/MailHandler.cpp
+--- a/src/game/Mails/MailHandler.cpp
++++ b/src/game/Mails/MailHandler.cpp
+@@ -36,8 +36,11 @@
+ #include "Server/WorldPacket.h"
+ #include "Server/WorldSession.h"
+ #include "Server/Opcodes.h"
+ #include "Chat/Chat.h"
++#ifdef ENABLE_PLAYERBOTS
++#include "playerbot/RemoteServiceAccess.h"
++#endif
+ #include "Anticheat/Anticheat.hpp"
+ 
+ #define MAX_INBOX_CLIENT_UI_CAPACITY 50
+ 
+@@ -46,9 +49,13 @@
+     // GM case
+     if (guid == GetPlayer()->GetObjectGuid())
+     {
+         // command case will return only if player have real access to command
+-        if (!ChatHandler(GetPlayer()).FindCommand("mailbox"))
++        bool remoteAccess = false;
++#ifdef ENABLE_PLAYERBOTS
++        remoteAccess = ai::RemoteServiceAccess::IsAllowed(GetPlayer(), ai::RemoteService::Mail);
++#endif
++        if (!remoteAccess && !ChatHandler(GetPlayer()).FindCommand("mailbox"))
+         {
+             DEBUG_LOG("%s attempt open mailbox in cheating way.", guid.GetString().c_str());
+             return false;
+         }

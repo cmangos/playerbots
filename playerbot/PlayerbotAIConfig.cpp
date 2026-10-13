@@ -1,5 +1,6 @@
 
 #include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/RemoteServiceAccess.h"
 #include "playerbot/playerbot.h"
 #include "RandomPlayerbotFactory.h"
 #include "Accounts/AccountMgr.h"
@@ -245,6 +246,31 @@ bool PlayerbotAIConfig::Initialize()
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.VendorOverAHItemIds", ""), vendorOverAHItemIds);
     botCheckAllAuctionListings = config.GetBoolDefault("AiPlayerbot.BotCheckAllAuctionListings", false);
     botsSaveEpics = config.GetBoolDefault("AiPlayerbot.BotsSaveEpics", true);
+    randomBotRemoteServices = config.GetBoolDefault("AiPlayerbot.RandomBotRemoteServices", false);
+    if (randomBotRemoteServices && !ai::RemoteServiceAccess::HasCoreBridge())
+        sLog.outString("PlayerBots: RandomBotRemoteServices needs the companion core patch; retaining normal world access.");
+    professionProgressionEnabled = config.GetBoolDefault("AiPlayerbot.ProfessionProgressionEnabled", config.GetBoolDefault("AiPlayerbot.ProfessionProgression.Enabled", true));
+    professionProgressionPercent = static_cast<uint32>(
+        std::max(0, std::min(100, config.GetIntDefault("AiPlayerbot.ProfessionProgressionPercent", config.GetIntDefault("AiPlayerbot.ProfessionProgression.CanaryPercent", 10)))));
+    professionPlanCheckInterval = static_cast<uint32>(
+        std::max(10, config.GetIntDefault("AiPlayerbot.ProfessionPlanCheckInterval", config.GetIntDefault("AiPlayerbot.ProfessionProgression.PlanCheckInterval", 60))));
+    professionCraftBatchSize =
+        static_cast<uint32>(std::max(1, config.GetIntDefault("AiPlayerbot.ProfessionCraftBatchSize", config.GetIntDefault("AiPlayerbot.ProfessionProgression.CraftBatchSize", 5))));
+    professionCraftCooldown =
+        static_cast<uint32>(std::max(1, config.GetIntDefault("AiPlayerbot.ProfessionCraftCooldown", config.GetIntDefault("AiPlayerbot.ProfessionProgression.CraftCooldown", 30))));
+    professionMaterialTarget =
+        static_cast<uint32>(std::max(1, config.GetIntDefault("AiPlayerbot.ProfessionMaterialTarget", config.GetIntDefault("AiPlayerbot.ProfessionProgression.MaterialTarget", 20))));
+    professionVendorPurchaseLimit = static_cast<uint32>(
+        std::max(1, config.GetIntDefault("AiPlayerbot.ProfessionVendorPurchaseLimit", config.GetIntDefault("AiPlayerbot.ProfessionProgression.VendorPurchaseLimit", 10))));
+    professionAhSearchCooldown = static_cast<uint32>(
+        std::max(60, config.GetIntDefault("AiPlayerbot.ProfessionAHSearchCooldown", config.GetIntDefault("AiPlayerbot.ProfessionProgression.AHSearchCooldown", 600))));
+    professionAhPurchaseLimit =
+        static_cast<uint32>(std::max(0, config.GetIntDefault("AiPlayerbot.ProfessionAHPurchaseLimit", config.GetIntDefault("AiPlayerbot.ProfessionProgression.AHPurchaseLimit", 2))));
+    professionAhBudgetPercent = static_cast<uint32>(
+        std::max(0, std::min(100, config.GetIntDefault("AiPlayerbot.ProfessionAHBudgetPercent", config.GetIntDefault("AiPlayerbot.ProfessionProgression.AHBudgetPercent", 10)))));
+    professionAhMaxPriceMultiplier = std::max<float>(0.1f, config.GetFloatDefault("AiPlayerbot.ProfessionAHMaxPriceMultiplier", config.GetFloatDefault("AiPlayerbot.ProfessionProgression.AHMaxPriceMultiplier", 1.25f)));
+    professionAuctionPostLimit =
+        static_cast<uint32>(std::max(1, config.GetIntDefault("AiPlayerbot.ProfessionAuctionPostLimit", config.GetIntDefault("AiPlayerbot.ProfessionProgression.AuctionPostLimit", 3))));
     //
     randomBotJoinLfg = config.GetBoolDefault("AiPlayerbot.RandomBotJoinLfg", true);
     logRandomBotJoinLfg = config.GetBoolDefault("AiPlayerbot.LogRandomBotJoinLfg", false);

@@ -63,6 +63,25 @@ namespace ai
     //DropMap[itemId] = {entry}
     typedef std::unordered_multimap<uint32, int32> DropMap;    
 
+    struct GatherSource
+    {
+        uint32 skillId = 0;
+        int32 entry = 0;
+    };
+
+    // GatherSourceMap[itemId] = {required gathering skill, travel entry}.
+    // Fishing entries are area IDs; other entries use the normal signed
+    // creature/gameobject convention used by TravelMgr.
+    typedef std::unordered_multimap<uint32, GatherSource> GatherSourceMap;
+
+    class GatherSourceMapValue : public SingleCalculatedValue<GatherSourceMap*>
+    {
+    public:
+        GatherSourceMapValue(PlayerbotAI* ai) : SingleCalculatedValue(ai, "gather source map") {}
+        virtual ~GatherSourceMapValue() { delete value; }
+        virtual GatherSourceMap* Calculate() override;
+    };
+
     class ItemDropMapValue : public SingleCalculatedValue<DropMap*>
     {
     public:

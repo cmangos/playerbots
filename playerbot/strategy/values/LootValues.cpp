@@ -2,6 +2,7 @@
 #include "SharedValueContext.h"
 #include "LootValues.h"
 #include "playerbot/strategy/actions/LootAction.h"
+#include "TravelValues.h"
 
 using namespace ai;
 
@@ -216,6 +217,68 @@ DropMap* DropMapValue::Calculate()
 	}
 
 	return dropMap;
+}
+
+namespace
+{
+    void AddGatherLootSources(
+        GatherSourceMap* sourceMap, LootTemplateAccess const* lootTemplate, uint32 skillId, int32 entry)
+    {
+        if (!sourceMap || !lootTemplate)
+            return;
+
+        for (LootStoreItem const& item : lootTemplate->Entries)
+            sourceMap->insert(std::make_pair(item.itemid, GatherSource{skillId, entry}));
+
+        for (LootLootGroupAccess const& group : lootTemplate->Groups)
+        {
+            for (LootStoreItem const& item : group.ExplicitlyChanced)
+                sourceMap->insert(std::make_pair(item.itemid, GatherSource{skillId, entry}));
+            for (LootStoreItem const& item : group.EqualChanced)
+                sourceMap->insert(std::make_pair(item.itemid, GatherSource{skillId, entry}));
+        }
+    }
+}
+
+GatherSourceMap* GatherSourceMapValue::Calculate()
+{
+    GatherSourceMap* sourceMap = new GatherSourceMap;
+
+    // Mining and herbalism already exist in the shared corpse/gameobject drop
+    // map. Classify those entries once instead of rescanning loot per bot.
+    DropMap* dropMap = GAI_VALUE(DropMap*, "drop map");
+    for (const auto& [itemId, entry] : *dropMap)
+    {
+        uint32 skillId = EntryTravelPurposeMapValue::SkillIdToGatherEntry(entry);
+        if (skillId == SKILL_MINING || skillId == SKILL_HERBALISM)
+            sourceMap->insert(std::make_pair(itemId, GatherSource{skillId, entry}));
+    }
+
+    // Skinning and fishing use separate loot stores and are not represented in
+    // the normal corpse/gameobject drop map.
+    for (uint32 entry = 0; entry < sCreatureStorage.GetMaxEntry(); ++entry)
+    {
+        CreatureInfo const* info = sObjectMgr.GetCreatureTemplate(entry);
+        if (!info || !info->SkinningLootId || info->GetRequiredLootSkill() != SKILL_SKINNING)
+            continue;
+
+        AddGatherLootSources(sourceMap,
+            DropMapValue::GetLootTemplate(ObjectGuid(HIGHGUID_UNIT, entry, uint32(1)), LOOT_SKINNING),
+            SKILL_SKINNING, static_cast<int32>(entry));
+    }
+
+    for (uint32 row = 0; row < sAreaStore.GetNumRows(); ++row)
+    {
+        AreaTableEntry const* area = sAreaStore.LookupEntry(row);
+        if (!area || !sObjectMgr.GetFishingBaseSkillLevel(area->ID))
+            continue;
+
+        LootTemplate const* fishingTemplate = LootTemplates_Fishing.GetLootFor(area->ID);
+        AddGatherLootSources(sourceMap, reinterpret_cast<LootTemplateAccess const*>(fishingTemplate),
+            SKILL_FISHING, static_cast<int32>(area->ID));
+    }
+
+    return sourceMap;
 }
 
 //What items does this entry have in its loot list?

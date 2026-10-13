@@ -12,6 +12,7 @@
 #include "RandomPlayerbotFactory.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/AiFactory.h"
+#include "playerbot/strategy/values/ProfessionProgressionPolicy.h"
 #include "Guilds/GuildMgr.h"
 
 #ifndef MANGOSBOT_ZERO
@@ -47,6 +48,10 @@ uint32 PlayerbotFactory::tradeSkills[] =
 #ifndef MANGOSBOT_ZERO
 	,
 	SKILL_JEWELCRAFTING
+#endif
+#ifdef MANGOSBOT_TWO
+    ,
+    SKILL_INSCRIPTION
 #endif
 };
 
@@ -3938,14 +3943,42 @@ void PlayerbotFactory::InitTradeSkills()
 {
     uint16 firstSkill = sRandomPlayerbotMgr.GetValue(bot, "firstSkill");
     uint16 secondSkill = sRandomPlayerbotMgr.GetValue(bot, "secondSkill");
+    uint16 storedFirstSkill = firstSkill;
+    uint16 storedSecondSkill = secondSkill;
+
+    // The random-bot metadata predates persisted character skills and can be
+    // missing after database migrations. Prefer the professions that the
+    // character actually knows instead of silently assigning replacements.
+    std::vector<uint16> knownPrimarySkills;
+    for (uint32 tradeSkill : tradeSkills)
+    {
+        if (IsPrimaryProfession(tradeSkill) && bot->HasSkill(tradeSkill))
+            knownPrimarySkills.push_back(tradeSkill);
+    }
+
+    // Normalize invalid metadata before applying the tested reconciliation
+    // policy. Two real character professions always win. With exactly one,
+    // only its previously stored companion can be restored; unrelated stale
+    // metadata is discarded and the normal assignment path fills the vacancy.
+    uint16 normalizedFirstSkill = IsPrimaryProfession(firstSkill) ? firstSkill : 0;
+    uint16 normalizedSecondSkill = IsPrimaryProfession(secondSkill) ? secondSkill : 0;
+    uint16 actualFirstSkill = knownPrimarySkills.empty() ? 0 : knownPrimarySkills[0];
+    uint16 actualSecondSkill = knownPrimarySkills.size() < 2 ? 0 : knownPrimarySkills[1];
+    profession::AssignmentPair assignments = profession::ReconcileAssignments(
+        normalizedFirstSkill, normalizedSecondSkill, actualFirstSkill, actualSecondSkill);
+    firstSkill = assignments.first;
+    secondSkill = assignments.second;
+
     if (!firstSkill || !secondSkill)
     {
+        uint16 preservedFirstSkill = firstSkill;
+        uint16 preservedSecondSkill = secondSkill;
         std::vector<uint32> firstSkills;
         std::vector<uint32> secondSkills;
         switch (urand(0, 4))
         {
             case 0:
-                switch (urand(0, 7))
+                switch (urand(0, 5))
                 {
                     case 0:
                         firstSkill = SKILL_HERBALISM;
@@ -4004,15 +4037,64 @@ void PlayerbotFactory::InitTradeSkills()
 #ifndef MANGOSBOT_ZERO
                         firstSkills.push_back(SKILL_JEWELCRAFTING);
 #endif
+#ifdef MANGOSBOT_TWO
+                        firstSkills.push_back(SKILL_INSCRIPTION);
+#endif
                         secondSkills.push_back(SKILL_ENCHANTING);
                 }
-                firstSkill = firstSkills[urand(0, firstSkills.size() - 1)];
-                secondSkill = secondSkills[urand(0, secondSkills.size() - 1)];
+                if (!firstSkill)
+                    firstSkill = firstSkills[urand(0, firstSkills.size() - 1)];
+                if (!secondSkill)
+                    secondSkill = secondSkills[urand(0, secondSkills.size() - 1)];
                 break;
         }
-        sRandomPlayerbotMgr.SetValue(bot, "firstSkill", firstSkill);
-        sRandomPlayerbotMgr.SetValue(bot, "secondSkill", secondSkill);
+
+        if (preservedFirstSkill)
+            firstSkill = preservedFirstSkill;
+        if (preservedSecondSkill)
+            secondSkill = preservedSecondSkill;
+
+        // Avoid assigning the same or an invalid primary profession when
+        // recovering incomplete metadata.
+        if (!IsPrimaryProfession(firstSkill))
+            firstSkill = 0;
+        if (!IsPrimaryProfession(secondSkill) || firstSkill == secondSkill)
+            secondSkill = 0;
+
+        if (!firstSkill || !secondSkill)
+        {
+            static const uint16 primarySkills[] = {
+                SKILL_ALCHEMY, SKILL_BLACKSMITHING, SKILL_ENCHANTING,
+                SKILL_ENGINEERING, SKILL_HERBALISM, SKILL_LEATHERWORKING,
+                SKILL_MINING, SKILL_SKINNING, SKILL_TAILORING
+#ifndef MANGOSBOT_ZERO
+                , SKILL_JEWELCRAFTING
+#endif
+#ifdef MANGOSBOT_TWO
+                , SKILL_INSCRIPTION
+#endif
+            };
+
+            for (uint16 candidate : primarySkills)
+            {
+                if (!firstSkill)
+                    firstSkill = candidate;
+                else if (!secondSkill && candidate != firstSkill)
+                    secondSkill = candidate;
+
+                if (firstSkill && secondSkill)
+                    break;
+            }
+        }
     }
+
+    // Persist repaired metadata even when both stored values were nonzero but
+    // stale. UpdateTradeSkills uses these values to distinguish an assigned
+    // profession at skill 1 from an orphan skill line.
+    if (firstSkill != storedFirstSkill)
+        sRandomPlayerbotMgr.SetValue(bot, "firstSkill", firstSkill);
+    if (secondSkill != storedSecondSkill)
+        sRandomPlayerbotMgr.SetValue(bot, "secondSkill", secondSkill);
 
     SetRandomSkill(SKILL_FIRST_AID);
     SetRandomSkill(SKILL_FISHING);
@@ -4164,9 +4246,34 @@ void PlayerbotFactory::UpdateTradeSkills()
     auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "PlayerbotFactory_Skills2");
     for (int i = 0; i < sizeof(tradeSkills) / sizeof(uint32); ++i)
     {
-        if (bot->GetSkillValue(tradeSkills[i]) == 1)
+        // Learning a recipe can create an orphan 1/1 skill line. Keep the
+        // historical cleanup, but never delete an assigned profession or a
+        // secondary profession merely because it has not skilled up yet.
+        if (bot->GetSkillValue(tradeSkills[i]) == 1 && !IsAssignedProfession(tradeSkills[i]))
             bot->SetSkill(tradeSkills[i], 0, 0, 0);
     }
+}
+
+bool PlayerbotFactory::IsPrimaryProfession(uint16 id) const
+{
+    SkillLineEntry const* skill = sSkillLineStore.LookupEntry(id);
+    return skill && skill->categoryId == SKILL_CATEGORY_PROFESSION;
+}
+
+bool PlayerbotFactory::IsAssignedProfession(uint16 id) const
+{
+    SkillLineEntry const* skill = sSkillLineStore.LookupEntry(id);
+    if (!skill)
+        return false;
+
+    if (skill->categoryId == SKILL_CATEGORY_SECONDARY)
+        return true;
+
+    if (skill->categoryId != SKILL_CATEGORY_PROFESSION)
+        return false;
+
+    return id == sRandomPlayerbotMgr.GetValue(bot, "firstSkill") ||
+        id == sRandomPlayerbotMgr.GetValue(bot, "secondSkill");
 }
 
 void PlayerbotFactory::InitSkills()
@@ -4317,13 +4424,23 @@ void PlayerbotFactory::InitSkills()
 
 void PlayerbotFactory::SetRandomSkill(uint16 id)
 {
-    uint32 maxValue = level * 5; // vanilla 60*5 = 300
-
     SkillLineEntry const* pSkill = sSkillLineStore.LookupEntry(id);
     if (!pSkill)
         return;
 
     SkillRangeType skillType = GetSkillRangeType(pSkill, false);
+
+    // Profession progress belongs to the character database. Randomization
+    // may restore a missing assignment, but must not manufacture skill points
+    // or overwrite progress earned through gathering and crafting.
+    if (pSkill->categoryId == SKILL_CATEGORY_PROFESSION || pSkill->categoryId == SKILL_CATEGORY_SECONDARY)
+    {
+        if (!bot->HasSkill(id))
+            bot->SetSkill(id, 1, 75);
+        return;
+    }
+
+    uint32 maxValue = level * 5; // vanilla 60*5 = 300
 
     // if this is not a profession type of skill or skill that is 1/1
     if (skillType != SKILL_RANGE_LEVEL && skillType != SKILL_RANGE_MONO)

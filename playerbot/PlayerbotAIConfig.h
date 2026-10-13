@@ -179,6 +179,19 @@ public:
     std::list<uint32> vendorOverAHItemIds;
     bool botCheckAllAuctionListings;
     bool botsSaveEpics;
+    bool randomBotRemoteServices = false;
+    bool professionProgressionEnabled;
+    uint32 professionProgressionPercent;
+    uint32 professionPlanCheckInterval;
+    uint32 professionCraftBatchSize;
+    uint32 professionCraftCooldown;
+    uint32 professionMaterialTarget;
+    uint32 professionVendorPurchaseLimit;
+    uint32 professionAhSearchCooldown;
+    uint32 professionAhPurchaseLimit;
+    uint32 professionAhBudgetPercent;
+    float professionAhMaxPriceMultiplier;
+    uint32 professionAuctionPostLimit;
     //
     bool randomBotJoinLfg;
     bool logRandomBotJoinLfg;

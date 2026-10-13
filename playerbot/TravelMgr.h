@@ -318,6 +318,18 @@ namespace ai
 		virtual std::string GetTitle() const override;
 	};
 
+    // A real spell-focus game object used by a planned profession recipe.
+    class CraftingFocusTravelDestination : public EntryTravelDestination
+    {
+    public:
+        CraftingFocusTravelDestination(TravelDestinationPurpose purpose, uint32 /*id*/, int32 entry) :
+            EntryTravelDestination(purpose, entry) { SetExpireFast(); }
+
+        virtual bool IsPossible(const PlayerTravelInfo& info) const override;
+        virtual bool IsActive(Player* bot, const PlayerTravelInfo& info) const override;
+        virtual std::string GetTitle() const override;
+    };
+
 	enum class TravelState : uint8
 	{
 		TRAVEL_STATE_IDLE = 0,
@@ -449,6 +461,17 @@ namespace ai
 		void SetMobAvoidArea();
 
 		DestinationList GetDestinations(const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;
+
+        // Read the existing index for one entry without scanning all world
+        // destinations. The index has the same lifetime as GetDestinations.
+        const DestinationList* GetEntryDestinations(TravelDestinationPurpose purpose, int32 entry) const
+        {
+            auto purposeItr = destinationMap.find(purpose);
+            if (purposeItr == destinationMap.end())
+                return nullptr;
+            auto entryItr = purposeItr->second.find(entry);
+            return entryItr == purposeItr->second.end() ? nullptr : &entryItr->second;
+        }
 		void GetPartitionsLock(bool getLock = true);
 		static bool IsLocationLevelValid(const WorldPosition& position, const PlayerTravelInfo& info);
 		PartitionedTravelList GetPartitions(const WorldPosition& center, const std::vector<uint32>& distancePartitions, const PlayerTravelInfo& info, uint32 purposeFlag = (uint32)TravelDestinationPurpose::None, const std::vector<int32>& entries = {}, bool onlyPossible = true, float maxDistance = 10000.0f) const;

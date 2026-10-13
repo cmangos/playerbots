@@ -50,6 +50,7 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     //All the standard choose travel target actions using either a specific val trigger or a generic purpose trigger.
     const std::vector<std::tuple<std::string, TravelDestinationPurpose, float>> PurposeActions =
     {        
+        {"",TravelDestinationPurpose::CraftingFocus, 6.99f},
         {"",TravelDestinationPurpose::AH, 6.95f},                                                //See isAllowed  90%
         {"",TravelDestinationPurpose::Vendor, 6.94f},                                                          // 90%
         {"",TravelDestinationPurpose::Repair, 6.93f},                                                          // 90%
@@ -78,6 +79,9 @@ void TravelStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
     //Specific named exceptions
     const std::vector<std::tuple<std::string, std::string, float>> StringActions =
     {
+        {"val::should travel named::profession gathering","request named travel target::profession gathering", 6.975f},
+        {"val::should travel named::profession vendor","request named travel target::profession vendor", 6.970f},
+        {"val::should travel named::profession auction house","request named travel target::profession auction house", 6.965f},
         {"val::should travel named::trainer class","request named travel target::trainer class", 6.89f},      // See isAllowed   25%
         //{"val::should travel named::trainer pet","request named travel target::trainer pet", 6.88f},        // 25%
         {"val::should travel named::trainer mount","request named travel target::trainer mount", 6.87f},      // 25%

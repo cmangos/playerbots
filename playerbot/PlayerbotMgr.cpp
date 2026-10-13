@@ -1971,6 +1971,9 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
         name = RandomPlayerbotFactory::CreateRandomBotName(raceAndGender);
     }
 
+    // Randomize appearance (skin/face/hair) so same-race/gender bots don't all look alike.
+    RandomPlayerbotFactory::RandomizeAppearance(race, gender, skin, face, hairStyle, hairColor, facialHair);
+
     WorldSession* botSession = new WorldSession(accountId, NULL, SEC_PLAYER,
 #ifdef MANGOSBOT_TWO
         2,

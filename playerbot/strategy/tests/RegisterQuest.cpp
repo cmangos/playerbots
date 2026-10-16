@@ -35,6 +35,20 @@ using namespace ai;
 
 namespace
 {
+    // True when the core never marks the quest rewarded server-side (repeatables, dailies,
+    // weekly/monthly/seasonal/dungeon-finder) — those need the "quest turnedin" monitor because
+    // "quest rewarded" can never fire. Mirrors wotlk Quest::CanIncreaseRewardedQuestCounters.
+    bool QuestNeverRewarded(Quest const* quest)
+    {
+#if defined(MANGOSBOT_TWO)
+        return !quest->CanIncreaseRewardedQuestCounters();
+#elif defined(MANGOSBOT_ONE)
+        return quest->IsDaily() || (quest->IsRepeatable() && !quest->IsWeekly() && !quest->IsMonthly());
+#else
+        return quest->IsRepeatable() && !quest->IsWeekly();
+#endif
+    }
+
     struct QuestSpawn
     {
         uint32 mapId = 0;
@@ -780,7 +794,7 @@ void TestRegistry::RegisterQuestSuiteTests()
             lines.push_back(RequireLine(atLevel, quest, questTeamAlliance, questTeamHorde));
             lines.push_back("accept quest " + std::to_string(questId));
             lines.push_back("complete quest " + std::to_string(questId));
-            if (!quest->CanIncreaseRewardedQuestCounters())
+            if (QuestNeverRewarded(quest))
                 lines.push_back("monitor quest turnedin " + std::to_string(questId) + " => pass \"Quest handed in\"");
             else
                 lines.push_back("monitor quest rewarded " + std::to_string(questId) + " => pass \"Quest handed in\"");

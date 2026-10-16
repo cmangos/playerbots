@@ -1,4 +1,5 @@
 #include "playerbot/TravelMgr.h"
+#include <sstream>
 #include <ctime>
 #include <cstdio>
 #include <numeric>
@@ -2888,4 +2889,33 @@ float TravelMgr::MapTransDistance(const WorldPosition& start, const WorldPositio
     }
 
     return sqrt(minsqDist);
+}
+
+std::string TravelMgr::GetCacheCensus() const
+{
+    uint32 destinations = 0;
+    uint32 destinationKeys = 0;
+    for (auto& purpose : destinationMap)
+        for (auto& entry : purpose.second)
+        {
+            ++destinationKeys;
+            destinations += entry.second.size();
+        }
+
+    uint32 populated = 0;
+    for (uint32 mapId = 0; mapId < 1024; ++mapId)
+        for (uint32 gx = 0; gx < 64; ++gx)
+            for (uint32 gy = 0; gy < 64; ++gy)
+                if (populatedGrids[mapId][gx][gy])
+                    ++populated;
+
+    std::ostringstream out;
+    out << "mem travel: destinations=" << destinations << " destKeys=" << destinationKeys
+        << " points=" << pointsMap.size()
+        << " fish=" << fishPoints.size()
+        << " areaLevels=" << areaLevels.size()
+        << " transfers=" << mapTransfersMap.size()
+        << " badMmap=" << badMmap.size()
+        << " populatedGrids=" << populated;
+    return out.str();
 }

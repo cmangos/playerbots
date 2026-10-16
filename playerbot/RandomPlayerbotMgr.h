@@ -240,6 +240,8 @@ public:
         std::list<std::string> HandleConsoleUpdate(std::string param);
         std::list<std::string> HandleConsolePid(std::string param);
         std::list<std::string> HandleConsoleDiff(std::string param);
+        std::list<std::string> HandleConsoleGrid(std::string param);
+        std::list<std::string> HandleConsoleMem(std::string param);
         std::list<std::string> HandleConsoleCleanMap(std::string param);
         std::list<std::string> HandleConsoleLoginDebug(std::string param);
         std::list<std::string> HandleConsolePathCheck(std::string param);

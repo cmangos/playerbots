@@ -14,6 +14,10 @@
 #include "MemoryMonitor.h"
 
 #include "Grids/GridNotifiers.h"
+#include "Maps/GridDefines.h"
+#include "MotionGenerators/MoveMap.h"
+#include "Vmap/VMapFactory.h"
+#include "Vmap/VMapManager2.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
 #include "FleeManager.h"
@@ -3466,6 +3470,8 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     handlers["pid "] = &RandomPlayerbotMgr::HandleConsolePid;
     handlers["diff"] = &RandomPlayerbotMgr::HandleConsoleDiff;
     handlers["diff "] = &RandomPlayerbotMgr::HandleConsoleDiff;
+    handlers["grid"] = &RandomPlayerbotMgr::HandleConsoleGrid;
+    handlers["mem"] = &RandomPlayerbotMgr::HandleConsoleMem;
     handlers["sample"] = &RandomPlayerbotMgr::HandleConsoleSample;
     handlers["find"] = &RandomPlayerbotMgr::HandleConsoleFind;
     handlers["history"] = &RandomPlayerbotMgr::HandleConsoleHistory;
@@ -5180,6 +5186,219 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleDiff(std::string param)
         messages.push_back(msg);
         return messages;
     }
+    return messages;
+}
+
+static std::string GridWatchCounters(char const* label)
+{
+    std::ostringstream out;
+    out << label << ": creature=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_CREATURE_GENERIC)
+        << " pet=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_CREATURE_PET)
+        << " totem=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_CREATURE_TOTEM)
+        << " temp=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_CREATURE_TEMP_SUMMON)
+        << " gameobject=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_GAMEOBJECT)
+        << " gridmap=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_GRIDMAP)
+        << " private=" << (sMemoryMonitor.GetPrivateUsage() / 1048576) << "MB";
+    return out.str();
+}
+
+static float GridWatchWorld(uint32 grid)
+{
+    return ((float)grid - CENTER_GRID_ID) * SIZE_OF_GRIDS + CENTER_GRID_OFFSET;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleGrid(std::string param)
+{
+    std::list<std::string> messages;
+
+    std::vector<std::string> args;
+    for (auto& arg : Qualified::getMultiQualifiers(param, " "))
+        if (!arg.empty())
+            args.push_back(arg);
+
+    if (args.empty() || args[0] == "status")
+    {
+        messages.push_back(GridWatchCounters("grid status"));
+        uint32 mapId = args.size() > 1 ? (uint32)atoi(args[1].c_str()) : 0;
+        if (Map* map = sMapMgr.FindMap(mapId, 0))
+        {
+            uint32 loaded = 0;
+            uint32 minX = MAX_NUMBER_OF_GRIDS, maxX = 0, minY = MAX_NUMBER_OF_GRIDS, maxY = 0;
+            for (uint32 gx = 0; gx < MAX_NUMBER_OF_GRIDS; ++gx)
+                for (uint32 gy = 0; gy < MAX_NUMBER_OF_GRIDS; ++gy)
+                    if (map->IsLoaded(GridWatchWorld(gx), GridWatchWorld(gy)))
+                    {
+                        ++loaded;
+                        minX = std::min(minX, gx);
+                        maxX = std::max(maxX, gx);
+                        minY = std::min(minY, gy);
+                        maxY = std::max(maxY, gy);
+                    }
+            messages.push_back("grid status: map " + std::to_string(mapId) + " loaded grids=" + std::to_string(loaded) +
+                (loaded ? " X " + std::to_string(minX) + "-" + std::to_string(maxX) + " Y " + std::to_string(minY) + "-" + std::to_string(maxY) : ""));
+        }
+        else
+            messages.push_back("grid status: map " + std::to_string(mapId) + " not found");
+        return messages;
+    }
+
+    if (args.size() < 4 || (args[0] != "load" && args[0] != "unload" && args[0] != "cycle"))
+    {
+        messages.push_back("Usage: grid status [map] | grid load <map> <gx> <gy> [n] | grid unload <map> <gx> <gy> [n] | grid cycle <map> <gx> <gy> [n]");
+        return messages;
+    }
+
+    uint32 mapId = (uint32)atoi(args[1].c_str());
+    uint32 startX = (uint32)atoi(args[2].c_str());
+    uint32 startY = (uint32)atoi(args[3].c_str());
+    uint32 count = args.size() > 4 ? (uint32)atoi(args[4].c_str()) : 1;
+    if (!count)
+        count = 1;
+    if (count > MAX_NUMBER_OF_GRIDS)
+        count = MAX_NUMBER_OF_GRIDS;
+
+    Map* map = sMapMgr.FindMap(mapId, 0);
+    if (!map)
+    {
+        messages.push_back("grid: map " + std::to_string(mapId) + " not found");
+        return messages;
+    }
+
+    messages.push_back("grid " + args[0] + ": map " + std::to_string(mapId) + " from " + std::to_string(startX) + "," + std::to_string(startY) + " n=" + std::to_string(count));
+    messages.push_back(GridWatchCounters("grid start"));
+
+    if (args[0] == "load" || args[0] == "cycle")
+    {
+        uint32 loaded = 0;
+        for (uint32 i = 0; i < count; ++i)
+        {
+            uint32 gx = startX + (i % 8);
+            uint32 gy = startY + (i / 8);
+            if (gx >= MAX_NUMBER_OF_GRIDS || gy >= MAX_NUMBER_OF_GRIDS)
+                break;
+            if (map->IsLoaded(GridWatchWorld(gx), GridWatchWorld(gy)))
+                continue;
+            map->ForceLoadGrid(GridWatchWorld(gx), GridWatchWorld(gy));
+            ++loaded;
+        }
+        messages.push_back("grid load: loaded " + std::to_string(loaded));
+        messages.push_back(GridWatchCounters("grid after load"));
+    }
+
+    if (args[0] == "unload" || args[0] == "cycle")
+    {
+        uint32 unloaded = 0;
+        for (uint32 i = 0; i < count; ++i)
+        {
+            uint32 gx = startX + (i % 8);
+            uint32 gy = startY + (i / 8);
+            if (gx >= MAX_NUMBER_OF_GRIDS || gy >= MAX_NUMBER_OF_GRIDS)
+                break;
+            if (!map->IsLoaded(GridWatchWorld(gx), GridWatchWorld(gy)))
+                continue;
+            if (map->UnloadGrid(gx, gy, false))
+                ++unloaded;
+        }
+        messages.push_back("grid unload: unloaded " + std::to_string(unloaded));
+        messages.push_back(GridWatchCounters("grid after unload"));
+    }
+
+    return messages;
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleMem(std::string param)
+{
+    std::list<std::string> messages;
+    std::ostringstream out;
+
+    out << "mem counters: creature=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_CREATURE_GENERIC)
+        << " pet=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_CREATURE_PET)
+        << " totem=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_CREATURE_TOTEM)
+        << " temp=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_CREATURE_TEMP_SUMMON)
+        << " gameobject=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_GAMEOBJECT)
+        << " gridmap=" << sMemoryMonitor.GetCount(OBJECT_COUNTER_GRIDMAP);
+    messages.push_back(out.str());
+
+    uint64 privateBytes = sMemoryMonitor.GetPrivateUsage();
+    uint32 regions = 0;
+    uint64 regionBytes = 0;
+#if PLATFORM == PLATFORM_WINDOWS
+    SYSTEM_INFO systemInfo;
+    GetSystemInfo(&systemInfo);
+    uintptr_t address = (uintptr_t)systemInfo.lpMinimumApplicationAddress;
+    uintptr_t maxAddress = (uintptr_t)systemInfo.lpMaximumApplicationAddress;
+    MEMORY_BASIC_INFORMATION memoryInfo;
+    while (address < maxAddress)
+    {
+        if (!VirtualQuery((LPCVOID)address, &memoryInfo, sizeof(memoryInfo)))
+            break;
+
+        if (memoryInfo.State == MEM_COMMIT && memoryInfo.Type == MEM_PRIVATE)
+        {
+            ++regions;
+            regionBytes += memoryInfo.RegionSize;
+        }
+
+        address += (uintptr_t)memoryInfo.RegionSize;
+    }
+#endif
+
+    out.str("");
+    out << "mem heap: private=" << (privateBytes / 1048576) << "MB regions=" << regions
+        << " regionMB=" << (regionBytes / 1048576)
+        << " avgRegionKB=" << (regions ? (regionBytes / regions / 1024) : 0);
+    messages.push_back(out.str());
+
+    MMAP::MMapManager* mmapManager = MMAP::MMapFactory::createOrGetMMapManager();
+    VMAP::VMapManager2* vmapManager = dynamic_cast<VMAP::VMapManager2*>(VMAP::VMapFactory::createOrGetVMapManager());
+
+    uint32 vmapTiles = 0;
+    if (vmapManager)
+    {
+        for (uint32 mapId : { 0, 1, 530, 571, 609 })
+            for (uint32 gx = 0; gx < MAX_NUMBER_OF_GRIDS; ++gx)
+                for (uint32 gy = 0; gy < MAX_NUMBER_OF_GRIDS; ++gy)
+                    if (vmapManager->IsTileLoaded(mapId, gx, gy))
+                        ++vmapTiles;
+    }
+
+    out.str("");
+    out << "mem engine: mmapMaps=" << (mmapManager ? mmapManager->getLoadedMapsCount() : 0)
+        << " mmapTiles=" << (mmapManager ? mmapManager->getLoadedTilesCount() : 0)
+        << " mmapModels=" << (mmapManager ? mmapManager->getLoadedModelsCount() : 0)
+        << " vmapMaps=" << (vmapManager ? vmapManager->GetLoadedMapCount() : 0)
+        << " vmapModels=" << (vmapManager ? vmapManager->GetLoadedModelCount() : 0)
+        << " vmapTiles=" << vmapTiles;
+    messages.push_back(out.str());
+
+    messages.push_back(sTravelMgr.GetCacheCensus());
+
+    uint32 eventBots = 0;
+    uint32 events = 0;
+    for (auto& botEvents : eventCache)
+    {
+        ++eventBots;
+        events += botEvents.second.size();
+    }
+
+    out.str("");
+    out << "mem module: eventBots=" << eventBots << " events=" << events
+        << " ahMirror=" << ahMirror.size()
+        << " locsPerLevel=" << locsPerLevelCache.size()
+        << " rpgLocs=" << rpgLocsCache.size()
+        << " rpgLocsLevel=" << rpgLocsCacheLevel.size()
+        << " battleMasters=" << BattleMastersCache.size()
+        << " lfg=" << LfgDungeons.size()
+        << " dbDelay=" << databaseDelay.size()
+        << " needBots=" << NeedBots.size()
+        << " bgBots=" << BgBots.size()
+        << " visualBots=" << VisualBots.size()
+        << " bgPlayers=" << BgPlayers.size()
+        << " arenaBots=" << ArenaBots.size()
+        << " rating=" << Rating.size()
+        << " supporters=" << Supporters.size();
+    messages.push_back(out.str());
+
     return messages;
 }
 

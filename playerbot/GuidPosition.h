@@ -39,7 +39,7 @@ namespace ai
         GameObjectData const* GetGameObjectData() const { return IsGameObject() ? sObjectMgr.GetGOData(GetCounter()) : nullptr; }
         GameObjectInfo const* GetGameObjectInfo() const { return IsGameObject() ? sObjectMgr.GetGameObjectInfo(GetEntry()) : nullptr; };
 
-        WorldObject* GetWorldObject(uint32 m_instanceId) const { return getMap(m_instanceId) ? getMap(m_instanceId)->GetWorldObject(*this) : nullptr; }
+        WorldObject* GetWorldObject(uint32 m_instanceId) const { Map* map = getMap(m_instanceId); if (!map) return nullptr; if (WorldObject* wo = map->GetWorldObject(*this)) return wo; if (GetHigh() == HIGHGUID_UNIT) return map->GetCreature(GetCounter()); return nullptr; }
         Creature* GetCreature(uint32 instanceId) const;
         Unit* GetUnit(uint32 instanceId) const;
         GameObject* GetGameObject(uint32 instanceId) const;

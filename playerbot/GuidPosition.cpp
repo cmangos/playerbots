@@ -69,7 +69,13 @@ Creature* GuidPosition::GetCreature(uint32 instanceId) const
     if (!getMap(instanceId))
         return nullptr;
 
-    return getMap(instanceId)->GetAnyTypeCreature(*this);
+    if (Creature* creature = getMap(instanceId)->GetAnyTypeCreature(*this))
+        return creature;
+
+    if (GetHigh() == HIGHGUID_UNIT)
+        return getMap(instanceId)->GetCreature(GetCounter());
+
+    return nullptr;
 }
 
 Unit* GuidPosition::GetUnit(uint32 instanceId) const

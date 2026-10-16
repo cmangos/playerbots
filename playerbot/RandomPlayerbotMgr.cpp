@@ -5362,12 +5362,18 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleMem(std::string param)
                         ++vmapTiles;
     }
 
+    // Loaded model/map counters need core-side accessors that only exist on wotlk;
+    // vanilla/tbc report 0 so the output format stays identical across cores.
+    uint32 mmapModels = 0;
+    uint32 vmapMaps = 0;
+    uint32 vmapModels = 0;
+
     out.str("");
     out << "mem engine: mmapMaps=" << (mmapManager ? mmapManager->getLoadedMapsCount() : 0)
         << " mmapTiles=" << (mmapManager ? mmapManager->getLoadedTilesCount() : 0)
-        << " mmapModels=" << (mmapManager ? mmapManager->getLoadedModelsCount() : 0)
-        << " vmapMaps=" << (vmapManager ? vmapManager->GetLoadedMapCount() : 0)
-        << " vmapModels=" << (vmapManager ? vmapManager->GetLoadedModelCount() : 0)
+        << " mmapModels=" << mmapModels
+        << " vmapMaps=" << vmapMaps
+        << " vmapModels=" << vmapModels
         << " vmapTiles=" << vmapTiles;
     messages.push_back(out.str());
 

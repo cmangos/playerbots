@@ -2285,7 +2285,7 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
     if (testNamePart[0] == '?')
     {
         listTests = true;
-        testNamePart = testNamePart.substr(2);
+        testNamePart = testNamePart.size() > 2 ? testNamePart.substr(2) : "";
     }
 
     std::transform(testNamePart.begin(), testNamePart.end(), testNamePart.begin(), ::tolower);

@@ -42,6 +42,7 @@ namespace
         bool continent = false;
         uint32 guid = 0;   // creature.spawn guid - real guid so injected rpg targets pass IsCreature/IsGameObject checks
         uint32 entry = 0;
+        uint32 phaseMask = 1;
     };
 
     using QuestSpawnMap = std::unordered_map<uint32, QuestSpawn>;
@@ -199,7 +200,34 @@ namespace
             ++depth;
         }
 
-        return prev <= 0;
+        if (prev > 0)
+            return false;
+
+        if (lines.empty() && !quest->prevQuests.empty())
+        {
+            uint32 best = 0;
+            uint32 bestLevel = 0xFFFFFFFF;
+            for (int32 backlink : quest->prevQuests)
+            {
+                if (backlink <= 0)
+                    continue;
+                Quest const* cand = sObjectMgr.GetQuestTemplate(static_cast<uint32>(backlink));
+                if (!cand)
+                    continue;
+                if (cand->GetMinLevel() < bestLevel)
+                {
+                    bestLevel = cand->GetMinLevel();
+                    best = static_cast<uint32>(backlink);
+                }
+            }
+            if (!best)
+                return false;
+            std::ostringstream out;
+            out << "reward quest " << best;
+            lines.push_back(out.str());
+        }
+
+        return true;
     }
 }
 
@@ -210,7 +238,7 @@ void TestRegistry::RegisterQuestSuiteTests()
 
     // creature_questrelation / creature_involvedrelation: `id` = creature entry, `quest` = quest id.
     if (auto result = WorldDatabase.Query(
-        "SELECT qr.quest, c.map, c.position_x, c.position_y, c.position_z, c.guid, c.id FROM creature_questrelation qr "
+        "SELECT qr.quest, c.map, c.position_x, c.position_y, c.position_z, c.guid, c.id, c.phaseMask FROM creature_questrelation qr "
         "JOIN creature c ON c.id = qr.id"))
     {
         do
@@ -220,15 +248,18 @@ void TestRegistry::RegisterQuestSuiteTests()
             uint32 mapId = fields[1].GetUInt32();
             MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
             bool continent = mapEntry && mapEntry->IsContinent();
+            uint32 giverPhase = fields[7].GetUInt32();
             if (!giverSpawns.count(questId))
-                giverSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32() };
-            else if (!giverSpawns[questId].continent && continent)
-                giverSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32() };
+                giverSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), giverPhase };
+            else if ((giverPhase & 1) && !(giverSpawns[questId].phaseMask & 1))
+                giverSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), giverPhase };
+            else if (((giverPhase & 1) == (giverSpawns[questId].phaseMask & 1)) && !giverSpawns[questId].continent && continent)
+                giverSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), giverPhase };
         } while (result->NextRow());
     }
 
     if (auto result = WorldDatabase.Query(
-        "SELECT ir.quest, c.map, c.position_x, c.position_y, c.position_z, c.guid, c.id FROM creature_involvedrelation ir "
+        "SELECT ir.quest, c.map, c.position_x, c.position_y, c.position_z, c.guid, c.id, c.phaseMask FROM creature_involvedrelation ir "
         "JOIN creature c ON c.id = ir.id"))
     {
         do
@@ -238,10 +269,13 @@ void TestRegistry::RegisterQuestSuiteTests()
             uint32 mapId = fields[1].GetUInt32();
             MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
             bool continent = mapEntry && mapEntry->IsContinent();
+            uint32 takerPhase = fields[7].GetUInt32();
             if (!takerSpawns.count(questId))
-                takerSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32() };
-            else if (!takerSpawns[questId].continent && continent)
-                takerSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32() };
+                takerSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), takerPhase };
+            else if ((takerPhase & 1) && !(takerSpawns[questId].phaseMask & 1))
+                takerSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), takerPhase };
+            else if (((takerPhase & 1) == (takerSpawns[questId].phaseMask & 1)) && !takerSpawns[questId].continent && continent)
+                takerSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), takerPhase };
         } while (result->NextRow());
     }
 
@@ -300,6 +334,7 @@ void TestRegistry::RegisterQuestSuiteTests()
 
     // First spawn wins; a continent spawn replaces a non-continent one.
     uint32 skipEventSpawnObj = 0; // objective spawns skipped for inactive-event gating (see load above)
+    uint32 skipPhaseSpawnObj = 0;
     std::unordered_map<uint32, QuestSpawn> objectiveSpawns;
     std::vector<uint32> entryList(objectiveEntrySet.begin(), objectiveEntrySet.end());
     for (size_t offset = 0; offset < entryList.size(); offset += 500)
@@ -309,7 +344,7 @@ void TestRegistry::RegisterQuestSuiteTests()
             in << (i > offset ? "," : "") << entryList[i];
 
         auto result = WorldDatabase.PQuery(
-            "SELECT c.id, c.guid, c.map, c.position_x, c.position_y, c.position_z FROM creature c WHERE c.id IN (%s)",
+            "SELECT c.id, c.guid, c.map, c.position_x, c.position_y, c.position_z, c.phaseMask FROM creature c WHERE c.id IN (%s)",
             in.str().c_str());
         if (!result)
             continue;
@@ -331,11 +366,14 @@ void TestRegistry::RegisterQuestSuiteTests()
                 continue;
             }
 
+            uint32 phase = fields[6].GetUInt32();
             auto it = objectiveSpawns.find(entry);
             if (it == objectiveSpawns.end())
-                objectiveSpawns[entry] = { mapId, fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat() };
-            else if (continent)
-                it->second = { mapId, fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat() };
+                objectiveSpawns[entry] = { mapId, fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), continent, guid, entry, phase };
+            else if ((phase & 1) && !(it->second.phaseMask & 1))
+                it->second = { mapId, fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), continent, guid, entry, phase };
+            else if (((phase & 1) == (it->second.phaseMask & 1)) && continent)
+                it->second = { mapId, fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), continent, guid, entry, phase };
         } while (result->NextRow());
     }
 
@@ -369,8 +407,11 @@ void TestRegistry::RegisterQuestSuiteTests()
     uint32 skipNoGiver = 0, skipNoTaker = 0, skipNoSpawn = 0, skipGated = 0, skipChain = 0, skipGatedCombo = 0, skipNoLevel = 0;
     uint32 skipAutoRewardHandin = 0;
     uint32 skipEnemyNpc = 0;
+    uint32 skipRepGated = 0;
     uint32 skipEventSpawn = 0;
+    uint32 skipPhaseSpawn = 0;
     uint32 skipEventQuest = 0, skipCondition = 0, skipBreadcrumb = 0, skipZeroCount = 0;
+    uint32 skipGrayPickup = 0;
     uint32 skipLogs = 0;
 
     auto logSkip = [&](char const* reason, uint32 questId)
@@ -438,6 +479,13 @@ void TestRegistry::RegisterQuestSuiteTests()
         {
             ++skipGatedCombo;
             logSkip("skill/reputation gated", questId);
+            continue;
+        }
+
+        if (quest->GetRequiredMaxRepFaction() && !quest->GetRequiredMaxRepValue())
+        {
+            ++skipRepGated;
+            logSkip("max-rep gate at 0 (needs rep below zero)", questId);
             continue;
         }
 
@@ -531,6 +579,18 @@ void TestRegistry::RegisterQuestSuiteTests()
             logSkip("taker spawn event-gated (event not active)", questId);
             haveTaker = false;
         }
+        if (haveGiver && !(giver->second.phaseMask & 1))
+        {
+            ++skipPhaseSpawn;
+            logSkip("giver spawn phased (bot never phases there)", questId);
+            haveGiver = false;
+        }
+        if (haveTaker && !(taker->second.phaseMask & 1))
+        {
+            ++skipPhaseSpawn;
+            logSkip("taker spawn phased (bot never phases there)", questId);
+            haveTaker = false;
+        }
 
         bool questTeamAlliance = !(raceMask & RACEMASK_HORDE) || (raceMask & RACEMASK_ALLIANCE);
         bool questTeamHorde = !(raceMask & RACEMASK_ALLIANCE) || (raceMask & RACEMASK_HORDE);
@@ -581,8 +641,13 @@ void TestRegistry::RegisterQuestSuiteTests()
             nearName << "quest_" << questId << "_giver_near";
             RegisterNamedLocation(nearName.str(), GuidPosition(ObjectGuid(), WorldPosition(gp.mapId, ox, oy, gp.z)));
 
+            int32 hideDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
+            int32 rawQuestLevel = quest->GetQuestLevel();
             for (uint32 level : levels)
             {
+                bool grayPickup = hideDiff >= 0 && rawQuestLevel >= 1 && !quest->GetRequiredClasses() && !quest->IsAutoComplete() && static_cast<int32>(level) > rawQuestLevel + hideDiff;
+                if (!grayPickup)
+                {
                 std::vector<std::string> lines;
                 lines.push_back("# quest pickup test " + std::to_string(questId));
                 lines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
@@ -591,6 +656,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                 lines.push_back("monitor quest active " + std::to_string(questId) + " => pass \"Quest picked up\"");
                 lines.push_back("monitor time > 300 => fail \"Timeout: quest not picked up after <time elapsed>\"");
                 lines.push_back("monitor bot dead => abort \"Bot died before picking up quest\"");
+                lines.push_back("monitor npc dead quest_" + std::to_string(questId) + "_giver => abort \"Quest giver died during the test\"");
                 lines.push_back("teleport quest_" + std::to_string(questId) + "_giver");
                 lines.push_back("require creature alive quest_" + std::to_string(questId) + "_giver");
                 lines.push_back("set destination quest_" + std::to_string(questId) + "_giver");
@@ -601,6 +667,12 @@ void TestRegistry::RegisterQuestSuiteTests()
                 testName << base << "_pickup_l" << level;
                 RegisterTest(testName.str(), lines);
                 ++pickupTests;
+                }
+                else
+                {
+                    ++skipGrayPickup;
+                    logSkip("gray quest at profile level (bot skips gray unless traveling)", questId);
+                }
 
                 // BL-46 travel flavor: drop the bot ~90 yd off the giver and let it genuinely
                 // travel back. The arrival flip then happens inside MoveToTravelTargetAction
@@ -617,6 +689,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                     // take longer than 600 s.
                     tlines.push_back("monitor time > 900 => fail \"Timeout: quest not picked up after travelling to the giver (<time elapsed>)\"");
                     tlines.push_back("monitor bot dead => abort \"Bot died before picking up quest\"");
+                    tlines.push_back("monitor npc dead quest_" + std::to_string(questId) + "_giver => abort \"Quest giver died during the test\"");
                     // Standard flow end-to-end (operator-approved 2026-09-27): no rpg injection,
                     // no strategy pins. The nonforced destination carries the giver's entry, so
                     // while traveling only 'move to travel target' runs (rpg choose is gated on
@@ -640,6 +713,8 @@ void TestRegistry::RegisterQuestSuiteTests()
                 // BL-46 aimed flavor: bot already standing at the giver; only the aim is
                 // injected. Isolates the accept action from rpg target choosing.
                 {
+                if (!grayPickup)
+                {
                     std::vector<std::string> alines;
                     alines.push_back("# quest pickup aimed test " + std::to_string(questId));
                     alines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
@@ -648,6 +723,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                     alines.push_back("monitor quest active " + std::to_string(questId) + " => pass \"Quest picked up (aimed)\"");
                     alines.push_back("monitor time > 300 => fail \"Timeout: quest not picked up after <time elapsed>\"");
                     alines.push_back("monitor bot dead => abort \"Bot died before picking up quest\"");
+                    alines.push_back("monitor npc dead quest_" + std::to_string(questId) + "_giver => abort \"Quest giver died during the test\"");
                     alines.push_back("teleport quest_" + std::to_string(questId) + "_giver");
                     alines.push_back("require creature alive quest_" + std::to_string(questId) + "_giver 150");
                     // Bot teleports INSIDE the radius: the first 'move to travel target' poll runs
@@ -664,6 +740,12 @@ void TestRegistry::RegisterQuestSuiteTests()
                     aname << base << "_pickup_aimed_l" << level;
                     RegisterTest(aname.str(), alines);
                     ++pickupAimedTests;
+                    }
+                    else
+                    {
+                        ++skipGrayPickup;
+                        logSkip("gray quest at profile level (bot skips gray unless traveling)", questId);
+                    }
                 }
             }
         }
@@ -698,9 +780,13 @@ void TestRegistry::RegisterQuestSuiteTests()
             lines.push_back(RequireLine(atLevel, quest, questTeamAlliance, questTeamHorde));
             lines.push_back("accept quest " + std::to_string(questId));
             lines.push_back("complete quest " + std::to_string(questId));
-            lines.push_back("monitor quest rewarded " + std::to_string(questId) + " => pass \"Quest handed in\"");
+            if (!quest->CanIncreaseRewardedQuestCounters())
+                lines.push_back("monitor quest turnedin " + std::to_string(questId) + " => pass \"Quest handed in\"");
+            else
+                lines.push_back("monitor quest rewarded " + std::to_string(questId) + " => pass \"Quest handed in\"");
             lines.push_back("monitor time > 600 => fail \"Timeout: quest not handed in after <time elapsed>\"");
             lines.push_back("monitor bot dead => abort \"Bot died before handing in quest\"");
+            lines.push_back("monitor npc dead quest_" + std::to_string(questId) + "_taker => abort \"Quest taker died during the test\"");
             lines.push_back("teleport quest_" + std::to_string(questId) + "_taker");
             lines.push_back("require creature alive quest_" + std::to_string(questId) + "_taker");
             lines.push_back("set destination quest_" + std::to_string(questId) + "_taker");
@@ -734,6 +820,11 @@ void TestRegistry::RegisterQuestSuiteTests()
             if (spawn == objectiveSpawns.end() || !isOverworldSpawn(spawn->second))
             {
                 ++skipNoSpawn;
+                continue;
+            }
+            if (!(spawn->second.phaseMask & 1))
+            {
+                ++skipPhaseSpawnObj;
                 continue;
             }
 
@@ -797,8 +888,8 @@ void TestRegistry::RegisterQuestSuiteTests()
     sLog.outString("[QUESTGEN] generated %u pickup, %u pickup_travel, %u pickup_aimed, %u handin, %u objective tests",
         pickupTests, pickupTravelTests, pickupAimedTests, handinTests, objTests);
     sLog.outError("[QUESTGEN] skips: %u no-giver, %u no-taker, %u no-spawn, %u gated, %u chain, %u race+class, %u level, "
-        "%u event-inactive, %u condition, %u breadcrumb, %u event-gated-spawn, %u event-gated-objspawns, %u zero-count, %u auto-reward-handin, %u enemy-npc",
+        "%u event-inactive, %u condition, %u breadcrumb, %u event-gated-spawn, %u event-gated-objspawns, %u zero-count, %u auto-reward-handin, %u enemy-npc, %u rep-gated, %u phased-objspawns, %u phased-spawn, %u gray-pickup",
         skipNoGiver, skipNoTaker, skipNoSpawn, skipGated, skipChain, skipGatedCombo, skipNoLevel,
         skipEventQuest, skipCondition, skipBreadcrumb, skipEventSpawn, skipEventSpawnObj, skipZeroCount, skipAutoRewardHandin,
-        skipEnemyNpc);
+        skipEnemyNpc, skipRepGated, skipPhaseSpawnObj, skipPhaseSpawn, skipGrayPickup);
 }

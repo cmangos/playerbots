@@ -109,6 +109,8 @@ void TestAction::RegisterMonitors()
     monitors.push_back(std::make_unique<MonitorOutgoingMessage>());
     monitors.push_back(std::make_unique<MonitorQuestComplete>());
     monitors.push_back(std::make_unique<MonitorQuestRewarded>());
+    monitors.push_back(std::make_unique<MonitorQuestTurnedIn>());
+    monitors.push_back(std::make_unique<MonitorNpcDead>());
     monitors.push_back(std::make_unique<MonitorQuestActive>());
     monitors.push_back(std::make_unique<MonitorQuestObjective>());
     monitors.push_back(std::make_unique<MonitorHasItem>());

@@ -1,6 +1,7 @@
 #include "playerbot/playerbot.h"
 #include "MonitorQuest.h"
 #include "Quests/QuestDef.h"
+#include "TestRegistry.h"
 
 using namespace ai;
 
@@ -70,6 +71,15 @@ bool MonitorQuestRewarded::IsConditionMet(const std::string& monitorStr, Player*
         return true;
 
     return false;
+}
+
+bool MonitorQuestTurnedIn::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    uint32 questId = ExtractLeadingId(monitorStr);
+    if (!questId)
+        return false;
+
+    return bot->GetQuestStatus(questId) != QUEST_STATUS_COMPLETE;
 }
 
 // =====================================================
@@ -247,6 +257,47 @@ bool MonitorHasMount::IsConditionMet(const std::string& monitorStr, Player* bot,
                 return true;
         }
     }
+
+    return false;
+}
+
+// =====================================================
+// MonitorNpcDead
+// Format: "npc dead <location> => abort \"message\""
+// True when the named creature location has no live unit on the bot's map
+// (giver/taker died or despawned mid-test). GameObject locations are not
+// covered, mirroring the setup-time require.
+// =====================================================
+bool MonitorNpcDead::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    std::string locName = monitorStr;
+    size_t arrow = locName.find("=>");
+    if (arrow != std::string::npos)
+        locName = locName.substr(0, arrow);
+    size_t nameStart = locName.find_first_not_of(" \t");
+    if (nameStart == std::string::npos)
+        return false;
+    size_t nameEnd = locName.find_last_not_of(" \t");
+    locName = locName.substr(nameStart, nameEnd - nameStart + 1);
+    if (locName.empty())
+        return false;
+
+    GuidPosition loc;
+    if (!TestRegistry::ParseLocation(locName, loc))
+        return false;
+
+    if (!loc || !loc.IsCreature() || !loc.GetEntry())
+        return false;
+
+    if (!bot->IsInWorld() || !bot->GetMap())
+        return false;
+
+    Creature* liveNpc = loc.GetCreature(bot->GetInstanceId());
+    if (!liveNpc)
+        return true;
+
+    if (!liveNpc->IsAlive())
+        return true;
 
     return false;
 }

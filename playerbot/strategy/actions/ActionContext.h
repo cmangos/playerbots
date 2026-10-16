@@ -367,6 +367,12 @@ namespace ai
             // Dungeon Actions
             creators["enable onyxias lair strategy"] = [](PlayerbotAI* ai) { return new OnyxiasLairEnableDungeonStrategyAction(ai); };
             creators["disable onyxias lair strategy"] = [](PlayerbotAI* ai) { return new OnyxiasLairDisableDungeonStrategyAction(ai); };
+            creators["ony move to side"] = [](PlayerbotAI* ai) { return new OnyxiaMoveToSideAction(ai); };
+            creators["ony spread out"] = [](PlayerbotAI* ai) { return new OnyxiaSpreadOutAction(ai); };
+            creators["ony move to safe zone"] = [](PlayerbotAI* ai) { return new OnyxiaMoveToSafeZoneAction(ai); };
+            creators["ony kill whelps"] = [](PlayerbotAI* ai) { return new OnyxiaKillWhelpsAction(ai); };
+            creators["ony avoid eggs move"] = [](PlayerbotAI* ai) { return new OnyxiaAvoidEggsAction(ai); };
+
             creators["enable molten core strategy"] = [](PlayerbotAI* ai) { return new MoltenCoreEnableDungeonStrategyAction(ai); };
             creators["disable molten core strategy"] = [](PlayerbotAI* ai) { return new MoltenCoreDisableDungeonStrategyAction(ai); };
             creators["enable blackwing lair strategy"] = [](PlayerbotAI* ai) { return new BlackwingLairEnableDungeonStrategyAction(ai); };

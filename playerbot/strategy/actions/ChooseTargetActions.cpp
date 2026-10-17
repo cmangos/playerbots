@@ -28,6 +28,10 @@ bool AttackAnythingAction::isUseful()
     if (!target || !ai->IsSafe(target))
         return false;
 
+    bool pinnedByOrder = ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) || ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT);
+    if (pinnedByOrder && target->GetDistance(bot) >= ai->GetRange("spell"))
+        return false;
+
     if (ai->ContainsStrategy(STRATEGY_TYPE_HEAL) && !ai->HasStrategy("offdps", BotState::BOT_STATE_COMBAT))
         return false;
 

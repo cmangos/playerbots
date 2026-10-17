@@ -313,6 +313,15 @@ bool RandomItemMgr::CanEquipItem(BotEquipKey key, ItemPrototype const* proto)
         requiredLevel = GetMinLevelFromCache(proto->ItemId);
     }
     if (!requiredLevel)
+    {
+        // World-drop items frequently have RequiredLevel 0 and no quest source,
+        // so the info cache has no minLevel for them either. Fall back to the
+        // item level instead of rejecting the item outright: otherwise items
+        // like the low-level green bows (needed by warriors/rogues for the
+        // "shoot" pull) can never enter the equipment cache.
+        requiredLevel = proto->ItemLevel;
+    }
+    if (!requiredLevel)
         return false;
 
     return true;
@@ -1438,6 +1447,16 @@ void RandomItemMgr::BuildItemInfoCache()
 
                 // Make wand useful
                 if (!statW && cacheInfo->slot == EQUIPMENT_SLOT_RANGED && proto->SubClass == ITEM_SUBCLASS_WEAPON_WAND && (clazz == CLASS_PRIEST || clazz == CLASS_MAGE || clazz == CLASS_WARLOCK))
+                    statW = 1;
+
+                // Make a stat-less ranged weapon useful: warriors and rogues need a
+                // bow/gun/crossbow (or thrown) for the "shoot" pull, and low-level
+                // ones usually carry no stats at all, so they would weigh 0 and
+                // never enter the equipment cache.
+                if (!statW && cacheInfo->slot == EQUIPMENT_SLOT_RANGED &&
+                    (proto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || proto->SubClass == ITEM_SUBCLASS_WEAPON_GUN ||
+                     proto->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW || proto->SubClass == ITEM_SUBCLASS_WEAPON_THROWN) &&
+                    (clazz == CLASS_WARRIOR || clazz == CLASS_ROGUE || clazz == CLASS_HUNTER))
                     statW = 1;
 
                 // Random properties
@@ -3429,6 +3448,13 @@ void RandomItemMgr::BuildEquipCache()
                                     continue;
 
                                 uint32 minLevel = GetMinLevelFromCache(itemId);
+                                if (!minLevel)
+                                {
+                                    // No required level and no quest source (common for
+                                    // world drops): use the item level as a proxy, otherwise
+                                    // the level band below drops the item at every level.
+                                    minLevel = proto->ItemLevel;
+                                }
                                 // skip higher level (e.g. quest rewards)
                                 if (minLevel > level)
                                     continue;

@@ -43,7 +43,12 @@ bool LootStartRollAction::Execute(Event& event)
     if (!loot)
         return false;
 
-    for(uint8 i=0;i< MAX_NR_LOOT_ITEMS;i++)
+    
+#ifdef MANGOSBOT_TWO
+    for (uint8 i = 0; i < MAX_LOOT_ITEMS; i++)
+#else
+    for (uint8 i = 0; i < MAX_NR_LOOT_ITEMS; i++)        
+#endif
         if(loot->GetRollForSlot(i))
             lootRolls.insert({ creatureGuid, i });
         

@@ -3,6 +3,9 @@
 #include "GenericTriggers.h"
 #include "playerbot/LootObjectStack.h"
 #include "playerbot/PlayerbotAIConfig.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/strategy/generic/CombatStrategy.h"
+#include "playerbot/strategy/generic/PullStrategy.h"
 #include "playerbot/strategy/values/PositionValue.h"
 #include "playerbot/strategy/values/AoeValues.h"
 
@@ -196,7 +199,17 @@ bool InvalidTargetTrigger::IsActive()
 
 bool NoTargetTrigger::IsActive()
 {
-	return !ai->GetUnit(AI_VALUE(ObjectGuid, "current target")) || AI_VALUE2(bool, "invalid target", "current target");
+	if (!ai->GetUnit(AI_VALUE(ObjectGuid, "current target")) || AI_VALUE2(bool, "invalid target", "current target"))
+		return true;
+
+	if (!sServerFacade.IsInCombat(bot) && bot->IsAlive() && bot->IsStopped() &&
+		!WaitForAttackStrategy::ShouldWait(ai) &&
+		!(PullStrategy::Get(ai) && PullStrategy::Get(ai)->HasPullStarted() &&
+			time(0) - PullStrategy::Get(ai)->GetPullStartTime() < PullStrategy::GetMaxPullTime()) &&
+		!bot->GetLootGuid() && !AI_VALUE(bool, "has available loot"))
+		return true;
+
+	return false;
 }
 
 bool MyAttackerCountTrigger::IsActive()

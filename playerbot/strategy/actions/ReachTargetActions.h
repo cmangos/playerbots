@@ -67,18 +67,48 @@ namespace ai
                     ai->TellPlayerNoFacing(GetMaster(), out);
                 }
                 
+                bool moved;
                 if (inLos && isFriend && (range <= ai->GetRange("follow")))
                 {
-                    return MoveNear(target, chaseDist);
+                    moved = MoveNear(target, chaseDist);
                 }
                 else
                 {
-                    return ChaseTo(target, chaseDist, bot->GetAngle(target));
+                    moved = ChaseTo(target, chaseDist, bot->GetAngle(target));
                 }
+
+                if (!moved)
+                {
+                    if (++reachFails >= 15)
+                    {
+                        reachFails = 0;
+
+                        SET_AI_VALUE(ObjectGuid, "old target", target->GetObjectGuid());
+                        SET_AI_VALUE(ObjectGuid, "current target", ObjectGuid());
+                        if (AI_VALUE(ObjectGuid, "attack target") == target->GetObjectGuid())
+                            SET_AI_VALUE(ObjectGuid, "attack target", ObjectGuid());
+
+                        bot->SetSelectionGuid(ObjectGuid());
+                        bot->AttackStop();
+
+                        if (verbose)
+                        {
+                            std::ostringstream out;
+                            out << "Dropping unreachable target: " << ChatHelper::formatWorldobject(target);
+                            ai->TellPlayerNoFacing(GetMaster(), out);
+                        }
+                    }
+                }
+                else
+                    reachFails = 0;
+
+                return moved;
             }
 
             return false;
         }
+
+        uint32 reachFails = 0;
 
         virtual bool isUseful() override
 		{

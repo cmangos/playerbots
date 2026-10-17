@@ -16,8 +16,13 @@
 #include "Grids/GridNotifiers.h"
 #include "Maps/GridDefines.h"
 #include "MotionGenerators/MoveMap.h"
+#ifdef MANGOSBOT_TWO
 #include "Vmap/VMapFactory.h"
 #include "Vmap/VMapManager2.h"
+#else
+#include "vmap/VMapFactory.h"
+#include "vmap/VMapManager2.h"
+#endif
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
 #include "FleeManager.h"

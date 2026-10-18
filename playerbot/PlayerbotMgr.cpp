@@ -2215,6 +2215,24 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
     std::list<std::string> messages;
     static constexpr size_t maxListLines = 200;
 
+    if (param == "pending")
+    {
+        std::lock_guard<std::mutex> lock(testResultsMutex);
+        if (pendingTests.empty())
+            messages.push_back("pendingTests: empty");
+        else
+        {
+            messages.push_back("pendingTests: " + std::to_string(pendingTests.size()));
+            for (const auto& pt : pendingTests)
+            {
+                const char* state = pt.completed ? "completed" : (pt.pending ? "in-flight" : "waiting");
+                std::string res = pt.result.empty() ? "" : ("\"" + pt.result.substr(0, 48) + "\"");
+                messages.push_back(std::string("  ") + state + " x" + std::to_string(pt.retry) + " " + res + " " + pt.testName);
+            }
+        }
+        return messages;
+    }
+
     if (param.empty())
     {
         messages.push_back("Usage: .rndbot runtest <testnamepart> [count]");
@@ -2383,6 +2401,8 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
 {
     std::lock_guard<std::mutex> lock(testResultsMutex);
 
+    QueueWatchReport();
+
     static constexpr uint32 maxActiveTestBots = 50;
     uint32 activeTestBots = 0;
     for (const auto& test : pendingTests)
@@ -2455,7 +2475,43 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
             pt.completed = true;
             testResults.push_back(pt);
         }
+        else if (pt.retry == 1 || pt.retry == 10 || pt.retry == 19)
+        {
+            std::string firstError;
+            for (auto const& msg : createMsgs)
+            {
+                if (!msg.empty() && msg.find("Bot created: ") != 0)
+                {
+                    firstError = msg;
+                    break;
+                }
+            }
+            sLog.outError("[TestQueue] create attempt %u for '%s' failed: %s", pt.retry, pt.testName.c_str(), firstError.c_str());
+        }
     }
+}
+
+void PlayerbotHolder::QueueWatchReport()
+{
+    static time_t last = 0;
+    time_t now = time(nullptr);
+    if (last && now - last < 60)
+        return;
+    last = now;
+
+    uint32 waiting = 0, inflight = 0, finished = 0;
+    for (const auto& pt : pendingTests)
+    {
+        if (pt.completed)
+            ++finished;
+        else if (pt.pending)
+            ++inflight;
+        else
+            ++waiting;
+    }
+
+    if (waiting)
+        sLog.outString("[TestQueue] waiting=%u in-flight=%u finished=%u (pending tests not starting)", waiting, inflight, finished);
 }
 
 void PlayerbotHolder::DepositTestResult(const std::string& testName, const std::string& result)

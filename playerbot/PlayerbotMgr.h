@@ -96,6 +96,7 @@ private:
     };
 
     void UpdatePendingTests(uint32 elapsed);
+    void QueueWatchReport();
     std::mutex testResultsMutex;
     std::vector<PendingTest> pendingTests;
     std::vector<PendingTest> testResults;

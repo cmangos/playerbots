@@ -853,6 +853,9 @@ void TestRegistry::EnsureTestsRegistered()
     RegisterQuestDkStartTests();
     RegisterQuestSuiteTests();
     RegisterTeleportTests();
+    RegisterLabTests();
+    RegisterLabMicroTests();
+    RegisterLabStayGuardTests();
 
     sTestsRegistered = true;
     sTestsRegistering = false;

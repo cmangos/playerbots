@@ -145,7 +145,22 @@ void BossFocusManager::LogObserveStatus()
         if (Unit* target = bot->GetVictim())
         {
             float hpPct = target->GetHealthPercent();
-            targetInfo = std::string(target->GetName()) + " HP=" + std::to_string((int)hpPct) + "%";
+            std::ostringstream targetDetail;
+            targetDetail << std::string(target->GetName()) << " HP=" << (int)hpPct << "%"
+                << " dist=" << bot->GetDistance(target)
+                << " evade=" << (target->GetCombatManager().IsInEvadeMode() ? 1 : 0)
+                << " tpos=" << target->GetPositionX() << "," << target->GetPositionY() << "," << target->GetPositionZ()
+                << " vitim=" << (target->GetVictim() ? target->GetVictim()->GetName() : "-");
+            targetInfo = targetDetail.str();
+        }
+        if (Creature* focusMob = ctx.focusMobGuid ? bot->GetMap()->GetCreature(ctx.focusMobGuid) : nullptr)
+        {
+            std::ostringstream focusDetail;
+            focusDetail << " focus=" << focusMob->GetName()
+                << " dist=" << bot->GetDistance(focusMob)
+                << " evade=" << (focusMob->GetCombatManager().IsInEvadeMode() ? 1 : 0)
+                << " fpos=" << focusMob->GetPositionX() << "," << focusMob->GetPositionY() << "," << focusMob->GetPositionZ();
+            targetInfo += focusDetail.str();
         }
 
         sLog.outString("[TestAction] Bot %s observing test %s, elapsed %us, monitors: %u, alive: %s, map: %u, combat: %s, target: %s",
@@ -162,6 +177,9 @@ void BossFocusManager::Update()
         return;
 
     LogObserveStatus();
+
+    if (ctx.focusMobPassive)
+        return;
 
     Creature* focusMob = FindFocusMob();
 

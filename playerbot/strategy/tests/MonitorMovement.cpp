@@ -115,7 +115,11 @@ bool MonitorNotOnMap::IsConditionMet(const std::string& monitorStr, Player* bot,
         return false;
     }
 
-    std::string currentMapName = botPos.getMapEntry()->name[0];
+    const MapEntry* entry = botPos.getMapEntry();
+    if (!entry || !entry->name[0])
+        return false;
+
+    std::string currentMapName = entry->name[0];
     currentMapName.erase(std::remove_if(currentMapName.begin(), currentMapName.end(), ::isspace), currentMapName.end());
     std::transform(currentMapName.begin(), currentMapName.end(), currentMapName.begin(), ::tolower);
 

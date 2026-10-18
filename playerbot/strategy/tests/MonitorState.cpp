@@ -408,6 +408,20 @@ bool MonitorAiValue::IsConditionMet(const std::string& monitorStr, Player* bot, 
         if(op == ">") return count > threshold;
         return false;
     }
+    else if (datatype == "uint8")
+    {
+        uint8 count = AI_VALUE(uint8, valueName);
+
+        uint32 threshold = 0;
+        if (TryParseUInt32Strict(valueToCompareTo, threshold, parseMessage, GetName()) != TestResult::PASS)
+            return false;
+
+        if(op == "==") return count == threshold;
+        if(op == "!=") return count != threshold;
+        if(op == "<") return count < threshold;
+        if(op == ">") return count > threshold;
+        return false;
+    }
     else if (datatype == "bool")
     {
         bool val = AI_VALUE(bool, valueName);

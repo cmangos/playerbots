@@ -39,6 +39,7 @@ namespace ai
         uint32 focusMobEntry;                   
         ObjectGuid focusMobGuid;                
         bool focusMobKilled;                    
+        bool focusMobPassive;                   
         std::vector<ObjectGuid> spawnedBots;    
         std::vector<std::string> monitors;      
         std::vector<std::string> deferredCleanups;
@@ -96,7 +97,7 @@ namespace ai
 
         bool debug = false; // enable extra logging for debugging
 
-        TestContext() : pc(0), observing(false), testStartTime(0), monitorTime(0), waitTime(0), undergroundCount(0), cannotReachCount(0), focusMobEntry(0), focusMobKilled(false), cleanupPc(0), cleanupPrepared(false), whoResponded(false), result(TestResult::PENDING) {}
+        TestContext() : pc(0), observing(false), testStartTime(0), monitorTime(0), waitTime(0), undergroundCount(0), cannotReachCount(0), focusMobEntry(0), focusMobKilled(false), focusMobPassive(false), cleanupPc(0), cleanupPrepared(false), whoResponded(false), result(TestResult::PENDING) {}
 
         void Reset();
     };

@@ -55,6 +55,7 @@ void TestAction::RegisterCommands()
     commands.push_back(std::make_unique<CommandSetupPull>());
     commands.push_back(std::make_unique<CommandSetupGiveItem>());
     commands.push_back(std::make_unique<CommandSetupEquipItem>());
+    commands.push_back(std::make_unique<CommandSpawnMob>());
     commands.push_back(std::make_unique<CommandSetupClearMobs>());
     commands.push_back(std::make_unique<CommandPartySpawnBot>());
     commands.push_back(std::make_unique<CommandPartyDespawnBot>());
@@ -243,8 +244,8 @@ bool TestAction::Execute(Event& event)
     std::string message;
     TestResult commandResult = ExecuteCommand(ctx.script[ctx.pc], message);
 
-    // Log command execution for scenario and quest tests
-    if (ctx.testName.find("scenario_") == 0 || ctx.testName.find("quest_") == 0)
+    // Log command execution for scenario, quest and lab tests
+    if (ctx.testName.find("scenario_") == 0 || ctx.testName.find("quest_") == 0 || ctx.testName.find("lab_") == 0 || ctx.testName.find("lab_micro") == 0)
     {
         std::string result = (commandResult == TestResult::PASS ? "PASS" :
                 commandResult == TestResult::FAIL               ? "FAIL" :

@@ -464,6 +464,85 @@ TestResult CommandSetupPull::Execute(const std::string& params, Player* bot,
     return TestResult::PASS;
 }
 
+TestResult CommandSpawnMob::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    uint32 entryId = atoi(params.c_str());
+    if (!entryId)
+    {
+        message = "Invalid creature entry: " + params;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    float distance = 5.0f;
+    size_t distancePos = params.find("dist=");
+    if (distancePos != std::string::npos)
+        distance = atof(params.c_str() + distancePos + 5);
+
+    if (distance <= 0.0f)
+    {
+        message = "Invalid spawn distance: " + params;
+        return TestResult::IMPOSSIBLE;
+    }
+
+    float x = bot->GetPositionX() + distance;
+    float y = bot->GetPositionY();
+
+    size_t towardPos = params.find("toward ");
+    if (towardPos != std::string::npos)
+    {
+        std::string towardName = params.substr(towardPos + 7);
+        size_t nameEnd = towardName.find(' ');
+        if (nameEnd != std::string::npos)
+            towardName = towardName.substr(0, nameEnd);
+
+        GuidPosition toward;
+        if (!TestRegistry::ParseLocation(towardName, toward))
+        {
+            message = "Invalid spawn direction: " + towardName;
+            return TestResult::IMPOSSIBLE;
+        }
+
+        float dx = toward.coord_x - bot->GetPositionX();
+        float dy = toward.coord_y - bot->GetPositionY();
+        float length = sqrt(dx * dx + dy * dy);
+        if (length > 1.0f)
+        {
+            x = bot->GetPositionX() + dx / length * distance;
+            y = bot->GetPositionY() + dy / length * distance;
+        }
+    }
+
+    bot->GetMap()->ForceLoadGrid(bot->GetPositionX(), bot->GetPositionY());
+
+    Creature* spawned = bot->SummonCreature(entryId, x, y, bot->GetPositionZ(),
+        bot->GetOrientation() + M_PI_F, TEMPSPAWN_MANUAL_DESPAWN, 0);
+
+    if (!spawned)
+    {
+        message = "Failed to spawn creature entry " + std::to_string(entryId);
+        return TestResult::IMPOSSIBLE;
+    }
+
+    ctx.focusMobEntry = entryId;
+    ctx.focusMobGuid = spawned->GetObjectGuid();
+    ctx.focusMobPassive = true;
+
+    if (params.find("aggro") != std::string::npos && spawned->AI())
+        spawned->AI()->AttackStart(bot);
+
+    if (params.find("select") != std::string::npos)
+    {
+        bot->SetSelectionGuid(spawned->GetObjectGuid());
+        AiObjectContext* context = ai->GetAiObjectContext();
+        SET_AI_VALUE(ObjectGuid, "current target", spawned->GetObjectGuid());
+    }
+
+    sLog.outString("[TestAction] Bot %s spawned creature %s (entry %u) at distance %.1f",
+        bot->GetName(), spawned->GetName(), entryId, bot->GetDistance(spawned));
+    return TestResult::PASS;
+}
+
 TestResult CommandSetValue::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)
 {
     // Expected format: "set value <datatype> <valueName> <valueToSetTo>"

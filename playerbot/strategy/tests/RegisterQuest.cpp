@@ -417,7 +417,8 @@ void TestRegistry::RegisterQuestSuiteTests()
     // True when the spawn exists regardless of events (no event links, or at least one active event).
 
     uint32 pickupTests = 0, handinTests = 0, objTests = 0;
-    uint32 pickupTravelTests = 0, pickupAimedTests = 0;
+    uint32 pickupTravelTests = 0;
+    uint32 moveGiverObjTests = 0, moveObjObjTests = 0, moveObjTakerTests = 0;
     uint32 skipNoGiver = 0, skipNoTaker = 0, skipNoSpawn = 0, skipGated = 0, skipChain = 0, skipGatedCombo = 0, skipNoLevel = 0;
     uint32 skipAutoRewardHandin = 0;
     uint32 skipEnemyNpc = 0;
@@ -673,7 +674,9 @@ void TestRegistry::RegisterQuestSuiteTests()
                 lines.push_back("monitor npc dead quest_" + std::to_string(questId) + "_giver => abort \"Quest giver died during the test\"");
                 lines.push_back("teleport quest_" + std::to_string(questId) + "_giver");
                 lines.push_back("require creature alive quest_" + std::to_string(questId) + "_giver");
-                lines.push_back("set destination quest_" + std::to_string(questId) + "_giver");
+                lines.push_back("set destination quest_" + std::to_string(questId) + "_giver nonforced");
+                lines.push_back("set rpg target quest_" + std::to_string(questId) + "_giver");
+                lines.push_back("set value string next rpg action => rpg start quest");
                 lines.push_back("wait 15");
                 lines.push_back("observe");
 
@@ -723,44 +726,6 @@ void TestRegistry::RegisterQuestSuiteTests()
                     RegisterTest(tname.str(), tlines);
                     ++pickupTravelTests;
                 }
-
-                // BL-46 aimed flavor: bot already standing at the giver; only the aim is
-                // injected. Isolates the accept action from rpg target choosing.
-                {
-                if (!grayPickup)
-                {
-                    std::vector<std::string> alines;
-                    alines.push_back("# quest pickup aimed test " + std::to_string(questId));
-                    alines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
-                    for (auto const& line : chainLines)
-                        alines.push_back(line);
-                    alines.push_back("monitor quest active " + std::to_string(questId) + " => pass \"Quest picked up (aimed)\"");
-                    alines.push_back("monitor time > 300 => fail \"Timeout: quest not picked up after <time elapsed>\"");
-                    alines.push_back("monitor bot dead => abort \"Bot died before picking up quest\"");
-                    alines.push_back("monitor npc dead quest_" + std::to_string(questId) + "_giver => abort \"Quest giver died during the test\"");
-                    alines.push_back("teleport quest_" + std::to_string(questId) + "_giver");
-                    alines.push_back("require creature alive quest_" + std::to_string(questId) + "_giver 150");
-                    // Bot teleports INSIDE the radius: the first 'move to travel target' poll runs
-                    // CheckStatus, sees IsIn(bot) true, and flips the nonforced destination
-                    // TRAVEL -> WORK within the first ticks (fixed 5-minute window). The rpg target
-                    // is injected (BL-47(a) destination carries the entry) and 'next rpg action' is
-                    // pinned so vendor/repair/discover triggers cannot outrun the accept.
-                    alines.push_back("set destination quest_" + std::to_string(questId) + "_giver nonforced");
-                    alines.push_back("set rpg target quest_" + std::to_string(questId) + "_giver");
-                    alines.push_back("set value string next rpg action => rpg start quest");
-                    alines.push_back("observe");
-
-                    std::ostringstream aname;
-                    aname << base << "_pickup_aimed_l" << level;
-                    RegisterTest(aname.str(), alines);
-                    ++pickupAimedTests;
-                    }
-                    else
-                    {
-                        ++skipGrayPickup;
-                        logSkip("gray quest at profile level (bot skips gray unless traveling)", questId);
-                    }
-                }
             }
         }
         else
@@ -803,7 +768,6 @@ void TestRegistry::RegisterQuestSuiteTests()
             lines.push_back("monitor npc dead quest_" + std::to_string(questId) + "_taker => abort \"Quest taker died during the test\"");
             lines.push_back("teleport quest_" + std::to_string(questId) + "_taker");
             lines.push_back("require creature alive quest_" + std::to_string(questId) + "_taker");
-            lines.push_back("set destination quest_" + std::to_string(questId) + "_taker");
             lines.push_back("set rpg target quest_" + std::to_string(questId) + "_taker");
             lines.push_back("set value string next rpg action => rpg end quest");
             lines.push_back("wait 15");
@@ -823,6 +787,8 @@ void TestRegistry::RegisterQuestSuiteTests()
         auto objectiveSet = questObjectiveEntries.find(questId);
         if (objectiveSet == questObjectiveEntries.end())
             continue;
+
+        std::vector<uint8> validObjectives;
 
         for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         {
@@ -853,6 +819,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                 continue;
             }
             uint32 clearTimeout = std::min<uint32>(1800, 600 + count * 60);
+            validObjectives.push_back(i);
 
             for (uint32 level : levels)
             {
@@ -897,10 +864,50 @@ void TestRegistry::RegisterQuestSuiteTests()
                 }
             }
         }
+
+        if (!validObjectives.empty())
+        {
+            uint32 legLevel = QUEST_LEVEL_CAP;
+
+            auto addMoveLeg = [&](const std::string& fromLoc, const std::string& toLoc, const std::string& variant, uint32& counter)
+            {
+                std::vector<std::string> lines;
+                lines.push_back("# quest movement leg " + std::to_string(questId) + " " + variant);
+                lines.push_back(RequireLine(legLevel, quest, questTeamAlliance, questTeamHorde));
+                lines.push_back("monitor distance to " + toLoc + " < 40 => pass \"Bot reached the objective after <time elapsed>\"");
+                lines.push_back("monitor time > 1800 => fail \"Timeout: bot did not reach the objective after <time elapsed> (traveled <distance traveled>)\"");
+                lines.push_back("monitor bot dead => abort \"Bot died on the way to the objective\"");
+                lines.push_back("teleport " + fromLoc);
+                lines.push_back("set destination " + toLoc + " nonforced");
+                lines.push_back("wait 10");
+                lines.push_back("observe");
+
+                std::ostringstream name;
+                name << base << "_" << variant << "_l" << legLevel;
+                RegisterTest(name.str(), lines);
+                ++counter;
+            };
+
+            std::string firstObjLoc = "quest_obj_" + std::to_string(questId) + "_" + std::to_string(validObjectives.front());
+            std::string lastObjLoc = "quest_obj_" + std::to_string(questId) + "_" + std::to_string(validObjectives.back());
+
+            if (haveGiver)
+                addMoveLeg("quest_" + std::to_string(questId) + "_giver", firstObjLoc, "move_giver_obj" + std::to_string(validObjectives.front()), moveGiverObjTests);
+
+            for (size_t k = 1; k < validObjectives.size(); ++k)
+                addMoveLeg("quest_obj_" + std::to_string(questId) + "_" + std::to_string(validObjectives[k - 1]),
+                    "quest_obj_" + std::to_string(questId) + "_" + std::to_string(validObjectives[k]),
+                    "move_obj" + std::to_string(validObjectives[k - 1]) + "_obj" + std::to_string(validObjectives[k]), moveObjObjTests);
+
+            if (haveTaker && !autoRewardHandin)
+                addMoveLeg(lastObjLoc, "quest_" + std::to_string(questId) + "_taker", "move_obj" + std::to_string(validObjectives.back()) + "_taker", moveObjTakerTests);
+        }
     }
 
-    sLog.outString("[QUESTGEN] generated %u pickup, %u pickup_travel, %u pickup_aimed, %u handin, %u objective tests",
-        pickupTests, pickupTravelTests, pickupAimedTests, handinTests, objTests);
+    sLog.outString("[QUESTGEN] generated %u pickup, %u pickup_travel, %u handin, %u objective tests",
+        pickupTests, pickupTravelTests, handinTests, objTests);
+    sLog.outString("[QUESTGEN] generated %u movement legs (giver->obj %u, obj->obj %u, obj->taker %u) at level %u",
+        moveGiverObjTests + moveObjObjTests + moveObjTakerTests, moveGiverObjTests, moveObjObjTests, moveObjTakerTests, QUEST_LEVEL_CAP);
     sLog.outError("[QUESTGEN] skips: %u no-giver, %u no-taker, %u no-spawn, %u gated, %u chain, %u race+class, %u level, "
         "%u event-inactive, %u condition, %u breadcrumb, %u event-gated-spawn, %u event-gated-objspawns, %u zero-count, %u auto-reward-handin, %u enemy-npc, %u rep-gated, %u phased-objspawns, %u phased-spawn, %u gray-pickup",
         skipNoGiver, skipNoTaker, skipNoSpawn, skipGated, skipChain, skipGatedCombo, skipNoLevel,

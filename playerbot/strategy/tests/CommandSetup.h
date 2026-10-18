@@ -93,6 +93,14 @@ namespace ai
         std::string GetName() const override { return "pull"; }
     };
 
+    class CommandSpawnMob : public TestCommand
+    {
+    public:
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+    protected:
+        std::string GetName() const override { return "spawn mob"; }
+    };
+
     class CommandSetValue : public TestCommand
     {
     public:

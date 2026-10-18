@@ -202,7 +202,8 @@ bool NoTargetTrigger::IsActive()
 	if (!ai->GetUnit(AI_VALUE(ObjectGuid, "current target")) || AI_VALUE2(bool, "invalid target", "current target"))
 		return true;
 
-	if (!sServerFacade.IsInCombat(bot) && bot->IsAlive() && bot->IsStopped() &&
+	if (!sServerFacade.IsInCombat(bot) && bot->IsAlive() &&
+		(bot->IsStopped() || AI_VALUE2(uint32, "time since last change", "current position") > 60) &&
 		!WaitForAttackStrategy::ShouldWait(ai) &&
 		!(PullStrategy::Get(ai) && PullStrategy::Get(ai)->HasPullStarted() &&
 			time(0) - PullStrategy::Get(ai)->GetPullStartTime() < PullStrategy::GetMaxPullTime()) &&

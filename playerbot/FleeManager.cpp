@@ -74,7 +74,7 @@ void FleeManager::calculatePossibleDestinations(std::list<FleePoint*> &points)
             {
                 if (intersectsOri(angle, enemyOri, angleIncrement)) continue;
 
-                float x = botPosX + cos(angle) * maxAllowedDistance, y = botPosY + sin(angle) * maxAllowedDistance, z = botPosZ + CONTACT_DISTANCE;
+                float x = botPosX + cos(angle) * dist, y = botPosY + sin(angle) * dist, z = botPosZ + CONTACT_DISTANCE;
                 if (MoveStyleValue::CheckForEdges(bot->GetPlayerbotAI()) && isTooCloseToEdge(x, y, z, angle)) continue;
 
                 if (forceMaxDistance && sServerFacade.IsDistanceLessThan(sServerFacade.GetDistance2d(bot, x, y), maxAllowedDistance - sPlayerbotAIConfig.tooCloseDistance))

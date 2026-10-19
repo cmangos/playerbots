@@ -8641,8 +8641,14 @@ void PlayerbotAI::EnchantItemT(uint32 spellid, uint8 slot, Item* item)
       return;
    }
 
-   if (!((1 << pItem->GetProto()->SubClass) & spellInfo->EquippedItemSubClassMask) &&
-      !((1 << pItem->GetProto()->InventoryType) & spellInfo->EquippedItemInventoryTypeMask))
+   // Every restriction the spell sets must match, not just one of them: a ring
+   // otherwise passes on the sub class bit alone and gets a chest enchant.
+   if ((spellInfo->EquippedItemClass >= 0 &&
+        uint32(spellInfo->EquippedItemClass) != pItem->GetProto()->Class) ||
+       (spellInfo->EquippedItemSubClassMask &&
+        !((uint32(1) << pItem->GetProto()->SubClass) & uint32(spellInfo->EquippedItemSubClassMask))) ||
+       (spellInfo->EquippedItemInventoryTypeMask &&
+        !((uint32(1) << pItem->GetProto()->InventoryType) & uint32(spellInfo->EquippedItemInventoryTypeMask))))
    {
 
       sLog.outError("%s: items could not be enchanted, wrong item type equipped", bot->GetName());

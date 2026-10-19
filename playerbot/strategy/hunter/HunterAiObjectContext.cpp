@@ -298,7 +298,7 @@ namespace ai
                 creators["scare beast on cc"] = [](PlayerbotAI* ai) { return new CastScareBeastCcAction(ai); };
                 creators["remove feign death"] = [](PlayerbotAI* ai) { return new RemoveFeignDeathAction(ai); };
                 creators["scatter shot"] = [](PlayerbotAI* ai) { return new CastScatterShotAction(ai); };
-                creators["scatter shot on closest attacker targeting me"] = [](PlayerbotAI* ai) { return new CastScatterShotAction(ai); };
+                creators["scatter shot on closest attacker targeting me"] = [](PlayerbotAI* ai) { return new CastScatterShotOnClosestAttackerTargetingMeAction(ai); };
                 creators["intimidation"] = [](PlayerbotAI* ai) { return new IntimidationAction(ai); };
                 creators["deterrence"] = [](PlayerbotAI* ai) { return new DeterrenceAction(ai); };
                 creators["counterattack"] = [](PlayerbotAI* ai) { return new CastCounterattackAction(ai); };

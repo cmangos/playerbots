@@ -29,7 +29,7 @@ AhBot.SendMail = 1
 # Intervals
 # The time between buying/selling items of the same type or category.
 # AhBot.ItemBuyMinInterval  = 600
-# AhBot.ItemBuyMinInterval  = 7200
+# AhBot.ItemBuyMaxInterval  = 7200
 # AhBot.ItemSellMinInterval = 600
 # AhBot.ItemSellMaxInterval = 7200
 # The maxium time 

@@ -147,7 +147,14 @@ bool MonitorMovementUnderground::IsConditionMet(const std::string& monitorStr, P
 
     botpos += WorldPosition(0, 0, 0, 0.5); //Give some leeway.
 
-    if (botpos.isUnderground())
+    float groundZ = botpos.getMap(botpos.getFirstInstanceId())->GetHeight(botpos.coord_x, botpos.coord_y, botpos.coord_z + 0.5f, true);
+    float maxZ = botpos.getTerrain()->GetWaterOrGroundLevel(botpos.coord_x, botpos.coord_y, botpos.coord_z + 0.5f, groundZ, true, 1.0f);
+
+    if (maxZ <= INVALID_HEIGHT)
+        return false;
+
+    float depth = maxZ - botpos.coord_z;
+    if (depth > 10.0f)
         ctx.undergroundCount++;
     else if (ctx.undergroundCount > 0)
         ctx.undergroundCount--;

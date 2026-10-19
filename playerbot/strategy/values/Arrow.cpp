@@ -48,11 +48,16 @@ WorldLocation ArrowFormation::GetLocationInternal()
 
     float ox, oy, oz;
     followTarget->GetPosition(ox, oy, oz);
+    if (std::isfinite(ox) && std::isfinite(oy) && std::isfinite(oz) && std::isfinite(x) && std::isfinite(y) && std::isfinite(z))
+    {
 #ifdef MANGOSBOT_TWO
-    followTarget->GetMap()->GetHitPosition(ox, oy, oz + bot->GetCollisionHeight(), x, y, z, bot->GetPhaseMask(), -0.5f);
+        followTarget->GetMap()->GetHitPosition(ox, oy, oz + bot->GetCollisionHeight(), x, y, z, bot->GetPhaseMask(), -0.5f);
 #else
-    followTarget->GetMap()->GetHitPosition(ox, oy, oz + bot->GetCollisionHeight(), x, y, z, -0.5f);
+        followTarget->GetMap()->GetHitPosition(ox, oy, oz + bot->GetCollisionHeight(), x, y, z, -0.5f);
 #endif
+    }
+    else
+        WorldPosition::logNonFinite("Arrow::GetHitPosition", WorldPosition(followTarget->GetMapId(), ox, oy, oz), nullptr);
 
     if (!bot->IsFlying() && !bot->IsFreeFlying() && !bot->IsSwimming())
     {

@@ -90,6 +90,8 @@ namespace ai
 
         //Operators
         operator bool() const { return  coord_x != 0 || coord_y != 0 || coord_z != 0; }
+        bool isFinite() const { return std::isfinite(coord_x) && std::isfinite(coord_y) && std::isfinite(coord_z); }
+        static void logNonFinite(char const* site, WorldPosition const& a, WorldPosition const* b = nullptr);
         bool operator==(const WorldPosition& p1) const { return mapid == p1.mapid && coord_x == p1.coord_x && coord_y == p1.coord_y && coord_z == p1.coord_z && orientation == p1.orientation; }
         bool operator!=(const WorldPosition& p1) const { return mapid != p1.mapid || coord_x != p1.coord_x || coord_y != p1.coord_y || coord_z != p1.coord_z || orientation != p1.orientation; }
         
@@ -227,11 +229,27 @@ namespace ai
 
         bool IsInStaticLineOfSight(WorldPosition pos, float heightMod = 0.5f) const;
 #if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
-        bool IsInLineOfSight(WorldPosition pos, float heightMod = 0.5f) const { return mapid == pos.mapid && getMap(getFirstInstanceId()) && getMap(getFirstInstanceId())->IsInLineOfSight(coord_x, coord_y, coord_z + heightMod, pos.coord_x, pos.coord_y, pos.coord_z + heightMod, 0, true); }
-        bool GetHitPosition(WorldPosition& pos) const { return getMap(getFirstInstanceId())->GetHitPosition(coord_x, coord_y, coord_z, pos.coord_x, pos.coord_y, pos.coord_z,0, 0.0f);};
+        bool IsInLineOfSight(WorldPosition pos, float heightMod = 0.5f) const
+        {
+            if (!isFinite() || !pos.isFinite()) { logNonFinite("IsInLineOfSight", *this, &pos); return false; }
+            return mapid == pos.mapid && getMap(getFirstInstanceId()) && getMap(getFirstInstanceId())->IsInLineOfSight(coord_x, coord_y, coord_z + heightMod, pos.coord_x, pos.coord_y, pos.coord_z + heightMod, 0, true);
+        }
+        bool GetHitPosition(WorldPosition& pos) const
+        {
+            if (!isFinite() || !pos.isFinite()) { logNonFinite("GetHitPosition", *this, &pos); return false; }
+            return getMap(getFirstInstanceId())->GetHitPosition(coord_x, coord_y, coord_z, pos.coord_x, pos.coord_y, pos.coord_z,0, 0.0f);
+        }
 #else
-        bool IsInLineOfSight(WorldPosition pos, float heightMod = 0.5f) const { return mapid == pos.mapid && getMap(getFirstInstanceId()) && getMap(getFirstInstanceId())->IsInLineOfSight(coord_x, coord_y, coord_z + heightMod, pos.coord_x, pos.coord_y, pos.coord_z + heightMod, true); }
-        bool GetHitPosition(WorldPosition& pos) { return getMap(getFirstInstanceId())->GetHitPosition(coord_x, coord_y, coord_z, pos.coord_x, pos.coord_y, pos.coord_z, 0.0f);};
+        bool IsInLineOfSight(WorldPosition pos, float heightMod = 0.5f) const
+        {
+            if (!isFinite() || !pos.isFinite()) { logNonFinite("IsInLineOfSight", *this, &pos); return false; }
+            return mapid == pos.mapid && getMap(getFirstInstanceId()) && getMap(getFirstInstanceId())->IsInLineOfSight(coord_x, coord_y, coord_z + heightMod, pos.coord_x, pos.coord_y, pos.coord_z + heightMod, true);
+        }
+        bool GetHitPosition(WorldPosition& pos)
+        {
+            if (!isFinite() || !pos.isFinite()) { logNonFinite("GetHitPosition", *this, &pos); return false; }
+            return getMap(getFirstInstanceId())->GetHitPosition(coord_x, coord_y, coord_z, pos.coord_x, pos.coord_y, pos.coord_z, 0.0f);
+        }
 #endif
 
 

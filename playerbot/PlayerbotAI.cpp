@@ -3233,6 +3233,9 @@ std::vector<std::pair<const Quest*, uint32>> PlayerbotAI::GetCurrentQuestsRequir
 
         QuestStatus status = bot->GetQuestStatus(questId);
         const Quest* quest = sObjectMgr.GetQuestTemplate(questId);
+        if (!quest)
+            continue;
+
         for (uint8 i = 0; i < std::size(quest->ReqItemId); ++i)
         {
             if (quest->ReqItemId[i] == itemId)

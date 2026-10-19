@@ -1164,7 +1164,9 @@ bool UseItemIdAction::isPossible()
         return false;
 
     ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemId);
-    if (!proto)
+    // Match the eligibility check UseItemInternal does, so an item the bot
+    // cannot use is not reported as possible.
+    if (!proto || bot->CanUseItem(proto) != EQUIP_ERR_OK)
         return false;
 
     if (HasItemCooldown(itemId))

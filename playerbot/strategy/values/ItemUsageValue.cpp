@@ -1255,7 +1255,7 @@ bool ItemUsageValue::IsManaPotion(ItemPrototype const* proto)
             if (spellInfo)
                 for (int i = 0; i < 3; i++)
                 {
-                    if (spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE)
+                    if (spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE && spellInfo->EffectMiscValue[i] == POWER_MANA)
                         return true;
                 }
         }

@@ -247,53 +247,71 @@ namespace
 
 void TestRegistry::RegisterQuestSuiteTests()
 {
+    FindPointCreatureData allSpawns(WorldPosition(), 0, 0);
+    sObjectMgr.DoCreatureData(allSpawns);
+
+    std::unordered_map<uint32, QuestSpawn> spawnIndex;
+    std::unordered_map<uint32, bool> spawnEventAvailable;
+
+    for (CreatureDataPair const* pair : allSpawns.GetResult())
+    {
+        CreatureData const& data = pair->second;
+        uint32 guid = pair->first;
+
+        spawnEventAvailable[guid] = data.gameEvent <= 0 || sGameEventMgr.IsActiveEvent(static_cast<uint16>(data.gameEvent));
+
+        uint32 phase = 1;
+#ifdef MANGOSBOT_TWO
+        phase = data.phaseMask;
+#endif
+        MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
+        bool continent = mapEntry && mapEntry->IsContinent();
+
+        auto it = spawnIndex.find(data.id);
+        if (it == spawnIndex.end())
+            spawnIndex[data.id] = { data.mapid, data.posX, data.posY, data.posZ, continent, guid, data.id, phase };
+        else if ((phase & 1) && !(it->second.phaseMask & 1))
+            it->second = { data.mapid, data.posX, data.posY, data.posZ, continent, guid, data.id, phase };
+        else if (((phase & 1) == (it->second.phaseMask & 1)) && continent && !it->second.continent)
+            it->second = { data.mapid, data.posX, data.posY, data.posZ, continent, guid, data.id, phase };
+    }
+
     std::unordered_map<uint32, QuestSpawn> giverSpawns;
     std::unordered_map<uint32, QuestSpawn> takerSpawns;
 
-    // creature_questrelation / creature_involvedrelation: `id` = creature entry, `quest` = quest id.
-    if (auto result = WorldDatabase.Query(
-        "SELECT qr.quest, c.map, c.position_x, c.position_y, c.position_z, c.guid, c.id, c.phaseMask FROM creature_questrelation qr "
-        "JOIN creature c ON c.id = qr.id"))
+    for (auto const& [entry, questId] : sObjectMgr.GetCreatureQuestRelationsMap())
     {
-        do
-        {
-            Field* fields = result->Fetch();
-            uint32 questId = fields[0].GetUInt32();
-            uint32 mapId = fields[1].GetUInt32();
-            MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-            bool continent = mapEntry && mapEntry->IsContinent();
-            uint32 giverPhase = fields[7].GetUInt32();
-            if (!giverSpawns.count(questId))
-                giverSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), giverPhase };
-            else if ((giverPhase & 1) && !(giverSpawns[questId].phaseMask & 1))
-                giverSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), giverPhase };
-            else if (((giverPhase & 1) == (giverSpawns[questId].phaseMask & 1)) && !giverSpawns[questId].continent && continent)
-                giverSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), giverPhase };
-        } while (result->NextRow());
+        auto spawn = spawnIndex.find(entry);
+        if (spawn == spawnIndex.end())
+            continue;
+
+        auto it = giverSpawns.find(questId);
+        if (it == giverSpawns.end())
+            giverSpawns[questId] = spawn->second;
+        else if ((spawn->second.phaseMask & 1) && !(it->second.phaseMask & 1))
+            it->second = spawn->second;
+        else if (((spawn->second.phaseMask & 1) == (it->second.phaseMask & 1)) && spawn->second.continent && !it->second.continent)
+            it->second = spawn->second;
     }
 
-    if (auto result = WorldDatabase.Query(
-        "SELECT ir.quest, c.map, c.position_x, c.position_y, c.position_z, c.guid, c.id, c.phaseMask FROM creature_involvedrelation ir "
-        "JOIN creature c ON c.id = ir.id"))
+    for (auto const& [entry, spawn] : spawnIndex)
     {
-        do
+        auto bounds = sObjectMgr.GetCreatureQuestInvolvedRelationsMapBounds(entry);
+        for (auto rel = bounds.first; rel != bounds.second; ++rel)
         {
-            Field* fields = result->Fetch();
-            uint32 questId = fields[0].GetUInt32();
-            uint32 mapId = fields[1].GetUInt32();
-            MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-            bool continent = mapEntry && mapEntry->IsContinent();
-            uint32 takerPhase = fields[7].GetUInt32();
-            if (!takerSpawns.count(questId))
-                takerSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), takerPhase };
-            else if ((takerPhase & 1) && !(takerSpawns[questId].phaseMask & 1))
-                takerSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), takerPhase };
-            else if (((takerPhase & 1) == (takerSpawns[questId].phaseMask & 1)) && !takerSpawns[questId].continent && continent)
-                takerSpawns[questId] = { mapId, fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), continent, fields[5].GetUInt32(), fields[6].GetUInt32(), takerPhase };
-        } while (result->NextRow());
+            uint32 questId = rel->second;
+
+            auto it = takerSpawns.find(questId);
+            if (it == takerSpawns.end())
+                takerSpawns[questId] = spawn;
+            else if ((spawn.phaseMask & 1) && !(it->second.phaseMask & 1))
+                it->second = spawn;
+            else if (((spawn.phaseMask & 1) == (it->second.phaseMask & 1)) && spawn.continent && !it->second.continent)
+                it->second = spawn;
+        }
     }
 
-    // Collect every creature objective entry, then resolve one spawn per entry in batched queries.
+    // Collect every creature objective entry, then resolve one spawn per entry from the spawnIndex.
     std::unordered_map<uint32, std::unordered_set<uint32>> questObjectiveEntries;
     std::unordered_set<uint32> objectiveEntrySet;
 
@@ -317,78 +335,33 @@ void TestRegistry::RegisterQuestSuiteTests()
     // BL-47(a) follow-up (five_signets / Field Marshal Snowfall 15701): the QUEST-level event check
     // below does not cover creatures whose SPAWN is event-linked. Snowfall's spawn
     // (game_event_creature event 120 = AV weekend) does not exist while the event is off, so the
-    // accept can never fire and every pickup run burned its full timeout. Load creature-spawn ->
-    // event links once; giver/taker spawns and objective spawns that are event-gated with no active
-    // event are treated as missing below.
-    std::unordered_map<uint32, std::vector<int16>> creatureSpawnEvents;
-    if (auto result = WorldDatabase.Query("SELECT guid, event FROM game_event_creature"))
-    {
-        do
-        {
-            Field* fields = result->Fetch();
-            creatureSpawnEvents[fields[0].GetUInt32()].push_back(fields[1].GetInt16());
-        } while (result->NextRow());
-    }
-
+    // accept can never fire and every pickup run burned its full timeout. Spawn-event links come
+    // from the core-loaded CreatureData.gameEvent; giver/taker spawns and objective spawns that
+    // are event-gated with no active event are treated as missing below.
     // True when the spawn exists regardless of events (no event links, or at least one active event).
-    auto spawnAvailable = [&creatureSpawnEvents](uint32 spawnGuid) -> bool
+    auto spawnAvailable = [&spawnEventAvailable](uint32 spawnGuid) -> bool
     {
-        auto it = creatureSpawnEvents.find(spawnGuid);
-        if (it == creatureSpawnEvents.end())
-            return true;
-        for (int16 eventId : it->second)
-        {
-            if (eventId <= 0)
-                return true;
-            if (sGameEventMgr.IsActiveEvent(static_cast<uint16>(eventId)))
-                return true;
-        }
-        return false;
+        auto it = spawnEventAvailable.find(spawnGuid);
+        return it == spawnEventAvailable.end() ? true : it->second;
     };
 
     // First spawn wins; a continent spawn replaces a non-continent one.
     uint32 skipEventSpawnObj = 0; // objective spawns skipped for inactive-event gating (see load above)
     uint32 skipPhaseSpawnObj = 0;
     std::unordered_map<uint32, QuestSpawn> objectiveSpawns;
-    std::vector<uint32> entryList(objectiveEntrySet.begin(), objectiveEntrySet.end());
-    for (size_t offset = 0; offset < entryList.size(); offset += 500)
+    for (uint32 entry : objectiveEntrySet)
     {
-        std::ostringstream in;
-        for (size_t i = offset; i < offset + 500 && i < entryList.size(); ++i)
-            in << (i > offset ? "," : "") << entryList[i];
-
-        auto result = WorldDatabase.PQuery(
-            "SELECT c.id, c.guid, c.map, c.position_x, c.position_y, c.position_z, c.phaseMask FROM creature c WHERE c.id IN (%s)",
-            in.str().c_str());
-        if (!result)
+        auto it = spawnIndex.find(entry);
+        if (it == spawnIndex.end())
             continue;
 
-        do
+        if (!spawnEventAvailable[it->second.guid])
         {
-            Field* fields = result->Fetch();
-            uint32 entry = fields[0].GetUInt32();
-            uint32 guid = fields[1].GetUInt32();
-            uint32 mapId = fields[2].GetUInt32();
-            MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-            bool continent = mapEntry && mapEntry->IsContinent();
+            ++skipEventSpawnObj;
+            continue;
+        }
 
-            // Event-gated spawn with no active event: this creature does not exist in the world
-            // (five_signets/Snowfall class). Do not let it become the representative spawn.
-            if (!spawnAvailable(guid))
-            {
-                ++skipEventSpawnObj;
-                continue;
-            }
-
-            uint32 phase = fields[6].GetUInt32();
-            auto it = objectiveSpawns.find(entry);
-            if (it == objectiveSpawns.end())
-                objectiveSpawns[entry] = { mapId, fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), continent, guid, entry, phase };
-            else if ((phase & 1) && !(it->second.phaseMask & 1))
-                it->second = { mapId, fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), continent, guid, entry, phase };
-            else if (((phase & 1) == (it->second.phaseMask & 1)) && continent)
-                it->second = { mapId, fields[3].GetFloat(), fields[4].GetFloat(), fields[5].GetFloat(), continent, guid, entry, phase };
-        } while (result->NextRow());
+        objectiveSpawns[entry] = it->second;
     }
 
     // Downgrade: an entry with only non-continent spawns is skipped per objective below by checking

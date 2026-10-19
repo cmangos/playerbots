@@ -104,6 +104,7 @@ void TestAction::RegisterMonitors()
     monitors.push_back(std::make_unique<MonitorStateGroupOnMap>());
     monitors.push_back(std::make_unique<MonitorStateLootGuid>());
     monitors.push_back(std::make_unique<MonitorStateStarterGearCount>());
+    monitors.push_back(std::make_unique<MonitorStateEquippedCount>());
     monitors.push_back(std::make_unique<MonitorStateEquipQuality>());
     monitors.push_back(std::make_unique<MonitorStateAreaLevelDiff>());
     monitors.push_back(std::make_unique<MonitorAiValue>());

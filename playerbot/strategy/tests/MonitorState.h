@@ -56,6 +56,13 @@ namespace ai
         std::string GetName() const override { return "starter gear count"; }
     };
 
+    class MonitorStateEquippedCount : public TestMonitor
+    {
+    private:
+        bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
+        std::string GetName() const override { return "equipped count"; }
+    };
+
     class MonitorStateEquipQuality : public TestMonitor
     {
     private:

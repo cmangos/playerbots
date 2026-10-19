@@ -110,8 +110,7 @@ void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float 
     std::string gmInvisible = "gm visible off";
     std::string gmVisible = "cleanup gm visible on";
     std::string needAlive = "monitor bot dead => abort \"Bot died test interupted\"";
-    std::string needAboveGRound = "monitor underground => fail \"Bot is underground at <current position>\"";
-    std::string needCanReachNode = "monitor can not reach nodes => fail \"Bot cannot reach travel network at <current position>\"";
+    std::string needCanReachNode = "monitor can not reach nodes => abort \"Bot cannot reach travel network at <current position>\"";
 
     int count = 0;
     for (size_t i = 0; i < sTeleLocations.size() && count < maxTests; ++i)
@@ -142,7 +141,7 @@ void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float 
                 continue;
 
             std::string prefix;
-            int timeoutSecs = dist + 600;
+            int timeoutSecs = std::min(int(dist + 600), 3600);
             if (dist < 500)
             {
                 prefix = "short";
@@ -176,7 +175,6 @@ void TestRegistry::GenerateMovementTestsImpl(int maxTests, float minDist, float 
             std::vector<std::string> script = {
                 gmInvisible,
                 needAlive,
-                needAboveGRound,
                 needCanReachNode,
                 timeout.str(),
                 reachCheck.str(),

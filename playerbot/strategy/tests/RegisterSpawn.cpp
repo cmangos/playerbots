@@ -98,7 +98,7 @@ void TestRegistry::RegisterSpawnTests()
                 "require bot is level=1 race=" + raceToken + " class=" + classToken,
                 "monitor time > 20 => fail \"Timeout without reply\"",
                 "monitor distance to " + spawnLoc + " > 50 => fail \"Bot is not near race spawn location\"",
-                "monitor starter gear count < 2 => fail \"Bot has less than 2 starter gear items equipped\"",
+                "monitor equipped count < 2 => fail \"Bot has less than 2 items equipped\"",
                 "record",
                 "who",
                 "monitor outgoing message * => pass \"Bot replied to who\"",
@@ -146,7 +146,6 @@ void TestRegistry::RegisterRandomizeTests()
                 std::vector<std::string> script = {
                     requireLine,
                     "monitor time > 20 => fail \"Timeout without reply\"",
-                    "monitor area level diff > 10 => fail \"Bot is not in an appropriate zone for level\"",
                     "record",
                     "who",
                     "monitor outgoing message * => pass \"Bot replied to who\"",

@@ -1,5 +1,7 @@
 #pragma once
 #include "Category.h"
+#include <map>
+#include <mutex>
 
 struct ItemPrototype;
 struct SpellEntry;
@@ -37,7 +39,10 @@ namespace ahbot
         bool IsCraftedBy(ItemPrototype const* proto, uint32 craftId);
         bool IsCraftedBySpell(ItemPrototype const* proto, SpellEntry const *entry);
         uint32 skill;
-        std::set<uint32> itemCache;
+        // Result per item id, hits and misses, so the scan runs once per item.
+        // Contains runs on the world thread at startup and on the AhBot update thread later.
+        std::map<uint32, bool> itemCache;
+        std::mutex itemCacheMutex;
         bool reagent;
     };
 

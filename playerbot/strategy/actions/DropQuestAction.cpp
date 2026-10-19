@@ -57,12 +57,15 @@ bool CleanQuestLogAction::Execute(Event& event)
     uint8 totalQuests = 0;
 
     DropQuestType(requester, totalQuests); //Count the total quests
-     
+
+    //Drop failed quests. Unconditional: the counting pass used to do this on
+    //every call as a side effect of the bug fixed here, and it ran before this
+    //threshold was evaluated, so gating it on the threshold would leave failed
+    //quests holding slots whenever the log is between 4 and 6 slots from full.
+    DropQuestType(requester, totalQuests, MAX_QUEST_LOG_SIZE, true, true);
+
     if (MAX_QUEST_LOG_SIZE - totalQuests > 6)
-    {
-        DropQuestType(requester, totalQuests, MAX_QUEST_LOG_SIZE, true, true); //Drop failed quests
         return true;
-    }
 
     if (AI_VALUE(bool, "can fight equal")) //Only drop gray quests when able to fight proper lvl quests.
     {
@@ -116,13 +119,20 @@ void CleanQuestLogAction::DropQuestType(Player* requester, uint8 &numQuest, uint
         if (!quest)
             continue;
 
+        //Counting pass: count every countable slot and drop nothing. Failed and
+        //class specific quests hold a slot too, and dropping one here decremented
+        //a counter that had not counted it, wrapping the uint8 to 255 - after
+        //which every later pass saw a full log and pruned until it wrapped back.
+        if (wantNum == 100)
+        {
+            numQuest++;
+            continue;
+        }
+
         if (bot->GetQuestStatus(questId) != QUEST_STATUS_FAILED)
         {
             if (quest->GetRequiredClasses()) //Do not drop class specific quests
                 continue;
-
-            if (wantNum == 100)
-                numQuest++;
 
             int32 lowLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
             if (lowLevelDiff < 0 || bot->GetLevel() <= bot->GetQuestLevelForPlayer(quest) + uint32(lowLevelDiff)) //Quest is not gray
@@ -150,7 +160,8 @@ void CleanQuestLogAction::DropQuestType(Player* requester, uint8 &numQuest, uint
         //Drop quest.
         bot->GetPlayerbotAI()->DropQuest(questId);
 
-        numQuest--;
+        if (numQuest)
+            numQuest--;
 
         ai->TellPlayer(requester, BOT_TEXT("quest_remove") + " " + chat->formatQuest(quest), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
     }

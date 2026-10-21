@@ -841,11 +841,13 @@ void TestRegistry::RegisterQuestSuiteTests()
         if (!validObjectives.empty())
         {
             uint32 legLevel = QUEST_LEVEL_CAP;
+            uint32 legQuestId = questId;
 
             auto addMoveLeg = [&](const std::string& fromLoc, const std::string& toLoc, const std::string& variant, uint32& counter)
             {
                 std::vector<std::string> lines;
                 lines.push_back("# quest movement leg " + std::to_string(questId) + " " + variant);
+                lines.push_back("# quest movement leg " + std::to_string(legQuestId) + " " + variant);
                 lines.push_back(RequireLine(legLevel, quest, questTeamAlliance, questTeamHorde));
                 lines.push_back("monitor distance to " + toLoc + " < 40 => pass \"Bot reached the objective after <time elapsed>\"");
                 lines.push_back("monitor time > 1800 => fail \"Timeout: bot did not reach the objective after <time elapsed> (traveled <distance traveled>)\"");

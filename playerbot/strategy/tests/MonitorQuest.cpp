@@ -292,9 +292,11 @@ bool MonitorNpcDead::IsConditionMet(const std::string& monitorStr, Player* bot, 
     if (!bot->IsInWorld() || !bot->GetMap())
         return false;
 
-    Creature* liveNpc = loc.GetCreature(bot->GetInstanceId());
+    uint32 instanceId = bot->GetMapId() == loc.getMapId() ? bot->GetInstanceId() : 0;
+
+    Creature* liveNpc = loc.GetCreature(instanceId);
     if (!liveNpc)
-        return true;
+        return false;
 
     if (!liveNpc->IsAlive())
         return true;

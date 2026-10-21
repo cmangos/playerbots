@@ -316,6 +316,11 @@ namespace ai
             // Dungeon Boss Triggers
             creators["start onyxia fight"] = [](PlayerbotAI* ai) { return new OnyxiaStartFightTrigger(ai); };
             creators["end onyxia fight"] = [](PlayerbotAI* ai) { return new OnyxiaEndFightTrigger(ai); };
+            creators["ony near tail"] = [](PlayerbotAI* ai) { return new OnyxiaNearTailTrigger(ai); };
+            creators["ony deep breath warning"] = [](PlayerbotAI* ai) { return new OnyxiaDeepBreathTrigger(ai); };
+            creators["ony fireball splash incoming"] = [](PlayerbotAI* ai) { return new OnyxiaFireballSplashTrigger(ai); };
+            creators["ony whelps spawn"] = [](PlayerbotAI* ai) { return new OnyxiaWhelpsSpawnTrigger(ai); };
+            creators["ony avoid eggs"] = [](PlayerbotAI* ai) { return new OnyxiaAvoidEggsTrigger(ai); };
 
             creators["start magmadar fight"] = [](PlayerbotAI* ai) { return new MagmadarStartFightTrigger(ai); };
             creators["end magmadar fight"] = [](PlayerbotAI* ai) { return new MagmadarEndFightTrigger(ai); };

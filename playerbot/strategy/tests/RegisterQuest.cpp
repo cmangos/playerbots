@@ -639,6 +639,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                 std::vector<std::string> lines;
                 lines.push_back("# quest pickup test " + std::to_string(questId));
                 lines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
+                lines.push_back("nc -bg");
                 for (auto const& line : chainLines)
                     lines.push_back(line);
                 lines.push_back("monitor quest active " + std::to_string(questId) + " => pass \"Quest picked up\"");
@@ -671,6 +672,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                     std::vector<std::string> tlines;
                     tlines.push_back("# quest pickup travel test " + std::to_string(questId));
                     tlines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
+                    tlines.push_back("nc -bg");
                     for (auto const& line : chainLines)
                         tlines.push_back(line);
                     tlines.push_back("monitor quest active " + std::to_string(questId) + " => pass \"Quest picked up on arrival\"");
@@ -730,6 +732,7 @@ void TestRegistry::RegisterQuestSuiteTests()
             std::vector<std::string> lines;
             lines.push_back("# quest handin test " + std::to_string(questId));
             lines.push_back(RequireLine(atLevel, quest, questTeamAlliance, questTeamHorde));
+            lines.push_back("nc -bg");
             lines.push_back("accept quest " + std::to_string(questId));
             lines.push_back("complete quest " + std::to_string(questId));
             if (QuestNeverRewarded(quest))
@@ -743,6 +746,7 @@ void TestRegistry::RegisterQuestSuiteTests()
             lines.push_back("require creature alive quest_" + std::to_string(questId) + "_taker");
             lines.push_back("set rpg target quest_" + std::to_string(questId) + "_taker");
             lines.push_back("set value string next rpg action => rpg end quest");
+            lines.push_back("set destination quest_" + std::to_string(questId) + "_taker nonforced");
             lines.push_back("wait 15");
             lines.push_back("observe");
 
@@ -800,6 +804,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                     std::vector<std::string> lines;
                     lines.push_back("# quest objective tick test " + std::to_string(questId) + " obj " + std::to_string(i));
                     lines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
+                    lines.push_back("nc -bg");
                     lines.push_back("accept quest " + std::to_string(questId));
                     lines.push_back("monitor quest objective " + std::to_string(questId) + " " + std::to_string(i) + " count > 0 => pass \"Objective ticked\"");
                     lines.push_back("monitor time > 420 => fail \"Timeout: objective not ticked after <time elapsed>\"");
@@ -819,6 +824,7 @@ void TestRegistry::RegisterQuestSuiteTests()
                     std::vector<std::string> lines;
                     lines.push_back("# quest objective clear test " + std::to_string(questId) + " obj " + std::to_string(i));
                     lines.push_back(RequireLine(level, quest, questTeamAlliance, questTeamHorde));
+                    lines.push_back("nc -bg");
                     lines.push_back("accept quest " + std::to_string(questId));
                     if (count > 1)
                         lines.push_back("force objectives " + std::to_string(questId) + " except " + std::to_string(i));
@@ -846,9 +852,9 @@ void TestRegistry::RegisterQuestSuiteTests()
             auto addMoveLeg = [&](const std::string& fromLoc, const std::string& toLoc, const std::string& variant, uint32& counter)
             {
                 std::vector<std::string> lines;
-                lines.push_back("# quest movement leg " + std::to_string(questId) + " " + variant);
                 lines.push_back("# quest movement leg " + std::to_string(legQuestId) + " " + variant);
                 lines.push_back(RequireLine(legLevel, quest, questTeamAlliance, questTeamHorde));
+                lines.push_back("nc -bg");
                 lines.push_back("monitor distance to " + toLoc + " < 40 => pass \"Bot reached the objective after <time elapsed>\"");
                 lines.push_back("monitor time > 1800 => fail \"Timeout: bot did not reach the objective after <time elapsed> (traveled <distance traveled>)\"");
                 lines.push_back("monitor bot dead => abort \"Bot died on the way to the objective\"");

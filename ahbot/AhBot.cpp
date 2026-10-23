@@ -561,7 +561,7 @@ int AhBot::AddAuction(int auction, Category* category, ItemPrototype const* prot
     if (!stackCount)
         stackCount = 1;
 
-    if (urand(0, 100) <= sAhBotConfig.underPriceProbability * 100)
+    if (urand(1, 100) <= sAhBotConfig.underPriceProbability * 100)
         price = price * 100 / urand(100, 200);
 
     uint32 bidPrice = PricingStrategy::RoundPrice(stackCount * price);

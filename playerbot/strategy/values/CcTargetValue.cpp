@@ -58,7 +58,7 @@ public:
         if (!ai->CanCastSpell(spell, creature, true, nullptr, false, true))
             return;
 
-        // If we have rti cc none but have cc strategy, then we'll cc something we're able to
+        // If we have rti cc none but have cc strategy, then we'll cc something that isn't occupied
         std::string rti = AI_VALUE(std::string, "rti cc");
         int index = RtiTargetValue::GetRtiIndex(rti);
         if (index == -1 && ai->HasStrategy("cc", BotState::BOT_STATE_COMBAT))
@@ -70,6 +70,21 @@ public:
                 if(!member || !sServerFacade.IsAlive(member) || member == bot || bot->GetMapId() != member->GetMapId())
                     continue;
 
+                PlayerbotAI* memberAI = member->GetPlayerbotAI();
+                bool isBot = member->IsPlayer() && memberAI;
+                if (isBot)
+                {
+                    AiObjectContext* context = memberAI->GetAiObjectContext();
+                    // If someone else has this target as their current target, don't cc
+                    if (context && context->GetValue<ObjectGuid>("current target")->Get() == creature->GetObjectGuid())
+                        return;
+                }
+                else
+                {
+                    // If member is not a bot, check if they are targeting this
+                    if (member->GetSelectionGuid() == creature->GetObjectGuid())
+                        return;
+                }
                 if (!ai->IsTank(member))
                     continue;
 

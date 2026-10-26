@@ -150,6 +150,8 @@ TestResult CommandSetupClearMobs::Execute(const std::string& params, Player* bot
     if (pos != std::string::npos)
     {
         std::string radStr = params.substr(pos + 6);
+        if (!radStr.empty() && radStr[0] == '=')
+            radStr = radStr.substr(1);
         radius = atof(radStr.c_str());
     }
 
@@ -485,6 +487,11 @@ TestResult CommandSpawnMob::Execute(const std::string& params, Player* bot,
         return TestResult::IMPOSSIBLE;
     }
 
+    uint32 spawnLevel = 0;
+    size_t levelPos = params.find("level=");
+    if (levelPos != std::string::npos)
+        spawnLevel = (uint32)atoi(params.c_str() + levelPos + 6);
+
     float x = bot->GetPositionX() + distance;
     float y = bot->GetPositionY();
 
@@ -515,8 +522,11 @@ TestResult CommandSpawnMob::Execute(const std::string& params, Player* bot,
 
     bot->GetMap()->ForceLoadGrid(bot->GetPositionX(), bot->GetPositionY());
 
-    Creature* spawned = bot->SummonCreature(entryId, x, y, bot->GetPositionZ(),
+    TempSpawnSettings settings(bot, entryId, x, y, bot->GetPositionZ(),
         bot->GetOrientation() + M_PI_F, TEMPSPAWN_MANUAL_DESPAWN, 0);
+    settings.level = spawnLevel;
+
+    Creature* spawned = WorldObject::SummonCreature(settings, bot->GetMap());
 
     if (!spawned)
     {

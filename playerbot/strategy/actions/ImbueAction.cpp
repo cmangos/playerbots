@@ -197,8 +197,8 @@ bool ImbueWithOilAction::isUseful()
 
 bool TryEmergencyAction::Execute(Event& event)
 {
-    // Do not use consumable if bot can heal self
-    if (ai->IsHeal(bot) && ai->GetManaPercent() > 20)
+    // Do not use consumable if bot can heal self or is prehealing
+    if (ai->IsHeal(bot) && (ai->GetManaPercent() > 10 || ai->HasStrategy("preheal", BotState::BOT_STATE_COMBAT)))
         return false;
 
     // If bot does not have aggro: use bandage instead of potion/stone/crystal

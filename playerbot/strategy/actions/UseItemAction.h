@@ -496,8 +496,8 @@ namespace ai
                 }
             }
 
-            // Do not use consumable if bot can heal self
-            if (ai->IsHeal(bot) && ai->GetManaPercent() > 20)
+            // Do not use consumable if bot can heal self or has preheal strategy
+            if (ai->IsHeal(bot) && (ai->GetManaPercent() > 10 || ai->HasStrategy("preheal", BotState::BOT_STATE_COMBAT)))
                 return false;
 
             return true;

@@ -2879,12 +2879,9 @@ bool MovementAction::Flee(Unit *target)
         fleeDelay = 1;
     }
 
-    if (lastFlee && sServerFacade.isMoving(bot))
+    if (lastFlee && (now - lastFlee) <= fleeDelay)
     {
-        if ((now - lastFlee) <= fleeDelay)
-        {
-            return true;
-        }
+        return sServerFacade.isMoving(bot);
     }
     
     const bool isHealer = ai->IsHeal(bot);
@@ -2996,30 +2993,6 @@ bool MovementAction::Flee(Unit *target)
         succeeded = MoveNear(fleeTarget);
     }
 
-    if (!ai->HasRealPlayerMaster() && !ai->IsRealPlayer(target))
-    {
-        bool fullDistance = false;
-        if (target->IsPlayer())
-            fullDistance = true;
-        if (WorldPosition(bot).isOverworld())
-            fullDistance = true;
-
-        float distance = fullDistance ? (ai->GetRange("flee") * 2) : ai->GetRange("flee");
-
-        MotionMaster* mm = bot->GetMotionMaster();
-
-        if (mm->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-        {
-            ChaseMovementGenerator* chase = (ChaseMovementGenerator*)mm->GetCurrent();
-
-            if (chase->GetCurrentTarget() == target && sServerFacade.GetChaseOffset(bot) == distance)
-                return true;
-        }
-
-        mm->MoveChase(target, distance, WorldPosition(bot).getAngleTo(target), true, false, true, false);
-        return true;
-    }
-
     // Generate a position to flee
     if(!succeeded)
     {
@@ -3064,8 +3037,25 @@ bool MovementAction::Flee(Unit *target)
         float rx, ry, rz;
         if (!manager.CalculateDestination(&rx, &ry, &rz))
         {
-            ai->TellError(GetMaster(), "Nowhere to flee");
-            return false;
+            AI_VALUE(LastMovement&, "last movement").lastFlee = time(0);
+
+            if (ai->HasRealPlayerMaster() || ai->IsRealPlayer(target))
+                return false;
+
+            float distance = fullDistance ? (ai->GetRange("flee") * 2) : ai->GetRange("flee");
+
+            MotionMaster* mm = bot->GetMotionMaster();
+
+            if (mm->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+            {
+                ChaseMovementGenerator* chase = (ChaseMovementGenerator*)mm->GetCurrent();
+
+                if (chase->GetCurrentTarget() == target && sServerFacade.GetChaseOffset(bot) == distance)
+                    return true;
+            }
+
+            mm->MoveChase(target, distance, WorldPosition(bot).getAngleTo(target), true, false, true, false);
+            return true;
         }
 
         if(MoveTo(target->GetMapId(), rx, ry, rz))

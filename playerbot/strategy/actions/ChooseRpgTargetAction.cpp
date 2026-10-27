@@ -148,7 +148,8 @@ std::unordered_map<ObjectGuid, float> ChooseRpgTargetAction::GetTargets(Player* 
         if (!guidP)
             SkipRpgTarget("not found on map/instance.");       
 
-        bool isTravelTarget = (guidP.GetEntry() == travelTarget->GetEntry());
+        int32 travelEntry = guidP.IsGameObject() ? -(int32)guidP.GetEntry() : (int32)guidP.GetEntry();
+        bool isTravelTarget = (travelEntry == travelTarget->GetEntry());
 
         //Stop to save peformance.
         if (checked >= maxCheck && !isTravelTarget)

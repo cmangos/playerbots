@@ -100,10 +100,10 @@ namespace ai
             creators["ranged medium aoe"] = [](PlayerbotAI* ai) { return new RangedMediumAoeTrigger(ai); };
             creators["ranged high aoe"] = [](PlayerbotAI* ai) { return new RangedHighAoeTrigger(ai); };
             creators["ranged very high aoe"] = [](PlayerbotAI* ai) { return new RangedVeryHighAoeTrigger(ai); };
-            creators["melee light aoe"] = [](PlayerbotAI* ai) { return new RangedLightAoeTrigger(ai); };
-            creators["melee medium aoe"] = [](PlayerbotAI* ai) { return new RangedMediumAoeTrigger(ai); };
-            creators["melee high aoe"] = [](PlayerbotAI* ai) { return new RangedHighAoeTrigger(ai); };
-            creators["melee very high aoe"] = [](PlayerbotAI* ai) { return new RangedVeryHighAoeTrigger(ai); };
+            creators["melee light aoe"] = [](PlayerbotAI* ai) { return new MeleeLightAoeTrigger(ai); };
+            creators["melee medium aoe"] = [](PlayerbotAI* ai) { return new MeleeMediumAoeTrigger(ai); };
+            creators["melee high aoe"] = [](PlayerbotAI* ai) { return new MeleeHighAoeTrigger(ai); };
+            creators["melee very high aoe"] = [](PlayerbotAI* ai) { return new MeleeVeryHighAoeTrigger(ai); };
 
             creators["has area debuff"] = [](PlayerbotAI* ai) { return new HasAreaDebuffTrigger(ai); };
             creators["has aura"] = [](PlayerbotAI* ai) { return new HasAuraTrigger(ai); };

@@ -159,5 +159,8 @@ bool WaitForAttackKeepSafeDistanceAction::IsEnemyClose(const WorldPosition& poin
 
 bool WaitForAttackKeepSafeDistanceAction::isUseful()
 {
-    return !ai->HasStrategy("stay", ai->GetState()) && (!ai->HasStrategy("guard", ai->GetState()) ||  WaitForAttackStrategy::GetSafeDistance() <= ai->GetRange("guard")) && ai->GetRange("flee") > 5.0f;
+    // Not useful to keep safe distance if we need to cc.
+    bool notCCBusy = (!ai->GetUnit(AI_VALUE2(ObjectGuid, "cc target", getName())) || (ai->GetUnit(AI_VALUE2(ObjectGuid, "cc target", getName())) && ai->GetUnit(AI_VALUE2(ObjectGuid, "current cc target", getName()))));
+
+    return !ai->HasStrategy("stay", ai->GetState()) && notCCBusy && (!ai->HasStrategy("guard", ai->GetState()) ||  WaitForAttackStrategy::GetSafeDistance() <= ai->GetRange("guard")) && ai->GetRange("flee") > 5.0f;
 }

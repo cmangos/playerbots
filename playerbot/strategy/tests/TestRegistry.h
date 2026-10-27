@@ -12,6 +12,7 @@ namespace ai
     {
     public:
         static void RegisterMoveTests();
+        static void RegisterFleeTests();
         static void RegisterSpawnTests();
         static void RegisterRandomizeTests();
         static void RegisterInstanceTests();

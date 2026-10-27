@@ -17,6 +17,8 @@ void PlayerbotDbStore::Load(PlayerbotAI *ai, std::string preset)
 {
     uint64 guid = ai->GetBot()->GetObjectGuid().GetRawValue();
 
+    // preset comes from chat ("load ai <preset>")
+    CharacterDatabase.escape_string(preset);
     auto results = CharacterDatabase.PQuery("SELECT `key`,`value` FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `preset` = '%s'", guid, preset.c_str());
     if (results)
     {
@@ -75,10 +77,15 @@ void PlayerbotDbStore::Reset(PlayerbotAI *ai, std::string preset)
     uint64 guid = ai->GetBot()->GetObjectGuid().GetRawValue();
     uint32 account = sObjectMgr.GetPlayerAccountIdByGUID(ObjectGuid(guid));
 
+    CharacterDatabase.escape_string(preset);
     CharacterDatabase.PExecute("DELETE FROM `ai_playerbot_db_store` WHERE `guid` = '%lu' AND `preset` = '%s'", guid, preset.c_str());
 }
 
 void PlayerbotDbStore::SaveValue(uint64 guid, std::string preset, std::string key, std::string value)
 {
+    // preset comes from chat ("save ai <preset>"); strategy and value strings can hold names with quotes
+    CharacterDatabase.escape_string(preset);
+    CharacterDatabase.escape_string(key);
+    CharacterDatabase.escape_string(value);
     CharacterDatabase.PExecute("INSERT INTO `ai_playerbot_db_store` (`guid`, `preset`, `key`, `value`) VALUES ('%lu', '%s', '%s', '%s')", guid, preset.c_str(), key.c_str(), value.c_str());
 }

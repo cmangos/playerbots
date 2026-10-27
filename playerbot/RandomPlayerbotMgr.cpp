@@ -35,6 +35,7 @@
 
 #ifdef GenerateBotTests
 #include "strategy/tests/TestRegistry.h"
+#include "strategy/tests/TravelProbe.h"
 #endif
 #include "Chat/ChannelMgr.h"
 #include "Guilds/GuildMgr.h"
@@ -3486,6 +3487,10 @@ bool RandomPlayerbotMgr::HandlePlayerbotConsoleCommand(ChatHandler* handler, cha
     handlers["login debug"] = &RandomPlayerbotMgr::HandleConsoleLoginDebug;
     handlers["taxtest"] = &RandomPlayerbotMgr::HandleConsoleTaxTest;
     handlers["zoneupd"] = &RandomPlayerbotMgr::HandleConsoleZoneUpd;
+#ifdef GenerateBotTests
+    handlers["travelsample"] = &RandomPlayerbotMgr::HandleConsoleTravelSample;
+    handlers["traveltrace"] = &RandomPlayerbotMgr::HandleConsoleTravelTrace;
+#endif
 
     for (auto& [prefix, consoleHandler] : handlers)
     {
@@ -4376,6 +4381,36 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleTaxTest(std::string para
     messages.push_back(std::string("taxtest ") + bot->GetName() + ": " + (ok ? "taxi started" : "ActivateTaxiPathTo FAILED"));
     return messages;
 }
+
+#ifdef GenerateBotTests
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleTravelSample(std::string param)
+{
+    std::list<std::string> messages;
+
+    std::vector<std::string> parts = Qualified::getMultiQualifiers(param, " ");
+    if (parts.empty())
+    {
+        messages.push_back("usage: travelsample <bot> <levels> <purposes> [runs]");
+        return messages;
+    }
+
+    Player* bot = sObjectAccessor.FindPlayerByName(parts[0].c_str());
+    if (!bot || !bot->GetPlayerbotAI())
+    {
+        messages.push_back("travelsample: bot not found: " + parts[0]);
+        return messages;
+    }
+
+    size_t nameLen = parts[0].size();
+    std::string rest = param.size() > nameLen + 1 ? param.substr(nameLen + 1) : "";
+    return TravelProbe::HandleTravelSample(bot, rest);
+}
+
+std::list<std::string> RandomPlayerbotMgr::HandleConsoleTravelTrace(std::string param)
+{
+    return TravelProbe::HandleTravelTrace(param);
+}
+#endif
 
 std::list<std::string> RandomPlayerbotMgr::HandleConsoleZoneUpd(std::string param)
 {

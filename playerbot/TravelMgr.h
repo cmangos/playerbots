@@ -60,6 +60,17 @@ namespace ai
 		uint8 GetUint8Value(const std::string& valueName) const { return uint8Values.at(valueName);};
 		uint8 GetUint32Value(const std::string& valueName) const { return uint32Values.at(valueName); };
 
+#ifdef GenerateBotTests
+		void SetProbeLevel(uint32 newLevel) { level = newLevel; }
+		void SetProbeTeam(Team newTeam) { team = newTeam; }
+		void SetProbePosition(const WorldPosition& newPosition) { position = newPosition; }
+		void SetProbeGroupSize(uint8 newSize) { groupSize = newSize; }
+		void SetProbeMoney(uint32 newMoney) { money = newMoney; }
+		void SetProbeBoolValue(const std::string& valueName, bool value) { if (boolValues.find(valueName) != boolValues.end()) boolValues[valueName] = value; }
+		void SetProbeUint8Value(const std::string& valueName, uint8 value) { if (uint8Values.find(valueName) != uint8Values.end()) uint8Values[valueName] = value; }
+		void SetProbeUint32Value(const std::string& valueName, uint32 value) { if (uint32Values.find(valueName) != uint32Values.end()) uint32Values[valueName] = value; }
+#endif
+
 	private:
 		WorldPosition position;
 		Team team = TEAM_NONE;

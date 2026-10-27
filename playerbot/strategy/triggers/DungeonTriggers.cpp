@@ -257,8 +257,8 @@ bool CloseToSpecificCreaturesTrigger::IsActive()
         AiObjectContext* context = ai->GetAiObjectContext();
         std::set<uint32>&creatureIDList = AI_VALUE(std::set<uint32>&, "avoid creature list");
         // Check if any of the creatures listed is nearby
-        float range = ai->GetRange("flee");
-        for (const uint32 creatureToCheck : creatureIDList)
+        float range = 8.0f;
+        for (uint32 creatureToCheck : creatureIDList)
         {
             // Iterate through the near creatures
             std::list<Unit*> creatures;

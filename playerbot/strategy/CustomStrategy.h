@@ -18,8 +18,5 @@ namespace ai
 
     private:
         std::list<std::string> actionLines;
-        
-    public:
-        static std::map<std::string, std::string> actionLinesCache;
     };
 }

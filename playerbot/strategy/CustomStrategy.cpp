@@ -1,11 +1,8 @@
 
 #include "playerbot/playerbot.h"
 #include "CustomStrategy.h"
-#include <regex>
 
 using namespace ai;
-
-std::map<std::string, std::string> CustomStrategy::actionLinesCache;
 
 NextAction* toNextAction(std::string action)
 {
@@ -58,28 +55,9 @@ void CustomStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     if (actionLines.empty())
     {
-        if (actionLinesCache[qualifier].empty())
-        {
-            LoadActionLines((uint32)ai->GetBot()->GetGUIDLow());
-            if (this->actionLines.empty())
-                LoadActionLines(0);
-        }
-        else
-        {
-            std::vector<std::string> tokens = split(actionLinesCache[qualifier], '\n');
-            std::regex tpl("\\(NULL,\\s*'.+',\\s*'(.+)'\\)(,|;)");
-            for (std::vector<std::string>::iterator i = tokens.begin(); i != tokens.end(); ++i)
-            {
-                std::string line = *i;
-                for (std::sregex_iterator j = std::sregex_iterator(line.begin(), line.end(), tpl); j != std::sregex_iterator(); ++j)
-                {
-                    std::smatch match = *j;
-                    std::string actionLine = match[1].str();
-                    if (!actionLine.empty())
-                        this->actionLines.push_back(actionLine);
-                }
-            }
-        }
+        LoadActionLines((uint32)ai->GetBot()->GetGUIDLow());
+        if (this->actionLines.empty())
+            LoadActionLines(0);
     }
 
     for (std::list<std::string>::iterator i = actionLines.begin(); i != actionLines.end(); ++i)
@@ -97,8 +75,11 @@ void CustomStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
 void CustomStrategy::LoadActionLines(uint32 owner)
 {
+    // The qualifier comes from chat ("co +custom::<name>")
+    std::string name = qualifier;
+    CharacterDatabase.escape_string(name);
     auto results = CharacterDatabase.PQuery("SELECT action_line FROM ai_playerbot_custom_strategy WHERE name = '%s' and owner = '%u' order by idx",
-            qualifier.c_str(), owner);
+            name.c_str(), owner);
     if (results)
     {
         do
@@ -113,5 +94,4 @@ void CustomStrategy::LoadActionLines(uint32 owner)
 void CustomStrategy::Reset()
 {
     actionLines.clear();
-    actionLinesCache[qualifier].clear();
 }

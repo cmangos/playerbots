@@ -809,6 +809,8 @@ uint32 PlayerbotHolder::GetAccountId(std::string name)
 {
     uint32 accountId = 0;
 
+    // name comes from chat (".bot add <name>")
+    LoginDatabase.escape_string(name);
     auto results = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", name.c_str());
     if(results)
     {
@@ -1937,7 +1939,9 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
 
     if (!name.empty())
     {
-        auto result = CharacterDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s'", name.c_str());
+        std::string sqlName = name;
+        CharacterDatabase.escape_string(sqlName);
+        auto result = CharacterDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s'", sqlName.c_str());
         if (result)
         {
             messages.push_back("Name already exists");

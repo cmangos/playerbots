@@ -20,14 +20,21 @@ using namespace ahbot;
 
 bool TradeSkill::Contains(ItemPrototype const* proto)
 {
-    if (itemCache.find(proto->ItemId) != itemCache.end())
-        return true;
-
     if (!Trade::Contains(proto))
         return false;
 
+    {
+        std::lock_guard<std::mutex> guard(itemCacheMutex);
+        std::map<uint32, bool>::const_iterator cached = itemCache.find(proto->ItemId);
+        if (cached != itemCache.end())
+            return cached->second;
+    }
+
+    // The scan runs unlocked: it is long and its result for an item never changes.
     bool contains = ContainsInternal(proto);
-    if (contains) itemCache.insert(proto->ItemId);
+
+    std::lock_guard<std::mutex> guard(itemCacheMutex);
+    itemCache[proto->ItemId] = contains;
     return contains;
 }
 

@@ -526,7 +526,11 @@ TestResult CommandSpawnMob::Execute(const std::string& params, Player* bot,
         bot->GetOrientation() + M_PI_F, TEMPSPAWN_MANUAL_DESPAWN, 0);
     settings.level = spawnLevel;
 
+#ifdef MANGOSBOT_TWO
+    Creature* spawned = WorldObject::SummonCreature(settings, bot->GetMap(), bot->GetPhaseMask());
+#else
     Creature* spawned = WorldObject::SummonCreature(settings, bot->GetMap());
+#endif
 
     if (!spawned)
     {

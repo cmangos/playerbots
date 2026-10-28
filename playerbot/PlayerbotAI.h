@@ -794,6 +794,8 @@ protected:
     uint32 jumpTime;
     bool fallAfterJump;
     uint32 faceTargetUpdateDelay;
+    time_t lastTickResetStrategies = 0;
+    bool tickResetStrategiesPending = false;
     bool isPlayerFriend = false;
     bool isMovingToTransport = false;
     bool shouldLogOut = false;

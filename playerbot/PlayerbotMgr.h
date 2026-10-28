@@ -93,6 +93,8 @@ private:
         bool completed;
         uint32 expectedBotSpawnCount = 1;
         uint8 retry = 0;
+        uint32 gateSkips = 0;
+        time_t started = 0;
     };
 
     void UpdatePendingTests(uint32 elapsed);

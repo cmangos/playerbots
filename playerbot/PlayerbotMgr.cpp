@@ -2231,7 +2231,12 @@ std::list<std::string> PlayerbotHolder::HandleRunTest(Player* master, const std:
             {
                 const char* state = pt.completed ? "completed" : (pt.pending ? "in-flight" : "waiting");
                 std::string res = pt.result.empty() ? "" : ("\"" + pt.result.substr(0, 48) + "\"");
-                messages.push_back(std::string("  ") + state + " x" + std::to_string(pt.retry) + " " + res + " " + pt.testName);
+                std::string extra;
+                if (pt.pending && pt.started)
+                    extra = " age=" + std::to_string(time(nullptr) - pt.started) + "s";
+                else if (pt.gateSkips)
+                    extra = " skips=" + std::to_string(pt.gateSkips);
+                messages.push_back(std::string("  ") + state + " x" + std::to_string(pt.retry) + " " + res + extra + " " + pt.testName);
             }
         }
         return messages;
@@ -2418,7 +2423,18 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
     for (auto& pt : pendingTests)
     {
         if (pt.pending)
+        {
+            if (!pt.started)
+                pt.started = time(nullptr);
+            else if (time(nullptr) - pt.started > 3600)
+            {
+                sLog.outError("[TestQueue] stale in-flight '%s' after %us with no report - force-completing", pt.testName.c_str(), uint32(time(nullptr) - pt.started));
+                pt.result = "FAILED: stale in-flight, no test report";
+                pt.completed = true;
+                testResults.push_back(pt);
+            }
             continue;
+        }
 
         if (pt.completed)
             continue;
@@ -2434,23 +2450,60 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
         {
             Player* master = (dynamic_cast<PlayerbotMgr*>(this))->GetMaster();
             if (!master)
+            {
+                if (++pt.gateSkips == 1 || pt.gateSkips % 30 == 0)
+                    sLog.outError("[TestQueue] picker gate: no master, skip %u for '%s'", pt.gateSkips, pt.testName.c_str());
+                if (pt.gateSkips >= 120)
+                {
+                    pt.result = "FAILED: picker found no master";
+                    pt.completed = true;
+                    testResults.push_back(pt);
+                }
                 continue;
+            }
 
             uint32 maxCharsPerAccount = 9;
 #ifdef MANGOSBOT_TWO
             maxCharsPerAccount = 10;
 #endif
             uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(master->GetObjectGuid());
-                if (accountId == 0) continue;
+            if (accountId == 0)
+            {
+                if (++pt.gateSkips == 1 || pt.gateSkips % 30 == 0)
+                    sLog.outError("[TestQueue] picker gate: master account unknown, skip %u for '%s'", pt.gateSkips, pt.testName.c_str());
+                if (pt.gateSkips >= 120)
+                {
+                    pt.result = "FAILED: master account not resolvable";
+                    pt.completed = true;
+                    testResults.push_back(pt);
+                }
+                continue;
+            }
 
             uint32 currentChars = sAccountMgr.GetCharactersCount(accountId);
             if (currentChars >= maxCharsPerAccount)
+            {
+                if (++pt.gateSkips == 1 || pt.gateSkips % 30 == 0)
+                    sLog.outError("[TestQueue] picker gate: account %u full (%u chars), skip %u for '%s'", accountId, currentChars, pt.gateSkips, pt.testName.c_str());
+                if (pt.gateSkips >= 120)
+                {
+                    pt.result = "FAILED: master account full";
+                    pt.completed = true;
+                    testResults.push_back(pt);
+                }
                 continue;
+            }
         }
 
         uint32 newTestBotCount = std::max<uint32>(1, pt.expectedBotSpawnCount);
         if (activeTestBots + newTestBotCount >= maxActiveTestBots)
+        {
+            if (++pt.gateSkips == 1 || pt.gateSkips % 30 == 0)
+                sLog.outError("[TestQueue] picker gate: capacity %u/%u active, skip %u for '%s'", activeTestBots, maxActiveTestBots, pt.gateSkips, pt.testName.c_str());
             continue;
+        }
+
+        pt.gateSkips = 0;
 
         std::string createParams = TestRegistry::GetBotCreationRequirement(pt.testName);
 
@@ -2471,6 +2524,7 @@ void PlayerbotHolder::UpdatePendingTests(uint32 elapsed)
         if (created)
         {
             pt.pending = true;
+            pt.started = time(nullptr);
             activeTestBots += newTestBotCount;
         }
         else if (++pt.retry >= 20)

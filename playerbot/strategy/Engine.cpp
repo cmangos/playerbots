@@ -385,6 +385,9 @@ void Engine::PruneUnhandledExternalEvents()
         bool held = false;
         for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
         {
+            if (!*i)
+                continue;
+
             if ((*i)->getName() == it->first)
             {
                 held = true;
@@ -688,7 +691,11 @@ void Engine::ProcessTriggers(bool minimal)
 
     for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
     {
-        Trigger* trigger = (*i)->getTrigger();
+        TriggerNode* node = *i;
+        if (!node)
+            continue;
+
+        Trigger* trigger = node->getTrigger();
         if (!trigger)
             continue;
 

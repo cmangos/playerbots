@@ -123,6 +123,15 @@ int ListQuestsAction::ListQuests(Player* requester, bool completed, bool silent,
         std::ostringstream out;
 
         Quest const* pQuest = sObjectMgr.GetQuestTemplate(questId);
+        // A slot whose quest template is gone from the world DB stays in the log;
+        // formatting it would dereference null.
+        if (!pQuest)
+        {
+            out << "quest " << questId << " (no template)";
+            ai->TellPlayer(requester, out);
+            continue;
+        }
+
         out << chat->formatQuest(pQuest);
 
         if (travelDetail == QUEST_TRAVEL_DETAIL_NONE)

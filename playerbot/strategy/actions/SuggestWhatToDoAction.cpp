@@ -122,7 +122,10 @@ std::vector<uint32> SuggestWhatToDoAction::GetIncompletedQuests()
             continue;
 
         QuestStatus status = bot->GetQuestStatus(questId);
-        if (status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_NONE)
+        // Skip ids with no template: the consumer picks one at random and formats
+        // it, so an orphan collected here silently costs a suggestion.
+        if ((status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_NONE)
+            && sObjectMgr.GetQuestTemplate(questId))
             result.push_back(questId);
     }
 

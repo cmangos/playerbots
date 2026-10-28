@@ -493,6 +493,17 @@ TestResult CommandSpawnMob::Execute(const std::string& params, Player* bot,
     if (levelPos != std::string::npos)
         spawnLevel = (uint32)atoi(params.c_str() + levelPos + 6);
 
+    float leashRange = 0.0f;
+    size_t leashPos = params.find("leash=");
+    if (leashPos != std::string::npos)
+        leashRange = atof(params.c_str() + leashPos + 6);
+
+    if (leashPos != std::string::npos && leashRange <= 0.0f)
+    {
+        message = "Invalid leash range: " + params;
+        return TestResult::IMPOSSIBLE;
+    }
+
     float x = bot->GetPositionX() + distance;
     float y = bot->GetPositionY();
 
@@ -542,6 +553,16 @@ TestResult CommandSpawnMob::Execute(const std::string& params, Player* bot,
     ctx.focusMobEntry = entryId;
     ctx.focusMobGuid = spawned->GetObjectGuid();
     ctx.focusMobPassive = true;
+
+    if (leashRange > 0.0f)
+    {
+        float const sx = spawned->GetPositionX();
+        float const sy = spawned->GetPositionY();
+        spawned->GetCombatManager().SetLeashingCheck([sx, sy, leashRange](Unit*, float x, float y, float z)
+        {
+            return sqrt((x - sx) * (x - sx) + (y - sy) * (y - sy)) > leashRange;
+        });
+    }
 
     if (params.find("aggro") != std::string::npos && spawned->AI())
         spawned->AI()->AttackStart(bot);

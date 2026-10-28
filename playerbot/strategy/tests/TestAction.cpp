@@ -92,6 +92,7 @@ void TestAction::RegisterMonitors()
     monitors.push_back(std::make_unique<MonitorStateDead>());
     monitors.push_back(std::make_unique<MonitorStateTime>());
     monitors.push_back(std::make_unique<MonitorCombatHp>());
+    monitors.push_back(std::make_unique<MonitorNotInCombat>());
     monitors.push_back(std::make_unique<MonitorMovementDistance>());
     monitors.push_back(std::make_unique<MonitorNotOnMap>());
     monitors.push_back(std::make_unique<MonitorMovementUnderground>());
@@ -99,6 +100,7 @@ void TestAction::RegisterMonitors()
     monitors.push_back(std::make_unique<MonitorMovementSpeed>());
     monitors.push_back(std::make_unique<MonitorMovementSpawnDistance>());
     monitors.push_back(std::make_unique<MonitorCombatMob>());
+    monitors.push_back(std::make_unique<MonitorCombatMobHome>());
     monitors.push_back(std::make_unique<MonitorCombatDeadMobs>());
     monitors.push_back(std::make_unique<MonitorCombatPartyXp>());
     monitors.push_back(std::make_unique<MonitorCombatPartyWiped>());

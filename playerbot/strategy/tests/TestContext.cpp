@@ -15,6 +15,7 @@ void TestContext::Reset()
     deferredCleanups.clear();
     cleanupPc = 0;
     cleanupPrepared = false;
+    combatSeen = false;
     whoResponded = false;
     result = TestResult::PENDING;
     resultMessage.clear();

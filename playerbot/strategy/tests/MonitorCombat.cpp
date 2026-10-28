@@ -27,6 +27,17 @@ bool MonitorCombatHp::IsConditionMet(const std::string& monitorStr, Player* bot,
     return hp > threshold;
 }
 
+bool MonitorNotInCombat::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    if (bot->IsInCombat())
+    {
+        ctx.combatSeen = true;
+        return false;
+    }
+
+    return ctx.combatSeen;
+}
+
 bool MonitorCombatMob::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {
     // monitorStr has "mob" prefix already stripped, e.g. " 11520 is dead => pass ..."
@@ -45,7 +56,7 @@ bool MonitorCombatMob::IsConditionMet(const std::string& monitorStr, Player* bot
     std::list<Creature*> creatures;
     MaNGOS::AnyUnitInObjectRangeCheck checker(bot, 500.0f);
     MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(creatures, checker);
-    Cell::VisitWorldObjects(bot, searcher, 500.0f);
+    Cell::VisitAllObjects(bot, searcher, 500.0f);
 
     bool found = false;
     bool allDead = true;
@@ -83,6 +94,101 @@ bool MonitorCombatMob::IsConditionMet(const std::string& monitorStr, Player* bot
         return true;
 
     return false;
+}
+
+bool MonitorCombatMobHome::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    size_t entryEnd = monitorStr.find("is home");
+
+    if (entryEnd == std::string::npos)
+        return false;
+
+    std::string entryStr = monitorStr.substr(0, entryEnd);
+    uint32 entryId = atoi(entryStr.c_str());
+
+    if (!entryId)
+        return false;
+
+    float threshold = 5.0f;
+    size_t thresholdPos = monitorStr.find_first_not_of(' ', entryEnd + 7);
+    if (thresholdPos != std::string::npos)
+    {
+        float parsed = atof(monitorStr.c_str() + thresholdPos);
+        if (parsed > 0.0f)
+            threshold = parsed;
+    }
+
+    std::list<Creature*> creatures;
+    MaNGOS::AnyUnitInObjectRangeCheck checker(bot, 500.0f);
+    MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(creatures, checker);
+    Cell::VisitAllObjects(bot, searcher, 500.0f);
+
+    auto& objectStore = bot->GetMap()->GetObjectsStore();
+    bool found = false;
+    bool foundAlive = false;
+    bool anyCombat = false;
+    bool tooFar = false;
+
+    for (auto& creature : creatures)
+    {
+        if (creature->GetEntry() != entryId)
+            continue;
+
+        found = true;
+
+        if (!creature->IsAlive())
+            continue;
+
+        foundAlive = true;
+
+        if (creature->IsInCombat())
+        {
+            ctx.combatSeen = true;
+            anyCombat = true;
+        }
+        else
+        {
+            float rx, ry, rz;
+            creature->GetRespawnCoord(rx, ry, rz);
+            if (creature->GetDistance2d(rx, ry, DIST_CALC_NONE) > threshold * threshold)
+                tooFar = true;
+        }
+    }
+
+    if (!found)
+    {
+        for (auto itr = objectStore.begin<Creature>(); itr != objectStore.end<Creature>(); ++itr)
+        {
+            Creature* creature = itr->second;
+            if (!creature || creature->GetEntry() != entryId)
+                continue;
+
+            found = true;
+
+            if (!creature->IsAlive())
+                continue;
+
+            foundAlive = true;
+
+            if (creature->IsInCombat())
+            {
+                ctx.combatSeen = true;
+                anyCombat = true;
+            }
+            else
+            {
+                float rx, ry, rz;
+                creature->GetRespawnCoord(rx, ry, rz);
+                if (creature->GetDistance2d(rx, ry, DIST_CALC_NONE) > threshold * threshold)
+                    tooFar = true;
+            }
+        }
+    }
+
+    if (anyCombat || tooFar)
+        return false;
+
+    return foundAlive && ctx.combatSeen;
 }
 
 bool MonitorCombatPartyWiped::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const

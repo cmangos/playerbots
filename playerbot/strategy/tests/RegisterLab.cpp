@@ -329,11 +329,11 @@ void TestRegistry::RegisterFleeTests()
         "clear mobs radius=1500",
         "accept quest 2139",
         "gm off",
-        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=10 toward lab_flee_far aggro level=75",
-        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=14 toward lab_flee_far aggro level=75",
-        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=18 toward lab_flee_far aggro level=75",
-        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=22 toward lab_flee_far aggro level=75",
-        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=26 toward lab_flee_far aggro level=75",
+        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=10 toward lab_flee_far aggro level=75 leash=30",
+        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=14 toward lab_flee_far aggro level=75 leash=30",
+        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=18 toward lab_flee_far aggro level=75 leash=30",
+        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=22 toward lab_flee_far aggro level=75 leash=30",
+        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=26 toward lab_flee_far aggro level=75 leash=30",
         "observe"
     });
 
@@ -352,11 +352,11 @@ void TestRegistry::RegisterFleeTests()
         "clear mobs radius=1500",
         "accept quest 2139",
         "gm off",
-        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=10 toward lab_flee_far aggro level=75",
-        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=14 toward lab_flee_far aggro level=75",
-        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=18 toward lab_flee_far aggro level=75",
-        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=22 toward lab_flee_far aggro level=75",
-        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=26 toward lab_flee_far aggro level=75",
+        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=10 toward lab_flee_far aggro level=75 leash=30",
+        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=14 toward lab_flee_far aggro level=75 leash=30",
+        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=18 toward lab_flee_far aggro level=75 leash=30",
+        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=22 toward lab_flee_far aggro level=75 leash=30",
+        std::string("spawn mob ") + std::to_string(DUMMY_ENTRY) + " dist=26 toward lab_flee_far aggro level=75 leash=30",
         "observe"
     });
 

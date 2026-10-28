@@ -216,8 +216,9 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
             if (member->GetObjectGuid() == bot->GetObjectGuid())
                 continue;
 
+            // The member can be on another map, updated by another thread.
             if (member->IsInCombat())
-                member->CombatStop(true);
+                ai->RunOnOwningThread(member, [](Player* p) { p->CombatStop(true); });
 
             if (member->GetGroup() && member->GetGroup() != leaderGroup)
                 member->GetGroup()->RemoveMember(member->GetObjectGuid(), 0);
@@ -292,7 +293,13 @@ bool BGJoinAction::gatherArenaTeam(ArenaType type)
         if (!leaderGroup->AddMember(ObjectGuid(HIGHGUID_PLAYER, *i), member->GetName()))
             continue;
 
-        member->GetPlayerbotAI()->Reset(true);
+        // Resetting deletes the member's trigger nodes; doing that while another map thread is
+        // processing them crashes, so let the member's own thread (or the world thread) do it.
+        ai->RunOnOwningThread(member, [](Player* p)
+        {
+            if (PlayerbotAI* memberAi = p->GetPlayerbotAI())
+                memberAi->Reset(true);
+        });
 
         sLog.outDetail("Bot #%d <%s>: Member of <%s>", member->GetGUIDLow(), member->GetName(), arenateam->GetName().c_str());
     }

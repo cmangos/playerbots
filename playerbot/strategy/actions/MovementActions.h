@@ -14,6 +14,7 @@ namespace ai
     {
     public:
         MovementAction(PlayerbotAI* ai, std::string name) : Action(ai, name) {}
+        virtual bool IsMovement() override { return true; }
 
         static bool MinimalMove(PlayerbotAI* ai);
         static bool UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition dockPosition, WorldPosition exitPosition, bool doTeleport);

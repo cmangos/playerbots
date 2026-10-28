@@ -118,6 +118,7 @@ namespace ai
     private:
         void LogAction(const char* format, ...);
         void LogValues();
+        void TrackLoop(Action* action);
 
     protected:
 	    Queue queue;
@@ -127,6 +128,13 @@ namespace ai
         std::map<std::string, Strategy*> strategies;
         float lastRelevance;
         std::string lastAction;
+        std::string lastLoopAction;
+        time_t lastLoopStart = 0;
+        uint32 lastLoopMap = 0;
+        float lastLoopX = 0.0f;
+        float lastLoopY = 0.0f;
+        uint32 lastLoopHealth = 0;
+        ObjectGuid lastLoopTarget;
         ActionExecutionListeners actionExecutionListeners;
         BotState state;
         Action* lastExecutedAction;

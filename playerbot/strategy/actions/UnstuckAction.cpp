@@ -60,3 +60,39 @@ bool UnstuckAction::Execute(Event& event)
     ai->TellDebug(master, "Unstuck: Fallback to reset action.", "debug unstuck");
     return ai->DoSpecificAction("reset", event, true);
 }
+
+bool DropStandoffAction::Execute(Event& event)
+{
+    ai->TellDebug(ai->GetMaster(), "Standoff: no damage exchanged while stationary, dropping combat.", "debug unstuck");
+
+    bot->AttackStop();
+    bot->SetSelectionGuid(ObjectGuid());
+    SET_AI_VALUE(ObjectGuid, "current target", ObjectGuid());
+    SET_AI_VALUE(ObjectGuid, "old target", ObjectGuid());
+    SET_AI_VALUE(ObjectGuid, "attack target", ObjectGuid());
+    bot->CombatStop();
+
+    return true;
+}
+
+bool ReleaseStuckMovementAction::Execute(Event& event)
+{
+    Unit* currentTarget = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));
+
+    if (currentTarget)
+    {
+        ai->TellDebug(ai->GetMaster(), "Stuck movement: dropping unreachable target.", "debug unstuck");
+
+        SET_AI_VALUE(ObjectGuid, "old target", currentTarget->GetObjectGuid());
+        SET_AI_VALUE(ObjectGuid, "current target", ObjectGuid());
+        if (AI_VALUE(ObjectGuid, "attack target") == currentTarget->GetObjectGuid())
+            SET_AI_VALUE(ObjectGuid, "attack target", ObjectGuid());
+
+        bot->SetSelectionGuid(ObjectGuid());
+        bot->AttackStop();
+    }
+
+    RESET_AI_VALUE(GuidPosition, "rpg target");
+
+    return true;
+}

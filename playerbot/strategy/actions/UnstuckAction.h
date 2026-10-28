@@ -23,4 +23,40 @@ public:
 #endif
 };
 
+class DropStandoffAction : public Action
+{
+public:
+    DropStandoffAction(PlayerbotAI* ai) : Action(ai, "drop standoff") {}
+    virtual bool Execute(Event& event) override;
+
+#ifdef GenerateBotHelp
+    virtual std::string GetHelpName() { return "drop standoff"; }
+    virtual std::string GetHelpDescription()
+    {
+        return "Drops a frozen combat stand-off: nobody exchanged damage while the bot stood still, so combat is stopped\n"
+               "and targets cleared, letting the state machine re-decide (fresh engagement or non-combat agenda).";
+    }
+    virtual std::vector<std::string> GetUsedActions() { return {}; }
+    virtual std::vector<std::string> GetUsedValues() { return {}; }
+#endif
+};
+
+class ReleaseStuckMovementAction : public Action
+{
+public:
+    ReleaseStuckMovementAction(PlayerbotAI* ai) : Action(ai, "release stuck movement") {}
+    virtual bool Execute(Event& event) override;
+
+#ifdef GenerateBotHelp
+    virtual std::string GetHelpName() { return "release stuck movement"; }
+    virtual std::string GetHelpDescription()
+    {
+        return "Drops the current target when a movement action has been looping without the bot actually moving,\n"
+               "losing health or changing target - the strategy machine then re-decides.";
+    }
+    virtual std::vector<std::string> GetUsedActions() { return {}; }
+    virtual std::vector<std::string> GetUsedValues() { return { "movement loop age" }; }
+#endif
+};
+
 #endif

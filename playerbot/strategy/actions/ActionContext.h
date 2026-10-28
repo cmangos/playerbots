@@ -234,6 +234,8 @@ namespace ai
             creators["guild accept quest order"] = [](PlayerbotAI* ai) { return new GuildAcceptQuestOrderAction(ai); };
             creators["use trinket"] = [](PlayerbotAI* ai) { return new UseTrinketAction(ai); };
             creators["unstuck"] = [](PlayerbotAI* ai) { return new UnstuckAction(ai); };
+            creators["drop standoff"] = [](PlayerbotAI* ai) { return new DropStandoffAction(ai); };
+            creators["release stuck movement"] = [](PlayerbotAI* ai) { return new ReleaseStuckMovementAction(ai); };
             creators["reset"] = [](PlayerbotAI* ai) { return new ResetAction(ai); };
             creators["interrupt current spell"] = [](PlayerbotAI* ai) { return new InterruptCurrentSpellAction(ai); };
             creators["initialize pet"] = [](PlayerbotAI* ai) { return new InitializePetAction(ai); };

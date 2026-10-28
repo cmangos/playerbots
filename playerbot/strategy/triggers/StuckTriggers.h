@@ -1,5 +1,7 @@
 #pragma once
 #include "playerbot/strategy/Trigger.h"
+#include "playerbot/ServerFacade.h"
+#include "playerbot/PlayerbotAIConfig.h"
 #include <MotionGenerators/MoveMap.h>
 
 namespace ai
@@ -148,7 +150,6 @@ namespace ai
     {
     public:
         CombatStuckTrigger(PlayerbotAI* ai) : Trigger(ai, "combat stuck", 5) {}
-
         virtual bool IsActive() override
         {
             if (ai->GetState() != BotState::BOT_STATE_COMBAT)
@@ -182,6 +183,103 @@ namespace ai
             }
 
             return false;
+        }
+    };
+
+    class CombatStandoffTrigger : public Trigger
+    {
+    public:
+        CombatStandoffTrigger(PlayerbotAI* ai) : Trigger(ai, "combat standoff", 5) {}
+
+        virtual bool IsActive() override
+        {
+            if (ai->GetState() != BotState::BOT_STATE_COMBAT)
+            {
+                lastSignature.clear();
+                lastChange = time(0);
+                return false;
+            }
+
+            if (ai->HasActivePlayerMaster())
+                return false;
+
+            if (ai->GetGroupMaster() && !ai->GetGroupMaster()->GetPlayerbotAI())
+                return false;
+
+            if (!ai->AllowActivity(ALL_ACTIVITY))
+                return false;
+
+            if (sServerFacade.isMoving(bot))
+            {
+                lastSignature.clear();
+                lastChange = time(0);
+                return false;
+            }
+
+            std::list<ObjectGuid> const attackers = AI_VALUE(std::list<ObjectGuid>, "attackers");
+            if (attackers.empty())
+            {
+                lastSignature.clear();
+                lastChange = time(0);
+                return false;
+            }
+
+            uint32 signature = (uint32)bot->GetHealthPercent() * 1000;
+            uint32 counted = 0;
+            for (ObjectGuid const& guid : attackers)
+            {
+                if (counted >= 10)
+                    break;
+
+                Unit* attacker = ai->GetUnit(guid);
+                if (!attacker || !attacker->IsAlive())
+                    continue;
+
+                signature += (uint32)(attacker->GetHealthPercent() * 7.0f);
+                counted++;
+            }
+
+            if (!counted)
+            {
+                lastSignature.clear();
+                lastChange = time(0);
+                return false;
+            }
+
+            time_t now = time(0);
+            std::string sig = std::to_string(signature);
+            if (sig != lastSignature)
+            {
+                lastSignature = sig;
+                lastChange = now;
+                return false;
+            }
+
+            return (now - lastChange) >= sPlayerbotAIConfig.motionlessGiveUpSec;
+        }
+
+    private:
+        std::string lastSignature;
+        time_t lastChange = time(0);
+    };
+
+    class MovementLoopStuckTrigger : public Trigger
+    {
+    public:
+        MovementLoopStuckTrigger(PlayerbotAI* ai) : Trigger(ai, "movement loop stuck", 5) {}
+
+        virtual bool IsActive() override
+        {
+            if (ai->HasActivePlayerMaster())
+                return false;
+
+            if (ai->GetGroupMaster() && !ai->GetGroupMaster()->GetPlayerbotAI())
+                return false;
+
+            if (!ai->AllowActivity(ALL_ACTIVITY))
+                return false;
+
+            return AI_VALUE(int, "movement loop age") >= (int)sPlayerbotAIConfig.motionlessGiveUpSec;
         }
     };
 

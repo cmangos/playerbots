@@ -190,6 +190,7 @@ public:
     bool logInGroupOnly, logValuesPerTick;
     uint32 actionHistorySize;   // per-bot action history ring buffer (0 = off)
     bool fleeingEnabled;
+    uint32 motionlessGiveUpSec;
     bool summonAtInnkeepersEnabled;
     std::string combatStrategies, nonCombatStrategies, reactStrategies, deadStrategies;
     std::string randomBotCombatStrategies, randomBotNonCombatStrategies, randomBotReactStrategies, randomBotDeadStrategies;

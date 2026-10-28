@@ -27,6 +27,14 @@ void ClassStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "combat stuck",
         NextAction::array(0, new NextAction("unstuck", ACTION_IDLE), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "combat standoff",
+        NextAction::array(0, new NextAction("drop standoff", 91.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "movement loop stuck",
+        NextAction::array(0, new NextAction("release stuck movement", 101.0f), NULL)));
 }
 
 void ClassStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -497,6 +505,14 @@ void ClassStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "combat stuck",
         NextAction::array(0, new NextAction("unstuck", ACTION_IDLE), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "combat standoff",
+        NextAction::array(0, new NextAction("drop standoff", 91.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "movement loop stuck",
+        NextAction::array(0, new NextAction("release stuck movement", 101.0f), NULL)));
 }
 
 void ClassStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -968,6 +984,14 @@ void ClassStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
     triggers.push_back(new TriggerNode(
         "combat stuck",
         NextAction::array(0, new NextAction("unstuck", static_cast<float>(ACTION_IDLE) - 0.3f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "combat standoff",
+        NextAction::array(0, new NextAction("drop standoff", 91.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "movement loop stuck",
+        NextAction::array(0, new NextAction("release stuck movement", 101.0f), NULL)));
 }
 
 void ClassStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)

@@ -39,6 +39,10 @@ void MaintenanceStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &trigger
         NextAction::array(0, new NextAction("unstuck", 0.9f), NULL)));
 
     triggers.push_back(new TriggerNode(
+        "movement loop stuck",
+        NextAction::array(0, new NextAction("release stuck movement", 101.0f), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "random",
         NextAction::array(0, new NextAction("use random quest item", 0.9f), NULL)));
 

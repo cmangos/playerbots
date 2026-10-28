@@ -39,6 +39,8 @@ void TestContext::Reset()
     spawnedBots.clear();
     deliveredGroupMembers.clear();
     groupOnMapExpected = 0;
+    lootStackSeen = false;
+    actionSpamArmed = false;
 }
 
 void TestContext::RecordDeliveredGroupMember(ObjectGuid guid)

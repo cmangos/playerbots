@@ -195,6 +195,36 @@ void TestRegistry::RegisterLabStayGuardTests()
     }
 }
 
+void TestRegistry::RegisterLabLootTests()
+{
+    RegisterTest("lab_loot_follow_far_corpse", {
+        "# Screenshot repro 2026-10-25 (bot Ruth): a following bot ping-pongs between 'move to loot'",
+        "# [far from current loot] and 'follow' [out of free move range] on loot it can never reach.",
+        "# The Rabbit anchor has no loot table on purpose: the far corpse is the only loot in the stack.",
+        "# The far Fang is planted AFTER the follow is running and the loot strategy is wide: a lootable",
+        "# corpse decays to bones in ~15-35 s, so planting it first made the wide-strategy window a race",
+        "# the setup kept losing. Loot appearing while already following is the real scenario anyway.",
+        "# Expected: the follower stays with its anchor; repeated 'move to loot' attempts are the defect.",
+        "monitor not on map 34 => abort \"Bot left the lab map\"",
+        "monitor bot dead => abort \"Bot died during the loot ping-pong probe\"",
+        "monitor distance to lab_stockade_center > 60 => fail \"Chase drifted the bot > 60m off its anchor, now at <current position>\"",
+        "monitor loot stack > 90 => fail \"The far corpse never registered as loot - repro setup failed\"",
+        "monitor action spam move to loot > 3 => fail \"Follower ping-pongs between move-to-loot and follow on the far corpse at <current position>\"",
+        "monitor value bool can loot == true => pass \"Follower reached the far corpse in <time elapsed>\"",
+        "monitor time > 150 => pass \"Follower ignored the far loot and stayed with its follow point for <time elapsed>\"",
+        "monitor time > 420 => fail \"Timeout: loot neither reached nor ignored after <time elapsed>\"",
+        "require bot is level=60",
+        "teleport lab_stockade_center",
+        "clear mobs radius=1500",
+        "spawn mob 721 dist=5",
+        "follow focus",
+        "set value string loot strategy => equip,quest,skill,disenchant,use,vendor,trash",
+        "spawn mob 471 dist=22 aggro",
+        "await focus corpse 60",
+        "observe"
+    });
+}
+
 void TestRegistry::RegisterLabMicroTests()
 {
     RegisterTest("lab_micro1_stockade", {

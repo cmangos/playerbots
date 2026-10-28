@@ -90,6 +90,9 @@ namespace ai
         void RecordDeliveredGroupMember(ObjectGuid guid);
         std::set<ObjectGuid> GetDeliveredGroupMembers();
 
+        bool lootStackSeen = false;
+        bool actionSpamArmed = false;
+
         // BL-44: snapshot of the expected group-member count, taken at the monitor's first tick. The
         // live group can shrink mid-window (a member leaves), which would silently lower the bar; the
         // snapshot keeps the original assertion strength for the whole observe window.

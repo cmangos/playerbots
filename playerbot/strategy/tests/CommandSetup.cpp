@@ -8,6 +8,7 @@
 #include "TestAction.h"
 #include "TestRegistry.h"
 #include "playerbot/ServerFacade.h"
+#include "playerbot/LootObjectStack.h"
 
 using namespace ai;
 
@@ -172,7 +173,7 @@ TestResult CommandSetupClearMobs::Execute(const std::string& params, Player* bot
     std::list<Creature*> creatures;
     MaNGOS::AnyUnitInObjectRangeCheck checker(bot, radius);
     MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(creatures, checker);
-    Cell::VisitWorldObjects(bot, searcher, radius);
+    Cell::VisitAllObjects(bot, searcher, radius);
 
     uint32 cleared = 0;
     for (auto& creature : creatures)
@@ -555,6 +556,85 @@ TestResult CommandSpawnMob::Execute(const std::string& params, Player* bot,
     sLog.outString("[TestAction] Bot %s spawned creature %s (entry %u) at distance %.1f",
         bot->GetName(), spawned->GetName(), entryId, bot->GetDistance(spawned));
     return TestResult::PASS;
+}
+
+TestResult CommandFollowFocus::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    Creature* focus = bot->IsInWorld() && bot->GetMap() ? bot->GetMap()->GetCreature(ctx.focusMobGuid) : nullptr;
+    if (!focus || !focus->IsInWorld())
+    {
+        message = "follow focus: no focus mob spawned yet";
+        return TestResult::PENDING;
+    }
+
+    ai->ChangeStrategy("+follow,-rpg,-travel,-stay,-guard,-wander,-passive", BotState::BOT_STATE_NON_COMBAT);
+    ai->ChangeStrategy("-stay,-guard,-wander", BotState::BOT_STATE_COMBAT);
+    AiObjectContext* context = ai->GetAiObjectContext();
+    SET_AI_VALUE(GuidPosition, "manual follow target", focus);
+
+    return TestResult::PASS;
+}
+
+TestResult CommandKillFocus::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    Creature* focus = bot->IsInWorld() && bot->GetMap() ? bot->GetMap()->GetCreature(ctx.focusMobGuid) : nullptr;
+    if (!focus)
+    {
+        message = "kill focus: no focus mob spawned yet";
+        return TestResult::PENDING;
+    }
+
+    if (!focus->IsAlive())
+    {
+        message = "kill focus: focus mob already dead";
+        return TestResult::PASS;
+    }
+
+    Unit::Kill(bot, focus, DIRECT_DAMAGE, nullptr, false, false);
+
+    return TestResult::PASS;
+}
+
+TestResult CommandAwaitFocusCorpse::Execute(const std::string& params, Player* bot,
+                    PlayerbotAI* ai, TestContext& ctx, std::string& message)
+{
+    uint32 graceSeconds = 20;
+    if (!params.empty())
+    {
+        std::string graceStr = params;
+        if (TryParseUInt32Strict(graceStr, graceSeconds, message, GetName()) != TestResult::PASS)
+            return TestResult::IMPOSSIBLE;
+    }
+
+    Creature* focus = bot->IsInWorld() && bot->GetMap() ? bot->GetMap()->GetCreature(ctx.focusMobGuid) : nullptr;
+    if (!focus)
+    {
+        message = "await focus corpse: focus mob despawned";
+        return TestResult::FAIL;
+    }
+
+    if (focus->IsAlive())
+        return TestResult::PENDING;
+
+    if (sServerFacade.GetDeathState(focus) == CORPSE && focus->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE))
+    {
+        AiObjectContext* context = bot->GetPlayerbotAI()->GetAiObjectContext();
+        AI_VALUE(LootObjectStack*, "available loot")->Add(focus->GetObjectGuid());
+        ctx.waitTime = 0;
+        message = "focus corpse lootable and registered";
+        return TestResult::PASS;
+    }
+
+    if (!ctx.waitTime)
+        ctx.waitTime = WorldTimer::getMSTime();
+
+    if (WorldTimer::getMSTimeDiff(ctx.waitTime, WorldTimer::getMSTime()) < graceSeconds * 1000)
+        return TestResult::PENDING;
+
+    message = "await focus corpse: corpse never became lootable (no loot recipient?)";
+    return TestResult::FAIL;
 }
 
 TestResult CommandSetValue::Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message)

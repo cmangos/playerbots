@@ -3,6 +3,11 @@
 #include "playerbot/WorldPosition.h"
 #include "playerbot/ChatHelper.h"
 #include "Server/DBCStores.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
+#include "playerbot/LootObjectStack.h"
+#include "playerbot/ServerFacade.h"
 #include <cctype>
 #include <set>
 
@@ -464,6 +469,103 @@ bool MonitorAiValue::IsConditionMet(const std::string& monitorStr, Player* bot, 
     }
 
     return false;
+}
+
+bool MonitorStateLootStackNever::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return false;
+
+    AiObjectContext* context = ai->GetAiObjectContext();
+
+    if (AI_VALUE(bool, "has available loot"))
+        ctx.lootStackSeen = true;
+
+    if (ctx.lootStackSeen)
+        return false;
+
+    std::string valueName;
+    std::string op;
+    std::string valueStr;
+    std::string parseMessage;
+    if (TryParseComparisonValue(monitorStr, valueName, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    uint32 threshold = 0;
+    if (TryParseUInt32Strict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    if (op != ">")
+        return false;
+
+    if (!ctx.monitorTime)
+        ctx.monitorTime = WorldTimer::getMSTime();
+
+    bool failing = (WorldTimer::getMSTime() - ctx.monitorTime) / 1000 > threshold;
+    if (failing)
+    {
+        std::list<Creature*> nearby;
+        MaNGOS::AnyUnitFulfillingConditionInRangeCheck checker(bot, [](Unit*) { return true; }, 60.0f * 60.0f, DIST_CALC_NONE);
+        MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitFulfillingConditionInRangeCheck> searcher(nearby, checker);
+        Cell::VisitAllObjects(bot, searcher, 60.0f);
+        std::ostringstream out;
+        out << "loot stack diag: strategy='" << AI_VALUE(std::string, "loot strategy") << "'"
+            << " getLoot0=" << AI_VALUE(LootObjectStack*, "available loot")->GetLoot(0).guid.GetRawValue();
+        for (Creature* c : nearby)
+        {
+            if (!c || c->IsPet())
+                continue;
+            out << " | " << c->GetName() << "#" << c->GetEntry() << " dbguid=" << c->GetGUIDLow()
+                << " xy=" << c->GetPositionX() << "," << c->GetPositionY()
+                << " alive=" << c->IsAlive() << " death=" << sServerFacade.GetDeathState(c)
+                << " combat=" << c->IsInCombat() << " loot=" << (c->m_loot ? "yes" : "no");
+            if (c->m_loot)
+                out << " gold=" << c->m_loot->GetGoldAmount()
+                    << " shouldLootFresh=" << AI_VALUE2(bool, "should loot object", std::to_string(c->GetObjectGuid().GetRawValue()));
+        }
+        sLog.outString("[TestAction] %s", out.str().c_str());
+    }
+
+    return failing;
+}
+
+bool MonitorStateActionSpam::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    PlayerbotAI* ai = bot->GetPlayerbotAI();
+    if (!ai)
+        return false;
+
+    if (!ctx.actionSpamArmed)
+    {
+        ai->SetActionHistorySize(256);
+        ai->ClearActionHistory();
+        ctx.actionSpamArmed = true;
+        return false;
+    }
+
+    std::string valueName;
+    std::string op;
+    std::string valueStr;
+    std::string parseMessage;
+    if (TryParseComparisonValue(monitorStr, valueName, op, valueStr, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    uint32 threshold = 0;
+    if (TryParseUInt32Strict(valueStr, threshold, parseMessage, GetName()) != TestResult::PASS)
+        return false;
+
+    if (op != ">")
+        return false;
+
+    uint32 count = 0;
+    for (const ActionHistoryEntry& entry : ai->GetActionHistory())
+    {
+        if (entry.action == valueName)
+            count++;
+    }
+
+    return count > threshold;
 }
 
 bool MonitorOutgoingMessage::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const

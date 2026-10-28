@@ -56,6 +56,9 @@ void TestAction::RegisterCommands()
     commands.push_back(std::make_unique<CommandSetupGiveItem>());
     commands.push_back(std::make_unique<CommandSetupEquipItem>());
     commands.push_back(std::make_unique<CommandSpawnMob>());
+    commands.push_back(std::make_unique<CommandFollowFocus>());
+    commands.push_back(std::make_unique<CommandKillFocus>());
+    commands.push_back(std::make_unique<CommandAwaitFocusCorpse>());
     commands.push_back(std::make_unique<CommandSetupClearMobs>());
     commands.push_back(std::make_unique<CommandPartySpawnBot>());
     commands.push_back(std::make_unique<CommandPartyDespawnBot>());
@@ -108,6 +111,8 @@ void TestAction::RegisterMonitors()
     monitors.push_back(std::make_unique<MonitorStateEquipQuality>());
     monitors.push_back(std::make_unique<MonitorStateAreaLevelDiff>());
     monitors.push_back(std::make_unique<MonitorAiValue>());
+    monitors.push_back(std::make_unique<MonitorStateLootStackNever>());
+    monitors.push_back(std::make_unique<MonitorStateActionSpam>());
     monitors.push_back(std::make_unique<MonitorOutgoingMessage>());
     monitors.push_back(std::make_unique<MonitorQuestComplete>());
     monitors.push_back(std::make_unique<MonitorQuestRewarded>());

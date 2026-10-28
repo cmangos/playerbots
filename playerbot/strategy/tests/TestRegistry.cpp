@@ -854,6 +854,7 @@ void TestRegistry::EnsureTestsRegistered()
     RegisterLabTests();
     RegisterLabMicroTests();
     RegisterLabStayGuardTests();
+    RegisterLabLootTests();
 
     sTestsRegistered = true;
     sTestsRegistering = false;

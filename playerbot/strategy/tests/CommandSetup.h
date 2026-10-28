@@ -101,6 +101,30 @@ namespace ai
         std::string GetName() const override { return "spawn mob"; }
     };
 
+    class CommandFollowFocus : public TestCommand
+    {
+    public:
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+    protected:
+        std::string GetName() const override { return "follow focus"; }
+    };
+
+    class CommandKillFocus : public TestCommand
+    {
+    public:
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+    protected:
+        std::string GetName() const override { return "kill focus"; }
+    };
+
+    class CommandAwaitFocusCorpse : public TestCommand
+    {
+    public:
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+    protected:
+        std::string GetName() const override { return "await focus corpse"; }
+    };
+
     class CommandSetValue : public TestCommand
     {
     public:

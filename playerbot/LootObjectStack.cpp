@@ -262,7 +262,7 @@ bool LootObject::IsLootPossible(Player* bot)
 
     AiObjectContext* context = ai->GetAiObjectContext();
 
-    if (!AI_VALUE2_LAZY(bool, "should loot object", std::to_string(guid.GetRawValue())))
+    if (!AI_VALUE2(bool, "should loot object", std::to_string(guid.GetRawValue())))
         return false;
 
     // Check if the game object has quest loot and bot has the quest for it

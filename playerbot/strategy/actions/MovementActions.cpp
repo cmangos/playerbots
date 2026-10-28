@@ -2881,7 +2881,27 @@ bool MovementAction::Flee(Unit *target)
 
     if (lastFlee && (now - lastFlee) <= fleeDelay)
     {
-        return sServerFacade.isMoving(bot);
+        if (sServerFacade.isMoving(bot))
+            return true;
+
+        WorldPosition const fleeTo = AI_VALUE(LastMovement&, "last movement").lastFleeTo;
+        if (fleeTo)
+        {
+            WorldPosition const botPos(bot);
+            float const dx = fleeTo.getX() - botPos.getX();
+            float const dy = fleeTo.getY() - botPos.getY();
+            float const len = sqrt(dx * dx + dy * dy);
+            if (len > 5.0f)
+            {
+                float const ring = WorldPosition(bot).isOverworld() ? (ai->GetRange("flee") * 2) : ai->GetRange("flee");
+                float const nx = botPos.getX() + dx / len * ring;
+                float const ny = botPos.getY() + dy / len * ring;
+                if (MoveTo(bot->GetMapId(), nx, ny, botPos.getZ()))
+                    return true;
+            }
+        }
+
+        return false;
     }
     
     const bool isHealer = ai->IsHeal(bot);
@@ -3022,9 +3042,7 @@ bool MovementAction::Flee(Unit *target)
 
         FleeManager manager(bot, fullDistance ? (ai->GetRange("flee") * 2) : ai->GetRange("flee"), bot->GetAngle(target) + M_PI);
         if (!manager.isUseful())
-        {
             return false;
-        }
 
         if (!urand(0, 50) && ai->HasStrategy("emote", BotState::BOT_STATE_NON_COMBAT))
         {
@@ -3061,6 +3079,7 @@ bool MovementAction::Flee(Unit *target)
         if(MoveTo(target->GetMapId(), rx, ry, rz))
         {
             AI_VALUE(LastMovement&, "last movement").lastFlee = time(0);
+            AI_VALUE(LastMovement&, "last movement").lastFleeTo = WorldPosition(target->GetMapId(), rx, ry, rz);
             succeeded = true;
         }
     }

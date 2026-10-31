@@ -4925,7 +4925,9 @@ bool PlayerbotAI::CastSpell(uint32 spellId, Unit* target, Item* itemTarget, bool
 	//bot->clearUnitState(UNIT_STAT_FOLLOW);
 
 	bool failWithDelay = false;
-    if (!bot->IsStandState())
+    // Respect native seated-casting permissions for eating and drinking.
+    SpellEntry const* sitCheckInfo = sServerFacade.LookupSpellInfo(spellId);
+    if (!bot->IsStandState() && !(sitCheckInfo && sitCheckInfo->HasAttribute(SPELL_ATTR_ALLOW_WHILE_SITTING)))
     {
         bot->SetStandState(UNIT_STAND_STATE_STAND);
         failWithDelay = true;
@@ -8666,8 +8668,14 @@ void PlayerbotAI::EnchantItemT(uint32 spellid, uint8 slot, Item* item)
       return;
    }
 
-   if (!((1 << pItem->GetProto()->SubClass) & spellInfo->EquippedItemSubClassMask) &&
-      !((1 << pItem->GetProto()->InventoryType) & spellInfo->EquippedItemInventoryTypeMask))
+   // Every restriction the spell sets must match, not just one of them: a ring
+   // otherwise passes on the sub class bit alone and gets a chest enchant.
+   if ((spellInfo->EquippedItemClass >= 0 &&
+        uint32(spellInfo->EquippedItemClass) != pItem->GetProto()->Class) ||
+       (spellInfo->EquippedItemSubClassMask &&
+        !((uint32(1) << pItem->GetProto()->SubClass) & uint32(spellInfo->EquippedItemSubClassMask))) ||
+       (spellInfo->EquippedItemInventoryTypeMask &&
+        !((uint32(1) << pItem->GetProto()->InventoryType) & uint32(spellInfo->EquippedItemInventoryTypeMask))))
    {
 
       sLog.outError("%s: items could not be enchanted, wrong item type equipped", bot->GetName());

@@ -47,7 +47,7 @@ public:
     {
     public:
         CastScatterShotOnClosestAttackerTargetingMeAction(PlayerbotAI* ai) : CastRangedDebuffSpellAction(ai, "scatter shot") {}
-        std::string GetTargetName() override { return "closest attacker targeting me target"; }
+        std::string GetTargetName() override { return "closest attacker targeting me"; }
     };
 
     BEGIN_RANGED_SPELL_ACTION(CastDistractingShotAction, "distracting shot")

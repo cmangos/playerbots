@@ -830,6 +830,8 @@ bool BroadcastHelper::BroadcastSuggestQuest(
         int index = rand() % quests.size();
 
         Quest const* quest = sObjectMgr.GetQuestTemplate(quests[index]);
+        if (!quest)
+            return false; // quest id with no template: nothing safe to format
 
         std::map<std::string, std::string> placeholders;
         placeholders["%my_role"] = ai->GetChatHelper()->formatClass(bot, AiFactory::GetPlayerSpecTab(bot));
@@ -1019,7 +1021,10 @@ bool BroadcastHelper::BroadcastSuggestToxicLinks(
                 continue;
 
             QuestStatus status = bot->GetQuestStatus(questId);
-            if (status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_NONE)
+            // Skip ids with no template: the pick below formats the template and
+            // would dereference null.
+            if ((status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_NONE)
+                && sObjectMgr.GetQuestTemplate(questId))
                 incompleteQuests.push_back(questId);
         }
 

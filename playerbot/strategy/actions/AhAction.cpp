@@ -222,6 +222,16 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             if (auction->owner == bot->GetGUIDLow())
                 continue;
 
+            // Resolved once for the whole iteration, so every use below is
+            // visibly covered. itemCount is the load-bearing half: a malformed
+            // row carrying 0 reaches `totalCost / itemCount` in the vendor arm
+            // and the same division inside IsWorthBuyingFromAhToResellAtAH. The
+            // prototype can be null once the item leaves item_template while its
+            // auction lives on, and both arms dereference it.
+            ItemPrototype const* proto = sObjectMgr.GetItemPrototype(auction->itemTemplate);
+            if (!proto || !auction->itemCount)
+                continue;
+
             uint32 totalCost = std::min(auction->buyout, uint32(std::max(auction->bid, auction->startbid) * frand(1.05f, 1.25f)));
 
             usage = AI_VALUE2(ItemUsage, "item usage", ItemQualifier(auction).GetQualifier());
@@ -240,7 +250,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             case ItemUsage::ITEM_USAGE_AH:
             {
                 auto pmo = sPerformanceMonitor.start(PERF_MON_VALUE, "IsWorthBuyingFromAhToResellAtAH", ai);
-                bool isWorthBuyingFromAhToResellAtAH = ItemUsageValue::IsWorthBuyingFromAhToResellAtAH(sObjectMgr.GetItemPrototype(auction->itemTemplate), totalCost, auction->itemCount);
+                bool isWorthBuyingFromAhToResellAtAH = ItemUsageValue::IsWorthBuyingFromAhToResellAtAH(proto, totalCost, auction->itemCount);
                 pmo.reset();
 
                 if (!isWorthBuyingFromAhToResellAtAH)
@@ -250,7 +260,7 @@ bool AhBidAction::ExecuteCommand(Player* requester, std::string text, Unit* auct
             }
             case ItemUsage::ITEM_USAGE_VENDOR:
                 //basically if AH price is lower than vendor sell price then it's worth it
-                if (totalCost / auction->itemCount >= (int32)sObjectMgr.GetItemPrototype(auction->itemTemplate)->SellPrice)
+                if (totalCost / auction->itemCount >= (int32)proto->SellPrice)
                     continue;
                 power = 1000;
                 break;
@@ -418,6 +428,12 @@ bool AhBidAction::BidItem(Player* requester, AuctionEntry* auction, uint32 price
     uint32 count = auction->itemCount;
 
     ItemPrototype const* proto = sObjectMgr.GetItemPrototype(auction->itemTemplate);
+
+    // Dereferenced unguarded below. Checked here rather than relying on the
+    // callers, because the auction is re-fetched from the auction house above
+    // and this is the frame that reads the prototype.
+    if (!proto)
+        return false;
 
     bot->GetSession()->HandleAuctionPlaceBid(packet);
 

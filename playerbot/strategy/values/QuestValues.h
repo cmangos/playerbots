@@ -112,7 +112,7 @@ namespace ai
         NeedForQuestValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "need for quest", 5), Qualified() {}
         virtual bool Calculate() override;
     };
-    
+
     //Free quest log slots
     class FreeQuestLogSlotValue : public Uint8CalculatedValue
     {
@@ -208,6 +208,8 @@ namespace ai
     public:
         NeedQuestObjectiveValue(PlayerbotAI* ai) : BoolCalculatedValue(ai, "need quest objective"), Qualified() {}
         static bool CanGetItemSomewhere(const uint32 itemId, const uint32 reqCount, Player* bot);
+        static bool IsNeeded(PlayerbotAI* ai, uint32 questId, uint32 objective, int32 entry);
+        static bool HasIncompleteObjective(PlayerbotAI* ai);
         virtual bool Calculate() override;
     };
 
@@ -216,6 +218,8 @@ namespace ai
     {
     public:
         CanUseItemOn(PlayerbotAI* ai) : BoolCalculatedValue(ai, "can use item on"), Qualified() {}
+        static bool IsQuestItemForEntry(PlayerbotAI* ai, uint32 itemId, int32 entry);
+        static bool HasQuestItemForEntry(PlayerbotAI* ai, int32 entry);
         virtual bool Calculate() override;
     };
 

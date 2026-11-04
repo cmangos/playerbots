@@ -371,6 +371,104 @@ std::list<GuidPosition> ActiveQuestObjectivesValue::Calculate()
 	return retQuestObjectives;
 }
 
+bool NeedQuestObjectiveValue::IsNeeded(PlayerbotAI* ai, uint32 questId, uint32 objective, int32 entry)
+{
+	if (objective >= QUEST_OBJECTIVES_COUNT)
+		return false;
+
+	Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+
+	if (!quest || !quest->IsActive() || !ai->GetBot()->IsActiveQuest(questId))
+		return false;
+
+	QuestStatusData& questStatus = ai->GetBot()->getQuestStatusMap().at(questId);
+
+	if (questStatus.m_status != QUEST_STATUS_INCOMPLETE)
+		return false;
+
+	int32 reqEntry = quest->ReqCreatureOrGOId[objective];
+	uint32 reqCount = quest->ReqCreatureOrGOCount[objective];
+
+	if (reqEntry != 0 && entry == reqEntry && reqCount != 0 && questStatus.m_creatureOrGOcount[objective] < reqCount)
+		return true;
+
+	uint32 itemReq = quest->ReqItemCount[objective];
+	uint32 itemHas = questStatus.m_itemcount[objective];
+
+	if (itemReq && itemHas < itemReq)
+	{
+		std::list<int32> drops = GAI_VALUE2(std::list<int32>, "item drop list", quest->ReqItemId[objective]);
+		if (std::find(drops.begin(), drops.end(), entry) != drops.end())
+			return true;
+	}
+
+	return false;
+}
+
+bool CanUseItemOn::IsQuestItemForEntry(PlayerbotAI* ai, uint32 itemId, int32 entry)
+{
+	QuestStatusMap& questStatusMap = ai->GetBot()->getQuestStatusMap();
+
+	for (auto& [questId, questStatusData] : questStatusMap)
+	{
+		Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+
+		if (!quest || !quest->IsActive() || questStatusData.m_status != QUEST_STATUS_INCOMPLETE)
+			continue;
+
+		if (quest->GetSrcItemId() != itemId)
+			continue;
+
+		for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
+			if (NeedQuestObjectiveValue::IsNeeded(ai, questId, objective, entry))
+				return true;
+	}
+
+	return false;
+}
+
+bool CanUseItemOn::HasQuestItemForEntry(PlayerbotAI* ai, int32 entry)
+{
+	std::list<Item*> questItems = ai->GetAiObjectContext()->GetValue<std::list<Item*>>("inventory items", "quest")->Get();
+
+	for (Item* item : questItems)
+	{
+		if (!item)
+			continue;
+
+		if (IsQuestItemForEntry(ai, item->GetProto()->ItemId, entry))
+			return true;
+	}
+
+	return false;
+}
+
+bool NeedQuestObjectiveValue::HasIncompleteObjective(PlayerbotAI* ai)
+{
+	QuestStatusMap& questStatusMap = ai->GetBot()->getQuestStatusMap();
+
+	for (auto& [questId, questStatusData] : questStatusMap)
+	{
+		Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
+
+		if (!quest || !quest->IsActive() || questStatusData.m_status != QUEST_STATUS_INCOMPLETE)
+			continue;
+
+		for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
+		{
+			if (quest->ReqCreatureOrGOId[objective] != 0 && quest->ReqCreatureOrGOCount[objective] != 0 &&
+				questStatusData.m_creatureOrGOcount[objective] < quest->ReqCreatureOrGOCount[objective])
+				return true;
+
+			if (quest->ReqItemCount[objective] != 0 &&
+				questStatusData.m_itemcount[objective] < quest->ReqItemCount[objective])
+				return true;
+		}
+	}
+
+	return false;
+}
+
 bool NeedForQuestValue::Calculate()
 {
 	if (!Qualified::isValidNumberString(getQualifier()))
@@ -378,43 +476,21 @@ bool NeedForQuestValue::Calculate()
 
 	int32 entry = stoi(getQualifier());
 
-	const PlayerTravelInfo& info(bot);
-
-	std::list<GuidPosition> retQuestObjectives;
-
 	QuestStatusMap& questStatusMap = bot->getQuestStatusMap();
 
-	for (auto& questStatus : questStatusMap)
+	for (auto& [questId, questStatusData] : questStatusMap)
 	{
-		uint32 questId = questStatus.first;
-
 		Quest const* quest = sObjectMgr.GetQuestTemplate(questId);
 
-		if (!quest || !quest->IsActive())
-		{
-			continue;
-		}
-
-		QuestStatusData statusData = questStatus.second;
-
-		if (statusData.m_status != QUEST_STATUS_INCOMPLETE)
+		if (!quest || !quest->IsActive() || questStatusData.m_status != QUEST_STATUS_INCOMPLETE)
 			continue;
 
 		for (uint32 objective = 0; objective < QUEST_OBJECTIVES_COUNT; objective++)
 		{
-			std::vector<std::string> qualifier = { std::to_string(questId), std::to_string(objective) };
-
-			if (!AI_VALUE2(bool, "need quest objective", Qualified::MultiQualify(qualifier, ",")))
+			if (!NeedQuestObjectiveValue::IsNeeded(ai, questId, objective, entry))
 				continue;
 
-			DestinationList destinations = sTravelMgr.GetDestinations(info, uint32(TravelDestinationPurpose::QuestAllObjective), {int32(questId)}, false, 0);
-			
-			for (auto destination : destinations)
-			{
-                if (entry == destination->GetEntry())
-					return true;
-
-			}
+			return true;
 		}
 	}
 
@@ -743,7 +819,12 @@ bool CanUseItemOn::Calculate()
 			}
 
 			if (ai->CanCastSpell(spellId, unit, 0, false, nullptr, true))
+			{
+				if (CanUseItemOn::IsQuestItemForEntry(ai, itemId, (int32)guidP.GetEntry()))
+					return true;
+
 				return tryRandomCast;
+			}
 		}
 		else if (gameObject)
 		{

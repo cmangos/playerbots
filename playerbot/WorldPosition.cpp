@@ -384,7 +384,8 @@ bool WorldPosition::canFly() const
 #endif
 #ifdef MANGOSBOT_TWO
     // Disallow mounting in wintergrasp when battle is in progress
-    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
+    Map* opvpMap = getMap(0);
+    if (OutdoorPvP* outdoorPvP = opvpMap ? opvpMap->GetOutdoorPvPMgr().GetScript(zoneid) : nullptr)
     {
         if (outdoorPvP->IsBattlefield())
             return ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() != BF_STATUS_IN_PROGRESS;

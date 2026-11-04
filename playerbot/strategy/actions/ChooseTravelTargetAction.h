@@ -65,7 +65,7 @@ namespace ai
     class RequestTravelTargetAction : public Action, public Qualified {
     public:
         RequestTravelTargetAction(PlayerbotAI* ai, std::string name = "request travel target") : Action(ai, name), Qualified() {}
-    private:
+    protected:
         virtual bool Execute(Event& event) override;
         virtual bool isUseful() override;
         virtual bool isAllowed() const;
@@ -76,6 +76,7 @@ namespace ai
         RequestNamedTravelTargetAction(PlayerbotAI* ai, std::string name = "request named travel target") : RequestTravelTargetAction(ai, name) {}
     private:
         virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
         virtual bool isAllowed() const override;
     };
 

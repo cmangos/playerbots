@@ -6,6 +6,7 @@
 #include "playerbot/strategy/values/TravelValues.h"
 #include "playerbot/strategy/values/SharedValueContext.h"
 #include "playerbot/strategy/values/GuildValues.h"
+#include "playerbot/strategy/values/QuestValues.h"
 #include "playerbot/strategy/values/FreeMoveValues.h"
 #ifdef GenerateBotTests
 #include "playerbot/strategy/tests/TravelProbe.h"
@@ -760,6 +761,25 @@ bool RequestTravelTargetAction::isUseful() {
         return false;
     }
 
+    if (Qualified::isValidNumberString(getQualifier()))
+    {
+        TravelDestinationPurpose purposeHint = TravelDestinationPurpose(stoi(getQualifier()));
+
+        if (purposeHint == TravelDestinationPurpose::Repair || purposeHint == TravelDestinationPurpose::Vendor ||
+            purposeHint == TravelDestinationPurpose::AH || purposeHint == TravelDestinationPurpose::Mail)
+        {
+            bool urgent = (purposeHint == TravelDestinationPurpose::Repair && AI_VALUE(bool, "should repair")) ||
+                ((purposeHint == TravelDestinationPurpose::Vendor || purposeHint == TravelDestinationPurpose::AH) && AI_VALUE(uint8, "bag space") > 90);
+
+            if (!urgent && NeedQuestObjectiveValue::HasIncompleteObjective(ai) &&
+                sTravelMgr.GetDestinations(PlayerTravelInfo(bot), (uint32)purposeHint, {}, true, sPlayerbotAIConfig.choreTravelBudget).empty())
+            {
+                ai->TellDebug(ai->GetMaster(), "Skipped " + GetTravelPurposeName(qualifier) + " (nearest destination is beyond the chore travel budget)", "debug travel");
+                return false;
+            }
+        }
+    }
+
     return true;
 }
 
@@ -1307,6 +1327,32 @@ bool RequestNamedTravelTargetAction::Execute(Event& event)
     SET_AI_VALUE2(int, "manual int", "future travel relevance", relevance * 100);
 
     return true;
+}
+
+bool RequestNamedTravelTargetAction::isUseful()
+{
+	if (!RequestTravelTargetAction::isUseful())
+		return false;
+
+	std::string travelName = getQualifier();
+	bool objectivePending = NeedQuestObjectiveValue::HasIncompleteObjective(ai);
+
+	if (objectivePending && (travelName == "city" || travelName == "pvp"))
+	{
+		ai->TellDebug(ai->GetMaster(), "Skipped " + GetTravelPurposeName(qualifier) + " (a quest objective still needs work)", "debug travel");
+		return false;
+	}
+
+	if (objectivePending && (travelName.find("trainer") == 0 || travelName == "mount"))
+	{
+		if (sTravelMgr.GetDestinations(PlayerTravelInfo(bot), (uint32)TravelDestinationPurpose::GenericRpg, {}, true, sPlayerbotAIConfig.choreTravelBudget).empty())
+		{
+			ai->TellDebug(ai->GetMaster(), "Skipped " + GetTravelPurposeName(qualifier) + " (no trainer or mount vendor within the chore travel budget)", "debug travel");
+			return false;
+		}
+	}
+
+	return true;
 }
 
 bool RequestNamedTravelTargetAction::isAllowed() const

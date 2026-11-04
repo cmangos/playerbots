@@ -8,6 +8,7 @@
 #include "Grids/CellImpl.h"
 #include "NearestUnitsValue.h"
 #include "playerbot/TravelMgr.h"
+#include "playerbot/strategy/values/QuestValues.h"
 
 using namespace ai;
 using namespace MaNGOS;
@@ -61,6 +62,9 @@ bool PossibleRpgTargetsValue::AcceptUnit(Unit* unit)
 
     if (sServerFacade.IsHostileTo(unit, bot) || dynamic_cast<Player*>(unit))
         return false;
+
+    if (CanUseItemOn::HasQuestItemForEntry(bot->GetPlayerbotAI(), (int32)unit->GetEntry()))
+        return true;
 
 	if (unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER))
 		return false;

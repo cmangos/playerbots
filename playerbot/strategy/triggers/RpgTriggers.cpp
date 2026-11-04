@@ -6,6 +6,7 @@
 #include "Social/SocialMgr.h"
 #include "playerbot/ServerFacade.h"
 #include "playerbot/strategy/values/ItemUsageValue.h"
+#include "playerbot/strategy/values/QuestValues.h"
 #include "playerbot/TravelMgr.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
@@ -599,15 +600,21 @@ bool RpgUseTrigger::IsActive()
 
 bool RpgQuestUseTrigger::IsActive()
 {
-    if (!RpgUseTrigger::IsActive())
+    GuidPosition guidP(getGuidP());
+
+    if (!guidP)
         return false;
 
-    GuidPosition guidP(getGuidP());
-    
-    switch (guidP.GetEntry())
+    if (RpgUseTrigger::IsActive())
     {
-    case 190767: return AI_VALUE2(bool, "need quest objective", "12701"); //Only when we need "Inconspicuous mine car"
+        switch (guidP.GetEntry())
+        {
+        case 190767: return AI_VALUE2(bool, "need quest objective", "12701"); //Only when we need "Inconspicuous mine car"
+        }
     }
+
+    if (guidP.IsUnit())
+        return CanUseItemOn::HasQuestItemForEntry(bot->GetPlayerbotAI(), (int32)guidP.GetEntry());
 
     return false;
 }

@@ -286,7 +286,18 @@ namespace ai
     private:
         virtual bool isUseful() override;
 
-        virtual std::string ActionName() override { if (rpg->guidP().IsGameObject() && rpg->guidP().GetGameObject(bot->GetInstanceId())->GetGoType() == GAMEOBJECT_TYPE_CHEST) return "add all loot";  return "use"; }
+        virtual std::string ActionName() override
+        {
+            if (rpg->guidP().IsGameObject())
+            {
+                if (rpg->guidP().GetGameObject(bot->GetInstanceId()) && rpg->guidP().GetGameObject(bot->GetInstanceId())->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+                    return "add all loot";
+
+                return "use";
+            }
+
+            return "rpg item";
+        }
         virtual Event ActionEvent(Event event) override { return Event("rpg action", chat->formatWorldobject(rpg->guidP().GetWorldObject(bot->GetInstanceId()))); }
     };
 

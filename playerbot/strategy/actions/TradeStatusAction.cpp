@@ -45,9 +45,8 @@ bool TradeStatusAction::Execute(Event& event)
 
     if (status == TRADE_STATUS_TRADE_ACCEPT || (status == TRADE_STATUS_BACK_TO_TRADE && trader->GetTradeData() && trader->GetTradeData()->IsAccepted()))
     {
-        WorldPacket p;
-        uint32 status = 0;
-        p << status;
+        WorldPacket p(CMSG_ACCEPT_TRADE, 4);
+        p << uint32(trader->GetTradeData()->GetServerStateIndex()); // the version of the trader's offer the bot accepts
 
         uint32 discount = sRandomPlayerbotMgr.GetTradeDiscount(bot, trader);
         if (CheckTrade())

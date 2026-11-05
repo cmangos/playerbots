@@ -730,9 +730,8 @@ bool RpgTradeUsefulAction::Execute(Event& event)
             if (!urand(0, 4) || items.size() < 2) //Complete the trade if we have no more items to trade.
             {
                 //bot->Say("End trade with" + chat->formatWorldobject(player), (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
-                WorldPacket p;
-                uint32 status = TRADE_STATUS_TRADE_ACCEPT;
-                p << status;
+                WorldPacket p(CMSG_ACCEPT_TRADE, 4);
+                p << uint32(bot->GetTradeData()->GetTraderData()->GetServerStateIndex()); // the version of the trader's offer the bot accepts
                 bot->GetSession()->HandleAcceptTradeOpcode(p);
             }
         }
@@ -822,10 +821,12 @@ bool RpgEnchantAction::Execute(Event& event)
                     else
                         bot->Say("Let me enchant this " + chat->formatItem(item) + " with " + chat->formatSpell(spellId) + " for you " + player->GetName() + ".", (bot->GetTeam() == ALLIANCE ? LANG_COMMON : LANG_ORCISH));
 
-                    WorldPacket p;
-                    uint32 status = TRADE_STATUS_TRADE_ACCEPT;
-                    p << status;
-                    bot->GetSession()->HandleAcceptTradeOpcode(p);
+                    if (bot->GetTradeData())
+                    {
+                        WorldPacket p(CMSG_ACCEPT_TRADE, 4);
+                        p << uint32(bot->GetTradeData()->GetTraderData()->GetServerStateIndex()); // the version of the trader's offer the bot accepts
+                        bot->GetSession()->HandleAcceptTradeOpcode(p);
+                    }
                 }
             }
 

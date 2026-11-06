@@ -595,7 +595,7 @@ int AhBot::AddAuction(int auction, Category* category, ItemPrototype const* prot
     auctionEntry->bid = 0;
     auctionEntry->buyout = buyoutPrice;
     auctionEntry->expireTime = time(nullptr) + auction_time;
-    //auctionEntry->moneyDeliveryTime = 0;
+    auctionEntry->moneyDeliveryTime = 0;
     auctionEntry->deposit = 0;
     auctionEntry->auctionHouseEntry = ahEntry;
 

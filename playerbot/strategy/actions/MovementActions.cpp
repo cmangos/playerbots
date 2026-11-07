@@ -465,6 +465,14 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
         return false;
     }
 
+    // The bot can only board on its own map, and the objects of another map
+    // belong to the thread that updates that map: do not read them.
+    if (dockPosition.mapid != bot->GetMapId())
+    {
+        ai->TellDebug(ai->GetMaster(), "Waiting for transport on different map.", "debug move");
+        return false;
+    }
+
     float minDist = 0;
 
     std::string transportName;

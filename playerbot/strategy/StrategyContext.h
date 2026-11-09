@@ -114,7 +114,7 @@ namespace ai
             creators["map full"] = [](PlayerbotAI* ai) { return new MapFullStrategy(ai); };
             creators["sit"] = [](PlayerbotAI* ai) { return new SitStrategy(ai); };
             creators["mark rti"] = [](PlayerbotAI* ai) { return new MarkRtiStrategy(ai); };
-            creators["ads"] = [](PlayerbotAI* ai) { return new PossibleAdsStrategy(ai); };
+            creators["ads"] = [](PlayerbotAI* ai) { return new PossibleAddsStrategy(ai); };
             creators["close"] = [](PlayerbotAI* ai) { return new MeleeCombatStrategy(ai); };
             creators["ranged"] = [](PlayerbotAI* ai) { return new RangedCombatStrategy(ai); };
             creators["behind"] = [](PlayerbotAI* ai) { return new SetBehindCombatStrategy(ai); };

@@ -60,10 +60,10 @@ namespace ai
         float GetValue(Action* action) override;
     };
 
-    class PossibleAdsStrategy : public Strategy
+    class PossibleAddsStrategy : public Strategy
     {
     public:
-        PossibleAdsStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        PossibleAddsStrategy(PlayerbotAI* ai) : Strategy(ai) {}
         std::string getName() override { return "ads"; }
 
     private:

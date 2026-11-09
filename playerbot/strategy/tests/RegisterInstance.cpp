@@ -20,6 +20,7 @@ namespace
 
 
         TravelNode* best = nullptr;
+        std::shared_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
         for (auto& node : sTravelNodeMap.getNodes())
         {
             if (node->getMapId() != mapEntry->MapID)
@@ -132,6 +133,7 @@ namespace
         TravelNode* bossNode = nullptr;
         TravelNode* exitNode = nullptr;
         float bossNodeDist = FLT_MAX;
+        std::shared_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
 
         for (TravelNode* node : sTravelNodeMap.getNodes())
         {

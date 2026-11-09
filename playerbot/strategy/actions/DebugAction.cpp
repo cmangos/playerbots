@@ -2638,6 +2638,7 @@ bool DebugAction::HandlePosition(Event& event, Player* requester, const std::str
             }
         }
 
+        std::shared_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
         std::vector<TravelNode*> nodes = sTravelNodeMap.getNodes(pos);
         std::ostringstream out;
         out << "Travel nodes near " << pos.getAreaName() << " (" << uint32(pos.getX()) << "," << uint32(pos.getY()) << "," << uint32(pos.getZ()) << "): " << nodes.size();
@@ -2977,6 +2978,7 @@ bool DebugAction::HandlePosition(Event& event, Player* requester, const std::str
             WorldPosition endPos(target.mapId, target.x, target.y, target.z);
             
             std::vector<WorldPosition> beginPath, endPath;
+            std::shared_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
             TravelNodeRoute route = sTravelNodeMap.getRoute(startPos, endPos, beginPath, endPath, bot);
             
             if (route.isEmpty())
@@ -3826,6 +3828,7 @@ bool DebugAction::HandleTravel(Event& event, Player* requester, const std::strin
             return false;
 
         std::vector<WorldPosition> beginPath, endPath;
+        std::shared_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
         TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *point, beginPath, endPath, bot);
 
         std::ostringstream out; out << "Traveling to " << dest->GetTitle() << ": ";
@@ -4211,12 +4214,16 @@ bool DebugAction::HandleAddNode(Event& event, Player* requester, const std::stri
 
     std::string name = "USER:" + text.substr(9);
 
+    std::unique_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
+
     TravelNode* startNode = sTravelNodeMap.addNode(pos, name, false, false);
 
     for (auto& endNode : sTravelNodeMap.getNodes(pos, 2000))
     {
         endNode->setLinked(false);
     }
+
+    sTravelNodeMap.calculateCoverage();
 
     ai->TellPlayerNoFacing(requester, "Node " + name + " created.");
     
@@ -4229,6 +4236,8 @@ bool DebugAction::HandleRemNode(Event& event, Player* requester, const std::stri
 {
     WorldPosition pos(bot);
 
+    std::unique_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
+
     TravelNode* startNode = sTravelNodeMap.getNode(pos, nullptr, 50);
 
     if (!startNode)
@@ -4238,10 +4247,10 @@ bool DebugAction::HandleRemNode(Event& event, Player* requester, const std::stri
     {
         ai->TellPlayerNoFacing(requester, "Node can not be removed.");
     }
-    sTravelNodeMap.m_nMapMtx.lock();
     sTravelNodeMap.removeNode(startNode);
     ai->TellPlayerNoFacing(requester, "Node removed.");
-    sTravelNodeMap.m_nMapMtx.unlock();
+
+    nodeLock.unlock();
 
     sTravelNodeMap.setHasToGen();
 
@@ -4250,6 +4259,7 @@ bool DebugAction::HandleRemNode(Event& event, Player* requester, const std::stri
 
 bool DebugAction::HandleResetNode(Event& event, Player* requester, const std::string& text)
 {
+    std::unique_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
     for (auto& node : sTravelNodeMap.getNodes())
         node->setLinked(false);
     return true;
@@ -4257,9 +4267,15 @@ bool DebugAction::HandleResetNode(Event& event, Player* requester, const std::st
 
 bool DebugAction::HandleResetPath(Event& event, Player* requester, const std::string& text)
 {
+    std::unique_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
     for (auto& node : sTravelNodeMap.getNodes())
+    {
+        std::vector<TravelNode*> linkedNodes;
         for (auto& path : *node->getLinks())
-            node->removeLinkTo(path.first, true);
+            linkedNodes.push_back(path.first);
+        for (auto& linkedNode : linkedNodes)
+            node->removeLinkTo(linkedNode, true);
+    }
     return true;
 }
 
@@ -4291,8 +4307,15 @@ bool DebugAction::HandleSaveNode(Event& event, Player* requester, const std::str
 
 bool DebugAction::HandleLoadNode(Event& event, Player* requester, const std::string& text)
 {
-    std::thread t([] {if (sTravelNodeMap.removeNodes())
-        sTravelNodeMap.loadNodeStore(); });
+    std::thread t([] {
+        std::unique_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx, std::chrono::seconds(10));
+        if (!nodeLock.owns_lock())
+            return;
+
+        sTravelNodeMap.removeNodes();
+        sTravelNodeMap.loadNodeStore();
+        sTravelNodeMap.calculateCoverage();
+    });
 
     t.detach();
 
@@ -4302,6 +4325,8 @@ bool DebugAction::HandleLoadNode(Event& event, Player* requester, const std::str
 bool DebugAction::HandleShowNode(Event& event, Player* requester, const std::string& text)
 {
     WorldPosition pos(bot);
+
+    std::shared_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
 
     std::vector<TravelNode*> nodes = sTravelNodeMap.getNodes(pos, 500);
 
@@ -5751,6 +5776,7 @@ bool DebugAction::HandleNodes(Event& event, Player* requester, const std::string
                    " water=" + std::string(inWater ? "YES" : "NO") + 
                    " underwater=" + std::string(isUnderWater ? "YES" : "NO"));
 
+    std::shared_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
     std::vector<TravelNode*> allNodes = sTravelNodeMap.getNodes(pos, -1.0f);
     ai->TellPlayer(requester, "Total nodes on map " + std::to_string(pos.getMapId()) + ": " + std::to_string(allNodes.size()));
 

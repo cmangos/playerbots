@@ -355,15 +355,16 @@ namespace ai
 
         TravelNode* addNode(WorldPosition pos, std::string preferedName = "Travel Node", bool isImportant = false, bool checkDuplicate = true, bool transport = false, uint32 transportId = 0);
         void removeNode(TravelNode* node);
-        bool removeNodes() { if (m_nMapMtx.try_lock_for(std::chrono::seconds(10))) { for (auto& node : m_nodes) removeNode(node); m_nMapMtx.unlock(); return true; } return false; };
+        void removeNodes() { while (!m_nodes.empty()) removeNode(m_nodes.back()); }
         void fullLinkNode(TravelNode* startNode, Unit* bot);
 
         //Get all nodes
         std::vector<TravelNode*> getNodes() { return m_nodes; }
         std::vector<TravelNode*> getNodes(WorldPosition pos, float range = -1, uint32 transportEntry = 0);
+        bool hasNodes() { std::shared_lock<std::shared_timed_mutex> nodeLock(m_nMapMtx); return !m_nodes.empty(); }
 
         //Find nearest node.
-        TravelNode* getNode(TravelNode* sameNode) { for (auto& node : m_map_nodes[sameNode->getMapId()]) { if (node->getName() == sameNode->getName() && node->getPosition() == sameNode->getPosition()) return node; } return nullptr; }
+        TravelNode* getNode(TravelNode* sameNode) { auto mapNodes = m_map_nodes.find(sameNode->getMapId()); if (mapNodes == m_map_nodes.end()) return nullptr; for (auto& node : mapNodes->second) { if (node->getName() == sameNode->getName() && node->getPosition() == sameNode->getPosition()) return node; } return nullptr; }
         TravelNode* getNode(WorldPosition pos, std::vector<WorldPosition>& ppath, Unit* bot = nullptr, float range = -1);
         TravelNode* getNode(WorldPosition pos, Unit* bot = nullptr, float range = -1) { std::vector<WorldPosition> ppath; return getNode(pos, ppath, bot, range); }
 
@@ -422,6 +423,7 @@ namespace ai
         void generatePaths(bool helpers = true);  //Call above methods.
 
         void generateAll();                       //Generate nodes, paths when needed. Map-offsets,transfers and node coverage is also calculated.
+        void calculateCoverage();
 
         void printMap();
 

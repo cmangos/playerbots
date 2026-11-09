@@ -541,6 +541,7 @@ bool GoAction::TellHowToGo(TravelDestination* dest, Player* requester) const
     }
 
     std::vector<WorldPosition> beginPath, endPath;
+    std::shared_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
     TravelNodeRoute route = sTravelNodeMap.getRoute(botPos, *point, beginPath, endPath, bot);
 
     if (route.isEmpty())

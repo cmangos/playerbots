@@ -194,11 +194,19 @@ bool MonitorMovementCanNotReachNodes::IsConditionMet(const std::string& monitorS
         return false;
     }
 
-    std::vector<TravelNode*> startNodes = sTravelNodeMap.getNodes(pos);
-
-    for (uint32 i = 0; i < std::min(5,int(startNodes.size())); i++)
+    std::vector<WorldPosition> startNodePositions;
     {
-        WorldPosition nodePos = *startNodes[i]->getPosition();
+        std::shared_lock<std::shared_timed_mutex> nodeLock(sTravelNodeMap.m_nMapMtx);
+        for (TravelNode* node : sTravelNodeMap.getNodes(pos))
+        {
+            if (startNodePositions.size() >= 5)
+                break;
+            startNodePositions.push_back(*node->getPosition());
+        }
+    }
+
+    for (const WorldPosition& nodePos : startNodePositions)
+    {
         std::vector<WorldPosition> path = pos.getPathTo(nodePos, bot);
         // 3 yd, not 1: dock/entry nodes sit on pier and platform edges where the mesh thins
         // out, and pathfinding stops 1-3 yd short of them. Within 3 yd the bot can walk the

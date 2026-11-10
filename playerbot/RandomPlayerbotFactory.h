@@ -64,6 +64,8 @@ class RandomPlayerbotFactory
 
 	public:
         bool CreateRandomBot(uint8 cls, uint8 inputRace = 0);
+        // Picks a random, DBC-valid appearance for the given race/gender.
+        static void RandomizeAppearance(uint8 race, uint8 gender, uint8& skin, uint8& face, uint8& hairStyle, uint8& hairColor, uint8& facialHair);
         static void CreateRandomBots();
         static void LoadRandomBotAccounts();
         static void CreateRandomGuilds();

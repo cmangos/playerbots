@@ -20,7 +20,7 @@ bool LootAction::Execute(Event& event)
         return false;
 
     LootObject prevLoot = AI_VALUE(LootObject, "loot target");
-    LootObject const& lootObject = AI_VALUE(LootObjectStack*, "available loot")->GetLoot(sPlayerbotAIConfig.lootDistance);
+    LootObject const& lootObject = AI_VALUE(LootObjectStack*, "available loot")->GetLoot(ai->GetRange("loot"));
 
     if (!prevLoot.IsEmpty() && prevLoot.guid != lootObject.guid)
     {
@@ -154,6 +154,144 @@ bool OpenLootAction::DoLoot(LootObject& lootObject)
     }
 
     return ai->CastSpell(spellId, bot);
+}
+
+static const time_t FETCH_TIMEOUT_SECONDS = 90;
+static const time_t FETCH_PAUSE_SECONDS = 5;
+
+void FetchObjectAction::UpdateClock()
+{
+    time_t now = time(0);
+    time_t lastTick = AI_VALUE2(time_t, "manual time", "fetch tick");
+    if (lastTick && now - lastTick > FETCH_PAUSE_SECONDS)
+        SET_AI_VALUE2(time_t, "manual time", "fetch start", AI_VALUE2(time_t, "manual time", "fetch start") + (now - lastTick));
+
+    SET_AI_VALUE2(time_t, "manual time", "fetch tick", now);
+}
+
+bool FetchObjectAction::IsTimedOut()
+{
+    return time(0) - AI_VALUE2(time_t, "manual time", "fetch start") > FETCH_TIMEOUT_SECONDS;
+}
+
+bool FetchObjectAction::IsMultiUseNode(GameObject* go)
+{
+    if (!go || go->GetGoType() != GAMEOBJECT_TYPE_CHEST || go->GetGOInfo()->chest.minSuccessOpens == 0)
+        return false;
+
+    LootObject loot(bot, go->GetObjectGuid());
+    return loot.skillId == SKILL_MINING || loot.skillId == SKILL_HERBALISM;
+}
+
+Player* FetchObjectAction::GetRequester()
+{
+    ObjectGuid requesterGuid = AI_VALUE(ObjectGuid, "fetch requester");
+    Player* requester = requesterGuid ? sObjectMgr.GetPlayer(requesterGuid) : nullptr;
+    return requester ? requester : GetMaster();
+}
+
+bool FetchObjectAction::isUseful()
+{
+    UpdateClock();
+
+    if (bot->IsNonMeleeSpellCasted(true))
+        return false;
+
+    if (!AI_VALUE(ObjectGuid, "fetch target") || IsTimedOut())
+        return true;
+
+    if (bot->IsSitState() || bot->HasAuraType(SPELL_AURA_MOD_REGEN) || bot->HasAuraType(SPELL_AURA_MOD_POWER_REGEN))
+        return false;
+
+    return true;
+}
+
+bool FetchObjectAction::Execute(Event& event)
+{
+    if (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+        ai->HasStrategy("stay", BotState::BOT_STATE_NON_COMBAT) ||
+        ai->HasStrategy("guard", BotState::BOT_STATE_NON_COMBAT) ||
+        ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT))
+    {
+        Finish(false);
+        return false;
+    }
+
+    ObjectGuid guid = AI_VALUE(ObjectGuid, "fetch target");
+    if (!guid)
+    {
+        Finish(true);
+        return true;
+    }
+
+    bool lootWindowOpen = bot->GetLootGuid() == guid;
+
+    if (IsTimedOut())
+    {
+        if (lootWindowOpen)
+        {
+            WorldPacket packet(CMSG_LOOT_RELEASE, 8);
+            packet << guid;
+            bot->GetSession()->HandleLootReleaseOpcode(packet);
+        }
+
+        if (GameObject* go = ai->GetGameObject(guid))
+            ai->TellPlayer(GetRequester(), "I could not get " + chat->formatGameobject(go) + ", coming back.");
+
+        Finish(true);
+        return true;
+    }
+
+    if (lootWindowOpen)
+    {
+        SET_AI_VALUE2(bool, "manual bool", "fetch opened", true);
+        return false;
+    }
+
+    GameObject* go = ai->GetGameObject(guid);
+    if (AI_VALUE2(bool, "manual bool", "fetch opened") && !IsMultiUseNode(go))
+    {
+        Finish(true);
+        return true;
+    }
+
+    LootObject loot(bot, guid);
+    if (loot.IsEmpty() || !loot.IsLootPossible(bot))
+    {
+        Finish(true);
+        return true;
+    }
+
+    SET_AI_VALUE(LootObject, "loot target", loot);
+
+    WorldObject* wo = loot.GetWorldObject(bot);
+    if (wo && sServerFacade.GetDistance2d(bot, wo) > INTERACTION_DISTANCE)
+        return ai->DoSpecificAction("move to loot", event, true);
+
+    return ai->DoSpecificAction("open loot", event, true);
+}
+
+void FetchObjectAction::Finish(bool restoreMode)
+{
+    std::string mode = AI_VALUE2(std::string, "manual string", "fetch mode");
+    Player* requester = GetRequester();
+
+    RESET_AI_VALUE(ObjectGuid, "fetch target");
+    RESET_AI_VALUE(ObjectGuid, "fetch requester");
+    SET_AI_VALUE2(std::string, "manual string", "fetch mode", "");
+    SET_AI_VALUE2(bool, "manual bool", "fetch opened", false);
+    SET_AI_VALUE2(time_t, "manual time", "fetch tick", 0);
+    ai->ChangeStrategy("-fetch", BotState::BOT_STATE_NON_COMBAT);
+
+    if (!restoreMode)
+        return;
+
+    if (mode == "stay" || mode == "guard" || mode == "wander")
+        ai->ChangeStrategy("+" + mode, BotState::BOT_STATE_NON_COMBAT);
+    else if (requester)
+        ai->DoSpecificAction("follow chat shortcut", Event("fetch object", "", requester), true);
+    else if (mode == "follow")
+        ai->ChangeStrategy("+follow", BotState::BOT_STATE_NON_COMBAT);
 }
 
 uint32 OpenLootAction::GetOpeningSpell(LootObject& lootObject)

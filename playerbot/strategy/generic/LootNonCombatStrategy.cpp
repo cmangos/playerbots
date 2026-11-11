@@ -30,6 +30,13 @@ void GatherStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
         NextAction::array(0, new NextAction("add gathering loot", 2.0f), NULL)));
 }
 
+void FetchStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
+{
+    triggers.push_back(new TriggerNode(
+        "timer",
+        NextAction::array(0, new NextAction("fetch object", 7.5f), NULL)));
+}
+
 void RevealStrategy::InitNonCombatTriggers(std::list<TriggerNode*> &triggers)
 {
     triggers.push_back(new TriggerNode(

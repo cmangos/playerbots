@@ -1708,6 +1708,15 @@ void PlayerbotAI::HandleCommand(uint32 type, const std::string& text, Player& fr
     if (filtered.empty())
         return;
 
+    if (!sPlayerbotAIConfig.commandSeparator.empty() && filtered.find(sPlayerbotAIConfig.commandSeparator) != std::string::npos)
+    {
+        std::vector<std::string> commands;
+        split(commands, filtered, sPlayerbotAIConfig.commandSeparator.c_str());
+        for (const std::string& command : commands)
+            HandleCommand(type, sPlayerbotAIConfig.commandPrefix + command, fromPlayer);
+        return;
+    }
+
     if (filtered.substr(0, 6) == "debug ")
     {
         std::string response = HandleRemoteCommand(filtered.substr(6));
@@ -2611,6 +2620,44 @@ void PlayerbotAI::ChangeStrategy(const std::string& names, BotState type)
             engine->ChangeStrategy(names);
         }
     }
+}
+
+void PlayerbotAI::SaveCombatOrders(bool preserveExisting)
+{
+    if (preserveExisting && hasSavedCombatOrders)
+        return;
+
+    savedCombatOrders.clear();
+    const std::vector<std::string> orderStrategies = { "tank", "heal", "dps assist", "offheal", "passive" };
+    for (const std::string& strategy : orderStrategies)
+    {
+        if (HasStrategy(strategy, BotState::BOT_STATE_COMBAT))
+            savedCombatOrders.push_back(strategy);
+    }
+    savedCombatOrderDelay = aiObjectContext->GetValue<uint8>("wait for attack time")->Get();
+    savedCombatOrderTarget = aiObjectContext->GetValue<std::string>("combat order target")->Get();
+    const std::string resistOrder = aiObjectContext->GetValue<std::string>("resist order")->Get();
+    savedResistOrder = resistOrder.substr(0, resistOrder.find(':'));
+    hasSavedCombatOrders = true;
+}
+
+bool PlayerbotAI::RestoreCombatOrders()
+{
+    if (!hasSavedCombatOrders)
+        return false;
+
+    ChangeStrategy("-tank,-heal,-dps assist,-offheal,-passive", BotState::BOT_STATE_COMBAT);
+    for (const std::string& strategy : savedCombatOrders)
+        ChangeStrategy("+" + strategy, BotState::BOT_STATE_COMBAT);
+    aiObjectContext->GetValue<uint8>("wait for attack time")->Set(savedCombatOrderDelay);
+    aiObjectContext->GetValue<std::string>("combat order target")->Set(savedCombatOrderTarget);
+    hasSavedCombatOrders = false;
+
+    const std::string resistOrder = aiObjectContext->GetValue<std::string>("resist order")->Get();
+    if (resistOrder.substr(0, resistOrder.find(':')) != savedResistOrder)
+        DoSpecificAction("resist", Event("co restore", savedResistOrder.empty() ? "none" : savedResistOrder, GetMaster()), true);
+
+    return true;
 }
 
 void PlayerbotAI::PrintStrategies(Player* requester, BotState type)
@@ -7177,6 +7224,7 @@ float PlayerbotAI::GetRange(std::string type)
     if (type == "heal") return sPlayerbotAIConfig.healDistance;
     if (type == "follow") return sPlayerbotAIConfig.followDistance;
     if (type == "guard") return sPlayerbotAIConfig.sightDistance;
+    if (type == "loot") return sPlayerbotAIConfig.lootDistance;
     if (type == "followraid") return sPlayerbotAIConfig.raidFollowDistance;
     if (type == "wandermin") return sPlayerbotAIConfig.wanderMinDistance;
     if (type == "wandermax") return sPlayerbotAIConfig.wanderMaxDistance;

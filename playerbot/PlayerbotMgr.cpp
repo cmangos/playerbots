@@ -524,6 +524,66 @@ void PlayerbotHolder::OnBotLogin(Player * const bot)
 #endif
             bot->StoreNewItemInBestSlots(6948, 1);
     }
+
+    PurgeExpiredBotAddCharges(time(nullptr));
+
+    auto addCharge = pendingBotAddCharges.find(bot->GetGUIDLow());
+    if (addCharge != pendingBotAddCharges.end())
+    {
+        PendingBotAddCharge charge = addCharge->second;
+        pendingBotAddCharges.erase(addCharge);
+
+        Player* payer = sObjectMgr.GetPlayer(charge.payer);
+        if (payer && payer->GetMoney() >= charge.cost)
+        {
+            payer->ModifyMoney(-int32(charge.cost));
+            ChatHandler(payer).PSendSysMessage("Paid %s to add %s.", ChatHelper::formatMoney(charge.cost).c_str(), bot->GetName());
+        }
+        else
+        {
+            if (payer)
+                ChatHandler(payer).PSendSysMessage("You need %s to add a bot.", ChatHelper::formatMoney(charge.cost).c_str());
+
+            ai->SetShouldLogOut(true);
+        }
+    }
+}
+
+void PlayerbotHolder::PurgeExpiredBotAddCharges(time_t now)
+{
+    for (auto pending = pendingBotAddCharges.begin(); pending != pendingBotAddCharges.end();)
+    {
+        if (now - pending->second.requested > botAddChargeTimeout)
+            pending = pendingBotAddCharges.erase(pending);
+        else
+            ++pending;
+    }
+}
+
+bool PlayerbotHolder::ReserveBotAddCost(Player* master, uint32 botGuid, std::string& error)
+{
+    uint32 addCost = (chargeBotAddCost && master && master->GetSession()->GetSecurity() <= SEC_PLAYER) ? sPlayerbotAIConfig.botAddCost : 0;
+    if (!addCost)
+        return true;
+
+    time_t now = time(nullptr);
+    PurgeExpiredBotAddCharges(now);
+
+    uint64 reserved = 0;
+    for (auto& pending : pendingBotAddCharges)
+    {
+        if (pending.second.payer == master->GetObjectGuid() && pending.first != botGuid)
+            reserved += pending.second.cost;
+    }
+
+    if (uint64(master->GetMoney()) < reserved + addCost)
+    {
+        error = "You need " + ChatHelper::formatMoney(addCost) + " to add a bot.";
+        return false;
+    }
+
+    pendingBotAddCharges[botGuid] = { master->GetObjectGuid(), addCost, now };
+    return true;
 }
 
 std::string PlayerbotHolder::ProcessBotCommand(std::string cmd, ObjectGuid guid, ObjectGuid masterguid, bool admin, uint32 masterAccountId, uint32 masterGuildId, const std::string param)
@@ -599,7 +659,19 @@ bool PlayerbotMgr::HandlePlayerbotMgrCommand(ChatHandler* handler, char const* a
         return false;
     }
 
-    std::list<std::string> messages = mgr->HandlePlayerbotCommand(args, player);
+    struct ChargeBotAddCostScope
+    {
+        PlayerbotHolder* holder;
+        explicit ChargeBotAddCostScope(PlayerbotHolder* h) : holder(h) { holder->SetChargeBotAddCost(true); }
+        ~ChargeBotAddCostScope() { holder->SetChargeBotAddCost(false); }
+    };
+
+    std::list<std::string> messages;
+    {
+        ChargeBotAddCostScope chargeScope(mgr);
+        messages = mgr->HandlePlayerbotCommand(args, player);
+    }
+
     if (messages.empty())
         return true;
 
@@ -1473,6 +1545,12 @@ std::string PlayerbotHolder::HandleConsoleCmd(Player* bot, Player* master, const
     if (!ai)
         return "Bot has no AI";
 
+    if (param.compare(0, 5, "chat ") == 0)
+    {
+        ai->HandleCommand(CHAT_MSG_WHISPER, param.substr(5), *(master ? master : bot));
+        return "Sending chat command " + param.substr(5) + " to player " + bot->GetName();
+    }
+
     ExternalEventHelper helper(ai->GetAiObjectContext());
 
     std::string msg = "Sending command " + param + " to player " + bot->GetName();
@@ -1827,10 +1905,18 @@ std::string PlayerbotHolder::HandleBotAddLogin(Player* bot, Player* master, cons
     bool isMasterAccount = (masterAccountId == botAccount);
     bool isRandomAccount = sPlayerbotAIConfig.IsInRandomAccountList(botAccount);
 
-    if (isRandomAccount)
+    bool ownAccountOnly = sPlayerbotAIConfig.IsPartyBotOnly();
+
+    if (isRandomAccount && !ownAccountOnly)
         sRandomPlayerbotMgr.AddRandomBot(guid);
-    else if (isMasterAccount || sPlayerbotAIConfig.allowMultiAccountAltBots)
+    else if (isMasterAccount || (!ownAccountOnly && sPlayerbotAIConfig.allowMultiAccountAltBots))
+    {
+        std::string costError;
+        if (!ReserveBotAddCost(master, guid.GetCounter(), costError))
+            return costError;
+
         AddPlayerBot(guid, masterAccountId);
+    }
     else
         return "Not in your account";
 
@@ -2074,8 +2160,22 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
 
         if (autoAdd)
         {
-            sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, botGuid));
-            messages.push_back("Bot is now online");
+            std::string costError;
+            if (sPlayerbotAIConfig.IsPartyBotOnly() && !ReserveBotAddCost(master, botGuid, costError))
+            {
+                messages.push_back(costError);
+                messages.push_back("Use '.bot add " + name + "' to bring this bot online");
+            }
+            else if (sPlayerbotAIConfig.IsPartyBotOnly())
+            {
+                AddPlayerBot(botGuid, accountId);
+                messages.push_back("Bot is now online");
+            }
+            else
+            {
+                sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, botGuid));
+                messages.push_back("Bot is now online");
+            }
         }
         else
         {

@@ -57,6 +57,7 @@ public:
 #endif
 
     std::list<std::string> HandleGroup(Player* master, const std::string param, AccountTypes security);
+    void SetChargeBotAddCost(bool charge) { chargeBotAddCost = charge; }
 protected:
     virtual void OnBotLoginInternal(Player * const bot) = 0;
     virtual void OnBotDeleted(uint32 botGuid, uint32 accountId);
@@ -135,6 +136,21 @@ private:
     std::string HandleBotLevelUp(Player* bot, Player* master, const std::string param);
     std::string HandleBotRefresh(Player* bot, Player* master, const std::string param);
     std::string HandleBotRandom(Player* bot, Player* master, const std::string param);
+
+    struct PendingBotAddCharge
+    {
+        ObjectGuid payer;
+        uint32 cost;
+        time_t requested;
+    };
+
+    static constexpr time_t botAddChargeTimeout = 300;
+
+    void PurgeExpiredBotAddCharges(time_t now);
+    bool ReserveBotAddCost(Player* master, uint32 botGuid, std::string& error);
+
+    bool chargeBotAddCost = false;
+    std::map<uint32, PendingBotAddCharge> pendingBotAddCharges;
 
     PlayerBotMap playerBots;
     std::map<std::string, HolderCommandHandler> m_holderHandlers;

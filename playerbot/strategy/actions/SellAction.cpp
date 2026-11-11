@@ -24,6 +24,67 @@ private:
     SellAction* action;
 };
 
+static bool SellAllLegacy(SellAction* action, PlayerbotAI* ai, Player* bot, Player* requester)
+{
+    AiObjectContext* context = ai->GetAiObjectContext();
+
+    bool vendorNearby = false;
+    std::list<ObjectGuid> npcs = context->GetValue<std::list<ObjectGuid> >("nearest npcs")->Get();
+    for (const ObjectGuid& guid : npcs)
+    {
+        if (bot->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_VENDOR))
+        {
+            vendorNearby = true;
+            break;
+        }
+    }
+
+    if (!vendorNearby)
+    {
+        ai->TellPlayerNoFacing(requester, "I need a vendor nearby.");
+        return true;
+    }
+
+    uint32 soldItems = 0;
+    uint32 soldMoney = 0;
+    std::list<Item*> items = ai->InventoryParseItems("all", IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+    for (Item* item : items)
+    {
+        const ItemPrototype* proto = item->GetProto();
+        if (!proto || !proto->SellPrice || proto->Class == ITEM_CLASS_QUEST)
+            continue;
+
+        const ItemUsage usage = context->GetValue<ItemUsage>("item usage", ItemQualifier(item).GetQualifier())->Get();
+        bool sellable = usage == ItemUsage::ITEM_USAGE_VENDOR;
+        if (proto->Quality == ITEM_QUALITY_POOR)
+        {
+            sellable = sellable || usage == ItemUsage::ITEM_USAGE_NONE || usage == ItemUsage::ITEM_USAGE_BAD_EQUIP
+                || usage == ItemUsage::ITEM_USAGE_AH || usage == ItemUsage::ITEM_USAGE_BROKEN_AH;
+        }
+
+        if (!sellable)
+            continue;
+
+        const uint32 value = proto->SellPrice * item->GetCount();
+        if (action->Sell(nullptr, item))
+        {
+            soldItems++;
+            soldMoney += value;
+        }
+    }
+
+    if (!soldItems)
+    {
+        ai->TellPlayerNoFacing(requester, "Nothing to sell.");
+        return true;
+    }
+
+    std::ostringstream out;
+    out << "Sold " << soldItems << (soldItems == 1 ? " item for " : " items for ") << ChatHelper::formatMoney(soldMoney);
+    ai->TellPlayerNoFacing(requester, out);
+    return true;
+}
+
 bool SellAction::Execute(Event& event)
 {
     static uint32 minAutoSellItems = 5;
@@ -34,6 +95,9 @@ bool SellAction::Execute(Event& event)
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
 
     std::string text = event.getParam();
+
+    if (text == "legacy all")
+        return SellAllLegacy(this, ai, bot, requester);
 
     if (text == "*" || text.empty())
         text = "gray";

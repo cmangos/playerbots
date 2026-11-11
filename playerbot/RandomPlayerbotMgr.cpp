@@ -680,6 +680,9 @@ void RandomPlayerbotMgr::UpdateAIInternal(uint32 elapsed, bool minimal)
     if (!sPlayerbotAIConfig.randomBotAutologin || !sPlayerbotAIConfig.enabled)
         return;
 
+    if (sPlayerbotAIConfig.IsPartyBotOnly())
+        return;
+
 #ifdef GenerateBotTests
     if (sPlayerbotAIConfig.startupRunTestsPending)
     {

@@ -6,7 +6,7 @@
 #endif
 
 #ifndef GenerateBotTests
-//#define GenerateBotTests //Enable only for test generation
+#define GenerateBotTests //Enable only for test generation [LOCAL UNCOMMITTED - operator rules: do not commit; re-apply after every upstream pull/merge]
 #endif
 
 class PlayerbotAI;

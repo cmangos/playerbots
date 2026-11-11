@@ -9,6 +9,92 @@ using namespace ai;
 
 std::map<uint32, SkillLineAbilityEntry const*> SetCraftAction::skillSpells;
 
+void SetCraftAction::LoadSkillSpells()
+{
+    if (!skillSpells.empty())
+        return;
+
+    for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+    {
+        SkillLineAbilityEntry const* skillLine = sSkillLineAbilityStore.LookupEntry(j);
+        if (skillLine)
+            skillSpells[skillLine->spellId] = skillLine;
+    }
+}
+
+uint32 SetCraftAction::ParseProfession(const std::string& text)
+{
+    std::string lower = text;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return (char)std::tolower(c); });
+
+    static const std::map<std::string, uint32> aliases = {
+        {"a", SKILL_ALCHEMY}, {"b", SKILL_BLACKSMITHING}, {"c", SKILL_COOKING}, {"e", SKILL_ENGINEERING},
+        {"f", SKILL_FIRST_AID}, {"firstaid", SKILL_FIRST_AID}, {"l", SKILL_LEATHERWORKING}, {"m", SKILL_ENCHANTING},
+        {"magic", SKILL_ENCHANTING}, {"s", SKILL_MINING}, {"smelting", SKILL_MINING}, {"t", SKILL_TAILORING}
+    };
+
+    const auto alias = aliases.find(lower);
+    if (alias != aliases.end())
+        return alias->second;
+
+    return ChatHelper::parseSkillName(lower);
+}
+
+void SetCraftAction::TellCraftableByProfession(Player* requester, uint32 skill)
+{
+    LoadSkillSpells();
+
+    std::vector<std::string> lines;
+    std::string line;
+    uint32 count = 0;
+    for (PlayerSpellMap::iterator itr = bot->GetSpellMap().begin(); itr != bot->GetSpellMap().end(); ++itr)
+    {
+        if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled || IsPassiveSpell(itr->first))
+            continue;
+
+        const auto skillLine = skillSpells.find(itr->first);
+        if (skillLine == skillSpells.end() || skillLine->second->skillId != skill)
+            continue;
+
+        const SpellEntry* const pSpellInfo = sServerFacade.LookupSpellInfo(itr->first);
+        if (!pSpellInfo)
+            continue;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            if (pSpellInfo->Effect[i] != SPELL_EFFECT_CREATE_ITEM)
+                continue;
+
+            ItemPrototype const* proto = sObjectMgr.GetItemPrototype(pSpellInfo->EffectItemType[i]);
+            if (!proto)
+                continue;
+
+            const std::string link = chat->formatItem(proto);
+            if (!line.empty() && line.size() + link.size() > 240)
+            {
+                lines.push_back(line);
+                line.clear();
+            }
+
+            line += (line.empty() ? "" : " ") + link;
+            count++;
+        }
+    }
+
+    if (!line.empty())
+        lines.push_back(line);
+
+    if (!count)
+    {
+        ai->TellPlayer(requester, "I do not know any " + ChatHelper::getSkillName(skill) + " recipes.");
+        return;
+    }
+
+    ai->TellPlayer(requester, "I can craft (" + std::to_string(count) + ") " + ChatHelper::getSkillName(skill) + " recipes:");
+    for (const std::string& entry : lines)
+        ai->TellPlayer(requester, entry);
+}
+
 bool SetCraftAction::Execute(Event& event)
 {
     Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
@@ -31,10 +117,17 @@ bool SetCraftAction::Execute(Event& event)
         return true;
     }
 
+    const uint32 profession = ParseProfession(link);
+    if (profession != SKILL_NONE)
+    {
+        TellCraftableByProfession(requester, profession);
+        return true;
+    }
+
     ItemIds itemIds = chat->parseItems(link);
     if (itemIds.empty())
     {
-        ai->TellPlayer(requester, "Usage: 'craft [itemId]' or 'craft reset'");
+        ai->TellPlayer(requester, "Usage: 'craft [itemId]', 'craft <profession>' or 'craft reset'");
         return false;
     }
 
@@ -43,15 +136,7 @@ bool SetCraftAction::Execute(Event& event)
     if (!proto)
         return false;
 
-    if (skillSpells.empty())
-    {
-        for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
-        {
-            SkillLineAbilityEntry const* skillLine = sSkillLineAbilityStore.LookupEntry(j);
-            if (skillLine)
-                skillSpells[skillLine->spellId] = skillLine;
-        }
-    }
+    LoadSkillSpells();
 
     data.required.clear();
     data.obtained.clear();

@@ -5,6 +5,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
 #include "CheckMountStateAction.h"
+#include "playerbot/strategy/ItemVisitors.h"
 
 using namespace ai;
 
@@ -764,5 +765,169 @@ bool DisenchantRandomItemAction::Execute(Event& event)
 
     return false;
 };
+
+bool ProcessItemAction::Execute(Event& event)
+{
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    const bool mill = getName() == "mill";
+    const std::string verb = mill ? "mill" : "prospect";
+    const std::string material = mill ? "herbs" : "ore";
+
+    uint32 effect = 0;
+    uint32 skill = 0;
+    uint32 flag = 0;
+    std::string skillName;
+#ifdef MANGOSBOT_TWO
+    if (mill)
+    {
+        effect = SPELL_EFFECT_MILLING;
+        skill = SKILL_INSCRIPTION;
+        flag = ITEM_FLAG_IS_MILLABLE;
+        skillName = "Inscription";
+    }
+#endif
+#ifndef MANGOSBOT_ZERO
+    if (!mill)
+    {
+        effect = SPELL_EFFECT_PROSPECTING;
+        skill = SKILL_JEWELCRAFTING;
+        flag = ITEM_FLAG_IS_PROSPECTABLE;
+        skillName = "Jewelcrafting";
+    }
+#endif
+
+    if (!effect)
+    {
+        ai->TellPlayer(requester, "I can't " + verb + " " + material + ", that is not possible in this version of the game.");
+        return false;
+    }
+
+    if (bot->IsInCombat())
+    {
+        ai->TellPlayer(requester, "I can't " + verb + " while fighting.");
+        return false;
+    }
+
+    uint32 spellId = 0;
+    for (auto& [id, spell] : bot->GetSpellMap())
+    {
+        if (spell.state == PLAYERSPELL_REMOVED || spell.disabled)
+            continue;
+
+        const SpellEntry* pSpellInfo = sServerFacade.LookupSpellInfo(id);
+        if (!pSpellInfo)
+            continue;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            if (pSpellInfo->Effect[i] == effect)
+            {
+                spellId = id;
+                break;
+            }
+        }
+
+        if (spellId)
+            break;
+    }
+
+    if (!spellId)
+    {
+        ai->TellPlayer(requester, std::string("I don't know how to ") + verb + ", I need " + skillName + " for that.");
+        return false;
+    }
+
+    const uint32 requiredCount = 5;
+    const uint32 skillValue = bot->GetSkillValue(skill);
+    const std::string param = event.getParam();
+
+    std::list<Item*> items;
+    if (!param.empty())
+    {
+        items = ai->InventoryParseItems(param, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+        if (items.empty())
+        {
+            ai->TellPlayer(requester, "I don't have that.");
+            return false;
+        }
+    }
+    else
+    {
+        FindAllItemVisitor visitor;
+        ai->InventoryIterateItems(&visitor, IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+        items = visitor.GetResult();
+    }
+
+    Item* best = nullptr;
+    Item* tooFew = nullptr;
+    Item* tooHard = nullptr;
+    for (Item* item : items)
+    {
+        ItemPrototype const* proto = item->GetProto();
+        if (!proto || !(proto->Flags & flag))
+            continue;
+
+        if (proto->RequiredSkillRank > skillValue)
+        {
+            tooHard = item;
+            continue;
+        }
+
+        if (item->GetCount() < requiredCount)
+        {
+            if (!tooFew || item->GetCount() > tooFew->GetCount())
+                tooFew = item;
+            continue;
+        }
+
+        if (!best || item->GetCount() > best->GetCount())
+            best = item;
+    }
+
+    if (!best)
+    {
+        if (tooFew)
+            ai->TellPlayer(requester, "I need a single stack of at least " + std::to_string(requiredCount) + " " + chat->formatItem(tooFew) + " to " + verb + ".");
+        else if (tooHard)
+            ai->TellPlayer(requester, "My " + skillName + " is too low to " + verb + " " + chat->formatItem(tooHard) + ".");
+        else if (!param.empty())
+            ai->TellPlayer(requester, "I can't " + verb + " that.");
+        else
+            ai->TellPlayer(requester, "I have no " + material + " to " + verb + ".");
+        return false;
+    }
+
+    if (bot->IsFlying() && WorldPosition(bot).currentHeight() > 10.0f)
+    {
+        ai->TellPlayer(requester, "I can't " + verb + " while flying.");
+        return false;
+    }
+
+    SpellCastResult checkResult;
+    if (!ai->CanCastSpell(spellId, bot, 0, true, best, false, false, true, &checkResult))
+    {
+        ai->TellPlayer(requester, "I can't " + verb + " " + chat->formatItem(best) + " right now.");
+        return false;
+    }
+
+    if (bot->IsMoving())
+        ai->StopMoving();
+
+    if (bot->IsMounted())
+        ai->Unmount();
+
+    ai->RemoveShapeshift();
+
+    uint32 spellDuration = sPlayerbotAIConfig.globalCoolDown;
+    if (!ai->CastSpell(spellId, bot, best, true, &spellDuration))
+    {
+        ai->TellPlayer(requester, "I failed to " + verb + " " + chat->formatItem(best) + ".");
+        return false;
+    }
+
+    SetDuration(spellDuration);
+    ai->TellPlayer(requester, std::string(mill ? "Milling " : "Prospecting ") + chat->formatItem(best), PlayerbotSecurityLevel::PLAYERBOT_SECURITY_ALLOW_ALL, false);
+    return true;
+}
 
 

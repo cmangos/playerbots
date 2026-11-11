@@ -25,6 +25,22 @@ namespace ai
         bool CanOpenLock(uint32 skillId, uint32 reqSkillValue);
     };
 
+    class FetchObjectAction : public MovementAction
+    {
+    public:
+        FetchObjectAction(PlayerbotAI* ai) : MovementAction(ai, "fetch object") {}
+        virtual bool Execute(Event& event) override;
+        virtual bool isUseful() override;
+        virtual bool isPossible() override { return true; }
+
+    private:
+        void UpdateClock();
+        bool IsTimedOut();
+        bool IsMultiUseNode(GameObject* go);
+        Player* GetRequester();
+        void Finish(bool restoreMode);
+    };
+
     class StoreLootAction : public Action
     {
     public:

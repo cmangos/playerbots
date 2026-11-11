@@ -13,6 +13,9 @@ namespace ai
 
     private:
         void TellCraft(Player* requester);
+        void TellCraftableByProfession(Player* requester, uint32 skill);
+        static uint32 ParseProfession(const std::string& text);
+        static void LoadSkillSpells();
 
     private:
         static std::map<uint32, SkillLineAbilityEntry const*> skillSpells;

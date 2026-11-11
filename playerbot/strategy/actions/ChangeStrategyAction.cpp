@@ -11,6 +11,63 @@ bool ChangeCombatStrategyAction::Execute(Event& event)
     std::string text = event.getParam();
     text = text.empty() ? getName() : text;
 
+    if (text == "save")
+    {
+        ai->SaveCombatOrders();
+        ai->TellPlayerNoFacing(requester, "Saved combat orders.");
+        return true;
+    }
+
+    if (text == "save once")
+    {
+        ai->SaveCombatOrders(true);
+        return true;
+    }
+
+    if (text.compare(0, 7, "legacy ") == 0)
+    {
+        std::string order = text.substr(7);
+        ai->SaveCombatOrders(true);
+
+        if (order == "reset")
+        {
+            ai->ChangeStrategy("-tank,-heal,-dps assist,-offheal,-passive", BotState::BOT_STATE_COMBAT);
+            ai->DoSpecificAction("order", Event("co", "clear", requester), true);
+            ai->DoSpecificAction("resist", Event("co", "none", requester), true);
+            ai->TellPlayerNoFacing(requester, "Combat orders reset.");
+        }
+        else if (order.compare(0, 7, "resist ") == 0)
+            ai->DoSpecificAction("resist", Event("co", order.substr(7), requester), true);
+        else if (order.compare(0, 6, "delay ") == 0)
+            ai->DoSpecificAction("wait for attack time", Event("co", order.substr(6), requester), true);
+        else
+        {
+            if (order.compare(0, 4, "add ") == 0)
+                order = order.substr(4);
+            else
+                ai->ChangeStrategy("-tank,-heal,-offheal,-dps assist,-passive", BotState::BOT_STATE_COMBAT);
+
+            ai->ChangeStrategy(order, BotState::BOT_STATE_COMBAT);
+            const size_t nameStart = order.find_first_not_of('+');
+            ai->TellPlayerNoFacing(requester, "Combat order set: " + order.substr(nameStart == std::string::npos ? 0 : nameStart));
+        }
+
+        if (!sPlayerbotAIConfig.bExplicitDbStoreSave)
+            sPlayerbotDbStore.Save(ai);
+
+        return true;
+    }
+
+    if (text == "restore")
+    {
+        const bool restored = ai->RestoreCombatOrders();
+        if (restored && !sPlayerbotAIConfig.bExplicitDbStoreSave)
+            sPlayerbotDbStore.Save(ai);
+
+        ai->TellPlayerNoFacing(requester, restored ? "Restored saved combat orders." : "No combat orders have been saved.");
+        return true;
+    }
+
     ai->ChangeStrategy(text, BotState::BOT_STATE_COMBAT);
 
     if (!sPlayerbotAIConfig.bExplicitDbStoreSave)

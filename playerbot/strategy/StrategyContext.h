@@ -68,6 +68,7 @@ namespace ai
             creators["racials"] = [](PlayerbotAI* ai) { return new RacialsStrategy(ai); };
             creators["loot"] = [](PlayerbotAI* ai) { return new LootNonCombatStrategy(ai); };
             creators["gather"] = [](PlayerbotAI* ai) { return new GatherStrategy(ai); };
+            creators["fetch"] = [](PlayerbotAI* ai) { return new FetchStrategy(ai); };
             creators["roll"] = [](PlayerbotAI* ai) { return new RollStrategy(ai); };
             creators["delayed roll"] = [](PlayerbotAI* ai) { return new DelayedRollStrategy(ai); };
             creators["emote"] = [](PlayerbotAI* ai) { return new EmoteStrategy(ai); };

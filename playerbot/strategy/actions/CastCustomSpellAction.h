@@ -72,6 +72,25 @@ namespace ai
         virtual bool Execute(Event& event) override;
     };
 
+    class ProcessItemAction : public ChatCommandAction
+    {
+    public:
+        ProcessItemAction(PlayerbotAI* ai, std::string name) : ChatCommandAction(ai, name) {}
+        virtual bool Execute(Event& event) override;
+    };
+
+    class MillItemAction : public ProcessItemAction
+    {
+    public:
+        MillItemAction(PlayerbotAI* ai) : ProcessItemAction(ai, "mill") {}
+    };
+
+    class ProspectItemAction : public ProcessItemAction
+    {
+    public:
+        ProspectItemAction(PlayerbotAI* ai) : ProcessItemAction(ai, "prospect") {}
+    };
+
     class EnchantRandomItemAction : public CastRandomSpellAction
     {
     public:

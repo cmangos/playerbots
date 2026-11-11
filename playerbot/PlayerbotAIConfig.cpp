@@ -130,6 +130,7 @@ bool PlayerbotAIConfig::Initialize()
     grindDistance = config.GetFloatDefault("AiPlayerbot.GrindDistance", 75.0f);
     aggroDistance = config.GetFloatDefault("AiPlayerbot.AggroDistance", 22.0f);
     lootDistance = config.GetFloatDefault("AiPlayerbot.LootDistance", 25.0f);
+    lootDistanceMax = config.GetFloatDefault("AiPlayerbot.LootDistanceMax", 50.0f);
     groupMemberLootDistance = config.GetFloatDefault("AiPlayerbot.GroupMemberLootDistance", 15.0f);
     groupMemberLootDistanceWithActiveMaster = config.GetFloatDefault("AiPlayerbot.GroupMemberLootDistanceWithActiveMaster", 10.0f);
     gatheringDistance = config.GetFloatDefault("AiPlayerbot.GatheringDistance", 15.0f);
@@ -206,6 +207,10 @@ bool PlayerbotAIConfig::Initialize()
 
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.RandomBotQuestIds", "7848,3802,5505,6502,7761,9378"), randomBotQuestIds);
     LoadList<std::list<uint32> >(config.GetStringDefault("AiPlayerbot.ImmuneSpellIds", ""), immuneSpellIds);
+
+    partyBotOnly = config.GetBoolDefault("AiPlayerbot.PartyBotOnly", false);
+    if (partyBotOnly && enabled)
+        sLog.outString("PartyBotOnly: bots exist only when added by a real player from their own account; the random bot population is disabled");
 
     botAutologin = BotAutoLogin(config.GetIntDefault("AiPlayerbot.BotAutologin", 0));
     randomBotAutologin = config.GetBoolDefault("AiPlayerbot.RandomBotAutologin", true);
@@ -628,6 +633,8 @@ bool PlayerbotAIConfig::Initialize()
     shareTargets = config.GetBoolDefault("AiPlayerbot.ShareTargets", true);
     globalSoundEffects = config.GetBoolDefault("AiPlayerbot.GlobalSoundEffects", false);
     nonGmFreeSummon = config.GetBoolDefault("AiPlayerbot.NonGmFreeSummon", false);
+    botAddCost = (uint32)std::max<int32>(0, config.GetIntDefault("AiPlayerbot.BotAddCost", 0));
+    botSummonCost = (uint32)std::max<int32>(0, config.GetIntDefault("AiPlayerbot.BotSummonCost", 0));
 
     //SPP automation
     autoPickReward = config.GetStringDefault("AiPlayerbot.AutoPickReward", "no");
@@ -846,6 +853,44 @@ bool PlayerbotAIConfig::IsFreeAltBot(uint32 guid)
             return true;
 
     return false;
+}
+
+bool PlayerbotAIConfig::IsPartyBotBannedStrategy(const std::string& name)
+{
+    static const std::set<std::string> banned = { "grind", "travel", "tfish", "gather", "maintenance", "free", "bg", "lfg", "start duel", "attack tagged", "dksquest" };
+    if (banned.find(name) != banned.end())
+        return true;
+
+    if (name.compare(0, 7, "travel ") == 0)
+        return true;
+
+    return name.compare(0, 3, "rpg") == 0 && name != "rpg jump";
+}
+
+std::string PlayerbotAIConfig::FilterPartyBotStrategies(const std::string& strategies)
+{
+    std::string result;
+    std::stringstream stream(strategies);
+    std::string token;
+    while (std::getline(stream, token, ','))
+    {
+        const size_t first = token.find_first_not_of(" +-~");
+        if (first == std::string::npos)
+            continue;
+
+        const size_t last = token.find_last_not_of(' ');
+        const std::string name = token.substr(first, last - first + 1);
+        const bool removal = token[token.find_first_not_of(' ')] == '-';
+        if (!removal && IsPartyBotBannedStrategy(name))
+            continue;
+
+        if (!result.empty())
+            result += ",";
+
+        result += token;
+    }
+
+    return result;
 }
 
 bool PlayerbotAIConfig::IsInRandomQuestItemList(uint32 id)

@@ -78,8 +78,35 @@ bool SummonAction::Execute(Event& event)
     if (!requester || requester->IsBeingTeleported())
         return false;
 
+    uint32 summonCost = (requester->GetSession()->GetSecurity() <= SEC_PLAYER && requester->isRealPlayer()) ? sPlayerbotAIConfig.botSummonCost : 0;
+    bool canPaySummon = requester->GetMoney() >= summonCost;
+    std::string summonCostText = "You need " + ChatHelper::formatMoney(summonCost) + " to summon me.";
+    auto chargeSummon = [this, requester, summonCost](bool summoned)
+    {
+        if (summoned && summonCost)
+        {
+            ai->RunOnOwningThread(requester, [summonCost](Player* payer)
+            {
+                if (payer->GetMoney() >= summonCost)
+                    payer->ModifyMoney(-int32(summonCost));
+                else
+                    ChatHandler(payer).PSendSysMessage("You could not pay %s for the summon.", ChatHelper::formatMoney(summonCost).c_str());
+            });
+        }
+
+        return summoned;
+    };
+
     if (requester->GetSession()->GetSecurity() > SEC_PLAYER || sPlayerbotAIConfig.nonGmFreeSummon)
-        return Teleport(requester, requester, bot);
+    {
+        if (!canPaySummon)
+        {
+            ai->TellPlayerNoFacing(requester, summonCostText);
+            return false;
+        }
+
+        return chargeSummon(Teleport(requester, requester, bot));
+    }
 
     if(bot->GetMapId() == requester->GetMapId() && !WorldPosition(bot).canPathTo(requester, bot) && bot->GetDistance(requester) < sPlayerbotAIConfig.sightDistance) //We can't walk to requester so fine to short-range teleport.
         return Teleport(requester, requester, bot);
@@ -87,7 +114,13 @@ bool SummonAction::Execute(Event& event)
     if (bot->IsTaxiFlying())
         return false;
 
-    if (SummonUsingGos(requester, requester, bot) || SummonUsingNpcs(requester, requester, bot))
+    if (!canPaySummon)
+    {
+        ai->TellPlayerNoFacing(requester, summonCostText);
+        return false;
+    }
+
+    if (chargeSummon(SummonUsingGos(requester, requester, bot) || SummonUsingNpcs(requester, requester, bot)))
     {
         ai->TellPlayerNoFacing(requester, BOT_TEXT("hello"));
         return true;

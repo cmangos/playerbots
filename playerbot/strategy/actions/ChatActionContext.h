@@ -23,6 +23,7 @@
 #include "SellAction.h"
 #include "UnequipAction.h"
 #include "EquipAction.h"
+#include "OutfitAction.h"
 #include "KeepItemAction.h"
 #include "TradeAction.h"
 #include "ChangeTalentsAction.h"
@@ -82,6 +83,7 @@
 #include "SetValueAction.h"
 #include "GlyphAction.h"
 #include "SayAction.h"
+#include "PullActions.h"
 
 namespace ai
 {
@@ -104,6 +106,10 @@ namespace ai
             creators["query quest"] = [](PlayerbotAI* ai) { return new QueryQuestAction(ai); };
             creators["query item usage"] = [](PlayerbotAI* ai) { return new QueryItemUsageAction(ai); };
             creators["ll"] = [](PlayerbotAI* ai) { return new LootStrategyAction(ai); };
+            creators["collect"] = [](PlayerbotAI* ai) { return new CollectAction(ai); };
+            creators["survey"] = [](PlayerbotAI* ai) { return new SurveyAction(ai); };
+            creators["find"] = [](PlayerbotAI* ai) { return new FindObjectAction(ai); };
+            creators["get"] = [](PlayerbotAI* ai) { return new GetObjectAction(ai); };
             creators["ss"] = [](PlayerbotAI* ai) { return new SkipSpellsListAction(ai); };
             creators["avoid creature"] = [](PlayerbotAI* ai) { return new AvoidCreatureListAction(ai); };
             creators["loot"] = [](PlayerbotAI* ai) { return new AddAllLootAction(ai); };
@@ -166,6 +172,8 @@ namespace ai
             creators["lfg"] = [](PlayerbotAI* ai) { return new LfgAction(ai); };
             creators["spell"] = [](PlayerbotAI* ai) { return new TellSpellAction(ai); };
             creators["rti"] = [](PlayerbotAI* ai) { return new RtiAction(ai); };
+            creators["order"] = [](PlayerbotAI* ai) { return new CombatOrderTargetAction(ai); };
+            creators["resist"] = [](PlayerbotAI* ai) { return new ResistAction(ai); };
             creators["spirit healer"] = [](PlayerbotAI* ai) { return new SpiritHealerAction(ai); };
             creators["position"] = [](PlayerbotAI* ai) { return new PositionAction(ai); };
             creators["tell target"] = [](PlayerbotAI* ai) { return new TellTargetAction(ai); };
@@ -187,6 +195,8 @@ namespace ai
             creators["wts"] = [](PlayerbotAI* ai) { return new WtsAction(ai); };
             creators["hire"] = [](PlayerbotAI* ai) { return new HireAction(ai); };
             creators["craft"] = [](PlayerbotAI* ai) { return new SetCraftAction(ai); };
+            creators["mill"] = [](PlayerbotAI* ai) { return new MillItemAction(ai); };
+            creators["prospect"] = [](PlayerbotAI* ai) { return new ProspectItemAction(ai); };
             creators["guild craft order"] = [](PlayerbotAI* ai) { return new GuildCraftOrderAction(ai); };
             creators["flag"] = [](PlayerbotAI* ai) { return new FlagAction(ai); };
             creators["give leader"] = [](PlayerbotAI* ai) { return new GiveLeaderAction(ai); };
@@ -194,7 +204,10 @@ namespace ai
             creators["rtsc"] = [](PlayerbotAI* ai) { return new RTSCAction(ai); };
             creators["ah"] = [](PlayerbotAI* ai) { return new AhAction(ai); };
             creators["ah bid"] = [](PlayerbotAI* ai) { return new AhBidAction(ai); };
+            creators["auction"] = [](PlayerbotAI* ai) { return new AuctionCommandAction(ai); };
             creators["wait for attack time"] = [](PlayerbotAI* ai) { return new SetWaitForAttackTimeAction(ai); };
+            creators["pull capability"] = [](PlayerbotAI* ai) { return new PullCheckAction(ai, "pull capability"); };
+            creators["pull readiness"] = [](PlayerbotAI* ai) { return new PullCheckAction(ai, "pull readiness"); };
             creators["self resurrect"] = [](PlayerbotAI* ai) { return new SelfResurrectAction(ai); };
             creators["pet"] = [](PlayerbotAI* ai) { return new SetPetAction(ai); };
 

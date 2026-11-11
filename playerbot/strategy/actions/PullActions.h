@@ -4,6 +4,13 @@
 
 namespace ai
 {
+    class PullCheckAction : public ChatCommandAction
+    {
+    public:
+        PullCheckAction(PlayerbotAI* ai, std::string name) : ChatCommandAction(ai, name) {}
+        bool Execute(Event& event) override;
+    };
+
     class PullRequestAction : public ChatCommandAction
     {
     public:

@@ -98,6 +98,12 @@ namespace ai
         TalkTargetValue(PlayerbotAI* ai, std::string name = "talk target") : ManualSetValue<ObjectGuid>(ai, ObjectGuid(), name) {}
     };
 
+    class FetchTargetValue : public ManualSetValue<ObjectGuid>
+    {
+    public:
+        FetchTargetValue(PlayerbotAI* ai, std::string name = "fetch target") : ManualSetValue<ObjectGuid>(ai, ObjectGuid(), name) {}
+    };
+
     class AttackTargetValue : public ManualSetValue<ObjectGuid>
     {
     public:

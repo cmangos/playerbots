@@ -37,6 +37,10 @@ ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("roll");
     supported.push_back("share");
     supported.push_back("ll");
+    supported.push_back("collect");
+    supported.push_back("survey");
+    supported.push_back("find");
+    supported.push_back("get");
     supported.push_back("ss");
     supported.push_back("avoid creature");
     supported.push_back("release");
@@ -70,6 +74,8 @@ ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("lfg");
     supported.push_back("spell");
     supported.push_back("rti");
+    supported.push_back("order");
+    supported.push_back("resist");
     supported.push_back("position");
     supported.push_back("summon");
     supported.push_back("who");
@@ -87,6 +93,8 @@ ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("wts");
     supported.push_back("hire");
     supported.push_back("craft");
+    supported.push_back("mill");
+    supported.push_back("prospect");
     supported.push_back("flag");
     supported.push_back("range");
     supported.push_back("ra");
@@ -102,6 +110,7 @@ ChatCommandHandlerStrategy::ChatCommandHandlerStrategy(PlayerbotAI* ai) : PassTr
     supported.push_back("rtsc");
     supported.push_back("ah");
     supported.push_back("ah bid");
+    supported.push_back("auction");
     supported.push_back("keep");
     supported.push_back("bg free");
     supported.push_back("cast");
@@ -216,6 +225,14 @@ void ChatCommandHandlerStrategy::InitReactionTriggers(std::list<TriggerNode*> &t
     triggers.push_back(new TriggerNode(
         "pull rti",
         NextAction::array(0, new NextAction("pull rti target", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "pull capability",
+        NextAction::array(0, new NextAction("pull capability", relevance), NULL)));
+
+    triggers.push_back(new TriggerNode(
+        "pull readiness",
+        NextAction::array(0, new NextAction("pull readiness", relevance), NULL)));
 
     triggers.push_back(new TriggerNode(
         "accept",

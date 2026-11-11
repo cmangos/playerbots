@@ -17,6 +17,7 @@ bool RangeAction::Execute(Event& event)
         PrintRange("flee", requester);
         PrintRange("follow", requester);
         PrintRange("guard", requester);
+        PrintRange("loot", requester);
         PrintRange("followraid", requester);
         PrintRange("attack", requester);
         PrintRange("wandermin", requester);
@@ -41,6 +42,8 @@ bool RangeAction::Execute(Event& event)
     }
 
     float newVal = (float) atof(value.c_str());
+    if (qualifier == "loot")
+        newVal = std::max(0.0f, std::min(newVal, sPlayerbotAIConfig.lootDistanceMax));
     SET_AI_VALUE2(float,"range", qualifier, newVal);
     std::ostringstream out;
     out << qualifier << " range set to: " << newVal;

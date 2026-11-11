@@ -175,3 +175,242 @@ void OutfitAction::Update(std::string name)
 
     Save(name, items);
 }
+
+static std::string ResistStrategyFor(uint8 cls, const std::string& school)
+{
+    if (cls == CLASS_PALADIN)
+    {
+        if (school == "fire" || school == "frost" || school == "shadow")
+            return "aura " + school;
+    }
+    else if (cls == CLASS_SHAMAN)
+    {
+        if (school == "fire")
+            return "totem water resistance";
+        if (school == "frost")
+            return "totem fire resistance";
+        if (school == "nature")
+            return "totem air resistance";
+    }
+    else if (cls == CLASS_HUNTER)
+    {
+        if (school == "nature")
+            return "aspect wild";
+    }
+
+    return "";
+}
+
+static std::string ResistStrategyPlaceholder(const std::string& strategy)
+{
+    if (strategy.compare(0, 5, "aura ") == 0)
+        return "aura";
+    if (strategy.compare(0, 6, "totem ") == 0)
+        return "totems";
+    if (strategy.compare(0, 7, "aspect ") == 0)
+        return "aspect";
+    return "";
+}
+
+static bool IsAnyItemEquipped(Player* bot, const ItemIds& ids)
+{
+    for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)
+    {
+        Item* item = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (item && ids.find(item->GetProto()->ItemId) != ids.end())
+            return true;
+    }
+
+    return false;
+}
+
+std::string ResistAction::FindResistOutfit(const std::string& school)
+{
+    if (school.empty())
+        return "";
+
+    const std::vector<std::string> candidates = { school, school + "res", "resist" + school, school + "resist" };
+    for (const std::string& candidate : candidates)
+    {
+        if (!ai->InventoryFindOutfitItems(candidate).empty())
+            return candidate;
+    }
+
+    return "";
+}
+
+bool ResistAction::WearsResistOutfit()
+{
+    const std::vector<std::string> schools = { "fire", "frost", "nature", "shadow" };
+    for (const std::string& school : schools)
+    {
+        const std::string outfit = FindResistOutfit(school);
+        if (!outfit.empty() && IsAnyItemEquipped(bot, ai->InventoryFindOutfitItems(outfit)))
+            return true;
+    }
+
+    return false;
+}
+
+void ResistAction::ChangeResistStrategy(const std::string& previousSchool, const std::string& school)
+{
+    const uint8 cls = bot->getClass();
+    const std::string previous = ResistStrategyFor(cls, previousSchool);
+    const std::string next = ResistStrategyFor(cls, school);
+    const BotState states[] = { BotState::BOT_STATE_COMBAT, BotState::BOT_STATE_NON_COMBAT };
+
+    if (!previous.empty())
+    {
+        const std::string snapshot = AI_VALUE(std::string, "resist order strategies");
+        const size_t separator = snapshot.find('|');
+        std::string restore[2];
+        if (separator == std::string::npos)
+        {
+            restore[0] = ResistStrategyPlaceholder(previous);
+            restore[1] = restore[0];
+        }
+        else
+        {
+            restore[0] = snapshot.substr(0, separator);
+            restore[1] = snapshot.substr(separator + 1);
+        }
+
+        for (uint8 i = 0; i < 2; ++i)
+        {
+            ai->ChangeStrategy("-" + previous, states[i]);
+            if (!restore[i].empty())
+                ai->ChangeStrategy("+" + restore[i], states[i]);
+        }
+    }
+
+    if (next.empty())
+    {
+        SET_AI_VALUE(std::string, "resist order strategies", "");
+        return;
+    }
+
+    std::set<std::string> group = ai->GetAiObjectContext()->GetSiblingStrategy(next);
+    group.insert(next);
+    std::string active[2];
+    for (uint8 i = 0; i < 2; ++i)
+    {
+        for (const std::string& strategy : group)
+        {
+            if (ai->HasStrategy(strategy, states[i]))
+            {
+                active[i] = strategy;
+                break;
+            }
+        }
+    }
+
+    SET_AI_VALUE(std::string, "resist order strategies", active[0] + "|" + active[1]);
+
+    for (uint8 i = 0; i < 2; ++i)
+        ai->ChangeStrategy("+" + next, states[i]);
+}
+
+static std::string TrimCopy(const std::string& text)
+{
+    const size_t first = text.find_first_not_of(' ');
+    if (first == std::string::npos)
+        return "";
+    const size_t last = text.find_last_not_of(' ');
+    return text.substr(first, last - first + 1);
+}
+
+bool ResistAction::Execute(Event& event)
+{
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    std::string text = TrimCopy(event.getParam());
+    std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return (char)std::tolower(c); });
+
+    const std::string current = AI_VALUE(std::string, "resist order");
+    const size_t separator = current.find(':');
+    const std::string currentSchool = current.substr(0, separator);
+    const std::string currentOutfit = separator == std::string::npos ? "" : current.substr(separator + 1);
+
+    if (text.empty() || text == "?")
+    {
+        if (currentSchool.empty())
+            ai->TellPlayer(requester, "No resist order.");
+        else
+            ai->TellPlayer(requester, "Resisting " + currentSchool + (currentOutfit.empty() ? "" : " (outfit " + currentOutfit + ")") + ".");
+        return true;
+    }
+
+    std::string school = text;
+    if (school.compare(0, 6, "resist") == 0)
+        school = TrimCopy(school.substr(6));
+
+    if (school == "none" || school == "clear" || school == "reset" || school == "off")
+        school = "";
+    else if (school != "fire" && school != "frost" && school != "nature" && school != "shadow")
+    {
+        ai->TellPlayer(requester, "Usage: resist <fire|frost|nature|shadow|none>");
+        return false;
+    }
+
+    if (school.empty() && currentSchool.empty())
+    {
+        ai->TellPlayer(requester, "No resist order.");
+        return true;
+    }
+
+    ChangeResistStrategy(currentSchool, school);
+
+    const bool inCombat = bot->IsInCombat();
+    std::string outfit;
+    bool backupMissing = false;
+    if (!inCombat)
+    {
+        outfit = FindResistOutfit(school);
+        ItemIds backup = ai->InventoryFindOutfitItems("noresist");
+
+        if (!outfit.empty())
+        {
+            if (currentOutfit.empty() && !(!backup.empty() && WearsResistOutfit()))
+                Update("noresist");
+            else if (!currentOutfit.empty() && currentOutfit != outfit && !backup.empty())
+                EquipItems(requester, backup);
+
+            EquipItems(requester, ai->InventoryFindOutfitItems(outfit));
+        }
+        else if (!currentOutfit.empty())
+        {
+            if (!backup.empty())
+            {
+                EquipItems(requester, backup);
+                Save("noresist", ItemIds());
+            }
+            else
+                backupMissing = true;
+        }
+    }
+
+    SET_AI_VALUE(std::string, "resist order", school.empty() ? "" : (outfit.empty() ? school : school + ":" + outfit));
+
+    if (!sPlayerbotAIConfig.bExplicitDbStoreSave)
+        sPlayerbotDbStore.Save(ai);
+
+    std::ostringstream out;
+    if (school.empty())
+        out << "Resist order cleared";
+    else
+    {
+        const std::string strategy = ResistStrategyFor(bot->getClass(), school);
+        out << "Resisting " << school << ": ";
+        out << (strategy.empty() ? "no " + school + " resist spell for my class" : "using " + strategy);
+        if (!inCombat)
+            out << ", " << (outfit.empty() ? "no resist outfit (name one " + school + " or " + school + "res)" : "equipped outfit " + outfit);
+    }
+
+    if (inCombat)
+        out << ", gear will not change in combat";
+    if (backupMissing)
+        out << ", could not restore my normal gear (no noresist outfit)";
+    out << ".";
+
+    ai->TellPlayer(requester, out.str());
+    return true;
+}

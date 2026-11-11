@@ -448,6 +448,8 @@ public:
     bool CanDoSpecificAction(const std::string& name, bool isUseful = true, bool isPossible = true);
     virtual bool DoSpecificAction(const std::string& name, Event event = Event(), bool silent = false);
     void ChangeStrategy(const std::string& name, BotState type);
+    void SaveCombatOrders(bool preserveExisting = false);
+    bool RestoreCombatOrders();
     void PrintStrategies(Player* requester, BotState type);
     void ClearStrategies(BotState type);
     std::list<std::string_view> GetStrategies(BotState type);
@@ -770,6 +772,11 @@ protected:
     BotState currentState;
 
     std::deque<ActionHistoryEntry> actionHistory;
+    std::vector<std::string> savedCombatOrders;
+    uint8 savedCombatOrderDelay = 0;
+    std::string savedCombatOrderTarget;
+    std::string savedResistOrder;
+    bool hasSavedCombatOrders = false;
     uint32 actionHistorySize = 0;
     uint32 aiTick = 0;
     ChatHelper chatHelper;

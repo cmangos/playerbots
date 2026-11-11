@@ -22,6 +22,10 @@ namespace ai
             creators["share"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "share"); };
             creators["q"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "q"); };
             creators["ll"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "ll"); };
+            creators["collect"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "collect"); };
+            creators["survey"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "survey"); };
+            creators["find"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "find"); };
+            creators["get"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "get"); };
             creators["ss"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "ss"); };
             creators["avoid creature"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "avoid creature"); };
             creators["loot"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "add all loot"); };
@@ -58,6 +62,8 @@ namespace ai
             creators["attack rti"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "attack rti"); };
             creators["pull"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "pull"); };
             creators["pull rti"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "pull rti"); };
+            creators["pull capability"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "pull capability"); };
+            creators["pull readiness"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "pull readiness"); };
             creators["chat"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "chat"); };
             creators["accept"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "accept"); };
             creators["home"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "home"); };
@@ -98,6 +104,8 @@ namespace ai
             creators["lfg"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "lfg"); };
             creators["spell"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "spell"); };
             creators["rti"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "rti"); };
+            creators["order"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "order"); };
+            creators["resist"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "resist"); };
             creators["revive"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "revive"); };
             creators["runaway"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "runaway"); };
             creators["warning"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "warning"); };
@@ -122,6 +130,8 @@ namespace ai
             creators["wts"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "wts"); };
             creators["hire"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "hire"); };
             creators["craft"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "craft"); };
+            creators["mill"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "mill"); };
+            creators["prospect"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "prospect"); };
             creators["flag"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "flag"); };
             creators["range"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "range"); };
             creators["ra"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "ra"); };
@@ -130,6 +140,7 @@ namespace ai
             creators["rtsc"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "rtsc"); };
             creators["ah"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "ah"); };
             creators["ah bid"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "ah bid"); };
+            creators["auction"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "auction"); };
             creators["guild invite"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "guild invite"); };
             creators["guild join"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "guild join"); };
             creators["guild promote"] = [](PlayerbotAI* ai) { return new ChatCommandTrigger(ai, "guild promote"); };

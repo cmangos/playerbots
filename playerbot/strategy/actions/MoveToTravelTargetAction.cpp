@@ -238,7 +238,7 @@ bool MoveToTravelTargetAction::isUseful()
     //Should the bot still loot something?
     if (AI_VALUE(bool, "has available loot"))
     {
-        LootObject lootObject = AI_VALUE(LootObjectStack*, "available loot")->GetLoot(sPlayerbotAIConfig.lootDistance);
+        LootObject lootObject = AI_VALUE(LootObjectStack*, "available loot")->GetLoot(ai->GetRange("loot"));
         if (lootObject.IsLootPossible(bot))
             return false;
     }

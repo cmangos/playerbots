@@ -161,6 +161,7 @@ namespace ai
             creators["return"] = [](PlayerbotAI* ai) { return new ReturnAction(ai); };
             creators["move to loot"] = [](PlayerbotAI* ai) { return new MoveToLootAction(ai); };
             creators["open loot"] = [](PlayerbotAI* ai) { return new OpenLootAction(ai); };
+            creators["fetch object"] = [](PlayerbotAI* ai) { return new FetchObjectAction(ai); };
             creators["guard"] = [](PlayerbotAI* ai) { return new GuardAction(ai); };
             creators["return to stay position"] = [](PlayerbotAI* ai) { return new ReturnToStayPositionAction(ai); };
             creators["move out of enemy contact"] = [](PlayerbotAI* ai) { return new MoveOutOfEnemyContactAction(ai); };

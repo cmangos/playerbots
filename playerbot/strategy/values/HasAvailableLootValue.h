@@ -13,7 +13,7 @@ namespace ai
         virtual bool Calculate() override
         {
             return !AI_VALUE(bool, "can loot") &&
-                    AI_VALUE(LootObjectStack*, "available loot")->CanLoot(sPlayerbotAIConfig.lootDistance);
+                    AI_VALUE(LootObjectStack*, "available loot")->CanLoot(ai->GetRange("loot"));
         }
     };
 }

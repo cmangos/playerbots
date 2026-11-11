@@ -7,6 +7,97 @@
 
 using namespace ai;
 
+static bool HasRequiredPullWeapon(Player* bot, PullStrategy* strategy)
+{
+    const bool needsRanged = bot->getClass() == CLASS_HUNTER || strategy->GetPullActionName() == "shoot";
+    return !needsRanged || bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+}
+
+bool PullCheckAction::Execute(Event& event)
+{
+    Player* requester = event.getOwner() ? event.getOwner() : GetMaster();
+    if (!requester)
+        return false;
+
+    PullStrategy* strategy = PullStrategy::Get(ai);
+    const bool strategyActive = strategy != nullptr;
+    if (!strategy)
+        strategy = dynamic_cast<PullStrategy*>(ai->GetAiObjectContext()->GetStrategy("pull"));
+
+    if (!strategy)
+    {
+        ai->TellPlayerNoFacing(requester, "My class has no pull ability.");
+        return true;
+    }
+
+    const std::string spellName = strategy->GetSpellName();
+
+    if (getName() == "pull capability")
+    {
+        if (strategyActive)
+        {
+            bool canPull = strategy->CanDoPullAction(nullptr);
+            ai->TellPlayerNoFacing(requester, canPull ? "I am capable of pulling with " + spellName + "." : "I don't have a usable pull action.");
+            return true;
+        }
+
+        if (!HasRequiredPullWeapon(bot, strategy))
+        {
+            ai->TellPlayerNoFacing(requester, "I can't pull: I have no ranged weapon equipped.");
+            return true;
+        }
+
+        if (!ai->HasSpell(spellName))
+        {
+            ai->TellPlayerNoFacing(requester, "I can't pull: I don't know " + spellName + ".");
+            return true;
+        }
+
+        ai->TellPlayerNoFacing(requester, "I can pull with " + spellName + ".");
+        return true;
+    }
+
+    Unit* target = ai->GetUnit(requester->GetSelectionGuid());
+    if (!target)
+    {
+        ai->TellPlayerNoFacing(requester, "Select a target to check pull readiness.");
+        return true;
+    }
+    if (target->GetDistance(bot) > sPlayerbotAIConfig.reactDistance * 3)
+    {
+        ai->TellPlayerNoFacing(requester, "The target is too far away.");
+        return true;
+    }
+    if (!AttackersValue::IsValid(target, bot, nullptr, false))
+    {
+        ai->TellPlayerNoFacing(requester, "That target can't be pulled.");
+        return true;
+    }
+    if (!bot->IsWithinLOSInMap(target))
+    {
+        ai->TellPlayerNoFacing(requester, "I can't see that target.");
+        return true;
+    }
+
+    if (!strategyActive)
+    {
+        const bool ready = HasRequiredPullWeapon(bot, strategy) && ai->HasSpell(spellName) && ai->CanCastSpell(spellName, target, true, nullptr, true);
+        ai->TellPlayerNoFacing(requester, ready ? "I am ready to pull that target with " + spellName + "." : "I can't pull that target right now.");
+        return true;
+    }
+
+    bool canPull = strategy->CanDoPullAction(target);
+    if (canPull)
+    {
+        ObjectGuid previousTarget = AI_VALUE(ObjectGuid, "pull target");
+        SET_AI_VALUE(ObjectGuid, "pull target", target->GetObjectGuid());
+        canPull = ai->CanDoSpecificAction("pull action", true, true);
+        SET_AI_VALUE(ObjectGuid, "pull target", previousTarget);
+    }
+    ai->TellPlayerNoFacing(requester, canPull ? "I am ready to pull that target." : "I can't pull that target right now.");
+    return true;
+}
+
 bool PullRequestAction::Execute(Event& event)
 {
     PullStrategy* strategy = PullStrategy::Get(ai);

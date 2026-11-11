@@ -7,6 +7,144 @@
 
 using namespace ai;
 
+static std::string ToLowerCopy(const std::string& text)
+{
+    std::string out = text;
+    std::transform(out.begin(), out.end(), out.begin(), [](unsigned char c) { return (char)std::tolower(c); });
+    return out;
+}
+
+static std::string TrimSpacesCopy(const std::string& text)
+{
+    const size_t first = text.find_first_not_of(' ');
+    if (first == std::string::npos)
+        return "";
+    return text.substr(first, text.find_last_not_of(' ') - first + 1);
+}
+
+static std::string TranslateLegacyOrdersuffix(const std::string& rest)
+{
+    if (rest == "tank" || rest == "maintank")
+        return "+tank";
+    if (rest == "heal" || rest == "mainheal")
+        return "+heal";
+    if (rest == "nodispell")
+        return "add +heal";
+    if (rest == "notmainheal")
+        return "+offheal";
+    if (rest == "assist")
+        return "+dps assist";
+    if (rest == "passive")
+        return "+passive";
+    return "";
+}
+
+static std::string TranslateLegacyNeutralize(PlayerbotAI* ai)
+{
+    Player* bot = ai->GetBot();
+    const char* spell = nullptr;
+    switch (bot->getClass())
+    {
+    case CLASS_MAGE:
+        spell = "poly";
+        break;
+    case CLASS_PRIEST:
+        spell = "shackle";
+        break;
+    case CLASS_DRUID:
+        spell = "hibernate";
+        break;
+    case CLASS_HUNTER:
+        spell = "scare";
+        break;
+    default:
+        break;
+    }
+
+    return spell ? std::string("cast ") + spell : "";
+}
+
+static std::string TranslateLegacyPartyBotCommand(const std::string& message, PlayerbotAI* ai)
+{
+    if (!sPlayerbotAIConfig.IsPartyBotOnly())
+        return message;
+
+    const std::string lower = ToLowerCopy(message);
+    const std::string ordersCombat("orders combat ");
+    const std::string ordersDelay("orders delay ");
+
+    if (lower.compare(0, ordersCombat.size(), ordersCombat) == 0)
+    {
+        std::string rest = TrimSpacesCopy(lower.substr(ordersCombat.size()));
+        std::string strategy = TranslateLegacyOrdersuffix(rest);
+        if (!strategy.empty())
+            return "co legacy " + strategy;
+
+        if (rest == "reset")
+            return "co legacy reset";
+
+        if (rest.compare(0, 6, "resist") == 0)
+        {
+            const size_t first = rest.find_first_not_of(' ', 6);
+            const std::string school = first == std::string::npos ? "" : rest.substr(first);
+            if (school == "fire" || school == "frost" || school == "nature" || school == "shadow")
+                return "co legacy resist " + school;
+        }
+
+        if (rest.compare(0, 7, "assist ") == 0 || rest.compare(0, 8, "protect ") == 0)
+            return "order " + TrimSpacesCopy(message.substr(ordersCombat.size()));
+
+        return message;
+    }
+
+    if (lower.compare(0, ordersDelay.size(), ordersDelay) == 0)
+        return "co legacy delay " + TrimSpacesCopy(message.substr(ordersDelay.size()));
+
+    if (lower == "sell all")
+        return "s legacy all";
+
+    if (lower == "pull test")
+        return "pull capability";
+
+    if (lower == "pull ready")
+        return "pull readiness";
+
+    if (lower == "resumeorders")
+        return "co restore";
+
+    if (lower == "follow near" || lower == "follow far")
+    {
+        float range = ai->GetRange("follow");
+        range = std::max(0.1f, range + (lower == "follow near" ? -0.5f : 0.5f));
+        return "range follow " + std::to_string(range);
+    }
+
+    const std::string process("process ");
+    if (lower.compare(0, process.size(), process) == 0)
+    {
+        std::string rest = lower.substr(process.size());
+        size_t space = rest.find(' ');
+        std::string mode = rest.substr(0, space);
+        std::string arg = space == std::string::npos ? "" : message.substr(process.size() + space + 1);
+
+        if ((mode == "disenchant" || mode == "d") && !arg.empty())
+            return "cast 13262 " + arg;
+        if (mode == "mill" || mode == "m")
+            return arg.empty() ? std::string("mill") : "mill " + arg;
+        if (mode == "prospect" || mode == "p")
+            return arg.empty() ? std::string("prospect") : "prospect " + arg;
+    }
+
+    if (lower == "neutralize")
+    {
+        std::string cast = TranslateLegacyNeutralize(ai);
+        if (!cast.empty())
+            return cast;
+    }
+
+    return message;
+}
+
 std::string ChatFilter::Filter(std::string message, std::string filter)
 {
     if (message.find("@") == std::string::npos)
@@ -1259,6 +1397,9 @@ std::string CompositeChatFilter::Filter(std::string message)
                 break;
         }
     }
+
+    if (!message.empty())
+        message = TranslateLegacyPartyBotCommand(message, ai);
 
     return message;
 }

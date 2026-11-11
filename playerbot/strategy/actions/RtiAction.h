@@ -14,6 +14,14 @@ namespace ai
         void AppendRti(std::ostringstream & out, std::string type);
     };
 
+    class CombatOrderTargetAction : public ChatCommandAction
+    {
+    public:
+        CombatOrderTargetAction(PlayerbotAI* ai) : ChatCommandAction(ai, "combat order target") {}
+        virtual bool Execute(Event& event) override;
+        virtual bool isUsefulWhenStunned() override { return true; }
+    };
+
     class MarkRtiAction : public Action
     {
     public:

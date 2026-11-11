@@ -35,7 +35,17 @@ void PlayerbotDbStore::Load(PlayerbotAI *ai, std::string preset)
             std::string value = fields[1].GetString();
             if (key == "value") values.push_back(value);
             else if (key == "co") ai->ChangeStrategy(value, BotState::BOT_STATE_COMBAT);
-            else if (key == "nc") ai->ChangeStrategy(value, BotState::BOT_STATE_NON_COMBAT);
+            else if (key == "nc")
+            {
+                if (sPlayerbotAIConfig.IsPartyBotOnly() && ai->HasRealPlayerMaster())
+                {
+                    value = PlayerbotAIConfig::FilterPartyBotStrategies(value);
+                    if (value.empty())
+                        continue;
+                }
+
+                ai->ChangeStrategy(value, BotState::BOT_STATE_NON_COMBAT);
+            }
             else if (key == "dead") ai->ChangeStrategy(value, BotState::BOT_STATE_DEAD);
             else if (key == "react") ai->ChangeStrategy(value, BotState::BOT_STATE_REACTION);
         } while (results->NextRow());

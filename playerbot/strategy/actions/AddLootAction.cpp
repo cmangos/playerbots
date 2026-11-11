@@ -148,6 +148,10 @@ bool AddAllLootAction::AddLoot(Player* requester, ObjectGuid guid)
         lootDistanceToUse = sPlayerbotAIConfig.lootDistance;
     }
 
+    float customLootDistance = AI_VALUE2(float, "range", "loot");
+    if (customLootDistance >= 0.1f)
+        lootDistanceToUse = customLootDistance;
+
     if (sServerFacade.IsDistanceGreaterThan(sServerFacade.GetDistance2d(requester, wo), lootDistanceToUse))
     {
         ai->TellDebug(requester, "Outside of loot range: " + std::to_string(lootDistanceToUse), "debug loot");

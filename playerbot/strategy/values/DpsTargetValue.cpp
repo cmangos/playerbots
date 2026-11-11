@@ -2,12 +2,16 @@
 #include "playerbot/playerbot.h"
 #include "DpsTargetValue.h"
 #include "LeastHpTargetValue.h"
+#include "RtiValue.h"
 
 using namespace ai;
 
 
 ObjectGuid DpsTargetValue::Calculate()
 {
+    ObjectGuid ordered = CombatOrderTargetValue::FindTarget(ai, false);
+    if (ordered) return ordered;
+
     ObjectGuid rti = RtiTargetValue::Calculate();
     if (rti) return rti;
 

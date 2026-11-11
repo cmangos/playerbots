@@ -35,6 +35,22 @@ namespace ai
         void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
     };
 
+    class FetchStrategy : public Strategy
+    {
+    public:
+        FetchStrategy(PlayerbotAI* ai) : Strategy(ai) {}
+        std::string getName() override { return "fetch"; }
+#ifdef GenerateBotHelp
+        virtual std::string GetHelpName() { return "fetch"; }
+        virtual std::string GetHelpDescription() {
+            return "This strategy is added by the 'get' command: the bot walks to the requested object, gathers or opens it and then follows its master again.";
+        }
+        virtual std::vector<std::string> GetRelatedStrategies() { return { "loot", "follow" }; }
+#endif
+    private:
+        void InitNonCombatTriggers(std::list<TriggerNode*> &triggers) override;
+    };
+
     class RevealStrategy : public Strategy
     {
     public:

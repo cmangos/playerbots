@@ -11,6 +11,24 @@ AiPlayerbot.Enabled = 1
 # Enable random bot system
 AiPlayerbot.RandomBotAutologin = 1
 
+# PartyBotOnly - old partybot compatibility mode (the deprecated in-core PlayerBot). One switch, everything follows from it:
+#   - No bot population: the random bot system (spawn, login churn, wandering, guild/quest/bg
+#     agendas) is switched off. Bots exist only while a real player has them added.
+#   - Bots can only be added from the requesting player's own account (like the old partybot;
+#     AiPlayerbot.AllowMultiAccountAltBots and random-account adds are refused with "Not in your account").
+#   - Player-added bots run a quiet agenda: follow/stay, combat rotation, loot, quest sharing,
+#     buffs, food, mount, collision. No grind/travel/rpg/maintenance/battleground/lfg/gather/fishing
+#     agendas, no duels, no emotes. Strategies saved in the database or listed in
+#     AiPlayerbot.NonCombatStrategies are filtered the same way when the bot logs in.
+#   - The old whisper wording is understood: orders combat tank/heal/assist/passive/reset/resist*,
+#     orders delay, resumeorders, follow near/far, pull test/ready, neutralize, process d/m/p, sell all.
+#   Native module commands (order, resist, collect, survey, find, get, mill, prospect, auction, pull
+#   capability, co save/restore) work in every mode; only the old spellings need this switch.
+#   Note: flipping this at runtime does not retire bots that are already online - restart required.
+#   See docs/OldPartyBot.md for the complete command reference.
+
+AiPlayerbot.PartyBotOnly = 0
+
 # Log on all random bots on start
 AiPlayerbot.RandomBotLoginAtStartup = 1
 
@@ -868,6 +886,8 @@ AiPlayerbot.ShootDistance = 26.0
 #AiPlayerbot.GrindDistance = 75.0
 #overall loot distance
 #AiPlayerbot.LootDistance = 25.0
+#maximum loot distance a player can set per bot with the collect or range loot commands
+#AiPlayerbot.LootDistanceMax = 50.0
 #loot distance when bot is a group member (not leader)
 #AiPlayerbot.GroupMemberLootDistance = 15.0
 #loot distance when bot is a group member (not leader) and has active player master (if player is group leader)
@@ -1032,6 +1052,14 @@ AiPlayerbot.RandomBotTeleportDistance = 100
 
 # The summon command can be used without restriction by non-gms.
 # AiPlayerbot.NonGmFreeSummon = 0
+
+# Cost in copper charged to a non-gm player for each bot added or logged in with the .bot add/login command.
+# The money is taken once the bot is actually online. Random bots, autologin and console adds are never charged.
+# AiPlayerbot.BotAddCost = 0
+
+# Cost in copper charged to a non-gm player each time the summon command brings a bot to that player.
+# Applies on top of AiPlayerbot.NonGmFreeSummon. Meeting stone rituals and short-range unstuck teleports are free.
+# AiPlayerbot.BotSummonCost = 0
 
 # Bots will put their talentspec in guild notes when they change/tell their talents if they have the rights.
 # AiPlayerbot.TalentsInPublicNote = 0

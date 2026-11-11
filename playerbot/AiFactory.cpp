@@ -884,7 +884,8 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
                 nonCombatEngine->addStrategy("dps assist");
             }
 
-            nonCombatEngine->addStrategy("dksquest");
+            if (!sPlayerbotAIConfig.IsPartyBotOnly() || !facade->HasRealPlayerMaster())
+                nonCombatEngine->addStrategy("dksquest");
 
             break;
         }
@@ -912,12 +913,18 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
         if (master && !master->GetPlayerbotAI())
         {
             const char* wanderFollow = sPlayerbotAIConfig.useWanderAsDefaultFollowStrategy ? "wander" : "follow";
-            nonCombatEngine->addStrategies("racials", "nc", "food", wanderFollow, "default", "quest", "loot", "gather", "duel", "emote", "buff", "mount", NULL);
+            if (sPlayerbotAIConfig.IsPartyBotOnly() && facade->HasRealPlayerMaster())
+                nonCombatEngine->addStrategies("racials", "nc", "food", wanderFollow, "default", "quest", "loot", "collision", "buff", "mount", NULL);
+            else
+                nonCombatEngine->addStrategies("racials", "nc", "food", wanderFollow, "default", "quest", "loot", "gather", "duel", "emote", "buff", "mount", NULL);
         }
         else
         {
             const char* wanderFollow = sPlayerbotAIConfig.useWanderAsDefaultFollowStrategy ? "wander" : "follow";
-            nonCombatEngine->addStrategies("racials", "nc", "food", wanderFollow, "default", "quest", "loot", "gather", "duel", "emote", "buff", "mount", NULL);
+            if (sPlayerbotAIConfig.IsPartyBotOnly() && facade->HasRealPlayerMaster())
+                nonCombatEngine->addStrategies("racials", "nc", "food", wanderFollow, "default", "quest", "loot", "collision", "buff", "mount", NULL);
+            else
+                nonCombatEngine->addStrategies("racials", "nc", "food", wanderFollow, "default", "quest", "loot", "gather", "duel", "emote", "buff", "mount", NULL);
         }
     }
 
@@ -934,8 +941,10 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
     if (!player->InBattleGround() && sPlayerbotAIConfig.jumpFollow)
         nonCombatEngine->addStrategy("follow jump");
 
-    if ((facade->IsRealPlayer() || sRandomPlayerbotMgr.IsFreeBot(player)) && !player->InBattleGround())
-    {   
+    const bool partyBotMaster = sPlayerbotAIConfig.IsPartyBotOnly() && facade->HasRealPlayerMaster();
+
+    if (!partyBotMaster && (facade->IsRealPlayer() || sRandomPlayerbotMgr.IsFreeBot(player)) && !player->InBattleGround())
+    {
         Player* master = facade->GetMaster();
 
         nonCombatEngine->addStrategy("roll");
@@ -1020,7 +1029,7 @@ void AiFactory::AddDefaultNonCombatStrategies(Player* player, PlayerbotAI* const
     }
     else
     {
-        nonCombatEngine->ChangeStrategy(sPlayerbotAIConfig.nonCombatStrategies);
+        nonCombatEngine->ChangeStrategy(partyBotMaster ? PlayerbotAIConfig::FilterPartyBotStrategies(sPlayerbotAIConfig.nonCombatStrategies) : sPlayerbotAIConfig.nonCombatStrategies);
     }
 
     // Battleground switch

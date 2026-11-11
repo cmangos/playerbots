@@ -116,7 +116,7 @@ public:
     bool allowMultiAccountAltBots;
     uint32 globalCoolDown, reactDelay, maxWaitForMove, expireActionTime, dispelAuraDuration, passiveDelay, repeatDelay, choreTravelBudget,
         errorDelay, rpgDelay, sitDelay, returnDelay, lootDelay;
-    float sightDistance, spellDistance, reactDistance, grindDistance, lootDistance, groupMemberLootDistance, groupMemberLootDistanceWithActiveMaster,
+    float sightDistance, spellDistance, reactDistance, grindDistance, lootDistance, lootDistanceMax, groupMemberLootDistance, groupMemberLootDistanceWithActiveMaster,
         gatheringDistance, groupMemberGatheringDistance, groupMemberGatheringDistanceWithActiveMaster, shootDistance,
         fleeDistance, tooCloseDistance, meleeDistance, followDistance, raidFollowDistance, wanderMinDistance, wanderMaxDistance, whisperDistance, contactDistance,
         aoeRadius, rpgDistance, targetPosRecalcDistance, farDistance, healDistance, aggroDistance, proximityDistance, maxFreeMoveDistance, freeMoveDelay, walkDistance;
@@ -124,6 +124,10 @@ public:
     uint32 lowMana, mediumMana;
 
     uint32 openGoSpell;
+    bool partyBotOnly;
+    bool IsPartyBotOnly() const { return enabled && partyBotOnly; }
+    static bool IsPartyBotBannedStrategy(const std::string& name);
+    static std::string FilterPartyBotStrategies(const std::string& strategies);
     bool randomBotAutologin;
     BotAutoLogin botAutologin;
     std::string randomBotMapsAsString;
@@ -325,6 +329,8 @@ public:
 
     bool talentsInPublicNote;
     bool nonGmFreeSummon;
+    uint32 botAddCost;
+    uint32 botSummonCost;
 
     BotSelfBotLevel selfBotLevel;
     uint32 iterationsPerTick;

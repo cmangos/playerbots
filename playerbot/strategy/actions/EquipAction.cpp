@@ -341,6 +341,19 @@ bool EquipUpgradesAction::Execute(Event& event)
     if (!sPlayerbotAIConfig.autoEquipUpgradeLoot && !sRandomPlayerbotMgr.IsRandomBot(bot))
         return false;
 
+    const std::string resistOrder = AI_VALUE(std::string, "resist order");
+    const size_t resistSeparator = resistOrder.find(':');
+    if (resistSeparator != std::string::npos)
+    {
+        const ItemIds resistOutfit = ai->InventoryFindOutfitItems(resistOrder.substr(resistSeparator + 1));
+        for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)
+        {
+            Item* equipped = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            if (equipped && resistOutfit.find(equipped->GetProto()->ItemId) != resistOutfit.end())
+                return false;
+        }
+    }
+
     if (event.getSource() == "trade status")
     {
         WorldPacket p(event.getPacket());

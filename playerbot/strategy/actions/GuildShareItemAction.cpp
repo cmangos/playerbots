@@ -69,6 +69,9 @@ bool GuildShareItemAction::Execute(Event& event)
                 return false;
             }
 
+            // SetCount and StoreItem do not update the quest item counters, unlike
+            // MoveItemFromInventory and MoveItemToInventory for a whole stack.
+            bot->ItemRemovedQuestCheck(itemId, giveCount);
             item->SetCount(stackCount - giveCount);
             item->SetState(ITEM_CHANGED, bot);
             bot->SaveInventoryAndGoldToDB();
@@ -77,6 +80,7 @@ bool GuildShareItemAction::Execute(Event& event)
             if (!newItem)
                 return false;
 
+            receiver->ItemAddedQuestCheck(itemId, giveCount);
             receiver->StoreItem(dest, newItem, true);
 
             std::ostringstream receiverOut;

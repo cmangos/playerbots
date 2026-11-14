@@ -70,6 +70,7 @@ class RandomPlayerbotMgr : public PlayerbotHolder
 private:
         void ScaleBotActivity();
         void LogPlayerLocation();
+        void LogLiveMapPositions();
         void DelayedFacingFix();
         void LoginFreeBots();
 public:

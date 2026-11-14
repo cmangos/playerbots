@@ -46,6 +46,7 @@ namespace ai
         void TellMaster(const std::string& msg);
         void LogToConsole(const std::string& msg);
         void LogToFile(const std::string& msg);
+        void LogRunRecord(const std::string& kind, const std::string& verdict);
         void DeactivateStrategy();
 
         TestResult GetResult() const { return ctx.result; }

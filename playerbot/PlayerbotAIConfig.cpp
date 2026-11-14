@@ -18,6 +18,9 @@
 #include <regex>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
+#include <sys/stat.h>
+#include <cctype>
 #include "PlayerbotLoginMgr.h"
 
 std::vector<std::string> ConfigAccess::GetValues(const std::string& name) const
@@ -469,6 +472,9 @@ bool PlayerbotAIConfig::Initialize()
     rndBotCheatMask = uint32(CheatAction::GetCheatMask(config.GetStringDefault("AiPlayerbot.RndBotCheats", "taxi,item,breath")));    
 
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.AllowedLogFiles", ""), allowedLogFiles);
+    logArchiveOnBoot = config.GetBoolDefault("AiPlayerbot.LogArchiveOnBoot", false);
+    logArchiveKeepBoots = config.GetIntDefault("AiPlayerbot.LogArchiveKeepBoots", 10);
+    liveMapSampleSec = std::max(1, config.GetIntDefault("AiPlayerbot.LiveMapSampleSec", 5));
     LoadListString<std::list<std::string>>(config.GetStringDefault("AiPlayerbot.DebugFilter", "add gathering loot,check values,emote,check mount state,jump"), debugFilter);
 
     worldBuffs.clear();
@@ -1111,6 +1117,149 @@ void PlayerbotAIConfig::log(std::string fileName, const char* str, ...)
     fflush(stdout);
 }
 
+void PlayerbotAIConfig::logRaw(std::string fileName, const std::string& text)
+{
+    if (text.empty())
+        return;
+
+    std::lock_guard<std::mutex> guard(m_logMtx);
+
+    if (!isLogOpen(fileName))
+        if (!openLog(fileName, "a"))
+            return;
+
+    FILE* file = logFiles.find(fileName)->second.first;
+    if (!file)
+        return;
+
+    fwrite(text.data(), 1, text.size(), file);
+    if (text.back() != '\n')
+        fputc('\n', file);
+    fflush(file);
+}
+
+std::string PlayerbotAIConfig::GetLogsDir()
+{
+    std::string dir = sConfig.GetStringDefault("LogsDir");
+    if (!dir.empty() && dir.back() != '/' && dir.back() != '\\')
+        dir.append("/");
+    return dir;
+}
+
+std::string PlayerbotAIConfig::GetBootStamp()
+{
+    if (bootStamp.empty())
+    {
+        time_t t = time(nullptr);
+        char stamp[24];
+        std::strftime(stamp, sizeof(stamp), "%Y%m%d_%H%M%S", localtime(&t));
+        bootStamp = stamp;
+    }
+    return bootStamp;
+}
+
+void PlayerbotAIConfig::openBootLog(std::string fileName, const std::string& header)
+{
+    if (!hasLog(fileName))
+        return;
+
+    if (logArchiveOnBoot)
+    {
+        auto it = logFiles.find(fileName);
+        if (it != logFiles.end() && it->second.second && it->second.first)
+        {
+            fclose(it->second.first);
+            it->second.first = nullptr;
+            it->second.second = false;
+        }
+
+        std::string dir = GetLogsDir();
+        std::string path = dir + fileName;
+        size_t dot = fileName.find_last_of('.');
+        std::string stem = dot == std::string::npos ? fileName : fileName.substr(0, dot);
+        std::string ext = dot == std::string::npos ? "" : fileName.substr(dot);
+
+        bool keepData = false;
+        std::error_code ec;
+        if (std::filesystem::exists(path, ec) && std::filesystem::file_size(path, ec) > 0)
+        {
+            struct stat info;
+            time_t written = stat(path.c_str(), &info) == 0 ? info.st_mtime : time(nullptr);
+            char stamp[24];
+            std::strftime(stamp, sizeof(stamp), "%Y%m%d_%H%M%S", localtime(&written));
+            std::string target = dir + stem + "_" + stamp + ext;
+            if (std::filesystem::exists(target, ec))
+                target = dir + stem + "_" + GetBootStamp() + ext;
+
+            ec.clear();
+            std::filesystem::rename(path, target, ec);
+            if (ec)
+            {
+                ec.clear();
+                std::filesystem::copy_file(path, target, std::filesystem::copy_options::overwrite_existing, ec);
+                keepData = bool(ec);
+            }
+        }
+
+        std::vector<std::string> archives;
+        std::string prefix = stem + "_";
+        ec.clear();
+        std::filesystem::directory_iterator iter(dir.empty() ? "." : dir, ec);
+        for (; !ec && iter != std::filesystem::directory_iterator(); iter.increment(ec))
+        {
+            std::string name = iter->path().filename().string();
+            if (name.size() != prefix.size() + 15 + ext.size() || name.compare(0, prefix.size(), prefix) != 0)
+                continue;
+            if (name.compare(name.size() - ext.size(), ext.size(), ext) != 0)
+                continue;
+            std::string middle = name.substr(prefix.size(), 15);
+            if (middle[8] != '_' || std::count_if(middle.begin(), middle.end(), [](unsigned char c) { return std::isdigit(c); }) != 14)
+                continue;
+            archives.push_back(iter->path().string());
+        }
+
+        std::sort(archives.begin(), archives.end());
+        while (archives.size() > logArchiveKeepBoots)
+        {
+            std::filesystem::remove(archives.front(), ec);
+            archives.erase(archives.begin());
+        }
+
+        if (keepData)
+        {
+            openLog(fileName, "a");
+            if (!header.empty())
+                logRaw(fileName, header);
+            return;
+        }
+    }
+
+    openLog(fileName, "w");
+
+    if (!header.empty())
+        logRaw(fileName, header);
+}
+
+std::string PlayerbotAIConfig::LocationColumns(Player* bot, bool withWmo)
+{
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(2);
+    out << bot->GetMapId() << "," << bot->GetInstanceId() << ",";
+    out << bot->GetPositionX() << "," << bot->GetPositionY() << "," << bot->GetPositionZ() << ",";
+    out << bot->GetObjectGuid().GetCounter();
+
+    if (withWmo)
+    {
+        uint32 flags = 0;
+        int32 adtId = 0, rootId = 0, groupId = 0;
+        if (bot->IsInWorld())
+            bot->GetTerrain()->GetAreaInfo(bot->GetPositionX(), bot->GetPositionY(), bot->GetPositionZ(), flags, adtId, rootId, groupId);
+        out << "," << rootId << "," << groupId;
+    }
+
+    return out.str();
+}
+
 void PlayerbotAIConfig::logEvent(PlayerbotAI* ai, std::string eventName, std::string info1, std::string info2)
 {
     if (hasLog("bot_events.csv"))
@@ -1131,7 +1280,8 @@ void PlayerbotAIConfig::logEvent(PlayerbotAI* ai, std::string eventName, std::st
         out << subLevel << ",";
 
         out << "\"" << info1 << "\",";
-        out << "\"" << info2 << "\"";
+        out << "\"" << info2 << "\",";
+        out << LocationColumns(bot);
 
         log("bot_events.csv", out.str().c_str());
     }

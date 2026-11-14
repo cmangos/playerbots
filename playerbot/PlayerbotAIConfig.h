@@ -384,6 +384,11 @@ public:
 
     std::unordered_map <std::string, std::pair<FILE*, bool>> logFiles;
 
+    bool logArchiveOnBoot = false;
+    uint32 logArchiveKeepBoots = 10;
+    uint32 liveMapSampleSec = 5;
+    std::string bootStamp;
+
     uint32 botCheatMask = 0;
     uint32 rndBotCheatMask = 0;
 
@@ -427,6 +432,11 @@ public:
     bool openLog(std::string fileName, char const* mode = "a", bool haslog = false);
     bool isLogOpen(std::string fileName) { auto it = logFiles.find(fileName); return it != logFiles.end() && it->second.second;}
     void log(std::string fileName, const char* str, ...);
+    void logRaw(std::string fileName, const std::string& text);
+    void openBootLog(std::string fileName, const std::string& header = "");
+    std::string GetLogsDir();
+    std::string GetBootStamp();
+    std::string LocationColumns(Player* bot, bool withWmo = false);
 
     void logEvent(PlayerbotAI* ai, std::string eventName, std::string info1 = "", std::string info2 = "");
     void logEvent(PlayerbotAI* ai, std::string eventName, ObjectGuid guid, std::string info2);

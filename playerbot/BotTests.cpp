@@ -1002,6 +1002,44 @@ void LogAnalysis::AnalysePid()
     sLog.outString("========= AVG DIFF [%d] & AVG ACTIVE BOTS [%d/%d]", aDiff, aBots, maxBots);
 }
 
+namespace
+{
+    Tokens SplitEventRow(const std::string& line)
+    {
+        Tokens fields;
+        std::string current;
+        bool quoted = false;
+        for (char c : line)
+        {
+            if (c == '"')
+                quoted = !quoted;
+            else if (c == ',' && !quoted)
+            {
+                fields.push_back(current);
+                current.clear();
+            }
+            else if (c != '\r')
+                current.push_back(c);
+        }
+        fields.push_back(current);
+        if (fields.size() > 9)
+            fields.resize(9);
+        return fields;
+    }
+
+    uint32 ParseCount(const std::string& text)
+    {
+        try
+        {
+            return uint32(std::stof(text));
+        }
+        catch (...)
+        {
+            return 0;
+        }
+    }
+}
+
 void LogAnalysis::AnalyseEvents()
 {
     std::string m_logsDir = sConfig.GetStringDefault("LogsDir");
@@ -1094,7 +1132,7 @@ void LogAnalysis::AnalyseQuests()
         if (!line.length())
             continue;
 
-        Tokens tokens = StrSplit(line, ",");
+        Tokens tokens = SplitEventRow(line);
 
         if (tokens.size() < 9)
             continue;
@@ -1116,19 +1154,19 @@ void LogAnalysis::AnalyseQuests()
 
         if (tokens[2] == "AcceptQuestAction")
         {
-            questId[tokens[7]] = stoi(tokens[8]);
+            questId[tokens[7]] = ParseCount(tokens[8]);
             questStartCount[tokens[7]]++;
         }
         else if (tokens[2] == "QueryItemUsageAction" || tokens[3] == "QuestUpdateAddKillAction")
         {
-            questId[tokens[7]] = stoi(tokens[8]);
+            questId[tokens[7]] = ParseCount(tokens[8]);
             questObjective[tokens[7]]++;
-            if (stof(tokens[8]) == 1)
+            if (ParseCount(tokens[8]) == 1)
                 questCompletedCount[tokens[7]]++;
         }
         else if (tokens[2] == "TalkToQuestGiverAction")
         {
-            questId[tokens[7]] = stoi(tokens[8]);
+            questId[tokens[7]] = ParseCount(tokens[8]);
             questEndCount[tokens[7]]++;
         }
     } while (in.good());
@@ -1193,7 +1231,7 @@ void LogAnalysis::AnalyseCounts()
         if (!line.length())
             continue;
 
-        Tokens tokens = StrSplit(line, ",");
+        Tokens tokens = SplitEventRow(line);
 
         if (tokens.size() < 9)
             continue;

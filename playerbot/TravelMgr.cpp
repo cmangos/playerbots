@@ -1482,14 +1482,17 @@ void TravelMgr::LoadQuestTravelTable()
 
     sPlayerbotAIConfig.openLog("unload_grid.csv", "w");
     sPlayerbotAIConfig.openLog("unload_obj.csv", "w");
-    sPlayerbotAIConfig.openLog("bot_events.csv", "w");
-    sPlayerbotAIConfig.openLog("bot_heartbeat.csv", "w");
-    sPlayerbotAIConfig.openLog("bot_reactions.csv", "w");
-    sPlayerbotAIConfig.openLog("travel_map.csv", "w");
-    sPlayerbotAIConfig.openLog("quest_map.csv", "w");
-    sPlayerbotAIConfig.openLog("activity_pid.csv", "w");
-    sPlayerbotAIConfig.openLog("deaths.csv", "w");
-    sPlayerbotAIConfig.openLog("player_paths.csv", "w");
+    sPlayerbotAIConfig.openBootLog("bot_events.csv");
+    sPlayerbotAIConfig.openBootLog("bot_heartbeat.csv");
+    sPlayerbotAIConfig.openBootLog("bot_reactions.csv");
+    sPlayerbotAIConfig.openBootLog("travel_map.csv");
+    sPlayerbotAIConfig.openBootLog("activity_pid.csv");
+    sPlayerbotAIConfig.openBootLog("deaths.csv");
+    sPlayerbotAIConfig.openBootLog("player_paths.csv");
+    if (sPlayerbotAIConfig.logArchiveOnBoot)
+        sPlayerbotAIConfig.openBootLog("bot_states.csv");
+    sPlayerbotAIConfig.openBootLog("bot_positions.csv", "ts,epoch,guid,name,isBot,mapId,instanceId,x,y,z,guidLow,wmoRootId,wmoGroupId,o,zoneId,areaId,level,hpPct,powerPct,flags,leaderGuid,money");
+    sPlayerbotAIConfig.openBootLog("bot_test_runs.csv", "ts,epoch,kind,guid,name,test,verdict,elapsedMs,mapId,instanceId,x,y,z,guidLow,msg,lastAction,travelTarget");
     sPlayerbotAIConfig.openLog("travel_destinations.csv", "w");
     sPlayerbotAIConfig.openLog("deadzone.csv", "w"); 
     std::string logsDir = sConfig.GetStringDefault("LogsDir");
@@ -1586,6 +1589,69 @@ void TravelMgr::LoadQuestTravelTable()
         }
 
         sPlayerbotAIConfig.log("map_offsets.csv", out.str().c_str());
+    }
+
+    if (sPlayerbotAIConfig.hasLog("livemap_manifest.json"))
+    {
+        std::vector<uint32> mapIds = { 0, 1, 530, 571 };
+        for (auto& node : sTravelNodeMap.getNodes())
+            if (std::find(mapIds.begin(), mapIds.end(), node->getMapId()) == mapIds.end())
+                mapIds.push_back(node->getMapId());
+
+        time_t now = time(nullptr);
+        tm localTm = *localtime(&now);
+        tm utcTm = *gmtime(&now);
+        utcTm.tm_isdst = localTm.tm_isdst;
+        int32 utcOffsetMin = int32(difftime(mktime(&localTm), mktime(&utcTm)) / 60);
+
+#ifdef MANGOSBOT_ZERO
+        std::string core = "vanilla";
+#elif defined(MANGOSBOT_ONE)
+        std::string core = "tbc";
+#else
+        std::string core = "wotlk";
+#endif
+#ifdef GenerateBotTests
+        bool testBuild = true;
+#else
+        bool testBuild = false;
+#endif
+
+        std::ostringstream out;
+        out << "{\n";
+        out << "  \"contract\": 1,\n";
+        out << "  \"core\": \"" << core << "\",\n";
+        out << "  \"bootStamp\": \"" << sPlayerbotAIConfig.GetBootStamp() << "\",\n";
+        out << "  \"bootEpoch\": " << now << ",\n";
+        out << "  \"utcOffsetMin\": " << utcOffsetMin << ",\n";
+        out << "  \"timestampsAreLocal\": true,\n";
+        out << "  \"maxLevel\": " << sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL) << ",\n";
+        out << "  \"testBuild\": " << (testBuild ? "true" : "false") << ",\n";
+        out << "  \"logArchiveOnBoot\": " << (sPlayerbotAIConfig.logArchiveOnBoot ? "true" : "false") << ",\n";
+        out << "  \"logArchiveKeepBoots\": " << sPlayerbotAIConfig.logArchiveKeepBoots << ",\n";
+        out << "  \"liveMapSampleSec\": " << sPlayerbotAIConfig.liveMapSampleSec << ",\n";
+        out << "  \"appendedLocationColumns\": [\"mapId\", \"instanceId\", \"x\", \"y\", \"z\", \"guidLow\"],\n";
+        out << "  \"appendedLocationStreams\": {\"bot_events.csv\": 9, \"bot_states.csv\": 8, \"bot_heartbeat.csv\": 7},\n";
+        out << "  \"heartbeatWmoColumns\": [\"wmoRootId\", \"wmoGroupId\"],\n";
+        out << "  \"mapOffsets\": [";
+        out << std::fixed << std::setprecision(4);
+        for (size_t i = 0; i < mapIds.size(); ++i)
+        {
+            WorldPosition offset = sTravelNodeMap.getMapOffset(mapIds[i]);
+            out << (i ? ", " : "") << "{\"mapId\": " << mapIds[i] << ", \"offX\": " << offset.getX() << ", \"offY\": " << offset.getY() << "}";
+        }
+        out << "],\n";
+        out << "  \"allowedLogFiles\": [";
+        bool first = true;
+        for (auto& name : sPlayerbotAIConfig.allowedLogFiles)
+        {
+            out << (first ? "" : ", ") << "\"" << name << "\"";
+            first = false;
+        }
+        out << "]\n}";
+
+        sPlayerbotAIConfig.openBootLog("livemap_manifest.json");
+        sPlayerbotAIConfig.logRaw("livemap_manifest.json", out.str());
     }
 
     //Creature/gos/zone export.

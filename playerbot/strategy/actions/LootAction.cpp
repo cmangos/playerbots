@@ -447,7 +447,7 @@ bool StoreLootAction::Execute(Event& event)
             )
 			continue;
 
-        if (loot_type != LOOT_SKINNING && !IsLootAllowed(itemQualifier, ai))
+        if (loot->GetLootType() != LOOT_SKINNING && !IsLootAllowed(itemQualifier, ai))
             continue;
 
         if (AI_VALUE2(uint32, "stack space for item", itemid) < itemcount)

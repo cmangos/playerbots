@@ -412,10 +412,26 @@ bool ShouldLootObject::Calculate()
 	if (lootAccess->m_lootMethod != NOT_GROUP_TYPE_LOOT && !lootAccess->m_isChecked) //Open loot once to start rolls.
 		return true;
 
+    if (object->IsCreature() && object->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE)) //A skinnable corpse is skinned, not opened: its skinning loot does not exist yet.
+        return true;
+
 	for (auto& lItem : lootAccess->GetLootContentFor(bot))
 	{
 		if (!lItem->itemId)
 			continue;
+
+        //Skip items being rolled, already looted, or kept for the master looter or another player, as StoreLootAction does.
+        if (lItem->isBlocked)
+            continue;
+
+        LootSlotType slotType = lItem->GetSlotTypeForSharedLoot(bot, object->m_loot);
+
+        if (slotType != LOOT_SLOT_NORMAL
+#ifndef MANGOSBOT_ZERO
+            && slotType != LOOT_SLOT_OWNER
+#endif
+            )
+            continue;
 
 		uint32 canLootAmount = AI_VALUE2(uint32, "stack space for item", lItem->itemId);
 

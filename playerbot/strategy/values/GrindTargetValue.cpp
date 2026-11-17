@@ -271,7 +271,7 @@ Unit* GrindTargetValue::FindTargetForGrinding(int assistCount)
             if (ai->HasStrategy("debug grind", BotState::BOT_STATE_NON_COMBAT))
                 ai->TellPlayer(GetMaster(), chat->formatWorldobject(unit) + " increased distance (" + std::to_string(GetTargetingPlayerCount(unit)) + " bots already targeting).");
 
-            newdistance =+ GetTargetingPlayerCount(unit) * 5;
+            newdistance += GetTargetingPlayerCount(unit) * 5;
         }
 
         if (group)

@@ -527,6 +527,15 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
 #endif
     }
 
+    // STRATEGY_TYPE_HEAL comes only from the healer spec strategies (Holy and Discipline priest, Holy paladin,
+    // Restoration druid and shaman), so dps and tank specs never get save mana whatever heal actions they keep.
+    // Added before the configured strategies are applied, so "-save mana" in the config strategies turns it off.
+    auto addSaveMana = [&]()
+    {
+        if (combatEngine->ContainsStrategy(STRATEGY_TYPE_HEAL))
+            combatEngine->addStrategy("save mana");
+    };
+
     if (facade->IsRealPlayer() || sRandomPlayerbotMgr.IsFreeBot(player))
 	{
         combatEngine->addStrategy("roll");
@@ -592,10 +601,12 @@ void AiFactory::AddDefaultCombatStrategies(Player* player, PlayerbotAI* const fa
         // remove threat for now
         //engine->removeStrategy("threat");
 
+        addSaveMana();
         combatEngine->ChangeStrategy(sPlayerbotAIConfig.randomBotCombatStrategies);
     }
     else
     {
+        addSaveMana();
         combatEngine->ChangeStrategy(sPlayerbotAIConfig.combatStrategies);
     }
 

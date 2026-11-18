@@ -18,13 +18,13 @@ namespace ai
 	class CastRejuvenationAction : public CastHealingSpellAction 
 	{
 	public:
-		CastRejuvenationAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "rejuvenation") {}
+		CastRejuvenationAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "rejuvenation", 15, HealingManaEfficiency::VERY_HIGH) {}
 	};
 
 	class CastRegrowthAction : public CastHealingSpellAction 
 	{
 	public:
-		CastRegrowthAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "regrowth") {}
+		CastRegrowthAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "regrowth", 35, HealingManaEfficiency::HIGH) {}
 	};
 
     class CastSwiftmendAction : public CastHealingSpellAction 
@@ -40,19 +40,19 @@ namespace ai
     class CastHealingTouchAction : public CastHealingSpellAction 
 	{
     public:
-        CastHealingTouchAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "healing touch") {}
+        CastHealingTouchAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "healing touch", 50, HealingManaEfficiency::MEDIUM) {}
     };
 
     class CastRejuvenationOnPartyAction : public HealPartyMemberAction
     {
     public:
-        CastRejuvenationOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "rejuvenation") {}
+        CastRejuvenationOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "rejuvenation", 15, HealingManaEfficiency::VERY_HIGH) {}
     };
 
     class CastRegrowthOnPartyAction : public HealPartyMemberAction
     {
     public:
-        CastRegrowthOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "regrowth") {}
+        CastRegrowthOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "regrowth", 35, HealingManaEfficiency::HIGH) {}
     };
 
     class CastSwiftmendOnPartyAction : public HealPartyMemberAction
@@ -68,7 +68,7 @@ namespace ai
     class CastHealingTouchOnPartyAction : public HealPartyMemberAction
     {
     public:
-        CastHealingTouchOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "healing touch") {}
+        CastHealingTouchOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "healing touch", 50, HealingManaEfficiency::MEDIUM) {}
     };
 
 	class CastReviveAction : public ResurrectPartyMemberAction

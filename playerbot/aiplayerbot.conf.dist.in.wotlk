@@ -926,6 +926,9 @@ AiPlayerbot.FleeingEnabled = 1
 #AiPlayerbot.LowMana = 15
 #AiPlayerbot.MediumMana = 40
 
+# Healers stop overhealing and inefficient heals at or below this mana percent (save mana strategy)
+#AiPlayerbot.SaveManaThreshold = 60
+
 # Random bot default strategies (applied after defaults)
 #AiPlayerbot.RandomBotCombatStrategies = +dps,+dps assist,-threat
 #AiPlayerbot.RandomBotNonCombatStrategies = +grind,+loot,+rpg,+custom::say

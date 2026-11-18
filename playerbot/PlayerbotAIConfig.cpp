@@ -156,6 +156,7 @@ bool PlayerbotAIConfig::Initialize()
     criticalHealth = config.GetIntDefault("AiPlayerbot.CriticalHealth", 20);
     lowHealth = config.GetIntDefault("AiPlayerbot.LowHealth", 50);
     mediumHealth = config.GetIntDefault("AiPlayerbot.MediumHealth", 70);
+    saveManaThreshold = std::clamp(config.GetIntDefault("AiPlayerbot.SaveManaThreshold", 60), 0, 100);
     almostFullHealth = config.GetIntDefault("AiPlayerbot.AlmostFullHealth", 90);
     lowMana = config.GetIntDefault("AiPlayerbot.LowMana", 15);
     mediumMana = config.GetIntDefault("AiPlayerbot.MediumMana", 40);

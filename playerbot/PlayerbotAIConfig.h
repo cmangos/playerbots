@@ -121,6 +121,7 @@ public:
         fleeDistance, tooCloseDistance, meleeDistance, followDistance, raidFollowDistance, wanderMinDistance, wanderMaxDistance, whisperDistance, contactDistance,
         aoeRadius, rpgDistance, targetPosRecalcDistance, farDistance, healDistance, aggroDistance, proximityDistance, maxFreeMoveDistance, freeMoveDelay, walkDistance;
     uint32 criticalHealth, lowHealth, mediumHealth, almostFullHealth;
+    uint32 saveManaThreshold;
     uint32 lowMana, mediumMana;
 
     uint32 openGoSpell;

@@ -9,31 +9,31 @@ namespace ai
     class CastLesserHealingWaveAction : public CastHealingSpellAction 
     {
     public:
-        CastLesserHealingWaveAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "lesser healing wave") {}
+        CastLesserHealingWaveAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "lesser healing wave", 25, HealingManaEfficiency::LOW) {}
     };
 
     class CastLesserHealingWaveOnPartyAction : public HealPartyMemberAction
     {
     public:
-        CastLesserHealingWaveOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "lesser healing wave") {}
+        CastLesserHealingWaveOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "lesser healing wave", 25, HealingManaEfficiency::LOW) {}
     };
 
     class CastHealingWaveAction : public CastHealingSpellAction 
     {
     public:
-        CastHealingWaveAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "healing wave") {}
+        CastHealingWaveAction(PlayerbotAI* ai) : CastHealingSpellAction(ai, "healing wave", 50, HealingManaEfficiency::MEDIUM) {}
     };
 
     class CastHealingWaveOnPartyAction : public HealPartyMemberAction
     {
     public:
-        CastHealingWaveOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "healing wave") {}
+        CastHealingWaveOnPartyAction(PlayerbotAI* ai) : HealPartyMemberAction(ai, "healing wave", 50, HealingManaEfficiency::MEDIUM) {}
     };
 
     class CastChainHealAction : public CastAoeHealSpellAction 
     {
     public:
-        CastChainHealAction(PlayerbotAI* ai) : CastAoeHealSpellAction(ai, "chain heal") {}
+        CastChainHealAction(PlayerbotAI* ai) : CastAoeHealSpellAction(ai, "chain heal", 30, HealingManaEfficiency::HIGH) {}
     };
 
     class CastRiptideAction : public CastHealingSpellAction 

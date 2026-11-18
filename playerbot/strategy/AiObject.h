@@ -323,6 +323,13 @@ class clazz : public super \
         clazz(PlayerbotAI* ai) : CastHealingSpellAction(ai, spell) {} \
     }
 
+#define HEAL_ACTION_E(clazz, spell, estAmount, manaEfficiency) \
+    class clazz : public CastHealingSpellAction \
+    { \
+    public: \
+        clazz(PlayerbotAI* ai) : CastHealingSpellAction(ai, spell, estAmount, manaEfficiency) {} \
+    }
+
 #define HEAL_ACTION_U(clazz, spell, useful) \
     class clazz : public CastHealingSpellAction \
     { \
@@ -336,6 +343,20 @@ class clazz : public super \
     { \
     public: \
         clazz(PlayerbotAI* ai) : HealPartyMemberAction(ai, spell) {} \
+    }
+
+#define HEAL_PARTY_ACTION_E(clazz, spell, estAmount, manaEfficiency) \
+    class clazz : public HealPartyMemberAction \
+    { \
+    public: \
+        clazz(PlayerbotAI* ai) : HealPartyMemberAction(ai, spell, estAmount, manaEfficiency) {} \
+    }
+
+#define HEAL_HOT_PARTY_ACTION_E(clazz, spell, estAmount, manaEfficiency) \
+    class clazz : public HealHotPartyMemberAction \
+    { \
+    public: \
+        clazz(PlayerbotAI* ai) : HealHotPartyMemberAction(ai, spell, estAmount, manaEfficiency) {} \
     }
 
 #define HEAL_HOT_PARTY_ACTION(clazz, spell) \

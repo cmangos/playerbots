@@ -5,6 +5,21 @@
 
 using namespace ai;
 
+bool HunterNoAmmoTrigger::IsActive()
+{
+    Item const* ranged = bot->GetWeaponForAttack(RANGED_ATTACK, true, false);
+    if (!ranged)
+        return false;
+
+    uint32 subclass = ranged->GetProto()->SubClass;
+    if (subclass != ITEM_SUBCLASS_WEAPON_BOW && subclass != ITEM_SUBCLASS_WEAPON_GUN &&
+        subclass != ITEM_SUBCLASS_WEAPON_CROSSBOW)
+        return false;
+
+    return !HunterEquipAmmoAction::HasAmmoEquipped(bot, ranged) &&
+        (ai->HasCheat(BotCheatMask::item) || AI_VALUE2(uint32, "item count", "ammo") > 0);
+}
+
 bool HunterNoStingsActiveTrigger::IsActive()
 {
 	Unit* target = ai->GetUnit(AI_VALUE(ObjectGuid, "current target"));

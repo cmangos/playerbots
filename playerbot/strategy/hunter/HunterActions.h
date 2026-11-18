@@ -13,14 +13,18 @@ namespace ai
         CastAutoShotAction(PlayerbotAI* ai) : CastSpellAction(ai, "auto shot") {}
         bool Execute(Event& event) override;
         bool isUseful() override;
+
+    private:
+        bool IsAutoShooting(Unit const* target) const;
     };
 
     class HunterEquipAmmoAction : public Action
-{
-public:
-    HunterEquipAmmoAction(PlayerbotAI* ai) : Action(ai, "equip ammo") {}
-    virtual bool Execute(Event& event) override;
-};
+    {
+    public:
+        HunterEquipAmmoAction(PlayerbotAI* ai) : Action(ai, "equip ammo") {}
+        virtual bool Execute(Event& event) override;
+        static bool HasAmmoEquipped(Player* bot, Item const* weapon);
+    };
 
     BEGIN_RANGED_SPELL_ACTION(CastTranquilizingShotAction, "tranquilizing shot")
     END_SPELL_ACTION()

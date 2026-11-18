@@ -1,5 +1,7 @@
 
 #include "playerbot/playerbot.h"
+#include "playerbot/PlayerbotFactory.h"
+#include "playerbot/strategy/ItemVisitors.h"
 #include "playerbot/strategy/actions/GenericActions.h"
 #include "HunterActions.h"
 
@@ -29,77 +31,67 @@ bool CastAutoShotAction::isUseful()
     if (ai->IsInVehicle() && !ai->IsInVehicle(false, false, true))
         return false;
 
-    return ai->HasStrategy("ranged", BotState::BOT_STATE_COMBAT) && AI_VALUE(uint32, "active spell") != AI_VALUE2(uint32, "spell id", getName());
+    if (!ai->HasStrategy("ranged", BotState::BOT_STATE_COMBAT) || ai->IsJumping() || bot->IsFalling())
+        return false;
+
+    Unit const* target = GetTarget();
+    return target && (!IsAutoShooting(target) || bot->IsMoving() || !bot->IsStopped());
+}
+
+bool CastAutoShotAction::IsAutoShooting(Unit const* target) const
+{
+    Spell const* spell = bot->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL);
+    return target && spell && spell->m_spellInfo->Id == GetSpellID() &&
+        spell->getState() != SPELL_STATE_FINISHED && spell->m_targets.getUnitTargetGuid() == target->GetObjectGuid();
+}
+
+bool HunterEquipAmmoAction::HasAmmoEquipped(Player* bot, Item const* weapon)
+{
+    const uint32 ammoId = bot->GetUInt32Value(PLAYER_AMMO_ID);
+    ItemPrototype const* ammo = sObjectMgr.GetItemPrototype(ammoId);
+    return ammo && FindAmmoVisitor(bot, weapon->GetProto()->SubClass).Accept(ammo) && bot->HasItemCount(ammoId, 1);
 }
 
 bool HunterEquipAmmoAction::Execute(Event& event)
 {
-    // Get ranged weapon
-    Item* ranged = bot->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+    Item const* ranged = bot->GetWeaponForAttack(RANGED_ATTACK, true, false);
     if (!ranged)
         return false;
 
-    uint32 ammoClass = ITEM_CLASS_PROJECTILE;
-    uint32 subClass = 0;
-
-    switch (ranged->GetProto()->SubClass)
+    const auto ammoItems = ai->InventoryParseItems("ammo", IterateItemsMask::ITERATE_ITEMS_IN_BAGS);
+    ItemPrototype const* bestAmmo = nullptr;
+    for (Item const* item : ammoItems)
     {
-    case ITEM_SUBCLASS_WEAPON_GUN:
-        subClass = ITEM_SUBCLASS_BULLET;
-        break;
-    case ITEM_SUBCLASS_WEAPON_BOW:
-    case ITEM_SUBCLASS_WEAPON_CROSSBOW:
-        subClass = ITEM_SUBCLASS_ARROW;
-        break;
-    case ITEM_SUBCLASS_WEAPON_THROWN:
-        ammoClass = ITEM_CLASS_WEAPON;
-        subClass = ITEM_SUBCLASS_WEAPON_THROWN;
-        break;
+        ItemPrototype const* ammo = item->GetProto();
+        if (ammo->InventoryType == INVTYPE_AMMO && (!bestAmmo || ammo->ItemLevel > bestAmmo->ItemLevel))
+            bestAmmo = ammo;
     }
 
-    uint32 currentAmmoId = bot->GetUInt32Value(PLAYER_AMMO_ID);
-    const ItemPrototype* bestAmmoProto = nullptr;
-
-    // Scan inventory for best ammo
-    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    if (bestAmmo)
     {
-        if (Bag* bag = (Bag*)bot->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-        {
-            for (uint32 j = 0; j < bag->GetBagSize(); ++j)
-            {
-                if (Item* item = bag->GetItemByPos(j))
-                {
-                    const ItemPrototype* proto = item->GetProto();
-                    if (!proto)
-                        continue;
+        if (bestAmmo->ItemId == bot->GetUInt32Value(PLAYER_AMMO_ID))
+            return false;
 
-                    if (proto->Class == ammoClass && proto->SubClass == subClass)
-                    {
-                        if (!bestAmmoProto || proto->ItemLevel > bestAmmoProto->ItemLevel)
-                            bestAmmoProto = proto;
-                    }
-                }
-            }
-        }
+        bot->SetAmmo(bestAmmo->ItemId);
+        return bot->GetUInt32Value(PLAYER_AMMO_ID) == bestAmmo->ItemId;
     }
 
-    // Equip best ammo if not already equipped
-    if (bestAmmoProto && currentAmmoId != bestAmmoProto->ItemId)
-    {
-        bot->SetUInt32Value(PLAYER_AMMO_ID, bestAmmoProto->ItemId);
-        bot->UpdateDamagePhysical(RANGED_ATTACK);
-        return true;
-    }
+    if (!ai->HasCheat(BotCheatMask::item))
+        return false;
 
-    return false;
+    PlayerbotFactory(bot, bot->GetLevel(), 0).InitAmmo();
+    return HasAmmoEquipped(bot, ranged);
 }
 
 bool CastAutoShotAction::Execute(Event& event)
 {
-    if (!bot->IsStopped())
+    if (bot->IsMoving() || !bot->IsStopped())
     {
         ai->StopMoving();
     }
+
+    if (IsAutoShooting(GetTarget()))
+        return !bot->IsMoving() && bot->IsStopped();
 
     return CastSpellAction::Execute(event);
 }

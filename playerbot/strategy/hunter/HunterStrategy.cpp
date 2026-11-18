@@ -50,12 +50,19 @@ HunterStrategy::HunterStrategy(PlayerbotAI* ai) : ClassStrategy(ai)
 
 NextAction** HunterStrategy::GetDefaultCombatActions()
 {
-    return NextAction::array(0, new NextAction("auto shot", ACTION_IDLE), NULL);
+    return NextAction::array(0,
+        new NextAction("auto shot", ACTION_IDLE + 1),
+        new NextAction("arcane shot", ACTION_IDLE),
+        nullptr);
 }
 
 void HunterStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     ClassStrategy::InitCombatTriggers(triggers);
+
+    triggers.push_back(new TriggerNode(
+        "no ammo",
+        NextAction::array(0, new NextAction("equip ammo", ACTION_HIGH), NULL)));
 
     triggers.push_back(new TriggerNode(
         "switch to ranged",

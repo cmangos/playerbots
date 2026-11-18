@@ -4767,6 +4767,13 @@ void PlayerbotFactory::InitAmmo()
         return;
 
     uint32 entry = bot->GetUInt32Value(PLAYER_AMMO_ID);
+    if (bot->getClass() == CLASS_HUNTER && entry)
+    {
+        ItemPrototype const* ammo = sObjectMgr.GetItemPrototype(entry);
+        if (!ammo || ammo->Class != ITEM_CLASS_PROJECTILE || ammo->SubClass != subClass)
+            entry = 0;
+    }
+
     uint32 count = bot->GetItemCount(entry) / 200;
     uint32 maxCount = 5 + level / 10;
 
@@ -4790,7 +4797,7 @@ void PlayerbotFactory::InitAmmo()
         }
     }
 
-    if(bot->GetUInt32Value(PLAYER_AMMO_ID) != entry)
+    if (bot->GetUInt32Value(PLAYER_AMMO_ID) != entry && bot->HasItemCount(entry, 1))
         bot->SetAmmo(entry);
 }
 

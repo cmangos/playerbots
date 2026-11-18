@@ -102,6 +102,8 @@ TestResult CommandSetupGiveItem::Execute(const std::string& params, Player* bot,
             return TestResult::IMPOSSIBLE;
         }
 
+        bot->SendNewItem(pItem, 1, true, false, false);
+
         if (isBank)
         {
             ItemPosCountVec dest;

@@ -22,13 +22,13 @@ void FourHorsemanFightStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 void FourHorsemanFightStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
 	triggers.push_back(new TriggerNode(
-		"end horseman fight",
+		"end four horseman fight",
 		NextAction::array(0, new NextAction("disable four horseman fight strategy", 100.0f), NULL)));
 }
 
 void FourHorsemanFightStrategy::InitDeadTriggers(std::list<TriggerNode*>& triggers)
 {
 	triggers.push_back(new TriggerNode(
-		"end horseman fight",
+		"end four horseman fight",
 		NextAction::array(0, new NextAction("disable four horseman fight strategy", 100.0f), NULL)));
 }

@@ -28,6 +28,25 @@ namespace ai
             return index;
         }
 
+        static bool IsTarget(Player* player, Unit* target)
+        {
+            if (!player || !target || !player->GetPlayerbotAI())
+                return false;
+
+            Group* group = player->GetGroup();
+            if (!group)
+                return false;
+
+            ObjectGuid const guid = target->GetObjectGuid();
+            for (uint8 icon = 0; icon < TARGET_ICON_COUNT; ++icon)
+            {
+                if (group->GetTargetIcon(icon) == guid)
+                    return PAI_VALUE(ObjectGuid, "rti target") == guid;
+            }
+
+            return false;
+        }
+
         ObjectGuid Calculate() override
         {
             Group *group = bot->GetGroup();

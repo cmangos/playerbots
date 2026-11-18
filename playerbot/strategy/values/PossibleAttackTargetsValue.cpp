@@ -50,64 +50,47 @@ std::list<ObjectGuid> PossibleAttackTargetsValue::Calculate()
 void PossibleAttackTargetsValue::RemoveNonThreating(std::list<ObjectGuid>& targets, bool getOne)
 {
     std::list<ObjectGuid> breakableCC;
-    std::list<ObjectGuid> unBreakableCC;
+    std::list<ObjectGuid> unbreakableCC;
 
-    for(std::list<ObjectGuid>::iterator tIter = targets.begin(); tIter != targets.end();)
+    for (auto it = targets.begin(); it != targets.end();)
     {
-        Unit* target = ai->GetUnit(*tIter);
+        auto candidate = it++;
+        Unit* target = ai->GetUnit(*candidate);
         if (!IsValid(target, bot, sPlayerbotAIConfig.sightDistance, true, false))
         {
-            std::list<ObjectGuid>::iterator tIter2 = tIter;
-            ++tIter;
-            targets.erase(tIter2);
+            targets.erase(candidate);
+            continue;
         }
-        else if (!HasIgnoreCCRti(target, bot) && HasBreakableCC(target, bot))
+
+        if (!HasIgnoreCCRti(target, bot))
         {
-            breakableCC.push_back(*tIter);
-            std::list<ObjectGuid>::iterator tIter2 = tIter;
-            ++tIter;
-            targets.erase(tIter2);
-        }
-        else if (!HasIgnoreCCRti(target, bot) && HasUnBreakableCC(target, bot))
-        {
-            unBreakableCC.push_back(*tIter);
-            std::list<ObjectGuid>::iterator tIter2 = tIter;
-            ++tIter;
-            targets.erase(tIter2);
-        }
-        else
-        {
-            if (getOne)
+            if (HasBreakableCC(target, bot))
             {
-                // If the target is valid return it straight away
-                std::list<ObjectGuid> result = { *tIter };
-                targets = result;
-                break;
+                breakableCC.splice(breakableCC.end(), targets, candidate);
+                continue;
             }
-            else
+            if (HasUnBreakableCC(target, bot))
             {
-                ++tIter;
+                unbreakableCC.splice(unbreakableCC.end(), targets, candidate);
+                continue;
             }
+        }
+
+        if (getOne)
+        {
+            targets.erase(targets.begin(), candidate);
+            targets.erase(it, targets.end());
+            return;
         }
     }
 
     if (targets.empty())
-    {
-        if (!unBreakableCC.empty())
-        {
-            targets = unBreakableCC;
-        }
-        else if(!breakableCC.empty())
-        {
-            targets = breakableCC;
-        }
-    }
+        targets.swap(unbreakableCC.empty() ? breakableCC : unbreakableCC);
 }
 
 bool PossibleAttackTargetsValue::HasIgnoreCCRti(Unit* target, Player* player)
 {
-    Group* group = player->GetGroup();
-    return group && (group->GetTargetIcon(7) == target->GetObjectGuid());
+    return RtiTargetValue::IsTarget(player, target);
 }
 
 bool PossibleAttackTargetsValue::HasBreakableCC(Unit* target, Player* player)
@@ -326,16 +309,15 @@ bool PossibleAttackTargetsValue::IsValid(Unit* target, Player* player, float ran
     if (target->GetObjectGuid().IsPlayer())
         return true;
 
-    if (player->GetPlayerbotAI() && (target->GetObjectGuid() == PAI_VALUE(ObjectGuid, "attack target")))
+    PlayerbotAI* playerAI = player->GetPlayerbotAI();
+    if (playerAI && (target->GetObjectGuid() == PAI_VALUE(ObjectGuid, "attack target")))
         return true;
 
-    if(!HasIgnoreCCRti(target, player) && (HasBreakableCC(target, player) || HasUnBreakableCC(target, player)))
+    const bool isRtiTarget = HasIgnoreCCRti(target, player);
+    if (!isRtiTarget && (HasBreakableCC(target, player) || HasUnBreakableCC(target, player)))
         return true;
 
-    if (player->GetPlayerbotAI() && !player->GetPlayerbotAI()->HasActivePlayerMaster()&& PAI_VALUE(ObjectGuid, "rti target") == target->GetObjectGuid())
-        return true;
-
-    return false;
+    return isRtiTarget && playerAI && !playerAI->HasActivePlayerMaster();
 }
 
 bool PossibleAttackTargetsValue::IsPossibleTarget(Unit* target, Player* player, float range, bool ignoreCC)

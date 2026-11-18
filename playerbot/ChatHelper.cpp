@@ -1255,14 +1255,11 @@ void ChatHelper::PopulateSpellNameList()
     }
 }
 
-std::vector<uint32> ChatHelper::SpellIds(const std::string& name)
+const std::vector<uint32>& ChatHelper::SpellIds(const std::string& name)
 {
+    static const std::vector<uint32> empty;
     auto spells = spellIds.find(name);
-
-    if (spells == spellIds.end())
-        return {};
-
-    return spells->second;
+    return spells == spellIds.end() ? empty : spells->second;
 }
 
 std::vector<std::string> ChatHelper::splitString(const std::string& text, const std::string& delimiter)

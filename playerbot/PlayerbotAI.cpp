@@ -1,6 +1,7 @@
 #include "PlayerbotMgr.h"
 #include "playerbot/playerbot.h"
 #include <stdarg.h>
+#include <algorithm>
 #include <iomanip>
 
 #include "playerbot/AiFactory.h"
@@ -4128,9 +4129,13 @@ bool PlayerbotAI::HasAura(std::string name, Unit* unit, bool maxStack, bool chec
     if (!unit)
         return false;
 
+    const bool noAuras = unit->GetSpellAuraHolderMap().empty();
+    if (noAuras && maxAuraAmount != 0)
+        return false;
+
     std::wstring wnamepart;
 
-    std::vector<uint32> ids = chatHelper.SpellIds(name);
+    const auto& ids = chatHelper.SpellIds(name);
 
     if (ids.empty())
     {
@@ -4141,14 +4146,27 @@ bool PlayerbotAI::HasAura(std::string name, Unit* unit, bool maxStack, bool chec
         wstrToLower(wnamepart);
     }
 
+    if (noAuras)
+        return maxAuraAmount == 0;
+
+    int firstType = SPELL_AURA_BIND_SIGHT;
+    int endType = TOTAL_AURAS;
+    if (auraTypeId != TOTAL_AURAS)
+    {
+        if (auraTypeId < firstType || auraTypeId >= endType)
+            return maxAuraAmount == 0;
+
+        firstType = auraTypeId;
+        endType = auraTypeId + 1;
+    }
+    else if (!ids.empty() && std::none_of(ids.begin(), ids.end(), [unit](uint32 id) { return unit->HasAura(id); }))
+        return maxAuraAmount == 0;
+
     int auraAmount = 0;
 
-	for (uint32 auraType = SPELL_AURA_BIND_SIGHT; auraType < TOTAL_AURAS; auraType++)
-	{
-        if (auraTypeId != TOTAL_AURAS && auraType != auraTypeId)
-            continue;
-
-		Unit::AuraList const& auras = unit->GetAurasByType((AuraType)auraType);
+    for (int auraType = firstType; auraType < endType; ++auraType)
+    {
+        Unit::AuraList const& auras = unit->GetAurasByType((AuraType)auraType);
 
         if (auras.empty())
             continue;
@@ -4261,10 +4279,10 @@ Aura* PlayerbotAI::GetAura(uint32 spellId, Unit* unit, bool checkIsOwner)
 
 Aura* PlayerbotAI::GetAura(std::string name, Unit* unit, bool checkIsOwner)
 {
-    if (!name.empty() && unit)
+    if (!name.empty() && unit && !unit->GetSpellAuraHolderMap().empty())
     {
         std::wstring wnamepart;
-        std::vector<uint32> ids = chatHelper.SpellIds(name);
+        const auto& ids = chatHelper.SpellIds(name);
 
         if (ids.empty())
         {
@@ -4274,6 +4292,8 @@ Aura* PlayerbotAI::GetAura(std::string name, Unit* unit, bool checkIsOwner)
 
             wstrToLower(wnamepart);
         }
+        else if (std::none_of(ids.begin(), ids.end(), [unit](uint32 id) { return unit->HasAura(id); }))
+            return nullptr;
 
         for (uint32 auraType = SPELL_AURA_BIND_SIGHT; auraType < TOTAL_AURAS; auraType++)
         {
@@ -4324,6 +4344,9 @@ Aura* PlayerbotAI::GetAura(std::string name, Unit* unit, bool checkIsOwner)
 std::vector<Aura*> PlayerbotAI::GetAuras(Unit* unit, bool allAuras, bool positive)
 {
     std::vector<Aura*> outAuras;
+    if (!unit || unit->GetSpellAuraHolderMap().empty())
+        return outAuras;
+
     for (uint32 auraType = SPELL_AURA_BIND_SIGHT; auraType < TOTAL_AURAS; auraType++)
     {
         Unit::AuraList const& auras = unit->GetAurasByType((AuraType)auraType);

@@ -30,7 +30,7 @@ uint32 SpellIdValue::Calculate()
         if (pSpellInfo) namepart = pSpellInfo->SpellName[0];
     }
 
-    std::vector<uint32> ids = chat->SpellIds(namepart);
+    const auto& ids = chat->SpellIds(namepart);
 
     char firstSymbol = 'x';
     int spellLength = 0;

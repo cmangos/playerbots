@@ -47,7 +47,14 @@ bool CheckMountStateAction::Execute(Event& event)
     }
 
     bool IsMounted = AI_VALUE2(uint32, "current mount speed", "self target");
-    bool IsLeaderMounted = groupMaster && AI_VALUE2(uint32, "current mount speed", "master target");
+    bool const followsGroupMaster = groupMaster && groupMaster != bot &&
+        (ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
+         ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT));
+    Group const* group = bot->GetGroup();
+    bool const leaderMounting = followsGroupMaster && group && group->IsLeader(groupMaster->GetObjectGuid()) &&
+        ai->IsSafe(groupMaster) && MountValue::IsMountCast(groupMaster->GetCurrentSpell(CURRENT_GENERIC_SPELL));
+    bool const leaderMountedOrMounting = leaderMounting ||
+        (followsGroupMaster && AI_VALUE2(uint32, "current mount speed", "master target"));
 
     //Mount up in battle grounds
     if (bot->InBattleGround())
@@ -92,10 +99,7 @@ bool CheckMountStateAction::Execute(Event& event)
     }
 
     //Following master and close to master that is unmounted.
-    if ((ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
-        ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)) &&
-        groupMaster && groupMaster != bot &&
-        !farFromMaster && !IsLeaderMounted)
+    if (followsGroupMaster && !farFromMaster && !leaderMountedOrMounting)
     {
         if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && IsMounted)
             ai->TellPlayerNoFacing(requester, "Unmount. Near umounted group master.");
@@ -155,15 +159,16 @@ bool CheckMountStateAction::Execute(Event& event)
         return UnMount();
     }
 
-    if ((ai->HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) ||
-        ai->HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT)) &&
-        groupMaster && groupMaster != bot)
+    if (followsGroupMaster)
     {
         //Mounting with master.
-        if (IsLeaderMounted && !hasAttackers)
+        if (leaderMountedOrMounting && !hasAttackers)
         {
+            if (leaderMounting && !IsMounted && bot->getStandState() == UNIT_STAND_STATE_SIT)
+                bot->SetStandState(UNIT_STAND_STATE_STAND);
+
             if (ai->HasStrategy("debug mount", BotState::BOT_STATE_NON_COMBAT) && !IsMounted)
-                ai->TellPlayerNoFacing(requester, "Mount. Group master mounted and no attackers.");
+                ai->TellPlayerNoFacing(requester, "Mount. Group master mounted or casting a mount and no attackers.");
 
             return Mount(requester);
         }

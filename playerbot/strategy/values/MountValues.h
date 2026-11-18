@@ -1,6 +1,8 @@
 #pragma once
 #include "playerbot/strategy/Value.h"
 
+class Spell;
+
 namespace ai
 {
     class MountValue
@@ -16,6 +18,7 @@ namespace ai
         uint32 GetSpellId() { return spellId; }
         uint32 GetSpeed(bool canFly) { return GetSpeed(spellId, canFly); }
         static uint32 IsMountSpell(uint32 spellId) { return GetSpeed(spellId, false) || GetSpeed(spellId, true); }
+        static bool IsMountCast(Spell const* spell);
         static uint32 GetSpeed(uint32 spellId, bool canFly);
         static uint32 GetSpeed(uint32 spellId) { return std::max(GetSpeed(spellId, false), GetSpeed(spellId, true)); };
         static uint32 GetMountSpell(uint32 itemId);

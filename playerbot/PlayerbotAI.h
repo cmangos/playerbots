@@ -18,6 +18,7 @@
 class Player;
 class PlayerbotMgr;
 class ChatHandler;
+class Group;
 
 using namespace ai;
 
@@ -759,6 +760,7 @@ public:
 private:
     bool UpdateAIReaction(uint32 elapsed, bool minimal, bool isStunned);
     void UpdateFaceTarget(uint32 elapsed, bool minimal);
+    bool TryMountWithGroupMaster(Group const& group);
 
 protected:
 	Player* bot;

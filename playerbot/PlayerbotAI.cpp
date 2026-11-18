@@ -31,6 +31,7 @@
 #include "Maps/InstanceData.h"
 #include "ChatHelper.h"
 #include "strategy/values/BudgetValues.h"
+#include "strategy/values/MountValues.h"
 #include "Social/SocialMgr.h"
 #include "PlayerbotTextMgr.h"
 #include "RandomItemMgr.h"
@@ -612,7 +613,13 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
 #endif
 
     // Only update the internal ai when no reaction is running and the internal ai can be updated
-    if(!UpdateAIReaction(elapsed, doMinimalReaction, bot->IsTaxiFlying()) && CanUpdateAIInternal())
+    bool reactionRunning = UpdateAIReaction(elapsed, doMinimalReaction, bot->IsTaxiFlying());
+
+    if (Group const* group = bot->GetGroup();
+        group && !reactionRunning && !inCombat && !isWaiting && TryMountWithGroupMaster(*group))
+        return;
+
+    if (!reactionRunning && CanUpdateAIInternal())
     {
         // Update the delay with the spell cast time
         Spell* currentSpell = bot->GetCurrentSpell(CURRENT_GENERIC_SPELL);
@@ -639,6 +646,25 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
 
         YieldAIInternalThread(min);
     }
+}
+
+bool PlayerbotAI::TryMountWithGroupMaster(Group const& group)
+{
+    ObjectGuid const leaderGuid = group.GetLeaderGuid();
+    if (!leaderGuid || leaderGuid == bot->GetObjectGuid() || group.IsBattleGroup() ||
+        !bot->IsInWorld() || !bot->IsAlive() || bot->IsMounted() || bot->IsBeingTeleported() ||
+        bot->GetTransport() || bot->GetSession()->isLogingOut() ||
+        bot->IsNonMeleeSpellCasted(false, false, true))
+        return false;
+
+    Player* leader = master && master->GetObjectGuid() == leaderGuid ? master : bot->GetMap()->GetPlayer(leaderGuid);
+    if (!IsSafe(leader) || !leader->IsInWorld() || !MountValue::IsMountCast(leader->GetCurrentSpell(CURRENT_GENERIC_SPELL)))
+        return false;
+
+    if (!HasStrategy("follow", BotState::BOT_STATE_NON_COMBAT) && !HasStrategy("wander", BotState::BOT_STATE_NON_COMBAT))
+        return false;
+
+    return DoSpecificAction("check mount state", Event("group master mount cast"), true);
 }
 
 bool PlayerbotAI::UpdateAIReaction(uint32 elapsed, bool minimal, bool isStunned)

@@ -3,8 +3,15 @@
 #include "playerbot/strategy/AiObjectContext.h"
 #include "BudgetValues.h"
 #include "SharedValueContext.h"
+#include "Spells/Spell.h"
 
 using namespace ai;
+
+bool MountValue::IsMountCast(Spell const* spell)
+{
+    return spell && spell->getState() == SPELL_STATE_CASTING && spell->GetCastedTime() > 0 &&
+        IsMountSpell(spell->m_spellInfo->Id);
+}
 
 uint32 MountValue::GetSpeed(uint32 spellId, bool canFly)
 {

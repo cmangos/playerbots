@@ -6191,11 +6191,9 @@ bool IsAlliance(uint8 race)
 
 uint32 PlayerbotAI::GetFixedBotNumber(BotTypeNumber typeNumber, uint32 maxNum, float cyclePerMin, bool ignoreGuid)
 {
-    uint8 seedNumber = uint8(typeNumber);
-    std::mt19937 rng(seedNumber);
-    uint32 randseed = rng();                                       //Seed random number
-    uint32 randnum = randseed;                                     //Semi-random.
-    
+    static const uint32 activitySeed = std::mt19937(uint8(BotTypeNumber::ACTIVITY_TYPE_NUMBER))();
+    uint32 randnum = typeNumber == BotTypeNumber::ACTIVITY_TYPE_NUMBER ? activitySeed : std::mt19937(uint8(typeNumber))();
+
     if (!ignoreGuid)
         randnum += bot->GetGUIDLow();                              //but fixed number for each bot.
 

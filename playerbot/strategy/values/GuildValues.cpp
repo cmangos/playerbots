@@ -7,6 +7,8 @@
 #include "playerbot/TravelMgr.h"
 #include "playerbot/ServerFacade.h"
 #include "Guilds/GuildMgr.h"
+#include <mutex>
+#include <shared_mutex>
 
 using namespace ai;
 
@@ -46,13 +48,17 @@ char* strstri(const char* haystack, const char* needle);
 uint32 GuildOrderValue::FindItemByName(const std::string& name)
 {
     static std::unordered_map<std::string, uint32> s_cache;
+    static std::shared_mutex s_cacheMutex;
 
     std::string lowerName = name;
     std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), [](unsigned char c) { return std::tolower(c); });
 
-    auto it = s_cache.find(lowerName);
-    if (it != s_cache.end())
-        return it->second;
+    {
+        std::shared_lock<std::shared_mutex> lock(s_cacheMutex);
+        auto it = s_cache.find(lowerName);
+        if (it != s_cache.end())
+            return it->second;
+    }
 
     uint32 substringMatch = 0;
 
@@ -69,25 +75,29 @@ uint32 GuildOrderValue::FindItemByName(const std::string& name)
 
         if (name.size() == strlen(proto->Name1) && strstri(proto->Name1, name.c_str()))
         {
-            s_cache[lowerName] = itemId;
-            return itemId;
+            substringMatch = itemId;
+            break;
         }
 
         if (!substringMatch && strstri(proto->Name1, name.c_str()))
             substringMatch = itemId;
     }
 
-    s_cache[lowerName] = substringMatch;
-    return substringMatch;
+    std::unique_lock<std::shared_mutex> lock(s_cacheMutex);
+    return s_cache.emplace(lowerName, substringMatch).first->second;
 }
 
 std::vector<std::pair<uint32, int8>> ai::FindRepeatableQuestsRewardingItem(uint32 itemId)
 {
     static std::unordered_map<uint32, std::vector<std::pair<uint32, int8>>> s_cache;
+    static std::shared_mutex s_cacheMutex;
 
-    auto cacheIt = s_cache.find(itemId);
-    if (cacheIt != s_cache.end())
-        return cacheIt->second;
+    {
+        std::shared_lock<std::shared_mutex> lock(s_cacheMutex);
+        auto cacheIt = s_cache.find(itemId);
+        if (cacheIt != s_cache.end())
+            return cacheIt->second;
+    }
 
     std::vector<std::pair<uint32, int8>> result;
 
@@ -120,8 +130,8 @@ std::vector<std::pair<uint32, int8>> ai::FindRepeatableQuestsRewardingItem(uint3
         }
     }
 
-    s_cache[itemId] = result;
-    return result;
+    std::unique_lock<std::shared_mutex> lock(s_cacheMutex);
+    return s_cache.emplace(itemId, std::move(result)).first->second;
 }
 
 uint32 ai::CountGuildFinishedItemDeficit(Player* bot, uint32 itemId, const std::vector<GuildShareItemEntry>& shareList)

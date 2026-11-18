@@ -1503,6 +1503,10 @@ void HunterPetStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 void HunterPetStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
     triggers.push_back(new TriggerNode(
+        "new pet",
+        NextAction::array(0, new NextAction("pet autocast", ACTION_NORMAL + 3), NULL)));
+
+    triggers.push_back(new TriggerNode(
         "no pet",
         NextAction::array(0, new NextAction("call pet", ACTION_NORMAL + 2), NULL)));
 

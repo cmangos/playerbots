@@ -14,6 +14,7 @@
 #include "PositionAction.h"
 #include "AttackAction.h"
 #include "CheckMailAction.h"
+#include "PetAutocastAction.h"
 #include "CheckValuesAction.h"
 #include "ChooseRpgTargetAction.h"
 #include "ChooseTravelTargetAction.h"
@@ -170,6 +171,7 @@ namespace ai
             creators["attack duel opponent"] = [](PlayerbotAI* ai) { return new AttackDuelOpponentAction(ai); };
             creators["select new target"] = [](PlayerbotAI* ai) { return new SelectNewTargetAction(ai); };
             creators["check mail"] = [](PlayerbotAI* ai) { return new CheckMailAction(ai); };
+            creators["pet autocast"] = [](PlayerbotAI* ai) { return new PetAutocastAction(ai); };
             creators["say"] = [](PlayerbotAI* ai) { return new SayAction(ai); };
             creators["reveal gathering item"] = [](PlayerbotAI* ai) { return new RevealGatheringItemAction(ai); };
             creators["outfit"] = [](PlayerbotAI* ai) { return new OutfitAction(ai); };

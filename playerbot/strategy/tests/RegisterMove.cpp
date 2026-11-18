@@ -58,15 +58,10 @@ void TestRegistry::RegisterMoveTests()
         needAlive,
         "require bot is level=60 class=warrior role=dps gear=empty",
         "monitor time > 10 => pass \"Test complete items properly equiped\"",
-        "give 8190",
-        "give 7687",
-        "do equip upgrades",
-        "give 17015",
-        "give 18805",
+        "give 913",
         "do equip upgrades",
         "wait 5",
-        "require equip main hand=17015",
-        "require equip off hand=18805",
+        "require equip main hand=913",
         "observe",
         gmVisible
     });

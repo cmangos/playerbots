@@ -234,7 +234,7 @@ namespace ai
                 if (currentMana > 0)
                 {
                     const uint32 maxMana = target->GetMaxPower(POWER_MANA);
-                    const uint32 currentManaPct = (uint32)(currentMana / maxMana) * 100;
+                    const uint32 currentManaPct = (uint32)((float)currentMana / maxMana * 100);
                     return currentManaPct < sPlayerbotAIConfig.lowMana;
                 }
             }

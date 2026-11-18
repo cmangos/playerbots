@@ -1,21 +1,22 @@
-#include "ActionBasket.h"
-
 #pragma once
+
+#include "Action.h"
+#include <memory>
+#include <vector>
+
 namespace ai
 {
 class Queue
 {
 public:
-    Queue(void) {}
-public:
-    ~Queue(void) {}
-public:
-	void Push(ActionBasket *action);
-	ActionNode* Pop(ActionBasket* action = nullptr);
-    ActionBasket* Peek();
-	int Size();
-	void RemoveExpired();
+    void Push(ActionNode* action, float relevance, bool skipPrerequisites, const Event& event);
+    ActionNode* Pop(ActionBasket* selection);
+    ActionBasket* Peek() const;
+    int Size() const { return static_cast<int>(actions.size()); }
+    void Clear() { actions.clear(); }
+    void RemoveExpired();
+
 private:
-	std::list<ActionBasket*> actions;
+    std::vector<std::unique_ptr<ActionBasket>> actions;
 };
 }

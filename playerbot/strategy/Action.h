@@ -4,6 +4,7 @@
 #include "AiObject.h"
 #include "AiObject.h"
 #include "playerbot/PlayerbotAIConfig.h"
+#include <memory>
 
 class Unit;
 
@@ -30,7 +31,7 @@ namespace ai
         }
 
     public:
-        std::string getName() const { return name; }
+        const std::string& getName() const { return name; }
         float getRelevance() const { return relevance; }
 
     public:
@@ -135,7 +136,7 @@ namespace ai
     public:
         Action* getAction() { return action; }
         void setAction(Action* action) { this->action = action; }
-        std::string getName() { return name; }
+        const std::string& getName() const { return name; }
 
     public:
         NextAction** getContinuers() { return NextAction::merge(NextAction::clone(continuers), action->getContinuers()); }
@@ -155,23 +156,23 @@ namespace ai
 	class ActionBasket
 	{
 	public:
-        ActionBasket(ActionNode* action, float relevance, bool skipPrerequisites, const Event& event) :
-          action(action), relevance(relevance), skipPrerequisites(skipPrerequisites), event(event) {
+        ActionBasket(std::unique_ptr<ActionNode> action, float relevance, bool skipPrerequisites, const Event& event) :
+          action(std::move(action)), relevance(relevance), skipPrerequisites(skipPrerequisites), event(event) {
             created = time(0);
         }
-        virtual ~ActionBasket(void) {}
+
 	public:
-		float getRelevance() {return relevance;}
-		ActionNode* getAction() {return action;}
-        Event getEvent() { return event; }
-        bool isSkipPrerequisites() { return skipPrerequisites; }
-        void AmendRelevance(float k) {relevance *= k; }
+        float getRelevance() const { return relevance; }
+        ActionNode* getAction() const { return action.get(); }
+        ActionNode* releaseAction() { return action.release(); }
+        Event getEvent() const { return event; }
+        bool isSkipPrerequisites() const { return skipPrerequisites; }
         void setRelevance(float relevance) { this->relevance = relevance; }
-        void setEvent(Event event) { this->event = event; }
-        bool isExpired(time_t secs) { return time(0) - created >= secs; }
+        void setEvent(const Event& event) { this->event = event; }
+        bool isExpired(time_t now, time_t secs) const { return now - created >= secs; }
 	private:
-		ActionNode* action;
-		float relevance;
+        std::unique_ptr<ActionNode> action;
+        float relevance;
         bool skipPrerequisites;
         Event event;
         time_t created;

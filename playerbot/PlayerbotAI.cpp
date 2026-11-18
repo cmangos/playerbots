@@ -81,7 +81,8 @@ void PacketHandlingHelper::AddHandler(uint16 opcode, std::string handler, bool s
 
 void PacketHandlingHelper::Handle(ExternalEventHelper &helper)
 {
-    if (!m_botPacketMutex.try_lock()) //Packets do not have to be handled now. Handle them later.
+    std::unique_lock<std::mutex> lock(m_botPacketMutex, std::try_to_lock);
+    if (!lock.owns_lock() || queue.empty()) //Packets do not have to be handled now. Handle them later.
         return;
 
     std::stack<WorldPacket> delayed;
@@ -90,13 +91,11 @@ void PacketHandlingHelper::Handle(ExternalEventHelper &helper)
     {
         if (!helper.HandlePacket(handlers, queue.top()))
             if(delay[queue.top().GetOpcode()])
-                delayed.push(queue.top());
+                delayed.push(std::move(queue.top()));
         queue.pop();
     }
 
-    queue = delayed;
-
-    m_botPacketMutex.unlock();
+    queue.swap(delayed);
 }
 
 void PacketHandlingHelper::AddPacket(const WorldPacket& packet)
@@ -1424,23 +1423,31 @@ void PlayerbotAI::UpdateAIInternal(uint32 elapsed, bool minimal)
     ExternalEventHelper helper(aiObjectContext);
 
     // chat replies
-    std::list<ChatQueuedReply> delayedResponses;
+    std::queue<ChatQueuedReply> pendingReplies;
     {
         std::scoped_lock lock(chatRepliesMutex);
-        while (!chatReplies.empty())
-        {
-            ChatQueuedReply holder = chatReplies.front();
-            time_t checkTime = holder.m_time;
-            if (checkTime && time(0) < checkTime)
-            {
-                delayedResponses.push_back(holder);
-                chatReplies.pop();
-                continue;
-            }
-            ChatReplyAction::ChatReplyDo(bot, holder.m_type, holder.m_guid1, holder.m_guid2, holder.m_msg, holder.m_chanName, holder.m_name);
-            chatReplies.pop();
-        }
+        if (!chatReplies.empty())
+            pendingReplies.swap(chatReplies);
+    }
 
+    std::list<ChatQueuedReply> delayedResponses;
+    while (!pendingReplies.empty())
+    {
+        ChatQueuedReply holder = pendingReplies.front();
+        time_t checkTime = holder.m_time;
+        if (checkTime && time(0) < checkTime)
+        {
+            delayedResponses.push_back(holder);
+            pendingReplies.pop();
+            continue;
+        }
+        ChatReplyAction::ChatReplyDo(bot, holder.m_type, holder.m_guid1, holder.m_guid2, holder.m_msg, holder.m_chanName, holder.m_name);
+        pendingReplies.pop();
+    }
+
+    if (!delayedResponses.empty())
+    {
+        std::scoped_lock lock(chatRepliesMutex);
         for (std::list<ChatQueuedReply>::iterator i = delayedResponses.begin(); i != delayedResponses.end(); ++i)
         {
             chatReplies.push(*i);

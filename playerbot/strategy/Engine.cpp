@@ -77,13 +77,7 @@ Engine::~Engine(void)
 
 void Engine::Reset()
 {
-    ActionNode* action = NULL;
-    do
-    {
-        action = queue.Pop();
-        if (!action) break;
-        delete action;
-    } while (true);
+    queue.Clear();
 
     for (std::list<TriggerNode*>::iterator i = triggers.begin(); i != triggers.end(); i++)
     {
@@ -146,12 +140,13 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
         if (basket) 
         {
             float relevance = basket->getRelevance(), oldRelevance = relevance; // just for reference
+            if (minimal && relevance < 100.0f)
+                break;
+
             bool skipPrerequisites = basket->isSkipPrerequisites();
             Event event = basket->getEvent();
-            if (minimal && (relevance < 100))
-                continue;
             // NOTE: queue.Pop() deletes basket
-            ActionNode* actionNode = queue.Pop();
+            ActionNode* actionNode = queue.Pop(basket);
 
             // The event has had its turn now, so the trigger can be handed back - even if the action
             // turns out to be unknown/useless/impossible, or deliberately does nothing with the
@@ -220,12 +215,15 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
                         }
                     }
 
-                    ActionBasket* peekAction = queue.Peek();
-                    if (relevance < oldRelevance && peekAction && peekAction->getRelevance() > relevance) //Relevance changed. Try again.
+                    if (relevance < oldRelevance) //Relevance changed. Try again.
                     {
-                        modifiedActions.push_back(action);
-                        PushAgain(actionNode, relevance, event);
-                        continue;
+                        ActionBasket* peekAction = queue.Peek();
+                        if (peekAction && peekAction->getRelevance() > relevance)
+                        {
+                            modifiedActions.push_back(action);
+                            PushAgain(actionNode, relevance, event);
+                            continue;
+                        }
                     }
 
                     if (!skipPrerequisites)
@@ -355,7 +353,7 @@ bool Engine::DoNextAction(Unit* unit, int depth, bool minimal, bool isStunned)
         basket = queue.Peek();
         if (basket) {
             // NOTE: queue.Pop() deletes basket
-            delete queue.Pop();
+            delete queue.Pop(basket);
         }
     } while (basket);*/
 
@@ -454,7 +452,7 @@ bool Engine::MultiplyAndPush(NextAction** actions, float forceRelevance, bool sk
                     k -= 200.0f;
                     shouldPush = true;
                 }
-                else if (strcmp(pushType, "prereq") == 0 || strcmp(pushType, "alt") == 0 || strcmp(pushType, "again") == 0)
+                else if (strcmp(pushType, "prereq") == 0 || strcmp(pushType, "alt") == 0)
                 {
                     k = forceRelevance;
                     shouldPush = true;
@@ -468,7 +466,7 @@ bool Engine::MultiplyAndPush(NextAction** actions, float forceRelevance, bool sk
                 if (shouldPush)
                 {
                     LogAction("PUSH:%s - %f (%s)", actionNode->getName().c_str(), k, pushType);
-                    queue.Push(new ActionBasket(actionNode, k, skipPrerequisites, event));
+                    queue.Push(actionNode, k, skipPrerequisites, event);
                     pushed = true;
                 }
                 else
@@ -744,10 +742,10 @@ std::list<std::string_view> Engine::GetStrategies()
 
 void Engine::PushAgain(ActionNode* actionNode, float relevance, const Event& event)
 {
-    NextAction** nextAction = new NextAction*[2];
-    nextAction[0] = new NextAction(actionNode->getName(), relevance);
-    nextAction[1] = NULL;
-    MultiplyAndPush(nextAction, relevance, true, event, "again");
+    ActionNode* retry = CreateActionNode(actionNode->getName());
+    InitializeAction(retry);
+    LogAction("PUSH:%s - %f (%s)", retry->getName().c_str(), relevance, "again");
+    queue.Push(retry, relevance, true, event);
     delete actionNode;
 }
 

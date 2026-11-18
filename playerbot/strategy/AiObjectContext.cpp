@@ -42,11 +42,11 @@ void AiObjectContext::ClearValues(std::string findName)
     std::set<std::string> names = valueContexts.GetCreated();
     for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
     {
-        UntypedValue* value = GetUntypedValue(*i);
-        if (!value)
+        if (!findName.empty() && i->find(findName) != 0)
             continue;
 
-        if (!findName.empty() && i->find(findName) != 0)
+        UntypedValue* value = GetUntypedValue(*i);
+        if (!value)
             continue;
 
         valueContexts.Erase(*i);
@@ -60,11 +60,11 @@ void AiObjectContext::ClearExpiredValues(std::string findName, uint32 interval)
 
     for (const auto& name : names)
     {
-        UntypedValue* value = GetUntypedValue(name);
-        if (!value || value->Protected())
+        if (!findName.empty() && name.find(findName) == std::string::npos)
             continue;
 
-        if (!findName.empty() && name.find(findName) == std::string::npos)
+        UntypedValue* value = GetUntypedValue(name);
+        if (!value || value->Protected())
             continue;
 
         if ((!interval && !value->Expired()) || (interval && !value->Expired(interval)))

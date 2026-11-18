@@ -1,5 +1,6 @@
 
 #include "playerbot/playerbot.h"
+#include <algorithm>
 #include <stdarg.h>
 #include "AiObjectContext.h"
 #include "Action.h"
@@ -34,18 +35,19 @@ NextAction** NextAction::clone(NextAction** actions)
 
 NextAction** NextAction::merge(NextAction** left, NextAction** right)
 {
-    int leftSize = NextAction::size(left);
-    int rightSize = NextAction::size(right);
+    if (!left)
+        return right;
+    if (!right)
+        return left;
+
+    int const leftSize = NextAction::size(left);
+    int const rightSize = NextAction::size(right);
 
     NextAction** res = new NextAction*[leftSize + rightSize + 1];
-    for (int i=0; i<leftSize; i++)
-        res[i] = new NextAction(*left[i]);
-    for (int i=0; i<rightSize; i++)
-        res[leftSize + i] = new NextAction(*right[i]);
-    res[leftSize + rightSize] = NULL;
-
-    NextAction::destroy(left);
-    NextAction::destroy(right);
+    std::copy_n(left, leftSize, res);
+    std::copy_n(right, rightSize + 1, res + leftSize);
+    delete[] left;
+    delete[] right;
 
     return res;
 }

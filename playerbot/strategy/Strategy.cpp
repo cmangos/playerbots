@@ -109,7 +109,7 @@ Strategy::Strategy(PlayerbotAI* ai) : PlayerbotAIAware(ai)
     actionNodeFactories.Add(std::make_unique<ActionNodeFactoryInternal>());
 }
 
-ActionNode* Strategy::GetAction(std::string name)
+ActionNode* Strategy::GetAction(const std::string& name)
 {
     return actionNodeFactories.GetObject(name, ai);
 }

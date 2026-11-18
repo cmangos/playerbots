@@ -1,106 +1,74 @@
 
 #include "playerbot/playerbot.h"
-#include "Action.h"
 #include "Queue.h"
-
 #include "playerbot/PlayerbotAIConfig.h"
+#include <algorithm>
+
 using namespace ai;
 
-
-void Queue::Push(ActionBasket *action)
+void Queue::Push(ActionNode* action, float relevance, bool skipPrerequisites, const Event& event)
 {
-	if (action)
+    std::unique_ptr<ActionNode> node(action);
+    if (!node)
+        return;
+
+    for (const auto& basket : actions)
     {
-        for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
+        if (node->getName() != basket->getAction()->getName())
+            continue;
+
+        if (relevance > basket->getRelevance())
         {
-            ActionBasket* basket = *iter;
-            if (action->getAction()->getName() == basket->getAction()->getName())
-            {
-                if (basket->getRelevance() < action->getRelevance())
-                {
-                    basket->setRelevance(action->getRelevance());
-                    basket->setEvent(action->getEvent());
-                }
-				ActionNode *actionNode = action->getAction();
-				if (actionNode)
-				    delete actionNode;
-                delete action;
-                return;
-            }
+            basket->setRelevance(relevance);
+            basket->setEvent(event);
         }
-		actions.push_back(action);
+        return;
     }
+
+    actions.push_back(std::make_unique<ActionBasket>(std::move(node), relevance, skipPrerequisites, event));
 }
 
-ActionNode* Queue::Pop(ActionBasket* action)
+ActionNode* Queue::Pop(ActionBasket* selection)
 {
-    ActionBasket* selection = action;
-    if (selection == nullptr)
-    {
-        float max = -400;
-        for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
-        {
-            ActionBasket* basket = *iter;
-            if (basket->getRelevance() > max)
-            {
-                max = basket->getRelevance();
-                selection = basket;
-            }
-        }
-    }
+    auto const iter = std::find_if(actions.begin(), actions.end(),
+        [selection](const auto& basket) { return basket.get() == selection; });
+    if (iter == actions.end())
+        return nullptr;
 
-    if (selection != nullptr)
-    {
-        ActionNode* action = selection->getAction();
-        actions.remove(selection);
-        delete selection;
-        return action;
-    }
-
-    return nullptr;
+    ActionNode* action = (*iter)->releaseAction();
+    actions.erase(iter);
+    return action;
 }
 
-ActionBasket* Queue::Peek()
+ActionBasket* Queue::Peek() const
 {
     float max = -400;
-    ActionBasket* selection = NULL;
-    for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
+    ActionBasket* selection = nullptr;
+    for (const auto& basket : actions)
     {
-        ActionBasket* basket = *iter;
         if (basket->getRelevance() > max)
         {
             max = basket->getRelevance();
-            selection = basket;
+            selection = basket.get();
         }
     }
     return selection;
 }
 
-int Queue::Size()
-{
-	return actions.size();
-}
-
 void Queue::RemoveExpired()
 {
-    std::list<ActionBasket*> expired;
-    for (std::list<ActionBasket*>::iterator iter = actions.begin(); iter != actions.end(); iter++)
-    {
-        ActionBasket* basket = *iter;
-        if (sPlayerbotAIConfig.expireActionTime && basket->isExpired(sPlayerbotAIConfig.expireActionTime / 1000))
-            expired.push_back(basket);
-    }
+    auto const expireTime = sPlayerbotAIConfig.expireActionTime;
+    if (!expireTime || actions.empty())
+        return;
 
-    for (std::list<ActionBasket*>::iterator iter = expired.begin(); iter != expired.end(); iter++)
+    time_t const now = time(nullptr);
+    auto const expired = std::remove_if(actions.begin(), actions.end(), [now, expireTime](const auto& basket)
     {
-        ActionBasket* basket = *iter;
-        actions.remove(basket);
-        ActionNode* action = basket->getAction();
-        if (action)
-        {
-            sLog.outDebug("Action %s is expired", action->getName().c_str());
-            delete action;
-        }
-        delete basket;
-    }
+        if (!basket->isExpired(now, expireTime / 1000))
+            return false;
+
+        sLog.outDebug("Action %s is expired", basket->getAction()->getName().c_str());
+        return true;
+    });
+    actions.erase(expired, actions.end());
 }

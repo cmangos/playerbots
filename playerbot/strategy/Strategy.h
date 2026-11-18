@@ -50,7 +50,7 @@ namespace ai
 
 		virtual NextAction** getDefaultActions(BotState state);
 		virtual int GetType() { return STRATEGY_TYPE_GENERIC; }
-        virtual ActionNode* GetAction(std::string name);
+        virtual ActionNode* GetAction(const std::string& name);
 		virtual std::string getName() = 0;
         void Update() {} //Nonfunctional see AiObjectContext::Update() to enable.
         void Reset() {}

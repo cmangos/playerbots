@@ -53,7 +53,7 @@ void SetCraftAction::TellCraftableByProfession(Player* requester, uint32 skill)
             continue;
 
         const auto skillLine = skillSpells.find(itr->first);
-        if (skillLine == skillSpells.end() || skillLine->second->skillId != skill)
+        if (skillLine == skillSpells.end() || !skillLine->second || skillLine->second->skillId != skill)
             continue;
 
         const SpellEntry* const pSpellInfo = sServerFacade.LookupSpellInfo(itr->first);

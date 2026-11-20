@@ -121,6 +121,15 @@ namespace ai
         ObjectGuid guid;
     };
 
+    class FindTargetValue : public UnitCalculatedValue,
+                            public Qualified
+    {
+    public:
+        FindTargetValue(PlayerbotAI* ai) : UnitCalculatedValue(ai, "find target", /*2 * IN_MILLISECONDS*/ 1) {}
+    public:
+        ObjectGuid Calculate() override;
+    };
+
     class FollowTargetValue : public UnitCalculatedValue
     {
     public:

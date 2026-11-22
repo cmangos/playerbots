@@ -94,8 +94,7 @@ bool LeaveVehicleAction::Execute(Event& event)
     //WorldPacket p;
     //bot->GetSession()->HandleRequestVehicleExit(p);
 
-    if (veh)
-        veh->UnBoard(bot, false);
+    PlayerbotAI::DetachFromVehicle(bot);
 
     bot->GetCamera().ResetView();
     bot->SetCharm(nullptr);

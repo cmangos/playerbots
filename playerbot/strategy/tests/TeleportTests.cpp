@@ -208,7 +208,7 @@ TestResult CommandMoveSpawn::Execute(const std::string& params, Player* bot, Pla
     // from this thread.
     ai->RunOnOwningThread(target, [mapId, x, y, z](Player* p)
     {
-        p->TeleportTo(mapId, x, y, z, p->GetOrientation());
+        PlayerbotAI::TeleportSafe(p, mapId, x, y, z, p->GetOrientation());
     });
 
     // Log the state right after the call: RunOnOwningThread runs inline when the bot shares our map,

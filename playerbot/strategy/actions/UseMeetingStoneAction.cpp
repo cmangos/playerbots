@@ -262,7 +262,7 @@ bool SummonAction::Teleport(Player* requester, Player *summoner, Player *player)
                         }
 
                         p->GetMotionMaster()->Clear();
-                        p->TeleportTo(mapId, x, y, z, 0);
+                        PlayerbotAI::TeleportSafe(p, mapId, x, y, z, 0);
                         if (p->isRealPlayer())
                             p->SendHeartBeat();
 

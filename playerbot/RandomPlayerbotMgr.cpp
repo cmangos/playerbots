@@ -1173,7 +1173,7 @@ void RandomPlayerbotMgr::LoginFreeBots()
                     const float masterDistance = sameMap ? bot->GetDistance(master) : -1.0f;
                     if (!sameMap || masterDistance > INTERACTION_DISTANCE)
                     {
-                        bot->TeleportTo(WorldPosition(master));
+                        PlayerbotAI::TeleportSafe(bot, WorldPosition(master));
                     }
                 }
 
@@ -2788,7 +2788,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation>&
                 bot->SetHomebindToLocation(loc, area->ID);
 
             bot->GetMotionMaster()->Clear();
-            bot->TeleportTo(loc.mapid, x, y, z, 0);
+            PlayerbotAI::TeleportSafe(bot, loc.mapid, x, y, z, 0);
             bot->SendHeartBeat();
             bot->GetPlayerbotAI()->Reset(true);
 
@@ -2809,7 +2809,7 @@ void RandomPlayerbotMgr::RandomTeleport(Player* bot, std::vector<WorldLocation>&
                         member->SetHomebindToLocation(loc, area->ID);
 
                     member->GetMotionMaster()->Clear();
-                    member->TeleportTo(loc.mapid, x, y, z, 0);
+                    PlayerbotAI::TeleportSafe(member, loc.mapid, x, y, z, 0);
                     member->SendHeartBeat();
                     if (PlayerbotAI* memberAi = member->GetPlayerbotAI())
                         memberAi->Reset(true);
@@ -4466,7 +4466,7 @@ std::list<std::string> RandomPlayerbotMgr::HandleConsoleTaxTest(std::string para
 
     if (bot->GetMapId() != start->map_id)
     {
-        bot->TeleportTo(start->map_id, start->x, start->y, start->z, bot->GetOrientation());
+        PlayerbotAI::TeleportSafe(bot, start->map_id, start->x, start->y, start->z, bot->GetOrientation());
         messages.push_back("taxtest: teleported to start map; rerun the command");
         return messages;
     }

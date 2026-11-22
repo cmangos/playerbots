@@ -377,7 +377,7 @@ bool CastCustomSpellAction::CastSummonPlayer(Player* requester, std::string comm
                             float destO = bot->GetOrientation();
                             ai->RunOnOwningThread(target, [destMapId, destX, destY, destZ, destO](Player* t)
                             {
-                                t->TeleportTo(destMapId, destX, destY, destZ, destO);
+                                PlayerbotAI::TeleportSafe(t, destMapId, destX, destY, destZ, destO);
                                 if (t->isRealPlayer())
                                     t->SendHeartBeat();
                             });

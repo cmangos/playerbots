@@ -674,6 +674,12 @@ bool UseAction::UseItemInternal(Player* requester, uint32 itemId, Unit* unit, Ga
                 ai->StopMoving();
             }
 
+            if (PlayerbotAI::IsDrivingVehicle(bot) && PlayerbotAI::IsTeleportSpell(spellInfo->Id))
+            {
+                PlayerbotAI::DetachFromVehicle(bot);
+                ai->StopMoving();
+            }
+
             const SpellCastResult result = spell->ForceSpellStart(&targets);
 
             // Check for using item on trade item

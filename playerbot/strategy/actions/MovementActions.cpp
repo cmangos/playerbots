@@ -255,7 +255,7 @@ bool MovementAction::FlyDirect(const WorldPosition &startPosition, const WorldPo
 
         AI_VALUE(LastMovement&, "last movement").nextTeleport = now + (time_t)MoveDelay(startPosition.distance(movePosition));
 
-        return bot->TeleportTo(movePosition.getMapId(), movePosition.getX(), movePosition.getY(), movePosition.getZ(), startPosition.getAngleTo(movePosition));
+        return PlayerbotAI::TeleportSafe(bot, movePosition.getMapId(), movePosition.getX(), movePosition.getY(), movePosition.getZ(), startPosition.getAngleTo(movePosition));
     }
 
     MotionMaster& mm = *bot->GetMotionMaster();
@@ -454,7 +454,7 @@ bool MovementAction::MoveOffTransport(PlayerbotAI* ai, WorldPosition exitPos, bo
 
     if (doTeleport)
     {
-        bot->TeleportTo(exitPos.getMapId(), exitPos.getX(), exitPos.getY(), exitPos.getZ(), exitPos.getO(), 0);
+        PlayerbotAI::TeleportSafe(bot, exitPos.getMapId(), exitPos.getX(), exitPos.getY(), exitPos.getZ(), exitPos.getO(), 0);
         TransportTrace::instance().Event(bot, transport, "exit", "exit_tp", "teleported_to_exit_dock", dockPosition, exitPos);
         TransportTrace::instance().RideEnded(bot);
         return true;
@@ -931,7 +931,7 @@ bool MovementAction::MinimalMove(PlayerbotAI* ai)
     {
         if (nextStep->point.sqDistance(bot) > INTERACTION_DISTANCE * INTERACTION_DISTANCE)
         {
-            bot->TeleportTo(nextStep->point);
+            PlayerbotAI::TeleportSafe(bot, nextStep->point);
 
             return true;
         }
@@ -991,7 +991,7 @@ bool MovementAction::MinimalMove(PlayerbotAI* ai)
 
         nextStep = path.begin();
 
-        bot->TeleportTo(nextStep->point);
+        PlayerbotAI::TeleportSafe(bot, nextStep->point);
 
         return true;
     }
@@ -1016,7 +1016,7 @@ bool MovementAction::MinimalMove(PlayerbotAI* ai)
     if (ai->HasPlayerNearby(nextStep->point, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL)))
         return true;
 
-    bot->TeleportTo(nextStep->point);
+    PlayerbotAI::TeleportSafe(bot, nextStep->point);
 
     if (std::next(nextStep) == path.end())
     {
@@ -1191,7 +1191,7 @@ bool MovementAction::HandleSpecialMovement(TravelPath& path)
         if (currentPoint.entry)
             AI_VALUE(LastMovement&, "last area trigger").lastAreaTrigger = currentPoint.entry;
         else
-            return bot->TeleportTo(nextPoint.point.getMapId(), nextPoint.point.getX(), nextPoint.point.getY(), nextPoint.point.getZ(), nextPoint.point.getO(), 0) ? true : false;
+            return PlayerbotAI::TeleportSafe(bot, nextPoint.point.getMapId(), nextPoint.point.getX(), nextPoint.point.getY(), nextPoint.point.getZ(), nextPoint.point.getO(), 0) ? true : false;
     }
 
     //We are getting 'on' transport.
@@ -1215,7 +1215,7 @@ bool MovementAction::HandleSpecialMovement(TravelPath& path)
     if (currentPoint.type == PathNodeType::NODE_TRANSPORT && TransportMode(ai) == 2) //Instant teleport case
     {
         TransportTrace::instance().Event(bot, nullptr, "exit", "board_tp", "mode2_dock_bypass", currentPoint.point, nextPoint.point);
-        return bot->TeleportTo(nextPoint.point.getMapId(), nextPoint.point.getX(), nextPoint.point.getY(), nextPoint.point.getZ(), nextPoint.point.getO(), 0);
+        return PlayerbotAI::TeleportSafe(bot, nextPoint.point.getMapId(), nextPoint.point.getX(), nextPoint.point.getY(), nextPoint.point.getZ(), nextPoint.point.getO(), 0);
     }
     
     if (currentPoint.type == PathNodeType::NODE_TRANSPORT)
@@ -1232,7 +1232,7 @@ bool MovementAction::HandleSpecialMovement(TravelPath& path)
         else
         {
             if (!bot->GetTransport())
-                return bot->TeleportTo(nextPoint.point.getMapId(), nextPoint.point.getX(), nextPoint.point.getY(), nextPoint.point.getZ(), nextPoint.point.getO(), 0);
+                return PlayerbotAI::TeleportSafe(bot, nextPoint.point.getMapId(), nextPoint.point.getX(), nextPoint.point.getY(), nextPoint.point.getZ(), nextPoint.point.getO(), 0);
 
             lastTransportEntry = nextPoint.entry;
         }
@@ -1625,14 +1625,14 @@ bool MovementAction::MoveTo2(const WorldPosition& endPos, bool idle, bool react,
             ai->InterruptSpell(false);
     }
 
-    if (totalDistance > sPlayerbotAIConfig.reactDistance && !detailedMove)
+    if (totalDistance > sPlayerbotAIConfig.reactDistance && !detailedMove && !PlayerbotAI::IsDrivingVehicle(bot))
     {
         WorldPosition teleportPosition = movePath.getBack();
         if (!ai->HasPlayerNearby(teleportPosition))
         {
             time_t now = time(0);
             lastMove.nextTeleport = now + (time_t)MoveDelay(startPos.distance(teleportPosition));
-            return bot->TeleportTo(teleportPosition.getMapId(),
+            return PlayerbotAI::TeleportSafe(bot, teleportPosition.getMapId(),
                 teleportPosition.getX(),
                 teleportPosition.getY(),
                 teleportPosition.getZ(),
@@ -2098,7 +2098,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                     AI_VALUE(LastMovement&, "last area trigger").lastAreaTrigger = entry;
                 }
                 else
-                    return bot->TeleportTo(movePosition.getMapId(), movePosition.getX(), movePosition.getY(), movePosition.getZ(), movePosition.getO(), 0);
+                    return PlayerbotAI::TeleportSafe(bot, movePosition.getMapId(), movePosition.getX(), movePosition.getY(), movePosition.getZ(), movePosition.getO(), 0);
             }
 
             if (pathType == PathNodeType::NODE_TRANSPORT)
@@ -2116,7 +2116,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
                 {
                     if (!bot->GetTransport())
                     {
-                        return bot->TeleportTo(movePosition.getMapId(), movePosition.getX(), movePosition.getY(), movePosition.getZ(), movePosition.getO(), 0);
+                        return PlayerbotAI::TeleportSafe(bot, movePosition.getMapId(), movePosition.getX(), movePosition.getY(), movePosition.getZ(), movePosition.getO(), 0);
                     }
 
                     lastMove.lastTransportEntry = entry;
@@ -2483,7 +2483,7 @@ bool MovementAction::MoveTo(uint32 mapId, float x, float y, float z, bool idle, 
 
         lastMove.nextTeleport = now + (time_t)MoveDelay(startPosition.distance(movePosition));
 
-        return bot->TeleportTo(movePosition.getMapId(), movePosition.getX(), movePosition.getY(), movePosition.getZ(), startPosition.getAngleTo(movePosition));
+        return PlayerbotAI::TeleportSafe(bot, movePosition.getMapId(), movePosition.getX(), movePosition.getY(), movePosition.getZ(), startPosition.getAngleTo(movePosition));
     }
 
     // walk if master walks and is close

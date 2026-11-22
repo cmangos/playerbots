@@ -189,7 +189,7 @@ bool FindCorpseAction::Execute(Event& event)
         if (deadTime > delay)
         {
             bot->GetMotionMaster()->Clear();
-            bot->TeleportTo(moveToPos.getMapId(), moveToPos.getX(), moveToPos.getY(), moveToPos.getZ(), 0);
+            PlayerbotAI::TeleportSafe(bot, moveToPos.getMapId(), moveToPos.getX(), moveToPos.getY(), moveToPos.getZ(), 0);
             if (bot->isRealPlayer())
                 bot->SendHeartBeat();
         }
@@ -321,7 +321,7 @@ bool SpiritHealerAction::Execute(Event& event)
     if (shouldTeleportToGY)
     {
         bot->GetMotionMaster()->Clear();
-        bot->TeleportTo(grave.getMapId(), grave.getX(), grave.getY(), grave.getZ(), 0);
+        PlayerbotAI::TeleportSafe(bot, grave.getMapId(), grave.getX(), grave.getY(), grave.getZ(), 0);
         if (bot->isRealPlayer())
             bot->SendHeartBeat();
         return true;

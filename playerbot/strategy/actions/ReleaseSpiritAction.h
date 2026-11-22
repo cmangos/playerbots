@@ -169,7 +169,7 @@ namespace ai
             {
                 sLog.outDetail("Repop: Teleporting bot #%d %s:%d <%s> to spawn", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
                 //teleport bot to spawn
-                bot->TeleportTo(defaultPlayerInfo->mapId, defaultPlayerInfo->positionX, defaultPlayerInfo->positionY, defaultPlayerInfo->positionZ, defaultPlayerInfo->orientation);
+                PlayerbotAI::TeleportSafe(bot, defaultPlayerInfo->mapId, defaultPlayerInfo->positionX, defaultPlayerInfo->positionY, defaultPlayerInfo->positionZ, defaultPlayerInfo->orientation);
                 if (bot->isRealPlayer())
                     bot->SendHeartBeat();
             }
@@ -177,7 +177,10 @@ namespace ai
             {
                 sLog.outDetail("Repop: Teleporting bot #%d %s:%d <%s> to homebind", bot->GetGUIDLow(), bot->GetTeam() == ALLIANCE ? "A" : "H", bot->GetLevel(), bot->GetName());
                 //teleport bot to homebind
-                bot->TeleportToHomebind();
+                uint32 homeMapId = 0;
+                float homeX = 0.0f, homeY = 0.0f, homeZ = 0.0f;
+                bot->GetHomebindLocation(homeX, homeY, homeZ, homeMapId);
+                PlayerbotAI::TeleportSafe(bot, homeMapId, homeX, homeY, homeZ, bot->GetOrientation());
                 bot->SendHeartBeat();
             }
 

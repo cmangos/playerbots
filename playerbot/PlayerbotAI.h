@@ -444,6 +444,12 @@ public:
     void HandleMasterIncomingPacket(const WorldPacket& packet);
     void HandleMasterOutgoingPacket(const WorldPacket& packet);
 	void HandleTeleportAck();
+    static bool IsDrivingVehicle(Player* player);
+    static bool NeedsVehicleDetach(Player* player);
+    static bool DetachFromVehicle(Player* player);
+    static bool TeleportSafe(Player* who, uint32 mapId, float x, float y, float z, float o, uint32 options = 0);
+    static bool TeleportSafe(Player* who, WorldPosition const& pos, uint32 options = 0);
+    static bool IsTeleportSpell(uint32 spellId);
     void ChangeEngine(BotState type);
     void DoNextAction(bool minimal = false);
     bool CanDoSpecificAction(const std::string& name, bool isUseful = true, bool isPossible = true);

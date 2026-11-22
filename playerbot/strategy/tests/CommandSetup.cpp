@@ -25,7 +25,7 @@ TestResult CommandSetupTeleport::Execute(const std::string& params, Player* bot,
         return TestResult::IMPOSSIBLE;
     }
 
-    if (bot->TeleportTo(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, bot->GetOrientation()))
+    if (PlayerbotAI::TeleportSafe(bot, loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, bot->GetOrientation()))
     {
         return TestResult::PASS;
     }
@@ -361,7 +361,7 @@ TestResult CommandSetupTeleportGroup::Execute(const std::string& params, Player*
             const uint32 fromMap = m->GetMapId();
             const bool wasInWorld = m->IsInWorld();
             const bool wasTeleporting = m->IsBeingTeleported();
-            const bool moved = m->TeleportTo(mapId, x, y, z, orient);
+            const bool moved = PlayerbotAI::TeleportSafe(m, mapId, x, y, z, orient);
 
             // BL-44: record the members that were ACTUALLY delivered (moved=true). The "group on map"
             // monitor switches to causal mode when this sink is non-empty, so a member that roams to

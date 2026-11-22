@@ -2824,7 +2824,7 @@ bool DebugAction::HandlePosition(Event& event, Player* requester, const std::str
             Player* master = ai->GetMaster();
             if (master)
             {
-                bot->TeleportTo(master->GetMapId(), master->GetPositionX(), master->GetPositionY(), master->GetPositionZ(), master->GetOrientation());
+                PlayerbotAI::TeleportSafe(bot, master->GetMapId(), master->GetPositionX(), master->GetPositionY(), master->GetPositionZ(), master->GetOrientation());
                 ai->TellPlayer(requester, "Teleported to master");
             }
             else
@@ -2837,7 +2837,7 @@ bool DebugAction::HandlePosition(Event& event, Player* requester, const std::str
         PositionTarget target = ParseLocation(teleParam, bot);
         if (target.valid)
         {
-            bot->TeleportTo(target.mapId, target.x, target.y, target.z, bot->GetOrientation());
+            PlayerbotAI::TeleportSafe(bot, target.mapId, target.x, target.y, target.z, bot->GetOrientation());
             std::ostringstream out;
             if (!target.name.empty())
                 out << "Teleported to " << target.name;

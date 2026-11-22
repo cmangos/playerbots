@@ -158,7 +158,7 @@ static bool SummonPlayerToSummoner(Player* summoner, Player* target, PlayerbotAI
         float destO = summoner->GetOrientation();
         summonerAI->RunOnOwningThread(target, [destMapId, destX, destY, destZ, destO](Player* t)
         {
-            t->TeleportTo(destMapId, destX, destY, destZ, destO);
+            PlayerbotAI::TeleportSafe(t, destMapId, destX, destY, destZ, destO);
         });
     }
 

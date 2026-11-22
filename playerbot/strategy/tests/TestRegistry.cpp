@@ -675,6 +675,40 @@ void TestRegistry::GenerateTransportTestsImpl(int maxTests)
 
             RegisterTest(testName, script);
 
+            float minRideSecs = rideSecs * 0.6f;
+            if (minRideSecs < 3.0f)
+                minRideSecs = 3.0f;
+
+            std::ostringstream m1Rode;
+            m1Rode << "monitor arrived " << endName << " < 100 rode >= " << (uint32)minRideSecs
+                   << " => pass \"Bot rode to " << endName << " after <time elapsed>\"";
+
+            std::ostringstream m1NoRide;
+            m1NoRide << "monitor arrived " << endName << " < 100 rode < " << (uint32)minRideSecs
+                     << " => fail \"Arrived at " << endName << " without riding for " << (uint32)minRideSecs << "s\"";
+
+            std::vector<std::string> m1Script = {
+                gmInvisible,
+                needAlive,
+                needCanReachNode,
+                timeout.str(),
+                m1Rode.str(),
+                m1NoRide.str(),
+                "monitor left transport away from dock => fail \"Left the transport away from a stop after <time elapsed>\"",
+                "set transport mode 1"
+            };
+
+            if (!factionReq.empty())
+                m1Script.push_back(factionReq);
+
+            m1Script.push_back("teleport " + startName);
+            m1Script.push_back("set destination " + endName);
+            m1Script.push_back("observe");
+            m1Script.push_back(gmVisible);
+            m1Script.push_back("cleanup set transport mode default");
+
+            RegisterTest(testName + "_m1", m1Script);
+
             if (skippedLog < 300)
             {
                 skippedLog++;

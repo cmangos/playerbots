@@ -9,9 +9,67 @@
 #include "playerbot/TravelMgr.h"
 #include "playerbot/strategy/values/LastMovementValue.h"
 
+#include <cmath>
+#include <cstdlib>
+
 using namespace ai;
 
+namespace
+{
+    bool ParseOperatorNumber(const std::string& clause, std::string& op, float& number)
+    {
+        size_t index = 0;
+        op.clear();
+
+        while (index < clause.size() && (clause[index] == '<' || clause[index] == '>' || clause[index] == '=' || clause[index] == '!'))
+            op += clause[index++];
+
+        std::string rest = clause.substr(index);
+        const size_t begin = rest.find_first_not_of(" \t");
+
+        if (begin == std::string::npos)
+            return false;
+
+        rest = rest.substr(begin);
+        const size_t end = rest.find_last_not_of(" \t");
+        rest = rest.substr(0, end + 1);
+
+        char* endPtr = nullptr;
+        number = (float)std::strtod(rest.c_str(), &endPtr);
+
+        return endPtr != rest.c_str() && *endPtr == 0;
+    }
+
+    bool CompareNumber(float actual, const std::string& op, float wanted)
+    {
+        if (op == "<")
+            return actual < wanted;
+
+        if (op == "<=")
+            return actual <= wanted;
+
+        if (op == ">")
+            return actual > wanted;
+
+        if (op == ">=")
+            return actual >= wanted;
+
+        if (op == "==" || op == "=")
+            return std::abs(actual - wanted) < 0.001f;
+
+        if (op == "!=")
+            return std::abs(actual - wanted) >= 0.001f;
+
+        return false;
+    }
+}
+
 bool MonitorMovementDistance::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    return DistanceMet(monitorStr, bot);
+}
+
+bool MonitorMovementDistance::DistanceMet(const std::string& monitorStr, Player* bot) const
 {
     std::string locPart;
     std::string outcomePart;
@@ -61,6 +119,76 @@ bool MonitorMovementDistance::IsConditionMet(const std::string& monitorStr, Play
 
     return dist > threshold;
 
+}
+
+bool MonitorMovementArrived::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    const size_t splitPos = monitorStr.find("=>");
+    std::string spec = splitPos == std::string::npos ? monitorStr : monitorStr.substr(0, splitPos);
+    std::string outcome = splitPos == std::string::npos ? std::string() : monitorStr.substr(splitPos);
+
+    const std::string rideTag = " rode ";
+    const size_t ridePos = spec.find(rideTag);
+
+    if (ridePos != std::string::npos)
+    {
+        std::string rideClause = spec.substr(ridePos + rideTag.size());
+        spec = spec.substr(0, ridePos);
+
+        std::string op;
+        float wanted = 0.0f;
+
+        if (!ParseOperatorNumber(rideClause, op, wanted))
+            return false;
+
+        auto it = ctx.transportRideMs.find(0);
+        float rodeSeconds = it == ctx.transportRideMs.end() ? 0.0f : it->second / 1000.0f;
+
+        if (!CompareNumber(rodeSeconds, op, wanted))
+            return false;
+    }
+
+    return DistanceMet(spec + outcome, bot);
+}
+
+bool MonitorMovementRodeTransport::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    std::string leftSide, rightSide, parseMessage;
+    if (TrySplitOnce(monitorStr, "=>", leftSide, rightSide, parseMessage, GetName(), true) != TestResult::PASS)
+        return false;
+
+    const size_t entryEnd = leftSide.find_first_of(" \t");
+    if (entryEnd == std::string::npos)
+        return false;
+
+    std::string entryStr = leftSide.substr(0, entryEnd);
+    std::string rideClause = leftSide.substr(entryEnd);
+
+    uint32 entry = 0;
+
+    if (entryStr != "any")
+    {
+        if (entryStr.empty() || entryStr.find_first_not_of("0123456789") != std::string::npos)
+            return false;
+
+        entry = (uint32)atol(entryStr.c_str());
+    }
+
+    std::string op;
+    float wanted = 0.0f;
+
+    if (!ParseOperatorNumber(rideClause, op, wanted))
+        return false;
+
+    auto it = ctx.transportRideMs.find(entry);
+    float rodeSeconds = it == ctx.transportRideMs.end() ? 0.0f : it->second / 1000.0f;
+
+    return CompareNumber(rodeSeconds, op, wanted);
+}
+
+bool MonitorMovementLeftTransport::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
+{
+    return ctx.transportLeftAway;
 }
 bool MonitorNotOnMap::IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const
 {

@@ -42,6 +42,12 @@ void TestContext::Reset()
     groupOnMapExpected = 0;
     lootStackSeen = false;
     actionSpamArmed = false;
+    transportRideMs.clear();
+    transportRideTick = 0;
+    transportRideOnLastTick = false;
+    transportRideLastGuid = ObjectGuid();
+    transportRideLastPos = WorldPosition();
+    transportLeftAway = false;
 }
 
 void TestContext::RecordDeliveredGroupMember(ObjectGuid guid)

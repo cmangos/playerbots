@@ -13,6 +13,8 @@
 #include "Entities/Transports.h"
 #include "MotionGenerators/PathFinder.h"
 #include "playerbot/PlayerbotLLMInterface.h"
+#include "playerbot/TransportTrace.h"
+#include "playerbot/strategy/actions/MovementActions.h"
 
 #ifdef MANGOSBOT_TWO
 #include "Vmap/VMapFactory.h"
@@ -24,6 +26,8 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
 
+#include <algorithm>
+#include <cctype>
 #include <iomanip>
 #include "SayAction.h"
 #ifdef GenerateBotTests
@@ -1600,6 +1604,17 @@ bool DebugAction::HandleMotion(Event& event, Player* requester, const std::strin
 
 bool DebugAction::HandleTransport(Event& event, Player* requester, const std::string& text)
 {
+    std::string param = text.length() > std::string("transport").size() ? text.substr(std::string("transport").size() + 1) : std::string();
+
+    if (param.compare(0, 4, "info") == 0)
+        return HandleTransportInfo(requester, param.length() > 4 ? param.substr(5) : std::string());
+
+    if (param.compare(0, 5, "state") == 0)
+        return HandleTransportState(requester);
+
+    if (param.compare(0, 6, "wander") == 0)
+        return HandleTransportWander(requester);
+
     std::vector<GenericTransport*> transports;
 
     for (auto trans : WorldPosition(bot).getTransports())
@@ -1637,9 +1652,154 @@ bool DebugAction::HandleTransport(Event& event, Player* requester, const std::st
     return true;
 }
 
+bool DebugAction::HandleTransportInfo(Player* requester, const std::string& param)
+{
+    uint32 entry = 0;
+
+    if (!param.empty() && std::all_of(param.begin(), param.end(), [](unsigned char c) { return std::isdigit(c); }))
+        entry = (uint32)std::stoul(param);
+
+    WorldPosition botPos(bot);
+    std::set<GenericTransport*> found = entry ? botPos.getTransports(entry) : botPos.getTransports();
+
+    std::vector<GenericTransport*> transports(found.begin(), found.end());
+    std::sort(transports.begin(), transports.end(), [botPos](GenericTransport* i, GenericTransport* j) { return botPos.distance(i) > botPos.distance(j); });
+
+    std::ostringstream head;
+    head << "transport info (" << (entry ? std::to_string(entry) : std::string("any")) << "): " << transports.size()
+         << " found, mode:" << sPlayerbotAIConfig.transportTeleportType << " trace:" << sPlayerbotAIConfig.transportTrace;
+    ai->TellPlayer(requester, head.str());
+
+    for (auto transport : transports)
+    {
+        GameObjectInfo const* data = sGOStorage.LookupEntry<GameObjectInfo>(transport->GetEntry());
+        std::string name = transport->GetName();
+
+        if (name.empty() && data)
+            name = data->name;
+
+        std::ostringstream out;
+        out << std::fixed << std::setprecision(1);
+        out << name << " (" << transport->GetEntry() << ") guid:" << transport->GetGUIDLow()
+            << " map:" << transport->GetMapId() << " dist:" << botPos.distance(transport)
+            << " on:" << (bot->GetTransport() == transport ? 1 : 0)
+            << " geom:" << (botPos.isOnTransport(transport) ? 1 : 0);
+        ai->TellPlayer(requester, out.str());
+
+        if (Transport* mapTransport = dynamic_cast<Transport*>(transport))
+        {
+            uint32 period = mapTransport->GetPeriod();
+            uint32 progress = transport->GetPathProgress();
+            uint32 cycle = period ? progress % period : 0;
+
+            std::ostringstream state;
+            state << "  period:" << period << " progress:" << progress << " cycle:" << cycle;
+            ai->TellPlayer(requester, state.str());
+
+            for (auto& frame : mapTransport->GetKeyFrames())
+            {
+                if (!frame.Node)
+                    continue;
+
+                uint32 eta = period ? (frame.ArriveTime + period - cycle) % period : 0;
+
+                std::ostringstream stop;
+                stop << std::fixed << std::setprecision(2);
+                stop << "  stop " << frame.Index << " map:" << frame.Node->mapid
+                     << " " << frame.Node->x << "," << frame.Node->y << "," << frame.Node->z
+                     << " arrive:" << frame.ArriveTime << " depart:" << frame.DepartureTime
+                     << " eta:" << eta << "ms";
+
+                if (cycle >= frame.ArriveTime && cycle < frame.DepartureTime)
+                    stop << " DOCKED";
+
+                ai->TellPlayer(requester, stop.str());
+            }
+
+            continue;
+        }
+
+#if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
+        Position pos;
+        uint32 pathProgress = 0;
+        transport->GetCurrentPathState(pos, pathProgress);
+
+        std::ostringstream elevator;
+        elevator << std::fixed << std::setprecision(2);
+        elevator << "  progress:" << pathProgress << " pos:" << pos.x << "," << pos.y << "," << pos.z;
+        ai->TellPlayer(requester, elevator.str());
+#else
+        ai->TellPlayer(requester, "  path state not available on this core");
+#endif
+    }
+
+    return true;
+}
+
+bool DebugAction::HandleTransportWander(Player* requester)
+{
+    GenericTransport* transport = bot->GetTransport();
+
+    if (!transport)
+    {
+        WorldPosition botPos(bot);
+
+        for (auto candidate : botPos.getTransports())
+        {
+            if (!transport || botPos.distance(candidate) < botPos.distance(transport))
+                transport = candidate;
+        }
+    }
+
+    if (!transport)
+    {
+        ai->TellPlayer(requester, "No transport nearby");
+        return true;
+    }
+
+    GameObjectInfo const* data = sGOStorage.LookupEntry<GameObjectInfo>(transport->GetEntry());
+    std::string name = transport->GetName();
+
+    if (name.empty() && data)
+        name = data->name;
+
+    if (bot->GetTransport() != transport)
+    {
+        WorldPosition stop;
+        MovementAction::TransportAtStop(transport, stop);
+
+        if (!MovementAction::MoveOnTransport(ai, transport, true, stop, WorldPosition()))
+        {
+            ai->TellPlayer(requester, "Could not board " + name + " - no deck point");
+            return true;
+        }
+
+        ai->TellPlayer(requester, "Boarded " + name);
+    }
+
+    const bool walked = MovementAction::WanderOnDeck(ai, transport);
+
+    std::ostringstream out;
+    out << std::fixed << std::setprecision(1);
+    out << (walked ? "Walking on the deck of " : "No deck walk point on ") << name;
+    out << " (riding:" << (bot->GetTransport() ? 1 : 0) << " trace:" << sPlayerbotAIConfig.transportTrace << ")";
+    ai->TellPlayer(requester, out.str());
+
+    return true;
+}
+
+bool DebugAction::HandleTransportState(Player* requester)
+{
+    std::istringstream in(TransportTrace::instance().Describe(bot));
+    std::string line;
+
+    while (std::getline(in, line))
+        ai->TellPlayer(requester, line);
+
+    return true;
+}
 bool DebugAction::HandlePointOnTrans(Event& event, Player* requester, const std::string& text)
 {
-
     uint32 radius = 20;
     std::string param;
 

@@ -57,6 +57,9 @@ namespace ai
         bool HandlePOI(Event& event, Player* requester, const std::string& text);
         bool HandleMotion(Event& event, Player* requester, const std::string& text);
         bool HandleTransport(Event& event, Player* requester, const std::string& text);
+        bool HandleTransportInfo(Player* requester, const std::string& param);
+        bool HandleTransportState(Player* requester);
+        bool HandleTransportWander(Player* requester);
         bool HandlePointOnTrans(Event& event, Player* requester, const std::string& text);
         bool HandleDoTransport(Event& event, Player* requester, const std::string& text);
         bool HandleOnTrans(Event& event, Player* requester, const std::string& text);

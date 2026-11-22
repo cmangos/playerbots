@@ -14,9 +14,28 @@
 #include "playerbot/ServerFacade.h"
 #include "MotionGenerators/MoveMap.h"
 #include "strategy/values/HazardsValue.h"
+#include "playerbot/RandomPlayerbotMgr.h"
 
 using namespace ai;
 using namespace MaNGOS;
+
+uint32 ai::TransportMode(PlayerbotAI* ai)
+{
+    if (ai)
+    {
+        Player* bot = ai->GetBot();
+
+        if (bot)
+        {
+            uint32 stored = sRandomPlayerbotMgr.GetValue(bot, "transport_mode");
+
+            if (stored)
+                return stored - 1;
+        }
+    }
+
+    return sPlayerbotAIConfig.transportTeleportType;
+}
 
 //TravelNodePath(float distance = 0.1f, float extraCost = 0, TravelNodePathType pathType = TravelNodePathType::walk, uint64 pathObject = 0, bool calculated = false, std::vector<uint8> maxLevelCreature = { 0,0,0 }, float swimDistance = 0)
 std::string TravelNodePath::print()
@@ -1018,7 +1037,7 @@ std::vector<PathNodePoint>::iterator TravelPath::getNextPoint(WorldPosition star
     return startP;
 }
 
-bool TravelPath::UpcommingSpecialMovement(WorldPosition startPos, float maxDist, bool onTransport)
+bool TravelPath::UpcommingSpecialMovement(WorldPosition startPos, float maxDist, bool onTransport, PlayerbotAI* ai)
 {
     if (getPath().empty())
         return false;
@@ -1076,7 +1095,7 @@ bool TravelPath::UpcommingSpecialMovement(WorldPosition startPos, float maxDist,
     }
 
     //Walk on / teleport to transport.
-    if (sPlayerbotAIConfig.transportTeleportType < 2 && startP->type == PathNodeType::NODE_TRANSPORT)
+    if (TransportMode(ai) < 2 && startP->type == PathNodeType::NODE_TRANSPORT)
     {
         uint32 entry = nextP->entry;
 
@@ -1099,7 +1118,7 @@ bool TravelPath::UpcommingSpecialMovement(WorldPosition startPos, float maxDist,
     }
         
     //Teleport to end of transport.
-    if (sPlayerbotAIConfig.transportTeleportType == 2 && nextP->type == PathNodeType::NODE_TRANSPORT)
+    if (TransportMode(ai) == 2 && nextP->type == PathNodeType::NODE_TRANSPORT)
     {
         if (prevP->point.sqDistance2d(startPos) > INTERACTION_DISTANCE * INTERACTION_DISTANCE) //Can we teleport or do we need to walk first?
             return false; //Walk to startP (last non transport point)

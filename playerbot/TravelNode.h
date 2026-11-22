@@ -45,6 +45,11 @@ namespace ai
 {
     class WorldPosition;
 
+    // TransportTeleportType in effect for this bot: a per-bot override (set by the transport tests
+    // through RandomPlayerbotMgr) wins over AiPlayerbot.TransportTeleportType. Stored as mode + 1 so
+    // 0 still means "no override".
+    uint32 TransportMode(PlayerbotAI* ai);
+
     //A connection between two nodes. 
     class TravelNodePath
     {
@@ -296,7 +301,7 @@ namespace ai
 
         void makeShortCut(WorldPosition startPos, float maxDist, Unit* bot);
         bool shouldMoveToNextPoint(WorldPosition startPos, std::vector<PathNodePoint>::iterator beg, std::vector<PathNodePoint>::iterator ed, std::vector<PathNodePoint>::iterator p, float& moveDist, float maxDist);
-        bool UpcommingSpecialMovement(WorldPosition startPos, float maxDist, bool onTransport);
+        bool UpcommingSpecialMovement(WorldPosition startPos, float maxDist, bool onTransport, PlayerbotAI* ai = nullptr);
 
         void ClipPath(PlayerbotAI* ai, Unit* mover, bool ignoreEnemyTargets);
         std::ostringstream print();

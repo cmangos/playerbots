@@ -132,4 +132,20 @@ namespace ai
     protected:
         std::string GetName() const override { return "set value"; }
     };
+
+    class CommandSetupTransportMode : public TestCommand
+    {
+    public:
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+    protected:
+        std::string GetName() const override { return "set transport mode"; }
+    };
+
+    class CommandSetupBoardTransport : public TestCommand
+    {
+    public:
+        TestResult Execute(const std::string& params, Player* bot, PlayerbotAI* ai, TestContext& ctx, std::string& message) override;
+    protected:
+        std::string GetName() const override { return "board transport"; }
+    };
 }

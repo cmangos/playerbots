@@ -28,6 +28,23 @@ void TestRegistry::RegisterMoveTests()
         gmVisible
     });
 
+    RegisterTest("movement_transport_boat_menethil_theramore_m1", {
+        gmInvisible,
+        needAlive,
+        "monitor can not reach nodes => fail \"Bot cannot reach travel network at <current position>\"",
+        timeout20Min,
+        "monitor arrived theramore < 100 rode >= 90 => pass \"Bot rode the boat to Theramore after <time elapsed>\"",
+        "monitor arrived theramore < 100 rode < 90 => fail \"Arrived at Theramore without riding the boat\"",
+        "monitor left transport away from dock => fail \"Left the boat away from a stop after <time elapsed>\"",
+        "set transport mode 1",
+        "require bot is faction=alliance",
+        "teleport menethilharbor",
+        "set destination theramore",
+        "observe",
+        gmVisible,
+        "cleanup set transport mode default"
+    });
+
     RegisterTest("movement_walk_short_inside_ironforge", {gmInvisible, needAlive, timeout2Min, "monitor distance to ironforge < 50 => pass \"Bot reached Ironforge gate\"", "teleport ironforge_outside", "set destination ironforge", "observe", gmVisible});
     RegisterTest("movement_walk_long_coldridge_ironforge", {gmInvisible, needAlive, timeout10Min, "monitor distance to ironforge < 100 => pass \"Bot arrived at Ironforge\"", "teleport coldridge", "set destination ironforge", "observe", gmVisible});
     RegisterTest("movement_fly_short_ironforge_to_stormwind", {gmInvisible, needAlive, timeout10Min, "monitor distance to stormwind < 100 => pass \"Bot arrived at Stormwind\"", "teleport ironforge", "set destination stormwind", "observe", gmVisible});

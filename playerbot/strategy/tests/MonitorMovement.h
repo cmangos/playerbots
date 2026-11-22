@@ -12,6 +12,29 @@ namespace ai
     private:
         bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
         std::string GetName() const override { return "distance to"; }
+    protected:
+        bool DistanceMet(const std::string& monitorStr, Player* bot) const;
+    };
+
+    class MonitorMovementArrived : public MonitorMovementDistance
+    {
+    private:
+        bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
+        std::string GetName() const override { return "arrived"; }
+    };
+
+    class MonitorMovementRodeTransport : public TestMonitor
+    {
+    private:
+        bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
+        std::string GetName() const override { return "rode transport"; }
+    };
+
+    class MonitorMovementLeftTransport : public TestMonitor
+    {
+    private:
+        bool IsConditionMet(const std::string& monitorStr, Player* bot, TestContext& ctx) const override;
+        std::string GetName() const override { return "left transport"; }
     };
 
     class MonitorNotOnMap : public TestMonitor

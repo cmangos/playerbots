@@ -30,6 +30,7 @@
 #include <cctype>
 #include "MonitorMovement.h"
 #include "BossFocusManager.h"
+#include "Entities/Transports.h"
 
 using namespace ai;
 
@@ -71,6 +72,8 @@ void TestAction::RegisterCommands()
     commands.push_back(std::make_unique<CommandFlowWait>());
     commands.push_back(std::make_unique<CommandFlowRepeat>());
     commands.push_back(std::make_unique<CommandSetValue>());
+    commands.push_back(std::make_unique<CommandSetupTransportMode>());
+    commands.push_back(std::make_unique<CommandSetupBoardTransport>());
     commands.push_back(std::make_unique<CommandDebug>());
     commands.push_back(std::make_unique<CommandRecord>());
     commands.push_back(std::make_unique<CommandRead>());
@@ -94,6 +97,9 @@ void TestAction::RegisterMonitors()
     monitors.push_back(std::make_unique<MonitorCombatHp>());
     monitors.push_back(std::make_unique<MonitorNotInCombat>());
     monitors.push_back(std::make_unique<MonitorMovementDistance>());
+    monitors.push_back(std::make_unique<MonitorMovementArrived>());
+    monitors.push_back(std::make_unique<MonitorMovementRodeTransport>());
+    monitors.push_back(std::make_unique<MonitorMovementLeftTransport>());
     monitors.push_back(std::make_unique<MonitorNotOnMap>());
     monitors.push_back(std::make_unique<MonitorMovementUnderground>());
     monitors.push_back(std::make_unique<MonitorMovementCanNotReachNodes>());
@@ -340,6 +346,8 @@ void TestAction::CheckMonitors()
 {
     //LogToConsole("[TestAction] CheckMonitors called, monitor count: " + std::to_string(ctx.monitors.size()));
 
+    UpdateTransportRide();
+
     for (const auto& monitorStr : ctx.monitors)
     {
         for (const auto& monitor : monitors)
@@ -360,6 +368,39 @@ void TestAction::CheckMonitors()
             }
         }
     }
+}
+
+void TestAction::UpdateTransportRide()
+{
+    if (!bot->IsInWorld())
+        return;
+
+    GenericTransport* transport = bot->GetTransport();
+    uint32 now = WorldTimer::getMSTime();
+
+    if (transport && ctx.transportRideOnLastTick && ctx.transportRideTick)
+    {
+        uint32 delta = WorldTimer::getMSTimeDiff(ctx.transportRideTick, now);
+
+        if (delta < 5000)
+        {
+            ctx.transportRideMs[0] += delta;
+            ctx.transportRideMs[transport->GetEntry()] += delta;
+        }
+    }
+
+    if (!transport && ctx.transportRideOnLastTick)
+    {
+        WorldPosition botPos(bot);
+
+        if (botPos.getMapId() != ctx.transportRideLastPos.getMapId() || botPos.distance(ctx.transportRideLastPos) > 30.0f)
+            ctx.transportLeftAway = true;
+    }
+
+    ctx.transportRideOnLastTick = transport != nullptr;
+    ctx.transportRideTick = now;
+    ctx.transportRideLastGuid = transport ? transport->GetObjectGuid() : ObjectGuid();
+    ctx.transportRideLastPos = transport ? WorldPosition(bot) : WorldPosition();
 }
 
 void TestAction::SetResult(TestResult newResult, const std::string& msg)

@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <map>
 #include <cstdint>
 #include <mutex>
 #include "Globals/ObjectMgr.h"
@@ -93,6 +94,14 @@ namespace ai
 
         bool lootStackSeen = false;
         bool actionSpamArmed = false;
+
+        std::map<uint32, uint32> transportRideMs;
+        uint32 transportRideTick = 0;
+        bool transportRideOnLastTick = false;
+        ObjectGuid transportRideLastGuid;
+        WorldPosition transportRideLastPos;
+
+        bool transportLeftAway = false;
 
         // BL-44: snapshot of the expected group-member count, taken at the monitor's first tick. The
         // live group can shrink mid-window (a member leaves), which would silently lower the bar; the

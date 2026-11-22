@@ -145,6 +145,7 @@ public:
     uint32 randomBotTeleportDistance;
     bool randomBotTeleportNearPlayer;
     uint32 transportTeleportType;
+    uint32 transportTrace;
     uint32 randomBotTeleportNearPlayerMaxAmount;
     float randomBotTeleportNearPlayerMaxAmountRadius;
     uint32 randomBotTeleportMinInterval, randomBotTeleportMaxInterval;

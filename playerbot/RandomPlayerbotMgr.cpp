@@ -4,6 +4,7 @@
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/PlayerbotFactory.h"
 #include "strategy/values/LastMovementValue.h"
+#include "strategy/actions/MovementActions.h"
 #include "Accounts/AccountMgr.h"
 #include "Globals/ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
@@ -3128,6 +3129,9 @@ void RandomPlayerbotMgr::RandomTeleportForLevel(Player* bot, bool activeOnly)
 void RandomPlayerbotMgr::RandomTeleport(Player* bot)
 {
     if (bot->InBattleGround())
+        return;
+
+    if (bot->GetTransport() && bot->GetPlayerbotAI() && MovementAction::IsRiding(bot->GetPlayerbotAI()))
         return;
 
     auto pmo = sPerformanceMonitor.start(PERF_MON_RNDBOT, "RandomTeleport");

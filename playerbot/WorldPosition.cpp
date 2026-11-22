@@ -20,9 +20,49 @@
 
 #include <numeric>
 #include <iomanip>
+#include <set>
+#include <cmath>
 
 using namespace ai;
 using namespace MaNGOS;
+
+namespace
+{
+    uint32 TransportPhaseMask(GenericTransport* transport)
+    {
+#if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
+        return transport ? transport->GetPhaseMask() : 0;
+#else
+        (void)transport;
+        return 0;
+#endif
+    }
+
+    bool MapHitPosition(Map* map, const WorldPosition& start, const WorldPosition& end, uint32 phaseMask, WorldPosition& hit)
+    {
+        if (!map)
+            return false;
+
+        float x = end.getX();
+        float y = end.getY();
+        float z = end.getZ();
+
+#if defined(MANGOSBOT_TWO) || MAX_EXPANSION == 2
+        const bool result = map->GetHitPosition(start.getX(), start.getY(), start.getZ(), x, y, z, phaseMask, 0.0f);
+#else
+        (void)phaseMask;
+        const bool result = map->GetHitPosition(start.getX(), start.getY(), start.getZ(), x, y, z, 0.0f);
+#endif
+
+        if (!result)
+            return false;
+
+        hit.setX(x);
+        hit.setY(y);
+        hit.setZ(z);
+        return true;
+    }
+}
 
 void WorldPosition::logNonFinite(char const* site, WorldPosition const& a, WorldPosition const* b)
 {
@@ -597,22 +637,43 @@ bool WorldPosition::isOnTransport(GenericTransport* transport)
     if (distance(trans) > 40.0f)
         return false;
 
-    WorldPosition below(*this);
-
-    below.setZ(below.getZ() - 5.0f);
-
     if (!isFinite())
     {
         logNonFinite("isOnTransport", *this);
         return false;
     }
 
-    bool result0 = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, coord_x, coord_y, coord_z + 0.5f, below.getX(), below.getY(), below.getZ(), below.coord_x, below.coord_y, below.coord_z, 0.0f);
+    Map* map = getMap(getFirstInstanceId());
 
-    if (result0)
+    if (!map)
         return false;
 
-    return GetHitPosition(below);
+    WorldPosition start(*this), below(*this), staticHit(*this);
+
+    start.setZ(start.getZ() + 0.5f);
+    below.setZ(below.getZ() - 5.0f);
+
+    WorldPosition mapHit(below);
+
+    bool staticResult = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, start.getX(), start.getY(), start.getZ(), below.getX(), below.getY(), below.getZ(), staticHit.coord_x, staticHit.coord_y, staticHit.coord_z, 0.0f);
+    bool mapResult = MapHitPosition(map, start, below, TransportPhaseMask(transport), mapHit);
+
+    if (!mapResult)
+        return false;
+
+    WorldPosition deck(transport);
+    deck.SetTranpotHeightToFloor(transport->GetEntry());
+
+    const float floorToDeck = mapHit.getZ() - deck.getZ();
+    const bool sameFloorAsDeck = std::abs(floorToDeck) < 2.0f && sqDistance2d(trans) < 625.0f;
+
+    if (!staticResult)
+        return true;
+
+    if (mapHit.getZ() > staticHit.getZ() + 0.05f)
+        return true;
+
+    return sameFloorAsDeck;
 }
 
 float WorldPosition::GetTransporFloorOffset(uint32 entry)
@@ -662,17 +723,13 @@ bool WorldPosition::SetOnTransport(GenericTransport* transport, int32 startHeigh
         return false;
     }
 
-    bool result = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, coord_x, coord_y, coord_z, below.getX(), below.getY(), below.getZ(), below.coord_x, below.coord_y, below.coord_z, 0.0f);
+    WorldPosition hit(below);
 
-    if (result)
+    if (!MapHitPosition(getMap(getFirstInstanceId()), start, below, TransportPhaseMask(transport), hit))
         return false;
 
-    bool gotHit = start.GetHitPosition(below);
-
-    if (gotHit)
-        set(below);
-
-    return gotHit;
+    set(hit);
+    return true;
 }
 
 WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, uint32 radius)
@@ -691,31 +748,14 @@ WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, uin
     WorldPosition transPos(transport);
     transPos.SetTranpotHeightToFloor(transport->GetEntry());
 
-    GameObjectInfo const* transportInfo =
-        sGOStorage.LookupEntry<GameObjectInfo>(transport->GetEntry());
-
-    // Mesa elevators (Elevatorcar.m2, display 360) expose contradictory
-    // results between SetOnTransport() and isOnTransport(). For this
-    // model, a successful SetOnTransport() is the authoritative floor test.
-    bool mesaElevatorGeometryFix =
-        transportInfo && transportInfo->displayId == 360;
     WorldPosition bestPos;
     std::vector<WorldPosition> bestPath;
-
-    bool wantThisPoint = false;
-
-    uint32 tries = 0;
 
     for (uint32 i = 0; i < 100; i++)
     {
         WorldPosition pos = transPos + WorldPosition(0, irand(-radius, radius), irand(-radius, radius));
 
-        bool setResult = pos.SetOnTransport(transport, 1, -1);
-
-        tries++;
-
-        if (mesaElevatorGeometryFix && !setResult)
-            continue;
+        pos.SetOnTransport(transport, 1, -1);
 
         if (pos.getZ() < transPos.getZ() - 1.0f)
             continue;
@@ -725,7 +765,7 @@ WorldPosition WorldPosition::RandomPointOnTrans(GenericTransport* transport, uin
 
         pos += WorldPosition(0, 0, 0, 0.1f);
 
-        if (!mesaElevatorGeometryFix && !pos.isOnTransport(transport))
+        if (!pos.isOnTransport(transport))
             continue;
 
         bestPos = pos;

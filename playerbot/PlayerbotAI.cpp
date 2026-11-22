@@ -40,6 +40,8 @@
 #include "strategy/values/LootValues.h"
 #include "strategy/values/AttackersValue.h"
 #include "Entities/Transports.h"
+#include "playerbot/TransportTrace.h"
+#include "strategy/actions/MovementActions.h"
 #include "Guilds/GuildMgr.h"
 #include "Chat/ChannelMgr.h"
 #include "PlayerbotLLMInterface.h"
@@ -582,6 +584,7 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
         else if (bot->GetTransport())
         {
             WorldPosition botPos(bot);
+            ai::TransportTrace::instance().Event(bot, bot->GetTransport(), "ride", "eject_guard", "master_transport_mismatch");
             bot->GetTransport()->RemovePassenger(bot);
             bot->NearTeleportTo(bot->m_movementInfo.pos.x, bot->m_movementInfo.pos.y, bot->m_movementInfo.pos.z, bot->m_movementInfo.pos.o);
             MANGOS_ASSERT(botPos.fDist(bot) < 500.0f);
@@ -589,17 +592,28 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
     }
     else if (!HasRealPlayerMaster() && !bot->IsBeingTeleported() && bot->GetTransport() && bot->GetMapId() == bot->GetTransport()->GetMapId() && !WorldPosition(bot).isOnTransport(bot->GetTransport()) && !isMovingToTransport)
     {
-        if (HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+        if (MovementAction::IsRiding(this))
         {
-            TellPlayer(GetMaster(), "Jumping off " + std::string(bot->GetTransport()->GetName()));
+            ai::TransportTrace::instance().Event(bot, bot->GetTransport(), "ride", "eject_guard", "vmap_ray_miss");
         }
+        else
+        {
+            if (HasStrategy("debug move", BotState::BOT_STATE_NON_COMBAT))
+            {
+                TellPlayer(GetMaster(), "Jumping off " + std::string(bot->GetTransport()->GetName()));
+            }
 
-        WorldPosition botPos(bot);
-        bot->GetTransport()->RemovePassenger(bot);
-        bot->NearTeleportTo(bot->m_movementInfo.pos.x, bot->m_movementInfo.pos.y, bot->m_movementInfo.pos.z, bot->m_movementInfo.pos.o);
-        MANGOS_ASSERT(botPos.fDist(bot) < 500.0f);
-        bot->StopMoving();
+            ai::TransportTrace::instance().Event(bot, bot->GetTransport(), "ride", "eject_guard", "vmap_ray_miss");
+
+            WorldPosition botPos(bot);
+            bot->GetTransport()->RemovePassenger(bot);
+            bot->NearTeleportTo(bot->m_movementInfo.pos.x, bot->m_movementInfo.pos.y, bot->m_movementInfo.pos.z, bot->m_movementInfo.pos.o);
+            MANGOS_ASSERT(botPos.fDist(bot) < 500.0f);
+            bot->StopMoving();
+        }
     }
+
+    MovementAction::RideUpdate(this);
 
     // Update facing
     UpdateFaceTarget(elapsed, minimal);

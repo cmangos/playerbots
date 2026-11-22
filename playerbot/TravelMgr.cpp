@@ -1492,6 +1492,7 @@ void TravelMgr::LoadQuestTravelTable()
     if (sPlayerbotAIConfig.logArchiveOnBoot)
         sPlayerbotAIConfig.openBootLog("bot_states.csv");
     sPlayerbotAIConfig.openBootLog("bot_positions.csv", "ts,epoch,guid,name,isBot,mapId,instanceId,x,y,z,guidLow,wmoRootId,wmoGroupId,o,zoneId,areaId,level,hpPct,powerPct,flags,leaderGuid,money");
+    sPlayerbotAIConfig.openBootLog("bot_transport.csv", "ts,epoch,bot,guid,state,event,reason,mode,transportEntry,transportGuid,transportMapId,mapId,wx,wy,wz,lx,ly,lz,tx,ty,tz,tSpeed,tPathProgress,isPassenger,hasTransport,geomOnTrans,distToDock,distToExit");
     sPlayerbotAIConfig.openBootLog("bot_test_runs.csv", "ts,epoch,kind,guid,name,test,verdict,elapsedMs,mapId,instanceId,x,y,z,guidLow,msg,lastAction,travelTarget");
     sPlayerbotAIConfig.openLog("travel_destinations.csv", "w");
     sPlayerbotAIConfig.openLog("deadzone.csv", "w"); 

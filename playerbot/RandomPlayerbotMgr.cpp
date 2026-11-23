@@ -737,6 +737,7 @@ void RandomPlayerbotMgr::LogPlayerLocation()
     if (sPlayerbotAIConfig.hasLog("transport.csv"))
     {
         sPlayerbotAIConfig.openLog("transport.csv", "w");
+        sPlayerbotAIConfig.log("transport.csv", "ts,name,entry,point,o,mapId,guid,passengers");
         for (auto& [mapId, map] : sMapMgr.Maps())
         {
             for (auto& transport : WorldPosition(map->GetId(), 1, 1).getTransports())
@@ -754,9 +755,12 @@ void RandomPlayerbotMgr::LogPlayerLocation()
                 out << transport->GetEntry() << ",";
                 out << std::fixed << std::setprecision(2);
                 WorldPosition(transport).printWKT(out);
-                out << transport->GetOrientation();
+                out << transport->GetOrientation() << ",";
+                out << transport->GetMapId() << ",";
+                out << transport->GetGUIDLow() << ",";
+                out << transport->GetPassengers().size();
 
-                sPlayerbotAIConfig.log("transport.csv", out.str().c_str());
+                sPlayerbotAIConfig.log("transport.csv", "%s", out.str().c_str());
             }
         }
     }

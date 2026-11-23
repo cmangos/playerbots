@@ -645,8 +645,10 @@ void TestRegistry::GenerateTransportTestsImpl(int maxTests)
             while (HasTest(testName))
                 testName = "movement_transport_" + transportName + "_" + startName + "_" + endName + "_" + std::to_string(dedupe++);
 
+            const uint32 arrivalRadius = (uint32)std::min(100.0f, std::max(8.0f, startDockPos.distance(endDockPos) * 0.4f));
+
             std::ostringstream reachCheck;
-            reachCheck << "monitor distance to " << endName << " < 100 => pass \"Bot arrived at " << endName << " after <time elapsed>\"";
+            reachCheck << "monitor distance to " << endName << " < " << arrivalRadius << " => pass \"Bot arrived at " << endName << " after <time elapsed>\"";
 
             std::ostringstream timeout;
             timeout << "monitor time > " << timeoutSecs << " => fail \"Timeout: bot did not reach the other side after <time elapsed> (traveled <distance traveled> / wanted <distance wanted>)\"";
@@ -680,11 +682,11 @@ void TestRegistry::GenerateTransportTestsImpl(int maxTests)
                 minRideSecs = 3.0f;
 
             std::ostringstream m1Rode;
-            m1Rode << "monitor arrived " << endName << " < 100 rode >= " << (uint32)minRideSecs
+            m1Rode << "monitor arrived " << endName << " < " << arrivalRadius << " rode >= " << (uint32)minRideSecs
                    << " => pass \"Bot rode to " << endName << " after <time elapsed>\"";
 
             std::ostringstream m1NoRide;
-            m1NoRide << "monitor arrived " << endName << " < 100 rode < " << (uint32)minRideSecs
+            m1NoRide << "monitor arrived " << endName << " < " << arrivalRadius << " rode < " << (uint32)minRideSecs
                      << " => fail \"Arrived at " << endName << " without riding for " << (uint32)minRideSecs << "s\"";
 
             std::vector<std::string> m1Script = {

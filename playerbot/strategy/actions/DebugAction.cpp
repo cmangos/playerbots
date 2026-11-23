@@ -1960,7 +1960,7 @@ bool DebugAction::HandleDoTransport(Event& event, Player* requester, const std::
         }
     }
 
-    MovementAction::UseTransport(ai, entry, transPos, requester, param.find("tele") != std::string::npos);
+    MovementAction::UseTransport(ai, entry, transPos, requester, param.find("tele") != std::string::npos, "debug");
 
     return true;
 }

@@ -393,7 +393,7 @@ void TestAction::UpdateTransportRide()
     {
         WorldPosition botPos(bot);
 
-        if (botPos.getMapId() != ctx.transportRideLastPos.getMapId() || botPos.distance(ctx.transportRideLastPos) > 30.0f)
+        if (botPos.getMapId() != ctx.transportRideLastPos.getMapId() || botPos.distance(ctx.transportRideLastPos) > 75.0f)
             ctx.transportLeftAway = true;
     }
 

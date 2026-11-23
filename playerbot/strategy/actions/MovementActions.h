@@ -17,8 +17,8 @@ namespace ai
         virtual bool IsMovement() override { return true; }
 
         static bool MinimalMove(PlayerbotAI* ai);
-        static bool UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition dockPosition, WorldPosition exitPosition, bool doTeleport);
-        static bool MoveOnTransport(PlayerbotAI* ai, GenericTransport* transport, bool doTeleport, WorldPosition dockPosition = WorldPosition(), WorldPosition exitPosition = WorldPosition());
+        static bool UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition dockPosition, WorldPosition exitPosition, bool doTeleport, const char* caller = nullptr, bool* approaching = nullptr);
+        static bool MoveOnTransport(PlayerbotAI* ai, GenericTransport* transport, bool doTeleport, WorldPosition dockPosition = WorldPosition(), WorldPosition exitPosition = WorldPosition(), const char* caller = nullptr);
         static bool MoveOffTransport(PlayerbotAI* ai, WorldPosition exitPos, bool doTeleport, WorldPosition dockPosition = WorldPosition());
 
         static bool IsRiding(PlayerbotAI* ai);

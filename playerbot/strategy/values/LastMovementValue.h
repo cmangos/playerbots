@@ -55,6 +55,10 @@ namespace ai
             lastFollow = other.lastFollow;
             lastAreaTrigger = other.lastAreaTrigger;
             lastTransportEntry = other.lastTransportEntry;
+            boardStop = other.boardStop;
+            boardEntry = other.boardEntry;
+            boardDeadlineMs = other.boardDeadlineMs;
+            boardWaitMs = other.boardWaitMs;
             ride = other.ride;
             lastPath = other.lastPath;
             lastMoveShort = other.lastMoveShort;
@@ -68,6 +72,10 @@ namespace ai
             lastFollow = NULL;
             lastAreaTrigger = 0;
             lastTransportEntry = 0;
+            boardStop = WorldPosition();
+            boardEntry = 0;
+            boardWaitMs = 0;
+            boardDeadlineMs = 0;
             ride.clear();
             lastFlee = 0;
             lastMoveShort = WorldPosition();
@@ -89,6 +97,10 @@ namespace ai
         Unit* lastFollow;
         uint32 lastAreaTrigger;
         uint32 lastTransportEntry;
+        WorldPosition boardStop;
+        uint32 boardEntry;
+        uint32 boardWaitMs;
+        uint32 boardDeadlineMs;
         TransportRide ride;
         time_t lastFlee;
         WorldPosition lastFleeTo;

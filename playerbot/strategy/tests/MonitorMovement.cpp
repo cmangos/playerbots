@@ -109,7 +109,7 @@ bool MonitorMovementDistance::DistanceMet(const std::string& monitorStr, Player*
             for (size_t i = 1; i < points.size(); ++i)
                 pathLength += points[i - 1].distance(points[i]);
 
-            if (pathLength > 0.0f)
+            if (pathLength > dist)
                 dist = pathLength;
         }
     }

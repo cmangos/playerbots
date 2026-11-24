@@ -383,11 +383,11 @@ void TestAction::UpdateTransportRide()
     {
         uint32 delta = WorldTimer::getMSTimeDiff(ctx.transportRideTick, now);
 
-        if (delta < 5000)
-        {
-            ctx.transportRideMs[0] += delta;
-            ctx.transportRideMs[transport->GetEntry()] += delta;
-        }
+        if (delta > 30000)
+            delta = 30000;
+
+        ctx.transportRideMs[0] += delta;
+        ctx.transportRideMs[transport->GetEntry()] += delta;
     }
 
     if (transport)

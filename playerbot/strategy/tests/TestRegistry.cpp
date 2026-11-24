@@ -645,7 +645,12 @@ void TestRegistry::GenerateTransportTestsImpl(int maxTests)
             while (HasTest(testName))
                 testName = "movement_transport_" + transportName + "_" + startName + "_" + endName + "_" + std::to_string(dedupe++);
 
-            const uint32 arrivalRadius = (uint32)std::min(100.0f, std::max(8.0f, startDockPos.distance(endDockPos) * 0.4f));
+            float arrivalSpan = startDockPos.distance(endDockPos);
+
+            if (startDockPos.getMapId() == endDockPos.getMapId())
+                arrivalSpan = sqrt(startDockPos.sqDistance2d(endDockPos));
+
+            const uint32 arrivalRadius = (uint32)std::min(100.0f, std::max(8.0f, arrivalSpan * 0.4f));
 
             std::ostringstream reachCheck;
             reachCheck << "monitor distance to " << endName << " < " << arrivalRadius << " => pass \"Bot arrived at " << endName << " after <time elapsed>\"";

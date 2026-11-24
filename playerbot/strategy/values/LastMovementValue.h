@@ -59,6 +59,7 @@ namespace ai
             boardEntry = other.boardEntry;
             boardDeadlineMs = other.boardDeadlineMs;
             boardWaitMs = other.boardWaitMs;
+            boardSpot = other.boardSpot;
             ride = other.ride;
             lastPath = other.lastPath;
             lastMoveShort = other.lastMoveShort;
@@ -76,6 +77,7 @@ namespace ai
             boardEntry = 0;
             boardWaitMs = 0;
             boardDeadlineMs = 0;
+            boardSpot = WorldPosition();
             ride.clear();
             lastFlee = 0;
             lastMoveShort = WorldPosition();
@@ -101,6 +103,7 @@ namespace ai
         uint32 boardEntry;
         uint32 boardWaitMs;
         uint32 boardDeadlineMs;
+        WorldPosition boardSpot;
         TransportRide ride;
         time_t lastFlee;
         WorldPosition lastFleeTo;

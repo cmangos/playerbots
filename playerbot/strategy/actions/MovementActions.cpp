@@ -1043,28 +1043,29 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
         nearStop = lastMove.boardStop;
 
     const bool wrongStop = nearStop && !NearStop(dockPosition, nearStop, 40.0f);
-    const bool atDock = botPos.distance(dockPosition) <= INTERACTION_DISTANCE;
+    const bool atDock = botPos.sqDistance2d(dockPosition) <= INTERACTION_DISTANCE * INTERACTION_DISTANCE;
 
     float minDist = 0;
+    float minDockedDist = 0;
 
     std::string transportName;
 
     const WorldPosition boardStop = nearStop ? nearStop : dockPosition;
     GenericTransport* dockedTransport = nullptr;
+    GenericTransport* nearestTransport = nullptr;
 
     for (auto& trans : dockPosition.getTransports(entry))
     {
         const float distance = dockDistanceSq(trans);
 
-        if (strictGate && TransportDockedAt(trans, boardStop))
+        if (strictGate && TransportDockedAt(trans, boardStop) && (!dockedTransport || distance < minDockedDist))
         {
-            transport = trans;
             dockedTransport = trans;
-            minDist = distance;
+            minDockedDist = distance;
         }
-        else if (!dockedTransport && (!minDist || distance < minDist))
+        else if (!nearestTransport || distance < minDist)
         {
-            transport = trans;
+            nearestTransport = trans;
             minDist = distance;
         }
 
@@ -1073,6 +1074,8 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
         if (transportName.empty())
             transportName = data->name;
     }
+
+    transport = dockedTransport ? dockedTransport : nearestTransport;
 
     uint32 waitBudgetMs = 120000;
 
@@ -1083,9 +1086,28 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
     const uint32 now = WorldTimer::getMSTime();
 
     WorldPosition waitSpot = dockPosition;
-    const bool elevatorSpot = strictGate && transport && !wrongStop && IsElevator(transport)
-        && ElevatorWaitSpot(transport, boardStop, botPos, waitSpot);
-    const bool atBoardSpot = elevatorSpot ? botPos.distance(waitSpot) <= 3.0f : atDock;
+    bool elevatorSpot = false;
+
+    if (lastMove.boardSpot && lastMove.boardEntry == entry && lastMove.boardSpot.getMapId() == bot->GetMapId()
+        && lastMove.boardSpot.distance(dockPosition) < 40.0f)
+    {
+        waitSpot = lastMove.boardSpot;
+        elevatorSpot = true;
+    }
+    else
+    {
+        elevatorSpot = strictGate && transport && !wrongStop && IsElevator(transport)
+            && ElevatorWaitSpot(transport, boardStop, botPos, waitSpot);
+
+        if (elevatorSpot)
+        {
+            lastMove.boardSpot = waitSpot;
+            lastMove.boardEntry = entry;
+        }
+    }
+
+    const float waitSpotDist = sqrt(botPos.sqDistance2d(waitSpot));
+    const bool atBoardSpot = elevatorSpot ? waitSpotDist <= 3.0f : atDock;
 
     const bool canBoard = transport && (strictGate ? (!wrongStop && atBoardSpot && TransportDockedAt(transport, boardStop))
                                                    : dockDistanceSq(transport) < INTERACTION_DISTANCE * INTERACTION_DISTANCE);
@@ -1096,6 +1118,7 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
         lastMove.boardStop = WorldPosition();
         lastMove.boardEntry = 0;
         lastMove.boardDeadlineMs = 0;
+        lastMove.boardSpot = WorldPosition();
 
         MoveOnTransport(ai, transport, doTeleport, boardStop, exitPosition, caller);
 
@@ -1153,7 +1176,8 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
 
         TransportTrace::instance().Event(bot, transport, "wait", "wait_for_dock", (elevatorSpot ? "walking_to_board_landing" : "walking_to_board") + diag, waitSpot, exitPosition);
 
-        PlayerbotAI::TeleportSafe(bot, waitSpot);
+        if (waitSpotDist > 3.0f)
+            PlayerbotAI::TeleportSafe(bot, waitSpot);
 
         return false;
     }

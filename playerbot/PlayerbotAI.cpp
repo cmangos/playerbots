@@ -595,7 +595,19 @@ void PlayerbotAI::UpdateAI(uint32 elapsed, bool minimal)
     }
     else if (!HasRealPlayerMaster() && !bot->IsBeingTeleported() && bot->GetTransport() && bot->GetMapId() == bot->GetTransport()->GetMapId() && !WorldPosition(bot).isOnTransport(bot->GetTransport()) && !isMovingToTransport)
     {
-        if (MovementAction::IsRiding(this))
+        GenericTransport* transport = bot->GetTransport();
+
+        if (bot->GetDistance2d(transport->GetPositionX(), transport->GetPositionY()) > 200.0f)
+        {
+            ai::TransportTrace::instance().Event(bot, transport, "ride", "eject_guard", "detached_far");
+
+            if (MovementAction::IsRiding(this))
+                MovementAction::RideLeave(this, "detached_far");
+
+            transport->RemovePassenger(bot);
+            bot->StopMoving();
+        }
+        else if (MovementAction::IsRiding(this))
         {
             ai::TransportTrace::instance().Event(bot, bot->GetTransport(), "ride", "eject_guard", "vmap_ray_miss");
         }

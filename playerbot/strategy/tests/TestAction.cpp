@@ -5,6 +5,7 @@
 #include "playerbot/BotState.h"
 #include "playerbot/strategy/values/PositionValue.h"
 #include "playerbot/TravelMgr.h"
+#include "playerbot/strategy/actions/MovementActions.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
@@ -389,18 +390,30 @@ void TestAction::UpdateTransportRide()
         }
     }
 
-    if (!transport && ctx.transportRideOnLastTick)
+    if (transport)
+        ctx.transportLeaveTick = 0;
+    else if (ctx.transportRideOnLastTick)
     {
         WorldPosition botPos(bot);
 
-        if (botPos.getMapId() != ctx.transportRideLastPos.getMapId() || botPos.distance(ctx.transportRideLastPos) > 75.0f)
-            ctx.transportLeftAway = true;
+        ctx.transportLeaveTick = now;
+        ctx.transportLeaveAtStop = ctx.transportRideLastAtStop
+            || (botPos.getMapId() == ctx.transportRideLastPos.getMapId() && botPos.distance(ctx.transportRideLastPos) <= 75.0f);
     }
+    else if (ctx.transportLeaveTick && WorldTimer::getMSTimeDiff(ctx.transportLeaveTick, now) >= 10000)
+    {
+        if (!ctx.transportLeaveAtStop)
+            ctx.transportLeftAway = true;
+
+        ctx.transportLeaveTick = 0;
+    }
+
+    WorldPosition stopPosition;
 
     ctx.transportRideOnLastTick = transport != nullptr;
     ctx.transportRideTick = now;
-    ctx.transportRideLastGuid = transport ? transport->GetObjectGuid() : ObjectGuid();
     ctx.transportRideLastPos = transport ? WorldPosition(bot) : WorldPosition();
+    ctx.transportRideLastAtStop = transport && MovementAction::TransportAtStop(transport, stopPosition);
 }
 
 void TestAction::SetResult(TestResult newResult, const std::string& msg)

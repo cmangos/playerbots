@@ -98,8 +98,10 @@ namespace ai
         std::map<uint32, uint32> transportRideMs;
         uint32 transportRideTick = 0;
         bool transportRideOnLastTick = false;
-        ObjectGuid transportRideLastGuid;
         WorldPosition transportRideLastPos;
+        bool transportRideLastAtStop = false;
+        uint32 transportLeaveTick = 0;
+        bool transportLeaveAtStop = false;
 
         bool transportLeftAway = false;
 

@@ -97,7 +97,58 @@ namespace
             return MovementAction::TransportAtStop(transport, keyframeStop) && NearStop(keyframeStop, stop, 40.0f);
         }
 
-        return NearStop(TransportPosition(transport), stop, 5.0f);
+        return NearStop(TransportPosition(transport), stop, 8.0f);
+    }
+
+    bool IsElevator(GenericTransport* transport)
+    {
+        Transport* scheduled = dynamic_cast<Transport*>(transport);
+
+        return transport && !(scheduled && scheduled->GetPeriod());
+    }
+
+    bool ElevatorWaitSpot(GenericTransport* transport, const WorldPosition& stop, const WorldPosition& from, WorldPosition& spot)
+    {
+        if (!transport || !stop || !transport->GetMap() || transport->GetMapId() != stop.getMapId())
+            return false;
+
+        const TerrainInfo* terrain = transport->GetMap()->GetTerrain();
+        const WorldPosition centre = TransportPosition(transport);
+
+        if (!terrain || !centre)
+            return false;
+
+        float dx = from.getX() - centre.getX();
+        float dy = from.getY() - centre.getY();
+        float length = std::sqrt(dx * dx + dy * dy);
+
+        if (length < 1.0f)
+        {
+            dx = stop.getX() - centre.getX();
+            dy = stop.getY() - centre.getY();
+            length = std::sqrt(dx * dx + dy * dy);
+        }
+
+        if (length < 1.0f)
+            return false;
+
+        dx /= length;
+        dy /= length;
+
+        for (float range = 4.0f; range <= 14.0f; range += 1.0f)
+        {
+            const float x = centre.getX() + dx * range;
+            const float y = centre.getY() + dy * range;
+            const float z = terrain->GetHeightStatic(x, y, stop.getZ() + 2.0f, true, 6.0f);
+
+            if (std::abs(z - stop.getZ()) > 2.5f)
+                continue;
+
+            spot = WorldPosition(stop.getMapId(), x, y, z + 0.5f, std::atan2(-dy, -dx));
+            return true;
+        }
+
+        return false;
     }
 
     uint32 PathRideEntry(TravelPath& path)
@@ -1031,7 +1082,12 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
 
     const uint32 now = WorldTimer::getMSTime();
 
-    const bool canBoard = transport && (strictGate ? (!wrongStop && atDock && TransportDockedAt(transport, boardStop))
+    WorldPosition waitSpot = dockPosition;
+    const bool elevatorSpot = strictGate && transport && !wrongStop && IsElevator(transport)
+        && ElevatorWaitSpot(transport, boardStop, botPos, waitSpot);
+    const bool atBoardSpot = elevatorSpot ? botPos.distance(waitSpot) <= 3.0f : atDock;
+
+    const bool canBoard = transport && (strictGate ? (!wrongStop && atBoardSpot && TransportDockedAt(transport, boardStop))
                                                    : dockDistanceSq(transport) < INTERACTION_DISTANCE * INTERACTION_DISTANCE);
 
     if (canBoard)
@@ -1091,13 +1147,13 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
         return false;
     }
 
-    if (strictGate && transport && !wrongStop && !atDock)
+    if (strictGate && transport && !wrongStop && !atBoardSpot)
     {
         *approaching = true;
 
-        TransportTrace::instance().Event(bot, transport, "wait", "wait_for_dock", "walking_to_board" + diag, dockPosition, exitPosition);
+        TransportTrace::instance().Event(bot, transport, "wait", "wait_for_dock", (elevatorSpot ? "walking_to_board_landing" : "walking_to_board") + diag, waitSpot, exitPosition);
 
-        PlayerbotAI::TeleportSafe(bot, dockPosition);
+        PlayerbotAI::TeleportSafe(bot, waitSpot);
 
         return false;
     }

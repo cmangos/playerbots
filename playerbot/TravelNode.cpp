@@ -836,6 +836,42 @@ bool TravelPath::cutTo(PathNodePoint point, bool including)
     return false;
 }
 
+namespace
+{
+    size_t RideLimit(std::vector<PathNodePoint>& path, const WorldPosition& startPos)
+    {
+        size_t board = path.size();
+
+        for (size_t i = 0; i < path.size(); i++)
+        {
+            if (path[i].type == PathNodeType::NODE_TRANSPORT && path[i].entry)
+            {
+                board = i;
+                break;
+            }
+        }
+
+        if (board == path.size())
+            return path.size();
+
+        size_t exit = board;
+
+        while (exit + 1 < path.size() && path[exit + 1].type == PathNodeType::NODE_TRANSPORT)
+            exit++;
+
+        const WorldPosition& boardStop = path[board].point;
+        const WorldPosition& exitStop = path[exit].point;
+
+        if (boardStop.getMapId() != startPos.getMapId())
+            return path.size();
+
+        if (exitStop.getMapId() == startPos.getMapId() && exitStop.distance(startPos) < boardStop.distance(startPos))
+            return path.size();
+
+        return board + 1;
+    }
+}
+
 //Attempts to move ahead of the path.
 void TravelPath::makeShortCut(WorldPosition startPos, float maxDist, Unit* bot)
 {
@@ -847,9 +883,17 @@ void TravelPath::makeShortCut(WorldPosition startPos, float maxDist, Unit* bot)
     float totalDist = fullPath.begin()->point.sqDistance(startPos);
     std::vector<PathNodePoint> newPath;
     WorldPosition firstNode;
+    const size_t rideLimit = RideLimit(fullPath, startPos);
+    size_t index = 0;
 
     for (auto& p : fullPath) //cycle over the full path
     {
+        if (index++ >= rideLimit)
+        {
+            newPath.push_back(p);
+            continue;
+        }
+
         //if (p.point.getMapId() != startPos.getMapId())
         //    continue;
 
@@ -986,15 +1030,17 @@ std::vector<PathNodePoint>::iterator TravelPath::getNextPoint(WorldPosition star
 
     if (!onTransport)
     {
+        auto limitP = fullPath.begin() + RideLimit(fullPath, startPos);
+
         //Get the closest point on the path to start from.
-        for (auto p = startP; p != fullPath.end(); p++)
+        for (auto p = startP; p != limitP; p++)
         {
             if (p->point.getMapId() != startPos.getMapId())
                 continue;
 
             float curDist = p->point.distance(startPos);
 
-            if (!p->isWalkable())
+            if (!p->isWalkable() && !(p == fullPath.begin() && p->type == PathNodeType::NODE_TRANSPORT && curDist < INTERACTION_DISTANCE * 3))
                 continue;
 
             if (curDist <= minDist)
@@ -2487,6 +2533,7 @@ void TravelNodeMap::generateTransportNodes()
                                     float totalTime = (p.second->TimeSeg - timeStart) / 1000.0f;
 
                                     TravelNodePath travelPath(0.1f, totalTime, (uint8)TravelNodePathType::transport, entry, true);
+                                    travelPath.setPath({ *prevNode->getPosition(), *node->getPosition() });
                                     prevNode->setPathTo(node, travelPath);
                                     ppath.clear();
                                     ppath.push_back(pos);
@@ -2536,7 +2583,7 @@ void TravelNodeMap::generateTransportNodes()
                                         float totalTime = (p.second->TimeSeg - timeStart) / 1000.0f;
 
                                         TravelNodePath travelPath(0.1f, totalTime, (uint8)TravelNodePathType::transport, entry, true);
-                                        travelPath.setPath(ppath);
+                                        travelPath.setPath({ *prevNode->getPosition(), *node->getPosition() });
                                         prevNode->setPathTo(node, travelPath);
                                         ppath.clear();
                                         ppath.push_back(pos);

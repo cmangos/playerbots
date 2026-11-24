@@ -45,8 +45,10 @@ void TestContext::Reset()
     transportRideMs.clear();
     transportRideTick = 0;
     transportRideOnLastTick = false;
-    transportRideLastGuid = ObjectGuid();
     transportRideLastPos = WorldPosition();
+    transportRideLastAtStop = false;
+    transportLeaveTick = 0;
+    transportLeaveAtStop = false;
     transportLeftAway = false;
 }
 

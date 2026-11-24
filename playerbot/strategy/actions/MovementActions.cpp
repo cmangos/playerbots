@@ -1068,14 +1068,19 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
             nearestTransport = trans;
             minDist = distance;
         }
-
-        GameObjectInfo const* data = sGOStorage.LookupEntry<GameObjectInfo>(trans->GetEntry());
-        transportName = trans->GetName();
-        if (transportName.empty())
-            transportName = data->name;
     }
 
     transport = dockedTransport ? dockedTransport : nearestTransport;
+
+    if (transport)
+    {
+        minDist = dockDistanceSq(transport);
+
+        GameObjectInfo const* data = sGOStorage.LookupEntry<GameObjectInfo>(transport->GetEntry());
+        transportName = transport->GetName();
+        if (transportName.empty() && data)
+            transportName = data->name;
+    }
 
     uint32 waitBudgetMs = 120000;
 
@@ -1088,20 +1093,24 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
     WorldPosition waitSpot = dockPosition;
     bool elevatorSpot = false;
 
-    if (lastMove.boardSpot && lastMove.boardEntry == entry && lastMove.boardSpot.getMapId() == bot->GetMapId()
-        && lastMove.boardSpot.distance(dockPosition) < 40.0f)
+    const bool pinnedSpot = lastMove.boardSpot && lastMove.boardSpotStop && lastMove.boardEntry == entry
+        && lastMove.boardSpot.getMapId() == bot->GetMapId()
+        && lastMove.boardSpotStop.distance(boardStop) < 5.0f;
+
+    if (pinnedSpot)
     {
         waitSpot = lastMove.boardSpot;
         elevatorSpot = true;
     }
-    else
+    else if (strictGate && transport && !wrongStop && IsElevator(transport)
+        && ElevatorWaitSpot(transport, boardStop, botPos, waitSpot))
     {
-        elevatorSpot = strictGate && transport && !wrongStop && IsElevator(transport)
-            && ElevatorWaitSpot(transport, boardStop, botPos, waitSpot);
+        elevatorSpot = true;
 
-        if (elevatorSpot)
+        if (TransportDockedAt(transport, boardStop))
         {
             lastMove.boardSpot = waitSpot;
+            lastMove.boardSpotStop = boardStop;
             lastMove.boardEntry = entry;
         }
     }
@@ -1119,6 +1128,7 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
         lastMove.boardEntry = 0;
         lastMove.boardDeadlineMs = 0;
         lastMove.boardSpot = WorldPosition();
+        lastMove.boardSpotStop = WorldPosition();
 
         MoveOnTransport(ai, transport, doTeleport, boardStop, exitPosition, caller);
 
@@ -1158,6 +1168,8 @@ bool MovementAction::UseTransport(PlayerbotAI* ai, uint32 entry, WorldPosition d
         lastMove.boardStop = WorldPosition();
         lastMove.boardEntry = 0;
         lastMove.boardDeadlineMs = 0;
+        lastMove.boardSpot = WorldPosition();
+        lastMove.boardSpotStop = WorldPosition();
 
         if (sawRide)
             lastMove.lastPath.cutTo(lastRideNode, true);

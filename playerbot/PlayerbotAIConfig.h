@@ -138,6 +138,10 @@ public:
     std::list<uint32> randomBotQuestIds;
     std::list<uint32> immuneSpellIds;
     std::list<std::pair<uint32, uint32>> freeAltBots;
+    // Bots run their AI in the map update threads, and test steps there create bots (CreateBot pushes
+    // onto freeAltBots) while other bots read the list through IsFreeAltBot. Every access takes this lock;
+    // never hold it across a call that can log in, create or delete a bot.
+    std::mutex freeAltBotsLock;
     std::list<std::string> toggleAlwaysOnlineAccounts;
     std::list<std::string> toggleAlwaysOnlineChars;
     bool enableRandomTeleports;

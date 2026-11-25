@@ -1020,13 +1020,25 @@ bool RandomPlayerbotMgr::BumpDeferredJoinTries(uint32 botGuid)
 
 void RandomPlayerbotMgr::LoginFreeBots()
 {
-    if (!sPlayerbotAIConfig.freeAltBots.empty() && sPlayerbotAIConfig.botAutologin != BotAutoLogin::LOGIN_ONLY_ALWAYS_ACTIVE)
+    // Iterate a copy: the loop body logs bots in and starts tests, which can add entries to the list.
+    std::list<std::pair<uint32, uint32>> freeAltBots;
+    {
+        std::lock_guard<std::mutex> lock(sPlayerbotAIConfig.freeAltBotsLock);
+        freeAltBots = sPlayerbotAIConfig.freeAltBots;
+    }
+
+    if (!freeAltBots.empty() && sPlayerbotAIConfig.botAutologin != BotAutoLogin::LOGIN_ONLY_ALWAYS_ACTIVE)
     {
         std::vector<std::pair<uint32, uint32>> botsToRemove;
 
-        for (auto [accountId, botGuid] : sPlayerbotAIConfig.freeAltBots)
+        for (auto [accountId, botGuid] : freeAltBots)
         {
             ObjectGuid guid(ObjectGuid(HIGHGUID_PLAYER, botGuid));
+
+            // The copy can be stale: skip bots removed from the list since it was taken.
+            if (!sPlayerbotAIConfig.IsFreeAltBot(botGuid))
+                continue;
+
             Player* bot = sObjectMgr.GetPlayer(guid, false);
 
             if (!bot)
@@ -1189,6 +1201,7 @@ void RandomPlayerbotMgr::LoginFreeBots()
             }
         }
 
+        std::lock_guard<std::mutex> lock(sPlayerbotAIConfig.freeAltBotsLock);
         sPlayerbotAIConfig.freeAltBots.remove_if([&](const std::pair<uint32, uint32>& entry) {
             return std::find(botsToRemove.begin(), botsToRemove.end(), entry) != botsToRemove.end();
         });
@@ -2162,7 +2175,13 @@ void RandomPlayerbotMgr::AddOfflineGroupBots()
 
                 if (sPlayerbotAIConfig.IsFreeAltBot(guid))
                 {
-                    for (auto& bot : sPlayerbotAIConfig.freeAltBots)
+                    std::list<std::pair<uint32, uint32>> freeAltBots;
+                    {
+                        std::lock_guard<std::mutex> lock(sPlayerbotAIConfig.freeAltBotsLock);
+                        freeAltBots = sPlayerbotAIConfig.freeAltBots;
+                    }
+
+                    for (auto& bot : freeAltBots)
                     {
                         if (bot.second == guid)
                         {

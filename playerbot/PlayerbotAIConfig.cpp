@@ -855,6 +855,7 @@ bool PlayerbotAIConfig::IsInRandomAccountList(uint32 id)
 
 bool PlayerbotAIConfig::IsFreeAltBot(uint32 guid)
 {
+    std::lock_guard<std::mutex> lock(freeAltBotsLock);
     for (auto bot : freeAltBots)
         if (bot.second == guid)
             return true;
@@ -990,6 +991,7 @@ void PlayerbotAIConfig::loadFreeAltBotAccounts()
 {
     bool allCharsOnline = (selfBotLevel == BotSelfBotLevel::ALWAYS_ACTIVE);
 
+    std::lock_guard<std::mutex> lock(freeAltBotsLock);
     freeAltBots.clear();
 
     auto results = LoginDatabase.PQuery("SELECT username, id FROM account where username not like '%s%%'", randomBotAccountPrefix.c_str());

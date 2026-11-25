@@ -1328,7 +1328,10 @@ std::string PlayerbotHolder::HandleBotAlways(Player* bot, Player* master, const 
     if (always == BotAlwaysOnline::DISABLED || always == BotAlwaysOnline::DISABLED_BY_COMMAND)
     {
         sRandomPlayerbotMgr.SetValue(guid.GetCounter(), "always", (uint32)BotAlwaysOnline::ACTIVE);
-        sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, guid.GetCounter()));
+        {
+            std::lock_guard<std::mutex> lock(sPlayerbotAIConfig.freeAltBotsLock);
+            sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, guid.GetCounter()));
+        }
 
         Player* existingBot = sRandomPlayerbotMgr.GetPlayerBot(guid);
         if (existingBot)
@@ -1367,8 +1370,11 @@ std::string PlayerbotHolder::HandleBotAlways(Player* bot, Player* master, const 
             }
         }
 
-        auto it = std::remove_if(sPlayerbotAIConfig.freeAltBots.begin(), sPlayerbotAIConfig.freeAltBots.end(), [guid](std::pair<uint32, uint32> i) { return i.second == guid.GetCounter(); });
-        sPlayerbotAIConfig.freeAltBots.erase(it, sPlayerbotAIConfig.freeAltBots.end());
+        {
+            std::lock_guard<std::mutex> lock(sPlayerbotAIConfig.freeAltBotsLock);
+            auto it = std::remove_if(sPlayerbotAIConfig.freeAltBots.begin(), sPlayerbotAIConfig.freeAltBots.end(), [guid](std::pair<uint32, uint32> i) { return i.second == guid.GetCounter(); });
+            sPlayerbotAIConfig.freeAltBots.erase(it, sPlayerbotAIConfig.freeAltBots.end());
+        }
 
         return "Disabled offline player ai for " + alwaysName;
     }
@@ -1947,6 +1953,12 @@ std::string PlayerbotHolder::HandleBotRemoveLogout(Player* bot, Player* master, 
 
 void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::list<std::string>& messages, ObjectGuid& guid)
 {    
+    // Test steps call this from the bot's AI update, so bots on different maps create bots at the same
+    // time on the map update threads. Creation shares the character guid counter, the object accessor
+    // and the bot value cache, none of which are synchronised, so only one creation runs at a time.
+    static std::mutex createBotLock;
+    std::lock_guard<std::mutex> createLock(createBotLock);
+
     // Allow null master for RA/console usage
     // Player* master can be null when called via .rndbot commands
 
@@ -2173,6 +2185,7 @@ void PlayerbotHolder::CreateBot(Player* master, const std::string param, std::li
             }
             else
             {
+                std::lock_guard<std::mutex> lock(sPlayerbotAIConfig.freeAltBotsLock);
                 sPlayerbotAIConfig.freeAltBots.push_back(std::make_pair(accountId, botGuid));
                 messages.push_back("Bot is now online");
             }

@@ -2,6 +2,7 @@
 #include "playerbot/playerbot.h"
 #include "InvalidTargetValue.h"
 #include "PossibleAttackTargetsValue.h"
+#include "PossibleTargetsValue.h"
 #include "EnemyPlayerValue.h"
 #include "playerbot/PlayerbotAIConfig.h"
 #include "playerbot/ServerFacade.h"
@@ -25,6 +26,12 @@ bool InvalidTargetValue::Calculate()
     if (qualifier == "current target")
     {
         if (target->GetObjectGuid() != bot->GetSelectionGuid())
+        {
+            return true;
+        }
+
+        // Lose the selection when the target vanishes in stealth/invisibility
+        if (PossibleTargetsValue::IsHiddenFrom(target, bot))
         {
             return true;
         }

@@ -14,6 +14,7 @@ namespace ai
 
         std::list<ObjectGuid> Calculate() override;
         static bool IsValid(Unit* target, Player* player, bool ignoreLos = false);
+        static bool IsHiddenFrom(Unit* target, Player* player);
 
     protected:
         virtual void FindUnits(std::list<Unit*> &targets) override;

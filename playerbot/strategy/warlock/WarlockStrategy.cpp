@@ -411,7 +411,9 @@ void WarlockPetStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
 void WarlockPetStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
-
+    triggers.push_back(new TriggerNode(
+        "new pet",
+        NextAction::array(0, new NextAction("pet autocast", ACTION_NORMAL + 3), NULL)));
 }
 
 void WarlockPetPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -875,6 +877,9 @@ void WarlockPetStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
 void WarlockPetStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
+    triggers.push_back(new TriggerNode(
+        "new pet",
+        NextAction::array(0, new NextAction("pet autocast", ACTION_NORMAL + 3), NULL)));
     triggers.push_back(new TriggerNode(
         "often",
         NextAction::array(0, new NextAction("initialize pet", ACTION_NORMAL), NULL)));
@@ -1341,7 +1346,9 @@ void WarlockPetStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
 
 void WarlockPetStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
-
+    triggers.push_back(new TriggerNode(
+        "new pet",
+        NextAction::array(0, new NextAction("pet autocast", ACTION_NORMAL + 3), NULL)));
 }
 
 void WarlockPetPvpStrategy::InitCombatTriggers(std::list<TriggerNode*>& triggers)
@@ -1421,6 +1428,12 @@ void WarlockCursesRaidStrategy::InitCombatTriggers(std::list<TriggerNode*>& trig
 
 void WarlockManualPetStrategy::InitNonCombatTriggers(std::list<TriggerNode*>& triggers)
 {
+    // Needed here too: with a manual pet strategy set, the situation pet strategy's "new pet" trigger
+    // was not checked in testing.
+    triggers.push_back(new TriggerNode(
+        "new pet",
+        NextAction::array(0, new NextAction("pet autocast", ACTION_NORMAL + 3), NULL)));
+
     triggers.push_back(new TriggerNode(
         triggerName,
         NextAction::array(0, new NextAction(actionName, ACTION_HIGH), NULL)));

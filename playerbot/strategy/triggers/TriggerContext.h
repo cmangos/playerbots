@@ -22,6 +22,7 @@
 #include "MechanarDungeonTriggers.h"
 #include "GlyphTriggers.h"
 #include "WorldBuffTravelTriggers.h"
+#include "NewPetTrigger.h"
 
 #ifdef GenerateBotTests
 #include "../tests/TestTriggers.h"
@@ -132,6 +133,7 @@ namespace ai
             creators["corpse near"] = [](PlayerbotAI* ai) { return new CorpseNearTrigger(ai); };
             creators["party member dead"] = [](PlayerbotAI* ai) { return new PartyMemberDeadTrigger(ai); };
             creators["no pet"] = [](PlayerbotAI* ai) { return new NoPetTrigger(ai); };
+            creators["new pet"] = [](PlayerbotAI* ai) { return new NewPetTrigger(ai); };
             creators["has attackers"] = [](PlayerbotAI* ai) { return new HasAttackersTrigger(ai); };
             creators["no possible targets"] = [](PlayerbotAI* ai) { return new NoPossibleTargetsTrigger(ai); };
             creators["possible adds"] = [](PlayerbotAI* ai) { return new PossibleAddsTrigger(ai); };

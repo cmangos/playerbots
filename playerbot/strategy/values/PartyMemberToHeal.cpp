@@ -112,7 +112,8 @@ ObjectGuid PartyMemberToHeal::Calculate()
             }
 
             Pet* pet = player->GetPet();
-            if (pet && CanHealPet(pet))
+            // Pets go through the same range and line of sight check as their owners.
+            if (pet && CanHealPet(pet) && Check(pet))
             {
                 health = pet->GetHealthPercent();
                 if (health < sPlayerbotAIConfig.almostFullHealth || !IsTargetOfSpellCast(player, predicate))
@@ -207,6 +208,9 @@ bool PartyMemberToHeal::Check(Unit* player)
     // Ignore players who have netherspite tank aura to avoid heal canceling
     NetherspiteFightStrategy* strategy = NetherspiteFightStrategy::Get(ai);
     if (strategy && player->HasAura(30421))
+        return false;
+
+    if (!sServerFacade.IsWithinLOSInMap(bot, player))
         return false;
 
     return true;
